@@ -61,8 +61,7 @@
 ;;;
 (eval-when (compile load eval)
 
-(import '(si::memq) 'pcl)
-;(defmacro memq (item list) `(member ,item ,list :test #'eq))
+(defmacro memq (item list) `(member ,item ,list :test #'eq))
 (defmacro assq (item list) `(assoc ,item ,list :test #'eq))
 (defmacro rassq (item list) `(rassoc ,item ,list :test #'eq))
 (defmacro delq (item list) `(delete ,item ,list :test #'eq))
@@ -81,8 +80,8 @@
 	(t (make-cdxr (- n 4) `(cddddr ,form)))))
 )
 
-;(deftype non-negative-fixnum ()
-;  '(and fixnum (integer 0 *)))
+(deftype non-negative-fixnum ()
+  '(and fixnum (integer 0 *)))
 
 (defun true (&rest ignore) (declare (ignore ignore)) t)
 (defun false (&rest ignore) (declare (ignore ignore)) nil)
@@ -316,11 +315,7 @@
        (loop (when (null .plist-tail.) (return nil))
 	     (setq ,key (pop .plist-tail.))
 	     (when (null .plist-tail.)
-	       (specific-error :invalid-form 
-			       "Malformed plist in doplist, odd number of elements."))
-	     (when (not (symbolp ,key))
-	       (specific-error :invalid-form 
-			       "Supplied key is not a symbol."))
+	       (error "Malformed plist in doplist, odd number of elements."))
 	     (setq ,val (pop .plist-tail.))
 	     (progn ,@bod)))))
 
@@ -444,7 +439,6 @@
 
 (defvar *create-classes-from-internal-structure-definitions-p* t)
 
-
 (defun find-class-from-cell (symbol cell &optional (errorp t))
   (or (find-class-cell-class cell)
       (and *create-classes-from-internal-structure-definitions-p*
@@ -462,9 +456,8 @@
   (find-class-cell-predicate cell))
 
 (defun legal-class-name-p (x)
-  (symbolp x))
-;  (and (symbolp x)
-;       (not (keywordp x))))
+  (and (symbolp x)
+       (not (keywordp x))))
 
 (defun find-class (symbol &optional (errorp t) environment)
   (declare (ignore environment))
@@ -508,8 +501,7 @@
   (declare (ignore errorp environment))
   `(SETF\ PCL\ FIND-CLASS ,new-value ,symbol))
 
-(defun #-setf SETF\ PCL\ FIND-CLASS #+setf (setf find-class) (new-value symbol  &optional errorp environment)
-  (declare (ignore errorp environment))
+(defun #-setf SETF\ PCL\ FIND-CLASS #+setf (setf find-class) (new-value symbol)
   (if (legal-class-name-p symbol)
       (let ((cell (find-class-cell symbol)))
 	(setf (find-class-cell-class cell) new-value)
@@ -528,8 +520,7 @@
 	    (dolist (keys+aok (find-class-cell-make-instance-function-keys cell))
 	      (update-initialize-info-internal
 	       (initialize-info new-value (car keys+aok) nil (cdr keys+aok))
-	       'make-instance-function))))
-	new-value)
+	       'make-instance-function)))))
       (error "~S is not a legal class name." symbol)))
 
 #-setf
@@ -666,7 +657,6 @@
 (defun do-standard-defsetfs-for-defclass (accessors)
   (dolist (name accessors) (do-standard-defsetf-1 name)))
 
-;; FIXME remove this when all is well
 (defun do-standard-defsetf-1 (function-name)
   #+setf
   (declare (ignore function-name))
@@ -707,8 +697,7 @@
 			 (bindings (mapcar #'(lambda (x) `(,(gensym) ,x)) loc-args))
 			 (vars (mapcar #'car bindings)))
 		    `(let ,bindings
-		       (funcall #',setf-function-name ,(car (last form)) ,@vars)))))
-	(format t "defsetfinf ~S~%" `(defsetf ,function-name ,helper))
+		       (,setf-function-name ,(car (last form)) ,@vars)))))
 	(eval `(defsetf ,function-name ,helper)))
       #+Xerox
       (flet ((setf-expander (body env)

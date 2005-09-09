@@ -11,23 +11,30 @@
   2)
 
 (deftest ccase.2
-  (signals-type-error x 1 (ccase x))
-  t)
+  (classify-error 
+   (let ((x 1)) (ccase x)))
+  type-error)
 
 (deftest ccase.3
-  (signals-type-error x 1 (ccase x (a 1) (b 2) (c 3)))
-  t)
+  (classify-error
+   (let ((x 1))
+     (ccase x (a 1) (b 2) (c 3))))
+  type-error)
 
 ;;; It is legal to use T or OTHERWISE as key designators
 ;;; in CCASE forms.  They have no special meaning here.
 
 (deftest ccase.4
-  (signals-type-error x 1 (ccase x (t nil)))
-  t)
+  (classify-error
+   (let ((x 1))
+     (ccase x (t nil))))
+  type-error)
 
 (deftest ccase.5
-  (signals-type-error x 1 (ccase x (otherwise nil)))
-  t)
+  (classify-error
+   (let ((x 1))
+     (ccase x (otherwise nil))))
+  type-error)
 
 (deftest ccase.6
   (let ((x 'b))
@@ -48,8 +55,10 @@
   a)
 
 (deftest ccase.9
-  (signals-type-error x nil (ccase x (nil 'a)))
-  t)
+  (classify-error
+   (let (x)
+     (ccase x (nil 'a))))
+  type-error)
 
 (deftest ccase.10
   (let (x)
@@ -62,8 +71,10 @@
   1 2 3)
 
 (deftest ccase.12
-  (signals-type-error x t (ccase x (a 10)))
-  t)
+  (classify-error
+   (let ((x t))
+     (ccase x (a 10))))
+  type-error)
 
 (deftest ccase.13
   (let ((x t))
@@ -76,20 +87,28 @@
   1)
 
 (deftest ccase.15
-  (signals-type-error x 'otherwise (ccase x ((t) 10)))
-  t)
+  (classify-error
+   (let ((x 'otherwise))
+     (ccase x ((t) 10))))
+  type-error)
 
 (deftest ccase.16
-  (signals-type-error x t (ccase x ((otherwise) 10)))
-  t)
+  (classify-error
+   (let ((x t))
+     (ccase x ((otherwise) 10))))
+  type-error)
 
 (deftest ccase.17
-  (signals-type-error x 'a (ccase x (b 0) (c 1) (otherwise 2)))
-  t)
+  (classify-error
+   (let ((x 'a))
+     (ccase x (b 0) (c 1) (otherwise 2))))
+  type-error)
 
 (deftest ccase.19
-  (signals-type-error x 'a (ccase x (b 0) (c 1) ((t) 2)))
-  t)
+  (classify-error
+   (let ((x 'a))
+     (ccase x (b 0) (c 1) ((t) 2))))
+  type-error)
 
 (deftest ccase.20
   (let ((x #\a))
@@ -162,34 +181,9 @@
       (2 nil))))
   :good)
 
-;;; No implicit tagbody
-(deftest ccase.32
-  (block done
-    (tagbody
-     (let ((x 'a))
-       (ccase x (a (go 10)
-		   10
-		   (return-from done 'bad))))
-     10
-     (return-from done 'good)))
-  good)
-
-
 ;;; (deftest ccase.error.1
-;;;  (signals-error (ccase) program-error)
-;;;  t)
+;;;  (classify-error (ccase))
+;;;  program-error)
 
-(deftest ccase.error.1
-  (signals-error (funcall (macro-function 'ccase))
-		 program-error)
-  t)
 
-(deftest ccase.error.2
-  (signals-error (funcall (macro-function 'ccase) '(ccase t))
-		 program-error)
-  t)
-
-(deftest ccase.error.3
-  (signals-error (funcall (macro-function 'ccase) '(ccase t) nil nil)
-		 program-error)
-  t)
+    

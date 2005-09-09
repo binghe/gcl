@@ -108,12 +108,6 @@ GMP_EXTERN int jmp_gmp;
            return Join(RR_,rt_);\
    }
 
-MEM_GMP_CALL(3,void,mpz_urandomm,1,mpz_t,gmp_randstate_t,mpz_t)
-MEM_GMP_CALL(2,void,gmp_randseed,1,gmp_randstate_t,mpz_t)
-MEM_GMP_CALL(2,void,gmp_randseed_ui,1,gmp_randstate_t,unsigned long int)
-MEM_GMP_CALL(1,void,gmp_randinit_default,0,gmp_randstate_t)
-
-
 MEM_GMP_CALL(3,void,mpz_add,1,mpz_t,mpz_t,mpz_t)
 MEM_GMP_CALL(3,void,mpz_add_ui,1,mpz_t,mpz_t,unsigned long int)
 MEM_GMP_CALL(3,void,mpz_sub,1,mpz_t,mpz_t,mpz_t)
@@ -138,22 +132,12 @@ MEM_GMP_CALL(1,double,mpz_get_d,0,mpz_t)
 MEM_GMP_CALL(1,gmp_lint,mpz_get_si,0,mpz_t)
 MEM_GMP_CALL(3,gmp_char_star,mpz_get_str,0,char *,int,mpz_t)
 MEM_GMP_CALL(1,int,mpz_fits_sint_p,0,mpz_t)
-MEM_GMP_CALL(1,int,mpz_fits_slong_p,0,mpz_t)
 MEM_GMP_CALL(1,gmp_ulint,mpz_popcount,0,mpz_t)
 /*MEM_GMP_CALL(2,void *,mpz_realloc,mpz_t,mp_size_t)*/
 MEM_GMP_CALL(1,size_t,mpz_size,0,mpz_t)
 MEM_GMP_CALL(2,size_t,mpz_sizeinbase,0,mpz_t,int)
-MEM_GMP_CALL(3,void,mpz_gcd,1,mpz_t,mpz_t,mpz_t)
-MEM_GMP_CALL(3,gmp_ulint,mpz_gcd_ui,1,mpz_t,mpz_t,unsigned long int)
-MEM_GMP_CALL(3,void,mpz_divexact,1,mpz_t,mpz_t,mpz_t)
-MEM_GMP_CALL(3,void,mpz_divexact_ui,1,mpz_t,mpz_t,unsigned long int)
 
      /* FIXME: find a way to have this follow the convention in gmp.h*/
-
-#define __gmpz_urandomm m__gmpz_urandomm
-#define __gmp_randseed m__gmp_randseed 
-#define __gmp_randseed_ui m__gmp_randseed_ui
-#define __gmp_randinit_default m__gmp_randinit_default
 
 #define __gmpz_add m__gmpz_add
 #define __gmpz_add_ui m__gmpz_add_ui
@@ -179,12 +163,7 @@ MEM_GMP_CALL(3,void,mpz_divexact_ui,1,mpz_t,mpz_t,unsigned long int)
 #define __gmpz_get_si m__gmpz_get_si
 #define __gmpz_get_str m__gmpz_get_str
 #define __gmpz_fits_sint_p m__gmpz_fits_sint_p
-#define __gmpz_fits_slong_p m__gmpz_fits_slong_p
 #define __gmpz_popcount m__gmpz_popcount
 /*#define __gmpz_realloc m__gmpz_realloc*/
 #define __gmpz_size m__gmpz_size
 #define __gmpz_sizeinbase m__gmpz_sizeinbase
-#define __gmpz_mpz_gcd m__gmpz_mpz_gcd
-#define __gmpz_mpz_gcd_ui m__gmpz_mpz_gcd_ui
-#define __gmpz_mpz_divexact m__gmpz_mpz_divexact
-#define __gmpz_mpz_divexact_ui m__gmpz_mpz_divexact_ui

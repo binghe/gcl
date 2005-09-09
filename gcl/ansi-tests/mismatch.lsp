@@ -597,47 +597,6 @@
      (mismatch m a :from-end t)))
   (4 4 5 nil nil 6 5 6))
 
-(deftest mistmatch-string.25
-  (let ((s0 "12345")
-	(s1 "123A")
-	(s2 "245"))
-    (do-special-strings
-     (s s0 nil)
-     (assert (null (mismatch s s0)))
-     (assert (null (mismatch s0 s)))
-     (assert (null (mismatch s s0 :from-end t)))
-     (assert (null (mismatch s0 s :from-end t)))
-     (assert (eql (mismatch s s1) 3))
-     (assert (eql (mismatch s1 s) 3))
-     ))
-  nil)
-
-;;; test and test-not tests
-
-(defharmless mismatch.test-and-test-not.1
-  (mismatch '(1 2 3) '(1 2 4) :test #'eql :test-not #'eql))
-
-(defharmless mismatch.test-and-test-not.2
-  (mismatch '(1 2 3) '(1 2 4) :test-not #'eql :test #'eql))
-
-(defharmless mismatch.test-and-test-not.3
-  (mismatch #(1 2 3) #(1 2 4) :test #'eql :test-not #'eql))
-
-(defharmless mismatch.test-and-test-not.4
-  (mismatch #(1 2 3) #(1 2 4) :test-not #'eql :test #'eql))
-
-(defharmless mismatch.test-and-test-not.5
-  (mismatch "abc" "abd" :test #'eql :test-not #'eql))
-
-(defharmless mismatch.test-and-test-not.6
-  (mismatch "abc" "abd" :test-not #'eql :test #'eql))
-
-(defharmless mismatch.test-and-test-not.7
-  (mismatch #*011 #*010 :test #'eql :test-not #'eql))
-
-(defharmless mismatch.test-and-test-not.8
-  (mismatch #*011 #*010 :test-not #'eql :test #'eql))
-
 ;;; Keyword tests
 
 (deftest mismatch.allow-other-keys.1
@@ -716,43 +675,41 @@
 ;;; Error cases
 
 (deftest mismatch.error.1
-  (signals-error (mismatch) program-error)
-  t)
+  (classify-error (mismatch))
+  program-error)
 
 (deftest mismatch.error.2
-  (signals-error (mismatch nil) program-error)
-  t)
+  (classify-error (mismatch nil))
+  program-error)
 
 (deftest mismatch.error.3
-  (signals-error (mismatch nil nil :bad t) program-error)
-  t)
+  (classify-error (mismatch nil nil :bad t))
+  program-error)
 
 (deftest mismatch.error.4
-  (signals-error (mismatch nil nil :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (mismatch nil nil :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest mismatch.error.5
-  (signals-error (mismatch nil nil :key) program-error)
-  t)
+  (classify-error (mismatch nil nil :key))
+  program-error)
 
 (deftest mismatch.error.6
-  (signals-error (mismatch nil nil 1 2) program-error)
-  t)
+  (classify-error (mismatch nil nil 1 2))
+  program-error)
 
 (deftest mismatch.error.7
-  (signals-error (mismatch '(a b) '(a b) :test #'identity) program-error)
-  t)
+  (classify-error (mismatch '(a b) '(a b) :test #'identity))
+  program-error)
 
 (deftest mismatch.error.8
-  (signals-error (mismatch '(a b) '(a b) :test-not #'identity) program-error)
-  t)
+  (classify-error (mismatch '(a b) '(a b) :test-not #'identity))
+  program-error)
 
 (deftest mismatch.error.9
-  (signals-error (mismatch '(a b) '(a b) :key #'car) type-error)
-  t)
+  (classify-error (mismatch '(a b) '(a b) :key #'car))
+  type-error)
 
 (deftest mismatch.error.10
-  (signals-error (mismatch '(a b) '(a b) :key #'cons) program-error)
-  t)
-
+  (classify-error (mismatch '(a b) '(a b) :key #'cons))
+  program-error)

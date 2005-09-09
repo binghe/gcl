@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -36,7 +35,7 @@
           bit-andc1 bit-andc2 bit-orc1 bit-orc2 bit-not
           array-has-fill-pointer-p fill-pointer
           vector-push vector-push-extend vector-pop
-          adjust-array))
+          adjust-array upgraded-array-element-type))
 
 (in-package 'system)
 
@@ -44,38 +43,29 @@
 (proclaim '(optimize (safety 2) (space 3)))
 
 (defun best-array-element-type (type)
-  (cond ((not type) nil)
-	((eq type '*) '*)
-	((member type '(string-char character standard-char base-char extended-char)) 'string-char) ;FIXME
-	((car (member type +array-types+)))
-	((car (member type +array-types+ :test 'subtypep)))
-	((subtypep type 'float) 'long-float)
-	(t)))
-
-;;FIXME -- this needs integration with other type functions.  CM 20050106
-;(defun best-array-element-type (type)
-;  (cond ((null type) nil)
-;	((eql t type) t)
-;	((memq type '(bit unsigned-char signed-char
-;				    unsigned-short
-;				    signed-short fixnum))
-;	       type)
-;	((subtypep type 'fixnum)
-;	 (dolist (v ;'(bit non-negative-char signed-char unsigned-char non-negative-short signed-short unsigned-short)
-;		    '(bit signed-char unsigned-char signed-short unsigned-short)
-;		    'fixnum)
-;		 (cond ((subtypep type v)
-;			(return v)))))
-;	((eql type 'character) 'string-char)
-;	(t (or (dolist (v '(string-char bit short-float
-;				    long-float))
-;		   (cond ((subtypep type v)
-;			  (return v))))
-;	       t))))
+  (cond ((or (eql t type) (null type))
+	 t)
+	((memq type '(bit unsigned-char signed-char
+				    unsigned-short
+				    signed-short fixnum))
+	       type)
+	((subtypep type 'fixnum)
+	 (dolist (v '(bit unsigned-char signed-char
+				    unsigned-short
+				    signed-short)
+		    'fixnum)
+		 (cond ((subtypep type v)
+			(return v)))))
+	((eql type 'character) 'string-char)
+	(t (or (dolist (v '(string-char bit short-float
+				    long-float))
+		   (cond ((subtypep type v)
+			  (return v))))
+	       t))))
 	 
-;(defun upgraded-array-element-type (type &optional environment)
-;  (declare (ignore environment))
-;  (best-array-element-type type))
+(defun upgraded-array-element-type (type &optional environment)
+  (declare (ignore environment))
+  (best-array-element-type type))
 
 ;(defun array-displacement (array)
 ;  (let ((x (si:array-displacement1 array)))
@@ -90,7 +80,7 @@
 			displaced-to (displaced-index-offset 0)
 			static)
   (when (integerp dimensions) (setq dimensions (list dimensions)))
-  (setq element-type (or (best-array-element-type element-type) 'string-char))
+  (setq element-type (best-array-element-type element-type))
   (cond ((= (length dimensions) 1)
 	 (let ((x (si:make-vector element-type (car dimensions)
 	                          adjustable fill-pointer
@@ -106,7 +96,7 @@
         (t
 	 (let ((x
 		(make-array1
-		       (the fixnum (get-aelttype element-type))
+		       (the fixnum(get-aelttype element-type))
 			static initial-element 
 		       displaced-to (the fixnum displaced-index-offset)
 		       dimensions)))
@@ -286,68 +276,70 @@
                      &rest r
 		     &key element-type
 			  initial-element
-			  (initial-contents nil initial-contents-supplied-p)
-			  (fill-pointer nil fill-pointer-supplied-p)
-			  (displaced-to nil)
-			  (displaced-index-offset 0)
-			  (static nil static-supplied-p))
-
-  (declare (ignore initial-element static displaced-index-offset) ;FIXME
-	   (:dynamic-extent r new-dimensions))
-
+			  initial-contents
+			  fill-pointer
+			  displaced-to
+			  displaced-index-offset
+			  static
+                     &aux fill-pointer-spec
+                      )
+  (declare (ignore 
+                   initial-element
+                   initial-contents
+                   fill-pointer
+                   displaced-to
+                   displaced-index-offset
+                   static))
+  (declare (:dynamic-extent r new-dimensions))
   (when (integerp new-dimensions)
         (setq new-dimensions (list new-dimensions)))
+  (if (setq fill-pointer-spec (member :fill-pointer r))
+      (unless (array-has-fill-pointer-p array)
+	      (error ":fill-pointer specified for array with no fill pointer"))
+    (when (array-has-fill-pointer-p array)
+      (push (fill-pointer array) r) (push :fill-pointer r)))
 
-  (when fill-pointer-supplied-p
-    (assert (array-has-fill-pointer-p array))
-    (unless fill-pointer
-      (setf (cadr (member :fill-pointer r)) (fill-pointer array))))
-    
-  (when (array-has-fill-pointer-p array)
-    (unless fill-pointer-supplied-p
-      (push (fill-pointer array) r)
-      (push :fill-pointer r)))
-      
   (setq element-type (array-element-type array))
-  (unless (eq element-type t)
-    (push element-type r)
-    (push :element-type r))
-
-  (unless static-supplied-p
-    (push (staticp array) r)
-    (push :static r))
-
+  (unless (eq element-type t) (push element-type r)
+	  (push :element-type r))
+  (unless (member :static r)
+        (push (staticp array) r) (push :static r))
   (let ((x (apply #'make-array new-dimensions :adjustable t r)))	
-
-    (unless (or displaced-to initial-contents-supplied-p)
-
-      (cond ((or (null (cdr new-dimensions))
-		 (and (equal (cdr new-dimensions)
-			     (cdr (array-dimensions array)))
-		      (or (not (eq element-type 'bit))
-			  (eql 0 (the fixnum (mod (the fixnum (car (last new-dimensions))) char-length))))))
-	     (copy-array-portion
-	      array x 0 0 (min (array-total-size x)
-			       (array-total-size array))))
-	    (t
-	     (do ((cursor (make-list (length new-dimensions) :initial-element 0)))
-		 (nil)
-	       (declare (:dynamic-extent cursor))
-	       (when (apply #'array-in-bounds-p array cursor)
-		 (aset-by-cursor
-		  x
-		  (if initial-contents-supplied-p
-		      (sequence-cursor initial-contents cursor)
-		    (apply #'aref array cursor))
-		  cursor))
-	       (when (increment-cursor cursor new-dimensions)
-		 (return nil))))))
+    (cond ((or (null (cdr new-dimensions))
+	       (and (equal (cdr new-dimensions)
+			   (cdr (array-dimensions array)))
+		    (or (not (eq element-type 'bit))
+			(eql 0 (the fixnum
+				    (mod
+				      (the fixnum (car (last new-dimensions)))
+				      char-size))))))
+	   (copy-array-portion array   x
+			       0 0
+			       (min (array-total-size x)
+				    (array-total-size array))))
+	  (t
+	    (do ((cursor (make-list (length new-dimensions)
+				    :initial-element 0)))
+		(nil)
+		(declare (:dynamic-extent cursor))
+		(when (apply #'array-in-bounds-p array cursor)
+		      (aset-by-cursor x
+				      (apply #'aref array cursor)
+				      cursor))
+		(when (increment-cursor cursor new-dimensions)
+		      (return nil)))))
     
-    (replace-array array x)
+    (si:replace-array array x)
+    (setf fill-pointer-spec (cadr fill-pointer-spec))
+    (when fill-pointer-spec
+        (cond ((eql t fill-pointer-spec)
+	       (setf (fill-pointer array) (array-total-size array)))
+	      ((typep fill-pointer-spec 'fixnum)
+	       (setf (fill-pointer array) fill-pointer-spec))
+	      (t (error "bad :fill-pointer arg: ~a" fill-pointer-spec))))
+    array
+    ))
 
-    (when (eq fill-pointer t)
-      (setq fill-pointer (array-total-size array)))
-    (when fill-pointer
-      (setf (fill-pointer array) fill-pointer))
-   
-    array))
+
+
+

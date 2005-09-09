@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 
 
 (defstruct (fasd (:type vector))

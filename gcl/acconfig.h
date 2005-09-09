@@ -10,14 +10,13 @@ is usually 4K or 8K bytes.  From 1 to 3 bytes per page are
 preallocated in a table at compile time.  this must be a power of 2 if
 SGC is enabled.  */
 
-#undef MAXPAGE
-#undef VSSIZE
-#undef BDSSIZE
-#undef IHSSIZE
-#undef FRSSIZE
-#undef CSSIZE
+#define MAXPAGE 128*1024
+#define VSSIZE 128*1024
+#define BDSSIZE 2*1024
+#define IHSSIZE 4*1024
+#define FRSSIZE 4*1024
 
-#undef HOLEDIV
+#define HOLEPAGE (MAXPAGE/10)
 
 /* check to see if getcwd exists
 */
@@ -95,13 +94,6 @@ SGC is enabled.  */
 */
 
 #define CSTACK_ADDRESS 0
-#define CSTACK_DIRECTION 0
-#define CSTACK_ALIGNMENT 0
-#define MEM_TOP 0
-#define MEM_RANGE 0
-#define SHARED_LIB_HEAP_CEILING 0
-#undef IM_FIX_BASE
-#undef IM_FIX_LIM
 
 /* define if SIGSYS is defined in signal.h */
 
@@ -166,7 +158,7 @@ SGC is enabled.  */
 
 #ifdef IN_NUM_CO
 #ifdef HAVE_ISNORMAL
-#define __USE_ISOC99 1
+#define _GNU_SOURCE
 #include <math.h>
 #define ISNORMAL(a) isnormal(a)
 #else
@@ -187,7 +179,7 @@ SGC is enabled.  */
 
 #ifdef NEED_ISFINITE
 #ifdef HAVE_ISFINITE
-#define __USE_ISOC99 1
+#define _GNU_SOURCE
 #include <math.h>
 #define ISFINITE(a) isfinite(a)
 #else
@@ -232,10 +224,6 @@ SGC is enabled.  */
 /*  #endif */
 
 #undef SIZEOF_LONG
-#undef SIZEOF_INT
-#undef SIZEOF_SHORT
-#undef SIZEOF_CHAR
-#undef CHAR_SIZE
 
 #undef USE_DLOPEN
 
@@ -263,7 +251,3 @@ SGC is enabled.  */
 #undef HOST_SYSTEM
 #undef GCL_GPROF_START
 #undef HZ
-
-#undef TYPE_BITS
-#undef OBJ_ALIGN
-#undef NEG_CSTACK_ADDRESS

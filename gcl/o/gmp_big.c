@@ -118,11 +118,11 @@ new_bignum(void)
    it, and then we can copy it back
 */   
 #define GCPROTECT(u) \
- MP_INT * __u = (u==MP(big_fixnum1) || u==MP(big_fixnum2)) ? u : MP(big_gcprotect); \
+ MP_INT * __u = MP(big_gcprotect); \
  (__u)->_mp_d =   (u)->_mp_d; \
  (__u)->_mp_alloc = (u)->_mp_alloc 
 #define GC_PROTECTED_SELF (__u)->_mp_d
-#define END_GCPROTECT if (__u==MP(big_gcprotect)) (__u)->_mp_d = 0
+#define END_GCPROTECT (__u)->_mp_d = 0
  
 
 
@@ -156,7 +156,7 @@ object
 make_integer(__mpz_struct *u)
 {
   if ((u)->_mp_size == 0) return small_fixnum(0);
-  if (mpz_fits_slong_p(u)) {
+  if (mpz_fits_sint_p(u)) {
     return make_fixnum(mpz_get_si(u));
       }
   return make_bignum(u);
@@ -172,8 +172,8 @@ make_integer_clear(u)
 mpz_t u;
 { object ans;
   if ((u)->_mp_size == 0) return small_fixnum(0);
-  if (mpz_fits_slong_p(u)) {
-    fixnum x = mpz_get_si(u);
+  if (mpz_fits_sint_p(u)) {
+    signed long int x = mpz_get_si(u);
     mpz_clear(u);
     return make_fixnum(x);
       }
@@ -273,9 +273,10 @@ object
 normalize_big(object x)
 {
  if (MP_SIZE(x) == 0) return small_fixnum(0);
-  if (mpz_fits_slong_p(MP(x))) {
+  if (mpz_fits_sint_p(MP(x))) {
     MP_INT *u = MP(x);
-    return make_fixnum(mpz_get_si(u));
+    signed long int xx = mpz_get_si(u);
+    return make_fixnum(xx);
       }
   else return x;
 }
@@ -419,13 +420,6 @@ otoi(object x) {
   FEwrong_type_argument(sLinteger,x);
   return NULL;
 }
-
-MP_INT *
-stoi(fixnum x) {
-  object y = new_bignum();
-  mpz_set_si(MP(y),x);
-  return MP(y);
-}
 /* end added section for declare integer -- CM */
 
 
@@ -442,21 +436,22 @@ maybe_replace_big(object x)
    bug or feature of gmp..
 */   
   if (MP_SIZE(x) == 0) return small_fixnum(0);
-  if (mpz_fits_slong_p(MP(x))) {
+  if (mpz_fits_sint_p(MP(x))) {
     MP_INT *u = MP(x);
-    return make_fixnum(mpz_get_si(u));
+    signed long int xx = mpz_get_si(u);
+    return make_fixnum(xx);
   }
   return make_bignum(MP(x));
 }
 
-/*FIXME 64*/
+
 object
-bignum2( int h,  int l)
+bignum2(unsigned int h, unsigned int l)
 {
   object x = new_bignum();
-  mpz_set_si(MP(x),h);
+  mpz_set_ui(MP(x),h);
   mpz_mul_2exp(MP(x),MP(x),32);
-  mpz_add_ui(MP(x),MP(x),((unsigned int)l));
+  mpz_add_ui(MP(x),MP(x),l);
   return normalize_big(x);
 }
 

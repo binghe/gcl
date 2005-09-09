@@ -5,8 +5,6 @@
 
 (in-package :cl-test)
 
-(compile-and-load "search-aux.lsp")
-
 ;;; The next test was busted due to to a stupid cut and paste
 ;;; error.  The loop terminates immediately, doing nothing
 ;;; useful. -- PFD
@@ -162,36 +160,4 @@
        (search pat a))
      (search pat a :from-end t)))
   0 4 0 0 nil nil)
-
-;; Order of test, test-not
-
-(deftest search-string.17
-  (let ((pat "m")
-	(target '"adgmnpq"))
-    (search pat target :test #'char<))
-  4)
-
-(deftest search-string.18
-  (let ((pat "m")
-	(target '"adgmnpq"))
-    (search pat target :test-not #'char>=))
-  4)
-
-;;; Specialized strings
-
-(deftest search-string.19
-  (do-special-strings
-   (s "a" nil)
-   (assert (eql (search s "xyza123apqr") 3))
-   (assert (eql (search s "xyza1a3apqr" :start2 4) 5))
-   (assert (eql (search s "xyza123apqr" :from-end t) 7)))
-  nil)
-
-(deftest search-string.20
-  (do-special-strings
-   (s "xababcdefabc123ababc18" nil)
-   (assert (eql (search "abc" s) 3))
-   (assert (eql (search "abc" s :start2 4) 9))
-   (assert (eql (search "abc" s :from-end t) 17)))
-  nil)
 

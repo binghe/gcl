@@ -5,8 +5,6 @@
 
 (in-package :cl-test)
 
-(compile-and-load "types-aux.lsp")
-
 ;;; SUBTYPEP on MEMBER types
 
 (deftest subtypep.member.1

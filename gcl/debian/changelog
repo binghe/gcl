@@ -1,507 +1,67 @@
-gclcvs (2.7.0-50) unstable; urgency=low
+gcl (2.6.7-1) unstable; urgency=high
 
-  * debian binutils 2-16.1
-
- -- Camm Maguire <camm@enhanced.com>  Fri,  9 Sep 2005 23:25:10 +0000
-
-gclcvs (2.7.0-49) unstable; urgency=low
-
-  * Restore acl2 build for testing purposes
-  * block compound integer inlines for now following older pattern --
-    FIXME
-  * Pass unboxed binums in and out of compiled functions -- FIXME,
-    decide if this is preferable to blocking this possibility and saving
-    this facility for floats/doubles.  ACL2 declares quite a few
-    functions as having unbounded integer arguments.
-  * Allow fmakunbound to proceed on undefined functions in cltl1 for
-    acl2
-  * Move cmp-array-dimension proclamation to sys-proclaim.lisp until can
-    work out top level form ordering in compiled files
-  * More efficient inliner for array-dimension
-  * Fix compile-file-pathname and compile-file-truename, split-files
-  * Handle file type defaults in compile-file
-  * Fix '* array element handling in aref-propagator
-  * Style-warning condition
-  * Save variable type information in *c-vars*, using alternate form
-    (cons index type) for stack vars in inline blocks, for use in late
-    inlining
-  * expand result-type-from-args invocation; run compiler macros before
-    c1 funs
-  * Better list search function optimizations -- FIXME more here later
-  * Don't  autodeclare apparently constant special variable bindings
-  * compile-file ansi test fixes
-  * replace eql with eq in list search functions when possible
-  * preliminary support for symbol keyword and cons type optimization in
-    compiler
-  * Preparation for error system overhaul work
-  * deftype before structure-subtype in typep
-  * unused vars
-  * remove ':
-  * fmakunbound on undefined fn is not an error
-  * heuristic to detect compiled objects from text files independent of
-    filename extension
-  * truename is not destructive
-  * wrap compile-file  in ansi image for warnings and failures
-  * Remove unused ansi_cl.lisp
-  * Preliminary gabriel benchmark addition
-  * Fix compile to pass warnings and failures from compile-file
-  * Fix binary file detection heuristic for short files
-  * Fix command line compile semantics for new compile-file behavior
-  * function identifier type -- stack strings don't work for error
-    reporting
-  * stoi for unboxed integer arguments
-  * use-fast-links -> si::use-fast-links in ansi
-  * Fix (* -2147483648 -2147483648)
-  * Begin centralizing C types in compiler.  Prevent passing unboxed
-    integers across functions, prepare for doing so with short and long
-    floats instead.
-  * TAGS in lsp and cmpnew
-  * reorder types for quick predicates, define some useful macros to
-    same end
-  * hash improvements courtesy of Boyer and Hunt, many thanks
-  * print-object for defstruct
-  * Only eval proper lists
-  * read error on non-real complex components
-  * nil means standard readtable
-  * gcc-4.0 fixups
-  * gcc 4.0 fixes;new trial subtypep (no member cons or satisfies yet);
-    branch elimination; much type propagation expansion; equality
-    upgrading to eq, list search functions inlined and optimized via
-    compiler macros ; fix subtypep {,-integer,-float,-real,-rational,-
-    complex} ansi tests.  FIXME -- go over these diffs and cleanup in a
-    week's time
-  * no nil vectors in gcl
-  * optimize external macros with safety >=1 for arg checking -- with
-    newer compiler mods enabling this facility
-  * agressive C inline function calls for (funcall (quote sym) ...
-  * Allow local function optimization declarations
-  * Fix member compiler-macro
-  * revert mistagged change to gcl_cmpeval.lsp
-  * fix constant numeric comparison result detection for use in branch
-    elimination ; eql-to-eq list type detection
-  * Last arg to and is not a boolean
-  * Make t inlines whenever boolean inlines are provided
-  * proper lists in map functions -- FIXME handle properly elsewher too
-  * fix terminal element in cons type support
-  * make sys-proclaim.lisp with saved_pre_gcl
-  * control-error support
-  * No nil vector types
-  * Major type system overhaul at the base -- all ansi subtypep tests
-    pass with second arg set to t.  Autodetection and branch elimination
-    for pcl::std-instance-p.  Incremental addition of class information
-    during pcl build.  Explicit type orthoganalization and subtypep
-    analysis based on assessment of (and t1 (not t2)) being type nil as
-    in the Baker paper.  Preliminary use in the compiler in type-and.
-    TODO complete replacement type-and and type-or in compiler with
-    these algorithms.  Consider type hash consing  in compiler for
-    compiler performance.  Consider a better deftype structure, as rate
-    limiting step at present lies in normalizing the type via evaluation
-    of interpreted deftype closures. Halv complex workload.
-  * Misc small modifications to aid the compiler in optimization
-  * Make sys-proclaims with saved_pre_gcl
-  * External macros and functions must be compiled with safety 1 to
-    check args
-  * control weeoe support
-  * pcl cache optimization, support for std-instance type declaration
-    analysis
-  * No mod/ files in saved_pre_gcl
-  * No LD_STACK_FLAGS on non mingw
-  * Lintian fix to package.d
-  * Fix format :@ order
-  * *print-readbaly* defauls to nil
-  * comma interval support in format.c courtesy of Bob Boyer (thanks)
-  * package-used-by-list typo fix in gcl_pcl_env.lisp
-  * clcs_macros.lisp  to gcl_clcs_macros.lisp in main makefile
-  * Fix cons-type-length bug blocking acl2
-  * Fix frame popping bug misc.613
-  * Don't evaluate 'the arg in recursively-cmp-macroexpand -- FIXME,
-    this needs replacing with another c1 pass soon
-  * Fix split-files pathname bug for the nqthms
-  * Add back on_stack_list, fix misc 614
-  * accelerated normalize-type without side-effects
-  * extra ansi hash functions
-  * another split-file fix
-  * Newer standards
-  * Fix cons type side-effect-induced bug -- FIXME try to remove the
-    side effects and see how bad the performance gets
-  * deftype structure-object to structure
-  * Various type system fixes
-  * class-precedence-list tests should work now
-  * define several standard conditions
-  * make-load-form support for conditions
-  * check-type test fixes
-  * Use new enhanced type-and in typep compiler optimizations -- patter
-    should be used elsewhere
-  * non-negative-{char,short-fixnum} array types
-  * compiler support for new interpreted function type
-  * use new subtypep/resolve-type system for enhanced compiler type-and
-    -- TODO cleanup dead code
-  * type-of now an sfun
-  * interpreted-function, non-negative-* lisp symbols
-  * interpreted-function C type support
-  * upgraded-array-element type of nil is nil
-  * all arrays are simple
-  * memq is a sys macro
-  * return unused format args in formatter
-  * extensive type system fixes
-  * make-sequence handles classes
-  * interpreted-function support for trace
-  * non-negative-* array types
-  * interpreted-function support
-  * more TAGS makefile support -- todo merge all dirs
-  * logical-pathname-p
-  * type-of support for classes
-  * function class and structure class constructor support
-  * export class-direct-subclasses to type system
-  * fix class-precedence-list-foo pcl bug a la cmucl
-  * make-load-form support a la cmucl
-  * fix structure-type-slot-description-list
-  * export make-load-form, make-load-form-saving-slots, and describe-
-    object
-  * don't implement any standard classes as structue classes
-  * remove extra eval of getf default
-  * dpp makefile bug fix
-  * gcc-4.0 fixes, Closes: #323523
-  * depend on common-lisp-controller, Closes: #308365
-  * base-char lisp symbol
-  * move base-char init into trad image
-  * fix clc script to avoid hanging on stdin -- TODO FIX, this should
-    happen with -batch in any case
-
- -- Camm Maguire <camm@enhanced.com>  Wed,  7 Sep 2005 17:43:55 +0000
-
-gclcvs (2.7.0-48) unstable; urgency=low
-
-  * More ortability fixes
-  * Fix stack/heap configuration issues on alpha
-  * mips optimizes bzero to memset
-  * Have to build 2.0 binary on hppa until debian gets >= gcc 3.4
-
- -- Camm Maguire <camm@enhanced.com>  Sat, 18 Jun 2005 22:08:17 +0000
-
-gclcvs (2.7.0-47) unstable; urgency=low
-
-  * More portability fixes
-  * Explicitly align CnilCt and character_table1, the only objects in
-    our initial .data segment
-  * Modify configure to handle cases where C stack is below dbegin.
-    FIXME -- do likewise for shared memory loads below dbegin
-  * FIXME _GNU_SOURCE -> __USE_ISOC99 macro for isnormal et. al.
-  * powerpc-macosx.h includes
-
- -- Camm Maguire <camm@enhanced.com>  Fri, 17 Jun 2005 01:13:32 +0000
-
-gclcvs (2.7.0-46) unstable; urgency=low
-
-  * Mac fixes
-  * gcc-4.0 static decl fixes
-  * my_sbrk -> sbrk_macosx
-  * unsigned long casts to printf in unexmacosx.c
-  * Make clcs/makefile compatible with new broken make
-  * Need SGC mark in TYPE_BITS
-  * Handle CSTACK_ADDRESS of MOST_NEGATIVE_FIX
-  * Preserve SGC bit i set_type_of
-
- -- Camm Maguire <camm@enhanced.com>  Wed, 15 Jun 2005 22:23:28 +0000
-
-gclcvs (2.7.0-45) unstable; urgency=low
-
-  * Portability fixes
-  * Arm is little endian, CSTACK_ALIGNMENT defaults to 1
-  * Update NULL_OR_ON_C_STACK macro for alpha
-  * Align Cnil et.al.,allow address to be unknown at load time, ensure 8
-    byte alignment on packed machines like m68k (hash table padding),
-    stripped cdr Scdr macro unmarks rather than unfrees as imm fix table
-    could be tight.  Revisit this
-  * Computable Cnil address
-  * Fix accelerated allocations in list()
-  * Fix most-negative-fixnum/abs(most-negative-fixnum) in
-    integer_exact_quotient
-  * Push bzero to plt table as compiler writes it via ZALLOCA -- revisit
-    builtin bzero issue
-  * Round CSTACK_ADDRESS
-  * Better cs_limit calculation
-  * Pass faults out of heap to segmentation catcher
-  * Centralize GET_FAULT_ADDR and NULL_OR_ON_C_STACK macros
-  * Cap rising C stacks for fixnum table, lower mips heap start
-  * Better mark/free semantics
-
- -- Camm Maguire <camm@enhanced.com>  Tue, 14 Jun 2005 22:37:17 +0000
-
-gclcvs (2.7.0-44) unstable; urgency=low
-
-  * All page size defaults in configure.in; memory bounds checking in
-    configure
-  * Automatic heap start lowering via linker script gcl.script
-    (configure changes too)
-  * Close ansi open/load errors failures
-  * Close ansi proclaim et.al. errors failures
-  * Two word cons
-  * Configurable immediate fixnums above c stack
-  * Enforce heap max
-  * Minimize stack hole garbage; push c stack mark to frame jsut above
-    toplevel
-  * gmp random numbers
-  * sigaltstack support for c stack overrun; FIXME -- remove separate
-    implementations in h/ where possible, which are lilely broken
-  * Better room report
-  * 64bit hashing, cache symbol hash code for sxhash
-  * Fast fixnum_times
-  * Fast (expt 2 x)
-  * builtin class for random-state
-
- -- Camm Maguire <camm@enhanced.com>  Fri, 10 Jun 2005 16:10:09 +0000
-
-gclcvs (2.7.0-43) unstable; urgency=low
-
-  * Add sqrt, newly written by the compiler, to the local plt table
-  * Remove rfa flag from sqrt optimizer -- FIXME, handle libm imports as
-    a group
-  * Fix remaining misc test failure by bridging the old string-char into
-    character -- FIXME, this needs to be done throughout
-
- -- Camm Maguire <camm@enhanced.com>  Mon,  9 May 2005 19:59:26 +0000
-
-gclcvs (2.7.0-42) unstable; urgency=low
-
+  * Fix (listen) with readline on
+  * fix control-d with readline
   * libreadline5 support for Debian
+  * Support for pre-compiled regexps and new texinfo format
+  * Reenable run-process
   * Push function 'accept  into lisp, use select for 'listen on socket
     streams
+  * New Upstream release version
+  * Native-reloc feature
   * Add daemon capabilities to server sockets, document socket and
     accept
   * Some gcl-tk fixes
+  * Update wrapt-literals strategy to be consistent with CVS head --
+    wrap evreything but symbols and integers, don't wrap when keeping
+    the gazonk files for linking in different images, this is really a
+    compile-file operation
   * gcltk demo cleanups
   * Probe-file, open_stream, and the like fail on directories
-  * Fix symlink resolution to absolute paths, Thanks Magnus Henoch
+  * Resolve symlinks in truename
   * Place prototypes for defcfun in header files
+  * Support for unique init names for compiler::link and the like
   * libreadline5 for Debian
-  * Darwin cleanups
-  * static function pointer for array-dimension for ia64
-  * si::*link-hash-table* to replace stored bfd hash tables (using
-    malloced memory)
-  * Unique init-names for compiler::link and the like
   * remove _o from init-names
-  * Update ensure-directories-exist to new probe-file behavior
+  * gcc-4.0 fixups
+  * Bug fix: "gcl: depends on binutils-dev &lt;&lt;= 2.1.5-999), so
+    uninstallable in unstable", thanks to Steve Langasek (Closes:
+    #318681).  Rebuild with new release to autocompute this dep
+  * Bug fix: "gcl: Please switch to po-debconf", thanks to Lucas Wall
+    (Closes: #295930). Apply po-debconf patch
+  * Newer standards
 
- -- Camm Maguire <camm@enhanced.com>  Sat,  7 May 2005 16:09:43 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu, 11 Aug 2005 15:00:26 +0000
 
-gclcvs (2.7.0-41) unstable; urgency=low
+gcl (2.6.6-1) unstable; urgency=high
 
-  * static ia64 stubs in regexpr.c: fScompile_regexp in fSstring_match
-  * Fix typo in sfaslbfd_mips.c
-  * Move impl/gcl/pcl_gcl_low.lisp into pcl/ directory in prep for
-    unique gprof init name patch
-  * fix symbol name hashing in new alpha relocation code
-
- -- Camm Maguire <camm@enhanced.com>  Sun, 17 Apr 2005 19:43:37 +0000
-
-gclcvs (2.7.0-40) unstable; urgency=low
-
-  * Fix ia64 function stubs in run_process.c
-  * Make sure local bfd has writable howto types
-
- -- Camm Maguire <camm@enhanced.com>  Fri, 15 Apr 2005 14:37:18 +0000
-
-gclcvs (2.7.0-39) unstable; urgency=low
-
-  * Alpha native relocs
-
- -- Camm Maguire <camm@enhanced.com>  Thu, 14 Apr 2005 21:29:42 +0000
-
-gclcvs (2.7.0-38) unstable; urgency=low
-
-  * Add _mcount symbol to plt table for mips native relocs on ansi gprof
-  * Make static stubs in run_process.c for ia64
-
- -- Camm Maguire <camm@enhanced.com>  Mon, 11 Apr 2005 19:56:30 +0000
-
-gclcvs (2.7.0-37) unstable; urgency=low
-
-  * Preliminary support for integer range type propagation and
-    optimization -- better function return type deductions using result-
-    from-args info
-  * Macroexpand let bindings as well as let* for use in function return
-    type deduction, error in latter when dotted list is encountered
-  * Move set_maxpage() past init_darwin_zone for mac
-  * expand 'satisfies declarations in c1body where possible
-  * track bounded-type propataion via the function symbol plist keyed to
-    result-type-from-bounded-args rather in the per inline record, as it
-    is more general and pertains to the function alone
-  * expand type propation facility
-  * Fix bug in fixnum_add on most-negative-fixnum arg
-  * Fix incf/decf bug
-  * enhanced support for multiple value inlining
-  * Better packlib number bounds
-  * boolean and dynamic-extent declaration type support
-  * Support type propagation in case of coerced multiple values, protect
-    against nil type propagation
-  * Limit length to less than most-positive-fixnum
-  * fun-ret-type -> c1symbol-fun in binding-decls et. al. for increased
-    modularity and type propagation of let forms as arguments, for
-    example.  Temporarily push new variables to *vars* therein to ensure
-    partial pre-traversal of pass1 generates correct type propagation
-    analysis.  Prevent recursive macroexpansion of (function ...) forms
-  * bounded-type -> integer-typep et. al. in gcl_cmptype.lsp to support
-    half bounded integer range type propagation
-  * Correct flag construction for function attributes -- aref needs
-    one_val flag
-  * Fix dynamic extent declarations, ammend existing declarations with
-    auto-determined ones where possible
-  * Compiler type propagation enhancements
-  * Whitespace in compile-file pathnames, lisp-implementation-version
-    sync with 2.6.6
+  * New upstream release
+  * Allow .data section to be first in executable, as on solaris.  Also
+    allow for new bfd section size semantics
+  * Don't try to write map file when not using GNU ld.  Also allow
+    compile-file to process pathnames with whitespace on Windows
+  * Fix corner case fixnum arithmetic on 64bit machines
+  * Rework gmp_wrappers semantics for older gcc
+  * Explicitly mprotect loaded code pages PROT_EXEC on x86 Linux, as FC3
+    now requires it.
+  * lisp-implementation-version is GCL
+  * Reader extension patch allowing for foo::(bar foobar) semantics
+  * a shell script variable fix in "unixport/makefile" for MSYS
+  * __MINGW32__ malloc initialisation fix in "o/alloc.c"
+  * Windows file/directory fixes in "o/unixfsys.c"
+  * MinGW32 -march in configure - removes deprecation warnings
+  * MinGW32 directory fix - "o/mingfile.c".
+  * Allow for sysconf to determine clock granularity at compile time to
+    fix time errors on the Itanium
   * Disable SGC on macosx until the sgc/save problem can be fixed.
-  * Push latest mingfile.c from 2.6.6pre
+  * Fix fixnum print bug on 64bit
   * Fix nil types in room report
+  * 64bit fixes to fixnum_add and fixnum_sub
   * Fix Mac SGC/save bug, at least in part
-  * Fix listen to work with readline
-  * Don't write into rl_line_buffer if null
-  * Fix fmakunbound to handle setf functions, and to give a type error
-    when no function is defined
-  * Fix :q, package error triggering in defpackage, defpackage symbol
-    finding logic (thanks Peter Wood)
-  * Reenable run-process on Linux
-  * Remove debugging break from gcl_cmpspecial.lsp
-  * Fix control-d in readline
-  * libreadline5-dev in build-depends
-  * Avoid adding duplicate data to data file
-  * Fix info processing for new texinfo format; allow for precompiled
-    regexps
-  * Fix a read error condition allowing the ansi test suite to complete
-  * Support for MIPS native object relocation, courtesy of lush
-  * Restore proper order of segv sigaction handler setup to reenable
-    saving images with sgc turned on
-  * Fix aref error in top-level parse function
-  * Fix recursively-cmp-macroexpand to handler 'declare generated by
-    macroexpansion for maxima; fix erroneous undefined-variable warning
-    in binding-decls-new
-  * libreadline5 for Debian
-  * cacheflush for mips; FIXME -- perhaps not necessary
-  * prototype for un_perm_writable
 
- -- Camm Maguire <camm@enhanced.com>  Sun, 10 Apr 2005 03:18:16 +0000
+ -- Camm Maguire <camm@enhanced.com>  Sun, 16 Jan 2005 02:28:50 +0000
 
-gclcvs (2.7.0-36) unstable; urgency=high
-
-  * Modify pull-evals and add arg-appears in gcl_cmpeval.lsp to more
-    correctly choose which arguments need pre-evaluation in binary op
-    compiler-macros
-  * fix fix_bitp reference to 30 instead of LOG_WORD_SIZE-2
-  * int ->fixnum in list.d
-  * Don't pull-eval function slot of binary-op forms
-  * Yet more conservative binary-op compiler-macro strategy
-  * Choose right binding when pre-evaluating vars in binary-op compiler-
-    macros, using cons args as divisors
-  * Fix bignum2 function broken recently by accident
-  * Use side-effect flag in optimizer to prevent exponential growth in C
-    expressions on nesting certain optimized forms
-  * Old pathname-name case behavior in CLtL1
-  * Preliminary type inferencing
-  * reduce print.cons.random.2 iterations for slow autobuilders to migrate
-    latest into sarge, Closes: #282809.
-
- -- Camm Maguire <camm@enhanced.com>  Sat, 11 Dec 2004 01:22:13 +0000
-
-gclcvs (2.7.0-35) unstable; urgency=high
-
-  * Evaluate all args to function operators rewritten in binary pairs
-    via compiler macros, closing recent test failures misc.lsp
-  * revert native-reloc exemption to wrap-literals -- is rather a 64bit
-    issue
-  * Preliminary support for 64bit address/nani/load-time-value, and
-    64bit most-positive-fixnum
-
- -- Camm Maguire <camm@enhanced.com>  Sat, 27 Nov 2004 22:03:22 +0000
-
-gclcvs (2.7.0-34) unstable; urgency=low
-
-  * revert changes to local bfd.h files, a users might have them as
-    system headers -- instead workaround reloc_done abort in sfaslbfd.c
-  * Add feature native-reloc for platforms which can natively relocate
-    loaded code (i.e. do not need dlopen), conditionalize new
-    compiler::wrap-literals with this feature, as otherwise code can
-    refer to data mapped by dlopen, which cannot be gc'ed
-  * Reduce iterations for print.cons.1 test, as slower machines are
-    timing out
-
- -- Camm Maguire <camm@enhanced.com>  Thu, 25 Nov 2004 14:47:53 -0500
-
-gclcvs (2.7.0-33) unstable; urgency=high
-
-  * Temporary workaround to restore xgcl
-  * Properly negate integers in mp.h on 64bit machines, allowing for the
-    fact that (int)2^31=-(int)2^31
-  * Fix CSSIZE configure handling
-  * Trigger error in funcall_with_catcher on too many call arguments
-  * install target depends on all in main makefile to comply with GNU
-    standards
-  * load-time-value support; close compile bugs in ansi test suite
-  * Only wrap-literals when not keeping temporary gazonk lisp files
-    (e.g. for possible future use in compiler::link and the like).
-    *keep-gaz* is effectively a switch turning compile into compile-
-    file.  Make wrapping algorithm a bit more thorough.
-  * Fix method-combintion ANSI failures, from cmucl
-  * compiler-macro and method-combination documentation types
-  * complete si::debug -> si::debugger name change
-  * open probe ANSI fixes
-  * array-dimension fix for bitvectors, adjust-array ansi fixes
-  * bfd version independent section size semantics
-  * Bug fix: "c-l-c for gclcvs creates directories in root", thanks to
-    Richard M Kreuter (Closes: #282535). Fix error in clc script.
-  * Make local bfd source compatible with new section size semantics
-  * Fix install-command target in main makefile, DESTDIR and prefix should
-    only be used in install1.
-  * Bug fix: "gclcvs: FTBFS: error making tests.", thanks to Kurt Roeckx
-    (Closes: #282809).file-author returns nil when pwent is null.
-  * Bug fix: "FTBFS: segmentation fault", thanks to Matt Kraai (Closes:
-    #274319).file-author returns nil when pwent is null.
-  * Support for SC_CLK_TICK for different system time increments
-  * versionless debhelper build-depend
-  * Fix Debian clc cleanup
-
- -- Camm Maguire <camm@enhanced.com>  Thu, 25 Nov 2004 00:02:07 +0000
-
-gclcvs (2.7.0-32) unstable; urgency=high
-
-  * Use GMP gcd in bignum case, for performance improvement and better
-    binary algorithm
-  * Optimize some ratio calculations by advance call of get_gcd, also
-    bring forward gmp functions mpz_divexact and mpz_divexact_ui
-  * lisp-implementation-version reports GCL instead of Kyoto Common Lisp
-  * Fix typo in get_gcd in num_arith.c; safer in_place checking in
-    ratio_op_with_cancellation
-  * Lint fixes to sfaslelf.c, correctly set init_address when .text is
-    not first (Solaris ld) (heads up, Mike, you might need to check this
-    too), remove assertion of non-alloc rel/rela section names
-  * Solaris Lint fix to sfasli.c
-  * Fix compiler::link when gnu-ld is absent
-  * Fix case of exact division of 0 by a greater gcd value in
-    integer_exact_quotient; trim make_ratio and reinstate as a ratio
-    regularization routine in all instances,add pre_cancle flag to
-    make_ratio, proper precision for some internal constants to
-    correctly propagate precision of results, rework sqrt to give sane
-    results for negative reals and to preserve precision, precision
-    corrections in number_atan2, fix inverse trig, sqrt, and all floor
-    related ansi tests
-  * subtypep, upgraded array-element-type and ash ansi fixes
-  * Build with local bfd in libgcl to ease migration into testing, as
-    current binutils is long-term buggy
-  * gmp_wrapper variable declaration order change for older gcc
-  * fix wrongprototype for Llast
-  * compiler macros to rewrite certain multi argument functions as
-    nested calls with two arguments, to enable inlining
-  * Support for inlining functions returning multiple values, with
-    gethash as the first example
-  * Fix compiler warning in gcl_top.lsp
-  * Cleanup fixes to subtype tests of ansi test suite
-  * Some very preliminary work/fixes to the ansi pretty printer tests
-  * Fix ansi bignum comparison tests; FIXME -- ratio *  double where
-    denominator of former is very large and the latter is modest will
-    still probably fail -- need a test here (Paul?)
-
- -- Camm Maguire <camm@enhanced.com>  Thu, 16 Sep 2004 21:24:12 +0000
-
-gclcvs (2.7.0-31) unstable; urgency=high
+gcl (2.6.5-1) unstable; urgency=high
 
   * New gmp_wrappers.{c,h} files that prevent all GBC within gmp,
     obviating the need for gmp patches and a local gmp configure.  FIXME
@@ -519,33 +79,26 @@ gclcvs (2.7.0-31) unstable; urgency=high
   * Fix overwrite end of sgc_type_map bug
   * Versioned depends on binutils-dev manually installed by Debian build
     process
+  * New upstream release
   * Proper binutils dependency for Debian
-  * Fix error in clcs_conditions.lisp in define-condition to handle
-    cases where slot-specs are symbols rather than lists -- allows ansi
-    tests to run
-  * Large pretty print queue size for ansi tests
-  * Reenable compressed info lookup -- allow-gzipped files must be
-    seekable, not pipes
   * head -1l -> head -n 1 for freebsd
   * Cleanup gmp_wrapper code, check for in-place calls as write in one
     step is not guaranteed in gmp according to its developers
-  * Fix ansi bug in set-pprint-dispatch which prevented test completion
-  * Properly detect floating point numbers and reset radix to 10 in
-    parse_number
-  * Further fixes to parse_number
+  * Rebuild against binutils 2.15, Closes: #266253, Closes: #263983
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 17 Aug 2004 18:03:19 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 17 Aug 2004 18:22:27 +0000
 
-gclcvs (2.7.0-30) unstable; urgency=high
+gcl (2.6.4-1) unstable; urgency=high
 
-  * Slightly modify proclaimed vararg function handling fix
-    (gcl_cmptop.lsp)
+  * New upstream release
   * Make disassemble work when original system directory is gone
   * New debian/support files for debconf image default selection support
   * More descriptive compiled C function names for use in gprof when
     profiling is compiled in
+  * Compiler fix for proclaimed vararg functions
   * Allow sharp numbers to be bignums
   * lintian fix in string-match
+  * Prototype for alloca for lint
   * Improve gprof support
   * Improve sgc page allocation which optimize-maximum-pages is in
     effect and the hole is overrun
@@ -553,56 +106,17 @@ gclcvs (2.7.0-30) unstable; urgency=high
     all four by default via debconf
   * reset-sys-paths lisp function for moving image installation
     directories, show profiling support in banner if present
-  * reset sys paths on installation
   * Fix typo in sys docs
-  * Better common-lisp-controller support
+  * reset sys paths on installation
 
- -- Camm Maguire <camm@enhanced.com>  Fri,  6 Aug 2004 18:21:08 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu,  5 Aug 2004 22:48:56 +0000
 
-gclcvs (2.7.0-29) unstable; urgency=low
+gcl (2.6.3-1) unstable; urgency=high
 
-  * Remove references to external functions by static names in file.d
-    (row_major_aref)
-  * Fix bug in gcl_cmptop.lsp in which &optional + &rest lambda lists were
-    not being compiled correctly.
-  * Cleanup after clc on purge, Closes: #261796.
-
- -- Camm Maguire <camm@enhanced.com>  Sun,  1 Aug 2004 23:06:21 +0000
-
-gclcvs (2.7.0-28) unstable; urgency=high
-
-  * Michael Koehne's ANSI patches  (Thanks!)
-  * Bug fix: "the function (setf fdefinition) is undefined", thanks to
-    Eric Marsden (Closes: #256673).  setf fdefinition support
-  * Bug fix: "MAKE-PATHNAME does not support relative directories", thanks
-    to Eric Marsden (Closes: #256676).  from Michael's patches
-  * Bug fix: "COMPILE-FILE does not accept :VERBOSE argument", thanks to
-    Eric Marsden (Closes: #256674).  From Michael's patches.  FIXME make
-    more functional
-  * Bug fix: "~@; FORMAT directive is not implemented (CLtS 22.3.5.2)",
-    thanks to Eric Marsden (Closes: #256696).  FIXME cleanup
-  * Restore debugging function pp
-  * remove old with-standard-io-syntax frm gcl_ansi_io.lsp
-  * preliminary support for common-lisp-controller, Closes: #130569.
-
- -- Camm Maguire <camm@enhanced.com>  Sat, 24 Jul 2004 13:11:10 +0000
-
-gclcvs (2.7.0-27) unstable; urgency=low
-
-  * Fixup bad extern declaration of signals_handled in usig.c
-  * Minor extern declaration fixup for signals_handled in usig.c
   * Correctly parse gcc version strings in gmp3 subconfigure on arm
-  * Remove unnecessary arguments from FEerror calls in pathname.d
-  * handler_function_type is void (*)(int)
   * Fix variable capture error in dotimes macro
-  * Fix segfault in string-match
-  * Add with-standard-io-syntax in mod/gcl_ansi_io.lsp greatly reducing
-    ansi test failures
-  * Protect against compiling references to macro functions; set sane
-    *eval-when-defaults* to '(:compile-toplevel :load-toplevel :execute)
-  * revert erroneously changed eval-when-defaults
-  * Fix value stack leak in rare compiled call sequence
   * Better sed separator for LI-CC in unixport/makefile
+  * Fix segfault in string-match
   * vs_top=sup -> (reset-top) where possible in compiler.  FIXME: a few
     items of a different form which need to set *sup-used* too.
   * Correct room report to show proper percentages when sgc is on
@@ -610,26 +124,35 @@ gclcvs (2.7.0-27) unstable; urgency=low
   * Remove local bfd libraries from libs variables as their objects are
     incorporated into libgcl and as the source directory may not be
     available at runtime
-  * Support for optimized and inlined calls to setf fuctions
+  * Remove pcl/pcl_gazonk*lsp build-generated files from source
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 15 Jul 2004 23:00:49 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu, 15 Jul 2004 14:26:44 -0400
 
-gclcvs (2.7.0-26) unstable; urgency=low
+gcl (2.6.2-3) unstable; urgency=low
 
-  * C_GC_OFFSET is 2 on m68k-linux
+  * Fix value stack leak in rare compiled call sequence
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 24 Jun 2004 15:13:46 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 13 Jul 2004 10:17:02 -0400
 
-gclcvs (2.7.0-25) unstable; urgency=low
+gcl (2.6.2-2) unstable; urgency=low
+
+  * New upstream point release
+
+ -- Camm Maguire <camm@enhanced.com>  Tue, 13 Jul 2004 10:08:53 -0400
+
+gcl (2.6.2-1) unstable; urgency=low
 
   * gcc-3.4 support
   * Proper isnormal default courtesy of Magnus Henoch
   * gclclean makefile target and other small makefile changes
   * Proper check for C stack array body address in gbc.c and sgbc.c
+  * New upstream release
   * acconfig.h update for isnormal default
   * Fix bug in setting elements (si::aset) of 0 rank arrays uncovered by
     the random tester
   * No -fomit-frame-pointer on mingw
+  * Backport minimal ansi-test patches from HEAD to enable running of
+    the random tester
   * installed tcl/tk patch for mingw
   * Fix banner license detection code in lsp/gcl_mislib.lsp as
     8features* entries are now keywords
@@ -637,8 +160,7 @@ gclcvs (2.7.0-25) unstable; urgency=low
     bug on mingw
   * Patch to mingwin.c:fix_filename to close long standing 'maxima
     ignore-errors filename corruption' bug on mingw
-  * Trigger error when trying to make an array of rank greater than the
-    limit set at compile time
+  * Check for too large rank supplied to make-array1
   * Fix potential stack overwrite bug in quick_call_sfun/eval.c
   * Add -mprferred-stack-boundary=8 on amd64, as constant integers used
     in a call must be retrievable with va_arg(,fixnum)
@@ -650,27 +172,19 @@ gclcvs (2.7.0-25) unstable; urgency=low
   * reenable SA_SIGINFO on amd64 to restore SGC there
   * Include elf.h in FreeBSD.h
   * Allow for elf_abi.h in FreeBSD.h
-  * Add envp arg to main in rsym_nt.c
   * Add README.openbsd file
-  * Fix load path of clcs_macros.lisp in myload1.lisp to reenable
-    compiler::link in the ansi build
   * readme.mingw updates
   * solaris.h updates for custreloc option
-  * Fix eval-when behavior in compiler -- in addition to extending
-    support for the new keywords :execute, :compile-toplevel, and :load-
-    toplevel throughout, repair the logic in which load trumped compile.
-    Closes: #226859
-  * Include stdlib.h when using alloca in the compiler, report all C
-    warnings to the user
-  * Remove generated pcl/pcl_gaz*lsp files from repository
-  * gcl -> gclcvs in gcl.el and dbl.el when compiling gclcvs package,
-    Closes: #255019
   * Close possibility of malloc failure due to intervening gbc arising
     from the misordering of allocation calls
+  * C_GC_OFFSET is 2 on m68k-linux
+  * Add release notes, remove gcl document presumably based on dpANS for
+    now
+  * Fixup bad extern declaration of signals_handled in usig.c
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 23 Jun 2004 19:22:08 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 25 Jun 2004 22:43:52 +0000
 
-gclcvs (2.7.0-24) unstable; urgency=low
+gcl (2.6.1-39) unstable; urgency=high
 
   * Fix segfault in referencing (sgc_)type_map out of bounds which can
     occurr when C stack is below heap, as on alpha.
@@ -679,9 +193,9 @@ gclcvs (2.7.0-24) unstable; urgency=low
   * Ensure set TLDFLAGS are used in finding DBEGIN in copnfigure.in, for
     OpenBSD
 
- -- Camm Maguire <camm@enhanced.com>  Fri,  7 May 2004 21:51:43 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri,  7 May 2004 21:50:03 +0000
 
-gclcvs (2.7.0-23) unstable; urgency=low
+gcl (2.6.1-38) unstable; urgency=low
 
   * Make *features* entries keywords -- add canonical host cpu and
     kernel-system to *features*, disable h files specific
@@ -697,58 +211,140 @@ gclcvs (2.7.0-23) unstable; urgency=low
     a long, need to handle npage >MAX_INT later.  This is to support the
     'billion cons element acl2 image' requested by a gcl user
   * Revert winnt features and debugging aids in configure.in
-  * Revert debugging forms in o/prog.c
   * OpenBSD support, gcc warning cleanups for long page integers
 
- -- Camm Maguire <camm@enhanced.com>  Mon,  3 May 2004 21:36:09 +0000
+ -- Camm Maguire <camm@enhanced.com>  Mon,  3 May 2004 21:34:57 +0000
 
-gclcvs (2.7.0-22) unstable; urgency=low
+gcl (2.6.1-37) unstable; urgency=high
 
-  * New snapshot for Debian package
+  * mprotect pages PROT_EXEC as CLEAR_CACHE step on amd64-linux
+  * Prevent recursive malloc calls for OpenBSD error reporting
+  * Push dummy 0 time for child runtime on windows to be compatible with
+    other platforms for now
+  * Make sure pages are mprotected PROT_EXEC for amd64 support
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 20 Apr 2004 12:05:26 -0400
+ -- Camm Maguire <camm@enhanced.com>  Tue, 13 Apr 2004 21:00:22 +0000
 
-gclcvs (2.7.0-21) unstable; urgency=low
+gcl (2.6.1-36) unstable; urgency=low
 
-  * Remove junk files from source, which blocked build on ia64
+  * Improve optimize-maximum-pages algorithm
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 15 Apr 2004 15:13:10 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue,  6 Apr 2004 03:23:40 +0000
 
-gclcvs (2.7.0-20) unstable; urgency=low
+gcl (2.6.1-35) unstable; urgency=low
 
-  * Rework compiler::*ld-libs*, compiler::link, and unixport/makefile to
-    accomodate mingw need for firstfile.o and lastfile.o
-  * Remove incompatible -fomit-frame-pointer when compiling with -pg
-    profiling
-  * Load sys-proclaim.lisp files forimproved linking and smaller object
-    size across the board, install same for use with compiler::link
-  * Use pathnames instead of strings in compiler::link, also in image
-    init files, for Windows
-  * small mod to unixport/makefile re filtering of firstfile and
-    lastfile
-  * Default to debug mode on hppa to work around gcc compiler
-    optimization bugs
-  * Add missing m4 and automake files in binutils directory to enable
-    automake and autoconf here
-  * Add bfd/po makefiles
-  * Macosx defaults in configure.in
-  * Regenerate generated autotools files in binutils/bfd subdir
-  * *gcl-version* -> *gcl-minor-version*,*gcl-extra-version*
-  * Support for more informative banner reading features list
-  * Support for both sigbus and sigsegv in sgbc.c as is customary in .h
-    files
-  * mach-o compatible changes in sfaslbfd.c
-  * Support for new debugging section names in sfaslelf.c
-  * Modify default banner slightly
-  * Homebrew plt-like mechanism for ensuring that valid internal
-    addresses exist to which undefined symbols in compiled lisp objects
-    referring to external shared libraries can be relocated
-  * Make configure demand gettext when choosing --enable-locbfd
-  * Make sure references to ldb1, a stub conventionally optimized away,
-    can be resonled when optimization is turned off
-  * completion_matches ->  rl_completion_matches in gcl_readline.d,
-    which is what is exported in the headers
-  * make suure bfd fasload initializes dum.sm.sm_object1 for
+  * Fix sigcontext autodetection on sparc
+
+ -- Camm Maguire <camm@enhanced.com>  Sun,  4 Apr 2004 19:26:48 +0000
+
+gcl (2.6.1-34) unstable; urgency=low
+
+  * Fix GNU_LD autodetection in configure.in
+  * Eliminate C_INCLUDE_PATH from shell script wrapper
+  * Use lisp rather than 'system touch' to make empty map file in
+    compiler::link
+  * fix small bug when info is passed bad second argument
+  * Don't try to open map file if doesn't stat (macosx)
+  * Add earlier forgotten branch patch to sfaslbfd.c for macosx
+  * Backport new eval-when keyword support from 2.7 to run random tester
+  * Perhormance improvement to gcl_seqlib.lsp -- no inner loop over
+    bignums
+  * Proper contblock/relblock determination when expanding string
+    streams
+  * Proper string type determination for *link-array*
+  * .ini files depend on plt.h
+  * plttest.c cannot depend on include.h
+  * Address longstanding FIXmE in gensym, so that two strings are not
+    allocated for each gensym
+  * Fix rare infinite loop bug in array.c
+  * Import si::info into 'user
+  * , -> # as sed separator
+  * Minro warning removals and fixups
+  * Binary searches through ordered arrays of referred and changed
+    variables for dramatic compiler performance improvement in the large
+    case -- support declarations and thereby optimizations of the form
+    (declare ((vector t) foo)), etc.
+  * Better 'time macro
+  * rebuild pcl_gaz* files
+  * cleanup room report and give more space to modern large heaps
+  * room report formatting
+  * Properly gensymmed time macro
+  * Allow for white space chars in compiled filenames
+  * Autodetect and work around sbrk randomization, e.g. on Fedora 1
+  * Probe for sbrk before probing for randomized sbrk
+  * Openbsd changes -- maximize data seg resource if possible, avoid
+    mallocing error message when allocation routines fails
+  * Fix sigcontext configure tests
+  * Rename loop-finish -> sloop-finish in sloop package so that sloop
+    and ansi loop can be used simultaneously
+  * Handle arguments which are zero in LCM
+  * Fix typo in configure.in
+  * Improved dotimes macro which avoids unnecessary fixnum garbage
+    generation
+  * Backport of ignorable declaration keyword for new dotimes macro
+  * si::*OPTIMIZE-MAXIMUM-PAGES* support
+  * rebuild pcl generated lisp files
+
+ -- Camm Maguire <camm@enhanced.com>  Sat,  3 Apr 2004 19:27:18 +0000
+
+gcl (2.6.1-33) unstable; urgency=low
+
+  * Remove extraneous symbols from plt.h, autodetect and correct for
+    leading underscore in object symbols
+  * complete readline version detection commit
+  * Backport support for new eval-when keywords
+  * Autodetect GNU ld and add -Wl,-Map only when appropriate
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 10 Mar 2004 22:51:44 +0000
+
+gcl (2.6.1-32) unstable; urgency=low
+
+  * Try to automatically determine the form used for the explicitly
+    compiled in external function addresses in plt.c
+  * No need to explicitly write cr-lf on windows
+  * Autodetection of machine on FreeBSD
+  * Updated defs and h files for FreeBSD courtesy of Mark Murray
+  * Minor ifdefs needed for FreeBSD
+  * Refer to exported non-static C stub of fSmake_vector1 in plt.c
+    (needed on ia64)
+  * Readline 4.1/4.3 configure magic
+
+ -- Camm Maguire <camm@enhanced.com>  Tue,  9 Mar 2004 01:58:43 +0000
+
+gcl (2.6.1-31) unstable; urgency=low
+
+  * Adjustments to vs_top reset logic to clear (hopefully last)
+    remaining bug found by the random-tester
+  * Allow args-info-referred-vars to match replaced vars, clearing bug
+    report submitted by Matt Kauffman
+  * Rework plt code yet again to be compatible with compiler::link for
+    axiom, and mingw32
+
+ -- Camm Maguire <camm@enhanced.com>  Mon,  8 Mar 2004 12:16:46 +0000
+
+gcl (2.6.1-30) unstable; urgency=low
+
+  * Fix rsym generated symbol tables for 64 bit platforms
+  * Make sure 'unwind' in frame.c does nt go below frs_org
+  * Do not define symbols with no value, either in bfd/rsym, or in
+    plt.c.  Generates a clear and explicit error of an undefined symbol
+    when we've missed an address
+  * Define the external symbols known to be written at present in plt.c
+  * fix some more compiler errors found by the random tester -- all
+    related to proper unwinding of temporary reductions of vs_top from
+    te local supremum
+
+ -- Camm Maguire <camm@enhanced.com>  Sat,  6 Mar 2004 02:05:59 +0000
+
+gcl (2.6.1-29) unstable; urgency=low
+
+  * Remove implicit dependency on gawk, optimize plt.c a little
+
+ -- Camm Maguire <camm@enhanced.com>  Wed,  3 Mar 2004 16:08:30 +0000
+
+gcl (2.6.1-28) unstable; urgency=low
+
+  * make sure bfd fasload initializes dum.sm.sm_object1 for
     read_fasl_vector
   * When a tagbody contains ccb reference tags, and hence i itself
     marked ccb, mark all the clb tags therein ccb too, as the tagbody
@@ -763,93 +359,70 @@ gclcvs (2.7.0-20) unstable; urgency=low
     than already allocated
   * Rework internal plt symbol address capture
   * Cleanup sfaslelf compiler warning
-  * Remove implicit dependency on gawk, optimize plt.c a little
-  * Fix rsym generated symbol tables for 64 bit platforms
-  * Make sure 'unwind' in frame.c does nt go below frs_org
-  * Do not define symbols with no value, either in bfd/rsym, or in
-    plt.c.  Generates a clear and explicit error of an undefined symbol
-    when we've missed an address
-  * Define the external symbols known to be written at present in plt.c
-  * fix some more compiler errors found by the random tester -- all
-    related to proper unwinding of temporary reductions of vs_top from
-    te local supremum
-  * Adjustments to vs_top reset logic to clear (hopefully last)
-    remaining bug found by the random-tester
-  * Allow args-info-referred-vars to match replaced vars, clearing bug
-    report submitted by Matt Kauffman
-  * Rework plt code yet again to be compatible with compiler::link for
-    axiom, and mingw32
-  * Try to automatically determine the form used for the explicitly
-    compiled in external function addresses in plt.c
-  * No need to explicitly write cr-lf on windows
-  * Autodetection of machine on FreeBSD
-  * Updated defs and h files for FreeBSD courtesy of Mark Murray
-  * Minor ifdefs needed for FreeBSD
-  * Refer to exported non-static C stub of fSmake_vector1 in plt.c
-    (needed on ia64)
-  * Readline 4.1/4.3 configure magic
-  * Remove extraneous symbols from plt.h, autodetect and correct for
-    leading underscore in object symbols
-  * complete readline version detection commit
-  * Minor cleanup in eval-when code
-  * Autodetect GNU ld and add -Wl,-Map only when appropriate
-  * Fix GNU_LD autodetection in configure.in
-  * Eliminate C_INCLUDE_PATH from shell script wrapper
-  * Use lisp rather than 'system touch' to make empty map file in
-    compiler::link
-  * fix small bug when info is passed bad second argument
-  * Don't try to open map file if doesn't stat (macosx)
-  * Add earlier forgotten branch patch to sfaslbfd.c for macosx
-  * minor variable name change
-  * Perhormance improvement to gcl_seqlib.lsp -- no inner loop over
-    bignums
-  * Proper contblock/relblock determination when expanding string
-    streams
-  * Proper string type determination for *link-array*
-  * .ini files depend on plt.h
-  * plttest.c cannot depend on include.h
-  * Address longstanding FIXmE in gensym, so that two strings are not
-    allocated for each gensym
-  * Fix rare infinite loop bug in array.c
-  * Import si::info into 'user
-  * , -> # as sed separator
-  * Fix find-class proclamation
-  * Minor warning removals and fixups
-  * Binary searches through ordered arrays of referred and changed
-    variables for dramatic compiler performance improvement in the large
-    case -- support declarations and thereby optimizations of the form
-    (declare ((vector t) foo)), etc.
-  * Better 'time macro
-  * allow universe file to be loaded by 2.6.1
-  * rebuild pcl_gaz* files
-  * cleanup room report and give more space to modern large heaps
-  * room report formatting
-  * Add old test failures to misc.lsp
-  * Properly gensymmed time macro
-  * Allow for white space chars in compiled filenames
-  * Autodetect and work around sbrk randomization, e.g. on Fedora 1
-  * Probe for sbrk before probing for randomized sbrk
-  * Openbsd changes -- maximize data seg resource if possible, avoid
-    mallocing error message when allocation routines fails
-  * Fix sigcontext configure tests
-  * Rename loop-finish -> sloop-finish in sloop package so that sloop
-    and ansi loop can be used simultaneously
-  * Handle arguments which are zero in LCM
-  * Fix typo in configure.in
-  * Improved dotimes macro which avoids unnecessary fixnum garbage
-    generation
-  * si::*OPTIMIZE-MAXIMUM-PAGES* support
-  * Fix sigcontext autodetection on sparc
-  * Improve optimize-maximum-pages algorithm
-  * mprotect pages PROT_EXEC as CLEAR_CACHE step on amd64-linux
-  * Prevent recursive malloc calls for OpenBSD error reporting
-  * Push dummy 0 time for child runtime on windows to be compatible with
-    other platforms for now
-  * Make sure pages are mprotected PROT_EXEC for amd64 support
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 13 Apr 2004 21:02:02 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed,  3 Mar 2004 00:27:08 +0000
 
-gclcvs (2.7.0-19) unstable; urgency=low
+gcl (2.6.1-27) unstable; urgency=low
+
+  * Modify default banner slightly
+  * Homebrew plt-like mechanism for ensuring that valid internal
+    addresses exist to which undefined symbols in compiled lisp objects
+    referring to external shared libraries can be relocated
+  * Make configure demand gettext when choosing --enable-locbfd
+  * Make sure references to ldb1, a stub conventionally optimized away,
+    can be resonled when optimization is turned off
+  * completion_matches ->  rl_completion_matches in gcl_readline.d,
+    which is what is exported in the headers
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 27 Feb 2004 23:50:49 +0000
+
+gcl (2.6.1-26) unstable; urgency=low
+
+  * Rework compiler::*ld-libs*, compiler::link, and unixport/makefile to
+    accomodate mingw need for firstfile.o and lastfile.o
+  * Remove incompatible -fomit-frame-pointer when compiling with -pg
+    profiling
+  * Load sys-proclaim.lisp files forimproved linking and smaller object
+    size across the board, install same for use with compiler::link
+  * Use pathnames instead of strings in compiler::link, also in image
+    init files, for Windows
+  * small mod to unixport/makefile re filtering of firstfile and
+    lastfile
+  * Backport zero divisor error cnditions from HEAD for
+    floor,ceiling,truncate
+  * Default to debug mode on hppa to work around gcc compiler
+    optimization bugs
+  * Add missing m4 and automake files in binutils directory to enable
+    automake and autoconf here
+  * Add mach-o specific files from cvs head to local bfd tree
+  * Add bfd/po makefiles
+  * Macosx defaults in configure.in
+  * bfd make and configure file changes to handle mach-o backend
+  * *gcl-version* -> *gcl-minor-version*,*gcl-extra-version*
+  * Support for more informative banner reading features list
+  * Support for both sigbus and sigsegv in sgbc.c as is customary in .h
+    files
+  * mach-o compatible changes in sfaslbfd.c
+  * Support for new debugging section names in sfaslelf.c
+  * powerpc-macosx h and defs files from cvs head
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 25 Feb 2004 23:08:59 +0000
+
+gcl (2.6.1-25) unstable; urgency=low
+
+  * rl_putc_em a carriage return after invoking readline to ensure the
+    prompt in rl_putc_em_line is cleared.
+  * use standard sgc fault recovery element for hppa as recommended by
+    hppa kernel experts
+  * Store banner in si::*system-banner* for possible modification
+  in compatibly licensed programs
+  * exit with -1 when standard in ends in lisp debug mode
+  * Backport macosx files from cvs HEAD
+  * Document system return codes
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 13 Feb 2004 20:44:54 +0000
+
+gcl (2.6.1-24) unstable; urgency=low
 
   * Revert unixport/makefile link order fix for windows, breaks
     compiler::link, find another way
@@ -857,18 +430,25 @@ gclcvs (2.7.0-19) unstable; urgency=low
   * Protect read/fread in case SGC is enabled with safe (restartable)
     versions
   * SGC on for arm and hppa
-  * use standard sgc fault recovery element for hppa as recommended by
-    hppa kernel experts
-  * Document system return codes
-  * exit with -1 when standard in ends in lisp debug mode
-  * rl_putc_em a carriage return after invoking readline to ensure the
-    prompt in rl_putc_em_line is cleared.
-  * Store banner in si::*system-banner* for possible modificationin
-    compatibly licensed programs
+  * remove fast-link workaround now fixed for windows
+  * Backport HEAD makefile changes to clean .{c,h,data} files and
+    new_decl.h, remove said from repository (generated files)
 
- -- Camm Maguire <camm@enhanced.com>  Sat, 14 Feb 2004 17:42:42 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu, 12 Feb 2004 05:56:29 +0000
 
-gclcvs (2.7.0-18) unstable; urgency=low
+gcl (2.6.1-23) unstable; urgency=low
+
+  * Remove calls to init-readline with new automatic readline setup
+
+ -- Camm Maguire <camm@enhanced.com>  Tue, 27 Jan 2004 20:27:20 +0000
+
+gcl (2.6.1-22) unstable; urgency=low
+
+  * Build depend on emacs21 | emacsen
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 23 Jan 2004 22:01:15 +0000
+
+gcl (2.6.1-21) unstable; urgency=low
 
   * Automatic readline initialization
   * Add watch file
@@ -886,23 +466,17 @@ gclcvs (2.7.0-18) unstable; urgency=low
   * Clean windows/sysdir.bat
   * Check for zero args in new gcd code
   * Default hole is maxpages/10, holesize configure option added
-  * Build depend on emacs21 | emacsen
-  * Remove calls to init-readline with new automatic readline setup
-  * Always check args in compiled macro functions to ensure safe calls
-    for now.  FIXME compile these in the future as sfn instead of cf
-    types so that arg checking is only done when called from safe code
-  * Avoid ~P escape with no arguments in ansi-tests/rt.lsp -- FIXME --
-    this should be made to work
+  * Fix syntax errors in older reloaction code: sfaslelf.c
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 30 Jan 2004 04:48:44 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 16 Jan 2004 16:57:50 +0000
 
-gclcvs (2.7.0-17) unstable; urgency=low
+gcl (2.6.1-20) unstable; urgency=low
 
   * Fix gcl-doc doc-base files
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 30 Dec 2003 22:35:58 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 30 Dec 2003 22:30:39 +0000
 
-gclcvs (2.7.0-16) unstable; urgency=low
+gcl (2.6.1-19) unstable; urgency=low
 
   * Fix bug in compiler::c2labels in which *ccb-vs* was missing a ocal
     rebind
@@ -917,8 +491,6 @@ gclcvs (2.7.0-16) unstable; urgency=low
   * Remove --enable-gmp configure option; gmp is required for GCL
   * Use --enable-emacsdir in debian/rules, make sure --enable-emacsdir
     and --enable-infodir work when arg contains ${prefix}
-  * Install myload1.lisp and clcs_macros.lisp to fix compiler::link with
-    ansi image
   * Fix typo in chap-6.texi
   * Make sure to export SGC define from config.h to cmpinclude.h -- Now
     that we used optimized structures in the compiler, we need at least
@@ -949,8 +521,8 @@ gclcvs (2.7.0-16) unstable; urgency=low
     appropriate for use in wt-ccb-vs, as the local functions, unlike the
     closures, receive an environment level with the mother generating
     function.  We therefore push *initial-ccb-vs* onto the end the list
-    pushed onto *local-funs* only when defining a local function, and
-    use it to initialize an added optional variable initialize-ccb-vs in
+    pushed onto *local-funs* only when defining a local function, and use
+    it to initialize an added optional variable initialize-ccb-vs in
     t3local-fun and t3local-dcfun, which default to the original ccb-vs.
     We then bind *initial-ccb-vs* to this new optional parameter instead
     of the former *ccb-vs, which was only appropriate for closures.
@@ -961,35 +533,24 @@ gclcvs (2.7.0-16) unstable; urgency=low
     'frame and  alloca otherwise.  New macro bignum-expansion-storage.
     FIXME, ensure that IDECL does not need similar modification.
   * Cleanup a few compiler warnings in the compiler
+  * Cleanup compiler warning in alloc.c
   * Eliminate unneeded transformatio of contniguous pages to other pages
     on save-system.
-  * Cleanup compiler warning in alloc.c
-  * Cleanup compiler warning in sys_mod_gcl.c
   * malloc -> gcl_gmp_alloc in recent setjmp frame protected bignum
     allocation
   * Add -Wa,--execstack if on an exec-shield enabled system, can be
     explicitly added otherwise by setting the CFLAGS variable before the
-    configure step, remove oldgmp configure option
+    configure step
   * Better execstack flag handling in configure
   * Allow for commas in CFLAGS in sed command writing *cc*
-  * Remove generated files from working part of repository, .c, .h, and
-    .data source for the mod, pcl, and clcs subsystems are now found in
-    the c subdir of the respective dir
-  * Some FreeBSD cleanups
   * Preliminary gprof profiling support
-  * Rework html documentation generation and installation
+  * Rework html documentation generation and installation, Closes:
+    #221774
   * Remove parentheses from setf class-name info node in chap-7.texi
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 30 Dec 2003 16:50:01 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 30 Dec 2003 16:26:45 +0000
 
-gclcvs (2.7.0-15) unstable; urgency=low
-
-  * Insert some forgotten STATIC_FUNCTION_POINTERS fixes into comm.c and
-    sheader.h in the gcl-tk directory
-
- -- Camm Maguire <camm@enhanced.com>  Thu,  6 Nov 2003 20:48:35 +0000
-
-gclcvs (2.7.0-14) unstable; urgency=low
+gcl (2.6.1-18) unstable; urgency=low
 
   * Portability patches to makefiles to support non-GNU grep (no -q),
     and non-bash sh, C_INCLUDE_PATH=...;export C_INCLUDE_PATH
@@ -998,14 +559,13 @@ gclcvs (2.7.0-14) unstable; urgency=low
     copies required, and eventually replace this global parameter with
     local variables
   * Turn on some optimization on hppa, -O only
-  * Make all C defined functions installed into lisp static functions
-    to work around dynamic function descriptors on ia64, Closes:
-    #217484, Closes: #204789, (STATIC_FUNCTION_POINTERS define in
-    config.h)
+  * Make all C defined functions installed into lisp static functions to
+    work around dynamic function descriptors on ia64, Closes: #217484,
+    Closes: #204789, (STATIC_FUNCTION_POINTERS define in config.h)
 
- -- Camm Maguire <camm@enhanced.com>  Thu,  6 Nov 2003 15:43:07 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu,  6 Nov 2003 15:40:25 +0000
 
-gclcvs (2.7.0-13) unstable; urgency=low
+gcl (2.6.1-17) unstable; urgency=low
 
   * Repair weak symbol addition to the bfd symbol table in sfasli.c
   * Be more thorough about adding fun-info to call-local info in
@@ -1015,68 +575,35 @@ gclcvs (2.7.0-13) unstable; urgency=low
     study rational for *info* special variable in certain places as
     opposed to more common copy-info
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 30 Oct 2003 20:23:17 -0500
+ -- Camm Maguire <camm@enhanced.com>  Thu, 30 Oct 2003 20:03:22 -0500
 
-gclcvs (2.7.0-12) unstable; urgency=low
+gcl (2.6.1-16) unstable; urgency=low
 
   * Fix sh syntax in debian/gcl.sh
   * init_or_load1 -> gcl_init_or_load1 in xgcl-2/sysinit.lsp
-  * Add generated pcl_gazonk8 files to archive, as Windows still can't
-    build pcl from lisp source
-  * Add clcs_macros and clcs package info to image before pcl build, as
-    walker needs final forms of certain macros/fuctions to generate
-    correct generic function calls, and clcs replaces/shadows some semi-
-    equivalent macros/functions in the traditional image, e.g.
-    etypecase, etc.
-  * TODO, rationalize this circular dependency between clcs and pcl for
-    the other shadowed functions (not in clcs_macros) as well
-  * find-class-no-error -> (find-class obj nil)
-  * internal-program-error -> internal-simple-program-error, add working
-    internal-simple-control-error
-  * Many restart test fixes, with guidance from cmucl, TODO rationalize
-    the integration with traditional image catch/throw of quit-tags
-  * relativize pathnames in clcs/myload.lisp
-  * Add with-condition-restarts to clcs exports
-  * Many ansi structure test fixes
-  * Some ansi fixes to 'the
-  * Many CLOS ansi fixes, particularly in methods and method-
-    combinations, via a (still partial) synchronization of the pcl
-    source tree with that of CMUCL
-  * Add functionless structures for missing lisp types that should be
-    classes, TODO, integrate this with GCL's native object support for
-    these types, and/or possibly use defclass directly instead of
-    defstruct
-  * Rebuild dependent files and install (for Windows), bringing ansi
-    failures down to 508, or some 3.5%
-  * Protect find-class with when symbolp in subtypep
-  * Map t and nil stream indicators properly in optimized compiled
-    references to read_char1 and read_byte1 (in read.d)
   * Load weak symbols as well as undefined symbols in
     bfd_build_symbol_table, for the purposes of the static build
     possibility
+  * Map t and nil stream indicators properly in optimized compiled
+    references to read_char1 and read_byte1 (in read.d)
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 23 Oct 2003 16:46:22 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu, 23 Oct 2003 16:43:15 +0000
 
-gclcvs (2.7.0-11) unstable; urgency=low
+gcl (2.6.1-15) unstable; urgency=low
 
   * Remove imod/ifloor functions in cmpaux.c and directly inline their
     fixed equivalents in gcl_cmpopt.lsp
-  * Init newly introduced gazonk8.o in pcl package for arches that can't
-    save natively relocated objects, Closes: #215501
-  * Fix some allow-other-keys errors in pcl_fast_init.lisp:  TODO
-    verify and test this
-  * Program error when bad place is passed to getf
 
- -- Camm Maguire <camm@enhanced.com>  Mon, 13 Oct 2003 21:50:55 +0000
+ -- Camm Maguire <camm@enhanced.com>  Mon, 13 Oct 2003 15:04:24 +0000
 
-gclcvs (2.7.0-10) unstable; urgency=low
+gcl (2.6.1-14) unstable; urgency=low
 
   * generate less garbage in add-info (gcl_cmpinline.lsp), enabling
     maxima compile to complete in a finite time :-)
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 10 Oct 2003 22:15:28 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 10 Oct 2003 22:14:04 +0000
 
-gclcvs (2.7.0-9) unstable; urgency=low
+gcl (2.6.1-13) unstable; urgency=low
 
   * Fix compiler optimization bug in gcl_cmpopt.lsp -- missing parens
     around inliner for max and min
@@ -1087,27 +614,11 @@ gclcvs (2.7.0-9) unstable; urgency=low
     inline-args, gcl_cmplet.lsp, c2let)
   * Fix an obviou int overflow in ifloor (o/cmpaux.c), handle more
     proper fixnum/integer determination from declarations later
-  * eliminate duplicate predicate calls in list-merge-srot in
-    gcl_seqlib.lsp
-  * declare ignorable support
-  * begin sync of our pcl tree with cmucl's, and fix a few bugs not in
-    cmucl's tree.  Brings ansi test failures down by about one hundred
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 10 Oct 2003 03:37:09 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 10 Oct 2003 02:34:11 +0000
 
-gclcvs (2.7.0-8) unstable; urgency=low
+gcl (2.6.1-12) unstable; urgency=low
 
-  * Parse errors implemented; recompile generated .c, .h, and .data
-    files with prior compiler fixes
-  * Initial setf function implementation, removes about 1/5 of ansi test
-    failures
-  * Rebuild depdndent files
-
- -- Camm Maguire <camm@enhanced.com>  Tue,  7 Oct 2003 21:08:29 +0000
-
-gclcvs (2.7.0-7) unstable; urgency=low
-
-  * ANSI :default-initarg fixes to define-condition
   * Restore mpz_to_mpz{1} in gmp_big.c, can be written by compiler
   * tk8.4 patches
   * Prevent destructive modification of bignum arguments in log_op/mp_op
@@ -1119,58 +630,49 @@ gclcvs (2.7.0-7) unstable; urgency=low
   * Remove pcl_methods.c patch. as is apparently no longer needed, TODO
     -- make sure VOL modifier is inserted where needed to prevent
     longjmp clobbers
-  * Add mod directory to *load-path*
-  * Fix BOA defstruct ansi tests
 
- -- Camm Maguire <camm@enhanced.com>  Thu,  2 Oct 2003 17:57:21 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu,  2 Oct 2003 14:26:43 +0000
 
-gclcvs (2.7.0-6) unstable; urgency=low
+gcl (2.6.1-11) unstable; urgency=low
 
-  * Enable NIFLAGS variable to work around ppc compiler bug
-  * VERSION correction in configure
-  * Merge in compilation from lsp step in lsp and cmpnew directories via
-    saved_pre_gcl from 2.6.1
+  * Add compilation step of compiling all lsp and cmpnew .lsp files from
+    an interpreted only saved_pre_gcl before the creation of saved_gcl -
+    - this enables us to use full optimization on these files while
+    getting the STREF constants right on 32bit and 64bit
+  * remove 'attic' from comment in gcl_loop.lsp
+  * configure changes for sizeof(struct contblock) detection
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 24 Sep 2003 16:28:59 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed, 24 Sep 2003 16:09:44 +0000
 
-gclcvs (2.7.0-5) unstable; urgency=low
-
-  * Separate lsp modules not in wfs' original tree into mod directory,
-    and rebuild from lisp source as an intermediary step between trad
-    and pcl.  Needed as the new loop macro, and hence possibly other
-    code we might use from cmucl, compiles structure references which
-    are machine word size dependent, and will break on 64bit machines
-    for example if compiled only from C with 32bit C sources.
-  * Merge in unused variable, cmpinit changes and optimizations,
-    fasdmacros name changes, collectfn name changes, and sys-proclaim
-    updates and rebuilds from 2.6.1
-
- -- Camm Maguire <camm@enhanced.com>  Tue, 23 Sep 2003 21:49:24 +0000
-
-gclcvs (2.7.0-4) unstable; urgency=low
+gcl (2.6.1-10) unstable; urgency=low
 
   * Mac OSX GET_FULL_PATH_SELF
-  * Add conditions::find-class-no-error, si::find-class-no-error pair a
-    la find-class for use in fixing subtypep when passed symbols naming
-    classes
-  * Newest loop macro from cmucl with a few edits
-  * Raise a package error in si::coerce-to-package on failure
-  * Better class handling in subtypep and support for 'satisfies in
-    normalize-type, some more predicate type pairs added
-  * Allow for non-keyword type keywords, and fix some allow-other-keys
-    processing
-  * Fix typo in fasldlsym.c, Closes: #212239
-  * Package rebuild and rerelease
+  * Preliminary subtypep checking for 'satisfies
+  * preliminary 'satisfies support in subtypep, more predicate type
+    pairs and reverse checking
+  * small compiler change to remove unused C variables from optimized
+    compiled macros
+  * Optional compiler init file is called gcl_cmpinit
+  * fasdmacros.lsp -> gcl_fasdmacros.lsp
+  * All cmpinit.lsp files named gcl_cmpinit.lsp; allow full lisp
+    optimization in all directories
+  * collectfn -> gcl_collectfn in lsp/gcl_auto.lsp
+  * collectfn -> gcl_collectfn in cmpnew/gcl_make-fn.lsp
+  * Make sure makefiles can generate sys-proclaim.lsp, regenerate these
+    files and recompile from lsp
+  * Rebuild with opts enabled
+  * Iterate sys-proclaim/rebuild generation once more
+  * Iterate sys-proclaim/rebuild for pcl and clcs
 
- -- Camm Maguire <camm@enhanced.com>  Mon, 22 Sep 2003 22:04:42 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 23 Sep 2003 19:33:27 +0000
 
-gclcvs (2.7.0-3) unstable; urgency=low
+gcl (2.6.1-9) unstable; urgency=low
 
   * Close streams in fasldlsym.c
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 16 Sep 2003 15:04:45 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 16 Sep 2003 14:57:20 +0000
 
-gclcvs (2.7.0-2) unstable; urgency=low
+gcl (2.6.1-8) unstable; urgency=low
 
   * Add processor flag variable to flags in configure.in
   * Autoadd full path to kcl_self to enable save-system when user moves
@@ -1186,42 +688,53 @@ gclcvs (2.7.0-2) unstable; urgency=low
   * Use NIFlAGS to compile new_init with lower opts on ppc to work
     around gcc bug, restore full opts to other files
 
- -- Camm Maguire <camm@enhanced.com>  Sun, 14 Sep 2003 02:43:36 +0000
+ -- Camm Maguire <camm@enhanced.com>  Sun, 14 Sep 2003 02:18:28 +0000
 
-gclcvs (2.7.0-1) unstable; urgency=low
+gcl (2.6.1-7) unstable; urgency=low
 
-  * New files for macosx
-  * rpm spec file added
-  * Merge changes from 2.5.4
-  * Add additional pop to loose package stack in read.d for dotted pairs
-  * Back to unstable distribution for cvs snapshots, reflect snapshot in
-    source package name instead of version, enable concurrent stable and
-    cvs snapshot installation
-  * 6.0 minor version for CVS snapshots, stable releases will start at
-    .1
-  * fixup config.guess,sub rules in debian/rules
-  * remove  windows/install.ansi.lsp (build generated file) from CVS
-  * Remove unused definitions of Vcs
-  * Merge changes from 2.6.1
-  * Add windows/install.lsp to clean target
-  * Add in macosx files to stable and cvs head
-  * Fix bad debelper postinst, Closes: #208765
-  * Fix static detection fr ia64; contblock size detection on arm
-  * Fix gcc verion checking in gmp3 subconfigure, esp. for arm
-  * Escape all sgc code with #ifdef SGC
+  * Fix permissions bug in temporary gzipped file handling
+  * Propagate control changes correctly with package extension
+  * Newer standards
+
+ -- Camm Maguire <camm@enhanced.com>  Tue,  9 Sep 2003 17:06:56 +0000
+
+gcl (2.6.1-6) unstable; urgency=low
+
+  * Remove build-dependency on autoconf as a temporary work around to
+    Debian autoconf's dependency bug on emacsen-common
+
+ -- Camm Maguire <camm@enhanced.com>  Tue,  9 Sep 2003 15:29:06 +0000
+
+gcl (2.6.1-5) unstable; urgency=low
+
+  * Redefine temporary files in elisp/makefile
+
+ -- Camm Maguire <camm@enhanced.com>  Mon,  8 Sep 2003 21:49:09 +0000
+
+gcl (2.6.1-4) unstable; urgency=low
+
   * Fix to sfasli.c to avoid defining symbols in other than *UND*
     sections
   * Remove some 64 bit warnings
   * Turn off def_static on ia64 for now -- its broken
-  * Redefine temporary files in elisp/makefile
-  * Remove build-dependency on autoconf as a temporary work around to
-    Debian autoconf's dependency bug on emacsen-common
-  * Fix permissions bug in temporary gzipped file handling
-  * Propagate control changes correctly with package extension
-  * Newer standards
-  * Add windows/isntall.lsp to clean target
 
- -- Camm Maguire <camm@enhanced.com>  Tue,  9 Sep 2003 17:10:20 +0000
+ -- Camm Maguire <camm@enhanced.com>  Sat,  6 Sep 2003 17:22:10 +0000
+
+gcl (2.6.1-3) unstable; urgency=low
+
+  * Fix static detection fr ia64; contblock size detection on arm
+  * Fix gcc verion checking in gmp3 subconfigure, esp. for arm
+  * Escape all sgc code with #ifdef SGC
+
+ -- Camm Maguire <camm@enhanced.com>  Fri,  5 Sep 2003 21:32:47 +0000
+
+gcl (2.6.1-2) unstable; urgency=low
+
+  * Add windows/install.lsp to clean target
+  * Add in macosx files to stable and cvs head
+  * Fix bad debelper postinst, Closes: #208765
+
+ -- Camm Maguire <camm@enhanced.com>  Fri,  5 Sep 2003 13:15:11 +0000
 
 gcl (2.6.1-1) unstable; urgency=low
 
@@ -1276,14 +789,6 @@ gcl (2.6.1-1) unstable; urgency=low
 
  -- Camm Maguire <camm@enhanced.com>  Thu,  4 Sep 2003 02:20:52 +0000
 
-gcl (2.6.0cvs-1) experimental; urgency=low
-
-  * Experimental Debian distribution for CVS snapshots
-  * reader enhancement to handle foo:(a b c)
-  * preliminary defgeneric method support
-
- -- Camm Maguire <camm@enhanced.com>  Tue, 15 Jul 2003 13:41:33 -0400
-
 gcl (2.5.3-2) unstable; urgency=low
 
   * gcc-3.3 all platforms
@@ -1298,7 +803,7 @@ gcl (2.5.3-1) unstable; urgency=low
     si-defs.texi
   * Unstatic object_to_float, object_to_double
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 15 Jul 2003 13:37:08 -0400
+ -- Camm Maguire <camm@enhanced.com>  Mon,  2 Jun 2003 12:38:03 -0400
 
 gcl (2.5.2-1) unstable; urgency=low
 

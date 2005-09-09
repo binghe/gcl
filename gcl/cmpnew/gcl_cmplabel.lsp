@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPLABEL  Exit manager.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -60,10 +59,9 @@
   (declare (fixnum bds-bind))
   (and *record-call-info* (record-call-info loc fname))
   (when (and (eq loc 'fun-val)
-	     (not (multiple-values-p))
              (not (eq *value-to-go* 'return))
              (not (eq *value-to-go* 'top)))
-	(wt-nl) (reset-top))
+        (wt-nl) (reset-top))
   (cond ((and (consp *value-to-go*) (eq (car *value-to-go*) 'jump-true))
          (set-jump-true loc (cadr *value-to-go*))
          (when (eq loc t) (return-from unwind-exit)))
@@ -86,8 +84,14 @@
 				(or (and (eq (car loc) 'var)
 					 (member (var-kind (cadr loc))
 						 '(SPECIAL GLOBAL)))
-				    (eq (car loc) 'SIMPLE-CALL)
-				    (rassoc (car loc) +inline-types-alist+)))
+				    (member (car loc)
+					    '(SIMPLE-CALL
+					      INLINE
+					      INLINE-COND INLINE-FIXNUM
+					      INLINE-CHARACTER
+					      INLINE-INTEGER
+					      INLINE-LONG-FLOAT
+					      INLINE-SHORT-FLOAT))))
 			   (cond ((and (consp *value-to-go*)
 				       (eq (car *value-to-go*) 'vs))
 				  (set-loc loc)
@@ -142,7 +146,11 @@
         ;;; Never reached
      )
     ((eq ue 'frame)
-     (when (and (consp loc) (or (eq (car loc) 'simple-call) (rassoc (car loc) +inline-types-alist+)))
+     (when (and (consp loc)
+		(member (car loc)
+			'(SIMPLE-CALL INLINE INLINE-COND INLINE-FIXNUM inline-integer
+				      INLINE-CHARACTER INLINE-LONG-FLOAT
+				      INLINE-SHORT-FLOAT)))
        (cond ((and (consp *value-to-go*)
 		   (eq (car *value-to-go*) 'vs))
 	      (set-loc loc)
@@ -151,23 +159,30 @@
 				       (list 'vs (vs-push)))))
 		  (set-loc loc)
 		  (setq loc *value-to-go*)))))
-     ;;baboon if didn't go through above?
      (wt-nl "frs_pop();"))
     ((eq ue 'tail-recursion-mark))
     ((eq ue 'jump) (setq jump-p t))
-    ((setq type.wt (assoc (car (rassoc ue +return-alist+)) +wt-loc-alist+))
-     (or (eq *exit* ue) (wfs-error))
-     (let ((cvar (cs-push (car type.wt) t)))
+    ((setq type.wt
+	   (assoc ue
+		  '((return-fixnum fixnum .  wt-fixnum-loc)
+		    (return-character character . wt-character-loc)
+		    (return-short-float short-float . wt-short-float-loc)
+		    (return-long-float long-float . wt-long-float-loc)
+		    (return-object t . wt-loc))))
+     (let ((cvar (next-cvar)))
+       (or (eq *exit* (car type.wt)) (wfs-error))
+       (setq type.wt (cdr type.wt))
        (wt-nl "{" (rep-type (car type.wt)) "V" cvar " = ")
        (funcall (cdr type.wt) loc)  (wt ";")
        (unwind-bds bds-cvar bds-bind)
        (wt-nl "VMR" *reservation-cmacro* "(" 
 	      (if (equal (rep-type (car type.wt)) "long ") "(object)" "") 
-	      "V" cvar")}"))
-     (return))
+	      "V" cvar")}")
+       (return)))
     (t (baboon))
        ;;; Never reached
-    )))
+    ))
+  )
 
 (defun unwind-no-exit (exit &aux (bds-cvar nil) (bds-bind 0))
   (declare (fixnum bds-bind))
@@ -192,7 +207,8 @@
 	  (reset-top)))
        ((numberp ue) (setq bds-cvar ue bds-bind 0))
        ((eq ue 'bds-bind) (incf bds-bind))
-       ((or (eq ue 'return) (rassoc ue +return-alist+))
+       ((member ue '(return return-object return-fixnum return-character
+                            return-long-float return-short-float))
         (cond ((eq exit ue) (unwind-bds bds-cvar bds-bind)
                             (return))
               (t (baboon)))

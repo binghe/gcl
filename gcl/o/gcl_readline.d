@@ -1,4 +1,3 @@
-/* -*-C-*- */
 /*
  Copyright (C) 2000 Tuukka Toivonen <tuukkat AT ee.oulu.fi>
 
@@ -141,11 +140,7 @@ static char *rl_completion_words_new(char *text, int state) {
       if (temp==temp1) 
 	package=(temp[1]==':') ? sLApackageA->s.s_dbind : keyword_package;
       else {
-	struct string s;/* ={t_string,0,0,0,1,0,OBJNULL,1,0,(char *)temp1,temp-temp1}; */
-	set_type_of(&s,t_string);
-	s.st_self=(char *)temp1;
-	s.st_fillp=s.st_dim=temp-temp1;
-	s.st_hasfillp=1;
+	struct string s={t_string,0,0,0,OBJNULL,1,0,(char *)temp1,temp-temp1};
 	package=find_package((object)&s);
       }
     }
@@ -232,7 +227,7 @@ int rl_putc_em(int c, FILE *f) {
 	static int current_length = 0;
 	char *old_line;
 
-	if (f!=stdout || !isatty(fileno(f)) || !readline_on) goto tail;
+	if (f!=stdout || !isatty(fileno(f)) ) goto tail;
 
 	if (c=='\r' || c=='\n') {
 		current_length = 0;
@@ -264,7 +259,7 @@ int rl_getc_em(FILE *f) {
 	static int linepos = 0;
 	int r;
 	
-	if (f!=stdin || !isatty(fileno(f))) return getc(f);
+	if (f!=stdin || !isatty(fileno(f)) ) return getc(f);
 	
 	if (rl_ungetc_em_char!=-1) {
 		r = rl_ungetc_em_char;
@@ -470,8 +465,8 @@ gcl_init_readline_function(void) {
   char *pn="GCL",*cp=getenv("TERM");
   rl_readline_name=pn;
 #ifdef RL_COMPLETION
-	rl_attempted_completion_function = (CPPFunction *)rl_completion;
-#endif			
+  rl_attempted_completion_function = (CPPFunction *)rl_completion;
+#endif		
   if (isatty(0) && (!cp || strcmp(cp,"dumb")))
     readline_on=1;
   if (!n) {

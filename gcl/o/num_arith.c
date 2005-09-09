@@ -35,12 +35,12 @@ object fixnum_add(fixnum i, fixnum j)
 
   if (i>=0)
    { if (j<= (MOST_POSITIVE_FIX-i))
-      { return make_fixnum(i+j);
+      { MYmake_fixnum(return,i+j);
       }
    MPOP(return,addss,i,j);
    } else { /* i < 0 */
-     if ((MOST_NEGATIVE_FIX -i) <= j) {
-       return make_fixnum(i+j);
+     if ((MOST_NEG_FIXNUM -i) <= j) {
+       MYmake_fixnum(return,i+j);
      }
    MPOP(return,addss,i,j);
    }
@@ -51,43 +51,17 @@ object fixnum_sub(fixnum i, fixnum j)
 
   if (i>=0)
    { if (j >= (i - MOST_POSITIVE_FIX))
-      { return make_fixnum(i-j);
+      { MYmake_fixnum(return,i-j);
       }
    MPOP(return,subss,i,j);
    } else { /* i < 0 */
-     if ((MOST_NEGATIVE_FIX -i) <= -j) {
-       return make_fixnum(i-j);
+     if ((MOST_NEG_FIXNUM -i) <= -j) {
+       MYmake_fixnum(return,i-j);
      }
    MPOP(return,subss,i,j);
    }
 }
 
-object 
-fixnum_times(fixnum i, fixnum j) {
-
-  if (i>=0) {
-    if (j>=0) {
-      if (!i || j<= (MOST_POSITIVE_FIX/i))
-	goto FIX;
-    } else {
-      if (j==-1 || i<= (MOST_NEGATIVE_FIX/j))
-	goto FIX;
-    }
-  } else {
-    if (j>=0) {
-      if (i==-1 || j<= (MOST_NEGATIVE_FIX/i))
-	goto FIX;
-    } else {
-      if (0<-i && -i<= (MOST_POSITIVE_FIX/-j))
-	goto FIX;
-    }
-  }
-  MPOP(return,mulss,i,j);
- FIX:
-  return make_fixnum(i*j);
-}
-
-/* return i - j */
 /* static object */
 /* fixnum_times(int i, int j) */
 /* { */
@@ -121,79 +95,6 @@ number_to_complex(object x)
 	}
 }
 
-static object
-integer_exact_quotient(object x,object y,int in_place) {
-
-  object r;
-
-  if (y==small_fixnum(1) || x==small_fixnum(0))
-    return x;
-
-  if (type_of(x)==t_fixnum)  /* no in_place for fixnums as could be small */
-    return make_fixnum((type_of(y)==t_fixnum ? fix(x)/fix(y) : -1)); 
-  /* Only big dividing a fix is most-negative-fix/abs(most-negative-fix)*/
-    
-  r=in_place ? x : new_bignum();
-
-  if (type_of(y)==t_fixnum) 
-    mpz_divexact_ui(MP(r),MP(x),fix(y));
-  else
-    mpz_divexact(MP(r),MP(x),MP(y));
-
-  return normalize_big(r);
-
-}
-
-static object
-ratio_op_with_cancellation(object a,object b,object c,object d,object (*op)(object,object)) {
-
-  object b0,d0,g,t,g1;
-  
-  b0=b;
-  d0=d;
-
-  g=get_gcd(b,d);
-  
-  b=integer_exact_quotient(b,g,0); /* Try to handle g==1 case quickly above and keep generic */
-  d=integer_exact_quotient(d,g,0);
-
-  t=op(number_times(a,d),number_times(b,c));
-  
-  g1=get_gcd(t,g);
-    
-  t=integer_exact_quotient(t,g1,t!=a&&t!=b0&&t!=c&&t!=d0);
-  b=integer_exact_quotient(b0,g1,0);
-
-  b=number_times(b,d);
-  
-  return make_ratio(t,b,1);
-  
-}
-
-
-static object
-ratio_mult_with_cancellation(object a,object b,object c,object d) {
-
-  object g;
-  
-  g=get_gcd(a,d);
-  
-  a=integer_exact_quotient(a,g,0);
-  d=integer_exact_quotient(d,g,0);
-
-  g=get_gcd(b,c);
-  
-  b=integer_exact_quotient(b,g,0);
-  c=integer_exact_quotient(c,g,0);
-
-  a=number_times(a,c);
-  b=number_times(b,d);
-
-  return make_ratio(a,b,1);
-  
-}
-
-
 object
 number_plus(object x, object y)
 {
@@ -207,9 +108,9 @@ number_plus(object x, object y)
 		case t_bignum:
 		  MPOP(return, addsi,fix(x),MP(y));
 		case t_ratio:
-		  return ratio_op_with_cancellation(x,small_fixnum(1),
-						    y->rat.rat_num,y->rat.rat_den,
-						    number_plus);
+			z = number_plus(number_times(x, y->rat.rat_den),
+					y->rat.rat_num);
+			return make_ratio(z, y->rat.rat_den);
 		case t_shortfloat:
 			dx = (double)(fix(x));
 			dy = (double)(sf(y));
@@ -231,9 +132,8 @@ number_plus(object x, object y)
 		case t_bignum:
 		  MPOP(return,addii,MP(y),MP(x)); 
 		case t_ratio:
-		  return ratio_op_with_cancellation(x,small_fixnum(1),
-						    y->rat.rat_num,y->rat.rat_den,
-						    number_plus);
+			z = number_plus(number_times(x, y->rat.rat_den), y->rat.rat_num);
+			return make_ratio(z, y->rat.rat_den);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -252,12 +152,17 @@ number_plus(object x, object y)
 		switch (type_of(y)) {
 		case t_fixnum:
 		case t_bignum:
-		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						    y,small_fixnum(1),
-						    number_plus);
+			
+			z = number_plus(x->rat.rat_num,
+					number_times(x->rat.rat_den, y));
+			z = make_ratio(z, x->rat.rat_den);
+			return(z);
 		case t_ratio:
-   		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						    y->rat.rat_num,y->rat.rat_den,number_plus);
+
+			z = number_plus(number_times(x->rat.rat_num,y->rat.rat_den),
+					number_times(x->rat.rat_den,y->rat.rat_num));
+			z = make_ratio(z,number_times(x->rat.rat_den,y->rat.rat_den));
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -347,15 +252,16 @@ one_plus(object x)
 	case t_fixnum:
 	  
 	  if (fix(x)< MOST_POSITIVE_FIX-1) {
-	    return make_fixnum(fix(x)+1);
+	    MYmake_fixnum(return,fix(x)+1);
 	  }
 	  MPOP(return,addss,1,fix(x));
 	case t_bignum:
 	  MPOP(return,addsi,1,MP(x));
 	case t_ratio:
-	  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-					    small_fixnum(1),small_fixnum(1),
-					    number_plus);
+		z = number_plus(x->rat.rat_num, x->rat.rat_den);
+		z = make_ratio(z, x->rat.rat_den);
+		return(z);
+
 	case t_shortfloat:
 		dx = (double)(sf(x));
 		z = alloc_object(t_shortfloat);
@@ -394,9 +300,9 @@ number_minus(object x, object y)
 		case t_bignum:
 		  MPOP(return, subsi,fix(x),MP(y));
 		case t_ratio:
-		  return ratio_op_with_cancellation(x,small_fixnum(1),
-						    y->rat.rat_num,y->rat.rat_den,
-						    number_minus);
+			z = number_minus(number_times(x, y->rat.rat_den), y->rat.rat_num);
+			z = make_ratio(z, y->rat.rat_den);
+			return(z);
 		case t_shortfloat:
 			dx = (double)(fix(x));
 			dy = (double)(sf(y));
@@ -418,9 +324,9 @@ number_minus(object x, object y)
 		case t_bignum:
 		  MPOP(return,subii,MP(x),MP(y));
 		case t_ratio:
-		  return ratio_op_with_cancellation(x,small_fixnum(1),
-						    y->rat.rat_num,y->rat.rat_den,
-						    number_minus);
+			z = number_minus(number_times(x, y->rat.rat_den), y->rat.rat_num);
+			z = make_ratio(z, y->rat.rat_den);
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -439,12 +345,14 @@ number_minus(object x, object y)
 		switch (type_of(y)) {
 		case t_fixnum:
 		case t_bignum:
-		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						    y,small_fixnum(1),
-						    number_minus);
+			z = number_minus(x->rat.rat_num, number_times(x->rat.rat_den, y));
+			z = make_ratio(z, x->rat.rat_den);
+			return(z);
 		case t_ratio:
-   		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						    y->rat.rat_num,y->rat.rat_den,number_minus);
+			z = number_minus(number_times(x->rat.rat_num,y->rat.rat_den),
+					 (number_times(x->rat.rat_den,y->rat.rat_num)));
+			z = make_ratio(z,number_times(x->rat.rat_den,y->rat.rat_den));
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -533,9 +441,10 @@ one_minus(object x)
 	case t_bignum:
 	  MPOP(return,addsi,-1,MP(x));
 	case t_ratio:
-	  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-					    small_fixnum(1),small_fixnum(1),
-					    number_minus);
+		z = number_minus(x->rat.rat_num, x->rat.rat_den);
+		z = make_ratio(z, x->rat.rat_den);
+		return(z);
+
 	case t_shortfloat:
 		dx = (double)(sf(x));
 		z = alloc_object(t_shortfloat);
@@ -606,23 +515,17 @@ number_times(object x, object y)
 	object z;
 	double dx, dy;
 
-	if (x==small_fixnum(1))
-	  return y;
-	if (y==small_fixnum(1))
-	  return x;
-
 	switch (type_of(x)) {
 
 	case t_fixnum:
 		switch (type_of(y)) {
 		case t_fixnum:
-		  return fixnum_times(fix(x),fix(y));
-/* 		  MPOP(return,mulss,fix(x),fix(y)); */
+		  MPOP(return,mulss,fix(x),fix(y));
 		case t_bignum:
 		  MPOP(return,mulsi,fix(x),MP(y));
 		case t_ratio:
-		  return ratio_mult_with_cancellation(x,small_fixnum(1),
-						      y->rat.rat_num,y->rat.rat_den);
+			z = make_ratio(number_times(x, y->rat.rat_num), y->rat.rat_den);
+			return(z);
 		case t_shortfloat:
 			dx = (double)(fix(x));
 			dy = (double)(sf(y));
@@ -641,11 +544,12 @@ number_times(object x, object y)
 		switch (type_of(y)) {
 		case t_fixnum:
  		  MPOP(return,mulsi,fix(y),MP(x));
+
 		case t_bignum:
 		  MPOP(return,mulii,MP(y),MP(x));
 		case t_ratio:
-		  return ratio_mult_with_cancellation(x,small_fixnum(1),
-						      y->rat.rat_num,y->rat.rat_den);
+			z = make_ratio(number_times(x, y->rat.rat_num), y->rat.rat_den);
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -664,11 +568,12 @@ number_times(object x, object y)
 		switch (type_of(y)) {
 		case t_fixnum:
 		case t_bignum:
-		  return ratio_mult_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						      y,small_fixnum(1));
+			z = make_ratio(number_times(x->rat.rat_num, y), x->rat.rat_den);
+			return(z);
 		case t_ratio:
-		  return ratio_mult_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						      y->rat.rat_num,y->rat.rat_den);
+			z = make_ratio(number_times(x->rat.rat_num,y->rat.rat_num),
+				       number_times(x->rat.rat_den,y->rat.rat_den));
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -767,19 +672,19 @@ number_divide(object x, object y)
 		switch (type_of(y)) {
 		case t_fixnum:
 		case t_bignum:
-/* 			if(number_zerop(y) == TRUE) */
-/* 				zero_divisor(); */
-/* 			if (number_minusp(y) == TRUE) { */
-/* 				x = number_negate(x); */
-/* 				y = number_negate(y); */
-/* 			} */
-/* 			z = make_ratio(x, y, 0); */
-			return(make_ratio(x, y, 0));
+			if(number_zerop(y) == TRUE)
+				zero_divisor();
+			if (number_minusp(y) == TRUE) {
+				x = number_negate(x);
+				y = number_negate(y);
+			}
+			z = make_ratio(x, y);
+			return(z);
 		case t_ratio:
 			if(number_zerop(y->rat.rat_num))
 				zero_divisor();
-			return ratio_mult_with_cancellation(x,small_fixnum(1),
-							    y->rat.rat_den,y->rat.rat_num);
+			z = make_ratio(number_times(x, y->rat.rat_den), y->rat.rat_num);
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -800,11 +705,12 @@ number_divide(object x, object y)
 		case t_bignum:
 			if (number_zerop(y))
 				zero_divisor();
-			return ratio_mult_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-							    small_fixnum(1),y);
+			z = make_ratio(x->rat.rat_num, number_times(x->rat.rat_den, y));
+			return(z);
 		case t_ratio:
-		  return ratio_mult_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						      y->rat.rat_den,y->rat.rat_num);
+			z = make_ratio(number_times(x->rat.rat_num,y->rat.rat_den),
+				       number_times(x->rat.rat_den,y->rat.rat_num));
+			return(z);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -913,18 +819,29 @@ integer_divide1(object x, object y)
 object
 get_gcd(object x, object y)
 {
-	object	r;
-
-	if (x==small_fixnum(1) || y==small_fixnum(1))
-	  return small_fixnum(1);
+	object	q, r;
 
 	if (number_minusp(x))
 		x = number_negate(x);
 	if (number_minusp(y))
 		y = number_negate(y);
 
+L:
 	if (type_of(x) == t_fixnum && type_of(y) == t_fixnum) {
-
+	  /* LL: */
+	  /* 		if (i < j) { */
+	  /* 			k = i; */
+	  /* 			i = j; */
+	  /* 			j = k; */
+	  /* 		} */
+	  /* 		if (j == 0) { */
+	  /* 			return(make_fixnum(i)); */
+	  /* 		} */
+	  /* 		k = i % j; */
+	  /* 		i = j; */
+	  /* 		j = k; */
+	  /* 		goto LL; */
+	  
 	  register fixnum i, j, k, t;
 
 	  if (!(i = fix(x)))
@@ -952,17 +869,13 @@ get_gcd(object x, object y)
 		x = y;
 		y = r;
 	}
-	if (type_of(y) == t_fixnum) {
-	  if (fix(y))
-	    return make_fixnum(mpz_gcd_ui(NULL,MP(x),fix(y)));
-	  else
-	    return(x);
+	if (type_of(y) == t_fixnum && fix(y) == 0) {
+		return(x);
 	}
-
-	r=new_bignum();
-	mpz_gcd(MP(r),MP(x),MP(y));
-	return normalize_big(r);
-	  
+	integer_quotient_remainder_1(x, y, &q, &r);
+	 x = y;
+	 y = r;
+	goto L;
 }
 
 /* (+          )   */

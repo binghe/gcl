@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;Copyright William F. Schelter 1990, All Rights Reserved 
 
 
@@ -361,7 +360,7 @@
   (setq tem (get fun 'line-info))
   (if tem
       (let ((ar tem))
-	(declare ((array t) ar))
+	(declare (type (array (t)) ar))
 	(when ar
 	  (dotimes
 	   (i (length ar))

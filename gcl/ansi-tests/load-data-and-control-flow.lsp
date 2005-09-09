@@ -2,14 +2,6 @@
 
 (load "data-and-control-flow.lsp")
 (load "places.lsp")
-(load "psetq.lsp")
-(load "psetf.lsp")
-(load "shiftf.lsp")
-(load "rotatef.lsp")
-(load "return.lsp")
-(load "return-from.lsp")
-(load "defsetf.lsp")
-(load "define-setf-expander.lsp")
 
 (load "and.lsp")
 (load "apply.lsp")
@@ -50,13 +42,11 @@
 (load "lambda-list-keywords.lsp")
 (load "lambda-parameters-limit.lsp")
 (load "let.lsp")
-(load "letstar.lsp")
 (load "macrolet.lsp")
 (load "multiple-value-bind.lsp")
 (load "multiple-value-call.lsp") ;; include multiple-value-list
 (load "multiple-value-prog1.lsp")
 (load "multiple-value-setq.lsp")
-(load "multiple-value-list.lsp")
 (load "nil.lsp")
 (load "not-and-null.lsp")
 (load "notany.lsp")

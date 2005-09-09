@@ -6,8 +6,9 @@
 (in-package :cl-test)
 
 (deftest identity.1
-  (check-predicate #'(lambda (x) (eqlt x (check-values (identity x)))))
-  nil)
+  (loop for x in *universe*
+	always (eqlt x (check-values (identity x))))
+  t)
 
 (deftest identity.2
   (let ((x (ash 1 100)))
@@ -25,10 +26,9 @@
   1 1)
 
 (deftest identity.error.1
-  (signals-error (identity) program-error)
-  t)
+  (classify-error (identity))
+  program-error)
 
 (deftest identity.error.2
-  (signals-error (identity 'a 'a) program-error)
-  t)
-
+  (classify-error (identity 'a 'a))
+  program-error)

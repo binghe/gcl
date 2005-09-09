@@ -36,7 +36,7 @@ Name: "{group}\Common Lisp HyperSpec"; Filename: "{app}\lib\gcl-@VERSION@\doc\gc
 Name: "{userdesktop}\GNU Common Lisp"; Filename: "{app}\bin\gcl.bat"; MinVersion: 4,4; Tasks: desktopicon; IconFilename: "{app}\bin\gcl.ico"
 
 [Run]
-Filename: "{app}\bin\sysdir.bat";  Parameters: "{app}/lib/gcl-@VERSION@/unixport/"
+Filename: "{app}\bin\sysdir.bat";  Parameters: "{app}\lib\gcl-@VERSION@\unixport\"
 Filename: "{app}\lib\gcl-@VERSION@\unixport\@FLISP@.exe"; Parameters: -load {app}/install/install.lsp
 Filename: "{app}\bin\gcl.bat"; Description: "Launch GNU Common Lisp"; Flags: postinstall skipifsilent
 

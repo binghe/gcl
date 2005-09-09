@@ -32,13 +32,13 @@
   (#\a #\b #\c))
 
 (deftest loop.5.7
-  (let ((x (make-array '(4) :initial-contents "abcd" :element-type 'base-char)))
-    (loop for e across (the base-string x) collect e))
+  (let ((x "abcd")) (loop for e across (the base-string x) collect e))
   (#\a #\b #\c #\d))
 
 (deftest loop.5.8
   (let ((x "abcd")) (loop for e of-type character across x collect e))
   (#\a #\b #\c #\d))
+
 
 (deftest loop.5.10
   (let ((x #*00010110))
@@ -143,81 +143,30 @@
     (loop for e across da collect e))
   (1 0 0 1 0))
 
-(deftest loop.5.39
-  (let ((v (make-array '(10) :initial-contents '(1 2 3 4 5 6 7 8 9 10)
-		       :fill-pointer 6)))
-    (loop for x across v collect x))
-  (1 2 3 4 5 6))
-
-(deftest loop.5.40
-  (loop for i from 1 to 40
-	for type = `(unsigned-byte ,i)
-	for v = (make-array '(10) :initial-contents '(0 0 1 1 0 1 1 1 0 0)
-			    :element-type type)
-	for r = (loop for x across v collect x)
-	unless (equal r '(0 0 1 1 0 1 1 1 0 0))
-	collect (list i r))
-  nil)
-
-(deftest loop.5.41
-  (loop for i from 1 to 40
-	for type = `(signed-byte ,i)
-	for v = (make-array '(10) :initial-contents '(0 0 -1 -1 0 -1 -1 -1 0 0)
-			    :element-type type)
-	for r = (loop for x across v collect x)
-	unless (equal r '(0 0 -1 -1 0 -1 -1 -1 0 0))
-	collect (list i r))
-  nil)
-
-(deftest loop.5.42
-  (let ((vals '(0 0 1 1 0 1 1 1 0 0)))
-    (loop for type in '(short-float single-float double-float long-float)
-	  for fvals = (loop for v in vals collect (coerce v type))
-	  for v = (make-array '(10) :initial-contents fvals :element-type type)
-	  for r = (loop for x across v collect x)
-	  unless (equal r fvals)
-	  collect (list fvals r)))
-  nil)
-
-(deftest loop.5.43
-  (let ((vals '(0 0 1 1 0 1 1 1 0 0)))
-    (loop for etype in '(short-float single-float double-float long-float)
-	  for type = `(complex ,etype)
-	  for fvals = (loop for v in vals collect (coerce v type))
-	  for v = (make-array '(10) :initial-contents fvals :element-type type)
-	  for r = (loop for x across v collect x)
-	  unless (equal r fvals)
-	  collect (list fvals r)))
-  nil)
 
 ;;; Error cases
 
 (deftest loop.5.error.1
-  (signals-error
-   (loop for (e . e) across (vector '(x . y) '(u . v)) collect e)
-   program-error)
-  t)
+  (classify-error
+   (loop for (e . e) across (vector '(x . y) '(u . v)) collect e))
+  program-error)
 
 (deftest loop.5.error.2
-  (signals-error
+  (classify-error
    (loop for e across (vector '(x . y) '(u . v))
-	 for e from 1 to 5 collect e)
-   program-error)
-  t)
+	 for e from 1 to 5 collect e))
+  program-error)
 
 (deftest loop.5.error.3
-  (signals-error
-   (macroexpand
-    '(loop for (e . e) across (vector '(x . y) '(u . v)) collect e))
-   program-error)
-  t)
+  (classify-error*
+   (macroexpand 
+    '(loop for (e . e) across (vector '(x . y) '(u . v)) collect e)))
+  program-error)
 
 (deftest loop.5.error.4
-  (signals-error
+  (classify-error*
    (macroexpand
     '(loop for e across (vector '(x . y) '(u . v))
-	   for e from 1 to 5 collect e))
-   program-error)
-  t)
-
+	   for e from 1 to 5 collect e)))
+  program-error)
 

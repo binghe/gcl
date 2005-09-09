@@ -220,8 +220,6 @@ FFN(Fflet)(object args)
 		def = MMcar(def_list);
 		if (endp(def) || endp(MMcdr(def)) ||
 		    type_of(MMcar(def)) != t_symbol)
-		  /* FIXME need t read environment for setf functions
-		     && !setf_fn_form(MMcar(def)) */
 			FEerror("~S~%\
 is an illegal function definition in FLET.",
 				1, def);
@@ -229,11 +227,6 @@ is an illegal function definition in FLET.",
 		top[0] = MMcons(lex[1], top[0]);
 		top[0] = MMcons(lex[0], top[0]);
 		top[0] = MMcons(sLlambda_block_closure, top[0]);
-		{
-		  object x=alloc_object(t_ifun);
-		  x->ifn.ifn_self=top[0];
-		  top[0]=x;
-		}
 		lex_fun_bind(MMcar(def), top[0]);
 		def_list = MMcdr(def_list);
 	}
@@ -270,11 +263,6 @@ is an illegal function definition in LABELS.",
 		top[1] = MMcons(top[0], top[1]);
 		top[0] = MMcons(lex[0], top[0]);
 		top[0] = MMcons(sLlambda_block_closure, top[0]);
-		{
-		  object x=alloc_object(t_ifun);
-		  x->ifn.ifn_self=top[0];
-		  top[0]=x;
-		}
 		lex_fun_bind(MMcar(def), top[0]);
 		def_list = MMcdr(def_list);
 	}

@@ -74,6 +74,7 @@ work during bootstrapping.
 (proclaim '(notinline make-a-method
 		      add-named-method		      
 		      ensure-generic-function-using-class
+
 		      add-method
 		      remove-method
 		      ))
@@ -100,7 +101,7 @@ work during bootstrapping.
 (defun redirect-early-function-internal (real early)
   (setf (gdefinition real)
 	(set-function-name
-	 (lambda (&rest args)
+	 #'(lambda (&rest args)
 	     (apply (the function (symbol-function early)) args))
 	 real)))
 
@@ -156,134 +157,65 @@ work during bootstrapping.
       ))
 
 
-
-;;;  FIXME need GCL support for these kernel:* functions
-
 ;;;
 ;;;
 ;;;
-;;;
-;;; ANSI 3.4.2, Generic Function Lambda Lists
-;;;
-
-;(defun parse-generic-function-lambda-list (lambda-list)
-  ;; This is like kernel:parse-lambda-list, but returns an additional
-  ;; value AUXP which is true if LAMBDA-LIST contains any &aux keyword.
-;  (multiple-value-bind (required optional restp rest keyp keys
-;				 allow-other-keys-p aux morep
-;				 more-context more-count)
-;      (kernel:parse-lambda-list lambda-list)
-;    (values required optional restp rest keyp keys allow-other-keys-p
-;	    (or aux (member '&aux lambda-list :test #'eq)) aux
-;	    morep more-context more-count)))
-
-;(defun check-generic-function-lambda-list (function-specifier lambda-list)
-;  (multiple-value-bind (required optional restp rest keyp keys
-;				 allow-other-keys-p auxp aux morep
-;				 more-context more-count)
-;      (parse-generic-function-lambda-list lambda-list)
-;    (declare (ignore restp rest keyp aux allow-other-keys-p more-context
-;		     more-count))
-;    (labels ((lambda-list-error (format-control &rest format-arguments)
-;	       (simple-program-error "Generic function ~A:~%~?"
-;				     function-specifier
-;				     format-control format-arguments))
-;	     (check-required-parameter (parameter)
-;	       (unless (symbolp parameter)
-;		 (lambda-list-error
-;		  "Invalid generic function parameter name ~A"
-;		  parameter)))
-;	     (check-key-or-optional-parameter (parameter)
-;	       (unless (or (symbolp parameter)
-;			   (and (consp parameter)
-;				(symbolp (car parameter))))
-;		 (lambda-list-error
-;		  "Invalid generic function parameter name: ~A"
-;		  parameter))
-;	       (when (and (consp parameter)
-;			  (not (null (cdr parameter))))
-;		 (lambda-list-error
-;		  "Optional and key parameters of generic functions~%~
-;                   may not have default values or supplied-p ~
-;                   parameters: ~A" parameter))))
-;      (when morep
-;	(lambda-list-error
-;	 "&MORE not allowed in generic function lambda lists"))
-;      (when auxp
-;	(lambda-list-error
-;	 "&AUX not allowed in generic function lambda lists"))
-;      (mapc #'check-required-parameter required)
-;      (mapc #'check-key-or-optional-parameter optional)
-;      (mapc #'check-key-or-optional-parameter keys))))
-
 (defmacro defgeneric (function-specifier lambda-list &body options)
-;  (check-generic-function-lambda-list function-specifier lambda-list)
   (expand-defgeneric function-specifier lambda-list options))
 
 (defun expand-defgeneric (function-specifier lambda-list options)
-  (let ((initargs ())
-	(methods ()))
-    (labels ((duplicate-option (name)
-	     (specific-error :invalid-form "The option ~S appears more than once." name))
-	     (check-declaration (declaration-specifiers)
-	       (loop for specifier in declaration-specifiers
-		     when (and (consp specifier)
-			       (member (car specifier)
-				       '(special ftype function inline
-						 notinline declaration)
-				       :test #'eq)) do
-				       (specific-error :invalid-form
-						       "Declaration specifier ~S is not allowed"
-						       specifier)))
-	     (initarg (key &optional (new nil new-supplied-p))
-		      (if new-supplied-p
-			  (setf (getf initargs key) new)
-			(getf initargs key))))
-      (dolist (option options)
-	(case (car option)
-	  (:argument-precedence-order
-	   (if (initarg :argument-precedence-order)
-	       (duplicate-option :argument-precedence-order)
-	     (initarg :argument-precedence-order `',(cdr option))))
-	  (declare
-	   (check-declaration (cdr option))
-	   (initarg :declarations
-		    (append (cdr option) (initarg :declarations))))
-	  (:documentation
-	   (if (initarg :documentation)
-	       (duplicate-option :documentation)
-	     (initarg :documentation `',(cadr option))))
-	  (:method-combination
-	   (if (initarg :method-combination)
-	       (duplicate-option :method-combination)
-	     (initarg :method-combination `',(cdr option))))
-	  (:generic-function-class
-	   (if (initarg :generic-function-class)
-	       (duplicate-option :generic-function-class)
-	     (initarg :generic-function-class `',(cadr option))))
-	  (:method-class
-	   (if (initarg :method-class)
-	       (duplicate-option :method-class)
-	     (initarg :method-class `',(cadr option))))
-	  (:method
-	   (push `(defmethod ,function-specifier ,@(cdr option))
-		 methods))
-	  (t ;unsupported things must get a 'program-error
-	   (specific-error :invalid-form "Unsupported option ~S." option))))
-      
-      (let ((declarations (initarg :declarations)))
-	(when declarations (initarg :declarations `',declarations))))
-;    (tell-compiler-about-gf function-specifier lambda-list)
-  `(progn
-     (proclaim-defgeneric ',function-specifier ',lambda-list)
-     ,(make-top-level-form
-       `(defgeneric ,function-specifier)
-			   *defgeneric-times*
-			   `(load-defgeneric ',function-specifier ',lambda-list ,@initargs))
-     ,@methods
-     `,(function ,function-specifier))))
+  (when (listp function-specifier) (do-standard-defsetf-1 (cadr function-specifier)))
+  (let ((initargs ()))
+    (flet ((duplicate-option (name)
+	     (error "The option ~S appears more than once." name)))
+      ;;
+      ;; INITARG takes this screwy new argument to get around a bad
+      ;; interaction between lexical macros and setf in the Lucid
+      ;; compiler.
+      ;; 
+      (macrolet ((initarg (key &optional new)
+		   (if new
+		       `(setf (getf initargs ,key) ,new)
+		       `(getf initargs ,key))))
+	(dolist (option options)
+	  (ecase (car option)
+	    (:argument-precedence-order
+	      (if (initarg :argument-precedence-order)
+		  (duplicate-option :argument-precedence-order)
+		  (initarg :argument-precedence-order `',(cdr option))))
+	    (declare
+	      (initarg :declarations
+		       (append (cdr option) (initarg :declarations))))
+	    (:documentation
+	      (if (initarg :documentation)
+		  (duplicate-option :documentation)
+		  (initarg :documentation `',(cadr option))))
+	    (:method-combination
+	      (if (initarg :method-combination)
+		  (duplicate-option :method-combination)
+		  (initarg :method-combination `',(cdr option))))
+	    (:generic-function-class
+	      (if (initarg :generic-function-class)
+		  (duplicate-option :generic-function-class)
+		  (initarg :generic-function-class `',(cadr option))))
+	    (:method-class
+	      (if (initarg :method-class)
+		  (duplicate-option :method-class)
+		  (initarg :method-class `',(cadr option))))
+	    (:method
+	      (error
+		"DEFGENERIC doesn't support the :METHOD option yet."))))
+
+	(let ((declarations (initarg :declarations)))
+	  (when declarations (initarg :declarations `',declarations)))))
+    `(progn
+       (proclaim-defgeneric ',function-specifier ',lambda-list)
+       ,(make-top-level-form `(defgeneric ,function-specifier)
+	  *defgeneric-times*
+	  `(load-defgeneric ',function-specifier ',lambda-list ,@initargs)))))
 
 (defun load-defgeneric (function-specifier lambda-list &rest initargs)
+  (when (listp function-specifier) (do-standard-defsetf-1 (cadr function-specifier)))
   (apply #'ensure-generic-function
 	 function-specifier
 	 :lambda-list lambda-list
@@ -296,6 +228,7 @@ work during bootstrapping.
 ;;;
 ;;;
 (defmacro DEFMETHOD (&rest args &environment env)
+  #+(or (not :lucid) :lcl3.0)	
   (declare (arglist name
 		    {method-qualifier}*
 		    specialized-lambda-list
@@ -352,6 +285,7 @@ work during bootstrapping.
 (defvar *asv-boundps*)
 
 (defun expand-defmethod (name proto-gf proto-method qualifiers lambda-list body env)
+  (when (listp name) (do-standard-defsetf-1 (cadr name)))
   (let ((*make-instance-function-keys* nil)
 	(*optimize-asv-funcall-p* t)
 	(*asv-readers* nil) (*asv-writers* nil) (*asv-boundps* nil))
@@ -363,7 +297,6 @@ work during bootstrapping.
 	(let ((initargs-form (make-method-initargs-form 
 			      proto-gf proto-method
 			      method-function-lambda initargs env)))
-;	  (tell-compiler-about-gf name lambda-list)
 	  `(progn
 	     (proclaim-defgeneric ',name ',lambda-list)
 	     ,@(when *make-instance-function-keys*
@@ -377,8 +310,8 @@ work during bootstrapping.
 				       (class-name (class-of proto-method))
 				       'standard-method)
 				   initargs-form
-	                           (getf (getf initargs :plist)
-				         :pv-table-symbol))))))))
+	                           (getf (getf initargs ':plist)
+				         ':pv-table-symbol))))))))
 
 (defun interned-symbol-p (x)
   (and (symbolp x) (symbol-package x)))
@@ -391,7 +324,7 @@ work during bootstrapping.
 				    (and (eq (car name) 'setf) (cadr name))
 				    name))
 	     (every #'interned-symbol-p qualifiers)
-	     (every (lambda (s)
+	     (every #'(lambda (s)
 			(if (consp s)
 			    (and (eq (car s) 'eql) 
 				 (constantp (cadr s))
@@ -409,12 +342,12 @@ work during bootstrapping.
 	     (eq (car fn) 'function)
 	     (consp (setq fn-lambda (cadr fn)))
 	     (eq (car fn-lambda) 'lambda))
-	(let* ((specls (mapcar (lambda (specl)
+	(let* ((specls (mapcar #'(lambda (specl)
 				   (if (consp specl)
 				       `(,(car specl) ,(eval (cadr specl)))
 				       specl))
 			       specializers))
-	       (mname `(,(if (eq (cadr initargs-form) :function)
+	       (mname `(,(if (eq (cadr initargs-form) ':function)
 			     'method 'fast-method)
 			,name ,@qualifiers ,specls))
 	       (mname-sym (intern (let ((*print-pretty* nil))
@@ -432,7 +365,7 @@ work during bootstrapping.
 	 *defmethod-times*
 	 (make-defmethod-form-internal 
 	  name qualifiers 
-	  `(list ,@(mapcar (lambda (specializer)
+	  `(list ,@(mapcar #'(lambda (specializer)
 			       (if (consp specializer)
 				   ``(,',(car specializer) ,,(cadr specializer))
 				   `',specializer))
@@ -510,23 +443,25 @@ work during bootstrapping.
       (multiple-value-bind (parameters lambda-list specializers)
 	  (parse-specialized-lambda-list specialized-lambda-list)
 	(let* ((required-parameters
-		(mapcar (lambda (r s) (declare (ignore s)) r)
+		(mapcar #'(lambda (r s) (declare (ignore s)) r)
 			parameters
 			specializers))
-	       (specialized-parameters
-	        (loop for s in specialized-lambda-list
-		      for p in required-parameters
-		      when (listp s) collect p))
 	       (slots (mapcar #'list required-parameters))
 	       (calls (list nil))
+	       (parameters-to-reference
+		(make-parameter-references specialized-lambda-list
+					   required-parameters
+					   declarations
+					   method-name
+					   specializers))
 	       (class-declarations
 		`(declare
-		  ,@(mapcan (lambda (a s)
-			      (when (and (symbolp s) (neq s t))
-				(list `(class ,a ,s))))
-;				(list `(type ,s ,a))))
-			    parameters
-			    specializers)))
+		  ,@(remove nil
+			    (mapcar #'(lambda (a s) (and (symbolp s)
+							 (neq s 't)
+							 `(class ,a ,s)))
+				    parameters
+				    specializers))))
 	       (method-lambda
 		  ;; Remove the documentation string and insert the
 		  ;; appropriate class declarations.  The documentation
@@ -536,9 +471,9 @@ work during bootstrapping.
 		  ;; are inserted to communicate the class of the method's
 		  ;; arguments to the code walk.
 		  `(lambda ,lambda-list
-		     (declare (ignorable ,@specialized-parameters))
 		     ,class-declarations
 		     ,@declarations
+		     (progn ,@parameters-to-reference)
 		     (block ,(if (listp generic-function-name)
 				 (cadr generic-function-name)
 				 generic-function-name)
@@ -553,12 +488,20 @@ work during bootstrapping.
 					(symbol-package constant-value))))
 			  (list :constant-value constant-value)
 			  ()))
-	       (walked-lambda (walk-method-lambda method-lambda
-						  required-parameters env 
-						  slots calls)))
+	       (applyp (dolist (p lambda-list nil)
+			 (cond ((memq p '(&optional &rest &key))
+				(return t))
+			       ((eq p '&aux)
+				(return nil))))))
+	    (multiple-value-bind (walked-lambda call-next-method-p closurep
+						next-method-p-p)
+		(walk-method-lambda method-lambda required-parameters env 
+				    slots calls)
 	      (multiple-value-bind (ignore walked-declarations walked-lambda-body)
 		  (extract-declarations (cddr walked-lambda))
 		(declare (ignore ignore))
+		(when (or next-method-p-p call-next-method-p)
+		  (setq plist (list* :needs-next-methods-p 't plist)))
 		(when (some #'cdr slots)
 		  (multiple-value-bind (slot-name-lists call-list)
 		      (slot-name-lists-from-slots slots calls)
@@ -571,8 +514,7 @@ work during bootstrapping.
 			      :pv-table-symbol ,pv-table-symbol
 			      ,@plist))
 		      (setq walked-lambda-body
-			    `((pv-binding (,required-parameters
-					   ,slot-name-lists
+			    `((pv-binding (,required-parameters ,slot-name-lists
 					   ,pv-table-symbol)
 			       ,@walked-lambda-body))))))
 		(when (and (memq '&key lambda-list)
@@ -584,21 +526,24 @@ work during bootstrapping.
 		(values `(lambda (.method-args. .next-methods.)
 			   (simple-lexical-method-functions
 			       (,lambda-list .method-args. .next-methods.
-                                :method-name-declaration ,name-decl)
+				:call-next-method-p ,call-next-method-p 
+				:next-method-p-p ,next-method-p-p
+				:closurep ,closurep
+				:applyp ,applyp)
 			     ,@walked-declarations
 			     ,@walked-lambda-body))
 			`(,@(when plist 
 			      `(:plist ,plist))
 			  ,@(when documentation 
-			      `(:documentation ,documentation))))))))))
+			      `(:documentation ,documentation)))))))))))
 		 
 (unless (fboundp 'make-method-lambda)
   (setf (gdefinition 'make-method-lambda)
 	(symbol-function 'real-make-method-lambda)))
 
-(defmacro simple-lexical-method-functions 
-  ((lambda-list method-args next-methods &rest lmf-options) 
-   &body body)
+(defmacro simple-lexical-method-functions ((lambda-list method-args next-methods
+							&rest lmf-options) 
+					   &body body)
   `(progn
      ,method-args ,next-methods
      (bind-simple-lexical-method-macros (,method-args ,next-methods)
@@ -606,36 +551,29 @@ work during bootstrapping.
          (bind-args (,lambda-list ,method-args)
 	   ,@body)))))
 
-(defmacro fast-lexical-method-functions 
-  ((lambda-list next-method-call args rest-arg &rest lmf-options)
-   &body body)
+(defmacro fast-lexical-method-functions ((lambda-list next-method-call args rest-arg
+						      &rest lmf-options)
+					 &body body)
  `(bind-fast-lexical-method-macros (,args ,rest-arg ,next-method-call)
     (bind-lexical-method-functions (,@lmf-options)
       (bind-args (,(nthcdr (length args) lambda-list) ,rest-arg)
         ,@body))))
 
-(defun call-no-next-method (method-name-declaration &rest args)
-  (destructuring-bind (name qualifiers specializers)
-      (car method-name-declaration)
-    (let ((method (find-method (gdefinition name) qualifiers specializers)))
-      (apply #'no-next-method (method-generic-function method) method args))))
-
-(defmacro bind-simple-lexical-method-macros 
-  ((method-args next-methods) &body body)
+(defmacro bind-simple-lexical-method-macros ((method-args next-methods) &body body)
   `(macrolet ((call-next-method-bind (&body body)
 		`(let ((.next-method. (car ,',next-methods))
 		       (,',next-methods (cdr ,',next-methods)))
 		   .next-method. ,',next-methods
 		   ,@body))
-	      (call-next-method-body (method-name-declaration cnm-args)
+	      (call-next-method-body (cnm-args)
 		`(if .next-method.
-		     (funcall (if (std-instance-p .next-method.)
-				  (method-function .next-method.)
-				.next-method.) ; for early methods
+		     (funcall (the function 
+				   (if (std-instance-p .next-method.)
+				       (method-function .next-method.)
+				       .next-method.)) ; for early methods
 			      (or ,cnm-args ,',method-args)
 		              ,',next-methods)
-		     (apply #'call-no-next-method ',method-name-declaration
-                            (or ,cnm-args ,',method-args))))
+		     (error "No next method.")))
 	      (next-method-p-body ()
 	        `(not (null .next-method.))))
      ,@body))
@@ -651,6 +589,7 @@ work during bootstrapping.
   `(let ((.function. ,function)
 	 (.args. ,args)
 	 (.cm-args. ,cm-args))
+     (declare (type function .function.))
      (if (and .cm-args. (null (cdr .cm-args.)))
 	 (funcall .function. .args. (car .cm-args.))
 	 (apply .function. .args. .cm-args.))))
@@ -673,7 +612,7 @@ work during bootstrapping.
 
 #-akcl
 (defmacro fmc-funcall (fn pv-cell next-method-call &rest args)
-  `(funcall ,fn ,pv-cell ,next-method-call ,@args))
+  `(funcall (the function ,fn) ,pv-cell ,next-method-call ,@args))
 
 (defmacro invoke-fast-method-call (method-call &rest required-args+rest-arg)
   `(fmc-funcall (fast-method-call-function ,method-call)
@@ -702,7 +641,6 @@ work during bootstrapping.
 	  (*enable-emf-call-tracing-p* nil))
       (format t "~&(The oldest entries are printed first)~%")
       (dotimes (i *emf-call-trace-size*)
-	(declare (fixnum i))
 	(let ((ct (aref *emf-call-trace* j)))
 	  (when ct (print ct)))
 	(incf j)
@@ -735,8 +673,9 @@ work during bootstrapping.
   (setq restp (eval restp))
   `(progn
      (trace-emf-call ,emf ,restp (list ,@required-args+rest-arg))
-     (cond ((typep ,emf 'fast-method-call)
-	    (invoke-fast-method-call ,emf ,@required-args+rest-arg))
+     (cond (#-(or lucid excl) (typep ,emf 'fast-method-call)
+	    #+(or lucid excl) (fast-method-call-p ,emf)
+	     (invoke-fast-method-call ,emf ,@required-args+rest-arg))
 	   ,@(when (and (null restp) (= 1 (length required-args+rest-arg)))
 	       `(((typep ,emf 'fixnum)
 		  (let* ((.slots. (get-slots-or-nil
@@ -783,7 +722,7 @@ work during bootstrapping.
        (if restp
 	   (let* ((rest-args (nthcdr nreq args))
 		  (req-args (ldiff args rest-args)))
-	     (apply (fast-method-call-function emf)
+	     (apply (the function (fast-method-call-function emf))
 		    (fast-method-call-pv-cell emf)
 		    (fast-method-call-next-method-call emf)
 		    (nconc req-args (list rest-args))))
@@ -800,12 +739,12 @@ work during bootstrapping.
 		      (invoke-fast-method-call emf (car args) (cadr args))
 		      (error "wrong number of args")))
 		 (t
-		  (apply (fast-method-call-function emf)
+		  (apply (the function (fast-method-call-function emf))
 			 (fast-method-call-pv-cell emf)
 			 (fast-method-call-next-method-call emf)
 			 args))))))
     (method-call 
-     (apply (method-call-function emf)
+     (apply (the function (method-call-function emf))
 	    args
 	    (method-call-call-method-args emf)))
     (fixnum 
@@ -826,13 +765,38 @@ work during bootstrapping.
 				 (fast-instance-boundp-index emf))
 		  *slot-unbound*))))
     (function
-     (apply emf args))))
+     (apply (the function emf) args))))
 
-(defmacro bind-fast-lexical-method-macros 
-  ((args rest-arg next-method-call) &body body)
+;; This can be improved alot.
+(defun gf-make-function-from-emf (gf emf)
+  (etypecase emf
+    (fast-method-call (let* ((arg-info (gf-arg-info gf))
+			     (nreq (arg-info-number-required arg-info))
+			     (restp (arg-info-applyp arg-info)))
+			#'(lambda (&rest args)
+			    #+copy-&rest-arg (setq args (copy-list args))
+			    (trace-emf-call emf t args)
+			    (apply (fast-method-call-function emf)
+				   (fast-method-call-pv-cell emf)
+				   (fast-method-call-next-method-call emf)
+				   (if restp
+				       (let* ((rest-args (nthcdr nreq args))
+					      (req-args (ldiff args rest-args)))
+					 (nconc req-args rest-args))
+				       args)))))
+    (method-call #'(lambda (&rest args)
+		     #+copy-&rest-arg (setq args (copy-list args))
+		     (trace-emf-call emf t args)
+		     (apply (method-call-function emf)
+			    args
+			    (method-call-call-method-args emf))))
+    (function emf)))
+
+(defmacro bind-fast-lexical-method-macros ((args rest-arg next-method-call)
+					   &body body)
   `(macrolet ((call-next-method-bind (&body body)
 		`(let () ,@body))
-	      (call-next-method-body (method-name-declaration cnm-args)
+	      (call-next-method-body (cnm-args)
 		`(if ,',next-method-call
 		     ,(if (and (null ',rest-arg)
 			       (consp cnm-args)
@@ -846,35 +810,50 @@ work during bootstrapping.
 					,@',args 
 					,@',(when rest-arg `(,rest-arg)))))
 			    `(if ,cnm-args
-				 (bind-args ((,@',args 
-					      ,@',(when rest-arg
-						    `(&rest ,rest-arg)))
+				 (bind-args ((,@',args ,@',(when rest-arg
+							     `(&rest ,rest-arg)))
 					     ,cnm-args)
 					    ,call)
 				 ,call)))
-                     ,(if (and (null ',rest-arg)
-                               (consp cnm-args)
-                               (eq (car cnm-args) 'list))
-                          `(call-no-next-method ',method-name-declaration
-                                                ,@(cdr cnm-args))
-                          `(call-no-next-method ',method-name-declaration
-                                                ,@',args
-                                                ,@',(when rest-arg
-                                                      `(,rest-arg))))))
+		     (error "No next method.")))
 	      (next-method-p-body ()
 	        `(not (null ,',next-method-call))))
      ,@body))
 
 (defmacro bind-lexical-method-functions 
-    ((&key method-name-declaration) &body body)
-    `(call-next-method-bind
-      (flet ((call-next-method (&rest cnm-args)
-			       (call-next-method-body ,method-name-declaration cnm-args))
-	     (next-method-p () (next-method-p-body)))
-;	(declare (ignorable #'call-next-method #'next-method-p))
-	,@body)))
+    ((&key call-next-method-p next-method-p-p closurep applyp)
+     &body body)
+  (cond ((and (null call-next-method-p) (null next-method-p-p)
+	      (null closurep)
+	      (null applyp))
+	 `(let () ,@body))
+	 ((and (null closurep)
+	       (null applyp))
+	 ;; OK to use MACROLET, and all args are mandatory 
+	 ;; (else APPLYP would be true).
+	 `(call-next-method-bind
+	    (macrolet ((call-next-method (&rest cnm-args)
+			 `(call-next-method-body ,(when cnm-args `(list ,@cnm-args))))
+		       (next-method-p ()
+			 `(next-method-p-body)))
+	       ,@body)))
+	(t
+	 `(call-next-method-bind
+	    (flet (,@(and call-next-method-p
+		       '((call-next-method (&rest cnm-args)
+			  #+Genera
+			  (declare (dbg:invisible-frame :clos-internal))
+			  #+copy-&rest-arg (setq args (copy-list args))
+			  (call-next-method-body cnm-args))))
+		     ,@(and next-method-p-p
+			 '((next-method-p ()
+			    (next-method-p-body)))))
+	      ,@body)))))
 
 (defmacro bind-args ((lambda-list args) &body body)
+  #|| ; Lucid and Allegro don't compile the function inline
+  `(apply #'(lambda ,lambda-list ,@body) ,args)
+  ||#
   (let ((args-tail '.args-tail.)
 	(key '.key.)
 	(state 'required))
@@ -906,84 +885,108 @@ work during bootstrapping.
 						      ,(cadr var)))))))
 		   (rest `((,var ,args-tail)))
 		   (key (cond ((not (consp var))
-			       `((,var (car
-					(get-key-arg-tail ,(make-keyword var)
-							  ,args-tail)))))
+			       `((,var (get-key-arg ,(make-keyword var)
+					            ,args-tail))))
 			      ((null (cddr var))
 			       (multiple-value-bind (keyword variable)
 				   (if (consp (car var))
 				       (values (caar var) (cadar var))
-				       (values (make-keyword (car var)) 
-					       (car var)))
-				 `((,key (get-key-arg-tail ',keyword
-							   ,args-tail))
-				   (,variable (if ,key
+				       (values (make-keyword (car var)) (car var)))
+				 `((,key (get-key-arg1 ,keyword ,args-tail))
+				   (,variable (if (consp ,key)
 						  (car ,key)
-						,(cadr var))))))
+						  ,(cadr var))))))
 			      (t
 			       (multiple-value-bind (keyword variable)
 				   (if (consp (car var))
 				       (values (caar var) (cadar var))
 				       (values (make-keyword (car var)) (car var)))
-				 `((,key (get-key-arg-tail ',keyword
-							   ,args-tail))
+				 `((,key (get-key-arg1 ,keyword ,args-tail))
 				   (,(caddr var) ,key)
-				   (,variable (if ,key
+				   (,variable (if (consp ,key)
 						  (car ,key)
-						,(cadr var))))))))
+						  ,(cadr var))))))))
 		   (aux `(,var))))))
       (let ((bindings (mapcan #'process-var lambda-list)))
 	`(let* ((,args-tail ,args)
 		,@bindings)
-	   (declare (ignorable ,args-tail))
+	   ,@(unless bindings `((declare (ignore ,args-tail))))
 	   ,@body)))))
 
-(defun get-key-arg-tail (keyword list)
-  (loop for (key . tail) on list by #'cddr
-	when (null tail) do
-	  (specific-error :invalid-form "Odd number of keyword arguments in ~S" list)
-	when (eq key keyword)
-	  return tail))
+(defun get-key-arg (keyword list)
+  (loop (when (atom list) (return nil))
+	(when (eq (car list) keyword) (return (cadr list)))
+	(setq list (cddr list))))
+
+(defun get-key-arg1 (keyword list)
+  (loop (when (atom list) (return nil))
+	(when (eq (car list) keyword) (return (cdr list)))
+	(setq list (cddr list))))
 
 (defun walk-method-lambda (method-lambda required-parameters env slots calls)
-  (flet ((walk-function (form context env)
-			(cond ((not (eq context :eval)) form)
-			      ((not (listp form)) form)
-			      ((and (or (eq (car form) 'slot-value)
-					(eq (car form) 'set-slot-value)
-					(eq (car form) 'slot-boundp))
-				    (constantp (caddr form)))
-			       (let ((parameter
-				      (can-optimize-access form required-parameters env)))
-				 (ecase (car form)
-				   (slot-value
-				    (optimize-slot-value     slots parameter form))
-				   (set-slot-value
-				    (optimize-set-slot-value slots parameter form))
-				   (slot-boundp
-				    (optimize-slot-boundp    slots parameter form)))))
-			      ((and (eq (car form) 'apply)
-				    (consp (cadr form))
-				    (eq (car (cadr form)) 'function)
-				    (generic-function-name-p (cadr (cadr form))))
-			       (optimize-generic-function-call 
-				form required-parameters env slots calls))
-			      ((and (or (symbolp (car form))
-					(and (consp (car form))
-					     (eq (caar form) 'setf)))
-				    (generic-function-name-p (car form)))
-			       (optimize-generic-function-call 
-				form required-parameters env slots calls))
-			      ((and (eq (car form) 'asv-funcall)
-				    *optimize-asv-funcall-p*)
-			       (case (fourth form)
-				 (reader (push (third form) *asv-readers*))
-				 (writer (push (third form) *asv-writers*))
-				 (boundp (push (third form) *asv-boundps*)))
-			       `(,(second form) ,@(cddddr form)))
-			      (t form))))
-    
-    (walk-form method-lambda env #'walk-function)))
+  (let ((call-next-method-p nil)   ;flag indicating that call-next-method
+				   ;should be in the method definition
+	(closurep nil)		   ;flag indicating that #'call-next-method
+				   ;was seen in the body of a method
+	(next-method-p-p nil))     ;flag indicating that next-method-p
+				   ;should be in the method definition
+    (flet ((walk-function (form context env)
+	     (cond ((not (eq context ':eval)) form)
+		   ((not (listp form)) form)
+		   ((eq (car form) 'call-next-method)
+		    (setq call-next-method-p 't)
+		    form)
+		   ((eq (car form) 'next-method-p)
+		    (setq next-method-p-p 't)
+		    form)
+		   ((and (eq (car form) 'function)
+			 (cond ((eq (cadr form) 'call-next-method)
+				(setq call-next-method-p 't)
+				(setq closurep t)
+				form)
+			       ((eq (cadr form) 'next-method-p)
+				(setq next-method-p-p 't)
+				(setq closurep t)
+				form)
+			       (t nil))))
+		   ((and (or (eq (car form) 'slot-value)
+			     (eq (car form) 'set-slot-value)
+			     (eq (car form) 'slot-boundp))
+			 (constantp (caddr form)))
+		    (let ((parameter
+			   (can-optimize-access form
+						required-parameters env)))
+		      (ecase (car form)
+			(slot-value
+			 (optimize-slot-value     slots parameter form))
+			(set-slot-value
+			 (optimize-set-slot-value slots parameter form))
+			(slot-boundp
+			 (optimize-slot-boundp    slots parameter form)))))
+		   ((and (eq (car form) 'apply)
+			 (consp (cadr form))
+			 (eq (car (cadr form)) 'function)
+			 (generic-function-name-p (cadr (cadr form))))
+		    (optimize-generic-function-call 
+		     form required-parameters env slots calls))
+		   ((and (or (symbolp (car form))
+			     (and (consp (car form))
+				  (eq (caar form) 'setf)))
+			 (generic-function-name-p (car form)))
+		    (optimize-generic-function-call 
+		     form required-parameters env slots calls))
+		   ((and (eq (car form) 'asv-funcall)
+			 *optimize-asv-funcall-p*)
+		    (case (fourth form)
+		      (reader (push (third form) *asv-readers*))
+		      (writer (push (third form) *asv-writers*))
+		      (boundp (push (third form) *asv-boundps*)))
+		    `(,(second form) ,@(cddddr form)))
+		   (t form))))
+	  
+      (let ((walked-lambda (walk-form method-lambda env #'walk-function)))
+	(values walked-lambda
+		call-next-method-p closurep next-method-p-p)))))
 
 (defun generic-function-name-p (name)
   (and (or (symbolp name)
@@ -997,6 +1000,29 @@ work during bootstrapping.
 	   (standard-generic-function-p (gdefinition name))
 	   (funcallable-instance-p (gdefinition name)))))
 
+(defun make-parameter-references (specialized-lambda-list
+				  required-parameters
+				  declarations
+				  method-name
+				  specializers)
+  (flet ((ignoredp (symbol)
+	   (dolist (decl (cdar declarations))
+	     (when (and (eq (car decl) 'ignore)
+			(memq symbol (cdr decl)))
+	       (return t)))))	   
+    (gathering ((references (collecting)))
+      (iterate ((s (list-elements specialized-lambda-list))
+		(p (list-elements required-parameters)))
+	(progn p)
+	(cond ((not (listp s)))
+	      ((ignoredp (car s))
+	       (warn "In defmethod ~S, there is a~%~
+                      redundant ignore declaration for the parameter ~S."
+		     method-name
+		     specializers
+		     (car s)))
+	      (t
+	       (gather (car s) references)))))))
 
 
 (defvar *method-function-plist* (make-hash-table :test #'eq))
@@ -1016,7 +1042,7 @@ work during bootstrapping.
 	  *mf1p* (gethash method-function *method-function-plist*)))
   *mf1p*)
 
-(defun (setf method-function-plist)
+(defun #-setf SETF\ PCL\ METHOD-FUNCTION-PLIST #+setf (setf method-function-plist)
        (val method-function)
   (unless (eq method-function *mf1*)
     (rotatef *mf1* *mf2*)
@@ -1031,7 +1057,7 @@ work during bootstrapping.
 (defun method-function-get (method-function key &optional default)
   (getf (method-function-plist method-function) key default))
 
-(defun (setf method-function-get)
+(defun #-setf SETF\ PCL\ METHOD-FUNCTION-GET #+setf (setf method-function-get)
        (val method-function key)
   (setf (getf (method-function-plist method-function) key) val))
 
@@ -1042,21 +1068,29 @@ work during bootstrapping.
 (defun method-function-method (method-function)
   (method-function-get method-function :method))
 
+(defun method-function-needs-next-methods-p (method-function)
+  (method-function-get method-function :needs-next-methods-p t))
+
+
+
 (defmacro method-function-closure-generator (method-function)
   `(method-function-get ,method-function 'closure-generator))
 
 (defun load-defmethod (class name quals specls ll initargs &optional pv-table-symbol)
+  (when (listp name) (do-standard-defsetf-1 (cadr name)))
   (setq initargs (copy-tree initargs))
-  (let ((method-spec (or (getf initargs :method-spec)
+  (let ((method-spec (or (getf initargs ':method-spec)
 			 (make-method-spec name quals specls))))
-    (setf (getf initargs :method-spec) method-spec)
+    (setf (getf initargs ':method-spec) method-spec)
+    (record-definition 'method method-spec)
     (load-defmethod-internal class name quals specls ll initargs pv-table-symbol)))
 
 (defun load-defmethod-internal
     (method-class gf-spec qualifiers specializers lambda-list 
 		  initargs pv-table-symbol)
+  (when (listp gf-spec) (do-standard-defsetf-1 (cadr gf-spec)))
   (when pv-table-symbol
-    (setf (getf (getf initargs :plist) :pv-table-symbol)
+    (setf (getf (getf initargs ':plist) :pv-table-symbol)
 	  pv-table-symbol))
   (let ((method (apply #'add-named-method
 		       gf-spec qualifiers specializers lambda-list
@@ -1081,12 +1115,12 @@ work during bootstrapping.
   `(method ,gf-spec ,@qualifiers ,unparsed-specializers))
 
 (defun initialize-method-function (initargs &optional return-function-p method)
-  (let* ((mf (getf initargs :function))
-	 (method-spec (getf initargs :method-spec))
-	 (plist (getf initargs :plist))
-	 (pv-table-symbol (getf plist :pv-table-symbol))
+  (let* ((mf (getf initargs ':function))
+	 (method-spec (getf initargs ':method-spec))
+	 (plist (getf initargs ':plist))
+	 (pv-table-symbol (getf plist ':pv-table-symbol))
 	 (pv-table nil)
-	 (mff (getf initargs :fast-function)))
+	 (mff (getf initargs ':fast-function)))
     (flet ((set-mf-property (p v)
 	     (when mf
 	       (setf (method-function-get mf p) v))
@@ -1182,15 +1216,15 @@ work during bootstrapping.
 	   #+cmu (old-allowp (and old-ftype (c::function-type-allowp old-ftype)))
 	   (keywords #+cmu (union old-keys (mapcar #'keyword-spec-name keywords))
 		     #-cmu (mapcar #'keyword-spec-name keywords)))
-      `(function ,(append (make-list nrequired :initial-element t)
+      `(function ,(append (make-list nrequired :initial-element 't)
 			  (when (plusp noptional)
 			    (append '(&optional)
-				    (make-list noptional :initial-element t)))
+				    (make-list noptional :initial-element 't)))
 			  (when (or restp #+cmu old-restp)
 			    '(&rest t))
 			  (when (or keysp #+cmu old-keysp)
 			    (append '(&key)
-				    (mapcar (lambda (key)
+				    (mapcar #'(lambda (key)
 						`(,key t))
 					    keywords)
 				    (when (or allow-other-keys-p #+cmu old-allowp)
@@ -1205,9 +1239,7 @@ work during bootstrapping.
 	(decl `(ftype ,(ftype-declaration-from-lambda-list lambda-list #+cmu spec)
 		      ,spec)))
     #+cmu (proclaim decl)
-;;FIXME  proclaim setf compiled closures too
-    #+kcl (when (symbolp spec)
-	    (setf (get spec 'compiler::proclaimed-closure) t))))
+    #+kcl (setf (get spec 'compiler::proclaimed-closure) t)))
 
 ;;;; Early generic-function support
 ;;;
@@ -1219,28 +1251,50 @@ work during bootstrapping.
 				&key environment
 				&allow-other-keys)
   (declare (ignore environment))
+  #+copy-&rest-arg (setq all-keys (copy-list all-keys))
   (let ((existing (and (gboundp function-specifier)		       
 		       (gdefinition function-specifier))))
-    (when (and existing
-	       (eq *boot-state* 'complete)
-	       (null (generic-function-p existing)))
-      (generic-clobbers-function function-specifier)
-      (setq existing nil))
-    (apply #'ensure-generic-function-using-class
-	   existing function-specifier all-keys)))
+    (if (and existing
+	     (eq *boot-state* 'complete)
+	     (null (generic-function-p existing)))
+	(generic-clobbers-function function-specifier)
+	(apply #'ensure-generic-function-using-class
+	       existing function-specifier all-keys))))
 
 (defun generic-clobbers-function (function-specifier)
-  (restart-case
-      (specific-error :invalid-form
-       "~S already names an ordinary function or a macro.~%~
-	If you want to replace it with a generic function, you should remove~%~
-        the existing definition beforehand.~%"
-       function-specifier)
-    (continue ()
-      :report (lambda (stream)
-		(format stream "Discard the existing definition of ~S."
-			function-specifier))
-      (fmakunbound function-specifier))))
+  #+Lispm (zl:signal 'generic-clobbers-function :name function-specifier)
+  #-Lispm (error "~S already names an ordinary function or a macro,~%~
+                  you may want to replace it with a generic function, but doing so~%~
+                  will require that you decide what to do with the existing function~%~
+                  definition.~%~
+                  The PCL-specific function MAKE-SPECIALIZABLE may be useful to you."
+		 function-specifier))
+
+#+Lispm
+(zl:defflavor generic-clobbers-function (name) (si:error)
+  :initable-instance-variables)
+
+#+Lispm
+(zl:defmethod #+Genera (dbg:report generic-clobbers-function)
+	      #+ti (generic-clobbers-function :report)
+	      (stream)
+ (format stream
+	 "~S aready names a ~a"
+	 name
+	 (if (and (symbolp name) (macro-function name)) "macro" "function")))
+
+#+Genera
+(zl:defmethod (sys:proceed generic-clobbers-function :specialize-it) ()
+  "Make it specializable anyway?"
+  (make-specializable name))
+
+#+ti
+(zl:defmethod
+     (generic-clobbers-function :case :proceed-asking-user :specialize-it)
+     (continuation ignore)
+  "Make it specializable anyway?"
+  (make-specializable name)
+  (funcall continuation :specialize-it))
 
 (defvar *sgf-wrapper* 
   (#+cmu17 boot-make-wrapper #-cmu17 make-wrapper
@@ -1249,7 +1303,7 @@ work during bootstrapping.
 
 (defvar *sgf-slots-init*
   (map 'vector
-       (lambda (canonical-slot)
+       #'(lambda (canonical-slot)
 	   (if (memq (getf canonical-slot :name) '(arg-info source))
 	       *slot-unbound*
 	       (let ((initfunction (getf canonical-slot :initfunction)))
@@ -1314,7 +1368,7 @@ work during bootstrapping.
   (length (arg-info-metatypes arg-info)))
 
 (defun arg-info-nkeys (arg-info)
-  (count-if (lambda (x) (neq x t)) (arg-info-metatypes arg-info)))
+  (count-if #'(lambda (x) (neq x 't)) (arg-info-metatypes arg-info)))
 
 ;;; Keep pages clean by not setting if the value is already the same.
 (defmacro esetf (pos val)
@@ -1336,7 +1390,7 @@ work during bootstrapping.
     (when (and (not lambda-list-p) methods)      
       (setq lambda-list (gf-lambda-list gf)))
     (when (or lambda-list-p
-	      (and first-p (eq (arg-info-lambda-list arg-info) :no-lambda-list)))
+	      (and first-p (eq (arg-info-lambda-list arg-info) ':no-lambda-list)))
       (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords)
 	  (analyze-lambda-list lambda-list)
 	(when (and methods (not first-p))
@@ -1373,10 +1427,9 @@ work during bootstrapping.
       (analyze-lambda-list (if (consp method)
 			       (early-method-lambda-list method)
 			       (method-lambda-list method)))
-    (flet ((lose (format-control &rest format-args)
-	     (specific-error :invalid-form
-			     "Attempt to add the method ~S to the generic function ~S.~%~
-                   But ~?" method gf format-control format-args))
+    (flet ((lose (string &rest args)
+	     (error "Attempt to add the method ~S to the generic function ~S.~%~
+                   But ~A" method gf (apply #'format nil string args)))
 	   (compare (x y)
 	     (if (> x y) "more" "fewer")))
       (let ((gf-nreq (arg-info-number-required arg-info))
@@ -1390,12 +1443,12 @@ work during bootstrapping.
 	  (lose "the method has ~S optional arguments than the generic function."
 		(compare nopt gf-nopt)))
 	(unless (eq (or keysp restp) gf-key/rest-p)
-	  (lose "the method and generic function differ in whether they accept~%~
+	  (error "the method and generic function differ in whether they accept~%~
                   rest or keyword arguments."))
 	(when (consp gf-keywords)
 	  (unless (or (and restp (not keysp))
 		      allow-other-keys-p
-		      (every (lambda (k) (memq k keywords)) gf-keywords))
+		      (every #'(lambda (k) (memq k keywords)) gf-keywords))
 	    (lose "the method does not accept each of the keyword arguments~%~
                  ~S." gf-keywords)))))))
 
@@ -1482,25 +1535,21 @@ work during bootstrapping.
 ;;;    
 (defun ensure-generic-function-using-class (existing spec &rest keys
 					    &key (lambda-list nil lambda-list-p)
-					    argument-precedence-order
 					    &allow-other-keys)
   (declare (ignore keys))
   (cond ((and existing (early-gf-p existing))
 	 existing)
 	((assoc spec *generic-function-fixups* :test #'equal)
 	 (if existing
-	     (make-early-gf spec lambda-list lambda-list-p existing
-			    argument-precedence-order)
+	     (make-early-gf spec lambda-list lambda-list-p existing)	       
 	     (error "The function ~S is not already defined" spec)))
 	(existing
 	 (error "~S should be on the list ~S" spec '*generic-function-fixups*))
 	(t
 	 (pushnew spec *early-generic-functions* :test #'equal)
-	 (make-early-gf spec lambda-list lambda-list-p nil
-	                argument-precedence-order))))
+	 (make-early-gf spec lambda-list lambda-list-p))))
 
-(defun make-early-gf (spec &optional lambda-list lambda-list-p function
-			   argument-precedence-order)
+(defun make-early-gf (spec &optional lambda-list lambda-list-p function)
   (let ((fin (allocate-funcallable-instance *sgf-wrapper* *sgf-slots-init*)))
     (set-funcallable-instance-function 
      fin 
@@ -1521,11 +1570,7 @@ work during bootstrapping.
       (setf (early-gf-arg-info fin) arg-info)
       (when lambda-list-p
 	(proclaim-defgeneric spec lambda-list)
-	(if argument-precedence-order
-	    (set-arg-info fin
-	                  :lambda-list lambda-list
-			  :argument-precedence-order argument-precedence-order)
-	    (set-arg-info fin :lambda-list lambda-list))))
+	(set-arg-info fin :lambda-list lambda-list)))
     fin))
 
 (defun set-dfun (gf &optional dfun cache info)
@@ -1565,7 +1610,7 @@ work during bootstrapping.
   (let ((arg-info (if (eq *boot-state* 'complete)
 		      (gf-arg-info gf)
 		      (early-gf-arg-info gf))))
-    (if (eq :no-lambda-list (arg-info-lambda-list arg-info))
+    (if (eq ':no-lambda-list (arg-info-lambda-list arg-info))
 	(let ((methods (if (eq *boot-state* 'complete)
 			   (generic-function-methods gf)
 			   (early-gf-methods gf))))
@@ -1600,10 +1645,7 @@ work during bootstrapping.
 	       (find-method-combination (class-prototype ,gf-class)
 					(car combin)
 					(cdr combin)))))
-     (let ((method-class (getf ,all-keys :method-class '.shes-not-there.)))
-       (unless (eq method-class '.shes-not-there.)
-	 (setf (getf ,all-keys :method-class)
-	       (find-class method-class t ,env))))))
+     ))
      
 (defun real-ensure-gf-using-class--generic-function
        (existing
@@ -1612,6 +1654,7 @@ work during bootstrapping.
 	&key environment (lambda-list nil lambda-list-p)
 	     (generic-function-class 'standard-generic-function gf-class-p)
 	&allow-other-keys)
+  #+copy-&rest-arg (setq all-keys (copy-list all-keys))
   (real-ensure-gf-internal generic-function-class all-keys environment)
   (unless (or (null gf-class-p)
 	      (eq (class-of existing) generic-function-class))
@@ -1629,6 +1672,7 @@ work during bootstrapping.
 	     (generic-function-class 'standard-generic-function)
 	&allow-other-keys)
   (declare (ignore existing))
+  #+copy-&rest-arg (setq all-keys (copy-list all-keys))
   (real-ensure-gf-internal generic-function-class all-keys environment)
   (prog1
       (setf (gdefinition function-specifier)
@@ -1650,7 +1694,7 @@ work during bootstrapping.
 		metatypes
 		arg-info))
     (values (length metatypes) applyp metatypes
-	    (count-if (lambda (x) (neq x t)) metatypes)
+	    (count-if #'(lambda (x) (neq x 't)) metatypes)
 	    arg-info)))
 
 (defun early-make-a-method (class qualifiers arglist specializers initargs doc
@@ -1666,17 +1710,17 @@ work during bootstrapping.
     ;; Note that the use of not symbolp in this call to every should be
     ;; read as 'classp' we can't use classp itself because it doesn't
     ;; exist yet.
-    (if (every (lambda (s) (not (symbolp s))) specializers)
+    (if (every #'(lambda (s) (not (symbolp s))) specializers)
 	(setq parsed specializers
-	      unparsed (mapcar (lambda (s)
-				   (if (eq s t) t (class-name s)))
+	      unparsed (mapcar #'(lambda (s)
+				   (if (eq s 't) 't (class-name s)))
 			       specializers))
 	(setq unparsed specializers
 	      parsed ()))
     (list :early-method		  ;This is an early method dammit!
 	  
-	  (getf initargs :function)
-	  (getf initargs :fast-function)
+	  (getf initargs ':function)
+	  (getf initargs ':fast-function)
 	  
 	  parsed                  ;The parsed specializers.  This is used
 				  ;by early-method-specializers to cache
@@ -1738,7 +1782,7 @@ work during bootstrapping.
 (defun early-method-specializers (early-method &optional objectsp)
   (if (and (listp early-method)
 	   (eq (car early-method) :early-method))
-      (cond ((eq objectsp t)
+      (cond ((eq objectsp 't)
 	     (or (fourth early-method)
 		 (setf (fourth early-method)
 		       (mapcar #'find-class (cadddr (fifth early-method))))))
@@ -1757,6 +1801,7 @@ work during bootstrapping.
 			       specializers
 			       arglist
 			       &rest initargs)
+  #+copy-&rest-arg (setq initargs (copy-list initargs))
   (let* ((gf (ensure-generic-function generic-function-name))
 	 (existing
 	   (dolist (m (early-gf-methods gf))
@@ -1812,7 +1857,7 @@ work during bootstrapping.
       (or (dolist (m (early-gf-methods generic-function))
 	    (when (and (or (equal (early-method-specializers m nil)
 				  specializers)
-			   (equal (early-method-specializers m t)
+			   (equal (early-method-specializers m 't)
 				  specializers))
 		       (equal (early-method-qualifiers m) qualifiers))
 	      (return m)))
@@ -1824,6 +1869,7 @@ work during bootstrapping.
 (defvar *fegf-debug-p* nil)
 
 (defun fix-early-generic-functions (&optional (noisyp *fegf-debug-p*))
+  (setq *fegf-started-p* t)
   (let ((accessors nil))
     ;; Rearrange *early-generic-functions* to speed up fix-early-generic-functions.
     (dolist (early-gf-spec *early-generic-functions*)
@@ -1855,7 +1901,7 @@ work during bootstrapping.
     (dolist (early-gf-spec *early-generic-functions*)
       (when noisyp (format t "~&~S..." early-gf-spec))
       (let* ((gf (gdefinition early-gf-spec))
-	     (methods (mapcar (lambda (early-method)
+	     (methods (mapcar #'(lambda (early-method)
 				  (let ((args (copy-list (fifth early-method))))
 				    (setf (fourth args)
 					  (early-method-specializers early-method t))
@@ -1871,7 +1917,7 @@ work during bootstrapping.
     (dolist (fixup *generic-function-fixups*)
       (let* ((fspec (car fixup))
 	     (gf (gdefinition fspec))
-	     (methods (mapcar (lambda (method)
+	     (methods (mapcar #'(lambda (method)
 				  (let* ((lambda-list (first method))
 					 (specializers (second method))
 					 (method-fn-name (third method))
@@ -1880,7 +1926,7 @@ work during bootstrapping.
 					 (initargs 
 					  (list :function
 						(set-function-name
-						 (lambda (args next-methods)
+						 #'(lambda (args next-methods)
 						     (declare (ignore next-methods))
 						     (apply fn args))
 						 `(call ,fn-name)))))
@@ -1903,7 +1949,7 @@ work during bootstrapping.
 ;;; implemented.
 ;;; 
 (defun parse-defmethod (cdr-of-form)
-  (declare (list cdr-of-form))
+  ;;(declare (values name qualifiers specialized-lambda-list body))
   (let ((name (pop cdr-of-form))
 	(qualifiers ())
 	(spec-ll ()))
@@ -1914,7 +1960,6 @@ work during bootstrapping.
     (values name qualifiers spec-ll cdr-of-form)))
 
 (defun parse-specializers (specializers)
-  (declare (list specializers))
   (flet ((parse (spec)
 	   (let ((result (specializer-from-type spec)))
 	     (if (specializerp result)
@@ -2039,7 +2084,7 @@ work during bootstrapping.
 	       (parse-specialized-lambda-list (cdr arglist))
 	     (values (cons (if (listp arg) (car arg) arg) parameters)
 		     (cons (if (listp arg) (car arg) arg) lambda-list)
-		     (cons (if (listp arg) (cadr arg) t) specializers)
+		     (cons (if (listp arg) (cadr arg) 't) specializers)
 		     (cons (if (listp arg) (car arg) arg) required)))))))
 
 
@@ -2107,14 +2152,14 @@ work during bootstrapping.
 (defmacro with-slots (slots instance &body body)
   (let ((in (gensym)))
     `(let ((,in ,instance))
-       (declare (ignorable ,in))
+       #+cmu (declare (ignorable ,in))
        ,@(let ((instance (if (and (consp instance) (eq (car instance) 'the))
                              (third instance)
                              instance)))
 	   (and (symbolp instance)
                 `((declare (variable-rebinding ,in ,instance)))))
        ,in
-       (symbol-macrolet ,(mapcar (lambda (slot-entry)
+       (symbol-macrolet ,(mapcar #'(lambda (slot-entry)
 				     (let ((variable-name 
 					    (if (symbolp slot-entry)
 						slot-entry
@@ -2128,18 +2173,17 @@ work during bootstrapping.
 				 slots)
 			,@body))))
 
-
 (defmacro with-accessors (slots instance &body body)
   (let ((in (gensym)))
     `(let ((,in ,instance))
-       (declare (ignorable ,in))
+       #+cmu (declare (ignorable ,in))
        ,@(let ((instance (if (and (consp instance) (eq (car instance) 'the))
                              (third instance)
                              instance)))
 	   (and (symbolp instance)
                 `((declare (variable-rebinding ,in ,instance)))))
        ,in
-       (symbol-macrolet ,(mapcar (lambda (slot-entry)
+       (symbol-macrolet ,(mapcar #'(lambda (slot-entry)
 				   (let ((variable-name (car slot-entry))
 					 (accessor-name (cadr slot-entry)))
 				     `(,variable-name

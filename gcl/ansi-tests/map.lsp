@@ -163,123 +163,44 @@
   (map 'cons #'identity '(a b c))
   (a b c))
 
-(deftest map.37
-  (map 'simple-string #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.38
-  (map '(simple-string) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.39
-  (map '(simple-string *) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.40
-  (map '(simple-string 3) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.41
-  (map '(base-string) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.42
-  (map '(base-string *) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.43
-  (map '(base-string 3) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.44
-  (map 'simple-base-string #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.45
-  (map '(simple-base-string) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.46
-  (map '(simple-base-string *) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.47
-  (map '(simple-base-string 3) #'identity '(#\a #\b #\c))
-  "abc")
-
-(deftest map.48
-  :notes (:result-type-element-type-by-subtype)
-  (let ((type '(or (vector t 10) (vector t 5))))
-    (if (subtypep type '(vector t))
-	(equalpt (map type #'identity '(1 2 3 4 5)) #(1 2 3 4 5))
-      t))
-  t)
-
-;;; Error tests
-
 (deftest map.error.1
-  (signals-error-always (map 'symbol #'identity '(a b c)) type-error)
-  t t)
-
-(deftest map.error.1a
-  (signals-error (map 'symbol #'identity '(a b c)) type-error)
-  t)
+  (handler-case (progn (proclaim '(optimize (safety 3)))
+		       (eval '(map 'symbol #'identity '(a b c))))
+		(error () :caught))
+  :caught)
 
 (deftest map.error.2
-  (signals-error (map '(vector * 8) #'identity '(a b c)) type-error)
-  t)
+  (classify-error (map '(vector * 8) #'identity '(a b c)))
+  type-error)
 
 (deftest map.error.3
-  (signals-error (map 'list #'identity '(a b . c)) type-error)
-  t)
+  (classify-error (map 'list #'identity '(a b . c)))
+  type-error)
 
 (deftest map.error.4
-  (signals-error (map) program-error)
-  t)
+  (classify-error (map))
+  program-error)
 
 (deftest map.error.5
-  (signals-error (map 'list) program-error)
-  t)
+  (classify-error (map 'list))
+  program-error)
 
 (deftest map.error.6
-  (signals-error (map 'list #'null) program-error)
-  t)
+  (classify-error (map 'list #'null))
+  program-error)
 
 (deftest map.error.7
-  (signals-error (map 'list #'cons '(a b c d)) program-error)
-  t)
+  (classify-error (map 'list #'cons '(a b c d)))
+  program-error)
 
 (deftest map.error.8
-  (signals-error (map 'list #'cons '(a b c d) '(1 2 3 4) '(5 6 7 8))
-		 program-error)
-  t)
+  (classify-error (map 'list #'cons '(a b c d) '(1 2 3 4) '(5 6 7 8)))
+  program-error)
 
 (deftest map.error.9
-  (signals-error (map 'list #'car '(a b c d)) type-error)
-  t)
+  (classify-error (map 'list #'car '(a b c d)))
+  type-error)
 
-(deftest map.error.10
-  :notes (:result-type-element-type-by-subtype)
-  (let ((type '(or (vector bit) (vector t))))
-    (if (subtypep type 'vector)
-	(eval `(signals-error-always (map ',type #'identity '(1 0 1)) error))
-      (values t t)))
-  t t)
-
-(deftest map.error.11
-  (let ((type '(or (vector t 5) (vector t 10))))
-    (if (subtypep type 'vector)
-	(eval `(signals-error (map ',type #'identity '(1 2 3 4 5 6)) type-error))
-      t))
-  t)
-
-(deftest map.error.12
-  (check-type-error #'(lambda (x) (map 'list #'identity x)) #'sequencep)
-  nil)
-
-(deftest map.error.13
-  (check-type-error #'(lambda (x) (map 'vector #'cons '(a b c d) x)) #'sequencep)
-  nil)
 
 ;;; Test mapping on arrays with fill pointers
 
@@ -323,97 +244,6 @@
     (map 'list #'(lambda (x y) x) '(1 2 3 4 5 6 7 8 9 10) s1))
   (1 2 3 4 5 6 7 8))
 
-;;; Specialized string tests
-
-(deftest map.specialized-string.1
-  (do-special-strings
-   (s "abcde" nil)
-   (let ((s2 (map 'list #'identity s)))
-     (assert (equal s2 '(#\a #\b #\c #\d #\e)))))
-  nil)
-
-(deftest map.specialized-string.2
-  (do-special-strings
-   (s "abcde" nil)
-   (let ((s2 (map 'list #'(lambda (x y) y) '(1 2 3 4 5) s)))
-     (assert (equal s2 '(#\a #\b #\c #\d #\e)))))
-  nil)
-
-(deftest map.specialized-string.3
-  (let ((s (map 'base-string #'identity '(#\a #\b #\c))))
-    (assert (typep s 'base-string))
-    s)
-  "abc")
-
-;;; FIXME: Add tests for building strings of other character types
-
-;;; Special vector types
-
-(deftest map.specialized-vector.1
-  (do-special-integer-vectors
-   (v #(0 1 1 0 0 1) nil)
-   (assert (equal (map 'list #'list v v) '((0 0) (1 1) (1 1) (0 0) (0 0) (1 1)))))
-  nil)
-
-(deftest map.specialized-vector.2
-  (do-special-integer-vectors
-   (v #(1 2 3 4 5 6 7) nil)
-   (assert (equal (map 'list #'identity v) '(1 2 3 4 5 6 7))))
-  nil)
-
-(deftest map.specialized-vector.3
-  (do-special-integer-vectors
-   (v #(-1 -2 -3 -4 -5 -6 -7) nil)
-   (assert (equal (map 'list #'- v) '(1 2 3 4 5 6 7))))
-  nil)
-
-(deftest map.specialized-vector.4
-  (loop for i from 1 to 40
-	for type = `(unsigned-byte ,i)
-	for bound = (ash 1 i)
-	for len = 10
-	for vals = (loop repeat len collect (random i))
-	for result = (map `(vector ,type) #'identity vals)
-	unless (and (= (length result) len)
-		    (every #'eql vals result))
-	collect (list i vals result))
-  nil)
-
-(deftest map.specialized-vector.5
-  (loop for i from 1 to 40
-	for type = `(signed-byte ,i)
-	for bound = (ash 1 i)
-	for len = 10
-	for vals = (loop repeat len collect (- (random i) (/ bound 2)))
-	for result = (map `(vector ,type) #'identity vals)
-	unless (and (= (length result) len)
-		    (every #'eql vals result))
-	collect (list i vals result))
-  nil)
-
-(deftest map.specialized-vector.6
-  (loop for type in '(short-float single-float long-float double-float)
-	for len = 10
-	for vals = (loop for i from 1 to len collect (coerce i type))
-	for result = (map `(vector ,type) #'identity vals)
-	unless (and (= (length result) len)
-		    (every #'eql vals result))
-	collect (list type vals result))
-  nil)
-
-(deftest map.specialized-vector.7
-  (loop for etype in '(short-float single-float long-float double-float
-		       integer rational)
-	for type = `(complex ,etype)
-	for len = 10
-	for vals = (loop for i from 1 to len collect (complex (coerce i etype)
-							      (coerce (- i) etype)))
-	for result = (map `(vector ,type) #'identity vals)
-	unless (and (= (length result) len)
-		    (every #'eql vals result))
-	collect (list type vals result))
-  nil)
-
 ;;; Order of evaluation tests
 
 (deftest map.order.1
@@ -425,7 +255,3 @@
 	  (progn (setf d (incf i)) '(b c d)))
      i a b c d))
   ((a b)(b c)(c d)) 4 1 2 3 4)
-
-;;; Constant folding test
-
-(def-fold-test map.fold.1 (map 'vector #'identity '(a b c)))

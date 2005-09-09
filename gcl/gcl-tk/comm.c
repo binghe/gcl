@@ -51,7 +51,6 @@ fScheck_fd_for_input(fixnum fd,fixnum timeout) {
 
 
 
-
 #define MAX_PACKET 1000
 #define MUST_CONFIRM 2000
 #define OUR_SOCK_MAGIC 0206

@@ -464,11 +464,6 @@
 	   (error "No method on ~S with qualifiers ~:S and specializers ~:S."
 		  generic-function qualifiers specializers)))))
 
-(defmethod find-method ((generic-function standard-generic-function)
-			qualifiers specializers &optional (errorp t))
-  (real-get-method generic-function qualifiers
-		   (parse-specializers specializers) errorp))
-  
 
 ;;;
 ;;; Compute various information about a generic-function's arglist by looking
@@ -1385,19 +1380,14 @@
 	   (arg-info (gf-arg-info generic-function))
 	   (metatypes (arg-info-metatypes arg-info))
 	   (applyp (arg-info-applyp arg-info))
-	   (fmc-arg-info (cons (length metatypes) applyp))
-	   (arglist (if function-p
-			(make-dfun-lambda-list metatypes applyp)
-			(make-fast-method-call-lambda-list metatypes applyp))))
+	   (fmc-arg-info (cons (length metatypes) applyp)))
       (multiple-value-bind
 	  (cfunction constants)
-	  (get-function1 `(lambda
-			    ,arglist
-			    ,@(unless function-p
-				`((declare (ignore .pv-cell. .next-method-call.))))
-			    (locally (declare #.*optimize-speed*)
-				     (let ((emf ,net))
-				       ,(make-emf-call metatypes applyp 'emf))))
+	  (get-function1 (make-dispatch-lambda 
+			  function-p metatypes applyp
+			  `((locally (declare #.*optimize-speed*)
+			      (let ((emf ,net))
+				,(make-emf-call metatypes applyp 'emf)))))
 			 #'net-test-converter
 			 #'net-code-converter
 			 #'(lambda (form)

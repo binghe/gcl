@@ -48,14 +48,16 @@
 ;;; Error tests
 
 (deftest array-dimension.error.1
-  (signals-error (array-dimension) program-error)
-  t)
+  (classify-error (array-dimension))
+  program-error)
 
 (deftest array-dimension.error.2
-  (signals-error (array-dimension #(a b c)) program-error)
-  t)
+  (classify-error (array-dimension #(a b c)))
+  program-error)
 
 (deftest array-dimension.error.3
-  (signals-error (array-dimension #(a b c) 0 nil)
-		 program-error)
-  t)
+  (classify-error (array-dimension #(a b c) 0 nil))
+  program-error)
+
+
+

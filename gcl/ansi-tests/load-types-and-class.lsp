@@ -12,11 +12,4 @@
 (load "subtypep-member.lsp")
 (load "subtypep-eql.lsp")
 (load "subtypep-array.lsp")
-(load "subtypep-function.lsp")
-(load "subtypep-complex.lsp")
 
-(load "deftype.lsp")
-(load "standard-generic-function.lsp")
-(load "type-of.lsp")
-(load "typep.lsp")
-(load "class-precedence-lists.lsp")

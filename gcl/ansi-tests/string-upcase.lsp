@@ -80,40 +80,6 @@
    ("abcde" "abcdE"))
   "abcde")
 
-(deftest string-upcase.11
-  :notes (:nil-vectors-are-strings)
-  (string-upcase (make-array '(0) :element-type nil))
-  "")
-
-(deftest string-upcase.12
-  (loop for type in '(standard-char base-char character)
-	for s = (make-array '(10) :element-type type
-			    :fill-pointer 5
-			    :initial-contents "aB0cDefGHi")
-	collect (list s (string-upcase s)))
-  (("aB0cD" "AB0CD") ("aB0cD" "AB0CD") ("aB0cD" "AB0CD")))
-
-
-(deftest string-upcase.13
-  (loop for type in '(standard-char base-char character)
-	for s0 = (make-array '(10) :element-type type
-			     :initial-contents "zZaB0cDefG")
-	for s = (make-array '(5) :element-type type
-			    :displaced-to s0
-			    :displaced-index-offset 2)
-	collect (list s (string-upcase s)))
-  (("aB0cD" "AB0CD") ("aB0cD" "AB0CD") ("aB0cD" "AB0CD")))
-
-(deftest string-upcase.14
-  (loop for type in '(standard-char base-char character)
-	for s = (make-array '(5) :element-type type
-			    :adjustable t
-			    :initial-contents "aB0cD")
-	collect (list s (string-upcase s)))
-  (("aB0cD" "AB0CD") ("aB0cD" "AB0CD") ("aB0cD" "AB0CD")))
-
-;;; Order of evaluation tests
-
 (deftest string-upcase.order.1
   (let ((i 0) a b c (s (copy-seq "abcdef")))
     (values
@@ -134,33 +100,30 @@
      i a b c))
   "aBCDef" 3 1 2 3)
 
-;;; Const fold tests
-
-(def-fold-test string-upcase.fold.1 (string-upcase "abcde"))
   
-;;; Error tests
+;;; Error cases
 
 (deftest string-upcase.error.1
-  (signals-error (string-upcase) program-error)
-  t)
+  (classify-error (string-upcase))
+  program-error)
 
 (deftest string-upcase.error.2
-  (signals-error (string-upcase (copy-seq "abc") :bad t) program-error)
-  t)
+  (classify-error (string-upcase (copy-seq "abc") :bad t))
+  program-error)
 
 (deftest string-upcase.error.3
-  (signals-error (string-upcase (copy-seq "abc") :start) program-error)
-  t)
+  (classify-error (string-upcase (copy-seq "abc") :start))
+  program-error)
 
 (deftest string-upcase.error.4
-  (signals-error (string-upcase (copy-seq "abc") :bad t
-				      :allow-other-keys nil) program-error)
-  t)
+  (classify-error (string-upcase (copy-seq "abc") :bad t
+				      :allow-other-keys nil))
+  program-error)
 
 (deftest string-upcase.error.5
-  (signals-error (string-upcase (copy-seq "abc") :end) program-error)
-  t)
+  (classify-error (string-upcase (copy-seq "abc") :end))
+  program-error)
 
 (deftest string-upcase.error.6
-  (signals-error (string-upcase (copy-seq "abc") 1 2) program-error)
-  t)
+  (classify-error (string-upcase (copy-seq "abc") 1 2))
+  program-error)

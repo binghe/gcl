@@ -88,8 +88,8 @@
   1 #*011001 3 1 2 3)
 
 (deftest sbit.error.1
-  (signals-error (sbit) program-error)
-  t)
+  (classify-error (sbit))
+  program-error)
 
   
   

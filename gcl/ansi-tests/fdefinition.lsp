@@ -8,49 +8,28 @@
 ;;; Error cases
 
 (deftest fdefinition.error.1
-  (signals-error (fdefinition) program-error)
-  t)
+  (classify-error (fdefinition))
+  program-error)
 
 (deftest fdefinition.error.2
-  (signals-error (fdefinition 'cons nil) program-error)
-  t)
+  (classify-error (fdefinition 'cons nil))
+  program-error)
 
 (deftest fdefinition.error.3
-  (let ((v (gensym)))
-    (eval `(signals-error (fdefinition ',v) undefined-function
-			  :name ,v)))
-  t)
+  (classify-error (fdefinition (gensym)))
+  undefined-function)
 
 (deftest fdefinition.error.4
-  (check-type-error #'fdefinition #'(lambda (x) (typep x '(or symbol (cons (eql setf) (cons symbol null))))))
-  nil)
+  (classify-error (fdefinition 10))
+  type-error)
 
-;;; (deftest fdefinition.error.5
-;;;  (let ((fn `(setf ,(gensym))))
-;;;    (eval `(signals-error (fdefinition ',fn) undefined-function
-;;;			  :name ,fn)))
-;;;  t)
+(deftest fdefinition.error.5
+  (classify-error (fdefinition (list 'setf (gensym))))
+  undefined-function)
 
 (deftest fdefinition.error.6
-  (signals-error (locally (fdefinition 10) t) type-error)
-  t)
-
-(deftest fdefinition.error.7
-  (check-type-error #'fdefinition (constantly nil) '((setf) (setf . foo) (setf foo . bar) (setf foo bar)))
-  nil)
-
-(deftest fdefinition.error.8
-  (loop for x in *mini-universe*
-	unless (symbolp x)
-	nconc
-	(handler-case
-	 (list x (fdefinition `(setf ,x)))
-	 (type-error (c)
-		     (assert (not (typep (type-error-datum c)
-					 (type-error-expected-type c))))
-		     nil)
-	 (error (c) (list (list x c)))))
-  nil)
+  (classify-error (locally (fdefinition 10) t))
+  type-error)
 
 ;;; Non-error cases
 

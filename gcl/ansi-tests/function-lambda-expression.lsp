@@ -21,14 +21,6 @@
 		(notnot (second ret-vals))))))
   3 t)
 
-;;; Verify that it doesn't barf on generic functions
-(deftest function-lambda-expression.3
-  (length
-   (multiple-value-list
-    (function-lambda-expression
-     #'meaningless-user-generic-function-for-universe)))
-  3)
-
 (deftest function-lambda-expression.order.1
   (let ((i 0))
     (function-lambda-expression (progn (incf i) #'cons))
@@ -36,9 +28,15 @@
   1)
 
 (deftest function-lambda-expression.error.1
-  (signals-error (function-lambda-expression) program-error)
-  t)
+  (classify-error (function-lambda-expression))
+  program-error)
 
 (deftest function-lambda-expression.error.2
-  (signals-error (function-lambda-expression #'cons nil) program-error)
-  t)
+  (classify-error (function-lambda-expression #'cons nil))
+  program-error)
+
+
+
+
+
+

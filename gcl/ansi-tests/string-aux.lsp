@@ -5,9 +5,6 @@
 
 (in-package :cl-test)
 
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (compile-and-load "random-aux.lsp"))
-
 (defun my-string-compare (string1 string2 comparison
 				  &key (start1 0) end1 (start2 0) end2 case
 				  &aux
@@ -58,8 +55,8 @@
 	  i1
 	nil)))
     (t
-     (let ((c1 (my-aref string1 i1))
-	   (c2 (my-aref string2 i2)))
+     (let ((c1 (char string1 i1))
+	   (c2 (char string2 i2)))
        (cond
 	((funcall equal-fn c1 c2))
 	(t ;; mismatch found -- what kind?
@@ -70,14 +67,9 @@
 
 (defun make-random-string-compare-test (n)
   (let* ((len (random n))
-	 ;; Maximum lengths of the two strings
+	 ;; Lengths of the two strings
 	 (len1 (if (or (coin) (= len 0)) len (+ len (random len))))
 	 (len2 (if (or (coin) (= len 0)) len (+ len (random len))))
-	 (s1 (make-random-string len1))
-	 (s2 (make-random-string len2))
-	 ;; Actual lengths of the strings
-	 (len1 (length s1))
-	 (len2 (length s2))
 	 ;; Lengths of the parts of the strings to be matched
 	 (sublen1 (if (or (coin) (= len1 0)) (min len1 len2) (random len1)))
 	 (sublen2 (if (or (coin) (= len2 0)) (min len2 sublen1) (random len2)))
@@ -89,7 +81,9 @@
 	 (start2 (if (coin 3) 0
 		   (max 0 (min (1- len2) (random (- len2 sublen2 -1))))))
 	 (end2 (+ start2 sublen2))
-	 )
+	 ;; generate the strings
+	 (s1 (make-random-string len1))
+	 (s2 (make-random-string len2)))
     #|
     (format t "len = ~A, len1 = ~A, len2 = ~A, sublen1 = ~A, sublen2 = ~A~%"
 	    len len1 len2 sublen1 sublen2)
@@ -98,9 +92,7 @@
     (format t "s1 = ~S, s2 = ~S~%" s1 s2)
     |#
     ;; Sometimes we want them to have a common prefix
-    (when (and (coin)
-	       (equal (array-element-type s1)
-		      (array-element-type s2)))
+    (when (coin)
       (if (<= sublen1 sublen2)
 	  (setf (subseq s2 start2 (+ start2 sublen1))
 		(subseq s1 start1 (+ start1 sublen1)))
@@ -130,7 +122,7 @@
 	count
 	(multiple-value-bind (s1 s2 args)
 	    (make-random-string-compare-test n)
-	  ;; (format t "Strings: ~s ~s - Args = ~S~%" s1 s2 args)
+	  ;; (format t "Args = ~S~%" args)
 	  (let ((x (apply (case comparison
 			    (< (if case #'string-lessp #'string<))
 			    (<= (if case #'string-not-greaterp
@@ -146,10 +138,28 @@
 	     (or (eql x y)
 		 (and x y (eqt comparison '=))))))))
 
+(defun make-random-string (n)
+  (let ((s (random-case
+	    (make-string n)
+	    (make-array n :element-type 'character
+			:initial-element #\a)
+	    (make-array n :element-type 'standard-char
+			:initial-element #\a)
+	    (make-array n :element-type 'base-char
+			:initial-element #\a))))
+    (if (coin)
+	(dotimes (i n)
+	  (setf (char s i) (elt #(#\a #\b #\A #\B) (random 4))))
+      (dotimes (i n)
+	(dotimes (i n)
+	  (setf (char s i)
+		(or (code-char (random 256))
+		    (elt "abcdefghijklmnopqrstuvwyxzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+			 (random 62)))))))
+    s))
+
 (defun string-all-the-same (s)
   (let ((len (length s)))
     (or (= len 0)
-	(let ((c (my-aref s 0)))
-	  (loop for i below len
-		for d = (my-aref s i)
-		always (eql c d))))))
+	(let ((c (char s 0)))
+	  (loop for d across s always (eql c d))))))

@@ -507,12 +507,6 @@
      ))
   #\2 #\4 #\1 #\5)
 
-(deftest find-if-string.20
-  (do-special-strings
-   (s "123a456" nil)
-   (assert (eql (find-if #'alpha-char-p s) #\a)))
-  nil)
-
 ;;; Keyword tests
 
 (deftest find-if.allow-other-keys.1
@@ -543,58 +537,64 @@
 ;;; Error tests
 
 (deftest find-if.error.1
-  (check-type-error #'(lambda (x) (find-if #'null x)) #'(lambda (x) (typep x 'sequence)))
-  nil)
+  (classify-error (find-if #'null 'b))
+  type-error)
+
+(deftest find-if.error.2
+  (classify-error (find-if #'identity 10))
+  type-error)
+
+(deftest find-if.error.3
+  (classify-error (find-if '1+ 1.4))
+  type-error)
 
 (deftest find-if.error.4
-  (signals-error (find-if 'null '(a b c . d)) type-error)
-  t)
+  (classify-error (find-if 'null '(a b c . d)))
+  type-error)
 
 (deftest find-if.error.5
-  (signals-error (find-if) program-error)
-  t)
+  (classify-error (find-if))
+  program-error)
 
 (deftest find-if.error.6
-  (signals-error (find-if #'null) program-error)
-  t)
+  (classify-error (find-if #'null))
+  program-error)
 
 (deftest find-if.error.7
-  (signals-error (find-if #'null nil :bad t) program-error)
-  t)
+  (classify-error (find-if #'null nil :bad t))
+  program-error)
 
 (deftest find-if.error.8
-  (signals-error (find-if #'null nil :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (find-if #'null nil :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest find-if.error.9
-  (signals-error (find-if #'null nil 1 1) program-error)
-  t)
+  (classify-error (find-if #'null nil 1 1))
+  program-error)
 
 (deftest find-if.error.10
-  (signals-error (find-if #'null nil :key) program-error)
-  t)
+  (classify-error (find-if #'null nil :key))
+  program-error)
 
 (deftest find-if.error.11
-  (signals-error (locally (find-if #'null 'b) t) type-error)
-  t)
+  (classify-error (locally (find-if #'null 'b) t))
+  type-error)
 
 (deftest find-if.error.12
-  (signals-error (find-if #'cons '(a b c)) program-error)
-  t)
+  (classify-error (find-if #'cons '(a b c)))
+  program-error)
 
 (deftest find-if.error.13
-  (signals-error (find-if #'car '(a b c)) type-error)
-  t)
+  (classify-error (find-if #'car '(a b c)))
+  type-error)
 
 (deftest find-if.error.14
-  (signals-error (find-if #'identity '(a b c) :key #'cons) program-error)
-  t)
+  (classify-error (find-if #'identity '(a b c) :key #'cons))
+  program-error)
 
 (deftest find-if.error.15
-  (signals-error (find-if #'identity '(a b c) :key #'car)
-		 type-error)
-  t)
+  (classify-error (find-if #'identity '(a b c) :key #'car))
+  type-error)
 
 ;;; Order of evaluation tests
 
@@ -607,7 +607,7 @@
   a 2 1 2)
 
 (deftest find-if.order.2
-  (let ((i 0) a b c d e f)
+  (let ((i 0) a b c d e f g)
     (values
      (find-if (progn (setf a (incf i)) #'null)
 	      (progn (setf b (incf i)) '(nil nil nil a nil nil))
@@ -621,7 +621,7 @@
 
 
 (deftest find-if.order.3
-  (let ((i 0) a b c d e f)
+  (let ((i 0) a b c d e f g)
     (values
      (find-if (progn (setf a (incf i)) #'null)
 	      (progn (setf b (incf i)) '(nil nil nil a nil nil))

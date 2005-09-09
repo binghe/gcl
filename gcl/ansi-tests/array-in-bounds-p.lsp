@@ -147,5 +147,6 @@
 ;;; Error tests
 
 (deftest array-in-bounds-p.error.1
-  (signals-error (array-in-bounds-p) program-error)
-  t)
+  (classify-error (array-in-bounds-p))
+  program-error)
+

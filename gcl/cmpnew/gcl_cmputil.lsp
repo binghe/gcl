@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPUTIL  Miscellaneous Functions.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -76,7 +75,7 @@
     (terpri))
   nil)
 
-(defvar *suppress-compiler-notes* t)
+(defvar *suppress-compiler-notes* nil)
 
 (defun cmpnote (string &rest args &aux (*print-case* :upcase))
   (unless *suppress-compiler-notes* 

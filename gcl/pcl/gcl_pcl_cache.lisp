@@ -107,9 +107,6 @@
     (setf (cache-vector-lock-count cache-vector) 0))
   cache-vector)
 
-;; FIXME 64
-(defconstant rand-base (- (ash 1 31) 1))
-
 (defmacro modify-cache (cache-vector &body body)
   `(without-interrupts
      (multiple-value-prog1
@@ -117,7 +114,7 @@
        (let ((old-count (cache-vector-lock-count ,cache-vector)))
 	 (declare (type non-negative-fixnum old-count))
 	 (setf (cache-vector-lock-count ,cache-vector)
-	       (if (= old-count rand-base)
+	       (if (= old-count most-positive-fixnum)
 		   1 (the non-negative-fixnum (1+ old-count))))))))
 
 (deftype field-type ()
@@ -130,7 +127,7 @@
   ;;(expt 2 (ceiling (log x 2)))
   (the non-negative-fixnum (ash 1 (integer-length (1- x)))))
 
-(defconstant *nkeys-limit* 255)
+(defconstant *nkeys-limit* 256)
 )
 
 (defstruct (cache
@@ -139,7 +136,7 @@
 	     (:copier copy-cache-internal))
   (owner nil)
   (nkeys 1 :type (integer 1 #.*nkeys-limit*))
-  (valuep nil :type boolean)
+  (valuep nil :type (member nil t))
   (nlines 0 :type non-negative-fixnum)
   (field 0 :type field-type)
   (limit-fn #'default-limit-fn :type function)
@@ -258,7 +255,7 @@
 ;;; most-positive-fixnum is all-ones.  -- Ram
 ;;;
 (defconstant wrapper-cache-number-length
-	     (- (integer-length rand-base)
+	     (- (integer-length most-positive-fixnum)
 		wrapper-cache-number-adds-ok))
 
 (defconstant wrapper-cache-number-mask
@@ -273,7 +270,7 @@
     (loop
       (setq n
 	    (logand wrapper-cache-number-mask
-		    (random rand-base *get-wrapper-cache-number*)))
+		    (random most-positive-fixnum *get-wrapper-cache-number*)))
       (unless (zerop n) (return n)))))
 
 
@@ -1397,7 +1394,7 @@
       (declare (type non-negative-fixnum location limit))
       (when (location-reserved-p location)
 	(setq location (next-location location)))
-      (dotimes (i (the non-negative-fixnum (1+ limit)))
+      (dotimes (i (1+ limit))
 	(when (location-matches-wrappers-p location wrappers)
 	  (return-from probe-cache (or (not (valuep))
 				       (location-value location))))

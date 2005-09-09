@@ -124,12 +124,6 @@
 
 (defmacro instance-ref (slots index)
   `(svref ,slots ,index))
-
-(si::putprop 'std-instance '(lambda nil `(or structure (and standard-object (not (funcallable-standard-object))))) 'si::deftype-definition)
-
-;(defmacro std-instance-p (object)
-;  `(or (typep ,object 'si::instance) (structurep ,object)))
-;  `(or (typep ,object 'si::instance) (%std-instance-p ,object)))
 )
 
 #+new-kcl-wrapper

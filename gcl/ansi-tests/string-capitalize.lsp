@@ -84,40 +84,6 @@
    ("ABCDEF" "ABCDEF"))
   "ABCDEF")
 
-(deftest string-capitalize.11
-  :notes (:nil-vectors-are-strings)
-  (string-capitalize (make-array '(0) :element-type nil))
-  "")
-
-(deftest string-capitalize.12
-  (loop for type in '(standard-char base-char character)
-	for s = (make-array '(10) :element-type type
-			    :fill-pointer 5
-			    :initial-contents "aB0cDefGHi")
-	collect (list s (string-capitalize s)))
-  (("aB0cD" "Ab0cd") ("aB0cD" "Ab0cd") ("aB0cD" "Ab0cd")))
-
-
-(deftest string-capitalize.13
-  (loop for type in '(standard-char base-char character)
-	for s0 = (make-array '(10) :element-type type
-			     :initial-contents "zZaB0cDefG")
-	for s = (make-array '(5) :element-type type
-			    :displaced-to s0
-			    :displaced-index-offset 2)
-	collect (list s (string-capitalize s)))
-  (("aB0cD" "Ab0cd") ("aB0cD" "Ab0cd") ("aB0cD" "Ab0cd")))
-
-(deftest string-capitalize.14
-  (loop for type in '(standard-char base-char character)
-	for s = (make-array '(5) :element-type type
-			    :adjustable t
-			    :initial-contents "aB0cD")
-	collect (list s (string-capitalize s)))
-  (("aB0cD" "Ab0cd") ("aB0cD" "Ab0cd") ("aB0cD" "Ab0cd")))
-
-;;; Order of evaluation tests
-
 (deftest string-capitalize.order.1
   (let ((i 0) a b c (s (copy-seq "abcdef")))
     (values
@@ -138,31 +104,29 @@
      i a b c))
   "aBcdef" 3 1 2 3)
 
-(def-fold-test string-capitalize.fold.1 (string-capitalize "ABCDE"))
-
 ;;; Error cases
 
 (deftest string-capitalize.error.1
-  (signals-error (string-capitalize) program-error)
-  t)
+  (classify-error (string-capitalize))
+  program-error)
 
 (deftest string-capitalize.error.2
-  (signals-error (string-capitalize (copy-seq "abc") :bad t) program-error)
-  t)
+  (classify-error (string-capitalize (copy-seq "abc") :bad t))
+  program-error)
 
 (deftest string-capitalize.error.3
-  (signals-error (string-capitalize (copy-seq "abc") :start) program-error)
-  t)
+  (classify-error (string-capitalize (copy-seq "abc") :start))
+  program-error)
 
 (deftest string-capitalize.error.4
-  (signals-error (string-capitalize (copy-seq "abc") :bad t
-				      :allow-other-keys nil) program-error)
-  t)
+  (classify-error (string-capitalize (copy-seq "abc") :bad t
+				      :allow-other-keys nil))
+  program-error)
 
 (deftest string-capitalize.error.5
-  (signals-error (string-capitalize (copy-seq "abc") :end) program-error)
-  t)
+  (classify-error (string-capitalize (copy-seq "abc") :end))
+  program-error)
 
 (deftest string-capitalize.error.6
-  (signals-error (string-capitalize (copy-seq "abc") 1 2) program-error)
-  t)
+  (classify-error (string-capitalize (copy-seq "abc") 1 2))
+  program-error)

@@ -70,29 +70,6 @@
 
 (deftest cond.14 (cond (t (values))))
 
-;;; No implicit tagbody
-(deftest cond.15
-  (block done
-    (tagbody
-     (cond (t (go 10)
-	      10
-	      (return-from done 'bad)))
-     10
-     (return-from done 'good)))
-  good)
 
-(deftest cond.error.1
-  (signals-error (funcall (macro-function 'cond))
-		 program-error)
-  t)
 
-(deftest cond.error.2
-  (signals-error (funcall (macro-function 'cond) '(cond))
-		 program-error)
-  t)
-
-(deftest cond.error.3
-  (signals-error (funcall (macro-function 'cond) '(cond) nil nil)
-		 program-error)
-  t)
 

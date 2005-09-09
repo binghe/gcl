@@ -28,9 +28,6 @@
     base-char
     character
     t
-    ,@(loop for i from 0 to 32 collect `(eql ,(ash 1 i)))
-    ,@(loop for i from 0 to 32 collect `(eql ,(1- (ash 1 i))))
-    (eql -1)
     ,@(loop for i from 0 to 32
 	    collect `(integer 0 (,(ash 1 i))))
     symbol
@@ -55,9 +52,8 @@
 (deftest upgraded-array-element-type.4
   (loop for type in *upgraded-array-types-to-check*
 	for upgraded-type = (upgraded-array-element-type type)
-	unless (empirical-subtypep type upgraded-type)
-	collect (list type upgraded-type))
-  nil)
+	always (empirical-subtypep type upgraded-type))
+  t)
 
 ;; Include an environment (NIL, denoting the default null lexical
 ;; environment)
@@ -65,9 +61,8 @@
 (deftest upgraded-array-element-type.5
   (loop for type in *upgraded-array-types-to-check*
 	for upgraded-type = (upgraded-array-element-type type nil)
-	unless (empirical-subtypep type upgraded-type)
-	collect (list type upgraded-type))
-  nil)
+	always (empirical-subtypep type upgraded-type))
+  t)
 
 (deftest upgraded-array-element-type.6
   (macrolet
@@ -92,35 +87,22 @@
 		collect (list type type2))))
   nil)
 
-;;; Tests that if Tx is a subtype of Ty, then UAET(Tx) is a subtype
-;;;  of UAET(Ty)  (see section 15.1.2.1, paragraph 3)
-
-(deftest upgraded-array-element-type.8
-  (let ((upgraded-types (mapcar #'upgraded-array-element-type
-				*upgraded-array-types-to-check*)))
-    (loop for type1 in *upgraded-array-types-to-check*
-	  for uaet1 in upgraded-types
-	  append
-	  (loop for type2 in *upgraded-array-types-to-check*
-		for uaet2 in upgraded-types
-		when (and (subtypep type1 type2)
-			(not (empirical-subtypep uaet1 uaet2)))
-		collect (list type1 type2))))
-  nil)
-
 ;;; Tests of upgrading NIL (it should be type equivalent to NIL)
 
 (deftest upgraded-array-element-type.nil.1
   (let ((uaet-nil (upgraded-array-element-type nil)))
-    (check-predicate (typef `(not ,uaet-nil))))
+    (loop for e in *universe*
+	  when (typep e uaet-nil)
+	  collect e))
   nil)
+		   
     
 ;;; Error tests
 
 (deftest upgraded-array-element-type.error.1
-  (signals-error (upgraded-array-element-type) program-error)
-  t)
+  (classify-error (upgraded-array-element-type))
+  program-error)
 
 (deftest upgraded-array-element-type.error.2
-  (signals-error (upgraded-array-element-type 'bit nil nil) program-error)
-  t)
+  (classify-error (upgraded-array-element-type 'bit nil nil))
+  program-error)

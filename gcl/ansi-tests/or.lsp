@@ -41,14 +41,8 @@
   (or (values nil 1 2) (values 1 nil 2))
   1 nil 2)
 
-(deftest or.error.1
-  (signals-error (funcall (macro-function 'or)) program-error)
-  t)
 
-(deftest or.error.2
-  (signals-error (funcall (macro-function 'or) '(or)) program-error)
-  t)
 
-(deftest or.error.3
-  (signals-error (funcall (macro-function 'or) '(or) nil nil) program-error)
-  t)
+
+  
+

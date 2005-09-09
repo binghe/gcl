@@ -39,14 +39,6 @@ Boston, MA 02111-1307, USA.
 #include "cyglacks.h"
 #endif
 
-#if 0
-#ifdef __MINGW32__
-#  define SEPARATE_BSS_SECTION
-#endif
-#endif
-
-extern void sigint(void);
-
 /* Include relevant definitions from IMAGEHLP.H, which can be found
    in \\win32sdk\mstools\samples\image\include\imagehlp.h. */
 
@@ -143,7 +135,7 @@ _start (void)
 {
   extern void mainCRTStartup (void);
 
-#if 1
+#if 0
   /* Give us a way to debug problems with crashes on startup when
      running under the MSVC profiler. */
   if (GetEnvironmentVariable ("EMACS_DEBUG", NULL, 0) > 0)
@@ -661,32 +653,26 @@ copy_executable_and_dump_data_section (file_data *p_infile,
   data_va = data_start_va;
     
   size = (DWORD) data_file - (DWORD) p_outfile->file_base;
-#if 0  
   printf ("Copying executable up to data section...\n");
   printf ("\t0x%08x Offset in input file.\n", 0);
   printf ("\t0x%08x Offset in output file.\n", 0);
   printf ("\t0x%08lx Size in bytes.\n", size);
-#endif  
   memcpy (p_outfile->file_base, p_infile->file_base, size);
   
   size = data_size;
-#if 0  
   printf ("Dumping .data section...\n");
   printf ("\t0x%p Address in process.\n", data_va);
   printf ("\t0x%08x Offset in output file.\n", 
 	  data_file - p_outfile->file_base);
   printf ("\t0x%08lx Size in bytes.\n", size);
-#endif  
   memcpy (data_file, data_va, size);
   
   index = (DWORD) data_file + size - (DWORD) p_outfile->file_base;
   size = p_infile->size - index;
-#if 0  
   printf ("Copying rest of executable...\n");
   printf ("\t0x%08lx Offset in input file.\n", index);
   printf ("\t0x%08lx Offset in output file.\n", index);
   printf ("\t0x%08lx Size in bytes.\n", size);
-#endif  
   memcpy ((char *) p_outfile->file_base + index, 
 	  (char *) p_infile->file_base + index, size);
 }
@@ -703,12 +689,10 @@ dump_bss_and_heap (file_data *p_infile, file_data *p_outfile)
     size = get_committed_heap_size ();
     heap_data = get_heap_start ();
 
-#if 0    
     printf ("\t0x%p Heap start in process.\n", heap_data);
     printf ("\t0x%08lx Heap offset in executable.\n", index);
     printf ("\t0x%08lx Heap size in bytes.\n", size);
-#endif
-    
+
     memcpy ((PUCHAR) p_outfile->file_base + index, heap_data, size);
 
     printf ("Dumping .bss into executable...\n");
@@ -716,13 +700,10 @@ dump_bss_and_heap (file_data *p_infile, file_data *p_outfile)
     index += size;
     size = bss_size;
     bss_data = bss_start;
-#if 0    
+    
     printf ("\t0x%p BSS start in process.\n", bss_data);
     printf ("\t0x%08lx BSS offset in executable.\n", index);
     printf ("\t0x%08lx BSS size in bytes.\n", size);
-    printf ("\t0x%08lx file base.\n", p_outfile->file_base );
-    printf ("\t0x%08lx file base + index.\n", p_outfile->file_base + index );
-#endif    
     memcpy ((char *) p_outfile->file_base + index, bss_data, size);
 }
 
@@ -762,12 +743,7 @@ read_in_bss (char *filename)
       i = GetLastError ();
       exit (1);
     }
-#if 0  
-    printf ("\t0x%p BSS start in memory.\n", bss_start);
-    printf ("\t0x%08lx BSS offset in saved executable.\n", index);
-    printf ("\t0x%08lx BSS size in bytes.\n", bss_size);
-    printf ("\t0x%08lx bytes read.\n", n_read);
-#endif
+
   CloseHandle (file);
 }
 
@@ -802,13 +778,6 @@ map_in_heap (char *filename)
   file_base = MapViewOfFileEx (file_mapping, FILE_MAP_COPY, 0, 
 			       heap_index_in_executable, size,
 			       get_heap_start ());
-#if 0  
-    printf ("\t0x%p Heap start in memory.\n", get_heap_start() );
-    printf ("\t0x%08lx Heap offset in executable.\n", heap_index_in_executable);
-    printf ("\t0x%08lx Heap size in bytes.\n", size);
-    printf ("\t0x%08lx file base.\n", file_base);
-#endif
-  
   if (file_base != 0) 
     {
       return;
@@ -871,10 +840,10 @@ Boston, MA 02111-1307, USA.
 /*
 
 */
-
+/* #include "lisp.h" */  /* for VALMASK */
+#define VALMASK -1
 /* try for 500 MB of address space */
-#define VALBITS 31
-#define VALMASK ((((unsigned int) 1) << VALBITS) - 1)
+#define VALBITS 29
 
 /* This gives us the page size and the size of the allocation unit on NT.  */
 SYSTEM_INFO sysinfo_cache;
@@ -987,18 +956,34 @@ allocate_heap (void)
      the region below the 256MB line for our malloc arena - 229MB is
      still a pretty decent arena to play in!  */
 
-  unsigned long base = DBEGIN /*0x01B00000*/;  /*  27MB */
-  unsigned long end  = 2*PAGESIZE*MAXPAGE;
+  unsigned long base = DBEGIN;   /*  27MB */
+  /*   unsigned long base = 0x01B00000; */  /*  27MB */
+  unsigned long end  = 2*PAGESIZE*MAXPAGE; /* 256MB */
   void *ptr = NULL;
 
+#define NTHEAP_PROBE_BASE 0
+#if NTHEAP_PROBE_BASE /* This is never normally defined */
+  /* Macros in gbc.c depend on DBEGIN being divisible by 32 */
+  /* Try various addresses looking for one the kernel will let us have.  */
+  while (!ptr && (base < end))
+    {
+      reserved_heap_size = end - base;
+      ptr = VirtualAlloc ((void *) base,
+			  get_reserved_heap_size (),
+			  MEM_RESERVE,
+			  PAGE_NOACCESS);
+      base += 0x00100000;  /* 1MB increment */
+      DBEGIN = (DBEGIN_TY) ptr;
+    }
+#else
   reserved_heap_size = end - base;
   ptr = VirtualAlloc ((void *) base,
 		      get_reserved_heap_size (),
 		      MEM_RESERVE,
 		      PAGE_NOACCESS);
-  if ( 0 == ptr ) {
-    FEerror ( "Can't allocate storage.", 1, "");
-  }
+  DBEGIN = (DBEGIN_TY) ptr;
+#endif
+
   return ptr;
 }
 

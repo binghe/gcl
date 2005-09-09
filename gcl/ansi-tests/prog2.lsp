@@ -34,15 +34,3 @@
      (prog2 (incf x (1+ x)) (incf x (+ 2 x)) (incf x 100))
      x))
   8 108)
-
-;;; Test that prog2 doesn't have a tagbody
-
-(deftest prog2.7
-  (block nil
-    (tagbody
-     (return (prog2 17 'bad (go 10) 10))
-     10
-     (return 'good)))
-  good)
-
-(def-macro-test prog2.error.1 (prog2 nil nil))

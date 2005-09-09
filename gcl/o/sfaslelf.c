@@ -23,12 +23,13 @@ License for more details.
  */
 
 
-#if  !defined(__linux__) && !defined(__FreeBSD__)
+#ifndef __linux__
 #define ELF_TARGET_SPARC 1
 #endif
 
 /* #include "include.h" */
 #include "ext_sym.h"
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -196,7 +197,7 @@ fasload(faslfile)
    file = fileno(fp);
 
    if (fstat (file, &stat_buf) == -1)
-     FEerror ("Can't fstat(~a): errno %d\n", 2,faslfile,0);
+     FEerror ("Can't fstat(~a): errno %d\n", 1,faslfile);
 
 
    if (use_mmap) {
@@ -321,16 +322,16 @@ fasload(faslfile)
 	   int k;
 	   char *rel = (char *) base +   shp->sh_offset;
 
-	   if (symtab_index != shp->sh_link)
-	     FEerror("unexpected symbol table used",0);
+	     if (symtab_index != shp->sh_link)
+	       FEerror("unexpected symbol table used",0);
 	   the_start = start_address + section[shp->sh_info].start;
-
+	 
 	   for (k= 0; k< shp->sh_size ; k+= shp->sh_entsize) 
 	     relocate(symbol_table,(Elf32_Rela *)(rel + k),shp->sh_type);
 
 	 }
 
-     }
+       }
 
    }
 

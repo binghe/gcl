@@ -136,7 +136,3 @@
   `(HANDLER-CASE (PROGN ,@FORMS)
      (ERROR (CONDITION) (VALUES NIL CONDITION))))
 
-;#+pcl
-;(defun conditions::find-class-no-error (object)
-;  (ignore-errors (find-class object)))
- 

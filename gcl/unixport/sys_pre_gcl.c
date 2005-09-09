@@ -16,8 +16,8 @@ void gcl_init_or_load1 (void (*)(void),char *);
   char b[200];\
   \
   if (snprintf(b,sizeof(b),"ar x %-*.*slibpre_gcl.a %s.o",\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
 		sSAsystem_directoryA->s.s_dbind->st.st_self,#a)<=0)\
     error("Cannot unpack module " #a "o\n");\
   if (system(b)) \
@@ -47,8 +47,8 @@ load1(x)
    char b[200];\
    \
    if (snprintf(b,sizeof(b),"%-*.*s%s",\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
 		sSAsystem_directoryA->s.s_dbind->st.st_self,a)<=0)\
      error("Cannot append system directory\n");\
    load1(b);\
@@ -78,36 +78,29 @@ gcl_init_system(object no_init)
   if (type_of(no_init)!=t_symbol)
     error("Supplied no_init is not of type symbol\n");
 
-  lsp_init("../lsp/gcl_mislib.lsp");
   lsp_init("../lsp/gcl_predlib.lsp");
   lsp_init("../lsp/gcl_setf.lsp");
   lsp_init("../lsp/gcl_arraylib.lsp");
-
-  lsp_init("../lsp/gcl_seq.lsp");
-  lsp_init("../lsp/gcl_seqlib.lsp");
-  lsp_init("../lsp/gcl_numlib.lsp");
-
   lsp_init("../lsp/gcl_assert.lsp");
   lsp_init("../lsp/gcl_defstruct.lsp");
   lsp_init("../lsp/gcl_describe.lsp");
 #ifdef HAVE_JAPI_H
-  lsp_init("../mod/gcl_japi.lsp");
+  lsp_init("../lsp/gcl_japi.lsp");
 #endif
   lsp_init("../lsp/gcl_iolib.lsp");
   lsp_init("../lsp/gcl_listlib.lsp");
-/*   lsp_init("../lsp/gcl_mislib.lsp"); */
-/*   lsp_init("../lsp/gcl_numlib.lsp"); */
+  lsp_init("../lsp/gcl_mislib.lsp");
+  lsp_init("../lsp/gcl_numlib.lsp");
   lsp_init("../lsp/gcl_packlib.lsp");
-/*   lsp_init("../lsp/gcl_seq.lsp"); */
-/*   lsp_init("../lsp/gcl_seqlib.lsp"); */
+  lsp_init("../lsp/gcl_seq.lsp");
+  lsp_init("../lsp/gcl_seqlib.lsp");
   lsp_init("../lsp/gcl_trace.lsp");
   lsp_init("../lsp/gcl_sloop.lsp");
   lsp_init("../lsp/gcl_serror.lsp");
-
-/*   lsp_init("../mod/gcl_destructuring_bind.lsp"); */
-/*   lsp_init("../mod/gcl_loop.lsp"); */
-/*   lsp_init("../mod/gcl_defpackage.lsp"); */
-/*   lsp_init("../mod/gcl_make_defpackage.lsp"); */
+  lsp_init("../lsp/gcl_destructuring_bind.lsp");
+  lsp_init("../lsp/gcl_loop.lsp");
+  lsp_init("../lsp/gcl_defpackage.lsp");
+  lsp_init("../lsp/gcl_make_defpackage.lsp");
 
   lsp_init("../cmpnew/gcl_cmpinline.lsp");
   lsp_init("../cmpnew/gcl_cmputil.lsp");

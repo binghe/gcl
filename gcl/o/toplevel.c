@@ -28,7 +28,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 
-object sLcompile, sLload, sLeval, sKcompile_toplevel, sLload_toplevel, sKexecute;
+object sLcompile, sLload, sLeval, sKcompile_toplevel, sKload_toplevel, sKexecute;
 object sLprogn;
 
 
@@ -50,64 +50,50 @@ FFN(Fdefun)(object args)
 	if (MMcadr(args) != Cnil && type_of(MMcadr(args)) != t_cons)
 		FEerror("~S is an illegal lambda-list.", 1, MMcadr(args));
 	name = MMcar(args);
-	if (type_of(name) != t_symbol) {
-	  if (setf_fn_form(name)) {
-	    object x;
-	    vs_base = vs_top;
-	    x=alloc_object(t_ifun);
-	    x->ifn.ifn_self=MMcons(sLlambda, MMcdr(args));
-	    vs_push(x);
-	    putprop(MMcadr(name),vs_base[0],sSsetf_function);
-	    vs_base[0]=name;
-	    return;
-	  } else
-	    not_a_symbol(name);
-	}
+	if (type_of(name) != t_symbol)
+		not_a_symbol(name);
 	if (name->s.s_sfdef != NOT_SPECIAL) {
-	  if (name->s.s_mflag) {
-	    if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
-	      name->s.s_sfdef = NOT_SPECIAL;
-	  } else if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
-	    FEerror("~S, a special form, cannot be redefined.", 1, name);
+		if (name->s.s_mflag) {
+			if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
+				name->s.s_sfdef = NOT_SPECIAL;
+		} else if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
+		 FEerror("~S, a special form, cannot be redefined.", 1, name);
 	}
 	if (name->s.s_hpack == lisp_package &&
 	    name->s.s_gfdef != OBJNULL && initflag) {
-	  vs_push(make_simple_string(
-				     "~S is being redefined."));
-	  ifuncall2(sLwarn, vs_head, name);
-	  vs_popp;
+		vs_push(make_simple_string(
+			"~S is being redefined."));
+		ifuncall2(sLwarn, vs_head, name);
+		vs_popp;
 	}
 	vs_base = vs_top;
 	if (lex_env[0] == Cnil && lex_env[1] == Cnil && lex_env[2] == Cnil) {
-	  vs_push(MMcons(sLlambda_block, args));
+		vs_push(MMcons(sLlambda_block, args));
 	} else {
-	  vs_push(MMcons(lex_env[2], args));
-	  vs_base[0] = MMcons(lex_env[1], vs_base[0]);
-	  vs_base[0] = MMcons(lex_env[0], vs_base[0]);
-	  vs_base[0] = MMcons(sLlambda_block_closure, vs_base[0]);
+		vs_push(MMcons(lex_env[2], args));
+		vs_base[0] = MMcons(lex_env[1], vs_base[0]);
+		vs_base[0] = MMcons(lex_env[0], vs_base[0]);
+		vs_base[0] = MMcons(sLlambda_block_closure, vs_base[0]);
 	}
 	{object fname =  clear_compiler_properties(name,vs_base[0]);
-	object x=alloc_object(t_ifun);
-	x->ifn.ifn_self=vs_base[0];
-	vs_base[0]=x;
-	fname->s.s_gfdef = vs_base[0];
-	fname->s.s_mflag = FALSE;}
+	 fname->s.s_gfdef = vs_base[0];
+	 fname->s.s_mflag = FALSE;}
 	vs_base[0] = name;
 	for (body = MMcddr(args);  !endp(body);  body = body->c.c_cdr) {
-	  form = macro_expand(body->c.c_car);
-	  if (type_of(form) == t_string) {
-	    if (endp(body->c.c_cdr))
-	      break;
-	    vs_push(form);
-	    name->s.s_plist =
-	      putf(name->s.s_plist,
-		   form,
-		   sSfunction_documentation);
-	    vs_popp;
-	    break;
-	  }
-	  if (type_of(form) != t_cons || form->c.c_car != sLdeclare)
-	    break;
+		form = macro_expand(body->c.c_car);
+		if (type_of(form) == t_string) {
+			if (endp(body->c.c_cdr))
+				break;
+			vs_push(form);
+			name->s.s_plist =
+			putf(name->s.s_plist,
+			     form,
+			     sSfunction_documentation);
+			vs_popp;
+			break;
+		}
+		if (type_of(form) != t_cons || form->c.c_car != sLdeclare)
+			break;
 	}
 }
 	
@@ -146,10 +132,10 @@ FFN(Feval_when)(object arg)
 	if(endp(arg))
 		FEtoo_few_argumentsF(arg);
 	for (ss = MMcar(arg);  !endp(ss);  ss = MMcdr(ss))
-            if ( (MMcar(ss) == sLeval) || (MMcar(ss) == sKexecute) )
+		if(MMcar(ss) == sLeval || (MMcar(ss) == sKexecute) )
 			flag = TRUE;
-		else if ( MMcar(ss) != sLload && MMcar(ss) != sLcompile &&
-                          MMcar(ss) != sLload_toplevel && MMcar(ss) != sKcompile_toplevel )
+		else if(MMcar(ss) != sLload && MMcar(ss) != sLcompile &&
+                          MMcar(ss) != sKload_toplevel && MMcar(ss) != sKcompile_toplevel )
 		 FEinvalid_form("~S is an undefined situation for EVAL-WHEN.",
 				MMcar(ss));
 	if(flag) {
@@ -206,19 +192,15 @@ FFN(Fthe)(object args)
 	eval(MMcadr(args));
 	args = MMcar(args);
 	if (type_of(args) == t_cons && MMcar(args) == sLvalues) {
-	  vs = vs_base;
-	  for (args=MMcdr(args); !endp(args) && vs<vs_top; args=MMcdr(args), vs++)
-	    /*			{ if (vs >= vs_top)
-				FEerror("Too many return values.", 0);*/
-	    if (ifuncall2(sLtypep, *vs, MMcar(args)) == Cnil)
-	      FEwrong_type_argument(MMcar(args), *vs);
-	  /*}
+		vs = vs_base;
+		for (args=MMcdr(args); !endp(args); args=MMcdr(args), vs++){
+			if (vs >= vs_top)
+				FEerror("Too many return values.", 0);
+			if (ifuncall2(sLtypep, *vs, MMcar(args)) == Cnil)
+				FEwrong_type_argument(MMcar(args), *vs);
+		}
 		if (vs < vs_top)
-			FEerror("Too few return values.", 0);*/
-	  for (args=MMcdr(args); !endp(args); args=MMcdr(args))
-	    if (ifuncall2(sLtypep, Cnil, MMcar(args)) == Cnil)
-	      FEwrong_type_argument(MMcar(args), Cnil);
-	  
+			FEerror("Too few return values.", 0);
 	} else {
 		if (ifuncall2(sLtypep, vs_base[0], args) == Cnil)
 			FEwrong_type_argument(args, vs_base[0]);
@@ -232,12 +214,11 @@ DEF_ORDINARY("EVAL",sLeval,LISP,"");
 DEF_ORDINARY("EXECUTE",sKexecute,KEYWORD,"");
 DEF_ORDINARY("FUNCTION-DOCUMENTATION",sSfunction_documentation,SI,"");
 DEF_ORDINARY("LOAD",sLload,LISP,"");
-DEF_ORDINARY("LOAD-TOPLEVEL",sLload_toplevel,KEYWORD,"");
+DEF_ORDINARY("LOAD-TOPLEVEL",sKload_toplevel,KEYWORD,"");
 DEF_ORDINARY("PROGN",sLprogn,LISP,"");
 DEF_ORDINARY("TYPEP",sLtypep,LISP,"");
 DEF_ORDINARY("VALUES",sLvalues,LISP,"");
 DEF_ORDINARY("VARIABLE-DOCUMENTATION",sSvariable_documentation,SI,"");
-DEF_ORDINARY("SETF-FUNCTION",sSsetf_function,SI,"");
 DEF_ORDINARY("WARN",sLwarn,LISP,"");
 
 void

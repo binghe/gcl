@@ -42,23 +42,28 @@
 ;;; Error tests
 
 (deftest array-dimensions.error.1
-  (signals-error (array-dimensions) program-error)
-  t)
+  (classify-error (array-dimensions))
+  program-error)
 
 (deftest array-dimensions.error.2
-  (signals-error (array-dimensions #(a b c) nil)
-		 program-error)
-  t)
+  (classify-error (array-dimensions #(a b c) nil))
+  program-error)
 
 (deftest array-dimensions.error.3
-  (check-type-error #'array-dimensions #'arrayp)
+  (let (why)
+    (loop for e in *mini-universe*
+	  unless (or (typep e 'array)
+		     (eq 'type-error
+			 (setq why (classify-error**
+				    `(array-dimensions ',e)))))
+	  collect (list e why)))
   nil)
 
 (deftest array-dimensions.error.4
-  (signals-type-error x nil (array-dimensions x))
-  t)
+  (classify-error (array-dimensions nil))
+  type-error)
 
 (deftest array-dimensions.error.5
-  (signals-error (locally (array-dimensions nil))
-		 type-error)
-  t)
+  (classify-error (locally (array-dimensions nil)))
+  type-error)
+

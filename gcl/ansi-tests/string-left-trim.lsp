@@ -89,25 +89,6 @@
   "abcdaba"
   "cdaba")
 
-(deftest string-left-trim.10a
-  (let* ((s (make-array 9 :initial-contents "abcdabadd"
-			:element-type 'base-char
-			:fill-pointer 7))
-	 (s2 (string-left-trim "ab" s)))
-    (values s s2))
-  "abcdaba"
-  "cdaba")
-
-(deftest string-left-trim.10b
-  (let* ((s (make-array 9 :initial-contents "abcdabadd"
-			:element-type 'base-char
-			:adjustable t
-			:fill-pointer 7))
-	 (s2 (string-left-trim "ab" s)))
-    (values s s2))
-  "abcdaba"
-  "cdaba")
-
 (deftest string-left-trim.11
   (let* ((s (make-array 7 :initial-contents "abcdaba"
 			:element-type 'standard-char
@@ -160,51 +141,6 @@
   (string-left-trim "abc" (copy-seq "abcabcabc"))
   "")
 
-(deftest string-left-trim.20
-  :notes (:nil-vectors-are-strings)
-  (string-left-trim "abcd" (make-array '(0) :element-type nil))
-  "")
-
-(deftest string-left-trim.21
-  :notes (:nil-vectors-are-strings)
-  (string-left-trim (make-array '(0) :element-type nil) "abcd")
-  "abcd")
-
-(deftest string-left-trim.22
-  (let ((s (make-array '(6) :initial-contents "abcaeb"
-		       :element-type 'base-char
-		       :adjustable t)))
-    (values (string-left-trim "ab" s) s))
-  "caeb" "abcaeb")
-
-(deftest string-left-trim.23
-  (let ((s (make-array '(6) :initial-contents "abcaeb"
-		       :element-type 'character
-		       :adjustable t)))
-    (values (string-left-trim "ab" s) s))
-  "caeb" "abcaeb")
-
-(deftest string-left-trim.24
-  (let* ((etype 'base-char)
-	 (s0 (make-array '(6) :initial-contents "abcaeb"
-			 :element-type etype))
-	 (s (make-array '(3) :element-type etype
-			:displaced-to s0
-			:displaced-index-offset 1)))
-    (values (string-left-trim "ab" s) s s0))
-  "ca" "bca" "abcaeb")
-
-(deftest string-left-trim.25
-  (let* ((etype 'character)
-	 (s0 (make-array '(6) :initial-contents "abcaeb"
-			 :element-type etype))
-	 (s (make-array '(3) :element-type etype
-			:displaced-to s0
-			:displaced-index-offset 1)))
-    (values (string-left-trim "ab" s) s s0))
-  "ca" "bca" "abcaeb")
-
-
 (deftest string-left-trim.order.1
   (let ((i 0) x y)
     (values
@@ -214,18 +150,16 @@
      i x y))
   "abc d e f  " 2 1 2)
 
-(def-fold-test string-left-trim.fold.1 (string-left-trim " " " abcd"))
-
 ;;; Error cases
 
 (deftest string-left-trim.error.1
-  (signals-error (string-left-trim) program-error)
-  t)
+  (classify-error (string-left-trim))
+  program-error)
 
 (deftest string-left-trim.error.2
-  (signals-error (string-left-trim "abc") program-error)
-  t)
+  (classify-error (string-left-trim "abc"))
+  program-error)
 
 (deftest string-left-trim.error.3
-  (signals-error (string-left-trim "abc" "abcdddabc" nil) program-error)
-  t)
+  (classify-error (string-left-trim "abc" "abcdddabc" nil))
+  program-error)

@@ -228,7 +228,7 @@ KEYWORD:
 		lambda_list = lambda_list->c.c_cdr;
 		if (type_of(x) == t_cons) {
 			if (type_of(x->c.c_car) == t_cons) {
-				if (type_of(x->c.c_car->c.c_car)!=t_symbol)
+				if (!keywordp(x->c.c_car->c.c_car))
 				  /* FIXME better message */
 					FEunexpected_keyword(x->c.c_car->c.c_car);
 				vs_push(x->c.c_car->c.c_car);
@@ -437,20 +437,17 @@ SEARCH_DECLARE:
 		bind_var(rest->rest_var, vs_head, rest->rest_spp);
 	}
 	if (key_flag) {
-                int allow_other_keys_found=0;
 		i = narg - nreq - nopt;
 		if (i >= 0 && i%2 != 0)
 		  /* FIXME better message */
 		  FEunexpected_keyword(Cnil);
 		other_keys_appeared = FALSE;
 		for (i = nreq + nopt;  i < narg;  i += 2) {
-			if (type_of(base[i])!=t_symbol)
+			if (!keywordp(base[i]))
 				FEunexpected_keyword(base[i]);
-			if (base[i] == sKallow_other_keys && !allow_other_keys_found) {
-			    allow_other_keys_found=1;
-			    if (base[i+1] != Cnil)
+			if (base[i] == sKallow_other_keys &&
+			    base[i+1] != Cnil)
 				allow_other_keys_flag = TRUE;
-                        }
 			for (j = 0;  j < nkey;  j++) {
 				if (keyword[j].key_word == base[i]) {
 					if (keyword[j].key_svar_val
@@ -463,8 +460,7 @@ SEARCH_DECLARE:
 					goto NEXT_ARG;
 				}
 			}
-                        if (base[i] != sKallow_other_keys)
-			  other_keys_appeared = TRUE;
+			other_keys_appeared = TRUE;
 
 		NEXT_ARG:
 			continue;
@@ -739,7 +735,7 @@ parse_key(object *base, bool rest, bool allow_other_keys, register int n, ...)
 	  FEunexpected_keyword(Cnil);
 	if (narg == 2) {
 		k = base[0];
-		if (type_of(k)!=t_symbol)
+		if (!keywordp(k))
 		  FEunexpected_keyword(k);
 		if (k == sKallow_other_keys && ! allow_other_keys_found) {
 		  allow_other_keys_found=1;
@@ -781,7 +777,7 @@ parse_key(object *base, bool rest, bool allow_other_keys, register int n, ...)
 	va_end(ap);
 	for (v = base;  v < vs_top;  v += 2) {
 		k = v[0];
-		if (type_of(k)!=t_symbol) {
+		if (!keywordp(k)) {
 			error_flag = NOT_KEYWORD;
 			other_key = k;
 			continue;
@@ -831,19 +827,16 @@ check_other_key(object l, int n, ...)
 	object k;
 	int i;
 	bool allow_other_keys = FALSE;
-	int allow_other_keys_found=0;
 
 	for (;  !endp(l);  l = l->c.c_cdr->c.c_cdr) {
 		k = l->c.c_car;
-		if (type_of(k)!=t_symbol)
+		if (!keywordp(k))
 		  FEunexpected_keyword(k);
 		if (endp(l->c.c_cdr))
 		  /* FIXME better message */
 		  FEunexpected_keyword(Cnil);
-		if (k == sKallow_other_keys && !allow_other_keys_found) {
-		  allow_other_keys_found=1;
-		  if (l->c.c_cdr->c.c_car != Cnil) 
-		    allow_other_keys = TRUE;
+		if (k == sKallow_other_keys && l->c.c_cdr->c.c_car != Cnil) {
+			allow_other_keys = TRUE;
 		} else {
 		  char buf [100];
 		  bzero(buf,n);
@@ -866,7 +859,8 @@ check_other_key(object l, int n, ...)
 /*  	   }; */
 
 
-object Cstd_key_defaults[15]={0};
+object Cstd_key_defaults[15]={Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,
+				Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil};
 
 /* FIXME rewrite this */
 /* static int */
@@ -1116,7 +1110,7 @@ gcl_init_bind(void)
 	make_cons(make_ordinary("&BODY"), Cnil)))))))));
 
 	make_constant("LAMBDA-PARAMETERS-LIMIT",
-		      make_fixnum(MAX_ARGS+1));
+		      make_fixnum(64));
 
 
 
@@ -1130,13 +1124,4 @@ gcl_init_bind(void)
 	six_nils.nil6_self[3] = Cnil;
 	six_nils.nil6_self[4] = Cnil;
 	six_nils.nil6_self[5] = Cnil;
-
-	{
-
-	  int i;
-	  for (i=0;i<sizeof(Cstd_key_defaults)/sizeof(*Cstd_key_defaults);i++)
-	    Cstd_key_defaults[i]=Cnil;
-
-	}
-
 }

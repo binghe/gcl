@@ -201,15 +201,11 @@ check_type_stream(object *p)
 		*p = wrong_type_argument(sLstream, *p);
 }
 
-/* Thankfully we can do this bit of non-lispy c stuff since we pass by reference. FIXME*/
 void
-check_type_readtable(object *p) {
-  
-  if (*p==Cnil)
-    *p=standard_readtable;
-  if (type_of(*p) != t_readtable)
-    *p = wrong_type_argument(sLreadtable, *p);
-
+check_type_readtable(object *p)
+{
+	while (type_of(*p) != t_readtable)
+		*p = wrong_type_argument(sLreadtable, *p);
 }
 
 #ifdef UNIX
@@ -291,7 +287,7 @@ check_type(object x, int t)
 }
    
 
-LFD(siLtype_of_c)(void)
+LFD(Ltype_of)(void)
 {
 	int i;
 
@@ -299,15 +295,12 @@ LFD(siLtype_of_c)(void)
 
 	switch (type_of(vs_base[0])) {
 	case t_fixnum:
-	  {
-	    fixnum i=fix(vs_base[0]);
-	    vs_base[0] = !i || i==1 ? sLbit : (i>0 ? sLnon_negative_fixnum : sLfixnum);
-	  }
-	  break;
+		vs_base[0] = sLfixnum;
+		break;
 
 	case t_bignum:
-	  vs_base[0] = big_sign(vs_base[0])<0 ? sLbignum : sLnon_negative_bignum;
-	  break;
+		vs_base[0] = sLbignum;
+		break;
 
 	case t_ratio:
 		vs_base[0] = sLratio;
@@ -334,19 +327,15 @@ LFD(siLtype_of_c)(void)
 			if ((' ' <= i && i < '\177') || i == '\n')
 				vs_base[0] = sLstandard_char;
 			else
-				vs_base[0] = sLbase_char;
+				vs_base[0] = sLstring_char;
 		}
 		break;
 
 	case t_symbol:
-		if (vs_base[0]==Cnil)
-		  vs_base[0] = sLnull;
-		else if (vs_base[0]==Ct)
-		  vs_base[0]=sLboolean;
-		else if (vs_base[0]->s.s_hpack == keyword_package)
-		  vs_base[0] = sLkeyword;
+		if (vs_base[0]->s.s_hpack == keyword_package)
+			vs_base[0] = sLkeyword;
 		else
-		  vs_base[0] = sLsymbol;
+			vs_base[0] = sLsymbol;
 		break;
 
 	case t_package:
@@ -362,40 +351,40 @@ LFD(siLtype_of_c)(void)
 		break;
 
 	case t_array:
-/* 		if (vs_base[0]->a.a_adjustable || */
-/* 		    vs_base[0]->a.a_displaced->c.c_car == Cnil) */
-/* 			vs_base[0] = sLarray; */
-/* 		else */
-	  vs_base[0] = sLarray;
-	  break;
+		if (vs_base[0]->a.a_adjustable ||
+		    vs_base[0]->a.a_displaced->c.c_car == Cnil)
+			vs_base[0] = sLarray;
+		else
+			vs_base[0] = sLsimple_array;
+		break;
 
 	case t_vector:
-/* 		if (vs_base[0]->v.v_adjustable || */
-/* 		    vs_base[0]->v.v_hasfillp || */
-/* 		    vs_base[0]->v.v_displaced->c.c_car == Cnil || */
-/* 		    (enum aelttype)vs_base[0]->v.v_elttype != aet_object) */
-/* 			vs_base[0] = sLvector; */
-/* 		else */
-	  vs_base[0] = sLvector;
-	  break;
+		if (vs_base[0]->v.v_adjustable ||
+		    vs_base[0]->v.v_hasfillp ||
+		    vs_base[0]->v.v_displaced->c.c_car == Cnil ||
+		    (enum aelttype)vs_base[0]->v.v_elttype != aet_object)
+			vs_base[0] = sLvector;
+		else
+			vs_base[0] = sLsimple_vector;
+		break;
 
 	case t_string:
-/* 		if (vs_base[0]->st.st_adjustable || */
-/* 		    vs_base[0]->st.st_hasfillp || */
-/* 		    vs_base[0]->st.st_displaced->c.c_car == Cnil) */
-/* 			vs_base[0] = sLstring; */
-/* 		else */
-	  vs_base[0] = sLstring;
-	  break;
+		if (vs_base[0]->st.st_adjustable ||
+		    vs_base[0]->st.st_hasfillp ||
+		    vs_base[0]->st.st_displaced->c.c_car == Cnil)
+			vs_base[0] = sLstring;
+		else
+			vs_base[0] = sLsimple_string;
+		break;
 
 	case t_bitvector:
-/* 		if (vs_base[0]->bv.bv_adjustable || */
-/* 		    vs_base[0]->bv.bv_hasfillp || */
-/* 		    vs_base[0]->bv.bv_displaced->c.c_car == Cnil) */
-/* 			vs_base[0] = sLbit_vector; */
-/* 		else */
-	  vs_base[0] = sLbit_vector;
-	  break;
+		if (vs_base[0]->bv.bv_adjustable ||
+		    vs_base[0]->bv.bv_hasfillp ||
+		    vs_base[0]->bv.bv_displaced->c.c_car == Cnil)
+			vs_base[0] = sLbit_vector;
+		else
+			vs_base[0] = sLsimple_bit_vector;
+		break;
 
 	case t_structure:
 		
@@ -403,39 +392,12 @@ LFD(siLtype_of_c)(void)
 		break;
 
 	case t_stream:
-#ifdef ANSI_COMMON_LISP
-		if ((vs_base[0]->sm.sm_mode == smm_input) ||
-		    (vs_base[0]->sm.sm_mode == smm_output) ||
-		    (vs_base[0]->sm.sm_mode == smm_probe) ||
-		    (vs_base[0]->sm.sm_mode == smm_io))
-			vs_base[0] = sLfile_stream;
-		else
-		if ((vs_base[0]->sm.sm_mode == smm_string_input) ||
-		    (vs_base[0]->sm.sm_mode == smm_string_output))
-			vs_base[0] = sLstring_stream;
-		else
-		if (vs_base[0]->sm.sm_mode == smm_synonym)
-			vs_base[0] = sLsynonym_stream;
-		else
-		if (vs_base[0]->sm.sm_mode == smm_broadcast)
-			vs_base[0] = sLbroadcast_stream;
-		else
-		if (vs_base[0]->sm.sm_mode == smm_concatenated)
-			vs_base[0] = sLconcatenated_stream;
-		else
-		if (vs_base[0]->sm.sm_mode == smm_two_way)
-			vs_base[0] = sLtwo_way_stream;
-		else
-		if (vs_base[0]->sm.sm_mode == smm_echo)
-			vs_base[0] = sLecho_stream;
-		else
 #ifdef USER_DEFINED_STREAMS
 		if (vs_base[0]->sm.sm_mode == (int)smm_user_defined)
 		   vs_base[0]= vs_base[0]->sm.sm_object1->str.str_self[8];
 		else
 #endif
-#endif
-			vs_base[0] = sLstream;
+		vs_base[0] = sLstream;
 		break;
 
 	case t_readtable:
@@ -443,11 +405,8 @@ LFD(siLtype_of_c)(void)
 		break;
 
 	case t_pathname:
-	  if (pathname_lookup(vs_base[0]->pn.pn_host,sSApathname_logicalA->s.s_dbind)!=Cnil)
-	    vs_base[0] = sLlogical_pathname;
-	  else
-	    vs_base[0] = sLpathname;
-	  break;
+		vs_base[0] = sLpathname;
+		break;
 
 	case t_random:
 		vs_base[0] = sLrandom_state;
@@ -462,10 +421,6 @@ LFD(siLtype_of_c)(void)
         case t_closure:
 		vs_base[0] = sLcompiled_function;
 		break;
-
-	case t_ifun:
-	  vs_base[0]=sLinterpreted_function;
-	  break;
 
 	default:
 		error("not a lisp data object");
@@ -487,9 +442,7 @@ DEF_ORDINARY("SIMPLE-VECTOR",sLsimple_vector,LISP,"");
 DEF_ORDINARY("SIMPLE-BIT-VECTOR",sLsimple_bit_vector,LISP,"");
 DEF_ORDINARY("SIMPLE-STRING",sLsimple_string,LISP,"");
 DEF_ORDINARY("FUNCTION",sLfunction,LISP,"");
-DEF_ORDINARY("FUNCTION-IDENTIFIER",sLfunction_identifier,LISP,"");
 DEF_ORDINARY("COMPILED-FUNCTION",sLcompiled_function,LISP,"");
-DEF_ORDINARY("INTERPRETED-FUNCTION",sLinterpreted_function,LISP,"");
 DEF_ORDINARY("PATHNAME",sLpathname,LISP,"");
 DEF_ORDINARY("CHARACTER",sLcharacter,LISP,"");
 DEF_ORDINARY("NUMBER",sLnumber,LISP,"");
@@ -501,36 +454,8 @@ DEF_ORDINARY("RATIO",sLratio,LISP,"");
 DEF_ORDINARY("SHORT-FLOAT",sLshort_float,LISP,"");
 DEF_ORDINARY("STANDARD-CHAR",sLstandard_char,LISP,"");
 DEF_ORDINARY("BOOLEAN",sLboolean,LISP,"");
-
-DEF_ORDINARY("SEQIND",sLseqind,LISP,"");
-DEF_ORDINARY("RNKIND",sLrnkind,LISP,"");
-
-DEF_ORDINARY("CHAR",sLchar,LISP,"");
-DEF_ORDINARY("NON-NEGATIVE-CHAR",sLnon_negative_char,LISP,"");
-DEF_ORDINARY("NEGATIVE-CHAR",sLnegative_char,LISP,"");
-DEF_ORDINARY("SIGNED-CHAR",sLsigned_char,LISP,"");
-DEF_ORDINARY("UNSIGNED-CHAR",sLunsigned_char,LISP,"");
-
-DEF_ORDINARY("SHORT",sLshort,LISP,"");
-DEF_ORDINARY("NON-NEGATIVE-SHORT",sLnon_negative_short,LISP,"");
-DEF_ORDINARY("NEGATIVE-SHORT",sLnegative_short,LISP,"");
-DEF_ORDINARY("SIGNED-SHORT",sLsigned_short,LISP,"");
-DEF_ORDINARY("UNSIGNED-SHORT",sLunsigned_short,LISP,"");
-
 DEF_ORDINARY("FIXNUM",sLfixnum,LISP,"");
-DEF_ORDINARY("NON-NEGATIVE-FIXNUM",sLnon_negative_fixnum,LISP,"");
-DEF_ORDINARY("NEGATIVE-FIXNUM",sLnegative_fixnum,LISP,"");
-DEF_ORDINARY("NON-NEGATIVE-BIGNUM",sLnon_negative_bignum,LISP,"");
-DEF_ORDINARY("NEGATIVE-BIGNUM",sLnegative_bignum,LISP,"");
-DEF_ORDINARY("SIGNED-FIXNUM",sLsigned_fixnum,LISP,"");
-DEF_ORDINARY("UNSIGNED-FIXNUM",sLunsigned_fixnum,LISP,"");
-
-DEF_ORDINARY("LFIXNUM",sLlfixnum,LISP,"");
-DEF_ORDINARY("NON-NEGATIVE-LFIXNUM",sLnon_negative_lfixnum,LISP,"");
-DEF_ORDINARY("NEGATIVE-LFIXNUM",sLnegative_lfixnum,LISP,"");
-DEF_ORDINARY("SIGNED-LFIXNUM",sLsigned_lfixnum,LISP,"");
-DEF_ORDINARY("UNSIGNED-LFIXNUM",sLunsigned_lfixnum,LISP,"");
-
+DEF_ORDINARY("POSITIVE-FIXNUM",sLpositive_fixnum,LISP,"");
 DEF_ORDINARY("COMPLEX",sLcomplex,LISP,"");
 DEF_ORDINARY("SINGLE-FLOAT",sLsingle_float,LISP,"");
 DEF_ORDINARY("PACKAGE",sLpackage,LISP,"");
@@ -553,21 +478,18 @@ DEF_ORDINARY("VALUES",sLvalues,LISP,"");
 DEF_ORDINARY("MOD",sLmod,LISP,"");
 DEF_ORDINARY("SIGNED-BYTE",sLsigned_byte,LISP,"");
 DEF_ORDINARY("UNSIGNED-BYTE",sLunsigned_byte,LISP,"");
+DEF_ORDINARY("SIGNED-CHAR",sLsigned_char,LISP,"");
+DEF_ORDINARY("UNSIGNED-CHAR",sLunsigned_char,LISP,"");
 DEF_ORDINARY("SIGNED-SHORT",sLsigned_short,LISP,"");
 DEF_ORDINARY("UNSIGNED-SHORT",sLunsigned_short,LISP,"");
 DEF_ORDINARY("*",sLA,LISP,"");
 DEF_ORDINARY("PLUSP",sLplusp,LISP,"");
-DEF_ORDINARY("FILE-STREAM",sLfile_stream,LISP,"");
-
-/* logical pathnames exist even in non ansi gcl */
-DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
-
-DEF_ORDINARY("BASE-CHAR",sLbase_char,LISP,"");
 
 #ifdef ANSI_COMMON_LISP
 /* New ansi types */
 DEF_ORDINARY("METHOD-COMBINATION",sLmethod_combination,LISP,"");
 DEF_ORDINARY("ARITHMETIC-ERROR",sLarithmetic_error,LISP,"");
+DEF_ORDINARY("BASE-CHAR",sLbase_char,LISP,"");
 DEF_ORDINARY("BASE-STRING",sLbase_string,LISP,"");
 DEF_ORDINARY("BROADCAST-STREAM",sLbroadcast_stream,LISP,"");
 DEF_ORDINARY("BUILT-IN-CLASS",sLbuilt_in_class,LISP,"");
@@ -575,18 +497,20 @@ DEF_ORDINARY("CELL-ERROR",sLcell_error,LISP,"");
 DEF_ORDINARY("CLASS",sLclass,LISP,"");
 DEF_ORDINARY("CONCATENATED-STREAM",sLconcatenated_stream,LISP,"");
 DEF_ORDINARY("CONDITION",sLcondition,LISP,"");
+DEF_ORDINARY("CONTROL-ERROR",sLcontrol_error,LISP,"");
 DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,"");
 DEF_ORDINARY("ECHO-STREAM",sLecho_stream,LISP,"");
 DEF_ORDINARY("END-OF-FILE",sLend_of_file,LISP,"");
-DEF_ORDINARY("CONTROL-ERROR",sLcontrol_error,LISP,"");
 DEF_ORDINARY("ERROR",sLerror,LISP,"");
 DEF_ORDINARY("EXTENDED-CHAR",sLextended_char,LISP,"");
 DEF_ORDINARY("FILE-ERROR",sLfile_error,LISP,"");
+DEF_ORDINARY("FILE-STREAM",sLfile_stream,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,"");
 DEF_ORDINARY("GENERIC-FUNCTION",sLgeneric_function,LISP,"");
+DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
 DEF_ORDINARY("METHOD",sLmethod,LISP,"");
 /* FIXME -- need this for types in predlib.lsp, why can't we use the keyword sKpackage_error ? */
 DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
@@ -616,13 +540,10 @@ DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,"");
 DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
 DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
 DEF_ORDINARY("WARNING",sLwarning,LISP,"");
-DEF_ORDINARY("DYNAMIC-EXTENT",sLdynamic_extent,LISP,"");
 #endif
 
-DEFCONST("CHAR-LENGTH",sSchar_length,SI,small_fixnum(CHAR_SIZE),"Size in bits of a character");
-DEFCONST("SHORT-LENGTH",sSshort_length,SI,small_fixnum(CHAR_SIZE*sizeof(short)),"Size in bits of a short integer");
-DEFCONST("FIXNUM-LENGTH",sSfixnum_length,SI,small_fixnum(CHAR_SIZE*sizeof(fixnum)),"Size in bits of a short integer");
-DEFCONST("LFIXNUM-LENGTH",sSlfixnum_length,SI,small_fixnum(CHAR_SIZE*sizeof(lfixnum)),"Size in bits of a short integer");
+DEFCONST("CHAR-SIZE",sSchar_size,SI,small_fixnum(CHAR_SIZE),"Size in bits of a character");
+DEFCONST("SHORT-SIZE",sSshort_size,SI,small_fixnum(CHAR_SIZE*sizeof(short)),"Size in bits of a short integer");
 
 void     
 gcl_init_typespec(void)
@@ -675,5 +596,5 @@ gcl_init_typespec_function(void)
 							    Cnil)))));
 	enter_mark_origin(&TSor_pathname_string_symbol_stream);
 
-	make_si_function("TYPE-OF-C", siLtype_of_c);
+	make_function("TYPE-OF", Ltype_of);
 }				

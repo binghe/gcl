@@ -43,10 +43,9 @@
 
 
 (deftest cell-error-name.error.1
-  (signals-error (cell-error-name) program-error)
-  t)
+  (classify-error (cell-error-name))
+  program-error)
 
 (deftest cell-error-name.error.2
-  (signals-error (cell-error-name (make-condition 'unbound-variable :name 'foo) nil)
-		 program-error)
-  t)
+  (classify-error (cell-error-name (make-condition 'unbound-variable :name 'foo) nil))
+  program-error)

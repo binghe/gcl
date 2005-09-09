@@ -35,9 +35,6 @@ extern int errno;
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
 
 /* Prototype these in case the system headers don't provide them. */
 extern char *getpwd ();

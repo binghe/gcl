@@ -2,14 +2,14 @@
 
 -include ../makedefs
 
-FILES:=$(shell ls -1 gcl_*.lisp | sed 's,\.lisp,,1')
+FILES:=$(shell ls -1 gcl_*.lisp | sed 's,\.lisp,,1') gcl_pcl_impl_low
 
-GFILES1:= 0 1 2 3 4 5 6 7 8
+GFILES1:= 0 1 2 3 4 5 6 7
 GFILES:=$(addprefix gcl_pcl_gazonk,$(GFILES1))
 
 AFILES:=$(FILES) $(GFILES)
 
-SETUP='(load "../clcs/package.lisp")(load "../clcs/myload1.lisp")(load "sys-package.lisp")' \
+SETUP='(load "sys-package.lisp")' \
 	'(setq *features* (delete (quote :kcl) *features*))'\
 	'(load "defsys.lisp")(push (quote :kcl) *features*)' \
 	'(setq pcl::*default-pathname-extensions* (cons "lisp" "o"))' \
@@ -23,17 +23,17 @@ SETUP='(load "../clcs/package.lisp")(load "../clcs/myload1.lisp")(load "sys-pack
 
 all: $(addsuffix .c,$(AFILES)) $(addsuffix .o,$(AFILES)) 
 
-saved_gcl_pcl: ../unixport/saved_mod_gcl
+saved_gcl_pcl: ../unixport/saved_gcl
 	cp ../h/cmpinclude.h .
 	echo $(SETUP) '(pcl::compile-pcl)' | $< 
 	echo $(SETUP) '(pcl::load-pcl)(si::save-system "$@")' | $<
 
 $(addsuffix .c,$(AFILES)) $(addsuffix .data,$(AFILES))\
 	$(addsuffix .h,$(AFILES)) $(addsuffix .lsp,$(GFILES)): \
-	$(addsuffix .lisp,$(FILES))
+	$(addsuffix .lisp,$(subst gcl_pcl_impl_low,impl/gcl/gcl_pcl_impl_low,$(FILES)))
 	rm -f *.o *gazonk*
 	cp ../h/cmpinclude.h .
-	echo ${SETUP} '(pcl::compile-pcl)' | ../unixport/saved_mod_gcl #../unixport/
+	echo ${SETUP} '(pcl::compile-pcl)' | ../unixport/saved_gcl ../unixport/
 # FIXME -- small compiler setjmp/volatile detection bug -- CM
 # doesn't seem to be needed now, but investigate more later
 #	patch -p0 <pcl_methods.patch
@@ -56,10 +56,10 @@ remake-sys-files:
 	rm -f *.o *gazonk*
 	cp ../h/cmpinclude.h .
 	echo ${SETUP} '(load "../cmpnew/gcl_collectfn.lsp")(compiler::emit-fn t)' \
-		'(pcl::compile-pcl)' | ../unixport/saved_mod_gcl ../unixport/
+		'(pcl::compile-pcl)' | ../unixport/saved_gcl ../unixport/
 	echo ${SETUP} '(load "../cmpnew/gcl_collectfn.lsp") '\
 		'(pcl::load-pcl)(in-package "PCL")(renew-sys-files)' | \
-		../unixport/saved_mod_gcl ../unixport/
+		../unixport/saved_gcl ../unixport/
 	cp sys-proclaim.lisp xxx
 	cat xxx | sed -e "s/COMPILER::CMP-ANON//g" > sys-proclaim.lisp
 	rm xxx

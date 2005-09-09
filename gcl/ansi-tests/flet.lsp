@@ -24,21 +24,10 @@
 ;;; the local function declaration
 (deftest flet.4
   (block %f
-    (flet ((%f (&optional (x (return-from %f :good)))
-	       nil))
-      (%f)
-      :bad))
-  :good)
-
-;;; Key arguments are not in the block defined by
-;;; the local function declaration
-(deftest flet.4a
-  (block %f
-    (flet ((%f (&key (x (return-from %f :good)))
-	       nil))
-      (%f)
-      :bad))
-  :good)
+    (flet ((%f (&optional (x (return-from %f 10)))
+	       20))
+      (%f)))
+  10)
 
 (deftest flet.5
   (flet ((%f () (return-from %f 15) 35))
@@ -86,33 +75,31 @@
 ;;; Unknown keyword parameter should throw a program-error in safe code
 ;;; (section 3.5.1.4)
 (deftest flet.12
-  (signals-error
-   (flet ((%f (&key a (b 0 b-p)) (values a b (not (not b-p))))) (%f :c 4))
-   program-error)
-  t)
+  (classify-error
+   (flet ((%f (&key a (b 0 b-p)) (values a b (not (not b-p))))) (%f :c 4)))
+  program-error)
 
 ;;; Odd # of keyword args should throw a program-error in safe code
 ;;; (section 3.5.1.6)
 (deftest flet.13
-  (signals-error
-   (flet ((%f (&key a (b 0 b-p)) (values a b (not (not b-p))))) (%f :a))
-   program-error)
-  t)
+  (classify-error
+   (flet ((%f (&key a (b 0 b-p)) (values a b (not (not b-p))))) (%f :a)))
+  program-error)
 
 ;;; Too few arguments (section 3.5.1.2)
 (deftest flet.14
-  (signals-error (flet ((%f (a) a)) (%f)) program-error)
-  t)
+  (classify-error (flet ((%f (a) a)) (%f)))
+  program-error)
 
 ;;; Too many arguments (section 3.5.1.3)
 (deftest flet.15
-  (signals-error (flet ((%f (a) a)) (%f 1 2)) program-error)
-  t)
+  (classify-error (flet ((%f (a) a)) (%f 1 2)))
+  program-error)
 
 ;;; Invalid keyword argument (section 3.5.1.5)
 (deftest flet.16
-  (signals-error (flet ((%f (&key a) a)) (%f '(foo))) program-error)
-  t)
+  (classify-error (flet ((%f (&key a) a)) (%f '(foo))))
+  program-error)
 
 
 ;;; Definition of a (setf ...) function
@@ -151,12 +138,12 @@
 
 ;;; flet works with a large (maximal?) number of arguments
 (deftest flet.20
-  (let* ((n (min (1- lambda-parameters-limit) 1024))
-	 (vars (loop repeat n collect (gensym))))
+  (let* ((n (min lambda-parameters-limit 1024))
+	 (vars (loop for i from 1 to n collect (gensym))))
     (eval
-     `(eqlt ,n
-	    (flet ((%f ,vars (+ ,@ vars)))
-	      (%f ,@(loop for e in vars collect 1))))))
+     `(eql ,n
+	   (flet ((%f ,vars (+ ,@ vars)))
+	     (%f ,@(loop for e in vars collect 1))))))
   t)
 
 ;;; Declarations and documentation strings are ok
@@ -366,6 +353,34 @@
 	 (%g :x 'worse))))
   good)
 
+;;; Test that [:&]allow-other-keys suppress errors for illegal keywords
+;;; or odd numbers of keyword arguments
+
+;;; Note -- These are apparently bad tests! -- PFD
+;;;(deftest flet.41
+;;;  (classify-error
+;;;   (flet ((%f (&key (a :good)) a))
+;;;     (%f :allow-other-keys t :b)))
+;;;  :good)
+;;;
+;;;(deftest flet.42
+;;;  (classify-error
+;;;   (flet ((%f (&key (a :good)) a))
+;;;     (%f :allow-other-keys t 10 20)))
+;;;  :good)
+;;;
+;;;(deftest flet.43
+;;;  (classify-error
+;;;   (flet ((%f (&key (a :good) &allow-other-keys) a))
+;;;     (%f :b)))
+;;;  :good)
+;;;
+;;;(deftest flet.44
+;;;  (classify-error
+;;;   (flet ((%f (&key (a :good) &allow-other-keys) a))
+;;;     (%f 10 20)))
+;;;  :good)
+
 
 (deftest flet.45
   (flet ((nil () 'a)) (nil))
@@ -386,14 +401,14 @@
 
 (deftest flet.49
   (loop for s in *cl-non-function-macro-special-operator-symbols*
-	for form = `(ignore-errors (flet ((,s () 'a)) (,s)))
+	for form = `(classify-error (flet ((,s () 'a)) (,s)))
 	unless (eq (eval form) 'a)
 	collect s)
   nil)
 
 (deftest flet.50
   (loop for s in *cl-non-function-macro-special-operator-symbols*
-	for form = `(ignore-errors (flet ((,s () 'a))
+	for form = `(classify-error (flet ((,s () 'a))
 				      (declare (ftype (function () symbol)
 						      ,s))
 				      (,s)))
@@ -404,7 +419,7 @@
 ;;; Binding SETF functions of certain COMMON-LISP symbols
 (deftest flet.51
   (loop for s in *cl-non-function-macro-special-operator-symbols*
-	for form = `(ignore-errors
+	for form = `(classify-error
 		     (flet (((setf ,s) (&rest args)
 			     (declare (ignore args))
 			     'a))
@@ -413,135 +428,4 @@
 	collect s)
   nil)
 
-;;; Check that FLET does not have a tagbody
-(deftest flet.52
-  (block done
-    (tagbody
-     (flet ((%f () (go 10) 10 (return-from done 'bad)))
-       (%f))
-     10
-     (return-from done 'good)))
-  good)
 
-;;; Check that nil keyword arguments do not enable the default values
-
-(deftest flet.53
-  (flet ((%f (&key (a 'wrong)) a)) (%f :a nil))
-  nil)
-
-(deftest flet.54
-  (flet ((%f (&key (a 'wrong a-p)) (list a (not a-p)))) (%f :a nil))
-  (nil nil))
-
-(deftest flet.55
-  (flet ((%f (&key ((:a b) 'wrong)) b)) (%f :a nil))
-  nil)
-
-(deftest flet.56
-  (flet ((%f (&key ((:a b) 'wrong present?)) (list b (not present?)))) (%f :a nil))
-  (nil nil))
-
-(deftest flet.57
-  (flet ((%f (&key) 'good))
-    (%f :allow-other-keys nil))
-  good)
-
-(deftest flet.58
-  (flet ((%f (&key) 'good))
-    (%f :allow-other-keys t))
-  good)
-
-(deftest flet.59
-  (flet ((%f (&key) 'good))
-    (%f :allow-other-keys t :a 1 :b 2))
-  good)
-
-(deftest flet.60
-  (flet ((%f (&key &allow-other-keys) 'good))
-    (%f :a 1 :b 2))
-  good)
-
-;;; NIL as a disallowed keyword argument
-(deftest flet.61
-  (signals-error
-   (flet ((%f (&key) :bad)) (%f nil nil))
-   program-error)
-  t)
-
-;;; Free declarations do not affect argument forms
-
-(deftest flet.62
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet ((%f (&optional (y x))
-		 (declare (special x))
-		 y))
-	(%f))))
-  :good)
-
-(deftest flet.63
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet ((%f (&key (y x))
-		 (declare (special x))
-		 y))
-	(%f))))
-  :good)
-
-(deftest flet.64
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet () (declare (special x)))
-      x))
-  :good)
-
-(deftest flet.65
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet ((%f () (declare (special x)))))
-      x))
-  :good)
-
-(deftest flet.66
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet ((%f () (declare (special x))))
-	x)))
-  :good)
-
-(deftest flet.67
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet ((%f (&aux (y x))
-		 (declare (special x))
-		 y))
-	(%f))))
-  :good)
-
-(deftest flet.68
-  (let ((x :bad))
-    (declare (special x))
-    (let ((x :good))
-      (flet ((%f () x))
-	(declare (special x))
-	(%f))))
-  :good)
-
-(deftest flet.69
-  (let ((*x* 0))
-    (declare (special *x*))
-    (flet ((%f (i)
-	       #'(lambda (arg)
-		   (declare (ignore arg))
-		   (incf *x* i))))
-      (values
-       (mapcar (%f 1) '(a b c))
-       (mapcar (%f 2) '(a b c)))))
-  (1 2 3)
-  (5 7 9))

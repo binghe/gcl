@@ -10,27 +10,27 @@
 ;; elt on lists
 
 (deftest elt.1
-  (signals-error (elt nil  0) type-error)
-  t)
+  (classify-error (elt nil 0))
+  type-error)
 
 (deftest elt.1a
-  (signals-error (elt nil -10) type-error)
-  t)
+  (classify-error (elt nil -10))
+  type-error)
 
 (deftest elt.1b
-  (signals-error (locally (elt nil 0) t) type-error)
-  t)
+  (classify-error (locally (elt nil 0) t))
+  type-error)
 
 (deftest elt.2
-  (signals-error (elt nil 1000000) type-error)
-  t)
+  (classify-error (elt nil 1000000))
+  type-error)
 
 (deftest elt.3 (elt '(a b c d e) 0) a)
 (deftest elt.4 (elt '(a b c d e) 2) c)
 (deftest elt.5 (elt '(a b c d e) 4) e)
 (deftest elt.5a 
-  (signals-error (elt '(a b c d e) -4) type-error)
-  t)
+  (classify-error (elt '(a b c d e) -4))
+  type-error)
 
 (deftest elt.6
   (let ((x (make-int-list 1000)))
@@ -59,11 +59,10 @@
   ((a b c e) e))
 
 (deftest elt.10
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (setf (elt x 4) 'd))
-   type-error)
-  t)
+     (setf (elt x 4) 'd)))
+  type-error)
 
 (deftest elt.11
   (let ((x (list 'a 'b 'c 'd 'e)))
@@ -89,46 +88,40 @@
   (79999 foo 80001))
 
 (deftest elt.14
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (elt x 10))
-   type-error)
-  t)
+     (elt x 10)))
+  type-error)
 
 (deftest elt.15
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (elt x 'a))
-   type-error)
-  t)
+     (elt x 'a)))
+  type-error)
 
 (deftest elt.16
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (elt x 10.0))
-   type-error)
-  t)
+     (elt x 10.0)))
+  type-error)
 
 (deftest elt.17
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (elt x -1))
-   type-error)
-  t)
+     (elt x -1)))
+  type-error)
 
 (deftest elt.18
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (elt x -100000000000000000))
-   type-error)
-  t)
+     (elt x -100000000000000000)))
+  type-error)
 
 (deftest elt.19
-  (signals-error
+  (classify-error
    (let ((x (list 'a 'b 'c)))
-     (elt x #\w))
-   type-error)
-  t)
+     (elt x #\w)))
+  type-error)
 
 (deftest elt.order.1
   (let ((i 0) x y)
@@ -150,8 +143,9 @@
   k (a b c k e) 3 1 2 3)
 
 (deftest elt-v.1
-  (signals-error (elt (make-array '(0)) 0) type-error)
-  t)
+  (classify-error
+   (elt (make-array '(0)) 0))
+  type-error)
 
 ;; (deftest elt-v.2 (elt (make-array '(1)) 0) nil)  ;; actually undefined
 (deftest elt-v.3
@@ -189,18 +183,16 @@
   (a b c e e))
 
 (deftest elt-v.10
-  (signals-error
+  (classify-error
    (let ((x (make-array '(3) :initial-contents (list 'a 'b 'c))))
-     (setf (elt x 4) 'd))
-   type-error)
-  t)
+     (setf (elt x 4) 'd)))
+  type-error)
 
 (deftest elt-v.11
-  (signals-error
+  (classify-error
    (let ((x (make-array '(3) :initial-contents (list 'a 'b 'c))))
-     (setf (elt x -100) 'd))
-   type-error)
-  t)
+     (setf (elt x -100) 'd)))
+  type-error)
 
 (deftest elt-v.12
     (let ((x (make-int-array 100000)))
@@ -218,8 +210,8 @@
 ;;;  Adjustable arrays
 
 (deftest elt-adj-array.1
-  (signals-error (elt (make-adj-array '(0)) 0) type-error)
-  t)
+  (classify-error (elt (make-adj-array '(0)) 0))
+  type-error)
 
 ;;; (deftest elt-adj-array.2 (elt (make-adj-array '(1)) 0) nil) ;; actually undefined 
 
@@ -258,18 +250,16 @@
   (a b c e e))
 
 (deftest elt-adj-array.10
-  (signals-error
+  (classify-error
    (let ((x (make-adj-array '(3) :initial-contents (list 'a 'b 'c))))
-     (setf (elt x 4) 'd))
-   type-error)
-  t)
+     (setf (elt x 4) 'd)))
+  type-error)
 
 (deftest elt-adj-array.11
-  (signals-error
+  (classify-error
    (let ((x (make-adj-array '(3) :initial-contents (list 'a 'b 'c))))
-     (setf (elt x -100) 'd))
-   type-error)
-  t)
+     (setf (elt x -100) 'd)))
+  type-error)
 
 (deftest elt-adj-array.12
     (let ((x (make-int-array 100000 #'make-adj-array)))
@@ -287,8 +277,8 @@
 ;; displaced arrays
 
 (deftest elt-displaced-array.1 
-  (signals-error (elt (make-displaced-array '(0) 100) 0) type-error)
-  t)
+  (classify-error (elt (make-displaced-array '(0) 100) 0))
+  type-error)
 
 (deftest elt-displaced-array.2
   (elt (make-displaced-array '(1) 100) 0)
@@ -315,23 +305,21 @@
   0 0 1)
 
 (deftest elt-fill-pointer.3
-  (signals-error
+  (classify-error
    (let ((a (make-array '(5)
 			:initial-contents '(0 0 1 0 0)
 			:fill-pointer 3)))
-     (elt a 4))
-   type-error)
-  t)
+     (elt a 4)))
+  type-error)
 
 (deftest elt-fill-pointer.4
-  (signals-error
+  (classify-error
    (let ((a (make-array '(5)
 			:initial-contents '(0 0 1 0 0)
 			:element-type 'bit
 			:fill-pointer 3)))
-     (elt a 4))
-   type-error)
-  t)
+     (elt a 4)))
+  type-error)
 
 (deftest elt-fill-pointer.5
    (let ((a (make-array '(5)
@@ -342,14 +330,13 @@
    #\a #\b #\c)
 
 (deftest elt-fill-pointer.6
-  (signals-error
+  (classify-error
    (let ((a (make-array '(5)
 			:initial-contents '(#\a #\b #\c #\d #\e)
 			:element-type 'character
 			:fill-pointer 3)))
-     (elt a 4))
-   type-error)
-  t)
+     (elt a 4)))
+  type-error)
 
 (deftest elt-fill-pointer.7
    (let ((a (make-array '(5)
@@ -360,98 +347,22 @@
    #\a #\b #\c)
 
 (deftest elt-fill-pointer.8
-  (signals-error
+  (classify-error
    (let ((a (make-array '(5)
 			:initial-contents '(#\a #\b #\c #\d #\e)
 			:element-type 'base-char
 			:fill-pointer 3)))
-     (elt a 4))
-   type-error)
-  t)
-
-;;; Specialized strings
-
-(deftest elt.special-strings.1
-  (do-special-strings
-   (s "abcde" nil)
-   (assert (char= (elt s 0) #\a))
-   (assert (char= (elt s 3) #\d))
-   (assert (char= (elt s 4) #\e)))
-  nil)
-
-;;; Specialized integer vectors
-
-(deftest elt.special-vectors.1
-  (do-special-integer-vectors
-   (v #(1 1 0 1 0 1) nil)
-   (assert (= (elt v 0) 1))
-   (assert (= (elt v 1) 1))
-   (assert (= (elt v 2) 0))
-   (assert (= (elt v 3) 1))
-   (assert (= (elt v 4) 0))
-   (assert (= (elt v 5) 1)))
-  nil)
-
-(deftest elt.special-vectors.2
-  (do-special-integer-vectors
-   (v #(1 2 0 -1 0 3) nil)
-   (assert (= (elt v 0) 1))
-   (assert (= (elt v 1) 2))
-   (assert (= (elt v 2) 0))
-   (assert (= (elt v 3) -1))
-   (assert (= (elt v 4) 0))
-   (assert (= (elt v 5) 3)))
-  nil)
-
-(deftest elt.special-vectors.3
-  (loop for type in '(short-float single-float long-float double-float)
-	for len = 10
-	for vals = (loop for i from 1 to len collect (coerce i type))
-	for vec = (make-array len :element-type type :initial-contents vals)
-	unless (loop for i below len always (eql (elt vec i)
-						 (coerce (1+ i) type)))
-	collect (list type vals vec))
-  nil)
-
-(deftest elt.special-vectors.4
-  (loop for etype in '(short-float single-float long-float double-float
-				   integer rational)
-	for type = `(complex ,etype)
-	for len = 10
-	for vals = (loop for i from 1 to len collect (complex (coerce i etype)
-							      (coerce (- i) etype)))
-	for vec = (make-array len :element-type type :initial-contents vals)
-	unless (loop for i below len always (eql (elt vec i)
-						 (elt vals i)))
-	collect (list type vals vec))
-  nil)
-
-
-
-;;; Error tests
+     (elt a 4)))
+  type-error)
 
 (deftest elt.error.1
-  (signals-error (elt) program-error)
-  t)
+  (classify-error (elt))
+  program-error)
 
 (deftest elt.error.2
-  (signals-error (elt nil) program-error)
-  t)
+  (classify-error (elt nil))
+  program-error)
 
 (deftest elt.error.3
-  (signals-error (elt nil 0 nil) program-error)
-  t)
-
-(deftest elt.error.4
-  (do-special-integer-vectors
-   (v #(1 1 0 1 0 1) nil)
-   (assert (eql t (eval `(signals-error (elt ,v -1) type-error))))
-   (assert (eql t (eval `(signals-error (elt ,v 6) type-error)))))
-  nil)
-
-(deftest elt.error.5
-  (do-special-strings
-   (s "ABCDEFGH" nil)
-   (assert (eql t (eval `(signals-error (elt ,s -1) type-error))))
-   (assert (eql t (eval `(signals-error (elt ,s 8) type-error)))))
-  nil)
+  (classify-error (elt nil 0 nil))
+  program-error)

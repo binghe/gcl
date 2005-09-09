@@ -1,7 +1,6 @@
 /* vms-hdr.c -- BFD back-end for VMS/VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    HDR record handling functions
    EMH record handling functions
@@ -26,7 +25,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
-#include "bfdver.h"
 #include "sysdep.h"
 #include "bfdlink.h"
 #include "safe-ctype.h"
@@ -206,7 +204,7 @@ _bfd_vms_slurp_hdr (abfd, objtype)
 /*-----------------------------------------------------------------------------*/
 /* Output routines.  */
 
-/* Manufacture a VMS like time on a unix based system.
+/* Manufacure a VMS like time on a unix based system.
    stolen from obj-vms.c  */
 
 static unsigned char *
@@ -225,8 +223,7 @@ get_vms_time_string ()
   pnt[10] = 0;
   pnt[16] = 0;
   pnt[24] = 0;
-  sprintf ((char *) tbuf, "%2s-%3s-%s %s",
-	   pnt + 8, pnt + 4, pnt + 20, pnt + 11);
+  sprintf (tbuf, "%2s-%3s-%s %s", pnt + 8, pnt + 4, pnt + 20, pnt + 11);
 #else
 #include <starlet.h>
   struct
@@ -410,10 +407,10 @@ _bfd_vms_slurp_eom (abfd, objtype)
 	  bfd_set_error (bfd_error_bad_value);
 	  return -1;
 	}
-      PRIV(eom_data).eom_has_transfer = FALSE;
+      PRIV(eom_data).eom_has_transfer = false;
       if (PRIV(rec_size) > 10)
 	{
-	   PRIV(eom_data).eom_has_transfer = TRUE;
+	   PRIV(eom_data).eom_has_transfer = true;
 	   PRIV(eom_data).eom_b_tfrflg = *(vms_rec + 9);
 	   PRIV(eom_data).eom_l_psindx = bfd_getl32 (vms_rec + 12);
 	   PRIV(eom_data).eom_l_tfradr = bfd_getl32 (vms_rec + 16);

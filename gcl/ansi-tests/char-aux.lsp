@@ -6,7 +6,6 @@
 (in-package :cl-test)
 
 (defun is-ordered-by (seq fn)
-  (declare (type function fn))
   (let ((n (length seq)))
     (loop for i from 0 below (1- n)
 	  for e = (elt seq i)
@@ -15,28 +14,21 @@
 		always (funcall fn e (elt seq j))))))
 
 (defun is-antisymmetrically-ordered-by (seq fn)
-  (declare (type function fn))
   (and (is-ordered-by seq fn)
        (is-ordered-by (reverse seq) (complement fn))))
 
 (defun is-case-insensitive (fn)
-  (when (symbolp fn)
-    (assert (fboundp fn))
-    (setf fn (symbol-function fn)))
-  (assert (typep fn 'function))
-  (locally
-   (declare (type function fn))
-   (loop for c across +code-chars+
-	 for c1 = (char-upcase c)
-	 for c2 = (if (eql c c1) (char-downcase c) c1)
-	 always
-	 (loop for d across +code-chars+
-	       for d1 = (char-upcase d)
-	       for d2 = (if (eql d d1) (char-downcase d) d1)
-	       always (equiv (funcall fn c d)
-			     (funcall fn c2 d)
-			     (funcall fn c d2)
-			     (funcall fn c2 d2))))))
+  (loop for c across +code-chars+
+	for c1 = (char-upcase c)
+	for c2 = (if (eql c c1) (char-downcase c) c1)
+	always
+	(loop for d across +code-chars+
+	      for d1 = (char-upcase d)
+	      for d2 = (if (eql d d1) (char-downcase d) d1)
+	      always (equiv (funcall fn c d)
+			    (funcall fn c2 d)
+			    (funcall fn c d2)
+			    (funcall fn c2 d2)))))
 
 (defun equiv (&rest args)
   (declare (dynamic-extent args))
@@ -48,17 +40,9 @@
 
 ;;; From character.lsp
 (defun char-type-error-check (fn)
-  (when (symbolp fn)
-    (assert (fboundp fn))
-    (setf fn (symbol-function fn)))
-  (assert (typep fn 'function))
-  (locally
-   (declare (type function fn))
-   (loop for x in *universe*
-	 always (or (characterp x)
-		    ;; FIXME -- catch the type error and check that datum
-		    ;; is eql to x (and that datum is not in the expected type)
-		    (eqt (catch-type-error (funcall fn x)) 'type-error)))))
+  (loop for x in *universe*
+	always (or (characterp x)
+		   (eqt (catch-type-error (funcall fn x)) 'type-error))))
 
 (defun standard-char.5.body ()
   (loop for i from 0 below (min 65536 char-code-limit)
@@ -69,9 +53,8 @@
 (defun extended-char.3.body ()
   (loop for i from 0 below (min 65536 char-code-limit)
 	always (let ((c (code-char i)))
-		 (not (and (typep c 'base-char)
-			   (typep c 'extended-char)
-			   )))))
+		 (not (and (typep c 'extended-char)
+			   (typep c 'base-char))))))
 
 (defun character.1.body ()
   (loop for i from 0 below (min 65536 char-code-limit)
@@ -91,7 +74,7 @@
 		      (let ((c (catch-type-error (character x))))
 			(or (eqlt c 'type-error)
 			    (let ((s (catch-type-error (string x))))
-			      (and (stringp s) (eqlt (my-aref s 0) c)))))))
+			      (and (stringp s) (eqlt (char s 0) c)))))))
 	do (return x)))
 
 (defun characterp.2.body ()
@@ -132,24 +115,14 @@
 		     t		     
 		     ))))
 
-(defun digit-char.1.body.old ()
-  (loop for r from 2 to 36 always
-       (loop for i from 0 to 36
-	  always (let* ((c (digit-char i r))
-			(result
-			 (if (>= i r) (null c)
-			     (eqlt c (char +extended-digit-chars+ i)))))
-		   (unless result
-		     (format t "~A ~A ~A~%" r i c))
-		   result))))
-
 (defun digit-char.1.body ()
-  (loop for r from 2 to 36 nconc
-       (loop for i from 0 to 36
-	  for c = (digit-char i r)
-	  unless (if (>= i r) (null c)
-		     (eqlt c (char +extended-digit-chars+ i)))
-	  collect (list r i c))))
+  (loop
+   for r from 2 to 36
+   always
+   (loop for i from 0 to 36
+	 always (let ((c (digit-char i r)))
+		  (if (>= i r) (null c)
+		    (eqlt c (char +extended-digit-chars+ i)))))))
 
 (defun digit-char-p.1.body ()
   (loop for x in *universe*
@@ -275,16 +248,12 @@
 		     (setf (gethash c c->i) i)
 		     (setf (gethash i i->c) c)
 		     t))))))
-      (or
-       (loop for i from 0 below (min (ash 1 16) char-code-limit)
-	     unless (%insert (code-char i))
-	     collect i)
-       (loop for i = (random char-code-limit)
-	     repeat 1000
-	     unless (%insert (code-char i))
-	     collect i)
-       (find-if-not #'%insert +standard-chars+)
-       (find-if-not #'%insert *universe*)))))
+      (and
+       (loop for i from 0 below char-code-limit
+	     always (%insert (code-char i)))
+       (every #'%insert +standard-chars+)
+       (every #'%insert *universe*)
+       t))))
 
 (defun char-name.1.fn ()
   (declare (optimize (safety 3) (speed 1) (space 1)))
@@ -296,7 +265,7 @@
 		    (and (stringp name)
 			 (eqlt c (name-char name))))))))
     (and
-     (loop for i from 0 below (min (ash 1 16) char-code-limit)
+     (loop for i from 0 below char-code-limit
 	   always (%check (code-char i)))
      (every #'%check +standard-chars+)
      (every #'%check *universe*)
@@ -311,11 +280,7 @@
 	    (let ((c (name-char x)))
 	      (or (not c)
 		  (characterp c)
-		  ;; FIXME The rest of this wasn't reachable
-		  #|
 		  (let ((name (char-name c)))
 		    (declare (type (or null string) name))
 		    (and name
-			 (string-equal name s)))
-		  |#
-		  )))))
+			 (string-equal name s))))))))

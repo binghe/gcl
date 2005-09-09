@@ -44,30 +44,6 @@
      x))
   a 1)
 
-;;; No implicit tagbody
-(deftest unless.10
-  (block done
-    (tagbody
-     (unless nil
-       (go 10)
-       10
-       (return-from done 'bad))
-     10
-     (return-from done 'good)))
-  good)
-
-(deftest unless.error.1
-  (signals-error (funcall (macro-function 'unless)) program-error)
-  t)
-
-(deftest unless.error.2
-  (signals-error (funcall (macro-function 'unless)
-			   '(unless t))
-		 program-error)
-  t)
-
-(deftest unless.error.3
-  (signals-error (funcall (macro-function 'unless)
-			   '(unless t) nil nil)
-		 program-error)
-  t)
+;;; (deftest unless.error.1
+;;;  (classify-error (unless))
+;;;  program-error)

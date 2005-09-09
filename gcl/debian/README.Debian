@@ -11,4 +11,10 @@ in /usr/share/doc/gcl/test_results.gz.
 To toggle the use of the ANSI image, set the environment variable
 GCL_ANSI to any non-empty string.
 
-Camm Maguire, Thu Feb 27 14:44:00 2003.
+New in 2.6.2
+------------
+
+Please see the RELEASE-2.6.2.html file for release note information,
+regression testing, and sample benchmarks.
+
+ -- Camm Maguire <camm@enhanced.com>, Fri Jun 25 22:07:18 2004

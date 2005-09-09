@@ -5,8 +5,6 @@
 
 (in-package :cl-test)
 
-(compile-and-load "types-aux.lsp")
-
 ;;; More subtypep tests are in types-and-class.lsp
 
 (deftest subtypep.order.1
@@ -64,16 +62,16 @@
   t)
 
 (deftest subtypep.error.1
-  (signals-error (subtypep) program-error)
-  t)
+  (classify-error (subtypep))
+  program-error)
 
 (deftest subtypep.error.2
-  (signals-error (subtypep t) program-error)
-  t)
+  (classify-error (subtypep t))
+  program-error)
 
 (deftest subtypep.error.3
-  (signals-error (subtypep t t nil nil) program-error)
-  t)
+  (classify-error (subtypep t t nil nil))
+  program-error)
 
 ;;; Special cases of types-6 that are/were causing problems in CMU CL
 
@@ -113,26 +111,11 @@
   (subtypep* 'simple-bit-vector 'simple-vector)
   nil t)
 
-;;; Extended characters
-
 (deftest subtypep.extended-char.1
   (if (subtypep* 'character 'base-char)
       (subtypep* 'extended-char nil)
     (values t t))
   t t)
-
-(deftest subtypep.extended-char.2
-  (if (subtypep* 'extended-char nil)
-      (subtypep* 'character 'base-char)
-    (values t t))
-  t t)
-
-(deftest subtypep.extended-char.3
-  (check-equivalence 'extended-char '(and character (not base-char)))
-  nil)
-
-
-;;; Some and, or combinations
 
 (deftest subtypep.and/or.1
   (check-equivalence

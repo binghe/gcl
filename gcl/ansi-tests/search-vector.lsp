@@ -5,13 +5,11 @@
 
 (in-package :cl-test)
 
-(compile-and-load "search-aux.lsp")
-
 (deftest search-vector.1
   (let ((target *searched-vector*)
 	(pat #(a)))
     (loop for i from 0 to (1- (length target))
-	  for tail = (subseq target i)
+	  for tail on target
 	  always
 	  (let ((pos (search pat tail)))
 	    (search-check pat tail pos))))
@@ -176,17 +174,3 @@
        (search pat a))
      (search pat a :from-end t)))
   0 4 0 0 nil nil)
-
-;; Order of test, test-not
-
-(deftest search-vector.17
-  (let ((pat #(10))
-	(target #(1 4 6 10 15 20)))
-    (search pat target :test #'<))
-  4)
-
-(deftest search-vector.18
-  (let ((pat #(10))
-	(target #(1 4 6 10 15 20)))
-    (search pat target :test-not #'>=))
-  4)

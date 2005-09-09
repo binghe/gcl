@@ -1,4 +1,3 @@
-/* -*-C-*- */
 /*
  Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
@@ -223,18 +222,28 @@ stack_cons(void)
 	*vs_top++ = c;
 }
 
-object on_stack_list(fixnum n,...) {
-  object x,first;
-  va_list ap;
-  va_start(ap,n);
-  first=va_arg(ap,object);
-  x=on_stack_list_vector_new(n,first,ap);
-  va_end(ap);
-  return x;
-}
+/*static object on_stack_list_vector(n,ap)
+     int n;
+     va_list ap;
+{object res=(object) alloca_val;
+ struct cons *p;
+ object x;
+ p=(struct cons *) res;
+ if (n<=0) return Cnil;
+ TOP:
+ p->t = (int)t_cons;
+ p->m=FALSE;
+ p->c_car= va_arg(ap,object);
+ if (--n == 0)
+   {p->c_cdr = Cnil;
+    return res;}
+ else
+   { x= (object) p;
+     x->c.c_cdr= (object) ( ++p);}
+ goto TOP;
+}*/
 
-
-object on_stack_list_vector_new(fixnum n,object first,va_list ap)
+object on_stack_list_vector_new(int n,object first,va_list ap)
 {object res=(object) alloca_val;
  struct cons *p;
  object x;
@@ -242,6 +251,8 @@ object on_stack_list_vector_new(fixnum n,object first,va_list ap)
  p=(struct cons *) res;
  if (n<=0) return Cnil;
  TOP:
+ p->t = (int)t_cons;
+ p->m=FALSE;
  p->c_car= jj ? va_arg(ap,object) : first;
  jj=1;
  if (--n == 0)
@@ -268,7 +279,7 @@ object on_stack_list_vector_new(fixnum n,object first,va_list ap)
  return ans;
 }*/
 
-object list_vector_new(fixnum n,object first,va_list ap)
+object list_vector_new(int n,object first,va_list ap)
 {object ans,*p;
  
  if (n == 0) return Cnil;
@@ -293,53 +304,54 @@ object list_vector_new(fixnum n,object first,va_list ap)
 
    
 
-object list(fixnum n,...) { 
-
-  va_list ap;
+object list(int n,...)
+{ va_list ap;
   struct typemanager *tm=(&tm_table[(int)t_cons]);
-
-  if (n<=0) return Cnil;
   va_start(ap,n);
-
   CHECK_INTERRUPT;
-  if (tm->tm_nfree < n )  {
-    
-    object *p = vs_top;
-    
-    vs_push(Cnil);
-    while(--n>=0)
-      { *p=make_cons(va_arg(ap,object),Cnil);
-      p= &((*p)->c.c_cdr);
-      }
-    return(vs_pop);
+  if (tm->tm_nfree < n )
+     {
+	object *p = vs_top;
 
-  } else  {
-
-    object tail=tm->tm_free,lis=tail;
-    BEGIN_NO_INTERRUPT;
-
+	vs_push(Cnil);
+	while(--n>=0)
+	  { *p=make_cons(va_arg(ap,object),Cnil);
+	    p= &((*p)->c.c_cdr);
+	  }
+	return(vs_pop);
+     }
+  else
+    {BEGIN_NO_INTERRUPT;
+    {int i=0;
+    object tail=tm->tm_free;
+    object lis;
     tm->tm_nfree -= n;
     tm->tm_nused += n;
-    while (--n) {
-      set_type_of(tail,t_cons);/*FIXME try removing this*/
-      tail->c.c_cdr=OBJ_LINK(tail);
-      tail->c.c_car=va_arg(ap,object); 
-      tail=tail->c.c_cdr;
-    }
-    tm->tm_free=OBJ_LINK(tail);
-    set_type_of(tail,t_cons);/*FIXME try removing this*/
-    tail->c.c_car=va_arg(ap,object); 
-    tail->c.c_cdr=Cnil;
-    
-    END_NO_INTERRUPT;
-    va_end(ap);
-    return lis;
-    
-  }
+    n=n-1;
+    lis=tail;
+    while (1)
+      {if (i < n)
+       tail->c.c_cdr=OBJ_LINK(tail);
+       else {tm->tm_free=OBJ_LINK(tail);
+	     tail->d.t = (int)t_cons;
+	     tail->d.m = FALSE;
+	     tail->c.c_car=va_arg(ap,object); 
+	     tail->c.c_cdr=Cnil;
+	     goto END_INTER ;
+	   }
+       /* these could be one instruction*/
+       tail->d.t = (int)t_cons;
+       tail->d.m=FALSE;
+       tail->c.c_car=va_arg(ap,object);
+       tail=tail->c.c_cdr;
+       i++;}
+   END_INTER: END_NO_INTERRUPT;
+  va_end(ap);
+  return lis;}}	
 
 }
 
-object listA(fixnum n, ...)
+object listA(int n, ...)
 {       va_list ap;
 	object *p = vs_top;
 	va_start(ap,n);
@@ -718,7 +730,7 @@ LFD(Lendp)()
 
 LFD(Llist_length)()
 {
-	fixnum n;
+	int n;
 	object fast, slow;
 	check_arg(1);
 	n = 0;
@@ -744,7 +756,7 @@ LFD(Llist_length)()
 
 
 object
-nth(fixnum n, object x) {
+nth(int n, object x) {
 
 	if (n < 0) {
 		vs_push(make_fixnum(n));
@@ -769,11 +781,11 @@ LFD(Lnthcdr)()
 }
 
 object
-nthcdr(fixnum n, object x) {
+nthcdr(int n, object x) {
 
 	if (n < 0) {
 		vs_push(make_fixnum(n));
-		FEwrong_type_argument(sLnon_negative_fixnum, vs_head);
+		FEwrong_type_argument(sLpositive_fixnum, vs_head);
 	}
 	while (n-- > 0)
 		if (endp_prop(x)) {
@@ -785,7 +797,7 @@ nthcdr(fixnum n, object x) {
 
 LFD(Llast)() {
 	object t;
-	fixnum n;
+	int n;
 
 	n=vs_top-vs_base;
 	if (n<1)
@@ -796,7 +808,7 @@ LFD(Llast)() {
 		return;
 	if (n==2) {
 		if (type_of(vs_base[1])!=t_fixnum || (n=fix(vs_base[1]))<0)
-			FEwrong_type_argument(sLnon_negative_fixnum,vs_base[1]);
+			FEwrong_type_argument(sLpositive_fixnum,vs_base[1]);
 		vs_popp;
 	}	
 
@@ -848,11 +860,13 @@ object x;
         
  
 object on_stack_make_list(n)
-fixnum n;
+int n;
 { object res=(object) alloca_val;
  struct cons *p = (struct cons *)res;
  if (n<=0) return Cnil;
   TOP:
+ p->t = (int)t_cons;
+ p->m=FALSE;
  p->c_car=Cnil;
  if (--n == 0)
    {p->c_cdr = Cnil;
@@ -864,14 +878,14 @@ fixnum n;
 }
 
 object make_list(n)
-fixnum n;
+int n;
 {object x =Cnil ;
   while (n-- > 0)
     x = make_cons(Cnil, x);
  return x;}
 
 @(defun make_list (size &key initial_element &aux x)
-	fixnum i=0;
+	int i;
 @
 	check_type_non_negative_integer(&size);
 	if (type_of(size) != t_fixnum)
@@ -920,10 +934,8 @@ LFD(Lrevappend)() {
 	object x, y;
 
 	check_arg(2);
-	/* check_proper_list(vs_base[0]); */
-	/* endp_prop does check */
 	y = vs_pop;
-	for (x = vs_base[0];  !endp_prop(x);  x = x->c.c_cdr) {
+	for (x = vs_base[0];  !endp(x);  x = x->c.c_cdr) {
 		vs_push(x->c.c_car);
 		vs_push(y);
 		stack_cons();
@@ -946,7 +958,7 @@ nconc(object x, object y) {
 
 LFD(Lnconc)() {
 	object x, l, m=Cnil;
-        fixnum i, narg;
+        int i, narg;
 	
 	narg = vs_top - vs_base - 1;
 	if (narg < 0) { vs_push(Cnil); return; }
@@ -986,7 +998,7 @@ LFD(Lreconc)() {
 }
 
 @(defun butlast (lis &optional (nn `make_fixnum(1)`))
-	fixnum i;
+	int i;
 @
 	check_type_non_negative_integer(&nn);
 	if (type_of(nn) != t_fixnum)
@@ -1007,7 +1019,7 @@ LFD(Lreconc)() {
 @)
 
 @(defun nbutlast (lis &optional (nn `make_fixnum(1)`))
-	fixnum i;
+	int i;
 	object x;
 @
 	check_type_non_negative_integer(&nn);
@@ -1024,7 +1036,7 @@ LFD(Lreconc)() {
 @)
 
 LFD(Lldiff)() {
-	fixnum i;
+	int i;
 	object x;
 
 	check_arg(2);
@@ -1111,26 +1123,13 @@ object x,y;
 
 void
 check_alist(alist)
-object alist;
-{
-    object v;
-    for (v=alist ; !endp(v) ; v=v->c.c_cdr)
-        if (type_of(v->c.c_car) != t_cons && v->c.c_car != Cnil)
-	     FEwrong_type_argument(sLlist, v);
-}
- 
-void
-check_proper_list(alist)
-object alist;
-{
-    object v;
-    /*
-    if (alist == Cnil)
-	 FEwrong_type_argument(sLlist, alist);
-    */
-    for (v=alist ; type_of(v) == t_cons ; v=v->c.c_cdr);
-    if (v != Cnil)
-	 FEwrong_type_argument(sLlist, alist);
+     object alist;
+{object v;
+   for (v=alist ; !endp(v) ; v=v->c.c_cdr)
+   {if (type_of(v->c.c_car) != t_cons
+         && v->c.c_car != Cnil)
+ FEerror("Not alist",0);}
+ return ;
 }
  
 
@@ -1182,7 +1181,7 @@ PREDICATE(Lmember,Lmember_if,Lmember_if_not, 2)
 	if (rev != Cnil)
 		reverse_comparison=1;
 	setupTEST(item, test, test_not, key);
-	while (!endp_prop(list)) {
+	while (!endp(list)) {
 		if (TEST(list->c.c_car))
 			goto L;
 		list = list->c.c_cdr;
@@ -1216,8 +1215,6 @@ LFD(Ladjoin)()
 
 	if (vs_top - vs_base < 2)
 		too_few_arguments();
-	/* member1 does now check */
-	/* check_proper_list(vs_base[1]); */
 	while (vs_base < top)
 		vs_push(*vs_base++);
 	FFN(Lmember1)();
@@ -1242,10 +1239,8 @@ LFD(Lacons)()
 	vp = vs_top + 1;
 	k = keys;
 	d = data;
-	/* check_proper_list(k);
-	check_proper_list(d); */
-	while (!endp_prop(k)) {
-		if (endp_prop(d))
+	while (!endp(k)) {
+		if (endp(d))
 		 FEerror(
 		  "The keys ~S and the data ~S are not of the same length",
 		  2, keys, data);
@@ -1253,7 +1248,7 @@ LFD(Lacons)()
 		k = k->c.c_cdr;
 		d = d->c.c_cdr;
 	}
-	if (!endp_prop(d))
+	if (!endp(d))
 	    FEerror("The keys ~S and the data ~S are not of the same length",
 		    2, keys, data);
 	vs_push(a_list);
@@ -1268,8 +1263,8 @@ LFD(Lacons)()
 	protectTEST;
 	setupTEST(item, test, test_not, key);
 	while (!endp(a_list)) {
-		if (a_list->c.c_car != Cnil && 
-		    TEST((*car_or_cdr)(a_list->c.c_car))) {
+		if (TEST((*car_or_cdr)(a_list->c.c_car)) &&
+                    a_list->c.c_car != Cnil) {
 			a_list = a_list->c.c_car;
 			goto L;
 		}
@@ -1316,26 +1311,26 @@ object x, l;
 	return(FALSE);
 }
 
-/* static void */
-/* FFN(siLmemq)() */
-/* { */
-/* 	object x, l; */
+static void
+FFN(siLmemq)()
+{
+	object x, l;
 
-/* 	check_arg(2); */
+	check_arg(2);
 
-/* 	x = vs_base[0]; */
-/* 	l = vs_base[1]; */
+	x = vs_base[0];
+	l = vs_base[1];
 
-/* 	for (;  type_of(l) == t_cons;  l = l->c.c_cdr) */
-/* 		if (x == l->c.c_car) { */
-/* 			vs_base[0] = l; */
-/* 			vs_popp; */
-/* 			return; */
-/* 		} */
+	for (;  type_of(l) == t_cons;  l = l->c.c_cdr)
+		if (x == l->c.c_car) {
+			vs_base[0] = l;
+			vs_popp;
+			return;
+		}
 	
-/* 	vs_base[0] = Cnil; */
-/* 	vs_popp; */
-/* } */
+	vs_base[0] = Cnil;
+	vs_popp;
+}
 
 void
 delete_eq(x, lp)
@@ -1440,6 +1435,6 @@ gcl_init_list_function()
 	make_function("RASSOC-IF", Lrassoc_if);
 	make_function("RASSOC-IF-NOT", Lrassoc_if_not);
 
-/* 	make_si_function("MEMQ", siLmemq); */
+	make_si_function("MEMQ", siLmemq);
 
 }

@@ -107,36 +107,3 @@
      collect (list i form)))
   nil)
 
-(deftest multiple-value-setq.13
-  (multiple-value-setq nil :good)
-  :good)
-
-(deftest multiple-value-setq.14
-  (multiple-value-setq nil (values))
-  nil)
-
-(deftest multiple-value-setq.15
-  (multiple-value-setq nil (values 'a 'b))
-  a)
-
-;;; Error tests
-
-(deftest multiple-value-setq.error.1
-  (signals-error (funcall (macro-function 'multiple-value-setq))
-		 program-error)
-  t)
-  
-(deftest multiple-value-setq.error.2
-  (signals-error (funcall (macro-function 'multiple-value-setq)
-			   '(multiple-value-setq nil nil))
-		 program-error)
-  t)
-
-(deftest multiple-value-setq.error.3
-  (signals-error (funcall (macro-function 'multiple-value-setq)
-			   '(multiple-value-setq nil nil)
-			   nil nil)
-		 program-error)
-  t)
-
-  

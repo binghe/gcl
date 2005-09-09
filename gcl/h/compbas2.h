@@ -161,23 +161,19 @@ EXTER object MVloc[10];
 /* #endif */
 #include <stdlib.h>
 EXTER char *alloca_val;
-#define OUR_ALLOCA(n) ZALLOCA(n)
+#define OUR_ALLOCA(n) alloca(n)
 #define ALLOCA_FREE(n) 
 
-#define ALLOCA_CONS_ALIGN(n) ({alloca_val=ZALLOCA((n)*sizeof(struct cons)+sizeof(alloca_val));if (((unsigned long)alloca_val)&sizeof(alloca_val)) alloca_val+=sizeof(alloca_val);alloca_val;})
-
-#define ALLOCA_CONS(n) ALLOCA_CONS_ALIGN(n)
-#define ON_STACK_CONS(x,y) (ALLOCA_CONS_ALIGN(1), on_stack_cons(x,y)) 
-/* #define ALLOCA_CONS(n) (alloca_val=alloca((n)*sizeof(struct cons)+sizeof(n)),alloca_val+=((unsigned long)alloca_val&sizeof(n))) */
-/* #define ON_STACK_CONS(x,y) (alloca_val=alloca(sizeof(struct cons)), on_stack_cons(x,y))  */
+#define ALLOCA_CONS(n) (alloca_val=alloca((n)*sizeof(struct cons))) 
+#define ON_STACK_CONS(x,y) (alloca_val=alloca(sizeof(struct cons)), on_stack_cons(x,y)) 
 #define ON_STACK_LIST on_stack_list
 #define ON_STACK_LIST_VECTOR on_stack_list_vector
 #define ON_STACK_LIST_VECTOR_NEW on_stack_list_vector_new
 #define ON_STACK_MAKE_LIST on_stack_make_list
 object on_stack_cons();
-object on_stack_list(fixnum,...);
+object on_stack_list(int,...);
 /* object on_stack_list_vector(int,va_list); */
-object on_stack_list_vector_new(fixnum,object,va_list);
+object on_stack_list_vector_new(int,object,va_list);
 object on_stack_make_list();
 #else /* no HAVE_ALLOCA */
 #define OUR_ALLOCA(n) malloc(n)

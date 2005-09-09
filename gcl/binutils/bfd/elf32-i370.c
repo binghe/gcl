@@ -1,5 +1,5 @@
 /* i370-specific support for 32-bit ELF
-   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2004
+   Copyright 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Hacked by Linas Vepstas for i370 linas@linas.org
@@ -34,6 +34,32 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "elf-bfd.h"
 #include "elf/i370.h"
 
+#define USE_RELA		/* we want RELA relocations, not REL */
+
+/* i370 relocations */
+/* Note that there is really just one relocation that we currently
+ * support (and only one that we seem to need, at the moment), and
+ * that is the 31-bit address relocation.  Note that the 370/390
+ * only supports a 31-bit (2GB) address space.
+ */
+enum i370_reloc_type
+{
+  R_I370_NONE		=   0,
+  R_I370_ADDR31		=   1,
+  R_I370_ADDR32		=   2,
+  R_I370_ADDR16		=   3,
+  R_I370_REL31		=   4,
+  R_I370_REL32		=   5,
+  R_I370_ADDR12		=   6,
+  R_I370_REL12		=   7,
+  R_I370_ADDR8		=   8,
+  R_I370_REL8		=   9,
+  R_I370_COPY		=  10,
+  R_I370_RELATIVE	=  11,
+
+  R_I370_max
+};
+
 static reloc_howto_type *i370_elf_howto_table[ (int)R_I370_max ];
 
 static reloc_howto_type i370_elf_howto_raw[] =
@@ -43,150 +69,150 @@ static reloc_howto_type i370_elf_howto_raw[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_NONE",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A standard 31 bit relocation.  */
   HOWTO (R_I370_ADDR31,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 31,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_ADDR31",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x7fffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A standard 32 bit relocation.  */
   HOWTO (R_I370_ADDR32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_ADDR32",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A standard 16 bit relocation.  */
   HOWTO (R_I370_ADDR16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_ADDR16",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* 31-bit PC relative */
   HOWTO (R_I370_REL31,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 31,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_REL31",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x7fffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* 32-bit PC relative */
   HOWTO (R_I370_REL32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_REL32",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* A standard 12 bit relocation.  */
   HOWTO (R_I370_ADDR12,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_ADDR12",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* 12-bit PC relative */
   HOWTO (R_I370_REL12,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_REL12",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xfff,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* A standard 8 bit relocation.  */
   HOWTO (R_I370_ADDR8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_ADDR8",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* 8-bit PC relative */
   HOWTO (R_I370_REL8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_I370_REL8",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xff,			/* dst_mask */
-	 TRUE),			/* pcrel_offset */
+	 true),			/* pcrel_offset */
 
   /* This is used only by the dynamic linker.  The symbol should exist
      both in the object being run and in some shared library.  The
@@ -197,15 +223,15 @@ static reloc_howto_type i370_elf_howto_raw[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	 /* special_function */
 	 "R_I370_COPY",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* Used only by the dynamic linker.  When the object is run, this
      longword is set to the load address of the object, plus the
@@ -214,26 +240,25 @@ static reloc_howto_type i370_elf_howto_raw[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	 /* special_function */
 	 "R_I370_RELATIVE",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
 };
 
-static void i370_elf_howto_init
-  PARAMS ((void));
+static void i370_elf_howto_init PARAMS ((void));
 static reloc_howto_type *i370_elf_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static void i370_elf_info_to_howto
-  PARAMS ((bfd *abfd, arelent *cache_ptr, Elf_Internal_Rela *dst));
-static bfd_boolean i370_elf_set_private_flags
-  PARAMS ((bfd *, flagword));
+
+static void i370_elf_info_to_howto PARAMS ((bfd *abfd, arelent *cache_ptr,
+					    Elf32_Internal_Rela *dst));
+static boolean i370_elf_set_private_flags PARAMS ((bfd *, flagword));
 
 /* Initialize the i370_elf_howto_table, so that linear accesses can be done.  */
 
@@ -276,31 +301,47 @@ i370_elf_reloc_type_lookup (abfd, code)
   return i370_elf_howto_table[ (int)i370_reloc ];
 };
 
-static bfd_boolean i370_elf_merge_private_bfd_data
-  PARAMS ((bfd *, bfd *));
-static bfd_boolean i370_elf_relocate_section
-  PARAMS ((bfd *, struct bfd_link_info *info, bfd *, asection *, bfd_byte *,
-	   Elf_Internal_Rela *relocs, Elf_Internal_Sym *local_syms,
-	   asection **));
+static boolean i370_elf_merge_private_bfd_data PARAMS ((bfd *, bfd *));
+
+static boolean i370_elf_relocate_section PARAMS ((bfd *,
+						  struct bfd_link_info *info,
+						  bfd *,
+						  asection *,
+						  bfd_byte *,
+						  Elf_Internal_Rela *relocs,
+						  Elf_Internal_Sym *local_syms,
+						  asection **));
 static void i370_elf_post_process_headers
   PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean i370_elf_create_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean i370_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
-static bfd_boolean i370_elf_fake_sections
-  PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
-static bfd_boolean i370_elf_check_relocs
-  PARAMS ((bfd *, struct bfd_link_info *, asection *,
-	   const Elf_Internal_Rela *));
-static bfd_boolean i370_elf_adjust_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *));
-static bfd_boolean i370_elf_adjust_dynindx
-  PARAMS ((struct elf_link_hash_entry *, PTR));
-static bfd_boolean i370_elf_size_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean i370_elf_finish_dynamic_sections
-  PARAMS ((bfd *, struct bfd_link_info *));
+
+static boolean i370_elf_create_dynamic_sections PARAMS ((bfd *,
+							 struct bfd_link_info *));
+
+static boolean i370_elf_section_from_shdr PARAMS ((bfd *,
+						   Elf32_Internal_Shdr *,
+						   const char *));
+static boolean i370_elf_fake_sections PARAMS ((bfd *,
+					       Elf32_Internal_Shdr *,
+					       asection *));
+#if 0
+static elf_linker_section_t *i370_elf_create_linker_section
+  PARAMS ((bfd *abfd,
+	   struct bfd_link_info *info,
+	   enum elf_linker_section_enum));
+#endif
+static boolean i370_elf_check_relocs PARAMS ((bfd *,
+					     struct bfd_link_info *,
+					     asection *,
+					     const Elf_Internal_Rela *));
+
+static boolean i370_elf_adjust_dynamic_symbol PARAMS ((struct bfd_link_info *,
+						      struct elf_link_hash_entry *));
+
+static boolean i370_elf_adjust_dynindx PARAMS ((struct elf_link_hash_entry *, PTR));
+
+static boolean i370_elf_size_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
+
+static boolean i370_elf_finish_dynamic_sections PARAMS ((bfd *, struct bfd_link_info *));
 
 /* The name of the dynamic interpreter.  This is put in the .interp
     section.  */
@@ -313,7 +354,7 @@ static void
 i370_elf_info_to_howto (abfd, cache_ptr, dst)
      bfd *abfd ATTRIBUTE_UNUSED;
      arelent *cache_ptr;
-     Elf_Internal_Rela *dst;
+     Elf32_Internal_Rela *dst;
 {
   if (!i370_elf_howto_table[ R_I370_ADDR31 ])	/* Initialize howto table */
     i370_elf_howto_init ();
@@ -326,7 +367,7 @@ i370_elf_info_to_howto (abfd, cache_ptr, dst)
  * why are we bothering with them ???
  */
 /* Function to set whether a module needs the -mrelocatable bit set.  */
-static bfd_boolean
+static boolean
 i370_elf_set_private_flags (abfd, flags)
      bfd *abfd;
      flagword flags;
@@ -335,13 +376,13 @@ i370_elf_set_private_flags (abfd, flags)
 	      || elf_elfheader (abfd)->e_flags == flags);
 
   elf_elfheader (abfd)->e_flags = flags;
-  elf_flags_init (abfd) = TRUE;
-  return TRUE;
+  elf_flags_init (abfd) = true;
+  return true;
 }
 
 /* Merge backend specific data from an object file to the output
    object file when linking */
-static bfd_boolean
+static boolean
 i370_elf_merge_private_bfd_data (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
@@ -351,13 +392,13 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
+    return true;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
   if (!elf_flags_init (obfd))	/* First call, no flags set */
     {
-      elf_flags_init (obfd) = TRUE;
+      elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = new_flags;
     }
 
@@ -367,14 +408,14 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
   else					/* Incompatible flags */
     {
       (*_bfd_error_handler)
-	("%B: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
-	 ibfd, (long) new_flags, (long) old_flags);
+	("%s: uses different e_flags (0x%lx) fields than previous modules (0x%lx)",
+	 bfd_archive_filename (ibfd), (long) new_flags, (long) old_flags);
 
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Handle an i370 specific section when reading an object file.  This
@@ -384,17 +425,17 @@ i370_elf_merge_private_bfd_data (ibfd, obfd)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
-     Elf_Internal_Shdr *hdr;
+     Elf32_Internal_Shdr *hdr;
      const char *name;
 {
   asection *newsect;
   flagword flags;
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name))
-    return FALSE;
+    return false;
 
   newsect = hdr->bfd_section;
   flags = bfd_get_section_flags (abfd, newsect);
@@ -405,7 +446,7 @@ i370_elf_section_from_shdr (abfd, hdr, name)
     flags |= SEC_SORT_ENTRIES;
 
   bfd_set_section_flags (abfd, newsect, flags);
-  return TRUE;
+  return true;
 }
 
 /* Set up any other section flags and such that may be necessary.  */
@@ -414,10 +455,10 @@ i370_elf_section_from_shdr (abfd, hdr, name)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_fake_sections (abfd, shdr, asect)
      bfd *abfd ATTRIBUTE_UNUSED;
-     Elf_Internal_Shdr *shdr;
+     Elf32_Internal_Shdr *shdr;
      asection *asect;
 {
   if ((asect->flags & SEC_EXCLUDE) != 0)
@@ -426,8 +467,86 @@ i370_elf_fake_sections (abfd, shdr, asect)
   if ((asect->flags & SEC_SORT_ENTRIES) != 0)
     shdr->sh_type = SHT_ORDERED;
 
-  return TRUE;
+  return true;
 }
+
+#if 0
+/* Create a special linker section */
+/* XXX hack alert bogus This routine is mostly all junk and almost
+ * certainly does the wrong thing.  Its here simply because it does
+ * just enough to allow glibc-2.1 ld.so to compile & link.
+ */
+
+static elf_linker_section_t *
+i370_elf_create_linker_section (abfd, info, which)
+     bfd *abfd;
+     struct bfd_link_info *info;
+     enum elf_linker_section_enum which;
+{
+  bfd *dynobj = elf_hash_table (info)->dynobj;
+  elf_linker_section_t *lsect;
+
+  /* Record the first bfd section that needs the special section */
+  if (!dynobj)
+    dynobj = elf_hash_table (info)->dynobj = abfd;
+
+  /* If this is the first time, create the section */
+  lsect = elf_linker_section (dynobj, which);
+  if (!lsect)
+    {
+      elf_linker_section_t defaults;
+      static elf_linker_section_t zero_section;
+
+      defaults = zero_section;
+      defaults.which = which;
+      defaults.hole_written_p = false;
+      defaults.alignment = 2;
+
+      /* Both of these sections are (technically) created by the user
+	 putting data in them, so they shouldn't be marked
+	 SEC_LINKER_CREATED.
+
+	 The linker creates them so it has somewhere to attach their
+	 respective symbols. In fact, if they were empty it would
+	 be OK to leave the symbol set to 0 (or any random number), because
+	 the appropriate register should never be used.  */
+      defaults.flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+			| SEC_IN_MEMORY);
+
+      switch (which)
+	{
+	default:
+	  (*_bfd_error_handler) ("%s: Unknown special linker type %d",
+				 bfd_archive_filename (abfd),
+				 (int) which);
+
+	  bfd_set_error (bfd_error_bad_value);
+	  return (elf_linker_section_t *)0;
+
+	case LINKER_SECTION_SDATA:	/* .sdata/.sbss section */
+	  defaults.name		  = ".sdata";
+	  defaults.rel_name	  = ".rela.sdata";
+	  defaults.bss_name	  = ".sbss";
+	  defaults.sym_name	  = "_SDA_BASE_";
+	  defaults.sym_offset	  = 32768;
+	  break;
+
+	case LINKER_SECTION_SDATA2:	/* .sdata2/.sbss2 section */
+	  defaults.name		  = ".sdata2";
+	  defaults.rel_name	  = ".rela.sdata2";
+	  defaults.bss_name	  = ".sbss2";
+	  defaults.sym_name	  = "_SDA2_BASE_";
+	  defaults.sym_offset	  = 32768;
+	  defaults.flags	 |= SEC_READONLY;
+	  break;
+	}
+
+      lsect = _bfd_elf_create_linker_section (abfd, info, which, &defaults);
+    }
+
+  return lsect;
+}
+#endif
 
 /* We have to create .dynsbss and .rela.sbss here so that they get mapped
    to output sections (just like _bfd_elf_create_dynamic_sections has
@@ -437,7 +556,7 @@ i370_elf_fake_sections (abfd, shdr, asect)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_create_dynamic_sections (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -446,7 +565,7 @@ i370_elf_create_dynamic_sections (abfd, info)
   flagword flags;
 
   if (!_bfd_elf_create_dynamic_sections(abfd, info))
-    return FALSE;
+    return false;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
@@ -454,7 +573,7 @@ i370_elf_create_dynamic_sections (abfd, info)
   s = bfd_make_section (abfd, ".dynsbss");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, SEC_ALLOC))
-    return FALSE;
+    return false;
 
   if (! info->shared)
     {
@@ -462,7 +581,7 @@ i370_elf_create_dynamic_sections (abfd, info)
       if (s == NULL
 	  || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
 	  || ! bfd_set_section_alignment (abfd, s, 2))
-	return FALSE;
+	return false;
     }
 
    /* xxx beats me, seem to need a rela.text ...  */
@@ -470,8 +589,8 @@ i370_elf_create_dynamic_sections (abfd, info)
    if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags | SEC_READONLY)
       || ! bfd_set_section_alignment (abfd, s, 2))
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -484,7 +603,7 @@ i370_elf_create_dynamic_sections (abfd, info)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_adjust_dynamic_symbol (info, h)
      struct bfd_link_info *info;
      struct elf_link_hash_entry *h;
@@ -500,26 +619,29 @@ i370_elf_adjust_dynamic_symbol (info, h)
 
   /* Make sure we know what is going on here.  */
   BFD_ASSERT (dynobj != NULL
-	      && (h->needs_plt
-		  || h->u.weakdef != NULL
-		  || (h->def_dynamic
-		      && h->ref_regular
-		      && !h->def_regular)));
+	      && ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT)
+		  || h->weakdef != NULL
+		  || ((h->elf_link_hash_flags
+		       & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_REF_REGULAR) != 0
+		      && (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)));
 
   s = bfd_get_section_by_name (dynobj, ".rela.text");
   BFD_ASSERT (s != NULL);
-  s->size += sizeof (Elf32_External_Rela);
+  s->_raw_size += sizeof (Elf32_External_Rela);
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
      real definition first, and we can just use the same value.  */
-  if (h->u.weakdef != NULL)
+  if (h->weakdef != NULL)
     {
-      BFD_ASSERT (h->u.weakdef->root.type == bfd_link_hash_defined
-		  || h->u.weakdef->root.type == bfd_link_hash_defweak);
-      h->root.u.def.section = h->u.weakdef->root.u.def.section;
-      h->root.u.def.value = h->u.weakdef->root.u.def.value;
-      return TRUE;
+      BFD_ASSERT (h->weakdef->root.type == bfd_link_hash_defined
+		  || h->weakdef->root.type == bfd_link_hash_defweak);
+      h->root.u.def.section = h->weakdef->root.u.def.section;
+      h->root.u.def.value = h->weakdef->root.u.def.value;
+      return true;
     }
 
   /* This is a reference to a symbol defined by a dynamic object which
@@ -530,7 +652,7 @@ i370_elf_adjust_dynamic_symbol (info, h)
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (info->shared)
-    return TRUE;
+    return true;
 
   /* We must allocate the symbol in our .dynbss section, which will
      become part of the .bss section of the executable.  There will be
@@ -565,8 +687,8 @@ i370_elf_adjust_dynamic_symbol (info, h)
       else
 	srel = bfd_get_section_by_name (dynobj, ".rela.bss");
       BFD_ASSERT (srel != NULL);
-      srel->size += sizeof (Elf32_External_Rela);
-      h->needs_copy = 1;
+      srel->_raw_size += sizeof (Elf32_External_Rela);
+      h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_COPY;
     }
 
   /* We need to figure out the alignment required for this symbol.  I
@@ -576,21 +698,22 @@ i370_elf_adjust_dynamic_symbol (info, h)
     power_of_two = 4;
 
   /* Apply the required alignment.  */
-  s->size = BFD_ALIGN (s->size, (bfd_size_type) (1 << power_of_two));
+  s->_raw_size = BFD_ALIGN (s->_raw_size,
+			    (bfd_size_type) (1 << power_of_two));
   if (power_of_two > bfd_get_section_alignment (dynobj, s))
     {
       if (! bfd_set_section_alignment (dynobj, s, power_of_two))
-	return FALSE;
+	return false;
     }
 
   /* Define the symbol as being at this point in the section.  */
   h->root.u.def.section = s;
-  h->root.u.def.value = s->size;
+  h->root.u.def.value = s->_raw_size;
 
   /* Increment the section size to make room for the symbol.  */
-  s->size += h->size;
+  s->_raw_size += h->size;
 
-  return TRUE;
+  return true;
 }
 
 /* Increment the index of a dynamic symbol by a given amount.  Called
@@ -600,7 +723,7 @@ i370_elf_adjust_dynamic_symbol (info, h)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_adjust_dynindx (h, cparg)
      struct elf_link_hash_entry *h;
      PTR cparg;
@@ -619,7 +742,7 @@ i370_elf_adjust_dynindx (h, cparg)
   if (h->dynindx != -1)
     h->dynindx += *cp;
 
-  return TRUE;
+  return true;
 }
 
 /* Set the sizes of the dynamic sections.  */
@@ -628,16 +751,16 @@ i370_elf_adjust_dynindx (h, cparg)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_size_dynamic_sections (output_bfd, info)
      bfd *output_bfd;
      struct bfd_link_info *info;
 {
   bfd *dynobj;
   asection *s;
-  bfd_boolean plt;
-  bfd_boolean relocs;
-  bfd_boolean reltext;
+  boolean plt;
+  boolean relocs;
+  boolean reltext;
 
 #ifdef DEBUG
   fprintf (stderr, "i370_elf_size_dynamic_sections called\n");
@@ -649,11 +772,11 @@ i370_elf_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (info->executable)
+      if (! info->shared)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  s->size = sizeof ELF_DYNAMIC_INTERPRETER;
+	  s->_raw_size = sizeof ELF_DYNAMIC_INTERPRETER;
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
@@ -673,20 +796,20 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	{
 	  s = bfd_get_section_by_name (dynobj, *p);
 	  if (s != NULL)
-	    s->size = 0;
+	    s->_raw_size = 0;
 	}
     }
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
      memory for them.  */
-  plt = FALSE;
-  relocs = FALSE;
-  reltext = FALSE;
+  plt = false;
+  relocs = false;
+  reltext = false;
   for (s = dynobj->sections; s != NULL; s = s->next)
     {
       const char *name;
-      bfd_boolean strip;
+      boolean strip;
 
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
@@ -694,25 +817,25 @@ i370_elf_size_dynamic_sections (output_bfd, info)
       /* It's OK to base decisions on the section name, because none
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_get_section_name (dynobj, s);
-      strip = FALSE;
+      strip = false;
 
       if (strcmp (name, ".plt") == 0)
 	{
-	  if (s->size == 0)
+	  if (s->_raw_size == 0)
 	    {
 	      /* Strip this section if we don't need it; see the
                  comment below.  */
-	      strip = TRUE;
+	      strip = true;
 	    }
 	  else
 	    {
 	      /* Remember whether there is a PLT.  */
-	      plt = TRUE;
+	      plt = true;
 	    }
 	}
       else if (strncmp (name, ".rela", 5) == 0)
 	{
-	  if (s->size == 0)
+	  if (s->_raw_size == 0)
 	    {
 	      /* If we don't need this section, strip it from the
 		 output file.  This is mostly to handle .rela.bss and
@@ -723,7 +846,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 		 adjust_dynamic_symbol is called, and it is that
 		 function which decides whether anything needs to go
 		 into these sections.  */
-	      strip = TRUE;
+	      strip = true;
 	    }
 	  else
 	    {
@@ -731,7 +854,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	      const char *outname;
 
 	      /* Remember whether there are any relocation sections.  */
-	      relocs = TRUE;
+	      relocs = true;
 
 	      /* If this relocation section applies to a read only
 		 section, then we probably need a DT_TEXTREL entry.  */
@@ -741,7 +864,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	      if (target != NULL
 		  && (target->flags & SEC_READONLY) != 0
 		  && (target->flags & SEC_ALLOC) != 0)
-		reltext = TRUE;
+		reltext = true;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -774,9 +897,9 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	  continue;
 	}
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
-      if (s->contents == NULL && s->size != 0)
-	return FALSE;
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
+      if (s->contents == NULL && s->_raw_size != 0)
+	return false;
     }
 
   if (elf_hash_table (info)->dynamic_sections_created)
@@ -787,12 +910,12 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
-  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
+  bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
 
       if (!info->shared)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
+	    return false;
 	}
 
       if (plt)
@@ -801,7 +924,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
 	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
 	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
+	    return false;
 	}
 
       if (relocs)
@@ -809,13 +932,13 @@ i370_elf_size_dynamic_sections (output_bfd, info)
 	  if (!add_dynamic_entry (DT_RELA, 0)
 	      || !add_dynamic_entry (DT_RELASZ, 0)
 	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
+	    return false;
 	}
 
       if (reltext)
 	{
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
-	    return FALSE;
+	    return false;
 	  info->flags |= DF_TEXTREL;
 	}
     }
@@ -830,7 +953,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
      FIXME: We assume that there will never be relocations to
      locations in linker-created sections that do not have
      externally-visible names. Instead, we should work out precisely
-     which sections relocations are targeted at.  */
+     which sections relocations are targetted at.  */
   if (info->shared)
     {
       int c;
@@ -858,7 +981,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
       elf_hash_table (info)->dynsymcount += c;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Look through the relocs for a section during the first phase, and
@@ -869,7 +992,7 @@ i370_elf_size_dynamic_sections (output_bfd, info)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -884,12 +1007,13 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
   bfd_vma *local_got_offsets;
   asection *sreloc;
 
-  if (info->relocatable)
-    return TRUE;
+  if (info->relocateable)
+    return true;
 
 #ifdef DEBUG
-  _bfd_error_handler ("i370_elf_check_relocs called for section %A in %B",
-		      sec, abfd);
+  fprintf (stderr, "i370_elf_check_relocs called for section %s in %s\n",
+	   bfd_get_section_name (abfd, sec),
+	   bfd_archive_filename (abfd));
 #endif
 
   dynobj = elf_hash_table (info)->dynobj;
@@ -928,7 +1052,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 		       elf_elfheader (abfd)->e_shstrndx,
 		       elf_section_data (sec)->rel_hdr.sh_name));
 	      if (name == NULL)
-		return FALSE;
+		return false;
 
 	      BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			  && strcmp (bfd_get_section_name (abfd, sec), name + 5) == 0);
@@ -946,11 +1070,11 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 		  if (sreloc == NULL
 		      || ! bfd_set_section_flags (dynobj, sreloc, flags)
 		      || ! bfd_set_section_alignment (dynobj, sreloc, 2))
-		    return FALSE;
+		    return false;
 		}
 	    }
 
-	  sreloc->size += sizeof (Elf32_External_Rela);
+	  sreloc->_raw_size += sizeof (Elf32_External_Rela);
 
 	  /* FIXME: We should here do what the m68k and i386
 	     backends do: if the reloc is pc-relative, record it
@@ -961,7 +1085,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Finish up the dynamic sections.  */
@@ -970,7 +1094,7 @@ i370_elf_check_relocs (abfd, info, sec, relocs)
  * just enough to allow glibc-2.1 ld.so to compile & link.
  */
 
-static bfd_boolean
+static boolean
 i370_elf_finish_dynamic_sections (output_bfd, info)
      bfd *output_bfd;
      struct bfd_link_info *info;
@@ -994,21 +1118,21 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
       BFD_ASSERT (splt != NULL && sdyn != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
-      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
+      dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->_raw_size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
 	  const char *name;
-	  bfd_boolean size;
+	  boolean size;
 
 	  bfd_elf32_swap_dyn_in (dynobj, dyncon, &dyn);
 
 	  switch (dyn.d_tag)
 	    {
-	    case DT_PLTGOT:   name = ".plt";	  size = FALSE; break;
-	    case DT_PLTRELSZ: name = ".rela.plt"; size = TRUE;  break;
-	    case DT_JMPREL:   name = ".rela.plt"; size = FALSE; break;
-	    default:	      name = NULL;	  size = FALSE; break;
+	    case DT_PLTGOT:   name = ".plt";	  size = false; break;
+	    case DT_PLTRELSZ: name = ".rela.plt"; size = true;  break;
+	    case DT_JMPREL:   name = ".rela.plt"; size = false; break;
+	    default:	      name = NULL;	  size = false; break;
 	    }
 
 	  if (name != NULL)
@@ -1023,7 +1147,12 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 		  if (! size)
 		    dyn.d_un.d_ptr = s->vma;
 		  else
-		    dyn.d_un.d_val = s->size;
+		    {
+		      if (s->_cooked_size != 0)
+			dyn.d_un.d_val = s->_cooked_size;
+		      else
+			dyn.d_un.d_val = s->_raw_size;
+		    }
 		}
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	    }
@@ -1095,7 +1224,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 	maxdindx + 1;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* The RELOCATE_SECTION function is called by the ELF backend linker
@@ -1107,7 +1236,7 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
 
    This function is responsible for adjust the section contents as
    necessary, and (if using Rela relocs and generating a
-   relocatable output file) adjusting the reloc addend as
+   relocateable output file) adjusting the reloc addend as
    necessary.
 
    This function does not have to worry about setting the reloc
@@ -1121,15 +1250,15 @@ i370_elf_finish_dynamic_sections (output_bfd, info)
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocatable output, this function must handle
+   When generating relocateable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static boolean
 i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
-			   contents, relocs, local_syms, local_sections)
+			  contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
      struct bfd_link_info *info;
      bfd *input_bfd;
@@ -1139,23 +1268,24 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
      Elf_Internal_Sym *local_syms;
      asection **local_sections;
 {
-  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  Elf_Internal_Shdr *symtab_hdr		  = &elf_tdata (input_bfd)->symtab_hdr;
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
-  bfd *dynobj = elf_hash_table (info)->dynobj;
-  Elf_Internal_Rela *rel = relocs;
-  Elf_Internal_Rela *relend = relocs + input_section->reloc_count;
-  asection *sreloc = NULL;
+  bfd *dynobj				  = elf_hash_table (info)->dynobj;
+  Elf_Internal_Rela *rel		  = relocs;
+  Elf_Internal_Rela *relend		  = relocs + input_section->reloc_count;
+  asection *sreloc			  = NULL;
   bfd_vma *local_got_offsets;
-  bfd_boolean ret = TRUE;
+  boolean ret				  = true;
 
-  if (info->relocatable)
-    return TRUE;
+  if (info->relocateable)
+    return true;
 
 #ifdef DEBUG
-  _bfd_error_handler ("i370_elf_relocate_section called for %B section %A, %ld relocations%s",
-		      input_bfd, input_section,
-		      (long) input_section->reloc_count,
-		      (info->relocatable) ? " (relocatable)" : "");
+  fprintf (stderr, "i370_elf_relocate_section called for %s section %s, %ld relocations%s\n",
+	   bfd_archive_filename (input_bfd),
+	   bfd_section_name(input_bfd, input_section),
+	   (long) input_section->reloc_count,
+	   (info->relocateable) ? " (relocatable)" : "");
 #endif
 
   if (!i370_elf_howto_table[ R_I370_ADDR31 ])	/* Initialize howto table if needed */
@@ -1181,12 +1311,12 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if ((unsigned)r_type >= (unsigned)R_I370_max
 	  || !i370_elf_howto_table[(int)r_type])
 	{
-	  (*_bfd_error_handler) ("%B: unknown relocation type %d",
-				 input_bfd,
+	  (*_bfd_error_handler) ("%s: unknown relocation type %d",
+				 bfd_archive_filename (input_bfd),
 				 (int) r_type);
 
 	  bfd_set_error (bfd_error_bad_value);
-	  ret = FALSE;
+	  ret = false;
 	  continue;
 	}
 
@@ -1199,7 +1329,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sec = local_sections[r_symndx];
 	  sym_name = "<local symbol>";
 
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
 	  addend = rel->r_addend;
 	}
       else
@@ -1215,7 +1345,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sec = h->root.u.def.section;
 	      if (info->shared
 		  && ((! info->symbolic && h->dynindx != -1)
-		      || !h->def_regular)
+		      || (h->elf_link_hash_flags
+			  & ELF_LINK_HASH_DEF_REGULAR) == 0)
 		  && (input_section->flags & SEC_ALLOC) != 0
 		  && (r_type == R_I370_ADDR31
 		      || r_type == R_I370_COPY
@@ -1234,21 +1365,19 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->unresolved_syms_in_objects == RM_IGNORE
+	  else if (info->shared
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
 	  else
 	    {
-	      if ((*info->callbacks->undefined_symbol)
-		  (info, h->root.root.string, input_bfd,
-		   input_section, rel->r_offset,
-		   (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
-		    || ELF_ST_VISIBILITY (h->other))))
-		{
-		  ret = FALSE;
-		  continue;
-		}
-	      relocation = 0;
+	      (*info->callbacks->undefined_symbol) (info,
+						    h->root.root.string,
+						    input_bfd,
+						    input_section,
+						    rel->r_offset,
+						    true);
+	      ret = false;
+	      continue;
 	    }
 	}
 
@@ -1256,11 +1385,12 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	default:
 	  (*_bfd_error_handler)
-	    ("%B: unknown relocation type %d for symbol %s",
-	     input_bfd, (int) r_type, sym_name);
+	    ("%s: unknown relocation type %d for symbol %s",
+	     bfd_archive_filename (input_bfd),
+	     (int) r_type, sym_name);
 
 	  bfd_set_error (bfd_error_bad_value);
-	  ret = FALSE;
+	  ret = false;
 	  continue;
 
 	case (int)R_I370_NONE:
@@ -1284,7 +1414,6 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && r_symndx != 0)
 	    {
 	      Elf_Internal_Rela outrel;
-	      bfd_byte *loc;
 	      int skip;
 
 #ifdef DEBUG
@@ -1306,7 +1435,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			   elf_elfheader (input_bfd)->e_shstrndx,
 			   elf_section_data (input_section)->rel_hdr.sh_name));
 		  if (name == NULL)
-		    return FALSE;
+		    return false;
 
 		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
 			      && strcmp (bfd_get_section_name (input_bfd,
@@ -1334,7 +1463,8 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                  become local.  */
 	      else if (h != NULL
 		       && ((! info->symbolic && h->dynindx != -1)
-			   || !h->def_regular))
+			   || (h->elf_link_hash_flags
+			       & ELF_LINK_HASH_DEF_REGULAR) == 0))
 		{
 		  BFD_ASSERT (h->dynindx != -1);
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -1351,12 +1481,21 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    {
 		      long indx;
 
-		      if (bfd_is_abs_section (sec))
+		      if (h == NULL)
+			sec = local_sections[r_symndx];
+		      else
+			{
+			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+				      || (h->root.type
+					  == bfd_link_hash_defweak));
+			  sec = h->root.u.def.section;
+			}
+		      if (sec != NULL && bfd_is_abs_section (sec))
 			indx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
 			  bfd_set_error (bfd_error_bad_value);
-			  return FALSE;
+			  return false;
 			}
 		      else
 			{
@@ -1380,9 +1519,11 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		    }
 		}
 
-	      loc = sreloc->contents;
-	      loc += sreloc->reloc_count++ * sizeof (Elf32_External_Rela);
-	      bfd_elf32_swap_reloca_out (output_bfd, &outrel, loc);
+	      bfd_elf32_swap_reloca_out (output_bfd, &outrel,
+					 (((Elf32_External_Rela *)
+					   sreloc->contents)
+					  + sreloc->reloc_count));
+	      ++sreloc->reloc_count;
 
 	      /* This reloc will be computed at runtime, so there's no
                  need to do anything now, unless this is a RELATIVE
@@ -1397,13 +1538,13 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case (int)R_I370_COPY:
 	case (int)R_I370_RELATIVE:
 	  (*_bfd_error_handler)
-	    ("%B: Relocation %s is not yet supported for symbol %s.",
-	     input_bfd,
+	    ("%s: Relocation %s is not yet supported for symbol %s.",
+	     bfd_archive_filename (input_bfd),
 	     i370_elf_howto_table[(int) r_type]->name,
 	     sym_name);
 
 	  bfd_set_error (bfd_error_invalid_operation);
-	  ret = FALSE;
+	  ret = false;
 	  continue;
 	}
 
@@ -1427,7 +1568,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r != bfd_reloc_ok)
 	{
-	  ret = FALSE;
+	  ret = false;
 	  switch (r)
 	    {
 	    default:
@@ -1438,7 +1579,7 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		const char *name;
 
 		if (h != NULL)
-		  name = NULL;
+		  name = h->root.root.string;
 		else
 		  {
 		    name = bfd_elf_string_from_elf_section (input_bfd,
@@ -1452,7 +1593,6 @@ i370_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  }
 
 		(*info->callbacks->reloc_overflow) (info,
-						    (h ? &h->root : NULL),
 						    name,
 						    howto->name,
 						    (bfd_vma) 0,
@@ -1523,8 +1663,7 @@ i370_elf_post_process_headers (abfd, link_info)
 
 #define elf_backend_post_process_headers	i370_elf_post_process_headers
 
-static int i370_noop
-  PARAMS ((void));
+static int i370_noop PARAMS ((void));
 
 static int i370_noop ()
 {
@@ -1534,16 +1673,16 @@ static int i370_noop ()
 /* we need to define these at least as no-ops to link glibc ld.so */
 
 #define elf_backend_add_symbol_hook \
-  (bfd_boolean (*) \
-     PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Sym *, \
-	      const char **, flagword *, asection **, bfd_vma *))) i370_noop
+  (boolean (*) PARAMS ((bfd *, struct bfd_link_info *, \
+			const Elf_Internal_Sym *, const char **, flagword *, \
+			asection **, bfd_vma *)))		i370_noop
 #define elf_backend_finish_dynamic_symbol \
-  (bfd_boolean (*) \
-     PARAMS ((bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, \
-	      Elf_Internal_Sym *))) i370_noop
+  (boolean (*) PARAMS ((bfd *, struct bfd_link_info *, \
+			struct elf_link_hash_entry *, \
+			Elf_Internal_Sym *)))			i370_noop
 #define elf_backend_additional_program_headers \
-  (int (*) PARAMS ((bfd *))) i370_noop
+  (int (*) PARAMS ((bfd *)))					i370_noop
 #define elf_backend_modify_segment_map \
-  (bfd_boolean (*) PARAMS ((bfd *, struct bfd_link_info *))) i370_noop
+  (boolean (*) PARAMS ((bfd *)))				i370_noop
 
 #include "elf32-target.h"

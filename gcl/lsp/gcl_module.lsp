@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -27,7 +26,7 @@
 
 (export '(*modules* provide require))
 (export 'documentation)
-(export '(variable function structure type setf compiler-macro))
+(export '(variable function structure type setf))
 
 (in-package 'system)
 
@@ -65,14 +64,10 @@
     (structure (get symbol 'structure-documentation))
     (type (get symbol 'type-documentation))
     (setf (get symbol 'setf-documentation))
-    (compiler-macro (get symbol 'compiler-macro-documentation))
-    (method-combination (get symbol 'method-combination-documentation))
-    (otherwise
-     (cond
-       ((packagep symbol) 
-	(get (find-symbol (package-name symbol) :keyword) 'package-documentation))
-       ((eql doc-type t) nil)
-       (t (error "~S is an illegal documentation type." doc-type))))))
+    (t
+     (if (packagep symbol) 
+	 (get (find-symbol (package-name symbol) :keyword) 'package-documentation)
+       (error "~S is an illegal documentation type." doc-type)))))
 
 
 (defun find-documentation (body)
@@ -85,3 +80,5 @@
                      (eq (car form) 'declare))
                 (find-documentation (cdr body))
                 nil)))))
+
+

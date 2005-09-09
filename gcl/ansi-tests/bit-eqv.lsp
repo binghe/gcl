@@ -6,8 +6,6 @@
 
 (in-package :cl-test)
 
-(compile-and-load "bit-aux.lsp")
-
 (deftest bit-eqv.1
   (let* ((s1 (make-array nil :initial-element 0 :element-type 'bit))
 	 (s2 (make-array nil :initial-element 0 :element-type 'bit)))
@@ -231,25 +229,17 @@
      x y z))
   #*1 2 1 2)
 
-(def-fold-test bit-eqv.fold.1 (bit-eqv #*01101 #*10100))
-
-;;; Random tests
-
-(deftest bit-eqv.random.1
-  (bit-random-test-fn #'bit-eqv #'logeqv)
-  nil)
-
 ;;; Error tests
 
 (deftest bit-eqv.error.1
-  (signals-error (bit-eqv) program-error)
-  t)
+  (classify-error (bit-eqv))
+  program-error)
 
 (deftest bit-eqv.error.2
-  (signals-error (bit-eqv #*000) program-error)
-  t)
+  (classify-error (bit-eqv #*000))
+  program-error)
 
 (deftest bit-eqv.error.3
-  (signals-error (bit-eqv #*000 #*0100 nil nil)
-		 program-error)
-  t)
+  (classify-error (bit-eqv #*000 #*0100 nil nil))
+  program-error)
+

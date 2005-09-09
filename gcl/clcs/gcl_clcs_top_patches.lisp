@@ -74,7 +74,7 @@
 	    (format *debug-io* "~&~A~2%" *break-message*) ;***
 	    (when (> (length *link-array*) 0)
 	      (format *debug-io* 
-		      "Fast links are on: do (si::use-fast-links nil) for debugging~%"))
+		      "Fast links are on: do (use-fast-links nil) for debugging~%"))
 	    (set-current)		;***
 	    (setq *no-prompt* nil)
 	    (show-restarts)))		;***
@@ -124,7 +124,7 @@
       (error "Console interrupt -- cannot continue.")))
 
 (defun clcs-break-quit (&optional (level 0))
-  (let ((abort (nth level (cons (find-restart 'conditions::gcl-top-restart) (reverse *abort-restarts*)))))
+  (let ((abort (nth level (reverse *abort-restarts*))))
     (when abort (invoke-restart-interactively abort)))
   (break-current))
 

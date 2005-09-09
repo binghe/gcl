@@ -50,9 +50,6 @@ ihs_function_name(object x)
 	case t_symbol:
 		return(x);
 
-	case t_ifun:
-	  x=x->ifn.ifn_self;
-	  /*pass through*/
 	case t_cons:
 		y = x->c.c_car;
 		if (y == sLlambda)
@@ -299,13 +296,6 @@ FEwrong_type_argument(object type, object value)
 }
 
 void
-FEcannot_coerce(object type, object value)
-{Icall_error_handler(sKwrong_type_argument,
-		     make_simple_string("Cannot coerce ~S to class ~S."),
-		     2,(value),(type));
-}
-
-void
 FEtoo_few_arguments(object *base, object *top)
 {    Icall_error_handler(sKtoo_few_arguments,
 			 (make_simple_string("~S [or a callee] requires more than ~R argument~:p.")),
@@ -383,14 +373,10 @@ FEundefined_function(object fname)
 
 void
 FEinvalid_function(object obj)
-{
-#ifdef ANSI_COMMON_LISP
-    FEwrong_type_argument(obj,sLfunction);
-#else
-    Icall_error_handler(sKinvalid_function,
+{Icall_error_handler(sKinvalid_function,
 		     make_simple_string("~S is invalid as a function."),
-		     2,(obj),sLfunction);
-#endif
+		     1,(obj));
+		     
 }
 
 void
@@ -812,7 +798,6 @@ check_arg_range(int n, int m)
      
 DEF_ORDINARY("TERMINAL-INTERRUPT",sSterminal_interrupt,SI,"");
 DEF_ORDINARY("WRONG-TYPE-ARGUMENT",sKwrong_type_argument,KEYWORD,"");
-DEF_ORDINARY("CONTROL-ERROR",sKcontrol_error,KEYWORD,"");
 DEF_ORDINARY("TOO-FEW-ARGUMENTS",sKtoo_few_arguments,KEYWORD,"");
 DEF_ORDINARY("TOO-MANY-ARGUMENTS",sKtoo_many_arguments,KEYWORD,"");
 DEF_ORDINARY("UNEXPECTED-KEYWORD",sKunexpected_keyword,KEYWORD,"");
@@ -822,7 +807,6 @@ DEF_ORDINARY("INVALID-VARIABLE",sKinvalid_variable,KEYWORD,"");
 DEF_ORDINARY("UNDEFINED-FUNCTION",sKundefined_function,KEYWORD,"");
 DEF_ORDINARY("INVALID-FUNCTION",sKinvalid_function,KEYWORD,"");
 DEF_ORDINARY("PACKAGE-ERROR",sKpackage_error,KEYWORD,"");
-DEF_ORDINARY("PARSE-ERROR",sKparse_error,KEYWORD,"");
 DEF_ORDINARY("CATCH",sKcatch,KEYWORD,"");
 DEF_ORDINARY("PROTECT",sKprotect,KEYWORD,"");
 DEF_ORDINARY("CATCHALL",sKcatchall,KEYWORD,"");

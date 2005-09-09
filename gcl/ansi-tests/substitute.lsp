@@ -435,26 +435,6 @@
     result)
   #(a b z c b))
 
-(deftest substitute-vector.32
-  (let* ((v1 (copy-seq #(a b c d a b c d a b c d a b c d)))
-	 (v2 (make-array '(8) :displaced-to v1
-			 :displaced-index-offset 3)))
-    (values
-     (substitute 'x 'c v2 :count 1)
-     v1))
-  #(d a b x d a b c)
-  #(a b c d a b c d a b c d a b c d))
-
-(deftest substitute-vector.33
-  (let* ((v1 (copy-seq #(a b c d a b c d a b c d a b c d)))
-	 (v2 (make-array '(8) :displaced-to v1
-			 :displaced-index-offset 3)))
-    (values
-     (substitute 'x 'c v2 :count 1 :from-end t)
-     v1))
-  #(d a b c d a b x)
-  #(a b c d a b c d a b c d a b c d))
-
 ;;; Tests on strings
 
 (deftest substitute-string.1
@@ -701,15 +681,6 @@
 	 (result (substitute #\z #\a x :from-end t :count 1)))
     result)
   "abzcb")
-
-(deftest substitute-string.32
-  (do-special-strings
-   (s "xyzabcxyzabc" nil)
-   (assert (string= (substitute #\! #\a s) "xyz!bcxyz!bc"))
-   (assert (string= (substitute #\! #\a s :count 1) "xyz!bcxyzabc"))
-   (assert (string= (substitute #\! #\a s :count 1 :from-end t) "xyzabcxyz!bc"))
-   (assert (string= s "xyzabcxyzabc")))
-  nil)
 
 ;;; Tests on bit-vectors
 
@@ -995,31 +966,6 @@
     result)
   #*01111)
 
-(defharmless substitute.test-and-test-not.1
-  (substitute 'b 'a (list 'a 'b 'c 'd 'a 'b) :test #'eql :test-not #'eql))
-
-(defharmless substitute.test-and-test-not.2
-  (substitute 'b 'a (list 'a 'b 'c 'd 'a 'b) :test-not #'eql :test #'eql))
-
-(defharmless substitute.test-and-test-not.3
-  (substitute 'b 'a (vector 'a 'b 'c 'd 'a 'b) :test #'eql :test-not #'eql))
-
-(defharmless substitute.test-and-test-not.4
-  (substitute 'b 'a (vector 'a 'b 'c 'd 'a 'b) :test-not #'eql :test #'eql))
-
-(defharmless substitute.test-and-test-not.5
-  (substitute #\b #\a (copy-seq "abcdab") :test #'eql :test-not #'eql))
-
-(defharmless substitute.test-and-test-not.6
-  (substitute #\b #\a (copy-seq "abcdab") :test-not #'eql :test #'eql))
-
-(defharmless substitute.test-and-test-not.7
-  (substitute 1 0 (copy-seq #*001101001) :test #'eql :test-not #'eql))
-
-(defharmless substitute.test-and-test-not.8
-  (substitute 0 1 (copy-seq #*1100110101) :test-not #'eql :test #'eql))
-
-
 (deftest substitute.order.1
   (let ((i 0) a b c d e f g h)
     (values
@@ -1092,59 +1038,49 @@
   (substitute 'a 0 (list 1 2 0 3 1 0 3) :allow-other-keys nil)
   (1 2 a 3 1 a 3))
 
-;;; Constant folding tests
-
-(def-fold-test substitute.fold.1 (substitute 'z 'b '(a b c)))
-(def-fold-test substitute.fold.2 (substitute 'z 'b #(a b c)))
-(def-fold-test substitute.fold.3 (substitute 0 1 #*001101))
-(def-fold-test substitute.fold.4 (substitute #\a #\b "abcebadfke"))
-
 ;;; Error cases
 
 (deftest substitute.error.1
-  (signals-error (substitute) program-error)
-  t)
+  (classify-error (substitute))
+  program-error)
 
 (deftest substitute.error.2
-  (signals-error (substitute 'a) program-error)
-  t)
+  (classify-error (substitute 'a))
+  program-error)
 
 (deftest substitute.error.3
-  (signals-error (substitute 'a 'b) program-error)
-  t)
+  (classify-error (substitute 'a 'b))
+  program-error)
 
 (deftest substitute.error.4
-  (signals-error (substitute 'a 'b nil 'bad t) program-error)
-  t)
+  (classify-error (substitute 'a 'b nil 'bad t))
+  program-error)
 
 (deftest substitute.error.5
-  (signals-error (substitute 'a 'b nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (substitute 'a 'b nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest substitute.error.6
-  (signals-error (substitute 'a 'b nil :key) program-error)
-  t)
+  (classify-error (substitute 'a 'b nil :key))
+  program-error)
 
 (deftest substitute.error.7
-  (signals-error (substitute 'a 'b nil 1 2) program-error)
-  t)
+  (classify-error (substitute 'a 'b nil 1 2))
+  program-error)
 
 (deftest substitute.error.8
-  (signals-error (substitute 'a 'b (list 'a 'b 'c) :test #'identity) program-error)
-  t)
+  (classify-error (substitute 'a 'b (list 'a 'b 'c) :test #'identity))
+  program-error)
 
 (deftest substitute.error.9
-  (signals-error (substitute 'a 'b (list 'a 'b 'c) :test-not #'identity) program-error)
-  t)
+  (classify-error (substitute 'a 'b (list 'a 'b 'c) :test-not #'identity))
+  program-error)
 
 (deftest substitute.error.10
-  (signals-error (substitute 'a 'b (list 'a 'b 'c) :key #'cons) program-error)
-  t)
+  (classify-error (substitute 'a 'b (list 'a 'b 'c) :key #'cons))
+  program-error)
 
 (deftest substitute.error.11
-  (signals-error (substitute 'a 'b (list 'a 'b 'c) :key #'car) type-error)
-  t)
+  (classify-error (substitute 'a 'b (list 'a 'b 'c) :key #'car))
+  type-error)
 
-(deftest substitute.error.12
-  (check-type-error #'(lambda (x) (substitute 'a 'b x)) #'sequencep)
-  nil)

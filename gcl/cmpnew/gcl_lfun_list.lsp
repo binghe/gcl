@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 
 ;; Modified data base including return values types
 ;; and making the arglists correct if they have optional args.
@@ -62,7 +61,7 @@
 ;(DEFSYSFUN 'USER-HOMEDIR-PATHNAME "Luser_homedir_pathname" '(*) 'T NIL
 ;    NIL) 
 (DEFSYSFUN 'NBUTLAST "Lnbutlast" '(T *) 'T NIL NIL) 
-(DEFSYSFUN 'ARRAY-DIMENSION "Larray_dimension" '(T RNKIND) 'SEQIND NIL NIL) 
+(DEFSYSFUN 'ARRAY-DIMENSION "Larray_dimension" '(T T) 'FIXNUM NIL NIL) 
 (DEFSYSFUN 'CDR "Lcdr" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'EQL "Leql" '(T T) 'T NIL T) 
 (DEFSYSFUN 'LOG "Llog" '(T *) 'T NIL NIL) 
@@ -112,7 +111,7 @@
 (DEFSYSFUN 'SET "Lset" '(T T) 'T NIL NIL) 
 (DEFSYSFUN 'FUNCTIONP "Lfunctionp" '(T) 'T NIL T) 
 (DEFSYSFUN 'WRITE-BYTE "Lwrite_byte" '(T T) 'T NIL NIL) 
-(DEFSYSFUN 'LAST "Llast" '(T *) 'T NIL NIL) 
+(DEFSYSFUN 'LAST "Llast" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'MAKE-STRING "Lmake_string" '(T *) 'STRING NIL NIL) 
 (DEFSYSFUN 'CAAAR "Lcaaar" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'LIST-LENGTH "Llist_length" '(T) 'T NIL NIL) 
@@ -166,7 +165,7 @@
 (DEFSYSFUN 'STRING-UPCASE "Lstring_upcase" '(T *) 'STRING NIL NIL) 
 (DEFSYSFUN 'CEILING "Lceiling" '(T *) '(VALUES T T) NIL NIL) 
 (DEFSYSFUN 'GETHASH "Lgethash" '(T T *) '(VALUES T T) NIL NIL) 
-;(DEFSYSFUN 'TYPE-OF "Ltype_of" '(T) 'T NIL NIL) 
+(DEFSYSFUN 'TYPE-OF "Ltype_of" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'BUTLAST "Lbutlast" '(T *) 'T NIL NIL) 
 (DEFSYSFUN '1- "Lone_minus" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'MAKE-HASH-TABLE "Lmake_hash_table" '(*) 'T NIL NIL) 
@@ -330,8 +329,6 @@
 (DEFSYSFUN 'STRING-NOT-LESSP "Lstring_not_lessp" '(T T *) 'T NIL T) 
 (DEFSYSFUN 'CHAR "Lchar" '(T T) 'CHARACTER NIL NIL) 
 (DEFSYSFUN 'AREF "Laref" '(T *) 'T NIL NIL) 
-;;FIXME -- autogenerate this whole file from C definitions.  CM 20050106
-(DEFSYSFUN 'ROW-MAJOR-AREF "Lrow_major_aref" '(T SEQIND) T NIL NIL) 
 (DEFSYSFUN 'PACKAGE-NICKNAMES "Lpackage_nicknames" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'ENDP "Lendp" '(T) 'T NIL T) 
 (DEFSYSFUN 'ODDP "Loddp" '(T) 'T NIL T) 

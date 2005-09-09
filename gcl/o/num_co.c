@@ -55,7 +55,6 @@ gcl_isnormal_double(double d) {
 
 #ifdef IEEEFLOAT
   u.d = d;
-  /*FIXME 64, and 0x7f below*/
   return (u.i[HIND] & 0x7ff00000) != 0;
 #else
 #error gcl_isnormal_double only implemented for IEEE
@@ -176,7 +175,6 @@ integer_decode_double(double d, int *hp, int *lp, int *ep, int *sp)
 	*ep = ((h & 0x7f000000) >> 24) - 64 - 14;
 	h = (h & 0x00ffffff);
 #endif
-	/*FIXME 64, note int args*/
 	if (32-BIG_RADIX)
 	  /* shift for making bignum */
 	  { h = h << (32-BIG_RADIX) ; 
@@ -339,7 +337,7 @@ double_to_integer(double d)
 {
 	int h, l, e, s;
 	object x;
-	object shift_integer(object x, fixnum w);
+	object shift_integer(object x, int w);
 	vs_mark;
 
 	if (d == 0.0)
@@ -1492,10 +1490,10 @@ gcl_init_num_co(void)
 	make_constant("LEAST-NEGATIVE-NORMALIZED-LONG-FLOAT",
 		      make_longfloat(-smallest_norm_double));
 
-	plus_half = make_ratio(small_fixnum(1), small_fixnum(2),1);
+	plus_half = make_ratio(small_fixnum(1), small_fixnum(2));
 	enter_mark_origin(&plus_half);
 
-	minus_half = make_ratio(small_fixnum(-1), small_fixnum(2),1);
+	minus_half = make_ratio(small_fixnum(-1), small_fixnum(2));
 	enter_mark_origin(&minus_half);
 
 	make_function("FLOAT", Lfloat);

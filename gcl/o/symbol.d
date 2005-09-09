@@ -1,4 +1,3 @@
-/* -*-C-*- */
 /*
  Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
@@ -64,7 +63,6 @@ object st;
 		for (i = 0;  i < x->s.s_fillp;  i++)
 			x->s.s_self[i] = st->st.st_self[i];
 	}
-	x->s.s_hash = ihash_equal1(x,0);
 	END_NO_INTERRUPT;}	
 	return(vs_pop);
 }
@@ -259,7 +257,7 @@ object place, indicator, deflt;
 			return(l->c.c_cdr->c.c_car);
 	}
 	if(l==Cnil) return deflt;
-	FEinvalid_form("Bad plist ~a",place);	
+	FEerror("Bad plist ~a",1,place);	
 	return Cnil;
 }
 
@@ -410,7 +408,6 @@ LFD(Lsymbol_plist)()
 
 @(defun getf (place indicator &optional deflt)
 @
-	check_proper_list(place);
 	@(return `getf(place, indicator, deflt)`)
 @)
 
@@ -418,8 +415,6 @@ LFD(Lsymbol_plist)()
 	object l, m;
 
 @
-	check_proper_list(place);
-	check_proper_list(indicator_list);
 	for (l = place;  !endp(l);  l = l->c.c_cdr->c.c_cdr) {
 		if (endp(l->c.c_cdr))
 			odd_plist(place);
@@ -510,7 +505,7 @@ DEFVAR("*GENSYM-COUNTER*",sLgensym_counter,LISP,make_fixnum(0),"");
 	  big=this_gensym_counter;
 	  sign=BIG_SIGN(big);
 	  size = mpz_sizeinbase(MP(big),10)+2+(sign<0? 1 : 0);
-	  if (!(p=ZALLOCA(size)))
+	  if (!(p=alloca(size)))
 	    FEerror("Cannot alloca gensym name", 0);
 	  mpz_get_str(p,10,MP(big));
 	  j=size-5;
@@ -519,9 +514,9 @@ DEFVAR("*GENSYM-COUNTER*",sLgensym_counter,LISP,make_fixnum(0),"");
 	  q=p+j;
 	  break;
 	case t_fixnum:
-	  for (size=1,f=fix(this_gensym_counter);f;f/=10,size++);
-	  q=p=ZALLOCA(size+5);
-	  if ((j=snprintf(p,size+5,"%d",(int)fix(this_gensym_counter)))<=0)
+	  for (size=1,f=this_gensym_counter->FIX.FIXVAL;f;f/=10,size++);
+	  q=p=alloca(size+5);
+	  if ((j=snprintf(p,size+5,"%d",(int)this_gensym_counter->FIX.FIXVAL))<=0)
 	    FEerror("Cannot write gensym counter",0);
 	  q=p+j;
 	  break;

@@ -267,23 +267,6 @@
   6
   "abcdef")
 
-(deftest map-into-string.13
-  (do-special-strings
-   (s (copy-seq "12345") nil)
-   (let ((s2 (map-into s #'identity "abcde")))
-     (assert (eq s s2))
-     (assert (string= s2 "abcde"))))
-  nil)
-
-(deftest map-into-string.14
-  (do-special-strings
-   (s "abcde" nil)
-   (let* ((s1 (copy-seq "123456"))
-	  (s2 (map-into s1 #'identity s)))
-     (assert (eq s1 s2))
-     (assert (string= s2 "abcde6"))))
-  nil)
-
 ;;; Tests on bit vectors
 
 (deftest map-into.bit-vector.1
@@ -361,138 +344,46 @@
   8
   #*11111100)
 
-;;; Other specialized vectors
-
-(deftest map-into.specialized-vector.1
-  (do-special-integer-vectors
-   (v #(1 2 3 4) nil)
-   (let ((result (list nil nil nil nil)))
-     (assert (eq (map-into result #'identity v) result))
-     (assert (equal result '(1 2 3 4)))))
-  nil)
-
-(deftest map-into.specialized-vector.2
-  (do-special-integer-vectors
-   (v #(1 2 3) nil)
-   (let ((result (list nil nil nil nil)))
-     (assert (eq (map-into result #'identity v) result))
-     (assert (equal result '(1 2 3 nil)))))
-  nil)
-
-(deftest map-into.specialized-vector.3
-  (do-special-integer-vectors
-   (v #(1 1 0 1 1) nil)
-   (let ((result (list nil nil nil nil)))
-     (assert (eq (map-into result #'identity v) result))
-     (assert (equal result '(1 1 0 1)))))
-  nil)
-
-(deftest map-into.specialized-vector.4
-  (do-special-integer-vectors
-   (v #(1 2 1 2 2) nil)
-   (let ((v2 #(2 1 2 2 1)))
-     (assert (eq (map-into v #'identity v2) v))
-     (assert (equalp v #(2 1 2 2 1)))))
-  nil)
-
-(deftest map-into.specialized-vector.5
-  (let ((len 10))
-    (loop for etype in '(short-float single-float double-float long-float)
-	  for vals = (loop for i below len collect (coerce i etype))
-	  for vec = (make-array len :initial-contents vals :element-type etype)
-	  for target = (loop repeat len collect nil)
-	  for result = (map-into target #'identity vec)
-	  unless (and (eq target result)
-		      (= (length result) len)
-		      (= (length vec) len)
-		      (equal vals result))
-	  collect (list etype vals vec result)))
-  nil)
-
-(deftest map-into.specialized-vector.6
-  (let ((len 10))
-    (loop for cetype in '(short-float single-float double-float long-float)
-	  for etype = `(complex ,cetype)
-	  for vals = (loop for i from 1 to len collect (complex (coerce i cetype)
-								(coerce (- i) cetype)))
-	  for vec = (make-array len :initial-contents vals :element-type etype)
-	  for target = (loop repeat len collect nil)
-	  for result = (map-into target #'identity vec)
-	  unless (and (eq target result)
-		      (= (length result) len)
-		      (= (length vec) len)
-		      (equal vals result))
-	  collect (list etype vals vec result)))
-  nil)
-
-(deftest map-into.specialized-vector.7
-  (let ((len 10))
-    (loop for etype in '(short-float single-float double-float long-float)
-	  for vals = (loop for i below len collect (coerce i etype))
-	  for target = (make-array len :initial-contents vals :element-type etype)
-	  for result = (map-into target #'identity vals)
-	  unless (and (eq target result)
-		      (= (length result) len)
-		      (every #'= result vals))
-	  collect (list etype vals result)))
-  nil)
-
-(deftest map-into.specialized-vector.8
-  (let ((len 10))
-    (loop for cetype in '(short-float single-float double-float long-float)
-	  for etype = `(complex ,cetype)
-	  for vals = (loop for i from 1 to len collect (complex (coerce i cetype)
-								(coerce (- i) cetype)))
-	  for target = (make-array len :initial-contents vals :element-type etype)
-	  for result = (map-into target #'identity vals)
-	  unless (and (eq target result)
-		      (= (length result) len)
-		      (every #'= result vals))
-	  collect (list etype vals result)))
-  nil)
 
 ;;; Error cases
 
 (deftest map-into.error.1
-  (check-type-error #'(lambda (x) (map-into x (constantly nil))) #'sequencep)
-  nil)
+  (classify-error (map-into 'a #'(lambda () nil)))
+  type-error)
 
 ;;; The next test was changed because if the first argument
 ;;; is NIL, map-into is said to 'return nil immediately', so
 ;;; the 'should be prepared' notation for the error checking
 ;;; means that error checking may be skipped.
 (deftest map-into.error.2
-  (and (locally (declare (optimize (safety 3)))
-		(handler-case (eval '(map-into nil #'identity 'a))
-			      (type-error () nil)))
-       :bad)
-  nil)
+  (case (classify-error (map-into nil #'identity 'a))
+    ((nil type-error) 'good)
+    (t 'bad))
+  good)
 
 (deftest map-into.error.3
-  (check-type-error #'(lambda (x) (map-into (copy-seq '(a b c)) #'cons '(d e f) x))
-		    #'sequencep)
-  nil)
+  (classify-error (map-into (copy-seq '(a b c)) #'cons '(d e f) 100))
+  type-error)
 
 (deftest map-into.error.4
-  (signals-error (map-into) program-error)
-  t)
+  (classify-error (map-into))
+  program-error)
 
 (deftest map-into.error.5
-  (signals-error (map-into (list 'a 'b 'c)) program-error)
-  t)
+  (classify-error (map-into (list 'a 'b 'c)))
+  program-error)
 
 (deftest map-into.error.6
-  (signals-error (locally (map-into 'a #'(lambda () nil)) t)
-		 type-error)
-  t)
+  (classify-error (locally (map-into 'a #'(lambda () nil)) t))
+  type-error)
 
 (deftest map-into.error.7
-  (signals-error (map-into (list 'a 'b 'c) #'cons '(a b c)) program-error)
-  t)
+  (classify-error (map-into (list 'a 'b 'c) #'cons '(a b c)))
+  program-error)
 
 (deftest map-into.error.8
-  (signals-error (map-into (list 'a 'b 'c) #'car '(a b c)) type-error)
-  t)
+  (classify-error (map-into (list 'a 'b 'c) #'car '(a b c)))
+  type-error)
 
 ;;; Order of evaluation tests
 

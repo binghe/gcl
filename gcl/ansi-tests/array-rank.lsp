@@ -12,8 +12,10 @@
   0)
 
 (deftest array-rank.2
-  (check-predicate #'(lambda (e) (or (not (typep e 'vector))
-				     (eql (array-rank e) 1))))
+  (loop for e in *universe*
+	when (and (typep e 'vector)
+		  (not (eql (array-rank e) 1)))
+	collect e)
   nil)
 
 (deftest array-rank.order.1
@@ -26,21 +28,25 @@
 ;;; Error tests
 
 (deftest array-rank.error.1
-  (signals-error (array-rank) program-error)
-  t)
+  (classify-error (array-rank))
+  program-error)
 
 (deftest array-rank.error.2
-  (signals-error (array-rank #(a b c) nil)  program-error)
-  t)
+  (classify-error (array-rank #(a b c) nil))
+  program-error)
 
 (deftest array-rank.error.3
-  (check-type-error #'array-rank #'arrayp)
+  (loop for e in *mini-universe*
+	when (and (not (typep e 'array))
+		  (not (eq (classify-error** `(array-rank ',e))
+			   'type-error)))
+	collect e)
   nil)
 
 (deftest array-rank.error.4
-  (signals-error (array-rank nil) type-error)
-  t)
+  (classify-error (array-rank nil))
+  type-error)
 
 (deftest array-rank.error.5
-  (signals-type-error x nil (locally (array-rank x) t))
-  t)
+  (classify-error (locally (array-rank nil) t))
+  type-error)

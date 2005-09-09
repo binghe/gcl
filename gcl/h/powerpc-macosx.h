@@ -36,10 +36,10 @@ extern char *mach_brkpt;
 extern char *get_dbegin ();
 
 #undef SET_REAL_MAXPAGE
-#define SET_REAL_MAXPAGE { sbrk_macosx(0); real_maxpage = (int) mach_maplimit/PAGESIZE; }
+#define SET_REAL_MAXPAGE { my_sbrk(0); real_maxpage = (int) mach_maplimit/PAGESIZE; }
 
-#define sbrk sbrk_macosx
-extern char *sbrk_macosx(int incr);
+#define sbrk my_sbrk
+extern char *my_sbrk(int incr);
 
 
 /** (si::save-system "...") a.k.a. unexec implementation  */
@@ -134,8 +134,6 @@ do {                                                    \
 
 /* si_addr not containing the faulting address is a bug in Darwin.
    Work around this by looking at the dar field of the exception state.  */
-#include <sys/ucontext.h>
-#include <sys/types.h>
 #define GET_FAULT_ADDR(sig,code,scp,addr) ((char *) (((ucontext_t *) scp)->uc_mcontext->es.dar))
 
 /*

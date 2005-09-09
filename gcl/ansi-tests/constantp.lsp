@@ -7,20 +7,21 @@
 
 (in-package :cl-test)
 
-;;; Error tests
-
 (deftest constantp.error.1
-  (signals-error (constantp) program-error)
-  t)
+  (classify-error (constantp))
+  program-error)
 
 (deftest constantp.error.2
-  (signals-error (constantp nil nil nil) program-error)
-  t)
+  (classify-error (constantp nil nil nil))
+  program-error)
 
-;;; Non-error tests
 
 (deftest constantp.1
-  (check-predicate #'(lambda (e) (or (symbolp e) (consp e) (constantp e))))
+  (loop for e in *universe*
+	when (and (not (symbolp e))
+		   (not (consp e))
+		   (not (constantp e)))
+	collect e)
   nil)
 
 (deftest constantp.2

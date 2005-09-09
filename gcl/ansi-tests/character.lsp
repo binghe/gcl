@@ -71,12 +71,12 @@
   #\a 1)
 
 (deftest character.error.1
-  (signals-error (character) program-error)
-  t)
+  (classify-error (character))
+  program-error)
 
 (deftest character.error.2
-  (signals-error (character #\a #\a) program-error)
-  t)
+  (classify-error (character #\a #\a))
+  program-error)
 
 ;;;
 
@@ -100,12 +100,12 @@
   nil 1)
 
 (deftest characterp.error.1
-  (signals-error (characterp) program-error)
-  t)
+  (classify-error (characterp))
+  program-error)
 
 (deftest characterp.error.2
-  (signals-error (characterp #\a #\b) program-error)
-  t)
+  (classify-error (characterp #\a #\b))
+  program-error)
 
 
 (deftest alpha-char-p.1
@@ -133,12 +133,12 @@
   nil 1)
 
 (deftest alpha-char-p.error.1
-  (signals-error (alpha-char-p) program-error)
-  t)
+  (classify-error (alpha-char-p))
+  program-error)
 
 (deftest alpha-char-p.error.2
-  (signals-error (alpha-char-p #\a #\b) program-error)
-  t)
+  (classify-error (alpha-char-p #\a #\b))
+  program-error)
 
 ;;;
 
@@ -173,18 +173,18 @@
   nil 1)
 
 (deftest alphanumericp.error.1
-  (signals-error (alphanumericp) program-error)
-  t)
+  (classify-error (alphanumericp))
+  program-error)
 
 (deftest alphanumericp.error.2
-  (signals-error (alphanumericp #\a #\b) program-error)
-  t)
+  (classify-error (alphanumericp #\a #\b))
+  program-error)
 
 ;;;
 
 (deftest digit-char.1
   (digit-char.1.body)
-  nil)
+  t)
 
 (deftest digit-char.2
   (map 'list #'digit-char (loop for i from 0 to 39 collect i))
@@ -208,12 +208,12 @@
   #\1 2 2)
 
 (deftest digit-char.error.1
-  (signals-error (digit-char) program-error)
-  t)
+  (classify-error (digit-char))
+  program-error)
 
 (deftest digit-char.error.2
-  (signals-error (digit-char 0 10 'foo) program-error)
-  t)
+  (classify-error (digit-char 0 10 'foo))
+  program-error)
 
 ;;;
 
@@ -262,12 +262,12 @@
   0 2 1 2)
 
 (deftest digit-char-p.error.1
-  (signals-error (digit-char-p) program-error)
-  t)
+  (classify-error (digit-char-p))
+  program-error)
   
 (deftest digit-char-p.error.2
-  (signals-error (digit-char-p #\1 10 'foo) program-error)
-  t)
+  (classify-error (digit-char-p #\1 10 'foo))
+  program-error)
 
 ;;;
 
@@ -297,12 +297,12 @@
   nil 1)
 
 (deftest graphic-char-p.error.1
-  (signals-error (graphic-char-p) program-error)
-  t)
+  (classify-error (graphic-char-p))
+  program-error)
 
 (deftest graphic-char-p.error.2
-  (signals-error (graphic-char-p #\a #\a) program-error)
-  t)
+  (classify-error (graphic-char-p #\a #\a))
+  program-error)
 
 ;;;
 
@@ -330,12 +330,12 @@
   nil 1)
 
 (deftest standard-char-p.error.1
-  (signals-error (standard-char-p) program-error)
-  t)
+  (classify-error (standard-char-p))
+  program-error)
   
 (deftest standard-char-p.error.2
-  (signals-error (standard-char-p #\a #\a) program-error)
-  t)
+  (classify-error (standard-char-p #\a #\a))
+  program-error)
 
 ;;;
 
@@ -363,12 +363,12 @@
   #\A 1)
 
 (deftest char-upcase.error.1
-  (signals-error (char-upcase) program-error)
-  t)
+  (classify-error (char-upcase))
+  program-error)
 
 (deftest char-upcase.error.2
-  (signals-error (char-upcase #\a #\a) program-error)
-  t)
+  (classify-error (char-upcase #\a #\a))
+  program-error)
 
 ;;;
 
@@ -396,12 +396,12 @@
   #\a 1)
 
 (deftest char-downcase.error.1
-  (signals-error (char-downcase) program-error)
-  t)
+  (classify-error (char-downcase))
+  program-error)
 
 (deftest char-downcase.error.2
-  (signals-error (char-downcase #\A #\A) program-error)
-  t)
+  (classify-error (char-downcase #\A #\A))
+  program-error)
 
 ;;;
 
@@ -429,12 +429,12 @@
   nil 1)
 
 (deftest upper-case-p.error.1
-  (signals-error (upper-case-p) program-error)
-  t)
+  (classify-error (upper-case-p))
+  program-error)
 
 (deftest upper-case-p.error.2
-  (signals-error (upper-case-p #\a #\A) program-error)
-  t)
+  (classify-error (upper-case-p #\a #\A))
+  program-error)
 
 ;;;
 
@@ -458,12 +458,12 @@
   nil 1)
 
 (deftest lower-case-p.error.1
-  (signals-error (lower-case-p) program-error)
-  t)
+  (classify-error (lower-case-p))
+  program-error)
 
 (deftest lower-case-p.error.2
-  (signals-error (lower-case-p #\a #\a) program-error)
-  t)
+  (classify-error (lower-case-p #\a #\a))
+  program-error)
 
 ;;;
 
@@ -487,12 +487,12 @@
   nil 1)
 
 (deftest both-case-p.error.1
-  (signals-error (both-case-p) program-error)
-  t)
+  (classify-error (both-case-p))
+  program-error)
 
 (deftest both-case-p.error.2
-  (signals-error (both-case-p #\a #\a) program-error)
-  t)
+  (classify-error (both-case-p #\a #\a))
+  program-error)
 
 ;;;
 
@@ -512,12 +512,12 @@
   nil 1)
 
 (deftest char-code.error.1
-  (signals-error (char-code) program-error)
-  t)
+  (classify-error (char-code))
+  program-error)
 
 (deftest char-code.error.2
-  (signals-error (char-code #\a #\a) program-error)
-  t)
+  (classify-error (char-code #\a #\a))
+  program-error)
 
 ;;;
 
@@ -534,12 +534,12 @@
   #\a 1)
 
 (deftest code-char.error.1
-  (signals-error (code-char) program-error)
-  t)
+  (classify-error (code-char))
+  program-error)
 
 (deftest code-char.error.2
-  (signals-error (code-char 1 1) program-error)
-  t)
+  (classify-error (code-char 1 1))
+  program-error)
 
 ;;;
 
@@ -550,7 +550,7 @@
 
 (deftest char-int.2
   (char-int.2.fn)
-  nil)
+  t)
 
 (deftest char-int.order.1
   (let ((i 0))
@@ -560,12 +560,12 @@
   #\a 1)
 
 (deftest char-int.error.1
-  (signals-error (char-int) program-error)
-  t)
+  (classify-error (char-int))
+  program-error)
 
 (deftest char-int.error.2
-  (signals-error (char-int #\a #\a) program-error)
-  t)
+  (classify-error (char-int #\a #\a))
+  program-error)
 
 ;;;
 
@@ -611,9 +611,41 @@
   "Space" 1)
 
 (deftest char-name.error.1
-  (signals-error (char-name) program-error)
-  t)
+  (classify-error (char-name))
+  program-error)
 
 (deftest char-name.error.2
-  (signals-error (char-name #\a #\a) program-error)
+  (classify-error (char-name #\a #\a))
+  program-error)
+
+;;;
+
+(deftest name-char.1
+  (name-char.1.body)
   t)
+
+(deftest name-char.2
+  (loop for s in '("RubOut" "PAGe" "BacKspace" "RetUrn" "Tab" "LineFeed"
+		   "SpaCE" "NewLine")
+	always
+	(let ((c1 (name-char (string-upcase s)))
+	      (c2 (name-char (string-downcase s)))
+	      (c3 (name-char (string-capitalize s)))
+	      (c4 (name-char s)))
+	  (and (eqlt c1 c2) (eqlt c2 c3) (eqlt c3 c4))))
+  t)
+
+(deftest name-char.order.1
+  (let ((i 0))
+    (values
+     (name-char (progn (incf i) "Space"))
+     i))
+  #\Space 1)
+
+(deftest name-char.error.1
+  (classify-error (name-char))
+  program-error)
+
+(deftest name-char.error.2
+  (classify-error (name-char "space" "space"))
+  program-error)

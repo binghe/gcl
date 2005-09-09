@@ -28,7 +28,12 @@
   t)
 
 (deftest arrayp.6
-  (check-type-predicate #'arrayp 'array)
+  (loop for e in *universe*
+	for a = (arrayp e)
+	for b = (typep e 'array)
+	when (or (and a (not b))
+		 (and b (not a)))
+	collect e)
   nil)
 
 (deftest arrayp.order.1
@@ -41,9 +46,12 @@
 ;;; Error tests
 
 (deftest arrayp.error.1
-  (signals-error (arrayp) program-error)
-  t)
+  (classify-error (arrayp))
+  program-error)
 
 (deftest arrayp.error.2
-  (signals-error (arrayp #(a b c) nil) program-error)
-  t)
+  (classify-error (arrayp #(a b c) nil))
+  program-error)
+
+
+

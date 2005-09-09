@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 
 ;; Loading the following causes these non standard symbols in the LISP
 ;; package, to no longer be automatically exported to packages which

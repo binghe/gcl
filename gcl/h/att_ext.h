@@ -116,9 +116,8 @@ float object_to_float();
 double object_to_double();
 
 /*  error.c  */
-EXTER object sKerror,sKparse_error;
+EXTER object sKerror;
 EXTER object sKwrong_type_argument;
-EXTER object sKcontrol_error;
 EXTER object sKcatch;
 EXTER object sKprotect;
 EXTER object sKcatchall;
@@ -160,7 +159,6 @@ EXTER object sKabort;
 EXTER object sKappend;
 EXTER object sKcreate;
 EXTER object sKdefault;
-EXTER object sKexternal_format;
 EXTER object sKdirection;
 EXTER object sKelement_type;
 EXTER object sKif_does_not_exist;
@@ -261,8 +259,8 @@ object cddddr();
 object nth();
 object nthcdr();
 object make_cons();
-object list(fixnum,...);
-object listA(fixnum,...);
+object list(int,...);
+object listA(int,...);
 object append();
 object copy_list();
 object make_list();
@@ -302,7 +300,7 @@ EXTER object sLlambda_block;
 EXTER object sLlambda_closure;
 EXTER object sLlambda_block_closure;
 
-EXTER object sLfunction,sLfunction_identifier;
+EXTER object sLfunction;
 EXTER object sLmacro;
 EXTER object sLtag;
 EXTER object sLblock;
@@ -315,6 +313,7 @@ EXTER object sLblock;
 /*  number.c  */
 EXTER object shortfloat_zero;
 EXTER object longfloat_zero;
+#define make_fixnum(a) ((((FIXtemp=(a))+SMALL_FIXNUM_LIMIT)&(-2*SMALL_FIXNUM_LIMIT))==0?small_fixnum(FIXtemp):make_fixnum1(FIXtemp))
 object make_fixnum1(long);
 object make_ratio();
 object make_shortfloat();
@@ -379,6 +378,8 @@ object find_symbol();
 
 /*  pathname.d  */
 EXTER object Vdefault_pathname_defaults;
+EXTER object sKwild;
+EXTER object sKnewest;
 EXTER object sKstart;
 EXTER object sKend;
 EXTER object sKjunk_allowed;
@@ -389,37 +390,16 @@ EXTER object sKname;
 EXTER object sKtype;
 EXTER object sKversion;
 EXTER object sKdefaults;
-EXTER object sKlocal;
-EXTER object sKcommon;
-
-EXTER object sKpathname_error;
-
-EXTER object sKabsolute;
-EXTER object sKrelative;
 EXTER object sKroot;
-EXTER object sKhome;
-EXTER object sKwild;
-EXTER object sKwildinf;
-EXTER object sKnewest;
 EXTER object sKcurrent;
 EXTER object sKparent;
-EXTER object sKback;
-EXTER object sKup;
-EXTER object sKunspecific;
-
+EXTER object sKper;
+/* object parse_namestring(); */
+object coerce_to_pathname();
+/* object default_device(); */
 object merge_pathnames();
 object namestring();
 object coerce_to_namestring();
-object coerce_to_pathname();
-object file_error();
-object wild_pathname_p();
-
-extern int pathname_resolve();
-extern object pathname_lookup();
-extern object translate_logical_pathname();
-extern object search_local_pathname();
-extern object coerce_to_local_namestring();
-extern object expand_pathname();
 
 /*  prediate.c  */
 
@@ -474,12 +454,6 @@ object terpri();
 EXTER object sSpretty_print_format;
 EXTER int  line_length;
 
-/*  file.d definied but not yet implemented */
-EXTER object sLAprint_linesA;
-EXTER object sLAprint_miser_widthA;
-EXTER object sLAprint_right_marginA;
-EXTER object sLAread_evalA;
-
 /*  Read.d  */
 EXTER object standard_readtable;
 EXTER object Vreadtable;
@@ -529,8 +503,6 @@ object elt();
 object elt_set();
 object reverse();
 object nreverse();
-
-void check_proper_list();
 
 /*  structure.c  */
 EXTER object sSs_data;
@@ -588,34 +560,20 @@ object unix_time_to_universal_time();
 EXTER object sLspecial,sLdeclare;
 EXTER object sSvariable_documentation;
 EXTER object sSfunction_documentation;
-EXTER object sSsetf_function;
-#define setf_fn_form(a_) (type_of(a_)==t_cons && MMcar(a_)==sLsetf &&\
-                          type_of(MMcdr(a_))==t_cons && type_of(MMcadr(a_))==t_symbol &&\
-                          MMcddr(a_)==Cnil)
 
 /*  typespec.c  */
 EXTER object sLcommon,sLnull,sLcons,sLlist,sLsymbol,sLarray,sLvector,sLbit_vector,sLstring;
 EXTER object sLsequence,sLsimple_array,sLsimple_vector,sLsimple_bit_vector,sLsimple_string;
 EXTER object sLcompiled_function,sLpathname,sLcharacter,sLnumber,sLrational,sLfloat,sLstring_char;
-EXTER object sLinteger,sLratio,sLshort_float,sLstandard_char,sLinterpreted_function;
-
-EXTER object sLchar,sLnon_negative_char,sLnegative_char,sLsigned_char,sLunsigned_char;
-EXTER object sLshort,sLnon_negative_short,sLnegative_short,sLsigned_short,sLunsigned_short;
-EXTER object sLfixnum,sLnon_negative_fixnum,sLnegative_fixnum,sLsigned_fixnum,sLunsigned_fixnum;
-EXTER object sLlfixnum,sLnon_negative_lfixnum,sLnegative_lfixnum;
-EXTER object sLsigned_lfixnum,sLunsigned_lfixnum,sLnegative_bignum,sLnon_negative_bignum,sLbase_char;
-
-EXTER object sLseqind,sLrnkind;
-
-EXTER object sLcomplex;
+EXTER object sLinteger,sLratio,sLshort_float,sLstandard_char,sLfixnum,sLpositive_fixnum, sLcomplex;
 EXTER object sLsingle_float,sLpackage,sLbignum,sLrandom_state,sLdouble_float,sLstream,sLbit,sLreadtable;
-EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean,sLfile_stream;
+EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean;
 
 #ifdef ANSI_COMMON_LISP
 /* new ansi types */
 EXTER object sLarithmetic_error,sLbase_char,sLbase_string,sLbroadcast_stream,sLbuilt_in_class;
-EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLdivision_by_zero;
-EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLcontrol_error;
+EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLcontrol_error,sLdivision_by_zero;
+EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLfile_stream;
 EXTER object sLfloating_point_inexact,sLfloating_point_invalid_operation,sLfloating_point_overflow;
 EXTER object sLfloating_point_underflow,sLgeneric_function,sLlogical_pathname,sLmethod,sLpackage_error;
 EXTER object sLparse_error,sLprint_not_readable,sLprogram_error,sLreader_error,sLserious_condition;
@@ -623,7 +581,7 @@ EXTER object sLsimple_base_string,sLsimple_condition,sLsimple_type_error,sLsimpl
 EXTER object sLstandard_generic_function,sLstandard_method,sLstandard_object,sLstorage_condition;
 EXTER object sLstream_error,sLstring_stream,sLstructure_class,sLstyle_warning,sLsynonym_stream;
 EXTER object sLtwo_way_stream,sLtype_error,sLunbound_slot,sLunbound_variable,sLundefined_function,sLwarning;
-EXTER object sLmethod_combination,sLstructure_object,sLdynamic_extent;
+EXTER object sLmethod_combination,sLstructure_object;
 #endif
 
 EXTER object sLsatisfies;

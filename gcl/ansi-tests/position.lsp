@@ -150,14 +150,6 @@
 	    :start 2 :from-end t)
   4)
 
-(deftest position-list.29
-  (position 10 '(1 4 8 10 15 20) :test #'<)
-  4)
-
-(deftest position-list.30
-  (position 10 '(1 4 8 10 15 20) :test-not #'>=)
-  4)
-
 ;;; Tests on vectors
 
 (deftest position-vector.1
@@ -320,22 +312,6 @@
 			   :fill-pointer 5)
 	    :from-end t)
   4)
-
-(deftest position-vector.32
-  (position 10 #(1 4 8 10 15 20) :test #'<)
-  4)
-
-(deftest position-vector.33
-  (position 10 #(1 4 8 10 15 20) :test-not #'>=)
-  4)
-
-(deftest position-vector.34
-  (let* ((v1 #(x x x a b c d a b c d y y y y y))
-	 (v2 (make-array '(8) :displaced-to v1
-			 :displaced-index-offset 3)))
-    (values (position 'c v2)
-	    (position 'c v2 :from-end t)))
-  2 6)			 
 
 ;;; tests on bit vectors
 
@@ -508,14 +484,6 @@
 			  :fill-pointer 5))
   1)
 
-(deftest position-bit-vector.33
-  (position 0 #*1111000 :test #'>=)
-  4)
-
-(deftest position-bit-vector.34
-  (position 0 #*1111000 :test-not #'<)
-  4)
-
 ;;; strings
 
 (deftest position-string.1
@@ -670,70 +638,6 @@
 	    :from-end t)
   4)
 
-(deftest position-string.29
-  (position #\m "adfmpz" :test #'char<)
-  4)
-
-(deftest position-string.30
-  (position #\m "adfmpz" :test-not #'char>=)
-  4)
-
-(deftest position-string.31
-  (let* ((s1 (copy-seq "xxxabcdyyyyy"))
-	 (s2 (make-array '(4) :displaced-to s1
-			 :displaced-index-offset 3
-			 :element-type (array-element-type s1))))
-    (position #\c s2))
-  2)
-
-(deftest position-string.32
-  (let* ((s1 (copy-seq "xxxabcdabcdyyyyyyyy"))
-	 (s2 (make-array '(8) :displaced-to s1
-			 :displaced-index-offset 3
-			 :element-type (array-element-type s1))))
-    (position #\c s2 :from-end t))
-  6)
-
-(deftest position-string.33
-  (do-special-strings
-   (s "abcdabcdabcd" nil)
-   (let* ((c #\c)
-	  (pos (position c s)))
-     (assert (eql pos 2) () "First position of ~A in ~A is ~A" c s pos)))
-  nil)
-
-(deftest position-string.34
-  (do-special-strings
-   (s "abcdabcdabcd" nil)
-   (let* ((c #\c)
-	  (pos (position c s :from-end t)))
-     (assert (eql pos 10) () "Last position of ~A in ~A is ~A" c s pos)))
-  nil)
-
-(defharmless position.test-and-test-not.1
-  (position 'b '(a b c d) :test #'eql :test-not #'eql))
-
-(defharmless position.test-and-test-not.2
-  (position 'b '(a b c d) :test-not #'eql :test #'eql))
-
-(defharmless position.test-and-test-not.3
-  (position 'b #(a b c d) :test #'eql :test-not #'eql))
-
-(defharmless position.test-and-test-not.4
-  (position 'b #(a b c d) :test-not #'eql :test #'eql))
-
-(defharmless position.test-and-test-not.5
-  (position #\b "abcd" :test #'eql :test-not #'eql))
-
-(defharmless position.test-and-test-not.6
-  (position #\b "abcd" :test-not #'eql :test #'eql))
-
-(defharmless position.test-and-test-not.7
-  (position 1 #*001010010 :test #'eql :test-not #'eql))
-
-(defharmless position.test-and-test-not.8
-  (position 0 #*1110010110111 :test-not #'eql :test #'eql))
-
 (deftest position.order.1
   (let ((i 0) a b c d e f g)
     (values
@@ -808,53 +712,62 @@
 ;;; Error tests
 
 (deftest position.error.1
-  (check-type-error #'(lambda (x) (position 'a x)) #'sequencep)
-  nil)
+  (classify-error (position 'a 'b))
+  type-error)
+
+(deftest position.error.2
+  (classify-error (position 'a 10))
+  type-error)
+
+(deftest position.error.3
+  (classify-error (position 'a 1.4))
+  type-error)
 
 (deftest position.error.4
-  (signals-error (position 'e '(a b c . d)) type-error)
-  t)
+  (classify-error (position 'e '(a b c . d)))
+  type-error)
 
 (deftest position.error.5
-  (signals-error (position) program-error)
-  t)
+  (classify-error (position))
+  program-error)
 
 (deftest position.error.6
-  (signals-error (position 'a) program-error)
-  t)
+  (classify-error (position 'a))
+  program-error)
 
 (deftest position.error.7
-  (signals-error (position 'a nil :key) program-error)
-  t)
+  (classify-error (position 'a nil :key))
+  program-error)
 
 (deftest position.error.8
-  (signals-error (position 'a nil 'bad t) program-error)
-  t)
+  (classify-error (position 'a nil 'bad t))
+  program-error)
 
 (deftest position.error.9
-  (signals-error (position 'a nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (position 'a nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest position.error.10
-  (signals-error (position 'a nil 1 2) program-error)
-  t)
+  (classify-error (position 'a nil 1 2))
+  program-error)
 
 (deftest position.error.11
-  (signals-error (locally (position 'a 'b) t) type-error)
-  t)
+  (classify-error (locally (position 'a 'b) t))
+  type-error)
 
 (deftest position.error.12
-  (signals-error (position 'b '(a b c d) :test #'identity) program-error)
-  t)
+  (classify-error (position 'b '(a b c d) :test #'identity))
+  program-error)
 
 (deftest position.error.13
-  (signals-error (position 'b '(a b c d) :test-not #'not) program-error)
-  t)
+  (classify-error (position 'b '(a b c d) :test-not #'not))
+  program-error)
 
 (deftest position.error.14
-  (signals-error (position 'b '(a b c d) :key #'cdr) type-error)
-  t)
+  (classify-error (position 'b '(a b c d) :key #'cdr))
+  type-error)
 
 (deftest position.error.15
-  (signals-error (position 'b '(a b c d) :key #'cons) program-error)
-  t)
+  (classify-error (position 'b '(a b c d) :key #'cons))
+  program-error)
+

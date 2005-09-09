@@ -49,17 +49,13 @@
     z)
   1)
 
-;;; (deftest loop.11.8
-;;;  (loop repeat 3 for i in '(a b c d e) collect i)
-;;;  (a b c))
+(deftest loop.11.8
+  (loop repeat 3 for i in '(a b c d e) collect i)
+  (a b c))
 
-;;; Enough implementors have complained about this test that
-;;; I'm removing it.  The standard is self-contradictory
-;;; on whether REPEAT can occur later in a LOOP form.
-
-;;; (deftest loop.11.9
-;;;  (loop for i in '(a b c d e) collect i repeat 3)
-;;;  (a b c))
+(deftest loop.11.9
+  (loop for i in '(a b c d e) collect i repeat 3)
+  (a b c))
 
 
 ;;; Tests of WHILE
@@ -167,43 +163,3 @@
 	until (>= i 6)
 	finally (return i))
   6)
-
-;;; More tests of a bug that showed up in c.l.l
-
-(deftest loop.11.29
-  (loop for i in '(4 8 9 A 13)
-	when (eq i 'a) return :good
-	while (< i 12) collect i)
-  :good)
-
-(deftest loop.11.30
-  (loop for i in '(4 8 9 A 13)
-	unless (numberp i) return :good
-	while (< i 12) collect i)
-  :good)
-
-(deftest loop.11.31
-  (loop for i in '(4 8 9 A 13)
-	when (eq i 'a) return :good
-	until (> i 12) collect i)
-  :good)
-
-(deftest loop.11.32
-  (loop for i in '(4 8 9 A 13)
-	unless (numberp i) return :good
-	until (> i 12) collect i)
-  :good)
-
-(deftest loop.11.33
-  (loop for i in '(4 8 9 A 13)
-	if (not (numberp i)) return :good end
-	while (< i 12) collect i)
-  :good)
-
-(deftest loop.11.34
-  (loop for i in '(4 8 9 A 13)
-	if (not (numberp i)) return :good end
-	until (> i 12) collect i)
-  :good)
-
-

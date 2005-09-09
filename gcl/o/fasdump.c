@@ -382,9 +382,6 @@ getd(str)
 #define MASK ~(~0 << 8)
 #define WRITE_BYTEI(x,i)  putc((((x) >> (i*SIZE_BYTE)) & MASK),fas_stream)
 
-#define PUTFIX(v_) Join(PUT,SIZEOF_LONG)(v_)
-#define GETFIX(v_) Join(GET,SIZEOF_LONG)(v_)
-
 #define PUT8(varx ) \
  do{unsigned long var= varx ; \
      DPRINTF("{8byte:varx= %ld}", var); \
@@ -668,7 +665,7 @@ FFN(close_fasd)(object ar)
 
 static void
 write_fasd(object obj)
-{  fixnum j,leng;
+{  int j,leng;
 
    /* hook for writing other data in fasd file */
 
@@ -781,7 +778,7 @@ write_fasd(object obj)
        else
 	 {PUT_OP(d_fixnum);
 	  j=leng;
-	  PUTFIX(j);}
+	  PUT4(j);}
        break;
      case DP(t_character:)
        PUT_OP(d_standard_character);
@@ -1267,8 +1264,8 @@ read_fasd1(int i, object *loc)
 	 return;}
     
       case DP(d_fixnum:)
-	{fixnum j;
-	 GETFIX(j);
+	{int j;
+	 GET4(j);
 	 *loc=make_fixnum(j);       
 	 return;}
       case DP( d_bignum:)
@@ -1385,7 +1382,7 @@ read_fasd1(int i, object *loc)
 	 x->a.a_displaced=Cnil;
 	 x->a.a_adjustable=0;
 	 if (x->a.a_rank > 0)
-	   { x->a.a_dims = (fixnum *)alloc_relblock(sizeof(fixnum)*(x->a.a_rank)); }
+	   { x->a.a_dims = (int *)alloc_relblock(sizeof(int)*(x->a.a_rank)); }
 	 for (i=0; i< x->a.a_rank ; i++)
 	   GET4(x->a.a_dims[i]);
 	 array_allocself(x,0,Cnil);
@@ -1502,8 +1499,7 @@ read_fasl_vector(object in)
 		       d->pn.pn_directory,
 		       d->pn.pn_name,
 		       make_simple_string("data"),
-		       d->pn.pn_version,
-		       Cnil);
+		       d->pn.pn_version);
      d = coerce_to_namestring(d);
      in = open_stream(d,smm_input,Cnil,Cnil);
      if (in == Cnil) 
@@ -1525,7 +1521,7 @@ read_fasl_vector(object in)
   { BEGIN_NO_INTERRUPT;
 #ifdef HAVE_ALLOCA
   current_fasd.table->v.v_self
-    = (object *)ZALLOCA(n*sizeof(object));
+    = (object *)alloca(n*sizeof(object));
 #else
   current_fasd.table->v.v_self
     = (object *)alloc_relblock(n*sizeof(object));

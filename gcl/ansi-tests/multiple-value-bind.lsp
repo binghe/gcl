@@ -51,55 +51,12 @@
      x y z))
   (1 2 0) nil nil 0)
 
-;;; No implicit tagbody
-(deftest multiple-value-bind.8
-  (block nil
-    (tagbody
-     (multiple-value-bind (x) nil
-       (go 10)
-       10
-       (return 'bad))
-     10
-     (return 'good)))
-  good)
+;;; (deftest multiple-value-bind.error.1
+;;;  (classify-error (multiple-value-bind))
+;;;  program-error)
+;;;
+;;; (deftest multiple-value-bind.error.2
+;;;  (classify-error (multiple-value-bind (a b c)))
+;;;  program-error)
 
-;;; Works with single values
-(deftest multiple-value-bind.9
-  (multiple-value-bind (x y z) :foo (list x y z))
-  (:foo nil nil))
-
-(deftest multiple-value-bind.10
-  (multiple-value-bind (x) :foo x)
-  :foo)
-
-(deftest multiple-value-bind.11
-  (multiple-value-bind () :foo)
-  nil)
-
-(deftest multiple-value-bind.12
-  (multiple-value-bind () (values))
-  nil)
-
-(deftest multiple-value-bind.13
-  (multiple-value-bind () (values 1 2 3 4 5))
-  nil)
-
-;;; Error cases
-
-(deftest multiple-value-bind.error.1
-  (signals-error (funcall (macro-function 'multiple-value-bind))
-		 program-error)
-  t)
   
-(deftest multiple-value-bind.error.2
-  (signals-error (funcall (macro-function 'multiple-value-bind)
-			   '(multiple-value-bind nil nil))
-		 program-error)
-  t)
-
-(deftest multiple-value-bind.error.3
-  (signals-error (funcall (macro-function 'multiple-value-bind)
-			   '(multiple-value-bind nil nil)
-			   nil nil)
-		 program-error)
-  t)

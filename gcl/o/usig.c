@@ -44,7 +44,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 extern char signals_handled[];
 
 void
-gcl_signal(int signo, handler_function_type handler)
+gcl_signal(int signo, void (*handler) (/* ??? */))
 {
   char *p = signals_handled;
   while (*p)
@@ -61,13 +61,13 @@ gcl_signal(int signo, handler_function_type handler)
     struct sigaction action;
     action.sa_handler = handler;
 /*    action.sa_flags =  SA_RESTART | ((signo == SIGSEGV || signo == SIGBUS) ? SV_ONSTACK : 0) */
-   action.sa_flags = SA_RESTART | ((signo == SIGSEGV || signo == SIGBUS) ? SA_ONSTACK : 0)  
+   action.sa_flags = SA_RESTART | ((signo == SIGSEGV || signo == SIGBUS) ? SV_ONSTACK : 0)  
 #ifdef SA_SIGINFO
     | SA_SIGINFO
 #endif      
       ;
     sigemptyset(&action.sa_mask);
-/*     sigaddset(&action.sa_mask,signo); */
+    sigaddset(&action.sa_mask,signo);
     sigaction(signo,&action,0);
 #else
 #ifdef HAVE_SIGVEC
@@ -133,29 +133,31 @@ unblock_sigusr_sigio(void)
 
 
 static void
-sigfpe1(int a)
+sigfpe1(void)
 {
 	gcl_signal(SIGFPE, sigfpe1);
 	FEerror("Floating-point exception.", 0);
 }
-
 static void
-sigpipe(int a)
+sigpipe(void)
 {
 	gcl_signal(SIGPIPE, sigpipe);
 	perror("");
 	FEerror("Broken pipe", 0);
 }
 
+
 void
-sigint(int a)
+sigint(void)
 {
   unblock_signals(SIGINT,SIGINT);
   terminal_interrupt(1);
 }
 
+
+
 static void
-sigalrm(int a)
+sigalrm(void)
 {
   unblock_signals(SIGALRM,SIGALRM);
   raise_pending_signals(sig_try_to_delay);
@@ -167,11 +169,11 @@ DEF_ORDINARY("SIGUSR1-INTERRUPT",sSsigusr1_interrupt,SI,"");
 DEF_ORDINARY("SIGIO-INTERRUPT",sSsigio_interrupt,SI,"");
 
 static void
-sigusr1(int a)
+sigusr1(void)
 {ifuncall1(sSsigusr1_interrupt,Cnil);}
 
 static void
-sigio(int a)
+sigio(void)
 {ifuncall1(sSsigio_interrupt,Cnil);}
 
 

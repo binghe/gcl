@@ -1,5 +1,4 @@
-/* Copyright 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+/* Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -162,8 +161,8 @@ static const char*
 ext_imms_scaled (const struct ia64_operand *self, ia64_insn code,
 		 ia64_insn *valuep, int scale)
 {
-  int i, bits = 0, total = 0;
-  BFD_HOST_64_BIT val = 0, sign;
+  int i, bits = 0, total = 0, shift;
+  BFD_HOST_64_BIT val = 0;
 
   for (i = 0; i < NELEMS (self->field) && self->field[i].bits; ++i)
     {
@@ -173,8 +172,8 @@ ext_imms_scaled (const struct ia64_operand *self, ia64_insn code,
       total += bits;
     }
   /* sign extend: */
-  sign = (BFD_HOST_64_BIT) 1 << (total - 1);
-  val = (val ^ sign) - sign;
+  shift = 8*sizeof (val) - total;
+  val = (val << shift) >> shift;
 
   *valuep = (val << scale);
   return 0;
@@ -189,7 +188,10 @@ ins_imms (const struct ia64_operand *self, ia64_insn value, ia64_insn *code)
 static const char*
 ins_immsu4 (const struct ia64_operand *self, ia64_insn value, ia64_insn *code)
 {
-  value = ((value & 0xffffffff) ^ 0x80000000) - 0x80000000;
+  if (value == (BFD_HOST_U_64_BIT) 0x100000000)
+    value = 0;
+  else
+    value = (((BFD_HOST_64_BIT)value << 32) >> 32);
 
   return ins_imms_scaled (self, value, code, 0);
 }
@@ -211,7 +213,10 @@ static const char*
 ins_immsm1u4 (const struct ia64_operand *self, ia64_insn value,
 	      ia64_insn *code)
 {
-  value = ((value & 0xffffffff) ^ 0x80000000) - 0x80000000;
+  if (value == (BFD_HOST_U_64_BIT) 0x100000000)
+    value = 0;
+  else
+    value = (((BFD_HOST_64_BIT)value << 32) >> 32);
 
   --value;
   return ins_imms_scaled (self, value, code, 0);
@@ -413,7 +418,6 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
   {
     /* constants: */
     { CST, ins_const, ext_const, "NIL",		{{ 0, 0}}, 0, "<none>" },
-    { CST, ins_const, ext_const, "ar.csd",	{{ 0, 0}}, 0, "ar.csd" },
     { CST, ins_const, ext_const, "ar.ccv",	{{ 0, 0}}, 0, "ar.ccv" },
     { CST, ins_const, ext_const, "ar.pfs",	{{ 0, 0}}, 0, "ar.pfs" },
     { CST, ins_const, ext_const, "1",		{{ 0, 0}}, 0, "1" },
@@ -582,7 +586,4 @@ const struct ia64_operand elf64_ia64_operands[IA64_OPND_COUNT] =
       "a branch target" },
     { REL, ins_rsvd, ext_rsvd, 0, {{0, 0}}, 0,                  /* TGT64  */
       "a branch target" },
-
-    { ABS, ins_const, ext_const, 0, {{0, 0}}, 0,		/* LDXMOV */
-      "ldxmov target" },
   };

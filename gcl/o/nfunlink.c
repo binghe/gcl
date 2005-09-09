@@ -183,10 +183,10 @@ IapplyVector(object fun, int nargs, object *base)
    starting at BASE.  This pushes on the CallHist, and puts the args onto
    the arg stack, so that debuggers may examine them.  It sets
    fcall.nvalues appropriately. */
-{ object res=OBJNULL,*abase=NULL;
-  int i=0;
+{ object res,*abase;
+  int i;
   object *oldtop = vs_top;
-  unsigned int  atypes=0;
+  unsigned int  atypes;
   if (oldtop == base) vs_top += nargs;
   else
     { object *b = base;
@@ -207,8 +207,7 @@ IapplyVector(object fun, int nargs, object *base)
       FEtoo_many_arguments(base,vs_top);
     atypes = F_TYPES(fun->sfn.sfn_argd) >> F_TYPE_WIDTH;
     if (atypes==0) {abase = base;}
-    else { abase = ZALLOCA(nargs*sizeof(object));
-           assert(abase);
+    else { abase = vs_top;
 	   for (i=0; i < nargs ; i++, atypes >>= F_TYPE_WIDTH)
 	     { object next = base[i];
 	       int atyp = atypes & MASK_RANGE(0,F_TYPE_WIDTH);
@@ -224,8 +223,7 @@ IapplyVector(object fun, int nargs, object *base)
 		 { ASSURE_TYPE(next,t_longfloat);
 		   next = COERCE_F_TYPE(next,F_object,F_double_ptr);}
 	       else {FEerror("cant get here!",0);}
-	       vs_push(base[i]);
-               abase[i]=next;}
+	       vs_push(next);}
 
 	 }
     res = c_apply_n(fun->sfn.sfn_self,nargs,abase);

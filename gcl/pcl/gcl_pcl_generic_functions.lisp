@@ -46,10 +46,6 @@
 ;          (short-method-combination)
 ;          (t)
 
-(defgeneric long-method-combination-p (object))
-;          (long-method-combination)
-;          (t)
-
 (defgeneric slot-class-p (object))
 ;          (t)
 ;          (slot-class)
@@ -137,9 +133,6 @@
 (defgeneric eql-specializer-object (eql-specializer))
 ;          (eql-specializer)
 
-(defgeneric generic-function-declarations (standard-generic-function))
-;          (standard-generic-function)
-
 (defgeneric generic-function-method-class (standard-generic-function))
 ;          (standard-generic-function)
 
@@ -150,9 +143,6 @@
 ;          (standard-generic-function)
 
 (defgeneric generic-function-name (standard-generic-function))
-;          (standard-generic-function)
-
-(defgeneric generic-function-argument-precedence-order (generic-function))
 ;          (standard-generic-function)
 
 (defgeneric gf-arg-info (standard-generic-function))
@@ -272,9 +262,6 @@
 ;          (t standard-generic-function)
 
 (defgeneric (setf generic-function-method-combination) (new-value standard-generic-function))
-;          (t standard-generic-function)
-
-(defgeneric (setf generic-function-declarations) (new-value standard-generic-function))
 ;          (t standard-generic-function)
 
 (defgeneric (setf generic-function-methods) (new-value standard-generic-function))
@@ -497,9 +484,7 @@
 (defgeneric add-method (generic-function method))
 ;          (standard-generic-function method)
 
-;; FIXME make sure this is right
-;(defgeneric change-class (instance new-class-name &rest initargs))
-(defgeneric change-class (instance new-class-name &key &allow-other-keys))
+(defgeneric change-class (instance new-class-name))
 ;          (standard-object standard-class)
 ;          (standard-object funcallable-standard-class)
 ;          (t symbol)
@@ -579,8 +564,6 @@
 (defgeneric map-dependents (metaobject function))
 ;          (dependent-update-mixin t)
 
-(defgeneric no-next-method (generic-function method &rest args))
-
 ;(defgeneric maybe-update-constructors (generic-function method))
 ;           (generic-function method)
 
@@ -638,20 +621,6 @@
 ;          (class built-in-class)
 ;          (slot-class forward-referenced-class)
 ;          (funcallable-standard-class standard-class)
-
-;; FIXME synch with cmucl to use these defs
-
-;(defgeneric (setf documentation) (new-value slotd doc-type)
-;  (:argument-precedence-order doc-type slotd new-value))
-;          (t t)
-;          (t documentation-mixin)
-;          (t standard-slot-definition)
-
-;(defgeneric documentation (slotd doc-type)
-;  (:argument-precedence-order doc-type slotd))
-;          (t)
-;          (documentation-mixin)
-;          (standard-slot-definition)
 
 
 ;;; 3 arguments 
@@ -724,9 +693,6 @@
 
 
 ;;; optional arguments  
-(defgeneric get-method (generic-function qualifiers specializers &optional errorp))
-;          (standard-generic-function t t)
-(defgeneric find-method (generic-function qualifiers specializers &optional errorp))
 (defgeneric (setf documentation) (new-value slotd &optional doc-type))
 ;          (t t)
 ;          (t documentation-mixin)
@@ -737,7 +703,7 @@
 ;          (documentation-mixin)
 ;          (standard-slot-definition)
 
-;(defgeneric get-method (generic-function qualifiers specializers &optional (errorp t)))
+(defgeneric get-method (generic-function qualifiers specializers &optional (errorp t)))
 ;          (standard-generic-function t t)
 
 (defgeneric remove-named-method (generic-function-name argument-specifiers &optional extra))
@@ -771,8 +737,6 @@
 
 (defgeneric no-applicable-method (generic-function &rest args))
 ;          (t)
-
-(defgeneric no-primary-method (generic-function &rest args))
 
 (defgeneric reader-method-class (class direct-slot &rest initargs))
 ;          (slot-class t)

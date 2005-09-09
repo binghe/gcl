@@ -1,6 +1,5 @@
 /* BFD back end for Lynx core files
-   Copyright 1993, 1994, 1995, 2001, 2002, 2004
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 2001, 2002 Free Software Foundation, Inc.
    Written by Stu Grossman of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -54,11 +53,11 @@ struct lynx_core_struct
 /* Handle Lynx core dump file.  */
 
 static asection *
-make_bfd_asection (abfd, name, flags, size, vma, filepos)
+make_bfd_asection (abfd, name, flags, _raw_size, vma, filepos)
      bfd *abfd;
      const char *name;
      flagword flags;
-     bfd_size_type size;
+     bfd_size_type _raw_size;
      bfd_vma vma;
      file_ptr filepos;
 {
@@ -76,7 +75,7 @@ make_bfd_asection (abfd, name, flags, size, vma, filepos)
     return NULL;
 
   asect->flags = flags;
-  asect->size = size;
+  asect->_raw_size = _raw_size;
   asect->vma = vma;
   asect->filepos = filepos;
   asect->alignment_power = 2;
@@ -225,11 +224,11 @@ lynx_core_file_failing_signal (abfd)
   return core_signal (abfd);
 }
 
-bfd_boolean
+boolean
 lynx_core_file_matches_executable_p  (core_bfd, exec_bfd)
      bfd *core_bfd, *exec_bfd;
 {
-  return TRUE;		/* FIXME, We have no way of telling at this point */
+  return true;		/* FIXME, We have no way of telling at this point */
 }
 
 #endif /* LYNX_CORE */

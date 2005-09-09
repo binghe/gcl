@@ -6,47 +6,45 @@
 (in-package :cl-test)
 
 (deftest fill.error.1
-  (signals-error (fill 'a 'b) type-error)
-  t)
+  (classify-error (fill 'a 'b))
+  type-error)
 
 (deftest fill.error.2
-  (signals-error (fill) program-error)
-  t)
+  (classify-error (fill))
+  program-error)
 
 (deftest fill.error.3
-  (signals-error (fill (list 'a 'b)) program-error)
-  t)
+  (classify-error (fill (list 'a 'b)))
+  program-error)
 
 (deftest fill.error.4
-  (signals-error (fill (list 'a 'b) 'c :bad t) program-error)
-  t)
+  (classify-error (fill (list 'a 'b) 'c :bad t))
+  program-error)
 
 (deftest fill.error.5
-  (signals-error (fill (list 'a 'b) 'c :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (fill (list 'a 'b) 'c :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest fill.error.6
-  (signals-error (fill (list 'a 'b) 'c :start) program-error)
-  t)
+  (classify-error (fill (list 'a 'b) 'c :start))
+  program-error)
 
 (deftest fill.error.7
-  (signals-error (fill (list 'a 'b) 'c :end) program-error)
-  t)
+  (classify-error (fill (list 'a 'b) 'c :end))
+  program-error)
 
 (deftest fill.error.8
-  (signals-error (fill (list 'a 'b) 'c 1 2) program-error)
-  t)
+  (classify-error (fill (list 'a 'b) 'c 1 2))
+  program-error)
 
 (deftest fill.error.10
-  (signals-error (fill (list 'a 'b) 'c :bad t :allow-other-keys nil
-			:allow-other-keys t)
-		 program-error)
-  t)
+  (classify-error (fill (list 'a 'b) 'c :bad t :allow-other-keys nil
+			:allow-other-keys t))
+  program-error)
 
 (deftest fill.error.11
-  (signals-error (locally (fill 'a 'b) t) type-error)
-  t)
+  (classify-error (locally (fill 'a 'b) t))
+  type-error)
 
 ;;; Fill on arrays
 
@@ -93,32 +91,28 @@
   t (x x x x x))
 
 (deftest array-fill-7
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5))))
-     (fill a 'x :start -1))
-   type-error)
-  t)
+     (fill a 'x :start -1)))
+  type-error)
 
 (deftest array-fill-8
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5))))
-     (fill a 'x :start 'a))
-   type-error)
-  t)
+     (fill a 'x :start 'a)))
+  type-error)
 
 (deftest array-fill-9
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5))))
-     (fill a 'x :end -1))
-   type-error)
-  t)
+     (fill a 'x :end -1)))
+  type-error)
 
 (deftest array-fill-10
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5))))
-     (fill a 'x :end 'a))
-   type-error)
-  t)
+     (fill a 'x :end 'a)))
+  type-error)
 
 ;;; fill on arrays of fixnums
 
@@ -165,32 +159,28 @@
   t (-1 -1 -1 -1 -1))
 
 (deftest array-fixnum-fill-7
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5) :element-type 'fixnum)))
-     (fill a 10 :start -1))
-   type-error)
-  t)
+     (fill a 10 :start -1)))
+  type-error)
 
 (deftest array-fixnum-fill-8
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5) :element-type 'fixnum)))
-     (fill a 100 :start 'a))
-   type-error)
-  t)
+     (fill a 100 :start 'a)))
+  type-error)
 
 (deftest array-fixnum-fill-9
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5) :element-type 'fixnum)))
-     (fill a -5 :end -1))
-   type-error)
-  t)
+     (fill a -5 :end -1)))
+  type-error)
 
 (deftest array-fixnum-fill-10
-  (signals-error
+  (classify-error
    (let* ((a (make-array '(5) :element-type 'fixnum)))
-     (fill a 17 :end 'a))
-   type-error)
-  t)
+     (fill a 17 :end 'a)))
+  type-error)
 
 ;;; fill on arrays of unsigned eight bit bytes
 
@@ -219,24 +209,20 @@
   t (0 0 0 0 0))
 
 (deftest array-unsigned-byte8-fill-7
-  (signals-error (array-unsigned-byte-fill-test-fn 8 0 :start -1)
-		 type-error)
-  t)
+  (classify-error (array-unsigned-byte-fill-test-fn 8 0 :start -1))
+  type-error)
 
 (deftest array-unsigned-byte8-fill-8
-  (signals-error (array-unsigned-byte-fill-test-fn 8 100 :start 'a)
-		 type-error)
-  t)
+  (classify-error (array-unsigned-byte-fill-test-fn 8 100 :start 'a))
+  type-error)
 
 (deftest array-unsigned-byte8-fill-9
-  (signals-error (array-unsigned-byte-fill-test-fn 8 19 :end -1)
-		 type-error)
-  t)
+  (classify-error (array-unsigned-byte-fill-test-fn 8 19 :end -1))
+  type-error)
 
 (deftest array-unsigned-byte8-fill-10
-  (signals-error (array-unsigned-byte-fill-test-fn 8 17 :end 'a)
-		 type-error)
-  t)
+  (classify-error (array-unsigned-byte-fill-test-fn 8 17 :end 'a))
+  type-error)
 
 ;;; Tests on arrays with fill pointers
 
@@ -534,66 +520,3 @@
 	   :start (progn (setf w (incf i)) 0))
      i x y z p q r s w))
   #(a z z a) 8 1 2 3 4 5 6 7 8)
-
-;;; Specialized strings
-
-(deftest fill.specialized-strings.1
-  (do-special-strings
-   (s (copy-seq "abcde") nil)
-   (assert (string= s "abcde"))
-   (assert (eq s (fill s #\x)))
-   (assert (string= s "xxxxx")))
-  nil)
-
-(deftest fill.specialized-strings.2
-  (do-special-strings
-   (s (copy-seq "abcde") nil)
-   (assert (string= s "abcde"))
-   (assert (eq s (fill s #\x  :start 2)))
-   (assert (string= s "abxxx")))
-  nil)
-
-(deftest fill.specialized-strings.3
-  (do-special-strings
-   (s (copy-seq "abcde") nil)
-   (assert (string= s "abcde"))
-   (assert (eq s (fill s #\x  :end 3)))
-   (assert (string= s "xxxde")))
-  nil)
-
-(deftest fill.specialized-strings.4
-  (do-special-strings
-   (s (copy-seq "abcde") nil)
-   (assert (string= s "abcde"))
-   (assert (eq s (fill s #\x  :start 1 :end 4)))
-   (assert (string= s "axxxe")))
-  nil)
-
-;;; Specialized vector tests
-
-(deftest fill.specialized-vectors.1
-  (do-special-integer-vectors
-   (v #(0 1 1 0 1) nil)
-   (let ((etype (array-element-type v)))
-     (assert (eq v (fill v 0)))
-     (assert (equal (array-element-type v) etype)))
-   (assert (equalp v #(0 0 0 0 0))))
-  nil)
-
-(deftest fill.specialized-vectors.2
-  (do-special-integer-vectors
-   (v #(0 -1 1 0 -1) nil)
-   (let ((etype (array-element-type v)))
-     (assert (eq v (fill v 1)))
-     (assert (equal (array-element-type v) etype)))
-   (assert (equalp v #(1 1 1 1 1))))
-  nil)
-
-(deftest fill.specialized-vectors.3
-  (do-special-integer-vectors
-   (v #(1 1 1 1 0) nil)
-   (let ((etype (array-element-type v)))
-     (assert (eq v (fill v 0 :start 1 :end 3)))
-     (assert (equal (array-element-type v) etype)))
-   (assert (equalp v #(1 0 0 1 0))))
-  nil)

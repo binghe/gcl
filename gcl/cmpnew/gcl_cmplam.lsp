@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPLAM  Lambda expression.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -98,7 +97,7 @@
 (si:putprop 'make-dclosure 'wt-make-dclosure 'wt-loc)
 
 (defun wt-make-dclosure (cfun clink)clink  ;;Dbase=base0
-  (wt-nl "(set_type_of(&DownClose"cfun",t_dclosure),DownClose" cfun ".dc_self=LC" cfun","
+  (wt-nl "(DownClose"cfun".t=t_dclosure,DownClose" cfun ".dc_self=LC" cfun","
      "DownClose" cfun ".dc_env=base0,(object)&DownClose" cfun ")"))
 
 (defun wfs-error ()
@@ -128,15 +127,7 @@
               (unwind-exit (list 'make-dclosure (fun-cfun fun) *clink*))))
 
 
-(defun decls-from-procls (ll procls body)
-  (cond ((or (null procls) (eq (car procls) '*)
-	     (null ll) (member (car ll) '(&whole &optional &rest &key &environment) :test #'eq)) nil)
-	((eq (car procls) t)
-	 (decls-from-procls (cdr ll) (cdr procls) body))
-	(t
-	 (cons (list (car procls) (or (if (atom (car ll)) (car ll) (caar ll))))
-	       (decls-from-procls (cdr ll) (cdr procls) body)))))
-	 
+
 (defun c1lambda-expr (lambda-expr
                       &optional (block-name nil block-it)
                       &aux (requireds nil) (optionals nil) (rest nil)
@@ -150,22 +141,9 @@
                            (aux-info nil)
 			   (setjmps *setjmps*)
                       )
-
   (cmpck (endp lambda-expr)
          "The lambda expression ~s is illegal." (cons 'lambda lambda-expr))
 
-
-  ;;FIXME -- this is backwards, as the proclamations should be
-  ;;generated from the declarations.  What we need here and in the let
-  ;;code is reverse type propagation.  CM 20050106
-  (let ((decls (decls-from-procls
-		(car lambda-expr)
-		(and block-it (get block-name 'compiler::proclaimed-arg-types))
-		(cdr lambda-expr))))
-    (when decls
-      (cmpnote "~S function args declared: ~S~%" block-name decls)
-      (setq lambda-expr (cons (car lambda-expr) (cons (cons 'declare decls) (cdr lambda-expr))))))
-    
   (multiple-value-setq (body ss ts is other-decls doc)
                        (c1body (cdr lambda-expr) t))
   
@@ -358,11 +336,7 @@
         (add-info aux-info (cadr body))
         (setq body (list 'let* aux-info aux-vars aux-inits body))
 	(or (eql setjmps *setjmps*) (setf (info-volatile aux-info) t)))
-
-  ;;FIXME -- is above for aux needed too?
-  (when (or optionals keywords)
-    (or (eql setjmps *setjmps*) (setf (info-volatile info) t)))
-
+  
   (setq body (fix-down-args requireds body block-name))
   (setq lambda-list
 	(list requireds optionals rest key-flag keywords allow-other-keys))
@@ -425,7 +399,7 @@
              nil)))
     (let ((*rest-on-stack*
 	    (cond ((and (caddr lambda-list)
-			(/= (var-dynamic (caddr lambda-list)) 0))
+			(eq (var-type (caddr lambda-list)) :dynamic-extent))
 		   t)
 		  (t *rest-on-stack*))))
        (if (cadddr lambda-list) ;;; key-flag
@@ -450,7 +424,7 @@
            (let ((kind (c2var-kind var)))
                 (declare (object kind))
                 (when kind
-                      (let ((cvar (cs-push (var-type var) t)))
+                      (let ((cvar (next-cvar)))
                            (setf (var-kind var) kind)
                            (setf (var-loc var) cvar)
                            (wt-nl)
@@ -467,15 +441,15 @@
   ;;; check arguments
   (when (or *safe-compile* *compiler-check-args*)
     (cond ((or rest optionals)
-	   (when requireds
-	     (wt-nl "if(vs_top-vs_base<" (length requireds)
-		    ") too_few_arguments();"))
-	   (unless rest
-	     (wt-nl "if(vs_top-vs_base>"
-		    (+ (length requireds) (length optionals))
-		    ") too_many_arguments();")))
-	  (t (wt-nl "check_arg(" (length requireds) ");"))))
-  
+           (when requireds
+             (wt-nl "if(vs_top-vs_base<" (length requireds)
+                    ") too_few_arguments();"))
+           (unless rest
+             (wt-nl "if(vs_top-vs_base>"
+                    (+ (length requireds) (length optionals))
+                    ") too_many_arguments();")))
+          (t (wt-nl "check_arg(" (length requireds) ");"))))
+
   ;;; Allocate the parameters.
   (dolist** (var requireds) (setf (var-ref var) (vs-push)))
   (dolist** (opt optionals) (setf (var-ref (car opt)) (vs-push)))
@@ -570,7 +544,7 @@
            (let ((kind (c2var-kind var)))
                 (declare (object kind))
                 (when kind
-                      (let ((cvar (cs-push (var-type var) t)))
+                      (let ((cvar (next-cvar)))
                            (setf (var-kind var) kind)
                            (setf (var-loc var) cvar)
                            (wt-nl)
@@ -589,9 +563,9 @@
         )
   ;;; Check arguments.
   (when (and (or *safe-compile* *compiler-check-args*) requireds)
-    (when requireds
-      (wt-nl "if(vs_top-vs_base<" (length requireds)
-	     ") too_few_arguments();")))
+        (when requireds
+              (wt-nl "if(vs_top-vs_base<" (length requireds)
+                     ") too_few_arguments();")))
 
   ;;; Allocate the parameters.
   (dolist** (var requireds) (setf (var-ref var) (vs-push)))
@@ -731,7 +705,7 @@
 
 (defun c1dm (macro-name vl body
                         &aux (*vs* *vs*) (whole nil) (env nil)
-			(setjmps *setjmps*)
+	(setjmps *setjmps*)
                         (*vnames* nil) (*dm-info* (make-info)) (*dm-vars* nil)
                         doc ss is ts other-decls ppn)
 
@@ -880,7 +854,7 @@
       ,end-form))))
 
 (defun c2dm (whole env vl body
-                   &aux (cvar (cs-push t t)))
+                   &aux (cvar (next-cvar)))
   (when (or *safe-compile* *compiler-check-args*)
     (wt-nl "check_arg(2);"))
   (cond (whole (setf (var-ref whole) (vs-push)))
@@ -953,7 +927,7 @@
       (wt "}"))
   (when rest (c2dm-bind-loc rest `(cvar ,cvar)))
   (dolist** (kwd keywords)
-    (let ((cvar1 (cs-push t t)))
+    (let ((cvar1 (next-cvar)))
          (wt-nl
           "{object V" cvar1 "=getf(V" cvar ",VV[" (add-symbol (car kwd))
           "],OBJNULL);")
@@ -984,14 +958,14 @@
 
 (defun c2dm-bind-loc (v loc)
   (if (consp v)
-      (let ((cvar (cs-push t t)))
+      (let ((cvar (next-cvar)))
            (maybe-wt-c2dm-bind-vl v cvar (wt-nl "{object V" cvar "= " loc ";") (wt "}")))
       (c2bind-loc v loc)))
 
 (defun c2dm-bind-init (v init)
   (if (consp v)
       (let* ((*vs* *vs*) (*inline-blocks* 0)
-             (cvar (cs-push t t))
+             (cvar (next-cvar))
              (loc (car (inline-args (list init) '(t)))))
        (maybe-wt-c2dm-bind-vl v cvar (wt-nl "{object V" cvar "= " loc ";") (wt "}"))
        (close-inline-blocks))

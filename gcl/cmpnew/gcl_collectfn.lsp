@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;                                                                    ;;;;;
 ;;;     Copyright (c) 1989 by William Schelter,University of Texas     ;;;;;
@@ -37,7 +36,7 @@
 
 (defvar *other-form* (make-fn))
 (defvar *all-fns* nil)
-(defvar *call-table* (make-hash-table :test #'equal))
+(defvar *call-table* (make-hash-table))
 (defvar *current-fn* nil)
 (defun add-callee (fname)
   (cond ((consp fname)
@@ -64,24 +63,22 @@
 
 (defun emit-fn (flag) (setq *record-call-info* flag))
 
-(defun promote-inlines (x)
-  (if (eq x 'inline) t
-    (if (si::memq x '(inline-fixnum fixnum-value)) 'fixnum
-      x)))
-
 (defun type-or (a b)
-  (let ((a (promote-inlines a)))
-    (if (type>= b a) b
-      (if (type>= a b) a
-	'*))))
-      
+  (if (eq b '*) '*
+    (case a
+      ((nil) b)
+      ((t inline) t)
+      ((fixnum inline-fixnum fixnum-value) (if (eq b 'fixnum) 'fixnum
+					     (type-or t b)))
+      (otherwise '*)
+      )))
+
 (defun current-fn ()
   (cond ((and (consp *current-form*)
 	      (member (car *current-form*) '(defun defmacro))
-	      (or (is-setf-function (second *current-form*))
-		  (and
-		   (symbolp  (second *current-form*))
-		   (symbol-package (second *current-form*)))));;don't record gensym'd
+	      (symbolp  (second *current-form*))
+	      (symbol-package (second *current-form*));;don't record gensym'd
+	      )
 	 (cond ((and *current-fn*
 		     (equal (second *current-form*)  (fn-name *current-fn*)))
 		*current-fn*)
@@ -268,7 +265,7 @@
   (cond ((and fname (symbolp fname))
 	 (add-callee fname)))
   (cond ((eq loc 'record-call-info) (return-from record-call-info nil)))
-  (case (if (multiple-values-p) 'top *value-to-go*)
+  (case *value-to-go*
     (return
       (if (eq loc 'fun-val)
 	  (add-value-type nil (or fname  'unknown-values))
@@ -277,7 +274,10 @@
       (add-value-type 'fixnum nil))
     (return-object
       (add-value-type t nil))
-    (top (setq *top-data* (cons fname nil)))))
+    
+    (top  (setq *top-data* (cons fname nil))
+	 ))
+     )
 
 (defun list-undefined-functions (&aux undefs)
   (sloop::sloop for (name fn) in-table *call-table*

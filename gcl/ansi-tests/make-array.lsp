@@ -5,7 +5,7 @@
 
 (in-package :cl-test)
 
-(compile-and-load "array-aux.lsp")
+;;; See array-aux.lsp for auxiliary functions
 
 (deftest make-array.1
   (let ((a (make-array-with-checks 10)))
@@ -100,7 +100,6 @@
 
 (deftest make-array.8
   (let ((a (make-array-with-checks 8 :element-type '(integer 0 (256)))))
-    ;; Should return a symbol only in error situations
     (and (symbolp a) a))
   nil)
 
@@ -113,39 +112,6 @@
   (make-array-with-checks '(8) :element-type '(integer 0 (256))
 			  :initial-contents '(4 3 2 1 9 8 7 6))
   #(4 3 2 1 9 8 7 6))
-
-(deftest make-array.8c
-  (loop for i from 1 to 32
-	for tp = `(unsigned-byte ,i)
-	for a = (make-array 5 :fill-pointer 3 :element-type tp :initial-contents '(1 1 0 0 1))
-	when (symbolp a)
-	collect (list i tp a))
-  nil)
-
-(deftest make-array.8d
-  (loop for i from 2 to 32
-	for tp = `(signed-byte ,i)
-	for a = (make-array 5 :fill-pointer 3 :element-type tp :initial-contents '(1 1 0 0 1))
-	when (symbolp a)
-	collect (list i tp a))
-  nil)
-
-(deftest make-array.8e
-  (loop for tp in '(short-float single-float double-float long-float)
-	for v in '(1.0s0 1.0f0 1.0d0 1.0l0)
-	for a = (make-array 5 :fill-pointer 3 :element-type tp :initial-element v)
-	when (symbolp a)
-	collect (list tp v a))
-  nil)
-
-(deftest make-array.8f
-  (loop for tp in '(short-float single-float double-float long-float)
-	for v in '(1.0s0 1.0f0 1.0d0 1.0l0)
-	for a = (make-array 5 :fill-pointer 3 :element-type `(complex ,tp)
-			    :initial-element (complex v))
-	when (symbolp a)
-	collect (list tp v a))
-  nil)
 
 ;;; Zero dimensional arrays
 
@@ -165,23 +131,6 @@
 (deftest make-array.12
   (make-array-with-checks nil :element-type 'bit :initial-contents 1)
   #0a1)
-
-(deftest make-array.12a
-  (make-array-with-checks 10 :element-type 'bit :initial-contents '(1 0 0 1 1 0 0 1 0 0)
-			  :fill-pointer 6)
-  #*100110)
-
-(deftest make-array.12b
-  (make-array-with-checks 10 :element-type 'character
-			  :initial-contents "abcdefghij"
-			  :fill-pointer 8)
-  "abcdefgh")
-
-(deftest make-array.12c
-  (make-array-with-checks 10 :element-type 'base-char
-			  :initial-contents "abcdefghij"
-			  :fill-pointer 8)
-  "abcdefgh")
 
 (deftest make-array.13
   (make-array-with-checks nil :element-type t :initial-contents 'a)
@@ -243,9 +192,9 @@
 	     (read-from-string (format nil "#~Aa()" len))))
   t)
 
-;;; (deftest make-array.24
-;;;  (make-array-with-checks '(5) :initial-element 'a :displaced-to nil)
-;;;  #(a a a a a))
+(deftest make-array.24
+  (make-array-with-checks '(5) :initial-element 'a :displaced-to nil)
+  #(a a a a a))
 
 (deftest make-array.25
   (make-array '(4) :initial-element 'x :nonsense-argument t
@@ -352,27 +301,6 @@
 			 :fill-pointer t
 			 :initial-contents '(a b c d))
  #(a b c d))
-
-(deftest make-array.adjustable.7a
- (make-array-with-checks '(4) :adjustable t
-			 :element-type 'bit
-			 :fill-pointer t
-			 :initial-contents '(1 0 0 1))
- #(1 0 0 1))
-
-(deftest make-array.adjustable.7b
- (make-array-with-checks '(4) :adjustable t
-			 :element-type 'base-char
-			 :fill-pointer t
-			 :initial-contents "abcd")
- "abcd")
-
-(deftest make-array.adjustable.7c
- (make-array-with-checks '(4) :adjustable t
-			 :element-type 'character
-			 :fill-pointer t
-			 :initial-contents "abcd")
- "abcd")
 
 (deftest make-array.adjustable.8
  (make-array-with-checks '(4) :adjustable t
@@ -691,57 +619,52 @@
 ;;; Error tests
 
 (deftest make-array.error.1
-  (signals-error (make-array) program-error)
-  t)
+  (classify-error (make-array))
+  program-error)
 
 (deftest make-array.error.2
-  (signals-error (make-array '(10) :bad t) program-error)
-  t)
+  (classify-error (make-array '(10) :bad t))
+  program-error)
 
 (deftest make-array.error.3
-  (signals-error (make-array '(10) :allow-other-keys nil :bad t)
-		 program-error)
-  t)
+  (classify-error (make-array '(10) :allow-other-keys nil :bad t))
+  program-error)
 
 (deftest make-array.error.4
-  (signals-error (make-array '(10) :allow-other-keys nil
-			      :allow-other-keys t :bad t)
-		 program-error)
-  t)
+  (classify-error (make-array '(10) :allow-other-keys nil
+			      :allow-other-keys t :bad t))
+  program-error)
 
 (deftest make-array.error.5
-  (signals-error (make-array '(10) :bad) program-error)
-  t)
+  (classify-error (make-array '(10) :bad))
+  program-error)
 
 (deftest make-array.error.6
-  (signals-error (make-array '(10) 1 2) program-error)
-  t)
+  (classify-error (make-array '(10) 1 2))
+  program-error)
 
 ;;; Order of evaluation tests
 
 (deftest make-array.order.1
-  (let ((i 0) a b c e)
+  (let ((i 0) a b c d e)
     (values
      (make-array (progn (setf a (incf i)) 5)
 		 :initial-element (progn (setf b (incf i)) 'a)
 		 :fill-pointer (progn (setf c (incf i)) nil)
-		 ;; :displaced-to (progn (setf d (incf i)) nil)
+		 :displaced-to (progn (setf d (incf i)) nil)
 		 :element-type (progn (setf e (incf i)) t)
 		 )
-     i a b c e))
-  #(a a a a a) 4 1 2 3 4)
+     i a b c d e))
+  #(a a a a a) 5 1 2 3 4 5)
 
 (deftest make-array.order.2
-  (let ((i 0) a b d e)
+  (let ((i 0) a b c d e)
     (values
      (make-array (progn (setf a (incf i)) 5)
 		 :element-type (progn (setf b (incf i)) t)
-		 ;; :displaced-to (progn (setf c (incf i)) nil)
+		 :displaced-to (progn (setf c (incf i)) nil)
 		 :fill-pointer (progn (setf d (incf i)) nil)
 		 :initial-element (progn (setf e (incf i)) 'a)
 		 )
-     i a b d e))
-  #(a a a a a) 4 1 2 3 4)
-
-;; Must add back order tests for :displaced-to and :displaced-index-offset
-
+     i a b c d e))
+  #(a a a a a) 5 1 2 3 4 5)

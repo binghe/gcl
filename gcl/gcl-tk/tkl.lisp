@@ -1399,19 +1399,18 @@
 
 
 (defvar *tk-library* nil)
-(defun tkconnect (&key host can-rsh gcltksrv (display 
-					      #+winnt "DUMMYDISPLAYNAME"
-					      #-winnt(si::getenv "DISPLAY"))
+(defun tkconnect (&key host can-rsh gcltksrv (display (si::getenv "DISPLAY"))
 		       (args  "")
 			    &aux hostid  (loopback "127.0.0.1"))
   (if *tk-connection*  (tkdisconnect))
-  #-winnt (or display (error "DISPLAY not set"))
+  (or display (error "DISPLAY not set"))
   (or *tk-library* (setq *tk-library* (si::getenv "TK_LIBRARY")))
   (or gcltksrv
       (setq 	gcltksrv
 	 (cond (host "gcltksrv")
 	       ((si::getenv "GCL_TK_SERVER"))
-	       ((probe-file (merge-pathnames "gcl-tk/gcltksrv" si::*lib-directory*)))
+	       ((probe-file (tk-conc si::*lib-directory* "/gcl-tk/gcltksrv")))
+	       ((probe-file (tk-conc si::*lib-directory* "gcl-tk/gcltksrv")))
 	       (t (error "Must setenv GCL_TK_SERVER ")))))
   (let ((pid (if host  -1 (si::getpid)))
 	(tk-socket  (si::open-named-socket 0))
@@ -1445,8 +1444,8 @@ on ~a as in: ~s~%" host command )))
       (if (eql pid -1)
 	  (si::SET-SIGIO-FOR-FD  (car (car *tk-connection*))))
       (setf *sigusr1* nil)
-      (tk-do (tk-conc "source " (namestring
-      	(merge-pathnames "gcl-tk/gcl.tcl" si::*lib-directory*)) )))))
+      (tk-do (tk-conc "source "  si::*lib-directory* "gcl-tk/gcl.tcl"))
+      )))
 
 
   

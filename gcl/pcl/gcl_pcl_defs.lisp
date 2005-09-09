@@ -39,6 +39,9 @@
 						;EARLY
 						;BRAID
 						;COMPLETE
+(defvar *fegf-started-p* nil)
+
+
 )
 
 (eval-when (load eval)
@@ -71,7 +74,7 @@
 (defmacro parse-gspec (spec
 		       (non-setf-var . non-setf-case)
 		       (setf-var . setf-case))
-;  (declare (indentation 1 1))
+  (declare (indentation 1 1))
   #+setf (declare (ignore setf-var setf-case))
   (once-only (spec)
     `(cond (#-setf (symbolp ,spec) #+setf t
@@ -102,14 +105,14 @@
 	      (symbol-function symbol))
   #+xerox (il:virginfn symbol)
   #+setf (fdefinition symbol)
-;  #+kcl (symbol-function
-;	  (let ((sym (when (symbolp symbol) (get symbol 'si::traced))) first-form)
-;	    (if (and sym
-;		     (consp (symbol-function symbol))
-;		     (consp (setq first-form (nth 3 (symbol-function symbol))))
-;		     (eq (car first-form) 'si::trace-call))
-;		sym
-;		symbol)))
+  #+kcl (symbol-function
+	  (let ((sym (get symbol 'si::traced)) first-form)
+	    (if (and sym
+		     (consp (symbol-function symbol))
+		     (consp (setq first-form (nth 3 (symbol-function symbol))))
+		     (eq (car first-form) 'si::trace-call))
+		sym
+		symbol)))
   #-(or Lispm Lucid excl Xerox setf kcl) (symbol-function symbol))
 
 ;;;
@@ -131,11 +134,9 @@
             (setf (symbol-function name) new-definition)
             (when brokenp (xcl:rebreak-function name))
             (when advisedp (xcl:readvise-function name)))
-  ;; FIXME add setf expander for fdefinition -- right now we go through
-  ;; the following code which expands to a call to si::fset
-  #+(and setf (not cmu) (not kcl)) (setf (fdefinition name) new-definition)
+  #+(and setf (not cmu)) (setf (fdefinition name) new-definition)
   #+kcl (setf (symbol-function 
-	       (let ((sym (when (symbolp name) (get name 'si::traced))) first-form)
+	       (let ((sym (get name 'si::traced)) first-form)
 		 (if (and sym
 			  (consp (symbol-function name))
 			  (consp (setq first-form
@@ -370,7 +371,7 @@
 	   type))))
 
 ;;; not used...
-;#+nil
+#+nil
 (defun *typep (object type)
   (setq type (*normalize-type type))
   (cond ((member (car type) '(eql wrapper-eq class-eq class))
@@ -434,8 +435,7 @@
   ;; better.  Note that for most ports, providing this definition
   ;; should just speed up class definition.  It shouldn't have an
   ;; effect on performance of most user code.
-  (progn ;(break "foo ~a ~a~%" name predicate)
-  (eval `(deftype ,name () '(satisfies ,predicate)))))
+  (eval `(deftype ,name () '(satisfies ,predicate))))
 
 (defun make-type-predicate-name (name &optional kind)
   (if (symbol-package name)
@@ -535,68 +535,41 @@
   ;;
   ;; name       supers     subs                     cdr of cpl
   ;; prototype
-  `(;(t         ()         (number sequence array character symbol) ())
+  '(;(t         ()         (number sequence array character symbol) ())
     (number     (t)        (complex float rational) (t))
-    (complex    (number)   ()                       (number t)                   #c(1 1))
-    (float      (real)     ()                       (real number t)              1.0)
-    (real       (number)   (rational float)         (number t))
-    (rational   (real)     (integer ratio)          (real number t))
-    (integer    (rational) ()                       (rational real number t)     1)
-    (ratio      (rational) ()                       (rational real number t)     1/2)
+    (complex    (number)   ()                       (number t)
+     #c(1 1))
+    (float      (number)   ()                       (number t)
+     1.0)
+    (rational   (number)   (integer ratio)          (number t))
+    (integer    (rational) ()                       (rational number t)
+     1)
+    (ratio      (rational) ()                       (rational number t)
+     1/2)
 
     (sequence   (t)        (list vector)            (t))
     (list       (sequence) (cons null)              (sequence t))
-    (cons       (list)     ()                       (list sequence t)            (nil))
-
-    (pathname   (t)        (logical-pathname)       (t)                          #p"foo")
-    (logical-pathname   
-                (pathname t)        ()              (pathname t)                 )
-    (readtable  (t)        ()                       (t)                          ,*readtable*)
-    (package    (t)        ()                       (t)                          ,*package*)
-    (hash-table (t)        ()                       (t)                          )
-    (function   (t)        ()                       (t)                          ,#'cons)
-;    (function   (t)        (interpreted-function
-;			    compiled-function)      (t)                          )
-;    (interpreted-function   
-;                (function t)
-;		           ()                       (function t)                 ,(eval `(function (lambda nil nil))))
-;    (compiled-function   
-;                (function t)
-;		           ()                       (function t)                 ,#'cons)
-    (synonym-stream  
-                (stream t) ()                       (stream t)                   ,*standard-output*)
-    (echo-stream  
-                (stream t) ()                       (stream t)                   )
-    (two-way-stream  
-                (stream t) ()                       (stream t)                   )
-    (string-stream  
-                (stream t) ()                       (stream t)                   )
-    (concatenated-stream  
-                (stream t) ()                       (stream t)                   )
-    (broadcast-stream  
-                (stream t) ()                       (stream t)                   )
-    (file-stream  
-                (stream t) ()                       (stream t)                   )
-    (stream     (t)        (synonym-stream 
-			    string-stream
-			    two-way-stream
-			    echo-stream
-			    file-stream
-			    concatenated-stream
-			    broadcast-stream)       (t))
+    (cons       (list)     ()                       (list sequence t)
+     (nil))
     
 
-    (array      (t)        (vector)                 (t)                          #2A((NIL)))
+    (array      (t)        (vector)                 (t)
+     #2A((NIL)))
     (vector     (array
-		 sequence) (string bit-vector)      (array sequence t)           #())
-    (string     (vector)   ()                       (vector array sequence t)    "")
-    (bit-vector (vector)   ()                       (vector array sequence t)    #*1)
-    (character  (t)        ()                       (t)                          #\c)
+		 sequence) (string bit-vector)      (array sequence t)
+     #())
+    (string     (vector)   ()                       (vector array sequence t)
+     "")
+    (bit-vector (vector)   ()                       (vector array sequence t)
+     #*1)
+    (character  (t)        ()                       (t)
+     #\c)
    
-    (symbol     (t)        (null)                   (t)                          symbol)
-    (random-state (t)      (null)                   (t)                          #$0)
+    (symbol     (t)        (null)                   (t)
+     symbol)
     (null       (symbol 
-		 list)     ()                       (symbol list sequence t)     nil)))
+		 list)     ()                       (symbol list sequence t)
+     nil)))
 
 #+cmu17
 (labels ((direct-supers (class)
@@ -650,8 +623,6 @@
   (defclass kernel:funcallable-instance (function) ()
     (:metaclass built-in-class)))
 
-(push (make-early-class-definition 'function nil 'built-in-class '(t) nil nil) *early-class-definitions*)
-
 (defclass slot-object (#-cmu17 t #+cmu17 kernel:instance) ()
   (:metaclass slot-class))
 
@@ -666,11 +637,7 @@
 
 (defclass metaobject (standard-object) ())
 
-(defclass funcallable-standard-object (standard-object function)
-  ()
-  (:metaclass funcallable-standard-class))
-
-(defclass specializer (metaobject)
+(defclass specializer (metaobject) 
      ((type
         :initform nil
         :reader specializer-type)))
@@ -698,7 +665,7 @@
 ;;; have the class CLASS in its class precedence list.
 ;;; 
 (defclass class (documentation-mixin dependent-update-mixin definition-source-mixin
-		 specializer )
+		 specializer)
      ((name
 	:initform nil
 	:initarg  :name
@@ -803,7 +770,7 @@
 ;;;
 ;;; Slot definitions.
 ;;;
-(defclass slot-definition (metaobject )
+(defclass slot-definition (metaobject) 
      ((name
 	:initform nil
 	:initarg :name
@@ -891,8 +858,7 @@
 					       effective-slot-definition)
   ())
 
-(defclass method (metaobject )
-  ())
+(defclass method (metaobject) ())
 
 (defclass standard-method (definition-source-mixin plist-mixin method)
      ((generic-function
@@ -941,7 +907,7 @@
 			    definition-source-mixin
 			    documentation-mixin
 			    metaobject
-			    funcallable-standard-object)
+			    #+cmu17 kernel:funcallable-instance)
      ()
   (:metaclass funcallable-standard-class))
     
@@ -973,8 +939,7 @@
   (:default-initargs :method-class *the-class-standard-method*
 		     :method-combination *standard-method-combination*))
 
-(defclass method-combination (metaobject)
-  ())
+(defclass method-combination (metaobject) ())
 
 (defclass standard-method-combination
 	  (definition-source-mixin method-combination)
@@ -984,14 +949,6 @@
 		     :initarg :documentation)
       (options       :reader method-combination-options
 	             :initarg :options)))
-
-(defclass long-method-combination (standard-method-combination)
-  ((function
-    :initarg :function
-    :reader long-method-combination-function)
-   (arguments-lambda-list
-    :initarg :arguments-lambda-list
-    :reader long-method-combination-arguments-lambda-list)))
 
 (defparameter *early-class-predicates*
   '((specializer specializerp)
@@ -1012,26 +969,5 @@
     (standard-boundp-method standard-boundp-method-p)
     (generic-function generic-function-p)
     (standard-generic-function standard-generic-function-p)
-    (method-combination method-combination-p)
-    (long-method-combination long-method-combination-p)))
+    (method-combination method-combination-p)))
 
-
-(defun early-find-class-symbol (x &optional errorp environment)
-  (declare (ignore errorp environment))
-  (when (or (member x *early-class-definitions* :key 'cadr)
-	    (gethash x *find-class*))
-    x))
-
-(defun mk-early-cpl (sym)
-  (let ((l (nth 4 (car (member sym *early-class-definitions* :key 'cadr)))))
-    (append l (reduce (lambda (&rest r) (when r (apply 'union r))) (mapcar 'mk-early-cpl l)))))
-
-(defun early-class-precedence-list-symbol (x &aux tem)
-  (cond ((mk-early-cpl x))
-	((setq tem (gethash x *find-class*))
-	 (early-class-precedence-list (car tem)))))
-
-(setf (symbol-function 'si::find-class) (symbol-function 'early-find-class-symbol))
-(setf (symbol-function 'si::class-precedence-list) (symbol-function 'early-class-precedence-list-symbol))
-(setf (symbol-function 'si::class-of) (symbol-function 'early-class-name-of))
-;(setf (symbol-function 'si::class-direct-subclasses) (symbol-function 'early-class-direct-subclasses)) ;FIXME need class-name here

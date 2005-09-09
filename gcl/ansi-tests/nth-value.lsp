@@ -34,21 +34,3 @@
 		(progn (setf y (incf i)) (values 'a 'b 'c 'd 'e 'f 'g)))
      i x y))
   d 2 1 2)
-
-(deftest nth-value.error.1
-  (signals-error (funcall (macro-function 'nth-value))
-		 program-error)
-  t)
-  
-(deftest nth-value.error.2
-  (signals-error (funcall (macro-function 'nth-value)
-			   '(nth-value 1 '(a b c)))
-		 program-error)
-  t)
-
-(deftest nth-value.error.3
-  (signals-error (funcall (macro-function 'nth-value)
-			   '(nth-value 1 '(a b c))
-			   nil nil)
-		 program-error)
-  t)

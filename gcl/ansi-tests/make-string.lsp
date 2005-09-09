@@ -8,8 +8,7 @@
 (deftest make-string.1
   (let ((s (make-string 10)))
     (and (stringp s)
-	 #+:ansi-tests-strict-initial-element
-	 (string-all-the-same s)
+	 ;; (string-all-the-same s)
 	 (eqlt (length s) 10)
 	 ))
   t)
@@ -53,8 +52,7 @@
   (let ((s (make-string 10 :element-type 'character)))
     (and (stringp s)
 	 (eqlt (length s) 10)
-	 #+:ansi-tests-strict-initial-element
-	 (string-all-the-same s)
+	 #| (string-all-the-same s) |#
 	 ))
   t)
 
@@ -62,8 +60,7 @@
   (let ((s (make-string 10 :element-type 'standard-char)))
     (and (stringp s)
 	 (eqlt (length s) 10)
-	 #+:ansi-tests-strict-initial-element
-	 (string-all-the-same s)
+	 #| (string-all-the-same s) |#
 	 ))
   t)
 
@@ -71,21 +68,9 @@
   (let ((s (make-string 10 :element-type 'base-char)))
     (and (stringp s)
 	 (eqlt (length s) 10)
-	 #+:ansi-tests-strict-initial-element
-	 (string-all-the-same s)
+	 #| (string-all-the-same s) |#
 	 ))
   t)
-
-(deftest make-string.10
-  :notes (:nil-vectors-are-strings)
-  (let ((s (make-string 0 :element-type nil)))
-    (values
-     (notnot (stringp s))
-     (eqlt (length s) 0)
-     (equalt s "")))
-  t t t)
-
-(def-fold-test make-string.fold.1 (make-string 5 :initial-element #\a))
 
 ;;; Keyword tests
 ;
@@ -124,29 +109,28 @@
 ;; Error cases
 
 (deftest make-string.error.1
-  (signals-error (make-string) program-error)
-  t)
+  (classify-error (make-string))
+  program-error)
 
 (deftest make-string.error.2
-  (signals-error (make-string 10 :bad t) program-error)
-  t)
+  (classify-error (make-string 10 :bad t))
+  program-error)
 
 (deftest make-string.error.3
-  (signals-error (make-string 10 :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (make-string 10 :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest make-string.error.4
-  (signals-error (make-string 10 :initial-element) program-error)
-  t)
+  (classify-error (make-string 10 :initial-element))
+  program-error)
 
 (deftest make-string.error.5
-  (signals-error (make-string 10 1 1) program-error)
-  t)
+  (classify-error (make-string 10 1 1))
+  program-error)
 
 (deftest make-string.error.6
-  (signals-error (make-string 10 :element-type) program-error)
-  t)
+  (classify-error (make-string 10 :element-type))
+  program-error)
 
 ;;; Order of evaluation
 

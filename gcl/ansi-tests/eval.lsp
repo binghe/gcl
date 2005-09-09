@@ -39,20 +39,14 @@
 ;;; Error cases
 
 (deftest eval.error.1
-  (signals-error (eval) program-error)
-  t)
+  (classify-error (eval))
+  program-error)
 
 (deftest eval.error.2
-  (signals-error (eval nil nil) program-error)
-  t)
+  (classify-error (eval nil nil))
+  program-error)
 
 (deftest eval.error.3
-  (let ((v (gensym)))
-    (eval `(signals-error (eval (list ',v)) undefined-function
-			  :name ,v)))
-  t)
+  (classify-error (eval (list (gensym))))
+  undefined-function)
 
-(deftest eval.error.4
-  (let ((v (gensym)))
-    (eval `(signals-error (eval ',v) unbound-variable :name ,v)))
-  t)

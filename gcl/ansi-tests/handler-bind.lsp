@@ -109,10 +109,8 @@
 (deftest handler-bind.15
   (catch 'done
     (handler-bind
-     ((nil #'(lambda (c) (declare (ignore c))
-	       (throw 'done 'bad)))
-      (error #'(lambda (c) (declare (ignore c))
-		 (throw 'done 'good))))
+     ((t #'(lambda (c) (declare (ignore c))
+	     (throw 'done 'good))))
      (error "an error")))
   good)
 

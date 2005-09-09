@@ -101,7 +101,7 @@ init_%.lsp: init_%.lsp.tmp
 		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
 		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
 		-e "s#@LI-CC@#\"$(CC) -c $(FINAL_CFLAGS)\"#1" \
-		-e "s#@LI-LD@#\"$(CC) $(LD_STACK_FLAGS) -o \"#1" \
+		-e "s#@LI-LD@#\"$(CC) -o \"#1" \
 		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)\"#1" \
 		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
 		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
@@ -150,7 +150,7 @@ raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) $(EXTRAS)
 	touch raw_$*_map
 ifeq ($(GNU_LD),1)
 	$(CC) -o raw_$*$(EXE) $(filter %.o,$^) \
-		-L. $(EXTRA_LD_LIBS) $(LD_STACK_FLAGS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+		-L. $(EXTRA_LD_LIBS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 else
 	$(CC) -o raw_$*$(EXE) $(filter %.o,$^) \
 		-L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
@@ -175,7 +175,7 @@ plt_%.o: plt_%.h plt.c
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
-		gazonk*.lsp plt*h *_map saved_* lib* raw_* gcl.script
+		gazonk*.lsp plt*h *_map saved_* lib* raw_*
 
 .INTERMEDIATE: init_ansi_gcl.lsp.tmp init_gcl.lsp.tmp raw_gcl raw_ansi_gcl
 .PRECIOUS: init_gcl.lsp init_ansi_gcl.lsp

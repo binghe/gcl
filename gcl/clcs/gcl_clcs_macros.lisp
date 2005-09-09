@@ -42,7 +42,6 @@
 	       (RPLACA (CAR C) (LIST KEYS))))))
 
 (DEFMACRO ECASE (KEYFORM &REST CASES)
-  (declare (optimize (safety 1)))
   (LET ((KEYS (ACCUMULATE-CASES 'ECASE CASES NIL))
 	(NCASES (ESCAPE-SPECIAL-CASES-REPLACE CASES))
 	(VAR (GENSYM)))
@@ -56,7 +55,6 @@
 				:POSSIBILITIES ',KEYS))))))
 
 (DEFMACRO CCASE (KEYPLACE &REST CASES)
-  (declare (optimize (safety 1)))
   (LET ((KEYS (ACCUMULATE-CASES 'CCASE CASES NIL))
 	(NCASES (ESCAPE-SPECIAL-CASES-REPLACE CASES))
 	(TAG1 (GENSYM))
@@ -81,7 +79,6 @@
 		   (GO ,TAG2))))))))))
 
 (DEFMACRO ETYPECASE (KEYFORM &REST CASES)
-  (declare (optimize (safety 1)))
   (LET ((TYPES (ACCUMULATE-CASES 'ETYPECASE CASES T))
 	(VAR (GENSYM)))
     `(LET ((,VAR ,KEYFORM))
@@ -94,7 +91,6 @@
 				:POSSIBILITIES ',TYPES))))))
 
 (DEFMACRO CTYPECASE (KEYPLACE &REST CASES)
-  (declare (optimize (safety 1)))
   (LET ((TYPES (ACCUMULATE-CASES 'CTYPECASE CASES T))
 	(TAG1 (GENSYM))
 	(TAG2 (GENSYM)))
@@ -143,7 +139,6 @@
 	 :FORMAT-ARGUMENTS (LIST ASSERTION)))
 
 (DEFMACRO ASSERT (TEST-FORM &OPTIONAL PLACES DATUM &REST ARGUMENTS)
-  (declare (optimize (safety 1)))
   (LET ((TAG (GENSYM)))
     `(TAGBODY ,TAG
        (UNLESS ,TEST-FORM
@@ -168,12 +163,12 @@
        (TAGBODY ,TAG2
 	 (IF (TYPEP ,PLACE ',TYPE) (RETURN-FROM ,TAG1 NIL))
 	 (RESTART-CASE ,(IF TYPE-STRING
-	   `(specific-error :wrong-type-argument
-			    "The value of ~S is not ~S."
-			    ,PLACE ,TYPE-STRING)
-	   `(specific-error :wrong-type-argument
-			    "The value of ~S is not of type ~S."
-			    ,PLACE ',TYPE))
+			    `(ERROR "The value of ~S is ~S, ~
+				     which is not ~A."
+				    ',PLACE ,PLACE ,TYPE-STRING)
+			    `(ERROR "The value of ~S is ~S, ~
+				     which is not of type ~S."
+				    ',PLACE ,PLACE ',TYPE))
 	   (STORE-VALUE (VALUE)
 	       :REPORT (LAMBDA (STREAM)
 			 (FORMAT STREAM "Supply a new value of ~S."

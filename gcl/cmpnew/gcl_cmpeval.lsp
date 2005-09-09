@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPEVAL  The Expression Dispatcher.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -23,7 +22,6 @@
 
 
 (export '(si::define-compiler-macro
-          si::compiler-macro-function
 	  si::undef-compiler-macro
           si::define-inline-function) 'system)
 
@@ -115,14 +113,13 @@
   (declare (fixnum i))
   (dolist
       (v
-       '((allocates-new-storage ans)            ;; might invoke gbc
-	 (side-effect-p set)                    ;; no effect on arguments
-	 (constantp)                            ;; always returns same result,
-	                                        ;; double eval ok.
-	 (result-type-from-args rfa)            ;; if passed args of matching
-					        ;; type result is of result type
-         (is)                                   ;; extends the `integer stack'.
-	 (inline-types-function itf)))          ;; car of ii is a function returning match info
+       '((allocates-new-storage ans); might invoke gbc
+	 (side-effect-p set)        ; no effect on arguments
+	 (constantp)                ; always returns same result,
+	                            ;double eval ok.
+	 (result-type-from-args rfa); if passed args of matching
+					;type result is of result type
+         (is)))                     ;; extends the `integer stack'.
     (cond ((member flag v :test 'eq)
 	   (return-from flags-pos i)))
     (setq i (+ i 1)))
@@ -192,29 +189,24 @@
 )				      
 				
 
-(defun result-type-from-args (f args)
-  (when (not (eq '* (get f 'return-type))) ;;FIXME  make sure return-type and proclaimed-return-type are in sync
-    (let* ((be (get f 'type-propagator))
-	   (ba (and be (apply be f (mapcar #'coerce-to-one-value args)))))
-      (when ba
-	(return-from result-type-from-args ba)))
+(defun result-type-from-args(f args &aux tem)
+  (when (and (setq tem (get f 'return-type))
+             (not (eq tem '*))
+	     (not (consp tem)))
     (dolist (v '(inline-always inline-unsafe))
-      (let* ((w (get f v)))
-	(if (and w (symbolp (caar w)) (flag-p (third (car w)) itf))
-	    (return-from result-type-from-args (cadr (apply (caar w) args)))
-	  (dolist (w w)
-	    (fix-opt w)
-	    (when (and
-		   (flag-p (third w) result-type-from-args)
-		   (= (length args) (length (car w)))
-		   (do ((a args (cdr a)) (b (car w) (cdr b)))
-		       ((null a) t)
-		       (unless (and (car a) (car b)
-				    (or  (eq (car a) (car b))
-					 (type>= (car b) (car a))))
+      (dolist (w (get f v))
+	(fix-opt w)
+	(when (and
+	       (flag-p (third w) result-type-from-args)
+	       (eql (length args) (length (car w)))
+	       (do ((a args (cdr a))
+		    (b (car w) (cdr b)))
+		   ((null a) t)
+		 (unless (or  (eq (car a) (car b))
+			      (type>= (car b)(car a) ))
 			 (return nil))))
-	      (return-from result-type-from-args (second w)))))))))
-	
+	  (return-from result-type-from-args (second w)))))))
+		      
 
 ;; omitting a flag means it is set to nil.
 (defmacro flags (&rest lis &aux (i 0))
@@ -227,377 +219,8 @@
 ; (push '((integer integer) integer #.(flags const raf) "addii(#0,#1)")
 ;         (get '+ 'inline-always))
 
-;(defun arg-appears (x y dep)
-;  (cond ((atom y) nil)
-;	((consp (car y))
-;	 (or (arg-appears x (cdar y) t) (arg-appears x (cdr y) dep)))
-;	(t
-;	 (or (and (eq x (car y)) dep)
-;	     (arg-appears x (cdr y) dep)))))
-
-(defun cons-to-right (x)
-  (and x (or (consp (car x)) (cons-to-right (cdr x)))))
-
-(defun needs-pre-eval (x)
-  (or (and (consp (car x)) (not (eq (caar x) 'quote)))
-      (and (atom (car x))
-	   (not (constantp (car x)))
-	   (cons-to-right (cdr x)))))
-;	   (arg-appears (car x) (cdr x) nil))))
-
-(defun bind-before-cons (x y)
-  (and y (consp (car y)) (atom (cadar y))
-       (if (eq x (cadar y)) (caar y)
-	 (bind-before-cons x (cdr y)))))
-  
-(defun pull-evals-int (x form lets)
-  (if (atom x)
-      (list (nreverse form) (nreverse lets))
-    (let* ((s (if (needs-pre-eval x) (bind-before-cons (car x) lets) (car x)))
-	   (lets (if s lets (cons (list (gensym) (car x)) lets)))
-	   (s (or s (caar lets))))
-      (pull-evals-int (cdr x) (cons s form) lets))))
-
-(defun pull-evals (form)
-  (let ((form (pull-evals-int (cdr form) (list (car form)) nil)))
-    (values (car form) (cadr form))))
-
-(defun binary-nest-int (form len)
-  (declare (fixnum len) (list form))
-  (if (> len 3)
-      (binary-nest-int
-       (cons (car form)
-	     (cons (list (car form) (cadr form) (caddr form))
-		   (cdddr form)))
-       (1- len))
-    form))
-
-(defmacro let-wrap (lets form)
-  `(if lets
-       (list 'let* ,lets ,form)
-     ,form))
-
-(defun binary-nest (form env)
-  (declare (ignore env))
-  (let ((len (length form)))
-    (declare (fixnum len))
-    (if (> len 3)
-	(multiple-value-bind (form lets) (values form nil);(pull-evals form)
-	  (let-wrap lets (binary-nest-int form len)))
-      form)))
-
-(si::putprop '* (function binary-nest) 'si::compiler-macro-prop)
-(si::putprop '+ (function binary-nest) 'si::compiler-macro-prop)
-
-(si::putprop 'logand (function binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'logior (function binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'logxor (function binary-nest) 'si::compiler-macro-prop)
-
-(si::putprop 'max (function binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'min (function binary-nest) 'si::compiler-macro-prop)
-
-(defun invert-binary-nest (form env)
-  (declare (ignore env))
-  (if (> (length form) 3)
-      (let* ((op (car form))
-	     (recip (cond
-		     ((eq op '-) '+)
-		     ((eq op '/) '*)
-		     (t (error "Bad op ~S~%" op)))))
-	(list op (cadr form) (cons recip (cddr form))))
-    form))
-
-(si::putprop '- (function invert-binary-nest) 'si::compiler-macro-prop)
-(si::putprop '/ (function invert-binary-nest) 'si::compiler-macro-prop)
-
-(defun logical-binary-nest (form env)
-  (declare (ignore env))
-  (if (> (length form) 3)
-      (multiple-value-bind (form lets) (pull-evals form)
-	(let (r)
-	  (do ((f (cdr form) (cdr f)))
-	      ((null (cdr f))
-	       (let-wrap lets (cons 'and (nreverse r))))
-	    (push (list (car form) (car f) (cadr f)) r))))
-	form))
-
-(si::putprop '> (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop '>= (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop '< (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop '<= (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop '= (function logical-binary-nest) 'si::compiler-macro-prop)
-
-(si::putprop 'char> (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'char>= (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'char< (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'char<= (function logical-binary-nest) 'si::compiler-macro-prop)
-(si::putprop 'char= (function logical-binary-nest) 'si::compiler-macro-prop)
-
-(defun logical-outer-nest (form env)
-  (declare (ignore env))
-  (if (> (length form) 3)
-      (multiple-value-bind (form lets) (pull-evals form)
-	(let (r)
-	  (do ((f (cdr form) (cdr f)))
-	      ((null (cdr f))
-	       (let-wrap lets (cons 'and (nreverse r))))
-	    (do ((g (cdr f) (cdr g))) ((null g))
-	    (push (list (car form) (car f) (car g)) r)))))
-    form))
-
-(si::putprop '/= (function logical-outer-nest) 'si::compiler-macro-prop)
-(si::putprop 'char/= (function logical-outer-nest) 'si::compiler-macro-prop)
 
 
-(defun incr-to-plus (form env)
-  (declare (ignore env))
-  `(+ ,(cadr form) 1))
-
-(defun decr-to-minus (form env)
-  (declare (ignore env))
-  `(- ,(cadr form) 1))
-
-(si::putprop '1+ (function incr-to-plus) 'si::compiler-macro-prop)
-(si::putprop '1- (function decr-to-minus) 'si::compiler-macro-prop)
-
-(defun seqind-wrap (form)
-  (if *safe-compile*
-      form
-    `(the seqind ,form)))
-
-(defun array-row-major-index-expander (form env &optional (it 0))
-  (declare (ignore env) (fixnum it))
-  (let ((l (length form)))
-    (cond ((= l 2) 0)
-	  ((= l 3) (seqind-wrap (caddr form)))
-	  (t (let ((it (1+ it))
-		   (fn (car form))
-		   (ar (cadr form))
-		   (first (seqind-wrap (caddr form)))
-		   (second (seqind-wrap (cadddr form)))
-		   (rest (cddddr form)))
-	       (array-row-major-index-expander
-		`(,fn ,ar ,(seqind-wrap
-			    `(+
-			      ,(seqind-wrap
-				`(* ,first (array-dimension ,ar ,it))) ,second)) ,@rest)
-		nil it))))))
-
-(si::putprop 'array-row-major-index (function array-row-major-index-expander) 'si::compiler-macro-prop)
-
-(defmacro with-pulled-array (bindings form &body body)
-  `(let ((,(car bindings) (cadr ,form)))
-     (let ((,(cadr bindings) (and (consp ,(car bindings)) `((,(gensym) ,,(car bindings))))))
-       (let ((,(caddr bindings) (or (caar ,(cadr bindings)) ,(car bindings))))
-	 ,@body))))
-	
-
-(defun aref-expander (form env)
-  (declare (ignore env))
-  (with-pulled-array
-   (ar lets sym) form
-   (let ((isym (gensym)))
-     (let ((lets (append lets `((,isym (array-row-major-index ,sym ,@(cddr form)))))))
-       (let-wrap lets `(compiler::cmp-aref ,sym ,isym))))))
-
-(si::putprop 'aref (function aref-expander) 'si::compiler-macro-prop)
-(si::putprop 'row-major-aref (function aref-expander) 'si::compiler-macro-prop)
-
-(defun aset-expander (form env)
-  (declare (ignore env))
-  (with-pulled-array
-   (ar lets sym) form
-   (let ((isym (gensym)))
-     (let ((lets (append lets `((,isym (array-row-major-index ,sym ,@(butlast (cddr form))))))))
-       (let-wrap lets `(compiler::cmp-aset ,sym ,isym ,(car (last form))))))))
-
-(si::putprop 'si::aset (function aset-expander) 'si::compiler-macro-prop)
-;FIXME -- test and install this and svref, CM 20050106
-;(si::putprop 'svset (function aset-expander) 'si::compiler-macro-prop)
-
-(defun array-dimension-expander (form env)
-  (declare (ignore env))
-  (with-pulled-array
-   (ar lets sym) form
-   (let-wrap lets `(compiler::cmp-array-dimension ,sym ,(caddr form)))))
-
-(si::putprop 'array-dimension (function array-dimension-expander) 'si::compiler-macro-prop)
-
-(defun do-list-search (test list &key (k1 nil k1p) (key nil keyp) (item nil itemp) rev (ret nil retp) test-not ((:test foo)))
-  (declare (ignore foo))
-  (let* ((x (gensym))
-	 (rf (if retp `(funcall ,ret ,x) x))
-	 (el (if k1p `(funcall ,k1 ,rf) rf))
-	 (el (if keyp `(funcall ,key ,el) el))
-	 (tf (if itemp `(funcall ,test ,(if rev el item) ,(if rev item el)) `(funcall ,test ,el)))
-	 (tf (if test-not `(not ,tf) tf))
-	 (tf (if retp `(and ,rf ,tf) tf))
-	 (ef `(or (not ,x) ,tf)))
-	 `(do ((,x ,list (cdr ,x))) (,ef ,rf))))
-
-(defun possible-eq-list-search (item list special-keys &rest r &key key (test ''eql) (test-not nil test-notp))
-  (declare (ignore key))
-  (let* ((test (if test-notp test-not test))
-	 (test (if (and (consp test) (eq (car test) 'function)) `(quote ,(cadr test)) test))
-	 (r `(,@special-keys ,@r)))
-    (let ((form (apply 'do-list-search test list r)))
-      (if (member :item special-keys)
-	  `(if (is-eq-test-item-list ,test ,item ,list); (and (eq ,test 'eql) (eql-is-eq ,item ,test ,list))
-	       ,(apply 'do-list-search ''eq list r)
-	     ,form)
-	form))))
-
-(defmacro member-compiler-macro (&whole w &rest args)
-  (if (or (< (length args) 2) (do ((r (cddr args) (cddr r))) ((not (and r (keywordp (car r)))) r)))
-      w
-    (let* ((syms (reduce (lambda (&rest r) 
-			   (when r 
-			     (if (or (constantp (cadr r))
-				     (and (consp (cadr r)) (eq (caadr r) 'lambda))) 
-				 (car r) 
-			       `(,@(car r) (,(gensym) ,(cadr r))))))
-			 args :initial-value nil))
-;	   (syms `((,(gensym) ,(car args)) (,(gensym) ,(cadr args)) ,@syms))
-	   (r (mapcar (lambda (x) (cond ((constantp x) x)
-					((and (consp x) (eq (car x) 'lambda)) x)
-					((car (rassoc x syms :key 'car :test 'equal))) (x))) args))
-	   (specials (if (member (car w) '(rassoc rassoc-if rassoc-if-not)) '(:k1 'cdr) '(:k1 'car)))
-	   (specials (if (member (car w) '(member assoc rassoc)) `(:item ,(car r) ,@specials) specials))
-	   (specials (if (member (car w) '(assoc assoc-if assoc-if-not rassoc rassoc-if rassoc-if-not)) 
-			 `(:ret 'car ,@specials) specials))
-	   (overrides (if (member (car w) '(member-if assoc-if rassoc-if)) `(:test ,(car r))))
-	   (overrides (if (member (car w) '(member-if-not assoc-if-not rassoc-if-not)) 
-			  `(:test-not ,(car r) ,@overrides) overrides)))
-      `(let (,@syms)
-	 ,(apply 'possible-eq-list-search (car r) (cadr r) specials `(,@overrides ,@(cddr r)))))))
-
-(si::putprop 'member (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'member-if (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'member-if-not (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'assoc (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'assoc-if (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'assoc-if-not (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'rassoc (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'rassoc-if (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-(si::putprop 'rassoc-if-not (macro-function 'member-compiler-macro) 'si::compiler-macro-prop)
-
-;;start end count position
-(defun do-sequence-search (fn vars &key dest newseq (sum nil sump) pos start end count (item nil itemp) ret k1 (key nil keyp) (test ''eql) rev not)
-  (let* (
-
-	 (gs (mapcar (lambda (x) (list (gensym) x)) vars))
-
-	 (l (gensym))
-	 (lf (mapcar (lambda (x) `(length ,x)) vars))
-	 (lf (if dest `((if (typep ,dest 'list) (length ,dest) (array-dimension ,dest 0)) ,@lf) lf))
-	 (lf (if end `(,end ,@lf) lf))
-	 (lf (if (> (length lf) 1) (cons 'min lf) (car lf)))
-;	 (lf `(if (and  (not ,dest) (not (eq ,newseq :vector)) ,@(mapcar (lambda (x) `(typep ,x 'list)) vars)) -1 ,lf))
-	 (lf `(if (or ,pos ,start ,end ,dest (eq ,newseq :vector) ,@(mapcar (lambda (x) `(typep ,x 'vector)) vars)) ,lf -1))
-	 (lf `((,l ,lf)))
-	 (i (gensym))
-
-	 (tf (mapcar (lambda (x) `(if (typep ,(cadr x) 'list) (car ,(car x)) (aref ,(cadr x) ,i))) gs))
-	 (tf (if ret (mapcar (lambda (x) `(funcall ,ret ,x)) tf) tf))
-	 (tf (if k1 (mapcar (lambda (x) `(funcall ,k1 ,x)) tf) tf))
-	 (tf (if keyp (mapcar (lambda (x) `(funcall ,key ,x)) tf) tf))
-	 (first (car (if rev (last tf) tf)))
-	 (out (gensym))
-	 (lh (gensym))
-	 (sv (gensym))
-	 (p  (gensym))
-	 (cv  (gensym))
-	 (tmp  (gensym))
-	 (tf (if sump (cons sv tf) tf))
-	 (tf (if itemp (if (and (not sump) (= (length vars) 1)) (cons item tf) (baboon)) tf))
-	 (tf (if rev (nreverse tf) tf))
-	 (tf `(funcall ,fn ,@tf))
-	 (tf (if not `(not ,tf) tf))
-
-	 (tf (if (and sump (not sum)) (if (= (length vars) 1) `(if ,sv ,tf ,first) (baboon)) tf))
-
-	 (inf (mapcar (lambda (x) `(,(car x) ,(cadr x) (if (typep ,(cadr x) 'list) (cdr ,(car x)) ,(car x)))) gs))
-	 (inf `((,i 0 (if (>= ,l 0) (+ ,i 1) ,i)) ,@inf))
-
-	 (lf `(,@lf (,out (when (eq ,newseq :vector)
-			    (make-array ,l :fill-pointer ,l :element-type (cmp-array-element-type ,@vars))))))
-	 (lf `(,@lf (,p (when (typep ,dest 'cons) ,dest))))
-	 (lf `(,@lf (,sv ,sum)))
-	 (lf `(,@lf (,cv 0)))
-	 (lf `(,@lf ,lh))
-	 (inf `((,p ,p (if (typep ,dest 'cons) (cdr ,p) ,p)) ,@inf))
-	 (tf `(cond ((typep ,dest 'cons) (setf (car ,p) ,tf) nil)
-		    ((typep ,dest 'vector) (setf (aref ,dest ,i) ,tf) nil)
-		    ((eq ,newseq :list)
-		     (setf 
-		      (car (setq ,p (let ((,tmp (cons nil nil))) (if ,p (cdr (rplacd ,p ,tmp)) (setq ,lh ,tmp)))))
-		      ,tf) nil)
-		    ((eq ,newseq :vector) (setf (aref ,out ,i) ,tf) nil)
-		    (,sump (setq ,sv ,tf) nil)
-		    (,count (when ,tf (incf ,cv)) nil)
-		    (,tf)))
-	 (tf (if start `(when (>= ,i ,start) ,tf) tf))
-	 (tf (if ret `(and (funcall ,ret ,(car vars)) ,tf) tf))
-;;FIXME the or problem if possible
-	 (ef `(if (and (>= ,l 0) (= ,i ,l)) t
-		,(reduce (lambda (x y) `(if (and (typep ,(cadr x) 'list) (not ,(car x))) t ,y)) gs 
-			 :initial-value tf :from-end t)))
-	 (rf `(cond (,dest ,dest) ((eq ,newseq :list) ,lh) ((eq ,newseq :vector) ,out) (,sump ,sv) (,count ,cv) (,pos ,i) (,(if ret `(funcall ,ret ,(caar gz)) (caar gs)))))
-		      
-)
-    `(let* ,lf
-       (when (typep ,dest 'vector)
-	 (setf (fill-pointer ,dest) ,l))
-       (do ,inf (,ef ,rf)(declare (seqind ,i ,cv))))))
-
-(defun do-vector-map (fn vars &key (not nil notp))
-  (let ((i (gensym)) (l (gensym)))
-    (let* ((tf `(funcall ,fn ,@(mapcar (lambda (x) `(aref ,x ,i)) vars)))
-	   (tf (if notp `(not ,tf) tf))
-	   (lf (mapcar (lambda (x) `(array-dimension ,x 0)) vars))
-	   (lf (if (= (length lf) 1) lf `(min ,@lf))))
-    `(let ((,l ,lf))
-       (do ((,i 0 (+ ,i 1))) ((or (= ,i ,l) ,tf) (= ,i ,l))
-	   (declare (seqind ,i)) )))))
-
-;(defmacro every-compiler-macro (&whole w &rest args)
-;  `(cond ((all-lists ,@(cdr args))
-;	  (not (member-if-not ,@args)))
-;	 ((all-vectors ,@(cdr args))
-;	  ,(do-vector-search (car args) (cdr args) :not t))
-;	 ((funcall (function every) ,@args))))
-;(si::putprop 'every (macro-function 'every-compiler-macro) 'si::compiler-macro-prop)
-	    
-
-
-(defun bind-all-vars-int (form nf bindings)
-  (cond ((null form)
-	 (list bindings (nreverse nf)))
-	((consp (car form))
-	 (let ((lwf (bind-all-vars-int (cdar form) (list (caar form)) bindings)))
-	   (bind-all-vars-int (cdr form) (cons (cadr lwf) nf) (car lwf))))
-	(t
-	 (let* ((sym (if (symbolp (car form)) (cdr (assoc (car form) bindings)) (car form)))
-		(bindings (if sym bindings (cons (cons (car form) (gensym)) bindings)))
-		(sym (or sym (cdar bindings))))
-	   (bind-all-vars-int (cdr form) (cons sym nf) bindings)))))
-
-(defun bind-all-vars (form)
-  (if (atom form) form
-    (let ((res (bind-all-vars-int (cdr form) (list (car form)) nil)))
-      (if (car res)
-	  (list 'let* (mapcar (lambda (x) (list (cdr x) (car x))) (nreverse (car res)))
-		(cadr res))
-	(cadr res)))))
-
-
-(defun if-protect-fun-inf (form env)
-  (declare (ignore env))
-  (cons (car form)
-	(cons (cadr form)
-	      (cons (bind-all-vars (caddr form))
-		    (if (cadddr form) (list (bind-all-vars (cadddr form))))))))
-		
 (defun c1symbol-fun (fname args &aux fd)
   (cond ((setq fd (get fname 'c1special)) (funcall fd args))
 	((and (setq fd (get fname 'co1special))
@@ -625,20 +248,11 @@
                                   (setq forms (reverse fl)))))
                   (list 'call-local info (cddr fd) forms))
              (c1expr (cmp-expand-macro fd fname args))))
-        ((let ((fn (get fname 'si::compiler-macro-prop)) (res (cons fname args)))
-	   (and fn
-		(let ((fd (cmp-eval `(funcall ',fn ',res nil))))
-                 (and (not (eq res fd))
-		      (c1expr fd))))))
 	((and (setq fd (get fname 'co1))
 	      (inline-possible fname)
 	      (funcall fd fname args)))
-	((and (get fname 'c1no-side-effects) (every 'constantp args))
-	 (c1expr `(quote ,(cmp-eval `(,fname ,@args)))))
         ((and (setq fd (get fname 'c1)) (inline-possible fname))
          (funcall fd args))
-        ((and (setq fd (get fname 'c1g)) (inline-possible fname))
-         (funcall fd fname args))
         ((and (setq fd (get fname 'c1conditional))
               (inline-possible fname)
               (funcall (car fd) args))
@@ -655,6 +269,8 @@
 	;;continue
         ((setq fd (macro-function fname))
          (c1expr (cmp-expand-macro fd fname args)))
+        ((setq fd (get fname 'compiler-macro))
+         (c1expr (cmp-eval `(funcall ',fd ',(cons fname args) nil))))
         ((and (setq fd (get fname 'si::structure-access))
               (inline-possible fname)
               ;;; Structure hack.
@@ -671,83 +287,83 @@
         ((eq fname 'si:|#,|)
          (cmperr "Sharp-comma-macro was found in a bad place."))
         (t (let* ((info (make-info
-			 :sp-change (null (get fname 'no-sp-change))))
+                        :sp-change (null (get fname 'no-sp-change))))
                   (forms (c1args args info))) ;; info updated by args here
-	     (let ((return-type (get-return-type fname)))
-	       (when return-type
-		 (if (or (eq return-type '*) (equal return-type '(*)))
-		     (setf return-type nil)
-		   (setf (info-type info) return-type))))
-	     (let ((arg-types (get-arg-types fname)))
+	   (let ((return-type (get-return-type fname)))
+		  (when return-type
+			(if (equal return-type '(*))
+			    (setf return-type nil)
+			(setf (info-type info) return-type))))
+                (let ((arg-types (get-arg-types fname)))
                      ;;; Add type information to the arguments.
-	       (when arg-types
-		 (do ((fl forms (cdr fl))
-		      (fl1 nil)
-		      (al args (cdr al)))
-		     ((endp fl)
-		      (setq forms (reverse fl1)))
-		   (cond ((endp arg-types) (push (car fl) fl1))
-			 (t (push (and-form-type (car arg-types)
-						 (car fl)
-						 (car al))
-				  fl1)
-			    (pop arg-types))))))
-	     (let ((arg-types (get fname 'arg-types)))
+                     (when arg-types
+                       (do ((fl forms (cdr fl))
+                            (fl1 nil)
+                            (al args (cdr al)))
+                           ((endp fl)
+                            (setq forms (reverse fl1)))
+                           (cond ((endp arg-types) (push (car fl) fl1))
+                                 (t (push (and-form-type (car arg-types)
+                                                         (car fl)
+                                                         (car al))
+                                          fl1)
+                                    (pop arg-types))))))
+                (let ((arg-types (get fname 'arg-types)))
                      ;;; Check argument types.
-	       (when arg-types
-		 (do ((fl forms (cdr fl))
-		      (al args (cdr al)))
-		     ((or (endp arg-types) (endp fl)))
-		   (check-form-type (car arg-types)
-				    (car fl) (car al))
-		   (pop arg-types))))
-	     (case fname
-	       (aref
-		(let ((etype (info-type (cadar forms))))
-		  (when (or (and (eq etype 'string)
-				 (setq etype 'character))
-			    (and (consp etype)
-				 (or (eq (car etype) 'array)
-				     (eq (car etype) 'vector))
-				 (setq etype (cadr etype))))
-		    (setq etype
-			  (type-and (info-type info) etype))
-		    (when (null etype)
-		      (cmpwarn
-		       "Type mismatch was found in ~s."
-		       (cons fname args)))
-		    (setf (info-type info) etype))))
-	       (si:aset
-		(let ((etype (info-type (cadar forms))))
-		  (when (or (and (eq etype 'string)
-				 (setq etype 'character))
-			    (and (consp etype)
-				 (or (eq (car etype) 'array)
-				     (eq (car etype) 'vector))
-				 (setq etype (cadr etype))))
-		    (setq etype
-			  (type-and (info-type info)
-				    (type-and (info-type
-					       (cadar (last forms)))
-					      etype)))
-		    (when (null etype)
-		      (cmpwarn
-		       "Type mismatch was found in ~s."
-		       (cons fname args)))
-		    (setf (info-type info) etype)
-		    (setf (info-type (cadar (last forms)))
-			  etype)
-		    ))))
-	     ;; some functions can have result type deduced from
-	     ;; arg types.
-	     
-	     (let ((tem (result-type-from-args fname
-					       (mapcar #'(lambda (x) (info-type (cadr x)))
-						       forms))))
-	       (when tem
-		 (setq tem (type-and tem (info-type info)))
-		 (setf (info-type info) tem)))
-	     (list 'call-global info fname forms)))
+                     (when arg-types
+                           (do ((fl forms (cdr fl))
+                                (al args (cdr al)))
+                               ((or (endp arg-types) (endp fl)))
+                               (check-form-type (car arg-types)
+                                                (car fl) (car al))
+                               (pop arg-types))))
+                (case fname
+                      (aref
+                       (let ((etype (info-type (cadar forms))))
+                            (when (or (and (eq etype 'string)
+                                           (setq etype 'character))
+                                      (and (consp etype)
+                                           (or (eq (car etype) 'array)
+                                               (eq (car etype) 'vector))
+                                           (setq etype (cadr etype))))
+                                  (setq etype
+                                        (type-and (info-type info) etype))
+                                  (when (null etype)
+                                        (cmpwarn
+                                         "Type mismatch was found in ~s."
+                                         (cons fname args)))
+                                  (setf (info-type info) etype))))
+                      (si:aset
+                       (let ((etype (info-type (cadar forms))))
+                            (when (or (and (eq etype 'string)
+                                           (setq etype 'character))
+                                      (and (consp etype)
+                                           (or (eq (car etype) 'array)
+                                               (eq (car etype) 'vector))
+                                           (setq etype (cadr etype))))
+                                  (setq etype
+                                        (type-and (info-type info)
+                                          (type-and (info-type
+                                                     (cadar (last forms)))
+                                                    etype)))
+                                  (when (null etype)
+                                        (cmpwarn
+                                         "Type mismatch was found in ~s."
+                                         (cons fname args)))
+                                  (setf (info-type info) etype)
+                                  (setf (info-type (cadar (last forms)))
+                                        etype)
+                                  ))))
+		;; some functions can have result type deduced from
+		;; arg types.
+		
+		(let ((tem (result-type-from-args fname
+						  (mapcar #'(lambda (x) (info-type (cadr x)))
+							  forms))))
+			  (when tem
+			    (setq tem (type-and tem (info-type info)))
+			    (setf (info-type info) tem)))
+		(list 'call-global info fname forms)))
         )
   )
 
@@ -765,15 +381,11 @@
 
 
 (defun c1lambda-fun (lambda-expr args &aux (info (make-info :sp-change t)))
-  (if (not (intersection '(&optional &rest &key &aux &allow-other-keys) (car lambda-expr)))
-      (c1expr
-       `(let* (,@(mapcar (lambda (x y) (list x y)) (car lambda-expr)  args))
-	  ,@(cdr lambda-expr)))
-    (progn 
-      (setq args (c1args args info))
-      (setq lambda-expr (c1lambda-expr lambda-expr))
-      (add-info info (cadr lambda-expr))
-      (list 'call-lambda info lambda-expr args))))
+  (setq args (c1args args info))
+  (setq lambda-expr (c1lambda-expr lambda-expr))
+  (add-info info (cadr lambda-expr))
+  (list 'call-lambda info lambda-expr args)
+  )
 
 (defun c2expr (form)
   (if (eq (car form) 'call-global)
@@ -890,10 +502,7 @@
   (let* ((sd (get name 'si::s-data))
 	 (aet-type (aref (si::s-data-raw sd) index))
 	 )
-    (setf (info-type info) (if (and (eq name 'si::s-data) (= index 2))
-			       ;;FIXME -- this belongs somewhere else.  CM 20050106
-			       '(vector unsigned-char)
-			     (type-filter (aref *aet-types* aet-type))))
+    (setf (info-type info) (type-filter (aref *aet-types* aet-type)))
     (list 'structure-ref info
 	  (c1expr* form info)
 	  (add-symbol name)
@@ -989,7 +598,7 @@
         (list x y (list 'call-global (make-info) 'side-effects nil))
         (if (eq type t) '(t t t)
    `(t ,tftype t))))
-
+  
   (setq ix (car locs))
   (setq iy (cadr locs))
   (if *safe-compile* (wfs-error))
@@ -1004,7 +613,7 @@
    ((eq val nil) (c1nil))
    ((eq val t) (c1t))
    ((si:fixnump val)
-    (list 'LOCATION (make-info :type (list 'integer val val)) ;;FIXME -- 1024 should be small fixnum limit
+    (list 'LOCATION (make-info :type 'fixnum)
           (list 'FIXNUM-VALUE (and (>= (abs val) 1024)(add-object val))
 		val)))
    ((characterp val)
@@ -1037,14 +646,11 @@
 (defmacro si::define-compiler-macro (name vl &rest body)
   `(progn (si:putprop ',name
                       (caddr (si:defmacro* ',name ',vl ',body))
-                      'si::compiler-macro-prop)
+                      'compiler-macro)
           ',name))  
 
-(defun si::compiler-macro-function (name)
-  (get name 'si::compiler-macro-prop))  
-
 (defun si::undef-compiler-macro (name)
-  (remprop name 'si::compiler-macro-prop))
+  (remprop name 'compiler-macro))
 
 (defvar *compiler-temps*
         '(tmp0 tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9))
@@ -1054,7 +660,7 @@
         (*compiler-temps* *compiler-temps*))
     (dolist (var vars)
       (if (and (symbolp var)
-               (not (member var '(&optional &rest &key &aux))))
+               (not (si:memq var '(&optional &rest &key &aux))))
           (push (or (pop *compiler-temps*)
                     (gentemp "TMP" (find-package 'compiler)))
                 temps)

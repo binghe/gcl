@@ -166,46 +166,6 @@
   (case 'a (b 'b) (otherwise))
   nil)
 
-;;; No implicit tagbody
-(deftest case.35
-  (block done
-    (tagbody
-     (case 'a (a (go 10)
-		 10
-		 (return-from done 'bad)))
-     10
-     (return-from done 'good)))
-  good)
-
-(deftest case.36
-  (block done
-    (tagbody
-     (case 'b
-       (a 'bad)
-       (otherwise (go 10)
-		  10
-		  (return-from done 'bad)))
-     10
-     (return-from done 'good)))
-  good)
-
-
-
 ;;; (deftest case.error.1
-;;;  (signals-error (case) program-error)
-;;;  t)
-
-(deftest case.error.1
-  (signals-error (funcall (macro-function 'case))
-		 program-error)
-  t)
-
-(deftest case.error.2
-  (signals-error (funcall (macro-function 'case) '(case t))
-		 program-error)
-  t)
-
-(deftest case.error.3
-  (signals-error (funcall (macro-function 'case) '(case t) nil nil)
-		 program-error)
-  t)
+;;;  (classify-error (case))
+;;;  program-error)

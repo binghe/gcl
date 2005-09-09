@@ -3,23 +3,17 @@
 #include <bfdlink.h>
 #include <string.h>
 #include <stdio.h>
-#define MY_BFD_BOOLEAN bfd_boolean
-#define MY_BFD_FALSE FALSE
-#define MY_BFD_TRUE TRUE
-
 
 static bfd *exe_bfd = NULL;
 struct bfd_link_info link_info;
-reloc_howto_type rhtt;
-    
+
 int build_symbol_table_bfd ( char *oname ) {
 
     int u,v;
     asymbol **q;
 
-    bfd_init();
     if ( ! ( exe_bfd = bfd_openr ( oname, 0 ) ) ) {
-        fprintf ( stderr, "Cannot open %s.\n", oname );
+        fprintf ( stderr, "Cannot open self.\n" );
         exit ( 0 );
     }
     
@@ -28,17 +22,17 @@ int build_symbol_table_bfd ( char *oname ) {
         exit ( 0 );
     }
     
-    if ( !(link_info.hash = bfd_link_hash_table_create ( exe_bfd ) ) ) {
+    if (!(link_info.hash = bfd_link_hash_table_create (exe_bfd))) {
         fprintf ( stderr, "Cannot make hash table.\n" );
         exit ( 0 );
     }
     
-    if ( !bfd_link_add_symbols ( exe_bfd, &link_info ) ) {
+    if (!bfd_link_add_symbols(exe_bfd,&link_info)) {
         fprintf ( stderr, "Cannot add self symbols\n.\n" );
         exit ( 0 );
     }
     
-    if ( ( u = bfd_get_symtab_upper_bound ( exe_bfd ) ) < 0 ) {
+    if ((u=bfd_get_symtab_upper_bound(exe_bfd))<0) {
         fprintf ( stderr, "Cannot get self's symtab upper bound.\n" );
         exit ( 0 );
     }
@@ -56,17 +50,14 @@ int build_symbol_table_bfd ( char *oname ) {
         char *c;
         if ( ( c = (char *) strstr ( q[u]->name, "_" ) ) ) {
             struct bfd_link_hash_entry *h;
-            if ( ( h = bfd_link_hash_lookup ( link_info.hash,
-                                                q[u]->name, MY_BFD_TRUE,MY_BFD_TRUE,MY_BFD_TRUE ) ) ) {
-                h->type=bfd_link_hash_defined;
-                if ( !q[u]->section )
-                    fprintf ( stderr, "Symbol is missing section.\n" );
-                h->u.def.value   = q[u]->value + q[u]->section->vma;
-                h->u.def.section = q[u]->section;
-                fprintf ( stderr, "Processed %s\n", q[u]->name );
-            } else {
+            if ( ! ( h = bfd_link_hash_lookup ( link_info.hash, q[u]->name, true, true, true ) ) )
                 fprintf ( stderr, "Cannot make new hash entry.\n" );
-            }
+            h->type=bfd_link_hash_defined;
+            if ( !q[u]->section )
+                fprintf ( stderr, "Symbol is missing section.\n" );
+            h->u.def.value   = q[u]->value + q[u]->section->vma;
+            h->u.def.section = q[u]->section;
+            fprintf ( stderr, "Processed %s\n", q[u]->name );
         }
     }
 #else    
@@ -75,7 +66,7 @@ int build_symbol_table_bfd ( char *oname ) {
         if ((c=(char *)strstr(q[u]->name,"@@GLIBC\n" ))) {
             struct bfd_link_hash_entry *h;
             *c=0;
-            if (!(h=bfd_link_hash_lookup(link_info.hash,q[u]->name,MY_BFD_TRUE,MY_BFD_TRUE,MY_BFD_TRUE)))
+            if (!(h=bfd_link_hash_lookup(link_info.hash,q[u]->name,true,true,true)))
                 fprintf ( stderr, "Cannot make new hash entry.\n" );
             h->type=bfd_link_hash_defined;
             if (!q[u]->section)
@@ -105,16 +96,16 @@ static void *
 #define ROUND_UP(a,b) round_up(a,b) 
 
 
-static MY_BFD_BOOLEAN
+static boolean
     madd_archive_element (struct bfd_link_info * link_info,
                            bfd *abfd,
                            const char *name) {
         fprintf ( stderr, "madd_archive_element\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mmultiple_definition (struct bfd_link_info * link_info,
                            const char *name,
                            bfd *obfd,
@@ -125,11 +116,11 @@ static MY_BFD_BOOLEAN
                            bfd_vma nval) {
 
         fprintf ( stderr, "mmultiple_definition\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mmultiple_common (struct bfd_link_info * link_info,
                        const char *name,
                        bfd *obfd,
@@ -140,54 +131,54 @@ static MY_BFD_BOOLEAN
                        bfd_vma nsize) {
 
         fprintf ( stderr, " mmultiple_common\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     madd_to_set (struct bfd_link_info * link_info,
                   struct bfd_link_hash_entry *entry,
                   bfd_reloc_code_real_type reloc,
                   bfd *abfd, asection *sec, bfd_vma value) {
 
         fprintf ( stderr, "madd_to_set\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static  MY_BFD_BOOLEAN 
-    mconstructor (struct bfd_link_info * link_info,MY_BFD_BOOLEAN constructor,
+static  boolean 
+    mconstructor (struct bfd_link_info * link_info,boolean constructor,
                    const char *name, bfd *abfd, asection *sec,
                    bfd_vma value) {
 
         fprintf ( stderr, "mconstructor\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mwarning (struct bfd_link_info * link_info,
                const char *warning, const char *symbol,
                bfd *abfd, asection *section,
                bfd_vma address) {
 
         fprintf ( stderr, "mwarning\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mundefined_symbol (struct bfd_link_info * link_info,
                         const char *name, bfd *abfd,
                         asection *section,
                         bfd_vma address,
-                        MY_BFD_BOOLEAN fatal) {
+                        boolean fatal) {
 
         printf("mundefined_symbol %s is undefined\n",name);
-        return MY_BFD_FALSE;
+        return false;
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mreloc_overflow (struct bfd_link_info * link_info,
                       const char *name,
                       const char *reloc_name, bfd_vma addend,
@@ -195,38 +186,38 @@ static MY_BFD_BOOLEAN
                       bfd_vma address) {
 
         printf("mreloc_overflow reloc for %s is overflowing\n",name);
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mreloc_dangerous (struct bfd_link_info * link_info,
                        const char *message,
                        bfd *abfd, asection *section,
                        bfd_vma address) {
 
         printf("mreloc_dangerous reloc is dangerous %s\n",message);
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     munattached_reloc (struct bfd_link_info * link_info,
                         const char *name,
                         bfd *abfd, asection *section,
                         bfd_vma address) {
 
         fprintf ( stderr, " munattached_reloc\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
-static MY_BFD_BOOLEAN
+static boolean
     mnotice (struct bfd_link_info * link_info, const char *name,
               bfd *abfd, asection *section, bfd_vma address) {
 
         fprintf ( stderr, "mnotice\n");
-        return MY_BFD_FALSE;
+        return false;
 
     }
 
@@ -252,11 +243,9 @@ int main ( int argc, char ** argv )
     void *start_address = NULL;
     void *m             = NULL;
     
-    fprintf ( stderr, "In BFD fast load test. Reloc_howto_type size %d\n",
-              sizeof ( rhtt ) );
-    
+    fprintf ( stderr, "In BFD fast load test.\n" );
     if ( argc < 3 ) {
-        fprintf ( stderr, "Need an executable (eg raw_gcl.exe) and an object file as arguments.\n" );
+        fprintf ( stderr, "Need an executable and an object file as arguments.\n" );
     } else {
 
         memset ( &link_info, 0, sizeof (link_info) );
@@ -264,7 +253,9 @@ int main ( int argc, char ** argv )
         memset ( &link_callbacks, 0, sizeof (link_callbacks) );
         
 
-        fprintf ( stderr, "BUILDING EXECUTABLE SYMBOL TABLE FOR %s \n", argv[1] );
+        bfd_init();
+
+        fprintf ( stderr, "BUILDING EXECUTABLE SYMBOL TABLE (ARGV[1]) \n\n" );
         build_symbol_table_bfd ( argv[1] );        
 
         link_callbacks.add_archive_element=madd_archive_element;
@@ -281,7 +272,6 @@ int main ( int argc, char ** argv )
         link_info.callbacks = &link_callbacks;
         link_order.type = bfd_indirect_link_order;
 
-        fprintf ( stderr, "OPENING OBJECT FILE %s\n", argv[2] );
         if ( ! ( obj_bfd = bfd_openr ( argv[2], 0 ) ) ) {
             fprintf ( stderr, "Cannot open bfd.\n" );
         }
@@ -320,11 +310,8 @@ int main ( int argc, char ** argv )
 
             current+=s->_raw_size;
 
-            fprintf ( stderr,
-                      "Section %s: owner = %x, output_offset = %x, "
-                      "output_section = %x (%s)\n",
-                      s->name, s->owner, s->output_offset, s->output_section,
-                      s->output_section->name );
+            fprintf ( stderr, "Section %s: owner = %x, output_offset = %x, output_section = %x (%s)\n",
+                      s->name, s->owner, s->output_offset, s->output_section, s->output_section->name );
         }
 
         fprintf ( stderr, "1\n");
@@ -366,9 +353,9 @@ int main ( int argc, char ** argv )
             fprintf ( stderr, "Section address %x\n", s );
             fprintf ( stderr, "m loop Section %s: owner = %x, output_offset = %x, "
                       "output_section = %x (%s), vma = %x, m = %x\n",
-                      s->name, s->owner, s->output_offset,
-                      s->output_section, s->output_section->name,
+                      s->name, s->owner, s->output_offset, s->output_section, s->output_section->name,
                       s->output_section->vma, m );
+           
         }
 
         fprintf ( stderr, "\n\nDOING SOMETHING WITH THE HASHED SYMBOLS\n\n" );
@@ -389,7 +376,7 @@ int main ( int argc, char ** argv )
                 continue;
             }
 
-            if (!(h=bfd_link_hash_lookup(link_info.hash,q[u]->name, MY_BFD_FALSE, MY_BFD_FALSE, MY_BFD_TRUE))) 
+            if (!(h=bfd_link_hash_lookup(link_info.hash,q[u]->name, false, false, true))) 
                 continue;
 
             if (h->type!=bfd_link_hash_defined) 

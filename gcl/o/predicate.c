@@ -245,72 +245,52 @@ DEFUNO_NEW("VECTORP",object,fLvectorp,LISP
 RETURN1(x0);}
 
 DEFUNO_NEW("SIMPLE-STRING-P",object,fLsimple_string_p,LISP
-   ,1,1,NONE,OO,OO,OO,OO,void,Lsimple_string_p,(object x0),"") {
+   ,1,1,NONE,OO,OO,OO,OO,void,Lsimple_string_p,(object x0),"")
 
-  RETURN1(fLstringp(x0));
-
-}
-
-
+{
 	/* 1 args */
 
-/* 	if (type_of(x0) == t_string && */
-
-/*	old    !x0->st.st_adjustable && */
-
-/* 	    !x0->st.st_hasfillp && */
-/* 	    x0->st.st_displaced->c.c_car == Cnil) */
-/* 		x0 = Ct; */
-/* 	else */
-/* 		x0 = Cnil; */
-/* RETURN1(x0);}  */
+	if (type_of(x0) == t_string &&
+/*	    !x0->st.st_adjustable && */
+	    !x0->st.st_hasfillp &&
+	    x0->st.st_displaced->c.c_car == Cnil)
+		x0 = Ct;
+	else
+		x0 = Cnil;
+RETURN1(x0);}
 
 DEFUNO_NEW("SIMPLE-BIT-VECTOR-P",object,fLsimple_bit_vector_p ,LISP
-   ,1,1,NONE,OO,OO,OO,OO,void,Lsimple_bit_vector_p ,(object x0),"") {
-  
-  RETURN1(fLbit_vector_p(x0));
+   ,1,1,NONE,OO,OO,OO,OO,void,Lsimple_bit_vector_p ,(object x0),"")
 
-}
-
+{
 	/* 1 args */
 
-/* 	if (type_of(x0) == t_bitvector && */
-
-
-	    /*	 old    !x0->bv.bv_adjustable && */
-
-
-/* 	    !x0->bv.bv_hasfillp && */
-/* 	    x0->bv.bv_displaced->c.c_car == Cnil) */
-/* 		x0 = Ct; */
-/* 	else */
-/* 		x0 = Cnil; */
-/* RETURN1(x0);} */
-
+	if (type_of(x0) == t_bitvector &&
+	    /*	    !x0->bv.bv_adjustable && */
+	    !x0->bv.bv_hasfillp &&
+	    x0->bv.bv_displaced->c.c_car == Cnil)
+		x0 = Ct;
+	else
+		x0 = Cnil;
+RETURN1(x0);}
 
 DEFUNO_NEW("SIMPLE-VECTOR-P",object,fLsimple_vector_p ,LISP
-   ,1,1,NONE,OO,OO,OO,OO,void,Lsimple_vector_p ,(object x0),"") {
+   ,1,1,NONE,OO,OO,OO,OO,void,Lsimple_vector_p ,(object x0),"")
 
-  RETURN1(fLvectorp(x0));
-
-}
-
-/* 	enum type t; */
+{
+	enum type t;
 	/* 1 args */
 
-/* 	t = type_of(x0); */
-/* 	if (t == t_vector && */
-
-
-/*	old     !x0->v.v_adjustable && */
-
-/* 	    !x0->v.v_hasfillp && */
-/* 	    x0->v.v_displaced->c.c_car == Cnil && */
-/* 	    (enum aelttype)x0->v.v_elttype == aet_object) */
-/* 		x0 = Ct; */
-/* 	else */
-/* 		x0 = Cnil; */
-/* RETURN1(x0);} */
+	t = type_of(x0);
+	if (t == t_vector &&
+/*	    !x0->v.v_adjustable && */
+	    !x0->v.v_hasfillp &&
+	    x0->v.v_displaced->c.c_car == Cnil &&
+	    (enum aelttype)x0->v.v_elttype == aet_object)
+		x0 = Ct;
+	else
+		x0 = Cnil;
+RETURN1(x0);}
 
 DEFUNO_NEW("ARRAYP",object,fLarrayp ,LISP
    ,1,1,NONE,OO,OO,OO,OO,void,Larrayp,(object x0),"")
@@ -344,33 +324,31 @@ DEFUNO_NEW("FUNCTIONP",object,fLfunctionp,LISP
 
 {
 	enum type t;
+	object x;
 
 	/* 1 args */
 	t = type_of(x0);
 	if (t == t_cfun || t == t_cclosure || t == t_sfun || t == t_gfun
 	    || t == t_closure|| t == t_afun
-	    || t == t_vfun || t == t_ifun) {
+	    || t == t_vfun)
 		x0 = Ct;
-#ifndef ANSI_COMMON_LISP
-	} else if (t == t_symbol) {
-	  if (x0->s.s_gfdef != OBJNULL &&
-	      x0->s.s_mflag == FALSE)
-	    x0 = Ct;
-	  else
-	    x0 = Cnil;
+	else if (t == t_symbol) {
+		if (x0->s.s_gfdef != OBJNULL &&
+		    x0->s.s_mflag == FALSE)
+			x0 = Ct;
+		else
+			x0 = Cnil;
 	} else if (t == t_cons) {
-	  object x = x0->c.c_car;
-	  if (x == sLlambda || x == sLlambda_block ||
-	      x == sSlambda_block_expanded ||
-	      x == sLlambda_closure || x == sLlambda_block_closure)
-	    x0 = Ct;
-	  else
-	    x0 = Cnil;
-#endif
+		x = x0->c.c_car;
+		if (x == sLlambda || x == sLlambda_block ||
+		    x == sSlambda_block_expanded ||
+		    x == sLlambda_closure || x == sLlambda_block_closure)
+			x0 = Ct;
+		else
+			x0 = Cnil;
 	} else
-	  x0 = Cnil;
+		x0 = Cnil;
 RETURN1(x0);}
-
 #ifdef STATIC_FUNCTION_POINTERS
 object
 fLfunctionp(object x) {
@@ -378,13 +356,6 @@ fLfunctionp(object x) {
 }
 #endif
 
-DEFUNO_NEW("LOGICAL-PATHNAME-P",object,fSlogical_pathname_p,SI
-	   ,1,1,NONE,OO,OO,OO,OO,void,siLlogical_pathname_p,(object x),"") {
-
-  x=type_of(x)==t_pathname && pathname_lookup(x->pn.pn_host,sSApathname_logicalA->s.s_dbind)!=Cnil ? Ct : Cnil;
-  RETURN1(x);
-
-}
 
 DEFUNO_NEW("COMPILED-FUNCTION-P",object,fLcompiled_function_p,LISP
    ,1,1,NONE,OO,OO,OO,OO,void,Lcompiled_function_p,(object x0),"")
@@ -402,18 +373,6 @@ DEFUNO_NEW("COMPILED-FUNCTION-P",object,fLcompiled_function_p,LISP
 	    
 	    
 	    )
-		x0 = Ct;
-	else
-		x0 = Cnil;
-RETURN1(x0);}
-
-DEFUNO_NEW("INTERPRETED-FUNCTION-P",object,fLinterpreted_function_p,LISP
-   ,1,1,NONE,OO,OO,OO,OO,void,Linterpreted_function_p,(object x0),"")
-
-{
-	/* 1 args */;
-
-	if (type_of(x0) == t_ifun)
 		x0 = Ct;
 	else
 		x0 = Cnil;
@@ -532,15 +491,8 @@ equal(register object x, register object y)
 register enum type t;
 
 	cs_check(y);
-	cs_check(x);
 
 BEGIN:
-        if ( NULL == x ) {
-            FEerror ( "equal: x is a NULL pointer", 0 );
-        }
-        if ( NULL == y ) {
-            FEerror ( "equal: y is a NULL pointer", 0 );
-        }
 	if ((t = type_of(x)) != type_of(y))
 		return(FALSE);
 	if (x==y)
@@ -586,22 +538,20 @@ BEGIN:
 	}
 
 	case t_pathname:
+#ifdef UNIX
 		if (equal(x->pn.pn_host, y->pn.pn_host) &&
 		    equal(x->pn.pn_device, y->pn.pn_device) &&
 		    equal(x->pn.pn_directory, y->pn.pn_directory) &&
 		    equal(x->pn.pn_name, y->pn.pn_name) &&
-		    equal(x->pn.pn_type, y->pn.pn_type)) {
-		    /* version is ignored unless logical host */
-		    if ((type_of(x->pn.pn_host) == t_string) &&
-			(pathname_lookup(x->pn.pn_host,sSApathname_logicalA) != Cnil))
-			return(equal(x->pn.pn_version, y->pn.pn_version) ?
-				TRUE : FALSE);
-		    else
+		    equal(x->pn.pn_type, y->pn.pn_type) &&
+		    equal(x->pn.pn_version, y->pn.pn_version))
+#endif
 			return(TRUE);
-		} else
+		else
 			return(FALSE);
+
 	default:
-		break;
+	  break;
 	}
 	return(eql(x,y));
 }

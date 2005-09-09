@@ -53,62 +53,6 @@
     (stable-sort a #'<))
   #(10 20 30 40 50))
 
-;;; FIXME Add random test similar to sort.5 here
-
-(deftest stable-sort-vector.6
-  (do-special-integer-vectors
-   (v #(1 4 7 3 2 6 5) nil)
-   (let ((sv (stable-sort v #'<)))
-     (assert (equalp sv #(1 2 3 4 5 6 7)))))
-  nil)
-
-(deftest stable-sort-vector.7
-  (do-special-integer-vectors
-   (v #(0 1 1 0 1 1 0 1 0) nil)
-   (let ((sv (stable-sort v #'<)))
-     (assert (equalp sv #(0 0 0 0 1 1 1 1 1)))))
-  nil)
-
-(deftest stable-sort-vector.8
-  (do-special-integer-vectors
-   (v #(0 -1 -1 0 -1 -1 0 -1 0) nil)
-   (let ((sv (stable-sort v #'>)))
-     (assert (equalp sv #(0 0 0 0 -1 -1 -1 -1 -1)))))
-  nil)
-
-(deftest stable-sort-vector.9
-  (let* ((ivals '(1 4 7 3 2 6 5))
-	 (sivals '(1 2 3 4 5 6 7))
-	 (len (length ivals)))
-    (loop for etype in '(short-float single-float double-float long-float rational)
-	  for vals = (loop for i in ivals collect (coerce i etype))
-	  for svals = (loop for i in sivals collect (coerce i etype))
-	  for vec = (make-array len :element-type etype :initial-contents vals)
-	  for svec = (stable-sort vec #'<)
-	  unless (and (eql (length svec) len)
-		      (every #'eql svals svec))
-	  collect (list etype vals svec)))
-  nil)
-
-(deftest stable-sort-vector.10
-  (let* ((ivals '(1 4 7 3 2 6 5))
-	 (sivals '(1 2 3 4 5 6 7))
-	 (len (length ivals)))
-    (loop for cetype in '(short-float single-float double-float long-float rational)
-	  for etype = `(complex ,cetype)
-	  for vals = (loop for i in ivals collect (complex (coerce i cetype)
-							   (coerce (- i) cetype)))
-	  for svals = (loop for i in sivals collect (complex (coerce i cetype)
-							     (coerce (- i) cetype)))
-	  for vec = (make-array len :element-type etype :initial-contents vals)
-	  for svec = (stable-sort vec #'(lambda (x y) (< (abs x) (abs y))))
-	  unless (and (eql (length svec) len)
-		      (every #'eql svals svec))
-	  collect (list etype vals svec)))
-  nil)
-
-;;; Bit vectors
-
 (deftest stable-sort-bit-vector.1
   (let ((a (copy-seq #*10011101)))
     (stable-sort a #'<))
@@ -147,14 +91,6 @@
     (stable-sort a #'char<))
   "00111")
 
-(deftest stable-sort-string.4
-  (do-special-strings
-   (s "aebdc" nil)
-   (let ((s2 (stable-sort s #'char<)))
-     (assert (eq s s2))
-     (assert (string= s2 "abcde"))))
-  nil)
-
 ;;; Order of evaluation tests
 
 (deftest stable-sort.order.1
@@ -178,45 +114,41 @@
 ;;; Error cases
 
 (deftest stable-sort.error.1
-  (signals-error (stable-sort) program-error)
-  t)
+  (classify-error (stable-sort))
+  program-error)
 
 (deftest stable-sort.error.2
-  (signals-error (stable-sort nil) program-error)
-  t)
+  (classify-error (stable-sort nil))
+  program-error)
 
 (deftest stable-sort.error.3
-  (signals-error (stable-sort nil #'< :key) program-error)
-  t)
+  (classify-error (stable-sort nil #'< :key))
+  program-error)
 
 (deftest stable-sort.error.4
-  (signals-error (stable-sort nil #'< 'bad t) program-error)
-  t)
+  (classify-error (stable-sort nil #'< 'bad t))
+  program-error)
 
 (deftest stable-sort.error.5
-  (signals-error (stable-sort nil #'< 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (stable-sort nil #'< 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest stable-sort.error.6
-  (signals-error (stable-sort nil #'< 1 2) program-error)
-  t)
+  (classify-error (stable-sort nil #'< 1 2))
+  program-error)
 
 (deftest stable-sort.error.7
-  (signals-error (stable-sort (list 1 2 3 4) #'identity) program-error)
-  t)
+  (classify-error (stable-sort (list 1 2 3 4) #'identity))
+  program-error)
 
 (deftest stable-sort.error.8
-  (signals-error (stable-sort (list 1 2 3 4) #'< :key #'cons) program-error)
-  t)
+  (classify-error (stable-sort (list 1 2 3 4) #'< :key #'cons))
+  program-error)
 
 (deftest stable-sort.error.9
-  (signals-error (stable-sort (list 1 2 3 4) #'< :key #'car) type-error)
-  t)
+  (classify-error (stable-sort (list 1 2 3 4) #'< :key #'car))
+  type-error)
 
 (deftest stable-sort.error.10
-  (signals-error (stable-sort (list 1 2 3 4) #'elt) type-error)
-  t)
-
-(deftest stable-sort.error.11
-  (check-type-error #'(lambda (x) (stable-sort x #'<)) #'sequencep)
-  nil)
+  (classify-error (stable-sort (list 1 2 3 4) #'elt))
+  type-error)

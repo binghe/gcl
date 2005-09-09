@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -23,7 +22,7 @@
 
 (in-package "LISP")
 
-(export '(defvar defparameter defconstant memq))
+(export '(defvar defparameter defconstant))
 
 (in-package "SYSTEM")
 
@@ -343,4 +342,3 @@
 	     ,@(mapcar #'(lambda (x) `(proclaim ',x)) l)))
 
 (defmacro lambda ( &rest l) `(function (lambda ,@l)))
-(defmacro memq (a b) `(member ,a ,b :test 'eq))

@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -114,7 +113,6 @@
               (setq - (locally (declare (notinline read))
                                (read *standard-input* nil *top-eof*)))
               (when (eq - *top-eof*) (bye))
-;              (si::clear-c-stack 4096)
               (let ((values (multiple-value-list
                              (locally (declare (notinline eval)) (eval -)))))
                 (setq /// // // / / values *** ** ** * * (car /))
@@ -145,7 +143,7 @@
 
 
 (defun dbl-read (&optional (stream *standard-input*) (eof-error-p t)
-			   (eof-value nil)  &aux ch)
+			   (eof-value nil)  &aux tem  ch)
   (tagbody
    top
    (setq ch (read-char stream eof-error-p eof-value))
@@ -153,26 +151,21 @@
 	 ((eq ch eof-value) (return-from dbl-read eof-value)))
    (unread-char ch stream))
 
-  (cond 
-;   ((eql #\: ch)
-;    (setq tem
-;	  (string-concatenate
-;	   "("
-;	   (read-line stream eof-error-p eof-value)")"))
-;    (read  (make-string-input-stream tem)
-;	   eof-error-p eof-value))
+  (cond ((eql #\: ch)
+	 (setq tem
+	       (string-concatenate
+		"("
+		(read-line stream eof-error-p eof-value)")"))
+	 (read  (make-string-input-stream tem)
+					 eof-error-p eof-value))
 	(t (read stream eof-error-p eof-value))))
 
 
 (defun break-level (at &optional env)
   (let* ((*break-message* (if (stringp at) at *break-message*))
-	 (quit-tags1 (cons *break-level* *quit-tag*))
-	 (quit-tags (cons quit-tags1 *quit-tags*))
-	 (*quit-tags* quit-tags)
-         (quit-tag (cons nil nil))
-         (*quit-tag* quit-tag)
-         (break-level (cons t *break-level*))
-         (*break-level* (if (not at) *break-level* break-level))
+	 (*quit-tags* (cons (cons *break-level* *quit-tag*) *quit-tags*))
+         (*quit-tag* (cons nil nil))
+         (*break-level* (if (not at) *break-level* (cons t *break-level*)))
          (*ihs-base* (1+ *ihs-top*))
          (*ihs-top* (1- (ihs-top)))
          (*current-ihs* *ihs-top*)
@@ -191,7 +184,6 @@
          (* *) (** **) (*** ***)
          (/ /) (// //) (/// ///)
          )
-    (declare (:dynamic-extent quit-tags quit-tags1 quit-tag break-level))
 					; (terpri *error-output*)
     (unless (or be (not (stringp at)))
       (simple-backtrace)
@@ -218,19 +210,15 @@
           (setq - (locally (declare (notinline read))
 			   (dbl-read *debug-io* nil *top-eof*)))
           (when (eq - *top-eof*) (bye -1))
-          (let* (break-command
+          (let* ( break-command
 		 (values
 		  (multiple-value-list
 		  (LOCALLY (declare (notinline break-call evalhook))
-;			   (if (keywordp -)(setq - (cons - nil)))
-			   (cond 
-			    ((keywordp -)
-			     (setq break-command t)
-			     (break-call - nil 'si::break-command))
-			    ((and (consp -) (keywordp (car -)))
-			     (setq break-command t)
-			     (break-call (car -) (cdr -) 'si::break-command))
-			    (t (evalhook - nil nil *break-env*)))))))
+			   (if (keywordp -)(setq - (cons - nil)))
+			   (cond ((and (consp -) (keywordp (car -)))
+				  (setq break-command t)
+				  (break-call (car -) (cdr -) 'si::break-command))
+				 (t (evalhook - nil nil *break-env*)))))))
 	    (and break-command (eq (car values) :resume )(return))
             (setq /// // // / / values *** ** ** * * (car /))
             (fresh-line *debug-io*)
@@ -258,7 +246,7 @@
   (error-name correctable function-name
    continue-format-string error-format-string
    &rest args &aux message)
-  (declare (ignore error-name) (:dynamic-extent args))
+  (declare (ignore error-name))
   (let ((*print-pretty* nil)
         (*print-level* *debug-print-level*)
         (*print-length* *debug-print-level*)
@@ -412,7 +400,7 @@
   (do ((bi (1+ (frs-bds (1- *frs-base*))) (1+ bi))
        (last (frs-bds (1+ *frs-top*))))
       ((> bi last) (values))
-    (when (or (null vars) (member (the symbol (bds-var bi)) vars))
+    (when (or (null vars) (member (bds-var bi) vars))
       (do ()
           ((or (> fi *frs-top*) (> (frs-bds fi) bi)))
         (print-frs fi)
@@ -471,7 +459,7 @@
   (case (frs-class i)
     (:catch
      (if (spicep (frs-tag i))
-         (or (and (setq x (member (the symbol (frs-tag i)) (vs (+ (frs-vs i) 2))
+         (or (and (setq x (member (frs-tag i) (vs (+ (frs-vs i) 2))
                                   :key #'caddr :test #'eq))
                   (if (eq (cadar x) 'block)
                       `(block ,(caar x) ***)
@@ -496,7 +484,7 @@
 (defvar *break-hidden-packages* nil)
 
 (defun ihs-visible (i &aux (tem (ihs-fname i)))
-  (and tem (not (member (the symbol tem) *break-hidden-packages*))))
+  (and tem (not (member tem *break-hidden-packages*))))
 
 
 (defun ihs-fname (ihs-index)
@@ -540,11 +528,11 @@
 
 (defun super-go (i tag &aux x)
   (when (and (>= i *frs-base*) (<= i *frs-top*) (spicep (frs-tag i)))
-    (if (setq x (member (the symbol (frs-tag i)) (vs (+ (frs-vs i) 2))
+    (if (setq x (member (frs-tag i) (vs (+ (frs-vs i) 2))
                         :key #'caddr :test #'eq))
         ; Interpreted TAGBODY.
         (when (and (eq (cadar x) 'tag)
-                   (member (the symbol tag) (mapcar #'car (remove (frs-tag i) x
+                   (member tag (mapcar #'car (remove (frs-tag i) x
                                                      :test-not #'eq
                                                      :key #'caddr))))
           (internal-super-go (frs-tag i) tag t))
@@ -721,15 +709,13 @@ First directory is checked for first name and all extensions etc."
     (or v (return nil))
     (let ((str (car v)))
       (declare (string str))
-;;FIXME  equal on strings should compile to something like this by itself
-      (if (and (= (length str) (length a))
-	       (or (= (length str) 0) (eql  (aref str 0) (aref a 0)))
-	       (or (= (length str) 1) (eql  (aref str 1) (aref a 1)))
+      (if (and (eql  (aref str 0) (aref a 0))
+	       (eql  (aref str 1) (aref a 1))
 	       (equal str a))
 	  (return
-	   (cond (val-if-there)
-		 ((cadr v)(values (cadr v) (cdr v)))
-		 (t t)))))))
+	  (cond (val-if-there)
+		((cadr v)(values (cadr v) (cdr v)))
+		(t t)))))))
 
 ; (let ((tem (member a si::*command-args* :test 'equal)))
 ;    (if tem (or  val-if-there (cadr tem) t))))
@@ -752,8 +738,6 @@ First directory is checked for first name and all extensions etc."
      (and *load-path* (equal tem *lib-directory*))
      (setq *load-path* (cons (si::string-concatenate *lib-directory*
 						     "lsp/") *load-path*))
-     (setq *load-path* (cons (si::string-concatenate *lib-directory*
-						     "mod/") *load-path*))
      (setq *load-path* (cons (si::string-concatenate *lib-directory*
 						     "gcl-tk/") *load-path*))
 	    )

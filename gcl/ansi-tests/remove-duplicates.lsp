@@ -5,22 +5,15 @@
 
 (in-package :cl-test)
 
-(compile-and-load "remove-aux.lsp")
-(compile-and-load "remove-duplicates-aux.lsp")
-
 (deftest random-remove-duplicates
-  (loop for result = (random-test-remove-dups (1+ (random 20)))
-	repeat 1000
-	unless (eq result t)
-	collect result)
-  nil)
+  (loop for i from 1 to 5000
+	always (random-test-remove-dups 20))
+  t)
 
 (deftest random-delete-duplicates
-  (loop for result = (random-test-remove-dups (1+ (random 20)) nil)
-	repeat 1000
-	unless (eq result t)
-	collect result)
-  nil)
+  (loop for i from 1 to 5000
+	always (random-test-remove-dups 20 nil))
+  t)
 
 ;;; Look for :KEY NIL bugs
 
@@ -38,28 +31,6 @@
     y)
   (3 4 1 5 6 2 7))
 
-(defharmless remove-duplicates.test-and-test-not.1
-  (remove-duplicates (list 'a 'b 'c 'd 'a 'e 'f 'd 'g) :test #'eql
-		     :test-not #'eql))
-
-(defharmless remove-duplicates.test-and-test-not.2
-  (remove-duplicates (list 'a 'b 'c 'd 'a 'e 'f 'd 'g) :test-not #'eql
-		     :test #'eql))
-
-(defharmless delete-duplicates.test-and-test-not.1
-  (delete-duplicates (list 'a 'b 'c 'd 'a 'e 'f 'd 'g) :test #'eql
-		     :test-not #'eql))
-
-(defharmless delete-duplicates.test-and-test-not.2
-  (delete-duplicates (list 'a 'b 'c 'd 'a 'e 'f 'd 'g) :test-not #'eql
-		     :test #'eql))
-
-;;; Const fold tests
-
-(def-fold-test remove-duplicates.fold.1 (remove-duplicates '(1 2 3 3)))
-(def-fold-test remove-duplicates.fold.2 (remove-duplicates #(1 2 3 3)))
-(def-fold-test remove-duplicates.fold.3 (remove-duplicates #*0011))
-(def-fold-test remove-duplicates.fold.4 (remove-duplicates "1233"))
 
 ;;; Order of evaluation tests
 
@@ -208,255 +179,75 @@
 ;;; Error cases
 
 (deftest remove-duplicates.error.1
-  (signals-error (remove-duplicates) program-error)
-  t)
+  (classify-error (remove-duplicates))
+  program-error)
 
 (deftest remove-duplicates.error.2
-  (signals-error (remove-duplicates nil :start) program-error)
-  t)
+  (classify-error (remove-duplicates nil :start))
+  program-error)
 
 (deftest remove-duplicates.error.3
-  (signals-error (remove-duplicates nil 'bad t) program-error)
-  t)
+  (classify-error (remove-duplicates nil 'bad t))
+  program-error)
 
 (deftest remove-duplicates.error.4
-  (signals-error (remove-duplicates nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (remove-duplicates nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest remove-duplicates.error.5
-  (signals-error (remove-duplicates nil 1 2) program-error)
-  t)
+  (classify-error (remove-duplicates nil 1 2))
+  program-error)
 
 (deftest remove-duplicates.error.6
-  (signals-error (remove-duplicates (list 'a 'b 'c) :test #'identity) program-error)
-  t)
+  (classify-error (remove-duplicates (list 'a 'b 'c) :test #'identity))
+  program-error)
 
 (deftest remove-duplicates.error.7
-  (signals-error (remove-duplicates (list 'a 'b 'c) :test-not #'identity) program-error)
-  t)
+  (classify-error (remove-duplicates (list 'a 'b 'c) :test-not #'identity))
+  program-error)
 
 (deftest remove-duplicates.error.8
-  (signals-error (remove-duplicates (list 'a 'b 'c) :key #'cons) program-error)
-  t)
+  (classify-error (remove-duplicates (list 'a 'b 'c) :key #'cons))
+  program-error)
 
 (deftest remove-duplicates.error.9
-  (signals-error (remove-duplicates (list 'a 'b 'c) :key #'car) type-error)
-  t)
-
-(deftest remove-duplicates.error.10
-  (check-type-error #'remove-duplicates #'sequencep)
-  nil)
+  (classify-error (remove-duplicates (list 'a 'b 'c) :key #'car))
+  type-error)
 
 ;;;
 
 (deftest delete-duplicates.error.1
-  (signals-error (delete-duplicates) program-error)
-  t)
+  (classify-error (delete-duplicates))
+  program-error)
 
 (deftest delete-duplicates.error.2
-  (signals-error (delete-duplicates nil :start) program-error)
-  t)
+  (classify-error (delete-duplicates nil :start))
+  program-error)
 
 (deftest delete-duplicates.error.3
-  (signals-error (delete-duplicates nil 'bad t) program-error)
-  t)
+  (classify-error (delete-duplicates nil 'bad t))
+  program-error)
 
 (deftest delete-duplicates.error.4
-  (signals-error (delete-duplicates nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (delete-duplicates nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest delete-duplicates.error.5
-  (signals-error (delete-duplicates nil 1 2) program-error)
-  t)
+  (classify-error (delete-duplicates nil 1 2))
+  program-error)
 
 (deftest delete-duplicates.error.6
-  (signals-error (delete-duplicates (list 'a 'b 'c) :test #'identity) program-error)
-  t)
+  (classify-error (delete-duplicates (list 'a 'b 'c) :test #'identity))
+  program-error)
 
 (deftest delete-duplicates.error.7
-  (signals-error (delete-duplicates (list 'a 'b 'c) :test-not #'identity) program-error)
-  t)
+  (classify-error (delete-duplicates (list 'a 'b 'c) :test-not #'identity))
+  program-error)
 
 (deftest delete-duplicates.error.8
-  (signals-error (delete-duplicates (list 'a 'b 'c) :key #'cons) program-error)
-  t)
+  (classify-error (delete-duplicates (list 'a 'b 'c) :key #'cons))
+  program-error)
 
 (deftest delete-duplicates.error.9
-  (signals-error (delete-duplicates (list 'a 'b 'c) :key #'car) type-error)
-  t)
-
-(deftest delete-duplicates.error.10
-  (check-type-error #'delete-duplicates #'sequencep)
-  nil)
-
-;;; Specialized string tests
-
-(deftest remove-duplicates.string.1
-  (do-special-strings
-   (s "abcadefabgz" nil)
-   (let ((s2 (remove-duplicates s)))
-     (assert (string= s "abcadefabgz"))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "cdefabgz"))))
-  nil)
-
-(deftest remove-duplicates.string.2
-  (do-special-strings
-   (s "abcadefabgz" nil)
-   (let ((s2 (remove-duplicates s :from-end t)))
-     (assert (string= s "abcadefabgz"))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "abcdefgz"))))
-  nil)
-
-(deftest delete-duplicates.string.1
-  (do-special-strings
-   (s "abcadefabgz" nil)
-   (let ((aet (array-element-type s))
-	 (s2 (delete-duplicates s)))
-     (assert (equal aet (array-element-type s2)))
-     (assert (string= s2 "cdefabgz"))))
-  nil)
-
-(deftest delete-duplicates.string.2
-  (do-special-strings
-   (s "abcadefabgz" nil)
-   (let ((aet (array-element-type s))
-	 (s2 (delete-duplicates s :from-end t)))
-     (assert (equal aet (array-element-type s2)))
-     (assert (string= s2 "abcdefgz"))))
-  nil)
-
-;;; Order of elements kept under EQUAL, EQUALP tests
-
-(deftest remove-duplicates.2
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (remove-duplicates (list x y) :test 'equal)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) nil t)
-
-(deftest remove-duplicates.2a
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (remove-duplicates (list x 'x y) :test 'equal)))
-    (values
-     result
-     (notnot (eql (cadr result) x))
-     (notnot (eql (cadr result) y))))
-  (x (a)) nil t)
-
-(deftest remove-duplicates.3
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (remove-duplicates (list x y) :test 'equal :from-end t)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) t nil)
-
-(deftest remove-duplicates.3a
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (remove-duplicates (list x 'u 'v y) :test 'equal :from-end t)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a) u v) t nil)
-
-(deftest remove-duplicates.4
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (remove-duplicates (list x y) :test 'equalp)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) nil t)
-
-(deftest remove-duplicates.5
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (remove-duplicates (list x y) :test 'equalp :from-end t)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) t nil)
-
-;;; Similar, but destructive
-
-(deftest delete-duplicates.2
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (delete-duplicates (list x y) :test 'equal)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) nil t)
-
-(deftest delete-duplicates.2a
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (delete-duplicates (list x 'x y) :test 'equal)))
-    (values
-     result
-     (notnot (eql (cadr result) x))
-     (notnot (eql (cadr result) y))))
-  (x (a)) nil t)
-
-(deftest delete-duplicates.3
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (delete-duplicates (list x y) :test 'equal :from-end t)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) t nil)
-
-(deftest delete-duplicates.3a
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (delete-duplicates (list x 'u 'v y) :test 'equal :from-end t)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a) u v) t nil)
-
-(deftest delete-duplicates.4
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (delete-duplicates (list x y) :test 'equalp)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) nil t)
-
-(deftest delete-duplicates.5
-  (let* ((x (list 'a))
-	 (y (list 'a))
-	 (result (delete-duplicates (list x y) :test 'equalp :from-end t)))
-    (values
-     result
-     (notnot (eql (car result) x))
-     (notnot (eql (car result) y))))
-  ((a)) t nil)
-
-
-
-    
-    
-
-
-		    
+  (classify-error (delete-duplicates (list 'a 'b 'c) :key #'car))
+  type-error)

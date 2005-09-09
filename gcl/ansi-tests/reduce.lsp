@@ -165,102 +165,48 @@
     (reduce #'+ a :end 3))
   6)
 
-;;; Specialized vectors
-
-(deftest reduce-array.20
-  (do-special-integer-vectors
-   (v #(1 0 0 1 1 0) nil)
-   (assert (eql (reduce #'+ v) 3)))
-  nil)
-
-(deftest reduce-array.21
-  (do-special-integer-vectors
-   (v #(1 0 0 1 1 0) nil)
-   (assert (equal (reduce #'cons v :from-end t :initial-value nil)
-		  '(1 0 0 1 1 0))))
-  nil)
-
-(deftest reduce-array.22
-  (do-special-integer-vectors
-   (v #(1 2 3 4 5 6 7) nil)
-   (assert (eql (reduce #'+ v) 28))
-   (assert (eql (reduce #'+ v :from-end t) 28))
-   (assert (eql (reduce #'+ v :start 1) 27))
-   (assert (eql (reduce #'+ v :initial-value 10) 38))
-   (assert (eql (reduce #'+ v :end 6) 21)))
-  nil)
-
-(deftest reduce-array.23
-  (let* ((len 10)
-	 (expected (* 1/2 (1+ len) len)))
-    (loop for etype in '(short-float single-float double-float long-float)
-	  for vals = (loop for i from 1 to len collect (coerce i etype))
-	  for vec = (make-array len :initial-contents vals :element-type etype)
-	  for result = (reduce #'+ vec)
-	  unless (= result (coerce expected etype))
-	  collect (list etype vals vec result)))
-  nil)
-
-(deftest reduce-array.24
-  (let* ((len 10)
-	 (expected (* 1/2 (1+ len) len)))
-    (loop for cetype in '(short-float single-float double-float long-float)
-	  for etype = `(complex ,cetype)
-	  for vals = (loop for i from 1 to len collect (complex (coerce i cetype)
-								(coerce (- i) cetype)))
-	  for vec = (make-array len :initial-contents vals :element-type etype)
-	  for result = (reduce #'+ vec)
-	  unless (= result (complex (coerce expected cetype) (coerce (- expected) cetype)))
-	  collect (list etype vals vec result)))
-  nil)
-
-(deftest reduce-array.25
-  (do-special-integer-vectors
-   (v (vector 0 most-positive-fixnum 0 most-positive-fixnum 0) nil)
-   (assert (eql (reduce #'+ v) (* 2 most-positive-fixnum))))
-  nil)
 
 ;;;;;;;;
 
 (deftest reduce.error.1
-  (check-type-error #'(lambda (x) (reduce 'cons x)) #'sequencep)
-  nil)
+  (classify-error (reduce 'cons 'a))
+  type-error)
 
 (deftest reduce.error.2
-  (signals-error (reduce) program-error)
-  t)
+  (classify-error (reduce))
+  program-error)
 
 (deftest reduce.error.3
-  (signals-error (reduce #'list nil :start) program-error)
-  t)
+  (classify-error (reduce #'list nil :start))
+  program-error)
 
 (deftest reduce.error.4
-  (signals-error (reduce #'list nil 'bad t) program-error)
-  t)
+  (classify-error (reduce #'list nil 'bad t))
+  program-error)
 
 (deftest reduce.error.5
-  (signals-error (reduce #'list nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (reduce #'list nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest reduce.error.6
-  (signals-error (reduce #'list nil 1 2) program-error)
-  t)
+  (classify-error (reduce #'list nil 1 2))
+  program-error)
 
 (deftest reduce.error.7
-  (signals-error (locally (reduce 'cons 'a) t) type-error)
-  t)
+  (classify-error (locally (reduce 'cons 'a) t))
+  type-error)
 
 (deftest reduce.error.8
-  (signals-error (reduce #'identity '(a b c)) program-error)
-  t)
+  (classify-error (reduce #'identity '(a b c)))
+  program-error)
 
 (deftest reduce.error.9
-  (signals-error (reduce #'cons '(a b c) :key #'cons) program-error)
-  t)
+  (classify-error (reduce #'cons '(a b c) :key #'cons))
+  program-error)
 
 (deftest reduce.error.10
-  (signals-error (reduce #'cons '(a b c) :key #'car) type-error)
-  t)
+  (classify-error (reduce #'cons '(a b c) :key #'car))
+  type-error)
 
 
 ;;;;;;;;
@@ -352,27 +298,6 @@
 		    :initial-value nil)
 	    'string))
   "dcba")
-
-(deftest reduce-string.18
-  (do-special-strings
-   (s "12345" nil)
-   (let ((x (reduce #'(lambda (x y) (cons y x)) s)))
-     (assert (equal x '(#\5 #\4 #\3 #\2 . #\1)))))
-  nil)
-
-(deftest reduce-string.19
-  (do-special-strings
-   (s "54321" nil)
-   (let ((x (reduce #'cons s :from-end t)))
-     (assert (equal x '(#\5 #\4 #\3 #\2 . #\1)))))
-  nil)
-
-(deftest reduce-string.20
-  (do-special-strings
-   (s "12345" nil)
-   (let ((x (reduce #'(lambda (x y) (cons y x)) s :initial-value nil)))
-     (assert (equal x '(#\5 #\4 #\3 #\2 #\1)))))
-  nil)
 
 ;;;;;;;;
 

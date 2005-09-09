@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPVAR  Variables.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -58,8 +57,7 @@
   		;;; OBJECT, the cvar for the C variable that holds the value.
   		;;; Not used for LEXICAL.
   (type t)	;;; Type of the variable.
-  (register 0 :type unsigned-short)  ;;; If greater than specified am't this goes into register.
-  (dynamic 0 :type unsigned-short)   ;;; If variable is declared dynamic-extent
+  (register 0)  ;;; If greater than specified am't this goes into register.
   )
 
 ;;; A special binding creates a var object with the kind field SPECIAL,
@@ -82,34 +80,36 @@
 
 (defun c1make-var (name specials ignores types &aux x)
   (let ((var (make-var :name name)))
-    (cmpck (not (symbolp name)) "The variable ~s is not a symbol." name)
-    (cmpck (constantp name)     "The constant ~s is being bound." name)
+       (cmpck (not (symbolp name)) "The variable ~s is not a symbol." name)
+       (cmpck (constantp name) "The constant ~s is being bound." name)
 
-    (dolist**
-     (v types)
-     (when (eq (car v) name)
-       (case (cdr v)
-	 (object (setf (var-loc var) 'object))
-	 (register (setf (var-register var) (+ (var-register var) 100)))
-	 (dynamic-extent  (setf (var-dynamic var) 1))
-	 (t (setf (var-type var) (nil-to-t (type-and (var-type var) (cdr v))))))))
-    
        (cond ((or (member name specials) (si:specialp name))
               (setf (var-kind var) 'SPECIAL)
               (setf (var-loc var) (add-symbol name))
-	      (when (and (not (assoc name types)) (setq x (get name 'cmp-type)))
-                     (setf (var-type var) x))
+              (cond ((setq x (assoc name types))
+                     (setf (var-type var) (cdr x)))
+                    ((setq x (get name 'cmp-type))
+                     (setf (var-type var) x)))
               (setq *special-binding* t))
              (t
+	      (dolist** (v types)
+			(cond ((eq (car v) name)
+			       (case (cdr v)
+				     (object (setf (var-loc var) 'object))
+				     (register
+				      (setf (var-register var)
+					    (+ (var-register var) 100)))
+				     (t (setf (var-type var) (cdr v)))))))
 	      (and (boundp '*c-gc*) *c-gc*
 		   (or (null (var-type var))
 		       (eq t (var-type var)))
 		   (setf (var-loc var) 'object))
               (setf (var-kind var) 'LEXICAL)))
        (let ((ign (member name ignores)))
-        (when ign
-         (setf (var-ref var) (if (eq (cadr ign) 'ignorable) 'IGNORABLE 'IGNORE))))
-       var))
+	 (when ign
+	   (setf (var-ref var) (if (eq (cadr ign) 'ignorable) 'IGNORABLE 'IGNORE))))
+       var)
+  )
 
 (defun check-vref (var)
   (when (and (eq (var-kind var) 'LEXICAL)
@@ -165,7 +165,12 @@
       (if (eq (var-loc var) 'OBJECT)
           'OBJECT
           (let ((type (var-type var)))
-               (cond ((car (member type +c-local-var-types+ :test 'type<=)))
+               (declare (object type))
+               (cond ((type>= 'fixnum type) 'FIXNUM)
+		     ((type>= 'integer type) 'INTEGER)
+                     ((type>= 'CHARACTER type) 'CHARACTER)
+                     ((type>= 'long-float type) 'LONG-FLOAT)
+                     ((type>= 'short-float type) 'SHORT-FLOAT)
                      ((and (boundp '*c-gc*) *c-gc* 'OBJECT))
 		     (t nil))))
       nil)
@@ -297,7 +302,7 @@
 		  (let ((*inline-blocks* 0) (*restore-avma* *restore-avma*))
 		    (save-avma '(nil integer))
 		    (wt-nl "SETQ_II(V"n",V" n"alloc,")
-		    (wt-integer-loc loc)
+		    (wt-integer-loc loc  (cons 'set-var var))
 		    (wt "," (bignum-expansion-storage) ");")
 		    (close-inline-blocks))
 		  (return-from set-var nil))
@@ -305,8 +310,15 @@
 	       (wt ");")))
             (t
              (wt-nl "V" (var-loc var) "= ")
-	     (funcall (or (cdr (assoc (var-kind var) +wt-loc-alist+)) (baboon)) loc)
-             (wt ";")))))
+             (case (var-kind var)
+                   (FIXNUM (wt-fixnum-loc loc))
+                   (CHARACTER (wt-character-loc loc))
+                   (LONG-FLOAT (wt-long-float-loc loc))
+                   (SHORT-FLOAT (wt-short-float-loc loc))
+                   (OBJECT (wt-loc loc))
+                   (t (baboon)))
+             (wt ";"))
+            )))
 
 (defun sch-global (name)
   (dolist* (var *undefined-vars* nil)
@@ -346,7 +358,7 @@
   (add-info info (cadr form1))
   (setq type (type-and (var-type (car name1)) (info-type (cadr form1))))
   (when (null type)
-    (cmpwarn "Type mismatches between ~s and ~s." name form))
+        (cmpwarn "Type mismatches between ~s and ~s." name form))
   (unless (eq type (info-type (cadr form1)))
     (let ((info1 (copy-info (cadr form1))))
          (setf (info-type info1) type)
@@ -371,7 +383,7 @@
   )
 
 (defun c2progv (symbols values body
-                &aux (cvar (cs-push t t))
+                &aux (cvar (next-cvar))
                      (*unwind-exit* *unwind-exit*))
 
   (wt-nl "{object symbols,values;")
@@ -435,10 +447,11 @@
         (case (caar forms)
           (LOCATION (push (cons vref (caddar forms)) saves))
           (otherwise
-            (if (assoc (var-kind (car vref)) +return-alist+)
+            (if (member (var-kind (car vref))
+                        '(FIXNUM CHARACTER LONG-FLOAT SHORT-FLOAT OBJECT))
                 (let* ((kind (var-kind (car vref)))
-                       (cvar (cs-push (var-type (car vref)) t))
-                       (temp (list 'var (make-var :kind kind :type (var-type (car vref)) :loc cvar) nil)))
+                       (cvar (next-cvar))
+                       (temp (list 'var (make-var :kind kind :loc cvar) nil)))
                   (wt-nl "{" *volatile* (rep-type kind) "V" cvar ";")
                   (incf blocks)
                   (let ((*value-to-go* temp)) (c2expr* (car forms)))

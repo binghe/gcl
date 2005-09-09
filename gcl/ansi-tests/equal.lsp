@@ -61,53 +61,6 @@
   (equalt (copy-seq #*000110) (copy-seq #*000111))
   nil)
 
-(deftest equal.13
-  :notes (:nil-vectors-are-strings)
-  (let ((x (make-array '(0) :element-type nil))
-	(y (make-array '(0) :element-type nil)))
-    (equalt x y))
-  t)
-
-(deftest equal.14
-  :notes (:nil-vectors-are-strings)
-  (and
-   (equalt (make-array '(0) :element-type nil) "")
-   (equalt "" (make-array '(0) :element-type nil)))
-  t)
-
-(deftest equal.15
-  (equalt (make-array '(0) :element-type 'character)
-	  (make-array '(0) :element-type 'base-char))
-  t)
-
-(deftest equal.16
-  (equalt "abc" (make-array '(3) :element-type 'base-char
-			    :initial-contents '(#\a #\b #\c)))
-  t)
-
-(deftest equal.17
-  (let ((s (make-array '(10) :element-type 'character
-		       :initial-contents "0123456789"
-		       :fill-pointer 3)))
-    (values (equalt s "012") (equalt "012" s)))
-  t t)
-
-(deftest equal.18
-  (let ((b (make-array '(10) :element-type 'bit
-		       :initial-contents #*0110001110
-		       :fill-pointer 5)))
-    (values (equalt #*01100 b) (equalt #*01100 b)))
-  t t)
-
-(deftest equal.19
-  (let ((s (make-array '(10) :element-type 'base-char
-		       :initial-contents "0123456789"
-		       :fill-pointer 3)))
-    (values (equalt s "012") (equalt "012" s)))
-  t t)
-
-;;; Should add more pathname equality tests
-
 (deftest equal.order.1
   (let ((i 0) x y)
     (values
@@ -115,16 +68,14 @@
      i x y))
   nil 2 1 2)
 
-;;; Error tests
-
 (deftest equal.error.1
-  (signals-error (equal) program-error)
-  t)
+  (classify-error (equal))
+  program-error)
 
 (deftest equal.error.2
-  (signals-error (equal nil) program-error)
-  t)
+  (classify-error (equal nil))
+  program-error)
 
 (deftest equal.error.3
-  (signals-error (equal nil nil nil) program-error)
-  t)
+  (classify-error (equal nil nil nil))
+  program-error)

@@ -41,46 +41,11 @@
 ;;; Restarts
 
 (DEFVAR *RESTART-CLUSTERS* '())
-;;;  An ALIST (condition . restarts) which records the restarts currently
-;;; associated with Condition.
-;;;
-(defvar *condition-restarts* ())
 
-
+; FIXME add condition support
 (DEFUN COMPUTE-RESTARTS (&optional condition)
-;  #+kcl (nconc (mapcan #'copy-list *RESTART-CLUSTERS*) (kcl-top-restarts))
-;  #-kcl (mapcan #'copy-list *RESTART-CLUSTERS*))
-  (let ((associated ())
-	(other ()))
-    (dolist (alist *condition-restarts*)
-      (if (eq (car alist) condition)
-	  (setq associated (cdr alist))
-	  (setq other (append (cdr alist) other))))
-    (let ((res '()))
-      (dolist (restart-cluster *restart-clusters*)
-	(dolist (restart restart-cluster)
-	  (when (and (or (not condition)
-			 (member restart associated)
-			 (not (member restart other)))
-		     (funcall (restart-test-function restart) condition))
-	    (push restart res))))
-      (nconc (nreverse res) (kcl-top-restarts)))))
-;      (nreverse res))))
-
-(defmacro with-condition-restarts (condition-form restarts-form &body body)
-  "WITH-CONDITION-RESTARTS Condition-Form Restarts-Form Form*
-   Evaluates the Forms in a dynamic environment where the restarts in the list
-   Restarts-Form are associated with the condition returned by Condition-Form.
-   This allows FIND-RESTART, etc., to recognize restarts that are not related
-   to the error currently being debugged.  See also RESTART-CASE."
-  (let ((n-cond (gensym)))
-    `(let ((*condition-restarts*
-	    (cons (let ((,n-cond ,condition-form))
-		    (cons ,n-cond
-			  (append ,restarts-form
-				  (cdr (assoc ,n-cond *condition-restarts*)))))
-		  *condition-restarts*)))
-       ,@body)))
+  #+kcl (nconc (mapcan #'copy-list *RESTART-CLUSTERS*) (kcl-top-restarts))
+  #-kcl (mapcan #'copy-list *RESTART-CLUSTERS*))
 
 (DEFUN RESTART-PRINT (RESTART STREAM DEPTH)
   (DECLARE (IGNORE DEPTH))
@@ -92,15 +57,14 @@
   NAME
   FUNCTION
   REPORT-FUNCTION
-  INTERACTIVE-FUNCTION
-  (test-function #'(lambda (cond) (declare (ignore cond)) t)))
+  INTERACTIVE-FUNCTION)
 
 #+kcl
 (progn
 (defvar *kcl-top-restarts* nil)
 
 (defun make-kcl-top-restart (quit-tag)
-  (make-restart :name 'gcl-top-restart
+  (make-restart :name 'abort
 		:function #'(lambda () (throw (car (list quit-tag)) quit-tag))
 		:report-function 
 		#'(lambda (stream) 
@@ -151,25 +115,22 @@
      ,@FORMS))
 
 (DEFUN FIND-RESTART (NAME &optional condition)
-  (let ((rl (compute-restarts condition)))
-    (dolist (restart rl)
-      (when (or (eq restart name) (eq (restart-name restart) name))
-	(return-from find-restart restart)))))
-;  (declare (ignore condition))
-;  (DOLIST (RESTART-CLUSTER *RESTART-CLUSTERS*)
-;    (DOLIST (RESTART RESTART-CLUSTER)
-;      (WHEN (OR (EQ RESTART NAME) (EQ (RESTART-NAME RESTART) NAME))
-;	(RETURN-FROM FIND-RESTART RESTART))))
-;  #+kcl 
-;  (let ((RESTART-CLUSTER (kcl-top-restarts)))
-;    (DOLIST (RESTART RESTART-CLUSTER)
-;      (WHEN (OR (EQ RESTART NAME) (EQ (RESTART-NAME RESTART) NAME))
-;	(RETURN-FROM FIND-RESTART RESTART)))))
+;FIXME add condition support
+  (declare (ignore condition))
+  (DOLIST (RESTART-CLUSTER *RESTART-CLUSTERS*)
+    (DOLIST (RESTART RESTART-CLUSTER)
+      (WHEN (OR (EQ RESTART NAME) (EQ (RESTART-NAME RESTART) NAME))
+	(RETURN-FROM FIND-RESTART RESTART))))
+  #+kcl 
+  (let ((RESTART-CLUSTER (kcl-top-restarts)))
+    (DOLIST (RESTART RESTART-CLUSTER)
+      (WHEN (OR (EQ RESTART NAME) (EQ (RESTART-NAME RESTART) NAME))
+	(RETURN-FROM FIND-RESTART RESTART)))))
   
 (DEFUN INVOKE-RESTART (RESTART &REST VALUES)
   (LET ((REAL-RESTART (OR (FIND-RESTART RESTART)
-			  (specific-ERROR :control-error "Restart ~S is not active." RESTART))))
-       (APPLY (RESTART-FUNCTION REAL-RESTART) VALUES)))
+			  (ERROR "Restart ~S is not active." RESTART))))
+    (APPLY (RESTART-FUNCTION REAL-RESTART) VALUES)))
 
 (DEFUN INVOKE-RESTART-INTERACTIVELY (RESTART)
   (LET ((REAL-RESTART (OR (FIND-RESTART RESTART)
@@ -181,57 +142,8 @@
 		 (FUNCALL INTERACTIVE-FUNCTION)
 		 '())))))
 
-(eval-when (compile load eval)
-;;; Wrap the restart-case expression in a with-condition-restarts if
-;;; appropriate.  Gross, but it's what the book seems to say...
-;;;
-(defmacro once-only (specs &body body)
-  "Once-Only ({(Var Value-Expression)}*) Form*
-  Create a Let* which evaluates each Value-Expression, binding a temporary
-  variable to the result, and wrapping the Let* around the result of the
-  evaluation of Body.  Within the body, each Var is bound to the corresponding
-  temporary variable."
-  (LABELS ((FROB (SPECS BODY)
-           (IF (NULL SPECS)
-               `(PROGN ,@BODY)
-               (LET ((SPEC (FIRST SPECS)))
-                 (WHEN (/= (LENGTH SPEC) 2)
-                   (ERROR "Malformed Once-Only binding spec: ~S." SPEC))
-                 (LET ((NAME (FIRST SPEC)) (EXP-TEMP (GENSYM)))
-                   `(LET ((,EXP-TEMP ,(SECOND SPEC)) (,NAME (GENSYM "OO-")))
-                      `(LET ((,,NAME ,,EXP-TEMP))
-                         ,,(FROB (REST SPECS) BODY))))))))
-  (FROB SPECS BODY)))
-
-(defun munge-restart-case-expression (expression data)
-  (let ((exp (macroexpand expression)))
-    (if (consp exp)
-	(let* ((name (car exp))
-	       (args (if (eq name 'cerror) (cddr exp) (cdr exp))))
-	  (if (member name '(signal error cerror warn))
-	      (once-only ((n-cond `(coerce-to-condition
-				    ,(first args)
-				    (list ,@(rest args))
-				    ',(case name
-					(warn 'simple-warning)
-					(signal 'simple-condition)
-					(t 'simple-error))
-				    ',name)))
-		`(with-condition-restarts
-		     ,n-cond
-		     (list ,@(mapcar #'(lambda (da)
-					 `(find-restart ',(nth 0 da)))
-				     data))
-		   ,(if (eq name 'cerror)
-			`(cerror ,(second expression) ,n-cond)
-			`(,name ,n-cond))))
-	      expression))
-	expression)))
-
-)
-
 (DEFMACRO RESTART-CASE (EXPRESSION &BODY CLAUSES)
-  (FLET ((TRANSFORM-KEYWORDS (&KEY REPORT INTERACTIVE TEST)
+  (FLET ((TRANSFORM-KEYWORDS (&KEY REPORT INTERACTIVE)
 	   (LET ((RESULT '()))
 	     (WHEN REPORT
 	       (SETQ RESULT (LIST* (IF (STRINGP REPORT)
@@ -244,22 +156,17 @@
 	       (SETQ RESULT (LIST* `#',INTERACTIVE
 				   :INTERACTIVE-FUNCTION
 				   RESULT)))
-	     (when test
-	       (setq result (list* `#',test
-				   :test-function
-				   result)))
 	     (NREVERSE RESULT))))
     (LET ((BLOCK-TAG (GENSYM))
 	  (TEMP-VAR  (GENSYM))
 	  (DATA
 	    (MAPCAR #'(LAMBDA (CLAUSE)
-			(WITH-KEYWORD-PAIRS ((REPORT INTERACTIVE TEST &REST FORMS)
+			(WITH-KEYWORD-PAIRS ((REPORT INTERACTIVE &REST FORMS)
 					     (CDDR CLAUSE))
 			  (LIST (CAR CLAUSE)			   ;Name=0
 				(GENSYM)			   ;Tag=1
 				(TRANSFORM-KEYWORDS :REPORT REPORT ;Keywords=2
-						    :INTERACTIVE INTERACTIVE
-						    :TEST TEST)
+						    :INTERACTIVE INTERACTIVE)
 				(CADR CLAUSE)			   ;BVL=3
 				FORMS)))			   ;Body=4
 		    CLAUSES)))
@@ -277,7 +184,7 @@
 					  (GO ,TAG))
 				,@KEYS)))
 			DATA)
-	       (RETURN-FROM ,BLOCK-TAG ,(munge-restart-case-expression EXPRESSION data)))
+	       (RETURN-FROM ,BLOCK-TAG ,EXPRESSION))
 	     ,@(MAPCAN #'(LAMBDA (DATUM)
 			   (LET ((TAG  (NTH 1 DATUM))
 				 (BVL  (NTH 3 DATUM))
@@ -297,44 +204,9 @@
 		  (FORMAT STREAM ,FORMAT-STRING ,@FORMAT-ARGUMENTS))
       (VALUES NIL T))))
 
-;(DEFUN ABORT          (&optional condition)      (INVOKE-RESTART (find-restart 'ABORT condition))
-;       			      (ERROR 'ABORT-FAILURE))
-;(DEFUN CONTINUE       ()      (INVOKE-RESTART 'CONTINUE))
-;(DEFUN MUFFLE-WARNING ()      (INVOKE-RESTART 'MUFFLE-WARNING))
-;(DEFUN STORE-VALUE    (VALUE) (INVOKE-RESTART 'STORE-VALUE VALUE))
-;(DEFUN USE-VALUE      (VALUE) (INVOKE-RESTART 'USE-VALUE   VALUE))
-
-;;; ABORT signals an error in case there was a restart named abort that did
-;;; not tranfer control dynamically.  This could happen with RESTART-BIND.
-;;;
-(defun abort (&optional condition)
-  "Transfers control to a restart named abort, signalling a control-error if
-   none exists."
-  (invoke-restart (find-restart 'abort condition))
-  (error 'abort-failure))
-
-
-(defun muffle-warning (&optional condition)
-  "Transfers control to a restart named muffle-warning, signalling a
-   control-error if none exists."
-  (invoke-restart (find-restart 'muffle-warning condition)))
-
-
-;;; DEFINE-NIL-RETURNING-RESTART finds the restart before invoking it to keep
-;;; INVOKE-RESTART from signalling a control-error condition.
-;;;
-(defmacro define-nil-returning-restart (name args doc)
-  `(defun ,name (,@args &optional condition)
-     ,doc
-     (if (find-restart ',name condition) (invoke-restart ',name ,@args))))
-
-(define-nil-returning-restart continue ()
-  "Transfer control to a restart named continue, returning nil if none exists.")
-
-(define-nil-returning-restart store-value (value)
-  "Transfer control and value to a restart named store-value, returning nil if
-   none exists.")
-
-(define-nil-returning-restart use-value (value)
-  "Transfer control and value to a restart named use-value, returning nil if
-   none exists.")
+(DEFUN ABORT          ()      (INVOKE-RESTART 'ABORT)
+       			      (ERROR 'ABORT-FAILURE))
+(DEFUN CONTINUE       ()      (INVOKE-RESTART 'CONTINUE))
+(DEFUN MUFFLE-WARNING ()      (INVOKE-RESTART 'MUFFLE-WARNING))
+(DEFUN STORE-VALUE    (VALUE) (INVOKE-RESTART 'STORE-VALUE VALUE))
+(DEFUN USE-VALUE      (VALUE) (INVOKE-RESTART 'USE-VALUE   VALUE))

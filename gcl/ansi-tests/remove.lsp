@@ -3,8 +3,6 @@
 ;;;; Created:  Sat Sep 14 11:46:05 2002
 ;;;; Contains: Tests for REMOVE
 
-(compile-and-load "remove-aux.lsp")
-
 (in-package :cl-test)
 
 (deftest remove-list.1
@@ -204,8 +202,6 @@
  t)
 
 ;;; Show that it tests using EQL, not EQ
-;;; NOTE: this test was bogus, since we can't sure non-EQness is preserved
-#|
 (deftest remove-list.18
    (let* ((i (1+ most-positive-fixnum))
 	  (orig (list i 0 i 1 i 2 3))
@@ -213,7 +209,6 @@
 	  (y (remove (1+ most-positive-fixnum) x)))
      (and (equalp orig x) y))
    (0 1 2 3))
-|#
 
 (deftest remove-list.19
   (let* ((orig '(1 2 3 2 6 1 2 4 1 3 2 7))
@@ -323,20 +318,6 @@
   (remove #\a (copy-seq "bcd") :count -1)
   "bcd")
 
-(deftest remove-string.4
-  (do-special-strings
-   (s "abcdbad" nil)
-   (let ((s2 (remove #\b s)))
-     (assert (equal (array-element-type s) (array-element-type s2)))
-     (assert (string= s2 "acdad")))
-   (let ((s2 (remove #\b s :count 1)))
-     (assert (equal (array-element-type s) (array-element-type s2)))
-     (assert (string= s2 "acdbad")))
-   (let ((s2 (remove #\b s :count 1 :from-end t)))
-     (assert (equal (array-element-type s) (array-element-type s2)))
-     (assert (string= s2 "abcdad"))))
-  nil)
-
 (deftest delete-vector.1
   (delete 'a (vector 'b 'c 'd))
   #(b c d))
@@ -361,30 +342,6 @@
   (delete #\a (copy-seq "bcd") :count -1)
   "bcd")
 
-(deftest delete-string.4
-  (do-special-strings
-   (s "abcdbad" nil)
-   (let ((s2 (delete #\b s)))
-     (assert (equal (array-element-type s) (array-element-type s2)))
-     (assert (string= s2 "acdad"))))
-  nil)
-
-(deftest delete-string.5
-  (do-special-strings
-   (s "abcdbad" nil)
-   (let ((s2 (delete #\b s :count 1)))
-     (assert (equal (array-element-type s) (array-element-type s2)))
-     (assert (string= s2 "acdbad"))))
-  nil)
-
-(deftest delete-string.6
-  (do-special-strings
-   (s "abcdbad" nil)
-   (let ((s2 (delete #\b s :count 1 :from-end t)))
-     (assert (equal (array-element-type s) (array-element-type s2)))
-     (assert (string= s2 "abcdad"))))
-  nil)
-
 (deftest remove-bit-vector.1
   (remove 0 (copy-seq #*00011101101))
   #*111111)
@@ -408,75 +365,6 @@
 (deftest delete-bit-vector.3
   (delete 0 (copy-seq #*11111) :count -1)
   #*11111)
-
-;;; test & test-not together is harmless
-
-(defharmless remove-list.test-and-test-not.1
-  (remove 'a '(a b c) :test #'eql :test-not #'eql))
-
-(defharmless remove-list.test-and-test-not.2
-  (remove 'a '(a b c) :test-not #'eql :test #'eql))
-
-(defharmless remove-vector.test-and-test-not.1
-  (remove 'a #(a b c) :test #'eql :test-not #'eql))
-
-(defharmless remove-vector.test-and-test-not.2
-  (remove 'a #(a b c) :test-not #'eql :test #'eql))
-
-(defharmless remove-bit-string.test-and-test-not.1
-  (remove 0 #*0001100100 :test #'eql :test-not #'eql))
-
-(defharmless remove-bit-string.test-and-test-not.2
-  (remove 0 #*0001100100 :test-not #'eql :test #'eql))
-
-(defharmless remove-string.test-and-test-not.1
-  (remove #\0 "0001100100" :test #'eql :test-not #'eql))
-
-(defharmless remove-string.test-and-test-not.2
-  (remove #\0 "0001100100" :test-not #'eql :test #'eql))
-
-
-(defharmless delete-list.test-and-test-not.1
-  (delete 'a (list 'a 'b 'c) :test #'eql :test-not #'eql))
-
-(defharmless delete-list.test-and-test-not.2
-  (delete 'a (list 'a 'b 'c) :test-not #'eql :test #'eql))
-
-(defharmless delete-vector.test-and-test-not.1
-  (delete 'a (vector 'a 'b 'c) :test #'eql :test-not #'eql))
-
-(defharmless delete-vector.test-and-test-not.2
-  (delete 'a (vector 'a 'b 'c) :test-not #'eql :test #'eql))
-
-(defharmless delete-bit-string.test-and-test-not.1
-  (delete 0 (copy-seq #*0001100100) :test #'eql :test-not #'eql))
-
-(defharmless delete-bit-string.test-and-test-not.2
-  (delete 0 (copy-seq #*0001100100) :test-not #'eql :test #'eql))
-
-(defharmless delete-string.test-and-test-not.1
-  (delete #\0 (copy-seq "0001100100") :test #'eql :test-not #'eql))
-
-(defharmless delete-string.test-and-test-not.2
-  (delete #\0 (copy-seq "0001100100") :test-not #'eql :test #'eql))
-
-
-;;; Const fold tests
-
-(def-fold-test remove.fold.1 (remove 'c '(a b c d e)))
-(def-fold-test remove.fold.2 (remove 'c #(a b c d e)))
-(def-fold-test remove.fold.3 (remove 1 #*0011011001))
-(def-fold-test remove.fold.4 (remove #\c "abcde"))
-
-(def-fold-test remove-if.fold.1 (remove-if 'null '(a b nil d e)))
-(def-fold-test remove-if.fold.2 (remove-if #'null #(a b nil d e)))
-(def-fold-test remove-if.fold.3 (remove-if 'plusp #*0011011001))
-(def-fold-test remove-if.fold.4 (remove-if 'digit-char-p "ab0de"))
-
-(def-fold-test remove-if-not.fold.1 (remove-if-not #'identity '(a b nil d e)))
-(def-fold-test remove-if-not.fold.2 (remove-if-not 'identity #(a b nil d e)))
-(def-fold-test remove-if-not.fold.3 (remove-if-not #'zerop #*0011011001))
-(def-fold-test remove-if-not.fold.4 (remove-if-not #'alpha-char-p "ab-de"))
 
 ;;; Order of evaluation tests
 
@@ -835,213 +723,84 @@
 ;;; Error cases
 
 (deftest remove.error.1
-  (signals-error (remove) program-error)
-  t)
+  (classify-error (remove))
+  program-error)
 
 (deftest remove.error.2
-  (signals-error (remove 'a) program-error)
-  t)
+  (classify-error (remove 'a))
+  program-error)
 
 (deftest remove.error.3
-  (signals-error (remove 'a nil :key) program-error)
-  t)
+  (classify-error (remove 'a nil :key))
+  program-error)
 
 (deftest remove.error.4
-  (signals-error (remove 'a nil 'bad t) program-error)
-  t)
-
-(deftest remove.error.4a
-  (signals-error (remove 'a nil nil t) program-error)
-  t)
+  (classify-error (remove 'a nil 'bad t))
+  program-error)
 
 (deftest remove.error.5
-  (signals-error (remove 'a nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (remove 'a nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest remove.error.6
-  (signals-error (remove 'a nil 1 2) program-error)
-  t)
+  (classify-error (remove 'a nil 1 2))
+  program-error)
 
 (deftest remove.error.7
-  (signals-error (remove 'a (list 'a 'b 'c) :test #'identity) program-error)
-  t)
+  (classify-error (remove 'a (list 'a 'b 'c) :test #'identity))
+  program-error)
 
 (deftest remove.error.8
-  (signals-error (remove 'a (list 'a 'b 'c) :test-not #'identity) program-error)
-  t)
+  (classify-error (remove 'a (list 'a 'b 'c) :test-not #'identity))
+  program-error)
 
 (deftest remove.error.9
-  (signals-error (remove 'a (list 'a 'b 'c) :key #'cons) program-error)
-  t)
+  (classify-error (remove 'a (list 'a 'b 'c) :key #'cons))
+  program-error)
 
 (deftest remove.error.10
-  (signals-error (remove 'a (list 'a 'b 'c) :key #'car) type-error)
-  t)
-
-(deftest remove.error.11
-  (check-type-error #'(lambda (x) (remove 'a x)) #'sequencep)
-  nil)
+  (classify-error (remove 'a (list 'a 'b 'c) :key #'car))
+  type-error)
 
 
 ;;;
 
 (deftest delete.error.1
-  (signals-error (delete) program-error)
-  t)
+  (classify-error (delete))
+  program-error)
 
 (deftest delete.error.2
-  (signals-error (delete 'a) program-error)
-  t)
+  (classify-error (delete 'a))
+  program-error)
 
 (deftest delete.error.3
-  (signals-error (delete 'a nil :key) program-error)
-  t)
+  (classify-error (delete 'a nil :key))
+  program-error)
 
 (deftest delete.error.4
-  (signals-error (delete 'a nil 'bad t) program-error)
-  t)
+  (classify-error (delete 'a nil 'bad t))
+  program-error)
 
 (deftest delete.error.5
-  (signals-error (delete 'a nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (delete 'a nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest delete.error.6
-  (signals-error (delete 'a nil 1 2) program-error)
-  t)
+  (classify-error (delete 'a nil 1 2))
+  program-error)
 
 (deftest delete.error.7
-  (signals-error (delete 'a (list 'a 'b 'c) :test #'identity) program-error)
-  t)
+  (classify-error (delete 'a (list 'a 'b 'c) :test #'identity))
+  program-error)
 
 (deftest delete.error.8
-  (signals-error (delete 'a (list 'a 'b 'c) :test-not #'identity) program-error)
-  t)
+  (classify-error (delete 'a (list 'a 'b 'c) :test-not #'identity))
+  program-error)
 
 (deftest delete.error.9
-  (signals-error (delete 'a (list 'a 'b 'c) :key #'cons) program-error)
-  t)
+  (classify-error (delete 'a (list 'a 'b 'c) :key #'cons))
+  program-error)
 
 (deftest delete.error.10
-  (signals-error (delete 'a (list 'a 'b 'c) :key #'car) type-error)
-  t)
-
-(deftest delete.error.11
-  (check-type-error #'(lambda (x) (delete 'a x)) #'sequencep)
-  nil)
-
-;;; More specialized string tests
-
-(deftest remove-if-string.1
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (remove-if #'alpha-char-p s)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "1234"))
-     (assert (string= s "ab1c23def4"))))
-  nil)
-
-(deftest remove-if-string.2
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (remove-if #'alpha-char-p s :count 3)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "123def4"))
-     (assert (string= s "ab1c23def4"))))
-  nil)
-
-(deftest remove-if-string.3
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (remove-if #'alpha-char-p s :count 3 :from-end t)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "ab1c234"))
-     (assert (string= s "ab1c23def4"))))
-  nil)
-
-(deftest remove-if-not-string.1
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (remove-if-not #'digit-char-p s)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "1234"))
-     (assert (string= s "ab1c23def4"))))
-  nil)
-
-(deftest remove-if-not-string.2
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (remove-if-not #'digit-char-p s :count 3)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "123def4"))
-     (assert (string= s "ab1c23def4"))))
-  nil)
-
-(deftest remove-if-not-string.3
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (remove-if-not #'digit-char-p s :count 3 :from-end t)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "ab1c234"))
-     (assert (string= s "ab1c23def4"))))
-  nil)
-
-
-(deftest delete-if-string.1
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (delete-if #'alpha-char-p s)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "1234"))))
-  nil)
-
-(deftest delete-if-string.2
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (delete-if #'alpha-char-p s :count 3)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "123def4"))))
-  nil)
-
-(deftest delete-if-string.3
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (delete-if #'alpha-char-p s :count 3 :from-end t)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "ab1c234"))))
-  nil)
-
-(deftest delete-if-not-string.1
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (delete-if-not #'digit-char-p s)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "1234"))))
-  nil)
-
-(deftest delete-if-not-string.2
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (delete-if-not #'digit-char-p s :count 3)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "123def4"))))
-  nil)
-
-(deftest delete-if-not-string.3
-  (do-special-strings
-   (s "ab1c23def4" nil)
-   (let ((s2 (delete-if-not #'digit-char-p s :count 3 :from-end t)))
-     (assert (equal (array-element-type s)
-		    (array-element-type s2)))
-     (assert (string= s2 "ab1c234"))))
-  nil)
+  (classify-error (delete 'a (list 'a 'b 'c) :key #'car))
+  type-error)

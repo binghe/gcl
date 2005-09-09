@@ -6,7 +6,11 @@
 (in-package :cl-test)
 
 (deftest compiled-function-p.1
-  (check-type-predicate #'compiled-function-p 'compiled-function)
+  (some #'(lambda (obj)
+	     (if (check-values (compiled-function-p obj))
+		 (not (typep obj 'compiled-function))
+	       (typep obj 'compiled-function)))
+	 *universe*)
   nil)
 
 (deftest compiled-function-p.2
@@ -25,9 +29,11 @@
   nil 1)
 
 (deftest compiled-function-p.error.1
-  (signals-error (compiled-function-p) program-error)
-  t)
+  (classify-error (compiled-function-p))
+  program-error)
 
 (deftest compiled-function-p.error.2
-  (signals-error (compiled-function-p nil nil) program-error)
-  t)
+  (classify-error (compiled-function-p nil nil))
+  program-error)
+
+

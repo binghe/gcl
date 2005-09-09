@@ -23,9 +23,6 @@ pltcomp(const void *v1,const void *v2) {
 
 }
 
-extern int _mcount();
-extern int mcount();
-
 #define MY_PLT(a_) {#a_,(unsigned long)(void *)a_}
 static Plt mplt[]={
 	/* This is an attempt to at least capture the addresses to
@@ -143,7 +140,7 @@ parse_plt() {
 
   for (;p<pe;p++)
     if ((op=bsearch(p->n,ar->v.v_self,ar->v.v_dim,sizeof(*ar->v.v_self),arsearch)) &&
-	fix((*op)->c.c_cdr) != p->ad)
+	(*op)->c.c_cdr->FIX.FIXVAL != p->ad)
       FEerror("plt/ld address mismatch",0);
 
   sSAplt_tableA->s.s_dbind=ar;
@@ -165,7 +162,7 @@ my_plt(const char *s,unsigned long *v) {
 		 sSAplt_tableA->s.s_dbind->v.v_dim,
 		 sizeof(*sSAplt_tableA->s.s_dbind->v.v_self),
 		 arsearch))) {
-    *v=fix((*op)->c.c_cdr);
+    *v=(*op)->c.c_cdr->FIX.FIXVAL;
     return 0;
   }
     

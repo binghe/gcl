@@ -33,122 +33,170 @@
   t "FOO")
 
 (deftest string.7
-  (check-predicate
-   #'(lambda (x)
-       (handler-case (stringp (string x))
-		     (type-error () :caught))))
-  nil)
+  (loop for x in *universe*
+	always (handler-case (stringp (string x))
+			     (type-error () :caught)))
+  t)
 
-(deftest string.8 
-  :notes (:allow-nil-arrays :nil-vectors-are-strings)
-  (subtypep* '(array nil (*)) 'string)
+;;; Tests of base-string
+
+(deftest base-string.1
+  (subtypep* 'base-string 'string)
   t t)
 
-(deftest string.9
-  :notes (:allow-nil-arrays :nil-vectors-are-strings)
-  (subtypep* '(array nil 1) 'string)
+(deftest base-string.2
+  (subtypep* 'base-string 'vector)
   t t)
 
-(deftest string.10
-  :notes (:allow-nil-arrays :nil-vectors-are-strings)
-  (string (make-array '(0) :element-type nil))
-  "")
+(deftest base-string.3
+  (subtypep* 'base-string 'array)
+  t t)
 
-(deftest string.11
-  (typep* "abcd" 'string)
+(deftest base-string.4
+  (subtypep* 'base-string 'sequence)
+  t t)
+
+;;; Tests of simple-string
+
+(deftest simple-string.1
+  (subtypep* 'simple-string 'string)
+  t t)
+
+(deftest simple-string.2
+  (subtypep* 'simple-string 'vector)
+  t t)
+
+(deftest simple-string.3
+  (subtypep* 'simple-string 'simple-array)
+  t t)
+
+(deftest simple-string.4
+  (subtypep* 'simple-string 'array)
+  t t)
+
+(deftest simple-string.5
+  (subtypep* 'simple-string 'sequence)
+  t t)
+
+;;; Tests for simple-base-string
+
+(deftest simple-base-string.1
+  (subtypep* 'simple-base-string 'string)
+  t t)
+
+(deftest simple-base-string.2
+  (subtypep* 'simple-base-string 'vector)
+  t t)
+
+(deftest simple-base-string.3
+  (subtypep* 'simple-base-string 'simple-array)
+  t t)
+
+(deftest simple-base-string.4
+  (subtypep* 'simple-base-string 'array)
+  t t)
+
+(deftest simple-base-string.5
+  (subtypep* 'simple-base-string 'sequence)
+  t t)
+
+(deftest simple-base-string.6
+  (subtypep* 'simple-base-string 'base-string)
+  t t)
+
+(deftest simple-base-string.7
+  (subtypep* 'simple-base-string 'simple-string)
+  t t)
+
+(deftest simple-base-string.8
+  (subtypep* 'simple-base-string 'simple-vector)
+  nil t)
+
+;;; Tests for simple-string-p
+
+(deftest simple-string-p.1
+  (loop for x in *universe*
+	always (if (typep x 'simple-string)
+		   (simple-string-p x)
+		 (not (simple-string-p x))))
   t)
 
-(deftest string.12
-  :notes (:allow-nil-arrays :nil-vectors-are-strings)
-  (typep* (make-array '(17) :element-type nil) 'string)
+(deftest simple-string-p.2
+  (notnot (simple-string-p "ancd"))
   t)
 
-(deftest string.13
-  :notes (:allow-nil-arrays :nil-vectors-are-strings)
-  (typep* (make-array '(0) :element-type nil) 'string)
+(deftest simple-string-p.3
+  (simple-string-p 0)
+  nil)
+
+(deftest simple-string-p.4
+  (simple-string-p (make-array 4 :element-type 'character
+			       :initial-contents '(#\a #\a #\a #\b)
+			       :fill-pointer t))
+  nil)
+
+(deftest simple-string-p.5
+  (notnot (simple-string-p (make-array
+			    4 :element-type 'base-char
+			    :initial-contents '(#\a #\a #\a #\b))))
   t)
 
-(deftest string.14
-  (let ((count 0))
-    (loop for i below (min char-code-limit 65536)
-	  for c = (code-char i)
-	  for s = (and c (string c))
-	  when (and c
-		    (or (not (stringp s))
-			(not (= (length s) 1))
-			(not (eql c (char s 0)))))
-	  collect (progn (incf count) (list i c s))
-	  until (>= count 100)))
-  nil)
-
-(deftest string.15
-  (when (> char-code-limit 65536)
-    (loop for i = (random char-code-limit)
-	  for c = (code-char i)
-	  for s = (and c (string c))
-	  repeat 2000
-	  when (and c
-		    (or (not (stringp s))
-			(not (= (length s) 1))
-			(not (eql c (char s 0)))))
-	  collect (list i c s)))
-  nil)
-
-(deftest string.16
-  (check-predicate #'(lambda (s) (or (not (stringp s)) (eq s (string s)))))
-  nil)
-
-(deftest string.17
-  (typep* "abc" '(string))
+(deftest simple-string-p.6
+  (notnot (simple-string-p (make-array
+			    4 :element-type 'standard-char
+			    :initial-contents '(#\a #\a #\a #\b))))
   t)
 
-(deftest string.18
-  (typep* "abc" '(string *))
+(deftest simple-string-p.7
+  (let* ((s (make-array 10 :element-type 'character
+			:initial-element #\a))
+	 (s2 (make-array 4 :element-type 'character
+			 :displaced-to s
+			 :displaced-index-offset 2)))
+    (simple-string-p s2))
+  nil)
+
+;;; Tests of stringp
+
+(deftest stringp.1
+  (loop for x in *universe*
+	always (if (typep x 'string)
+		   (stringp x)
+		 (not (stringp x))))
   t)
 
-(deftest string.19
-  (typep* "abc" '(string 3))
+(deftest stringp.2
+  (notnot (stringp "abcd"))
   t)
 
-(deftest string.20
-  (typep* "abc" '(string 2))
-  nil)
-
-(deftest string.21
-  (typep* "abc" '(string 4))
-  nil)
-
-(deftest string.22
-  (do-special-strings (s "X") (assert (typep s 'string)))
-  nil)
-		     
-(deftest string.23
-  (do-special-strings (s "X") (assert (typep s '(string))))
-  nil)
-		     
-(deftest string.24
-  (do-special-strings (s "X") (assert (typep s '(string *))))
-  nil)
-		     
-(deftest string.25
-  (do-special-strings (s "X")
-		      (or (array-has-fill-pointer-p s)
-			  (assert (typep s '(string 1)))))
-  nil)
-
-(deftest string.26
-  (let ((i 0))
-    (values (string (progn (incf i) "")) i))
-  "" 1)
-
-(def-fold-test string.fold.1 (string #\A))
-
-;;; Error tests
-
-(deftest string.error.1
-  (signals-error (string) program-error)
+(deftest stringp.3
+  (notnot (stringp (make-array 4 :element-type 'character
+			       :initial-contents '(#\a #\b #\c #\d))))
   t)
 
-(deftest string.error.2
-  (signals-error (string nil nil) program-error)
+(deftest stringp.4
+  (notnot (stringp (make-array 4 :element-type 'base-char
+			       :initial-contents '(#\a #\b #\c #\d))))
+  t)
+
+(deftest stringp.5
+  (notnot (stringp (make-array 4 :element-type 'standard-char
+			       :initial-contents '(#\a #\b #\c #\d))))
+  t)
+
+(deftest stringp.6
+  (stringp 0)
+  nil)
+
+(deftest stringp.7
+  (stringp #\a)
+  nil)
+
+(deftest stringp.8
+  (let* ((s (make-array 10 :element-type 'character
+			:initial-element #\a))
+	 (s2 (make-array 4 :element-type 'character
+			 :displaced-to s
+			 :displaced-index-offset 2)))
+    (notnot (stringp s2)))
   t)

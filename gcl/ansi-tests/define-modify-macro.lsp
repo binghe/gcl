@@ -65,43 +65,19 @@
   (3 #(0 0 3 0 0) 3))
 
 ;;; (deftest define-modify-macro.error.1
-;;;   (signals-error (define-modify-macro)  program-error)
-;;;   t)
+;;;   (classify-error (define-modify-macro))
+;;;   program-error)
 ;;; 
 ;;; (deftest define-modify-macro.error.2
-;;;   (signals-error (define-modify-macro dfm-error-1) program-error)
-;;;   t)
+;;;   (classify-error (define-modify-macro dfm-error-1))
+;;;   program-error)
 ;;; 
 ;;; (deftest define-modify-macro.error.3
-;;;   (signals-error (define-modify-macro dfm-error-2 ()) program-error)
-;;;   t)
+;;;   (classify-error (define-modify-macro dfm-error-2 ()))
+;;;   program-error)
 ;;; 
 ;;; (deftest define-modify-macro.error.4
-;;;   (signals-error (define-modify-macro dfm-error-2 () nil "Documentation"
-;;; 		    "extra illegal argument")
-;;;                   program-error)
-;;;   t)
+;;;   (classify-error (define-modify-macro dfm-error-2 () nil "Documentation"
+;;; 		    "extra illegal argument"))
+;;;   program-error)
 
-(def-macro-test define-modify-macro.error.1
-  (define-modify-macro nonexistent-modify-macro () foo))
-
-;;; Documentation tests
-
-(deftest define-modify-macro.documentation.1
-  (let ((sym (gensym)))
-    (eval `(define-modify-macro ,sym (&optional (delta 1)) +))
-    (values
-     (documentation sym 'function)
-     (documentation (macro-function sym) 'function)
-     (documentation (macro-function sym) t)))
-  nil nil nil)
-
-(deftest define-modify-macro.documentation.2
-  (let ((sym (gensym))
-	(doc "DMM-DOC"))
-    (eval `(define-modify-macro ,sym (&optional (delta 1)) + ,doc))
-    (values
-     (equalt doc (or (documentation sym 'function) doc))
-     (equalt doc (or (documentation (macro-function sym) 'function) doc))
-     (equalt doc (or (documentation (macro-function sym) t) doc))))
-  t t t)

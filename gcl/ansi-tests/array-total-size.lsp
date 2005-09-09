@@ -37,22 +37,27 @@
 ;;; Error tests
 
 (deftest array-total-size.error.1
-  (signals-error (array-total-size) program-error)
-  t)
+  (classify-error (array-total-size))
+  program-error)
 
 (deftest array-total-size.error.2
-  (signals-error (array-total-size #(a b c) nil) program-error)
-  t)
+  (classify-error (array-total-size #(a b c) nil))
+  program-error)
 
 (deftest array-total-size.error.3
-  (check-type-error #'array-total-size #'arrayp)
+  (let (why)
+    (loop for e in *mini-universe*
+	  when (and (not (typep e 'array))
+		    (not (eql (setq why 
+				    (classify-error** `(array-total-size ',e)))
+			      'type-error)))
+	collect (list e why)))
   nil)
 
 (deftest array-total-size.error.4
-  (signals-error (array-total-size 0) type-error)
-  t)
+  (classify-error (array-total-size 0))
+  type-error)
 
 (deftest array-total-size.error.5
-  (signals-type-error x 0 (locally (array-total-size x) t))
-  t)
-
+  (classify-error (locally (array-total-size 0) t))
+  type-error)

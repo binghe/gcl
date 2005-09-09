@@ -10,8 +10,8 @@
 ;;; is true.
 
 (deftest eql.1
-  (check-predicate #'(lambda (x) (eql x x)))
-  nil)
+  (loop for x in *universe* always (check-values (eql x x)))
+  t)
 
 (deftest eql.2
   (eqlt 2 (1+ 1))
@@ -58,30 +58,30 @@
      i x y))
   nil 2 1 2)
 
-;;; Error tests for EQL
-
 (deftest eql.error.1
-  (signals-error (eql) program-error)
-  t)
+  (classify-error (eql))
+  program-error)
 
 (deftest eql.error.2
-  (signals-error (eql nil) program-error)
-  t)
+  (classify-error (eql nil))
+  program-error)
 
 (deftest eql.error.3
-  (signals-error (eql nil nil nil) program-error)
-  t)
+  (classify-error (eql nil nil nil))
+  program-error)
 
 ;;; Error tests for EQ
 
 (deftest eq.error.1
-  (signals-error (eq) program-error)
-  t)
+  (classify-error (eq))
+  program-error)
 
 (deftest eq.error.2
-  (signals-error (eq nil) program-error)
-  t)
+  (classify-error (eq nil))
+  program-error)
 
 (deftest eq.error.3
-  (signals-error (eq nil nil nil) program-error)
-  t)
+  (classify-error (eq nil nil nil))
+  program-error)
+
+  

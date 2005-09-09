@@ -43,17 +43,17 @@
 ;;; Error tests
 
 (deftest svref.error.1
-  (signals-error (svref) program-error)
-  t)
+  (classify-error (svref))
+  program-error)
 
 (deftest svref.error.2
-  (signals-error (svref (vector 1)) program-error)
-  t)
+  (classify-error (svref (vector 1)))
+  program-error)
 
 (deftest svref.error.3
-  (signals-error (svref (vector 1) 0 0) program-error)
-  t)
+  (classify-error (svref (vector 1) 0 0))
+  program-error)
 
 (deftest svref.error.4
-  (signals-error (svref (vector 1) 0 nil) program-error)
-  t)
+  (classify-error (svref (vector 1) 0 nil))
+  program-error)

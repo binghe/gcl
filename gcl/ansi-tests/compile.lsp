@@ -9,7 +9,7 @@
   (progn
     (fmakunbound 'compile.1-fn)
     (values
-     (eval '(defun compile.1-fn (x) x))
+     (defun compile.1-fn (x) x)
      (compiled-function-p 'compile.1-fn)
      (let ((x (compile 'compile.1-fn)))
        (or (eqt x 'compile.1-fn)
@@ -82,13 +82,10 @@
      i a b))
   z 2 1 2)
 
-;;; Error tests
-
 (deftest compile.error.1
-  (signals-error (compile) program-error)
-  t)
+  (classify-error (compile))
+  program-error)
 
 (deftest compile.error.2
-  (signals-error (compile nil '(lambda () nil) 'garbage)
-		 program-error)
-  t)
+  (classify-error (compile nil '(lambda () nil) 'garbage))
+  program-error)

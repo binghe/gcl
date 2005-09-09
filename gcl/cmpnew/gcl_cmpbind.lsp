@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPBIND  Variable Binding.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -86,15 +85,20 @@
 	 (let ((*inline-blocks* 0) (*restore-avma* *restore-avma*))
 	   (save-avma '(nil integer))
 	   (wt-nl "V" (var-loc var) "= ")
-	   (wt-integer-loc loc)
+	   (wt-integer-loc loc var)
 	   (wt ";")
 	   (close-inline-blocks)))
         (t
          (wt-nl "V" (var-loc var) "= ")
-         (let ((wtf (cdr (assoc (var-kind var) +wt-loc-alist+))))
-          (unless wtf (baboon))
-          (funcall wtf loc))
-         (wt ";"))))
+         (case (var-kind var)
+               (OBJECT (wt-loc loc))
+               (FIXNUM (wt-fixnum-loc loc))
+               (CHARACTER (wt-character-loc loc))
+               (LONG-FLOAT (wt-long-float-loc loc))
+               (SHORT-FLOAT (wt-short-float-loc loc))
+               (t (baboon)))
+         (wt ";")))
+  )
 
 (defun c2bind-init (var init)
   (case (var-kind var)
@@ -117,11 +121,11 @@
 	(DOWN
 	  (let ((*value-to-go* (list 'down (var-loc var))))
 	    (c2expr* init)))
-	(t 
-	 (unless (assoc (var-kind var) +wt-loc-alist+)
-	   (baboon))
+        ((OBJECT FIXNUM CHARACTER LONG-FLOAT SHORT-FLOAT INTEGER)
          (let ((*value-to-go* (list 'var var nil)))
-	   (c2expr* init)))))
+              (c2expr* init)))
+        (t (baboon)))
+  )
 
 (defun set-bds-bind (loc vv)
        (wt-nl "bds_bind(VV[" vv "]," loc ");"))

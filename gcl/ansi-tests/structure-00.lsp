@@ -262,16 +262,15 @@ do the defstruct."
 		       (cons slot-name (create-instance-of-type type))
 		     (cons slot-name (defstruct-maketemp name "SLOTTEMP" i)))))
 	 )
-    (declare (ignorable initial-offset))
     ;; Build the tests in an eval-when form
-    `(eval-when (:load-toplevel :compile-toplevel :execute)
+    `(eval-when (compile load eval)
 
-       (report-and-ignore-errors
-	(eval '(defstruct ,name-and-options
-		 ,@slot-descriptions-and-documentation))
-	,(unless (or type-option include-option)
-	   `(pushnew ',name *defstruct-with-tests-names*))
-	nil)
+       (ignore-errors
+	 (eval '(defstruct ,name-and-options
+		  ,@slot-descriptions-and-documentation))
+	 ,(unless (or type-option include-option)
+	    `(pushnew ',name *defstruct-with-tests-names*))
+	 nil)
 
        ;; Test that structure is of the correct type
        (deftest ,(make-struct-test-name name 1)
@@ -295,11 +294,11 @@ do the defstruct."
 		      ))
 	       t)
 	     (deftest ,(make-struct-test-name name "ERROR.1")
-	       (signals-error (,p-fn) program-error)
-	       t)
+	       (classify-error (,p-fn))
+	       program-error)
 	     (deftest ,(make-struct-test-name name "ERROR.2")
-	       (signals-error (,p-fn (,make-fn) nil) program-error)
-	       t)
+	       (classify-error (,p-fn (,make-fn) nil))
+	       program-error)
 	     ))
 
        ;; Test that the elements of *universe* are not
@@ -344,11 +343,9 @@ do the defstruct."
 		     for (slot-name . initval) in initial-value-alist
 		     for field-fn in field-fns
 		     collect
-		     `(multiple-value-bind
-			  (x val)
-			  (signals-error (,field-fn) program-error)
-			(unless x
-			  (list ',slot-name ',field-fn val))))))
+		     `(let ((x (classify-error (,field-fn))))
+			(unless (eqt x 'program-error)
+			  (list ',slot-name ',field-fn x))))))
 	 nil)
 
        (deftest ,(make-struct-test-name name "ERROR.4")
@@ -358,12 +355,9 @@ do the defstruct."
 		     for (slot-name . initval) in initial-value-alist
 		     for field-fn in field-fns
 		     collect
-		     `(multiple-value-bind
-			  (x val)
-			  (signals-error (,field-fn (,make-fn) nil)
-					 program-error)
-			(unless x
-			  (list ',slot-name ',field-fn val))))))
+		     `(let ((x (classify-error (,field-fn (,make-fn) nil))))
+			(unless (eqt x 'program-error)
+			  (list ',slot-name ',field-fn x))))))
 	 nil)
 
        ;; Check that two invocations return different structures
@@ -399,11 +393,11 @@ do the defstruct."
 		    t)
 	       t)
 	     (deftest ,(make-struct-test-name name "ERROR.5")
-	       (signals-error (,copy-fn) program-error)
-	       t)
+	       (classify-error (,copy-fn))
+	       program-error)
 	     (deftest ,(make-struct-test-name name "ERROR.6")
-	       (signals-error (,copy-fn (,make-fn) nil) program-error)
-	       t)
+	       (classify-error (,copy-fn (,make-fn) nil))
+	       program-error)
 	     ))	     
 
        ;; Check that the copy function properly copies fields

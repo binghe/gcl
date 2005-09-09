@@ -154,98 +154,34 @@
     (equal-array x y))
   t)
 
-(deftest copy-seq.19
-  :notes (:nil-vectors-are-strings)
-  (copy-seq (make-array '(0) :element-type nil))
-  "")
-
-;;; Specialized string tests
-
-(deftest copy-seq.20
-  (do-special-strings
-   (s "abcde" nil)
-   (let ((s2 (copy-seq s)))
-     (assert (typep s2 'simple-array))
-     (assert (string= s s2))
-     (assert (equal (array-element-type s) (array-element-type s2)))))
-  nil)
-
-;;; Specialized vector tests
-
-(deftest copy-seq.21
-  (let ((v0 #(1 1 0 1 1 2)))
-    (do-special-integer-vectors
-     (v v0 nil)
-     (let ((v2 (copy-seq v)))
-       (assert (typep v2 'simple-array))
-       (assert (equalp v v2))
-       (assert (equalp v v0))
-       (assert (equal (array-element-type v) (array-element-type v2))))))
-  nil)
-
-(deftest copy-seq.22
-  (let ((v0 #(-1 1 1 0 1 -1 0)))
-    (do-special-integer-vectors
-     (v v0 nil)
-     (let ((v2 (copy-seq v)))
-       (assert (typep v2 'simple-array))
-       (assert (equalp v v2))
-       (assert (equalp v v0))
-       (assert (equal (array-element-type v) (array-element-type v2))))))
-  nil)
-
-(deftest copy-seq.23
-  (loop for type in '(short-float single-float long-float double-float)
-	for len = 10
-	for vals = (loop for i from 1 to len collect (coerce i type))
-	for vec = (make-array len :element-type type :initial-contents vals)
-	for result = (copy-seq vec)
-	unless (and (= (length result) len)
-		    (equal (array-element-type vec) (array-element-type result))
-		    (equalp vec result))
-	collect (list type vals result))
-  nil)
-
-(deftest copy-seq.24
-  (loop for etype in '(short-float single-float long-float double-float)
-	for type = `(complex ,etype)
-	for len = 10
-	for vals = (loop for i from 1 to len collect (complex (coerce i etype)
-							      (coerce (- i) etype)))
-	for vec = (make-array len :element-type type :initial-contents vals)
-	for result = (copy-seq vec)
-	unless (and (= (length result) len)
-		    (equal (array-element-type vec) (array-element-type result))
-		    (equalp vec result))
-	collect (list type vals result))
-  nil)
-
-;;; Order of evaluation test
-
 (deftest copy-seq.order.1
   (let ((i 0))
     (values (copy-seq (progn (incf i) "abc")) i))
   "abc" 1)
 
-(def-fold-test copy-seq.fold.1 (copy-seq '(a b c)))
-(def-fold-test copy-seq.fold.2 (copy-seq #(a b c)))
-(def-fold-test copy-seq.fold.3 (copy-seq #*01101100))
-(def-fold-test copy-seq.fold.4 (copy-seq "abcdef"))
-
 ;;; Error tests
 
 (deftest copy-seq.error.1
-  (check-type-error #'copy-seq #'sequencep)
-  nil)
+  (classify-error (copy-seq 10))
+  type-error)
+
+(deftest copy-seq.error.2
+  (classify-error (copy-seq 'a))
+  type-error)
+
+(deftest copy-seq.error.3
+  (classify-error (copy-seq 13.21))
+  type-error)
 
 (deftest copy-seq.error.4
-  (signals-error (copy-seq) program-error)
-  t)
+  (classify-error (copy-seq))
+  program-error)
 
 (deftest copy-seq.error.5
-  (signals-error (copy-seq "abc" 2 nil) program-error)
-  t)
+  (classify-error (copy-seq "abc" 2 nil))
+  program-error)
 
 (deftest copy-seq.error.6
-  (signals-error (locally (copy-seq 10) t) type-error)
-  t)
+  (classify-error (locally (copy-seq 10) t))
+  type-error)
+

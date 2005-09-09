@@ -95,8 +95,8 @@ quick_call_sfun(object fun)
 { DEBUG_AVMA
   int i=fun->sfn.sfn_argd,n=SFUN_NARGS(i);
   enum ftype restype;
-  object *x,res=OBJNULL,*base;
-  object *temp_ar=ZALLOCA(n*sizeof(object));
+  object *x,res,*base;
+  object *temp_ar=alloca(n*sizeof(object));
 /*   i=fun->sfn.sfn_argd; */
 /*   n=SFUN_NARGS(i); */
   base = vs_base;
@@ -105,7 +105,7 @@ quick_call_sfun(object fun)
   restype = SFUN_RETURN_TYPE(i);
   SFUN_START_ARG_TYPES(i);
   /* for moment just support object and int */
-#define COERCE_ARG(a,type)  (type==f_object ? a : (type==f_fixnum ? (object)(fix(a)) : (object)otoi(a)))
+#define COERCE_ARG(a,type)  (type==f_object ? a : (object)(fix(a)))
   if (i==0)
     x=vs_base;
   else
@@ -117,9 +117,8 @@ quick_call_sfun(object fun)
   SET_TO_APPLY(res,fun->sfn.sfn_self,n,x);
   base[0]=
     (restype==f_object ?  res :
-     (restype==f_fixnum ? make_fixnum((long)res) :
-      (restype==f_integer ? make_integer((GEN)res) :
-       (object) (FEerror("Bad result type",0),Cnil))));
+     restype==f_fixnum ? make_fixnum((long)res)
+     :(object) (FEerror("Bad result type",0),Cnil));
   vs_base = base;
   vs_top=base+1;
   CHECK_AVMA;
@@ -158,16 +157,13 @@ call_vfun(object fun)
 void
 funcall(object fun)
 { 
-/*         object VOL sfirst=NULL; */
-/*         wipe_stack(&sfirst); */
-	{
-        object temporary=OBJNULL;
-	object x=OBJNULL;
-	object * VOL top=NULL;
-	object *lex=NULL;
-	bds_ptr old_bds_top=NULL;
-	VOL bool b=0;
-	bool c=0;
+        object temporary;
+	object x;
+	 object * VOL top;
+	object *lex;
+	bds_ptr old_bds_top;
+	VOL bool b;
+	bool c;
 	DEBUG_AVMA
       TOP:
 	if (fun == OBJNULL)
@@ -189,7 +185,7 @@ funcall(object fun)
 		return;
          case t_afun:
 	 case t_closure:
-	   { object res=OBJNULL,*b = vs_base;
+	   { object res,*b = vs_base;
 	     int n = vs_top - b;
 	     res = (object)IapplyVector(fun,n,b);
 	     n = fcall.nvalues;
@@ -201,7 +197,7 @@ funcall(object fun)
       case t_cclosure:
 
 	{
-		object *top=NULL, *base=NULL, l=OBJNULL;
+		object *top, *base, l;
 
 		if (fun->cc.cc_turbo != NULL) {
 			MMccall(fun, fun->cc.cc_turbo);
@@ -225,13 +221,6 @@ funcall(object fun)
 		FEundefined_function(fun);
 	      }
 
-	case t_ifun:
-	  {object x = fun->ifn.ifn_self;
-	  if (x) { fun = x; goto TOP;}
-	  else
-	    FEundefined_function(fun);
-	  }
-	  
 	case t_cons:
 		break;
 
@@ -349,7 +338,7 @@ END:
 	lex_env = lex;
 	if (not_pushed == 0) {ihs_pop();}
 	CHECK_AVMA;
-}}}
+}}
 
 void
 funcall_no_event(object fun)
@@ -364,7 +353,7 @@ funcall_no_event(object fun)
 
 	case t_cclosure:
 	{
-		object *top=NULL, *base=NULL, l=OBJNULL;
+		object *top, *base, l;
 
 		if (fun->cc.cc_turbo != NULL) {
 			(*fun->cc.cc_self)(fun->cc.cc_turbo);
@@ -905,7 +894,7 @@ EVAL_ARGS:
 	  top[0] = ans;
 	  vs_top = ++top;
 	  form = MMcdr(form);}
-	n =top - base; /* number of args */
+	  n =top - base; /* number of args */
 	if (Vapplyhook->s.s_dbind != Cnil) {
 	  base[0]= (object)n;
 	  base[0] = c_apply_n(list,n+1,base);
@@ -944,11 +933,11 @@ Ieval(object form)
 void
 eval(object form)
 { 
-        object temporary=OBJNULL;
+        object temporary;
         DEBUG_AVMA
-	object fun=OBJNULL, x=OBJNULL;
-	object *top=NULL;
-	object *base=NULL;
+	object fun, x;
+	object *top;
+	object *base;
 
 	cs_check(form);
 
@@ -1084,7 +1073,7 @@ EVAL_ARGS:
 	form = form->c.c_cdr;
 	base = vs_top;
 	top = vs_top;
-	while(!endp_prop(form)) {
+	while(!endp(form)) {
 		eval(MMcar(form));
 		top[0] = vs_base[0];
 		vs_top = ++top;
@@ -1140,21 +1129,17 @@ call_applyhook(object fun)
 	super_funcall(ah);
 }
 
+
 DEFUNO_NEW("FUNCALL",object,fLfuncall,LISP
-       ,1,MAX_ARGS,NONE,OO,OO,OO,OO,void,Lfuncall,(object fun,...),"") { 
-
-  va_list ap;
+       ,1,MAX_ARGS,NONE,OO,OO,OO,OO,void,Lfuncall,(object fun,...),"")
+{ va_list ap;
   object *new;
-  int i,n = VFUN_NARGS-1;
-
-  if (n>=65) FEerror("arg limit exceeded",0);
-  new=ZALLOCA(n*sizeof(*new));
-/*   wipe_stack(&n); */
+  int n = VFUN_NARGS;
   va_start(ap,fun);
-  for (i=0;i<n;i++)
-    new[i]=va_arg(ap,object);
+  {COERCE_VA_LIST(new,ap,n);
+  return IapplyVector(fun,n-1,new);
   va_end(ap);
-  return IapplyVector(fun,n,new);
+ }
 }
 
 
@@ -1358,8 +1343,7 @@ void
 funcall_with_catcher(object fname, object fun)
 {
 	int n = vs_top - vs_base;
-	if (n > MAX_ARGS+1) 
-	  FEerror("Call argument linit exceeded",0);
+	if (n > 64) n = 64;
 	frs_push(FRS_CATCH, make_cons(fname, make_fixnum(n)));
 	if (nlj_active)
 		nlj_active = FALSE;
@@ -1434,10 +1418,9 @@ fcalln_general(object first,va_list ap) {
       while (n-- > 0) {
 	typ= SFUN_NEXT_TYPE(i);
 	x =
-	  (typ==f_object ?	(jj ? va_arg(ap,object) : first) :
-	   (typ==f_fixnum ? make_fixnum((jj ? va_arg(ap,fixnum) : (fixnum)first)) :
-	    (typ==f_integer ? make_integer((jj ? va_arg(ap,GEN) : (GEN)first)) :
-	     (object) (FEerror("bad type",0),Cnil))));
+	  (typ==f_object ?	(jj ? va_arg(ap,object) : first):
+	   typ==f_fixnum ? make_fixnum((jj ? va_arg(ap,fixnum) : (fixnum)first)):
+	   (object) (FEerror("bad type",0),Cnil));
 	*(vs_top++) = x;
 	jj++;
       }
@@ -1454,9 +1437,8 @@ fcalln_general(object first,va_list ap) {
     vs_top=old_vs_top;
     /* vs_base=old_vs_base; */
     return (restype== f_object ? x :
-	    (restype== f_fixnum ? (object) (fix(x)) :
-	     (restype== f_integer ? (object) (otoi(x)) :
-	      (object) (FEerror("bad type",0),Cnil))));
+	    restype== f_fixnum ? (object) (fix(x)):
+	    (object) (FEerror("bad type",0),Cnil));
   }
 }
 
@@ -1546,7 +1528,7 @@ gcl_init_eval(void)
 
 
 
-        make_constant("CALL-ARGUMENTS-LIMIT", make_fixnum(MAX_ARGS+1));
+        make_constant("CALL-ARGUMENTS-LIMIT", make_fixnum(64));
 
 
 	Vevalhook = make_special("*EVALHOOK*", Cnil);

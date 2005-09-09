@@ -40,7 +40,6 @@ number_compare(object x, object y)
 {
 	int i;
 	double dx, dy=0.0;
-	object q;
 	vs_mark;
 
 	switch (type_of(x)) {
@@ -99,23 +98,13 @@ number_compare(object x, object y)
 			vs_reset;
 			return(i);
 		case t_shortfloat:
-		  if ((float)number_to_double((q=double_to_integer((double)sf(y))))==sf(y)) {
-		    i=number_compare(x,q);
-		    vs_reset;
-		    return i;
-		  }
-		  dx=number_to_double(x);
-		  dy=(double)sf(y);
-		  goto LONGFLOAT;
+			dx = number_to_double(x);
+			dy = (double)(sf(y));
+			goto LONGFLOAT;
 		case t_longfloat:
-		  if (number_to_double((q=double_to_integer(lf(y))))==lf(y)) {
-		    i=number_compare(x,q);
-		    vs_reset;
-		    return i;
-		  }
-		  dx=number_to_double(x);
-		  dy=lf(y);
-		  goto LONGFLOAT;
+			dx = number_to_double(x);
+			dy = lf(y);
+			goto LONGFLOAT;
 		case t_complex:
 			goto Y_COMPLEX;
 		default:
@@ -139,17 +128,13 @@ number_compare(object x, object y)
 			vs_reset;
 			return(i);
 		case t_shortfloat:
-		  if ((float)number_to_double((q=double_to_integer((double)sf(y))))==sf(y)) 
-		    y=q;
-		  i=number_compare(x->rat.rat_num,number_times(x->rat.rat_den,y));
-		  vs_reset;
-		  return i;
+			dx = number_to_double(x);
+			dy = (double)(sf(y));
+			goto LONGFLOAT;
 		case t_longfloat:
-		  if (number_to_double((q=double_to_integer(lf(y))))==lf(y)) 
-		    y=q;
-		  i=number_compare(x->rat.rat_num,number_times(x->rat.rat_den,y));
-		  vs_reset;
-		  return i;
+			dx = number_to_double(x);
+			dy = lf(y);
+			goto LONGFLOAT;
 		case t_complex:
 			goto Y_COMPLEX;
 		default:
@@ -162,25 +147,15 @@ number_compare(object x, object y)
 
 	case t_longfloat:
 		dx = lf(x);
- 	LONGFLOAT0:
+	LONGFLOAT0:
 		switch (type_of(y)) {
 		case t_fixnum:
 			dy = (double)(fix(y));
 			goto LONGFLOAT;
 		case t_bignum:
-		  if (number_to_double((q=double_to_integer(dx)))==dx) {
-		    i=number_compare(q,y);
-		    vs_reset;
-		    return i;
-		  }
-		  dy=number_to_double(y);
-		  goto LONGFLOAT;
 		case t_ratio:
-		  if (number_to_double((q=double_to_integer(dx)))==dx) 
-		    x=q;
-		  i=number_compare(number_times(x,y->rat.rat_den),y->rat.rat_num);
-		  vs_reset;
-		  return i;
+			dy = number_to_double(y);
+			goto LONGFLOAT;
 		case t_shortfloat:
 			dy = (double)(sf(y));
 			goto LONGFLOAT;

@@ -467,7 +467,7 @@ and load your system with:
 (defun operation-transformations (name mode &optional arg)
   (let ((system (get-system name)))
     (unless system (error "Can't find system with name ~S." name))
-    (let ((*system-directory* (funcall (car system))) ;(the function (car system))
+    (let ((*system-directory* (funcall (the function (car system))))
 	  (modules (cadr system)))
       (ecase mode
 	(:compile
@@ -536,17 +536,18 @@ and load your system with:
 
 #+cmu17
 (defparameter *byte-files* '(defclass defcombin iterate env))
+
 (defun operate-on-system (name mode &optional arg print-only)
   (let ((system (get-system name)))
     (unless system (error "Can't find system with name ~S." name))
-    (let* ((*system-directory* (funcall (car system))) ; (the function (car system))
+    (let* ((*system-directory* (funcall (the function (car system))))
 	   (transformations (operation-transformations name mode arg)))
       (labels ((load-binary (name pathname)
 		 (format t "~&Loading binary of ~A...~%" name)
 		 (or print-only (load pathname)))	       
 	       (load-module (m)
 		 (let* ((name (module-name m))
-			(*load-verbose* t)
+			(*load-verbose* nil)
 			(binary (make-binary-pathname m)))
 		   (load-binary name binary)))
 	       (compile-module (m)
@@ -599,11 +600,9 @@ and load your system with:
 				(:source (car *system-directory*))
 				(:binary (cdr *system-directory*)))))))
 	 (dir (pathname-directory directory))
-	 (ldir nil)
-
-;	 (if (consp dir)
-;		   dir
-;		   (pathname-directory (truename directory))))
+	 (ldir (if (consp dir)
+		   dir
+		   (pathname-directory (truename directory))))
 
 	 (port-dname (when (and port 
 				(or *put-impl-binaries-in-impl-directory-p*
@@ -613,20 +612,10 @@ and load your system with:
 			     (append ldir (list "impl" port-dname))
 			     ldir))
 			     
-;	 (port-directory (if port-dname
-;			     (append ldir (list "impl" port-dname))
-;			     ldir))
-			     
-	 (port-directory ldir)
-	 (port-device (if (null port-directory)
-			  nil
-			(pathname-device port-directory)))
-			     
          (pathname
            (make-pathname
              :name (string-downcase (string name))
              :type extension
-	     :device port-device
 	     :directory port-directory
              :defaults directory)))
 
@@ -639,14 +628,14 @@ and load your system with:
 (defun system-source-files (name)
   (let ((system (get-system name)))
     (unless system (error "Can't find system with name ~S." name))
-    (let ((*system-directory* (funcall (car system))) ;(the function (car system))
+    (let ((*system-directory* (funcall (the function (car system))))
 	  (modules (cadr system)))
       (mapcar #'make-source-pathname modules))))
 
 (defun system-binary-files (name)
   (let ((system (get-system name)))
     (unless system (error "Can't find system with name ~S." name))
-    (let ((*system-directory* (funcall (car system))) ;(the function (car system))
+    (let ((*system-directory* (funcall (the function (car system))))
 	  (modules (cadr system)))
       (mapcar #'make-binary-pathname modules))))
 
@@ -686,10 +675,9 @@ and load your system with:
     ;; 3.0 it's in the LUCID-COMMON-LISP package.
     ;;
     #+LUCID (or lucid::*source-pathname* (bad-time))
-    #+gcl *load-pathname*
-    #+(and akcl (not gcl))  si:*load-pathname*
+    #+akcl   si:*load-pathname*
     #+cmu17 *load-truename*
-    #-(or Lispm excl Xerox (and dec vax common) LUCID akcl gcl cmu17) nil))
+    #-(or Lispm excl Xerox (and dec vax common) LUCID akcl cmu17) nil))
 
 #-(or cmu Symbolics)
 (defvar *pcl-directory* (concatenate 'string user::*system-directory* "../pcl/"))
@@ -743,7 +731,7 @@ and load your system with:
    (sys-proclaim    t            t            ()                kcl)
    (gcl_pcl_walk        (gcl_pcl_pkg)    (gcl_pcl_pkg)    ())
    (gcl_pcl_iterate     t            t            ())
-   (gcl_pcl_macros    t         t        ())
+   (gcl_pcl_macros      t            t            ())
    (gcl_pcl_low         (gcl_pcl_pkg gcl_pcl_macros) t            (gcl_pcl_macros))
    
    

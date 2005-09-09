@@ -297,7 +297,7 @@
 
 (deftest structure-53-1
   (let ((s (make-struct-test-53 :a53 10 :b53 'a)))
-    (values (my-aref s 5) (my-aref s 6)))
+    (values (aref s 5) (aref s 6)))
   10 a)
 
 (defstruct-with-tests (struct-test-54 (:type vector)
@@ -308,7 +308,7 @@
 
 (deftest structure-54-1
   (let ((s (make-struct-test-54 :a53 8 :b53 'g :a54 10 :b54 'a)))
-    (values (my-aref s 5) (my-aref s 6) (my-aref s 9) (my-aref s 10)))
+    (values (aref s 5) (aref s 6) (aref s 9) (aref s 10)))
   8 g 10 a)
 
 (defstruct-with-tests (struct-test-55 (:type list)
@@ -376,7 +376,7 @@
 ;;; Initializer forms are evaluated only when needed, and are
 ;;; evaluated in the lexical environment in which they were defined
 
-(eval-when (:load-toplevel :execute)
+(eval-when (load eval)
   (let ((x nil))
     (flet ((%f () x)
 	  (%g (y) (setf x y)))
@@ -388,110 +388,33 @@
 (deftest structure-62-1
   (let* ((s (make-struct-test-62 :a 1))
 	 (f (struct-test-62-f s)))
-    (assert (typep f 'function))
     (values
      (struct-test-62-a s)
-     (funcall (the function f))))
+     (funcall f)))
   1 nil)
 
 (deftest structure-62-2
   (let* ((s (make-struct-test-62))
 	 (f (struct-test-62-f s))
 	 (g (struct-test-62-g s)))
-    (assert (typep f 'function))
-    (assert (typep g 'function))
-    (locally
-     (declare (type function f g))
-     (values
-      (struct-test-62-a s)
-      (funcall f)
-      (funcall g nil)
-      (funcall f))))
+    (values
+     (struct-test-62-a s)
+     (funcall f)
+     (funcall g nil)
+     (funcall f)))
   nil a nil nil)
 
 ;;; Keywords are allowed in defstruct
 (defstruct-with-tests :struct-test-63 a63 b63 c63)
 (defstruct-with-tests struct-test-64 :a63 :b63 :c63)
 
-(defstruct-with-tests struct-test-65
-    array-dimension-limit
-    array-rank-limit
-    array-total-size-limit
-    boole-1
-    boole-2
-    boole-and
-    boole-andc1
-    boole-andc2
-    boole-c1
-    boole-c2
-    boole-clr
-    boole-eqv
-    boole-ior
-    boole-nand
-    boole-nor
-    boole-orc1
-    boole-orc2
-    boole-set
-    boole-xor
-    call-arguments-limit
-    char-code-limit
-    double-float-epsilon
-    double-float-negative-epsilon
-    internal-time-units-per-second
-    lambda-list-keywords
-    lambda-parameters-limit
-    least-negative-double-float
-    least-negative-long-float
-    least-negative-normalized-double-float
-    least-negative-normalized-long-float
-    least-negative-normalized-short-float
-    least-negative-normalized-single-float
-    least-negative-short-float
-    least-negative-single-float
-    least-positive-double-float
-    least-positive-long-float
-    least-positive-normalized-double-float
-    least-positive-normalized-long-float
-    least-positive-normalized-short-float
-    least-positive-normalized-single-float
-    least-positive-short-float
-    least-positive-single-float
-    long-float-epsilon
-    long-float-negative-epsilon
-    most-negative-double-float
-    most-negative-fixnum
-    most-negative-long-float
-    most-negative-short-float
-    most-negative-single-float
-    most-positive-double-float
-    most-positive-fixnum
-    most-positive-long-float
-    most-positive-short-float
-    most-positive-single-float
-    multiple-values-limit
-    pi
-    short-float-epsilon
-    short-float-negative-epsilon
-    single-float-epsilon
-    single-float-negative-epsilon
-    t)
-
-(defstruct-with-tests struct-test-66 nil)
-
-(defstruct-with-tests struct-test-67
-  (a 0 :type (integer 0 (#.(ash 1 32))))
-  (b nil))
-
-(defstruct-with-tests (struct-test-68 (:include struct-test-67))
-  c d)  
-
 ;;; Error tests
 
 (deftest copy-structure.error.1
-  (signals-error (copy-structure) program-error)
-  t)
+  (classify-error (copy-structure))
+  program-error)
 
 (deftest copy-structure.error.2
-  (signals-error (copy-structure (make-s-2) nil) program-error)
-  t)
+  (classify-error (copy-structure (make-s-2) nil))
+  program-error)
 

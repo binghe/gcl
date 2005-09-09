@@ -6,7 +6,6 @@
 #include "errno.h"
 #include "signal.h"
 #include "stdlib.h"
-extern void sigint ( int );
 
 #ifdef DODEBUG
 #define dprintf(s,arg) \
@@ -86,11 +85,6 @@ static struct {
 static int SocketsEnabled();
 static void close_winsock();
 extern void doReverse ( char *s, int n );
-extern void init_shared_memory (void);
-
-unsigned int shared_memory_initialised = FALSE;
-
-
 
 
 /*
@@ -861,24 +855,22 @@ void close_shared_memory()
 }
 
 void init_shared_memory (void)
-{
-    if ( ! shared_memory_initialised ) {
-        sprintf(sharedMemory.name,"gcl-%d",getpid());
-        sharedMemory.handle =
-            CreateFileMapping((HANDLE)-1, NULL, PAGE_READWRITE, 0, sharedMemory.length , TEXT (sharedMemory.name));
-        if (sharedMemory.handle == NULL)
-            error("CreateFileMapping failed");
-        sharedMemory.address =
-            MapViewOfFile(sharedMemory.handle, /* Handle to mapping object.  */
-                           FILE_MAP_WRITE, /* Read/write permission */
-                           0,              /* Max.  object size.  */
-                           0,              /* Size of hFile.  */
-                           0);             /* Map entire file.  */
-        if (sharedMemory.address == NULL)
-            { error("MapViewOfFile failed");}
-        init_signals_pendingPtr();
-        atexit(close_shared_memory);
-    }
+{ 
+  sprintf(sharedMemory.name,"gcl-%d",getpid());
+  sharedMemory.handle =
+    CreateFileMapping((HANDLE)-1, NULL, PAGE_READWRITE, 0, sharedMemory.length , TEXT (sharedMemory.name));
+  if (sharedMemory.handle == NULL)
+    error("CreateFileMapping failed");
+   sharedMemory.address =
+     MapViewOfFile(sharedMemory.handle, /* Handle to mapping object.  */
+		   FILE_MAP_WRITE,               /* Read/write permission */
+		   0,                                 /* Max.  object size.  */
+		   0,                                 /* Size of hFile.  */
+		   0);                                /* Map entire file.  */
+   if (sharedMemory.address == NULL)
+     { error("MapViewOfFile failed");}
+   init_signals_pendingPtr();
+   atexit(close_shared_memory);
 }
 
 /* The only signal REALLY handled somewhat under mingw is the
@@ -944,6 +936,7 @@ fix_filename(object pathname, char *filename1)
         p++;
     }
 }
+
 
 char *GCLExeName ( void )
 {

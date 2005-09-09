@@ -67,54 +67,6 @@
    ("abcde" "abcDe" "abcDE")
    ("abcde" "abcdE")))
 
-(deftest nstring-downcase.11
-  :notes (:nil-vectors-are-strings)
-  (nstring-downcase (make-array '(0) :element-type nil))
-  "")
-
-(deftest nstring-downcase.12
-  (loop for type in '(standard-char base-char character)
-	for s = (make-array '(10) :element-type type
-			    :fill-pointer 5
-			    :initial-contents "aB0cDefGHi")
-	collect (list (copy-seq s)
-		      (copy-seq (nstring-downcase s))
-		      (copy-seq s)
-		      (progn (setf (fill-pointer s) 10) (copy-seq s))
-		      ))
-  (("aB0cD" "ab0cd" "ab0cd" "ab0cdefGHi")
-   ("aB0cD" "ab0cd" "ab0cd" "ab0cdefGHi")
-   ("aB0cD" "ab0cd" "ab0cd" "ab0cdefGHi")))
-
-(deftest nstring-downcase.13
-  (loop for type in '(standard-char base-char character)
-	for s0 = (make-array '(10) :element-type type
-			     :initial-contents "zZaB0cDefG")
-	for s = (make-array '(5) :element-type type
-			    :displaced-to s0
-			    :displaced-index-offset 2)
-	collect (list (copy-seq s)
-		      (nstring-downcase s)
-		      (copy-seq s)
-		      s0))
-  (("aB0cD" "ab0cd" "ab0cd" "zZab0cdefG")
-   ("aB0cD" "ab0cd" "ab0cd" "zZab0cdefG")
-   ("aB0cD" "ab0cd" "ab0cd" "zZab0cdefG")))
-
-(deftest nstring-downcase.14
-  (loop for type in '(standard-char base-char character)
-	for s = (make-array '(5) :element-type type
-			    :adjustable t
-			    :initial-contents "aB0cD")
-	collect (list (copy-seq s)
-		      (nstring-downcase s)
-		      (copy-seq s)))
-  (("aB0cD" "ab0cd" "ab0cd")
-   ("aB0cD" "ab0cd" "ab0cd")
-   ("aB0cD" "ab0cd" "ab0cd")))
-
-;;; Order of evaluation tests
-
 (deftest nstring-downcase.order.1
   (let ((i 0) a b c (s (copy-seq "ABCDEF")))
     (values
@@ -138,31 +90,29 @@
 ;;; Error cases
 
 (deftest nstring-downcase.error.1
-  (signals-error (nstring-downcase) program-error)
-  t)
+  (classify-error (nstring-downcase))
+  program-error)
 
 (deftest nstring-downcase.error.2
-  (signals-error (nstring-downcase (copy-seq "abc") :bad t) program-error)
-  t)
+  (classify-error (nstring-downcase (copy-seq "abc") :bad t))
+  program-error)
 
 (deftest nstring-downcase.error.3
-  (signals-error (nstring-downcase (copy-seq "abc") :start) program-error)
-  t)
+  (classify-error (nstring-downcase (copy-seq "abc") :start))
+  program-error)
 
 (deftest nstring-downcase.error.4
-  (signals-error (nstring-downcase (copy-seq "abc") :bad t
-				      :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (nstring-downcase (copy-seq "abc") :bad t
+				      :allow-other-keys nil))
+  program-error)
 
 (deftest nstring-downcase.error.5
-  (signals-error (nstring-downcase (copy-seq "abc") :end) program-error)
-  t)
+  (classify-error (nstring-downcase (copy-seq "abc") :end))
+  program-error)
 
 (deftest nstring-downcase.error.6
-  (signals-error (nstring-downcase (copy-seq "abc") 1 2) program-error)
-  t)
-
+  (classify-error (nstring-downcase (copy-seq "abc") 1 2))
+  program-error)
 
 
 

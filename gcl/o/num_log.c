@@ -28,8 +28,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 #include "num_include.h"
 
-/*FIXME 64*/
-#define int fixnum
    
 #ifdef GMP
 #include "gmp_num_log.c"
@@ -159,7 +157,7 @@ int (*intLogOps)()[16]= {
 static int
 fix_bitp(object x, int p)
 {
-	if (p > LOG_WORD_SIZE-2) {		/* fix = sign + bit0-30 */
+	if (p > 30) {		/* fix = sign + bit0-30 */
 		if (fix(x) < 0)
 			return(1);
 		else
@@ -174,7 +172,7 @@ count_int_bits(int x)
 	int	i, count;
 
 	count = 0;
-	for (i=0; i <= (LOG_WORD_SIZE-1); i++) count += ((x >> i) & 1);
+	for (i=0; i <= 31; i++) count += ((x >> i) & 1);
 	return(count);
 }
 
@@ -205,17 +203,16 @@ count_bits(object x)
 
 
 object
-shift_integer(object x, fixnum w) { 
-  if (type_of(x) == t_fixnum) { 
-    if (w <= 0){   
-      w = -w;
-      if (w >= LOG_WORD_SIZE || w<0 /*most-negative-fixnum*/) 
-	return small_fixnum(fix(x) < 0 ? -1 :0);
-      else
-	return make_fixnum (fix(x) >> (w));
-    }
+shift_integer(object x, int w)
+{ 
+  if (type_of(x) == t_fixnum)
+    { if (w <= 0)
+      {   w = -w;
+	  if (w >= WSIZ) return small_fixnum(fix(x) < 0 ? -1 :0);
+	  else
+	return make_fixnum (fix(x) >> (w));}
     MPOP(return, shifti,SI_TO_MP(fix(x),big_fixnum1),w);
-  }
+    }
   else
     if (type_of(x) == t_bignum) {
       MPOP(return,shifti,MP(x),w);
@@ -231,7 +228,7 @@ int_bit_length(int i)
 	int	count, j;
 
 	count = 0;
-	for (j = 0; j <= (LOG_WORD_SIZE-1) ; j++)
+	for (j = 0; j <= 31 ; j++)
 		if (((i >> j) & 1) == 1) count = j + 1;
 	return(count);
 }
@@ -366,7 +363,7 @@ LFD(Llogbitp)(void)
 	int	i;
 
 	check_arg(2);
-	check_type_non_negative_integer(&vs_base[0]);
+	check_type_integer(&vs_base[0]);
 	check_type_integer(&vs_base[1]);
 	p = vs_base[0];
 	x = vs_base[1];
@@ -481,7 +478,7 @@ LFD(Linteger_length)(void)
 	vs_push(make_fixnum(count));
 }
 
-/* #define W_SIZE (8*sizeof(int)) */
+#define W_SIZE (8*sizeof(int))
 /* static object */
 /* bitand(object a, object b, object c) */
 /* { int d= a->bv.bv_fillp; */
@@ -559,14 +556,14 @@ LFD(siLbit_array_op)(void)
 				goto ERROR;
 			if (r->bv.bv_dim != d)
 				goto ERROR;
-			i = (r->bv.bv_self - xp)*CHAR_SIZE + (BV_OFFSET(r) - xo);
+			i = (r->bv.bv_self - xp)*8 + (BV_OFFSET(r) - xo);
 			if ((i > 0 && i < d) || (i < 0 && -i < d)) {
 				r0 = r;
 				r = Cnil;
 				replace = TRUE;
 				goto L1;
 			}
-			i = (r->bv.bv_self - yp)*CHAR_SIZE + (BV_OFFSET(r) - yo);
+			i = (r->bv.bv_self - yp)*8 + (BV_OFFSET(r) - yo);
 			if ((i > 0 && i < d) || (i < 0 && -i < d)) {
 				r0 = r;
 				r = Cnil;
@@ -617,14 +614,14 @@ LFD(siLbit_array_op)(void)
 			for (i = 0;  i < x->a.a_rank;  i++)
 				if (r->a.a_dims[i] != x->a.a_dims[i])
 					goto ERROR;
-			i = (r->bv.bv_self - xp)*CHAR_SIZE + (BV_OFFSET(r) - xo);
+			i = (r->bv.bv_self - xp)*8 + (BV_OFFSET(r) - xo);
 			if ((i > 0 && i < d) || (i < 0 && -i < d)) {
 				r0 = r;
 				r = Cnil;
 				replace = TRUE;
 				goto L2;
 			} 
-			i = (r->bv.bv_self - yp)*CHAR_SIZE + (BV_OFFSET(r) - yo);
+			i = (r->bv.bv_self - yp)*8 + (BV_OFFSET(r) - yo);
 			if ((i > 0 && i < d) || (i < 0 && -i < d)) {
 				r0 = r;
 				r = Cnil;
@@ -634,15 +631,18 @@ LFD(siLbit_array_op)(void)
 	L2:
 		if (r == Cnil) {
 		  object b;
-		  struct cons *p=ZALLOCA((x->a.a_rank+1)*sizeof(struct cons));
-		  p=(void *)(((unsigned long)((void *)p+sizeof(struct cons)-1))&~(sizeof(struct cons)-1));
+		  struct cons *p=alloca(x->a.a_rank*sizeof(struct cons));
 		  if (x->a.a_rank) {
 		    object b1;
 
 		    b=(object)p;
 		    for (b1=b,i=0;i<x->a.a_rank;i++,b1=b1->c.c_cdr) {
-		      set_type_of(b1,t_cons); 
-		      b1->c.c_car=make_fixnum(x->a.a_dims[i]);
+		      b1->d.t=(int)t_cons;
+		      b1->d.m=FALSE;
+		      b1->c.c_car=/* x->a.a_dims[i]<SMALL_FIXNUM_LIMIT ?  */
+			/* small_fixnum(x->a.a_dims[i]) :  */ 
+			/* now done in a macro */
+			make_fixnum(x->a.a_dims[i]);
 		      b1->c.c_cdr=i<x->a.a_rank-1 ? (object)++p : Cnil;
 		    }
 		  } else

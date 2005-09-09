@@ -1,17 +1,17 @@
 .SUFFIXES:
 .SUFFIXES: .info .dvi  .texi
 
-INFO_DIR=${prefix}/lib/info
+INFO_DIR=/usr/local/lib/info
 
-GCL_DVI=gcl-tk.dvi gcl-si.dvi gcl.dvi
+GCL_DVI=gcl-tk.dvi gcl-si.dvi #gcl.dvi
 #GCL_HTML=gcl-si_toc.html gcl-tk_toc.html gcl_toc.html
-GCL_HTML=gcl-si/index.html gcl-tk/index.html gcl/index.html
+GCL_HTML=gcl-si/index.html gcl-tk/index.html #gcl/index.html
 #HTML_CMD=texi2html -split_chapter
 HTML_CMD=makeinfo --html 
 
 -include ../makedefs
 
-all: gcl-tk.info gcl-si.info gcl.info $(GCL_DVI) $(GCL_HTML)
+all: gcl-tk.info gcl-si.info  $(GCL_DVI) $(GCL_HTML) #gcl.info
 
 .texi.info:
 	rm -f $*.*gz
@@ -89,7 +89,8 @@ install: $(GCL_DVI) $(GCL_HTML)
 #	-cp gcl-si/* $(DESTDIR)$(INFO_DIR)../doc/gcl-doc/gcl-si.html
 #	-cp gcl-tk/* $(DESTDIR)$(INFO_DIR)../doc/gcl-doc/gcl-tk.html
 	-mkdir -p $(DESTDIR)$(INFO_DIR)../doc
-	-cp -r gcl-si gcl gcl-tk $(DESTDIR)$(INFO_DIR)../doc
+#	-cp -r gcl-si gcl gcl-tk $(DESTDIR)$(INFO_DIR)../doc
+	-cp -r gcl-si gcl-tk $(DESTDIR)$(INFO_DIR)../doc
 	-cp *dvi $(DESTDIR)$(INFO_DIR)../doc
 
 FILE=gcl-si.texi

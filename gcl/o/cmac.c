@@ -74,12 +74,12 @@ cmod(object x)
  if (mod==Cnil) return(x);
 else
  if((type_of(mod)==t_fixnum && type_of(x)==t_fixnum))
-    {register fixnum xx,mm;
+    {register int xx,mm;
      mm=fix(mod);
      if (mm==2) {xx= (fix(x) & 1); return(small_fixnum(xx));}
      xx=(fix(x)%mm);
      FIX_MOD(xx,mm);
-     return make_fixnum(xx);
+     MYmake_fixnum(return,xx);
    }
  else
    {object qp,rp,mod2;
@@ -96,17 +96,16 @@ else
     return rp;}}
 
 
-#include "num_include.h"
-/* #define MOST_POSITIVE_FIX (((unsigned int) (~0) ) /2) */
+#define MOST_POSITIVE_FIX (((unsigned int) (~0) ) /2)
 #define SMALL_MODULUS_P(mod) (FIXNUMP(mod) && (fix(mod) < (MOST_POSITIVE_FIX)/2))
 object
 ctimes(object a, object b)
 {object mod = *gclModulus;
  if (FIXNUMP(mod))
-     {register fixnum res, m ;
+     {register int res, m ;
       res=dblrem(fix(a),fix(b),m=fix(mod));
       FIX_MOD(res,m);
-      return make_fixnum(res);}
+      MYmake_fixnum(return,res);}
 else if (mod==Cnil)
   { return(our_times(a,b));}
  return cmod(number_times(a,b));}
@@ -116,10 +115,10 @@ object
 cdifference(object a, object b)
 {object mod = *gclModulus;
  if (SMALL_MODULUS_P(mod))
-   {register fixnum res,m;
+   {register int res,m;
     res=((fix(a)-fix(b))%(m=fix(mod)));
     FIX_MOD(res,m);
-    return make_fixnum(res);}
+    MYmake_fixnum(return,res);}
  else if (mod==Cnil)
      return (our_minus(a,b));
  else return(cmod(number_minus(a,b)));}
@@ -128,10 +127,10 @@ object
 cplus(object a, object b)
 {object mod = *gclModulus;
  if (SMALL_MODULUS_P(mod))
-   {register fixnum res,m;
+   {register int res,m;
     res=((fix(a)+fix(b))%(m=fix(mod)));
     FIX_MOD(res,m);
-    return make_fixnum(res);}
+    MYmake_fixnum(return,res);}
  else
    if (mod==Cnil)
      return (our_plus(a,b));

@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; -*- Mode:LISP; Package:(SLOOP LISP);Syntax:COMMON-LISP;Base:10 -*- ;;;;;
 ;;;                                                                    ;;;;;
 ;;;     Copyright (c) 1985,86 by William Schelter,                     ;;;;;
@@ -590,7 +589,7 @@ otherwise nil"
   (cond (type (list 'the type symbol ))
 	(t symbol)))
 
-(defun sloop-type-error ()
+(defun type-error ()
   (error "While checking a bound of a sloop, I found the wrong type 
 for something in sloop::*automatic-declarations*.
     Perhaps your limit is wrong? 
@@ -638,7 +637,7 @@ recompile."))
 				       'the-value *type-test-limit*)
 			      (or chk value))
 			   ',type)
-			  (sloop-type-error))
+			  (type-error))
 			 ,(or chk value)))))))
 	(t (list value))))
 
@@ -835,7 +834,7 @@ recompile."))
 					       (or inc 1))))
 				 (t `(> ,var  ,(+ most-negative-fixnum
 						  (or inc 1)))))
-			  (sloop-type-error))
+			  (type-error))
 		       *loop-increment*)
 		     )))))
     

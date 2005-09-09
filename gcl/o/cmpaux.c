@@ -43,7 +43,7 @@ DEFUNO_NEW("SPECIALP",object,fSspecialp,SI
 	RETURN1(sym);
 }
 
-DEF_ORDINARY("DEBUGGER",sSdebugger,SI,"");
+DEF_ORDINARY("DEBUG",sSdebug,SI,"");
 
 DEFUN_NEW("DEFVAR1",object,fSdefvar1,SI
        ,2,3,NONE,OO,OO,OO,OO,(object sym,object val,...),"")
@@ -66,10 +66,10 @@ DEFUN_NEW("DEFVAR1",object,fSdefvar1,SI
       }
 
 
-DEFUN_NEW("DEBUGGER",object,fSdebugger,SI
+DEFUN_NEW("DEBUG",object,fSdebug,SI
        ,2,2,NONE,OO,OO,OO,OO,(object sym,object val),"")
 { /* 2 args */
-  putprop(sym,val,sSdebugger);
+  putprop(sym,val,sSdebug);
   RETURN1(sym);
 }
 
@@ -172,7 +172,7 @@ object_to_char(object x)
 	case t_character:
 		c = char_code(x);  break;
 	default:
-		FEcannot_coerce(sLcharacter,x);
+		FEerror("~S cannot be coerce to a C char.", 1, x);
 	}
 	return(c);
 }
@@ -197,7 +197,7 @@ object_to_int(object x)
 	case t_longfloat:
 		i = lf(x);  break;
 	default:
-		FEcannot_coerce(sLinteger,x);
+		FEerror("~S cannot be coerce to a C int.", 1, x);
 	}
 	return(i);
 }
@@ -220,7 +220,7 @@ object_to_float(object x)
 	case t_longfloat: 
 		f = lf(x);  break; 
 	default: 
-		FEcannot_coerce(sLfloat,x);
+		FEerror("~S cannot be coerce to a C float.", 1, x); 
 	} 
 	return(f); 
 } 
@@ -243,7 +243,7 @@ object_to_double(object x)
 	case t_longfloat: 
 		d = lf(x);  break; 
 	default: 
-		FEcannot_coerce(sLdouble_float,x);
+		FEerror("~S cannot be coerce to a C double.", 1, x); 
 	} 
 	return(d); 
 } 

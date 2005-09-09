@@ -127,14 +127,13 @@
      i x))
   #*110010 1 1)
 
-(def-fold-test bit-not.fold.1 (bit-not #*00101))
-
 ;;; Error tests
 
 (deftest bit-not.error.1
-  (signals-error (bit-not) program-error)
-  t)
+  (classify-error (bit-not))
+  program-error)
 
 (deftest bit-not.error.2
-  (signals-error (bit-not #*000 nil nil) program-error)
-  t)
+  (classify-error (bit-not #*000 nil nil))
+  program-error)
+

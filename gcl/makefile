@@ -27,7 +27,6 @@ LSPDIR	= lsp
 CMPDIR	= cmpnew
 PORTDIR	= unixport
 CLCSDIR = clcs
-MODDIR = mod
 PCLDIR = pcl
 MPDIR	= mp
 TESTDIR = ansi-tests
@@ -66,11 +65,7 @@ $(PORTDIR)/saved_gcl: $(HDIR)cmpinclude.h $(PORTDIR)/saved_pre_gcl
 	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
 	cd $(@D) && $(MAKE) $(@F)
 
-$(PORTDIR)/saved_mod_gcl: $(PORTDIR)/saved_gcl
-	(cd $(MODDIR); rm -f *.c; $(MAKE) all)
-	cd $(@D) && $(MAKE) $(@F)
-
-$(PORTDIR)/saved_pcl_gcl: $(PORTDIR)/saved_mod_gcl
+$(PORTDIR)/saved_pcl_gcl: $(PORTDIR)/saved_gcl
 	(cd $(PCLDIR); rm -f *.c; $(MAKE) all)
 	cd $(@D) && $(MAKE) $(@F)
 
@@ -123,7 +118,7 @@ command:
 	rm -f bin/gcl xbin/gcl
 	MGCLDIR=`echo $(GCLDIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
 	GCLDIR=`echo $(GCLDIR)` ; \
-	$(MAKE) install_command "INSTALL_LIB_DIR=$$GCLDIR" "prefix=$$GCLDIR" "BINDIR=$$MGCLDIR/$(PORTDIR)"
+	$(MAKE) install-command "INSTALL_LIB_DIR=$$GCLDIR" "prefix=$$GCLDIR" "BINDIR=$$MGCLDIR/$(PORTDIR)"
 	(cd xbin ; cp ../bin/gcl .)
 
 #	GCLDIR=`echo $(GCLDIR) | sed -e 'sX^/cygdrive/\([a-z]\)X\1!Xg' -e 'sX^//\([a-z]\)X\1!Xg'` ; \
@@ -131,32 +126,21 @@ command:
 merge:
 	$(CC) -o merge merge.c
 
-LISP_LIB=clcs/myload1.lisp clcs/gcl_clcs_macros.lisp cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h unixport/init_$(SYSTEM).lsp unixport/lib$(SYSTEM).a unixport/libgclp.a gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs) unixport/gcl.script
+LISP_LIB=cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h unixport/init_$(SYSTEM).lsp unixport/lib$(SYSTEM).a unixport/libgclp.a gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs)
 
-install_command:
-	rm -f bin/gcl
+install-command:
+	rm -f $(DESTDIR)$(prefix)/bin/gcl
 	(echo '#!/bin/sh' ; \
 	echo exec $(BINDIR)/$(FLISP)$(EXE) \\ ; \
 	echo '   -dir' $(INSTALL_LIB_DIR)/unixport/ \\ ; \
 	echo '   -libdir' $(INSTALL_LIB_DIR)/ \\ ; \
 	echo '   -eval '\''(setq si::*allow-gzipped-file* t)'\' \\ ;\
 	! [ -d "$(TK_CONFIG_PREFIX)" ] || echo '   -eval '\''(setq si::*tk-library* '\"$(TK_LIBRARY)\"')'\' \\;\
-	echo '     '\"\$$@\" ) > bin/gcl;
-	echo '#' other options: -load "/tmp/foo.o" -load "jo.lsp" -eval '"(joe 3)"' >> bin/gcl
-	chmod a+x bin/gcl
-
-install_windows_command:
-	rm -f $(prefix)/bin/gcl
-	(echo '#!/bin/sh' ; \
-	echo exec $(BINDIR)/$(FLISP)$(EXE) \\ ; \
-	echo '   -dir' $(INSTALL_LIB_DIR)/unixport/ \\ ; \
-	echo '   -libdir' $(INSTALL_LIB_DIR)/ \\ ; \
-	echo '   -eval '\''(setq si::*allow-gzipped-file* t)'\' \\ ;\
-	! [ -d "$(TK_CONFIG_PREFIX)" ] || echo '   -eval '\''(setq si::*tk-library* '\"$(TK_LIBRARY)\"')'\' \\;\
-	echo '     '\"\$$@\" ) > $(prefix)/bin/gcl;
-	chmod a+x $(prefix)/bin/gcl
-	rm -f $(prefix)/bin/gclm.bat
-	(echo '@SET cd='; \
+	echo '     '\"\$$@\" ) > $(DESTDIR)$(prefix)/bin/gcl;
+	echo '#' other options: -load "/tmp/foo.o" -load "jo.lsp" -eval '"(joe 3)"' >> $(DESTDIR)$(prefix)/bin/gcl
+	chmod a+x $(DESTDIR)$(prefix)/bin/gcl
+	rm -f $(DESTDIR)$(prefix)/bin/gclm.bat
+	if gcc --version | grep mingw >/dev/null 2>&1 ; then (echo '@SET cd='; \
 	 echo '@SET promp$=%prompt%'; \
 	 echo '@PROMPT SET cd$Q$P'; \
 	 echo '@CALL>%temp%.\setdir.bat'; \
@@ -166,29 +150,27 @@ install_windows_command:
 	 echo 'PROMPT %promp$%'; \
 	 echo 'FOR %%c IN (CALL DEL) DO %%c %temp%.\setdir.bat'; \
 	 echo 'set cwd=%cd%'; \
-	 echo 'set libdir=%cd%\..\lib\gcl-'$(VERSION); \
+	 echo 'set libdir=%cd%\..\lib\gcl-$(VERSION)'; \
 	 echo 'set unixportdir=%libdir%\unixport'; \
 	 echo 'path %cd%\..\mingw\bin;%PATH%'; \
-	 echo "start %unixportdir%\$(FLISP).exe -dir %unixportdir% -libdir %libdir% -eval \"(setq si::*allow-gzipped-file* t)\" %1 %2 %3 %4 %5 %6 %7 %8 %9" ) > $(prefix)/bin/gclm.bat
+	 echo "start %unixportdir%\$(FLISP).exe -dir %unixportdir% -libdir %libdir% -eval \"(setq si::*allow-gzipped-file* t)\" %1 %2 %3 %4 %5 %6 %7 %8 %9" ) > $(DESTDIR)$(prefix)/bin/gclm.bat ; fi
+	rm -f $(DESTDIR)$(prefix)/bin/gclfinal.bat
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then (echo 'ECHO path %1\mingw\bin;%PATH% > gcli.bat'; \
+	 echo "ECHO start %1\lib\gcl-$(VERSION)\unixport\$(FLISP).exe -dir %1\lib\gcl-$(VERSION)\unixport -libdir %1\lib\gcl-$(VERSION) -eval \"(setq si::*allow-gzipped-file* t)\" %1 %2 %3 %4 %5 %6 %7 %8 %9 >> gcli.bat" ) > $(DESTDIR)$(prefix)/bin/gclfinal.bat ; fi
 
-install: all
+install: 
 	$(MAKE) install1 "INSTALL_LIB_DIR=$(prefix)/lib/gcl-`cat majvers`.`cat minvers`" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)"
 INSTALL_LIB_DIR=
 install1:
-	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then \
-		make install_windows; \
-	else \
-		make install_unix ; fi
-
-install_unix:
 	mkdir -p $(DESTDIR)$(prefix)/lib 
 	mkdir -p $(DESTDIR)$(prefix)/bin
 	mkdir -p $(DESTDIR)$(INSTALL_LIB_DIR)
 	MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
-	$(MAKE) install_command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
+	$(MAKE) install-command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
 	rm -f $(DESTDIR)$(prefix)/bin/gcl.exe
 	tar cf - $(PORTDIR)/$(FLISP)$(EXE) info/*.info* $(LISP_LIB) \
 	$(TCL_EXES)  |  (cd $(DESTDIR)$(INSTALL_LIB_DIR) ;tar xf -)
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then if grep -i oncrpc makedefs >/dev/null 2>&1 ; then cp /mingw/bin/oncrpc.dll $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR); fi ; fi
 	cd $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR) && \
 		mv $(FLISP)$(EXE) temp$(EXE) && \
 		echo '(reset-sys-paths "$(INSTALL_LIB_DIR)/")\
@@ -208,35 +190,11 @@ install_unix:
 #	echo '(load "../tkl.o")(TK::GET-AUTOLOADS (directory "*.lisp"))' | ../../$(PORTDIR)/$(FLISP)$(EXE)) ; fi
 	if test "$(EMACS_SITE_LISP)" != "" ; then (cd elisp ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
 	if test "$(INFO_DIR)" != "unknown"; then (cd info ; $(MAKE) ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
-
-install_windows:
-	mkdir -p $(DESTDIR)$(prefix)/lib 
-	mkdir -p $(DESTDIR)$(prefix)/bin
-	mkdir -p $(DESTDIR)$(INSTALL_LIB_DIR)
-	MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
-	$(MAKE) install_windows_command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
-	rm -f $(DESTDIR)$(prefix)/bin/gcl.exe
-	tar cf - $(PORTDIR)/$(FLISP)$(EXE) info/*.info* $(LISP_LIB) \
-	$(TCL_EXES)  |  (cd $(DESTDIR)$(INSTALL_LIB_DIR) ;tar xf -)
-	if grep -i oncrpc makedefs >/dev/null 2>&1 ; then cp /mingw/bin/oncrpc.dll $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR); fi
-	if test -f /mingw/bin/libgmp.dll ; then cp /mingw/bin/libgmp.dll $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR); fi
-	cd $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR) && \
-		mv $(FLISP)$(EXE) temp$(EXE) && \
-		echo '(reset-sys-paths "$(INSTALL_LIB_DIR)/")\
-		      (si::save-system "$(FLISP)$(EXE)")' | ./temp$(EXE) && \
-		rm -f temp$(EXE)
-	if [ -e "unixport/rsym$(EXE)" ] ; then cp unixport/rsym$(EXE) $(DESTDIR)$(INSTALL_LIB_DIR)/unixport/ ; fi
-	if [ -d "$(TK_CONFIG_PREFIX)" ] ; then  \
-	cat gcl-tk/gcltksrv$(BAT) | \
-	sed -e "s!GCL_TK_DIR=.*!GCL_TK_DIR=$(INSTALL_LIB_DIR)/gcl-tk!g"  \
-	-e "s!TK_LIBRARY=.*!TK_LIBRARY=$(TK_LIBRARY)!g" > \
-	$(DESTDIR)$(INSTALL_LIB_DIR)/gcl-tk/gcltksrv$(BAT) ; \
-	chmod a+x $(DESTDIR)$(INSTALL_LIB_DIR)/gcl-tk/gcltksrv$(BAT) ; fi
-	if test "$(EMACS_SITE_LISP)" != "" ; then (cd elisp ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
-	if test "$(INFO_DIR)" != "unknown"; then (cd info ; $(MAKE) ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
-	cp COPYING.LIB-2.0 readme-bin.mingw $(prefix)
-	cp gcl.ico $(prefix)/bin
-	rm -rf $(prefix)/install; mkdir $(prefix)/install ; cp windows/install.lsp $(prefix)/install ; cp windows/sysdir.bat $(prefix)/bin
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then cp COPYING.LIB-2.0 readme-bin.mingw $(prefix) ; fi
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then cp gcl.ico $(prefix)/bin ; fi
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then rm -rf $(prefix)/install; mkdir $(prefix)/install ; cp windows/install.lsp $(prefix)/install ; windows/instdos.sh windows/sysdir.bat $(prefix)/bin/sysdir.bat ; fi
+	-if gcc --version | grep -i mingw >/dev/null 2>&1 ; then rm -rf $(prefix)/doc; mkdir $(prefix)/doc; cp info/*.html $(prefix)/doc ; fi
+	-if gcc --version | grep -i mingw >/dev/null 2>&1 ; then rm -rf $(prefix)/doc; mkdir $(prefix)/doc; cp -rp info/gcl info/gcl-si info/gcl-tk  $(prefix)/doc ; fi
 
 gclclean:
 
@@ -244,7 +202,6 @@ gclclean:
 	(cd mp ; $(MAKE) clean)
 	(cd $(ODIR); $(MAKE) clean)
 	(cd $(LSPDIR); $(MAKE) clean)
-	(cd $(MODDIR); $(MAKE) clean)
 	(cd $(CMPDIR); $(MAKE) clean)
 	(cd $(PORTDIR); $(MAKE) clean)
 	(cd gcl-tk ; $(MAKE) clean)
@@ -260,10 +217,8 @@ gclclean:
 	rm -f windows/gcl.iss bin/gcl.bat windows/gcl.ansi.iss windows/install.ansi.lsp \
 		windows/install.lsp windows/sysdir.bat
 	rm -rf windows/Output
-	rm -f ansi-tests/test_results ansi-tests/gazonk* \
-		ansi-tests/generated-eval-when-test-file.lisp
-	rm -f config.log config.cache config.status $(PORTDIR)/gmon.out gcl.script
-
+	rm -f ansi-tests/test_results ansi-tests/gazonk*lsp
+	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out
 
 clean: gclclean
 	-(cd $(GMPDIR) ; $(MAKE) distclean)

@@ -1,4 +1,3 @@
-/* -*-C-*- */
 /*
  Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
@@ -30,8 +29,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 @(defun standard_char_p (c)
 	int i;
 @
-        if (type_of(c)!=t_character) @(return Cnil)
-/* 	check_type_character(&c); */
+	check_type_character(&c);
 	if (char_font(c) != 0 || char_bits(c) != 0)
 		@(return Cnil)
 	i = char_code(c);
@@ -54,8 +52,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 @(defun string_char_p (c)
 @
-        if (type_of(c)!=t_character) @(return Cnil)
-  /*	check_type_character(&c);*/
+	check_type_character(&c);
 	if (char_font(c) != 0 || char_bits(c) != 0)
 		@(return Cnil)
 	@(return Ct)
@@ -584,19 +581,17 @@ gcl_init_character()
 	int i;
 
 	for (i = 0;  i < CHCODELIM;  i++) {
-	  object x=(object)(character_table+i);
-	  set_type_of(x,t_character);
-	  x->ch.ch_code = i;
-	  x->ch.ch_font = 0;
-	  x->ch.ch_bits = 0;
+		character_table[i].t = (short)t_character;
+		character_table[i].ch_code = i;
+		character_table[i].ch_font = 0;
+		character_table[i].ch_bits = 0;
 	}
 #ifdef AV
 	for (i = -128;  i < 0;  i++) {
-	  object x=(object)(character_table+i);
-	  set_type_of(x,t_character);
-	  x->ch.ch_code = i+CHCODELIM;
-	  x->ch.ch_font = 0;
-	  x->ch.ch_bits = 0;
+		character_table[i].t = (short)t_character;
+		character_table[i].ch_code = i+CHCODELIM;
+		character_table[i].ch_font = 0;
+		character_table[i].ch_bits = 0;
 	}
 #endif
 

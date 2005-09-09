@@ -51,33 +51,3 @@
      (incf i)
      (push 'a x))))
   (a a a a))
-
-;;; Loop errors
-
-(def-macro-test loop.error.1 (loop))
-
-(deftest loop-finish.error.1
-  (block done
-    (loop
-     for i from 1 to 10
-     do (macrolet
-	    ((%m (&environment env)
-		 (let ((mfn (macro-function 'loop-finish env)))
-		   (cond
-		    ((not mfn) '(return-from done :fail1))
-		    ((not (eval `(signals-error (funcall ,mfn)
-						program-error)))
-		     '(return-from done :fail2))
-		    ((not (eval `(signals-error (funcall ,mfn
-							 '(loop-finish))
-						program-error)))
-		     '(return-from done :fail3))
-		       
-		    ((not (eval `(signals-error (funcall ,mfn
-							 '(loop-finish)
-							 nil nil)
-						program-error)))
-		     '(return-from done :fail4))
-		    (t '(return-from done :good))))))
-	  (%m))))
-  :good)

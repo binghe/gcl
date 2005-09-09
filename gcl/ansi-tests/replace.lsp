@@ -586,45 +586,6 @@
   t
   "aabcef")
 
-(deftest replace-string.22
-  (do-special-strings
-   (s "abcdefg" nil)
-   (assert (eq s (replace s "XYZ")))
-   (assert (string= s "XYZdefg")))
-  nil)
-
-(deftest replace-string.23
-  (do-special-strings
-   (s "abcdefg" nil)
-   (assert (eq s (replace s "XYZ" :start1 1)))
-   (assert (string= s "aXYZefg")))
-  nil)
-
-(deftest replace-string.24
-  (do-special-strings
-   (s "abcdefg" nil)
-   (assert (eq s (replace s "XYZ" :start1 1 :end2 2)))
-   (assert (string= s "aXYdefg")))
-  nil)
-
-(deftest replace-string.25
-  (do-special-strings
-   (s "abcdefg" nil)
-   (assert (eq s (replace s "XYZ" :end1 2)))
-   (assert (string= s "XYcdefg")))
-  nil)
-
-(deftest replace-string.26
-  (do-special-strings
-   (s "abcdefg" nil)
-   (assert (eq s (replace s "XYZ" :start2 1)))
-   (assert (string= s "YZcdefg")))
-  nil)
-
-
-
-
-
 ;;; Order of evaluation tests
 
 (deftest replace.order.1
@@ -699,26 +660,26 @@
 ;;; Error cases
 
 (deftest replace.error.1
-  (signals-error (replace) program-error)
-  t)
+  (classify-error (replace))
+  program-error)
 
 (deftest replace.error.2
-  (signals-error (replace nil) program-error)
-  t)
+  (classify-error (replace nil))
+  program-error)
 
 (deftest replace.error.3
-  (signals-error (replace nil nil :start) program-error)
-  t)
+  (classify-error (replace nil nil :start))
+  program-error)
 
 (deftest replace.error.4
-  (signals-error (replace nil nil 'bad t) program-error)
-  t)
+  (classify-error (replace nil nil 'bad t))
+  program-error)
 
 (deftest replace.error.5
-  (signals-error (replace nil nil :allow-other-keys nil 'bad t) program-error)
-  t)
+  (classify-error (replace nil nil :allow-other-keys nil 'bad t))
+  program-error)
 
 (deftest replace.error.6
-  (signals-error (replace nil nil 1 2) program-error)
-  t)
+  (classify-error (replace nil nil 1 2))
+  program-error)
 

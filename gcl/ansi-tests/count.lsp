@@ -79,20 +79,6 @@
 	 :test #'(lambda (x y) (declare (ignore x y))  t))
   5)
 
-(deftest count-list.17
-  (count 10 '(1 11 2 4 14 5 18 6 7) :test #'<)
-  3)
-
-(deftest count-list.18
-  (count 10 '(1 11 2 4 14 5 18 6 7) :test-not #'>=)
-  3)
-
-(defharmless count-list.test-and-test-not.1
-  (count 0 '(0 1 2 0 1 2 3 0 1) :test #'eql :test-not #'eql))
-
-(defharmless count-list.test-and-test-not.2
-  (count 0 '(0 1 2 0 1 2 3 0 1) :test-not #'eql :test #'eql))
-
 ;;; On vectors
 
 (deftest count-vector.1
@@ -164,24 +150,10 @@
   (count 1 #(1 1 1 1 1 2 1 1)  :test-not #'eql)
   1)
 
-(deftest count-vector.16
+(deftest count-vector16
   (count 1 #(1 1 1 3 1 2 1 1) :start 2 :end 7
 	 :test #'(lambda (x y) (declare (ignore x y)) t))
   5)
-
-(deftest count-vector.17
-  (count 10 #(1 11 2 4 14 5 18 6 7) :test #'<)
-  3)
-
-(deftest count-vector.18
-  (count 10 #(1 11 2 4 14 5 18 6 7) :test-not #'>=)
-  3)
-
-(defharmless count-vector.test-and-test-not.1
-  (count 0 #(0 1 2 0 1 2 3 0 1) :test #'eql :test-not #'eql))
-
-(defharmless count-vector.test-and-test-not.2
-  (count 0 #(0 1 2 0 1 2 3 0 1) :test-not #'eql :test #'eql))
 
 ;;; Non-simple vectors
 
@@ -310,52 +282,6 @@
 	 :start 2 :from-end 'yes)
   4)
 
-;;; Other specialized vectors
-
-(deftest count.special-vector.1
-  (do-special-integer-vectors
-   (v #(0 1 1 0 1 1 1 0 1 1 1 1 0) nil)
-   (assert (eql (count 0 v) 4))
-   (assert (eql (count 1 v) 9))
-   (assert (eql (count 2 v) 0))
-   (assert (eql (count 0 v :start 2) 3))
-   (assert (eql (count 1 v :end 11) 8)))
-  nil)
-
-(deftest count.special-vector.2
-  (do-special-integer-vectors
-   (v #(1 2 3 4 5 6 7) nil)
-   (assert (eql (count 0 v) 0))
-   (assert (eql (count 1 v) 1))
-   (assert (eql (count 2 v) 1))
-   (assert (eql (count 3 v) 1))
-   (assert (eql (count 4 v) 1))
-   (assert (eql (count 5 v) 1))
-   (assert (eql (count 6 v) 1))
-   (assert (eql (count 7 v) 1)))
-  nil)
-
-(deftest count.special-vector.3
-  (loop for etype in '(short-float single-float double-float long-float)
-	for vals = (loop for e in '(0 1 2 1 3 1 4 5 6 0)
-			 collect (coerce e etype))
-	for vec = (make-array (length vals) :element-type etype :initial-contents vals)
-	for result = (count (coerce 1 etype) vec)
-	unless (= result 3)
-	collect (list etype vals vec result))
-  nil)
-
-(deftest count.special-vector.4
-  (loop for cetype in '(short-float single-float double-float long-float rational integer)
-	for etype = `(complex ,cetype)
-	for vals = (loop for e in '(4 1 2 1 3 1 4 5 6 6)
-			 collect (complex 0 (coerce e cetype)))
-	for vec = (make-array (length vals) :element-type etype :initial-contents vals)
-	for result = (count (complex 0 (coerce 1 cetype)) vec)
-	unless (= result 3)
-	collect (list etype vals vec result))
-  nil)
-
 
 
 ;;; Tests on bit vectors
@@ -458,19 +384,6 @@
 	 :end 4)
   3)
 
-(deftest count-bit-vector.21
-  (count 1 #*00001100100 :test #'<=)
-  3)
-
-(deftest count-bit-vector.22
-  (count 1 #*00001100100 :test-not #'>)
-  3)
-
-(defharmless count-bit-vector.test-and-test-not.1
-  (count 0 #*0011010101100010000 :test #'eql :test-not #'eql))
-
-(defharmless count-bit-vector.test-and-test-not.2
-  (count 0 #*0011010101100010000 :test-not #'eql :test #'eql))
 
 ;;; Tests on strings
 
@@ -573,26 +486,6 @@
 	 :start 2 :end 5)
   3)
 
-(deftest count-string.21
-  (count #\1 "00001100100" :test #'char<=)
-  3)
-
-(deftest count-string.22
-  (count #\1 "00001100100" :test-not #'char>)
-  3)
-
-(deftest count-string.23
-  (do-special-strings
-   (s "a1a3abcda" nil)
-   (assert (= (count #\a s) 4)))
-  nil)
-
-(defharmless count-string.test-and-test-not.1
-  (count #\0 "0011010101100010000" :test #'eql :test-not #'eql))
-
-(defharmless count-string.test-and-test-not.2
-  (count #\0 "0011010101100010000" :test-not #'eql :test #'eql))
-
 ;;; Argument order tests
 
 (deftest count.order.1
@@ -653,61 +546,64 @@
 ;;; Error tests
 
 (deftest count.error.1
-  (check-type-error #'(lambda (x) (count 'a x)) #'sequencep)
-  nil)
+  (classify-error (count 'a 1))
+  type-error)
+
+(deftest count.error.2
+  (classify-error (count 'a 'a))
+  type-error)
+
+(deftest count.error.3
+  (classify-error (count 'a #\a))
+  type-error)
 
 (deftest count.error.4
-  (signals-error (count) program-error)
-  t)
+  (classify-error (count))
+  program-error)
 
 (deftest count.error.5
-  (signals-error (count nil) program-error)
-  t)
+  (classify-error (count nil))
+  program-error)
 
 (deftest count.error.6
-  (signals-error (count nil nil :bad t) program-error)
-  t)
+  (classify-error (count nil nil :bad t))
+  program-error)
 
 (deftest count.error.7
-  (signals-error (count nil nil :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (count nil nil :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest count.error.8
-  (signals-error (count nil nil :key) program-error)
-  t)
+  (classify-error (count nil nil :key))
+  program-error)
 
 (deftest count.error.9
-  (signals-error (count nil nil 3 3) program-error)
-  t)
+  (classify-error (count nil nil 3 3))
+  program-error)
 
 ;;; Only leftmost :allow-other-keys argument matters
 (deftest count.error.10
-  (signals-error (count 'a nil :bad t
+  (classify-error (count 'a nil :bad t
 			 :allow-other-keys nil
-			 :allow-other-keys t)
-		 program-error)
-  t)
+			 :allow-other-keys t))
+  program-error)
 
 (deftest count.error.11
-  (signals-error (locally (count 'a 1) t) type-error)
-  t)
+  (classify-error (locally (count 'a 1) t))
+  type-error)
 
 (deftest count.error.12
-  (signals-error (count 'b '(a b c) :test #'identity)
-		 program-error)
-  t)
+  (classify-error (count 'b '(a b c) :test #'identity))
+  program-error)
 
 (deftest count.error.13
-  (signals-error (count 'b '(a b c) :key #'car) type-error)
-  t)
+  (classify-error (count 'b '(a b c) :key #'car))
+  type-error)
 
 (deftest count.error.14
-  (signals-error (count 'b '(a b c) :test-not #'identity)
-		 program-error)
-  t)
+  (classify-error (count 'b '(a b c) :test-not #'identity))
+  program-error)
 
 (deftest count.error.15
-  (signals-error (count 'b '(a b c) :key #'cons)
-		 program-error)
-  t)
+  (classify-error (count 'b '(a b c) :key #'cons))
+  program-error)

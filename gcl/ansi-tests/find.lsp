@@ -150,14 +150,6 @@
 	    :start 2 :from-end t)
   (a b))
 
-(deftest find-list.29
-  (find 10 '(1 2 3 8 20 3 1 21 3) :test #'<)
-  20)
-
-(deftest find-list.30
-  (find 10 '(1 2 3 8 20 3 1 21 3) :test-not #'>=)
-  20)
-
 ;;; Tests on vectors
 
 (deftest find-vector.1
@@ -327,37 +319,6 @@
 		       :fill-pointer 5)))
     (loop for i from 1 to 5 collect (find i a :from-end t :key #'car)))
   ((1 1) (2 2) (3 3) (4 4) (5 5)))
-
-(deftest find-vector.31
-  (find 10 #(1 2 3 8 20 3 1 21 3) :test #'<)
-  20)
-
-(deftest find-vector.32
-  (find 10 #(1 2 3 8 20 3 1 21 3) :test-not #'>=)
-  20)
-
-(deftest find-vector.33
-  (do-special-integer-vectors
-   (v #(1 2 3 4 5 6 7) nil)
-   (assert (null (find 0 v)))
-   (assert (= (find 4 v) 4))
-   (assert (= (find -1 v :test #'<) 1))
-   (assert (= (find -1 v :test #'< :from-end t) 7)))
-  nil)
-
-(deftest find-vector.34
-  (do-special-integer-vectors
-   (v #(0 0 0 0) nil)
-   (assert (eql (find 0 v) 0))
-   (assert (eql (find 0 v :start 1) 0))
-   (assert (eql (find 0 v :from-end t) 0))
-   (assert (null (find 1 v)))
-   (assert (null (find 'a v)))
-   (assert (null (find 0.0 v)))
-   (assert (null (find #c(1.0 0.0) v)))
-   (assert (null (find -1 v)))
-   (assert (null (find 2 v))))
-  nil)
 
 ;;; tests on bit vectors
 
@@ -632,22 +593,6 @@
     (values (find 0 a) (find 0 a :from-end t)))
   0 0)
 
-(deftest find-bit-vector.31
-  (find 2 #*00011010010 :test #'<)
-  nil)
-
-(deftest find-bit-vector.32
-  (find 2 #*0010101101 :test-not #'>=)
-  nil)
-
-(deftest find-bit-vector.33
-  (find 0 #*00011010010 :test #'<)
-  1)
-
-(deftest find-bit-vector.34
-  (find 0 #*0010101101 :test-not #'>=)
-  1)
-
 ;;; strings
 
 (deftest find-string.1
@@ -796,46 +741,6 @@
   (#\a #\b #\c #\d #\e nil nil nil nil nil)
   (#\a #\b #\c #\d #\e nil nil nil nil nil))
 
-(deftest find-string.26
-  (find #\k "abcdmnop" :test #'char<)
-  #\m)
-
-(deftest find-string.27
-  (find #\k "abcdmnop" :test-not #'char>=)
-  #\m)
-
-(deftest find-string.28
-  (do-special-strings
-   (s "abcdef" nil)
-   (assert (char= (find #\c s :test #'char<) #\d)))
-  nil)
-
-;;; Test & test not
-
-(defharmless find-list.test-and-test-not.1
-  (find 'b '(a b c) :test #'eql :test-not #'eql))
-
-(defharmless find-list.test-and-test-not.2
-  (find 'b '(a b c) :test-not #'eql :test #'eql))
-
-(defharmless find-vector.test-and-test-not.1
-  (find 'b #(a b c) :test #'eql :test-not #'eql))
-
-(defharmless find-vector.test-and-test-not.2
-  (find 'b #(a b c) :test-not #'eql :test #'eql))
-
-(defharmless find-string.test-and-test-not.1
-  (find #\b "abc" :test #'eql :test-not #'eql))
-
-(defharmless find-string.test-and-test-not.2
-  (find #\b "abc" :test-not #'eql :test #'eql))
-
-(defharmless find-bit-string.test-and-test-not.1
-  (find 0 #*110110 :test #'eql :test-not #'eql))
-
-(defharmless find-bit-string.test-and-test-not.2
-  (find 0 #*110110 :test-not #'eql :test #'eql))
-
 ;;; Keyword tests
 
 (deftest find.allow-other-keys.1
@@ -868,57 +773,64 @@
 ;;; Error tests
 
 (deftest find.error.1
-  (check-type-error #'(lambda (x) (find 'a x)) #'(lambda (x) (typep x 'sequence)))
-  nil)
+  (classify-error (find 'a 'b))
+  type-error)
+
+(deftest find.error.2
+  (classify-error (find 'a 10))
+  type-error)
+
+(deftest find.error.3
+  (classify-error (find 'a 1.4))
+  type-error)
 
 (deftest find.error.4
-  (signals-error (find 'e '(a b c . d)) type-error)
-  t)
+  (classify-error (find 'e '(a b c . d)))
+  type-error)
 
 (deftest find.error.5
-  (signals-error (find) program-error)
-  t)
+  (classify-error (find))
+  program-error)
 
 (deftest find.error.6
-  (signals-error (find 'a) program-error)
-  t)
+  (classify-error (find 'a))
+  program-error)
 
 (deftest find.error.7
-  (signals-error (find 'a nil :bad t) program-error)
-  t)
+  (classify-error (find 'a nil :bad t))
+  program-error)
 
 (deftest find.error.8
-  (signals-error (find 'a nil :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (find 'a nil :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest find.error.9
-  (signals-error (find 'a nil 1 1) program-error)
-  t)
+  (classify-error (find 'a nil 1 1))
+  program-error)
 
 (deftest find.error.10
-  (signals-error (find 'a nil :key) program-error)
-  t)
+  (classify-error (find 'a nil :key))
+  program-error)
 
 (deftest find.error.11
-  (signals-error (locally (find 'a 'b) t) type-error)
-  t)
+  (classify-error (locally (find 'a 'b) t))
+  type-error)
 
 (deftest find.error.12
-  (signals-error (find 'b '(a b c) :test #'identity) program-error)
-  t)
+  (classify-error (find 'b '(a b c) :test #'identity))
+  program-error)
 
 (deftest find.error.13
-  (signals-error (find 'b '(a b c) :test-not #'identity) program-error)
-  t)
+  (classify-error (find 'b '(a b c) :test-not #'identity))
+  program-error)
 
 (deftest find.error.14
-  (signals-error (find 'c '(a b c) :key #'cons) program-error)
-  t)
+  (classify-error (find 'c '(a b c) :key #'cons))
+  program-error)
 
 (deftest find.error.15
-  (signals-error (find 'c '(a b c) :key #'car) type-error)
-  t)
+  (classify-error (find 'c '(a b c) :key #'car))
+  type-error)
 
 
 ;;; Order of evaluation tests
@@ -932,7 +844,7 @@
   a 2 1 2)
 
 (deftest find.order.2
-  (let ((i 0) a b c d e f)
+  (let ((i 0) a b c d e f g)
     (values
      (find (progn (setf a (incf i)) nil)
 	   (progn (setf b (incf i)) '(nil nil nil a nil nil))
@@ -945,7 +857,7 @@
   a 6 1 2 3 4 5 6)
 
 (deftest find.order.3
-  (let ((i 0) a b c d e f)
+  (let ((i 0) a b c d e f g)
     (values
      (find (progn (setf a (incf i)) nil)
 	   (progn (setf b (incf i)) '(nil nil nil a nil nil))

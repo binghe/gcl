@@ -11,14 +11,13 @@
 
 #define DBEGIN 0
 
-#undef MAXPAGE
-#undef VSSIZE
-#undef BDSSIZE
-#undef IHSSIZE
-#undef FRSSIZE
-#undef CSSIZE
+#define MAXPAGE 128*1024
+#define VSSIZE 128*1024
+#define BDSSIZE 2*1024
+#define IHSSIZE 4*1024
+#define FRSSIZE 4*1024
 
-#undef HOLEDIV
+#define HOLEPAGE (MAXPAGE/10)
 
 #undef NO_GETTOD
 
@@ -61,13 +60,6 @@
 #undef HAVE_SV_ONSTACK 
 
 #define CSTACK_ADDRESS 0
-#define CSTACK_DIRECTION 0
-#define CSTACK_ALIGNMENT 0
-#define MEM_TOP 0
-#define MEM_RANGE 0
-#define SHARED_LIB_HEAP_CEILING 0
-#undef IM_FIX_BASE
-#undef IM_FIX_LIM
 
 #undef HAVE_SIGSYS
 
@@ -124,7 +116,7 @@
 
 #ifdef IN_NUM_CO
 #ifdef HAVE_ISNORMAL
-#define __USE_ISOC99 1
+#define _GNU_SOURCE
 #include <math.h>
 #define ISNORMAL(a) isnormal(a)
 #else
@@ -145,7 +137,7 @@
 
 #ifdef NEED_ISFINITE
 #ifdef HAVE_ISFINITE
-#define __USE_ISOC99 1
+#define _GNU_SOURCE
 #include <math.h>
 #define ISFINITE(a) isfinite(a)
 #else
@@ -187,12 +179,6 @@
 /*  #define PAGESIZE (1<<PAGEWIDTH) */
 /*  #endif */
 
-#undef SIZEOF_LONG
-#undef SIZEOF_INT
-#undef SIZEOF_SHORT
-#undef SIZEOF_CHAR
-#undef CHAR_SIZE
-
 #undef USE_DLOPEN
 
 #define MP_LIMB_BYTES 0
@@ -220,21 +206,8 @@
 #undef GCL_GPROF_START
 #undef HZ
 
-#undef TYPE_BITS
-#undef OBJ_ALIGN
-#undef NEG_CSTACK_ADDRESS
-
-/* The number of bytes in a char.  */
-#undef SIZEOF_CHAR
-
-/* The number of bytes in a int.  */
-#undef SIZEOF_INT
-
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG
-
-/* The number of bytes in a short.  */
-#undef SIZEOF_SHORT
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD

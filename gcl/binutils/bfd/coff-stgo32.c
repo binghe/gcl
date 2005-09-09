@@ -1,5 +1,5 @@
 /* BFD back-end for Intel 386 COFF files (DJGPP variant with a stub).
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
    Written by Robert Hoehne.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -32,7 +32,8 @@
    image and NOT in the file.
 
    To be compatible with any existing executables I have fixed this
-   here and NOT in the DJGPP startup code.  */
+   here and NOT in the DJGPP startup code.
+ */
 
 #define TARGET_SYM		go32stubbedcoff_vec
 #define TARGET_NAME		"coff-go32-exe"
@@ -54,32 +55,40 @@
 
 #include "bfd.h"
 
-/* At first the prototypes.  */
+/* At first the prototypes */
 
 static void
-adjust_filehdr_in_post PARAMS ((bfd *, PTR, PTR));
+adjust_filehdr_in_post PARAMS ((bfd * abfd, PTR src, PTR dst));
 static void
-adjust_filehdr_out_pre PARAMS ((bfd *, PTR, PTR));
+adjust_filehdr_out_pre PARAMS ((bfd * abfd, PTR in, PTR out));
 static void
-adjust_filehdr_out_post PARAMS ((bfd *, PTR, PTR));
-static void
-adjust_scnhdr_in_post PARAMS ((bfd *, PTR, PTR));
-static void
-adjust_scnhdr_out_pre PARAMS ((bfd *, PTR, PTR));
-static void
-adjust_scnhdr_out_post PARAMS ((bfd *, PTR, PTR));
-static void
-adjust_aux_in_post PARAMS ((bfd *, PTR, int, int, int, int, PTR));
-static void
-adjust_aux_out_pre PARAMS ((bfd *, PTR, int, int, int, int, PTR));
-static void
-adjust_aux_out_post PARAMS ((bfd *, PTR, int, int, int, int, PTR));
-static void
-create_go32_stub PARAMS ((bfd *));
+adjust_filehdr_out_post PARAMS ((bfd * abfd, PTR in, PTR out));
 
-/* All that ..._PRE and ...POST functions are called from the corresponding
+static void
+adjust_scnhdr_in_post PARAMS ((bfd * abfd, PTR ext, PTR in));
+static void
+adjust_scnhdr_out_pre PARAMS ((bfd * abfd, PTR in, PTR out));
+static void
+adjust_scnhdr_out_post PARAMS ((bfd * abfd, PTR in, PTR out));
+
+static void
+adjust_aux_in_post PARAMS ((bfd * abfd, PTR ext1, int type, int class, int indx,
+			    int numaux, PTR in1));
+static void
+adjust_aux_out_pre PARAMS ((bfd * abfd, PTR inp, int type, int class, int indx,
+			    int numaux, PTR extp));
+static void
+adjust_aux_out_post PARAMS ((bfd * abfd, PTR inp, int type, int class, int indx,
+			     int numaux, PTR extp));
+
+static void
+create_go32_stub PARAMS ((bfd * abfd));
+
+/*
+   All that ..._PRE and ...POST functions are called from the corresponding
    coff_swap... functions. The ...PRE functions are called at the beginning
-   of the function and the ...POST functions at the end of the swap routines.  */
+   of the function and the ...POST functions at the end of the swap routines.
+ */
 
 #define COFF_ADJUST_FILEHDR_IN_POST adjust_filehdr_in_post
 #define COFF_ADJUST_FILEHDR_OUT_PRE adjust_filehdr_out_pre
@@ -93,24 +102,24 @@ create_go32_stub PARAMS ((bfd *));
 #define COFF_ADJUST_AUX_OUT_PRE adjust_aux_out_pre
 #define COFF_ADJUST_AUX_OUT_POST adjust_aux_out_post
 
-static bfd_boolean
-  go32_stubbed_coff_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+static boolean
+  go32_stubbed_coff_bfd_copy_private_bfd_data PARAMS ((bfd * ibfd, bfd * obfd));
 
 #define coff_bfd_copy_private_bfd_data go32_stubbed_coff_bfd_copy_private_bfd_data
 
 #include "coff-i386.c"
 
-/* I hold in the usrdata the stub.  */
+/* I hold in the usrdata the stub */
 #define bfd_coff_go32stub bfd_usrdata
 
 /* This macro is used, because I cannot assume the endianess of the
-   host system.  */
+   host system */
 #define _H(index) (H_GET_16 (abfd, (header+index*2)))
 
 /* These bytes are a 2048-byte DOS executable, which loads the COFF
-   image into memory and then runs it. It is called 'stub'.  */
+   image into memory and then runs it. It is called 'stub' */
 
-static const unsigned char stub_bytes[STUBSIZE] =
+static unsigned char stub_bytes[STUBSIZE] =
 {
 #include "go32stub.h"
 };
@@ -120,10 +129,10 @@ static const unsigned char stub_bytes[STUBSIZE] =
    technique is in any function the same. For the ...in function,
    all the pointers are adjusted by adding STUBSIZE and for the
    ...out function, it is subtracted first and after calling the
-   standard swap function it is reset to the old value.  */
+   standard swap function it is reset to the old value */
 
 /* This macro is used for adjusting the filepointers, which
-   is done only, if the pointer is nonzero.  */
+   is done only, if the pointer is nonzero */
 
 #define ADJUST_VAL(val,diff) \
   if (val != 0) val += diff
@@ -139,13 +148,13 @@ adjust_filehdr_in_post  (abfd, src, dst)
 
   ADJUST_VAL (filehdr_dst->f_symptr, STUBSIZE);
 
-  /* Save now the stub to be used later.  */
+  /* Save now the stub to be used later */
   bfd_coff_go32stub (abfd) = (PTR) bfd_alloc (abfd, (bfd_size_type) STUBSIZE);
 
   /* Since this function returns no status, I do not set here
      any bfd_error_...
      That means, before the use of bfd_coff_go32stub (), this value
-     should be checked if it is != NULL.  */
+     should be checked if it is != NULL */
   if (bfd_coff_go32stub (abfd) == NULL)
     return;
   memcpy (bfd_coff_go32stub (abfd), filehdr_src->stub, STUBSIZE);
@@ -160,14 +169,14 @@ adjust_filehdr_out_pre  (abfd, in, out)
   struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
   FILHDR *filehdr_out = (FILHDR *) out;
 
-  /* Generate the stub.  */
+  /* Generate the stub */
   create_go32_stub (abfd);
 
-  /* Copy the stub to the file header.  */
+  /* Copy the stub to the file header */
   if (bfd_coff_go32stub (abfd) != NULL)
     memcpy (filehdr_out->stub, bfd_coff_go32stub (abfd), STUBSIZE);
   else
-    /* Use the default.  */
+    /* use the default */
     memcpy (filehdr_out->stub, stub_bytes, STUBSIZE);
 
   ADJUST_VAL (filehdr_in->f_symptr, -STUBSIZE);
@@ -180,7 +189,7 @@ adjust_filehdr_out_post  (abfd, in, out)
      PTR out ATTRIBUTE_UNUSED;
 {
   struct internal_filehdr *filehdr_in = (struct internal_filehdr *) in;
-  /* Undo the above change.  */
+  /* undo the above change */
   ADJUST_VAL (filehdr_in->f_symptr, STUBSIZE);
 }
 
@@ -277,7 +286,8 @@ adjust_aux_out_post (abfd, inp, type, class, indx, numaux, extp)
     }
 }
 
-/* That's the function, which creates the stub. There are
+/*
+   That's the function, which creates the stub. There are
    different cases from where the stub is taken.
    At first the environment variable $(GO32STUB) is checked and then
    $(STUB) if it was not set.
@@ -287,13 +297,14 @@ adjust_aux_out_post (abfd, inp, type, class, indx, numaux, extp)
    file.
 
    If there was any error, the standard stub (compiled in this file)
-   is taken.  */
+   is taken.
+ */
 
 static void
 create_go32_stub (abfd)
      bfd *abfd;
 {
-  /* Do it only once.  */
+  /* Do it only once */
   if (bfd_coff_go32stub (abfd) == NULL)
     {
       char *stub;
@@ -304,9 +315,9 @@ create_go32_stub (abfd)
       unsigned long coff_start;
       long exe_start;
 
-      /* Check at first the environment variable $(GO32STUB).  */
+      /* Check at first the environment variable $(GO32STUB) */
       stub = getenv ("GO32STUB");
-      /* Now check the environment variable $(STUB).  */
+      /* Now check the environment variable $(STUB) */
       if (stub == NULL)
 	stub = getenv ("STUB");
       if (stub == NULL)
@@ -325,19 +336,19 @@ create_go32_stub (abfd)
 	  close (f);
 	  goto stub_end;
 	}
-      if (_H (0) != 0x5a4d)	/* It is not an exe file.  */
+      if (_H (0) != 0x5a4d)	/* it is not an exe file */
 	{
 	  close (f);
 	  goto stub_end;
 	}
       /* Compute the size of the stub (it is every thing up
-         to the beginning of the coff image).  */
+         to the beginning of the coff image) */
       coff_start = (long) _H (2) * 512L;
       if (_H (1))
 	coff_start += (long) _H (1) - 512L;
 
       /* Currently there is only a fixed stub size of 2048 bytes
-         supported.  */
+         supported */
       if (coff_start != 2048)
 	{
 	  close (f);
@@ -359,7 +370,7 @@ create_go32_stub (abfd)
 	  close (f);
 	  goto stub_end;
 	}
-      /* Now we found a correct stub (hopefully).  */
+      /* Now we found a correct stub (hopefully) */
       bfd_coff_go32stub (abfd)
 	= (PTR) bfd_alloc (abfd, (bfd_size_type) coff_start);
       if (bfd_coff_go32stub (abfd) == NULL)
@@ -378,36 +389,40 @@ create_go32_stub (abfd)
     }
 stub_end:
   /* There was something wrong above, so use now the standard builtin
-     stub.  */
+     stub */
   if (bfd_coff_go32stub (abfd) == NULL)
     {
       bfd_coff_go32stub (abfd)
 	= (PTR) bfd_alloc (abfd, (bfd_size_type) STUBSIZE);
       if (bfd_coff_go32stub (abfd) == NULL)
-	return;
+	{
+	  return;
+	}
+
       memcpy (bfd_coff_go32stub (abfd), stub_bytes, STUBSIZE);
     }
 }
 
 /* If ibfd was a stubbed coff image, copy the stub from that bfd
-   to the new obfd.  */
+   to the new obfd.
+ */
 
-static bfd_boolean
+static boolean
 go32_stubbed_coff_bfd_copy_private_bfd_data  (ibfd, obfd)
      bfd *ibfd;
      bfd *obfd;
 {
-  /* Check if both are the same targets.  */
+  /* check if both are the same targets */
   if (ibfd->xvec != obfd->xvec)
-    return TRUE;
+    return true;
 
-  /* Check if both have a valid stub.  */
+  /* check if both have a valid stub */
   if (bfd_coff_go32stub (ibfd) == NULL
       || bfd_coff_go32stub (obfd) == NULL)
-    return TRUE;
+    return true;
 
-  /* Now copy the stub.  */
+  /* Now copy the stub */
   memcpy (bfd_coff_go32stub (obfd), bfd_coff_go32stub (ibfd), STUBSIZE);
 
-  return TRUE;
+  return true;
 }

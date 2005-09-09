@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 COFF files.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -29,22 +29,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "coff/internal.h"
 #include "libcoff.h"		/* to allow easier abstraction-breaking */
 
-static bfd_boolean coff_i960_is_local_label_name
-  PARAMS ((bfd *, const char *));
+static boolean coff_i960_is_local_label_name PARAMS ((bfd *, const char *));
 static bfd_reloc_status_type optcall_callback
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type coff_i960_relocate
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static reloc_howto_type *coff_i960_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
-static bfd_boolean coff_i960_start_final_link
+static boolean coff_i960_start_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
-static bfd_boolean coff_i960_relocate_section
+static boolean coff_i960_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
-static bfd_boolean coff_i960_adjust_symndx
+static boolean coff_i960_adjust_symndx
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *,
-	   struct internal_reloc *, bfd_boolean *));
+	   struct internal_reloc *, boolean *));
 
 #define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (3)
 #define COFF_ALIGN_IN_SECTION_HEADER 1
@@ -60,7 +59,7 @@ static bfd_boolean coff_i960_adjust_symndx
 
 /* This set of local label names is taken from gas.  */
 
-static bfd_boolean
+static boolean
 coff_i960_is_local_label_name (abfd, name)
      bfd *abfd ATTRIBUTE_UNUSED;
      const char *name;
@@ -180,12 +179,12 @@ optcall_callback (abfd, reloc_entry, symbol_in, data,
    same object file.  It appears to simply discard such relocs, rather
    than adding their values into the object file.  We handle this here
    by converting all relocs against defined symbols into relocs
-   against the section symbol, when generating a relocatable output
+   against the section symbol, when generating a relocateable output
    file.
 
    Note that this function is only called if we are not using the COFF
    specific backend linker.  It only does something when doing a
-   relocatable link, which will almost certainly fail when not
+   relocateable link, which will almost certainly fail when not
    generating COFF i960 output, so this function is actually no longer
    useful.  It was used before this target was converted to use the
    COFF specific backend linker.  */
@@ -205,7 +204,7 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
 
   if (output_bfd == NULL)
     {
-      /* Not generating relocatable output file.  */
+      /* Not generating relocateable output file.  */
       return bfd_reloc_continue;
     }
 
@@ -267,15 +266,15 @@ coff_i960_relocate (abfd, reloc_entry, symbol, data, input_section,
 }
 
 static reloc_howto_type howto_rellong =
-  HOWTO ((unsigned int) R_RELLONG, 0, 2, 32,FALSE, 0,
-	 complain_overflow_bitfield, coff_i960_relocate,"rellong", TRUE,
+  HOWTO ((unsigned int) R_RELLONG, 0, 2, 32,false, 0,
+	 complain_overflow_bitfield, coff_i960_relocate,"rellong", true,
 	 0xffffffff, 0xffffffff, 0);
 static reloc_howto_type howto_iprmed =
-  HOWTO (R_IPRMED, 0, 2, 24,TRUE,0, complain_overflow_signed,
-	 coff_i960_relocate, "iprmed ", TRUE, 0x00ffffff, 0x00ffffff, 0);
+  HOWTO (R_IPRMED, 0, 2, 24,true,0, complain_overflow_signed,
+	 coff_i960_relocate, "iprmed ", true, 0x00ffffff, 0x00ffffff, 0);
 static reloc_howto_type howto_optcall =
-  HOWTO (R_OPTCALL, 0,2,24,TRUE,0, complain_overflow_signed,
-	 optcall_callback, "optcall", TRUE, 0x00ffffff, 0x00ffffff, 0);
+  HOWTO (R_OPTCALL, 0,2,24,true,0, complain_overflow_signed,
+	 optcall_callback, "optcall", true, 0x00ffffff, 0x00ffffff, 0);
 
 static reloc_howto_type *
 coff_i960_reloc_type_lookup (abfd, code)
@@ -319,7 +318,7 @@ coff_i960_reloc_type_lookup (abfd, code)
    called at the start of the linking process, and it creates the
    necessary symbols.  */
 
-static bfd_boolean
+static boolean
 coff_i960_start_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -328,15 +327,15 @@ coff_i960_start_final_link (abfd, info)
   asection *o;
   bfd_byte *esym;
 
-  if (! info->relocatable)
-    return TRUE;
+  if (! info->relocateable)
+    return true;
 
   esym = (bfd_byte *) bfd_malloc (symesz);
   if (esym == NULL)
-    return FALSE;
+    return false;
 
   if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
-    return FALSE;
+    return false;
 
   for (o = abfd->sections; o != NULL; o = o->next)
     {
@@ -354,7 +353,7 @@ coff_i960_start_final_link (abfd, info)
       if (bfd_bwrite (esym, symesz, abfd) != symesz)
 	{
 	  free (esym);
-	  return FALSE;
+	  return false;
 	}
 
       obj_raw_syment_count (abfd) += 1;
@@ -362,12 +361,12 @@ coff_i960_start_final_link (abfd, info)
 
   free (esym);
 
-  return TRUE;
+  return true;
 }
 
 /* The reloc processing routine for the optimized COFF linker.  */
 
-static bfd_boolean
+static boolean
 coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 			    contents, relocs, syms, sections)
      bfd *output_bfd ATTRIBUTE_UNUSED;
@@ -393,7 +392,7 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma val;
       reloc_howto_type *howto;
       bfd_reloc_status_type rstat = bfd_reloc_ok;
-      bfd_boolean done;
+      boolean done;
 
       symndx = rel->r_symndx;
 
@@ -420,7 +419,7 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 	case 27: howto = &howto_optcall; break;
 	default:
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return false;
 	}
 
       val = 0;
@@ -455,18 +454,18 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 		     + sec->output_section->vma
 		     + sec->output_offset);
 	    }
-	  else if (! info->relocatable)
+	  else if (! info->relocateable)
 	    {
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd, input_section,
-		      rel->r_vaddr - input_section->vma, TRUE)))
-		return FALSE;
+		      rel->r_vaddr - input_section->vma, true)))
+		return false;
 	    }
 	}
 
-      done = FALSE;
+      done = false;
 
-      if (howto->type == R_OPTCALL && ! info->relocatable && symndx != -1)
+      if (howto->type == R_OPTCALL && ! info->relocateable && symndx != -1)
 	{
 	  int class;
 
@@ -486,7 +485,7 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 		      _("uncertain calling convention for non-COFF symbol"),
 		      input_bfd, input_section,
 		      rel->r_vaddr - input_section->vma)))
-		return FALSE;
+		return false;
 	      break;
 	    case C_LEAFSTAT:
 	    case C_LEAFEXT:
@@ -522,7 +521,7 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 		bfd_put_32 (input_bfd,
 			    (bfd_vma) word,
 			    contents + (rel->r_vaddr - input_section->vma));
-		done = TRUE;
+		done = true;
 	      }
 	      break;
 	    case C_SCALL:
@@ -555,53 +554,52 @@ coff_i960_relocate_section (output_bfd, info, input_bfd, input_section,
 	    if (symndx == -1)
 	      name = "*ABS*";
 	    else if (h != NULL)
-	      name = NULL;
+	      name = h->root.root.string;
 	    else
 	      {
 		name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
 		if (name == NULL)
-		  return FALSE;
+		  return false;
 	      }
 
 	    if (! ((*info->callbacks->reloc_overflow)
-		   (info, (h ? &h->root : NULL), name, howto->name,
-		    (bfd_vma) 0, input_bfd, input_section,
-		    rel->r_vaddr - input_section->vma)))
-	      return FALSE;
+		   (info, name, howto->name, (bfd_vma) 0, input_bfd,
+		    input_section, rel->r_vaddr - input_section->vma)))
+	      return false;
 	  }
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Adjust the symbol index of any reloc against a global symbol to
    instead be a reloc against the internal symbol we created specially
    for the section.  */
 
-static bfd_boolean
+static boolean
 coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
      bfd *obfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      bfd *ibfd;
      asection *sec ATTRIBUTE_UNUSED;
      struct internal_reloc *irel;
-     bfd_boolean *adjustedp;
+     boolean *adjustedp;
 {
   struct coff_link_hash_entry *h;
 
-  *adjustedp = FALSE;
+  *adjustedp = false;
 
   h = obj_coff_sym_hashes (ibfd)[irel->r_symndx];
   if (h == NULL
       || (h->root.type != bfd_link_hash_defined
 	  && h->root.type != bfd_link_hash_defweak))
-    return TRUE;
+    return true;
 
   irel->r_symndx = h->root.u.def.section->output_section->target_index - 1;
-  *adjustedp = TRUE;
+  *adjustedp = true;
 
-  return TRUE;
+  return true;
 }
 
 #define coff_bfd_is_local_label_name coff_i960_is_local_label_name
@@ -618,7 +616,7 @@ coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 
 extern const bfd_target icoff_big_vec;
 
-CREATE_LITTLE_COFF_TARGET_VEC (icoff_little_vec, "coff-Intel-little", 0, 0, '_', & icoff_big_vec, COFF_SWAP_TABLE)
+CREATE_LITTLE_COFF_TARGET_VEC (icoff_little_vec, "coff-Intel-little", 0, 0, '_', & icoff_big_vec)
 
 const bfd_target icoff_big_vec =
 {

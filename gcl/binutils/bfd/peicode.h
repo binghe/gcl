@@ -1,29 +1,31 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
-   This file is part of BFD, the Binary File Descriptor library.
+This file is part of BFD, the Binary File Descriptor library.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Most of this hacked by  Steve Chamberlain,
+/*
+Most of this hacked by  Steve Chamberlain,
 			sac@cygnus.com
 
-   PE/PEI rearrangement (and code added): Donn Terry
-                                       Softway Systems, Inc.  */
+PE/PEI rearrangement (and code added): Donn Terry
+                                       Softway Systems, Inc.
+*/
 
 /* Hey look, some documentation [and in a place you expect to find it]!
 
@@ -51,11 +53,12 @@
 
    FIXME: Please add more docs here so the next poor fool that has to hack
    on this code has a chance of getting something accomplished without
-   wasting too much time.  */
+   wasting too much time.
+*/
 
 #include "libpei.h"
 
-static bfd_boolean (*pe_saved_coff_bfd_print_private_bfd_data)
+static boolean (*pe_saved_coff_bfd_print_private_bfd_data)
     PARAMS ((bfd *, PTR)) =
 #ifndef coff_bfd_print_private_bfd_data
      NULL;
@@ -64,10 +67,10 @@ static bfd_boolean (*pe_saved_coff_bfd_print_private_bfd_data)
 #undef coff_bfd_print_private_bfd_data
 #endif
 
-static bfd_boolean pe_print_private_bfd_data PARAMS ((bfd *, PTR));
+static boolean pe_print_private_bfd_data PARAMS ((bfd *, PTR));
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 
-static bfd_boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
+static boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
     PARAMS ((bfd *, bfd *)) =
 #ifndef coff_bfd_copy_private_bfd_data
      NULL;
@@ -76,7 +79,7 @@ static bfd_boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
 #undef coff_bfd_copy_private_bfd_data
 #endif
 
-static bfd_boolean pe_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
+static boolean pe_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 #define coff_bfd_copy_private_bfd_data pe_bfd_copy_private_bfd_data
 
 #define coff_mkobject      pe_mkobject
@@ -88,7 +91,7 @@ static unsigned int coff_swap_reloc_out PARAMS ((bfd *, PTR, PTR));
 #endif
 static void coff_swap_filehdr_in PARAMS ((bfd *, PTR, PTR));
 static void coff_swap_scnhdr_in PARAMS ((bfd *, PTR, PTR));
-static bfd_boolean pe_mkobject PARAMS ((bfd *));
+static boolean pe_mkobject PARAMS ((bfd *));
 static PTR pe_mkobject_hook PARAMS ((bfd *, PTR, PTR));
 
 #ifdef COFF_IMAGE_WITH_PE
@@ -130,6 +133,15 @@ typedef struct
   struct internal_reloc * int_reltab;
 }
 pe_ILF_vars;
+
+static asection_ptr       pe_ILF_make_a_section   PARAMS ((pe_ILF_vars *, const char *, unsigned int, flagword));
+static void               pe_ILF_make_a_reloc     PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, asection_ptr));
+static void               pe_ILF_make_a_symbol    PARAMS ((pe_ILF_vars *, const char *, const char *, asection_ptr, flagword));
+static void               pe_ILF_save_relocs      PARAMS ((pe_ILF_vars *, asection_ptr));
+static void		  pe_ILF_make_a_symbol_reloc  PARAMS ((pe_ILF_vars *, bfd_vma, bfd_reloc_code_real_type, struct symbol_cache_entry **, unsigned int));
+static boolean            pe_ILF_build_a_bfd      PARAMS ((bfd *, unsigned int, bfd_byte *, bfd_byte *, unsigned int, unsigned int));
+static const bfd_target * pe_ILF_object_p         PARAMS ((bfd *));
+static const bfd_target * pe_bfd_object_p 	  PARAMS ((bfd *));
 #endif /* COFF_IMAGE_WITH_PE */
 
 /**********************************************************************/
@@ -247,17 +259,12 @@ coff_swap_scnhdr_in (abfd, ext, in)
     }
 
 #ifndef COFF_NO_HACK_SCNHDR_SIZE
-  /* If this section holds uninitialized data and is from an object file
-     or from an executable image that has not initialized the field,
-     or if the image is an executable file and the physical size is padded,
-     use the virtual size (stored in s_paddr) instead.  */
-  if (scnhdr_int->s_paddr > 0
-      && (((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
-	   && (! bfd_pe_executable_p (abfd) || scnhdr_int->s_size == 0))
-          || (bfd_pe_executable_p (abfd) && scnhdr_int->s_size > scnhdr_int->s_paddr)))
+  /* If this section holds uninitialized data, use the virtual size
+     (stored in s_paddr) instead of the physical size.  */
+  if ((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
+      && (scnhdr_int->s_paddr > 0))
     {
       scnhdr_int->s_size = scnhdr_int->s_paddr;
-
       /* This code used to set scnhdr_int->s_paddr to 0.  However,
          coff_set_alignment_hook stores s_paddr in virt_size, which
          only works if it correctly holds the virtual size of the
@@ -266,7 +273,7 @@ coff_swap_scnhdr_in (abfd, ext, in)
 #endif
 }
 
-static bfd_boolean
+static boolean
 pe_mkobject (abfd)
      bfd * abfd;
 {
@@ -276,7 +283,7 @@ pe_mkobject (abfd)
   abfd->tdata.pe_obj_data = (struct pe_tdata *) bfd_zalloc (abfd, amt);
 
   if (abfd->tdata.pe_obj_data == 0)
-    return FALSE;
+    return false;
 
   pe = pe_data (abfd);
 
@@ -292,7 +299,7 @@ pe_mkobject (abfd)
   pe->target_subsystem = PEI_TARGET_SUBSYSTEM;
 #endif
 
-  return TRUE;
+  return true;
 }
 
 /* Create the COFF backend specific information.  */
@@ -348,7 +355,7 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
   return (PTR) pe;
 }
 
-static bfd_boolean
+static boolean
 pe_print_private_bfd_data (abfd, vfile)
      bfd *abfd;
      PTR vfile;
@@ -356,7 +363,7 @@ pe_print_private_bfd_data (abfd, vfile)
   FILE *file = (FILE *) vfile;
 
   if (!_bfd_XX_print_private_bfd_data_common (abfd, vfile))
-    return FALSE;
+    return false;
 
   if (pe_saved_coff_bfd_print_private_bfd_data != NULL)
     {
@@ -365,31 +372,23 @@ pe_print_private_bfd_data (abfd, vfile)
       return pe_saved_coff_bfd_print_private_bfd_data (abfd, vfile);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-static bfd_boolean
+static boolean
 pe_bfd_copy_private_bfd_data (ibfd, obfd)
      bfd *ibfd, *obfd;
 {
-  /* PR binutils/716: Copy the large address aware flag.
-     XXX: Should we be copying other flags or other fields in the pe_data()
-     structure ?  */
-  if (pe_data (obfd) != NULL
-      && pe_data (ibfd) != NULL
-      && pe_data (ibfd)->real_flags & IMAGE_FILE_LARGE_ADDRESS_AWARE)
-    pe_data (obfd)->real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
-      
   if (!_bfd_XX_bfd_copy_private_bfd_data_common (ibfd, obfd))
-    return FALSE;
+    return false;
 
   if (pe_saved_coff_bfd_copy_private_bfd_data)
     return pe_saved_coff_bfd_copy_private_bfd_data (ibfd, obfd);
 
-  return TRUE;
+  return true;
 }
 
 #define coff_bfd_copy_private_section_data \
@@ -469,7 +468,7 @@ static void
 pe_ILF_make_a_symbol_reloc (pe_ILF_vars *                 vars,
 			    bfd_vma                       address,
 			    bfd_reloc_code_real_type      reloc,
-			    struct bfd_symbol **  sym,
+			    struct symbol_cache_entry **  sym,
 			    unsigned int                  sym_index)
 {
   arelent * entry;
@@ -486,6 +485,11 @@ pe_ILF_make_a_symbol_reloc (pe_ILF_vars *                 vars,
   internal->r_vaddr  = address;
   internal->r_symndx = sym_index;
   internal->r_type   = entry->howto->type;
+#if 0  /* These fields do not need to be initialised.  */
+  internal->r_size   = 0;
+  internal->r_extern = 0;
+  internal->r_offset = 0;
+#endif
 
   vars->relcount ++;
 
@@ -514,7 +518,7 @@ pe_ILF_save_relocs (pe_ILF_vars * vars,
     abort ();
 
   coff_section_data (vars->abfd, sec)->relocs = vars->int_reltab;
-  coff_section_data (vars->abfd, sec)->keep_relocs = TRUE;
+  coff_section_data (vars->abfd, sec)->keep_relocs = true;
 
   sec->relocation  = vars->reltab;
   sec->reloc_count = vars->relcount;
@@ -577,17 +581,38 @@ pe_ILF_make_a_symbol (pe_ILF_vars *  vars,
 
   /* The following initialisations are unnecessary - the memory is
      zero initialised.  They are just kept here as reminders.  */
+#if 0
+  esym->e.e.e_zeroes = 0;
+  esym->e_value = 0;
+  esym->e_type = T_NULL;
+  esym->e_numaux = 0;
+#endif
 
   /* Initialise the internal symbol structure.  */
   ent->u.syment.n_sclass          = sclass;
   ent->u.syment.n_scnum           = section->target_index;
   ent->u.syment._n._n_n._n_offset = (long) sym;
 
+#if 0 /* See comment above.  */
+  ent->u.syment.n_value  = 0;
+  ent->u.syment.n_flags  = 0;
+  ent->u.syment.n_type   = T_NULL;
+  ent->u.syment.n_numaux = 0;
+  ent->fix_value         = 0;
+#endif
+
   sym->symbol.the_bfd = vars->abfd;
   sym->symbol.name    = vars->string_ptr;
   sym->symbol.flags   = BSF_EXPORT | BSF_GLOBAL | extra_flags;
   sym->symbol.section = section;
   sym->native         = ent;
+
+#if 0 /* See comment above.  */
+  sym->symbol.value   = 0;
+  sym->symbol.udata.i = 0;
+  sym->done_lineno    = false;
+  sym->lineno         = NULL;
+#endif
 
   * vars->table_ptr = vars->sym_index;
   * vars->sym_ptr_ptr = sym;
@@ -728,11 +753,11 @@ static jump_table jtab[] =
 #endif
 
 /* Build a full BFD from the information supplied in a ILF object.  */
-static bfd_boolean
+static boolean
 pe_ILF_build_a_bfd (bfd *           abfd,
 		    unsigned int    magic,
-		    char *          symbol_name,
-		    char *          source_dll,
+		    bfd_byte *      symbol_name,
+		    bfd_byte *      source_dll,
 		    unsigned int    ordinal,
 		    unsigned int    types)
 {
@@ -757,14 +782,14 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
     case IMPORT_CONST:
       /* XXX code yet to be written.  */
-      _bfd_error_handler (_("%B: Unhandled import type; %x"),
-			  abfd, import_type);
-      return FALSE;
+      _bfd_error_handler (_("%s: Unhandled import type; %x"),
+			  bfd_archive_filename (abfd), import_type);
+      return false;
 
     default:
-      _bfd_error_handler (_("%B: Unrecognised import type; %x"),
-			  abfd, import_type);
-      return FALSE;
+      _bfd_error_handler (_("%s: Unrecognised import type; %x"),
+			  bfd_archive_filename (abfd), import_type);
+      return false;
     }
 
   switch (import_name_type)
@@ -776,9 +801,9 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       break;
 
     default:
-      _bfd_error_handler (_("%B: Unrecognised import name type; %x"),
-			  abfd, import_name_type);
-      return FALSE;
+      _bfd_error_handler (_("%s: Unrecognised import name type; %x"),
+			  bfd_archive_filename (abfd), import_name_type);
+      return false;
     }
 
   /* Initialise local variables.
@@ -790,7 +815,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
      so allocate all the space that we will need right now.  */
   ptr = bfd_zalloc (abfd, (bfd_size_type) ILF_DATA_SIZE);
   if (ptr == NULL)
-    return FALSE;
+    return false;
 
   /* Create a bfd_in_memory structure.  */
   vars.bim = (struct bfd_in_memory *) ptr;
@@ -828,10 +853,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   vars.int_reltab  = (struct internal_reloc *) ptr;
   ptr += SIZEOF_ILF_INT_RELOCS;
 
-  vars.string_table = (char *) ptr;
-  vars.string_ptr   = (char *) ptr + STRING_SIZE_SIZE;
+  vars.string_table = ptr;
+  vars.string_ptr   = ptr + STRING_SIZE_SIZE;
   ptr += SIZEOF_ILF_STRINGS;
-  vars.end_string_ptr = (char *) ptr;
+  vars.end_string_ptr = ptr;
 
   /* The remaining space in bim->buffer is used
      by the pe_ILF_make_a_section() function.  */
@@ -850,7 +875,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   id4 = pe_ILF_make_a_section (& vars, ".idata$4", SIZEOF_IDATA4, 0);
   id5 = pe_ILF_make_a_section (& vars, ".idata$5", SIZEOF_IDATA5, 0);
   if (id4 == NULL || id5 == NULL)
-    return FALSE;
+    return false;
 
   /* Fill in the contents of these sections.  */
   if (import_name_type == IMPORT_ORDINAL)
@@ -865,66 +890,33 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   else
     {
       char * symbol;
-      unsigned int len;
 
       /* Create .idata$6 - the Hint Name Table.  */
       id6 = pe_ILF_make_a_section (& vars, ".idata$6", SIZEOF_IDATA6, 0);
       if (id6 == NULL)
-	return FALSE;
+	return false;
 
       /* If necessary, trim the import symbol name.  */
       symbol = symbol_name;
 
       if (import_name_type != IMPORT_NAME)
-	{
-	  bfd_boolean skipped_leading_underscore = FALSE;
-	  bfd_boolean skipped_leading_at = FALSE;
-	  bfd_boolean skipped_leading_question_mark = FALSE;
-	  bfd_boolean check_again;
-	  
-	  /* Skip any prefix in symbol_name.  */
-	  -- symbol;
-	  do
-	    {
-	      check_again = FALSE;
-	      ++ symbol;
+	/* Skip any prefix in symbol_name.  */
+	while (*symbol == '@' || * symbol == '?' || * symbol == '_')
+	  ++ symbol;
 
-	      switch (*symbol)
-		{
-		case '@':
-		  if (! skipped_leading_at)
-		    check_again = skipped_leading_at = TRUE;
-		  break;
-		case '?':
-		  if (! skipped_leading_question_mark)
-		    check_again = skipped_leading_question_mark = TRUE;
-		  break;
-		case '_':
-		  if (! skipped_leading_underscore)
-		    check_again = skipped_leading_underscore = TRUE;
-		  break;
-		default:
-		  break;
-		}
-	    }
-	  while (check_again);
-	}
-      
-      len = strlen (symbol);
       if (import_name_type == IMPORT_NAME_UNDECORATE)
 	{
-	  /* Truncate at the first '@'.  */
-	  char *at = strchr (symbol, '@');
+	  /* Truncate at the first '@'  */
+	  while (* symbol != 0 && * symbol != '@')
+	    symbol ++;
 
-	  if (at != NULL)
-	    len = at - symbol;
+	  * symbol = 0;
 	}
 
       id6->contents[0] = ordinal & 0xff;
       id6->contents[1] = ordinal >> 8;
 
-      memcpy ((char *) id6->contents + 2, symbol, len);
-      id6->contents[len + 2] = '\0';
+      strcpy (id6->contents + 2, symbol);
     }
 
   if (import_name_type != IMPORT_ORDINAL)
@@ -958,7 +950,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       /* Create the .text section.  */
       text = pe_ILF_make_a_section (& vars, ".text", jtab[i].size, SEC_CODE);
       if (text == NULL)
-	return FALSE;
+	return false;
 
       /* Copy in the jump code.  */
       memcpy (text->contents, jtab[i].data, jtab[i].size);
@@ -973,11 +965,11 @@ pe_ILF_build_a_bfd (bfd *           abfd,
       if (magic == MIPS_ARCH_MAGIC_WINCE)
 	{
 	  pe_ILF_make_a_symbol_reloc (&vars, (bfd_vma) 0, BFD_RELOC_HI16_S,
-				      (struct bfd_symbol **) imp_sym,
+				      (struct symbol_cache_entry **) imp_sym,
 				      imp_index);
 	  pe_ILF_make_a_reloc (&vars, (bfd_vma) 0, BFD_RELOC_LO16, text);
 	  pe_ILF_make_a_symbol_reloc (&vars, (bfd_vma) 4, BFD_RELOC_LO16,
-				      (struct bfd_symbol **) imp_sym,
+				      (struct symbol_cache_entry **) imp_sym,
 				      imp_index);
 	}
       else
@@ -1007,10 +999,10 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
   if (   ! bfd_set_start_address (abfd, (bfd_vma) 0)
       || ! bfd_coff_set_arch_mach_hook (abfd, & internal_f))
-    return FALSE;
+    return false;
 
   if (bfd_coff_mkobject_hook (abfd, (PTR) & internal_f, NULL) == NULL)
-    return FALSE;
+    return false;
 
   coff_data (abfd)->pe = 1;
 #ifdef THUMBPEMAGIC
@@ -1036,7 +1028,7 @@ pe_ILF_build_a_bfd (bfd *           abfd,
 
       /* Create an import symbol for the DLL, without the
        .dll suffix.  */
-      ptr = (bfd_byte *) strrchr (source_dll, '.');
+      ptr = strrchr (source_dll, '.');
       if (ptr)
 	* ptr = 0;
       pe_ILF_make_a_symbol (& vars, "__IMPORT_DESCRIPTOR_", source_dll, NULL, 0);
@@ -1061,17 +1053,17 @@ pe_ILF_build_a_bfd (bfd *           abfd,
   obj_raw_syment_count (abfd) = vars.sym_index;
 
   obj_coff_external_syms (abfd) = (PTR) vars.esym_table;
-  obj_coff_keep_syms (abfd) = TRUE;
+  obj_coff_keep_syms (abfd) = true;
 
   obj_convert (abfd) = vars.sym_table;
   obj_conv_table_size (abfd) = vars.sym_index;
 
   obj_coff_strings (abfd) = vars.string_table;
-  obj_coff_keep_strings (abfd) = TRUE;
+  obj_coff_keep_strings (abfd) = true;
 
   abfd->flags |= HAS_SYMS;
 
-  return TRUE;
+  return true;
 }
 
 /* We have detected a Image Library Format archive element.
@@ -1081,8 +1073,8 @@ pe_ILF_object_p (bfd * abfd)
 {
   bfd_byte        buffer[16];
   bfd_byte *      ptr;
-  char *          symbol_name;
-  char *          source_dll;
+  bfd_byte *      symbol_name;
+  bfd_byte *      source_dll;
   unsigned int    machine;
   bfd_size_type   size;
   unsigned int    ordinal;
@@ -1166,9 +1158,9 @@ pe_ILF_object_p (bfd * abfd)
       /* We no longer support PowerPC.  */
     default:
       _bfd_error_handler
-	(_("%B: Unrecognised machine type (0x%x)"
-	   " in Import Library Format archive"),
-	 abfd, machine);
+	(
+_("%s: Unrecognised machine type (0x%x) in Import Library Format archive"),
+         bfd_archive_filename (abfd), machine);
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1178,9 +1170,9 @@ pe_ILF_object_p (bfd * abfd)
   if (magic == 0)
     {
       _bfd_error_handler
-	(_("%B: Recognised but unhandled machine type (0x%x)"
-	   " in Import Library Format archive"),
-	 abfd, machine);
+	(
+_("%s: Recognised but unhandled machine type (0x%x) in Import Library Format archive"),
+	 bfd_archive_filename (abfd), machine);
       bfd_set_error (bfd_error_wrong_format);
 
       return NULL;
@@ -1196,7 +1188,8 @@ pe_ILF_object_p (bfd * abfd)
   if (size == 0)
     {
       _bfd_error_handler
-	(_("%B: size field is zero in Import Library Format header"), abfd);
+	(_("%s: size field is zero in Import Library Format header"),
+	 bfd_archive_filename (abfd));
       bfd_set_error (bfd_error_malformed_archive);
 
       return NULL;
@@ -1214,32 +1207,26 @@ pe_ILF_object_p (bfd * abfd)
     return NULL;
 
   if (bfd_bread (ptr, size, abfd) != size)
-    {
-      bfd_release (abfd, ptr);
-      return NULL;
-    }
+    return NULL;
 
-  symbol_name = (char *) ptr;
-  source_dll  = symbol_name + strlen (symbol_name) + 1;
+  symbol_name = ptr;
+  source_dll  = ptr + strlen (ptr) + 1;
 
   /* Verify that the strings are null terminated.  */
-  if (ptr[size - 1] != 0
-      || (bfd_size_type) ((bfd_byte *) source_dll - ptr) >= size)
+  if (ptr[size - 1] != 0 || ((unsigned long) (source_dll - ptr) >= size))
     {
       _bfd_error_handler
-	(_("%B: string not null terminated in ILF object file."), abfd);
+	(_("%s: string not null terminated in ILF object file."),
+	 bfd_archive_filename (abfd));
       bfd_set_error (bfd_error_malformed_archive);
-      bfd_release (abfd, ptr);
+
       return NULL;
     }
 
   /* Now construct the bfd.  */
   if (! pe_ILF_build_a_bfd (abfd, magic, symbol_name,
 			    source_dll, ordinal, types))
-    {
-      bfd_release (abfd, ptr);
-      return NULL;
-    }
+    return NULL;
 
   return abfd->xvec;
 }

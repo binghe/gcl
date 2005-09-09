@@ -152,52 +152,46 @@
 ;;; Error cases
 
 (deftest loop.12.error.50
-  (signals-error
+  (classify-error
    (loop for i from 1 to 10
 	 collect i
-	 always (< i 20))
-   program-error)
-  t)
+	 always (< i 20)))
+  program-error)
 
 (deftest loop.12.error.50a
-  (signals-error
+  (classify-error
    (loop for i from 1 to 10
 	 always (< i 20)
-	 collect i)
-   program-error)
-  t)
+	 collect i))
+  program-error)
 
 (deftest loop.12.error.51
-  (signals-error
+  (classify-error
    (loop for i from 1 to 10
 	 collect i
-	 never (> i 20))
-   program-error)
-  t)
+	 never (> i 20)))
+  program-error)
 
 (deftest loop.12.error.51a
-  (signals-error
+  (classify-error
    (loop for i from 1 to 10
 	 never (> i 20)
-	 collect i)
-   program-error)
-  t)
+	 collect i))
+  program-error)
 
 (deftest loop.12.error.52
-  (signals-error
+  (classify-error
    (loop for i from 1 to 10
 	 collect i
-	 thereis (> i 20))
-   program-error)
-  t)
+	 thereis (> i 20)))
+  program-error)
 
 (deftest loop.12.error.52a
-  (signals-error
+  (classify-error
    (loop for i from 1 to 10
 	 thereis (> i 20)
-	 collect i)
-   program-error)
-  t)
+	 collect i))
+  program-error)
 
 ;;; Non-error cases
 

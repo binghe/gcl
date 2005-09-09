@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -201,7 +200,7 @@
 
 (defun inspect-number (number)
   (case (type-of number)
-    (fixnum (format t "~S - fixnum" number))
+    (fixnum (format t "~S - fixnum (32 bits)" number))
     (bignum (format t "~S - bignum" number))
     (ratio
      (format t "~S - ratio" number)
@@ -244,7 +243,7 @@
                                (car l) (nth i cons)))))
 
 (defun inspect-string (string)
-  (format t "~S - string";(if (simple-string-p string) "~S - simple string" "~S - string")
+  (format t (if (simple-string-p string) "~S - simple string" "~S - string")
           string)
   (inspect-print  "dimension:  ~D"(array-dimension string 0))
   (when (array-has-fill-pointer-p string)
@@ -258,7 +257,7 @@
                                       (char string i)))))
 
 (defun inspect-vector (vector)
-  (format t "~S - vector";(if (simple-vector-p vector) "~S - simple vector" "~S - vector")
+  (format t (if (simple-vector-p vector) "~S - simple vector" "~S - vector")
           vector)
   (inspect-print  "dimension:  ~D" (array-dimension vector 0))
   (when (array-has-fill-pointer-p vector)

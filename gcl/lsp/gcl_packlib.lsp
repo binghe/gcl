@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -41,11 +40,9 @@
       p
       (let ((g (gensym)))
         `(let ((,g ,p))
-           (unless (or
-                    (packagep ,g)
-                    (setq ,g (find-package (string ,g))))
-            (specific-error :package-error "A package error occurred on ~S: ~S." ,p "Cannot coerce"))
-          ,g))))
+           (if (packagep ,g)
+               ,g
+               (find-package (string ,g)))))))
 
 (defun find-all-symbols (string-or-symbol)
   (when (symbolp string-or-symbol)
@@ -69,7 +66,7 @@
        (dolist (,q (cons ,p (package-use-list ,p)) (progn (setq ,var nil) ,result-form))
 	       (multiple-value-bind 
 		(,y ,x) (package-size ,q)
-		(declare ((integer 0 1048573) ,x ,y))
+		(declare (fixnum ,x ,y))
 		(if (not (eq ,p ,q)) (setq ,x 0))
 		(dotimes (,i (+ ,x ,y))
 			 (setq ,l (if (< ,i ,x)
@@ -184,10 +181,10 @@
         (x (gensym))(y (gensym)) (access (gensym)) declaration)
     (multiple-value-setq (declaration body) (si::find-declarations body))
     (if (null symbol-types)
-	(specific-error :too-few-arguments "Symbol type specifiers must be supplied."))
+	(specific-error :too-few-arguments "Symbol type specifiers must be supplied"))
     `(let ((,p (cons t (if (atom ,plist) (list ,plist) ,plist))) (,q nil) (,l nil)
 	   (,i -1) (,x 0) (,y 0) (,dum nil) (,access nil))
-       (declare ((integer 0 1048573) ,x ,y))
+       (declare (fixnum ,x ,y))
        (flet ((,name () 
 		     (tagbody ,name
 			      (when (null (setq ,l (cdr ,l)))

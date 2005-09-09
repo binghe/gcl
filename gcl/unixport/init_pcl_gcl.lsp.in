@@ -10,7 +10,7 @@
 (in-package :pcl)
 (defvar *the-pcl-package* (find-package :pcl))
 (defun load-truename (&optional (errorp nil))
-  (flet () *load-pathname* nil))
+  (flet () si:*load-pathname* nil))
 
 (in-package "SYSTEM")
 
@@ -118,7 +118,7 @@
   (unintern 'lisp)
   (unintern 'compiler)
   (unintern 'user)
-  (when (fboundp 'si::init-cmp-anon) (fmakunbound 'si::init-cmp-anon))
+  (fmakunbound 'si::init-cmp-anon)
   
   (eval-when (load)
 	     (if (fboundp 'get-system-time-zone)

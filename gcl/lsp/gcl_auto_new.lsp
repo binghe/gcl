@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 (in-package 'si)
 ;;; Autoloaders.
 
@@ -139,9 +138,6 @@
 (autoload 'y-or-n-p '|gcl_iolib|)
 (autoload 'yes-or-no-p '|gcl_iolib|)
 
-(autoload 'logical-pathname-translations '|gcl_iolib|)
-(autoload 'si::set-logical-pathname-translations '|gcl_iolib|)
-(autoload 'ensure-directories-exist '|gcl_iolib|)
 
 (set-dispatch-macro-character #\# #\a 'si::sharp-a-reader)
 (set-dispatch-macro-character #\# #\A 'si::sharp-a-reader)
@@ -186,8 +182,6 @@
 (autoload-macro 'with-open-file '|gcl_iolib|)
 (autoload-macro 'with-open-stream '|gcl_iolib|)
 (autoload-macro 'with-output-to-string '|gcl_iolib|)
-(autoload-macro 'with-standard-io-syntax '|gcl_iolib|)
-
 )   ;;end autoloads of normally loaded files.j
 (if (find-package "COMPILER") (push :compiler *features*))
 #+compiler

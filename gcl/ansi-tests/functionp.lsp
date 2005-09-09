@@ -46,8 +46,9 @@
   (functionp '(lambda (x) x))
   nil)
 
-(report-and-ignore-errors
- (defun (setf functionp-7-accessor) (y x) (setf (car x) y) y))
+(eval-when (eval compile)
+  (ignore-errors
+    (defun (setf functionp-7-accessor) (y x) (setf (car x) y) y)))
 
 (deftest functionp.7
   (not-mv (functionp #'(setf functionp-7-accessor)))
@@ -63,11 +64,12 @@
 
 ;;; In ANSI CL, symbols and cons can no longer be functions
 (deftest functionp.10
-  (check-predicate #'(lambda (x)
-		       (not (and (or (numberp x) (characterp x)
-				     (symbolp x) (consp x)
-				     (typep x 'array))
-				 (functionp x)))))
+  (loop for x in *universe*
+	when (and (or (numberp x) (characterp x)
+		      (symbolp x) (consp x)
+		      (typep x 'array))
+		  (functionp x))
+	collect x)
   nil)
 
 (deftest functionp.11
@@ -78,8 +80,6 @@
   (flet ((%f () nil)) (not-mv (functionp #'%f)))
   nil)
 
-;;; TODO: Add check-type-predicate test?
-
 (deftest functionp.order.1
   (let ((i 0))
     (values
@@ -88,9 +88,9 @@
   t 1)
 
 (deftest functionp.error.1
-  (signals-error (functionp) program-error)
-  t)
+  (classify-error (functionp))
+  program-error)
 
 (deftest functionp.error.2
-  (signals-error (functionp #'cons nil) program-error)
-  t)
+  (classify-error (functionp #'cons nil))
+  program-error)

@@ -132,5 +132,5 @@
   0 #*00010 3 1 2 3)
 
 (deftest bit.error.1
-  (signals-error (bit) program-error)
-  t)
+  (classify-error (bit))
+  program-error)

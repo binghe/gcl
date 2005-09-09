@@ -197,34 +197,6 @@
   t
   #(2 5 8 9 11))
 
-(deftest merge-vector.18
-  (merge '(vector) (list 1 3 10) (list 2 4 6) #'<)
-  #(1 2 3 4 6 10))
-
-(deftest merge-vector.19
-  (merge '(vector *) (list 1 3 10) (list 2 4 6) #'<)
-  #(1 2 3 4 6 10))
-
-(deftest merge-vector.20
-  (merge '(vector t) (list 1 3 10) (list 2 4 6) #'<)
-  #(1 2 3 4 6 10))
-
-(deftest merge-vector.21
-  (merge '(vector * 6) (list 1 3 10) (list 2 4 6) #'<)
-  #(1 2 3 4 6 10))
-
-(deftest merge-vector.22
-  (merge '(simple-vector) (list 2 4 6) (list 1 3 5) #'<)
-  #(1 2 3 4 5 6))
-
-(deftest merge-vector.23
-  (merge '(simple-vector *) (list 2 4 6) (list 1 3 5) #'<)
-  #(1 2 3 4 5 6))
-
-(deftest merge-vector.24
-  (merge '(simple-vector 6) (list 2 4 6) (list 1 3 5) #'<)
-  #(1 2 3 4 5 6))
-
 ;;; Tests on strings
 
 (deftest merge-string.1
@@ -234,26 +206,26 @@
   "12345789")
 
 (deftest merge-string.1a
-  (let ((x (copy-seq "1378"))
+  (let ((x "1378")
 	(y (list #\2 #\4 #\5 #\9)))
     (merge 'string x y #'char<))
   "12345789")
 
 (deftest merge-string.1b
   (let ((x (list #\1 #\3 #\7 #\8))
-	(y (copy-seq "2459")))
+	(y "2459"))
     (merge 'string x y #'char<))
   "12345789")
 
 (deftest merge-string.1c
-  (let ((x (copy-seq "1378"))
-	(y (copy-seq "2459")))
+  (let ((x "1378")
+	(y "2459"))
     (merge 'string x y #'char<))
   "12345789")
 
 (deftest merge-string.1d
-  (let ((x (copy-seq "1378"))
-	(y (copy-seq "2459")))
+  (let ((x "1378")
+	(y "2459"))
     (merge 'string y x #'char<))
   "12345789")
 
@@ -346,85 +318,6 @@
 			:fill-pointer 5 :element-type 'character)))
     (merge 'string x nil #'char<))
   "adgkm")
-
-(deftest merge-string.19
-  (do-special-strings
-   (s "ace" nil)
-   (assert (string= (merge 'string s (copy-seq "bdf") #'char<) "abcdef")))
-  nil)
-
-(deftest merge-string.20
-  (do-special-strings
-   (s "ace" nil)
-   (assert (string= (merge 'base-string (copy-seq "bdf") s #'char<) "abcdef")))
-  nil)
-
-(deftest merge-string.21
-  (do-special-strings
-   (s "ace" nil)
-   (assert (string= (merge 'simple-string s (copy-seq "bdf") #'char<) "abcdef")))
-  nil)
-
-(deftest merge-string.22
-  (do-special-strings
-   (s "ace" nil)
-   (assert (string= (merge 'simple-base-string s (copy-seq "bdf") #'char<) "abcdef")))
-  nil)
-
-(deftest merge-string.23
-  (do-special-strings
-   (s "ace" nil)
-   (assert (string= (merge '(vector character) s (copy-seq "bdf") #'char<) "abcdef")))
-  nil)
-
-(deftest merge-string.24
-  (merge '(string) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.25
-  (merge '(string *) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.26
-  (merge '(string 6) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.27
-  (merge '(simple-string) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.28
-  (merge '(simple-string *) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.29
-  (merge '(simple-string 6) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.30
-  (merge '(base-string) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.31
-  (merge '(base-string *) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.32
-  (merge '(base-string 6) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.33
-  (merge '(simple-base-string) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.34
-  (merge '(simple-base-string *) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
-(deftest merge-string.35
-  (merge '(simple-base-string 6) (copy-seq "ace") (copy-seq "bdf") #'char<)
-  "abcdef")
-
 
 ;;; Tests for bit vectors
 
@@ -606,87 +499,74 @@
 
 (deftest merge.error.1
   (handler-case (eval
-		 '(locally (declare (optimize safety))
+		 '(locally (declare (optimize (safety 3)))
 			   (merge 'symbol (list 1 2 3) (list 4 5 6) #'<)))
 		(error () :caught))
   :caught)
 
 (deftest merge.error.2
-  (signals-error (merge '(vector * 3) (list 1 2 3) (list 4 5 6) #'<)
-		 type-error)
-  t)
+  (classify-error (merge '(vector * 3) (list 1 2 3) (list 4 5 6) #'<))
+  type-error)
 
 (deftest merge.error.3
-  (signals-error (merge '(bit-vector 3) (list 0 0 0) (list 1 1 1) #'<)
-		 type-error)
-  t)
+  (classify-error (merge '(bit-vector 3) (list 0 0 0) (list 1 1 1) #'<))
+  type-error)
 
 (deftest merge.error.4
-  (signals-error (merge '(vector * 7) (list 1 2 3) (list 4 5 6) #'<)
-		 type-error)
-  t)
+  (classify-error (merge '(vector * 7) (list 1 2 3) (list 4 5 6) #'<))
+  type-error)
 
 (deftest merge.error.5
-  (signals-error (merge '(bit-vector 7) (list 0 0 0) (list 1 1 1) #'<)
-		 type-error)
-  t)
+  (classify-error (merge '(bit-vector 7) (list 0 0 0) (list 1 1 1) #'<))
+  type-error)
 
 (deftest merge.error.6
-  (signals-error (merge 'null (list 1 2 3) (list 4 5 6) #'<)
-		 type-error)
-  t)
+  (classify-error (merge 'null (list 1 2 3) (list 4 5 6) #'<))
+  type-error)
 
 (deftest merge.error.7
-  (signals-error (merge) program-error)
-  t)
+  (classify-error (merge))
+  program-error)
 
 (deftest merge.error.8
-  (signals-error (merge 'list) program-error)
-  t)
+  (classify-error (merge 'list))
+  program-error)
 
 (deftest merge.error.9
-  (signals-error (merge 'list (list 2 4 6)) program-error)
-  t)
+  (classify-error (merge 'list (list 2 4 6)))
+  program-error)
 
 (deftest merge.error.10
-  (signals-error (merge 'list (list 2 4 6) (list 1 3 5))
-		 program-error)
-  t)
+  (classify-error (merge 'list (list 2 4 6) (list 1 3 5)))
+  program-error)
 
 (deftest merge.error.11
-  (signals-error (merge 'list (list 2 4 6) (list 1 3 5) #'< :bad t)
-		 program-error)
-  t)
+  (classify-error (merge 'list (list 2 4 6) (list 1 3 5) #'< :bad t))
+  program-error)
 
 (deftest merge.error.12
-  (signals-error (merge 'list (list 2 4 6) (list 1 3 5) #'< :key)
-		 program-error)
-  t)
+  (classify-error (merge 'list (list 2 4 6) (list 1 3 5) #'< :key))
+  program-error)
 
 (deftest merge.error.13
-  (signals-error (merge 'list (list 2 4 6) (list 1 3 5) #'< :bad t
-			 :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (merge 'list (list 2 4 6) (list 1 3 5) #'< :bad t
+			 :allow-other-keys nil))
+  program-error)
 
 (deftest merge.error.14
-  (signals-error (merge 'list (list 2 4 6) (list 1 3 5) #'< 1 2)
-		 program-error)
-  t)
+  (classify-error (merge 'list (list 2 4 6) (list 1 3 5) #'< 1 2))
+  program-error)
 
 (deftest merge.error.15
-  (signals-error (locally (merge '(vector * 3) (list 1 2 3)
+  (classify-error (locally (merge '(vector * 3) (list 1 2 3)
 				  (list 4 5 6) #'<)
-			   t)
-		 type-error)
-  t)  
+			   t))
+  type-error)
 
 (deftest merge.error.16
-  (signals-error (merge 'list (list 1 2) (list 3 4) #'car)
-		 program-error)
-  t)
+  (classify-error (merge 'list (list 1 2) (list 3 4) #'car))
+  program-error)
 
 (deftest merge.error.17
-  (signals-error (merge 'list (list 'a 'b) (list 3 4) #'max)
-		 type-error)
-  t)
+  (classify-error (merge 'list (list 'a 'b) (list 3 4) #'max))
+  type-error)

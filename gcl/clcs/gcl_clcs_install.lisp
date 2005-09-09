@@ -67,15 +67,17 @@
 		(values-list values)))
 	    (error "~S failed." 'compile)))))
 
-(defun clcs-load (&rest args)
-  (loop (with-simple-restart (retry "Retry loading file ~S." (car args))
+(defun clcs-load (file &rest args)
+  (loop (with-simple-restart (retry "Retry loading file ~S." file)
           (return-from clcs-load 
-                       (apply (or (get 'load 'definition-before-clcs) #'load) args)))))
+                       (apply (or (get 'load 'definition-before-clcs) #'load)
+                              file args)))))
 
-(defun clcs-open (&rest args)
-  (loop (with-simple-restart (retry "Retry opening file ~S." (car args))
+(defun clcs-open (file &rest args)
+  (loop (with-simple-restart (retry "Retry opening file ~S." file)
           (return-from clcs-open
-                       (apply (or (get 'open 'definition-before-clcs) #'open) args)))))
+                       (apply (or (get 'open 'definition-before-clcs) #'open)
+                              file args)))))
 
 #+(or kcl lucid cmu)
 (install-clcs-symbols)

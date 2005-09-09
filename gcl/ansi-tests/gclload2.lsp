@@ -12,9 +12,6 @@
 ;;; Tests of iteration forms
 (load "load-iteration.lsp")
 
-;;; Tests of objects
-(load "load-objects.lsp")
-
 ;;; Tests of conditions
 (load "load-conditions.lsp")
 
@@ -25,14 +22,14 @@
 (load "load-arrays.lsp")
 
 ;;; Tests of hash tables
-(load "load-hash-tables.lsp")
+
+(load "hash-table.lsp")
+(load "make-hash-table.lsp")
+  ; More to come
 
 ;;; Tests of packages
 
-(load "load-packages.lsp")
-
-;;; Tests of numbers (section 12)
-(load "load-numbers.lsp")
+#-ecl (load "packages.lsp")
 
 ;;; Tests of sequences
 (load "load-sequences.lsp")
@@ -43,33 +40,16 @@
 ;;; Tests of types and classes
 (load "load-types-and-class.lsp")
 
+;;; Tests of the reader
+(load "reader-test.lsp")
+
 ;;; Tests of strings
 (load "load-strings.lsp")
 
 ;;; Tests for character functions
-(load "load-characters.lsp")
-
-;;; Tests of pathnames
-(load "load-pathnames.lsp")
-
-;;; Tests of file operations
-(load "load-files.lsp")
-
-;;; Tests of streams
-(load "load-streams.lsp")
-
-;;; Tests of the printer
-(load "load-printer.lsp")
-
-;;; Tests of the reader
-(load "load-reader.lsp")
+(compile-and-load "char-aux.lsp")
+(load "character.lsp")
+(load "char-compare.lsp")
 
 ;;; Tests of system construction
-(load "load-system-construction.lsp")
-
-;;; Tests of environment
-(load "load-environment.lsp")
-
-;;; Miscellaneous tests, mostly tests that failed in random testing
-;;; on various implementations
-(load "load-misc.lsp")
+(load "features.lsp")

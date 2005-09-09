@@ -484,11 +484,6 @@
    (nil #\6)
    (#\6)))
 
-(deftest find-if-not-string.19
-  (do-special-strings
-   (s "abc1def" nil)
-   (assert (eql (find-if-not #'alpha-char-p s) #\1)))
-  nil)
 
 ;;; Keyword tests
 
@@ -519,60 +514,64 @@
 ;;; Error tests
 
 (deftest find-if-not.error.1
-  (check-type-error #'(lambda (x) (find-if-not #'null x)) #'(lambda (x) (typep x 'sequence)))
-  nil)
+  (classify-error (find-if-not #'null 'b))
+  type-error)
+
+(deftest find-if-not.error.2
+  (classify-error (find-if-not #'identity 10))
+  type-error)
+
+(deftest find-if-not.error.3
+  (classify-error (find-if-not '1+ 1.4))
+  type-error)
 
 (deftest find-if-not.error.4
-  (signals-error (find-if-not 'identity '(a b c . d))
-		 type-error)
-  t)
+  (classify-error (find-if-not 'identity '(a b c . d)))
+  type-error)
 
 (deftest find-if-not.error.5
-  (signals-error (find-if-not) program-error)
-  t)
+  (classify-error (find-if-not))
+  program-error)
 
 (deftest find-if-not.error.6
-  (signals-error (find-if-not #'null) program-error)
-  t)
+  (classify-error (find-if-not #'null))
+  program-error)
 
 (deftest find-if-not.error.7
-  (signals-error (find-if-not #'null nil :bad t) program-error)
-  t)
+  (classify-error (find-if-not #'null nil :bad t))
+  program-error)
 
 (deftest find-if-not.error.8
-  (signals-error (find-if-not #'null nil :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (find-if-not #'null nil :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest find-if-not.error.9
-  (signals-error (find-if-not #'null nil 1 1) program-error)
-  t)
+  (classify-error (find-if-not #'null nil 1 1))
+  program-error)
 
 (deftest find-if-not.error.10
-  (signals-error (find-if-not #'null nil :key) program-error)
-  t)
+  (classify-error (find-if-not #'null nil :key))
+  program-error)
 
 (deftest find-if-not.error.11
-  (signals-error (locally (find-if-not #'null 'b) t) type-error)
-  t)
+  (classify-error (locally (find-if-not #'null 'b) t))
+  type-error)
 
 (deftest find-if-not.error.12
-  (signals-error (find-if-not #'cons '(a b c)) program-error)
-  t)
+  (classify-error (find-if-not #'cons '(a b c)))
+  program-error)
 
 (deftest find-if-not.error.13
-  (signals-error (find-if-not #'car '(a b c)) type-error)
-  t)
+  (classify-error (find-if-not #'car '(a b c)))
+  type-error)
 
 (deftest find-if-not.error.14
-  (signals-error (find-if-not #'identity '(a b c) :key #'cons)
-		 program-error)
-  t)
+  (classify-error (find-if-not #'identity '(a b c) :key #'cons))
+  program-error)
 
 (deftest find-if-not.error.15
-  (signals-error (find-if-not #'identity '(a b c) :key #'car)
-		 type-error)
-  t)
+  (classify-error (find-if-not #'identity '(a b c) :key #'car))
+  type-error)
 
 ;;; Order of evaluation tests
 
@@ -585,7 +584,7 @@
   a 2 1 2)
 
 (deftest find-if-not.order.2
-  (let ((i 0) a b c d e f)
+  (let ((i 0) a b c d e f g)
     (values
      (find-if-not (progn (setf a (incf i)) #'identity)
 		  (progn (setf b (incf i)) '(nil nil nil a nil nil))
@@ -599,7 +598,7 @@
 
 
 (deftest find-if-not.order.3
-  (let ((i 0) a b c d e f)
+  (let ((i 0) a b c d e f g)
     (values
      (find-if-not (progn (setf a (incf i)) #'identity)
 		  (progn (setf b (incf i)) '(nil nil nil a nil nil))

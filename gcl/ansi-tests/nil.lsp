@@ -6,12 +6,15 @@
 (in-package :cl-test)
 
 (deftest nil.1
-  (check-predicate #'(lambda (x) (not (subtypep (type-of x) nil))))
+  (loop for x in *universe*
+	thereis (subtypep (type-of x) nil))
   nil)
 
 
 (deftest nil.2
-  (check-predicate #'(lambda (x) (subtypep nil (type-of x))))
+  (loop for x in *universe*
+	unless (subtypep nil (type-of x))
+	collect (type-of x))
   nil)
 
 (deftest nil.3

@@ -31,13 +31,6 @@
 	   (not (first results))
 	   (rest results))))
 
-(declaim (ftype (function (t) function) to-function))
-
-(defun to-function (fn)
-  (etypecase fn
-    (function fn)
-    (symbol (symbol-function fn))
-    ((cons (eql setf) (cons symbol null)) (fdefinition fn))))
 
 ;;; Macro to check that a function is returning a specified number of values
 ;;; (defaults to 1)
@@ -87,30 +80,15 @@ Results: ~A~%" expected-number form n results))))
   "Like EQUALP, but guaranteed to return T for true."
   (apply #'values (mapcar #'notnot (multiple-value-list (equalp x y)))))
 
-(defun equalpt-or-report (x y)
-  "Like EQUALPT, but return either T or a list of the arguments."
-  (or (equalpt x y) (list x y)))
-
-(defun string=t (x y)
-  (notnot-mv (string= x y)))
-
 (defun =t (x &rest args)
   "Like =, but guaranteed to return T for true."
   (apply #'values (mapcar #'notnot (multiple-value-list (apply #'=  x args)))))
-
-(defun <=t (x &rest args)
-  "Like <=, but guaranteed to return T for true."
-  (apply #'values (mapcar #'notnot (multiple-value-list (apply #'<=  x args)))))
 
 (defun make-int-list (n)
   (loop for i from 0 below n collect i))
 
 (defun make-int-array (n &optional (fn #'make-array))
-  (when (symbolp fn)
-    (assert (fboundp fn))
-    (setf fn (symbol-function (the symbol fn))))
-  (let ((a (funcall (the function fn) n)))
-    (declare (type (array * *) a))
+  (let ((a (funcall fn n)))
     (loop for i from 0 below n do (setf (aref a i) i))
     a))
 
@@ -122,26 +100,20 @@ Results: ~A~%" expected-number form n results))))
        (typep a2 'array)
        (= (array-rank a1) (array-rank a2))
        (if (= (array-rank a1) 0)
-	   (equal (regression-test::my-aref a1) (regression-test::my-aref a2))
+	   (equal (aref a1) (aref a2))
 	 (let ((ad (array-dimensions a1)))
 	   (and (equal ad (array-dimensions a2))
-		(locally
-		 (declare (type (array * *) a1 a2))
-		 (if (= (array-rank a1) 1)
-		     (let ((as (first ad)))
-		       (loop
-			for i from 0 below as
-			always (equal (regression-test::my-aref a1 i)
-				      (regression-test::my-aref a2 i))))
-		   (let ((as (array-total-size a1)))
-		     (and (= as (array-total-size a2))
-			  (loop
-			   for i from 0 below as
-			   always
-			   (equal
-			    (regression-test::my-row-major-aref a1 i)
-			    (regression-test::my-row-major-aref a2 i))
-			   ))))))))))
+		(if (= (array-rank a1) 1)
+		    (let ((as (first ad)))
+		      (loop
+		       for i from 0 below as
+		       always (equal (aref a1 i) (aref a2 i))))
+		  (let ((as (array-total-size a1)))
+		    (and (= as (array-total-size a2))
+			 (loop
+			  for i from 0 below as
+			  always (equal (row-major-aref a1 i)
+					(row-major-aref a2 i)))))))))))
 
 ;;; *universe* is defined elsewhere -- it is a list of various
 ;;; lisp objects used when stimulating things in various tests.
@@ -163,27 +135,85 @@ Results: ~A~%" expected-number form n results))))
       (loop for e in *universe*
 	    always (or (not (typep e type1)) (typep e type2))))))
 
+;;; Check that the subtype relationships implied
+;;; by disjointness are not contradicted.  Return NIL
+;;; if ok, or a list of error messages if not.
+
+;;; Assumes the types are nonempty.
+
+(defun check-disjointness (type1 type2)
+  (append
+   (check-subtypep type1 type2 nil)
+   (check-subtypep type2 type1 nil)
+   (check-subtypep type1 `(not ,type2) t)
+   (check-subtypep type2 `(not ,type1) t)
+   (check-subtypep `(and ,type1 ,type2) nil t)
+   (check-subtypep `(and ,type2 ,type1) nil t)
+   (check-subtypep `(and ,type1 (not ,type2)) type1 t)
+   (check-subtypep `(and (not ,type2) ,type1) type1 t)
+   (check-subtypep `(and ,type2 (not ,type1)) type2 t)
+   (check-subtypep `(and (not ,type1) ,type2) type2 t)
+;;;   (check-subtypep type1 `(or ,type1 (not ,type2)) t)
+;;;   (check-subtypep type1 `(or (not ,type2) ,type1) t)
+;;;   (check-subtypep type2 `(or ,type2 (not ,type1)) t)
+;;;   (check-subtypep type2 `(or (not ,type1) ,type2) t)
+   (check-subtypep t `(or (not ,type1) (not ,type2)) t)
+   (check-subtypep t `(or (not ,type2) (not ,type1)) t)
+   ))
+
+(defun check-equivalence (type1 type2)
+  (append
+   (check-subtypep type1 type2 t)
+   (check-subtypep type2 type1 t)
+   (check-subtypep `(not ,type1) `(not ,type2) t)
+   (check-subtypep `(not ,type2) `(not ,type1) t)
+   (check-subtypep `(and ,type1 (not ,type2)) nil t)
+   (check-subtypep `(and ,type2 (not ,type1)) nil t)
+   (check-subtypep `(and (not ,type2) ,type1) nil t)
+   (check-subtypep `(and (not ,type1) ,type2) nil t)
+   (check-subtypep t `(or ,type1 (not ,type2)) t)
+   (check-subtypep t `(or ,type2 (not ,type1)) t)
+   (check-subtypep t `(or (not ,type2) ,type1) t)
+   (check-subtypep t `(or (not ,type1) ,type2) t)))
+
+(defun check-all-subtypep (type1 type2)
+  (append
+   (check-subtypep type1 type2 t)
+   (check-subtypep `(not ,type2) `(not ,type1) t)
+   (check-subtypep `(and ,type1 (not ,type2)) nil t)
+   (check-subtypep t `(or (not ,type1) ,type2) t)))   
+
+(defun check-all-not-subtypep (type1 type2)
+  (append
+   (check-subtypep type1 type2 nil)
+   (check-subtypep `(not ,type2) `(not ,type1) nil)))
+
+(defun check-subtypep (type1 type2 is-sub &optional should-be-valid)
+  (multiple-value-bind
+      (sub valid)
+      (subtypep type1 type2)
+    (unless (constantp type1) (setq type1 (list 'quote type1)))
+    (unless (constantp type2) (setq type2 (list 'quote type2)))
+    (if (or (and valid sub (not is-sub))
+	    (and valid (not sub) is-sub)
+	    (and (not valid) should-be-valid))
+	`(((SUBTYPEP ,type1 ,type2) cl-user::==> ,sub ,valid))
+      nil)))
+
 (defun check-type-predicate (P TYPE)
   "Check that a predicate P is the same as #'(lambda (x) (typep x TYPE))
    by applying both to all elements of *UNIVERSE*.  Print message
    when a mismatch is found, and return number of mistakes."
-
-  (when (symbolp p)
-    (assert (fboundp p))
-    (setf p (symbol-function p)))
-  (assert (typep p 'function))
-
   (loop
-      for x in *universe*
-      when
+      for x in *universe* count
 	(block failed
 	  (let ((p1 (handler-case
-			(normally (funcall (the function p) x))
+			(funcall P x)
 		      (error () (format t "(FUNCALL ~S ~S) failed~%"
 					P x)
 			(return-from failed t))))
 		(p2 (handler-case
-			(normally (typep x TYPE))
+			(typep x TYPE)
 		      (error () (format t "(TYPEP ~S '~S) failed~%"
 					x TYPE)
 			(return-from failed t)))))
@@ -191,18 +221,7 @@ Results: ~A~%" expected-number form n results))))
 			(and (not p1) p2))
 		(format t "(FUNCALL ~S ~S) = ~S, (TYPEP ~S '~S) = ~S~%"
 			P x p1 x TYPE p2)
-		t)))
-	collect x))
-
-;;; We have a common idiom where a guarded predicate should be
-;;; true everywhere
-
-(defun check-predicate (predicate &optional guard (universe *universe*))
-  "Return all elements of UNIVERSE for which the guard (if present) is false
-   and for which PREDICATE is false."
-  (remove-if #'(lambda (e) (or (and guard (funcall guard e))
-			       (funcall predicate e)))
-	     universe))
+		t)))))
 
 (declaim (special *catch-error-type*))
 
@@ -239,7 +258,7 @@ Results: ~A~%" expected-number form n results))))
 If an error does occur, return type-error on TYPE-ERRORs, or the error
 condition itself on other errors."
 `(locally (declare (optimize (safety 3)))
-  (handler-case (normally ,form)
+  (handler-case ,form
      (type-error () 'type-error)
      (error (c) c))))
 
@@ -248,21 +267,17 @@ condition itself on other errors."
 If an error does occur, return a symbol classify the error, or allow
 the condition to go uncaught if it cannot be classified."
 `(locally (declare (optimize (safety 3)))
-  (handler-case (normally ,form)
+  (handler-case ,form
      (undefined-function () 'undefined-function)
      (program-error () 'program-error)
      (package-error () 'package-error)
      (type-error    () 'type-error)
      (control-error () 'control-error)
-     (parse-error   () 'parse-error)
      (stream-error  () 'stream-error)
      (reader-error  () 'reader-error)
      (file-error    () 'file-error)
+     (control-error () 'control-error)
      (cell-error    () 'cell-error)
-     (division-by-zero () 'division-by-zero)
-     (floating-point-overflow () 'floating-point-overflow)
-     (floating-point-underflow () 'floating-point-underflow)
-     (arithmetic-error () 'arithmetic-error)
      (error         () 'error)
   )))
 
@@ -281,123 +296,53 @@ the condition to go uncaught if it cannot be classified."
 (defmacro classify-error (form)
   `(classify-error** ',form))
 
-;;; The above is badly designed, since it fails when some signals
-;;; may be in more than one class/
+;;;
+;;; A scaffold is a structure that is used to remember the object
+;;; identities of the cons cells in a (noncircular) data structure.
+;;; This lets us check if the data structure has been changed by
+;;; an operation.
+;;;
 
-(defmacro signals-error (form error-name &key (safety 3) (name nil name-p) (inline nil))
-  `(handler-bind
-    ((warning #'(lambda (c) (declare (ignore c))
-			      (muffle-warning))))
-    (proclaim '(optimize (safety 3)))
-    (handler-case
-     (apply #'values
-	    nil
-	    (multiple-value-list
-	     ,(cond
-	       (inline form)
-	       (regression-test::*compile-tests*
-		`(funcall (compile nil '(lambda ()
-					  (declare (optimize (safety ,safety)))
-					  ,form))))
-	       (t `(eval ',form)))))
-     (,error-name (c)
-		  (cond
-		   ,@(case error-name
-		       (type-error
-			`(((typep (type-error-datum c)
-				  (type-error-expected-type c))
-			   (values
-			    nil
-			    (list (list 'typep (list 'quote
-						     (type-error-datum c))
-					(list 'quote
-					      (type-error-expected-type c)))
-				  "==> true")))))
-		       ((undefined-function unbound-variable)
-			(and name-p
-			     `(((not (eq (cell-error-name c) ',name))
-				(values
-				 nil
-				 (list 'cell-error-name "==>"
-				       (cell-error-name c)))))))
-		       ((stream-error end-of-file reader-error)
-			`(((not (streamp (stream-error-stream c)))
-			   (values
-			    nil
-			    (list 'stream-error-stream "==>"
-				  (stream-error-stream c))))))
-		       (file-error
-			`(((not (pathnamep (pathname (file-error-pathname c))))
-			   (values
-			    nil
-			    (list 'file-error-pathname "==>"
-				  (file-error-pathname c))))))
-		       (t nil))
-		   (t (printable-p c)))))))
+(defstruct scaffold
+  node
+  car
+  cdr)
 
-(defmacro signals-error-always (form error-name)
-  `(values
-    (signals-error ,form ,error-name)
-    (signals-error ,form ,error-name :safety 0)))
+(defun make-scaffold-copy (x)
+  "Make a tree that will be used to check if a tree has been changed."
+  (if
+      (consp x)
+      (make-scaffold :node x
+		     :car (make-scaffold-copy (car x))
+		     :cdr (make-scaffold-copy (cdr x)))
+    (make-scaffold :node x
+		   :car nil
+		   :cdr nil)))
 
-(defmacro signals-type-error (var datum-form form &key (safety 3) (inline nil))
-  (let ((lambda-form
-	 `(lambda (,var)
-	    (declare (optimize (safety ,safety)))
-	    ,form)))
-    `(let ((,var ,datum-form))
-       (declare (optimize safety))
-       (handler-bind
-	((warning #'(lambda (c) (declare (ignore c))
-		      (muffle-warning))))
-					; (proclaim '(optimize (safety 3)))
-	(handler-case
-	 (apply #'values
-		nil
-		(multiple-value-list
-		 (funcall
-		 ,(cond
-		   (inline `(function ,lambda-form))
-		   (regression-test::*compile-tests*
-		     `(compile nil ',lambda-form))
-		   (t `(eval ',lambda-form)))
-		  ,var)))
-	 (type-error
-	  (c)
-	  (let ((datum (type-error-datum c))
-		(expected-type (type-error-expected-type c)))
-	    (cond
-	     ((not (eql ,var datum))
-	      (list :datum-mismatch ,var datum))
-	     ((typep datum expected-type)
-	      (list :is-typep datum expected-type))
-	     (t (printable-p c))))))))))
+(defun check-scaffold-copy (x xcopy)
+  "Return t if xcopy were produced from x by make-scaffold-copy,
+   and none of the cons cells in the tree rooted at x have been
+   changed."
 
-(declaim (special *mini-universe*))
+  (and (eq x (scaffold-node xcopy))
+       (or
+	(not (consp x))
+	(and
+	 (check-scaffold-copy (car x) (scaffold-car xcopy))
+	 (check-scaffold-copy (cdr x) (scaffold-cdr xcopy))))))
 
-(defun check-type-error* (pred-fn guard-fn &optional (universe *mini-universe*))
-  "Check that for all elements in some set, either guard-fn is true or
-   pred-fn signals a type error."
-  (let (val)
-    (loop for e in universe
-	  unless (or (funcall guard-fn e)
-		     (equal
-		      (setf val (multiple-value-list
-				 (signals-type-error x e (funcall pred-fn x) :inline t)))
-		      '(t)))
-	collect (list e val))))
+(defun create-c*r-test (n)
+  (cond
+   ((<= n 0) 'none)
+   (t
+    (cons (create-c*r-test (1- n))
+	  (create-c*r-test (1- n))))))
 
-(defmacro check-type-error (&body args)
-  `(locally (declare (optimize safety)) (check-type-error* ,@args)))
-
-(defun printable-p (obj)
-  "Returns T iff obj can be printed to a string."
-  (with-standard-io-syntax
-   (let ((*print-readably* nil)
-	 (*print-escape* nil))
-     (declare (optimize safety))
-     (handler-case (and (stringp (write-to-string obj)) t)
-		   (condition (c) (declare (ignore c)) nil)))))
+(defun nth-1-body (x)
+  (loop
+      for e in x
+       and i from 0
+       count (not (eqt e (nth i x)))))
 
 ;;;
 ;;; The function SUBTYPEP should return two generalized booleans.
@@ -421,13 +366,14 @@ the condition to go uncaught if it cannot be classified."
 	 (or (not (second results))
 	     (not (first results))))))
 
-;; (declaim (ftype (function (&rest function) (values function &optional))
-;;		compose))
+;;; (eval-when (load eval compile)
+;;;   (unless (fboundp 'complement)
+;;;     (defun complement (fn)
+;;;       #'(lambda (&rest args) (not (apply fn args))))))
 
 (defun compose (&rest fns)
   (let ((rfns (reverse fns)))
-    #'(lambda (x) (loop for f
-			in rfns do (setf x (funcall (the function f) x))) x)))
+    #'(lambda (x) (loop for f in rfns do (setf x (funcall f x))) x)))
 
 (defun evendigitp (c)
   (notnot (find c "02468")))
@@ -456,6 +402,31 @@ the condition to go uncaught if it cannot be classified."
 (defun symbol< (x &rest args)
   (apply #'string< (symbol-name x) (mapcar #'symbol-name args)))
 
+(defun random-from-seq (seq)
+  "Generate a random member of a sequence."
+  (let ((len (length seq)))
+    (assert (> len 0))
+    (elt seq (random len))))
+
+(defmacro random-case (&body cases)
+  (let ((len (length cases)))
+    (assert (> len 0))
+    `(case (random ,len)
+       ,@(loop for i from 0 for e in cases collect `(,i ,e))
+       (t (error "Can't happen?! (in random-case~%")))))
+
+(defun coin (&optional (n 2))
+  "Flip an n-sided coin."
+  (eql (random n) 0))
+
+;;; Randomly permute a sequence
+(defun random-permute (seq)
+  (setq seq (copy-seq seq))
+  (let ((len (length seq)))
+    (loop for i from len downto 2
+	  do (let ((r (random i)))
+	       (rotatef (elt seq r) (elt seq (1- i))))))
+  seq)
 
 (defun make-list-expr (args)
   "Build an expression for computing (LIST . args), but that evades
@@ -467,52 +438,37 @@ the condition to go uncaught if it cannot be classified."
     (cons 'list args)))  
 
 (defparameter +standard-chars+
-  (coerce
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()_+|\\=-`{}[]:\";'<>?,./
- " 'simple-base-string))
+ ")
 
 (defparameter
-  +base-chars+ #.(coerce
-		  (concatenate 'string
-			       "abcdefghijklmnopqrstuvwxyz"
-			       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-			       "0123456789"
-			       "<,>.?/\"':;[{]}~`!@#$%^&*()_-+= \\|")
-		  'simple-base-string))
-		  
-
-(declaim (type simple-base-string +base-chars+))
+  +base-chars+ #.(concatenate 'string
+			      "abcdefghijklmnopqrstuvwxyz"
+			      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			      "0123456789"
+			      "<,>.?/\"':;[{]}~`!@#$%^&*()_-+= \\|"))
 
 (defparameter +num-base-chars+ (length +base-chars+))
+
 
 (defparameter +alpha-chars+ (subseq +standard-chars+ 0 52))
 (defparameter +lower-case-chars+ (subseq +alpha-chars+ 0 26))
 (defparameter +upper-case-chars+ (subseq +alpha-chars+ 26 52))
 (defparameter +alphanumeric-chars+ (subseq +standard-chars+ 0 62))
 (defparameter +digit-chars+ "0123456789")
-(defparameter +extended-digit-chars+ (coerce
-				      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-				      'simple-base-string))
-
-(declaim (type simple-base-string +alpha-chars+ +lower-case-chars+
-	       +upper-case-chars+ +alphanumeric-chars+ +extended-digit-chars+
-	       +standard-chars+))
-
+(defparameter +extended-digit-chars+ "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 (defparameter +code-chars+
   (coerce (loop for i from 0 below 256
 		for c = (code-char i)
 		when c collect c)
-	  'simple-string))
-
-(declaim (type simple-string +code-chars+))
-
+	  'string))
 (defparameter +rev-code-chars+ (reverse +code-chars+))
 
 ;;; Used in checking for continuable errors
 
 (defun has-non-abort-restart (c)
   (throw 'handled
-	 (if (position 'abort (the list (compute-restarts c))
+	 (if (position 'abort (compute-restarts c)
 		       :key #'restart-name :test-not #'eq)
 	     'success
 	   'fail)))
@@ -684,9 +640,8 @@ the condition to go uncaught if it cannot be classified."
     (setq table
 	  (append
 	   '((character base-char)
-	     ;; (string base-string)
-	     ;; (simple-string simple-base-string)
-	     )
+	     (string base-string)
+	     (simple-string simple-base-string))
 	   table)))
   
   table))
@@ -737,17 +692,612 @@ the condition to go uncaught if it cannot be classified."
   (when (symbolp type) (setq type (find-class type nil)))
   (typep type 'built-in-class))
 
+(defun classes-are-disjoint (c1 c2)
+  "If either c1 or c2 is a builtin class or the name of a builtin
+   class, then check for disjointness.  Return a non-NIL list
+   of failed subtypep relationships, if any."
+  (and (or (is-builtin-class c1)
+	   (is-builtin-class c2))
+       (check-disjointness c1 c2)))
+
+(declaim (special *subtype-table*))
+
+(defun types.6-body ()
+  (loop
+      for p in *subtype-table*
+      for tp = (car p)
+      append
+      (and (not (member tp '(sequence cons list t)))
+	   (let ((message (check-subtypep tp 'atom t t)))
+	     (if message (list message))))))
+
+(defparameter *type-list* nil)
+(defparameter *supertype-table* nil)
+(declaim (special *subtype-table*))
+
+(defun types.9-body ()
+  (let ((tp-list (append '(keyword atom list)
+			 (loop for p in *subtype-table* collect (car p))))
+	(result-list))
+    (setf tp-list (remove-duplicates tp-list))
+    ;; TP-LIST is now a list of unique CL type names
+    ;; Store it in *TYPE-LIST* so we can inspect it later if this test
+    ;; fails.  The variable is also used in test TYPES.9A
+    (setf *type-list* tp-list)
+    ;; Compute all pairwise SUBTYPEP relationships among
+    ;; the elements of *TYPE-LIST*.
+    (let ((subs (make-hash-table :test #'eq))
+	  (sups (make-hash-table :test #'eq)))
+      (loop
+	  for x in tp-list do
+	    (loop
+		for y in tp-list do
+		  (multiple-value-bind (result good)
+		      (subtypep* x y)
+		    (declare (ignore good))
+		    (when result
+		      (pushnew x (gethash y subs))
+		      (pushnew y (gethash x sups))))))
+      ;; Store the supertype relations for later inspection
+      ;; and use in test TYPES.9A
+      (setf *supertype-table* sups)
+      ;; Check that the relation we just computed is transitive.
+      ;; Return a list of triples on which transitivity fails.
+      (loop
+	  for x in tp-list do
+	    (let ((sub-list (gethash x subs))
+		  (sup-list (gethash x sups)))
+	      (loop
+		  for t1 in sub-list do
+		    (loop
+			for t2 in sup-list do
+			  (multiple-value-bind (result good)
+			      (subtypep* t1 t2)
+			    (when (and good (not result))
+			      (pushnew (list t1 x t2) result-list
+				       :test #'equal)))))))
+      
+      result-list)))
+
+;;; TYPES.9-BODY returns a list of triples (T1 T2 T3)
+;;; where (AND (SUBTYPEP T1 T2) (SUBTYPEP T2 T3) (NOT (SUBTYPEP T1 T3)))
+;;;  (and where SUBTYPEP succeeds in each case, returning true as its
+;;;   second return value.)
+
+(defun types.9a-body ()
+  (cond
+   ((not (and *type-list* *supertype-table*))
+    (format nil "Run test type.9 first~%")
+    nil)
+   (t
+    (loop
+     for tp in *type-list*
+     sum
+     (let ((sups (gethash tp *supertype-table*)))
+       (loop
+	for x in *universe*
+	sum
+	(handler-case
+	 (cond
+	  ((not (typep x tp)) 0)
+	  (t
+	   (loop
+	    for tp2 in sups
+	    count
+	    (handler-case
+	     (and (not (typep x tp2))
+		  (progn
+		    (format t "Found element of ~S not in ~S: ~S~%"
+			    tp tp2 x)
+		    t))
+	     (condition (c) (format t "Error ~S occured: ~S~%"
+				    c tp2)
+			t)))))
+	 (condition (c) (format t "Error ~S occured: ~S~%" c tp)
+		    1))))))))
+
 (defun even-size-p (a)
   (some #'evenp (array-dimensions a)))
 
+(defun check-cons-copy (x y)
+  "Check that the tree x is a copy of the tree y,
+   returning t if it is, nil if not."
+  (cond
+   ((consp x)
+    (and (consp y)
+	 (not (eqt x y))
+	 (check-cons-copy (car x) (car y))
+	 (check-cons-copy (cdr x) (cdr y))))
+   ((eqt x y) t)
+   (t nil)))
+
+(defun check-sublis (a al &key (key 'no-key) test test-not)
+  "Apply sublis al a with various keys.  Check that
+   the arguments are not themselves changed.  Return nil
+   if the arguments do get changed."
+  (setf a (copy-tree a))
+  (setf al (copy-tree al))
+  (let ((acopy (make-scaffold-copy a))
+	(alcopy (make-scaffold-copy al)))
+    (let ((as
+	   (apply #'sublis al a
+		  `(,@(when test `(:test ,test))
+		    ,@(when test-not `(:test-not ,test-not))
+		    ,@(unless (eqt key 'no-key) `(:key ,key))))))
+      (and
+       (check-scaffold-copy a acopy)
+       (check-scaffold-copy al alcopy)
+       as))))
+
+(defun check-nsublis (a al &key (key 'no-key) test test-not)
+  "Apply nsublis al a, copying these arguments first."
+  (setf a (copy-tree a))
+  (setf al (copy-tree al))
+  (let ((as
+	 (apply #'sublis (copy-tree al) (copy-tree a)
+		`(,@(when test `(:test ,test))
+		    ,@(when test-not `(:test-not ,test-not))
+		    ,@(unless (eqt key 'no-key) `(:key ,key))))))
+    as))
+
+(defun check-subst (new old tree &key (key 'no-key) test test-not)
+  "Call subst new old tree, with keyword arguments if present.
+   Check that the arguments are not changed."
+  (setf new (copy-tree new))
+  (setf old (copy-tree old))
+  (setf tree (copy-tree tree))
+  (let ((newcopy (make-scaffold-copy new))
+	(oldcopy (make-scaffold-copy old))
+	(treecopy (make-scaffold-copy tree)))
+    (let ((result
+	   (apply #'subst new old tree
+		  `(,@(unless (eqt key 'no-key) `(:key ,key))
+		    ,@(when test `(:test ,test))
+		    ,@(when test-not `(:test-not ,test-not))))))
+      (and (check-scaffold-copy new newcopy)
+	   (check-scaffold-copy old oldcopy)
+	   (check-scaffold-copy tree treecopy)
+	   result))))
+
+
+(defun check-subst-if (new pred tree &key (key 'no-key))
+  "Call subst-if new pred tree, with various keyword arguments
+   if present.  Check that the arguments are not changed."
+  (setf new (copy-tree new))
+  (setf tree (copy-tree tree))
+  (let ((newcopy (make-scaffold-copy new))
+	(predcopy (make-scaffold-copy pred))
+	(treecopy (make-scaffold-copy tree)))
+    (let ((result
+	   (apply #'subst-if new pred tree
+		  (unless (eqt key 'no-key) `(:key ,key)))))
+      (and (check-scaffold-copy new newcopy)
+	   (check-scaffold-copy pred predcopy)
+	   (check-scaffold-copy tree treecopy)
+	   result))))
+
+(defun check-subst-if-not (new pred tree &key (key 'no-key))
+  "Call subst-if-not new pred tree, with various keyword arguments
+   if present.  Check that the arguments are not changed."
+  (setf new (copy-tree new))
+  (setf tree (copy-tree tree))
+  (let ((newcopy (make-scaffold-copy new))
+	(predcopy (make-scaffold-copy pred))
+	(treecopy (make-scaffold-copy tree)))
+    (let ((result
+	   (apply #'subst-if-not new pred tree
+		  (unless (eqt key 'no-key) `(:key ,key)))))
+      (and (check-scaffold-copy new newcopy)
+	   (check-scaffold-copy pred predcopy)
+	   (check-scaffold-copy tree treecopy)
+	   result))))
+
+(defun check-nsubst (new old tree &key (key 'no-key) test test-not)
+  "Call nsubst new old tree, with keyword arguments if present."
+  (setf new (copy-tree new))
+  (setf old (copy-tree old))
+  (setf tree (copy-tree tree))
+  (apply #'nsubst new old tree
+	 `(,@(unless (eqt key 'no-key) `(:key ,key))
+	     ,@(when test `(:test ,test))
+	     ,@(when test-not `(:test-not ,test-not)))))
+
+(defun check-nsubst-if (new pred tree &key (key 'no-key))
+  "Call nsubst-if new pred tree, with keyword arguments if present."
+  (setf new (copy-tree new))
+  (setf tree (copy-tree tree))
+  (apply #'nsubst-if new pred tree
+	 (unless (eqt key 'no-key) `(:key ,key))))
+
+(defun check-nsubst-if-not (new pred tree &key (key 'no-key))
+  "Call nsubst-if-not new pred tree, with keyword arguments if present."
+  (setf new (copy-tree new))
+  (setf tree (copy-tree tree))
+  (apply #'nsubst-if-not new pred tree
+		  (unless (eqt key 'no-key) `(:key ,key))))
+
+(defun check-copy-list-copy (x y)
+  "Check that y is a copy of the list x."
+  (if
+      (consp x)
+      (and (consp y)
+	   (not (eqt x y))
+	   (eqt (car x) (car y))
+	   (check-copy-list-copy (cdr x) (cdr y)))
+    (and (eqt x y) t)))
+
+(defun check-copy-list (x)
+  "Apply copy-list, checking that it properly copies,
+   and checking that it does not change its argument."
+  (let ((xcopy (make-scaffold-copy x)))
+    (let ((y (copy-list x)))
+      (and
+       (check-scaffold-copy x xcopy)
+       (check-copy-list-copy x y)
+       y))))
+
+(defun append-6-body ()
+  (let* ((cal (min 2048 call-arguments-limit))
+	 (step (max 1 (floor (/ cal) 64))))
+    (loop
+     for n from 0
+     below cal
+     by step
+     count
+     (not
+      (equal
+       (apply #'append (loop for i from 1 to n
+			     collect '(a)))
+       (make-list n :initial-element 'a))))))
+
+(defun is-intersection (x y z)
+  "Check that z is the intersection of x and y."
+  (and
+   (listp x)
+   (listp y)
+   (listp z)
+   (loop for e in x
+	 always (or (not (member e y))
+		    (member e z)))
+   (loop for e in y
+	 always (or (not (member e x))
+		    (member e z)))
+   (loop for e in z
+	 always (and (member e x) (member e y)))
+   t))
+
+(defun shuffle (x)
+  (cond
+   ((null x) nil)
+   ((null (cdr x)) x)
+   (t
+    (multiple-value-bind
+	(y z)
+	(split-list x)
+      (append (shuffle y) (shuffle z))))))
+
+(defun split-list (x)
+  (cond
+   ((null x) (values nil nil))
+   ((null (cdr x)) (values x nil))
+   (t
+    (multiple-value-bind
+	(y z)
+	(split-list (cddr x))
+      (values (cons (car x) y) (cons (cadr x) z))))))
+
+(defun intersection-12-body (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+     for i from 1 to niters do
+     (let ((x (shuffle (loop for j from 1 to size
+			     collect (random maxelem state))))
+	   (y (shuffle (loop for j from 1 to size
+			     collect (random maxelem state)))))
+       (let ((z (intersection x y)))
+	 (let ((is-good (is-intersection x y z)))
+	   (unless is-good (return (values x y z)))))))
+    nil))
+
+(defun nintersection-with-check (x y &key test)
+  (let ((ycopy (make-scaffold-copy y)))
+    (let ((result (if test
+		      (nintersection x y :test test)
+		    (nintersection x y))))
+      (if (check-scaffold-copy y ycopy)
+	  result
+	'failed))))
+
+(defun nintersection-12-body (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state t)))
+    (loop
+     for i from 1 to niters do
+     (let ((x (shuffle (loop for j from 1 to size
+			     collect (random maxelem state))))
+	   (y (shuffle (loop for j from 1 to size
+			     collect (random maxelem state)))))
+       (let ((z (nintersection-with-check (copy-list x) y)))
+	 (when (eqt z 'failed) (return (values x y z)))
+	 (let ((is-good (is-intersection x y z)))
+	   (unless is-good (return (values x y z)))))))
+    nil))
+
+
+(defun union-with-check (x y &key test test-not)
+  (let ((xcopy (make-scaffold-copy x))
+	(ycopy (make-scaffold-copy y)))
+    (let ((result (cond
+		   (test (union x y :test test))
+		   (test-not (union x y :test-not test-not))
+		   (t (union x y)))))
+      (if (and (check-scaffold-copy x xcopy)
+	       (check-scaffold-copy y ycopy))
+	  result
+	'failed))))
+
+(defun union-with-check-and-key (x y key &key test test-not)
+  (let ((xcopy (make-scaffold-copy x))
+	(ycopy (make-scaffold-copy y)))
+    (let ((result  (cond
+		   (test (union x y :key key :test test))
+		   (test-not (union x y :key key :test-not test-not))
+		   (t (union x y :key key)))))
+      (if (and (check-scaffold-copy x xcopy)
+	       (check-scaffold-copy y ycopy))
+	  result
+	'failed))))
+
+(defun check-union (x y z)
+  (and (listp x)
+       (listp y)
+       (listp z)
+       (loop for e in z always (or (member e x) (member e y)))
+       (loop for e in x always (member e z))
+       (loop for e in y always (member e z))
+       t))
+
+(defun do-random-unions (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+       for i from 1 to niters do
+	  (let ((x (shuffle (loop for j from 1 to size collect
+				  (random maxelem state))))
+		(y (shuffle (loop for j from 1 to size collect
+				  (random maxelem state)))))
+	    (let ((z (union x y)))
+	      (let ((is-good (check-union x y z)))
+		(unless is-good (return (values x y z)))))))
+    nil))
+
+(defun nunion-with-copy (x y &key test test-not)
+  (setf x (copy-list x))
+  (setf y (copy-list y))
+  (cond
+   (test (nunion x y :test test))
+   (test-not (nunion x y :test-not test-not))
+   (t (nunion x y))))
+
+(defun nunion-with-copy-and-key (x y key &key test test-not)
+  (setf x (copy-list x))
+  (setf y (copy-list y))
+  (cond
+   (test (nunion x y :key key :test test))
+   (test-not (nunion x y :key key :test-not test-not))
+   (t (nunion x y :key key))))
+
+(defun do-random-nunions (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+       for i from 1 to niters do
+	  (let ((x (shuffle (loop for j from 1 to size collect
+				  (random maxelem state))))
+		(y (shuffle (loop for j from 1 to size collect
+				  (random maxelem state)))))
+	    (let ((z (nunion-with-copy x y)))
+	      (let ((is-good (check-union x y z)))
+		(unless is-good (return (values x y z)))))))
+    nil))
+
+(defun set-difference-with-check (x y &key (key 'no-key)
+					   test test-not)
+  (setf x (copy-list x))
+  (setf y (copy-list y))
+  (let ((xcopy (make-scaffold-copy x))
+	(ycopy (make-scaffold-copy y)))
+    (let ((result (apply #'set-difference
+			 x y
+			 `(,@(unless (eqt key 'no-key) `(:key ,key))
+			   ,@(when test `(:test ,test))
+			   ,@(when test-not `(:test-not ,test-not))))))  
+      (cond
+       ((and (check-scaffold-copy x xcopy)
+	     (check-scaffold-copy y ycopy))
+	result)
+       (t
+	'failed)))))
+
+(defun check-set-difference (x y z &key (key #'identity)
+					(test #'eql))
+  (and
+   ;; (not (eqt 'failed z))
+   (listp x)
+   (listp y)
+   (listp z)
+   (loop for e in z always (member e x :key key :test test))
+   (loop for e in x always (or (member e y :key key :test test)
+			       (member e z :key key :test test)))
+   (loop for e in y never  (member e z :key key :test test))
+   t))
+
+(defun do-random-set-differences (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+     for i from 1 to niters do
+     (let ((x (shuffle (loop for j from 1 to size collect
+			     (random maxelem state))))
+	   (y (shuffle (loop for j from 1 to size collect
+			     (random maxelem state)))))
+       (let ((z (set-difference-with-check x y)))
+	 (let ((is-good (check-set-difference x y z)))
+	   (unless is-good (return (values x y z)))))))
+    nil))
+(defun nset-difference-with-check (x y &key (key 'no-key)
+				     test test-not)
+  (setf x (copy-list x))
+  (setf y (copy-list y))
+  (apply #'nset-difference
+	 x y
+	 `(,@(unless (eqt key 'no-key) `(:key ,key))
+	     ,@(when test `(:test ,test))
+	     ,@(when test-not `(:test-not ,test-not)))))
+
+(defun check-nset-difference (x y z &key (key #'identity)
+				(test #'eql))
+  (and
+   (listp x)
+   (listp y)
+   (listp z)
+   (loop for e in z always (member e x :key key :test test))
+   (loop for e in x always (or (member e y :key key :test test)
+			       (member e z :key key :test test)))
+   (loop for e in y never  (member e z :key key :test test))
+   t))
+
+(defun do-random-nset-differences (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+     for i from 1 to niters do
+     (let ((x (shuffle (loop for j from 1 to size collect
+			     (random maxelem state))))
+	   (y (shuffle (loop for j from 1 to size collect
+			     (random maxelem state)))))
+       (let ((z (nset-difference-with-check x y)))
+	 (let ((is-good (check-nset-difference x y z)))
+	   (unless is-good (return (values x y z)))))))
+    nil))
+
+(defun set-exclusive-or-with-check (x y &key (key 'no-key)
+				      test test-not)
+  (setf x (copy-list x))
+  (setf y (copy-list y))
+  (let ((xcopy (make-scaffold-copy x))
+	(ycopy (make-scaffold-copy y)))
+    (let ((result (apply #'set-exclusive-or
+			 x y
+			 `(,@(unless (eqt key 'no-key) `(:key ,key))
+			     ,@(when test `(:test ,test))
+			     ,@(when test-not `(:test-not ,test-not))))))  
+      (cond
+       ((and (check-scaffold-copy x xcopy)
+	     (check-scaffold-copy y ycopy))
+	result)
+       (t
+	'failed)))))
+
+(defun check-set-exclusive-or (x y z &key (key #'identity)
+				 (test #'eql))
+  (and
+   ;; (not (eqt 'failed z))
+   (listp x)
+   (listp y)
+   (listp z)
+   (loop for e in z always (or (member e x :key key :test test)
+			       (member e y :key key :test test)))
+   (loop for e in x always (if (member e y :key key :test test)
+			       (not (member e z :key key :test test))
+			     (member e z :key key :test test)))
+   (loop for e in y always (if (member e x :key key :test test)
+			       (not (member e z :key key :test test))
+			     (member e z :key key :test test)))
+   t))
+
+(defun do-random-set-exclusive-ors (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+     for i from 1 to niters do
+     (let ((x (shuffle (loop for j from 1 to size collect
+			     (random maxelem state))))
+	   (y (shuffle (loop for j from 1 to size collect
+			     (random maxelem state)))))
+       (let ((z (set-exclusive-or-with-check x y)))
+	 (let ((is-good (check-set-exclusive-or x y z)))
+	   (unless is-good (return (values x y z)))))))
+    nil))
+
+(defun nset-exclusive-or-with-check (x y &key (key 'no-key)
+				       test test-not)
+  (setf x (copy-list x))
+  (setf y (copy-list y))
+  (apply #'nset-exclusive-or
+	 x y
+	 `(,@(unless (eqt key 'no-key) `(:key ,key))
+	     ,@(when test `(:test ,test))
+	     ,@(when test-not `(:test-not ,test-not)))))
+
+(defun do-random-nset-exclusive-ors (size niters &optional (maxelem (* 2 size)))
+  (let ((state (make-random-state)))
+    (loop
+     for i from 1 to niters do
+     (let ((x (shuffle (loop for j from 1 to size collect
+			     (random maxelem state))))
+	   (y (shuffle (loop for j from 1 to size collect
+			     (random maxelem state)))))
+       (let ((z (nset-exclusive-or-with-check x y)))
+	 (let ((is-good (check-set-exclusive-or x y z)))
+	   (unless is-good (return (values x y z)))))))
+    nil))
+
+(defun subsetp-with-check (x y &key (key 'no-key) test test-not)
+  (let ((xcopy (make-scaffold-copy x))
+	(ycopy (make-scaffold-copy y)))
+    (let ((result
+	   (apply #'subsetp x y
+		  `(,@(unless (eqt key 'no-key)
+			`(:key ,key))
+		      ,@(when test `(:test ,test))
+		      ,@(when test-not `(:test-not ,test-not))))))
+      (cond
+       ((and (check-scaffold-copy x xcopy)
+	     (check-scaffold-copy y ycopy))
+	(not (not result)))
+       (t 'failed)))))
 
 (defun safe-elt (x n)
   (classify-error* (elt x n)))
 
 (defmacro defstruct* (&body args)
-  `(eval-when (:load-toplevel :compile-toplevel :execute)
-     (handler-case (eval '(defstruct ,@args))
-		      (serious-condition () nil))))
+  `(eval-when (load eval compile)
+     (ignore-errors
+       (defstruct ,@args))))
+
+
+(defun sort-package-list (x)
+  (sort (copy-list x)
+	#'string<
+	:key #'package-name))
+
+(defun sort-symbols (sl)
+  (sort (copy-list sl)
+	#'(lambda (x y)
+	    (or
+	     (string< (symbol-name x)
+		      (symbol-name y))
+	     (and (string= (symbol-name x)
+			   (symbol-name y))
+		  (string< (package-name (symbol-package x))
+			   (package-name (symbol-package y))))))))
+
+(defun num-symbols-in-package (p)
+  (let ((num 0))
+    (declare (fixnum num))
+    (do-symbols (s p num)
+      (incf num))))
+
+(defun num-external-symbols-in-package (p)
+  (let ((num 0))
+    (declare (fixnum num))
+    (do-external-symbols (s p num)
+      (incf num))))
 
 (defun safely-delete-package (package-designator)
   (let ((package (find-package package-designator)))
@@ -757,21 +1307,98 @@ the condition to go uncaught if it cannot be classified."
 	  (unuse-package package using-package)))
       (delete-package package))))
 
-#-(or allegro openmcl lispworks)
-(defun delete-all-versions (pathspec)
-  "Replace the versions field of the pathname specified by pathspec with
-   :wild, and delete all the files this refers to."
-  (let* ((wild-pathname (make-pathname :version :wild :defaults (pathname pathspec)))
-	 (truenames (directory wild-pathname)))
-    (mapc #'delete-file truenames)))    
-
-;;; This is a hack to get around an ACL bug; OpenMCL also apparently
-;;; needs it
-#+(or allegro openmcl lispworks)
-(defun delete-all-versions (pathspec)
-  (when (probe-file pathspec) (delete-file pathspec)))
-
 (defconstant +fail-count-limit+ 20)
+
+(defmacro test-with-package-iterator (package-list-expr &rest symbol-types)
+  "Build an expression that tests the with-package-iterator form."
+  (let ((name (gensym))
+	(cht-var (gensym))
+	(pkg-list-var (gensym)))
+    `(let ((,cht-var (make-hash-table))
+	   (,pkg-list-var ,package-list-expr)
+	   (fail-count 0))
+	 (with-package-iterator (,name ,pkg-list-var
+				       ,@(copy-list symbol-types))
+	   ;; For each symbol, check that name is returning appropriate
+	   ;; things
+	   (loop
+	     (block fail
+	       (multiple-value-bind (more sym access pkg)
+		   (,name)
+		 (unless more (return nil))
+		 (setf (gethash sym ,cht-var) t)  ;; note presence of symbol
+		 ;; Check that its access status is in the list,
+		 ;;  that pkg is a package,
+		 ;;  that the symbol is in the package,
+		 ;;  and that (in the package) it has the correct access type
+		 (unless (member access (quote ,(copy-list symbol-types)))
+		   (unless (> fail-count +fail-count-limit+)
+		     (format t "Bad access type: ~S ==> ~A~%" sym access))
+		   (when (= fail-count +fail-count-limit+)
+		     (format t "Further messages suppressed~%"))
+		   (incf fail-count)
+		   (return-from fail nil))
+		 
+		 (unless (packagep pkg)
+		   (unless (> fail-count +fail-count-limit+)
+		     (format t "Not a package: ~S ==> ~S~%" sym pkg))
+		   (when (= fail-count +fail-count-limit+)
+		     (format t "Further messages suppressed~%"))
+		   (incf fail-count)
+		   (return-from fail nil))
+		 (multiple-value-bind (sym2 access2)
+		     (find-symbol (symbol-name sym) pkg)
+		   (unless (or (eqt sym sym2)
+			       (member sym2 (package-shadowing-symbols pkg)))
+		     (unless (> fail-count +fail-count-limit+)
+		       (format t "Not same symbol: ~S ~S~%" sym sym2))
+		     (when (= fail-count +fail-count-limit+)
+		       (format t "Further messages suppressed~%"))
+		     (incf fail-count)
+		     (return-from fail nil))
+		   (unless  (eqt access access2)
+		     (unless (> fail-count +fail-count-limit+)
+		       (format t "Not same access type: ~S ~S ~S~%"
+			       sym access access2))
+		     (when (= fail-count +fail-count-limit+)
+		       (format t "Further messages suppressed~%"))
+		     (incf fail-count)
+		     (return-from fail nil)))))))
+	 ;; now, check that each symbol in each package has
+	 ;; been properly found
+	 (loop
+	     for p in ,pkg-list-var do
+	       (block fail
+		 (do-symbols (sym p)
+		   (multiple-value-bind (sym2 access)
+		       (find-symbol (symbol-name sym) p)
+		     (unless (eqt sym sym2)
+		       (unless (> fail-count +fail-count-limit+)
+			 (format t "Not same symbol (2): ~S ~S~%"
+				 sym sym2))
+		       (when (= fail-count +fail-count-limit+)
+			 (format t "Further messages suppressed~%"))
+		       (incf fail-count)
+		       (return-from fail nil))
+		     (unless (or (not (member access
+					      (quote ,(copy-list symbol-types))))
+				 (gethash sym ,cht-var))
+		       (format t "Symbol not found: ~S~%" sym)
+		       (incf fail-count)
+		       (return-from fail nil))))))
+	 (or (zerop fail-count) fail-count))))
+
+(defun with-package-iterator-internal (packages)
+  (test-with-package-iterator packages :internal))
+
+(defun with-package-iterator-external (packages)
+  (test-with-package-iterator packages :external))
+
+(defun with-package-iterator-inherited (packages)
+  (test-with-package-iterator packages :inherited))
+
+(defun with-package-iterator-all (packages)
+  (test-with-package-iterator packages :internal :external :inherited))
 
 (defun frob-simple-condition (c expected-fmt &rest expected-args)
   "Try out the format control and format arguments of a simple-condition C,
@@ -800,380 +1427,31 @@ the condition to go uncaught if it cannot be classified."
       single-float double-float long-float
       nil character base-char symbol boolean null))
 
-(defun collect-properties (plist prop)
-  "Collect all the properties in plist for a property prop."
-  (loop for e on plist by #'cddr
-	when (eql (car e) prop)
-	collect (cadr e)))
+(defun random-partition (n p)
+  "Partition n into p numbers, each >= 1.  Return list of numbers."
+  (assert (<= 1 p))
+  #|
+  (cond
+   ((= p 1) (list n))
+   ((< n p) (make-list p :initial-element 1))
+   (t
+    (let ((n1 (1+ (random (floor n p)))))
+      (cons n1 (random-partition (- n n1) (1- p)))))))
+  |#
+  (cond
+   ((= p 1) (list n))
+   ((= n 0) (make-list p :initial-element 0))
+   (t (let* ((r (random p))
+	     (n1 (random (1+ n))))
+	(cond
+	 ((= r 0)
+	  (cons n1 (random-partition (- n n1) (1- p))))
+	 ((= r (1- p))
+	  (append (random-partition (- n n1) (1- p)) (list n1)))
+	 (t
+	  (let* ((n2 (random (1+ (- n n1))))
+		 (n3 (- n n1 n2)))
+	    (append (random-partition n2 r)
+		    (list n1)
+		    (random-partition n3 (- p 1 r))))))))))
 
-(defmacro def-macro-test (test-name macro-form)
-  (let ((macro-name (car macro-form)))
-    (assert (symbolp macro-name))
-    `(deftest ,test-name
-       (values
-	(signals-error (funcall (macro-function ',macro-name))
-		       program-error)
-	(signals-error (funcall (macro-function ',macro-name)
-				',macro-form)
-		       program-error)
-	(signals-error (funcall (macro-function ',macro-name)
-				',macro-form nil nil)
-		       program-error))
-       t t t)))
-
-(defun typep* (element type)
-  (not (not (typep element type))))
-
-(defun applyf (fn &rest args)
-  (etypecase fn
-    (symbol
-     #'(lambda (&rest more-args) (apply (the symbol fn) (append args more-args))))
-    (function
-     #'(lambda (&rest more-args) (apply (the function fn) (append args more-args))))))
-
-(defun slot-boundp* (object slot)
-  (notnot (slot-boundp object slot)))
-
-(defun slot-exists-p* (object slot)
-  (notnot (slot-exists-p object slot)))
-
-(defun map-slot-boundp* (c slots)
-  (mapcar (applyf #'slot-boundp c) slots))
-
-(defun map-slot-exists-p* (c slots)
-  (mapcar (applyf #'slot-exists-p* c) slots))
-
-(defun map-slot-value (c slots)
-  (mapcar (applyf #'slot-value c) slots))
-
-(defun map-typep* (object types)
-  (mapcar (applyf #'typep* object) types))
-
-(defun slot-value-or-nil (object slot-name)
-  (and (slot-exists-p object slot-name)
-       (slot-boundp object slot-name)
-       (slot-value object slot-name)))
-
-(defun is-noncontiguous-sublist-of (list1 list2)
-  (loop
-   for x in list1
-   do (loop
-       when (null list2) do (return-from is-noncontiguous-sublist-of nil)
-       when (eql x (pop list2)) do (return))
-   finally (return t)))
-
-;;; This defines a new metaclass to allow us to get around
-;;; the restriction in section 11.1.2.1.2, bullet 19 in some
-;;; object system tests
-
-;;; (when (typep (find-class 'standard-class) 'standard-class)
-;;;  (defclass substandard-class (standard-class) ())
-;;;  (defparameter *can-define-metaclasses* t))
-
-;;; Macro for testing that something is undefined but 'harmless'
-
-(defmacro defharmless (name form)
-  `(deftest ,name
-     (block done
-       (let ((*debugger-hook* #'(lambda (&rest args)
-				  (declare (ignore args))
-				  (return-from done :good))))
-	 (handler-case
-	  (unwind-protect (eval ',form) (return-from done :good))
-	  (condition () :good))))
-     :good))
-
-(defun rational-safely (x)
-  "Rational a floating point number, making sure the rational
-   number isn't 'too big'.  This is important in implementations such
-   as clisp where the floating bounds can be very large."
-  (assert (floatp x))
-  (multiple-value-bind (significand exponent sign)
-      (integer-decode-float x)
-    (let ((limit 1000)
-	  (radix (float-radix x)))
-      (cond
-       ((< exponent (- limit))
-	(* significand (expt radix (- limit)) sign))
-       ((> exponent limit)
-	(* significand (expt radix limit) sign))
-       (t (rational x))))))
-
-(declaim (special *similarity-list*))
-
-(defun is-similar (x y)
-  (let ((*similarity-list* nil))
-    (is-similar* x y)))
-
-(defgeneric is-similar* (x y))
-
-(defmethod is-similar* ((x number) (y number))
-  (and (eq (class-of x) (class-of y))
-       (= x y)
-       t))
-
-(defmethod is-similar* ((x character) (y character))
-  (and (char= x y) t))
-
-(defmethod is-similar* ((x symbol) (y symbol))
-  (if (null (symbol-package x))
-      (and (null (symbol-package y))
-	   (is-similar* (symbol-name x) (symbol-name y)))
-    ;; I think the requirements for interned symbols in
-    ;; 3.2.4.2.2 boils down to EQ after the symbols are in the lisp
-    (eq x y))
-  t)
-
-(defmethod is-similar* ((x random-state) (y random-state))
-  (let ((copy-of-x (make-random-state x))
-	(copy-of-y (make-random-state y))
-	(bound (1- (ash 1 24))))
-    (and
-     ;; Try 50 values, and assume the random state are the same
-     ;; if all the values are the same.  Assuming the RNG is not
-     ;; very pathological, this should be acceptable.
-     (loop repeat 50
-	   always (eql (random bound copy-of-x)
-		       (random bound copy-of-y)))
-     t)))
-
-(defmethod is-similar* ((x cons) (y cons))
-  (or (and (eq x y) t)
-      (and (loop for (x2 . y2) in *similarity-list*
-		 thereis (and (eq x x2) (eq y y2)))
-	   t)
-      (let ((*similarity-list*
-	     (cons (cons x y) *similarity-list*)))
-	(and (is-similar* (car x) (car y))
-	     ;; If this causes stack problems,
-	     ;; convert to a loop
-	     (is-similar* (cdr x) (cdr y))))))
-
-(defmethod is-similar* ((x vector) (y vector))
-  (or (and (eq x y) t)
-      (and
-       (or (not (typep x 'simple-array))
-	   (typep x 'simple-array))
-       (= (length x) (length y))
-       (is-similar* (array-element-type x)
-		    (array-element-type y))
-       (loop for i below (length x)
-	     always (is-similar* (aref x i) (aref y i)))
-       t)))
-
-(defmethod is-similar* ((x array) (y array))
-  (or (and (eq x y) t)
-      (and
-       (or (not (typep x 'simple-array))
-	   (typep x 'simple-array))
-       (= (array-rank x) (array-rank y))
-       (equal (array-dimensions x) (array-dimensions y))
-       (is-similar* (array-element-type x)
-		    (array-element-type y))
-       (let ((*similarity-list*
-	      (cons (cons x y) *similarity-list*)))
-	 (loop for i below (array-total-size x)
-	       always (is-similar* (row-major-aref x i)
-				   (row-major-aref y i))))
-       t)))
-
-(defmethod is-similar* ((x hash-table) (y hash-table))
-  ;; FIXME  Add similarity check for hash tables
-  (error "Sorry, we're not computing this yet."))
-
-(defmethod is-similar* ((x pathname) (y pathname))
-  (and
-   (is-similar* (pathname-host x) (pathname-host y))
-   (is-similar* (pathname-device x) (pathname-device y))
-   (is-similar* (pathname-directory x) (pathname-directory y))
-   (is-similar* (pathname-name x) (pathname-name y))
-   (is-similar* (pathname-type x) (pathname-type y))
-   (is-similar* (pathname-version x) (pathname-version y))
-   t))
-
-(defmethod is-similar* ((x t) (y t))
-  (and (eql x y) t))
-
-(defparameter *initial-print-pprint-dispatch* (if (boundp '*print-pprint-dispatch*)
-						  *print-pprint-dispatch*
-						nil))
-
-(defmacro my-with-standard-io-syntax (&body body)
-  `(let ((*package* (find-package "COMMON-LISP-USER"))
-	 (*print-array* t)
-	 (*print-base* 10)
-	 (*print-case* :upcase)
-	 (*print-circle* nil)
-	 (*print-escape* t)
-	 (*print-gensym* t)
-	 (*print-length* nil)
-	 (*print-level* nil)
-	 (*print-lines* nil)
-	 (*print-miser-width* nil)
-	 (*print-pprint-dispatch* *initial-print-pprint-dispatch*)
-	 (*print-pretty* nil)
-	 (*print-radix* nil)
-	 (*print-readably* t)
-	 (*print-right-margin* nil)
-	 (*read-base* 10)
-	 (*read-default-float-format* 'single-float)
-	 (*read-eval* t)
-	 (*read-suppress* nil)
-	 (*readtable* (copy-readtable nil)))
-     ,@body))
-
-;;; Function to produce a non-simple string
-
-(defun make-special-string (string &key fill adjust displace base)
-  (let* ((len (length string))
-	 (len2 (if fill (+ len 4) len))
-	 (etype (if base 'base-char 'character)))
-    (if displace
-	(let ((s0 (make-array (+ len2 5)
-			      :initial-contents
-			      (concatenate 'string
-					   (make-string 2 :initial-element #\X)
-					   string
-					   (make-string (if fill 7 3)
-							:initial-element #\Y))
-			      :element-type etype)))
-	  (make-array len2 :element-type etype
-		      :adjustable adjust
-		      :fill-pointer (if fill len nil)
-		      :displaced-to s0
-		      :displaced-index-offset 2))
-      (make-array len2 :element-type etype
-		  :initial-contents
-		  (if fill (concatenate 'string string "ZZZZ") string)
-		  :fill-pointer (if fill len nil)
-		  :adjustable adjust))))
-
-(defmacro do-special-strings ((var string-form &optional ret-form) &body forms)
-  (let ((string (gensym))
-	(fill (gensym "FILL"))
-	(adjust (gensym "ADJUST"))
-	(base (gensym "BASE"))
-	(displace (gensym "DISPLACE")))
-    `(let ((,string ,string-form))
-       (dolist (,fill '(nil t) ,ret-form)
-	 (dolist (,adjust '(nil t))
-	   (dolist (,base '(nil t))
-	     (dolist (,displace '(nil t))
-	       (let ((,var (make-special-string
-			    ,string
-			    :fill ,fill :adjust ,adjust
-			    :base ,base :displace ,displace)))
-		 ,@forms))))))))
-
-(defun make-special-integer-vector (contents &key fill adjust displace (etype 'integer))
-  (let* ((len (length contents))
-	 (min (reduce #'min contents))
-	 (max (reduce #'max contents))
-	 (len2 (if fill (+ len 4) len)))
-    (unless (and (typep min etype)
-		 (typep max etype))
-      (setq etype `(integer ,min ,max)))
-    (if displace
-	(let ((s0 (make-array (+ len2 5)
-			      :initial-contents
-			      (concatenate 'list
-					   (make-list 2 :initial-element
-						      (if (typep 0 etype) 0 min))
-					   contents
-					   (make-list (if fill 7 3)
-						      :initial-element
-						      (if (typep 1 etype) 1 max)))
-			      :element-type etype)))
-	  (make-array len2 :element-type etype
-		      :adjustable adjust
-		      :fill-pointer (if fill len nil)
-		      :displaced-to s0
-		      :displaced-index-offset 2))
-      (make-array len2 :element-type etype
-		  :initial-contents
-		  (if fill (concatenate 'list
-					contents
-					(make-list 4 :initial-element
-						   (if (typep 2 etype) 2 (floor (+ min max) 2))))
-		    contents)
-		  :fill-pointer (if fill len nil)
-		  :adjustable adjust))))
-
-(defmacro do-special-integer-vectors ((var vec-form &optional ret-form) &body forms)
-  (let ((vector (gensym))
-	(fill (gensym "FILL"))
-	(adjust (gensym "ADJUST"))
-	(etype (gensym "ETYPE"))
-	(displace (gensym "DISPLACE")))
-    `(let ((,vector ,vec-form))
-       (dolist (,fill '(nil t) ,ret-form)
-	 (dolist (,adjust '(nil t))
-	   (dolist (,etype ',(append (loop for i from 1 to 32 collect `(unsigned-byte ,i))
-				     (loop for i from 2 to 32 collect `(signed-byte ,i))
-				     '(integer)))
-	     (dolist (,displace '(nil t))
-	       (let ((,var (make-special-integer-vector
-			    ,vector
-			    :fill ,fill :adjust ,adjust
-			    :etype ,etype :displace ,displace)))
-		 ,@forms))))))))
-
-;;; Return T if arg X is a string designator in this implementation
-
-(defun string-designator-p (x)
-  (handler-case
-   (progn (string x) t)
-   (error nil)))
-
-;;; Approximate comparison of numbers
-#|
-(defun approx= (x y)
-  (let ((eps 1.0d-4))
-    (<= (abs (- x y))
-       (* eps (max (abs x) (abs y))))))
-|#
-
-;;; Approximate equality function
-(defun approx= (x y &optional (eps (epsilon x)))
-  (<= (abs (/ (- x y) (max (abs x) 1))) eps))
-
-(defun epsilon (number)
-  (etypecase number
-    (complex (* 2 (epsilon (realpart number)))) ;; crude
-    (short-float short-float-epsilon)
-    (single-float single-float-epsilon)
-    (double-float double-float-epsilon)
-    (long-float long-float-epsilon)
-    (rational 0)))
-
-(defun negative-epsilon (number)
-  (etypecase number
-    (complex (* 2 (negative-epsilon (realpart number)))) ;; crude
-    (short-float short-float-negative-epsilon)
-    (single-float single-float-negative-epsilon)
-    (double-float double-float-negative-epsilon)
-    (long-float long-float-negative-epsilon)
-    (rational 0)))
-
-(defun sequencep (x) (typep x 'sequence))
-
-(defun typef (type) #'(lambda (x) (typep x type)))
-
-(defun package-designator-p (x)
-  "TRUE if x could be a package designator.  The package need not
-   actually exist."
-  (or (packagep x)
-      (handler-case (and (locally (declare (optimize safety))
-				  (string x))
-			 t)
-		    (type-error () nil))))
-
-(defmacro def-fold-test (name form)
-  "Create a test that FORM, which should produce a fresh value,
-   does not improperly introduce sharing during constant folding."
-  `(deftest ,name
-     (flet ((%f () (declare (optimize (speed 3) (safety 0) (space 0)
-				      (compilation-speed 0) (debug 0)))
-	       ,form))
-       (eq (%f) (%f)))
-     nil))

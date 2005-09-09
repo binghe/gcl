@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPCALL  Function call.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -26,8 +25,10 @@
 
 
 (eval-when (compile eval)
- (defmacro link-arg-p (x)
-  `(or (is-global-arg-type ,x) (not (is-local-arg-type ,x)))))
+(defmacro link-arg-p (x)
+  `(let ((.u ,x))
+     (not (member .u '(character boolean long-float short-float)))))
+)
 
 (defun fast-link-proclaimed-type-p (fname &optional args)
   (and 
@@ -101,19 +102,7 @@
                                  :sp-change
                                  (null (get (cadr fun) 'no-sp-change)))
                                 (cadr fun)))
-                      )
-		 (and
-		  (is-setf-function (cadr fun))
-		  (let ((new (make-setf-function-proxy-symbol (cadadr fun))))
-		    (or (and (setq fd (c1local-fun new))
-			     (eq (car fd) 'call-local)
-			     fd)
-			(list 'call-global
-			      (make-info
-			       :sp-change
-				   (null (get new 'no-sp-change)))
-			      new))))
-		 ))))
+                      )))))
    (let ((x (c1expr fun)) (info (make-info :sp-change t)))
         (add-info info (cadr x))
         (list 'ordinary info x))
@@ -148,12 +137,11 @@
 		       *use-sfuncall*
 		       ;;Determine if only one value at most is required:
 		       (or
-			(and (not *values-to-go*) (not (and (consp *value-to-go*) (consp (car *value-to-go*)))) 
-			     (not (member *value-to-go* '(top return))))
-;			(eq *value-to-go* 'trash)
-;			(and (consp *value-to-go*)
-;			     (eq (car *value-to-go*) 'var))
-			(and info (equal (info-type info) '(values t)))))
+			(eq *value-to-go* 'trash)
+			(and (consp *value-to-go*)
+			     (eq (car *value-to-go*) 'var))
+			(and info (equal (info-type info) '(values t)))
+			))
 		  (c2funcall-sfun form args info)
 		  (return-from c2funcall nil)))
            (unless loc
@@ -181,19 +169,18 @@
   (unless (and (consp f) (eq (car f) 'var))
 	  (setq f (list 'cvar (cs-push)))
 	  (wt-nl f " = " (car args) ","))
-   (wt-nl "({object _ob=" f ";enum type _tp=type_of(_ob);if (_tp==t_symbol) {_ob=_ob->s.s_gfdef;_tp=type_of(_ob);}")
-   (wt-nl "(_tp == t_sfun ?"
+   (wt-nl "(type_of(" f ") == t_sfun ?"
 ;	  "(*(object (*)())((" f ")->sfn.sfn_self)):")
-	  "(*((_ob)->sfn.sfn_self)):")
+	  "(*((" f ")->sfn.sfn_self)):")
    (when (< *space* 3)
 	 (setq length t)
-	 (wt-nl "(fcall.argd="  (length (cdr args)) ",_tp==t_vfun) ?")
+	 (wt-nl "(fcall.argd="  (length (cdr args)) ",type_of("f")==t_vfun) ?")
 ;	 (wt-nl  "(*(object (*)())((" f ")->sfn.sfn_self)):"))
-	 (wt-nl  "(*((_ob)->sfn.sfn_self)):"))
-   (wt-nl  "(fcall.fun=(_ob),")
+	 (wt-nl  "(*((" f ")->sfn.sfn_self)):"))
+   (wt-nl  "(fcall.fun=(" f "),")
    (unless length
 	   (wt "fcall.argd="  (length (cdr args)) ","))
-   (wt   "fcalln));})(")
+   (wt   "fcalln))(")
    (when (cdr args) (wt (cadr args))
 	 (dolist (loc (cddr args)) (wt #\, loc)))
    (wt #\) #\)  ))
@@ -263,8 +250,9 @@
            *do-tail-recursion*
            *tail-recursion-info*
            (eq (car *tail-recursion-info*) fname)
-	   (or (eq *exit* 'return)
-	       (rassoc *exit* +return-alist+))
+           (member *exit*
+                   '(RETURN RETURN-FIXNUM RETURN-CHARACTER RETURN-SHORT-FLOAT
+                            RETURN-LONG-FLOAT RETURN-OBJECT))
            (tail-recursion-possible)
            (= (length args) (length (cdr *tail-recursion-info*))))
       (let* ((*value-to-go* 'trash)
@@ -337,7 +325,7 @@
 
 
 (defun add-fast-link (fname type args)
-  (let (link-info (n (add-symbol fname)) vararg)
+  (let (link link-info (n (add-symbol fname)) vararg)
     (cond (type  
 	   ;;should do some args checking in that case too.
 	   (let* (link-string tem argtypes
@@ -377,19 +365,22 @@
 		    (princ ")" st)
 		    )
 		    )
+;	      (print (list 'link-string link-string))
+;   (format t "~{~a~#[~:;,~]~}" '(1 2 3 4))
+; 1,2,3,4
 
-	      ;; If link is bound above, closure is unprintable as is in its own environment
-	      ;; enables tracing of inline-type-matches.  CM 20050106
-	      (let ((link (when vararg (lambda ( &rest l)
+	      (if vararg (setq link
+					#'(lambda ( &rest l)
 					    (wt "(VFUN_NARGS="(length l) ",")
 					    (wt-inline-loc link-string l)
-					    (wt ")")))))
-		(push (list fname argtypes
-			    (or (get fname 'proclaimed-return-type)
-				t)
-			    (flags side-effect-p allocates-new-storage)
-			    (or link link-string) 'link-call)
-		      *inline-functions*))
+					    (wt ")"))))
+							   
+	      (push (list fname argtypes
+			  (or (get fname 'proclaimed-return-type)
+			      t)
+			  (flags side-effect-p allocates-new-storage)
+			  (or link link-string) 'link-call)
+		    *inline-functions*)
 	      (setq link-info (list fname (format nil "LI~d" n)
 				    (or (get fname 'proclaimed-return-type)
 					t)
@@ -413,16 +404,15 @@
   (let ((name (first x))
 	(num (second x))
 	(type (third x))
-	(args (fourth x))
-	(setf (setf-function-base-symbol (first x))))
+	(args (fourth x)))
     (cond
       ((null type)
        (wt-nl1 "static void LnkT"
-	       num "(){ call_or_link(VV[" num "]," (if setf "1" "0") ",(void **)(void *)&Lnk" num");}"
+	       num "(){ call_or_link(VV[" num "],(void **)(void *)&Lnk" num");}"
 	       ))
       ((eql type 'proclaimed-closure)
        (wt-nl1 "static void LnkT" num
-	       "(ptr) object *ptr;{ call_or_link_closure(VV[" num "]," (if setf "1" "0") ",(void **)(void *)&Lnk" num",(void **)(void *)&Lclptr" num");}"))
+	       "(ptr) object *ptr;{ call_or_link_closure(VV[" num "],(void **)(void *)&Lnk" num",(void **)(void *)&Lclptr" num");}"))
       (t
        ;;change later to include above.
        ;;(setq type (cdr (assoc type '((t . "object")(:btpr . "bptr")))))
@@ -431,15 +421,15 @@
 	      (let ((vararg (member '* args)))
 		(wt "(object first,...){"
 		    (declaration-type (rep-type type)) "V1;"
-		    "va_list ap;va_start(ap,first);V1=(" (declaration-type (rep-type type)) ")call_"
+		    "va_list ap;va_start(ap,first);V1=call_"
 		    (if vararg "v" "") "proc_new(VV["
-		    (add-object name)"]," (if setf "1" "0") ",(void **)(void *)&Lnk" num )
+		    (add-object name)"],(void **)(void *)&Lnk" num )
 		(or vararg (wt "," (proclaimed-argd args type)))
 		(wt   ",first,ap);va_end(ap);return V1;}" )))
 	     (t (wt "(){return call_proc0(VV[" (add-object name)
-		    "]," (if setf "1" "0") ",(void **)(void *)&Lnk" num ");}" ))))
+		    "],(void **)(void *)&Lnk" num ");}" ))))
       (t (error "unknown link type ~a" type)))
-    (setq name (function-string name))
+    (setq name (symbol-name name))
     (if (find #\/ name) (setq name (remove #\/ name)))
     (wt " /* " name " */")
     ))
@@ -463,7 +453,7 @@
 	   (wt-nl "(")  
 	   (wt-loc  fun-loc)))
 	  (t
-	   (setq loc (list 'cvar (cs-push t t)))
+	   (setq loc (list 'cvar (incf *next-cvar*)))
 	   (let ((*value-to-go* loc))
 	     (wt-nl 
 	      "{object V" (second loc) ";")

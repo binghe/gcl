@@ -6,22 +6,22 @@
 (in-package :cl-test)
 
 (deftest coerce.1
-  (check-predicate #'(lambda (x)
-		       (let ((type (type-of x)))
-			 (or (and (consp type) (eqt (car type) 'function))
-			     (eql (coerce x type) x)))))
-  nil)
+  (loop for x in *universe*
+	for type = (type-of x)
+	unless (and (consp type) (eqt (car type) 'function))
+	count (not (eq (coerce x type) x)))
+  0)
 
 (deftest coerce.2
-  (check-predicate #'(lambda (x) (eql (coerce x t) x)))
-  nil)
+  (loop for x in *universe*
+	count (not (eq (coerce x t) x)))
+  0)
 
 (deftest coerce.3
-  (check-predicate
-   #'(lambda (x)
-       (let ((class (class-of x)))
-	 (eql (coerce x class) x))))
-  nil)
+  (loop for x in *universe*
+	for class = (class-of x)
+	count (and class (not (eq (coerce x class) x))))
+  0)
 
 (deftest coerce.4
   (loop for x in '(() #() #*)
@@ -138,70 +138,41 @@
      i a b))
   10.0f0 2 1 2)
 
-;;; Constant folding test
-;;; If the coerce call is folded to a constant, this will fail
-;;; when that constant is modified.
-
-(def-fold-test coerce.fold.1 (coerce '(1 2 3) 'vector))
-(def-fold-test coerce.fold.2 (coerce '(1 0 1) 'bit-vector))
-(def-fold-test coerce.fold.3 (coerce '(#\a #\b #\c) 'string))
-
 ;;; Error tests
 
 ;;; (deftest coerce.error.1
-;;;  (signals-error (coerce -1 '(integer 0 100)) type-error)
-;;;  t)
+;;;  (classify-error (coerce -1 '(integer 0 100)))
+;;;  type-error)
 
 (deftest coerce.error.2
-  (signals-error (coerce '(a b c) '(vector * 2)) type-error)
-  t)
+  (classify-error (coerce '(a b c) '(vector * 2)))
+  type-error)
 
 (deftest coerce.error.3
-  (signals-error (coerce '(a b c) '(vector * 4)) type-error)
-  t)
+  (classify-error (coerce '(a b c) '(vector * 4)))
+  type-error)
 
 (deftest coerce.error.4
-  (signals-error (coerce nil 'cons) type-error)
-  t)
+  (classify-error (coerce nil 'cons))
+  type-error)
 
 (deftest coerce.error.5
-  (handler-case
-   (eval '(coerce 'not-a-bound-function 'function))
-   (error () :caught))
+  (handler-case (eval '(coerce 'not-a-bound-function 'function))
+		(error () :caught))
   :caught)
 
 (deftest coerce.error.6
-  (signals-error (coerce) program-error)
-  t)
+  (classify-error (coerce))
+  program-error)
 
 (deftest coerce.error.7
-  (signals-error (coerce t) program-error)
-  t)
+  (classify-error (coerce t))
+  program-error)
 
 (deftest coerce.error.8
-  (signals-error (coerce 'x t 'foo) program-error)
-  t)
+  (classify-error (coerce 'x t 'foo))
+  program-error)
 
 (deftest coerce.error.9
-  (signals-error (locally (coerce nil 'cons) t) type-error)
-  t)
-
-(deftest coerce.error.10
-  :notes (:result-type-element-type-by-subtype)
-  (let* ((tp1 '(vector character))
-	 (tp2 `(vector t))
-	 (tp3 `(or ,tp1 ,tp2)))
-    (if (not (subtypep tp3 'vector))
-	t
-      (handler-case
-       (eval `(coerce '(#\a #\b #\c) ',tp3))
-       (type-error (c)
-	 (cond
-	  ((typep (type-error-datum c)
-		  (type-error-expected-type c))
-	   `((typep ',(type-error-datum c)
-		    ',(type-error-expected-type c))
-	     "==>" true))
-	  (t t)))
-       (error (c) (declare (ignore c)) t))))
-  t)
+  (classify-error (locally (coerce nil 'cons) t))
+  type-error)

@@ -34,32 +34,6 @@
      x))
   a 1)
 
-;;; No implicit tagbody
-(deftest when.8
-  (block done
-    (tagbody
-     (when t
-       (go 10)
-       10
-       (return-from done 'bad))
-     10
-     (return-from done 'good)))
-  good)
-
-;;; Error tests
-
-(deftest when.error.1
-  (signals-error (funcall (macro-function 'when)) program-error)
-  t)
-
-(deftest when.error.2
-  (signals-error (funcall (macro-function 'when)
-			   '(when t))
-		 program-error)
-  t)
-
-(deftest when.error.3
-  (signals-error (funcall (macro-function 'when)
-			   '(when t) nil nil)
-		 program-error)
-  t)
+;;; (deftest when.error.1
+;;;  (classify-error (when))
+;;;  program-error)

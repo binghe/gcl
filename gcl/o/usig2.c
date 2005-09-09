@@ -167,7 +167,11 @@ only in very SAFE places.")
      
 
 void
+#ifdef __MINGW32__
 main_signal_handler(int signo)
+#else    
+main_signal_handler(int signo, int a, int b)
+#endif    
 {  int allowed = signals_allowed;
 #ifdef NEED_TO_REINSTALL_SIGNALS
        signal(signo,main_signal_handler);
@@ -225,11 +229,11 @@ before_interrupt(struct save_for_interrupt *p, int allowed)
 	      ad->tm_nfree --;
 	      bcopy(beg ,&(p->buf[i]), amt);
 	      bzero(beg+8,amt-8);
-	      make_unfree(x);
+	      x->d.m = 0;
 	      if (p->free2[i])
 		{ x = (object) p->free2[i];
 		  beg = (char *)x;
-		  make_unfree(x);
+		  x->d.m = 0;
 		  bzero(beg+8,amt-8);
 		  SS1(ad->tm_free,OBJ_LINK(p->free2[i]));
 		  ad->tm_nfree --;
@@ -281,12 +285,12 @@ after_interrupt(struct save_for_interrupt *p, int allowed)
 	      object x = (object)beg;
 	      int amt = ad->tm_size;
 	      RS1(p->free2[i],(p->free1[i]));
-	      if (is_marked_or_free(x)) error("should not be free");
+	      if (x->d.m) error("should not be free");
 	      bcopy(&(p->buf[i]),beg, amt);
 	      if (p->free2[i])
 		{ x = (object) p->free2[i];
-		  if (is_marked_or_free(x)) error("should not be free");
-		  make_free(x);
+		  if (x->d.m) error("should not be free");
+		  x->d.m = FREE;
 		  F_LINK(F_LINK(ad->tm_free)) = (long )current_fl;
 		  ad->tm_nfree += 2;
 		}

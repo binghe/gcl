@@ -23,9 +23,6 @@
 (DEFINE-CONDITION WARNING (CONDITION)
   ())
 
-(DEFINE-CONDITION STYLE-WARNING (WARNING)
-  ())
-
 (DEFINE-CONDITION SERIOUS-CONDITION (CONDITION)
   ())
 
@@ -114,21 +111,12 @@
 (DEFINE-CONDITION CONTROL-ERROR (ERROR)
   ())
 
-(DEFINE-CONDITION PARSE-ERROR (ERROR)
-  ())
-
-(DEFINE-CONDITION PRINT-NOT-READABLE (ERROR)
-  ())
-
 (DEFINE-CONDITION STREAM-ERROR (ERROR)
   #-(or clos pcl)
   (STREAM)
   #+(or clos pcl)
   ((STREAM :initarg :STREAM
 	   :reader STREAM-ERROR-STREAM)))
-
-(DEFINE-CONDITION READER-ERROR (PARSE-ERROR STREAM-ERROR)
-  ())
 
 (DEFINE-CONDITION END-OF-FILE (STREAM-ERROR)
   ()
@@ -170,12 +158,6 @@
   (:REPORT (LAMBDA (CONDITION STREAM)
 	     (FORMAT STREAM "The variable ~S is unbound."
 		     (CELL-ERROR-NAME CONDITION)))))
-
-(DEFINE-CONDITION UNBOUND-SLOT (CELL-ERROR)
-  ()
-  (:REPORT (LAMBDA (CONDITION STREAM)
-	     (FORMAT STREAM "The slot ~S is unbound."
-		     (CELL-ERROR-NAME CONDITION)))))
   
 (DEFINE-CONDITION UNDEFINED-FUNCTION (CELL-ERROR)
   ()
@@ -196,12 +178,6 @@
 (DEFINE-CONDITION FLOATING-POINT-OVERFLOW  (ARITHMETIC-ERROR)
   ())
 
-(DEFINE-CONDITION FLOATING-POINT-INVALID-OPERATION  (ARITHMETIC-ERROR)
-  ())
-
-(DEFINE-CONDITION FLOATING-POINT-INEXACT  (ARITHMETIC-ERROR)
-  ())
-
 (DEFINE-CONDITION FLOATING-POINT-UNDERFLOW (ARITHMETIC-ERROR)
   ())
 
@@ -210,19 +186,6 @@
 
 #+kcl
 (progn
-(define-condition internal-warning ( warning)
-  #-(or clos pcl)
-  ((function-name nil))
-  #+(or clos pcl)
-  ((function-name :initarg :function-name
-		  :reader internal-error-function-name
-		  :initform 'nil))
-  (:report (lambda (condition stream)
-	     (when (internal-error-function-name condition)
-	       (format stream "Warning in ~S [or a callee]: "
-		       (internal-error-function-name condition)))
-	     #+(or clos pcl)(call-next-method))))
-
 (define-condition internal-error ( error)
   #-(or clos pcl)
   ((function-name nil))
@@ -243,13 +206,6 @@
   (apply #'format stream (simple-condition-format-string    condition)
 	 		 (simple-condition-format-arguments condition)))
 
-(defun internal-simple-warning-printer (condition stream)
-  (when (internal-error-function-name condition)
-    (format stream "Warning in ~S [or a callee]: "
-	    (internal-error-function-name condition)))
-  (apply #'format stream (simple-condition-format-string    condition)
-	 		 (simple-condition-format-arguments condition)))
-
 (define-condition internal-simple-error 
     (internal-error #+(or clos pcl) simple-condition)
   #-(or clos pcl)
@@ -258,15 +214,6 @@
   ()
   #-(or clos pcl)(:conc-name %%internal-simple-error-)
   (:report internal-simple-error-printer))
-
-(define-condition internal-simple-warning 
-    (internal-warning #+(or clos pcl) simple-condition)
-  #-(or clos pcl)
-  ((function-name nil) format-string (format-arguments '()))
-  #+(or clos pcl)
-  ()
-  #-(or clos pcl)(:conc-name %%internal-simple-warning-)
-  (:report internal-simple-warning-printer))
 
 (define-condition internal-type-error 
     (#+(or clos pcl) internal-error type-error)
@@ -305,15 +252,6 @@
   #+(or clos pcl)
   ()
   #-(or clos pcl)(:conc-name %%internal-simple-program-error-)
-  #-(or clos pcl)(:report internal-simple-error-printer))
-
-(define-condition internal-simple-parse-error 
-    (#+(or clos pcl) internal-simple-error parse-error)
-  #-(or clos pcl)
-  ((function-name nil) format-string (format-arguments '()))
-  #+(or clos pcl)
-  ()
-  #-(or clos pcl)(:conc-name %%internal-simple-parse-error-)
   #-(or clos pcl)(:report internal-simple-error-printer))
 
 (define-condition internal-simple-control-error 
@@ -396,8 +334,6 @@
      (%%internal-type-error-function-name condition))
     (internal-simple-program-error
      (%%internal-simple-program-error-function-name condition))
-    (internal-simple-parse-error
-     (%%internal-simple-parse-error-function-name condition))
     (internal-simple-control-error
      (%%internal-simple-control-error-function-name condition))
     (internal-unbound-variable  
@@ -425,8 +361,6 @@
 	  (%%internal-simple-error-format-string condition))
     #+kcl(internal-simple-program-error
 	  (%%internal-simple-program-error-format-string condition))
-    #+kcl(internal-simple-parse-error
-	  (%%internal-simple-parse-error-format-string condition))
     #+kcl(internal-simple-control-error
 	  (%%internal-simple-control-error-format-string condition))
     #+kcl(internal-simple-file-error
@@ -444,8 +378,6 @@
 	  (%%internal-simple-error-format-arguments condition))
     #+kcl(internal-simple-program-error
 	  (%%internal-simple-program-error-format-arguments condition))
-    #+kcl(internal-simple-parse-error
-	  (%%internal-simple-parse-error-format-arguments condition))
     #+kcl(internal-simple-control-error
 	  (%%internal-simple-control-error-format-arguments condition))
     #+kcl(internal-simple-file-error
@@ -457,7 +389,6 @@
   (member type '(SIMPLE-CONDITION SIMPLE-WARNING SIMPLE-TYPE-ERROR SIMPLE-ERROR
 		 #+kcl internal-simple-error
 		 #+kcl internal-simple-program-error
-		 #+kcl internal-simple-parse-error
 		 #+kcl internal-simple-control-error
 		 #+kcl internal-simple-file-error
 		 #+kcl internal-simple-stream-error)))

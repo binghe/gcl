@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -73,7 +72,7 @@
   (error "both test and test not supplied"))
 
 (defun bad-seq-limit (x &optional y)
-  (specific-error :wrong-type-argument "The value of ~S is not ~S." (if y (list x y) x) "in sequence limit"))
+  (specific-error :wrong-type-argument "bad sequence limit ~a" (if y (list x y) x)))
 
 
 (eval-when (compile eval)
@@ -120,7 +119,7 @@
      (cond ((not from-end)
            (when (null ivsp)
                  (when (>= start end)
-                       (return-from reduce (let ((z (funcall function))) z)))
+                       (return-from reduce (funcall function)))
 		 (setq initial-value (funcall key (elt sequence start)))
                  (setf start (f+ 1 start))
 		 )
@@ -132,7 +131,7 @@
           (t
            (when (null ivsp)
                  (when (>= start end)
-                       (return-from reduce (let ((z (funcall function))) z)))
+                       (return-from reduce (funcall function)))
                  (setf end (f+ end -1))
 		  (setq initial-value (funcall key (elt sequence end)))
 		  )
@@ -599,7 +598,7 @@
               ((= i 2)
                (setq key-left (funcall key (car l)))
                (setq key-right (funcall key (cadr l)))
-               (cond ;((funcall predicate key-left key-right) (return l))
+               (cond ((funcall predicate key-left key-right) (return l))
                      ((funcall predicate key-right key-left)
                       (return (nreverse l)))
                      (t (return l)))))
@@ -619,7 +618,7 @@
         (setq key-left (funcall key (car left)))
         (setq key-right (funcall key (car right)))
       loop
-        (cond ;((funcall predicate key-left key-right) (go left))
+        (cond ((funcall predicate key-left key-right) (go left))
               ((funcall predicate key-right key-left) (go right))
               (t (go left)))
       left
@@ -640,8 +639,7 @@
               (return (cdr l0)))
         (setq key-right (funcall key (car right)))
         (go loop))))
-   (let ((z (sort l)))
-     z)))
+   (sort l)))
 
 
 #|

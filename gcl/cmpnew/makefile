@@ -8,15 +8,11 @@ PORTDIR	= ../unixport
 CAT=cat
 APPEND=../xbin/append
 
-PREFS:= cmpbind cmpblock cmpcall cmpcatch cmpenv cmpeval \
-	cmpflet cmpfun cmpif cmpinline cmplabel cmplam cmplet \
-	cmploc cmpmap cmpmulti cmpspecial cmptag cmptop \
-	cmptype cmputil cmpvar cmpvs cmpwt 
+OBJS	= gcl_cmpbind.o gcl_cmpblock.o gcl_cmpcall.o gcl_cmpcatch.o gcl_cmpenv.o gcl_cmpeval.o \
+	gcl_cmpflet.o gcl_cmpfun.o gcl_cmpif.o gcl_cmpinline.o gcl_cmplabel.o gcl_cmplam.o gcl_cmplet.o \
+	gcl_cmploc.o gcl_cmpmap.o gcl_cmpmulti.o gcl_cmpspecial.o gcl_cmptag.o gcl_cmptop.o \
+	gcl_cmptype.o gcl_cmputil.o gcl_cmpvar.o gcl_cmpvs.o gcl_cmpwt.o # gcl_cmpmain.o gcl_cmpopt.o gcl_lfun_list.o
 
-NCPREFS:= cmpmain cmpopt lfun_list
-
-SRC:= $(addprefix gcl_,$(addsuffix .lsp,$(PREFS) $(NCPREFS)))
-OBJS:=$(addprefix gcl_,$(addsuffix .o,$(PREFS)))
 FNS:= $(OBJS:.o=.fn)
 
 COMPILE_FILE=$(PORTDIR)/saved_pre_gcl $(PORTDIR) -system-p -c-file -data-file \
@@ -35,13 +31,10 @@ COMPILE_FILE=$(PORTDIR)/saved_pre_gcl $(PORTDIR) -system-p -c-file -data-file \
 	"$(CC) $(OFLAG) $(CFLAGS) -c $*.c" \
 	"${APPEND} ${NULLFILE} $*.data $*.o"
 
-all:	$(OBJS) TAGS
-
-TAGS: $(SRC)
-	etags $^
+all:	$(OBJS)
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
-	../xbin/make-fn $*.lsp ../unixport/saved_pre_gcl
+	../xbin/make-fn $*.lsp
 
 
 .c.o:  
@@ -49,7 +42,7 @@ TAGS: $(SRC)
 	${APPEND} ${NULLFILE} $*.data  $*.o
 
 gcl_collectfn.o:
-	$(PORTDIR)/saved_pre_gcl $(PORTDIR)/ -compile $*
+	$(PORTDIR)/saved_pre_gcl $(PORTDIR)/ -compile $*.lsp
 
 .lisp.o:
 	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl \
@@ -57,7 +50,7 @@ gcl_collectfn.o:
 sys-proclaim.lisp: $(FNS)
 	echo '(in-package "COMPILER")' \
 	'(load "../cmpnew/gcl_collectfn")(load "../lsp/sys-proclaim.lisp")'\
-	'(compiler::make-all-proclaims "*.fn")' | ../unixport/saved_pre_gcl
+	'(compiler::make-all-proclaims "*.fn")' | ../xbin/gcl
 
 
 newfn:	
@@ -77,6 +70,6 @@ remake:
 	(cd .. ; $(MAKE))
 
 clean:
-	rm -f *.o core a.out *.fn *.c *.h *.data
+	rm -f *.o core a.out *.fn *.c *.data *.h
 allclean:
 	rm -f *.h *.data *.c

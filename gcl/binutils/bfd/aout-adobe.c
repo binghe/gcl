@@ -1,6 +1,6 @@
 /* BFD back-end for a.out.adobe binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001,
+   2002
    Free Software Foundation, Inc.
    Written by Cygnus Support.  Based on bout.c.
 
@@ -32,26 +32,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Forward decl.  */
 extern const bfd_target a_out_adobe_vec;
 
-static const bfd_target *aout_adobe_callback
-  PARAMS ((bfd *));
-extern bfd_boolean aout_32_slurp_symbol_table
-  PARAMS ((bfd *abfd));
-extern bfd_boolean aout_32_write_syms
-  PARAMS ((bfd *));
-static void aout_adobe_write_section
-  PARAMS ((bfd *abfd, sec_ptr sect));
-static const bfd_target * aout_adobe_object_p
-  PARAMS ((bfd *));
-static bfd_boolean aout_adobe_mkobject
-  PARAMS ((bfd *));
-static bfd_boolean aout_adobe_write_object_contents
-  PARAMS ((bfd *));
-static bfd_boolean aout_adobe_set_section_contents
-  PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
-static bfd_boolean aout_adobe_set_arch_mach
+static const bfd_target *aout_adobe_callback PARAMS ((bfd *));
+
+extern boolean aout_32_slurp_symbol_table PARAMS ((bfd *abfd));
+extern boolean aout_32_write_syms PARAMS ((bfd *));
+static void    aout_adobe_write_section PARAMS ((bfd *abfd, sec_ptr sect));
+static const bfd_target * aout_adobe_object_p PARAMS ((bfd *));
+static boolean aout_adobe_mkobject PARAMS ((bfd *));
+static boolean aout_adobe_write_object_contents PARAMS ((bfd *));
+static boolean aout_adobe_set_section_contents
+  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+static boolean aout_adobe_set_arch_mach
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
-static int     aout_adobe_sizeof_headers
-  PARAMS ((bfd *, bfd_boolean));
+static int     aout_adobe_sizeof_headers PARAMS ((bfd *, boolean));
 
 /* Swaps the information in an executable header taken from a raw byte
    stream memory image, into the internal exec_header structure.  */
@@ -201,8 +194,8 @@ aout_adobe_callback (abfd)
 
 	default:
 	  (*_bfd_error_handler)
-	    (_("%B: Unknown section type in a.out.adobe file: %x\n"),
-	     abfd, ext->e_type[0]);
+	    (_("%s: Unknown section type in a.out.adobe file: %x\n"),
+	     bfd_archive_filename (abfd), ext->e_type[0]);
 	  goto no_more_sections;
 	}
 
@@ -235,9 +228,10 @@ aout_adobe_callback (abfd)
       /* Now set the section's attributes.  */
       bfd_set_section_flags (abfd, sect, flags);
       /* Assumed big-endian.  */
-      sect->size = ((ext->e_size[0] << 8)
-		    | ext->e_size[1] << 8
-		    | ext->e_size[2]);
+      sect->_raw_size = ((ext->e_size[0] << 8)
+			 | ext->e_size[1] << 8
+			 | ext->e_size[2]);
+      sect->_cooked_size = sect->_raw_size;
       sect->vma = H_GET_32 (abfd, ext->e_virtbase);
       sect->filepos = H_GET_32 (abfd, ext->e_filebase);
       /* FIXME XXX alignment?  */
@@ -277,7 +271,7 @@ struct bout_data_struct
     struct internal_exec e;
   };
 
-static bfd_boolean
+static boolean
 aout_adobe_mkobject (abfd)
      bfd *abfd;
 {
@@ -286,7 +280,7 @@ aout_adobe_mkobject (abfd)
 
   rawptr = (struct bout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
-    return FALSE;
+    return false;
 
   abfd->tdata.bout_data = rawptr;
   exec_hdr (abfd) = &rawptr->e;
@@ -297,10 +291,10 @@ aout_adobe_mkobject (abfd)
   adata (abfd).segment_size = 1; /* Not applicable.  */
   adata (abfd).exec_bytes_size = EXEC_BYTES_SIZE;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static boolean
 aout_adobe_write_object_contents (abfd)
      bfd *abfd;
 {
@@ -323,19 +317,19 @@ aout_adobe_write_object_contents (abfd)
     {
       if (sect->flags & SEC_CODE)
 	{
-	  exec_hdr (abfd)->a_text += sect->size;
+	  exec_hdr (abfd)->a_text += sect->_raw_size;
 	  exec_hdr (abfd)->a_trsize += sect->reloc_count *
 	    sizeof (struct reloc_std_external);
 	}
       else if (sect->flags & SEC_DATA)
 	{
-	  exec_hdr (abfd)->a_data += sect->size;
+	  exec_hdr (abfd)->a_data += sect->_raw_size;
 	  exec_hdr (abfd)->a_drsize += sect->reloc_count *
 	    sizeof (struct reloc_std_external);
 	}
       else if (sect->flags & SEC_ALLOC && !(sect->flags & SEC_LOAD))
 	{
-	  exec_hdr (abfd)->a_bss += sect->size;
+	  exec_hdr (abfd)->a_bss += sect->_raw_size;
 	}
     }
 
@@ -348,7 +342,7 @@ aout_adobe_write_object_contents (abfd)
   amt = EXEC_BYTES_SIZE;
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
       || bfd_bwrite ((PTR) &swapped_hdr, amt, abfd) != amt)
-    return FALSE;
+    return false;
 
   /* Now write out the section information.  Text first, data next, rest
      afterward.  */
@@ -368,38 +362,38 @@ aout_adobe_write_object_contents (abfd)
   /* Write final `sentinel` section header (with type of 0).  */
   amt = sizeof (*sentinel);
   if (bfd_bwrite ((PTR) sentinel, amt, abfd) != amt)
-    return FALSE;
+    return false;
 
   /* Now write out reloc info, followed by syms and strings.  */
   if (bfd_get_symcount (abfd) != 0)
     {
       if (bfd_seek (abfd, (file_ptr) (N_SYMOFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
-	return FALSE;
+	return false;
 
       if (! aout_32_write_syms (abfd))
-	return FALSE;
+	return false;
 
       if (bfd_seek (abfd, (file_ptr) (N_TRELOFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
-	return FALSE;
+	return false;
 
       for (sect = abfd->sections; sect; sect = sect->next)
 	if (sect->flags & SEC_CODE)
 	  if (!aout_32_squirt_out_relocs (abfd, sect))
-	    return FALSE;
+	    return false;
 
       if (bfd_seek (abfd, (file_ptr) (N_DRELOFF (*exec_hdr (abfd))), SEEK_SET)
 	  != 0)
-	return FALSE;
+	return false;
 
       for (sect = abfd->sections; sect; sect = sect->next)
 	if (sect->flags & SEC_DATA)
 	  if (!aout_32_squirt_out_relocs (abfd, sect))
-	    return FALSE;
+	    return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 static void
@@ -410,11 +404,11 @@ aout_adobe_write_section (abfd, sect)
   /* FIXME XXX */
 }
 
-static bfd_boolean
+static boolean
 aout_adobe_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
-     const PTR location;
+     PTR location;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -434,7 +428,7 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
 	    {
 	      sect->filepos = section_start;
 	      /* FIXME:  Round to alignment.  */
-	      section_start += sect->size;
+	      section_start += sect->_raw_size;
 	    }
 	}
 
@@ -444,7 +438,7 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
 	    {
 	      sect->filepos = section_start;
 	      /* FIXME:  Round to alignment.  */
-	      section_start += sect->size;
+	      section_start += sect->_raw_size;
 	    }
 	}
 
@@ -455,7 +449,7 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
 	    {
 	      sect->filepos = section_start;
 	      /* FIXME:  Round to alignment.  */
-	      section_start += sect->size;
+	      section_start += sect->_raw_size;
 	    }
 	}
     }
@@ -463,34 +457,34 @@ aout_adobe_set_section_contents (abfd, section, location, offset, count)
   /* Regardless, once we know what we're doing, we might as well get
      going.  */
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0)
-    return FALSE;
+    return false;
 
   if (count == 0)
-    return TRUE;
+    return true;
 
   return bfd_bwrite ((PTR) location, count, abfd) == count;
 }
 
-static bfd_boolean
+static boolean
 aout_adobe_set_arch_mach (abfd, arch, machine)
      bfd *abfd;
      enum bfd_architecture arch;
      unsigned long machine;
 {
   if (! bfd_default_set_arch_mach (abfd, arch, machine))
-    return FALSE;
+    return false;
 
   if (arch == bfd_arch_unknown
       || arch == bfd_arch_m68k)
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 static int
 aout_adobe_sizeof_headers (ignore_abfd, ignore)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
-     bfd_boolean ignore ATTRIBUTE_UNUSED;
+     boolean ignore ATTRIBUTE_UNUSED;
 {
   return sizeof (struct internal_exec);
 }
@@ -516,10 +510,7 @@ aout_adobe_sizeof_headers (ignore_abfd, ignore)
 #define aout_32_bfd_relax_section       bfd_generic_relax_section
 #define aout_32_bfd_gc_sections         bfd_generic_gc_sections
 #define aout_32_bfd_merge_sections	bfd_generic_merge_sections
-#define aout_32_bfd_is_group_section	bfd_generic_is_group_section
 #define aout_32_bfd_discard_group	bfd_generic_discard_group
-#define aout_32_section_already_linked \
-  _bfd_generic_section_already_linked
 #define aout_32_bfd_link_hash_table_create \
   _bfd_generic_link_hash_table_create
 #define aout_32_bfd_link_hash_table_free \

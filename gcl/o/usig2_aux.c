@@ -11,6 +11,7 @@ XS(CMPtemp);
 XS(CMPtemp1);
 XS(CMPtemp2);
 XS(CMPtemp3);
+XSI(FIXtemp);
 XSI(PRINTarray);
 XSI(PRINTbase);
 XS(PRINTcase);

@@ -16,8 +16,8 @@ void gcl_init_or_load1 (void (*)(void),char *);
   char b[200];\
   \
   if (snprintf(b,sizeof(b),"ar x %-*.*slibpcl_gcl.a %s.o",\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
 		sSAsystem_directoryA->s.s_dbind->st.st_self,#a)<=0)\
     error("Cannot unpack module " #a "o\n");\
   if (system(b)) \
@@ -47,8 +47,8 @@ load1(x)
    char b[200];\
    \
    if (snprintf(b,sizeof(b),"%-*.*s%s",\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
-		(int)sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
+		sSAsystem_directoryA->s.s_dbind->st.st_fillp,\
 		sSAsystem_directoryA->s.s_dbind->st.st_self,a)<=0)\
      error("Cannot append system directory\n");\
    load1(b);\
@@ -101,7 +101,6 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_loop,no_init);
   ar_check_init(gcl_defpackage,no_init);
   ar_check_init(gcl_make_defpackage,no_init);
-  /* ar_check_init(gcl_ansi_io,no_init); deleted by kraehe */
 
 	
   ar_check_init(gcl_cmpinline,no_init);
@@ -132,9 +131,6 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_cmpvar,no_init);
   ar_check_init(gcl_cmpvs,no_init);
   ar_check_init(gcl_cmpwt,no_init);
-
-  lsp_init("../clcs/package.lisp");
-  lsp_init("../clcs/myload1.lisp");
 
   ar_check_init(gcl_pcl_pkg,no_init);
   ar_check_init(gcl_pcl_walk,no_init);
@@ -204,9 +200,6 @@ gcl_init_cmp_anon(void) {
     break;
   case 7:
     ar_check_init(gcl_pcl_gazonk7,Cnil);
-    break;
-  case 8:
-    ar_check_init(gcl_pcl_gazonk8,Cnil);
     i=1;
     break;
   default:

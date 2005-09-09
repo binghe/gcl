@@ -31,8 +31,9 @@
       } while(0)
 
 
-#define GET_FAULT_ADDR(sig,code,sv,a) ((siginfo_t *)code)->si_addr
-#define MPROTECT_ACTION_FLAGS SA_RESTART | SA_ONSTACK | SA_SIGINFO
+#ifdef IN_GBC
+/* Based upon sun4.h */
+#define MPROTECT_ACTION_FLAGS SA_RESTART
 #define INSTALL_MPROTECT_HANDLER \
 do {static struct sigaction action; \
       action.sa_handler = (void *)memprotect_handler; \
@@ -44,7 +45,7 @@ do {static struct sigaction action; \
       sigaction(SIGSEGV,&action,0); \
       sigaction(SIGBUS,&action,0);} while (0)
 
-#undef SETUP_SIG_STACK
+#endif
 
 #define ELF_TEXT_BASE  DBEGIN
 
@@ -79,6 +80,7 @@ do {static struct sigaction action; \
 #undef HAVE_SIGVEC
 #define HAVE_SIGACTION
 /* make this a noop */
+#define SETUP_SIG_STACK
 #ifndef HAVE_SV_ONSTACK
 #define SV_ONSTACK 0
 #endif
@@ -123,7 +125,7 @@ do { int c = 0; \
 
 
 #define INSTALL_SEGMENTATION_CATCHER \
-  	 (void) gcl_signal(SIGSEGV,segmentation_catcher)
+  	 (void) signal(SIGSEGV,segmentation_catcher)
 
 
 /* get the fileno of a FILE* */

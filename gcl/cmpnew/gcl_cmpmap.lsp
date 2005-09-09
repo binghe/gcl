@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPMAP  Map functions.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -50,9 +49,9 @@
 (defun c2mapcar (funob car-p args &aux (*vs* *vs*) (*inline-blocks* 0))
   (let ((label (next-label*))
         (value-loc (list 'VS (vs-push)))
-        (handy (list 'CVAR (cs-push t t)))
+        (handy (list 'CVAR (next-cvar)))
         (handies (mapcar #'(lambda (x) (declare (ignore x))
-                                   (list 'CVAR (cs-push t t)))
+                                   (list 'CVAR (next-cvar)))
                          args))
         save
         )
@@ -68,8 +67,8 @@
          (wt-nl "object " loc "= " (car args) ";")
          (pop args))
        (cond (*safe-compile*
-              (wt-nl "if(endp_prop(" (car handies) ")")
-              (dolist** (loc (cdr handies)) (wt "||endp_prop(" loc ")"))
+              (wt-nl "if(endp(" (car handies) ")")
+              (dolist** (loc (cdr handies)) (wt "||endp(" loc ")"))
               (wt "){"))
              (t
               (wt-nl "if(" (car handies) "==Cnil")
@@ -96,9 +95,9 @@
 	      (wt-nl (car handies) "=MMcdr(" (car handies) ");")
               (dolist** (loc (cdr handies))
 			(wt-nl loc "=MMcdr(" loc ");"))
-              (wt-nl "if(endp_prop(" (car handies)  ")")
+              (wt-nl "if(endp(" (car handies)  ")")
               (dolist** (loc (cdr handies))
-                        (wt "||endp_prop(" loc ")"))
+                        (wt "||endp(" loc ")"))
               (wt "){"))
              (t
               (wt-nl "if((" (car handies) "=MMcdr(" (car handies) "))==Cnil")
@@ -118,7 +117,7 @@
   (let ((label (next-label*))
         value-loc
         (handies (mapcar #'(lambda (x) (declare (ignore x))
-                                   (list 'CVAR (cs-push t t)))
+                                   (list 'CVAR (next-cvar)))
                          args))
         save
         )
@@ -135,8 +134,8 @@
                  (wt-nl "object " loc "= " (car args) ";")
                  (pop args))
        (cond (*safe-compile*
-              (wt-nl "if(endp_prop(" (car handies) ")")
-              (dolist** (loc (cdr handies)) (wt "||endp_prop(" loc ")"))
+              (wt-nl "if(endp(" (car handies) ")")
+              (dolist** (loc (cdr handies)) (wt "||endp(" loc ")"))
               (wt "){"))
              (t
               (wt-nl "if(" (car handies) "==Cnil")
@@ -182,9 +181,9 @@
 (defun c2mapcan (funob car-p args &aux (*vs* *vs*) (*inline-blocks* 0))
   (let ((label (next-label*))
         (value-loc (list 'VS (vs-push)))
-        (handy (list 'CVAR (cs-push t t)))
+        (handy (list 'CVAR (next-cvar)))
         (handies (mapcar #'(lambda (x) (declare (ignore x))
-                                   (list 'CVAR (cs-push t t)))
+                                   (list 'CVAR (next-cvar)))
                          args))
         save
         )
@@ -260,36 +259,4 @@
                    (wt-nl temp "= " loc ";")
                    (push temp locs1))
               (push loc locs1))))
-
-(defun c1map-into (args)
-  (when (or (endp args) (endp (cdr args)))
-    (too-few-args 'map-function 2 (length args)))
-  (let ((info (make-info)))
-    (let ((nargs (c1args args info)))
-      (if (not (member-if-not (lambda (x) (subtypep (info-type (cadr x)) 'vector)) (cddr nargs)))
-	(let ((l (gensym)) (i (gensym)))
-	  (c1expr 
-	   `(let ((,l (min ,@(mapcar (lambda (x) `(length ,x)) (cddr args)))))
-	      (do ((,i 0 (+ ,i 1))) ((= ,i ,l))
-		  (declare (seqind ,i))
-		  (setf (aref ,(car args) ,i) (funcall ,(cadr args) ,@(mapcar (lambda (x) `(aref ,x ,i)) (cddr args))))))))
-	(list 'call-global info 'map-into nargs)))))
-(si::putprop 'map-into 'c1map-into 'c1)
-
-(defun c1map (args)
-  (when (or (endp args) (endp (cdr args)))
-    (too-few-args 'map-function 2 (length args)))
-  (let ((info (make-info)))
-    (let ((nargs (c1args (cddr args) info)))
-      (if (and (not (car args)) (not (member-if-not (lambda (x) (subtypep (info-type (cadr x)) 'vector)) nargs)))
-	  (let ((l (gensym)) (i (gensym)))
-	    (c1expr 
-	     `(let ((,l (min ,@(mapcar (lambda (x) `(length ,x)) (cddr args)))))
-		(do ((,i 0 (+ ,i 1))) ((= ,i ,l))
-		    (declare (seqind ,i))
-		    (funcall ,(cadr args) ,@(mapcar (lambda (x) `(aref ,x ,i)) (cddr args)))))))
-	(let ((info (make-info)))
-	  (list 'call-global info 'map (c1args args info)))))))
-(si::putprop 'map 'c1map 'c1)
-
 

@@ -213,15 +213,7 @@
     (flet ((%f (x) (eql x 1)))
       (values (position-if #'%f a)
 	      (position-if #'%f a :from-end t))))
-  0 2)
-
-(deftest position-if-vector.14
-  (let* ((v1 #(x x x a b 1 d a b 2 d y y y y y))
-	 (v2 (make-array '(8) :displaced-to v1
-			:displaced-index-offset 3)))
-    (values (position-if #'integerp v2)
-	    (position-if #'integerp v2 :from-end t)))
-  2 6)
+  0 2)	      
 
 ;;; Bit vector tests
 
@@ -449,21 +441,6 @@
 	    (position-if #'%g a :from-end 'foo))))
   nil nil 0 4)
 
-(deftest position-if-string.14
-  (do-special-strings
-   (s "12345a6  78b90" nil)
-   (let ((pos (position-if #'alpha-char-p s)))
-     (assert (eql pos 5) () "First alpha char in ~A is at position ~A" s pos)))
-  nil)
-
-(deftest position-if-string.15
-  (do-special-strings
-   (s "12345a6  78b90" nil)
-   (let ((pos (position-if #'alpha-char-p s :from-end t)))
-     (assert (eql pos 11) () "Last alpha char in ~A is at position ~A" s pos)))
-  nil)
-
-
 (deftest position-if.order.1
   (let ((i 0) a b c d e f)
     (values
@@ -535,53 +512,63 @@
 ;;; Error tests
 
 (deftest position-if.error.1
-  (check-type-error #'(lambda (x) (position-if #'identity x)) #'sequencep)
-  nil)
+  (classify-error (position-if #'identity 'b))
+  type-error)
+
+(deftest position-if.error.2
+  (classify-error (position-if #'identity 10))
+  type-error)
+
+(deftest position-if.error.3
+  (classify-error (position-if 'null 1.4))
+  type-error)
 
 (deftest position-if.error.4
-  (signals-error (position-if 'null '(a b c . d)) type-error)
-  t)
+  (classify-error (position-if 'null '(a b c . d)))
+  type-error)
 
 (deftest position-if.error.5
-  (signals-error (position-if) program-error)
-  t)
+  (classify-error (position-if))
+  program-error)
 
 (deftest position-if.error.6
-  (signals-error (position-if #'null) program-error)
-  t)
+  (classify-error (position-if #'null))
+  program-error)
 
 (deftest position-if.error.7
-  (signals-error (position-if #'null nil :key) program-error)
-  t)
+  (classify-error (position-if #'null nil :key))
+  program-error)
 
 (deftest position-if.error.8
-  (signals-error (position-if #'null nil 'bad t) program-error)
-  t)
+  (classify-error (position-if #'null nil 'bad t))
+  program-error)
 
 (deftest position-if.error.9
-  (signals-error (position-if #'null nil 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (position-if #'null nil 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest position-if.error.10
-  (signals-error (position-if #'null nil 1 2) program-error)
-  t)
+  (classify-error (position-if #'null nil 1 2))
+  program-error)
 
 (deftest position-if.error.11
-  (signals-error (locally (position-if #'identity 'b) t) type-error)
-  t)
+  (classify-error (locally (position-if #'identity 'b) t))
+  type-error)
 
 (deftest position-if.error.12
-  (signals-error (position-if #'cons '(a b c d)) program-error)
-  t)
+  (classify-error (position-if #'cons '(a b c d)))
+  program-error)
 
 (deftest position-if.error.13
-  (signals-error (position-if #'car '(a b c d)) type-error)
-  t)
+  (classify-error (position-if #'car '(a b c d)))
+  type-error)
 
 (deftest position-if.error.14
-  (signals-error (position-if #'identity '(a b c d) :key #'cdr) type-error)
-  t)
+  (classify-error (position-if #'identity '(a b c d) :key #'cdr))
+  type-error)
 
 (deftest position-if.error.15
-  (signals-error (position-if #'identity '(a b c d) :key #'cons) program-error)
-  t)
+  (classify-error (position-if #'identity '(a b c d) :key #'cons))
+  program-error)
+
+

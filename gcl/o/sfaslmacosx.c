@@ -74,7 +74,7 @@ get_init_sym(NSModule module,object ff) {
 
     object x;
     struct string st;
-    set_type_of(&st,t_string);
+    st.t=t_string;
     st.st_self="COMPILER";
     st.st_dim=st.st_fillp=strlen(st.st_self);
     if ((x=find_package((object)&st))==Cnil)
@@ -88,17 +88,17 @@ get_init_sym(NSModule module,object ff) {
     
   }
 
-  set_type_of(&st,t_string);
+  st.t=t_string;
   st.st_self=ff->st.st_self;
   st.st_dim=st.st_fillp=ff->st.st_dim;
   x=ifuncall1(inf,(object)&st);
-  if (type_of(x)!=t_string)
+  if (x->d.t!=t_string)
     sfasl_error("INIT-NAME error\n");
   assert(snprintf(ib,sizeof(ib),"_init_%-.*s",x->st.st_dim,x->st.st_self)>0);
 
   if (!(v=NSLookupSymbolInModule(module, ib))) {
     x=ifuncall2(inf,(object)&st,Ct);
-    if (type_of(x)!=t_string)
+    if (x->d.t!=t_string)
       sfasl_error("INIT-NAME error\n");
     assert(snprintf(ib,sizeof(ib),"_init_%-.*s",x->st.st_dim,x->st.st_self)>0);
     if (!(v=NSLookupSymbolInModule(module, ib)))

@@ -5,8 +5,6 @@
 
 (in-package :cl-test)
 
-(compile-and-load "search-aux.lsp")
-
 (deftest search-list.1
   (let ((target *searched-list*)
 	(pat '(a)))
@@ -136,45 +134,6 @@
 	  collect pat))
   nil)
 
-;; Order of test, test-not
-
-(deftest search-list.15
-  (let ((pat '(10))
-	(target '(1 4 6 10 15 20)))
-    (search pat target :test #'<))
-  4)
-
-(deftest search-list.16
-  (let ((pat '(10))
-	(target '(1 4 6 10 15 20)))
-    (search pat target :test-not #'>=))
-  4)
-
-(defharmless search.test-and-test-not.1
-  (search '(b c) '(a b c d) :test #'eql :test-not #'eql))
-
-(defharmless search.test-and-test-not.2
-  (search '(b c) '(a b c d) :test-not #'eql :test #'eql))
-
-(defharmless search.test-and-test-not.3
-  (search #(b c) #(a b c d) :test #'eql :test-not #'eql))
-
-(defharmless search.test-and-test-not.4
-  (search #(b c) #(a b c d) :test-not #'eql :test #'eql))
-
-(defharmless search.test-and-test-not.5
-  (search "bc" "abcd" :test #'eql :test-not #'eql))
-
-(defharmless search.test-and-test-not.6
-  (search "bc" "abcd" :test-not #'eql :test #'eql))
-
-(defharmless search.test-and-test-not.7
-  (search #*01 #*0011 :test #'eql :test-not #'eql))
-
-(defharmless search.test-and-test-not.8
-  (search #*01 #*0011 :test-not #'eql :test #'eql))
-
-
 ;;; Keyword tests
 
 (deftest search.allow-other-keys.1
@@ -216,44 +175,44 @@
 ;;; Error cases
 
 (deftest search.error.1
-  (signals-error (search) program-error)
-  t)
+  (classify-error (search))
+  program-error)
 
 (deftest search.error.2
-  (signals-error (search "a") program-error)
-  t)
+  (classify-error (search "a"))
+  program-error)
 
 (deftest search.error.3
-  (signals-error (search "a" "a" :key) program-error)
-  t)
+  (classify-error (search "a" "a" :key))
+  program-error)
 
 (deftest search.error.4
-  (signals-error (search "a" "a" 'bad t) program-error)
-  t)
+  (classify-error (search "a" "a" 'bad t))
+  program-error)
 
 (deftest search.error.5
-  (signals-error (search "a" "a" 'bad t :allow-other-keys nil) program-error)
-  t)
+  (classify-error (search "a" "a" 'bad t :allow-other-keys nil))
+  program-error)
 
 (deftest search.error.6
-  (signals-error (search "a" "a" 1 2) program-error)
-  t)
+  (classify-error (search "a" "a" 1 2))
+  program-error)
 
 (deftest search.error.7
-  (signals-error (search "c" "abcde" :test #'identity) program-error)
-  t)
+  (classify-error (search "c" "abcde" :test #'identity))
+  program-error)
 
 (deftest search.error.8
-  (signals-error (search "c" "abcde" :test-not #'identity) program-error)
-  t)
+  (classify-error (search "c" "abcde" :test-not #'identity))
+  program-error)
 
 (deftest search.error.9
-  (signals-error (search "c" "abcde" :key #'cons) program-error)
-  t)
+  (classify-error (search "c" "abcde" :key #'cons))
+  program-error)
 
 (deftest search.error.10
-  (signals-error (search "c" "abcde" :key #'car) type-error)
-  t)
+  (classify-error (search "c" "abcde" :key #'car))
+  type-error)
 
 ;;; Order of evaluation
 

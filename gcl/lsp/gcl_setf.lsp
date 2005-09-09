@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -29,11 +28,7 @@
 (export '(setf psetf shiftf rotatef
           define-modify-macro defsetf
           getf remf incf decf push pushnew pop
-          define-setf-method
-	  define-setf-expander
-	  get-setf-method
-	  get-setf-expansion
-	  get-setf-method-multiple-value))
+          define-setf-method get-setf-method get-setf-method-multiple-value))
 
 
 (in-package 'system)
@@ -82,9 +77,7 @@
 	(t (setq args (cons (gensym) args))
 	   (push `(declare (ignore ,(car args))) body)))
   `(eval-when (compile eval load)
-          (si:putprop ',access-fn
-		      #'(lambda ,args (block ,access-fn ,@ body))
-		      'setf-method)
+          (si:putprop ',access-fn #'(lambda ,args ,@ body) 'setf-method)
           (remprop ',access-fn 'setf-lambda)
           (remprop ',access-fn 'setf-update-fn)
           (si:putprop ',access-fn
@@ -92,8 +85,6 @@
                       'setf-documentation)
           ',access-fn))
 
-(defmacro define-setf-expander (access-fn &rest rest)
-  `(define-setf-method ,access-fn ,@rest))
 
 ;;; GET-SETF-METHOD.
 ;;; It just calls GET-SETF-METHOD-MULTIPLE-VALUE
@@ -105,13 +96,8 @@
 	    (error "Multiple store-variables are not allowed."))
     (values vars vals stores store-form access-form)))
 
-(defun get-setf-expansion (form &optional env)
-  (get-setf-method form env))
 
 ;;;; GET-SETF-METHOD-MULTIPLE-VALUE.
-
-;; FIXME  when all is well, remove this and the setf tests in the pcl directory
-(push :setf *features*)
 
 (defun get-setf-method-multiple-value (form &optional env &aux tem)
   (cond ((symbolp form)
@@ -155,17 +141,8 @@
 		   (cons (car form) vars))))
 	((macro-function (car form))
 	 (get-setf-method-multiple-value (macroexpand form)))
-	(t 
-	 (let ((vars (mapcar #'(lambda (x)
-	                         (declare (ignore x))
-	                         (gensym))
-	                     (cdr form)))
-	       (store (gensym)))
-	   (values vars (cdr form) (list store)
-	           `(funcall
-		     #'(setf ,(car form))
-		     ,store ,@vars )
-		   (cons (car form) vars))))))
+	(t
+	 (error "Cannot expand the SETF form ~S." form))))
 
 
 ;;;; SETF definitions.
@@ -236,29 +213,24 @@
      (structure (si:putprop ,s ,v 'structure-documentation))
      (type (si:putprop ,s ,v 'type-documentation))
      (setf (si:putprop ,s ,v 'setf-documentation))
-     (compiler-macro (si:putprop ,s ,v 'compiler-macro-documentation))
-     (method-combination (si:putprop ,s ,v 'method-combination-documentation))
      (t (error "~S is an illegal documentation type." ,d))))
 
 
 (define-setf-method getf (&environment env place indicator &optional default)
   (multiple-value-bind (vars vals stores store-form access-form)
       (get-setf-method place env)
-    (let ((itemp (gensym))
-	  (store (gensym))
-	  (def-temp (if default (gensym))))
-      (values `(,@vars ,itemp ,@(if default `(,def-temp)))
-	      `(,@vals ,indicator ,@(if default `(,default)))
-	      (list store)
-	      `(let ((,(car stores) (si:put-f ,access-form ,store ,itemp)))
-		 ,store-form
-		 ,store)
-	      `(getf ,access-form ,itemp ,@(if default `(,def-temp)))))))
+    (let ((itemp (gensym)) (store (gensym)))
+      (values `(,@vars ,itemp)
+              `(,@vals ,indicator)
+              (list store)
+              `(let ((,(car stores) (si:put-f ,access-form ,store ,itemp)))
+                 ,store-form
+                 ,store)
+              `(getf ,access-form ,itemp ,default)))))
 
 (defsetf subseq (sequence1 start1 &optional end1)
-                (sequence2)
-  `(progn (replace ,sequence1 ,sequence2 :start1 ,start1 :end1 ,end1)
-	  ,sequence2))
+		(sequence2)
+  `(replace ,sequence1 ,sequence2 :start1 ,start1 :end1 ,end1))
 
 (define-setf-method the (&environment env type form)
   (multiple-value-bind (vars vals stores store-form access-form)
@@ -400,7 +372,7 @@
 (defun setf-helper (rest env)
   (setq rest (cdr rest))
   (cond ((endp rest) nil)
-;        ((endp (cdr rest)) (error "~S is an illegal SETF form." rest))
+        ((endp (cdr rest)) (error "~S is an illegal SETF form." rest))
         ((endp (cddr rest)) (setf-expand-1 (car rest) (cadr rest) env))
         (t (cons 'progn (setf-expand rest env)))))
 
@@ -486,20 +458,12 @@
       (setq access-forms (cons access-form access-forms)))))
 
 
-(defun make-update-form (function access-form others lets)
-  (if others
-      (make-update-form function access-form (cdr others)
-			(cons (list 'list (list 'quote (gensym)) (car others)) lets))
-    `(list 'let* (list ,@lets)
-	   (list ',function access-form ,@(mapcar (lambda (x) (list 'quote (cadadr x))) lets)))))
-
 ;;; DEFINE-MODIFY-MACRO macro.
-;;FIXME -- this is really upgly and error prone.  CM 20041214
 (defmacro define-modify-macro (name lambda-list function &optional doc-string)
   (let ((update-form
 	 (do ((l lambda-list (cdr l))
 	      (vs nil))
-	     ((null l) (make-update-form function 'access-form (nreverse vs) nil))
+	     ((null l) `(list ',function access-form ,@(nreverse vs)))
 	   (unless (eq (car l) '&optional)
 		   (if (eq (car l) '&rest)
 		       (return `(list* ',function
@@ -526,43 +490,14 @@
 
 ;;; Some macro definitions.
 
-;;; (defmacro remf (&environment env place indicator)
-;;;  (multiple-value-bind (vars vals stores store-form access-form)
-;;;      (get-setf-method place env)
-;;;    `(let* ,(mapcar #'list vars vals)
-;;;       (multiple-value-bind (,(car stores) flag)
-;;;           (si:rem-f ,access-form ,indicator)
-;;;         ,store-form
-;;;         flag))))
-
-;;; This definition was obtained from SBCL
 (defmacro remf (&environment env place indicator)
-  (multiple-value-bind (dummies vals newval setter getter)
+  (multiple-value-bind (vars vals stores store-form access-form)
       (get-setf-method place env)
-    (do* ((d dummies (cdr d))
-          (v vals (cdr v))
-          (let-list nil)
-          (ind-temp (gensym))
-          (local1 (gensym))
-          (local2 (gensym)))
-         ((null d)
-          ;; See ANSI 5.1.3 for why we do out-of-order evaluation
-          (push (list ind-temp indicator) let-list)
-          (push (list (car newval) getter) let-list)
-          `(let* ,(nreverse let-list)
-             (do ((,local1 ,(car newval) (cddr ,local1))
-                  (,local2 nil ,local1))
-                 ((atom ,local1) nil)
-               (cond ((atom (cdr ,local1))
-                      (error "Odd-length property list in REMF."))
-                     ((eq (car ,local1) ,ind-temp)
-                      (cond (,local2
-                             (rplacd (cdr ,local2) (cddr ,local1))
-                             (return t))
-                            (t (setq ,(car newval) (cddr ,(car newval)))
-                               ,setter
-                               (return t))))))))
-      (push (list (car d) (car v)) let-list))))
+    `(let* ,(mapcar #'list vars vals)
+       (multiple-value-bind (,(car stores) flag)
+           (si:rem-f ,access-form ,indicator)
+         ,store-form
+         flag))))
 
 (define-modify-macro incf (&optional (delta 1)) +)
 (define-modify-macro decf (&optional (delta 1)) -)
@@ -606,18 +541,3 @@
 		    (append vals (list (list 'cdr access-form))))
        (prog1 (car ,access-form)
               ,store-form))))
-
-(defun (setf fdefinition) (def fn)
-  (when (not (functionp def))
-    (specific-error :wrong-type-argument "~S is not of type ~S~%" def 'function))
-  (cond ((symbolp fn)
-	 (when (special-operator-p fn)
-	   (specific-error :wrong-type-argument
-			   "~S is a special operator and cannot be chenged by (set fdefinition), expect ~S~%"
-			   fn '(or symbol function)))
-	 (setf (symbol-function fn) def))
-	(t
-	 (unless (and (consp fn) (eq (car fn) 'setf) (symbolp (cadr fn)) (null (cddr fn)))
-	   (specific-error :wrong-type-argument
-			   "~S is not of type ~S~%" fn 'function))
-	 (setf (get (cadr fn) 'setf-function) def))))

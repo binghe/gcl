@@ -994,13 +994,8 @@
 
 (defparameter *cl-symbols*
   (let ((pkg (find-package :common-lisp)))
-    (#-clisp progn
-     #+clisp ext:without-package-lock  #+clisp ("COMMON-LISP")
-     (mapcar #'(lambda (str) (intern str pkg))
-	     *cl-symbol-names*))))
-
-(defparameter *cl-symbols-vector*
-  (make-array (length *cl-symbols*) :initial-contents *cl-symbols*))
+    (mapcar #'(lambda (str) (intern str pkg))
+	    *cl-symbol-names*)))
 
 ;;; Symbols classified by their kind in the spec
 (defparameter *cl-function-symbols*
@@ -1179,9 +1174,7 @@
     file-length
     file-namestring
     file-position
-    file-string-length
     file-write-date
-    fill
     find
     find-all-symbols
     find-if
@@ -1394,7 +1387,6 @@
     probe-file
     proclaim
     provide
-    random
     random-state-p
     rassoc
     rassoc-if
@@ -1714,8 +1706,8 @@
     dolist
     dotimes
     formatter
-    cl:handler-bind
-    cl:handler-case
+    handler-bind
+    handler-case
     ignore-errors
     in-package
     incf
@@ -2151,7 +2143,7 @@
 		 *cl-local-macro-symbols*
 		 *cl-special-operator-symbols*
 		 *cl-standard-generic-function-symbols*
-		 '(declare ed)))))
+		 '(declare)))))
 
 (defparameter *cl-function-or-accessor-symbols*
   (append *cl-function-symbols* *cl-accessor-symbols*))

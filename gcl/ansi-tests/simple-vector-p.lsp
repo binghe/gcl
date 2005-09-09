@@ -8,7 +8,11 @@
 ;;; More tests for this are in make-array.lsp
 
 (deftest simple-vector-p.1
-  (check-type-predicate #'simple-vector-p 'simple-vector)
+  (loop for e in *universe*
+	unless (if (typep e 'simple-vector)
+		   (simple-vector-p e)
+		 (not (simple-vector-p e)))
+	collect e)
   nil)
 
 (deftest simple-vector-p.2
@@ -59,9 +63,9 @@
 ;;; Error tests
 
 (deftest simple-vector-p.error.1
-  (signals-error (simple-vector-p) program-error)
-  t)
+  (classify-error (simple-vector-p))
+  program-error)
 
 (deftest simple-vector-p.error.2
-  (signals-error (simple-vector-p #(a b) nil) program-error)
-  t)
+  (classify-error (simple-vector-p #(a b) nil))
+  program-error)

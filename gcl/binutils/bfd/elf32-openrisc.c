@@ -1,5 +1,5 @@
 /* OpenRISC-specific support for 32-bit ELF.
-   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Contributed by Johan Rydberg, jrydberg@opencores.org
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -30,26 +30,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 static reloc_howto_type *openrisc_reloc_type_lookup
   PARAMS ((bfd * , bfd_reloc_code_real_type));
 static void openrisc_info_to_howto_rela
-  PARAMS ((bfd *, arelent *, Elf_Internal_Rela *));
-static bfd_boolean openrisc_elf_relocate_section
+  PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static boolean openrisc_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static bfd_reloc_status_type openrisc_final_link_relocate
   PARAMS ((reloc_howto_type *, bfd *, asection *, bfd_byte *,
            Elf_Internal_Rela *, bfd_vma));
-static bfd_boolean openrisc_elf_gc_sweep_hook
+static boolean openrisc_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
            const Elf_Internal_Rela *));
 static asection * openrisc_elf_gc_mark_hook
   PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
-static bfd_boolean openrisc_elf_check_relocs
+static boolean openrisc_elf_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
-static bfd_boolean openrisc_elf_object_p
+static boolean openrisc_elf_object_p
   PARAMS ((bfd *));
 static void openrisc_elf_final_write_processing
-  PARAMS ((bfd *, bfd_boolean));
+  PARAMS ((bfd *, boolean));
 
 
 static reloc_howto_type openrisc_elf_howto_table[] =
@@ -59,148 +59,148 @@ static reloc_howto_type openrisc_elf_howto_table[] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_NONE",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A PC relative 26 bit relocation, right shifted by 2.  */
   HOWTO (R_OPENRISC_INSN_REL_26, /* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_INSN_REL_26", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x03ffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A absolute 26 bit relocation, right shifted by 2.  */
   HOWTO (R_OPENRISC_INSN_ABS_26, /* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 26,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_INSN_ABS_26", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x03ffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OPENRISC_LO_16_IN_INSN, /* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_LO_16_IN_INSN", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_OPENRISC_HI_16_IN_INSN, /* type */
 	 16,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_HI_16_IN_INSN",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* An 8 bit absolute relocation.  */
   HOWTO (R_OPENRISC_8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_8",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000,		/* src_mask */
 	 0x00ff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A 16 bit absolute relocation.  */
   HOWTO (R_OPENRISC_16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_16",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A 32 bit absolute relocation.  */
   HOWTO (R_OPENRISC_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_OPENRISC_32",	/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_OPENRISC_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 NULL,			/* special_function */
 	 "R_OPENRISC_GNU_VTINHERIT", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_OPENRISC_GNU_VTENTRY, /* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 0,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 _bfd_elf_rel_vtable_reloc_fn, /* special_function */
 	 "R_OPENRISC_GNU_VTENTRY", /* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to OpenRISC ELF reloc types.  */
@@ -246,7 +246,7 @@ static void
 openrisc_info_to_howto_rela (abfd, cache_ptr, dst)
      bfd * abfd ATTRIBUTE_UNUSED;
      arelent * cache_ptr;
-     Elf_Internal_Rela * dst;
+     Elf32_Internal_Rela * dst;
 {
   unsigned int r_type;
 
@@ -289,6 +289,9 @@ openrisc_final_link_relocate (howto, input_bfd, input_section, contents, rel,
 }
 
 /* Relocate an OpenRISC ELF section.
+   There is some attempt to make this function usable for many architectures,
+   both USE_REL and USE_RELA ['twould be nice if such a critter existed],
+   if only to serve as a learning tool.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
    to handle the relocations for a section.
@@ -298,7 +301,7 @@ openrisc_final_link_relocate (howto, input_bfd, input_section, contents, rel,
    zero.
 
    This function is responsible for adjusting the section contents as
-   necessary, and (if using Rela relocs and generating a relocatable
+   necessary, and (if using Rela relocs and generating a relocateable
    output file) adjusting the reloc addend as necessary.
 
    This function does not have to worry about setting the reloc
@@ -312,13 +315,13 @@ openrisc_final_link_relocate (howto, input_bfd, input_section, contents, rel,
    The global hash table entry for the global symbols can be found
    via elf_sym_hashes (input_bfd).
 
-   When generating relocatable output, this function must handle
+   When generating relocateable output, this function must handle
    STB_LOCAL/STT_SECTION symbols specially.  The output symbol is
    going to be the section symbol corresponding to the output
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static boolean
 openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			       contents, relocs, local_syms, local_sections)
      bfd *output_bfd;
@@ -335,8 +338,8 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
-  if (info->relocatable)
-    return TRUE;
+  if (info->relocateable)
+    return true;
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -375,7 +378,7 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
@@ -383,12 +386,33 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned;
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
-				   r_symndx, symtab_hdr, sym_hashes,
-				   h, sec, relocation,
-				   unresolved_reloc, warned);
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  name = h->root.root.string;
+
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      sec = h->root.u.def.section;
+	      relocation = (h->root.u.def.value
+			    + sec->output_section->vma + sec->output_offset);
+	    }
+	  else if (h->root.type == bfd_link_hash_undefweak)
+	    {
+	      relocation = 0;
+	    }
+	  else
+	    {
+	      if (!((*info->callbacks->undefined_symbol)
+		    (info, h->root.root.string, input_bfd,
+		     input_section, rel->r_offset, true)))
+		return false;
+	      relocation = 0;
+	    }
 	}
 
       r = openrisc_final_link_relocate (howto, input_bfd, input_section,
@@ -402,13 +426,13 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    {
 	    case bfd_reloc_overflow:
 	      r = info->callbacks->reloc_overflow
-		(info, (h ? &h->root : NULL), name, howto->name,
-		 (bfd_vma) 0, input_bfd, input_section, rel->r_offset);
+		(info, name, howto->name, (bfd_vma) 0,
+		 input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
-		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
+		(info, name, input_bfd, input_section, rel->r_offset, true);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -433,11 +457,11 @@ openrisc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      (info, msg, name, input_bfd, input_section, rel->r_offset);
 
 	  if (!r)
-	    return FALSE;
+	    return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -482,21 +506,21 @@ openrisc_elf_gc_mark_hook (sec, info, rel, h, sym)
 
 /* Update the got entry reference counts for the section being removed.  */
 
-static bfd_boolean
+static boolean
 openrisc_elf_gc_sweep_hook (abfd, info, sec, relocs)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      asection *sec ATTRIBUTE_UNUSED;
      const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
-  return TRUE;
+  return true;
 }
 
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
 
-static bfd_boolean
+static boolean
 openrisc_elf_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -508,8 +532,8 @@ openrisc_elf_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (info->relocatable)
-    return TRUE;
+  if (info->relocateable)
+    return true;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -535,25 +559,25 @@ openrisc_elf_check_relocs (abfd, info, sec, relocs)
 	  /* This relocation describes the C++ object vtable hierarchy.
 	     Reconstruct it for later use during GC.  */
 	case R_OPENRISC_GNU_VTINHERIT:
-	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return FALSE;
+	  if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
+	    return false;
 	  break;
 
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
 	case R_OPENRISC_GNU_VTENTRY:
-	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return FALSE;
+	  if (!_bfd_elf32_gc_record_vtentry (abfd, sec, h, rel->r_addend))
+	    return false;
 	  break;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Set the right machine number.  */
 
-static bfd_boolean
+static boolean
 openrisc_elf_object_p (abfd)
      bfd *abfd;
 {
@@ -563,7 +587,7 @@ openrisc_elf_object_p (abfd)
       (void) bfd_default_set_arch_mach (abfd, bfd_arch_openrisc, 0);
       break;
     }
-  return TRUE;
+  return true;
 }
 
 /* Store the machine number in the flags field.  */
@@ -571,7 +595,7 @@ openrisc_elf_object_p (abfd)
 static void
 openrisc_elf_final_write_processing (abfd, linker)
      bfd *abfd;
-     bfd_boolean linker ATTRIBUTE_UNUSED;
+     boolean linker ATTRIBUTE_UNUSED;
 {
   unsigned long val;
 

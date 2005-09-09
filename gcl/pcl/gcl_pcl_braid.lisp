@@ -224,10 +224,9 @@
 		(setf (wrapper-class-slots wrapper)
 		      ()))
 	      
-	      (setq proto (if (eq name 'function) #'cons ;;FIXME -- not necessary
-			    (if (eq meta 'funcallable-standard-class)
+	      (setq proto (if (eq meta 'funcallable-standard-class)
 			      (allocate-funcallable-instance wrapper)
-			      (allocate-standard-instance wrapper))))
+			      (allocate-standard-instance wrapper)))
 	    
 	      (setq direct-slots
 		    (bootstrap-make-slot-definitions 
@@ -463,9 +462,8 @@
   (let* ((built-in-class (find-class 'built-in-class))
 	 (built-in-class-wrapper (class-wrapper built-in-class)))
     (dolist (e *built-in-classes*)
-      (unless (find-class (car e) nil)
-	(let ((class (allocate-standard-instance built-in-class-wrapper)))
-	  (setf (find-class (car e)) class)))))
+      (let ((class (allocate-standard-instance built-in-class-wrapper)))
+	(setf (find-class (car e)) class))))
 
   ;;
   ;; In the second pass, we initialize the class objects.
@@ -603,22 +601,19 @@
     :initfunction ,(eval-form (structure-slotd-init-form slotd))))
 
 (defun find-structure-class (symbol)
-  (unless (eq symbol 'std-instance)
-    (if (structure-type-p symbol)
-	(unless (eq find-structure-class symbol)
-	  (let ((find-structure-class symbol))
-	    (let ((res (ensure-class symbol
-				     :metaclass 'structure-class
-				     :name symbol
-				     :direct-superclasses
-				     (when (structure-type-included-type-name symbol)
-				       (list (structure-type-included-type-name symbol)))
-				     :direct-slots
-				     (mapcar #'slot-initargs-from-structure-slotd
-					     (structure-type-slot-description-list symbol)))))
-	      (setf (class-defstruct-constructor res) (car (si::s-data-constructors (get symbol 'si::s-data))))
-	      res)))
-      (error "~S is not a legal structure class name." symbol))))
+  (if (structure-type-p symbol)
+      (unless (eq find-structure-class symbol)
+	(let ((find-structure-class symbol))
+	  (ensure-class symbol
+			:metaclass 'structure-class
+			:name symbol
+			:direct-superclasses
+			(when (structure-type-included-type-name symbol)
+			  (list (structure-type-included-type-name symbol)))
+			:direct-slots
+			(mapcar #'slot-initargs-from-structure-slotd
+				(structure-type-slot-description-list symbol)))))
+      (error "~S is not a legal structure class name." symbol)))
 
 #-cmu17
 (eval-when (compile eval)
@@ -763,36 +758,3 @@
           when called with arguments ~S."
 	  generic-function args)
   (apply generic-function args))
-
-(defmethod no-next-method ((generic-function standard-generic-function)
-			   (method standard-method)
-			   &rest args)
-  (cerror "Try again."
-	  "No next method to ~S when calling generic function ~S with arguments ~S~%"
-	  method generic-function args)
-  (apply generic-function args))
-
-(defmethod no-primary-method ((generic-function standard-generic-function)
-			      &rest args)
-  (cerror "Try again."
-	  "No primary method when calling generic function ~S with arguments ~S~%"
-	  generic-function args)
-  (apply generic-function args))
-
-(defmethod invalid-qualifiers ((gf generic-function) combin args methods)
-  (if (null (cdr methods))
-      (error "~@<In a call to ~s with arguments ~:s: ~
-              The method ~s has invalid qualifiers for method ~
-              combination ~s.~@:>"
-	 gf args (car methods) combin)
-      (error "~@<In a call to ~s with arguments ~:s: ~
-              The methods ~{~s~^, ~} have invalid qualifiers for ~
-              method combination ~s.~@:>"
-	 gf args methods combin)))
-
-(defun %no-primary-method (gf args)
-  (apply #'no-primary-method gf args))
-
-(defun %invalid-qualifiers (gf combin args methods)
-  (invalid-qualifiers gf combin args methods))
-

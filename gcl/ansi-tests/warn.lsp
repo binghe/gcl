@@ -133,43 +133,29 @@
   (nil) t)
 
 (deftest warn.12
-  (signals-error (warn 'condition) type-error)
-  t)
+  (classify-error (warn 'condition))
+  type-error)
 
 (deftest warn.13
-  (signals-error (warn 'simple-condition) type-error)
-  t)
+  (classify-error (warn 'simple-condition))
+  type-error)
 
 (deftest warn.14
-  (signals-error (warn (make-condition 'simple-warning) :format-control "Foo") type-error)
-  t)
+  (classify-error (warn (make-condition 'simple-warning) :format-control "Foo"))
+  type-error)
 
 (deftest warn.15
-  (signals-error (warn) program-error)
-  t)
+  (classify-error (warn))
+  program-error)
 
 (deftest warn.16
-  (signals-error (warn (make-condition 'condition)) type-error)
-  t)
+  (classify-error (warn (make-condition 'condition)))
+  type-error)
 
 (deftest warn.17
-  (signals-error (warn (make-condition 'simple-condition)) type-error)
-  t)
+  (classify-error (warn (make-condition 'simple-condition)))
+  type-error)
 
 (deftest warn.18
-  (signals-error (warn (make-condition 'simple-error)) type-error)
-  t)
-
-(deftest warn.19
-  (let ((warned nil))
-    (handler-bind
-     ((warning #'(lambda (c)
-		   (assert (typep c 'simple-warning))
-		   (setf warned t)
-		   (muffle-warning c))))
-     (values
-      (multiple-value-list
-       (warn (make-condition 'simple-warning
-			     :format-control (formatter "Foo!"))))
-      warned)))
-  (nil) t)
+  (classify-error (warn (make-condition 'simple-error)))
+  type-error)

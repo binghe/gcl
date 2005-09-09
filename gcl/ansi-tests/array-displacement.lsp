@@ -108,17 +108,28 @@
 ;;; Error tests
 
 (deftest array-displacement.error.1
-  (signals-error (array-displacement) program-error)
-  t)
+  (classify-error (array-displacement))
+  program-error)
 
 (deftest array-displacement.error.2
-  (signals-error (array-displacement #(a b c) nil) program-error)
-  t)
+  (classify-error (array-displacement #(a b c) nil))
+  program-error)
 
 (deftest array-displacement.error.3
-  (check-type-error #'array-displacement #'arrayp)
+  (let (why)
+    (loop for e in *mini-universe*
+	  unless (or (typep e 'array)
+		     (eq 'type-error
+			 (setq why (classify-error**
+				    `(array-displacement ',e)))))
+	collect (list e why)))
   nil)
 
 (deftest array-displacement.error.4
-  (signals-type-error x nil (array-displacement x))
-  t)
+  (classify-error (array-displacement nil))
+  type-error)
+
+(deftest array-displacement.error.5
+  (classify-error (let ((x nil)) (array-displacement x)))
+  type-error)
+

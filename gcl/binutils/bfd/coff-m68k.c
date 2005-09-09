@@ -1,6 +1,6 @@
 /* BFD back-end for Motorola 68000 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-   2000, 2001, 2002, 2003, 2005
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -67,20 +67,19 @@ static reloc_howto_type *m68kcoff_common_addend_rtype_to_howto
 #define RELOC_SPECIAL_FN m68kcoff_common_addend_special_fn
 #endif
 
-static bfd_boolean m68k_coff_is_local_label_name
-  PARAMS ((bfd *, const char *));
+static boolean m68k_coff_is_local_label_name PARAMS ((bfd *, const char *));
 
 /* On the delta, a symbol starting with L% is local.  We won't see
    such a symbol on other platforms, so it should be safe to always
    consider it local here.  */
 
-static bfd_boolean
+static boolean
 m68k_coff_is_local_label_name (abfd, name)
      bfd *abfd;
      const char *name;
 {
   if (name[0] == 'L' && name[1] == '%')
-    return TRUE;
+    return true;
 
   return _bfd_coff_is_local_label_name (abfd, name);
 }
@@ -101,13 +100,13 @@ static
 #endif
 reloc_howto_type m68kcoff_howto_table[] =
   {
-    HOWTO (R_RELBYTE,	       0,  0,  	8,  FALSE, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "8",	TRUE, 0x000000ff,0x000000ff, FALSE),
-    HOWTO (R_RELWORD,	       0,  1, 	16, FALSE, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "16",	TRUE, 0x0000ffff,0x0000ffff, FALSE),
-    HOWTO (R_RELLONG,	       0,  2, 	32, FALSE, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "32",	TRUE, 0xffffffff,0xffffffff, FALSE),
-    HOWTO (R_PCRBYTE,	       0,  0, 	8,  TRUE,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP8",    TRUE, 0x000000ff,0x000000ff, FALSE),
-    HOWTO (R_PCRWORD,	       0,  1, 	16, TRUE,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP16",   TRUE, 0x0000ffff,0x0000ffff, FALSE),
-    HOWTO (R_PCRLONG,	       0,  2, 	32, TRUE,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP32",   TRUE, 0xffffffff,0xffffffff, FALSE),
-    HOWTO (R_RELLONG_NEG,      0, -2, 	32, FALSE, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "-32",	TRUE, 0xffffffff,0xffffffff, FALSE),
+    HOWTO (R_RELBYTE,	       0,  0,  	8,  false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "8",	true, 0x000000ff,0x000000ff, false),
+    HOWTO (R_RELWORD,	       0,  1, 	16, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "16",	true, 0x0000ffff,0x0000ffff, false),
+    HOWTO (R_RELLONG,	       0,  2, 	32, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "32",	true, 0xffffffff,0xffffffff, false),
+    HOWTO (R_PCRBYTE,	       0,  0, 	8,  true,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP8",    true, 0x000000ff,0x000000ff, false),
+    HOWTO (R_PCRWORD,	       0,  1, 	16, true,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP16",   true, 0x0000ffff,0x0000ffff, false),
+    HOWTO (R_PCRLONG,	       0,  2, 	32, true,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP32",   true, 0xffffffff,0xffffffff, false),
+    HOWTO (R_RELLONG_NEG,      0, -2, 	32, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "-32",	true, 0xffffffff,0xffffffff, false),
   };
 #endif /* not ONLY_DECLARE_RELOCS */
 
@@ -250,7 +249,7 @@ m68kcoff_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
    symbol is the value itself plus any desired offset.  (taken from
    work done by Ian Taylor, Cygnus Support, for I386 COFF).  */
 
-/* If we are producing relocatable output, we need to do some
+/* If we are producing relocateable output, we need to do some
    adjustments to the object file that are not done by the
    bfd_perform_relocation function.  This function is called by every
    reloc type to make any required adjustments.  */
@@ -290,7 +289,7 @@ m68kcoff_common_addend_special_fn (abfd, reloc_entry, symbol, data,
     {
       /* For some reason bfd_perform_relocation always effectively
 	 ignores the addend for a COFF target when producing
-	 relocatable output.  This seems to be always wrong for 386
+	 relocateable output.  This seems to be always wrong for 386
 	 COFF, so we handle the addend here instead.  */
       diff = reloc_entry->addend;
     }
@@ -409,7 +408,7 @@ m68kcoff_common_addend_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     }
 
   /* If the output symbol is common (in which case this must be a
-     relocatable link), we need to add in the final size of the
+     relocateable link), we need to add in the final size of the
      common symbol.  */
   if (h != NULL && h->root.type == bfd_link_hash_common)
     *addendp += h->root.u.c.size;
@@ -431,7 +430,7 @@ m68kcoff_common_addend_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
    after the add_symbols entry point has been called for all the
    objects, and before the final_link entry point is called.  */
 
-bfd_boolean
+boolean
 bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
      bfd *abfd;
      struct bfd_link_info *info;
@@ -445,24 +444,24 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
   bfd_byte *p;
   bfd_size_type amt;
 
-  BFD_ASSERT (! info->relocatable);
+  BFD_ASSERT (! info->relocateable);
 
   *errmsg = NULL;
 
   if (datasec->reloc_count == 0)
-    return TRUE;
+    return true;
 
   extsyms = obj_coff_external_syms (abfd);
   symesz = bfd_coff_symesz (abfd);
 
-  irel = _bfd_coff_read_internal_relocs (abfd, datasec, TRUE, NULL, FALSE,
+  irel = _bfd_coff_read_internal_relocs (abfd, datasec, true, NULL, false,
 					 NULL);
   irelend = irel + datasec->reloc_count;
 
   amt = (bfd_size_type) datasec->reloc_count * 12;
   relsec->contents = (bfd_byte *) bfd_alloc (abfd, amt);
   if (relsec->contents == NULL)
-    return FALSE;
+    return false;
 
   p = relsec->contents;
 
@@ -481,7 +480,7 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 	{
 	  *errmsg = _("unsupported reloc type");
 	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
+	  return false;
 	}
 
       if (irel->r_symndx == -1)
@@ -510,10 +509,10 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 		  (irel->r_vaddr - datasec->vma + datasec->output_offset), p);
       memset (p + 4, 0, 8);
       if (targetsec != NULL)
-	strncpy ((char *) p + 4, targetsec->output_section->name, 8);
+	strncpy (p + 4, targetsec->output_section->name, 8);
     }
 
-  return TRUE;
+  return true;
 }
 #endif /* neither ONLY_DECLARE_RELOCS not STATIC_RELOCS  */
 
@@ -532,7 +531,7 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 #endif
 
 #ifdef NAMES_HAVE_UNDERSCORE
-CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, D_PAGED, 0, '_', NULL, COFF_SWAP_TABLE)
+CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, D_PAGED, 0, '_', NULL)
 #else
-CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, D_PAGED, 0, 0, NULL, COFF_SWAP_TABLE)
+CREATE_BIG_COFF_TARGET_VEC (TARGET_SYM, TARGET_NAME, D_PAGED, 0, 0, NULL)
 #endif

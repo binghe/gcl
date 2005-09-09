@@ -10,23 +10,23 @@
   2)
 
 (deftest ecase.2
-  (signals-type-error x 1 (ecase x))
-  t)
+  (classify-error (ecase 1))
+  type-error)
 
 (deftest ecase.3
-  (signals-type-error x 1 (ecase x (a 1) (b 2) (c 3)))
-  t)
+  (classify-error (ecase 1 (a 1) (b 2) (c 3)))
+  type-error)
 
 ;;; It is legal to use T or OTHERWISE as key designators
 ;;; in ECASE forms.  They have no special meaning here.
 
 (deftest ecase.4
-  (signals-type-error x 1 (ecase x (t nil)))
-  t)
+  (classify-error (ecase 1 (t nil)))
+  type-error)
 
 (deftest ecase.5
-  (signals-type-error x 1 (ecase x (otherwise nil)))
-  t)
+  (classify-error (ecase 1 (otherwise nil)))
+  type-error)
 
 (deftest ecase.6
   (ecase 'b ((a z) 1) ((y b w) 2) ((b c) 3))
@@ -45,8 +45,8 @@
   a)
 
 (deftest ecase.9
-  (signals-type-error x nil (ecase x (nil 'a)))
-  t)
+  (classify-error (ecase nil (nil 'a)))
+  type-error)
 
 (deftest ecase.10
   (ecase nil ((nil) 'a))
@@ -57,8 +57,8 @@
   1 2 3)
 
 (deftest ecase.12
-  (signals-type-error x t (ecase x (a 10)))
-  t)
+  (classify-error (ecase t (a 10)))
+  type-error)
 
 (deftest ecase.13
   (ecase t ((t) 10) (t 20))
@@ -70,24 +70,24 @@
   1)
 
 (deftest ecase.15
-  (signals-type-error x 'otherwise (ecase x ((t) 10)))
-  t)
+  (classify-error (ecase 'otherwise ((t) 10)))
+  type-error)
 
 (deftest ecase.16
-  (signals-type-error x t (ecase x ((otherwise) 10)))
-  t)
+  (classify-error (ecase t ((otherwise) 10)))
+  type-error)
 
 (deftest ecase.17
-  (signals-type-error x 'a (ecase x (b 0) (c 1) (otherwise 2)))
-  t)
+  (classify-error (ecase 'a (b 0) (c 1) (otherwise 2)))
+  type-error)
 
 (deftest ecase.18
-  (signals-type-error x 'a (ecase x (b 0) (c 1) ((otherwise) 2)))
-  t)
+  (classify-error (ecase 'a (b 0) (c 1) ((otherwise) 2)))
+  type-error)
 
 (deftest ecase.19
-  (signals-type-error x 'a (ecase x (b 0) (c 1) ((t) 2)))
-  t)
+  (classify-error (ecase 'a (b 0) (c 1) ((t) 2)))
+  type-error)
 
 (deftest ecase.20
   (ecase #\a
@@ -147,28 +147,3 @@
 (deftest ecase.32
   (ecase 'a (a) (b 'b))
   nil)
-
-;;; No implicit tagbody
-(deftest ecase.33
-  (block done
-    (tagbody
-     (ecase 'a (a (go 10)
-		  10
-		  (return-from done 'bad)))
-     10
-     (return-from done 'good)))
-  good)
-
-(deftest ecase.error.1
-  (signals-error (funcall (macro-function 'ecase)) program-error)
-  t)
-
-(deftest ecase.error.2
-  (signals-error (funcall (macro-function 'ecase) '(ecase t))
-		 program-error)
-  t)
-
-(deftest ecase.error.3
-  (signals-error (funcall (macro-function 'ecase) '(ecase t) nil nil)
-		 program-error)
-  t)

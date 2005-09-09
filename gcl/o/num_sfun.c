@@ -149,16 +149,6 @@ number_expt(object x, object y)
 			vs_reset;
 			return(z);
 		}
-		if (tx==t_fixnum && fix(x)==2 && ty==t_fixnum) {
-		  object z1;
-		  if (fix(y)<CHAR_SIZE*sizeof(fixnum)-1)
-		    return make_fixnum((((fixnum)1)<<fix(y)));
-		  z=new_bignum();
-		  z1=new_bignum();
-		  mpz_set_ui(MP(z),1);
-		  mpz_mul_2exp(MP(z1),MP(z),fix(y));
-		  return normalize_big(z1);
-		}
 		z = small_fixnum(1);
 		vs_push(z);
 		vs_push(Cnil);
@@ -262,46 +252,35 @@ number_log(object x, object y)
 static object
 number_sqrt(object x)
 {
-	object z,q;
-	int s;
-	enum type t;
-	double sqrt(double),d;
+	object z;
+	double sqrt(double);
 	vs_mark;
 
 	if (type_of(x) == t_complex)
 		goto COMPLEX;
-	if ((s=number_minusp(x))) 
-	  x=number_negate(x);
-
-	switch ((t=type_of(x))) {
+	if (number_minusp(x))
+		goto COMPLEX;
+	switch (type_of(x)) {
 	case t_fixnum:
 	case t_bignum:
 	case t_ratio:
-	  d=sqrt(number_to_double(x));
-	  if (d!=(number_to_double((q=double_to_integer(d)))))
-	    t=t_longfloat;
-	  break;
+		return(make_longfloat(
+			(longfloat)sqrt(number_to_double(x))));
+
 	case t_shortfloat:
-	  d=sqrt((double)(sf(x)));
-	  q=make_shortfloat((shortfloat)d);
-	  break;
+		return(make_shortfloat((shortfloat)sqrt((double)(sf(x)))));
+
 	case t_longfloat:
-	  d=sqrt(lf(x));
-	  q=Cnil;
-	  break;
+		return(make_longfloat(sqrt(lf(x))));
+
 	default:
-	  FEwrong_type_argument(sLnumber, x);
-	  return Cnil;
+		FEwrong_type_argument(sLnumber, x);
 	}
 
-	q=t==t_longfloat ? make_longfloat(d) : q;
-
-	return s ? make_complex(small_fixnum(0),q) : q;
-
-
 COMPLEX:
-	{extern object plus_half;
-	z = number_expt(x, plus_half);}
+	z = make_ratio(small_fixnum(1), small_fixnum(2));
+	vs_push(z);
+	z = number_expt(x, z);
 	vs_reset;
 	return(z);
 }
@@ -335,8 +314,7 @@ number_atan2(object y, object x)
 			dz = PI;
 		else
 			dz = -PI + atan(-dy / -dx);
-	if ((type_of(x) == t_shortfloat && type_of(y)!=t_longfloat) || 
-	    (type_of(y) == t_shortfloat && type_of(x)!=t_longfloat))
+	if (type_of(x) == t_shortfloat)
 	  z = make_shortfloat((shortfloat)dz);
 	else
 	  z = make_longfloat(dz);
@@ -631,29 +609,17 @@ void
 gcl_init_num_sfun(void)
 {
 	imag_unit
-	= make_complex(small_fixnum(0),
-		       small_fixnum(1));
+	= make_complex(make_longfloat((longfloat)0.0),
+		       make_longfloat((longfloat)1.0));
 	enter_mark_origin(&imag_unit);
 	minus_imag_unit
-	= make_complex(small_fixnum(0),
-		       small_fixnum(-1));
+	= make_complex(make_longfloat((longfloat)0.0),
+		       make_longfloat((longfloat)-1.0));
 	enter_mark_origin(&minus_imag_unit);
 	imag_two
-	= make_complex(small_fixnum(0),
-		       small_fixnum(2));
+	= make_complex(make_longfloat((longfloat)0.0),
+		       make_longfloat((longfloat)2.0));
 	enter_mark_origin(&imag_two);
-/* 	imag_unit */
-/* 	= make_complex(make_longfloat((longfloat)0.0), */
-/* 		       make_longfloat((longfloat)1.0)); */
-/* 	enter_mark_origin(&imag_unit); */
-/* 	minus_imag_unit */
-/* 	= make_complex(make_longfloat((longfloat)0.0), */
-/* 		       make_longfloat((longfloat)-1.0)); */
-/* 	enter_mark_origin(&minus_imag_unit); */
-/* 	imag_two */
-/* 	= make_complex(make_longfloat((longfloat)0.0), */
-/* 		       make_longfloat((longfloat)2.0)); */
-/* 	enter_mark_origin(&imag_two); */
 
 	make_constant("PI", make_longfloat(PI));
 

@@ -44,7 +44,7 @@ static void
 fmt_roman(int,int,int,int,int);
 
 static void
-fmt_integer(object,bool,bool,int,int,int,int,int);
+fmt_integer(object,bool,bool,int,int,int,int);
 
 static void
 fmt_semicolon(bool,bool);
@@ -132,6 +132,7 @@ fmt_decimal(bool, bool);
 
 
 object sSAindent_formatted_outputA;
+
 
 #define	ctl_string	(fmt_string->st.st_self + ctl_origin)
 
@@ -370,11 +371,6 @@ DIRECTIVE:
 	if (c == '@') {
 		atsign = TRUE;
 		c = ctl_advance();
-		if (!colon)
-		  if (c == ':') {
-		    colon = TRUE;
-		    c = ctl_advance();
-		  }
 	}
 	fmt_nparam = n;
 	switch (c) {
@@ -676,63 +672,59 @@ fmt_S_expression(bool colon, bool atsign)
 static void
 fmt_decimal(bool colon, bool atsign)
 {
-	int mincol=0, padchar=0, commachar=0, commainterval=0;
+	int mincol=0, padchar=0, commachar=0;
 
-	fmt_max_param(4);
+	fmt_max_param(3);
 	fmt_set_param(0, &mincol, fmt_int, 0);
 	fmt_set_param(1, &padchar, fmt_char, ' ');
 	fmt_set_param(2, &commachar, fmt_char, ',');
-	fmt_set_param(3, &commainterval, fmt_int, 3);
 	fmt_integer(fmt_advance(), colon, atsign,
-		    10, mincol, padchar, commachar, commainterval);
+		    10, mincol, padchar, commachar);
 }
 
 static void
 fmt_binary(bool colon, bool atsign)
 {
-	int mincol=0, padchar=0, commachar=0, commainterval=0;
+	int mincol=0, padchar=0, commachar=0;
 
-	fmt_max_param(4);
+	fmt_max_param(3);
 	fmt_set_param(0, &mincol, fmt_int, 0);
 	fmt_set_param(1, &padchar, fmt_char, ' ');
 	fmt_set_param(2, &commachar, fmt_char, ',');
-	fmt_set_param(3, &commainterval, fmt_int, 3);
 	fmt_integer(fmt_advance(), colon, atsign,
-		    2, mincol, padchar, commachar, commainterval);
+		    2, mincol, padchar, commachar);
 }
 
 static void
 fmt_octal(bool colon, bool atsign)
 {
-	int mincol=0, padchar=0, commachar=0, commainterval=0;;
+	int mincol=0, padchar=0, commachar=0;
 
-	fmt_max_param(4);
+	fmt_max_param(3);
 	fmt_set_param(0, &mincol, fmt_int, 0);
 	fmt_set_param(1, &padchar, fmt_char, ' ');
 	fmt_set_param(2, &commachar, fmt_char, ',');
-	fmt_set_param(3, &commainterval, fmt_int, 3);
 	fmt_integer(fmt_advance(), colon, atsign,
-		    8, mincol, padchar, commachar, commainterval);
+		    8, mincol, padchar, commachar);
 }
 
 static void
 fmt_hexadecimal(bool colon, bool atsign)
 {
-	int mincol=0, padchar=0, commachar=0, commainterval=0;;
+	int mincol=0, padchar=0, commachar=0;
 
-	fmt_max_param(4);
+	fmt_max_param(3);
 	fmt_set_param(0, &mincol, fmt_int, 0);
 	fmt_set_param(1, &padchar, fmt_char, ' ');
 	fmt_set_param(2, &commachar, fmt_char, ',');
-	fmt_set_param(3, &commainterval, fmt_int, 3);
 	fmt_integer(fmt_advance(), colon, atsign,
-		    16, mincol, padchar, commachar, commainterval);
+		    16, mincol, padchar, commachar);
 }
 
 static void
 fmt_radix(bool colon, bool atsign)
 {
-	int radix=0, mincol=0, padchar=0, commachar=0, commainterval=0;;
+	int radix=0, mincol=0, padchar=0, commachar=0;
 	object x;
 	int i, j, k;
 	int s, t;
@@ -749,7 +741,7 @@ fmt_radix(bool colon, bool atsign)
 				i = -1;
 			if ((!colon && (i <= 0 || i >= 4000)) ||
 			    (colon && (i <= 0 || i >= 5000))) {
-				fmt_integer(x, FALSE, FALSE, 10, 0, ' ', ',', 3);
+				fmt_integer(x, FALSE, FALSE, 10, 0, ' ', ',');
 				return;
 			}
 			fmt_roman(i/1000, 'M', '*', '*', colon);
@@ -796,23 +788,22 @@ fmt_radix(bool colon, bool atsign)
 		}
 		return;
 	}
-	fmt_max_param(5);
+	fmt_max_param(4);
 	fmt_set_param(0, &radix, fmt_int, 10);
 	fmt_set_param(1, &mincol, fmt_int, 0);
 	fmt_set_param(2, &padchar, fmt_char, ' ');
 	fmt_set_param(3, &commachar, fmt_char, ',');
-	fmt_set_param(4, &commainterval, fmt_int, 3);
 	x = fmt_advance();
 	check_type_integer(&x);
 	if (radix < 0 || radix > 36) {
 		vs_push(make_fixnum(radix));
 		FEerror("~D is illegal as a radix.", 1, vs_head);
 	}
-	fmt_integer(x, colon, atsign, radix, mincol, padchar, commachar, commainterval);
+	fmt_integer(x, colon, atsign, radix, mincol, padchar, commachar);
 }	
 
 static void
-fmt_integer(object x, bool colon, bool atsign, int radix, int mincol, int padchar, int commachar, int commainterval)
+fmt_integer(object x, bool colon, bool atsign, int radix, int mincol, int padchar, int commachar)
 {
 	int l, l1;
 	int s;
@@ -863,7 +854,7 @@ fmt_integer(object x, bool colon, bool atsign, int radix, int mincol, int padcha
 		writec_stream('+', fmt_stream);
 	while (l1-- > 0) {
 		writec_stream(fmt_tempstr(s++), fmt_stream);
-		if (colon && l1 > 0 && l1%(commainterval) == 0)
+		if (colon && l1 > 0 && l1%3 == 0)
 			writec_stream(commachar, fmt_stream);
 	}
 }
@@ -2104,14 +2095,6 @@ fmt_justification(volatile bool colon, bool atsign)
 			fmt_restore1;
 			while (ctl_string[--j0] != '>')
 				j0 = fmt_skip();
-			if (ctl_string[j0-1] == '@') {
-			    j0--;
-			    if (ctl_string[j0-1] == ':') j0--;
-			} else
-			if (ctl_string[j0-1] == ':') {
-			    j0--;
-			    if (ctl_string[j0-1] == '@') j0--;
-			}
 			if (ctl_string[--j0] != '~')
 				fmt_error("~> expected");
 			break;
@@ -2119,23 +2102,12 @@ fmt_justification(volatile bool colon, bool atsign)
 		format(fields[n++], ctl_origin + i, j - i);
 		fmt_restore1;
 		if (ctl_string[--j0] == '>') {
-			if (ctl_string[j0-1] == '@') {
-			    j0--;
-			    if (ctl_string[j0-1] == ':') j0--;
-			} else
-			if (ctl_string[j0-1] == ':') {
-			    j0--;
-			    if (ctl_string[j0-1] == '@') j0--;
-			}
 			if (ctl_string[--j0] != '~')
 				fmt_error("~> expected");
 			break;
 		} else if (ctl_string[j0] != ';')
 			fmt_error("~; expected");
-		else {
-		    if (ctl_string[j0] == '@')
-			--j0;
-		    if (ctl_string[--j0] == ':') {
+		else if (ctl_string[--j0] == ':') {
 			if (n != 1)
 				fmt_error("illegal ~:;");
 			special = 1;
@@ -2146,16 +2118,9 @@ fmt_justification(volatile bool colon, bool atsign)
 			fmt_restore1;
 			spare_spaces = fmt_spare_spaces;
 			line_length = fmt_line_length;
-		    } else {
-			if (ctl_string[j0] == '@')
-			    --j0;
-			if (ctl_string[j0] != '~')
-			    fmt_error("~; expected");
-			sSAprint_line_prefixA->s.s_dbind=fields[n-1]->sm.sm_object0;
-		    }
-		}
+		} else if (ctl_string[j0] != '~')
+			fmt_error("~; expected");
 	}
-	sSAprint_line_prefixA->s.s_dbind=Cnil;
 	for (i = special, l = 0;  i < n;  i++)
 		l += fields[i]->sm.sm_object0->st.st_fillp;
 	m = n - 1 - special;
@@ -2229,8 +2194,6 @@ fmt_semicolon(bool colon, bool atsign)
 	fmt_set_param(1, &fmt_line_length, fmt_int, 72);
 }
 
-DEFVAR("*FORMAT-UNUSED-ARGS*",sSAformat_unused_argsA,SI,OBJNULL,"");
-
 DEFUNO_NEW("FORMAT",object,fLformat,LISP
        ,2,F_ARG_LIMIT,NONE,OO,OO,OO,OO,void,Lformat,(object strm, object control,...),"")
 {       va_list ap; 
@@ -2238,9 +2201,7 @@ DEFUNO_NEW("FORMAT",object,fLformat,LISP
 	VOL object x = OBJNULL;
 	jmp_buf fmt_jmp_buf0;
 	bool colon, e;
-	object *l;
 	fmt_old;
-
 	nargs=nargs-2;
 	if (nargs < 0)
 		too_few_arguments();
@@ -2257,87 +2218,51 @@ DEFUNO_NEW("FORMAT",object,fLformat,LISP
 		strm->sm.sm_object0 = x;
 	} else
 		check_type_stream(&strm);
-
-	/* check_type_string(&control); */
-	if (type_of(control) == t_string) {
-	    fmt_save;
-	    va_start(ap,control);
-	    frs_push(FRS_PROTECT, Cnil);
-	    if (nlj_active) {
-		    e = TRUE;
-		    goto L;
-	    }
-	{
-	    COERCE_VA_LIST(l,ap,nargs);
-	    fmt_base = l;
-	    fmt_index = 0;
-	    fmt_end = nargs;
-	    fmt_jmp_bufp = & fmt_jmp_buf0;
-	    if (symbol_value(sSAindent_formatted_outputA) != Cnil)
-		    fmt_indents = file_column(strm);
-	    else
-		    fmt_indents = 0;
-	    fmt_string = control;
-	    if ((colon = setjmp(*fmt_jmp_bufp))) {
-		    if (--colon)
-			    fmt_error("illegal ~:^");
-		    vs_base = vs_top;
-		    if (x != OBJNULL)
-			    vs_push(x);
-		    else
-			    vs_push(Cnil);
-		    e = FALSE;
-		    goto L;
-	    }
-	    format(strm, 0, control->st.st_fillp);
-	    if (sSAformat_unused_argsA->s.s_dbind) {
-	      int i;
-	      for (i=fmt_end-1;i>=fmt_index;i--)
-		sSAformat_unused_argsA->s.s_dbind=MMcons(fmt_base[i],sSAformat_unused_argsA->s.s_dbind);
-	    }
-
-	    flush_stream(strm);
+	check_type_string(&control);
+	fmt_save;
+	frs_push(FRS_PROTECT, Cnil);
+	if (nlj_active) {
+		e = TRUE;
+		goto L;
 	}
-	    e = FALSE;
+	
+	va_start(ap,control);
+	{object *l;
+	 COERCE_VA_LIST(l,ap,nargs);
+	fmt_base = l;
+	fmt_index = 0;
+	fmt_end = nargs;
+	fmt_jmp_bufp = & fmt_jmp_buf0;
+	if (symbol_value(sSAindent_formatted_outputA) != Cnil)
+		fmt_indents = file_column(strm);
+	else
+		fmt_indents = 0;
+	fmt_string = control;
+	if ((colon = setjmp(*fmt_jmp_bufp))) {
+		if (--colon)
+			fmt_error("illegal ~:^");
+		vs_base = vs_top;
+		if (x != OBJNULL)
+			vs_push(x);
+		else
+			vs_push(Cnil);
+		e = FALSE;
+		goto L;
+	}
+	format(strm, 0, control->st.st_fillp);
+	flush_stream(strm);
+       }
+	va_end(ap);
+	e = FALSE;
 L:
-	    va_end(ap);
-	    frs_pop();
-	    fmt_restore;
-	    if (e) {
-		    nlj_active = FALSE;
-		    unwind(nlj_fr, nlj_tag);
-	    }
-	} else
-	switch (type_of(control)) {
-	    case t_cfun:
-	    case t_gfun:
-	    case t_sfun:
-	    case t_vfun:
-	    case t_afun:
-	    case t_closure:
-	    case t_cclosure:
-	    case t_symbol:
-	    case t_cons:
-		if (nargs >= 64) FEerror("Too plong vl",0);
-	    {	int i;
-		object Xxvl[65];
-		vs_mark;
-		va_start(ap,control);
-		
-		Xxvl[0] = strm;
-		for (i=1 ; i <= nargs; i++) Xxvl[i]=va_arg(ap,object);
-		va_end(ap);
-		IapplyVector(control,nargs+1,Xxvl);
-		vs_reset;
-	    }
-	    	break;
-	    default:
-		FEwrong_type_argument(sLstring,control);
+	frs_pop();
+	fmt_restore;
+	if (e) {
+		nlj_active = FALSE;
+		unwind(nlj_fr, nlj_tag);
 	}
-    
-    RETURN1 (x ==0 ? Cnil : x);  
+	RETURN1 (x ==0 ? Cnil : x);  
 }
-
 object 
 fLformat_1(object strm, object control,object x) {
   VFUN_NARGS=3;
@@ -2363,4 +2288,8 @@ gcl_init_format(void)
 	fmt_temporary_stream = make_string_output_stream(64);
 	enter_mark_origin(&fmt_temporary_stream);
 	fmt_temporary_string = fmt_temporary_stream->sm.sm_object0;
+
+
+
+
 }

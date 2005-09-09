@@ -37,6 +37,7 @@ which is usually 60 maybe 100 or something else. */
 #include <sys/param.h>
 #endif
 #endif
+
 #ifndef HZ
 /* #define HZ 60 */
 #define HZ 100

@@ -152,7 +152,6 @@
   (unless (or parent-list (eq name 'condition))
 	  (setq parent-list (list 'condition)))
   (let* ((REPORT-FUNCTION nil)
-	 (DEFAULT-INITARGS nil)
 	 (DOCUMENTATION nil))
     (DO ((O OPTIONS (CDR O)))
 	((NULL O))
@@ -163,20 +162,18 @@
 					        (DECLARE (IGNORE CONDITION))
 					        (WRITE-STRING ,(CADR OPTION) STREAM))
 					     (CADR OPTION))))
-	  (:DEFAULT-INITARGS (SETQ DEFAULT-INITARGS OPTION)) 
 	  (:DOCUMENTATION (SETQ DOCUMENTATION (CADR OPTION)))
 	  (OTHERWISE (CERROR "Ignore this DEFINE-CONDITION option."
 			     "Invalid DEFINE-CONDITION option: ~S" OPTION)))))
     `(progn
        (eval-when (compile)
 	 #+pcl (setq pcl::*defclass-times* '(compile load eval)))
-       ,(if default-initargs
-       `(defclass ,name ,parent-list ,slot-specs ,default-initargs)
-       `(defclass ,name ,parent-list ,slot-specs))
+       (defclass ,name ,parent-list
+	 ,slot-specs)
        (eval-when (compile load eval)
 	 (pushnew '(,name ,parent-list
 		    ,@(mapcan #'(lambda (slot-spec)
-				  (let* ((ia (and (consp slot-spec) (getf (cdr slot-spec) ':initarg))))
+				  (let* ((ia (getf (cdr slot-spec) ':initarg)))
 				    (when ia
 				      (list
 				       (cons ia
@@ -197,11 +194,6 @@
 (eval-when (compile load eval)
 (define-condition condition ()
   ())
-
-(defmethod pcl::make-load-form ((object condition) &optional env)
-  (declare (ignore env))
-  (error "~@<Default ~s method for ~s called.~@>"
-	 'pcl::make-load-form object))
 
 #+pcl
 (when (fboundp 'pcl::proclaim-incompatible-superclasses)

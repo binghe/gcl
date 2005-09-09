@@ -6,12 +6,6 @@
 
 void enter_mark_origin() ;
 
-#ifdef __ia64__
-EXTER int *cs_base2;
-EXTER int *cs_org2;
-#endif
-
-EXTER int *cs_base;     
 EXTER int *cs_org;     
 EXTER int GBC_enable;
 
@@ -58,6 +52,12 @@ EXTER object user_package;
   while(_i++ <= max) { if (_i > _nargs) *__p++ = Cnil; \
 			 else *__p++ = va_arg(ap,object);} \
   va_end(ap)
+
+/*  #undef endp */
+
+/*  #define	endp(obje)	((enum type)((endp_temp = (obje))->d.t) == t_cons ? \ */
+/*  			 FALSE : endp_temp == Cnil ? TRUE : \ */
+/*  			 endp1(endp_temp)) */
 
 #ifndef NO_DEFUN
 #undef DEFUN
@@ -220,7 +220,7 @@ EXTER  bool left_trim;
 EXTER bool right_trim;
 int  (*casefun)();
 
-#define	Q_SIZE		256
+#define	Q_SIZE		128
 #define IS_SIZE		256
 
 struct printStruct {
@@ -253,10 +253,10 @@ EXTER struct printStruct *printStructBufp;
 #ifndef NULL_OR_ON_C_STACK
 
 
-#ifdef NEG_CSTACK_ADDRESS
-#define NULL_OR_ON_C_STACK(x) ((long)x <= DBEGIN)     
+#if (CSTACK_ADDRESS > 0)
+#define NULL_OR_ON_C_STACK(x) ((x)==0 || ((unsigned long)x) > (unsigned long)(pagetochar(MAXPAGE+1)))
 #else
-#define NULL_OR_ON_C_STACK(x) (((unsigned long)x)<=DBEGIN || ((unsigned long)x) >= (unsigned long)(pagetochar(MAXPAGE)))
+#define NULL_OR_ON_C_STACK(x) ((long)x <= 0)     
 #endif
 
 #endif /* NULL_OR_ON_C_STACK */

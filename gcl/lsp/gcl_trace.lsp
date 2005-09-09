@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -243,10 +242,9 @@
 		   fname))
 
 	  ;;(LAMBDA-BLOCK block-name lambda-list (TRACE-CALL ... ))
-	  ((let ((fn (and (interpreted-function-p (symbol-function fname))
-			  (interpreted-function-lambda (symbol-function fname)))))
-	     (and (consp (nth 3 fn))
-		  (eq (car (nth 3 fn)) 'trace-call)))
+	  ((and (consp (symbol-function fname))
+		(consp (nth 3 (symbol-function fname)))
+		(eq (car (nth 3 (symbol-function fname))) 'trace-call))
 	   (si:fset fname (symbol-function sym)))
 	  (t
 	   (format *trace-output*

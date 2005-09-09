@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPSPECIAL  Miscellaneous special forms.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -41,8 +40,8 @@
   (when (endp args) (too-few-args 'eval-when 1 0))
   (dolist** (situation (car args) (c1nil))
     (case situation
-          ((eval :execute) (return-from c1eval-when (c1progn (cdr args))))
-          ((load compile :load-toplevel :compile-toplevel))
+          (eval (return-from c1eval-when (c1progn (cdr args))))
+          ((load compile))
           (otherwise
            (cmperr "The situation ~s is illegal." situation))))
   )
@@ -60,7 +59,7 @@
   (setq info (copy-info (cadr form)))
   (setq type (type-and (type-filter (car args)) (info-type info)))
   (when (null type)
-    (cmpwarn "Type mismatch was found in ~s." (cons 'the args)))
+        (cmpwarn "Type mismatch was found in ~s." (cons 'the args)))
   (setf (info-type info) type)
   (list* (car form) info (cddr form))
   )
@@ -104,12 +103,12 @@
              ((and (consp fun) (eq (car fun) 'lambda))
               (cmpck (endp (cdr fun))
                      "The lambda expression ~s is illegal." fun)
-	      (let ((*vars* (cons 'cb *vars*))
-		    (*funs* (cons 'cb *funs*))
-		    (*blocks* (cons 'cb *blocks*))
-		    (*tags* (cons 'cb *tags*)))
-		(setq fun (c1lambda-expr (cdr fun)))
-		(list 'function (cadr fun) fun)))
+              (let ((*vars* (cons 'cb *vars*))
+                    (*funs* (cons 'cb *funs*))
+                    (*blocks* (cons 'cb *blocks*))
+                    (*tags* (cons 'cb *tags*)))
+                   (setq fun (c1lambda-expr (cdr fun)))
+                   (list 'function (cadr fun) fun)))
              (t (cmperr "The function ~s is illegal." fun))))
   )
 

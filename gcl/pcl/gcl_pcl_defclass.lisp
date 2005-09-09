@@ -133,7 +133,7 @@
 ;;; file defclass.lisp
 ;;; 
 (defmacro DEFCLASS (name direct-superclasses direct-slots &rest options)
-;  (declare (indentation 2 4 3 1))
+  (declare (indentation 2 4 3 1))
   (expand-defclass name direct-superclasses direct-slots options))
 
 (defun expand-defclass (name supers slots options)
@@ -450,7 +450,7 @@
 	canonical-slots   (copy-tree canonical-slots)
 	canonical-options (copy-tree canonical-options))
   (do-standard-defsetfs-for-defclass accessor-names)
-  (when (or (eq metaclass 'standard-class) (eq metaclass 'funcallable-standard-class))
+  (when (eq metaclass 'standard-class)
     (inform-type-system-about-std-class name))
   (let ((ecd
 	  (make-early-class-definition name

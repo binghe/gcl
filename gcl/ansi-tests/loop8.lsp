@@ -129,15 +129,13 @@
 ;;; I am interpreting the spec as ruling out the latter as well.
 
 (deftest loop.8.error.1
-  (signals-error
+  (classify-error
    (loop with a = 1
-	 and  a = 2 return a)
-   program-error)
-  t)
+	 and  a = 2 return a))
+  program-error)
 
 (deftest loop.8.error.2
-  (signals-error
+  (classify-error
    (loop with a = 1
-	 with a = 2 return a)
-   program-error)
-  t)
+	 with a = 2 return a))
+  program-error)

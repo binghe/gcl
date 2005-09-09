@@ -1,4 +1,3 @@
-/* -*-C-*- */
 /*
  Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
@@ -29,7 +28,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #undef endp
 
-#define	endp(obje)	((enum type)(type_of(endp_temp = (obje))) == t_cons ? \
+#define	endp(obje)	((enum type)((endp_temp = (obje))->d.t) == t_cons ? \
 			 FALSE : endp_temp == Cnil ? TRUE : \
 			 (FEwrong_type_argument(sLlist, endp_temp),FALSE))
 
@@ -86,59 +85,46 @@ int index;
 {
 	object endp_temp;
 
-	int i,max;
+	int i;
 	object l;
 
 	if (index < 0) {
 		vs_push(make_fixnum(index));
-		FEwrong_type_argument(sLnon_negative_fixnum, vs_head);
+		FEwrong_type_argument(sLpositive_fixnum, vs_head);
 	}
 	switch (type_of(seq)) {
 	case t_cons:
 		for (i = index, l = seq;  i > 0;  --i)
-			if (endp(l)) {
-				max=i;
+			if (endp(l))
 				goto E;
-			} else
+			else
 				l = l->c.c_cdr;
-		if (endp(l)) {
-			max=i;
+		if (endp(l))
 			goto E;
-		} 
 		return(l->c.c_car);
 
 	case t_vector:
 	case t_bitvector:
-		if (index >= seq->v.v_fillp) {
-			max=seq->v.v_fillp;
+		if (index >= seq->v.v_fillp)
 			goto E;
-		}
 		return(aref(seq, index));
 
 	case t_string:
-		if (index >= seq->st.st_fillp) {
-			max=seq->st.st_fillp;
+		if (index >= seq->st.st_fillp)
 			goto E;
-		}
 		return(code_char(seq->ust.ust_self[index]));
 
 	default:
-		/* if (seq == Cnil) goto E; */
+		if (seq == Cnil) goto E;
 		FEwrong_type_argument(sLsequence, seq);
-		return(Cnil);
 	}
 
 E:
-	l = vs_push( make_fixnum(max) );
-	vs_push( make_fixnum(0) );
-	l = vs_head = make_cons(vs_head, l);
-	l = vs_head = make_cons(sLinteger, l);
 	vs_push(make_fixnum(index));
-	/* FIXME message should indicate out of range
+	/* FIXME message should indicate out of range */
 	Icall_error_handler(sKwrong_type_argument,
 		     make_simple_string("The index, ~S, is too large."),
-		     1,vs_head); */
-	FEwrong_type_argument(l,vs_head);
+		     1,vs_head);
 	return(Cnil);
 }
 
@@ -158,60 +144,47 @@ object val;
 {
 	object endp_temp;
 
-	int i,max;
+	int i;
 	object l;
 
 	if (index < 0) {
 		vs_push(make_fixnum(index));
-		FEwrong_type_argument(sLnon_negative_fixnum, vs_head);
+		FEwrong_type_argument(sLpositive_fixnum, vs_head);
 	}
 	switch (type_of(seq)) {
 	case t_cons:
 		for (i = index, l = seq;  i > 0;  --i)
-			if (endp(l)) {
-				max=i;
+			if (endp(l))
 				goto E;
-			} else
+			else
 				l = l->c.c_cdr;
-		if (endp(l)) {
-			max=i;
+		if (endp(l))
 			goto E;
-		}
 		return(l->c.c_car = val);
 
 	case t_vector:
 	case t_bitvector:
-		if (index >= seq->v.v_fillp) {
-			max=seq->v.v_fillp;
+		if (index >= seq->v.v_fillp)
 			goto E;
-		}
 		return(aset(seq, index, val));
 
 	case t_string:
-		if (index >= seq->st.st_fillp) {
-			max=seq->st.st_fillp;
+		if (index >= seq->st.st_fillp)
 			goto E;
-		}
 		if (type_of(val) != t_character)
 			FEwrong_type_argument(sLcharacter, val);
 		seq->st.st_self[index] = val->ch.ch_code;
 		return(val);
 
 	default:
-		max=0;
+		if (seq == Cnil) goto E;
 		FEwrong_type_argument(sLsequence, seq);
 	}
 
 E:
-	l = vs_push( make_fixnum(max) );
-	vs_push( make_fixnum(0) );
-	l = vs_head = make_cons(vs_head, l);
-	l = vs_head = make_cons(sLinteger, l);
 	vs_push(make_fixnum(index));
-
-	/* FIXME error message should indicate value out of range -
-	   fixed kraehe */
-	FEwrong_type_argument(l, vs_head);
+	/* FIXME error message should indicate value out of range */
+	FEwrong_type_argument(sLpositive_fixnum, vs_head);
 	return(Cnil);	
 }
 
@@ -269,6 +242,8 @@ E:
 		array_allocself(x, FALSE,0);
 		switch (sequence->v.v_elttype) {
 		case aet_object:
+		case aet_fix:
+		case aet_sf:
 			for (i = s, j = 0;  i < e;  i++, j++)
 				x->v.v_self[j] = sequence->v.v_self[i];
 			break;
@@ -279,27 +254,12 @@ E:
 				sequence->lfa.lfa_self[i];
 			break;
 
-		case aet_sf:
-			for (i = s, j = 0;  i < e;  i++, j++)
-				x->sfa.sfa_self[j] =
-				sequence->sfa.sfa_self[i];
-			break;
-
-		case aet_nnfix:
-		case aet_fix:
-			for (i = s, j = 0;  i < e;  i++, j++)
-				x->fixa.fixa_self[j] =
-				sequence->fixa.fixa_self[i];
-			break;
-
 		case aet_short:
-		case aet_nnshort:
 		case aet_ushort:
 			for (i = s, j = 0;  i < e;  i++, j++)
 				USHORT_GCL(x, j) = USHORT_GCL(sequence, i);
 			break;
 		case aet_char:
-		case aet_nnchar:
 		case aet_uchar:
 			for (i = s, j = 0;  i < e;  i++, j++)	
 			  x->st.st_self[j] = sequence->st.st_self[i];
@@ -437,6 +397,8 @@ object seq;
 		array_allocself(y, FALSE,0);
 		switch (x->v.v_elttype) {
 		case aet_object:
+		case aet_fix:
+		case aet_sf:
 			for (j = k - 1, i = 0;  j >=0;  --j, i++)
 				y->v.v_self[j] = x->v.v_self[i];
 			break;
@@ -446,25 +408,12 @@ object seq;
 				y->lfa.lfa_self[j] = x->lfa.lfa_self[i];
 			break;
 
-		case aet_sf:
-			for (j = k - 1, i = 0;  j >=0;  --j, i++)
-				y->sfa.sfa_self[j] = x->sfa.sfa_self[i];
-			break;
-
-		case aet_fix:
-		case aet_nnfix:
-			for (j = k - 1, i = 0;  j >=0;  --j, i++)
-				y->fixa.fixa_self[j] = x->fixa.fixa_self[i];
-			break;
-
 		case aet_short:
-		case aet_nnshort:
 		case aet_ushort:
 			for (j = k - 1, i = 0;  j >=0;  --j, i++)
 				USHORT_GCL(y, j) = USHORT_GCL(x, i);
 			break;
 		case aet_char:
-		case aet_nnchar:
 		case aet_uchar:
 		    goto TYPE_STRING;
 		}
@@ -542,6 +491,8 @@ object seq;
 		k = x->v.v_fillp;
 		switch (x->v.v_elttype) {
 		case aet_object:
+		case aet_fix:
+		case aet_sf:
 			for (i = 0, j = k - 1;  i < j;  i++, --j) {
 				y = x->v.v_self[i];
 				x->v.v_self[i] = x->v.v_self[j];
@@ -558,27 +509,7 @@ object seq;
 			}
 			return(seq);
 
-		case aet_sf:
-			for (i = 0, j = k - 1;  i < j;  i++, --j) {
-				shortfloat y;
-				y = x->sfa.sfa_self[i];
-				x->sfa.sfa_self[i] = x->sfa.sfa_self[j];
-				x->sfa.sfa_self[j] = y;
-			}
-			return(seq);
-
-		case aet_fix:
-		case aet_nnfix:
-			for (i = 0, j = k - 1;  i < j;  i++, --j) {
-				fixnum y;
-				y = x->fixa.fixa_self[i];
-				x->fixa.fixa_self[i] = x->fixa.fixa_self[j];
-				x->fixa.fixa_self[j] = y;
-			}
-			return(seq);
-
 		case aet_short:
-		case aet_nnshort:
 		case aet_ushort:
 			for (i = 0, j = k - 1;  i < j;  i++, --j) {
 				unsigned short y;
@@ -588,7 +519,6 @@ object seq;
 			}
 			return(seq);
 		case aet_char:
-		case aet_nnchar:
 		case aet_uchar:
 		    goto TYPE_STRING;
 		}

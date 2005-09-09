@@ -271,48 +271,6 @@
 	      )))
   3 3 1 1)
 
-;;; Other special vectors
-
-`(deftest count-if-not.special-vector.1
-  (do-special-integer-vectors
-   (v #(1 0 1 1 1 0 1 1 1 0 1) nil)
-   (assert (eql (count-if-not #'plusp v) 3))
-   (assert (eql (count-if-not #'zerop v) 8))
-   (assert (eql (count-if-not #'plusp v :start 2) 2))
-   (assert (eql (count-if-not #'zerop v :end 9) 7)))
-  nil)
-
-(deftest count-if-not.special-vector.2
-  (do-special-integer-vectors
-   (v #(1 3 2 4 7 5 6 1 0 2 4) nil)
-   (assert (eql (count-if-not #'evenp v) 5))
-   (assert (eql (count-if-not #'oddp v) 6))
-   (assert (eql (count-if-not #'plusp v :start 2) 1))
-   (assert (eql (count-if-not #'zerop v :end 8) 8)))
-  nil)
-
-(deftest count-if-not.special-vector.3
-  (loop for etype in '(short-float single-float double-float long-float)
-	for vals = (loop for e in '(0 1 2 1 3 0 4 5 6 0)
-			 collect (coerce e etype))
-	for vec = (make-array (length vals) :element-type etype :initial-contents vals)
-	for result = (count-if-not #'zerop vec)
-	unless (= result 7)
-	collect (list etype vals vec result))
-  nil)
-
-(deftest count-if-not.special-vector.4
-  (loop for cetype in '(short-float single-float double-float long-float integer rational)
-	for etype = `(complex ,cetype)
-	for vals = (loop for e in '(6 1 2 1 3 -4 4 5 6 100)
-			 collect (complex 0 (coerce e cetype)))
-	for vec = (make-array (length vals) :element-type etype :initial-contents vals)
-	for result = (count-if-not #'(lambda (x) (< (abs x) 5/2)) vec)
-	unless (= result 7)
-	collect (list etype vals vec result))
-  nil)
-
-
 ;;; tests on bit-vectors
 
 (deftest count-if-not-bit-vector.1
@@ -460,12 +418,6 @@
 		   (count-if-not #'%onep a :from-end t)))))
   2 3 2 3)
 
-(deftest count-if-not-string.18
-  (do-special-strings
-   (s "a1ha^%&%#( 873ff83nfa!" nil)
-   (assert (= (count-if-not #'alpha-char-p s) 14)))
-  nil)
-
 ;;; Argument order tests
 
 (deftest count-if-not.order.1
@@ -525,61 +477,64 @@
 ;;; Error tests
 
 (deftest count-if-not.error.1
-  (check-type-error #'(lambda (x) (count-if-not #'identity x)) #'sequencep)
-  nil)
+  (classify-error (count-if-not #'identity 1))
+  type-error)
+
+(deftest count-if-not.error.2
+  (classify-error (count-if-not #'identity 'a))
+  type-error)
+
+(deftest count-if-not.error.3
+  (classify-error (count-if-not #'identity #\a))
+  type-error)
 
 (deftest count-if-not.error.4
-  (signals-error (count-if-not) program-error)
-  t)
+  (classify-error (count-if-not))
+  program-error)
 
 (deftest count-if-not.error.5
-  (signals-error (count-if-not #'null) program-error)
-  t)
+  (classify-error (count-if-not #'null))
+  program-error)
 
 (deftest count-if-not.error.6
-  (signals-error (count-if-not #'null nil :bad t) program-error)
-  t)
+  (classify-error (count-if-not #'null nil :bad t))
+  program-error)
 
 (deftest count-if-not.error.7
-  (signals-error (count-if-not #'null nil :bad t :allow-other-keys nil)
-		 program-error)
-  t)
+  (classify-error (count-if-not #'null nil :bad t :allow-other-keys nil))
+  program-error)
 
 (deftest count-if-not.error.8
-  (signals-error (count-if-not #'null nil :key) program-error)
-  t)
+  (classify-error (count-if-not #'null nil :key))
+  program-error)
 
 (deftest count-if-not.error.9
-  (signals-error (count-if-not #'null nil 3 3) program-error)
-  t)
+  (classify-error (count-if-not #'null nil 3 3))
+  program-error)
 
 ;;; Only leftmost :allow-other-keys argument matters
 (deftest count-if-not.error.10
-  (signals-error (count-if-not #'null nil :bad t
+  (classify-error (count-if-not #'null nil :bad t
 				:allow-other-keys nil
-				:allow-other-keys t)
-		 program-error)
-  t)
+				:allow-other-keys t))
+  program-error)
 
 (deftest count-if-not.error.11
-  (signals-error (locally (count-if-not #'identity 1) t)
-		 type-error)
-  t)
+  (classify-error (locally (count-if-not #'identity 1) t))
+  type-error)
 
 (deftest count-if-not.error.12
-  (signals-error (count-if-not #'cons '(a b c)) program-error)
-  t)
+  (classify-error (count-if-not #'cons '(a b c)))
+  program-error)
 
 (deftest count-if-not.error.13
-  (signals-error (count-if-not #'car '(a b c)) type-error)
-  t)
+  (classify-error (count-if-not #'car '(a b c)))
+  type-error)
 
 (deftest count-if-not.error.14
-  (signals-error (count-if-not #'identity '(a b c) :key #'cdr)
-		 type-error)
-  t)
+  (classify-error (count-if-not #'identity '(a b c) :key #'cdr))
+  type-error)
 
 (deftest count-if-not.error.15
-  (signals-error (count-if-not #'identity '(a b c) :key #'cons)
-		 program-error)
-  t)
+  (classify-error (count-if-not #'identity '(a b c) :key #'cons))
+  program-error)

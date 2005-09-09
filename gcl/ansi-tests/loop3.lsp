@@ -72,16 +72,15 @@
   (3 7 11))
 
 (deftest loop.3.14
-  (signals-error
+  (classify-error
    (loop for x on '(a b c)
-	 for x on '(d e f) collect x)
-   program-error)
-  t)
+	 for x on '(d e f) collect x))
+  program-error)
 
 (deftest loop.3.15
-  (signals-error (loop for (x . x) on '((a b) (c d)) collect x)
-		 program-error)
-  t)
+  (classify-error
+   (loop for (x . x) on '((a b) (c d)) collect x))
+  program-error)
 
 (deftest loop.3.16
   (loop for nil on nil do (return t))

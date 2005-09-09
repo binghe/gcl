@@ -12,17 +12,13 @@ if [ "$GCL_PROF" = "" ] ; then
 else
     DIR=/usr/lib/gcl-$VERS-prof ; 
 fi
-SYS=$DIR/unixport
 
 if [ "$GCL_ANSI" = "" ] ; then 
     EXE=saved_gcl;
 else
-    if [ -e $SYS/saved_clc_gcl ] ; then
-	EXE=saved_clc_gcl;
-    else
-	EXE=saved_ansi_gcl;
-    fi
+    EXE=saved_ansi_gcl;
 fi
+SYS=$DIR/unixport
 
 exec $SYS/$EXE -dir $SYS/ -libdir $DIR/ \
    -eval '(setq si::*allow-gzipped-file* t)' \

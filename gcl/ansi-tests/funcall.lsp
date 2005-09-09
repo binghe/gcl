@@ -73,33 +73,33 @@
 ;;; called on a symbol with a global definition as a special
 ;;; operator
 (deftest funcall.error.1
-  (signals-error (funcall 'quote 1) undefined-function :name quote)
-  t)
+  (classify-error (funcall 'quote 1))
+  undefined-function)
 
 (deftest funcall.error.2
-  (signals-error (funcall 'progn 1) undefined-function :name progn)
-  t)
+  (classify-error (funcall 'progn 1))
+  undefined-function)
 
 ;;; FUNCALL should throw an UNDEFINED-FUNCTION condition when
 ;;; called on a symbol with a global definition as a macro
 (deftest funcall.error.3
-  (signals-error (funcall 'defconstant '(defconstant x 10))
-		 undefined-function
-		 :name defconstant)
-  t)
+  (classify-error (funcall 'defconstant '(defconstant x 10)))
+  undefined-function)
 
 (deftest funcall.error.4
-  (signals-error (funcall) program-error)
-  t)
+  (classify-error (funcall))
+  program-error)
 
 (deftest funcall.error.5
-  (signals-error (funcall #'cons) program-error)
-  t)
+  (classify-error (funcall #'cons))
+  program-error)
 
 (deftest funcall.error.6
-  (signals-error (funcall #'cons 1) program-error)
-  t)
+  (classify-error (funcall #'cons 1))
+  program-error)
 
 (deftest funcall.error.7
-  (signals-type-error x 'a (funcall #'car x))
-  t)
+  (classify-error (funcall #'car 'a))
+  type-error)
+
+

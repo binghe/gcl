@@ -1,4 +1,3 @@
-#include <string.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <math.h>
@@ -6,7 +5,6 @@
 /*  We try here to compile in function addresses to which it is known
     that the compiler will make *direct* reference.  20040308 CM */
 
-extern int _mcount();
 
 int
 main(int argc,char * argv[],char *envp[]) {
@@ -16,13 +14,8 @@ main(int argc,char * argv[],char *envp[]) {
   jmp_buf env;
   double d=0.1;
 
-  bzero(&env,sizeof(env));
-  memset(&env,0,sizeof(env));
-
   getc(f);
   putc(ch,f);
-
-  _mcount();
 
   setjmp(env);
 
@@ -46,8 +39,6 @@ main(int argc,char * argv[],char *envp[]) {
 
   exp(d);
   log(d);
-
-  sqrt(d);
   
   return 0;
 

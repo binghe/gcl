@@ -9,12 +9,6 @@
   (cond
    ((subtypep* 'fixnum type)
     (random most-positive-fixnum))
-   ((and (listp type)
-	 (eql (car type) 'integer)
-	 (integerp (cadr type))
-	 (integerp (caddr type))
-	 (null (cdddr type)))
-    (+ (cadr type) (random (- (1+ (caddr type)) (cadr type)))))
    ((subtypep* '(integer 0 255) type)
     (random 255))
    ((subtypep* '(integer 0 7) type)
@@ -67,12 +61,8 @@
 		  (count nil))
   (assert (not (and test-p test-not-p)))
   (my-remove-if
-   (cond (test-p
-	  (setf test (coerce test 'function))
-	  #'(lambda (x) (funcall (the function test) element x)))
-	 (test-not-p
-	  (setf test-not (coerce test-not 'function))
-	  #'(lambda (x) (not (funcall (the function test-not) element x))))
+   (cond (test-p #'(lambda (x) (funcall test element x)))
+	 (test-not-p #'(lambda (x) (not (funcall test-not element x))))
 	 (t #'(lambda (x) (eql element x))))
    sequence :start start :end end :key key :from-end from-end :count count))
   
@@ -95,9 +85,6 @@
     (assert (integerp count))
     (assert (or (symbolp predicate) (functionp predicate)))
     (assert (or (symbolp key) (functionp key)))
-
-    (setf predicate (coerce predicate 'function))
-    (setf key (coerce key 'function))
     
     ;; If FROM-END, reverse the sequence and flip
     ;; start, end
@@ -114,8 +101,7 @@
 	       (if (and (> count 0)
 			(>= pos start)
 			(< pos end)
-			(funcall (the function predicate)
-				 (funcall (the function key) e)))
+			(funcall predicate (funcall key e)))
 		   (decf count)
 		 (push e result))
 	       (incf pos))
@@ -137,12 +123,7 @@
 
 (defun make-random-rd-params (maxlen)
   "Generate random paramaters for remove/delete/etc. functions."
-  (let* ((element-type
-	  (rcase
-	   (2 t)
-	   (1 'bit)
-	   (1 '(integer 0 2))
-	   (1 'symbol)))
+  (let* ((element-type t)
 	 (type-select (random 7))
 	 (type
 	  (case type-select
@@ -219,15 +200,13 @@
 (defun random-test-remove (maxlen &key (tested-fn #'remove)
 				  (check-fn #'my-remove)
 				  (pure t))
-  (setf tested-fn (coerce tested-fn 'function))
-  (setf check-fn (coerce check-fn 'function))
   (multiple-value-bind (element seq arg-list)
       (random-test-remove-args maxlen)
     (let* ((seq1 (copy-seq seq))
 	   (seq2 (copy-seq seq))
-	   (seq1r (apply (the function tested-fn) element seq1 arg-list))
-	   (seq2r (apply (the function check-fn) element seq2 arg-list)))
-      (setq *remove-fail-args* (list* element seq arg-list))
+	   (seq1r (apply tested-fn element seq1 arg-list))
+	   (seq2r (apply check-fn element seq2 arg-list)))
+      (setq *remove-fail-args* (list* element seq1 arg-list))
       (cond
        ((and pure (not (equalp seq seq1))) :fail1)
        ((and pure (not (equalp seq seq2))) :fail2)
@@ -243,15 +222,13 @@
       (remf arg-list :test)
       (remf arg-list :test-not)
       (unless test (setq test #'eql))
-      (setf test (coerce test 'function))
       (if fn
 	  (case (random 3)
 	    (0 (setf arg-list (list* :key 'identity arg-list)))
 	    (1 (setf arg-list (list* :key #'identity arg-list)))
 	    (t nil))
 	(setf fn (if (coin) 'identity
-		   #'(lambda (x) (funcall (the function test)
-					  element x)))))
+		   #'(lambda (x) (funcall test element x)))))
       (let* ((seq1 (copy-seq seq))
 	     (seq2 (copy-seq seq))
 	     (seq1r (apply (if negate #'remove-if-not #'remove-if)
@@ -277,14 +254,13 @@
       (remf arg-list :test)
       (remf arg-list :test-not)
       (unless test (setq test #'eql))
-      (setf test (coerce test 'function))
       (if fn
 	  (case (random 3)
 	    (0 (setf arg-list (list* :key 'identity arg-list)))
 	    (1 (setf arg-list (list* :key #'identity arg-list)))
 	    (t nil))
 	(setf fn (if (coin) 'identity
-		   #'(lambda (x) (funcall (the function test) element x)))))
+		   #'(lambda (x) (funcall test element x)))))
       (setq *remove-fail-args* (list* seq arg-list))
       (let* ((seq1 (copy-seq seq))
 	     (seq2 (copy-seq seq))

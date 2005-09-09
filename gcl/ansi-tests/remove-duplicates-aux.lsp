@@ -12,13 +12,9 @@
 	 (len (length sequence)))
     (unless end (setq end len))
     (unless key (setq key #'identity))
-    (setf key (coerce key 'function))
     (cond
-      (test (setf test (coerce test 'function))
-	    (assert (not test-not)))
-      (test-not (setf test-not (coerce test-not 'function))
-		(setq test #'(lambda (x y)
-			       (not (funcall (the function test) x y)))))
+      (test (assert (not test-not)))
+      (test-not (setq test #'(lambda (x y) (not (funcall test x y)))))
       (t (setq test #'eql)))
     (assert (integerp start))
     (assert (integerp end))
@@ -36,13 +32,13 @@
 	    do (push (elt sequence i) result))
       (loop for i from start below end
 	    for x = (elt sequence i)
-	    for kx = (funcall (the function key) x)
+	    for kx = (if key (funcall key x) x)
 	    unless (position kx
 			     sequence
 			     :start (1+ i)
 			     :end end
-			     :test (the function test)
-			     :key (the function key))
+			     :test test
+			     :key key)
 	    do (push x result))
       (loop for i from end below len
 	    do (push (elt sequence i) result))
@@ -59,7 +55,7 @@
   (multiple-value-bind (element-type type len start end from-end
 				     count seq key test test-not)
       (make-random-rd-params maxlen)
-    (declare (ignore count element-type len type))
+    (declare (ignore count element-type))
     (let ((arg-list
 	   (reduce #'nconc
 		   (random-permute
@@ -86,7 +82,7 @@
 			 seq1 arg-list))
 	   (seq2r (apply #'my-remove-duplicates seq2 arg-list)))
       (cond
-       ((and pure (not (equalp seq seq1))) (list :fail1 seq seq1r seq2r arg-list))
-       ((and pure (not (equalp seq seq2))) (list :fail2 seq seq1r seq2r arg-list))
-       ((not (equalp seq1r seq2r)) (list :fail3 seq seq1r seq2r arg-list))
+       ((and pure (not (equalp seq seq1))) :fail1)
+       ((and pure (not (equalp seq seq2))) :fail2)
+       ((not (equalp seq1r seq2r)) :fail3)
        (t t)))))

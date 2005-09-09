@@ -343,7 +343,7 @@ extern int obstack_exit_failure;
 
 #endif
 
-#define obstack_1grow_fast(h,achar) (*((h)->next_free)++ = (achar))
+#define obstack_1grow_fast(h,achar) (*((h)->next_free)++ = achar)
 
 #define obstack_blank_fast(h,n) ((h)->next_free += (n))
 
@@ -411,7 +411,7 @@ __extension__								\
 ({ struct obstack *__o = (OBSTACK);					\
    if (__o->next_free + 1 > __o->chunk_limit)				\
      _obstack_newchunk (__o, 1);					\
-   obstack_1grow_fast (__o, datum);					\
+   *(__o->next_free)++ = (datum);					\
    (void) 0; })
 
 /* These assume that the obstack alignment is good enough for pointers or ints,
@@ -423,28 +423,19 @@ __extension__								\
 ({ struct obstack *__o = (OBSTACK);					\
    if (__o->next_free + sizeof (void *) > __o->chunk_limit)		\
      _obstack_newchunk (__o, sizeof (void *));				\
-   obstack_ptr_grow_fast (__o, datum); })
+   *((void **)__o->next_free)++ = ((void *)datum);			\
+   (void) 0; })
 
 # define obstack_int_grow(OBSTACK,datum)				\
 __extension__								\
 ({ struct obstack *__o = (OBSTACK);					\
    if (__o->next_free + sizeof (int) > __o->chunk_limit)		\
      _obstack_newchunk (__o, sizeof (int));				\
-   obstack_int_grow_fast (__o, datum); })
-
-# define obstack_ptr_grow_fast(OBSTACK,aptr)				\
-__extension__								\
-({ struct obstack *__o1 = (OBSTACK);					\
-   *(const void **) __o1->next_free = (aptr);				\
-   __o1->next_free += sizeof (const void *);				\
+   *((int *)__o->next_free)++ = ((int)datum);				\
    (void) 0; })
 
-# define obstack_int_grow_fast(OBSTACK,aint)				\
-__extension__								\
-({ struct obstack *__o1 = (OBSTACK);					\
-   *(int *) __o1->next_free = (aint);					\
-   __o1->next_free += sizeof (int);					\
-   (void) 0; })
+# define obstack_ptr_grow_fast(h,aptr) (*((void **) (h)->next_free)++ = (void *)aptr)
+# define obstack_int_grow_fast(h,aint) (*((int *) (h)->next_free)++ = (int) aint)
 
 # define obstack_blank(OBSTACK,length)					\
 __extension__								\
@@ -452,7 +443,7 @@ __extension__								\
    int __len = (length);						\
    if (__o->chunk_limit - __o->next_free < __len)			\
      _obstack_newchunk (__o, __len);					\
-   obstack_blank_fast (__o, __len);					\
+   __o->next_free += __len;						\
    (void) 0; })
 
 # define obstack_alloc(OBSTACK,length)					\
@@ -494,9 +485,9 @@ __extension__								\
 # define obstack_free(OBSTACK, OBJ)					\
 __extension__								\
 ({ struct obstack *__o = (OBSTACK);					\
-   void *__obj = (void *) (OBJ);					\
+   void *__obj = (OBJ);							\
    if (__obj > (void *)__o->chunk && __obj < (void *)__o->chunk_limit)  \
-     __o->next_free = __o->object_base = (char *) __obj;		\
+     __o->next_free = __o->object_base = __obj;				\
    else (obstack_free) (__o, __obj); })
 
 #else /* not __GNUC__ or not __STDC__ */
@@ -539,29 +530,26 @@ __extension__								\
 # define obstack_1grow(h,datum)						\
 ( (((h)->next_free + 1 > (h)->chunk_limit)				\
    ? (_obstack_newchunk ((h), 1), 0) : 0),				\
-  obstack_1grow_fast (h, datum))
+  (*((h)->next_free)++ = (datum)))
 
 # define obstack_ptr_grow(h,datum)					\
 ( (((h)->next_free + sizeof (char *) > (h)->chunk_limit)		\
    ? (_obstack_newchunk ((h), sizeof (char *)), 0) : 0),		\
-  obstack_ptr_grow_fast (h, datum))
+  (*((char **) (((h)->next_free+=sizeof(char *))-sizeof(char *))) = ((char *) datum)))
 
 # define obstack_int_grow(h,datum)					\
 ( (((h)->next_free + sizeof (int) > (h)->chunk_limit)			\
    ? (_obstack_newchunk ((h), sizeof (int)), 0) : 0),			\
-  obstack_int_grow_fast (h, datum))
+  (*((int *) (((h)->next_free+=sizeof(int))-sizeof(int))) = ((int) datum)))
 
-# define obstack_ptr_grow_fast(h,aptr)					\
-  (((const void **) ((h)->next_free += sizeof (void *)))[-1] = (aptr))
-
-# define obstack_int_grow_fast(h,aint)					\
-  (((int *) ((h)->next_free += sizeof (int)))[-1] = (aptr))
+# define obstack_ptr_grow_fast(h,aptr) (*((char **) (h)->next_free)++ = (char *) aptr)
+# define obstack_int_grow_fast(h,aint) (*((int *) (h)->next_free)++ = (int) aint)
 
 # define obstack_blank(h,length)					\
 ( (h)->temp = (length),							\
   (((h)->chunk_limit - (h)->next_free < (h)->temp)			\
    ? (_obstack_newchunk ((h), (h)->temp), 0) : 0),			\
-  obstack_blank_fast (h, (h)->temp))
+  ((h)->next_free += (h)->temp))
 
 # define obstack_alloc(h,length)					\
  (obstack_blank ((h), (length)), obstack_finish ((h)))

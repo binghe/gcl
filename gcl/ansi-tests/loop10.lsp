@@ -60,20 +60,18 @@
   4.0)
 
 (deftest loop.10.9
-  (signals-error
+  (classify-error
    (loop with foo = 10
 	 for x in '(a b c) count x into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (deftest loop.10.10
-  (signals-error
+  (classify-error
    (loop with foo = 10
 	 for x in '(a b c) counting x into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (declaim (special *loop-count-var*))
 
@@ -186,20 +184,18 @@
   10 100)
 
 (deftest loop.10.37
-  (signals-error
+  (classify-error
    (loop with foo = 100
 	 for i from 1 to 10 maximize i into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (deftest loop.10.38
-  (signals-error
+  (classify-error
    (loop with foo = 100
 	 for i from 1 to 10 maximizing i into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 
 (deftest loop.10.39
@@ -290,20 +286,18 @@
   4 100)
 
 (deftest loop.10.57
-  (signals-error
+  (classify-error
    (loop with foo = 100
 	 for i from 1 to 10 minimize i into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (deftest loop.10.58
-  (signals-error
+  (classify-error
    (loop with foo = 100
 	 for i from 1 to 10 minimizing i into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (deftest loop.10.58a
   (loop for x in '(1 2 3) minimize (return 10))
@@ -406,20 +400,18 @@
   10 100)
 
 (deftest loop.10.85
-  (signals-error
+  (classify-error
    (loop with foo = 100
 	 for i from 1 to 4 sum i into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (deftest loop.10.86
-  (signals-error
+  (classify-error
    (loop with foo = 100
 	 for i from 1 to 4 summing i into foo
-	 finally (return foo))
-   program-error)
-  t)
+	 finally (return foo)))
+  program-error)
 
 (deftest loop.10.87
   (loop for i from 1 to 4
@@ -456,47 +448,3 @@
 (deftest loop.10.93
   (loop for i from 1 to 4 summing (return 100))
   100)
-
-(deftest loop.10.94
-  (loop for i in nil sum i of-type integer)
-  0)
-
-(deftest loop.10.95
-  (loop for i in nil sum i of-type fixnum)
-  0)
-
-(deftest loop.10.96
-  (loop for i in nil sum i of-type bit)
-  0)
-
-(deftest loop.10.97
-  (loop for i in nil sum i of-type (integer 0 100))
-  0)
-
-(deftest loop.10.98
-  (loop for i in nil sum i of-type (integer -100 0))
-  0)
-
-(deftest loop.10.99
-  (loop for i in nil sum i of-type (integer -100 100))
-  0)
-
-(deftest loop.10.100
-  (loop for i in nil sum i of-type (and integer (real -100.0 100.0)))
-  0)
-
-(deftest loop.10.101
-  (loop for i in nil sum i of-type short-float)
-  0.0s0)
-
-(deftest loop.10.102
-  (loop for i in nil sum i of-type single-float)
-  0.0f0)
-
-(deftest loop.10.103
-  (loop for i in nil sum i of-type double-float)
-  0.0d0)
-
-(deftest loop.10.104
-  (loop for i in nil sum i of-type long-float)
-  0.0l0)

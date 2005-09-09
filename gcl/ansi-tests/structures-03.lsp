@@ -321,32 +321,32 @@
   (1 2 3))
 
 (deftest structure-boa-test-15/2
-  (signals-error (sbt-15-con :a 1) program-error)
-  t)
+  (classify-error (sbt-15-con :a 1))
+  program-error)
 
 (deftest structure-boa-test-15/3
-  (signals-error (sbt-15-con :b 1) program-error)
-  t)
+  (classify-error (sbt-15-con :b 1))
+  program-error)
 
 (deftest structure-boa-test-15/4
-  (signals-error (sbt-15-con 'x 1) program-error)
-  t)
+  (classify-error (sbt-15-con 'x 1))
+  program-error)
 
 (deftest structure-boa-test-15/5
-  (signals-error (sbt-15-con :y 1) program-error)
-  t)
+  (classify-error (sbt-15-con :y 1))
+  program-error)
 
 (deftest structure-boa-test-15/6
-  (signals-error (sbt-15-con 'c 1) program-error)
-  t)
+  (classify-error (sbt-15-con 'c 1))
+  program-error)
 
 (deftest structure-boa-test-15/7
-  (signals-error (sbt-15-con 'a 1) program-error)
-  t)
+  (classify-error (sbt-15-con 'a 1))
+  program-error)
 
 (deftest structure-boa-test-15/8
-  (signals-error (sbt-15-con 'b 1) program-error)
-  t)
+  (classify-error (sbt-15-con 'b 1))
+  program-error)
 
 
 ;;; Default constructor w. BOA constructor, and error cases
@@ -364,20 +364,20 @@
   (4 5 6))
 
 (deftest structure-boa-test-16/3
-  (signals-error (make-sbt-16 :d 1) program-error)
-  t)
+  (classify-error (make-sbt-16 :d 1))
+  program-error)
 
 (deftest structure-boa-test-16/4
-  (signals-error (make-sbt-16 :a) program-error)
-  t)
+  (classify-error (make-sbt-16 :a))
+  program-error)
 
 (deftest structure-boa-test-16/5
-  (signals-error (make-sbt-16 'a) program-error)
-  t)
+  (classify-error (make-sbt-16 'a))
+  program-error)
 
 (deftest structure-boa-test-16/6
-  (signals-error (make-sbt-16 1 1) program-error)
-  t)
+  (classify-error (make-sbt-16 1 1))
+  program-error)
 
 (deftest structure-boa-test-16/7
   (sbt-slots 'sbt-16 (make-sbt-16 :a 1 :b 2 :c 3 :d 5 :allow-other-keys t)
@@ -415,7 +415,3 @@
 ;;;	     :a :b :c)
 ;;;  (3 6 9))
 
-
-;;; Error test
-
-(def-macro-test struct.error.1 (defstruct nonexistent-structure-type a b c))

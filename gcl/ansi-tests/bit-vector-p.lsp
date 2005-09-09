@@ -47,8 +47,11 @@
   nil)
 
 (deftest bit-vector-p.12
-  (check-type-predicate #'bit-vector-p 'bit-vector)
-  nil)
+  (loop for e in *universe*
+	for p1 = (typep e 'bit-vector)
+	for p2 = (bit-vector-p e)
+	always (if p1 p2 (not p2)))
+  t)
 
 (deftest bit-vector-p.order.1
   (let ((i 0) x)
@@ -65,10 +68,12 @@
   nil 1 1)
 
 
+    
+
 (deftest bit-vector-p.error.1
-  (signals-error (bit-vector-p) program-error)
-  t)
+  (classify-error (bit-vector-p))
+  program-error)
 
 (deftest bit-vector-p.error.2
-  (signals-error (bit-vector-p #* #*) program-error)
-  t)
+  (classify-error (bit-vector-p #* #*))
+  program-error)

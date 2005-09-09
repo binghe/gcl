@@ -16,9 +16,8 @@
   2)
 
 (deftest loop.2.3
-  (signals-error (loop for x in '(a . b) collect x)
-		 type-error)
-  t)
+  (classify-error (loop for x in '(a . b) collect x))
+  type-error)
 
 (deftest loop.2.4
   (let ((x nil))
@@ -74,17 +73,15 @@
   (3 7 11))
 
 (deftest loop.2.14
-  (signals-error
+  (classify-error
    (loop for x in '(a b c)
-	 for x in '(d e f) collect x)
-   program-error)
-  t)
+	 for x in '(d e f) collect x))
+  program-error)
 
 (deftest loop.2.15
-  (signals-error
-   (loop for (x . x) in '((a b) (c d)) collect x)
-   program-error)
-  t)
+  (classify-error
+   (loop for (x . x) in '((a b) (c d)) collect x))
+  program-error)
 
 (deftest loop.2.16
   (loop for nil in nil do (return t))

@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -100,7 +99,6 @@ declaim
 decode-universal-time
 defconstant
 define-modify-macro
-define-setf-expander
 define-setf-method
 defparameter
 defsetf
@@ -146,7 +144,6 @@ fourth
 fround
 ftruncate
 get-decoded-time
-get-setf-expansion
 get-setf-method
 get-setf-method-multiple-value
 get-universal-time
@@ -264,9 +261,6 @@ with-output-to-string
 write-to-string
 y-or-n-p
 yes-or-no-p
-with-standard-io-syntax
-logical-pathname-translations
-ensure-directories-exist
 
 proclaim
 proclamation
@@ -281,7 +275,6 @@ optimize
 speed
 space
 safety
-debug
 compilation-speed
 declaration
 

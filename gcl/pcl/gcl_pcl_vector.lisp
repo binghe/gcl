@@ -892,7 +892,7 @@
     type))
 
 (defvar *variable-declarations-without-argument*
-  '(ignore ignorable special dynamic-extent
+  '(ignore special dynamic-extent
     array atom base-char bignum bit bit-vector character common compiled-function
     complex cons double-float extended-char fixnum float function hash-table integer
     keyword list long-float nil null number package pathname random-state ratio
@@ -931,21 +931,16 @@
 			      '*variable-declarations-without-argument*)
 			(push declaration-name
 			      *variable-declarations-without-argument*))
-		      (if (eq (car dname) 'class)
-			  (if (member (car form) args)
-			      (push `(declare (,@dname ,@form)) outer-decls)
-			    (push `(declare (,@dname ,@form)) inner-decls))
-			(progn
-			  (when arg-p
-			    (setq dname (append dname (list (pop form)))))
-			  (dolist (var form)
-			    (if (member var args)
-				(push var outers)
-			      (push var inners)))
-			  (when outers
-			    (push `(declare (,@dname ,@outers)) outer-decls))
-			  (when inners
-			    (push `(declare (,@dname ,@inners)) inner-decls)))))))))
+		      (when arg-p
+			(setq dname (append dname (list (pop form)))))
+		      (dolist (var form)
+			(if (member var args)
+			    (push var outers)
+			    (push var inners)))
+		      (when outers
+			(push `(declare (,@dname ,@outers)) outer-decls))
+		      (when inners
+			(push `(declare (,@dname ,@inners)) inner-decls)))))))
 	  (setq body (cdr body)))
     (values outer-decls inner-decls body)))
 
