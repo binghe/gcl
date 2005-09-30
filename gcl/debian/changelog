@@ -2,8 +2,9 @@ gcl (2.6.8-1) unstable; urgency=low
 
   * New upstream release
   * fdollars in identifiers and gcc 4.0 for arm
+  * Fix 64bit fixnum coersion bug using code from cvs HEAD
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 30 Sep 2005 02:25:44 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 30 Sep 2005 22:15:48 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

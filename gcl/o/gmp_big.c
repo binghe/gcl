@@ -436,10 +436,9 @@ maybe_replace_big(object x)
    bug or feature of gmp..
 */   
   if (MP_SIZE(x) == 0) return small_fixnum(0);
-  if (mpz_fits_sint_p(MP(x))) {
+  if (mpz_fits_slong_p(MP(x))) {
     MP_INT *u = MP(x);
-    signed long int xx = mpz_get_si(u);
-    return make_fixnum(xx);
+    return make_fixnum(mpz_get_si(u));
   }
   return make_bignum(MP(x));
 }
