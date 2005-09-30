@@ -119,7 +119,7 @@ void install_segmentation_catcher(void);
 
 #ifdef NEED_NONRANDOM_SBRK
 #include <syscall.h>
-#include <linux/personality.h>
+#include <sys/personality.h>
 #include <unistd.h>
 #endif
 
@@ -132,17 +132,21 @@ main(int argc, char **argv, char **envp) {
 #endif
 
 #ifdef NEED_NONRANDOM_SBRK
-#if SIZEOF_LONG == 4
-	if (!syscall(SYS_personality,PER_LINUX32))
-#else
-        if (!syscall(SYS_personality,PER_LINUX))
-#endif
-	  execvp(argv[0],argv);
+	{
+	  long pers;
+	  pers=personality(-1);
+	  if (!(pers & ADDR_NO_RANDOMIZE)) {
+	    personality(pers | ADDR_NO_RANDOMIZE);
+	    execve(*argv,argv,envp);
+	  }	
+	}
 #endif
 
 #if defined(DARWIN)
-    extern void init_darwin_zone_compat ();
-    init_darwin_zone_compat ();
+	{
+	  extern void init_darwin_zone_compat ();
+	  init_darwin_zone_compat ();
+	}
 #endif
 
 #ifdef RECREATE_HEAP

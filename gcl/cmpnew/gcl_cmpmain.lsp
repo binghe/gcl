@@ -313,7 +313,11 @@ Cannot compile ~a.~%"
 
             (when prev (set-dispatch-macro-character #\# #\, prev rtb)))))
 
-     (setq *init-name* (init-name input-pathname system-p))
+    (setq *init-name* (init-name input-pathname system-p))
+;    (let ((x (merge-pathnames #".o" o-pathname)))
+;      (with-open-file (s x :if-does-not-exist :create)
+;		      (setq *init-name* (init-name x system-p)))
+;      (delete-file x))
 
       (when (zerop *error-count*)
         (when *compile-verbose* (format t "~&End of Pass 1.  ~%"))
@@ -737,15 +741,13 @@ SYSTEM_SPECIAL_INIT
 		  (let ((p nil))
 		    (dolist (tem files)
 		      (when (equal (pathname-type tem) "o")
-			  (push (list
-                                 (init-name tem t)
-				 (namestring tem))
-				p)))
+			(let ((tem (namestring tem)))
+			  (push (list (si::find-init-name tem) tem) p))))
 
 		    (setq p (nreverse p))
 
 		    (dolist (tem p)
-		      (format st "extern void init_~a(void);~%" (car tem)))
+		      (format st "extern void ~a(void);~%" (car tem)))
 		    (format st "~%")
 
 		    (format st "typedef struct {void (*fn)(void);char *s;} Fnlst;~%")
@@ -754,14 +756,14 @@ SYSTEM_SPECIAL_INIT
 		    (dolist (tem p)
 		      (when (not (eq tem (car p)))
 			(format st ",~%"))
-		      (format st "{init_~a,\"~a\"}" (car tem) (cadr tem)))
+		      (format st "{~a,\"~a\"}" (car tem) (cadr tem)))
 		    (format st "};~%~%")
 		    
 		    (format st "object user_init(void) {~%")
 		    (dolist (tem files)
 		      (let ((tem (namestring tem)))
 			    (cond ((equal (cadr (car p)) tem)
-				   (format st "gcl_init_or_load1(init_~a,\"~a\");~%"
+				   (format st "gcl_init_or_load1(~a,\"~a\");~%"
 					   (car (car p)) tem)
 				   (setq p (cdr p)))
 				  (t 
