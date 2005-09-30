@@ -1634,7 +1634,7 @@ case $use in
 			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
 			;;
 		arm*)
-			TCFLAGS="$TCFLAGS -mlong-calls";;	
+			TCFLAGS="$TCFLAGS -mlong-calls -fdollars-in-identifiers ";;	
 		powerpc*) 
 			if $CC -v 2>&1 | grep -q "gcc version 3.2" ; then
 			   echo Reducing optimization for buggy gcc-3.2
