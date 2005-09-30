@@ -1,3 +1,53 @@
+gcl (2.6.8-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 30 Sep 2005 01:58:44 +0000
+
+gcl (2.6.7-7) unstable; urgency=high
+
+  * Scan .o file for init name when using dlopen
+  * Set init name using .o file instead of source file by default
+  * wrap-literals function from cvs head to allow optimizations using
+    compile or compile-file
+  * ADDR_NO_RANDOMIZE fix
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 29 Sep 2005 17:50:56 +0000
+
+gcl (2.6.7-6) unstable; urgency=high
+
+  * Build bfd snapshot locally, Closes: #318681
+
+ -- Camm Maguire <camm@enhanced.com>  Tue, 20 Sep 2005 17:53:17 +0000
+
+gcl (2.6.7-5) unstable; urgency=high
+
+  * gcc-3.3 for arm
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 15 Sep 2005 20:33:00 +0000
+
+gcl (2.6.7-4) unstable; urgency=high
+
+  * gcc 3.4 on arm to work around reserved '$' identifiers.
+  * gcl: French translation update
+  * French translation added, Closes: #325214
+  * Czech translation added, Closes: #325869
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 15 Sep 2005 13:45:11 +0000
+
+gcl (2.6.7-3) unstable; urgency=low
+
+  * static wraper for compiled_regexp for ia64
+
+ -- Camm Maguire <camm@enhanced.com>  Sat, 10 Sep 2005 11:26:37 +0000
+
+gcl (2.6.7-2) unstable; urgency=high
+
+  * rebuild against libgmp3c2, Closes: #323765
+  * 2.6.7 fixes all gcc 4.0 issues.  Closes: #323979
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 24 Aug 2005 00:44:48 +0000
+
 gcl (2.6.7-1) unstable; urgency=high
 
   * Fix (listen) with readline on
