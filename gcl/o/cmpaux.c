@@ -484,6 +484,12 @@ function.")
 object
 find_init_name1(char *s,unsigned len) {
 
+#ifdef _WIN32
+  FEerror ( "Unsupported on Windows platforms", 0 );
+#else    
+/* These functions have no relevance on Windows
+ * as dlopen and friends don't exist in that part of Cyberspace. */
+
   struct stat ss;
   char *tmp,*q;
   FILE *f;
@@ -506,6 +512,7 @@ find_init_name1(char *s,unsigned len) {
   if (strncmp(s,"init_",5))
     FEerror("Init name not found",0);
   return make_simple_string(s);
+#endif  /* _WIN32 */
 
 }
  
@@ -518,3 +525,4 @@ DEFUN_NEW("FIND-INIT-NAME", object, fSfind_init_name, SI, 1, 1,
   return find_init_name1(namestring->st.st_self,namestring->st.st_dim);
 
 }
+
