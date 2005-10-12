@@ -876,7 +876,22 @@ FFN(siLaddress)(void) {
 static void
 FFN(siLnani)(void) {
   check_arg(1);
-  vs_base[0] = (object)fixint(vs_base[0]);
+
+  /*This is temporary, 2.6.x does not have 64bit fixnums on 64bit machines*/
+  switch (type_of(vs_base[0])) {
+  case t_fixnum:
+    vs_base[0]=(object)fix(vs_base[0]);
+    break;
+  case t_bignum:
+    if (mpz_fits_slong_p(MP(vs_base[0]))) {
+      MP_INT *u = MP(vs_base[0]);
+      vs_base[0]=(object)mpz_get_si(u);
+      break;
+    }
+  default:
+    FEerror("Cannot coerce ~s to an address",1,vs_base[0]);
+  }
+
 }
 
 static void

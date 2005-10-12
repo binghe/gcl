@@ -4,8 +4,13 @@ gcl (2.6.8-1) unstable; urgency=low
   * fdollars in identifiers and gcc 4.0 for arm
   * Fix 64bit fixnum coersion bug using code from cvs HEAD
   * 64bit fixnum fasd data format fix from cvs head
+  * Fix long-call gcc configure bug for ppc
+  * revert 64bit coersion (gmp_big.c, maybe_replace_big) and replace with
+    code in siLnani (main.c) to get addresses from bignums.  2.7.0 will
+    have 64bit fixnums on 64bit machines, but this should not be
+    backported to 2.6.x
 
- -- Camm Maguire <camm@enhanced.com>  Wed,  5 Oct 2005 18:51:33 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed, 12 Oct 2005 23:10:30 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
