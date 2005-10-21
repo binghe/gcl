@@ -12,8 +12,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Remove gcc-3.3 for arm in debian/rules
   * make default maxpage depend on SIZEOF_LONG and PAGEWIDTH in a sane
     fashion
+  * Fix read-char-no-hang
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 19 Oct 2005 23:58:55 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 21 Oct 2005 16:50:30 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

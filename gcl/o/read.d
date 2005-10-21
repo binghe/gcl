@@ -2259,9 +2259,12 @@ READ:
 	else if (strm == Ct)
 		strm = symbol_value(sLAterminal_ioA);
 	check_type_stream(&strm);
-	if (!listen_stream(strm))
-		/* Incomplete! */
-		@(return Cnil)
+	if (!listen_stream(strm)) {
+		if (eof_errorp == Cnil)
+			@(return eof_value)
+		else
+			end_of_stream(strm);
+	}
 	@(return `read_char(strm)`)
 @)
 
