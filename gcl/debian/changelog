@@ -13,8 +13,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * make default maxpage depend on SIZEOF_LONG and PAGEWIDTH in a sane
     fashion
   * Fix read-char-no-hang
+  * Strip emacs warnings when finding site-lisp directory
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 21 Oct 2005 16:50:30 +0000
+ -- Camm Maguire <camm@enhanced.com>  Sun, 27 Nov 2005 21:48:28 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
