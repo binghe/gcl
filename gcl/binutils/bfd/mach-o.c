@@ -2138,6 +2138,8 @@ bfd_mach_o_core_file_matches_executable_p (core_bfd, exec_bfd)
   return TRUE;
 }
 
+#include "mach-o-reloc.c"
+
 #define TARGET_NAME mach_o_be_vec
 #define TARGET_STRING "mach-o-be"
 #define TARGET_BIG_ENDIAN 1

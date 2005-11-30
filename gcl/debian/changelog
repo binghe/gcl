@@ -14,8 +14,9 @@ gcl (2.6.8-1) unstable; urgency=low
     fashion
   * Fix read-char-no-hang
   * Strip emacs warnings when finding site-lisp directory
+  * mach-o update for latest binutils
 
- -- Camm Maguire <camm@enhanced.com>  Sun, 27 Nov 2005 21:48:28 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed, 30 Nov 2005 20:25:00 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

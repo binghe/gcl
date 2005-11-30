@@ -18,10 +18,13 @@ enum bfd_mach_o_rtype {
   PPC_RELOC_HA16_SECTDIFF            = 12, /* expects a pair */
   PPC_RELOC_JBSR                     = 13, /* expects a pair */
   PPC_RELOC_LO14_SECTDIFF            = 14, /* expects a pair */
+  PPC_RELOC_LOCAL_SECTDIFF           = 15, /* expects a pair */
 
   PPC_RELOC_NONE                     = 255
 
 };
+#define PPC_RELOC_SENTINEL (PPC_RELOC_LOCAL_SECTDIFF+1)
+
 
 /* Entries not suffixed by "PCREL" are expected to be absolute.  Note, however,
    that the canonicalization routine does not require this.  This means that adding
@@ -49,10 +52,12 @@ enum bfd_reloc_code_real_type {
   BFD_MACH_O_PPC_RELOC_HI16_SECTDIFF   = 14,
   BFD_MACH_O_PPC_RELOC_LO16_SECTDIFF   = 15,
   BFD_MACH_O_PPC_RELOC_HA16_SECTDIFF   = 16,
-  BFD_MACH_O_PPC_RELOC_LO14_SECTDIFF   = 17,
-  BFD_MACH_O_PPC_RELOC_JBSR            = 18
+  BFD_MACH_O_PPC_RELOC_JBSR            = 17,
+  BFD_MACH_O_PPC_RELOC_LO14_SECTDIFF   = 18,
+  BFD_MACH_O_PPC_RELOC_LOCAL_SECTDIFF  = 19
 
 };
+#define BFD_MACH_O_PPC_RELOC_SENTINEL (BFD_MACH_O_PPC_RELOC_LOCAL_SECTDIFF+1)
 
 #define BFD_MACH_O_R_ABS        0
 #define BFD_MACH_O_R_SCATTERED  0x80000000
@@ -457,7 +462,29 @@ reloc_howto_type reloc_howto_table [] = {
         false                                   /* pcrel_offset */
         ),
 
+  /* The jbsr instruction is assembled to the branch island. For
+     now, don't bother testing if the target can be reached directly.  */
+
   /* 17 */
+  HOWTO(
+        BFD_MACH_O_PPC_RELOC_JBSR,              /* type */
+        0,                                      /* right_shift */
+        2,                                      /* size */
+        26,                                     /* bitsize */
+        false,                                  /* pc_relative */
+        0,                                      /* bitpos */
+        complain_overflow_dont,                 /*
+omplain_overflow */
+        NULL,                                   /*
+pecial_function */
+        "BFD_MACH_O_PPC_RELOC_JBSR",            /* name */
+        false,                                  /* partial_inplace */
+        0,                                      /* src_mask */
+        0,                                      /* dst_mask */
+        false                                   /* pcrel_offset */
+        ),
+
+  /* 18 */
   HOWTO(
         BFD_MACH_O_PPC_RELOC_LO14_SECTDIFF,     /* type */
         0,                                      /* right_shift */
@@ -474,23 +501,20 @@ reloc_howto_type reloc_howto_table [] = {
         false                                   /* pcrel_offset */
         ),
 
-  /* The jbsr instruction is assembled to the branch island. For
-     now, don't bother testing if the target can be reached directly.  */
-  
-  /* 18 */
+  /* 19 */
   HOWTO(
-        BFD_MACH_O_PPC_RELOC_JBSR,              /* type */
+        BFD_MACH_O_PPC_RELOC_LOCAL_SECTDIFF,    /* type */
         0,                                      /* right_shift */
         2,                                      /* size */
-        26,                                     /* bitsize */
+        32,                                     /* bitsize */
         false,                                  /* pc_relative */
         0,                                      /* bitpos */
         complain_overflow_dont,                 /* complain_overflow */
-        NULL,                                   /* special_function */
-        "BFD_MACH_O_PPC_RELOC_JBSR",            /* name */
+        bfd_mach_o_sectdiff_reloc,              /* special_function */
+        "BFD_MACH_O_PPC_RELOC_LOCAL_SECTDIFF",  /* name */
         false,                                  /* partial_inplace */
         0,                                      /* src_mask */
-        0,                                      /* dst_mask */
+        0xffffffff,                             /* dst_mask */
         false                                   /* pcrel_offset */
         )
 
@@ -513,11 +537,12 @@ static reloc_howto_type *to_howto [] = {
   & reloc_howto_table [BFD_MACH_O_PPC_RELOC_HA16_SECTDIFF],
   & reloc_howto_table [BFD_MACH_O_PPC_RELOC_JBSR],
   & reloc_howto_table [BFD_MACH_O_PPC_RELOC_LO14_SECTDIFF],
-
+  & reloc_howto_table [BFD_MACH_O_PPC_RELOC_LOCAL_SECTDIFF],
   NULL,
   NULL,
   & reloc_howto_table [BFD_MACH_O_PPC_RELOC_BR14_PCREL],
   & reloc_howto_table [BFD_MACH_O_PPC_RELOC_BR24_PCREL],
+  NULL,
   NULL,
   NULL,
   NULL,
@@ -601,7 +626,7 @@ bfd_mach_o_bfd_reloc_type_lookup (abfd, code)
      bfd *abfd ATTRIBUTE_UNUSED;
      bfd_reloc_code_real_type code;
 {
-  if (code <= BFD_MACH_O_PPC_RELOC_JBSR) {
+  if (code < BFD_MACH_O_PPC_RELOC_SENTINEL) {
     return reloc_howto_table + code;
   } else {
     return NULL;
@@ -909,7 +934,8 @@ bfd_mach_o_slurp_relocation_entries (abfd, asect, reloc_count, relent, symbols,
                r_type == PPC_RELOC_HI16_SECTDIFF ||
                r_type == PPC_RELOC_LO16_SECTDIFF ||
                r_type == PPC_RELOC_HA16_SECTDIFF ||
-               r_type == PPC_RELOC_LO14_SECTDIFF)
+               r_type == PPC_RELOC_LO14_SECTDIFF ||
+	       r_type == PPC_RELOC_LOCAL_SECTDIFF)
         {
           struct scattered_relocation_info *srip = NULL;
           enum bfd_mach_o_rtype pair_r_type = PPC_RELOC_NONE;
@@ -948,7 +974,7 @@ bfd_mach_o_slurp_relocation_entries (abfd, asect, reloc_count, relent, symbols,
 
       octets = relent->address * bfd_octets_per_byte (abfd);
         
-      if (r_type == PPC_RELOC_VANILLA || r_type == PPC_RELOC_SECTDIFF)
+      if (r_type == PPC_RELOC_VANILLA || r_type == PPC_RELOC_SECTDIFF || r_type == PPC_RELOC_LOCAL_SECTDIFF)
         {             
           switch (r_length)
             {
@@ -1015,7 +1041,7 @@ bfd_mach_o_slurp_relocation_entries (abfd, asect, reloc_count, relent, symbols,
               break;
                 
             default:
-              fprintf (stderr, "error: unknown relocation entry\n");
+              fprintf (stderr, "error: unknown relocation entry, r_type=0x%x\n",r_type);
               return false;
             }
         }
@@ -1070,7 +1096,8 @@ bfd_mach_o_slurp_relocation_entries (abfd, asect, reloc_count, relent, symbols,
           r_type == PPC_RELOC_HI16_SECTDIFF ||
           r_type == PPC_RELOC_LO16_SECTDIFF ||
           r_type == PPC_RELOC_HA16_SECTDIFF ||
-          r_type == PPC_RELOC_LO14_SECTDIFF)
+          r_type == PPC_RELOC_LO14_SECTDIFF ||
+	  r_type == PPC_RELOC_LOCAL_SECTDIFF)
         {
           bfd_mach_o_sectdiff *sectdiff = (bfd_mach_o_sectdiff *)
             bfd_alloc (abfd, sizeof (bfd_mach_o_sectdiff));
@@ -1099,10 +1126,10 @@ bfd_mach_o_slurp_relocation_entries (abfd, asect, reloc_count, relent, symbols,
 
       relent->howto = NULL;
       
-      if ((r_type + (PPC_RELOC_LO14_SECTDIFF+1) * r_pcrel) < sizeof (to_howto))
+      if ((r_type + PPC_RELOC_SENTINEL * r_pcrel) < sizeof (to_howto))
         {
           relent->howto =
-            to_howto [r_type + (PPC_RELOC_LO14_SECTDIFF+1) * r_pcrel];
+            to_howto [r_type + PPC_RELOC_SENTINEL * r_pcrel];
         
           if (relent->howto ==
               & reloc_howto_table [BFD_MACH_O_PPC_RELOC_VANILLA_2])
