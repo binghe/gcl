@@ -15,8 +15,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix read-char-no-hang
   * Strip emacs warnings when finding site-lisp directory
   * mach-o update for latest binutils
+  * Latext bfd mach-o support from Aurelien
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 30 Nov 2005 20:25:00 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu,  1 Dec 2005 22:07:05 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

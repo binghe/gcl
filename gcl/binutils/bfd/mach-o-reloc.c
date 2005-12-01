@@ -471,17 +471,17 @@ reloc_howto_type reloc_howto_table [] = {
         0,                                      /* right_shift */
         2,                                      /* size */
         26,                                     /* bitsize */
-        false,                                  /* pc_relative */
+        FALSE,                                  /* pc_relative */
         0,                                      /* bitpos */
         complain_overflow_dont,                 /*
 omplain_overflow */
         NULL,                                   /*
 pecial_function */
         "BFD_MACH_O_PPC_RELOC_JBSR",            /* name */
-        false,                                  /* partial_inplace */
+        FALSE,                                  /* partial_inplace */
         0,                                      /* src_mask */
         0,                                      /* dst_mask */
-        false                                   /* pcrel_offset */
+        FALSE                                   /* pcrel_offset */
         ),
 
   /* 18 */
