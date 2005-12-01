@@ -18,8 +18,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Latext bfd mach-o support from Aurelien
   * revert to locbfd default on ppc-macosx
   * More ppc macosx fixes from Aurelien
+  * revert a few macosx changes
 
- -- Camm Maguire <camm@enhanced.com>  Thu,  1 Dec 2005 22:16:43 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu,  1 Dec 2005 22:59:39 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
