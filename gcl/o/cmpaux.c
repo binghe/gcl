@@ -24,6 +24,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	cmpaux.c
 */
 
+#include <sys/types.h>
+#include <sys/stat.h>
+     
 #include <string.h>
 #include <signal.h>
 #include <stdlib.h>
