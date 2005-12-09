@@ -19,8 +19,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * revert to locbfd default on ppc-macosx
   * More ppc macosx fixes from Aurelien
   * revert a few macosx changes
+  * default to void * prototype on my_sbrk for latest macosx pending
+    Aureliens #ifdef
 
- -- Camm Maguire <camm@enhanced.com>  Thu,  1 Dec 2005 22:59:39 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri,  9 Dec 2005 01:31:00 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

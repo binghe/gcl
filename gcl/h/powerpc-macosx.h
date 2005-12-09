@@ -39,7 +39,7 @@ extern char *get_dbegin ();
 #define SET_REAL_MAXPAGE { my_sbrk(0); real_maxpage = (int) mach_maplimit/PAGESIZE; }
 
 #define sbrk my_sbrk
-extern char *my_sbrk(int incr);
+extern void *my_sbrk(int incr);
 
 
 /** (si::save-system "...") a.k.a. unexec implementation  */
