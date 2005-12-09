@@ -23,8 +23,9 @@ gcl (2.6.8-1) unstable; urgency=low
     Aureliens #ifdef
   * Fix plt.h parsing on macosx
   * Fix leading_underscore detection on mac
+  * macosx name mangling fixes
 
- -- Camm Maguire <camm@enhanced.com>  Fri,  9 Dec 2005 02:02:02 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri,  9 Dec 2005 02:13:57 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
