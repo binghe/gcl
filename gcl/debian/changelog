@@ -22,8 +22,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * default to void * prototype on my_sbrk for latest macosx pending
     Aureliens #ifdef
   * Fix plt.h parsing on macosx
+  * Fix leading_underscore detection on mac
 
- -- Camm Maguire <camm@enhanced.com>  Fri,  9 Dec 2005 01:58:23 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri,  9 Dec 2005 02:02:02 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
