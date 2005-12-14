@@ -24,8 +24,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix plt.h parsing on macosx
   * Fix leading_underscore detection on mac
   * macosx name mangling fixes
+  * multi-process safe gazonk names in compiler::*tmp-dir*
 
- -- Camm Maguire <camm@enhanced.com>  Fri,  9 Dec 2005 02:13:57 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed, 14 Dec 2005 14:39:11 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

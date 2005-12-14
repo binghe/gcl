@@ -395,11 +395,32 @@ Cannot compile ~a.~%"
 	  (values)
 	  ))))))
 
+(defun get-temp-dir ()
+  (dolist (x `(,@(mapcar 'si::getenv #-winnt '("TMPDIR" "TMP") #+winnt '("%TEMP%" "%TMP%")) #-winnt "/tmp" ""))
+    (when x
+      (let* ((x (pathname x))
+	     (x (if (pathname-name x) x 
+		  (merge-pathnames
+		   (make-pathname :directory (butlast (pathname-directory x)) 
+				  :name (car (last (pathname-directory x))))
+		   x))))
+	(when (directory x) 
+	  (return-from 
+	   get-temp-dir 
+	   (namestring 
+	    (make-pathname 
+	     :directory (when (or (pathname-directory x) (pathname-name x))
+			  (append (pathname-directory x) (list (pathname-name x))))))))))))
+
+(defvar *tmp-dir* (get-temp-dir))
+
 (defun gazonk-name ( &aux tem)
   (dotimes (i 1000)
-	   (unless (probe-file (setq tem (merge-pathnames (format nil "gazonk~d.lsp" i))))
-		  (return-from gazonk-name (pathname tem))))
-  (error "1000 gazonk names used already!"))
+   (let ((tem (merge-pathnames 
+               (format nil "~agazonk_~d_~d.lsp" (if (boundp '*tmp-dir*) *tmp-dir* "") (si::getpid) i))))
+    (unless (probe-file tem)
+     (return-from gazonk-name (pathname tem)))))
+ (error "1000 gazonk names used already!"))
 
 (defun prin1-cmp (form strm)
   (let ((*compiler-output-data* strm)

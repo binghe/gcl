@@ -19,7 +19,7 @@ SETUP='(load "sys-package.lisp")' \
 	'(setq compiler::*default-c-file* t)'\
 	'(setq compiler::*default-data-file* t)'\
 	'(setq compiler::*default-system-p* t)' \
-	'(setq compiler::*keep-gaz* t)'
+	'(setq compiler::*keep-gaz* t compiler::*tmp-dir* "")'
 
 all: $(addsuffix .c,$(AFILES)) $(addsuffix .o,$(AFILES)) 
 
@@ -33,14 +33,12 @@ $(addsuffix .c,$(AFILES)) $(addsuffix .data,$(AFILES))\
 	$(addsuffix .lisp,$(subst gcl_pcl_impl_low,impl/gcl/gcl_pcl_impl_low,$(FILES)))
 	rm -f *.o *gazonk*
 	cp ../h/cmpinclude.h .
-	echo ${SETUP} '(pcl::compile-pcl)' | ../unixport/saved_gcl ../unixport/
-# FIXME -- small compiler setjmp/volatile detection bug -- CM
-# doesn't seem to be needed now, but investigate more later
-#	patch -p0 <pcl_methods.patch
-#	rm -f pcl_methods.o
-	for i in gazonk* ; do j=$$(echo $$i | sed 's,\..*$$,,1');\
-		cat $$i | sed   -e "s,$$j\.h,gcl_pcl_$$j.h,1" \
-				-e  "s,init_.*$$j,init_gcl_pcl_$$j,g" >gcl_pcl_$$i && rm $$i; done
+	echo ${SETUP} '(pcl::compile-pcl)' | ../unixport/saved_gcl
+	for i in gazonk* ; do \
+		j=$$(echo $$i | sed 's,\..*$$,,1');k="gazonk$$(echo $$j | cut -f3 -d\_)";\
+		l=$$(echo $$i | sed 's,^.*\.,,1');\
+		cat $$i | sed   -e "s,$$j\.h,gcl_pcl_$$k.h,1" \
+				-e "s,init_.*$$j,init_gcl_pcl_$$k,g" >gcl_pcl_$$k.$$l && rm $$i; done
 
 %.o: %.c %.h %.data
 	$(CC) $(CFLAGS) -c $< -o $@
