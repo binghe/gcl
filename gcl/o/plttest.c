@@ -18,6 +18,7 @@ main(int argc,char * argv[],char *envp[]) {
   putc(ch,f);
 
   setjmp(env);
+  _setjmp(env);
 
   cos(d);
   sin(d);

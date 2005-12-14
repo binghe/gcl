@@ -25,8 +25,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix leading_underscore detection on mac
   * macosx name mangling fixes
   * multi-process safe gazonk names in compiler::*tmp-dir*
+  * Add underscore-mangled setjmp calls to plttest.c for macosx
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 14 Dec 2005 14:39:11 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed, 14 Dec 2005 14:39:33 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
