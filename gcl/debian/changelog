@@ -29,8 +29,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix POTFILES.in, Closes: #336207.
   * Update templates, Closes: #324636
   * New French and Swedish translations, Closes: #333654, Closes: #336757.
+  * Add feof to plttest.c for macosx
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 14 Dec 2005 18:55:38 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu, 15 Dec 2005 01:37:18 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

@@ -16,6 +16,7 @@ main(int argc,char * argv[],char *envp[]) {
 
   getc(f);
   putc(ch,f);
+  feof(f);
 
   setjmp(env);
   _setjmp(env);
