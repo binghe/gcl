@@ -154,6 +154,7 @@ plt.h: plttest.o
                             printf("MY_PLT(%s)\n",a)}' \
 			k=$(LEADING_UNDERSCORE) |\
 			sort | \
+			grep -v '[^_]_[^_]' |\
 			awk '{A[++k]=$$0} END {for (i=1;i<=k;i++) \
 				printf("%s%s\n",A[i],i==k ? "" : ",");}' >$@
 
