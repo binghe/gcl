@@ -9,6 +9,9 @@
 
 #include "include.h"
 
+#ifdef DARWIN
+extern int dyld_stub_binding_helper();
+#endif
 
 typedef struct {
   const char *n;
