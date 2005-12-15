@@ -252,3 +252,4 @@ SGC is enabled.  */
 #undef GCL_GPROF_START
 #undef HZ
 #undef ADDR_NO_RANDOMIZE
+#undef LEADING_UNDERSCORE

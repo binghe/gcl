@@ -206,6 +206,7 @@
 #undef GCL_GPROF_START
 #undef HZ
 #undef ADDR_NO_RANDOMIZE
+#undef LEADING_UNDERSCORE
 
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG

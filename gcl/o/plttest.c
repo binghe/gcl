@@ -19,7 +19,6 @@ main(int argc,char * argv[],char *envp[]) {
   feof(f);
 
   setjmp(env);
-  _setjmp(env);
 
   cos(d);
   sin(d);
