@@ -27,7 +27,7 @@ pltcomp(const void *v1,const void *v2) {
   return strcmp(stn(p1->n),stn(p2->n));
 
 }
-
+extern int mcount();
 #define MY_PLT(a_) {#a_,(unsigned long)(void *)a_}
 static Plt mplt[]={
 	/* This is an attempt to at least capture the addresses to
