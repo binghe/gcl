@@ -409,6 +409,7 @@ Cannot compile ~a.~%"
 	   get-temp-dir 
 	   (namestring 
 	    (make-pathname 
+	     :device (pathname-device x)
 	     :directory (when (or (pathname-directory x) (pathname-name x))
 			  (append (pathname-directory x) (list (pathname-name x))))))))))))
 
@@ -496,7 +497,7 @@ Cannot compile ~a.~%"
 		 (on (get-output-pathname gaz "o" gaz )))
 	     (with-open-file (st cn)
 			     (do () ((let ((a (read-line st)))
-				       (when (>= (si::string-match "gazonk[0-9]*.h" a) 0)
+				       (when (>= (si::string-match "gazonk_[0-9]*_[0-9]*.h" a) 0)
 					 (format t "~%~d~%" a)
 					 a))))
 			     (si::copy-stream st *standard-output*))

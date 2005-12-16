@@ -31,8 +31,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * New French and Swedish translations, Closes: #333654, Closes: #336757.
   * Add feof to plttest.c for macosx
   * Cleanup LEADING_UNDERSCORE case in plt.c et.al for macosx et.al.
+  * pass devices if present in compiler::get-temp-dir, fix disassemble
+    for new gazonk name pattern
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 15 Dec 2005 18:13:56 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 16 Dec 2005 20:50:37 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
