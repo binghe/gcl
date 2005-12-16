@@ -43,7 +43,9 @@ static Plt mplt[]={
 	   in sfasli.c.  FIXME -- this should be made synchronous with
 	   compiler changes; sort the list automatically.  SORT THIS
 	   LIST BY HAND FOR THE TIME BEING. */
-#include "plt.h"
+#ifndef _WIN32
+#  include "plt.h"
+#endif    
 };
 
 object sSAplt_tableA;
