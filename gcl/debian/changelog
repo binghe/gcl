@@ -34,8 +34,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * pass devices if present in compiler::get-temp-dir, fix disassemble
     for new gazonk name pattern
   * fix configure
+  * Add mount declaration to plt.c
 
- -- Camm Maguire <camm@enhanced.com>  Sat, 17 Dec 2005 15:15:23 +0000
+ -- Camm Maguire <camm@enhanced.com>  Sun, 18 Dec 2005 12:57:53 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
