@@ -221,7 +221,7 @@ gclclean:
 		windows/install.lsp windows/sysdir.bat
 	rm -rf windows/Output
 	rm -f ansi-tests/test_results ansi-tests/gazonk*lsp
-	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out
+	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out machine
 
 clean: gclclean
 	-(cd $(GMPDIR) ; $(MAKE) distclean)
