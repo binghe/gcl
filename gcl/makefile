@@ -41,13 +41,16 @@ xgcl: $(PORTDIR)/saved_xgcl
 $(PORTDIR)/saved_xgcl: $(PORTDIR)/saved_gcl
 	cd xgcl-2 && $(MAKE)
 
-binutils/bfd/libbfd.a binutils/libiberty/libiberty.a:
+binutils/intl/libintl.a:
+	cd $(@D) && $(MAKE)
+
+binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
 	cd $(@D) && $(MAKE)
 
 h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
 	cp $(<D)/$(@F) $@
 
-h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
+h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/intl/libintl.a binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
 	cp $(<D)/../include/$(@F) $@
 
 $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
@@ -223,6 +226,7 @@ gclclean:
 clean: gclclean
 	-(cd $(GMPDIR) ; $(MAKE) distclean)
 	rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
+	-cd binutils/intl && $(MAKE) distclean
 	-cd binutils/bfd && $(MAKE) distclean
 	-cd binutils/libiberty && $(MAKE) distclean
 

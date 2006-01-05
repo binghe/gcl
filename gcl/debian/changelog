@@ -35,8 +35,9 @@ gcl (2.6.8-1) unstable; urgency=low
     for new gazonk name pattern
   * fix configure
   * Add mount declaration to plt.c
+  * Use internal gettext for bfd
 
- -- Camm Maguire <camm@enhanced.com>  Sun, 18 Dec 2005 12:57:53 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu,  5 Jan 2006 16:36:19 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
