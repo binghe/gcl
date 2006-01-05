@@ -50,7 +50,7 @@ binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
 h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
 	cp $(<D)/$(@F) $@
 
-h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/intl/libintl.a binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
+h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
 	cp $(<D)/../include/$(@F) $@
 
 $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
