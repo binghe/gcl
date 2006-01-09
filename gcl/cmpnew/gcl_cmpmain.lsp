@@ -415,10 +415,10 @@ Cannot compile ~a.~%"
 
 (defvar *tmp-dir* (get-temp-dir))
 
-(defun gazonk-name ( &aux tem)
+(defun gazonk-name ()
   (dotimes (i 1000)
    (let ((tem (merge-pathnames 
-               (format nil "~agazonk_~d_~d.lsp" (if (boundp '*tmp-dir*) *tmp-dir* "") (si::getpid) i))))
+               (format nil "~agazonk_~d_~d.lsp" (if (boundp '*tmp-dir*) *tmp-dir* "") (abs (si::getpid)) i))))
     (unless (probe-file tem)
      (return-from gazonk-name (pathname tem)))))
  (error "1000 gazonk names used already!"))
@@ -516,6 +516,7 @@ Cannot compile ~a.~%"
 
 
 (defun compiler-pass2 (c-pathname h-pathname system-p )
+  (declare (special *init-name*))
   (with-open-file (st c-pathname :direction :output)
     (let ((*compiler-output1* (if (eq system-p 'disassemble) *standard-output*
 				st)))
@@ -744,7 +745,7 @@ SYSTEM_SPECIAL_INIT
 ;  the loading of binary objects on systems relocating with dlopen.
 ;
 
-(defun make-user-init (files outn &aux tem)
+(defun make-user-init (files outn)
 
   (let* ((c (pathname outn))
 	 (c (merge-pathnames c (make-pathname :directory '(:current))))
@@ -820,7 +821,7 @@ SYSTEM_SPECIAL_INIT
 		   new
 		   (mysub (subseq str y) it new)))))
 
-(defun link (files image &optional post extra-libs (run-user-init t) &aux raw init) 
+(defun link (files image &optional post extra-libs (run-user-init t)) 
 
   (let* ((ui (make-user-init files "user-init"))
 	 (raw (pathname image))

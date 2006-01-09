@@ -1219,6 +1219,9 @@ BEGIN:
 	switch (strm->sm.sm_mode) {
 #ifdef HAVE_NSOCKET
 	case smm_socket:
+
+	  if (SOCKET_STREAM_BUFFER(strm)->ust.ust_fillp>0) return TRUE;
+
 	  {
 	    fd_set fds;
 	    struct timeval tv;
