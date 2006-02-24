@@ -220,10 +220,10 @@
           (or (endp i) (match-dimensions (array-dimensions object) i))))
     (simple-vector
      (and (simple-vector-p object)
-	  (or (endp i) (eq (car i) '*) 
-	      (and (eq (car i) t) (not (stringp object)) (not (bit-vector-p object)))
-	      (equal (array-element-type object) (best-array-element-type (car i))))
-          (or (endp (cdr i)) (match-dimensions (array-dimensions object) (cdr i)))))
+	  (or (endp i)  
+	      (and (not (stringp object)) (not (bit-vector-p object)))
+	      (equal (best-array-element-type (array-element-type object)) t))
+          (or (endp i) (match-dimensions (array-dimensions object) i))))
     (vector
      (and (vectorp object)
 	  (or (endp i) (eq (car i) '*) 
@@ -232,12 +232,12 @@
           (or (endp (cdr i)) (match-dimensions (array-dimensions object) (cdr i)))))
     (simple-array
      (and (simple-array-p object)
+          (or (endp i)
+              (equal (best-array-element-type (array-element-type object)) t))
           (or (endp i) (eq (car i) '*)
-              (equal (array-element-type object)(best-array-element-type (car i))))
-          (or (endp (cdr i)) (eq (cadr i) '*)
-	      (if (listp (cadr i))
-		  (match-dimensions (array-dimensions object) (cadr i))
-		(eql (array-rank object) (cadr i))))))
+	      (if (listp (car i))
+		  (match-dimensions (array-dimensions object) (car i))
+		(eql (array-rank object) (car i))))))
     (array
      (and (arrayp object)
           (or (endp i) (eq (car i) '*)

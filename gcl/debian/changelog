@@ -44,8 +44,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * fix configure unbalanced quotes
   * support for bignums in nth et.al.
   * Fix branch cut of atanh
+  * Fix typep on simple-arrays
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 24 Feb 2006 21:06:33 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 24 Feb 2006 21:07:23 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
