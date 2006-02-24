@@ -42,8 +42,9 @@ gcl (2.6.8-1) unstable; urgency=low
     batch operation; fix listen on socket streams; use (abs (getpid)) in
     tmp names for Windows
   * fix configure unbalanced quotes
+  * support for bignums in nth et.al.
 
- -- Camm Maguire <camm@enhanced.com>  Mon,  9 Jan 2006 19:53:20 +0000
+ -- Camm Maguire <camm@enhanced.com>  Fri, 24 Feb 2006 21:04:32 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

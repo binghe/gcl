@@ -24,7 +24,6 @@
 
 
 (export 'time)
-(export 'nth-value)
 (export '(reset-sys-paths decode-universal-time encode-universal-time compile-file-pathname complement constantly))
 
 
@@ -112,9 +111,6 @@
         seconds-per-day)
      (* h 3600) (* min 60) sec))
 
-; Courtesy Paul Dietz
-(defmacro nth-value (n expr)
-  `(nth ,n (multiple-value-list ,expr)))
 (defun compile-file-pathname (pathname)
 (make-pathname :defaults pathname :type "o"))
 (defun constantly (x)
