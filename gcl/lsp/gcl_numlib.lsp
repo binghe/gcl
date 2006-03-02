@@ -168,10 +168,11 @@
              (error "The argument, ~s, is a logarithmic singularity.~
                     ~%Don't be foolish, GLS."
                     x))
-       (let ((y (log (/ (1+ x) (sqrt (- 1 (* x x)))))))
-	 (if (and (= (imagpart x) 0) (complexp y))
-	     (complex (realpart y) (- (imagpart y)))
-	   y)))
+       (log (/ (1+ x) (sqrt (- 1 (* x x))))))
+;;        (let ((y (log (/ (1+ x) (sqrt (- 1 (* x x)))))))
+;; 	 (if (and (= (imagpart x) 0) (complexp y))
+;; 	     (complex (realpart y) (- (imagpart y)))
+;; 	   y)))
 
 
 (defun rational (x)
