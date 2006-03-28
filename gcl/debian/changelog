@@ -51,8 +51,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * cond evalmacro from cvs head
   * Fix fixnum declarations in new smallnthcdr/bignthcdr
   * fix simple-array typep
+  * updates for lsp/sys-proclaim
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 28 Mar 2006 21:23:34 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 28 Mar 2006 21:24:01 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
