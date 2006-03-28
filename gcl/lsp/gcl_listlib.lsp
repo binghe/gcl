@@ -198,13 +198,13 @@
   `(specific-error :wrong-type-argument "~S is not of type ~S." ,x ',y))
 
 (defun smallnthcdr (n x)
-  (declare (seqind n))
+  (declare (fixnum n))
   (cond ((atom x) (when x (tp-error x proper-list)))
 	((= n 0) x)
 	((smallnthcdr (1- n) (cdr x)))))
 
 (defun bignthcdr (n i s f) 
-  (declare (seqind i))
+  (declare (fixnum i))
   (cond ((atom f) (when f (tp-error f proper-list)))
 	((atom (cdr f)) (when (cdr f) (tp-error (cdr f) proper-list)))
 	((eq s f) (smallnthcdr (mod n i) s))
