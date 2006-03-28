@@ -48,8 +48,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * prevent nested free errors
   * revert atanh branch cut change
   * Fix function documentation wrapping by compile
+  * cond evalmacro from cvs head
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 15 Mar 2006 19:12:02 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 28 Mar 2006 21:21:30 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
