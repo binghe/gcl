@@ -52,8 +52,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix fixnum declarations in new smallnthcdr/bignthcdr
   * fix simple-array typep
   * updates for lsp/sys-proclaim
+  * fix read-char-no-hang
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 28 Mar 2006 21:24:01 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed,  7 Jun 2006 15:09:24 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
