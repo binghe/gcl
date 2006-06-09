@@ -207,6 +207,7 @@
 #undef HZ
 #undef ADDR_NO_RANDOMIZE
 #undef LEADING_UNDERSCORE
+#undef HAVE_XGCL
 
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG

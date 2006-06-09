@@ -253,3 +253,4 @@ SGC is enabled.  */
 #undef HZ
 #undef ADDR_NO_RANDOMIZE
 #undef LEADING_UNDERSCORE
+#undef HAVE_XGCL

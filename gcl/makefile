@@ -34,7 +34,11 @@ TESTDIR = ansi-tests
 
 VERSION=`cat majvers`.`cat minvers`
 
-all: $(BUILD_BFD) $(PORTDIR)/$(FLISP) command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk do-info
+all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk do-info
+
+system: $(PORTDIR)/$(FLISP)
+	[ "$X_LIBS" == "" ] || cd xgcl-2 && make saved_xgcl LISP=../$< && mv saved_xgcl ../$(PORTDIR)/$(FLISP)
+	touch $@
 
 xgcl: $(PORTDIR)/saved_xgcl
 
@@ -129,7 +133,7 @@ command:
 merge:
 	$(CC) -o merge merge.c
 
-LISP_LIB=cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h unixport/init_$(SYSTEM).lsp unixport/lib$(SYSTEM).a unixport/libgclp.a gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs)
+LISP_LIB=cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp xgcl-2/gcl_dwtest.lsp xgcl-2/gcl_dwtestcases.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h unixport/init_$(SYSTEM).lsp unixport/lib$(SYSTEM).a unixport/libgclp.a gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs) 
 
 install-command:
 	rm -f $(DESTDIR)$(prefix)/bin/gcl
@@ -193,6 +197,7 @@ install1:
 #	echo '(load "../tkl.o")(TK::GET-AUTOLOADS (directory "*.lisp"))' | ../../$(PORTDIR)/$(FLISP)$(EXE)) ; fi
 	if test "$(EMACS_SITE_LISP)" != "" ; then (cd elisp ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
 	if test "$(INFO_DIR)" != "unknown"; then (cd info ; $(MAKE) ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
+	if test "$(INFO_DIR)" != "unknown"; then (cd xgcl-2 ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
 	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then cp COPYING.LIB-2.0 readme-bin.mingw $(prefix) ; fi
 	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then cp gcl.ico $(prefix)/bin ; fi
 	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then rm -rf $(prefix)/install; mkdir $(prefix)/install ; cp windows/install.lsp $(prefix)/install ; windows/instdos.sh windows/sysdir.bat $(prefix)/bin/sysdir.bat ; fi
@@ -221,7 +226,7 @@ gclclean:
 		windows/install.lsp windows/sysdir.bat
 	rm -rf windows/Output
 	rm -f ansi-tests/test_results ansi-tests/gazonk*lsp
-	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out machine
+	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out machine system
 
 clean: gclclean
 	-(cd $(GMPDIR) ; $(MAKE) distclean)

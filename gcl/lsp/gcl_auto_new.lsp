@@ -198,8 +198,7 @@
 (AUTOLOAD 'offer-choices '|tinfo|)
 (AUTOLOAD 'tkconnect '|tkl|)
 
-
-
+(AUTOLOAD 'user::xgcl '|gcl_dwtest|)
 
 ;; the sun has a broken ypbind business, if one wants to save.
 ;; So to stop users from invoking this

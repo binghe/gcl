@@ -1,5 +1,5 @@
 (in-package :XLIB)
-; general.lsp         Hiep Huu Nguyen                      27 Aug 92
+; general.lsp         Hiep Huu Nguyen  ; 15 Sep 05; 24 Jan 06
 
 ; Copyright (c) 1994 Hiep Huu Nguyen and The University of Texas at Austin.
 
@@ -22,6 +22,10 @@
 ; Some of the files that interface to the Xlib are adapted from DEC/MIT files.
 ; See the file dec.copyright for details.
 
+; 27 Aug 92
+; 15 Sep 05: Edited by G. Novak to change C function headers to new form
+; 24 Jan 06: Edited by G. Novak to remove vertex-array entries.
+
 (defentry free (int) (void free))
 (defentry calloc(int int) (int calloc))
 (defentry char-array (int) (int char_array))
@@ -42,9 +46,8 @@
 
 (defentry get-c-string (object) (object "(object)object_to_string"))
 
-
 ;; General routines.
-(defCfun "object lisp_string(object a_string, int c_string )" 0
+(defCfun "object lisp_string(object a_string, int c_string) " 0
   "int len = strlen(c_string);"
   "a_string->st.st_dim = len;"
   "a_string->st.st_fillp = len;"
@@ -58,7 +61,7 @@
 
 ;;modified from mark ring's function
 ;; General routines.
-(defCfun "int get_st_point(object s)" 0
+(defCfun "int   get_st_point(object s)" 0
   " return((int) s->st.st_self);"
   )
 (defentry get-st-point2 (object) (int get_c_string))
@@ -66,12 +69,4 @@
 ;; make sure string is null terminated
 (defun  get-st-point (string)
   ( get-st-point2 (concatenate 'string string "")))
-
-(defentry vertex-array (int) (int vertex_array))
-(defentry vertex-pos-x (int int) (int vertex_pos_x))
-(defentry vertex-pos-y (int int) (int vertex_pos_y))
-(defentry vertex-pos-flag (int int) (int vertex_pos_flag))
-(defentry set-vertex-array (int int int int int) (void set_vertex_array))
-;(defentry Xdraw (int int int int int) (int "XDraw"))
-;(defentry Xdrawfilled (int int int int int) (int "XDrawFilled"))
 

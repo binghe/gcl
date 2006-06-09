@@ -1091,6 +1091,9 @@ init_main(void) {
 #endif
 #endif
   ADD_FEATURE("UNEXEC");
+#ifdef HAVE_XGCL
+  ADD_FEATURE("XGCL");
+#endif
 
 #ifdef HAVE_GNU_LD
   ADD_FEATURE("GNU-LD");
