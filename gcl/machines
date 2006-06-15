@@ -6,12 +6,11 @@ names for various supported machines.
 * alpha-osf1:  Dec alpha DEC OSF/1 V3.2 Worksystem Software (Rev. 214)
 * dec3100:  Decstation 3100,5000, OS=Ultrix V3.1C-0 (Rev. 42) [akcl 505]
             ULTRIX V4.2 (Rev. 96)[akcl 602] (VOL= )
-* gnuwin95: Windows 95 or Windows NT, using gcc and cygwinb19.dll (NOT b20)
 * hp300-bsd:  Hp 350, 370 [motorola 68K]  under 4.3 BSD (mt xinu)
 * hp300:  Hp 350, 370 under HPUX.
 * hp800:  Hp 720,730 under HPUX (version 8).  Possibly hp 800 also
 * mac2:  Macintosh under AUX (unix) 
-* mingw: Windows NT (Win9? untested) with Mingw32 gcc hosted by Cygwin
+* mingw: Windows built with MSYS hosted Mingw32 gcc 
 * mp386: intel 386 under System V 3 (eg microport,interactive)
 * NeXT30-m68k: NeXT (M68K) under NeXTSTEP 3.0
 * NeXT32-m68k: NeXT (M68K) under NeXTSTEP 3.2, 3.3 (gcc-2.6.3 is required)
