@@ -55,8 +55,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * fix read-char-no-hang
   * string comparison functions are not predicates
   * xgcl integration
+  * Add missing build dependencies, omit html generation to avoid non-free
+    dependencies, CLoses: #372574.
 
- -- Camm Maguire <camm@enhanced.com>  Fri,  9 Jun 2006 15:53:02 +0000
+ -- Camm Maguire <camm@enhanced.com>  Mon, 19 Jun 2006 14:07:34 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
