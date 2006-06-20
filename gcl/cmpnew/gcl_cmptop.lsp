@@ -1577,7 +1577,7 @@
   (cmpck (not (symbolp (car args)))
          "The function name ~s is not a symbol." (car args))
   (dolist** (x (cadr args))
-    (cmpck (not (member x '(object char int float double string)))
+    (cmpck (not (member x '(object char fixnum int float double string)))
            "The C-type ~s is illegal." x))
   (setq cfspec (caddr args))
   (cond ((symbolp cfspec)
@@ -1587,7 +1587,7 @@
          (setq type 'object)
          (setq cname cfspec))
         ((and (consp cfspec)
-              (member (car cfspec) '(void object char int float double
+              (member (car cfspec) '(void object char fixnum int float double
 					  string))
               (consp (cdr cfspec))
               (or (symbolp (cadr cfspec)) (stringp (cadr cfspec)))
@@ -1639,7 +1639,7 @@
         (void (wt "Cnil"))
         (object (wt "x"))
         (char (wt "code_char(x)"))
-        (int (when (zerop *space*) (wt "CMP"))
+        ((fixnum int) (when (zerop *space*) (wt "CMP"))
              (wt "make_fixnum(x)"))
 	(string
 	  (wt "make_simple_string(x)"))

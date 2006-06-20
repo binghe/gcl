@@ -24,7 +24,7 @@
 /* 24 Jan 06: edited by G. Novak to remove vertex_array functions,
               remove includes, change function arg lists to new form */
 #include <stdlib.h>
-
+#define int long
 int char_array(int size)
 {
   return ((int) calloc (size, sizeof(char)));

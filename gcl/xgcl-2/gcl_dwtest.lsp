@@ -30,11 +30,6 @@
 (defvar *myw*)  ; my window
 (defvar myw)
 
-(defun xgcl nil
-  (format t "Welcome to xgcl!  Please see dwdoc for details.~%  Or try (wtestc) .. (wtestk) for examples.~%")
-  (wtesta)
-  (wtestb))
-
 ; Make a window to play in.
 (defun wtesta ()
   (setq myw (setq *myw* (window-create 300 300 "test window"))) )
