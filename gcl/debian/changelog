@@ -58,8 +58,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Add missing build dependencies, omit html generation to avoid non-free
     dependencies, CLoses: #372574.
   * Remove references to null constant in gcl_Xinit.lsp
+  * Fix cs.po
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 20 Jun 2006 16:25:42 +0000
+ -- Camm Maguire <camm@enhanced.com>  Tue, 20 Jun 2006 16:31:31 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
