@@ -178,7 +178,9 @@
   (if type (wt "/* " (symbol-name type) " */"))
   (wt "V" cvar))
 
-(defun wt-vv (vv) (wt "VV[" vv "]"))
+(defun vv-str (vv) (si::string-concatenate "((object)VV[" (write-to-string vv) "])"))
+
+(defun wt-vv (vv) (wt (vv-str vv)))
 
 (defun wt-fixnum-loc (loc)
   (cond ((and (consp loc)
@@ -224,7 +226,7 @@
            (eq (car loc) 'fixnum-value))))
 
 (defun wt-fixnum-value (vv fixnum-value)
-  (if vv (wt "VV[" vv "]")
+  (if vv (wt (vv-str vv))
     (wt "small_fixnum(" fixnum-value ")")))
         
 
@@ -248,7 +250,7 @@
 
 (defun wt-character-value (vv character-code)
        (declare (ignore character-code))
-       (wt "VV[" vv "]"))
+       (wt (vv-str vv)))
 
 (defun wt-long-float-loc (loc)
   (cond ((and (consp loc)
@@ -270,7 +272,7 @@
 
 (defun wt-long-float-value (vv long-float-value)
        (declare (ignore long-float-value))
-       (wt "VV[" vv "]"))
+       (wt (vv-str vv)))
 
 (defun wt-short-float-loc (loc)
   (cond ((and (consp loc)
@@ -292,4 +294,4 @@
 
 (defun wt-short-float-value (vv short-float-value)
        (declare (ignore short-float-value))
-       (wt "VV[" vv "]"))
+       (wt (vv-str vv)))

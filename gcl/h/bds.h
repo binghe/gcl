@@ -59,8 +59,8 @@ EXTER bds_ptr bds_save_top;
 #define	bds_bind(sym, val)  \
 	do {bds_ptr _b = bds_top+1; \
 	      (_b)->bds_sym = (sym);  \
-	_b->bds_val = (sym)->s.s_dbind;  \
-	(sym)->s.s_dbind = (val); bds_top=_b;} while (0)
+	_b->bds_val = ((object)sym)->s.s_dbind;  \
+	((object)sym)->s.s_dbind = (val); bds_top=_b;} while (0)
 
 #define	bds_unwind1  \
 	((bds_top->bds_sym)->s.s_dbind = bds_top->bds_val, --bds_top)

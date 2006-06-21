@@ -296,7 +296,7 @@
   ;;; Initialization function.
   (wt-nl1     "void init_" name "(){"
 	      #+sgi3d "Init_Links ();"
-	       "do_init(VV);"
+	       "do_init((void *)VV);"
 	      "}")
 
 
@@ -364,14 +364,14 @@
   ;; last entry in the VV vector.
 
 
-  (wt-h "static char * VVi[" (+ 1 *next-vv*) "]={")
+  (wt-h "static void * VVi[" (+ 1 *next-vv*) "]={")
   (wt-h "#define Cdata VV[" *next-vv* "]")
   (or *vaddress-list* (wt-h 0))
    (do ((v (nreverse *Vaddress-List*) (cdr v)))
        ((null v)   (wt-h "};"))
-       (wt-h "(char *)(" (caar v) (if (cdr v) ")," ")")))
+       (wt-h "(void *)(" (caar v) (if (cdr v) ")," ")")))
 
-   (wt-h "#define VV ((object *)VVi)")
+   (wt-h "#define VV (VVi)")
 
 
    (wt-data-file)
@@ -400,7 +400,6 @@
 		(wt-h "static " (declaration-type newtype) " LnkT" num "();")
 		#-sgi3d (wt-h "static "  (declaration-type newtype) " (*Lnk" num ")() = LnkT" num ";")
 		#+sgi3d (wt-h "static "  (declaration-type newtype) " (*Lnk" num ")();"))))))
-)
 
 
 ;; this default will be as close to the the decision of the x3j13 committee
@@ -798,7 +797,7 @@
                     (wt-nl "goto TTL;") (wt-nl1 "TTL:;"))
               (dolist
                 (v specials)
-	          (wt-nl "bds_bind(VV[" (cdr v)"],V" (var-loc (car v))");")
+	          (wt-nl "bds_bind(" (vv-str (cdr v)) ",V" (var-loc (car v)) ");")
 	          (push 'bds-bind *unwind-exit*)
 		  (setf (var-kind (car v)) 'SPECIAL)
 		  (setf (var-loc (car v)) (cdr v)))
@@ -1428,10 +1427,8 @@
 
 (defun t2ordinary (form)
   (cond ((atom form))
-	((constantp form) )
+	((constantp form))
 	(t (add-init form ))))
-  
-  )
 
 (defun add-load-time-sharp-comma ()
   (dolist* (vv (reverse *sharp-commas*))
@@ -1461,7 +1458,7 @@
 (si:putprop 'dbind 'set-dbind 'set-loc)
 
 (defun set-dbind (loc vv)
-  (wt-nl "VV[" vv "]->s.s_dbind = " loc ";"))
+  (wt-nl (vv-str vv) "->s.s_dbind = " loc ";"))
 
 (defun t1clines (args)
   (dolist** (s args)
@@ -1517,10 +1514,10 @@
           ((eq (caar s) 'quote)
            (wt-nl1 (cadadr s))
            (case (caadr s)
-                 (object (wt "=VV[" (cadar s) "];"))
+                 (object (wt "=" (vv-str (cadar s)) ";"))
                  (otherwise
                   (wt "=object_to_" (string-downcase (symbol-name (caadr s)))
-                      "(VV[" (cadar s) "]);"))))
+                      "(" (vv-str (cadar s)) ");"))))
           (t (wt-nl1 "{vs_base=vs_top=old_top;")
              (dolist** (arg (cdar s))
                (wt-nl1 "vs_push(")
@@ -1534,17 +1531,15 @@
                (wt ");"))
              (cond ((setq fd (assoc (caar s) *global-funs*))
                     (cond (*compiler-push-events*
-                           (wt-nl1 "ihs_push(VV[" (add-symbol (caar s)) "]);")
+                           (wt-nl1 "ihs_push(" (vv-str (add-symbol (caar s))) ");")
                            (wt-nl1 (c-function-name "L" (cdr fd) (caar s)) "();")
                            (wt-nl1 "ihs_pop();"))
                           (t (wt-nl1 (c-function-name "L" (cdr fd) (caar s)) "();"))))
                    (*compiler-push-events*
-                    (wt-nl1 "super_funcall(VV[" (add-symbol (caar s)) "]);"))
+                    (wt-nl1 "super_funcall(" (vv-str (add-symbol (caar s))) ");"))
                    (*safe-compile*
-                    (wt-nl1 "super_funcall_no_event(VV[" (add-symbol (caar s))
-                                                        "]);"))
-                   (t (wt-nl1 "CMPfuncall(VV[" (add-symbol (caar s))
-                                              "]->s.s_gfdef);"))
+                    (wt-nl1 "super_funcall_no_event(" (vv-str (add-symbol (caar s))) ");"))
+                   (t (wt-nl1 "CMPfuncall(" (vv-str (add-symbol (caar s))) "->s.s_gfdef);"))
                    )
              (unless (endp (cdr s))
                (wt-nl1 (cadadr s))

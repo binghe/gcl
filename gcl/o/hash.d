@@ -31,6 +31,16 @@ object sKsize;
 object sKrehash_size;
 object sKrehash_threshold;
 
+typedef union {
+  float f;
+  int i;
+} F2i;
+
+typedef union {
+  double d;
+  int i[2];
+} D2i;
+
 
 static unsigned int
 hash_eql(x)
@@ -69,11 +79,18 @@ object x;
    		return(hash_eql(x->rat.rat_num) + hash_eql(x->rat.rat_den));
 
 	case t_shortfloat:
-		return(*((int *) &(sf(x))));
+	  { 
+	    F2i u;
+	    u.f=sf(x);
+	    return(u.i);
+	  }
 
 	case t_longfloat:
-		{int *y = (int *) &lf(x);
-		return( *y + *(y+1));}
+	  { 
+	    D2i u;
+	    u.d=lf(x);
+	    return(u.i[0]+u.i[1]);
+	  }
 
 	case t_complex:
 		return(hash_eql(x->cmp.cmp_real) + hash_eql(x->cmp.cmp_imag));

@@ -62,8 +62,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * update fr and sv po files
   * clean xgcl-2/gmon.out
   * xgcl merge from cvs head
+  * cleanup latest gcc warnings
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 20 Jun 2006 23:00:01 +0000
+ -- Camm Maguire <camm@enhanced.com>  Wed, 21 Jun 2006 20:02:48 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

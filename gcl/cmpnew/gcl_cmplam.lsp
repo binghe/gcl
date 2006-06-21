@@ -929,8 +929,7 @@
   (dolist** (kwd keywords)
     (let ((cvar1 (next-cvar)))
          (wt-nl
-          "{object V" cvar1 "=getf(V" cvar ",VV[" (add-symbol (car kwd))
-          "],OBJNULL);")
+          "{object V" cvar1 "=getf(V" cvar "," (vv-str (add-symbol (car kwd))) ",OBJNULL);")
          (wt-nl "if(V" cvar1 "==OBJNULL){")
          (let ((*clink* *clink*)
                (*unwind-exit* *unwind-exit*)
@@ -950,7 +949,7 @@
              (not allow-other-keys))
         (wt-nl "check_other_key(V" cvar "," (length keywords))
         (dolist** (kwd keywords)
-                  (wt ",VV[" (add-symbol (car kwd)) "]"))
+                  (wt "," (vv-str (add-symbol (car kwd)))))
         (wt ");"))
   (dolist** (aux auxs)
             (c2dm-bind-init (car aux) (cadr aux)))
