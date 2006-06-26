@@ -65,8 +65,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * cleanup latest gcc warnings
   * defentry C proclamations and xgcl cleanup
   * remove emacs build dependency
+  * synch xgcl-2 with Novak edits
 
- -- Camm Maguire <camm@enhanced.com>  Mon, 26 Jun 2006 17:41:16 +0000
+ -- Camm Maguire <camm@enhanced.com>  Mon, 26 Jun 2006 22:01:39 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

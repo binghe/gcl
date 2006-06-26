@@ -1,22 +1,29 @@
 -include ../makedefs
 
-all: dwdoc.pdf #dwdoc/index.html 
+all: saved_xgcl docs
+
+saved_xgcl: $(LISP)
+	echo '(load "sysdef.lisp")(xlib::compile-xgcl)(xlib::save-xgcl "$@")' | $(LISP)
+
+docs: dwdoc/dwdoccontents.html dwdoc.pdf
+
+dwdoc/dwdoccontents.html: saved_xgcl
+	mkdir -p $(@D) && \
+	cd $(@D) && \
+	echo '(in-package :xlib)(tohtml "../dwdoc.tex" "dwdoc")(with-open-file (s "dwdoccontents.html" :direction :output) (let ((*standard-output* s)) (xlib::makecont "dwdoc.tex" 1 "dwdoc")))(with-open-file (s "dwdocindex.html" :direction :output) (let ((*standard-output* s)) (xlib::printindex indexdata "dwdoc")))' | ../$<
+
 
 dwdoc.pdf: dwdoc.tex
 	pdflatex $<
-
-#dwdoc/index.html: dwdoc.tex
-#	latex2html $<
-
-saved_%: $(LISP)
-	echo '(load "sysdef.lisp")(xlib::compile-xgcl)(xlib::save-xgcl "$@")' | $(LISP)
 
 clean:
 	rm -f *.o *.data saved_*  cmpinclude.h dwdoc.pdf dwdoc.aux dwdoc.log gmon.out
 	rm -f gcl*c gcl*h gcl*data gcl_xrecompile* user-init*
 	rm -rf dwdoc
 
-install: all
+install:
 	-mkdir -p $(DESTDIR)$(INFO_DIR)../doc
-#	-cp -r dwdoc $(DESTDIR)$(INFO_DIR)../doc
+	-cp -r dwdoc $(DESTDIR)$(INFO_DIR)../doc
 	-cp *tex *.pdf $(DESTDIR)$(INFO_DIR)../doc
+
+#.INTERMEDIATE: saved_xgcl
