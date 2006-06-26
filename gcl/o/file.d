@@ -2328,7 +2328,7 @@ maccept(object x) {
 static void
 rmc(int e,void *pid) {
 
-  kill((int)pid,SIGTERM);
+  kill((long)pid,SIGTERM);
 
 }
 #endif
@@ -2374,7 +2374,7 @@ object x=Cnil;
 #ifdef BSD
   if (isServer && daemon != Cnil) {
 
-    int pid,i;
+    long pid,i;
     struct rlimit r;
     struct sigaction sa;
 
