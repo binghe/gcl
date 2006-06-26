@@ -58,7 +58,7 @@
 	 (z (set-difference y x :test 'equal)))
     (compiler::link x (namestring pn) (format nil "(load ~s)(mapc 'load '~s)" "sysdef.lisp" x) 
 		    (reduce (lambda (&rest xy) (when xy (concatenate 'string (namestring (car xy)) " " (cadr xy)))) z
-			    :initial-value " -lXmu -lXt -lXext -lXaw6 -lX11" :from-end t) nil)))
+			    :initial-value " -lXmu -lXt -lXext -lXaw -lX11" :from-end t) nil)))
 
 
 

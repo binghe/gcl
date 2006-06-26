@@ -2,7 +2,7 @@ Source: gclcvs
 Section: interpreters
 Priority: optional
 Maintainer: Camm Maguire <camm@enhanced.com>
-Build-Depends: debhelper (>= 4.1.16), emacs21 | emacsen, libreadline5-dev | libreadline-dev, m4, tk8.4-dev, tetex-bin, texinfo, libgmp3-dev, autotools-dev, libxmu-dev, libxaw6-dev
+Build-Depends: debhelper (>= 4.1.16), emacs21 | emacsen, libreadline5-dev | libreadline-dev, m4, tk8.4-dev, tetex-bin, texinfo, libgmp3-dev, autotools-dev, libxmu-dev, libxaw7-dev
 Standards-Version: 3.6.2.1
 
 Package: gclcvs

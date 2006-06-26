@@ -63,8 +63,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * clean xgcl-2/gmon.out
   * xgcl merge from cvs head
   * cleanup latest gcc warnings
+  * defentry C proclamations and xgcl cleanup
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 21 Jun 2006 20:02:48 +0000
+ -- Camm Maguire <camm@enhanced.com>  Mon, 26 Jun 2006 16:06:54 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

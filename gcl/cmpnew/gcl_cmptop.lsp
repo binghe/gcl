@@ -1604,6 +1604,14 @@
   )
 
 (defun t3defentry (fname cfun arg-types type cname)
+  (wt-h 
+   (if (eq type 'string) "char *" (string-downcase (symbol-name type)))
+   " " cname "("
+   (with-output-to-string 
+    (s)
+    (do ((l arg-types (cdr l))) ((not l) (princ ");"s ))
+      (princ (if (eq (car l) 'string) "char *" (string-downcase (symbol-name (car l)))) s)
+      (when (cdr l) (princ "," s)))))
   (wt-comment "function definition for " fname)
   (wt-nl1 "static void " (c-function-name "L" cfun fname) "()")
   (wt-nl1 "{	object *old_base=vs_base;")

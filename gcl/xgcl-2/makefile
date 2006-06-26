@@ -13,6 +13,7 @@ saved_%: $(LISP)
 
 clean:
 	rm -f *.o *.data saved_*  cmpinclude.h dwdoc.pdf dwdoc.aux dwdoc.log gmon.out
+	rm -f gcl*c gcl*h gcl*data gcl_xrecompile* user-init*
 	rm -rf dwdoc
 
 install: all

@@ -3127,14 +3127,14 @@ else
 miss=1
 fi
 
-   echo $ac_n "checking for main in -lXaw6""... $ac_c" 1>&6
-echo "configure:3132: checking for main in -lXaw6" >&5
-ac_lib_var=`echo Xaw6'_'main | sed 'y%./+-%__p_%'`
+   echo $ac_n "checking for main in -lXaw""... $ac_c" 1>&6
+echo "configure:3132: checking for main in -lXaw" >&5
+ac_lib_var=`echo Xaw'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   ac_save_LIBS="$LIBS"
-LIBS="-lXaw6 $X_LIBS $LIBS"
+LIBS="-lXaw $X_LIBS $LIBS"
 cat > conftest.$ac_ext <<EOF
 #line 3140 "configure"
 #include "confdefs.h"
@@ -3158,7 +3158,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  X_LIBS="$X_LIBS -lXaw6"
+  X_LIBS="$X_LIBS -lXaw"
 else
   echo "$ac_t""no" 1>&6
 miss=1
