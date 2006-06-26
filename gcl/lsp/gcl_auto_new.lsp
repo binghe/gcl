@@ -198,7 +198,10 @@
 (AUTOLOAD 'offer-choices '|tinfo|)
 (AUTOLOAD 'tkconnect '|tkl|)
 
-(AUTOLOAD 'user::xgcl '|gcl_dwtest|)
+(AUTOLOAD 'user::xgcl-demo '|gcl_dwtest|)
+(defun user::xgcl nil
+ (use-package :xlib)
+ (format t "Welcome to xgcl! Try (xgcl-demo) for a demonstration."))
 
 ;; the sun has a broken ypbind business, if one wants to save.
 ;; So to stop users from invoking this
