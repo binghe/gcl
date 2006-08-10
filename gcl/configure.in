@@ -1794,7 +1794,7 @@ if test $gcl_ok = yes ; then
     AC_DEFINE(HAVE_ALLOCA)
 else
   AC_TRY_RUN([#include <alloca.h>
-  int main() { exit(alloca(500) != NULL ? 0 : 1)}],
+  int main() { exit(alloca(500) != NULL ? 0 : 1);}],
   ,gcl_ok=yes, gcl_ok=no,gcl_ok=no)
  if test $gcl_ok = yes ; then
     AC_MSG_RESULT(yes)

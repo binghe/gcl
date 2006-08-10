@@ -6504,7 +6504,7 @@ else
 #line 6505 "configure"
 #include "confdefs.h"
 #include <alloca.h>
-  int main() { exit(alloca(500) != NULL ? 0 : 1)}
+  int main() { exit(alloca(500) != NULL ? 0 : 1);}
 EOF
 if { (eval echo configure:6510: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then

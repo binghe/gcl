@@ -68,8 +68,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * synch xgcl-2 with Novak edits
   * fix build errors
   * Remove power of two limit to MAXPAGE;fix X lib paths
+  * configure cleanup
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 10 Aug 2006 13:49:54 -0400
+ -- Camm Maguire <camm@enhanced.com>  Thu, 10 Aug 2006 17:36:40 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
