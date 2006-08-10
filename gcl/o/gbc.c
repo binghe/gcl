@@ -1519,22 +1519,6 @@ gcl_init_GBC(void) {
   make_si_function("ROOM-REPORT", siLroom_report);
   make_si_function("RESET-GBC-COUNT", siLreset_gbc_count);
   make_si_function("GBC-TIME",siLgbc_time);
+  make_si_function("SGC-ON",siLsgc_on);
   
-#ifdef SGC
-  /* we use that maxpage is a power of 2 in this
-     case, to quickly be able to look in our table */ 
-  { 
-    long i,j;
-  
-    for(i=j=1 ; i< 32 ; i++) 
-      if (MAXPAGE == (1 <<i))
-	j=0;
-    if (j) {
-      perror("MAXPAGE is not a power of 2.  Recompile");
-      exit(1);
-    }
-    make_si_function("SGC-ON",siLsgc_on);
-
-  }
-#endif	
 }

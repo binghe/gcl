@@ -14,7 +14,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gcl 2.6.7-12\n"
 "Report-Msgid-Bugs-To: camm@enhanced.com\n"
-"POT-Creation-Date: 2005-12-14 19:03+0000\n"
+"POT-Creation-Date: 2006-08-10 11:49-0400\n"
 "PO-Revision-Date: 2005-12-17 11:41+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -24,27 +24,60 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:3
+#: ../in.gcl.templates:1001
 msgid "Use the work-in-progress ansi build by default"
 msgstr "Använd work-in-progress ANSI-bygget som standard"
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:3
-msgid "GCL is in the process of providing an ANSI compliant image in addition to its traditional CLtL1 image still in production use.  Please see the README.Debian file for a brief description of these terms.  Setting this variable will determine which image you will use by default on executing 'gcl@EXT@'.  You can locally override this choice by setting the GCL_ANSI environment variable to any non-empty string for the ANSI build, and to the empty string for the CLtL1 build, e.g. GCL_ANSI=t gcl@EXT@.  The flavor of the build in force will be reported in the initial startup banner."
-msgstr "GCL är i processen att ge en ANSI-godkänt avbild i tillägg till sin traditionella CLtL1-avbild som fortfarande är i produktion. Vänligen se filen README.Debian för en kortfattad beskrivning av dessa termer. Ställa in denna variabel kommer att fastställa vilken avbild du vill använda som förvalda vid uppstart av \"gcl@EXT@\". Du kan lokalt åsidosätta detta val genom att sätta miljövariabeln GCL_ANSI till någon icke-blank sträng för ANSI-byggen och till en blank sträng för CLtL1-bygget, exempelvis GCL_ANSI=t gcl@EXT@.  Valet av använt bygge kommer att rapporteras i den initiala uppstarten."
+#: ../in.gcl.templates:1001
+msgid ""
+"GCL is in the process of providing an ANSI compliant image in addition to "
+"its traditional CLtL1 image still in production use.  Please see the README."
+"Debian file for a brief description of these terms.  Setting this variable "
+"will determine which image you will use by default on executing 'gcl@EXT@'.  "
+"You can locally override this choice by setting the GCL_ANSI environment "
+"variable to any non-empty string for the ANSI build, and to the empty string "
+"for the CLtL1 build, e.g. GCL_ANSI=t gcl@EXT@.  The flavor of the build in "
+"force will be reported in the initial startup banner."
+msgstr ""
+"GCL är i processen att ge en ANSI-godkänt avbild i tillägg till sin "
+"traditionella CLtL1-avbild som fortfarande är i produktion. Vänligen se "
+"filen README.Debian för en kortfattad beskrivning av dessa termer. Ställa in "
+"denna variabel kommer att fastställa vilken avbild du vill använda som "
+"förvalda vid uppstart av \"gcl@EXT@\". Du kan lokalt åsidosätta detta val "
+"genom att sätta miljövariabeln GCL_ANSI till någon icke-blank sträng för "
+"ANSI-byggen och till en blank sträng för CLtL1-bygget, exempelvis GCL_ANSI=t "
+"gcl@EXT@.  Valet av använt bygge kommer att rapporteras i den initiala "
+"uppstarten."
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:16
+#: ../in.gcl.templates:2001
 msgid "Use the profiling build by default"
 msgstr "Använd profilbygget som standard"
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:16
-msgid "GCL now has optional support for profiling via gprof.  Please see the documentation for si::gprof-start and si::gprof-quit for details. As this build is slower than builds without gprof support, it is not recommended for final production use. You can locally override the default choice made here by setting the GCL_PROF environment variable to any non-empty string for profiling support, and to the empty string for the more optimized builds, e.g. GCL_PROF=t gcl@EXT@.  If profiling is enabled, this will be reported in the initial startup banner."
-msgstr "GCL har nu stöd för valfria profiler via gprof.  Vänligen se dokumentationen för si::gprof-start och si::gprof-quit för detaljer. Detta bygge är långsammare än byggen utan gprof-stöd så det är inte rekommenderat för användning i produktion. Du kan lokalt åsidosätta detta val genom att sätta miljövariabeln GCL_PROF till en icke-blank sträng för profilstöd och till en blank sträng för mer optimerade byggen, exempelvis GCL_PROF=t gcl@EXT@.  Om profilstöd är aktiverat kommer detta att rapporteras vid den initiella uppstarten."
+#: ../in.gcl.templates:2001
+msgid ""
+"GCL now has optional support for profiling via gprof.  Please see the "
+"documentation for si::gprof-start and si::gprof-quit for details. As this "
+"build is slower than builds without gprof support, it is not recommended for "
+"final production use. You can locally override the default choice made here "
+"by setting the GCL_PROF environment variable to any non-empty string for "
+"profiling support, and to the empty string for the more optimized builds, e."
+"g. GCL_PROF=t gcl@EXT@.  If profiling is enabled, this will be reported in "
+"the initial startup banner."
+msgstr ""
+"GCL har nu stöd för valfria profiler via gprof.  Vänligen se dokumentationen "
+"för si::gprof-start och si::gprof-quit för detaljer. Detta bygge är "
+"långsammare än byggen utan gprof-stöd så det är inte rekommenderat för "
+"användning i produktion. Du kan lokalt åsidosätta detta val genom att sätta "
+"miljövariabeln GCL_PROF till en icke-blank sträng för profilstöd och till en "
+"blank sträng för mer optimerade byggen, exempelvis GCL_PROF=t gcl@EXT@.  Om "
+"profilstöd är aktiverat kommer detta att rapporteras vid den initiella "
+"uppstarten."
 
 #~ msgid ""
 #~ "GCL is one of the oldest free common lisp systems still in use. Several "
@@ -82,4 +115,3 @@ msgstr "GCL har nu stöd för valfria profiler via gprof.  Vänligen se dokumentati
 #~ "medgörlighet som klaras av än så länge, i /usr/share/doc/gcl/test_results."
 #~ "gz.  Valet av bygget som används kommer att rapporteras i den initiella "
 #~ "uppstarten."
-

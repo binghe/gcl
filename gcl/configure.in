@@ -752,6 +752,8 @@ if test "$enable_xgcl" = "yes" ; then
    if test "$miss" = "1" ; then
       X_CFLAGS=
       X_LIBS=
+      X_EXTRA_LIBS=
+      X_PRE_LIBS=
       echo missing x libraries -- cannot compile xgcl
    else
       AC_DEFINE(HAVE_XGCL)
@@ -1849,9 +1851,9 @@ if  2>&1 $CC -v | fgrep "gcc version 2.96" > /dev/null
 	AC_MSG_RESULT([no])
 fi 
 
-LIBS="$LDFLAGS $TLDFLAGS $LIBS $TLIBS"
+LIBS="$LDFLAGS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
 AC_SUBST(LIBS)
-FINAL_CFLAGS="$CFLAGS $TCFLAGS $PROCESSOR_FLAGS"
+FINAL_CFLAGS="$CFLAGS $X_CFLAGS $TCFLAGS $PROCESSOR_FLAGS"
 AC_SUBST(FINAL_CFLAGS)
 # Work around bug with gcc on ppc -- CM
 NIFLAGS="$CFLAGS $TCFLAGS $TONIFLAGS $PROCESSOR_FLAGS -I\$(GCLDIR)/o"
