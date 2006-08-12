@@ -1519,6 +1519,8 @@ gcl_init_GBC(void) {
   make_si_function("ROOM-REPORT", siLroom_report);
   make_si_function("RESET-GBC-COUNT", siLreset_gbc_count);
   make_si_function("GBC-TIME",siLgbc_time);
+#ifdef SGC
   make_si_function("SGC-ON",siLsgc_on);
-  
+#endif
+
 }
