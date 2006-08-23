@@ -22,6 +22,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 
 #define IN_UNIXFSYS
 #include "include.h"
@@ -527,8 +528,8 @@ DEFUNO_NEW("DELETE-FILE",object,fLdelete_file,LISP
 	/* 1 args */
 	check_type_or_pathname_string_symbol_stream(&path);
 	coerce_to_filename(path, filename);
-	if (unlink(filename) < 0)
-		FEerror("Cannot delete the file ~S.", 1, path);
+	if (unlink(filename) < 0 && rmdir(filename) < 0)
+		FEerror("Cannot delete the file ~S: ~s.", 2, path, make_simple_string(strerror(errno)));
 	path = Ct;
 	RETURN1(path);
 }

@@ -1,16 +1,20 @@
 -include ../makedefs
 
-all: saved_xgcl docs
+
+all: objects docs
+
+objects: $(LISP)
+	echo '(load "sysdef.lisp")(xlib::compile-xgcl)' | $(LISP)
 
 saved_xgcl: $(LISP)
 	echo '(load "sysdef.lisp")(xlib::compile-xgcl)(xlib::save-xgcl "$@")' | $(LISP)
 
 docs: dwdoc/dwdoccontents.html dwdoc.pdf
 
-dwdoc/dwdoccontents.html: saved_xgcl
+dwdoc/dwdoccontents.html: $(LISP)
 	mkdir -p $(@D) && \
 	cd $(@D) && \
-	echo '(in-package :xlib)(tohtml "../dwdoc.tex" "dwdoc")(with-open-file (s "dwdoccontents.html" :direction :output) (let ((*standard-output* s)) (xlib::makecont "dwdoc.tex" 1 "dwdoc")))(with-open-file (s "dwdocindex.html" :direction :output) (let ((*standard-output* s)) (xlib::printindex indexdata "dwdoc")))' | ../$<
+	echo '(load "../sysdef.lisp")(in-package :xlib)(defmacro while (test &rest forms) `(loop (unless ,test (return)) ,@forms))(load "../gcl_tohtml.lsp")(load "../gcl_index.lsp")(tohtml "../dwdoc.tex" "dwdoc")(with-open-file (s "dwdoccontents.html" :direction :output) (let ((*standard-output* s)) (xlib::makecont "dwdoc.tex" 1 "dwdoc")))(with-open-file (s "dwdocindex.html" :direction :output) (let ((*standard-output* s)) (xlib::printindex indexdata "dwdoc")))' | ../$<
 
 
 dwdoc.pdf: dwdoc.tex

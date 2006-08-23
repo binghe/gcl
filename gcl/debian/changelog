@@ -69,8 +69,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * fix build errors
   * Remove power of two limit to MAXPAGE;fix X lib paths
   * configure cleanup
+  * delete-file works on directories;build xgcl the old way;latest xgcl
+    from Gordon Novak
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 10 Aug 2006 17:36:40 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 23 Aug 2006 14:10:43 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 

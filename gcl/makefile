@@ -37,7 +37,7 @@ VERSION=`cat majvers`.`cat minvers`
 all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk do-info
 
 system: $(PORTDIR)/$(FLISP)
-	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && make saved_xgcl LISP=../$< && mv saved_xgcl ../$(PORTDIR)/$(FLISP))
+#	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && make saved_xgcl LISP=../$< && mv saved_xgcl ../$(PORTDIR)/$(FLISP))
 	touch $@
 
 xgcl: $(PORTDIR)/saved_xgcl
@@ -67,9 +67,10 @@ $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	(cd $(ODIR); $(MAKE) all)
 	cd $(@D) && $(MAKE) $(@F)
 
-$(PORTDIR)/saved_gcl: $(HDIR)cmpinclude.h $(PORTDIR)/saved_pre_gcl
+$(PORTDIR)/saved_gcl: $(PORTDIR)/saved_pre_gcl $(HDIR)cmpinclude.h 
 	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
 	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
+	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && make LISP=../$<)
 	cd $(@D) && $(MAKE) $(@F)
 
 $(PORTDIR)/saved_pcl_gcl: $(PORTDIR)/saved_gcl

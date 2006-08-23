@@ -1,11 +1,11 @@
-; dwindow.lsp           Gordon S. Novak Jr.           ; 25 Jun 06
+; dwindow.lsp               Gordon S. Novak Jr.           ; 17 Jul 06
 
 ; Window types and interface functions for using X windows from GNU Common Lisp
 
 ; Copyright (c) 2006 Gordon S. Novak Jr. and The University of Texas at Austin.
 
-; 08 Jan 97; 17 May 02; 17 May 04; 18 May 04; 01 Jun 04; 18 Aug 04; 21 Jan 06
-; 24 Jan 06; 24 Jun 06
+; 08 Jan 97; 17 May 02; 17 May 04; 18 May 04; 01 Jun 04; 18 Aug 04; 24 Jan 06
+; 26 Jan 06
 
 ; See the files gnu.license and dec.copyright .
 
@@ -35,158 +35,6 @@
 ; derived from {DSK}<LISPFILES>DWINDOW.CL;1  1-Mar-89 13:16:20 
 ; Modified for AKCL/X using Hiep Huu Nguyen's interfaces from AKCL -> C -> X.
 ; Parts of Nguyen's file Xinit.lsp are included.
-
-(in-package :XLIB)
-
-(setf (get 'xlib::int-pos 'user::glfnresulttype) 'lisp::integer)
-(setf (get 'xlib::fixnum-pos 'user::glfnresulttype) 'lisp::integer)
-
-; exported symbols: from dwimports.lsp
-(dolist (x '( menu
- window-get-mouse-position window-create window-set-font
- window-font-info window-gcontext window-parent
- window-drawable-height window-drawable-width window-label
- window-font window-foreground window-set-foreground
- window-background window-set-background window-wfunction
- window-get-geometry window-get-geometry-b window-sync
- window-screen-height window-geometry window-size
- window-left window-top-neg-y window-reset-geometry
- window-force-output window-query-pointer window-set-xor
- window-unset window-reset window-set-erase
- window-set-copy window-set-invert window-set-line-width
- window-set-line-attr window-std-line-attr window-draw-line
- window-draw-line-xy window-draw-arrowhead-xy
- window-draw-arrow-xy window-draw-arrow2-xy window-draw-box
- window-draw-box-xy window-xor-box-xy window-draw-box-corners
- window-draw-rcbox-xy window-draw-arc-xy
- window-draw-circle-xy window-draw-circle window-erase-area
- window-erase-area-xy window-erase-box-xy
- window-draw-ellipse-xy window-copy-area-xy window-invertarea
- window-invert-area window-invert-area-xy
- window-prettyprintat window-prettyprintat-xy window-printat
- window-printat-xy window-string-width window-string-height
- window-string-extents window-font-string-width
- window-yposition window-centeroffset dowindowcom
- window-menu window-close window-unmap window-open
- window-map window-destroy window-destroy-selected-window
- window-clear window-moveto-xy window-paint
- window-move window-draw-border window-track-mouse
- window-wait-exposure window-wait-unmap
- window-init-mouse-poll window-poll-mouse menu-init
- menu-calculate-size menu-adjust-offset menu-draw
- menu-item-value menu-find-item-width menu-find-item-height
- menu-clear menu-display-item menu-choose menu-box-item
- menu-unbox-item menu-item-position menu-select
- menu-select! menu-select-b menu-destroy
- menu-create menu-offset menu-size menu-moveto-xy
- menu-reposition picmenu-create picmenu-create-spec
- picmenu-create-from-spec picmenu-calculate-size picmenu-init
- picmenu-draw picmenu-draw-button picmenu-delete-named-button
- picmenu-select picmenu-box-item picmenu-unbox-item
- picmenu-destroy picmenu-button-containsxy?
- picmenu-item-position barmenu-create
- barmenu-calculate-size barmenu-init barmenu-draw
- barmenu-select barmenu-update-value window-get-point
- window-get-click window-get-line-position
- window-get-latex-position window-get-box-position
- window-get-icon-position window-get-region
- window-get-box-size window-track-mouse-in-region
- window-adjust-box-side window-adj-box-xy window-get-circle
- window-circle-radius window-draw-circle-pt
- window-get-ellipse window-draw-ellipse-pt
- window-draw-vector-pt window-get-vector-end
- window-get-crosshairs window-draw-crosshairs-xy
- window-get-cross window-draw-cross-xy window-draw-dot-xy
- window-draw-latex-xy window-reset-color
- window-set-color-rgb window-set-xcolor window-set-color
- window-set-color window-free-color window-get-chars
- window-process-char-event window-input-string
- window-input-char-fn window-draw-carat window-init-keymap
- window-set-cursor window-positive-y window-code-char
- window-get-raw-char
- window-print-line window-print-lines textmenu-create
- textmenu-calculate-size textmenu-init textmenu-draw
- textmenu-select textmenu-set-text textmenu
- editmenu editmenu-create editmenu-calculate-size
- editmenu-init editmenu-draw editmenu-display
- window-edit
- window-edit-display editmenu-carat editmenu-erase
- window-edit-erase editmenu-select editmenu-edit-fn
- window-edit-fn editmenu-setxy editmenu-char
- editmenu-edit
- *window-editmenu-kill-strings*
-*window-add-menu-title*
-*window-menu*
-*mouse-x*
-*mouse-y*
-*mouse-window*
-*window-fonts*
-*window-display*
-*window-screen*
-*root-window*
-*black-pixel*
-*white-pixel*
-*default-fg-color*
-*default-bg-color*
-*default-size-hints*
-*default-GC*
-*default-colormap*
-*window-event*
-*window-default-pos-x*
-*window-default-pos-y*
-*window-default-border*
-*window-default-font-name*
-*window-default-cursor*
-*window-save-foreground*
-*window-save-function*
-*window-attributes*
-*window-attr*
-*menu-title-pad*
-*root-return*
-*child-return*
-*root-x-return*
-*root-y-return*
-*win-x-return*
-*win-y-return*
-*mask-return*
-*x-return*
-*y-return*
-*width-return*
-*height-return*
-*depth-return*
-*border-width-return*
-*text-width-return*
-*direction-return*
-*ascent-return*
-*descent-return*
-*overall-return*
-*GC-Values*
-*window-xcolor*
-*window-menu-code*
-
-*window-keymap*
-*window-shiftkeymap*
-*window-keyinit*
-*window-meta*
-*window-ctrl*
-*window-shift*
-*window-string*
-*window-string-count*
-*window-string-max*
-*window-input-string-x*
-*window-input-string-y*
-*window-input-string-charwidth*
-
-*window-shift-keys*
-*window-control-keys*
-*window-meta-keys*
-*barmenu-update-value-cons*
-*picmenu-no-selection*
-*min-keycodes-return*
-*max-keycodes-return*
-*keycodes-return*
- ))
-  (export x))         ; export the above symbols
 
 (defvar *window-add-menu-title* nil)  ; t to add title bar within menu area
 (defvar *window-menu* nil)
@@ -230,17 +78,8 @@
 (defvar *window-attributes*)
 (defvar *window-attr*)
 (defvar *menu-title-pad* 30)           ; extra space for title bar of menu
-; The following -return globals are used in calls to Xlib
-; routines.
-; Where the Xlib parameter is int*, the parameter must be
-; initialized to (int-array 1) and is accessed with
-; (int-pos param 0).
-; The following X types are CARD32: (from Xproto.h)
-;    Window Drawable Font Pixmap Cursor Colormap GContext
-;    Atom VisualID Time KeySym
-; KeyCode = CARD8
-(defvar *root-return*         (fixnum-array 1))
-(defvar *child-return*        (fixnum-array 1))
+(defvar *root-return*         (int-array 1))
+(defvar *child-return*        (int-array 1))
 (defvar *root-x-return*       (int-array 1))
 (defvar *root-y-return*       (int-array 1))
 (defvar *win-x-return*        (int-array 1))
@@ -604,14 +443,10 @@ msg     ((force-output       window-force-output     open t)
         ((symbolp x) (copy-seq (symbol-name x)))
 	(t (princ-to-string x))))
 
-; 24 Jun 06
 ; This function initializes variables needed by most applications.
 ; It uses all defaults inherited from the root window, and screen. ; H. Nguyen
 (defun window-Xinit ()
   (setq *window-display* (XOpenDisplay (get-c-string "")))
-  (if (or (not (numberp *window-display*))                 ; 22 Jun 06
-	  (< *window-display* 10000))
-      (error "DISPLAY did not open: return value ~A~%" *window-display*))
   (setq *window-screen* (XdefaultScreen *window-display*))
   (setq *root-window* (XRootWindow *window-display* *window-screen*))
   (setq *black-pixel* (XBlackPixel *window-display* *window-screen*))
@@ -637,7 +472,7 @@ msg     ((force-output       window-force-output     open t)
 		 *win-x-return* *win-y-return* *mask-return*)
   (setq *mouse-x* (int-pos *root-x-return* 0))
   (setq *mouse-y* (int-pos *root-y-return* 0))
-  (setq *mouse-window* (fixnum-pos *child-return* 0)) )  ; 22 Jun 06
+  (setq *mouse-window* (int-pos *child-return* 0)) )
 
 ; 13 Aug 91; 14 Aug 91; 06 Sep 91; 12 Sep 91; 06 Dec 91; 01 May 92; 01 Sep 92
 (setf (glfnresulttype 'window-create) 'window)
@@ -947,32 +782,32 @@ msg     ((force-output       window-force-output     open t)
 	 ((w window) (offset vector) (size vector) &optional linewidth)
   (window-draw-box-xy w (x offset) (y offset) (x size) (y size) linewidth) )
 
-; 08 Aug 91; 12 Sep 91; 11 Dec 91; 01 Sep 92; 02 Sep 92
+
+; 08 Aug 91; 12 Sep 91; 11 Dec 91; 01 Sep 92; 02 Sep 92; 17 Jul 06
 ; New version avoids XDrawRectangle, which messes up when used with XOR.
 ; was  (XDrawRectangle *window-display* (parent w) (gcontext w)
 ;		       offsetx (- qqwheight (offsety + sizey)) sizex sizey)
 (gldefun window-draw-box-xy
 	 ((w window) (offsetx integer) (offsety integer)
-		    (sizex integer)   (sizey integer)
-		    &optional linewidth)
-  (let ((qqwheight (drawable-height w)) miny lw lw2 lw2b (pw (parent w))
+		     (sizex integer)   (sizey integer)  &optional linewidth)
+  (let ((qqwheight (drawable-height w)) lw lw2 lw2b (pw (parent w))
 	(gc  (gcontext w)))
     (if (linewidth and (linewidth <> 1)) (set-line-width w linewidth))
     (lw = (or linewidth 1))
-    (lw2 = lw / 2)
-    (lw2b = (lw + 1) / 2)
-    (miny = offsety - lw2b)
-    (XdrawLine *window-display*  pw gc offsetx (- qqwheight miny)
-	       offsetx (- qqwheight (miny + sizey + lw)))
+    (lw2 = (truncate lw 2))
+    (lw2b = (truncate (lw + 1) 2))
+    (XdrawLine *window-display* pw gc
+	       (- offsetx lw2) (- qqwheight offsety)
+	       (- (+ offsetx sizex) lw2) (- qqwheight offsety))
     (XdrawLine *window-display*  pw gc
-		     (offsetx + sizex) (- qqwheight miny)
-		     (offsetx + sizex) (- qqwheight (miny + sizey + lw)))
+	       (+ offsetx sizex) (- qqwheight (- offsety lw2b))
+	       (+ offsetx sizex) (- qqwheight (+ sizey (- offsety lw2b))))
     (XdrawLine *window-display*  pw gc
-		     (offsetx + lw2b) (- qqwheight offsety)
-		     (offsetx + sizex - lw2) (- qqwheight offsety) )
+	       (+ offsetx sizex lw2b) (- qqwheight (+ offsety sizey))
+	       (+ offsetx lw2b) (- qqwheight (+ offsety sizey)))
     (XdrawLine *window-display*  pw gc
-		     (offsetx + lw2b) (- qqwheight (offsety + sizey))
-		     (offsetx + sizex - lw2) (- qqwheight (offsety + sizey)) )
+	       offsetx (- qqwheight (+ offsety sizey lw2))
+	       offsetx (- qqwheight (+ offsety lw2)) )
     (if (linewidth and (linewidth <> 1)) (set-line-width w 1)) ))
 
 ; 26 Nov 91
@@ -991,27 +826,32 @@ msg     ((force-output       window-force-output     open t)
 				  &optional lw)
   (draw-box-xy w (min xa xb) (min ya yb) (abs (- xa xb)) (abs (- ya yb)) lw) )
 
-; 13 Sep 91
+; 13 Sep 91; 17 Jul 06
 ; Draw a box with round corners
 (gldefun window-draw-rcbox-xy ((w window) (x integer) (y integer)
 			       (width integer)
 			       (height integer) (radius integer)
 					 &optional linewidth)
-  (let (x1 x2 y1 y2 r)
+  (let (x1 x2 y1 y2 r lw2 lw2b fudge)
     (r = (max 0 (min radius (truncate (abs width) 2)
 			           (truncate (abs height) 2))))
+    (if (not (numberp linewidth)) (linewidth = 1))
+    (lw2 = (truncate linewidth 2))
+    (lw2b = (truncate (1+ linewidth) 2))
+    (fudge = (if (oddp linewidth) 0 1))
     (x1 = x + r)
     (x2 = x + width - r)
     (y1 = y + r)
     (y2 = y + height - r)
-    (draw-line-xy w x1 y x2 y linewidth)
-    (draw-line-xy w (x + width) y1 (x + width) y2 linewidth)
-    (draw-line-xy w x1 (y + height) x2 (y + height) linewidth)
-    (draw-line-xy w x y1 x y2 linewidth)
-    (draw-arc-xy w x1 y1 r r 180 90 linewidth)
+    (draw-line-xy w (- (- x1 1) lw2) y x2 y linewidth)                ; bottom
+    (draw-line-xy w (x + width) (- y1 lw2b) (x + width) (+ y2 1)
+		                                           linewidth) ; right
+    (draw-line-xy w (- x1 1) (+ y height) (+ x2 lw2) (+ y height) linewidth)
+    (draw-line-xy w x y1 x (+ y2 1) linewidth)                        ; left
+    (draw-arc-xy w (- x1 fudge) y1 r r 180 90 linewidth)
     (draw-arc-xy w x2 y1 r r 270 90 linewidth)
-    (draw-arc-xy w x2 y2 r r   0 90 linewidth)
-    (draw-arc-xy w x1 y2 r r  90 90 linewidth) ))
+    (draw-arc-xy w x2 (+ y2 fudge) r r 0 90 linewidth)
+    (draw-arc-xy w (- x1 fudge) (+ y2 fudge) r r  90 90 linewidth) ))
 
 ; 13 Aug 91; 15 Aug 91; 12 Sep 91
 (gldefun window-draw-arc-xy ((w window) (x integer) (y integer)
@@ -1226,7 +1066,7 @@ msg     ((force-output       window-force-output     open t)
     (sleep 3)
     (setq ww *root-window*)
  lp (window-query-pointer-b ww)
-    (setq child (fixnum-pos *child-return* 0))  ; 22 Jun 06
+    (setq child (int-pos *child-return* 0))
     (if (> child 0)
 	(progn (setq ww child) (go lp)))
     (if (/= ww *root-window*)
@@ -2996,7 +2836,7 @@ lp  (res = (choose m inside))
   (window-unset w)
   (window-force-output w) )
 
-; 31 Dec 93; 04 Oct 94; 15 Nov 94; 16 Nov 94; 14 Mar 95; 25 Jun 06
+; 31 Dec 93; 04 Oct 94; 15 Nov 94; 16 Nov 94; 14 Mar 95
 ; Initialize mapping between keys and ASCII.
 (defun window-init-keymap ()
   (let (mincode maxcode keycode keysym keynum shiftkeynum char)
@@ -3015,8 +2855,8 @@ lp  (res = (choose m inside))
       (setq keycode (+ i mincode))
       (setq keysym (XGetKeyboardMapping *window-display* keycode 1
 					*keycodes-return*))
-      (setq keynum (fixnum-pos keysym 0))       ; ascii integer code
-      (setq shiftkeynum (fixnum-pos keysym 1))
+      (setq keynum (int-pos keysym 0))       ; ascii integer code
+      (setq shiftkeynum (int-pos keysym 1))
    ;   (XFree keysym)   ; ***** commented out -- causes error on Sun
   ; Following is a Kludge (TM) for Sun keyboard
       (if (and (>= keynum 65) (<= keynum 90) (eql shiftkeynum NoSymbol))
