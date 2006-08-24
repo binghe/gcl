@@ -1,4 +1,4 @@
-; 26 Jan 2006 15:17:04 CST  ; 27 Jan 06; hand-edited 17 Jul 06
+; 23 Aug 2006 14:01:25 CDT
 ; dwtrans.lsp  -- translation of dwindow.lsp
 
 ; Copyright (c) 2006 Gordon S. Novak Jr. and The University of Texas at Austin.
@@ -30,9 +30,8 @@
 
 (defmacro while (test &rest forms) `(loop (unless ,test (return)) ,@forms) )
 
-; dwexports.lsp         Gordon S. Novak Jr.           24 Jan 2006
-
 (setf (get 'xlib::int-pos 'user::glfnresulttype) 'lisp::integer)
+(setf (get 'xlib::fixnum-pos 'user::glfnresulttype) 'lisp::integer)
 
 ; exported symbols: from dwimports.lsp
 (dolist (x '( menu stringify window picmenu textmenu editmenu barmenu
@@ -244,9 +243,9 @@
 
 (DEFVAR *MENU-TITLE-PAD* 30)
 
-(DEFVAR *ROOT-RETURN* (INT-ARRAY 1))
+(DEFVAR *ROOT-RETURN* (FIXNUM-ARRAY 1))
 
-(DEFVAR *CHILD-RETURN* (INT-ARRAY 1))
+(DEFVAR *CHILD-RETURN* (FIXNUM-ARRAY 1))
 
 (DEFVAR *ROOT-X-RETURN* (INT-ARRAY 1))
 
@@ -328,6 +327,9 @@
 
 (DEFUN WINDOW-XINIT ()
   (SETQ *WINDOW-DISPLAY* (XOPENDISPLAY (GET-C-STRING "")))
+  (IF (OR (NOT (NUMBERP *WINDOW-DISPLAY*)) (< *WINDOW-DISPLAY* 10000))
+      (ERROR "DISPLAY did not open: return value ~A~%"
+             *WINDOW-DISPLAY*))
   (SETQ *WINDOW-SCREEN* (XDEFAULTSCREEN *WINDOW-DISPLAY*))
   (SETQ *ROOT-WINDOW* (XROOTWINDOW *WINDOW-DISPLAY* *WINDOW-SCREEN*))
   (SETQ *BLACK-PIXEL* (XBLACKPIXEL *WINDOW-DISPLAY* *WINDOW-SCREEN*))
@@ -353,7 +355,7 @@
       *WIN-Y-RETURN* *MASK-RETURN*)
   (SETQ *MOUSE-X* (INT-POS *ROOT-X-RETURN* 0))
   (SETQ *MOUSE-Y* (INT-POS *ROOT-Y-RETURN* 0))
-  (SETQ *MOUSE-WINDOW* (INT-POS *CHILD-RETURN* 0)))
+  (SETQ *MOUSE-WINDOW* (FIXNUM-POS *CHILD-RETURN* 0)))
 
 
 
@@ -687,7 +689,8 @@
   (WINDOW-DRAW-BOX-XY W (CAR OFFSET) (CADR OFFSET) (CAR SIZE)
       (CADR SIZE) LINEWIDTH))
 
-(DEFUN WINDOW-DRAW-BOX-XY (W OFFSETX OFFSETY SIZEX SIZEY &OPTIONAL LINEWIDTH)
+(DEFUN WINDOW-DRAW-BOX-XY
+       (W OFFSETX OFFSETY SIZEX SIZEY &OPTIONAL LINEWIDTH)
   (LET ((QQWHEIGHT (CADDDR W)) LW LW2 LW2B (PW (CADR W))
         (GC (CADDR W)))
     (IF (AND LINEWIDTH (NOT (EQL LINEWIDTH 1)))
@@ -721,7 +724,8 @@
   (WINDOW-DRAW-BOX-XY W (MIN XA XB) (MIN YA YB) (ABS (- XA XB))
       (ABS (- YA YB)) LW))
 
-(DEFUN WINDOW-DRAW-RCBOX-XY (W X Y WIDTH HEIGHT RADIUS &OPTIONAL LINEWIDTH)
+(DEFUN WINDOW-DRAW-RCBOX-XY
+       (W X Y WIDTH HEIGHT RADIUS &OPTIONAL LINEWIDTH)
   (LET (X1 X2 Y1 Y2 R LW2 LW2B FUDGE)
     (SETQ R
           (MAX 0
@@ -1010,7 +1014,7 @@
     (SETQ WW *ROOT-WINDOW*)
     LP
     (WINDOW-QUERY-POINTER-B WW)
-    (SETQ CHILD (INT-POS *CHILD-RETURN* 0))
+    (SETQ CHILD (FIXNUM-POS *CHILD-RETURN* 0))
     (IF (> CHILD 0) (PROGN (SETQ WW CHILD) (GO LP)))
     (IF (/= WW *ROOT-WINDOW*)
         (PROGN
@@ -1259,12 +1263,12 @@
 
 (DEFUN MENU-CLEAR (M)
   (IF (CADDR M)
-      (LET ((GLVAR96260 (+ 3 (EIGHTH M))))
+      (LET ((GLVAR16279 (+ 3 (EIGHTH M))))
         (XCLEARAREA *WINDOW-DISPLAY* (CADADR M)
             (1- (IF (CADDR M) (FIFTH M) 0))
             (- (CADDDR (CADR M))
-               (1- (+ (1- (IF (CADDR M) (SIXTH M) 0)) GLVAR96260)))
-            (+ 3 (SEVENTH M)) GLVAR96260 0))
+               (1- (+ (1- (IF (CADDR M) (SIXTH M) 0)) GLVAR16279)))
+            (+ 3 (SEVENTH M)) GLVAR16279 0))
       (PROGN
         (XCLEARWINDOW *WINDOW-DISPLAY* (CADADR M))
         (XFLUSH *WINDOW-DISPLAY*))))
@@ -2408,7 +2412,7 @@
               (LET ((SSTR (STRINGIFY "W")))
                 (XTEXTWIDTH (SEVENTH (OR (CADR M) (EDITMENU-INIT M)))
                     (GET-C-STRING SSTR) (LENGTH SSTR)))))
-    (WHILE (AND LINES (>= Y (+ 4 (IF (CADDR M) (SIXTH M) 0))))   ; = by hand
+    (WHILE (AND LINES (>= Y (+ 4 (IF (CADDR M) (SIXTH M) 0))))
            (IF (< CHAR MAXWIDTH)
                (IF (PLUSP CHAR)
                    (LET ((SSTR (STRINGIFY
@@ -2490,7 +2494,7 @@
                   (XTEXTWIDTH (SEVENTH W) (GET-C-STRING SSTR)
                               (LENGTH SSTR)))
                 (NTH 15 M))))
-    (LET ((GLVAR113882 (WINDOW-STRING-HEIGHT W "Tg")))
+    (LET ((GLVAR24026 (WINDOW-STRING-HEIGHT W "Tg")))
       (XCLEARAREA *WINDOW-DISPLAY* (CADR W)
           (+ (IF (CADDR M) (FIFTH M) 0) XW)
           (- (CADDDR W)
@@ -2510,13 +2514,13 @@
                                    *DESCENT-RETURN* *OVERALL-RETURN*)
                                (LIST (INT-POS *ASCENT-RETURN* 0)
                                      (INT-POS *DESCENT-RETURN* 0)))))
-                    GLVAR113882)))
+                    GLVAR24026)))
           (IF ONEP
               (LET ((SSTR (STRINGIFY "W")))
                 (XTEXTWIDTH (SEVENTH W) (GET-C-STRING SSTR)
                     (LENGTH SSTR)))
               (- (SEVENTH M) XW))
-          GLVAR113882 0))
+          GLVAR24026 0))
     (XFLUSH *WINDOW-DISPLAY*)))
 
 (DEFUN EDITMENU-LINE-Y (M LINE)
@@ -2787,8 +2791,8 @@
       (SETQ KEYSYM
             (XGETKEYBOARDMAPPING *WINDOW-DISPLAY* KEYCODE 1
                 *KEYCODES-RETURN*))
-      (SETQ KEYNUM (INT-POS KEYSYM 0))
-      (SETQ SHIFTKEYNUM (INT-POS KEYSYM 1))
+      (SETQ KEYNUM (FIXNUM-POS KEYSYM 0))
+      (SETQ SHIFTKEYNUM (FIXNUM-POS KEYSYM 1))
       (IF (AND (>= KEYNUM 65) (<= KEYNUM 90)
                (EQL SHIFTKEYNUM NOSYMBOL))
           (PROGN
