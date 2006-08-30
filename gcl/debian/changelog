@@ -76,8 +76,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * fix object_to_string
   * install xgcl-2/sysdef.lisp
   * fix info dir and emacs site lisp dir installation
+  * New xgcl readme
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 30 Aug 2006 11:12:08 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 30 Aug 2006 11:30:11 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
