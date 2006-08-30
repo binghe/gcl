@@ -11,5 +11,5 @@ Format: PDF
 Files: /usr/share/doc/gcl@EXT@-doc/dwdoc.pdf
 
 Format: HTML
-Index: /usr/share/doc/gcl@EXT@-doc/dwdoc/index.html
+Index: /usr/share/doc/gcl@EXT@-doc/dwdoc/dwdoc1.html
 Files: /usr/share/doc/gcl@EXT@-doc/dwdoc/*.html
