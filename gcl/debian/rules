@@ -129,7 +129,7 @@ build-stamp: build-gprof-stamp build-ansi-gprof-stamp build-trad-stamp build-ans
 	touch $@
 
 debian/control.rm:
-	rm -f `echo $@ | sed 's,\.rm$,,1'`
+	rm -f `echo $@ | sed 's,\.rm$$,,1'`
 
 debian/control: debian/control.rm
 	cp debian/control.$(EXT) debian/control
