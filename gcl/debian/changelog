@@ -77,8 +77,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * install xgcl-2/sysdef.lisp
   * fix info dir and emacs site lisp dir installation
   * New xgcl readme
+  * Remove bashism from debian/rules
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 30 Aug 2006 11:30:11 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 30 Aug 2006 11:56:19 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
