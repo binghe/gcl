@@ -74,8 +74,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * xgcl upgrade
   * parse_number from cvs head with *read-base* fixes
   * fix object_to_string
+  * install xgcl-2/sysdef.lisp
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 25 Aug 2006 15:08:28 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 30 Aug 2006 10:29:17 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
