@@ -254,3 +254,4 @@ SGC is enabled.  */
 #undef ADDR_NO_RANDOMIZE
 #undef LEADING_UNDERSCORE
 #undef HAVE_XGCL
+#undef HAVE_SYS_SOCKIO_H

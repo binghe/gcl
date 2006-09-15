@@ -489,16 +489,15 @@ DEFVAR("*GENSYM-COUNTER*",sLgensym_counter,LISP,make_fixnum(0),"");
         object this_gensym_prefix,big;
         object this_gensym_counter;
 @
-        this_gensym_prefix=gensym_prefix;
-	this_gensym_counter=sLgensym_counter->s.s_dbind;
-	if (type_of(x) == t_string)
+        if (type_of(x) == t_string) {
 		this_gensym_prefix = x;
-	else {
+		this_gensym_counter=sLgensym_counter->s.s_dbind;
+                sLgensym_counter->s.s_dbind=number_plus(sLgensym_counter->s.s_dbind,small_fixnum(1));
+	} else {
 		check_type_non_negative_integer(&x);
 		this_gensym_counter=x;
+		this_gensym_prefix=gensym_prefix;
 	}
-        if (x==gensym_prefix) 
-                sLgensym_counter->s.s_dbind=number_plus(sLgensym_counter->s.s_dbind,small_fixnum(1));
 
         switch (type_of(this_gensym_counter)) {
 	case t_bignum:

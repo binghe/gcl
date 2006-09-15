@@ -81,8 +81,20 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix dwdoc doc-base error
   * fix ia64 build
   * fix socket write error
+  * HAVE_SYS_SOCKIO_H for solaris
+  * autolocbfd for solaris
+  * no -Wall when no gcc
+  * no -fomit-frame-pointer on m68k
+  * no profiling on mips
+  * $(AWK) instead of awk
+  * si::stat function
+  * fix 'the boolean type coersion error
+  * no varargs on cygwin
+  * while eval macro
+  * gensym counter fixes
+  * xgcl updates
 
- -- Camm Maguire <camm@enhanced.com>  Wed,  6 Sep 2006 09:56:28 -0400
+ -- Camm Maguire <camm@enhanced.com>  Fri, 15 Sep 2006 13:43:44 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 

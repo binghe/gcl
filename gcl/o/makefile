@@ -150,12 +150,12 @@ plttest.o: plttest.c
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
 
 plt.h: plttest.o
-	nm $< | awk '/ U / {a=$$2;if (k) sub("^_","",a);\
+	nm $< | $(AWK) '/ U / {a=$$2;if (k) sub("^_","",a);\
                             print a}' \
 			k=$(LEADING_UNDERSCORE) |\
 			sort | \
 			grep -v '[^ \t_]_' |\
-			awk '{A[++k]=$$0} END {for (i=1;i<=k;i++) \
+			$(AWK) '{A[++k]=$$0} END {for (i=1;i<=k;i++) \
 				printf("MY_PLT(%s)%s\n",A[i],i==k ? "" : ",");}' >$@
 
 plt.o: plt.c plt.h

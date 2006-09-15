@@ -208,6 +208,7 @@
 #undef ADDR_NO_RANDOMIZE
 #undef LEADING_UNDERSCORE
 #undef HAVE_XGCL
+#undef HAVE_SYS_SOCKIO_H
 
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG
@@ -250,6 +251,9 @@
 
 /* Define if you have the <sys/ioctl.h> header file.  */
 #undef HAVE_SYS_IOCTL_H
+
+/* Define if you have the <sys/sockio.h> header file.  */
+#undef HAVE_SYS_SOCKIO_H
 
 /* Define if you have the <values.h> header file.  */
 #undef HAVE_VALUES_H
