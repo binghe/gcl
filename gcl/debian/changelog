@@ -93,8 +93,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * while eval macro
   * gensym counter fixes
   * xgcl updates
+  * fix lstat for mingw
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 15 Sep 2006 13:43:44 -0400
+ -- Camm Maguire <camm@enhanced.com>  Thu,  5 Oct 2006 13:30:24 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
