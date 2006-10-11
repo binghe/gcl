@@ -94,8 +94,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * gensym counter fixes
   * xgcl updates
   * fix lstat for mingw
+  * backoff to gcc-3.4 on alpha,arm,hppa, and m68k
 
- -- Camm Maguire <camm@enhanced.com>  Thu,  5 Oct 2006 13:30:24 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 11 Oct 2006 10:13:29 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
