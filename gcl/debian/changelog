@@ -98,8 +98,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * build-dep on gcc3.4 where appropriate
   * Newer standards
   * fix typeo in object_to_string
+  * Fix large float read bug in c1constant-value
 
- -- Camm Maguire <camm@enhanced.com>  Sat, 14 Oct 2006 21:19:11 -0400
+ -- Camm Maguire <camm@enhanced.com>  Mon, 16 Oct 2006 12:39:06 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 

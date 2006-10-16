@@ -625,20 +625,13 @@
           (list 'CHARACTER-VALUE (add-object val) (char-code val))))
    ((typep val 'long-float)
     ;; We can't read in long-floats which are too big:
-    (let (tem x)
-      (unless (setq tem (cadr (assoc val *objects*)))
-         (cond((or
-		 (and
-		   (> (setq x (abs val)) (/ most-positive-long-float 2))
-		   (c1expr `(si::|#,| * ,(/ val most-positive-long-float)
-				 most-positive-long-float)))
-		 (and
-		   (< x (* least-positive-long-float 1.0d20))
-		   (c1expr `(si::|#,| * ,(/ val least-positive-long-float)
-				 least-positive-long-float))))
-	       (push (list val (setq tem *next-vv*)) *objects*))))
-      (list 'LOCATION (make-info :type 'long-float)
-	    (list 'LONG-FLOAT-VALUE (or tem (add-object val)) val))))
+    (let* (sc (vv (cond ((> (abs val) (/ most-positive-long-float 2))
+			 (add-object `(si::|#,| * ,(/ val most-positive-long-float) most-positive-long-float)))
+			((< (abs val) (* least-positive-long-float 1.0d20))
+			 (add-object `(si::|#,| * ,(/ val least-positive-long-float) least-positive-long-float)))
+			((setq sc t) (add-object val)))))
+      `(location ,(make-info :type 'long-float)
+		 ,(if sc (list 'LONG-FLOAT-VALUE vv val) (list 'vv vv)))))
    ((typep val 'short-float)
     (list 'LOCATION (make-info :type 'short-float)
           (list 'SHORT-FLOAT-VALUE (add-object val) val)))
