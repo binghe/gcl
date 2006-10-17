@@ -269,7 +269,7 @@ main(int argc, char **argv, char **envp) {
 #ifdef RLIMIT_STACK
 	{
 	  unsigned long mss;
-	  mss=16*sizeof(short)*MAXPAGE; /* i.e. short foo[MAXPAGE] on stack in sgc_start */
+	  mss=(MAXPAGE/64)<<PAGEWIDTH;
 	  if (getrlimit(RLIMIT_STACK, &rl))
 	    error("Cannot get stack rlimit\n");
 	  if (rl.rlim_max != RLIM_INFINITY && rl.rlim_max < mss)
