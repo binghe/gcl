@@ -101,8 +101,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix large float read bug in c1constant-value
   * more default stack space
   * unrestricted gcc for alpha
+  * si::gettimeofday function for HOL88 build
+  * macosx fixes
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 17 Oct 2006 11:29:01 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 18 Oct 2006 13:07:56 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 

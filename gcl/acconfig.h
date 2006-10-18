@@ -255,3 +255,5 @@ SGC is enabled.  */
 #undef LEADING_UNDERSCORE
 #undef HAVE_XGCL
 #undef HAVE_SYS_SOCKIO_H
+#undef HAVE_MALLOC_MALLOC_H
+#undef HAVE_OBJC_MALLOC_H
