@@ -395,26 +395,7 @@ Cannot compile ~a.~%"
 	  (values)
 	  ))))))
 
-(defun get-temp-dir ()
-  (dolist (x `(,@(mapcar 'si::getenv #-winnt '("TMPDIR" "TMP") #+winnt '("TEMP" "TMP")) #-winnt "/tmp" ""))
-    (when x
-      (let* ((x (pathname x))
-	     (x (if (pathname-name x) x 
-		  (merge-pathnames
-		   (make-pathname :directory (butlast (pathname-directory x)) 
-				  :name (car (last (pathname-directory x))))
-		   x))))
-	(when (si::stat x) 
-	  (return-from 
-	   get-temp-dir 
-	   (namestring 
-	    (make-pathname 
-	     :device (pathname-device x)
-	     :directory (when (or (pathname-directory x) (pathname-name x))
-			  (append (pathname-directory x) (list (pathname-name x))))))))))))
-
-(defvar *tmp-dir* (get-temp-dir))
-
+(import 'si::*tmp-dir* 'compiler)
 (defun gazonk-name ()
   (dotimes (i 1000)
    (let ((tem (merge-pathnames 

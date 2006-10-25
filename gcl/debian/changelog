@@ -105,8 +105,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * macosx fixes
   * unrestricted gcc for m68k
   * no profiling for hppa, allow C optimization on hppa
+  * make sure *tmp-dir* is set
 
- -- Camm Maguire <camm@enhanced.com>  Sat, 21 Oct 2006 14:58:38 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 25 Oct 2006 17:16:54 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 

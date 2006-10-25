@@ -721,37 +721,57 @@ First directory is checked for first name and all extensions etc."
 
 (defun set-dir (sym flag)
    (let ((tem (or (si::get-command-arg flag) (and (boundp sym) (symbol-value sym)))))
-      (if tem (set sym (si::coerce-slash-terminated tem)))))
+      (if tem (set sym (coerce-slash-terminated tem)))))
 
-(defun set-up-top-level ( &aux (i (si::argc)) tem)
+(defvar *tmp-dir*)
+
+(defun get-temp-dir ()
+ (dolist (x `(,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
+   (when x
+     (let* ((x (pathname x))
+	    (x (if (pathname-name x) x 
+		 (merge-pathnames
+		  (make-pathname :directory (butlast (pathname-directory x)) 
+				 :name (car (last (pathname-directory x))))
+		  x))))
+       (when (stat x) 
+	 (return-from 
+	     get-temp-dir 
+	   (namestring 
+	    (make-pathname 
+	     :device (pathname-device x)
+	     :directory (when (or (pathname-directory x) (pathname-name x))
+			  (append (pathname-directory x) (list (pathname-name x))))))))))))
+
+
+(defun set-up-top-level ( &aux (i (argc)) tem)
   (declare (fixnum i))
   (loop (setq i (- i 1))
 	(cond ((< i 0)(return nil))
 	      (t (setq tem (cons (argv i) tem)))))
   (setq *command-args* tem)
+  (setq *tmp-dir* (get-temp-dir))
   (setq tem *lib-directory*)
-  (let ((dir (si::getenv "GCL_LIBDIR")))
-    (or (set-dir  'si::*lib-directory* "-libdir")
+  (let ((dir (getenv "GCL_LIBDIR")))
+    (or (set-dir  '*lib-directory* "-libdir")
 	(if dir (setq *lib-directory* (coerce-slash-terminated dir))))
     (unless
      (and *load-path* (equal tem *lib-directory*))
-     (setq *load-path* (cons (si::string-concatenate *lib-directory*
+     (setq *load-path* (cons (string-concatenate *lib-directory*
 						     "lsp/") *load-path*))
-     (setq *load-path* (cons (si::string-concatenate *lib-directory*
+     (setq *load-path* (cons (string-concatenate *lib-directory*
 						     "gcl-tk/") *load-path*))
-     (setq *load-path* (cons (si::string-concatenate *lib-directory*
-						     "xgcl-2/") *load-path*))
-	    )
-    (when (not (boundp 'si::*system-directory*)) 
-      (setq si::*system-directory* (namestring
-        (truename (make-pathname :name nil :type nil :defaults (si::argv 0))))))
-    (set-dir  'si::*system-directory* "-dir")
+     (setq *load-path* (cons (string-concatenate *lib-directory*
+						     "xgcl-2/") *load-path*)))
+    (when (not (boundp '*system-directory*)) 
+      (setq *system-directory* (namestring
+        (truename (make-pathname :name nil :type nil :defaults (argv 0))))))
+    (set-dir '*system-directory* "-dir")
     (if (multiple-value-setq (tem tem) (get-command-arg "-f"))
 	(let (*load-verbose*)
-	  (si::process-some-args si::*command-args*)
-	  (setq si::*command-args* tem)
-	  (si::do-f (car si::*command-args*))))
-    ))
+	  (process-some-args *command-args*)
+	  (setq *command-args* tem)
+	  (do-f (car *command-args*))))))
 
 (defun do-f (file )
   (let ((eof '(nil)) tem
