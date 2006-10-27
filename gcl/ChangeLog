@@ -1,6 +1,8 @@
 2006-10-26  Gabriel Dos Reis  <gdr@cs.tamu.edu>
 
 	* configure.in: Don't be overly eager about setting INFO_DIR.
+	Fix quotations, as new Autoconf are pickier.
+
 	* configure: Regenerate.
 
 2002-01-25  Camm Maguire  <camm@intech19.enhanced.com>

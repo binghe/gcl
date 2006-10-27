@@ -271,6 +271,43 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
+# Factoring default headers for most tests.
+ac_includes_default="\
+#include <stdio.h>
+#if HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#if HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
+#if STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# if HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
+#if HAVE_STRING_H
+# if !STDC_HEADERS && HAVE_MEMORY_H
+#  include <memory.h>
+# endif
+# include <string.h>
+#endif
+#if HAVE_STRINGS_H
+# include <strings.h>
+#endif
+#if HAVE_INTTYPES_H
+# include <inttypes.h>
+#else
+# if HAVE_STDINT_H
+#  include <stdint.h>
+# endif
+#endif
+#if HAVE_UNISTD_H
+# include <unistd.h>
+#endif"
+
 ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS VERSION build build_cpu build_vendor build_os host host_cpu host_vendor host_os PROCESSOR_FLAGS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP AWK MAKEINFO EGREP GMP GMPDIR X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS BUILD_BFD LITTLE_END HAVE_LONG_LONG FLISP SYSTEM CLSTANDARD PAGEWIDTH RL_OBJS RL_LIB NO_PROFILE HAVE_SETENV HAVE_PUTENV USE_CLEANUP ENDIAN_ALREADY_DEFINED HAVE_SV_ONSTACK HAVE_SIGSYS HAVE_SIGEMT EMACS EMACS_SITE_LISP EMACS_DEFAULT_EL INFO_DIR TCLSH TK_CONFIG_PREFIX TK_LIBRARY TCL_LIBRARY TK_XINCLUDES TK_INCLUDE TCL_INCLUDE TK_LIB_SPEC TK_BUILD_LIB_SPEC TK_XLIBSW TCL_LIB_SPEC TCL_DL_LIBS TCL_LIBS NOTIFY BROKEN_O4_OPT FINAL_CFLAGS NIFLAGS O3FLAGS O2FLAGS EXTRA_LOBJS LEADING_UNDERSCORE GNU_LD use LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
@@ -3342,204 +3379,22 @@ echo "${ECHO_T}$system" >&6
 fi
 
 if test "$use" = "powerpc-macosx" ; then
-   if test "${ac_cv_header_malloc_malloc_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for malloc/malloc.h" >&5
-echo $ECHO_N "checking for malloc/malloc.h... $ECHO_C" >&6
-if test "${ac_cv_header_malloc_malloc_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_malloc_malloc_h" >&5
-echo "${ECHO_T}$ac_cv_header_malloc_malloc_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking malloc/malloc.h usability" >&5
-echo $ECHO_N "checking malloc/malloc.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <malloc/malloc.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_c_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
 
-# Is the header present?
-echo "$as_me:$LINENO: checking malloc/malloc.h presence" >&5
-echo $ECHO_N "checking malloc/malloc.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <malloc/malloc.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_c_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: malloc/malloc.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: malloc/malloc.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: malloc/malloc.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: malloc/malloc.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: malloc/malloc.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: malloc/malloc.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: malloc/malloc.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: malloc/malloc.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ------------------------------------------ ##
-## Report this to the AC_PACKAGE_NAME lists.  ##
-## ------------------------------------------ ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for malloc/malloc.h" >&5
-echo $ECHO_N "checking for malloc/malloc.h... $ECHO_C" >&6
-if test "${ac_cv_header_malloc_malloc_h+set}" = set; then
+echo "$as_me:$LINENO: checking for egrep" >&5
+echo $ECHO_N "checking for egrep... $ECHO_C" >&6
+if test "${ac_cv_prog_egrep+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_malloc_malloc_h=$ac_header_preproc
+  if echo a | (grep -E '(a|b)') >/dev/null 2>&1
+    then ac_cv_prog_egrep='grep -E'
+    else ac_cv_prog_egrep='egrep'
+    fi
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_malloc_malloc_h" >&5
-echo "${ECHO_T}$ac_cv_header_malloc_malloc_h" >&6
+echo "$as_me:$LINENO: result: $ac_cv_prog_egrep" >&5
+echo "${ECHO_T}$ac_cv_prog_egrep" >&6
+ EGREP=$ac_cv_prog_egrep
 
-fi
-if test $ac_cv_header_malloc_malloc_h = yes; then
-  cat >>confdefs.h <<\_ACEOF
-#define HAVE_MALLOC_MALLOC_H 1
-_ACEOF
-
-else
-  if test "${ac_cv_header_objc_malloc_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for objc/malloc.h" >&5
-echo $ECHO_N "checking for objc/malloc.h... $ECHO_C" >&6
-if test "${ac_cv_header_objc_malloc_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_objc_malloc_h" >&5
-echo "${ECHO_T}$ac_cv_header_objc_malloc_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking objc/malloc.h usability" >&5
-echo $ECHO_N "checking objc/malloc.h usability... $ECHO_C" >&6
-
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-# Factoring default headers for most tests.
-ac_includes_default="\
-#include <stdio.h>
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#if HAVE_SYS_STAT_H
-# include <sys/stat.h>
-#endif
-#if STDC_HEADERS
-# include <stdlib.h>
-# include <stddef.h>
-#else
-# if HAVE_STDLIB_H
-#  include <stdlib.h>
-# endif
-#endif
-#if HAVE_STRING_H
-# if !STDC_HEADERS && HAVE_MEMORY_H
-#  include <memory.h>
-# endif
-# include <string.h>
-#endif
-#if HAVE_STRINGS_H
-# include <strings.h>
-#endif
-#if HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# if HAVE_STDINT_H
-#  include <stdint.h>
-# endif
-#endif
-#if HAVE_UNISTD_H
-# include <unistd.h>
-#endif"
 
 echo "$as_me:$LINENO: checking for ANSI C header files" >&5
 echo $ECHO_N "checking for ANSI C header files... $ECHO_C" >&6
@@ -3598,23 +3453,7 @@ rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
 
 if test $ac_cv_header_stdc = yes; then
   # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
-
-echo "$as_me:$LINENO: checking for egrep" >&5
-echo $ECHO_N "checking for egrep... $ECHO_C" >&6
-if test "${ac_cv_prog_egrep+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if echo a | (grep -E '(a|b)') >/dev/null 2>&1
-    then ac_cv_prog_egrep='grep -E'
-    else ac_cv_prog_egrep='egrep'
-    fi
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_egrep" >&5
-echo "${ECHO_T}$ac_cv_prog_egrep" >&6
- EGREP=$ac_cv_prog_egrep
-
-
-cat >conftest.$ac_ext <<_ACEOF
+  cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -3795,6 +3634,167 @@ fi
 done
 
 
+if test "${ac_cv_header_malloc_malloc_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for malloc/malloc.h" >&5
+echo $ECHO_N "checking for malloc/malloc.h... $ECHO_C" >&6
+if test "${ac_cv_header_malloc_malloc_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_malloc_malloc_h" >&5
+echo "${ECHO_T}$ac_cv_header_malloc_malloc_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking malloc/malloc.h usability" >&5
+echo $ECHO_N "checking malloc/malloc.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <malloc/malloc.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_header_compiler=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6
+
+# Is the header present?
+echo "$as_me:$LINENO: checking malloc/malloc.h presence" >&5
+echo $ECHO_N "checking malloc/malloc.h presence... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <malloc/malloc.h>
+_ACEOF
+if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
+  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null; then
+  if test -s conftest.err; then
+    ac_cpp_err=$ac_c_preproc_warn_flag
+    ac_cpp_err=$ac_cpp_err$ac_c_werror_flag
+  else
+    ac_cpp_err=
+  fi
+else
+  ac_cpp_err=yes
+fi
+if test -z "$ac_cpp_err"; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.$ac_ext
+echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: malloc/malloc.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: malloc/malloc.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: malloc/malloc.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: malloc/malloc.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: malloc/malloc.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: malloc/malloc.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: malloc/malloc.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: malloc/malloc.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: malloc/malloc.h: in the future, the compiler will take precedence" >&2;}
+    (
+      cat <<\_ASBOX
+## ------------------------------------------ ##
+## Report this to the AC_PACKAGE_NAME lists.  ##
+## ------------------------------------------ ##
+_ASBOX
+    ) |
+      sed "s/^/$as_me: WARNING:     /" >&2
+    ;;
+esac
+echo "$as_me:$LINENO: checking for malloc/malloc.h" >&5
+echo $ECHO_N "checking for malloc/malloc.h... $ECHO_C" >&6
+if test "${ac_cv_header_malloc_malloc_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_malloc_malloc_h=$ac_header_preproc
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_malloc_malloc_h" >&5
+echo "${ECHO_T}$ac_cv_header_malloc_malloc_h" >&6
+
+fi
+if test $ac_cv_header_malloc_malloc_h = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_MALLOC_MALLOC_H 1
+_ACEOF
+
+else
+  if test "${ac_cv_header_objc_malloc_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for objc/malloc.h" >&5
+echo $ECHO_N "checking for objc/malloc.h... $ECHO_C" >&6
+if test "${ac_cv_header_objc_malloc_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+echo "$as_me:$LINENO: result: $ac_cv_header_objc_malloc_h" >&5
+echo "${ECHO_T}$ac_cv_header_objc_malloc_h" >&6
+else
+  # Is the header compilable?
+echo "$as_me:$LINENO: checking objc/malloc.h usability" >&5
+echo $ECHO_N "checking objc/malloc.h usability... $ECHO_C" >&6
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
 $ac_includes_default
 #include <objc/malloc.h>
 _ACEOF
@@ -3873,10 +3873,7 @@ echo "${ECHO_T}$ac_header_preproc" >&6
 
 # So?  What about this header?
 case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
-  yes:no:
-fi
-
-
+  yes:no: )
     { echo "$as_me:$LINENO: WARNING: objc/malloc.h: accepted by the compiler, rejected by the preprocessor!" >&5
 echo "$as_me: WARNING: objc/malloc.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
     { echo "$as_me:$LINENO: WARNING: objc/malloc.h: proceeding with the compiler's result" >&5
@@ -3928,7 +3925,10 @@ echo "$as_me: error: need malloc.h on macosx" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
-)
+
+fi
+
+
 fi
 
 # sysconf

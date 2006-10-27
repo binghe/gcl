@@ -384,7 +384,7 @@ fi
 #exit(1)
 #fi
 
-AC_MSG_RESULT(use=$use)	
+AC_MSG_RESULT([use=$use])	
 
 
 #
@@ -451,7 +451,7 @@ case "$use" in
 	TFPFLAG="-fomit-frame-pointer";;
 esac
 
-AC_CHECK_PROGS(AWK,gawk nawk awk)
+AC_CHECK_PROGS(AWK,[gawk nawk awk])
 
 # Work around system/gprof mips/hppa hang
 case $use in
@@ -564,9 +564,9 @@ else
 fi
 
 if test "$use" = "powerpc-macosx" ; then
-   AC_CHECK_HEADER(malloc/malloc.h,AC_DEFINE(HAVE_MALLOC_MALLOC_H),
-      AC_CHECK_HEADER(objc/malloc.h,AC_DEFINE(HAVE_OBJC_MALLOC_H),
-	AC_MSG_ERROR(need malloc.h on macosx)))
+   AC_CHECK_HEADER(malloc/malloc.h,[AC_DEFINE([HAVE_MALLOC_MALLOC_H])],
+      [AC_CHECK_HEADER(objc/malloc.h,[AC_DEFINE([HAVE_OBJC_MALLOC_H])],
+	[AC_MSG_ERROR([need malloc.h on macosx])])])
 fi
 
 # sysconf
@@ -586,7 +586,7 @@ AC_CHECK_HEADER(unistd.h,
 			    hz=`cat conftest1`
 			    AC_DEFINE_UNQUOTED(HZ,$hz)
 			    ,hz=0,hz=0)
-	        AC_MSG_RESULT($hz)))
+	        [AC_MSG_RESULT($hz)]))
 
 
 #MY_SUBDIRS=
