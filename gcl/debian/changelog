@@ -108,8 +108,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * make sure *tmp-dir* is set
   * makeinfo is optional
   * no C optimization on hppa, gcc 4.x on hppa
+  * update cs.po, Closes: #389211
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 27 Oct 2006 13:01:33 -0400
+ -- Camm Maguire <camm@enhanced.com>  Fri, 27 Oct 2006 13:07:58 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
