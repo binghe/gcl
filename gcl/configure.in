@@ -283,7 +283,7 @@ case $use in
 		ia64*)
 			def_dlopen="yes" ; def_statsysbfd="no" ; def_static="no" ;;
 		hppa*)
-			def_dlopen="yes" ; def_statsysbfd="no" ; def_pic="yes" ;; # def_debug="yes" ;;
+			def_dlopen="yes" ; def_statsysbfd="no" ; def_pic="yes" ; def_debug="yes" ;;
 #		m68k*)
 #			def_oldgmp="yes" ;;
 	esac;;

@@ -107,8 +107,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * no profiling for hppa, allow C optimization on hppa
   * make sure *tmp-dir* is set
   * makeinfo is optional
+  * no C optimization on hppa, gcc 4.x on hppa
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 25 Oct 2006 17:36:24 -0400
+ -- Camm Maguire <camm@enhanced.com>  Fri, 27 Oct 2006 13:01:33 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
