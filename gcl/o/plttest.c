@@ -40,6 +40,7 @@ main(int argc,char * argv[],char *envp[]) {
 
   exp(d);
   log(d);
+  sqrt(d);
   
   return 0;
 
