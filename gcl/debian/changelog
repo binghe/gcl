@@ -113,8 +113,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * add sqrt to plttest.c
   * disable-nls added to the binutils subconfigures to avoid msgfmt
     dependency
+  * remove -lintl from powerpc-macosx.defs
 
- -- Camm Maguire <camm@enhanced.com>  Thu,  2 Nov 2006 09:25:19 -0500
+ -- Camm Maguire <camm@enhanced.com>  Mon,  6 Nov 2006 08:45:05 -0500
 
 gcl (2.6.7-7) unstable; urgency=high
 
