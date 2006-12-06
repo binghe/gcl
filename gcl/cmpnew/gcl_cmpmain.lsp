@@ -734,7 +734,6 @@ SYSTEM_SPECIAL_INIT
 	 (c (merge-pathnames (make-pathname :type "c") c)))
   
   (with-open-file (st c :direction :output)
-		  (format st "#include <string.h>~%")
 		  (format st "#include ~a~%~%" *cmpinclude*)
 
 		  (format st "#define load2(a) do {")
@@ -763,7 +762,11 @@ SYSTEM_SPECIAL_INIT
 		      (format st "{~a,\"~a\"}" (car tem) (cadr tem)))
 		    (format st "};~%~%")
 		    
+		    (format st "static int user_init_run;~%")
+		    (format st "#define my_load(a_,b_) {if (!user_init_run && (a_)) gcl_init_or_load1((a_),(b_));(a_)=0;}~%~%")
+                    
 		    (format st "object user_init(void) {~%")
+		    (format st "user_init_run=1;~%")
 		    (dolist (tem files)
 		      (let ((tem (namestring tem)))
 			    (cond ((equal (cadr (car p)) tem)
@@ -775,10 +778,10 @@ SYSTEM_SPECIAL_INIT
 		    (format st "return Cnil;}~%~%")
 
 		    (format st "int user_match(const char *s,int n) {~%")
-		    (format st "  const Fnlst *f;~%")
+		    (format st "  Fnlst *f;~%")
 		    (format st "  for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
 		    (format st "     if (!strncmp(s,f->s,n)) {~%")
-		    (format st "        gcl_init_or_load1(f->fn,f->s);~%")
+		    (format st "        my_load(f->fn,f->s);~%")
 		    (format st "        return 1;~%")
 		    (format st "     }~%")
 		    (format st "  }~%")
@@ -786,11 +789,10 @@ SYSTEM_SPECIAL_INIT
 		    (format st "}~%~%")))
 		    
   (compiler-cc c o)
-;  (system (format nil "~a ~a" *cc* tem))
   (delete-file c)
 
   o))
- 
+
 (defun mysub (str it new)
   (let ((x (search it str)))
     (unless x
@@ -809,7 +811,7 @@ SYSTEM_SPECIAL_INIT
 	 (init (merge-pathnames (make-pathname
 				 :name (concatenate 'string "init_" (pathname-name raw))
 				 :type "lsp") raw))
-	 (raw (merge-pathnames raw (make-pathname :directory (list :current))))
+	 #-winnt (raw (merge-pathnames raw (make-pathname :directory (list :current))))
 	 (raw (merge-pathnames (make-pathname
 				:name (concatenate 'string "raw_" (pathname-name raw)))
 			       raw))

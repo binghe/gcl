@@ -114,8 +114,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * disable-nls added to the binutils subconfigures to avoid msgfmt
     dependency
   * remove -lintl from powerpc-macosx.defs
+  * update to make-user-init from cvs head to support hol88, fix link on
+    mingw
 
- -- Camm Maguire <camm@enhanced.com>  Mon,  6 Nov 2006 08:45:05 -0500
+ -- Camm Maguire <camm@enhanced.com>  Wed,  6 Dec 2006 09:00:54 -0500
 
 gcl (2.6.7-7) unstable; urgency=high
 
