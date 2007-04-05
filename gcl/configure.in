@@ -1113,6 +1113,20 @@ if test "$HAVE_SBRK" = "1" ; then
 	fi
 fi
 
+# pagewidth
+AC_MSG_CHECKING(for pagewidth)
+AC_TRY_RUN([#include <stdio.h>
+            #include <unistd.h>
+int main() {size_t i=getpagesize(),j; 
+	    FILE *fp=fopen("conftest1","w");
+	    for (j=0;i>>=1;j++);
+	    if (j<12) {printf("pagewidth %u is too small\n",j);return -1;}
+	    fprintf(fp,"%u",j);
+	    return 0;}],PAGEWIDTH=`cat conftest1`,PAGEWIDTH=0,PAGEWIDTH=0)
+AC_MSG_RESULT($PAGEWIDTH)
+AC_DEFINE_UNQUOTED(PAGEWIDTH,$PAGEWIDTH)
+AC_SUBST(PAGEWIDTH)
+
 
 old_LDFLAGS="$LDFLAGS"
 LDFLAGS="$TLDFLAGS"
@@ -1127,7 +1141,7 @@ AC_TRY_RUN([#include <stdio.h>
 int
 main(int argc,char * argv[])
 {
-  char *b;
+  char *b,*b1;
   FILE *fp;
 
 #ifdef NEED_NONRANDOM_SBRK
@@ -1146,7 +1160,8 @@ main(int argc,char * argv[])
 #if defined (__APPLE__) && defined (__MACH__)
   fprintf(fp,"get_dbegin()");
 #else
-  fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)0xffffff);
+  b1=((unsigned long) b) & ~(unsigned long)0xffffff;b=(void *)b1<(void *)&b1 && (void *)b>(void *)&b ? ((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1) : b1;
+  fprintf(fp,"0x%lx",b);
 #endif
 #endif
   fclose(fp);
@@ -1212,20 +1227,6 @@ FLISP="saved_$SYSTEM"
 AC_SUBST(FLISP)
 AC_SUBST(SYSTEM)
 AC_SUBST(CLSTANDARD)
-
-# pagewidth
-AC_MSG_CHECKING(for pagewidth)
-AC_TRY_RUN([#include <stdio.h>
-            #include <unistd.h>
-int main() {size_t i=getpagesize(),j; 
-	    FILE *fp=fopen("conftest1","w");
-	    for (j=0;i>>=1;j++);
-	    if (j<12) {printf("pagewidth %u is too small\n",j);return -1;}
-	    fprintf(fp,"%u",j);
-	    return 0;}],PAGEWIDTH=`cat conftest1`,PAGEWIDTH=0,PAGEWIDTH=0)
-AC_MSG_RESULT($PAGEWIDTH)
-AC_DEFINE_UNQUOTED(PAGEWIDTH,$PAGEWIDTH)
-AC_SUBST(PAGEWIDTH)
 
 # Maximum number of pages
 
