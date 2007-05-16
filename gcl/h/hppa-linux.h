@@ -27,3 +27,4 @@
 #endif
 
 #define SGC
+#define STATIC_FUNCTION_POINTERS

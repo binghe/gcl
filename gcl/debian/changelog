@@ -109,6 +109,7 @@ gcl (2.6.8-1) unstable; urgency=low
   * makeinfo is optional
   * no C optimization on hppa, gcc 4.x on hppa
   * update cs.po, Closes: #389211
+  * static function pointers for hppa
   * Fix leading underscore behavior of my_plt
   * add sqrt to plttest.c
   * disable-nls added to the binutils subconfigures to avoid msgfmt
