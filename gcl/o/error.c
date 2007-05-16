@@ -233,9 +233,9 @@ DEFUNO_NEW("CERROR",object,fLcerror,LISP
   va_list ap;
 
   b[0]=sKerror;
-  b[1]=Cnil;
+  b[1]=Ct;
   b[2]=ihs_top_function_name(ihs_top-1);
-  b[3]=null_string;
+  b[3]=continue_fmt_string;
   b[4]=fmt_string;
   i=4;
   n--;
