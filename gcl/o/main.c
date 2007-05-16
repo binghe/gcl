@@ -314,7 +314,7 @@ main(int argc, char **argv, char **envp) {
 #if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC)
 	  {
 	    /* make sure the stack is 8 byte aligned */
-	    static double estack_buf[SIG_STACK_SIZE];
+	    static double estack_buf[32*SIGSTKSZ];
 	    static struct sigaltstack estack;
 	    
 	    bzero(estack_buf,sizeof(estack_buf));
