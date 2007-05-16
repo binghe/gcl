@@ -117,8 +117,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * update to make-user-init from cvs head to support hol88, fix link on
     mingw
   * solaris-i386 support
+  * fix read-char-no-hang on mingw
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 05 Apr 2007 15:28:43 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 16 May 2007 10:36:04 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
