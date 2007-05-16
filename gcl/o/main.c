@@ -314,15 +314,16 @@ main(int argc, char **argv, char **envp) {
 #if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC)
 	  {
 	    /* make sure the stack is 8 byte aligned */
-#ifdef SETJMP_ONE_DIRECTION
-	    static
-#endif
-	    double estack_buf[SIG_STACK_SIZE];
+	    static double estack_buf[SIG_STACK_SIZE];
+	    static struct sigaltstack estack;
 	    
 	    bzero(estack_buf,sizeof(estack_buf));
-	    estack.ss_sp = (char *) &estack_buf[SIG_STACK_SIZE-1];
-	    estack.ss_onstack=0;
-	    sigstack(&estack,0);
+	    estack.ss_sp = estack_buf;
+	    estack.ss_flags = 0;                                   
+	    estack.ss_size = sizeof(estack_buf);                             
+	    if (sigaltstack(&estack, 0) < 0)                       
+	      error("sigaltstack");                             
+
 	  }
 #endif	
 #endif	

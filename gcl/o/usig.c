@@ -61,7 +61,7 @@ gcl_signal(int signo, void (*handler) (/* ??? */))
     struct sigaction action;
     action.sa_handler = handler;
 /*    action.sa_flags =  SA_RESTART | ((signo == SIGSEGV || signo == SIGBUS) ? SV_ONSTACK : 0) */
-   action.sa_flags = SA_RESTART | ((signo == SIGSEGV || signo == SIGBUS) ? SV_ONSTACK : 0)  
+   action.sa_flags = SA_RESTART | ((signo == SIGSEGV || signo == SIGBUS) ? SA_ONSTACK : 0)  
 #ifdef SA_SIGINFO
     | SA_SIGINFO
 #endif      

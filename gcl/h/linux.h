@@ -80,7 +80,7 @@ do {static struct sigaction action; \
 #undef HAVE_SIGVEC
 #define HAVE_SIGACTION
 /* make this a noop */
-#define SETUP_SIG_STACK
+/* #define SETUP_SIG_STACK */
 #ifndef HAVE_SV_ONSTACK
 #define SV_ONSTACK 0
 #endif
@@ -125,7 +125,7 @@ do { int c = 0; \
 
 
 #define INSTALL_SEGMENTATION_CATCHER \
-  	 (void) signal(SIGSEGV,segmentation_catcher)
+  	 (void) gcl_signal(SIGSEGV,segmentation_catcher)
 
 
 /* get the fileno of a FILE* */
