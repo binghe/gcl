@@ -73,20 +73,6 @@
 (defun c1sharp-comma (arg)
   (c1constant-value (cons 'si:|#,| arg) t))
 
-(defun wrap-literals (form)
-  (cond ((and (consp form) (eq (car form) 'quote))
-	 (let ((x (cadr form)))
-	   (if (and (symbolp x)
-		    (eq :external (cadr (multiple-value-list (find-symbol (symbol-name x) 'lisp)))))
-	       form
-	     `(load-time-value (si::nani ,(si::address x))))))
-	((consp form)
-	 (cons (wrap-literals (car form)) (wrap-literals (cdr form))))
-	((or (symbolp form) (numberp form) (characterp form))
-	 form)
-	(`(load-time-value (si::nani ,(si::address form))))))
-
-
 (defun c1load-time-value (arg)
   (c1constant-value
    (cons 'si:|#,|
@@ -635,6 +621,9 @@
    ((typep val 'short-float)
     (list 'LOCATION (make-info :type 'short-float)
           (list 'SHORT-FLOAT-VALUE (add-object val) val)))
+   ((and *compiler-compile* (not *keep-gaz*))
+    (list 'LOCATION (make-info :type (object-type val))
+	  (list 'VV (add-object (cons 'si::|#,| `(si::nani ,(si::address val)))))))
    (always-p
     (list 'LOCATION (make-info :type (object-type val))
           (list 'VV (add-object val))))

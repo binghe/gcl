@@ -279,41 +279,43 @@ Cannot compile ~a.~%"
 
       (wt-data-begin)
 
-      (let* ((rtb *readtable*)
-               (prev (and (eq (get-macro-character #\# rtb)
-                              (get-macro-character
-                                #\# (si:standard-readtable)))
-                          (get-dispatch-macro-character #\# #\, rtb))))
-          (if (and prev (eq prev (get-dispatch-macro-character
-                                   #\# #\, (si:standard-readtable))))
-              (set-dispatch-macro-character #\# #\,
-                'si:sharp-comma-reader-for-compiler rtb)
-              (setq prev nil))
+      (if *compiler-compile*
+	  (t1expr *compiler-compile*)
+	(let* ((rtb *readtable*)
+	       (prev (and (eq (get-macro-character #\# rtb)
+			      (get-macro-character
+			       #\# (si:standard-readtable)))
+			  (get-dispatch-macro-character #\# #\, rtb))))
+	  (if (and prev (eq prev (get-dispatch-macro-character
+				  #\# #\, (si:standard-readtable))))
+	      (set-dispatch-macro-character #\# #\,
+					    'si:sharp-comma-reader-for-compiler rtb)
+	    (setq prev nil))
 	  
 	  ;; t1expr the package ops again..
 	  (if (consp *split-files*)
 	      (dolist (v (fourth *split-files*)) (t1expr v)))
-          (unwind-protect
-            (do ((form (read *compiler-input* nil eof)
-                       (read *compiler-input* nil eof))
-		 (load-flag (or (eq :defaults *eval-when-defaults*)
-				(member 'load *eval-when-defaults*))))
-                (nil)
-              (cond
-	       ((eq form eof))
-	       (load-flag (t1expr form))
-	       ((maybe-eval nil form)))
-	      (cond
-	       ((and *split-files* (check-end form eof))
-		(setf (fourth *split-files*) (reverse (third *data*)))
-		(return nil))
-	       ((eq form eof) (return nil)))
-	      )
+	  (unwind-protect
+	      (do ((form (read *compiler-input* nil eof)
+			 (read *compiler-input* nil eof))
+		   (load-flag (or (eq :defaults *eval-when-defaults*)
+				  (member 'load *eval-when-defaults*))))
+		  (nil)
+		  (cond
+		   ((eq form eof))
+		   (load-flag (t1expr form))
+		   ((maybe-eval nil form)))
+		  (cond
+		   ((and *split-files* (check-end form eof))
+		    (setf (fourth *split-files*) (reverse (third *data*)))
+		    (return nil))
+		   ((eq form eof) (return nil)))
+		  )
 	    
-
-            (when prev (set-dispatch-macro-character #\# #\, prev rtb)))))
-
-    (setq *init-name* (init-name input-pathname system-p))
+	    
+            (when prev (set-dispatch-macro-character #\# #\, prev rtb))))))
+      
+      (setq *init-name* (init-name input-pathname system-p))
 ;    (let ((x (merge-pathnames #".o" o-pathname)))
 ;      (with-open-file (s x :if-does-not-exist :create)
 ;		      (setq *init-name* (init-name x system-p)))
@@ -428,16 +430,13 @@ Cannot compile ~a.~%"
 	 (values name nil nil))
 	((and (setq tem (symbol-function name))
 	      (consp tem))
-	 (let ((na (if (symbol-package name) name 'cmp-anon))
-	       (tem (if *keep-gaz* tem (wrap-literals tem))))
+	 (let ((na (if (symbol-package name) name 'cmp-anon)))
 	   (unless (and (fboundp 'si::init-cmp-anon) (or (si::init-cmp-anon) (fmakunbound 'si::init-cmp-anon)))
 	     (with-open-file
-	      (st (setq gaz (gazonk-name)) :direction :output)
-	      (prin1-cmp `(defun ,na ,@ (ecase (car tem)
-					       (lambda (cdr tem))
-					       (lambda-block (cddr tem))
-					       ))       st))
-	     (let ((fi (let ((*compiler-compile* t))
+	      (st (setq gaz (gazonk-name)) :direction :output))
+	     (let ((fi (let ((*compiler-compile* `(defun ,na ,@ (ecase (car tem)
+								       (lambda (cdr tem))
+								       (lambda-block (cddr tem))))))
 			 (compile-file gaz))))
 	       (load fi)
 	       (delete-file fi))
