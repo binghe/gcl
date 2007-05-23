@@ -25,7 +25,8 @@
 (in-package 'lisp)
 
 
-(export '(with-open-stream with-input-from-string with-output-to-string))
+(export '(with-open-stream with-input-from-string with-output-to-string 
+			   read-byte write-byte read-sequence write-sequence))
 (export '(read-from-string))
 (export '(write-to-string prin1-to-string princ-to-string))
 (export 'with-open-file)
@@ -192,4 +193,66 @@
              (format t "~&Starts dribbling to ~A (~d/~d/~d, ~d:~d:~d)."
                      namestring year month day hour min sec))))))
 
+(defconstant char-length 8)
+
+(defun get-byte-stream-nchars (s)
+  (check-type s stream)
+  (let* ((tp (stream-element-type s))
+	 (tp (if (consp tp) (cadr tp) char-length))
+	 (nc (ceiling tp char-length)))
+    nc))
+
+(defun write-byte (j s)
+  (declare (optimize (safety 1)))
+  (let ((nc (get-byte-stream-nchars s))
+	(ff (1- (expt 2 char-length))))
+    (do ((k 0 (1+ k))(i j (ash i (- char-length)))) ((>= k nc) j)
+	(write-char (code-char (logand i ff)) s))))
+
+(defun read-byte (s &optional (eof-error-p t) eof-value)
+  (declare (optimize (safety 1)))
+  (let ((nc (get-byte-stream-nchars s)))
+    (do ((j 0 (1+ j)) 
+	 (i 0 (logior i
+	       (ash (char-code (let ((ch (read-char s eof-error-p eof-value)))
+				 (if (and (not eof-error-p) (eq ch eof-value))
+				     (return-from read-byte ch)
+				   ch))) (* j char-length)))))
+	((>= j nc) i))))
+
+
+(defun read-sequence (seq strm &key (start 0) end)
+  (declare (optimize (safety 1)))
+  (check-type seq sequence)
+  (check-type start (integer 0))
+  (check-type end (or null (integer 0)))
+  (let* ((start (min start array-dimension-limit))
+	 (end   (if end (min end array-dimension-limit) (length seq)))
+	 (l (listp seq))
+	 (seq (if (and l (> start 0)) (nthcdr start seq) seq))
+	 (tp (subtypep (stream-element-type strm) 'character)))
+    (do ((i start (1+ i))(seq seq (if l (cdr seq) seq)))
+	((or (>= i end) (when l (endp seq))) i)
+	(declare (fixnum i))
+	(let ((el (if tp (read-char strm nil 'eof) (read-byte strm nil 'eof))))
+	  (when (eq el 'eof) (return i))
+	  (if l (setf (car seq) el) (setf (aref seq i) el))))))
+
+
+(defun write-sequence (seq strm &key (start 0) end)
+  (declare (optimize (safety 1)))
+  (check-type seq sequence)
+  (check-type start (integer 0))
+  (check-type end (or null (integer 0)))
+  (let* ((start (min start array-dimension-limit))
+	 (end   (if end (min end array-dimension-limit) (length seq)))
+	 (l (listp seq))
+	 (tp (subtypep (stream-element-type strm) 'character)))
+    (do ((i start (1+ i))
+	 (seq (if (and l (> start 0)) (nthcdr start seq) seq) (if l (cdr seq) seq))) 
+	((or (>= i end) (when l (endp seq)))) 
+	(declare (fixnum i))
+	(let ((el (if l (car seq) (aref seq i))))
+	  (if tp (write-char el strm) (write-byte el strm))))
+    seq))
 

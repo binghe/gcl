@@ -126,7 +126,7 @@ make-load-form-saving-slots make-method open-stream-p pathname-match-p
 pprint-dispatch pprint-exit-if-list-exhausted pprint-fill
 pprint-indent pprint-linear pprint-logical-block pprint-newline
 pprint-pop pprint-tab pprint-tabular print-not-readable-object
-print-unreadable-object read-sequence readtable-case row-major-aref
+print-unreadable-object readtable-case row-major-aref
 set-pprint-dispatch simple-condition-format-control
 stream-external-format synonym-stream-symbol
 translate-logical-pathname translate-pathname
@@ -134,7 +134,7 @@ two-way-stream-input-stream two-way-stream-output-stream
 unbound-slot-instance 
 upgraded-complex-part-type wild-pathname-p with-compilation-unit
 with-condition-restarts with-package-iterator with-standard-io-syntax
-write-sequence ))
+ ))
 	(shadowing-import (list s) "COMMON-LISP"))
 
 (use-package "ANSI-LOOP" "COMMON-LISP")

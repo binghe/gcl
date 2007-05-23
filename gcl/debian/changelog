@@ -122,8 +122,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * fast compile without wrap-literals
   * sigaltstack support
   * fix cerror
+  * add read-byte,read-sequence,write-byte,write-sequence support
 
- -- Camm Maguire <camm@enhanced.com>  Wed, 16 May 2007 11:19:16 -0400
+ -- Camm Maguire <camm@enhanced.com>  Wed, 23 May 2007 18:06:04 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
