@@ -124,8 +124,11 @@ gcl (2.6.8-1) unstable; urgency=low
   * fix cerror
   * add read-byte,read-sequence,write-byte,write-sequence support
   * fix some float parsing inaccuracies
+  * support GNU_HASH sections, Closes: #426135
+  * safety 2 for certain low level functions in gcl_listlib.lsp, CLoses:
+    #415266
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 03 Jul 2007 11:30:28 -0400
+ -- Camm Maguire <camm@enhanced.com>  Tue, 03 Jul 2007 11:57:00 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
