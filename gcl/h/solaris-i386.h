@@ -1,3 +1,6 @@
+#define I386
+#define LITTLE_END
+
 #define ElfW(a) Elf32_ ## a
 #if !defined(HAVE_LIBBFD) && !defined(USE_DLOPEN)
 #define __ELF_NATIVE_CLASS 32

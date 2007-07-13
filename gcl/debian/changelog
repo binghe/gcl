@@ -127,8 +127,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * support GNU_HASH sections, Closes: #426135
   * safety 2 for certain low level functions in gcl_listlib.lsp, CLoses:
     #415266
+  * solaris i386 is little endian
 
- -- Camm Maguire <camm@enhanced.com>  Tue, 03 Jul 2007 11:57:00 -0400
+ -- Camm Maguire <camm@enhanced.com>  Fri, 13 Jul 2007 17:39:33 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
