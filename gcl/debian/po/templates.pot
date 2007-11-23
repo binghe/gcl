@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: camm@enhanced.com\n"
-"POT-Creation-Date: 2006-10-16 12:39-0400\n"
+"POT-Creation-Date: 2007-11-23 12:47-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../in.gcl.templates:1001
-msgid "Use the work-in-progress ansi build by default"
+msgid "Use the work-in-progress ansi build by default?"
 msgstr ""
 
 #. Type: boolean
@@ -39,7 +39,7 @@ msgstr ""
 #. Type: boolean
 #. Description
 #: ../in.gcl.templates:2001
-msgid "Use the profiling build by default"
+msgid "Use the profiling build by default?"
 msgstr ""
 
 #. Type: boolean
