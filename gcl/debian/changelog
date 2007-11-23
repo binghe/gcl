@@ -128,8 +128,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * safety 2 for certain low level functions in gcl_listlib.lsp, CLoses:
     #415266
   * solaris i386 is little endian
+  * drop gcc-3.4 on arm
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 13 Jul 2007 17:39:33 -0400
+ -- Camm Maguire <camm@intech21.enhanced.com>  Thu, 22 Nov 2007 20:06:32 -0500
 
 gcl (2.6.7-7) unstable; urgency=high
 
