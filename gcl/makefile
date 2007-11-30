@@ -51,6 +51,12 @@ binutils/intl/libintl.a:
 binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
 	cd $(@D) && $(MAKE)
 
+copy_iberty: $(LIBIBERTY)
+	cd binutils/libiberty && ar x $<
+
+copy_bfd: $(LIBBFD) copy_iberty
+	cd binutils/bfd && ar x $<
+
 h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
 	cp $(<D)/$(@F) $@
 
@@ -218,6 +224,7 @@ gclclean:
 	cd xgcl-2 && $(MAKE) clean
 	(cd $(TESTDIR); $(MAKE) clean)
 	(cd info ; $(MAKE) clean)
+	find binutils -name "*.o" -exec rm {} \;
 	rm -f foo.tcl config.log makedefs makedefsafter config.cache config.status makedefc
 	rm -f h/config.h h/gclincl.h h/cmpinclude.h h/gmp.h
 	rm -f xbin/gcl foo foo.c bin/gclm.bat gmp_all

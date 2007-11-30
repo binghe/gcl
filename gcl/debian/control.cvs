@@ -2,7 +2,7 @@ Source: gclcvs
 Section: interpreters
 Priority: optional
 Maintainer: Camm Maguire <camm@enhanced.com>
-Build-Depends: debhelper (>= 4.1.16), libreadline5-dev | libreadline-dev, m4, tk8.4-dev, texlive-latex-base, texinfo, libgmp3-dev, autotools-dev, libxmu-dev, libxaw7-dev, po-debconf
+Build-Depends: debhelper (>= 4.1.16), libreadline5-dev | libreadline-dev, m4, tk8.4-dev, texlive-latex-base, texinfo, libgmp3-dev, autotools-dev, libxmu-dev, libxaw7-dev, po-debconf, binutils-dev
 Standards-Version: 3.7.2
 
 Package: gclcvs
