@@ -117,9 +117,9 @@ void install_segmentation_catcher(void);
 #endif
 #endif
 
-#ifdef NEED_NONRANDOM_SBRK
-#include <syscall.h>
+#ifdef CAN_UNRANDOMIZE_SBRK
 #include <sys/personality.h>
+#include <syscall.h>
 #include <unistd.h>
 #endif
 
@@ -131,14 +131,21 @@ main(int argc, char **argv, char **envp) {
 #endif
 #endif
 
-#ifdef NEED_NONRANDOM_SBRK
+#ifdef CAN_UNRANDOMIZE_SBRK
 	{
-	  long pers;
-	  pers=personality(-1);
-	  if (!(pers & ADDR_NO_RANDOMIZE)) {
-	    personality(pers | ADDR_NO_RANDOMIZE);
-	    execve(*argv,argv,envp);
-	  }	
+          long pers = personality(0xffffffffUL);
+          if (!(pers & ADDR_NO_RANDOMIZE)) {
+            long retval = personality(pers | ADDR_NO_RANDOMIZE);
+            long newpers = personality(0xffffffffUL);
+            if (retval != -1 && newpers & ADDR_NO_RANDOMIZE) {
+#ifdef GCL_GPROF
+                gprof_cleanup();
+#endif
+                execve(*argv, argv, envp);
+            }
+            fprintf(stderr, "WARNING: Couldn't re-execute with the proper personality flags\n");
+	    exit(-1);
+          }
 	}
 #endif
 

@@ -30,6 +30,7 @@ pltcomp(const void *v1,const void *v2) {
 
 extern int mcount();
 extern int _mcount();
+extern void sincos(double,double *,double *);
 
 #define MY_PLT(a_) {#a_,(unsigned long)(void *)a_}
 static Plt mplt[]={

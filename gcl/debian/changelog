@@ -133,8 +133,34 @@ gcl (2.6.8-1) unstable; urgency=low
   * debconf translations Closes: #410683, Closes: #419736, Closes: #423706, Closes: #441408
   * statsysbfd in Debian, incoporating modules into libgcl.a for
     compiler::link support
+  * Non-maintainer upload to fix pending l10n issues
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. Closes: #457025
+  * [Debconf translation updates]
+    - Portuguese. Closes: #457576
+    - Czech. Closes: #457677
+    - French. Closes: #458120
+    - Finnish. Closes: #458255
+    - Galician. Closes: #458529
+    - Vietnamese. Closes: #459008
+    - Russian. Closes: #459308
+    - Dutch. Closes: #459541
+    - German. Closes: #459887
+  * [Lintian] Correct FSF address in debian/copyright
+  * [Lintian] Remove extra whitespaces at the end of
+    debian/in.gcl-doc.doc-base.tk
+  * [Lintian] Correct section in doc-base documents from Apps/Programming
+    to Programming
+  * Accept NMU
+  * Bug fix: "[INTL:sv] po-debconf file for gcl", thanks to Martin Ågren
+    (Closes: #492241).
+  * Bug fix: "gcl: FTBFS [amd64]: cannot trap sbrk", thanks to Daniel
+    Schepler (Closes: #487435).  Modified and applied personality handling
+    patch.
+  * Bug fix: "gcl: Builds broken package with gcc-4.3", thanks to Daniel
+    Schepler (Closes: #467474).  Added sincos to plttest.c
 
- -- Camm Maguire <camm@intech21.enhanced.com>  Fri, 30 Nov 2007 07:59:19 -0500
+ -- Camm Maguire <camm@sacrifice.m.enhanced.com>  Thu, 31 Jul 2008 00:55:35 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
