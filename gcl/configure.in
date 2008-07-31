@@ -1022,7 +1022,8 @@ if test "$HAVE_SBRK" = "1" ; then
 	fi
 
 	AC_MSG_CHECKING([for personality(ADDR_NO_RANDOMIZE) support])
-	AC_TRY_RUN([int main(int argc,char *argv[],char *envp[]) {
+	AC_TRY_RUN([void gprof_cleanup() {};
+		    int main(int argc,char *argv[],char *envp[]) {
 	            #include "h/unrandomize.h"
 		    return 0;}],CAN_UNRANDOMIZE_SBRK=1,CAN_UNRANDOMIZE_SBRK=0,CAN_UNRANDOMIZE_SBRK=0)
 
@@ -1035,6 +1036,7 @@ if test "$HAVE_SBRK" = "1" ; then
 
 	AC_MSG_CHECKING([that sbrk is (now) non-random])
 	AC_TRY_RUN([#include <stdio.h>
+	            void gprof_cleanup() {};
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1048,6 +1050,7 @@ if test "$HAVE_SBRK" = "1" ; then
 		exit 1
 	fi
 	AC_TRY_RUN([#include <stdio.h>
+                    void gprof_cleanup() {};
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1092,6 +1095,8 @@ LDFLAGS="$TLDFLAGS"
 AC_MSG_CHECKING("finding DBEGIN")
 AC_TRY_RUN([#include <stdio.h>
             #include <stdlib.h>
+
+void gprof_cleanup() {};
 int
 main(int argc,char * argv[],char *envp[])
 {
