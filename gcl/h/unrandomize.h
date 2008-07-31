@@ -17,6 +17,9 @@
       n[i--]="GCL_UNRANDOMIZE=t";
       for (;i>=0;i--)
 	n[i]=envp[i];
+#ifdef GCL_GPROF
+      gprof_cleanup();
+#endif
       execve(*argv,argv,n);    
     }
 
