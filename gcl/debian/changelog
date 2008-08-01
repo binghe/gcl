@@ -160,8 +160,11 @@ gcl (2.6.8-1) unstable; urgency=low
   * Bug fix: "gcl: Builds broken package with gcc-4.3", thanks to Daniel
     Schepler (Closes: #467474).  Added sincos to plttest.c
   * No infinite unrandomization loops
+  * gcc 4.2 for mips/mipsel for now
+  * __divdi3 et. al. symbols for ia64 and arm
+  * clean some compiler warnings
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 31 Jul 2008 15:11:40 -0400
+ -- Camm Maguire <camm@enhanced.com>  Fri, 01 Aug 2008 12:50:27 -0400
 
 gcl (2.6.7-7) unstable; urgency=high
 
