@@ -164,8 +164,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * __divdi3 et. al. symbols for ia64 and arm
   * clean some compiler warnings
   * default gcc with pic enabled on mips/mipsel
+  * more div/rem symbols for arm and hppa
 
- -- Camm Maguire <camm@enhanced.com>  Fri, 01 Aug 2008 13:24:57 -0400
+ -- Camm Maguire <camm@sacrifice.m.enhanced.com>  Sat, 02 Aug 2008 00:20:12 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
