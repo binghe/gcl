@@ -43,6 +43,10 @@ extern int $$divI();
 extern int $$divU();
 extern int $$remI();
 extern int $$remU();
+extern int __divq();
+extern int __divqu();
+extern int __remq();
+extern int __remqu();
 
 #define MY_PLT(a_) {#a_,(unsigned long)(void *)a_}
 static Plt mplt[]={
