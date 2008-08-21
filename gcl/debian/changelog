@@ -166,8 +166,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * default gcc with pic enabled on mips/mipsel
   * more div/rem symbols for arm and hppa
   * more div/rem symbols for alpha
+  * redo unrandomize.h to enable compilation under -O2 -- FIXME; Closes: 494153
 
- -- Camm Maguire <camm@sacrifice.m.enhanced.com>  Sun, 03 Aug 2008 10:40:37 +0000
+ -- Camm Maguire <camm@maguirefamily.org>  Wed, 20 Aug 2008 21:04:41 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
