@@ -168,8 +168,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * more div/rem symbols for alpha
   * redo unrandomize.h to enable compilation under -O2 -- FIXME; Closes: 494153
   * backoff arm opts
+  * more careful handling of GCL_GPROF_START
 
- -- Camm Maguire <camm@enhanced.com>  Thu, 21 Aug 2008 11:35:46 -0400
+ -- Camm Maguire <camm@maguirefamily.org>  Sat, 23 Aug 2008 21:23:42 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
