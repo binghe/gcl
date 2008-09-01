@@ -169,8 +169,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * redo unrandomize.h to enable compilation under -O2 -- FIXME; Closes: 494153
   * backoff arm opts
   * more careful handling of GCL_GPROF_START
+  * proper word order detection macro, fixes armel
 
- -- Camm Maguire <camm@maguirefamily.org>  Sat, 23 Aug 2008 21:23:42 +0000
+ -- Camm Maguire <camm@maguirefamily.org>  Mon, 01 Sep 2008 13:46:44 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

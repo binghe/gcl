@@ -972,14 +972,21 @@ AC_MSG_RESULT($sizeof_contblock)
 AC_DEFINE_UNQUOTED(SIZEOF_CONTBLOCK,$sizeof_contblock)
 
 
-
-AC_CHECK_HEADERS(endian.h,
-	AC_MSG_CHECKING("endianness")
-	AC_TRY_RUN([#define __ARMEB__
-		#include <endian.h> 
-		int main() { return BYTE_ORDER == __LITTLE_ENDIAN ? 0 : 1;}],
-	AC_DEFINE(LITTLE_END) AC_MSG_RESULT(little),
-	AC_MSG_RESULT(big),AC_MSG_RESULT(big)))
+AC_MSG_CHECKING(for word order)
+AC_TRY_RUN([int main () {
+  /* Are we little or big endian?  Adapted from Harbison&Steele.  */
+  union
+  {
+    double d;
+    int l[sizeof(double)/sizeof(int)];
+  } u;
+  u.d = 1.0;
+  return u.l[sizeof(double)/sizeof(int)-1] ? 0 : 1;
+}],AC_MSG_RESULT(little) 
+   AC_DEFINE(LITTLE_END),
+   AC_MSG_RESULT(big),
+   AC_MSG_RESULT([WARNING: ASSUMING LITTLE ENDIAN FOR CROSS COMPILING !!!]
+   AC_DEFINE(LITTLE_END)))
 AC_SUBST(LITTLE_END)
 
 
