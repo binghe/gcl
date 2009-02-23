@@ -211,6 +211,7 @@
 #undef HAVE_SYS_SOCKIO_H
 #undef HAVE_MALLOC_MALLOC_H
 #undef HAVE_OBJC_MALLOC_H
+#undef HAVE_OUTPUT_BFD
 
 /* The number of bytes in a long.  */
 #undef SIZEOF_LONG
@@ -232,9 +233,6 @@
 
 /* Define if you have the <elf_abi.h> header file.  */
 #undef HAVE_ELF_ABI_H
-
-/* Define if you have the <endian.h> header file.  */
-#undef HAVE_ENDIAN_H
 
 /* Define if you have the <float.h> header file.  */
 #undef HAVE_FLOAT_H

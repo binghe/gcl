@@ -170,8 +170,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * backoff arm opts
   * more careful handling of GCL_GPROF_START
   * proper word order detection macro, fixes armel
+  * support newer binutils with output_bfd element
 
- -- Camm Maguire <camm@maguirefamily.org>  Mon, 01 Sep 2008 13:46:44 +0000
+ -- Camm Maguire <camm@debian.org>  Mon, 23 Feb 2009 19:25:05 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
