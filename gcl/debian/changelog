@@ -171,8 +171,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * more careful handling of GCL_GPROF_START
   * proper word order detection macro, fixes armel
   * support newer binutils with output_bfd element
+  * Fix 64bit interrupt bug
 
- -- Camm Maguire <camm@debian.org>  Mon, 23 Feb 2009 19:25:05 +0000
+ -- Camm Maguire <camm@debian.org>  Thu, 26 Feb 2009 18:07:41 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

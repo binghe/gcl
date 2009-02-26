@@ -228,13 +228,13 @@ before_interrupt(struct save_for_interrupt *p, int allowed)
 	      SS1(p->free2[i],OBJ_LINK(p->free1[i]));
 	      ad->tm_nfree --;
 	      bcopy(beg ,&(p->buf[i]), amt);
-	      bzero(beg+8,amt-8);
+	      bzero(beg+sizeof(struct freelist),amt-sizeof(struct freelist));
 	      x->d.m = 0;
 	      if (p->free2[i])
 		{ x = (object) p->free2[i];
 		  beg = (char *)x;
 		  x->d.m = 0;
-		  bzero(beg+8,amt-8);
+		  bzero(beg+sizeof(struct freelist),amt-sizeof(struct freelist));
 		  SS1(ad->tm_free,OBJ_LINK(p->free2[i]));
 		  ad->tm_nfree --;
 		}
