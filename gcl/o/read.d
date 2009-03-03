@@ -646,7 +646,7 @@ SYMBOL:
 static void
 Lleft_parenthesis_reader()
 {
-	object in, c, x;
+	object in, x;
 	object *p;
 
 	check_arg(2);
@@ -662,18 +662,17 @@ Lleft_parenthesis_reader()
 		if (dot_flag) {
 			if (p == &vs_head)
 	FEerror("A dot appeared after a left parenthesis.", 0);
+			delimiting_char = code_char(')');
 			in_list_flag = TRUE;
 			*p = read_object(in);
 			if (dot_flag)
 	FEerror("Two dots appeared consecutively.", 0);
-			c = read_char(in);
-			while (cat(c) == cat_whitespace)
-				c = read_char(in);
-			if (char_code(c) != ')')
-	FEerror("A dot appeared before a right parenthesis.", 0);
-			else if (PP0>P0) PP0--; /* should be the only other place
- 						   outside of read_object where
-					           closing parens are read */
+			if (*p==OBJNULL)
+	FEerror("Object missing after dot.", 0);
+			delimiting_char = code_char(')');
+			in_list_flag = TRUE;
+			if (read_object(in)!=OBJNULL)
+        FEerror("Two objects after dot.",0);
 			goto ENDUP;
 		}
 		vs_push(x);
