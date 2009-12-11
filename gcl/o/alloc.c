@@ -1486,6 +1486,8 @@ void *
 malloc(size_t size) {
 	static int in_malloc;
 
+	CHECK_INTERRUPT;
+
 	if (in_malloc)
 	  return NULL;
 	in_malloc=1;

@@ -175,8 +175,21 @@ gcl (2.6.8-1) unstable; urgency=low
   * reader error fix
   * Ensure plt entries are not blank
   * plt table reading fix
+  * Bug fix: "FTBFS: current binutils static libs need -lz", thanks to
+    Daniel Schepler (Closes: #521929).
+  * Bug fix: "replacing libreadline5-dev build dependency with
+    libreadline-dev", thanks to Matthias Klose (Closes: #553761).
+  * Bug fix: "crash after ctrl-C", thanks to Miroslaw Kwasniak (Closes:
+    #519903).
+  * Bug fix: "FTBFS with binutils-gold", thanks to Peter Fritzsche
+    (Closes: #554418). -ldl added to bfd linker args
+  * Bug fix: "[INTL:es] Spanish debconf template translation for gcl",
+    thanks to Francisco Javier Cuadrado (Closes: #508728).
+  * Bug fix: "[INTL:it] Italian translation", thanks to Vincenzo
+    Campanella (Closes: #560364).
+  * gcc error/warning cleanups
 
- -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 16:09:35 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 16:13:40 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
