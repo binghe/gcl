@@ -1,10 +1,3 @@
-gcl (2.6.8-1.1) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * Ensure plt entries are not blank
-
- --  <camm@maguirefamily.org>  Fri, 19 Jun 2009 19:22:59 +0000
-
 gcl (2.6.8-1) unstable; urgency=low
 
   * New upstream release
@@ -180,8 +173,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * support newer binutils with output_bfd element
   * Fix 64bit interrupt bug
   * reader error fix
+  * Ensure plt entries are not blank
+  * plt table reading fix
 
- -- Camm Maguire <camm@debian.org>  Tue, 03 Mar 2009 16:59:28 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 16:09:35 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
