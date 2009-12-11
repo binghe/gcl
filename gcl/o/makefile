@@ -150,7 +150,7 @@ plttest.o: plttest.c
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
 
 plt.h: plttest.o
-	nm $< | $(AWK) '/ U / {if ($$NF!=2) next;a=$$2;if (k) sub("^_","",a);\
+	nm $< | $(AWK) '/ U / {if (NF!=2) next;a=$$2;if (k) sub("^_","",a);\
                             print a}' \
 			k=$(LEADING_UNDERSCORE) |\
 			sort | \

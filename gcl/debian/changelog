@@ -188,8 +188,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * Bug fix: "[INTL:it] Italian translation", thanks to Vincenzo
     Campanella (Closes: #560364).
   * gcc error/warning cleanups
+  * fix plt table awk
 
- -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 16:13:40 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 17:44:11 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
