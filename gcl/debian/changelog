@@ -189,8 +189,12 @@ gcl (2.6.8-1) unstable; urgency=low
     Campanella (Closes: #560364).
   * gcc error/warning cleanups
   * fix plt table awk
+  * Bug fix: "configure: error: Need zlib for bfd linking", thanks to
+    Cyril Brulebois (Closes: #560761).
+  * Bug fix: "Disfunctional maintainer address", thanks to Joerg Jaspert
+    (Closes: #560752).
 
- -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 17:44:11 +0000
+ -- Camm Maguire <camm@debian.org>  Mon, 14 Dec 2009 19:03:56 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

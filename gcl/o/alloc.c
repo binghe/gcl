@@ -225,7 +225,7 @@ call_after_gbc_hook(t)
 #define PERCENT_FREE(tm)  ((tm->tm_percent_free ? tm->tm_percent_free : 30)/100.0)
 
 static int
-grow_linear(int old, int fract, int grow_min, int grow_max) {
+grow_linear(int old, int fract, int grow_min, int grow_max,int max_delt) {
   
   int delt;
   if (fract==0) 
@@ -241,6 +241,9 @@ grow_linear(int old, int fract, int grow_min, int grow_max) {
 	 delt > grow_max ? grow_max:
 	 delt);
 
+  if (delt>max_delt)
+    fprintf(stderr,"Grow_linear: %d %d\n", delt, max_delt);
+  delt=delt>max_delt ? max_delt : delt;
   return old + delt;
 
 }
@@ -380,7 +383,7 @@ CALL_GBC:
 	     int j;
 	     
 	     tm->tm_maxpage=grow_linear((j=tm->tm_maxpage),tm->tm_growth_percent,
-					tm->tm_min_grow,tm->tm_max_grow);
+					tm->tm_min_grow,tm->tm_max_grow,available_pages);
 	     tm->tm_adjgbccnt*=(double)j/tm->tm_maxpage;
 	   } 
 	}
@@ -449,7 +452,7 @@ CALL_GBC:
 	     int j;
 	     
 	     tm->tm_maxpage=grow_linear((j=tm->tm_maxpage),tm->tm_growth_percent,
-					tm->tm_min_grow,tm->tm_max_grow);
+					tm->tm_min_grow,tm->tm_max_grow,available_pages);
 	     tm->tm_adjgbccnt*=(double)j/tm->tm_maxpage;
 	   } 
 	}
@@ -581,7 +584,7 @@ ONCE_MORE:
 		  struct typemanager *tm = &tm_table[(int)t_contiguous];
 		  if ((!OPTIMIZE_MAX_PAGES || !opt_maxpage(tm)) && g) {
 		    maxcbpage=grow_linear(maxcbpage,tm->tm_growth_percent,
-					  tm->tm_min_grow, tm->tm_max_grow);
+					  tm->tm_min_grow, tm->tm_max_grow,available_pages);
 		    tm->tm_adjgbccnt*=(double)j/maxcbpage;
 		  }
 		} 
@@ -734,7 +737,7 @@ ONCE_MORE:
 	    struct typemanager *tm = &tm_table[(int)t_relocatable];
 	    if ((!OPTIMIZE_MAX_PAGES  || !opt_maxpage(tm)) && (g || must_have_more_pages)) {
 	      nrbpage=grow_linear(nrbpage,tm->tm_growth_percent,
-				  tm->tm_min_grow, tm->tm_max_grow);
+				  tm->tm_min_grow, tm->tm_max_grow,available_pages/2);
 	      tm->tm_adjgbccnt*=(double)i/nrbpage;
 	    }
 	    if (available_pages < 0) {
