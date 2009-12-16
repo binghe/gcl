@@ -305,18 +305,7 @@ big_minus(object x)
 double
 big_to_double(object x)
 {
-  double d;
-  char *b;
-  unsigned n=mpz_sizeinbase(MP(x),10);
-  if (n>14) {
-    if (!(b=alloca(n+2))) FEerror("alloca failure",0);
-    memset(b,0,n);
-    mpz_get_str(b,10,MP(x));
-    sscanf(b,"%lf",&d);
-  } else
-    d=mpz_get_d(MP(x));
-    
-  return d;
+    return mpz_get_d(MP(x));
 
 }
 

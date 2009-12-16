@@ -193,8 +193,9 @@ gcl (2.6.8-1) unstable; urgency=low
     Cyril Brulebois (Closes: #560761).
   * Bug fix: "Disfunctional maintainer address", thanks to Joerg Jaspert
     (Closes: #560752).
+  * round to nearest in ratio to double
 
- -- Camm Maguire <camm@debian.org>  Mon, 14 Dec 2009 19:03:56 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 16 Dec 2009 15:00:41 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

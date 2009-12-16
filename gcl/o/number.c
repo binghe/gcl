@@ -245,6 +245,12 @@ number_to_double(object x)
 
 	case t_ratio:
 	  
+	  vs_base=vs_top;
+	  vs_push(x);
+	  Lround();
+	  if (vs_base[0]!=small_fixnum(0)) 
+	    return number_to_double(vs_base[0])+number_to_double(vs_base[1]);
+	  else
 	  {
 	    double dx,dy;
 	    object xx,yy;
