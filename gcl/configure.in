@@ -95,7 +95,13 @@ case $canonical in
      *x86_64*linux*)
 	use=amd64-linux;;
 
+     *x86_64*kfreebsd*)
+	use=amd64-linux;;
+
      *86*linux*)
+	use=386-linux;;
+
+     *86*kfreebsd*)
 	use=386-linux;;
 
 # m6800 not working with gcc-3.2
@@ -880,6 +886,9 @@ if test "$enable_statsysbfd" = "yes" || test "$enable_dynsysbfd" = "yes" ; then
 		AC_CHECK_LIB(z,inflate,
 			[TLIBS="$TLIBS -lz"],
 			AC_MSG_ERROR([Need zlib for bfd linking]),[])
+		AC_CHECK_LIB(dl,dlsym,
+			[TLIBS="$TLIBS -ldl"],
+			AC_MSG_ERROR([Need libdl for bfd linking]),[])
 		AC_SUBST(BUILD_BFD)
 		AC_SUBST(LIBBFD)
 		AC_SUBST(LIBIBERTY)
