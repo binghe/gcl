@@ -102,7 +102,7 @@ case $canonical in
 	use=386-linux;;
 
      *86*kfreebsd*)
-	use=386-linux;;
+	use=386-kfreebsd;;
 
 # m6800 not working with gcc-3.2
      m68k*linux*)
