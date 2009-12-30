@@ -28,7 +28,7 @@
 #endif     
 #endif
 
-#define GET_FAULT_ADDR(sig,code,sv,a) ((void *)(((struct sigcontext *)(&code))->cr2)) */
+#define GET_FAULT_ADDR(sig,code,sv,a) ((void *)(((struct sigcontext *)(&code))->cr2))
 #endif
 
 /*#define NULL_OR_ON_C_STACK(x) ((x)==0 || ((unsigned int)x) > (unsigned int)(pagetochar(MAXPAGE+1)))*/
