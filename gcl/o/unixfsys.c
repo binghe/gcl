@@ -237,7 +237,7 @@ coerce_to_filename(object pathname, char *p)
      struct passwd *pwent;
      int m=0;
      q=namestring->st.st_self;
-     for (n=0; n< namestring->st.st_fillp; n++)
+     for (n=1; n< namestring->st.st_fillp; n++)
        if (q[n]=='/') break;
      bcopy(q+1,name,n-1);
      name[n-1]= 0;
@@ -279,7 +279,7 @@ truename(object pathname)
            FEerror ( "truename could not determine the current directory.", 1, "" ); 
         } 
 #else 
-        getwd(current_directory); 
+        getcwd(current_directory,sizeof(current_directory)); 
 #endif 
     
 	coerce_to_filename(pathname, filename);
@@ -362,7 +362,7 @@ truename(object pathname)
                 } 
                 p = directory; 
 #else 
-		p = getwd(directory);
+		p = getcwd(directory,sizeof(directory));
 #endif                
 	}
 	if (p[0] == '/' && p[1] == '\0') {

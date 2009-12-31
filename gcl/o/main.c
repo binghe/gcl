@@ -462,27 +462,27 @@ initlisp(void) {
 	Dotnil_body.s_stype = (short)stp_constant;
 	Dotnil_body.s_mflag = FALSE;
 	
-	Cnil_body.t = (short)t_symbol;
-	Cnil_body.s_dbind = Cnil;
-	Cnil_body.s_sfdef = NOT_SPECIAL;
-	Cnil_body.s_fillp = 3;
-	Cnil_body.s_self = "NIL";
-	Cnil_body.s_gfdef = OBJNULL;
-	Cnil_body.s_plist = Cnil;
-	Cnil_body.s_hpack = Cnil;
-	Cnil_body.s_stype = (short)stp_constant;
-	Cnil_body.s_mflag = FALSE;
+	Cnil_body.s.t = (short)t_symbol;
+	Cnil_body.s.s_dbind = Cnil;
+	Cnil_body.s.s_sfdef = NOT_SPECIAL;
+	Cnil_body.s.s_fillp = 3;
+	Cnil_body.s.s_self = "NIL";
+	Cnil_body.s.s_gfdef = OBJNULL;
+	Cnil_body.s.s_plist = Cnil;
+	Cnil_body.s.s_hpack = Cnil;
+	Cnil_body.s.s_stype = (short)stp_constant;
+	Cnil_body.s.s_mflag = FALSE;
 	
-	Ct_body.t = (short)t_symbol;
-	Ct_body.s_dbind = Ct;
-	Ct_body.s_sfdef = NOT_SPECIAL;
-	Ct_body.s_fillp = 1;
-	Ct_body.s_self = "T";
-	Ct_body.s_gfdef = OBJNULL;
-	Ct_body.s_plist = Cnil;
-	Ct_body.s_hpack = Cnil;
-	Ct_body.s_stype = (short)stp_constant;
-	Ct_body.s_mflag = FALSE;
+	Ct_body.s.t = (short)t_symbol;
+	Ct_body.s.s_dbind = Ct;
+	Ct_body.s.s_sfdef = NOT_SPECIAL;
+	Ct_body.s.s_fillp = 1;
+	Ct_body.s.s_self = "T";
+	Ct_body.s.s_gfdef = OBJNULL;
+	Ct_body.s.s_plist = Cnil;
+	Ct_body.s.s_hpack = Cnil;
+	Ct_body.s.s_stype = (short)stp_constant;
+	Ct_body.s.s_mflag = FALSE;
 	
 	gcl_init_symbol();
 

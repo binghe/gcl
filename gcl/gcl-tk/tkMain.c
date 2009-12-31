@@ -495,8 +495,8 @@ StdinProc(clientData, mask)
 	  if (msg->type == m_tcl_command_wait_response
 	      || code)
 	    {
-	      unsigned char buf[4];
-	      unsigned char *p = buf;
+	      char buf[4];
+	      char *p = buf;
 	      /*header */
 	      *p++ = (code ? '1' : '0');
 	      bcopy(msg->msg_id,p,3);

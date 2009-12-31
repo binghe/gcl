@@ -110,11 +110,11 @@ struct fixnum_struct {
 
 #define	SMALL_FIXNUM_LIMIT	1024
 
-EXTER
-struct fixnum_struct small_fixnum_table[2*SMALL_FIXNUM_LIMIT];
+/* EXTER */
+/* struct fixnum_struct small_fixnum_table[2*SMALL_FIXNUM_LIMIT]; */
 
-#define	small_fixnum(i)  \
-	(object)(small_fixnum_table+SMALL_FIXNUM_LIMIT+(i))
+/* #define	small_fixnum(i)  \ */
+/* 	(object)(small_fixnum_table+SMALL_FIXNUM_LIMIT+(i)) */
 
 struct shortfloat_struct {
 			FIRSTWORD;
@@ -181,13 +181,14 @@ struct character {
 
 
 
-EXTER 
-struct character character_table1[256+128];
-#define character_table (character_table1+128)
-#define	code_char(c)		(object)(character_table+(c))
-#define	char_code(obje)		((object)obje)->ch.ch_code
-#define	char_font(obje)		((object)obje)->ch.ch_font
-#define	char_bits(obje)		((object)obje)->ch.ch_bits
+/* struct character character_table1[256+128]; */
+/* EXTER  */
+/* union lispunion character_table1[256+128]; */
+/* #define character_table (character_table1+128) */
+/* #define	code_char(c)		(object)(character_table+(c)) */
+/* #define	char_code(obje)		((object)obje)->ch.ch_code */
+/* #define	char_font(obje)		((object)obje)->ch.ch_font */
+/* #define	char_bits(obje)		((object)obje)->ch.ch_bits */
 
 enum stype {			/*  symbol type  */
 	stp_ordinary,		/*  ordinary  */
@@ -226,7 +227,8 @@ struct symbol {
 	short	s_mflag;	/*  macro flag  */
 };
 EXTER 
-struct symbol Cnil_body, Ct_body;
+/* struct symbol Cnil_body, Ct_body; */
+union lispunion Cnil_body, Ct_body;
 
 struct package {
 		FIRSTWORD;
@@ -705,6 +707,24 @@ union lispunion {
 	struct lfarray	lfa;	/*  plong-float array  */
 };
 
+
+/* struct character character_table1[256+128]; */
+EXTER 
+union lispunion character_table1[256+128];
+#define character_table (character_table1+128)
+#define	code_char(c)		(object)(character_table+(c))
+#define	char_code(obje)		((object)obje)->ch.ch_code
+#define	char_font(obje)		((object)obje)->ch.ch_font
+#define	char_bits(obje)		((object)obje)->ch.ch_bits
+
+EXTER
+union lispunion small_fixnum_table[2*SMALL_FIXNUM_LIMIT];
+
+#define	small_fixnum(i)  \
+	(object)(small_fixnum_table+SMALL_FIXNUM_LIMIT+(i))
+
+
+
 #define address_int unsigned long
 
 /*
@@ -866,8 +886,8 @@ char *tmp_alloc;
 #endif
 
 #define	TIME_ZONE	(-9)
-EXTER 
-fixnum FIXtemp;
+/* EXTER  */
+/* fixnum FIXtemp; */
 
 /*  For IEEEFLOAT, the double may have exponent in the second word
 (little endian) or first word.*/
@@ -1027,20 +1047,20 @@ EXTER struct symbol Dotnil_body;
 #define Dotnil ((object)&Dotnil_body)
 
 #define	endp(x)	({\
-    static struct cons s_my_dot={t_cons,0,0,0,Dotnil,Dotnil};\
+    static union lispunion s_my_dot={.c={t_cons,0,0,0,Dotnil,Dotnil}}; \
     object _x=(x);\
     bool _b=FALSE;\
     \
     if (type_of(_x)==t_cons) {\
        if (type_of(_x->c.c_cdr)!=t_cons && _x->c.c_cdr!=Cnil)\
-          s_my_dot.c_car=_x->c.c_cdr;\
+          s_my_dot.c.c_car=_x->c.c_cdr;\
        else \
-          s_my_dot.c_car=Dotnil;\
+          s_my_dot.c.c_car=Dotnil;\
     } else {\
-       if (_x==s_my_dot.c_car)\
-          x=(object)&s_my_dot;\
+       if (_x==s_my_dot.c.c_car)\
+	 x=&s_my_dot;\
        else {\
-         s_my_dot.c_car=Dotnil;\
+         s_my_dot.c.c_car=Dotnil;\
          if (_x==Cnil || _x==Dotnil)\
              _b=TRUE;\
          else\

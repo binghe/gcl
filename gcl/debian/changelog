@@ -196,8 +196,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * round to nearest in ratio to double
   * Bug fix: "/bin/sh: line 6: /bin/gcl: Permission denied", thanks to
     Nobuhiro Iwamatsu (Closes: #561554).
+  * gcc 4.4 warning cleanups
 
- -- Camm Maguire <camm@debian.org>  Wed, 30 Dec 2009 23:01:56 +0000
+ -- Camm Maguire <camm@debian.org>  Thu, 31 Dec 2009 20:40:09 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

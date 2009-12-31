@@ -295,9 +295,9 @@ gcl_init_number(void)
 	int i;
 
 	for (i = -SMALL_FIXNUM_LIMIT;  i < SMALL_FIXNUM_LIMIT;  i++) {
-		small_fixnum_table[i + SMALL_FIXNUM_LIMIT].t
+		small_fixnum_table[i + SMALL_FIXNUM_LIMIT].FIX.t
 		= (short)t_fixnum;
-		small_fixnum_table[i + SMALL_FIXNUM_LIMIT].FIXVAL = i;
+		small_fixnum_table[i + SMALL_FIXNUM_LIMIT].FIX.FIXVAL = i;
 	}
 
 	shortfloat_zero = alloc_object(t_shortfloat);
