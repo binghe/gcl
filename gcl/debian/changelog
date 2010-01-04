@@ -198,8 +198,9 @@ gcl (2.6.8-1) unstable; urgency=low
     Nobuhiro Iwamatsu (Closes: #561554).
   * gcc 4.4 warning cleanups
   * user_match escapes once only
+  * SIGINFO for kfreebsd-386
 
- -- Camm Maguire <camm@debian.org>  Sun, 03 Jan 2010 05:30:14 +0000
+ -- Camm Maguire <camm@debian.org>  Mon, 04 Jan 2010 17:48:17 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
