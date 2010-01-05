@@ -199,8 +199,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * gcc 4.4 warning cleanups
   * user_match escapes once only
   * SIGINFO for kfreebsd-386
+  * revert round ratio to nearest
 
- -- Camm Maguire <camm@debian.org>  Mon, 04 Jan 2010 17:48:17 +0000
+ -- Camm Maguire <camm@debian.org>  Tue, 05 Jan 2010 03:03:40 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
