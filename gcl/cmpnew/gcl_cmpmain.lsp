@@ -752,13 +752,13 @@ SYSTEM_SPECIAL_INIT
 		      (format st "extern void ~a(void);~%" (car tem)))
 		    (format st "~%")
 
-		    (format st "typedef struct {void (*fn)(void);char *s;int p;} Fnlst;~%")
+		    (format st "typedef struct {void (*fn)(void);char *s;} Fnlst;~%")
 		    (format st "#define NF ~a~%" (length p))
 		    (format st "static Fnlst my_fnlst[NF]={")
 		    (dolist (tem p)
 		      (when (not (eq tem (car p)))
 			(format st ",~%"))
-		      (format st "{~a,\"~a\",0}" (car tem) (cadr tem)))
+		      (format st "{~a,\"~a\"}" (car tem) (cadr tem)))
 		    (format st "};~%~%")
 		    
 		    (format st "static int user_init_run;~%")
@@ -778,11 +778,12 @@ SYSTEM_SPECIAL_INIT
 
 		    (format st "int user_match(const char *s,int n) {~%")
 		    (format st "  Fnlst *f;~%")
-		    (format st "  for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
-		    (format st "     if (!strncmp(s,f->s,n) && !f->p) {~%")
-		    (format st "        my_load(f->fn,f->s);~%")
-		    (format st "        return f->p=1;~%")
-		    (format st "     }~%")
+		    (format st "  if (sAdisable_user_matchA->s.s_dbind==Cnil) ")
+		    (format st "     for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
+		    (format st "        if (!strncmp(s,f->s,n)) {~%")
+		    (format st "           my_load(f->fn,f->s);~%")
+		    (format st "           return 1;~%")
+		    (format st "        }~%")
 		    (format st "  }~%")
 		    (format st "  return 0;~%")
 		    (format st "}~%~%")))
@@ -850,7 +851,7 @@ SYSTEM_SPECIAL_INIT
 		    (with-open-file (st1 
 				     (format nil "~a~a" si::*system-directory* *init-lsp*))
 				    (si::copy-stream st1 st))
-		    (if (stringp post) (format st "~a~%" post))
+		    (if (stringp post) (format st "(let ((si::*disable-user-match* nil)) ~a)~%" post))
 		    (format st "(si::save-system \"~a\")~%" (namestring image)))
     
     (system (format nil "~a ~a < ~a" 

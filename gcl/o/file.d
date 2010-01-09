@@ -344,6 +344,7 @@ object strm;
 #endif
 
 DEFVAR("*ALLOW-GZIPPED-FILE*",sSAallow_gzipped_fileA,SI,sLnil,"");
+DEFVAR("*DISABLE-USER-MATCH*",sSAdisable_user_matchA,SI,sLt,"");
 
 static void
 too_long_file_name(object);
