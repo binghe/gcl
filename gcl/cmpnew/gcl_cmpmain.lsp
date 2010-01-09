@@ -778,7 +778,8 @@ SYSTEM_SPECIAL_INIT
 
 		    (format st "int user_match(const char *s,int n) {~%")
 		    (format st "  Fnlst *f;~%")
-		    (format st "  if (sAdisable_user_matchA->s.s_dbind==Cnil) ")
+		    (format st "  extern object sSAdisable_user_matchA;~%")
+		    (format st "  if (sSAdisable_user_matchA->s.s_dbind==Cnil) ")
 		    (format st "     for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
 		    (format st "        if (!strncmp(s,f->s,n)) {~%")
 		    (format st "           my_load(f->fn,f->s);~%")
