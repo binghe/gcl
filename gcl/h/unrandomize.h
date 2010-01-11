@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <alloca.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 {
@@ -27,7 +29,7 @@
 	gprof_cleanup();
 #endif
 	errno=0;
-	execve(kcl_self,argv,n);
+	execve(*argv,argv,n);
 	printf("execve failure %d\n",errno);
 	exit(-1);
       } else {

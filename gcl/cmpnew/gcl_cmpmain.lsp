@@ -762,7 +762,7 @@ SYSTEM_SPECIAL_INIT
 		    (format st "};~%~%")
 		    
 		    (format st "static int user_init_run;~%")
-		    (format st "#define my_load(a_,b_) {if (!user_init_run && (a_)) gcl_init_or_load1((a_),(b_));(a_)=0;}~%~%")
+		    (format st "#define my_load(a_,b_) {if (!user_init_run && (a_) && (b_)) gcl_init_or_load1((a_),(b_));(a_)=0;(b_)=0;}~%~%")
                     
 		    (format st "object user_init(void) {~%")
 		    (format st "user_init_run=1;~%")
@@ -778,13 +778,11 @@ SYSTEM_SPECIAL_INIT
 
 		    (format st "int user_match(const char *s,int n) {~%")
 		    (format st "  Fnlst *f;~%")
-		    (format st "  extern object sSAdisable_user_matchA;~%")
-		    (format st "  if (sSAdisable_user_matchA->s.s_dbind==Cnil) ")
-		    (format st "     for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
-		    (format st "        if (!strncmp(s,f->s,n)) {~%")
-		    (format st "           my_load(f->fn,f->s);~%")
-		    (format st "           return 1;~%")
-		    (format st "        }~%")
+		    (format st "  for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
+		    (format st "     if (f->s && !strncmp(s,f->s,n)) {~%")
+		    (format st "        my_load(f->fn,f->s);~%")
+		    (format st "        return 1;~%")
+		    (format st "     }~%")
 		    (format st "  }~%")
 		    (format st "  return 0;~%")
 		    (format st "}~%~%")))
@@ -852,7 +850,7 @@ SYSTEM_SPECIAL_INIT
 		    (with-open-file (st1 
 				     (format nil "~a~a" si::*system-directory* *init-lsp*))
 				    (si::copy-stream st1 st))
-		    (if (stringp post) (format st "(let ((si::*disable-user-match* nil)) ~a)~%" post))
+		    (if (stringp post) (format st "~a~%" post))
 		    (format st "(si::save-system \"~a\")~%" (namestring image)))
     
     (system (format nil "~a ~a < ~a" 

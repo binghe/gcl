@@ -645,8 +645,9 @@ getCharGclSocket(object strm, object block)
 	  }
 	else
 	  {
-	   return EOF;
-	  FEerror("select said there was stuff there but there was not",0);
+	    SOCKET_STREAM_FD(strm)=-1;
+	    return EOF;
+	    FEerror("select said there was stuff there but there was not",0);
 	  }
 	}
       /* probably a signal interrupted us.. */

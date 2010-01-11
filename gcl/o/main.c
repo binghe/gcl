@@ -141,6 +141,7 @@ main(int argc, char **argv, char **envp) {
 	 if (strlen(kcl_self)> n) error("name grew");
 	}
 #endif	
+	*argv=kcl_self;
 
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include "unrandomize.h"

@@ -344,7 +344,6 @@ object strm;
 #endif
 
 DEFVAR("*ALLOW-GZIPPED-FILE*",sSAallow_gzipped_fileA,SI,sLnil,"");
-DEFVAR("*DISABLE-USER-MATCH*",sSAdisable_user_matchA,SI,sLt,"");
 
 static void
 too_long_file_name(object);
@@ -1120,6 +1119,7 @@ stream_at_end(object strm) {
 BEGIN:
 	switch (strm->sm.sm_mode) {
 	case smm_socket:  
+	  listen_stream(strm);
 	  if (SOCKET_STREAM_FD(strm)>=0)
 	    return(FALSE);
 	  else return(TRUE);	  
@@ -1225,19 +1225,19 @@ BEGIN:
 
 	  if (SOCKET_STREAM_BUFFER(strm)->ust.ust_fillp>0) return TRUE;
 
-	  {
-	    fd_set fds;
-	    struct timeval tv;
-	    FD_ZERO(&fds);
-	    FD_SET(SOCKET_STREAM_FD(strm),&fds);
-	    memset(&tv,0,sizeof(tv));
-	    return select(SOCKET_STREAM_FD(strm)+1,&fds,NULL,NULL,&tv)>0 ? TRUE : FALSE;
- 	  }
-/* 	  { int ch  = getCharGclSocket(strm,Cnil); */
-/* 	   if (ch == EOF) return FALSE; */
-/* 	   else unreadc_stream(ch,strm); */
-/* 	   return TRUE; */
-/* 	  } */
+	  /* { */
+	  /*   fd_set fds; */
+	  /*   struct timeval tv; */
+	  /*   FD_ZERO(&fds); */
+	  /*   FD_SET(SOCKET_STREAM_FD(strm),&fds); */
+	  /*   memset(&tv,0,sizeof(tv)); */
+	  /*   return select(SOCKET_STREAM_FD(strm)+1,&fds,NULL,NULL,&tv)>0 ? TRUE : FALSE; */
+ 	  /* } */
+	  { int ch  = getCharGclSocket(strm,Cnil);
+	   if (ch == EOF) return FALSE;
+	   else unreadc_stream(ch,strm);
+	   return TRUE;
+	  }
 #endif	   
 
 	case smm_input:
