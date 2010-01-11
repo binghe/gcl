@@ -241,8 +241,8 @@ grow_linear(int old, int fract, int grow_min, int grow_max,int max_delt) {
 	 delt > grow_max ? grow_max:
 	 delt);
 
-  if (delt>max_delt)
-    fprintf(stderr,"Grow_linear: %d %d\n", delt, max_delt);
+  /* if (delt>max_delt) */
+  /*   fprintf(stderr,"Grow_linear: %d %d\n", delt, max_delt); */
   delt=delt>max_delt ? max_delt : delt;
   return old + delt;
 
