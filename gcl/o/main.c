@@ -144,6 +144,8 @@ main(int argc, char **argv, char **envp) {
 	*argv=kcl_self;
 
 #ifdef CAN_UNRANDOMIZE_SBRK
+#include <stdio.h>
+#include <stdlib.h>
 #include "unrandomize.h"
 #endif
 
