@@ -450,8 +450,8 @@ TO2FLAGS=""
 # FIXME -- remove when mingw compiler issues are fixed
 case "$use" in
   *mingw*)
-	TFPFLAG="";;
-   m68k*)#FIXME gcc 4.x bug workaround
+  	TFPFLAG="";;
+  m68k*)#FIXME gcc 4.x bug workaround
 	TFPFLAG="";;
   *)
 	TFPFLAG="-fomit-frame-pointer";;
@@ -540,6 +540,44 @@ if test "$enable_pic" = "yes" ; then
 	TCFLAGS="$TCFLAGS -fPIC"
 fi
 
+FDEBUG=`echo $CFLAGS | tr ' ' '\012' |grep "^\-g$"`
+#CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-g$"`
+FOMITF=`echo $CFLAGS | tr ' ' '\012' |grep "^\-fomit-frame-pointer$"`
+CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-fomit-frame-pointer$"`
+FOOPT3=`echo $CFLAGS | tr ' ' '\012' |grep "^\-O3$"`
+CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-O3$"`
+FOOPT2=`echo $CFLAGS | tr ' ' '\012' |grep "^\-O2$"`
+CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-O2$"`
+FOOPT1=`echo $CFLAGS | tr ' ' '\012' |grep "^\-O1$"`
+TMP=`echo $CFLAGS | tr ' ' '\012' |grep "^\-O$"`
+FOOPT1="$FOOPT1$TMP"
+CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-O1$"|grep -v "^\-O$"`
+FOOPT0=`echo $CFLAGS | tr ' ' '\012' |grep "^\-O0$"`
+CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-O0$"`
+
+if test "$FOOPT0" != "" ; then
+   TO3FLAGS=`echo $TO3FLAGS | sed 's,\-O[[123 ]],-O0 ,g' | sed 's,\-O$,-O0 ,g'`
+   TO2FLAGS=`echo $TO2FLAGS | sed 's,\-O[[123 ]],-O0 ,g' | sed 's,\-O$,-O0 ,g'`
+else 
+if test "$FOOPT1" != "" ; then
+   TO3FLAGS=`echo $TO3FLAGS | sed 's,\-O[[2-3]],-O1,g'`
+   TO2FLAGS=`echo $TO2FLAGS | sed 's,\-O[[2-3]],-O1,g'`
+else 
+if test "$FOOPT2" != "" ; then
+   TO3FLAGS=`echo "$TO3FLAGS" | sed 's,\-O3,-O2,g'`
+   TO2FLAGS=`echo "$TO2FLAGS" | sed 's,\-O3,-O2,g'`
+fi
+fi
+fi
+
+if test "$FDEBUG" != "" ; then
+   TO3FLAGS=`echo $TO3FLAGS | sed 's,\-fomit-frame-pointer,,g'`
+   TO2FLAGS=`echo $TO2FLAGS | sed 's,\-fomit-frame-pointer,,g'`
+fi
+
+if test "$FOMITF" != "" ; then
+   TO3FLAGS="$TO3FLAGS $FOMITF"
+fi
 
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but
@@ -764,17 +802,18 @@ fi
 
 if test "$enable_xgcl" = "yes" ; then 
 
-   AC_PATH_XTRA
-   echo $X_CFLAGS
-   echo $X_LIBS
-   echo $X_EXTRA_LIBS
-   echo $X_PRE_LIBS
+   AC_PATH_X
+#   AC_PATH_XTRA
+#   echo $X_CFLAGS
+#   echo $X_LIBS
+#   echo $X_EXTRA_LIBS
+#   echo $X_PRE_LIBS
 
    miss=0
-   AC_CHECK_LIB(Xmu,main,X_LIBS="$X_LIBS -lXmu",miss=1,$X_LIBS)
-   AC_CHECK_LIB(Xt,main,X_LIBS="$X_LIBS -lXt",miss=1,$X_LIBS)
-   AC_CHECK_LIB(Xext,main,X_LIBS="$X_LIBS -lXext",miss=1,$X_LIBS)
-   AC_CHECK_LIB(Xaw,main,X_LIBS="$X_LIBS -lXaw",miss=1,$X_LIBS)
+#   AC_CHECK_LIB(Xmu,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)#FIXME remove these
+#   AC_CHECK_LIB(Xt,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)
+#   AC_CHECK_LIB(Xext,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)
+#   AC_CHECK_LIB(Xaw,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)#until here
    AC_CHECK_LIB(X11,main,X_LIBS="$X_LIBS -lX11",miss=1,$X_LIBS)
  
    if test "$miss" = "1" ; then
@@ -1380,12 +1419,12 @@ if test "$enable_readline" = "yes" ; then
 	AC_CHECK_HEADERS(readline/readline.h,
 		AC_CHECK_LIB(readline,main,
 			AC_DEFINE(HAVE_READLINE) 
-			TLIBS="$TLIBS -lreadline -lncurses"
+			TLIBS="$TLIBS -lreadline"
 			RL_OBJS=gcl_readline.o
 # Readline support now initialized automatically when compiled in, this lisp
 # object no longer needed -- 20040102 CM
 #			RL_LIB=lsp/gcl_readline.o
-			,,-lncurses))
+			,,))
 
 # These tests discover differences between readline 4.1 and 4.3
 	AC_CHECK_LIB(readline,rl_completion_matches,
