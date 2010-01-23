@@ -203,8 +203,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * robustify user_match, unrandomize, read-char-no-hang for sockets
   * SA_SIGINFO for 386-linux
   * if cmpinclude.h is not available, use *cmpinclude-string* in compiler-pass2
+  * SGC fix, debian override fix, xgcl update
 
- -- Camm Maguire <camm@debian.org>  Wed, 20 Jan 2010 19:01:03 +0000
+ -- Camm Maguire <camm@debian.org>  Sat, 23 Jan 2010 00:48:20 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

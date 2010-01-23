@@ -300,7 +300,7 @@ sgc_mark_object1(object x) {
     j=0;
     if (x->a.a_displaced->c.c_car == Cnil)
       for (i = 0, j = x->a.a_dim;  i < j;  i++)
-	if (ON_WRITABLE_PAGE(&p[i]))
+	/* if (ON_WRITABLE_PAGE(&p[i])) */
 	  sgc_mark_object(p[i]);
     cp = (char *)p;
     j *= sizeof(object);
@@ -438,8 +438,8 @@ sgc_mark_object1(object x) {
       unsigned char * s_type = &SLOT_TYPE(def,0);
       unsigned short *s_pos= & SLOT_POS(def,0);
       for (i = 0, j = S_DATA(def)->length;  i < j;  i++)
-	if (s_type[i]==0 &&
-	    ON_WRITABLE_PAGE(& STREF(object,x,s_pos[i]))
+	if (s_type[i]==0
+	    /* && ON_WRITABLE_PAGE(& STREF(object,x,s_pos[i])) */
 	    )
 	  sgc_mark_object(STREF(object,x,s_pos[i]));
       if ((int)what_to_collect >= (int)t_contiguous) {
@@ -1380,7 +1380,7 @@ sgc_start(void) {
       if (i>=MAXPAGE || k>MAXPAGE)
 	error("Pages out of range in sgc_start");
       for (;i<k;i++) 
-	sgc_type_map[i]|= SGC_PAGE_FLAG;
+	sgc_type_map[i]|=SGC_PAGE_FLAG;
     }
 
     for (cbpp=&cb_pointer;*cbpp;) {
@@ -1417,7 +1417,7 @@ sgc_start(void) {
       if (j>=MAXPAGE || i>MAXPAGE)
 	error("Pages out of range in sgc_start");
       for (;j<i;j++)
-	sgc_type_map[j]|= SGC_PAGE_FLAG;
+	sgc_type_map[j]|=SGC_PAGE_FLAG;
     }
 
     /* SGC contblock pages: switch to new free SGC contblock list. CM
