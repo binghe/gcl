@@ -205,8 +205,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * if cmpinclude.h is not available, use *cmpinclude-string* in compiler-pass2
   * SGC fix, debian override fix, xgcl update
   * SGC fix for relocatable and contiguous gmp storage
+  * __builtin___clear_cache on arm
 
- -- Camm Maguire <camm@debian.org>  Tue, 26 Jan 2010 19:31:05 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 27 Jan 2010 22:30:41 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
