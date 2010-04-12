@@ -2,8 +2,8 @@ Source: gcl
 Section: lisp
 Priority: optional
 Maintainer: Camm Maguire <camm@debian.org>
-Build-Depends: debhelper (>= 5 ), libreadline-dev, m4, tk8.4-dev, texlive-latex-base, texinfo, libgmp3-dev, autotools-dev, libxmu-dev, libxaw7-dev, po-debconf, binutils-dev, zlib1g-dev
-Standards-Version: 3.8.3
+Build-Depends: debhelper (>= 5 ), libreadline-dev, m4, tk8.4-dev, texlive-latex-base, texinfo, libgmp3-dev, autotools-dev, libxmu-dev, libxaw7-dev, po-debconf, binutils-dev, zlib1g-dev, gcc-4.3 [ alpha ]
+Standards-Version: 3.8.4
 
 Package: gcl
 Architecture: any
