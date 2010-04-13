@@ -4,7 +4,7 @@ Author: W. Schelter
 Abstract: Documentation on GCL-specific Lisp system functions
 Section: Programming
 
-Format: TEX
+Format: Text
 Files: /usr/share/doc/gcl@EXT@-doc/dwdoc.tex.gz
 
 Format: PDF

@@ -24,6 +24,7 @@ Section: doc
 Architecture: all
 Conflicts: gclinfo
 Replaces: gclinfo
+Depends: dpkg (>= 1.15.4) | install-info, ${misc:Depends}
 Description: Documentation for GNU Common Lisp
  GNU Common Lisp (GCL) is a Common Lisp compiler and interpreter
  implemented in C, and complying mostly with the standard set 

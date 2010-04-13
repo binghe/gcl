@@ -1,25 +1,26 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
-AC_PREREQ(2.59)
+AC_PREREQ(2.65)
 AC_INIT
 AC_CONFIG_SRCDIR([libbfd.c])
 
 AC_CANONICAL_TARGET
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 
 AM_INIT_AUTOMAKE(bfd, 2.16.1)
 
-dnl These must be called before AM_PROG_LIBTOOL, because it may want
+AC_CONFIG_MACRO_DIR([m4])
+
+dnl These must be called before LT_INIT, because it may want
 dnl to call AC_CHECK_PROG.
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 
 dnl Default to a non shared library.  This may be overridden by the
 dnl configure option --enable-shared.
-AM_DISABLE_SHARED
 
-AM_PROG_LIBTOOL
+LT_INIT([disable-shared])
 
 AC_ARG_ENABLE(64-bit-bfd,
 [  --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)],
@@ -72,7 +73,7 @@ if test "x${build_warnings}" != x && test "x$GCC" = xyes ; then
 fi
 AC_SUBST(WARN_CFLAGS)
 
-AM_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_HEADERS([config.h:config.in])
 
 if test -z "$target" ; then
     AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
