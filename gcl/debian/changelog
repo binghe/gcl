@@ -209,8 +209,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * gcc-4.3 on alpha
   * static function pointer wrapper for gcl_gmp_allocfun, stabilizing gmp
     on hppa/ia64
+  * hurd support
 
- -- Camm Maguire <camm@debian.org>  Mon, 12 Apr 2010 22:19:11 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 21 Apr 2010 19:37:34 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

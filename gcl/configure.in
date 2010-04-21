@@ -101,6 +101,9 @@ case $canonical in
      *86*linux*)
 	use=386-linux;;
 
+     *86*gnu*)
+	use=386-gnu;;
+
      *86*kfreebsd*)
 	use=386-kfreebsd;;
 
@@ -277,6 +280,8 @@ def_pic="no";
 def_static="no";
 def_debug="no";
 case $use in 
+     *gnu)
+	ln -snf linux.defs h/$use.defs;;
      *linux)
 	ln -snf linux.defs h/$use.defs;
 	case $use in
