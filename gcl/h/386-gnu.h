@@ -30,7 +30,12 @@
 
 #undef MPROTECT_ACTION_FLAGS
 #define MPROTECT_ACTION_FLAGS SA_RESTART|SA_SIGINFO
+#ifndef SA_SIGINFO
+#define GET_FAULT_ADDR(sig,code,sv,a) (char *)code)
+#define SA_SIGINFO 0
+#else
 #define GET_FAULT_ADDR(sig,code,sv,a) ((siginfo_t *)code)->si_addr
+#endif
 /* #define GET_FAULT_ADDR(sig,code,sv,a) ((void *)(((struct sigcontext *)(&code))->cr2)) */
 #endif
 
@@ -59,5 +64,8 @@
 }
 #endif
 
-#define SA_NOCLDWAIT 0
-#define NULL_OR_ON_C_STACK(x) ((unsigned long)x <= DBEGIN)
+#ifndef SA_NOCLDWAIT
+#define SA_NOCLDWAIT 0 /*fixme handler does waitpid(-1, ..., WNOHANG)*/
+#define NULL_OR_ON_C_STACK(x) ((unsigned long)x <= DBEGIN)/*fixme configure detect*/
+#define PATH_MAX 4096 /*fixme dynamic*/
+#define MAXPATHLEN 4096 /*fixme dynamic*/
