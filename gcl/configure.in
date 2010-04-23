@@ -473,6 +473,7 @@ AC_CHECK_PROGS(AWK,[gawk nawk awk])
 case $use in
   mips*) enable_gprof="no";;
   hppa*) enable_gprof="no";;
+  *gnu)  enable_gprof="no";;
 esac		     
 
 if test "$enable_gprof" = "yes" ; then
