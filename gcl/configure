@@ -853,11 +853,11 @@ case $canonical in
      *86*linux*)
 	use=386-linux;;
 
-     *86*gnu*)
-	use=386-gnu;;
-
      *86*kfreebsd*)
 	use=386-kfreebsd;;
+
+     *86*gnu*)
+	use=386-gnu;;
 
 # m6800 not working with gcc-3.2
      m68k*linux*)
