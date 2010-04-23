@@ -31,7 +31,7 @@
 #undef MPROTECT_ACTION_FLAGS
 #define MPROTECT_ACTION_FLAGS SA_RESTART|SA_SIGINFO
 #ifndef SA_SIGINFO
-#define GET_FAULT_ADDR(sig,code,sv,a) (char *)code)
+#define GET_FAULT_ADDR(sig,code,sv,a) ((char *)code)
 #define SA_SIGINFO 0
 #else
 #define GET_FAULT_ADDR(sig,code,sv,a) ((siginfo_t *)code)->si_addr
