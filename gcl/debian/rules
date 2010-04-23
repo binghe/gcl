@@ -44,6 +44,9 @@ endif
 ifeq ($(ARCHT),hppa)
 RELOC=dlopen
 endif
+ifeq ($(ARCHT),sh4)
+RELOC=dlopen
+endif
 
 GMP?=
 
