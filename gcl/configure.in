@@ -92,6 +92,9 @@ case $canonical in
      older)
      use=386-bsd;;
 
+     sh4*linux*)
+	use=sh4-linux;;
+
      *x86_64*linux*)
 	use=amd64-linux;;
 
@@ -285,6 +288,8 @@ case $use in
      *linux)
 	ln -snf linux.defs h/$use.defs;
 	case $use in
+	     	sh4*)
+			def_dlopen="yes" ; def_statsysbfd="no" ;;
 		alpha*)
 			def_dlopen="yes" ; def_statsysbfd="no" ;;
 		mips*)
