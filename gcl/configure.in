@@ -148,6 +148,9 @@ case $canonical in
      powerpc-*-darwin*)
      	use=powerpc-macosx;;
      
+     *86*darwin*)
+     	use=386-macosx;;
+     
      alpha-dec-osf)
      use=alpha-osf1;;
 
@@ -305,8 +308,8 @@ case $use in
 	esac;;
     *mingw*)
 	def_statsysbfd="no" ; def_custreloc="yes" ;;
-    powerpc-macosx)
-	def_statsysbfd="no" ; def_locbfd="yes" ;;
+    *-macosx)
+	def_statsysbfd="no" ; def_custreloc="yes" ;;
     *solaris*)
 	def_statsysbfd="no" ; def_locbfd="yes" ;;
 esac
