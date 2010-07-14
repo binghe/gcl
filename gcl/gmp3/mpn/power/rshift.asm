@@ -6,7 +6,7 @@ dnl  This file is part of the GNU MP Library.
 
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 2.1 of the License, or (at
+dnl  by the Free Software Foundation; either version 3 of the License, or (at
 dnl  your option) any later version.
 
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 dnl  License for more details.
 
 dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-dnl  the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-dnl  MA 02111-1307, USA.
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 dnl  INPUT PARAMETERS
@@ -45,6 +43,6 @@ Loop:	lu	0,4(4)		C load next higher limb
 	bdn	Loop		C loop back until CTR is zero
 Lend:	stu	7,4(9)		C store 2:nd most significant limb
 Lend2:	sre	7,0,6		C compute most significant limb
-	st      7,4(9)		C store it
+	st	7,4(9)		C store it
 	br
 EPILOGUE(mpn_rshift)

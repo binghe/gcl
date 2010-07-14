@@ -1,12 +1,13 @@
 dnl  Alpha mpn_invert_limb -- Invert a normalized limb.
 
-dnl  Copyright 1996, 2000, 2001 Free Software Foundation, Inc.
+dnl  Copyright 1996, 2000, 2001, 2002, 2003, 2007 Free Software Foundation,
+dnl  Inc.
 dnl
 dnl  This file is part of the GNU MP Library.
 dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 2.1 of the License, or (at
+dnl  by the Free Software Foundation; either version 3 of the License, or (at
 dnl  your option) any later version.
 dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,25 +16,22 @@ dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 dnl  License for more details.
 dnl
 dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-dnl  the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-dnl  MA 02111-1307, USA.
-
-dnl 
-dnl  This is based on sophie:/gmp-stuff/dbg-inv-limb.c.
-dnl  The ideas are due to Peter L. Montgomery
-dnl 
-dnl  The table below uses 4096 bytes.  The file mentioned above has an
-dnl  alternative function that doesn't require the table, but it runs 50%
-dnl  slower than this.
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+C      cycles/limb
+C EV4:    ~175
+C EV5:    ~111-126
+C EV6:    ~52-76
+
+C  This is based on ideas of Peter L. Montgomery.
 
 ASM_START()
 
 FLOAT64($C36,9223372036854775808.0)		C 2^63
 
-PROLOGUE_GP(mpn_invert_limb)
+PROLOGUE(mpn_invert_limb,gp)
 	lda	r30,-16(r30)
 	addq	r16,r16,r1
 	bne	r1,$73
@@ -45,10 +43,10 @@ $73:
 	ldt	f11,0(r30)
 	cvtqt	f11,f1
 	LEA(r1,$C36)
-	ldt	f10,0(r1)
-	divt	f10,f1,f10
+	ldt	f10,0(r1)		C f10 = 2^63
+	divt	f10,f1,f10		C f10 = 2^63 / (u / 2)
 	LEA(r2,$invtab-4096)
-	srl	r16,52,r1		C extract high 8 bits
+	srl	r16,52,r1		C extract high 12 bits
 	addq	r1,r1,r1		C align ...0000bbbbbbbb0
 	addq	r1,r2,r1		C compute array offset
 	ldq_u	r2,0(r1)		C load quadword containing our 16 bits

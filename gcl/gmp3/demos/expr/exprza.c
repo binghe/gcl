@@ -1,13 +1,12 @@
-/* mpz expression evaluation */
+/* mpz expression evaluation
 
-/*
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,13 +15,11 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <ctype.h>
 #include <stdio.h>
+#include <string.h>
 #include "gmp.h"
 #include "expr-impl.h"
 
@@ -35,6 +32,8 @@ mpexpr_mpz_number (mpz_ptr res, __gmp_const char *e, size_t elen, int base)
   char    *edup;
   size_t  i, ret;
   int     base_effective = (base == 0 ? 10 : base);
+  void    *(*allocate_func) (size_t);
+  void    (*free_func) (void *, size_t);
 
   i = 0;
   if (e[i] == '0')
@@ -48,7 +47,8 @@ mpexpr_mpz_number (mpz_ptr res, __gmp_const char *e, size_t elen, int base)
     if (! isasciidigit_in_base (e[i], base_effective))
       break;
 
-  edup = (*__gmp_allocate_func) (i+1);
+  mp_get_memory_functions (&allocate_func, NULL, &free_func);
+  edup = (*allocate_func) (i+1);
   memcpy (edup, e, i);
   edup[i] = '\0';
 
@@ -57,10 +57,16 @@ mpexpr_mpz_number (mpz_ptr res, __gmp_const char *e, size_t elen, int base)
   else
     ret = 0;
 
-  (*__gmp_free_func) (edup, i+1);
+  (*free_func) (edup, i+1);
   return ret;
 }
 
+/* ignoring prec */
+static void
+e_mpz_init (mpz_ptr z, unsigned long prec)
+{
+  mpz_init (z);
+}
 
 int
 mpz_expr_a (__gmp_const struct mpexpr_operator_t *table,
@@ -80,7 +86,7 @@ mpz_expr_a (__gmp_const struct mpexpr_operator_t *table,
   p.mpX_clear       = (mpexpr_fun_one_t)      mpz_clear;
   p.mpX_ulong_p     = (mpexpr_fun_i_unary_t)  mpz_fits_ulong_p;
   p.mpX_get_ui      = (mpexpr_fun_get_ui_t)   mpz_get_ui;
-  p.mpX_init        = (mpexpr_fun_unary_ui_t) mpz_init;
+  p.mpX_init        = (mpexpr_fun_unary_ui_t) e_mpz_init;
   p.mpX_number      = (mpexpr_fun_number_t)   mpexpr_mpz_number;
   p.mpX_set         = (mpexpr_fun_unary_t)    mpz_set;
   p.mpX_set_or_swap = (mpexpr_fun_unary_t)    mpz_swap;

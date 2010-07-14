@@ -1,13 +1,12 @@
-/* Test expression evaluation (print nothing and exit 0 if successful). */
+/* Test expression evaluation (print nothing and exit 0 if successful).
 
-/*
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,25 +15,14 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "gmp.h"
-#include "gmp-impl.h"
 #include "tests.h"
 #include "expr-impl.h"
-
-#if HAVE_MPFR
-extern mpfr_t __mpfr_const_pi;
-extern int __mpfr_const_pi_prec;
-extern mpfr_t __mpfr_const_log2;
-extern int __mpfr_const_log2_prec;
-#endif
 
 
 int  option_trace = 0;
@@ -46,11 +34,13 @@ struct data_t {
   const char  *want;
 };
 
+#define numberof(x)  (sizeof (x) / sizeof ((x)[0]))
+
 
 /* These data_xxx[] arrays are tables to be tested with one or more of the
-   mp?_t types.  z=mpz_t, q=mpz_t, f=mpf_t, r=mpfr_t.  */
+   mp?_t types.  z=mpz_t, q=mpz_t, f=mpf_t.  */
 
-struct data_t  data_zqfr[] = {
+struct data_t  data_zqf[] = {
 
   /* various deliberately wrong expressions */
   { 0, "", NULL },
@@ -133,14 +123,14 @@ struct data_t  data_zqfr[] = {
 
 
 const struct data_t  data_z[] = {
+  { 0, "divisible_p(333,3)", "1" },
+  { 0, "congruent_p(7,1,3)", "1" },
+
   { 0, "cmpabs(0,0)", "0" },
   { 0, "cmpabs(1,0)", "1" },
   { 0, "cmpabs(0,1)", "-1" },
   { 0, "cmpabs(-1,0)", "1" },
   { 0, "cmpabs(0,-1)", "-1" },
-
-  { 0, "divisible_p(333,3)", "1" },
-  { 0, "congruent_p(7,1,3)", "1" },
 
   { 0, "odd_p(1)", "1" },
   { 0, "odd_p(0)", "0" },
@@ -149,6 +139,12 @@ const struct data_t  data_z[] = {
   { 0, "even_p(1)", "0" },
   { 0, "even_p(0)", "1" },
   { 0, "even_p(-1)", "0" },
+
+  { 0, "fac(0)",  "1" },
+  { 0, "fac(1)",  "1" },
+  { 0, "fac(2)",  "2" },
+  { 0, "fac(3)",  "6" },
+  { 0, "fac(10)", "3628800" },
 
   { 10, "root(81,4)", "3" },
 
@@ -165,7 +161,6 @@ const struct data_t  data_z[] = {
   { 0, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~1", "1" },
 
   { 0, "fib(10)", "55" },
-  { 0, "fac(10)", "3628800" },
 
   { 0, "setbit(0,5)", "32" },
   { 0, "clrbit(32,5)", "0" },
@@ -186,14 +181,14 @@ const struct data_t  data_q[] = {
   { 0, "den(5/9)", "9" },
 };
 
-const struct data_t  data_zfr[] = {
+const struct data_t  data_zf[] = {
   { 10, "sqrt ( 49 )", "7" },
   { 10, "sqrt ( 49 ) + 1", "8" },
   { 10, "sqrt((49))", "7" },
   { 10, "sqrt((((((((49))))))))", "7" },
 };
 
-const struct data_t  data_fr[] = {
+const struct data_t  data_f[] = {
   { 0, "1@10",    "10000000000" },
   { 0, "1.5@10",  "15000000000" },
   { 0, "1000@-1", "100" },
@@ -206,60 +201,36 @@ const struct data_t  data_fr[] = {
 
   { 16, "1@9",  "68719476736" },
 
-  /* only simple cases because mpf_eq currently only works on whole limbs */
-  { 0, "eq(0xFFFFFFFFFFFFFFFF1111111111111111,0xFFFFFFFFFFFFFFFF2222222222222222,64)", "1" },
-  { 0, "eq(0xFFFFFFFFFFFFFFFF1111111111111111,0xFFFFFFFFFFFFFFFF2222222222222222,128)", "0" },
-};
-
-const struct data_t  data_f[] = {
   { 16,  "1@10", "18446744073709551616" },
   { -16, "1@10", "1099511627776" },
 
+  { 0, "ceil(0)",           "0" },
+  { 0, "ceil(0.25)",        "1" },
+  { 0, "ceil(0.5)",         "1" },
+  { 0, "ceil(1.5)",         "2" },
+  { 0, "ceil(-0.5)",        "0" },
+  { 0, "ceil(-1.5)",        "-1" },
+
+  /* only simple cases because mpf_eq currently only works on whole limbs */
+  { 0, "eq(0xFFFFFFFFFFFFFFFF1111111111111111,0xFFFFFFFFFFFFFFFF2222222222222222,64)", "1" },
+  { 0, "eq(0xFFFFFFFFFFFFFFFF1111111111111111,0xFFFFFFFFFFFFFFFF2222222222222222,128)", "0" },
+
+  { 0, "floor(0)",           "0" },
+  { 0, "floor(0.25)",        "0" },
+  { 0, "floor(0.5)",         "0" },
+  { 0, "floor(1.5)",         "1" },
+  { 0, "floor(-0.5)",        "-1" },
+  { 0, "floor(-1.5)",        "-2" },
+
   { 0, "integer_p(1)",   "1" },
   { 0, "integer_p(0.5)", "0" },
-};
 
-const struct data_t  data_r[] = {
-  { 16, "1@10", "1099511627776" },
-
-  { 0, "pi", "" },
-  { 0, "2*pi", "" },
-  { 0, "log2", "" },
-  { 0, "log2+1", "" },
-
-  { 0, "pi()", NULL },
-  { 0, "2 + pi() * 4", NULL },
-
-  { 0, "sin(0)",     "~0" },
-  { 0, "sin(pi/2)",  "~1" },
-  { 0, "sin(pi)",    "~0" },
-  { 0, "sin(3*pi/2)","~-1" },
-  { 0, "sin(2*pi)",  "~0" },
-
-  { 0, "cos(0)",     "~1" },
-  { 0, "cos(pi/2)",  "~0" },
-  { 0, "cos(pi)",    "~-1" },
-  { 0, "cos(3*pi/2)","~0" },
-  { 0, "cos(2*pi)",  "~1" },
-
-  { 0, "inf_p(1/0)",    "1" },
-  { 0, "nan_p(1/0)",    "0" },
-  { 0, "number_p(1/0)", "0" },
-
-  { 0, "inf_p(sqrt(-1))",    "0" },
-  { 0, "nan_p(sqrt(-1))",    "1" },
-  { 0, "number_p(sqrt(-1))", "0" },
-
-  { 0, "inf_p(1)",    "0" },
-  { 0, "nan_p(1)",    "0" },
-  { 0, "number_p(1)", "1" },
-
-  { 0, "inf_p(-1)",    "0" },
-  { 0, "nan_p(-1)",    "0" },
-  { 0, "number_p(-1)", "1" },
-
-  { 0, "eq(0xFF,0xF0,4)", "1" },
-  { 0, "eq(0xFF,0xF0,5)", "0" },
+  { 0, "trunc(0)",           "0" },
+  { 0, "trunc(0.25)",        "0" },
+  { 0, "trunc(0.5)",         "0" },
+  { 0, "trunc(1.5)",         "1" },
+  { 0, "trunc(-0.5)",        "0" },
+  { 0, "trunc(-1.5)",        "-1" },
 };
 
 struct datalist_t {
@@ -272,28 +243,20 @@ struct datalist_t {
 struct datalist_t  list_z[] = {
   DATALIST (data_z),
   DATALIST (data_zq),
-  DATALIST (data_zfr),
-  DATALIST (data_zqfr),
+  DATALIST (data_zf),
+  DATALIST (data_zqf),
 };
 
 struct datalist_t  list_q[] = {
   DATALIST (data_q),
   DATALIST (data_zq),
-  DATALIST (data_zqfr),
+  DATALIST (data_zqf),
 };
 
 struct datalist_t  list_f[] = {
-  DATALIST (data_zfr),
-  DATALIST (data_zqfr),
-  DATALIST (data_fr),
+  DATALIST (data_zf),
+  DATALIST (data_zqf),
   DATALIST (data_f),
-};
-
-struct datalist_t  list_r[] = {
-  DATALIST (data_zfr),
-  DATALIST (data_zqfr),
-  DATALIST (data_fr),
-  DATALIST (data_r),
 };
 
 
@@ -518,137 +481,6 @@ check_f (void)
   abort ();
 }
 
-#if HAVE_MPFR
-void
-check_r (void)
-{
-  const struct data_t  *data;
-  mpfr_t  a, b, got, want, diff, tolerance;
-  int     l, i, ret;
-
-  mpfr_set_default_prec (300L);
-
-  mpfr_init (got);
-  mpfr_init (want);
-  mpfr_init (diff);
-  mpfr_init (tolerance);
-  mpfr_init (a);
-  mpfr_init (b);
-  mpfr_set_ui (a, 55L, GMP_RNDZ);
-  mpfr_set_ui (b, 99L, GMP_RNDZ);
-
-  mpfr_set_ui (tolerance, 1L, GMP_RNDZ);
-  mpfr_div_2exp (tolerance, tolerance, 190L, GMP_RNDZ);
-
-  for (l = 0; l < numberof (list_r); l++)
-    {
-      data = list_r[l].data;
-
-      for (i = 0; i < list_r[l].num; i++)
-        {
-          if (option_trace)
-            printf ("mpfr_expr \"%s\"\n", data[i].expr);
-
-          ret = mpfr_expr (got, data[i].base, data[i].expr, a, b, NULL);
-
-          if (data[i].want == NULL)
-            {
-              /* expect to fail */
-              if (ret == MPEXPR_RESULT_OK)
-                {
-                  printf ("mpfr_expr wrong return value, got %d, expected failure\n", ret);
-                  goto error;
-                }
-            }
-          else
-            {
-              if (ret != MPEXPR_RESULT_OK)
-                {
-                  printf ("mpfr_expr failed unexpectedly\n");
-                  printf ("   return value %d\n", ret);
-                  goto error;
-                }
-
-              /* empty string means don't check the result value as such */
-              if (data[i].want[0] != '\0')
-                {
-                  const char  *want_str = data[i].want;
-                  int         approx = (*want_str == '~');
-                  want_str += approx;
-                  if (mpfr_set_str (want, want_str, 10, GMP_RNDZ) != 0)
-                    {
-                      printf ("Cannot parse wanted value string\n");
-                      printf ("    \"%s\"\n", want_str);
-                      goto error;
-                    }
-                  if (approx)
-                    {
-                      mpfr_sub (diff, got, want, GMP_RNDZ);
-                      mpfr_abs (diff, diff, GMP_RNDZ);
-                      if (mpfr_cmp (diff, tolerance) >= 0)
-                        {
-                          printf ("mpfr_expr result outside tolerance\n");
-                          printf ("   \"%s\"\n", data[i].expr);
-                          printf ("   got  ");
-                          mpfr_out_str (stdout, 10, 0, got, GMP_RNDZ);
-                          printf ("\n");
-                          printf ("   want ");
-                          mpfr_out_str (stdout, 10, 0, want, GMP_RNDZ);
-                          printf ("\n");
-                          printf ("   diff ");
-                          mpfr_out_str (stdout, 10, 0, diff, GMP_RNDZ);
-                          printf ("\n");
-                          goto error;
-                        }
-                    }
-                  else
-                    {
-                      if (mpfr_cmp (got, want) != 0)
-                        {
-                          printf ("mpfr_expr wrong result\n");
-                          printf ("   \"%s\"\n", data[i].expr);
-                          printf ("   got  ");
-                          mpfr_out_str (stdout, 10, 20, got, GMP_RNDZ);
-                          printf ("\n");
-                          printf ("   want ");
-                          mpfr_out_str (stdout, 10, 20, want, GMP_RNDZ);
-                          printf ("\n");
-                          goto error;
-                        }
-                    }
-                }
-            }
-        }
-    }
-  mpfr_clear (a);
-  mpfr_clear (b);
-  mpfr_clear (got);
-  mpfr_clear (want);
-  mpfr_clear (diff);
-  mpfr_clear (tolerance);
-
-  if (__mpfr_const_pi_prec != 0)
-    {
-      mpfr_clear (__mpfr_const_pi);
-      __mpfr_const_pi_prec = 0;
-    }
-  if (__mpfr_const_log2_prec != 0)
-    {
-      mpfr_clear (__mpfr_const_log2);
-      __mpfr_const_log2_prec = 0;
-    }
-
-  return;
-
- error:
-  printf ("   base %d\n", data[i].base);
-  printf ("   expr \"%s\"\n", data[i].expr);
-  if (data[i].want != NULL)
-    printf ("   want \"%s\"\n", data[i].want);
-  abort ();
-}
-#endif
-
 
 int
 main (int argc, char *argv[])
@@ -661,9 +493,6 @@ main (int argc, char *argv[])
   check_z ();
   check_q ();
   check_f ();
-#if HAVE_MPFR
-  check_r ();
-#endif
 
   tests_end ();
   exit (0);

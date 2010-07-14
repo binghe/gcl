@@ -1,29 +1,26 @@
 dnl  AMD K7 mpn_mod_1 -- mpn by limb remainder.
-dnl 
-dnl  K7: 17.0 cycles/limb.
 
-
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C K7: 17.0 cycles/limb.
 
 
 C mp_limb_t mpn_mod_1 (mp_srcptr src, mp_size_t size, mp_limb_t divisor);
@@ -101,13 +98,13 @@ deflit(`FRAME',0)
 
 	movl	$32, %ebx			C 32-l
 	decl	%eax
-	jz	LF(mpn_mod_1,inverse_one_left)	C size==2, one divide
+	jz	L(inverse_one_left)		C size==2, one divide
 
 	movd	%ebx, %mm7			C 32-l
 	decl	%eax
-	jz	LF(mpn_mod_1,inverse_two_left)	C size==3, two divides
+	jz	L(inverse_two_left)		C size==3, two divides
 
-	jmp	LF(mpn_mod_1,inverse_top)	C size>=4
+	jmp	L(inverse_top)			C size>=4
 
 
 L(done_edi):
@@ -136,7 +133,7 @@ deflit(`FRAME',STACK_SPACE)
 
 	movl	%esi, SAVE_ESI
 	movl	PARAM_SRC, %esi
-	jmp	LF(mpn_mod_1,start_1c)
+	jmp	L(start_1c)
 
 EPILOGUE()
 
@@ -162,7 +159,7 @@ deflit(`FRAME',STACK_SPACE)
 	movl	-4(%esi,%ecx,4), %eax	C src high limb
 
 	cmpl	%ebp, %eax		C carry flag if high<divisor
-					
+
 	cmovc(	%eax, %edx)		C src high limb as initial carry
 	sbbl	$0, %ecx		C size-1 to skip one div
 	jz	L(divide_done)
@@ -170,7 +167,7 @@ deflit(`FRAME',STACK_SPACE)
 
 	ALIGN(16)
 L(start_1c):
-	C eax	
+	C eax
 	C ebx
 	C ecx	size
 	C edx	carry
@@ -333,7 +330,7 @@ L(inverse_top):
 
 	adcl	%edx, %ebx         C 1 + high(n2<<32 + m*(n2+n1) + nadj) = q1+1
 	jz	L(q1_ff)
-	nop                        C dummy
+	nop			   C dummy
 
 	mull	%ebx		   C (q1+1)*d
 

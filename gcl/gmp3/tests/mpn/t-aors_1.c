@@ -1,12 +1,12 @@
 /* Test mpn_add_1 and mpn_sub_1.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,10 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,13 +25,13 @@ MA 02111-1307, USA.
 #include "tests.h"
 
 
-#define M      MP_LIMB_T_MAX
+#define M      GMP_NUMB_MAX
 #define ASIZE  10
 #define MAGIC  0x1234
 
 #define SETUP()                         \
   do {                                  \
-    mpn_random (got, data[i].size);     \
+    refmpn_random (got, data[i].size);  \
     got[data[i].size] = MAGIC;          \
   } while (0)
 
@@ -52,8 +49,8 @@ MA 02111-1307, USA.
   } while (0)
 
 typedef mp_limb_t (*mpn_aors_1_t)
-     _PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_limb_t));
-mpn_aors_1_t fudge _PROTO ((mpn_aors_1_t));
+     __GMP_PROTO ((mp_ptr, mp_srcptr, mp_size_t, mp_limb_t));
+mpn_aors_1_t fudge __GMP_PROTO ((mpn_aors_1_t));
 
 
 void
@@ -68,7 +65,7 @@ verify (const char *name, int i,
       abort ();
     }
 
-  if (got_c != want_c || refmpn_cmp (got, want, size) != 0)
+  if (got_c != want_c || ! refmpn_equal_anynail (got, want, size))
     {
       printf ("Wrong at %s i=%d size=%ld\n", name, i, size);
       mpn_trace ("   src", src,  size);

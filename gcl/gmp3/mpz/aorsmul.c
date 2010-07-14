@@ -1,12 +1,12 @@
 /* mpz_addmul, mpz_submul -- add or subtract multiple.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2004, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -36,7 +34,7 @@ MA 02111-1307, USA. */
    The sign of w is retained for the result, unless the absolute value
    submul underflows, in which case it flips.  */
 
-static void __gmpz_aorsmul _PROTO ((REGPARM_3_1 (mpz_ptr w, mpz_srcptr x, mpz_srcptr y, mp_size_t sub))) REGPARM_ATTR (1);
+static void __gmpz_aorsmul __GMP_PROTO ((REGPARM_3_1 (mpz_ptr w, mpz_srcptr x, mpz_srcptr y, mp_size_t sub))) REGPARM_ATTR (1);
 #define mpz_aorsmul(w,x,y,sub)  __gmpz_aorsmul (REGPARM_3_1 (w, x, y, sub))
 
 REGPARM_ATTR (1) static void
@@ -45,7 +43,7 @@ mpz_aorsmul (mpz_ptr w, mpz_srcptr x, mpz_srcptr y, mp_size_t sub)
   mp_size_t  xsize, ysize, tsize, wsize, wsize_signed;
   mp_ptr     wp, tp;
   mp_limb_t  c, high;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   /* w unaffected if x==0 or y==0 */
   xsize = SIZ(x);
@@ -91,7 +89,7 @@ mpz_aorsmul (mpz_ptr w, mpz_srcptr x, mpz_srcptr y, mp_size_t sub)
       return;
     }
 
-  TMP_MARK (marker);
+  TMP_MARK;
   tp = TMP_ALLOC_LIMBS (tsize);
 
   high = mpn_mul (tp, PTR(x),xsize, PTR(y),ysize);
@@ -139,7 +137,7 @@ mpz_aorsmul (mpz_ptr w, mpz_srcptr x, mpz_srcptr y, mp_size_t sub)
 
   SIZ(w) = (wsize_signed >= 0 ? wsize : -wsize);
 
-  TMP_FREE (marker);
+  TMP_FREE;
 }
 
 

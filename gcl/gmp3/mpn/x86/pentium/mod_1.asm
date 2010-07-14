@@ -1,29 +1,26 @@
 dnl  Intel P5 mpn_mod_1 -- mpn by limb remainder.
-dnl 
-dnl  P5: 28.0 cycles/limb
 
-
-dnl  Copyright (C) 1999, 2000 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C P5: 28.0 cycles/limb
 
 
 C mp_limb_t mpn_mod_1 (mp_srcptr src, mp_size_t size, mp_limb_t divisor);
@@ -105,7 +102,7 @@ deflit(`FRAME',0)
 	movl	$0, VAR_NORM
 	decl	%edx
 
-	jnz	LF(mpn_mod_1,start_preinv)
+	jnz	L(start_preinv)
 
 	subl	%ebp, %edi		C src-divisor
 	popl	%ebx
@@ -113,7 +110,7 @@ deflit(`FRAME',0)
 	sbbl	%ecx, %ecx		C -1 if underflow
 	movl	%edi, %eax		C src-divisor
 
-	andl	%ebp, %ecx	 	C d if underflow
+	andl	%ebp, %ecx		C d if underflow
 	popl	%edi
 
 	addl	%ecx, %eax		C remainder, with possible addback
@@ -137,7 +134,7 @@ deflit(`FRAME',0)
 	movl	PARAM_CARRY, %edx
 
 	orl	%ecx, %ecx
-	jz	LF(mpn_mod_1,done_edx)		C result==carry if size==0
+	jz	L(done_edx)			C result==carry if size==0
 
 	andl	$MUL_NORM_DELTA, %eax
 	pushl	%ebp		FRAME_pushl()
@@ -149,13 +146,13 @@ deflit(`FRAME',0)
 	movl	PARAM_DIVISOR, %ebp
 
 	cmpl	%eax, %ecx
-	jb	LF(mpn_mod_1,divide_top)
+	jb	L(divide_top)
 
 	movl	%edx, %eax		C carry as pretend src high limb
 	leal	1(%ecx), %edx		C size+1
 
 	cmpl	$0x1000000, %ebp
-	jmp	LF(mpn_mod_1,mul_by_inverse_1c)
+	jmp	L(mul_by_inverse_1c)
 
 EPILOGUE()
 
@@ -188,7 +185,7 @@ deflit(`FRAME',0)
 	addl	%edx, %ecx		C size-1 if high<divisor
 	jz	L(done_eax)
 
-	cmpl	%ebp, %ecx	
+	cmpl	%ebp, %ecx
 	movl	PARAM_DIVISOR, %ebp
 
 	movl	PARAM_SRC, %esi
@@ -346,13 +343,13 @@ L(inverse_top):
 
 	addl	%edi, %ecx	   C remainder -> n2, and possible addback
 	ASSERT(b,`cmpl %ebp, %ecx')
- 	andl	%eax, %ebx	   C -n1 & d
+	andl	%eax, %ebx	   C -n1 & d
 
- 	movl	(%esi), %edi	   C n10
+	movl	(%esi), %edi	   C n10
 	andl	$1, %eax	   C n1
 
- 	addl	%ecx, %eax         C n2+n1
- 	addl	%edi, %ebx         C nadj = n10 + (-n1 & d), ignoring overflow
+	addl	%ecx, %eax         C n2+n1
+	addl	%edi, %ebx         C nadj = n10 + (-n1 & d), ignoring overflow
 
 	mull	VAR_INVERSE        C m*(n2+n1)
 

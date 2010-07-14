@@ -1,13 +1,13 @@
 /* mpz_perfect_power_p(arg) -- Return non-zero if ARG is a perfect power,
    zero otherwise.
 
-Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1998, 1999, 2000, 2001, 2005, 2008 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 /*
   We are to determine if c is a perfect power, c = a ^ b.
@@ -42,8 +40,8 @@ MA 02111-1307, USA. */
 #include "gmp-impl.h"
 #include "longlong.h"
 
-static unsigned long int gcd _PROTO ((unsigned long int a, unsigned long int b));
-static int isprime _PROTO ((unsigned long int t));
+static unsigned long int gcd __GMP_PROTO ((unsigned long int, unsigned long int));
+static int isprime __GMP_PROTO ((unsigned long int));
 
 static const unsigned short primes[] =
 {  2,  3,  5,  7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
@@ -61,6 +59,8 @@ static const unsigned short primes[] =
 #define SMALLEST_OMITTED_PRIME 1009
 
 
+#define POW2P(a) (((a) & ((a) - 1)) == 0)
+
 int
 mpz_perfect_power_p (mpz_srcptr u)
 {
@@ -72,25 +72,30 @@ mpz_perfect_power_p (mpz_srcptr u)
   int exact;
   mp_size_t uns;
   mp_size_t usize = SIZ (u);
-  TMP_DECL (marker);
+  TMP_DECL;
 
-  if (usize == 0)
-    return 1;			/* consider 0 a perfect power */
+  if (mpz_cmpabs_ui (u, 1) <= 0)
+    return 1;			/* -1, 0, and +1 are perfect powers */
 
   n2 = mpz_scan1 (u, 0);
   if (n2 == 1)
     return 0;			/* 2 divides exactly once.  */
 
-  if (n2 != 0 && (n2 & 1) == 0 && usize < 0)
-    return 0;			/* 2 has even multiplicity with negative U */
-
-  TMP_MARK (marker);
+  TMP_MARK;
 
   uns = ABS (usize) - n2 / BITS_PER_MP_LIMB;
   MPZ_TMP_INIT (q, uns);
   MPZ_TMP_INIT (u2, uns);
 
   mpz_tdiv_q_2exp (u2, u, n2);
+  mpz_abs (u2, u2);
+
+  if (mpz_cmp_ui (u2, 1) == 0)
+    {
+      TMP_FREE;
+      /* factoring completed; consistent power */
+      return ! (usize < 0 && POW2P(n2));
+    }
 
   if (isprime (n2))
     goto n2prime;
@@ -98,13 +103,16 @@ mpz_perfect_power_p (mpz_srcptr u)
   for (i = 1; primes[i] != 0; i++)
     {
       prime = primes[i];
-      rem = mpz_tdiv_ui (u2, prime);
-      if (rem == 0)		/* divisable by this prime? */
+
+      if (mpz_cmp_ui (u2, prime) < 0)
+	break;
+
+      if (mpz_divisible_ui_p (u2, prime))	/* divisible by this prime? */
 	{
 	  rem = mpz_tdiv_q_ui (q, u2, prime * prime);
 	  if (rem != 0)
 	    {
-	      TMP_FREE (marker);
+	      TMP_FREE;
 	      return 0;		/* prime divides exactly once, reject */
 	    }
 	  mpz_swap (q, u2);
@@ -117,23 +125,18 @@ mpz_perfect_power_p (mpz_srcptr u)
 	      n++;
 	    }
 
-	  if ((n & 1) == 0 && usize < 0)
-	    {
-	      TMP_FREE (marker);
-	      return 0;		/* even multiplicity with negative U, reject */
-	    }
-
 	  n2 = gcd (n2, n);
 	  if (n2 == 1)
 	    {
-	      TMP_FREE (marker);
+	      TMP_FREE;
 	      return 0;		/* we have multiplicity 1 of some factor */
 	    }
 
-	  if (mpz_cmpabs_ui (u2, 1) == 0)
+	  if (mpz_cmp_ui (u2, 1) == 0)
 	    {
-	      TMP_FREE (marker);
-	      return 1;		/* factoring completed; consistent power */
+	      TMP_FREE;
+	      /* factoring completed; consistent power */
+	      return ! (usize < 0 && POW2P(n2));
 	    }
 
 	  /* As soon as n2 becomes a prime number, stop factoring.
@@ -158,12 +161,12 @@ mpz_perfect_power_p (mpz_srcptr u)
 	    exact = mpz_root (q, u2, nth);
 	  if (exact)
 	    {
-	      TMP_FREE (marker);
+	      TMP_FREE;
 	      return 1;
 	    }
 	  if (mpz_cmp_ui (q, SMALLEST_OMITTED_PRIME) < 0)
 	    {
-	      TMP_FREE (marker);
+	      TMP_FREE;
 	      return 0;
 	    }
 	}
@@ -171,6 +174,13 @@ mpz_perfect_power_p (mpz_srcptr u)
   else
     {
       unsigned long int nth;
+
+      if (usize < 0 && POW2P(n2))
+	{
+	  TMP_FREE;
+	  return 0;
+	}
+
       /* We found some factors above.  We just need to consider values of n
 	 that divides n2.  */
       for (nth = 2; nth <= n2; nth++)
@@ -186,23 +196,32 @@ mpz_perfect_power_p (mpz_srcptr u)
 	    exact = mpz_root (q, u2, nth);
 	  if (exact)
 	    {
-	      TMP_FREE (marker);
-	      return 1;
+	      if (! (usize < 0 && POW2P(nth)))
+		{
+		  TMP_FREE;
+		  return 1;
+		}
 	    }
 	  if (mpz_cmp_ui (q, SMALLEST_OMITTED_PRIME) < 0)
 	    {
-	      TMP_FREE (marker);
+	      TMP_FREE;
 	      return 0;
 	    }
 	}
 
-      TMP_FREE (marker);
+      TMP_FREE;
       return 0;
     }
 
 n2prime:
+  if (usize < 0 && POW2P(n2))
+    {
+      TMP_FREE;
+      return 0;
+    }
+
   exact = mpz_root (NULL, u2, n2);
-  TMP_FREE (marker);
+  TMP_FREE;
   return exact;
 }
 

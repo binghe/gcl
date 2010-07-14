@@ -6,7 +6,7 @@ This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +50,7 @@ check_one (mpz_srcptr a, unsigned long d)
     }                           \
   else                          \
     fun (dst, src, d);
-  
+
   for (inplace = 0; inplace <= 1; inplace++)
     {
       INPLACE (mpz_fdiv_q_2exp, q, a, d);
@@ -61,15 +59,15 @@ check_one (mpz_srcptr a, unsigned long d)
       mpz_mul_2exp (p, q, d);
       mpz_add (p, p, r);
       if (mpz_sgn (r) < 0 || mpz_cmp (r, d2exp) >= 0)
-        {
-          printf ("mpz_fdiv_r_2exp result out of range\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_fdiv_r_2exp result out of range\n");
+	  goto error;
+	}
       if (mpz_cmp (p, a) != 0)
-        {
-          printf ("mpz_fdiv_[qr]_2exp doesn't multiply back\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_fdiv_[qr]_2exp doesn't multiply back\n");
+	  goto error;
+	}
 
 
       INPLACE (mpz_cdiv_q_2exp, q, a, d);
@@ -78,15 +76,15 @@ check_one (mpz_srcptr a, unsigned long d)
       mpz_mul_2exp (p, q, d);
       mpz_add (p, p, r);
       if (mpz_sgn (r) > 0 || mpz_cmpabs (r, d2exp) >= 0)
-        {
-          printf ("mpz_cdiv_r_2exp result out of range\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_cdiv_r_2exp result out of range\n");
+	  goto error;
+	}
       if (mpz_cmp (p, a) != 0)
-        {
-          printf ("mpz_cdiv_[qr]_2exp doesn't multiply back\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_cdiv_[qr]_2exp doesn't multiply back\n");
+	  goto error;
+	}
 
 
       INPLACE (mpz_tdiv_q_2exp, q, a, d);
@@ -95,20 +93,20 @@ check_one (mpz_srcptr a, unsigned long d)
       mpz_mul_2exp (p, q, d);
       mpz_add (p, p, r);
       if (mpz_sgn (r) != 0 && mpz_sgn (r) != mpz_sgn (a))
-        {
-          printf ("mpz_tdiv_r_2exp result wrong sign\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_tdiv_r_2exp result wrong sign\n");
+	  goto error;
+	}
       if (mpz_cmpabs (r, d2exp) >= 0)
-        {
-          printf ("mpz_tdiv_r_2exp result out of range\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_tdiv_r_2exp result out of range\n");
+	  goto error;
+	}
       if (mpz_cmp (p, a) != 0)
-        {
-          printf ("mpz_tdiv_[qr]_2exp doesn't multiply back\n");
-          goto error;
-        }
+	{
+	  printf ("mpz_tdiv_[qr]_2exp doesn't multiply back\n");
+	  goto error;
+	}
     }
 
   mpz_clear (d2exp);
@@ -148,26 +146,37 @@ check_all (mpz_ptr a, unsigned long d)
 void
 check_various (void)
 {
-  unsigned long  i, d;
+  static const unsigned long  table[] = {
+    0, 1, 2, 3, 4, 5,
+    GMP_NUMB_BITS-1, GMP_NUMB_BITS, GMP_NUMB_BITS+1,
+    2*GMP_NUMB_BITS-1, 2*GMP_NUMB_BITS, 2*GMP_NUMB_BITS+1,
+    3*GMP_NUMB_BITS-1, 3*GMP_NUMB_BITS, 3*GMP_NUMB_BITS+1,
+    4*GMP_NUMB_BITS-1, 4*GMP_NUMB_BITS, 4*GMP_NUMB_BITS+1
+  };
+
+  int            i, j;
+  unsigned long  n, d;
   mpz_t          a;
 
   mpz_init (a);
 
   /* a==0, and various d */
   mpz_set_ui (a, 0L);
-  for (d = 0; d < 2*BITS_PER_MP_LIMB+4; d++)
-    check_one (a, d);
+  for (i = 0; i < numberof (table); i++)
+    check_one (a, table[i]);
 
-  /* a==2^i, and various d */
-  for (i = 0; i < 5*BITS_PER_MP_LIMB; i++)
+  /* a==2^n, and various d */
+  for (i = 0; i < numberof (table); i++)
     {
-      d = (i < BITS_PER_MP_LIMB+3 ? 0 : i-(BITS_PER_MP_LIMB+3));
-      for ( ; d < i+BITS_PER_MP_LIMB+3; d++)
-        {
-          mpz_set_ui (a, 1L);
-          mpz_mul_2exp (a, a, i);
-          check_all (a, d);
-        }
+      n = table[i];
+      mpz_set_ui (a, 1L);
+      mpz_mul_2exp (a, a, n);
+
+      for (j = 0; j < numberof (table); j++)
+	{
+	  d = table[j];
+	  check_all (a, d);
+	}
     }
 
   mpz_clear (a);
@@ -178,7 +187,7 @@ void
 check_random (int argc, char *argv[])
 {
   gmp_randstate_ptr  rands = RANDS;
-  int            reps = 5000;
+  int            reps = 100;
   mpz_t          a;
   unsigned long  d;
   int            i;

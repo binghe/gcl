@@ -1,44 +1,41 @@
 dnl  Intel P6 mpn_sqr_basecase -- square an mpn number.
-dnl 
-dnl  P6: approx 4.0 cycles per cross product, or 7.75 cycles per triangular
-dnl  product (measured on the speed difference between 20 and 40 limbs,
-dnl  which is the Karatsuba recursing range).
 
-
-dnl  Copyright 1999, 2000 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
 
+C P6: approx 4.0 cycles per cross product, or 7.75 cycles per triangular
+C     product (measured on the speed difference between 20 and 40 limbs,
+C     which is the Karatsuba recursing range).
+
+
 dnl  These are the same as in mpn/x86/k6/sqr_basecase.asm, see that file for
 dnl  a description.  The only difference here is that UNROLL_COUNT can go up
-dnl  to 64 (not 63) making KARATSUBA_SQR_THRESHOLD_MAX 67.
+dnl  to 64 (not 63) making SQR_KARATSUBA_THRESHOLD_MAX 67.
 
-deflit(KARATSUBA_SQR_THRESHOLD_MAX, 67)
+deflit(SQR_KARATSUBA_THRESHOLD_MAX, 67)
 
-ifdef(`KARATSUBA_SQR_THRESHOLD_OVERRIDE',
-`define(`KARATSUBA_SQR_THRESHOLD',KARATSUBA_SQR_THRESHOLD_OVERRIDE)')
+ifdef(`SQR_KARATSUBA_THRESHOLD_OVERRIDE',
+`define(`SQR_KARATSUBA_THRESHOLD',SQR_KARATSUBA_THRESHOLD_OVERRIDE)')
 
-m4_config_gmp_mparam(`KARATSUBA_SQR_THRESHOLD')
-deflit(UNROLL_COUNT, eval(KARATSUBA_SQR_THRESHOLD-3))
+m4_config_gmp_mparam(`SQR_KARATSUBA_THRESHOLD')
+deflit(UNROLL_COUNT, eval(SQR_KARATSUBA_THRESHOLD-3))
 
 
 C void mpn_sqr_basecase (mp_ptr dst, mp_srcptr src, mp_size_t size);
@@ -294,7 +291,7 @@ L(four_or_more):
 deflit(`FRAME',4)  dnl  %esi already pushed
 
 C First multiply src[0]*src[1..size-1] and store at dst[1..size].
- 
+
 	subl	$STACK_SPACE-FRAME, %esp
 deflit(`FRAME',STACK_SPACE)
 	movl	$1, %ecx
@@ -495,7 +492,7 @@ L(unroll_inner_end):
 
 	incl	%edx
 	jnz	L(unroll_outer_top)
-	
+
 
 ifelse(OFFSET,0,,`
 	addl	$OFFSET, %esi
@@ -634,7 +631,7 @@ L(pic_calc):
 	addl	(%esp), %ecx
 	addl	$L(unroll_inner_end)-L(here)-eval(2*CODE_BYTES_PER_LIMB), %ecx
 	addl	%edx, %ecx
-	ret
+	ret_internal
 ')
 
 

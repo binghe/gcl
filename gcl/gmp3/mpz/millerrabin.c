@@ -9,14 +9,14 @@
    CERTAIN TO BE SUBJECT TO INCOMPATIBLE CHANGES OR DISAPPEAR COMPLETELY IN
    FUTURE GNU MP RELEASES.
 
-Copyright 1991, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001 Free Software
-Foundation, Inc.  Contributed by John Amanatides.
+Copyright 1991, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2005 Free
+Software Foundation, Inc.  Contributed by John Amanatides.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -25,32 +25,30 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
 
-static int millerrabin _PROTO ((mpz_srcptr n, mpz_srcptr nm1,
-                                mpz_ptr x, mpz_ptr y,
-                                mpz_srcptr q, unsigned long int k));
+static int millerrabin __GMP_PROTO ((mpz_srcptr, mpz_srcptr,
+				     mpz_ptr, mpz_ptr,
+				     mpz_srcptr, unsigned long int));
 
 int
 mpz_millerrabin (mpz_srcptr n, int reps)
 {
   int r;
-  mpz_t nm1, x, y, q;
+  mpz_t nm1, nm3, x, y, q;
   unsigned long int k;
   gmp_randstate_t rstate;
   int is_prime;
-  TMP_DECL (marker);
-  TMP_MARK (marker);
+  TMP_DECL;
+  TMP_MARK;
 
   MPZ_TMP_INIT (nm1, SIZ (n) + 1);
   mpz_sub_ui (nm1, n, 1L);
 
-  MPZ_TMP_INIT (x, SIZ (n));
+  MPZ_TMP_INIT (x, SIZ (n) + 1);
   MPZ_TMP_INIT (y, 2 * SIZ (n)); /* mpz_powm_ui needs excessive memory!!! */
 
   /* Perform a Fermat test.  */
@@ -58,7 +56,7 @@ mpz_millerrabin (mpz_srcptr n, int reps)
   mpz_powm (y, x, nm1, n);
   if (mpz_cmp_ui (y, 1L) != 0)
     {
-      TMP_FREE (marker);
+      TMP_FREE;
       return 0;
     }
 
@@ -68,21 +66,26 @@ mpz_millerrabin (mpz_srcptr n, int reps)
   k = mpz_scan1 (nm1, 0L);
   mpz_tdiv_q_2exp (q, nm1, k);
 
-  gmp_randinit (rstate, GMP_RAND_ALG_DEFAULT, 32L);
+  /* n-3 */
+  MPZ_TMP_INIT (nm3, SIZ (n) + 1);
+  mpz_sub_ui (nm3, n, 3L);
+  ASSERT (mpz_cmp_ui (nm3, 1L) >= 0);
+
+  gmp_randinit_default (rstate);
 
   is_prime = 1;
   for (r = 0; r < reps && is_prime; r++)
     {
-      do
-	mpz_urandomb (x, rstate, mpz_sizeinbase (n, 2) - 1);
-      while (mpz_cmp_ui (x, 1L) <= 0);
+      /* 2 to n-2 inclusive, don't want 1, 0 or -1 */
+      mpz_urandomm (x, rstate, nm3);
+      mpz_add_ui (x, x, 2L);
 
       is_prime = millerrabin (n, nm1, x, y, q, k);
     }
 
   gmp_randclear (rstate);
 
-  TMP_FREE (marker);
+  TMP_FREE;
   return is_prime;
 }
 

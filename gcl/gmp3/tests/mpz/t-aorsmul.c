@@ -1,12 +1,12 @@
 /* Test mpz_addmul, mpz_addmul_ui, mpz_submul, mpz_submul_ui.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,10 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 
 #include <stdio.h>
@@ -29,6 +26,110 @@ MA 02111-1307, USA.
 #include "gmp-impl.h"
 #include "tests.h"
 
+
+#define M GMP_NUMB_MAX
+
+
+void
+check_one_inplace (mpz_srcptr w, mpz_srcptr y)
+{
+  mpz_t  want, got;
+
+  mpz_init (want);
+  mpz_init (got);
+
+  mpz_mul (want, w, y);
+  mpz_add (want, w, want);
+  mpz_set (got, w);
+  mpz_addmul (got, got, y);
+  MPZ_CHECK_FORMAT (got);
+  if (mpz_cmp (want, got) != 0)
+    {
+      printf ("mpz_addmul inplace fail\n");
+    fail:
+      mpz_trace ("w", w);
+      mpz_trace ("y", y);
+      mpz_trace ("want", want);
+      mpz_trace ("got ", got);
+      abort ();
+    }
+
+  mpz_mul (want, w, y);
+  mpz_sub (want, w, want);
+  mpz_set (got, w);
+  mpz_submul (got, got, y);
+  MPZ_CHECK_FORMAT (got);
+  if (mpz_cmp (want, got) != 0)
+    {
+      printf ("mpz_submul inplace fail\n");
+      goto fail;
+    }
+
+  mpz_clear (want);
+  mpz_clear (got);
+}
+
+void
+check_one_ui_inplace (mpz_ptr w, unsigned long y)
+{
+  mpz_t  want, got;
+
+  mpz_init (want);
+  mpz_init (got);
+
+  mpz_mul_ui (want, w, (unsigned long) y);
+  mpz_add (want, w, want);
+  mpz_set (got, w);
+  mpz_addmul_ui (got, got, (unsigned long) y);
+  MPZ_CHECK_FORMAT (got);
+  if (mpz_cmp (want, got) != 0)
+    {
+      printf ("mpz_addmul_ui fail\n");
+    fail:
+      mpz_trace ("w", w);
+      printf    ("y=0x%lX   %lu\n", y, y);
+      mpz_trace ("want", want);
+      mpz_trace ("got ", got);
+      abort ();
+    }
+
+  mpz_mul_ui (want, w, y);
+  mpz_sub (want, w, want);
+  mpz_set (got, w);
+  mpz_submul_ui (got, got, y);
+  MPZ_CHECK_FORMAT (got);
+  if (mpz_cmp (want, got) != 0)
+    {
+      printf ("mpz_submul_ui fail\n");
+      goto fail;
+    }
+
+  mpz_clear (want);
+  mpz_clear (got);
+}
+
+void
+check_all_inplace (mpz_ptr w, mpz_ptr y)
+{
+  int  wneg, yneg;
+
+  MPZ_CHECK_FORMAT (w);
+  MPZ_CHECK_FORMAT (y);
+
+  for (wneg = 0; wneg < 2; wneg++)
+    {
+      for (yneg = 0; yneg < 2; yneg++)
+        {
+          check_one_inplace (w, y);
+
+          if (mpz_fits_ulong_p (y))
+            check_one_ui_inplace (w, mpz_get_ui (y));
+
+          mpz_neg (y, y);
+        }
+      mpz_neg (w, w);
+    }
+}
 
 void
 check_one (mpz_srcptr w, mpz_srcptr x, mpz_srcptr y)
@@ -69,7 +170,6 @@ check_one (mpz_srcptr w, mpz_srcptr x, mpz_srcptr y)
   mpz_clear (want);
   mpz_clear (got);
 }
-
 
 void
 check_one_ui (mpz_ptr w, mpz_ptr x, unsigned long y)
@@ -145,6 +245,53 @@ check_all (mpz_ptr w, mpz_ptr x, mpz_ptr y)
 }
 
 void
+check_data_inplace_ui (void)
+{
+  static const struct {
+    mp_limb_t      w[6];
+    unsigned long  y;
+
+  } data[] = {
+
+    { { 0 }, 0 },
+    { { 0 }, 1 },
+    { { 1 }, 1 },
+    { { 2 }, 1 },
+
+    { { 123 }, 1 },
+    { { 123 }, ULONG_MAX },
+    { { M }, 1 },
+    { { M }, ULONG_MAX },
+
+    { { 123, 456 }, 1 },
+    { { M, M }, 1 },
+    { { 123, 456 }, ULONG_MAX },
+    { { M, M }, ULONG_MAX },
+
+    { { 123, 456, 789 }, 1 },
+    { { M, M, M }, 1 },
+    { { 123, 456, 789 }, ULONG_MAX },
+    { { M, M, M }, ULONG_MAX },
+  };
+
+  mpz_t  w, y;
+  int    i;
+
+  mpz_init (w);
+  mpz_init (y);
+
+  for (i = 0; i < numberof (data); i++)
+    {
+      mpz_set_n (w, data[i].w, (mp_size_t) numberof(data[i].w));
+      mpz_set_ui (y, data[i].y);
+      check_all_inplace (w, y);
+    }
+
+  mpz_clear (w);
+  mpz_clear (y);
+}
+
+void
 check_data (void)
 {
   static const struct {
@@ -153,8 +300,6 @@ check_data (void)
     mp_limb_t  y[6];
 
   } data[] = {
-
-#define M MP_LIMB_T_MAX
 
     /* reducing to zero */
     { { 1 }, { 1 }, { 1 } },
@@ -215,9 +360,9 @@ check_data (void)
 
   for (i = 0; i < numberof (data); i++)
     {
-      mpz_set_n (w, data[i].w, numberof(data[i].w));
-      mpz_set_n (x, data[i].x, numberof(data[i].x));
-      mpz_set_n (y, data[i].y, numberof(data[i].y));
+      mpz_set_n (w, data[i].w, (mp_size_t) numberof(data[i].w));
+      mpz_set_n (x, data[i].x, (mp_size_t) numberof(data[i].x));
+      mpz_set_n (y, data[i].y, (mp_size_t) numberof(data[i].y));
       check_all (w, x, y);
     }
 
@@ -247,11 +392,13 @@ check_random (int argc, char *argv[])
       mpz_errandomb (x, rands, 5*BITS_PER_MP_LIMB);
       mpz_errandomb (y, rands, 5*BITS_PER_MP_LIMB);
       check_all (w, x, y);
+      check_all_inplace (w, y);
 
       mpz_errandomb (w, rands, 5*BITS_PER_MP_LIMB);
       mpz_errandomb (x, rands, 5*BITS_PER_MP_LIMB);
       mpz_errandomb (y, rands, BITS_PER_ULONG);
       check_all (w, x, y);
+      check_all_inplace (w, y);
     }
 
   mpz_clear (w);
@@ -267,6 +414,7 @@ main (int argc, char *argv[])
   mp_trace_base = -16;
 
   check_data ();
+  check_data_inplace_ui ();
   check_random (argc, argv);
 
   tests_end ();

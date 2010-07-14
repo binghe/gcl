@@ -1,28 +1,27 @@
 dnl  AMD K7 mpn_gcd_1 -- mpn by 1 gcd.
-dnl 
-dnl  K7: 6.75 cycles/bit (approx)  1x1 gcd
-dnl      11.0 cycles/limb          Nx1 reduction (modexact_1_odd)
 
-dnl  Copyright 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C K7: 6.75 cycles/bit (approx)  1x1 gcd
+C     11.0 cycles/limb          Nx1 reduction (modexact_1_odd)
 
 
 dnl  Reduce using x%y if x is more than DIV_THRESHOLD bits bigger than y,
@@ -50,7 +49,7 @@ deflit(MAXSHIFT, 6)
 
 	TEXT
 	ALIGN(64)
-LF(mpn_gcd_1,table):
+L(table):
 	.byte	MAXSHIFT
 forloop(i,1,MASK,
 `	.byte	m4_count_trailing_zeros(i)
@@ -212,7 +211,7 @@ ifdef(`PIC',`
 
 	movl	%eax, %ecx
 	movl	%edx, %ebx
- 	je	L(strip_x)
+	je	L(strip_x)
 
 	ASSERT(nz, `testl $1, %eax')	C both odd
 	ASSERT(nz, `testl $1, %edx')
@@ -264,8 +263,8 @@ L(divide_strip_y):
 	movl	%eax, %ebp
 	movl	-4(%eax,%ecx,4), %eax		C src high limb
 
- 	cmp	$MODEXACT_THRESHOLD, %ecx
- 	jae	L(modexact)
+	cmp	$MODEXACT_THRESHOLD, %ecx
+	jae	L(modexact)
 
 	cmpl	%ebx, %eax			C high cmp divisor
 	movl	$0, %edx
@@ -332,7 +331,7 @@ ifdef(`PIC',`
 	movl	%ebp, CALL_DIVISOR
 	movl	%ecx, CALL_SIZE
 
-        call	GSYM_PREFIX`'mpn_modexact_1_odd@PLT
+	call	GSYM_PREFIX`'mpn_modexact_1_odd@PLT
 ',`
 dnl non-PIC
 	movl	%ebx, CALL_DIVISOR
@@ -364,7 +363,7 @@ dnl non-PIC
 ifdef(`PIC', `
 L(movl_eip_to_edi):
 	movl	(%esp), %edi
-	ret
+	ret_internal
 ')
 
 EPILOGUE()

@@ -2,13 +2,13 @@
    integer in the range 0 to N-1, using STATE as the random state
    previously initialized by a call to gmp_randinit().
 
-Copyright 2000  Free Software Foundation, Inc.
+Copyright 2000, 2002  Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -17,55 +17,78 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
-#include "longlong.h"
+#include "longlong.h" /* for count_leading_zeros */
+
+
+#define MAX_URANDOMM_ITER  80
 
 void
 mpz_urandomm (mpz_ptr rop, gmp_randstate_t rstate, mpz_srcptr n)
 {
-  mpz_t t, p, m;
-  mp_ptr tp;
+  mp_ptr rp, np, nlast;
   mp_size_t nbits, size;
   int count;
-  TMP_DECL (marker);
+  int pow2;
+  int cmp;
+  TMP_DECL;
 
-  TMP_MARK (marker);
+  size = ABSIZ (n);
+  if (size == 0)
+    DIVIDE_BY_ZERO;
 
-  /* FIXME: Should check for n == 0 and report error */
+  nlast = &PTR (n)[size - 1];
 
-  size = SIZ (n);
-  count_leading_zeros (count, PTR (n)[size - 1]);
-  nbits = size * BITS_PER_MP_LIMB - count;
+  /* Detect whether n is a power of 2.  */
+  pow2 = POW2_P (*nlast);
+  if (pow2 != 0)
+    for (np = PTR (n); np < nlast; np++)
+      if (*np != 0)
+	{
+	  pow2 = 0;		/* Mark n as `not a power of two'.  */
+	  break;
+	}
 
-  /* Allocate enough for any mpz function called since a realloc of
-     these will fail.  */
-  MPZ_TMP_INIT (t, size);
-  MPZ_TMP_INIT (m, size + 1);
-  MPZ_TMP_INIT (p, size + 1);
+  count_leading_zeros (count, *nlast);
+  nbits = size * GMP_NUMB_BITS - (count - GMP_NAIL_BITS) - pow2;
+  if (nbits == 0)		/* nbits == 0 means that n was == 1.  */
+    {
+      SIZ (rop) = 0;
+      return;
+    }
 
-  /* Let m = highest possible random number plus 1.  */
-  mpz_set_ui (m, 0);
-  mpz_setbit (m, nbits);
+  TMP_MARK;
+  np = PTR (n);
+  if (rop == n)
+    {
+      mp_ptr tp;
+      tp = TMP_ALLOC_LIMBS (size);
+      MPN_COPY (tp, np, size);
+      np = tp;
+    }
 
-  /* Let p = floor(m / n) * n.  */
-  mpz_fdiv_q (p, m, n);
-  mpz_mul (p, p, n);
+  /* Here the allocated size can be one too much if n is a power of
+     (2^GMP_NUMB_BITS) but it's convenient for using mpn_cmp below.  */
+  rp = MPZ_REALLOC (rop, size);
+  /* Clear last limb to prevent the case in which size is one too much.  */
+  rp[size - 1] = 0;
 
-  tp = PTR (t);
+  count = MAX_URANDOMM_ITER;	/* Set iteration count limit.  */
   do
     {
-      _gmp_rand (tp, rstate, nbits);
-      MPN_NORMALIZE (tp, size);	/* FIXME: Really necessary?  */
-      SIZ (t) = size;
+      _gmp_rand (rp, rstate, nbits);
+      MPN_CMP (cmp, rp, np, size);
     }
-  while (mpz_cmp (t, p) >= 0);
+  while (cmp >= 0 && --count != 0);
 
-  mpz_mod (rop, t, n);
+  if (count == 0)
+    /* Too many iterations; return result mod n == result - n */
+    mpn_sub_n (rp, rp, np, size);
 
-  TMP_FREE (marker);
+  MPN_NORMALIZE (rp, size);
+  SIZ (rop) = size;
+  TMP_FREE;
 }

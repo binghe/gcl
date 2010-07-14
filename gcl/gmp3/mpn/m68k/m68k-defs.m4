@@ -2,13 +2,13 @@ divert(-1)
 
 dnl  m4 macros for 68k assembler.
 
-dnl  Copyright 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
 dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
 dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
@@ -16,10 +16,8 @@ dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
 dnl
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 dnl  The default m4 `#' commenting interferes with the assembler syntax for
@@ -30,17 +28,17 @@ dnl  mpn/asm-defs.m4), so use `;' which should be harmless.
 changecom(;)
 
 
-dnl  Usage: PROLOGUE
+dnl  Called: PROLOGUE_cpu(GSYM_PREFIX`'foo)
 dnl
 dnl  Same as the standard PROLOGUE, but align to 2 bytes not 4.
 
-define(`PROLOGUE',
-m4_assert_defined(`GSYM_PREFIX')
+define(`PROLOGUE_cpu',
+m4_assert_numargs(1)
 `	TEXT
 	ALIGN(2)
-	GLOBL	GSYM_PREFIX`$1' GLOBL_ATTR
-	TYPE(GSYM_PREFIX`$1',`function')
-GSYM_PREFIX`$1'LABEL_SUFFIX')
+	GLOBL	`$1' GLOBL_ATTR
+	TYPE(`$1',`function')
+`$1'LABEL_SUFFIX')
 
 
 dnl  Usage: d0, etc
@@ -154,12 +152,14 @@ m68k_definsn(addx, l)
 m68k_definsn(addq, l)
 m68k_definsn(asl,  l)
 m68k_definsn(cmp,  l)
+m68k_definsn(cmp,  w)
 m68k_definsn(clr,  l)
 m68k_definsn(divu, l)
 m68k_definsn(eor,  w)
 m68k_definsn(lsl,  l)
 m68k_definsn(lsr,  l)
 m68k_definsn(move, l)
+m68k_definsn(move, w)
 m68k_definsn(movem,l)
 m68k_definsn(moveq,l)
 m68k_definsn(mulu, l)

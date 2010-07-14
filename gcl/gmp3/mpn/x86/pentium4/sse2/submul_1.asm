@@ -1,30 +1,28 @@
 dnl  Intel Pentium-4 mpn_submul_1 -- Multiply a limb vector with a limb and
 dnl  subtract the result from a second limb vector.
-dnl 
-dnl  Pentium4: 7 cycles/limb, unstable timing, at least on early Pentium4
-dnl  silicon (stepping 10).
 
-dnl  Copyright 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C P4: 7 cycles/limb, unstable timing, at least on early Pentium4 silicon
+C     (stepping 10).
 
 
 C mp_limb_t mpn_submul_1 (mp_ptr dst, mp_srcptr src, mp_size_t size,
@@ -74,7 +72,7 @@ defframe(PARAM_DST,       4)
 PROLOGUE(mpn_submul_1c)
 deflit(`FRAME',0)
 	movd	PARAM_CARRY, %mm1
-	jmp	LF(mpn_submul_1,start_1c)
+	jmp	L(start_1c)
 EPILOGUE()
 
 PROLOGUE(mpn_submul_1)

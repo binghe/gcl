@@ -1,13 +1,13 @@
 /* mpz_setbit -- set a specified bit.
 
-Copyright 1991, 1993, 1994, 1995, 1997, 1999, 2001 Free Software Foundation,
-Inc.
+Copyright 1991, 1993, 1994, 1995, 1997, 1999, 2001, 2002 Free Software
+Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -30,25 +28,22 @@ mpz_setbit (mpz_ptr d, unsigned long int bit_index)
   mp_ptr dp = d->_mp_d;
   mp_size_t limb_index;
 
-  limb_index = bit_index / BITS_PER_MP_LIMB;
+  limb_index = bit_index / GMP_NUMB_BITS;
   if (dsize >= 0)
     {
       if (limb_index < dsize)
 	{
-	  dp[limb_index] |= (mp_limb_t) 1 << (bit_index % BITS_PER_MP_LIMB);
+	  dp[limb_index] |= (mp_limb_t) 1 << (bit_index % GMP_NUMB_BITS);
 	  d->_mp_size = dsize;
 	}
       else
 	{
 	  /* Ugh.  The bit should be set outside of the end of the
 	     number.  We have to increase the size of the number.  */
-	  if (d->_mp_alloc < limb_index + 1)
-	    {
-	      _mpz_realloc (d, limb_index + 1);
-	      dp = d->_mp_d;
-	    }
+	  if (UNLIKELY (d->_mp_alloc < limb_index + 1))
+            dp = _mpz_realloc (d, limb_index + 1);
 	  MPN_ZERO (dp + dsize, limb_index - dsize);
-	  dp[limb_index] = (mp_limb_t) 1 << (bit_index % BITS_PER_MP_LIMB);
+	  dp[limb_index] = (mp_limb_t) 1 << (bit_index % GMP_NUMB_BITS);
 	  d->_mp_size = limb_index + 1;
 	}
     }
@@ -73,15 +68,25 @@ mpz_setbit (mpz_ptr d, unsigned long int bit_index)
 	{
 	  if (limb_index < dsize)
             {
-              dp[limb_index] &= ~((mp_limb_t) 1 << (bit_index % BITS_PER_MP_LIMB));
-              MPN_NORMALIZE (dp, dsize);
-              d->_mp_size = -dsize;
+              mp_limb_t  dlimb;
+              dlimb = dp[limb_index];
+              dlimb &= ~((mp_limb_t) 1 << (bit_index % GMP_NUMB_BITS));
+              dp[limb_index] = dlimb;
+
+              if (UNLIKELY (dlimb == 0 && limb_index == dsize-1))
+                {
+                  /* high limb became zero, must normalize */
+                  do {
+                    dsize--;
+                  } while (dsize > 0 && dp[dsize-1] == 0);
+                  d->_mp_size = -dsize;
+                }
             }
 	}
       else if (limb_index == zero_bound)
 	{
 	  dp[limb_index] = ((dp[limb_index] - 1)
-			    & ~((mp_limb_t) 1 << (bit_index % BITS_PER_MP_LIMB))) + 1;
+			    & ~((mp_limb_t) 1 << (bit_index % GMP_NUMB_BITS))) + 1;
 	  if (dp[limb_index] == 0)
 	    {
 	      mp_size_t i;
@@ -94,11 +99,8 @@ mpz_setbit (mpz_ptr d, unsigned long int bit_index)
 	      /* We got carry all way out beyond the end of D.  Increase
 		 its size (and allocation if necessary).  */
 	      dsize++;
-	      if (d->_mp_alloc < dsize)
-		{
-		  _mpz_realloc (d, dsize);
-		  dp = d->_mp_d;
-		}
+	      if (UNLIKELY (d->_mp_alloc < dsize))
+                dp = _mpz_realloc (d, dsize);
 	      dp[i] = 1;
 	      d->_mp_size = -dsize;
 	    fin:;
@@ -107,7 +109,7 @@ mpz_setbit (mpz_ptr d, unsigned long int bit_index)
       else
 	{
 	  mpn_decr_u (dp + limb_index,
-		     (mp_limb_t) 1 << (bit_index % BITS_PER_MP_LIMB));
+		     (mp_limb_t) 1 << (bit_index % GMP_NUMB_BITS));
 	  dsize -= dp[dsize - 1] == 0;
 	  d->_mp_size = -dsize;
 	}

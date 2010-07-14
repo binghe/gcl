@@ -1,12 +1,12 @@
 /* __gmp_extract_double -- convert from double to array of mp_limb_t.
 
-Copyright 1996, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1999, 2000, 2001, 2002, 2006 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -41,9 +39,9 @@ __gmp_extract_double (mp_ptr rp, double d)
   unsigned sc;
 #ifdef _LONG_LONG_LIMB
 #define BITS_PER_PART 64	/* somewhat bogus */
-  unsigned long long int manh, manl;
+  unsigned long long int manl;
 #else
-#define BITS_PER_PART BITS_PER_MP_LIMB
+#define BITS_PER_PART GMP_LIMB_BITS
   unsigned long int manh, manl;
 #endif
 
@@ -51,7 +49,7 @@ __gmp_extract_double (mp_ptr rp, double d)
 
      1. Should handle Inf and NaN in IEEE specific code.
      2. Handle Inf and NaN also in default code, to avoid hangs.
-     3. Generalize to handle all BITS_PER_MP_LIMB >= 32.
+     3. Generalize to handle all GMP_LIMB_BITS >= 32.
      4. This lits is incomplete and misspelled.
    */
 
@@ -85,7 +83,7 @@ __gmp_extract_double (mp_ptr rp, double d)
 	    manl = manl << 1;
 	    exp--;
 	  }
-	while ((mp_limb_signed_t) manl >= 0);
+	while ((manl & GMP_LIMB_HIGHBIT) == 0);
       }
 #endif
 #if BITS_PER_PART == 32
@@ -102,7 +100,7 @@ __gmp_extract_double (mp_ptr rp, double d)
 	    manl = manl << 1;
 	    exp--;
 	  }
-	while ((mp_limb_signed_t) manh >= 0);
+	while ((manh & GMP_LIMB_HIGHBIT) == 0);
       }
 #endif
 #if BITS_PER_PART != 32 && BITS_PER_PART != 64
@@ -116,8 +114,7 @@ __gmp_extract_double (mp_ptr rp, double d)
     exp = 0;
     if (d >= 1.0)
       {
-	if (d * 0.5 == d)
-	  abort ();
+	ASSERT_ALWAYS (d * 0.5 != d);
 
 	while (d >= 32768.0)
 	  {
@@ -147,26 +144,24 @@ __gmp_extract_double (mp_ptr rp, double d)
     d *= (4.0 * ((unsigned long int) 1 << (BITS_PER_PART - 2)));
 #if BITS_PER_PART == 64
     manl = d;
-#else
+#endif
+#if BITS_PER_PART == 32
     manh = d;
     manl = (d - manh) * (4.0 * ((unsigned long int) 1 << (BITS_PER_PART - 2)));
 #endif
   }
 #endif /* IEEE */
 
-  /* Up until here, we have ignored the actual limb size.  Remains
-     to split manh,,manl into an array of LIMBS_PER_DOUBLE limbs.
-  */
-
-  sc = (unsigned) exp % BITS_PER_MP_LIMB;
+  sc = (unsigned) (exp + 64 * GMP_NUMB_BITS) % GMP_NUMB_BITS;
 
   /* We add something here to get rounding right.  */
-  exp = (exp + 2048) / BITS_PER_MP_LIMB - 2048 / BITS_PER_MP_LIMB + 1;
+  exp = (exp + 64 * GMP_NUMB_BITS) / GMP_NUMB_BITS - 64 * GMP_NUMB_BITS / GMP_NUMB_BITS + 1;
 
-#if LIMBS_PER_DOUBLE == 2
+#if BITS_PER_PART == 64 && LIMBS_PER_DOUBLE == 2
+#if GMP_NAIL_BITS == 0
   if (sc != 0)
     {
-      rp[1] = manl >> (BITS_PER_MP_LIMB - sc);
+      rp[1] = manl >> (GMP_LIMB_BITS - sc);
       rp[0] = manl << sc;
     }
   else
@@ -175,12 +170,63 @@ __gmp_extract_double (mp_ptr rp, double d)
       rp[0] = 0;
       exp--;
     }
+#else
+  if (sc > GMP_NAIL_BITS)
+    {
+      rp[1] = manl >> (GMP_LIMB_BITS - sc);
+      rp[0] = (manl << (sc - GMP_NAIL_BITS)) & GMP_NUMB_MASK;
+    }
+  else
+    {
+      if (sc == 0)
+	{
+	  rp[1] = manl >> GMP_NAIL_BITS;
+	  rp[0] = (manl << GMP_NUMB_BITS - GMP_NAIL_BITS) & GMP_NUMB_MASK;
+	  exp--;
+	}
+      else
+	{
+	  rp[1] = manl >> (GMP_LIMB_BITS - sc);
+	  rp[0] = (manl >> (GMP_NAIL_BITS - sc)) & GMP_NUMB_MASK;
+	}
+    }
 #endif
-#if LIMBS_PER_DOUBLE == 3
+#endif
+
+#if BITS_PER_PART == 64 && LIMBS_PER_DOUBLE == 3
+  if (sc > GMP_NAIL_BITS)
+    {
+      rp[2] = manl >> (GMP_LIMB_BITS - sc);
+      rp[1] = (manl << sc - GMP_NAIL_BITS) & GMP_NUMB_MASK;
+      if (sc >= 2 * GMP_NAIL_BITS)
+	rp[0] = 0;
+      else
+	rp[0] = (manl << GMP_NUMB_BITS - GMP_NAIL_BITS + sc) & GMP_NUMB_MASK;
+    }
+  else
+    {
+      if (sc == 0)
+	{
+	  rp[2] = manl >> GMP_NAIL_BITS;
+	  rp[1] = (manl << GMP_NUMB_BITS - GMP_NAIL_BITS) & GMP_NUMB_MASK;
+	  rp[0] = 0;
+	  exp--;
+	}
+      else
+	{
+	  rp[2] = manl >> (GMP_LIMB_BITS - sc);
+	  rp[1] = (manl >> GMP_NAIL_BITS - sc) & GMP_NUMB_MASK;
+	  rp[0] = (manl << GMP_NUMB_BITS - GMP_NAIL_BITS + sc) & GMP_NUMB_MASK;
+	}
+    }
+#endif
+
+#if BITS_PER_PART == 32 && LIMBS_PER_DOUBLE == 3
+#if GMP_NAIL_BITS == 0
   if (sc != 0)
     {
-      rp[2] = manh >> (BITS_PER_MP_LIMB - sc);
-      rp[1] = (manl >> (BITS_PER_MP_LIMB - sc)) | (manh << sc);
+      rp[2] = manh >> (GMP_LIMB_BITS - sc);
+      rp[1] = (manh << sc) | (manl >> (GMP_LIMB_BITS - sc));
       rp[0] = manl << sc;
     }
   else
@@ -190,27 +236,65 @@ __gmp_extract_double (mp_ptr rp, double d)
       rp[0] = 0;
       exp--;
     }
-#endif
-#if LIMBS_PER_DOUBLE > 3
-  /* Insert code for splitting manh,,manl into LIMBS_PER_DOUBLE
-     mp_limb_t's at rp.  */
-  if (sc != 0)
+#else
+  if (sc > GMP_NAIL_BITS)
     {
-      /* This is not perfect, and would fail for BITS_PER_MP_LIMB == 16.
-	 The ASSERT_ALWAYS should catch the problematic cases.  */
-      ASSERT_ALWAYS ((manl << sc) == 0);
-      manl = (manh << sc) | (manl >> (BITS_PER_MP_LIMB - sc));
-      manh = manh >> (BITS_PER_MP_LIMB - sc);
+      rp[2] = (manh >> (GMP_LIMB_BITS - sc));
+      rp[1] = ((manh << (sc - GMP_NAIL_BITS)) |
+	       (manl >> (GMP_LIMB_BITS - sc + GMP_NAIL_BITS))) & GMP_NUMB_MASK;
+      if (sc >= 2 * GMP_NAIL_BITS)
+	rp[0] = (manl << sc - 2 * GMP_NAIL_BITS) & GMP_NUMB_MASK;
+      else
+	rp[0] = manl >> (2 * GMP_NAIL_BITS - sc) & GMP_NUMB_MASK;
     }
-  {
-    int i;
-    for (i = LIMBS_PER_DOUBLE - 1; i >= 0; i--)
-      {
-	rp[i] = manh >> (BITS_PER_LONGINT - BITS_PER_MP_LIMB);
-	manh = ((manh << BITS_PER_MP_LIMB)
-		| (manl >> (BITS_PER_LONGINT - BITS_PER_MP_LIMB)));
-	manl = manl << BITS_PER_MP_LIMB;
-      }
+  else
+    {
+      if (sc == 0)
+	{
+	  rp[2] = manh >> GMP_NAIL_BITS;
+	  rp[1] = ((manh << GMP_NUMB_BITS - GMP_NAIL_BITS) | (manl >> 2 * GMP_NAIL_BITS)) & GMP_NUMB_MASK;
+	  rp[0] = (manl << GMP_NUMB_BITS - 2 * GMP_NAIL_BITS) & GMP_NUMB_MASK;
+	  exp--;
+	}
+      else
+	{
+	  rp[2] = (manh >> (GMP_LIMB_BITS - sc));
+	  rp[1] = (manh >> (GMP_NAIL_BITS - sc)) & GMP_NUMB_MASK;
+	  rp[0] = ((manh << (GMP_NUMB_BITS - GMP_NAIL_BITS + sc))
+		   | (manl >> (GMP_LIMB_BITS - (GMP_NUMB_BITS - GMP_NAIL_BITS + sc)))) & GMP_NUMB_MASK;
+	}
+    }
+#endif
+#endif
+
+#if BITS_PER_PART == 32 && LIMBS_PER_DOUBLE > 3
+  if (sc == 0)
+    {
+      int i;
+
+      for (i = LIMBS_PER_DOUBLE - 1; i >= 0; i--)
+	{
+	  rp[i] = manh >> (BITS_PER_ULONG - GMP_NUMB_BITS);
+	  manh = ((manh << GMP_NUMB_BITS)
+		  | (manl >> (BITS_PER_ULONG - GMP_NUMB_BITS)));
+	  manl = manl << GMP_NUMB_BITS;
+	}
+      exp--;
+    }
+  else
+    {
+      int i;
+
+      rp[LIMBS_PER_DOUBLE - 1] = (manh >> (GMP_LIMB_BITS - sc));
+      manh = (manh << sc) | (manl >> (GMP_LIMB_BITS - sc));
+      manl = (manl << sc);
+      for (i = LIMBS_PER_DOUBLE - 2; i >= 0; i--)
+	{
+	  rp[i] = manh >> (BITS_PER_ULONG - GMP_NUMB_BITS);
+	  manh = ((manh << GMP_NUMB_BITS)
+		  | (manl >> (BITS_PER_ULONG - GMP_NUMB_BITS)));
+	  manl = manl << GMP_NUMB_BITS;
+	}
   }
 #endif
 

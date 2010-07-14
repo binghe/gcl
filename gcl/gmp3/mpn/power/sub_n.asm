@@ -1,14 +1,14 @@
 dnl  IBM POWER mpn_sub_n -- Subtract two limb vectors of equal, non-zero
 dnl  length.
 
-dnl  Copyright 1992, 1994, 1995, 1996, 1999, 2000, 2001 Free Software
+dnl  Copyright 1992, 1994, 1995, 1996, 1999, 2000, 2001, 2005 Free Software
 dnl  Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
 
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 2.1 of the License, or (at
+dnl  by the Free Software Foundation; either version 3 of the License, or (at
 dnl  your option) any later version.
 
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
@@ -17,9 +17,7 @@ dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 dnl  License for more details.
 
 dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-dnl  the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-dnl  MA 02111-1307, USA.
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 dnl  INPUT PARAMETERS
@@ -39,9 +37,9 @@ PROLOGUE(mpn_sub_n)
 	sri	10,6,1		C count for unrolled loop
 	sf	7,0,8		C subtract least significant limbs, set cy
 	mtctr	10		C copy count into CTR
-	beq	0,Leven		C branch if even C of limbs (C of limbs >= 2)
+	beq	0,Leven		C branch if even # of limbs (# of limbs >= 2)
 
-C We have an odd C of limbs.  Add the first limbs separately.
+C We have an odd # of limbs.  Add the first limbs separately.
 	cmpi	1,10,0		C is count for unrolled loop zero?
 	bc	4,6,L1		C bne cr1,L1 (misassembled by gas)
 	st	7,4(3)
@@ -61,16 +59,16 @@ Leven:	lu	9,4(4)		C load s1 limb and update s1_ptr
 Loop:	lu	8,4(4)		C load s1 limb and update s1_ptr
 	lu	0,4(5)		C load s2 limb and update s2_ptr
 	sfe	11,10,9		C subtract previous limbs with cy, set cy
-	stu	7,4(3)		C 
+	stu	7,4(3)		C
 	lu	9,4(4)		C load s1 limb and update s1_ptr
 	lu	10,4(5)		C load s2 limb and update s2_ptr
 	sfe	7,0,8		C subtract previous limbs with cy, set cy
-	stu	11,4(3)		C 
+	stu	11,4(3)		C
 	bdn	Loop		C decrement CTR and loop back
 
 Lend:	sfe	11,10,9		C subtract limbs with cy, set cy
-	st	7,4(3)		C 
-	st	11,8(3)		C 
+	st	7,4(3)		C
+	st	11,8(3)		C
 	sfe	3,0,0		C load !cy into ...
 	sfi	3,3,0		C ... return value register
 	br

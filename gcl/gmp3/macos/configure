@@ -1,14 +1,16 @@
+#!/usr/bin/perl
+
 # This is a simple configure script for MacOS and MPW.
 # Note that this script can't be run directly from MPW perl
 # because it has the wrong end-of-line characters. See README.
 
-# Copyright 2000, 2001 Free Software Foundation, Inc.
+# Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 #
 # This file is part of the GNU MP Library.
 #
 # The GNU MP Library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation; either version 2.1 of the License, or (at your
+# the Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 #
 # The GNU MP Library is distributed in the hope that it will be useful, but
@@ -17,12 +19,10 @@
 # License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-# MA 02111-1307, USA.
+# along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 # ***************************** NOTE **************************************
-# This script try to figure out things about this release but has a hard
+# This script tries to figure out things about this release but has a hard
 # time doing it. It reads some lines in "configure", "Makefile.am" and
 # "mp*/Makefile.am" and try to guess things. With every new release
 # this script has to be tested.
@@ -53,6 +53,8 @@ my @dirs =
    'MpnObj',
    'MpqObj',
    'MpzObj',
+   'PrintfObj',
+   'ScanfObj',
    'CmnObj',
    'AsmObj',
    'Asm',
@@ -106,12 +108,12 @@ my %cfg_cw =
 # We only set the variables that have a value
 my %vars =
   (
-   '__GMP_BITS_PER_MP_LIMB' => 32,
-   '__GMP_HAVE_HOST_CPU_FAMILY_power' => 0,
-   '__GMP_HAVE_HOST_CPU_FAMILY_powerpc' => 1,
+   'BITS_PER_MP_LIMB' => 32,
+   'HAVE_HOST_CPU_FAMILY_power' => 0,
+   'HAVE_HOST_CPU_FAMILY_powerpc' => 1,
+   'GMP_NAIL_BITS' => 0,
    'DEFN_LONG_LONG_LIMB' => '',
-   '__GMP_LIBGMP_STATIC' => 0,
-   '__GMP_LIBGMP_SHARED' => 0,
+   'LIBGMP_DLL' => 0,
   );
 
 my $make_in      = 'Makefile.in';
@@ -246,6 +248,8 @@ my $file;
 foreach $file (@asm_files) {
   my $ifile = mf("$mpn_asm_dir/$file.asm");
   my $ofile = mf("Asm/$file.s");
+  my $func;
+  my %defs = ();
 
   open(ASM, $ifile)
     or die "Can't read file \"$ifile\"\n";
@@ -261,9 +265,22 @@ foreach $file (@asm_files) {
 
     s/ASM_START\s*\(.*?\)/$asm_start/;
 
-    s/PROLOGUE\s*\(\s*(.*?)\s*\)/asm_prologue($1)/e;
+    if (s/PROLOGUE\s*\(\s*(.*?)\s*\)/asm_prologue($1)/e) {
+      $func = $1;
+    }
 
-    s/EPILOGUE\s*\(\s*(.*?)\s*\)/asm_epilogue($1)/e;
+    s/EPILOGUE\s*\(\s*(.*?)\s*\)/asm_epilogue($func)/e;
+
+    s/L\(([^)]*)\)/L$1/g;       # L() style labels
+
+    # register name defines
+    if (/\bdefine\(`?([a-zA-Z0-9]+)'?,`?([^')]*)\'?\)/) {
+      $defs{$1} = $2;
+      $_ = "\n";
+    }
+    foreach my $i (keys %defs) {
+      s/\b\Q$i\E\b/$defs{$i}/g;
+    }
 
     s/\n/\x0D/g;
     print NEW "$_\x0D";		# Use MacOS end-of-line character
@@ -315,6 +332,8 @@ my %config =
    'mpz_objects' => what_objects("mpz","../mpz","{MpzObjDir}"),
    'mpf_objects' => what_objects("mpf","../mpf","{MpfObjDir}"),
    'mpq_objects' => what_objects("mpq","../mpq","{MpqObjDir}"),
+   'printf_objects' => what_objects("printf","../printf","{PrintfObjDir}"),
+   'scanf_objects'  => what_objects("scanf","../scanf","{ScanfObjDir}"),
    'gmp_objects' => what_objects("gmp","..",    "{CmnObjDir}"),
    %{$cfg},
   );
@@ -356,8 +375,8 @@ sub parse_top_configure {
   $/ = $old_eol;
   close CONFIGURE;
 
-  my ($package) = $text =~ /(?:\n|\r)PACKAGE\s*=\s*(\S+)/;
-  my ($version) = $text =~ /(?:\n|\r)VERSION\s*=\s*(\S+)/;
+  my ($package) = $text =~ /(?:\n|\r)PACKAGE_NAME\s*=\s*(\S+)/;
+  my ($version) = $text =~ /(?:\n|\r)PACKAGE_VERSION\s*=\s*(\S+)/;
 
   my $files = join(' ',$text =~ /(?:\n|\r)gmp_mpn_functions\s*=\s*\"([^\"]+)/);
   $files =~ s/\\/ /g;
@@ -429,7 +448,7 @@ sub what_objects {
   close MAKEFILE_AM;
 
   my @ofiles = split(' ',$text);
-  @ofiles > 10 or die "Can't find $part files in \"$makefile_am\"\n";
+  @ofiles > 8 or die "Can't find $part files in \"$makefile_am\"\n";
   my $ofiles = join(' ', map {/^(.+)\.c$/ and $_ = "$dstdir$1.o"} @ofiles);
   $ofiles =~ s/(.{1,66})\s/$1 \xB6\x0D\t/g;
 

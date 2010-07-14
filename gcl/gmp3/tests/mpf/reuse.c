@@ -1,12 +1,12 @@
 /* Test that routines allow reusing a source variable as destination.
 
-Copyright 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,10 +25,10 @@ MA 02111-1307, USA. */
 #include "gmp-impl.h"
 #include "tests.h"
 
-#if defined (_WIN32) && __GMP_LIBGMP_SHARED
+#if __GMP_LIBGMP_DLL
 
 /* FIXME: When linking to a DLL libgmp, mpf_add etc can't be used as
-   initializers for global variables because they're effectively a global
+   initializers for global variables because they're effectively global
    variables (function pointers) themselves.  Perhaps calling a test
    function successively with mpf_add etc would be better.  */
 
@@ -52,9 +50,9 @@ main (void)
 #define EXPO 32
 #endif
 
-void dump_abort _PROTO ((char *name, mpf_t res1, mpf_t res2));
+void dump_abort __GMP_PROTO ((char *, mpf_t, mpf_t));
 
-typedef void (*dss_func) _PROTO ((mpf_ptr, mpf_srcptr, mpf_srcptr));
+typedef void (*dss_func) __GMP_PROTO ((mpf_ptr, mpf_srcptr, mpf_srcptr));
 
 dss_func dss_funcs[] =
 {
@@ -66,7 +64,7 @@ char *dss_func_names[] =
   "mpf_div", "mpf_add", "mpf_mul", "mpf_sub",
 };
 
-typedef void (*dsi_func) _PROTO ((mpf_ptr, mpf_srcptr, unsigned long int));
+typedef void (*dsi_func) __GMP_PROTO ((mpf_ptr, mpf_srcptr, unsigned long int));
 
 dsi_func dsi_funcs[] =
 {
@@ -80,7 +78,7 @@ char *dsi_func_names[] =
   "mpf_mul_2exp", "mpf_div_2exp"
 };
 
-typedef void (*dis_func) _PROTO ((mpf_ptr, unsigned long int, mpf_srcptr));
+typedef void (*dis_func) __GMP_PROTO ((mpf_ptr, unsigned long int, mpf_srcptr));
 
 dis_func dis_funcs[] =
 {
@@ -205,9 +203,9 @@ dump_abort (char *name, mpf_t res1, mpf_t res2)
 }
 
 #if 0
-void mpf_abs		_PROTO ((mpf_ptr, mpf_srcptr));
-void mpf_sqrt		_PROTO ((mpf_ptr, mpf_srcptr));
-void mpf_neg		_PROTO ((mpf_ptr, mpf_srcptr));
+void mpf_abs		__GMP_PROTO ((mpf_ptr, mpf_srcptr));
+void mpf_sqrt		__GMP_PROTO ((mpf_ptr, mpf_srcptr));
+void mpf_neg		__GMP_PROTO ((mpf_ptr, mpf_srcptr));
 #endif
 
 #endif /* ! DLL_EXPORT */

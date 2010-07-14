@@ -1,13 +1,12 @@
-/* mpz_congruent_ui_p -- test congruence of mpz and ulong */
+/* mpz_congruent_ui_p -- test congruence of mpz and ulong.
 
-/*
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,10 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -39,8 +35,8 @@ mpz_congruent_ui_p (mpz_srcptr a, unsigned long cu, unsigned long du)
   mp_size_t  asize;
   mp_limb_t  c, d, r;
 
-  if (du == 0) 
-    DIVIDE_BY_ZERO;
+  if (UNLIKELY (du == 0))
+    return (mpz_cmp_ui (a, cu) == 0);
 
   asize = SIZ(a);
   if (asize == 0)
@@ -49,6 +45,23 @@ mpz_congruent_ui_p (mpz_srcptr a, unsigned long cu, unsigned long du)
         return cu == 0;
       else
         return (cu % du) == 0;
+    }
+
+  /* For nails don't try to be clever if c or d is bigger than a limb, just
+     fake up some mpz_t's and go to the main mpz_congruent_p.  */
+  if (du > GMP_NUMB_MAX || cu > GMP_NUMB_MAX)
+    {
+      mp_limb_t  climbs[2], dlimbs[2];
+      mpz_t      cz, dz;
+
+      ALLOC(cz) = 2;
+      PTR(cz) = climbs;
+      ALLOC(dz) = 2;
+      PTR(dz) = dlimbs;
+
+      mpz_set_ui (cz, cu);
+      mpz_set_ui (dz, du);
+      return mpz_congruent_p (a, cz, dz);
     }
 
   /* NEG_MOD works on limbs, so convert ulong to limb */

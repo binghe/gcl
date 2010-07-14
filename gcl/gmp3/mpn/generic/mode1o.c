@@ -2,16 +2,15 @@
 
    THE FUNCTIONS IN THIS FILE ARE FOR INTERNAL USE ONLY.  THEY'RE ALMOST
    CERTAIN TO BE SUBJECT TO INCOMPATIBLE CHANGES OR DISAPPEAR COMPLETELY IN
-   FUTURE GNU MP RELEASES.  */
- 
-/*
-Copyright 2000, 2001 Free Software Foundation, Inc.
+   FUTURE GNU MP RELEASES.
+
+Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -20,10 +19,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -32,16 +28,16 @@ MA 02111-1307, USA.
 
 /* Calculate an r satisfying
 
-           r*b^k + a - c == q*d
+           r*B^k + a - c == q*d
 
-   where b=2^BITS_PER_MP_LIMB, a is {src,size}, k is either size or size-1
+   where B=2^BITS_PER_MP_LIMB, a is {src,size}, k is either size or size-1
    (the caller won't know which), and q is the quotient (discarded).  d must
    be odd, c can be any limb value.
 
    If c<d then r will be in the range 0<=r<d, or if c>=d then 0<=r<=d.
 
    This slightly strange function suits the initial Nx1 reduction for GCDs
-   or Jacobi symbols since the factors of 2 in b^k can be ignored, leaving
+   or Jacobi symbols since the factors of 2 in B^k can be ignored, leaving
    -r == a mod d (by passing c=0).  For a GCD the factor of -1 on r can be
    ignored, or for the Jacobi symbol it can be accounted for.  The function
    also suits divisibility and congruence testing since if r=0 (or r=d) is
@@ -49,10 +45,10 @@ MA 02111-1307, USA.
 
 
    r is a bit like the remainder returned by mpn_divexact_by3c, and is the
-   sort of remainder a hypothetical mpn_divexact_1 might return.  Like
-   mpn_divexact_by3c, r represents a borrow, since effectively quotient
-   limbs are chosen so that subtracting that multiple of d from src at each
-   step will produce a zero limb.
+   sort of remainder mpn_divexact_1 might return.  Like mpn_divexact_by3c, r
+   represents a borrow, since effectively quotient limbs are chosen so that
+   subtracting that multiple of d from src at each step will produce a zero
+   limb.
 
    A long calculation can be done piece by piece from low to high by passing
    the return value from one part as the carry parameter to the next part.
@@ -78,11 +74,11 @@ MA 02111-1307, USA.
    In the main loop it will be noted that the new carry (call it r) is the
    sum of the high product h and any borrow from l=s-c.  If c<d then we will
    have r<d too, for the following reasons.  Let q=l*inverse be the quotient
-   limb, so that q*d = b*h + l.  Now if h=d-1 then
+   limb, so that q*d = B*h + l, where B=2^GMP_NUMB_BITS.  Now if h=d-1 then
 
-       l = q*d - b*(d-1) <= (b-1)*d - b*(d-1) = b-d
+       l = q*d - B*(d-1) <= (B-1)*d - B*(d-1) = B-d
 
-   But if l=s-c produces a borrow when c<d, then l>=b-d+1 and hence will
+   But if l=s-c produces a borrow when c<d, then l>=B-d+1 and hence will
    never have h=d-1 and so r=h+borrow <= d-1.
 
    When c>=d, on the other hand, h=d-1 can certainly occur together with a
@@ -97,7 +93,7 @@ MA 02111-1307, USA.
    The special case for size==1 is so that it can be assumed c<=d in the
    high<=divisor test at the end.  c<=d is only guaranteed after at least
    one iteration of the main loop.  There's also a decent chance one % is
-   faster than a modlimb_invert, though that will depend on the processor.
+   faster than a binvert_limb, though that will depend on the processor.
 
    A CPU specific implementation might want to omit the size==1 code or the
    high<divisor test.  mpn/x86/k6/mode1o.asm for instance finds neither
@@ -105,43 +101,48 @@ MA 02111-1307, USA.
 
 
 mp_limb_t
-mpn_modexact_1c_odd (mp_srcptr src, mp_size_t size, mp_limb_t d, mp_limb_t c)
+mpn_modexact_1c_odd (mp_srcptr src, mp_size_t size, mp_limb_t d,
+                     mp_limb_t orig_c)
 {
-  mp_limb_t  s, h, l, inverse, dummy;
+  mp_limb_t  s, h, l, inverse, dummy, dmul, ret;
+  mp_limb_t  c = orig_c;
   mp_size_t  i;
 
   ASSERT (size >= 1);
   ASSERT (d & 1);
+  ASSERT_MPN (src, size);
+  ASSERT_LIMB (d);
+  ASSERT_LIMB (c);
 
   if (size == 1)
     {
       s = src[0];
       if (s > c)
-        {
-          l = s-c;
-          h = l % d;
-          if (h != 0)
-            h = d - h;
-        }
+	{
+	  l = s-c;
+	  h = l % d;
+	  if (h != 0)
+	    h = d - h;
+	}
       else
-        {
-          l = c-s;
-          h = l % d;
-        }
+	{
+	  l = c-s;
+	  h = l % d;
+	}
       return h;
     }
 
 
-  modlimb_invert (inverse, d);
+  binvert_limb (inverse, d);
+  dmul = d << GMP_NAIL_BITS;
 
   i = 0;
   do
     {
       s = src[i];
-      l = s - c;
-      c = (l > s);
-      l *= inverse;
-      umul_ppmm (h, dummy, l, d);
+      SUBC_LIMB (c, l, s, c);
+      l = (l * inverse) & GMP_NUMB_MASK;
+      umul_ppmm (h, dummy, l, dmul);
       c += h;
     }
   while (++i < size-1);
@@ -151,28 +152,28 @@ mpn_modexact_1c_odd (mp_srcptr src, mp_size_t size, mp_limb_t d, mp_limb_t c)
   if (s <= d)
     {
       /* With high<=d the final step can be a subtract and addback.  If c==0
-         then the addback will restore to l>=0.  If c==d then will get l==d
-         if s==0, but that's ok per the function definition.  */
+	 then the addback will restore to l>=0.  If c==d then will get l==d
+	 if s==0, but that's ok per the function definition.  */
 
       l = c - s;
-      if (l > c)
-        l += d;
+      if (c < s)
+	l += d;
 
-      ASSERT (l < d);
-      return l;
+      ret = l;
     }
   else
     {
       /* Can't skip a divide, just do the loop code once more. */
-      l = s - c;
-      c = (l > s);
-      l *= inverse;
-      umul_ppmm (h, dummy, l, d);
-      c += h;
 
-      ASSERT (c < d);
-      return c;
+      SUBC_LIMB (c, l, s, c);
+      l = (l * inverse) & GMP_NUMB_MASK;
+      umul_ppmm (h, dummy, l, dmul);
+      c += h;
+      ret = c;
     }
+
+  ASSERT (orig_c < d ? ret < d : ret <= d);
+  return ret;
 }
 
 
@@ -193,32 +194,31 @@ mpn_modexact_1c_odd (mp_srcptr src, mp_size_t size, mp_limb_t d, mp_limb_t c)
 mp_limb_t
 mpn_modexact_1c_odd (mp_srcptr src, mp_size_t size, mp_limb_t d, mp_limb_t h)
 {
-  mp_limb_t  s, x, y, inverse, dummy;
+  mp_limb_t  s, x, y, inverse, dummy, dmul, c1, c2;
   mp_limb_t  c = 0;
   mp_size_t  i;
 
   ASSERT (size >= 1);
   ASSERT (d & 1);
 
-  modlimb_invert (inverse, d);
+  binvert_limb (inverse, d);
+  dmul = d << GMP_NAIL_BITS;
 
   for (i = 0; i < size; i++)
     {
       ASSERT (c==0 || c==1);
 
       s = src[i];
-      x = s - c;
-      c = (x > s);
+      SUBC_LIMB (c1, x, s, c);
 
-      y = x - h;
-      c += (y > x);
+      SUBC_LIMB (c2, y, x, h);
+      c = c1 + c2;
 
-      y *= inverse;
-      umul_ppmm (h, dummy, y, d);
+      y = (y * inverse) & GMP_NUMB_MASK;
+      umul_ppmm (h, dummy, y, dmul);
     }
 
   h += c;
-  ASSERT (h < d);
   return h;
 }
 

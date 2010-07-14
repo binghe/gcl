@@ -1,12 +1,13 @@
 /* Test mpz_add, mpz_add_ui, mpz_cmp, mpz_cmp, mpz_mul, mpz_sqrtrem.
 
-Copyright 1991, 1993, 1994, 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1991, 1993, 1994, 1996, 2000, 2001, 2002 Free Software Foundation,
+Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,8 +25,8 @@ MA 02111-1307, USA. */
 #include "gmp-impl.h"
 #include "tests.h"
 
-void dump_abort _PROTO ((mpz_t, mpz_t, mpz_t));
-void debug_mp _PROTO ((mpz_t, int));
+void dump_abort __GMP_PROTO ((mpz_t, mpz_t, mpz_t));
+void debug_mp __GMP_PROTO ((mpz_t, int));
 
 int
 main (int argc, char **argv)
@@ -37,7 +36,7 @@ main (int argc, char **argv)
   mpz_t temp, temp2;
   mp_size_t x2_size;
   int i;
-  int reps = 20000;
+  int reps = 200000;
   gmp_randstate_ptr rands;
   mpz_t bs;
   unsigned long size_range;
@@ -48,7 +47,7 @@ main (int argc, char **argv)
   mpz_init (bs);
 
   if (argc == 2)
-     gmp_randseed_ui (rands, atoi (argv[1]));
+    reps = atoi (argv[1]);
 
   mpz_init (x2);
   mpz_init (x);
@@ -68,6 +67,9 @@ main (int argc, char **argv)
       /* printf ("%ld\n", SIZ (x2)); */
 
       mpz_sqrtrem (x, rem, x2);
+      MPZ_CHECK_FORMAT (x);
+      MPZ_CHECK_FORMAT (rem);
+
       mpz_mul (temp, x, x);
 
       /* Is square of result > argument?  */

@@ -1,33 +1,35 @@
 dnl  Intel Pentium mpn_com_n -- mpn ones complement.
-dnl
-dnl  P5: 1.75 cycles/limb
 
-dnl  Copyright 1996, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1996, 2001, 2002, 2006 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
 
+C P5: 1.75 cycles/limb
+
+
+NAILS_SUPPORT(0-31)
+
+
 C void mpn_com_n (mp_ptr dst, mp_srcptr src, mp_size_t size);
 C
-C This code is similar to mpn_copyi, basically there's just some "xorl $-1"s
-C inserted.
+C This code is similar to mpn_copyi, basically there's just some "xorl
+C $GMP_NUMB_MASK"s inserted.
 C
 C Alternatives:
 C
@@ -40,6 +42,8 @@ defframe(PARAM_SIZE,12)
 defframe(PARAM_SRC, 8)
 defframe(PARAM_DST, 4)
 
+	TEXT
+	ALIGN(8)
 PROLOGUE(mpn_com_n)
 deflit(`FRAME',0)
 
@@ -74,29 +78,29 @@ L(top):
 
 	movl	-28(%eax,%ecx,4), %esi
 	movl	-24(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, -32(%edx)
 	movl	%edi, -28(%edx)
 
 	movl	-20(%eax,%ecx,4), %esi
 	movl	-16(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, -24(%edx)
 	movl	%edi, -20(%edx)
 
 	movl	-12(%eax,%ecx,4), %esi
 	movl	-8(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, -16(%edx)
 	movl	%edi, -12(%edx)
 
 	movl	-4(%eax,%ecx,4), %esi
 	movl	(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, -8(%edx)
 	movl	%edi, -4(%edx)
 
@@ -116,15 +120,15 @@ L(end):
 
 	movl	-12(%eax,%ecx,4), %esi
 	movl	-8(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, (%edx)
 	movl	%edi, 4(%edx)
 
 	movl	-4(%eax,%ecx,4), %esi
 	movl	(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, 8(%edx)
 	movl	%edi, 12(%edx)
 
@@ -139,8 +143,8 @@ L(no4):
 
 	movl	-4(%eax,%ecx,4), %esi
 	movl	(%eax,%ecx,4), %edi
-	xorl	$-1, %esi
-	xorl	$-1, %edi
+	xorl	$GMP_NUMB_MASK, %esi
+	xorl	$GMP_NUMB_MASK, %edi
 	movl	%esi, (%edx)
 	movl	%edi, 4(%edx)
 
@@ -153,7 +157,7 @@ L(no2):
 
 	movl	-4(%eax), %ecx
 
-	xorl	$-1, %ecx
+	xorl	$GMP_NUMB_MASK, %ecx
 	popl	%esi
 
 	movl	%ecx, (%edx)

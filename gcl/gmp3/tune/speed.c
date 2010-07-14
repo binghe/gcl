@@ -1,12 +1,12 @@
 /* Speed measuring program.
 
-Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 /* Usage message is in the code below, run with no arguments to print it.
    See README for interesting applications.
@@ -90,6 +88,15 @@ SPEED_EXTRA_PROTOS2
       (ptr)[__i] = (n);                 \
   } while (0)
 
+
+#if BITS_PER_MP_LIMB == 32
+#define GMP_NUMB_0xAA  (CNST_LIMB(0xAAAAAAAA) & GMP_NUMB_MASK)
+#endif
+#if BITS_PER_MP_LIMB == 64
+#define GMP_NUMB_0xAA  (CNST_LIMB(0xAAAAAAAAAAAAAAAA) & GMP_NUMB_MASK)
+#endif
+
+
 #define CMP_ABSOLUTE     1
 #define CMP_RATIO        2
 #define CMP_DIFFERENCE   3
@@ -104,8 +111,9 @@ int  option_unit = UNIT_SECONDS;
 #define DATA_RANDOM   1
 #define DATA_RANDOM2  2
 #define DATA_ZEROS    3
-#define DATA_FFS      4
-#define DATA_2FD      5
+#define DATA_AAS      4
+#define DATA_FFS      5
+#define DATA_2FD      6
 int  option_data = DATA_RANDOM;
 
 int        option_square = 0;
@@ -135,24 +143,52 @@ const struct routine_t {
   const char        *name;
   speed_function_t  fun;
   int               flag;
-  
 } routine[] = {
 
   { "noop",              speed_noop                 },
   { "noop_wxs",          speed_noop_wxs             },
   { "noop_wxys",         speed_noop_wxys            },
 
-  { "mpn_add_n",         speed_mpn_add_n            },
-  { "mpn_sub_n",         speed_mpn_sub_n            },
-  { "mpn_add_n_self",    speed_mpn_add_n_self       },
-  { "mpn_add_n_inplace", speed_mpn_add_n_inplace    },
+  { "mpn_add_n",         speed_mpn_add_n,     FLAG_R_OPTIONAL },
+  { "mpn_sub_n",         speed_mpn_sub_n,     FLAG_R_OPTIONAL },
+
+#if HAVE_NATIVE_mpn_addsub_n
+  { "mpn_addsub_n",      speed_mpn_addsub_n,     FLAG_R_OPTIONAL },
+#endif
 
   { "mpn_addmul_1",      speed_mpn_addmul_1,  FLAG_R },
   { "mpn_submul_1",      speed_mpn_submul_1,  FLAG_R },
+#if HAVE_NATIVE_mpn_addmul_2
+  { "mpn_addmul_2",      speed_mpn_addmul_2,  FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addmul_3
+  { "mpn_addmul_3",      speed_mpn_addmul_3,  FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addmul_4
+  { "mpn_addmul_4",      speed_mpn_addmul_4,  FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addmul_5
+  { "mpn_addmul_5",      speed_mpn_addmul_5,  FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addmul_6
+  { "mpn_addmul_6",      speed_mpn_addmul_6,  FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addmul_7
+  { "mpn_addmul_7",      speed_mpn_addmul_7,  FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addmul_8
+  { "mpn_addmul_8",      speed_mpn_addmul_8,  FLAG_R_OPTIONAL },
+#endif
   { "mpn_mul_1",         speed_mpn_mul_1,     FLAG_R },
   { "mpn_mul_1_inplace", speed_mpn_mul_1_inplace, FLAG_R },
 #if HAVE_NATIVE_mpn_mul_2
-  { "mpn_mul_2",         speed_mpn_mul_2             },
+  { "mpn_mul_2",         speed_mpn_mul_2,     FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_mul_3
+  { "mpn_mul_3",         speed_mpn_mul_3,     FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_mul_4
+  { "mpn_mul_4",         speed_mpn_mul_4,     FLAG_R_OPTIONAL },
 #endif
 
   { "mpn_divrem_1",      speed_mpn_divrem_1,  FLAG_R },
@@ -165,6 +201,8 @@ const struct routine_t {
 #if HAVE_NATIVE_mpn_mod_1c
   { "mpn_mod_1c",        speed_mpn_mod_1c,    FLAG_R },
 #endif
+  { "mpn_preinv_divrem_1",  speed_mpn_preinv_divrem_1,  FLAG_R },
+  { "mpn_preinv_divrem_1f", speed_mpn_preinv_divrem_1f, FLAG_R },
   { "mpn_preinv_mod_1",  speed_mpn_preinv_mod_1, FLAG_R },
 
   { "mpn_divrem_1_div",  speed_mpn_divrem_1_div,  FLAG_R },
@@ -181,10 +219,16 @@ const struct routine_t {
   { "mpn_divexact_1",    speed_mpn_divexact_1,    FLAG_R },
   { "mpn_divexact_by3",  speed_mpn_divexact_by3          },
 
-#if HAVE_NATIVE_mpn_modexact_1c_odd
+  { "mpn_bdiv_dbm1c",    speed_mpn_bdiv_dbm1c,    FLAG_R_OPTIONAL },
+
+#if HAVE_NATIVE_mpn_modexact_1_odd
   { "mpn_modexact_1_odd",  speed_mpn_modexact_1_odd,  FLAG_R },
 #endif
   { "mpn_modexact_1c_odd", speed_mpn_modexact_1c_odd, FLAG_R },
+
+#if GMP_NUMB_BITS % 4 == 0
+  { "mpn_mod_34lsub1",   speed_mpn_mod_34lsub1 },
+#endif
 
   { "mpn_dc_tdiv_qr",       speed_mpn_dc_tdiv_qr       },
   { "mpn_dc_divrem_n",      speed_mpn_dc_divrem_n      },
@@ -199,27 +243,32 @@ const struct routine_t {
   { "mpn_lshift",        speed_mpn_lshift, FLAG_R   },
   { "mpn_rshift",        speed_mpn_rshift, FLAG_R   },
 
-  { "mpn_and_n",         speed_mpn_and_n            },
-  { "mpn_andn_n",        speed_mpn_andn_n           },
-  { "mpn_nand_n",        speed_mpn_nand_n           },
-  { "mpn_ior_n",         speed_mpn_ior_n            },
-  { "mpn_iorn_n",        speed_mpn_iorn_n           },
-  { "mpn_nior_n",        speed_mpn_nior_n           },
-  { "mpn_xor_n",         speed_mpn_xor_n            },
-  { "mpn_xnor_n",        speed_mpn_xnor_n           },
+  { "mpn_and_n",         speed_mpn_and_n,  FLAG_R_OPTIONAL },
+  { "mpn_andn_n",        speed_mpn_andn_n, FLAG_R_OPTIONAL },
+  { "mpn_nand_n",        speed_mpn_nand_n, FLAG_R_OPTIONAL },
+  { "mpn_ior_n",         speed_mpn_ior_n,  FLAG_R_OPTIONAL },
+  { "mpn_iorn_n",        speed_mpn_iorn_n, FLAG_R_OPTIONAL },
+  { "mpn_nior_n",        speed_mpn_nior_n, FLAG_R_OPTIONAL },
+  { "mpn_xor_n",         speed_mpn_xor_n,  FLAG_R_OPTIONAL },
+  { "mpn_xnor_n",        speed_mpn_xnor_n, FLAG_R_OPTIONAL },
   { "mpn_com_n",         speed_mpn_com_n            },
 
   { "mpn_popcount",      speed_mpn_popcount         },
   { "mpn_hamdist",       speed_mpn_hamdist          },
 
+  { "mpn_matrix22_mul",  speed_mpn_matrix22_mul     },
+
+  { "mpn_hgcd",          speed_mpn_hgcd             },
+  { "mpn_hgcd_lehmer",   speed_mpn_hgcd_lehmer      },
+
   { "mpn_gcd_1",         speed_mpn_gcd_1,  FLAG_R_OPTIONAL },
   { "mpn_gcd_1N",        speed_mpn_gcd_1N, FLAG_R_OPTIONAL },
 
   { "mpn_gcd",           speed_mpn_gcd                    },
+#if 0
   { "mpn_gcd_binary",    speed_mpn_gcd_binary             },
+  { "mpn_gcd_accel",     speed_mpn_gcd_accel              },
   { "find_a",            speed_find_a,        FLAG_NODATA },
-#if HAVE_NATIVE_mpn_gcd_finda
-  { "mpn_gcd_finda",     speed_mpn_gcd_finda, FLAG_NODATA },
 #endif
 
   { "mpn_gcdext",            speed_mpn_gcdext            },
@@ -227,18 +276,24 @@ const struct routine_t {
   { "mpn_gcdext_double",     speed_mpn_gcdext_double     },
   { "mpn_gcdext_one_single", speed_mpn_gcdext_one_single },
   { "mpn_gcdext_one_double", speed_mpn_gcdext_one_double },
-
+#if 0
+  { "mpn_gcdext_lehmer",     speed_mpn_gcdext_lehmer     },
+#endif
   { "mpz_jacobi",        speed_mpz_jacobi           },
   { "mpn_jacobi_base",   speed_mpn_jacobi_base      },
+  { "mpn_jacobi_base_1", speed_mpn_jacobi_base_1    },
+  { "mpn_jacobi_base_2", speed_mpn_jacobi_base_2    },
+  { "mpn_jacobi_base_3", speed_mpn_jacobi_base_3    },
 
-  { "mpn_mul_basecase",  speed_mpn_mul_basecase, FLAG_R_OPTIONAL },
+  { "mpn_mul",           speed_mpn_mul,         FLAG_R_OPTIONAL },
+  { "mpn_mul_basecase",  speed_mpn_mul_basecase,FLAG_R_OPTIONAL },
   { "mpn_sqr_basecase",  speed_mpn_sqr_basecase     },
 #if HAVE_NATIVE_mpn_sqr_diagonal
   { "mpn_sqr_diagonal",  speed_mpn_sqr_diagonal     },
 #endif
 
   { "mpn_mul_n",         speed_mpn_mul_n            },
-  { "mpn_sqr_n",         speed_mpn_sqr_n            },
+  { "mpn_sqr",           speed_mpn_sqr_n            },
 
   { "mpn_kara_mul_n",    speed_mpn_kara_mul_n       },
   { "mpn_kara_sqr_n",    speed_mpn_kara_sqr_n       },
@@ -250,15 +305,16 @@ const struct routine_t {
   { "mpn_mul_fft",       speed_mpn_mul_fft,     FLAG_R_OPTIONAL },
   { "mpn_mul_fft_sqr",   speed_mpn_mul_fft_sqr, FLAG_R_OPTIONAL },
 
-  { "mpn_toom3_mul_n_mpn",   speed_mpn_toom3_mul_n_mpn   },
-  { "mpn_toom3_mul_n_open",  speed_mpn_toom3_mul_n_open  },
-  { "mpn_toom3_sqr_n_mpn",   speed_mpn_toom3_sqr_n_mpn   },
-  { "mpn_toom3_sqr_n_open",  speed_mpn_toom3_sqr_n_open  },
+  { "mpn_mullow_n",      speed_mpn_mullow_n         },
+  { "mpn_mullow_basecase", speed_mpn_mullow_basecase},
 
   { "mpn_get_str",       speed_mpn_get_str,  FLAG_R_OPTIONAL },
-  { "mpn_set_str",       speed_mpn_set_str,  FLAG_R_OPTIONAL },
+
+  { "mpn_set_str",         speed_mpn_set_str,     FLAG_R_OPTIONAL },
+  { "mpn_set_str_basecase",speed_mpn_bc_set_str,  FLAG_R_OPTIONAL },
 
   { "mpn_sqrtrem",       speed_mpn_sqrtrem          },
+  { "mpn_rootrem",       speed_mpn_rootrem, FLAG_R  },
 
   { "mpn_fib2_ui",       speed_mpn_fib2_ui,    FLAG_NODATA },
   { "mpz_fib_ui",        speed_mpz_fib_ui,     FLAG_NODATA },
@@ -272,10 +328,10 @@ const struct routine_t {
   { "mpz_powm",          speed_mpz_powm             },
   { "mpz_powm_mod",      speed_mpz_powm_mod         },
   { "mpz_powm_redc",     speed_mpz_powm_redc        },
-  { "mpz_powm_ui",       speed_mpz_powm_ui          },
+  { "mpz_powm_ui",       speed_mpz_powm_ui,  FLAG_R_OPTIONAL },
 
   { "mpz_mod",           speed_mpz_mod              },
-  { "redc",              speed_redc                 },
+  { "mpn_redc_1",        speed_mpn_redc_1           },
 
   { "MPN_COPY",          speed_MPN_COPY             },
   { "MPN_COPY_INCR",     speed_MPN_COPY_INCR        },
@@ -287,14 +343,26 @@ const struct routine_t {
 #if HAVE_NATIVE_mpn_copyd
   { "mpn_copyd",         speed_mpn_copyd            },
 #endif
+#if HAVE_NATIVE_mpn_addlsh1_n
+  { "mpn_addlsh1_n",     speed_mpn_addlsh1_n        },
+#endif
+#if HAVE_NATIVE_mpn_sublsh1_n
+  { "mpn_sublsh1_n",     speed_mpn_sublsh1_n        },
+#endif
+#if HAVE_NATIVE_mpn_rsh1add_n
+  { "mpn_rsh1add_n",     speed_mpn_rsh1add_n        },
+#endif
+#if HAVE_NATIVE_mpn_rsh1sub_n
+  { "mpn_rsh1sub_n",     speed_mpn_rsh1sub_n        },
+#endif
 
   { "MPN_ZERO",          speed_MPN_ZERO             },
 
-  { "modlimb_invert",       speed_modlimb_invert,       FLAG_NODATA },
-  { "modlimb_invert_mul1",  speed_modlimb_invert_mul1,  FLAG_NODATA },
-  { "modlimb_invert_loop",  speed_modlimb_invert_loop,  FLAG_NODATA },
-  { "modlimb_invert_cond",  speed_modlimb_invert_cond,  FLAG_NODATA },
-  { "modlimb_invert_arith", speed_modlimb_invert_arith, FLAG_NODATA },
+  { "binvert_limb",       speed_binvert_limb,       FLAG_NODATA },
+  { "binvert_limb_mul1",  speed_binvert_limb_mul1,  FLAG_NODATA },
+  { "binvert_limb_loop",  speed_binvert_limb_loop,  FLAG_NODATA },
+  { "binvert_limb_cond",  speed_binvert_limb_cond,  FLAG_NODATA },
+  { "binvert_limb_arith", speed_binvert_limb_arith, FLAG_NODATA },
 
   { "malloc_free",                  speed_malloc_free                  },
   { "malloc_realloc_free",          speed_malloc_realloc_free          },
@@ -309,21 +377,31 @@ const struct routine_t {
 #if HAVE_NATIVE_mpn_umul_ppmm
   { "mpn_umul_ppmm",     speed_mpn_umul_ppmm, FLAG_R_OPTIONAL },
 #endif
+#if HAVE_NATIVE_mpn_umul_ppmm_r
+  { "mpn_umul_ppmm_r",   speed_mpn_umul_ppmm_r, FLAG_R_OPTIONAL },
+#endif
 
   { "count_leading_zeros",  speed_count_leading_zeros,  FLAG_NODATA | FLAG_R_OPTIONAL },
   { "count_trailing_zeros", speed_count_trailing_zeros, FLAG_NODATA | FLAG_R_OPTIONAL },
 
   { "udiv_qrnnd",             speed_udiv_qrnnd,             FLAG_R_OPTIONAL },
-  { "udiv_qrnnd_preinv",      speed_udiv_qrnnd_preinv,      FLAG_R_OPTIONAL },
-  { "udiv_qrnnd_preinv2norm", speed_udiv_qrnnd_preinv2norm, FLAG_R_OPTIONAL },
+  { "udiv_qrnnd_preinv1",     speed_udiv_qrnnd_preinv1,     FLAG_R_OPTIONAL },
+  { "udiv_qrnnd_preinv2",     speed_udiv_qrnnd_preinv2,     FLAG_R_OPTIONAL },
   { "udiv_qrnnd_c",           speed_udiv_qrnnd_c,           FLAG_R_OPTIONAL },
 #if HAVE_NATIVE_mpn_udiv_qrnnd
   { "mpn_udiv_qrnnd",         speed_mpn_udiv_qrnnd,         FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_udiv_qrnnd_r
+  { "mpn_udiv_qrnnd_r",       speed_mpn_udiv_qrnnd_r,       FLAG_R_OPTIONAL },
 #endif
   { "invert_limb",            speed_invert_limb,            FLAG_R_OPTIONAL },
 
   { "operator_div",           speed_operator_div,           FLAG_R_OPTIONAL },
   { "operator_mod",           speed_operator_mod,           FLAG_R_OPTIONAL },
+
+  { "gmp_randseed",    speed_gmp_randseed,    FLAG_R_OPTIONAL               },
+  { "gmp_randseed_ui", speed_gmp_randseed_ui, FLAG_R_OPTIONAL | FLAG_NODATA },
+  { "mpz_urandomb",    speed_mpz_urandomb,    FLAG_R_OPTIONAL | FLAG_NODATA },
 
 #ifdef SPEED_EXTRA_ROUTINES
   SPEED_EXTRA_ROUTINES
@@ -336,7 +414,7 @@ const struct routine_t {
 
 struct choice_t {
   const struct routine_t  *p;
-  int                     r;
+  mp_limb_t               r;
   double                  scale;
   double                  time;
   int                     no_time;
@@ -360,11 +438,14 @@ data_fill (mp_ptr ptr, mp_size_t size)
   case DATA_ZEROS:
     MPN_ZERO (ptr, size);
     break;
+  case DATA_AAS:
+    MPN_FILL (ptr, size, GMP_NUMB_0xAA);
+    break;
   case DATA_FFS:
-    MPN_FILL (ptr, size, MP_LIMB_T_MAX);
+    MPN_FILL (ptr, size, GMP_NUMB_MAX);
     break;
   case DATA_2FD:
-    MPN_FILL (ptr, size, MP_LIMB_T_MAX);
+    MPN_FILL (ptr, size, GMP_NUMB_MAX);
     ptr[0] -= 2;
     break;
   default:
@@ -387,9 +468,9 @@ run_one (FILE *fp, struct speed_params *s, mp_size_t prev_size)
   const char  *first_open_fastest, *first_open_notfastest, *first_close;
   int         i, fastest, want_data;
   double      fastest_time;
-  TMP_DECL (marker);
+  TMP_DECL;
 
-  TMP_MARK (marker);
+  TMP_MARK;
 
   /* allocate data, unless all routines are NODATA */
   want_data = 0;
@@ -398,8 +479,8 @@ run_one (FILE *fp, struct speed_params *s, mp_size_t prev_size)
 
   if (want_data)
     {
-      sp.xp = SPEED_TMP_ALLOC_LIMBS (s->size, s->align_xp);
-      sp.yp = SPEED_TMP_ALLOC_LIMBS (s->size, s->align_yp);
+      SPEED_TMP_ALLOC_LIMBS (sp.xp, s->size, s->align_xp);
+      SPEED_TMP_ALLOC_LIMBS (sp.yp, s->size, s->align_yp);
 
       data_fill (s->xp, s->size);
       data_fill (s->yp, s->size);
@@ -430,7 +511,8 @@ run_one (FILE *fp, struct speed_params *s, mp_size_t prev_size)
       s->r = choice[i].r;
       choice[i].time = speed_measure (choice[i].p->fun, s);
       choice[i].no_time = (choice[i].time == -1.0);
-      choice[i].time *= choice[i].scale;
+      if (! choice[i].no_time)
+        choice[i].time *= choice[i].scale;
 
       /* Apply the effect of CMP_DIFFPREV, but the new choice[i].prev_time
          is before any differences.  */
@@ -480,7 +562,7 @@ run_one (FILE *fp, struct speed_params *s, mp_size_t prev_size)
             choice[i].time /= speed_cycletime;
           else if (option_unit == UNIT_CYCLESPERLIMB)
             choice[i].time /= (speed_cycletime * SIZE_TO_DIVISOR(s->size));
-          
+
           if (option_cmp == CMP_RATIO && i > 0)
             {
               /* A ratio isn't affected by the units chosen. */
@@ -512,10 +594,10 @@ run_one (FILE *fp, struct speed_params *s, mp_size_t prev_size)
          the measurements actually. */
 
       if (! (option_cmp == CMP_DIFFPREV && prev_size == -1))
-        {     
+        {
           fprintf (fp, "%-6ld ", s->size);
           for (i = 0; i < num_choices; i++)
-            fprintf (fp, "  %.9e", 
+            fprintf (fp, "  %.9e",
                      choice[i].no_time ? 0.0
                      : (option_cmp == CMP_RATIO && i == 0) ? 1.0
                      : choice[i].time);
@@ -531,24 +613,28 @@ run_one (FILE *fp, struct speed_params *s, mp_size_t prev_size)
           int   decimals;
 
           if (choice[i].no_time)
-            decimals = 0, choice[i].time = 0.0;
-          else if (option_unit == UNIT_CYCLESPERLIMB
-                   || (option_cmp == CMP_RATIO && i > 0))
-            decimals = 4;
-          else if (option_unit == UNIT_CYCLES)
-            decimals = 2;
+            {
+              fprintf (fp, " %*s", COLUMN_WIDTH, "n/a");
+            }
           else
-            decimals = 9;
+            {if (option_unit == UNIT_CYCLESPERLIMB
+                 || (option_cmp == CMP_RATIO && i > 0))
+                decimals = 4;
+              else if (option_unit == UNIT_CYCLES)
+                decimals = 2;
+              else
+                decimals = 9;
 
-          sprintf (buf, "%s%.*f%s",
-                   i == fastest ? first_open_fastest : first_open_notfastest,
-                   decimals, choice[i].time, first_close);
-          fprintf (fp, " %*s", COLUMN_WIDTH, buf);
+              sprintf (buf, "%s%.*f%s",
+                       i == fastest ? first_open_fastest : first_open_notfastest,
+                       decimals, choice[i].time, first_close);
+              fprintf (fp, " %*s", COLUMN_WIDTH, buf);
+            }
         }
       fprintf (fp, "\n");
     }
 
-  TMP_FREE (marker);
+  TMP_FREE;
 }
 
 void
@@ -556,11 +642,11 @@ run_all (FILE *fp)
 {
   mp_size_t  prev_size;
   int        i;
-  TMP_DECL (marker);
+  TMP_DECL;
 
-  TMP_MARK (marker);
-  sp.xp_block = SPEED_TMP_ALLOC_LIMBS (SPEED_BLOCK_SIZE, sp.align_xp);
-  sp.yp_block = SPEED_TMP_ALLOC_LIMBS (SPEED_BLOCK_SIZE, sp.align_yp);
+  TMP_MARK;
+  SPEED_TMP_ALLOC_LIMBS (sp.xp_block, SPEED_BLOCK_SIZE, sp.align_xp);
+  SPEED_TMP_ALLOC_LIMBS (sp.yp_block, SPEED_BLOCK_SIZE, sp.align_yp);
 
   data_fill (sp.xp_block, SPEED_BLOCK_SIZE);
   data_fill (sp.yp_block, SPEED_BLOCK_SIZE);
@@ -599,7 +685,7 @@ run_all (FILE *fp)
         }
     }
 
-  TMP_FREE (marker);
+  TMP_FREE;
 }
 
 
@@ -614,7 +700,7 @@ fopen_for_write (const char *filename)
     }
   return fp;
 }
-      
+
 void
 fclose_written (FILE *fp, const char *filename)
 {
@@ -638,12 +724,12 @@ run_gnuplot (int argc, char *argv[])
   char  *data_filename;
   FILE  *fp;
   int   i;
-     
+
   plot_filename = (char *) (*__gmp_allocate_func)
     (strlen (option_gnuplot_basename) + 20);
   data_filename = (char *) (*__gmp_allocate_func)
     (strlen (option_gnuplot_basename) + 20);
-      
+
   sprintf (plot_filename, "%s.gnuplot", option_gnuplot_basename);
   sprintf (data_filename, "%s.data",    option_gnuplot_basename);
 
@@ -656,12 +742,14 @@ run_gnuplot (int argc, char *argv[])
   fprintf (fp, "\n");
   fprintf (fp, "\n");
 
+  fprintf (fp, "reset\n");
+
   /* Putting the key at the top left is usually good, and you can change it
      interactively if it's not. */
   fprintf (fp, "set key left\n");
 
   /* designed to make it possible to see crossovers easily */
-  fprintf (fp, "set data style linespoints\n");
+  fprintf (fp, "set data style lines\n");
 
   fprintf (fp, "plot ");
   for (i = 0; i < num_choices; i++)
@@ -688,16 +776,21 @@ run_gnuplot (int argc, char *argv[])
 }
 
 
-/* Return a long with n many one bits (starting from the least significant) */
+/* Return a limb with n many one bits (starting from the least significant) */
 
 #define LIMB_ONES(n) \
-  ((n) == BITS_PER_MP_LIMB ? -1L : (n) == 0 ? 0L : (1L << (n)) - 1)
+  ((n) == BITS_PER_MP_LIMB ? MP_LIMB_T_MAX      \
+    : (n) == 0 ? CNST_LIMB(0)                   \
+    : (CNST_LIMB(1) << (n)) - 1)
 
 mp_limb_t
 r_string (const char *s)
 {
   const char  *s_orig = s;
   long        n;
+
+  if (strcmp (s, "aas") == 0)
+    return GMP_NUMB_0xAA;
 
   {
     mpz_t      z;
@@ -728,18 +821,18 @@ r_string (const char *s)
       mp_limb_t  l;
       if (n > BITS_PER_MP_LIMB)
         {
-          fprintf (stderr, "%ld bit parameter invalid (max %d bits)\n", 
+          fprintf (stderr, "%ld bit parameter invalid (max %d bits)\n",
                    n, BITS_PER_MP_LIMB);
           exit (1);
         }
       mpn_random (&l, 1);
-      return (l | (1 << (n-1))) & LIMB_ONES(n);
+      return (l | (CNST_LIMB(1) << (n-1))) & LIMB_ONES(n);
     }
   else  if (strcmp (s, "ones") == 0)
     {
       if (n > BITS_PER_MP_LIMB)
         {
-          fprintf (stderr, "%ld bit parameter invalid (max %d bits)\n", 
+          fprintf (stderr, "%ld bit parameter invalid (max %d bits)\n",
                    n, BITS_PER_MP_LIMB);
           exit (1);
         }
@@ -825,69 +918,79 @@ void
 usage (void)
 {
   int  i;
-  
+
   speed_time_init ();
 
-  printf ("\
-Usage: speed [-options] -s size <routine>...\n\
-Measure the speed of some routines.\n\
-Times are in seconds, accuracy is shown.\n\
-\n\
-   -p num     set precision as number of time units each routine must run\n\
-   -s size[-end][,size[-end]]...   sizes to measure\n\
-              single sizes or ranges, sep with comma or use multiple -s\n\
-   -t step    step through sizes by given amount\n\
-   -f factor  step through sizes by given factor (eg. 1.05)\n\
-   -r         show times as ratios of the first routine\n\
-   -d         show times as difference from the first routine\n\
-   -D         show times as difference from previous size shown\n\
-   -c         show times in CPU cycles\n\
-   -C         show times in cycles per limb\n\
-   -u         print resource usage (memory) at end\n\
-   -P name    output plot files \"name.gnuplot\" and \"name.data\"\n\
-   -a <type>  use given data: random(default), random2, zeros, ffs\n\
-   -x, -y, -w, -W <align>  specify data alignments, sources and dests\n\
-   -o addrs   print addresses of data blocks\n\
-\n\
-If both -t and -f are used, it means step by the factor or the step, whichever\n\
-is greater.\n\
-If both -C and -D are used, it means cycles per however many limbs between a\n\
-size and the previous size.\n\
-\n\
-After running with -P, plots can be viewed with Gnuplot or Quickplot.\n\
-\"gnuplot name.gnuplot\" (use \"set logscale xy; replot\" at the prompt for\n\
-a log/log plot).\n\
-\"quickplot -s name.data\" (has interactive zooming, and note -s is important\n\
-when viewing more than one routine, it means same axis scales for all data).\n\
-\n\
-The available routines are as follows.\n\
-\n\
-");
+  printf ("Usage: speed [-options] -s size <routine>...\n");
+  printf ("Measure the speed of some routines.\n");
+  printf ("Times are in seconds, accuracy is shown.\n");
+  printf ("\n");
+  printf ("   -p num     set precision as number of time units each routine must run\n");
+  printf ("   -s size[-end][,size[-end]]...   sizes to measure\n");
+  printf ("              single sizes or ranges, sep with comma or use multiple -s\n");
+  printf ("   -t step    step through sizes by given amount\n");
+  printf ("   -f factor  step through sizes by given factor (eg. 1.05)\n");
+  printf ("   -r         show times as ratios of the first routine\n");
+  printf ("   -d         show times as difference from the first routine\n");
+  printf ("   -D         show times as difference from previous size shown\n");
+  printf ("   -c         show times in CPU cycles\n");
+  printf ("   -C         show times in cycles per limb\n");
+  printf ("   -u         print resource usage (memory) at end\n");
+  printf ("   -P name    output plot files \"name.gnuplot\" and \"name.data\"\n");
+  printf ("   -a <type>  use given data: random(default), random2, zeros, aas, ffs, 2fd\n");
+  printf ("   -x, -y, -w, -W <align>  specify data alignments, sources and dests\n");
+  printf ("   -o addrs   print addresses of data blocks\n");
+  printf ("\n");
+  printf ("If both -t and -f are used, it means step by the factor or the step, whichever\n");
+  printf ("is greater.\n");
+  printf ("If both -C and -D are used, it means cycles per however many limbs between a\n");
+  printf ("size and the previous size.\n");
+  printf ("\n");
+  printf ("After running with -P, plots can be viewed with Gnuplot or Quickplot.\n");
+  printf ("\"gnuplot name.gnuplot\" (use \"set logscale xy; replot\" at the prompt for\n");
+  printf ("a log/log plot).\n");
+  printf ("\"quickplot -s name.data\" (has interactive zooming, and note -s is important\n");
+  printf ("when viewing more than one routine, it means same axis scales for all data).\n");
+  printf ("\n");
+  printf ("The available routines are as follows.\n");
+  printf ("\n");
 
   for (i = 0; i < numberof (routine); i++)
     {
-      if (routine[i].flag & FLAG_R) 
-        printf ("\t%s.r\n", routine[i].name); 
-      else if (routine[i].flag & FLAG_R_OPTIONAL) 
-        printf ("\t%s (optional .r)\n", routine[i].name); 
+      if (routine[i].flag & FLAG_R)
+        printf ("\t%s.r\n", routine[i].name);
+      else if (routine[i].flag & FLAG_R_OPTIONAL)
+        printf ("\t%s (optional .r)\n", routine[i].name);
       else
-        printf ("\t%s\n", routine[i].name); 
+        printf ("\t%s\n", routine[i].name);
     }
-      
-  printf ("\n\
-Routines with a \".r\" need an extra parameter, for example mpn_lshift.6\n\
-r should be in decimal, or use 0xN for hexadecimal.\n\
-Special forms for r are Nbits for a random N bit number, and Nones for N one\n\
-bits.\n\
-\n\
-Times for sizes out of the range accepted by a routine are shown as 0.\n\
-The fastest routine at each size is marked with a # (free form output only).\n\
-\n\
-%s\
-\n\
-Gnuplot home page http://www.cs.dartmouth.edu/gnuplot_info.html\n\
-Quickplot home page http://www.kachinatech.com/~quickplot\n\
-", speed_time_string);
+  printf ("\n");
+  printf ("Routines with a \".r\" need an extra parameter, for example mpn_lshift.6\n");
+  printf ("r should be in decimal, or use 0xN for hexadecimal.\n");
+  printf ("\n");
+  printf ("Special forms for r are \"<N>bits\" for a random N bit number, \"<N>ones\" for\n");
+  printf ("N one bits, or \"aas\" for 0xAA..AA.\n");
+  printf ("\n");
+  printf ("Times for sizes out of the range accepted by a routine are shown as 0.\n");
+  printf ("The fastest routine at each size is marked with a # (free form output only).\n");
+  printf ("\n");
+  printf ("%s", speed_time_string);
+  printf ("\n");
+  printf ("Gnuplot home page http://www.gnuplot.info/\n");
+  printf ("Quickplot home page http://quickplot.sourceforge.net/\n");
+}
+
+void
+check_align_option (const char *name, mp_size_t align)
+{
+  if (align < 0 || align > SPEED_TMP_ALLOC_ADJUST_MASK)
+    {
+      fprintf (stderr, "Alignment request out of range: %s %ld\n",
+               name, (long) align);
+      fprintf (stderr, "  should be 0 to %d (limbs), inclusive\n",
+               SPEED_TMP_ALLOC_ADJUST_MASK);
+      exit (1);
+    }
 }
 
 int
@@ -911,6 +1014,7 @@ main (int argc, char *argv[])
         if (strcmp (optarg, "random") == 0)       option_data = DATA_RANDOM;
         else if (strcmp (optarg, "random2") == 0) option_data = DATA_RANDOM2;
         else if (strcmp (optarg, "zeros") == 0)   option_data = DATA_ZEROS;
+        else if (strcmp (optarg, "aas") == 0)     option_data = DATA_AAS;
         else if (strcmp (optarg, "ffs") == 0)     option_data = DATA_FFS;
         else if (strcmp (optarg, "2fd") == 0)     option_data = DATA_2FD;
         else
@@ -1027,15 +1131,19 @@ main (int argc, char *argv[])
         break;
       case 'x':
         sp.align_xp = atol (optarg);
+        check_align_option ("-x", sp.align_xp);
         break;
       case 'y':
         sp.align_yp = atol (optarg);
+        check_align_option ("-y", sp.align_yp);
         break;
       case 'w':
         sp.align_wp = atol (optarg);
+        check_align_option ("-w", sp.align_wp);
         break;
       case 'W':
         sp.align_wp2 = atol (optarg);
+        check_align_option ("-W", sp.align_wp2);
         break;
       case '?':
         exit(1);
@@ -1054,7 +1162,9 @@ main (int argc, char *argv[])
       exit (1);
     }
 
-  gmp_randseed_ui (RANDS, option_seed);
+  gmp_randinit_default (__gmp_rands);
+  __gmp_rands_initialized = 1;
+  gmp_randseed_ui (__gmp_rands, option_seed);
 
   choice = (struct choice_t *) (*__gmp_allocate_func)
     ((argc - optind) * sizeof(choice[0]));
@@ -1065,7 +1175,7 @@ main (int argc, char *argv[])
       choice[num_choices] = c;
       num_choices++;
     }
-  
+
   if ((option_cmp == CMP_RATIO || option_cmp == CMP_DIFFERENCE) &&
       num_choices < 2)
     {
@@ -1091,15 +1201,15 @@ main (int argc, char *argv[])
                 speed_measure (speed_noop, NULL) / speed_cycletime);
       printf (", precision %d units of %.2e secs",
               speed_precision, speed_unittime);
-      
-      if (speed_cycletime == 1.0)
+
+      if (speed_cycletime == 1.0 || speed_cycletime == 0.0)
         printf (", CPU freq unknown\n");
       else
         printf (", CPU freq %.2f MHz\n", 1e-6/speed_cycletime);
 
       printf ("       ");
       for (i = 0; i < num_choices; i++)
-        printf (" %*s", COLUMN_WIDTH, choice[i].name); 
+        printf (" %*s", COLUMN_WIDTH, choice[i].name);
       printf ("\n");
 
       run_all (stdout);
@@ -1116,7 +1226,7 @@ main (int argc, char *argv[])
         else
           printf ("getrusage(): utime %ld.%06ld data %ld stack %ld maxresident %ld\n",
                   r.ru_utime.tv_sec, r.ru_utime.tv_usec,
-                  r.ru_idrss, r.ru_isrss, r.ru_ixrss); 
+                  r.ru_idrss, r.ru_isrss, r.ru_ixrss);
       }
 #else
       printf ("getrusage() not available\n");
@@ -1137,5 +1247,3 @@ main (int argc, char *argv[])
 
   return 0;
 }
-
-

@@ -1,13 +1,12 @@
-/* mpz_divisible_ui_p -- mpz by ulong divisibility test */
+/* mpz_divisible_ui_p -- mpz by ulong divisibility test.
 
-/*
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,10 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -33,12 +29,24 @@ mpz_divisible_ui_p (mpz_srcptr a, unsigned long d)
   mp_ptr     ap;
   unsigned   twos;
 
-  if (d == 0)
-    DIVIDE_BY_ZERO;
-
   asize = SIZ(a);
+  if (UNLIKELY (d == 0))
+    return (asize == 0);
+
   if (asize == 0)  /* 0 divisible by any d */
     return 1;
+
+  /* For nails don't try to be clever if d is bigger than a limb, just fake
+     up an mpz_t and go to the main mpz_divisible_p.  */
+  if (d > GMP_NUMB_MAX)
+    {
+      mp_limb_t  dlimbs[2];
+      mpz_t      dz;
+      ALLOC(dz) = 2;
+      PTR(dz) = dlimbs;
+      mpz_set_ui (dz, d);
+      return mpz_divisible_p (a, dz);
+    }
 
   ap = PTR(a);
   asize = ABS(asize);  /* ignore sign of a */

@@ -1,12 +1,12 @@
 /* Tests of mpz_scan0 and mpz_scan1.
 
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +27,7 @@ MA 02111-1307, USA. */
 unsigned long
 refmpz_scan (mpz_srcptr z, unsigned long i, int sought)
 {
-  unsigned long  z_bits = (unsigned long) ABSIZ(z) * BITS_PER_MP_LIMB;
+  unsigned long  z_bits = (unsigned long) ABSIZ(z) * GMP_NUMB_BITS;
 
   do
     {
@@ -58,12 +56,17 @@ refmpz_scan1 (mpz_srcptr z, unsigned long starting_bit)
 void
 check_ref (void)
 {
+  static const int offset[] = {
+    -2, -1, 0, 1, 2, 3
+  };
+
   mpz_t          z;
-  int            test, size, neg, sought;
-  unsigned long  i, got, want;
+  int            test, neg, sought, oindex, o;
+  mp_size_t      size, isize;
+  unsigned long  start, got, want;
 
   mpz_init (z);
-  for (test = 0; test < 10; test++)
+  for (test = 0; test < 5; test++)
     {
       for (size = 0; size < 5; size++)
         {
@@ -74,30 +77,39 @@ check_ref (void)
               if (neg)
                 mpz_neg (z, z);
 
-              for (i = 0; i < size*BITS_PER_MP_LIMB + 8; i++)
+              for (isize = 0; isize <= size; isize++)
                 {
-                  for (sought = 0; sought <= 1; sought++)
+                  for (oindex = 0; oindex <= numberof (offset); oindex++)
                     {
-                      if (sought == 0)
-                        {
-                          got = mpz_scan0 (z, i);
-                          want = refmpz_scan0 (z, i);
-                        }
-                      else
-                        {
-                          got = mpz_scan1 (z, i);
-                          want = refmpz_scan1 (z, i);
-                        }
+                      o = offset[oindex];
+                      if ((int) isize*GMP_NUMB_BITS < -o)
+                        continue;  /* start would be negative */
 
-                      if (got != want)
+                      start = isize*GMP_NUMB_BITS + o;
+
+                      for (sought = 0; sought <= 1; sought++)
                         {
-                          printf ("wrong at test=%d, size=%d, neg=%d, i=%lu, sought=%d\n",
-                                  test, size, neg, i, sought);
-                          printf ("   z 0x");
-                          mpz_out_str (stdout, -16, z);
-                          printf ("\n");
-                          printf ("   got=%lu, want=%lu\n", got, want);
-                          exit (1);                  
+                          if (sought == 0)
+                            {
+                              got = mpz_scan0 (z, start);
+                              want = refmpz_scan0 (z, start);
+                            }
+                          else
+                            {
+                              got = mpz_scan1 (z, start);
+                              want = refmpz_scan1 (z, start);
+                            }
+
+                          if (got != want)
+                            {
+                              printf ("wrong at test=%d, size=%ld, neg=%d, start=%lu, sought=%d\n",
+                                      test, size, neg, start, sought);
+                              printf ("   z 0x");
+                              mpz_out_str (stdout, -16, z);
+                              printf ("\n");
+                              printf ("   got=%lu, want=%lu\n", got, want);
+                              exit (1);
+                            }
                         }
                     }
                 }

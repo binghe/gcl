@@ -1,11 +1,11 @@
 /*
-Copyright 1999, 2000 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2004, 2009 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -14,14 +14,25 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "gmp.h"
 #include "gmp-impl.h"
+#include "tests.h"
+
+#ifdef OPERATION_copyi
+#define func MPN_COPY_INCR
+#define reffunc refmpn_copyi
+#define funcname "MPN_COPY_INCR"
+#endif
+
+#ifdef OPERATION_copyd
+#define func MPN_COPY_DECR
+#define reffunc refmpn_copyd
+#define funcname "MPN_COPY_DECR"
+#endif
 
 #if defined (USG) || defined (__SVR4) || defined (_UNICOS) || defined (__hpux)
 #include <time.h>
@@ -48,86 +59,54 @@ cputime ()
 }
 #endif
 
+static void mpn_print (mp_ptr, mp_size_t);
+
 #define M * 1000000
 
 #ifndef CLOCK
-#if defined (__m88k__)
-#define CLOCK 20 M
-#elif defined (__i386__)
-#define CLOCK (16666667)
-#elif defined (__m68k__)
-#define CLOCK (20 M)
-#elif defined (_IBMR2)
-#define CLOCK (25 M)
-#elif defined (__sparc__)
-#define CLOCK (20 M)
-#elif defined (__sun__)
-#define CLOCK (20 M)
-#elif defined (__mips)
-#define CLOCK (40 M)
-#elif defined (__hppa__)
-#define CLOCK (50 M)
-#elif defined (__alpha)
-#define CLOCK (133 M)
-#else
 #error "Don't know CLOCK of your machine"
-#endif
 #endif
 
 #ifndef OPS
 #define OPS (CLOCK/2)
 #endif
 #ifndef SIZE
-#define SIZE 328
+#define SIZE 496
 #endif
 #ifndef TIMES
-#define TIMES (OPS/SIZE)
-#else
-#undef OPS
-#define OPS (SIZE*TIMES)
+#define TIMES OPS/(SIZE+1)
 #endif
 
-
-void
-#if __STDC__
-refmpn_copyi (mp_ptr rptr, mp_srcptr sptr, mp_size_t n)
-#else
-refmpn_copyi (rptr, sptr, n)
-     register mp_ptr rptr;
-     register mp_srcptr sptr;
-     mp_size_t n;
-#endif
+int
+main (int argc, char **argv)
 {
-  mp_size_t i;
-
-  for (i = 0; i < n; i++)
-    rptr[i] = sptr[i];
-}
-
-main (argc, argv)
-     int argc;
-     char **argv;
-{
-  mp_limb_t s1[SIZE];
-  mp_limb_t dx[SIZE+2];
-  mp_limb_t dy[SIZE+2];
+  mp_ptr s1, dx, dy;
   int i;
   long t0, t;
-  int test;
+  unsigned int test;
   mp_size_t size;
+  unsigned int ntests;
 
-  for (test = 0; ; test++)
+  s1 = malloc (SIZE * sizeof (mp_limb_t));
+  dx = malloc ((SIZE + 2) * sizeof (mp_limb_t));
+  dy = malloc ((SIZE + 2) * sizeof (mp_limb_t));
+
+  ntests = ~(unsigned) 0;
+  if (argc == 2)
+    ntests = strtol (argv[1], 0, 0);
+
+  for (test = 1; test <= ntests; test++)
     {
 #if TIMES == 1 && ! defined (PRINT)
-      if (test % (SIZE > 10000 ? 1 : 10000 / SIZE) == 0)
+      if (test % (SIZE > 100000 ? 1 : 100000 / SIZE) == 0)
 	{
-	  printf ("\r%d", test);
+	  printf ("\r%u", test);
 	  fflush (stdout);
 	}
 #endif
 
 #ifdef RANDOM
-      size = (random () % SIZE + 1);
+      size = random () % SIZE + 1;
 #else
       size = SIZE;
 #endif
@@ -140,21 +119,12 @@ main (argc, argv)
 #if TIMES != 1
       mpn_random (s1, size);
 
-#ifndef NOCHECK
       t0 = cputime();
       for (i = 0; i < TIMES; i++)
-	refmpn_copyi (dx+1, s1, size);
+	func (dx+1, s1, size);
       t = cputime() - t0;
-      printf ("refmpn_copyi:   %ldms (%.2f cycles/limb)\n",
-	      t, ((double) t * CLOCK) / (OPS * 1000.0));
-#endif
-
-      t0 = cputime();
-      for (i = 0; i < TIMES; i++)
-	MPN_COPY_INCR (dx+1, s1, size);
-      t = cputime() - t0;
-      printf ("MPN_COPY_INCR:   %ldms (%.2f cycles/limb)\n",
-	      t, ((double) t * CLOCK) / (OPS * 1000.0));
+      printf (funcname ":    %5ldms (%.3f cycles/limb)\n",
+	      t, ((double) t * CLOCK) / (TIMES * size * 1000.0));
 #endif
 
 #ifndef NOCHECK
@@ -171,12 +141,14 @@ main (argc, argv)
 	  dy[i+1] = 0xbeef;
 	}
 
-      refmpn_copyi (dx+1, s1, size);
-      MPN_COPY_INCR (dy+1, s1, size);
+      reffunc (dx+1, s1, size);
+      func (dy+1, s1, size);
+
 #ifdef PRINT
       mpn_print (dx+1, size);
       mpn_print (dy+1, size);
 #endif
+
       if (mpn_cmp (dx, dy, size+2) != 0
 	  || dx[0] != 0x87654321 || dx[size+1] != 0x12345678)
 	{
@@ -184,13 +156,20 @@ main (argc, argv)
 	  mpn_print (dx+1, size);
 	  mpn_print (dy+1, size);
 #endif
-	  printf ("TEST NUMBER %d\n", test);
+	  printf ("\n");
+	  if (dy[0] != 0x87654321)
+	    printf ("clobbered at low end\n");
+	  if (dy[size+1] != 0x12345678)
+	    printf ("clobbered at high end\n");
+	  printf ("TEST NUMBER %u\n", test);
 	  abort();
 	}
 #endif
     }
+  exit (0);
 }
 
+static void
 mpn_print (mp_ptr p, mp_size_t size)
 {
   mp_size_t i;

@@ -2,13 +2,14 @@
    If X has an inverse, return non-zero and store inverse in INVERSE,
    otherwise, return 0 and put garbage in INVERSE.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2005 Free Software Foundation,
+Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -17,9 +18,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -29,7 +28,7 @@ mpz_invert (mpz_ptr inverse, mpz_srcptr x, mpz_srcptr n)
 {
   mpz_t gcd, tmp;
   mp_size_t xsize, nsize, size;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   xsize = SIZ (x);
   nsize = SIZ (n);
@@ -42,16 +41,16 @@ mpz_invert (mpz_ptr inverse, mpz_srcptr x, mpz_srcptr n)
   if (xsize == 0 || (nsize == 1 && (PTR (n))[0] == 1))
     return 0;
 
-  TMP_MARK (marker);
+  TMP_MARK;
 
   MPZ_TMP_INIT (gcd, size);
   MPZ_TMP_INIT (tmp, size);
   mpz_gcdext (gcd, tmp, (mpz_ptr) 0, x, n);
 
   /* If no inverse existed, return with an indication of that.  */
-  if (gcd->_mp_size != 1 || (gcd->_mp_d)[0] != 1)
+  if (SIZ (gcd) != 1 || PTR(gcd)[0] != 1)
     {
-      TMP_FREE (marker);
+      TMP_FREE;
       return 0;
     }
 
@@ -66,6 +65,6 @@ mpz_invert (mpz_ptr inverse, mpz_srcptr x, mpz_srcptr n)
   else
     mpz_set (inverse, tmp);
 
-  TMP_FREE (marker);
+  TMP_FREE;
   return 1;
 }

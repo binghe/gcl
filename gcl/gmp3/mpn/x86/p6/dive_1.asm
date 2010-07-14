@@ -1,28 +1,27 @@
 dnl  Intel P6 mpn_modexact_1_odd -- exact division style remainder.
-dnl
-dnl        odd  even  divisor
-dnl  P6:  10.0  12.0  cycles/limb
 
-dnl  Copyright 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2001, 2002, 2007 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C       odd  even  divisor
+C P6:  10.0  12.0  cycles/limb
 
 
 C void mpn_divexact_1 (mp_ptr dst, mp_srcptr src, mp_size_t size,
@@ -71,19 +70,15 @@ deflit(`FRAME',0)
 
 	movl	%eax, %edx
 	shrl	%eax			C d/2 without twos
-	
+
 	movl	%edx, PARAM_DIVISOR
 	andl	$127, %eax
 
 ifdef(`PIC',`
-	call	L(movl_eip_ebp)
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebp
-	movl	modlimb_invert_table@GOT(%ebp), %ebp
-	movzbl	(%eax,%ebp), %ebp			C inv 8 bits
-
+	LEA(	binvert_limb_table, %ebp)
+	movzbl	(%eax,%ebp), %ebp		C inv 8 bits
 ',`
-dnl non-PIC
-	movzbl	modlimb_invert_table(%eax), %ebp	C inv 8 bits
+	movzbl	binvert_limb_table(%eax), %ebp	C inv 8 bits
 ')
 
 	leal	(%ebp,%ebp), %eax	C 2*inv
@@ -131,7 +126,7 @@ C
 C	subl	%edx, %eax       1
 C	imull	%ebp, %eax       4
 C	mull	PARAM_DIVISOR    5
-C               	       ----
+C			       ----
 C       total		        10
 C
 C and this is the measured speed.  No special scheduling is necessary, out
@@ -198,7 +193,7 @@ L(even):
 	shrdl(	%cl, %edi, %eax)
 
 	jmp	L(even_entry)
-	
+
 
 L(even_top):
 	C eax	scratch
@@ -256,12 +251,5 @@ L(even_one):
 	addl	$STACK_SPACE, %esp
 
 	ret
-
-
-ifdef(`PIC',`
-L(movl_eip_ebp):
-	movl	(%esp), %ebp
-	ret
-')
 
 EPILOGUE()

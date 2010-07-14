@@ -1,12 +1,12 @@
 /* double mpf_get_d_2exp (signed long int *exp, mpf_t src).
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,42 +15,36 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 
+
 double
 mpf_get_d_2exp (signed long int *exp2, mpf_srcptr src)
 {
-  double res;
-  mp_size_t size, i, n_limbs_to_use;
-  int negative;
-  mp_ptr qp;
+  mp_size_t size, abs_size;
+  mp_srcptr ptr;
   int cnt;
+  long exp;
 
   size = SIZ(src);
-  if (size == 0)
+  if (UNLIKELY (size == 0))
     {
       *exp2 = 0;
       return 0.0;
     }
 
-  negative = size < 0;
-  size = ABS (size);
-  qp = PTR(src);
+  ptr = PTR(src);
+  abs_size = ABS (size);
+  count_leading_zeros (cnt, ptr[abs_size - 1]);
+  cnt -= GMP_NAIL_BITS;
 
-  n_limbs_to_use = MIN (LIMBS_PER_DOUBLE, size);
-  qp += size - n_limbs_to_use;
-  res = qp[0] / MP_BASE_AS_DOUBLE;
-  for (i = 1; i < n_limbs_to_use; i++)
-    res = (res + qp[i]) / MP_BASE_AS_DOUBLE;
-  count_leading_zeros (cnt, qp[n_limbs_to_use - 1]);
-  *exp2 = EXP(src) * BITS_PER_MP_LIMB - cnt;
-  res = res * ((mp_limb_t) 1 << cnt);
+  exp = EXP(src) * GMP_NUMB_BITS - cnt;
+  *exp2 = exp;
 
-  return negative ? -res : res;
+  return mpn_get_d (ptr, abs_size, (mp_size_t) 0,
+                    (long) - (abs_size * GMP_NUMB_BITS - cnt));
 }

@@ -1,13 +1,13 @@
 /* mpq_mul_2exp, mpq_div_2exp - multiply or divide by 2^N */
 
 /*
-Copyright 2000 Free Software Foundation, Inc.
+Copyright 2000, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,10 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -42,9 +39,9 @@ mord_2exp (mpz_ptr ldst, mpz_ptr rdst, mpz_srcptr lsrc, mpz_srcptr rsrc,
 
   p = rsrc_ptr;
   plow = *p;
-  while (n >= BITS_PER_MP_LIMB && plow == 0)
+  while (n >= GMP_NUMB_BITS && plow == 0)
     {
-      n -= BITS_PER_MP_LIMB;
+      n -= GMP_NUMB_BITS;
       p++;
       plow = *p;
     }
@@ -66,7 +63,7 @@ mord_2exp (mpz_ptr ldst, mpz_ptr rdst, mpz_srcptr lsrc, mpz_srcptr rsrc,
       if (plow == 0)
         shift = n;
       else
-        {        
+        {
           count_trailing_zeros (shift, plow);
           shift = MIN (shift, n);
         }
@@ -89,7 +86,7 @@ mpq_mul_2exp (mpq_ptr dst, mpq_srcptr src, unsigned long n)
   mord_2exp (mpq_numref (dst), mpq_denref (dst),
              mpq_numref (src), mpq_denref (src), n);
 }
-  
+
 void
 mpq_div_2exp (mpq_ptr dst, mpq_srcptr src, unsigned long n)
 {

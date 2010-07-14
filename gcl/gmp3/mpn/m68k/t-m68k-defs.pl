@@ -1,12 +1,12 @@
 #! /usr/bin/perl -w
 
-# Copyright 2001 Free Software Foundation, Inc.
+# Copyright 2001, 2003 Free Software Foundation, Inc.
 #
 # This file is part of the GNU MP Library.
 #
 # The GNU MP Library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation; either version 2.1 of the License, or (at your
+# the Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 #
 # The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@
 # License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-# MA 02111-1307, USA.
+# along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 # Usage:  perl t-m68k-defs.pl [-t]
@@ -40,8 +38,8 @@ open(FD, "<m68k-defs.m4")
     or die "Cannot open m68k-defs.m4: $!\nIs this the mpn/m68k source directory?\n";
 my ($srcdir, $top_srcdir);
 while (<FD>) {
-    if (/^m68k_defbranch\(\s*(.*)\)/) { %branch->{"b".$1}=1; }
-    if (/^m68k_definsn\(\s*(.*),\s*(.*)\)/) { %insn->{$1.$2}=1; }
+    if (/^m68k_defbranch\(\s*(.*)\)/) { $branch{"b".$1} = 1; }
+    if (/^m68k_definsn\(\s*(.*),\s*(.*)\)/) { $insn{$1.$2} = 1; }
 }
 close(FD);
 
@@ -62,8 +60,8 @@ foreach my $file (glob("*.asm"), glob("*/*.asm")) {
 	    # instructions with an l, w or b suffix should have a definsn
 	    # (unless they're already a defbranch)
 	    if ($opcode =~ /[lwb]$/
-		&& ! defined %insn->{$opcode}
-		&& ! defined %branch->{$opcode})
+		&& ! defined $insn{$opcode}
+		&& ! defined $branch{$opcode})
 	    {
 		print "$file: $.: missing m68k_definsn: $opcode\n";
 	    }
@@ -71,8 +69,8 @@ foreach my $file (glob("*.asm"), glob("*/*.asm")) {
 	    # instructions bXX should have a defbranch (unless they're
 	    # already a definsn)
 	    if ($opcode =~ /^b/
-		&& ! defined %insn->{$opcode}
-		&& ! defined %branch->{$opcode})
+		&& ! defined $insn{$opcode}
+		&& ! defined $branch{$opcode})
 	    {
 		print "$file: $.: missing m68k_defbranch: $opcode\n";
 	    }

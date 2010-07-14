@@ -1,28 +1,27 @@
-dnl  AMD K6 mpn_mod_1 -- mpn by 1 gcd.
-dnl 
-dnl  K6: 9.5 cycles/bit (approx)   1x1 gcd
-dnl      11.0 cycles/limb          Nx1 reduction (modexact_1_odd)
+dnl  AMD K6 mpn_gcd_1 -- mpn by 1 gcd.
 
-dnl  Copyright 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C K6: 9.5 cycles/bit (approx)   1x1 gcd
+C     11.0 cycles/limb          Nx1 reduction (modexact_1_odd)
 
 
 C mp_limb_t mpn_gcd_1 (mp_srcptr src, mp_size_t size, mp_limb_t y);
@@ -100,7 +99,7 @@ L(common_twos):
 	cmpl	%eax, %edx
 
 	jb	L(noswap)
-	movl	%edx, %eax		
+	movl	%edx, %eax
 
 	movl	%ebx, %edx
 	movl	%eax, %ebx
@@ -149,13 +148,13 @@ L(nodiv):
 	C ebp
 
 L(strip_y):
- 	shrl	%edx
+	shrl	%edx
 	jnc	L(strip_y)
 
 	leal	1(%edx,%edx), %edx
 	movl	%ecx, %ebx	C common twos
 
- 	leal	1(%eax), %ecx
+	leal	1(%eax), %ecx
 	jmp	L(strip_x_and)
 
 
@@ -184,15 +183,15 @@ L(strip_x):
 	ASSERT(nz)
 
 L(strip_x_leal):
- 	leal	1(%eax), %ecx
+	leal	1(%eax), %ecx
 
 L(strip_x_and):
- 	andl	$1, %ecx	C (x^1)&1
+	andl	$1, %ecx	C (x^1)&1
 
- 	shrl	%cl, %eax	C shift if x even
+	shrl	%cl, %eax	C shift if x even
 
- 	testb	$1, %al
- 	jz	L(strip_x)
+	testb	$1, %al
+	jz	L(strip_x)
 
 	ASSERT(nz,`testl $1, %eax')	C x, y odd
 	ASSERT(nz,`testl $1, %edx')
@@ -279,7 +278,7 @@ L(divide_top):
 	popl	%esi
 
 	popl	%edi
- 	leal	1(%eax), %ecx
+	leal	1(%eax), %ecx
 
 	orl	%eax, %eax
 	jnz	L(strip_x_and)
@@ -316,7 +315,7 @@ ifdef(`PIC',`
 	call	L(movl_eip_ebx)
 L(here):
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-        call	GSYM_PREFIX`'mpn_modexact_1_odd@PLT
+	call	GSYM_PREFIX`'mpn_modexact_1_odd@PLT
 ',`
 	call	GSYM_PREFIX`'mpn_modexact_1_odd
 ')
@@ -330,7 +329,7 @@ L(here):
 	addl	$eval(FRAME - FRAME_TWO_OR_MORE), %esp
 	orl	%eax, %eax
 
- 	leal	1(%eax), %ecx
+	leal	1(%eax), %ecx
 	jnz	L(strip_x_and)
 
 
@@ -346,7 +345,7 @@ L(here):
 ifdef(`PIC',`
 L(movl_eip_ebx):
 	movl	(%esp), %ebx
-	ret
+	ret_internal
 ')
 
 EPILOGUE()

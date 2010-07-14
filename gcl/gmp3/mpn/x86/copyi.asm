@@ -1,36 +1,33 @@
 dnl  x86 mpn_copyi -- copy limb vector, incrementing.
-dnl
-dnl      cycles/limb  startup (approx)
-dnl  P5:     1.0         35
-dnl  P6      0.75        45
-dnl  K6      1.0         30
-dnl  K7:     1.3         65
-dnl  P4:     1.0        120
-dnl
-dnl  (Startup time includes some function call overheads.)
 
-
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C     cycles/limb  startup (approx)
+C P5:     1.0         35
+C P6      0.75        45
+C K6      1.0         30
+C K7:     1.3         65
+C P4:     1.0        120
+C
+C (Startup time includes some function call overheads.)
 
 
 C void mpn_copyi (mp_ptr dst, mp_srcptr src, mp_size_t size);

@@ -1,26 +1,56 @@
 dnl  x86 calling conventions checking.
 
-dnl  Copyright 2000 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2000, 2003 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 include(`../config.m4')
+
+
+C void x86_fldcw (unsigned short cw);
+C
+C Execute an fldcw, setting the x87 control word to cw.
+
+PROLOGUE(x86_fldcw)
+        fldcw   4(%esp)
+        ret
+EPILOGUE()
+
+
+C unsigned short x86_fstcw (void);
+C
+C Execute an fstcw, returning the current x87 control word.
+
+PROLOGUE(x86_fstcw)
+        xorl    %eax, %eax
+        pushl   %eax
+        fstcw   (%esp)
+        popl    %eax
+        ret
+EPILOGUE()
+
+
+dnl  Instrumented profiling doesn't come out quite right below, since we
+dnl  don't do an actual "ret".  There's only a few instructions here, so
+dnl  there's no great need to get them separately accounted, just let them
+dnl  get attributed to the caller.
+
+ifelse(WANT_PROFILING,instrument,
+`define(`WANT_PROFILING',no)')
 
 
 C int calling_conventions (...);

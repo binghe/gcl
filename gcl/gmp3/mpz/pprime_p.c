@@ -6,14 +6,14 @@
    positive is (1/4)**reps, where reps is the number of internal passes of the
    probabilistic algorithm.  Knuth indicates that 25 passes are reasonable.
 
-Copyright 1991, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001 Free Software
-Foundation, Inc.  Miller-Rabin code contributed by John Amanatides.
+Copyright 1991, 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2005 Free
+Software Foundation, Inc.  Miller-Rabin code contributed by John Amanatides.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -22,37 +22,39 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 
-static int isprime _PROTO ((unsigned long int t));
+static int isprime __GMP_PROTO ((unsigned long int));
+
+
+/* MPN_MOD_OR_MODEXACT_1_ODD can be used instead of mpn_mod_1 for the trial
+   division.  It gives a result which is not the actual remainder r but a
+   value congruent to r*2^n mod d.  Since all the primes being tested are
+   odd, r*2^n mod p will be 0 if and only if r mod p is 0.  */
 
 int
 mpz_probab_prime_p (mpz_srcptr n, int reps)
 {
   mp_limb_t r;
+  mpz_t n2;
 
   /* Handle small and negative n.  */
   if (mpz_cmp_ui (n, 1000000L) <= 0)
     {
       int is_prime;
-      if (mpz_sgn (n) < 0)
+      if (mpz_cmpabs_ui (n, 1000000L) <= 0)
 	{
-	  /* Negative number.  Negate and call ourselves.  */
-	  mpz_t n2;
-	  mpz_init (n2);
-	  mpz_neg (n2, n);
-	  is_prime = mpz_probab_prime_p (n2, reps);
-	  mpz_clear (n2);
-	  return is_prime;
+	  is_prime = isprime (mpz_get_ui (n));
+	  return is_prime ? 2 : 0;
 	}
-      is_prime = isprime (mpz_get_ui (n));
-      return is_prime ? 2 : 0;
+      /* Negative number.  Negate and fall out.  */
+      PTR(n2) = PTR(n);
+      SIZ(n2) = -SIZ(n);
+      n = n2;
     }
 
   /* If n is now even, it is not a prime.  */
@@ -62,10 +64,10 @@ mpz_probab_prime_p (mpz_srcptr n, int reps)
 #if defined (PP)
   /* Check if n has small factors.  */
 #if defined (PP_INVERTED)
-  r = MPN_MOD_OR_PREINV_MOD_1 (PTR(n), SIZ(n), (mp_limb_t) PP,
+  r = MPN_MOD_OR_PREINV_MOD_1 (PTR(n), (mp_size_t) SIZ(n), (mp_limb_t) PP,
                                (mp_limb_t) PP_INVERTED);
 #else
-  r = mpn_mod_1 (PTR(n), SIZ(n), (mp_limb_t) PP);
+  r = mpn_mod_1 (PTR(n), (mp_size_t) SIZ(n), (mp_limb_t) PP);
 #endif
   if (r % 3 == 0
 #if BITS_PER_MP_LIMB >= 4
@@ -102,7 +104,7 @@ mpz_probab_prime_p (mpz_srcptr n, int reps)
 
     nprimes = 0;
     p = 1;
-    ln2 = mpz_sizeinbase (n, 2) / 30; ln2 = ln2 * ln2;
+    ln2 = mpz_sizeinbase (n, 2);	/* FIXME: tune this limit */
     for (q = PP_FIRST_OMITTED; q < ln2; q += 2)
       {
 	if (isprime (q))
@@ -110,11 +112,11 @@ mpz_probab_prime_p (mpz_srcptr n, int reps)
 	    umul_ppmm (p1, p0, p, q);
 	    if (p1 != 0)
 	      {
-		r = mpn_mod_1 (PTR(n), SIZ(n), p);
+		r = MPN_MOD_OR_MODEXACT_1_ODD (PTR(n), (mp_size_t) SIZ(n), p);
 		while (--nprimes >= 0)
 		  if (r % primes[nprimes] == 0)
 		    {
-		      ASSERT_ALWAYS (mpn_mod_1 (PTR(n), SIZ(n), (mp_limb_t) primes[nprimes]) == 0);
+		      ASSERT_ALWAYS (mpn_mod_1 (PTR(n), (mp_size_t) SIZ(n), (mp_limb_t) primes[nprimes]) == 0);
 		      return 0;
 		    }
 		p = q;

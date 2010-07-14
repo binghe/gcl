@@ -1,13 +1,13 @@
 /* Cray PVP/IEEE mpn_submul_1 -- multiply a limb vector with a limb and
    subtract the result from a second limb vector.
 
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.  */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 /* This code runs at just under 9 cycles/limb on a T90.  That is not perfect,
    mainly due to vector register shortage in the main loop.  Assembly code
@@ -35,6 +33,15 @@ mpn_submul_1 (mp_ptr rp, mp_srcptr up, mp_size_t n, mp_limb_t vl)
   mp_limb_t a, b, r, s0, s1, c0, c1;
   mp_size_t i;
   int more_carries;
+
+  if (up == rp)
+    {
+      /* The algorithm used below cannot handle overlap.  Handle it here by
+	 making a temporary copy of the source vector, then call ourselves.  */
+      mp_limb_t xp[n];
+      MPN_COPY (xp, up, n);
+      return mpn_submul_1 (rp, xp, n, vl);
+    }
 
   a = up[0] * vl;
   r = rp[0];

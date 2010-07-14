@@ -1,23 +1,21 @@
 /* mpz_jacobi, mpz_legendre, mpz_kronecker -- mpz/mpz Jacobi symbols.
 
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Library General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at your
+The GNU MP Library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by the
+Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library General Public
-License for more details.
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License
+for more details.
 
-You should have received a copy of the GNU Library General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+You should have received a copy of the GNU Lesser General Public License along
+with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include "gmp.h"
@@ -80,14 +78,6 @@ MA 02111-1307, USA. */
    introduces can be accounted for (or maybe they can be ignored).  */
 
 
-/* This implementation depends on BITS_PER_MP_LIMB being even, so that
-   (a/2)^BITS_PER_MP_LIMB = 1 and so there's no need to pay attention to how
-   many low zero limbs are stripped.  */
-#if BITS_PER_MP_LIMB % 2 != 0
-Error, error, need BITS_PER_MP_LIMB even
-#endif
-
-
 int
 mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
 {
@@ -97,7 +87,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
   mp_limb_t  alow, blow, ahigh, bhigh, asecond, bsecond;
   unsigned   atwos, btwos;
   int        result_bit1;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   TRACE (printf ("start asize=%d bsize=%d\n", SIZ(a), SIZ(b));
          mpz_trace (" a", a);
@@ -126,7 +116,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
   bsize = ABS (bsize);
 
   /* low zero limbs on b can be discarded */
-  MPN_STRIP_LOW_ZEROS_NOT_ZERO (bsrcp, bsize, blow);
+  JACOBI_STRIP_LOW_ZEROS (result_bit1, alow, bsrcp, bsize, blow);
 
   count_trailing_zeros (btwos, blow);
   TRACE (printf ("b twos %u\n", btwos));
@@ -137,13 +127,13 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
     {
       bsecond = bsrcp[1];
       if (btwos != 0)
-        blow |= bsecond << (BITS_PER_MP_LIMB-btwos);
+        blow |= (bsecond << (GMP_NUMB_BITS - btwos)) & GMP_NUMB_MASK;
     }
 
   /* account for effect of sign of a, then ignore it */
   result_bit1 ^= JACOBI_ASGN_SU_BIT1 (asize, blow);
   asize = ABS (asize);
-          
+
   if (bsize == 1 || (bsize == 2 && (bsecond >> btwos) == 0))
     {
       /* special case one limb b, use modexact and no copying */
@@ -153,7 +143,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
 
       if (blow == 1)   /* (a/1)=1 always */
         return JACOBI_BIT1_TO_PN (result_bit1);
-      
+
       JACOBI_MOD_OR_MODEXACT_1_ODD (result_bit1, alow, asrcp, asize, blow);
       TRACE (printf ("base (%lu/%lu) with %d\n",
                      alow, blow, JACOBI_BIT1_TO_PN (result_bit1)));
@@ -162,7 +152,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
 
   /* Discard low zero limbs of a.  Usually there won't be anything to
      strip, hence not bothering with it for the bsize==1 case.  */
-  MPN_STRIP_LOW_ZEROS_NOT_ZERO (asrcp, asize, alow);
+  JACOBI_STRIP_LOW_ZEROS (result_bit1, blow, asrcp, asize, alow);
 
   count_trailing_zeros (atwos, alow);
   TRACE (printf ("a twos %u\n", atwos));
@@ -174,9 +164,9 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
     {
       asecond = asrcp[1];
       if (atwos != 0)
-        alow |= asecond << (BITS_PER_MP_LIMB-atwos);
+        alow |= (asecond << (GMP_NUMB_BITS - atwos)) & GMP_NUMB_MASK;
     }
-  
+
   /* (a/2)=(2/a) with a odd */
   result_bit1 ^= JACOBI_TWOS_U_BIT1 (btwos, alow);
 
@@ -189,7 +179,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
 
       /* b still has its twos, so cancel out their effect */
       result_bit1 ^= JACOBI_TWOS_U_BIT1 (btwos, alow);
-      
+
       result_bit1 ^= JACOBI_RECIP_UU_BIT1 (alow, blow);  /* now (b/a) */
       JACOBI_MOD_OR_MODEXACT_1_ODD (result_bit1, blow, bsrcp, bsize, alow);
       TRACE (printf ("base (%lu/%lu) with %d\n",
@@ -198,7 +188,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
     }
 
 
-  TMP_MARK (marker);
+  TMP_MARK;
   TMP_ALLOC_LIMBS_2 (ap, asize, bp, bsize);
 
   MPN_RSHIFT_OR_COPY (ap, asrcp, asize, atwos);
@@ -227,7 +217,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
       TRACE (printf ("tdiv_qr asize=%ld bsize=%ld\n", asize, bsize));
 
       TMP_ALLOC_LIMBS_2 (rp, bsize, qp, asize-bsize+1);
-      mpn_tdiv_qr (qp, rp, 0, ap, asize, bp, bsize);
+      mpn_tdiv_qr (qp, rp, (mp_size_t) 0, ap, asize, bp, bsize);
       ap = rp;
       asize = bsize;
       MPN_NORMALIZE (ap, asize);
@@ -288,7 +278,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
 
     strip_a:
       /* low zero limbs on a can be discarded */
-      MPN_STRIP_LOW_ZEROS_NOT_ZERO (ap, asize, alow);
+      JACOBI_STRIP_LOW_ZEROS (result_bit1, blow, ap, asize, alow);
 
       if ((alow & 1) == 0)
         {
@@ -304,7 +294,7 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
     }
 
   ASSERT (asize == 1 && bsize == 1);  /* just alow and blow left */
-  TMP_FREE (marker);
+  TMP_FREE;
 
   /* (1/b)=1 always (in this case have b==1 because a>=b) */
   if (alow == 1)
@@ -317,6 +307,6 @@ mpz_jacobi (mpz_srcptr a, mpz_srcptr b)
   return mpn_jacobi_base (blow, alow, result_bit1);
 
  zero:
-  TMP_FREE (marker);
+  TMP_FREE;
   return 0;
 }

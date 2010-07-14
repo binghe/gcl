@@ -1,27 +1,26 @@
 dnl  AMD K6 mpn_modexact_1_odd -- exact division style remainder.
-dnl
-dnl  K6: 10.0 cycles/limb
 
-dnl  Copyright 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2000, 2001, 2002, 2003, 2007 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C K6: 10.0 cycles/limb
 
 
 C mp_limb_t mpn_modexact_1_odd (mp_srcptr src, mp_size_t size,
@@ -52,13 +51,7 @@ deflit(`FRAME',0)
 	pushl	%esi		FRAME_pushl()
 
 	movl	PARAM_CARRY, %edx
-	jmp	LF(mpn_modexact_1_odd,start_1c)
-
-ifdef(`PIC',`
-L(movl_eip_edi):
-	movl	(%esp), %edi
-	ret
-')
+	jmp	L(start_1c)
 
 EPILOGUE()
 
@@ -81,17 +74,10 @@ L(start_1c):
 	pushl	%ebp		FRAME_pushl()
 
 ifdef(`PIC',`
-	call	LF(mpn_modexact_1c_odd,movl_eip_edi)
-
-	addl	$_GLOBAL_OFFSET_TABLE_, %edi
-	C
-	movl	modlimb_invert_table@GOT(%edi), %edi
-	C
-Zdisp(	movzbl,	0,(%ecx,%edi), %edi)			C inv 8 bits
+	LEA(	binvert_limb_table, %edi)
+Zdisp(	movzbl,	0,(%ecx,%edi), %edi)		C inv 8 bits
 ',`
-
-dnl non-PIC
-	movzbl	modlimb_invert_table(%ecx), %edi	C inv 8 bits
+	movzbl	binvert_limb_table(%ecx), %edi	C inv 8 bits
 ')
 	leal	(%edi,%edi), %ecx	C 2*inv
 
@@ -149,7 +135,6 @@ L(top):
 
 	movl	(%ebx,%ebp,4), %eax
 	addl	%ecx, %edx		C apply carry bit to carry limb
-	ASSERT(a, `cmpl %edx, %esi')
 
 L(entry):
 	xorl	%ecx, %ecx

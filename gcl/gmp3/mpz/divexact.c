@@ -1,13 +1,13 @@
 /* mpz_divexact -- finds quotient when known that quot * den == num && den != 0.
 
-Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001 Free Software
-Foundation, Inc.
+Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2005,
+2006, 2007 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.  */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 /*  Ken Weber (kweber@mat.ufrgs.br, kweber@mcs.kent.edu)
 
@@ -42,7 +40,17 @@ mpz_divexact (mpz_ptr quot, mpz_srcptr num, mpz_srcptr den)
   mp_size_t qsize, tsize;
   mp_srcptr np, dp;
   mp_size_t nsize, dsize;
-  TMP_DECL (marker);
+  TMP_DECL;
+
+#if WANT_ASSERT
+  {
+    mpz_t  rem;
+    mpz_init (rem);
+    mpz_tdiv_r (rem, num, den);
+    ASSERT (SIZ(rem) == 0);
+    mpz_clear (rem);
+  }
+#endif
 
   nsize = ABS (num->_mp_size);
   dsize = ABS (den->_mp_size);
@@ -55,10 +63,11 @@ mpz_divexact (mpz_ptr quot, mpz_srcptr num, mpz_srcptr den)
   dp = den->_mp_d;
   qp = quot->_mp_d;
 
-  if (nsize == 0)
+  if (nsize < dsize)
     {
-      if (dsize == 0)
-	DIVIDE_BY_ZERO;
+      /* This special case avoids segfaults below when the function is
+	 incorrectly called with |N| < |D|, N != 0.  It also handles the
+	 well-defined case N = 0.  */
       quot->_mp_size = 0;
       return;
     }
@@ -77,7 +86,14 @@ mpz_divexact (mpz_ptr quot, mpz_srcptr num, mpz_srcptr den)
       DIVIDE_BY_ZERO;
     }
 
-  TMP_MARK (marker);
+  /* Avoid quadratic behaviour, but do it conservatively.  */
+  if (qsize > 1500)
+    {
+      mpz_tdiv_q (quot, num, den);
+      return;
+    }
+
+  TMP_MARK;
 
   /*  QUOT <-- NUM/2^r, T <-- DEN/2^r where = r number of twos in DEN.  */
   while (dp[0] == 0)
@@ -102,17 +118,17 @@ mpz_divexact (mpz_ptr quot, mpz_srcptr num, mpz_srcptr den)
       count_trailing_zeros (r, dp[0]);
       mpn_rshift (tp, dp, tsize, r);
       if (dsize > tsize)
-	tp[tsize - 1] |= dp[tsize] << (BITS_PER_MP_LIMB - r);
+	tp[tsize - 1] |= (dp[tsize] << (GMP_NUMB_BITS - r)) & GMP_NUMB_MASK;
       mpn_rshift (qp, np, qsize, r);
       if (nsize > qsize)
-	qp[qsize - 1] |= np[qsize] << (BITS_PER_MP_LIMB - r);
+	qp[qsize - 1] |= (np[qsize] << (GMP_NUMB_BITS - r)) & GMP_NUMB_MASK;
     }
 
   /*  Now QUOT <-- QUOT/T.  */
-  mpn_bdivmod (qp, qp, qsize, tp, tsize, qsize * BITS_PER_MP_LIMB);
+  mpn_bdivmod (qp, qp, qsize, tp, tsize, qsize * GMP_NUMB_BITS);
   MPN_NORMALIZE (qp, qsize);
 
   quot->_mp_size = (num->_mp_size ^ den->_mp_size) >= 0 ? qsize : -qsize;
 
-  TMP_FREE (marker);
+  TMP_FREE;
 }

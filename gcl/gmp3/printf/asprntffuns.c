@@ -1,12 +1,12 @@
 /* __gmp_asprintf_memory etc -- formatted output to allocated space.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,20 +15,12 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 
 /* These routines are in a separate file so that the mpz_t, mpq_t and mpf_t
    operator<< routines can avoid dragging vsnprintf into the link (via
-   __gmp_asprintf_format).
-
-   These routines are only needed to support gmp_asprintf if vsnprintf
-   exists, or to support mpz_out_ostream if C++ has been enabled, and could
-   therefore be under "#if HAVE_VSNPRINTF || WANT_CXX".  But they're
-   provided unconditionally so that the contents of libgmp don't depend on
-   the setting of --enable-cxx.  */
+   __gmp_asprintf_format).  */
 
 #include "config.h"
 
@@ -70,7 +62,7 @@ __gmp_asprintf_final (struct gmp_asprintf_t *d)
   char  *buf = d->buf;
   ASSERT (d->alloc >= d->size + 1);
   buf[d->size] = '\0';
-  __GMP_REALLOCATE_FUNC_MAYBE (buf, d->alloc, d->size+1);
+  __GMP_REALLOCATE_FUNC_MAYBE_TYPE (buf, d->alloc, d->size+1, char);
   *d->result = buf;
   return 0;
 }

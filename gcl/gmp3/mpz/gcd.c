@@ -1,12 +1,13 @@
 /* mpz/gcd.c:   Calculate the greatest common divisor of two integers.
 
-Copyright 1991, 1993, 1994, 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1991, 1993, 1994, 1996, 2000, 2001, 2002, 2005 Free Software
+Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -42,7 +41,7 @@ gcd (mpz_srcptr u, mpz_srcptr v, mpz_ptr g)
   mp_ptr vp = v->_mp_d;
   mp_size_t vsize = ABS (v->_mp_size);
   mp_size_t gsize;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   /* GCD(0, V) == V.  */
   if (usize == 0)
@@ -82,7 +81,7 @@ gcd (mpz_srcptr u, mpz_srcptr v, mpz_ptr g)
       return;
     }
 
-  TMP_MARK (marker);
+  TMP_MARK;
 
   /*  Eliminate low zero bits from U and V and move to temporary storage.  */
   while (*up == 0)
@@ -141,7 +140,7 @@ gcd (mpz_srcptr u, mpz_srcptr v, mpz_ptr g)
   if (g_zero_bits != 0)
     {
       mp_limb_t cy_limb;
-      gsize += (vp[vsize - 1] >> (BITS_PER_MP_LIMB - g_zero_bits)) != 0;
+      gsize += (vp[vsize - 1] >> (GMP_NUMB_BITS - g_zero_bits)) != 0;
       if (g->_mp_alloc < gsize)
 	_mpz_realloc (g, gsize);
       MPN_ZERO (g->_mp_d, g_zero_limbs);
@@ -160,5 +159,5 @@ gcd (mpz_srcptr u, mpz_srcptr v, mpz_ptr g)
     }
 
   g->_mp_size = gsize;
-  TMP_FREE (marker);
+  TMP_FREE;
 }

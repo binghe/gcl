@@ -2,16 +2,15 @@
 
    THE FUNCTIONS IN THIS FILE ARE FOR INTERNAL USE ONLY.  THEY'RE ALMOST
    CERTAIN TO BE SUBJECT TO INCOMPATIBLE CHANGES OR DISAPPEAR COMPLETELY IN
-   FUTURE GNU MP RELEASES.  */
+   FUTURE GNU MP RELEASES.
 
-/*
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -20,10 +19,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -70,17 +66,19 @@ MA 02111-1307, USA.
 
 int
 mpn_divisible_p (mp_srcptr ap, mp_size_t asize,
-                 mp_srcptr dp, mp_size_t dsize)
+		 mp_srcptr dp, mp_size_t dsize)
 {
   mp_limb_t  alow, dlow, dmask;
   mp_ptr     qp, rp;
   mp_size_t  i;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   ASSERT (asize >= 0);
   ASSERT (asize == 0 || ap[asize-1] != 0);
   ASSERT (dsize >= 1);
   ASSERT (dp[dsize-1] != 0);
+  ASSERT_MPN (ap, asize);
+  ASSERT_MPN (dp, dsize);
 
   /* When a<d only a==0 is divisible.
      Notice this test covers all cases of asize==0. */
@@ -94,10 +92,10 @@ mpn_divisible_p (mp_srcptr ap, mp_size_t asize,
       dlow = *dp;
 
       if (dlow != 0)
-        break;
+	break;
 
       if (alow != 0)
-        return 0;  /* a has fewer low zero limbs than d, so not divisible */
+	return 0;  /* a has fewer low zero limbs than d, so not divisible */
 
       /* a!=0 and d!=0 so won't get to size==0 */
       asize--; ASSERT (asize >= 1);
@@ -114,14 +112,14 @@ mpn_divisible_p (mp_srcptr ap, mp_size_t asize,
   if (dsize == 1)
     {
       if (BELOW_THRESHOLD (asize, MODEXACT_1_ODD_THRESHOLD))
-        return mpn_mod_1 (ap, asize, dlow) == 0;
+	return mpn_mod_1 (ap, asize, dlow) == 0;
 
       if ((dlow & 1) == 0)
-        {
-          unsigned  twos;
-          count_trailing_zeros (twos, dlow);
-          dlow >>= twos;
-        }
+	{
+	  unsigned  twos;
+	  count_trailing_zeros (twos, dlow);
+	  dlow >>= twos;
+	}
       return mpn_modexact_1_odd (ap, asize, dlow) == 0;
     }
 
@@ -129,31 +127,34 @@ mpn_divisible_p (mp_srcptr ap, mp_size_t asize,
     {
       mp_limb_t  dsecond = dp[1];
       if (dsecond <= dmask)
-        {
-          unsigned  twos;
-          count_trailing_zeros (twos, dlow);
-          dlow = (dlow >> twos) | (dsecond << (BITS_PER_MP_LIMB-twos));
-          return MPN_MOD_OR_MODEXACT_1_ODD (ap, asize, dlow) == 0;
-        }
+	{
+	  unsigned  twos;
+	  count_trailing_zeros (twos, dlow);
+	  dlow = (dlow >> twos) | (dsecond << (GMP_NUMB_BITS-twos));
+	  ASSERT_LIMB (dlow);
+	  return MPN_MOD_OR_MODEXACT_1_ODD (ap, asize, dlow) == 0;
+	}
     }
 
-  TMP_MARK (marker);
+  TMP_MARK;
 
   rp = TMP_ALLOC_LIMBS (asize+1);
   qp = rp + dsize;
 
-  mpn_tdiv_qr (qp, rp, 0, ap, asize, dp, dsize);
+  mpn_tdiv_qr (qp, rp, (mp_size_t) 0, ap, asize, dp, dsize);
 
   /* test for {rp,dsize} zero or non-zero */
   i = 0;
-  do {
-    if (rp[i] != 0)
-      {
-        TMP_FREE (marker);
-        return 0;
-      }
-  } while (++i < dsize);
+  do
+    {
+      if (rp[i] != 0)
+	{
+	  TMP_FREE;
+	  return 0;
+	}
+    }
+  while (++i < dsize);
 
-  TMP_FREE (marker);
+  TMP_FREE;
   return 1;
 }

@@ -1,12 +1,12 @@
 # GMP mpf module.
 
-# Copyright 2001 Free Software Foundation, Inc.
+# Copyright 2001, 2003 Free Software Foundation, Inc.
 #
 # This file is part of the GNU MP Library.
 #
 # The GNU MP Library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
-# by the Free Software Foundation; either version 2.1 of the License, or (at
+# by the Free Software Foundation; either version 3 of the License, or (at
 # your option) any later version.
 #
 # The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@
 # License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-# MA 02111-1307, USA.
+# along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 package GMP::Mpf;
@@ -73,20 +71,17 @@ sub import {
 
 sub overload_string {
   my $fmt;
-  {
-    # don't whinge about $# being deprecated
-    local $^W = 0;
+  BEGIN { $^W = 0; }
+  if (defined ($#)) {
     $fmt = $#;
-  }
-  if (! defined $fmt) {
-    $fmt = '%.Fg';
-  } else {
+    BEGIN { $^W = 1; }
     # protect against calling sprintf_internal with a bad format
-    if ($# !~ /^(%%|[^%])*%[-+ .\d]*[eEfgG](%%|[^%])*$/) {
+    if ($fmt !~ /^((%%|[^%])*%[-+ .\d]*)([eEfgG](%%|[^%])*)$/) {
       die "GMP::Mpf: invalid \$# format: $#\n";
     }
-    $fmt = $OFMT;
-    $fmt =~ s/(.)$/F$1/;
+    $fmt = $1 . 'F' . $3;
+  } else {
+    $fmt = '%.Fg';
   }
   GMP::sprintf_internal ($fmt, $_[0]);
 }

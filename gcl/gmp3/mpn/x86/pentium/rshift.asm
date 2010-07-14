@@ -1,18 +1,13 @@
 dnl  Intel Pentium mpn_rshift -- mpn right shift.
-dnl
-dnl          cycles/limb
-dnl  P5,P54:    6.0
-dnl  P55:       5.375
 
-
-dnl  Copyright 1992, 1994, 1995, 1996, 1999, 2000 Free Software
+dnl  Copyright 1992, 1994, 1995, 1996, 1999, 2000, 2002 Free Software
 dnl  Foundation, Inc.
 dnl
 dnl  This file is part of the GNU MP Library.
 dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
 dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
@@ -20,13 +15,15 @@ dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
 dnl
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C         cycles/limb
+C P5,P54:    6.0
+C P55:       5.375
 
 
 C mp_limb_t mpn_rshift (mp_ptr dst, mp_srcptr src, mp_size_t size,
@@ -55,7 +52,7 @@ deflit(`FRAME',16)
 	movl	PARAM_SIZE,%ebp
 	movl	PARAM_SHIFT,%ecx
 
-C We can use faster code for shift-by-1 under certain conditions. 
+C We can use faster code for shift-by-1 under certain conditions.
 	cmp	$1,%ecx
 	jne	L(normal)
 	leal	4(%edi),%eax

@@ -1,15 +1,17 @@
 divert(-1)
 
+
 dnl  m4 macros for x86 assembler.
 
 
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002, 2003, 2007 Free Software Foundation,
+dnl  Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
 dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
 dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
@@ -17,10 +19,8 @@ dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
 dnl
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 dnl  Notes:
@@ -35,10 +35,10 @@ dnl
 dnl  2. Immediates in macro definitions need a space or `' to stop the $
 dnl     looking like a macro parameter.  For example,
 dnl
-dnl  	        define(foo, `mov $ 123, %eax')
+dnl	        define(foo, `mov $ 123, %eax')
 dnl
 dnl     This is only a problem in macro definitions, not in ordinary text,
-dnl     nor in macro parameters like text passed to forloop() or ifdef().
+dnl     and not in macro parameters like text passed to forloop() or ifdef().
 
 
 deflit(BYTES_PER_MP_LIMB, 4)
@@ -51,114 +51,74 @@ dnl  case and definitely don't want the ELF style _GLOBAL_OFFSET_TABLE_ etc.
 ifdef(`DLL_EXPORT',`undefine(`PIC')')
 
 
-dnl  --------------------------------------------------------------------------
-dnl  Replacement PROLOGUE/EPILOGUE with more error checking.  Nesting and
-dnl  overlapping not allowed.
+dnl  Usage: CPUVEC_FUNCS_LIST
 dnl
+dnl  A list of the functions from gmp-impl.h x86 struct cpuvec_t, in the
+dnl  order they appear in that structure.
+
+define(CPUVEC_FUNCS_LIST,
+``add_n',
+`addmul_1',
+`copyd',
+`copyi',
+`divexact_1',
+`divexact_by3c',
+`divrem_1',
+`gcd_1',
+`lshift',
+`mod_1',
+`mod_34lsub1',
+`modexact_1c_odd',
+`mul_1',
+`mul_basecase',
+`preinv_divrem_1',
+`preinv_mod_1',
+`rshift',
+`sqr_basecase',
+`sub_n',
+`submul_1'')
 
 
-dnl  Usage: PROLOGUE(functionname)
+dnl  Called: PROLOGUE_cpu(GSYM_PREFIX`'foo)
 dnl
-dnl  Generate a function prologue.  functionname gets GSYM_PREFIX added.
-dnl  Examples,
+dnl  In the x86 code we use explicit TEXT and ALIGN() calls in the code,
+dnl  since different alignments are wanted in various circumstances.  So for
+dnl  instance,
 dnl
-dnl         PROLOGUE(mpn_add_n)
-dnl         PROLOGUE(somefun)
+dnl                  TEXT
+dnl                  ALIGN(16)
+dnl          PROLOGUE(mpn_add_n)
+dnl          ...
+dnl          EPILOGUE()
 
-define(`PROLOGUE',
+define(`PROLOGUE_cpu',
 m4_assert_numargs(1)
-m4_assert_defined(`PROLOGUE_cpu')
-`ifdef(`PROLOGUE_current_function',
-`m4_error(`PROLOGUE'(`PROLOGUE_current_function') needs an `EPILOGUE'() before `PROLOGUE'($1)
-)')dnl
-m4_file_seen()dnl
-define(`PROLOGUE_current_function',`$1')dnl
-PROLOGUE_cpu(GSYM_PREFIX`'$1)')
-
-
-dnl  Usage: EPILOGUE()
-dnl
-dnl  Notice the function name is passed to EPILOGUE_cpu(), letting it use $1
-dnl  instead of the long PROLOGUE_current_function symbol.
-
-define(`EPILOGUE',
-m4_assert_numargs(0)
-m4_assert_defined(`EPILOGUE_cpu')
-`ifdef(`PROLOGUE_current_function',,
-`m4_error(`EPILOGUE'() with no `PROLOGUE'()
-)')dnl
-EPILOGUE_cpu(GSYM_PREFIX`'PROLOGUE_current_function)`'dnl
-undefine(`PROLOGUE_current_function')')
-
-m4wrap_prepend(
-`ifdef(`PROLOGUE_current_function',
-`m4_error(`EPILOGUE() for PROLOGUE('PROLOGUE_current_function`) never seen
-')')')
-
-
-dnl  Usage: PROLOGUE_assert_inside()
-dnl
-dnl  Use this unquoted on a line on its own at the start of a macro
-dnl  definition to add some code to check the macro is only used inside a
-dnl  PROLOGUE/EPILOGUE pair, and that hence PROLOGUE_current_function is
-dnl  defined.
-
-define(PROLOGUE_assert_inside,
-m4_assert_numargs(0)
-``PROLOGUE_assert_inside_internal'(m4_doublequote($`'0))`dnl '')
-
-define(PROLOGUE_assert_inside_internal,
-m4_assert_numargs(1)
-`ifdef(`PROLOGUE_current_function',,
-`m4_error(`$1 used outside a PROLOGUE / EPILOGUE pair
-')')')
-
-
-dnl  Usage: L(labelname)
-dnl         LF(functionname,labelname)
-dnl
-dnl  Generate a local label in the current or given function.  For LF(),
-dnl  functionname gets GSYM_PREFIX added, the same as with PROLOGUE().
-dnl
-dnl  For example, in a function mpn_add_n (and with MPN_PREFIX __gmpn),
-dnl
-dnl         L(bar)          => L__gmpn_add_n__bar
-dnl         LF(somefun,bar) => Lsomefun__bar
-dnl
-dnl  The function name and label name get two underscores between them
-dnl  rather than one to guard against clashing with a separate external
-dnl  symbol that happened to be called functionname_labelname.  (Though this
-dnl  would only happen if the local label prefix is is empty.)  Underscores
-dnl  are used so the whole label will still be a valid C identifier and so
-dnl  can be easily used in gdb.
-
-dnl  LSYM_PREFIX can be L$, so defn() is used to prevent L expanding as the
-dnl  L macro and making an infinite recursion.
-define(LF,
-m4_assert_numargs(2)
-m4_assert_defined(`LSYM_PREFIX')
-`defn(`LSYM_PREFIX')GSYM_PREFIX`'$1`'__$2')
-
-define(`L',
-m4_assert_numargs(1)
-PROLOGUE_assert_inside()
-`LF(PROLOGUE_current_function,`$1')')
-
-
-dnl  Called: PROLOGUE_cpu(gsym)
-dnl          EPILOGUE_cpu(gsym)
-
-define(PROLOGUE_cpu,
-m4_assert_numargs(1)
+m4_assert_defined(`WANT_PROFILING')
 	`GLOBL	$1
 	TYPE($1,`function')
+	COFF_TYPE($1)
 $1:
-ifelse(WANT_PROFILING,`no',,`call_mcount
-')')')
+ifelse(WANT_PROFILING,`prof',      `	call_mcount')
+ifelse(WANT_PROFILING,`gprof',     `	call_mcount')
+ifelse(WANT_PROFILING,`instrument',`	call_instrument(enter)')
+')
 
-define(EPILOGUE_cpu,
+
+dnl  Usage: COFF_TYPE(GSYM_PREFIX`'foo)
+dnl
+dnl  Emit COFF style ".def ... .endef" type information for a function, when
+dnl  supported.  The argument should include any GSYM_PREFIX.
+dnl
+dnl  See autoconf macro GMP_ASM_COFF_TYPE for HAVE_COFF_TYPE.
+
+define(COFF_TYPE,
 m4_assert_numargs(1)
-`	SIZE($1,.-$1)')
+m4_assert_defined(`HAVE_COFF_TYPE')
+`ifelse(HAVE_COFF_TYPE,yes,
+	`.def	$1
+	.scl	2
+	.type	32
+	.endef')')
 
 
 dnl  Usage: call_mcount
@@ -172,6 +132,7 @@ dnl  For `prof' style profiling gcc generates mcount calls without setting
 dnl  up %ebp, and the same is done here.
 
 define(`call_mcount',
+m4_assert_numargs(-1)
 m4_assert_defined(`WANT_PROFILING')
 m4_assert_defined(`MCOUNT_PIC_REG')
 m4_assert_defined(`MCOUNT_NONPIC_REG')
@@ -180,7 +141,7 @@ m4_assert_defined(`MCOUNT_NONPIC_CALL')
 `ifelse(ifdef(`PIC',`MCOUNT_PIC_REG',`MCOUNT_NONPIC_REG'),,,
 `	DATA
 	ALIGN(4)
-L(mcount_data):
+L(mcount_data_`'mcount_counter):
 	W32	0
 	TEXT
 ')dnl
@@ -190,39 +151,185 @@ ifelse(WANT_PROFILING,`gprof',
 ')dnl
 ifdef(`PIC',
 `	pushl	%ebx
-	mcount_movl_GOT_ebx
+	call_movl_eip_to_ebx
+L(mcount_here_`'mcount_counter):
+	addl	$_GLOBAL_OFFSET_TABLE_+[.-L(mcount_here_`'mcount_counter)], %ebx
 ifelse(MCOUNT_PIC_REG,,,
-`	leal	L(mcount_data)@GOTOFF(%ebx), MCOUNT_PIC_REG')
+`	leal	L(mcount_data_`'mcount_counter)@GOTOFF(%ebx), MCOUNT_PIC_REG')
 MCOUNT_PIC_CALL
 	popl	%ebx
 ',`dnl non-PIC
 ifelse(MCOUNT_NONPIC_REG,,,
-`	movl	`$'L(mcount_data), MCOUNT_NONPIC_REG
+`	movl	`$'L(mcount_data_`'mcount_counter), MCOUNT_NONPIC_REG
 ')dnl
 MCOUNT_NONPIC_CALL
 ')dnl
 ifelse(WANT_PROFILING,`gprof',
 `	popl	%ebp
-')')
+')
+define(`mcount_counter',incr(mcount_counter))
+')
 
-dnl  Called: mcount_movl_GOT_ebx
-dnl  Label H is "here", the %eip obtained from the call.  C is the called
-dnl  subroutine.  J is the jump across that subroutine.  A fetch and "ret"
-dnl  is always done so calls and returns are balanced for the benefit of the
-dnl  various x86s that have return stack branch prediction.
-define(mcount_movl_GOT_ebx,
+define(mcount_counter,1)
+
+
+dnl  Usage: call_instrument(enter|exit)
+dnl
+dnl  Call __cyg_profile_func_enter or __cyg_profile_func_exit.
+dnl
+dnl  For PIC, most routines don't require _GLOBAL_OFFSET_TABLE_ themselves
+dnl  so %ebx is just setup for these calls.  It's a bit wasteful to repeat
+dnl  the setup for the exit call having done it earlier for the enter, but
+dnl  there's nowhere very convenient to hold %ebx through the length of a
+dnl  routine, in general.
+dnl
+dnl  For PIC, because instrument_current_function will be within the current
+dnl  object file we can get it just as an offset from %eip, there's no need
+dnl  to use the GOT.
+dnl
+dnl  No attempt is made to maintain the stack alignment gcc generates with
+dnl  -mpreferred-stack-boundary.  This wouldn't be hard, but it seems highly
+dnl  unlikely the instrumenting functions would be doing anything that'd
+dnl  benefit from alignment, in particular they're unlikely to be using
+dnl  doubles or long doubles on the stack.
+dnl
+dnl  The FRAME scheme is used to conveniently account for the register saves
+dnl  before accessing the return address.  Any previous value is saved and
+dnl  restored, since plenty of code keeps a value across a "ret" in the
+dnl  middle of a routine.
+
+define(call_instrument,
+m4_assert_numargs(1)
+`	pushdef(`FRAME',0)
+ifelse($1,exit,
+`	pushl	%eax	FRAME_pushl()	C return value
+')
+ifdef(`PIC',
+`	pushl	%ebx	FRAME_pushl()
+	call_movl_eip_to_ebx
+L(instrument_here_`'instrument_count):
+	movl	%ebx, %ecx
+	addl	$_GLOBAL_OFFSET_TABLE_+[.-L(instrument_here_`'instrument_count)], %ebx
+	C use addl rather than leal to avoid old gas bugs, see mpn/x86/README
+	addl	$instrument_current_function-L(instrument_here_`'instrument_count), %ecx
+	pushl	m4_empty_if_zero(FRAME)(%esp)	FRAME_pushl()	C return addr
+	pushl	%ecx				FRAME_pushl()	C this function
+	call	GSYM_PREFIX`'__cyg_profile_func_$1@PLT
+	addl	$`'8, %esp
+	popl	%ebx
+',
+`	C non-PIC
+	pushl	m4_empty_if_zero(FRAME)(%esp)	FRAME_pushl()	C return addr
+	pushl	$instrument_current_function	FRAME_pushl()	C this function
+	call	GSYM_PREFIX`'__cyg_profile_func_$1
+	addl	$`'8, %esp
+')
+ifelse($1,exit,
+`	popl	%eax			C return value
+')
+	popdef(`FRAME')
+define(`instrument_count',incr(instrument_count))
+')
+define(instrument_count,1)
+
+
+dnl  Usage: instrument_current_function
+dnl
+dnl  Return the current function name for instrumenting purposes.  This is
+dnl  PROLOGUE_current_function, but it sticks at the first such name seen.
+dnl
+dnl  Sticking to the first name seen ensures that multiple-entrypoint
+dnl  functions like mpn_add_nc and mpn_add_n will make enter and exit calls
+dnl  giving the same function address.
+
+define(instrument_current_function,
 m4_assert_numargs(-1)
-`	call	L(mcount_movl_GOT_ebx_C`'mcount_movl_GOT_ebx_counter)
-L(mcount_movl_GOT_ebx_H`'mcount_movl_GOT_ebx_counter):
-	jmp	L(mcount_movl_GOT_ebx_J`'mcount_movl_GOT_ebx_counter)
-L(mcount_movl_GOT_ebx_C`'mcount_movl_GOT_ebx_counter):
-	movl	(%esp), %ebx
-	ret
-L(mcount_movl_GOT_ebx_J`'mcount_movl_GOT_ebx_counter):
-	addl	$_GLOBAL_OFFSET_TABLE_+[.-L(mcount_movl_GOT_ebx_H`'mcount_movl_GOT_ebx_counter)], %ebx
-define(`mcount_movl_GOT_ebx_counter',incr(mcount_movl_GOT_ebx_counter))')
+`ifdef(`instrument_current_function_seen',
+`instrument_current_function_seen',
+`define(`instrument_current_function_seen',PROLOGUE_current_function)dnl
+PROLOGUE_current_function')')
 
-define(mcount_movl_GOT_ebx_counter,1)
+
+dnl  Usage: call_movl_eip_to_ebx
+dnl
+dnl  Generate a call to L(movl_eip_to_ebx), and record the need for that
+dnl  routine.
+
+define(call_movl_eip_to_ebx,
+m4_assert_numargs(-1)
+`call	L(movl_eip_to_ebx)
+define(`movl_eip_to_ebx_needed',1)')
+
+dnl  Usage: generate_movl_eip_to_ebx
+dnl
+dnl  Emit a L(movl_eip_to_ebx) routine, if needed and not already generated.
+
+define(generate_movl_eip_to_ebx,
+m4_assert_numargs(-1)
+`ifelse(movl_eip_to_ebx_needed,1,
+`ifelse(movl_eip_to_ebx_done,1,,
+`L(movl_eip_to_ebx):
+	movl	(%esp), %ebx
+	ret_internal
+define(`movl_eip_to_ebx_done',1)
+')')')
+
+
+dnl  Usage: ret
+dnl
+dnl  Generate a "ret", but if doing instrumented profiling then call
+dnl  __cyg_profile_func_exit first.
+
+define(ret,
+m4_assert_numargs(-1)
+m4_assert_defined(`WANT_PROFILING')
+`ifelse(WANT_PROFILING,instrument,
+`ret_instrument',
+`ret_internal')
+generate_movl_eip_to_ebx
+')
+
+
+dnl  Usage: ret_internal
+dnl
+dnl  A plain "ret", without any __cyg_profile_func_exit call.  This can be
+dnl  used for a return which is internal to some function, such as when
+dnl  getting %eip for PIC.
+
+define(ret_internal,
+m4_assert_numargs(-1)
+``ret'')
+
+
+dnl  Usage: ret_instrument
+dnl
+dnl  Generate call to __cyg_profile_func_exit and then a ret.  If a ret has
+dnl  already been seen from this function then jump to that chunk of code,
+dnl  rather than emitting it again.
+
+define(ret_instrument,
+m4_assert_numargs(-1)
+`ifelse(m4_unquote(ret_instrument_seen_`'instrument_current_function),1,
+`jmp	L(instrument_exit_`'instrument_current_function)',
+`define(ret_instrument_seen_`'instrument_current_function,1)
+L(instrument_exit_`'instrument_current_function):
+call_instrument(exit)
+	ret_internal')')
+
+
+dnl  Usage: _GLOBAL_OFFSET_TABLE_
+dnl
+dnl  Expand to _GLOBAL_OFFSET_TABLE_ plus any necessary underscore prefix.
+dnl  This lets us write plain _GLOBAL_OFFSET_TABLE_ in SVR4 style, but still
+dnl  work with systems requiring an extra underscore such as OpenBSD.
+dnl
+dnl  deflit is used so "leal _GLOBAL_OFFSET_TABLE_(%eax), %ebx" will come
+dnl  out right, though that form doesn't work properly in gas (see
+dnl  mpn/x86/README).
+
+deflit(_GLOBAL_OFFSET_TABLE_,
+m4_assert_defined(`GOT_GSYM_PREFIX')
+`GOT_GSYM_PREFIX`_GLOBAL_OFFSET_TABLE_'')
 
 
 dnl  --------------------------------------------------------------------------
@@ -279,6 +386,7 @@ defframe_empty_if_zero(FRAME+($2))(%esp)')')
 
 dnl  Called: defframe_empty_if_zero(expression)
 define(defframe_empty_if_zero,
+m4_assert_numargs(1)
 `ifelse(defframe_empty_if_zero_disabled,1,
 `eval($1)',
 `m4_empty_if_zero($1)')')
@@ -338,6 +446,7 @@ dnl  Notice the defframe() is done with an unquoted -FRAME thus giving its
 dnl  current value without tracking future changes.
 
 define(defframe_pushl,
+m4_assert_numargs(1)
 `FRAME_pushl()defframe(`$1',-FRAME)')
 
 
@@ -376,17 +485,10 @@ dnl  Usage: femms
 dnl
 dnl  Gas 2.9.1 which comes with FreeBSD 3.4 doesn't support femms, so the
 dnl  following is a replacement using .byte.
-dnl
-dnl  If femms isn't available, an emms is generated instead, for convenience
-dnl  when testing on a machine without femms.
 
 define(femms,
 m4_assert_numargs(-1)
-`ifelse(femms_available_p,1,
-`.byte	15,14	C AMD 3DNow femms',
-`emms`'dnl
-m4_warning(`warning, using emms in place of femms, use for testing only
-')')')
+`.byte	15,14	C AMD 3DNow femms')
 
 
 dnl  Usage: jadcl0(op)
@@ -420,19 +522,6 @@ define(`jadcl0_counter',incr(jadcl0_counter))')')
 define(jadcl0_counter,1)
 
 
-dnl  Usage: cmov_available_p
-dnl
-dnl  Expand to 1 if cmov is available, 0 if not.
-
-define(cmov_available_p,
-`m4_ifdef_anyof_p(
-	`HAVE_HOST_CPU_pentiumpro',
-	`HAVE_HOST_CPU_pentium2',
-	`HAVE_HOST_CPU_pentium3',
-	`HAVE_HOST_CPU_pentium4',
-	`HAVE_HOST_CPU_athlon')')
-
-
 dnl  Usage: x86_lookup(target, key,value, key,value, ...)
 dnl         x86_lookup_p(target, key,value, key,value, ...)
 dnl
@@ -444,6 +533,7 @@ dnl
 dnl  x86_lookup_p expands to 1 if `target' is found, or 0 if not.
 
 define(x86_lookup,
+m4_assert_numargs_range(1,999)
 `ifelse(eval($#<3),1,
 `m4_error(`unrecognised part of x86 instruction: $1
 ')',
@@ -451,6 +541,7 @@ define(x86_lookup,
 `x86_lookup(`$1',shift(shift(shift($@))))')')')
 
 define(x86_lookup_p,
+m4_assert_numargs_range(1,999)
 `ifelse(eval($#<3),1, `0',
 `ifelse(`$1',`$2',    `1',
 `x86_lookup_p(`$1',shift(shift(shift($@))))')')')
@@ -512,16 +603,12 @@ define(x86_opcode_tttn_list,
 `nle',15, `g',  15')
 
 
-dnl  Usage: cmovCC(srcreg,dstreg)
+dnl  Usage: cmovCC(%srcreg,%dstreg)
 dnl
-dnl  Generate a cmov instruction if the host supports cmov, or simulate it
-dnl  with a conditional jump if not (the latter being meant only for
-dnl  testing).  For example,
+dnl  Emit a cmov instruction, using a .byte sequence, since various past
+dnl  versions of gas don't know cmov.  For example,
 dnl
 dnl         cmovz(  %eax, %ebx)
-dnl
-dnl  cmov instructions are generated using .byte sequences, since only
-dnl  recent versions of gas know cmov.
 dnl
 dnl  The source operand can only be a plain register.  (m4 code implementing
 dnl  full memory addressing modes exists, believe it or not, but isn't
@@ -529,8 +616,8 @@ dnl  currently needed and isn't included.)
 dnl
 dnl  All the standard conditions are defined.  Attempting to use one without
 dnl  the macro parentheses, such as just "cmovbe %eax, %ebx", will provoke
-dnl  an error.  This ensures the necessary .byte sequences aren't
-dnl  accidentally missed.
+dnl  an error.  This protects against writing something old gas wouldn't
+dnl  understand.
 
 dnl  Called: define_cmov_many(cond,tttn,cond,tttn,...)
 define(define_cmov_many,
@@ -538,42 +625,19 @@ define(define_cmov_many,
 `define_cmov(`$1',`$2')define_cmov_many(shift(shift($@)))')')
 
 dnl  Called: define_cmov(cond,tttn)
+dnl  Emit basically define(cmov<cond>,`cmov_internal(<cond>,<ttn>,`$1',`$2')')
 define(define_cmov,
 m4_assert_numargs(2)
 `define(`cmov$1',
 m4_instruction_wrapper()
 m4_assert_numargs(2)
-`cmov_internal'(m4_doublequote($`'0),``$1',`$2'',dnl
+`cmov_internal'(m4_doublequote($`'0),``$2'',dnl
 m4_doublequote($`'1),m4_doublequote($`'2)))')
 
 define_cmov_many(x86_opcode_tttn_list)
 
-
-dnl  Called: cmov_internal(name,cond,tttn,src,dst)
+dnl  Called: cmov_internal(name,tttn,src,dst)
 define(cmov_internal,
-m4_assert_numargs(5)
-`ifelse(cmov_available_p,1,
-`cmov_bytes_tttn(`$1',`$3',`$4',`$5')',
-`m4_warning(`warning, simulating cmov with jump, use for testing only
-')cmov_simulate(`$2',`$4',`$5')')')
-
-dnl  Called: cmov_simulate(cond,src,dst)
-dnl  If this is going to be used with memory operands for the source it will
-dnl  need to be changed to do a fetch even if the condition is false, so as
-dnl  to trigger exceptions the same way a real cmov does.
-define(cmov_simulate,
-m4_assert_numargs(3)
-`j$1	L(cmov_T`'cmov_counter)	C cmov$1 $2, $3
-	jmp	L(cmov_F`'cmov_counter)
-L(cmov_T`'cmov_counter):
-	movl	$2, $3
-L(cmov_F`'cmov_counter):
-define(`cmov_counter',incr(cmov_counter))')
-
-define(cmov_counter,1)
-
-dnl  Called: cmov_bytes_tttn(name,tttn,src,dst)
-define(cmov_bytes_tttn,
 m4_assert_numargs(4)
 `.byte	dnl
 15, dnl
@@ -601,11 +665,13 @@ define(x86_opcode_regmmx_list,
 `%mm7',7')
 
 
-dnl  Usage: psadbw(src,dst)
+dnl  Usage: psadbw(%srcreg,%dstreg)
 dnl
-dnl  Only recent versions of gas know psadbw, in particular gas 2.9.1 on
-dnl  FreeBSD 3.3 and 3.4 doesn't recognise it, so instead emit .byte
-dnl  sequences.
+dnl  Oldish versions of gas don't know psadbw, in particular gas 2.9.1 on
+dnl  FreeBSD 3.3 and 3.4 doesn't, so instead emit .byte sequences.  For
+dnl  example,
+dnl
+dnl         psadbw( %mm1, %mm2)
 dnl
 dnl  Only register->register forms are supported here, which suffices for
 dnl  the current code.
@@ -613,68 +679,9 @@ dnl  the current code.
 define(psadbw,
 m4_instruction_wrapper()
 m4_assert_numargs(2)
-`ifelse(psadbw_available_p,1,
-`psadbw_bytes(`$1',`$2')',
-`psadbw_simulate(`$1',`$2')')')
-
-define(psadbw_available_p,
-m4_assert_numargs(-1)
-`m4_ifdef_anyof_p(`HAVE_HOST_CPU_pentium3',
-                  `HAVE_HOST_CPU_pentium4',
-                  `HAVE_HOST_CPU_athlon')')
-
-dnl  Called: psadbw_bytes(src,dst)
-define(psadbw_bytes,
-m4_assert_numargs(2)
 `.byte 0x0f,0xf6,dnl
 eval(192+x86_opcode_regmmx(`$2')*8+x86_opcode_regmmx(`$1')) dnl
 	C `psadbw $1, $2'')
-
-dnl  Called: psadbw_simulate(src,dst)
-define(psadbw_simulate,
-m4_assert_numargs(2)
-`m4_warning(`warning, using simulated and only partly functional psadbw, use testing only
-')	C This works enough for the sum of bytes done in some of the popcounts,
-	C but is otherwise a long way short of correct.
-	pushl	%eax
-	pushl	%edx
-	pushf
-	subl	$`'8, %esp
-	movq	$2, (%esp)
-	movzbl	(%esp), %eax
-forloop(i,1,7,
-`	movzbl	i`'(%esp), %edx
-	addl	%edx, %eax
-')
-	movd	%eax, $2
-	addl	$`'8, %esp
-	popf
-	popl	%edx
-	popl	%eax
-')
-
-
-dnl  Usage: loop_or_decljnz label
-dnl
-dnl  Generate either a "loop" instruction or a "decl %ecx / jnz", whichever
-dnl  is better.  "loop" is better on K6 and probably on 386, on other chips
-dnl  separate decl/jnz is better.
-dnl
-dnl  This macro is just for mpn/x86/divrem_1.asm and mpn/x86/mod_1.asm where
-dnl  this loop_or_decljnz variation is enough to let the code be shared by
-dnl  all chips.
-
-define(loop_or_decljnz,
-`ifelse(loop_is_better_p,1,
-	`loop',
-	`decl	%ecx
-	jnz')')
-
-define(loop_is_better_p,
-`m4_ifdef_anyof_p(`HAVE_HOST_CPU_k6',
-                  `HAVE_HOST_CPU_k62',
-                  `HAVE_HOST_CPU_k63',
-                  `HAVE_HOST_CPU_i386')')
 
 
 dnl  Usage: Zdisp(inst,op,op,op)
@@ -707,6 +714,7 @@ dnl  needed for any different operation or registers.  The table is split
 dnl  into separate macros to avoid overflowing BSD m4 macro expansion space.
 
 define(Zdisp,
+m4_assert_numargs(4)
 `define(`Zdisp_found',0)dnl
 Zdisp_1($@)dnl
 Zdisp_2($@)dnl
@@ -728,6 +736,8 @@ Zdisp_match( sbbl, 0,(%edx), %esi,        `0x1b,0x72,0x00',           $@)`'dnl
 Zdisp_match( subl, %ecx, 0,(%edi),        `0x29,0x4f,0x00',           $@)`'dnl
 Zdisp_match( movzbl, 0,(%eax,%ebp), %eax, `0x0f,0xb6,0x44,0x28,0x00', $@)`'dnl
 Zdisp_match( movzbl, 0,(%ecx,%edi), %edi, `0x0f,0xb6,0x7c,0x39,0x00', $@)`'dnl
+Zdisp_match( adc, 0,(%ebx,%ecx,4), %eax,  `0x13,0x44,0x8b,0x00',      $@)`'dnl
+Zdisp_match( sbb, 0,(%ebx,%ecx,4), %eax,  `0x1b,0x44,0x8b,0x00',      $@)`'dnl
 ')
 define(Zdisp_2,`dnl
 Zdisp_match( movl, %eax, 0,(%edi),        `0x89,0x47,0x00',           $@)`'dnl
@@ -738,6 +748,8 @@ Zdisp_match( movl, 0,(%ebx), %esi,        `0x8b,0x73,0x00',           $@)`'dnl
 Zdisp_match( movl, 0,(%edx), %eax,        `0x8b,0x42,0x00',           $@)`'dnl
 Zdisp_match( movl, 0,(%esi), %eax,        `0x8b,0x46,0x00',           $@)`'dnl
 Zdisp_match( movl, 0,(%esi,%ecx,4), %eax, `0x8b,0x44,0x8e,0x00',      $@)`'dnl
+Zdisp_match( mov, 0,(%esi,%ecx,4), %eax,  `0x8b,0x44,0x8e,0x00',      $@)`'dnl
+Zdisp_match( mov, %eax, 0,(%edi,%ecx,4),  `0x89,0x44,0x8f,0x00',      $@)`'dnl
 ')
 define(Zdisp_3,`dnl
 Zdisp_match( movq, 0,(%eax,%ecx,8), %mm0, `0x0f,0x6f,0x44,0xc8,0x00', $@)`'dnl
@@ -762,6 +774,7 @@ Zdisp_match( movd, %mm0, 0,(%edx,%ecx,4), `0x0f,0x7e,0x44,0x8a,0x00', $@)`'dnl
 ')
 
 define(Zdisp_match,
+m4_assert_numargs(9)
 `ifelse(eval(m4_stringequal_p(`$1',`$6')
 	&& m4_stringequal_p(`$2',0)
 	&& m4_stringequal_p(`$3',`$8')
@@ -810,6 +823,7 @@ dnl  just a plain "shldl ...", an error results.  This ensures the necessary
 dnl  variant treatment of %cl isn't accidentally bypassed.
 
 define(define_shd_instruction,
+m4_assert_numargs(1)
 `define($1,
 m4_instruction_wrapper()
 m4_assert_numargs(3)
@@ -856,6 +870,7 @@ dnl         ASSERT(, `movl %eax, VAR_KEEPVAL')
 
 define(ASSERT,
 m4_assert_numargs_range(1,2)
+m4_assert_defined(`WANT_ASSERT')
 `ifelse(WANT_ASSERT,1,
 `ifelse(`$1',,
 	`$2',
@@ -887,6 +902,7 @@ dnl  won't suffer from the two forwards references bug in old gas (described
 dnl  in mpn/x86/README).
 
 define(movl_text_address,
+m4_assert_numargs(2)
 `ifdef(`PIC',
 	`call	L(movl_text_address_`'movl_text_address_counter)
 L(movl_text_address_`'movl_text_address_counter):
@@ -897,5 +913,44 @@ define(`movl_text_address_counter',incr(movl_text_address_counter))',
 
 define(movl_text_address_counter,1)
 
+
+dnl  Usage: notl_or_xorl_GMP_NUMB_MASK(reg)
+dnl
+dnl  Expand to either "notl `reg'" or "xorl $GMP_NUMB_BITS,`reg'" as
+dnl  appropriate for nails in use or not.
+
+define(notl_or_xorl_GMP_NUMB_MASK,
+m4_assert_numargs(1)
+`ifelse(GMP_NAIL_BITS,0,
+`notl	`$1'',
+`xorl	$GMP_NUMB_MASK, `$1'')')
+
+
+dnl  Usage LEA(symbol,reg)
+
+define(`LEA',`
+define(`EPILOGUE_cpu',
+`
+L(movl_eip_`'substr($2,1)):
+	movl	(%esp), $2
+	ret_internal
+	SIZE($'`1, .-$'`1)')
+
+        call    L(movl_eip_`'substr($2,1))
+        addl    $_GLOBAL_OFFSET_TABLE_, $2
+        movl    $1@GOT($2), $2
+')
+
+
+define(`DEF_OBJECT',
+m4_assert_numargs_range(1,2)
+	`RODATA
+	ALIGN(ifelse($#,1,2,$2))
+$1:
+')
+
+define(`END_OBJECT',
+m4_assert_numargs(1)
+`	SIZE(`$1',.-`$1')')
 
 divert`'dnl

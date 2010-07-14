@@ -1,48 +1,45 @@
 dnl  AMD K7 mpn_sqr_basecase -- square an mpn number.
-dnl 
-dnl  K7: approx 2.3 cycles/crossproduct, or 4.55 cycles/triangular product
-dnl  (measured on the speed difference between 25 and 50 limbs, which is
-dnl  roughly the Karatsuba recursing range).
 
-
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C K7: approx 2.3 cycles/crossproduct, or 4.55 cycles/triangular product
+C     (measured on the speed difference between 25 and 50 limbs, which is
+C     roughly the Karatsuba recursing range).
 
 
 dnl  These are the same as mpn/x86/k6/sqr_basecase.asm, see that code for
 dnl  some comments.
 
-deflit(KARATSUBA_SQR_THRESHOLD_MAX, 66)
+deflit(SQR_KARATSUBA_THRESHOLD_MAX, 66)
 
-ifdef(`KARATSUBA_SQR_THRESHOLD_OVERRIDE',
-`define(`KARATSUBA_SQR_THRESHOLD',KARATSUBA_SQR_THRESHOLD_OVERRIDE)')
+ifdef(`SQR_KARATSUBA_THRESHOLD_OVERRIDE',
+`define(`SQR_KARATSUBA_THRESHOLD',SQR_KARATSUBA_THRESHOLD_OVERRIDE)')
 
-m4_config_gmp_mparam(`KARATSUBA_SQR_THRESHOLD')
-deflit(UNROLL_COUNT, eval(KARATSUBA_SQR_THRESHOLD-3))
+m4_config_gmp_mparam(`SQR_KARATSUBA_THRESHOLD')
+deflit(UNROLL_COUNT, eval(SQR_KARATSUBA_THRESHOLD-3))
 
 
 C void mpn_sqr_basecase (mp_ptr dst, mp_srcptr src, mp_size_t size);
 C
-C With a KARATSUBA_SQR_THRESHOLD around 50 this code is about 1500 bytes,
+C With a SQR_KARATSUBA_THRESHOLD around 50 this code is about 1500 bytes,
 C which is quite a bit, but is considered good value since squares big
 C enough to use most of the code will be spending quite a few cycles in it.
 
@@ -119,7 +116,7 @@ deflit(`FRAME',0)
 
 	popl	%ebx
 
- 	addl	%eax, 4(%ecx)
+	addl	%eax, 4(%ecx)
 	adcl	%edx, 8(%ecx)
 	adcl	$0, 12(%ecx)
 	ASSERT(nc)
@@ -258,7 +255,7 @@ L(four_or_more):
 
 C First multiply src[0]*src[1..size-1] and store at dst[1..size].
 C Further products are added in rather than stored.
- 
+
 	C eax	src
 	C ebx
 	C ecx	size
@@ -296,17 +293,17 @@ L(mul_1):
 	C edi	&dst[size]
 	C ebp	multiplier
 
-        movl    (%esi,%ecx,4), %eax
+	movl	(%esi,%ecx,4), %eax
 
-        mull    %ebp
+	mull	%ebp
 
-        addl    %ebx, %eax
-        movl    %eax, (%edi,%ecx,4)
-        movl    $0, %ebx
+	addl	%ebx, %eax
+	movl	%eax, (%edi,%ecx,4)
+	movl	$0, %ebx
 
-        adcl    %edx, %ebx
-        incl    %ecx
-        jnz     L(mul_1)
+	adcl	%edx, %ebx
+	incl	%ecx
+	jnz	L(mul_1)
 
 
 C Add products src[n]*src[n+1..size-1] at dst[2*n-1...], for each n=1..size-2.
@@ -425,7 +422,7 @@ L(pic_calc):
 	addl	(%esp), %ecx
 	addl	$UNROLL_INNER_END-eval(2*CODE_BYTES_PER_LIMB)-L(here), %ecx
 	addl	%edx, %ecx
-	ret
+	ret_internal
 ')
 
 
@@ -452,9 +449,9 @@ forloop(`i', UNROLL_COUNT, 1, `
 
 ifelse(eval(i%2),0,`
 Zdisp(	movl,	disp_src,(%esi), %eax)
-        adcl    %edx, %ebx
+	adcl	%edx, %ebx
 
-        mull	%ebp
+	mull	%ebp
 
 Zdisp(  addl,	%ecx, disp_dst,(%edi))
 	movl	$0, %ecx
@@ -466,14 +463,14 @@ Zdisp(  addl,	%ecx, disp_dst,(%edi))
 Zdisp(  movl,	disp_src,(%esi), %eax)
 	adcl	%edx, %ecx
 
-	mull    %ebp
+	mull	%ebp
 
 Zdisp(	addl,	%ebx, disp_dst,(%edi))
 
 ifelse(forloop_last,0,
 `	movl	$0, %ebx')
 
-	adcl    %eax, %ecx
+	adcl	%eax, %ecx
 ')
 ')
 
@@ -485,18 +482,18 @@ ifelse(forloop_last,0,
 	C edi	dst
 	C ebp	multiplier
 
-        adcl    $0, %edx
+	adcl	$0, %edx
 	addl	%ecx, -4+OFFSET(%edi)
 	movl	VAR_JMP, %ecx
 
-        adcl    $0, %edx
-	
+	adcl	$0, %edx
+
 	movl	%edx, m4_empty_if_zero(OFFSET) (%edi)
 	movl	VAR_COUNTER, %edx
 
 	incl	%edx
 	jnz	L(unroll_outer_top)
-	
+
 
 ifelse(OFFSET,0,,`
 	addl	$OFFSET, %esi
@@ -540,7 +537,7 @@ L(corner):
 
 	adcl	$0, %edx
 	movl	%edx, 8(%edi)
-	
+
 
 
 C Left shift of dst[1..2*size-2], high bit shifted out becomes dst[2*size-1].

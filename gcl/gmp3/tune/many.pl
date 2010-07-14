@@ -1,12 +1,12 @@
 #! /usr/bin/perl -w
 
-# Copyright 2000, 2001 Free Software Foundation, Inc.
+# Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 #
 # This file is part of the GNU MP Library.
 #
 # The GNU MP Library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation; either version 2.1 of the License, or (at your
+# the Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 #
 # The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@
 # License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-# MA 02111-1307, USA.
+# along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 # Usage:  cd $builddir/tune
@@ -282,10 +280,11 @@ if (defined $ENV{directories}) { push @DIRECTORIES, @{$ENV{directories}} }
 my @table =
     (
      {
-       'regexp'=> 'add_n|sub_n',
+       'regexp'=> 'add_n|sub_n|addlsh1_n|sublsh1_n|rsh1add_n|rsh1sub_n',
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_ptr wp, mp_srcptr xp, mp_srcptr yp, mp_size_t size',
        'speed' => 'SPEED_ROUTINE_MPN_BINARY_N',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
      },
      {
        'regexp'=> 'aors_n',
@@ -293,8 +292,9 @@ my @table =
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_ptr wp, mp_srcptr xp, mp_srcptr yp, mp_size_t size',
        'speed' => 'SPEED_ROUTINE_MPN_BINARY_N',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
      },
-     
+
      {
        'regexp'=> 'addmul_1|submul_1',
        'ret'   => 'mp_limb_t',
@@ -309,6 +309,63 @@ my @table =
        'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_limb_t mult',
        'speed' => 'SPEED_ROUTINE_MPN_UNARY_1',
        'speed_flags'=> 'FLAG_R',
+     },
+
+     {
+       'regexp'=> 'addmul_2|submul_2',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_2',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 2,
+     },
+     {
+       'regexp'=> 'addmul_3|submul_3',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_3',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 3,
+     },
+     {
+       'regexp'=> 'addmul_4|submul_4',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_4',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 4,
+     },
+     {
+       'regexp'=> 'addmul_5|submul_5',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_5',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 5,
+     },
+     {
+       'regexp'=> 'addmul_6|submul_6',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_6',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 6,
+     },
+     {
+       'regexp'=> 'addmul_7|submul_7',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_7',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 7,
+     },
+     {
+       'regexp'=> 'addmul_8|submul_8',
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr yp',
+       'speed' => 'SPEED_ROUTINE_MPN_UNARY_8',
+       'speed_flags'=> 'FLAG_R_OPTIONAL',
+       'try-minsize' => 8,
      },
 
      {
@@ -349,14 +406,25 @@ my @table =
        'carrys'=> [''],
        'speed' => 'SPEED_ROUTINE_MPN_COPY',
      },
-     
+
+     # mpn_preinv_divrem_1 is an optional extra entrypoint
      {
        'regexp'=> 'divrem_1',
+       'funs'  => ['divrem_1', 'preinv_divrem_1'],
        'ret'   => 'mp_limb_t',
-       'args'  => 'mp_ptr rp, mp_size_t xsize, mp_srcptr sp, mp_size_t size, mp_limb_t divisor',
-       'speed_flags' => 'FLAG_R',
+       'args_divrem_1' => 'mp_ptr rp, mp_size_t xsize, mp_srcptr sp, mp_size_t size, mp_limb_t divisor',
+       'args_preinv_divrem_1' => 'mp_ptr rp, mp_size_t xsize, mp_srcptr sp, mp_size_t size, mp_limb_t divisor, mp_limb_t inverse, unsigned shift',
+       'speed_flags'=> 'FLAG_R',
        'speed_suffixes' => ['f'],
      },
+     {
+       'regexp'=> 'pre_divrem_1',
+       'funs'  => ['preinv_divrem_1'],
+       'ret'   => 'mp_limb_t',
+       'args'  => 'mp_ptr qp, mp_size_t qxn, mp_srcptr ap, mp_size_t asize, mp_limb_t divisor, mp_limb_t inverse, int shift',
+       'speed_flags' => 'FLAG_R',
+     },
+
      {
        'regexp'=> 'divrem_2',
        'ret'   => 'mp_limb_t',
@@ -448,7 +516,6 @@ my @table =
        'regexp'=> 'gcd_1',
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_ptr xp, mp_size_t xsize, mp_limb_t y',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
        'speed_flags'=> 'FLAG_R_OPTIONAL',
        'speed_suffixes' => ['N'],
      },
@@ -461,9 +528,8 @@ my @table =
        'regexp'=> 'gcd_finda',
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_srcptr cp',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
      },
-     
+
 
      {
        'regexp'=> 'jacobi',
@@ -471,7 +537,6 @@ my @table =
        'mpX'   => 'mpz',
        'ret'   => 'int',
        'args'  => 'mpz_srcptr a, mpz_srcptr b',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
        'try-legendre' => 'TYPE_MPZ_JACOBI',
      },
      {
@@ -479,7 +544,6 @@ my @table =
        'funs'  => ['jacobi_base'],
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_limb_t a, mp_limb_t b, int bit1',
-       'attrib'=> 'ATTRIBUTE_CONST',
        'speed' => 'SPEED_ROUTINE_MPN_JACBASE',
        'try'   => 'none',
      },
@@ -507,7 +571,6 @@ my @table =
        'ret'   => 'mp_limb_t',
        'args_mod_1'       => 'mp_srcptr xp, mp_size_t size, mp_limb_t divisor',
        'args_preinv_mod_1'=> 'mp_srcptr xp, mp_size_t size, mp_limb_t divisor, mp_limb_t inverse',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
        'speed_flags'=> 'FLAG_R',
      },
      {
@@ -515,22 +578,30 @@ my @table =
        'funs'  => ['preinv_mod_1'],
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_srcptr xp, mp_size_t size, mp_limb_t divisor, mp_limb_t inverse',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
        'speed_flags'=> 'FLAG_R',
      },
      {
        'regexp'=> 'mod_34lsub1',
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_srcptr src, mp_size_t len',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
      },
      {
        'regexp'=> 'invert_limb',
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_limb_t divisor',
-       'attrib'=> 'ATTRIBUTE_CONST',
        'speed_flags'=> 'FLAG_R_OPTIONAL',
        'try'   => 'none',
+     },
+
+     {
+       # not for use with hppa reversed argument versions of mpn_umul_ppmm
+       'regexp'=> 'udiv',
+       'funs'  => ['udiv_qrnnd','udiv_qrnnd_r'],
+       'ret'   => 'mp_limb_t',
+       'args_udiv_qrnnd'   => 'mp_limb_t *, mp_limb_t, mp_limb_t, mp_limb_t',
+       'args_udiv_qrnnd_r' => 'mp_limb_t, mp_limb_t, mp_limb_t, mp_limb_t *',
+       'speed' => 'none',
+       'try-minsize' => 2,
      },
 
      {
@@ -538,7 +609,6 @@ my @table =
        'funs'  => ['modexact_1_odd'],
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_srcptr src, mp_size_t size, mp_limb_t divisor',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
        'speed_flags'=> 'FLAG_R',
      },
      {
@@ -546,7 +616,6 @@ my @table =
        'funs'  => ['modlimb_invert'],
        'ret'   => 'mp_limb_t',
        'args'  => 'mp_limb_t v',
-       'attrib'=> 'ATTRIBUTE_CONST',
        'carrys'=> [''],
        'try'   => 'none',
      },
@@ -561,10 +630,11 @@ my @table =
      {
        'regexp'=> 'mul_2',
        'ret'   => 'mp_limb_t',
-       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_limb_t low, mp_limb_t high',
+       'args'  => 'mp_ptr wp, mp_srcptr xp, mp_size_t size, mp_srcptr mult',
        'speed' => 'SPEED_ROUTINE_MPN_UNARY_2',
+       'speed_flags'=> 'FLAG_R',
      },
-     
+
      {
        'regexp'=> 'mul_basecase',
        'ret'   => 'void',
@@ -578,15 +648,15 @@ my @table =
        'rename'=> ['kara_mul_n','kara_sqr_n','toom3_mul_n','toom3_sqr_n'],
      },
      {
-       # not for use with hppa reversed argument versions of mpn_umul_ppmm
        'regexp'=> 'umul',
-       'funs'  => ['umul_ppmm'],
+       'funs'  => ['umul_ppmm','umul_ppmm_r'],
        'ret'   => 'mp_limb_t',
-       'args'  => 'mp_limb_t *lowptr, mp_limb_t m1, mp_limb_t m2',
+       'args_umul_ppmm'   => 'mp_limb_t *lowptr, mp_limb_t m1, mp_limb_t m2',
+       'args_umul_ppmm_r' => 'mp_limb_t m1, mp_limb_t m2, mp_limb_t *lowptr',
        'speed' => 'none',
        'try-minsize' => 3,
      },
-       
+
 
      {
        'regexp'=> 'popham',
@@ -594,19 +664,16 @@ my @table =
        'ret'   => 'unsigned long',
        'args_popcount'=> 'mp_srcptr xp, mp_size_t size',
        'args_hamdist' => 'mp_srcptr xp, mp_srcptr yp, mp_size_t size',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
      },
      {
        'regexp'=> 'popcount',
        'ret'   => 'unsigned long',
        'args'  => 'mp_srcptr xp, mp_size_t size',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
      },
      {
        'regexp'=> 'hamdist',
        'ret'   => 'unsigned long',
        'args'  => 'mp_srcptr xp, mp_srcptr yp, mp_size_t size',
-       'attrib'=> '__GMP_ATTRIBUTE_PURE',
        # extra renaming to support sharing a data table with mpn_popcount
        'rename'=> ['popcount'],
      },
@@ -637,7 +704,6 @@ my @table =
        'funs'  => ['count_leading_zeros'],
        'ret'   => 'unsigned',
        'args'  => 'mp_limb_t',
-       'attrib'=> 'ATTRIBUTE_CONST',
        'macro-before' => "#undef COUNT_LEADING_ZEROS_0",
        'macro-speed'  =>
 '#ifdef COUNT_LEADING_ZEROS_0
@@ -645,8 +711,9 @@ my @table =
 #else
 #define COUNT_LEADING_ZEROS_0_ALLOWED   0
 #endif
-  SPEED_ROUTINE_COUNT_LEADING_ZEROS_C ($fun (c, n),
-    COUNT_LEADING_ZEROS_0_ALLOWED)',
+  SPEED_ROUTINE_COUNT_ZEROS_A (1, COUNT_LEADING_ZEROS_0_ALLOWED);
+  $fun (c, n);
+  SPEED_ROUTINE_COUNT_ZEROS_B ()',
        'speed_flags'=> 'FLAG_R_OPTIONAL',
        'try'   => 'none',
      },
@@ -655,8 +722,10 @@ my @table =
        'funs'  => ['count_trailing_zeros'],
        'ret'   => 'unsigned',
        'args'  => 'mp_limb_t',
-       'attrib'=> 'ATTRIBUTE_CONST',
-       'macro-speed' => 'SPEED_ROUTINE_COUNT_TRAILING_ZEROS_C ($fun(c,n), 0)',
+       'macro-speed' => '
+  SPEED_ROUTINE_COUNT_ZEROS_A (0, 0);
+  $fun (c, n);
+  SPEED_ROUTINE_COUNT_ZEROS_B ()',
        'speed_flags' => 'FLAG_R_OPTIONAL',
        'try'   => 'none',
      },
@@ -685,10 +754,9 @@ my @table =
      # special for use during development
      {
        'regexp'=> 'back',
-       'funs'  => ['back_to'],
+       'funs'  => ['back_to_back'],
        'ret'   => 'void',
        'args'  => 'void',
-       'suffix'=> 'back',
        'pic'   => 'no',
        'try'   => 'none',
        'speed_flags'=> 'FLAG_NODATA',
@@ -702,7 +770,7 @@ if (defined $ENV{table2}) {
 }
 
 
-my %pictable = 
+my %pictable =
     (
      'yes' => {
        'suffix' =>  '_pic',
@@ -724,7 +792,8 @@ my $top_builddir = "${builddir}/..";
 
 
 open(MAKEFILE, "<${builddir}/Makefile")
-    or die "Cannot open Makefile: $!\nIs this a tune build directory?";
+  or die "Cannot open ${builddir}/Makefile: $!\n"
+       . "Is this a tune build directory?";
 my ($srcdir, $top_srcdir);
 while (<MAKEFILE>) {
   if (/^srcdir = (.*)/) {     $srcdir = $1;     }
@@ -855,7 +924,7 @@ foreach my $file_full (@files) {
   elsif ($lang eq '.S') { @pic_choices=('no','yes'); }
   elsif ($lang eq '.h') { @pic_choices=('no'); }
   else { next };
-  
+
   my ($t, $file_match);
   foreach my $p (@table) {
     # print " ",$p->{'regexp'},"\n" if $opt{'t'};
@@ -892,7 +961,7 @@ foreach my $file_full (@files) {
   if (defined $t->{'carrys'}) { $carrys = $t->{'carrys'}; }
   else                        { $carrys = ['','c'];       }
   print "carrys $carrys @$carrys\n" if $opt{'t'};
-  
+
   # some restriction functions are implemented, but they're not very useful
   my $restriction='';
 
@@ -909,15 +978,13 @@ foreach my $file_full (@files) {
     } elsif ($suffix =~ /([^_]*_)*([^_]+)$/) {
       $suffix = $2;
     }
-  } elsif (defined $t->{'suffix'}) {
-    $suffix = $t->{'suffix'};
   } else {
     die "Can't determine suffix for: $file_full (path $path)\n";
   }
   print "suffix $suffix\n" if $opt{'t'};
-  
+
   $count_files++;
-  
+
   foreach my $obj (@{$objs}) {
     print "obj $obj\n" if $opt{'t'};
 
@@ -938,7 +1005,7 @@ foreach my $file_full (@files) {
 
     foreach my $pic (map {$pictable{$_}} @pic_choices) {
       print "pic $pic->{'suffix'}\n" if $opt{'t'};
-      
+
       my $objbase = "${obj}_$suffix$pic->{'suffix'}";
       print "objbase $objbase\n" if $opt{'t'};
 
@@ -947,11 +1014,18 @@ foreach my $file_full (@files) {
       }
 
       my $tmp_file = "tmp-$objbase.c";
-      
+
       my $renaming;
       foreach my $fun (@{$funs}) {
+        if ($mpX eq 'mpn_' && $lang eq '.c') {
+          $renaming .= "\t\t-DHAVE_NATIVE_mpn_$fun=1 \\\n";
+        }
+
+        # The carry-in variant is with a "c" appended, unless there's a "_1"
+        # somewhere, eg. "modexact_1_odd", in which case that becomes "_1c".
 	my $fun_carry = $fun;
 	if (! ($fun_carry =~ s/_1/_1c/)) { $fun_carry = "${fun}c"; }
+
 	$renaming .=
 	    "\t\t-D__g$mpX$fun=$mpX${fun}_$suffix$pic->{'suffix'} \\\n" .
 	    "\t\t-D__g$mpX$fun_carry=$mpX${fun_carry}_$suffix$pic->{'suffix'} \\\n";
@@ -1069,16 +1143,16 @@ EOF
 	if (! defined $args) { $args = $t->{'args'}; }
 	if (! defined $args) { die "Need args for $fun\n"; }
 	print "args $args\n" if $opt{'t'};
-      
+
 	foreach my $carry (@$carrys) {
 	  print "carry $carry\n" if $opt{'t'};
 
 	  my $fun_carry = $fun;
 	  if (! ($fun_carry =~ s/_1/_1$carry/)) { $fun_carry = "$fun$carry"; }
           print "fun_carry $fun_carry\n" if $opt{'t'};
-		    
+
 	  if ($lang =~ /\.(asm|S)/
-	      && ! grep(m"PROLOGUE.*$mpX$fun_carry",@file_contents)) {
+	      && ! grep(m"PROLOGUE\((.* )?$mpX$fun_carry[ ,)]",@file_contents)) {
 	    print "no PROLOGUE $mpX$fun_carry\n" if $opt{'t'};
 	    next;
 	  }
@@ -1092,7 +1166,7 @@ EOF
 	    print "no mention of #define $fun_carry\n" if $opt{'t'};
 	    next;
 	  }
-	  
+
 	  $count_functions++;
 
 	  my $carryarg;
@@ -1100,20 +1174,16 @@ EOF
 	  if ($carry eq '')             { $carryarg = ''; }
 	  else                          { $carryarg = ', mp_limb_t carry'; }
 	  print "carryarg $carryarg\n" if $opt{'t'};
-	  
+
 	  my $funfull="$mpX${fun_carry}_$suffix$pic->{'suffix'}";
 	  print "funfull $funfull\n" if $opt{'t'};
 
 	  if ($lang ne '.h') {
-	    my $attrib = $t->{'attrib'};
-	    if (defined $attrib) { $attrib = " $attrib"; }
-	    else { $attrib = ''; }
-
-	    my $proto = "$t->{'ret'} $funfull _PROTO (($args$carryarg))$attrib; \\\n";
+	    my $proto = "$t->{'ret'} $funfull _PROTO (($args$carryarg)); \\\n";
 	    $SPEED_EXTRA_PROTOS .= $proto;
 	    $TRY_EXTRA_PROTOS .= $proto;
 	  }
-	  
+
 	  my $try_type = $t->{"try-$fun"};
 	  $try_type = $t->{'try'} if ! defined $try_type;
 	  if (! defined $try_type) {
@@ -1124,7 +1194,7 @@ EOF
 	    }
 	  }
 	  print "try_type $try_type\n" if $opt{'t'};
-	  
+
 	  my $try_minsize = $t->{'try-minsize'};
 	  if (defined $try_minsize) {
 	    $try_minsize = ", " . $try_minsize;
@@ -1132,7 +1202,7 @@ EOF
 	    $try_minsize = "";
 	  }
 	  print "try_minsize $try_minsize\n" if $opt{'t'};
-	  
+
 	  if ($try_type ne 'none') {
 	    $TRY_EXTRA_ROUTINES .=
 		"  { TRY($mpX${fun_carry}_$suffix$pic->{'suffix'}), $try_type$try_minsize }, \\\n";
@@ -1141,7 +1211,7 @@ EOF
 	  my $speed_flags = $t->{'speed_flags'};
 	  $speed_flags = '0' if ! defined $speed_flags;
 	  print "speed_flags $speed_flags\n" if $opt{'t'};
-	  
+
 	  my $speed_routine = $t->{'speed'};
 	  $speed_routine = "SPEED_ROUTINE_\U$mpX\U$fun"
 	      if !defined $speed_routine;
@@ -1149,19 +1219,19 @@ EOF
 	    $speed_routine = "$speed_routine\U$carry";
 	  }
 	  print "speed_routine $speed_routine\n" if $opt{'t'};
-	  
+
 	  my @speed_suffixes = ();
 	  push (@speed_suffixes, '') if $speed_routine ne 'none';
 	  push (@speed_suffixes, @{$t->{'speed_suffixes'}})
 	      if defined $t->{'speed_suffixes'};
-	  
+
           my $macro_speed = $t->{'macro-speed'};
           $macro_speed = "$speed_routine ($fun_carry)" if ! defined $macro_speed;
           $macro_speed =~ s/\$fun/$fun_carry/g;
 
 	  foreach my $S (@speed_suffixes) {
 	    my $Sfunfull="$mpX${fun_carry}${S}_$suffix$pic->{'suffix'}";
-	    
+
 	    $SPEED_EXTRA_PROTOS .=
 	      "double speed_$Sfunfull _PROTO ((struct speed_params *s)); \\\n";
 	    $SPEED_EXTRA_ROUTINES .=
@@ -1251,8 +1321,9 @@ CFLAGS_TESTS = -DSIZE=50 -DTIMES=1 -DRANDOM -DCLOCK=333000000
 CFLAGS_TESTS_SP = -DSIZE=1024 -DNOCHECK -DOPS=200000000 -DCLOCK=333000000
 EOF
 
+close MAKEFILE or die;
 
-print "Total $count_files files, $count_functions functions\n";    
+print "Total $count_files files, $count_functions functions\n";
 
 
 

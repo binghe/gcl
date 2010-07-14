@@ -1,12 +1,13 @@
 /* Support for diagnostic traces.
 
-Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation,
+Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 
 /* Future: Would like commas printed between limbs in hex or binary, but
@@ -63,13 +62,13 @@ void
 mpq_trace (const char *name, mpq_srcptr q)
 {
   mp_trace_start (name);
+  if (q == NULL)
+    {
+      printf ("NULL\n");
+      return;
+    }
+
   mpq_out_str (stdout, mp_trace_base, q);
-
-  /* It's not very interesting to know when numbers are unnormalized.
-     mpz's should always be and ought to be checked with ASSERT() if in doubt.
-     mpn's can often be unnormalized without affecting anything.  */
-  /* if (!mpq_normalized_p (z))  printf (" (unnorm)"); */
-
   printf ("\n");
 }
 
@@ -80,6 +79,12 @@ mpz_trace (const char *name, mpz_srcptr z)
 {
   mpq_t      q;
   mp_limb_t  one;
+
+  if (z == NULL)
+    {
+      mpq_trace (name, NULL);
+      return;
+    }
 
   q->_mp_num._mp_alloc = ALLOC(z);
   q->_mp_num._mp_size = SIZ(z);
@@ -99,7 +104,13 @@ void
 mpf_trace (const char *name, mpf_srcptr f)
 {
   mp_trace_start (name);
-  mpf_out_str (stdout, mp_trace_base, 0, f);
+  if (f == NULL)
+    {
+      printf ("NULL\n");
+      return;
+    }
+
+  mpf_out_str (stdout, ABS (mp_trace_base), 0, f);
   printf ("\n");
 }
 
@@ -123,11 +134,30 @@ void
 mpn_trace (const char *name, mp_srcptr ptr, mp_size_t size)
 {
   mpz_t  z;
+  if (ptr == NULL)
+    {
+      mpz_trace (name, NULL);
+      return;
+    }
   MPN_NORMALIZE (ptr, size);
   PTR(z) = (mp_ptr) ptr;
   SIZ(z) = size;
   ALLOC(z) = size;
   mpz_trace (name, z);
+}
+
+/* Print "name=value\n" to stdout for a limb, nail doesn't have to be zero. */
+void
+mp_limb_trace (const char *name, mp_limb_t n)
+{
+#if GMP_NAIL_BITS != 0
+  mp_limb_t  a[2];
+  a[0] = n & GMP_NUMB_MASK;
+  a[1] = n >> GMP_NUMB_BITS;
+  mpn_trace (name, a, (mp_size_t) 2);
+#else
+  mpn_trace (name, &n, (mp_size_t) 1);
+#endif
 }
 
 
@@ -217,9 +247,9 @@ mpn_tracea_file (const char *filename,
 {
   char  *s;
   int   i;
-  TMP_DECL (marker);
+  TMP_DECL;
 
-  TMP_MARK (marker);
+  TMP_MARK;
   s = (char *) TMP_ALLOC (strlen (filename) + 50);
 
   for (i = 0; i < count; i++)
@@ -228,5 +258,62 @@ mpn_tracea_file (const char *filename,
       mpn_trace_file (s, a[i], size);
     }
 
-  TMP_FREE (marker);
+  TMP_FREE;
+}
+
+
+void
+byte_trace (const char *name, const void *ptr, mp_size_t size)
+{
+  char       *fmt;
+  mp_size_t  i;
+
+  mp_trace_start (name);
+
+  switch (mp_trace_base) {
+  case   8: fmt = " %o"; break;
+  case  10: fmt = " %d"; break;
+  case  16: fmt = " %x"; break;
+  case -16: fmt = " %X"; break;
+  default: printf ("Oops, unsupported base in byte_trace\n"); abort (); break;
+  }
+
+  for (i = 0; i < size; i++)
+    printf (fmt, (int) ((unsigned char *) ptr)[i]);
+  printf ("\n");
+}
+
+void
+byte_tracen (const char *name, int num, const void *ptr, mp_size_t size)
+{
+  if (name != NULL && name[0] != '\0')
+    {
+      printf (name, num);
+      putchar ('=');
+    }
+  byte_trace (NULL, ptr, size);
+}
+
+
+void
+d_trace (const char *name, double d)
+{
+  union {
+    double         d;
+    unsigned char  b[sizeof(double)];
+  } u;
+  int  i;
+
+  if (name != NULL && name[0] != '\0')
+    printf ("%s=", name);
+
+  u.d = d;
+  printf ("[");
+  for (i = 0; i < sizeof (u.b); i++)
+    {
+      if (i != 0)
+        printf (" ");
+      printf ("%02X", (int) u.b[i]);
+    }
+  printf ("] %.20g\n", d);
 }

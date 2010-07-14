@@ -1,13 +1,13 @@
 /* Test mpz_abs, mpz_add, mpz_cmp, mpz_cmp_ui, mpz_tdiv_qr_ui, mpz_tdiv_q_ui,
-   mpz_tdiv_r_ui, mpz_mul_ui.
+   mpz_tdiv_r_ui, mpz_tdiv_ui, mpz_mul_ui.
 
-Copyright 1993, 1994, 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1993, 1994, 1996, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,8 +25,8 @@ MA 02111-1307, USA. */
 #include "gmp-impl.h"
 #include "tests.h"
 
-void dump_abort _PROTO ((mpz_t, unsigned long));
-void debug_mp _PROTO ((mpz_t, int));
+void dump_abort __GMP_PROTO ((char *, mpz_t, unsigned long));
+void debug_mp __GMP_PROTO ((mpz_t, int));
 
 int
 main (int argc, char **argv)
@@ -40,10 +38,11 @@ main (int argc, char **argv)
   mp_size_t dividend_size;
   unsigned long divisor;
   int i;
-  int reps = 10000;
+  int reps = 200000;
   gmp_randstate_ptr rands;
   mpz_t bs;
   unsigned long bsi, size_range;
+  unsigned long r_rq, r_q, r_r, r;
 
   tests_start ();
   rands = RANDS;
@@ -83,37 +82,53 @@ main (int argc, char **argv)
 
       /* printf ("%ld\n", SIZ (dividend)); */
 
-      mpz_tdiv_qr_ui (quotient, remainder, dividend, divisor);
-      mpz_tdiv_q_ui (quotient2, dividend, divisor);
-      mpz_tdiv_r_ui (remainder2, dividend, divisor);
+      r_rq = mpz_tdiv_qr_ui (quotient, remainder, dividend, divisor);
+      r_q = mpz_tdiv_q_ui (quotient2, dividend, divisor);
+      r_r = mpz_tdiv_r_ui (remainder2, dividend, divisor);
+      r = mpz_tdiv_ui (dividend, divisor);
 
       /* First determine that the quotients and remainders computed
 	 with different functions are equal.  */
       if (mpz_cmp (quotient, quotient2) != 0)
-	dump_abort (dividend, divisor);
+	dump_abort ("quotients from mpz_tdiv_qr_ui and mpz_tdiv_q_ui differ",
+		    dividend, divisor);
       if (mpz_cmp (remainder, remainder2) != 0)
-	dump_abort (dividend, divisor);
+	dump_abort ("remainders from mpz_tdiv_qr_ui and mpz_tdiv_r_ui differ",
+		    dividend, divisor);
 
       /* Check if the sign of the quotient is correct.  */
       if (mpz_cmp_ui (quotient, 0) != 0)
 	if ((mpz_cmp_ui (quotient, 0) < 0)
 	    != (mpz_cmp_ui (dividend, 0) < 0))
-	dump_abort (dividend, divisor);
+	dump_abort ("quotient sign wrong", dividend, divisor);
 
       /* Check if the remainder has the same sign as the dividend
 	 (quotient rounded towards 0).  */
       if (mpz_cmp_ui (remainder, 0) != 0)
 	if ((mpz_cmp_ui (remainder, 0) < 0) != (mpz_cmp_ui (dividend, 0) < 0))
-	  dump_abort (dividend, divisor);
+	  dump_abort ("remainder sign wrong", dividend, divisor);
 
       mpz_mul_ui (temp, quotient, divisor);
       mpz_add (temp, temp, remainder);
       if (mpz_cmp (temp, dividend) != 0)
-	dump_abort (dividend, divisor);
+	dump_abort ("n mod d != n - [n/d]*d", dividend, divisor);
 
       mpz_abs (remainder, remainder);
       if (mpz_cmp_ui (remainder, divisor) >= 0)
-	dump_abort (dividend, divisor);
+	dump_abort ("remainder greater than divisor", dividend, divisor);
+
+      if (mpz_cmp_ui (remainder, r_rq) != 0)
+	dump_abort ("remainder returned from mpz_tdiv_qr_ui is wrong",
+		    dividend, divisor);
+      if (mpz_cmp_ui (remainder, r_q) != 0)
+	dump_abort ("remainder returned from mpz_tdiv_q_ui is wrong",
+		    dividend, divisor);
+      if (mpz_cmp_ui (remainder, r_r) != 0)
+	dump_abort ("remainder returned from mpz_tdiv_r_ui is wrong",
+		    dividend, divisor);
+      if (mpz_cmp_ui (remainder, r) != 0)
+	dump_abort ("remainder returned from mpz_tdiv_ui is wrong",
+		    dividend, divisor);
     }
 
   mpz_clear (bs);
@@ -129,9 +144,9 @@ main (int argc, char **argv)
 }
 
 void
-dump_abort (mpz_t dividend, unsigned long divisor)
+dump_abort (char *str, mpz_t dividend, unsigned long divisor)
 {
-  fprintf (stderr, "ERROR\n");
+  fprintf (stderr, "ERROR: %s\n", str);
   fprintf (stderr, "dividend = "); debug_mp (dividend, -16);
   fprintf (stderr, "divisor  = %lX\n", divisor);
   abort();

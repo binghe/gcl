@@ -1,13 +1,12 @@
-/* Header for expression evaluation. */
+/* Header for expression evaluation.
 
-/*
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,10 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 
 #ifndef __EXPR_H__
@@ -32,7 +28,7 @@ MA 02111-1307, USA.
 #define MPEXPR_RESULT_NOT_UI        4
 
 
-/* basic types */ 
+/* basic types */
 #define MPEXPR_TYPE_NARY(n)       ((n) * 0x0100)
 #define MPEXPR_TYPE_MASK_ARGCOUNT MPEXPR_TYPE_NARY(0xF)
 #define MPEXPR_TYPE_0ARY          MPEXPR_TYPE_NARY(0)
@@ -88,11 +84,11 @@ MA 02111-1307, USA.
 #define MPEXPR_TYPE_MASK_CMP_EQ   0x002
 #define MPEXPR_TYPE_MASK_CMP_GT   0x004
 #define MPEXPR_TYPE_CMP_LT       (MPEXPR_TYPE_BINARY | MPEXPR_TYPE_MASK_CMP \
-                                  | MPEXPR_TYPE_MASK_CMP_LT)
+				  | MPEXPR_TYPE_MASK_CMP_LT)
 #define MPEXPR_TYPE_CMP_EQ       (MPEXPR_TYPE_BINARY | MPEXPR_TYPE_MASK_CMP \
-                                  | MPEXPR_TYPE_MASK_CMP_EQ)
+				  | MPEXPR_TYPE_MASK_CMP_EQ)
 #define MPEXPR_TYPE_CMP_GT       (MPEXPR_TYPE_BINARY | MPEXPR_TYPE_MASK_CMP \
-                                  | MPEXPR_TYPE_MASK_CMP_GT)
+				  | MPEXPR_TYPE_MASK_CMP_GT)
 #define MPEXPR_TYPE_CMP_LE       (MPEXPR_TYPE_CMP_LT | MPEXPR_TYPE_MASK_CMP_EQ)
 #define MPEXPR_TYPE_CMP_NE       (MPEXPR_TYPE_CMP_LT | MPEXPR_TYPE_MASK_CMP_GT)
 #define MPEXPR_TYPE_CMP_GE       (MPEXPR_TYPE_CMP_GT | MPEXPR_TYPE_MASK_CMP_EQ)
@@ -102,7 +98,7 @@ MA 02111-1307, USA.
 #define MPEXPR_TYPE_OPERATOR       0x2000
 
 
-typedef void (*mpexpr_fun_t) _PROTO ((void));
+typedef void (*mpexpr_fun_t) __GMP_PROTO ((void));
 
 struct mpexpr_operator_t {
   __gmp_const char  *name;
@@ -112,31 +108,22 @@ struct mpexpr_operator_t {
 };
 
 
-int mpf_expr_a _PROTO ((__gmp_const struct mpexpr_operator_t *table,
-                        mpf_ptr res, int base, unsigned long prec,
-                        __gmp_const char *e, size_t elen,
-                        mpf_srcptr var[26]));
-int mpf_expr _PROTO ((mpf_ptr res, int base, __gmp_const char *e, ...));
+int mpf_expr_a __GMP_PROTO ((__gmp_const struct mpexpr_operator_t *table,
+			mpf_ptr res, int base, unsigned long prec,
+			__gmp_const char *e, size_t elen,
+			mpf_srcptr var[26]));
+int mpf_expr __GMP_PROTO ((mpf_ptr res, int base, __gmp_const char *e, ...));
 
-int mpq_expr_a _PROTO ((__gmp_const struct mpexpr_operator_t *table,
-                        mpq_ptr res, int base,
-                        __gmp_const char *e, size_t elen,
-                        mpq_srcptr var[26]));
-int mpq_expr _PROTO ((mpq_ptr res, int base, __gmp_const char *e, ...));
+int mpq_expr_a __GMP_PROTO ((__gmp_const struct mpexpr_operator_t *table,
+			mpq_ptr res, int base,
+			__gmp_const char *e, size_t elen,
+			mpq_srcptr var[26]));
+int mpq_expr __GMP_PROTO ((mpq_ptr res, int base, __gmp_const char *e, ...));
 
-int mpz_expr_a _PROTO ((__gmp_const struct mpexpr_operator_t *table,
-                        mpz_ptr res, int base,
-                        __gmp_const char *e, size_t elen,
-                        mpz_srcptr var[26]));
-int mpz_expr _PROTO ((mpz_ptr res, int base, __gmp_const char *e, ...));
-
-/* when mpfr.h has been included */
-#ifdef GMP_RNDZ
-int mpfr_expr_a _PROTO ((__gmp_const struct mpexpr_operator_t *table,
-                         mpfr_ptr res, int base, unsigned long prec,
-                         __gmp_const char *e, size_t elen,
-                         mpfr_srcptr var[26]));
-int mpfr_expr _PROTO ((mpfr_ptr res, int base, __gmp_const char *e, ...));
-#endif
+int mpz_expr_a __GMP_PROTO ((__gmp_const struct mpexpr_operator_t *table,
+			mpz_ptr res, int base,
+			__gmp_const char *e, size_t elen,
+			mpz_srcptr var[26]));
+int mpz_expr __GMP_PROTO ((mpz_ptr res, int base, __gmp_const char *e, ...));
 
 #endif

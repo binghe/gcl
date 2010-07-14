@@ -1,12 +1,12 @@
 ## Process this file with automake to generate Makefile.in
 
-# Copyright 2001 Free Software Foundation, Inc.
+# Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 #
 # This file is part of the GNU MP Library.
 #
 # The GNU MP Library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation; either version 2.1 of the License, or (at your
+# the Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 #
 # The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,31 +15,24 @@
 # License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-# MA 02111-1307, USA.
+# along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
-AUTOMAKE_OPTIONS = gnu no-dependencies $(top_builddir)/ansi2knr
+INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/tests
 
-INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/tests -I$(top_srcdir)/mpfr
-
-if WANT_MPFR
-MPFR_SOURCES_OPTION = exprfr.c exprfra.c
-MPFR_LIBADD_OPTION = $(top_builddir)/mpfr/libmpfr.a
-endif
-
-# ensure these are always distributed
-EXTRA_DIST = exprfr.c exprfra.c
+# FIXME: This is a workaround for a bug in automake 1.8.4.  When the only
+# library is in EXTRA_LIBRARIES, $(ARFLAGS) is used but no default setting
+# for that variable is established.  We give an explicit ARFLAGS=cru the
+# same as generated for lib_LIBRARIES or noinst_LIBRARIES.
+#
+ARFLAGS = cru
 
 EXTRA_LIBRARIES = libexpr.a
-libexpr_a_SOURCES = expr.h \
-  expr.c exprv.c exprz.c exprza.c exprq.c exprqa.c exprf.c exprfa.c \
-  $(MPFR_SOURCES_OPTION)
-nodist_libexpr_a_SOURCES = expr-impl.h
+libexpr_a_SOURCES = expr.h expr-impl.h \
+  expr.c exprv.c exprz.c exprza.c exprq.c exprqa.c exprf.c exprfa.c
 
 EXTRA_PROGRAMS = run-expr t-expr
-LDADD = libexpr.a $(MPFR_LIBADD_OPTION) $(top_builddir)/libgmp.la
+LDADD = libexpr.a $(top_builddir)/libgmp.la
 t_expr_LDADD = $(top_builddir)/tests/libtests.la $(LDADD)
 
 CLEANFILES = $(EXTRA_PROGRAMS) $(EXTRA_LIBRARIES)

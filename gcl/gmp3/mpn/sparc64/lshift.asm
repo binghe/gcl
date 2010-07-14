@@ -1,13 +1,13 @@
 dnl  SPARC v9 mpn_lshift
 
-dnl  Copyright 1996, 2000, 2001 Free Software Foundation, Inc.
+dnl  Copyright 1996, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
 
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
-dnl  it under the terms of the GNU Lesser General Public License as published by
-dnl  the Free Software Foundation; either version 2.1 of the License, or (at your
-dnl  option) any later version.
+dnl  it under the terms of the GNU Lesser General Public License as published
+dnl  by the Free Software Foundation; either version 3 of the License, or (at
+dnl  your option) any later version.
 
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
 dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
@@ -15,11 +15,14 @@ dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 dnl  License for more details.
 
 dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-dnl  the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-dnl  MA 02111-1307, USA.
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+
 
 include(`../config.m4')
+
+C		   cycles/limb
+C UltraSPARC 1&2:     2
+C UltraSPARC 3:	      3.25
 
 C INPUT PARAMETERS
 define(`rp',`%i0')
@@ -38,8 +41,8 @@ define(`fanop',`fitod %f0,%f2')		dnl  A quasi nop running in the FA pipe
 define(`fmnop',`fmuld %f0,%f0,%f4')	dnl  A quasi nop running in the FM pipe
 
 ASM_START()
-	.register	%g2,#scratch
-	.register	%g3,#scratch
+	REGISTER(%g2,#scratch)
+	REGISTER(%g3,#scratch)
 PROLOGUE(mpn_lshift)
 	save	%sp,-160,%sp
 

@@ -1,12 +1,12 @@
 ## Process this file with automake to generate Makefile.in
 
-# Copyright 2000, 2001 Free Software Foundation, Inc.
+# Copyright 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 #
 # This file is part of the GNU MP Library.
 #
 # The GNU MP Library is free software; you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation; either version 2.1 of the License, or (at your
+# the Free Software Foundation; either version 3 of the License, or (at your
 # option) any later version.
 #
 # The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,39 +15,47 @@
 # License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-# the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-# MA 02111-1307, USA.
+# along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
-
-AUTOMAKE_OPTIONS = gnu no-dependencies $(top_builddir)/ansi2knr
 
 INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/tests
 
-EXTRA_DIST = alpha.asm pentium.asm sparcv9.asm hppa.asm hppa2.asm hppa2w.asm ia64.asm many.pl
+EXTRA_DIST = alpha.asm pentium.asm sparcv9.asm hppa.asm hppa2.asm hppa2w.asm \
+  ia64.asm powerpc.asm powerpc64.asm x86_64.asm many.pl
 noinst_HEADERS = speed.h
 
+# Prefer -static on the speed and tune programs, since that can avoid
+# overheads of shared library linkages on some systems.  Libtool tends to
+# botch -static if configured with --disable-static, perhaps reasonably
+# enough.  In any event under --disable-static the only choice is a dynamic
+# link so there's no point in -static.
+#
+if ENABLE_STATIC
+STATIC = -static
+else
+STATIC =
+endif
 
-EXTRA_LTLIBRARIES = libspeed.la libdummy.la
+
+EXTRA_LTLIBRARIES = libspeed.la
 
 libspeed_la_SOURCES =							\
   common.c divrem1div.c divrem1inv.c divrem2div.c divrem2inv.c		\
-  freq.c gcd_bin.c gcd_finda_gen.c					\
+  freq.c					\
   gcdext_single.c gcdext_double.c gcdextod.c gcdextos.c			\
-  mod_1_div.c mod_1_inv.c modlinv.c mul_n_mpn.c mul_n_open.c		\
-  noop.c powm_mod.c powm_redc.c time.c					\
+  jacbase1.c jacbase2.c jacbase3.c					\
+  mod_1_div.c mod_1_inv.c modlinv.c					\
+  noop.c powm_mod.c powm_redc.c pre_divrem_1.c				\
+  set_strb.c set_strs.c set_strp.c time.c						\
   sb_div.c sb_inv.c
 
 libspeed_la_DEPENDENCIES = $(SPEED_CYCLECOUNTER_OBJ) \
   $(top_builddir)/tests/libtests.la $(top_builddir)/libgmp.la
 libspeed_la_LIBADD = $(libspeed_la_DEPENDENCIES) $(LIBM)
-libspeed_la_LDFLAGS = -static
+libspeed_la_LDFLAGS = $(STATIC)
 
 $(top_builddir)/tests/libtests.la:
 	cd $(top_builddir)/tests; $(MAKE) $(AM_MAKEFLAGS) libtests.la
-
-# create an ansi2knr rule for sqr_basecase.c in case it's recompiled
-nodist_libdummy_la_SOURCES = sqr_basecase.c
 
 
 # The library code is faster static than shared on some systems, so do
@@ -67,18 +75,18 @@ DEPENDENCIES = libspeed.la
 LDADD = $(DEPENDENCIES)
 
 speed_SOURCES = speed.c
-speed_LDFLAGS = -static
+speed_LDFLAGS = $(STATIC)
 
 speed_dynamic_SOURCES = speed.c
 
 speed_ext_SOURCES = speed-ext.c
-speed_ext_LDFLAGS = -static
+speed_ext_LDFLAGS = $(STATIC)
 
 tuneup_SOURCES = tuneup.c
 nodist_tuneup_SOURCES = sqr_basecase.c $(TUNE_MPN_SRCS)
 tuneup_DEPENDENCIES = $(TUNE_SQR_OBJ) libspeed.la
 tuneup_LDADD = $(tuneup_DEPENDENCIES)
-tuneup_LDFLAGS = -static
+tuneup_LDFLAGS = $(STATIC)
 
 
 tune:
@@ -115,8 +123,9 @@ DISTCLEANFILES = sqr_basecase.c  $(MANY_DISTCLEAN)
 # recompiled object will be rebuilt if that file changes.
 
 TUNE_MPN_SRCS = $(TUNE_MPN_SRCS_BASIC) divrem_1.c mod_1.c
-TUNE_MPN_SRCS_BASIC = dc_divrem_n.c divrem_2.c gcd.c mul_n.c mul_fft.c mul.c \
-  sb_divrem_mn.c tdiv_qr.c
+TUNE_MPN_SRCS_BASIC = dc_divrem_n.c divrem_2.c gcd.c gcdext.c get_str.c \
+  set_str.c matrix22_mul.c hgcd.c mul_n.c toom44_mul.c toom4_sqr.c	\
+  mullow_n.c mul_fft.c mul.c sb_divrem_mn.c tdiv_qr.c
 
 $(TUNE_MPN_SRCS_BASIC):
 	for i in $(TUNE_MPN_SRCS_BASIC); do \
@@ -135,7 +144,7 @@ mod_1.c:
 	echo "#include \"mpn/generic/mod_1.c\""     >>mod_1.c
 
 sqr_asm.asm: $(top_builddir)/mpn/sqr_basecase.asm
-	echo 'define(KARATSUBA_SQR_THRESHOLD_OVERRIDE,KARATSUBA_SQR_THRESHOLD_MAX)' >sqr_asm.asm
+	echo 'define(SQR_KARATSUBA_THRESHOLD_OVERRIDE,SQR_KARATSUBA_THRESHOLD_MAX)' >sqr_asm.asm
 	echo 'include(../mpn/sqr_basecase.asm)' >>sqr_asm.asm
 
 

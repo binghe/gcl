@@ -1,10 +1,10 @@
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -13,9 +13,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 
@@ -29,7 +27,7 @@ level as the directory containing this file.)
 
 The cfp subdirectory is for systems utilizing the traditional Cray
 floating-point format, and the ieee subdirectory is for the newer
-systems that use the IEEE floating-point format.  
+systems that use the IEEE floating-point format.
 
 There are several issues that reduces speed on Cray systems.  For
 systems with cfp floating point, the main obstacle is the forming of
@@ -38,7 +36,7 @@ computing carry is the main issue.  There are no vectorizing
 unsigned-less-than instructions, and the sequence that implement that
 opetration is very long.
 
-Shifting is the only operation that s simple to make fast.  All Cray
+Shifting is the only operation that is simple to make fast.  All Cray
 systems have a bitblt instructions (Vi Vj,Vj<Ak and Vi Vj,Vj>Ak) that
 should be really useful.
 
@@ -110,4 +108,3 @@ storing even fewer bits per limb, perhaps 56, it would be possible to
 write a mul_mul_basecase that would run at effectively 1 cycle/limb.
 (Use VM here to better handle the romb-shaped multiply area, perhaps
 rouding operand sizes up to the next power of 2.)
- 

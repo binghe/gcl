@@ -1,30 +1,28 @@
 dnl  AMD K6 mpn_mul_basecase -- multiply two mpn numbers.
-dnl 
-dnl  K6: approx 9.0 cycles per cross product on 30x30 limbs (with 16 limbs/loop
-dnl      unrolling).
 
-
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C K6: approx 9.0 cycles per cross product on 30x30 limbs (with 16 limbs/loop
+C     unrolling).
+
 
 
 dnl  K6: UNROLL_COUNT cycles/product (approx)
@@ -51,11 +49,14 @@ C it's faster because it does most of the mpn_addmul_1() entry code only
 C once.  The saving is about 10-20% on typical sizes coming from the
 C Karatsuba multiply code.
 C
-C Future:
+C Enhancements:
 C
-C The unrolled loop could be shared by mpn_addmul_1, with some extra stack
-C setups and maybe 2 or 3 wasted cycles at the end.  Code saving would be
-C 256 bytes.
+C The mul_1 loop is about 8.5 c/l, which is slower than mpn_mul_1 at 6.25
+C c/l.  Could call mpn_mul_1 when ysize is big enough to make it worthwhile.
+C
+C The main unrolled addmul loop could be shared by mpn_addmul_1, using some
+C extra stack setups and maybe 2 or 3 wasted cycles at the end.  Code saving
+C would be 256 bytes.
 
 ifdef(`PIC',`
 deflit(UNROLL_THRESHOLD, 8)
@@ -89,7 +90,7 @@ deflit(`FRAME',0)
 
 	movl	(%edx), %edx	C xp low limb
 	movl	PARAM_WP, %ecx
-	
+
 	mull	%edx
 
 	movl	%eax, (%ecx)
@@ -108,7 +109,7 @@ deflit(`FRAME',4)
 deflit(`FRAME',8)
 
 	movl	%eax, %ecx	C yp low limb
-	movl	(%edx), %eax	C xp low limb	
+	movl	(%edx), %eax	C xp low limb
 
 	movl	%edx, %esi	C xp
 	jnz	L(two_by_two)
@@ -116,7 +117,7 @@ deflit(`FRAME',8)
 
 	C two limbs by one limb
 
-	mull	%ecx	
+	mull	%ecx
 
 	movl	%eax, (%ebx)
 	movl	4(%esi), %eax
@@ -135,7 +136,7 @@ deflit(`FRAME',8)
 
 	popl	%ebx
 	ret
-	
+
 
 
 C -----------------------------------------------------------------------------
@@ -196,7 +197,7 @@ deflit(`FRAME',12)
 	popl	%ebx
 	ret
 
-	
+
 C -----------------------------------------------------------------------------
 	ALIGN(16)
 L(xsize_more_than_two_limbs):
@@ -311,7 +312,7 @@ C cycles, the same as the simple loop in aorsmul_1.asm.
 
 	C aligning here saves a couple of cycles
 	ALIGN(16)
-L(simple_outer_top):	
+L(simple_outer_top):
 	C edx	ysize counter, negative
 
 	movl	PARAM_YP, %eax		C yp end
@@ -486,7 +487,7 @@ L(pic_calc):
 	leal	(%ecx,%esi,1), %ecx
 	addl	$L(unroll_entry)-L(unroll_here), %ecx
 	addl	(%esp), %ecx
-	ret
+	ret_internal
 ')
 
 

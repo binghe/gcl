@@ -6,7 +6,7 @@ This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -107,9 +105,11 @@ check_various (void)
   SET4 (x, 4,1,666,3,4, 3,88,5,6,7);
   SET4 (y, 4,1,2,3,4, 3,99,5,6,7);
   check_all (x, y, 0);
+#if GMP_NUMB_BITS != 62
   SET4 (x, 4,667,2,3,4, 3,88,5,6,7);
   SET4 (y, 4,1,2,3,4, 3,99,5,6,7);
   check_all (x, y, 0);
+#endif
   SET4 (x, 4,1,2,3,4, 3,88,5,6,667);
   SET4 (y, 4,1,2,3,4, 3,99,5,6,7);
   check_all (x, y, 0);

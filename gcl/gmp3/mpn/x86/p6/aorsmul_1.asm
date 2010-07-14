@@ -1,29 +1,38 @@
 dnl  Intel P6 mpn_addmul_1/mpn_submul_1 -- add or subtract mpn multiple.
-dnl 
-dnl  P6: 6.35 cycles/limb (at 16 limbs/loop).
 
-
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C                           cycles/limb
+C P5:
+C P6 model 0-8,10-12)            6.44
+C P6 model 9  (Banias)
+C P6 model 13 (Dothan)           6.11
+C P4 model 0  (Willamette)
+C P4 model 1  (?)
+C P4 model 2  (Northwood)
+C P4 model 3  (Prescott)
+C P4 model 4  (Nocona)
+C K6:
+C K7:
+C K8:
 
 
 dnl  P6 UNROLL_COUNT cycles/limb
@@ -89,7 +98,7 @@ PROLOGUE(M4_function_1c)
 	pushl	%ebx
 deflit(`FRAME',4)
 	movl	PARAM_CARRY, %ebx
-	jmp	LF(M4_function_1,start_nc)
+	jmp	L(start_nc)
 EPILOGUE()
 
 PROLOGUE(M4_function_1)
@@ -114,7 +123,7 @@ deflit(`FRAME',16)
 	movl	PARAM_MULTIPLIER, %ebp
 	jae	L(unroll)
 
-	
+
 	C simple loop
 	C this is offset 0x22, so close enough to aligned
 L(simple):
@@ -234,7 +243,7 @@ L(pic_calc):
 
 	addl	(%esp), %edx
 
-	ret
+	ret_internal
 ')
 
 

@@ -1,12 +1,12 @@
 /* Test mpf_trunc, mpf_ceil, mpf_floor.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,10 +33,10 @@ check_print (mpf_srcptr src, mpf_srcptr got, mpf_srcptr want)
   mpf_trace ("want", want);
 
   printf ("got  size=%d exp=%ld\n", SIZ(got), EXP(got));
-  mpn_trace ("     limbs=", PTR(got), ABSIZ(got));
+  mpn_trace ("     limbs=", PTR(got), (mp_size_t) ABSIZ(got));
 
   printf ("want size=%d exp=%ld\n", SIZ(want), EXP(want));
-  mpn_trace ("     limbs=", PTR(want), ABSIZ(want));
+  mpn_trace ("     limbs=", PTR(want), (mp_size_t) ABSIZ(want));
 }
 
 void
@@ -57,9 +55,9 @@ check_one (mpf_srcptr src, mpf_srcptr trunc, mpf_srcptr ceil, mpf_srcptr floor)
   MPF_CHECK_FORMAT (got);                       \
   if (mpf_cmp (got, want) != 0)                 \
     {                                           \
-        printf ("%s wrong\n", name);            \
-        check_print (src, got, want);           \
-        abort ();                               \
+	printf ("%s wrong\n", name);            \
+	check_print (src, got, want);           \
+	abort ();                               \
     }
 
   CHECK_SEP ("mpf_trunc", mpf_trunc, trunc);
@@ -72,9 +70,9 @@ check_one (mpf_srcptr src, mpf_srcptr trunc, mpf_srcptr ceil, mpf_srcptr floor)
   MPF_CHECK_FORMAT (got);               \
   if (mpf_cmp (got, want) != 0)         \
     {                                   \
-        printf ("%s wrong\n", name);    \
-        check_print (src, got, want);   \
-        abort ();                       \
+	printf ("%s wrong\n", name);    \
+	check_print (src, got, want);   \
+	abort ();                       \
     }
 
   CHECK_INPLACE ("mpf_trunc", mpf_trunc, trunc);
@@ -140,7 +138,7 @@ check_various (void)
   mpf_set (ceil,  src);
   mpf_set (floor, src);
   check_all (src, trunc, ceil, floor);
-  
+
   /* 1/2^1024, fraction only */
   mpf_set_ui (src, 1L);
   mpf_div_2exp (src,  src, 1024L);
@@ -156,7 +154,7 @@ check_various (void)
   mpf_set_si (ceil, 1L);
   mpf_set_si (floor, 0L);
   check_all (src, trunc, ceil, floor);
-  
+
   /* 123+1/2^64 */
   mpf_set_ui (src, 1L);
   mpf_div_2exp (src,  src, 64L);
@@ -228,11 +226,11 @@ check_various (void)
   /* F.F, carry out of ceil */
   EXP(src) = 1;
   SIZ(src) = 2;
-  PTR(src)[0] = MP_LIMB_T_MAX;
-  PTR(src)[1] = MP_LIMB_T_MAX;
+  PTR(src)[0] = GMP_NUMB_MAX;
+  PTR(src)[1] = GMP_NUMB_MAX;
   EXP(trunc) = 1;
   SIZ(trunc) = 1;
-  PTR(trunc)[0] = MP_LIMB_T_MAX;
+  PTR(trunc)[0] = GMP_NUMB_MAX;
   mpf_set (floor, trunc);
   EXP(ceil) = 2;
   SIZ(ceil) = 1;
@@ -242,13 +240,13 @@ check_various (void)
   /* FF.F, carry out of ceil */
   EXP(src) = 2;
   SIZ(src) = 3;
-  PTR(src)[0] = MP_LIMB_T_MAX;
-  PTR(src)[1] = MP_LIMB_T_MAX;
-  PTR(src)[2] = MP_LIMB_T_MAX;
+  PTR(src)[0] = GMP_NUMB_MAX;
+  PTR(src)[1] = GMP_NUMB_MAX;
+  PTR(src)[2] = GMP_NUMB_MAX;
   EXP(trunc) = 2;
   SIZ(trunc) = 2;
-  PTR(trunc)[0] = MP_LIMB_T_MAX;
-  PTR(trunc)[1] = MP_LIMB_T_MAX;
+  PTR(trunc)[0] = GMP_NUMB_MAX;
+  PTR(trunc)[1] = GMP_NUMB_MAX;
   mpf_set (floor, trunc);
   EXP(ceil) = 3;
   SIZ(ceil) = 1;

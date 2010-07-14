@@ -1,27 +1,29 @@
-dnl  AMD K7 mpn_mod_32lsub1 -- remainder modulo 2^24-1.
-dnl
-dnl  K7: 1.0 cycles/limb
+dnl  AMD K7 mpn_mod_34lsub1 -- remainder modulo 2^24-1.
 
-dnl  Copyright 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2000, 2001, 2002, 2004, 2005, 2008 Free Software Foundation,
+dnl  Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C         cycles/limb
+C Athlon:     1
+C Hammer:     1
 
 
 C mp_limb_t mpn_mod_34lsub1 (mp_srcptr src, mp_size_t size)
@@ -77,7 +79,6 @@ L(three_or_more):
 	C edx	src
 	C esi
 	C edi
-	C ebp
 
 	pushl	%ebx	FRAME_pushl()
 	xorl	%eax, %eax
@@ -96,7 +97,6 @@ L(top):
 	C edx	src
 	C esi	acc 2mod3
 	C edi
-	C ebp
 
 	leal	24(%edx), %edx
 	leal	-2(%ecx), %ecx
@@ -104,8 +104,8 @@ L(top):
 	adcl	-20(%edx), %ebx
 	adcl	-16(%edx), %esi
 
- 	decl	%ecx
- 	jng	L(done_loop)
+	decl	%ecx
+	jng	L(done_loop)
 
 	leal	-2(%ecx), %ecx
 	adcl	-12(%edx), %eax
@@ -142,7 +142,6 @@ L(combine):
 	C edx
 	C esi	acc 2mod3
 	C edi	mask
-	C ebp
 
 	sbbl	%ecx, %ecx		C carry
 	movl	%eax, %edx		C 0mod3
@@ -162,7 +161,7 @@ L(combine):
 
 	addl	%ebx, %eax		C apply 1mod3 high
 	shrl	$8, %esi		C 2mod3 high
-	andl	$0xFF, %edx		C 2mod3 low
+	movzbl	%dl, %edx		C 2mod3 low
 
 	addl	%edi, %eax		C apply 1mod3 low
 	shll	$16, %edx		C 2mod3 low

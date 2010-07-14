@@ -1,13 +1,13 @@
-/* mpq_cmp(u,v) -- Compare U, V.  Return postive, zero, or negative
+/* mpq_cmp(u,v) -- Compare U, V.  Return positive, zero, or negative
    based on if U > V, U == V, or U < V.
 
-Copyright 1991, 1994, 1996, 2001 Free Software Foundation, Inc.
+Copyright 1991, 1994, 1996, 2001, 2002, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -35,7 +33,7 @@ mpq_cmp (const MP_RAT *op1, const MP_RAT *op2)
   mp_ptr tmp1_ptr, tmp2_ptr;
   mp_size_t num1_sign;
   int cc;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   /* need canonical signs to get right result */
   ASSERT (den1_size > 0);
@@ -74,11 +72,11 @@ mpq_cmp (const MP_RAT *op1, const MP_RAT *op2)
 
     count_leading_zeros (cnt1, op1->_mp_num._mp_d[num1_size - 1]);
     count_leading_zeros (cnt2, op2->_mp_den._mp_d[den2_size - 1]);
-    bits1 = tmp1_size * BITS_PER_MP_LIMB - cnt1 - cnt2;
+    bits1 = tmp1_size * GMP_NUMB_BITS - cnt1 - cnt2 + 2 * GMP_NAIL_BITS;
 
     count_leading_zeros (cnt1, op2->_mp_num._mp_d[num2_size - 1]);
     count_leading_zeros (cnt2, op1->_mp_den._mp_d[den1_size - 1]);
-    bits2 = tmp2_size * BITS_PER_MP_LIMB - cnt1 - cnt2;
+    bits2 = tmp2_size * GMP_NUMB_BITS - cnt1 - cnt2 + 2 * GMP_NAIL_BITS;
 
     if (bits1 > bits2 + 1)
       return num1_sign;
@@ -88,7 +86,7 @@ mpq_cmp (const MP_RAT *op1, const MP_RAT *op2)
 
   /* 3. Finally, cross multiply and compare.  */
 
-  TMP_MARK (marker);
+  TMP_MARK;
   TMP_ALLOC_LIMBS_2 (tmp1_ptr,tmp1_size, tmp2_ptr,tmp2_size);
 
   if (num1_size >= den2_size)
@@ -112,6 +110,6 @@ mpq_cmp (const MP_RAT *op1, const MP_RAT *op2)
 
   cc = tmp1_size - tmp2_size != 0
     ? tmp1_size - tmp2_size : mpn_cmp (tmp1_ptr, tmp2_ptr, tmp1_size);
-  TMP_FREE (marker);
+  TMP_FREE;
   return num1_sign < 0 ? -cc : cc;
 }

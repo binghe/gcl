@@ -1,13 +1,12 @@
-/* mpz_congruent_p -- test congruence of two mpz's */
+/* mpz_congruent_p -- test congruence of two mpz's.
 
-/*
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,10 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -54,16 +50,17 @@ MA 02111-1307, USA.
 int
 mpz_congruent_p (mpz_srcptr a, mpz_srcptr c, mpz_srcptr d)
 {
-  mp_size_t  asize, csize, dsize, xor;
+  mp_size_t  asize, csize, dsize, sign;
   mp_srcptr  ap, cp, dp;
   mp_ptr     xp;
   mp_limb_t  alow, clow, dlow, dmask, r;
   int        result;
-  TMP_DECL (marker);
+  TMP_DECL;
 
   dsize = SIZ(d);
-  if (dsize == 0)
-    DIVIDE_BY_ZERO;
+  if (UNLIKELY (dsize == 0))
+    return (mpz_cmp (a, c) == 0);
+
   dsize = ABS(dsize);
   dp = PTR(d);
 
@@ -72,7 +69,7 @@ mpz_congruent_p (mpz_srcptr a, mpz_srcptr c, mpz_srcptr d)
 
   asize = SIZ(a);
   csize = SIZ(c);
-  xor = (asize ^ csize);
+  sign = (asize ^ csize);
 
   asize = ABS(asize);
   ap = PTR(a);
@@ -89,8 +86,8 @@ mpz_congruent_p (mpz_srcptr a, mpz_srcptr c, mpz_srcptr d)
 
   /* Check a==c mod low zero bits of dlow.  This might catch a few cases of
      a!=c quickly, and it helps the csize==1 special cases below.  */
-  dmask = LOW_ZEROS_MASK (dlow);
-  alow = (xor >= 0 ? alow : -alow);
+  dmask = LOW_ZEROS_MASK (dlow) & GMP_NUMB_MASK;
+  alow = (sign >= 0 ? alow : -alow);
   if (((alow-clow) & dmask) != 0)
     return 0;
 
@@ -99,7 +96,7 @@ mpz_congruent_p (mpz_srcptr a, mpz_srcptr c, mpz_srcptr d)
       if (dsize == 1)
         {
         cong_1:
-          if (xor < 0)
+          if (sign < 0)
             NEG_MOD (clow, clow, dlow);
 
           if (BELOW_THRESHOLD (asize, MODEXACT_1_ODD_THRESHOLD))
@@ -136,20 +133,21 @@ mpz_congruent_p (mpz_srcptr a, mpz_srcptr c, mpz_srcptr d)
             {
               unsigned   twos;
               count_trailing_zeros (twos, dlow);
-              dlow = (dlow >> twos) | (dsecond << (BITS_PER_MP_LIMB-twos));
+              dlow = (dlow >> twos) | (dsecond << (GMP_NUMB_BITS-twos));
+              ASSERT_LIMB (dlow);
 
               /* dlow will be odd here, so the test for it even under cong_1
                  is unnecessary, but the rest of that code is wanted. */
               goto cong_1;
             }
-        }          
+        }
     }
-  
-  TMP_MARK (marker);
+
+  TMP_MARK;
   xp = TMP_ALLOC_LIMBS (asize+1);
 
   /* calculate abs(a-c) */
-  if (xor >= 0)
+  if (sign >= 0)
     {
       /* same signs, subtract */
       if (asize > csize || mpn_cmp (ap, cp, asize) >= 0)
@@ -169,6 +167,6 @@ mpz_congruent_p (mpz_srcptr a, mpz_srcptr c, mpz_srcptr d)
 
   result = mpn_divisible_p (xp, asize, dp, dsize);
 
-  TMP_FREE (marker);
+  TMP_FREE;
   return result;
 }

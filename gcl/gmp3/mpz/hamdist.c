@@ -1,12 +1,12 @@
 /* mpz_hamdist -- calculate hamming distance.
 
-Copyright 1994, 1996, 2001 Free Software Foundation, Inc.
+Copyright 1994, 1996, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -97,7 +95,7 @@ mpz_hamdist (mpz_srcptr u, mpz_srcptr v)
          might be zero) */
       ulimb = -ulimb;
       vlimb = -vlimb;
-      popc_limb (count, ulimb ^ vlimb);
+      popc_limb (count, (ulimb ^ vlimb) & GMP_NUMB_MASK);
 
       if (vlimb == 0)
         {
@@ -115,7 +113,7 @@ mpz_hamdist (mpz_srcptr u, mpz_srcptr v)
 
           /* part of u corresponding to skipped v zeros */
           step = old_vsize - vsize - 1;
-          count += step * BITS_PER_MP_LIMB;
+          count += step * GMP_NUMB_BITS;
           step = MIN (step, usize);
           if (step != 0)
             {
@@ -135,7 +133,7 @@ mpz_hamdist (mpz_srcptr u, mpz_srcptr v)
           popc_limb (twoscount, vlimb);
           count += twoscount;
         }
-      
+
       /* Overlapping part of u and v, if any.  Ones complement both, so just
          plain hamdist. */
       step = MIN (usize, vsize);

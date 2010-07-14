@@ -7,7 +7,7 @@ dnl  This file is part of the GNU MP Library.
 
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
 dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 2.1 of the License, or (at
+dnl  by the Free Software Foundation; either version 3 of the License, or (at
 dnl  your option) any later version.
 
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 dnl  License for more details.
 
 dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-dnl  the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-dnl  MA 02111-1307, USA.
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 
 dnl  INPUT PARAMETERS
@@ -35,7 +33,7 @@ dnl  has its most significant bit set, and we add the multiplier if the
 dnl  multiplicand has its most significant bit set.  We need to preserve the
 dnl  carry flag between each iteration, so we have to compute the compensation
 dnl  carefully (the natural, srai+and doesn't work).  Since all POWER can
-dnl  branch in zero cycles, we use conditional branches to for the additions.
+dnl  branch in zero cycles, we use conditional branches for the compensation.
 
 include(`../config.m4')
 

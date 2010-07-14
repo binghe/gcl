@@ -1,62 +1,59 @@
 dnl  AMD K6 mpn_sqr_basecase -- square an mpn number.
-dnl 
-dnl  K6: approx 4.7 cycles per cross product, or 9.2 cycles per triangular
-dnl  product (measured on the speed difference between 17 and 33 limbs,
-dnl  which is roughly the Karatsuba recursing range).
 
-
-dnl  Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
 
-dnl  KARATSUBA_SQR_THRESHOLD_MAX is the maximum KARATSUBA_SQR_THRESHOLD this
+C K6: approx 4.7 cycles per cross product, or 9.2 cycles per triangular
+C     product (measured on the speed difference between 17 and 33 limbs,
+C     which is roughly the Karatsuba recursing range).
+
+
+dnl  SQR_KARATSUBA_THRESHOLD_MAX is the maximum SQR_KARATSUBA_THRESHOLD this
 dnl  code supports.  This value is used only by the tune program to know
 dnl  what it can go up to.  (An attempt to compile with a bigger value will
 dnl  trigger some m4_assert()s in the code, making the build fail.)
 dnl
 dnl  The value is determined by requiring the displacements in the unrolled
 dnl  addmul to fit in single bytes.  This means a maximum UNROLL_COUNT of
-dnl  63, giving a maximum KARATSUBA_SQR_THRESHOLD of 66.
+dnl  63, giving a maximum SQR_KARATSUBA_THRESHOLD of 66.
 
-deflit(KARATSUBA_SQR_THRESHOLD_MAX, 66)
+deflit(SQR_KARATSUBA_THRESHOLD_MAX, 66)
 
 
 dnl  Allow a value from the tune program to override config.m4.
 
-ifdef(`KARATSUBA_SQR_THRESHOLD_OVERRIDE',
-`define(`KARATSUBA_SQR_THRESHOLD',KARATSUBA_SQR_THRESHOLD_OVERRIDE)')
+ifdef(`SQR_KARATSUBA_THRESHOLD_OVERRIDE',
+`define(`SQR_KARATSUBA_THRESHOLD',SQR_KARATSUBA_THRESHOLD_OVERRIDE)')
 
 
 dnl  UNROLL_COUNT is the number of code chunks in the unrolled addmul.  The
-dnl  number required is determined by KARATSUBA_SQR_THRESHOLD, since
-dnl  mpn_sqr_basecase only needs to handle sizes < KARATSUBA_SQR_THRESHOLD.
+dnl  number required is determined by SQR_KARATSUBA_THRESHOLD, since
+dnl  mpn_sqr_basecase only needs to handle sizes < SQR_KARATSUBA_THRESHOLD.
 dnl
 dnl  The first addmul is the biggest, and this takes the second least
 dnl  significant limb and multiplies it by the third least significant and
-dnl  up.  Hence for a maximum operand size of KARATSUBA_SQR_THRESHOLD-1
-dnl  limbs, UNROLL_COUNT needs to be KARATSUBA_SQR_THRESHOLD-3.
+dnl  up.  Hence for a maximum operand size of SQR_KARATSUBA_THRESHOLD-1
+dnl  limbs, UNROLL_COUNT needs to be SQR_KARATSUBA_THRESHOLD-3.
 
-m4_config_gmp_mparam(`KARATSUBA_SQR_THRESHOLD')
-deflit(UNROLL_COUNT, eval(KARATSUBA_SQR_THRESHOLD-3))
+m4_config_gmp_mparam(`SQR_KARATSUBA_THRESHOLD')
+deflit(UNROLL_COUNT, eval(SQR_KARATSUBA_THRESHOLD-3))
 
 
 C void mpn_sqr_basecase (mp_ptr dst, mp_srcptr src, mp_size_t size);
@@ -291,7 +288,7 @@ C a 5780 cycle operation, which is not surprising since the loop here is 8
 C c/l and mpn_mul_1 is 6.25 c/l.
 
 	subl	$STACK_SPACE, %esp	deflit(`FRAME',STACK_SPACE)
-	
+
 	movl	%edi, SAVE_EDI
 	leal	4(%edx), %edi
 
@@ -521,7 +518,7 @@ L(unroll_inner_end):
 
 	incl	%edx
 	jnz	L(unroll_outer_top)
-	
+
 
 ifelse(OFFSET,0,,`
 	addl	$OFFSET, %ebx
@@ -568,7 +565,7 @@ L(corner):
 	adcl	$0, %edx
 
 	movl	%edx, 8(%edi)
-	
+
 
 C -----------------------------------------------------------------------------
 C Left shift of dst[1..2*size-2], the bit shifted out becomes dst[2*size-1].
@@ -661,11 +658,11 @@ L(diag):
 C -----------------------------------------------------------------------------
 ifdef(`PIC',`
 L(pic_calc):
-        C See mpn/x86/README about old gas bugs
+	C See mpn/x86/README about old gas bugs
 	addl	(%esp), %ecx
 	addl	$L(unroll_inner_end)-L(here)-eval(2*CODE_BYTES_PER_LIMB), %ecx
 	addl	%edx, %ecx
-	ret
+	ret_internal
 ')
 
 

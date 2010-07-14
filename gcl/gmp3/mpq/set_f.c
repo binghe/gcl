@@ -1,12 +1,12 @@
 /* mpq_set_f -- set an mpq from an mpf.
 
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -87,12 +85,12 @@ mpq_set_f (mpq_ptr q, mpf_srcptr f)
 
           den_size--;
           count_trailing_zeros (shift, flow);
- 
+
           mpn_rshift (num_ptr, fptr, abs_fsize, shift);
           abs_fsize -= (num_ptr[abs_fsize-1] == 0);
 
           MPN_ZERO (den_ptr, den_size);
-          den_ptr[den_size] = MP_LIMB_T_HIGHBIT >> (shift-1);
+          den_ptr[den_size] = GMP_LIMB_HIGHBIT >> (shift-1);
         }
 
       q->_mp_num._mp_size = fsize >= 0 ? abs_fsize : -abs_fsize;

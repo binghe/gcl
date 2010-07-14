@@ -1,29 +1,26 @@
 dnl  Intel P5 mpn_lshift -- mpn left shift.
-dnl 
-dnl  P5: 1.75 cycles/limb.
 
-
-dnl  Copyright 2000, 2001 Free Software Foundation, Inc.
-dnl 
+dnl  Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
+dnl
 dnl  This file is part of the GNU MP Library.
-dnl 
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or
 dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 2.1 of the
+dnl  published by the Free Software Foundation; either version 3 of the
 dnl  License, or (at your option) any later version.
-dnl 
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful,
 dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 dnl  Lesser General Public License for more details.
-dnl 
-dnl  You should have received a copy of the GNU Lesser General Public
-dnl  License along with the GNU MP Library; see the file COPYING.LIB.  If
-dnl  not, write to the Free Software Foundation, Inc., 59 Temple Place -
-dnl  Suite 330, Boston, MA 02111-1307, USA.
-
+dnl
+dnl  You should have received a copy of the GNU Lesser General Public License
+dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
 
 include(`../config.m4')
+
+
+C P5: 1.75 cycles/limb.
 
 
 C mp_limb_t mpn_lshift (mp_ptr dst, mp_srcptr src, mp_size_t size,
@@ -69,7 +66,7 @@ deflit(`FRAME',8)
 
 	shldl(	%cl, %edi, %eax)	C eax was decremented to zero
 
- 	shll	%cl, %edi
+	shll	%cl, %edi
 
 	movl	%edi, (%edx)		C dst low limb
 	popl	%edi			C risk of data cache bank clash
@@ -92,7 +89,7 @@ deflit(`FRAME',8)
 
 	movd	(%ebx,%eax,4), %mm5	C src high limb
 
- 	movd	%ecx, %mm6		C lshift
+	movd	%ecx, %mm6		C lshift
 	negl	%ecx
 
 	psllq	%mm6, %mm5
@@ -118,7 +115,7 @@ L(simple_top):
 	movq	-4(%ebx,%eax,4), %mm0
 	decl	%eax
 
- 	psrlq	%mm7, %mm0
+	psrlq	%mm7, %mm0
 
 	C
 
@@ -129,7 +126,7 @@ L(simple_top):
 	movd	(%ebx), %mm0
 
 	movd	%mm5, %eax
- 	psllq	%mm6, %mm0
+	psllq	%mm6, %mm0
 
 	popl	%edi
 	popl	%ebx
@@ -156,7 +153,7 @@ deflit(`FRAME',8)
 	movd	-4(%ebx,%eax,4), %mm5	C src high limb
 	leal	(%ebx,%eax,4), %edi
 
- 	movd	%ecx, %mm6		C lshift
+	movd	%ecx, %mm6		C lshift
 	andl	$4, %edi
 
 	psllq	%mm6, %mm5
@@ -169,7 +166,7 @@ deflit(`FRAME',8)
 	C  source     -8(ebx,%eax,4)
 	C                  |
 	C  +-------+-------+-------+--
-	C  |               |          
+	C  |               |
 	C  +-------+-------+-------+--
 	C        0mod8   4mod8   0mod8
 	C
@@ -177,7 +174,7 @@ deflit(`FRAME',8)
 	C     -4(edx,%eax,4)
 	C          |
 	C  +-------+-------+--
-	C  |  xxx  |       |  
+	C  |  xxx  |       |
 	C  +-------+-------+--
 
 	movq	-8(%ebx,%eax,4), %mm0	C unaligned load
@@ -208,7 +205,7 @@ L(start_src_aligned):
 	C  source     -8(ebx,%eax,4)
 	C                  |
 	C  +-------+-------+--
-	C  |      mm1      |  
+	C  |      mm1      |
 	C  +-------+-------+--
 	C                0mod8   4mod8
 	C
@@ -235,18 +232,18 @@ L(start_src_aligned):
 L(start_dst_aligned):
 
 
- 	psllq	%mm6, %mm1
+	psllq	%mm6, %mm1
 	negl	%ecx			C -shift
 
-        addl    $64, %ecx		C 64-shift
- 	movq	%mm3, %mm2
+	addl	$64, %ecx		C 64-shift
+	movq	%mm3, %mm2
 
-        movd    %ecx, %mm7
+	movd	%ecx, %mm7
 	subl	$8, %eax		C size-8
 
- 	psrlq	%mm7, %mm3
+	psrlq	%mm7, %mm3
 
- 	por	%mm1, %mm3		C mm3 ready to store
+	por	%mm1, %mm3		C mm3 ready to store
 	jc	L(finish)
 
 
@@ -270,25 +267,25 @@ L(unroll_loop):
 	C mm6	lshift
 	C mm7	rshift
 
- 	movq	8(%ebx,%eax,4), %mm0
- 	psllq	%mm6, %mm2
+	movq	8(%ebx,%eax,4), %mm0
+	psllq	%mm6, %mm2
 
- 	movq	%mm0, %mm1
- 	psrlq	%mm7, %mm0
+	movq	%mm0, %mm1
+	psrlq	%mm7, %mm0
 
- 	movq	%mm3, 24(%edx,%eax,4)	C prev
- 	por	%mm2, %mm0
+	movq	%mm3, 24(%edx,%eax,4)	C prev
+	por	%mm2, %mm0
 
- 	movq	(%ebx,%eax,4), %mm3	C
- 	psllq	%mm6, %mm1		C
+	movq	(%ebx,%eax,4), %mm3	C
+	psllq	%mm6, %mm1		C
 
- 	movq	%mm0, 16(%edx,%eax,4)
- 	movq	%mm3, %mm2		C
+	movq	%mm0, 16(%edx,%eax,4)
+	movq	%mm3, %mm2		C
 
- 	psrlq	%mm7, %mm3		C
+	psrlq	%mm7, %mm3		C
 	subl	$4, %eax
 
- 	por	%mm1, %mm3		C
+	por	%mm1, %mm3		C
 	jnc	L(unroll_loop)
 
 
@@ -300,14 +297,14 @@ L(finish):
 
 	jz	L(finish_no_two)
 
- 	movq	8(%ebx,%eax,4), %mm0
- 	psllq	%mm6, %mm2
+	movq	8(%ebx,%eax,4), %mm0
+	psllq	%mm6, %mm2
 
- 	movq	%mm0, %mm1
- 	psrlq	%mm7, %mm0
+	movq	%mm0, %mm1
+	psrlq	%mm7, %mm0
 
- 	movq	%mm3, 24(%edx,%eax,4)	C prev
- 	por	%mm2, %mm0
+	movq	%mm3, 24(%edx,%eax,4)	C prev
+	por	%mm2, %mm0
 
 	movq	%mm1, %mm2
 	movq	%mm0, %mm3
@@ -366,22 +363,22 @@ L(finish_no_two):
 	C left shifted.
 
 
-        movd    (%ebx), %mm0
- 	psllq	%mm6, %mm2
+	movd	(%ebx), %mm0
+	psllq	%mm6, %mm2
 
 	movq	%mm3, 12(%edx)
 	psllq	$32, %mm0
 
-        movq    %mm0, %mm1
-        psrlq   %mm7, %mm0
+	movq	%mm0, %mm1
+	psrlq	%mm7, %mm0
 
-        por     %mm2, %mm0
-        psllq   %mm6, %mm1
+	por	%mm2, %mm0
+	psllq	%mm6, %mm1
 
-	movq    %mm0, 4(%edx)
+	movq	%mm0, 4(%edx)
 	psrlq	$32, %mm1
 
-        andl	$32, %ecx
+	andl	$32, %ecx
 	popl	%ebx
 
 	jz	L(finish_one_unaligned)
@@ -391,7 +388,7 @@ L(finish_one_unaligned):
 
 	emms
 
-        ret
+	ret
 
 
 L(finish_zero):
@@ -432,13 +429,13 @@ L(finish_zero):
 	C that the movq does for the aligned case.
 
 
- 	movq	%mm3, 8(%edx)
+	movq	%mm3, 8(%edx)
 	andl	$32, %ecx
 
- 	psllq	%mm6, %mm2
+	psllq	%mm6, %mm2
 	jz	L(finish_zero_unaligned)
 
- 	movq	%mm2, (%edx)
+	movq	%mm2, (%edx)
 L(finish_zero_unaligned):
 
 	psrlq	$32, %mm2

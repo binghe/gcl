@@ -1,12 +1,12 @@
 /* Test mpz_cmp_d and mpz_cmpabs_d.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,7 +31,6 @@ MA 02111-1307, USA. */
 
 
 #define SGN(n)  ((n) > 0 ? 1 : (n) < 0 ? -1 : 0)
-double fudge _PROTO ((double x));
 
 
 void
@@ -53,7 +50,7 @@ check_one (const char *name, mpz_srcptr x, double y, int cmp, int cmpabs)
       printf    ("  y %g\n", y);
       mp_trace_base=-16;
       mpz_trace ("  x", x);
-      printf    ("  y %A\n", y);
+      printf    ("  y %g\n", y);
       printf    ("  y");
       for (i = 0; i < sizeof(y); i++)
         printf (" %02X", (unsigned) ((unsigned char *) &y)[i]);
@@ -205,46 +202,77 @@ check_low_z_one (void)
   mpz_clear (x);
 }
 
-/* Comparing 1 and 1+2^-n */
+/* Comparing 1 and 1+2^-n.  "y" is volatile to make gcc store and fetch it,
+   which forces it to a 64-bit double, whereas on x86 it would otherwise
+   remain on the float stack as an 80-bit long double.  */
 void
 check_one_2exp (void)
 {
-  mpz_t   x;
-  double  y;
-  double  e = 1.0;
-  int     i;
+  double           e;
+  mpz_t            x;
+  volatile double  y;
+  int              i;
 
   mpz_init (x);
 
+  e = 1.0;
   for (i = 0; i < 128; i++)
     {
       e /= 2.0;
-
-      y = fudge (1.0 + e);
+      y = 1.0 + e;
       if (y == 1.0)
         break;
 
       mpz_set_ui (x, 1L);
       check_one ("check_one_2exp", x,  y, -1, -1);
-      check_one ("check_oen_2exp", x, -y,  1, -1);
+      check_one ("check_one_2exp", x, -y,  1, -1);
 
       mpz_set_si (x, -1L);
       check_one ("check_one_2exp", x,  y, -1, -1);
-      check_one ("check_oen_2exp", x, -y,  1, -1);
+      check_one ("check_one_2exp", x, -y,  1, -1);
     }
 
   mpz_clear (x);
 }
 
-
-/* Stop the compiler getting too smart, in particular on x86 stop it keeping
-   a double in an 80-bit long double fp register.  */
-double
-fudge (double x)
+void
+check_infinity (void)
 {
-  return x;
-}
+  mpz_t   x;
+  double  y = tests_infinity_d ();
+  if (y == 0.0)
+    return;
 
+  mpz_init (x);
+
+  /* 0 cmp inf */
+  mpz_set_ui (x, 0L);
+  check_one ("check_infinity", x,  y, -1, -1);
+  check_one ("check_infinity", x, -y,  1, -1);
+
+  /* 123 cmp inf */
+  mpz_set_ui (x, 123L);
+  check_one ("check_infinity", x,  y, -1, -1);
+  check_one ("check_infinity", x, -y,  1, -1);
+
+  /* -123 cmp inf */
+  mpz_set_si (x, -123L);
+  check_one ("check_infinity", x,  y, -1, -1);
+  check_one ("check_infinity", x, -y,  1, -1);
+
+  /* 2^5000 cmp inf */
+  mpz_set_ui (x, 1L);
+  mpz_mul_2exp (x, x, 5000L);
+  check_one ("check_infinity", x,  y, -1, -1);
+  check_one ("check_infinity", x, -y,  1, -1);
+
+  /* -2^5000 cmp inf */
+  mpz_neg (x, x);
+  check_one ("check_infinity", x,  y, -1, -1);
+  check_one ("check_infinity", x, -y,  1, -1);
+
+  mpz_clear (x);
+}
 
 int
 main (int argc, char *argv[])
@@ -255,6 +283,7 @@ main (int argc, char *argv[])
   check_onebits ();
   check_low_z_one ();
   check_one_2exp ();
+  check_infinity ();
 
   tests_end ();
   exit (0);

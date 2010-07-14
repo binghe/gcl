@@ -1,12 +1,12 @@
-/* mpz_bin_uiui - compute n over k.
+/* mpz_bin_ui - compute n over k.
 
-Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -32,12 +30,11 @@ MA 02111-1307, USA. */
    1 section 1.2.6 part G. */
 
 
-/* Enhancement: use mpn_divexact_1 when it exists */
-#define DIVIDE()                                                \
-  do {                                                          \
-    ASSERT (SIZ(r) > 0);                                        \
-    MPN_DIVREM_OR_DIVEXACT_1 (PTR(r), PTR(r), SIZ(r), kacc);    \
-    SIZ(r) -= (PTR(r)[SIZ(r)-1] == 0);                          \
+#define DIVIDE()                                                              \
+  do {                                                                        \
+    ASSERT (SIZ(r) > 0);                                                      \
+    MPN_DIVREM_OR_DIVEXACT_1 (PTR(r), PTR(r), (mp_size_t) SIZ(r), kacc);      \
+    SIZ(r) -= (PTR(r)[SIZ(r)-1] == 0);                                        \
   } while (0)
 
 void
@@ -48,7 +45,7 @@ mpz_bin_ui (mpz_ptr r, mpz_srcptr n, unsigned long int k)
   mpz_t      nacc;
   mp_limb_t  kacc;
   mp_size_t  negate;
-  
+
   if (mpz_sgn (n) < 0)
     {
       /* bin(n,k) = (-1)^k * bin(-n+k-1,k), and set ni = -n+k-1 - k = -n-1 */
@@ -89,7 +86,7 @@ mpz_bin_ui (mpz_ptr r, mpz_srcptr n, unsigned long int k)
     }
 
   kacc = 1;
-  mpz_init_set_ui (nacc, 1);
+  mpz_init_set_ui (nacc, 1L);
 
   for (i = 1; i <= k; i++)
     {
@@ -108,14 +105,15 @@ mpz_bin_ui (mpz_ptr r, mpz_srcptr n, unsigned long int k)
       mpz_div_2exp (nacc, nacc, c);
 #endif
 
-      mpz_add_ui (ni, ni, 1);
+      mpz_add_ui (ni, ni, 1L);
       mpz_mul (nacc, nacc, ni);
-      umul_ppmm (k1, k0, kacc, i);
+      umul_ppmm (k1, k0, kacc, i << GMP_NAIL_BITS);
+      k0 >>= GMP_NAIL_BITS;
       if (k1 != 0)
 	{
 	  /* Accumulator overflow.  Perform bignum step.  */
 	  mpz_mul (r, r, nacc);
-	  mpz_set_ui (nacc, 1);
+	  mpz_set_ui (nacc, 1L);
           DIVIDE ();
 	  kacc = i;
 	}

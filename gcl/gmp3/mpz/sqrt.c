@@ -1,12 +1,13 @@
 /* mpz_sqrt(root, u) --  Set ROOT to floor(sqrt(U)).
 
-Copyright 1991, 1993, 1994, 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1991, 1993, 1994, 1996, 2000, 2001, 2005 Free Software Foundation,
+Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h> /* for NULL */
 #include "gmp.h"
@@ -30,9 +29,9 @@ mpz_sqrt (mpz_ptr root, mpz_srcptr op)
   mp_ptr root_ptr, op_ptr;
   mp_ptr free_me = NULL;
   mp_size_t free_me_size;
-  TMP_DECL (marker);
+  TMP_DECL;
 
-  TMP_MARK (marker);
+  TMP_MARK;
   op_size = op->_mp_size;
   if (op_size <= 0)
     {
@@ -81,5 +80,5 @@ mpz_sqrt (mpz_ptr root, mpz_srcptr op)
 
   if (free_me != NULL)
     (*__gmp_free_func) (free_me, free_me_size * BYTES_PER_MP_LIMB);
-  TMP_FREE (marker);
+  TMP_FREE;
 }

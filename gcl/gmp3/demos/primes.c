@@ -2,11 +2,11 @@
    Written by tege while on holiday in Rodupp, August 2001.
    Between 10 and 500 times faster than previous program.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2006 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -14,8 +14,7 @@ WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-Place - Suite 330, Boston, MA 02111-1307, USA.  */
+this program.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -56,15 +55,15 @@ Place - Suite 330, Boston, MA 02111-1307, USA.  */
 struct primes
 {
   unsigned int prime;
-  signed int rem;
+  int rem;
 };
 
 struct primes *primes;
 unsigned long n_primes;
 
-void find_primes (unsigned char *, mpz_t, unsigned long, mpz_t);
-void sieve_region (unsigned char *, mpz_t, unsigned long);
-void make_primelist (unsigned long);
+void find_primes __GMP_PROTO ((unsigned char *, mpz_t, unsigned long, mpz_t));
+void sieve_region __GMP_PROTO ((unsigned char *, mpz_t, unsigned long));
+void make_primelist __GMP_PROTO ((unsigned long));
 
 int flag_print = 1;
 int flag_count = 0;
@@ -254,7 +253,7 @@ sieve_region (unsigned char *s, mpz_t fr, unsigned long rsize)
     ((long *) s) [ii] = ~0L;
 #else
   {
-    signed long k;
+    long k;
     long *se = (long *) (s + ((ssize + sizeof (long) - 1) & -sizeof (long)));
     for (k = -((ssize + sizeof (long) - 1) / sizeof (long)); k < 0; k++)
       se[k] = ~0L;
@@ -295,7 +294,7 @@ sieve_region (unsigned char *s, mpz_t fr, unsigned long rsize)
       primes[i].rem = ii - ssize;
 #else
       {
-	signed long k;
+	long k;
 	unsigned char *se = s + ssize; /* point just beyond sieving range */
 	for (k = start2 - ssize; k < 0; k += prime)
 	  se[k] = 0;
@@ -327,7 +326,7 @@ find_primes (unsigned char *s, mpz_t  fr, unsigned long ssize,
 		    goto out;
 		  mpz_add_ui (tmp, fr, (j * sizeof (long) + ij) * 2);
 		  if (mpz_cmp (tmp, siev_sqr_lim) < 0 ||
-		      mpz_probab_prime_p (tmp, 3))
+		      mpz_probab_prime_p (tmp, 10))
 		    report (tmp);
 		}
 	    }
@@ -337,7 +336,7 @@ find_primes (unsigned char *s, mpz_t  fr, unsigned long ssize,
   mpz_clear (tmp);
 }
 
-/* Generate a lits of primes and store in the global array primes[].  */
+/* Generate a list of primes and store in the global array primes[].  */
 void
 make_primelist (unsigned long maxprime)
 {

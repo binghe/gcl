@@ -1,13 +1,12 @@
-/* mpz_kronecker_si -- mpz+long Kronecker/Jacobi symbol. */
+/* mpz_kronecker_si -- mpz+long Kronecker/Jacobi symbol.
 
-/*
-Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,22 +15,11 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
-
-
-/* This implementation depends on BITS_PER_MP_LIMB being even, so that
-   (a/2)^BITS_PER_MP_LIMB = 1 and so there's no need to pay attention to how
-   many low zero limbs are stripped.  */
-#if BITS_PER_MP_LIMB % 2 != 0
-Error, error, unsupported BITS_PER_MP_LIMB
-#endif
 
 
 /* After the absolute value of b is established it's treated as an unsigned
@@ -40,8 +28,8 @@ Error, error, unsupported BITS_PER_MP_LIMB
 int
 mpz_kronecker_si (mpz_srcptr a, long b)
 {
-  mp_srcptr  a_ptr = PTR(a);
-  int        a_size;
+  mp_srcptr  a_ptr;
+  mp_size_t  a_size;
   mp_limb_t  a_rem, b_limb;
   int        result_bit1;
 
@@ -49,8 +37,21 @@ mpz_kronecker_si (mpz_srcptr a, long b)
   if (a_size == 0)
     return JACOBI_0S (b);
 
+#if GMP_NUMB_BITS < BITS_PER_ULONG
+  if (b > GMP_NUMB_MAX || b < -GMP_NUMB_MAX)
+    {
+      mp_limb_t  blimbs[2];
+      mpz_t      bz;
+      ALLOC(bz) = numberof (blimbs);
+      PTR(bz) = blimbs;
+      mpz_set_si (bz, b);
+      return mpz_kronecker (a, bz);
+    }
+#endif
+
   result_bit1 = JACOBI_BSGN_SS_BIT1 (a_size, b);
   b_limb = (unsigned long) ABS (b);
+  a_ptr = PTR(a);
 
   if ((b_limb & 1) == 0)
     {
@@ -64,7 +65,7 @@ mpz_kronecker_si (mpz_srcptr a, long b)
         return 0;  /* (even/even)=0 */
 
       /* (a/2)=(2/a) for a odd */
-      count_trailing_zeros (twos, b_limb);  
+      count_trailing_zeros (twos, b_limb);
       b_limb >>= twos;
       result_bit1 ^= JACOBI_TWOS_U_BIT1 (twos, a_low);
     }
@@ -79,5 +80,3 @@ mpz_kronecker_si (mpz_srcptr a, long b)
   JACOBI_MOD_OR_MODEXACT_1_ODD (result_bit1, a_rem, a_ptr, a_size, b_limb);
   return mpn_jacobi_base (a_rem, b_limb, result_bit1);
 }
-
-

@@ -1,13 +1,13 @@
 /* mpz_tdiv_q_2exp -- Divide an integer by 2**CNT.  Round the quotient
    towards -infinity.
 
-Copyright 1991, 1993, 1994, 1996, 2001 Free Software Foundation, Inc.
+Copyright 1991, 1993, 1994, 1996, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -30,7 +28,7 @@ mpz_tdiv_q_2exp (mpz_ptr w, mpz_srcptr u, unsigned long int cnt)
   mp_size_t limb_cnt;
 
   usize = u->_mp_size;
-  limb_cnt = cnt / BITS_PER_MP_LIMB;
+  limb_cnt = cnt / GMP_NUMB_BITS;
   wsize = ABS (usize) - limb_cnt;
   if (wsize <= 0)
     w->_mp_size = 0;
@@ -45,7 +43,7 @@ mpz_tdiv_q_2exp (mpz_ptr w, mpz_srcptr u, unsigned long int cnt)
       wp = w->_mp_d;
       up = u->_mp_d;
 
-      cnt %= BITS_PER_MP_LIMB;
+      cnt %= GMP_NUMB_BITS;
       if (cnt != 0)
 	{
 	  mpn_rshift (wp, up + limb_cnt, wsize, cnt);

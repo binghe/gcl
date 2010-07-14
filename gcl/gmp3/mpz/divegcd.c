@@ -3,13 +3,13 @@
    THE FUNCTIONS IN THIS FILE ARE FOR INTERNAL USE AND ARE ALMOST CERTAIN TO
    BE SUBJECT TO INCOMPATIBLE CHANGES IN FUTURE GNU MP RELEASES.
 
-Copyright 2000 Free Software Foundation, Inc.
+Copyright 2000, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -18,9 +18,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.  */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -33,17 +31,17 @@ MA 02111-1307, USA.  */
    section 4.5.2 theorem D.
 
             GCD     chance
-             1       60.7%
+             1       60.8%
             2^k      20.2%     (1<=k<32)
            3*2^k      9.0%     (1<=k<32)
-           other     10.1%    
+           other     10.1%
 
    Only the low limb is examined for optimizations, since GCDs bigger than
    2^32 (or 2^64) will occur very infrequently.
 
    Future: This could change to an mpn_divexact_gcd, possibly partly
    inlined, if/when the relevant mpq functions change to an mpn based
-   implementation.  */ 
+   implementation.  */
 
 
 static void

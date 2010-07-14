@@ -4,7 +4,7 @@ This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -13,15 +13,13 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA.
-*/
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "gmp.h"
 #include "gmp-impl.h"
+#include "tests.h"
 
 #define ADD 1
 #define SUB 2
@@ -40,14 +38,10 @@ MA 02111-1307, USA.
 #define TESTCALL mpn_sub_n
 #endif
 
-mp_limb_t refmpn_add_n ();
-mp_limb_t refmpn_sub_n ();
-
 #define SIZE 100
 
-main (argc, argv)
-     int argc;
-     char **argv;
+int
+main (int argc, char **argv)
 {
   mp_size_t alloc_size, max_size, size, i, cumul_size;
   mp_ptr s1, s2, dx, dy;
@@ -74,17 +68,17 @@ main (argc, argv)
   cumul_size = 0;
   for (pass = 0; pass < n_passes; pass++)
     {
+      size = random () % max_size + 1;
+
       cumul_size += size;
       if (cumul_size >= 1000000)
 	{
 	  cumul_size -= 1000000;
-	  printf ("%d ", pass); fflush (stdout);
+	  printf ("\r%ld", pass); fflush (stdout);
 	}
       s1_align = random () % 32;
       s2_align = random () % 32;
       d_align = random () % 32;
-
-      size = random () % max_size + 1;
 
       mpn_random2 (s1 + s1_align, size);
       mpn_random2 (s2 + s2_align, size);
@@ -99,86 +93,6 @@ main (argc, argv)
 	abort ();
     }
 
-  printf ("%d passes OK\n", n_passes);
+  printf ("%ld passes OK\n", n_passes);
   exit (0);
-}
-
-mp_limb_t
-#if __STDC__
-refmpn_add_n (mp_ptr res_ptr,
-	      mp_srcptr s1_ptr, mp_srcptr s2_ptr, mp_size_t size)
-#else
-refmpn_add_n (res_ptr, s1_ptr, s2_ptr, size)
-     register mp_ptr res_ptr;
-     register mp_srcptr s1_ptr;
-     register mp_srcptr s2_ptr;
-     mp_size_t size;
-#endif
-{
-  register mp_limb_t x, y, cy;
-  register mp_size_t j;
-
-  /* The loop counter and index J goes from -SIZE to -1.  This way
-     the loop becomes faster.  */
-  j = -size;
-
-  /* Offset the base pointers to compensate for the negative indices.  */
-  s1_ptr -= j;
-  s2_ptr -= j;
-  res_ptr -= j;
-
-  cy = 0;
-  do
-    {
-      y = s2_ptr[j];
-      x = s1_ptr[j];
-      y += cy;			/* add previous carry to one addend */
-      cy = (y < cy);		/* get out carry from that addition */
-      y = x + y;		/* add other addend */
-      cy = (y < x) + cy;	/* get out carry from that add, combine */
-      res_ptr[j] = y;
-    }
-  while (++j != 0);
-
-  return cy;
-}
-
-mp_limb_t
-#if __STDC__
-refmpn_sub_n (mp_ptr res_ptr,
-	       mp_srcptr s1_ptr, mp_srcptr s2_ptr, mp_size_t size)
-#else
-refmpn_sub_n (res_ptr, s1_ptr, s2_ptr, size)
-     register mp_ptr res_ptr;
-     register mp_srcptr s1_ptr;
-     register mp_srcptr s2_ptr;
-     mp_size_t size;
-#endif
-{
-  register mp_limb_t x, y, cy;
-  register mp_size_t j;
-
-  /* The loop counter and index J goes from -SIZE to -1.  This way
-     the loop becomes faster.  */
-  j = -size;
-
-  /* Offset the base pointers to compensate for the negative indices.  */
-  s1_ptr -= j;
-  s2_ptr -= j;
-  res_ptr -= j;
-
-  cy = 0;
-  do
-    {
-      y = s2_ptr[j];
-      x = s1_ptr[j];
-      y += cy;			/* add previous carry to subtrahend */
-      cy = (y < cy);		/* get out carry from that addition */
-      y = x - y;		/* main subtract */
-      cy = (y > x) + cy;	/* get out carry from the subtract, combine */
-      res_ptr[j] = y;
-    }
-  while (++j != 0);
-
-  return cy;
 }

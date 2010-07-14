@@ -1,13 +1,13 @@
 /* mpf_inp_str(dest_float, stream, base) -- Input a number in base
    BASE from stdio stream STREAM and store the result in DEST_FLOAT.
 
-Copyright 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -31,7 +29,7 @@ mpf_inp_str (mpf_ptr rop, FILE *stream, int base)
   char *str;
   size_t alloc_size, str_size;
   int c;
-  size_t retval;
+  int res;
   size_t nread;
 
   if (stream == 0)
@@ -64,6 +62,7 @@ mpf_inp_str (mpf_ptr rop, FILE *stream, int base)
       c = getc (stream);
     }
   ungetc (c, stream);
+  nread--;
 
   if (str_size >= alloc_size)
     {
@@ -73,10 +72,11 @@ mpf_inp_str (mpf_ptr rop, FILE *stream, int base)
     }
   str[str_size] = 0;
 
-  retval = mpf_set_str (rop, str, base);
-  if (retval == -1)
+  res = mpf_set_str (rop, str, base);
+  (*__gmp_free_func) (str, alloc_size);
+
+  if (res == -1)
     return 0;			/* error */
 
-  (*__gmp_free_func) (str, alloc_size);
   return str_size + nread;
 }

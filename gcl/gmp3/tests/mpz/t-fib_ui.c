@@ -1,12 +1,12 @@
 /* Test mpz_fib_ui and mpz_fib2_ui.
 
-Copyright 2000, 2001 Free Software Foundation, Inc.
+Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,9 +15,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,7 +43,31 @@ MA 02111-1307, USA. */
 
 
 #define MPZ_FIB_SIZE_FLOAT(n) \
-  ((mp_size_t) ((n) * 0.6942419 / BITS_PER_MP_LIMB + 1))
+  ((mp_size_t) ((n) * 0.6942419 / GMP_NUMB_BITS + 1))
+
+
+void
+check_fib_table (void)
+{
+  int        i;
+  mp_limb_t  want;
+
+  ASSERT_ALWAYS (FIB_TABLE(-1) == 1);
+  ASSERT_ALWAYS (FIB_TABLE(0) == 0);
+
+  for (i = 1; i <= FIB_TABLE_LIMIT; i++)
+    {
+      want = FIB_TABLE(i-1) + FIB_TABLE(i-2);
+      if (FIB_TABLE(i) != want)
+        {
+          printf ("FIB_TABLE(%d) wrong\n", i);
+          gmp_printf ("  got  %#Nx\n", &FIB_TABLE(i), 1);
+          gmp_printf ("  want %#Nx\n", &want, 1);
+          abort ();
+        }
+    }
+}
+
 
 int
 main (int argc, char *argv[])
@@ -60,6 +82,8 @@ main (int argc, char *argv[])
     limit = ULONG_MAX;
   else if (argc > 1)
     limit = atoi (argv[1]);
+
+  check_fib_table ();
 
   /* start at n==0 */
   mpz_init_set_ui (want_fn1, 1);  /* F[-1] */

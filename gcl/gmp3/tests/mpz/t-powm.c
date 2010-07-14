@@ -1,13 +1,13 @@
-/* Test mpz_powm, mpz_mul. mpz_mod, mpz_mod_ui, mpz_div_ui.
+/* Test mpz_powm, mpz_mul, mpz_mod, mpz_mod_ui, mpz_div_ui.
 
-Copyright 1991, 1993, 1994, 1996, 1999, 2000, 2001 Free Software Foundation,
-Inc.
+Copyright 1991, 1993, 1994, 1996, 1999, 2000, 2001, 2009 Free Software
+Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,7 +25,7 @@ MA 02111-1307, USA. */
 #include "gmp-impl.h"
 #include "tests.h"
 
-void debug_mp _PROTO ((mpz_t, int));
+void debug_mp __GMP_PROTO ((mpz_t, int));
 
 int
 main (int argc, char **argv)
@@ -36,7 +34,7 @@ main (int argc, char **argv)
   mpz_t r1, r2, t1, exp2, base2;
   mp_size_t base_size, exp_size, mod_size;
   int i;
-  int reps = 200;
+  int reps = 1000;
   gmp_randstate_ptr rands;
   mpz_t bs;
   unsigned long bsi, size_range;
@@ -91,28 +89,30 @@ main (int argc, char **argv)
       /* printf ("%ld %ld %ld\n", SIZ (base), SIZ (exp), SIZ (mod)); */
 
       mpz_powm (r1, base, exp, mod);
+      MPZ_CHECK_FORMAT (r1);
 
       mpz_set_ui (r2, 1);
-      mpz_set (base2, base);
+      mpz_mod (base2, base, mod);
       mpz_set (exp2, exp);
+      mpz_mod (r2, r2, mod);
 
-      mpz_mod (r2, r2, mod);	/* needed when exp==0 and mod==1 */
-      while (mpz_cmp_ui (exp2, 0) != 0)
+      for (;;)
 	{
-	  mpz_mod_ui (t1, exp2, 2);
-	  if (mpz_cmp_ui (t1, 0) != 0)
+	  if (mpz_tstbit (exp2, 0))
 	    {
 	      mpz_mul (r2, r2, base2);
 	      mpz_mod (r2, r2, mod);
 	    }
+	  if  (mpz_cmp_ui (exp2, 1) <= 0)
+	    break;
 	  mpz_mul (base2, base2, base2);
 	  mpz_mod (base2, base2, mod);
-	  mpz_div_ui (exp2, exp2, 2);
+	  mpz_tdiv_q_2exp (exp2, exp2, 1);
 	}
 
       if (mpz_cmp (r1, r2) != 0)
 	{
-	  fprintf (stderr, "\nIncorrect results for operands:\n");
+	  fprintf (stderr, "\nIncorrect results in test %d for operands:\n", i);
 	  debug_mp (base, -16);
 	  debug_mp (exp, -16);
 	  debug_mp (mod, -16);

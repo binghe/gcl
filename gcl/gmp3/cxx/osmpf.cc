@@ -1,12 +1,12 @@
 /* operator<< -- mpf formatted output to an ostream.
 
-Copyright 2001 Free Software Foundation, Inc.
+Copyright 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -15,10 +15,9 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
+#include <clocale>
 #include <iostream>
 #include <stdarg.h>    /* for va_list and hence doprnt_funs_t */
 #include <string.h>
@@ -43,11 +42,19 @@ operator<< (ostream &o, mpf_srcptr f)
 
   __gmp_doprnt_params_from_ios (&param, o);
 
+#if HAVE_STD__LOCALE
+  char  point[2];
+  point[0] = use_facet< numpunct<char> >(o.getloc()).decimal_point();
+  point[1] = '\0';
+#else
+  const char *point = localeconv()->decimal_point;
+#endif
+
   GMP_ASPRINTF_T_INIT (d, &result);
-  ret = __gmp_doprnt_mpf (&__gmp_asprintf_funs_noformat, &d, &param, f);
+  ret = __gmp_doprnt_mpf (&__gmp_asprintf_funs_noformat, &d, &param, point, f);
   ASSERT (ret != -1);
   __gmp_asprintf_final (&d);
 
-  gmp_allocated_string alloc = result;
-  return o.write (result, strlen (result));
+  gmp_allocated_string  t (result);
+  return o.write (t.str, t.len);
 }

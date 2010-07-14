@@ -1,13 +1,13 @@
 /* Stack allocation routines.  This is intended for machines without support
    for the `alloca' function.
 
-Copyright 1996, 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1999, 2000, 2001, 2006 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,9 +16,7 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -98,7 +96,7 @@ __gmp_tmp_alloc (unsigned long size)
    __gmp_tmp_free can later be used to reclaim all subsequently allocated
    storage.  */
 void
-__gmp_tmp_mark (tmp_marker *mark)
+__gmp_tmp_mark (struct tmp_marker *mark)
 {
   mark->which_chunk = current;
   mark->alloc_point = current->alloc_point;
@@ -106,7 +104,7 @@ __gmp_tmp_mark (tmp_marker *mark)
 
 /* Free everything allocated since <mark> was assigned by __gmp_tmp_mark */
 void
-__gmp_tmp_free (tmp_marker *mark)
+__gmp_tmp_free (struct tmp_marker *mark)
 {
   while (mark->which_chunk != current)
     {

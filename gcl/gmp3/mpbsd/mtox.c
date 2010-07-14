@@ -7,7 +7,7 @@ This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or (at your
+the Free Software Foundation; either version 3 of the License, or (at your
 option) any later version.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
@@ -16,61 +16,46 @@ or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
 License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library; see the file COPYING.LIB.  If not, write to
-the Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
-MA 02111-1307, USA. */
+along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
+#include <string.h>
 #include "mp.h"
 #include "gmp.h"
 #include "gmp-impl.h"
+#include "longlong.h"
 
 char *
 mtox (const MINT *x)
 {
-  mp_ptr xp;
   mp_size_t xsize = x->_mp_size;
+  mp_ptr    xp;
   mp_size_t xsign;
   unsigned char *str, *s;
-  size_t str_size, i;
-  int zeros;
-  TMP_DECL (marker);
+  size_t str_size, alloc_size, i;
 
-  if (xsize == 0)
-    {
-      str = (unsigned char *) (*__gmp_allocate_func) (2);
-      str[0] = '0';
-      str[1] = 0;
-      return (char *) str;
-    }
   xsign = xsize;
   if (xsize < 0)
     xsize = -xsize;
 
-  TMP_MARK (marker);
-  str_size = ((size_t) (xsize * BITS_PER_MP_LIMB
-			* __mp_bases[16].chars_per_bit_exactly)) + 3;
-  str = (unsigned char *) (*__gmp_allocate_func) (str_size);
+  /* digits, plus '\0', plus possible '-', for an exact size */
+  xp = x->_mp_d;
+  MPN_SIZEINBASE_16 (alloc_size, xp, xsize);
+  alloc_size += 1 + (xsign < 0);
+
+  str = (unsigned char *) (*__gmp_allocate_func) (alloc_size);
   s = str;
 
   if (xsign < 0)
     *s++ = '-';
 
-  /* Move the number to convert into temporary space, since mpn_get_str
-     clobbers its argument + needs one extra high limb....  */
-  xp = (mp_ptr) TMP_ALLOC ((xsize + 1) * BYTES_PER_MP_LIMB);
-  MPN_COPY (xp, x->_mp_d, xsize);
-
   str_size = mpn_get_str (s, 16, xp, xsize);
+  ASSERT (str_size <= alloc_size - (xsign < 0));
+  ASSERT (str_size == 1 || *s != 0);
 
-  /* mpn_get_str might make some leading zeros.  Skip them.  */
-  for (zeros = 0; s[zeros] == 0; zeros++)
-    str_size--;
-
-  /* Translate to printable chars and move string down.  */
   for (i = 0; i < str_size; i++)
-    s[i] = "0123456789abcdef"[s[zeros + i]];
+    s[i] = "0123456789abcdef"[s[i]];
   s[str_size] = 0;
 
-  TMP_FREE (marker);
+  ASSERT (strlen (str) + 1 == alloc_size);
   return (char *) str;
 }
