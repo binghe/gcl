@@ -95,10 +95,9 @@ along with GNU Gcl.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <crt_externs.h>
 #include <mach/mach.h>
 #include <mach-o/loader.h>
+#include <mach-o/reloc.h>
 #if defined (__ppc__)
 #include <mach-o/ppc/reloc.h>
-#else
-#include <mach-o/reloc.h>
 #endif
 #include <mach-o/nlist.h>
 #include <mach-o/getsect.h>
