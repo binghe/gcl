@@ -5,10 +5,9 @@
 #include <sys/stat.h>
 #include <mach/mach.h>
 #include <mach-o/loader.h>
+#include <mach-o/reloc.h>
 #ifdef __ppc__
 #include <mach-o/ppc/reloc.h>
-#else
-#include <mach-o/reloc.h>
 #endif
 #include <mach-o/nlist.h>
 #include <mach-o/getsect.h>
