@@ -2003,7 +2003,7 @@ rm -f makedefsafter
 MP_INCLUDE=""
 if test $use_gmp = yes ; then
 
- GMPDIR=gmp3
+ GMPDIR=gmp4
  PATCHED_SYMBOLS=""
  if test "$enable_dynsysgmp" = "yes" ; then
 	ac_safe=`echo "gmp.h" | sed 'y%./+-%__p_%'`
