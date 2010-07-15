@@ -519,6 +519,8 @@ fi
 # gcc on ppc cannot compile our new_init.c with full opts --CM
 TONIFLAGS=""
 case $use in 
+     powerpc*macosx)
+	   TCFLAGS="$TCFLAGS -mlongcall";;
      *linux)
 	case $use in
 #		amd64*) # stack-boundary option does not work
