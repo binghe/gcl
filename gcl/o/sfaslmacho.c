@@ -51,10 +51,12 @@ parse_file(void *v1,
       
       for (seg=v,*sec1=sec=(void *)(seg+1),*sece=*sec1+seg->nsects;sec<*sece;sec++) {
 	
+	a=sec->addr+sec->size;
+	*s=*s<a ? a : *s;
+
 	a=(1<<sec->align)-1;
-	
-	*s=(*s+a) & ~a;
-	*s+=sec->size;
+	/* *s=(*s+a) & ~a; */
+	/* *s+=sec->size; */
 	if (*ma<a) *ma=a;
 
 	fl=sec->flags&SECTION_TYPE;
@@ -304,6 +306,9 @@ relocate_sections(void *v1,void *d1,struct section *sec1,struct section *sece,
 
   for (d=d1,sec=sec1;sec<sece;d+=sec->size,sec++) {
     
+    if ((sec->flags&SECTION_TYPE)==S_ZEROFILL)
+      continue;
+
     a=(1<<sec->align)-1;
     
     d=(void *)(((ul)d+a) & ~a);
