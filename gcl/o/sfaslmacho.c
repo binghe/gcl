@@ -306,8 +306,10 @@ relocate_sections(void *v1,void *d1,struct section *sec1,struct section *sece,
 
   for (d=d1,sec=sec1;sec<sece;d+=sec->size,sec++) {
     
-    if ((sec->flags&SECTION_TYPE)==S_ZEROFILL)
+    if ((sec->flags&SECTION_TYPE)==S_ZEROFILL) {
+      d-=sec->size;
       continue;
+    }
 
     a=(1<<sec->align)-1;
     
