@@ -909,11 +909,13 @@
 
 
 (defun sublis1-inline (a b c)
-  (let ((tst (car (find (cadr c) *objects* :key 'cadr))))
+  (let ((tst (or (car (find (cadr c) *objects* :key 'cadr))
+		 (let ((v (member (cadr c) *top-level-forms* :key 'cadr)))
+		   (and v
+			(eq (caar v) 'sharp-comma)
+			(cmp-eval (caddar v)))))))
     (or (member tst '(eq equal eql)) (error "bad test"))
-  (wt "(check_alist("
-      a
-     "),sublis1("a "," b "," (format nil "~(&~a~)))" tst))))
+    (wt "(check_alist("	a "),sublis1("a "," b "," (format nil "~(&~a~)))" tst))))
 
   
 ;; end new		  

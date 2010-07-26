@@ -156,7 +156,7 @@ plt.h: plttest.o
 			sort | \
 			grep -v 'restFP' | grep -v 'saveFP' | \
 			grep -v '[^ \t_]_' |\
-			$(AWK) '{gsub("\\$$.*","");A[++k]=$$0} END {for (i=1;i<=k;i++) \
+			$(AWK) '{gsub("[a-z]\\$$.*","");A[++k]=$$0} END {for (i=1;i<=k;i++) \
 				 printf("MY_PLT(%s)%s\n",A[i],i==k ? "" : ",");}' >$@
 
 plt.o: plt.c plt.h
