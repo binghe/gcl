@@ -236,8 +236,8 @@ gclclean:
 	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out machine system
 
 clean: gclclean
-	[ -z "$(GMPDIR)" ] || (cd $(GMPDIR) ; $(MAKE) distclean)
-	[ -z "$(GMPDIR)" ] || rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
+	-[ -z "$(GMPDIR)" ] || (cd $(GMPDIR) && $(MAKE) distclean)
+	-[ -z "$(GMPDIR)" ] || rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
 	-cd binutils/intl && $(MAKE) distclean
 	-cd binutils/bfd && $(MAKE) distclean
 	-cd binutils/libiberty && $(MAKE) distclean
