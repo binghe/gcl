@@ -18,3 +18,4 @@
 
 #define PTR_ALIGN 8
 
+#define RELOC_H "elf32_sparc_reloc.h"

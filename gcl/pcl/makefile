@@ -23,7 +23,7 @@ SETUP='(load "sys-package.lisp")' \
 
 all: $(addsuffix .c,$(AFILES)) $(addsuffix .o,$(AFILES)) 
 
-saved_gcl_pcl: ../unixport/saved_gcl
+saved_gcl_pcl: ../unixport/saved_gcl$(EXE)
 	cp ../h/cmpinclude.h .
 	echo $(SETUP) '(pcl::compile-pcl)' | $< 
 	echo $(SETUP) '(pcl::load-pcl)(si::save-system "$@")' | $<
@@ -33,7 +33,7 @@ $(addsuffix .c,$(AFILES)) $(addsuffix .data,$(AFILES))\
 	$(addsuffix .lisp,$(subst gcl_pcl_impl_low,impl/gcl/gcl_pcl_impl_low,$(FILES)))
 	rm -f *.o *gazonk*
 	cp ../h/cmpinclude.h .
-	echo ${SETUP} '(pcl::compile-pcl)' | ../unixport/saved_gcl
+	echo ${SETUP} '(pcl::compile-pcl)' | ../unixport/saved_gcl$(EXE)
 	for i in gazonk* ; do \
 		j=$$(echo $$i | sed 's,\..*$$,,1');k="gazonk$$(echo $$j | cut -f3 -d\_)";\
 		l=$$(echo $$i | sed 's,^.*\.,,1');\
@@ -45,7 +45,7 @@ $(addsuffix .c,$(AFILES)) $(addsuffix .data,$(AFILES))\
 	../xbin/append $*.data $@
 
 clean:
-	rm -f *.o *.fn *.exe *.dll saved_gcl_pcl cmpinclude.h *.c *.h *.data *gazonk*
+	rm -f *.o *.fn *.exe *.dll saved_gcl_pcl$(EXE) cmpinclude.h *.c *.h *.data *gazonk*
 
 
 # remake the sys-package.lisp and sys-proclaim.lisp files
@@ -54,10 +54,10 @@ remake-sys-files:
 	rm -f *.o *gazonk*
 	cp ../h/cmpinclude.h .
 	echo ${SETUP} '(load "../cmpnew/gcl_collectfn.lsp")(compiler::emit-fn t)' \
-		'(pcl::compile-pcl)' | ../unixport/saved_gcl ../unixport/
+		'(pcl::compile-pcl)' | ../unixport/saved_gcl$(EXE) ../unixport/
 	echo ${SETUP} '(load "../cmpnew/gcl_collectfn.lsp") '\
 		'(pcl::load-pcl)(in-package "PCL")(renew-sys-files)' | \
-		../unixport/saved_gcl ../unixport/
+		../unixport/saved_gcl$(EXE) ../unixport/
 	cp sys-proclaim.lisp xxx
 	cat xxx | sed -e "s/COMPILER::CMP-ANON//g" > sys-proclaim.lisp
 	rm xxx

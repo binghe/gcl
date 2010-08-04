@@ -76,7 +76,7 @@ $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 $(PORTDIR)/saved_gcl: $(PORTDIR)/saved_pre_gcl $(HDIR)cmpinclude.h 
 	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
 	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
-	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && $(MAKE) LISP=../$<)
+	[ -z "$(X_LIBS)" ] || (cd xgcl-2 && $(MAKE) LISP=../$<)
 	cd $(@D) && $(MAKE) $(@F)
 
 $(PORTDIR)/saved_pcl_gcl: $(PORTDIR)/saved_gcl
@@ -236,8 +236,8 @@ gclclean:
 	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out machine system
 
 clean: gclclean
-	-(cd $(GMPDIR) ; $(MAKE) distclean)
-	rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
+	[ -z "$(GMPDIR)" ] || (cd $(GMPDIR) ; $(MAKE) distclean)
+	[ -z "$(GMPDIR)" ] || rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
 	-cd binutils/intl && $(MAKE) distclean
 	-cd binutils/bfd && $(MAKE) distclean
 	-cd binutils/libiberty && $(MAKE) distclean

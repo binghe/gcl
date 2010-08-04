@@ -471,24 +471,29 @@ char *s;
 #endif
 
 void
-gcl_init_or_load1(void (*fn)(void),char *file)
-{int n=strlen(file);
- if (file[n-1]=='o')
-   { object memory;
-     object fasl_data;
-     file=FIX_PATH_STRING(file);
+gcl_init_or_load1(void (*fn)(void),const char *file) {
 
-     memory=alloc_object(t_cfdata);
-     memory->cfd.cfd_self=0;
-     memory->cfd.cfd_fillp=0;
-     memory->cfd.cfd_size = 0;
-     printf("Initializing %s\n",file); fflush(stdout);
-     fasl_data = read_fasl_data(file);
-     memory->cfd.cfd_start= (char *)fn;
-     call_init(0,memory,fasl_data,0);
+  if (file[strlen(file)-1]=='o') {
+
+    object memory;
+    object fasl_data;
+    file=FIX_PATH_STRING(file);
+    
+    memory=alloc_object(t_cfdata);
+    memory->cfd.cfd_self=0;
+    memory->cfd.cfd_fillp=0;
+    memory->cfd.cfd_size = 0;
+    printf("Initializing %s\n",file); fflush(stdout);
+    fasl_data = read_fasl_data(file);
+    memory->cfd.cfd_start= (char *)fn;
+    call_init(0,memory,fasl_data,0);
+
+  } else {
+    printf("loading %s\n",file); 
+    fflush(stdout);  
+    load(file);
   }
- else
-  {printf("loading %s\n",file); fflush(stdout);  load(file);}
+
 }
 
 DEFUN_NEW("INIT-CMP-ANON", object, fSinit_cmp_anon, SI, 0, 0,
@@ -521,6 +526,7 @@ find_init_name1(char *s,unsigned len) {
 
 #ifdef _WIN32
   FEerror ( "Unsupported on Windows platforms", 0 );
+  return Cnil;
 #else    
 /* These functions have no relevance on Windows
  * as dlopen and friends don't exist in that part of Cyberspace. */

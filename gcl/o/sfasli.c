@@ -5,25 +5,7 @@ Copyright William Schelter. All rights reserved. */
 #error Need either BFD or SPECIAL_RSYM
 #endif
 
-#ifdef SPECIAL_RSYM
-
-int node_compare();
-
-
-struct node *
-find_sym_ptable(name)
-  char *name;
-  {struct node joe,*answ;
-   joe.string=name;
-   answ =  (struct node *)  bsearch((char *)(&joe),(char*) (c_table.ptable),
-			 c_table.length,
-			 sizeof(struct node), node_compare);
-
-   return answ;
- }
-       
-
-#else
+#ifndef SPECIAL_RSYM
 
 /* Replace this with gcl's own hash structure at some point */
 static int
@@ -113,57 +95,54 @@ build_symbol_table_bfd(void) {
 
 LFD(build_symbol_table)(void) { 
 
-
   printf("Building symbol table for %s ..\n",kcl_self);fflush(stdout);
 
 #ifdef SPECIAL_RSYM
-  {
 
-    char tmpfile1[80],command[300];
-
-    snprintf(tmpfile1,sizeof(tmpfile1),"rsym%d",(int)getpid());
-#ifndef STAND
-    coerce_to_filename(symbol_value(sSAsystem_directoryA),
-		       system_directory);
+#ifndef USE_DLOPEN
+  load_self_symbols();
 #endif
-#ifndef RSYM_COMMAND
-    snprintf(command,sizeof(command),"%srsym %s %s",system_directory,kcl_self,tmpfile1);
-#else
-    RSYM_COMMAND(command,system_directory,kcl_self,tmpfile1);
-#endif   
-    if (system(command) != 0)
-#ifdef STAND
-      FEerror("The rsym command %s failed .",1,command);
-#else
-    FEerror("The rsym command ~a failed .",1,
-	    make_simple_string(command));
-#endif
-    read_special_symbols(tmpfile1);
-    unlink(tmpfile1);
-    qsort((char*)(c_table.ptable),(int)(c_table.length),sizeof(struct node),node_compare);
 
-    {
-      struct node *p,*pe;
-      for (p=*c_table.ptable,pe=p+c_table.length;p<pe;p++) {
-	unsigned long pa;
-	if (!my_plt(p->string,&pa)) {
-/* 	  printf("my_plt %s %p %p\n",p->string,(void *)pa,(void *)p->address); */
-	  if (p->address && p->address!=pa)
-	    FEerror("plt address mismatch",0);
-	  else
-	    p->address=pa;
-	}
-      }
-    }
-
-  }
-#else /* special_rsym */
+#else
 
   build_symbol_table_bfd();
 
 #endif
 
 }
+
+extern int mcount();
+extern int _mcount();
+extern int __divdi3();
+extern int __moddi3();
+extern int __udivdi3();
+extern int __umoddi3();
+extern void sincos(double,double *,double *);
+extern int __divsi3();
+extern int __modsi3();
+extern int __udivsi3();
+extern int __umodsi3();
+extern int $$divI();
+extern int $$divU();
+extern int $$remI();
+extern int $$remU();
+extern int __divq();
+extern int __divqu();
+extern int __remq();
+extern int __remqu();
+
+#ifndef DARWIN
+#ifndef _WIN32
+int
+use_symbols(double d) {
+
+  sincos(d,&d,&d);
+  
+  return (int)d;
+
+}
+#endif
+#endif
 
 void
 gcl_init_sfasl() {

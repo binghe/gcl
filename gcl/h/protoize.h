@@ -146,7 +146,7 @@ struct key {short n,allow_other_keys;
 typedef int (*FUNC)();
 /* cmpaux.c:294:OF */ extern void call_init (int init_address, object memory, object fasl_vec, FUNC fptr); /* (init_address, memory, fasl_vec, fptr) int init_address; object memory; object fasl_vec; FUNC fptr; */
 /* cmpaux.c:339:OF */ extern void do_init (object *statVV); /* (statVV) object *statVV; */
-/* cmpaux.c:416:OF */ extern void gcl_init_or_load1 (void (*fn) (void), char *file); /* (fn, file) int (*fn)(); char *file; */
+/* cmpaux.c:416:OF */ extern void gcl_init_or_load1 (void (*fn) (void), const char *file); /* (fn, file) int (*fn)(); char *file; */
 /* conditional.c:200:OF */ extern void gcl_init_conditional (void); /* () */
 /* error.c:38:OF */ extern void terminal_interrupt (int correctable); /* (correctable) int correctable; */
 /* error.c:147:OF */ extern void Lerror (void); /* () */
@@ -652,7 +652,7 @@ int
 pack_hash(object);
 
 void
-load(char *);
+load(const char *);
 
 bool
 member_eq(object,object);
@@ -1281,14 +1281,6 @@ Ldigit_char_p(void);
 void
 Lwrite_byte(void);
 
-#ifdef SPECIAL_RSYM
-void
-read_special_symbols(char *);
-
-int
-node_compare(const void *,const void *);
-#endif
-
 void
 unlink_loaded_files(void);
 
@@ -1797,3 +1789,27 @@ int sigprocmask ( int how, const sigset_t *set, sigset_t *oldset );
 void
 gprof_cleanup(void);
 #endif
+
+int
+msystem(const char *);
+
+void
+assert_error(const char *,unsigned,const char *,const char *);
+
+#ifdef _WIN32
+void
+detect_wine(void);
+
+void
+init_shared_memory(void);
+
+void *
+alloca(size_t);
+
+#endif
+
+void *
+get_mmap(FILE *,void **);
+
+int
+un_mmap(void *,void *);

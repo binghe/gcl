@@ -194,3 +194,5 @@ if (realpath (buf, fub) == 0) {                             \
 }                                                           \
 (a_) = fub;                                                 \
 } while (0)
+
+#define RELOC_H "mach32_ppc_reloc.h"

@@ -213,7 +213,7 @@ DEFUN_NEW("ACCEPT-SOCKET-CONNECTION",object,fSaccept_socket_connection,
 and returns (list* named_socket fd name1) when one is established")
 
 {
-  unsigned n;
+  socklen_t n;
   int fd;
   struct sockaddr_in addr;
   object x; 
@@ -262,7 +262,12 @@ DEFUN_NEW("HOSTNAME-TO-HOSTID",object,fShostname_to_hostid,SI,1,1,
   char buf[300];
   char *p;
   p = lisp_copy_to_null_terminated(host,buf,sizeof(buf));
-  h = gethostbyname(p);
+  h = /* gethostbyname(p); */
+#ifdef STATIC_LINKING
+    NULL;
+#else
+  gethostbyname(p);
+#endif
   if (p != buf) free (p);
   if (h && h->h_addr_list[0])
     return
@@ -288,7 +293,12 @@ DEFUN_NEW("HOSTID-TO-HOSTNAME",object,fShostid_to_hostname,SI,
   char buf[300];
   hostid = lisp_copy_to_null_terminated(host_id,buf,sizeof(buf));
   addr.s_addr = inet_addr(hostid);
-  h = gethostbyaddr((char *)&addr, 4, AF_INET);
+  h = /* gethostbyaddr((char *)&addr, 4, AF_INET); */
+#ifdef STATIC_LINKING
+    NULL;
+#else
+  gethostbyaddr((char *)&addr, 4, AF_INET);
+#endif
   if (h && h->h_name && *h->h_name)
     return make_simple_string(h->h_name);
   else

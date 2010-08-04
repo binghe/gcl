@@ -22,9 +22,11 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	read.d
 */
 
+#include <string.h>
+#include <errno.h>
+
 #define NEED_ISFINITE
 #include "include.h"
-#include <string.h>
 
 static object
 current_readtable(void);
@@ -561,17 +563,17 @@ M:
 		dot_flag = TRUE;
 		vs_reset;
 		return(Cnil);
-	} else if (!escape_flag && length > 0) {
-		for (i = 0;  i < length;  i++)
-			if (token->st.st_self[i] != '.')
-				goto N;
-		FEerror("Dots appeared illegally.", 0);
+	 } else if (!escape_flag && length > 0) { 
+	 	for (i = 0;  i < length;  i++) 
+	 		if (token->st.st_self[i] != '.') 
+	 			goto N; 
+	 	FEerror("Dots appeared illegally.", 0); 
 	}
 
-N:
+N: 
 	token->st.st_fillp = length;
 	if (escape_flag || (READbase<=10 && token_buffer[0]>'9'))
-		goto SYMBOL;
+	  goto SYMBOL;
 	x = parse_number(token_buffer, length, &i, READbase);
 	if (x != OBJNULL && length == i) {
 		vs_reset;
@@ -695,15 +697,18 @@ ENDUP:
 double pow();
 
 static double
-new_fraction(char *s,int end,int exp_pos) {
+new_fraction(char *s,int end,int exp_pos,int *err) {
 
-  char ch,ch1=0;
+  char ch,ch1=0,*p;
   double fraction;
 
   ch=s[end];
   s[end]=0;
   if (exp_pos>=0) {ch1=s[exp_pos];s[exp_pos]='E';}
-  sscanf(s,"%lf",&fraction);
+/*  sscanf(s,"%lf",&fraction);*/
+  errno=0;
+  fraction=strtod(s,&p);
+  *err=errno || *p;
   s[end]=ch;
   if (exp_pos>=0) s[exp_pos]=ch1;
 
@@ -918,11 +923,20 @@ parse_number(char *s, int end, int *ep, int radix) {
     goto MAKE_FLOAT;
     
   case 's':  case 'S':
-    x = make_shortfloat((shortfloat)new_fraction(s,end,exp_pos));/*FIXME code above cannot re-read denormalized numbers accurately*/
+    {
+      int err;
+      /*FIXME code above cannot re-read denormalized numbers accurately*/
+      x = make_shortfloat((shortfloat)new_fraction(s,end,exp_pos,&err));
+      if (err) goto NO_NUMBER;
+    }
     break;
     
   case 'f':  case 'F':  case 'd':  case 'D':  case 'l':  case 'L':
-    x = make_longfloat((longfloat)new_fraction(s,end,exp_pos));
+    {
+      int err;
+      x = make_longfloat((longfloat)new_fraction(s,end,exp_pos,&err));
+      if (err) goto NO_NUMBER;
+    }
     break;
     
   case 'b':  case 'B':

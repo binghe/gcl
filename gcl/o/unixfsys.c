@@ -224,7 +224,7 @@ coerce_to_filename(object pathname, char *p)
      FEerror ( "NIL argument.", 1, pathname ); 
   } 
     
-#ifndef NO_PWD_H  
+#if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
   if(namestring->st.st_self[0]=='~')
     {char name[20];
      int n;
@@ -452,7 +452,7 @@ backup_fopen(char *filename, char *option)
 
 	strcat(strcpy(backupfilename, filename), ".BAK");
 	sprintf(command, "mv %s %s", filename, backupfilename);
-	system(command);
+	msystem(command);
 	return(fopen(filename, option));
 }
 
@@ -492,7 +492,7 @@ LFD(Lrename_file)(void)
 			2, vs_base[0], vs_base[1]);
 #else
 	sprintf(command, "mv %s %s", filename, newfilename);
-	system(command);
+	msystem(command);
 #endif
 	vs_push(vs_base[1]);
 	vs_push(truename(vs_base[0]));
@@ -598,7 +598,7 @@ LFD(Lfile_write_date)(void)
 
 LFD(Lfile_author)(void)
 {
-#ifndef NO_PWD_H
+#if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
 	char filename[MAXPATHLEN];
 	struct stat filestatus;
 	struct passwd *pwent;
@@ -622,7 +622,7 @@ LFD(Lfile_author)(void)
 static void
 FFN(Luser_homedir_pathname)(void)
 {
-#ifndef NO_PWD_H  
+#if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
 	struct passwd *pwent;
 	char filename[MAXPATHLEN];
 	register int i;

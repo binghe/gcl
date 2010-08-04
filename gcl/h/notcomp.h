@@ -287,3 +287,5 @@ gcl_init_cmp_anon(void);
 #endif
 
 #include "gmp_wrappers.h"
+
+#define massert(a_) if (!(a_)) assert_error(#a_,__LINE__,__FILE__,__FUNCTION__)

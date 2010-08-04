@@ -76,7 +76,6 @@
 				  name)
 			:type ext))))
 
-
 (defun safe-system (string)
  (multiple-value-bind
   (code result) (system string)
@@ -610,9 +609,21 @@ SYSTEM_SPECIAL_INIT
 	      (finish (subseq s (1+ pos))))
 	  (prep-win-path-acc finish (concatenate 'string acc start "~")))
       (concatenate 'string acc s))))
-#+winnt (defun prep-win-path ( s ) (prep-win-path-acc s ""))        
 
-(defun compiler-cc (c-pathname o-pathname  )
+#+winnt
+(defun no-device (c)
+  (let* ((c (namestring (truename c)))
+	 (p (search ":" c)))
+    (if p (subseq c (1+ p)) c)))
+
+#+winnt
+(defun prep-win-path (c o)
+  (let* ((w si::*wine-detected*)
+	 (c (if w (no-device c) c))
+	 (o (if w (no-device o) o)))
+    (prep-win-path-acc (compiler-command c o) "")))
+
+(defun compiler-cc (c-pathname o-pathname)
   (safe-system
     (format
      nil
@@ -620,7 +631,7 @@ SYSTEM_SPECIAL_INIT
 	 #+irix5 (compiler-command c-pathname o-pathname )
 	 #+vax "~a ~@[~*-O ~]-S -I. -w ~a ; as -J -W -o ~A ~A"
 	 #+(or system-v e15 dgux sgi ) "~a ~@[~*-O ~]-c -I. ~a 2> /dev/null"
-	 #+winnt (prep-win-path (compiler-command c-pathname o-pathname ))
+	 #+winnt (prep-win-path c-pathname o-pathname)
 	 #-winnt (compiler-command c-pathname o-pathname)
 	)
      *cc*

@@ -36,6 +36,32 @@ via #include "../c/sfasl.c"
 #undef S_DATA
 /*  #endif */
 
+
+#ifdef SPECIAL_RSYM
+
+#include <string.h>
+
+#include "ptable.h"
+
+static int
+node_compare(const void *v1,const void *v2) {
+  const struct node *a1=v1,*a2=v2;
+  
+  return strcmp(a1->string,a2->string);
+
+}
+
+static struct node *
+find_sym_ptable(const char *name) {
+
+  struct node joe;
+  joe.string=name;
+  return bsearch(&joe,c_table.ptable,c_table.length,sizeof(joe),node_compare);
+
+}
+
+#endif
+
 #ifdef SEPARATE_SFASL_FILE
 #include SEPARATE_SFASL_FILE
 #else

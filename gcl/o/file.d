@@ -1496,30 +1496,30 @@ BEGIN:
 }
 
 void
-load(s)
-char *s;
-{
-	object filename, strm, x;
-	vs_mark;
+load(const char *s) {
 
-	if (user_match(s,strlen(s)))
-		return;
-	filename = make_simple_string(s);
-	vs_push(filename);
-	strm = open_stream(filename, smm_input, Cnil, sKerror);
-	vs_push(strm);
-	for (;;) {
-		preserving_whitespace_flag = FALSE;
-		detect_eos_flag = TRUE;
-		x = read_object_non_recursive(strm);
-		if (x == OBJNULL)
-			break;
-		vs_push(x);
-		ieval(x);
-		vs_popp;
-	}
-	close_stream(strm);
-	vs_reset;
+  object filename, strm, x;
+  vs_mark;
+  
+  if (user_match(s,strlen(s)))
+    return;
+  filename = make_simple_string(s);
+  vs_push(filename);
+  strm = open_stream(filename, smm_input, Cnil, sKerror);
+  vs_push(strm);
+  for (;;) {
+    preserving_whitespace_flag = FALSE;
+    detect_eos_flag = TRUE;
+    x = read_object_non_recursive(strm);
+    if (x == OBJNULL)
+      break;
+    vs_push(x);
+    ieval(x);
+    vs_popp;
+  }
+  close_stream(strm);
+  vs_reset;
+
 }
 
 
@@ -2296,7 +2296,7 @@ static object
 maccept(object x) {
 
   int fd;
-  unsigned n;
+  socklen_t n;
   struct sockaddr_in addr;
   object server,host,port;
   
@@ -2304,7 +2304,7 @@ maccept(object x) {
     FEerror("~S is not a steam~%",1,x);
   if (x->sm.sm_mode!=smm_two_way)
     FEerror("~S is not a two-way steam~%",1,x);
-  fd=accept(SOCKET_STREAM_FD(STREAM_INPUT_STREAM(x)),(struct sockaddr *)&addr, &n);
+  fd=accept(SOCKET_STREAM_FD(STREAM_INPUT_STREAM(x)),(struct sockaddr *)&addr,&n);
   if (fd <0) {
     FEerror("Error ~S on accepting connection to ~S~%",2,make_simple_string(strerror(errno)),x);
     x=Cnil;
@@ -2667,9 +2667,8 @@ gcl_init_file_function()
 
 
 object
-read_fasl_data(str)
-char *str;
-{
+read_fasl_data(const char *str) {
+
 	object faslfile, data;
 #ifndef SEEK_TO_END_OFILE
 #if defined(BSD) && defined(UNIX)

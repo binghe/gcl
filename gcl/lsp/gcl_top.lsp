@@ -725,8 +725,14 @@ First directory is checked for first name and all extensions etc."
 
 (defvar *tmp-dir*)
 
+(defun wine-tmp-redirect ()
+  (let* ((s (find-symbol "*WINE-DETECTED*" (find-package "SYSTEM"))))
+    (when (and s (symbol-value s))
+      (list *system-directory*))))
+	 
 (defun get-temp-dir ()
- (dolist (x `(,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
+ (dolist (x `(,@(wine-tmp-redirect)
+	      ,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
    (when x
      (let* ((x (pathname x))
 	    (x (if (pathname-name x) x 

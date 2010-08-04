@@ -1,0 +1,9 @@
+On some recent mac boxes (e.g. 10.6) running 64bit capable processors,
+the default configure scripts detect the cpu as 32bit only.  To get a
+64bit build, do:
+
+./configure --build=x86_64-apple-darwin10.4.0 ....
+
+where the key item is the x86_64, and some darwin string in the last
+place.
+

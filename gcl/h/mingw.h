@@ -7,7 +7,7 @@
 #  undef RSYM_COMMAND
 #  define SEPARATE_SFASL_FILE "sfaslbfd.c"
 #else
-#  undef SEPARATE_SFASL_FILE
+#  define SEPARATE_SFASL_FILE "sfaslcoff.c"
 #  define SPECIAL_RSYM "rsym_nt.c"
 #  define RSYM_COMMAND(command,system_directory,kcl_self,tmpfile1) \
       sprintf(command,"rsym %s %s",kcl_self,tmpfile1);
@@ -118,7 +118,8 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
     
 #define RECREATE_HEAP if (initflag) { recreate_heap1(); \
      terminal_io->sm.sm_object1->sm.sm_fp=stdout; \
-     terminal_io->sm.sm_object0->sm.sm_fp=stdin; }
+     terminal_io->sm.sm_object0->sm.sm_fp=stdin; \
+     init_shared_memory();}
 
 #define HAVE_AOUT "wincoff.h"
 /* we dont need to worry about zeroing fp->_base , to prevent  */
@@ -144,8 +145,7 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
 #define I386
 
 #undef SET_REAL_MAXPAGE  
-#define SET_REAL_MAXPAGE \
-	 init_shared_memory(); real_maxpage=MAXPAGE;
+#define SET_REAL_MAXPAGE {init_shared_memory(); real_maxpage=MAXPAGE;}
 
 /* include some low level routines for maxima */
 #define CMAC
@@ -216,3 +216,5 @@ extern char *GCLExeName ( void );
 extern int mingwlisten(FILE *);
 #undef LISTEN_FOR_INPUT
 #define LISTEN_FOR_INPUT(fp) do {if (mingwlisten(fp)) return 0;} while (0)
+
+#define socklen_t int

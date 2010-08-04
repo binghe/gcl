@@ -30,7 +30,19 @@ DECL := $(HDIR)/new_decl.h
 	rm $*.c
 
 CPP=
-%.ini: %.c grab_defs plt.h
+
+PLT=
+PLTH=
+ifneq ($(findstring bfd,$(LIBS)),) 
+PLT     = plt.o
+PLTH    = plt.h
+endif
+ifneq ($(BUILD_BFD),) 
+PLT     = plt.o
+PLTH    = plt.h
+endif
+
+%.ini: %.c grab_defs $(PLTH)
 	[ -e $(DECL) ] || touch $(DECL)
 	$(CC) -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c | sed -e 's:\"[ ]*):\"):g' | ./grab_defs > $*.ini
 
@@ -77,7 +89,7 @@ OBJS	= $(OD)main.o $(OD)alloc.o $(OD)gbc.o \
 	$(OD)print.o $(OD)format.o $(OD)pathname.o \
 	$(OD)unixfsys.o $(OD)unixfasl.o $(OD)error.o \
 	$(OD)unixtime.o $(OD)unixsys.o $(OD)unixsave.o \
-	$(OD)funlink.o  $(OD)plt.o \
+	$(OD)funlink.o  $(OD)$(PLT) \
 	$(OD)fat_string.o ${ODIR}/run_process.o \
 	$(OD)nfunlink.o $(OD)usig.o $(OD)usig2.o $(OD)utils.o \
 	$(OD)makefun.o $(OD)sockets.o $(OD)gmp_wrappers.o $(OD)clxsocket.o  \
@@ -132,20 +144,6 @@ grab_defs: grab_defs.c
 # CM 20040227
 #
 
-#def: $(OBJECTS)
-#	nm $^ | awk '/ [TBCD] / {print $$3}' | sort |uniq >def
-
-#undef: $(OBJECTS)
-#	nm $^ | awk '/ [U] / {print $$2}' | sort |uniq >undef
-
-#undef.h: undef def
-#	join -v1 $^ | \
-#	awk '{if (i++) printf("MY_PLT(%s),\n",a);a=$$1} END {printf("MY_PLT(%s)\n",a)}'>$@
-
-#void.h: undef def
-#	join -v1 $^ | \
-#	awk '/my_plt/ {next} {printf("extern void *%s;\n",$$1);}'>$@
-
 plttest.o: plttest.c 
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
 
@@ -171,7 +169,7 @@ $(GCLIB): ${ALIB}
 	$(AR) gcllib.a ${ALIB}
 	${RANLIB} gcllib.a
 clean:
-	rm -f $(OBJS) ${ALIB} new_init.o  $(LAST_FILE) $(FIRST_FILE) *.a grab_defs$(EXE) *.ini tmpx foo.c cmpinclude.h new_init.c $(DECL) def undef udef.h void.h plt.h plttest.o
+	rm -f $(OBJS) ${ALIB} new_init.o  $(LAST_FILE) $(FIRST_FILE) *.a grab_defs$(EXE) *.ini tmpx foo.c cmpinclude.h new_init.c $(DECL) def undef udef.h void.h plt.h plttest.o grab_defs
 
 fsavres.o: /lib/libc.a
 	ar xv /lib/libc.a fsavres.o

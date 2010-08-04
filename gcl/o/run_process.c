@@ -157,9 +157,9 @@ void run_process ( char *name )
 
     
     /* Connect up the Lisp objects with the pipes. */
-    ofd = _open_osfhandle ( hChildStdoutRead, _O_RDONLY | _O_TEXT );
+    ofd = _open_osfhandle ( (int)hChildStdoutRead, _O_RDONLY | _O_TEXT );
     ofp = _fdopen ( ofd, "r" );
-    ifd = _open_osfhandle ( hChildStdinWrite, _O_WRONLY | _O_TEXT );
+    ifd = _open_osfhandle ( (int)hChildStdinWrite, _O_WRONLY | _O_TEXT );
     ifp = _fdopen ( ifd, "w" );
 
 #if 0
@@ -358,7 +358,9 @@ int	server;
 	struct	hostent	*hp;
 	struct	sockaddr_in	sock_add;	/* Address of socket          */
 
+#ifndef STATIC_LINKING
 	if((hp = gethostbyname(host)) == NULL)
+#endif
 	{
 		FEerror("No such host.",0);
 	}

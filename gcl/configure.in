@@ -1,4 +1,5 @@
 AC_INIT()
+AC_PREREQ([2.61])
 AC_CONFIG_HEADER(h/gclincl.h)
 
 VERSION=`cat majvers`.`cat minvers`
@@ -149,7 +150,14 @@ case $canonical in
      	use=powerpc-macosx;;
      
      *86*darwin*)
-     	use=386-macosx;;
+     	use=386-macosx
+	if test "$build_cpu" = "x86_64" ; then 
+	   CFLAGS="-m64 $CFLAGS";
+	   LDFLAGS="-m64 -Wl,-headerpad,72 $LDFLAGS"; 
+	else 
+	   CFLAGS="-m32 $CFLAGS";
+	   LDFLAGS="-m32  -Wl,-headerpad,56 $LDFLAGS"; 
+        fi;;
      
      alpha-dec-osf)
      use=alpha-osf1;;
@@ -389,10 +397,12 @@ if test "$load_opt" != "1" ; then
 	exit 1
 fi
 
-TLIBS=""
+TLDFLAGS=""
 if test "$enable_static" = "yes" ; then
-   TLIBS="-static $TLIBS";
+   TLDFLAGS="-static -Wl,-zmuldefs $TLDFLAGS"; #FIXME should be in unixport/makefile
+   AC_DEFINE(STATIC_LINKING,1,[staticly linked images])
 fi
+
 
 ## finally warn if we did not find a recognized machine.s
 ##
@@ -445,6 +455,7 @@ if test "$GCC" = "yes" ; then
 	     *mingw*)
 	        echo "WARNING: Remove -fno-zero-initialized-in-bss from makedefs if gcc less than 3.3.1."
 	        echo "         It is ptherwise needed for the Unexec stuff to work."
+		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
 		TCFLAGS="$TCFLAGS -fno-zero-initialized-in-bss -mms-bitfields";;
         esac
 fi
@@ -627,11 +638,20 @@ else
     fi
 fi
 
-if test "$use" = "powerpc-macosx" ; then
-   AC_CHECK_HEADER(malloc/malloc.h,[AC_DEFINE([HAVE_MALLOC_MALLOC_H])],
-      [AC_CHECK_HEADER(objc/malloc.h,[AC_DEFINE([HAVE_OBJC_MALLOC_H])],
-	[AC_MSG_ERROR([need malloc.h on macosx])])])
-fi
+case $use in
+     *macosx)
+        AC_CHECK_HEADER(malloc/malloc.h,,[AC_MSG_ERROR([need malloc.h on macosx])])
+	AC_CHECK_MEMBER([struct _malloc_zone_t.memalign],
+ 		AC_DEFINE(HAVE_MALLOC_ZONE_MEMALIGN,1,[memalign element present]), [], 
+		[
+		#include <malloc/malloc.h>
+		])
+	AC_SUBST(HAVE_MALLOC_ZONE_MEMALIGN)
+	;;
+esac
+
+
+	
 
 # sysconf
 
@@ -1360,43 +1380,38 @@ AC_CHECK_HEADERS(float.h,AC_DEFINE(HAVE_FLOAT_H))
 # test makes sense.  CM
 #
 AC_MSG_CHECKING([for isnormal])
-AC_TRY_RUN([#define _GNU_SOURCE
+AC_RUN_IFELSE(AC_LANG_PROGRAM([[
 	    #include <math.h>
-	    int main() {
-		float f;
-		return isnormal(f) || !isnormal(f) ? 0 : 1;
-		}],
-		AC_DEFINE(HAVE_ISNORMAL) AC_MSG_RESULT(yes),
+	    ]],[[
+	    float f;
+	    return isnormal(f) || !isnormal(f) ? 0 : 1;
+	    ]]),
+		AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes),
 		AC_MSG_CHECKING([for fpclass in ieeefp.h])
-		AC_TRY_RUN([#include <ieeefp.h>
-			    int main() {
-				float f;
-				return fpclass(f)>=FP_NZERO || fpclass(f)<FP_NZERO ? 0 : 1;
-				}],
-		AC_DEFINE(HAVE_IEEEFP) AC_MSG_RESULT(yes),
-		HAVE_IEEEFP=0 AC_MSG_RESULT(no),HAVE_IEEEFP=0 AC_MSG_RESULT(no))
-	,HAVE_ISNORMAL=0 AC_MSG_RESULT(no),HAVE_ISNORMAL=0 AC_MSG_RESULT(no))
+		AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+			#include <ieeefp.h>
+			]],[[
+			float f;
+			return fpclass(f)>=FP_NZERO || fpclass(f)<FP_NZERO ? 0 : 1;
+			]]),AC_DEFINE(HAVE_IEEEFP,1,[Have ieeefp fpclass function]) AC_MSG_RESULT(yes),
+			    AC_MSG_ERROR(no)))
 
 AC_MSG_CHECKING([for isfinite])
-AC_TRY_RUN([#define _GNU_SOURCE
-	    #include <math.h>
-	    int main() {
+AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+	#include <math.h>
+	]],[[
+	float f;
+	return isfinite(f) || !isfinite(f) ? 0 : 1;
+	]]),AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes),
+	    AC_MSG_CHECKING([for finite()])
+	    AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+		#include <math.h>
+		#include <ieeefp.h>
+		]],[[
 		float f;
-		return isfinite(f) || !isfinite(f) ? 0 : 1;
-		}],
-		AC_DEFINE(HAVE_ISFINITE) AC_MSG_RESULT(yes),
-		AC_MSG_CHECKING([for finite()])
-		AC_TRY_RUN([#include <math.h>
-	                    #include <ieeefp.h>
-			    int main() {
-				float f;
-				return finite(f) || !finite(f) ? 0 : 1;
-				}],
-		AC_DEFINE(HAVE_FINITE) AC_MSG_RESULT(yes),
-		HAVE_FINITE=0 AC_MSG_RESULT(no),HAVE_FINITE=0 AC_MSG_RESULT(no))
-	,HAVE_ISFINITE=0 AC_MSG_RESULT(no),HAVE_ISFINITE=0 AC_MSG_RESULT(no))
-
-
+		return finite(f) || !finite(f) ? 0 : 1;
+		]]),AC_DEFINE(HAVE_FINITE,1,[Have finite function]) AC_MSG_RESULT(yes),
+		    AC_MSG_ERROR(no)))
 
 #--------------------------------------------------------------------
 #	Check for the existence of the -lsocket and -lnsl libraries.
@@ -1914,6 +1929,8 @@ if  2>&1 $CC -v | fgrep "gcc version 2.96" > /dev/null
 	AC_MSG_RESULT([no])
 fi 
 
+LDFLAGS="$LDFLAGS $TLDFLAGS"
+AC_SUBST(LDFLAGS)
 LIBS="$LDFLAGS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
 AC_SUBST(LIBS)
 FINAL_CFLAGS="$CFLAGS $X_CFLAGS $TCFLAGS $PROCESSOR_FLAGS"

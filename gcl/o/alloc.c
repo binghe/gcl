@@ -411,7 +411,7 @@ make_cons(object a, object d)
 {
 	 object obj;
 	 char *p;
-	 struct typemanager *tm=(&tm_table[(int)t_cons]);
+	 struct typemanager *tm=tm_of(t_cons);
 	 int must_have_more_pages;
 
 ONCE_MORE:
@@ -1493,69 +1493,54 @@ static char *baby_malloc(n)
 
 void *
 malloc(size_t size) {
-	static int in_malloc;
 
-	CHECK_INTERRUPT;
+  static int in_malloc;
 
-	if (in_malloc)
-	  return NULL;
-	in_malloc=1;
+  if (in_malloc)
+    return NULL;
+  in_malloc=1;
 
-/*  #ifdef HAVE_LIBBFD */
-/*  	if (in_bfd_init) */
-/*  	  return bfd_malloc(size); */
-/*  #endif */
+  if (!GBC_enable) {
 
 #ifdef BABY_MALLOC_SIZE
-	if (GBC_enable == 0) {
-	  in_malloc = 0;
-	  return baby_malloc(size);
-	}
+    in_malloc=0;
+    return baby_malloc(size);
 #else	
-	if (GBC_enable==0) {
-	   if ( initflag ==0)
-	     gcl_init_alloc();
-	   else {
-#ifdef	     RECREATE_HEAP
-	     	RECREATE_HEAP
+
+    if (!initflag)
+      gcl_init_alloc();
+#ifdef RECREATE_HEAP
+    else RECREATE_HEAP
 #endif
-		;
-#ifdef       __MINGW32__ 
-                   /* If malloc() gets called by the C runtime before 
-                    * main starts and the shared memory is not yet 
-                    * initialised causing boofo. 
-                    * SET_REAL_MAXPAGE calls init_shared_memory(). 
-                    * This problem arose with gcc 3.4.2 and new libs. 
-                    */ 
-                   SET_REAL_MAXPAGE 
-                   ; 
-#endif 
-	   }
-	}
 
 #endif	
-      
-	malloc_list = make_cons(Cnil, malloc_list);
 
-	malloc_list->c.c_car = alloc_simple_string(size);
+  }      
 
-	malloc_list->c.c_car->st.st_self = alloc_contblock(size);
+  CHECK_INTERRUPT;
 
-	/* FIXME: this is just to handle clean freeing of the
-	   monstartup memory allocated automatically on raw image
-	   startup.  In saved images, monstartup memory is only
-	   allocated with gprof-start. 20040804 CM*/
+  malloc_list = make_cons(Cnil, malloc_list);
+  
+  malloc_list->c.c_car = alloc_simple_string(size);
+  
+  malloc_list->c.c_car->st.st_self = alloc_contblock(size);
+  
+  /* FIXME: this is just to handle clean freeing of the
+     monstartup memory allocated automatically on raw image
+     startup.  In saved images, monstartup memory is only
+     allocated with gprof-start. 20040804 CM*/
 #ifdef GCL_GPROF
-	if (!initflag && size>(textend-textstart) && !initial_monstartup_pointer) 
-	  initial_monstartup_pointer=malloc_list->c.c_car->st.st_self;
+  if (!initflag && size>(textend-textstart) && !initial_monstartup_pointer) 
+    initial_monstartup_pointer=malloc_list->c.c_car->st.st_self;
 #endif
-	
+  
 #ifdef SGC
-	perm_writable(malloc_list->c.c_car->st.st_self,size);
+  perm_writable(malloc_list->c.c_car->st.st_self,size);
 #endif
+  
+  in_malloc=0;
+  return(malloc_list->c.c_car->st.st_self);
 
-	in_malloc=0;
-	return(malloc_list->c.c_car->st.st_self);
 }
 
 
@@ -1684,6 +1669,7 @@ cfree(void *ptr) {
 
 
 #ifndef GNUMALLOC
+#ifdef WANT_VALLOC
 static void *
 memalign(size_t align,size_t size) { 
   object x = alloc_simple_string(size);
@@ -1691,7 +1677,6 @@ memalign(size_t align,size_t size) {
   malloc_list = make_cons(x, malloc_list);
   return x->st.st_self;
 }
-#ifdef WANT_VALLOC
 void *
 valloc(size_t size)
 { return memalign(getpagesize(),size);}

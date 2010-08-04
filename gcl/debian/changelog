@@ -212,8 +212,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * hurd support
   * sh4 support
   * macosx support
+  * windows/wine support
+  * custreloc support with no plt
 
- -- Camm Maguire <camm@debian.org>  Wed, 14 Jul 2010 21:38:32 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 04 Aug 2010 21:42:35 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

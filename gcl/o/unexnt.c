@@ -273,8 +273,8 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   if (strcmp (ptr, ".exe") && strcmp (ptr, ".EXE")  )
     strcat (out_filename, ".exe");
 #endif
-  printf ("Dumping from %s\n", in_filename);
-  printf ("          to %s\n", out_filename);
+  /* printf ("Dumping from %s\n", in_filename); */
+  /* printf ("          to %s\n", out_filename); */
 
   /* We need to round off our heap to NT's allocation unit (64KB).  */
   round_heap (get_allocation_unit ());
@@ -296,7 +296,7 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
     round_to_next ((unsigned char *) in_file.size, get_allocation_unit ());
   /* from lisp we know what to use */
 #ifdef IN_UNIXSAVE
-  data_region_end = round_to_next(core_end,0x10000);
+  data_region_end = round_to_next((unsigned char *)core_end,0x10000);
   real_data_region_end = data_region_end;
 #endif  
   size = heap_index_in_executable + get_committed_heap_size () + bss_size;
@@ -487,7 +487,7 @@ find_section (char * name, IMAGE_NT_HEADERS * nt_header)
 
   for (i = 0; i < nt_header->FileHeader.NumberOfSections; i++)
     {
-      if (strcmp (section->Name, name) == 0)
+      if (strcmp ((char *)section->Name, name) == 0)
 	return section;
       section++;
     }
@@ -586,11 +586,11 @@ get_section_info (file_data *p_infile)
 #else
 #define DATA_SECTION ".data"
 #endif      
-      if (!strcmp (section->Name, DATA_SECTION)) 
+      if (!strcmp ((char *)section->Name, DATA_SECTION)) 
 	{
 	  /* The Emacs initialized data section.  */
 	  data_section = section;
-	  ptr = (char *) nt_header->OptionalHeader.ImageBase +
+	  ptr = (unsigned char *) nt_header->OptionalHeader.ImageBase +
 	    section->VirtualAddress;
 	  data_start_va = ptr;
 	  data_start_file = section->PointerToRawData;
@@ -630,7 +630,7 @@ get_section_info (file_data *p_infile)
    bss system data on the Alpha).  However, in practice this doesn't
    seem to matter, since presumably the system libraries always
    reinitialize their bss variables.  */
-  bss_start = min (my_begbss, my_begbss_static);
+  bss_start = (unsigned char *)min (my_begbss, my_begbss_static);
   bss_size = max ((char *)my_endbss, (char *) my_endbss_static) - (char *) bss_start;
 
 #endif
@@ -647,32 +647,32 @@ copy_executable_and_dump_data_section (file_data *p_infile,
   unsigned long size, index;
   
   /* Get a pointer to where the raw data should go in the executable file.  */
-  data_file = (char *) p_outfile->file_base + data_start_file;
+  data_file = (unsigned char *) p_outfile->file_base + data_start_file;
 
   /* Get a pointer to the raw data in our address space.  */
   data_va = data_start_va;
     
   size = (DWORD) data_file - (DWORD) p_outfile->file_base;
-  printf ("Copying executable up to data section...\n");
-  printf ("\t0x%08x Offset in input file.\n", 0);
-  printf ("\t0x%08x Offset in output file.\n", 0);
-  printf ("\t0x%08lx Size in bytes.\n", size);
+  /* printf ("Copying executable up to data section...\n"); */
+  /* printf ("\t0x%08x Offset in input file.\n", 0); */
+  /* printf ("\t0x%08x Offset in output file.\n", 0); */
+  /* printf ("\t0x%08lx Size in bytes.\n", size); */
   memcpy (p_outfile->file_base, p_infile->file_base, size);
   
   size = data_size;
-  printf ("Dumping .data section...\n");
-  printf ("\t0x%p Address in process.\n", data_va);
-  printf ("\t0x%08x Offset in output file.\n", 
-	  data_file - p_outfile->file_base);
-  printf ("\t0x%08lx Size in bytes.\n", size);
+  /* printf ("Dumping .data section...\n"); */
+  /* printf ("\t0x%p Address in process.\n", data_va); */
+  /* printf ("\t0x%08x Offset in output file.\n",  */
+  /* 	  data_file - p_outfile->file_base); */
+  /* printf ("\t0x%08lx Size in bytes.\n", size); */
   memcpy (data_file, data_va, size);
   
   index = (DWORD) data_file + size - (DWORD) p_outfile->file_base;
   size = p_infile->size - index;
-  printf ("Copying rest of executable...\n");
-  printf ("\t0x%08lx Offset in input file.\n", index);
-  printf ("\t0x%08lx Offset in output file.\n", index);
-  printf ("\t0x%08lx Size in bytes.\n", size);
+  /* printf ("Copying rest of executable...\n"); */
+  /* printf ("\t0x%08lx Offset in input file.\n", index); */
+  /* printf ("\t0x%08lx Offset in output file.\n", index); */
+  /* printf ("\t0x%08lx Size in bytes.\n", size); */
   memcpy ((char *) p_outfile->file_base + index, 
 	  (char *) p_infile->file_base + index, size);
 }
@@ -683,27 +683,27 @@ dump_bss_and_heap (file_data *p_infile, file_data *p_outfile)
     unsigned char *heap_data, *bss_data;
     unsigned long size, index;
 
-    printf ("Dumping heap into executable...\n");
+    /* printf ("Dumping heap into executable...\n"); */
 
     index = heap_index_in_executable;
     size = get_committed_heap_size ();
     heap_data = get_heap_start ();
 
-    printf ("\t0x%p Heap start in process.\n", heap_data);
-    printf ("\t0x%08lx Heap offset in executable.\n", index);
-    printf ("\t0x%08lx Heap size in bytes.\n", size);
+    /* printf ("\t0x%p Heap start in process.\n", heap_data); */
+    /* printf ("\t0x%08lx Heap offset in executable.\n", index); */
+    /* printf ("\t0x%08lx Heap size in bytes.\n", size); */
 
     memcpy ((PUCHAR) p_outfile->file_base + index, heap_data, size);
 
-    printf ("Dumping .bss into executable...\n");
+    /* printf ("Dumping .bss into executable...\n"); */
     
     index += size;
     size = bss_size;
     bss_data = bss_start;
     
-    printf ("\t0x%p BSS start in process.\n", bss_data);
-    printf ("\t0x%08lx BSS offset in executable.\n", index);
-    printf ("\t0x%08lx BSS size in bytes.\n", size);
+    /* printf ("\t0x%p BSS start in process.\n", bss_data); */
+    /* printf ("\t0x%08lx BSS offset in executable.\n", index); */
+    /* printf ("\t0x%08lx BSS size in bytes.\n", size); */
     memcpy ((char *) p_outfile->file_base + index, bss_data, size);
 }
 
@@ -998,7 +998,7 @@ sbrk (unsigned long increment)
   /* Allocate our heap if we haven't done so already.  */
   if (data_region_base == UNINIT_PTR) 
     {
-      data_region_base = allocate_heap ();
+      data_region_base = (unsigned char *)allocate_heap ();
       if (!data_region_base)
 	return NULL;
 
@@ -1136,6 +1136,7 @@ _heap_term (void)
 #ifdef UNIXSAVE
 BOOL ctrl_c_handler (unsigned long type)
 {
+  extern void sigint(void);
   sigint();
   return 0;
 

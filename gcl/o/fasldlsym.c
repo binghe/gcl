@@ -34,17 +34,11 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <elf_abi.h>
 #endif
 
-#include "ptable.h"
-
 struct name_list { 
   struct name_list *next;
   char name[1];
 };
 static struct name_list *loaded_files;
-
-#define massert(a_) if (!(a_)) FEerror("The assertion ~a on line ~a of ~a in function ~a failed",4,\
-                    make_simple_string(#a_),make_fixnum(__LINE__),\
-                    make_simple_string(__FILE__),make_simple_string(__FUNCTION__))
 
 int
 fasload(object faslfile) {

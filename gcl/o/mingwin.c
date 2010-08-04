@@ -584,7 +584,7 @@ error:
 int
 TcpOutputProc ( int fd, char *buf, int toWrite, int *errorCodePtr, int block )
 {
-    int bytesWritten;
+    int bytesWritten=0;
     int error;
     int count=1000*30;
 
@@ -705,8 +705,8 @@ int getCharGclSocket(strm,block)
       if (high > 0)
 	{ object bufp = SOCKET_STREAM_BUFFER(strm);
 	int n;
-	n = (*winSock.recv)(fd,bufp->ust.ust_self ,bufp->ust.ust_dim,0);
-	doReverse(bufp->ust.ust_self,n);
+	n = (*winSock.recv)(fd,bufp->st.st_self ,bufp->ust.ust_dim,0);
+	doReverse(bufp->st.st_self,n);
 	bufp->ust.ust_fillp=n;
 	if (n > 0)
 	  {
@@ -823,54 +823,59 @@ void sigkill()
 }
 
 
+static void
+init_signals_pendingPtr() { 
 
-static void init_signals_pendingPtr()
-{ static int where;
- if (sharedMemory.address) {
-   signalsPendingPtr = sharedMemory.address;
- } else {
-   signalsPendingPtr = &where;
- }
- gcl_signal(SIGKILL,sigkill);
- gcl_signal(SIGTERM,sigterm);
+  static unsigned int where;
+  if (sharedMemory.address) {
+    signalsPendingPtr = sharedMemory.address;
+  } else {
+    signalsPendingPtr = &where;
+  }
+  gcl_signal(SIGKILL,sigkill);
+  gcl_signal(SIGTERM,sigterm);
 #ifdef SIGABRT
- gcl_signal(SIGABRT,sigabrt);
+  gcl_signal(SIGABRT,sigabrt);
 #endif 
- 
- 
- 
+  
 }
 
+void
+close_shared_memory() {
 
-
-
-
-void close_shared_memory()
-{
-  if (sharedMemory.handle)  CloseHandle(sharedMemory.handle);
+  if (sharedMemory.handle)  
+    CloseHandle(sharedMemory.handle);
   sharedMemory.handle = NULL;
-  if (sharedMemory.address)  UnmapViewOfFile(sharedMemory.address);
+  if (sharedMemory.address)  
+    UnmapViewOfFile(sharedMemory.address);
   sharedMemory.address = NULL;
   init_signals_pendingPtr();
+  
 }
 
-void init_shared_memory (void)
-{ 
+void
+init_shared_memory (void) {
+  static int n;
+
+  if (n) return;
+  n=1;
+
   sprintf(sharedMemory.name,"gcl-%d",getpid());
   sharedMemory.handle =
-    CreateFileMapping((HANDLE)-1, NULL, PAGE_READWRITE, 0, sharedMemory.length , TEXT (sharedMemory.name));
+    CreateFileMapping((HANDLE)-1,NULL,PAGE_READWRITE,0,sharedMemory.length ,TEXT(sharedMemory.name));
   if (sharedMemory.handle == NULL)
     error("CreateFileMapping failed");
-   sharedMemory.address =
-     MapViewOfFile(sharedMemory.handle, /* Handle to mapping object.  */
-		   FILE_MAP_WRITE,               /* Read/write permission */
-		   0,                                 /* Max.  object size.  */
-		   0,                                 /* Size of hFile.  */
-		   0);                                /* Map entire file.  */
-   if (sharedMemory.address == NULL)
-     { error("MapViewOfFile failed");}
-   init_signals_pendingPtr();
-   atexit(close_shared_memory);
+  sharedMemory.address =
+    MapViewOfFile(sharedMemory.handle, /* Handle to mapping object.  */
+		  FILE_MAP_WRITE,      /* Read/write permission */
+		  0,                   /* Max.  object size.  */
+		  0,                   /* Size of hFile.  */
+		  0);                  /* Map entire file.  */
+  if (sharedMemory.address == NULL)
+    error("MapViewOfFile failed");
+  init_signals_pendingPtr();
+  atexit(close_shared_memory);
+
 }
 
 /* The only signal REALLY handled somewhat under mingw is the
@@ -922,19 +927,16 @@ sigprocmask (int how , const sigset_t *set,sigset_t *oldset)
 }
   
 void
-fix_filename(object pathname, char *filename1)
-{
-    char current_directory[MAXPATHLEN];
-    char directory[MAXPATHLEN];
-    char *filename = filename1;
-    char *p;
-    extern char *getwd();
-    /*    fprintf ( stderr, "fix_filename: At start %s\n", filename1 );*/
-    p = filename;
-    while ( *p ) {
-        if (*p=='\\') *p='/';
-        p++;
-    }
+fix_filename(object pathname, char *filename1) {
+
+  char *filename=filename1,*p=filename;
+  extern char *getwd();
+
+  while (*p) {
+    if (*p=='\\') *p='/';
+    p++;
+  }
+
 }
 
 
@@ -949,4 +951,3 @@ char *GCLExeName ( void )
     }
     return ( (char *) rv );
 }
-

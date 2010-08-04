@@ -328,6 +328,11 @@ main(int argc, char **argv, char **envp) {
 #endif
 
 	if (initflag) {
+
+#ifdef _WIN32
+	  detect_wine();
+#endif
+	  
 		if (saving_system) {
 			saving_system = FALSE;
 			terminal_io->sm.sm_object0->sm.sm_fp = stdin;
@@ -369,9 +374,8 @@ main(int argc, char **argv, char **envp) {
                 }
                     
 #ifdef USE_DLOPEN
- 	unlink_loaded_files();
+		unlink_loaded_files();
 #endif			
-
 		exit(0);
 	}
 
@@ -381,6 +385,9 @@ main(int argc, char **argv, char **envp) {
 	fflush(stdout);
 
 	initlisp();
+#ifdef _WIN32
+	detect_wine();
+#endif
 
 	vs_base = vs_top;
 	ihs_push(Cnil);
@@ -390,7 +397,9 @@ main(int argc, char **argv, char **envp) {
 
 	CMPtemp = CMPtemp1 = CMPtemp2 = CMPtemp3 = OBJNULL;
 
+#ifdef HAVE_LIBBFD
 	parse_plt();
+#endif
 	gcl_init_init();
 
 	sLApackageA->s.s_dbind = user_package;
@@ -448,7 +457,7 @@ initlisp(void) {
 
 	if (NULL_OR_ON_C_STACK(&j) == 0
 	    || NULL_OR_ON_C_STACK(Cnil) != 0
-	    || (((unsigned long )core_end) !=0
+	    || (((unsigned long)core_end) !=0
 	        && NULL_OR_ON_C_STACK(core_end) != 0))
 	  { /* check person has correct definition of above */
 	    error("NULL_OR_ON_C_STACK macro invalid");
@@ -681,6 +690,7 @@ DEFUNO_NEW("BYE",object,fLbye,LISP
 #endif
 
 }
+
 
 DEFUN_NEW("QUIT",object,fLquit,LISP
        ,0,1,NONE,OI,OO,OO,OO,(fixnum exitc),"")
@@ -1091,6 +1101,10 @@ init_main(void) {
   ADD_FEATURE("GNU-LD");
 #endif
   
+#ifdef STATIC_LINKING
+  ADD_FEATURE("STATIC");
+#endif	 
+
   make_special("*FEATURES*",features);}
   
   make_si_function("SAVE-SYSTEM", siLsave_system);
