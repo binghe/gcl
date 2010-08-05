@@ -125,7 +125,7 @@ add_vals(ul *w,ul m,ul v) {
 static int 
 or_val(ul *w,ul m,ul v) { 
   
-  return store_val(w,m,v|(*w&m)); 
+  return store_valu(w,m,v|(*w&m)); 
   
 } 
 
