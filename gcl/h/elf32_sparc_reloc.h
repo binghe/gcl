@@ -19,5 +19,5 @@
   case R_SPARC_LO10:
     /* val = (s+a) & MASK(10); */
     /* *(short *)((void *)where +2) |= val; */
-    or_val(where,MASK(10),s+a)
+    or_val(where,MASK(10),s+a);
     break;
