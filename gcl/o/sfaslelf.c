@@ -58,7 +58,7 @@ License for more details.
 #define GOT_RELOC(a) 0
 #endif
 
-#define MASK(n) (~(~0 << (n)))
+#define MASK(n) (~(~0L << (n)))
 
 
 
@@ -95,7 +95,13 @@ store_val(ul *w,ul m,ul v) {
 static int
 add_val(ul *w,ul m,ul v) {
 
-  return store_val(w,m,v+(*w&m));
+  ul l=*w&m,mm;
+  
+  mm=~m;
+  mm|=mm>>1;
+  if (l&mm) l|=mm;
+
+  return store_val(w,m,v+l);
 
 }
 
@@ -350,16 +356,16 @@ set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,Sym *ds1,const cha
 	  (sec=get_section(".rela.plt",sec1,sece,sn)));
 
   np=sec->sh_size/sec->sh_entsize;
-  massert(!(psec->sh_size%(np+1)));
-  ps=psec->sh_size/(np+1);
+  ps=psec->sh_size/np;
 
   v+=sec->sh_offset;
   ve=v+np*sec->sh_entsize;
 
-  p=psec->sh_addr+ps;
+  p=psec->sh_addr+psec->sh_size%np;
 
   for (r=v;v<ve;v+=sec->sh_entsize,p+=ps,r=v) 
-    ds1[ELF_R_SYM(r->r_info)].st_value=p;
+    if (!ds1[ELF_R_SYM(r->r_info)].st_value)
+      ds1[ELF_R_SYM(r->r_info)].st_value=p;
 
   return 0;
 
