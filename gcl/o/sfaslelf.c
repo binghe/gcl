@@ -93,6 +93,16 @@ store_val(ul *w,ul m,ul v) {
 }
 
 static int
+store_valu(ul *w,ul m,ul v) {
+
+  massert(!(v&~m));
+  *w=(v&m)|(*w&~m);
+
+  return 0;
+
+}
+
+static int
 add_val(ul *w,ul m,ul v) {
 
   return store_val(w,m,v+(*w&m));
