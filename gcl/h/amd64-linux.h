@@ -33,3 +33,5 @@
    }\
 }
 #endif
+
+#define RELOC_H "elf64_i386_reloc.h"
