@@ -1806,6 +1806,9 @@ init_shared_memory(void);
 void *
 alloca(size_t);
 
+object
+find_init_string(const char *);
+
 #endif
 
 void *

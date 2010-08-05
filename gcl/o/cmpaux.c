@@ -525,8 +525,18 @@ object
 find_init_name1(char *s,unsigned len) {
 
 #ifdef _WIN32
-  FEerror ( "Unsupported on Windows platforms", 0 );
-  return Cnil;
+
+  char *tmp;
+
+  if (len) {
+    tmp=alloca(len+1);
+    memcpy(tmp,s,len);
+    tmp[len]=0;
+  } else
+    tmp=s;
+
+  return find_init_string(tmp);
+
 #else    
 /* These functions have no relevance on Windows
  * as dlopen and friends don't exist in that part of Cyberspace. */

@@ -339,6 +339,53 @@ seek_to_end_ofile(FILE *fp) {
 
 }
 
+object
+find_init_string(const char *s) {
+
+  FILE *f;
+  struct filehdr *fhp;
+  struct scnhdr *sec1,*sece;
+  struct syment *sy1,*sym,*sye;
+  char *st1,*ste;
+  void *st,*est;
+  object o;
+
+  massert(f=fopen(s,"r"));
+  massert(st=get_mmap(f,&est));
+
+  fhp=st;
+  sec1=(void *)(fhp+1)+fhp->f_opthdr;
+  sece=sec1+fhp->f_nscns;
+  sy1=st+fhp->f_ptrsym;
+  sye=sy1+fhp->f_symnum;
+  st1=(void *)sye;
+  ste=st1+*(ul *)st1;
+
+  for (sym=sy1;sym<sye;sym++) {
+
+    if (sym->n.n.n_zeroes) {
+      sym->n.n_name[8]=0;
+      s=sym->n.n_name;
+    } else
+      s=st1+sym->n.n.n_offset;
+
+    if (!strncmp(s,"_init_",6)) {
+      o=make_simple_string(s);
+      massert(!un_mmap(st,&est));
+      massert(!fclose(f));
+      return o;
+    }
+
+  }
+
+  massert(!un_mmap(st,&est));
+  massert(!fclose(f));
+  massert(!"init not found");
+
+  return NULL;
+
+}  
+
 int
 fasload(object faslfile) {
 
