@@ -126,7 +126,7 @@ $(RSYM): $(SPECIAL_RSYM) $(HDIR)/mdefs.h
 	$(CC) $(LDFLAGS) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)
 
 msys: msys.c
-	PATH=/usr/bin:$$PATH cc $< -o $@ # Unix binary if running wine
+	PATH=/usr/bin:$$PATH $(CC) $< -o $@ # Unix binary if running wine
 
 $(HDIR)/mdefs.h: $(HDIR)/include.h
 	cat $(HDIR)/include.h | sed -e "/include/d" > $(HDIR)/mdefs.h
