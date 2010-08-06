@@ -36,4 +36,4 @@
 
 #define SGC
 
-#define RELOC_H "elf32_s390_reloc.h"
+#define RELOC_H "elf32_arm_reloc.h"
