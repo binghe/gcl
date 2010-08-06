@@ -54,3 +54,4 @@
    for (;p<pe;p++) asm __volatile__ ("ocbp @%0\n\t": : "r" (p) : "memory");\
 }
 #endif
+#define RELOC_H "elf32_sh4_reloc.h"
