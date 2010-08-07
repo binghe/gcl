@@ -819,20 +819,17 @@ LFD(siLreset_stack_limits)(void)
 }
 
 #define COPYSTACK(org,p,typ,lim,top,geta,size) \
- do{int leng,topl;      \
-  bcopy(org,p,leng=(stack_multiple*size*sizeof(typ))); \
-  topl= top - org; \
-  org=(typ *)p; top = org +topl;\
-  p=p+leng+(STACK_OVER+1)*geta*sizeof(typ); \
-  lim = ((typ *)p) - (STACK_OVER+1)*geta;   \
-  }while (0)
+  {unsigned long topl=top-org;\
+   bcopy(org,p,(lim-org)*sizeof(typ));\
+   org=p;\
+   top=org+topl;\
+   lim=org+stack_multiple*size;\
+   p=lim+(STACK_OVER+1)*geta;\
+   }
 
 static int
 multiply_stacks(int m) {  
-/*    int n; */
-/*    object x; */
-/*    object gc_pro=stack_space; */
-  char *p;
+  void *p;
   int vs,bd,frs,ihs;
   stack_multiple=stack_multiple*m;
 #define ELTSIZE(x) (((char *)((x)+1)) - ((char *) x))
