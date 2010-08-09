@@ -285,7 +285,7 @@ char *envp[];
 #define SET_SESSION_ID() setsid()
 #else
 #ifdef BSD
-#define SET_SESSION_ID() (setpgrp(0,0) ? -1 : 0)
+#define SET_SESSION_ID() (setpgrp() ? -1 : 0)
 #endif
 #endif	  
 #endif
