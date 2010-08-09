@@ -715,6 +715,7 @@ enable_ihssize
 enable_frssize
 enable_machine
 enable_notify
+enable_tcltk
 enable_tkconfig
 enable_tclconfig
 enable_infodir
@@ -1372,6 +1373,7 @@ Optional Features:
  --enable-frssize=XXXX will compile in a frame stack of size XXX
  --enable-machine=XXXX will force the use of one of the definitions in h/XXXX.defs
  --enable-notify=no will disable the automatic notification of gcl maintainers of successful builds/problems
+ try to build gcl-tk
  --enable-tkconfig=XXXX will force the use of a TK_CONFIG_PREFIX=XXXXX as place to look for tkConfig.sh and tclConfig.sh
  --enable-tclconfig=XXXX will force the use of a TCL_CONFIG_PREFIX=XXXXX as place to look for tclConfig.sh and tclConfig.sh
  --enable-infodir=XXXX will force the use of a INFO_DIR=XXXXX as place to look for info
@@ -2474,6 +2476,14 @@ if test "${enable_notify+set}" = set; then :
   enableval=$enable_notify; enable_notify=$enableval
 else
   enable_notify="yes"
+fi
+
+
+# Check whether --enable-tcltk was given.
+if test "${enable_tcltk+set}" = set; then :
+  enableval=$enable_tcltk; enable_tcltk=$enableval
+else
+  enable_tcltk="yes"
 fi
 
 
@@ -7350,6 +7360,8 @@ fi
 $as_echo "$INFO_DIR" >&6; }
 
 
+if test "$enable_tcltk" = "yes" ; then
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for tcl/tk" >&5
 $as_echo_n "checking for tcl/tk... " >&6; }
 
@@ -7481,6 +7493,9 @@ if test -f ${TCL_CONFIG_PREFIX}/../include/tcl.h ; then
     TCL_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
   fi
 fi
+
+fi
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -llieee" >&5
 $as_echo_n "checking for main in -llieee... " >&6; }
 if test "${ac_cv_lib_lieee_main+set}" = set; then :
