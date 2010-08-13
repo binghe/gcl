@@ -80,7 +80,7 @@ init_pcl_gcl.lsp.tmp: init_pcl_gcl.lsp.in ../cmpnew/gcl_cmpmain.lsp \
 		$(shell find ../clcs/ -name "clcs_*.lisp")
 
 	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} {if (i==0) print}' $< >$@
-	cat ../cmpnew/gcl_cmpmain.lsp >>$@
+#	cat ../cmpnew/gcl_cmpmain.lsp >>$@
 	cat ../pcl/sys-package.lisp >>$@
 	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} {if (i==1) print}' $< >>$@
 
@@ -89,7 +89,7 @@ init_ansi_gcl.lsp.tmp: init_ansi_gcl.lsp.in ../cmpnew/gcl_cmpmain.lsp \
 
 	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} \
 		/^ *@LI-CLCS-PACKAGE@/{i=2;next} {if (i==0) print}' $< >$@
-	cat ../cmpnew/gcl_cmpmain.lsp >>$@
+#	cat ../cmpnew/gcl_cmpmain.lsp >>$@
 	cat ../pcl/sys-package.lisp >>$@
 	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} \
 		/^ *@LI-CLCS-PACKAGE@/{i=2;next} {if (i==1) print}' $< >>$@

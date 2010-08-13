@@ -827,7 +827,7 @@ SYSTEM_SPECIAL_INIT
        (if (= ,q -1) (length ,y) ,q)))))
 
 (defun ts (s &optional (r ""))
-  (declare (string s))
+  (declare (string s) (ignorable r))
   #+winnt
   (if (not si::*wine-detected*) s
     (let* ((x (sml (fcr #u"[^ \n\t]") s))
