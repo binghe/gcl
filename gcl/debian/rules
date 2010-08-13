@@ -95,6 +95,7 @@ configure-%-stamp: $(CFGS)
 	CC=$(MCC) ./configure \
 		--host=$$(dpkg-architecture -qDEB_HOST_GNU_TYPE) \
 		--disable-statsysbfd \
+		--disable-dlopen \
 		--enable-$(RELOC) \
 		$(GMP) \
 		$(DEBUG) \
