@@ -28,3 +28,10 @@
   (char *)((struct ucontext *)scp )->uc_mcontext.sc_traparg_a0
 #endif
 #define SGC
+
+#define RELOC_H "elf64_alpha_reloc.h"
+#define STATIC_RELOC_VARS static ul gpd;
+#define PAL_imb		134
+#define imb() \
+__asm__ __volatile__ ("call_pal %0 #imb" : : "i" (PAL_imb) : "memory")
+#define CLEAR_CACHE imb()

@@ -1816,3 +1816,6 @@ get_mmap(FILE *,void **);
 
 int
 un_mmap(void *,void *);
+
+object
+fSuse_fast_links_2(object,object);

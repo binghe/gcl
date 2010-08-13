@@ -43,8 +43,9 @@ License for more details.
 #define Rela Mjoin(Elf,_Rela)
 #define Word Elf32_Word
 
-#define   ELF_R_SYM(a)  Mjoin(ELF,_R_SYM)(a)
-#define  ELF_R_TYPE(a)  Mjoin(ELF,_R_TYPE)(a)
+#define   ELF_R_SYM(a)   Mjoin(ELF,_R_SYM)(a)
+#define  ELF_R_TYPE(a)   Mjoin(ELF,_R_TYPE)(a)
+#define  ELF_R_INFO(a,b) Mjoin(ELF,_R_INFO)(a,b)
 #define ELF_ST_BIND(a)  Mjoin(ELF,_ST_BIND)(a)
 
 
@@ -53,10 +54,6 @@ License for more details.
 #define  LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
 #define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info);\
       sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK);})
-
-#ifndef GOT_RELOC
-#define GOT_RELOC(a) 0
-#endif
 
 #define MASK(n) (~(~0L << (n)))
 
@@ -70,10 +67,11 @@ typedef unsigned long ul;
 STATIC_RELOC_VARS
 #endif
 
+static ul cgp;
 
 
 static int
-ovchk(ul v,ul m) {
+ovchks(ul v,ul m) {
 
   m|=m>>1;
   v&=m;
@@ -83,29 +81,50 @@ ovchk(ul v,ul m) {
 }
 
 static int
+ovchku(ul v,ul m) {
+
+  return !(v&=m);
+
+}
+
+static int
 store_val(ul *w,ul m,ul v) {
 
-  massert(ovchk(v,~m));
   *w=(v&m)|(*w&~m);
 
   return 0;
+
+}
+
+
+static int
+store_vals(ul *w,ul m,ul v) {
+
+  massert(ovchks(v,~m));
+  return store_val(w,m,v);
 
 }
 
 static int
 store_valu(ul *w,ul m,ul v) {
 
-  massert(!(v&~m));
-  *w=(v&m)|(*w&~m);
-
-  return 0;
+  massert(ovchku(v,~m));
+  return store_val(w,m,v);
 
 }
+
 
 static int
 add_val(ul *w,ul m,ul v) {
 
   return store_val(w,m,v+(*w&m));
+
+}
+
+static int
+add_valu(ul *w,ul m,ul v) {
+
+  return store_valu(w,m,v+(*w&m));
 
 }
 
@@ -119,6 +138,19 @@ add_vals(ul *w,ul m,ul v) {
   if (l&mm) l|=mm;
 
   return store_val(w,m,v+l);
+
+}
+
+static int
+add_valsc(ul *w,ul m,ul v) {
+
+  ul l=*w&m,mm;
+  
+  mm=~m;
+  mm|=mm>>1;
+  if (l&mm) l|=mm;
+
+  return store_vals(w,m,v+l);
 
 }
 
@@ -204,7 +236,7 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
 
     else if ((a=find_sym_ptable(st1+sym->st_name)))
       sym->st_value=a->address;
-
+	
   }
 
   return 0;
@@ -298,13 +330,18 @@ relocate_code(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,ul *got,ul *gote) {
 
 }
 
+#ifndef GOT_RELOC
+#define GOT_RELOC(a) 0
+#endif
+
 static int
 label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,ul *gs) {
 
-  Rel *r;
+  Rela *r;
   Sym *sym;
   Shdr *sec;
   void *v,*ve;
+  ul q;
 
   for (sym=sym1;sym<syme;sym++)
     sym->st_size=0;
@@ -313,9 +350,16 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,ul *gs) {
     if (sec->sh_type==SHT_REL || sec->sh_type==SHT_RELA)
       for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 	if (GOT_RELOC(r)) {
-	  sym=sym1+ELF_R_SYM(r->r_info);
-	  if (!sym->st_size)
-	    sym->st_size=++*gs;
+	  sym=sym1+ELF_R_SYM(r->r_info); 
+	  if (sec->sh_type==SHT_RELA && r->r_addend)
+	    ++*gs;
+	  else if (!sym->st_size) 
+	    sym->st_size=++*gs; 
+  	  if (sec->sh_type==SHT_RELA) {
+	    q=sizeof(r->r_addend)*4;
+	    massert(!(r->r_addend>>q));
+	    r->r_addend|=r->r_addend ? (*gs)<<q : sym->st_size<<q;
+	  }
 	}
   
   return 0;
@@ -360,14 +404,86 @@ parse_map(void *v1,Shdr **sec1,Shdr **sece,
 }
 
 static int
-set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,Sym *ds1,const char *st1) {
+find_cgp(Sym *sym,Sym *syme,const char *st1) {
+
+  for (;sym<syme && strcmp("_gp",st1+sym->st_name);sym++);
+  massert(sym<syme);
+  cgp=sym->st_value;
+
+  return 0;
+
+}
+
+static int
+load_got_offsets(Shdr *sec1,Shdr *sece,const char *sn,Sym *ds1,Sym *dse) {
+
+  Shdr *sec;
+  Sym *sym;
+  ul ss,lgs=0,gs=0,got,*q;
+  void *p,*pe;
+
+  massert(sec=get_section(".dynamic",sec1,sece,sn));
+  for (gs=ss=got=0,p=(void *)sec->sh_addr,pe=p+sec->sh_size;p<pe;p+=sec->sh_entsize) {
+    q=p;
+    if (q[0]==DT_MIPS_GOTSYM)
+      gs=q[1];
+    if (q[0]==DT_MIPS_LOCAL_GOTNO)
+      lgs=q[1];
+    
+  }
+
+  massert(gs && lgs);
+
+  massert(sec=get_section(".got",sec1,sece,sn));
+  got=sec->sh_addr;
+  got+=lgs*sec->sh_entsize;
+
+  for (sym=ds1+gs;sym<dse;sym++,got+=sec->sh_entsize)
+    sym->st_value=got-cgp;
+
+  return 0;
+
+}
+
+
+static int
+set_rel_dyn(void *v,Shdr *sec,Sym *ds1) {
+
+  Rela *r;
+  void *ve;
+
+  v+=sec->sh_offset;
+  ve=v+sec->sh_size;
+
+  for (r=v;v<ve;v+=sec->sh_entsize,r=v) 
+    if (!ds1[ELF_R_SYM(r->r_info)].st_value)
+      ds1[ELF_R_SYM(r->r_info)].st_value=*(ul *)r->r_offset;
+
+  return 0;
+
+}
+
+static int
+set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,
+		 Sym *ds1,Sym *dse,const char *dst1,
+		 Sym *sym1,Sym *syme,const char *st1) {
 
   Shdr *sec,*psec;
   Rel *r;
   ul np,ps,p;
   void *ve;
 
-  massert(psec=get_section(".plt",sec1,sece,sn));
+  if ((sec=get_section(".rel.dyn",sec1,sece,sn))||
+      (sec=get_section(".rela.dyn",sec1,sece,sn)))
+    set_rel_dyn(v,sec,ds1);
+    
+  if (!(psec=get_section(".plt",sec1,sece,sn))) {
+
+    massert(!find_cgp(sym1,syme,st1));
+    massert(!load_got_offsets(sec1,sece,sn,ds1,dse));
+
+    return 0;
+  }
 
   massert((sec=get_section( ".rel.plt",sec1,sece,sn)) ||
 	  (sec=get_section(".rela.plt",sec1,sece,sn)));
@@ -384,19 +500,26 @@ set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,Sym *ds1,const cha
     if (!ds1[ELF_R_SYM(r->r_info)].st_value)
       ds1[ELF_R_SYM(r->r_info)].st_value=p;
 
+
   return 0;
 
 }
 
 static int
-calc_space(ul *ns,ul *sl,Sym *sym1,Sym *syme,const char *st1) {
+calc_space(ul *ns,ul *sl,Sym *sym1,Sym *syme,const char *st1,Sym *d1,Sym *de,const char *ds1) {
 
-  Sym *sym;
+  Sym *sym,*d;
 
   for (sym=sym1;sym<syme;sym++) {
     
     if (!LOAD_SYM(sym))
       continue;
+
+    if (d1) {
+      for (d=d1;d<de && strcmp(st1+sym->st_name,ds1+d->st_name);d++);
+      if (d<de)
+	continue;
+    }
 
     (*ns)++;
     (*sl)+=strlen(st1+sym->st_name)+1;
@@ -408,14 +531,21 @@ calc_space(ul *ns,ul *sl,Sym *sym1,Sym *syme,const char *st1) {
 }
 
 static int
-load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1) {
+load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1,
+	    Sym *d1,Sym *de,const char *ds1) {
 
-  Sym *sym;
+  Sym *sym,*d;
 
   for (sym=sym1;sym<syme;sym++) {
 
     if (!LOAD_SYM(sym))
       continue;
+
+    if (d1) {
+      for (d=d1;d<de && strcmp(st1+sym->st_name,ds1+d->st_name);d++);
+      if (d<de)
+	continue;
+    }
 
     (*a)->address=sym->st_value;
     (*a)->string=(*s);
@@ -429,6 +559,7 @@ load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1) {
   return 0;
 
 }
+
 
 static int 
 load_self_symbols() {
@@ -447,20 +578,20 @@ load_self_symbols() {
   massert(!parse_map(v1,&sec1,&sece,&sn,&sym1,&syme,&st1,&end,&dsym1,&dsyme,&dst1));
 
 #ifndef STATIC_LINKING
-  massert(!set_symbol_stubs(v1,sec1,sece,sn,dsym1,dst1));
+  massert(!set_symbol_stubs(v1,sec1,sece,sn,dsym1,dsyme,dst1,sym1,syme,st1));
 #endif
 
   ns=sl=0;
-  massert(!calc_space(&ns,&sl,sym1,syme,st1));
-  massert(!calc_space(&ns,&sl,dsym1,dsyme,dst1));
+  massert(!calc_space(&ns,&sl,dsym1,dsyme,dst1,NULL,NULL,NULL));
+  massert(!calc_space(&ns,&sl,sym1,syme,st1,dsym1,dsyme,dst1));
 
   c_table.alloc_length=c_table.length=ns;
   massert(c_table.ptable=malloc(sizeof(*c_table.ptable)*c_table.alloc_length));
   massert(s=malloc(sl));
 
   a=c_table.ptable;
-  massert(!load_ptable(&a,&s,sym1,syme,st1));
-  massert(!load_ptable(&a,&s,dsym1,dsyme,dst1));
+  massert(!load_ptable(&a,&s,dsym1,dsyme,dst1,NULL,NULL,NULL));
+  massert(!load_ptable(&a,&s,sym1,syme,st1,dsym1,dsyme,dst1));
   
   qsort(c_table.ptable,c_table.length,sizeof(*c_table.ptable),node_compare);
 
@@ -497,7 +628,7 @@ fasload(object faslfile) {
 
   FILE *fp;
   char filename[256],*sn,*st1,*dst1;
-  ul init_address=0,end,gs,*got=&gs,*gote;
+  ul init_address=0,end,gs=0,*got=&gs,*gote;
   object memory,data;
   Shdr *sec1,*sece;
   Sym *sym1,*syme,*dsym1,*dsyme;

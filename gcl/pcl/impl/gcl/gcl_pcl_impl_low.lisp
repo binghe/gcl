@@ -73,7 +73,7 @@
 
 ;#+turbo-closure-env-size
 (clines "
-object cclosure_env_nthcdr (fixnum n,object cc) {  
+static object cclosure_env_nthcdr (fixnum n,object cc) {  
    object env,*turbo;
    if(n<0)return Cnil;
    if(type_of(cc)!=t_cclosure)return Cnil;
@@ -88,9 +88,9 @@ object cclosure_env_nthcdr (fixnum n,object cc) {
       return turbo[n];}
 }")
 
-(defentry cclosure-env-nthcdr (fixnum object) (object cclosure_env_nthcdr))
+(defentry cclosure-env-nthcdr (fixnum object) (compiler::static object cclosure_env_nthcdr))
 ;; This is the unsafe but fast version.
-(defentry %cclosure-env-nthcdr (fixnum object) (object cclosure_env_nthcdr))
+(defentry %cclosure-env-nthcdr (fixnum object) (compiler::static object cclosure_env_nthcdr))
 
 (eval-when (compile eval load)
 (defparameter *gcl-function-inlines*
@@ -168,7 +168,7 @@ object cclosure_env_nthcdr (fixnum n,object cc) {
 
 (clines "
 object fSuse_fast_links_2(object,object);
-object set_cclosure (object result_cc,object value_cc,fixnum available_size) {
+static object set_cclosure (object result_cc,object value_cc,fixnum available_size) {
   object result_env_tail,value_env_tail; int i;
 
   /* If we are currently using fast linking,     */
@@ -190,7 +190,7 @@ object set_cclosure (object result_cc,object value_cc,fixnum available_size) {
   return result_cc;
 }")
 
-(defentry %set-cclosure (object object fixnum) (object set_cclosure))
+(defentry %set-cclosure (object object fixnum) (compiler::static object set_cclosure))
 
 
 (defun structure-functions-exist-p ()

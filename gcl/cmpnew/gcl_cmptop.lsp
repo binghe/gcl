@@ -1566,7 +1566,7 @@
   (wt-nl1 "}")
   )
 
-(defun t1defentry (args &aux type cname (cfun (next-cfun)) cfspec)
+(defun t1defentry (args &aux static type cname (cfun (next-cfun)) cfspec)
   (when (or (endp args) (endp (cdr args)) (endp (cddr args)))
         (too-few-args 'defentry 3 (length args)))
   (cmpck (not (symbolp (car args)))
@@ -1582,6 +1582,7 @@
          (setq type 'object)
          (setq cname cfspec))
         ((and (consp cfspec)
+              (or (not (eq (car cfspec) 'static)) (setq static (pop cfspec)))
               (member (car cfspec) '(void object char fixnum int float double
 					  string))
               (consp (cdr cfspec))
@@ -1592,19 +1593,19 @@
                         (cadr cfspec)))
          (setq type (car cfspec)))
         (t (cmperr "The C function specification ~s is illegal." cfspec)))
-  (push (list 'defentry (car args) cfun (cadr args) type cname)
+  (push (list 'defentry (car args) cfun (cadr args) type cname static)
         *top-level-forms*)
   (push (cons (car args) cfun) *global-funs*)
   )
 
-(defun t2defentry (fname cfun arg-types type cname)
-  (declare (ignore arg-types type cname))
+(defun t2defentry (fname cfun arg-types type cname static)
+  (declare (ignore arg-types type cname static))
   (wt-h "static void " (c-function-name "L" cfun fname) "();")
   (add-init `(si::mf ',fname ,(add-address (c-function-name "L" cfun fname))) )
   )
 
-(defun t3defentry (fname cfun arg-types type cname)
-  (wt-h 
+(defun t3defentry (fname cfun arg-types type cname static)
+  (wt-h (if static "static " "")
    (if (eq type 'string) "char *" (string-downcase (symbol-name type)))
    " " cname "("
    (with-output-to-string 

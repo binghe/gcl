@@ -136,6 +136,55 @@ extern int __remqu();
 int
 use_symbols(double d) {
 
+  va_list va=NULL;
+
+  Llistp();
+  Latom();
+  Lapply();
+  Lmakunbound();
+  Lconsp();
+  Lfuncall();
+  Leql();
+  Lfloatp();
+  Lnull();
+  Lnull();
+  Lnumberp();
+  Lcharacterp();
+  Lbit_vector_p();
+  Larrayp();
+  Lvectorp();
+  Lcommonp();
+  Lequalp();
+  Lintegerp();
+  Lequal();
+  Lmonotonically_nondecreasing();
+  Lmonotonically_nonincreasing();
+  Leq();
+  Lsvref();
+  Lconstantp();
+  Lfmakunbound();
+
+  do_init((void *)&d);
+
+  simple_lispcall((void *)&d,1);
+  super_funcall_no_event((void *)&d);
+  fcalln1((void *)&d);
+  call_proc0((void *)&d,(void *)&d);
+  call_vproc_new((void *)&d,(void *)&d,(void *)&d,va);
+  call_or_link((void *)&d,(void *)&d);
+  call_or_link_closure((void *)&d,(void *)&d,(void *)&d);
+  lispcall((void *)&d,1);
+
+  check_alist((void *)&d);
+  fSuse_fast_links_2((void *)&d,(void *)&d);
+
+  make_cclosure((void *)&d,(void *)&d,(void *)&d,(void *)&d,(void *)&d,(int)(long)&d);
+  make_list(1);
+  listA(1,(void *)&d);
+
+  princ_char((int)d,(void *)&d);
+  remprop((void *)&d);
+    
   sincos(d,&d,&d);
   
   return (int)d;

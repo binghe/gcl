@@ -17,6 +17,15 @@
 
 /*  #define CLEAR_CACHE do {void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size; for (;v<ve;v+=32)   asm __volatile__ ("dcbst 0,%0\n\tsync\n\ticbi 0,%0\n\tsync\n\tisync": : "r" (v) : "memory");} while(0) */
 
+#include <asm/cachectl.h>
+int cacheflush(void *,int,int);
+#define CLEAR_CACHE_LINE_SIZE 32
+#define CLEAR_CACHE do {void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size; \
+                        v=(void *)((unsigned long)v & ~(CLEAR_CACHE_LINE_SIZE - 1));\
+                        cacheflush(v,ve-v,BCACHE);\
+                    } while(0)
+
+
 #undef MPROTECT_ACTION_FLAGS
 #define MPROTECT_ACTION_FLAGS SA_RESTART|SA_SIGINFO
 #ifdef IN_GBC
@@ -24,3 +33,7 @@
   ((siginfo_t *)code )->si_addr
 #endif
 #define SGC
+
+#define RELOC_H "elf32_mips_reloc.h"
+#define STATIC_RELOC_VARS static ul gpd,cgp; static Rel *hr;
+
