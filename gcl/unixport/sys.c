@@ -7,13 +7,20 @@
 static void
 ar_init_fn(void (fn)(void),const char *s) {
 
-  char b[200];
+  char b[200],*n;
   struct stat ss;
+  unsigned l;
   object sysd=sSAsystem_directoryA->s.s_dbind;
   
   if (stat(s,&ss)) {
     assert(snprintf(b,sizeof(b),"ar x %-.*slibgcl.a %s",sysd->st.st_fillp,sysd->st.st_self,s)>0);
-    assert(!system(b));
+    assert(!msystem(b));
+    if (sSAwine_detectedA->s.s_dbind!=Cnil) {
+      l=strlen(s)+6;
+      n=alloca(l);
+      snprintf(n,l,"/tmp/%s",s);
+      s=(void *)n;
+    }
   }
   gcl_init_or_load1(fn,s);
   assert(!unlink(s));

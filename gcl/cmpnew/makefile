@@ -11,7 +11,7 @@ APPEND=../xbin/append
 OBJS	= gcl_cmpbind.o gcl_cmpblock.o gcl_cmpcall.o gcl_cmpcatch.o gcl_cmpenv.o gcl_cmpeval.o \
 	gcl_cmpflet.o gcl_cmpfun.o gcl_cmpif.o gcl_cmpinline.o gcl_cmplabel.o gcl_cmplam.o gcl_cmplet.o \
 	gcl_cmploc.o gcl_cmpmap.o gcl_cmpmulti.o gcl_cmpspecial.o gcl_cmptag.o gcl_cmptop.o \
-	gcl_cmptype.o gcl_cmputil.o gcl_cmpvar.o gcl_cmpvs.o gcl_cmpwt.o # gcl_cmpmain.o gcl_cmpopt.o gcl_lfun_list.o
+	gcl_cmptype.o gcl_cmputil.o gcl_cmpvar.o gcl_cmpvs.o gcl_cmpwt.o gcl_cmpmain.o #gcl_cmpopt.o gcl_lfun_list.o
 
 FNS:= $(OBJS:.o=.fn)
 

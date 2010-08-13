@@ -78,6 +78,7 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_cmpvar,no_init);
   ar_check_init(gcl_cmpvs,no_init);
   ar_check_init(gcl_cmpwt,no_init);
+  ar_check_init(gcl_cmpmain,no_init);
 
 #ifdef HAVE_XGCL
   lsp_init("../xgcl-2/sysdef.lisp");

@@ -16,7 +16,8 @@ CLCSDIR = ../clcs
 PCLDIR  = ../pcl
 PORTDIR = $(shell pwd)
 
-LD_LIBS_PRE=$(FIRST_FILE) $(addprefix -u ,$(PATCHED_SYMBOLS))
+LD_FLAGS=$(LDFLAGS) $(FIRST_FILE)
+LD_LIBS_PRE=$(addprefix -u ,$(PATCHED_SYMBOLS))
 LD_LIBS_POST=$(LIBS) $(LIBC) -lgclp $(LAST_FILE)
 
 ifeq ($(ARRS),)
@@ -105,7 +106,7 @@ init_%.lsp: init_%.lsp.tmp
 		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
 		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
 		-e "s#@LI-CC@#\"$(CC) -c $(FINAL_CFLAGS)\"#1" \
-		-e "s#@LI-LD@#\"$(CC) $(LDFLAGS) -o \"#1" \
+		-e "s#@LI-LD@#\"$(CC) $(LD_FLAGS) -o \"#1" \
 		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)\"#1" \
 		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
 		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
@@ -123,7 +124,7 @@ saved_%:raw_% $(RSYM) init_%.lsp raw_%_map msys \
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
 
 $(RSYM): $(SPECIAL_RSYM) $(HDIR)/mdefs.h
-	$(CC) $(LDFLAGS) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)
+	$(CC) $(LD_FLAGS) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)
 
 msys: msys.c
 	PATH=/usr/bin:$$PATH gcc $< -o $@ # Unix binary if running wine
@@ -154,12 +155,12 @@ libpcl_gcl.a: $(OBJS) $(PCLOBJS) sys_pcl_gcl.o gmpfiles bfdfiles # plt_pcl_gcl.o
 	rm -rf $@
 	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
 
-raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) $(EXTRAS)
+raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) #$(EXTRAS)
 	touch raw_$*_map
 ifeq ($(GNU_LD),1)
-	$(CC) $(LDFLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 else
-	$(CC) $(LDFLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 endif
 #	diff map_$* map_$*.old >/dev/null || (cp map_$* map_$*.old && rm -f $@ && $(MAKE) $@)
 #	cp map_$*.old map_$*
@@ -167,16 +168,16 @@ endif
 map_%:
 	touch $@
 
-plt_%.h: map_%
-	cat $< | awk '/^ .plt/ {if (NF==4) i=1;next;} \
-		{if (!NF) i=0; if (!i) next; } \
-		{b=$$2; sub("@.*$$","",b);print "{\"" b "\"," $$1 "}"}' | \
-		sort | awk '{A[++k]=$$0} END {for (i=1;i<=k;i++) \
+#plt_%.h: map_%
+#	cat $< | awk '/^ .plt/ {if (NF==4) i=1;next;} \
+#		{if (!NF) i=0; if (!i) next; } \
+#		{b=$$2; sub("@.*$$","",b);print "{\"" b "\"," $$1 "}"}' | \
+#		sort | awk '{A[++k]=$$0} END {for (i=1;i<=k;i++) \
 			printf("%s%s\n",A[i],i==k ? "" : ",")}' >$@
 
-plt_%.o: plt_%.h plt.c
-	ln -snf $< plt.h
-	$(CC) $(LDFLAGS) -c -o $@ plt.c $(CFLAGS) -I$(HDIR) -I$(ODIR)
+#plt_%.o: plt_%.h plt.c
+#	ln -snf $< plt.h
+#	$(CC) $(LD_FLAGS) -c -o $@ plt.c $(CFLAGS) -I$(HDIR) -I$(ODIR)
 
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \

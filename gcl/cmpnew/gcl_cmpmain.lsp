@@ -28,6 +28,7 @@
 
 
 (export '(*compile-print* *compile-verbose*))
+(import 'si::*tmp-dir* 'compiler)
 
 ;;; This had been true with Linux 1.2.13 a.out or even older
 ;;; #+linux   (push :ld-not-accept-data  *features*)
@@ -78,7 +79,7 @@
 
 (defun safe-system (string)
  (multiple-value-bind
-  (code result) (system string)
+  (code result) (system (ts string))
     (unless (and (zerop code) (zerop result))
       (cerror "Continues anyway."
               "(SYSTEM ~S) returned a non-zero value ~D."
@@ -148,7 +149,7 @@
 		(setq args (append args (list :output-file (car args)))))
 	    (return 
 	     (prog1 (apply 'compile-file gaz (cdr args))
-	       (unless *keep-gaz* (delete-file gaz))))
+	       (unless *keep-gaz* (mdelete-file gaz))))
 	    ))
 	 (t nil))
    (if (consp *split-files*)
@@ -318,7 +319,7 @@ Cannot compile ~a.~%"
 ;    (let ((x (merge-pathnames #".o" o-pathname)))
 ;      (with-open-file (s x :if-does-not-exist :create)
 ;		      (setq *init-name* (init-name x system-p)))
-;      (delete-file x))
+;      (mdelete-file x))
 
       (when (zerop *error-count*)
         (when *compile-verbose* (format t "~&End of Pass 1.  ~%"))
@@ -346,7 +347,7 @@ Cannot compile ~a.~%"
                         (when fasl-file
                               (compiler-build ob-pathname fasl-pathname)
                               (when load (load fasl-pathname)))
-                        (unless ob-file (delete-file ob-pathname))
+                        (unless ob-file (mdelete-file ob-pathname))
                         (when *compile-verbose*
                               (print-compiler-info)
                               (format t "~&Finished compiling ~a.~%" (namestring output-file))
@@ -357,9 +358,9 @@ Cannot compile ~a.~%"
                  (print-compiler-info)
                  (format t "~&Finished compiling ~a.~%" (namestring output-file)
 			 )))
-          (unless c-file (delete-file c-pathname))
-          (unless h-file (delete-file h-pathname))
-          (unless fasl-file (delete-file fasl-pathname)))
+          (unless c-file (mdelete-file c-pathname))
+          (unless h-file (mdelete-file h-pathname))
+          (unless fasl-file (mdelete-file fasl-pathname)))
 
 
         (progn
@@ -382,21 +383,20 @@ Cannot compile ~a.~%"
                   (print-compiler-info)
                   (format t "~&Finished compiling ~a.~%" (namestring output-file)
 			  )))
-          (unless c-file (delete-file c-pathname))
-          (unless h-file (delete-file h-pathname))
-          (unless (or data-file #+ld-not-accept-data t system-p) (delete-file data-pathname))
+          (unless c-file (mdelete-file c-pathname))
+          (unless h-file (mdelete-file h-pathname))
+          (unless (or data-file #+ld-not-accept-data t system-p) (mdelete-file data-pathname))
 	  o-pathname)
 
         (progn
-          (when (probe-file c-pathname) (delete-file c-pathname))
-          (when (probe-file h-pathname) (delete-file h-pathname))
-          (when (probe-file data-pathname) (delete-file data-pathname))
+          (when (probe-file c-pathname) (mdelete-file c-pathname))
+          (when (probe-file h-pathname) (mdelete-file h-pathname))
+          (when (probe-file data-pathname) (mdelete-file data-pathname))
           (format t "~&No FASL generated.~%")
           (setq *error-p* t)
 	  (values)
 	  ))))))
 
-(import 'si::*tmp-dir* 'compiler)
 (defun gazonk-name ()
   (dotimes (i 1000)
    (let ((tem (merge-pathnames 
@@ -438,8 +438,8 @@ Cannot compile ~a.~%"
 								       (lambda-block (cddr tem))))))
 			 (compile-file gaz))))
 	       (load fi)
-	       (delete-file fi))
-	     (unless *keep-gaz* (delete-file gaz)))
+	       (mdelete-file fi))
+	     (unless *keep-gaz* (mdelete-file gaz)))
 	   (or (eq na name) (setf (symbol-function name) (symbol-function na)))
 	 ;; FIXME -- support warnings-p and failures-p.  CM 20041119
 	   (values (symbol-function name) nil nil)
@@ -484,13 +484,12 @@ Cannot compile ~a.~%"
 			     (si::copy-stream st *standard-output*))
 	     (with-open-file (st hn)
 			     (si::copy-stream st *standard-output*))
-	     (system (si::string-concatenate "objdump -d -l "
-					     (namestring on)))
-	     (delete-file cn)
-	     (delete-file dn)
-	     (delete-file hn)
-	     (delete-file on)
-	     (unless *keep-gaz* (delete-file gaz)))))
+	     (safe-system (si::string-concatenate "objdump -d -l " (namestring on)))
+	     (mdelete-file cn)
+	     (mdelete-file dn)
+	     (mdelete-file hn)
+	     (mdelete-file on)
+	     (unless *keep-gaz* (mdelete-file gaz)))))
 	(t (error "can't disassemble ~a" name))))
 
 
@@ -616,22 +615,22 @@ SYSTEM_SPECIAL_INIT
 	 (p (search ":" c)))
     (if p (subseq c (1+ p)) c)))
 
-#+winnt
-(defun prep-win-path (c o)
-  (let* ((w si::*wine-detected*)
-	 (c (if w (no-device c) c))
-	 (o (if w (no-device o) o)))
-    (prep-win-path-acc (compiler-command c o) "")))
+;; #+winnt
+;; (defun prep-win-path (c o)
+;;   (let* ((w si::*wine-detected*)
+;; 	 (c (if w (no-device c) c))
+;; 	 (o (if w (no-device o) o)))
+;;     (prep-win-path-acc (compiler-command c o) "")))
 
 (defun compiler-cc (c-pathname o-pathname)
   (safe-system
-    (format
+   (format
      nil
      (prog1
 	 #+irix5 (compiler-command c-pathname o-pathname )
 	 #+vax "~a ~@[~*-O ~]-S -I. -w ~a ; as -J -W -o ~A ~A"
 	 #+(or system-v e15 dgux sgi ) "~a ~@[~*-O ~]-c -I. ~a 2> /dev/null"
-	 #+winnt (prep-win-path c-pathname o-pathname)
+	 #+winnt (prep-win-path-acc (compiler-command c-pathname o-pathname) "")
 	 #-winnt (compiler-command c-pathname o-pathname)
 	)
      *cc*
@@ -710,7 +709,7 @@ SYSTEM_SPECIAL_INIT
 			    :name (or (pathname-name pa) :wild)
 			    :type (pathname-type pa)))
     (setq name (namestring pa))
-    (system (format nil "ls -d ~a > ~a" name temp))
+    (safe-system (format nil "ls -d ~a > ~a" name temp))
     (with-open-file (st temp)
 	    (loop (setq tem (read-line st nil nil))
 		  (if (and tem (setq tem (probe-file tem)))
@@ -804,7 +803,7 @@ SYSTEM_SPECIAL_INIT
 		    (format st "}~%~%")))
 		    
   (compiler-cc c o)
-  (delete-file c)
+  (mdelete-file c)
 
   o))
 
@@ -819,6 +818,33 @@ SYSTEM_SPECIAL_INIT
 		   new
 		   (mysub (subseq str y) it new)))))
 
+
+(eval-when (compile)
+(defmacro fcr (x) `(load-time-value (si::compile-regexp ,x)))
+(defmacro sml (x y &optional z) 
+  (let ((q (gensym)))
+    `(let ((,q (si::string-match ,x ,y ,@(when z (list z)))))
+       (if (= ,q -1) (length ,y) ,q)))))
+
+(defun ts (s &optional (r ""))
+  (declare (string s))
+  #+winnt
+  (if (not si::*wine-detected*) s
+    (let* ((x (sml (fcr #u"[^ \n\t]") s))
+	   (y (sml (fcr #u"[ \n\t]") s x))
+	   (f (subseq s x y))
+	   (l (subseq s y))
+	   (k (when (> (length f) 0) (aref f 0)))
+	   (q (if (eql k #\") (string k) ""))
+	   (f (if (eql k #\") (subseq f 1 (1- (length f))) f))
+	   (f (if (and k (not (eql k #\-))) (namestring (no-device f)) f)))
+      (if k (concatenate 'string r q f q (ts l " ")) "")))
+  #-winnt s)
+
+(defun mdelete-file (x)
+  (delete-file (ts (namestring x))))
+
+
 (defun link (files image &optional post extra-libs (run-user-init t)) 
 
   (let* ((ui (make-user-init files "user-init"))
@@ -826,7 +852,7 @@ SYSTEM_SPECIAL_INIT
 	 (init (merge-pathnames (make-pathname
 				 :name (concatenate 'string "init_" (pathname-name raw))
 				 :type "lsp") raw))
-	 #-winnt (raw (merge-pathnames raw (make-pathname :directory (list :current))))
+	 (raw (merge-pathnames raw (make-pathname :directory (list :current))))
 	 (raw (merge-pathnames (make-pathname
 				:name (concatenate 'string "raw_" (pathname-name raw)))
 			       raw))
@@ -836,7 +862,7 @@ SYSTEM_SPECIAL_INIT
 	 )
 
     (with-open-file (st (namestring map) :direction :output))
-    (system 
+    (safe-system 
      (format nil "~a ~a ~a ~a -L~a ~a ~a ~a"
 	     *ld* 
 	     (namestring raw)
@@ -848,13 +874,13 @@ SYSTEM_SPECIAL_INIT
 	       sfiles) 
 	     si::*system-directory*
 	     #+gnu-ld (format nil "-Wl,-Map ~a" (namestring map)) #-gnu-ld ""
+	     (if (stringp extra-libs) extra-libs "")
 	     (let* ((par (namestring (make-pathname :directory '(:parent))))
 		    (i (concatenate 'string " " par))
 		    (j (concatenate 'string " " si::*system-directory* par)))
-	       (mysub *ld-libs* i j))
-	     (if (stringp extra-libs) extra-libs "")))
+	       (mysub *ld-libs* i j))))
     
-    (delete-file ui)
+    (mdelete-file ui)
     
     (with-open-file (st init :direction :output)
 		    (unless run-user-init
@@ -867,14 +893,14 @@ SYSTEM_SPECIAL_INIT
 				     (format nil "~a~a" si::*system-directory* *init-lsp*))
 				    (si::copy-stream st1 st))
 		    (if (stringp post) (format st "~a~%" post))
-		    (format st "(si::save-system \"~a\")~%" (namestring image)))
+		    (format st "(si::save-system \"~a\")~%" (ts (namestring image))))
     
-    (system (format nil "~a ~a < ~a" 
+    (safe-system (format nil "~a ~a < ~a" 
 		    (namestring raw)
 		    si::*system-directory*
 		    (namestring init)))
     
-    (delete-file raw)
-    (delete-file init))
+    (mdelete-file raw)
+    (mdelete-file init))
 
   image)

@@ -860,6 +860,10 @@ init_shared_memory (void) {
   if (n) return;
   n=1;
 
+  sharedMemory.address=0;
+  init_signals_pendingPtr();
+  return;
+
   sprintf(sharedMemory.name,"gcl-%d",getpid());
   sharedMemory.handle =
     CreateFileMapping((HANDLE)-1,NULL,PAGE_READWRITE,0,sharedMemory.length ,TEXT(sharedMemory.name));
