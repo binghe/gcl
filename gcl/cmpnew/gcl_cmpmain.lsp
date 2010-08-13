@@ -819,7 +819,7 @@ SYSTEM_SPECIAL_INIT
 		   (mysub (subseq str y) it new)))))
 
 
-(eval-when (compile)
+(eval-when (compile eval)
 (defmacro fcr (x) `(load-time-value (si::compile-regexp ,x)))
 (defmacro sml (x y &optional z) 
   (let ((q (gensym)))

@@ -214,8 +214,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * macosx support
   * windows/wine support
   * custreloc support with no plt
+  * default debian custreloc builds where supported (all but ia64 and hppa)
+  * mingw/wine path fixes
 
- -- Camm Maguire <camm@debian.org>  Wed, 04 Aug 2010 21:42:35 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 13 Aug 2010 16:05:12 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
