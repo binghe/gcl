@@ -134,10 +134,11 @@ extern int __remqu();
 #ifndef DARWIN
 #ifndef _WIN32
 int
-use_symbols(double d) {
+use_symbols(double d,...) {
 
-  va_list va=NULL;
+  va_list va;
 
+  va_start(va,d);
   Llistp();
   Latom();
   Lapply();
@@ -187,6 +188,8 @@ use_symbols(double d) {
     
   sincos(d,&d,&d);
   
+  va_end(va);
+
   return (int)d;
 
 }

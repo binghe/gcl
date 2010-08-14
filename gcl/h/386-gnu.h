@@ -70,3 +70,5 @@
 #define NULL_OR_ON_C_STACK(x) ((unsigned long)x <= DBEGIN)/*fixme configure detect*/
 #define PATH_MAX 4096 /*fixme dynamic*/
 #define MAXPATHLEN 4096 /*fixme dynamic*/
+
+#define RELOC_H "elf32_i386_reloc.h"
