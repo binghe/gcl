@@ -44,7 +44,7 @@ clean::
 # for some reason -lieee is on various linux systems in the list of requireds..
 
 gcltkaux:  $(GUIOS)
-	$(LD_ORDINARY_CC) $(GUIOS) -o gcltkaux  ${TK_LIB_SPEC} ${TK_BUILD_LIB_SPEC} ${TK_XLIBSW} ${TK_XINCLUDES} ${TCL_LIB_SPEC}  `echo ${TCL_LIBS} | sed -e s:-lieee::g`  ${LIBS} ${GCLIB}
+	$(LD_ORDINARY_CC) $(GUIOS) $(LDFLAGS) -o gcltkaux  ${TK_LIB_SPEC} ${TK_BUILD_LIB_SPEC} ${TK_XLIBSW} ${TK_XINCLUDES} ${TCL_LIB_SPEC}  `echo ${TCL_LIBS} | sed -e s:-lieee::g`  ${LIBS} ${GCLIB}
 
 gcltksrv: makefile
 	cat gcltksrv.in | sed -e "s!TK_LIBRARY=.*!TK_LIBRARY=${TK_LIBRARY}!g" \
