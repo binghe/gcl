@@ -7,9 +7,8 @@
 static void
 ar_init_fn(void (fn)(void),const char *s) {
 
-  char b[200],*n;
+  char b[200];
   struct stat ss;
-  unsigned l;
   object sysd=sSAsystem_directoryA->s.s_dbind;
   
   if (stat(s,&ss)) {
@@ -17,6 +16,8 @@ ar_init_fn(void (fn)(void),const char *s) {
     assert(!msystem(b));
 #ifdef _WIN32
     if (sSAwine_detectedA->s.s_dbind!=Cnil) {
+      char *n;
+      unsigned l;
       l=strlen(s)+6;
       n=alloca(l);
       snprintf(n,l,"/tmp/%s",s);

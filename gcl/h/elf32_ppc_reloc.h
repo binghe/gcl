@@ -1,3 +1,12 @@
+    case R_PPC_REL24: /*FIXME, this is just for mcount, and reads through the trampoline */
+      s+=a;
+      s=*(ul *)s;
+      if (ovchks(s,~MASK(26)))
+        store_val(where,MASK(26),s|0x3);
+      else  if (ovchks(s-p,~MASK(26)))
+        store_val(where,MASK(26),(s-p)|0x1); 
+      else massert(!"REL24 overflow");
+        break;
     case R_PPC_ADDR16_HA:
       s+=a;
       s+=s&0x8000 ? 1<<16 : 0;
