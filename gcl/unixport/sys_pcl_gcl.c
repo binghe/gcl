@@ -1,3 +1,5 @@
+#define FLAVOR "pcl_"
+
 #include "sys.c"
 
 

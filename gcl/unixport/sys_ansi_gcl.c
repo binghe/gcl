@@ -1,3 +1,5 @@
+#define FLAVOR "ansi_"
+
 #include "sys.c"
 
 
