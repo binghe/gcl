@@ -103,9 +103,10 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
    if the pointe/r is on the C stack or the 0 pointer
    in winnt our heap starts at DBEGIN
    */
-#define NULL_OR_ON_C_STACK(y) \
-    (((unsigned int)(y)) == 0 || \
-    (((unsigned int)(y)) > _stacktop && ((unsigned int)(y)) < _stackbottom))     
+/* #define NULL_OR_ON_C_STACK(y) \ */
+/*     (((unsigned int)(y)) == 0 || \ */
+/*     (((unsigned int)(y)) > _stacktop && ((unsigned int)(y)) < _stackbottom))      */
+#define NULL_OR_ON_C_STACK(x) (!(int *)x || ((int *)x>cs_limit && (int *)x<=cs_org))
       
 #if defined ( IN_FILE ) || defined ( IN_SOCKETS )
 #  define HAVE_NSOCKET

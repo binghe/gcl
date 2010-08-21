@@ -98,7 +98,6 @@ static object stack_space;
 
 #ifdef _WIN32
 unsigned int _dbegin = 0x10100000;
-unsigned int _stacktop, _stackbottom;
 #endif
 
 int cssize;
@@ -160,15 +159,6 @@ main(int argc, char **argv, char **envp) {
 	RECREATE_HEAP
 #endif
 	
-#ifdef _WIN32
-	  {
-	    unsigned int dummy;
-	    
-	    _stackbottom = (unsigned int ) &dummy;
-	    _stacktop    = _stackbottom - 0x10000; // ???
-
-	  }
-#endif
         setbuf(stdin, stdin_buf); 
 	setbuf(stdout, stdout_buf);
 #ifdef _WIN32
@@ -459,9 +449,9 @@ initlisp(void) {
 	    || NULL_OR_ON_C_STACK(Cnil) != 0
 	    || (((unsigned long)core_end) !=0
 	        && NULL_OR_ON_C_STACK(core_end) != 0))
-	  { /* check person has correct definition of above */
-	    error("NULL_OR_ON_C_STACK macro invalid");
-	  }
+	  /* check person has correct definition of above */
+	  error("NULL_OR_ON_C_STACK macro invalid");
+	
 	gcl_init_alloc();
 
 	Dotnil_body.t = (short)t_symbol;
