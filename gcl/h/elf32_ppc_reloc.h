@@ -1,6 +1,5 @@
-    case R_PPC_REL24: /*FIXME, this is just for mcount, and reads through the trampoline */
+    case R_PPC_REL24: /*FIXME, this is just for mcount, why longcall doesn't work is unknown */
       s+=a;
-      s=*(ul *)s;
       if (ovchks(s,~MASK(26)))
         store_val(where,MASK(26),s|0x3);
       else  if (ovchks(s-p,~MASK(26)))

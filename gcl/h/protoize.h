@@ -1819,3 +1819,17 @@ un_mmap(void *,void *);
 
 object
 fSuse_fast_links_2(object,object);
+
+MP_INT *
+otoi(object);
+void
+isetq_fix(MP_INT *,int);
+int
+mpz_to_mpz1(MP_INT *,MP_INT *,void *);
+int
+mpz_to_mpz(MP_INT *,MP_INT *);
+int
+obj_to_mpz1(object,MP_INT *,void *);
+int
+obj_to_mpz(object,MP_INT *);
+
