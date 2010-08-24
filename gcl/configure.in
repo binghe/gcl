@@ -1384,6 +1384,7 @@ AC_CHECK_HEADERS(float.h,AC_DEFINE(HAVE_FLOAT_H))
 #
 AC_MSG_CHECKING([for isnormal])
 AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+            #define _GNU_SOURCE
 	    #include <math.h>
 	    ]],[[
 	    float f;
@@ -1401,6 +1402,7 @@ AC_RUN_IFELSE(AC_LANG_PROGRAM([[
 
 AC_MSG_CHECKING([for isfinite])
 AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+        #define _GNU_SOURCE
 	#include <math.h>
 	]],[[
 	float f;
