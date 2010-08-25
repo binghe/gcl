@@ -456,7 +456,7 @@ set_rel_dyn(void *v,Shdr *sec,Sym *ds1) {
   ve=v+sec->sh_size;
 
   for (r=v;v<ve;v+=sec->sh_entsize,r=v) 
-    if (!ds1[ELF_R_SYM(r->r_info)].st_value)
+    if (ELF_R_TYPE(r->r_info) && !ds1[ELF_R_SYM(r->r_info)].st_value)
       ds1[ELF_R_SYM(r->r_info)].st_value=*(ul *)r->r_offset;
 
   return 0;
