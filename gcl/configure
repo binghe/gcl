@@ -4784,10 +4784,10 @@ if ac_fn_c_try_run "$LINENO"; then :
 #				PATCHED_SYMBOLS=__gmpn_toom3_mul_n
 				MPFILES=
 				PATCHED_SYMBOLS=
-				if test "$use" = "m68k-linux" ; then
-					MPFILES="$MPFILES $GMPDIR/mpn/lshift.o $GMPDIR/mpn/rshift.o"
-					PATCHED_SYMBOLS="$PATCHED_SYMBOLS __gmpn_lshift __gmpn_rshift"
-				fi
+#				if test "$use" = "m68k-linux" ; then
+#					MPFILES="$MPFILES $GMPDIR/mpn/lshift.o $GMPDIR/mpn/rshift.o"
+#					PATCHED_SYMBOLS="$PATCHED_SYMBOLS __gmpn_lshift __gmpn_rshift"
+#				fi
 				TLIBS="$TLIBS -lgmp"
 				echo "#include \"gmp.h\"" >foo.c
 				echo "int main() {return 0;}" >>foo.c

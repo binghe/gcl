@@ -190,9 +190,11 @@ LFD(siLmake_structure)(void)
   name=base[0];
   COERCE_DEF(name);
   if (type_of(name)!=t_structure  ||
-      (def=S_DATA(name))->length != --narg)
-    FEerror("Bad make_structure args for type ~a",1,
-	    base[0]);
+      (def=S_DATA(name))->length != --narg) {
+    printf("%d %d  %d %d\n",type_of(name),t_structure,S_DATA(name)->length,narg);
+    fflush(stdout);
+    FEerror("Bad make_structure args for type ~a",1,base[0]);
+  }
   x->str.str_def = name;
   x->str.str_self = NULL;
   size=S_DATA(name)->size;

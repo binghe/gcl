@@ -443,7 +443,7 @@ struct structure {		/*  structure header  */
 };
 
 struct s_data {object name;
-	       int length;
+	       unsigned long   length;
 	       object raw;
 	       object included;
 	       object includes;
@@ -451,7 +451,7 @@ struct s_data {object name;
 	       object print_function;
 	       object slot_descriptions;
 	       object slot_position;
-	       int    size;
+	       unsigned long   size;
 	       object has_holes;
 	     };
 
