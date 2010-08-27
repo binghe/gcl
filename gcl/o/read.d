@@ -22,11 +22,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	read.d
 */
 
-#include <string.h>
-#include <errno.h>
 
 #define NEED_ISFINITE
 #include "include.h"
+
+#include <string.h>
+#include <errno.h>
 
 static object
 current_readtable(void);

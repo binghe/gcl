@@ -89,7 +89,7 @@ typedef unsigned short fatchar;
 typedef union lispunion *object;
 
 typedef union int_object iobject;
-union int_object {object o; int i;};
+union int_object {object o; fixnum i;};
 
 /*
 	OBJect NULL value.
@@ -443,7 +443,7 @@ struct structure {		/*  structure header  */
 };
 
 struct s_data {object name;
-	       unsigned long   length;
+	       fixnum   length;
 	       object raw;
 	       object included;
 	       object includes;
@@ -451,7 +451,7 @@ struct s_data {object name;
 	       object print_function;
 	       object slot_descriptions;
 	       object slot_position;
-	       unsigned long   size;
+	       fixnum   size;
 	       object has_holes;
 	     };
 
