@@ -1236,9 +1236,7 @@ main(int argc,char * argv[],char *envp[])
   fclose(fp);
   return 0;
 }],dbegin=`cat conftest1`,dbegin=0,dbegin=0)
-AC_DEFINE_UNQUOTED(DBEGIN,$dbegin \
-/* where data begins */
-)
+AC_DEFINE_UNQUOTED(DBEGIN,$dbegin /* where data begins */)
 AC_MSG_RESULT(got $dbegin)
 LDFLAGS="$old_LDFLAGS"
 
@@ -1454,7 +1452,7 @@ RL_OBJS=""
 RL_LIB=""
 if test "$enable_readline" = "yes" ; then
 	AC_CHECK_HEADERS(readline/readline.h,
-		AC_CHECK_LIB(readline,main,
+		AC_CHECK_LIB(readline,rl_initialize,
 			AC_DEFINE(HAVE_READLINE) 
 			TLIBS="$TLIBS -lreadline"
 			RL_OBJS=gcl_readline.o
