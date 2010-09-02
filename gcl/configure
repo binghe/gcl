@@ -6784,7 +6784,7 @@ if test "${ac_cv_lib_readline_rl_initialize+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lreadline  $LIBS"
+LIBS="-lreadline -lncurses $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -6817,7 +6817,7 @@ $as_echo "$ac_cv_lib_readline_rl_initialize" >&6; }
 if test "x$ac_cv_lib_readline_rl_initialize" = x""yes; then :
   $as_echo "#define HAVE_READLINE 1" >>confdefs.h
 
-			TLIBS="$TLIBS -lreadline"
+			TLIBS="$TLIBS -lreadline -lncurses" #some machines don't link this, e.g. Slackware
 			RL_OBJS=gcl_readline.o
 # Readline support now initialized automatically when compiled in, this lisp
 # object no longer needed -- 20040102 CM
@@ -6837,7 +6837,7 @@ if test "${ac_cv_lib_readline_rl_completion_matches+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lreadline  $LIBS"
+LIBS="-lreadline -lncurses $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
