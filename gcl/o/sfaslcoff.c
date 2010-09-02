@@ -47,6 +47,7 @@ struct scnhdr {
 #define ALLOC_SEC(sec) (sec->s_flags&(SEC_CODE|SEC_DATA|SEC_BSS))
 #define  LOAD_SEC(sec) (sec->s_flags&(SEC_CODE|SEC_DATA))
 
+#define STOP(s_,op_) ({char *_s=s_,_c=_s[8];_s[8]=0;op_;_s[8]=_c;})
 
 struct reloc {
   union {
@@ -152,7 +153,6 @@ static void
 relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char *st1) {
 
   struct node *answ;
-  char c;
 
   for (;sym<sye;sym++) {
 
@@ -161,13 +161,9 @@ relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char 
 
     else if (!sym->n_scnum) {
 
-      if (sym->n.n.n_zeroes) {
-	c=sym->n.n_name[8];
-	sym->n.n_name[8]=0;
-	answ=find_sym_ptable(sym->n.n_name);
-	sym->n.n_name[8]=c;
-
-      } else
+      if (sym->n.n.n_zeroes)
+	STOP(sym->n.n_name,answ=find_sym_ptable(sym->n.n_name));
+      else
 	answ=find_sym_ptable(st1+sym->n.n.n_offset);
 
       if (answ) sym->n_value=answ->address;
@@ -221,7 +217,7 @@ load_self_symbols() {
   struct scnhdr *sec1,*sec,*sece;
   struct opthdr *h;
   struct node *a;
-  char *st1,*st,c;
+  char *st1,*st;
   ul ns,sl,jj;
 
   massert(f=fopen(kcl_self,"r"));
@@ -250,15 +246,9 @@ load_self_symbols() {
     
     ns++;
 
-    if (sym->n.n.n_zeroes) {
-
-      c=sym->n.n_name[8];
-      sym->n.n_name[8]=0;
-      sl+=strlen(sym->n.n_name)+1;
-      sym->n.n_name[8]=c;
-
-    } else
-
+    if (sym->n.n.n_zeroes)
+      STOP(sym->n.n_name,sl+=strlen(sym->n.n_name)+1);
+    else
       sl+=strlen(st1+sym->n.n.n_offset)+1;
   
     sym+=sym->n_numaux;
@@ -274,14 +264,9 @@ load_self_symbols() {
     if (sym->n_sclass!=2 || sym->n_scnum<1)
       continue;
 
-    if (sym->n.n.n_zeroes) {
-      
-      c=sym->n.n_name[8];
-      sym->n.n_name[8]=0;
-      strcpy(st,sym->n.n_name);
-      sym->n.n_name[8]=c;
-      
-    } else
+    if (sym->n.n.n_zeroes)
+      STOP(sym->n.n_name,strcpy(st,sym->n.n_name));
+    else
       strcpy(st,st1+sym->n.n.n_offset);
     
     sec=sec1+sym->n_scnum-1;
@@ -363,14 +348,13 @@ find_init_string(const char *s) {
 
   for (sym=sy1;sym<sye;sym++) {
 
-    if (sym->n.n.n_zeroes) {
-      sym->n.n_name[8]=0;
-      s=sym->n.n_name;
-    } else
-      s=st1+sym->n.n.n_offset;
-
+    s=sym->n.n.n_zeroes ? sym->n.n_name : st1+sym->n.n.n_offset;
+    
     if (!strncmp(s,"_init_",6)) {
-      o=make_simple_string(s);
+      if (sym->n.n.n_zeroes)
+	STOP((char *)s,o=make_simple_string(s));
+      else
+	o=make_simple_string(s);
       massert(!un_mmap(st,&est));
       massert(!fclose(f));
       return o;
