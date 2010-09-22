@@ -443,10 +443,10 @@ error(char *s)
 static void
 initlisp(void) {
 
-	int j;
+	void *v=&v,*vv=Cnil;
 
-	if (NULL_OR_ON_C_STACK(&j) == 0
-	    || NULL_OR_ON_C_STACK(Cnil) != 0
+	if (NULL_OR_ON_C_STACK(v) == 0
+	    || NULL_OR_ON_C_STACK(vv) != 0
 	    || (((unsigned long)core_end) !=0
 	        && NULL_OR_ON_C_STACK(core_end) != 0))
 	  /* check person has correct definition of above */
