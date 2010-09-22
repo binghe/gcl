@@ -152,111 +152,75 @@ DEV_FOUND:
 
 #ifdef HAVE_GETCWD
 char *
-getwd(char *buffer)
-{
+getwd(char *buffer) {
 #ifndef _WIN32    
-	char *getcwd(char *, size_t);
+  char *getcwd(char *, size_t);
 #endif
-	return(getcwd(buffer, MAXPATHLEN));
+  return(getcwd(buffer, MAXPATHLEN));
 }
 #endif
 
-#ifdef DGUX
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+#define pcopy(a_,b_,c_,d_) ({\
+      unsigned _c=c_,_d=d_;\
+      if (_c+_d>=MAXPATHLEN-16) FEerror("Can't expand pathname ~a",1,namestring);\
+      bcopy(a_,b_+_c,_d);\
+      b_[_c+_d]=0;\
+      })
 
 void
-coerce_to_filename(object pathname, char *p)
-{
-  object namestring;
-  namestring = coerce_to_namestring(pathname);
-  if ( pathname == Cnil ) { 
-     FEerror ( "NIL argument.", 1, pathname ); 
-  } 
+coerce_to_filename(object pathname,char *p) {
+
+  object namestring = coerce_to_namestring(pathname);
+  unsigned e=namestring->st.st_fillp;
+  char *q=namestring->st.st_self,*qe=q+e;;
+
+  if (pathname==Cnil)
+    FEerror ( "NIL argument.", 1, pathname ); 
+  
+  if (*q=='~') {
+
+    unsigned m=0;
+    char *s=++q;
+
+    for (;s<qe && *s!='/';s++);
     
 #if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
-  if(namestring->st.st_self[0]=='~')
-    {char name[20];
-     int n;
-     char *q = namestring->st.st_self;
+    {
 #ifndef __STDC__
-     extern struct passwd *getpwuid();
-     extern struct passwd *getpwnam();
+      extern struct passwd *getpwuid();
+      extern struct passwd *getpwnam();
 #endif
-
-     struct passwd *pwent;
-     int m=0;
-     q=namestring->st.st_self;
-     for (n=1; n< namestring->st.st_fillp; n++)
-       if (q[n]=='/') break;
-     bcopy(q+1,name,n-1);
-     name[n-1]= 0;
-     pwent = (n==1 ? getpwuid(getuid()) : getpwnam(name));
-     if (pwent==0 || ((m = strlen(pwent->pw_dir))
-		     && (m + namestring->st.st_fillp -n) >= MAXPATHLEN -16))
-       {FEerror("Can't expand pathname ~a", 1,namestring);}
-     bcopy(pwent->pw_dir,p,m);
-     bcopy(namestring->st.st_self+n,p+m,namestring->st.st_fillp-n);
-     p[m+namestring->st.st_fillp-n]=0;}
-  else
+      struct passwd *pwent;
+      
+      if (s==q)
+	pwent=getpwuid(getuid());
+      else {
+	*s=0;
+	pwent=getpwnam(q);
+	*s='/';
+      }
+      
+      if (!pwent)
+	FEerror("Can't expand pathname ~a",1,namestring);
+      pcopy(pwent->pw_dir,p,0,m=strlen(pwent->pw_dir));
+      
+    }
+#else
+    {
+      char *c=getenv("HOME");
+      if (!c || s>q)
+	FEerror("Can't expand pathname ~a",1,namestring);
+      pcopy(c,p,0,m=strlen(c));
+    }       
 #endif
-    {if (namestring->st.st_fillp >= MAXPATHLEN - 16) {
-      vs_push(namestring);
-      FEerror("Too long filename: ~S.", 1, namestring);}
-     bcopy(namestring->st.st_self,p,namestring->st.st_fillp);
-     p[namestring->st.st_fillp]=0;}
+    pcopy(s,p,m,qe-s);
+    
+  } else
+    pcopy(q,p,0,e);
+  
 #ifdef FIX_FILENAME
-    FIX_FILENAME(pathname,p);
+  FIX_FILENAME(pathname,p);
 #endif
     
 }
