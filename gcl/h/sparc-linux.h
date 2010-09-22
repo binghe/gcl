@@ -18,4 +18,8 @@
 
 #define PTR_ALIGN 8
 
+#if SIZEOF_LONG==4
 #define RELOC_H "elf32_sparc_reloc.h"
+#else
+#define RELOC_H "elf64_sparc_reloc.h"
+#endif

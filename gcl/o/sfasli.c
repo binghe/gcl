@@ -231,6 +231,14 @@ use_symbols(double d,...) {
     
   sincos(d,&d,&d);
 
+  read_byte1((void *)&d,(void *)&d);
+  read_char1((void *)&d,(void *)&d);
+  putc((int)d,(void *)&d);
+  getc((void *)&d);
+
+  endp_prop((void *)&d);
+  fixnum_expt((int)d,(int)d);
+
 #ifdef GCL_GPROF
   _mcount();
 #endif

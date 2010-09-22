@@ -6,6 +6,9 @@
         store_val(where,MASK(26),(s-p)|0x1); 
       else massert(!"REL24 overflow");
         break;
+    case R_PPC_REL32: 
+      store_val(where,~0L,s+a-p);
+      break;
     case R_PPC_ADDR16_HA:
       s+=a;
       s+=s&0x8000 ? 1<<16 : 0;

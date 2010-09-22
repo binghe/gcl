@@ -161,6 +161,12 @@ or_val(ul *w,ul m,ul v) {
   
 } 
 
+/* mips64 */
+/* #undef ELF_R_SYM */
+/* #define ELF_R_SYM(a_) (a_&0xffffffff) */
+/* #undef ELF_R_TYPE */
+/* #define ELF_R_TYPE(a_) (((a_>>40)&0xff) ? ((a_>>40)&0xff) : ((a_>>56)&0xff)) */
+
 
 static void
 relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
@@ -628,7 +634,7 @@ fasload(object faslfile) {
 
   FILE *fp;
   char filename[256],*sn,*st1,*dst1;
-  ul init_address=0,end,gs=0,*got=&gs,*gote;
+  ul init_address=0,end,gs=0,*got=&gs,*gote=got+1;
   object memory,data;
   Shdr *sec1,*sece;
   Sym *sym1,*syme,*dsym1,*dsyme;

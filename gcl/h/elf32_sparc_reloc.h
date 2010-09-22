@@ -1,4 +1,4 @@
-  case     R_SPARC_WDISP30:
+  case R_SPARC_WDISP30:
     /* v-disp30*/
     store_valu(where,MASK(30),(s+a-p) >> 2);
     break;
