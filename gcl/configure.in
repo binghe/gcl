@@ -1274,7 +1274,7 @@ AC_SUBST(HAVE_LONG_LONG)
 
 # readline
 AC_ARG_ENABLE(readline,
-	[--enable-readine    enables command line completion via the readline library ],,
+	[--enable-readline    enables command line completion via the readline library ],,
 	enable_readline="yes")
 
 # ansi lisp

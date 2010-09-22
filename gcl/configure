@@ -1404,7 +1404,7 @@ Optional Features:
 
  --enable-dynsysgmp will link against the system libgmp3 overriding certain functions with patched versions from the local source
 
---enable-readine    enables command line completion via the readline library
+--enable-readline    enables command line completion via the readline library
 --enable-ansi builds a large gcl aiming for ansi compliance,
 		    --disable-ansi builds the smaller traditional CLtL1 image
 
