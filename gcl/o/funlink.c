@@ -222,18 +222,21 @@ fSuse_fast_links_2(object flag,object res) {
 
 
 object
-clear_compiler_properties(object sym, object code)
-{ object tem;
+clear_compiler_properties(object sym, object code) { 
+  object tem;
   extern object sSclear_compiler_properties;  
-  VFUN_NARGS=2; FFN(fSuse_fast_links)(Cnil,sym);
+  
+  if (sSclear_compiler_properties && sSclear_compiler_properties->s.s_gfdef!=OBJNULL)
+    if ((sSAinhibit_macro_specialA && sSAinhibit_macro_specialA->s.s_dbind != Cnil) ||
+	sym->s.s_sfdef == NOT_SPECIAL)
+      (void)ifuncall2(sSclear_compiler_properties,sym,code);
   tem = getf(sym->s.s_plist,sStraced,Cnil);
-  if (sSAinhibit_macro_specialA && sSAinhibit_macro_specialA->s.s_dbind != Cnil)
-    (void)ifuncall2(sSclear_compiler_properties, sym,code);
-  if (tem != Cnil) return tem;
-  return sym;
+
+  VFUN_NARGS=2;
+  FFN(fSuse_fast_links)(Cnil,sym);
+  return tem!=Cnil ? tem : sym;
   
 }
-
 
 static int
 clean_link_array(object *ar, object *ar_end)

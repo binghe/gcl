@@ -845,6 +845,15 @@ sgc_sweep_phase(void) {
 	  mpz_clear(MP(x));
 #endif
 	
+	if (sLAlink_arrayA->s.s_dbind!=Cnil)
+	  if (x->d.t == t_cfdata) {
+	    unsigned long *p=(void *)sLAlink_arrayA->s.s_dbind->st.st_self;
+	    unsigned long *pe=(void *)p+sLAlink_arrayA->s.s_dbind->st.st_fillp;
+	    for (;p<pe;p+=2)
+	      if (*p>=(unsigned long)x->cfd.cfd_start && *p<(unsigned long)x->cfd.cfd_start+x->cfd.cfd_size)
+		*p=0;
+	  }
+
 	SET_LINK(x,f);
 	x->d.m = FREE;
 	x->d.s = (int)SGC_RECENT;
