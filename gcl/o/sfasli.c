@@ -236,7 +236,6 @@ use_symbols(double d,...) {
   putc((int)d,(void *)&d);
   getc((void *)&d);
 
-  endp_prop((void *)&d);
   fixnum_expt((int)d,(int)d);
 
 #ifdef GCL_GPROF

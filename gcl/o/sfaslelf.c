@@ -87,7 +87,7 @@ ovchku(ul v,ul m) {
 
 }
 
-static int
+int
 store_val(ul *w,ul m,ul v) {
 
   *w=(v&m)|(*w&~m);
@@ -97,7 +97,7 @@ store_val(ul *w,ul m,ul v) {
 }
 
 
-static int
+int
 store_vals(ul *w,ul m,ul v) {
 
   massert(ovchks(v,~m));
@@ -105,7 +105,7 @@ store_vals(ul *w,ul m,ul v) {
 
 }
 
-static int
+int
 store_valu(ul *w,ul m,ul v) {
 
   massert(ovchku(v,~m));
@@ -114,21 +114,21 @@ store_valu(ul *w,ul m,ul v) {
 }
 
 
-static int
+int
 add_val(ul *w,ul m,ul v) {
 
   return store_val(w,m,v+(*w&m));
 
 }
 
-static int
+int
 add_valu(ul *w,ul m,ul v) {
 
   return store_valu(w,m,v+(*w&m));
 
 }
 
-static int
+int
 add_vals(ul *w,ul m,ul v) {
 
   ul l=*w&m,mm;
@@ -141,7 +141,7 @@ add_vals(ul *w,ul m,ul v) {
 
 }
 
-static int
+int
 add_valsc(ul *w,ul m,ul v) {
 
   ul l=*w&m,mm;
@@ -153,13 +153,6 @@ add_valsc(ul *w,ul m,ul v) {
   return store_vals(w,m,v+l);
 
 }
-
-static int 
-or_val(ul *w,ul m,ul v) { 
-  
-  return store_valu(w,m,v|(*w&m)); 
-  
-} 
 
 /* mips64 */
 /* #undef ELF_R_SYM */
