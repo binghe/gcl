@@ -461,7 +461,7 @@ EXTER object sLAread_default_float_formatA;
 EXTER object sLAread_baseA;
 EXTER object sLAread_suppressA;
 EXTER object READtable;
-/* EXTER object read_byte1();  */
+EXTER object read_byte1();
 EXTER int READdefault_float_format;
 EXTER int READbase;
 EXTER bool READsuppress;
