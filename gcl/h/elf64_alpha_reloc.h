@@ -15,7 +15,6 @@
       store_val(where,MASK(32),s+a-(ul)got);
       break;
     case R_ALPHA_LITUSE:
-      break;
     case R_ALPHA_HINT:
       break;
     case R_ALPHA_REFQUAD:
@@ -42,4 +41,7 @@
       break;
     case R_ALPHA_GPRELLOW:
       store_val(where,MASK(16),s+a-(ul)got);
+      break;
+    case R_ALPHA_BRSGP:
+      store_vals(where,MASK(21),((long)(s+a-p))>>2);
       break;
