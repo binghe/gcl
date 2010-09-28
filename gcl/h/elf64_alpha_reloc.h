@@ -42,6 +42,6 @@
     case R_ALPHA_GPRELLOW:
       store_val(where,MASK(16),s+a-(ul)got);
       break;
-    case R_ALPHA_BRSGP:
+    case R_ALPHA_TLS_GD_HI:
       store_vals(where,MASK(21),((long)(s+a-p))>>2);
       break;
