@@ -1020,12 +1020,15 @@ fmt_fix_float(bool colon, bool atsign)
 	int w=0, d=0, k=0, overflowchar=0, padchar=0;
 	double f;
 	int sign;
-	char buff[256], *b, buff1[256];
+	char *buff, *b, *buff1;
 	int exp;
 	int i, j;
 	object x;
 	int n, m;
 	vs_mark;
+
+	massert(buff=alloca(256)); /*from automatic array -- work around for persistent gcc alpha bug*/
+	massert(buff1=alloca(256));
 
 	b = buff1 + 1;
 
