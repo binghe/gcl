@@ -88,7 +88,7 @@ ovchku(ul v,ul m) {
 }
 
 int
-store_val(ul *w,ul m,ul v) {
+store_ival(int *w,ul m,ul v) {
 
   *w=(v&m)|(*w&~m);
 
@@ -96,6 +96,32 @@ store_val(ul *w,ul m,ul v) {
 
 }
 
+
+int
+store_ivals(int *w,ul m,ul v) {
+
+  massert(ovchks(v,~m));
+  return store_ival(w,m,v);
+
+}
+
+int
+store_ivalu(int *w,ul m,ul v) {
+
+  massert(ovchku(v,~m));
+  return store_ival(w,m,v);
+
+}
+
+
+int
+store_val(ul *w,ul m,ul v) {
+
+  *w=(v&m)|(*w&~m);
+
+  return 0;
+
+}
 
 int
 store_vals(ul *w,ul m,ul v) {

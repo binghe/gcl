@@ -1,25 +1,22 @@
   case R_SPARC_WDISP30:
-    /* v-disp30*/
-    store_vals(where,MASK(30),((long)(s+a-p))>>2);
+    store_ivals((int *)where,MASK(30),((long)(s+a-p))>>2);
     break;
     
   case R_SPARC_HI22:
-    /* t-sim22 */
-    store_val(where,MASK(22),(s+a)>>10);
+    store_ival((int *)where,MASK(22),(s+a)>>10);
     break;
     
   case R_SPARC_LO10:
-    /* or_val(where,MASK(10),(s+a)&MASK(10)); */
-    store_val(where,MASK(10),s+a);
+    store_ival((int *)where,MASK(10),s+a);
     break;
 
   case R_SPARC_13:
-    store_valu(where,MASK(13),s+a);
+    store_ivalu((int *)where,MASK(13),s+a);
     break;
     
   case R_SPARC_32:
   case R_SPARC_UA32:
-    store_valu(where,MASK(32),s+a);
+    store_ivalu((int *)where,MASK(32),s+a);
     break;
     
   case R_SPARC_64:
