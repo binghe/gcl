@@ -1115,14 +1115,15 @@ memprotect_handler_test(int sig, long code, void *scp, char *addr) {
     memprotect_result=memprotect_bad_fault_address;
   else
     memprotect_result=memprotect_none;
-  mprotect(memprotect_test_address,PAGESIZE,PROT_READ_WRITE_EXEC);
+  mprotect(memprotect_test_address,page_multiple*PAGESIZE,PROT_READ_WRITE_EXEC);
 
 }
 
 static int
 memprotect_test(void) {
 
-  char b1[2*PAGESIZE],b2[PAGESIZE];
+  char *b1,*b2;
+  unsigned long p=PAGESIZE*page_multiple;
   struct sigaction sa,sao,saob;
 
   if (memprotect_result!=memprotect_none)
@@ -1132,10 +1133,20 @@ memprotect_test(void) {
     exit(-1);
   }
 
-  memset(b1,32,sizeof(b1));
-  memset(b2,0,sizeof(b2));
-  memprotect_test_address=(void *)(((unsigned long)b1+PAGESIZE-1) & ~(PAGESIZE-1));
-  if (mprotect(memprotect_test_address,PAGESIZE,PROT_READ_EXEC)) {
+  if (!(b1=alloca(2*p))) {
+    memprotect_result=memprotect_cannot_protect;
+    return -1;
+  }
+
+  if (!(b2=alloca(p))) {
+    memprotect_result=memprotect_cannot_protect;
+    return -1;
+  }
+
+  memset(b1,32,2*p);
+  memset(b2,0,p);
+  memprotect_test_address=(void *)(((unsigned long)b1+p-1) & ~(p-1));
+  if (mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
     memprotect_result=memprotect_cannot_protect;
     return -1;
   }
@@ -1151,7 +1162,7 @@ memprotect_test(void) {
     return -1;
   }
   memprotect_result=memprotect_bad_return;
-  memset(memprotect_test_address,0,PAGESIZE);
+  memset(memprotect_test_address,0,p);
   if (memprotect_result==memprotect_bad_return)
     memprotect_result=memprotect_no_signal;
   if (memprotect_result!=memprotect_none) {
@@ -1159,7 +1170,7 @@ memprotect_test(void) {
     sigaction(SIGBUS,&saob,NULL);
     return -1;
   }
-  if (memcmp(memprotect_test_address,b2,PAGESIZE)) {
+  if (memcmp(memprotect_test_address,b2,p)) {
     memprotect_result=memprotect_no_restart;
     sigaction(SIGSEGV,&sao,NULL);
     sigaction(SIGBUS,&saob,NULL);
@@ -1707,22 +1718,22 @@ fix_for_page_multiple(unsigned long beg, unsigned long end) {
   beg = ROUND_DOWN_PAGE_NO(beg);
   for (i = beg ; i < end; i = i+ page_multiple){
     p = sgc_type_map + i;
-    j = page_multiple;
+    j = page_multiple-1;
     writable = ((*p++) & SGC_WRITABLE);
     if (writable) {
       /* all pages must be */
-      while (--j)
+      while (j--)
 	if (((*p++) & SGC_WRITABLE)  == 0)
 	  goto FIXIT;}
     else 
-      while (--j)
+      while (j--)
 	if ((*p++) & SGC_WRITABLE ) 
 	  goto FIXIT;
     continue;
   FIXIT:
     j = page_multiple;
     p = sgc_type_map + i;
-    while (--j >= 0 ) 
+    while (j--) 
       (*p++) |= SGC_WRITABLE;
   }
 }
@@ -1734,25 +1745,26 @@ memory_protect(int on) {
   unsigned long i,beg,end= page(core_end);
   int writable=1;
   extern void install_segmentation_catcher(void);
+  static unsigned long first_data_page;
 
-  if (first_protectable_page==0) {
-    for (i=page_multiple; i< maxpage ; i++)
-      if (type_map[i]!=t_other)
-	break;
-      else {
-	/* We want page(0) to be non writable since that
-	   is the only check for 0 pointer in sgc */
-	sgc_type_map[i] = SGC_PERM_WRITABLE;
-      }
-    first_protectable_page= ROUND_DOWN_PAGE_NO(i);
+  if (!first_data_page) {
+    for (i=1;i<maxpage && type_map[i]==t_other;i++)
+      sgc_type_map[i]=SGC_PERM_WRITABLE;
+    first_data_page=i;
+  }
+  first_protectable_page=ROUND_DOWN_PAGE_NO(first_data_page);
+  if (!first_protectable_page) {
+    first_protectable_page=page_multiple;
+    for (i=first_data_page;i<first_protectable_page;i++)
+      sgc_type_map[i]=SGC_PERM_WRITABLE;
   }
   if(page_multiple > 1)
     fix_for_page_multiple(first_protectable_page,end);
   /* turning it off */
-  if (on==0) {sgc_mprotect((first_protectable_page),
-			   (end - first_protectable_page), SGC_WRITABLE);
-  install_segmentation_catcher();
-  return;
+  if (on==0) {
+    sgc_mprotect(first_protectable_page,end-first_protectable_page,SGC_WRITABLE);
+    install_segmentation_catcher();
+    return;
   }
   /* write protect some pages by first write protecting them
      all and then selectively disabling */

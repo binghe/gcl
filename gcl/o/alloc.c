@@ -849,7 +849,7 @@ set_maxpage(void) {
      maxpage are here */ 
 #ifdef SGC
   page_multiple=getpagesize()/PAGESIZE;
-  if (page_multiple==0) error("PAGESIZE must be factor of getpagesize()");
+  if (page_multiple==0) page_multiple=1;/* error("PAGESIZE must be factor of getpagesize()"); */
   if (gcl_alloc_initialized) {
     extern long maxpage;
     maxpage=page(heap_end);
