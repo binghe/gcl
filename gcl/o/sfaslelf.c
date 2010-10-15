@@ -63,12 +63,17 @@ typedef unsigned long ul;
 
 
 
-#ifdef STATIC_RELOC_VARS
-STATIC_RELOC_VARS
+static Shdr *
+get_section(char *s,Shdr *sec,Shdr *sece,const char *sn) {
+
+  for (;sec<sece && strcmp(sn+sec->sh_name,s);sec++);
+  return sec<sece ? sec : 0;
+
+}
+
+#ifdef SPECIAL_RELOC_H
+#include SPECIAL_RELOC_H
 #endif
-
-static ul cgp;
-
 
 static int
 ovchks(ul v,ul m) {
@@ -206,14 +211,6 @@ relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
     massert(tp&~tp);
 
   }
-
-}
-
-static Shdr *
-get_section(char *s,Shdr *sec,Shdr *sece,const char *sn) {
-
-  for (;sec<sece && strcmp(sn+sec->sh_name,s);sec++);
-  return sec<sece ? sec : 0;
 
 }
 
@@ -359,8 +356,9 @@ relocate_code(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,ul *got,ul *gote) {
 #define GOT_RELOC(a) 0
 #endif
 
+
 static int
-label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,ul *gs) {
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
 
   Rela *r;
   Sym *sym;
@@ -378,8 +376,12 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,ul *gs) {
 	  sym=sym1+ELF_R_SYM(r->r_info); 
 	  if (sec->sh_type==SHT_RELA && r->r_addend)
 	    ++*gs;
-	  else if (!sym->st_size) 
+	  else if (!sym->st_size) {
 	    sym->st_size=++*gs; 
+#ifdef __mips__	    
+	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+#endif
+	  }
   	  if (sec->sh_type==SHT_RELA) {
 	    q=sizeof(r->r_addend)*4;
 	    massert(!(r->r_addend>>q));
@@ -428,48 +430,6 @@ parse_map(void *v1,Shdr **sec1,Shdr **sece,
 
 }
 
-static int
-find_cgp(Sym *sym,Sym *syme,const char *st1) {
-
-  for (;sym<syme && strcmp("_gp",st1+sym->st_name);sym++);
-  massert(sym<syme);
-  cgp=sym->st_value;
-
-  return 0;
-
-}
-
-static int
-load_got_offsets(Shdr *sec1,Shdr *sece,const char *sn,Sym *ds1,Sym *dse) {
-
-  Shdr *sec;
-  Sym *sym;
-  ul ss,lgs=0,gs=0,got,*q;
-  void *p,*pe;
-
-  massert(sec=get_section(".dynamic",sec1,sece,sn));
-  for (gs=ss=got=0,p=(void *)sec->sh_addr,pe=p+sec->sh_size;p<pe;p+=sec->sh_entsize) {
-    q=p;
-    if (q[0]==DT_MIPS_GOTSYM)
-      gs=q[1];
-    if (q[0]==DT_MIPS_LOCAL_GOTNO)
-      lgs=q[1];
-    
-  }
-
-  massert(gs && lgs);
-
-  massert(sec=get_section(".got",sec1,sece,sn));
-  got=sec->sh_addr;
-  got+=lgs*sec->sh_entsize;
-
-  for (sym=ds1+gs;sym<dse;sym++,got+=sec->sh_entsize)
-    sym->st_value=got-cgp;
-
-  return 0;
-
-}
-
 
 static int
 set_rel_dyn(void *v,Shdr *sec,Sym *ds1) {
@@ -502,14 +462,12 @@ set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,
       (sec=get_section(".rela.dyn",sec1,sece,sn)))
     set_rel_dyn(v,sec,ds1);
     
-  if (!(psec=get_section(".plt",sec1,sece,sn))) {
+#ifdef __mips__
+  massert(!find_global_mips_params(sec1,sece,sn,st1,ds1,dse,sym1,syme));
+  return 0;
+#endif
 
-    massert(!find_cgp(sym1,syme,st1));
-    massert(!load_got_offsets(sec1,sece,sn,ds1,dse));
-
-    return 0;
-  }
-
+  massert(psec=get_section(".plt",sec1,sece,sn));
   massert((sec=get_section( ".rel.plt",sec1,sece,sn)) ||
 	  (sec=get_section(".rela.plt",sec1,sece,sn)));
 
@@ -667,7 +625,7 @@ fasload(object faslfile) {
 
   massert(!parse_map(v1,&sec1,&sece,&sn,&sym1,&syme,&st1,&end,&dsym1,&dsyme,&dst1));
   
-  massert(!label_got_symbols(v1,sec1,sece,sym1,syme,got));
+  massert(!label_got_symbols(v1,sec1,sece,sym1,syme,st1,got));
 
   massert(memory=load_memory(sec1,sece,v1,&got,&gote));
 

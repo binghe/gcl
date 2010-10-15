@@ -136,114 +136,12 @@ extern int __remqu();
 int
 use_symbols(double d,...) {
 
-  va_list va;
-
-  va_start(va,d);
-
-  Llistp();
-  Latom();
-  Lapply();
-  Lmakunbound();
-  Lconsp();
-  Lfuncall();
-  Leql();
-  Lfloatp();
-  Lnull();
-  Lnull();
-  Lnumberp();
-  Lcharacterp();
-  Lbit_vector_p();
-  Larrayp();
-  Lvectorp();
-  Lcommonp();
-  Lequalp();
-  Lintegerp();
-  Lequal();
-  Lmonotonically_nondecreasing();
-  Lmonotonically_nonincreasing();
-  Leq();
-  Lsvref();
-  Lconstantp();
-  Lfmakunbound();
-
-  car((void *)&d);
-  cdr((void *)&d);
-
-  caar((void *)&d);
-  cadr((void *)&d);
-  cdar((void *)&d);
-  cddr((void *)&d);
-
-  caaar((void *)&d);
-  caadr((void *)&d);
-  cadar((void *)&d);
-  caddr((void *)&d);
-  cdaar((void *)&d);
-  cdadr((void *)&d);
-  cddar((void *)&d);
-  cdddr((void *)&d);
-
-  caaaar((void *)&d);
-  caaadr((void *)&d);
-  caadar((void *)&d);
-  caaddr((void *)&d);
-  cadaar((void *)&d);
-  cadadr((void *)&d);
-  caddar((void *)&d);
-  cadddr((void *)&d);
-  cdaaar((void *)&d);
-  cdaadr((void *)&d);
-  cdadar((void *)&d);
-  cdaddr((void *)&d);
-  cddaar((void *)&d);
-  cddadr((void *)&d);
-  cdddar((void *)&d);
-  cddddr((void *)&d);
-
-  do_init((void *)&d);
-
-  simple_lispcall((void *)&d,1);
-  super_funcall_no_event((void *)&d);
-  fcalln1((void *)&d);
-  call_proc0((void *)&d,(void *)&d);
-  call_vproc_new((void *)&d,(void *)&d,(void *)&d,va);
-  call_or_link((void *)&d,(void *)&d);
-  call_or_link_closure((void *)&d,(void *)&d,(void *)&d);
-  lispcall((void *)&d,1);
-  funcall_with_catcher((void *)&d,(void *)&d);
-
-  ck_larg_exactly((int)d,(void *)&d);
-  check_alist((void *)&d);
-  fSuse_fast_links_2((void *)&d,(void *)&d);
-
-  make_cclosure((void *)&d,(void *)&d,(void *)&d,(void *)&d,(void *)&d,(int)(long)&d);
-  make_list(1);
-  listA(1,(void *)&d);
-
-  make_integer((void *)&d);
-  mpz_to_mpz((void *)&d,(void *)&d);mpz_to_mpz1((void *)&d,(void *)&d,(void *)&d);
-  obj_to_mpz((void *)&d,(void *)&d);obj_to_mpz1((void *)&d,(void *)&d,(void *)&d);
-  otoi((void *)&d);
-  isetq_fix((void *)&d,(int)d);
-
-  princ_char((int)d,(void *)&d);
-  remprop((void *)&d);
-    
   sincos(d,&d,&d);
-
-  read_byte1((void *)&d,(void *)&d);
-  read_char1((void *)&d,(void *)&d);
-  putc((int)d,(void *)&d);
-  getc((void *)&d);
-
-  fixnum_expt((int)d,(int)d);
 
 #ifdef GCL_GPROF
   _mcount();
 #endif
   
-  va_end(va);
-
   return (int)d;
 
 }

@@ -33,12 +33,12 @@ RELOC?=custreloc
 #ifeq ($(ARCHT),alpha)
 #RELOC=dlopen
 #endif
-ifeq ($(ARCHT),mips)
-RELOC=dlopen
-endif
-ifeq ($(ARCHT),mipsel)
-RELOC=dlopen
-endif
+#ifeq ($(ARCHT),mips)
+#RELOC=dlopen
+#endif
+#ifeq ($(ARCHT),mipsel)
+#RELOC=dlopen
+#endif
 ifeq ($(ARCHT),ia64)
 RELOC=dlopen
 endif

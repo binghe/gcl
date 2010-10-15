@@ -24,13 +24,12 @@
       store_val(where,MASK(32),s+a);
       break;
     case R_ALPHA_LITERAL:
-      gpd=(ul)got;
       s+=a&MASK(32);
       got+=(a>>32)-1;
       massert(got<gote); 
       massert(s); 
       *got=s;
-      s=(ul)got-gpd;
+      s=(a>>32)-1;
       massert(!(s&0x8000));
       store_val(where,MASK(16),s);
       break;

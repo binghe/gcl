@@ -35,5 +35,4 @@ int cacheflush(void *,int,int);
 #define SGC
 
 #define RELOC_H "elf32_mips_reloc.h"
-#define STATIC_RELOC_VARS static ul gpd,cgp; static Rel *hr;
-
+#define SPECIAL_RELOC_H "elf32_mips_reloc_special.h"
