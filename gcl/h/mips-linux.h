@@ -32,7 +32,13 @@ int cacheflush(void *,int,int);
 #define GET_FAULT_ADDR(sig,code,scp,addr) \
   ((siginfo_t *)code )->si_addr
 #endif
-#define SGC
+
+/* Reenable when recent mips kernel bug fixed -- SIGBUS passed on
+   occasion instead of SIGSEGV with no address passed in siginfo_t*/
+/* #define SGC */
 
 #define RELOC_H "elf32_mips_reloc.h"
 #define SPECIAL_RELOC_H "elf32_mips_reloc_special.h"
+
+/*Remove when .MIPS.stubs are replaced with callable .plt entries*/
+#define LD_BIND_NOW

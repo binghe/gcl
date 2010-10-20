@@ -148,6 +148,12 @@ main(int argc, char **argv, char **envp) {
 #include "unrandomize.h"
 #endif
 
+#ifdef LD_BIND_NOW
+#include <stdio.h>
+#include <stdlib.h>
+#include "ld_bind_now.h"
+#endif
+
 #if defined(DARWIN)
 	{
 	  extern void init_darwin_zone_compat ();

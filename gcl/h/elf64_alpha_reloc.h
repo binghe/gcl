@@ -25,11 +25,11 @@
       break;
     case R_ALPHA_LITERAL:
       s+=a&MASK(32);
-      got+=(a>>32)-1;
-      massert(got<gote); 
+      massert((a>>32)-1<gote-got); 
+      gote=got+(a>>32)-1;
       massert(s); 
-      *got=s;
-      s=(a>>32)-1;
+      *gote=s;
+      s=(gote-got)*sizeof(*got);
       massert(!(s&0x8000));
       store_val(where,MASK(16),s);
       break;
