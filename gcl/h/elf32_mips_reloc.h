@@ -2,18 +2,22 @@
 
     case R_MIPS_JALR:
       break;
+    case R_MIPS_GPREL32:
+      add_val(where,~0L,s+a-(ul)got);
+      break;
     case R_MIPS_32:
-      add_val(where,~0L,s);
+      add_val(where,~0L,s+a);
       break;
     case R_MIPS_GOT16:
     case R_MIPS_CALL16:
       if (!sym1[ELF_R_SYM(r->r_info)].st_shndx) { 
 	gote=got;
 	got+=sym1[ELF_R_SYM(r->r_info)].st_size-1;
-	*got=s;
 	store_val(where,MASK(16),(got-gote)*sizeof(*got));
-	if (s>=stub1 && s<stube)
+	if (s>=stub1 && s<stube) {
 	  massert(!write_stub(s,got));
+	} else
+	  *got=s;
 	break;
       }
       massert(ELF_R_TYPE(r->r_info)==R_MIPS_GOT16);

@@ -28,7 +28,10 @@
       massert((a>>32)-1<gote-got); 
       gote=got+(a>>32)-1;
       massert(s); 
-      *gote=s;
+      if (s>=ggot1 && s<ggote) {
+        massert(!write_stub(s,gote));
+      } else 
+	*gote=s;
       s=(gote-got)*sizeof(*got);
       massert(!(s&0x8000));
       store_val(where,MASK(16),s);

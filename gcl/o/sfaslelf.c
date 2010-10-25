@@ -364,7 +364,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   Sym *sym;
   Shdr *sec;
   void *v,*ve;
-  ul q;
+  ul q,a,b;
 
   for (sym=sym1;sym<syme;sym++)
     sym->st_size=0;
@@ -373,19 +373,20 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
     if (sec->sh_type==SHT_REL || sec->sh_type==SHT_RELA)
       for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 	if (GOT_RELOC(r)) {
+	  a=sec->sh_type==SHT_RELA && r->r_addend;
 	  sym=sym1+ELF_R_SYM(r->r_info); 
-	  if (sec->sh_type==SHT_RELA && r->r_addend)
-	    ++*gs;
-	  else if (!sym->st_size) {
-	    sym->st_size=++*gs; 
-#ifdef __mips__	    
+	  if (!sym->st_size || a) {
+	    q=++*gs;
+	    if (!a) sym->st_size=q;
+#ifdef SPECIAL_RELOC_H
 	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
 #endif
 	  }
   	  if (sec->sh_type==SHT_RELA) {
-	    q=sizeof(r->r_addend)*4;
-	    massert(!(r->r_addend>>q));
-	    r->r_addend|=r->r_addend ? (*gs)<<q : sym->st_size<<q;
+	    b=sizeof(r->r_addend)*4;
+	    massert(!(r->r_addend>>b));
+	    q=a ? q : sym->st_size;
+	    r->r_addend|=(q<<=b);
 	  }
 	}
   
@@ -432,23 +433,6 @@ parse_map(void *v1,Shdr **sec1,Shdr **sece,
 
 
 static int
-set_rel_dyn(void *v,Shdr *sec,Sym *ds1) {
-
-  Rela *r;
-  void *ve;
-
-  v+=sec->sh_offset;
-  ve=v+sec->sh_size;
-
-  for (r=v;v<ve;v+=sec->sh_entsize,r=v) 
-    if (ELF_R_TYPE(r->r_info) && !ds1[ELF_R_SYM(r->r_info)].st_value)
-      ds1[ELF_R_SYM(r->r_info)].st_value=*(ul *)r->r_offset;
-
-  return 0;
-
-}
-
-static int
 set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 		 Sym *ds1,Sym *dse,const char *dst1,
 		 Sym *sym1,Sym *syme,const char *st1) {
@@ -458,16 +442,13 @@ set_symbol_stubs(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   ul np,ps,p;
   void *ve;
 
-  if ((sec=get_section(".rel.dyn",sec1,sece,sn))||
-      (sec=get_section(".rela.dyn",sec1,sece,sn)))
-    set_rel_dyn(v,sec,ds1);
-    
-#ifdef __mips__
-  massert(!find_global_mips_params(sec1,sece,sn,st1,ds1,dse,sym1,syme));
-  return 0;
+#ifdef SPECIAL_RELOC_H
+  massert(!find_special_params(v,sec1,sece,sn,st1,ds1,dse,sym1,syme));
 #endif
 
-  massert(psec=get_section(".plt",sec1,sece,sn));
+  if (!(psec=get_section(".plt",sec1,sece,sn)))
+    return 0;
+
   massert((sec=get_section( ".rel.plt",sec1,sece,sn)) ||
 	  (sec=get_section(".rela.plt",sec1,sece,sn)));
 

@@ -1,7 +1,5 @@
 static ul gpd,cgp,stub1,stube,gotsym,locgotno,ggot; static Rel *hr;
 
-#ifdef __mips__
-
 static int
 write_stub(ul s,ul *got) {
 
@@ -40,9 +38,9 @@ make_got_room_for_stub(Shdr *sec1,Shdr *sece,Sym *sym,const char *st1,ul *gs) {
 }
 
 static int
-find_global_mips_params(Shdr *sec1,Shdr *sece,const char *sn,const char *st1,
-			Sym *ds1,Sym *dse,Sym *sym,Sym *syme) {
-
+find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
+		    const char *st1,Sym *ds1,Sym *dse,Sym *sym,Sym *syme) {
+  
   Shdr *sec;
   ul *q;
   void *p,*pe;
@@ -72,4 +70,3 @@ find_global_mips_params(Shdr *sec1,Shdr *sece,const char *sn,const char *st1,
   return 0;
 
 }
-#endif
