@@ -22,4 +22,5 @@
 #define RELOC_H "elf32_sparc_reloc.h"
 #else
 #define RELOC_H "elf64_sparc_reloc.h"
+#define SPECIAL_RELOC_H "elf64_sparc_reloc_special.h"
 #endif

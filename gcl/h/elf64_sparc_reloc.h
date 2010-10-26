@@ -10,6 +10,11 @@
     store_ival((int *)where,MASK(10),s+a);
     break;
 
+  case R_SPARC_OLO10:
+    store_ival((int *)where,MASK(10),s+a);
+    add_ival((int *)where,MASK(13),ELF_R_ADDEND(r->r_info));
+    break;
+
   case R_SPARC_13:
     store_ivalu((int *)where,MASK(13),s+a);
     break;

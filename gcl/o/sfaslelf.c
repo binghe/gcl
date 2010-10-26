@@ -71,10 +71,6 @@ get_section(char *s,Shdr *sec,Shdr *sece,const char *sn) {
 
 }
 
-#ifdef SPECIAL_RELOC_H
-#include SPECIAL_RELOC_H
-#endif
-
 static int
 ovchks(ul v,ul m) {
 
@@ -92,32 +88,9 @@ ovchku(ul v,ul m) {
 
 }
 
-int
-store_ival(int *w,ul m,ul v) {
-
-  *w=(v&m)|(*w&~m);
-
-  return 0;
-
-}
-
-
-int
-store_ivals(int *w,ul m,ul v) {
-
-  massert(ovchks(v,~m));
-  return store_ival(w,m,v);
-
-}
-
-int
-store_ivalu(int *w,ul m,ul v) {
-
-  massert(ovchku(v,~m));
-  return store_ival(w,m,v);
-
-}
-
+#ifdef SPECIAL_RELOC_H
+#include SPECIAL_RELOC_H
+#endif
 
 int
 store_val(ul *w,ul m,ul v) {
@@ -184,13 +157,6 @@ add_valsc(ul *w,ul m,ul v) {
   return store_vals(w,m,v+l);
 
 }
-
-/* mips64 */
-/* #undef ELF_R_SYM */
-/* #define ELF_R_SYM(a_) (a_&0xffffffff) */
-/* #undef ELF_R_TYPE */
-/* #define ELF_R_TYPE(a_) (((a_>>40)&0xff) ? ((a_>>40)&0xff) : ((a_>>56)&0xff)) */
-
 
 static void
 relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
