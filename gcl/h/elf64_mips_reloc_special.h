@@ -100,12 +100,12 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	  a=r->r_addend>>15;
 
-	  if (a>=sizeof(sym->st_size) || !((sym->st_size>>(a*8))&0xff)) {
+	  if (2*a>=sizeof(sym->st_size) || !((sym->st_size>>(a*16))&0xffff)) {
 
 	    q=++*gs;
-	    if (a<sizeof(sym->st_size)) {
-	      massert(q<=0xff);
-	      sym->st_size|=(q<<(a*8));
+	    if (2*a<sizeof(sym->st_size)) {
+	      massert(q<=0xffff);
+	      sym->st_size|=(q<<(a*16));
 	    }
 	    
 	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
@@ -114,7 +114,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	  b=sizeof(r->r_addend)*4; 
 	  massert(!(r->r_addend>>b)); 
-	  q=a>=sizeof(sym->st_size) ? q : (sym->st_size>>(a*8))&0xff; 
+	  q=2*a>=sizeof(sym->st_size) ? q : (sym->st_size>>(a*16))&0xffff; 
 	  r->r_addend|=(q<<=b); 
 
 	}
