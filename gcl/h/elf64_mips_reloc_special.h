@@ -76,3 +76,49 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   return 0;
 
 }
+
+static int
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
+
+  Rela *r;
+  Sym *sym;
+  Shdr *sec;
+  void *v,*ve;
+  ul q=0,a,b;
+
+  for (sym=sym1;sym<syme;sym++)
+    sym->st_size=0;
+
+  for (*gs=0,sec=sec1;sec<sece;sec++)
+    if (sec->sh_type==SHT_RELA)
+      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
+	if (ELF_R_TYPE(r->r_info)==R_MIPS_CALL16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_DISP||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_PAGE) {
+
+	  sym=sym1+ELF_R_SYM(r->r_info);
+
+	  a=r->r_addend>>15;
+
+	  if (a>=sizeof(sym->st_size) || !((sym->st_size>>(a*8))&0xff)) {
+
+	    q=++*gs;
+	    if (a<sizeof(sym->st_size)) {
+	      massert(q<=0xff);
+	      sym->st_size|=(q<<(a*8));
+	    }
+	    
+	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+
+	  }
+
+	  b=sizeof(r->r_addend)*4; 
+	  massert(!(r->r_addend>>b)); 
+	  q=a>=sizeof(sym->st_size) ? q : (sym->st_size>>(a*8))&0xff; 
+	  r->r_addend|=(q<<=b); 
+
+	}
+  
+  return 0;
+  
+}

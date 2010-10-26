@@ -318,48 +318,6 @@ relocate_code(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,ul *got,ul *gote) {
 
 }
 
-#ifndef GOT_RELOC
-#define GOT_RELOC(a) 0
-#endif
-
-
-static int
-label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
-
-  Rela *r;
-  Sym *sym;
-  Shdr *sec;
-  void *v,*ve;
-  ul q,a,b;
-
-  for (sym=sym1;sym<syme;sym++)
-    sym->st_size=0;
-
-  for (*gs=0,sec=sec1;sec<sece;sec++)
-    if (sec->sh_type==SHT_REL || sec->sh_type==SHT_RELA)
-      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
-	if (GOT_RELOC(r)) {
-	  a=sec->sh_type==SHT_RELA && r->r_addend;
-	  sym=sym1+ELF_R_SYM(r->r_info); 
-	  if (!sym->st_size || a) {
-	    q=++*gs;
-	    if (!a) sym->st_size=q;
-#ifdef SPECIAL_RELOC_H
-	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
-#endif
-	  }
-  	  if (sec->sh_type==SHT_RELA) {
-	    b=sizeof(r->r_addend)*4;
-	    massert(!(r->r_addend>>b));
-	    q=a ? q : sym->st_size;
-	    r->r_addend|=(q<<=b);
-	  }
-	}
-  
-  return 0;
-  
-}
-
 static int
 parse_map(void *v1,Shdr **sec1,Shdr **sece,
 	  char **sn,Sym **sym1,Sym **syme,char **st1,ul *end,
@@ -572,7 +530,9 @@ fasload(object faslfile) {
 
   massert(!parse_map(v1,&sec1,&sece,&sn,&sym1,&syme,&st1,&end,&dsym1,&dsyme,&dst1));
   
+#ifdef SPECIAL_RELOC_H
   massert(!label_got_symbols(v1,sec1,sece,sym1,syme,st1,got));
+#endif
 
   massert(memory=load_memory(sec1,sece,v1,&got,&gote));
 

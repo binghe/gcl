@@ -695,7 +695,7 @@ if test $use_gmp = yes ; then
 			AC_MSG_CHECKING("for external gmp version")
 			AC_TRY_RUN([#include <gmp.h>
 				    int main() {
-				    #if __GNU_MP_VERSION == 4
+				    #if __GNU_MP_VERSION == 4 || __GNU_MP_VERSION == 5
 					return 0;
 				    #else
 					return -1;

@@ -1,8 +1,3 @@
-#define GOT_RELOC(r) (ELF_R_TYPE(r->r_info)==R_MIPS_CALL16||\
-                      ELF_R_TYPE(r->r_info)==R_MIPS_GOT_DISP||\
-                      ELF_R_TYPE(r->r_info)==R_MIPS_GOT_PAGE||\
-                      ELF_R_TYPE(r->r_info)==R_MIPS_GOT_OFST)
-
     case R_MIPS_JALR:
       break;
     case R_MIPS_64:
@@ -17,16 +12,17 @@
     case R_MIPS_GOT_DISP:
     case R_MIPS_CALL16:
     case R_MIPS_GOT_PAGE:
-      s+=a&MASK(32);
       gote=got;
       got+=(a>>32)-1;
+      a&=MASK(32);
       store_val(where,MASK(16),(got-gote)*sizeof(*got));
       if (s>=stub1 && s<stube) {
         massert(!write_stub(s,got));
       } else
-        *got=s;
+        *got=s+(a&~MASK(16))+((a&0x8000)<<1);
       break;
     case R_MIPS_GOT_OFST:
+      store_val(where,MASK(16),a);
       break;
     case R_MIPS_HI16:
       s+=a&MASK(32);

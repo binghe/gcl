@@ -1,5 +1,3 @@
-#define GOT_RELOC(r) ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL
-
     case R_ALPHA_GPDISP:
       s=(ul)got;
       s-=p; 
@@ -25,7 +23,6 @@
       break;
     case R_ALPHA_LITERAL:
       s+=a&MASK(32);
-      massert((a>>32)-1<gote-got); 
       gote=got+(a>>32)-1;
       massert(s); 
       if (s>=ggot1 && s<ggote) {

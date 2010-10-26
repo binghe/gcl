@@ -4778,7 +4778,7 @@ else
 /* end confdefs.h.  */
 #include <gmp.h>
 				    int main() {
-				    #if __GNU_MP_VERSION == 4
+				    #if __GNU_MP_VERSION == 4 || __GNU_MP_VERSION == 5
 					return 0;
 				    #else
 					return -1;

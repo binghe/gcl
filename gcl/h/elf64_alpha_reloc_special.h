@@ -59,3 +59,39 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   return 0;
 
 }
+
+static int
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
+
+  Rela *r;
+  Sym *sym;
+  Shdr *sec;
+  void *v,*ve;
+  ul q=0,b;
+
+  for (sym=sym1;sym<syme;sym++)
+    sym->st_size=0;
+
+  for (*gs=0,sec=sec1;sec<sece;sec++)
+    if (sec->sh_type==SHT_RELA)
+      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
+	if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
+
+	  sym=sym1+ELF_R_SYM(r->r_info);
+	    
+	  if (!sym->st_size || r->r_addend) { 
+	    q=++*gs; 
+	    if (!r->r_addend) sym->st_size=q; 
+	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+	  }
+
+	  b=sizeof(r->r_addend)*4; 
+	  massert(!(r->r_addend>>b)); 
+	  q=r->r_addend ? q : sym->st_size; 
+	  r->r_addend|=(q<<=b); 
+
+	}
+  
+  return 0;
+  
+}

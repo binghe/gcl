@@ -1,5 +1,3 @@
-#define GOT_RELOC(r) (ELF_R_TYPE(r->r_info)==R_MIPS_CALL16||ELF_R_TYPE(r->r_info)==R_MIPS_GOT16)
-
     case R_MIPS_JALR:
       break;
     case R_MIPS_GPREL32:
