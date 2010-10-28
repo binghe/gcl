@@ -26,7 +26,7 @@
       gote=got+(a>>32)-1;
       massert(s); 
       if (s>=ggot1 && s<ggote) {
-        massert(!write_stub(s,gote));
+        massert(!write_stub(s,got,gote));
       } else 
 	*gote=s;
       s=(gote-got)*sizeof(*got);

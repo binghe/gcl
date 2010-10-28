@@ -1,18 +1,16 @@
 static ul ggot1,ggote;
 
 static int
-write_stub(ul s,ul *got) {
+write_stub(ul s,ul *got,ul *gote) {
 
   unsigned int *goti;
 
-  goti=(void *)(got+1);
-  *got=(ul)goti;
-  *goti++=(0x29<<26)|(0x1b<<21)|(0x1b<<16)|16;
+  *gote=(ul)(goti=(void *)(gote+2));
+  *++gote=s;
+  *goti++=(0x29<<26)|(0x1b<<21)|(0x1d<<16)|((void *)gote-(void *)got);
   *goti++=(0x29<<26)|(0x1b<<21)|(0x1b<<16)|0;
   *goti++=(0x1a<<26)|(0x1f<<21)|(0x1b<<16)|0x4000;
   *goti++=0;
-  got=(void *)goti;
-  *got=s;
 
   return 0;
   
