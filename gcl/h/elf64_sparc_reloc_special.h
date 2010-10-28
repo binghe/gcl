@@ -3,7 +3,7 @@
 #define ELF_R_ADDEND(a) (((ELF64_R_TYPE(a)>>8)^0x800000)-0x800000)
 
 static int
-make_got_room_for_stub(Shdr *sec1,Shdr *sece,Sym *sym,const char *st1,ul *gs) {
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
 
   return 0;
 
@@ -83,4 +83,3 @@ add_ivalsc(int *w,ul m,ul v) {
   return store_ivals(w,m,v+l);
 
 }
-
