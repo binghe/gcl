@@ -852,7 +852,7 @@ SYSTEM_SPECIAL_INIT
 	 (init (merge-pathnames (make-pathname
 				 :name (concatenate 'string "init_" (pathname-name raw))
 				 :type "lsp") raw))
-	 (raw (merge-pathnames raw (make-pathname :directory (list :current))))
+	 (raw (merge-pathnames raw (truename "./")))
 	 (raw (merge-pathnames (make-pathname
 				:name (concatenate 'string "raw_" (pathname-name raw)))
 			       raw))
@@ -863,21 +863,21 @@ SYSTEM_SPECIAL_INIT
 
     (with-open-file (st (namestring map) :direction :output))
     (safe-system 
-     (format nil "~a ~a ~a ~a -L~a ~a ~a ~a"
-	     *ld* 
-	     (namestring raw)
-	     (namestring ui)
-	     (let ((sfiles ""))
-	       (dolist (tem files)
-		 (if (equal (pathname-type tem) "o")
-		     (setq sfiles (concatenate 'string sfiles " " (namestring tem)))))
-	       sfiles) 
-	     si::*system-directory*
-	     #+gnu-ld (format nil "-Wl,-Map ~a" (namestring map)) #-gnu-ld ""
-	     (if (stringp extra-libs) extra-libs "")
-	     (let* ((par (namestring (make-pathname :directory '(:parent))))
-		    (i (concatenate 'string " " par))
-		    (j (concatenate 'string " " si::*system-directory* par)))
+     (let* ((par (namestring (make-pathname :directory '(:parent))))
+	    (i (concatenate 'string " " par))
+	    (j (concatenate 'string " " si::*system-directory* par)))
+       (format nil "~a ~a ~a ~a -L~a ~a ~a ~a"
+	       (mysub *ld* i j) 
+	       (namestring raw)
+	       (namestring ui)
+	       (let ((sfiles ""))
+		 (dolist (tem files)
+		   (if (equal (pathname-type tem) "o")
+		       (setq sfiles (concatenate 'string sfiles " " (namestring tem)))))
+		 sfiles) 
+	       si::*system-directory*
+	       #+gnu-ld (format nil "-Wl,-Map ~a" (namestring map)) #-gnu-ld ""
+	       (if (stringp extra-libs) extra-libs "")
 	       (mysub *ld-libs* i j))))
     
     (mdelete-file ui)
