@@ -12,21 +12,20 @@
     case R_MIPS_GOT_DISP:
     case R_MIPS_CALL16:
     case R_MIPS_GOT_PAGE:
-      gote=got;
-      got+=(a>>32)-1;
+      gote=got+(a>>32)-1;
       a&=MASK(32);
-      store_val(where,MASK(16),(got-gote)*sizeof(*got));
-      if (s>=stub1 && s<stube) {
-        massert(!write_stub(s,got));
+      store_val(where,MASK(16),((void *)gote-(void *)got));
+      if (s>=ggot && s<ggote) {
+        massert(!write_stub(s,got,gote));
       } else
-        *got=s+(a&~MASK(16))+((a&0x8000)<<1);
+        *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
       break;
     case R_MIPS_GOT_OFST:
       store_val(where,MASK(16),a);
       break;
     case R_MIPS_HI16:
       s+=a&MASK(32);
-      if (ELF_R_FTYPE(r->r_info)==R_MIPS_GPREL16) s=(ul)got-(ul)s;
+      if (ELF_R_FTYPE(r->r_info)==R_MIPS_GPREL16) s=(ul)got-s;
       if (!hr) hr=(void *)r;
       if (a&(1L<<32)) add_vals(where,MASK(16),(s+(a>>32))>>16);
       break;

@@ -9,13 +9,12 @@
     case R_MIPS_GOT16:
     case R_MIPS_CALL16:
       if (!sym1[ELF_R_SYM(r->r_info)].st_shndx) { 
-	gote=got;
-	got+=sym1[ELF_R_SYM(r->r_info)].st_size-1;
-	store_val(where,MASK(16),(got-gote)*sizeof(*got));
-	if (s>=stub1 && s<stube) {
-	  massert(!write_stub(s,got));
+	gote=got+sym1[ELF_R_SYM(r->r_info)].st_size-1;
+	store_val(where,MASK(16),((void *)gote-(void *)got));
+	if (s>=ggot && s<ggote) {
+	  massert(!write_stub(s,got,gote));
 	} else
-	  *got=s;
+	  *gote=s;
 	break;
       }
       massert(ELF_R_TYPE(r->r_info)==R_MIPS_GOT16);
