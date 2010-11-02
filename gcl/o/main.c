@@ -124,6 +124,10 @@ main(int argc, char **argv, char **envp) {
 #endif
 #endif
 
+#ifdef RECREATE_HEAP
+	RECREATE_HEAP
+#endif
+	
 #ifdef UNIX
 /*
 	if (argv[0][0] != '/')
@@ -161,10 +165,6 @@ main(int argc, char **argv, char **envp) {
 	}
 #endif
 
-#ifdef RECREATE_HEAP
-	RECREATE_HEAP
-#endif
-	
         setbuf(stdin, stdin_buf); 
 	setbuf(stdout, stdout_buf);
 #ifdef _WIN32
