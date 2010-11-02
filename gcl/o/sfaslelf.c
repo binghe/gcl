@@ -162,12 +162,14 @@ static void
 relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
   
   Rel *r=v;
+  Sym *sym;
   ul *where,p,s,tp;
   
   where=(void *)start+r->r_offset;
   p=(ul)where;
 
-  s=sym1[ELF_R_SYM(r->r_info)].st_value;
+  sym=sym1+ELF_R_SYM(r->r_info);
+  s=sym->st_value;
   
   switch((tp=ELF_R_TYPE(r->r_info))) {
 

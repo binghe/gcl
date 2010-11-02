@@ -73,6 +73,9 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   void *v,*ve;
 
   for (sym=sym1;sym<syme;sym++)
+    sym->st_other=!strcmp(st1+sym->st_name,"_gp_disp");
+
+  for (sym=sym1;sym<syme;sym++)
     sym->st_size=0;
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
