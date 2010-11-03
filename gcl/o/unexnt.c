@@ -292,8 +292,9 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
 
   /* The size of the dumped executable is the size of the original
      executable plus the size of the heap and the size of the .bss section.  */
-  heap_index_in_executable = (unsigned long)
-    round_to_next ((unsigned char *) in_file.size, get_allocation_unit ());
+  if (heap_index_in_executable==UNINIT_LONG)
+    heap_index_in_executable = (unsigned long)
+      round_to_next ((unsigned char *) in_file.size, get_allocation_unit ());
   /* from lisp we know what to use */
 #ifdef IN_UNIXSAVE
   data_region_end = round_to_next((unsigned char *)core_end,0x10000);

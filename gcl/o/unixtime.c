@@ -178,17 +178,24 @@ LFD(Lget_internal_run_time)(void)
 
 DEFUN_NEW("GETTIMEOFDAY",object,fSgettimeofday,SI,0,0,NONE,OO,OO,OO,OO,(void),"Return time with maximum resolution") {
 #ifdef __MINGW32__
-    struct timeb t;
-    ftime(&t);
-    return make_longfloat(((longfloat)t.time+1.0e-3*t.millitm)*HZ1);
+  /* static struct timeb t0; */
+  /* static unsigned u; */
+  /* struct timeb t;  */
+  /* ftime(&t); */
+  /* if (t.time!=t0.time || t.millitm!=t0.millitm) {t0=t;u=0;} */
+  /* u++; */
+  /* return make_longfloat(((longfloat)t.time+1.0e-3*t.millitm+1.0e-6*(u%1000)));  */
+  LARGE_INTEGER uu;
+  QueryPerformanceCounter(&uu);
+  return make_longfloat((longfloat)uu.QuadPart*1.0e-6);
 #endif  
 #ifdef BSD
-    struct timeval tzp;
-    gettimeofday(&tzp,0);
-    return make_longfloat((longfloat)tzp.tv_sec+1.0e-6*tzp.tv_usec);
+  struct timeval tzp;
+  gettimeofday(&tzp,0);
+  return make_longfloat((longfloat)tzp.tv_sec+1.0e-6*tzp.tv_usec);
 #endif
 #ifdef ATT
-    return make_longfloat((longfloat)time(0));
+  return make_longfloat((longfloat)time(0));
 #endif
 }
 
