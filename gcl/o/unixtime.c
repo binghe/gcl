@@ -184,6 +184,7 @@ DEFUN_NEW("GETTIMEOFDAY",object,fSgettimeofday,SI,0,0,NONE,OO,OO,OO,OO,(void),"R
     return make_longfloat((longfloat)uu.QuadPart/ticks.QuadPart);
   } else {
     FEerror("microsecond timing not available",0);
+    return Cnil;
    /* static struct timeb t0;  */
    /* static unsigned u;  */
    /* struct timeb t;   */
