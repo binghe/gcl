@@ -45,23 +45,23 @@ xgcl: $(PORTDIR)/saved_xgcl
 $(PORTDIR)/saved_xgcl: $(PORTDIR)/saved_gcl
 	cd xgcl-2 && $(MAKE)
 
-binutils/intl/libintl.a:
-	cd $(@D) && $(MAKE)
+#binutils/intl/libintl.a:
+#	cd $(@D) && $(MAKE)
 
-binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
-	cd $(@D) && $(MAKE)
+#binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
+#	cd $(@D) && $(MAKE)
 
 copy_iberty: $(LIBIBERTY)
-	cd binutils/libiberty && ar x $<
+	mkdir -p binutils/libiberty && cd binutils/libiberty && ar x $<
 
 copy_bfd: $(LIBBFD) copy_iberty
-	cd binutils/bfd && ar x $<
+	mkdir -p binutils/bfd && cd binutils/bfd && ar x $<
 
-h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
-	cp $(<D)/$(@F) $@
+#h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
+#	cp $(<D)/$(@F) $@
 
-h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
-	cp $(<D)/../include/$(@F) $@
+#h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
+#	cp $(<D)/../include/$(@F) $@
 
 $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	(cd $(BINDIR); $(MAKE) all)
@@ -224,7 +224,8 @@ gclclean:
 	cd xgcl-2 && $(MAKE) clean
 	(cd $(TESTDIR); $(MAKE) clean)
 	(cd info ; $(MAKE) clean)
-	find binutils -name "*.o" -exec rm {} \;
+#	find binutils -name "*.o" -exec rm {} \;
+	rm -rf binutils
 	rm -f foo.tcl config.log makedefs makedefsafter config.cache config.status makedefc
 	rm -f h/config.h h/gclincl.h h/cmpinclude.h h/gmp.h
 	rm -f xbin/gcl foo foo.c bin/gclm.bat gmp_all
@@ -238,9 +239,9 @@ gclclean:
 clean: gclclean
 	-[ -z "$(GMPDIR)" ] || (cd $(GMPDIR) && $(MAKE) distclean)
 	-[ -z "$(GMPDIR)" ] || rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
-	-cd binutils/intl && $(MAKE) distclean
-	-cd binutils/bfd && $(MAKE) distclean
-	-cd binutils/libiberty && $(MAKE) distclean
+#	-cd binutils/intl && $(MAKE) distclean
+#	-cd binutils/bfd && $(MAKE) distclean
+#	-cd binutils/libiberty && $(MAKE) distclean
 
 CMPINCLUDE_FILES=$(HDIR)cmpincl1.h $(HDIR)gclincl.h $(HDIR)compbas.h $(HDIR)enum.h $(HDIR)mgmp.h $(HDIR)object.h $(HDIR)vs.h \
 	$(HDIR)bds.h $(HDIR)frame.h \
