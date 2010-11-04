@@ -28,7 +28,7 @@ libgclp.a: $(ODIR)/gcllib.a
 	cp $< $@
 	ranlib $@
 
-gmpfiles: $(shell find ../$(GMPDIR) -name "*.o" |grep -v '\.lib')
+gmpfiles: $(shell [ -z "$(GMPDIR)" ] || find ../$(GMPDIR) -name "*.o" |grep -v '\.lib')
 	rm -rf gmp
 	mkdir gmp
 	a="$^" ; \
