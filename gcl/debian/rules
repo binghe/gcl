@@ -59,7 +59,7 @@ DEBUG=
 VERS=$(shell echo $$(cat majvers).$$(cat minvers))
 #EXT:=cvs
 
-CFG:=$(addsuffix /config.,. binutils) gmp4/configfsf.
+CFG:=$(addsuffix /config.,.) gmp4/configfsf.
 # Bug in autocont dependency on emacsen-common workaround
 #CFGS:=$(addsuffix .ori,configure $(addsuffix guess,$(CFG)) $(addsuffix sub,$(CFG)))
 CFGS:=$(addsuffix .ori,$(addsuffix guess,$(CFG)) $(addsuffix sub,$(CFG)))
@@ -154,7 +154,6 @@ clean: debian/control debian/gcl.templates
 	rm -rf debian/gprof debian/ansi-gprof debian/trad debian/ansi $(INS) debian/substvars
 	rm -rf *stamp
 	for i in $(CFGS) ; do ! [ -e $$i ] || mv $$i $${i%.ori} ; done
-	rm -f binutils/bfd/po/*gmo
 
 
 #BVER:=$(shell dpkg -s binutils |grep ^Version: | cut -f2 -d\  )
