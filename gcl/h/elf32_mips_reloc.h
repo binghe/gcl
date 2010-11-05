@@ -22,7 +22,7 @@
         *gote=s;
       break;
     case R_MIPS_HI16:
-      if (sym->st_other) s=gpd=(ul)got-(ul)where;
+      if (sym->st_other) s=gpd=(ul)got-(sym->st_other==2 ? 0 : (ul)where);
       if (!hr) hr=r;
       if (a) add_vals(where,MASK(16),(s>>16)+a);
       break;

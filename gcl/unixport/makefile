@@ -37,7 +37,7 @@ gmpfiles: $(shell [ -z "$(GMPDIR)" ] || find ../$(GMPDIR) -name "*.o" |grep -v '
 	done
 	touch $@
 
-bfdfiles: $(shell find ../binutils -name "*.o")
+bfdfiles: $(shell ! [ -d ../binutils ] || find ../binutils -name "*.o")
 	rm -rf bfd
 	mkdir bfd
 	a="$^" ; \

@@ -71,10 +71,18 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   Sym *sym;
   Shdr *sec;
   void *v,*ve;
+  ul q;
 
-  for (sym=sym1;sym<syme;sym++)
-    sym->st_other=!strcmp(st1+sym->st_name,"_gp_disp");
-
+  for (q=0,sym=sym1;sym<syme;sym++)
+    if (!strcmp(st1+sym->st_name,"_gp_disp")) {
+      sym->st_other=1;
+      q++;
+    } else if (!strcmp(st1+sym->st_name,"__gnu_local_gp")) {
+      sym->st_other=2;
+      q++;
+    }
+  massert(q==1);
+  
   for (sym=sym1;sym<syme;sym++)
     sym->st_size=0;
 

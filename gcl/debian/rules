@@ -10,7 +10,6 @@
 #export DH_VERBOSE=1
 
 # This is the debhelper compatability version to use.
-#export DH_COMPAT=4
 ARCHT:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
 MCC:=gcc
@@ -30,28 +29,17 @@ MCC:=gcc
 #RELOC=locbfd
 #RELOC?=statsysbfd
 RELOC?=custreloc
-#ifeq ($(ARCHT),alpha)
-#RELOC=dlopen
-#endif
-#ifeq ($(ARCHT),mips)
-#RELOC=dlopen
-#endif
-#ifeq ($(ARCHT),mipsel)
-#RELOC=dlopen
-#endif
 ifeq ($(ARCHT),ia64)
 RELOC=dlopen
 endif
 ifeq ($(ARCHT),hppa)
 RELOC=dlopen
 endif
-#ifeq ($(ARCHT),sh4)
-#RELOC=dlopen
-#endif
 
 GMP?=
 
 DEBUG=
+
 #ifeq ($(ARCHT),hppa)
 #DEBUG=--enable-debug
 #endif
@@ -60,7 +48,7 @@ VERS=$(shell echo $$(cat majvers).$$(cat minvers))
 #EXT:=cvs
 
 CFG:=$(addsuffix /config.,.) gmp4/configfsf.
-# Bug in autocont dependency on emacsen-common workaround
+# Bug in autoconf dependency on emacsen-common workaround
 #CFGS:=$(addsuffix .ori,configure $(addsuffix guess,$(CFG)) $(addsuffix sub,$(CFG)))
 CFGS:=$(addsuffix .ori,$(addsuffix guess,$(CFG)) $(addsuffix sub,$(CFG)))
 
@@ -87,14 +75,13 @@ configure-%-stamp: $(CFGS)
 
 	chmod -R +x gmp4/*
 
-#	[ "$(ARCHT)" != "i386" ] || ( cd gmp4 && CC=$(MCC) ./configure --build=i486-unknown-linux-gnu )
-
 	[ "$*" != "ansi" ] || FLAGS="--enable-ansi" ; \
 	[ "$*" != "gprof" ] || FLAGS="--enable-gprof" ; \
 	[ "$*" != "ansi-gprof" ] || FLAGS="--enable-ansi --enable-gprof" ; \
 	CC=$(MCC) ./configure \
 		--host=$$(dpkg-architecture -qDEB_HOST_GNU_TYPE) \
 		--disable-statsysbfd \
+		--disable-custreloc \
 		--disable-dlopen \
 		--enable-$(RELOC) \
 		$(GMP) \
@@ -155,12 +142,6 @@ clean: debian/control debian/gcl.templates
 	rm -rf *stamp
 	for i in $(CFGS) ; do ! [ -e $$i ] || mv $$i $${i%.ori} ; done
 
-
-#BVER:=$(shell dpkg -s binutils |grep ^Version: | cut -f2 -d\  )
-#BVERB:=$(shell echo $(BVER) | cut -f1 -d-)
-#debian/substvars:
-#	grep -q ^binutils: $@ 2>/dev/null || echo "binutils:Version=$(BVER)" >> $@
-
 INS:=$(shell for i in debian/in.* ; do echo $$i | sed 's,in.,,1' ; done |sed "s,gcl,gcl$(EXT),g")
 
 $(INS): debian/gcl$(EXT)% : debian/in.gcl%
@@ -182,10 +163,6 @@ install-stamp: build-stamp debian/control $(INS)
 	mv debian/tmp/usr/share/emacs/site-lisp debian/tmp/usr/share/emacs/foo
 	mkdir -p debian/tmp/usr/share/emacs/site-lisp
 	mv debian/tmp/usr/share/emacs/foo debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)
-
-#	cp -a $$(find debian/tmp/usr/local -name site-lisp -type d) \
-#		debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)
-#	rm -rf debian/tmp/usr/local
 
 	cat debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/gcl.el |\
 		sed "s,(provide 'gcl),(provide 'gcl$(EXT)),1" >tmp &&\
@@ -257,7 +234,6 @@ binary-arch: build install #debian/substvars
 	dh_testroot -a
 	dh_installdocs -a
 	dh_installemacsen -a
-#	dh_installmanpages -a gcl/gmp4/ansi2knr.1
 	dh_installman -a
 	dh_installdebconf -a
 	dh_installchangelogs ChangeLog -a
@@ -268,7 +244,6 @@ binary-arch: build install #debian/substvars
 	dh_fixperms -a
 	dh_installdeb -a
 	dh_shlibdeps -a
-#	dh_gencontrol -a -u"-Vgcc=$(MCC) -Vbinutils=binutils-dev(>=$(BVER)),binutils-dev(<=$(BVERB)-999)"
 	dh_gencontrol -a -u"-Vgcc=$(MCC)"
 	dh_md5sums -a
 	dh_builddeb -a
