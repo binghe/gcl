@@ -3,6 +3,9 @@
     case R_MIPS_GPREL32:
       add_val(where,~0L,s+a-(ul)got);
       break;
+    case R_MIPS_26:
+      add_val(where,MASK(26),(s+a)>>2);
+      break;
     case R_MIPS_32:
       add_val(where,~0L,s+a);
       break;
