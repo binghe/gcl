@@ -32,9 +32,9 @@ RELOC?=custreloc
 ifeq ($(ARCHT),ia64)
 RELOC=dlopen
 endif
-ifeq ($(ARCHT),hppa)
-RELOC=dlopen
-endif
+#ifeq ($(ARCHT),hppa)
+#RELOC=dlopen
+#endif
 
 GMP?=
 
