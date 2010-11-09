@@ -28,3 +28,16 @@
 
 #define SGC
 #define STATIC_FUNCTION_POINTERS
+
+#ifdef IN_SFASL
+#include <sys/mman.h>
+#define CLEAR_CACHE_LINE_SIZE 32
+#define CLEAR_CACHE {\
+   void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size; \
+   v=(void *)((unsigned long)v & ~(CLEAR_CACHE_LINE_SIZE - 1));\
+   for (;v<ve;v+=CLEAR_CACHE_LINE_SIZE) \
+   asm __volatile__ ("fdc %%r0(%0)\n\tfic %%r0(%%sr0,%0)\n\tsync\n": : "r" (v) : "memory");}
+#endif
+
+#define RELOC_H "elf32_hppa_reloc.h"
+#define SPECIAL_RELOC_H "elf32_hppa_reloc_special.h"

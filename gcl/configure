@@ -2900,7 +2900,8 @@ case $use in
 		ia64*)
 			def_dlopen="yes" ; def_custreloc="no" ;;
 		hppa*)
-			def_dlopen="yes" ; def_custreloc="no" ; def_pic="yes" ;;
+			def_pic="yes" ;;
+#			def_dlopen="yes" ; def_custreloc="no" ; def_pic="yes" ;;
 	esac;;
 esac
 
@@ -4132,11 +4133,12 @@ case $use in
 			TCFLAGS="$TCFLAGS -mieee";;
 #		m68k*)
 #			TCFLAGS="$TCFLAGS -ffloat-store";;
-#		hppa*)
+		hppa*)
+			TCFLAGS="$TCFLAGS -mlong-calls "
 #			TCFLAGS="$TCFLAGS -ffunction-sections"
 #			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O $TFPFLAG" ; fi
 #			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
-#			;;
+			;;
 		arm*)
 			TCFLAGS="$TCFLAGS -mlong-calls -fdollars-in-identifiers -g "
 #			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O2" ; fi

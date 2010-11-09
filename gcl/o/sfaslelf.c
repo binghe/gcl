@@ -46,14 +46,15 @@ License for more details.
 #define   ELF_R_SYM(a)   Mjoin(ELF,_R_SYM)(a)
 #define  ELF_R_TYPE(a)   Mjoin(ELF,_R_TYPE)(a)
 #define  ELF_R_INFO(a,b) Mjoin(ELF,_R_INFO)(a,b)
-#define ELF_ST_BIND(a)  Mjoin(ELF,_ST_BIND)(a)
+#define ELF_ST_BIND(a)   Mjoin(ELF,_ST_BIND)(a)
+#define ELF_ST_TYPE(a)   Mjoin(ELF,_ST_TYPE)(a)
 
 
 #define ulmax(a_,b_) ({ul _a=a_,_b=b_;_a<_b ? _b : _a;})
 #define ALLOC_SEC(sec) (sec->sh_flags&SHF_ALLOC && (sec->sh_type==SHT_PROGBITS || sec->sh_type==SHT_NOBITS))
 #define  LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
-#define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info);\
-      sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK);})
+#define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info),_t=ELF_ST_TYPE(sym->st_info);	\
+      sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK || (_t>=STT_LOPROC && _t<=STT_HIPROC));})
 
 #define MASK(n) (~(~0L << (n)))
 
