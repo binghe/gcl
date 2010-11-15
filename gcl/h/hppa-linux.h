@@ -1,29 +1,9 @@
 #include "linux.h"
 
-/*  #ifdef IN_GBC */
-/*  #define GET_FAULT_ADDR(sig,code,sv,a) \ */
-/*      ((void *)(*((char ***)(&code)))[17]) */
-/*  #endif */
-
-/*#define NULL_OR_ON_C_STACK(x) ((x)==0 || ((unsigned int)x) > (unsigned int)(pagetochar(MAXPAGE+1)))*/
-
-/*  #define ADDITIONAL_FEATURES \ */
-/*  		     ADD_FEATURE("BSD386"); \ */
-/*        	             ADD_FEATURE("MC68020") */
-
-
-/*  #define	I386 */
-/*  #define SGC */
-
-/*  #define CLEAR_CACHE do {void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size; for (;v<ve;v+=32)   asm __volatile__ ("dcbst 0,%0\n\tsync\n\ticbi 0,%0\n\tsync\n\tisync": : "r" (v) : "memory");} while(0) */
-
 #ifdef IN_GBC
 #undef MPROTECT_ACTION_FLAGS
 #define MPROTECT_ACTION_FLAGS SA_RESTART|SA_SIGINFO
-#define GET_FAULT_ADDR(sig,code,sv,a) \
- ((siginfo_t *)code)->si_addr
-/*  #define GET_FAULT_ADDR(sig,code,sv,a) \ */
-/*      ((void *)(*((char ***)(&code)))[44]) */
+#define GET_FAULT_ADDR(sig,code,sv,a) ((siginfo_t *)code)->si_addr
 #endif
 
 #define SGC
@@ -33,10 +13,12 @@
 #include <sys/mman.h>
 #define CLEAR_CACHE_LINE_SIZE 32
 #define CLEAR_CACHE {\
-   void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size; \
-   v=(void *)((unsigned long)v & ~(CLEAR_CACHE_LINE_SIZE - 1));\
-   for (;v<ve;v+=CLEAR_CACHE_LINE_SIZE) \
-   asm __volatile__ ("fdc %%r0(%0)\n\tfic %%r0(%%sr0,%0)\n\tsync\n": : "r" (v) : "memory");}
+    void *v1=memory->cfd.cfd_start,*v,*ve=v1+memory->cfd.cfd_size+CLEAR_CACHE_LINE_SIZE; \
+   v1=(void *)((unsigned long)v1 & ~(CLEAR_CACHE_LINE_SIZE - 1));\
+   for (v=v1;v<ve;v+=CLEAR_CACHE_LINE_SIZE) asm __volatile__ ("fdc 0(%0)" : : "r" (v) : "memory");\
+   asm __volatile__ ("syncdma\n\tsync" : : "r" (v) : "memory");\
+   for (v=v1;v<ve;v+=CLEAR_CACHE_LINE_SIZE) asm __volatile__ ("fic 0(%%sr4,%0)" : : "r" (v) : "memory");\
+   asm __volatile__ ("syncdma\n\tsync" : : "r" (v) : "memory");}
 #endif
 
 #define RELOC_H "elf32_hppa_reloc.h"
