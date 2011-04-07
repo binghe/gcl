@@ -482,11 +482,11 @@ int level;
 */
 	short ois[IS_SIZE];
 
-	int oqh;
-	int oqt;
-	int oqc;
-	int oisp;
-	int oiisp;
+	VOL int oqh;
+	VOL int oqt;
+	VOL int oqc;
+	VOL int oisp;
+	VOL int oiisp;
 
 ONCE_MORE:
 	if (interrupt_flag) {
