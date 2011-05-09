@@ -436,8 +436,9 @@ AC_SUBST(CC)
 #fi
 # subst GCC not only under 386-linux, but where available -- CM
 
+#FIXME -Wno-unused-but-set-variable when time
 if test "$GCC" = "yes" ; then
-   TCFLAGS="-Wall -DVOL=volatile -fsigned-char"
+   TCFLAGS="-Wall -DVOL=volatile -fsigned-char -Wno-unused-but-set-variable"
 else
    TCFLAGS="-DVOL=volatile -fsigned-char"
 fi
@@ -1366,40 +1367,40 @@ AC_CHECK_HEADERS(float.h,AC_DEFINE(HAVE_FLOAT_H))
 # test makes sense.  CM
 #
 AC_MSG_CHECKING([for isnormal])
-AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
             #define _GNU_SOURCE
 	    #include <math.h>
 	    ]],[[
 	    float f;
 	    return isnormal(f) || !isnormal(f) ? 0 : 1;
-	    ]]),
-		AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes),
-		AC_MSG_CHECKING([for fpclass in ieeefp.h])
-		AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+	    ]])],
+		[AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes),
+		 AC_MSG_CHECKING([for fpclass in ieeefp.h])
+		 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 			#include <ieeefp.h>
 			]],[[
 			float f;
 			return fpclass(f)>=FP_NZERO || fpclass(f)<FP_NZERO ? 0 : 1;
-			]]),AC_DEFINE(HAVE_IEEEFP,1,[Have ieeefp fpclass function]) AC_MSG_RESULT(yes),
-			    AC_MSG_RESULT(no)))
+			]])],[AC_DEFINE(HAVE_IEEEFP,1,[Have ieeefp fpclass function]) AC_MSG_RESULT(yes)],
+			     [AC_MSG_RESULT(no)])])
 
 AC_MSG_CHECKING([for isfinite])
-AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
         #define _GNU_SOURCE
 	#include <math.h>
 	]],[[
 	float f;
 	return isfinite(f) || !isfinite(f) ? 0 : 1;
-	]]),AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes),
-	    AC_MSG_CHECKING([for finite()])
-	    AC_RUN_IFELSE(AC_LANG_PROGRAM([[
+	]])],[AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes),
+	      AC_MSG_CHECKING([for finite()])
+	      AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 		#include <math.h>
 		#include <ieeefp.h>
 		]],[[
 		float f;
 		return finite(f) || !finite(f) ? 0 : 1;
-		]]),AC_DEFINE(HAVE_FINITE,1,[Have finite function]) AC_MSG_RESULT(yes),
-		    AC_MSG_ERROR(no)))
+		]])],[AC_DEFINE(HAVE_FINITE,1,[Have finite function]) AC_MSG_RESULT(yes)],
+   		     [AC_MSG_ERROR(no)])])
 
 #--------------------------------------------------------------------
 #	Check for the existence of the -lsocket and -lnsl libraries.
