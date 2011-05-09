@@ -1374,8 +1374,8 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	    float f;
 	    return isnormal(f) || !isnormal(f) ? 0 : 1;
 	    ]])],
-		[AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes),
-		 AC_MSG_CHECKING([for fpclass in ieeefp.h])
+		[AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes)],
+		[AC_MSG_CHECKING([for fpclass in ieeefp.h])
 		 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 			#include <ieeefp.h>
 			]],[[
@@ -1391,8 +1391,8 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	]],[[
 	float f;
 	return isfinite(f) || !isfinite(f) ? 0 : 1;
-	]])],[AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes),
-	      AC_MSG_CHECKING([for finite()])
+	]])],[AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes)],
+	     [AC_MSG_CHECKING([for finite()])
 	      AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 		#include <math.h>
 		#include <ieeefp.h>
