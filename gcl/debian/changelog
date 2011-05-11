@@ -218,8 +218,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * mingw/wine path fixes
   * mips local got relocs
   * VOL fix to prog.c and print.d, thanks Jerry James
+  * support new mips relocs
+  * lower opt to work around gcc 4.6 bug on arm
 
- -- Camm Maguire <camm@debian.org>  Thu, 07 Apr 2011 17:02:13 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 11 May 2011 20:01:02 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

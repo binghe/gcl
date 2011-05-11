@@ -504,6 +504,16 @@ if test "$enable_gprof" = "yes" ; then
 	esac
 fi
 
+if $CC -v 2>&1 | tail -n 1 | grep -q "gcc version 4.6.1" ; then
+   case "$use" in	
+     arm*)	
+     #FIXME report and remove this when done
+	AC_MSG_RESULT(Reducing optimization on arm build to workaround gcc 4.6 bug)
+	enable_debug=yes;;
+   esac
+fi
+
+
 if test "$enable_debug" = "yes" ; then
 	TCFLAGS="$TCFLAGS -g"
 	# for subconfigurations

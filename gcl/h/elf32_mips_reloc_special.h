@@ -81,7 +81,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
       sym->st_other=2;
       q++;
     }
-  massert(q==1);
+  massert(q<=1);
   
   for (sym=sym1;sym<syme;sym++)
     sym->st_size=0;
