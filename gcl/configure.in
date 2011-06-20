@@ -436,9 +436,18 @@ AC_SUBST(CC)
 #fi
 # subst GCC not only under 386-linux, but where available -- CM
 
-#FIXME -Wno-unused-but-set-variable when time
 if test "$GCC" = "yes" ; then
-   TCFLAGS="-Wall -DVOL=volatile -fsigned-char -Wno-unused-but-set-variable"
+
+   TCFLAGS="-Wall -DVOL=volatile -fsigned-char"
+
+   #FIXME -Wno-unused-but-set-variable when time
+   TMPF=-Wno-unused-but-set-variable
+   AC_MSG_CHECKING([for CFLAG $TMPF])
+   CFLAGS_ORI=$CFLAGS
+   CFLAGS="$CFLAGS $TMPF"
+   AC_TRY_RUN([int main() {return 0;}],TCFLAGS="$TCFLAGS $TMPF";AC_MSG_RESULT(yes),AC_MSG_RESULT(no))
+   CFLAGS=$CFLAGS_ORI
+
 else
    TCFLAGS="-DVOL=volatile -fsigned-char"
 fi

@@ -220,8 +220,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * VOL fix to prog.c and print.d, thanks Jerry James
   * support new mips relocs
   * lower opt to work around gcc 4.6 bug on arm
+  * configure time check for -Wno-unused-but-set-variable
 
- -- Camm Maguire <camm@debian.org>  Wed, 11 May 2011 20:01:02 +0000
+ -- Camm Maguire <camm@debian.org>  Mon, 20 Jun 2011 15:36:04 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
