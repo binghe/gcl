@@ -2057,17 +2057,23 @@ current_readtable()
 			goto READ;
 		}
 	}
-	if (eof_errorp == Cnil && recursivep == Cnil)
-		@(return eof_value)
-	end_of_stream(strm);
+	/* if (eof_errorp == Cnil && recursivep == Cnil) */
+	/* 	@(return eof_value) */
+	/* end_of_stream(strm); */
 
 READ:
 	if (recursivep == Cnil)
 		preserving_whitespace_flag = TRUE;
-	if (recursivep == Cnil)
+        detect_eos_flag = TRUE;
+        if (recursivep == Cnil)
 		x = read_object_non_recursive(strm);
 	else
 		x = read_object_recursive(strm);
+	if (x == OBJNULL) {
+		if (eof_errorp == Cnil && recursivep == Cnil)
+			@(return eof_value)
+		end_of_stream(strm);
+	}
 	@(return x)
 @)
 

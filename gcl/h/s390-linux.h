@@ -14,3 +14,7 @@
 #define SGC
 
 #define RELOC_H "elf32_s390_reloc.h"
+
+#if SIZEOF_LONG == 8
+#define C_GC_OFFSET 4
+#endif

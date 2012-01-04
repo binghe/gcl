@@ -1038,6 +1038,11 @@ if test "$enable_locbfd" = "yes" ; then
 	AC_SUBST(BUILD_BFD)
 fi
 
+
+AC_CHECK_FUNC(xdr_double,,
+	   AC_CHECK_LIB(tirpc,xdr_double,TLIBS="$TLIBS -ltirpc",AC_MSG_ERROR([Need xdr_double])))
+
+
 #AC_CONFIG_SUBDIRS($MY_SUBDIRS)
 
 # Find where Data begins.  This is used by the storage allocation
