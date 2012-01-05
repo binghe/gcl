@@ -1,3 +1,10 @@
+gcl (2.6.8-1.3) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * lower C optimization on ia64, arm and mips for now
+
+ --  <camm@maguirefamily.org>  Thu, 05 Jan 2012 17:13:42 +0000
+
 gcl (2.6.8-1.2) unstable; urgency=low
 
   * Non-maintainer upload.
