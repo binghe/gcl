@@ -1,3 +1,10 @@
+gcl (2.6.8-1.2) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * s390x support
+
+ --  <camm@maguirefamily.org>  Thu, 05 Jan 2012 16:09:33 +0000
+
 gcl (2.6.8-1.1) unstable; urgency=low
 
   * Non-maintainer upload.
