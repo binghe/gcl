@@ -490,6 +490,7 @@ case $use in
   sh4*)  enable_gprof="no";;
   mips*) enable_gprof="no";;
   hppa*) enable_gprof="no";;
+  arm*)  enable_gprof="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
   *gnu)  enable_gprof="no";;
 esac		     
 
