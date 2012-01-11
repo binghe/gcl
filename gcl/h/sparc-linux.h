@@ -25,6 +25,6 @@
 #define SPECIAL_RELOC_H "elf64_sparc_reloc_special.h"
 #endif
 
-#if SIZEOF_LONG == 8
-#define C_GC_OFFSET 4
-#endif
+/* #if SIZEOF_LONG == 8 */
+/* #define C_GC_OFFSET 4 */
+/* #endif */

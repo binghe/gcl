@@ -1,33 +1,3 @@
-gcl (2.6.8-1.4) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * remove gprof on arm as mcount calls are 24/22bit -- marginally
-    accessible
-
- --  <camm@maguirefamily.org>  Sat, 07 Jan 2012 02:39:56 +0000
-
-gcl (2.6.8-1.3) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * lower C optimization on ia64, arm and mips for now
-
- --  <camm@maguirefamily.org>  Thu, 05 Jan 2012 17:13:42 +0000
-
-gcl (2.6.8-1.2) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * s390x support
-
- --  <camm@maguirefamily.org>  Thu, 05 Jan 2012 16:09:33 +0000
-
-gcl (2.6.8-1.1) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * libtirpc check for newest glibc;read_preserving_whitespace fix;armhf
-    reloc support; s390x support; try C_GC_OFFSET for sparc64
-
- --  <camm@maguirefamily.org>  Wed, 04 Jan 2012 19:41:50 +0000
-
 gcl (2.6.8-1) unstable; urgency=low
 
   * New upstream release
@@ -251,8 +221,15 @@ gcl (2.6.8-1) unstable; urgency=low
   * support new mips relocs
   * lower opt to work around gcc 4.6 bug on arm
   * configure time check for -Wno-unused-but-set-variable
+  * libtirpc check for newest glibc;read_preserving_whitespace fix;armhf
+    reloc support; s390x support; try C_GC_OFFSET for sparc64
+  * s390x support
+  * lower C optimization on ia64, arm and mips for now
+  * remove gprof on arm as mcount calls are 24/22bit -- marginally
+    accessible
+  * remove C_GC_OFFSET for sparc64
 
- -- Camm Maguire <camm@debian.org>  Mon, 20 Jun 2011 15:36:04 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 17:26:36 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
