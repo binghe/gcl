@@ -233,8 +233,9 @@ gcl (2.6.8-1) unstable; urgency=low
     gave error exit status 2", thanks to Didier Raboud (Closes: #643131).
   * Bug fix: "drops readline support if rebuilt", thanks to Sven Joachim
     (Closes: #646735).
+  * lower opts on sparc64 asof gcc 4.6.1
 
- -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 17:43:54 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 21:03:17 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

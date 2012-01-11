@@ -558,6 +558,9 @@ case $use in
 		ia64*)
 			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
 			;;
+		sparc64*)
+			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.6.1 frame.c/longjmp, possible make/fork
+			;;
 		arm*)
 			TCFLAGS="$TCFLAGS -mlong-calls -fdollars-in-identifiers -g "
 			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
