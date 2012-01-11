@@ -228,8 +228,13 @@ gcl (2.6.8-1) unstable; urgency=low
   * remove gprof on arm as mcount calls are 24/22bit -- marginally
     accessible
   * remove C_GC_OFFSET for sparc64
+  * remove ncurses dependency for readline
+  * Bug fix: "FTBFS: dpkg-buildpackage: error: dpkg-source -b gcl-2.6.7
+    gave error exit status 2", thanks to Didier Raboud (Closes: #643131).
+  * Bug fix: "drops readline support if rebuilt", thanks to Sven Joachim
+    (Closes: #646735).
 
- -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 17:26:36 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 17:43:54 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

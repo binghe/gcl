@@ -1471,17 +1471,17 @@ if test "$enable_readline" = "yes" ; then
 	AC_CHECK_HEADERS(readline/readline.h,
 		AC_CHECK_LIB(readline,rl_initialize,
 			AC_DEFINE(HAVE_READLINE) 
-			TLIBS="$TLIBS -lreadline -lncurses" #some machines don't link this, e.g. Slackware
+			TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
 			RL_OBJS=gcl_readline.o
 # Readline support now initialized automatically when compiled in, this lisp
 # object no longer needed -- 20040102 CM
 #			RL_LIB=lsp/gcl_readline.o
-			,,-lncurses))
+			))
 
 # These tests discover differences between readline 4.1 and 4.3
 	AC_CHECK_LIB(readline,rl_completion_matches,
 			AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES)
-			AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T),,-lncurses)
+			AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T))
 fi
 
 AC_SUBST(RL_OBJS)
