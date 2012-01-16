@@ -234,8 +234,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * Bug fix: "drops readline support if rebuilt", thanks to Sven Joachim
     (Closes: #646735).
   * lower opts on sparc64 asof gcc 4.6.1
+  * optimize unwind at O0 to workaround gcc bug; centralize on
+    __builtin__clear_cache when available;arm_thm_call reloc support
 
- -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 21:03:17 +0000
+ -- Camm Maguire <camm@debian.org>  Mon, 16 Jan 2012 20:07:33 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

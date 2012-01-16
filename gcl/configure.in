@@ -558,9 +558,6 @@ case $use in
 		ia64*)
 			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
 			;;
-		sparc64*)
-			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.6.1 frame.c/longjmp, possible make/fork
-			;;
 		arm*)
 			TCFLAGS="$TCFLAGS -mlong-calls -fdollars-in-identifiers -g "
 			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
@@ -1052,6 +1049,14 @@ fi
 AC_CHECK_FUNC(xdr_double,,
 	   AC_CHECK_LIB(tirpc,xdr_double,TLIBS="$TLIBS -ltirpc",AC_MSG_ERROR([Need xdr_double])))
 
+AC_MSG_CHECKING(__builtin___clear_cache)
+AC_TRY_COMPILE([],
+[void *v,*ve;
+ __builtin___clear_cache(v,ve);
+],
+[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE)
+ AC_MSG_RESULT(yes)],
+AC_MSG_RESULT(no))
 
 #AC_CONFIG_SUBDIRS($MY_SUBDIRS)
 

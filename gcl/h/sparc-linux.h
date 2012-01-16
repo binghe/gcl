@@ -23,6 +23,7 @@
 #else
 #define RELOC_H "elf64_sparc_reloc.h"
 #define SPECIAL_RELOC_H "elf64_sparc_reloc_special.h"
+void unwind(frame_ptr fr, object tag) __attribute__((optimize("O0")));/*FIXME*/
 #endif
 
 /* #if SIZEOF_LONG == 8 */
