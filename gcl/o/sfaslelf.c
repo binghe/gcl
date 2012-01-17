@@ -519,13 +519,16 @@ static int
 clear_protect_memory(object memory) {
 
   void *p,*pe;
-
-  __builtin___clear_cache((void *)memory->cfd.cfd_start,(void *)memory->cfd.cfd_start+memory->cfd.cfd_size);
+  int i;
 
   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1));
   pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size) & ~(PAGESIZE-1)) + PAGESIZE-1;
 
-  return mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC) ? 1 : 0;
+  i=mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
+
+  __builtin___clear_cache((void *)memory->cfd.cfd_start,(void *)memory->cfd.cfd_start+memory->cfd.cfd_size);
+
+  return i;
 
 }
 #endif
