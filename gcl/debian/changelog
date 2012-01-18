@@ -238,8 +238,9 @@ gcl (2.6.8-1) unstable; urgency=low
     __builtin__clear_cache when available;arm_thm_call reloc support
   * clear_cache after mprotect
   * better XDR detection; no __builtin_clear_cache on sh4
+  * evade __builtin___clear_cache on hppa
 
- -- Camm Maguire <camm@debian.org>  Wed, 18 Jan 2012 01:28:55 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 18 Jan 2012 14:51:54 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

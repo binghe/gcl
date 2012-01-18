@@ -1055,6 +1055,7 @@ fi
 
 case $use in
      sh4*) ;; #FIXME
+     hppa*) ;; #FIXME
      *) 
      AC_MSG_CHECKING(__builtin___clear_cache)
      		AC_TRY_COMPILE([],
