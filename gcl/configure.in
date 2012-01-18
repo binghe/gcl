@@ -66,7 +66,7 @@ AC_ARG_ENABLE(japi,[ --enable-japi=yes will compile in support for the JAPI grap
 [try_japi=$enableval],[try_japi="no"])
 
 AC_ARG_ENABLE(xdr,[ --enable-xdr=yes will compile in support for XDR],
-[try_xdr=$enableval],[try_xdr="no"])
+[enable_xdr=$enableval],[enable_xdr="yes"])
 
 AC_ARG_ENABLE(xgcl,[ --enable-xgcl=yes will compile in support for XGCL],
 [enable_xgcl=$enableval],[enable_xgcl="yes"])
@@ -1046,17 +1046,25 @@ if test "$enable_locbfd" = "yes" ; then
 fi
 
 
-AC_CHECK_FUNC(xdr_double,,
-	   AC_CHECK_LIB(tirpc,xdr_double,TLIBS="$TLIBS -ltirpc",AC_MSG_ERROR([Need xdr_double])))
+if test "$enable_xdr" = "yes" ; then
+   AC_CHECK_FUNC(xdr_double,AC_DEFINE(HAVE_XDR),
+   	   AC_CHECK_LIB(tirpc,xdr_double,AC_DEFINE(HAVE_XDR) TLIBS="$TLIBS -ltirpc",
+	   AC_CHECK_LIB(rpc,xdr_double,AC_DEFINE(HAVE_XDR) TLIBS="$TLIBS -lrpc",
+	   AC_CHECK_LIB(oncrpc,xdr_double,AC_DEFINE(HAVE_XDR) TLIBS="$TLIBS -loncrpc"))))
+fi
 
-AC_MSG_CHECKING(__builtin___clear_cache)
-AC_TRY_COMPILE([],
-[void *v,*ve;
- __builtin___clear_cache(v,ve);
-],
-[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+case $use in
+     sh4*) ;; #FIXME
+     *) 
+     AC_MSG_CHECKING(__builtin___clear_cache)
+     		AC_TRY_COMPILE([],
+			       [void *v,*ve;
+			        __builtin___clear_cache(v,ve);
+				],
+				[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE)
+				 AC_MSG_RESULT(yes)],
+				 AC_MSG_RESULT(no));;
+esac
 
 #AC_CONFIG_SUBDIRS($MY_SUBDIRS)
 
@@ -1373,17 +1381,17 @@ if test "$try_japi" = "yes" ; then
 				 EXTRA_LOBJS="${EXTRA_LOBJS} gcl_japi.o"
 			 	 LIBS="${LIBS} -ljapi -lwsock32"] )
 fi
-if test "$use" = "mingw" ; then
- if test "$try_xdr" = "yes" ; then
-   AC_CHECK_HEADERS(rpc/rpc.h,[AC_DEFINE(HAVE_XDR)
-			 	 LIBS="${LIBS} -loncrpc"] )
- fi
-else
- if test "$try_xdr" = "yes" ; then
-   AC_CHECK_HEADERS(rpc/rpc.h,[AC_DEFINE(HAVE_XDR)
-			 	 LIBS="${LIBS} -lrpc"] )
- fi
-fi
+dnl if test "$use" = "mingw" ; then
+dnl  if test "$try_xdr" = "yes" ; then
+dnl    AC_CHECK_HEADERS(rpc/rpc.h,[AC_DEFINE(HAVE_XDR)
+dnl 			 	 LIBS="${LIBS} -loncrpc"] )
+dnl  fi
+dnl else
+dnl  if test "$try_xdr" = "yes" ; then
+dnl    AC_CHECK_HEADERS(rpc/rpc.h,[AC_DEFINE(HAVE_XDR)
+dnl 			 	 LIBS="${LIBS} -lrpc"] )
+dnl  fi
+dnl fi
 
 # Should really find a way to check for prototypes, but this 
 # basically works for now.  CM

@@ -86,7 +86,7 @@ do {char *x=sbrk(0); \
    and get a stream connection with it */
 #define RUN_PROCESS
 
-#define HAVE_XDR
+/* #define HAVE_XDR */
 
 #define WANT_VALLOC  
 

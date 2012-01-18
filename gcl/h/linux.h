@@ -97,7 +97,7 @@ do {static struct sigaction action; \
 
 #define	IEEEFLOAT
        
-#define HAVE_XDR
+/* #define HAVE_XDR */
 
 #define USE_ULONG_
 
