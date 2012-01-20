@@ -239,8 +239,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * clear_cache after mprotect
   * better XDR detection; no __builtin_clear_cache on sh4
   * evade __builtin___clear_cache on hppa
+  * make-array;make-sequence;replace;coerce
 
- -- Camm Maguire <camm@debian.org>  Wed, 18 Jan 2012 14:51:54 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 20 Jan 2012 05:32:54 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

@@ -715,41 +715,73 @@
 	   (match-dimensions (cdr dim) (cdr pat)))))
 
 
+(defmacro check-type-eval (place type)
+  `(values (assert (typep ,place ,type) (,place) 'type-error :datum ,place :expected-type ,type)))
 
-;;; COERCE function.
-(defun coerce (object type)
+(deftype simple-array (&optional (et '*) (dims '*))  `(array ,et ,(if (not dims) 0 dims)))
+(deftype null nil `(member nil))
+(deftype single-float (&optional (low '*) (high '*)) `(long-float ,low ,high))
+(deftype double-float (&optional (low '*) (high '*)) `(long-float ,low ,high))
+
+(defun coerce (object type &aux ntype (atp (listp type)) (ctp (if atp (car type) type)) (tp (when atp (cdr type))))
+  (declare (optimize (safety 2)))
+  (check-type type (or symbol class structure cons))
   (when (typep object type)
-        ;; Just return as it is.
-        (return-from coerce object))
-  (when (classp type)
-    (specific-error :wrong-type-argument "Cannot coerce ~S to class ~S~%" object type))
-  (setq type (normalize-type type))
-  (case (car type)
-    (list
-     (do ((l nil (cons (elt object i) l))
-          (i (1- (length object)) (1- i)))
-         ((< i 0) l)))
-    ((array simple-array)
-     (unless (or (endp (cdr type))
-                 (endp (cddr type))
-                 (eq (caddr type) '*)
-                 (endp (cdr (caddr type))))
-             (error "Cannot coerce to an multi-dimensional array."))
-     (do ((seq (make-sequence type (length object)))
-          (i 0 (1+ i))
-          (l (length object)))
-         ((>= i l) seq)
-       (setf (elt seq i) (elt object i))))
-    (character (character object))
-    (float (float object))
-    ((short-float) (float object 0.0S0))
-    ((single-float double-float long-float) (float object 0.0L0))
-    (complex
-     (if (or (null (cdr type)) (null (cadr type)) (eq (cadr type) '*))
-         (complex (realpart object) (imagpart object))
-         (complex (coerce (realpart object) (cadr type))
-                  (coerce (imagpart object) (cadr type)))))
-    (t (error "Cannot coerce ~S to ~S." object type))))
+    (return-from coerce object))
+  (case ctp
+	(function (values (eval `(function ,object))));FIXME
+	((list cons vector array member) (replace (make-sequence type (length object)) object))
+	(character (character object))
+	(short-float (float object 0.0S0))
+	(long-float (float object 0.0L0))
+	(float (float object))
+	(complex
+	 (let ((rtp (or (car tp) t)))
+	   (complex (coerce (realpart object) rtp) (coerce (imagpart object) rtp))))
+	(otherwise 
+	 (cond ((classp ctp) (coerce object (class-name ctp)))
+	       ((let ((tem (get ctp 'deftype-definition)))
+		  (when tem
+		    (setq ntype (apply tem tp))
+		    (not (eq ctp (if (listp ntype) (car ntype) ntype)))))
+		(coerce object ntype))
+	       ((check-type-eval object type))))))
+
+
+;; ;;; COERCE function.
+;; (defun coerce (object type)
+;;   (when (typep object type)
+;;         ;; Just return as it is.
+;;         (return-from coerce object))
+;;   (when (classp type)
+;;     (specific-error :wrong-type-argument "Cannot coerce ~S to class ~S~%" object type))
+;;   (setq type (normalize-type type))
+;;   (case (car type)
+;;     (list
+;;      (do ((l nil (cons (elt object i) l))
+;;           (i (1- (length object)) (1- i)))
+;;          ((< i 0) l)))
+;;     ((array simple-array)
+;;      (unless (or (endp (cdr type))
+;;                  (endp (cddr type))
+;;                  (eq (caddr type) '*)
+;;                  (endp (cdr (caddr type))))
+;;              (error "Cannot coerce to an multi-dimensional array."))
+;;      (do ((seq (make-sequence type (length object)))
+;;           (i 0 (1+ i))
+;;           (l (length object)))
+;;          ((>= i l) seq)
+;;        (setf (elt seq i) (elt object i))))
+;;     (character (character object))
+;;     (float (float object))
+;;     ((short-float) (float object 0.0S0))
+;;     ((single-float double-float long-float) (float object 0.0L0))
+;;     (complex
+;;      (if (or (null (cdr type)) (null (cadr type)) (eq (cadr type) '*))
+;;          (complex (realpart object) (imagpart object))
+;;          (complex (coerce (realpart object) (cadr type))
+;;                   (coerce (imagpart object) (cadr type)))))
+;;     (t (error "Cannot coerce ~S to ~S." object type))))
 
 ;; set by unixport/init_kcl.lsp
 ;; warn if a file was comopiled in another version
