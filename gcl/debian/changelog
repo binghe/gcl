@@ -240,8 +240,10 @@ gcl (2.6.8-1) unstable; urgency=low
   * better XDR detection; no __builtin_clear_cache on sh4
   * evade __builtin___clear_cache on hppa
   * make-array;make-sequence;replace;coerce
+  * restore traditional make-sequence,make-array, and coerce, and
+    optimize replace, as 2.6.8 compiler is still too weak re: inlines
 
- -- Camm Maguire <camm@debian.org>  Fri, 20 Jan 2012 05:32:54 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 20 Jan 2012 19:53:29 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

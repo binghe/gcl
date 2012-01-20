@@ -32,65 +32,48 @@
 (proclaim '(optimize (safety 2) (space 3)))
 
 
-(defun make-sequence (type size &key initial-element
-			   &aux ntype (atp (listp type)) (ctp (if atp (car type) type)) (tp (when atp (cdr type))))
-  (declare (optimize (safety 1)))
-  (let ((res
-	 (case ctp
-	       ((list cons member) (make-list size :initial-element initial-element))
-	       ((vector array) (make-vector (upgraded-array-element-type (car tp)) size nil nil nil 0 nil initial-element))
-	       (otherwise 'none))))
-    (cond ((not (eq res 'none)) (check-type-eval res type) res)
-          ((classp ctp) (make-sequence (class-name ctp) size :initial-element initial-element))
-	  ((let ((tem (get ctp 'deftype-definition)))
-	     (when tem
-	       (setq ntype (apply tem tp))
-	       (not (eq ctp (if (listp ntype) (car ntype) ntype)))))
-	   (make-sequence ntype size :initial-element initial-element))
-	  ((check-type-eval type '(member list vector))))))
-
-;; (defun make-sequence (type size	&key (initial-element nil iesp)
-;;                                 &aux element-type sequence)
-;;   (setq element-type
-;;         (cond ((eq type 'list)
-;;                (return-from make-sequence
-;;                 (if iesp
-;;                     (make-list size :initial-element initial-element)
-;;                     (make-list size))))
-;;               ((or (eq type 'simple-string) (eq type 'string)) 'string-char)
-;;               ((or (eq type 'simple-bit-vector) (eq type 'bit-vector)) 'bit)
-;;               ((or (eq type 'simple-vector) (eq type 'vector)) t)
-;;               (t
-;;                (setq type (normalize-type type))
-;;                (when (subtypep (car type) 'list)
-;; 		 (if (or (and (eq 'null (car type)) (not (equal size 0)))
-;; 			 (and (eq 'cons (car type)) (equal size 0)))
-;; 		     (specific-error :wrong-type-argument "~S is not of type ~S." 
-;; 				     type (format nil "list (size ~S)" size)))
-;;                      (return-from make-sequence
-;;                       (if iesp
-;;                           (make-list size :initial-element initial-element)
-;;                           (make-list size))))
-;;                (unless (or (eq (car type) 'array)
-;; 			   (eq (car type) 'simple-array))
-;; 		 (specific-error :wrong-type-argument "~S is not of type ~S." 
-;; 				 type 'sequence))
-;; 	       (let ((ssize (caddr type)))
-;; 		 (if (listp ssize) (setq ssize (car ssize)))
-;; 		 (if (not (si::fixnump ssize)) (setq ssize size))
-;; 		 (unless (equal ssize size)
-;; 		 (specific-error :wrong-type-argument "~S is not of type ~S." 
-;; 				 type (format nil "~S (size ~S)" type size))))
-;;                (or (cadr type) t))))
-;;   (setq element-type (si::best-array-element-type element-type))
-;;   (setq sequence (si:make-vector element-type size nil nil nil nil nil))
-;;   (when iesp
-;;         (do ((i 0 (1+ i))
-;;              (size size))
-;;             ((>= i size))
-;;           (declare (fixnum i size))
-;;           (setf (elt sequence i) initial-element)))
-;;   sequence)
+(defun make-sequence (type size	&key (initial-element nil iesp)
+                                &aux element-type sequence)
+  (setq element-type
+        (cond ((eq type 'list)
+               (return-from make-sequence
+                (if iesp
+                    (make-list size :initial-element initial-element)
+                    (make-list size))))
+              ((or (eq type 'simple-string) (eq type 'string)) 'string-char)
+              ((or (eq type 'simple-bit-vector) (eq type 'bit-vector)) 'bit)
+              ((or (eq type 'simple-vector) (eq type 'vector)) t)
+              (t
+               (setq type (normalize-type type))
+               (when (subtypep (car type) 'list)
+		 (if (or (and (eq 'null (car type)) (not (equal size 0)))
+			 (and (eq 'cons (car type)) (equal size 0)))
+		     (specific-error :wrong-type-argument "~S is not of type ~S." 
+				     type (format nil "list (size ~S)" size)))
+                     (return-from make-sequence
+                      (if iesp
+                          (make-list size :initial-element initial-element)
+                          (make-list size))))
+               (unless (or (eq (car type) 'array)
+			   (eq (car type) 'simple-array))
+		 (specific-error :wrong-type-argument "~S is not of type ~S." 
+				 type 'sequence))
+	       (let ((ssize (caddr type)))
+		 (if (listp ssize) (setq ssize (car ssize)))
+		 (if (not (si::fixnump ssize)) (setq ssize size))
+		 (unless (equal ssize size)
+		 (specific-error :wrong-type-argument "~S is not of type ~S." 
+				 type (format nil "~S (size ~S)" type size))))
+               (or (cadr type) t))))
+  (setq element-type (si::best-array-element-type element-type))
+  (setq sequence (si:make-vector element-type size nil nil nil nil nil))
+  (when iesp
+        (do ((i 0 (1+ i))
+             (size size))
+            ((>= i size))
+          (declare (fixnum i size))
+          (setf (elt sequence i) initial-element)))
+  sequence)
 
 
 (defun concatenate (result-type &rest sequences)

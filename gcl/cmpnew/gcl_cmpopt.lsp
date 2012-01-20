@@ -110,6 +110,8 @@
    (get 'system:aset 'inline-always))
 (push '((t t t) t #.(flags set)"aset1(#0,fix(#1),#2)")
    (get 'system:aset 'inline-unsafe))
+(push '((t fixnum t) t #.(flags set)"aset1(#0,#1,#2)")
+   (get 'system:aset 'inline-unsafe))
 (push '(((array t) fixnum t) t #.(flags set)"(#0)->v.v_self[#1]= (#2)")
    (get 'system:aset 'inline-unsafe))
 (push '(((array string-char) fixnum character) character #.(flags rfa set)"(#0)->ust.ust_self[#1]= (#2)")
@@ -166,6 +168,8 @@
 (push '((t fixnum t) t #.(flags set)"elt_set(#0,#1,#2)")
    (get 'system:elt-set 'inline-always))
 (push '((t t t) t #.(flags set)"elt_set(#0,fix(#1),#2)")
+   (get 'system:elt-set 'inline-unsafe))
+(push '((t fixnum t) t #.(flags set)"elt_set(#0,#1,#2)")
    (get 'system:elt-set 'inline-unsafe))
 
 ;;SYSTEM:FILL-POINTER-SET
@@ -371,12 +375,14 @@
    (get 'append 'inline-always))
 
 ;;AREF
-;;  (push '((t t) t #.(flags ans)"aref1(#0,fixint(#1))")
-;;    (get 'aref 'inline-always))
-;; (push '((t fixnum) t #.(flags ans)"aref1(#0,#1)")
-;;    (get 'aref 'inline-always))
-;; (push '((t t) t #.(flags ans)"aref1(#0,fix(#1))")
-;;    (get 'aref 'inline-unsafe))
+(push '((t t) t #.(flags ans)"fLrow_major_aref(#0,fixint(#1))")
+   (get 'aref 'inline-always))
+(push '((t fixnum) t #.(flags ans)"fLrow_major_aref(#0,#1)")
+   (get 'aref 'inline-always))
+(push '((t t) t #.(flags ans)"fLrow_major_aref(#0,fix(#1))")
+   (get 'aref 'inline-unsafe))
+(push '((t fixnum) t #.(flags ans)"fLrow_major_aref(#0,#1)")
+   (get 'aref 'inline-unsafe))
 (push '(((array t) fixnum) t #.(flags)"(#0)->v.v_self[#1]")
    (get 'aref 'inline-unsafe))
 (push '(((array string-char) fixnum) character #.(flags rfa)"(#0)->ust.ust_self[#1]")
@@ -697,6 +703,8 @@ type_of(#0)==t_bitvector")
 (push '((t fixnum) t #.(flags ans)"elt(#0,#1)")
    (get 'elt 'inline-always))
 (push '((t t) t #.(flags ans)"elt(#0,fix(#1))")
+   (get 'elt 'inline-unsafe))
+(push '((t fixnum) t #.(flags ans)"elt(#0,#1)")
    (get 'elt 'inline-unsafe))
 
 ;;ENDP
