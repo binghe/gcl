@@ -119,7 +119,9 @@ bclean-stamp:
 ansi-tests/test_results: build-ansi-stamp
 	$(MAKE) $@
 
-build: build-stamp
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
 build-stamp: build-gprof-stamp build-ansi-gprof-stamp build-trad-stamp build-ansi-stamp ansi-tests/test_results
 	touch $@
 
