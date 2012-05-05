@@ -1054,8 +1054,11 @@ if test "$enable_xdr" = "yes" ; then
 fi
 
 case $use in
-     sh4*) ;; #FIXME
-     hppa*) ;; #FIXME
+     sh4*) ;;     #FIXME, these exceptions needed as of gcc 4.7
+     hppa*) ;;    #FIXME
+     powerpc*) ;; #FIXME
+     alpha*) ;;   #FIXME
+     ia64*) ;;    #FIXME
      *) 
      AC_MSG_CHECKING(__builtin___clear_cache)
      		AC_TRY_COMPILE([],

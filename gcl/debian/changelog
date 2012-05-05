@@ -1,10 +1,3 @@
-gcl (2.6.8-1.1) unstable; urgency=low
-
-  * Non-maintainer upload.
-  * nil case keylist support
-
- --  <camm@maguirefamily.org>  Fri, 20 Apr 2012 02:19:27 +0000
-
 gcl (2.6.8-1) unstable; urgency=low
 
   * New upstream release
@@ -250,8 +243,11 @@ gcl (2.6.8-1) unstable; urgency=low
   * restore traditional make-sequence,make-array, and coerce, and
     optimize replace, as 2.6.8 compiler is still too weak re: inlines
   * case default error checking
+  * nil case keylist support
+  * add alpha, ppc, ppc64, and ia64 to __builtin__clear_cache exception
+    list as per gcc maintainers
 
- -- Camm Maguire <camm@debian.org>  Fri, 23 Mar 2012 14:15:50 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 04 May 2012 13:59:35 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 

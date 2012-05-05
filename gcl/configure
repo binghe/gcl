@@ -5824,8 +5824,11 @@ fi
 fi
 
 case $use in
-     sh4*) ;; #FIXME
-     hppa*) ;; #FIXME
+     sh4*) ;;     #FIXME, these exceptions needed as of gcc 4.7
+     hppa*) ;;    #FIXME
+     powerpc*) ;; #FIXME
+     alpha*) ;;   #FIXME
+     ia64*) ;;    #FIXME
      *)
      { $as_echo "$as_me:${as_lineno-$LINENO}: checking __builtin___clear_cache" >&5
 $as_echo_n "checking __builtin___clear_cache... " >&6; }
