@@ -246,8 +246,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * nil case keylist support
   * add alpha, ppc, ppc64, and ia64 to __builtin__clear_cache exception
     list as per gcc maintainers
+  * Fix hash key distribution bug, bitvector equal bug
 
- -- Camm Maguire <camm@debian.org>  Fri, 04 May 2012 13:59:35 +0000
+ -- Camm Maguire <camm@debian.org>  Thu, 05 Jul 2012 18:00:32 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
