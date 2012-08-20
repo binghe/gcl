@@ -148,7 +148,7 @@ BEGIN:
   if (depth++ <=3)
     switch ((tx=type_of(x))) {
     case t_cons:
-      h^=ihash_equal(x->c.c_car,depth);
+      h^=ihash_equal(x->c.c_car,depth)^rtb[depth];
       x = x->c.c_cdr;
       goto BEGIN;
       break;

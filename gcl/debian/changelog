@@ -247,8 +247,9 @@ gcl (2.6.8-1) unstable; urgency=low
   * add alpha, ppc, ppc64, and ia64 to __builtin__clear_cache exception
     list as per gcc maintainers
   * Fix hash key distribution bug, bitvector equal bug
+  * distinguish car position in equal-hash of lists
 
- -- Camm Maguire <camm@debian.org>  Thu, 05 Jul 2012 18:00:32 +0000
+ -- Camm Maguire <camm@debian.org>  Mon, 20 Aug 2012 17:32:45 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
