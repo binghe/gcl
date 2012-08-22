@@ -43,11 +43,12 @@ License for more details.
 #define Rela Mjoin(Elf,_Rela)
 #define Word Elf32_Word
 
-#define   ELF_R_SYM(a)   Mjoin(ELF,_R_SYM)(a)
-#define  ELF_R_TYPE(a)   Mjoin(ELF,_R_TYPE)(a)
-#define  ELF_R_INFO(a,b) Mjoin(ELF,_R_INFO)(a,b)
-#define ELF_ST_BIND(a)   Mjoin(ELF,_ST_BIND)(a)
-#define ELF_ST_TYPE(a)   Mjoin(ELF,_ST_TYPE)(a)
+#define   ELF_R_SYM(a)         Mjoin(ELF,_R_SYM)(a)
+#define  ELF_R_TYPE(a)         Mjoin(ELF,_R_TYPE)(a)
+#define  ELF_R_INFO(a,b)       Mjoin(ELF,_R_INFO)(a,b)
+#define ELF_ST_BIND(a)         Mjoin(ELF,_ST_BIND)(a)
+#define ELF_ST_TYPE(a)         Mjoin(ELF,_ST_TYPE)(a)
+#define ELF_ST_VISIBILITY(a)   Mjoin(ELF,_ST_VISIBILITY)(a)
 
 
 #define ulmax(a_,b_) ({ul _a=a_,_b=b_;_a<_b ? _b : _a;})
@@ -441,6 +442,10 @@ load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1,
     (*a)->address=sym->st_value;
     (*a)->string=(*s);
     strcpy((*s),st1+sym->st_name);
+
+#ifdef FIX_HIDDEN_SYMBOLS
+    FIX_HIDDEN_SYMBOLS(st1,a,sym1,sym,syme);
+#endif
 
     (*a)++;
     (*s)+=strlen(*s)+1;
