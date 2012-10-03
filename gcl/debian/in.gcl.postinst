@@ -31,6 +31,8 @@ case "$1" in
 	
 	ucf --debconf-ok $CONFIGFILE /etc/default/gcl@EXT@
 	ucfr gcl@EXT@ /etc/default/gcl@EXT@
+
+	chmod 644 /etc/default/gcl@EXT@
 	
 esac
 
