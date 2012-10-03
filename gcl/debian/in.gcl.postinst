@@ -2,7 +2,7 @@
 case "$1" in
   configure)
 
-	CONFIGFILE=$(tempfile)
+	CONFIGFILE=$(tempfile -m 644)
 	set -e
 	. /usr/share/debconf/confmodule
 	
