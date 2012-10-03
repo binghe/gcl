@@ -207,9 +207,6 @@ install-stamp: build-stamp debian/control $(INS)
 	chmod 0755 debian/tmp/usr/bin/gcl$(EXT)
 
 	rm -rf debian/tmp/usr/lib/gcl-$(VERS)/info
-	mkdir -p debian/tmp/usr/share/gcl$(EXT)/
-	echo DEFAULT_GCL_ANSI= >debian/tmp/usr/share/gcl$(EXT)/gcl$(EXT)
-	echo DEFAULT_GCL_PROF= >>debian/tmp/usr/share/gcl$(EXT)/gcl$(EXT)
 
 	dh_install
 
