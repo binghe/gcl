@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gcl\n"
 "Report-Msgid-Bugs-To: gcl@packages.debian.org\n"
-"POT-Creation-Date: 2007-12-23 08:47+0100\n"
+"POT-Creation-Date: 2012-12-30 11:53-0400\n"
 "PO-Revision-Date: 2009-11-29 08:39+0100\n"
 "Last-Translator: Vincenzo Campanella <vinz65@gmail.com>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:2001
+#: ../gcl.templates:2001
 msgid "Use the work-in-progress ANSI build by default?"
 msgstr ""
 "Usare in modo predefinito la compilazione ANSI, che è in fase di "
@@ -27,7 +27,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:2001
+#: ../gcl.templates:2001
 msgid ""
 "GCL is in the process of providing an ANSI compliant image in addition to "
 "its traditional CLtL1 image still in production use."
@@ -37,7 +37,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:2001
+#: ../gcl.templates:2001
 msgid ""
 "Please see the README.Debian file for a brief description of these terms. "
 "Choosing this option will determine which image will be used by default when "
@@ -49,7 +49,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:2001
+#: ../gcl.templates:2001
 msgid ""
 "This setting may be overridden by setting the GCL_ANSI environment variable "
 "to any non-empty string for the ANSI build, and to the empty string for the "
@@ -64,19 +64,19 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:3001
+#: ../gcl.templates:3001
 msgid "Use the profiling build by default?"
 msgstr "Usare il profiling in modo predefinito?"
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:3001
+#: ../gcl.templates:3001
 msgid "GCL has optional support for profiling via gprof."
 msgstr "GCL possiede un supporto opzionale per il profiling tramite gprof."
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:3001
+#: ../gcl.templates:3001
 msgid ""
 "Please see the documentation for si::gprof-start and si::gprof-quit for "
 "details. As this build is slower than builds without gprof support, it is "
@@ -89,7 +89,7 @@ msgstr ""
 
 #. Type: boolean
 #. Description
-#: ../in.gcl.templates:3001
+#: ../gcl.templates:3001
 msgid ""
 "Set the GCL_PROF environment variable to the empty string for more optimized "
 "builds, or any non-empty string for profiling support; e.g. GCL_PROF=t "

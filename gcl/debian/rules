@@ -235,6 +235,7 @@ binary-arch: build install #debian/substvars
 	dh_installemacsen -a
 	dh_installman -a
 	dh_installdebconf -a
+	sed -i -e 's,@EXT@,$(EXT),g' debian/gcl$(EXT)/DEBIAN/templates
 	dh_installchangelogs ChangeLog -a
 	dh_strip -a -Xlibgcl -Xlibansi_gcl \
 		-Xgcl-$(VERS)-prof/unixport/saved_gcl -Xgcl-$(VERS)-prof/unixport/saved_ansi_gcl
