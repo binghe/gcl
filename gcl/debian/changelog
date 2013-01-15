@@ -249,6 +249,7 @@ gcl (2.6.8-1) unstable; urgency=low
   * Fix hash key distribution bug, bitvector equal bug
   * distinguish car position in equal-hash of lists
   * do not modify conffiles
+  * trim excess digits from printed floats
 
  -- Camm Maguire <camm@debian.org>  Mon, 01 Oct 2012 16:32:43 +0000
 
