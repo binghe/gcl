@@ -171,7 +171,7 @@ getwd(char *buffer) {
 void
 coerce_to_filename(object pathname,char *p) {
 
-  object namestring = coerce_to_namestring(pathname);
+  object namestring=coerce_to_namestring(pathname);
   unsigned e=namestring->st.st_fillp;
   char *q=namestring->st.st_self,*qe=q+e;;
 
@@ -181,12 +181,16 @@ coerce_to_filename(object pathname,char *p) {
   if (*q=='~') {
 
     unsigned m=0;
-    char *s=++q;
+    char *s=++q,*c;
 
     for (;s<qe && *s!='/';s++);
-    
+
+    if (s==q && (c=getenv("HOME")))
+
+      pcopy(c,p,0,m=strlen(c));
+
 #if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
-    {
+    else {
 #ifndef __STDC__
       extern struct passwd *getpwuid();
       extern struct passwd *getpwnam();
@@ -206,17 +210,12 @@ coerce_to_filename(object pathname,char *p) {
       pcopy(pwent->pw_dir,p,0,m=strlen(pwent->pw_dir));
       
     }
-#else
-    {
-      char *c=getenv("HOME");
-      if (!c || s>q)
-	FEerror("Can't expand pathname ~a",1,namestring);
-      pcopy(c,p,0,m=strlen(c));
-    }       
 #endif
+
     pcopy(s,p,m,qe-s);
     
   } else
+
     pcopy(q,p,0,e);
   
 #ifdef FIX_FILENAME
@@ -586,30 +585,13 @@ LFD(Lfile_author)(void)
 static void
 FFN(Luser_homedir_pathname)(void)
 {
-#if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
-	struct passwd *pwent;
-	char filename[MAXPATHLEN];
-	register int i;
-#ifndef __STDC__
-	extern struct passwd *getpwuid();
-#endif
 
-	if (vs_top - vs_base > 1)
-		too_many_arguments();
-	pwent = getpwuid(getuid());
-	strcpy(filename, pwent->pw_dir);
-	i = strlen(filename);
-	if (filename[i-1] != '/') {
-		filename[i++] = '/';
-		filename[i] = '\0';
-	}
-#else
-	 char *filename= "~/" ;
-#endif	
-	vs_base[0] = make_simple_string(filename);
-	vs_top = vs_base+1;
-	vs_base[0] = coerce_to_pathname(vs_base[0]);
-	
+  char filename[MAXPATHLEN];
+
+  coerce_to_filename(make_simple_string("~/"),filename);
+  vs_base[0]=coerce_to_pathname(make_simple_string(filename));
+  vs_top = vs_base+1; 
+  
 }
 
 

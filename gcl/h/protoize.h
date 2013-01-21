@@ -309,8 +309,10 @@ typedef void (*funcvoid)(void);
 /* main.c:807:OF */ extern object fLlisp_implementation_version (void); /* () */
 /* makefun.c:10:OF */ extern object MakeAfun (object (*addr)(object,object), unsigned int argd, object data); /* (addr, argd, data) int (*addr)(); unsigned int argd; object data; */
 /* makefun.c:113:OF */ extern object fSset_key_struct (object key_struct_ind); /* (key_struct_ind) object key_struct_ind; */
-/* makefun.c:122:OF */ extern void SI_makefun (char *strg, object (*fn) (/* ??? */), unsigned int argd); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
-/* makefun.c:131:OF */ extern void LISP_makefun (char *strg, object (*fn) (/* ??? */), unsigned int argd); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
+/* /\* makefun.c:122:OF *\/ extern void SI_makefun (char *strg, object (*fn) (/\* ??? *\/), unsigned int argd); /\* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; *\/ */
+/* /\* makefun.c:131:OF *\/ extern void LISP_makefun (char *strg, object (*fn) (/\* ??? *\/), unsigned int argd); /\* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; *\/ */
+/* makefun.c:122:OF */ extern void SI_makefun (char *,void *,unsigned int); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
+/* makefun.c:131:OF */ extern void LISP_makefun (char *,void *,unsigned int); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
 /* makefun.c:167:OF */ extern object fSinvoke (object x); /* (x) object x; */
 /* mapfun.c:324:OF */ extern void gcl_init_mapfun (void); /* () */
 /* multival.c:32:OF */ extern void Lvalues (void); /* () */

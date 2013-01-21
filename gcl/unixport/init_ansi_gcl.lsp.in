@@ -280,11 +280,6 @@
   (push :common-lisp *features*)
   (push :ansi-cl *features*)
   
-  (eval-when (load)
-	     (if (fboundp 'get-system-time-zone)
-		 (setf system:*default-time-zone* (get-system-time-zone))
-	       (setf system:*default-time-zone* 6)))
-  
   (if (fboundp 'si::user-init) (si::user-init))
   (si::set-up-top-level)
   

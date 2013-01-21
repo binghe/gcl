@@ -103,13 +103,13 @@ DEFUN_NEW("SET-KEY-STRUCT",object,fSset_key_struct,SI,1,1,NONE,OO,OO,OO,OO,(obje
      
 
 void
-SI_makefun(char *strg, object (*fn) (/* ??? */), unsigned int argd)
+SI_makefun(char *strg, void *fn, unsigned int argd)
 { object sym = make_si_ordinary(strg);
  fSfset(sym, fSmakefun(sym,fn,argd));
 }
 
 void
-LISP_makefun(char *strg, object (*fn) (/* ??? */), unsigned int argd)
+LISP_makefun(char *strg, void *fn, unsigned int argd)
 { object sym = make_ordinary(strg);
  fSfset(sym, fSmakefun(sym,fn,argd));
 }
