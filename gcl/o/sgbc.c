@@ -1158,14 +1158,14 @@ memprotect_test(void) {
     return -1;
   }
   { /* mips kernel bug test -- SIGBUS with no faddr when floating point is emulated. */
-    float *f1=(void *)memprotect_test_address,*f2=(void *)b2;
+    float *f1=(void *)memprotect_test_address,*f2=(void *)b2,*f1e=f1+p/sizeof(*f1);
   
     if (mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
       memprotect_result=memprotect_cannot_protect;
       return -1;
     }
     memprotect_result=memprotect_bad_return;
-    *f1=*f2;
+    for (;f1<f1e;) *f1++=*f2;
     if (memprotect_result==memprotect_bad_return)
       memprotect_result=memprotect_no_signal;
     if (memprotect_result!=memprotect_none) {

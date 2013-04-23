@@ -11,7 +11,7 @@ is usually 4K or 8K bytes.  From 1 to 3 bytes per page are
 preallocated in a table at compile time.  this must be a power of 2 if
 SGC is enabled.  */
 
-#define MAXPAGE (128*1024*(SIZEOF_LONG>>2)/(1<<(PAGEWIDTH-12)))
+#define MAXPAGE (256*1024*(SIZEOF_LONG>>2)/(1<<(PAGEWIDTH-12)))
 #define VSSIZE 128*1024
 #define BDSSIZE 2*1024
 #define IHSSIZE 4*1024
