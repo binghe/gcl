@@ -336,7 +336,7 @@
 (DEFSYSFUN 'VALUES-LIST "Lvalues_list" '(T) '* NIL NIL) 
 (DEFSYSFUN 'EQUAL "Lequal" '(T T) 'T NIL T) 
 (DEFSYSFUN 'DIGIT-CHAR-P "Ldigit_char_p" '(T *) 'T NIL NIL) 
-#-clcs (DEFSYSFUN 'ERROR "Lerror" '(T *) 'T NIL NIL) 
+;; #-clcs (DEFSYSFUN 'ERROR "Lerror" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'CHAR/= "Lchar_neq" '(T *) 'T NIL T) 
 (DEFSYSFUN 'PATHNAME-DIRECTORY "Lpathname_directory" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'CDAAAR "Lcdaaar" '(T) 'T NIL NIL) 
@@ -444,10 +444,10 @@
 (DEFSYSFUN 'SYSTEM::MAKE-STRUCTURE "siLmake_structure" NIL T NIL NIL) 
 (DEFSYSFUN 'SYSTEM::STRUCTURE-NAME "siLstructure_name" '(T) 'SYMBOL NIL
     NIL) 
-(DEFSYSFUN 'SYSTEM::STRUCTURE-REF "siLstructure_ref" '(T T FIXNUM) T NIL
-    NIL) 
-(DEFSYSFUN 'SYSTEM::STRUCTURE-SET "siLstructure_set" '(T T FIXNUM T) T
-    NIL NIL) 
+;; (DEFSYSFUN 'SYSTEM::STRUCTURE-REF "siLstructure_ref" '(T T FIXNUM) T NIL
+;;     NIL) 
+;; (DEFSYSFUN 'SYSTEM::STRUCTURE-SET "siLstructure_set" '(T T FIXNUM T) T
+;;     NIL NIL) 
 (DEFSYSFUN 'SYSTEM::PUT-F "siLput_f" NIL '(T T) NIL NIL) 
 (DEFSYSFUN 'SYSTEM::REM-F "siLrem_f" NIL '(T T) NIL NIL) 
 (DEFSYSFUN 'SYSTEM::SET-SYMBOL-PLIST "siLset_symbol_plist" '(SYMBOL T) T

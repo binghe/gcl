@@ -54,33 +54,52 @@ bad_raw_type(void)
 {     	  FEerror("Bad raw struct type",0);}
 
 
+DEFUN_NEW("STRUCTURE-DEF",object,fSstructure_def,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_structure(x);
+  return (x)->str.str_def;
+}
+
+DEFUN_NEW("STRUCTURE-LENGTH",fixnum,fSstructure_length,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  check_type_structure(x);
+  return S_DATA(x)->length;
+}
+
+DEFUN_NEW("STRUCTURE-REF",object,structure_ref,SI,3,3,NONE,OO,OI,OO,OO,(object x,object name,fixnum i),"") {
+/* object */
+/* structure_ref(object x, object name, int i) */
+/* { */
+  unsigned short *s_pos;
+  COERCE_DEF(name);
+  if (type_of(x) != t_structure ||
+      (type_of(name)!=t_structure) ||
+      !structure_subtypep(x->str.str_def, name))
+    FEwrong_type_argument((type_of(name)==t_structure ?
+			   S_DATA(name)->name : name),
+			  x);
+  s_pos = &SLOT_POS(x->str.str_def,0);
+  switch((SLOT_TYPE(x->str.str_def,i)))
+    {
+    case aet_object: return(STREF(object,x,s_pos[i]));
+    case aet_fix:  return(make_fixnum((STREF(fixnum,x,s_pos[i]))));
+    case aet_ch:  return(code_char(STREF(char,x,s_pos[i])));
+    case aet_bit:
+    case aet_char: return(small_fixnum(STREF(char,x,s_pos[i])));
+    case aet_sf: return(make_shortfloat(STREF(shortfloat,x,s_pos[i])));
+    case aet_lf: return(make_longfloat(STREF(longfloat,x,s_pos[i])));
+    case aet_uchar: return(small_fixnum(STREF(unsigned char,x,s_pos[i])));
+    case aet_ushort: return(make_fixnum(STREF(unsigned short,x,s_pos[i])));
+    case aet_short: return(make_fixnum(STREF(short,x,s_pos[i])));
+    default:
+      bad_raw_type();
+      return 0;
+    }
+}
+#ifdef STATIC_FUNCTION_POINTERS
 object
-structure_ref(object x, object name, int i)
-{unsigned short *s_pos;
- COERCE_DEF(name);
- if (type_of(x) != t_structure ||
-     (type_of(name)!=t_structure) ||
-     !structure_subtypep(x->str.str_def, name))
-   FEwrong_type_argument((type_of(name)==t_structure ?
-			  S_DATA(name)->name : name),
-			 x);
- s_pos = &SLOT_POS(x->str.str_def,0);
- switch((SLOT_TYPE(x->str.str_def,i)))
-   {
-   case aet_object: return(STREF(object,x,s_pos[i]));
-   case aet_fix:  return(make_fixnum((STREF(fixnum,x,s_pos[i]))));
-   case aet_ch:  return(code_char(STREF(char,x,s_pos[i])));
-   case aet_bit:
-   case aet_char: return(small_fixnum(STREF(char,x,s_pos[i])));
-   case aet_sf: return(make_shortfloat(STREF(shortfloat,x,s_pos[i])));
-   case aet_lf: return(make_longfloat(STREF(longfloat,x,s_pos[i])));
-   case aet_uchar: return(small_fixnum(STREF(unsigned char,x,s_pos[i])));
-   case aet_ushort: return(make_fixnum(STREF(unsigned short,x,s_pos[i])));
-   case aet_short: return(make_fixnum(STREF(short,x,s_pos[i])));
-   default:
-     bad_raw_type();
-     return 0;
-   }}
+structure_ref(object x,object name,fixnum i) {
+  return FFN(structure_ref)(x,name,i);
+}
+#endif
 
 
 static void
@@ -96,46 +115,50 @@ FFN(siLstructure_ref1)(void)
  vs_top=vs_base+1;
 }
 
- 
- 
-
-
-object
-structure_set(object x, object name, int i, object v)
-{unsigned short *s_pos;
- 
- COERCE_DEF(name);
- if (type_of(x) != t_structure ||
-     type_of(name) != t_structure ||
-     !structure_subtypep(x->str.str_def, name))
-   FEwrong_type_argument((type_of(name)==t_structure ?
-			  S_DATA(name)->name : name)
-			 , x);
-
+DEFUN_NEW("STRUCTURE-SET",object,structure_set,SI,4,4,NONE,OO,OI,OO,OO,(object x,object name,fixnum i,object v),"") {
+/* object */
+/* structure_set(object x, object name, int i, object v) */
+/* { */
+  unsigned short *s_pos;
+  
+  COERCE_DEF(name);
+  if (type_of(x) != t_structure ||
+      type_of(name) != t_structure ||
+      !structure_subtypep(x->str.str_def, name))
+    FEwrong_type_argument((type_of(name)==t_structure ?
+			   S_DATA(name)->name : name)
+			  , x);
+  
 #ifdef SGC
- /* make sure the structure header is on a writable page */
- if (x->d.m) FEerror("bad gc field",0); else  x->d.m = 0;
+  /* make sure the structure header is on a writable page */
+  if (x->d.m) FEerror("bad gc field",0); else  x->d.m = 0;
 #endif   
- 
- s_pos= & SLOT_POS(x->str.str_def,0);
- switch(SLOT_TYPE(x->str.str_def,i)){
-   
-   case aet_object: STREF(object,x,s_pos[i])=v; break;
-   case aet_fix:  (STREF(fixnum,x,s_pos[i]))=fix(v); break;
-   case aet_ch:  STREF(char,x,s_pos[i])=char_code(v); break;
-   case aet_bit:
-   case aet_char: STREF(char,x,s_pos[i])=fix(v); break;
-   case aet_sf: STREF(shortfloat,x,s_pos[i])=sf(v); break;
-   case aet_lf: STREF(longfloat,x,s_pos[i])=lf(v); break;
-   case aet_uchar: STREF(unsigned char,x,s_pos[i])=fix(v); break;
-   case aet_ushort: STREF(unsigned short,x,s_pos[i])=fix(v); break;
-   case aet_short: STREF(short,x,s_pos[i])=fix(v); break;
- default:
-   bad_raw_type();
-
-   }
- return(v);
+  
+  s_pos= & SLOT_POS(x->str.str_def,0);
+  switch(SLOT_TYPE(x->str.str_def,i)){
+    
+  case aet_object: STREF(object,x,s_pos[i])=v; break;
+  case aet_fix:  (STREF(fixnum,x,s_pos[i]))=fix(v); break;
+  case aet_ch:  STREF(char,x,s_pos[i])=char_code(v); break;
+  case aet_bit:
+  case aet_char: STREF(char,x,s_pos[i])=fix(v); break;
+  case aet_sf: STREF(shortfloat,x,s_pos[i])=sf(v); break;
+  case aet_lf: STREF(longfloat,x,s_pos[i])=lf(v); break;
+  case aet_uchar: STREF(unsigned char,x,s_pos[i])=fix(v); break;
+  case aet_ushort: STREF(unsigned short,x,s_pos[i])=fix(v); break;
+  case aet_short: STREF(short,x,s_pos[i])=fix(v); break;
+  default:
+    bad_raw_type();
+    
+  }
+  return(v);
 }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+structure_set(object x,object name,fixnum i) {
+  return FFN(structure_set)(x,name,i);
+}
+#endif
 
 static void
 FFN(siLstructure_subtype_p)(void)
@@ -362,12 +385,12 @@ FFN(siLmake_s_data_structure)(void)
  vs_top=vs_base+1;
 }
 
-static void
-FFN(siLstructure_def)(void)
-{check_arg(1);
- check_type_structure(vs_base[0]);
-  vs_base[0]=vs_base[0]->str.str_def;
-}
+/* static void */
+/* FFN(siLstructure_def)(void) */
+/* {check_arg(1); */
+/*  check_type_structure(vs_base[0]); */
+/*   vs_base[0]=vs_base[0]->str.str_def; */
+/* } */
 
 short aet_sizes [] = {
 sizeof(object),  /* aet_object  t  */
@@ -431,10 +454,10 @@ gcl_init_structure_function(void)
 	make_si_function("MAKE-S-DATA-STRUCTURE",siLmake_s_data_structure);
 	make_si_function("COPY-STRUCTURE", siLcopy_structure);
 	make_si_function("STRUCTURE-NAME", siLstructure_name);
-	make_si_function("STRUCTURE-REF", siLstructure_ref);
-	make_si_function("STRUCTURE-DEF", siLstructure_def);
+	/* make_si_function("STRUCTURE-REF", siLstructure_ref); */
+	/* make_si_function("STRUCTURE-DEF", siLstructure_def); */
 	make_si_function("STRUCTURE-REF1", siLstructure_ref1);
-	make_si_function("STRUCTURE-SET", siLstructure_set);
+	/* make_si_function("STRUCTURE-SET", siLstructure_set); */
 	make_si_function("STRUCTUREP", siLstructurep);
 	make_si_function("SIZE-OF", siLsize_of);
 	make_si_function("ALIGNMENT",siLalignment);

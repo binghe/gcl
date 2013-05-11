@@ -62,6 +62,7 @@
 
 
 ;;; Some DEFTYPE definitions.
+(deftype spice nil `(satisfies spice-p))
 (deftype fixnum ()
   `(integer ,most-negative-fixnum ,most-positive-fixnum))
 (deftype bit () '(integer 0 1))

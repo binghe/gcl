@@ -407,6 +407,17 @@ LFD(Lgethash)()
 	vs_popp;
 }
 
+DEFUN_NEW("GETHASH1",object,fSgethash1,SI,2,2,NONE,OO,OO,OO,OO,(object k,object h),"") {
+
+  struct htent *e;
+
+  check_type_hash_table(&h);
+  e = gethash(k,h);
+  return e->hte_key != OBJNULL ? e->hte_value : Cnil;
+
+}
+
+
 LFD(siLhash_set)()
 {
 	check_arg(3);

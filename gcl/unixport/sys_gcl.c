@@ -24,9 +24,9 @@ gcl_init_system(object no_init) {
   if (type_of(no_init)!=t_symbol)
     error("Supplied no_init is not of type symbol\n");
 
+  ar_check_init(gcl_arraylib,no_init);
   ar_check_init(gcl_predlib,no_init);
   ar_check_init(gcl_setf,no_init);
-  ar_check_init(gcl_arraylib,no_init);
   ar_check_init(gcl_assert,no_init);
   ar_check_init(gcl_defstruct,no_init);
   ar_check_init(gcl_describe,no_init);
@@ -47,6 +47,7 @@ gcl_init_system(object no_init) {
   ar_check_init(gcl_loop,no_init);
   ar_check_init(gcl_defpackage,no_init);
   ar_check_init(gcl_make_defpackage,no_init);
+  ar_check_init(gcl_sharp,no_init);
 
 	
   ar_check_init(gcl_cmpinline,no_init);

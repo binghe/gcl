@@ -34,7 +34,8 @@ END-INFO-DIR-ENTRY
 @titlepage
 @sp 10
 @comment The title is printed in a large font.
-@center @titlefont{GCL SI Manual}
+@comment @center @titlefont{GCL SI Manual}
+@title GCL SI Manual
 @end titlepage
 
 @node Top, Numbers, (dir), (dir)

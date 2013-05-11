@@ -159,7 +159,7 @@ funcall(object fun)
 { 
         object temporary;
 	object x;
-	 object * VOL top;
+        object * VOL top;
 	object *lex;
 	bds_ptr old_bds_top;
 	VOL bool b;
@@ -174,15 +174,23 @@ funcall(object fun)
 		CHECK_AVMA; return;
 	case t_gfun:	
 	case t_sfun:
-		ihs_check;ihs_push(fun);
-		quick_call_sfun(fun);
-		ihs_pop();
-		return;
+	  { 
+	    extern int Rset;
+	    int rset=Rset;
+	    if (!rset) {ihs_check;ihs_push(fun);}
+	    quick_call_sfun(fun);
+	    if (!rset) ihs_pop();
+	  }
+	  return;
         case t_vfun:
-		ihs_check;ihs_push(fun);
-		call_vfun(fun);
-		ihs_pop();
-		return;
+	  { 
+	    extern int Rset;
+	    int rset=Rset;
+	    if (!rset) {ihs_check;ihs_push(fun);}
+	    call_vfun(fun);
+	    if (!rset) ihs_pop();
+	  }
+	  return;
          case t_afun:
 	 case t_closure:
 	   { object res,*b = vs_base;

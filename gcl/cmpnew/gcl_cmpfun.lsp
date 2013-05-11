@@ -516,6 +516,7 @@
 (defvar *type-alist*
   '((fixnum . si::fixnump)
     (float . floatp)
+    (si::spice . si::spice-p)
     (short-float . short-float-p)
     (long-float . long-float-p)
     (integer . integerp)

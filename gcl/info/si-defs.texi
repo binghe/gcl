@@ -992,7 +992,7 @@ will be called automatically as needed.
 @end menu
 
 @node Regular Expressions,  , System Definitions, System Definitions
-@subsection Regular Expressions
+@section Regular Expressions
 
 The function @code{string-match} (*Index string-match::) is used to
 match a regular expression against a string.  If the variable
@@ -1085,7 +1085,7 @@ from left to right across the input string and the pattern, and it
 attempts to match longer pieces of the input string before shorter
 ones.  More specifically, the following rules apply in decreasing
 order of priority:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 If a regular expression could match two different parts of an input string

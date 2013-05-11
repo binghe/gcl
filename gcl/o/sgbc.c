@@ -1068,7 +1068,7 @@ typedef enum {memprotect_none,memprotect_cannot_protect,memprotect_sigaction,
 	      memprotect_bad_return,memprotect_no_signal,
 	      memprotect_multiple_invocations,memprotect_no_restart,
 	      memprotect_bad_fault_address,memprotect_success} memprotect_enum;
-static memprotect_enum memprotect_result;
+static volatile memprotect_enum memprotect_result;
 static int memprotect_handler_invocations,memprotect_print_enable;
 static void *memprotect_test_address;
 

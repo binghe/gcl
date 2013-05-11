@@ -210,7 +210,7 @@ This command is ignored if the button's state is @b{disabled}.
 
 Tk automatically creates class bindings for buttons that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 The button activates whenever the mouse passes over it and deactivates
@@ -414,7 +414,7 @@ element of the listbox.  Returns an empty string.
 
 Tk automatically creates class bindings for listboxes that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 When button 1 is pressed over a listbox, the element underneath the
@@ -2482,7 +2482,7 @@ window of the topmost pixel in the entry specified by @i{index}.
 
 Tk automatically creates class bindings for menus that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 When the mouse cursor enters a menu, the entry underneath the mouse
@@ -2949,7 +2949,7 @@ modifying its associated variable to reflect the new state.
 
 Tk automatically creates class bindings for check buttons that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 The check button activates whenever the mouse passes over it and deactivates
@@ -3145,7 +3145,7 @@ use ``@i{pathName }@b{:configure :state normal}'' instead.
 
 Tk automatically creates class bindings for menu buttons that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 A menu button activates whenever the mouse passes over it and deactivates
@@ -3560,7 +3560,7 @@ Text widgets support the standard X selection.
 Selection support is implemented via tags.
 If the @b{exportSelection} option for the text widget is true
 then the @b{sel} tag will be associated with the selection:
-@itemize  @asis
+@itemize  @asis{}
 @item
 [1]
 Whenever characters are tagged with @b{sel} the text widget
@@ -3892,7 +3892,7 @@ If the @b{:pickplace}@r{ option isn't specified then }@i{what} will
 appear at the top of the window.
 If @b{:pickplace} is specified then the widget chooses where
 @i{what} appears in the window:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 If @i{what} is already visible somewhere in the window then the
@@ -3920,7 +3920,7 @@ This command returns an empty string.
 
 Tk automatically creates class bindings for texts that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 Pressing mouse button 1 in an text positions the insertion cursor
@@ -4217,7 +4217,7 @@ at the left edge of the window.  Returns an empty string.
 Tk automatically creates class bindings for entries that give them
 the following default behavior:
 
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 Clicking mouse button 1 in an entry positions the insertion cursor
@@ -4908,7 +4908,7 @@ to this widget.
 
 Tk automatically creates class bindings for radio buttons that give them
 the following default behavior:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 The radio button activates whenever the mouse passes over it and deactivates

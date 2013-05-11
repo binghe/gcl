@@ -244,8 +244,8 @@
                           (t (setf (var-ref var) (vs-push))
 			     )))
            )
-	  ((eq (var-kind var) 'object))    
-          (t (setf (var-ref var) (vs-push))
+;	  ((eq (var-kind var) 'object))    
+          (t (unless (eq (var-kind var) 'object) (setf (var-ref var) (vs-push)))
 	     )))
         ))
 

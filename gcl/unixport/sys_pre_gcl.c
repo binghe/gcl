@@ -50,6 +50,7 @@ gcl_init_system(object no_init)
   lsp_init("../lsp/gcl_loop.lsp");
   lsp_init("../lsp/gcl_defpackage.lsp");
   lsp_init("../lsp/gcl_make_defpackage.lsp");
+  lsp_init("../lsp/gcl_sharp.lsp");
 
   lsp_init("../cmpnew/gcl_cmpinline.lsp");
   lsp_init("../cmpnew/gcl_cmputil.lsp");

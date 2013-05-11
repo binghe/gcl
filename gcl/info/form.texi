@@ -45,7 +45,7 @@ Syntax:
 Replaces the value in PLACE with the value of NEWVALUE, from left to right.
 Returns the value of the last NEWVALUE.  Each PLACE may be any one of the
 following:
-@itemize  @asis
+@itemize  @asis{}
 @item
 A symbol that names a variable.
 @item

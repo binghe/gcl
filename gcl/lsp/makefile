@@ -9,7 +9,7 @@ PORTDIR	= ../unixport
 CAT=cat
 APPEND=../xbin/append
 
-OBJS	= gcl_arraylib.o gcl_assert.o gcl_defmacro.o gcl_defstruct.o \
+OBJS	= gcl_sharp.o gcl_arraylib.o gcl_assert.o gcl_defmacro.o gcl_defstruct.o \
 	  gcl_describe.o gcl_evalmacros.o \
 	  gcl_iolib.o gcl_listlib.o gcl_mislib.o gcl_module.o gcl_numlib.o \
 	  gcl_packlib.o gcl_predlib.o \

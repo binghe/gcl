@@ -285,11 +285,11 @@ Package:LISP
 
 Displays information about storage allocation in the following format.
 
-@itemize @asis
+@itemize @asis{}
 
 @item
 for each type class
-@itemize @asis
+@itemize @asis{}
 @item
 the number of pages so-far allocated for the type class
 @item

@@ -87,7 +87,7 @@ M-c continues execution.
 
    Keywords typed at top level, in the debug loop have
 a special meaning:
-@itemize @asis
+@itemize @asis{}
 
 @item
 :delete  [n1] [n2] .. -- delete all break points or just n1,n2

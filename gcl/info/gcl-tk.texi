@@ -24,7 +24,8 @@ END-INFO-DIR-ENTRY
 @titlepage
 @sp 10
 @comment The title is printed in a large font.
-@center @titlefont{GCL TK Manual}
+@comment @center @titlefont{GCL TK Manual}
+@title GCL TK Manual
 @end titlepage
 
 @node Top, General, (dir), (dir)

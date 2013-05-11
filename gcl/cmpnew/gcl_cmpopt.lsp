@@ -213,6 +213,10 @@
  (push '((t) t #.(flags)"(#0)->str.str_def")
    (get 'system:structure-def 'inline-unsafe))
 
+;;SYSTEM:STRUCTURE-LENGTH
+ (push '((t) fixnum #.(flags rfa)"S_DATA(#0)->length")
+   (get 'system:structure-length 'inline-unsafe))
+
 ;;SYSTEM:STRUCTURE-REF
  (push '((t t fixnum) t #.(flags ans)"structure_ref(#0,#1,#2)")
    (get 'system:structure-ref 'inline-always))
@@ -224,6 +228,10 @@
 ;;SYSTEM:STRUCTUREP
  (push '((t) boolean #.(flags)"type_of(#0)==t_structure")
    (get 'system:structurep 'inline-always))
+
+;;SYSTEM:gethash1
+ (push '((t t) t #.(flags)"({struct htent *e=gethash(#0,#1);e->hte_key != OBJNULL ? e->hte_value : Cnil;})")
+   (get 'system:gethash1 'inline-always))
 
 ;;SYSTEM:SVSET
  (push '((t t t) t #.(flags set)"aset1(#0,fixint(#1),#2)")
@@ -885,6 +893,10 @@ type_of(#0)==t_bitvector")
 ;;LISTP
  (push '((t) boolean #.(flags)"@0;type_of(#0)==t_cons||(#0)==Cnil")
    (get 'listp 'inline-always))
+
+;;si::spice-p
+ (push '((t) boolean #.(flags)"@0;type_of(#0)==t_spice")
+   (get 'si::spice-p 'inline-always))
 
 ;;LOGAND
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) & (#1))")

@@ -58,17 +58,17 @@ gcl.info: ${GCL_MAN} gcl.texi
 #	$(HTML_CMD) gcl.texi
 
 gcl-si/index.html: ${GCL_SI} gcl-si.texi
-	mkdir -p $@
+	mkdir -p $(@D)
 	touch $@
 	-$(HTML_CMD) gcl-si.texi
 
 gcl-tk/index.html: ${GCL_TK} gcl-tk.texi
-	mkdir -p $@
+	mkdir -p $(@D)
 	touch $@
 	-$(HTML_CMD) gcl-tk.texi
 
 gcl/index.html: gcl.texi
-	mkdir -p $@
+	mkdir -p $(@D)
 	touch $@
 	-$(HTML_CMD) gcl.texi
 
@@ -114,3 +114,5 @@ tex:
 clean:
 	rm -f *.info* *.html *.dvi *.cp *.ky *.vr *.tp *.pg *.toc *.aux *.log *.fn
 	rm -rf gcl.IC gcl.IE gcl.IG gcl.IP gcl.IR gcl.IT gcl.fu gcl gcl-si gcl-tk
+	rm -rf gcl gcl-si gcl-tk
+

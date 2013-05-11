@@ -467,8 +467,8 @@ typedef void (*funcvoid)(void);
 #include <unistd.h>
 /* sbrk.c:9:OF */ /*  extern void * sbrk (int n); */ /* (n) int n; */
 /* strcspn.c:3:OF */ /*  extern size_t strcspn (const char *s1, const char *s2); */ /* (s1, s2) char *s1; char *s2; */
-/* structure.c:59:OF */ extern object structure_ref (object x, object name, int i); /* (x, name, i) object x; object name; int i; */
-/* structure.c:107:OF */ extern object structure_set (object x, object name, int i, object v); /* (x, name, i, v) object x; object name; int i; object v; */
+/* structure.c:59:OF */ extern object structure_ref (object x, object name, fixnum i); /* (x, name, i) object x; object name; int i; */
+/* structure.c:107:OF */ extern object structure_set (object x, object name, fixnum i, object v); /* (x, name, i, v) object x; object name; int i; object v; */
 /* structure.c:164:OF */ extern object structure_to_list (object x); /* (x) object x; */
 /* structure.c:188:OF */ extern void siLmake_structure (void); /* () */
 /* structure.c:281:OF */ extern void siLstructure_set (void); /* () */

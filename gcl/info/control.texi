@@ -926,7 +926,7 @@ At any given time, the only menus available for traversal
 are those associated with the top-level window containing the
 input focus.
 Menu traversal is initiated by one of the following actions:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 If <F10> is typed, then the first menu button in the list for the
@@ -950,7 +950,7 @@ its first entry.
 
 Once a menu has been posted, the input focus is switched to that
 menu and the following actions are possible:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 Typing <ESC> or clicking mouse button 1 outside the menu button or
@@ -2046,7 +2046,7 @@ This area is called the @i{cavity};  for the first slave it
 is the entire area of the master.
 
 For each slave the packer carries out the following steps:
-@itemize @asis
+@itemize @asis{}
 @item
 [1]
 The packer allocates a rectangular @i{parcel} for the slave
