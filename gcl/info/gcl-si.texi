@@ -18,17 +18,15 @@
 
 
 @setchapternewpage odd
+@dircategory GNU Common Lisp
+@direntry 
+* gcl-si: (gcl-si.info). GNU Common Lisp System Internals
+@end direntry
+
 @ifinfo
 This is a Texinfo GCL SYSTEM INTERNALS Manual
 
 Copyright 1994 William F. Schelter
-
-@format
-INFO-DIR-SECTION GNU Common Lisp
-START-INFO-DIR-ENTRY
-* gcl-si: (gcl-si.info). GNU Common Lisp System Internals
-END-INFO-DIR-ENTRY
-@end format
 @end ifinfo
 
 @titlepage

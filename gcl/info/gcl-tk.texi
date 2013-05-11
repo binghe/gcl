@@ -1,24 +1,32 @@
 \input texinfo
 @c -*-texinfo-*-
+@c IMPORTANT....
+@c some versions of texinfo.tex cause an error message 'unmatched paren
+@c for:
+@c @defun foo (a &optional (b 3))
+@c ! unbalanced parens in @def arguments.
+@c ignore these by using 's' to scroll error messages in tex.
+
+
 @c @smallbook
 @setfilename gcl-tk.info
+@synindex vr fn
 
 @c to update the menus do: 
-@c (texinfo-multiple-files-update "gcl-tk.texi" t t)
+@c (texinfo-multiple-files-update "gcl-si.texi" t t)
+
 
 
 @setchapternewpage odd
+@dircategory GNU Common Lisp
+@direntry 
+* gcl-tk: (gcl-tk.info). GNU TK Manual
+@end direntry
+
 @ifinfo
 This is a Texinfo GCL TK Manual
 
 Copyright 1994 William F. Schelter
-
-@format
-INFO-DIR-SECTION GNU Common Lisp
-START-INFO-DIR-ENTRY
-* gcl-tk: (gcl-tk.info). GNU Common Lisp Tk Manual
-END-INFO-DIR-ENTRY
-@end format
 @end ifinfo
 
 @titlepage
