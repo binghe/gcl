@@ -296,4 +296,11 @@ define-compiler-macro
 compiler-macro
 compiler-macro-function
 
+with-compilation-unit
+with-standard-io-syntax
+*print-lines*
+*print-miser-width*
+*print-pprint-dispatch*
+*print-right-margin*
+
 ))
