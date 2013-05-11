@@ -292,4 +292,8 @@ int
 float
 double
 
+define-compiler-macro
+compiler-macro
+compiler-macro-function
+
 ))

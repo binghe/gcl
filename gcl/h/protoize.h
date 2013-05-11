@@ -1835,3 +1835,4 @@ obj_to_mpz1(object,MP_INT *,void *);
 int
 obj_to_mpz(object,MP_INT *);
 
+void *gethash(object,object);

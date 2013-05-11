@@ -385,7 +385,7 @@
 ;(warn "****** Things will go faster if you fix define-compiler-macro")
 )
 
-#-cmu
+#-(or cmu gcl)
 (defmacro define-compiler-macro (name arglist &body body)
   #+(or lucid kcl)
   `(#+lucid lcl:def-compiler-macro #+kcl si::define-compiler-macro

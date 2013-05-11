@@ -155,8 +155,8 @@ DEFUN_NEW("STRUCTURE-SET",object,structure_set,SI,4,4,NONE,OO,OI,OO,OO,(object x
 }
 #ifdef STATIC_FUNCTION_POINTERS
 object
-structure_set(object x,object name,fixnum i) {
-  return FFN(structure_set)(x,name,i);
+structure_set(object x,object name,fixnum i,object v) {
+  return FFN(structure_set)(x,name,i,v);
 }
 #endif
 

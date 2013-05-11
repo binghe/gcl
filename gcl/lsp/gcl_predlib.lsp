@@ -62,6 +62,7 @@
 
 
 ;;; Some DEFTYPE definitions.
+(deftype string-stream nil `(or (satisfies string-input-stream-p) (satisfies string-output-stream-p)))
 (deftype spice nil `(satisfies spice-p))
 (deftype fixnum ()
   `(integer ,most-negative-fixnum ,most-positive-fixnum))

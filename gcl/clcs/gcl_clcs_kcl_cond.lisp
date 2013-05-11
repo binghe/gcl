@@ -107,7 +107,7 @@
     ("FEundefined_function" :undefined-function "The function ~S is undefined."
      internal-undefined-function :name)
     ("FEinvalid_function" :invalid-function "~S is invalid as a function."
-     internal-type-error) ; |obj|
+     internal-undefined-function :name) ; |obj|
     ("FEinvalid_variable" :invalid-variable "~S is an invalid variable."
      internal-program-error) ; |obj|
     ("check_arg_failed" :too-few-arguments "~S [or a callee] requires ~R argument~:p,~%\

@@ -68,8 +68,21 @@
 
 (defvar *fasd-data*)
 
+(defvar *hash-eq* nil)
+(defun memoized-hash-equal (x depth);FIXME implement all this in lisp
+  (declare (fixnum depth))
+  (unless *hash-eq* (setq *hash-eq* (make-hash-table :test 'eq)))
+  (or (gethash x *hash-eq*)
+      (setf (gethash x *hash-eq*)
+	    (if (> depth 3) 0
+	      (if (typep x 'cons)
+		  (logxor (setq depth (the fixnum (1+ depth)))
+			  (memoized-hash-equal (car x) depth) 
+			  (memoized-hash-equal (cdr x) depth))
+	      (si::hash-equal x depth))))))
+
 (defun push-data-incf (x)
-  (vector-push-extend (cons (si::hash-equal x -1000) x) (data-vector))
+  (vector-push-extend (cons (memoized-hash-equal x -1000) x) (data-vector))
   (incf *next-vv*))
 
 (defun wt-data1 (expr)
@@ -92,7 +105,7 @@
 (defun verify-data-vector(vec &aux v)
   (dotimes (i (length vec))
 	   (setq v (aref vec i))
-	   (let ((has (si::hash-equal (cdr v) -1000)))
+	   (let ((has (memoized-hash-equal (cdr v) -1000)))
 	     (cond ((not (eql (car v) has))
 		    (cmpwarn "A form or constant:~% ~s ~%has changed during the eval compile procedure!.~%  The changed form will be the one put in the compiled file" (cdr v)))))
 	   (setf (aref vec i) (cdr v)))
@@ -100,7 +113,7 @@
   )
 
 (defun add-init (x &optional endp)
-  (let ((tem (cons (si::hash-equal x -1000) x)))
+  (let ((tem (cons (memoized-hash-equal x -1000) x)))
     (setf (data-inits)
 		    (if endp
 			(nconc (data-inits) (list tem))

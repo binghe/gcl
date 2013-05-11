@@ -85,7 +85,26 @@
                ((endp forms) form))))
   )
                
-(defmacro locally (&rest body) `(let () ,@body))
+(defun parse-body-header (x &optional doc decl ctps &aux (a (car x)))
+  (cond 
+   ((unless (or doc ctps) (and (stringp a) (cdr x))) (parse-body-header (cdr x) a decl ctps))
+   ((unless ctps (when (consp a) (eq (car a) 'declare)))  (parse-body-header (cdr x) doc (cons a decl) ctps))
+   ((when (consp a) (eq (car a) 'check-type)) (parse-body-header (cdr x) doc decl (cons a ctps)))
+   (t (values doc (nreverse decl) (nreverse ctps) x))))
+
+(defmacro locally (&rest body)
+  (multiple-value-bind
+   (doc decls ctps body)
+   (parse-body-header body)
+   `(let (,@(mapcan (lambda (x &aux (z (pop x))(z (if (eq z 'type) (pop x) z)))
+		      (case z
+			    ((ftype inline notinline optimize) nil)
+			    (otherwise (mapcar (lambda (x) (list x x)) x))))
+		   (apply 'append (mapcar 'cdr decls))))
+      ,@(when doc (list doc))
+      ,@decls
+      ,@ctps
+      ,@body)))
 
 (defmacro loop (&rest body &aux (tag (gensym)))
   `(block nil (tagbody ,tag (progn ,@body) (go ,tag))))
@@ -356,3 +375,6 @@
 	     ,@(mapcar #'(lambda (x) `(proclaim ',x)) l)))
 
 (defmacro lambda ( &rest l) `(function (lambda ,@l)))
+
+(defun compiler-macro-function (name)
+  (get name 'compiler-macro-prop))

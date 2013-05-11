@@ -676,6 +676,13 @@ int istart, iend;
 	return(strm);
 }
 
+DEFUN_NEW("STRING-INPUT-STREAM-P",object,fSstring_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  return type_of(x)==t_stream && x->sm.sm_mode == (short)smm_string_input ? Ct : Cnil;
+}
+DEFUN_NEW("STRING-OUTPUT-STREAM-P",object,fSstring_output_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  return type_of(x)==t_stream && x->sm.sm_mode == (short)smm_string_output ? Ct : Cnil;
+}
+
 object
 make_string_output_stream(line_length)
 int line_length;
