@@ -303,4 +303,6 @@ with-standard-io-syntax
 *print-pprint-dispatch*
 *print-right-margin*
 
+*read-eval*
+
 ))
