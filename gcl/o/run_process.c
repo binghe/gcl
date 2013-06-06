@@ -177,9 +177,11 @@ void run_process ( char *name )
     stream_in = (object) alloc_object(t_stream);
     stream_in->sm.sm_mode = smm_input;
     stream_in->sm.sm_fp = ofp;
+    stream_in->sm.sm_buffer = 0;
     stream_out = (object) alloc_object(t_stream);
     stream_out->sm.sm_mode = smm_output;
     stream_out->sm.sm_fp = ifp;
+    stream_out->sm.sm_buffer = 0;
     setup_stream_buffer ( stream_in );
     setup_stream_buffer ( stream_out );
     stream = make_two_way_stream ( stream_in, stream_out );
@@ -424,6 +426,7 @@ enum smmode smm;
 	stream = (object)  alloc_object(t_stream);
 	stream->sm.sm_mode = (short)smm;
 	stream->sm.sm_fp = fp;
+	stream->sm.sm_buffer = 0;
 
 	stream->sm.sm_object0 = sLstring_char;
 	stream->sm.sm_object1 = host_l;
@@ -494,11 +497,13 @@ make_socket_pair()
   stream_in = (object) alloc_object(t_stream);
   stream_in->sm.sm_mode = smm_input;
   stream_in->sm.sm_fp = fp1;
+  stream_in->sm.sm_buffer = 0;
   stream_in->sm.sm_int0 = sockets_in[1];
   stream_in->sm.sm_int1 = 0;
   stream_out = (object) alloc_object(t_stream);
   stream_out->sm.sm_mode = smm_output;
   stream_out->sm.sm_fp = fp2;
+  stream_out->sm.sm_buffer = 0;
   setup_stream_buffer(stream_in);
   setup_stream_buffer(stream_out);
   stream_out->sm.sm_int0 = sockets_out[1];

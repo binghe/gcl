@@ -936,6 +936,11 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
   tm_table[(int)t].tm_adjgbccnt = 0;
   tm_table[(int)t].tm_opt_maxpage = 0;
   tm_table[(int)t].tm_distinct=distinct;
+
+  if (t<t_end) {
+    tm_table[(int)t].tm_percent_free=30;
+    tm_table[(int)t].tm_growth_percent=50;
+  }
 #ifdef SGC	
   tm_table[(int)t].tm_sgc = sgc;
   tm_table[(int)t].tm_sgc_max = 3000;

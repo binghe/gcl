@@ -638,6 +638,7 @@ object istrm, ostrm;
 	strm = alloc_object(t_stream);
 	strm->sm.sm_mode = (short)smm_two_way;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STREAM_INPUT_STREAM(strm) = istrm;
 	STREAM_OUTPUT_STREAM(strm) = ostrm;
 	strm->sm.sm_int0 = strm->sm.sm_int1 = 0;
@@ -665,6 +666,7 @@ int istart, iend;
 	strm = alloc_object(t_stream);
 	strm->sm.sm_mode = (short)smm_string_input;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
 	STRING_INPUT_STREAM_NEXT(strm)= istart;
@@ -700,6 +702,7 @@ int line_length;
 	strm = alloc_object(t_stream);
 	strm->sm.sm_mode = (short)smm_string_output;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
 	strm->sm.sm_int0 = STREAM_FILE_COLUMN(strm) = 0;
@@ -1536,6 +1539,7 @@ LFD(Lmake_synonym_stream)()
 	x = alloc_object(t_stream);
 	x->sm.sm_mode = (short)smm_synonym;
 	x->sm.sm_fp = NULL;
+	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
@@ -1558,6 +1562,7 @@ LFD(Lmake_broadcast_stream)()
 	x = alloc_object(t_stream);
 	x->sm.sm_mode = (short)smm_broadcast;
 	x->sm.sm_fp = NULL;
+	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
@@ -1580,6 +1585,7 @@ LFD(Lmake_concatenated_stream)()
 	x = alloc_object(t_stream);
 	x->sm.sm_mode = (short)smm_concatenated;
 	x->sm.sm_fp = NULL;
+	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
@@ -2001,6 +2007,7 @@ LFD(siLmake_string_output_stream_from_string)()
 	strm = alloc_object(t_stream);
 	strm->sm.sm_mode = (short)smm_string_output;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
 	/* strm->sm.sm_int0 = strng->st.st_fillp; */
@@ -2534,6 +2541,7 @@ gcl_init_file(void)
 	standard_input = alloc_object(t_stream);
 	standard_input->sm.sm_mode = (short)smm_input;
 	standard_input->sm.sm_fp = stdin;
+	standard_input->sm.sm_buffer = 0;
 	standard_input->sm.sm_object0 = sLstring_char;
 	standard_input->sm.sm_object1
 #ifdef UNIX
@@ -2545,6 +2553,7 @@ gcl_init_file(void)
 	standard_output = alloc_object(t_stream);
 	standard_output->sm.sm_mode = (short)smm_output;
 	standard_output->sm.sm_fp = stdout;
+	standard_output->sm.sm_buffer = 0;
 	standard_output->sm.sm_object0 = sLstring_char;
 	standard_output->sm.sm_object1
 #ifdef UNIX
@@ -2560,6 +2569,7 @@ gcl_init_file(void)
 	x = alloc_object(t_stream);
 	x->sm.sm_mode = (short)smm_synonym;
 	x->sm.sm_fp = NULL;
+	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = sLAterminal_ioA;
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0; /* unused */
