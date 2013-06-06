@@ -1005,7 +1005,7 @@ FFN(siLsave_system)(void) {
     core_end = new;
     rb_end=rb_limit=rb_pointer;
     nrbpage=(rb_pointer-rb_start)/PAGESIZE;
-    new_holepage=holepage=old_holepage;
+    new_holepage=old_holepage;
   }
 
 #ifdef GCL_GPROF
