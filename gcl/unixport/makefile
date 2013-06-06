@@ -182,7 +182,7 @@ map_%:
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
-		gazonk*.lsp plt*h *_map saved_* lib* raw_* msys out* log* tmp*
+		gazonk*.lsp plt*h *_map saved_* lib* raw_* msys out* log* tmp* gcl.script
 
 .INTERMEDIATE: init_ansi_gcl.lsp.tmp init_gcl.lsp.tmp raw_gcl raw_ansi_gcl
 .PRECIOUS: init_pre_gcl.lsp init_gcl.lsp init_ansi_gcl.lsp

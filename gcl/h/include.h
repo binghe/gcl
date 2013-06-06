@@ -70,6 +70,15 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 
+#ifdef IN_NUM_CO
+#ifdef HAVE_VALUES_H
+#include <values.h>
+#endif
+#ifdef HAVE_FLOAT_H
+#include <float.h>
+#endif
+#endif
+
 #ifdef UNIX
 #include <ctype.h>
 #define	isalphanum(x)	isalnum(x)

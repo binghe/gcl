@@ -8306,7 +8306,8 @@ if test "x$ac_cv_header_values_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_VALUES_H 1
 _ACEOF
- $as_echo "#define HAVE_VALUES_H 1" >>confdefs.h
+
+$as_echo "#define HAVE_VALUES_H 1" >>confdefs.h
 
 fi
 
@@ -8323,7 +8324,8 @@ if test "x$ac_cv_header_float_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_FLOAT_H 1
 _ACEOF
- $as_echo "#define HAVE_FLOAT_H 1" >>confdefs.h
+
+$as_echo "#define HAVE_FLOAT_H 1" >>confdefs.h
 
 fi
 

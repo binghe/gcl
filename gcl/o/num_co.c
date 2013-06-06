@@ -1371,7 +1371,6 @@ gcl_init_num_co(void)
 	biggest_double = *(double *)l;
 #endif
 
-
 #ifdef DBL_MAX_10_EXP
 	biggest_double = DBL_MAX;
 	smallest_norm_double = DBL_MIN;

@@ -1895,12 +1895,12 @@ AC_CHECK_HEADERS(complex.h,AC_DEFINE(HAVE_COMPLEX_H,1,[have complex.h]))
 #
 # For DBL_MAX et. al. on (only) certain Linux arches, apparently CM
 #
-AC_CHECK_HEADERS(values.h,AC_DEFINE(HAVE_VALUES_H))
+AC_CHECK_HEADERS(values.h,AC_DEFINE(HAVE_VALUES_H,1,[have values.h]))
 
 #
 # Sparc solaris keeps this in float.h, rework either/or with values.h later
 #
-AC_CHECK_HEADERS(float.h,AC_DEFINE(HAVE_FLOAT_H))
+AC_CHECK_HEADERS(float.h,AC_DEFINE(HAVE_FLOAT_H,1,[have float.h]))
 
 #
 # The second alternative is for solaris.  This needs to be
