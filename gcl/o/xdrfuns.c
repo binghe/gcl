@@ -47,7 +47,10 @@ FFN(siGxdr_write)(object str,object elt) {
 
   switch (type_of(elt)) {
   case t_fixnum:
-    if(!xdr_long(xdrp,(long *)&fix(elt))) goto error;
+    {
+      fixnum e=fix(elt);
+      if(!xdr_long(xdrp,(long *)&e)) goto error;
+    }
     break;
   case t_longfloat:
     if(!xdr_double(xdrp,&lf(elt))) goto error;

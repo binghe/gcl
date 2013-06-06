@@ -758,7 +758,7 @@ adjust_displaced(object x, long diff)
 {
 	if (x->ust.ust_self != NULL)
 		x->ust.ust_self = (unsigned char *)((long)(x->a.a_self) + diff);
-	for (x = Mcdr(x->ust.ust_displaced);  x != Cnil;  x = Mcdr(x))
+	for (x = Scdr(x->ust.ust_displaced);  x != Cnil;  x = Scdr(x))
 		adjust_displaced(Mcar(x), diff);
 }
 

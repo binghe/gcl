@@ -281,7 +281,7 @@
                            link-alist))))))
     (terpri)
     (dolist (info (reverse info-list))
-      (apply #'format t "~6D/~D~12T~6,1F%~@[~8D~]~28T~{~A~^ ~}"
+      (apply #'format t "~8D/~D~19T~6,1F%~@[~8D~]~35T~{~A~^ ~}"
              (append (cdr info)
                      (if  (assoc (car info) link-alist)
                           (list (assoc (car info) link-alist))
@@ -289,17 +289,17 @@
       (terpri)
       )
     (terpri)
-    (format t "~6D/~D~19T~@[~8D~]~28Tcontiguous (~D blocks)~%"
+    (format t "~8D/~D~26T~@[~8D~]~35Tcontiguous (~D blocks)~%"
             ncbpage maxcbpage (if (zerop cbgbccount) nil cbgbccount) ncb)
-    (format t "~7T~D~28Thole~%" holepage)
-    (format t "~7T~D~12T~6,1F%~@[~8D~]~28Trelocatable~%~%"
+    (format t "~9T~D~35Thole~%" holepage)
+    (format t "~9T~D~19T~6,1F%~@[~8D~]~35Trelocatable~%~%"
             nrbpage (/ rbused 0.01 (+ rbused rbfree))
             (if (zerop rbgbccount) nil rbgbccount))
     (format t "~10D pages for cells~%" npage)
     (format t "~10D total pages~%" (+ npage ncbpage holepage nrbpage))
     (format t "~10D pages available~%" leftpage)
     (format t "~10D pages in heap but not gc'd + pages needed for gc marking~%"
-	    (- maxpage (+ npage ncbpage holepage nrbpage leftpage)))
+	    (- maxpage (+ npage ncbpage nrbpage leftpage)))
     (format t "~10D maximum pages~%" maxpage)
     (values)
     ))

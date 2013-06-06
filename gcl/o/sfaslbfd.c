@@ -210,7 +210,7 @@ fasload(object faslfile) {
 
     nbfd=1;
 
-    dum.sm.t=t_stream;
+    set_type_of(&dum,t_stream);
     dum.sm.sm_mode=smm_input;
     dum.sm.sm_object0=sLstring_char;
 

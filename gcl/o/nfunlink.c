@@ -179,7 +179,7 @@ object
 IapplyVector(object fun, int nargs, object *base)
                       
                
-/* Call FUN a lisp objectect on NARGS which are loaded into an array
+/* Call FUN a lisp object on NARGS which are loaded into an array
    starting at BASE.  This pushes on the CallHist, and puts the args onto
    the arg stack, so that debuggers may examine them.  It sets
    fcall.nvalues appropriately. */

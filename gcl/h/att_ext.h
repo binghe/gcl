@@ -23,7 +23,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 /*  alloc.c  */
-char *alloc_page();
+void *alloc_page();
 object alloc_object();
 void *malloc(size_t);
 void *realloc(void *,size_t);
@@ -313,7 +313,7 @@ EXTER object sLblock;
 /*  number.c  */
 EXTER object shortfloat_zero;
 EXTER object longfloat_zero;
-#define make_fixnum(a) ({fixnum _a=(a);((_a+SMALL_FIXNUM_LIMIT)&(-2*SMALL_FIXNUM_LIMIT))==0?small_fixnum(_a):make_fixnum1(_a);})
+/* #define make_fixnum(a) ({fixnum _a=(a);((_a+SMALL_FIXNUM_LIMIT)&(-2*SMALL_FIXNUM_LIMIT))==0?small_fixnum(_a):make_fixnum1(_a);}) */
 object make_fixnum1(long);
 object make_ratio();
 object make_shortfloat();

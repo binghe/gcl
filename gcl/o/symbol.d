@@ -513,9 +513,9 @@ DEFVAR("*GENSYM-COUNTER*",sLgensym_counter,LISP,make_fixnum(0),"");
 	  q=p+j;
 	  break;
 	case t_fixnum:
-	  for (size=1,f=this_gensym_counter->FIX.FIXVAL;f;f/=10,size++);
+	  for (size=1,f=fix(this_gensym_counter);f;f/=10,size++);
 	  q=p=alloca(size+5);
-	  if ((j=snprintf(p,size+5,"%d",(int)this_gensym_counter->FIX.FIXVAL))<=0)
+	  if ((j=snprintf(p,size+5,"%ld",fix(this_gensym_counter)))<=0)
 	    FEerror("Cannot write gensym counter",0);
 	  q=p+j;
 	  break;

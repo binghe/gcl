@@ -82,9 +82,6 @@ void old(void) \
    pack == LISP ? LISP_makefun(string,fname,argd) : \
    error("Bad pack variable in MAKEFUN\n"))
 
-#define mjoin(a_,b_) a_ ## b_
-#define Mjoin(a_,b_) mjoin(a_,b_)
-
 #define SI 0
 #define LISP 1
 

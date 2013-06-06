@@ -106,7 +106,6 @@ be over written.   \
   va_list ap;
   object v = sSAmatch_dataA->s.s_dbind;
   char **pp,*str,save_c=0;
-  unsigned np;
 
   if (type_of(pattern)!= t_string && type_of(pattern)!=t_symbol &&
       (type_of(pattern)!=t_vector || pattern->v.v_elttype!=aet_uchar))
@@ -156,9 +155,7 @@ be over written.   \
 
 
      str=string->st.st_self;
-     np=page(str);
-     if (np>=MAXPAGE || (type_map[np] != t_contiguous && type_map[np] != t_relocatable) ||
-	 str+end==(void *)core_end || str+end==(void *)compiled_regexp) {
+     if (str+end==(void *)core_end || str+end==(void *)compiled_regexp) {
 
        if (!(str=alloca(string->st.st_fillp+1)))
 	 FEerror("Cannot allocate memory on C stack",0);

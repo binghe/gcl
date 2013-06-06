@@ -26,6 +26,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 #include <unistd.h>
+#include "num_include.h"
 
 #define LINE_LENGTH line_length
 int  line_length = 72;
@@ -628,7 +629,7 @@ int level;
 		write_str("#<OBJNULL>");
 		return;
 	}
-	if (x->d.m == FREE) {
+	if (is_free(x)) {
 		write_str("#<FREE OBJECT ");
 		write_addr(x);
 		write_str(">");
@@ -654,8 +655,8 @@ int level;
 		}
 		if (i < 0) {
 			write_ch('-');
-			if (i == MOST_NEG_FIXNUM) {
-				x = fixnum_add(1,(MOST_POSITIVE_FIXNUM));
+			if (i == MOST_NEGATIVE_FIX) {
+				x = fixnum_add(1,(MOST_POSITIVE_FIX));
 				vs_push(x);
 				i = PRINTradix;
 				PRINTradix = FALSE;
@@ -1316,7 +1317,7 @@ int level;
 	case t_random:
 		write_str("#$");
 		y = alloc_object(t_fixnum);
-		fix(y) = x->rnd.rnd_value;
+		set_fix(y,x->rnd.rnd_value);
 		vs_push(y);
 		write_object(y, level);
 		vs_popp;
@@ -1868,7 +1869,7 @@ gcl_init_print()
 	travel_push_type[(int)t_vector]=1;
 	travel_push_type[(int)t_structure]=1;
 	travel_push_type[(int) t_cons]=1;
-	if(sizeof(travel_push_type) < (int) t_other)
+	if(sizeof(travel_push_type) <  t_other)
 	  error("travel_push_size to small see print.d");
 
 	PRINTstream = Cnil;

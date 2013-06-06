@@ -74,7 +74,7 @@ get_init_sym(NSModule module,object ff) {
 
     object x;
     struct string st;
-    st.t=t_string;
+    set_type_of(&st,t_string);
     st.st_self="COMPILER";
     st.st_dim=st.st_fillp=strlen(st.st_self);
     if ((x=find_package((object)&st))==Cnil)
@@ -88,7 +88,7 @@ get_init_sym(NSModule module,object ff) {
     
   }
 
-  st.t=t_string;
+  set_type_of(&st,t_string);
   st.st_self=ff->st.st_self;
   st.st_dim=st.st_fillp=ff->st.st_dim;
   x=ifuncall1(inf,(object)&st);

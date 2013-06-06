@@ -73,9 +73,6 @@ bool saving_system ;
 
 char *system_directory;
 
-int page_multiple=1;
-
-
 #define EXTRA_BUFSIZE 8
 char stdin_buf[BUFSIZ + EXTRA_BUFSIZE];
 char stdout_buf[BUFSIZ + EXTRA_BUFSIZE];
@@ -115,6 +112,65 @@ void install_segmentation_catcher(void);
         struct sigstack estack;
 #endif
 #endif
+
+int
+cstack_dir(fixnum j) {
+  static fixnum n;
+  if (!n) {
+    n=1;
+    return cstack_dir((fixnum)&j);
+  }
+  return (fixnum)&j<j ? -1 : 1;
+}
+
+fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
+
+int
+update_real_maxpage(void) {
+
+  fixnum i;
+  void *end,*cur;
+  /* fixnum j=0; */
+  /* void *p; */
+
+  /* getrlimit(RLIMIT_DATA, &rl); */
+  /* end=pagetoinfo(first_data_page)+rl.rlim_cur; */
+  /* getrlimit(RLIMIT_AS, &rl); */
+  /* p=pagetoinfo(first_data_page)+rl.rlim_cur; */
+  /* getrlimit(RLIMIT_STACK, &rl); */
+  /* p=&j+rl.rlim_cur*cstack_dir(j); */
+  /* end=p<end ? p : end; */
+  /* p=&memcpy; */
+  /* p=(void*)((((ufixnum)p)>>(2*PAGEWIDTH))<<(2*PAGEWIDTH)); */
+  /* end=p<end ? p : end; */
+
+  massert(cur=sbrk(0));
+  for (i=1;i<=log_maxpage_bound;i++)
+    if ((end=(void *)(1L<<i))>cur)
+      if (!brk(end))
+	real_maxpage=page(end);
+  massert(!brk(cur));
+
+  return 0;
+
+}
+
+DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,OO,OO,(fixnum l),"") {
+
+  void *end;
+  fixnum def=sizeof(fixnum)*8-1;
+
+  l=l<def ? l : def;
+  end=(void *)(1L<<l);
+  if (end >= (void *)core_end) {
+    log_maxpage_bound=l;
+    update_real_maxpage();
+  }
+
+  return log_maxpage_bound;
+
+}
+
 
 int
 main(int argc, char **argv, char **envp) {
@@ -265,7 +321,7 @@ main(int argc, char **argv, char **envp) {
 	      rl.rlim_cur != mss) {
 	    rl.rlim_cur=mss;
 	    if (setrlimit(RLIMIT_STACK,&rl))
-	      error("Cannot set stack rlimit\n");
+	      fprintf(stderr,"Cannot set stack rlimit\n");/*FIXME work around make bug on mips*/
 	  }
 	  cssize = rl.rlim_cur/sizeof(*cs_org) - sizeof(*cs_org)*CSGETA;
         }
@@ -322,6 +378,8 @@ main(int argc, char **argv, char **envp) {
 	if (atexit(gprof_cleanup))
 	  error("Cannot setup gprof_cleanup on exit");
 #endif
+
+	update_real_maxpage();
 
 	if (initflag) {
 
@@ -459,19 +517,8 @@ initlisp(void) {
 	  error("NULL_OR_ON_C_STACK macro invalid");
 	
 	gcl_init_alloc();
-
-	Dotnil_body.t = (short)t_symbol;
-	Dotnil_body.s_dbind = Dotnil;
-	Dotnil_body.s_sfdef = NOT_SPECIAL;
-	Dotnil_body.s_fillp = 6;
-	Dotnil_body.s_self = "DOTNIL";
-	Dotnil_body.s_gfdef = OBJNULL;
-	Dotnil_body.s_plist = Cnil;
-	Dotnil_body.s_hpack = Cnil;
-	Dotnil_body.s_stype = (short)stp_constant;
-	Dotnil_body.s_mflag = FALSE;
 	
-	Cnil_body.s.t = (short)t_symbol;
+ 	Cnil->c.c_cdr=Cnil;
 	Cnil_body.s.s_dbind = Cnil;
 	Cnil_body.s.s_sfdef = NOT_SPECIAL;
 	Cnil_body.s.s_fillp = 3;
@@ -482,7 +529,7 @@ initlisp(void) {
 	Cnil_body.s.s_stype = (short)stp_constant;
 	Cnil_body.s.s_mflag = FALSE;
 	
-	Ct_body.s.t = (short)t_symbol;
+	set_type_of(Ct,t_symbol);
 	Ct_body.s.s_dbind = Ct;
 	Ct_body.s.s_sfdef = NOT_SPECIAL;
 	Ct_body.s.s_fillp = 1;
@@ -943,28 +990,32 @@ FFN(siLsave_system)(void) {
   DO_BEFORE_SAVE
 #endif	
     
-    saving_system = TRUE;
-  GBC(t_contiguous);
-  
+  saving_system = TRUE;
+  {
+    int in_sgc=sgc_enabled;
+    extern long new_holepage;
+    fixnum old_holepage=new_holepage;
+    void *new;
+
+    if (in_sgc) sgc_quit();
+    holepage=new_holepage=1;
+    GBC(t_contiguous);
+    if (in_sgc) sgc_start();
+    new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
+    core_end = new;
+    rb_end=rb_limit=rb_pointer;
+    nrbpage=(rb_pointer-rb_start)/PAGESIZE;
+    new_holepage=holepage=old_holepage;
+  }
+
 #ifdef GCL_GPROF
   gprof_cleanup();
 #endif
     
 #if defined(BSD) || defined(ATT)  
   brk(core_end);
-  /* printf( "(breaking at core_end = %x in main ,)",core_end); */
 #endif
   
-/*  #ifdef DGUX */
-  
-/*  #endif */
-  
-/*  #ifdef AOSVS */
-  
-  
-  
-  
-/*  #endif */
   cbgbccount = tm_table[t_contiguous].tm_adjgbccnt = tm_table[t_contiguous].tm_opt_maxpage = 0;
   rbgbccount = tm_table[t_relocatable].tm_adjgbccnt = tm_table[t_relocatable].tm_opt_maxpage = 0;
   for (i = 0;  i < (int)t_end;  i++)
@@ -1054,7 +1105,7 @@ init_main(void) {
   ADD_FEATURE("BSD");
 #endif
   
-#ifdef LITTLE_END	 
+#if !defined(DOUBLE_BIGENDIAN)
   ADD_FEATURE("CLX-LITTLE-ENDIAN");
 #endif
   
@@ -1105,3 +1156,5 @@ init_main(void) {
   make_si_function("WARN-VERSION",Lidentity);
   
 }
+
+#include "writable.h"

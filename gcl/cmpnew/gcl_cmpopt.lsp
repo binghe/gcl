@@ -261,8 +261,9 @@
 
 
 ;;+
-(push '((t t) t #.(flags ans)"number_plus(#0,#1)")
-   (get '+ 'inline-always))
+;; (push '((t t) t #.(flags ans)"number_plus(#0,#1)")
+;;    (get '+ 'inline-always))
+(push '((t t) t #.(flags ans)"immnum_plus(#0,#1)") (get '+ 'inline-always))
 (push '((fixnum-float fixnum-float) short-float #.(flags)"(double)(#0)+(double)(#1)")
    (get '+ 'inline-always))
 (push '((fixnum-float fixnum-float) long-float #.(flags)"(double)(#0)+(double)(#1)")
@@ -278,10 +279,12 @@
 
 
 ;;-
- (push '((t) t #.(flags ans)"number_negate(#0)")
-   (get '- 'inline-always))
-(push '((t t) t #.(flags ans)"number_minus(#0,#1)")
-   (get '- 'inline-always))
+ ;; (push '((t) t #.(flags ans)"number_negate(#0)")
+ ;;   (get '- 'inline-always))
+(push '((t) t #.(flags ans)"immnum_negate(#0)") (get '- 'inline-always))
+(push '((t t) t #.(flags ans)"immnum_minus(#0,#1)") (get '- 'inline-always))
+;; (push '((t t) t #.(flags ans)"number_minus(#0,#1)")
+;;    (get '- 'inline-always))
 (push '((fixnum-float fixnum-float) short-float #.(flags)"(double)(#0)-(double)(#1)")
    (get '- 'inline-always))
 (push '((fixnum-float) short-float #.(flags)"-(double)(#0)")
@@ -315,8 +318,10 @@
    (get '/ 'inline-always))
 
 ;;/=
- (push '((t t) boolean #.(flags)"number_compare(#0,#1)!=0")
+ (push '((t t) boolean #.(flags rfa)"immnum_ne(#0,#1)")
    (get '/= 'inline-always))
+ ;; (push '((t t) boolean #.(flags)"number_compare(#0,#1)!=0")
+ ;;   (get '/= 'inline-always))
 (push '((fixnum-float fixnum-float) boolean #.(flags)"(#0)!=(#1)")
    (get '/= 'inline-always))
 
@@ -342,8 +347,9 @@
    (get '1- 'inline-always))
 
 ;;<
- (push '((t t) boolean #.(flags)"number_compare(#0,#1)<0")
-   (get '< 'inline-always))
+ (push '((t t) boolean #.(flags rfa)"immnum_lt(#0,#1)") (get '< 'inline-always))
+ ;; (push '((t t) boolean #.(flags)"number_compare(#0,#1)<0")
+ ;;   (get '< 'inline-always))
 (push '((fixnum-float fixnum-float) boolean #.(flags)"(#0)<(#1)")
    (get '< 'inline-always))
 
@@ -352,29 +358,33 @@
    (get 'si::objlt 'inline-always))
 
 ;;<=
- (push '((t t) boolean #.(flags)"number_compare(#0,#1)<=0")
-   (get '<= 'inline-always))
+ (push '((t t) boolean #.(flags rfa)"immnum_le(#0,#1)") (get '<= 'inline-always))
+ ;; (push '((t t) boolean #.(flags)"number_compare(#0,#1)<=0")
+ ;;   (get '<= 'inline-always))
 
 (push '((fixnum-float fixnum-float) boolean #.(flags)"(#0)<=(#1)")
    (get '<= 'inline-always))
 
 ;;=
- (push '((t t) boolean #.(flags)"number_compare(#0,#1)==0")
-   (get '= 'inline-always))
+ (push '((t t) boolean #.(flags rfa)"immnum_eq(#0,#1)") (get '= 'inline-always))
+ ;; (push '((t t) boolean #.(flags)"number_compare(#0,#1)==0")
+ ;;   (get '= 'inline-always))
 
 (push '((fixnum-float fixnum-float) boolean #.(flags)"(#0)==(#1)")
    (get '= 'inline-always))
 
 ;;>
- (push '((t t) boolean #.(flags)"number_compare(#0,#1)>0")
-   (get '> 'inline-always))
+ (push '((t t) boolean #.(flags rfa)"immnum_gt(#0,#1)") (get '> 'inline-always))
+ ;; (push '((t t) boolean #.(flags)"number_compare(#0,#1)>0")
+ ;;   (get '> 'inline-always))
 
 (push '((fixnum-float fixnum-float) boolean #.(flags)"(#0)>(#1)")
    (get '> 'inline-always))
 
 ;;>=
- (push '((t t) boolean #.(flags)"number_compare(#0,#1)>=0")
-   (get '>= 'inline-always))
+ (push '((t t) boolean #.(flags rfa)"immnum_ge(#0,#1)") (get '>= 'inline-always))
+ ;; (push '((t t) boolean #.(flags)"number_compare(#0,#1)>=0")
+ ;;   (get '>= 'inline-always))
 (push '((fixnum-float fixnum-float) boolean #.(flags)"(#0)>=(#1)")
    (get '>= 'inline-always))
 
@@ -899,18 +909,26 @@ type_of(#0)==t_bitvector")
    (get 'si::spice-p 'inline-always))
 
 ;;LOGAND
+ (push '((t t) t #.(flags)"immnum_and((#0),(#1))")
+   (get 'logand 'inline-always))
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) & (#1))")
    (get 'logand 'inline-always))
 
 ;;LOGIOR
+ (push '((t t) t #.(flags)"immnum_ior((#0),(#1))")
+   (get 'logior 'inline-always))
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) | (#1))")
    (get 'logior 'inline-always))
 
 ;;LOGXOR
+ (push '((t t) t #.(flags)"immnum_xor((#0),(#1))")
+   (get 'logxor 'inline-always))
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) ^ (#1))")
    (get 'logxor 'inline-always))
 
 ;;LOGNOT
+ (push '((t) t #.(flags)"immnum_not(#0)")
+   (get 'lognot 'inline-always))
  (push '((fixnum) fixnum #.(flags rfa)"(~(#0))")
    (get 'lognot 'inline-always))
 

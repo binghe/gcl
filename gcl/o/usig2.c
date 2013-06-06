@@ -229,11 +229,11 @@ before_interrupt(struct save_for_interrupt *p, int allowed)
 	      ad->tm_nfree --;
 	      bcopy(beg ,&(p->buf[i]), amt);
 	      bzero(beg+sizeof(struct freelist),amt-sizeof(struct freelist));
-	      x->d.m = 0;
+	      make_unfree(x);
 	      if (p->free2[i])
 		{ x = (object) p->free2[i];
 		  beg = (char *)x;
-		  x->d.m = 0;
+		  make_unfree(x);
 		  bzero(beg+sizeof(struct freelist),amt-sizeof(struct freelist));
 		  SS1(ad->tm_free,OBJ_LINK(p->free2[i]));
 		  ad->tm_nfree --;
@@ -285,12 +285,12 @@ after_interrupt(struct save_for_interrupt *p, int allowed)
 	      object x = (object)beg;
 	      int amt = ad->tm_size;
 	      RS1(p->free2[i],(p->free1[i]));
-	      if (x->d.m) error("should not be free");
+	      if (is_marked_or_free(x)) error("should not be free");
 	      bcopy(&(p->buf[i]),beg, amt);
 	      if (p->free2[i])
 		{ x = (object) p->free2[i];
-		  if (x->d.m) error("should not be free");
-		  x->d.m = FREE;
+		  if (is_marked_or_free(x)) error("should not be free");
+		  make_free(x);
 		  F_LINK(F_LINK(ad->tm_free)) = (long )current_fl;
 		  ad->tm_nfree += 2;
 		}

@@ -33,8 +33,8 @@ enum type {
   t_closure,
   t_cfdata,
   t_spice,
-  t_end,
   t_contiguous,
+  t_end=t_contiguous,
   t_relocatable,
   t_other
 };

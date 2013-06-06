@@ -527,7 +527,7 @@ clear_protect_memory(object memory) {
   int i;
 
   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1));
-  pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size) & ~(PAGESIZE-1)) + PAGESIZE-1;
+  pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size + PAGESIZE-1) & ~(PAGESIZE-1));
 
   i=mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
 

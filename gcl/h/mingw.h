@@ -167,7 +167,7 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
 	if (e - core_end < 0x10000 ) { \
 	  int i; \
 	  for (i=page(core_end); i < page(e); i++) { \
-	    type_map[i] = t_other; \
+	    \
 	  } \
 	  core_end = e; \
 	} \

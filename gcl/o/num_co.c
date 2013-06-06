@@ -337,7 +337,6 @@ double_to_integer(double d)
 {
 	int h, l, e, s;
 	object x;
-	object shift_integer(object x, int w);
 	vs_mark;
 
 	if (d == 0.0)
@@ -416,7 +415,7 @@ LFD(Lfloat)(void)
 	double	d;
 	int narg;
 	object	x;
-	enum type t=t_other;
+	enum type t=t_longfloat;
 
 	narg = vs_top - vs_base;
 	if (narg < 1)

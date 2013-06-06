@@ -42,6 +42,34 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 
+#ifdef IN_NUM_CO
+#ifdef HAVE_ISNORMAL
+#define ISNORMAL(a) isnormal(a)
+#else
+#ifdef HAVE_IEEEFP
+#include <ieeefp.h>
+#define ISNORMAL(a) (fpclass(a)>=FP_NZERO)
+#else
+#define ISNORMAL(a) ((sizeof (a) == sizeof (float)) ? \
+       gcl_isnormal_float(a) : \
+       gcl_isnormal_double(a))
+#endif
+#endif
+#endif
+
+#ifdef NEED_ISFINITE
+#ifdef HAVE_ISFINITE
+#define ISFINITE(a) isfinite(a)
+#else
+#ifdef HAVE_FINITE
+#include <ieeefp.h>
+#define ISFINITE(a) finite(a)
+#else
+#error "No isfinite found"
+#endif
+#endif
+#endif
+
 #ifdef UNIX
 #include <ctype.h>
 #define	isalphanum(x)	isalnum(x)
@@ -59,6 +87,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "../h/compbas.h"
 #include "../h/enum.h"
+#include "../h/bits.h"
 #include "../h/object.h"
 #include "../h/vs.h"
 #include "../h/bds.h"

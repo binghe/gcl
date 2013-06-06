@@ -25,6 +25,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include "include.h"
+#include "page.h"
 
 static int reverse_comparison;
 
@@ -251,8 +252,8 @@ object on_stack_list_vector_new(int n,object first,va_list ap)
  p=(struct cons *) res;
  if (n<=0) return Cnil;
  TOP:
- p->t = (int)t_cons;
- p->m=FALSE;
+ /* p->t = (int)t_cons; */
+ /* p->m=FALSE; */
  p->c_car= jj ? va_arg(ap,object) : first;
  jj=1;
  if (--n == 0)
@@ -303,51 +304,54 @@ object list_vector_new(int n,object first,va_list ap)
 }*/
 
    
+object list(int n,...) { 
 
-object list(int n,...)
-{ va_list ap;
+  va_list ap;
   struct typemanager *tm=(&tm_table[(int)t_cons]);
-  va_start(ap,n);
-  CHECK_INTERRUPT;
-  if (tm->tm_nfree < n )
-     {
-	object *p = vs_top;
+  object tail=tm->tm_free,lis=tail;
 
-	vs_push(Cnil);
-	while(--n>=0)
-	  { *p=make_cons(va_arg(ap,object),Cnil);
-	    p= &((*p)->c.c_cdr);
-	  }
-	return(vs_pop);
-     }
-  else
-    {BEGIN_NO_INTERRUPT;
-    {int i=0;
-    object tail=tm->tm_free;
-    object lis;
+  if (n<=0) return Cnil;
+  va_start(ap,n);
+
+  CHECK_INTERRUPT;
+  if (/* stack_alloc_start || */ tm->tm_nfree < n )  {
+    
+    object *p = vs_top;
+    
+    vs_push(Cnil);
+    while(--n>=0)
+      { *p=make_cons(va_arg(ap,object),Cnil);
+      p= &((*p)->c.c_cdr);
+      }
+    return(vs_pop);
+
+  }
+
+   
+  {
+
+    BEGIN_NO_INTERRUPT;
+
     tm->tm_nfree -= n;
     tm->tm_nused += n;
-    n=n-1;
-    lis=tail;
-    while (1)
-      {if (i < n)
-       tail->c.c_cdr=OBJ_LINK(tail);
-       else {tm->tm_free=OBJ_LINK(tail);
-	     tail->d.t = (int)t_cons;
-	     tail->d.m = FALSE;
-	     tail->c.c_car=va_arg(ap,object); 
-	     tail->c.c_cdr=Cnil;
-	     goto END_INTER ;
-	   }
-       /* these could be one instruction*/
-       tail->d.t = (int)t_cons;
-       tail->d.m=FALSE;
-       tail->c.c_car=va_arg(ap,object);
-       tail=tail->c.c_cdr;
-       i++;}
-   END_INTER: END_NO_INTERRUPT;
-  va_end(ap);
-  return lis;}}	
+    while (--n) {
+      set_type_of(tail,t_cons);/*FIXME try removing this*/
+      pageinfo(tail)->in_use++;
+      tail->c.c_cdr=OBJ_LINK(tail);
+      tail->c.c_car=va_arg(ap,object); 
+      tail=tail->c.c_cdr;
+    }
+    tm->tm_free=OBJ_LINK(tail);
+    set_type_of(tail,t_cons);/*FIXME try removing this*/
+    pageinfo(tail)->in_use++;
+    tail->c.c_car=va_arg(ap,object); 
+    tail->c.c_cdr=Cnil;
+    
+    END_NO_INTERRUPT;
+    va_end(ap);
+    return lis;
+    
+  }
 
 }
 
@@ -865,8 +869,6 @@ int n;
  struct cons *p = (struct cons *)res;
  if (n<=0) return Cnil;
   TOP:
- p->t = (int)t_cons;
- p->m=FALSE;
  p->c_car=Cnil;
  if (--n == 0)
    {p->c_cdr = Cnil;
@@ -1001,9 +1003,11 @@ LFD(Lreconc)() {
 	int i;
 @
 	check_type_non_negative_integer(&nn);
+	if (!listp(lis))/*FIXME checktype*/
+	  FEwrong_type_argument(sLlist, lis);
 	if (type_of(nn) != t_fixnum)
 		@(return Cnil)
-	for (i = 0;  !endp(lis) && fix_dot(lis)==lis;  i++, lis = lis->c.c_cdr)
+	for (i = 0;  consp(lis);  i++, lis = lis->c.c_cdr)
 		vs_check_push(lis->c.c_car);
 	if (i <= fix((nn))) {
 		vs_top -= i;
@@ -1023,10 +1027,11 @@ LFD(Lreconc)() {
 	object x;
 @
 	check_type_non_negative_integer(&nn);
+	if (!listp(lis))/*FIXME checktype*/
+	  FEwrong_type_argument(sLlist, lis);
 	if (type_of(nn) != t_fixnum)
 		@(return Cnil)
-	for (i = 0, x = lis;  !endp(x) && fix_dot(x)==x;  i++, x = x->c.c_cdr)
-		;
+	for (i = 0, x = lis;  consp(x);  i++, x = x->c.c_cdr);
 	if (i <= fix((nn)))
 		@(return Cnil)
 	for (i -= fix((nn)), x = lis;  --i > 0;  x = x->c.c_cdr)
@@ -1036,22 +1041,19 @@ LFD(Lreconc)() {
 @)
 
 LFD(Lldiff)() {
-	int i;
+	fixnum i;
 	object x;
 
 	check_arg(2);
-	for (i = 0, x = vs_base[0];  !endp(x);  i++, x = x->c.c_cdr)
-/*		if (dot_list_eq(x,vs_base[1]))*/
-		if (eql(fix_dot(x),vs_base[1]))
-			break;
-		else
-			vs_check_push(x->c.c_car);
-        if (proper_list(x))
-		vs_push(Cnil);
-	else
-		i--;
+	x = vs_base[0];
+	if (!listp(x))/*FIXME checktype*/
+	  FEwrong_type_argument(sLlist, x);
+	for (i = 0; consp(x) && x!=vs_base[1] ;  i++, x = x->c.c_cdr)
+	  vs_check_push(x->c.c_car); /*FIXME but a segfault breaker at vs_limit*/
+	x=eql(x,vs_base[1]) ? Cnil : x;
+	vs_check_push(x);
 	while (i-- > 0)
-		stack_cons();
+	  stack_cons();
 	vs_base[0] = vs_pop;
 	vs_popp;
 }
@@ -1195,8 +1197,8 @@ LFD(Ltailp)() {
 	object x;
 
 	check_arg(2);
-	for (x = vs_base[1];  !endp(x);  x = x->c.c_cdr)
-		if (eql(fix_dot(x),vs_base[0])) {
+	for (x = vs_base[1];  consp(x);  x = x->c.c_cdr)
+		if (x==vs_base[0]) {
 			vs_base[0] = Ct;
 			vs_popp;
 			return;

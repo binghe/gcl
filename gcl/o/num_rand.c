@@ -45,7 +45,7 @@ rando(object x, object rs)
 	d = (double)(rs->rnd.rnd_value>>1) / (4294967296.0/2.0);
 	d = number_to_double(x) * d;
 	if (tx == t_fixnum) {
-		z = make_fixnum((int)d);
+		z = make_fixnum((fixnum)d);
 		return(z);
 	} else if (tx == t_bignum) {
 		z = double_to_integer(d);

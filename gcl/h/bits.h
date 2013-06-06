@@ -1,0 +1,35 @@
+#define mjoin(a_,b_) a_ ## b_
+#define Mjoin(a_,b_) mjoin(a_,b_)
+
+#include "arth.h"
+
+#define LM(a_) AM(AT(SIZEOF_LONG,8),a_)
+
+struct pageinfo {
+  unsigned long type:6;
+  unsigned long in_use:16;
+  unsigned long sgc_flags:3;
+  unsigned long magic:LM(25);
+  struct pageinfo *next;
+};
+  
+#ifndef WORDS_BIGENDIAN
+
+#define FIRSTWORD unsigned long    e:1,m:1,f:1,s:1,tt:4,t:5,st:3,w:LM(16)
+#define FSTPWORD  unsigned long emfs:4,            tp:9,    st:3,w:LM(16)
+#define MARKWORD  unsigned long    e:1,   mf:2,s:1,tt:4,t:5,x:LM(13)
+#define SGCMWORD  unsigned long    e:1,mfs:3,      tt:4,t:5,x:LM(13)
+#define TYPEWORD  unsigned long  emf:3,        s:1,tt:4,t:5,x:LM(13)
+#define FUNWORD   unsigned long    e:1,m:1,f:1,s:1,tt:4,t:5,fun_minarg:6,fun_maxarg:6,fun_neval:5,fun_vv:1,y:LM(31)
+
+#else
+
+#define FIRSTWORD unsigned long w:LM(16),st:3,t:5,tt:4,s:1,f:1,m:1,e:1
+#define FSTPWORD  unsigned long w:LM(16),st:3,tp:9,             emfs:4
+#define MARKWORD  unsigned long x:LM(13),     t:5,tt:4,s:1,   mf:2,e:1
+#define SGCMWORD  unsigned long x:LM(13),     t:5,tt:4,      mfs:3,e:1
+#define TYPEWORD  unsigned long x:LM(13),     t:5,tt:4,s:1,      emf:3
+#define FUNWORD   unsigned long y:LM(31),fun_vv:1,fun_neval:5,fun_maxarg:6,fun_minarg:6,t:5,tt:4,s:1,f:1,m:1,e:1
+
+#endif
+

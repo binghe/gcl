@@ -156,7 +156,7 @@ object
 make_integer(__mpz_struct *u)
 {
   if ((u)->_mp_size == 0) return small_fixnum(0);
-  if (mpz_fits_sint_p(u)) {
+  if (mpz_fits_slong_p(u)) {
     return make_fixnum(mpz_get_si(u));
       }
   return make_bignum(u);
@@ -172,8 +172,8 @@ make_integer_clear(u)
 mpz_t u;
 { object ans;
   if ((u)->_mp_size == 0) return small_fixnum(0);
-  if (mpz_fits_sint_p(u)) {
-    signed long int x = mpz_get_si(u);
+  if (mpz_fits_slong_p(u)) {
+    fixnum x = mpz_get_si(u);
     mpz_clear(u);
     return make_fixnum(x);
       }
@@ -273,10 +273,9 @@ object
 normalize_big(object x)
 {
  if (MP_SIZE(x) == 0) return small_fixnum(0);
-  if (mpz_fits_sint_p(MP(x))) {
+  if (mpz_fits_slong_p(MP(x))) {
     MP_INT *u = MP(x);
-    signed long int xx = mpz_get_si(u);
-    return make_fixnum(xx);
+    return make_fixnum(mpz_get_si(u));
       }
   else return x;
 }
@@ -482,7 +481,7 @@ maybe_replace_big(object x)
    bug or feature of gmp..
 */   
   if (MP_SIZE(x) == 0) return small_fixnum(0);
-  if (mpz_fits_sint_p(MP(x))) {
+  if (mpz_fits_slong_p(MP(x))) {
     MP_INT *u = MP(x);
     return make_fixnum(mpz_get_si(u));
   }

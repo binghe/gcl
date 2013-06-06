@@ -36,104 +36,104 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 
-static int
-ior_op(int i, int j)
+static fixnum
+ior_op(fixnum i, fixnum j)
 {
 	return(i | j);
 }
 
-static int
-xor_op(int i, int j)
+static fixnum
+xor_op(fixnum i, fixnum j)
 {
 	return(i ^ j);
 }
 
-static int
-and_op(int i, int j)
+static fixnum
+and_op(fixnum i, fixnum j)
 {
 	return(i & j);
 }
 
-static int
-eqv_op(int i, int j)
+static fixnum
+eqv_op(fixnum i, fixnum j)
 {
 	return(~(i ^ j));
 }
 
-static int
-nand_op(int i, int j)
+static fixnum
+nand_op(fixnum i, fixnum j)
 {
 	return(~(i & j));
 }
 
-static int
-nor_op(int i, int j)
+static fixnum
+nor_op(fixnum i, fixnum j)
 {
 	return(~(i | j));
 }
 
-static int
-andc1_op(int i, int j)
+static fixnum
+andc1_op(fixnum i, fixnum j)
 {
 	return((~i) & j);
 }
 
-static int
-andc2_op(int i, int j)
+static fixnum
+andc2_op(fixnum i, fixnum j)
 {
 	return(i & (~j));
 }
 
-static int
-orc1_op(int i, int j)
+static fixnum
+orc1_op(fixnum i, fixnum j)
 {
 	return((~i) | j);
 }
 
-static int
-orc2_op(int i, int j)
+static fixnum
+orc2_op(fixnum i, fixnum j)
 {
 	return(i | (~j));
 }
 
-static int
-b_clr_op(int i, int j)
+static fixnum
+b_clr_op(fixnum i, fixnum j)
 {
 	return(0);
 }
 
-static int
-b_set_op(int i, int j)
+static fixnum
+b_set_op(fixnum i, fixnum j)
 {
 	return(-1);
 }
 
-static int
-b_1_op(int i, int j)
+static fixnum
+b_1_op(fixnum i, fixnum j)
 {
 	return(i);
 }
 
-static int
-b_2_op(int i, int j)
+static fixnum
+b_2_op(fixnum i, fixnum j)
 {
 	return(j);
 }
 
-static int
-b_c1_op(int i, int j)
+static fixnum
+b_c1_op(fixnum i, fixnum j)
 {
 	return(~i);
 }
 
-static int
-b_c2_op(int i, int j)
+static fixnum
+b_c2_op(fixnum i, fixnum j)
 {
 	return(~j);
 }
 
 #ifdef NEVER
-int (*intLogOps)()[16]= {
+fixnum (*intLogOps)()[16]= {
   b_clr_op,  /* 0 */
   b_and_op,  /* 01 */
   b_andc2_op,  /* 02 */
@@ -157,7 +157,7 @@ int (*intLogOps)()[16]= {
 static int
 fix_bitp(object x, int p)
 {
-	if (p > 30) {		/* fix = sign + bit0-30 */
+	if (p > LOG_WORD_SIZE-2) {		/* fix = sign + bit0-30 */
 		if (fix(x) < 0)
 			return(1);
 		else
@@ -172,7 +172,7 @@ count_int_bits(int x)
 	int	i, count;
 
 	count = 0;
-	for (i=0; i <= 31; i++) count += ((x >> i) & 1);
+	for (i=0; i <= (LOG_WORD_SIZE-1); i++) count += ((x >> i) & 1);
 	return(count);
 }
 
@@ -203,12 +203,13 @@ count_bits(object x)
 
 
 object
-shift_integer(object x, int w)
+shift_integer(object x, fixnum w)
 { 
   if (type_of(x) == t_fixnum)
     { if (w <= 0)
       {   w = -w;
-	  if (w >= WSIZ) return small_fixnum(fix(x) < 0 ? -1 :0);
+	  if (w >= LOG_WORD_SIZE || w<0 /*most-negative-fixnum*/)
+	    return small_fixnum(fix(x) < 0 ? -1 :0);
 	  else
 	return make_fixnum (fix(x) >> (w));}
     MPOP(return, shifti,SI_TO_MP(fix(x),big_fixnum1),w);
@@ -221,25 +222,47 @@ shift_integer(object x, int w)
   return(Cnil);
 }
 	
-
-static int
-int_bit_length(int i)
-{
-	int	count, j;
-
-	count = 0;
-	for (j = 0; j <= 31 ; j++)
-		if (((i >> j) & 1) == 1) count = j + 1;
-	return(count);
+static fixnum
+int_bit_length(fixnum i) {
+  fixnum j;
+  for (j=LOG_WORD_SIZE-1;j>=0 && !((i>>j)&1);j--);
+  return j+1;
 }
 
 
+#define L2OP(a_,b_,c_,d_)						\
+  DEFUN_NEW("2LOG" #a_,object,c_,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") { \
+									\
+  object u;								\
+  if (type_of(x)==t_fixnum && type_of(y)==t_fixnum)			\
+    return make_fixnum(fix(x) b_ fix(y));				\
+  u = new_bignum();							\
+  MP_ASSIGN_OBJECT(MP(u),x);						\
+  d_(MP(u),MP(u), INTEGER_TO_TEMP_MP(y,big_fixnum1));	\
+  return normalize_big(u);						\
+									\
+}
+
+L2OP(IOR,|,fS2logior,mpz_ior);
+L2OP(AND,&,fS2logand,mpz_and);
+L2OP(XOR,^,fS2logxor,mpz_xor);
+
+DEFUN_NEW("1LOGNOT",object,fS1lognot,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  object u;								
+  if (type_of(x)==t_fixnum)			
+    return make_fixnum(~fix(x));				
+  u = new_bignum();							
+  MP_ASSIGN_OBJECT(MP(u),x);						
+  mpz_com(MP(u),MP(u));	
+  return normalize_big(u);						
+  									
+}
 
 LFD(Llogior)(void)
 {
 	object  x;
 	int	narg, i;
-	int	ior_op(int i, int j);
 
 	narg = vs_top - vs_base;
 	for (i = 0; i < narg; i++)
@@ -260,7 +283,6 @@ LFD(Llogxor)(void)
 {
 	object  x;
 	int	narg, i;
-	int	xor_op(int i, int j);
 
 	narg = vs_top - vs_base;
 	for (i = 0; i < narg; i++)
@@ -280,7 +302,6 @@ LFD(Llogand)(void)
 {
 	object  x;
 	int	narg, i;
-	int	and_op(int i, int j);
 
 	narg = vs_top - vs_base;
 	for (i = 0; i < narg; i++)
@@ -300,7 +321,6 @@ LFD(Llogeqv)(void)
 {
 	object  x;
 	int	narg, i;
-	int	eqv_op(int i, int j);
 
 	narg = vs_top - vs_base;
 	for (i = 0; i < narg; i++)
@@ -320,7 +340,7 @@ LFD(Lboole)(void)
 {
 	object  x;
 	object	o;
-	int	(*op)()=NULL;
+	fixnum	(*op)()=NULL;
 	void	(*mp_op)() = (void *) 0;
 
 	check_arg(3);
@@ -400,7 +420,7 @@ LFD(Llogbitp)(void)
 LFD(Lash)(void)
 {
 	object	r=Cnil, x, y;
-	int	w, sign_x;
+	fixnum	w, sign_x;
 
 	check_arg(2);
         check_type_integer(&vs_base[0]);
@@ -462,7 +482,7 @@ LFD(Llogcount)(void)
 LFD(Linteger_length)(void)
 {
 	object	x;
-	int count=0, i;
+	fixnum count=0, i;
 
 	check_arg(1);
 	x = vs_base[0];
@@ -525,13 +545,13 @@ LFD(Linteger_length)(void)
 
 LFD(siLbit_array_op)(void)
 {
-	int i, j, n, d;
+	fixnum i, j, n, d;
 	object  o, x, y, r, r0=Cnil;
-	int (*op)()=NULL;
+	fixnum (*op)()=NULL;
 	bool replace = FALSE;
-	int xi, yi, ri;
+	fixnum xi, yi, ri;
 	char *xp, *yp, *rp;
-	int xo, yo, ro;
+	fixnum xo, yo, ro;
 	object *base = vs_base;
 
 	check_arg(4);
@@ -637,8 +657,7 @@ LFD(siLbit_array_op)(void)
 
 		    b=(object)p;
 		    for (b1=b,i=0;i<x->a.a_rank;i++,b1=b1->c.c_cdr) {
-		      b1->d.t=(int)t_cons;
-		      b1->d.m=FALSE;
+		      set_type_of(b1,t_cons); 
 		      b1->c.c_car=/* x->a.a_dims[i]<SMALL_FIXNUM_LIMIT ?  */
 			/* small_fixnum(x->a.a_dims[i]) :  */ 
 			/* now done in a macro */

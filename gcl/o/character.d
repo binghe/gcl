@@ -581,7 +581,9 @@ gcl_init_character()
 	int i;
 
 	for (i = 0;  i < CHCODELIM;  i++) {
-		character_table[i].ch.t = (short)t_character;
+	  object x=(object)(character_table+i);
+	  set_type_of(x,t_character);
+		/* character_table[i].ch.t = (short)t_character; */
 		character_table[i].ch.ch_code = i;
 		character_table[i].ch.ch_font = 0;
 		character_table[i].ch.ch_bits = 0;

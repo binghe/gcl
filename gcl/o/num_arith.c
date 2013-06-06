@@ -35,12 +35,12 @@ object fixnum_add(fixnum i, fixnum j)
 
   if (i>=0)
    { if (j<= (MOST_POSITIVE_FIX-i))
-      { MYmake_fixnum(return,i+j);
+      { return make_fixnum(i+j);
       }
    MPOP(return,addss,i,j);
    } else { /* i < 0 */
-     if ((MOST_NEG_FIXNUM -i) <= j) {
-       MYmake_fixnum(return,i+j);
+     if ((MOST_NEGATIVE_FIX -i) <= j) {
+       return make_fixnum(i+j);
      }
    MPOP(return,addss,i,j);
    }
@@ -51,19 +51,44 @@ object fixnum_sub(fixnum i, fixnum j)
 
   if (i>=0)
    { if (j >= (i - MOST_POSITIVE_FIX))
-      { MYmake_fixnum(return,i-j);
+      { return make_fixnum(i-j);
       }
    MPOP(return,subss,i,j);
    } else { /* i < 0 */
-     if ((MOST_NEG_FIXNUM -i) <= -j) {
-       MYmake_fixnum(return,i-j);
+     if ((MOST_NEGATIVE_FIX -i) <= -j) {
+       return make_fixnum(i-j);
      }
    MPOP(return,subss,i,j);
    }
 }
 
+object 
+fixnum_times(fixnum i, fixnum j) {
+
+  if (i>=0) {
+    if (j>=0) {
+      if (!i || j<= (MOST_POSITIVE_FIX/i))
+	goto FIX;
+    } else {
+      if (j==-1 || i<= (MOST_NEGATIVE_FIX/j))
+	goto FIX;
+    }
+  } else {
+    if (j>=0) {
+      if (i==-1 || j<= (MOST_NEGATIVE_FIX/i))
+	goto FIX;
+    } else {
+      if (i>MOST_NEGATIVE_FIX && -i<= (MOST_POSITIVE_FIX/-j))
+	goto FIX;
+    }
+  }
+  MPOP(return,mulss,i,j);
+ FIX:
+  return make_fixnum(i*j);
+}
+
 /* static object */
-/* fixnum_times(int i, int j) */
+/* fixnum_times(fixnum i, fixnum j) */
 /* { */
 
 /*   MPOP(return,mulss,i,j); */
@@ -252,7 +277,7 @@ one_plus(object x)
 	case t_fixnum:
 	  
 	  if (fix(x)< MOST_POSITIVE_FIX-1) {
-	    MYmake_fixnum(return,fix(x)+1);
+	    return make_fixnum(fix(x)+1);
 	  }
 	  MPOP(return,addss,1,fix(x));
 	case t_bignum:
@@ -296,7 +321,8 @@ number_minus(object x, object y)
 	case t_fixnum:
 		switch(type_of(y)) {
 		case t_fixnum:
-		  MPOP(return,subss,fix(x),fix(y));
+		  return fixnum_sub(fix(x),fix(y));
+		  /* MPOP(return,subss,fix(x),fix(y)); */
 		case t_bignum:
 		  MPOP(return, subsi,fix(x),MP(y));
 		case t_ratio:
@@ -520,7 +546,8 @@ number_times(object x, object y)
 	case t_fixnum:
 		switch (type_of(y)) {
 		case t_fixnum:
-		  MPOP(return,mulss,fix(x),fix(y));
+		  return fixnum_times(fix(x),fix(y));
+		  /* MPOP(return,mulss,fix(x),fix(y)); */
 		case t_bignum:
 		  MPOP(return,mulsi,fix(x),MP(y));
 		case t_ratio:
@@ -881,7 +908,7 @@ L:
 /* (+          )   */
 LFD(Lplus)(void)
 {
-        int i, j;
+        fixnum i, j;
 	
 	j = vs_top - vs_base;
 	if (j == 0) {
@@ -897,7 +924,7 @@ LFD(Lplus)(void)
 
 LFD(Lminus)(void)
 {
-	int i, j;
+	fixnum i, j;
 
 	j = vs_top - vs_base;
 	if (j == 0)
@@ -915,7 +942,7 @@ LFD(Lminus)(void)
 
 LFD(Ltimes)(void)
 {
-	int i, j;
+	fixnum i, j;
 
 	j = vs_top - vs_base;
 	if (j == 0) {
@@ -931,7 +958,7 @@ LFD(Ltimes)(void)
 
 LFD(Ldivide)(void)
 {
-	int i, j;
+	fixnum i, j;
 
 	j = vs_top - vs_base;
 	if (j == 0)
@@ -980,7 +1007,7 @@ LFD(Lconjugate)(void)
 
 LFD(Lgcd)(void)
 {
-	int i, narg;
+	fixnum i, narg;
 
 	narg = vs_top - vs_base;
 	if (narg == 0) {
@@ -1002,7 +1029,7 @@ LFD(Lgcd)(void)
 LFD(Llcm)(void)
 {
 	object t, g;
-	int i, narg;
+	fixnum i, narg;
 
 	narg = vs_top - vs_base;
 	if (narg == 0)

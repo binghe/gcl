@@ -309,14 +309,10 @@ BEGIN:
 
 #ifndef NO_SETBUF
 void
-setup_stream_buffer(x)
-     object x;
-{char *buf=alloc_contblock(BUFSIZ);
-  	x->sm.sm_buffer = buf;
-#ifdef SGC
-	perm_writable(buf,BUFSIZ);
-#endif
-	setbuf(x->sm.sm_fp, buf);
+setup_stream_buffer(object x) {
+  char *buf=alloc_contblock(BUFSIZ);
+  x->sm.sm_buffer = buf;
+  setbuf(x->sm.sm_fp, buf);
 }	
 
 static void
@@ -395,7 +391,7 @@ object if_exists, if_does_not_exist;
 			      FEerror("Cannot write .gz filename",0);
 			    st.st_self=buf;
 			    st.st_dim=st.st_fillp=strlen(buf);
-			    st.t=t_string;
+			    set_type_of(&st,t_string);
 			    if (file_exists((object)&st)) {
 			      FILE *pp;
 			      int n;

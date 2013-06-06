@@ -26,14 +26,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 
-#undef endp
-
-#define	endp(obje)	((enum type)((endp_temp = (obje))->d.t) == t_cons ? \
-			 FALSE : endp_temp == Cnil ? TRUE : \
-			 (FEwrong_type_argument(sLlist, endp_temp),FALSE))
-
-object endp_temp;
-
 /*
 	I know the following name is not good.
 */
@@ -83,8 +75,6 @@ elt(seq, index)
 object seq;
 int index;
 {
-	object endp_temp;
-
 	int i;
 	object l;
 
@@ -142,8 +132,6 @@ object seq;
 int index;
 object val;
 {
-	object endp_temp;
-
 	int i;
 	object l;
 
@@ -371,8 +359,6 @@ object
 reverse(seq)
 object seq;
 {
-	object endp_temp;
-
 	object x, y, *v;
 	int i, j, k;
 
@@ -465,8 +451,6 @@ object
 nreverse(seq)
 object seq;
 {
-	object endp_temp;
-
 	object x, y, z;
 	int i, j, k;
 

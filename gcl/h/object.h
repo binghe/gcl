@@ -30,8 +30,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define	TRUE		1	/*  boolean true value  */
 #define	FALSE		0	/*  boolean false value  */
 
-#define FIRSTWORD unsigned char  t,flag; char s,m
-
 #define	NBPP		4	/*  number of bytes per pointer  */
 
 #ifndef PAGEWIDTH
@@ -73,7 +71,7 @@ typedef double longfloat;
 typedef unsigned short fatchar;
 
 #ifndef plong
-#define plong int
+#define plong long
 #endif
 
 
@@ -105,16 +103,97 @@ struct fixnum_struct {
 		FIRSTWORD;
 	fixnum	FIXVAL;		/*  fixnum value  */
 };
-#define	Mfix(obje)	(obje)->FIX.FIXVAL
-#define fix(x) Mfix(x)
+/* #define	Mfix(obje)	(obje)->FIX.FIXVAL */
+/* #define fix(x) Mfix(x) */
 
 #define	SMALL_FIXNUM_LIMIT	1024
 
-/* EXTER */
-/* struct fixnum_struct small_fixnum_table[2*SMALL_FIXNUM_LIMIT]; */
+#if defined (LOW_SHFT)
 
-/* #define	small_fixnum(i)  \ */
-/* 	(object)(small_fixnum_table+SMALL_FIXNUM_LIMIT+(i)) */
+#define LOW_IM_FIX (1L<<(LOW_SHFT-1))
+#define INT_IN_BITS(a_,b_) ({fixnum _a=(fixnum)(a_);_a>>(b_)==_a>>(CHAR_SIZE*SIZEOF_LONG-1);})
+
+#define      make_imm_fixnum(a_)        ((object)a_)
+#define       fix_imm_fixnum(a_)        ((fixnum)a_)
+#define      mark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)+(LOW_IM_FIX<<1))))
+#define    unmark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)-(LOW_IM_FIX<<1))))
+#define        is_imm_fixnum(a_)        ((fixnum)(a_)<DBEGIN)
+#define is_unmrkd_imm_fixnum(a_)        ((fixnum)(a_)<LOW_IM_FIX)
+#define is_marked_imm_fixnum(a_)        (is_imm_fixnum(a_)*!is_unmrkd_imm_fixnum(a_))
+#define           is_imm_fix(a_)        INT_IN_BITS(a_,LOW_SHFT-1)
+#elif defined (IM_FIX_BASE) && defined(IM_FIX_LIM)
+#define      make_imm_fixnum(a_)        ((object)((a_)+(IM_FIX_BASE+(IM_FIX_LIM>>1))))
+#define       fix_imm_fixnum(a_)        (((fixnum)(a_))-(IM_FIX_BASE+(IM_FIX_LIM>>1)))
+#define      mark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) | IM_FIX_LIM)))
+#define    unmark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) &~ IM_FIX_LIM)))
+#define        is_imm_fixnum(a_)        (((ufixnum)(a_))>=IM_FIX_BASE)
+#define is_unmrkd_imm_fixnum(a_)        (is_imm_fixnum(a_)&&!is_marked_imm_fixnum(a_))
+#define is_marked_imm_fixnum(a_)        (((fixnum)(a_))&IM_FIX_LIM)
+#define           is_imm_fix(a_)        (!(((a_)+(IM_FIX_LIM>>1))&-IM_FIX_LIM))
+/* #define        un_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_))&~(IM_FIX_BASE)))) */
+#else
+#define      make_imm_fixnum(a_)        make_fixnum1(a_)
+#define       fix_imm_fixnum(a_)        ((a_)->FIX.FIXVAL)
+#define      mark_imm_fixnum(a_)        
+#define    unmark_imm_fixnum(a_)        
+#define        is_imm_fixnum(a_)        0
+#define is_unmrkd_imm_fixnum(a_)        0
+#define is_marked_imm_fixnum(a_)        0
+#define           is_imm_fix(a_)        0
+/* #define        un_imm_fixnum(a_)         */
+#endif
+
+#define make_fixnum(a_)  ({register fixnum _q1=(a_);register object _q4; \
+      _q4=is_imm_fix(_q1) ? make_imm_fixnum(_q1) : make_fixnum1(_q1);_q4;})
+#define fix(a_)          ({register object _q2=(a_);register fixnum _q3;		\
+      _q3=is_imm_fixnum(_q2) ? fix_imm_fixnum(_q2) :  (_q2)->FIX.FIXVAL;_q3;})
+#define Mfix(a_)         fix(a_)
+#define small_fixnum(a_) make_fixnum(a_) /*make_imm_fixnum(a_)*/
+#define set_fix(a_,b_)   ((a_)->FIX.FIXVAL=(b_))
+
+#define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
+#define is_marked(a_)            (is_imm_fixnum(Zcdr(a_)) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->d.m)
+#define is_marked_or_free(a_)    (is_imm_fixnum(Zcdr(a_)) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->md.mf)
+#define mark(a_)                 if (is_imm_fixnum(Zcdr(a_))) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
+#define unmark(a_)               if (is_imm_fixnum(Zcdr(a_))) unmark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=0
+#define is_free(a_)              (!is_imm_fixnum(a_) && !is_imm_fixnum(Zcdr(a_)) && (a_)->d.f)
+#define make_free(a_)            {(a_)->fw&=TYPE_BITS;(a_)->d.f=1;}/*set_type_of(a_,t_other)*/
+#define make_unfree(a_)          {(a_)->d.f=0;}
+
+#define valid_cdr(a_)            (!(a_)->d.e || is_imm_fixnum(Zcdr(a_)))
+
+
+#define type_of(x)       ({register object _z=(object)(x);\
+                           _z==Cnil ? t_symbol : \
+                           (is_imm_fixnum(_z) ? t_fixnum : \
+                           (valid_cdr(_z) ?  t_cons  : _z->d.t));})
+
+/* #define type_of(x)       ({register object _z=(object)(x);\ */
+/*       _z==Cnil ? t_symbol : is_imm_fixnum(_z) ? t_fixnum : _z->d.t;}) */
+  
+#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->fw&=TYPE_BITS;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;}})
+
+/* ({register object _z=(object)(x);			   \ */
+/*   _z==Cnil ? t_symbol :					   \ */
+/*     (is_imm_fixnum(_z) ? t_fixnum :					\ */
+/*      (valid_cdr(_z) ?  t_cons  : _z->d.t));}) */
+
+/* #define consp(x) (type_of(x)==t_cons) */
+/* #define listp(x) ({register object _z=x;_z==Cnil || type_of(x)==t_cons;}) */
+/* #define atom(x)  !consp(x) */
+
+#define consp(x)         ({register object _z=(object)(x);\
+                           (_z!=Cnil && !is_imm_fixnum(_z) && valid_cdr(_z));})
+#define listp(x)         ({register object _z=(object)(x);\
+                           (!is_imm_fixnum(_z) && valid_cdr(_z));})
+#define atom(x)          ({register object _z=(object)(x);\
+                           (_z==Cnil || is_imm_fixnum(_z) || !valid_cdr(_z));})
+
+/* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
+/* #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector) */
+
+/* #define writable_ptr(a_) (((unsigned long)(a_)>=DBEGIN && (void *)(a_)<(void *)heap_end) || is_imm_fixnum(a_)) */
+
 
 struct shortfloat_struct {
 			FIRSTWORD;
@@ -164,7 +243,7 @@ struct ratio {
 				/*  must be an integer  */
 };
 
-struct complex {
+struct ocomplex {
 		FIRSTWORD;
 	object	cmp_real;	/*  real part  */
 				/*  must be a number  */
@@ -262,8 +341,9 @@ struct package {
 */
 EXTER struct package *pack_pointer;	/*  package pointer  */
 
+#define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
 struct cons {
-		FIRSTWORD;
+		/* FIRSTWORD; */
 	object	c_cdr;		/*  cdr  */
 	object	c_car;		/*  car  */
 };
@@ -658,6 +738,12 @@ struct spice {
 struct dummy {
 	FIRSTWORD;
 };
+struct ff         {ufixnum ff;};
+struct fstpw      {FSTPWORD;};
+union  fstp       {ufixnum ff;struct fstpw t;};
+struct mark       {MARKWORD;};
+struct typew      {TYPEWORD;};
+struct sgcm       {SGCMWORD;};
 
 /*
 	Definition of lispunion.
@@ -671,7 +757,7 @@ union lispunion {
 			SF;	/*  short floating-point number  */
 	struct longfloat_struct
 			LF;	/*  plong floating-point number  */
-	struct complex	cmp;	/*  complex number  */
+	struct ocomplex	cmp;	/*  complex number  */
 	struct character
 			ch;	/*  character  */
 	struct symbol	s;	/*  symbol  */
@@ -700,11 +786,20 @@ union lispunion {
 	struct cfdata   cfd;    /* compiled fun data */
 	struct spice	spc;	/*  spice  */
 
-	struct dummy	d;	/*  dummy  */
+	struct dummy      d;	/*  dummy  */
+
+        struct fstpw   fstp; /*  fast type  */
+        struct ff        ff; /*  fast type  */
+        struct mark      md; /*  mark dummy  */
+        struct sgcm     smd; /*  sgc mark dummy  */
+        struct typew     td; /*  type dummy  */
+        fixnum           fw;
+        void *           vw;
 
 	struct fixarray	fixa;	/*  fixnum array  */
 	struct sfarray	sfa;	/*  short-float array  */
 	struct lfarray	lfa;	/*  plong-float array  */
+
 };
 
 
@@ -712,16 +807,16 @@ union lispunion {
 EXTER 
 union lispunion character_table1[256+128];
 #define character_table (character_table1+128)
-#define	code_char(c)		(object)(character_table+(c))
+#define	code_char(c)		(object)(character_table+((unsigned char)(c)))
 #define	char_code(obje)		((object)obje)->ch.ch_code
 #define	char_font(obje)		((object)obje)->ch.ch_font
 #define	char_bits(obje)		((object)obje)->ch.ch_bits
 
-EXTER
-union lispunion small_fixnum_table[2*SMALL_FIXNUM_LIMIT];
+/* EXTER */
+/* union lispunion small_fixnum_table[2*SMALL_FIXNUM_LIMIT]; */
 
-#define	small_fixnum(i)  \
-	(object)(small_fixnum_table+SMALL_FIXNUM_LIMIT+(i))
+/* #define	small_fixnum(i)  \ */
+/* 	(object)(small_fixnum_table+SMALL_FIXNUM_LIMIT+(i)) */
 
 
 
@@ -748,7 +843,7 @@ struct freelist {
 /*
 	Type_of.
 */
-#define	type_of(obje)	((enum type)(((object)(obje))->d.t))
+/* #define	type_of(obje)	((enum type)(((object)(obje))->d.t)) */
 
 /*
 	Storage manager for each type.
@@ -768,6 +863,7 @@ struct typemanager {
 	int	tm_gbccount;	/*  GBC count  */
 	object  tm_alt_free;    /*  Alternate free list (swap with tm_free) */
 	long     tm_alt_nfree;   /*  Alternate nfree (length of nfree) */
+	long	tm_alt_npage;	/*  number of pages  */
 	short   tm_sgc;         /*  this type has at least this many
 				    sgc pages */
 	short   tm_sgc_minfree;   /* number free on a page to qualify for
@@ -808,15 +904,6 @@ EXTER struct contblock *cb_pointer;	/*  contblock pointer  */
    list of free blocks on non-SGC pages, and cb_pointer will be
    likewise for SGC pages.  CM 20030827*/
 EXTER struct contblock *old_cb_pointer;	/*  old contblock pointer when in SGC  */
-
-/* SGC cont pages: FIXME -- at some point, enable runtime disabling of
-   SGC cont pages.  Right now, the tm_sgc variable for type contiguous
-   will govern only the possible attempt to get new pages for SGC.
-   Contiguous pages normally allocated when SGC is on will always be
-   marked with SGC_PAGE_FLAG, as the current GBC algorithm always uses
-   sgc_contblock_sweep_phase in this case. */
-/* #define SGC_CONT_ENABLED (sgc_enabled && tm_table[t_contiguous].tm_sgc) */
-#define SGC_CONT_ENABLED (sgc_enabled)
 
 /*
 	Variables for memory management.
@@ -874,7 +961,7 @@ char *tmp_alloc;
 /* #define	RB_GETA		512 */
 
 #define	INIT_HOLEPAGE	(6*HOLEPAGE/5)
-#define	INIT_NRBPAGE	(INIT_HOLEPAGE/3)
+#define	INIT_NRBPAGE	(INIT_HOLEPAGE/30)
 #define	RB_GETA		(10*INIT_NRBPAGE)
 
 
@@ -892,7 +979,7 @@ char *tmp_alloc;
 /*  For IEEEFLOAT, the double may have exponent in the second word
 (little endian) or first word.*/
 
-#if defined(I386) || defined(LITTLE_END)
+#if !defined(DOUBLE_BIGENDIAN)
 #define HIND 1  /* (int) of double where the exponent and most signif is */
 #define LIND 0  /* low part of a double */
 #else /* big endian */
@@ -900,7 +987,7 @@ char *tmp_alloc;
 #define LIND 1
 #endif
 #ifndef VOL
-#define VOL
+#define VOL volatile
 #endif
 
 
@@ -999,7 +1086,7 @@ EXTER struct call_data fcall;
 /* we sometimes have to touch the header of arrays or structures
    to make sure the page is writable */
 #ifdef SGC
-#define SGC_TOUCH(x) if ((x)->d.m) system_error(); (x)->d.m=0
+#define SGC_TOUCH(x) if (is_marked(x)) system_error(); unmark(x)
 #else
 #define SGC_TOUCH(x)
 #endif
@@ -1046,31 +1133,31 @@ EXTER unsigned plong signals_allowed, signals_pending  ;
 EXTER struct symbol Dotnil_body;
 #define Dotnil ((object)&Dotnil_body)
 
-#define	endp(x)	({\
-    static union lispunion s_my_dot={.c={t_cons,0,0,0,Dotnil,Dotnil}}; \
-    object _x=(x);\
-    bool _b=FALSE;\
-    \
-    if (type_of(_x)==t_cons) {\
-       if (type_of(_x->c.c_cdr)!=t_cons && _x->c.c_cdr!=Cnil)\
-          s_my_dot.c.c_car=_x->c.c_cdr;\
-       else \
-          s_my_dot.c.c_car=Dotnil;\
-    } else {\
-       if (_x==s_my_dot.c.c_car)\
-	 x=&s_my_dot;\
-       else {\
-         s_my_dot.c.c_car=Dotnil;\
-         if (_x==Cnil || _x==Dotnil)\
-             _b=TRUE;\
-         else\
-             FEwrong_type_argument(sLlist, _x);\
-       }\
-    }\
-    _b;\
-    })
+/* #define	endp(x)	({\ */
+/*       static union lispunion s_my_dot={.c={1,0,0,0,t_cons,0,0,0,Dotnil,Dotnil}}; \ */
+/*     object _x=(x);\ */
+/*     bool _b=FALSE;\ */
+/*     \ */
+/*     if (type_of(_x)==t_cons) {\ */
+/*        if (type_of(_x->c.c_cdr)!=t_cons && _x->c.c_cdr!=Cnil)\ */
+/*           s_my_dot.c.c_car=_x->c.c_cdr;\ */
+/*        else \ */
+/*           s_my_dot.c.c_car=Dotnil;\ */
+/*     } else {\ */
+/*        if (_x==s_my_dot.c.c_car)\ */
+/* 	 x=&s_my_dot;\ */
+/*        else {\ */
+/*          s_my_dot.c.c_car=Dotnil;\ */
+/*          if (_x==Cnil || _x==Dotnil)\ */
+/*              _b=TRUE;\ */
+/*          else\ */
+/*              FEwrong_type_argument(sLlist, _x);\ */
+/*        }\ */
+/*     }\ */
+/*     _b;\ */
+/*     }) */
 
-#define endp_prop(a) (type_of(a)==t_cons ? FALSE : ((a)==Cnil ? TRUE : (FEwrong_type_argument(sLlist, (a)),FALSE)))
+#define endp_prop(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : (FEwrong_type_argument(sLlist, (a)),FALSE)))
+#define endp(a) endp_prop(a)
     
 #define proper_list(a) (type_of(a)==t_cons || (a)==Cnil)
-#define fix_dot(a) ((a) == Dotnil ? Cnil : (type_of(a)==t_cons && (a)->c.c_cdr==Dotnil ? (a)->c.c_car : (a))) 

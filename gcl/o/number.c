@@ -55,6 +55,8 @@ object small_fixnum ( int i ) {
 }
 #endif
 
+#if !defined(IM_FIX_BASE)
+
 #define BIGGER_FIXNUM_RANGE
 
 #ifdef BIGGER_FIXNUM_RANGE
@@ -69,8 +71,7 @@ DEFUN_NEW("ALLOCATE-BIGGER-FIXNUM-RANGE",object,fSallocate_bigger_fixnum_range,
 				       (max - min));
   
   for (j=min ; j < max ; j=j+1)
-    { 		bigger_fixnum_table[j - min].t
-		= (short)t_fixnum;
+    { 		set_type_of(bigger_fixnum_table+j - min,t_fixnum);
 		bigger_fixnum_table[j - min].FIXVAL = j;
 	      }
   bigger_fixnums.min=min;
@@ -79,7 +80,7 @@ DEFUN_NEW("ALLOCATE-BIGGER-FIXNUM-RANGE",object,fSallocate_bigger_fixnum_range,
   return Ct;
 }
 #endif
-
+#endif
 
 
 object
@@ -99,7 +100,7 @@ make_fixnum1(long i)
 #endif	
 	      
 	x = alloc_object(t_fixnum);	    
-	fix(x) = i;
+	set_fix(x,i);
 	return(x);
 }
 
@@ -292,13 +293,10 @@ number_to_double(object x)
 void
 gcl_init_number(void)
 {
-	int i;
 
-	for (i = -SMALL_FIXNUM_LIMIT;  i < SMALL_FIXNUM_LIMIT;  i++) {
-		small_fixnum_table[i + SMALL_FIXNUM_LIMIT].FIX.t
-		= (short)t_fixnum;
-		small_fixnum_table[i + SMALL_FIXNUM_LIMIT].FIX.FIXVAL = i;
-	}
+#if !defined(IM_FIX_BASE)
+  FFN(fSallocate_bigger_fixnum_range)(-1024,1023);
+#endif
 
 	shortfloat_zero = alloc_object(t_shortfloat);
 	sf(shortfloat_zero) = (shortfloat)0.0;

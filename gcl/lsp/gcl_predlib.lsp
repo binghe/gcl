@@ -163,8 +163,9 @@
       (setq tp type i nil)
       (setq tp (car type) i (cdr type)))
   (if (eq tp 'structure-object) (setq tp 'structure))
-  (let ((f (get tp 'type-predicate)))
-    (when f (return-from typep (funcall f object))))
+  (unless i 
+    (let ((f (get tp 'type-predicate)))
+      (when f (return-from typep (funcall f object)))))
   (case tp
     (member (member object i))
     (not (not (typep object (car i))))

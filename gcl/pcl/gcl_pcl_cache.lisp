@@ -88,6 +88,8 @@
 ;;; of caches will require corresponding port-specific modifications to the
 ;;; lap code assembler.
 ;;;
+;; #+gcl(import 'si::non-negative-fixnum)
+
 (defmacro cache-vector-ref (cache-vector location)
   `(svref (the simple-vector ,cache-vector)
           (#-cmu the #+cmu ext:truly-the non-negative-fixnum ,location)))
@@ -107,6 +109,9 @@
     (setf (cache-vector-lock-count cache-vector) 0))
   cache-vector)
 
+;; FIXME 64
+(defconstant rand-base (- (ash 1 31) 1))
+
 (defmacro modify-cache (cache-vector &body body)
   `(without-interrupts
      (multiple-value-prog1
@@ -114,7 +119,7 @@
        (let ((old-count (cache-vector-lock-count ,cache-vector)))
 	 (declare (type non-negative-fixnum old-count))
 	 (setf (cache-vector-lock-count ,cache-vector)
-	       (if (= old-count most-positive-fixnum)
+	       (if (= old-count rand-base)
 		   1 (the non-negative-fixnum (1+ old-count))))))))
 
 (deftype field-type ()
@@ -127,7 +132,7 @@
   ;;(expt 2 (ceiling (log x 2)))
   (the non-negative-fixnum (ash 1 (integer-length (1- x)))))
 
-(defconstant *nkeys-limit* 256)
+(defconstant *nkeys-limit* 255)
 )
 
 (defstruct (cache
@@ -136,7 +141,7 @@
 	     (:copier copy-cache-internal))
   (owner nil)
   (nkeys 1 :type (integer 1 #.*nkeys-limit*))
-  (valuep nil :type (member nil t))
+  (valuep nil :type boolean)
   (nlines 0 :type non-negative-fixnum)
   (field 0 :type field-type)
   (limit-fn #'default-limit-fn :type function)
@@ -255,7 +260,7 @@
 ;;; most-positive-fixnum is all-ones.  -- Ram
 ;;;
 (defconstant wrapper-cache-number-length
-	     (- (integer-length most-positive-fixnum)
+	     (- (integer-length rand-base)
 		wrapper-cache-number-adds-ok))
 
 (defconstant wrapper-cache-number-mask
@@ -270,7 +275,7 @@
     (loop
       (setq n
 	    (logand wrapper-cache-number-mask
-		    (random most-positive-fixnum *get-wrapper-cache-number*)))
+		    (random rand-base *get-wrapper-cache-number*)))
       (unless (zerop n) (return n)))))
 
 
@@ -1394,7 +1399,7 @@
       (declare (type non-negative-fixnum location limit))
       (when (location-reserved-p location)
 	(setq location (next-location location)))
-      (dotimes (i (1+ limit))
+      (dotimes (i (the non-negative-fixnum (1+ limit)))
 	(when (location-matches-wrappers-p location wrappers)
 	  (return-from probe-cache (or (not (valuep))
 				       (location-value location))))

@@ -356,6 +356,7 @@
       long-float nil null number package pathname random-state ratio rational
       readtable sequence short-float simple-array simple-bit-vector
       simple-string simple-vector single-float standard-char stream string
+      dynamic-extent :dynamic-extent
       string-char symbol t vector signed-byte unsigned-byte)
      (proclaim-var (car decl) (cdr decl)))
     (otherwise
@@ -470,8 +471,7 @@
 				 simple-bit-vector simple-string simple-base-string simple-vector single-float
 				 standard-char stream string string-char symbol t vector
 				 signed-byte unsigned-byte)
-			 (let ((type (if (eq stype ':dynamic-extent) stype
-				       (type-filter stype))))
+			 (let ((type (type-filter stype)))
 			   (when type
 			     (dolist** (var (cdr decl))
 				       (cmpck (not (symbolp var))
@@ -686,6 +686,7 @@
       long-float nil null number package pathname random-state ratio rational
       readtable sequence short-float simple-array simple-bit-vector
       simple-string simple-vector single-float standard-char stream string
+      dynamic-extent :dynamic-extent
       string-char symbol t vector signed-byte unsigned-byte)
      (let ((type (type-filter (car decl))))
           (dolist** (var (cdr decl) t)

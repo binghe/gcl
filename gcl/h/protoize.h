@@ -1,4 +1,4 @@
-/* alloc.c:89:OF */ extern char *alloc_page (long n); /* (n) int n; */
+/* alloc.c:89:OF */ extern void *alloc_page (long n); /* (n) int n; */
 /* alloc.c:149:OF */ extern void add_page_to_freelist (char *p, struct typemanager *tm); /* (p, tm) char *p; struct typemanager *tm; */
 /* alloc.c:196:OF */ extern object type_name (int t); /* (t) int t; */
 /* alloc.c:213:OF */ extern object alloc_object (enum type t); /* (t) enum type t; */
@@ -368,7 +368,7 @@ typedef void (*funcvoid)(void);
 /* num_comp.c:272:OF */ extern void Lmonotonically_nonincreasing (void); /* () */
 /* num_comp.c:292:OF */ extern void Lmin (void); /* () */
 /* num_comp.c:309:OF */ extern void gcl_init_num_comp (void); /* () */
-/* num_log.c:224:OF */ extern object shift_integer (object x, int w); /* (x, w) object x; int w; */
+/* num_log.c:224:OF */ extern object shift_integer (object x, fixnum w); /* (x, w) object x; int w; */
 /* num_log.c:258:OF */ extern void Llogior (void); /* () */
 /* num_log.c:279:OF */ extern void Llogxor (void); /* () */
 /* num_log.c:299:OF */ extern void Llogand (void); /* () */

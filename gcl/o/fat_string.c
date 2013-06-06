@@ -90,7 +90,7 @@ static void
 cfuns_to_combined_table(unsigned int n) /* non zero n will ensure new table length */
                
 {int ii=0;  
- STATIC int i, j;
+ STATIC int j;
  STATIC object x;
  STATIC char *p,*cf_addr;
  STATIC struct typemanager *tm;
@@ -103,35 +103,38 @@ cfuns_to_combined_table(unsigned int n) /* non zero n will ensure new table leng
        FEerror("unable to allocate",0);
      combined_table.alloc_length=n;}
 
- for (i = 0;  i < maxpage;  i++) {
-   if ((enum type)type_map[i]!=tm_table[(short)t_cfun].tm_type &&
-       (enum type)type_map[i]!=tm_table[(short)t_gfun].tm_type &&
-       (enum type)type_map[i]!=tm_table[(short)t_sfun].tm_type &&
-       (enum type)type_map[i]!=tm_table[(short)t_vfun].tm_type
-       )
+ {
+   struct pageinfo *v;
+   for (v=cell_list_head;v;v=v->next) {
+     enum type tp=v->type;
+     if (tp!=tm_table[(short)t_cfun].tm_type &&
+	 tp!=tm_table[(short)t_gfun].tm_type &&
+	 tp!=tm_table[(short)t_sfun].tm_type &&
+	 tp!=tm_table[(short)t_vfun].tm_type
+	 )
      continue;
-   tm = tm_of((enum type)type_map[i]);
-   p = pagetochar(i);
-   for (j = tm->tm_nppage; j > 0; --j, p += tm->tm_size) {
-     x = (object)p;
-     if (type_of(x)!=t_cfun &&
-	 type_of(x)!=t_sfun &&
-	 type_of(x)!=t_vfun &&
-	 type_of(x)!=t_gfun
-	 ) continue;
-     if ((x->d.m == FREE) || x->cf.cf_self == NULL)
-       continue;
-	/* the cdefn things are the proclaimed call types. */
-     cf_addr=(char * ) ((unsigned long)(x->cf.cf_self));
-	
-     SYM_ADDRESS(combined_table,ii)=(unsigned long)cf_addr;
-     SYM_STRING(combined_table,ii)= (char *)(CF_FLAG | (unsigned long)x) ;
-/*       (x->cf.cf_name ? x->cf.cf_name->s.st_self : NULL) ; */
-     combined_table.length = ++ii;
-     if (ii >= combined_table.alloc_length)
-       FEerror("Need a larger combined_table",0);
+     tm = tm_of(tp);
+     p = pagetochar(page(v));
+     for (j = tm->tm_nppage; j > 0; --j, p += tm->tm_size) {
+       x = (object)p;
+       if (type_of(x)!=t_cfun &&
+	   type_of(x)!=t_sfun &&
+	   type_of(x)!=t_vfun &&
+	   type_of(x)!=t_gfun
+	   ) continue;
+       if (is_free(x) || x->cf.cf_self == NULL)
+	 continue;
+       /* the cdefn things are the proclaimed call types. */
+       cf_addr=(char * ) ((unsigned long)(x->cf.cf_self));
+       
+       SYM_ADDRESS(combined_table,ii)=(unsigned long)cf_addr;
+       SYM_STRING(combined_table,ii)= (char *)(CF_FLAG | (unsigned long)x) ;
+       /*       (x->cf.cf_name ? x->cf.cf_name->s.st_self : NULL) ; */
+       combined_table.length = ++ii;
+       if (ii >= combined_table.alloc_length)
+	 FEerror("Need a larger combined_table",0);
+     }
    }
-		
  }
 }
 

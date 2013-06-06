@@ -601,7 +601,7 @@ SYMBOL:
 			p = find_package(token);
 			if (p == Cnil) {
 			    vs_push(copy_simple_string(token));
-			    FEerror("There is no package with the name ~A.",
+			    FEerror("There is no package with the name \"~A\".",
 				    1, vs_head);
 			}
 		}
@@ -625,7 +625,7 @@ SYMBOL:
 		p = find_package(token);
 		if (p == Cnil) {
 			vs_push(copy_simple_string(token));
-			FEerror("There is no package with the name ~A.",
+			FEerror("There is no package with the name \"~A\".",
 				1, vs_head);
 		}
 		for (i = colon + 2;  i < length;  i++)

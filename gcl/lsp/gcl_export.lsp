@@ -305,4 +305,6 @@ with-standard-io-syntax
 
 *read-eval*
 
+dynamic-extent
+
 ))
