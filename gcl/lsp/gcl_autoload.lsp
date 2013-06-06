@@ -245,6 +245,29 @@
           structure stream random-state readtable pathname
           cfun cclosure sfun gfun vfun afun closure cfdata spice))
 
+(defun heaprep nil
+  
+  (let ((f (list
+	    "word size:            ~a bits~%"
+	    "page size:            ~a bytes~%"
+	    "heap start:           0x~x~%"
+	    "heap max :            0x~x~%"
+	    "shared library start: 0x~x~%"
+	    "cstack start:         0x~x~%"
+	    "cstack mark offset:   ~a bytes~%"
+	    "cstack direction:     ~[downward~;upward~;~]~%"
+	    "cstack alignment:     ~a bytes~%"
+	    "cstack max:           ~a bytes~%"
+	    "immfix start:         0x~x~%"
+	    "immfix size:          ~a fixnums~%"))
+	(v (multiple-value-list (si::heap-report))))
+    
+    (do ((v v (cdr v)) (f f (cdr f))) ((not (car v)))
+	(format t (car f) 
+		(let ((x (car v))) 
+		  (cond ((>= x 0) x) 
+			((+ x (* 2 (1+ most-positive-fixnum))))))))))
+
 (defun room (&optional x)
   (let ((l (multiple-value-list (si:room-report)))
         maxpage leftpage ncbpage maxcbpage ncb cbgbccount npage
@@ -302,7 +325,14 @@
 	    (- maxpage (+ npage ncbpage nrbpage leftpage)))
     (format t "~10D maximum pages~%" maxpage)
     (values)
-    ))
+    )
+
+ (when x
+  (format t "~%~%")
+  (format t "Key:~%~%WS: words per struct~%UP: allocated pages~%MP: maximum pages~%FI: fraction of cells in use on allocated pages~%GC: number of gc triggers allocating this type~%~%")
+  (heaprep))
+
+ (values))
 
 
 ;;; C Interface.

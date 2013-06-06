@@ -264,6 +264,12 @@
 /* no uname call */
 #undef NO_UNAME
 
+/* can use C extension for object alignment */
+#undef OBJ_ALIGN
+
+/* needed object alignment in bytes */
+#undef OBJ_ALIGNMENT
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 

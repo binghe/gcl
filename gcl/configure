@@ -6626,6 +6626,98 @@ _ACEOF
 
 
 
+####  Memory areas and alignment
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for required object alignment" >&5
+$as_echo_n "checking for required object alignment... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+        #include <stdio.h>
+	#define EXTER
+	#include "$MP_INCLUDE"
+	#include "./h/enum.h"
+	#include "./h/bits.h"
+	#define OBJ_ALIGN
+	#include "./h/object.h"
+
+int
+main ()
+{
+
+	unsigned long i;
+   	FILE *fp=fopen("conftest1","w");
+	for (i=1;i && NOT_OBJECT_ALIGNED(i); i<<=1);
+	if (!i) return -1;
+	fprintf(fp,"%lu\n",i);
+	fclose(fp);
+	return 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  obj_align=`cat conftest1`
+	 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $obj_align" >&5
+$as_echo "$obj_align" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define OBJ_ALIGNMENT $obj_align
+_ACEOF
+
+else
+  as_fn_error $? "Cannot find object alignent" "$LINENO" 5
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C extension variable alignment" >&5
+$as_echo_n "checking for C extension variable alignment... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+	    char *v __attribute__ ((aligned ($obj_align)));
+	    return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  obj_align="__attribute__ ((aligned ($obj_align)))"
+else
+  obj_align=
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $obj_align" >&5
+$as_echo "$obj_align" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define OBJ_ALIGN $obj_align
+_ACEOF
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking TYPE_BITS macro" >&5
 $as_echo_n "checking TYPE_BITS macro... " >&6; }
 if test "$cross_compiling" = yes; then :
@@ -7374,7 +7466,7 @@ $as_echo "got it" >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking trying to lower heap start" >&5
 $as_echo_n "checking trying to lower heap start... " >&6; }
       cp gcl.script gcl.script.def
-      cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[0-9]*","0x0",$0);} {print}' >gcl.script
+      cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x...","0x000",$0);} {print}' >gcl.script
       if diff gcl.script.def gcl.script >/dev/null 2>&1 ; then
 	 { $as_echo "$as_me:${as_lineno-$LINENO}: result: cannot or not needed" >&5
 $as_echo "cannot or not needed" >&6; }
@@ -7387,7 +7479,7 @@ $as_echo_n "checking linker script... " >&6; }
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: done" >&5
 $as_echo "done" >&6; }
 	    rm -f gcl.script.def
-	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
+	    TLDFLAGS="$TLDFLAGS -Wl,-T gcl.script "
 	    cp gcl.script unixport
 	 else
 	     { $as_echo "$as_me:${as_lineno-$LINENO}: result: failed" >&5
@@ -9943,7 +10035,7 @@ fi
 # redhat/cygnus released for some reason a buggy version of gcc,
 # which no one else released.   Catch that here.
 
-LDFLAGS="$LDFLAGS $TLDFLAGS"
+LDFLAGS="$LDFLAGS"
 
 LIBS="$LDFLAGS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
 

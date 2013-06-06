@@ -29,6 +29,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 /* #define	CSSIZE		20000 */
 #define	CSGETA		4000
 
+#ifdef __ia64__
+EXTER int *cs_base2;
+EXTER int *cs_org2;
+#endif
+
+EXTER int *cs_base;
 EXTER int *cs_org;
 EXTER int *cs_limit;
 

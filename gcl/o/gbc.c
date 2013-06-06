@@ -1358,6 +1358,35 @@ GBC(enum type t) {
 }
 
 static void
+FFN(siLheap_report)(void) {
+
+  int i;
+  
+  check_arg(0);
+  
+  vs_check_push(make_fixnum(sizeof(fixnum)*CHAR_SIZE));
+  vs_push(make_fixnum(PAGESIZE));
+  vs_push(make_fixnum(DBEGIN));
+  vs_push(make_fixnum(DBEGIN+(MAXPAGE<<PAGEWIDTH)));
+  vs_push(make_fixnum(SHARED_LIB_HEAP_CEILING));
+  i=sizeof(fixnum)*CHAR_SIZE-2;
+  i=1<<i;
+  vs_push(make_fixnum(((unsigned long)cs_base+i-1)&-i));
+  vs_push(make_fixnum(abs(cs_base-cs_org)));
+  vs_push(make_fixnum((CSTACK_DIRECTION+1)>>1));
+  vs_push(make_fixnum(CSTACK_ALIGNMENT));
+  vs_push(make_fixnum(CSSIZE));
+#if defined(IM_FIX_BASE) && defined(IM_FIX_LIM)
+  vs_push(make_fixnum(IM_FIX_BASE));
+  vs_push(make_fixnum(IM_FIX_LIM));
+#else  
+  vs_push(make_fixnum(0));
+  vs_push(make_fixnum(0));
+#endif
+
+}  
+
+static void
 FFN(siLroom_report)(void) {
 
   int i;
@@ -1482,6 +1511,7 @@ DEFVAR("*GBC-MESSAGE*",sSAgbc_messageA,SI,Cnil,"");
 void
 gcl_init_GBC(void) {
 
+  make_si_function("HEAP-REPORT", siLheap_report);
   make_si_function("ROOM-REPORT", siLroom_report);
   make_si_function("RESET-GBC-COUNT", siLreset_gbc_count);
   make_si_function("GBC-TIME",siLgbc_time);

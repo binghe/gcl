@@ -1100,6 +1100,38 @@ esac
 
 AC_CHECK_SIZEOF(long,0)
 
+####  Memory areas and alignment
+
+AC_MSG_CHECKING([for required object alignment])
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+        #include <stdio.h>
+	#define EXTER
+	#include "$MP_INCLUDE"
+	#include "./h/enum.h"
+	#include "./h/bits.h"
+	#define OBJ_ALIGN
+	#include "./h/object.h"
+	]],[[
+	unsigned long i;
+   	FILE *fp=fopen("conftest1","w");
+	for (i=1;i && NOT_OBJECT_ALIGNED(i); i<<=1);
+	if (!i) return -1;
+	fprintf(fp,"%lu\n",i);
+	fclose(fp);
+	return 0;
+	]])],
+	 [obj_align=`cat conftest1`
+	 AC_MSG_RESULT($obj_align)
+	 AC_DEFINE_UNQUOTED(OBJ_ALIGNMENT,$obj_align,[needed object alignment in bytes])],
+         [AC_MSG_ERROR([Cannot find object alignent])])
+
+AC_MSG_CHECKING([for C extension variable alignment])
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
+	    char *v __attribute__ ((aligned ($obj_align)));
+	    return 0;]])],[obj_align="__attribute__ ((aligned ($obj_align)))"],[obj_align=])
+AC_MSG_RESULT($obj_align)
+AC_DEFINE_UNQUOTED(OBJ_ALIGN,$obj_align,[can use C extension for object alignment])
+
 AC_MSG_CHECKING(TYPE_BITS macro)
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
@@ -1454,7 +1486,7 @@ if ./foo ; then
       AC_MSG_RESULT(got it)
       AC_MSG_CHECKING([trying to lower heap start])
       cp gcl.script gcl.script.def
-      cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x0",$0);} {print}' >gcl.script
+      cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x...","0x000",$0);} {print}' >gcl.script
       if diff gcl.script.def gcl.script >/dev/null 2>&1 ; then
 	 AC_MSG_RESULT([cannot or not needed])
 	 rm -f gcl.script gcl.script.def
@@ -1464,7 +1496,7 @@ if ./foo ; then
 	 if $CC -Wl,-T gcl.script foo.c -o foo >/dev/null 2>&1 && ./foo >/dev/null 2>&1 ; then
 	    AC_MSG_RESULT([done])
 	    rm -f gcl.script.def
-	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
+	    TLDFLAGS="$TLDFLAGS -Wl,-T gcl.script "
 	    cp gcl.script unixport
 	 else
 	     AC_MSG_RESULT([failed])
@@ -2512,7 +2544,7 @@ dnl    else
 dnl 	AC_MSG_RESULT([no])
 dnl fi 
 
-LDFLAGS="$LDFLAGS $TLDFLAGS"
+LDFLAGS="$LDFLAGS"
 AC_SUBST(LDFLAGS)
 LIBS="$LDFLAGS $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
 AC_SUBST(LIBS)

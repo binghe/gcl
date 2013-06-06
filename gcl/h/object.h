@@ -27,6 +27,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	Some system constants.
 */
 
+#if SIZEOF_LONG < 8
+#define SPAD object pad
+#else
+#define SPAD
+#endif
+
 #define	TRUE		1	/*  boolean true value  */
 #define	FALSE		0	/*  boolean false value  */
 
@@ -203,8 +209,9 @@ struct shortfloat_struct {
 #define sf(x) Msf(x)
 
 struct longfloat_struct {
-			FIRSTWORD;
-	longfloat	LFVAL;	/*  longfloat value  */
+  FIRSTWORD;
+  longfloat	LFVAL;	/*  longfloat value  */
+  SPAD;
 };
 #define	Mlf(obje)	(obje)->LF.LFVAL
 #define lf(x) Mlf(x)
@@ -226,7 +233,7 @@ struct longfloat_struct {
 /*  #endif */
 
 struct bignum {
-			FIRSTWORD;
+  FIRSTWORD;
 #ifdef GMP
   __mpz_struct big_mpz_t;
 #else
@@ -236,26 +243,29 @@ struct bignum {
 };
 
 struct ratio {
-		FIRSTWORD;
-	object	rat_den;	/*  denominator  */
+  FIRSTWORD;
+  object	rat_den;	/*  denominator  */
 				/*  must be an integer  */
-	object	rat_num;	/*  numerator  */
+  object	rat_num;	/*  numerator  */
 				/*  must be an integer  */
+  SPAD;
+
 };
 
 struct ocomplex {
-		FIRSTWORD;
-	object	cmp_real;	/*  real part  */
+  FIRSTWORD;
+  object	cmp_real;	/*  real part  */
 				/*  must be a number  */
-	object	cmp_imag;	/*  imaginary part  */
+  object	cmp_imag;	/*  imaginary part  */
 				/*  must be a number  */
+  SPAD;
 };
 
 struct character {
-			FIRSTWORD;
-	unsigned short	ch_code;	/*  code  */
-	unsigned char	ch_font;	/*  font  */
-	unsigned char	ch_bits;	/*  bits  */
+  FIRSTWORD;
+  unsigned short	ch_code;	/*  code  */
+  unsigned char	ch_font;	/*  font  */
+  unsigned char	ch_bits;	/*  bits  */
 };
 
 
@@ -285,47 +295,51 @@ enum stype {			/*  symbol type  */
 #define	s_self		st_self
 
 struct symbol {
-		FIRSTWORD;
-	object	s_dbind;	/*  dynamic binding  */
-	void	(*s_sfdef)();	/*  special form definition  */
-				/*  This field coincides with c_car  */
-	char	*s_self;	/*  print name  */
-				/*  These fields coincide with  */
-				/*  st_fillp and st_self.  */
-	int	s_fillp;	/*  print name length  */
-
-	object	s_gfdef;        /*  global function definition  */
+  FIRSTWORD;
+  object	s_dbind;	/*  dynamic binding  */
+  void	(*s_sfdef)();	/*  special form definition  */
+  /*  This field coincides with c_car  */
+  char	*s_self;	/*  print name  */
+  /*  These fields coincide with  */
+  /*  st_fillp and st_self.  */
+  int	s_fillp;	/*  print name length  */
+  
+  object	s_gfdef;        /*  global function definition  */
 				/*  For a macro,  */
 				/*  its expansion function  */
 				/*  is to be stored.  */
-	object	s_plist;	/*  property list  */
-	object	s_hpack;	/*  home package  */
+  object	s_plist;	/*  property list  */
+  object	s_hpack;	/*  home package  */
 				/*  Cnil for uninterned symbols  */
-	short	s_stype;	/*  symbol type  */
-				/*  of enum stype  */
-	short	s_mflag;	/*  macro flag  */
+  short	s_stype;	/*  symbol type  */
+  /*  of enum stype  */
+  short	s_mflag;	/*  macro flag  */
+  SPAD;
+
 };
-EXTER 
-/* struct symbol Cnil_body, Ct_body; */
-union lispunion Cnil_body, Ct_body;
+
+#define NOT_OBJECT_ALIGNED(a_) ({union lispunion _t={.vw=(void *)(a_)};_t.td.emf;})
+
+EXTER union lispunion Cnil_body OBJ_ALIGN;
+EXTER union lispunion Ct_body OBJ_ALIGN;
 
 struct package {
-		FIRSTWORD;
-	object	p_name;		/*  package name  */
+  FIRSTWORD;
+  object	p_name;		/*  package name  */
 				/*  a string  */
-	object	p_nicknames;	/*  nicknames  */
+  object	p_nicknames;	/*  nicknames  */
 				/*  list of strings  */
-	object	p_shadowings;	/*  shadowing symbol list  */
-	object	p_uselist;	/*  use-list of packages  */
-	object	p_usedbylist;	/*  used-by-list of packages  */
-	object	*p_internal;	/*  hashtable for internal symbols  */
-	object	*p_external;	/*  hashtable for external symbols  */
-	int p_internal_size;    /* size of internal hash table*/
-	int p_external_size;     /* size of external hash table */
-	int p_internal_fp;       /* [rough] number of symbols */
-        int p_external_fp;    /* [rough]  number of symbols */
-	struct package
-		*p_link;	/*  package link  */
+  object	p_shadowings;	/*  shadowing symbol list  */
+  object	p_uselist;	/*  use-list of packages  */
+  object	p_usedbylist;	/*  used-by-list of packages  */
+  object	*p_internal;	/*  hashtable for internal symbols  */
+  object	*p_external;	/*  hashtable for external symbols  */
+  int p_internal_size;    /* size of internal hash table*/
+  int p_external_size;     /* size of external hash table */
+  int p_internal_fp;       /* [rough] number of symbols */
+  int p_external_fp;    /* [rough]  number of symbols */
+  struct package *p_link;	/*  package link  */
+  SPAD;
 };
 
 /*
@@ -343,9 +357,9 @@ EXTER struct package *pack_pointer;	/*  package pointer  */
 
 #define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
 struct cons {
-		/* FIRSTWORD; */
-	object	c_cdr;		/*  cdr  */
-	object	c_car;		/*  car  */
+  /* FIRSTWORD; */
+  object	c_cdr;		/*  cdr  */
+  object	c_car;		/*  car  */
 };
 
 enum httest {			/*  hash table key test function  */
@@ -355,19 +369,19 @@ enum httest {			/*  hash table key test function  */
 };
 
 struct htent {			/*  hash table entry  */
-	object	hte_key;	/*  key  */
-	object	hte_value;	/*  value  */
+  object	hte_key;	/*  key  */
+  object	hte_value;	/*  value  */
 };
 
 struct hashtable {		/*  hash table header  */
-		FIRSTWORD;
-	struct htent
-		*ht_self;	/*  pointer to the hash table  */
-	object	ht_rhsize;	/*  rehash size  */
-	object	ht_rhthresh;	/*  rehash threshold  */
-	int	ht_nent;	/*  number of entries  */
-	int	ht_size;	/*  hash table size  */
-	short	ht_test;	/*  key test function  */
+  FIRSTWORD;
+  struct htent *ht_self;	/*  pointer to the hash table  */
+  object	ht_rhsize;	/*  rehash size  */
+  object	ht_rhthresh;	/*  rehash threshold  */
+  int	ht_nent;	/*  number of entries  */
+  int	ht_size;	/*  hash table size  */
+  short	ht_test;	/*  key test function  */
+  SPAD;
 				/*  of enum httest  */
 };
 
@@ -386,59 +400,58 @@ enum aelttype {			/*  array element type  */
 	  };
 
 struct array {			/*  array header  */
-		FIRSTWORD;
-	object	a_displaced;	/*  displaced  */
-	short	a_rank;		/*  array rank  */
-	short	a_elttype;	/*  element type  */
-	object	*a_self;	/*  pointer to the array  */
-	short	a_adjustable;	/*  adjustable flag  */
-	short	a_offset;	/*  bitvector offset  */
-	int	a_dim;		/*  dimension  */
-	int	*a_dims;	/*  table of dimensions  */
+  FIRSTWORD;
+  object	a_displaced;	/*  displaced  */
+  short	a_rank;		/*  array rank  */
+  short	a_elttype;	/*  element type  */
+  object	*a_self;	/*  pointer to the array  */
+  short	a_adjustable;	/*  adjustable flag  */
+  short	a_offset;	/*  bitvector offset  */
+  int	a_dim;		/*  dimension  */
+  int	*a_dims;	/*  table of dimensions  */
+  SPAD;
 
 };
 
 
 
 struct vector {			/*  vector header  */
-		FIRSTWORD;
-	object	v_displaced;	/*  displaced  */
-	short	v_hasfillp;	/*  has-fill-pointer flag  */
-	short	v_elttype;	/*  element type  */
-		
-	object	*v_self;	/*  pointer to the vector  */
-	int	v_fillp;	/*  fill pointer  */
-				/*  For simple vectors,  */
-				/*  v_fillp is equal to v_dim.  */
-	int	v_dim;		/*  dimension  */
-	short	v_adjustable;	/*  adjustable flag  */
-	short	v_offset;	/*  not used  */
+  FIRSTWORD;
+  object v_displaced;	/*  displaced  */
+  short	v_hasfillp;	/*  has-fill-pointer flag  */
+  short	v_elttype;	/*  element type  */
+  object *v_self;	/*  pointer to the vector  */
+  int	v_fillp;	/*  fill pointer  */
+  /*  For simple vectors,  */
+  /*  v_fillp is equal to v_dim.  */
+  int	v_dim;		/*  dimension  */
+  short	v_adjustable;	/*  adjustable flag  */
+  short	v_offset;	/*  not used  */
+  SPAD;
 };
 
 struct string {			/*  string header  */
-		FIRSTWORD;
-	object	st_displaced;	/*  displaced  */
-	short	st_hasfillp;	/*  has-fill-pointer flag  */
-	short	st_adjustable;	/*  adjustable flag  */
-	char	*st_self;	/*  pointer to the string  */
-	int	st_fillp;	/*  fill pointer  */
-				/*  For simple strings,  */
-				/*  st_fillp is equal to st_dim.  */
-	int	st_dim;		/*  dimension  */
-				/*  string length  */
-
+  FIRSTWORD;
+  object	st_displaced;	/*  displaced  */
+  short	st_hasfillp;	/*  has-fill-pointer flag  */
+  short	st_adjustable;	/*  adjustable flag  */
+  char	*st_self;	/*  pointer to the string  */
+  int	st_fillp;	/*  fill pointer  */
+  /*  For simple strings,  */
+  /*  st_fillp is equal to st_dim.  */
+  int	st_dim;		/*  dimension  */
 };
 
 struct ustring {
-		FIRSTWORD;
-	object	ust_displaced;
-	short	ust_hasfillp;
-	short	ust_adjustable;		
-	unsigned char *ust_self;
-	int	ust_fillp;
-
-	int	ust_dim;
-
+  FIRSTWORD;
+  object	ust_displaced;
+  short	ust_hasfillp;
+  short	ust_adjustable;		
+  unsigned char *ust_self;
+  int	ust_fillp;
+  
+  int	ust_dim;
+  
 
 };
 
@@ -455,71 +468,74 @@ struct ustring {
 		       
 
 struct bitvector {		/*  bitvector header  */
-		FIRSTWORD;
-	object	bv_displaced;	/*  displaced  */
-	short	bv_hasfillp;	/*  has-fill-pointer flag  */
-	short	bv_elttype;	/*  not used  */
-	char	*bv_self;	/*  pointer to the bitvector  */
-	int	bv_fillp;	/*  fill pointer  */
-				/*  For simple bitvectors,  */
-				/*  st_fillp is equal to st_dim.  */
-	int	bv_dim;		/*  dimension  */
-				/*  number of bits  */
-	short	bv_adjustable;	/*  adjustable flag  */
-	short	bv_offset;	/*  bitvector offset  */
-				/*  the position of the first bit  */
-				/*  in the first byte  */
+  FIRSTWORD;
+  object bv_displaced;	/*  displaced  */
+  short	bv_hasfillp;	/*  has-fill-pointer flag  */
+  short	bv_elttype;	/*  not used  */
+  char	*bv_self;	/*  pointer to the bitvector  */
+  int	bv_fillp;	/*  fill pointer  */
+  /*  For simple bitvectors,  */
+  /*  st_fillp is equal to st_dim.  */
+  int	bv_dim;		/*  dimension  */
+  /*  number of bits  */
+  short	bv_adjustable;	/*  adjustable flag  */
+  short	bv_offset;	/*  bitvector offset  */
+  /*  the position of the first bit  */
+  /*  in the first byte  */
+  SPAD;
 };
 
 struct fixarray {		/*  fixnum array header  */
-		FIRSTWORD;
-	object	fixa_displaced;	/*  displaced  */
-	short	fixa_rank;	/*  array rank  */
-	short	fixa_elttype;	/*  element type  */
-	fixnum	*fixa_self;	/*  pointer to the array  */
-	short	fixa_adjustable;/*  adjustable flag  */
-	short	fixa_offset;	/*  not used  */
-	int	fixa_dim;	/*  dimension  */
-	int	*fixa_dims;	/*  table of dimensions  */
+  FIRSTWORD;
+  object	fixa_displaced;	/*  displaced  */
+  short	fixa_rank;	/*  array rank  */
+  short	fixa_elttype;	/*  element type  */
+  fixnum	*fixa_self;	/*  pointer to the array  */
+  short	fixa_adjustable;/*  adjustable flag  */
+  short	fixa_offset;	/*  not used  */
+  int	fixa_dim;	/*  dimension  */
+  int	*fixa_dims;	/*  table of dimensions  */
+  SPAD;
 
 };
 
 struct sfarray {		/*  short-float array header  */
-		FIRSTWORD;
-	object	sfa_displaced;	/*  displaced  */
-	short	sfa_rank;	/*  array rank  */
-	short	sfa_elttype;	/*  element type  */
-	shortfloat
-		*sfa_self;	/*  pointer to the array  */
-	short	sfa_adjustable;	/*  adjustable flag  */
-	short	sfa_offset;	/*  not used  */
-	int	sfa_dim;	/*  dimension  */
-
-	int	*sfa_dims;	/*  table of dimensions  */
-
-
+  FIRSTWORD;
+  object	sfa_displaced;	/*  displaced  */
+  short	sfa_rank;	/*  array rank  */
+  short	sfa_elttype;	/*  element type  */
+  shortfloat
+  *sfa_self;	/*  pointer to the array  */
+  short	sfa_adjustable;	/*  adjustable flag  */
+  short	sfa_offset;	/*  not used  */
+  int	sfa_dim;	/*  dimension  */
+  
+  int	*sfa_dims;	/*  table of dimensions  */
+  
+  SPAD;
 
 };
 
 struct lfarray {		/*  plong-float array header  */
-		FIRSTWORD;
-	object	lfa_displaced;	/*  displaced  */
-	short	lfa_rank;	/*  array rank  */
-	short	lfa_elttype;	/*  element type  */
-	longfloat
-		*lfa_self;	/*  pointer to the array  */
-	short	lfa_adjustable;	/*  adjustable flag  */
-	short	lfa_offset;	/*  not used  */
-	int	lfa_dim;		/*  dimension  */
-	int	*lfa_dims;	/*  table of dimensions  */
-
+  FIRSTWORD;
+  object	lfa_displaced;	/*  displaced  */
+  short	lfa_rank;	/*  array rank  */
+  short	lfa_elttype;	/*  element type  */
+  longfloat
+  *lfa_self;	/*  pointer to the array  */
+  short	lfa_adjustable;	/*  adjustable flag  */
+  short	lfa_offset;	/*  not used  */
+  int	lfa_dim;		/*  dimension  */
+  int	*lfa_dims;	/*  table of dimensions  */
+  SPAD;
 
 };
 
 struct structure {		/*  structure header  */
-		FIRSTWORD;
-	object	str_def;	/*  structure definition (a structure)  */
-	object	*str_self;	/*  structure self  */
+  FIRSTWORD;
+  object	str_def;	/*  structure definition (a structure)  */
+  object	*str_self;	/*  structure self  */
+  SPAD;
 };
 
 struct s_data {object name;
@@ -582,17 +598,17 @@ enum smmode {			/*  stream mode  */
 #define STRING_STREAM_STRING(strm) ((strm)->sm.sm_object0)
 
 struct stream {
-		FIRSTWORD;
-	FILE	*sm_fp;		/*  file pointer  */
-	object	sm_object0;	/*  some object  */
-	object	sm_object1;	/*  some object */
-	int	sm_int0;	/*  some int  */
-	int	sm_int1;	/*  column for input or output, stream */
-	char  	*sm_buffer;     /*  ptr to BUFSIZE block of storage */
-	char	sm_mode;	/*  stream mode  */
-        unsigned char    sm_flags;         /* flags from gcl_sm_flags */
-        short sm_fd;         /* stream fd */
-     
+  FIRSTWORD;
+  FILE	*sm_fp;		/*  file pointer  */
+  object	sm_object0;	/*  some object  */
+  object	sm_object1;	/*  some object */
+  int	sm_int0;	/*  some int  */
+  int	sm_int1;	/*  column for input or output, stream */
+  char  	*sm_buffer;     /*  ptr to BUFSIZE block of storage */
+  char	sm_mode;	/*  stream mode  */
+  unsigned char    sm_flags;         /* flags from gcl_sm_flags */
+  short sm_fd;         /* stream fd */
+  
 };
 /* flags */
 #define GET_STREAM_FLAG(strm,name) ((strm)->sm.sm_flags & (1<<(name)))
@@ -634,8 +650,8 @@ enum gcl_sm_flags {
 #endif
 
 struct random {
-			FIRSTWORD;
-	unsigned	rnd_value;	/*  random state value  */
+  FIRSTWORD;
+  unsigned	rnd_value;	/*  random state value  */
 };
 
 enum chattrib {			/*  character attribute  */
@@ -659,84 +675,90 @@ struct rtent {				/*  read table entry  */
 };
 
 struct readtable {			/*  read table  */
-			FIRSTWORD;
-	struct rtent	*rt_self;	/*  read table itself  */
+  FIRSTWORD;
+  struct rtent	*rt_self;	/*  read table itself  */
 };
 
 struct pathname {
-		FIRSTWORD;
-	object	pn_host;	/*  host  */
-	object	pn_device;	/*  device  */
-	object	pn_directory;	/*  directory  */
-	object	pn_name;	/*  name  */
-	object	pn_type;	/*  type  */
-	object	pn_version;	/*  version  */
+  FIRSTWORD;
+  object	pn_host;	/*  host  */
+  object	pn_device;	/*  device  */
+  object	pn_directory;	/*  directory  */
+  object	pn_name;	/*  name  */
+  object	pn_type;	/*  type  */
+  object	pn_version;	/*  version  */
+  SPAD;
 };
 
 struct cfun {			/*  compiled function header  */
-		FIRSTWORD;
-	object	cf_name;	/*  compiled function name  */
-	void	(*cf_self)();	/*  entry address  */
-	object	cf_data;	/*  data the function uses  */
+  FIRSTWORD;
+  object	cf_name;	/*  compiled function name  */
+  void	(*cf_self)();	/*  entry address  */
+  object	cf_data;	/*  data the function uses  */
 				/*  for GBC  */
 };
 
 struct cclosure {		/*  compiled closure header  */
-		FIRSTWORD;
-	object	cc_name;	/*  compiled closure name  */
-	void	(*cc_self)();	/*  entry address  */
-	object	cc_env;		/*  environment  */
-	object	cc_data;	/*  data the closure uses  */
+  FIRSTWORD;
+  object	cc_name;	/*  compiled closure name  */
+  void	(*cc_self)();	/*  entry address  */
+  object	cc_env;		/*  environment  */
+  object	cc_data;	/*  data the closure uses  */
 				/*  for GBC  */
-	int cc_envdim;
-	object	*cc_turbo;	/*  turbo charger */
+  int cc_envdim;
+  object	*cc_turbo;	/*  turbo charger */
+  SPAD;
 };
 
 struct closure {
-	FIRSTWORD; 
-	object	cl_name;       /* name */
-	object	(*cl_self)();  /* C start address of code */
-	object	cl_data;       /* To object holding VV vector */
-	int cl_argd;           /* description of args + number */
-	int cl_envdim;         /* length of the environment vector */
-	object *cl_env;        /* environment vector referenced by cl_self()*/
+  FIRSTWORD; 
+  object	cl_name;       /* name */
+  object	(*cl_self)();  /* C start address of code */
+  object	cl_data;       /* To object holding VV vector */
+  int cl_argd;           /* description of args + number */
+  int cl_envdim;         /* length of the environment vector */
+  object *cl_env;        /* environment vector referenced by cl_self()*/
+  SPAD;
 };
 
 struct sfun {
-		FIRSTWORD; 
-	object	sfn_name;       /* name */
-	object	(*sfn_self)();  /* C start address of code */
-	object	sfn_data;       /* To object holding VV vector */
-	int sfn_argd;           /* description of args + number */
-
-	      };
+  FIRSTWORD; 
+  object	sfn_name;       /* name */
+  object	(*sfn_self)();  /* C start address of code */
+  object	sfn_data;       /* To object holding VV vector */
+  int sfn_argd;           /* description of args + number */
+  SPAD;
+};
 
 struct vfun {
-		FIRSTWORD; 
-	object	vfn_name;       /* name */
-	object	(*vfn_self)();  /* C start address of code */
-	object	vfn_data;       /* To object holding VV data */
-	unsigned short vfn_minargs; /* Min args and where varargs start */
-	unsigned short vfn_maxargs;    /* Max number of args */
-	      };
+  FIRSTWORD; 
+  object	vfn_name;       /* name */
+  object	(*vfn_self)();  /* C start address of code */
+  object	vfn_data;       /* To object holding VV data */
+  unsigned short vfn_minargs; /* Min args and where varargs start */
+  unsigned short vfn_maxargs;    /* Max number of args */
+  SPAD;
+ 
+};
 struct cfdata {
-     FIRSTWORD;
-     char *cfd_start;             /* beginning of contblock for fun */
-     int cfd_size;              /* size of contblock */
-     int cfd_fillp;             /* size of self */
-     object *cfd_self;          /* body */
-   };
+  FIRSTWORD;
+  char *cfd_start;             /* beginning of contblock for fun */
+  int cfd_size;              /* size of contblock */
+  int cfd_fillp;             /* size of self */
+  object *cfd_self;          /* body */
+  SPAD;
+};
 
 struct spice {
-		FIRSTWORD;
-	int	spc_dummy;
+  FIRSTWORD;
+  int	spc_dummy;
 };
 
 /*
 	dummy type
 */
 struct dummy {
-	FIRSTWORD;
+  FIRSTWORD;
 };
 struct ff         {ufixnum ff;};
 struct fstpw      {FSTPWORD;};
@@ -804,8 +826,7 @@ union lispunion {
 
 
 /* struct character character_table1[256+128]; */
-EXTER 
-union lispunion character_table1[256+128];
+EXTER union lispunion character_table1[256+128] OBJ_ALIGN;
 #define character_table (character_table1+128)
 #define	code_char(c)		(object)(character_table+((unsigned char)(c)))
 #define	char_code(obje)		((object)obje)->ch.ch_code

@@ -130,23 +130,10 @@ update_real_maxpage(void) {
 
   fixnum i;
   void *end,*cur;
-  /* fixnum j=0; */
-  /* void *p; */
-
-  /* getrlimit(RLIMIT_DATA, &rl); */
-  /* end=pagetoinfo(first_data_page)+rl.rlim_cur; */
-  /* getrlimit(RLIMIT_AS, &rl); */
-  /* p=pagetoinfo(first_data_page)+rl.rlim_cur; */
-  /* getrlimit(RLIMIT_STACK, &rl); */
-  /* p=&j+rl.rlim_cur*cstack_dir(j); */
-  /* end=p<end ? p : end; */
-  /* p=&memcpy; */
-  /* p=(void*)((((ufixnum)p)>>(2*PAGEWIDTH))<<(2*PAGEWIDTH)); */
-  /* end=p<end ? p : end; */
 
   massert(cur=sbrk(0));
   for (i=1;i<=log_maxpage_bound;i++)
-    if ((end=(void *)(1L<<i))>cur)
+    if ((end=(void *)(1L<<i)-PAGESIZE)>cur)
       if (!brk(end))
 	real_maxpage=page(end);
   massert(!brk(cur));
@@ -303,7 +290,13 @@ main(int argc, char **argv, char **envp) {
 	ihs_top = ihs_org-1;
 	bds_top = bds_org-1;
 	frs_top = frs_org-1;
-	cs_org = &argc;
+	cs_org = cs_base = &argc;
+#ifdef __ia64__
+ {
+   extern void * __libc_ia64_register_backing_store_base;
+   cs_org2=cs_base2=__libc_ia64_register_backing_store_base;
+ }
+#endif
 
 	cssize = CSSIZE;
 	install_segmentation_catcher();
@@ -510,6 +503,10 @@ initlisp(void) {
 	void *v=&v,*vv=Cnil;
 
 	if (NULL_OR_ON_C_STACK(v) == 0
+#if defined(IM_FIX_BASE)
+             || NULL_OR_ON_C_STACK(IM_FIX_BASE) == 0
+             || NULL_OR_ON_C_STACK((IM_FIX_BASE|IM_FIX_LIM)) == 0
+#endif
 	    || NULL_OR_ON_C_STACK(vv) != 0
 	    || (((unsigned long)core_end) !=0
 	        && NULL_OR_ON_C_STACK(core_end) != 0))
@@ -822,16 +819,6 @@ FFN(siLcatch_fatal)(int i) {
   return Cnil;
 }
 
-static void
-reset_cstack_limit(int arg) {
-#ifdef AV
-  if (&arg > cs_org - cssize + 16)
-    cs_limit = cs_org - cssize;
-  else
-    error("can't reset cs_limit");
-#endif
-}
-
 LFD(siLreset_stack_limits)(void)
 {
   int i=0;
@@ -857,7 +844,16 @@ LFD(siLreset_stack_limits)(void)
     ihs_limit = ihs_org + stack_multiple *  IHSSIZE;
   else
     error("can't reset ihs_limit");
-  reset_cstack_limit(i);
+  if (cs_base==cs_org)
+    cs_org=(void *)&i;
+#ifdef __ia64__
+ {
+   extern void * GC_save_regs_in_stack();
+   if (cs_base2==cs_org2)
+     cs_org2=GC_save_regs_in_stack();
+ }
+#endif
+  /* reset_cstack_limit(i); */
   vs_base[0] = Cnil;
 }
 
