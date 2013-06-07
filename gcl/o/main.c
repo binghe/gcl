@@ -124,6 +124,7 @@ cstack_dir(fixnum j) {
 }
 
 fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
+#define mbrk(x_) ({void *_c=sbrk(0);_c==sbrk(x_-_c) ? 0 : -1;})
 
 int
 update_real_maxpage(void) {
@@ -134,9 +135,9 @@ update_real_maxpage(void) {
   massert(cur=sbrk(0));
   for (i=1;i<=log_maxpage_bound;i++)
     if ((end=(void *)(1L<<i)-PAGESIZE)>cur)
-      if (!brk(end))
+      if (!mbrk(end))
 	real_maxpage=page(end);
-  massert(!brk(cur));
+  massert(!mbrk(cur));
 
   return 0;
 
