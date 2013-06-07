@@ -86,10 +86,10 @@ mark_object(object);
 #define BBITS_LONG (BBYTES_LONG+BBITS_CHAR)
 #define BCHARS_TABLE (BBITS_LONG+BBYTES_CONTBLOCK)
 
-#define Shamt(x) (((((unsigned long) x) >> BBYTES_CONTBLOCK) & ~(~0 << BBITS_LONG)))
+#define Shamt(x) (((((unsigned long) x) >> BBYTES_CONTBLOCK) & ~(~0UL << BBITS_LONG)))
 #define Madr(x) (mark_table+((((unsigned long) x) - ((unsigned long)DBEGIN)) >> (BCHARS_TABLE)))
 #define get_mark_bit(x) (*(Madr(x)) >> Shamt(x) & 1)
-#define set_mark_bit(x) ((*(Madr(x))) |= ((unsigned long)1 << Shamt(x)))
+#define set_mark_bit(x) ((*(Madr(x))) |= (1UL << Shamt(x)))
 
 /*  #define Shamt(x) (((((long) x) >> 3) & ~(~0 << 6))) */
 /*  #define Madr(x) (mark_table+((((long) x) - ((long)DBEGIN)) >> (9))) */
