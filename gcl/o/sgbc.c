@@ -184,7 +184,7 @@ sgc_mark_object1(object x) {
     if (x->s.s_self == NULL)
       break;
     /* to do */
-    if ((int)what_to_collect >= (int)t_contiguous) {
+    if (what_to_collect >= t_contiguous) {
       if (inheap(x->s.s_self)) {
 	if (what_to_collect == t_contiguous)
 	  mark_contblock(x->s.s_self,
@@ -244,7 +244,7 @@ sgc_mark_object1(object x) {
   case t_array:
     if ((x->a.a_displaced) != Cnil)
       sgc_mark_displaced_field(x);
-    if ((int)what_to_collect >= (int)t_contiguous &&
+    if (what_to_collect >= t_contiguous &&
 	x->a.a_dims != NULL) {
       if (inheap(x->a.a_dims)) {
 	if (what_to_collect == t_contiguous)
@@ -271,7 +271,7 @@ sgc_mark_object1(object x) {
     switch((enum aelttype)x->a.a_elttype){
     case aet_lf:
       j= sizeof(longfloat)*x->lfa.lfa_dim;
-      if (((int)what_to_collect >= (int)t_contiguous) &&
+      if ((what_to_collect >= t_contiguous) &&
 	  !(inheap(cp)) && SGC_RELBLOCK_P(x->a.a_self))
 	ROUND_RB_POINTERS_DOUBLE;
       break;
@@ -305,7 +305,7 @@ sgc_mark_object1(object x) {
     cp = (char *)p;
     j *= sizeof(object);
   COPY:
-    if ((int)what_to_collect >= (int)t_contiguous) {
+    if (what_to_collect >= t_contiguous) {
       if (inheap(cp)) {
 	if (what_to_collect == t_contiguous)
 	  mark_contblock(cp, j);
@@ -339,7 +339,7 @@ sgc_mark_object1(object x) {
 	printf("bad body for %x (%x)\n",x,cp);
 #endif
 #ifndef GMP
-    if ((int)what_to_collect >= (int)t_contiguous) {
+    if (what_to_collect >= t_contiguous) {
       j = x->big.big_length;
       cp = (char *)x->big.big_self;
       if (cp == NULL)
@@ -362,7 +362,7 @@ sgc_mark_object1(object x) {
 	  x->big.big_self = (plong *)copy_relblock(cp, j);}}
 #endif /* no gmp */
 #ifndef GMP_USE_MALLOC
-    if ((int)what_to_collect >= (int)t_contiguous) {
+    if (what_to_collect >= t_contiguous) {
       j = MP_ALLOCATED(x);
       cp = (char *)MP_SELF(x);
       if (cp == 0)
@@ -398,7 +398,7 @@ sgc_mark_object1(object x) {
       break;
     
   COPY_STRING:
-    if ((int)what_to_collect >= (int)t_contiguous) {
+    if (what_to_collect >= t_contiguous) {
       if (inheap(cp)) {
 	if (what_to_collect == t_contiguous)
 	  mark_contblock(cp, j);
@@ -440,7 +440,7 @@ sgc_mark_object1(object x) {
       for (i = 0, j = S_DATA(def)->length;  i < j;  i++)
 	if (s_type[i]==0 && ON_WRITABLE_PAGE(&STREF(object,x,s_pos[i])))
 	  sgc_mark_object(STREF(object,x,s_pos[i]));
-      if ((int)what_to_collect >= (int)t_contiguous) {
+      if (what_to_collect >= t_contiguous) {
 	if (inheap(x->str.str_self)) {
 	  if (what_to_collect == t_contiguous)
 	    mark_contblock((char *)p,
@@ -565,7 +565,7 @@ sgc_mark_object1(object x) {
       break;
     if (what_to_collect == t_contiguous) {
       if (!MAYBE_DATA_P((x->cfd.cfd_start)) ||
-	  get_mark_bit((int *)(x->cfd.cfd_start)))
+	  get_mark_bit(x->cfd.cfd_start))
 	break;
       mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
     }
@@ -730,13 +730,13 @@ sgc_sweep_phase(void) {
 
     i=page(v);
 
-    if (tp == (int)t_contiguous) {
+    if (tp == t_contiguous) {
       if (debug) {
 	printf("-");
 	continue;
       }
     }
-    if (tp >= (int)t_end)
+    if (tp >= t_end)
       continue;
     
     tm = tm_of((enum type)tp);
@@ -802,7 +802,7 @@ sgc_sweep_phase(void) {
 	
 	SET_LINK(x,f);
 	make_free(x);
-	if (!valid_cdr(x)) x->d.s = (int)SGC_RECENT;
+	if (!valid_cdr(x)) x->d.s = SGC_RECENT;
 	f = x;
 	k++;
       }
@@ -889,7 +889,7 @@ char *old_rb_start;
 
 #ifdef SDEBUG
 sgc_count(object yy) {
-  int count=0;
+  fixnum count=0;
   object y=yy;
   while(y)
     {count++;
@@ -903,15 +903,15 @@ sgc_count(object yy) {
 fixnum writable_pages=0;
 
 /* count writable pages excluding the hole */
-static int
-sgc_count_writable(int end) { 
+static fixnum
+sgc_count_writable(void) { 
 
   return page(core_end)-page(rb_start)+writable_pages-(page(old_rb_start)-page(heap_end));
 
 }
 
 
-int
+fixnum
 sgc_count_type(int t) {
 
   if (t==t_relocatable)
@@ -1359,7 +1359,7 @@ sgc_start(void) {
   for (i= t_start; i < t_contiguous ; i++)
     if (TM_BASE_TYPE_P(i) && (np=(tm=tm_of(i))->tm_sgc)) {
       object f=tm->tm_free ,x,y,next;
-      int count=0;
+      fixnum count=0;
       x=y=0;
       
       while (f!=0) {
@@ -1551,7 +1551,7 @@ sgc_quit(void) {
       else {
 	/* tack the alt_free onto the end of free */
 #ifdef SDEBUG
-	int count=0;
+	fixnum count=0;
 	f=tm->tm_free;
 	while(y= (object) F_LINK(f)) {
 	  if(y->d.s != SGC_RECENT)
@@ -1599,8 +1599,8 @@ sgc_quit(void) {
   
 }
 
-long debug_fault =0;
-int fault_count =0;
+fixnum debug_fault =0;
+fixnum fault_count =0;
 extern char etext;
 static void
 memprotect_handler(int sig, long code, void *scp, char *addr) {
@@ -1672,7 +1672,7 @@ sgc_mprotect(long pbeg, long n, int writable) {
 
 
 
-unsigned long first_data_page=0;
+extern unsigned long first_data_page;
 
 void
 memory_protect(int on) {

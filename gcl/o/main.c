@@ -988,7 +988,11 @@ FFN(siLsave_system)(void) {
     
   saving_system = TRUE;
   {
+#ifdef SGC
     int in_sgc=sgc_enabled;
+#else
+    int in_sgc=0;
+#endif
     extern long new_holepage;
     fixnum old_holepage=new_holepage;
     void *new;
@@ -1153,4 +1157,6 @@ init_main(void) {
   
 }
 
+#ifdef SGC
 #include "writable.h"
+#endif

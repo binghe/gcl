@@ -988,7 +988,6 @@ allocate_heap (void)
   return ptr;
 }
 
-
 /* Emulate Unix sbrk.  */
 void *
 sbrk (unsigned long increment)

@@ -1074,14 +1074,11 @@ void *my_sbrk (int incr)
     return (mach_brkpt);
   } else {
     ptr = mach_brkpt + incr;
-    if (ptr <= mach_maplimit) {
-      temp = mach_brkpt;
-      mach_brkpt = ptr;
-      return (temp);
-    } else {
-      unexec_error("my_sbrk(): no more memory\n");
-      return ((char *)-1);
-    }
+    if (ptr<mach_mapstart || ptr > mach_maplimit)
+      return (char *)-1;
+    temp = mach_brkpt;
+    mach_brkpt = ptr;
+    return (temp);
   }
 }
 

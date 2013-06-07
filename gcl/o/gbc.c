@@ -44,8 +44,8 @@ sgc_sweep_phase(void);
 static void
 sgc_mark_phase(void);
 
-static int
-sgc_count_writable(int);
+static fixnum
+sgc_count_writable(void);
 
 #endif
 
@@ -1130,8 +1130,8 @@ GBC(enum type t) {
 #endif
 #ifdef SGC
     if(sgc_enabled)
-      printf("(%ld faulted pages, %d writable, %ld read only)..",fault_pages,sgc_count_writable(page(core_end)),
-	     (page(core_end)-first_data_page)-(page(old_rb_start)-page(heap_end))-sgc_count_writable(page(core_end)));
+      printf("(%ld faulted pages, %ld writable, %ld read only)..",fault_pages,sgc_count_writable(),
+	     (page(core_end)-first_data_page)-(page(old_rb_start)-page(heap_end))-sgc_count_writable());
 #endif	  
     fflush(stdout);
   }
