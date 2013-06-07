@@ -508,8 +508,7 @@ initlisp(void) {
              || NULL_OR_ON_C_STACK((IM_FIX_BASE|IM_FIX_LIM)) == 0
 #endif
 	    || NULL_OR_ON_C_STACK(vv) != 0
-	    || (((unsigned long)core_end) !=0
-	        && NULL_OR_ON_C_STACK(core_end) != 0))
+	    || NULL_OR_ON_C_STACK(pagetoinfo(real_maxpage)))
 	  /* check person has correct definition of above */
 	  error("NULL_OR_ON_C_STACK macro invalid");
 	
