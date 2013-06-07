@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.
    Geoff Voelker (voelker@cs.washington.edu)                         8-12-94
 */
 
-#include "gclincl.h"
+/* #include "gclincl.h" */
 
 #ifndef UNIXSAVE
 #include <config.h>
@@ -982,6 +982,7 @@ allocate_heap (void)
 		      get_reserved_heap_size (),
 		      MEM_RESERVE,
 		      PAGE_NOACCESS);
+
   DBEGIN = (DBEGIN_TY) ptr;
 #endif
 

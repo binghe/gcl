@@ -6655,7 +6655,7 @@ main ()
    	FILE *fp=fopen("conftest1","w");
 	for (i=1;i && NOT_OBJECT_ALIGNED(i); i<<=1);
 	if (!i) return -1;
-	fprintf(fp,"%lu\n",i);
+	fprintf(fp,"%lu",i);
 	fclose(fp);
 	return 0;
 

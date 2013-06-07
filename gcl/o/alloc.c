@@ -559,8 +559,8 @@ too_full_p(struct typemanager *tm) {
     return 100*(rb_limit-rb_pointer)<tm->tm_percent_free*(rb_limit-rb_start);
     break;
   case t_contiguous:
-    for (cbp=cb_pointer;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
-    for (pi=contblock_list_head;pi;pi=pi->next)
+    for (cbp=cb_pointer,k=0;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
+    for (pi=contblock_list_head,j=0;pi;pi=pi->next)
 #ifdef SGC
       if (!sgc_enabled || pi->sgc_flags&SGC_PAGE_FLAG)
 #endif

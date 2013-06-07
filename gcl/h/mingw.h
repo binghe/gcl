@@ -219,3 +219,6 @@ extern int mingwlisten(FILE *);
 #define LISTEN_FOR_INPUT(fp) do {if (mingwlisten(fp)) return 0;} while (0)
 
 #define socklen_t int
+
+#undef DBEGIN
+#define DBEGIN _dbegin

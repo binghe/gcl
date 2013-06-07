@@ -43,7 +43,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 				/*  log2(PAGESIZE)  */
 #undef PAGESIZE
-#define	PAGESIZE	(1 << PAGEWIDTH)	/*  page size in bytes  */
+#define	PAGESIZE	(1UL << PAGEWIDTH)	/*  page size in bytes  */
 
 
 #define	CHCODELIM	256	/*  character code limit  */
