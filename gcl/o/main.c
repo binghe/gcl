@@ -134,7 +134,7 @@ update_real_maxpage(void) {
 
   massert(cur=sbrk(0));
   for (i=1;i<=log_maxpage_bound;i++)
-    if ((end=(void *)(1UL<<i)-PAGESIZE)>cur)
+    if ((end=(void *)(1L<<i)-PAGESIZE)>cur)
       if (!mbrk(end))
 	real_maxpage=page(end);
   massert(!mbrk(cur));
