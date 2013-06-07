@@ -74,8 +74,8 @@
 
 #define INIT_ALLOC \
      	heap_end = sbrk(0); \
-	if ((i = ((int)heap_end & (PAGESIZE - 1)))) \
-		sbrk(PAGESIZE - i); \
+	({fixnum i;if ((i = ((int)heap_end & (PAGESIZE - 1))))	\
+		     sbrk(PAGESIZE - i);})			\
 	heap_end = core_end = sbrk(0);
 
 	
