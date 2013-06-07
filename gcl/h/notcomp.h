@@ -251,7 +251,11 @@ EXTER struct printStruct *printStructBufp;
 
 
 #if (CSTACK_ADDRESS > 0)
-#define NULL_OR_ON_C_STACK(x) ((x)==0 || ((unsigned long)x) > (unsigned long)(pagetochar(MAXPAGE+1)))
+#if (CSTACK_DIRECTION == -1)
+#define NULL_OR_ON_C_STACK(x) ((x)==0 || ((unsigned long)x) > (unsigned long)cs_limit)
+#else
+#define NULL_OR_ON_C_STACK(x) ((x)==0 || ((unsigned long)x) > (unsigned long)cs_org)
+#endif
 #else
 #define NULL_OR_ON_C_STACK(x) ((long)x <= 0)     
 #endif
