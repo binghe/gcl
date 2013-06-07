@@ -1323,7 +1323,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
   fprintf ( fp,"0x%lx", 0x3000000 );  /* Windows custom allocation from this point up */
   #else
   #if defined (__APPLE__) && defined (__MACH__)
-  fprintf(fp,"((unsigned long)get_dbegin())");
+  fprintf(fp,"0x0");
   #else
   b = sbrk(0);
   fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1));
@@ -1442,12 +1442,16 @@ if ! test -x `which ldd` && ! test -d /proc/self ; then
 else
 if test -d /proc/self ; then
    heap_ceiling=0x`/bin/cat /proc/self/maps | grep "/lib.*/ld-" | cut -f1 -d- | head -1`
+else 
+if test "`which ldd`" = "" ; then 
+   heap_ceiling=0x0
 else
 #echo -e "#include <stdio.h>\n int main() {printf(\"foo\");return 0;}" >foo.c
 #$CC foo.c -o foo
    AAWK=`which awk`
 # | grep -v ld-kfreebsd needed on some strange bsd amd64 boxes
    heap_ceiling=`ldd $AAWK | tail -n 1 | $AWK '{print $NF}' | tr -d '()'`
+fi
 fi
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	#include <stdio.h>

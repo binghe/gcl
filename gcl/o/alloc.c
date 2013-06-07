@@ -76,7 +76,6 @@ struct rlimit data_rlimit;
 void
 add_page_to_contblock_list(void *p,fixnum m) {
  
-  fixnum i;
   struct pageinfo *pp=pageinfo(p);
 
   bzero(pp,sizeof(*pp));
@@ -90,8 +89,9 @@ add_page_to_contblock_list(void *p,fixnum m) {
   
 #ifdef SGC
   if (sgc_enabled) {
-    for (i=0;i<m;i++)
-      massert(IS_WRITABLE(page(p)+i));
+    /* fixnum i;	    */
+    /* for (i=0;i<m;i++) */
+    /*   massert(IS_WRITABLE(page(p)+i)); */
     pp->sgc_flags=SGC_PAGE_FLAG;
   }
 #endif
@@ -123,7 +123,9 @@ maybe_reallocate_page(struct typemanager *ntm,ufixnum count) {
 
     if (v->type>=t_end ||
 	(tm=tm_of(v->type))==ntm ||
+#ifdef SGC
 	(sgc_enabled && tm->tm_sgc && v->sgc_flags!=SGC_PAGE_FLAG) ||
+#endif
 	v->in_use)
       continue;
 
@@ -263,14 +265,13 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 
   IF_ALLOCATE_ERR error("Can't allocate.  Good-bye!");
 
-  if (sgc_enabled) {
-    fixnum y;
-
-    for (y=page(rb_start);y<page(core_end);y++)
-      massert(IS_WRITABLE(y));
-
-  }
-
+/* #ifdef SGC */
+/*   if (sgc_enabled) { */
+/*     fixnum y; */
+/*     for (y=page(rb_start);y<page(core_end);y++) */
+/*       massert(IS_WRITABLE(y)); */
+/*   } */
+/* #endif */
   core_end+=PAGESIZE*(n-m);
 
   return(e);
@@ -289,15 +290,14 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
 
   short t,size;
   long i=tm->tm_nppage,fw;
-  unsigned long np=page(p);
   object x,f;
   struct pageinfo *pp;
 
  t=tm->tm_type;
-#ifdef SGC
- if (sgc_enabled) 
-   massert(IS_WRITABLE(np));
-#endif
+/* #ifdef SGC */
+/*  if (sgc_enabled)  */
+/*    massert(IS_WRITABLE(page(p))); */
+/* #endif */
 
  size=tm->tm_size;
  f=tm->tm_free;
@@ -547,6 +547,31 @@ grow_linear1(struct typemanager *tm) {
 
 }
 
+int
+too_full_p(struct typemanager *tm) {
+
+  fixnum j,k;
+  struct contblock *cbp;
+  struct pageinfo *pi;
+
+  switch (tm->tm_type) {
+  case t_relocatable:
+    return 100*(rb_limit-rb_pointer)<tm->tm_percent_free*(rb_limit-rb_start);
+    break;
+  case t_contiguous:
+    for (cbp=cb_pointer;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
+    for (pi=contblock_list_head;pi;pi=pi->next)
+      if (!sgc_enabled || pi->sgc_flags&SGC_PAGE_FLAG)
+	j+=pi->in_use;
+    return 100*k<tm->tm_percent_free*j*PAGESIZE;
+    break;
+  default:
+    return 100*tm->tm_nfree<tm->tm_percent_free*TOTAL_THIS_TYPE(tm);
+    break;
+  }
+
+}
+
 void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
@@ -566,7 +591,7 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
       break;
     }
 
-    if (IGNORE_MAX_PAGES && ((float)tm->tm_nfree)<(PERCENT_FREE(tm)*TOTAL_THIS_TYPE(tm)))
+    if (IGNORE_MAX_PAGES && too_full_p(tm))
       grow_linear1(tm);
 
     call_after_gbc_hook(tm->tm_type);
@@ -601,10 +626,14 @@ add_pages(struct typemanager *tm,fixnum n) {
   case t_relocatable:
 
     i=nrbpage;
+#ifdef SGC
     {
       extern char *old_rb_start;
       nrbpage=m+2*npage(RB_GETA+(rb_pointer-(sgc_enabled ? old_rb_start : rb_start)));
     }
+#else
+      nrbpage=m+2*npage(RB_GETA+(rb_pointer-rb_start));	
+#endif
     tm->tm_adjgbccnt*=(double)i/nrbpage;
 
     rb_end=heap_end+(holepage+nrbpage)*PAGESIZE;
@@ -651,13 +680,20 @@ void *
 alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
   fixnum m=npage(n),reloc_min,i;
-  extern char *old_rb_start;
 
   if (tm->tm_type>=t_relocatable) return NULL;
 
   /* GBC(t_relocatable); */
   /* tm_table[t_relocatable].tm_adjgbccnt--; */
-  reloc_min=2*npage(rb_pointer-(sgc_enabled ? old_rb_start : rb_start));
+#ifdef SGC
+  {
+    extern char *old_rb_start;
+
+    reloc_min=2*npage(rb_pointer-(sgc_enabled ? old_rb_start : rb_start));
+  }
+#else
+  reloc_min=2*npage(rb_pointer-rb_start);
+#endif
 
   if (m<nrbpage-reloc_min) {
 
@@ -937,7 +973,7 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
   tm_table[(int)t].tm_opt_maxpage = 0;
   tm_table[(int)t].tm_distinct=distinct;
 
-  if (t<t_end) {/*FIXME*/
+  if (1) {/*FIXME(t<t_end)*/
     tm_table[(int)t].tm_percent_free=30;
     tm_table[(int)t].tm_growth_percent=50;
   }
@@ -995,6 +1031,8 @@ static void init_textpage() {
   
 }
 #endif
+
+unsigned long first_data_page=0;
 
 void
 gcl_init_alloc(void) {
@@ -1054,10 +1092,8 @@ gcl_init_alloc(void) {
 #ifdef INIT_ALLOC  
   INIT_ALLOC;
 #endif  
-  {
-    extern unsigned long first_data_page;
-    first_data_page=page(heap_end);
-  }
+
+  first_data_page=page(heap_end);
   
   alloc_page(-(holepage + nrbpage));
   

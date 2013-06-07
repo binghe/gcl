@@ -72,7 +72,7 @@ enum sgc_type { SGC_NORMAL,   /* not allocated since the last sgc */
 		};
 
 
-#define TM_BASE_TYPE_P(i) (((int) (tm_table[i].tm_type)) == i)
+#define TM_BASE_TYPE_P(i) (tm_table[i].tm_type == i)
 
 /* check if a relblock address is new relblock */
 #define SGC_RELBLOCK_P(x)  ((char *)(x) >= rb_start)
@@ -118,6 +118,6 @@ extern fixnum writable_pages;
 #define IS_WRITABLE(i) is_writable(i)
 
 
-#ifndef IN_MAIN
+#if !defined(IN_MAIN) && defined(SGC)
 #include "writable.h"
 #endif

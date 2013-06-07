@@ -883,7 +883,7 @@ struct typemanager {
 	char	*tm_name;	/*  type name  */
 	int	tm_gbccount;	/*  GBC count  */
 	object  tm_alt_free;    /*  Alternate free list (swap with tm_free) */
-	long     tm_alt_nfree;   /*  Alternate nfree (length of nfree) */
+	long    tm_alt_nfree;   /*  Alternate nfree (length of nfree) */
 	long	tm_alt_npage;	/*  number of pages  */
 	short   tm_sgc;         /*  this type has at least this many
 				    sgc pages */

@@ -39,7 +39,7 @@ extern char *get_dbegin ();
 #define SET_REAL_MAXPAGE real_maxpage = MAXPAGE
 
 #include <unistd.h> /* to get sbrk defined */
-extern void *my_sbrk(int incr);
+extern void *my_sbrk(long incr);
 #define sbrk my_sbrk
 
 
@@ -218,3 +218,5 @@ if (realpath (buf, fub) == 0) {                             \
 #else
 #define RELOC_H "mach32_i386_reloc.h"
 #endif
+#undef DBEGIN
+#define DBEGIN mach_mapstart

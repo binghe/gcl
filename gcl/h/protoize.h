@@ -238,7 +238,7 @@ typedef void (*funcvoid)(void);
 /* gbc.c:151:OF */ extern void enter_mark_origin (object *p); /* (p) object *p; */
 /* gbc.c:938:OF */ extern void GBC (enum type t); /* (t) enum type t; */
 /* gbc.c:1326:OF */ extern object fLgbc (object x0); /* (x0) object x0; */
-/* sgbc.c:924:OF */ extern int sgc_count_type (int t); /* (t) int t; */
+/* sgbc.c:924:OF */ extern fixnum sgc_count_type (int t); /* (t) int t; */
 /* sgbc.c:938:OF */ extern int sgc_start (void); /* () */
 /* sgbc.c:1068:OF */ extern int sgc_quit (void); /* () */
 /* sgbc.c:1131:OF */ extern void make_writable (unsigned long beg, unsigned long i); /* (beg, i) int beg; int i; */
