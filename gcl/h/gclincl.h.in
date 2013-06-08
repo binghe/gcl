@@ -317,9 +317,6 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* bit mask for type flags in objects */
-#undef TYPE_BITS
-
 /* have _cleanup function */
 #undef USE_CLEANUP
 

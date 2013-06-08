@@ -1132,30 +1132,6 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
 AC_MSG_RESULT($obj_align)
 AC_DEFINE_UNQUOTED(OBJ_ALIGN,$obj_align,[can use C extension for object alignment])
 
-AC_MSG_CHECKING(TYPE_BITS macro)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-	#define EXTER
-	#include "$MP_INCLUDE"
-	#include "./h/enum.h"
-	#include "./h/bits.h"
-	#include "./h/object.h"
-
-	]],[[
-
-	FILE *f=fopen("conftest1","w");
-	union lispunion g={.fw=0};
-	g.d.e=-1;
-	g.d.t=-1;
-	g.d.s=-1;
-	fprintf(f,"0x%x",g.fw);
-	fclose(f);
-	return 0;
-	]])],[type_bits=`cat conftest1`],
-        [AC_MSG_ERROR([Cannot find type_bits])])
-AC_MSG_RESULT($type_bits)
-AC_DEFINE_UNQUOTED(TYPE_BITS,$type_bits,[bit mask for type flags in objects])
-
 AC_MSG_CHECKING(sizeof struct contblock)
 
 # work around MSYS pwd result incompatibility
@@ -1437,10 +1413,10 @@ else
 if test "$enable_static" = "yes" ; then
   heap_ceiling=0x0
 else
-if ! test -x `which ldd` && ! test -d /proc/self ; then
+if ! test -x `which ldd` && ! test -f /proc/self/maps ; then
    heap_ceiling=0x0
 else
-if test -d /proc/self ; then
+if test -f /proc/self/maps ; then
    heap_ceiling=0x`/bin/cat /proc/self/maps | grep "/lib.*/ld-" | cut -f1 -d- | head -1`
 else 
 if test "`which ldd`" = "" ; then 

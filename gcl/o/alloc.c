@@ -1034,8 +1034,6 @@ static void init_textpage() {
 }
 #endif
 
-unsigned long first_data_page=0;
-
 void
 gcl_init_alloc(void) {
 

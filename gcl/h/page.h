@@ -121,3 +121,6 @@ extern fixnum writable_pages;
 #if !defined(IN_MAIN) && defined(SGC)
 #include "writable.h"
 #endif
+
+EXTER unsigned long first_data_page;
+

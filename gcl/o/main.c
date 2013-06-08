@@ -133,7 +133,7 @@ update_real_maxpage(void) {
   void *end,*cur;
 
   massert(cur=sbrk(0));
-  for (i=1;i<=log_maxpage_bound;i++)
+  for (i=PAGEWIDTH;i<=log_maxpage_bound;i++)
     if ((end=(void *)(1L<<i)-PAGESIZE)>cur)
       if (!mbrk(end))
 	real_maxpage=page(end);
@@ -509,7 +509,8 @@ initlisp(void) {
              || NULL_OR_ON_C_STACK((IM_FIX_BASE|IM_FIX_LIM)) == 0
 #endif
 	    || NULL_OR_ON_C_STACK(vv) != 0
-	    || NULL_OR_ON_C_STACK(pagetoinfo(real_maxpage)))
+	    || NULL_OR_ON_C_STACK(data_start)
+	    || NULL_OR_ON_C_STACK(core_end-1))
 	  /* check person has correct definition of above */
 	  error("NULL_OR_ON_C_STACK macro invalid");
 	

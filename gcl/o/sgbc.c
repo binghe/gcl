@@ -1346,13 +1346,8 @@ sgc_start(void) {
   }
   /* the relblock has been allocated */
   
-  {
-
-    VFUN_NARGS=3;
-    sSAwritableA->s.s_dbind=fSmake_vector1((page(rb_start)-first_data_page),aet_bit,Cnil);
-    wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
-  
-  }
+  sSAwritableA->s.s_dbind=fSmake_vector1_1((page(rb_start)-first_data_page),aet_bit,Cnil);
+  wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 
   /* now move the sgc free lists into place.   alt_free should
      contain the others */

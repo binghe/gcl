@@ -247,6 +247,12 @@ L2OP(IOR,|,fS2logior,mpz_ior);
 L2OP(AND,&,fS2logand,mpz_and);
 L2OP(XOR,^,fS2logxor,mpz_xor);
 
+#ifdef STATIC_FUNCTION_POINTERS
+object fS2logior(object x,object y) { return FFN(fS2logior)(x,y);}
+object fS2logxor(object x,object y) { return FFN(fS2logxor)(x,y);}
+object fS2logand(object x,object y) { return FFN(fS2logand)(x,y);}
+#endif
+
 DEFUN_NEW("1LOGNOT",object,fS1lognot,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
   object u;								
