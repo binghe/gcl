@@ -508,8 +508,8 @@ initlisp(void) {
              || NULL_OR_ON_C_STACK(IM_FIX_BASE) == 0
              || NULL_OR_ON_C_STACK((IM_FIX_BASE|IM_FIX_LIM)) == 0
 #endif
-	    || NULL_OR_ON_C_STACK(vv) != 0
-	    || NULL_OR_ON_C_STACK(data_start)
+	    || NULL_OR_ON_C_STACK(vv)
+	    || NULL_OR_ON_C_STACK(pagetoinfo(first_data_page))
 	    || NULL_OR_ON_C_STACK(core_end-1))
 	  /* check person has correct definition of above */
 	  error("NULL_OR_ON_C_STACK macro invalid");
