@@ -163,7 +163,7 @@ struct fixnum_struct {
 #define mark(a_)                 if (is_imm_fixnum(Zcdr(a_))) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
 #define unmark(a_)               if (is_imm_fixnum(Zcdr(a_))) unmark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=0
 #define is_free(a_)              (!is_imm_fixnum(a_) && !is_imm_fixnum(Zcdr(a_)) && (a_)->d.f)
-#define make_free(a_)            {(a_)->fw=0;(a_)->d.f=1;}/*set_type_of(a_,t_other)*/
+#define make_free(a_)            ({(a_)->fw=0;(a_)->d.f=1;})/*set_type_of(a_,t_other)*/
 #define make_unfree(a_)          {(a_)->d.f=0;}
 
 #define valid_cdr(a_)            (!(a_)->d.e || is_imm_fixnum(Zcdr(a_)))
@@ -177,7 +177,7 @@ struct fixnum_struct {
 /* #define type_of(x)       ({register object _z=(object)(x);\ */
 /*       _z==Cnil ? t_symbol : is_imm_fixnum(_z) ? t_fixnum : _z->d.t;}) */
   
-#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->fw=0;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;}})
+#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;}})
 
 /* ({register object _z=(object)(x);			   \ */
 /*   _z==Cnil ? t_symbol :					   \ */

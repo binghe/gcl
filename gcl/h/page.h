@@ -81,7 +81,7 @@ enum sgc_type { SGC_NORMAL,   /* not allocated since the last sgc */
    have same length as a short
    (x->d.m || x->d.s) would be an equivalent for our purposes */
 /* struct sgc_firstword {short t; short sm;}; */
-#define SGC_OR_M(x)  (is_marked_or_free((object)x) || (valid_cdr((object)x) ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s))
+#define SGC_OR_M(x)  (is_marked_or_free((object)x) || (pageinfo(x)->type==t_cons  ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s))
 
 #ifndef SIGPROTV
 #define SIGPROTV SIGSEGV

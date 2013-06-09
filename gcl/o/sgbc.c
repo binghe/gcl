@@ -769,7 +769,7 @@ sgc_sweep_phase(void) {
 	  unmark(x);
 	  continue;
 	}
-	if(!valid_cdr(x) && x->d.s == SGC_NORMAL)
+	if (pageinfo(x)->type!=t_cons && x->d.s == SGC_NORMAL)
 	  continue;
 	
 	/* it is ok to free x */
@@ -802,7 +802,7 @@ sgc_sweep_phase(void) {
 	
 	SET_LINK(x,f);
 	make_free(x);
-	if (!valid_cdr(x)) x->d.s = SGC_RECENT;
+	if (pagetoinfo(i)!=t_cons) x->d.s = SGC_RECENT;
 	f = x;
 	k++;
       }
@@ -1365,12 +1365,12 @@ sgc_start(void) {
 #endif
 	if (pageinfo(f)->sgc_flags&SGC_PAGE_FLAG) {
 	  SET_LINK(f,x);
-	  if (!valid_cdr(f)) f->d.s = SGC_RECENT;
+	  if (pageinfo(f)->type!=t_cons) f->d.s = SGC_RECENT;
 	  x=f;
 	  count++;
 	} else {
 	  SET_LINK(f,y);
- 	  if (!valid_cdr(f)) f->d.s = SGC_NORMAL;
+ 	  if (pageinfo(f)->type!=t_cons) f->d.s = SGC_NORMAL;
 	  y=f;
 	}
 	f=next;
@@ -1578,7 +1578,7 @@ sgc_quit(void) {
   /*FIXME*/
   /* remove the recent flag from any objects on sgc pages */
   for (v=cell_list_head;v;v=v->next) 
-    if (v->type==(tm=tm_of(v->type))->tm_type && v->sgc_flags & SGC_PAGE_FLAG)
+    if (v->type==(tm=tm_of(v->type))->tm_type && v->type!=t_cons && v->sgc_flags & SGC_PAGE_FLAG)
       for (p=pagetochar(page(v)),j=tm->tm_nppage;j>0;--j,p+=tm->tm_size)
 	if (!valid_cdr((object)p)) ((object) p)->d.s=SGC_NORMAL;
   
