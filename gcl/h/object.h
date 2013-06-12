@@ -123,7 +123,7 @@ struct fixnum_struct {
 #define       fix_imm_fixnum(a_)        ((fixnum)a_)
 #define      mark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)+(LOW_IM_FIX<<1))))
 #define    unmark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)-(LOW_IM_FIX<<1))))
-#define        is_imm_fixnum(a_)        ((fixnum)(a_)<DBEGIN)
+#define        is_imm_fixnum(a_)        ((fixnum)(a_)<data_start)
 #define is_unmrkd_imm_fixnum(a_)        ((fixnum)(a_)<LOW_IM_FIX)
 #define is_marked_imm_fixnum(a_)        (is_imm_fixnum(a_)*!is_unmrkd_imm_fixnum(a_))
 #define           is_imm_fix(a_)        INT_IN_BITS(a_,LOW_SHFT-1)
@@ -198,7 +198,6 @@ struct fixnum_struct {
 /* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
 /* #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector) */
 
-/* #define writable_ptr(a_) (((unsigned long)(a_)>=DBEGIN && (void *)(a_)<(void *)heap_end) || is_imm_fixnum(a_)) */
 
 
 struct shortfloat_struct {
@@ -972,18 +971,18 @@ char *tmp_alloc;
 
 
 /* FIXME  Make all other page constants scale similarly by default. */
-#ifndef HOLEPAGE
-#define	HOLEPAGE	(MAXPAGE/10)
-#endif
+/* #ifndef HOLEPAGE */
+/* #define	HOLEPAGE	(MAXPAGE/10) */
+/* #endif */
 
 
-/* #define	INIT_HOLEPAGE	150 */
-/* #define	INIT_NRBPAGE	50 */
-/* #define	RB_GETA		512 */
+/* /\* #define	INIT_HOLEPAGE	150 *\/ */
+/* /\* #define	INIT_NRBPAGE	50 *\/ */
+/* /\* #define	RB_GETA		512 *\/ */
 
-#define	INIT_HOLEPAGE	(6*HOLEPAGE/5)
-#define	INIT_NRBPAGE	(INIT_HOLEPAGE/30)
-#define	RB_GETA		(10*INIT_NRBPAGE)
+/* #define	INIT_HOLEPAGE	(6*HOLEPAGE/5) */
+/* #define	INIT_NRBPAGE	(INIT_HOLEPAGE/30) */
+#define	RB_GETA		PAGESIZE
 
 
 #ifdef AV

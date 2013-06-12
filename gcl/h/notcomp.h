@@ -249,7 +249,10 @@ EXTER struct printStruct *printStructBufp;
 */
 #ifndef NULL_OR_ON_C_STACK
 
-#define NULL_OR_ON_C_STACK(x) (((void *)(x))<=(void *)DBEGIN || ((void *)(x))>=(void *)core_end)
+#define NULL_OR_ON_C_STACK(x) ({\
+      /* if ((void *)(x)<data_start && ((void *)(x)!=NULL) && ((object)(x))!=Cnil && ((object)(x))!=Ct) */ \
+      /* {pp(x);printf("%p %p\n",(void *)(x),data_start);}			*/ \
+      ((((void *)(x))<(void *)data_start || ((void *)(x))>=(void *)core_end));})
 
 #endif /* NULL_OR_ON_C_STACK */
 

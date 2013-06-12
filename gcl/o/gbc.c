@@ -87,14 +87,9 @@ mark_object(object);
 #define BCHARS_TABLE (BBITS_LONG+BBYTES_CONTBLOCK)
 
 #define Shamt(x) (((((unsigned long) x) >> BBYTES_CONTBLOCK) & ~(~0UL << BBITS_LONG)))
-#define Madr(x) (mark_table+((((unsigned long) x) - ((unsigned long)DBEGIN)) >> (BCHARS_TABLE)))
+#define Madr(x) (mark_table+((((unsigned long) x)) >> (BCHARS_TABLE)))
 #define get_mark_bit(x) (*(Madr(x)) >> Shamt(x) & 1)
 #define set_mark_bit(x) ((*(Madr(x))) |= (1UL << Shamt(x)))
-
-/*  #define Shamt(x) (((((long) x) >> 3) & ~(~0 << 6))) */
-/*  #define Madr(x) (mark_table+((((long) x) - ((long)DBEGIN)) >> (9))) */
-/*  #define get_mark_bit(x) (*(Madr(x)) >> Shamt(x) & 1) */
-/*  #define set_mark_bit(x) ((*(Madr(x))) |= ((unsigned long)1 << Shamt(x))) */
 
 #ifdef KCLOVM
 void mark_all_stacks();
@@ -193,37 +188,54 @@ enter_mark_origin(object *p) {
 
 }
 
+/* static void */
+/* mark_cons(object x) { */
+  
+/*   cs_check(x); */
+  
+/*   /\*  x is already marked.  *\/ */
+  
+/*  BEGIN:   */
+/*   if (NULL_OR_ON_C_STACK(x->c.c_car)) goto MARK_CDR; */
+/*   if (type_of(x->c.c_car) == t_cons) { */
+/*     if (is_marked_or_free(x->c.c_car)) */
+/*       ; */
+/*     else { */
+/*       mark(x->c.c_car); */
+/*       mark_cons(x->c.c_car); */
+/*     } */
+/*   } else */
+/*     mark_object(x->c.c_car); */
+/*  MARK_CDR:   */
+/*   if (NULL_OR_ON_C_STACK(x->c.c_cdr)) */
+/*     return; */
+/*   x = Scdr(x); */
+/*   if (consp(x)) { */
+/*     if (is_marked_or_free(x)) */
+/*       return; */
+/*     mark(x); */
+/*     goto BEGIN; */
+/*   } */
+/*   if (x == Cnil) */
+/*     return; */
+/*   mark_object(x); */
+/* } */
+
 static void
 mark_cons(object x) {
   
-  cs_check(x);
-  
-  /*  x is already marked.  */
-  
- BEGIN:  
-  if (NULL_OR_ON_C_STACK(x->c.c_car)) goto MARK_CDR;
-  if (type_of(x->c.c_car) == t_cons) {
-    if (is_marked_or_free(x->c.c_car))
-      ;
-    else {
-      mark(x->c.c_car);
-      mark_cons(x->c.c_car);
-    }
-  } else
-    mark_object(x->c.c_car);
- MARK_CDR:  
-  if (NULL_OR_ON_C_STACK(x->c.c_cdr))
-    return;
-  x = Scdr(x);
-  if (consp(x)) {
-    if (is_marked_or_free(x))
-      return;
+  object d;
+
+  do {
+    d=x->c.c_cdr;
     mark(x);
-    goto BEGIN;
-  }
-  if (x == Cnil)
-    return;
+    mark_object(x->c.c_car);
+    x=d;
+    if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))
+      return;
+  } while (type_of(x)==t_cons);
   mark_object(x);
+
 }
 
 /* Whenever two arrays are linked together by displacement,
@@ -236,8 +248,8 @@ mark_object(object x) {
   fixnum i,j;
   object *p;
   char *cp;
+  enum type tp;
   
-  cs_check(x);
  BEGIN:
   /* if the body of x is in the c stack, its elements
      are marked anyway by the c stack mark carefully, and
@@ -249,8 +261,14 @@ mark_object(object x) {
     return;
   if (is_marked_or_free(x))
     return;
+
+  if ((tp=type_of(x))==t_cons) {
+    mark_cons(x);
+    return;
+  }
+
   mark(x);
-  switch (type_of(x)) {
+  switch (tp) {
   case t_fixnum:
     break;
     
@@ -652,7 +670,6 @@ static long *c_stack_where;
 void **contblock_stack_list=NULL;
 
 #define PAGEINFO_P(pi) (pi->magic==PAGE_MAGIC && pi->type<=t_contiguous)
-extern unsigned long first_data_page;
 
 #ifdef SGC
 static void
@@ -663,7 +680,7 @@ static void
 mark_stack_carefully(void *topv, void *bottomv, int offset) {
 
   long pageoffset;
-  unsigned long p;
+  long p;
   object x;
   struct typemanager *tm;
   register long *j;
@@ -726,8 +743,8 @@ mark_phase(void) {
   STATIC frame_ptr frp;
   STATIC ihs_ptr ihsp;
   
-  mark_object(Cnil);
-  mark_object(Ct);
+  mark_object(Cnil->s.s_plist);
+  mark_object(Ct->s.s_plist);
   
   mark_stack_carefully(vs_top-1,vs_org,0);
   mark_stack_carefully(MVloc+(sizeof(MVloc)/sizeof(object)),MVloc,0);
@@ -930,9 +947,6 @@ sweep_phase(void) {
   STATIC struct typemanager *tm;
   STATIC object f;
   STATIC struct pageinfo *v;
-  
-  unmark(Cnil);
-  unmark(Ct);
   
 #ifdef DEBUG
   if (debug)
@@ -1366,16 +1380,16 @@ FFN(siLheap_report)(void) {
   
   vs_check_push(make_fixnum(sizeof(fixnum)*CHAR_SIZE));
   vs_push(make_fixnum(PAGESIZE));
-  vs_push(make_fixnum(DBEGIN));
-  vs_push(make_fixnum(DBEGIN+(MAXPAGE<<PAGEWIDTH)));
-  vs_push(make_fixnum(SHARED_LIB_HEAP_CEILING));
+  vs_push(make_fixnum((ufixnum)data_start));
+  vs_push(make_fixnum((ufixnum)data_start+(real_maxpage<<PAGEWIDTH)));
+  vs_push(make_fixnum(0));/*SHARED_LIB_HEAP_CEILING*/
   i=sizeof(fixnum)*CHAR_SIZE-2;
   i=1<<i;
   vs_push(make_fixnum(((unsigned long)cs_base+i-1)&-i));
   vs_push(make_fixnum(abs(cs_base-cs_org)));
   vs_push(make_fixnum((CSTACK_DIRECTION+1)>>1));
   vs_push(make_fixnum(CSTACK_ALIGNMENT));
-  vs_push(make_fixnum(CSSIZE));
+  vs_push(make_fixnum(abs(cs_limit-cs_org)));/*CSSIZE*/
 #if defined(IM_FIX_BASE) && defined(IM_FIX_LIM)
   vs_push(make_fixnum(IM_FIX_BASE));
   vs_push(make_fixnum(IM_FIX_LIM));

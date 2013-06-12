@@ -1,16 +1,12 @@
-#ifndef DBEGIN
-#define DBEGIN 0
-#endif
-
-#define MAYBE_DATA_P(pp) ((char *)(pp)> (char *) DBEGIN)
+#define MAYBE_DATA_P(pp) ((char *)(pp)>= (char *) data_start)/*DBEGIN*/
 #define VALID_DATA_ADDRESS_P(pp) (MAYBE_DATA_P(pp) &&  ((char *)(pp) < heap_end))
 
 
 #ifndef page
-#define page(p)	((unsigned long)(((unsigned long)(((char *)(p))-DBEGIN)>>PAGEWIDTH)))
-#define	pagetochar(x)	((char *)((((unsigned long)x) << PAGEWIDTH) + DBEGIN + sizeof(struct pageinfo)))
+#define page(p)	(((unsigned long)(p))>>PAGEWIDTH)
+#define	pagetochar(x)	((char *)((((unsigned long)x) << PAGEWIDTH) + sizeof(struct pageinfo)))
 #define pageinfo(x) ((struct pageinfo *)((((ufixnum)x)>>PAGEWIDTH)<<PAGEWIDTH))
-#define pagetoinfo(x) ((struct pageinfo *)((((ufixnum)x)<<PAGEWIDTH)+DBEGIN))
+#define pagetoinfo(x) ((struct pageinfo *)((((ufixnum)x)<<PAGEWIDTH)))
 #endif
   
 #ifdef UNIX
@@ -51,11 +47,10 @@
 
 #define SGC_WRITABLE  (SGC_PERM_WRITABLE | SGC_PAGE_FLAG)
 
-#define GCL_PAGE(p)         ((unsigned long)p<MAXPAGE)
-#define WRITABLE_PAGE_P(p)  (GCL_PAGE(p) && IS_WRITABLE(p))
+#define WRITABLE_PAGE_P(p)  IS_WRITABLE(p)
 #define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
 
-#define  IF_WRITABLE(x,if_code) ({unsigned long xSG= page(x);if(xSG < MAXPAGE && IS_WRITABLE(xSG)) {if_code;}})/*FIXME maxpage*/
+#define  IF_WRITABLE(x,if_code) ({if (IS_WRITABLE(page(x))) {if_code;}})/*FIXME maxpage*/
 
 #define sgc_mark_object(x) IF_WRITABLE(x,if(!is_marked(x)) sgc_mark_object1(x))
 
@@ -109,7 +104,6 @@ extern struct pageinfo *cell_list_head,*cell_list_tail,*contblock_list_head,*con
 
 #define PAGE_MAGIC 0x2e
 
-extern unsigned long first_data_page;
 extern unsigned char *wrimap;
 extern fixnum writable_pages;
 
@@ -118,9 +112,11 @@ extern fixnum writable_pages;
 #define IS_WRITABLE(i) is_writable(i)
 
 
+EXTER long first_data_page,real_maxpage;
+EXTER void * data_start;
+
 #if !defined(IN_MAIN) && defined(SGC)
 #include "writable.h"
 #endif
 
-EXTER unsigned long first_data_page;
 

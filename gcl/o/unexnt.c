@@ -957,9 +957,9 @@ allocate_heap (void)
      the region below the 256MB line for our malloc arena - 229MB is
      still a pretty decent arena to play in!  */
 
-  unsigned long base = DBEGIN;   /*  27MB */
+  unsigned long base = 0x01100000;   /*  27MB */
   /*   unsigned long base = 0x01B00000; */  /*  27MB */
-  unsigned long end  = 2*PAGESIZE*MAXPAGE; /* 256MB */
+  unsigned long end  = 2*PAGESIZE*65536; /* 256MB */
   void *ptr = NULL;
 
 #define NTHEAP_PROBE_BASE 0

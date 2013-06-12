@@ -129,14 +129,24 @@ fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
 int
 update_real_maxpage(void) {
 
-  fixnum i;
+  ufixnum i,j;
   void *end,*cur;
+#ifdef __MINGW32__
+  static fixnum n;
+
+  if (!n) {
+    init_shared_memory();
+    n=1;
+  }
+#endif
 
   massert(cur=sbrk(0));
-  for (i=PAGEWIDTH;i<=log_maxpage_bound;i++)
-    if ((end=(void *)(1L<<i)-PAGESIZE)>cur)
-      if (!mbrk(end))
+  for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
+    if ((end=data_start+i+j-PAGESIZE)>cur)
+      if (!mbrk(end)) {
 	real_maxpage=page(end);
+	i+=j;
+      }
   massert(!mbrk(cur));
 
   return 0;
@@ -299,14 +309,14 @@ main(int argc, char **argv, char **envp) {
  }
 #endif
 
-	cssize = CSSIZE;
+        cssize = (1L<<23);
 	install_segmentation_catcher();
 
 #ifdef BSD
 #ifdef RLIMIT_STACK
 	{
 	  unsigned long mss;
-	  mss=(MAXPAGE/64)<<PAGEWIDTH;
+	  mss=(real_maxpage/64)<<PAGEWIDTH;
 	  if (getrlimit(RLIMIT_STACK, &rl))
 	    error("Cannot get stack rlimit\n");
 	  if (rl.rlim_max != RLIM_INFINITY && rl.rlim_max < mss)
@@ -382,6 +392,7 @@ main(int argc, char **argv, char **envp) {
 #endif
 	  
 		if (saving_system) {
+
 			saving_system = FALSE;
 			terminal_io->sm.sm_object0->sm.sm_fp = stdin;
 			terminal_io->sm.sm_object1->sm.sm_fp = stdout;
@@ -389,7 +400,19 @@ main(int argc, char **argv, char **envp) {
 #ifdef INIT_CORE_END
 			INIT_CORE_END
 #endif			  
-			alloc_page(-(holepage + nrbpage));
+			  /* if (available_pages/20>nrbpage) */
+			  /*   add_pages(tm_table+t_relocatable,(available_pages/20-nrbpage)<<PAGEWIDTH); */
+			  /* { */
+			  /*   int in_sgc=sgc_enabled; */
+			  /*   if (in_sgc) sgc_quit(); */
+			  /*   /\* holepage=available_pages/10; *\/ */
+			  /*   /\* if (available_pages/20>nrbpage) nrbpage=available_pages/20; *\/ */
+			  /*   GBC_enable = TRUE; */
+			  /*   GBC(t_relocatable); */
+			  /*   if (in_sgc) sgc_start(); */
+			  /* } */
+			  /* alloc_page(-((available_pages/5) + nrbpage)); */
+			  alloc_page(-(holepage + nrbpage));
 		}
 
 		initflag = FALSE;
@@ -427,9 +450,9 @@ main(int argc, char **argv, char **envp) {
 		exit(0);
 	}
 
-	printf("GCL (GNU Common Lisp)  %s  %d pages\n",
+	printf("GCL (GNU Common Lisp)  %s  %ld pages\n",
 	       LISP_IMPLEMENTATION_VERSION,
-	       MAXPAGE);
+	       real_maxpage);
 	fflush(stdout);
 
 	initlisp();
@@ -501,14 +524,14 @@ error(char *s)
 static void
 initlisp(void) {
 
-	void *v=&v,*vv=Cnil;
+        void *v=&v;
 
 	if (NULL_OR_ON_C_STACK(v) == 0
 #if defined(IM_FIX_BASE)
              || NULL_OR_ON_C_STACK(IM_FIX_BASE) == 0
              || NULL_OR_ON_C_STACK((IM_FIX_BASE|IM_FIX_LIM)) == 0
 #endif
-	    || NULL_OR_ON_C_STACK(vv)
+	    /* || NULL_OR_ON_C_STACK(vv) */
 	    || NULL_OR_ON_C_STACK(pagetoinfo(first_data_page))
 	    || NULL_OR_ON_C_STACK(core_end-1))
 	  /* check person has correct definition of above */
@@ -1004,8 +1027,8 @@ FFN(siLsave_system)(void) {
     if (in_sgc) sgc_start();
     new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
     core_end = new;
-    rb_end=rb_limit=rb_pointer;
-    nrbpage=(rb_pointer-rb_start)/PAGESIZE;
+    /* rb_end=rb_limit=rb_pointer; */
+    /* nrbpage=(rb_pointer-rb_start)/PAGESIZE; */
     new_holepage=old_holepage;
   }
 

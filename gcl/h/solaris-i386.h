@@ -34,4 +34,4 @@ void bcopy (const void *,void *,size_t);
 void bzero(void *,size_t);
 int bcmp(const void *,const void *,size_t);
 
-#define NULL_OR_ON_C_STACK(x) ((unsigned long)x<DBEGIN)
+#define NULL_OR_ON_C_STACK(x) ((unsigned long)x<data_start)

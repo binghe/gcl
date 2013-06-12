@@ -11,21 +11,21 @@ AC_SUBST(VERSION)
 # Arguments
 #
 
-help="--enable-maxpage=XXXX will compile in a page table of size XXX (default ${default_maxpage})"
+dnl help="--enable-maxpage=XXXX will compile in a page table of size XXX (default ${default_maxpage})"
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	    #include <stdio.h>
-            #include <unistd.h>
-	    ]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
-	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	    #include <stdio.h>
+dnl             #include <unistd.h>
+dnl 	    ]],[[
+dnl 	    FILE *fp=fopen("conftest1","w");
+dnl 	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
+dnl 	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
 
-AC_ARG_ENABLE(maxpage,
-[ --enable-maxpage=XXXX  will compile in a page table of size XXX
-                         (eg '--enable-maxpage=64*1024' would produce
-			 64K pages allowing 256 MB if pages are 4K each)],
-,enable_maxpage=$def_maxpage)
+dnl AC_ARG_ENABLE(maxpage,
+dnl [ --enable-maxpage=XXXX  will compile in a page table of size XXX
+dnl                          (eg '--enable-maxpage=64*1024' would produce
+dnl 			 64K pages allowing 256 MB if pages are 4K each)],
+dnl ,enable_maxpage=$def_maxpage)
 
 
 AC_ARG_ENABLE(holepage,[ --enable-holepage=XXXX will compile in a XXX-sized hole between the heap and relocatable memory area (eg '--enable-holepage=64*1024' would give 64K pages allowing 256 MB if pages are 4K each)] ,
@@ -1277,53 +1277,53 @@ if test "$HAVE_SBRK" = "1" ; then
 	fi
 fi
 
-AC_MSG_CHECKING(DBEGIN)
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <unistd.h>
-  void gprof_cleanup() {};
+dnl AC_MSG_CHECKING(DBEGIN)
+dnl AC_RUN_IFELSE([AC_LANG_SOURCE([[
+dnl   #include <stdio.h>
+dnl   #include <stdlib.h>
+dnl   #include <unistd.h>
+dnl   void gprof_cleanup() {};
 
-  int main(int argc,char **argv,char **envp) {
+dnl   int main(int argc,char **argv,char **envp) {
 
-  void *b;
-  FILE *fp;
+dnl   void *b;
+dnl   FILE *fp;
 
-  #ifdef CAN_UNRANDOMIZE_SBRK
-  #include "h/unrandomize.h"
-  #endif
+dnl   #ifdef CAN_UNRANDOMIZE_SBRK
+dnl   #include "h/unrandomize.h"
+dnl   #endif
 			
-  fp = fopen("conftest1","w");
+dnl   fp = fopen("conftest1","w");
 
-  #ifdef _WIN32
-  fprintf ( fp,"0x%lx", 0x3000000 );  /* Windows custom allocation from this point up */
-  #else
-  #if defined (__APPLE__) && defined (__MACH__)
-  fprintf(fp,"0x0");
-  #else
-  b = sbrk(0);
-  fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1));
-  #endif
-  #endif
-  fclose(fp);
-  return 0;}]])],
-  [dbegin=`cat conftest1`],[dbegin=0])
+dnl   #ifdef _WIN32
+dnl   fprintf ( fp,"0x%lx", 0x3000000 );  /* Windows custom allocation from this point up */
+dnl   #else
+dnl   #if defined (__APPLE__) && defined (__MACH__)
+dnl   fprintf(fp,"0x0");
+dnl   #else
+dnl   b = sbrk(0);
+dnl   fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1));
+dnl   #endif
+dnl   #endif
+dnl   fclose(fp);
+dnl   return 0;}]])],
+dnl   [dbegin=`cat conftest1`],[dbegin=0])
 
-AC_MSG_RESULT($dbegin)
+dnl AC_MSG_RESULT($dbegin)
 
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	    #include <stdio.h>
-            #include <unistd.h>
-	    ]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
-	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	    #include <stdio.h>
+dnl             #include <unistd.h>
+dnl 	    ]],[[
+dnl 	    FILE *fp=fopen("conftest1","w");
+dnl 	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
+dnl 	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
 
-AC_ARG_ENABLE(maxpage,
-[ --enable-maxpage=XXXX  will compile in a page table of size XXX
-                         (eg '--enable-maxpage=64*1024' would produce
-			 64K pages allowing 256 MB if pages are 4K each)],
-,enable_maxpage=$def_maxpage)
+dnl AC_ARG_ENABLE(maxpage,
+dnl [ --enable-maxpage=XXXX  will compile in a page table of size XXX
+dnl                          (eg '--enable-maxpage=64*1024' would produce
+dnl 			 64K pages allowing 256 MB if pages are 4K each)],
+dnl ,enable_maxpage=$def_maxpage)
 
 
 AC_MSG_CHECKING(CSTACK_ADDRESS)
@@ -1403,58 +1403,58 @@ AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up 
 AC_MSG_RESULT($cstack_direction)
 
 
-AC_MSG_CHECKING(for shared library/C stack ceiling to heap)
-if test "$use" = "mingw" ; then
-  heap_ceiling=2000000000
-else
-if test "$use" = "solaris-i386" ; then
-  heap_ceiling=0x0
-else
-if test "$enable_static" = "yes" ; then
-  heap_ceiling=0x0
-else
-if ! test -x `which ldd` && ! test -f /proc/self/maps ; then
-   heap_ceiling=0x0
-else
-if test -f /proc/self/maps ; then
-   heap_ceiling=0x`/bin/cat /proc/self/maps | grep "/lib.*/ld-" | cut -f1 -d- | head -1`
-else 
-if test "`which ldd`" = "" ; then 
-   heap_ceiling=0x0
-else
-#echo -e "#include <stdio.h>\n int main() {printf(\"foo\");return 0;}" >foo.c
-#$CC foo.c -o foo
-   AAWK=`which awk`
-# | grep -v ld-kfreebsd needed on some strange bsd amd64 boxes
-   heap_ceiling=`ldd $AAWK | tail -n 1 | $AWK '{print $NF}' | tr -d '()'`
-fi
-fi
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	FILE *fp=fopen("conftest1","w");
-	unsigned long h=$heap_ceiling,d=$dbegin,c=$cstack_address;
-	h=h<d ? 0 : h;
-	h=c>d && c<h ? c : h;
-	fprintf(fp,"0x%lx",h);
-	return 0;]])],[heap_ceiling=`cat conftest1`],[AC_MSG_ERROR([failed])])
-fi
-fi
-fi
-fi
-AC_MSG_RESULT($heap_ceiling)
-AC_DEFINE_UNQUOTED(SHARED_LIB_HEAP_CEILING,$heap_ceiling,
-	[address at which shared lib placement terminates heap growth])
+dnl AC_MSG_CHECKING(for shared library/C stack ceiling to heap)
+dnl if test "$use" = "mingw" ; then
+dnl   heap_ceiling=2000000000
+dnl else
+dnl if test "$use" = "solaris-i386" ; then
+dnl   heap_ceiling=0x0
+dnl else
+dnl if test "$enable_static" = "yes" ; then
+dnl   heap_ceiling=0x0
+dnl else
+dnl if ! test -x `which ldd` && ! test -f /proc/self/maps ; then
+dnl    heap_ceiling=0x0
+dnl else
+dnl if test -f /proc/self/maps ; then
+dnl    heap_ceiling=0x`/bin/cat /proc/self/maps | grep "/lib.*/ld-" | cut -f1 -d- | head -1`
+dnl else 
+dnl if test "`which ldd`" = "" ; then 
+dnl    heap_ceiling=0x0
+dnl else
+dnl #echo -e "#include <stdio.h>\n int main() {printf(\"foo\");return 0;}" >foo.c
+dnl #$CC foo.c -o foo
+dnl    AAWK=`which awk`
+dnl # | grep -v ld-kfreebsd needed on some strange bsd amd64 boxes
+dnl    heap_ceiling=`ldd $AAWK | tail -n 1 | $AWK '{print $NF}' | tr -d '()'`
+dnl fi
+dnl fi
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	#include <stdio.h>
+dnl 	]],[[
+dnl 	FILE *fp=fopen("conftest1","w");
+dnl 	unsigned long h=$heap_ceiling,d=$dbegin,c=$cstack_address;
+dnl 	h=h<d ? 0 : h;
+dnl 	h=c>d && c<h ? c : h;
+dnl 	fprintf(fp,"0x%lx",h);
+dnl 	return 0;]])],[heap_ceiling=`cat conftest1`],[AC_MSG_ERROR([failed])])
+dnl fi
+dnl fi
+dnl fi
+dnl fi
+dnl AC_MSG_RESULT($heap_ceiling)
+dnl AC_DEFINE_UNQUOTED(SHARED_LIB_HEAP_CEILING,$heap_ceiling,
+dnl 	[address at which shared lib placement terminates heap growth])
 
-## Don't lower heap start if C stack is below default dbegin, as we're
-# likely to get more heap this way.
-if test "$enable_static" = "yes" ; then 
-   echo "int main() {return !((unsigned long)$dbegin < (unsigned long)$cstack_address);}" >foo.c
-else
-   echo "int main() {return !($heap_ceiling && (unsigned long)$dbegin < (unsigned long)$cstack_address);}" >foo.c
-fi
-$CC foo.c -o foo
-if ./foo ; then
+dnl ## Don't lower heap start if C stack is below default dbegin, as we're
+dnl # likely to get more heap this way.
+dnl if test "$enable_static" = "yes" ; then 
+dnl    echo "int main() {return !((unsigned long)$dbegin < (unsigned long)$cstack_address);}" >foo.c
+dnl else
+dnl    echo "int main() {return !($heap_ceiling && (unsigned long)$dbegin < (unsigned long)$cstack_address);}" >foo.c
+dnl fi
+dnl $CC foo.c -o foo
+dnl if ./foo ; then
 
    AC_MSG_CHECKING([finding default linker script])
    touch unixport/gcl.script
@@ -1489,154 +1489,154 @@ if ./foo ; then
      rm -f gcl.script
    fi
 
-   old_LDFLAGS="$LDFLAGS"
-   LDFLAGS="$LDFLAGS $TLDFLAGS"
-   AC_MSG_CHECKING([revised DBEGIN])
-   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <unistd.h>
+   dnl old_LDFLAGS="$LDFLAGS"
+   dnl LDFLAGS="$LDFLAGS $TLDFLAGS"
+   dnl AC_MSG_CHECKING([revised DBEGIN])
+   dnl AC_RUN_IFELSE([AC_LANG_SOURCE([[
+   dnl 	#include <stdio.h>
+   dnl 	#include <stdlib.h>
+   dnl 	#include <unistd.h>
 
-	int main(int argc,char **argv,char **envp) {
+   dnl 	int main(int argc,char **argv,char **envp) {
 
-	    void *b;
-	    FILE *fp;
+   dnl 	    void *b;
+   dnl 	    FILE *fp;
 
-	    #ifdef CAN_UNRANDOMIZE_SBRK
-	    #include "h/unrandomize.h"
-	    #endif
-	    fp = fopen("conftest1","w");
+   dnl 	    #ifdef CAN_UNRANDOMIZE_SBRK
+   dnl 	    #include "h/unrandomize.h"
+   dnl 	    #endif
+   dnl 	    fp = fopen("conftest1","w");
 
-	    #ifdef _WIN32
-	    fprintf ( fp,"0x%lx", 0x1a000000 );  /* Windows custom allocation from this point up */
-	    #else
-	    #if defined (__APPLE__) && defined (__MACH__)
-	    fprintf(fp,"((unsigned long)get_dbegin())");
-	    #else
-	    b = sbrk(0);
-	    fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)0xffffff);
-	    #endif
-	    #endif
-	    fclose(fp);
-	    return 0;}]])],[dbegin=`cat conftest1`],[dbegin=0])
-   AC_MSG_RESULT($dbegin)
-   LDFLAGS="$old_LDFLAGS"
-fi
-AC_DEFINE_UNQUOTED(DBEGIN,$dbegin,[down-rounded beginning address of lisp data])
-rm -rf foo*
+   dnl 	    #ifdef _WIN32
+   dnl 	    fprintf ( fp,"0x%lx", 0x1a000000 );  /* Windows custom allocation from this point up */
+   dnl 	    #else
+   dnl 	    #if defined (__APPLE__) && defined (__MACH__)
+   dnl 	    fprintf(fp,"((unsigned long)get_dbegin())");
+   dnl 	    #else
+   dnl 	    b = sbrk(0);
+   dnl 	    fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)0xffffff);
+   dnl 	    #endif
+   dnl 	    #endif
+   dnl 	    fclose(fp);
+   dnl 	    return 0;}]])],[dbegin=`cat conftest1`],[dbegin=0])
+   dnl AC_MSG_RESULT($dbegin)
+   dnl LDFLAGS="$old_LDFLAGS"
+dnl fi
+dnl dnl AC_DEFINE_UNQUOTED(DBEGIN,$dbegin,[down-rounded beginning address of lisp data])
+dnl rm -rf foo*
 
-AC_MSG_CHECKING(for maxpage revision)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	char *b;
-	unsigned long i,j;
-	FILE *fp = fopen("conftest1","w");
-	j=((unsigned long)$enable_maxpage <<$PAGEWIDTH) + $dbegin;
-	j=$heap_ceiling && j>$heap_ceiling ? $heap_ceiling : j;
-	j-=$dbegin;
-	/*  for (i=1;i<<1 && i<=j;i<<=1); */
-	/*  if (i>j) i>>=1; */
-	i=j;
-	fprintf(fp,"%ld",i>>$PAGEWIDTH);
-	fclose(fp);
-	return 0;
-]])],[tmp_maxpage=`cat conftest1`],[tmp_maxpage=0])
-if test "$tmp_maxpage" != "$enable_maxpage" ; then
-   enable_maxpage=$tmp_maxpage
-   AC_MSG_RESULT($enable_maxpage)
-else
-   AC_MSG_RESULT($enable_maxpage is OK)
-fi
-AC_DEFINE_UNQUOTED(MAXPAGE,$enable_maxpage,[maximum number of pages to be allocated])
+dnl AC_MSG_CHECKING(for maxpage revision)
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	#include <stdio.h>
+dnl 	]],[[
+dnl 	char *b;
+dnl 	unsigned long i,j;
+dnl 	FILE *fp = fopen("conftest1","w");
+dnl 	j=((unsigned long)$enable_maxpage <<$PAGEWIDTH) + $dbegin;
+dnl 	j=$heap_ceiling && j>$heap_ceiling ? $heap_ceiling : j;
+dnl 	j-=$dbegin;
+dnl 	/*  for (i=1;i<<1 && i<=j;i<<=1); */
+dnl 	/*  if (i>j) i>>=1; */
+dnl 	i=j;
+dnl 	fprintf(fp,"%ld",i>>$PAGEWIDTH);
+dnl 	fclose(fp);
+dnl 	return 0;
+dnl ]])],[tmp_maxpage=`cat conftest1`],[tmp_maxpage=0])
+dnl if test "$tmp_maxpage" != "$enable_maxpage" ; then
+dnl    enable_maxpage=$tmp_maxpage
+dnl    AC_MSG_RESULT($enable_maxpage)
+dnl else
+dnl    AC_MSG_RESULT($enable_maxpage is OK)
+dnl fi
+dnl AC_DEFINE_UNQUOTED(MAXPAGE,$enable_maxpage,[maximum number of pages to be allocated])
 
-AC_MSG_CHECKING(for C stack size floor from heap)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	char *b;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long j,k;
+dnl AC_MSG_CHECKING(for C stack size floor from heap)
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	#include <stdio.h>
+dnl 	]],[[
+dnl 	char *b;
+dnl 	FILE *fp = fopen("conftest1","w");
+dnl 	unsigned long j,k;
 
-	j=$cstack_address + $cstack_direction * $enable_cssize;
-	k=($dbegin + ((unsigned long)$enable_maxpage << $PAGEWIDTH));
-	j=abs(j-$cstack_address)!=$enable_cssize || (j<k && $dbegin < $cstack_address) ? k : j;
-	j-=$cstack_address;
-	j*=$cstack_direction;
-	fprintf(fp,"%lu",j);
-	fclose(fp);
-	return 0;
-]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
-if test "$tmp_cssize" != "$enable_cssize" ; then
-   enable_cssize=$tmp_cssize;
-   AC_MSG_RESULT($enable_cssize)
-else
-   AC_MSG_RESULT($enable_cssize is OK)
-fi
+dnl 	j=$cstack_address + $cstack_direction * $enable_cssize;
+dnl 	k=($dbegin + ((unsigned long)$enable_maxpage << $PAGEWIDTH));
+dnl 	j=abs(j-$cstack_address)!=$enable_cssize || (j<k && $dbegin < $cstack_address) ? k : j;
+dnl 	j-=$cstack_address;
+dnl 	j*=$cstack_direction;
+dnl 	fprintf(fp,"%lu",j);
+dnl 	fclose(fp);
+dnl 	return 0;
+dnl ]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
+dnl if test "$tmp_cssize" != "$enable_cssize" ; then
+dnl    enable_cssize=$tmp_cssize;
+dnl    AC_MSG_RESULT($enable_cssize)
+dnl else
+dnl    AC_MSG_RESULT($enable_cssize is OK)
+dnl fi
 
-AC_MSG_CHECKING(for C stack size limit from fixnum table)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	char *b;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long j,k;
+dnl AC_MSG_CHECKING(for C stack size limit from fixnum table)
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	#include <stdio.h>
+dnl 	]],[[
+dnl 	char *b;
+dnl 	FILE *fp = fopen("conftest1","w");
+dnl 	unsigned long j,k;
 
-	j=$cstack_address + $cstack_direction * $enable_cssize;
-	if ($cstack_direction>0) {
-	  k=$cstack_address + ((-(unsigned long)$cstack_address)>>1);
-	  j=j<$cstack_address || j > k ? k : j;
-	  j=$cstack_address < $dbegin && j > $dbegin ? $dbegin : j;
-	}
-	j-=$cstack_address;
-	j*=$cstack_direction;
-	fprintf(fp,"%lu",j);
-	fclose(fp);
-	return 0;
-]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
-if test "$tmp_cssize" != "$enable_cssize" ; then
-   enable_cssize=$tmp_cssize;
-   AC_MSG_RESULT($enable_cssize)
-else
-   AC_MSG_RESULT($enable_cssize is OK)
-fi
+dnl 	j=$cstack_address + $cstack_direction * $enable_cssize;
+dnl 	if ($cstack_direction>0) {
+dnl 	  k=$cstack_address + ((-(unsigned long)$cstack_address)>>1);
+dnl 	  j=j<$cstack_address || j > k ? k : j;
+dnl 	  j=$cstack_address < $dbegin && j > $dbegin ? $dbegin : j;
+dnl 	}
+dnl 	j-=$cstack_address;
+dnl 	j*=$cstack_direction;
+dnl 	fprintf(fp,"%lu",j);
+dnl 	fclose(fp);
+dnl 	return 0;
+dnl ]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
+dnl if test "$tmp_cssize" != "$enable_cssize" ; then
+dnl    enable_cssize=$tmp_cssize;
+dnl    AC_MSG_RESULT($enable_cssize)
+dnl else
+dnl    AC_MSG_RESULT($enable_cssize is OK)
+dnl fi
 
-AC_MSG_CHECKING(for C stack size limit from address wrap)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	char *b;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long j,k;
+dnl AC_MSG_CHECKING(for C stack size limit from address wrap)
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	#include <stdio.h>
+dnl 	]],[[
+dnl 	char *b;
+dnl 	FILE *fp = fopen("conftest1","w");
+dnl 	unsigned long j,k;
 
-	j=-$cstack_address * $cstack_direction;
-	j=j>$enable_cssize ? $enable_cssize : j;
-	fprintf(fp,"%lu",j);
-	fclose(fp);
-	return 0;
-]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
-if test "$tmp_cssize" != "$enable_cssize" ; then
-   enable_cssize=$tmp_cssize;
-   AC_MSG_RESULT($enable_cssize)
-else
-   AC_MSG_RESULT($enable_cssize is OK)
-fi
-AC_DEFINE_UNQUOTED(CSSIZE,$enable_cssize,[maximum C stack size])
+dnl 	j=-$cstack_address * $cstack_direction;
+dnl 	j=j>$enable_cssize ? $enable_cssize : j;
+dnl 	fprintf(fp,"%lu",j);
+dnl 	fclose(fp);
+dnl 	return 0;
+dnl ]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
+dnl if test "$tmp_cssize" != "$enable_cssize" ; then
+dnl    enable_cssize=$tmp_cssize;
+dnl    AC_MSG_RESULT($enable_cssize)
+dnl else
+dnl    AC_MSG_RESULT($enable_cssize is OK)
+dnl fi
+dnl AC_DEFINE_UNQUOTED(CSSIZE,$enable_cssize,[maximum C stack size])
 
-AC_MSG_CHECKING(for fast NULL_OR_ON_CSTACK macro)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	return ((long)$dbegin>=0 &&
-	       ((long)$dbegin+(long)($enable_maxpage<<$PAGEWIDTH)) >=0 &&
-	       ((long)$cstack_address<0)) ? 0 : 1;
-]])],[tmp_fnocm=yes],[tmp_fnocm=no])
-if test "$tmp_fnocm" = "yes" ; then
-   AC_MSG_RESULT(yes)
-   AC_DEFINE(USE_FAST_NULL_OR_ON_CSTACK_MACRO,1,[whether one instruction heap address check can be used])
-else
-   AC_MSG_RESULT(no)
-fi
+dnl AC_MSG_CHECKING(for fast NULL_OR_ON_CSTACK macro)
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 	#include <stdio.h>
+dnl 	]],[[
+dnl 	return ((long)$dbegin>=0 &&
+dnl 	       ((long)$dbegin+(long)($enable_maxpage<<$PAGEWIDTH)) >=0 &&
+dnl 	       ((long)$cstack_address<0)) ? 0 : 1;
+dnl ]])],[tmp_fnocm=yes],[tmp_fnocm=no])
+dnl if test "$tmp_fnocm" = "yes" ; then
+dnl    AC_MSG_RESULT(yes)
+dnl    AC_DEFINE(USE_FAST_NULL_OR_ON_CSTACK_MACRO,1,[whether one instruction heap address check can be used])
+dnl else
+dnl    AC_MSG_RESULT(no)
+dnl fi
 
 mem_top=0
 mem_range=0
@@ -1649,9 +1649,8 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	FILE *fp = fopen("conftest1","w");
 
 	for (i=2,k=1;i;k=i,i<<=1);
-	l=$cstack_address + ($cstack_direction==1 ? $enable_cssize : 0);
-	m=$dbegin + ((unsigned long)$enable_maxpage << $PAGEWIDTH);
-	l=l<m ? m : l;
+	l=$cstack_address;
+	l=$cstack_direction==1 ? (l<k ? k-1 : -1) : l;
 	for (i=j=k;j && i<l;j>>=1,i|=j);
 	if (j<(k>>3)) i=0;
 	j=1;
@@ -1663,9 +1662,9 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	fprintf(fp,"0x%lx",i);
 	fclose(fp);
 	return 0;
-]])],[mem_top=`cat conftest1`],[mem_top=0])
+]])],[mem_top=`cat conftest1`],[mem_top="0x0"])
 AC_MSG_RESULT($mem_top)
-if test "$mem_top" != "0" ; then
+if test "$mem_top" != "0x0" ; then
    AC_MSG_CHECKING(finding upper mem half range)
    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
    #include <stdio.h>
@@ -1677,9 +1676,9 @@ if test "$mem_top" != "0" ; then
    fprintf(fp,"0x%lx",j>>1);
    fclose(fp);
    return 0;
-   ]])],[mem_range=`cat conftest1`],[mem_range=0])
+   ]])],[mem_range=`cat conftest1`],[mem_range="0x0"])
    AC_MSG_RESULT($mem_range)
-   if test "$mem_range" != "0" ; then 
+   if test "$mem_range" != "0x0" ; then 
 	AC_DEFINE_UNQUOTED(MEM_TOP,$mem_top,[beginning address for immediate fixnum range])
         AC_DEFINE_UNQUOTED(MEM_RANGE,$mem_range,[size of immediate fixnum address space])
    fi

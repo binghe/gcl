@@ -1462,7 +1462,7 @@ fmt_general_float(bool colon, bool atsign)
 		q = 8;
 	edit_double(q, number_to_double(x), &sign, buff, &exp);
 	n = exp + 1;
-	while (q >= 0)
+	while (q > 0)
 		if (buff[q - 1] == '0')
 			--q;
 		else

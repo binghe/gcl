@@ -70,8 +70,6 @@
 
 #define NUMBER_OPEN_FILES _NFILE 
 
-#define SET_REAL_MAXPAGE real_maxpage = MAXPAGE
-
 #define INIT_ALLOC \
      	heap_end = sbrk(0); \
 	({fixnum i;if ((i = ((int)heap_end & (PAGESIZE - 1))))	\

@@ -830,7 +830,7 @@ init_signals_pendingPtr() {
   if (sharedMemory.address) {
     signalsPendingPtr = sharedMemory.address;
   } else {
-    signalsPendingPtr = &where;
+    signalsPendingPtr = (void *)&where;
   }
   gcl_signal(SIGKILL,sigkill);
   gcl_signal(SIGTERM,sigterm);

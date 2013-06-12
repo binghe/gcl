@@ -106,7 +106,7 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
 /* #define NULL_OR_ON_C_STACK(y) \ */
 /*     (((unsigned int)(y)) == 0 || \ */
 /*     (((unsigned int)(y)) > _stacktop && ((unsigned int)(y)) < _stackbottom))      */
-#define NULL_OR_ON_C_STACK(x) (!(int *)x || ((int *)x>cs_limit && (int *)x<=cs_org))
+/* #define NULL_OR_ON_C_STACK(x) (!(int *)x || ((int *)x>cs_limit && (int *)x<=cs_org)) */
       
 #if defined ( IN_FILE ) || defined ( IN_SOCKETS )
 #  define HAVE_NSOCKET
@@ -144,9 +144,6 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
 #define FCLOSE_SETBUF_OK 
 #define	IEEEFLOAT
 #define I386
-
-#undef SET_REAL_MAXPAGE  
-#define SET_REAL_MAXPAGE {init_shared_memory(); real_maxpage=MAXPAGE;}
 
 /* include some low level routines for maxima */
 #define CMAC

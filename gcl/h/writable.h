@@ -4,7 +4,7 @@ set_writable(fixnum i,fixnum m) {
   fixnum j;
   object v;
 
-  if (i<=page(DBEGIN) || i>=page(core_end))
+  if (i<first_data_page || i>=page(core_end))
     error("out of core in set_writable");
 
   if ((v=sSAwritableA ? sSAwritableA->s.s_dbind : Cnil)==Cnil)
@@ -33,7 +33,7 @@ is_writable(fixnum i) {
   fixnum j;
   object v;
 
-  if (i<=page(DBEGIN) || i>=page(core_end))
+  if (i<first_data_page || i>=page(core_end))
     return 0;
 
   if ((v=sSAwritableA ? sSAwritableA->s.s_dbind : Cnil)==Cnil)

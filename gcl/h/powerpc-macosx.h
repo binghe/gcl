@@ -35,9 +35,6 @@ extern char *mach_brkpt;
 
 extern char *get_dbegin ();
 
-#undef SET_REAL_MAXPAGE
-#define SET_REAL_MAXPAGE real_maxpage = MAXPAGE
-
 #include <unistd.h> /* to get sbrk defined */
 extern void *my_sbrk(long incr);
 #define sbrk my_sbrk

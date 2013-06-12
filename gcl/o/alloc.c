@@ -61,7 +61,6 @@ sbrk1(n)
 #define sbrk sbrk1
 #endif /* DEBUG_SBRK */
 
-long real_maxpage = MAXPAGE;
 long new_holepage;
 long resv_pages=40;
 
@@ -73,7 +72,7 @@ struct rlimit data_rlimit;
 #endif
 #endif
 
-void
+inline void
 add_page_to_contblock_list(void *p,fixnum m) {
  
   struct pageinfo *pp=pageinfo(p);
@@ -107,7 +106,7 @@ icomp(const void *v1,const void *v2) {
   return *f1<*f2 ? -1 : *f1==*f2 ? 0 : +1;
 }
 
-void
+inline void
 maybe_reallocate_page(struct typemanager *ntm,ufixnum count) {
 
   void **y,**n;
@@ -190,7 +189,7 @@ int hole_overrun=0;
    If not in_signal_handler then try to keep a minimum of
    reserve_pages_for_signal_handler pages on hand in the hole
  */
-void *
+inline void *
 alloc_page(long n) {
 
   void *e=heap_end;
@@ -285,7 +284,7 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 struct pageinfo *cell_list_head=NULL,*cell_list_tail=NULL;;
 
 
-void
+inline void
 add_page_to_freelist(char *p, struct typemanager *tm) {
 
   short t,size;
@@ -419,7 +418,7 @@ DEFVAR("*OPTIMIZE-MAXIMUM-PAGES*",sSAoptimize_maximum_pagesA,SI,sLt,"");
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 DEFVAR("*NOTIFY-OPTIMIZE-MAXIMUM-PAGES*",sSAnotify_optimize_maximum_pagesA,SI,sLnil,"");
 #define MMAX_PG(a_) ((a_)->tm_type == t_relocatable ? (a_)->tm_npage : (a_)->tm_maxpage)
-long
+inline long
 opt_maxpage(struct typemanager *my_tm) {
 
   double x=0.0,y=0.0,z,r;
@@ -492,7 +491,7 @@ Use ALLOCATE to expand the space.",
 #else
 #define TOTAL_THIS_TYPE(tm) (tm->tm_nppage * tm->tm_npage)
 #endif
-void *
+inline void *
 alloc_from_freelist(struct typemanager *tm,fixnum n) {
 
   void *p;
@@ -534,7 +533,7 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
 
 #define npage(m_) ((m_+PAGESIZE-1)/PAGESIZE)
 
-void
+static inline void
 grow_linear1(struct typemanager *tm) {
   
   fixnum maxgro=available_pages,j=tm->tm_maxpage;
@@ -546,7 +545,7 @@ grow_linear1(struct typemanager *tm) {
 
 }
 
-int
+static inline int
 too_full_p(struct typemanager *tm) {
 
   fixnum j,k;
@@ -573,7 +572,7 @@ too_full_p(struct typemanager *tm) {
 
 }
 
-void *
+inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
   if (tm->tm_npage+npage(n)>=tm->tm_maxpage) {
@@ -607,7 +606,7 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
 
 struct pageinfo *contblock_list_head=NULL,*contblock_list_tail=NULL;
 
-void
+inline void
 add_pages(struct typemanager *tm,fixnum n) {
 
   void *p;
@@ -654,7 +653,7 @@ add_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-void *
+inline void *
 alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   
   fixnum m=npage(n);
@@ -677,7 +676,7 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-void *
+inline void *
 alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
   fixnum m=npage(n),reloc_min,i;
@@ -715,7 +714,7 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-void *
+inline void *
 alloc_mem(enum type t,fixnum n) {
 
   void *p;
@@ -734,7 +733,7 @@ alloc_mem(enum type t,fixnum n) {
   return exhausted_report(t,tm);
 }
 
-object
+inline object
 alloc_object(enum type t)  {
 
   object obj;
@@ -749,12 +748,12 @@ alloc_object(enum type t)  {
   
 }
 
-void *
+inline void *
 alloc_contblock(size_t n) {
   return alloc_mem(t_contiguous,ROUND_UP_PTR_CONT(n));
 }
 
-void *
+inline void *
 alloc_relblock(size_t n) {
 
   return alloc_mem(t_relocatable,ROUND_UP_PTR(n));
@@ -762,7 +761,7 @@ alloc_relblock(size_t n) {
 }
 
 
-object
+inline object
 make_cons(object a,object d) {
 
   object obj=alloc_object(t_cons);
@@ -776,7 +775,7 @@ make_cons(object a,object d) {
 
 
 
-object on_stack_cons(object x, object y)
+inline object on_stack_cons(object x, object y)
 {object p = (object) alloca_val;
  set_type_of(p,t_cons);
  p->c.c_car=x;
@@ -1012,7 +1011,7 @@ set_maxpage(void) {
   }
 #endif
   
-  SET_REAL_MAXPAGE;
+  update_real_maxpage();
 
 }
 
@@ -1061,16 +1060,26 @@ gcl_init_alloc(void) {
 #endif	
 #endif
 
-  holepage = INIT_HOLEPAGE;
+#ifdef INIT_ALLOC  
+  INIT_ALLOC;
+#endif  
+
+  data_start=heap_end;
+  first_data_page=page(data_start);
+  
+  set_maxpage();
+  
+  /* holepage = INIT_HOLEPAGE; */
+  holepage = available_pages/10;
 #ifdef GCL_GPROF
   if (holepage<textpage)
      holepage=textpage;
 #endif
 
-  new_holepage = HOLEPAGE;
-  nrbpage = INIT_NRBPAGE;
-  
-  set_maxpage();
+  /* new_holepage = HOLEPAGE; */
+  new_holepage = available_pages/10;
+  /* nrbpage = INIT_NRBPAGE; */
+  nrbpage = real_maxpage/20;
   
 #ifdef __linux__
   /* Some versions of the Linux startup code are broken.
@@ -1088,12 +1097,6 @@ gcl_init_alloc(void) {
     }
 #endif
 
-#ifdef INIT_ALLOC  
-  INIT_ALLOC;
-#endif  
-
-  first_data_page=page(heap_end);
-  
   alloc_page(-(holepage + nrbpage));
   
   rb_start = rb_pointer = heap_end + PAGESIZE*holepage;

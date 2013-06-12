@@ -72,44 +72,60 @@ joe1(){;}
 joe() {;}     
 #endif
 
+/* static void */
+/* sgc_mark_cons(object x) { */
+  
+/*   cs_check(x); */
+  
+/*   /\*  x is already marked.  *\/ */
+  
+/*  BEGIN: */
+/* #ifdef SDEBUG */
+/*   if(x==sdebug) joe1(); */
+/* #endif */
+/*   sgc_mark_object(x->c.c_car); */
+/* #ifdef OLD */
+/*   IF_WRITABLE(x->c.c_car, goto MARK_CAR;); */
+/*   goto MARK_CDR; */
+  
+/*  MARK_CAR: */
+/*   if (!is_marked_or_free(x->c.c_car)) { */
+/*     if (consp(x->c.c_car)) { */
+/*       mark(x->c.c_car); */
+/*       sgc_mark_cons(x->c.c_car); */
+/*     } else */
+/*       sgc_mark_object1(x->c.c_car);} */
+/*  MARK_CDR:   */
+/* #endif */
+/*   /\* if (is_imm_fixnum(x->c.c_cdr)) return; *\/ */
+/*   x = Scdr(x); */
+/*   IF_WRITABLE(x, goto WRITABLE_CDR;); */
+/*   return; */
+/*  WRITABLE_CDR: */
+/*   if (is_marked_or_free(x)) return; */
+/*   if (consp(x)) { */
+/*     mark(x); */
+/*     goto BEGIN; */
+/*   } */
+/*   sgc_mark_object1(x); */
+/* } */
+
 static void
 sgc_mark_cons(object x) {
   
-  cs_check(x);
-  
-  /*  x is already marked.  */
-  
- BEGIN:
-#ifdef SDEBUG
-  if(x==sdebug) joe1();
-#endif
-  sgc_mark_object(x->c.c_car);
-#ifdef OLD
-  IF_WRITABLE(x->c.c_car, goto MARK_CAR;);
-  goto MARK_CDR;
-  
- MARK_CAR:
-  if (!is_marked_or_free(x->c.c_car)) {
-    if (consp(x->c.c_car)) {
-      mark(x->c.c_car);
-      sgc_mark_cons(x->c.c_car);
-    } else
-      sgc_mark_object1(x->c.c_car);}
- MARK_CDR:  
-#endif
-  /* if (is_imm_fixnum(x->c.c_cdr)) return; */
-  x = Scdr(x);
-  IF_WRITABLE(x, goto WRITABLE_CDR;);
-  return;
- WRITABLE_CDR:
-  if (is_marked_or_free(x)) return;
-  if (consp(x)) {
-    mark(x);
-    goto BEGIN;
-  }
-  sgc_mark_object1(x);
-}
+  object d;
 
+  do {
+    d=x->c.c_cdr;
+    mark(x);
+    sgc_mark_object(x->c.c_car);
+    x=d;
+    if (!IS_WRITABLE(page(x)) || is_marked_or_free(x))
+      return;
+  } while (type_of(x)==t_cons);
+  sgc_mark_object1(x);
+
+}
 
 /* Whenever two arrays are linked together by displacement,
    if one is live, the other will be made live */
@@ -129,6 +145,7 @@ sgc_mark_object1(object x) {
   fixnum i,j;
   object *p;
   char *cp;
+  enum type tp;
   
   cs_check(x);
  BEGIN:
@@ -144,15 +161,14 @@ sgc_mark_object1(object x) {
 #ifdef SDEBUG
   if(x==sdebug) joe1();
 #endif
-  if (DBEGIN)
-    if (NULL_OR_ON_C_STACK(x))
-      return;
-  /* otherwise if DBEGIN==0 the IF_WRITABLE test will
-     always fail on x that satisfy (NULL_OR_ON_C_STACK(x))
-  */
   
+  if ((tp=type_of(x))==t_cons) {
+    sgc_mark_cons(x);
+    return;
+  }
+
   mark(x);
-  switch (type_of(x)) {
+  switch (tp) {
   case t_fixnum:
     break;
     
@@ -177,7 +193,7 @@ sgc_mark_object1(object x) {
     
   case t_symbol:
     IF_WRITABLE(x->s.s_plist,if(!is_marked_or_free(x->s.s_plist))
-    {mark(x->s.s_plist);
+    {/* mark(x->s.s_plist); */
     sgc_mark_cons(x->s.s_plist);});
     sgc_mark_object(x->s.s_gfdef);
     sgc_mark_object(x->s.s_dbind);
@@ -605,8 +621,8 @@ sgc_mark_phase(void) {
   STATIC ihs_ptr ihsp;
   STATIC struct pageinfo *v;
   
-  sgc_mark_object(Cnil);
-  sgc_mark_object(Ct);
+  sgc_mark_object(Cnil->s.s_plist);
+  sgc_mark_object(Ct->s.s_plist);
   
   /* mark all non recent data on writable pages */
   {
@@ -626,11 +642,11 @@ sgc_mark_phase(void) {
 	  object x = (object) p; 
 	  if (SGC_OR_M(x)) 
 	    continue;
-	  if (consp(x)) {
-	    mark(x);
-	    sgc_mark_cons(x);
-	  } else
-	    sgc_mark_object1(x);
+	  /* if (consp(x)) { */
+	  /*   mark(x); */
+	  /*   sgc_mark_cons(x); */
+	  /* } else */
+	  sgc_mark_object1(x);
 	}
       else {
 	int size=tm->tm_size;
@@ -718,9 +734,6 @@ sgc_sweep_phase(void) {
   int size;
   STATIC struct pageinfo *v;
   
-  unmark(Cnil);
-  unmark(Ct);
-  
 #ifdef DEBUG
   if (debug)
     printf("type map\n");
@@ -802,7 +815,7 @@ sgc_sweep_phase(void) {
 	
 	SET_LINK(x,f);
 	make_free(x);
-	if (pagetoinfo(i)!=t_cons) x->d.s = SGC_RECENT;
+	if (pagetoinfo(i)->type!=t_cons) x->d.s = SGC_RECENT;
 	f = x;
 	k++;
       }
@@ -1314,7 +1327,6 @@ sgc_start(void) {
 	 GBC freed pages onto the old contblock list.  CM 20030827*/
       unsigned long z=count+1,n=z*PAGESIZE-sizeof(struct pageinfo);
       void *old_contblock_list_tail=contblock_list_tail;
-      extern void add_pages(struct typemanager *tm,fixnum n);
 
 
       add_pages(tm_table+t_contiguous,n);
@@ -1580,7 +1592,7 @@ sgc_quit(void) {
   for (v=cell_list_head;v;v=v->next) 
     if (v->type==(tm=tm_of(v->type))->tm_type && v->type!=t_cons && v->sgc_flags & SGC_PAGE_FLAG)
       for (p=pagetochar(page(v)),j=tm->tm_nppage;j>0;--j,p+=tm->tm_size)
-	if (!valid_cdr((object)p)) ((object) p)->d.s=SGC_NORMAL;
+	((object) p)->d.s=SGC_NORMAL;
   
   {
     struct pageinfo *pi;
@@ -1601,7 +1613,7 @@ static void
 memprotect_handler(int sig, long code, void *scp, char *addr) {
   
   unsigned long p;
-  char *faddr;  /* Needed because we must not modify signal handler
+  void *faddr;  /* Needed because we must not modify signal handler
 		   arguments on the stack! */
 #ifdef GET_FAULT_ADDR
   faddr=GET_FAULT_ADDR(sig,code,scp,addr); 
@@ -1609,7 +1621,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
 #ifdef DEBUG_MPROTECT
   printf("fault:0x%x [%d] (%d)  ",faddr,page(faddr),faddr >= core_end);
 #endif 
-  if (faddr >= core_end || (unsigned long)faddr < DBEGIN) {
+  if (faddr >= (void *)core_end || faddr < data_start) {
     if (fault_count > 300) error("fault count too high");
     fault_count ++;
     INSTALL_MPROTECT_HANDLER;
@@ -1621,7 +1633,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
   p = page(faddr);
   /* p = ROUND_DOWN_PAGE_NO(p); */
   if (p >= first_protectable_page
-      && faddr < core_end
+      && faddr < (void *)core_end
       && !(WRITABLE_PAGE_P(p))) {
     /*   CHECK_RANGE(p,1); */
 #ifdef DEBUG_MPROTECT
@@ -1667,8 +1679,6 @@ sgc_mprotect(long pbeg, long n, int writable) {
 
 
 
-extern unsigned long first_data_page;
-
 void
 memory_protect(int on) {
 
@@ -1677,7 +1687,7 @@ memory_protect(int on) {
   extern void install_segmentation_catcher(void);
 
 
-  massert(first_protectable_page=first_data_page);
+  first_protectable_page=first_data_page;
 
   /* turning it off */
   if (on==0) {

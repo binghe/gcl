@@ -67,7 +67,6 @@
 #ifndef SA_NOCLDWAIT
 #define SA_NOCLDWAIT 0 /*fixme handler does waitpid(-1, ..., WNOHANG)*/
 #endif
-/* #define NULL_OR_ON_C_STACK(x) ((unsigned long)x <= DBEGIN)/\*fixme configure detect*\/ */
 #define PATH_MAX 4096 /*fixme dynamic*/
 #define MAXPATHLEN 4096 /*fixme dynamic*/
 

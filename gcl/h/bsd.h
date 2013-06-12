@@ -36,13 +36,13 @@ extern char etext;
 
 
 
-#define SET_REAL_MAXPAGE do { struct rlimit data_rlimit; \
-				extern char etext; \
-			     real_maxpage = MAXPAGE ; \
-     	getrlimit(RLIMIT_DATA, &data_rlimit); \
-	real_maxpage = ((unsigned int)&etext/PAGESIZE + data_rlimit.rlim_cur/PAGESIZE); \
-	if (real_maxpage > MAXPAGE) \
-		real_maxpage = MAXPAGE ; } while(0)
+/* #define SET_REAL_MAXPAGE do { struct rlimit data_rlimit; \ */
+/* 				extern char etext; \ */
+/* 			     real_maxpage = MAXPAGE ; \ */
+/*      	getrlimit(RLIMIT_DATA, &data_rlimit); \ */
+/* 	real_maxpage = ((unsigned int)&etext/PAGESIZE + data_rlimit.rlim_cur/PAGESIZE); \ */
+/* 	if (real_maxpage > MAXPAGE) \ */
+/* 		real_maxpage = MAXPAGE ; } while(0) */
      
 #define ROUND_UP_SBRK(x)  \
        do {long i; \

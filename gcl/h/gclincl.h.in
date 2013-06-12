@@ -17,9 +17,6 @@
    */
 #undef CRAY_STACKSEG_END
 
-/* maximum C stack size */
-#undef CSSIZE
-
 /* starting C stack address */
 #undef CSTACK_ADDRESS
 
@@ -31,9 +28,6 @@
 
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
-
-/* down-rounded beginning address of lisp data */
-#undef DBEGIN
 
 /* big endian word order */
 #undef DOUBLE_BIGENDIAN
@@ -234,9 +228,6 @@
 /* can use fcntl for listen function */
 #undef LISTEN_USE_FCNTL
 
-/* maximum number of pages to be allocated */
-#undef MAXPAGE
-
 /* size of immediate fixnum address space */
 #undef MEM_RANGE
 
@@ -291,9 +282,6 @@
 /* system pagewidth */
 #undef PAGEWIDTH
 
-/* address at which shared lib placement terminates heap growth */
-#undef SHARED_LIB_HEAP_CEILING
-
 /* have sigcontext in signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT
 
@@ -322,9 +310,6 @@
 
 /* link compiled objects via libdl */
 #undef USE_DLOPEN
-
-/* whether one instruction heap address check can be used */
-#undef USE_FAST_NULL_OR_ON_CSTACK_MACRO
 
 /* use fionbio for non-blocking io */
 #undef USE_FIONBIO

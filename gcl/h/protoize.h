@@ -2,7 +2,8 @@
 /* alloc.c:149:OF */ extern void add_page_to_freelist (char *p, struct typemanager *tm); /* (p, tm) char *p; struct typemanager *tm; */
 /* alloc.c:196:OF */ extern object type_name (int t); /* (t) int t; */
 /* alloc.c:213:OF */ extern object alloc_object (enum type t); /* (t) enum type t; */
-/* alloc.c:296:OF */ extern object make_cons (object a, object d); /* (a, d) object a; object d; */
+/* alloc.c:213:OF */ inline void add_pages(struct typemanager *,fixnum);
+/* alloc.c:296:OF */ extern inline object make_cons (object a, object d); /* (a, d) object a; object d; */
 /* alloc.c:364:OF */ extern object on_stack_cons (object x, object y); /* (x, y) object x; object y; */
 /* alloc.c:376:OF */ extern object fSallocated (object typ); /* (typ) object typ; */
 /* alloc.c:401:OF */ extern object fSreset_number_used (object typ); /* (typ) object typ; */
@@ -1836,3 +1837,6 @@ int
 obj_to_mpz(object,MP_INT *);
 
 struct htent *gethash(object,object);
+
+int
+update_real_maxpage(void);
