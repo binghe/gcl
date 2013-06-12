@@ -1411,7 +1411,7 @@ FFN(siLroom_report)(void) {
     GBC(t_contiguous);
   */
   
-  vs_check_push(make_fixnum(real_maxpage));
+  vs_check_push(make_fixnum(real_maxpage-first_data_page));
   vs_push(make_fixnum(available_pages));
   vs_push(make_fixnum(ncbpage));
   vs_push(make_fixnum(maxcbpage));
