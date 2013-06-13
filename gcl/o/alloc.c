@@ -1451,7 +1451,7 @@ DEFUN_NEW("GPROF-START",object,fSgprof_start,SI
 
   if (!gprof_on) {
     start=start ? start : textstart;
-    end=end ? end : (unsigned long)core_end;
+    end=end ? end : textend;
     monstartup(start,end);
     gprof_on=1;
     if (!n && atexit(gprof_cleanup)) {
@@ -1784,7 +1784,7 @@ void *
 calloc(size_t nelem, size_t elsize)
 {
 	char *ptr;
-	int i;
+	long i;
 
 	ptr = malloc(i = nelem*elsize);
 	while (--i >= 0)
