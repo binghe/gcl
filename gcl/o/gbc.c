@@ -87,7 +87,7 @@ mark_object(object);
 #define BCHARS_TABLE (BBITS_LONG+BBYTES_CONTBLOCK)
 
 #define Shamt(x) (((((unsigned long) x) >> BBYTES_CONTBLOCK) & ~(~0UL << BBITS_LONG)))
-#define Madr(x) (mark_table+((((unsigned long) x)) >> (BCHARS_TABLE)))
+#define Madr(x) (mark_table+((((unsigned long) x)-(unsigned long)data_start) >> (BCHARS_TABLE)))
 #define get_mark_bit(x) (*(Madr(x)) >> Shamt(x) & 1)
 #define set_mark_bit(x) ((*(Madr(x))) |= (1UL << Shamt(x)))
 
@@ -1155,7 +1155,7 @@ GBC(enum type t) {
   maxpage = page(heap_end);
   
   if ((int)t >= (int)t_contiguous) {
-    j = maxpage*(PAGESIZE/(CPTR_ALIGN*SIZEOF_LONG*CHAR_SIZE)) ;
+    j = (maxpage-first_data_page)*(PAGESIZE/(CPTR_ALIGN*SIZEOF_LONG*CHAR_SIZE)) ;
     
     if (t == t_relocatable)
       j = 0;

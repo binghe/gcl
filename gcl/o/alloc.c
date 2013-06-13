@@ -1079,7 +1079,7 @@ gcl_init_alloc(void) {
   /* new_holepage = HOLEPAGE; */
   new_holepage = available_pages/10;
   /* nrbpage = INIT_NRBPAGE; */
-  nrbpage = real_maxpage/20;
+  nrbpage = available_pages/20;
   
 #ifdef __linux__
   /* Some versions of the Linux startup code are broken.
