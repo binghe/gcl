@@ -1102,6 +1102,36 @@ AC_CHECK_SIZEOF(long,0)
 
 ####  Memory areas and alignment
 
+AC_MSG_CHECKING(for byte order)
+AC_RUN_IFELSE([
+	AC_LANG_PROGRAM([[
+		]],[[
+
+		/* Are we little or big endian?  Adapted from Harbison&Steele.  */
+		union {long l;char c[sizeof(long)];} u;
+		u.l = 1;
+		return u.c[sizeof(long)-1] ? 1 : 0;
+	]])],[
+	AC_MSG_RESULT(little)],
+	[AC_MSG_RESULT(big) 
+	AC_DEFINE(WORDS_BIGENDIAN,1,[big endian byte order])])
+AC_SUBST(WORDS_BIGENDIAN)
+
+
+AC_MSG_CHECKING(for word order)
+AC_RUN_IFELSE([
+	AC_LANG_PROGRAM([[
+		]],[[
+		/* Are we little or big endian?  Adapted from Harbison&Steele.  */
+		union {double d;int l[sizeof(double)/sizeof(int)];} u;
+		u.d = 1.0;
+		return u.l[sizeof(double)/sizeof(int)-1] ? 0 : 1;
+	]])],
+	[AC_MSG_RESULT(little)],
+	[AC_MSG_RESULT(big) 
+	AC_DEFINE(DOUBLE_BIGENDIAN,1,[big endian word order])])
+AC_SUBST(DOUBLE_BIGENDIAN)
+
 AC_MSG_CHECKING([for required object alignment])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
@@ -1456,6 +1486,8 @@ dnl fi
 dnl $CC foo.c -o foo
 dnl if ./foo ; then
 
+if test "$use" != "386-gnu" ; then
+
    AC_MSG_CHECKING([finding default linker script])
    touch unixport/gcl.script
    echo "int main() {return 0;}" >foo.c
@@ -1488,6 +1520,8 @@ dnl if ./foo ; then
      AC_MSG_RESULT([none])
      rm -f gcl.script
    fi
+
+fi
 
    dnl old_LDFLAGS="$LDFLAGS"
    dnl LDFLAGS="$LDFLAGS $TLDFLAGS"
@@ -1693,36 +1727,6 @@ if test "$enable_immfix" = "yes" ; then
   fi
 fi
 
-
-AC_MSG_CHECKING(for byte order)
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-		]],[[
-
-		/* Are we little or big endian?  Adapted from Harbison&Steele.  */
-		union {long l;char c[sizeof(long)];} u;
-		u.l = 1;
-		return u.c[sizeof(long)-1] ? 1 : 0;
-	]])],[
-	AC_MSG_RESULT(little)],
-	[AC_MSG_RESULT(big) 
-	AC_DEFINE(WORDS_BIGENDIAN,1,[big endian byte order])])
-AC_SUBST(WORDS_BIGENDIAN)
-
-
-AC_MSG_CHECKING(for word order)
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-		]],[[
-		/* Are we little or big endian?  Adapted from Harbison&Steele.  */
-		union {double d;int l[sizeof(double)/sizeof(int)];} u;
-		u.d = 1.0;
-		return u.l[sizeof(double)/sizeof(int)-1] ? 0 : 1;
-	]])],
-	[AC_MSG_RESULT(little)],
-	[AC_MSG_RESULT(big) 
-	AC_DEFINE(DOUBLE_BIGENDIAN,1,[big endian word order])])
-AC_SUBST(DOUBLE_BIGENDIAN)
 
 dnl AC_MSG_CHECKING(for word order)
 dnl AC_TRY_RUN([int main () {
