@@ -809,15 +809,15 @@ DEFUN_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),""
 	     ));
 }
  
-DEFUN_NEW("RESET-NUMBER-USED",object,fSreset_number_used,SI,0,1,NONE,OO,OO,OO,OO,(object typ),"")
-{int i;
- if (VFUN_NARGS == 1)
-   { tm_table[t_from_type(typ)].tm_nused = 0;}
- else
- for (i=0; i <= t_relocatable ; i++)
-   { tm_table[i].tm_nused = 0;}
-  RETURN1(sLnil);
-}
+/* DEFUN_NEW("RESET-NUMBER-USED",object,fSreset_number_used,SI,0,1,NONE,OO,OO,OO,OO,(object typ),"") */
+/* {int i; */
+/*  if (VFUN_NARGS == 1) */
+/*    { tm_table[t_from_type(typ)].tm_nused = 0;} */
+/*  else */
+/*  for (i=0; i <= t_relocatable ; i++) */
+/*    { tm_table[i].tm_nused = 0;} */
+/*   RETURN1(sLnil); */
+/* } */
 
 #define IN_CONTBLOCK_P(p,pi) ((void *)p>=(void *)pi && (void *)p<(void *)pi+pi->in_use*PAGESIZE)
 
@@ -966,7 +966,7 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
   tm_table[(int)t].tm_nppage = (PAGESIZE-sizeof(struct pageinfo))/ROUND_UP_PTR(elsize);
   tm_table[(int)t].tm_free = OBJNULL;
   tm_table[(int)t].tm_nfree = 0;
-  tm_table[(int)t].tm_nused = 0;
+  /* tm_table[(int)t].tm_nused = 0; */
   /*tm_table[(int)t].tm_npage = 0; */  /* dont zero nrbpage.. */
   tm_table[(int)t].tm_maxpage = maxpage;
   tm_table[(int)t].tm_gbccount = 0;
