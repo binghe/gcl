@@ -170,23 +170,11 @@ struct fixnum_struct {
 
 
 #define type_of(x)       ({register object _z=(object)(x);\
-                           _z==Cnil ? t_symbol : \
                            (is_imm_fixnum(_z) ? t_fixnum : \
-                           (valid_cdr(_z) ?  t_cons  : _z->d.t));})
-
-/* #define type_of(x)       ({register object _z=(object)(x);\ */
-/*       _z==Cnil ? t_symbol : is_imm_fixnum(_z) ? t_fixnum : _z->d.t;}) */
+			    (valid_cdr(_z) ?  (_z==Cnil ? t_symbol : t_cons)  : _z->d.t));})
   
 #define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;}})
 
-/* ({register object _z=(object)(x);			   \ */
-/*   _z==Cnil ? t_symbol :					   \ */
-/*     (is_imm_fixnum(_z) ? t_fixnum :					\ */
-/*      (valid_cdr(_z) ?  t_cons  : _z->d.t));}) */
-
-/* #define consp(x) (type_of(x)==t_cons) */
-/* #define listp(x) ({register object _z=x;_z==Cnil || type_of(x)==t_cons;}) */
-/* #define atom(x)  !consp(x) */
 
 #define consp(x)         ({register object _z=(object)(x);\
                            (_z!=Cnil && !is_imm_fixnum(_z) && valid_cdr(_z));})
@@ -355,6 +343,14 @@ struct package {
 EXTER struct package *pack_pointer;	/*  package pointer  */
 
 #define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
+/* #define pageinfo(x) ((struct pageinfo *)(((ufixnum)x)&(-PAGESIZE))) */
+/* #define make_cons(a_,b_) ({struct typemanager *tm=tm_table+t_cons;\ */
+/*                            object _x=tm->tm_free;\ */
+/* 			   _x==OBJNULL ? make_cons1(a_,b_) : \ */
+/* 			     ({tm->tm_free=OBJ_LINK(_x);\ */
+/* 			       tm->tm_nfree--;\ */
+/* 			       _x->c.c_car=a_;_x->c.c_cdr=b_;pageinfo(_x)->in_use++;_x;});}) */
+
 struct cons {
   /* FIRSTWORD; */
   object	c_cdr;		/*  cdr  */
@@ -876,7 +872,6 @@ struct typemanager {
 	object	tm_free;	/*  free list  */
 				/*  Note that it is of type object.  */
 	long	tm_nfree;	/*  number of free elements  */
-	long	tm_nused;	/*  number of elements used  */
 	long	tm_npage;	/*  number of pages  */
 	long	tm_maxpage;	/*  maximum number of pages  */
 	char	*tm_name;	/*  type name  */
@@ -1152,30 +1147,6 @@ EXTER unsigned plong signals_allowed, signals_pending  ;
 
 EXTER struct symbol Dotnil_body;
 #define Dotnil ((object)&Dotnil_body)
-
-/* #define	endp(x)	({\ */
-/*       static union lispunion s_my_dot={.c={1,0,0,0,t_cons,0,0,0,Dotnil,Dotnil}}; \ */
-/*     object _x=(x);\ */
-/*     bool _b=FALSE;\ */
-/*     \ */
-/*     if (type_of(_x)==t_cons) {\ */
-/*        if (type_of(_x->c.c_cdr)!=t_cons && _x->c.c_cdr!=Cnil)\ */
-/*           s_my_dot.c.c_car=_x->c.c_cdr;\ */
-/*        else \ */
-/*           s_my_dot.c.c_car=Dotnil;\ */
-/*     } else {\ */
-/*        if (_x==s_my_dot.c.c_car)\ */
-/* 	 x=&s_my_dot;\ */
-/*        else {\ */
-/*          s_my_dot.c.c_car=Dotnil;\ */
-/*          if (_x==Cnil || _x==Dotnil)\ */
-/*              _b=TRUE;\ */
-/*          else\ */
-/*              FEwrong_type_argument(sLlist, _x);\ */
-/*        }\ */
-/*     }\ */
-/*     _b;\ */
-/*     }) */
 
 #define endp_prop(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : (FEwrong_type_argument(sLlist, (a)),FALSE)))
 #define endp(a) endp_prop(a)

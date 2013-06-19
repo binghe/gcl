@@ -500,18 +500,18 @@ bignum2(unsigned int h, unsigned int l)
 }
 
 void
-integer_quotient_remainder_1(object x, object y, object *qp, object *rp)
-{
-  *qp = new_bignum();
-  *rp = new_bignum();
+integer_quotient_remainder_1(object x, object y, object *qp, object *rp) {
+  
+  object q=qp ? new_bignum() : big_fixnum3;
+  object r=rp ? new_bignum() : big_fixnum4;
+
   /* we may need to coerce the fixnums to MP here, and
      we use the temporary storage of the rp/qp as inputs.
      since overlap is allowed in the mpz_tdiv_qr operation..
   */    
-  mpz_tdiv_qr(MP(*qp),MP(*rp),INTEGER_TO_MP(x,big_fixnum1),
-	      INTEGER_TO_MP(y,big_fixnum2));
-  *qp = normalize_big(*qp);
-  *rp = normalize_big(*rp);
+  mpz_tdiv_qr(MP(q),MP(r),INTEGER_TO_MP(x,big_fixnum1),INTEGER_TO_MP(y,big_fixnum2));
+  if (qp) *qp = normalize_big(q);
+  if (rp) *rp = normalize_big(r);
   return;
 }
 
@@ -543,9 +543,13 @@ gcl_init_big(void)
   MP_ALLOCATED(big_gcprotect)=0;
   big_fixnum1=new_bignum();
   big_fixnum2=new_bignum();
+  big_fixnum3=new_bignum();
+  big_fixnum4=new_bignum();
   enter_mark_origin(&big_fixnum1);
   enter_mark_origin(&big_gcprotect);
   enter_mark_origin(&big_fixnum2);
+  enter_mark_origin(&big_fixnum3);
+  enter_mark_origin(&big_fixnum4);
   gcl_init_big1();
 
 

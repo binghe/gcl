@@ -66,8 +66,8 @@ object big_plus();
 object big_times();
 object normalize_big_to_object();
 double big_to_double();
-EXTER  struct bignum big_fixnum1_body,big_fixnum2_body;
-EXTER object big_fixnum1,big_fixnum2;
+EXTER  struct bignum big_fixnum1_body,big_fixnum2_body,big_fixnum3_body,big_fixnum4_body;
+EXTER object big_fixnum1,big_fixnum2,big_fixnum3,big_fixnum4;
 object maybe_replace_big();
 
 

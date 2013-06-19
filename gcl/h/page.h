@@ -5,7 +5,8 @@
 #ifndef page
 #define page(p)	(((unsigned long)(p))>>PAGEWIDTH)
 #define	pagetochar(x)	((char *)((((unsigned long)x) << PAGEWIDTH) + sizeof(struct pageinfo)))
-#define pageinfo(x) ((struct pageinfo *)((((ufixnum)x)>>PAGEWIDTH)<<PAGEWIDTH))
+/* #define pageinfo(x) ((struct pageinfo *)((((ufixnum)x)>>PAGEWIDTH)<<PAGEWIDTH)) */
+#define pageinfo(x) ((struct pageinfo *)(((ufixnum)x)&(-PAGESIZE)))
 #define pagetoinfo(x) ((struct pageinfo *)((((ufixnum)x)<<PAGEWIDTH)))
 #endif
   

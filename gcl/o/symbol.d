@@ -279,7 +279,6 @@ putf(p, v, i)
 object p, v, i;
 {
 	object l;
-	vs_mark;
 
 	for (l = p;  !cendp(l);  l = l->c.c_cdr->c.c_cdr) {
 		if (cendp(l->c.c_cdr))
@@ -290,11 +289,7 @@ object p, v, i;
 		}
 	}
         if(l!=Cnil) FEerror("Bad plist ~a",1,p);
-	l = make_cons(v, p);
-	vs_push(l);
-	l = make_cons(i, l);
-	vs_reset;
-	return(l);
+	return listA(3,i,v,p);
 }
 
 object

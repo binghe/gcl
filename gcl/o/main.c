@@ -533,9 +533,16 @@ initlisp(void) {
 #endif
 	    /* || NULL_OR_ON_C_STACK(vv) */
 	    || NULL_OR_ON_C_STACK(pagetoinfo(first_data_page))
-	    || NULL_OR_ON_C_STACK(core_end-1))
+	    || NULL_OR_ON_C_STACK(core_end-1)) {
 	  /* check person has correct definition of above */
+	  fprintf(stderr,"%p %d %p %d %p %d %p %d %p %d\n",
+		  v,NULL_OR_ON_C_STACK(v),
+		  (void *)IM_FIX_BASE,NULL_OR_ON_C_STACK(IM_FIX_BASE),
+		  (void *)(IM_FIX_BASE|IM_FIX_LIM),NULL_OR_ON_C_STACK(IM_FIX_BASE|IM_FIX_LIM),
+		  pagetoinfo(first_data_page),NULL_OR_ON_C_STACK(pagetoinfo(first_data_page)),
+		  core_end-1,NULL_OR_ON_C_STACK(core_end-1));
 	  error("NULL_OR_ON_C_STACK macro invalid");
+	}
 	
 	gcl_init_alloc();
 	

@@ -837,16 +837,16 @@ number_divide(object x, object y)
 object
 integer_divide1(object x, object y)
 {
-	object q, r;
+	object q;
 
-	integer_quotient_remainder_1(x, y, &q, &r);
+	integer_quotient_remainder_1(x, y, &q, NULL);
 	return(q);
 }
 
 object
 get_gcd(object x, object y)
 {
-	object	q, r;
+	object	r;
 
 	if (number_minusp(x))
 		x = number_negate(x);
@@ -899,7 +899,7 @@ L:
 	if (type_of(y) == t_fixnum && fix(y) == 0) {
 		return(x);
 	}
-	integer_quotient_remainder_1(x, y, &q, &r);
+	integer_quotient_remainder_1(x, y, NULL, &r);
 	 x = y;
 	 y = r;
 	goto L;

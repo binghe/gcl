@@ -304,16 +304,15 @@ object list_vector_new(int n,object first,va_list ap)
 }*/
 
    
-object list(int n,...) { 
+object listqA(int a,int n,va_list ap) { 
 
-  va_list ap;
   struct typemanager *tm=(&tm_table[(int)t_cons]);
   object tail=tm->tm_free,lis=tail;
 
   if (n<=0) return Cnil;
-  va_start(ap,n);
 
   CHECK_INTERRUPT;
+
   if (/* stack_alloc_start || */ tm->tm_nfree < n )  {
     
     object *p = vs_top;
@@ -323,6 +322,8 @@ object list(int n,...) {
       { *p=make_cons(va_arg(ap,object),Cnil);
       p= &((*p)->c.c_cdr);
       }
+    if (a) 
+      *p=va_arg(ap,object);
     return(vs_pop);
 
   }
@@ -333,41 +334,48 @@ object list(int n,...) {
     BEGIN_NO_INTERRUPT;
 
     tm->tm_nfree -= n;
-    tm->tm_nused += n;
     while (--n) {
-      set_type_of(tail,t_cons);/*FIXME try removing this*/
       pageinfo(tail)->in_use++;
       tail->c.c_cdr=OBJ_LINK(tail);
       tail->c.c_car=va_arg(ap,object); 
       tail=tail->c.c_cdr;
     }
     tm->tm_free=OBJ_LINK(tail);
-    set_type_of(tail,t_cons);/*FIXME try removing this*/
     pageinfo(tail)->in_use++;
     tail->c.c_car=va_arg(ap,object); 
-    tail->c.c_cdr=Cnil;
+    tail->c.c_cdr=a ? va_arg(ap,object) : Cnil;
     
     END_NO_INTERRUPT;
-    va_end(ap);
     return lis;
     
   }
 
 }
 
-object listA(int n, ...)
-{       va_list ap;
-	object *p = vs_top;
-	va_start(ap,n);
-	vs_push(Cnil);
-	while(--n>0)
-	  { *p=make_cons(va_arg(ap,object),Cnil);
-	    p= &((*p)->c.c_cdr);
-	  }
-	*p=va_arg(ap,object);
-	va_end(ap);
-	return(vs_pop);
+object list(int n,...) { 
+
+  va_list ap;
+  object lis;
+
+  va_start(ap,n);
+  lis=listqA(0,n,ap);
+  va_end(ap);
+  return lis;
+
 }
+
+object listA(int n,...) { 
+
+  va_list ap;
+  object lis;
+
+  va_start(ap,n);
+  lis=listqA(1,n-1,ap);
+  va_end(ap);
+  return lis;
+
+}
+
 
 static bool
 tree_equal(x, y)
@@ -500,6 +508,32 @@ object new, tree;
 	} else
 		vs_check_push(tree);
 }
+
+/* static object */
+/* subst1(object new, object tree) { */
+
+/*   if (TEST(tree)) */
+/*     return new; */
+/*   else if (type_of(tree) == t_cons) { */
+/*     object oa=tree->c.c_car,a=subst1(new,oa),od=tree->c.c_cdr,d=subst1(new,od); */
+/*     return a==oa && d==od ? tree : make_cons(a,d); */
+/*   } else */
+/*     return tree; */
+
+/* } */
+
+/* static object */
+/* subst1qi(object new, object tree) { */
+
+/*   if (item_compared == tree) */
+/*     return new; */
+/*   else if (type_of(tree) == t_cons) { */
+/*     object oa=tree->c.c_car,a=subst1qi(new,oa),od=tree->c.c_cdr,d=subst1qi(new,od); */
+/*     return a==oa && d==od ? tree : make_cons(a,d); */
+/*   } else */
+/*     return tree; */
+
+/* } */
 
 /*
 	Nsubst(new, treep) stores
@@ -1082,6 +1116,13 @@ LFD(Lrplacd)()
 	setupTEST(old, test, test_not, key);
 	subst(new, tree);
 	tree = vs_pop;
+        /* if (kf==identity && */
+	/*     tf==test_eql && */
+	/*     (is_imm_fixnum(item_compared) || */
+	/*      ({enum type tp=type_of(item_compared);tp>t_complex || tp<t_fixnum;}))) */
+	/*   tree=subst1qi(new,tree); */
+	/* else */
+	/*   tree=subst1(new,tree); */
 	restoreTEST;
 	@(return tree)
 @)

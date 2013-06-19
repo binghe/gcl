@@ -521,7 +521,6 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
     if ((p=tm->tm_free)!=OBJNULL) {
       tm->tm_free = OBJ_LINK(p);
       tm->tm_nfree--;
-      tm->tm_nused++;
       return(p);
     }
     break;
@@ -715,10 +714,9 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 }
 
 inline void *
-alloc_mem(enum type t,fixnum n) {
+alloc_mem(struct typemanager *tm,fixnum n) {
 
   void *p;
-  struct typemanager *tm=tm_of(t);
 
   CHECK_INTERRUPT;
   
@@ -730,7 +728,7 @@ alloc_mem(enum type t,fixnum n) {
     return p;
   if ((p=alloc_after_reclaiming_pages(tm,n)))
     return p;
-  return exhausted_report(t,tm);
+  return exhausted_report(tm->tm_type,tm);
 }
 
 inline object
@@ -739,7 +737,7 @@ alloc_object(enum type t)  {
   object obj;
   struct typemanager *tm=tm_of(t);
   
-  obj=alloc_mem(t,tm->tm_size);
+  obj=alloc_mem(tm,tm->tm_size);
   set_type_of(obj,t);
   
   pageinfo(obj)->in_use++;
@@ -750,13 +748,13 @@ alloc_object(enum type t)  {
 
 inline void *
 alloc_contblock(size_t n) {
-  return alloc_mem(t_contiguous,ROUND_UP_PTR_CONT(n));
+  return alloc_mem(tm_of(t_contiguous),ROUND_UP_PTR_CONT(n));
 }
 
 inline void *
 alloc_relblock(size_t n) {
 
-  return alloc_mem(t_relocatable,ROUND_UP_PTR(n));
+  return alloc_mem(tm_of(t_relocatable),ROUND_UP_PTR(n));
 
 }
 
@@ -764,10 +762,13 @@ alloc_relblock(size_t n) {
 inline object
 make_cons(object a,object d) {
 
-  object obj=alloc_object(t_cons);
+  static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
+  object obj=alloc_mem(tm,tm->tm_size);
 
   obj->c.c_car = a;
   obj->c.c_cdr = d;
+
+  pageinfo(obj)->in_use++;
 
   return(obj);
 
@@ -804,7 +805,7 @@ DEFUN_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),""
 	     RV(make_fixnum(tm->tm_maxpage)),
 	     RV(make_fixnum(tm->tm_nppage)),
 	     RV(make_fixnum(tm->tm_gbccount)),
-	     RV(make_fixnum(tm->tm_nused))
+	     RV(make_fixnum(tm->tm_npage*tm->tm_nppage-tm->tm_nfree))
 	     ));
 }
  
@@ -1002,7 +1003,7 @@ set_maxpage(void) {
      maxpage are here */ 
 #ifdef SGC
 
-  massert(getpagesize()==PAGESIZE);
+  massert(getpagesize()<=PAGESIZE);
 
   if (gcl_alloc_initialized) {
     extern long maxpage;

@@ -106,10 +106,10 @@ cmod(object x) {
 
   } else {
 
-    object qp,rp,mod2;
+    object rp,mod2;
     int compare;
 
-    integer_quotient_remainder_1(x,mod,&qp,&rp);
+    integer_quotient_remainder_1(x,mod,NULL,&rp);
     mod2=shift_integer(mod,-1);
     compare = number_compare(rp,small_fixnum(0));
     if (compare >= 0) {
