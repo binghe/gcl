@@ -1258,8 +1258,10 @@ if test "$HAVE_SBRK" = "1" ; then
    AC_MSG_CHECKING([for personality(ADDR_NO_RANDOMIZE) support])
    AC_RUN_IFELSE([
 	AC_LANG_SOURCE([[
+	        #include <stdio.h>
+	        #include <stdlib.h>
 		void gprof_cleanup() {};
-		int main(int argc,char **argv,char **envp) {
+ 		int main(int argc,char **argv,char **envp) {
 		#include "h/unrandomize.h"
 		return 0;}]])],
 	[AC_MSG_RESULT(yes)
@@ -1268,7 +1270,8 @@ if test "$HAVE_SBRK" = "1" ; then
 
 	AC_MSG_CHECKING([that sbrk is (now) non-random])
 	AC_TRY_RUN([#include <stdio.h>
-	            void gprof_cleanup() {};
+	            #include <stdlib.h>
+		    void gprof_cleanup() {};
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1282,7 +1285,8 @@ if test "$HAVE_SBRK" = "1" ; then
 		exit 1
 	fi
 	AC_TRY_RUN([#include <stdio.h>
-                    void gprof_cleanup() {};
+	            #include <stdlib.h>
+		    void gprof_cleanup() {};
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1357,18 +1361,23 @@ dnl ,enable_maxpage=$def_maxpage)
 
 
 AC_MSG_CHECKING(CSTACK_ADDRESS)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
+	#include <stdlib.h>
 	void *
 	foo() {
 	      int i;
 	      return (void *)&i;
         }
-	]],[[
+
+	int main(int argc,char **argv,char **envp) {
 	void *v ;
 	FILE *fp = fopen("conftest1","w");
 	unsigned long i,j;
 
+	#ifdef CAN_UNRANDOMIZE_SBRK
+	#include "h/unrandomize.h"
+	#endif
 	j=1;
 	j<<=$PAGEWIDTH;
 	j<<=16;
@@ -1380,27 +1389,35 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	fprintf(fp,"0x%lx",i-1);
 	fclose(fp);
 	return 0;
-]])],[cstack_address=`cat conftest1`],[cstack_address=0])
+}]])],[cstack_address=`cat conftest1`],[cstack_address=0])
 AC_DEFINE_UNQUOTED(CSTACK_ADDRESS,$cstack_address,[starting C stack address])
 AC_MSG_RESULT($cstack_address)
 
 AC_MSG_CHECKING(NEG_CSTACK_ADDRESS)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
-	]],[[
+	#include <stdlib.h>
+	int main(int argc,char **argv,char **envp) {
+	#ifdef CAN_UNRANDOMIZE_SBRK
+	#include "h/unrandomize.h"
+	#endif
 	return (long)$cstack_address<0 ? 0 : -1;
-]])],[AC_MSG_RESULT(yes)
+}]])],[AC_MSG_RESULT(yes)
    AC_DEFINE(NEG_CSTACK_ADDRESS,1,[C stack address is negative])],
    [AC_MSG_RESULT(no)])
 
 
 AC_MSG_CHECKING([finding CSTACK_ALIGNMENT])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
-	]],[[
+	#include <stdlib.h>
+	int main(int argc,char **argv,char **envp) {
 	void *b,*c;
 	FILE *fp = fopen("conftest1","w");
 	long n;
+	#ifdef CAN_UNRANDOMIZE_SBRK
+	#include "h/unrandomize.h"
+	#endif
 	b=alloca(sizeof(b));
 	c=alloca(sizeof(c));
 	n=b>c ? b-c : c-b;
@@ -1408,27 +1425,30 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	fprintf(fp,"%ld",n);
 	fclose(fp);
 	return 0;
-]])],[cstack_alignment=`cat conftest1`],[cstack_alignment=0])
+}]])],[cstack_alignment=`cat conftest1`],[cstack_alignment=0])
 AC_DEFINE_UNQUOTED(CSTACK_ALIGNMENT,$cstack_alignment,[C stack alignment])
 AC_MSG_RESULT($cstack_alignment)
 
 AC_MSG_CHECKING(CSTACK_DIRECTION)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
+	#include <stdlib.h>
 	void *
 	foo(void) {
 	int i;
 	return (void *)&i;
 	}
 
-	]],[[
-
+	int main(int argc,char **argv,char **envp) {
 	char *b;
 	FILE *fp = fopen("conftest1","w");
+	#ifdef CAN_UNRANDOMIZE_SBRK
+	#include "h/unrandomize.h"
+	#endif
 	fprintf(fp,"%d",((long) &b) > ((long) foo()) ? -1 : 1);
 	fclose(fp);
 	return 0;
-]])],[cstack_direction=`cat conftest1`],[cstack_direction=0])
+}]])],[cstack_direction=`cat conftest1`],[cstack_direction=0])
 AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up or down])
 AC_MSG_RESULT($cstack_direction)
 
