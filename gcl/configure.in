@@ -1370,6 +1370,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	      return (void *)&i;
         }
 
+	void gprof_cleanup() {};
 	int main(int argc,char **argv,char **envp) {
 	void *v ;
 	FILE *fp = fopen("conftest1","w");
@@ -1397,6 +1398,7 @@ AC_MSG_CHECKING(NEG_CSTACK_ADDRESS)
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
 	#include <stdlib.h>
+	void gprof_cleanup() {};
 	int main(int argc,char **argv,char **envp) {
 	#ifdef CAN_UNRANDOMIZE_SBRK
 	#include "h/unrandomize.h"
@@ -1411,6 +1413,7 @@ AC_MSG_CHECKING([finding CSTACK_ALIGNMENT])
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
 	#include <stdlib.h>
+	void gprof_cleanup() {};
 	int main(int argc,char **argv,char **envp) {
 	void *b,*c;
 	FILE *fp = fopen("conftest1","w");
@@ -1439,6 +1442,7 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	return (void *)&i;
 	}
 
+	void gprof_cleanup() {};
 	int main(int argc,char **argv,char **envp) {
 	char *b;
 	FILE *fp = fopen("conftest1","w");
