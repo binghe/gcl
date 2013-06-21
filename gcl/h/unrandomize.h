@@ -31,7 +31,7 @@
 #ifdef GCL_GPROF
 	gprof_cleanup();
 #endif
-	for (i=0;argv[i];i++);a=malloc((i+1)*sizeof(*argv));for (i=0;argv[i];i++) a[i]=strdup(argv[i]);
+	for (i=0;argv[i];i++);a=malloc((i+1)*sizeof(*argv));for (i=0;argv[i];i++) a[i]=strdup(argv[i]);a[i]=0;
 	errno=0;
 	execve(*a,a,n);
 	printf("execve failure %d\n",errno);
