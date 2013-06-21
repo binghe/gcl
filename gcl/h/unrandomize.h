@@ -1,6 +1,7 @@
 #include <sys/personality.h>
 #include <syscall.h>
 #include <unistd.h>
+#include <string.h>
 #include <alloca.h>
 #include <errno.h>
 
@@ -20,18 +21,19 @@
       errno=0;
       if (personality(pers | flag) != -1 && personality(0xffffffffUL) & flag) {
 	int i;
-	char **n;
+	char **n,**a;
 	for (i=0;envp[i];i++);
-	n=alloca((i+2)*sizeof(*n));
+	n=malloc((i+2)*sizeof(*n));
 	n[i+1]=0;
 	n[i--]="GCL_UNRANDOMIZE=t";
 	for (;i>=0;i--)
-	  n[i]=envp[i];
+	  n[i]=strdup(envp[i]);
 #ifdef GCL_GPROF
 	gprof_cleanup();
 #endif
+	for (i=0;argv[i];i++);a=malloc((i+1)*sizeof(*argv));for (i=0;argv[i];i++) a[i]=strdup(argv[i]);
 	errno=0;
-	execve(*argv,argv,n);
+	execve(*a,a,n);
 	printf("execve failure %d\n",errno);
 	exit(-1);
       } else {
