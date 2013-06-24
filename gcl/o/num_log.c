@@ -264,6 +264,9 @@ DEFUN_NEW("1LOGNOT",object,fS1lognot,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
   return normalize_big(u);						
   									
 }
+#ifdef STATIC_FUNCTION_POINTERS
+object fS1lognot(object x) { return FFN(fS1lognot)(x);}
+#endif
 
 LFD(Llogior)(void)
 {
