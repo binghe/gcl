@@ -1049,7 +1049,7 @@ unexec (char *outfile, char *infile, void *start_data, void *start_bss,
 
 /* Replacement for broken sbrk(2).  */
 
-void *my_sbrk (int incr)
+void *my_sbrk (long incr)
 {
   char               *temp, *ptr;
   kern_return_t       rtn;
