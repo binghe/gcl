@@ -22,8 +22,9 @@
       if (personality(pers | flag) != -1 && (personality(0xffffffffUL) & flag)==flag) {
 	int i;
 	char **n,**a;
-	for (i=0;envp[i];i++);
+	extern int *cs_org;
 	cs_org=(void *)&flag;/*get right stack for potential gc in malloc*/
+	for (i=0;envp[i];i++);
 	n=malloc((i+2)*sizeof(*n));
 	n[i+1]=0;
 	n[i--]="GCL_UNRANDOMIZE=t";
