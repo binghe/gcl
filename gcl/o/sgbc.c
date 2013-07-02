@@ -581,7 +581,7 @@ sgc_mark_object1(object x) {
       break;
     if (what_to_collect == t_contiguous) {
       if (!MAYBE_DATA_P((x->cfd.cfd_start)) ||
-	  get_mark_bit(x->cfd.cfd_start))
+	  get_mark_bit(get_pageinfo(x->cfd.cfd_start),x->cfd.cfd_start))
 	break;
       mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
     }
@@ -637,24 +637,10 @@ sgc_mark_phase(void) {
       t=v->type;
       tm=tm_of(t);
       p=pagetochar(i);
-      if ( t == t_cons) 
-	for (j = tm->tm_nppage; --j >= 0; p += tm_table[t_cons].tm_size/*  sizeof(struct cons) */) {
-	  object x = (object) p; 
-	  if (SGC_OR_M(x)) 
-	    continue;
-	  /* if (consp(x)) { */
-	  /*   mark(x); */
-	  /*   sgc_mark_cons(x); */
-	  /* } else */
-	  sgc_mark_object1(x);
-	}
-      else {
-	int size=tm->tm_size;
-	for (j = tm->tm_nppage; --j >= 0; p += size) {
-	  object x = (object) p; 
-	  if (SGC_OR_M(x)) continue;
-	  sgc_mark_object1(x);
-	}
+      for (j = tm->tm_nppage; --j >= 0; p += tm->tm_size) {
+	object x = (object) p; 
+	if (SGC_OR_M(x)) continue;
+	sgc_mark_object1(x);
       }
     }
   }
@@ -856,29 +842,29 @@ sgc_contblock_sweep_phase(void) {
     i=page(v);
     j=i+v->in_use;
     
-    s=pagetochar(i);
+    s=pagetochar(i)+mbytes(v->in_use);
     e=(void *)pagetoinfo(j);
 
     for (p = s;  p < e;) {
-      if (get_mark_bit(p)) {
+      if (get_mark_bit(v,p)) {
 	/* SGC cont pages: cont blocks must be no smaller than
 	   sizeof(struct contblock), and must not have a sweep
-	   granularity greater than this amount (e.g. CPTR_ALIGN) if
+	   granularity greater than this amount (e.g. CPTR_SIZE) if
 	   contblock leaks are to be avoided.  Used to be aligned at
 	   PTR_ALIGN. CM 20030827 */
-	p += CPTR_ALIGN;
+	p += CPTR_SIZE;
 	continue;
       }
-      q = p + CPTR_ALIGN;
+      q = p + CPTR_SIZE;
       while (q < e) {
-	if (!get_mark_bit(q)) {
-	  q += CPTR_ALIGN;
+	if (!get_mark_bit(v,q)) {
+	  q += CPTR_SIZE;
 	  continue;
 	}
 	break;
       }
       insert_contblock(p, q - p);
-      p = q + CPTR_ALIGN;
+      p = q + CPTR_SIZE;
     }
     /* i = j + 1; */
   }
@@ -896,7 +882,7 @@ sgc_contblock_sweep_phase(void) {
 #define PAGE_ROUND_UP(adr) \
     ((char *)(PAGESIZE*(((long)(adr)+PAGESIZE -1) >> PAGEWIDTH)))
 
-char *old_rb_start;
+/* char *old_rb_start; */
 
 #undef tm
 
@@ -1191,13 +1177,15 @@ unsigned char *wrimap=NULL;
 int
 sgc_start(void) {
 
-  long i,count,minfree;
+  long i,count,minfree,allocate_more_pages=!saving_system && 10*available_pages>2*(real_maxpage-first_data_page);
   long np;
   struct typemanager *tm;
-  extern int hole_overrun;
   struct pageinfo *v;
+  object omp=sSAoptimize_maximum_pagesA->s.s_dbind;
   double tmp,scale;
 
+  sSAoptimize_maximum_pagesA->s.s_dbind=Cnil;
+  
   if (memprotect_result!=memprotect_success && do_memprotect_test())
     return 0;
 
@@ -1206,22 +1194,20 @@ sgc_start(void) {
 
   /* Reset maxpage statistics if not invoked automatically on a hole
      overrun. 20040804 CM*/
-  if (!hole_overrun) {
-    vs_mark;
-    object *old_vs_base=vs_base;
-    vs_base=vs_top;
-    FFN(siLreset_gbc_count)();
-    vs_base=old_vs_base;
-    vs_reset;
-  }
+  /* if (!hole_overrun) { */
+  /*   vs_mark; */
+  /*   object *old_vs_base=vs_base; */
+  /*   vs_base=vs_top; */
+  /*   FFN(siLreset_gbc_count)(); */
+  /*   vs_base=old_vs_base; */
+  /*   vs_reset; */
+  /* } */
 
   for (i=t_start,scale=1.0,tmp=0.0;i<t_other;i++)
     if (TM_BASE_TYPE_P(i))
       tmp+=WSGC(tm_of(i));
   tmp+=WSGC(tm_of(t_relocatable));
-  /* printf("%lf %ld\n",scale,available_pages/2);fflush(stdout); */
-  scale=tmp>available_pages/2 ? (float)available_pages/(2*tmp) : 1.0;
-  if (scale!=1.0) {printf("%lf %lf %ld\n",scale,tmp,available_pages/2);fflush(stdout);}
+  scale=tmp>available_pages/10 ? (float)available_pages/(10*tmp) : 1.0;
 
   for (i= t_start; i < t_contiguous ; i++) {
     
@@ -1253,7 +1239,7 @@ sgc_start(void) {
       }
 
     /* don't do any more allocations  for this type if saving system */
-    if (saving_system) 
+    if (!allocate_more_pages) 
       continue;
     
     if (count < WSGC(tm)) {
@@ -1294,6 +1280,7 @@ sgc_start(void) {
    pages, especially when the blocks are small as in bignums, makes
    necessary the sweeping of minimal contblocks to prevent leaks. CM
    20030827 */
+
   {
 
     void *p=NULL,*pe;
@@ -1305,8 +1292,8 @@ sgc_start(void) {
 
     for (pi=contblock_list_head;pi;pi=pi->next) {
 
-      j=PAGESIZE*pi->in_use-sizeof(*pi);
-      p=pagetochar(page(pi));
+      j=CB_DATA_SIZE(pi->in_use);
+      p=CB_DATA_START(pi);
       pe=p+j;
 
       for (cbpp=&cb_pointer;*cbpp;cbpp=&(*cbpp)->cb_link)
@@ -1319,15 +1306,13 @@ sgc_start(void) {
       count+=pi->in_use;
 
     }
-    i=WSGC(tm);
-    count=i>count ? i - count : 0;
+    i=allocate_more_pages ? WSGC(tm) : (saving_system ? 1 : 0);
     
-    if (count>0 && !saving_system) {
+    if (i>count) {
       /* SGC cont pages: allocate more if necessary, dumping possible
 	 GBC freed pages onto the old contblock list.  CM 20030827*/
-      unsigned long z=count+1,n=z*PAGESIZE-sizeof(struct pageinfo);
+      unsigned long z=(i-count)+1,n=CB_DATA_SIZE(z);
       void *old_contblock_list_tail=contblock_list_tail;
-
 
       add_pages(tm_table+t_contiguous,n);
 
@@ -1347,7 +1332,7 @@ sgc_start(void) {
     
     {
       old_rb_start=rb_start;
-      if(((unsigned long)WSGC(tm)) && !saving_system) {
+      if(((unsigned long)WSGC(tm)) && allocate_more_pages) {
 	new=alloc_relblock(((unsigned long)WSGC(tm))*PAGESIZE);
 	/* the above may cause a gc, shifting the relblock */
 	old_rb_start=rb_start;
@@ -1402,16 +1387,13 @@ sgc_start(void) {
       struct contblock *new_cb_pointer=NULL,*tmp_cb_pointer=NULL,**cbpp;
       void *p=NULL,*pe;
       struct pageinfo *pi;
-      fixnum j;
-
 
       for (pi=contblock_list_head;pi;pi=pi->next) {
 	
 	if (pi->sgc_flags!=SGC_PAGE_FLAG) continue;
 	
-	j=PAGESIZE*pi->in_use-sizeof(*pi);
-	p=pagetochar(page(pi));
-	pe=p+j;
+	p=CB_DATA_START(pi);
+	pe=p+CB_DATA_SIZE(pi->in_use);
 	
 	for (cbpp=&cb_pointer;*cbpp;)
 	  if ((void *)*cbpp>=p && (void *)*cbpp<pe)
@@ -1424,7 +1406,7 @@ sgc_start(void) {
 	cb_pointer=new_cb_pointer;
 	/* SGC contblock pages: add whole pages to new list, p p-k, and
 	   p+i are guaranteed to be distinct when used. CM 20030827 */
-	insert_contblock(pagetochar(page(pi)),pi->in_use*PAGESIZE-sizeof(*pi));
+	insert_contblock(p,pe-p);
 	new_cb_pointer=cb_pointer;
 	cb_pointer=tmp_cb_pointer;
 	
@@ -1488,23 +1470,25 @@ sgc_start(void) {
     fflush(stdout);
   }
 
+  sSAoptimize_maximum_pagesA->s.s_dbind=omp;
+
   return 1;
   
 }
 
-int
-pdebug(void) {
+/* int */
+/* pdebug(void) { */
 
-  extern object malloc_list;
-  object x=malloc_list;
-  struct pageinfo *v;
-  for (;x!=Cnil;x=x->c.c_cdr) 
-    printf("%p %d\\n",x->c.c_car->st.st_self,x->c.c_car->st.st_dim);
+/*   extern object malloc_list; */
+/*   object x=malloc_list; */
+/*   struct pageinfo *v; */
+/*   for (;x!=Cnil;x=x->c.c_cdr)  */
+/*     printf("%p %d\n",x->c.c_car->st.st_self,x->c.c_car->st.st_dim); */
 
-  for (v=contblock_list_head;v;v=v->next)
-    printf("%p %d\n",v,v->in_use<<12);
-  return 0;
-}
+/*   for (v=contblock_list_head;v;v=v->next) */
+/*     printf("%p %ld\n",v,v->in_use<<12); */
+/*   return 0; */
+/* } */
 
 
 int

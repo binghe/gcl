@@ -538,6 +538,7 @@ coerce_big_to_string(object x, int printbase)
 void
 gcl_init_big(void)
 {
+  gcl_init_big1();
   big_gcprotect=alloc_object(t_bignum);
   MP_SELF(big_gcprotect)=0;
   MP_ALLOCATED(big_gcprotect)=0;
@@ -550,7 +551,6 @@ gcl_init_big(void)
   enter_mark_origin(&big_fixnum2);
   enter_mark_origin(&big_fixnum3);
   enter_mark_origin(&big_fixnum4);
-  gcl_init_big1();
 
 
 }

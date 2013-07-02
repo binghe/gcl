@@ -149,18 +149,68 @@ update_real_maxpage(void) {
       }
   massert(!mbrk(cur));
 
+#ifdef HAVE_SYSCONF_PHYS_PAGES
+  phys_pages=sysconf(_SC_PHYS_PAGES);
+#endif
+
+  available_pages=real_maxpage-first_data_page-resv_pages;
+  for (i=t_start;i<t_other;i++)
+    available_pages-=tm_table[i].tm_type==t_relocatable ? 2*tm_table[i].tm_npage : tm_table[i].tm_maxpage;
+
   return 0;
 
 }
 
+static int
+minimize_image(void) {
+
+#ifdef SGC
+  int in_sgc=sgc_enabled;
+#else
+  int in_sgc=0;
+#endif
+  extern long new_holepage;
+  fixnum old_holepage=new_holepage,i;
+  void *new;
+  
+  if (in_sgc) sgc_quit();
+  holepage=new_holepage=1;
+  GBC(t_contiguous);
+  if (in_sgc) sgc_start();
+  new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
+  core_end = new;
+  rb_end=rb_limit=new;
+  set_tm_maxpage(tm_table+t_relocatable,((char *)new-REAL_RB_START)/PAGESIZE);
+  new_holepage=old_holepage;
+  
+#ifdef GCL_GPROF
+  gprof_cleanup();
+#endif
+  
+#if defined(BSD) || defined(ATT)  
+  brk(core_end);
+#endif
+  
+  cbgbccount = tm_table[t_contiguous].tm_adjgbccnt = tm_table[t_contiguous].tm_opt_maxpage = 0;
+  rbgbccount = tm_table[t_relocatable].tm_adjgbccnt = tm_table[t_relocatable].tm_opt_maxpage = 0;
+  for (i = 0;  i < (int)t_end;  i++)
+    tm_table[i].tm_gbccount = tm_table[i].tm_adjgbccnt = tm_table[i].tm_opt_maxpage = 0;
+  
+  return 0;
+  
+}
+
 DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,OO,OO,(fixnum l),"") {
 
-  void *end;
+  void *end,*dend;
   fixnum def=sizeof(fixnum)*8-1;
 
   l=l<def ? l : def;
-  end=(void *)(1L<<l);
-  if (end >= (void *)core_end) {
+  end=data_start+(1L<<l)-PAGESIZE;
+  GBC(t_contiguous);
+  dend=heap_end+PAGESIZE+(((rb_pointer-REAL_RB_START)+PAGESIZE-1)&(-PAGESIZE));
+  if (end >= dend) {
+    minimize_image();
     log_maxpage_bound=l;
     update_real_maxpage();
   }
@@ -211,6 +261,7 @@ main(int argc, char **argv, char **envp) {
 #include <stdlib.h>
 #include "ld_bind_now.h"
 #endif
+
 
 #if defined(DARWIN)
 	{
@@ -382,8 +433,6 @@ main(int argc, char **argv, char **envp) {
 	if (atexit(gprof_cleanup))
 	  error("Cannot setup gprof_cleanup on exit");
 #endif
-
-	update_real_maxpage();
 
 	if (initflag) {
 
@@ -1005,7 +1054,6 @@ DEFUN_NEW("LISP-IMPLEMENTATION-VERSION",object,fLlisp_implementation_version,LIS
 
 static void
 FFN(siLsave_system)(void) {
-  int i;
   
 #ifdef HAVE_YP_UNBIND
   extern object truename(),namestring();
@@ -1025,38 +1073,19 @@ FFN(siLsave_system)(void) {
     
   saving_system = TRUE;
   {
-#ifdef SGC
-    int in_sgc=sgc_enabled;
-#else
-    int in_sgc=0;
-#endif
-    extern long new_holepage;
-    fixnum old_holepage=new_holepage;
-    void *new;
 
-    if (in_sgc) sgc_quit();
-    holepage=new_holepage=1;
-    GBC(t_contiguous);
-    if (in_sgc) sgc_start();
-    new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
-    core_end = new;
-    /* rb_end=rb_limit=rb_pointer; */
-    /* nrbpage=(rb_pointer-rb_start)/PAGESIZE; */
-    new_holepage=old_holepage;
+    void *old_rb_end=rb_end,*old_rb_limit=rb_limit;
+    fixnum old_nrbpage=nrbpage;
+
+    /* add_pages(tm_table+t_contiguous,1);/\*ensure at least one free contiguous page for starup mallocs*\/ */
+    minimize_image();
+
+    rb_end=old_rb_end;
+    rb_limit=old_rb_limit;
+    set_tm_maxpage(tm_table+t_relocatable,old_nrbpage);
+
   }
 
-#ifdef GCL_GPROF
-  gprof_cleanup();
-#endif
-    
-#if defined(BSD) || defined(ATT)  
-  brk(core_end);
-#endif
-  
-  cbgbccount = tm_table[t_contiguous].tm_adjgbccnt = tm_table[t_contiguous].tm_opt_maxpage = 0;
-  rbgbccount = tm_table[t_relocatable].tm_adjgbccnt = tm_table[t_relocatable].tm_opt_maxpage = 0;
-  for (i = 0;  i < (int)t_end;  i++)
-    tm_table[i].tm_gbccount = tm_table[i].tm_adjgbccnt = tm_table[i].tm_opt_maxpage = 0;
   Lsave();
   saving_system = FALSE;
   alloc_page(-(holepage+nrbpage));

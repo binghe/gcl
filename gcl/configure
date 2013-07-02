@@ -4813,8 +4813,8 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_c_sysconf" >&5
 $as_echo "$ac_cv_lib_c_sysconf" >&6; }
 if test "x$ac_cv_lib_c_sysconf" = xyes; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking \"for _SC_CLK_TCK\"" >&5
-$as_echo_n "checking \"for _SC_CLK_TCK\"... " >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking _SC_CLK_TCK" >&5
+$as_echo_n "checking _SC_CLK_TCK... " >&6; }
 		if test "$cross_compiling" = yes; then :
   hz=0
 else
@@ -4847,6 +4847,42 @@ fi
 
 	        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $hz" >&5
 $as_echo "$hz" >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking _SC_PHYS_PAGES" >&5
+$as_echo_n "checking _SC_PHYS_PAGES... " >&6; }
+		if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+			#include <stdio.h>
+			#include <unistd.h>
+			int main() {
+			   FILE *fp=fopen("conftest1","w");
+			   fprintf(fp,"%lu\n",sysconf(_SC_PHYS_PAGES));
+			   fclose(fp);
+			   return 0;
+			}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  phys=`cat conftest1`
+			 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $phys" >&5
+$as_echo "$phys" >&6; }
+
+$as_echo "#define HAVE_SYSCONF_PHYS_PAGES \$phys" >>confdefs.h
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
 fi
 
 fi
@@ -6132,6 +6168,55 @@ fi
 
 
 
+# pagewidth
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pagewidth" >&5
+$as_echo_n "checking for pagewidth... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+	    #include <stdio.h>
+            #include <unistd.h>
+
+int
+main ()
+{
+
+	    size_t i=getpagesize(),j;
+	    FILE *fp=fopen("conftest1","w");
+	    for (j=0;i>>=1;j++);
+	    if (j<12) {printf("pagewidth %u is too small\n",j);return -1;}
+	    fprintf(fp,"%u",j);
+	    return 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  PAGEWIDTH=`cat conftest1`
+else
+  PAGEWIDTH=0
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAGEWIDTH" >&5
+$as_echo "$PAGEWIDTH" >&6; }
+
+cat >>confdefs.h <<_ACEOF
+#define PAGEWIDTH $PAGEWIDTH
+_ACEOF
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for required object alignment" >&5
 $as_echo_n "checking for required object alignment... " >&6; }
 if test "$cross_compiling" = yes; then :
@@ -6289,56 +6374,6 @@ $as_echo "$sizeof_contblock" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define SIZEOF_CONTBLOCK $sizeof_contblock
 _ACEOF
-
-
-
-# pagewidth
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for pagewidth" >&5
-$as_echo_n "checking for pagewidth... " >&6; }
-if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-	    #include <stdio.h>
-            #include <unistd.h>
-
-int
-main ()
-{
-
-	    size_t i=getpagesize(),j;
-	    FILE *fp=fopen("conftest1","w");
-	    for (j=0;i>>=1;j++);
-	    if (j<12) {printf("pagewidth %u is too small\n",j);return -1;}
-	    fprintf(fp,"%u",j);
-	    return 0;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  PAGEWIDTH=`cat conftest1`
-else
-  PAGEWIDTH=0
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $PAGEWIDTH" >&5
-$as_echo "$PAGEWIDTH" >&6; }
-
-cat >>confdefs.h <<_ACEOF
-#define PAGEWIDTH $PAGEWIDTH
-_ACEOF
-
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sbrk" >&5

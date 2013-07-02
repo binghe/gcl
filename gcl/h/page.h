@@ -25,15 +25,15 @@
 #define ROUND_UP_PTR(n)	(((long)(n) + (PTR_ALIGN-1)) & ~(PTR_ALIGN-1))
 #define ROUND_DOWN_PTR(n) (((long)(n)  & ~(PTR_ALIGN-1)))
 
-/* alignment required for contiguous pointers */
+/* minimum size required for contiguous pointers */
 #if PTR_ALIGN < SIZEOF_CONTBLOCK
-#define CPTR_ALIGN SIZEOF_CONTBLOCK
+#define CPTR_SIZE SIZEOF_CONTBLOCK
 #else
-#define CPTR_ALIGN PTR_ALIGN
+#define CPTR_SIZE PTR_ALIGN
 #endif
 
-#define ROUND_UP_PTR_CONT(n)	(((long)(n) + (CPTR_ALIGN-1)) & ~(CPTR_ALIGN-1))
-#define ROUND_DOWN_PTR_CONT(n) (((long)(n)  & ~(CPTR_ALIGN-1)))
+#define ROUND_UP_PTR_CONT(n)	(((long)(n) + (CPTR_SIZE-1)) & ~(CPTR_SIZE-1))
+#define ROUND_DOWN_PTR_CONT(n) (((long)(n)  & ~(CPTR_SIZE-1)))
 
 
 #ifdef SGC
@@ -99,7 +99,8 @@ extern int sgc_enabled;
 
 extern long resv_pages;
 extern int reserve_pages_for_signal_handler;
-#define	available_pages	((fixnum)(real_maxpage-page(heap_end)-2*nrbpage-resv_pages))
+/* #define CONT_MARK_PAGE (((page(heap_end)-first_data_page)*(PAGESIZE/(CPTR_SIZE*CHAR_SIZE))+PAGESIZE-1)/PAGESIZE) */
+/* #define	available_pages	((fixnum)(real_maxpage-page(heap_end)-2*nrbpage-CONT_MARK_PAGE-resv_pages)) */
 
 extern struct pageinfo *cell_list_head,*cell_list_tail,*contblock_list_head,*contblock_list_tail;
 
@@ -113,11 +114,20 @@ extern fixnum writable_pages;
 #define IS_WRITABLE(i) is_writable(i)
 
 
-EXTER long first_data_page,real_maxpage;
-EXTER void * data_start;
+EXTER long first_data_page,real_maxpage,phys_pages,available_pages;
+EXTER void *data_start;
 
 #if !defined(IN_MAIN) && defined(SGC)
 #include "writable.h"
 #endif
 
+#ifdef SGC
+#define REAL_RB_START (sgc_enabled ? old_rb_start : rb_start)
+#else
+#define REAL_RB_START rb_start
+#endif
 
+#define npage(m_) (((m_)+PAGESIZE-1)/PAGESIZE)
+#define cpage(m_) ((1+sizeof(struct pageinfo)+((CPTR_SIZE*CHAR_SIZE*(m_))/(CPTR_SIZE*CHAR_SIZE-1))+PAGESIZE-1)/PAGESIZE)
+#define mbytes(p_) (((p_)*PAGESIZE-sizeof(struct pageinfo)+(CPTR_SIZE*CHAR_SIZE)-1)/(CPTR_SIZE*CHAR_SIZE))
+#define tpage(tm_,m_) (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_))

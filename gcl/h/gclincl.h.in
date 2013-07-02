@@ -171,6 +171,9 @@
 /* have sv_onstack */
 #undef HAVE_SV_ONSTACK
 
+/* probe runtime phys pages for gc performance */
+#undef HAVE_SYSCONF_PHYS_PAGES
+
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
 

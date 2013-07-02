@@ -17,9 +17,9 @@
     if (sizeof(long)==4) flag|=ADDR_LIMIT_3GB|ADDR_COMPAT_LAYOUT;
 
     if (pers==-1) {printf("personality failure %d\n",errno);exit(-1);}
-    if (!(pers & flag) && !getenv("GCL_UNRANDOMIZE")) {
+    if ((pers & flag)!=flag && !getenv("GCL_UNRANDOMIZE")) {
       errno=0;
-      if (personality(pers | flag) != -1 && personality(0xffffffffUL) & flag) {
+      if (personality(pers | flag) != -1 && (personality(0xffffffffUL) & flag)==flag) {
 	int i;
 	char **n,**a;
 	for (i=0;envp[i];i++);

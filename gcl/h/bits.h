@@ -4,12 +4,20 @@
 #include "arth.h"
 
 #define LM(a_) AM(AT(SIZEOF_LONG,8),a_)
+#if SIZEOF_LONG == 4
+#define LL 2
+#elif SIZEOF_LONG == 8
+#define LL 3
+#else
+#error "unknown SIZEOF_LONG"
+#endif 
+#define POW AM(PAGEWIDTH,AP(LL,1))
 
 struct pageinfo {
   unsigned long type:6;
-  unsigned long in_use:16;
-  unsigned long sgc_flags:3;
-  unsigned long magic:LM(25);
+  unsigned long magic:7;
+  unsigned long sgc_flags:2;
+  unsigned long in_use:LM(15);
   struct pageinfo *next;
 };
   

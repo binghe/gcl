@@ -343,13 +343,6 @@ struct package {
 EXTER struct package *pack_pointer;	/*  package pointer  */
 
 #define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
-/* #define pageinfo(x) ((struct pageinfo *)(((ufixnum)x)&(-PAGESIZE))) */
-/* #define make_cons(a_,b_) ({struct typemanager *tm=tm_table+t_cons;\ */
-/*                            object _x=tm->tm_free;\ */
-/* 			   _x==OBJNULL ? make_cons1(a_,b_) : \ */
-/* 			     ({tm->tm_free=OBJ_LINK(_x);\ */
-/* 			       tm->tm_nfree--;\ */
-/* 			       _x->c.c_car=a_;_x->c.c_cdr=b_;pageinfo(_x)->in_use++;_x;});}) */
 
 struct cons {
   /* FIRSTWORD; */
@@ -938,8 +931,10 @@ long holepage;			/*  hole pages  */
 /* int nrbpage;			  number of relblock pages  */
   
 
-EXTER 
-char *rb_start;			/*  relblock start  */
+#ifdef SGC
+EXTER char *old_rb_start;			/*  read-only relblock start  */
+#endif
+EXTER char *rb_start;			/*  relblock start  */
 EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */
 EXTER char *rb_pointer;		/*  relblock pointer  */

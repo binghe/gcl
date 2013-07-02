@@ -65,31 +65,94 @@ mark_object(object);
    These assume that DBEGIN is divisible by 32, or else we should have
    #define Shamt(x) (((((int) x -DBEGIN) >> 2) & ~(~0 << 5)))
 */ 
-#define BBITS_CHAR 3
+#define LOG_BITS_CHAR 3
 
-#if SIZEOF_LONG == 4
-#define BBYTES_LONG 2
-#elif SIZEOF_LONG == 8
-#define BBYTES_LONG 3
+#if CPTR_SIZE == 8
+#define LOG_BYTES_CONTBLOCK 3
+#elif CPTR_SIZE == 16
+#define LOG_BYTES_CONTBLOCK 4
 #else
-#error Do not recognize SIZEOF_LONG
+#error Do not recognize CPTR_SIZE
 #endif
 
-#if CPTR_ALIGN == 8
-#define BBYTES_CONTBLOCK 3
-#elif CPTR_ALIGN == 16
-#define BBYTES_CONTBLOCK 4
-#else
-#error Do not recognize CPTR_ALIGN
+#ifdef CONTBLOCK_MARK_DEBUG
+int
+cb_check(void) {
+  struct contblock **cbpp;
+  struct pageinfo *v;
+  void *cbe;
+
+  for (cbpp=&cb_pointer;*cbpp;cbpp=&((*cbpp)->cb_link)) {
+    v=get_pageinfo(*cbpp);
+    cbe=((void *)(*cbpp)+(*cbpp)->cb_size-1);
+    if (cbe>(void *)v+v->in_use*PAGESIZE)
+      return 1;
+  }
+  return 0;
+}
+
+int
+m_check(void) {
+  struct contblock **cbpp;
+  void *v,*ve,*p,*pe;
+  extern object malloc_list;
+  object l;
+
+  for (l=malloc_list;l!=Cnil;l=l->c.c_cdr) {
+    p=l->c.c_car->st.st_self;
+    pe=p+l->c.c_car->st.st_dim;
+    for (cbpp=&cb_pointer;*cbpp;cbpp=&((*cbpp)->cb_link)) {
+      v=(void *)(*cbpp);
+      ve=(v+(*cbpp)->cb_size-1);
+      printf("%p %p  %p %p\n",p,pe,v,ve);
+      if ((v<=p && p < ve)||(v<pe && pe<=ve)) 
+	return 1;
+    }
+  }
+  return 0;
+}
+
+int
+off_check(void *v,void *ve,fixnum i,struct pageinfo *pi) {
+  massert(i>=0);
+  massert(v+i<(void *)pi+pi->in_use*PAGESIZE);
+  massert(i<(ve-v));
+  return 0;
+}
 #endif
 
-#define BBITS_LONG (BBYTES_LONG+BBITS_CHAR)
-#define BCHARS_TABLE (BBITS_LONG+BBYTES_CONTBLOCK)
 
-#define Shamt(x) (((((unsigned long) x) >> BBYTES_CONTBLOCK) & ~(~0UL << BBITS_LONG)))
-#define Madr(x) (mark_table+((((unsigned long) x)-(unsigned long)data_start) >> (BCHARS_TABLE)))
-#define get_mark_bit(x) (*(Madr(x)) >> Shamt(x) & 1)
-#define set_mark_bit(x) ((*(Madr(x))) |= (1UL << Shamt(x)))
+#define CB_DATA_SIZE(z_)   ({fixnum _z=(z_);_z*PAGESIZE-mbytes(_z)-sizeof(struct pageinfo);})
+#define CB_MARK_START(pi_) ((void *)(pi_)+sizeof(struct pageinfo))
+#define CB_DATA_START(pi_) ({struct pageinfo *_pi=(pi_);CB_MARK_START(_pi)+mbytes(_pi->in_use);})
+
+inline struct pageinfo *
+get_pageinfo(void *x) {
+  struct pageinfo *v=contblock_list_head;void *vv;
+  for (;(vv=v) && (vv>=x || vv+v->in_use*PAGESIZE<=x);v=v->next);
+  return v;
+}
+
+inline char
+get_mark_bit(struct pageinfo *pi,char *x) {
+  char *v=CB_MARK_START(pi),*ve=CB_DATA_START(pi);
+  fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
+#ifdef CONTBLOCK_MARK_DEBUG
+  off_check(v,ve,i,pi);
+#endif
+  return (v[i]>>s)&0x1;
+}
+
+inline void
+set_mark_bit(struct pageinfo *pi,char *x) {
+  char *v=CB_MARK_START(pi),*ve=CB_DATA_START(pi);
+  fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
+#ifdef CONTBLOCK_MARK_DEBUG
+  off_check(v,ve,i,pi);
+#endif
+  v[i]|=(1UL<<s);
+}
+
 
 #ifdef KCLOVM
 void mark_all_stacks();
@@ -107,17 +170,7 @@ int sgc_enabled=0;
 #endif
 long  first_protectable_page =0;
 
-
-
 static char *copy_relblock(char *p, int s);
-
-
-
-#ifdef MV
-
-
-#endif
-
 
 long real_maxpage;
 long new_holepage;
@@ -138,45 +191,16 @@ object sSAgbc_messageA;
 #define	MARK_ORIGIN_MAX		300
 #define	MARK_ORIGIN_BLOCK_MAX	20
 
-#ifdef AV
-/*
-  See bitop.c.
-*/
-#endif
-#ifdef MV
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
-
-/* #define	symbol_marked(x)	((x)->d.m) */
-
 object *mark_origin[MARK_ORIGIN_MAX];
 int mark_origin_max;
 
 struct {
-  object	*mob_addr;	/*  mark origin block address  */
+  object *mob_addr;	/*  mark origin block address  */
   int	mob_size;	/*  mark origin block size  */
 } mark_origin_block[MARK_ORIGIN_BLOCK_MAX];
 int mark_origin_block_max;
 
-/* must be a long * to match with SIZEOF_LONG usage above*/
-long *mark_table;
-
 enum type what_to_collect;
-
-
 
 void
 enter_mark_origin(object *p) {
@@ -187,39 +211,6 @@ enter_mark_origin(object *p) {
   mark_origin[mark_origin_max++] = p;
 
 }
-
-/* static void */
-/* mark_cons(object x) { */
-  
-/*   cs_check(x); */
-  
-/*   /\*  x is already marked.  *\/ */
-  
-/*  BEGIN:   */
-/*   if (NULL_OR_ON_C_STACK(x->c.c_car)) goto MARK_CDR; */
-/*   if (type_of(x->c.c_car) == t_cons) { */
-/*     if (is_marked_or_free(x->c.c_car)) */
-/*       ; */
-/*     else { */
-/*       mark(x->c.c_car); */
-/*       mark_cons(x->c.c_car); */
-/*     } */
-/*   } else */
-/*     mark_object(x->c.c_car); */
-/*  MARK_CDR:   */
-/*   if (NULL_OR_ON_C_STACK(x->c.c_cdr)) */
-/*     return; */
-/*   x = Scdr(x); */
-/*   if (consp(x)) { */
-/*     if (is_marked_or_free(x)) */
-/*       return; */
-/*     mark(x); */
-/*     goto BEGIN; */
-/*   } */
-/*   if (x == Cnil) */
-/*     return; */
-/*   mark_object(x); */
-/* } */
 
 static void
 mark_cons(object x) {
@@ -638,7 +629,7 @@ mark_object(object x) {
       break;
     if (what_to_collect == t_contiguous) {
       if (!MAYBE_DATA_P((x->cfd.cfd_start)) ||
-	  get_mark_bit((long *)(x->cfd.cfd_start)))
+	  get_mark_bit(get_pageinfo(x->cfd.cfd_start),x->cfd.cfd_start))
 	break;
       mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);}
     break;
@@ -908,7 +899,7 @@ mark_c_stack(jmp_buf env1, int n, void (*fn)(void *,void *,int)) {
 	  tv=pagetoinfo(page(v)+i);
 	  if (PAGEINFO_P(tv)) {
 	    a=contblock_stack_list;
-	    printf("%p\n",tv);
+	    /* printf("%p\n",tv); */
 	    contblock_stack_list=alloca(2*sizeof(a));
 	    contblock_stack_list[0]=tv;
 	    contblock_stack_list[1]=a;
@@ -991,7 +982,7 @@ sweep_phase(void) {
 	unmark(x);
 	continue;
       }
-      
+
 #ifdef GMP_USE_MALLOC
       if (x->d.t == t_bignum) {
 	mpz_clear(MP(x));
@@ -1028,29 +1019,29 @@ contblock_sweep_phase(void) {
 
   for (v=contblock_list_head;v;v=v->next) {
 
-    s=pagetochar(page(v));
-    e=(void *)pagetoinfo(page(s)+v->in_use);
+    s=CB_DATA_START(v);
+    e=(void *)v+v->in_use*PAGESIZE;
 
     for (p = s;  p < e;) {
-      if (get_mark_bit(p)) {
+      if (get_mark_bit(v,p)) {
 	/* SGC cont pages: cont blocks must be no smaller than
 	   sizeof(struct contblock), and must not have a sweep
-	   granularity greater than this amount (e.g. CPTR_ALIGN) if
+	   granularity greater than this amount (e.g. CPTR_SIZE) if
 	   contblock leaks are to be avoided.  Used to be aligned at
 	   PTR_ALIGN. CM 20030827 */
-	p += CPTR_ALIGN;
+	p += CPTR_SIZE;
 	continue;
       }
-      q = p + CPTR_ALIGN;
+      q = p + CPTR_SIZE;
       while (q < e) {
-	if (!get_mark_bit(q)) {
-	  q += CPTR_ALIGN;
+	if (!get_mark_bit(v,q)) {
+	  q += CPTR_SIZE;
 	  continue;
 	}
 	break;
       }
       insert_contblock(p, q - p);
-      p = q + CPTR_ALIGN;
+      p = q + CPTR_SIZE;
     }
   }
 #ifdef DEBUG
@@ -1091,7 +1082,7 @@ fixnum fault_pages=0;
 void
 GBC(enum type t) {
 
-  long i, j;
+  long i,j;
   struct apage *pp, *qq;
 #ifdef SGC
   int in_sgc = sgc_enabled;
@@ -1155,21 +1146,18 @@ GBC(enum type t) {
   maxpage = page(heap_end);
   
   if ((int)t >= (int)t_contiguous) {
-    j = (maxpage-first_data_page)*(PAGESIZE/(CPTR_ALIGN*SIZEOF_LONG*CHAR_SIZE)) ;
+
+    /* j = (maxpage-first_data_page)*(PAGESIZE/(CPTR_SIZE*SIZEOF_LONG*CHAR_SIZE)) ; */
     
-    if (t == t_relocatable)
-      j = 0;
-    
-#ifdef SGC
-    i = rb_pointer - (sgc_enabled ? old_rb_start : rb_start);
-#else
-    i = rb_pointer - rb_start;
-#endif    
+    /* if (t == t_relocatable) */
+    /*   j = 0; */
+
+    i=rb_pointer-REAL_RB_START;
 
 #ifdef SGC
-      if (sgc_enabled==0)
+    if (sgc_enabled==0)
 #endif
-	{rb_start = heap_end + PAGESIZE*holepage;}
+      rb_start = heap_end + PAGESIZE*holepage;
     
     rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
     
@@ -1190,16 +1178,25 @@ GBC(enum type t) {
     rb_pointer = rb_start;  /* where the new relblock will start */
     rb_pointer1 = rb_start1;/* where we will copy it to during gc*/
     
-    mark_table = (long *)(rb_start1 + i);
+    /* mark_table = (long *)(rb_start1 + i); */
     
-    if (rb_end < (char *)&mark_table[j])
-      i = (char *)&mark_table[j] - heap_end;
+    if (rb_end < (rb_start1 + i))/*(char *)&mark_table[j]*/
+      i = (rb_start1 + i) - heap_end;
     else
       i = rb_end - heap_end;
     alloc_page(-(i + PAGESIZE - 1)/PAGESIZE);
     
-    for (i = 0;  i < j; i++)
-      mark_table[i] = 0;
+    /* for (i = 0;  i < j; i++) */
+    /*   mark_table[i] = 0; */
+    
+    { 
+      struct pageinfo *v;
+      for (v=contblock_list_head;v;v=v->next) {
+	void *p=pagetochar(page(v)),*pe=p+mbytes(v->in_use);
+	bzero(p,pe-p);
+      }
+    }
+
   }
   
 #ifdef DEBUG
@@ -1352,13 +1349,12 @@ GBC(enum type t) {
   }
   
   {
-    extern int hole_overrun;
     extern long opt_maxpage(struct typemanager *);
 
 #define IGNORE_MAX_PAGES (sSAignore_maximum_pagesA ==0 || sSAignore_maximum_pagesA->s.s_dbind !=sLnil) 
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 
-    if (!hole_overrun && IGNORE_MAX_PAGES && OPTIMIZE_MAX_PAGES)
+    if (IGNORE_MAX_PAGES && OPTIMIZE_MAX_PAGES)
       opt_maxpage(tm_table+t);
     
   }
@@ -1476,6 +1472,7 @@ mark_contblock(void *p, int s) {
 
   STATIC char *q;
   STATIC char *x, *y;
+  struct pageinfo *v;
   
   if (!MAYBE_DATA_P(p))
     return;
@@ -1484,8 +1481,12 @@ mark_contblock(void *p, int s) {
      sizeof(struct contblock).  CM 20030827 */
   x = (char *)ROUND_DOWN_PTR_CONT(p);
   y = (char *)ROUND_UP_PTR_CONT(q);
-  for (;  x < y;  x+=CPTR_ALIGN)
-    set_mark_bit(x);
+  v=get_pageinfo(x);
+#ifdef SGC
+  if (!sgc_enabled || (v->sgc_flags&SGC_PAGE_FLAG))
+#endif
+    for (;  x < y;  x+=CPTR_SIZE)
+      set_mark_bit(v,x);
 }
 
 DEFUN_NEW("GBC",object,fLgbc,LISP

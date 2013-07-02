@@ -80,23 +80,24 @@ add_page_to_contblock_list(void *p,fixnum m) {
   bzero(pp,sizeof(*pp));
   pp->type=t_contiguous;
   pp->in_use=m;
+  massert(pp->in_use==m);
   pp->magic=PAGE_MAGIC;
   
-  if (contblock_list_head==NULL) contblock_list_head=p;
-  else contblock_list_tail->next=p;
-  contblock_list_tail=p;
+  if (contblock_list_head==NULL)
+    contblock_list_tail=contblock_list_head=p;
+  else if (pp > contblock_list_tail) {
+    contblock_list_tail->next=p;
+    contblock_list_tail=p;
+  }
   
 #ifdef SGC
-  if (sgc_enabled) {
-    /* fixnum i;	    */
-    /* for (i=0;i<m;i++) */
-    /*   massert(IS_WRITABLE(page(p)+i)); */
+  if (sgc_enabled)
     pp->sgc_flags=SGC_PAGE_FLAG;
-  }
 #endif
   
   ncbpage+=m;
-  insert_contblock(p+sizeof(struct pageinfo),PAGESIZE*m-sizeof(struct pageinfo));
+  p+=mbytes(m)+sizeof(struct pageinfo);
+  insert_contblock(p,PAGESIZE*m-(p-(void *)pp));
 
 }
 
@@ -110,7 +111,7 @@ inline void
 maybe_reallocate_page(struct typemanager *ntm,ufixnum count) {
 
   void **y,**n;
-  fixnum *pp,*pp1,*pp2,*ppe,yp;
+  fixnum *pp,*pp1,*ppe,yp;
   struct typemanager *tm;
   fixnum i,j,e[t_end];
   struct pageinfo *v;
@@ -155,30 +156,16 @@ maybe_reallocate_page(struct typemanager *ntm,ufixnum count) {
     massert(!j);
   }
 
-  if (ntm->tm_type<t_end)
-
-    for (pp=pp1;pp<ppe;pp++)
-      add_page_to_freelist(pagetochar(*pp),ntm);
-
-  else {
-
-    massert(ntm->tm_type==t_contiguous);
-
-    for (pp=pp1;pp<ppe;pp=pp2) {
-
-      for (pp2=pp+1;pp2<ppe && *pp2==pp2[-1]+1;pp2++);
-
-      add_page_to_contblock_list(pagetoinfo(*pp),pp2-pp);
-
-    }
-      
+  for (pp=pp1;pp<ppe;pp++) {
+    struct pageinfo *pn=pagetoinfo(*pp)->next;
+    add_page_to_freelist(pagetochar(*pp),ntm);
+    pagetoinfo(*pp)->next=pn;
   }
-    
+      
 }
 
 
 int reserve_pages_for_signal_handler=30;
-int hole_overrun=0;
 
 /* If  (n >= 0 ) return pointer to n pages starting at heap end,
    These must come from the hole, so if that is exhausted you have
@@ -203,9 +190,6 @@ alloc_page(long n) {
 		       available_pages-n<=reserve_pages_for_signal_handler ? 0 : 
 		       reserve_pages_for_signal_handler))) {
 
-#ifdef SGC
-      if (in_sgc) sgc_quit();
-#endif
 
       if (in_signal_handler) {
 	fprintf(stderr,"Cant do relocatable gc in signal handler. \
@@ -223,6 +207,10 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
       
       holepage = d + n;
 
+#ifdef SGC
+      if (in_sgc) sgc_quit();
+#endif
+
       GBC(t_relocatable);
       tm_table[t_relocatable].tm_adjgbccnt--;/* hole overrun is not a call for more relocatable */
 
@@ -232,9 +220,7 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 	 and may move heap end, so start over
       */
       if (in_sgc) {
-	hole_overrun=1;
 	sgc_start();
-	hole_overrun=0;
 	return alloc_page(n);
       }
 #endif
@@ -264,13 +250,6 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 
   IF_ALLOCATE_ERR error("Can't allocate.  Good-bye!");
 
-/* #ifdef SGC */
-/*   if (sgc_enabled) { */
-/*     fixnum y; */
-/*     for (y=page(rb_start);y<page(core_end);y++) */
-/*       massert(IS_WRITABLE(y)); */
-/*   } */
-/* #endif */
   core_end+=PAGESIZE*(n-m);
 
   return(e);
@@ -283,6 +262,15 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 
 struct pageinfo *cell_list_head=NULL,*cell_list_tail=NULL;;
 
+inline void
+set_tm_maxpage(struct typemanager *tm,fixnum n) {
+  
+  fixnum r=tm->tm_type==t_relocatable,j=r ? tm->tm_npage : tm->tm_maxpage;;
+  available_pages-=(n-j)*(r ? 2 : 1);
+  tm->tm_adjgbccnt*=((double)j)/n;
+  if (r) tm->tm_npage=n; else tm->tm_maxpage=n;
+}
+  
 
 inline void
 add_page_to_freelist(char *p, struct typemanager *tm) {
@@ -293,10 +281,6 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
   struct pageinfo *pp;
 
  t=tm->tm_type;
-/* #ifdef SGC */
-/*  if (sgc_enabled)  */
-/*    massert(IS_WRITABLE(page(p))); */
-/* #endif */
 
  size=tm->tm_size;
  f=tm->tm_free;
@@ -306,10 +290,11 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
  pp->magic=PAGE_MAGIC;
 
  if (cell_list_head==NULL) 
-   cell_list_head=pp;
- else
+   cell_list_tail=cell_list_head=pp;
+ else if (pp > cell_list_tail) {
    cell_list_tail->next=pp;
- cell_list_tail=pp;
+   cell_list_tail=pp;
+ }
 
  x= (object)pagetochar(page(p));
  set_type_of(x,t);
@@ -343,7 +328,7 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
  tm->tm_free=f;
  tm->tm_nfree += tm->tm_nppage;
  tm->tm_npage++;
- tm->tm_maxpage=MAX(tm->tm_npage,tm->tm_maxpage);
+ set_tm_maxpage(tm,MAX(tm->tm_npage,tm->tm_maxpage));
 
 }
 
@@ -360,10 +345,6 @@ call_after_gbc_hook(t) {
     ifuncall1(sSAafter_gbc_hookA->s.s_dbind,intern(string_register,system_package));
   }
 }
-
-/* #define PERCENT_FREE(tm)  ((tm->tm_percent_free ? tm->tm_percent_free : 10)/100.0) */
-/* #define PERCENT_FREE(tm)  ((tm->tm_percent_free ? tm->tm_percent_free : 30)/100.0) */
-#define PERCENT_FREE(tm)  (tm->tm_percent_free/100.0)
 
 static fixnum
 grow_linear(fixnum old, fixnum fract, fixnum grow_min, fixnum grow_max,fixnum max_delt) {
@@ -426,6 +407,14 @@ opt_maxpage(struct typemanager *my_tm) {
   struct typemanager *tm,*tme;
   long mro=0,tro=0;
 
+#ifdef HAVE_SYSCONF_PHYS_PAGES
+  if (page(heap_end)-first_data_page+nrbpage>=phys_pages)
+    return 0;
+#endif
+
+  if (page(core_end)>0.8*real_maxpage)
+    return 0;
+
   for (tm=tm_table,tme=tm+sizeof(tm_table)/sizeof(*tm_table);tm<tme;tm++) {
     x+=tm->tm_adjgbccnt;
     y+=MMAX_PG(tm);
@@ -455,10 +444,7 @@ opt_maxpage(struct typemanager *my_tm) {
 	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r);
   if (r<=0.95) {
     my_tm->tm_adjgbccnt*=mmax_page/z;
-    if (my_tm->tm_type==t_relocatable)
-      my_tm->tm_npage=z+mro;
-    else
-      my_tm->tm_maxpage=z+mro;
+    set_tm_maxpage(my_tm,z+mro);
     return 1;
   }
   return 0;
@@ -530,30 +516,27 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
 
 }
 
-#define npage(m_) ((m_+PAGESIZE-1)/PAGESIZE)
-
 static inline void
 grow_linear1(struct typemanager *tm) {
   
-  fixnum maxgro=available_pages,j=tm->tm_maxpage;
+  fixnum maxgro=available_pages/100;
 
   if (tm->tm_type==t_relocatable) maxgro>>=1;
 
-  tm->tm_maxpage=grow_linear(tm->tm_npage,tm->tm_growth_percent,tm->tm_min_grow, tm->tm_max_grow,maxgro);
-  tm->tm_adjgbccnt*=(double)j/tm->tm_maxpage;
+  set_tm_maxpage(tm,grow_linear(tm->tm_npage,tm->tm_growth_percent,tm->tm_min_grow, tm->tm_max_grow,maxgro));
 
 }
 
 static inline int
 too_full_p(struct typemanager *tm) {
 
-  fixnum j,k;
+  fixnum j,k,pf=tm->tm_percent_free ? tm->tm_percent_free : 30;
   struct contblock *cbp;
   struct pageinfo *pi;
 
   switch (tm->tm_type) {
   case t_relocatable:
-    return 100*(rb_limit-rb_pointer)<tm->tm_percent_free*(rb_limit-rb_start);
+    return 100*(rb_limit-rb_pointer)<pf*(rb_limit-rb_start);
     break;
   case t_contiguous:
     for (cbp=cb_pointer,k=0;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
@@ -562,10 +545,10 @@ too_full_p(struct typemanager *tm) {
       if (!sgc_enabled || pi->sgc_flags&SGC_PAGE_FLAG)
 #endif
 	j+=pi->in_use;
-    return 100*k<tm->tm_percent_free*j*PAGESIZE;
+    return 100*k<pf*j*PAGESIZE;
     break;
   default:
-    return 100*tm->tm_nfree<tm->tm_percent_free*TOTAL_THIS_TYPE(tm);
+    return 100*tm->tm_nfree<pf*TOTAL_THIS_TYPE(tm);
     break;
   }
 
@@ -574,7 +557,7 @@ too_full_p(struct typemanager *tm) {
 inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
-  if (tm->tm_npage+npage(n)>=tm->tm_maxpage) {
+  if (tm->tm_npage+tpage(tm,n)>=tm->tm_maxpage) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
@@ -608,32 +591,18 @@ struct pageinfo *contblock_list_head=NULL,*contblock_list_tail=NULL;
 inline void
 add_pages(struct typemanager *tm,fixnum n) {
 
-  void *p;
-  fixnum m=npage(n),i;
+  fixnum m=tpage(tm,n);
 
   switch (tm->tm_type) {
   case t_contiguous:
 
-    n+=sizeof(struct pageinfo);
-    m=npage(n);
-    p = alloc_page(m);
-
-    add_page_to_contblock_list(p,m);
+    add_page_to_contblock_list(alloc_page(m),m);
 
     break;
 
   case t_relocatable:
 
-    i=nrbpage;
-#ifdef SGC
-    {
-      extern char *old_rb_start;
-      nrbpage=m+2*npage(RB_GETA+(rb_pointer-(sgc_enabled ? old_rb_start : rb_start)));
-    }
-#else
-      nrbpage=m+2*npage(RB_GETA+(rb_pointer-rb_start));	
-#endif
-    tm->tm_adjgbccnt*=(double)i/nrbpage;
+    set_tm_maxpage(tm_table+t_relocatable,m+2*tpage(tm,RB_GETA+(rb_pointer-REAL_RB_START)));
 
     rb_end=heap_end+(holepage+nrbpage)*PAGESIZE;
     rb_limit=rb_end-2*RB_GETA;
@@ -655,9 +624,9 @@ add_pages(struct typemanager *tm,fixnum n) {
 inline void *
 alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   
-  fixnum m=npage(n);
+  fixnum m=tpage(tm,n);
 
-  if ((tm->tm_type==t_relocatable ? 2*(m-npage(rb_limit-rb_pointer)) : m) > available_pages)
+  if ((tm->tm_type==t_relocatable ? 2*(m-tpage(tm,rb_limit-rb_pointer)) : m) > available_pages)
     return NULL;
 
   if (tm->tm_npage+m>tm->tm_maxpage) {
@@ -665,7 +634,7 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
     if (!IGNORE_MAX_PAGES) return NULL;
 
     grow_linear1(tm);
-    if (tm->tm_npage+m>tm->tm_maxpage) tm->tm_maxpage=tm->tm_npage+m;
+    if (tm->tm_npage+m>tm->tm_maxpage) set_tm_maxpage(tm,tm->tm_npage+m);
 
   }
 
@@ -678,27 +647,15 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
 inline void *
 alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
-  fixnum m=npage(n),reloc_min,i;
+  fixnum m=tpage(tm,n),reloc_min;
 
-  if (tm->tm_type>=t_relocatable) return NULL;
+  if (tm->tm_type>=t_end) return NULL;
 
-  /* GBC(t_relocatable); */
-  /* tm_table[t_relocatable].tm_adjgbccnt--; */
-#ifdef SGC
-  {
-    extern char *old_rb_start;
-
-    reloc_min=2*npage(rb_pointer-(sgc_enabled ? old_rb_start : rb_start));
-  }
-#else
-  reloc_min=2*npage(rb_pointer-rb_start);
-#endif
+  reloc_min=2*tpage(tm,rb_pointer-REAL_RB_START);
 
   if (m<nrbpage-reloc_min) {
 
-    i=nrbpage;
-    nrbpage=reloc_min;
-    tm->tm_adjgbccnt*=(double)i/nrbpage;
+    set_tm_maxpage(tm_table+t_relocatable,reloc_min);
 
     GBC(t_relocatable);
     tm_table[t_relocatable].tm_adjgbccnt--;
@@ -710,6 +667,17 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
   maybe_reallocate_page(tm,100);
 
   return alloc_from_freelist(tm,n);
+
+}
+
+inline void *alloc_mem(struct typemanager *,fixnum);
+
+inline void *
+alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
+
+  if (!sgc_enabled) return NULL;
+  sgc_quit();
+  return alloc_mem(tm,n);
 
 }
 
@@ -725,6 +693,8 @@ alloc_mem(struct typemanager *tm,fixnum n) {
   if ((p=alloc_after_gc(tm,n)))
     return p;
   if ((p=alloc_after_adding_pages(tm,n)))
+    return p;
+  if ((p=alloc_after_turning_off_sgc(tm,n)))
     return p;
   if ((p=alloc_after_reclaiming_pages(tm,n)))
     return p;
@@ -955,7 +925,7 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
 	j = i;
   if (j >= 0) {
     tm_table[(int)t].tm_type = (enum type)j;
-    tm_table[j].tm_maxpage += maxpage;
+    set_tm_maxpage(tm_table+j,tm_table[j].tm_maxpage+maxpage);
 #ifdef SGC		
     tm_table[j].tm_sgc += sgc;
 #endif
@@ -968,16 +938,12 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
   tm_table[(int)t].tm_nfree = 0;
   /* tm_table[(int)t].tm_nused = 0; */
   /*tm_table[(int)t].tm_npage = 0; */  /* dont zero nrbpage.. */
-  tm_table[(int)t].tm_maxpage = maxpage;
+  set_tm_maxpage(tm_table+t,maxpage);
   tm_table[(int)t].tm_gbccount = 0;
   tm_table[(int)t].tm_adjgbccnt = 0;
   tm_table[(int)t].tm_opt_maxpage = 0;
   tm_table[(int)t].tm_distinct=distinct;
 
-  if (1) {/*FIXME(t<t_end)*/
-    tm_table[(int)t].tm_percent_free=30;
-    tm_table[(int)t].tm_growth_percent=50;
-  }
 #ifdef SGC	
   tm_table[(int)t].tm_sgc = sgc;
   tm_table[(int)t].tm_sgc_max = 3000;
@@ -1077,10 +1043,8 @@ gcl_init_alloc(void) {
      holepage=textpage;
 #endif
 
-  /* new_holepage = HOLEPAGE; */
   new_holepage = available_pages/10;
-  /* nrbpage = INIT_NRBPAGE; */
-  nrbpage = available_pages/20;
+  set_tm_maxpage(tm_table+t_relocatable,available_pages/20);
   
 #ifdef __linux__
   /* Some versions of the Linux startup code are broken.
@@ -1153,10 +1117,10 @@ gcl_init_alloc(void) {
   
   ncb = 0;
   ncbpage = 0;
-  maxcbpage = 512;
+  set_tm_maxpage(tm_table+t_contiguous,512);
 #ifdef GCL_GPROF
   if (maxcbpage<textpage)
-     maxcbpage=textpage;
+    set_tm_maxpage(tm_table+t_contiguous,textpage);
 #endif
 
 #ifndef DONT_NEED_MALLOC	
@@ -1243,8 +1207,8 @@ DEFUN_NEW("ALLOCATE-GROWTH",object,fSallocate_growth,SI,5,5,NONE,OO,II,II,OO,
     goto END;
  tm->tm_max_grow=max;
  tm->tm_min_grow=min;
- tm->tm_growth_percent= percent;
- tm->tm_percent_free= percent_free;
+ tm->tm_growth_percent=percent;
+ tm->tm_percent_free=percent_free;
  END:
  RETURN1(res);
 }
@@ -1275,7 +1239,7 @@ DEFUN_NEW("ALLOCATE-CONTIGUOUS-PAGES",object,fSallocate_contiguous_pages,SI
 /*     printf("Allocate contiguous %ld: %d already there pages",npages,ncbpage); */
     npages=ncbpage;
   }
-  maxcbpage = npages;
+  set_tm_maxpage(tm_table+t_contiguous,npages);
   if (really_do == Cnil) 
     RETURN1(Ct);
   m = maxcbpage - ncbpage;
@@ -1323,12 +1287,12 @@ DEFUN_NEW("ALLOCATE-RELOCATABLE-PAGES",object,fSallocate_relocatable_pages,SI
   CHECK_ARG_RANGE(1,2);
   if (npages  <= 0)
     FEerror("Requires positive arg",0);
-  if ((nrbpage > npages && rb_pointer >= rb_start + PAGESIZE*npages - 2*RB_GETA)
+  if ((nrbpage > npages && rb_pointer >= rb_start + PAGESIZE*npages - 2*RB_GETA)/*FIXME*/
       || 2*npages > real_maxpage-page(heap_end)-new_holepage-real_maxpage/32)
     FEerror("Can't set the limit for relocatable blocks to ~D.",
 	    1, make_fixnum(npages));
   rb_end += (npages-nrbpage)*PAGESIZE;
-  nrbpage = npages;
+  set_tm_maxpage(tm_table+t_relocatable,npages);
   rb_limit = rb_end - 2*RB_GETA;
   alloc_page(-(holepage + nrbpage));
   vs_top = vs_base;
@@ -1362,7 +1326,7 @@ DEFUN_NEW("ALLOCATE",object,fSallocate,SI
 			make_fixnum(npages));
   tm = tm_of(t);
   if (tm->tm_npage > npages) {npages=tm->tm_npage;}
-  tm->tm_maxpage = npages;
+  set_tm_maxpage(tm,npages);
   if (really_do != Cnil &&
       tm->tm_maxpage > tm->tm_npage)
     goto ALLOCATE;
@@ -1378,8 +1342,7 @@ DEFUN_NEW("ALLOCATE",object,fSallocate,SI
       FUNCALL(2,FFN(fSallocate_relocatable_pages)(npages,really_do));
     else {
       
-      if (available_pages < tm->tm_maxpage - tm->tm_npage ||
-	  (pp = alloc_page(tm->tm_maxpage - tm->tm_npage)) == NULL) {
+      if ((pp = alloc_page(tm->tm_maxpage - tm->tm_npage)) == NULL) {
 	FEerror("Can't allocate ~D pages for ~A.", 2,
 		make_fixnum(npages), (make_simple_string(tm->tm_name+1)));
       }
