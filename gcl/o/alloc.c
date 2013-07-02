@@ -672,6 +672,7 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
 inline void *alloc_mem(struct typemanager *,fixnum);
 
+#ifdef SGC
 inline void *
 alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
 
@@ -680,6 +681,7 @@ alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
   return alloc_mem(tm,n);
 
 }
+#endif
 
 inline void *
 alloc_mem(struct typemanager *tm,fixnum n) {
@@ -694,8 +696,10 @@ alloc_mem(struct typemanager *tm,fixnum n) {
     return p;
   if ((p=alloc_after_adding_pages(tm,n)))
     return p;
+#ifdef SGC
   if ((p=alloc_after_turning_off_sgc(tm,n)))
     return p;
+#endif
   if ((p=alloc_after_reclaiming_pages(tm,n)))
     return p;
   return exhausted_report(tm->tm_type,tm);
