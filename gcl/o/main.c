@@ -124,8 +124,22 @@ cstack_dir(fixnum j) {
 }
 
 fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
-#define mbrk(x_) ({void *_c=sbrk(0);_c==sbrk(x_-_c) ? 0 : -1;})
-
+inline int
+mbrk(void *v) {
+  ufixnum uv=(ufixnum)v,uc=(ufixnum)sbrk(0),ux,um;
+  fixnum m=((1UL<<(sizeof(fixnum)*8-1))-1);
+  if (uv<uc) {
+    um=uv;
+    ux=uc;
+  } else {
+    um=uc;
+    ux=uv;
+  }
+  if (((fixnum)(ux-um))<0)
+    return mbrk((void *)uc+(uv<uc ? -m : m)) || mbrk(v);
+  return uc==(ufixnum)sbrk(uv-uc) ? 0 : -1;
+}
+    
 int
 update_real_maxpage(void) {
 

@@ -23,6 +23,7 @@
 	int i;
 	char **n,**a;
 	for (i=0;envp[i];i++);
+	cs_org=(void *)&flag;/*get right stack for potential gc in malloc*/
 	n=malloc((i+2)*sizeof(*n));
 	n[i+1]=0;
 	n[i--]="GCL_UNRANDOMIZE=t";
