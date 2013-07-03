@@ -1438,8 +1438,8 @@ sgc_start(void) {
 	object x=v;
 	if (type_of(x)!=t_stream || is_free(x)) continue;
 	if (x->sm.sm_buffer) 
-	  for (i=0;i<(BUFSIZ+PAGESIZE-1)/PAGESIZE;i++)
-	    SET_WRITABLE(page(x->sm.sm_buffer)+i);
+	  for (i=page(x->sm.sm_buffer);i<=page(x->sm.sm_buffer+BUFSIZ-1);i++)
+	    SET_WRITABLE(i);
       }
 #endif
     }

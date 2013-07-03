@@ -165,6 +165,9 @@ update_real_maxpage(void) {
 
 #ifdef HAVE_SYSCONF_PHYS_PAGES
   phys_pages=sysconf(_SC_PHYS_PAGES);
+#ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
+  if (real_maxpage>phys_pages) for (real_maxpage=1;real_maxpage<phys_pages;real_maxpage<<=1);
+#endif
 #endif
 
   available_pages=real_maxpage-first_data_page-resv_pages;
