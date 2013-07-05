@@ -44,6 +44,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef IN_NUM_CO
 #ifdef HAVE_ISNORMAL
+#define _GNU_SOURCE
 #define ISNORMAL(a) isnormal(a)
 #else
 #ifdef HAVE_IEEEFP
@@ -59,6 +60,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef NEED_ISFINITE
 #ifdef HAVE_ISFINITE
+#define _GNU_SOURCE
 #define ISFINITE(a) isfinite(a)
 #else
 #ifdef HAVE_FINITE

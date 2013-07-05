@@ -2005,45 +2005,41 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 		]])],[AC_DEFINE(HAVE_FINITE,1,[Have finite function]) AC_MSG_RESULT(yes)],
    		     [AC_MSG_ERROR(no)])])
 
-#
-# The second alternative is for solaris.  This needs to be
-# a more comprehensive later, i.e. checking that the fpclass
-# test makes sense.  CM
-#
+dnl AC_MSG_CHECKING([for INFINITY])
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl         #define _GNU_SOURCE
+dnl 	#include <math.h>
+dnl 	]],[[
+dnl 	double d=INFINITY;
+dnl 	return 0;
+dnl 	]])],[AC_MSG_RESULT(yes)],
+dnl 	    [AC_MSG_CHECKING([for builtin_inf()])
+dnl 	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 		#include <math.h>
+dnl 		#include <ieeefp.h>
+dnl 		]],[[
+dnl 		double d=__builtin_inf();
+dnl 		return 0;
+dnl 		]])],[AC_DEFINE_UNQUOTED(INFINITY,__builtin_inf(),[Have builtin_inf]) AC_MSG_RESULT(yes)],
+dnl 		    [AC_MSG_ERROR(no)])])
 
-AC_MSG_CHECKING([for INFINITY])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <math.h>
-	]],[[
-	double d=INFINITY;
-	return 0;
-	]])],[AC_MSG_RESULT(yes)],
-	    [AC_MSG_CHECKING([for builtin_inf()])
-	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-		#include <math.h>
-		#include <ieeefp.h>
-		]],[[
-		double d=__builtin_inf();
-		return 0;
-		]])],[AC_DEFINE_UNQUOTED(INFINITY,__builtin_inf(),[Have builtin_inf]) AC_MSG_RESULT(yes)],
-		    [AC_MSG_ERROR(no)])])
-
-AC_MSG_CHECKING([for NAN])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <math.h>
-	]],[[
-	double d=NAN;
-	return 0;
-	]])],[AC_MSG_RESULT(yes)],
-	    [AC_MSG_CHECKING([for builtin_nan()])
-	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-		#include <math.h>
-		#include <ieeefp.h>
-		]],[[
-		double d=__builtin_nan("0x0");
-		return 0;
-		]])],[AC_DEFINE_UNQUOTED(NAN,__builtin_nan("0x0"),[Have builtin_nan]) AC_MSG_RESULT(yes)],
-		    [AC_MSG_ERROR(no)])])
+dnl AC_MSG_CHECKING([for NAN])
+dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl         #define _GNU_SOURCE
+dnl 	#include <math.h>
+dnl 	]],[[
+dnl 	double d=NAN;
+dnl 	return 0;
+dnl 	]])],[AC_MSG_RESULT(yes)],
+dnl 	    [AC_MSG_CHECKING([for builtin_nan()])
+dnl 	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+dnl 		#include <math.h>
+dnl 		#include <ieeefp.h>
+dnl 		]],[[
+dnl 		double d=__builtin_nan("0x0");
+dnl 		return 0;
+dnl 		]])],[AC_DEFINE_UNQUOTED(NAN,__builtin_nan("0x0"),[Have builtin_nan]) AC_MSG_RESULT(yes)],
+dnl 		    [AC_MSG_ERROR(no)])])
 
 #--------------------------------------------------------------------
 #	Check for the existence of the -lsocket and -lnsl libraries.
