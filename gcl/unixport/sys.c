@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include "../h/include.h"
 
+#ifdef FLAVOR
 static void
 ar_init_fn(void (fn)(void),const char *s) {
 
@@ -43,6 +44,7 @@ ar_check_init_fn(void (fn)(void),char *s,object b,char *o) {
      ar_init_fn(fn,o);
 
 }
+#endif
 
 #define proc(init,fn,args...) {extern void init(void);fn(init,##args);}
 

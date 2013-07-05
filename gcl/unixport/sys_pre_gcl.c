@@ -1,5 +1,3 @@
-#define FLAVOR ""
-
 #include "sys.c"
 
 void
