@@ -34,7 +34,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "options.h"
 #include "gclincl.h"
-#include "config.h"
 
 #ifdef __GNUC__
 #ifndef alloca
@@ -71,6 +70,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 #endif
+
+#include "config.h"
 
 #ifdef IN_NUM_CO
 #ifdef HAVE_VALUES_H
