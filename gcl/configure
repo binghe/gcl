@@ -4221,7 +4221,7 @@ done
 # Work around system/gprof mips/hppa hang
 case $use in
   sh4*)  enable_gprof="no";;
-  mips*) enable_gprof="no";;
+#  mips*) enable_gprof="no";;
   hppa*) enable_gprof="no";;
   arm*)  enable_gprof="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
   *gnu)  enable_gprof="no";;
@@ -4296,7 +4296,7 @@ case $use in
 #			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
 			;;
 		mips*)
-			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
+			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.6.2
 			;;
 		ia64*)
 			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
