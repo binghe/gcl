@@ -63,6 +63,9 @@
 /* bfd_boolean defined */
 #undef HAVE_BFD_BOOLEAN
 
+/* Define to 1 if you have the <bfd.h> header file. */
+#undef HAVE_BFD_H
+
 /* have bsdgettimeofday */
 #undef HAVE_BSDGETTIMEOFDAY
 
@@ -93,6 +96,9 @@
 /* Define to 1 if you have the `getwd' function. */
 #undef HAVE_GETWD
 
+/* Define to 1 if you have the <gmp.h> header file. */
+#undef HAVE_GMP_H
+
 /* gnu linker present */
 #undef HAVE_GNU_LD
 
@@ -116,6 +122,9 @@
 
 /* long long is available */
 #undef HAVE_LONG_LONG
+
+/* Define to 1 if you have the <malloc/malloc.h> header file. */
+#undef HAVE_MALLOC_MALLOC_H
 
 /* memalign element present */
 #undef HAVE_MALLOC_ZONE_MEMALIGN
@@ -222,9 +231,6 @@
 /* size of immediate fixnum address space */
 #undef IM_FIX_LIM
 
-/* Have builtin_inf */
-#undef INFINITY
-
 /* symbol name mangling convention */
 #undef LEADING_UNDERSCORE
 
@@ -239,9 +245,6 @@
 
 /* sizeof mp_limb in gmp library */
 #undef MP_LIMB_BYTES
-
-/* Have builtin_nan */
-#undef NAN
 
 /* binutils requires CONST definition */
 #undef NEED_CONST

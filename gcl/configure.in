@@ -679,7 +679,7 @@ fi
 
 case $use in
      *macosx)
-        AC_CHECK_HEADER(malloc/malloc.h,,[AC_MSG_ERROR([need malloc.h on macosx])])
+        AC_CHECK_HEADERS(malloc/malloc.h,,[AC_MSG_ERROR([need malloc.h on macosx])])
 	AC_CHECK_MEMBER([struct _malloc_zone_t.memalign],
  		AC_DEFINE(HAVE_MALLOC_ZONE_MEMALIGN,1,[memalign element present]), [], 
 		[
@@ -694,7 +694,7 @@ esac
 
 # sysconf
 
-AC_CHECK_HEADER(unistd.h,
+AC_CHECK_HEADERS(unistd.h,
 	AC_CHECK_LIB(c,sysconf,
 		AC_MSG_CHECKING(_SC_CLK_TCK)
 		AC_TRY_RUN([#include <unistd.h>
@@ -740,7 +740,7 @@ if test $use_gmp = yes ; then
 
  PATCHED_SYMBOLS=""
  if test "$enable_dynsysgmp" = "yes" ; then
-	AC_CHECK_HEADER(gmp.h,
+	AC_CHECK_HEADERS(gmp.h,
 		AC_CHECK_LIB(gmp,__gmpz_init,
 			AC_MSG_CHECKING("for external gmp version")
 			AC_TRY_RUN([#include <gmp.h>
@@ -944,7 +944,7 @@ dnl	TLIBS="$TLIBS -rdynamic"
 fi
 
 if test "$enable_statsysbfd" = "yes" || test "$enable_dynsysbfd" = "yes" ; then
-	AC_CHECK_HEADER(bfd.h,
+	AC_CHECK_HEADERS(bfd.h,
 		AC_CHECK_LIB(bfd,bfd_init,
 		#
 		# Old binutils appear to need CONST defined to const
@@ -1032,7 +1032,7 @@ if test "$enable_locbfd" = "yes" ; then
 
 	# check for gettext.  It is part of glibc, but others
 	# need GNU gettext separately.
-#	AC_CHECK_HEADER(libintl.h, true,
+#	AC_CHECK_HEADERS(libintl.h, true,
 #			   AC_MSG_ERROR(libintl.h (gettext) not found))
 #	AC_SEARCH_LIBS(dgettext, intl, true, AC_MSG_ERROR(gettext library not found))
  
