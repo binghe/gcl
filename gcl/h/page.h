@@ -5,7 +5,6 @@
 #ifndef page
 #define page(p)	(((unsigned long)(p))>>PAGEWIDTH)
 #define	pagetochar(x)	((char *)((((unsigned long)x) << PAGEWIDTH) + sizeof(struct pageinfo)))
-/* #define pageinfo(x) ((struct pageinfo *)((((ufixnum)x)>>PAGEWIDTH)<<PAGEWIDTH)) */
 #define pageinfo(x) ((struct pageinfo *)(((ufixnum)x)&(-PAGESIZE)))
 #define pagetoinfo(x) ((struct pageinfo *)((((ufixnum)x)<<PAGEWIDTH)))
 #endif
@@ -128,6 +127,6 @@ EXTER void *data_start;
 #endif
 
 #define npage(m_) (((m_)+PAGESIZE-1)/PAGESIZE)
-#define cpage(m_) ((1+sizeof(struct pageinfo)+((CPTR_SIZE*CHAR_SIZE*(m_))/(CPTR_SIZE*CHAR_SIZE-1))+PAGESIZE-1)/PAGESIZE)
+#define cpage(m_) ({ufixnum _m=(m_);((1+sizeof(struct pageinfo)+_m+(_m/(CPTR_SIZE*CHAR_SIZE-1))+PAGESIZE-1)/PAGESIZE);})
 #define mbytes(p_) (((p_)*PAGESIZE-sizeof(struct pageinfo)+(CPTR_SIZE*CHAR_SIZE)-1)/(CPTR_SIZE*CHAR_SIZE))
 #define tpage(tm_,m_) (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_))
