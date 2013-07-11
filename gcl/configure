@@ -6410,6 +6410,12 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
 
+if test "$use" = "386-macosx" ; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: emulating sbrk for mac" >&5
+$as_echo "emulating sbrk for mac" >&6; };
+   HAVE_SBRK=0
+fi
+
 if test "$HAVE_SBRK" = "1" ; then
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ADDR_NO_RANDOMIZE constant" >&5
