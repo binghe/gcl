@@ -124,10 +124,16 @@ cstack_dir(fixnum j) {
 }
 
 fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
+
 inline int
 mbrk(void *v) {
   ufixnum uv=(ufixnum)v,uc=(ufixnum)sbrk(0),ux,um;
   fixnum m=((1UL<<(sizeof(fixnum)*8-1))-1);
+
+#ifdef MAX_BRK /*GNU Hurd fragmentation bug*/
+  if ((ufixnum)v>MAX_BRK) return -1;
+#endif
+
   if (uv<uc) {
     um=uv;
     ux=uc;
@@ -166,7 +172,7 @@ update_real_maxpage(void) {
 #ifdef HAVE_SYSCONF_PHYS_PAGES
   phys_pages=sysconf(_SC_PHYS_PAGES);
 #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
-  if (real_maxpage>phys_pages) for (real_maxpage=1;real_maxpage<phys_pages;real_maxpage<<=1);
+  if (phys_pages>0 && real_maxpage>phys_pages+first_data_page) real_maxpage=phys_pages+first_data_page;
 #endif
 #endif
 

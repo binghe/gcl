@@ -69,5 +69,6 @@
 #endif
 #define PATH_MAX 4096 /*fixme dynamic*/
 #define MAXPATHLEN 4096 /*fixme dynamic*/
+#define MAX_BRK 0x70000000 /*GNU Hurd fragmentation bug*/
 
 #define RELOC_H "elf32_i386_reloc.h"
