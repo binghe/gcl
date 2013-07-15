@@ -6839,7 +6839,7 @@ $as_echo_n "checking linker script... " >&6; }
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: done" >&5
 $as_echo "done" >&6; }
 	    rm -f gcl.script.def
-	    TLDFLAGS="$TLDFLAGS -Wl,-T gcl.script "
+	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
 	    cp gcl.script unixport
 	 else
 	     { $as_echo "$as_me:${as_lineno-$LINENO}: result: failed" >&5

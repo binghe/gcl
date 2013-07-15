@@ -1560,7 +1560,7 @@ if test "$use" != "386-gnu" ; then
 	 if $CC -Wl,-T gcl.script foo.c -o foo >/dev/null 2>&1 && ./foo >/dev/null 2>&1 ; then
 	    AC_MSG_RESULT([done])
 	    rm -f gcl.script.def
-	    TLDFLAGS="$TLDFLAGS -Wl,-T gcl.script "
+	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
 	    cp gcl.script unixport
 	 else
 	     AC_MSG_RESULT([failed])
