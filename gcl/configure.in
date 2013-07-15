@@ -2542,9 +2542,9 @@ dnl    else
 dnl 	AC_MSG_RESULT([no])
 dnl fi 
 
-LDFLAGS="$LDFLAGS"
+LDFLAGS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'`"
 AC_SUBST(LDFLAGS)
-LIBS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'` $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
+LIBS="$X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
 AC_SUBST(LIBS)
 FINAL_CFLAGS="$CFLAGS $X_CFLAGS $TCFLAGS $PROCESSOR_FLAGS"
 AC_SUBST(FINAL_CFLAGS)
