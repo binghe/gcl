@@ -73,6 +73,7 @@ add_val(ul *w,ul m,ul v) {
 }
 
 
+#ifndef _LP64
 /*redirect trampolines gcc-4.0 gives no reloc for stub sections on x86 only*/
 static int
 redirect_trampoline(struct relocation_info *ri,ul o,ul rel,
@@ -99,6 +100,7 @@ redirect_trampoline(struct relocation_info *ri,ul o,ul rel,
   return 0;
   
 }
+#endif
 
 static int
 relocate(struct relocation_info *ri,struct section *sec,
