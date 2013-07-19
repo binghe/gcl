@@ -233,6 +233,76 @@ mark_cons(object x) {
    if one is live, the other will be made live */
 #define mark_displaced_field(ar) mark_object(ar->a.a_displaced)
 
+#define LINK_ARRAY_MARKED(x_) ((*(unsigned long *)(x_))&0x1)
+#define MARK_LINK_ARRAY(x_) ((*(unsigned long *)(x_))|=1UL)
+#define CLEAR_LINK_ARRAY(x_) ((*(unsigned long *)(x_))&=~(1UL))
+
+static void
+mark_link_array(void *v,void *ve) {
+
+  void **p,**pe;
+
+  if (sLAlink_arrayA->s.s_dbind==Cnil)
+    return;
+  p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  for (;p<pe;p+=2)
+    if (*p>=v && *p<ve) {
+      massert(!LINK_ARRAY_MARKED(p));
+      MARK_LINK_ARRAY(p);
+    }
+
+}
+
+static void
+prune_link_array(void) {
+
+  void **p,**pe,**n,**ne;
+
+  if (sLAlink_arrayA->s.s_dbind==Cnil)
+    return;
+
+  ne=n=p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+
+  while (p<pe) {
+    if (*p) {
+      *ne++=*p++;
+      *ne++=*p++;
+    } else
+      p+=2;
+  }
+
+  sLAlink_arrayA->s.s_dbind->v.v_fillp=(ne-n)*sizeof(*n);
+
+}
+
+
+static void
+sweep_link_array(void) {
+
+  void ***p,***pe;
+
+  if (sLAlink_arrayA->s.s_dbind==Cnil)
+    return;
+
+  p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  for (;p<pe;p+=2)
+    if (*p) {
+      if (LINK_ARRAY_MARKED(p))
+	CLEAR_LINK_ARRAY(p);
+      else {
+	**p=p[1];
+	*p=0;
+      }
+    }
+
+  prune_link_array();
+
+}
+
+
 static void
 mark_object(object x) {
   
@@ -631,7 +701,9 @@ mark_object(object x) {
       if (!MAYBE_DATA_P((x->cfd.cfd_start)) ||
 	  get_mark_bit(get_pageinfo(x->cfd.cfd_start),x->cfd.cfd_start))
 	break;
-      mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);}
+      mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
+      mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
+    }
     break;
   case t_cclosure:
     mark_object(x->cc.cc_name);
@@ -1299,6 +1371,8 @@ GBC(enum type t) {
 #endif		
     rb_limit = rb_end - 2*RB_GETA;
     
+    sweep_link_array();
+
   }
   
 #ifdef DEBUG
