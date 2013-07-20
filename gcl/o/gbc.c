@@ -249,7 +249,10 @@ mark_link_array(void *v,void *ve) {
   for (;p<pe;p+=2)
     if (*p>=v && *p<ve) {
       massert(!LINK_ARRAY_MARKED(p));
-      MARK_LINK_ARRAY(p);
+#ifdef SGC
+      if(sgc_enabled && SGC_RELBLOCK_P(p))
+#endif
+	MARK_LINK_ARRAY(p);
     }
 
 }
