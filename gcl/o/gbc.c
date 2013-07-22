@@ -246,6 +246,13 @@ mark_link_array(void *v,void *ve) {
     return;
   p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
   pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+
+  if (is_marked(sLAlink_arrayA->s.s_dbind)) {
+    fixnum j=rb_pointer1-rb_pointer;
+    p=(void *)p+j;
+    pe=(void *)pe+j;
+  }
+
   for (;p<pe;p+=2)
     if (*p>=v && *p<ve) {
       massert(!LINK_ARRAY_MARKED(p));
