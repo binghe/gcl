@@ -1097,14 +1097,12 @@ FFN(siLsave_system)(void) {
   saving_system = TRUE;
   {
 
-    void *old_rb_end=rb_end,*old_rb_limit=rb_limit;
     fixnum old_nrbpage=nrbpage;
 
     /* add_pages(tm_table+t_contiguous,1);/\*ensure at least one free contiguous page for starup mallocs*\/ */
     minimize_image();
 
-    rb_end=old_rb_end;
-    rb_limit=old_rb_limit;
+    rb_limit=rb_end=REAL_RB_START+old_nrbpage*PAGESIZE;
     set_tm_maxpage(tm_table+t_relocatable,old_nrbpage);
 
   }

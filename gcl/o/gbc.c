@@ -244,10 +244,15 @@ mark_link_array(void *v,void *ve) {
 
   if (sLAlink_arrayA->s.s_dbind==Cnil)
     return;
+
   p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
   pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
 
-  if (is_marked(sLAlink_arrayA->s.s_dbind)) {
+  if (is_marked(sLAlink_arrayA->s.s_dbind)
+#ifdef SGC
+      && (!sgc_enabled || SGC_RELBLOCK_P(sLAlink_arrayA->s.s_dbind->v.v_self))
+#endif
+      ) {
     fixnum j=rb_pointer1-rb_pointer;
     p=(void *)p+j;
     pe=(void *)pe+j;
@@ -257,7 +262,7 @@ mark_link_array(void *v,void *ve) {
     if (*p>=v && *p<ve) {
       massert(!LINK_ARRAY_MARKED(p));
 #ifdef SGC
-      if(sgc_enabled && SGC_RELBLOCK_P(p))
+      if(!sgc_enabled || IS_WRITABLE(page(p)))
 #endif
 	MARK_LINK_ARRAY(p);
     }
