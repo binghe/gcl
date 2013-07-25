@@ -13,24 +13,24 @@
 ARCHT:=$(shell dpkg-architecture -qDEB_BUILD_ARCH)
 
 MCC:=gcc
-ifeq ($(ARCHT),alpha)
-MCC:=gcc-4.6
-endif
-ifeq ($(ARCHT),mips)
-MCC:=gcc-4.6
-endif
-ifeq ($(ARCHT),mipsel)
-MCC:=gcc-4.6
-endif
-ifeq ($(ARCHT),ia64)
-MCC:=gcc-4.6
-endif
-ifeq ($(ARCHT),armel)
-MCC:=gcc-4.6
-endif
-ifeq ($(ARCHT),armhf)
-MCC:=gcc-4.6
-endif
+# ifeq ($(ARCHT),alpha)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),mips)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),mipsel)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),ia64)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),armel)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),armhf)
+# MCC:=gcc-4.6
+# endif
 
 #RELOC=locbfd
 #RELOC?=statsysbfd

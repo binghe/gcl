@@ -519,23 +519,27 @@ case $use in
 esac		     
 
 if test "$enable_gprof" = "yes" ; then
-        TCFLAGS="$TCFLAGS -pg";
-        TLIBS="$TLIBS -pg";
-	TFPFLAG=""
-	AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
 	AC_MSG_CHECKING(for text start)
 	echo 'int main () {return(0);}' >foo.c
 	$CC foo.c -o foo
 	GCL_GPROF_START=`nm foo | $AWK  '/  *T  *_[_]*start$/ {print $NF}'`
 	rm -f foo.c foo
-	AC_MSG_RESULT($GCL_GPROF_START)
-	AC_DEFINE_UNQUOTED(GCL_GPROF_START,$GCL_GPROF_START,[starting address for gprof])
-	case "$use" in	
-	  arm*)	
-	#FIXME report and remove this when done
-		AC_MSG_RESULT(Reducing optimization on profiling arm build to workaround gcc bug)
-		enable_debug=yes;;
-	esac
+	if test "GCL_GPROF_START" != "" ; then #FIXME ppc64 fails here
+		AC_MSG_RESULT($GCL_GPROF_START)
+		AC_DEFINE_UNQUOTED(GCL_GPROF_START,$GCL_GPROF_START,[starting address for gprof])
+		case "$use" in	
+		   arm*)	
+	             #FIXME report and remove this when done
+	             AC_MSG_RESULT(Reducing optimization on profiling arm build to workaround gcc bug)
+		     enable_debug=yes;;
+		esac
+                TCFLAGS="$TCFLAGS -pg";
+                TLIBS="$TLIBS -pg";
+        	TFPFLAG=""
+ 		AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
+	else			   
+                enable_gprof="no";
+	fi			   
 fi
 
 if $CC -v 2>&1 | tail -n 1 | grep -q "gcc version 4.6.1" ; then
@@ -567,7 +571,9 @@ case $use in
 #		amd64*) # stack-boundary option does not work
 #			TCFLAGS="$TCFLAGS -m64 -mpreferred-stack-boundary=8";;  
 		alpha*)
-			TCFLAGS="$TCFLAGS -mieee";;
+			TCFLAGS="$TCFLAGS -mieee"
+			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.8.1
+			;;
 #		m68k*)
 #			TCFLAGS="$TCFLAGS -ffloat-store";;
 		hppa*)
@@ -580,7 +586,7 @@ case $use in
 #			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.6.2
 			;;
 		ia64*)
-#			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
+			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.8.1
 			;;
 		arm*)
 			TCFLAGS="$TCFLAGS -mlong-calls -fdollars-in-identifiers -g "
