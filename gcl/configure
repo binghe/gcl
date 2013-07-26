@@ -3008,6 +3008,9 @@ case $use in
 	case $use in
 # def_static -- Function descriptors are currently realized at runtime in a non-reproducible fashion
 # on these architectures -- CM
+     	        powerpc*)
+			if test "$host_cpu" = "powerpc64" ; then def_dlopen="yes" ; def_custreloc="no" ; fi
+			;;
 		ia64*)
 			def_dlopen="yes" ; def_custreloc="no" ;;
 		hppa*)
@@ -4232,9 +4235,9 @@ if test "$enable_gprof" = "yes" ; then
 $as_echo_n "checking for text start... " >&6; }
 	echo 'int main () {return(0);}' >foo.c
 	$CC foo.c -o foo
-	GCL_GPROF_START=`nm foo | $AWK  '/  *T  *__*start$/ {print $NF}'`
+	GCL_GPROF_START=`nm foo | $AWK  '/  *[TD]  *__*start$/ {print $NF}'` # D for ppc64 -- FIXME custreloc
 	rm -f foo.c foo
-	if test "GCL_GPROF_START" != "" ; then #FIXME ppc64 fails here
+	if test "$GCL_GPROF_START" != "" ; then
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $GCL_GPROF_START" >&5
 $as_echo "$GCL_GPROF_START" >&6; }
 
