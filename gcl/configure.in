@@ -1157,6 +1157,10 @@ AC_SUBST(DOUBLE_BIGENDIAN)
 
 # pagewidth
 AC_MSG_CHECKING(for pagewidth)
+case $use in
+     mips*) min_pagewidth=14;;
+     *) min_pagewidth=12;;
+esac
 AC_RUN_IFELSE([
 	AC_LANG_PROGRAM([[
 	    #include <stdio.h>
@@ -1165,7 +1169,7 @@ AC_RUN_IFELSE([
 	    size_t i=getpagesize(),j; 
 	    FILE *fp=fopen("conftest1","w");
 	    for (j=0;i>>=1;j++);
-	    if (j<12) {printf("pagewidth %u is too small\n",j);return -1;}
+	    j=j<$min_pagewidth ? $min_pagewidth : j;
 	    fprintf(fp,"%u",j);
 	    return 0;
 	]])],
