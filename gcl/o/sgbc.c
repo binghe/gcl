@@ -1312,10 +1312,13 @@ sgc_start(void) {
     if (i>count) {
       /* SGC cont pages: allocate more if necessary, dumping possible
 	 GBC freed pages onto the old contblock list.  CM 20030827*/
-      unsigned long z=(i-count)+1,n=CB_DATA_SIZE(z);
+      unsigned long z=(i-count)+1;
       void *old_contblock_list_tail=contblock_list_tail;
 
-      add_pages(tm_table+t_contiguous,n);
+      if (maxcbpage<ncbpage+z)
+	massert(set_tm_maxpage(tm_table+t_contiguous,ncbpage+z));
+
+      add_pages(tm_table+t_contiguous,z);
 
       massert(old_contblock_list_tail!=contblock_list_tail);
 

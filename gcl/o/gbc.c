@@ -1234,12 +1234,7 @@ GBC(enum type t) {
   
   if ((int)t >= (int)t_contiguous) {
 
-    /* j = (maxpage-first_data_page)*(PAGESIZE/(CPTR_SIZE*SIZEOF_LONG*CHAR_SIZE)) ; */
-    
-    /* if (t == t_relocatable) */
-    /*   j = 0; */
-
-    i=rb_pointer-REAL_RB_START;
+    i=rb_pointer-REAL_RB_START;/*FIXME*/
 
 #ifdef SGC
     if (sgc_enabled==0)
@@ -1265,16 +1260,8 @@ GBC(enum type t) {
     rb_pointer = rb_start;  /* where the new relblock will start */
     rb_pointer1 = rb_start1;/* where we will copy it to during gc*/
     
-    /* mark_table = (long *)(rb_start1 + i); */
-    
-    if (rb_end < (rb_start1 + i))/*(char *)&mark_table[j]*/
-      i = (rb_start1 + i) - heap_end;
-    else
-      i = rb_end - heap_end;
+    i = (rb_end < (rb_start1 + i) ? (rb_start1 + i) : rb_end) - heap_end;
     alloc_page(-(i + PAGESIZE - 1)/PAGESIZE);
-    
-    /* for (i = 0;  i < j; i++) */
-    /*   mark_table[i] = 0; */
     
     { 
       struct pageinfo *v;
@@ -1370,12 +1357,6 @@ GBC(enum type t) {
 	wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 #endif
 
-    {
-
-        /* extern object contblock_page_hash; */
-	/* contblock_page_hash->ht.ht_self=new_contblock_page_hash; */
-    }
-  
 #ifdef SGC
     /* we don't know which pages have relblock on them */
     if(sgc_enabled) {

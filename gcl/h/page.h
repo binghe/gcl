@@ -129,4 +129,4 @@ EXTER void *data_start;
 #define npage(m_) (((m_)+PAGESIZE-1)/PAGESIZE)
 #define cpage(m_) ({ufixnum _m=(m_);((1+sizeof(struct pageinfo)+_m+(_m/(CPTR_SIZE*CHAR_SIZE-1))+PAGESIZE-1)/PAGESIZE);})
 #define mbytes(p_) (((p_)*PAGESIZE-sizeof(struct pageinfo)+(CPTR_SIZE*CHAR_SIZE)-1)/(CPTR_SIZE*CHAR_SIZE))
-#define tpage(tm_,m_) (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_))
+#define tpage(tm_,m_) (tm_->tm_type==t_relocatable ? npage(m_-(rb_limit-rb_pointer)) : (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_)))

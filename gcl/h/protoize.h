@@ -1841,6 +1841,6 @@ struct htent *gethash(object,object);
 int
 update_real_maxpage(void);
 
-void
+fixnum
 set_tm_maxpage(struct typemanager *,fixnum);
 

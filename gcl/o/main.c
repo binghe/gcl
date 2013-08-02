@@ -176,9 +176,12 @@ update_real_maxpage(void) {
 #endif
 #endif
 
-  available_pages=real_maxpage-first_data_page-resv_pages;
+  available_pages=real_maxpage-first_data_page;
   for (i=t_start;i<t_other;i++)
-    available_pages-=tm_table[i].tm_type==t_relocatable ? 2*tm_table[i].tm_npage : tm_table[i].tm_maxpage;
+    available_pages-=tm_table[i].tm_type==t_relocatable ? 2*tm_table[i].tm_maxpage : tm_table[i].tm_maxpage;
+  resv_pages=40<available_pages ? 40 : available_pages;
+  available_pages-=resv_pages;
+    
 
   return 0;
 
@@ -203,7 +206,7 @@ minimize_image(void) {
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   core_end = new;
   rb_end=rb_limit=new;
-  set_tm_maxpage(tm_table+t_relocatable,((char *)new-REAL_RB_START)/PAGESIZE);
+  set_tm_maxpage(tm_table+t_relocatable,(nrbpage=((char *)new-REAL_RB_START)/PAGESIZE));
   new_holepage=old_holepage;
   
 #ifdef GCL_GPROF
@@ -1099,11 +1102,10 @@ FFN(siLsave_system)(void) {
 
     fixnum old_nrbpage=nrbpage;
 
-    /* add_pages(tm_table+t_contiguous,1);/\*ensure at least one free contiguous page for starup mallocs*\/ */
     minimize_image();
 
     rb_limit=rb_end=REAL_RB_START+old_nrbpage*PAGESIZE;
-    set_tm_maxpage(tm_table+t_relocatable,old_nrbpage);
+    set_tm_maxpage(tm_table+t_relocatable,nrbpage=old_nrbpage);
 
   }
 
