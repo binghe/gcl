@@ -773,7 +773,7 @@ First directory is checked for first name and all extensions etc."
   (set-up-top-level)
   
   (in-package :user)
-  (setq *ihs-top* 3)
+  (setq *ihs-top* (ihs-top))
   (funcall *old-top-level*))
  
 (defun do-f (file &aux *break-enable*)
