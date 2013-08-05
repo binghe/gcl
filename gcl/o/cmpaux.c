@@ -480,9 +480,9 @@ gcl_init_or_load1(void (*fn)(void),const char *file) {
     memory->cfd.cfd_self=0;
     memory->cfd.cfd_fillp=0;
     memory->cfd.cfd_size = 0;
+    memory->cfd.cfd_start= (char *)fn;
     printf("Initializing %s\n",file); fflush(stdout);
     fasl_data = read_fasl_data(file);
-    memory->cfd.cfd_start= (char *)fn;
     call_init(0,memory,fasl_data,0);
 
   } else {
