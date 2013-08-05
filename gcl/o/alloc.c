@@ -445,12 +445,7 @@ opt_maxpage(struct typemanager *my_tm) {
   if (sSAnotify_optimize_maximum_pagesA->s.s_dbind!=sLnil)
     printf("[type %u max %lu(%lu) opt %lu   y %lu(%lu) gbcrat %f sav %f]\n",
 	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r);
-  if (r<=0.95) {
-    if (set_tm_maxpage(my_tm,z+mro))
-      my_tm->tm_adjgbccnt*=mmax_page/z;
-    return 1;
-  }
-  return 0;
+  return r<=0.95 && set_tm_maxpage(my_tm,z+mro) ? 1 : 0;
 
 }
 
@@ -1100,13 +1095,13 @@ gcl_init_alloc(void) {
   
   ncb = 0;
   ncbpage = 0;
-  set_tm_maxpage(tm_table+t_contiguous,512);
+  set_tm_maxpage(tm_table+t_contiguous,9);
 #ifdef GCL_GPROF
   if (maxcbpage<textpage)
     set_tm_maxpage(tm_table+t_contiguous,textpage);
 #endif
 
-  set_tm_maxpage(tm_table+t_relocatable,available_pages/20);
+  set_tm_maxpage(tm_table+t_relocatable,5);
   nrbpage=0;
 
 #ifdef __linux__
