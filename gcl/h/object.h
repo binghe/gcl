@@ -173,7 +173,7 @@ struct fixnum_struct {
                            (is_imm_fixnum(_z) ? t_fixnum : \
 			    (valid_cdr(_z) ?  (_z==Cnil ? t_symbol : t_cons)  : _z->d.t));})
   
-#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;}})
+#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->fw=0;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;}})
 
 
 #define consp(x)         ({register object _z=(object)(x);\
