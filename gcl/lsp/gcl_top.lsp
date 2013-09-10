@@ -778,12 +778,12 @@ First directory is checked for first name and all extensions etc."
  
 (defun do-f (file &aux *break-enable*)
   (catch *quit-tag*
-      (with-open-file
-       (st file)
-       (read-line st)
-       (loop
-	(let ((tem (read st nil 'eof)))
-	  (if (eq 'eof tem) (return nil) (eval tem)))))
-      (bye))
+    (labels ((read-loop (st &aux (tem (read st nil 'eof))) (when (eq tem 'eof) (bye)) (eval tem) (read-file st))
+	     (read-file (st) (read-line st) (read-loop st)))
+	    (if file
+		(with-open-file
+		 (st file)
+		 (read-file st))
+	      (read-file *standard-input*))))
   (bye 1))
 
