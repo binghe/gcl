@@ -656,7 +656,24 @@ mark_object(object x) {
     }
     break;
     
+#define MARK_CP(a_,b_) {fixnum _t=(b_);if (inheap(a_)) {\
+	if (what_to_collect == t_contiguous) mark_contblock((void *)(a_),_t); \
+      } else (a_)=(void *)copy_relblock((void *)(a_),_t);}
+
+#define MARK_MP(a_) {if ((a_)->_mp_d) \
+                        MARK_CP((a_)->_mp_d,(a_)->_mp_alloc*MP_LIMB_SIZE);}
+
   case t_random:
+    if ((int)what_to_collect >= (int)t_contiguous) {
+      MARK_MP(x->rnd.rnd_state._mp_seed);
+#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION  == 4 && __GNU_MP_VERSION_MINOR < 2)
+      if (x->rnd.rnd_state._mp_algdata._mp_lc) {
+	MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_a);
+	if (!x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m2exp) MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m);
+	MARK_CP(x->rnd.rnd_state._mp_algdata._mp_lc,sizeof(*x->rnd.rnd_state._mp_algdata._mp_lc));
+      }
+#endif
+    }
     break;
     
   case t_readtable:

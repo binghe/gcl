@@ -1314,10 +1314,16 @@ int level;
 		}
 		break;
 
+#define FRESH_COPY(a_,b_) {(b_)->_mp_alloc=(a_)->_mp_alloc;\
+                           (b_)->_mp_d=gcl_gmp_alloc((b_)->_mp_alloc*sizeof(*(b_)->_mp_d));\
+                           (b_)->_mp_size=(a_)->_mp_size;\
+                           memcpy((b_)->_mp_d,(a_)->_mp_d,(b_)->_mp_alloc*sizeof(*(b_)->_mp_d));}
+
 	case t_random:
 		write_str("#$");
-		y = alloc_object(t_fixnum);
-		set_fix(y,x->rnd.rnd_value);
+		y = new_bignum();
+		FRESH_COPY(x->rnd.rnd_state._mp_seed,MP(y));
+		y=normalize_big(y);
 		vs_push(y);
 		write_object(y, level);
 		vs_popp;

@@ -1101,7 +1101,7 @@ gcl_init_alloc(void) {
     set_tm_maxpage(tm_table+t_contiguous,textpage);
 #endif
 
-  set_tm_maxpage(tm_table+t_relocatable,5);
+  set_tm_maxpage(tm_table+t_relocatable,19);
   nrbpage=0;
 
 #ifdef __linux__

@@ -522,7 +522,24 @@ sgc_mark_object1(object x) {
     }
     break;
     
+#define SGC_MARK_CP(a_,b_) {fixnum _t=(b_);if (inheap((a_))) {\
+	if (what_to_collect == t_contiguous) mark_contblock((void *)(a_),_t); \
+      } else if (SGC_RELBLOCK_P((a_))) (a_)=(void *)copy_relblock((void *)(a_),_t);}
+
+#define SGC_MARK_MP(a_) {if ((a_)->_mp_d) \
+                           SGC_MARK_CP((a_)->_mp_d,(a_)->_mp_alloc*MP_LIMB_SIZE);}
+
   case t_random:
+    if ((int)what_to_collect >= (int)t_contiguous) {
+      SGC_MARK_MP(x->rnd.rnd_state._mp_seed);
+#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR < 2)
+      if (x->rnd.rnd_state._mp_algdata._mp_lc) {
+	SGC_MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_a);
+	if (!x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m2exp) SGC_MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m);
+	SGC_MARK_CP(x->rnd.rnd_state._mp_algdata._mp_lc,sizeof(*x->rnd.rnd_state._mp_algdata._mp_lc));
+      }
+#endif
+    }
     break;
     
   case t_readtable:

@@ -638,8 +638,11 @@ enum gcl_sm_flags {
 #endif
 
 struct random {
+
   FIRSTWORD;
-  unsigned	rnd_value;	/*  random state value  */
+
+  __gmp_randstate_struct  rnd_state;
+
 };
 
 enum chattrib {			/*  character attribute  */

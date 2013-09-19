@@ -1844,3 +1844,6 @@ update_real_maxpage(void);
 inline fixnum
 set_tm_maxpage(struct typemanager *,fixnum);
 
+void
+init_gmp_rnd_state(__gmp_randstate_struct *);
+
