@@ -861,32 +861,29 @@ struct freelist {
 	Storage manager for each type.
 */
 struct typemanager {
-	enum type
-		tm_type;	/*  type  */
-	short	tm_size;	/*  element size in bytes  */
-	short   tm_nppage;	/*  number per page  */
-	object	tm_free;	/*  free list  */
-				/*  Note that it is of type object.  */
-	long	tm_nfree;	/*  number of free elements  */
-	long	tm_npage;	/*  number of pages  */
-	long	tm_maxpage;	/*  maximum number of pages  */
-	char	*tm_name;	/*  type name  */
-	int	tm_gbccount;	/*  GBC count  */
-	object  tm_alt_free;    /*  Alternate free list (swap with tm_free) */
-	long    tm_alt_nfree;   /*  Alternate nfree (length of nfree) */
-	long	tm_alt_npage;	/*  number of pages  */
-	short   tm_sgc;         /*  this type has at least this many
-				    sgc pages */
-	short   tm_sgc_minfree;   /* number free on a page to qualify for
-				    being an sgc page */
-	short   tm_sgc_max;     /* max on sgc pages */
-	short   tm_min_grow;    /* min amount to grow when growing */
-	short   tm_max_grow;    /* max amount to grow when growing */
-	short   tm_growth_percent;  /* percent to increase maxpages */
-	short   tm_percent_free;  /* percent which must be free after a gc for this type */
-        short   tm_distinct;       /* pages of this type are distinct */
-        float   tm_adjgbccnt;
-        long    tm_opt_maxpage;
+  enum type tm_type;             /*  type  */
+  long	    tm_size;             /*  element size in bytes  */
+  long      tm_nppage;           /*  number per page  */
+  object    tm_free;             /*  free list  */
+				 /*  Note that it is of type object.  */
+  long	    tm_nfree;            /*  number of free elements  */
+  long	    tm_npage;            /*  number of pages  */
+  long	    tm_maxpage;          /*  maximum number of pages  */
+  char	   *tm_name;             /*  type name  */
+  long	    tm_gbccount;         /*  GBC count  */
+  object    tm_alt_free;         /*  Alternate free list (swap with tm_free) */
+  long      tm_alt_nfree;        /*  Alternate nfree (length of nfree) */
+  long	    tm_alt_npage;        /*  number of pages  */
+  long      tm_sgc;              /*  this type has at least this many sgc pages */
+  long      tm_sgc_minfree;      /*  number free on a page to qualify for being an sgc page */
+  long      tm_sgc_max;          /* max on sgc pages */
+  long      tm_min_grow;         /* min amount to grow when growing */
+  long      tm_max_grow;         /* max amount to grow when growing */
+  long      tm_growth_percent;   /* percent to increase maxpages */
+  long      tm_percent_free;     /* percent which must be free after a gc for this type */
+  long      tm_distinct;         /* pages of this type are distinct */
+  float     tm_adjgbccnt;
+  long      tm_opt_maxpage;
 };
 
 
