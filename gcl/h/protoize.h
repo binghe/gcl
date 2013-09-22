@@ -1849,3 +1849,6 @@ init_gmp_rnd_state(__gmp_randstate_struct *);
 
 inline void
 set_sgc_bit(struct pageinfo *,void *);
+
+void
+reinit_gmp(void);
