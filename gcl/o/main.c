@@ -465,7 +465,13 @@ main(int argc, char **argv, char **envp) {
 #ifdef _WIN32
 	  detect_wine();
 #endif
-	  
+
+#ifdef LD_BIND_NOW /*FIXME currently mips only, verify that these two
+		     requirements are the same*/
+	  reinit_gmp();
+#endif
+
+
 		if (saving_system) {
 
 			saving_system = FALSE;
