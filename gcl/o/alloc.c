@@ -1101,10 +1101,10 @@ gcl_init_alloc(void) {
   init_tm(t_afun, "AAFUN", sizeof(struct sfun), 0 ,1,0);
   init_tm(t_cfdata, "cCFDATA", sizeof(struct cfdata), 102 ,1,0);
   init_tm(t_spice, "!SPICE", sizeof(struct spice), 4096 ,1,0);
-  init_tm(t_relocatable, "%RELOCATABLE-BLOCKS", 1000,0,20,0);
-  init_tm(t_contiguous, "_CONTIGUOUS-BLOCKS", 1001,0,20,0);
   tm_table[t_relocatable].tm_nppage = PAGESIZE;
+  init_tm(t_relocatable, "%RELOCATABLE-BLOCKS", 1000,0,20,0);
   tm_table[t_contiguous].tm_nppage = PAGESIZE;
+  init_tm(t_contiguous, "_CONTIGUOUS-BLOCKS", 1001,0,20,0);
   
   
   ncb = 0;
