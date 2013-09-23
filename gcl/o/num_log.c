@@ -666,7 +666,7 @@ LFD(siLbit_array_op)(void)
 
 		    b=(object)p;
 		    for (b1=b,i=0;i<x->a.a_rank;i++,b1=b1->c.c_cdr) {
-		      set_type_of(b1,t_cons); 
+		      /* set_type_of(b1,t_cons);  */
 		      b1->c.c_car=/* x->a.a_dims[i]<SMALL_FIXNUM_LIMIT ?  */
 			/* small_fixnum(x->a.a_dims[i]) :  */ 
 			/* now done in a macro */

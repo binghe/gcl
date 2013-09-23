@@ -385,7 +385,7 @@ object if_exists, if_does_not_exist;
 		if (fp == NULL) {
 		        if (sSAallow_gzipped_fileA->s.s_dbind != sLnil)
 			  { 
-			    struct string st;
+			    static struct string st;
 			    char buf[256];
 			    if (snprintf(buf,sizeof(buf),"%s.gz",fname)<=0)
 			      FEerror("Cannot write .gz filename",0);

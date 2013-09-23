@@ -644,6 +644,7 @@ initlisp(void) {
 	Cnil_body.s.s_stype = (short)stp_constant;
 	Cnil_body.s.s_mflag = FALSE;
 	
+	Ct->fw=0;
 	set_type_of(Ct,t_symbol);
 	Ct_body.s.s_dbind = Ct;
 	Ct_body.s.s_sfdef = NOT_SPECIAL;

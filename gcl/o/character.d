@@ -582,11 +582,12 @@ gcl_init_character()
 
 	for (i = 0;  i < CHCODELIM;  i++) {
 	  object x=(object)(character_table+i);
+	  x->fw=0;
 	  set_type_of(x,t_character);
-		/* character_table[i].ch.t = (short)t_character; */
-		character_table[i].ch.ch_code = i;
-		character_table[i].ch.ch_font = 0;
-		character_table[i].ch.ch_bits = 0;
+	  /* character_table[i].ch.t = (short)t_character; */
+	  character_table[i].ch.ch_code = i;
+	  character_table[i].ch.ch_font = 0;
+	  character_table[i].ch.ch_bits = 0;
 	}
 #ifdef AV
 	for (i = -128;  i < 0;  i++) {
