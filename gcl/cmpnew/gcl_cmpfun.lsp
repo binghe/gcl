@@ -49,6 +49,10 @@
 (si:putprop 'si:list-nth 'c1list-nth 'c1)
 (si:putprop 'list-nth-immediate 'c2list-nth-immediate 'c2)
 
+(si:putprop 'gethash 'c1gethash 'c1)
+(si:putprop 'gethash 'c2gethash 'c2)
+
+
 (defvar *princ-string-limit* 80)
 
 (defun c1princ (args &aux stream (info (make-info)))
@@ -955,3 +959,31 @@
   )
 
 
+(defun c1gethash (args)
+  (unless (cdr args) (too-few-args 'gethash 2 (length args)))
+  (when   (cdddr args) (too-many-args 'gethash 3 (length args)))
+  (let* ((info (make-info))
+	 (nargs (c1args args info)))
+    `(gethash ,info ,nargs)))
+
+(defun c2gethash (args)
+  (cond ((member *value-to-go* '(top return))
+	 (let* ((nargs (inline-args args '(t t)))
+		(base *vs*)(*vs* *vs*)
+		(r (cdr (vs-push)))(f (cdr (vs-push))))
+	   (wt-nl "{ struct htent *_z=gethash" (if *safe-compile* "_with_check" "") "(" (car nargs) "," (cadr nargs) ");")
+	   (wt-nl "if (_z->hte_key==OBJNULL) {")
+	   (wt-nl "base[" r "]=" (caddr nargs) ";")
+	   (wt-nl "base[" f "]=Cnil;")
+	   (wt-nl "} else {")
+	   (wt-nl "base[" r "]=_z->hte_value;")
+	   (wt-nl "base[" f "]=Ct;")
+	   (wt-nl "}}")
+	   (wt-nl "vs_top=(vs_base=base+" base ")+" (- *vs* base) ";")
+	   (unwind-exit 'fun-val nil (cons 'values 2))))
+	((unwind-exit (get-inline-loc `((t t) t #.(flags rfa) 
+					,(concatenate 'string
+						      "({struct htent *_z=gethash"
+						      (if *safe-compile* "_with_check" "")
+						      "(#0,#1);_z->hte_key==OBJNULL ? (#2) : _z->hte_value;})"))
+					args)))))

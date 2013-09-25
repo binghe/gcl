@@ -189,3 +189,7 @@ object on_stack_make_list();
 #endif
 
 
+#define gethash_with_check(a_,b_) \
+  ({object _b=(b_);while (type_of(_b)!=t_hashtable) _b=wrong_type_argument(sLhash_table,_b);gethash(a_,_b);})
+#define sethash_with_check(a_,b_,c_) \
+  ({object _b=(b_);while (type_of(_b)!=t_hashtable) _b=wrong_type_argument(sLhash_table,_b);sethash(a_,_b,c_);})

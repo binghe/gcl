@@ -182,6 +182,10 @@
 (push '((fixnum) boolean #.(flags)"1")
    (get 'system:fixnump 'inline-always))
 
+;;SYSTEM:HASH-SET
+(push '((t t t) t #.(flags rfa) "@2;(sethash(#0,#1,#2),#2)") (get 'si::hash-set 'inline-unsafe))
+(push '((t t t) t #.(flags rfa) "@2;(sethash_with_check(#0,#1,#2),#2)") (get 'si::hash-set 'inline-always))
+
 ;;SYSTEM:MV-REF
  (push '((fixnum) t #.(flags ans set)"(MVloc[(#0)])")
    (get 'system:mv-ref 'inline-always))
