@@ -29,11 +29,17 @@
 /* C stack alignment */
 #undef CSTACK_ALIGNMENT
 
+/* log starting C stack address */
+#undef CSTACK_BITS
+
 /* whether C stack grows up or down */
 #undef CSTACK_DIRECTION
 
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
+
+/* debug safecdr code */
+#undef DEBUG_SAFE_CDR
 
 /* big endian word order */
 #undef DOUBLE_BIGENDIAN
@@ -331,6 +337,9 @@
 
 /* use fionbio for non-blocking io */
 #undef USE_FIONBIO
+
+/* protect cdr from immfix and speed up type processing */
+#undef USE_SAFE_CDR
 
 /* value stack size */
 #undef VSSIZE
