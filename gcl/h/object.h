@@ -157,11 +157,20 @@ struct fixnum_struct {
 #define small_fixnum(a_) make_fixnum(a_) /*make_imm_fixnum(a_)*/
 #define set_fix(a_,b_)   ((a_)->FIX.FIXVAL=(b_))
 
-#define SAFE_CDR(a_)             ({object _a=(a_);is_imm_fixnum(_a) ? make_fixnum1(fix(_a)) : _a;})
-
 #define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
-/* #define imcdr(a_)                (is_imm_fixnum(Zcdr(a_)) && (error("imfix cdr"),1)) *//*for debugging*/
+
+#ifndef USE_SAFE_CDR
+#define SAFE_CDR(a_)             a_
+#define immcdr(a_)               is_imm_fixnum(Zcdr(a_))
+#else
+#define SAFE_CDR(a_)             ({object _a=(a_);is_imm_fixnum(_a) ? make_fixnum1(fix(_a)) : _a;})
+#ifdef DEBUG_SAFE_CDR
+#define imcdr(a_)                (is_imm_fixnum(Zcdr(a_)) && (error("imfix cdr"),1))
+#else
 #define imcdr(a_)                0
+#endif
+#endif
+
 #define is_marked(a_)            (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->d.m)
 #define is_marked_or_free(a_)    (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->md.mf)
 #define mark(a_)                 if (imcdr(a_)) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
