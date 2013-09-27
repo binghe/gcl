@@ -243,6 +243,9 @@
 /* can use fcntl for listen function */
 #undef LISTEN_USE_FCNTL
 
+/* upper immediate fixnum bound */
+#undef LOW_SHFT
+
 /* size of immediate fixnum address space */
 #undef MEM_RANGE
 
@@ -266,6 +269,9 @@
 
 /* no uname call */
 #undef NO_UNAME
+
+/* lowest address non-object */
+#undef OBJNULL
 
 /* can use C extension for object alignment */
 #undef OBJ_ALIGN

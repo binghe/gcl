@@ -1089,7 +1089,7 @@
 		     ;; keyword default bound by parse_key.. and no supplied-p
 		     (c2bind (cadr kwd)))
 		    (t
-		     (wt-nl "if(") (wt-vs (var-ref (cadr kwd))) (wt "==0){")
+		     (wt-nl "if(") (wt-vs (var-ref (cadr kwd))) (wt "==OBJNULL){")
 		     (let ((*clink* *clink*)
 			   (*unwind-exit* *unwind-exit*)
 			   (*ccb-vs* *ccb-vs*))

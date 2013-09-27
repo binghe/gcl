@@ -963,7 +963,7 @@ array_allocself(object x, int staticp, object dflt)
 	default:
 	  break;
 	}
-	if(dflt!=0) gset(x->st.st_self,raw_aet_ptr(dflt,typ),n,typ);
+	if(dflt!=OBJNULL) gset(x->st.st_self,raw_aet_ptr(dflt,typ),n,typ);
       }
 	
 }

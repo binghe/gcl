@@ -274,7 +274,7 @@ funcall(object fun)
 	}else if (x == sLlambda_block) {
 	  b = TRUE;
 	  c = FALSE;
-	  if(sSlambda_block_expanded->s.s_dbind)
+	  if(sSlambda_block_expanded->s.s_dbind!=OBJNULL)
 	    fun = ifuncall1(sSlambda_block_expanded->s.s_dbind,fun);
 
 	  fun = fun->c.c_cdr;

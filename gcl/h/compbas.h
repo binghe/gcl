@@ -32,7 +32,6 @@
 #define fimb    0
 #endif
 
-
 #if defined (LOW_SHFT)
 
 #define LOW_IM_FIX (1L<<(LOW_SHFT-1))
@@ -47,6 +46,19 @@
   ({object _x=x;is_unmrkd_imm_fixnum(_x)&&_x!=(object)(-LOW_IM_FIX) ? ((object)-(fixnum)_x) : number_negate(_x);})
 #define immnum_times(x,y) \
   ({object _x=x,_y=y;is_unmrkd_imm_fixnum(_x)&&is_unmrkd_imm_fixnum(_y) ? make_fixnum((fixnum)_x*(fixnum)_y) : number_times(_x,_y);})
+
+#define immnum_ior(x,y) \
+  ({object _x=x,_y=y;is_imm_fixnum(_x)&&is_imm_fixnum(_y) ? make_fixnum(fix(_x)|fix(_y)) : fS2logior(_x,_y);})
+#define immnum_and(x,y) \
+  ({object _x=x,_y=y;is_imm_fixnum(_x)&&is_imm_fixnum(_y) ? make_fixnum(fix(_x)&fix(_y)) : fS2logand(_x,_y);})
+#define immnum_xor(x,y) \
+  ({object _x=x,_y=y;is_imm_fixnum(_x)&&is_imm_fixnum(_y) ? make_fixnum(fix(_x)^fix(_y)) : fS2logxor(_x,_y);})
+#define immnum_not(x) \
+  ({object _x=x;is_imm_fixnum(_x) ? make_fixnum(~fix(_x)) : fS1lognot(_x);})
+
+
+
+
 #else
 /* #define immnum_comp(x,y,c) (fimf(((ufixnum)x)&((ufixnum)y)) ? (x c y) : (number_compare(x,y) c 0)) */
 /* #define immnum_comp(x,y,c) ({register object _x=x,_y=y;\ */
