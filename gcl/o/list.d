@@ -215,12 +215,8 @@ object x;
 void
 stack_cons(void)
 {
-	object c;
-
-	c = alloc_object(t_cons);
-	c->c.c_cdr = vs_pop;
-	c->c.c_car = vs_pop;
-	*vs_top++ = c;
+	object d=vs_pop,a=vs_pop;
+	*vs_top++ = make_cons(a,d);
 }
 
 /*static object on_stack_list_vector(n,ap)
@@ -323,7 +319,7 @@ object listqA(int a,int n,va_list ap) {
       p= &((*p)->c.c_cdr);
       }
     if (a) 
-      *p=va_arg(ap,object);
+      *p=SAFE_CDR(va_arg(ap,object));
     return(vs_pop);
 
   }
@@ -343,7 +339,7 @@ object listqA(int a,int n,va_list ap) {
     tm->tm_free=OBJ_LINK(tail);
     pageinfo(tail)->in_use++;
     tail->c.c_car=va_arg(ap,object); 
-    tail->c.c_cdr=a ? va_arg(ap,object) : Cnil;
+    tail->c.c_cdr=a ? SAFE_CDR(va_arg(ap,object)) : Cnil;
     
     END_NO_INTERRUPT;
     return lis;
@@ -421,7 +417,7 @@ object x, y;
 		z->c.c_cdr = make_cons(Cnil, Cnil);
 		z = z->c.c_cdr;
 	}
-	z->c.c_cdr = y;
+	z->c.c_cdr = SAFE_CDR(y);
 	return(vs_pop);
 }
 
@@ -442,7 +438,7 @@ object x;
 		y->c.c_cdr = make_cons(x->c.c_car, Cnil);
 		y = y->c.c_cdr;
 	}
-	y->c.c_cdr = x;
+	y->c.c_cdr = SAFE_CDR(x);
 	return(vs_pop);
 }
 
@@ -728,16 +724,11 @@ DEFUN_NEW("NINTH",object,fLninth,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"")
 DEFUN_NEW("TENTH",object,fLtenth,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"")
 { return fLnth(9,x);}
 
-LFD(Lcons)()
-{
-	object x;
+LFD(Lcons)() {
+  
+  check_arg(2);
+  stack_cons();
 
-	check_arg(2);
-	x = alloc_object(t_cons);
-	x->c.c_car = vs_base[0];
-	x->c.c_cdr = vs_base[1];
-	vs_base[0] = x;
-	vs_popp;
 }
 
 @(defun tree_equal (x y &key test test_not)
@@ -988,7 +979,7 @@ nconc(object x, object y) {
 		return(y);
 	for (x1 = x;  !endp(x1->c.c_cdr);  x1 = x1->c.c_cdr)
 		;
-	x1->c.c_cdr = y;
+	x1->c.c_cdr = SAFE_CDR(y);
 	return(x);
 }
 
@@ -1006,14 +997,14 @@ LFD(Lnconc)() {
 		if (x == Cnil)
 			x = m = l;
 		else {
-			m->c.c_cdr = l;
+			m->c.c_cdr = SAFE_CDR(l);
 			m = l;
 		}
 		for (;  type_of(m->c.c_cdr)==t_cons;  m = m->c.c_cdr);
 	}
 	if (x == Cnil) vs_base[0] = vs_top[-1];
 	else {
-		m->c.c_cdr = vs_top[-1];
+		m->c.c_cdr = SAFE_CDR(vs_top[-1]);
 		vs_base[0] = x;
 	}
 	vs_top = vs_base+1;
@@ -1027,7 +1018,7 @@ LFD(Lreconc)() {
 	for (x = vs_base[0];  !endp_prop(x);) {
 		z = x;
 		x = x->c.c_cdr;
-		z->c.c_cdr = y;
+		z->c.c_cdr = SAFE_CDR(y);
 		y = z;
 	}
 	vs_base[0] = y;
@@ -1105,7 +1096,7 @@ LFD(Lrplacd)()
 {
 	check_arg(2);
 	check_type_cons(&vs_base[0]);
-	vs_base[0]->c.c_cdr = vs_base[1];
+	vs_base[0]->c.c_cdr = SAFE_CDR(vs_base[1]);
 	vs_popp;
 }
 
@@ -1135,7 +1126,7 @@ PREDICATE(Lsubst,Lsubst_if,Lsubst_if_not, 3)
 @
 	protectTEST;
 	setupTEST(old, test, test_not, key);
-	nsubst(new, &tree);
+	nsubst(SAFE_CDR(new), &tree);
 	restoreTEST;
 	@(return tree)
 @)

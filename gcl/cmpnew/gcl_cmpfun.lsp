@@ -270,7 +270,7 @@
   (safe-compile
    (wt-nl "if(type_of(" (car args) ")!=t_cons)"
           "FEwrong_type_argument(Scons," (car args) ");"))
-  (wt-nl "(" (car args) ")->c.c_cdr = " (cadr args) ";")
+  (wt-nl "(" (car args) ")->c.c_cdr = SAFE_CDR(" (cadr args) ");")
   (unwind-exit (car args))
   (close-inline-blocks)
   )

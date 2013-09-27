@@ -678,7 +678,7 @@ Lleft_parenthesis_reader()
 	FEerror("A dot appeared after a left parenthesis.", 0);
 			delimiting_char = code_char(')');
 			in_list_flag = TRUE;
-			*p = read_object(in);
+			*p = SAFE_CDR(read_object(in));
 			if (dot_flag)
 	FEerror("Two dots appeared consecutively.", 0);
 			if (*p==OBJNULL)

@@ -747,6 +747,12 @@ alloc_relblock(size_t n) {
 
 }
 
+static inline void
+load_cons(object p,object a,object d) {
+ /* set_type_of(obj,t_cons); */
+  p->c.c_cdr=SAFE_CDR(d);
+  p->c.c_car=a;
+}
 
 inline object
 make_cons(object a,object d) {
@@ -754,9 +760,7 @@ make_cons(object a,object d) {
   static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
   object obj=alloc_mem(tm,tm->tm_size);
 
- /* set_type_of(obj,t_cons); */
-  obj->c.c_car = a;
-  obj->c.c_cdr = d;
+  load_cons(obj,a,d);
 
   pageinfo(obj)->in_use++;
 
@@ -766,12 +770,10 @@ make_cons(object a,object d) {
 
 
 
-inline object on_stack_cons(object x, object y)
-{object p = (object) alloca_val;
- /* set_type_of(p,t_cons); */
- p->c.c_car=x;
- p->c.c_cdr=y;
- return p;
+inline object on_stack_cons(object x, object y) {
+  object p = (object) alloca_val;
+  load_cons(p,x,y);
+  return p;
 }
 
 

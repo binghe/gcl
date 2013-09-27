@@ -894,7 +894,7 @@ fasd_patch_sharp_cons(object x, int depth)
 		if (type_of(x->c.c_cdr) == t_cons)
 			x = x->c.c_cdr;
 		else {
-			x->c.c_cdr = fasd_patch_sharp(x->c.c_cdr,depth+1);
+                        x->c.c_cdr = SAFE_CDR(fasd_patch_sharp(x->c.c_cdr,depth+1));
 			break;
 		}
 	}
@@ -1263,13 +1263,13 @@ read_fasd1(int i, object *loc)
 	{int leng=GETD("n=%d");
 	 if (leng & (1 << (SIZE_SHORT -1)))
 	   leng= leng - (1 << (SIZE_SHORT));
-	 *loc=make_fixnum(leng);
+	 *loc=SAFE_CDR(make_fixnum(leng));
 	 return;}
     
       case DP(d_fixnum:)
 	{fixnum j;
 	 GETFIX(j);
-	 *loc=make_fixnum(j);       
+	 *loc=SAFE_CDR(make_fixnum(j));       
 	 return;}
       case DP( d_bignum:)
 	{int j,m;

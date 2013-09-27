@@ -55,7 +55,7 @@ object small_fixnum ( int i ) {
 }
 #endif
 
-#if !defined(IM_FIX_BASE)
+/* #if !defined(IM_FIX_BASE) */
 
 #define BIGGER_FIXNUM_RANGE
 
@@ -80,7 +80,7 @@ DEFUN_NEW("ALLOCATE-BIGGER-FIXNUM-RANGE",object,fSallocate_bigger_fixnum_range,S
   return Ct;
 }
 #endif
-#endif
+/* #endif */
 
 
 object
@@ -294,9 +294,9 @@ void
 gcl_init_number(void)
 {
 
-#if !defined(IM_FIX_BASE)
+/* #if !defined(IM_FIX_BASE) */
   FFN(fSallocate_bigger_fixnum_range)(-1024,1023);
-#endif
+/* #endif */
 
 	shortfloat_zero = alloc_object(t_shortfloat);
 	sf(shortfloat_zero) = (shortfloat)0.0;
