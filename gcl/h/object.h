@@ -161,7 +161,7 @@ struct fixnum_struct {
 
 #ifndef USE_SAFE_CDR
 #define SAFE_CDR(a_)             a_
-#define immcdr(a_)               is_imm_fixnum(Zcdr(a_))
+#define imcdr(a_)                is_imm_fixnum(Zcdr(a_))
 #else
 #define SAFE_CDR(a_)             ({object _a=(a_);is_imm_fixnum(_a) ? make_fixnum1(fix(_a)) : _a;})
 #ifdef DEBUG_SAFE_CDR
