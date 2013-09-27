@@ -201,7 +201,7 @@ minimize_image(void) {
   
   if (in_sgc) sgc_quit();
   holepage=new_holepage=1;
-  GBC(t_contiguous);
+  GBC(t_relocatable);
   if (in_sgc) sgc_start();
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   core_end = new;
@@ -233,7 +233,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,
 
   l=l<def ? l : def;
   end=data_start+(1L<<l)-PAGESIZE;
-  GBC(t_contiguous);
+  GBC(t_relocatable);
   dend=heap_end+PAGESIZE+(((rb_pointer-REAL_RB_START)+PAGESIZE-1)&(-PAGESIZE));
   if (end >= dend) {
     minimize_image();
@@ -481,19 +481,7 @@ main(int argc, char **argv, char **envp) {
 #ifdef INIT_CORE_END
 			INIT_CORE_END
 #endif			  
-			  /* if (available_pages/20>nrbpage) */
-			  /*   add_pages(tm_table+t_relocatable,(available_pages/20-nrbpage)<<PAGEWIDTH); */
-			  /* { */
-			  /*   int in_sgc=sgc_enabled; */
-			  /*   if (in_sgc) sgc_quit(); */
-			  /*   /\* holepage=available_pages/10; *\/ */
-			  /*   /\* if (available_pages/20>nrbpage) nrbpage=available_pages/20; *\/ */
-			  /*   GBC_enable = TRUE; */
-			  /*   GBC(t_relocatable); */
-			  /*   if (in_sgc) sgc_start(); */
-			  /* } */
-			  /* alloc_page(-((available_pages/5) + nrbpage)); */
-			  alloc_page(-(holepage + nrbpage));
+                        alloc_page(-(holepage + nrbpage));
 		}
 
 		initflag = FALSE;
