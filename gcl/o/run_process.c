@@ -534,9 +534,9 @@ char **argv;
   if (fork() == 0)
     { /* the child --- replace standard in and out with descriptors given */
       close(0);
-      dup(fdin);
+      massert(dup(fdin)>=0);
       close(1);
-      dup(fdout);
+      massert(dup(fdout)>=0);
       fprintf(stderr, "\n***** Spawning process %s ", pname);
       if (execvp(pname, argv) == -1)
 	{

@@ -242,7 +242,7 @@ truename(object pathname)
            FEerror ( "truename could not determine the current directory.", 1, "" ); 
         } 
 #else 
-        getcwd(current_directory,sizeof(current_directory)); 
+        massert(current_directory==getcwd(current_directory,sizeof(current_directory))); 
 #endif 
     
 	coerce_to_filename(pathname, filename);
@@ -346,7 +346,7 @@ truename(object pathname)
 		}
 	} else
 		sprintf(truefilename, "%s/%s", p, q);
-	chdir(current_directory);
+	massert(!chdir(current_directory));
 	vs_push(make_simple_string(truefilename));
 	pathname = coerce_to_pathname(vs_head);
 	vs_popp;
