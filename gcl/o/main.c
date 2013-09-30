@@ -181,7 +181,10 @@ update_real_maxpage(void) {
     available_pages-=tm_table[i].tm_type==t_relocatable ? 2*tm_table[i].tm_maxpage : tm_table[i].tm_maxpage;
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
-    
+
+  new_holepage=available_pages/starting_hole_div;
+  if (maxrbpage<available_pages/starting_relb_div)
+    massert(set_tm_maxpage(tm_table+t_relocatable,available_pages/starting_relb_div));
 
   return 0;
 
@@ -481,7 +484,6 @@ main(int argc, char **argv, char **envp) {
 #ifdef INIT_CORE_END
 			INIT_CORE_END
 #endif			  
-                        alloc_page(-(holepage + nrbpage));
 		}
 
 		initflag = FALSE;
@@ -1095,16 +1097,8 @@ FFN(siLsave_system)(void) {
 #endif	
     
   saving_system = TRUE;
-  {
 
-    fixnum old_nrbpage=nrbpage;
-
-    minimize_image();
-
-    rb_limit=rb_end=REAL_RB_START+old_nrbpage*PAGESIZE;
-    set_tm_maxpage(tm_table+t_relocatable,nrbpage=old_nrbpage);
-
-  }
+  minimize_image();
 
   Lsave();
   saving_system = FALSE;

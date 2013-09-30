@@ -968,18 +968,16 @@ EXTER struct contblock *old_cb_pointer;	/*  old contblock pointer when in SGC  *
 	Variables for memory management.
 */
 EXTER long ncb;			/*  number of contblocks  */
-/* int ncbpage;			  number of contblock pages  */
 #define ncbpage tm_table[t_contiguous].tm_npage
 #define maxcbpage tm_table[t_contiguous].tm_maxpage
 #define cbgbccount tm_table[t_contiguous].tm_gbccount  
   
 
-/* int maxcbpage; maximum number of contblock pages  */
-EXTER 
-long holepage;			/*  hole pages  */
+EXTER long holepage;			/*  hole pages  */
 #define nrbpage tm_table[t_relocatable].tm_npage
+#define maxrbpage tm_table[t_relocatable].tm_maxpage
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
-/* int nrbpage;			  number of relblock pages  */
+EXTER long new_holepage,starting_hole_div,starting_relb_div;
   
 
 #ifdef SGC
