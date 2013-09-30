@@ -1538,10 +1538,6 @@ FFN(siLroom_report)(void) {
   
   check_arg(0);
   
-  /*
-    GBC(t_contiguous);
-  */
-  
   vs_check_push(make_fixnum(real_maxpage-first_data_page));
   vs_push(make_fixnum(available_pages));
   vs_push(make_fixnum(ncbpage));
@@ -1552,6 +1548,7 @@ FFN(siLroom_report)(void) {
   vs_push(make_fixnum(rb_pointer - rb_start));
   vs_push(make_fixnum(rb_end - rb_pointer));
   vs_push(make_fixnum(nrbpage));
+  vs_push(make_fixnum(maxrbpage));
   vs_push(make_fixnum(rbgbccount));
   for (i = 0;  i < (int)t_end;  i++) {
     if (tm_table[i].tm_type == (enum type)i) {

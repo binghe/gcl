@@ -270,20 +270,22 @@
 
 (defun room (&optional x)
   (let ((l (multiple-value-list (si:room-report)))
-        maxpage leftpage ncbpage maxcbpage ncb cbgbccount npage
-        rbused rbfree nrbpage
+        maxpage leftpage ncbpage maxcbpage ncb cbgbccount npage maxnpage
+        rbused rbfree nrbpage maxrbpage
         info-list link-alist)
     (setq maxpage (nth 0 l) leftpage (nth 1 l)
           ncbpage (nth 2 l) maxcbpage (nth 3 l) ncb (nth 4 l)
           cbgbccount (nth 5 l)
           holepage (nth 6 l)
           rbused (nth 7 l) rbfree (nth 8 l) nrbpage (nth 9 l)
-          rbgbccount (nth 10 l)
-          l (nthcdr 11 l))
+	  maxrbpage (nth 10 l)
+          rbgbccount (nth 11 l)
+          l (nthcdr 12 l))
     (do ((l l (nthcdr 5 l))
          (tl *type-list* (cdr tl))
+         (j 0 (+ j (if (nth 3 l) (nth 3 l) 0)))
          (i 0 (+ i (if (nth 2 l) (nth 2 l) 0))))
-        ((null l) (setq npage i))
+        ((null l) (setq npage i maxnpage j))
       (let ((typename (car tl))
             (nused (nth 0 l))
             (nfree (nth 1 l))
@@ -315,14 +317,15 @@
     (format t "~8D/~D~26T~@[~8D~]~35Tcontiguous (~D blocks)~%"
             ncbpage maxcbpage (if (zerop cbgbccount) nil cbgbccount) ncb)
     (format t "~9T~D~35Thole~%" holepage)
-    (format t "~9T~D~19T~6,1F%~@[~8D~]~35Trelocatable~%~%"
-            nrbpage (/ rbused 0.01 (+ rbused rbfree))
+    (format t "~8D/~D~19T~6,1F%~@[~8D~]~35Trelocatable~%~%"
+            nrbpage maxrbpage (/ rbused 0.01 (+ rbused rbfree))
             (if (zerop rbgbccount) nil rbgbccount))
-    (format t "~10D pages for cells~%" npage)
-    (format t "~10D total pages~%" (+ npage ncbpage holepage nrbpage))
-    (format t "~10D pages available~%" leftpage)
-    (format t "~10D pages in heap but not gc'd + pages needed for gc marking~%"
-	    (- maxpage (+ npage ncbpage nrbpage leftpage)))
+    (format t "~10D pages for cells~%~%" npage)
+    (format t "~10D total pages in core~%" (+ npage ncbpage nrbpage))
+    (format t "~10D current core maximum pages~%" (+ maxnpage maxcbpage maxrbpage))
+    (format t "~10D pages reserved for gc~%" maxrbpage)
+    (format t "~10D pages available for adding to core~%" leftpage)
+    (format t "~10D pages reserved for core exhaustion~%~%" (- maxpage (+ maxnpage maxcbpage (ash maxrbpage 1) leftpage)))
     (format t "~10D maximum pages~%" maxpage)
     (values)
     )
