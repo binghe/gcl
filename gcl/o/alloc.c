@@ -1469,7 +1469,7 @@ DEFUN_NEW("SET-STARTING-HOLE-DIVISOR",fixnum,fSset_starting_hole_divisor,SI,1,1,
   return starting_hole_div;
 }
   
-DEFUN_NEW("SET-STARTING-RELBLOCK-DIVISOR",fixnum,fSset_starting_hole_divisor,SI,1,1,NONE,II,OO,OO,OO,(fixnum div),"") {
+DEFUN_NEW("SET-STARTING-RELBLOCK-DIVISOR",fixnum,fSset_starting_relb_divisor,SI,1,1,NONE,II,OO,OO,OO,(fixnum div),"") {
   if (div>0 && div <100)
     starting_relb_div=div;
   return starting_relb_div;
