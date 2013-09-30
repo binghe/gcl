@@ -344,6 +344,9 @@
 /* value stack size */
 #undef VSSIZE
 
+/* three word cons */
+#undef WIDE_CONS
+
 /* big endian byte order */
 #undef WORDS_BIGENDIAN
 

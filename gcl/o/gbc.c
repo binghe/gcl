@@ -309,10 +309,10 @@ mark_cons(object x) {
     mark(x);
     mark_object(x->c.c_car);
     x=d;
-    if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))
+    if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))/*catches Cnil*/
       return;
-  } while (valid_cdr(x));
-  if (x!=Cnil) mark_object(x);
+  } while (cdr_listp(x));
+  mark_object(x);
 
 }
 

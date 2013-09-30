@@ -118,10 +118,10 @@ sgc_mark_cons(object x) {
     mark(x);
     sgc_mark_object(x->c.c_car);
     x=d;
-    if (!IS_WRITABLE(page(x)) || is_marked_or_free(x))
+    if (!IS_WRITABLE(page(x)) || is_marked_or_free(x))/*catches Cnil*/
       return;
-  } while (valid_cdr(x));
-  if (x!=Cnil) sgc_mark_object1(x);
+  } while (cdr_listp(x));
+  sgc_mark_object(x);
 
 }
 
@@ -710,14 +710,14 @@ sgc_sweep_phase(void) {
 	  continue;
 	}
 
-	if (pageinfo(x)->type!=t_cons && x->d.s == SGC_NORMAL)
+	if (TYPEWORD_TYPE_P(pageinfo(x)->type) && x->d.s == SGC_NORMAL)
 	  continue;
 	
 	/* it is ok to free x */
 	
 	SET_LINK(x,f);
 	make_free(x);
-	if (v->type!=t_cons) x->d.s = SGC_RECENT;
+	if (TYPEWORD_TYPE_P(v->type)) x->d.s = SGC_RECENT;
 	f = x;
 	k++;
 
@@ -1063,7 +1063,7 @@ memprotect_test_reset(void) {
 /* If opt_maxpage is set, add full pages to the sgc set if needed
    too. 20040804 CM*/
 /* #define FSGC(tm) (tm->tm_type==t_cons ? tm->tm_nppage : (tm->tm_opt_maxpage ? 0 : tm->tm_sgc_minfree)) */
-#define FSGC(tm) (tm->tm_type==t_cons ? tm->tm_nppage : tm->tm_sgc_minfree)
+#define FSGC(tm) (!TYPEWORD_TYPE_P(tm->tm_type) ? tm->tm_nppage : tm->tm_sgc_minfree)
 
 DEFVAR("*WRITABLE*",sSAwritableA,SI,Cnil,"");
 
@@ -1263,12 +1263,12 @@ sgc_start(void) {
 #endif
 	if (pageinfo(f)->sgc_flags&SGC_PAGE_FLAG) {
 	  SET_LINK(f,x);
-	  if (pageinfo(f)->type!=t_cons) f->d.s = SGC_RECENT;
+	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_RECENT;
 	  x=f;
 	  count++;
 	} else {
 	  SET_LINK(f,y);
- 	  if (pageinfo(f)->type!=t_cons) f->d.s = SGC_NORMAL;
+ 	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_NORMAL;
 	  y=f;
 	}
 	f=next;
@@ -1481,7 +1481,7 @@ sgc_quit(void) {
   /*FIXME*/
   /* remove the recent flag from any objects on sgc pages */
   for (v=cell_list_head;v;v=v->next) 
-    if (v->type==(tm=tm_of(v->type))->tm_type && v->type!=t_cons && v->sgc_flags & SGC_PAGE_FLAG)
+    if (v->type==(tm=tm_of(v->type))->tm_type && TYPEWORD_TYPE_P(v->type) && v->sgc_flags & SGC_PAGE_FLAG)
       for (p=pagetochar(page(v)),j=tm->tm_nppage;j>0;--j,p+=tm->tm_size)
 	((object) p)->d.s=SGC_NORMAL;
 

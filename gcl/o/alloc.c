@@ -310,7 +310,7 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
 
  if (sgc_enabled && tm->tm_sgc)
    pp->sgc_flags=SGC_PAGE_FLAG;
- if (pp->type!=t_cons)
+ if (TYPEWORD_TYPE_P(pp->type))
    x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
 
  /* array headers must be always writable, since a write to the
@@ -749,7 +749,9 @@ alloc_relblock(size_t n) {
 
 static inline void
 load_cons(object p,object a,object d) {
- /* set_type_of(obj,t_cons); */
+#ifdef WIDE_CONS
+  set_type_of(p,t_cons);
+#endif
   p->c.c_cdr=SAFE_CDR(d);
   p->c.c_car=a;
 }

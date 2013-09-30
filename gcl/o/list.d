@@ -248,8 +248,9 @@ object on_stack_list_vector_new(int n,object first,va_list ap)
  p=(struct cons *) res;
  if (n<=0) return Cnil;
  TOP:
- /* p->t = (int)t_cons; */
- /* p->m=FALSE; */
+#ifdef WIDE_CONS
+ set_type_of(p,t_cons);
+#endif
  p->c_car= jj ? va_arg(ap,object) : first;
  jj=1;
  if (--n == 0)
@@ -332,12 +333,18 @@ object listqA(int a,int n,va_list ap) {
     tm->tm_nfree -= n;
     while (--n) {
       pageinfo(tail)->in_use++;
+#ifdef WIDE_CONS
+      set_type_of(tail,t_cons);
+#endif
       tail->c.c_cdr=OBJ_LINK(tail);
       tail->c.c_car=va_arg(ap,object); 
       tail=tail->c.c_cdr;
     }
     tm->tm_free=OBJ_LINK(tail);
     pageinfo(tail)->in_use++;
+#ifdef WIDE_CONS
+      set_type_of(tail,t_cons);
+#endif
     tail->c.c_car=va_arg(ap,object); 
     tail->c.c_cdr=a ? SAFE_CDR(va_arg(ap,object)) : Cnil;
     
@@ -894,6 +901,9 @@ int n;
  struct cons *p = (struct cons *)res;
  if (n<=0) return Cnil;
   TOP:
+#ifdef WIDE_CONS
+ set_type_of(p,t_cons);
+#endif
  p->c_car=Cnil;
  if (--n == 0)
    {p->c_cdr = Cnil;

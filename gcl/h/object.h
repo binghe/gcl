@@ -159,6 +159,8 @@ struct fixnum_struct {
 
 #define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
 
+#ifndef WIDE_CONS
+
 #ifndef USE_SAFE_CDR
 #define SAFE_CDR(a_)             a_
 #define imcdr(a_)                is_imm_fixnum(Zcdr(a_))
@@ -171,6 +173,13 @@ struct fixnum_struct {
 #endif
 #endif
 
+#else
+
+#define SAFE_CDR(a_)             a_
+#define imcdr(a_)                0
+
+#endif
+
 #define is_marked(a_)            (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->d.m)
 #define is_marked_or_free(a_)    (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->md.mf)
 #define mark(a_)                 if (imcdr(a_)) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
@@ -179,23 +188,44 @@ struct fixnum_struct {
 #define make_free(a_)            ({(a_)->fw=0;(a_)->d.f=1;(a_)->fw|=(fixnum)OBJNULL;})/*set_type_of(a_,t_other)*/
 #define make_unfree(a_)          {(a_)->d.f=0;}
 
+#ifdef WIDE_CONS
+#define valid_cdr(a_)            0
+#else
 #define valid_cdr(a_)            (!(a_)->d.e || imcdr(a_))
-
+#endif
 
 #define type_of(x)       ({register object _z=(object)(x);\
                            (is_imm_fixnum(_z) ? t_fixnum : \
 			    (valid_cdr(_z) ?  (_z==Cnil ? t_symbol : t_cons)  : _z->d.t));})
+
+#ifdef WIDE_CONS
+#define TYPEWORD_TYPE_P(y_) 1
+#else
+#define TYPEWORD_TYPE_P(y_) (y_!=t_cons)
+#endif
   
 /*Note preserve sgc flag here                                         VVV*/
-#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;if (_y!=t_cons) {_x->d.e=1;_x->d.t=_y;_x->fw|=(fixnum)OBJNULL;}})
+#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;\
+    if (TYPEWORD_TYPE_P(_y)) {_x->d.e=1;_x->d.t=_y;_x->fw|=(fixnum)OBJNULL;}})
 
+#ifndef WIDE_CONS
 
+#define cdr_listp(x)     valid_cdr(x)
 #define consp(x)         ({register object _z=(object)(x);\
-                           (_z!=Cnil && !is_imm_fixnum(_z) && valid_cdr(_z));})
+                           (!is_imm_fixnum(_z) && valid_cdr(_z) && _z!=Cnil);})
 #define listp(x)         ({register object _z=(object)(x);\
                            (!is_imm_fixnum(_z) && valid_cdr(_z));})
 #define atom(x)          ({register object _z=(object)(x);\
-                           (_z==Cnil || is_imm_fixnum(_z) || !valid_cdr(_z));})
+                           (is_imm_fixnum(_z) || !valid_cdr(_z) || _z==Cnil);})
+
+#else
+
+#define cdr_listp(x)     listp(x)
+#define consp(x)         (type_of(x)==t_cons)
+#define listp(x)         ({object _x=x;type_of(_x)==t_cons || _x==Cnil;})
+#define atom(x)          !consp(x)
+
+#endif
 
 /* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
 /* #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector) */
@@ -356,10 +386,16 @@ struct package {
 */
 EXTER struct package *pack_pointer;	/*  package pointer  */
 
+#ifdef WIDE_CONS
+#define Scdr(a_) (a_)->c.c_cdr
+#else
 #define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
+#endif
 
 struct cons {
-  /* FIRSTWORD; */
+#ifdef WIDE_CONS
+  FIRSTWORD;
+#endif
   object	c_cdr;		/*  cdr  */
   object	c_car;		/*  car  */
 };

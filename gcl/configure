@@ -736,6 +736,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+enable_widecons
 enable_safecdr
 enable_safecdrdbg
 enable_fastimmfix
@@ -1395,6 +1396,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+use a three word cons with simplified typing
 protect cdr from immfix and speed up type processing
 debug safecdr code
 --enable-fastimmfix=XXXX will reject low immediate fixnums unless 1<<XXXX can be attained
@@ -2495,6 +2497,15 @@ VERSION=`cat majvers`.`cat minvers`
 # Arguments
 #
 
+
+
+
+# Check whether --enable-widecons was given.
+if test "${enable_widecons+set}" = set; then :
+  enableval=$enable_widecons;
+$as_echo "#define WIDE_CONS 1" >>confdefs.h
+
+fi
 
 
 
