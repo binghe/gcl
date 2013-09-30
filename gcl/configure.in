@@ -30,7 +30,7 @@ dnl ,enable_maxpage=$def_maxpage)
 AC_ARG_ENABLE(widecons,[use a three word cons with simplified typing],[AC_DEFINE([WIDE_CONS],[1],[three word cons])])
 
 
-AC_ARG_ENABLE(safecdr,[protect cdr from immfix and speed up type processing],,[enable_safecdr="yes"])
+AC_ARG_ENABLE(safecdr,[protect cdr from immfix and speed up type processing],,[enable_safecdr="no"])
 if test "$enable_safecdr" = "yes" ; then
    AC_DEFINE([USE_SAFE_CDR],[1],[protect cdr from immfix and speed up type processing])
 fi
