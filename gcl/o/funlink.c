@@ -972,8 +972,6 @@ FFN(mv_ref)(unsigned int i)
   if (i >= (sizeof(MVloc)/sizeof(object)))
      FEerror("Bad mv index",0);
   x = MVloc[i];
-  if (x == 0)
-      FEerror("Null value",0);
   return x;
 }
 
