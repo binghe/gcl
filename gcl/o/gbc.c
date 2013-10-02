@@ -1167,29 +1167,6 @@ contblock_sweep_phase(void) {
       p=q;
     }
 
-
-    /* for (p = s;  p < e;) { */
-    /*   if (get_mark_bit(v,p)) { */
-    /* 	/\* SGC cont pages: cont blocks must be no smaller than */
-    /* 	   sizeof(struct contblock), and must not have a sweep */
-    /* 	   granularity greater than this amount (e.g. CPTR_SIZE) if */
-    /* 	   contblock leaks are to be avoided.  Used to be aligned at */
-    /* 	   PTR_ALIGN. CM 20030827 *\/ */
-    /* 	p += CPTR_SIZE; */
-    /* 	continue; */
-    /*   } */
-    /*   q = p + CPTR_SIZE; */
-    /*   while (q < e) { */
-    /* 	if (!get_mark_bit(v,q)) { */
-    /* 	  q += CPTR_SIZE; */
-    /* 	  continue; */
-    /* 	} */
-    /* 	break; */
-    /*   } */
-    /*   insert_contblock(p, q - p); */
-    /*   p = q + CPTR_SIZE; */
-    /* } */
-
     bzero(CB_MARK_START(v),CB_SGCF_START(v)-CB_MARK_START(v));
 
   }
@@ -1618,13 +1595,11 @@ mark_contblock(void *p, int s) {
 #ifdef SGC
   if (!sgc_enabled || (v->sgc_flags&SGC_PAGE_FLAG))
 #endif
-    set_bits(CB_MARK_START(v),v,x,y);
+    set_mark_bits(v,x,y);
 }
 
-DEFUN_NEW("GBC",object,fLgbc,LISP
-       ,1,1,NONE,OO,OO,OO,OO,(object x0),"")
+DEFUN_NEW("GBC",object,fLgbc,LISP,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
 
-{
   /* 1 args */
   
   if (x0 == Ct)
