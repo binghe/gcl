@@ -605,6 +605,7 @@ sgc_mark_phase(void) {
 	  z=1-z;
 	  p=q;
 	}
+      }
 	    
   mark_stack_carefully(vs_top-1,vs_org,0);
   mark_stack_carefully(MVloc+(sizeof(MVloc)/sizeof(object)),MVloc,0);
