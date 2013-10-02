@@ -329,6 +329,9 @@ mark_link_array(void *v,void *ve) {
 
   void **p,**pe;
 
+  if (NULL_OR_ON_C_STACK(v))
+    return;
+
   if (sLAlink_arrayA->s.s_dbind==Cnil)
     return;
 
@@ -797,8 +800,6 @@ mark_object(object x) {
       {int i=x->cfd.cfd_fillp;
       while(i-- > 0)
 	mark_object(x->cfd.cfd_self[i]);}
-    if (x->cfd.cfd_start == NULL)
-      break;
     if (what_to_collect == t_contiguous) {
       mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
       mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
@@ -1581,8 +1582,9 @@ mark_contblock(void *p, int s) {
   STATIC char *x, *y;
   struct pageinfo *v;
   
-  if (!MAYBE_DATA_P(p))
+  if (NULL_OR_ON_C_STACK(p))
     return;
+
   q = p + s;
   /* SGC cont pages: contblock pages must be no smaller than
      sizeof(struct contblock).  CM 20030827 */
