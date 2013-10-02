@@ -358,7 +358,7 @@
 			((null v))
 			(cond ((eq (car v) '*)
 			       (setq vararg t)
-			       (princ "#*"  st))
+			       (princ "#?"  st));#? ensures 'first' vararg is initialized
 			      (t 
 			       (if com  (princ "," st) (setq com t))
 			       (format st "#~a" i))))
