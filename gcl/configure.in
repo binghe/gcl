@@ -1635,7 +1635,7 @@ dnl fi
 dnl $CC foo.c -o foo
 dnl if ./foo ; then
 
-if test "$use" != "386-gnu" ; then
+if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(0) remains above, foiling unexec
 
    AC_MSG_CHECKING([finding default linker script])
    touch unixport/gcl.script
@@ -1714,6 +1714,10 @@ if test "$use" != "386-gnu" ; then
   else
       AC_MSG_RESULT([not found])
   fi 
+
+else
+ 
+     AC_DEFINE_UNQUOTED(OBJNULL,NULL,[lowest address non-object])      	 
 
 fi
 

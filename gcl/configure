@@ -7025,7 +7025,7 @@ $as_echo "$cstack_direction" >&6; }
 
 
 
-if test "$use" != "386-gnu" ; then
+if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(0) remains above, foiling unexec
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking finding default linker script" >&5
 $as_echo_n "checking finding default linker script... " >&6; }
@@ -7128,6 +7128,14 @@ $as_echo "none found or not needed" >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: not found" >&5
 $as_echo "not found" >&6; }
   fi
+
+else
+
+
+cat >>confdefs.h <<_ACEOF
+#define OBJNULL NULL
+_ACEOF
+
 
 fi
 
