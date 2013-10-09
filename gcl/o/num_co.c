@@ -277,23 +277,6 @@ LFD(Ldenominator)(void)
 		vs_base[0] = small_fixnum(1);
 }
 
-/* object */
-/* integer_times(object x,object y) { */
-/*   enum type tx=type_of(x),ty=type_of(y); */
-/*   if (tx==t_fixnum) { */
-/*     if (ty==t_fixnum) */
-/*       return fixnum_times(fix(x),fix(y)); */
-/*     else */
-/*       MPOP(return,mulsi,fix(x),MP(y)); */
-/*   } else { */
-/*     if (ty==t_fixnum) */
-/*       MPOP(return,mulsi,fix(y),MP(x)); */
-/*     else */
-/*       MPOP(return,mulii,MP(y),MP(x)); */
-/*   } */
-/* } */
-
-  
 inline void
 intdivrem(object x,object y,fixnum d,object *q,object *r) {
 
@@ -567,106 +550,18 @@ TWO_ARG:
 	}
 }
 
-object
-mod(object x,object y) {
-  
-  enum type tx=type_of(x),ty=type_of(y);
-  object z,q,q1;
-  
-  if (number_zerop(y)==TRUE)
-    zero_divisor();
-  
-  if ((tx == t_fixnum || tx == t_bignum) &&
-      (ty == t_fixnum || ty == t_bignum)) {
-    integer_quotient_remainder_1(x, y, NULL, &z,-1);
-    RETURN1(z);
-  }
-  check_type_or_rational_float(&x);
-  check_type_or_rational_float(&y);
-  q = number_divide(x, y);
-  switch (type_of(q)) {
-  case t_fixnum:
-  case t_bignum:
-    RETURN1(small_fixnum(0));
-    break;
-    
-  case t_ratio:
-    q1 = integer_divide1(q->rat.rat_num, q->rat.rat_den,-1);
-    RETURN1(num_remainder(x, y, q1));
-    break;
-    
-  case t_shortfloat:
-  case t_longfloat:
-    q1 = double_to_integer(number_to_double(q));
-    if (number_minusp(q) && number_compare(q, q1))
-      q1 = one_minus(q1);
-    RETURN1(num_remainder(x, y, q1));
-    break;
-  default:
-    RETURN1(small_fixnum(0));
-    break;
-  }
-  
-}
 
 LFD(Lmod)(void) {
-
   check_arg(2);
-
-  vs_top=vs_base;
-  vs_push(mod(vs_base[0],vs_base[1]));
-
+  intdivrem(vs_base[0],vs_base[1],-1,NULL,vs_base);
+  vs_top=vs_base+1;
 }
   
-/*   x = vs_base[0]; */
-/*   y = vs_base[1]; */
-/*   if (number_zerop(y)==TRUE) */
-/*     zero_divisor(); */
 
-/*   if ((type_of(x) == t_fixnum || type_of(x) == t_bignum) && */
-/*       (type_of(y) == t_fixnum || type_of(y) == t_bignum)) { */
-/*     vs_base = vs_top; */
-/*     vs_push(Cnil); */
-/*     integer_quotient_remainder_1(x, y, NULL, &vs_base[0],-1); */
-/*     return; */
-/*   } */
-/*   check_type_or_rational_float(&vs_base[0]); */
-/*   check_type_or_rational_float(&vs_base[1]); */
-/*   q = number_divide(x, y); */
-/*   switch (type_of(q)) { */
-/*   case t_fixnum: */
-/*   case t_bignum: */
-/*     vs_base = vs_top; */
-/*     vs_push(small_fixnum(0)); */
-/*     break; */
-    
-/*   case t_ratio: */
-/*     q1 = integer_divide1(q->rat.rat_num, q->rat.rat_den,-1); */
-/*     vs_base = vs_top; */
-/*     vs_push(num_remainder(x, y, q1)); */
-/*     return; */
-    
-/*   case t_shortfloat: */
-/*   case t_longfloat: */
-/*     q1 = double_to_integer(number_to_double(q)); */
-/*     if (number_minusp(q) && number_compare(q, q1)) { */
-/*       vs_push(q1); */
-/*       q1 = one_minus(q1); */
-/*     } else */
-/*       q1 = q1; */
-/*     vs_base = vs_top; */
-/*     vs_push(num_remainder(x, y, q1)); */
-/*     return; */
-/*   default: */
-/*     break; */
-/*   } */
-/* } */
-
-LFD(Lrem)(void)
-{
-	check_arg(2);
-	Ltruncate();
-	vs_base++;
+LFD(Lrem)(void) {
+  check_arg(2);
+  intdivrem(vs_base[0],vs_base[1],0,NULL,vs_base);
+  vs_top=vs_base+1;
 }
 
 
