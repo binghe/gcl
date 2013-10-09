@@ -63,7 +63,7 @@
 (DEFSYSFUN 'NBUTLAST "Lnbutlast" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'ARRAY-DIMENSION "Larray_dimension" '(T T) 'FIXNUM NIL NIL) 
 (DEFSYSFUN 'CDR "Lcdr" '(T) 'T NIL NIL) 
-(DEFSYSFUN 'EQL "Leql" '(T T) 'T NIL T) 
+;(DEFSYSFUN 'EQL "Leql" '(T T) 'T NIL T) 
 (DEFSYSFUN 'LOG "Llog" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'DIRECTORY "Ldirectory" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'STRING-NOT-EQUAL "Lstring_not_equal" '(T T *) 'T NIL NIL) 
@@ -268,7 +268,7 @@
 (DEFSYSFUN 'INPUT-STREAM-P "Linput_stream_p" '(T) 'T NIL T) 
 (DEFSYSFUN '>= "Lmonotonically_nonincreasing" '(T *) 'T NIL T) 
 (DEFSYSFUN 'PATHNAME "Lpathname" '(T) 'T NIL NIL) 
-(DEFSYSFUN 'EQ "Leq" '(T T) 'T NIL T) 
+;(DEFSYSFUN 'EQ "Leq" '(T T) 'T NIL T) 
 (DEFSYSFUN 'MAKE-CHAR "Lmake_char" '(T *) 'CHARACTER NIL NIL) 
 (DEFSYSFUN 'FILE-NAMESTRING "Lfile_namestring" '(T) 'STRING NIL NIL) 
 (DEFSYSFUN 'CHARACTER "Lcharacter" '(T) 'CHARACTER NIL NIL) 
@@ -293,7 +293,7 @@
 (DEFSYSFUN 'SYMBOL-VALUE "Lsymbol_value" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'RPLACD "Lrplacd" '(T T) 'T NIL NIL) 
 (DEFSYSFUN 'BOUNDP "Lboundp" '(T) 'T NIL T) 
-(DEFSYSFUN 'EQUALP "Lequalp" '(T T) 'T NIL T) 
+;(DEFSYSFUN 'EQUALP "Lequalp" '(T T) 'T NIL T) 
 (DEFSYSFUN 'SIMPLE-BIT-VECTOR-P "Lsimple_bit_vector_p" '(T) 'T NIL T) 
 (DEFSYSFUN 'MEMBER-IF-NOT "Lmember_if_not" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'MAKE-TWO-WAY-STREAM "Lmake_two_way_stream" '(T T) 'T NIL
@@ -334,7 +334,7 @@
 (DEFSYSFUN 'CHAR-UPCASE "Lchar_upcase" '(T) 'CHARACTER NIL NIL) 
 (DEFSYSFUN 'LIST* "LlistA" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'VALUES-LIST "Lvalues_list" '(T) '* NIL NIL) 
-(DEFSYSFUN 'EQUAL "Lequal" '(T T) 'T NIL T) 
+;(DEFSYSFUN 'EQUAL "Lequal" '(T T) 'T NIL T) 
 (DEFSYSFUN 'DIGIT-CHAR-P "Ldigit_char_p" '(T *) 'T NIL NIL) 
 ;; #-clcs (DEFSYSFUN 'ERROR "Lerror" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'CHAR/= "Lchar_neq" '(T *) 'T NIL T) 
@@ -454,7 +454,7 @@
     NIL NIL) 
 (DEFSYSFUN 'SI::BIT-ARRAY-OP "siLbit_array_op" NIL T NIL NIL)
 
-(dolist (l '(ldb-test logtest))
+(dolist (l '(eq eql equal equalp ldb-test logtest))
   (setf (get l 'predicate) t))
 
 
