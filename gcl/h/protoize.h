@@ -82,7 +82,7 @@
 /* gmp_big.c:324:OF */ extern double big_to_double (object x); /* (x) object x; */
 /* gmp_big.c:454:OF */ extern object maybe_replace_big (object x); /* (x) object x; */
 /* gmp_big.c:472:OF */ extern object bignum2 (unsigned int h, unsigned int l); /* (h, l) unsigned int h; unsigned int l; */
-/* gmp_big.c:482:OF */ extern void integer_quotient_remainder_1 (object x, object y, object *qp, object *rp); /* (x, y, qp, rp) object x; object y; object *qp; object *rp; */
+/* gmp_big.c:482:OF */ extern void integer_quotient_remainder_1 (object x, object y, object *qp, object *rp,fixnum z); /* (x, y, qp, rp) object x; object y; object *qp; object *rp; */
 /* gmp_big.c:502:OF */ extern object coerce_big_to_string (object x, int printbase); /* (x, printbase) object x; int printbase; */
 /* gmp_big.c:521:OF */ extern void gcl_init_big (void); /* () */
 /* big.c:72:OF */ extern int big_sign (object x); /* (x) object x; */
@@ -341,7 +341,8 @@ typedef void (*funcvoid)(void);
 /* num_arith.c:478:OF */ extern object number_negate (object x); /* (x) object x; */
 /* num_arith.c:520:OF */ extern object number_times (object x, object y); /* (x, y) object x; object y; */
 /* num_arith.c:670:OF */ extern object number_divide (object x, object y); /* (x, y) object x; object y; */
-/* num_arith.c:818:OF */ extern object integer_divide1 (object x, object y); /* (x, y) object x; object y; */
+/* num_arith.c:818:OF */ extern object integer_divide1 (object x, object y,fixnum z); /* (x, y) object x; object y; */
+/* num_arith.c:818:OF */ extern object integer_divide2 (object x, object y,fixnum z,object *r); /* (x, y) object x; object y; */
 /* num_arith.c:828:OF */ extern object get_gcd (object x, object y); /* (x, y) object x; object y; */
 /* num_arith.c:873:OF */ extern void Lplus (void); /* () */
 /* num_arith.c:889:OF */ extern void Lminus (void); /* () */
@@ -369,7 +370,7 @@ typedef void (*funcvoid)(void);
 /* num_comp.c:272:OF */ extern void Lmonotonically_nonincreasing (void); /* () */
 /* num_comp.c:292:OF */ extern void Lmin (void); /* () */
 /* num_comp.c:309:OF */ extern void gcl_init_num_comp (void); /* () */
-/* num_log.c:224:OF */ extern object shift_integer (object x, fixnum w); /* (x, w) object x; int w; */
+/* num_log.c:224:OF */ extern object integer_fix_shift (object x, fixnum w); /* (x, w) object x; int w; */
 /* num_log.c:258:OF */ extern void Llogior (void); /* () */
 /* num_log.c:279:OF */ extern void Llogxor (void); /* () */
 /* num_log.c:299:OF */ extern void Llogand (void); /* () */
@@ -438,11 +439,14 @@ typedef void (*funcvoid)(void);
 /* predicate.c:346:OF */ extern object fLcompiled_function_p (object x0); /* (x0) object x0; */
 /* predicate.c:367:OF */ extern object fLcommonp (object x0); /* (x0) object x0; */
 /* predicate.c:379:OF */ extern object fLeq (object x0, object x1); /* (x0, x1) object x0; object x1; */
-/* predicate.c:393:OF */ extern int eql (object x, object y); /* (x, y) object x; object y; */
+/* predicate.c:393:OF */ extern bool eql1 (object x, object y); /* (x, y) object x; object y; */
+/* predicate.c:393:OF */ extern bool oeql (object x, object y); /* (x, y) object x; object y; */
 /* predicate.c:455:OF */ extern object fLeql (object x0, object x1); /* (x0, x1) object x0; object x1; */
-/* predicate.c:469:OF */ extern int equal (register object x, register object y); /* (x, y) register object x; register object y; */
+/* predicate.c:469:OF */ extern bool equal1 (register object x, register object y); /* (x, y) register object x; register object y; */
+/* predicate.c:469:OF */ extern bool oequal (register object x, register object y); /* (x, y) register object x; register object y; */
 /* predicate.c:543:OF */ extern object fLequal (object x0, object x1); /* (x0, x1) object x0; object x1; */
-/* predicate.c:557:OF */ extern bool equalp (object x, object y); /* (x, y) object x; object y; */
+/* predicate.c:557:OF */ extern bool equalp1 (object x, object y); /* (x, y) object x; object y; */
+/* predicate.c:557:OF */ extern bool oequalp (object x, object y); /* (x, y) object x; object y; */
 /* predicate.c:681:OF */ extern object fLequalp (object x0, object x1); /* (x0, x1) object x0; object x1; */
 /* predicate.c:750:OF */ extern bool contains_sharp_comma (object x); /* (x) object x; */
 /* predicate.c:797:OF */ extern object fScontains_sharp_comma (object x0); /* (x0) object x0; */
@@ -1852,3 +1856,46 @@ set_sgc_bit(struct pageinfo *,void *);
 
 void
 reinit_gmp(void);
+
+object
+mod(object,object);
+
+void
+intdivrem(object,object,fixnum,object *,object *);
+
+inline object
+integer_count(object);
+
+inline object
+integer_length(object);
+
+inline bool
+integer_bitp(object,object);
+
+inline object 
+fixnum_times(fixnum,fixnum);
+
+inline object
+log_op2(fixnum,object,object);
+
+inline object
+fixnum_big_shift(fixnum,fixnum);
+
+inline object
+integer_shift(object,object);
+
+object
+number_abs(object);
+
+object
+number_signum(object);
+
+
+object
+number_ldb(object,object);
+object
+number_ldbt(object,object);
+object
+number_dpb(object,object,object);
+object
+number_dpf(object,object,object);

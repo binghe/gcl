@@ -23,6 +23,22 @@
 
 (or (fboundp 'flags) (load "../cmpnew/cmpeval.lsp"))
 
+;;INTEGER-LENGTH
+(push '((t) t #.(compiler::flags) "immnum_length(#0)") (get 'integer-length 'compiler::inline-always))
+;;LOGCOUNT
+(push '((t) t #.(compiler::flags) "immnum_count(#0)") (get 'logcount 'compiler::inline-always))
+;;LOGBITP
+(push '((t t) boolean #.(compiler::flags) "immnum_bitp(#0,#1)") (get 'logbitp 'compiler::inline-always))
+
+;;ABS
+(push '((t) t #.(compiler::flags) "immnum_abs(#0)") (get 'abs 'compiler::inline-always))       
+
+;;ASH
+(push '((t t) t #.(compiler::flags) "immnum_shft(#0,#1)") (get 'ash 'compiler::inline-always))
+
+;;BOOLE
+(push '((t t t) t #.(compiler::flags) "immnum_bool(#0,#1,#2)") (get 'boole 'compiler::inline-always))
+(push '((fixnum t t) t #.(compiler::flags) "immnum_boole(#0,#1,#2)") (get 'boole 'compiler::inline-always))
 
 ;;BOOLE3
  (push '((fixnum fixnum fixnum) fixnum #.(flags rfa)INLINE-BOOLE3)
@@ -248,7 +264,7 @@
    (get 'system:svset 'inline-unsafe))
 
 ;;*
-(push '((t t) t #.(flags ans)"number_times(#0,#1)")
+(push '((t t) t #.(flags ans) "immnum_times(#0,#1)");"number_times(#0,#1)"
    (get '* 'inline-always))
 (push '((fixnum-float fixnum-float) short-float #.(flags)"(double)(#0)*(double)(#1)")
    (get '* 'inline-always))
@@ -739,30 +755,30 @@ type_of(#0)==t_bitvector")
    (get 'endp 'inline-unsafe))
 
 ;;EQ
- (push '((t t) boolean #.(flags)"(#0)==(#1)")
+ (push '((t t) boolean #.(flags rfa)"(#0)==(#1)")
    (get 'eq 'inline-always))
-(push '((fixnum fixnum) boolean #.(flags)"0")
+(push '((fixnum fixnum) boolean #.(flags rfa)"0")
    (get 'eq 'inline-always))
 
 ;;EQL
- (push '((t t) boolean #.(flags)"eql(#0,#1)")
+ (push '((t t) boolean #.(flags rfa)"eql(#0,#1)")
    (get 'eql 'inline-always))
-(push '((fixnum fixnum) boolean #.(flags)"(#0)==(#1)")
+(push '((fixnum fixnum) boolean #.(flags rfa)"(#0)==(#1)")
    (get 'eql 'inline-always))
-(push '((character character) boolean #.(flags)"(#0)==(#1)")
+(push '((character character) boolean #.(flags rfa)"(#0)==(#1)")
    (get 'eql 'inline-always))
 
 
 ;;EQUAL
- (push '((t t) boolean #.(flags)"equal(#0,#1)")
+ (push '((t t) boolean #.(flags rfa)"equal(#0,#1)")
    (get 'equal 'inline-always))
-(push '((fixnum fixnum) boolean #.(flags)"(#0)==(#1)")
+(push '((fixnum fixnum) boolean #.(flags rfa)"(#0)==(#1)")
    (get 'equal 'inline-always))
 
 ;;EQUALP
- (push '((t t) boolean #.(flags)"equalp(#0,#1)")
+ (push '((t t) boolean #.(flags rfa)"equalp(#0,#1)")
    (get 'equalp 'inline-always))
-(push '((fixnum fixnum) boolean #.(flags)"(#0)==(#1)")
+(push '((fixnum fixnum) boolean #.(flags rfa)"(#0)==(#1)")
    (get 'equalp 'inline-always))
 
 ;;EXPT
@@ -805,11 +821,15 @@ type_of(#0)==t_bitvector")
   "@0;type_of(#0)==t_shortfloat||type_of(#0)==t_longfloat")
    (get 'floatp 'inline-always))
 
+;;CEILING
+(push '((t t) t #.(compiler::flags) "immnum_ceiling(#0,#1)") (get 'ceiling 'compiler::inline-always))
+
 ;;FLOOR
 ; (push '((fixnum fixnum) fixnum #.(flags rfa)
 ;  "@01;(#0>=0&&(#1)>0?(#0)/(#1):ifloor(#0,#1))")
 ;   (get 'floor 'inline-always))
- (push '((fixnum fixnum) fixnum #.(flags rfa)
+(push '((t t) t #.(compiler::flags) "immnum_floor(#0,#1)") (get 'floor 'compiler::inline-always))
+(push '((fixnum fixnum) fixnum #.(flags rfa)
   "@01;({fixnum _t=(#0)/(#1);((#1)<0  && (#0)<=0) || ((#1)>0 && (#0)>=0) || ((#1)*_t == (#0)) ? _t : _t - 1;})")
    (get 'floor 'inline-always))
 
@@ -912,6 +932,23 @@ type_of(#0)==t_bitvector")
  (push '((t) boolean #.(flags)"@0;type_of(#0)==t_spice")
    (get 'si::spice-p 'inline-always))
 
+;;LOGNAND
+(push '((t t) t #.(compiler::flags) "immnum_nand(#0,#1)") (get 'lognand 'compiler::inline-always))
+;;LOGNOR
+(push '((t t) t #.(compiler::flags) "immnum_nor(#0,#1)") (get 'lognor 'compiler::inline-always))
+;;LOGEQV
+(push '((t t) t #.(compiler::flags) "immnum_eqv(#0,#1)") (get 'logeqv 'compiler::inline-always))
+
+;;LOGANDC1
+(push '((t t) t #.(compiler::flags) "immnum_andc1(#0,#1)") (get 'logandc1 'compiler::inline-always))
+;;LOGANDC2
+(push '((t t) t #.(compiler::flags) "immnum_andc2(#0,#1)") (get 'logandc2 'compiler::inline-always))
+;;LOGORC1
+(push '((t t) t #.(compiler::flags) "immnum_orc1(#0,#1)") (get 'logorc1 'compiler::inline-always))
+;;LOGORC1
+(push '((t t) t #.(compiler::flags) "immnum_orc2(#0,#1)") (get 'logorc2 'compiler::inline-always))
+       
+
 ;;LOGAND
  (push '((t t) t #.(flags)"immnum_and((#0),(#1))")
    (get 'logand 'inline-always))
@@ -942,19 +979,31 @@ type_of(#0)==t_bitvector")
    (get 'make-list 'inline-always))
 
 ;;MAX
- (push '((t t) t #.(flags)"@01;(number_compare(#0,#1)>=0?(#0):#1)")
+ (push '((t t) t #.(flags) "immnum_max(#0,#1)");"@01;(number_compare(#0,#1)>=0?(#0):#1)"
    (get 'max 'inline-always))
 (push '((fixnum fixnum) fixnum #.(flags rfa)"@01;((#0)>=(#1)?(#0):#1)")
    (get 'max 'inline-always))
 
 ;;MIN
- (push '((t t) t #.(flags)"@01;(number_compare(#0,#1)<=0?(#0):#1)")
+ (push '((t t) t #.(flags) "immnum_min(#0,#1)");"@01;(number_compare(#0,#1)<=0?(#0):#1)"
    (get 'min 'inline-always))
 (push '((fixnum fixnum) fixnum #.(flags rfa)"@01;((#0)<=(#1)?(#0):#1)")
    (get 'min 'inline-always))
 
+;;LDB
+(push '((t t) t #.(compiler::flags) "immnum_ldb(#0,#1)") (get 'ldb 'compiler::inline-always))
+;;LDB-TEST
+(push '((t t) boolean #.(compiler::flags) "immnum_ldbt(#0,#1)") (get 'ldb-test 'compiler::inline-always))
+;;LOGTEST
+(push '((t t) boolean #.(compiler::flags) "immnum_logt(#0,#1)") (get 'logtest 'compiler::inline-always))
+;;DPB
+(push '((t t t) t #.(compiler::flags) "immnum_dpb(#0,#1,#2)") (get 'dpb 'compiler::inline-always))
+;;DEPOSIT-FIELD
+(push '((t t t) t #.(compiler::flags) "immnum_dpf(#0,#1,#2)") (get 'deposit-field 'compiler::inline-always))
+
+
 ;;MINUSP
- (push '((t) boolean #.(flags)"number_compare(small_fixnum(0),#0)>0")
+ (push '((t) boolean #.(flags) "immnum_minusp(#0)");"number_compare(small_fixnum(0),#0)>0"
    (get 'minusp 'inline-always))
 (push '((fixnum-float) boolean #.(flags)"(#0)<0")
    (get 'minusp 'inline-always))
@@ -962,7 +1011,8 @@ type_of(#0)==t_bitvector")
 ;;MOD
 ; (push '((fixnum fixnum) fixnum #.(flags rfa)"@01;(#0>=0&&(#1)>0?(#0)%(#1):imod(#0,#1))")
 ;   (get 'mod 'inline-always))
- (push '((fixnum fixnum) fixnum #.(flags rfa)"@01;({fixnum _t=(#0)%(#1);((#1)<0 && _t<=0) || ((#1)>0 && _t>=0) ? _t : _t + (#1);})")
+(push '((t t) t #.(compiler::flags) "immnum_mod(#0,#1)") (get 'mod 'compiler::inline-always))
+(push '((fixnum fixnum) fixnum #.(flags rfa)"@01;({fixnum _t=(#0)%(#1);((#1)<0 && _t<=0) || ((#1)>0 && _t>=0) ? _t : _t + (#1);})")
    (get 'mod 'inline-always))
 
 ;;NCONC
@@ -1027,7 +1077,7 @@ type_of(#0)==t_complex")
    (get 'numberp 'inline-always))
 
 ;;PLUSP
- (push '((t) boolean #.(flags)"number_compare(small_fixnum(0),#0)<0")
+ (push '((t) boolean #.(flags) "immnum_plusp(#0)");"number_compare(small_fixnum(0),#0)<0"
    (get 'plusp 'inline-always))
 (push '((fixnum-float) boolean #.(flags)"(#0)>0")
    (get 'plusp 'inline-always))
@@ -1059,10 +1109,8 @@ type_of(#0)==t_complex")
       (get 'ratiop 'inline-always))
 
 ;;REM
-
-
-#+
-TRUNCATE_USE_C
+(push '((t t) t #.(compiler::flags) "immnum_rem(#0,#1)") (get 'rem 'compiler::inline-always))
+#+TRUNCATE_USE_C
 (push '((fixnum fixnum) fixnum #.(flags rfa)"(#0)%(#1)")
    (get 'rem 'inline-always))
 
@@ -1154,9 +1202,8 @@ TRUNCATE_USE_C
    (get 'third 'inline-unsafe))
 
 ;;TRUNCATE
-
-#+
-TRUNCATE_USE_C
+(push '((t t) t #.(compiler::flags) "immnum_truncate(#0,#1)") (get 'truncate 'compiler::inline-always))
+#+TRUNCATE_USE_C
 (push '((fixnum fixnum) fixnum #.(flags rfa)"(#0)/(#1)")
    (get 'truncate 'inline-always))
 (push '((fixnum-float) fixnum #.(flags)"(fixnum)(#0)")
@@ -1176,8 +1223,17 @@ type_of(#0)==t_bitvector")
   "@0;(writec_stream(char_code(#0),Vstandard_output->s.s_dbind),(#0))")
    (get 'write-char 'inline-unsafe))
 
+;;EVENP
+(push '((t) boolean #.(compiler::flags) "immnum_evenp(#0)") (get 'evenp 'compiler::inline-always))
+;;ODDP
+(push '((t) boolean #.(compiler::flags) "immnum_oddp(#0)") (get 'oddp 'compiler::inline-always))
+
+;;SIGNUM
+(push '((t) t #.(compiler::flags) "immnum_signum(#0)") (get 'signum 'compiler::inline-always))
+
+
 ;;ZEROP
- (push '((t) boolean #.(flags)"number_compare(small_fixnum(0),#0)==0")
+ (push '((t) boolean #.(flags) "immnum_zerop(#0)");"number_compare(small_fixnum(0),#0)==0"
    (get 'zerop 'inline-always))
 
 (push '((fixnum-float) boolean #.(flags)"(#0)==0")
