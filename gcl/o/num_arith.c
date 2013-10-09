@@ -554,7 +554,6 @@ number_times(object x, object y)
 		switch (type_of(y)) {
 		case t_fixnum:
  		  MPOP(return,mulsi,fix(y),MP(x));
-
 		case t_bignum:
 		  MPOP(return,mulii,MP(y),MP(x));
 		case t_ratio:
@@ -818,12 +817,21 @@ number_divide(object x, object y)
 }
 
 object
-integer_divide1(object x, object y)
-{
-	object q;
+integer_divide1(object x, object y,fixnum d) {
+  object q;
 
-	integer_quotient_remainder_1(x, y, &q, NULL);
-	return(q);
+  integer_quotient_remainder_1(x, y, &q, NULL,d);
+  return(q);
+
+}
+
+object
+integer_divide2(object x, object y,fixnum d,object *r) {
+  object q;
+
+  integer_quotient_remainder_1(x, y, &q, r,d);
+  return(q);
+
 }
 
 object
@@ -882,7 +890,7 @@ L:
 	if (type_of(y) == t_fixnum && fix(y) == 0) {
 		return(x);
 	}
-	integer_quotient_remainder_1(x, y, NULL, &r);
+	integer_quotient_remainder_1(x, y, NULL, &r,0);
 	 x = y;
 	 y = r;
 	goto L;
