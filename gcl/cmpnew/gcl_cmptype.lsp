@@ -132,11 +132,7 @@
 (defun type-and (type1 type2)
   
   (cond ((equal type1 type2) type1)
-        ((eq type1 t) type2)
 	((eq type1 '*) type2)
-	((eq type1 'object) type2)
-	((eq type2 'object) type1)
-        ((eq type2 t) type1)
 	((eq type2 '*) type1)
 	((and (consp type2) (eq (car type2) 'values))
 	 (type-and type1 (second type2)))
@@ -156,6 +152,10 @@
                     type1 nil))
 	       (values (type-and (second type1) type2))
                (t nil)))
+        ((eq type1 t) type2)
+	((eq type1 'object) type2)
+	((eq type2 'object) type1)
+        ((eq type2 t) type1)
         (t (case type1
                  (string
                   (if (and (consp type2) (eq (car type2) 'array)
