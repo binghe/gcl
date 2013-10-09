@@ -84,6 +84,9 @@
 /* have __builtin__clear_cache instruction */
 #undef HAVE_BUILTIN_CLEAR_CACHE
 
+/* clzl instruction */
+#undef HAVE_CLZL
+
 /* Define to 1 if you have the <complex.h> header file. */
 #undef HAVE_COMPLEX_H
 
