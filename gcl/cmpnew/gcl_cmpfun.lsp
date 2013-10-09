@@ -920,7 +920,7 @@
 			(eq (caar v) 'sharp-comma)
 			(cmp-eval (caddar v)))))))
     (or (member tst '(eq equal eql)) (error "bad test"))
-    (wt "(check_alist("	a "),sublis1("a "," b "," (format nil "~(&~a~)))" tst))))
+    (wt "(check_alist("	a "),sublis1("a "," b "," (format nil "&o~(~a~)))" tst))))
 
   
 ;; end new		  
