@@ -362,7 +362,7 @@
 
 
 (defun boole3 (a b c)  (boole a b c))
-(si:putprop 'boole '(c1boole-condition . c1boole3) 'c1conditional)
+;(si:putprop 'boole '(c1boole-condition . c1boole3) 'c1conditional)
 
 (defun c1boole-condition (args)
    (and (not (endp (cddr args)))
