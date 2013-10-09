@@ -257,22 +257,34 @@
 (defun byte-position (bytespec)
   (cdr bytespec))
 
-(defun ldb (bytespec integer)
-  (logandc2 (ash integer (- (byte-position bytespec)))
-            (- (ash 1 (byte-size bytespec)))))
+;; (defun ldb (bytespec integer)
+;;   (logandc2 (ash integer (- (byte-position bytespec)))
+;;             (- (ash 1 (byte-size bytespec)))))
 
+;; (defun ldb-test (bytespec integer)
+;;   (not (zerop (ldb bytespec integer))))
+
+;; (defun mask-field (bytespec integer)
+;;   (ash (ldb bytespec integer) (byte-position bytespec)))
+
+;; (defun dpb (newbyte bytespec integer)
+;;   (logxor integer
+;;           (mask-field bytespec integer)
+;;           (ash (logandc2 newbyte
+;;                          (- (ash 1 (byte-size bytespec))))
+;;                (byte-position bytespec))))
+
+;; (defun deposit-field (newbyte bytespec integer)
+;;   (dpb (ash newbyte (- (byte-position bytespec))) bytespec integer))
+
+
+(defun ldb (bytespec integer)
+  (logand (ash integer (- (byte-position bytespec)))
+	  (1- (ash 1 (byte-size bytespec)))))
 (defun ldb-test (bytespec integer)
   (not (zerop (ldb bytespec integer))))
-
-(defun mask-field (bytespec integer)
-  (ash (ldb bytespec integer) (byte-position bytespec)))
-
-(defun dpb (newbyte bytespec integer)
-  (logxor integer
-          (mask-field bytespec integer)
-          (ash (logandc2 newbyte
-                         (- (ash 1 (byte-size bytespec))))
-               (byte-position bytespec))))
-
-(defun deposit-field (newbyte bytespec integer)
-  (dpb (ash newbyte (- (byte-position bytespec))) bytespec integer))
+(defun dpb (newbyte bytespec integer &aux (z (1- (ash 1 (byte-size bytespec)))))
+  (logior (logandc2 integer (ash z (byte-position bytespec)))
+	  (ash (logand newbyte z) (byte-position bytespec))))
+(defun deposit-field (newbyte bytespec integer &aux (z (ash (1- (ash 1 (byte-size bytespec))) (byte-position bytespec))))
+  (logior (logandc2 integer z) (logand newbyte z)))
