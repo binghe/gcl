@@ -26,6 +26,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include "include.h"
 
 DEFUNO_NEW("NULL",object,fLnull,LISP
@@ -390,328 +391,286 @@ DEFUNO_NEW("COMMONP",object,fLcommonp,LISP
 		x0 = Cnil;
 RETURN1(x0);}
 
-DEFUNO_NEW("EQ",object,fLeq,LISP
-   ,2,2,NONE,OO,OO,OO,OO,void,Leq,(object x0,object x1),"")
+DEFUN_NEW("EQ",object,fLeq,LISP,2,2,NONE,OO,OO,OO,OO,(object x0,object x1),"") {
+  RETURN1(x0==x1 ? Ct : Cnil);
+}
 
-{
-  /* 2 args */
-
-  if (x0 == x1)
-    x0 = Ct;
-  else
-    x0 = Cnil;
-	
-  RETURN1(x0)
-    ;}
+#define eqlm(x,y) \
+\
+  case t_fixnum:\
+    return (fix(x)==fix(y)) ? TRUE : FALSE;\
+\
+  case t_bignum:\
+    return big_compare(x,y) ? FALSE : TRUE;\
+\
+  case t_ratio:\
+    return (eql(x->rat.rat_num,y->rat.rat_num) &&\
+	    eql(x->rat.rat_den,y->rat.rat_den)) ? TRUE : FALSE;\
+\
+  case t_shortfloat:\
+    return sf(x)==sf(y) ? TRUE : FALSE;\
+\
+  case t_longfloat:\
+    return lf(x)==lf(y) ? TRUE : FALSE;\
+\
+  case t_complex:\
+    return (eql(x->cmp.cmp_real,y->cmp.cmp_real) &&\
+	    eql(x->cmp.cmp_imag,y->cmp.cmp_imag)) ? TRUE : FALSE;\
+\
+  default:\
+    return FALSE;
 
 bool
-eql(object x, object y)
-{
-	enum type t;
+eql1(register object x,register object y) {
 
-	if (x == y)
-		return(TRUE);
-	if ((t = type_of(x)) != type_of(y))
-		return(FALSE);
-	switch (t) {
+  /*x and y are not == and not Cnil and not immfix*/
 
-	case t_fixnum:
-		if (fix(x) == fix(y))
-			return(TRUE);
-		else
-			return(FALSE);
+  if (valid_cdr(x)||valid_cdr(y)||x->d.t!=y->d.t) return FALSE;
+  
+  switch (x->d.t) {
 
-	case t_bignum:
-		if (big_compare(x,y) == 0)
-			return(TRUE);
-		else
-			return(FALSE);
+    eqlm(x,y);
 
-	case t_ratio:
-		if (eql(x->rat.rat_num, y->rat.rat_num) &&
-		    eql(x->rat.rat_den, y->rat.rat_den))
-			return(TRUE);
-		else
-			return(FALSE);
+  }
 
-	case t_shortfloat:
-		if (sf(x) == sf(y))
-			return(TRUE);
-		else
-			return(FALSE);
+}
 
-	case t_longfloat:
-		if (lf(x) == lf(y))
-			return(TRUE);
-		else
-			return(FALSE);
+/*for sublis1-inline*/
+bool
+oeql(object x,object y) {
+  return eql(x,y) ? TRUE : FALSE;
+}
 
-	case t_complex:
-		if (eql(x->cmp.cmp_real, y->cmp.cmp_real) &&
-		    eql(x->cmp.cmp_imag, y->cmp.cmp_imag))
-			return(TRUE);
-		else
-			return(FALSE);
+DEFUN_NEW("EQL",object,fLeql,LISP,2,2,NONE,OO,OO,OO,OO,(object x0,object x1),"") {
+  RETURN1(eql(x0,x1) ? Ct : Cnil);
+}
 
-	case t_character:
-		if (char_code(x) == char_code(y) &&
-		    char_bits(x) == char_bits(y) &&
-		    char_font(x) == char_font(y))
-			return(TRUE);
-		else
-			return(FALSE);
-	default:
-	  break;
-	}
+bool
+equal1(register object x, register object y) {
+
+  /*x and y are not == and not Cnil and not immfix*/
+
+  if (valid_cdr(x)) return valid_cdr(y)&&equal(x->c.c_car,y->c.c_car)&&equal(x->c.c_cdr,y->c.c_cdr);
+
+  if (valid_cdr(y)) return FALSE;
+  
+  if (x->d.t!=y->d.t)
+    return FALSE;
+  
+  switch(x->d.t) {
+
+  case t_string:
+    return(string_eq(x, y));
+    
+  case t_bitvector:
+    {
+      fixnum i, ox, oy;
+      
+      if (x->bv.bv_fillp != y->bv.bv_fillp)
 	return(FALSE);
+      ox = BV_OFFSET(x);
+      oy = BV_OFFSET(y);
+      for (i = 0;  i < x->bv.bv_fillp;  i++)
+	if(((x->bv.bv_self[(i+ox)/8] & (0200>>(i+ox)%8)) ? 1 : 0)
+	   !=((y->bv.bv_self[(i+oy)/8] & (0200>>(i+oy)%8)) ? 1 : 0))
+	  return(FALSE);
+      return(TRUE);
+    }
+    
+  case t_pathname:
+    if (equal(x->pn.pn_host, y->pn.pn_host) &&
+	equal(x->pn.pn_device, y->pn.pn_device) &&
+	equal(x->pn.pn_directory, y->pn.pn_directory) &&
+	equal(x->pn.pn_name, y->pn.pn_name) &&
+	equal(x->pn.pn_type, y->pn.pn_type) &&
+	equal(x->pn.pn_version, y->pn.pn_version))
+      return(TRUE);
+    else
+      return(FALSE);
+
+    eqlm(x,y);
+
+  }
+
 }
 
-DEFUNO_NEW("EQL",object,fLeql,LISP
-   ,2,2,NONE,OO,OO,OO,OO,void,Leql,(object x0,object x1),"")
-
-{
-	/* 2 args */
-
-	if (eql(x0, x1))
-		x0 = Ct;
-	else
-		x0 = Cnil;
-	
-RETURN1(x0);}
-
+/*for sublis1-inline*/
 bool
-
-equal(register object x, register object y)
-                  
-#ifdef UNIX   /* in non unix case cs_check want's an address */
-        
-#endif
-         
-{
-register enum type t;
-
-	cs_check(y);
-
-BEGIN:
-	if ((t = type_of(x)) != type_of(y))
-		return(FALSE);
-	if (x==y)
-		return(TRUE);
-	switch (t) {
-
-	case t_cons:
-		if (!equal(x->c.c_car, y->c.c_car))
-			return(FALSE);
-		x = x->c.c_cdr;
-		y = y->c.c_cdr;
-		goto BEGIN;
-
-        case t_structure:
-	case t_symbol: 
-	case t_vector:
-        case t_array:
-		return FALSE;
-
-	case t_fixnum :
-	return(fix(x)==fix(y));
-	case t_shortfloat:
-	return(x->SF.SFVAL==y->SF.SFVAL);
-	case t_longfloat:
-	return(x->LF.LFVAL==y->LF.LFVAL);
-
- 	case t_string:
-	  return(string_eq(x, y));
-
-	case t_bitvector:
-	{
-		int i, ox, oy;
-
-		if (x->bv.bv_fillp != y->bv.bv_fillp)
-			return(FALSE);
-		ox = BV_OFFSET(x);
-		oy = BV_OFFSET(y);
-		for (i = 0;  i < x->bv.bv_fillp;  i++)
-		  if(((x->bv.bv_self[(i+ox)/8] & (0200>>(i+ox)%8)) ? 1 : 0)
-		     !=((y->bv.bv_self[(i+oy)/8] & (0200>>(i+oy)%8)) ? 1 : 0))
-		    return(FALSE);
-		return(TRUE);
-	}
-
-	case t_pathname:
-#ifdef UNIX
-		if (equal(x->pn.pn_host, y->pn.pn_host) &&
-		    equal(x->pn.pn_device, y->pn.pn_device) &&
-		    equal(x->pn.pn_directory, y->pn.pn_directory) &&
-		    equal(x->pn.pn_name, y->pn.pn_name) &&
-		    equal(x->pn.pn_type, y->pn.pn_type) &&
-		    equal(x->pn.pn_version, y->pn.pn_version))
-#endif
-			return(TRUE);
-		else
-			return(FALSE);
-
-	default:
-	  break;
-	}
-	return(eql(x,y));
+oequal(object x,object y) {
+  return equal(x,y) ? TRUE : FALSE;
 }
 
-DEFUNO_NEW("EQUAL",object,fLequal,LISP
-   ,2,2,NONE,OO,OO,OO,OO,void,Lequal,(object x0,object x1),"")
-
-{
-	/* 2 args */
-
-	if (equal(x0, x1))
-		x0 = Ct;
-	else
-		x0 = Cnil;
-	vs_popp;
-	RETURN1(x0);
+DEFUN_NEW("EQUAL",object,fLequal,LISP,2,2,NONE,OO,OO,OO,OO,(object x0,object x1),"") {
+  RETURN1(equal(x0, x1) ? Ct : Cnil);
 }
 
 bool
-equalp(object x, object y)
-{
-	enum type tx, ty;
-	int j;
+equalp1(register object x, register object y) {
 
-	cs_check(x);
+  enum type tx,ty;
+  fixnum j;
+  
+  /*x and y are not == and not Cnil*/
 
-BEGIN:
-	if (eql(x, y))
-		return(TRUE);
-	tx = type_of(x);
-	ty = type_of(y);
+  if (listp(x)) return listp(y)&&equalp(x->c.c_car,y->c.c_car)&&equalp(x->c.c_cdr,y->c.c_cdr);
+    
+  if (listp(y)) return FALSE;
 
-	switch (tx) {
-	case t_fixnum:
-	case t_bignum:
-	case t_ratio:
-	case t_shortfloat:
-	case t_longfloat:
-	case t_complex:
-		if (ty == t_fixnum || ty == t_bignum || ty == t_ratio ||
-		    ty == t_shortfloat || ty == t_longfloat ||
-		    ty == t_complex)
-			return(!number_compare(x, y));
-		else
-			return(FALSE);
+  tx=is_imm_fixnum(x) ? t_fixnum : x->d.t;
+  ty=is_imm_fixnum(y) ? t_fixnum : y->d.t;
 
-	case t_vector:
-	case t_string:
-	case t_bitvector:
-		if (ty == t_vector || ty == t_string || ty == t_bitvector)
-			{ j = x->v.v_fillp;
-			  if (j != y->v.v_fillp)
-			    return FALSE;
-			  goto ARRAY;}
-		else
-			return(FALSE);
+  switch(tx) {
 
-	case t_array:
-		if (ty == t_array && x->a.a_rank == y->a.a_rank)
-		  { if (x->a.a_rank > 1)
-		     {int i=0;
-		      for (i=0; i< x->a.a_rank; i++)
-			{if (x->a.a_dims[i]!=y->a.a_dims[i])
-			   return(FALSE);}}
-		    if (x->a.a_dim != y->a.a_dim)
-		      return(FALSE);
-		    j=x->a.a_dim;
-		    goto ARRAY;}
-		else
-			return(FALSE);
-	default:
-	  break;
+  case t_fixnum:
+  case t_bignum:
+  case t_ratio:
+  case t_shortfloat:
+  case t_longfloat:
+  case t_complex:
+    if (ty==t_fixnum||ty==t_bignum||ty==t_ratio ||
+	ty==t_shortfloat||ty==t_longfloat ||
+	ty==t_complex)
+      return(!number_compare(x, y));
+    else
+      return(FALSE);
+    
+  case t_vector:
+  case t_string:
+  case t_bitvector:
+    if (ty==t_vector||ty==t_string||ty==t_bitvector) {
+      j = x->v.v_fillp;
+      if (j != y->v.v_fillp)
+	return FALSE;
+      goto ARRAY;
+    }
+    else
+      return(FALSE);
+    
+  case t_array:
+    if (ty==t_array && x->a.a_rank==y->a.a_rank) { 
+      if (x->a.a_rank > 1) {
+	fixnum i;
+	for (i=0; i< x->a.a_rank; i++) {
+	  if (x->a.a_dims[i]!=y->a.a_dims[i])
+	    return(FALSE);
 	}
-	if (tx != ty)
-		return(FALSE);
-	switch (tx) {
-	case t_character:
-		return(char_equal(x, y));
-
-	case t_cons:
-		if (!equalp(x->c.c_car, y->c.c_car))
-			return(FALSE);
-		x = x->c.c_cdr;
-		y = y->c.c_cdr;
-		goto BEGIN;
-
-	case t_structure:
-		{
-		int i;
-		if (x->str.str_def != y->str.str_def)
-			return(FALSE);
-		{int leng= S_DATA(x->str.str_def)->length;
-		 unsigned char *s_type= & SLOT_TYPE(x->str.str_def,0);
-		 unsigned short *s_pos= & SLOT_POS(x->str.str_def,0);
-		for (i = 0;  i < leng;  i++,s_pos++)
-		 {if (s_type[i]==0)
-		   {if (!equalp(STREF(object,x,*s_pos),STREF(object,y,*s_pos)))
-		       return FALSE;}
-		  else
-/* 		   if (! (*s_pos & (sizeof(object)-1))) */
-		    switch(s_type[i]){
-		    case aet_lf:
-		     if((! (*s_pos & (sizeof(longfloat)-1))) &&
-			STREF(longfloat,x,*s_pos) != STREF(longfloat,y,*s_pos))
-			return(FALSE);
-		      break;
-		    case aet_sf:
-		     if((! (*s_pos & (sizeof(shortfloat)-1))) &&
-			STREF(shortfloat,x,*s_pos)!=STREF(shortfloat,y,*s_pos))
-			return(FALSE);
-		      break;
-		    default:
-		      if((! (*s_pos & (sizeof(fixnum)-1))) &&
-			 STREF(fixnum,x,*s_pos)!=STREF(fixnum,y,*s_pos))
-			return(FALSE);
-		      break;}}
-		return(TRUE);
-	}}
-
-	case t_pathname:
-		return(equal(x, y));
-	default:
-	  break;
-	}
+      }
+      if (x->a.a_dim != y->a.a_dim)
 	return(FALSE);
+      j=x->a.a_dim;
+      goto ARRAY;
+    }
+    else
+      return(FALSE);
 
-ARRAY:
+  default:
+    break;
+    
+  }
+  
+  if (tx != ty)
+    return(FALSE);
+  
+  switch (tx) {
 
-	{
-		int i;
-
-		vs_push(Cnil);
-		vs_push(Cnil);
-		for (i = 0;  i < j;  i++) {
-			vs_top[-2] = aref(x, i);
-			vs_top[-1] = aref(y, i);
-			if (!equalp(vs_top[-2], vs_top[-1])) {
-				vs_popp;
-				vs_popp;
-				return(FALSE);
-			}
-		}
-		vs_popp;
-		vs_popp;
-		return(TRUE);
+  case t_character:
+    return(char_equal(x, y));
+    
+  case t_structure:
+    {
+      fixnum i;
+      if (x->str.str_def != y->str.str_def)
+	return(FALSE);
+      {
+	fixnum leng= S_DATA(x->str.str_def)->length;
+	unsigned char *s_type= & SLOT_TYPE(x->str.str_def,0);
+	unsigned short *s_pos= & SLOT_POS(x->str.str_def,0);
+	for (i = 0;  i < leng;  i++,s_pos++) {
+	  if (s_type[i]==aet_object) {
+	    if (!equalp(STREF(object,x,*s_pos),STREF(object,y,*s_pos)))
+	      return FALSE;
+	  }
+	  else
+	    /* 		   if (! (*s_pos & (sizeof(object)-1))) */
+	    switch(s_type[i]) {
+	    case aet_lf:
+	      if((! (*s_pos & (sizeof(longfloat)-1))) &&
+		 STREF(longfloat,x,*s_pos) != STREF(longfloat,y,*s_pos))
+		return(FALSE);
+	      break;
+	    case aet_sf:
+	      if((! (*s_pos & (sizeof(shortfloat)-1))) &&
+		 STREF(shortfloat,x,*s_pos)!=STREF(shortfloat,y,*s_pos))
+		return(FALSE);
+	      break;
+	    default:
+	      if((! (*s_pos & (sizeof(fixnum)-1))) &&
+		 STREF(fixnum,x,*s_pos)!=STREF(fixnum,y,*s_pos))
+		return(FALSE);
+	    break;
+	    }
 	}
+	return(TRUE);
+      }
+    }
+    
+  case t_hashtable:
+    {
+      unsigned i;
+      struct htent *e;
+
+      if (x->ht.ht_nent!=y->ht.ht_nent)
+	return(FALSE);
+      if (x->ht.ht_test!=y->ht.ht_test)
+	return(FALSE);
+      for (i=0;i<x->ht.ht_size;i++) {
+	if (x->ht.ht_self[i].hte_key==OBJNULL)
+	  continue;
+	if ((e=gethash(x->ht.ht_self[i].hte_key,y))->hte_key==OBJNULL
+	   ||!equalp(x->ht.ht_self[i].hte_value,e->hte_value))
+	  return(FALSE);
+      }
+      return(TRUE);
+      break;
+    }
+
+  case t_pathname:
+    return(equal(x, y));
+
+  case t_random:
+    return(x->rnd.rnd_state._mp_seed->_mp_alloc==y->rnd.rnd_state._mp_seed->_mp_alloc &&
+	   !memcmp(x->rnd.rnd_state._mp_seed->_mp_d,y->rnd.rnd_state._mp_seed->_mp_d,
+		   x->rnd.rnd_state._mp_seed->_mp_alloc*sizeof(*x->rnd.rnd_state._mp_seed->_mp_d)));
+  default:
+    return(FALSE);
+
+  }
+  
+  
+ ARRAY:
+  
+  {
+    fixnum i;
+    
+    for (i = 0;  i < j;  i++)
+      if (!equalp(aref(x, i), aref(y, i)))
+	return(FALSE);
+    return(TRUE);
+  }
+
 }
 
-DEFUNO_NEW("EQUALP",object,fLequalp,LISP
-   ,2,2,NONE,OO,OO,OO,OO,void,Lequalp,(object x0,object x1),"")
-
-{
-	/* 2 args */
-
-	if (equalp(x0, x1))
-		x0 = Ct;
-	else
-		x0 = Cnil;
-	RETURN1(x0);
+/*for sublis1-inline*/
+bool 
+oequalp(object x,object y) {
+  return equalp(x,y) ? TRUE : FALSE;
 }
+
+
+DEFUN_NEW("EQUALP",object,fLequalp,LISP,2,2,NONE,OO,OO,OO,OO,(object x0,object x1),"") {
+  RETURN1(equalp(x0,x1) ? Ct : Cnil);
+}
+
 
 static void
 FFN(Fand)(object args)

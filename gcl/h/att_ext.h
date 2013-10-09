@@ -401,10 +401,6 @@ object merge_pathnames();
 object namestring();
 object coerce_to_namestring();
 
-/*  prediate.c  */
-
-int eql(),equal(),eq();
-
 /*  print.d  */
 EXTER object sKupcase;
 EXTER object sKdowncase;
