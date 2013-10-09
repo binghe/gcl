@@ -121,6 +121,14 @@ MEM_GMP_CALL(3,void,mpz_mul_si,1,mpz_t,mpz_t,long int)
 MEM_GMP_CALL(3,void,mpz_mul_2exp,1,mpz_t,mpz_t,unsigned long int)
 MEM_GMP_CALL(2,void,mpz_neg,1,mpz_t,mpz_t)
 MEM_GMP_CALL(4,void,mpz_tdiv_qr,2,mpz_t,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(3,void,mpz_tdiv_r,1,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(3,void,mpz_tdiv_q,1,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(4,void,mpz_fdiv_qr,2,mpz_t,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(3,void,mpz_fdiv_r,1,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(3,void,mpz_fdiv_q,1,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(4,void,mpz_cdiv_qr,2,mpz_t,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(3,void,mpz_cdiv_r,1,mpz_t,mpz_t,mpz_t)
+MEM_GMP_CALL(3,void,mpz_cdiv_q,1,mpz_t,mpz_t,mpz_t)
 MEM_GMP_CALL(3,void,mpz_fdiv_q_2exp,1,mpz_t,mpz_t,unsigned long int)
 MEM_GMP_CALL(2,int,mpz_cmp,0,mpz_t,mpz_t)
 MEM_GMP_CALL(3,void,mpz_and,1,mpz_t,mpz_t,mpz_t)
@@ -129,6 +137,7 @@ MEM_GMP_CALL(3,void,mpz_ior,1,mpz_t,mpz_t,mpz_t)
 MEM_GMP_CALL(2,void,mpz_com,1,mpz_t,mpz_t)
 MEM_GMP_CALL(2,int,mpz_tstbit,0,mpz_t,unsigned long int)
 MEM_GMP_CALL(1,void,mpz_init,1,mpz_t)
+MEM_GMP_CALL(2,void,mpz_init_set,1,mpz_t,mpz_t)
 MEM_GMP_CALL(2,void,mpz_set,1,mpz_t,mpz_t)
 MEM_GMP_CALL(2,void,mpz_set_ui,1,mpz_t,unsigned long int)
 MEM_GMP_CALL(2,void,mpz_set_si,1,mpz_t,long int)
@@ -152,6 +161,14 @@ MEM_GMP_CALL(2,size_t,mpz_sizeinbase,0,mpz_t,int)
 #define __gmpz_mul_2exp m__gmpz_mul_2exp
 #define __gmpz_neg m__gmpz_neg
 #define __gmpz_tdiv_qr m__gmpz_tdiv_qr
+#define __gmpz_tdiv_q m__gmpz_tdiv_q
+#define __gmpz_tdiv_r m__gmpz_tdiv_r
+#define __gmpz_fdiv_qr m__gmpz_fdiv_qr
+#define __gmpz_fdiv_q m__gmpz_fdiv_q
+#define __gmpz_fdiv_r m__gmpz_fdiv_r
+#define __gmpz_cdiv_qr m__gmpz_cdiv_qr
+#define __gmpz_cdiv_q m__gmpz_cdiv_q
+#define __gmpz_cdiv_r m__gmpz_cdiv_r
 #define __gmpz_fdiv_q_2exp m__gmpz_fdiv_q_2exp
 #define __gmpz_cmp m__gmpz_cmp
 #define __gmpz_and m__gmpz_and
@@ -160,6 +177,7 @@ MEM_GMP_CALL(2,size_t,mpz_sizeinbase,0,mpz_t,int)
 #define __gmpz_com m__gmpz_com
 #define __gmpz_tstbit m__gmpz_tstbit
 #define __gmpz_init m__gmpz_init
+#define __gmpz_init_set m__gmpz_init_set
 #define __gmpz_set m__gmpz_set
 #define __gmpz_set_ui m__gmpz_set_ui
 #define __gmpz_set_si m__gmpz_set_si
