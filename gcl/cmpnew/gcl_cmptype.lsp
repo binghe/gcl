@@ -136,6 +136,12 @@
 	((eq type2 '*) type1)
 	((and (consp type2) (eq (car type2) 'values))
 	 (type-and type1 (second type2)))
+	((and (consp type1) (eq (car type1) 'values))
+	 (type-and (second type1) type2))
+	((eq type1 'object) type2)
+        ((eq type1 t) type2)
+	((eq type2 'object) type1)
+        ((eq type2 t) type1)
         ((consp type1)
          (case (car type1)
                (array
@@ -150,12 +156,7 @@
                 (if (and (consp type2) (eq (car type2) 'array)
                          (eq (cadr type1) (cadr type2)))
                     type1 nil))
-	       (values (type-and (second type1) type2))
                (t nil)))
-        ((eq type1 t) type2)
-	((eq type1 'object) type2)
-	((eq type2 'object) type1)
-        ((eq type2 t) type1)
         (t (case type1
                  (string
                   (if (and (consp type2) (eq (car type2) 'array)
