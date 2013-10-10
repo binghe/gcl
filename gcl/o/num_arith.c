@@ -835,68 +835,39 @@ integer_divide2(object x, object y,fixnum d,object *r) {
 }
 
 object
-get_gcd(object x, object y)
-{
-	object	r;
+get_gcd_abs(object x,object y) {
 
-	if (number_minusp(x))
-		x = number_negate(x);
-	if (number_minusp(y))
-		y = number_negate(y);
+  object r;
+  
+  for (;;) {
+    
+    if (type_of(x) == t_fixnum && type_of(y) == t_fixnum)
+      return make_fixnum(fixnum_gcd(fix(x),fix(y)));
+    
+    if (number_compare(x, y) < 0) {
+      r = x;
+      x = y;
+      y = r;
+    }
+    if (type_of(y) == t_fixnum && fix(y) == 0)
+      return(x);
 
-L:
-	if (type_of(x) == t_fixnum && type_of(y) == t_fixnum) {
-	  /* LL: */
-	  /* 		if (i < j) { */
-	  /* 			k = i; */
-	  /* 			i = j; */
-	  /* 			j = k; */
-	  /* 		} */
-	  /* 		if (j == 0) { */
-	  /* 			return(make_fixnum(i)); */
-	  /* 		} */
-	  /* 		k = i % j; */
-	  /* 		i = j; */
-	  /* 		j = k; */
-	  /* 		goto LL; */
-	  
-	  register fixnum i, j, k, t;
+    integer_quotient_remainder_1(x, y, NULL, &r,0);
+    x = y;
+    y = r;
 
-	  if (!(i = fix(x)))
-	    return y;
-	  if (!(j = fix(y)))
-	    return x;
-	  k=0;
-	  while(!(i&0x1) && !(j&0x1)) {
-	      k++;
-	      i>>=1;
-	      j>>=1;
-	  }
-	  t= i&0x1 ? -j : i>>1; 
-	  do {
-	    while(!(t&0x1)) t>>=1;
-	    if(t>0) i=t; else j=-t;
-	    t=i-j;
-	  } while (t);
-	  return make_fixnum(i<<k);
+  }
 
-	}
-
-	if (number_compare(x, y) < 0) {
-		r = x;
-		x = y;
-		y = r;
-	}
-	if (type_of(y) == t_fixnum && fix(y) == 0) {
-		return(x);
-	}
-	integer_quotient_remainder_1(x, y, NULL, &r,0);
-	 x = y;
-	 y = r;
-	goto L;
 }
 
-/* (+          )   */
+
+object
+get_gcd(object x, object y) {
+  
+  return get_gcd_abs(number_abs(x),number_abs(y));
+
+}
+
 LFD(Lplus)(void)
 {
         fixnum i, j;
@@ -996,59 +967,60 @@ LFD(Lconjugate)(void)
 	}
 }
 
-LFD(Lgcd)(void)
-{
-	fixnum i, narg;
+LFD(Lgcd)(void) {
 
-	narg = vs_top - vs_base;
-	if (narg == 0) {
-		vs_push(small_fixnum(0));
-		return;
-	}
-	for (i = 0;  i < narg;  i++)
-		check_type_integer(&vs_base[i]);
-	if (narg == 1) {
-		if (number_minusp(vs_base[0]))
-			vs_base[0] = number_negate(vs_base[0]);
-		return;
-	}
-	for (i = 1;  i < narg;  i++)
-		vs_base[0] = get_gcd(vs_base[0], vs_base[i]);
-	vs_top = vs_base+1;
+  fixnum i, narg=vs_top-vs_base;
+  
+  if (narg == 0) {
+    vs_push(small_fixnum(0));
+    return;
+  }
+
+  for (i = 0;  i < narg;  i++)
+    check_type_integer(&vs_base[i]);
+
+  vs_top=vs_base;
+  vs_push(number_abs(vs_base[0]));
+  
+  for (i = 1;  i < narg;  i++)
+    vs_base[0] = get_gcd_abs(vs_base[0], number_abs(vs_base[i]));
+
 }
 
-LFD(Llcm)(void)
-{
-	object t, g;
-	fixnum i, narg;
+object
+get_lcm_abs(object x,object y) {
 
-	narg = vs_top - vs_base;
-	if (narg == 0)
-		too_few_arguments();
-	for (i = 0;  i < narg;  i++)
-		check_type_integer(&vs_base[i]);
-	if (narg == 1) {
-		if (number_minusp(vs_base[0]))
-			vs_base[0] = number_negate(vs_base[0]);
-		return;
-	}
-	for (i = 1;  i < narg;  i++) {
-	  if (number_zerop(vs_base[0]) ||
-	      number_zerop(vs_base[i]))
-	    vs_base[0]=small_fixnum(0);
-	  else {
-	    t = number_times(vs_base[0], vs_base[i]);
-	    vs_push(t);
-	    g = get_gcd(vs_base[0], vs_base[i]);
-	    vs_push(g);
-	    vs_base[0] = number_divide(t, g);
-	    vs_popp;
-	    vs_popp;
-	  }
-	}
-	if (number_minusp(vs_base[0]))
-		vs_base[0] = number_negate(vs_base[0]);
-	vs_top = vs_base+1;
+  object g=get_gcd_abs(x,y);
+
+  return number_zerop(g) ? g : number_times(x,integer_divide1(y,g,0));
+
+}
+
+object
+get_lcm(object x,object y) {
+
+  return get_lcm_abs(number_abs(x),number_abs(y));
+
+}
+
+LFD(Llcm)(void) {
+
+  fixnum i, narg;
+  
+  narg = vs_top - vs_base;
+
+  if (narg == 0)
+    too_few_arguments();
+
+  for (i = 0;  i < narg;  i++)
+    check_type_integer(&vs_base[i]);
+
+  vs_top=vs_base;
+  vs_push(number_abs(vs_base[0]));
+
+  for (i=1;i<narg && !number_zerop(vs_base[0]);i++)
+    vs_base[0]=get_lcm_abs(vs_base[0],number_abs(vs_base[i]));
+
 }
 
 void
