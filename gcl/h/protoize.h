@@ -1860,7 +1860,7 @@ reinit_gmp(void);
 object
 mod(object,object);
 
-void
+inline void
 intdivrem(object,object,fixnum,object *,object *);
 
 inline object
