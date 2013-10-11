@@ -168,6 +168,8 @@ LFD(Lget_internal_run_time)(void)
 	times(&buf);
 	vs_push(make_fixnum(buf.tms_utime));
 	vs_push(make_fixnum(buf.tms_cutime));
+	vs_push(make_fixnum(buf.tms_stime));
+	vs_push(make_fixnum(buf.tms_cstime));
 
 #endif	
 	
