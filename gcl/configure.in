@@ -496,7 +496,7 @@ if test "$GCC" = "yes" ; then
 	     *mingw*)
 	        echo "WARNING: Remove -fno-zero-initialized-in-bss from makedefs if gcc less than 3.3.1."
 	        echo "         It is ptherwise needed for the Unexec stuff to work."
-		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
+#		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
 		TCFLAGS="$TCFLAGS -fno-zero-initialized-in-bss -mms-bitfields";;
         esac
 fi
