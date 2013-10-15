@@ -118,6 +118,8 @@ MEM_GMP_CALL(3,void,mpz_sub,1,mpz_t,mpz_t,mpz_t)
 MEM_GMP_CALL(3,void,mpz_sub_ui,1,mpz_t,mpz_t,unsigned long int)
 MEM_GMP_CALL(3,void,mpz_mul,1,mpz_t,mpz_t,mpz_t)
 MEM_GMP_CALL(3,void,mpz_mul_si,1,mpz_t,mpz_t,long int)
+MEM_GMP_CALL(3,void,mpz_pow_ui,1,mpz_t,mpz_t,unsigned long int)
+MEM_GMP_CALL(3,void,mpz_ui_pow_ui,1,mpz_t,unsigned long int,unsigned long int)
 MEM_GMP_CALL(3,void,mpz_mul_2exp,1,mpz_t,mpz_t,unsigned long int)
 MEM_GMP_CALL(2,void,mpz_neg,1,mpz_t,mpz_t)
 MEM_GMP_CALL(4,void,mpz_tdiv_qr,2,mpz_t,mpz_t,mpz_t,mpz_t)
@@ -158,6 +160,8 @@ MEM_GMP_CALL(2,size_t,mpz_sizeinbase,0,mpz_t,int)
 #define __gmpz_sub_ui m__gmpz_sub_ui
 #define __gmpz_mul m__gmpz_mul
 #define __gmpz_mul_si m__gmpz_mul_si
+#define __gmpz_pow_ui m__gmpz_pow_ui
+#define __gmpz_ui_pow_ui m__gmpz_ui_pow_ui
 #define __gmpz_mul_2exp m__gmpz_mul_2exp
 #define __gmpz_neg m__gmpz_neg
 #define __gmpz_tdiv_qr m__gmpz_tdiv_qr
