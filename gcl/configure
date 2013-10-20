@@ -6736,7 +6736,6 @@ else
 	        #include <stdio.h>
 	        #include <stdlib.h>
 		void gprof_cleanup() {};
-		int *cs_org;
  		int main(int argc,char **argv,char **envp) {
 		#include "h/unrandomize.h"
 		return 0;}
@@ -6766,7 +6765,6 @@ else
 #include <stdio.h>
 	            #include <stdlib.h>
 		    void gprof_cleanup() {};
-		    int *cs_org;
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -6798,7 +6796,6 @@ else
 #include <stdio.h>
 	            #include <stdlib.h>
 		    void gprof_cleanup() {};
-		    int *cs_org;
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -6866,7 +6863,6 @@ else
         }
 
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	void *v ;
 	FILE *fp = fopen("conftest1","w");
@@ -6925,7 +6921,6 @@ else
         }
 
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	void *v ;
 	FILE *fp = fopen("conftest1","w");
@@ -6979,7 +6974,6 @@ else
 	#include <stdio.h>
 	#include <stdlib.h>
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	#ifdef CAN_UNRANDOMIZE_SBRK
 	#include "h/unrandomize.h"
@@ -7019,7 +7013,6 @@ else
 	#include <stdio.h>
 	#include <stdlib.h>
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	void *b,*c;
 	FILE *fp = fopen("conftest1","w");
@@ -7073,7 +7066,6 @@ else
 	}
 
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	char *b;
 	FILE *fp = fopen("conftest1","w");

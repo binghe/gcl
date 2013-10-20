@@ -1377,7 +1377,6 @@ if test "$HAVE_SBRK" = "1" ; then
 	        #include <stdio.h>
 	        #include <stdlib.h>
 		void gprof_cleanup() {};
-		int *cs_org;
  		int main(int argc,char **argv,char **envp) {
 		#include "h/unrandomize.h"
 		return 0;}]])],
@@ -1389,7 +1388,6 @@ if test "$HAVE_SBRK" = "1" ; then
 	AC_TRY_RUN([#include <stdio.h>
 	            #include <stdlib.h>
 		    void gprof_cleanup() {};
-		    int *cs_org;
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1405,7 +1403,6 @@ if test "$HAVE_SBRK" = "1" ; then
 	AC_TRY_RUN([#include <stdio.h>
 	            #include <stdlib.h>
 		    void gprof_cleanup() {};
-		    int *cs_org;
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1490,7 +1487,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
         }
 
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	void *v ;
 	FILE *fp = fopen("conftest1","w");
@@ -1525,7 +1521,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
         }
 
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	void *v ;
 	FILE *fp = fopen("conftest1","w");
@@ -1555,7 +1550,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
 	#include <stdlib.h>
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	#ifdef CAN_UNRANDOMIZE_SBRK
 	#include "h/unrandomize.h"
@@ -1573,7 +1567,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	#include <stdio.h>
 	#include <stdlib.h>
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	void *b,*c;
 	FILE *fp = fopen("conftest1","w");
@@ -1603,7 +1596,6 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 	}
 
 	void gprof_cleanup() {};
-	int *cs_org;
 	int main(int argc,char **argv,char **envp) {
 	char *b;
 	FILE *fp = fopen("conftest1","w");
