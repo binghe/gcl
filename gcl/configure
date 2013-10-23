@@ -4269,6 +4269,7 @@ done
 # Work around system/gprof mips/hppa hang
 case $use in
   sh4*)  enable_gprof="no";;
+  ia64*)  enable_gprof="no";;
 #  mips*) enable_gprof="no";;
   hppa*) enable_gprof="no";;
   arm*)  enable_gprof="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
