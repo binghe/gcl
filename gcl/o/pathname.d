@@ -110,6 +110,8 @@ int start, end, *ep;
 #ifdef UNIX
 			if (i-j == 1 && s->st.st_self[j] == '.') {
 				vs_push(sKcurrent);
+			} else if (i-j == 1 && s->st.st_self[j] == '*') {
+				vs_push(sKwild);
 			} else if (i-j==2 && s->st.st_self[j]=='.' && s->st.st_self[j+1]=='.') {
 				vs_push(sKparent);
 			} else {
@@ -333,6 +335,10 @@ D:	l = x->pn.pn_directory;
 #ifdef UNIX
 		if (y == sKcurrent) {
 			token->st.st_self[i++] = '.';
+			token->st.st_self[i++] = '/';
+			continue;
+		} else if (y == sKwild) {
+			token->st.st_self[i++] = '*';
 			token->st.st_self[i++] = '/';
 			continue;
 		} else if (y == sKparent) {

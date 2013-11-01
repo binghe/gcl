@@ -26,6 +26,7 @@
 
 
 (export '(with-open-stream with-input-from-string with-output-to-string 
+			   ensure-directories-exist wild-pathname-p
 			   read-byte write-byte read-sequence write-sequence))
 (export '(read-from-string))
 (export '(write-to-string prin1-to-string princ-to-string))
@@ -290,3 +291,29 @@
 	  (*read-suppress* nil)
 	  (*readtable* (copy-readtable (si::standard-readtable))));FIXME copy?
      ,@body))
+
+(defun ensure-directories-exist (ps &key verbose &aux created)
+  (when (wild-pathname-p ps)
+    (error 'file-error :pathname ps :format-control "Pathname is wild"))
+  (labels ((d (x y &aux (z (ldiff x y)) (p (make-pathname :directory z)))
+	      (when (when z (stringp (car (last z))))
+		(unless (eq :directory (car (stat p)))
+		  (mkdir (namestring p))
+		  (setq created t)
+		  (when verbose (format *standard-output* "Creating directory ~s~%" p))))
+	      (when y (d x (cdr y)))))
+    (let ((pd (pathname-directory ps)))
+      (d pd (cdr pd)))
+    (values ps created)))
+
+#.(let ((g '(:host :device :directory :name :type :version)))
+     `(defun wild-pathname-p (pd &optional f &aux (p (pathname pd)))
+       (declare (optimize (safety 1)))
+       (check-type f (or null (member ,@g)))
+       (labels ((w-f (x)
+		     (case x
+		       ,@(mapcar (lambda (x &aux (f (intern (string-concatenate "PATHNAME-" (string-upcase x)))))
+				   `(,x ,(if (eq x :directory) `(when (member :wild (,f p)) t) `(eq :wild (,f p))))) g))))
+	 (if f 
+	     (w-f f)
+	   (reduce (lambda (z x) (or z (w-f x))) ',g :initial-value nil)))))

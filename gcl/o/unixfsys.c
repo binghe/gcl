@@ -782,56 +782,28 @@ LFD(Ldirectory)()
 #endif
 
 
-#ifdef DGUX
+DEFUN_NEW("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  char filename[MAXPATHLEN];
+
+  check_type_string(&x);
+
+  memcpy(filename,x->st.st_self,x->st.st_fillp);
+  filename[x->st.st_fillp]=0;
+
+#ifdef __MINGW32__
+  if (mkdir(filename) < 0)
+#else        
+  if (mkdir(filename,01777) < 0)
+#endif        
+    FEerror("Cannot make the directory ~S.", 1, vs_base[0]);
+
+  RETURN1(x);
+
+}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
 
 static void
 FFN(siLchdir)(void)
