@@ -781,6 +781,30 @@ LFD(Ldirectory)()
 }
 #endif
 
+#include <sys/types.h>
+#include <dirent.h>
+
+DEFUN_NEW("OPENDIR",fixnum,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  DIR *d;
+  char filename[MAXPATHLEN];
+  check_type_string(&x);
+  memcpy(filename,x->st.st_self,x->st.st_fillp);
+  filename[x->st.st_fillp]=0;
+  d=opendir(filename);
+  return (fixnum)d;
+}
+  
+DEFUN_NEW("READDIR",object,fSreaddir,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
+  struct dirent *e;
+  if (!x) RETURN1(Cnil);
+  e=readdir((DIR *)x);
+  RETURN1(e ? make_simple_string(e->d_name) : Cnil);
+}
+
+DEFUN_NEW("CLOSEDIR",object,fSclosedir,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
+  closedir((DIR *)x);
+  return Cnil;
+}
 
 DEFUN_NEW("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
