@@ -190,56 +190,51 @@ DEFUN_NEW("HASH-EQUAL",object,fShash_equal,SI,2,2,NONE,OO,IO,OO,OO,(object x,fix
   RETURN1(make_fixnum(ihash_equal(x,depth)));
 }
 
-struct htent *
-gethash(key, hashtable)
-object key;
-object hashtable;
-{
-	enum httest htest;
-	int hsize;
-	struct htent *e;
-	object hkey;
-	int i=0, j = -1, k; /* k added by chou */
-	bool b=FALSE;
 
-	htest = (enum httest)hashtable->ht.ht_test;
-	hsize = hashtable->ht.ht_size;
-	if (htest == htt_eq)
-		i = (long)key / 4;
-	else if (htest == htt_eql)
-		i = hash_eql(key);
-	else if (htest == htt_equal)
-		i = ihash_equal(key,0);
-	i &= 0x7fffffff;
-	for (i %= hsize, k = 0; k < hsize;  i = (i + 1) % hsize, k++) { /* k added by chou */
-		e = &hashtable->ht.ht_self[i];
-		hkey = e->hte_key;
-		if (hkey == OBJNULL) {
-			if (e->hte_value == OBJNULL)
-				if (j < 0)
-					return(e);
-				else
-					return(&hashtable->ht.ht_self[j]);
-			else
-				if (j < 0)
-					j = i;
-				else if (j==i)
-				  /* this was never returning --wfs
-				     but looping around with j=0 */
-				  return(e) 
-					;
-			continue;
-		}
-		if (htest == htt_eq)
-		    	b = key == hkey;
-		else if (htest == htt_eql)
-			b = eql(key, hkey);
-		else if (htest == htt_equal)
-			b = equal(key, hkey);
-		if (b)
-			return(&hashtable->ht.ht_self[i]);
-	}
-	return(&hashtable->ht.ht_self[j]);	/* added by chou */
+struct htent *
+gethash(object key, object hashtable) {
+
+  enum httest htest;
+  long hsize,j,s,q;
+  struct htent *e,*first_objnull=NULL;
+  object hkey;
+  static struct htent dummy={OBJNULL,OBJNULL};
+  
+  if (!hashtable->ht.ht_size)
+    return &dummy;
+
+  htest = (enum httest)hashtable->ht.ht_test;
+  hsize = hashtable->ht.ht_size;
+
+#define eq(x,y) x==y
+#define hash_loop(t_,i_)						\
+  for (s=i_%hsize,q=hsize,e=first_objnull;s>=0;q=s,s=s?0:-1)		\
+    for (j=s;j<q;j++) {							\
+      e = &hashtable->ht.ht_self[j];					\
+      hkey = e->hte_key;						\
+      if (hkey==OBJNULL) {						\
+	if (e->hte_value==OBJNULL) return first_objnull ? first_objnull : e; \
+	if (!first_objnull) first_objnull=e;				\
+      } else if (t_(key,hkey)) return e;				\
+    }
+
+  switch (htest) {
+  case htt_eq:
+    hash_loop(eq,MHSH((long)key>>3));
+    break;
+  case htt_eql:
+    hash_loop(eql,hash_eql(key));
+    break;
+  case htt_equal:
+    hash_loop(equal,ihash_equal(key,0));
+    break;
+  default:
+    FEerror( "gethash:  Hash table not of type EQ, EQL, or EQUAL." ,0);
+    return &dummy;
+  }
+  
+  return first_objnull ? first_objnull : (FEerror("No free spot in hashtable ~S.", 1, hashtable),&dummy);
+
 }
 
 static void
