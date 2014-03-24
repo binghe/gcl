@@ -8622,13 +8622,12 @@ $as_echo "$INFO_DIR" >&6; }
 
 if test "$enable_tcltk" = "yes" ; then
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for tcl/tk" >&5
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for tcl/tk" >&5
 $as_echo_n "checking for tcl/tk... " >&6; }
 
+   if test -d "${TCL_CONFIG_PREFIX}"  ; then true ; else
 
-if test -d "${TCL_CONFIG_PREFIX}"  ; then true ; else
-
-  # Extract the first word of "tclsh", so it can be a program name with args.
+     # Extract the first word of "tclsh", so it can be a program name with args.
 set dummy tclsh; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
 $as_echo_n "checking for $ac_word... " >&6; }
@@ -8667,76 +8666,76 @@ fi
 
 
 
-  if test "${TCLSH}" = "" ; then true ; else
+     if test "${TCLSH}" = "" ; then true ; else
 
-     rm -f conftest.tcl
-     cat >> conftest.tcl <<EOF
+        rm -f conftest.tcl
+        cat >> conftest.tcl <<EOF
 
 puts [set tcl_version]
 
 EOF
 
-     TCL_VERSION=`${TCLSH} < conftest.tcl`
-  fi
+        TCL_VERSION=`${TCLSH} < conftest.tcl`
+     fi
 
-  if test -x /usr/lib/tcl$TCL_VERSION/tclConfig.sh ; then
-    TCL_CONFIG_PREFIX=/usr/lib/tcl$TCL_VERSION
-  fi
+     if test -x /usr/lib/tcl$TCL_VERSION/tclConfig.sh ; then
+       TCL_CONFIG_PREFIX=/usr/lib/tcl$TCL_VERSION
+     fi
 
-fi
+   fi
 
-if test -f ${TCL_CONFIG_PREFIX}/tclConfig.sh  ; then . ${TCL_CONFIG_PREFIX}/tclConfig.sh ; fi
+   if test -f ${TCL_CONFIG_PREFIX}/tclConfig.sh  ; then . ${TCL_CONFIG_PREFIX}/tclConfig.sh ; fi
 
-if test -d "${TK_CONFIG_PREFIX}"  ; then true ; else
-   if test -f ${TCL_CONFIG_PREFIX}/tkConfig.sh ; then
-      TK_CONFIG_PREFIX=${TCL_CONFIG_PREFIX}
-   else
-      if test -x `echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`/tkConfig.sh ; then
-         TK_CONFIG_PREFIX=`echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`
+   if test -d "${TK_CONFIG_PREFIX}"  ; then true ; else
+      if test -f ${TCL_CONFIG_PREFIX}/tkConfig.sh ; then
+         TK_CONFIG_PREFIX=${TCL_CONFIG_PREFIX}
+      else
+         if test -x `echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`/tkConfig.sh ; then
+            TK_CONFIG_PREFIX=`echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`
+         fi
       fi
    fi
-fi
 
-if test -f ${TK_CONFIG_PREFIX}/tkConfig.sh  ; then . ${TK_CONFIG_PREFIX}/tkConfig.sh ; fi
+   if test -f ${TK_CONFIG_PREFIX}/tkConfig.sh  ; then . ${TK_CONFIG_PREFIX}/tkConfig.sh ; fi
 
-if test -d ${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION} ; then
-   TCL_LIBRARY=${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION}
-else
-   if test -d ${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION} ; then
-     TCL_LIBRARY=${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION}
+   if test -d ${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION} ; then
+      TCL_LIBRARY=${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION}
+   else
+      if test -d ${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION} ; then
+        TCL_LIBRARY=${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION}
+      fi
    fi
-fi
 
-if test -d ${TK_CONFIG_PREFIX}/tk${TK_VERSION} ; then
-   TK_LIBRARY=${TK_CONFIG_PREFIX}/tk${TK_VERSION}
-else
-   if test -d ${TK_CONFIG_PREFIX}/../tk${TK_VERSION} ; then
-     TK_LIBRARY=${TK_CONFIG_PREFIX}/../tk${TK_VERSION}
+   if test -d ${TK_CONFIG_PREFIX}/tk${TK_VERSION} ; then
+      TK_LIBRARY=${TK_CONFIG_PREFIX}/tk${TK_VERSION}
+   else
+      if test -d ${TK_CONFIG_PREFIX}/../tk${TK_VERSION} ; then
+        TK_LIBRARY=${TK_CONFIG_PREFIX}/../tk${TK_VERSION}
+      fi
    fi
-fi
 
-if test -f ${TCL_CONFIG_PREFIX}/../include/tcl.h ; then
-   TCL_INCLUDE=-I${TCL_CONFIG_PREFIX}/../include
-else
-   if test -f /usr/include/tcl${TCL_VERSION}/tcl.h ; then
-     TCL_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
+   if test -f ${TCL_CONFIG_PREFIX}/../include/tcl.h ; then
+      TCL_INCLUDE=-I${TCL_CONFIG_PREFIX}/../include
+   else
+      if test -f /usr/include/tcl${TCL_VERSION}/tcl.h ; then
+        TCL_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
+      fi
    fi
-fi
 
-if test -f ${TK_CONFIG_PREFIX}/../include/tk.h ; then
-   TK_INCLUDE=-I${TK_CONFIG_PREFIX}/../include
-else
-   if test -f /usr/include/tcl${TCL_VERSION}/tk.h ; then
-     TK_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
+   if test -f ${TK_CONFIG_PREFIX}/../include/tk.h ; then
+      TK_INCLUDE=-I${TK_CONFIG_PREFIX}/../include
+   else
+      if test -f /usr/include/tcl${TCL_VERSION}/tk.h ; then
+        TK_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
+      fi
    fi
-fi
 
-TCL_VERSION_DOT_FREE=`echo ${TCL_VERSION} | tr -d .`
-if test -f ${TK_CONFIG_PREFIX}/../bin/tcl${TCL_VERSION_DOT_FREE}.dll  ; then
-   TCL_LIBS="-L${TK_CONFIG_PREFIX}/../bin -ltk${TCL_VERSION_DOT_FREE} -ltcl${TCL_VERSION_DOT_FREE}"
-   TCL_STUB_LIBS="-L${TK_CONFIG_PREFIX}/lib -ltkstub${TCL_VERSION_DOT_FREE} -ltclstub${TCL_VERSION_DOT_FREE}"
-else
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -llieee" >&5
+   TCL_VERSION_DOT_FREE=`echo ${TCL_VERSION} | tr -d .`
+   if test -f ${TK_CONFIG_PREFIX}/../bin/tcl${TCL_VERSION_DOT_FREE}.dll  ; then
+      TCL_LIBS="-L${TK_CONFIG_PREFIX}/../bin -ltk${TCL_VERSION_DOT_FREE} -ltcl${TCL_VERSION_DOT_FREE}"
+      TCL_STUB_LIBS="-L${TK_CONFIG_PREFIX}/lib -ltkstub${TCL_VERSION_DOT_FREE} -ltclstub${TCL_VERSION_DOT_FREE}"
+   else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -llieee" >&5
 $as_echo_n "checking for main in -llieee... " >&6; }
 if ${ac_cv_lib_lieee_main+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -8772,13 +8771,15 @@ else
   have_ieee=0
 fi
 
-   if test "$have_ieee" = "0" ; then
-     TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-lieee::g" `
+      if test "$have_ieee" = "0" ; then
+        TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-lieee::g" `
+      fi
+      if test "$have_dl" = "0" ; then
+        TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-ldl::g"`
+      fi
+      TCL_STUB_LIBS=""
    fi
-   if test "$have_dl" = "0" ; then
-     TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-ldl::g"`
-   fi
-   TCL_STUB_LIBS=""
+
 fi
 
 
