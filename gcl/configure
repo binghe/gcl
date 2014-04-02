@@ -4346,6 +4346,7 @@ case $use in
 #			TCFLAGS="$TCFLAGS -ffloat-store";;
 		hppa*)
 			TCFLAGS="$TCFLAGS -mlong-calls "
+			TLIBS="$TLIBS -lgcc_s" # workaround hppa __moddi3 local func symbols with default linker flags
 #			TCFLAGS="$TCFLAGS -ffunction-sections"
 #			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O $TFPFLAG" ; fi
 #			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
@@ -5025,7 +5026,7 @@ else
 /* end confdefs.h.  */
 #include <gmp.h>
 				    int main() {
-				    #if __GNU_MP_VERSION == 4 || __GNU_MP_VERSION == 5
+				    #if __GNU_MP_VERSION > 3
 					return 0;
 				    #else
 					return -1;
