@@ -613,8 +613,8 @@
     ;; We can't read in long-floats which are too big:
     (let* (sc (vv (cond ((> (abs val) (/ most-positive-long-float 2))
 			 (add-object `(si::|#,| * ,(/ val most-positive-long-float) most-positive-long-float)))
-			((< (abs val) (* least-positive-long-float 1.0d20))
-			 (add-object `(si::|#,| * ,(/ val least-positive-long-float) least-positive-long-float)))
+			((< (abs val) (* least-positive-normalized-long-float 2.0))
+			 (add-object `(si::|#,| * ,(/ val least-positive-normalized-long-float) least-positive-normalized-long-float)))
 			((setq sc t) (add-object val)))))
       `(location ,(make-info :type 'long-float)
 		 ,(if sc (list 'LONG-FLOAT-VALUE vv val) (list 'vv vv)))))
