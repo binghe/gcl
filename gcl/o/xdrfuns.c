@@ -24,7 +24,11 @@ License for more details.
 #ifdef AIX3
 #include <sys/select.h>
 #endif
+#ifdef __CYGWIN__
+#include <rpc/xdr.h>
+#else  /* __CYGWIN__ */
 #include <rpc/rpc.h>
+#endif /* __CYGWIN__ */
 
 extern short aet_sizes[];
 static object

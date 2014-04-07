@@ -25,6 +25,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	This file contains those functions that interpret namestrings.
 */
 
+#include <string.h>
 #include "include.h"
 
 
@@ -400,7 +401,7 @@ N:
 #ifdef FIX_FILENAME
         {char buf[MAXPATHLEN];
          if (i > MAXPATHLEN-1) i =MAXPATHLEN-1;
-         bcopy(token->st.st_self,buf,i);
+         memcpy(buf,token->st.st_self,i);
          buf[i]=0;
          FIX_FILENAME(x,buf);
          return (make_simple_string(buf));

@@ -96,6 +96,9 @@ static object stack_space;
 #ifdef _WIN32
 unsigned int _dbegin = 0x10100000;
 #endif
+#ifdef __CYGWIN__
+unsigned long _dbegin = 0;
+#endif
 
 int cssize;
 
@@ -605,6 +608,8 @@ static void
 initlisp(void) {
 
         void *v=&v;
+	
+	gcl_init_alloc();
 
 	if (NULL_OR_ON_C_STACK(v) == 0
 #if defined(IM_FIX_BASE)
@@ -629,8 +634,6 @@ initlisp(void) {
 		  core_end-1,NULL_OR_ON_C_STACK(core_end-1));
 	  error("NULL_OR_ON_C_STACK macro invalid");
 	}
-	
-	gcl_init_alloc();
 	
 	Cnil->fw=0;
 	set_type_of(Cnil,t_symbol);
