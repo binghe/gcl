@@ -78,8 +78,8 @@ char stdin_buf[BUFSIZ + EXTRA_BUFSIZE];
 char stdout_buf[BUFSIZ + EXTRA_BUFSIZE];
 
 int debug;			/* debug switch */
-int initflag = FALSE;		/* initialized flag */
-int raw_image = FALSE;		/* raw or saved image */
+/* int initflag = FALSE;		/\* initialized flag *\/ */
+int raw_image = TRUE;		/* raw or saved image */
 
 long real_maxpage;
 object sSAlisp_maxpagesA;
@@ -325,7 +325,7 @@ main(int argc, char **argv, char **envp) {
 	ENVP = envp;
 #endif
 
-	if (!initflag) {
+	if (raw_image) {
 
 		system_directory= (char *) malloc(strlen(argv[1])+3);
 					
@@ -358,7 +358,7 @@ main(int argc, char **argv, char **envp) {
 
 #endif
 
-	if (!initflag && argc > 1) {
+	if (raw_image && argc > 1) {
 #ifdef UNIX
 		if (argv[1][strlen(argv[1])-1] != '/')
 #endif
@@ -475,7 +475,7 @@ main(int argc, char **argv, char **envp) {
 	  error("Cannot setup gprof_cleanup on exit");
 #endif
 
-	if (initflag) {
+	if (!raw_image) {
 
 #ifdef _WIN32
 	  detect_wine();
@@ -498,7 +498,7 @@ main(int argc, char **argv, char **envp) {
 #endif			  
 		}
 
-		initflag = FALSE;
+		/* initflag = FALSE; */
 		GBC_enable = TRUE;
 		vs_base = vs_top;
 		ihs_push(Cnil);
@@ -509,7 +509,7 @@ main(int argc, char **argv, char **envp) {
 		install_default_signals();
 
 		sSAlisp_maxpagesA->s.s_dbind = make_fixnum(real_maxpage);
-		initflag = TRUE;
+		/* initflag = TRUE; */
 #ifdef KCLOVM
 		ovm_user_context_change = change_contexts;
 		ovm_user_context_initialize = initialize_process;
@@ -560,11 +560,11 @@ main(int argc, char **argv, char **envp) {
 
 	lex_new();
 	vs_base = vs_top;
-	initflag = TRUE;
+	/* initflag = TRUE; */
 
 	interrupt_enable = TRUE;
 
-	raw_image=TRUE;
+	/* raw_image=TRUE; */
 
 	super_funcall(sStop_level);
 

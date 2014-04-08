@@ -60,7 +60,7 @@ FFN(Fdefun)(object args)
 		 FEerror("~S, a special form, cannot be redefined.", 1, name);
 	}
 	if (name->s.s_hpack == lisp_package &&
-	    name->s.s_gfdef != OBJNULL && initflag) {
+	    name->s.s_gfdef != OBJNULL && !raw_image) {
 		vs_push(make_simple_string(
 			"~S is being redefined."));
 		ifuncall2(sLwarn, vs_head, name);
