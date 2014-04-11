@@ -368,7 +368,8 @@ main(int argc, char **argv, char **envp) {
 		strcpy(system_directory, argv[1]);
 	}
 
-	GBC_enable = FALSE;
+	/* GBC_enable = FALSE; */
+	set_maxpage();
 
 	/* if stack_space not zero we have grown the stack space */
 	if (stack_space == 0)
@@ -445,7 +446,6 @@ main(int argc, char **argv, char **envp) {
 
 #endif
         
-	set_maxpage();
 #ifdef SETUP_SIG_STACK
 	SETUP_SIG_STACK
 #else

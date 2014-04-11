@@ -1231,7 +1231,7 @@ GBC(enum type t) {
     (*GBC_enter_hook)();
   
   if (!GBC_enable)
-    error("GBC is not enabled");
+      error("GBC is not enabled");
   interrupt_enable = FALSE;
   
   if (saving_system)
