@@ -33,9 +33,7 @@ struct bds_bd {
 
 typedef struct bds_bd *bds_ptr;
 
-EXTER bds_ptr bds_org;
-
-EXTER bds_ptr bds_limit;
+extern bds_ptr bds_org,bds_limit;
 
 EXTER bds_ptr bds_top;		/*  bind stack top  */
 

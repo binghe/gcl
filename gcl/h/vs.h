@@ -25,8 +25,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	value stack
 */
 
-EXTER object *vs_org;
-EXTER object *vs_limit;	/*  value stack limit  */
+extern object *vs_org,*vs_limit;	/*  value stack limit  */
 
 EXTER object *vs_base;	/*  value stack base  */
 EXTER object *vs_top;		/*  value stack top  */

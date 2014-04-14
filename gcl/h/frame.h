@@ -34,9 +34,7 @@ typedef struct invocation_history {
 	object	*ihs_base;
 } *ihs_ptr;
 
-EXTER ihs_ptr ihs_org;
-
-EXTER ihs_ptr ihs_limit;
+extern ihs_ptr ihs_org,ihs_limit;
 
 EXTER ihs_ptr ihs_top;
 
@@ -105,9 +103,7 @@ PROTECT   |               NIL                    |
 */
 
 
-EXTER frame_ptr frs_org;
-
-EXTER frame_ptr frs_limit;
+extern frame_ptr frs_org,frs_limit;
 
 EXTER frame_ptr frs_top;		/* frame stack top */
 
