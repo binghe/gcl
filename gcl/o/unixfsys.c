@@ -793,6 +793,8 @@ DEFUN_NEW("OPENDIR",fixnum,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   d=opendir(filename);
   return (fixnum)d;
 }
+
+#ifdef HAVE_D_TYPE
   
 DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") {
   RETURN1(list(8,
@@ -806,6 +808,7 @@ DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") 
 	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
 	       ));
 }
+#endif
 
 DEFUN_NEW("READDIR",object,fSreaddir,SI,2,2,NONE,OI,IO,OO,OO,(fixnum x,fixnum y),"") {
   struct dirent *e;
@@ -813,10 +816,14 @@ DEFUN_NEW("READDIR",object,fSreaddir,SI,2,2,NONE,OI,IO,OO,OO,(fixnum x,fixnum y)
   if (!x) RETURN1(Cnil);
   e=readdir((DIR *)x);
   RETURN1(e ? make_simple_string(e->d_name) : Cnil);
+#ifdef HAVE_D_TYPE
   for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && e->d_type!=y;);
+#endif
   if (!e) RETURN1(Cnil);
   z=make_simple_string(e->d_name);
+#ifdef HAVE_D_TYPE
   if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(e->d_type));
+#endif
   RETURN1(z);
 }
 
