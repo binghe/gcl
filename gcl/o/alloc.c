@@ -1008,6 +1008,8 @@ static void init_textpage() {
 
 object malloc_list=Cnil;
 
+#include <signal.h>
+
 void
 gcl_init_alloc(void *cs_start) {
 
@@ -1071,7 +1073,6 @@ gcl_init_alloc(void *cs_start) {
   SETUP_SIG_STACK
 #else
 #if defined(HAVE_SIGACTION) || defined(HAVE_SIGVEC)
-#include <signal.h>
     {
       /* make sure the stack is 8 byte aligned */
       static double estack_buf[32*SIGSTKSZ];
