@@ -1899,3 +1899,7 @@ object
 number_dpb(object,object,object);
 object
 number_dpf(object,object,object);
+
+#if defined(DARWIN)
+void init_darwin_zone_compat ();
+#endif
