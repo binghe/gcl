@@ -287,3 +287,4 @@ gcl_init_cmp_anon(void);
 
 extern bool writable_malloc;
 #define writable_malloc_wrap(f_,rt_,a_...) ({rt_ v;bool w=writable_malloc;writable_malloc=1;v=f_(a_);writable_malloc=w;v;})
+#define fopen(a_,b_) writable_malloc_wrap(fopen,FILE *,a_,b_)
