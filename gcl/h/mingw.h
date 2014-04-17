@@ -140,7 +140,6 @@ extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
         ungetc(i, fp); \
     } while (0)
 		
-#define FCLOSE_SETBUF_OK 
 #define	IEEEFLOAT
 #define I386
 
