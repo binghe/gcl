@@ -284,3 +284,6 @@ gcl_init_cmp_anon(void);
 #include "gmp_wrappers.h"
 
 #define massert(a_) if (!(a_)) assert_error(#a_,__LINE__,__FILE__,__FUNCTION__)
+
+extern bool writable_malloc;
+#define writable_malloc_wrap(f_,rt_,a_...) ({rt_ v;bool w=writable_malloc;writable_malloc=1;v=f_(a_);writable_malloc=w;v;})
