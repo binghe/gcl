@@ -1289,9 +1289,6 @@ void
 Lwrite_byte(void);
 
 void
-unlink_loaded_files(void);
-
-void
 FEpackage_error(object,const char *s);
 
 int

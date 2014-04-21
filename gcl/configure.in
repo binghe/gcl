@@ -962,6 +962,7 @@ dnl	AC_SEARCH_LIBS(dlopen, dl, have_dl=1, AC_ERROR(dlopen not found))
 dnl LIBS and TLIBS - why not merged from the beginning?
 
 	TLIBS="$TLIBS -ldl -rdynamic"
+	TCFLAGS="-fPIC $TCFLAGS"
 dnl	TLIBS="$TLIBS -rdynamic"
 	AC_DEFINE(USE_DLOPEN,1,[link compiled objects via libdl])
 fi
