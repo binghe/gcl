@@ -304,8 +304,7 @@ main(int argc, char **argv, char **envp) {
     
     if (argc>1) {
       massert(argv[1][strlen(argv[1])-1]=='/');
-      system_directory= (char *) malloc(strlen(argv[1])+3);
-      strcpy(system_directory, argv[1]);
+      system_directory=argv[1];
     }
 
     initlisp();
@@ -326,13 +325,16 @@ main(int argc, char **argv, char **envp) {
     reinit_gmp();
 #endif
     gcl_init_big1();
+#ifdef HAVE_READLINE
+    gcl_init_readline_function();
+#endif
 
   }
 
 #ifdef _WIN32
   detect_wine();
 #endif
-  
+
   sSAlisp_maxpagesA->s.s_dbind = make_fixnum(real_maxpage);
 
   ihs_push(Cnil);
@@ -527,7 +529,7 @@ initlisp(void) {
 	gcl_init_cmac();
 #endif	
 #ifdef HAVE_READLINE
-        gcl_init_readline_function();
+	gcl_init_readline();
 #endif
 
 }
