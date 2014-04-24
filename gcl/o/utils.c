@@ -64,18 +64,6 @@ void Wrong_type_error(char *str,int n,...) {
 /* } */
 
 object
-Iapply_ap_new(object (*f) (/* ??? */), object first, va_list ap)
-/* Apply f to the va_list ap, with an implicit number of args
-   passed in VFUN_NARGS */
-           
-              
-{ int n = VFUN_NARGS;
-  object *new;
-  COERCE_VA_LIST_NEW(new,first,ap,n);
-  return c_apply_n(f,n,new);
-}
-
-object
 Ifuncall_n(object fun,int n,...) {
 /* call fun on the n optional args supplied, and set the fcall.nvalues etc
    return the first value */

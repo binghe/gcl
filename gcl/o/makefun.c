@@ -82,12 +82,17 @@ closure.")
   return sym;
 }
 
+#include "apply_n.h"
+
 DEFUN_NEW("INITMACRO",object,fSinitmacro,SI,4,ARG_LIMIT,NONE,OO,OO,OO,OO,(object first,...),
       "Like INITFUN, but makes then sets the 'macro' flag on this symbol")
 {va_list ap;
  object res;
+ int n = VFUN_NARGS;
+ object *new;
  va_start(ap,first);
- res = Iapply_ap_new((object (*)())FFN(fSinitfun),first,ap);
+ COERCE_VA_LIST_NEW(new,first,ap,n);
+ res= c_apply_n_f((void *)FFN(fSinitfun),n,new,3,ARG_LIMIT);
  va_end(ap);
  res->s.s_mflag = 1;
  return res;

@@ -232,7 +232,6 @@ typedef void (*funcvoid)(void);
 /* frame.c:69:OF */ extern frame_ptr frs_sch_catch (object frame_id); /* (frame_id) object frame_id; */
 /* funlink.c:19:OF */ extern void call_or_link (object sym, void **link); /* (sym, link) object sym; void **link; */
 /* funlink.c:41:OF */ extern void call_or_link_closure (object sym, void **link, void **ptr); /* (sym, link, ptr) object sym; void **link; object *ptr; */
-/* funlink.c:230:OF */ extern object c_apply_n (object (*fn)(), int n, object *x); /* (fn, n, x) long int (*fn)(); int n; object *x; */
 /* funlink.c:696:OF */ extern object call_proc0 (object sym, void *link); /* (sym, link) object sym; void *link; */
 /* funlink.c:784:OF */ extern int clear_stack (object *beg, object *limit); /* (beg, limit) object *beg; object *limit; */
 /* funlink.c:821:OF */ extern void gcl_init_links (void); /* () */
@@ -557,6 +556,9 @@ typedef void (*funcvoid)(void);
 
 /*  readline.d */
 extern int readline_on;
+void
+gcl_init_readline(void);
+
 void
 gcl_init_readline_function(void);
 

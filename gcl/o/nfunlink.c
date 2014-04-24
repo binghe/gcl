@@ -175,6 +175,8 @@ union {int i;
 /*     return bil.f;} */
 /* } */
 
+#include "apply_n.h"
+
 object
 IapplyVector(object fun, int nargs, object *base)
                       
@@ -226,7 +228,7 @@ IapplyVector(object fun, int nargs, object *base)
 	       vs_push(next);}
 
 	 }
-    res = c_apply_n(fun->sfn.sfn_self,nargs,abase);
+    res = c_apply_n_fun(fun,nargs,abase);
     res = COERCE_F_TYPE(res,F_RESULT_TYPE(fun->sfn.sfn_argd),F_object);
     if (F_ARG_FLAGS_P(fun->sfn.sfn_argd,F_caller_sets_one_val))
       { fcall.nvalues = 1;}
@@ -290,7 +292,7 @@ Iinvoke_c_function_from_value_stack(object (*f)(), int fargd)
 	    x[i] = COERCE_F_TYPE(next,F_object,F_double_ptr);}
       else {FEerror("cant get here!",0);}}
   VFUN_NARGS = nargs;
-  res = c_apply_n(f,nargs,x);
+  res = c_apply_n_f(f,nargs,x,min,max);
   res = COERCE_F_TYPE(res,F_RESULT_TYPE(fargd),F_object);
   base[0]=res;
   if (F_ARG_FLAGS_P(fargd,F_caller_sets_one_val))
