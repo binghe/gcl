@@ -433,7 +433,10 @@ if test "$enable_static" = "yes" ; then
    TLDFLAGS="-static -Wl,-zmuldefs $TLDFLAGS"; #FIXME should be in unixport/makefile
    AC_DEFINE(STATIC_LINKING,1,[staticly linked images])
 fi
-
+case $use in
+     *gnuwin*)
+	TLDFLAGS="$TLDFLAGS -Wl,--stack,8000000";;
+esac
 
 ## finally warn if we did not find a recognized machine.s
 ##

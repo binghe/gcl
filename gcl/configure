@@ -3187,7 +3187,10 @@ if test "$enable_static" = "yes" ; then
 $as_echo "#define STATIC_LINKING 1" >>confdefs.h
 
 fi
-
+case $use in
+     *gnuwin*)
+	TLDFLAGS="$TLDFLAGS -Wl,--stack,8000000";;
+esac
 
 ## finally warn if we did not find a recognized machine.s
 ##
