@@ -1794,11 +1794,6 @@ int sigprocmask ( int how, const sigset_t *set, sigset_t *oldset );
 void recreate_heap1 ( void );
 #endif
 
-#if defined (__CYGWIN__)
-void
-cygwin_conv_to_full_win32_path(char *,char *);
-#endif
-
 #ifdef GCL_GPROF
 void
 gprof_cleanup(void);

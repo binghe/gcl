@@ -219,6 +219,7 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   char filename[MAX_PATH];
   unsigned long size;
   char *ptr;
+  extern void cygwin_conv_to_full_win32_path(char *,char *);
 
   fflush (stdin);
   /* copy_stdin = *stdin; */
