@@ -1780,7 +1780,6 @@ int bcmp ( const void *s1, const void *s2, size_t n );
 void bcopy ( const void *s1, void *s2, size_t n );
 void bzero(void *b, size_t length);
 int TcpOutputProc ( int fd, char *buf, int toWrite, int *errorCodePtr, int block );
-void recreate_heap1 ( void );
 void gcl_init_shared_memory ( void );
 void fix_filename ( object pathname, char *filename1 );
 void alarm ( int n );
@@ -1789,6 +1788,15 @@ void sigemptyset( sigset_t *set);
 void sigaddset ( sigset_t *set, int n);
 int sigismember ( sigset_t *set, int n );
 int sigprocmask ( int how, const sigset_t *set, sigset_t *oldset );
+#endif
+
+#if defined (__MINGW32__) || defined (__CYGWIN__)
+void recreate_heap1 ( void );
+#endif
+
+#if defined (__CYGWIN__)
+void
+cygwin_conv_to_full_win32_path(char *,char *);
 #endif
 
 #ifdef GCL_GPROF
