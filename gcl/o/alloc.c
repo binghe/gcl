@@ -1595,6 +1595,7 @@ void *
 malloc(size_t size) {
 
   static bool in_malloc;
+  object x;
 
   if (in_malloc)
     return NULL;
@@ -1605,11 +1606,11 @@ malloc(size_t size) {
   
   CHECK_INTERRUPT;
   
-  malloc_list = make_cons(Cnil, malloc_list);
-  malloc_list->c.c_car = alloc_simple_string(size);
-  malloc_list->c.c_car->st.st_self = alloc_contblock(size);
-  malloc_list->c.c_car->st.st_adjustable=writable_malloc;
-
+  x = alloc_simple_string(size);
+  x->st.st_self = alloc_contblock(size);
+  x->st.st_adjustable=writable_malloc;
+  malloc_list = make_cons(x, malloc_list);
+  
   /* FIXME: this is just to handle clean freeing of the
      monstartup memory allocated automatically on raw image
      startup.  In saved images, monstartup memory is only
