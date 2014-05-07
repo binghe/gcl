@@ -69,13 +69,5 @@
 
 #undef DO_INIT
 #define DO_INIT(x) x
-  
-  
 
-	   
-	   
-	   
-
-  
-
-  
+#include <signal.h>

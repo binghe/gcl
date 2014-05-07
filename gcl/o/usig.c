@@ -67,7 +67,7 @@ gcl_signal(int signo, void (*handler) (/* ??? */))
 #endif      
       ;
     sigemptyset(&action.sa_mask);
-    sigaddset(&action.sa_mask,signo);
+    /* sigaddset(&action.sa_mask,signo); */
     sigaction(signo,&action,0);
 #else
 #ifdef HAVE_SIGVEC
@@ -131,12 +131,67 @@ unblock_sigusr_sigio(void)
 #endif
 }
 
+#define MC(b_) v.uc_mcontext.b_
+#define REG_LIST(a_,b_) list(3,make_fixnum((void *)&(a_)-(void *)(b_)),make_fixnum(sizeof(a_)),make_fixnum(sizeof(*a_)))
+#define MCF(b_) (((struct _fpstate *)MC(fpregs))->b_)
+
+DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,
+	 ({ucontext_t v;list(4,REG_LIST(MC(gregs),&v),REG_LIST(MC(fpregs),&v),
+			     REG_LIST(MCF(_st),MC(fpregs)),REG_LIST(MCF(_xmm),MC(fpregs)));}),"");
+
+/* #define ASM __asm__ __volatile__ */
+
+/* DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") { */
+/*   double d; */
+/*   ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val)); */
+/*   RETURN1(make_longfloat(d)); */
+/* } */
+/* DEFUN_NEW("AFIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") { */
+/*   RETURN1(*(fixnum *)addr); */
+/* } */
+/* DEFUN_NEW("AFLOAT",object,fSAfloat,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") { */
+/*   RETURN1(make_shortfloat(*(float *)addr)); */
+/* } */
+/* DEFUN_NEW("ADOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") { */
+/*   RETURN1(make_longfloat(*(double *)addr)); */
+/* } */
+
+#define _GNU_SOURCE 1
+#include <fenv.h>
+
+#ifdef HAVE_FEENABLEEXCEPT
+
+DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
+  RETURN1(feenableexcept(x));
+}
+DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
+  feclearexcept(FE_ALL_EXCEPT);
+  RETURN1(fedisableexcept(FE_ALL_EXCEPT));
+}
+
+#endif
+
+
+DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
+					 list(3,sLdivision_by_zero,make_fixnum(FPE_FLTDIV),make_fixnum(FE_DIVBYZERO)),
+					 list(3,sLfloating_point_overflow,make_fixnum(FPE_FLTOVF),make_fixnum(FE_OVERFLOW)),
+					 list(3,sLfloating_point_underflow,make_fixnum(FPE_FLTUND),make_fixnum(FE_UNDERFLOW)),
+					 list(3,sLfloating_point_inexact,make_fixnum(FPE_FLTRES),make_fixnum(FE_INEXACT)),
+					 list(3,sLfloating_point_invalid_operation,make_fixnum(FPE_FLTINV),make_fixnum(FE_INVALID))),"");
+
+DEF_ORDINARY("FLOATING-POINT-ERROR",sSfloating_point_error,SI,"");
 
 static void
-sigfpe1(void)
-{
-	gcl_signal(SIGFPE, sigfpe1);
-	FEerror("Floating-point exception.", 0);
+sigfpe3(int sig,siginfo_t *i,void *p) {
+
+  ucontext_t *v=p;
+
+  unblock_signals(SIGFPE,SIGFPE);
+  ifuncall3(sSfloating_point_error,make_fixnum((fixnum)i->si_code),
+	    /* make_fixnum((fixnum)i->si_addr), */
+	    make_fixnum(v->uc_mcontext.fpregs->fop ? v->uc_mcontext.fpregs->rip : (fixnum)i->si_addr),
+	    make_fixnum((fixnum)v));
+
 }
 static void
 sigpipe(void)
@@ -180,7 +235,7 @@ sigio(void)
 
 void
 install_default_signals(void)
-{	gcl_signal(SIGFPE, sigfpe1);
+{	gcl_signal(SIGFPE, sigfpe3);
 	gcl_signal(SIGPIPE, sigpipe);
 	gcl_signal(SIGINT, sigint);
 	gcl_signal(SIGUSR1, sigusr1);
