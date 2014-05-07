@@ -1,12 +1,14 @@
 (in-package :fpe :use '(:lisp))
 
-(import 'si::(disassemble-instruction feenableexcept fedisableexcept fld *fixnum *float *double))
+(import 'si::(disassemble-instruction feenableexcept fedisableexcept fld *fixnum *float *double
+				      +fe-list+ +mc-context-offsets+ floating-point-error 
+				      function-by-address))
 (export '(break-on-floating-point-exceptions read-instruction))
 
 (eval-when
     (eval compile)
 
-  (defconstant +feallexcept+ (reduce 'logior (mapcar 'caddr si::+fe-list+)))
+  (defconstant +feallexcept+ (reduce 'logior (mapcar 'caddr +fe-list+)))
 
 
   (defun moff (i r) (+ (car r) (* i (caddr r))))
@@ -37,9 +39,9 @@
 			   "RIP" "EFL" "CSGSFS" "ERR" "TRAPNO" "OLDMASK" "CR2")
 		  #-x86_64'("GS" "FS" "ES" "DS" "EDI" "ESI" "EBP" "ESP" "EBX" "EDX" "ECX" "EAX" 
 			   "TRAPNO" "ERR" "EIP" "CS" "EFL" "UESP" "SS")
-		   (first si::+mc-context-offsets+)))
-#.`(progn ,@(mcr "ST" (third si::+mc-context-offsets+)))
-#.`(progn ,@(mcr "XMM" (fourth si::+mc-context-offsets+)))
+		   (first +mc-context-offsets+)))
+#.`(progn ,@(mcr "ST" (third +mc-context-offsets+)))
+#.`(progn ,@(mcr "XMM" (fourth +mc-context-offsets+)))
 
 
 (defconstant +top-readtable+ (let ((*readtable* (copy-readtable)))
@@ -73,7 +75,7 @@
 
 (defun reg-lookup (x) (*fixnum (+ *context* (symbol-value x))))
 
-(let ((off (caadr si::+mc-context-offsets+)))
+(let ((off (caadr +mc-context-offsets+)))
   (defun fpregs nil (*fixnum (+ *context* off))))
 (defun st-lookup (x) (fld (+ (fpregs) (symbol-value x))))
 (defun xmm-lookup (x) (gref (+ (fpregs) (symbol-value x))))
@@ -126,20 +128,20 @@
 
 #.`(let ((fpe-enabled 0))
      (defun break-on-floating-point-exceptions 
-       (&key suspend ,@(mapcar (lambda (x) `(,(car x) (logtest ,(caddr x) fpe-enabled))) si::+fe-list+) &aux r)
+       (&key suspend ,@(mapcar (lambda (x) `(,(car x) (logtest ,(caddr x) fpe-enabled))) +fe-list+) &aux r)
        (fe-enable
 	(if suspend 0
 	  (setq fpe-enabled 
 		(logior
 		 ,@(mapcar (lambda (x)
 			     `(cond (,(car x) (push ,(intern (symbol-name (car x)) :keyword) r) ,(caddr x))
-				    (0))) si::+fe-list+)))))
+				    (0))) +fe-list+)))))
        r))
 
-(defun si::floating-point-error (code addr context)
+(defun floating-point-error (code addr context)
   (break-on-floating-point-exceptions :suspend t)
   (unwind-protect
-    (let* ((fun (si::function-by-address addr))(m (read-instruction addr context)))
-      (error (or (caar (member code si::+fe-list+ :key 'cadr)) 'arithmetic-error) 
+    (let* ((fun (function-by-address addr))(m (read-instruction addr context)))
+      (error (or (caar (member code +fe-list+ :key 'cadr)) 'arithmetic-error) 
 	     :operation (list :insn (pop m) :op (pop m) :fun fun :addr addr) :operands m))
     (break-on-floating-point-exceptions)))
