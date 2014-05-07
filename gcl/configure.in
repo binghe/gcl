@@ -2415,6 +2415,11 @@ int joe=SIGEMT;
 AC_MSG_RESULT(no))
 
 AC_CHECK_FUNCS(sigaltstack)
+AC_CHECK_FUNCS(feenableexcept)
+
+AC_CHECK_HEADERS(dis-asm.h,
+	AC_CHECK_LIB(opcodes,print_insn_i386))
+AC_CHECK_FUNCS(print_insn_i386)
 
 #if test $use = "386-linux" ; then
 	AC_CHECK_HEADERS(asm/sigcontext.h)
