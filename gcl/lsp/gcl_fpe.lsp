@@ -16,12 +16,14 @@
   (defun stl (s &aux (s (if (stringp s) (make-string-input-stream s) s))(x (read s nil 'eof)))
     (unless (eq x 'eof) (cons x (stl s))))
 
+  (defun ml (r) (when r (make-list (truncate (car r) (cdr r)))))
+
   (defun mcgr (r &aux (n (stl (pop r)))(i -1))
-    (mapcar (lambda (x y) `(defconstant ,x ,(moff (incf i) r))) n (make-list (truncate (car r) (cdr r)))))
+    (mapcar (lambda (x y) `(defconstant ,x ,(moff (incf i) r))) n (ml r)))
   
   (defun mcr (p r &aux (i -1))
     (mapcar (lambda (x) `(defconstant ,(intern (concatenate 'string p (write-to-string (incf i))) :fpe) ,(moff i r)))
-	    (make-list (truncate (car r) (cdr r)))))
+	    (ml r)))
 
   (defmacro deft (n rt args &rest code)
   `(progn
@@ -108,10 +110,13 @@
   (let* ((x (read-delimited-list #\) stream)))
     (gref (+ *offset* (pop x) (if x (* (pop x) (car x)) 0)))))
 
-(defun read-instruction (addr context &aux (*context* context)(*readtable* +top-readtable+)
+(defun read-operands (s context &aux (*context* context))
+  (read-delimited-list #\; s))
+
+(defun read-instruction (addr context &aux (*readtable* +top-readtable+)
 			      (i (car (disassemble-instruction addr)))(s (make-string-input-stream i))
 			      (*insn* (read s)))
-  (cons i (cons *insn* (read-delimited-list #\; s))))
+  (cons i (cons *insn* (when context (read-operands s context)))))
 
 
 (defun fe-enable (a)

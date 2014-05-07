@@ -145,3 +145,9 @@ extern DBEGIN_TY _dbegin;
 
 /* End for cmpinclude */
 
+
+#define FPE_CODE(i_) make_fixnum((fixnum)i_->si_code)
+#define FPE_ADDR(i_,v_) make_fixnum((fixnum)i_->si_addr)
+#define FPE_CTXT(v_) Cnil
+
+#define FPE_INIT Cnil
