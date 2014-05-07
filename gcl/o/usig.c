@@ -139,22 +139,22 @@ DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,
 	 ({ucontext_t v;list(4,REG_LIST(MC(gregs),&v),REG_LIST(MC(fpregs),&v),
 			     REG_LIST(MCF(_st),MC(fpregs)),REG_LIST(MCF(_xmm),MC(fpregs)));}),"");
 
-/* #define ASM __asm__ __volatile__ */
+#define ASM __asm__ __volatile__
 
-/* DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") { */
-/*   double d; */
-/*   ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val)); */
-/*   RETURN1(make_longfloat(d)); */
-/* } */
-/* DEFUN_NEW("AFIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") { */
-/*   RETURN1(*(fixnum *)addr); */
-/* } */
-/* DEFUN_NEW("AFLOAT",object,fSAfloat,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") { */
-/*   RETURN1(make_shortfloat(*(float *)addr)); */
-/* } */
-/* DEFUN_NEW("ADOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") { */
-/*   RETURN1(make_longfloat(*(double *)addr)); */
-/* } */
+DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
+  double d;
+  ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val));
+  RETURN1(make_longfloat(d));
+}
+DEFUN_NEW("*FIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") {
+  RETURN1(*(fixnum *)addr);
+}
+DEFUN_NEW("*FLOAT",object,fSAfloat,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+  RETURN1(make_shortfloat(*(float *)addr));
+}
+DEFUN_NEW("*DOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+  RETURN1(make_longfloat(*(double *)addr));
+}
 
 #define _GNU_SOURCE 1
 #include <fenv.h>

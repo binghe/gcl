@@ -1,12 +1,12 @@
 (in-package :fpe :use '(:lisp))
 
-(import 'si::(disassemble-instruction feenableexcept fedisableexcept))
+(import 'si::(disassemble-instruction feenableexcept fedisableexcept fld *fixnum *float *double))
 (export '(break-on-floating-point-exceptions read-instruction))
 
 (eval-when
     (eval compile)
 
-  (defconstant +feallexcept+ (reduce 'logior (mapcar 'caddr +fe-list+)))
+  (defconstant +feallexcept+ (reduce 'logior (mapcar 'caddr si::+fe-list+)))
 
 
   (defun moff (i r) (+ (car r) (* i (caddr r))))
@@ -31,15 +31,6 @@
 			   ") "
 			   code)))
      (defentry ,n ,(mapcar 'car args) (,rt ,(string-downcase (symbol-name n)))))))
-
-(deft fld object ((fixnum x)) 
-  "{double d;"
-  "__asm__ __volatile__ (\"fldt %1;fstpl %0\" : \"=m\" (d) : \"m\" (*(char *)x));"
-  "return make_longfloat(d);}")
-
-(deft afixnum fixnum ((fixnum x)) "{return *(fixnum *)x;}")
-(deft afloat object ((fixnum x)) "{return make_shortfloat(*(float *)x);}")
-(deft adouble object ((fixnum x)) "{return make_longfloat(*(double *)x);}")
 
 #.`(progn ,@(mcgr "" 
 		  #+x86_64'("R8" "R9" "R10" "R11" "R12" "R13" "R14" "R15" "RDI" "RSI" "RBP" "RBX" "RDX" "RAX" "RCX" "RSP" 
@@ -69,7 +60,7 @@
 
 
 (defun rf (addr w)
-  (ecase w (4 (afloat addr)) (8 (adouble addr))))
+  (ecase w (4 (*float addr)) (8 (*double addr))))
 
 (defun ref (addr p w &aux (i -1)) 
   (if p 
@@ -80,10 +71,10 @@
 		  (f (eql #\F (aref z 0))))
   (ref addr (unless f (eql (aref z (- lz 2)) #\P)) (if (or f (eql (aref z (1- lz)) #\D)) 8 4)))
 
-(defun reg-lookup (x) (afixnum (+ *context* (symbol-value x))))
+(defun reg-lookup (x) (*fixnum (+ *context* (symbol-value x))))
 
 (let ((off (caadr si::+mc-context-offsets+)))
-  (defun fpregs nil (afixnum (+ *context* off))))
+  (defun fpregs nil (*fixnum (+ *context* off))))
 (defun st-lookup (x) (fld (+ (fpregs) (symbol-value x))))
 (defun xmm-lookup (x) (gref (+ (fpregs) (symbol-value x))))
 
