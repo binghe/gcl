@@ -10,7 +10,7 @@ CAT=cat
 APPEND=../xbin/append
 
 OBJS	= gcl_sharp.o gcl_arraylib.o gcl_assert.o gcl_defmacro.o gcl_defstruct.o \
-	  gcl_describe.o gcl_evalmacros.o \
+	  gcl_describe.o gcl_evalmacros.o gcl_fpe.o \
 	  gcl_iolib.o gcl_listlib.o gcl_mislib.o gcl_module.o gcl_numlib.o \
 	  gcl_packlib.o gcl_predlib.o \
 	  gcl_seq.o gcl_seqlib.o gcl_setf.o gcl_top.o gcl_trace.o gcl_sloop.o \

@@ -4,6 +4,7 @@
 (make-package "ANSI-LOOP" :use '("LISP"))
 (make-package "DEFPACKAGE" :use '("LISP"))
 (make-package "TK" :use '("LISP" "SLOOP"))
+(make-package "FPE" :use '("LISP"))
 
 @LI-PCL-PACKAGE@
 
@@ -17,6 +18,7 @@
 (rename-package 'user 'common-lisp-user '(cl-user user))
 
 (in-package "SYSTEM")
+(use-package :fpe)
 
 (defvar *command-args* nil)
  ;; if ANY header or license information is printed by the
