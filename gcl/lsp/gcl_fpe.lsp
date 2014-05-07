@@ -18,8 +18,8 @@
 
   (defun ml (r) (when r (make-list (truncate (car r) (cdr r)))))
 
-  (defun mcgr (r &aux (n (stl (pop r)))(i -1))
-    (mapcar (lambda (x y) `(defconstant ,x ,(moff (incf i) r))) n (ml r)))
+  (defun mcgr (r &aux (i -1))
+    (mapcar (lambda (x y) `(defconstant ,x ,(moff (incf i) r))) (when r (stl (pop r))) (ml r)))
   
   (defun mcr (p r &aux (i -1))
     (mapcar (lambda (x) `(defconstant ,(intern (concatenate 'string p (write-to-string (incf i))) :fpe) ,(moff i r)))
