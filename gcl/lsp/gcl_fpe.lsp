@@ -11,16 +11,17 @@
   (defconstant +feallexcept+ (reduce 'logior (mapcar 'caddr +fe-list+)))
 
 
-  (defun moff (i r) (+ (car r) (* i (caddr r))))
+  (defun moff (i r) (* i (cdr r)))
   
-  (defun mcgr (p n r &aux (i -1))
-    (mapcar (lambda (x y)
-	      `(defconstant ,(intern (concatenate 'string p x) :fpe) ,(moff (incf i) r)))
-	    n (make-list (truncate (cadr r) (caddr r)))))
+  (defun stl (s &aux (s (if (stringp s) (make-string-input-stream s) s))(x (read s nil 'eof)))
+    (unless (eq x 'eof) (cons x (stl s))))
+
+  (defun mcgr (r &aux (n (stl (pop r)))(i -1))
+    (mapcar (lambda (x y) `(defconstant ,x ,(moff (incf i) r))) n (make-list (truncate (car r) (cdr r)))))
   
   (defun mcr (p r &aux (i -1))
     (mapcar (lambda (x) `(defconstant ,(intern (concatenate 'string p (write-to-string (incf i))) :fpe) ,(moff i r)))
-	    (make-list (truncate (cadr r) (caddr r)))))
+	    (make-list (truncate (car r) (cdr r)))))
 
   (defmacro deft (n rt args &rest code)
   `(progn
@@ -34,14 +35,9 @@
 			   code)))
      (defentry ,n ,(mapcar 'car args) (,rt ,(string-downcase (symbol-name n)))))))
 
-#.`(progn ,@(mcgr "" 
-		  #+x86_64'("R8" "R9" "R10" "R11" "R12" "R13" "R14" "R15" "RDI" "RSI" "RBP" "RBX" "RDX" "RAX" "RCX" "RSP" 
-			   "RIP" "EFL" "CSGSFS" "ERR" "TRAPNO" "OLDMASK" "CR2")
-		  #-x86_64'("GS" "FS" "ES" "DS" "EDI" "ESI" "EBP" "ESP" "EBX" "EDX" "ECX" "EAX" 
-			   "TRAPNO" "ERR" "EIP" "CS" "EFL" "UESP" "SS")
-		   (first +mc-context-offsets+)))
-#.`(progn ,@(mcr "ST" (third +mc-context-offsets+)))
-#.`(progn ,@(mcr "XMM" (fourth +mc-context-offsets+)))
+#.`(progn ,@(mcgr (first +mc-context-offsets+)))
+#.`(progn ,@(mcr "ST" (second +mc-context-offsets+)))
+#.`(progn ,@(mcr "XMM" (third +mc-context-offsets+)))
 
 
 (defconstant +top-readtable+ (let ((*readtable* (copy-readtable)))
@@ -73,12 +69,10 @@
 		  (f (eql #\F (aref z 0))))
   (ref addr (unless f (eql (aref z (- lz 2)) #\P)) (if (or f (eql (aref z (1- lz)) #\D)) 8 4)))
 
-(defun reg-lookup (x) (*fixnum (+ *context* (symbol-value x))))
+(defun reg-lookup (x) (*fixnum (+ (car *context*) (symbol-value x))))
 
-(let ((off (caadr +mc-context-offsets+)))
-  (defun fpregs nil (*fixnum (+ *context* off))))
-(defun st-lookup (x) (fld (+ (fpregs) (symbol-value x))))
-(defun xmm-lookup (x) (gref (+ (fpregs) (symbol-value x))))
+(defun st-lookup (x) (fld (+ (cadr *context*) (symbol-value x))))
+(defun xmm-lookup (x) (gref (+ (caddr *context*) (symbol-value x))))
 
 
 (defun lookup (x &aux (z (symbol-name x)))

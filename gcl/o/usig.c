@@ -131,13 +131,7 @@ unblock_sigusr_sigio(void)
 #endif
 }
 
-#define MC(b_) v.uc_mcontext.b_
-#define REG_LIST(a_,b_) list(3,make_fixnum((void *)&(a_)-(void *)(b_)),make_fixnum(sizeof(a_)),make_fixnum(sizeof(*a_)))
-#define MCF(b_) (((struct _fpstate *)MC(fpregs))->b_)
-
-DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,
-	 ({ucontext_t v;list(4,REG_LIST(MC(gregs),&v),REG_LIST(MC(fpregs),&v),
-			     REG_LIST(MCF(_st),MC(fpregs)),REG_LIST(MCF(_xmm),MC(fpregs)));}),"");
+DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,FPE_INIT,"");
 
 #define ASM __asm__ __volatile__
 
@@ -187,12 +181,10 @@ sigfpe3(int sig,siginfo_t *i,void *p) {
   ucontext_t *v=p;
 
   unblock_signals(SIGFPE,SIGFPE);
-  ifuncall3(sSfloating_point_error,make_fixnum((fixnum)i->si_code),
-	    /* make_fixnum((fixnum)i->si_addr), */
-	    make_fixnum(v->uc_mcontext.fpregs->fop ? v->uc_mcontext.fpregs->rip : (fixnum)i->si_addr),
-	    make_fixnum((fixnum)v));
+  ifuncall3(sSfloating_point_error,FPE_CODE(i),FPE_ADDR(i,v),FPE_CTXT(v));
 
 }
+
 static void
 sigpipe(void)
 {

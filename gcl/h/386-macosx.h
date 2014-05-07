@@ -196,3 +196,23 @@ if (realpath (buf, fub) == 0) {                             \
 #else
 #define RELOC_H "mach32_i386_reloc.h"
 #endif
+
+#define FPE_CODE(i_) make_fixnum((fixnum)i_->si_code)
+#define FPE_ADDR(i_,v_) make_fixnum(v_->uc_mcontext->__fs->__fpu_fop ? v_->uc_mcontext->__fs->__fpu_ip : (fixnum)i_->si_addr)
+#define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&v->uc_mcontext->__ss),	\
+			  make_fixnum((fixnum)&v->uc_mcontext->__fs->__fpu_stmm0), \
+			  make_fixnum((fixnum)&v->uc_mcontext->__fs->__fpu_xmm0))
+
+
+#define MC(b_) v.uc_mcontext->b_
+#define REG_LIST(a_) MMcons(make_fixnum(sizeof(a_)),make_fixnum(sizeof(*a_)))
+#define MCF(b_) ((MC(__fs))->b_)
+
+#ifdef __x86_64__
+#define FPE_RLST "RAX RBX RCX RDX RDI RSI RBP RSP R8 R9 R10 R11 R12 R13 R14 R15 RIP RFLAGS CS FS GS"
+#else
+#error Missing reg list
+#endif
+
+#define FPE_INIT ({ucontext_t v;list(3,MMcons(make_simple_string(({const char *s=FPE_RLST;s;})),REG_LIST(MC(__ss))),\
+				     REG_LIST(MCF(__fpu_stmm0)),REG_LIST(MCF(__fpu_xmm0)));})
