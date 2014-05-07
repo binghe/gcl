@@ -1027,7 +1027,12 @@ my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
   dinfo->fprintf_func(dinfo->stream,"%p",(void *)addr);
 }
 
+#endif
+
 DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+
+#ifdef HAVE_PRINT_INSN_I386
+
   static disassemble_info i;
   /* static int k; */
   int j;
@@ -1042,9 +1047,13 @@ DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE
   j=print_insn_i386(addr,&i);
   my_fprintf(NULL," ;");
   return MMcons(make_simple_string(b),make_fixnum(j));
-}
+
+#else
+
+  return MMcons(make_simple_string("unavailable ;"),make_fixnum(0));
 
 #endif
+}
 
 typedef struct {
   enum type tt;

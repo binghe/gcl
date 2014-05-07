@@ -153,17 +153,54 @@ DEFUN_NEW("*DOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
 #define _GNU_SOURCE 1
 #include <fenv.h>
 
+DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
+
 #ifdef HAVE_FEENABLEEXCEPT
 
-DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
-  RETURN1(feenableexcept(x));
-}
-DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
-  feclearexcept(FE_ALL_EXCEPT);
-  RETURN1(fedisableexcept(FE_ALL_EXCEPT));
+  x=feenableexcept(x);
+
+#else
+#define ASM __asm__ __volatile__
+  {
+    fixnum j;
+    unsigned short s;
+    unsigned int i;
+    ASM("fnstcw %0" :: "m" (s));
+    s=(s|FE_ALL_EXCEPT)&(~x);
+    ASM("fldcw %0" : "=m" (s));
+    ASM("stmxcsr %0" :: "m" (i));
+    i=(i|(FE_ALL_EXCEPT<<7))&(~(x<<7));
+    ASM("ldmxcsr %0" : "=m" (i));
+  }    
+#endif
+
+  RETURN1(x);
+
 }
 
+DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
+
+  fixnum x;
+
+#ifdef HAVE_FEENABLEEXCEPT
+
+  feclearexcept(FE_ALL_EXCEPT);
+  x=fedisableexcept(FE_ALL_EXCEPT);
+
+#else
+#define ASM __asm__ __volatile__
+  {
+    unsigned int i;
+    ASM("fnclex");
+    ASM("stmxcsr %0" :: "m" (i));
+    i=(i|(FE_ALL_EXCEPT<<7));
+    ASM("ldmxcsr %0" : "=m" (i));
+    x=0;
+  }
 #endif
+
+  RETURN1(x);
+}
 
 
 DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
