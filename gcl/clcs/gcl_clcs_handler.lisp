@@ -35,28 +35,31 @@
 ;;;  by all the other routines.
 
 (DEFUN COERCE-TO-CONDITION (DATUM ARGUMENTS DEFAULT-TYPE FUNCTION-NAME)
-  #+LISPM (SETQ ARGUMENTS (COPY-LIST ARGUMENTS))
   (COND ((CONDITIONP DATUM)
 	 (IF ARGUMENTS
 	     (CERROR "Ignore the additional arguments."
 		     'SIMPLE-TYPE-ERROR
 		     :DATUM ARGUMENTS
 		     :EXPECTED-TYPE 'NULL
-		     :FORMAT-STRING "You may not supply additional arguments ~
+		     :FORMAT-CONTROL "You may not supply additional arguments ~
 				     when giving ~S to ~S."
 		     :FORMAT-ARGUMENTS (LIST DATUM FUNCTION-NAME)))
 	 DATUM)
         ((OR (SYMBOLP DATUM) (CONDITION-CLASS-P DATUM))
-         (APPLY #'MAKE-CONDITION DATUM ARGUMENTS))	 
+	 (let* ((n (if (symbolp datum) datum (class-name datum)))
+		(c (find-class (symcat (if (simple-condition-class-p n) "INTERNAL-" "INTERNAL-SIMPLE-") n) nil)))
+	   (if c
+	       (apply 'make-condition (class-name c) (append arguments (list :function-name (si::ihs-fname si::*ihs-top*))));FIXME
+	     (apply #'make-condition datum arguments))))
         ((STRINGP DATUM)
 	 (MAKE-CONDITION DEFAULT-TYPE
-                         :FORMAT-STRING DATUM
+                         :FORMAT-CONTROL DATUM
                          :FORMAT-ARGUMENTS ARGUMENTS))
         (T
          (ERROR 'SIMPLE-TYPE-ERROR
 		:DATUM DATUM
 		:EXPECTED-TYPE '(OR SYMBOL STRING)
-		:FORMAT-STRING "Bad argument to ~S: ~S"
+		:FORMAT-CONTROL "Bad argument to ~S: ~S"
 		:FORMAT-ARGUMENTS (LIST FUNCTION-NAME DATUM)))))
 
 (DEFUN ERROR (DATUM &REST ARGUMENTS)
@@ -69,11 +72,11 @@
     (APPLY #'ERROR DATUM ARGUMENTS))
   NIL)
 
-(DEFUN BREAK (&OPTIONAL (FORMAT-STRING "Break") &REST FORMAT-ARGUMENTS)
+(DEFUN BREAK (&OPTIONAL (FORMAT-CONTROL "Break") &REST FORMAT-ARGUMENTS)
   (WITH-SIMPLE-RESTART (CONTINUE "Return from BREAK.")
     (INVOKE-DEBUGGER
       (MAKE-CONDITION 'SIMPLE-CONDITION
-		      :FORMAT-STRING    FORMAT-STRING
+		      :FORMAT-CONTROL   FORMAT-CONTROL
 		      :FORMAT-ARGUMENTS FORMAT-ARGUMENTS)))
   NIL)
 

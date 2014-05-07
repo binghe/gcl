@@ -36,28 +36,28 @@
 (defvar *internal-error-parms* nil)
 
 (defun clcs-universal-error-handler (error-name correctable function-name
-			             continue-format-string error-format-string
+			             continue-format-control error-format-string
 			             &rest args
 				     &aux (internal-error-parms
 					   (list error-name correctable function-name
-						 continue-format-string error-format-string)))
+						 continue-format-control error-format-string)))
   (when (equal internal-error-parms *internal-error-parms*)
     (format t "Universal error handler called recursively ~S~%"
 	    internal-error-parms)
 	    (return-from clcs-universal-error-handler))
   (let* ((*internal-error-parms* (list error-name correctable function-name
-				       continue-format-string error-format-string))
+				       continue-format-control error-format-string))
 	 (e-d (find-internal-error-data error-name)))
     (if e-d
 	(let ((condition-name (car e-d)))
 	  (if correctable
 	      (with-simple-restart 
-	       (continue "~a" (apply #'format nil continue-format-string args))
+	       (continue "~a" (apply #'format nil continue-format-control args))
 	       (apply #'error condition-name
 		   :function-name function-name
 		      (let ((k-a (mapcan #'list (cdr e-d) args)))
 			(if (simple-condition-class-p condition-name)
-			    (list* :format-string error-format-string
+			    (list* :format-control error-format-string
 				   :format-arguments args
 				   k-a)
 			  k-a))))
@@ -65,12 +65,12 @@
 		   :function-name function-name
 		   (let ((k-a (mapcan #'list (cdr e-d) args)))
 		     (if (simple-condition-class-p condition-name)
-			 (list* :format-string error-format-string
+			 (list* :format-control error-format-string
 				:format-arguments args
 				k-a)
 		       k-a)))))
       (error 'internal-simple-error :function-name function-name
-	     :format-string error-format-string :format-arguments args))))
+	     :format-control error-format-string :format-arguments args))))
 
 (defun set-internal-error (error-keyword error-format condition-name
 					 &rest keyword-list)
@@ -87,9 +87,9 @@
 
 (defparameter *internal-error-list*
   '(("FEwrong_type_argument" :wrong-type-argument "~S is not of type ~S."
-     internal-type-error :datum :expected-type)
+     internal-simple-type-error :datum :expected-type)
     ("FEpackage_error" :package-error "A package error occurred on ~S: ~S."
-     internal-package-error :package :message) ; |<function>| |top - base|
+     internal-simple-package-error :package :message) ; |<function>| |top - base|
     ("FEtoo_few_arguments" :too-few-arguments "~S [or a callee] requires more than ~R argument~:p." 
      internal-simple-program-error) ; |<function>| |top - base|
 ;    ("FEtoo_few_argumentsF" :too-few-arguments "Too few arguments."
@@ -103,13 +103,13 @@
     ("FEunexpected_keyword" :unexpected-keyword "~S does not allow the keyword ~S."
      internal-simple-program-error) ; |<function>| |key|
     ("FEunbound_variable" :unbound-variable "The variable ~S is unbound."
-     internal-unbound-variable :name) ; |sym|
+     internal-simple-unbound-variable :name) ; |sym|
     ("FEundefined_function" :undefined-function "The function ~S is undefined."
-     internal-undefined-function :name)
+     internal-simple-undefined-function :name)
     ("FEinvalid_function" :invalid-function "~S is invalid as a function."
-     internal-undefined-function :name) ; |obj|
+     internal-simple-undefined-function :name) ; |obj|
     ("FEinvalid_variable" :invalid-variable "~S is an invalid variable."
-     internal-program-error) ; |obj|
+     internal-simple-program-error) ; |obj|
     ("check_arg_failed" :too-few-arguments "~S [or a callee] requires ~R argument~:p,~%\
 but only ~R ~:*~[were~;was~:;were~] supplied."
      internal-simple-program-error) ; |<function>| |n| |top - base|
@@ -135,7 +135,7 @@ but only ~R ~:*~[were~;was~:;were~] supplied."
     ("vfun_wrong_number_of_args" :error "Expected ~S args but received ~S args"
      internal-simple-control-error)
     ("end_of_stream" :error "Unexpected end of ~S."
-     internal-end-of-file :stream)
+     internal-simple-end-of-file :stream)
     ("open_stream" :error "~S is an illegal IF-DOES-NOT-EXIST option."
      internal-simple-control-error)
     ("open_stream" :error "The file ~A already exists."
