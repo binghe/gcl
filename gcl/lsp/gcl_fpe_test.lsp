@@ -89,16 +89,18 @@
   (deft c_array_self fixnum ((object x)) "{return (fixnum)x->a.a_self;}")
   (defun c-array-eltsize (x) (ecase (array-element-type x) (short-float 4) (long-float 8)))
   (defun make-aligned-array (alignment size &rest r
-				       &aux (ic (member :initial-contents r))
+				       &aux (ic (member :initial-contents r)) y
 				       (c (cadr ic))
 				       (r (append (ldiff r ic) (cddr ic)))
-				       (a (apply 'make-array (+ alignment size) r)))
-    (map-into
+				       (a (apply 'make-array (+ alignment size) (list* :static t r))))
+    (setq y (map-into
      (apply 'make-array size
 	    :displaced-to a
 	    :displaced-index-offset (truncate (- alignment (mod (c_array_self a) alignment)) (c-array-eltsize a))
 	    r)
-     'identity c)))
+     'identity c))
+    (assert (zerop (mod (c_array_self y) 16)))
+    y))
 
 (setq fa (make-aligned-array 16 4 :element-type 'short-float :initial-contents '(1.2s0 2.3s0 3.4s0 4.1s0))
       fb (make-aligned-array 16 4 :element-type 'short-float)
