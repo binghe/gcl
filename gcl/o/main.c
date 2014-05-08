@@ -1050,7 +1050,7 @@ DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE
 
 #else
 
-  return MMcons(make_simple_string("unavailable ;"),make_fixnum(0));
+  return MMcons(make_simple_string("fnop ;"),make_fixnum(0));
 
 #endif
 }
