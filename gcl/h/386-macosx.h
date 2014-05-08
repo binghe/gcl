@@ -197,11 +197,15 @@ if (realpath (buf, fub) == 0) {                             \
 #define RELOC_H "mach32_i386_reloc.h"
 #endif
 
-#define FPE_CODE(i_) make_fixnum((fixnum)i_->si_code)
-#define FPE_ADDR(i_,v_) make_fixnum(v_->uc_mcontext->__fs.__fpu_fop ? v_->uc_mcontext->__fs.__fpu_ip : (fixnum)i_->si_addr)
-#define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&v->uc_mcontext->__ss),	\
-			  make_fixnum((fixnum)&v->uc_mcontext->__fs.__fpu_stmm0), \
-			  make_fixnum((fixnum)&v->uc_mcontext->__fs.__fpu_xmm0))
+
+#define UC(a_) ((ucontext_t *)a_)
+#define SF(a_) ((siginfo_t *)a_)
+
+#define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(*(fixnum *)&UC(v_)->uc_mcontext->__fs.__fpu_fsw,UC(v_)->uc_mcontext->__fs.__fpu_mxcsr))
+#define FPE_ADDR(i_,v_) make_fixnum(UC(v_)->uc_mcontext->__fs.__fpu_fop ? UC(v_)->uc_mcontext->__fs.__fpu_ip : (fixnum)i_->si_addr)
+#define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&UC(v_)->uc_mcontext->__ss), \
+			  make_fixnum((fixnum)&UC(v_)->uc_mcontext->__fs.__fpu_stmm0), \
+			  make_fixnum((fixnum)&UC(v_)->uc_mcontext->__fs.__fpu_xmm0))
 
 
 #define MC(b_) v.uc_mcontext->b_
@@ -216,3 +220,4 @@ if (realpath (buf, fub) == 0) {                             \
 
 #define FPE_INIT ({ucontext_t v;list(3,MMcons(make_simple_string(({const char *s=FPE_RLST;s;})),REG_LIST(21,MC(__ss))),	\
 				     REG_LIST(8,MCF(__fpu_stmm0)),REG_LIST(16,MCF(__fpu_xmm0)));})
+

@@ -151,5 +151,3 @@ extern DBEGIN_TY _dbegin;
 #define FPE_CTXT(v_) Cnil
 
 #define FPE_INIT Cnil
-
-#define ucontext_t void

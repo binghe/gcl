@@ -151,11 +151,16 @@ do { int c = 0; \
  }\
 } while(0)
 
-#define FPE_CODE(i_) make_fixnum((fixnum)i_->si_code)
-#define FPE_ADDR(i_,v_) make_fixnum(v_->uc_mcontext.fpregs->fop ? v_->uc_mcontext.fpregs->rip : (fixnum)i_->si_addr)
-#define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&v->uc_mcontext.gregs),	\
-			    make_fixnum((fixnum)&v->uc_mcontext.fpregs->_st), \
-			    make_fixnum((fixnum)&v->uc_mcontext.fpregs->_xmm))
+
+#define UC(a_) ((ucontext_t *)a_)
+#define SF(a_) ((siginfo_t *)a_)
+
+/* #define FPE_CODE(i_) make_fixnum((fixnum)SF(i_)->si_code) */
+#define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->swd,UC(v_)->uc_mcontext.fpregs->mxcsr))
+#define FPE_ADDR(i_,v_) make_fixnum(UC(v_)->uc_mcontext.fpregs->fop ? UC(v_)->uc_mcontext.fpregs->rip : (fixnum)SF(i_)->si_addr)
+#define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&UC(v_)->uc_mcontext.gregs),	\
+			    make_fixnum((fixnum)&UC(v_)->uc_mcontext.fpregs->_st), \
+			    make_fixnum((fixnum)&UC(v_)->uc_mcontext.fpregs->_xmm))
 
 #define MC(b_) v.uc_mcontext.b_
 #define REG_LIST(a_) MMcons(make_fixnum(sizeof(a_)),make_fixnum(sizeof(*a_)))

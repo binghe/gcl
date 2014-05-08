@@ -159,7 +159,7 @@ DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixn
 
   x=feenableexcept(x);
 
-#else
+#elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
     fixnum j;
@@ -178,35 +178,6 @@ DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixn
 
 }
 
-DEFUN_NEW("FETESTEXCEPT",fixnum,fSfetestexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum excepts),"") {
-#ifdef HAVE_FEENABLEEXCEPT
-  excepts=fetestexcept(excepts);
-#else
-  excepts=(FFN(fSfnstsw)()&excepts)|(~(FFN(fSstmxcsr)()>>7)&excepts);
-#endif  
-  RETURN1(excepts);
-}
-
-DEFUN_NEW("FPE_CODE",fixnum,fSfpe_code,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
-
-  RETURN1(FFN(fSfetestexcept)(FE_DIVBYZERO) ? FPE_FLTDIV :
-	  (FFN(fSfetestexcept)(FE_INVALID) ? FPE_FLTINV :
-	   (FFN(fSfetestexcept)(FE_OVERFLOW) ? FPE_FLTOVF :
-	    (FFN(fSfetestexcept)(FE_UNDERFLOW) ? FPE_FLTUND :
-	     (FFN(fSfetestexcept)(FE_INEXACT) ? FPE_FLTRES : 0)))));
-}
-
-DEFUN_NEW("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
-  unsigned short t;
-  asm ("fnstsw %0" :: "m" (t));
-  RETURN1(t);
-}
-DEFUN_NEW("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
-  unsigned int t;
-  asm ("stmxcsr %0" :: "m" (t));
-  RETURN1(t);
-}
-
 DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
 
   fixnum x;
@@ -216,7 +187,7 @@ DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(vo
   feclearexcept(FE_ALL_EXCEPT);
   x=fedisableexcept(FE_ALL_EXCEPT);
 
-#else
+#elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
     unsigned int i;
@@ -231,6 +202,46 @@ DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(vo
   RETURN1(x);
 }
 
+#if defined(__x86_64__) || defined(__i386__)
+
+#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(~((mxcsr_)>>7)&excepts_)
+
+DEFUN_NEW("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
+
+  RETURN1(FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV :
+	  (FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV :
+	   (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF :
+	    (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND :
+	     (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0)))));
+}
+
+#ifdef __MINGW32__
+
+DEFUN_NEW("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+  unsigned short t;
+  ASM ("fnstsw %0" :: "m" (t));
+  RETURN1(t);
+}
+DEFUN_NEW("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+  unsigned int t;
+  ASM ("stmxcsr %0" :: "m" (t));
+  RETURN1(t);
+}
+
+#endif
+#endif
+
+
+static void
+sigfpe3(int sig,void *i,void *v) {
+
+  unblock_signals(SIGFPE,SIGFPE);
+#ifdef __MINGW32__
+  gcl_signal(SIGFPE,sigfpe3);
+#endif
+  ifuncall3(sSfloating_point_error,FPE_CODE(i,v),FPE_ADDR(i,v),FPE_CTXT(v));
+
+}
 
 DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
 					 list(3,sLdivision_by_zero,make_fixnum(FPE_FLTDIV),make_fixnum(FE_DIVBYZERO)),
@@ -240,16 +251,6 @@ DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
 					 list(3,sLfloating_point_invalid_operation,make_fixnum(FPE_FLTINV),make_fixnum(FE_INVALID))),"");
 
 DEF_ORDINARY("FLOATING-POINT-ERROR",sSfloating_point_error,SI,"");
-
-static void
-sigfpe3(int sig,siginfo_t *i,void *p) {
-
-  ucontext_t *v=p;
-
-  unblock_signals(SIGFPE,SIGFPE);
-  ifuncall3(sSfloating_point_error,FPE_CODE(i),FPE_ADDR(i,v),FPE_CTXT(v));
-
-}
 
 static void
 sigpipe(void)
