@@ -178,6 +178,35 @@ DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixn
 
 }
 
+DEFUN_NEW("FETESTEXCEPT",fixnum,fSfetestexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum excepts),"") {
+#ifdef HAVE_FEENABLEEXCEPT
+  excepts=fetestexcept(excepts);
+#else
+  excepts=(FFN(fSfnstcw)()&excepts)|(~(FFN(fSstmxcsr)()>>7)&excepts);
+#endif  
+  RETURN1(excepts);
+}
+
+DEFUN_NEW("FPE_CODE",fixnum,fSfpe_code,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+
+  RETURN1(FFN(fSfetestexcept)(FE_DIVBYZERO) ? FPE_FLTDIV :
+	  (FFN(fSfetestexcept)(FE_INVALID) ? FPE_FLTINV :
+	   (FFN(fSfetestexcept)(FE_OVERFLOW) ? FPE_FLTOVF :
+	    (FFN(fSfetestexcept)(FE_UNDERFLOW) ? FPE_FLTUND :
+	     (FFN(fSfetestexcept)(FE_INEXACT) ? FPE_FLTRES : 0)))));
+}
+
+DEFUN_NEW("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+  unsigned short t;
+  asm ("fnstsw %0" :: "m" (t));
+  RETURN1(t);
+}
+DEFUN_NEW("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+  unsigned int t;
+  asm ("stmxcsr %0" :: "m" (t));
+  RETURN1(t);
+}
+
 DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
 
   fixnum x;

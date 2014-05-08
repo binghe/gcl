@@ -219,3 +219,12 @@ extern int mingwlisten(FILE *);
 #define DBEGIN _dbegin
 
 #define NOFREE_ERR
+
+
+#define FPE_CODE(i_) make_fixnum(fSfpe_code())
+#define FPE_ADDR(i_,v_) make_fixnum(0)
+#define FPE_CTXT(v_) Cnil
+
+#define FPE_INIT Cnil
+
+#define ucontext_t void
