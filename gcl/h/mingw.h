@@ -220,7 +220,7 @@ extern int mingwlisten(FILE *);
 
 #define NOFREE_ERR
 
-#define FPE_CODE(i_) make_fixnum(fSfpe_code(FFN(fSfnstsw)(),FFN(fSstmxcsr)()))
+#define FPE_CODE(i_,v_) make_fixnum(fSfpe_code(FFN(fSfnstsw)(),FFN(fSstmxcsr)()))
 #define FPE_ADDR(i_,v_) make_fixnum(0)
 #define FPE_CTXT(v_) Cnil
 
