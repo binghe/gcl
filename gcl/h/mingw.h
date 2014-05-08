@@ -228,3 +228,19 @@ extern int mingwlisten(FILE *);
 #define FPE_INIT Cnil
 
 #define ucontext_t void
+#define siginfo_t void
+
+#define FE_DIVBYZERO 4
+#define FE_INVALID 1
+#define FE_OVERFLOW 8
+#define FE_UNDERFLOW 16
+#define FE_INEXACT 32
+
+#define FPE_FLTDIV 3
+#define FPE_FLTINV 7
+#define FPE_FLTOVF 4
+#define FPE_FLTUND 5
+#define FPE_FLTRES 6
+
+
+
