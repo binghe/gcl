@@ -19,6 +19,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
+#define _GNU_SOURCE 1
+#include <fenv.h>
+
 #ifdef __MINGW32__
 #include <sys/types.h>          /* sigset_t */
 #endif
@@ -133,6 +136,8 @@ unblock_sigusr_sigio(void)
 
 DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,FPE_INIT,"");
 
+#if defined(__x86_64__) || defined(__i386__)
+
 #define ASM __asm__ __volatile__
 
 DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
@@ -140,6 +145,9 @@ DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
   ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val));
   RETURN1(make_longfloat(d));
 }
+
+#endif
+
 DEFUN_NEW("*FIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") {
   RETURN1(*(fixnum *)addr);
 }
@@ -150,9 +158,6 @@ DEFUN_NEW("*DOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
   RETURN1(make_longfloat(*(double *)addr));
 }
 
-#define _GNU_SOURCE 1
-#include <fenv.h>
-
 DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
 
 #ifdef HAVE_FEENABLEEXCEPT
@@ -162,7 +167,6 @@ DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixn
 #elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
-    fixnum j;
     unsigned short s;
     unsigned int i;
     ASM("fnstcw %0" :: "m" (s));
@@ -215,7 +219,7 @@ DEFUN_NEW("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fix
 	     (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0)))));
 }
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 
 DEFUN_NEW("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
   unsigned short t;

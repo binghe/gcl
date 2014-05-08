@@ -147,7 +147,8 @@ extern DBEGIN_TY _dbegin;
 
 #define SF(a_) ((siginfo_t *)a_)
 
-#define FPE_CODE(i_,v_) make_fixnum((fixnum)SF(i_)->si_code)
+#define FPE_CODE(i_,v_) make_fixnum(fSfpe_code(FFN(fSfnstsw)(),FFN(fSstmxcsr)()))
+/* #define FPE_CODE(i_,v_) make_fixnum((fixnum)SF(i_)->si_code) */
 #define FPE_ADDR(i_,v_) make_fixnum((fixnum)SF(i_)->si_addr)
 #define FPE_CTXT(v_) Cnil
 

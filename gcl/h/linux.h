@@ -155,6 +155,8 @@ do { int c = 0; \
 #define UC(a_) ((ucontext_t *)a_)
 #define SF(a_) ((siginfo_t *)a_)
 
+#if defined(__x86_64__) || defined(__i386__)
+
 /* #define FPE_CODE(i_) make_fixnum((fixnum)SF(i_)->si_code) */
 #define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->swd,UC(v_)->uc_mcontext.fpregs->mxcsr))
 #define FPE_ADDR(i_,v_) make_fixnum(UC(v_)->uc_mcontext.fpregs->fop ? UC(v_)->uc_mcontext.fpregs->rip : (fixnum)SF(i_)->si_addr)
@@ -176,3 +178,13 @@ do { int c = 0; \
 
 #define FPE_INIT ({ucontext_t v;list(3,MMcons(make_simple_string(({const char *s=FPE_RLST;s;})),REG_LIST(MC(gregs))),\
 				     REG_LIST(MCF(_st)),REG_LIST(MCF(_xmm)));})
+
+#else
+
+#define FPE_CODE(i_,v_) make_fixnum((fixnum)SF(i_)->si_code)
+#define FPE_ADDR(i_,v_) make_fixnum((fixnum)SF(i_)->si_addr)
+#define FPE_CTXT(v_) Cnil
+
+#define FPE_INIT Cnil
+
+#endif
