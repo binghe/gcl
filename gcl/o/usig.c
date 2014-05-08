@@ -182,7 +182,7 @@ DEFUN_NEW("FETESTEXCEPT",fixnum,fSfetestexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum e
 #ifdef HAVE_FEENABLEEXCEPT
   excepts=fetestexcept(excepts);
 #else
-  excepts=(FFN(fSfnstcw)()&excepts)|(~(FFN(fSstmxcsr)()>>7)&excepts);
+  excepts=(FFN(fSfnstsw)()&excepts)|(~(FFN(fSstmxcsr)()>>7)&excepts);
 #endif  
   RETURN1(excepts);
 }
