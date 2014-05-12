@@ -377,6 +377,36 @@ be any non-negative, non-complex number.
 
 </dd></dl>
 
+<dl>
+<dt><a name="index-BREAK_002dON_002dFLOATING_002dPOINT_002dEXCEPTIONS"></a>Function: <strong>BREAK-ON-FLOATING-POINT-EXCEPTIONS</strong> <em>(&amp;key division-by-zero</em></dt>
+<dd><p>floating-point-invalid-operation
+                                                floating-point-overflow
+                                                floating-point-underflow
+                                                floating-point-inexact)
+Package:SI
+</p>
+<p>Break on the specified IEEE floating point error conditions.  With no
+arguments, report the exceptions currently trapped.  Disable the break
+by setting the key to nil, e.g.
+</p>
+<p>&gt; (break-on-floaint-point-exceptions :division-by-zero t)
+   (DIVISION-BY-ZERO)
+</p>
+<p>&gt; (break-on-floaint-point-exceptions)
+   (DIVISION-BY-ZERO)
+</p>
+<p>&gt; (break-on-floaint-point-exceptions :division-by-zero nil)
+   NIL
+</p>
+<p>On some of the most common platforms, the offending instruction will be
+disassembled, and the register arguments looked up in the saved context
+and reported in as operands.  Within the error handler, addresses may be
+disassembled, and other registers inspected, using the functions defined
+in gcl_fpe.lsp.
+</p>
+</dd></dl>
+
+
 <hr>
 <div class="header">
 <p>

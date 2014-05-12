@@ -4907,6 +4907,27 @@ File: gcl-si.info,  Node: Operating System Definitions,  Prev: Command Line,  Up
      This function causes execution to be suspended for N seconds.  N
      may be any non-negative, non-complex number.
 
+ -- Function: BREAK-ON-FLOATING-POINT-EXCEPTIONS (&key division-by-zero
+     floating-point-invalid-operation floating-point-overflow
+     floating-point-underflow floating-point-inexact) Package:SI
+
+     Break on the specified IEEE floating point error conditions.  With
+     no arguments, report the exceptions currently trapped.  Disable the
+     break by setting the key to nil, e.g.
+
+     > (break-on-floaint-point-exceptions :division-by-zero t)
+     (DIVISION-BY-ZERO)
+
+     > (break-on-floaint-point-exceptions) (DIVISION-BY-ZERO)
+
+     > (break-on-floaint-point-exceptions :division-by-zero nil) NIL
+
+     On some of the most common platforms, the offending instruction
+     will be disassembled, and the register arguments looked up in the
+     saved context and reported in as operands.  Within the error
+     handler, addresses may be disassembled, and other registers
+     inspected, using the functions defined in gcl_fpe.lsp.
+
 
 File: gcl-si.info,  Node: Structures,  Next: Iteration and Tests,  Prev: Operating System,  Up: Top
 
@@ -7285,6 +7306,8 @@ Appendix A Function and Variable Index
 * BOUNDP:                                Symbols.             (line 230)
 * BREAK:                                 User Interface.      (line 120)
 * BREAK-FUNCTION:                        System Definitions.  (line 676)
+* BREAK-ON-FLOATING-POINT-EXCEPTIONS:    Operating System Definitions.
+                                                              (line 207)
 * BUTLAST:                               Lists.               (line 281)
 * BY:                                    GCL Specific.        (line  39)
 * BYE:                                   GCL Specific.        (line 213)
@@ -8184,25 +8207,25 @@ Node: Symbols134272
 Node: Operating System144030
 Node: Command Line144238
 Node: Operating System Definitions148244
-Node: Structures154601
-Node: Iteration and Tests156153
-Node: User Interface159603
-Node: Doc168629
-Node: Type171878
-Node: GCL Specific174538
-Node: Bignums182965
-Node: C Interface185655
-Node: Available Symbols185819
-Node: System Definitions186298
-Node: Regular Expressions216605
-Node: Debugging222695
-Node: Source Level Debugging in Emacs222899
-Node: Low Level Debug Functions227144
-Node: Miscellaneous228144
-Node: Environment228358
-Node: Inititialization228983
-Node: Low Level X Interface229527
-Node: Compiler Definitions230124
-Node: Function and Variable Index235419
+Node: Structures155543
+Node: Iteration and Tests157095
+Node: User Interface160545
+Node: Doc169571
+Node: Type172820
+Node: GCL Specific175480
+Node: Bignums183907
+Node: C Interface186597
+Node: Available Symbols186761
+Node: System Definitions187240
+Node: Regular Expressions217547
+Node: Debugging223637
+Node: Source Level Debugging in Emacs223841
+Node: Low Level Debug Functions228086
+Node: Miscellaneous229086
+Node: Environment229300
+Node: Inititialization229925
+Node: Low Level X Interface230469
+Node: Compiler Definitions231066
+Node: Function and Variable Index236361
 
 End Tag Table

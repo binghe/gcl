@@ -427,3 +427,32 @@ be any non-negative, non-complex number.
 
 
 @end defun
+
+@defun BREAK-ON-FLOATING-POINT-EXCEPTIONS (&key division-by-zero
+                                                floating-point-invalid-operation
+                                                floating-point-overflow
+                                                floating-point-underflow
+                                                floating-point-inexact)
+Package:SI
+
+Break on the specified IEEE floating point error conditions.  With no
+arguments, report the exceptions currently trapped.  Disable the break
+by setting the key to nil, e.g.
+
+   > (break-on-floaint-point-exceptions :division-by-zero t)
+   (DIVISION-BY-ZERO)
+
+   > (break-on-floaint-point-exceptions)
+   (DIVISION-BY-ZERO)
+
+   > (break-on-floaint-point-exceptions :division-by-zero nil)
+   NIL
+
+On some of the most common platforms, the offending instruction will be
+disassembled, and the register arguments looked up in the saved context
+and reported in as operands.  Within the error handler, addresses may be
+disassembled, and other registers inspected, using the functions defined
+in gcl_fpe.lsp.
+
+@end defun
+
