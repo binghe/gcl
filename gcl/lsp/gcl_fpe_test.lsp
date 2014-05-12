@@ -21,15 +21,15 @@
 (test-fpe 'l/ (list 1.0 2.0) 0.5)
 (test-fpe 'l/ (list 1.0 0.0) :division-by-zero)
 (test-fpe 'l/ (list 0.0 0.0) :floating-point-invalid-operation)
-(test-fpe 'l/ (list most-positive-long-float least-positive-long-float) :floating-point-overflow)
-(test-fpe 'l/ (list least-positive-long-float most-positive-long-float) :floating-point-underflow)
+(test-fpe 'l/ (list most-positive-long-float least-positive-normalized-long-float) :floating-point-overflow)
+(test-fpe 'l/ (list least-positive-normalized-long-float most-positive-long-float) :floating-point-underflow)
 (test-fpe 'l/ (list 1.2 1.3) :floating-point-inexact)
 
 (test-fpe 's/ (list 1.0s0 2.0s0) 0.5s0)
 (test-fpe 's/ (list 1.0s0 0.0s0) :division-by-zero)
 (test-fpe 's/ (list 0.0s0 0.0s0) :floating-point-invalid-operation)
-(test-fpe 's/ (list most-positive-short-float least-positive-short-float) :floating-point-overflow)
-(test-fpe 's/ (list least-positive-short-float most-positive-short-float) :floating-point-underflow)
+(test-fpe 's/ (list most-positive-short-float least-positive-normalized-short-float) :floating-point-overflow)
+(test-fpe 's/ (list least-positive-normalized-short-float most-positive-short-float) :floating-point-underflow)
 (test-fpe 's/ (list 1.2s0 1.3s0) :floating-point-inexact)
 
 (test-fpe 'lsqrt (list 4.0) 2.0)
@@ -128,7 +128,7 @@
 	fb (make-aligned-array 16 4 :element-type 'short-float)
 	fc (make-aligned-array 16 4 :element-type 'short-float :initial-contents '(1.3s0 2.4s0 3.5s0 4.6s0))
 	fx (make-aligned-array 16 4 :element-type 'short-float :initial-contents (make-list 4 :initial-element most-positive-short-float))
-	fm (make-aligned-array 16 4 :element-type 'short-float :initial-contents (make-list 4 :initial-element least-positive-short-float))
+	fm (make-aligned-array 16 4 :element-type 'short-float :initial-contents (make-list 4 :initial-element least-positive-normalized-short-float))
 	fn (make-aligned-array 16 4 :element-type 'short-float :initial-contents (make-list 4 :initial-element -1.0s0))
 	fr (make-aligned-array 16 4 :element-type 'short-float))
   
@@ -136,15 +136,15 @@
 	db (make-aligned-array 16 2 :element-type 'long-float)
 	dc (make-aligned-array 16 2 :element-type 'long-float :initial-contents '(1.3 2.4))
 	dx (make-aligned-array 16 2 :element-type 'long-float :initial-contents (make-list 2 :initial-element most-positive-long-float))
-	dm (make-aligned-array 16 2 :element-type 'long-float :initial-contents (make-list 2 :initial-element least-positive-long-float))
+	dm (make-aligned-array 16 2 :element-type 'long-float :initial-contents (make-list 2 :initial-element least-positive-normalized-long-float))
 	dn (make-aligned-array 16 2 :element-type 'long-float :initial-contents (make-list 2 :initial-element -1.0))
 	dr (make-aligned-array 16 2 :element-type 'long-float))
   
   (test-fpe 'fdivp (list 1.0 2.0) 0.5 t)
   (test-fpe 'fdivp (list 1.0 0.0) :division-by-zero t)
   (test-fpe 'fdivp (list 0.0 0.0) :floating-point-invalid-operation t)
-  (test-fpe 'fdivp (list most-positive-long-float least-positive-long-float) :floating-point-overflow);fstpl
-  (test-fpe 'fdivp (list least-positive-long-float most-positive-long-float) :floating-point-underflow);fstpl
+  (test-fpe 'fdivp (list most-positive-long-float least-positive-normalized-long-float) :floating-point-overflow);fstpl
+  (test-fpe 'fdivp (list least-positive-normalized-long-float most-positive-long-float) :floating-point-underflow);fstpl
   (test-fpe 'fdivp (list 1.2 1.3) :floating-point-inexact);post args
   
   (test-fpe 'divpd (list da da dr) dr t)
@@ -181,29 +181,29 @@
   (test-fpe 'divsd (list 1.0 2.0) 0.5 t)
   (test-fpe 'divsd (list 1.0 0.0) :division-by-zero t)
   (test-fpe 'divsd (list 0.0 0.0) :floating-point-invalid-operation t)
-  (test-fpe 'divsd (list most-positive-long-float least-positive-long-float) :floating-point-overflow t)
-  (test-fpe 'divsd (list least-positive-long-float most-positive-long-float) :floating-point-underflow t)
+  (test-fpe 'divsd (list most-positive-long-float least-positive-normalized-long-float) :floating-point-overflow t)
+  (test-fpe 'divsd (list least-positive-normalized-long-float most-positive-long-float) :floating-point-underflow t)
   (test-fpe 'divsd (list 1.2 2.3) :floating-point-inexact t)
   
   (test-fpe 'divsdm (list 1.0 2.0) 0.5 t)
   (test-fpe 'divsdm (list 1.0 0.0) :division-by-zero t)
   (test-fpe 'divsdm (list 0.0 0.0) :floating-point-invalid-operation t)
-  (test-fpe 'divsdm (list most-positive-long-float least-positive-long-float) :floating-point-overflow t)
-  (test-fpe 'divsdm (list least-positive-long-float most-positive-long-float) :floating-point-underflow t)
+  (test-fpe 'divsdm (list most-positive-long-float least-positive-normalized-long-float) :floating-point-overflow t)
+  (test-fpe 'divsdm (list least-positive-normalized-long-float most-positive-long-float) :floating-point-underflow t)
   (test-fpe 'divsdm (list 1.2 2.3) :floating-point-inexact t)
   
   (test-fpe 'divss (list 1.0s0 2.0s0) 0.5s0 t)
   (test-fpe 'divss (list 1.0s0 0.0s0) :division-by-zero t)
   (test-fpe 'divss (list 0.0s0 0.0s0) :floating-point-invalid-operation t)
-  (test-fpe 'divss (list most-positive-short-float least-positive-short-float) :floating-point-overflow t)
-  (test-fpe 'divss (list least-positive-short-float most-positive-short-float) :floating-point-underflow t)
+  (test-fpe 'divss (list most-positive-short-float least-positive-normalized-short-float) :floating-point-overflow t)
+  (test-fpe 'divss (list least-positive-normalized-short-float most-positive-short-float) :floating-point-underflow t)
   (test-fpe 'divss (list 1.2s0 2.3s0) :floating-point-inexact t)
   
   (test-fpe 'divssm (list 1.0s0 2.0s0) 0.5s0 t)
   (test-fpe 'divssm (list 1.0s0 0.0s0) :division-by-zero t)
   (test-fpe 'divssm (list 0.0s0 0.0s0) :floating-point-invalid-operation t)
-  (test-fpe 'divssm (list most-positive-short-float least-positive-short-float) :floating-point-overflow t)
-  (test-fpe 'divssm (list least-positive-short-float most-positive-short-float) :floating-point-underflow t)
+  (test-fpe 'divssm (list most-positive-short-float least-positive-normalized-short-float) :floating-point-overflow t)
+  (test-fpe 'divssm (list least-positive-normalized-short-float most-positive-short-float) :floating-point-underflow t)
   (test-fpe 'divssm (list 1.2s0 2.3s0) :floating-point-inexact t)
   
   (test-fpe 'sqrtpd (list da db dr) dr t)
