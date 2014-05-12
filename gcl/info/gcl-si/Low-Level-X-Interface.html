@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Low Level X Interface</title>
+
+<meta name="description" content="GCL SI Manual: Low Level X Interface">
+<meta name="keywords" content="GCL SI Manual: Low Level X Interface">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Miscellaneous.html#Miscellaneous" rel="up" title="Miscellaneous">
+<link href="Compiler-Definitions.html#Compiler-Definitions" rel="next" title="Compiler Definitions">
+<link href="Inititialization.html#Inititialization" rel="prev" title="Inititialization">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Low-Level-X-Interface"></a>
+<div class="header">
+<p>
+Previous: <a href="Inititialization.html#Inititialization" accesskey="p" rel="prev">Inititialization</a>, Up: <a href="Miscellaneous.html#Miscellaneous" accesskey="u" rel="up">Miscellaneous</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Low-Level-X-Interface-1"></a>
+<h3 class="section">19.3 Low Level X Interface</h3>
+
+<p>A sample program for drawing things on X windows from lisp
+is included in the file gcl/lsp/littleXlsp.lsp
+</p>
+<p>That routine invokes the corresponding C routines in XLIB.
+So in order to use it you must &lsquo;faslink&rsquo; in the X routines.
+Directions are given at the beginning of the lisp file,
+for either building them into the image or using faslink.
+</p>
+<p>This program is also a good tutorial on invoking C from lisp.
+</p>
+<p>See also defentry and faslink.
+</p>
+
+
+
+
+
+</body>
+</html>

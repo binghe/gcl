@@ -1,0 +1,1075 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Lists</title>
+
+<meta name="description" content="GCL SI Manual: Lists">
+<meta name="keywords" content="GCL SI Manual: Lists">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Streams-and-Reading.html#Streams-and-Reading" rel="next" title="Streams and Reading">
+<link href="Characters.html#Characters" rel="prev" title="Characters">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Lists"></a>
+<div class="header">
+<p>
+Next: <a href="Streams-and-Reading.html#Streams-and-Reading" accesskey="n" rel="next">Streams and Reading</a>, Previous: <a href="Characters.html#Characters" accesskey="p" rel="prev">Characters</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Lists-1"></a>
+<h2 class="chapter">4 Lists</h2>
+
+<dl>
+<dt><a name="index-NINTERSECTION"></a>Function: <strong>NINTERSECTION</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the intersection of LIST1 and LIST2.  LIST1 may be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RASSOC_002dIF"></a>Function: <strong>RASSOC-IF</strong> <em>(predicate alist)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first cons in ALIST whose cdr satisfies PREDICATE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dLIST"></a>Function: <strong>MAKE-LIST</strong> <em>(size &amp;key (initial-element nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a list containing SIZE elements, each of which is
+initialized to INITIAL-ELEMENT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NTH"></a>Function: <strong>NTH</strong> <em>(n list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the N-th element of LIST, where the car of LIST is the zeroth
+element.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAAR"></a>Function: <strong>CAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NULL"></a>Function: <strong>NULL</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is NIL; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIFTH"></a>Function: <strong>FIFTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDDDDR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NCONC"></a>Function: <strong>NCONC</strong> <em>(&amp;rest lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Concatenates LISTs by destructively modifying them.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TAILP"></a>Function: <strong>TAILP</strong> <em>(sublist list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if SUBLIST is one of the conses in LIST; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CONSP"></a>Function: <strong>CONSP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a cons; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TENTH"></a>Function: <strong>TENTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CADR (CDDDDR (CDDDDR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LISTP"></a>Function: <strong>LISTP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is either a cons or NIL; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAPCAN"></a>Function: <strong>MAPCAN</strong> <em>(fun list &amp;rest more-lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUN to successive cars of LISTs, NCONCs the results, and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EIGHTH"></a>Function: <strong>EIGHTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CADDDR (CDDDDR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LENGTH"></a>Function: <strong>LENGTH</strong> <em>(sequence)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the length of SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RASSOC"></a>Function: <strong>RASSOC</strong> <em>(item alist &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first cons in ALIST whose cdr is equal to ITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBST_002dIF_002dNOT"></a>Function: <strong>NSUBST-IF-NOT</strong> <em>(new test tree &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes NEW for subtrees of TREE that do not satisfy TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NBUTLAST"></a>Function: <strong>NBUTLAST</strong> <em>(list &amp;optional (n 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Changes the cdr of the N+1 th cons from the end of the list LIST to NIL.
+Returns the whole list.
+</p>
+
+</dd></dl>
+
+
+
+<dl>
+<dt><a name="index-CDR"></a>Function: <strong>CDR</strong> <em>(list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the cdr of LIST.  Returns NIL if LIST is NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAPC"></a>Function: <strong>MAPC</strong> <em>(fun list &amp;rest more-lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUN to successive cars of LISTs.  Returns the first LIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAPL"></a>Function: <strong>MAPL</strong> <em>(fun list &amp;rest more-lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUN to successive cdrs of LISTs.  Returns the first LIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CONS"></a>Function: <strong>CONS</strong> <em>(x y)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a new cons whose car and cdr are X and Y, respectively.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LIST"></a>Function: <strong>LIST</strong> <em>(&amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of its arguments
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-THIRD"></a>Function: <strong>THIRD</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CADDR X).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDAAR"></a>Function: <strong>CDDAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR (CAR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDADAR"></a>Function: <strong>CDADAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR (CDR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDAADR"></a>Function: <strong>CDAADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR (CAR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADDAR"></a>Function: <strong>CADDAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR (CDR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADADR"></a>Function: <strong>CADADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR (CAR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAADDR"></a>Function: <strong>CAADDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR (CDR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NTHCDR"></a>Function: <strong>NTHCDR</strong> <em>(n list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the result of performing the CDR operation N times on LIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PAIRLIS"></a>Function: <strong>PAIRLIS</strong> <em>(keys data &amp;optional (alist nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Constructs an association list from KEYS and DATA adding to ALIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SEVENTH"></a>Function: <strong>SEVENTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CADDR (CDDDDR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBSETP"></a>Function: <strong>SUBSETP</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if every element of LIST1 appears in LIST2; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBST_002dIF"></a>Function: <strong>NSUBST-IF</strong> <em>(new test tree &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes NEW for subtrees of TREE that satisfy TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COPY_002dLIST"></a>Function: <strong>COPY-LIST</strong> <em>(list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a new copy of LIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LAST"></a>Function: <strong>LAST</strong> <em>(list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the last cons in LIST
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAAAR"></a>Function: <strong>CAAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR (CAR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LIST_002dLENGTH"></a>Function: <strong>LIST-LENGTH</strong> <em>(list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the length of LIST, or NIL if LIST is circular.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDDR"></a>Function: <strong>CDDDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR (CDR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INTERSECTION"></a>Function: <strong>INTERSECTION</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the intersection of List1 and List2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBST"></a>Function: <strong>NSUBST</strong> <em>(new old tree &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes NEW for subtrees in TREE that match OLD.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REVAPPEND"></a>Function: <strong>REVAPPEND</strong> <em>(x y)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (APPEND (REVERSE X) Y)
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDAR"></a>Function: <strong>CDAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADR"></a>Function: <strong>CADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REST"></a>Function: <strong>REST</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR X).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSET_002dEXCLUSIVE_002dOR"></a>Function: <strong>NSET-EXCLUSIVE-OR</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list with elements which appear but once in LIST1 and LIST2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ACONS"></a>Function: <strong>ACONS</strong> <em>(key datum alist)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Constructs a new alist by adding the pair (KEY . DATUM) to ALIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBST_002dIF_002dNOT"></a>Function: <strong>SUBST-IF-NOT</strong> <em>(new test tree &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes NEW for subtrees of TREE that do not satisfy TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RPLACA"></a>Function: <strong>RPLACA</strong> <em>(x y)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Replaces the car of X with Y, and returns the modified X.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SECOND"></a>Function: <strong>SECOND</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CADR X).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NUNION"></a>Function: <strong>NUNION</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the union of LIST1 and LIST2.  LIST1 and/or LIST2 may be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BUTLAST"></a>Function: <strong>BUTLAST</strong> <em>(list &amp;optional (n 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a list with the same elements as LIST but without the
+last N elements.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COPY_002dALIST"></a>Function: <strong>COPY-ALIST</strong> <em>(alist)</em></dt>
+<dd><p>Package:LISP
+ Returns a new copy of ALIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SIXTH"></a>Function: <strong>SIXTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+ Equivalent to (CADR (CDDDDR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAAAAR"></a>Function: <strong>CAAAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR (CAR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDDAR"></a>Function: <strong>CDDDAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR (CDR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDADR"></a>Function: <strong>CDDADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR (CAR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDADDR"></a>Function: <strong>CDADDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR (CDR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADDDR"></a>Function: <strong>CADDDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR (CDR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FOURTH"></a>Function: <strong>FOURTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CADDDR X).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBLIS"></a>Function: <strong>NSUBLIS</strong> <em>(alist tree &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes from ALIST for subtrees of TREE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBST_002dIF"></a>Function: <strong>SUBST-IF</strong> <em>(new test tree &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes NEW for subtrees of TREE that satisfy TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSET_002dDIFFERENCE"></a>Function: <strong>NSET-DIFFERENCE</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of elements of LIST1 that do not appear in LIST2.  LIST1 may
+be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-POP"></a>Special Form: <strong>POP</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(pop place)
+</pre></div>
+
+<p>Pops one item off the front of the list in PLACE and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PUSH"></a>Special Form: <strong>PUSH</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(push item place)
+</pre></div>
+
+<p>Conses ITEM onto the list in PLACE, and returns the new list.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDAAR"></a>Function: <strong>CDAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR (CAR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADAR"></a>Function: <strong>CADAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR (CAR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAADR"></a>Function: <strong>CAADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR (CDR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIRST"></a>Function: <strong>FIRST</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR X).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBST"></a>Function: <strong>SUBST</strong> <em>(new old tree &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes NEW for subtrees of TREE that match OLD.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ADJOIN"></a>Function: <strong>ADJOIN</strong> <em>(item list &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Adds ITEM to LIST unless ITEM is already a member of LIST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAPCON"></a>Function: <strong>MAPCON</strong> <em>(fun list &amp;rest more-lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUN to successive cdrs of LISTs, NCONCs the results, and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PUSHNEW"></a>Macro: <strong>PUSHNEW</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(pushnew item place {keyword value}*)
+</pre></div>
+
+<p>If ITEM is already in the list stored in PLACE, does nothing.  Else, conses
+ITEM onto the list.  Returns NIL.  If no KEYWORDs are supplied, each element
+in the list is compared with ITEM by EQL, but the comparison can be controlled
+by supplying keywords :TEST, :TEST-NOT, and/or :KEY.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SET_002dEXCLUSIVE_002dOR"></a>Function: <strong>SET-EXCLUSIVE-OR</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of elements appearing exactly once in LIST1 and LIST2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TREE_002dEQUAL"></a>Function: <strong>TREE-EQUAL</strong> <em>(x y &amp;key (test #'eql) test-not)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X and Y are isomorphic trees with identical leaves.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDR"></a>Function: <strong>CDDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR X)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GETF"></a>Function: <strong>GETF</strong> <em>(place indicator &amp;optional (default nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Searches the property list stored in Place for an indicator EQ to Indicator.
+If one is found, the corresponding value is returned, else the Default is
+returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LDIFF"></a>Function: <strong>LDIFF</strong> <em>(list sublist)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a new list, whose elements are those of LIST that appear before
+SUBLIST.  If SUBLIST is not a tail of LIST, a copy of LIST is returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNION"></a>Function: <strong>UNION</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the union of LIST1 and LIST2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASSOC_002dIF_002dNOT"></a>Function: <strong>ASSOC-IF-NOT</strong> <em>(test alist)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first pair in ALIST whose car does not satisfy TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RPLACD"></a>Function: <strong>RPLACD</strong> <em>(x y)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Replaces the cdr of X with Y, and returns the modified X.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MEMBER_002dIF_002dNOT"></a>Function: <strong>MEMBER-IF-NOT</strong> <em>(test list &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the tail of LIST beginning with the first element not satisfying
+TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAR"></a>Function: <strong>CAR</strong> <em>(list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the car of LIST.  Returns NIL if LIST is NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ENDP"></a>Function: <strong>ENDP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is NIL.  Returns NIL if X is a cons.  Otherwise, signals an
+error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LIST_002a"></a>Function: <strong>LIST*</strong> <em>(arg &amp;rest others)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of its arguments with the last cons being a dotted pair of
+the next to the last argument and the last argument.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NINTH"></a>Function: <strong>NINTH</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDDDDR (CDDDDR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDAAAR"></a>Function: <strong>CDAAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR (CAR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADAAR"></a>Function: <strong>CADAAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR (CAR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAADAR"></a>Function: <strong>CAADAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR (CDR (CAR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CAAADR"></a>Function: <strong>CAAADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CAR (CAR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDDDR"></a>Function: <strong>CDDDDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR (CDR (CDR X)))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBLIS"></a>Function: <strong>SUBLIS</strong> <em>(alist tree &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Substitutes from ALIST for subtrees of TREE nondestructively.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RASSOC_002dIF_002dNOT"></a>Function: <strong>RASSOC-IF-NOT</strong> <em>(predicate alist)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first cons in ALIST whose cdr does not satisfy PREDICATE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NRECONC"></a>Function: <strong>NRECONC</strong> <em>(x y)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (NCONC (NREVERSE X) Y).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAPLIST"></a>Function: <strong>MAPLIST</strong> <em>(fun list &amp;rest more-lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUN to successive cdrs of LISTs and returns the results as a list.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SET_002dDIFFERENCE"></a>Function: <strong>SET-DIFFERENCE</strong> <em>(list1 list2 &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of elements of LIST1 that do not appear in LIST2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASSOC_002dIF"></a>Function: <strong>ASSOC-IF</strong> <em>(test alist)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first pair in ALIST whose car satisfies TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET_002dPROPERTIES"></a>Function: <strong>GET-PROPERTIES</strong> <em>(place indicator-list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Looks for the elements of INDICATOR-LIST in the property list stored in PLACE.
+If found, returns the indicator, the value, and T as multiple-values.  If not,
+returns NILs as its three values.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MEMBER_002dIF"></a>Function: <strong>MEMBER-IF</strong> <em>(test list &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the tail of LIST beginning with the first element satisfying TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COPY_002dTREE"></a>Function: <strong>COPY-TREE</strong> <em>(object)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Recursively copies conses in OBJECT and returns the result.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ATOM"></a>Function: <strong>ATOM</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is not a cons; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDDAR"></a>Function: <strong>CDDAR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CDR (CAR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CDADR"></a>Function: <strong>CDADR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CDR (CAR (CDR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CADDR"></a>Function: <strong>CADDR</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Equivalent to (CAR (CDR (CDR X))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASSOC"></a>Function: <strong>ASSOC</strong> <em>(item alist &amp;key (test #'eql) test-not)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first pair in ALIST whose car is equal (in the sense of TEST) to
+ITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-APPEND"></a>Function: <strong>APPEND</strong> <em>(&amp;rest lists)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Constructs a new list by concatenating its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MEMBER"></a>Function: <strong>MEMBER</strong> <em>(item list &amp;key (test #'eql) test-not (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the tail of LIST beginning with the first ITEM.
+</p>
+
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Streams-and-Reading.html#Streams-and-Reading" accesskey="n" rel="next">Streams and Reading</a>, Previous: <a href="Characters.html#Characters" accesskey="p" rel="prev">Characters</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

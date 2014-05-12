@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: Argument Lists</title>
+
+<meta name="description" content="GCL TK Manual: Argument Lists">
+<meta name="keywords" content="GCL TK Manual: Argument Lists">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html#General" rel="up" title="General">
+<link href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics" rel="next" title="Lisp Functions Invoked from Graphics">
+<link href="Return-Values.html#Return-Values" rel="prev" title="Return Values">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Argument-Lists"></a>
+<div class="header">
+<p>
+Next: <a href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics" accesskey="n" rel="next">Lisp Functions Invoked from Graphics</a>, Previous: <a href="Return-Values.html#Return-Values" accesskey="p" rel="prev">Return Values</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="Argument-Lists-1"></a>
+<h3 class="section">1.5 Argument Lists</h3>
+
+<a name="Widget-Functions"></a>
+<h4 class="subsection">1.5.1 Widget Functions</h4>
+
+<p>The rule is that the first argument for a widget function is a keyword,
+called the <i>option</i>.  The pattern of the remaining arguments depends
+completely
+on the <i>option</i> argument.  Thus
+</p>
+<div class="example">
+<pre class="example">(.hello <i>option</i> ?arg1? ?arg2? ...)
+</pre></div>
+
+<p>One <i>option</i> which is permitted for every widget function is
+<code>:configure</code>.  The argument pattern following it is the same
+keyword/value pair list which is used in widget creation.  For a
+<code>button</code> widget, the other valid options are <code>:deactivate</code>,
+<code>:flash</code>, and <code>:invoke</code>.   To find these, since
+<code>.hello</code> was constructed with the <code>button</code> constructor, you
+should see See <a href="button.html#button">button</a>.  
+The argument pattern for other options depends completely on the option
+and the widget function.
+For example if <code>.scrollbar</code> is a scroll bar window, then the option
+<code>:set</code> must be followed by 4 numeric arguments, which indicate how
+the scrollbar should be displayed, see See <a href="scrollbar.html#scrollbar">scrollbar</a>. 
+</p>
+<div class="example">
+<pre class="example">(.scrollbar :set a1 a2 a3 a4)
+</pre></div>
+
+<p>If on the other hand <code>.scale</code> is a scale (see <a href="scale.html#scale">scale</a>), then we have
+</p>
+<div class="example">
+<pre class="example">(.scale :set a1 )
+</pre></div>
+<p>only one numeric argument should be supplied, in order to position the
+scale.
+</p>
+<a name="Widget-Constructor-Argument-Lists"></a>
+<h4 class="subsection">1.5.2 Widget Constructor Argument Lists</h4>
+
+<p>These are
+</p>
+<div class="example">
+<pre class="example">(widget-constructor <i>pathname</i> :keyword1 value1 :keyword2 value2 ...)
+</pre></div>
+
+<p>to create the widget whose name is <i>pathname</i>.  The possible keywords
+allowed are specified in the corresponding section of See <a href="Widgets.html#Widgets">Widgets</a>.
+</p>
+<a name="Concatenation-Using-_0060_003a_0027-in-Argument-List"></a>
+<h4 class="subsection">1.5.3 Concatenation Using &lsquo;:&rsquo; in Argument List</h4>
+
+<p>What has been said so far about arguments is not quite true.  A
+special string concatenation construction is allowed in argument lists
+for widgets, widget constructors and control functions.
+</p>
+<p>First we introduce the function <code>tk-conc</code> which takes an arbitrary
+number of arguments, which may be symbols, strings or numbers, and 
+concatenates these into a string.   The print names of symbols are 
+converted to lower case, and package names are ignored.
+</p>
+<div class="example">
+<pre class="example">(tk-conc &quot;a&quot; 1 :b 'cd &quot;e&quot;) ==&gt; &quot;a1bcde&quot;
+</pre></div>
+
+<p>One could use <code>tk-conc</code> to construct arguments for widget
+functions.  But even though <code>tk-conc</code> has been made quite
+efficient, it still would involve the creation of a string.   The
+<code>:</code> construct avoids this.   In a call to a widget function,
+a widget constructor, or a control function you may remove the call to
+<code>tk-conc</code> and place <code>:</code> in between each of its arguments.
+Those functions are able to understand this and treat the extra
+arguments as if they were glued together in one string, but without
+the extra cost of actually forming that string.
+</p>
+<div class="example">
+<pre class="example">(tk-conc a b c .. w) &lt;==&gt; a : b : c : ... w
+(setq i 10)
+(.hello :configure :text i : &quot; pies&quot;)
+(.hello :configure :text (tk-conc i  &quot; pies&quot;))
+(.hello :configure :text (format nil &quot;~a pies&quot; i))
+</pre></div>
+
+<p>The last three examples would all result in the text string being
+<code>&quot;10 pies&quot;</code>, but the first method is the most efficient.
+That call will be made with no string or cons creation.   The 
+<b>GC Monitor</b> example, is written in such a way that there is no
+creation of <code>cons</code> or <code>string</code> types during normal operation.
+This is particularly useful in that case, since one is trying to 
+monitor usage of conses by other programs, not its own usage.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics" accesskey="n" rel="next">Lisp Functions Invoked from Graphics</a>, Previous: <a href="Return-Values.html#Return-Values" accesskey="p" rel="prev">Return Values</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: toplevel</title>
+
+<meta name="description" content="GCL TK Manual: toplevel">
+<meta name="keywords" content="GCL TK Manual: toplevel">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="Control.html#Control" rel="next" title="Control">
+<link href="radiobutton.html#radiobutton" rel="prev" title="radiobutton">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="toplevel"></a>
+<div class="header">
+<p>
+Previous: <a href="radiobutton.html#radiobutton" accesskey="p" rel="prev">radiobutton</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="toplevel-1"></a>
+<h3 class="section">2.15 toplevel</h3>
+
+<p>toplevel \- Create and manipulate toplevel widgets
+</p><a name="Synopsis-14"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>toplevel</b><i> </i><i>pathName </i><span class="roman">?</span><b>:screen </b><i>screenName</i><span class="roman">? ?</span><b>:class </b><i>className</i><span class="roman">? ?</span><i>options</i>?
+</p><a name="Standard-Options-14"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">background                  geometry                
+borderWidth                 relief                  
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Toplevel"></a>
+<h4 class="unnumberedsubsec">Arguments for Toplevel</h4>
+
+<a name="Description-11"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>toplevel</b> command creates a new toplevel widget (given
+by the <i>pathName</i> argument).  Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the toplevel such as its background color
+and relief.  The <b>toplevel</b> command returns the
+path name of the new window.
+</p>
+<p>A toplevel is similar to a frame except that it is created as a
+top-level window:  its X parent is the root window of a screen
+rather than the logical parent from its path name.  The primary
+purpose of a toplevel is to serve as a container for dialog boxes
+and other collections of widgets.  The only features
+of a toplevel are its background color and an optional 3-D border
+to make the toplevel appear raised or sunken.
+</p>
+<p>Two special command-line options may be provided to the <b>toplevel</b>
+command:  <b>:class</b><span class="roman"> and </span><b>:screen</b><span class="roman">.  If </span><b>:class</b>
+is specified, then the new widget&rsquo;s class will be set to
+<i>className</i><span class="roman"> instead of </span><b>Toplevel</b>.  Changing the class of
+a toplevel widget may be useful
+in order to use a special class name in database options referring
+to this widget and its children.  The <b>:screen</b> option
+may be used to place the window on a different screen than the
+window&rsquo;s logical parent.  Any valid screen name may be used, even
+one associated with a different display.
+</p>
+<p>Note:  <b>:class</b><span class="roman"> and </span><b>:screen</b> are handled
+differently than other command-line options.  They may not be specified
+using the option database (these options must have been processed
+before the new window has been created enough to use the option database;
+in particular, the new class name will affect the lookup of options
+in the database).  In addition, <b>:class</b><span class="roman"> and </span><b>:screen</b>
+may not be queried or changed using the <b>config</b> command described
+below.  However, the <b>winfo :class</b> command may be used to query
+the class of a window, and <b>winfo :screen</b> may be used to query
+its screen.
+</p>
+<a name="A-Toplevel-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Toplevel Widget&rsquo;s Arguments</h4>
+
+<p>The <b>toplevel</b> command creates a new Tcl command whose
+name is the same as the path name of the toplevel&rsquo;s window.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>PathName</i> is the name of the command, which is the same as
+the toplevel widget&rsquo;s path name.  <i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for toplevel widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>toplevel</b>
+command.
+</p>
+</dd>
+</dl>
+<a name="Bindings-8"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>When a new toplevel is created, it has no default event bindings:
+toplevels are not intended to be interactive.
+</p>
+<a name="Keywords-14"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>toplevel, widget
+</p>
+
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="radiobutton.html#radiobutton" accesskey="p" rel="prev">radiobutton</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

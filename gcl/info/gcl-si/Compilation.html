@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Compilation</title>
+
+<meta name="description" content="GCL SI Manual: Compilation">
+<meta name="keywords" content="GCL SI Manual: Compilation">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Symbols.html#Symbols" rel="next" title="Symbols">
+<link href="Special-Forms-and-Functions.html#Special-Forms-and-Functions" rel="prev" title="Special Forms and Functions">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Compilation"></a>
+<div class="header">
+<p>
+Next: <a href="Symbols.html#Symbols" accesskey="n" rel="next">Symbols</a>, Previous: <a href="Special-Forms-and-Functions.html#Special-Forms-and-Functions" accesskey="p" rel="prev">Special Forms and Functions</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Compilation-1"></a>
+<h2 class="chapter">7 Compilation</h2>
+
+<dl>
+<dt><a name="index-COMPILE"></a>Function: <strong>COMPILE</strong> <em>(name &amp;optional (definition nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If DEFINITION is NIL, NAME must be the name of a not-yet-compiled
+function.  In this case, COMPILE compiles the function, installs the compiled
+function as the global function definition of NAME, and returns NAME.
+If DEFINITION is non-NIL, it must be a lambda expression and NAME must be
+a symbol.  COMPILE compiles the lambda expression, installs the compiled
+function as the function definition of NAME, and returns NAME.
+There is only one exception for this:  If NAME is NIL, then the compiled
+function is not installed but is simply returned as the value of COMPILE.
+     In any case, COMPILE creates temporary files whose filenames are
+&quot;gazonk***&quot;.  By default, i.e. if :LEAVE-GAZONK is not supplied or is
+NIL, these files are automatically deleted after compilation.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LINK"></a>Function: <strong>LINK</strong> <em>(files image &amp;optional post extra-libs (run-user-init t) &amp;aux raw init) </em></dt>
+<dd><p>Package:LISP
+</p>
+<p>On systems where dlopen is used for relocations, one cannot make custom
+images containing loaded binary object files simply by loading the files
+and executing save-system.  This function is provided for such cases.
+</p>
+<p>After compiling source files into objects, LINK can be called with a
+list of binary and source FILES which would otherwise normally be
+loaded in sequence before saving the image to IMAGE.  LINK will use
+the system C linker to link the binary files thus supplied with GCL&rsquo;s
+objects, using EXTRA-LIBS as well if provided, and producing a
+raw_IMAGE executable. This executable is then run to initialize first
+GCL&rsquo;s objects, followed by the supplied files, in order, if
+RUN-USER-INIT is set.  In such a case, source files are loaded at
+their position in the sequence.  Any optional code which should be run
+after file initialization can be supplied in the POST variable.  The
+image is then saved using save-system to IMAGE.
+</p>
+<p>This method of creating lisp images may also have the advantage that
+all new object files are kept out of the lisp core and placed instead
+in the final image&rsquo;s .text section.  This should in principle reduce
+the core size, speed up garbage collection, and forego any performance
+penalty induced by data cache flushing on some machines.
+</p>
+
+<p>In both the RAW and SAVED image, any calls to LOAD binary object files
+which have been specified in this list will bypass the normal load
+procedure, and simply initialize the already linked in module.  One
+can rely on this feature by disabling RUN-USER-INIT, and instead
+passing the normal build commands in POST.  In the course of executing
+this code, binary modules previously linked into the .text section of
+the executable will be initialized at the same point at which they
+would have normally been loaded into the lisp core, in the
+executable&rsquo;s .data section.  In this way, the user can choose to take
+advantage of the aforementioned possible benefits of this linking
+method in a relatively transparent way.
+</p>
+<p>All binary objects specified in FILES must have been compiled with
+:SYSTEM-P set to T.
+</p>
+</dd></dl>
+
+<dl>
+<dt><a name="index-EVAL_002dWHEN"></a>Special Form: <strong>EVAL-WHEN</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(eval-when ({situation}*) {form}*)
+</pre></div>
+
+<p>A situation must be either COMPILE, LOAD, or EVAL.  The interpreter evaluates
+only when EVAL is specified.  If COMPILE is specified, FORMs are evaluated
+at compile time.  If LOAD is specified, the compiler arranges so that FORMs
+be evaluated when the compiled code is loaded.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COMPILE_002dFILE"></a>Function: <strong>COMPILE-FILE</strong> <em>(input-pathname &amp;key output-file (load nil) (message-file nil)  ;GCL specific keywords: system-p c-debug c-file h-file data-file)</em></dt>
+<dd><p>Package:LISP
+</p>
+
+<p>Compiles the file specified by INPUT-PATHNAME and generates a fasl file
+specified by OUTPUT-FILE.  If the filetype is not specified in INPUT-PATHNAME,
+then &quot;.lsp&quot; is used as the default file type for the source file.  :LOAD
+specifies whether to load the generated fasl file after compilation.
+:MESSAGE-FILE specifies the log file for the compiler messages.  It defaults to
+the value of the variable COMPILER:*DEFAULT-MESSAGE-FILE*.  A non-NIL value of
+COMPILER::*COMPILE-PRINT* forces the compiler to indicate the form currently
+being compiled.  More keyword parameters are accepted, depending on the
+version.  Most versions of GCL can receive :O-FILE, :C-FILE, :H-FILE, and
+:DATA-FILE keyword parameters, with which you can control the intermediate
+files generated by the GCL compiler.  Also :C-DEBUG will pass the -g flag to
+the C compiler.
+</p>
+
+<p>By top level forms in a file, we mean the value of *top-level-forms* after
+doing (TF form) for each form read from a file.  We define TF as follows:
+</p>
+<p>(defun TF (x)
+ (when (consp x)
+  (setq x (macroexpand x))
+  (when (consp x)
+     (cond ((member (car x) &rsquo;(progn  eval-when))
+            (mapcar &rsquo;tf (cdr x)))
+           (t  (push x *top-level-forms*))))))
+</p>
+<p>Among the common lisp special forms only DEFUN and DEFMACRO will cause actual
+native machine code to be generated.  The rest will be specially treated in an
+init section of the .data file.  This is done so that things like putprop,setq,
+and many other forms would use up space which could not be usefully freed, if
+we were to compile to native machine code.  If you have other &lsquo;ordinary&rsquo; top
+level forms which you need to have compiled fully to machine code you may
+either set compiler::*COMPILE-ORDINARIES* to t, or put them inside a
+</p>
+<p>(PROGN &rsquo;COMPILE ...forms-which-need-to-be-compiled)
+</p>
+<p>The compiler will take each of them and make a temporary function which will be
+compiled and invoked once.  It is permissible to wrap a (PROGN &rsquo;COMPILE ..)
+around the whole file.  Currently this construction binds the
+compiler::*COMPILE-ORDINARIES* flag to t.  Setting this flag globally to a non
+nil value to cause all top level forms to generate machine code.  This might be
+useful in a system such as PCL, where a number of top level lambda expressions
+are given.  Note that most common lisps will simply ignore the top level atom
+&rsquo;compile, since it has no side effects.
+</p>
+<p>Defentry, clines, and defcfun also result in machine code being generated.
+</p>
+</dd></dl>
+
+<a name="subsection-Evaluation-at-Compile-time"></a>
+<h2 class="unnumbered">subsection Evaluation at Compile time</h2>
+
+<p>In GCL the eval-when behaviour was changed in order to allow
+more efficient init code, and also to bring it into line with the resolution
+passed by the X3j13 committee.  Evaluation at compile time is controlled by
+placing eval-when special forms in the code, or by the value of the variable
+compiler::*eval-when-defaults* [default value :defaults].  If that variable
+has value :defaults, then the following hold:
+</p>
+<p>Eval&nbsp;at&nbsp;Compile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Type&nbsp;of&nbsp;Top&nbsp;Level&nbsp;Form<!-- /@w --><br>
+</p>
+<dl compact="compact">
+<dt>Partial:</dt>
+<dd><p>defstructs, defvar, defparameter
+</p></dd>
+<dt>Full:</dt>
+<dd><p>defmacro, defconstant, defsetf, define-setf-method,
+			deftype, package ops, proclaim
+</p></dd>
+<dt>None:</dt>
+<dd><p>defun, others
+</p></dd>
+</dl>
+
+
+<p>By &lsquo;partial&rsquo; we mean (see the X3J13 Common Lisp document
+(doc/compile-file-handling-of-top-level-forms) for more detail), that functions
+will not be defined, values will not be set, but other miscellaneous compiler
+properties will be set: eg properties to inline expand defstruct accessors and
+testers, defstruct properties allowing subsequent defstructs to include this
+one, any type hierarch information, special variable information will be set up.
+</p>
+<p>Example:
+</p><div class="example">
+<pre class="example">(defun foo () 3)
+(defstruct jo a b)
+</pre></div>
+
+<p>As a side effect of compiling these two forms, foo would not have its function
+cell changed.  Neither would jo-a, although it would gain a property which
+allows it to expand inline to a structure access.  Thus if it had a previous
+definition (as commonly happens from previously loading the file), this previous
+definition would not be touched, and could well be inconsistent with the
+compiler properties.  Unfortunately this is what the CL standard says to do,
+and I am just trying to follow it.
+</p>
+<p>If you prefer a more intuitive scheme, of evaling all forms in the file, so
+that there are no inconsistencies, (previous behaviour of AKCL) you may set
+compiler::*eval-when-defaults* to &rsquo;(compile eval load).
+</p>
+<p>The variable compiler::*FASD-DATA* [default t] controls whether an ascii output
+is used for the data section of the object file.  The data section will be in
+ascii if *fasd-data* is nil or if the system-p keyword is supplied to
+compile-file and *fasd-data* is not eq to :system-p.
+</p>
+<p>The old GCL variable *compile-time-too* has disappeared.
+</p>
+<p>See OPTIMIZE on how to enable warnings of slow constructs.
+</p>
+<dl>
+<dt><a name="index-PROCLAIM"></a>Function: <strong>PROCLAIM</strong> <em>(decl-spec)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Puts the declaration given by DECL-SPEC into effect globally.  See the doc of
+DECLARE for possible DECL-SPECs.
+</p>
+
+</dd></dl>
+
+
+
+
+
+
+<dl>
+<dt><a name="index-PROVIDE"></a>Function: <strong>PROVIDE</strong> <em>(module-name)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Adds the specified module to the list of modules maintained in *MODULES*.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COMPILED_002dFUNCTION_002dP"></a>Function: <strong>COMPILED-FUNCTION-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a compiled function; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GPROF_002dSTART"></a>Function: <strong>GPROF-START</strong> <em>()</em></dt>
+<dd><p>Package:SYSTEM
+</p>
+<p>GCL now has preliminary support for profiling with gprof, an
+externally supplied profiling tool at the C level which typically
+accompanies gcc.  Support must be enabled at compile time with
+&ndash;enable-gprof.  This function starts the profiling timers and
+counters.
+</p>
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-GPROF_002dQUIT"></a>Function: <strong>GPROF-QUIT</strong> <em>()</em></dt>
+<dd><p>Package:SYSTEM
+</p>
+<p>GCL now has preliminary support for profiling with gprof, an
+externally supplied profiling tool at the C level which typically
+accompanies gcc.  Support must be enabled at compile time with
+&ndash;enable-gprof.  This function reports the profiling results in the
+form of a call graph to standard output, and clears the profiling
+arrays.  Please note that lisp functions are not (yet) displayed with
+their lisp names.  Please see also the PROFILE function.
+</p>
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-GPROF_002dSET"></a>Function: <strong>GPROF-SET</strong> <em>(begin end)</em></dt>
+<dd><p>Package:SYSTEM
+</p>
+<p>GCL now has preliminary support for profiling with gprof, an
+externally supplied profiling tool at the C level which typically
+accompanies gcc.  Support must be enabled at compile time with
+&ndash;enable-gprof.  This function sets the address range used by
+GPROF-START in specifying the section of the running program which is
+to be profiled.  All subsequent calls to GPROF-START will use this new
+address range.  By default, the range is set to begin at the starting
+address of the .text section, and to end at the current end of the
+running core.  These default values can be restored by calling
+GPROF-SET with both argments set to 0.
+</p>
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-_002aDEFAULT_002dSYSTEM_002dP_002a"></a>Variable: <strong>*DEFAULT-SYSTEM-P*</strong></dt>
+<dd><p>Pakcage:COMPILER
+Specifies the default setting of :SYSTEM-P used by COMPILE.  Defaults to NIL.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-_002aDEFAULT_002dC_002dFILE_002a"></a>Variable: <strong>*DEFAULT-C-FILE*</strong></dt>
+<dd><p>Pakcage:COMPILER
+Specifies the default setting of :C-FILE used by COMPILE.  Defaults to NIL.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-_002aDEFAULT_002dH_002dFILE_002a"></a>Variable: <strong>*DEFAULT-H-FILE*</strong></dt>
+<dd><p>Pakcage:COMPILER
+Specifies the default setting of :H-FILE used by COMPILE.  Defaults to NIL.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-_002aDEFAULT_002dDATA_002dFILE_002a"></a>Variable: <strong>*DEFAULT-DATA-FILE*</strong></dt>
+<dd><p>Pakcage:COMPILER
+Specifies the default setting of :DATA-FILE used by COMPILE.  Defaults to NIL.
+</p></dd></dl>
+
+<dl>
+<dt><a name="index-_002aFEATURES_002a"></a>Variable: <strong>*FEATURES*</strong></dt>
+<dd><p>Package:LISP
+List of symbols that name features of the current version of GCL.
+These features are used to decide the read-time conditionalization facility
+provided by &rsquo;#+&rsquo; and &rsquo;#-&rsquo; read macros.  When the GCL reader encounters
+</p><div class="example">
+<pre class="example">	#+ feature-description form
+</pre></div>
+<p>it reads FORM in the usual manner if FEATURE-DESCRIPTION is true.  Otherwise,
+the reader just skips FORM.
+</p><div class="example">
+<pre class="example">	#- feature-description form
+</pre></div>
+<p>is equivalent to
+</p><div class="example">
+<pre class="example">	#- (not feature-description) form
+</pre></div>
+<p>A feature-description may be a symbol, which is true only when it is an
+element of *FEATURES*.  Or else, it must be one of the following:
+</p><div class="example">
+<pre class="example">(and feature-desciption-1 ... feature-desciption-n)
+(or  feature-desciption-1 ... feature-desciption-n)
+(not feature-desciption)
+</pre></div>
+<p>The AND description is true only when all of its sub-descriptions are true.
+The OR description is true only when at least one of its sub-descriptions is
+true.  The NOT description is true only when its sub-description is false.
+</p>
+
+</dd></dl>
+
+
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Symbols.html#Symbols" accesskey="n" rel="next">Symbols</a>, Previous: <a href="Special-Forms-and-Functions.html#Special-Forms-and-Functions" accesskey="p" rel="prev">Special Forms and Functions</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

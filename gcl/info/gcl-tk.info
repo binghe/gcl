@@ -1,0 +1,72 @@
+This is gcl-tk.info, produced by makeinfo version 5.2 from gcl-tk.texi.
+
+INFO-DIR-SECTION GNU Common Lisp
+START-INFO-DIR-ENTRY
+* gcl-tk: (gcl-tk.info). GNU TK Manual
+END-INFO-DIR-ENTRY
+
+This is a Texinfo GCL TK Manual
+
+   Copyright 1994 William F. Schelter
+
+
+Indirect:
+gcl-tk.info-1: 258
+gcl-tk.info-2: 301240
+
+Tag Table:
+(Indirect)
+Node: Top258
+Node: General1286
+Node: Introduction1589
+Node: Getting Started3086
+Node: Common Features of Widgets4688
+Node: Return Values8350
+Node: Argument Lists12408
+Node: Lisp Functions Invoked from Graphics15840
+Node: Linked Variables20893
+Node: tkconnect24626
+Node: Widgets26553
+Node: button26886
+Node: listbox33607
+Node: scale42026
+Node: canvas49273
+Node: menu109974
+Node: scrollbar129133
+Node: checkbutton136422
+Node: menubutton146160
+Node: text154138
+Node: entry188279
+Node: message198621
+Node: frame204579
+Node: label208582
+Node: radiobutton211997
+Node: toplevel221434
+Node: Control225276
+Node: after225730
+Node: bind226886
+Node: destroy242569
+Node: tk-dialog243154
+Node: exit244969
+Node: focus245646
+Node: grab250361
+Node: tk-listbox-single-select255029
+Node: lower255933
+Node: tk-menu-bar256811
+Node: option262479
+Node: options265561
+Node: pack-old283145
+Node: pack290905
+Node: place301241
+Node: raise310062
+Node: selection310921
+Node: send316127
+Node: tk317948
+Node: tkerror319785
+Node: tkvars321509
+Node: tkwait323777
+Node: update325261
+Node: winfo326783
+Node: wm335226
+
+End Tag Table

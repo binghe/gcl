@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: Lisp Functions Invoked from Graphics</title>
+
+<meta name="description" content="GCL TK Manual: Lisp Functions Invoked from Graphics">
+<meta name="keywords" content="GCL TK Manual: Lisp Functions Invoked from Graphics">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html#General" rel="up" title="General">
+<link href="Linked-Variables.html#Linked-Variables" rel="next" title="Linked Variables">
+<link href="Argument-Lists.html#Argument-Lists" rel="prev" title="Argument Lists">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Lisp-Functions-Invoked-from-Graphics"></a>
+<div class="header">
+<p>
+Next: <a href="Linked-Variables.html#Linked-Variables" accesskey="n" rel="next">Linked Variables</a>, Previous: <a href="Argument-Lists.html#Argument-Lists" accesskey="p" rel="prev">Argument Lists</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="Lisp-Functions-Invoked-from-Graphics-1"></a>
+<h3 class="section">1.6 Lisp Functions Invoked from Graphics</h3>
+
+
+<p>It is possible to make certain areas of a window mouse sensitive,
+or to run commands on reception of certain events such as keystrokes,
+while the focus is in a certain window.   This is done by having
+a lisp function invoked or some lisp form evaluated.   We shall
+refer to such a lisp function or form as a <em>command</em>. 
+</p>
+<p>For example
+</p>
+<div class="example">
+<pre class="example">(button '.button :text &quot;Hello&quot; :command '(print &quot;hi&quot;))
+(button '.jim :text &quot;Call Jim&quot; :command 'call-jim)
+</pre></div>
+
+<p>In the first case when the window <code>.button</code> is clicked on, the
+word &quot;hi&quot; will be printed in the lisp to standard output.   In the
+second case <code>call-jim</code> will be funcalled with no arguments.
+</p>
+<p>A command must be one of the following three types.  What happens
+depends on which type it is:
+</p>
+<dl compact="compact">
+<dt>&lsquo;<samp>function</samp>&rsquo;</dt>
+<dd><p>If the value satisfies <code>functionp</code> then it will be called with
+a number of arguments which is dependent on the way it was bound,
+to graphics.  
+</p></dd>
+<dt>&lsquo;<samp>string</samp>&rsquo;</dt>
+<dd><p>If the command is a string, then it is passed directly to <b>TCL/TK</b>
+for evaluation on that side.  Lisp will not be required for the
+evaluation when the command is invoked.
+</p></dd>
+<dt>&lsquo;<samp>lisp form</samp>&rsquo;</dt>
+<dd><p>Any other lisp object is regarded as a lisp form to be eval&rsquo;d, and
+this will be done when the command is invoked.
+</p></dd>
+</dl>
+
+<p>The following keywords accept as their value a command:
+</p>
+<div class="example">
+<pre class="example">   :command
+   :yscroll    :yscrollcommand
+   :xscroll    :xscrollcommand
+   :scrollcommand
+   :bind
+</pre></div>
+
+<p>and in addition <code>bind</code> takes a command as its third argument,
+see See <a href="bind.html#bind">bind</a>.
+</p>
+<p>Below we give three different examples using the 3 possibilities for
+a command: functionp, string, and lisp form.  They all accomplish
+exactly the same thing.  
+For given a frame <code>.frame</code> we could construct a listbox
+in it as:
+</p>
+<div class="example">
+<pre class="example">(listbox '.frame.listbox :yscroll 'joe)
+</pre></div>
+
+<p>Then whenever the listbox view position changes, or text is inserted,
+so that something changes, the function <code>joe</code> will be invoked with 4
+arguments giving the totalsize of the text, maximum number of units
+the window can display, the index of the top unit, and finally the
+index of the bottom unit.   What these arguments are is specific
+to the widget <code>listbox</code> and is documented See <a href="listbox.html#listbox">listbox</a>.
+</p>
+<p><code>joe</code> might be used to do anything, but a common usage is to have
+<code>joe</code> alter the position of some other window, such as a scroll
+bar window.   Indeed if <code>.scrollbar</code> is a scrollbar then
+the function
+</p>
+<div class="example">
+<pre class="example">(defun joe (a b c d)
+  (.scrollbar :set a b c d))
+</pre></div>
+
+<p>would look after sizing the scrollbar appropriately for the percentage
+of the window visible, and positioning it.
+</p>
+<p>A second method of accomplishing this identical, using a string (the
+second type of command),
+</p>
+
+<div class="example">
+<pre class="example">(listbox '.frame.listbox :yscroll &quot;.scrollbar set&quot;)
+</pre></div>
+
+<p>and this will not involve a call back to lisp.   It uses the fact that
+the <b>TK</b> graphics side understands the window name <code>.scrollbar</code> and
+that it takes the <i>option</i> <code>set</code>.   Note that it does not get
+the <code>:</code> before the keyword in this case.
+</p>
+<p>In the case of a command which is a <i>lisp form</i> but is not installed
+via <code>bind</code> or <code>:bind</code>, then the form will be installed as
+</p>
+<div class="example">
+<pre class="example">#'(lambda (&amp;rest *arglist*) <i>lisp-form</i>)
+</pre></div>
+
+<p>where the <i>lisp-form</i> might wish to access the elements of the special
+variable <code>*arglist*</code>.   Most often this list will be empty, but for
+example if the command was setup for <code>.scale</code> which is a <i>scale</i>,
+then the command will be supplied one argument which is the new numeric
+value which is the scale position.  A third way of accomplishing the
+scrollbar setting using a lisp form is:
+</p>
+<div class="example">
+<pre class="example">(listbox '.frame.listbox :yscroll '(apply '.scrollbar :set *arglist*))
+</pre></div>
+
+<p>The <code>bind</code> command and <code>:bind</code> keyword, have an additional
+wrinkle, see See <a href="bind.html#bind">bind</a>.   These are associated to an event in a
+particular window, and the lisp function or form to be evaled must have
+access to that information.   For example the x y position, the window
+name, the key pressed, etc.   This is done via <i>percent symbols</i> which
+are specified, see See <a href="bind.html#bind">bind</a>.
+</p>
+<div class="example">
+<pre class="example">(bind &quot;Entry&quot; &quot;&lt;Control-KeyPress&gt;&quot; '(emacs-move  %W %A ))
+</pre></div>
+
+<p>will cause the function emacs-move to be be invoked whenever a control
+key is pressed (unless there are more key specific or window specific
+bindings of said key).   It will be invoked with two arguments, the
+first %W indicating the window in which it was invoked, and the second
+being a string which is the ascii keysym which was pressed at the same
+time as the control key.
+</p>
+<p>These <i>percent constructs</i> are only permitted in commands which are
+invoked via <code>bind</code> or <code>:bind</code>.  The lisp form which is passed
+as the command, is searched for the percent constructs, and then a
+function
+</p>
+<div class="example">
+<pre class="example">#'(lambda (%W %A) (emacs-move %W %A))
+</pre></div>
+
+<p>will be invoked with two arguments, which will be supplied by the
+<b>TK</b> graphics server, at the time the command is invoked.   The
+<code>*arglist*</code> construct is not available for these commands.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Linked-Variables.html#Linked-Variables" accesskey="n" rel="next">Linked Variables</a>, Previous: <a href="Argument-Lists.html#Argument-Lists" accesskey="p" rel="prev">Argument Lists</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

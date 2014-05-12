@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: radiobutton</title>
+
+<meta name="description" content="GCL TK Manual: radiobutton">
+<meta name="keywords" content="GCL TK Manual: radiobutton">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="toplevel.html#toplevel" rel="next" title="toplevel">
+<link href="label.html#label" rel="prev" title="label">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="radiobutton"></a>
+<div class="header">
+<p>
+Next: <a href="toplevel.html#toplevel" accesskey="n" rel="next">toplevel</a>, Previous: <a href="label.html#label" accesskey="p" rel="prev">label</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="radiobutton-1"></a>
+<h3 class="section">2.14 radiobutton</h3>
+
+<p>radiobutton \- Create and manipulate radio-button widgets
+</p><a name="Synopsis-13"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>radiobutton</b><i> </i><i>pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options-13"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">activeBackground  bitmap              font        relief        
+activeForeground  borderWidth         foreground  text          
+anchor            cursor              padX        textVariable  
+background        disabledForeground  padX        
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Radiobutton"></a>
+<h4 class="unnumberedsubsec">Arguments for Radiobutton</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:command</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>command</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Command</b>&quot;</code>
+</p><br>
+
+<p>Specifies a Tcl command to associate with the button.  This command
+is typically invoked when mouse button 1 is released over the button
+window.  The button&rsquo;s global variable (<b>:variable</b> option) will
+be updated before the command is invoked.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:height</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>height</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Height</b>&quot;</code>
+</p><br>
+
+<p>Specifies a desired height for the button.
+If a bitmap is being displayed in the button then the value is in
+screen units (i.e. any of the forms acceptable to <b>Tk_GetPixels</b>);
+for text it is in lines of text.
+If this option isn&rsquo;t specified, the button&rsquo;s desired height is computed
+from the size of the bitmap or text being displayed in it.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:selector</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>selector</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Foreground</b>&quot;</code>
+</p><br>
+
+<p>Specifies the color to draw in the selector when this button is
+selected.
+If specified as an empty string then no selector is drawn for the button.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:state</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>state</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>State</b>&quot;</code>
+</p><br>
+
+<p>Specifies one of three states for the radio button:  <b>normal</b><span class="roman">, </span><b>active</b>,
+or <b>disabled</b>.  In normal state the radio button is displayed using the
+<b>foreground</b><span class="roman"> and </span><b>background</b> options.  The active state is
+typically used when the pointer is over the radio button.  In active state
+the radio button is displayed using the <b>activeForeground</b> and
+<b>activeBackground</b> options.  Disabled state means that the radio button
+is insensitive:  it doesn&rsquo;t activate and doesn&rsquo;t respond to mouse
+button presses.  In this state the <b>disabledForeground</b> and
+<b>background</b> options determine how the radio button is displayed.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:value</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>value</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Value</b>&quot;</code>
+</p><br>
+
+<p>Specifies value to store in the button&rsquo;s associated variable whenever
+this button is selected.  Defaults to the name of the radio button.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:variable</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>variable</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Variable</b>&quot;</code>
+</p><br>
+
+<p>Specifies name of global variable to set whenever this button is
+selected.  Changes in this variable also cause the button to select
+or deselect itself.
+Defaults to the value <b>selectedButton</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies a desired width for the button.
+If a bitmap is being displayed in the button then the value is in
+screen units (i.e. any of the forms acceptable to <b>Tk_GetPixels</b>);
+for text it is in characters.
+If this option isn&rsquo;t specified, the button&rsquo;s desired width is computed
+from the size of the bitmap or text being displayed in it.
+</p></dd>
+</dl>
+
+<a name="Description-10"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>radiobutton</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a radiobutton widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the radio button such as its colors, font,
+text, and initial relief.  The <b>radiobutton</b> command returns its
+<i>pathName</i> argument.  At the time this command is invoked,
+there must not exist a window named <i>pathName</i>, but
+<i>pathName</i>&rsquo;s parent must exist.
+</p>
+<p>A radio button is a widget
+that displays a textual string or bitmap
+and a diamond called a <i>selector</i>.
+A radio button has
+all of the behavior of a simple button: it can display itself in either
+of three different ways, according to the <b>state</b> option;
+it can be made to appear
+raised, sunken, or flat; it can be made to flash; and it invokes
+a Tcl command whenever mouse button 1 is clicked over the
+check button.
+</p>
+<p>In addition, radio buttons can be <i>selected</i>.
+If a radio button is selected then a special highlight appears
+in the selector and a Tcl variable associated with the radio button
+is set to a particular value.
+If the radio button is not selected then the selector is drawn
+in a different fashion.
+Typically, several radio buttons share a single variable and the
+value of the variable indicates which radio button is to be selected.
+When a radio button is selected it sets the value of the variable to
+indicate that fact;  each radio button also monitors the value of
+the variable and automatically selects and deselects itself when the
+variable&rsquo;s value changes.
+By default the variable <b>selectedButton</b>
+is used;  its contents give the name of the button that is
+selected, or the empty string if no button associated with that
+variable is selected.
+The name of the variable for a radio button,
+plus the variable to be stored into it, may be modified with options
+on the command line or in the option database.  By default a radio
+button is configured to select itself on button clicks.
+</p>
+<a name="A-Radiobutton-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Radiobutton Widget&rsquo;s Arguments</h4>
+
+<p>The <b>radiobutton</b> command creates a new Tcl command whose
+name is <i>pathName</i>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for radio-button widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:activate</b></dt>
+<dd><p>Change the radio button&rsquo;s state to <b>active</b> and redisplay the button
+using its active foreground and background colors instead of normal
+colors.
+This command is ignored if the radio button&rsquo;s state is <b>disabled</b>.
+This command is obsolete and will eventually be removed;
+use &ldquo;<i>pathName </i><b>:configure :state active</b>&rdquo; instead.
+</p></dd>
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>radiobutton</b>
+command.
+</p></dd>
+<dt><i>pathName </i><b>:deactivate</b></dt>
+<dd><p>Change the radio button&rsquo;s state to <b>normal</b> and redisplay the button
+using its normal foreground and background colors.
+This command is ignored if the radio button&rsquo;s state is <b>disabled</b>.
+This command is obsolete and will eventually be removed;
+use &ldquo;<i>pathName </i><b>:configure :state normal</b>&rdquo; instead.
+</p></dd>
+<dt><i>pathName </i><b>:deselect</b></dt>
+<dd><p>Deselect the radio button:  redisplay it without a highlight in
+the selector and set the associated variable to an empty string.  If
+this radio button was not currently selected, then the command has
+no effect.
+</p></dd>
+<dt><i>pathName </i><b>:flash</b></dt>
+<dd><p>Flash the radio button.  This is accomplished by redisplaying the radio button
+several times, alternating between active and normal colors.  At
+the end of the flash the radio button is left in the same normal/active
+state as when the command was invoked.
+This command is ignored if the radio button&rsquo;s state is <b>disabled</b>.
+</p></dd>
+<dt><i>pathName </i><b>:invoke</b></dt>
+<dd><p>Does just what would have happened if the user invoked the radio button
+with the mouse: select the button and invoke
+its associated Tcl command, if there is one.
+The return value is the return value from the Tcl command, or an
+empty string if there is no command associated with the radio button.
+This command is ignored if the radio button&rsquo;s state is <b>disabled</b>.
+</p></dd>
+<dt><i>pathName </i><b>:select</b></dt>
+<dd><p>Select the radio button:  display it with a highlighted
+selector and set the associated variable to the value corresponding
+to this widget.
+</p>
+</dd>
+</dl>
+<a name="Bindings-7"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>Tk automatically creates class bindings for radio buttons that give them
+the following default behavior:
+</p><ul class="no-bullet">
+<li> [1]
+The radio button activates whenever the mouse passes over it and deactivates
+whenever the mouse leaves the radio button.
+</li><li> [2]
+The radio button&rsquo;s relief is changed to sunken whenever mouse button 1 is
+pressed over it, and the relief is restored to its original
+value when button 1 is later released.
+</li><li> [3]
+If mouse button 1 is pressed over the radio button and later released over
+the radio button, the radio button is invoked (i.e. it is selected
+and the command associated with the button is invoked,
+if there is one).  However, if the mouse is not
+over the radio button when button 1 is released, then no invocation occurs.
+</li></ul>
+
+<p>The behavior of radio buttons can be changed by defining new bindings for
+individual widgets or by redefining the class bindings.
+</p>
+<a name="Keywords-13"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>radio button, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="toplevel.html#toplevel" accesskey="n" rel="next">toplevel</a>, Previous: <a href="label.html#label" accesskey="p" rel="prev">label</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

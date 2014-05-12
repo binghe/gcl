@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: grab</title>
+
+<meta name="description" content="GCL TK Manual: grab">
+<meta name="keywords" content="GCL TK Manual: grab">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="tk_002dlistbox_002dsingle_002dselect.html#tk_002dlistbox_002dsingle_002dselect" rel="next" title="tk-listbox-single-select">
+<link href="focus.html#focus" rel="prev" title="focus">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="grab"></a>
+<div class="header">
+<p>
+Next: <a href="tk_002dlistbox_002dsingle_002dselect.html#tk_002dlistbox_002dsingle_002dselect" accesskey="n" rel="next">tk-listbox-single-select</a>, Previous: <a href="focus.html#focus" accesskey="p" rel="prev">focus</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="grab-1"></a>
+<h3 class="section">3.7 grab</h3>
+
+<p>grab \- Confine pointer and keyboard events to a window sub-tree
+</p><a name="Synopsis-21"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<br><p><b>grab&nbsp;</b><span class="roman">?</span><b>:global</b><span class="roman">?&nbsp;</span><i>window</i><!-- /@w --><br>
+<b>grab </b><i>option </i><span class="roman">?arg arg </span>...?
+</p>
+<a name="Description-18"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>This command implements simple pointer and keyboard grabs for Tk.
+Tk&rsquo;s grabs are different than the grabs
+described in the Xlib documentation.
+When a grab is set for a particular window, Tk restricts all pointer
+events to the grab window and its descendants in Tk&rsquo;s window hierarchy.
+Whenever the pointer is within the grab window&rsquo;s subtree, the pointer
+will behave exactly the same as if there had been no grab at all
+and all events will be reported in the normal fashion.
+When the pointer is outside <i>window</i>&rsquo;s tree, button presses and
+releases and
+mouse motion events are reported to <i>window</i>, and window entry
+and window exit events are ignored.
+The grab subtree &ldquo;owns&rdquo; the pointer:
+windows outside the grab subtree will be visible on the screen
+but they will be insensitive until the grab is released.
+The tree of windows underneath the grab window can include top-level
+windows, in which case all of those top-level windows
+and their descendants will continue to receive mouse events
+during the grab.
+</p>
+<p>Two forms of grabs are possible:  local and global.
+A local grab affects only the grabbing application:  events will
+be reported to other applications as if the grab had never occurred.
+Grabs are local by default.
+A global grab locks out all applications on the screen,
+so that only the given subtree of the grabbing application will be
+sensitive to pointer events (mouse button presses, mouse button releases,
+pointer motions, window entries, and window exits).
+During global grabs the window manager will not receive pointer
+events either.
+</p>
+<p>During local grabs, keyboard events (key presses and key releases)
+are delivered as usual:  the window
+manager controls which application receives keyboard events, and
+if they are sent to any window in the grabbing application then they are
+redirected to the focus window.
+During a global grab Tk grabs the keyboard so that all keyboard events
+are always sent to the grabbing application.
+The <b>focus</b> command is still used to determine which window in the
+application receives the keyboard events.
+The keyboard grab is released when the grab is released.
+</p>
+<p>Grabs apply to particular displays.  If an application has windows
+on multiple displays then it can establish a separate grab on each
+display.
+The grab on a particular display affects only the windows on
+that display.
+It is possible for different applications on a single display to have
+simultaneous local grabs, but only one application can have a global
+grab on a given display at once.
+</p>
+<p>The <b>grab</b> command can take any of the following forms:
+</p>
+<dl compact="compact">
+<dt><b>grab </b><span class="roman">?</span><b>:global</b><span class="roman">? </span><i>window</i></dt>
+<dd><p>Same as <b>grab :set</b>, described below.
+</p></dd>
+<dt><b>grab :current </b><span class="roman">?</span><i>window</i>?</dt>
+<dd><p>If <i>window</i> is specified, returns the name of the current grab
+window in this application for <i>window</i>&rsquo;s display, or an empty
+string if there is no such window.
+If <i>window</i> is omitted, the command returns a list whose elements
+are all of the windows grabbed by this application for all displays,
+or an empty string if the application has no grabs.
+</p></dd>
+<dt><b>grab :release </b><i>window</i></dt>
+<dd><p>Releases the grab on <i>window</i> if there is one, otherwise does
+nothing.  Returns an empty string.
+</p></dd>
+<dt><b>grab :set </b><span class="roman">?</span><b>:global</b><span class="roman">? </span><i>window</i></dt>
+<dd><p>Sets a grab on <i>window</i><span class="roman">.  If </span><b>:global</b> is specified then the
+grab is global, otherwise it is local.
+If a grab was already in effect for this application on
+<i>window</i>&rsquo;s display then it is automatically released.
+If there is already a grab on <i>window</i> and it has the same
+global/local form as the requested grab, then the command
+does nothing.  Returns an empty string.
+</p></dd>
+<dt><b>grab :status </b><i>window</i></dt>
+<dd><p>Returns <b>none</b><span class="roman"> if no grab is currently set on </span><i>window</i>,
+<b>local</b><span class="roman"> if a local grab is set on </span><i>window</i>, and
+<b>global</b> if a global grab is set.
+</p>
+</dd>
+</dl>
+<a name="Bugs-2"></a>
+<h4 class="unnumberedsubsec">Bugs</h4>
+
+<p>It took an incredibly complex and gross implementation to produce
+the simple grab effect described above.
+Given the current implementation, it isn&rsquo;t safe for applications
+to use the Xlib grab facilities at all except through the Tk grab
+procedures.
+If applications try to manipulate X&rsquo;s grab mechanisms directly,
+things will probably break.
+</p>
+<p>If a single process is managing several different Tk applications,
+only one of those applications can have a local grab for a given
+display at any given time.  If the applications are in different
+processes, this restriction doesn&rsquo;t exist.
+</p>
+<a name="Keywords-21"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>grab, keyboard events, pointer events, window
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="tk_002dlistbox_002dsingle_002dselect.html#tk_002dlistbox_002dsingle_002dselect" accesskey="n" rel="next">tk-listbox-single-select</a>, Previous: <a href="focus.html#focus" accesskey="p" rel="prev">focus</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: tkwait</title>
+
+<meta name="description" content="GCL TK Manual: tkwait">
+<meta name="keywords" content="GCL TK Manual: tkwait">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="update.html#update" rel="next" title="update">
+<link href="tkvars.html#tkvars" rel="prev" title="tkvars">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="tkwait"></a>
+<div class="header">
+<p>
+Next: <a href="update.html#update" accesskey="n" rel="next">update</a>, Previous: <a href="tkvars.html#tkvars" accesskey="p" rel="prev">tkvars</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="tkwait-1"></a>
+<h3 class="section">3.22 tkwait</h3>
+
+<p>tkwait \- Wait for variable to change or window to be destroyed
+</p><a name="Synopsis-34"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<br><p><b>tkwait&nbsp;:variable&nbsp;</b><i>name</i><!-- /@w --><br>
+<br><b>tkwait&nbsp;:visibility&nbsp;</b><i>name</i><!-- /@w --><br>
+<b>tkwait :window </b><i>name</i>
+</p>
+<a name="Description-33"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>tkwait</b> command waits for one of several things to happen,
+then it returns without taking any other actions.
+The return value is always an empty string.
+If the first argument is <b>:variable</b> (or any abbreviation of
+it) then the second argument is the name of a global variable and the
+command waits for that variable to be modified.
+If the first argument is <b>:visibility</b> (or any abbreviation
+of it) then the second argument is the name of a window and the
+<b>tkwait</b> command waits for a change in its
+visibility state (as indicated by the arrival of a VisibilityNotify
+event).  This form is typically used to wait for a newly-created
+window to appear on the screen before taking some action.
+If the first argument is <b>:window</b> (or any abbreviation
+of it) then the second argument is the name of a window and the
+<b>tkwait</b> command waits for that window to be destroyed.
+This form is typically used to wait for a user to finish interacting
+with a dialog box before using the result of that interaction.
+</p>
+<p>While the <b>tkwait</b> command is waiting it processes events in
+the normal fashion, so the application will continue to respond
+to user interactions.
+</p>
+<a name="Keywords-36"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>variable, visibility, wait, window
+</p>
+
+
+</body>
+</html>

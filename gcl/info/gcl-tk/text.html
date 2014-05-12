@@ -1,0 +1,910 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: text</title>
+
+<meta name="description" content="GCL TK Manual: text">
+<meta name="keywords" content="GCL TK Manual: text">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="entry.html#entry" rel="next" title="entry">
+<link href="menubutton.html#menubutton" rel="prev" title="menubutton">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="text"></a>
+<div class="header">
+<p>
+Next: <a href="entry.html#entry" accesskey="n" rel="next">entry</a>, Previous: <a href="menubutton.html#menubutton" accesskey="p" rel="prev">menubutton</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="text-1"></a>
+<h3 class="section">2.9 text</h3>
+
+<p>text \- Create and manipulate text widgets
+</p><a name="Synopsis-8"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>text</b><i> </i><i>pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options-8"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">background      foreground        insertWidth      selectBorderWidth 
+borderWidth     insertBackground  padX             selectForeground  
+cursor          insertBorderWidth padY             setGrid           
+exportSelection insertOffTime     relief           yScrollCommand    
+font            insertOnTime      selectBackground 
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Text"></a>
+<h4 class="unnumberedsubsec">Arguments for Text</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:height</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>height</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Height</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired height for the window, in units of characters.
+Must be at least one.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:state</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>state</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>State</b>&quot;</code>
+</p><br>
+
+<p>Specifies one of two states for the text:  <b>normal</b><span class="roman"> or </span><b>disabled</b>.
+If the text is disabled then characters may not be inserted or deleted
+and no insertion cursor will be displayed, even if the input focus is
+in the widget.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired width for the window in units of characters.
+If the font doesn&rsquo;t have a uniform width then the width of the
+character &ldquo;0&rdquo; is used in translating from character units to
+screen units.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:wrap</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>wrap</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Wrap</b>&quot;</code>
+</p><br>
+
+<p>Specifies how to handle lines in the text that are too long to be
+displayed in a single line of the text&rsquo;s window.
+The value must be <b>none</b><span class="roman"> or </span><b>char</b><span class="roman"> or </span><b>word</b>.
+A wrap mode of <b>none</b> means that each line of text appears as
+exactly one line on the screen;  extra characters that don&rsquo;t fit
+on the screen are not displayed.
+In the other modes each line of text will be broken up into several
+screen lines if necessary to keep all the characters visible.
+In <b>char</b> mode a screen line break may occur after any character;
+in <b>word</b> mode a line break will only be made at word boundaries.
+</p></dd>
+</dl>
+
+<a name="Description-5"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>text</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a text widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the text such as its default background color
+and relief.  The <b>text</b> command returns the
+path name of the new window.
+</p>
+<p>A text widget displays one or more lines of text and allows that
+text to be edited.
+Text widgets support three different kinds of annotations on the
+text, called tags, marks, and windows.
+Tags allow different portions of the text
+to be displayed with different fonts and colors.
+In addition, Tcl commands can be associated with tags so
+that commands are invoked when particular actions such as keystrokes
+and mouse button presses occur in particular ranges of the text.
+See TAGS below for more details.
+</p>
+<p>The second form of annotation consists of marks, which are floating
+markers in the text.
+Marks are used to keep track of various interesting positions in the
+text as it is edited.
+See MARKS below for more details.
+</p>
+<p>The third form of annotation allows arbitrary windows to be displayed
+in the text widget.
+See WINDOWS below for more details.
+</p>
+<a name="Indices-1"></a>
+<h4 class="unnumberedsubsec">Indices</h4>
+
+<p>Many of the widget commands for texts take one or more indices
+as arguments.
+An index is a string used to indicate a particular place within
+a text, such as a place to insert characters or one endpoint of a
+range of characters to delete.
+Indices have the syntax
+</p>
+<p><i>base modifier modifier modifier ...</i>
+</p>
+
+<p>Where <i>base</i><span class="roman"> gives a starting point and the </span><i>modifier</i>s
+adjust the index from the starting point (e.g. move forward or
+backward one character).  Every index must contain a <i>base</i>,
+but the <i>modifier</i>s are optional.
+</p>
+
+<p>The <i>base</i> for an index must have one of the following forms:
+</p>
+<dl compact="compact">
+<dt><i>line</i><b>.</b><i>char</i></dt>
+<dd><p>Indicates <i>char</i><span class="roman">&rsquo;th character on line </span><i>line</i>.
+Lines are numbered from 1 for consistency with other UNIX programs
+that use this numbering scheme.
+Within a line, characters are numbered from 0.
+</p></dd>
+<dt><b>@</b><i>x</i><b>,</b><i>y</i></dt>
+<dd><p>Indicates the character that covers the pixel whose x and y coordinates
+within the text&rsquo;s window are <i>x</i><span class="roman"> and </span><i>y</i>.
+</p></dd>
+<dt><b>end</b></dt>
+<dd><p>Indicates the last character in the text, which is always a newline
+character.
+</p></dd>
+<dt><i>mark</i></dt>
+<dd><p>Indicates the character just after the mark whose name is <i>mark</i>.
+</p></dd>
+<dt><i>tag</i><b>.first</b></dt>
+<dd><p>Indicates the first character in the text that has been tagged with
+<i>tag</i>.
+This form generates an error if no characters are currently tagged
+with <i>tag</i>.
+</p></dd>
+<dt><i>tag</i><b>.last</b></dt>
+<dd><p>Indicates the character just after the last one in the text that has
+been tagged with <i>tag</i>.
+This form generates an error if no characters are currently tagged
+with <i>tag</i>.
+</p></dd>
+</dl>
+
+
+<p>If modifiers follow the base index, each one of them must have one
+of the forms listed below.  Keywords such as <b>chars</b><span class="roman"> and </span><b>wordend</b>
+may be abbreviated as long as the abbreviation is unambiguous.
+</p>
+<dl compact="compact">
+<dt><b>+ </b><i>count</i><b> chars</b></dt>
+<dd><p>Adjust the index forward by <i>count</i> characters, moving to later
+lines in the text if necessary.  If there are fewer than <i>count</i>
+characters in the text after the current index, then set the index
+to the last character in the text.
+Spaces on either side of <i>count</i> are optional.
+</p></dd>
+<dt><b>-</b> <i>count</i><b> chars</b></dt>
+<dd><p>Adjust the index backward by <i>count</i> characters, moving to earlier
+lines in the text if necessary.  If there are fewer than <i>count</i>
+characters in the text before the current index, then set the index
+to the first character in the text.
+Spaces on either side of <i>count</i> are optional.
+</p></dd>
+<dt><b>+ </b><i>count</i><b> lines</b></dt>
+<dd><p>Adjust the index forward by <i>count</i> lines, retaining the same
+character position within the line.  If there are fewer than <i>count</i>
+lines after the line containing the current index, then set the index
+to refer to the same character position on the last line of the text.
+Then, if the line is not long enough to contain a character at the indicated
+character position, adjust the character position to refer to the last
+character of the line (the newline).
+Spaces on either side of <i>count</i> are optional.
+</p></dd>
+<dt><b>-</b> <i>count</i><b> lines</b></dt>
+<dd><p>Adjust the index backward by <i>count</i> lines, retaining the same
+character position within the line.  If there are fewer than <i>count</i>
+lines before the line containing the current index, then set the index
+to refer to the same character position on the first line of the text.
+Then, if the line is not long enough to contain a character at the indicated
+character position, adjust the character position to refer to the last
+character of the line (the newline).
+Spaces on either side of <i>count</i> are optional.
+</p></dd>
+<dt><b>linestart</b></dt>
+<dd><p>Adjust the index to refer to the first character on the line.
+</p></dd>
+<dt><b>lineend</b></dt>
+<dd><p>Adjust the index to refer to the last character on the line (the newline).
+</p></dd>
+<dt><b>wordstart</b></dt>
+<dd><p>Adjust the index to refer to the first character of the word containing
+the current index.  A word consists of any number of adjacent characters
+that are letters, digits, or underscores, or a single character that
+is not one of these.
+</p></dd>
+<dt><b>wordend</b></dt>
+<dd><p>Adjust the index to refer to the character just after the last one of the
+word containing the current index.  If the current index refers to the last
+character of the text then it is not modified.
+</p></dd>
+</dl>
+
+
+<p>If more than one modifier is present then they are applied in
+left-to-right order.  For example, the index &ldquo;\fBend \- 1 chars&rdquo;
+refers to the next-to-last character in the text and
+&ldquo;\fBinsert wordstart \- 1 c&rdquo; refers to the character just before
+the first one in the word containing the insertion cursor.
+</p>
+<a name="Tags"></a>
+<h4 class="unnumberedsubsec">Tags</h4>
+
+<p>The first form of annotation in text widgets is a tag.
+A tag is a textual string that is associated with some of the characters
+in a text.
+There may be any number of tags associated with characters in a
+text.
+Each tag may refer to a single character, a range of characters, or
+several ranges of characters.
+An individual character may have any number of tags associated with it.
+</p>
+<p>A priority order is defined among tags, and this order is used in
+implementing some of the tag-related functions described below.
+When a tag is defined (by associating it with characters or setting
+its display options or binding commands to it), it is given
+a priority higher than any existing tag.
+The priority order of tags may be redefined using the
+&ldquo;<i>pathName </i><b>:tag :raise</b><span class="roman">&rdquo; and &ldquo;</span><i>pathName </i><b>:tag :lower</b>&rdquo;
+widget commands.
+</p>
+<p>Tags serve three purposes in text widgets.
+First, they control the way information is displayed on the screen.
+By default, characters are displayed as determined by the
+<b>background</b><span class="roman">, </span><b>font</b><span class="roman">, and </span><b>foreground</b> options for the
+text widget.
+However, display options may be associated with individual tags
+using the &ldquo;<i>pathName </i><b>:tag configure</b>&rdquo; widget command.
+If a character has been tagged, then the display options associated
+with the tag override the default display style.
+The following options are currently supported for tags:
+</p>
+<dl compact="compact">
+<dt><b>:background </b><i>color</i></dt>
+<dd><p><i>Color</i> specifies the background color to use for characters
+associated with the tag.
+It may have any of the forms accepted by <b>Tk_GetColor</b>.
+</p></dd>
+<dt><b>:bgstipple </b><i>bitmap</i></dt>
+<dd><p><i>Bitmap</i> specifies a bitmap that is used as a stipple pattern
+for the background.
+It may have any of the forms accepted by <b>Tk_GetBitmap</b>.
+If <i>bitmap</i> hasn&rsquo;t been specified, or if it is specified
+as an empty string, then a solid fill will be used for the
+background.
+</p></dd>
+<dt><b>:borderwidth </b><i>pixels</i></dt>
+<dd><p><i>Pixels</i> specifies the width of a 3-D border to draw around
+the background.
+It may have any of the forms accepted by <b>Tk_GetPixels</b>.
+This option is used in conjunction with the <b>:relief</b>
+option to give a 3-D appearance to the background for characters;
+it is ignored unless the <b>:background</b> option
+has been set for the tag.
+</p></dd>
+<dt><b>:fgstipple </b><i>bitmap</i></dt>
+<dd><p><i>Bitmap</i> specifies a bitmap that is used as a stipple pattern
+when drawing text and other foreground information such as
+underlines.
+It may have any of the forms accepted by <b>Tk_GetBitmap</b>.
+If <i>bitmap</i> hasn&rsquo;t been specified, or if it is specified
+as an empty string, then a solid fill will be used.
+</p></dd>
+<dt><b>:font </b><i>fontName</i></dt>
+<dd><p><i>FontName</i> is the name of a font to use for drawing characters.
+It may have any of the forms accepted by <b>Tk_GetFontStruct</b>.
+</p></dd>
+<dt><b>:foreground </b><i>color</i></dt>
+<dd><p><i>Color</i> specifies the color to use when drawing text and other
+foreground information such as underlines.
+It may have any of the forms accepted by <b>Tk_GetColor</b>.
+</p></dd>
+<dt><b>:relief </b><i>relief</i></dt>
+<dd><p>\fIRelief specifies the 3-D relief to use for drawing backgrounds,
+in any of the forms accepted by <b>Tk_GetRelief</b>.
+This option is used in conjunction with the <b>:borderwidth</b>
+option to give a 3-D appearance to the background for characters;
+it is ignored unless the <b>:background</b> option
+has been set for the tag.
+</p></dd>
+<dt><b>:underline </b><i>boolean</i></dt>
+<dd><p><i>Boolean</i> specifies whether or not to draw an underline underneath
+characters.
+It may have any of the forms accepted by <b>Tk_GetBoolean</b>.
+</p>
+<p>If a character has several tags associated with it, and if their
+display options conflict, then the options of the highest priority
+tag are used.
+If a particular display option hasn&rsquo;t been specified for a
+particular tag, or if it is specified as an empty string, then
+that option will never be used;  the next-highest-priority
+tag&rsquo;s option will used instead.
+If no tag specifies a particular display optionl, then the default
+style for the widget will be used.
+</p>
+<p>The second purpose for tags is event bindings.
+You can associate bindings with a tag in much the same way you can
+associate bindings with a widget class:  whenever particular X
+events occur on characters with the given tag, a given
+Tcl command will be executed.
+Tag bindings can be used to give behaviors to ranges of characters;
+among other things, this allows hypertext-like
+features to be implemented.
+For details, see the description of the <b>tag bind</b> widget
+command below.
+</p>
+<p>The third use for tags is in managing the selection.
+See THE SELECTION below.
+</p>
+</dd>
+</dl>
+<a name="Marks"></a>
+<h4 class="unnumberedsubsec">Marks</h4>
+
+<p>The second form of annotation in text widgets is a mark.
+Marks are used for remembering particular places in a text.
+They are something like tags, in that they have names and
+they refer to places in the file, but a mark isn&rsquo;t associated
+with particular characters.
+Instead, a mark is associated with the gap between two characters.
+Only a single position may be associated with a mark at any given
+time.
+If the characters around a mark are deleted the mark will still
+remain;  it will just have new neighbor characters.
+In contrast, if the characters containing a tag are deleted then
+the tag will no longer have an association with characters in
+the file.
+Marks may be manipulated with the &ldquo;<i>pathName </i><b>:mark</b>&rdquo; widget
+command, and their current locations may be determined by using the
+mark name as an index in widget commands.
+</p>
+<p>The name space for marks is different from that for tags:  the
+same name may be used for both a mark and a tag, but they will refer
+to different things.
+</p>
+<p>Two marks have special significance.
+First, the mark <b>insert</b> is associated with the insertion cursor,
+as described under THE INSERTION CURSOR below.
+Second, the mark <b>current</b> is associated with the character
+closest to the mouse and is adjusted automatically to track the
+mouse position and any changes to the text in the widget (one
+exception:  <b>current</b> is not updated in response to mouse
+motions if a mouse button is down;  the update will be deferred
+until all mouse buttons have been released).
+Neither of these special marks may be unset.
+</p>
+<a name="Windows"></a>
+<h4 class="unnumberedsubsec">Windows</h4>
+
+<p>The third form of annotation in text widgets is a window.
+Window support isn&rsquo;t implemented yet, but when it is it will be
+described here.
+</p>
+<a name="The-Selection"></a>
+<h4 class="unnumberedsubsec">The Selection</h4>
+
+<p>Text widgets support the standard X selection.
+Selection support is implemented via tags.
+If the <b>exportSelection</b> option for the text widget is true
+then the <b>sel</b> tag will be associated with the selection:
+</p><ul class="no-bullet">
+<li> [1]
+Whenever characters are tagged with <b>sel</b> the text widget
+will claim ownership of the selection.
+</li><li> [2]
+Attempts to retrieve the
+selection will be serviced by the text widget, returning all the
+charaters with the <b>sel</b> tag.
+</li><li> [3]
+If the selection is claimed away by another application or by another
+window within this application, then the <b>sel</b> tag will be removed
+from all characters in the text.
+</li></ul>
+
+<p>The <b>sel</b> tag is automatically defined when a text widget is
+created, and it may not be deleted with the &ldquo;<i>pathName </i><b>:tag delete</b>&rdquo;
+widget command.  Furthermore, the <b>selectBackground</b>,
+<b>selectBorderWidth</b><span class="roman">, and </span><b>selectForeground</b> options for
+the text widget are tied to the <b>:background</b>,
+<b>:borderwidth</b><span class="roman">, and </span><b>:foreground</b><span class="roman"> options for the </span><b>sel</b>
+tag:  changes in either will automatically be reflected in the
+other.
+</p>
+<a name="The-Insertion-Cursor"></a>
+<h4 class="unnumberedsubsec">The Insertion Cursor</h4>
+
+<p>The mark named <b>insert</b> has special significance in text widgets.
+It is defined automatically when a text widget is created and it
+may not be unset with the &ldquo;<i>pathName </i><b>:mark unset</b>&rdquo; widget
+command.
+The <b>insert</b> mark represents the position of the insertion
+cursor, and the insertion cursor will automatically be drawn at
+this point whenever the text widget has the input focus.
+</p>
+<a name="A-Text-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Text Widget&rsquo;s Arguments</h4>
+
+<p>The <b>text</b> command creates a new Tcl command whose
+name is the same as the path name of the text&rsquo;s window.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>PathName</i> is the name of the command, which is the same as
+the text widget&rsquo;s path name.  <i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for text widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:compare</b><span class="roman"> </span><i>index1 op index2</i></dt>
+<dd><p>Compares the indices given by <i>index1</i><span class="roman"> and </span><i>index2</i> according
+to the relational operator given by <i>op</i>, and returns 1 if
+the relationship is satisfied and 0 if it isn&rsquo;t.
+<i>Op</i> must be one of the operators &lt;, &lt;=, ==, &gt;=, &gt;, or !=.
+If <i>op</i> is == then 1 is returned if the two indices refer to
+the same character, if <i>op</i><span class="roman"> is &lt; then 1 is returned if </span><i>index1</i>
+refers to an earlier character in the text than <i>index2</i>, and
+so on.
+</p></dd>
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? </span><i>?value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>text</b>
+command.
+</p></dd>
+<dt><i>pathName </i><b>:debug </b><span class="roman">?</span><i>boolean</i>?</dt>
+<dd><p>If <i>boolean</i> is specified, then it must have one of the true or
+false values accepted by Tcl_GetBoolean.
+If the value is a true one then internal consistency checks will be
+turned on in the B-tree code associated with text widgets.
+If <i>boolean</i> has a false value then the debugging checks will
+be turned off.
+In either case the command returns an empty string.
+If <i>boolean</i><span class="roman"> is not specified then the command returns </span><b>on</b>
+or <b>off</b> to indicate whether or not debugging is turned on.
+There is a single debugging switch shared by all text widgets:  turning
+debugging on or off in any widget turns it on or off for all widgets.
+For widgets with large amounts of text, the consistency checks may
+cause a noticeable slow-down.
+</p></dd>
+<dt><i>pathName </i><b>:delete </b><i>index1 </i><span class="roman">?</span><i>index2</i>?</dt>
+<dd><p>Delete a range of characters from the text.
+If both <i>index1</i><span class="roman"> and </span><i>index2</i> are specified, then delete
+all the characters starting with the one given by <i>index1</i>
+and stopping just before <i>index2</i> (i.e. the character at
+<i>index2</i> is not deleted).
+If <i>index2</i> doesn&rsquo;t specify a position later in the text
+than <i>index1</i> then no characters are deleted.
+If <i>index2</i> isn&rsquo;t specified then the single character at
+<i>index1</i> is deleted.
+It is not allowable to delete characters in a way that would leave
+the text without a newline as the last character.
+The command returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:get </b><i>index1 </i><span class="roman">?</span><i>index2</i>?</dt>
+<dd><p>Return a range of characters from the text.
+The return value will be all the characters in the text starting
+with the one whose index is <i>index1</i> and ending just before
+the one whose index is <i>index2</i><span class="roman"> (the character at </span><i>index2</i>
+will not be returned).
+If <i>index2</i><span class="roman"> is omitted then the single character at </span><i>index1</i>
+is returned.
+If there are no characters in the specified range (e.g. <i>index1</i>
+is past the end of the file or <i>index2</i> is less than or equal
+to <i>index1</i>) then an empty string is returned.
+</p></dd>
+<dt><i>pathName </i><b>:index </b><i>index</i></dt>
+<dd><p>Returns the position corresponding to <i>index</i> in the form
+<i>line.char</i><span class="roman"> where </span><i>line</i><span class="roman"> is the line number and </span><i>char</i>
+is the character number.
+<i>Index</i> may have any of the forms described under INDICES above.
+</p></dd>
+<dt><i>pathName </i><b>:insert </b>\fIindex chars</dt>
+<dd><p>Inserts <i>chars</i> into the text just before the character at
+<i>index</i> and returns an empty string.
+It is not possible to insert characters after the last newline
+of the text.
+</p></dd>
+<dt><i>pathName </i><b>:mark </b><i>option </i><span class="roman">?</span><i>arg arg ...</i>?</dt>
+<dd><p>This command is used to manipulate marks.  The exact behavior of
+the command depends on the <i>option</i> argument that follows
+the <b>mark</b> argument.  The following forms of the command
+are currently supported:
+</p><dl compact="compact">
+<dt><i>pathName </i><b>:mark :names</b></dt>
+<dd><p>Returns a list whose elements are the names of all the marks that
+are currently set.
+</p></dd>
+<dt><i>pathName </i><b>:mark :set </b><i>markName index</i></dt>
+<dd><p>Sets the mark named <i>markName</i> to a position just before the
+character at <i>index</i>.
+If <i>markName</i> already exists, it is moved from its old position;
+if it doesn&rsquo;t exist, a new mark is created.
+This command returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:mark :unset </b><i>markName </i><span class="roman">?</span><i>markName markName ...</i>?</dt>
+<dd><p>Remove the mark corresponding to each of the <i>markName</i> arguments.
+The removed marks will not be usable in indices and will not be
+returned by future calls to &ldquo;<i>pathName </i><b>:mark names</b>&rdquo;.
+This command returns an empty string.
+</p></dd>
+</dl>
+
+</dd>
+<dt><i>pathName </i><b>:scan</b><span class="roman"> </span><i>option args</i></dt>
+<dd><p>This command is used to implement scanning on texts.  It has
+two forms, depending on <i>option</i>:
+</p><dl compact="compact">
+<dt><i>pathName </i><b>:scan :mark </b><i>y</i></dt>
+<dd><p>Records <i>y</i> and the current view in the text window;  used in
+conjunction with later <b>scan dragto</b> commands.  Typically this
+command is associated with a mouse button press in the widget.  It
+returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:scan :dragto </b><i>y</i></dt>
+<dd><p>This command computes the difference between its <i>y</i> argument
+and the <i>y</i><span class="roman"> argument to the last </span><b>scan mark</b> command for
+the widget.  It then adjusts the view up or down by 10 times the
+difference in y-coordinates.  This command is typically associated
+with mouse motion events in the widget, to produce the effect of
+dragging the text at high speed through the window.  The return
+value is an empty string.
+</p></dd>
+</dl>
+
+</dd>
+<dt><i>pathName </i><b>:tag </b><i>option </i><span class="roman">?</span><i>arg arg ...</i>?</dt>
+<dd><p>This command is used to manipulate tags.  The exact behavior of the
+command depends on the <i>option</i> argument that follows the
+<b>tag</b> argument.  The following forms of the command are currently
+supported:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:tag :add </b><i>tagName index1 </i><span class="roman">?</span><i>index2</i>?</dt>
+<dd><p>Associate the tag <i>tagName</i> with all of the characters starting
+with <i>index1</i> and ending just before
+<i>index2</i><span class="roman"> (the character at </span><i>index2</i> isn&rsquo;t tagged).
+If <i>index2</i> is omitted then the single character at
+<i>index1</i> is tagged.
+If there are no characters in the specified range (e.g. <i>index1</i>
+is past the end of the file or <i>index2</i> is less than or equal
+to <i>index1</i>) then the command has no effect.
+This command returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:tag :bind </b><i>tagName</i><span class="roman"> ?</span><i>sequence</i><span class="roman">? ?</span><i>command</i>?</dt>
+<dd><p>This command associates <i>command</i> with the tag given by
+<i>tagName</i>.
+Whenever the event sequence given by <i>sequence</i> occurs for a
+character that has been tagged with <i>tagName</i>,
+the command will be invoked.
+This widget command is similar to the <b>bind</b> command except that
+it operates on characters in a text rather than entire widgets.
+See the <b>bind</b> manual entry for complete details
+on the syntax of <i>sequence</i> and the substitutions performed
+on <i>command</i> before invoking it.
+If all arguments are specified then a new binding is created, replacing
+any existing binding for the same <i>sequence</i><span class="roman"> and </span><i>tagName</i>
+(if the first character of <i>command</i><span class="roman"> is &ldquo;+&rdquo; then </span><i>command</i>
+augments an existing binding rather than replacing it).
+In this case the return value is an empty string.
+If <i>command</i><span class="roman"> is omitted then the command returns the </span><i>command</i>
+associated with <i>tagName</i><span class="roman"> and </span><i>sequence</i> (an error occurs
+if there is no such binding).
+If both <i>command</i><span class="roman"> and </span><i>sequence</i> are omitted then the command
+returns a list of all the sequences for which bindings have been
+defined for <i>tagName</i>.
+</p>
+
+<p>The only events for which bindings may be specified are those related
+to the mouse and keyboard, such as <b>Enter</b><span class="roman">, </span><b>Leave</b>,
+<b>ButtonPress</b><span class="roman">, </span><b>Motion</b><span class="roman">, and </span><b>KeyPress</b>.
+Event bindings for a text widget use the <b>current</b> mark
+described under MARKS above.
+<b>Enter</b> events trigger for a character when it
+becomes the current character (i.e. the <b>current</b> mark moves
+to just in front of that character).
+<b>Leave</b> events trigger for a character when it ceases to be
+the current item (i.e. the <b>current</b> mark moves away from
+that character, or the character is deleted).
+These events are different than <b>Enter</b><span class="roman"> and </span><b>Leave</b>
+events for windows.
+Mouse and keyboard events are directed to the current character.
+</p>
+
+<p>It is possible for the current character to have multiple tags,
+and for each of them to have a binding for a particular event
+sequence.
+When this occurs, the binding from the highest priority tag is
+used.
+If a particular tag doesn&rsquo;t have a binding that matches an
+event, then the tag is ignored and tags with lower priority
+will be checked.
+</p>
+
+<p>If bindings are created for the widget as a whole using the
+<b>bind</b> command, then those bindings will supplement the
+tag bindings.
+This means that a single event can trigger two Tcl scripts,
+one for a widget-level binding and one for a tag-level
+binding.
+</p>
+
+</dd>
+<dt><i>pathName </i><b>:tag :configure </b><i>tagName</i><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value</i><span class="roman">? ?</span><i>option value ...</i>?</dt>
+<dd><p>This command is similar to the <b>configure</b> widget command except
+that it modifies options associated with the tag given by <i>tagName</i>
+instead of modifying options for the overall text widget.
+If no <i>option</i> is specified, the command returns a list describing
+all of the available options for <i>tagName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b>
+for information on the format of this list).
+If <i>option</i><span class="roman"> is specified with no </span><i>value</i>, then the command returns
+a list describing the one named option (this list will be identical to
+the corresponding sublist of the value returned if no <i>option</i>
+is specified).
+If one or more <i>option:value</i> pairs are specified, then the command
+modifies the given option(s) to have the given value(s) in <i>tagName</i>;
+in this case the command returns an empty string.
+See TAGS above for details on the options available for tags.
+</p></dd>
+<dt><i>pathName </i><b>:tag :delete </b><i>tagName </i><span class="roman">?</span><i>tagName ...</i>?</dt>
+<dd><p>Deletes all tag information for each of the <i>tagName</i>
+arguments.
+The command removes the tags from all characters in the file
+and also deletes any other information associated with the tags,
+such as bindings and display information.
+The command returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:tag :lower </b><i>tagName </i><span class="roman">?</span><i>belowThis</i>?</dt>
+<dd><p>Changes the priority of tag <i>tagName</i> so that it is just lower
+in priority than the tag whose name is <i>belowThis</i>.
+If <i>belowThis</i><span class="roman"> is omitted, then </span><i>tagName</i>&rsquo;s priority
+is changed to make it lowest priority of all tags.
+</p></dd>
+<dt><i>pathName </i><b>:tag :names </b><span class="roman">?</span><i>index</i>?</dt>
+<dd><p>Returns a list whose elements are the names of all the tags that
+are active at the character position given by <i>index</i>.
+If <i>index</i> is omitted, then the return value will describe
+all of the tags that exist for the text (this includes all tags
+that have been named in a &ldquo;<i>pathName </i><b>:tag</b>&rdquo; widget
+command but haven&rsquo;t been deleted by a &ldquo;<i>pathName </i><b>:tag :delete</b>&rdquo;
+widget command, even if no characters are currently marked with
+the tag).
+The list will be sorted in order from lowest priority to highest
+priority.
+</p></dd>
+<dt><i>pathName </i><b>:tag :nextrange </b><i>tagName index1 </i><span class="roman">?</span><i>index2</i>?</dt>
+<dd><p>This command searches the text for a range of characters tagged
+with <i>tagName</i> where the first character of the range is
+no earlier than the character at <i>index1</i> and no later than
+the character just before <i>index2</i> (a range starting at
+<i>index2</i> will not be considered).
+If several matching ranges exist, the first one is chosen.
+The command&rsquo;s return value is a list containing
+two elements, which are the index of the first character of the
+range and the index of the character just after the last one in
+the range.
+If no matching range is found then the return value is an
+empty string.
+If <i>index2</i> is not given then it defaults to the end of the text.
+</p></dd>
+<dt><i>pathName </i><b>:tag :raise </b><i>tagName </i><span class="roman">?</span><i>aboveThis</i>?</dt>
+<dd><p>Changes the priority of tag <i>tagName</i> so that it is just higher
+in priority than the tag whose name is <i>aboveThis</i>.
+If <i>aboveThis</i><span class="roman"> is omitted, then </span><i>tagName</i>&rsquo;s priority
+is changed to make it highest priority of all tags.
+</p></dd>
+<dt><i>pathName </i><b>:tag :ranges </b><i>tagName</i></dt>
+<dd><p>Returns a list describing all of the ranges of text that have been
+tagged with <i>tagName</i>.
+The first two elements of the list describe the first tagged range
+in the text, the next two elements describe the second range, and
+so on.
+The first element of each pair contains the index of the first
+character of the range, and the second element of the pair contains
+the index of the character just after the last one in the
+range.
+If there are no characters tagged with <i>tag</i> then an
+empty string is returned.
+</p></dd>
+<dt><i>pathName </i><b>:tag :remove </b><i>tagName index1 </i><span class="roman">?</span><i>index2</i>?</dt>
+<dd><p>Remove the tag <i>tagName</i> from all of the characters starting
+at <i>index1</i> and ending just before
+<i>index2</i><span class="roman"> (the character at </span><i>index2</i> isn&rsquo;t affected).
+If <i>index2</i> is omitted then the single character at
+<i>index1</i> is untagged.
+If there are no characters in the specified range (e.g. <i>index1</i>
+is past the end of the file or <i>index2</i> is less than or equal
+to <i>index1</i>) then the command has no effect.
+This command returns an empty string.
+</p>
+</dd>
+</dl>
+</dd>
+<dt><i>pathName </i><b>:yview </b><span class="roman">?</span><b>:pickplace</b><span class="roman">? </span><i>what</i></dt>
+<dd><p>This command changes the view in the widget&rsquo;s window so that the line
+given by <i>what</i> is visible in the window.
+<i>What</i> may be either an absolute line number, where 0 corresponds
+to the first line of the file, or an index with any of the forms
+described under INDICES above.
+The first form (absolute line number) is used in the commands issued
+by scrollbars to control the widget&rsquo;s view.
+If the <b>:pickplace</b><span class="roman"> option isn&rsquo;t specified then </span><i>what</i> will
+appear at the top of the window.
+If <b>:pickplace</b> is specified then the widget chooses where
+<i>what</i> appears in the window:
+</p><ul class="no-bullet">
+<li> [1]
+If <i>what</i> is already visible somewhere in the window then the
+command does nothing.
+</li><li> [2]
+If <i>what</i> is only a few lines off-screen above the window then
+it will be positioned at the top of the window.
+</li><li> [3]
+If <i>what</i> is only a few lines off-screen below the window then
+it will be positioned at the bottom of the window.
+</li><li> [4]
+Otherwise, <i>what</i> will be centered in the window.
+</li></ul>
+
+<p>The <b>:pickplace</b> option is typically used after inserting text
+to make sure that the insertion cursor is still visible on the screen.
+This command returns an empty string.
+</p></dd>
+</dl>
+
+
+<a name="Bindings-4"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>Tk automatically creates class bindings for texts that give them
+the following default behavior:
+</p><ul class="no-bullet">
+<li> [1]
+Pressing mouse button 1 in an text positions the insertion cursor
+just before the character underneath the mouse cursor and sets the
+input focus to this widget.
+</li><li> [2]
+Dragging with mouse button 1 strokes out a selection between
+the insertion cursor and the character under the mouse.
+</li><li> [3]
+If you double-press mouse button 1 then the word under the mouse cursor
+will be selected, the insertion cursor will be positioned at the
+beginning of the word, and dragging the mouse will stroke out a selection
+whole words at a time.
+</li><li> [4]
+If you triple-press mouse button 1 then the line under the mouse cursor
+will be selected, the insertion cursor will be positioned at the
+beginning of the line, and dragging the mouse will stroke out a selection
+whole line at a time.
+</li><li> [5]
+The ends of the selection can be adjusted by dragging with mouse
+button 1 while the shift key is down;  this will adjust the end
+of the selection that was nearest to the mouse cursor when button
+1 was pressed.  If the selection was made in word or line mode then
+it will be adjusted in this same mode.
+</li><li> [6]
+The view in the text can be adjusted by dragging with mouse button 2.
+</li><li> [7]
+If the input focus is in a text widget and characters are typed on the
+keyboard, the characters are inserted just before the insertion cursor.
+</li><li> [8]
+Control+h and the Backspace and Delete keys erase the character just
+before the insertion cursor.
+</li><li> [9]
+Control+v inserts the current selection just before the insertion cursor.
+</li><li> [10]
+Control+d deletes the selected characters;  an error occurs if the selection
+is not in this widget.
+</li></ul>
+
+<p>If the text is disabled using the <b>state</b> option, then the text&rsquo;s
+view can still be adjusted and text in the text can still be selected,
+but no insertion cursor will be displayed and no text modifications will
+take place.
+</p>
+<p>The behavior of texts can be changed by defining new bindings for
+individual widgets or by redefining the class bindings.
+</p>
+<a name="g_t_0022Performance-Issues_0022"></a>
+<h4 class="unnumberedsubsec">&quot;Performance Issues&quot;</h4>
+
+<p>Text widgets should run efficiently under a variety
+of conditions.  The text widget uses about 2-3 bytes of
+main memory for each byte of text, so texts containing a megabyte
+or more should be practical on most workstations.
+Text is represented internally with a modified B-tree structure
+that makes operations relatively efficient even with large texts.
+Tags are included in the B-tree structure in a way that allows
+tags to span large ranges or have many disjoint smaller ranges
+without loss of efficiency.
+Marks are also implemented in a way that allows large numbers of
+marks.
+The only known mode of operation where a text widget may not run
+efficiently is if it has a very large number of different tags.
+Hundreds of tags should be fine, or even a thousand,
+but tens of thousands of tags will make texts consume a lot of
+memory and run slowly.
+</p>
+<a name="Keywords-8"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>text, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="entry.html#entry" accesskey="n" rel="next">entry</a>, Previous: <a href="menubutton.html#menubutton" accesskey="p" rel="prev">menubutton</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

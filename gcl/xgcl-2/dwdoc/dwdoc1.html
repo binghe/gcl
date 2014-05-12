@@ -1,0 +1,948 @@
+<HTML> <HEAD> <TITLE>dwdoc  p. 1</TITLE> </HEAD>
+<BODY>
+
+<P>
+
+ <B> Interface from GCL to X Windows</B> <BR>
+  
+<P>
+
+<P>
+<P>
+
+<P>
+
+
+Department of Computer Sciences <BR>
+
+University of Texas at Austin <BR>
+
+Austin, TX  78712 <BR>
+
+
+<P>
+Software copyright  &nbsp by Gordon S. Novak Jr. and
+The University of Texas at Austin.  Distribution and use are allowed
+under the Gnu Public License.  Also see the copyright section at the end
+of this document for the copyright on X Consortium software.
+<P>
+<P>
+
+<P>
+<H2>Introduction</H2>
+<P>
+This document describes a relatively easy-to-use interface between
+XGCL (X version of Gnu Common Lisp) and X windows.  The interface
+consists of several parts:
+<OL>
+
+<LI> Hiep Huu Nguyen has written (and adapted from X Consortium software)
+an interface between GCL and Xlib, the X library in C.
+Xlib functions can be called directly if desired, but most users will find
+the <TT> dwindow</TT> functions easier to use.  There is little documentation
+of these functions, but the Xlib documentation can be consulted, and
+the <TT> dwindow</TT> functions can be examined as examples.
+<P>
+<LI> The <TT> dwindow</TT> functions described in this document, which call
+the Xlib functions and provide an easier interface for Lisp programs.
+<P>
+<LI> It is possible to make an interactive graphical interface
+within a web page; this is described in a section below.
+</OL>
+
+The source file for the interface (written in GLISP) is
+<TT> dwindow.lsp</TT>; this file is compiled into a file in plain Lisp,
+<TT> dwtrans.lsp</TT>.  <TT> dwtrans.lsp</TT> is compiled as part of XGCL.
+<P>
+The functions in this package use the convention that the coordinate
+<TT> (0 0)</TT> is the lower-left corner of a window, with positive <TT> y</TT>
+being upward.  This is different from the convention used by
+X, which assumes that <TT> (0 0)</TT> is the upper left corner and
+that positive <TT> y</TT> is downward.
+<P>
+In the descriptions below, some function arguments are shown with a type,
+e.g. <TT> arg:type</TT>, to indicate the expected type of the argument.
+The type <TT> vector</TT> is a list <TT> (x y)</TT> of integers.  The argument
+<TT> w</TT> that is used with many functions is of type <TT> window</TT>
+(<TT> window</TT> is a Lisp data structure used by the <TT> dwindow</TT> functions).
+<P>
+Both the Xlib and <TT> dwindow</TT> functions are in the package <TT> xlib:</TT>.
+In order to use these functions, the Lisp command <TT> (use-package 'xlib)</TT>
+should be used to import the <TT> dwindow</TT> symbols.
+<P>
+<P>
+<H2>Examples and Utilities</H2>
+<P>
+<H3><TT> dwtest</TT></H3>
+<P>
+The file <TT> dwtest.lsp</TT> contains example functions that illustrate
+the use of the <TT> dwindow</TT> package.  The function call <TT> (wtesta)</TT>
+creates a small window for testing.  <TT> (wtestb)</TT> through
+<TT> (wtestk)</TT> perform drawing and mouse interaction tests using the
+window.  These functions may be consulted as examples of the use of
+commonly used <TT> dwindow</TT> functions.
+<P>
+<H3><TT> pcalc</TT></H3>
+<P>
+The file <TT> pcalc.lsp</TT> implements
+a pocket calculator as a <TT> picmenu</TT>; its entry is <TT> (pcalc)</TT>.
+<P>
+<H3><TT> draw</TT></H3>
+<P>
+The file <TT> drawtrans.lsp</TT> contains an interactive drawing program;
+its entry is <TT> (draw 'foo)</TT> where <TT> foo</TT> is the name of the drawing.
+The file <TT> ice-cream.lsp</TT> can be loaded, followed by
+<TT> (draw 'ice-cream)</TT> to examine an example drawing.
+<TT> draw</TT> can produce a Lisp program or a set of    commands to
+recreate the drawing; use <TT> origin to zero</TT> before making a program.
+<TT> (draw-out file names)</TT> will write definitions of drawings in the
+list <TT> names</TT> to the file <TT> file</TT>.
+<P>
+<H3><TT> editors</TT></H3>
+<P>
+The file <TT> editorstrans.lsp</TT> contains some interactive editing programs;
+it is a translation of the file <TT> editors.lsp</TT> .
+One useful editor is the color editor; after entering <TT> (wtesta)</TT>
+(in file <TT> dwtest.lsp</TT>), enter <TT> (edit-color myw)</TT> to edit a
+color.  The result is an <TT> rgb</TT> list as used in <TT> window-set-color</TT>.
+<P>
+A simple line editor and an Emacs-like text editor are described in sections
+texted  and emacsed below.
+<P>
+<H2>Menus</H2>
+<P>
+The function <TT> menu</TT> provides an easy interface to make a pop-up menu,
+get a selection from it, and destroy it: <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu items &optional title)</TT> <BR>
+
+<P>
+<P>
+
+Example: <TT> (menu '(red white blue))</TT>
+<P>
+This simple call is all that is needed in most cases.
+More sophisticated menu features are described below.
+<P>
+The <TT> items</TT> in a menu is a list; each item may be a symbol, a <TT> cons</TT>
+of a symbol or string and the corresponding value, or a <TT> cons</TT> of a
+function name and the corresponding value.  In the latter case, the function
+is expected to draw the corresponding menu item.
+<P>
+If a function name is specified as the first element of a menu item, the
+drawing function should have arguments <TT> (fn w x y)</TT>, where <TT> w</TT>
+is the window and <TT> x</TT> and <TT> y</TT> are the lower-left corner of the
+drawing area.  The property list of the function name should have the
+property <TT> display-size</TT>, which should be a list <TT> (width height)</TT>
+in pixels of the displayed symbol.
+<P>
+Menus can be associated with a particular window; if no window is specified,
+the menu is associated with the window where the mouse cursor is located
+when the menu is initialized (which might not be a Lisp user's window).  If a
+menu is associated with a user window, it may be <I> permanent</I> (left
+displayed after a selection is made) and may be <I> flat</I> (drawn directly
+on the containing window, rather than having its own window).
+<P>
+A menu can be created by <TT> menu-create</TT> : <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+ (menu-create items &optional title w:window x y perm flat font)</TT> <BR>
+
+<P>
+<P>
+
+<TT> title</TT>, if specified, is displayed over the menu.
+<TT> w</TT> is an existing <TT> window</TT>; if specified, the menu is put
+within this window at the <TT> x y</TT> offsets specified (adjusted if necessary
+to keep the menu inside the window).  If no <TT> w</TT>
+is specified, or if <TT> x</TT> is <TT> nil</TT>, the menu is put where the cursor
+is the first time the menu is displayed.
+<TT> perm</TT> is non-<TT> nil</TT> if the menu is to be permanent, <I> i.e.</I>, is to
+be left displayed after a selection has been made.
+<TT> flat</TT> is non-<TT> nil</TT> if the menu is to be drawn directly on the
+containing window.
+<TT> font</TT> is a symbol or string that names the font to be used; the
+default is a <TT> 9x15</TT> typewriter font.
+<P>
+The menu is returned as the value of <TT> menu-create</TT>.  Such a menu can
+be saved; selections can be made from a menu <TT> m</TT> as follows: <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-select m &optional inside)</TT>      or
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-select! m)</TT> <BR>
+
+<P>
+<P>
+
+<TT> menu-select</TT> will return <TT> nil</TT> if the mouse is clicked outside the
+menu, or is moved outside after it has been inside (or if <TT> inside</TT> is
+not <TT> nil</TT>), provided that the menu is contained within a user-created
+window.
+<TT> menu-select!</TT> requires that a choice be made.
+<P>
+In order to avoid wasting storage, unused menus should be destroyed:
+<TT> (menu-destroy m)</TT>.  The simple <TT> menu</TT> function destroys its
+menu after it is used.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-size m)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-moveto-xy m x y)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-reposition m)</TT>  
+<P>
+<TT> menu-reposition</TT> will reposition a <TT> flat</TT> menu within its parent
+window by allowing the user to position a ghost box using the mouse.
+<TT> menu-size</TT> returns the size of the menu as a vector, <TT> (x y)</TT>.
+<TT> menu-moveto-xy</TT> adjusts the offsets to move a <TT> flat</TT> menu to
+the specified position within its parent window.  These functions and
+<TT> menu-destroy</TT> work for picmenus and barmenus as well.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-item-position m name &optional location)</TT> <BR>
+
+<P>
+<P>
+
+<TT> menu-item-position</TT> returns a vector <TT> (x y)</TT> that gives the
+coordinates of the menu item whose name is <TT> name</TT>.  <TT> location</TT>
+may be <TT> center</TT>, <TT> left</TT>, <TT> right</TT>, <TT> top</TT>, or <TT> bottom</TT>;
+the default is the lower-left corner of the menu item.  <TT> center</TT>
+specifies the center of the box containing the menu item; the other
+<TT> location</TT> values are at the center of the specified edge of the box.
+<P>
+<H3>Picmenus</H3>
+<P>
+A <TT> picmenu</TT> (picture menu) is analogous to a menu, but involves a
+user-defined picture containing sensitive spots or ``buttons''.
+The test function <TT> (wteste)</TT> shows an example of a <TT> picmenu</TT>.
+A <TT> picmenu</TT> is created by: <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (picmenu-create buttons width height drawfn <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &optional title dotflg w:window x y perm flat font boxflg)</TT> <BR>
+
+<P>
+<P>
+
+<P>
+If a picmenu is to be used more than once, the common parts can be made
+into a <TT> picmenu-spec</TT> and reused:
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (picmenu-create-spec buttons width height drawfn <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &optional dotflg font)</TT> <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (picmenu-create-from-spec spec:picmenu-spec <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &optional title w:window x y perm flat boxflg)</TT> <BR>
+
+<P>
+<P>
+
+<TT> width</TT> and <TT> height</TT> are the size of the area occupied by the
+picture.  <TT> (drawfn w x y)</TT> should draw the picture at the offset
+<TT> x y</TT>.  Note that the <TT> draw</TT> utility can be used to
+make the drawing function, including <TT> picmenu</TT> buttons.
+<TT> dotflg</TT> is non-<TT> nil</TT> if it is desired that small boxes be
+automatically added to the sensitive points when the picture is drawn.
+<TT> boxflg</TT> is non-<TT> nil</TT> if a box is to be drawn around the picmenu
+when the picture is drawn (this is only needed for flat
+picmenus).  If <TT> perm</TT> is non-nil, the drawing program is not called when
+a selection is to be made, so that an external program must draw the
+<TT> picmenu</TT>; this avoids the need to redraw a complex picture.
+The remaining arguments are as described for menus.
+<P>
+Each of the <TT> buttons</TT> in a picmenu is a list: <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (buttonname offset size highlightfn unhighlightfn)</TT> <BR>
+
+<P>
+<P>
+
+<TT> buttonname</TT> is the name of the button; it is the value returned when that
+button is selected.
+<TT> offset</TT> is a vector <TT> (x y)</TT> that gives the offset of the center
+of the button from the lower-left corner of the picture.
+The remainder of the button list may be omitted.
+<TT> size</TT> is an optional list <TT> (width height)</TT> that gives the size of the
+sensitive area of the button; the default size is <TT> (12 12)</TT>.
+<TT> (highlightfn w x y)</TT> and <TT> (unhighlightfn w x y)</TT> (where <TT> (x y)</TT>
+is the center of the button in the coordinates of <TT> w</TT>) are optional
+functions to highlight the button area when the cursor is moved into it and
+unhighlight the button when the cursor is moved out; the default is to
+display a box of the specified <TT> size</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (picmenu-select m &optional inside)</TT> <BR>
+
+If the <TT> picmenu</TT> is not <TT> flat</TT>, its window should be destroyed
+following the selection using <TT> menu-destroy</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (picmenu-item-position m name &optional location)</TT> <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (picmenu-delete-named-button m name:symbol)</TT> <BR>
+
+This deletes a button from a displayed <TT> picmenu</TT>.  The set of
+deleted buttons is reset to <TT> nil</TT> when the picmenu is drawn.
+<P>
+<H3>Barmenus</H3>
+<P>
+A <TT> barmenu</TT> displays a bar graph whose size can be adjusted using
+the mouse.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 
+(barmenu-create maxval initval barwidth <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp &optional title horizontal subtrackfn subtrackparms <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp parentw x y perm flat color)</TT>
+<P>
+A value is selected by: <TT> (barmenu-select m:barmenu &optional inside)</TT> <BR>
+
+If the <TT> barmenu</TT> is not <TT> flat</TT>, its window should be destroyed
+following the selection using <TT> menu-destroy</TT>.
+<P>
+The user must first click the mouse in the bar area; then
+the size of the displayed bar is adjusted as the user moves the mouse
+pointer.  In addition, the <TT> subtrackfn</TT> is called with arguments
+of the size of the bar followed by the <TT> subtrackparms</TT>; this can
+be used, for example, to display a numeric value in addition to the
+bar size.
+<P>
+<P>
+<H3>Menu Sets and Menu Conns</H3>
+<P>
+A <TT> menu-set</TT> is a set of multiple menus, picmenus, or barmenus
+that are simultaneously active within the same window.  Menu-sets
+can be used to implement graphical user interfaces.  A <TT> menu-conns</TT>
+is a menu-set that includes connections between menus; this can be
+used to implement interfaces that allow the user to construct a network
+from components.
+<P>
+The source file for menu-sets is the GLISP file <TT> menu-set.lsp</TT>;
+this file is translated as part of the file <TT> drawtrans.lsp</TT> in
+plain Lisp.  Examples of the use of menu sets are given at the top
+of the file <TT> menu-set.lsp</TT>.  In the following descriptions,
+<TT> ms</TT> is a <TT> menu-set</TT> and <TT> mc</TT> is a <TT> menu-conns</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-create w)</TT> creates a menu set to be displayed
+in the window <TT> w</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-name symbol)</TT> makes a <TT> gensym</TT> name that
+begins with <TT> symbol</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-add-menu ms name:symbol sym title items</TT> <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <TT> &optional offset:vector)</TT>
+<P>
+This function adds a menu to a menu-set.  <TT> sym</TT> is arbitrary
+information that is saved with the menu.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-add-picmenu ms name sym title spec:picmenu-spec</TT> <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <TT> &optional offset:vector nobox)</TT>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-add-component ms name &optional offset:vector)</TT>
+<P>
+This adds a component that has a <TT> picmenu-spec</TT> defined on the
+property list of <TT> name</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-add-barmenu ms name sym barmenu title</TT> <BR>
+
+&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <TT> &optional offset:vector)</TT>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-draw ms)</TT> draws all the menus.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-set-select ms &optional redraw enabled)</TT>
+<P>
+<TT> menu-set-select</TT> gets a selection from a menu-set.  If <TT> redraw</TT>
+is non-<TT> nil</TT>, the menu-set is drawn.  <TT> enabled</TT> may be a list
+of names of menus that are enabled for selection.  The result is
+<TT> (selection menu-name)</TT>, or <TT> ((x y) BACKGROUND button)</TT>
+for a click outside any menu.
+<P>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-conns-create ms)</TT> creates a <TT> menu-conns</TT>
+from a <TT> menu-set</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-conns-add-conn mc)</TT>
+<P>
+This function allows the user to select two ports from menus of the
+<TT> menu-conns</TT>.  It then draws a line between the ports and adds the
+connection to the <TT> connections</TT> of the <TT> menu-conns</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-conns-move mc)</TT>
+<P>
+This function allows the user to select a menu and move it.
+The <TT> menu-set</TT> and connections are redrawn afterwards.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-conns-find-conn mc pt:vector)</TT> <BR>
+
+This finds the connection selected by the point <TT> pt</TT>, if any.
+This is useful to allow the user to delete a connection:
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-conns-delete-conn mc conn)</TT>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (menu-conns-find-conns mc menuname port)</TT> <BR>
+
+This returns all the connections from the specified <TT> port</TT> (selection)
+of the menu whose name is <TT> menuname</TT>.
+<P>
+<P>
+<H2>Windows</H2>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-create width height &optional title parentw
+ x y font)</TT> <BR>
+
+<P>
+<P>
+
+<TT> window-create</TT> makes a new window of the specified <TT> width</TT> and
+<TT> height</TT>.  <TT> title</TT>, if specified, becomes the displayed title
+of the window.  If <TT> parentw</TT> is specified, it should be the
+<TT> window-parent</TT> property of an existing window, which becomes the parent
+window of the new window.  <TT> x</TT> and <TT> y</TT> are the offset of the
+new window from the parent window.  <TT> font</TT> is the font to be used
+for printing in the window; the default is given by
+<TT> *window-default-font-name*</TT>, initially <TT> courier-bold-12</TT>.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-open w)</TT> causes a window to be displayed
+on the screen.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-close w)</TT> removes the window from the display;
+it can be re-opened.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-destroy w)</TT>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-moveto-xy w x y)</TT>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-geometry w)</TT> queries X for the window geometry.
+The result is a list, 
+<TT> (x y width height border-width)</TT> .
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-size w)</TT> returns a list <TT> (width height)</TT> .
+<P>
+<P>
+
+Note that the width and height are cached within the structure so that no call
+to X is needed to examine them.  However, if the window is resized, it is
+necessary to call <TT> (window-reset-geometry w)</TT> to reset the local
+parameters to their correct values.
+<P>
+
+
+
+
+
+
+<P>
+The following functions provide access to the parts of the <TT> window</TT> data
+structure; most applications will not need to use them. <BR>
+
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-gcontext        w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-parent          w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-drawable-height w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-drawable-width  w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-label           w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-font            w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-screen-height)</TT> <BR>
+
+<P>
+<P>
+<H2>Drawing Functions</H2>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-clear w)</TT> clears the window to the background
+color.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-force-output &optional w)</TT>
+<P>
+<P>
+
+Communication between the running program and X windows is done through a
+stream; actual drawing on the display is done asynchronously.
+<TT> window-force-output</TT> causes the current drawing commands, if any,
+to be sent to X.  Without this, commands may be left in the stream buffer and
+may appear not to have been executed.  The argument <TT> w</TT> is not used.
+<P>
+In all of the drawing functions, the <TT> linewidth</TT> argument is optional
+and defaults to <TT> 1</TT>.
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-line w from:vector to:vector linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+ (window-draw-line-xy w x1 y1 x2 y2 &optional linewidth op)</TT> <BR>
+
+ &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp <TT> op</TT> may be <TT> xor</TT> or <TT> erase</TT>.
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+ (window-draw-arrow-xy w x1 y1 x2 y2 &optional linewidth size)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+ (window-draw-arrow2-xy w x1 y1 x2 y2 &optional linewidth size)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
+ (window-draw-arrowhead-xy w x1 y1 x2 y2 &optional linewidth size)</TT>
+<P>
+<P>
+
+These draw a line with an arrowhead at the second point, a line with an
+arrowhead at both points, or an arrowhead alone at the second point,
+respectively.  <TT> size</TT> is the arrowhead size; the default is
+<TT> (+ 20 (* linewidth 5))</TT>.
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-box-xy w x y width height linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-xor-box-xy w x y width height linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-box w offset:vector size:vector linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-box-corners w x1 y1 x2 y2 linewidth)</TT> <BR>
+
+ &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp where <TT> (x1 y1)</TT> and <TT> (x2 y2)</TT> are opposite corners. <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-rcbox-xy w x y width height radius linewidth)</TT> <BR>
+
+ &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp draws a box with rounded corners.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-arc-xy w x y radiusx radiusy anglea angleb linewidth)</TT>
+<P>
+<P>
+
+<TT> anglea</TT> is the angle, in degrees, at which the arc is started.
+<TT> angleb</TT> is the angle, in degrees, that specifies the amount of arc
+to be drawn, counterclockwise from the starting position.
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-circle-xy w x y radius linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-circle w center:vector radius linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-ellipse-xy w x y radiusx radiusy linewidth)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-dot-xy w x y)</TT>
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-erase-area-xy w left bottom width height)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-erase-area w offset:vector size:vector)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-copy-area-xy w fromx fromy	tox toy width height)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-invert-area w offset:vector size:vector)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-invert-area-xy w left bottom width height)</TT>
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-printat-xy w s x y)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-printat w s at:vector)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-prettyprintat-xy w s x y)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-prettyprintat w s at:vector)</TT> <BR>
+
+<P>
+<P>
+
+The argument <TT> s</TT> is printed at the specified position.
+<TT> s</TT> is stringified if necessary.
+Currently, the pretty-print versions are the same as the plain versions.
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-draw-border w)</TT> draws a border just
+inside a window.
+<P>
+<H2>Fonts, Operations, Colors</H2>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-font w font)</TT>
+<P>
+<P>
+
+The font symbols that are currently defined are <TT> courier-bold-12</TT>,
+<TT> 8x10</TT>, and <TT> 9x15</TT> .  The global variable <TT> *window-fonts*</TT>
+contains correspondences between font symbols and font strings.
+A font string may also be specified instead of a font symbol.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-string-width w s)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-string-extents w s)</TT> <BR>
+
+These give the width and the vertical size <TT> (ascent descent)</TT> in pixels
+of the specified string <TT> s</TT> using the font of the specified window.
+<TT> s</TT> is stringified if necessary.
+<P>
+Operations on a window other than direct drawing are performed by
+setting a condition for the window, performing the operation, and then
+unsetting the condition with <TT> window-unset</TT>.  <TT> window-reset</TT>
+will reset a window to its ``standard'' setting; it is useful primarily
+for cases in which a program bug causes window settings to be in an
+undesired state.
+<P>
+<P>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-xor w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-erase w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-copy w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-invert w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-unset w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-reset w)</TT> <BR>
+
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-line-width w width)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-line-attr w width &optional line-style cap-style join-style)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-std-line-attr w)</TT> <BR>
+
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-foreground w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-foreground w fg-color)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-background w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-background w bg-color)</TT> <BR>
+
+<P>
+<P>
+<H3>Color</H3>
+<P>
+The color of the foreground (things that are drawn, such as lines or
+characters) is set by:
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-color w rgb &optional background)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-set-color-rgb w r g b &optional background)</TT> <BR>
+
+<P>
+<TT> rgb</TT> is a list <TT> (red green blue)</TT> of 16-bit unsigned integers in
+the range <TT> 0</TT> to <TT> 65535</TT>.  <TT> background</TT> is non-<TT> nil</TT>
+to set the background color rather than the foreground color.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-reset-color w)</TT> <BR>
+
+<TT> window-reset-color</TT> resets a window's colors to the default values.
+<P>
+Colors are a scarce resource; there is only a finite number of
+available colors, such as 256 colors.  If you only use a small, fixed set
+of colors, the finite set of colors will not be a problem.  However,
+if you create a lot of colors that are used only briefly, it will be
+necessary to release them after they are no longer needed.
+<TT> window-set-color</TT> will leave the global variable <TT> *window-xcolor*</TT>
+set to an integer value that denotes an X color; this value should be
+saved and used as the argument to <TT> window-free-color</TT> to release
+the color after it is no longer needed.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-free-color w &optional xcolor)</TT> <BR>
+
+<P>
+<TT> window-free-color</TT> frees either the last color used, as given by
+<TT> *window-xcolor*</TT>, or the specified color.
+<P>
+<P>
+<H3>Character Input</H3> texted
+<P>
+Characters can be input within a window by the call:
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-input-string w str x y &optional size)</TT> <BR>
+
+<P>
+<TT> window-input-string</TT> will print the initial string <TT> str</TT>,
+if non-<TT> nil</TT>,
+at the specified position in the window; <TT> str</TT>, if not modified
+by the user, will also be the initial part of the result.  A caret
+is displayed showing the location of the next input character.
+Characters are echoed as they are typed; backspacing erases characters,
+including those from the initial string <TT> str</TT>.  An area of width
+<TT> size</TT> (default 100) is erased to the right of the initial caret.
+<P>
+<P>
+<H3>Emacs-like Editing</H3> emacsed
+<P>
+<TT> window-edit</TT> allows editing of text using an Emacs-subset editor.
+Only a few simple Emacs commands are implemented.
+<PRE>
+
+   (window-edit w x y width height </TD><TD>optional strings boxflg scroll endp)
+</PRE>
+
+<TT> x y width height</TT> specify the offset and size of the editing
+area; it is a good idea to draw a box around this area first.
+<TT> strings</TT> is an initial list of strings; the return value is a list
+of strings.
+<TT> scroll</TT> is number of lines to scroll down before displaying text,
+          or <TT> T</TT> to have one line only and terminate on return.
+<TT> endp</TT> is <TT> T</TT> to begin editing at the end of the first line.
+Example:
+<PRE>
+
+  (window-draw-box-xy myw 48 48 204 204)
+  (window-edit myw 50 50 200 200 '("Now is the time" "for all" "good"))
+</PRE>
+
+<P>
+<P>
+<H2>Mouse Interaction</H2>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-point w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-crosshairs w)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-cross w)</TT> <BR>
+
+These functions  get a point position by mouse click; they return <TT> (x y)</TT> .
+<P>
+The following function gets a point position by mouse click.  It returns
+<TT> (button (x y))</TT> where <TT> button</TT> is <TT> 1</TT> for the left button,
+<TT> 2</TT> for middle, <TT> 3</TT> for right.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-click w)</TT> <BR>
+
+<P>
+The following function gets a point position by mouse click within a specified
+region.  It returns <TT> (button (x y))</TT> or <TT> NIL</TT> if the mouse leaves
+the region.  If <TT> boxflg</TT> is <TT> t</TT>, a box will be drawn outside the
+region while the mouse is being tracked.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-track-mouse-in-region w x y sizex sizey &optional boxflg)</TT> <BR>
+
+<P>
+<P>
+The following functions get a point position indicated by drawing a line
+from a specified origin position to the cursor position; they return
+<TT> (x y)</TT> at the cursor position when a mouse button is clicked.
+The <TT> latex</TT> version restricts the slope of the line to be a slope that
+  can draw; if <TT> flg</TT> is non-<TT> nil</TT>, the slope is restricted
+to be a   <TT> vector</TT> slope.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-line-position w orgx orgy)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-latex-position w orgx orgy flg)</TT> <BR>
+
+<P>
+The following function gets a position by moving a ``ghost'' icon,
+defined by the icon drawing function <TT> fn</TT>.  This allows exact positioning
+of an object by the user.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-icon-position w fn args &optional (dx 0)
+ (dy 0))</TT> <BR>
+
+<P>
+<P>
+
+The function <TT> fn</TT> has arguments <TT> (fn w x y . args)</TT> , where <TT> x</TT>
+and <TT> y</TT> are the offset within the window <TT> w</TT> at which the icon is
+to be drawn, and <TT> args</TT> is a list of arbitrary arguments, e.g., the size
+of the icon, that are passed through to the drawing function.
+The icon is drawn in <TT> xor</TT> mode, so it must be drawn using
+only ``plain'' drawing functions, without resetting window attributes.
+The returned value is <TT> (x y)</TT> at the cursor position when a button
+is clicked.  <TT> dx</TT> and <TT> dy</TT>, if specified, are offsets of <TT> x</TT>
+and <TT> y</TT> from the cursor position.
+<P>
+The following function gets a position by moving a ``ghost'' box icon.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-box-position w width height &optional (dx 0) (dy 0))</TT> <BR>
+
+<P>
+<P>
+
+By default, the lower-left corner of the box is placed at the cursor position;
+<TT> dx</TT> and <TT> dy</TT> may be used to offset the box from the cursor, e.g.,
+to move the box by a different corner.  The returned value is <TT> (x y)</TT>
+at the cursor position when a button is clicked.
+<P>
+The following function gets coordinates of a box of arbitrary size and
+position.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-region w)</TT> <BR>
+
+<P>
+<P>
+
+The user first clicks for one corner of the box, moves the
+mouse and clicks again for the opposite corner, then moves the box into
+the desired position. The returned value is 
+<TT> ((x y) (width height))</TT>,
+where <TT> (x y)</TT> is the lower-left corner of the box.
+<P>
+The following function gets the size of a box by mouse selection,
+echoing the size in pixels below the box.  <TT> offsety</TT>
+should be at least <TT> 30</TT> to leave room to display the size of the box.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-box-size w offsetx offsety)</TT> <BR>
+
+<P>
+<P>
+The following function adjusts one side of a box.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-adjust-box-side w x y width height side)</TT> <BR>
+
+<P>
+<P>
+
+<TT> side</TT> specifies the side of the box to be adjusted: <TT> left</TT>,
+<TT> right</TT>, <TT> top</TT>, or <TT> bottom</TT>.  The result is
+<TT> ((x y) (width height))</TT> for the resulting box.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-circle w &optional center:vector)</TT> <BR>
+
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-get-ellipse w &optional center:vector)</TT> <BR>
+
+These functions interactively get a circle or ellipse.  For an ellipse,
+a circle is gotten first for the horizontal size; then the vertical
+size of the ellipse is adjusted.
+<TT> window-get-circle</TT> returns <TT> ((x y) radius)</TT>.
+<TT> window-get-ellipse</TT> returns <TT> ((x y) (xradius yradius))</TT>.
+<P>
+
+
+<P>
+<TT> window-track-mouse</TT> is the basic function for following the mouse
+and performing some action as it moves.  This function is used in
+the implementation of menus and the mouse-interaction functions described in
+this section.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-track-mouse w fn &optional outflg)</TT>
+          
+<P>
+
+Each time the mouse position changes or a mouse button is pressed,
+the function <TT> fn</TT> is called with
+arguments <TT> (x y code)</TT> where <TT> x</TT> and <TT> y</TT> are the cursor
+position, <TT> code</TT> is a button code (<TT> 0</TT> if no button, <TT> 1</TT> for
+the left button, <TT> 2</TT> for the middle button, or <TT> 3</TT> for the right
+button).  <TT> window-track-mouse</TT> continues to track the mouse until <TT> fn</TT>
+returns a value other than <TT> nil</TT>, at which time <TT> window-track-mouse</TT>
+returns that value.  Usually, it is a good idea for <TT> fn</TT> to return a
+value other than <TT> nil</TT> upon a mouse click.  If the argument <TT> outflg</TT>
+is non-<TT> nil</TT>, the function <TT> fn</TT> will be called for button clicks
+outside the window <TT> w</TT>; note, however, that such clicks will not be
+seen if the containing window intercepts them, so that this feature will
+work only if the window <TT> w</TT> is inside another Lisp user window.
+<P>
+<P>
+<H2>Miscellaneous Functions</H2>
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (stringify x)</TT> makes its argument into a string.
+<P>
+<TT> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp (window-destroy-selected-window)</TT> waits 3 seconds,
+then destroys the window containing the mouse cursor.  This function
+should be used with care; it can destroy a non-user window, causing
+processes associated with the window to be destroyed.  It is useful
+primarily in debugging, to get rid of a window that is left on the screen
+due to an error.
+                
+<P>
+<H2>Examples</H2>
+<P>
+Several interactive programs using this software for their graphical
+interface can be found at <TT> http://www.cs.utexas.edu/users/novak/</TT>
+under the heading Software Demos.
+<P>
+<P>
+<H2>Web Interface</H2>
+<P>
+This software allows a Lisp program to be used interactively within
+a web page.  There are two approaches, either using an X server on
+the computer of the person viewing the web page, or using WeirdX, a
+Java program that emulates an X server.  Details can be found at:
+<TT> http://www.cs.utexas.edu/users/novak/dwindow.html</TT> 
+<P>
+<P>
+<H2>Files</H2>
+<P>
+<TABLE>
+<TR><TD>
+<TT> dec.copyright</TT>  </TD><TD> Copyright and license for DEC/MIT files </TD></TR>
+<TR><TD>
+<TT> draw.lsp</TT>       </TD><TD> GLISP source code for interactive drawing utility </TD></TR>
+<TR><TD>
+<TT> drawtrans.lsp</TT>  </TD><TD> <TT> draw.lsp</TT> translated into plain Lisp </TD></TR>
+<TR><TD>
+<TT> draw-gates.lsp</TT> </TD><TD> Code to draw <TT> nand</TT> gates etc. </TD></TR>
+<TR><TD>
+<TT> dwdoc.tex</TT>      </TD><TD>   source for this document </TD></TR>
+<TR><TD>
+<TT> dwexports.lsp</TT>  </TD><TD> exported symbols </TD></TR>
+<TR><TD>
+<TT> dwimportsb.lsp</TT> </TD><TD> imported symbols </TD></TR>
+<TR><TD>
+<TT> dwindow.lsp</TT>    </TD><TD> GLISP source code for <TT> dwindow</TT> functions </TD></TR>
+<TR><TD>
+<TT> dwtest.lsp</TT>     </TD><TD> Examples of use of <TT> dwindow</TT> functions </TD></TR>
+<TR><TD>
+<TT> dwtrans.lsp</TT>    </TD><TD> <TT> dwindow.lsp</TT> translated into plain Lisp </TD></TR>
+<TR><TD>
+<TT> editors.lsp</TT>    </TD><TD> Editors for colors etc. </TD></TR>
+<TR><TD>
+<TT> editorstrans.lsp</TT>    </TD><TD> translation of <TT> editors.lsp</TT> </TD></TR>
+<TR><TD>
+<TT> gnu.license</TT>    </TD><TD> GNU General Public License </TD></TR>
+<TR><TD>
+<TT> ice-cream.lsp</TT>  </TD><TD> Drawing of an ice cream cone made with <TT> draw</TT> </TD></TR>
+<TR><TD>
+<TT> lispserver.lsp</TT> </TD><TD> Example web demo: a Lisp server </TD></TR>
+<TR><TD>
+<TT> lispservertrans.lsp</TT>    </TD><TD> translation of <TT> lispserver.lsp</TT> </TD></TR>
+<TR><TD>
+<TT> menu-set.lsp</TT>   </TD><TD> GLISP source code for menu-set functions </TD></TR>
+<TR><TD>
+<TT> menu-settrans.lsp</TT>   </TD><TD> translation of <TT> menu-set.lsp</TT> </TD></TR>
+<TR><TD>
+<TT> pcalc.lsp</TT>      </TD><TD> Pocket calculator implemented as a <TT> picmenu</TT> </TD></TR>
+<TR><TD>
+</TABLE>
+
+<P>
+<P>
+
+<a href="dwdoccontents.html">Contents</a>&nbsp&nbsp&nbsp
+<a href="dwdoc2.html">Next</a>&nbsp&nbsp&nbsp
+<a href="dwdoc11.html">Page+10</a>&nbsp&nbsp&nbsp
+<a href="dwdocindex.html">Index</a>&nbsp&nbsp&nbsp
+</BODY></HTML>

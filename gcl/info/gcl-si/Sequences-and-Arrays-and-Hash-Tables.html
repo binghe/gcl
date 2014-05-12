@@ -1,0 +1,1162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Sequences and Arrays and Hash Tables</title>
+
+<meta name="description" content="GCL SI Manual: Sequences and Arrays and Hash Tables">
+<meta name="keywords" content="GCL SI Manual: Sequences and Arrays and Hash Tables">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Characters.html#Characters" rel="next" title="Characters">
+<link href="Numbers.html#Numbers" rel="prev" title="Numbers">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Sequences-and-Arrays-and-Hash-Tables"></a>
+<div class="header">
+<p>
+Next: <a href="Characters.html#Characters" accesskey="n" rel="next">Characters</a>, Previous: <a href="Numbers.html#Numbers" accesskey="p" rel="prev">Numbers</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Sequences-and-Arrays-and-Hash-Tables-1"></a>
+<h2 class="chapter">2 Sequences and Arrays and Hash Tables</h2>
+
+<dl>
+<dt><a name="index-VECTOR"></a>Function: <strong>VECTOR</strong> <em>(&amp;rest objects)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Constructs a Simple-Vector from the given objects.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBSEQ"></a>Function: <strong>SUBSEQ</strong> <em>(sequence start &amp;optional (end (length sequence)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of a subsequence of SEQUENCE between START (inclusive) and
+END (exclusive).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COPY_002dSEQ"></a>Function: <strong>COPY-SEQ</strong> <em>(sequence)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-POSITION"></a>Function: <strong>POSITION</strong> <em>(item sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the index of the first element in SEQUENCE that satisfies TEST with
+ITEM; NIL if no such element exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dRANK"></a>Function: <strong>ARRAY-RANK</strong> <em>(array)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of dimensions of ARRAY.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SBIT"></a>Function: <strong>SBIT</strong> <em>(simple-bit-array &amp;rest subscripts)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit from SIMPLE-BIT-ARRAY at SUBSCRIPTS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dCAPITALIZE"></a>Function: <strong>STRING-CAPITALIZE</strong> <em>(string &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of STRING with the first character of each word converted to
+upper-case, and remaining characters in the word converted to lower case.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBSTITUTE_002dIF_002dNOT"></a>Function: <strong>NSUBSTITUTE-IF-NOT</strong> <em>(new test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same kind as SEQUENCE with the same elements
+</p>
+<p>except that all elements not satisfying TEST are replaced with NEWITEM.
+SEQUENCE may be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIND_002dIF"></a>Function: <strong>FIND-IF</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the index of the first element in SEQUENCE that satisfies TEST; NIL if
+no such element exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dEQV"></a>Function: <strong>BIT-EQV</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical EQV  on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_003c"></a>Function: <strong>STRING&lt;</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If STRING1 is lexicographically less than STRING2, then returns the longest
+common prefix of the strings.  Otherwise, returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REVERSE"></a>Function: <strong>REVERSE</strong> <em>(sequence)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a new sequence containing the same elements as SEQUENCE but in
+reverse order.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSTRING_002dUPCASE"></a>Function: <strong>NSTRING-UPCASE</strong> <em>(string &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns STRING with all lower case characters converted to uppercase.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_003e_003d"></a>Function: <strong>STRING&gt;=</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If STRING1 is lexicographically greater than or equal to STRING2, then returns
+the longest common prefix of the strings.  Otherwise, returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dROW_002dMAJOR_002dINDEX"></a>Function: <strong>ARRAY-ROW-MAJOR-INDEX</strong> <em>(array &amp;rest subscripts)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the index into the data vector of ARRAY for the element of ARRAY
+specified by SUBSCRIPTS.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-ARRAY_002dDIMENSION"></a>Function: <strong>ARRAY-DIMENSION</strong> <em>(array axis-number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the length of AXIS-NUMBER of ARRAY.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIND"></a>Function: <strong>FIND</strong> <em>(item sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the first element in SEQUENCE satisfying TEST with ITEM; NIL if no
+such element exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dNOT_002dEQUAL"></a>Function: <strong>STRING-NOT-EQUAL</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Similar to STRING=, but ignores cases.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dRIGHT_002dTRIM"></a>Function: <strong>STRING-RIGHT-TRIM</strong> <em>(char-bag string)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of STRING with the characters in CHAR-BAG removed from the
+right end.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DELETE_002dIF_002dNOT"></a>Function: <strong>DELETE-IF-NOT</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence formed by destructively removing the elements not
+satisfying TEST from SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMOVE_002dIF_002dNOT"></a>Function: <strong>REMOVE-IF-NOT</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of SEQUENCE with elements not satisfying TEST removed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_003d"></a>Function: <strong>STRING=</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the two strings are character-wise CHAR=; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBSTITUTE_002dIF"></a>Function: <strong>NSUBSTITUTE-IF</strong> <em>(new test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same kind as SEQUENCE with the same elements
+except that all elements satisfying TEST are replaced with NEWITEM.  SEQUENCE
+may be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SOME"></a>Function: <strong>SOME</strong> <em>(predicate sequence &amp;rest more-sequences)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if at least one of the elements in SEQUENCEs satisfies PREDICATE;
+NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSTRING"></a>Function: <strong>MAKE-STRING</strong> <em>(size &amp;key (initial-element #\Space))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a new string of SIZE length whose elements are all
+INITIAL-ELEMENT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSUBSTITUTE"></a>Function: <strong>NSUBSTITUTE</strong> <em>(newitem olditem sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same kind as SEQUENCE with the same elements
+except that OLDITEMs are replaced with NEWITEM.  SEQUENCE may be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dEQUAL"></a>Function: <strong>STRING-EQUAL</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Given two strings (string1 and string2), and optional integers start1,
+start2, end1 and end2, compares characters in string1 to characters in
+string2 (using char-equal).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dNOT_002dGREATERP"></a>Function: <strong>STRING-NOT-GREATERP</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Similar to STRING&lt;=, but ignores cases.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_003e"></a>Function: <strong>STRING&gt;</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If STRING1 is lexicographically greater than STRING2, then returns the
+longest common prefix of the strings.  Otherwise, returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRINGP"></a>Function: <strong>STRINGP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a string; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DELETE_002dIF"></a>Function: <strong>DELETE-IF</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence formed by removing the elements satisfying TEST
+destructively from SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SIMPLE_002dSTRING_002dP"></a>Function: <strong>SIMPLE-STRING-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a simple string; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMOVE_002dIF"></a>Function: <strong>REMOVE-IF</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of SEQUENCE with elements satisfying TEST removed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-HASH_002dTABLE_002dCOUNT"></a>Function: <strong>HASH-TABLE-COUNT</strong> <em>(hash-table)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of entries in the given Hash-Table.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dDIMENSIONS"></a>Function: <strong>ARRAY-DIMENSIONS</strong> <em>(array)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list whose elements are the dimensions of ARRAY
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBSTITUTE_002dIF_002dNOT"></a>Function: <strong>SUBSTITUTE-IF-NOT</strong> <em>(new test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same kind as SEQUENCE with the same elements
+except that all elements not satisfying TEST are replaced with NEWITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ADJUSTABLE_002dARRAY_002dP"></a>Function: <strong>ADJUSTABLE-ARRAY-P</strong> <em>(array)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if ARRAY is adjustable; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SVREF"></a>Function: <strong>SVREF</strong> <em>(simple-vector index)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the INDEX-th element of SIMPLE-VECTOR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-VECTOR_002dPUSH_002dEXTEND"></a>Function: <strong>VECTOR-PUSH-EXTEND</strong> <em>(new-element vector &amp;optional (extension (length vector)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Similar to VECTOR-PUSH except that, if the fill pointer gets too large,
+extends VECTOR rather then simply returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DELETE"></a>Function: <strong>DELETE</strong> <em>(item sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence formed by removing the specified ITEM destructively from
+SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMOVE"></a>Function: <strong>REMOVE</strong> <em>(item sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of SEQUENCE with ITEM removed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING"></a>Function: <strong>STRING</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Coerces X into a string.  If X is a string, then returns X itself.  If X is a
+symbol, then returns X&rsquo;s print name.  If X is a character, then returns a one
+element string containing that character.  Signals an error if X cannot be
+coerced into a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dUPCASE"></a>Function: <strong>STRING-UPCASE</strong> <em>(string &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of STRING with all lower case characters converted to
+uppercase.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GETHASH"></a>Function: <strong>GETHASH</strong> <em>(key hash-table &amp;optional (default nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Finds the entry in HASH-TABLE whose key is KEY and returns the associated
+value and T, as multiple values.  Returns DEFAULT and NIL if there is no
+such entry.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dHASH_002dTABLE"></a>Function: <strong>MAKE-HASH-TABLE</strong> <em>(&amp;key (test 'eql) (size 1024) (rehash-size 1.5) (rehash-threshold 0.7))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a hash table.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002f_003d"></a>Function: <strong>STRING/=</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns NIL if STRING1 and STRING2 are character-wise CHAR=.  Otherwise,
+returns the index to the longest common prefix of the strings.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dGREATERP"></a>Function: <strong>STRING-GREATERP</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Similar to STRING&gt;, but ignores cases.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ELT"></a>Function: <strong>ELT</strong> <em>(sequence index)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the INDEX-th element of SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dARRAY"></a>Function: <strong>MAKE-ARRAY</strong> <em>(dimensions &amp;key (element-type t) initial-element (initial-contents nil) (adjustable nil) (fill-pointer nil) (displaced-to nil) (displaced-index-offset 0) static)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates an array of the specified DIMENSIONS.  The default for INITIAL-
+ELEMENT depends on ELEMENT-TYPE.
+MAKE-ARRAY will always try to find the &lsquo;best&rsquo; array to
+accommodate the element-type specified.   For example on a SUN element-type
+(mod 1) &ndash;&gt; bit
+(integer 0 10) &ndash;&gt; unsigned-char
+(integer -3 10) &ndash;&gt; signed-char
+si::best-array-element-type is the function doing this.  It
+is also used by the compiler, for coercing array element types.
+If you are going to declare an array you should use the same
+element type as was used in making it.  eg
+(setq my-array (make-array 4 :element-type &rsquo;(integer 0 10)))
+(the (array (integer 0 10)) my-array)
+    When wanting to optimize references to an array you need to
+declare the array eg: (the (array (integer -3 10)) my-array) if ar
+were constructed using the (integer -3 10) element-type.  You could of
+course have used signed-char, but since the ranges may be
+implementation dependent it is better to use -3 10 range.  MAKE-ARRAY
+needs to do some calculation with the element-type if you don&rsquo;t
+provide a primitive data-type.  One way of doing this in a machine
+independent fashion:
+</p>
+<p>(defvar *my-elt-type* #.
+      (array-element-type (make-array 1 :element-type &rsquo;(integer -3 10))))
+</p>
+<p>Then calls to (make-array n :element-type *my-elt-type*) will not have to go
+through a type inclusion computation.  The keyword STATIC (GCL specific) if non
+nil, will cause the array body to be non relocatable.
+</p>
+
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSTRING_002dDOWNCASE"></a>Function: <strong>NSTRING-DOWNCASE</strong> <em>(string &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+ Returns STRING with all upper case
+characters converted to lowercase.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dIN_002dBOUNDS_002dP"></a>Function: <strong>ARRAY-IN-BOUNDS-P</strong> <em>(array &amp;rest subscripts)</em></dt>
+<dd><p>Package:LISP
+ Returns T if SUBSCRIPTS are valid subscripts for
+ARRAY; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SORT"></a>Function: <strong>SORT</strong> <em>(sequence predicate &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+ Destructively sorts SEQUENCE.
+PREDICATE should return non-NIL if its first argument is to precede
+its second argument.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-HASH_002dTABLE_002dP"></a>Function: <strong>HASH-TABLE-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a hash table object; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COUNT_002dIF_002dNOT"></a>Function: <strong>COUNT-IF-NOT</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of elements in SEQUENCE not satisfying TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FILL_002dPOINTER"></a>Function: <strong>FILL-POINTER</strong> <em>(vector)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the fill pointer of VECTOR.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-ARRAYP"></a>Function: <strong>ARRAYP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is an array; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REPLACE"></a>Function: <strong>REPLACE</strong> <em>(sequence1 sequence2 &amp;key (start1 0) (end1 (length sequence1)) (start2 0) (end2 (length sequence2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Destructively modifies SEQUENCE1 by copying successive elements into it from
+SEQUENCE2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dXOR"></a>Function: <strong>BIT-XOR</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical XOR on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CLRHASH"></a>Function: <strong>CLRHASH</strong> <em>(hash-table)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Removes all entries of HASH-TABLE and returns the hash table itself.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBSTITUTE_002dIF"></a>Function: <strong>SUBSTITUTE-IF</strong> <em>(newitem test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same kind as SEQUENCE with the same elements
+except that all elements satisfying TEST are replaced with NEWITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MISMATCH"></a>Function: <strong>MISMATCH</strong> <em>(sequence1 sequence2 &amp;key (from-end nil) (test #'eql) test-not (start1 0) (start2 0) (end1 (length sequence1)) (end2 (length sequence2)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>The specified subsequences of SEQUENCE1 and SEQUENCE2 are compared
+element-wise.  If they are of equal length and match in every element, the
+result is NIL.  Otherwise, the result is a non-negative integer, the index
+within SEQUENCE1 of the leftmost position at which they fail to match; or, if
+one is shorter than and a matching prefix of the other, the index within
+SEQUENCE1 beyond the last position tested is returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dTOTAL_002dSIZE_002dLIMIT"></a>Constant: <strong>ARRAY-TOTAL-SIZE-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The exclusive upper bound on the total number of elements of an array.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-VECTOR_002dPOP"></a>Function: <strong>VECTOR-POP</strong> <em>(vector)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Attempts to decrease the fill-pointer of VECTOR by 1 and returns the element
+pointed to by the new fill pointer.  Signals an error if the old value of
+the fill pointer is 0.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBSTITUTE"></a>Function: <strong>SUBSTITUTE</strong> <em>(newitem olditem sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (count most-positive-fixnum) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same kind as SEQUENCE with the same elements
+except that OLDITEMs are replaced with NEWITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dHAS_002dFILL_002dPOINTER_002dP"></a>Function: <strong>ARRAY-HAS-FILL-POINTER-P</strong> <em>(array)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if ARRAY has a fill pointer; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CONCATENATE"></a>Function: <strong>CONCATENATE</strong> <em>(result-type &amp;rest sequences)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a new sequence of the specified RESULT-TYPE, consisting of all
+elements in SEQUENCEs.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-VECTOR_002dPUSH"></a>Function: <strong>VECTOR-PUSH</strong> <em>(new-element vector)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Attempts to set the element of ARRAY designated by its fill pointer to
+NEW-ELEMENT and increments the fill pointer by one.  Returns NIL if the fill
+pointer is too large.  Otherwise, returns the new fill pointer value.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dTRIM"></a>Function: <strong>STRING-TRIM</strong> <em>(char-bag string)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of STRING with the characters in CHAR-BAG removed from both
+ends.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dELEMENT_002dTYPE"></a>Function: <strong>ARRAY-ELEMENT-TYPE</strong> <em>(array)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the type of the elements of ARRAY
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NOTANY"></a>Function: <strong>NOTANY</strong> <em>(predicate sequence &amp;rest more-sequences)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if none of the elements in SEQUENCEs satisfies PREDICATE; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dNOT"></a>Function: <strong>BIT-NOT</strong> <em>(bit-array &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical NOT in the elements of BIT-ARRAY.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dORC1"></a>Function: <strong>BIT-ORC1</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical ORC1 on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COUNT_002dIF"></a>Function: <strong>COUNT-IF</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of elements in SEQUENCE satisfying TEST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAP"></a>Function: <strong>MAP</strong> <em>(result-type function sequence &amp;rest more-sequences)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>FUNCTION must take as many arguments as there are sequences provided.  The 
+result is a sequence such that the i-th element is the result of applying
+FUNCTION to the i-th elements of the SEQUENCEs.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dRANK_002dLIMIT"></a>Constant: <strong>ARRAY-RANK-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The exclusive upper bound on the rank of an array.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COUNT"></a>Function: <strong>COUNT</strong> <em>(item sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of elements in SEQUENCE satisfying TEST with ITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dVECTOR_002dP"></a>Function: <strong>BIT-VECTOR-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a bit vector; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NSTRING_002dCAPITALIZE"></a>Function: <strong>NSTRING-CAPITALIZE</strong> <em>(string &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns STRING with the first character of each word converted to upper-case,
+and remaining characters in the word converted to lower case.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ADJUST_002dARRAY"></a>Function: <strong>ADJUST-ARRAY</strong> <em>(array dimensions &amp;key (element-type (array-element-type array)) initial-element (initial-contents nil) (fill-pointer nil) (displaced-to nil) (displaced-index-offset 0))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Adjusts the dimensions of ARRAY to the given DIMENSIONS.  The default value
+of INITIAL-ELEMENT depends on ELEMENT-TYPE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SEARCH"></a>Function: <strong>SEARCH</strong> <em>(sequence1 sequence2 &amp;key (from-end nil) (test #'eql) test-not (start1 0) (start2 0) (end1 (length sequence1)) (end2 (length sequence2)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>A search is conducted for the first subsequence of SEQUENCE2 which
+element-wise matches SEQUENCE1.  If there is such a subsequence in SEQUENCE2,
+the index of the its leftmost element is returned; otherwise, NIL is
+returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SIMPLE_002dBIT_002dVECTOR_002dP"></a>Function: <strong>SIMPLE-BIT-VECTOR-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a simple bit-vector; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSEQUENCE"></a>Function: <strong>MAKE-SEQUENCE</strong> <em>(type length &amp;key initial-element)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the given TYPE and LENGTH, with elements initialized
+to INITIAL-ELEMENT.  The default value of INITIAL-ELEMENT depends on TYPE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dORC2"></a>Function: <strong>BIT-ORC2</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical ORC2 on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NREVERSE"></a>Function: <strong>NREVERSE</strong> <em>(sequence)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence of the same elements as SEQUENCE but in reverse order.
+SEQUENCE may be destroyed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dDIMENSION_002dLIMIT"></a>Constant: <strong>ARRAY-DIMENSION-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The exclusive upper bound of the array dimension.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NOTEVERY"></a>Function: <strong>NOTEVERY</strong> <em>(predicate sequence &amp;rest more-sequences)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if at least one of the elements in SEQUENCEs does not satisfy
+PREDICATE; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-POSITION_002dIF_002dNOT"></a>Function: <strong>POSITION-IF-NOT</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the index of the first element in SEQUENCE that does not satisfy TEST;
+NIL if no such element exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dDOWNCASE"></a>Function: <strong>STRING-DOWNCASE</strong> <em>(string &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of STRING with all upper case characters converted to
+lowercase.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT"></a>Function: <strong>BIT</strong> <em>(bit-array &amp;rest subscripts)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit from BIT-ARRAY at SUBSCRIPTS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dNOT_002dLESSP"></a>Function: <strong>STRING-NOT-LESSP</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Similar to STRING&gt;=, but ignores cases.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR"></a>Function: <strong>CHAR</strong> <em>(string index)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the INDEX-th character in STRING.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-AREF"></a>Function: <strong>AREF</strong> <em>(array &amp;rest subscripts)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the element of ARRAY specified by SUBSCRIPTS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FILL"></a>Function: <strong>FILL</strong> <em>(sequence item &amp;key (start 0) (end (length sequence)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Replaces the specified elements of SEQUENCE all with ITEM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STABLE_002dSORT"></a>Function: <strong>STABLE-SORT</strong> <em>(sequence predicate &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Destructively sorts SEQUENCE.  PREDICATE should return non-NIL if its first
+argument is to precede its second argument.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dIOR"></a>Function: <strong>BIT-IOR</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical IOR on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMHASH"></a>Function: <strong>REMHASH</strong> <em>(key hash-table)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Removes any entry for KEY in HASH-TABLE.  Returns T if such an entry
+existed; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-VECTORP"></a>Function: <strong>VECTORP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a vector; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_003c_003d"></a>Function: <strong>STRING&lt;=</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If STRING1 is lexicographically less than or equal to STRING2, then returns
+the longest common prefix of the two strings.  Otherwise, returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SIMPLE_002dVECTOR_002dP"></a>Function: <strong>SIMPLE-VECTOR-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a simple vector; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dLEFT_002dTRIM"></a>Function: <strong>STRING-LEFT-TRIM</strong> <em>(char-bag string)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of STRING with the characters in CHAR-BAG removed from the
+left end.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ARRAY_002dTOTAL_002dSIZE"></a>Function: <strong>ARRAY-TOTAL-SIZE</strong> <em>(array)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the total number of elements of ARRAY.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIND_002dIF_002dNOT"></a>Function: <strong>FIND-IF-NOT</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the index of the first element in SEQUENCE that does not satisfy
+TEST; NIL if no such element exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DELETE_002dDUPLICATES"></a>Function: <strong>DELETE-DUPLICATES</strong> <em>(sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a sequence formed by removing duplicated elements destructively from
+SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMOVE_002dDUPLICATES"></a>Function: <strong>REMOVE-DUPLICATES</strong> <em>(sequence &amp;key (from-end nil) (test #'eql) test-not (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>The elements of SEQUENCE are examined, and if any two match, one is discarded.
+Returns the resulting sequence.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-POSITION_002dIF"></a>Function: <strong>POSITION-IF</strong> <em>(test sequence &amp;key (from-end nil) (start 0) (end (length sequence)) (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the index of the first element in SEQUENCE that satisfies TEST; NIL
+if no such element exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MERGE"></a>Function: <strong>MERGE</strong> <em>(result-type sequence1 sequence2 predicate &amp;key (key #'identity))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>SEQUENCE1 and SEQUENCE2 are destructively merged into a sequence of type
+RESULT-TYPE using PREDICATE to order the elements.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EVERY"></a>Function: <strong>EVERY</strong> <em>(predicate sequence &amp;rest more-sequences)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if every elements of SEQUENCEs satisfy PREDICATE; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REDUCE"></a>Function: <strong>REDUCE</strong> <em>(function sequence &amp;key (from-end nil) (start 0) (end (length sequence)) initial-value)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Combines all the elements of SEQUENCE using a binary operation FUNCTION.
+If INITIAL-VALUE is supplied, it is logically placed before the SEQUENCE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dLESSP"></a>Function: <strong>STRING-LESSP</strong> <em>(string1 string2 &amp;key (start1 0) (end1 (length string1)) (start2 0) (end2 (length string2)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Similar to STRING&lt;, but ignores cases.
+</p>
+
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Characters.html#Characters" accesskey="n" rel="next">Characters</a>, Previous: <a href="Numbers.html#Numbers" accesskey="p" rel="prev">Numbers</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

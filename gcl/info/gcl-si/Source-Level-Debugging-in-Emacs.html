@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Source Level Debugging in Emacs</title>
+
+<meta name="description" content="GCL SI Manual: Source Level Debugging in Emacs">
+<meta name="keywords" content="GCL SI Manual: Source Level Debugging in Emacs">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Debugging.html#Debugging" rel="up" title="Debugging">
+<link href="Low-Level-Debug-Functions.html#Low-Level-Debug-Functions" rel="next" title="Low Level Debug Functions">
+<link href="Debugging.html#Debugging" rel="prev" title="Debugging">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Source-Level-Debugging-in-Emacs"></a>
+<div class="header">
+<p>
+Next: <a href="Low-Level-Debug-Functions.html#Low-Level-Debug-Functions" accesskey="n" rel="next">Low Level Debug Functions</a>, Previous: <a href="Debugging.html#Debugging" accesskey="p" rel="prev">Debugging</a>, Up: <a href="Debugging.html#Debugging" accesskey="u" rel="up">Debugging</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Source-Level-Debugging-in-Emacs-1"></a>
+<h3 class="section">18.1 Source Level Debugging in Emacs</h3>
+
+<p>In emacs load (load &quot;dbl.el&quot;) from the gcl/doc directory.
+[ It also requires gcl.el from that directory.    Your system
+administrator should do make in the doc directory, so that
+these files are copied to the standard location.]
+</p>
+<p>OVERVIEW:
+</p>
+<p>Lisp files loaded with si::nload will have source line information about
+them recorded.  Break points may be set, and functions stepped.  Source code
+will be automatically displayed in the other window, with a little arrow beside
+the current line.  The backtrace (command :bt) will show line information and
+you will get automatic display of the source as you move up and down the stack.
+</p>
+<p>FUNCTIONS:
+break points which have been set.
+   si::nload (file)
+      load a lisp file collecting source line information.
+</p>    
+<p>si::break-function (function &amp;optional line absolute)
+     set up a breakpoint for FUNCTION at LINE relative to start or ABSOLUTE
+</p>
+<p>EMACS COMMANDS:
+M-x dbl makes a dbl buffer, suitable for running an inferior gcl.
+It has special keybindings for stepping and viewing sources.   You may
+start your favorite gcl program in the dbl shell buffer.
+</p>
+<p>Inferior Dbl Mode:
+Major mode for interacting with an inferior Dbl process.
+The following commands are available:
+</p>
+<p>C-c l           dbl-find-line
+</p>
+<p>ESC d           dbl-:down
+ESC u           dbl-:up
+ESC c           dbl-:r
+ESC n           dbl-:next
+ESC i           dbl-:step
+ESC s           dbl-:step
+</p>
+
+<p>M-x dbl-display-frame displays in the other window
+the last line referred to in the dbl buffer.
+</p>
+<p>ESC i and ESC n in the dbl window,
+call dbl to step and next and then update the other window
+with the current file and position.
+</p>
+<p>If you are in a source file, you may select a point to break
+at, by doing C-x SPC.
+</p>
+<p>Commands:
+Many commands are inherited from shell mode. 
+Additionally we have:
+</p>
+<p>M-x dbl-display-frame display frames file in other window
+ESC i advance one line in program
+ESC n advance one line in program (skip over calls).
+M-x send-dbl-command used for special printing of an arg at the current point.
+C-x SPACE sets break point at current line.
+</p>
+<p>&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;-
+</p>
+<p>When visiting a lisp buffer (if gcl.el is loaded in your emacs) the command
+c-m-x evaluates the current defun into the process running in the other window.
+Line information will be kept.  This line information allows you to set break
+points at a given line (by typing C-x \space on the line in the source file
+where you want the break to occur.  Once stopped within a function you may
+single step with M-s.  This moves one line at a time in the source code,
+displaying a little arrow beside your current position.  M-c is like M-s,
+except that function invocations are skipped over, rather than entered into.
+M-c continues execution.
+</p>
+<p>Keywords typed at top level, in the debug loop have
+a special meaning:
+</p><ul class="no-bullet">
+<li> :delete  [n1] [n2] .. &ndash; delete all break points or just n1,n2
+</li><li> :disable [n1] [n2] .. &ndash; disable all break points or just n1,n2
+</li><li> :enable  [n1] [n2] .. &ndash; enable all break points or just n1,n2
+</li><li> :info  [:bkpt]      &ndash;print information about 
+</li><li> :break [fun] [line] &ndash; break at the current location, or if
+     fun is supplied in fun.   Break  at the beginning unless a
+     line offset from the beginning of fun is supplied.
+</li><li> :fr [n] go to frame n   When in frame n, if the frame is interpreted,
+    typing the name of locals, will print their values.   If it is compiled
+    you must use (si::loc j) to print &lsquo;locj&rsquo;.   Autodisplay of the source
+    will take place if it is interpreted and the line can be determined.
+</li><li> :up [n] go up n frames from the current frame.
+</li><li> :down [n] go down n frames
+</li><li> :bt [n] back trace starting at the current frame and going to top level
+     If n is specified show only n frames.
+</li><li> :r  If stopped in a function resume.   If at top level in the dbl
+   loop, exit and resume an outer loop.
+</li><li> :q  quit the computation back to top level dbl loop.
+</li><li> :step step to the next line with line information
+</li><li> :next  step to the next line with line information skipping over function
+    invocations.
+
+</li></ul>
+<p>Files:  debug.lsp  dbl.el    gcl.el
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Low-Level-Debug-Functions.html#Low-Level-Debug-Functions" accesskey="n" rel="next">Low Level Debug Functions</a>, Previous: <a href="Debugging.html#Debugging" accesskey="p" rel="prev">Debugging</a>, Up: <a href="Debugging.html#Debugging" accesskey="u" rel="up">Debugging</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

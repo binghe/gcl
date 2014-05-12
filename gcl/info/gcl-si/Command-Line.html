@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Command Line</title>
+
+<meta name="description" content="GCL SI Manual: Command Line">
+<meta name="keywords" content="GCL SI Manual: Command Line">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Operating-System.html#Operating-System" rel="up" title="Operating System">
+<link href="Operating-System-Definitions.html#Operating-System-Definitions" rel="next" title="Operating System Definitions">
+<link href="Operating-System.html#Operating-System" rel="prev" title="Operating System">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Command-Line"></a>
+<div class="header">
+<p>
+Next: <a href="Operating-System-Definitions.html#Operating-System-Definitions" accesskey="n" rel="next">Operating System Definitions</a>, Previous: <a href="Operating-System.html#Operating-System" accesskey="p" rel="prev">Operating System</a>, Up: <a href="Operating-System.html#Operating-System" accesskey="u" rel="up">Operating System</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Command-Line-1"></a>
+<h3 class="section">9.1 Command Line</h3>
+
+<p>The variable si::*command-args* is set to the list of strings passed
+in when gcl is invoked.
+</p>
+<p>Various flags are understood.
+</p><dl compact="compact">
+<dt><code>-eval</code>
+<a name="index-_002deval"></a>
+</dt>
+<dd><p>Call read and then eval on the command argument following <code>-eval</code>
+</p></dd>
+<dt><code>-load</code>
+<a name="index-_002dload"></a>
+</dt>
+<dd><p>Load the file whose pathname is specified after <code>-load</code>.
+</p></dd>
+<dt><code>-f</code>
+<a name="index-_002df"></a>
+</dt>
+<dd><p>Replace si::*command-args* by the the list starting after <code>-f</code>.
+Open the file following <code>-f</code> for input, skip the first line, and then
+read and eval the rest of the forms in the file.   This can be used
+as with the shells to write small shell programs:
+</p><div class="example">
+<pre class="example">#!/usr/local/bin/gcl.exe -f
+(format t &quot;hello world ~a~%&quot; (nth 1 si::*command-args*))
+</pre></div>
+<p>The value si::*command-args* will have the appropriate value.
+Thus if the above 2 line file is made executable and called <samp>foo</samp>
+then
+</p><div class="example">
+<pre class="example">tutorial% foo billy
+hello world billy
+</pre></div>
+<p>NOTE:  On many systems (eg SunOs) the first line of an executable script file
+such as:
+</p><div class="example">
+<pre class="example">#!/usr/local/bin/gcl.exe -f
+</pre></div>
+<p>only reads the first 32 characters!   So if your pathname where the executable
+together with the &rsquo;-f&rsquo; amount to more than 32 characters the file will not
+be recognized.   Also the executable must be the actual large binary file,
+[or a link to it], 
+and not just a <code>/bin/sh</code> script.   In latter case the
+<code>/bin/sh</code> interpreter would get invoked on the file.
+</p>
+<p>Alternately one could invoke the file <samp>foo</samp> without making it
+executable:
+</p><div class="example">
+<pre class="example">tutorial% gcl -f foo &quot;from bill&quot;
+hello world from bill
+</pre></div>
+
+<p>Finally perhaps the best way (why do we save the best for last..
+I guess because we only figure it out after all the others..)
+The following file <samp>myhello</samp> has 4 lines: 
+</p><div class="example">
+<pre class="example">#!/bin/sh
+#| Lisp will skip the next 2 lines on reading
+exec gcl   -f &quot;$0&quot; $&nbsp;|#
+(format t &quot;hello world ~a~%&quot; (nth 1 si::*command-args*))
+</pre></div>
+
+<div class="example">
+<pre class="example">marie% chmod a+x myhello
+marie% myhello bill
+hello world bill
+</pre></div>
+
+<p>The advantage of this method is that <samp>gcl</samp> can itself
+be a shell script, which sets up environment and
+so on.   Also the normal path will be searched to find <samp>gcl</samp>
+The disadvantage is that this would cause 2 invocations of <samp>sh</samp>
+and one invocation of <samp>gcl</samp>.   The plan using <samp>gcl.exe</samp>
+bypasses the <samp>sh</samp> entirely.  Inded invoking <samp>gcl.exe</samp> to
+print <samp>hello world</samp> is faster on most systems than a similar
+<samp>csh</samp> or <samp>bash</samp> script, but slightly slower than the old
+<samp>sh</samp>.   
+</p>
+
+</dd>
+<dt><code>-batch</code>
+<a name="index-_002dbatch"></a>
+</dt>
+<dd><p>Do not enter the command print loop.  Useful if the other command line
+arguments do something.  Do not print the License and acknowledgement
+information.  Note if your program does print any License information,
+it must print the GCL header information also.
+</p></dd>
+<dt><code>-dir</code>
+<a name="index-_002ddir"></a>
+</dt>
+<dd><p>Directory where the executable binary that is running is located.
+Needed by save and friends.  This gets set as si::*system-directory*
+</p></dd>
+<dt><code>-libdir</code>
+<a name="index-_002dlibdir"></a>
+</dt>
+<dd><div class="example">
+<pre class="example">   -libdir <samp>/d/wfs/gcl-2.0/</samp>
+</pre></div>
+<p>would mean that the files like gcl-tk/tk.o would be found by
+concatting the path to the libdir path, ie in
+</p><div class="example">
+<pre class="example"><samp>/d/wfs/gcl-2.0/gcl-tk/tk.o</samp>
+</pre></div>
+</dd>
+<dt><code>-compile</code>
+<a name="index-_002dcompile"></a>
+</dt>
+<dd><p>Invoke the compiler on the filename following <code>-compile</code>.
+Other flags affect compilation.
+</p></dd>
+<dt><code>-o-file</code>
+<a name="index-_002do_002dfile"></a>
+</dt>
+<dd><p>If nil follows <code>-o-file</code> then do not produce an <code>.o</code> file.
+</p></dd>
+<dt><code>-c-file</code>
+<a name="index-_002dc_002dfile"></a>
+</dt>
+<dd><p>If <code>-c-file</code> is specified, leave the intermediate <code>.c</code> file there.
+</p></dd>
+<dt><code>-h-file</code>
+<a name="index-_002dh_002dfile"></a>
+</dt>
+<dd><p>If <code>-h-file</code> is specified, leave the intermediate <code>.h</code> file there.
+</p></dd>
+<dt><code>-data-file</code>
+<a name="index-_002ddata_002dfile"></a>
+</dt>
+<dd><p>If <code>-data-file</code> is specified, leave the intermediate <code>.data</code> file there.
+</p></dd>
+<dt><code>-system-p</code>
+<a name="index-_002dsystem_002dp"></a>
+</dt>
+<dd><p>If <code>-system-p</code> is specified then invoke <code>compile-file</code> with the
+<code>:system-p t</code> keyword argument, meaning that the C init function
+will bear a name based on the name of the file, so that it may be invoked
+by name by C code.
+</p></dd>
+</dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Operating-System-Definitions.html#Operating-System-Definitions" accesskey="n" rel="next">Operating System Definitions</a>, Previous: <a href="Operating-System.html#Operating-System" accesskey="p" rel="prev">Operating System</a>, Up: <a href="Operating-System.html#Operating-System" accesskey="u" rel="up">Operating System</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

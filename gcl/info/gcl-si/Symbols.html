@@ -1,0 +1,580 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Symbols</title>
+
+<meta name="description" content="GCL SI Manual: Symbols">
+<meta name="keywords" content="GCL SI Manual: Symbols">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Operating-System.html#Operating-System" rel="next" title="Operating System">
+<link href="Compilation.html#Compilation" rel="prev" title="Compilation">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Symbols"></a>
+<div class="header">
+<p>
+Next: <a href="Operating-System.html#Operating-System" accesskey="n" rel="next">Operating System</a>, Previous: <a href="Compilation.html#Compilation" accesskey="p" rel="prev">Compilation</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Symbols-1"></a>
+<h2 class="chapter">8 Symbols</h2>
+
+<dl>
+<dt><a name="index-GENSYM"></a>Function: <strong>GENSYM</strong> <em>(&amp;optional (x nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a new uninterned symbol whose name is a prefix string
+(defaults to &quot;G&quot;), followed by a decimal number.  The number is incremented
+by each call to GENSYM.  X, if an integer, resets the counter.  If X is a
+string, it becomes the new prefix.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-KEYWORDP"></a>Function: <strong>KEYWORDP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a symbol and it belongs to the KEYWORD package; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMPROP"></a>Function: <strong>REMPROP</strong> <em>(symbol indicator)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Look on property list of SYMBOL for property with specified
+INDICATOR.  If found, splice this indicator and its value out of
+the plist, and return T. If not found, returns NIL with no side effects.
+</p>
+</dd></dl>
+
+<dl>
+<dt><a name="index-SYMBOL_002dPACKAGE"></a>Function: <strong>SYMBOL-PACKAGE</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the contents of the package cell of the symbol SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPACKAGE_002a"></a>Variable: <strong>*PACKAGE*</strong></dt>
+<dd><p>Package:LISP
+The current package.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-SHADOWING_002dIMPORT"></a>Function: <strong>SHADOWING-IMPORT</strong> <em>(symbols &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Imports SYMBOLS into PACKAGE, disregarding any name conflict.  If a symbol
+of the same name is already present, then it is uninterned.  SYMBOLS must
+be a list of symbols or a symbol.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REMF"></a>Macro: <strong>REMF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(remf place indicator)
+</pre></div>
+
+<p>PLACE may be any place expression acceptable to SETF, and is expected
+to hold a property list or NIL.  This list is destructively altered to
+remove the property specified by INDICATOR.  Returns T if such a
+property was present; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKUNBOUND"></a>Function: <strong>MAKUNBOUND</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes empty the value slot of SYMBOL.  Returns SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-USE_002dPACKAGE"></a>Function: <strong>USE-PACKAGE</strong> <em>(packages-to-use &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Adds all packages in PACKAGE-TO-USE list to the use list for PACKAGE so that
+the external symbols of the used packages are available as internal symbols
+in PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSYMBOL"></a>Function: <strong>MAKE-SYMBOL</strong> <em>(string)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a new uninterned symbol whose print name is STRING.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PSETQ"></a>Special Form: <strong>PSETQ</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(psetq {var form}*)
+</pre></div>
+
+<p>Similar to SETQ, but evaluates all FORMs first, and then assigns each value to
+the corresponding VAR.  Returns NIL always.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PACKAGE_002dUSED_002dBY_002dLIST"></a>Function: <strong>PACKAGE-USED-BY-LIST</strong> <em>(package)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the list of packages that use PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SYMBOLP"></a>Function: <strong>SYMBOLP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a symbol; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NIL"></a>Constant: <strong>NIL</strong></dt>
+<dd><p>Package:LISP
+Holds NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SET"></a>Function: <strong>SET</strong> <em>(symbol value)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Assigns the value of VALUE to the dynamic variable named by SYMBOL, and
+returns the value assigned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SETQ"></a>Special Form: <strong>SETQ</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(setq {var form}*)
+</pre></div>
+
+<p>VARs are not evaluated and must be symbols.  Assigns the value of the first
+FORM to the first VAR, then assigns the value of the second FORM to the second
+VAR, and so on.  Returns the last value assigned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNUSE_002dPACKAGE"></a>Function: <strong>UNUSE-PACKAGE</strong> <em>(packages-to-unuse &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Removes PACKAGES-TO-UNUSE from the use list for PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-T"></a>Constant: <strong>T</strong></dt>
+<dd><p>Package:LISP
+Holds T.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PACKAGE_002dUSE_002dLIST"></a>Function: <strong>PACKAGE-USE-LIST</strong> <em>(package)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the list of packages used by PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LIST_002dALL_002dPACKAGES"></a>Function: <strong>LIST-ALL-PACKAGES</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of all existing packages.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COPY_002dSYMBOL"></a>Function: <strong>COPY-SYMBOL</strong> <em>(symbol &amp;optional (copy-props nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a new uninterned symbol with the same print name as SYMBOL.
+If COPY-PROPS is NIL, the function, the variable, and the property slots
+of the new symbol have no value.  Otherwise, these slots are given the
+values of the corresponding slots of SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SYMBOL_002dPLIST"></a>Function: <strong>SYMBOL-PLIST</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the property list of SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SYMBOL_002dNAME"></a>Function: <strong>SYMBOL-NAME</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the print name of the symbol SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIND_002dSYMBOL"></a>Function: <strong>FIND-SYMBOL</strong> <em>(name &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the symbol named NAME in
+PACKAGE.  If such a symbol is found, then the second value is :INTERN,
+:EXTERNAL, or :INHERITED to indicate how the symbol is accessible.  If
+no symbol is found then both values are NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SHADOW"></a>Function: <strong>SHADOW</strong> <em>(symbols &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates an internal symbol in PACKAGE with the same name as each of the
+specified SYMBOLS.  SYMBOLS must be a list of symbols or a symbol.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-FBOUNDP"></a>Function: <strong>FBOUNDP</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if SYMBOL has a global function definition or if SYMBOL names a
+special form or a macro; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MACRO_002dFUNCTION"></a>Function: <strong>MACRO-FUNCTION</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If SYMBOL globally names a macro, then returns the expansion function.
+Returns NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-IN_002dPACKAGE"></a>Function: <strong>IN-PACKAGE</strong> <em>(package-name &amp;key (nicknames nil) (use '(lisp)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Sets *PACKAGE* to the package with PACKAGE-NAME, creating the package if
+it does not exist.  If the package already exists then it is modified
+to agree with USE and NICKNAMES arguments.  Any new nicknames are added
+without removing any old ones not specified.  If any package in the USE list
+is not currently used, then it is added to the use list.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dPACKAGE"></a>Function: <strong>MAKE-PACKAGE</strong> <em>(package-name &amp;key (nicknames nil) (use '(lisp)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes a new package having the specified PACKAGE-NAME and NICKNAMES.  The
+package will inherit all external symbols from each package in the USE list.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PACKAGE_002dSHADOWING_002dSYMBOLS"></a>Function: <strong>PACKAGE-SHADOWING-SYMBOLS</strong> <em>(package)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the list of symbols that have been declared as shadowing symbols
+in PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INTERN"></a>Function: <strong>INTERN</strong> <em>(name &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a symbol having the specified name, creating it if necessary.
+Returns as the second value one of the symbols :INTERNAL, :EXTERNAL,
+:INHERITED, and NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EXPORT"></a>Function: <strong>EXPORT</strong> <em>(symbols &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes SYMBOLS external symbols of PACKAGE.  SYMBOLS must be a list of symbols
+or a symbol.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PACKAGEP"></a>Function: <strong>PACKAGEP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a package; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SYMBOL_002dFUNCTION"></a>Function: <strong>SYMBOL-FUNCTION</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the current global function definition named by SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SYMBOL_002dVALUE"></a>Function: <strong>SYMBOL-VALUE</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the current value of the dynamic (special) variable named by SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOUNDP"></a>Function: <strong>BOUNDP</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the global variable named by SYMBOL has a value; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DOCUMENTATION"></a>Function: <strong>DOCUMENTATION</strong> <em>(symbol doc-type)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the doc-string of DOC-TYPE for SYMBOL; NIL if none exists.
+Possible doc-types are:
+	FUNCTION  (special forms, macros, and functions)
+	VARIABLE  (dynamic variables, including constants)
+	TYPE      (types defined by DEFTYPE)
+	STRUCTURE (structures defined by DEFSTRUCT)
+	SETF      (SETF methods defined by DEFSETF, DEFINE-SETF-METHOD, and
+	           DEFINE-MODIFY-MACRO)
+All built-in special forms, macros, functions, and variables have their
+doc-strings.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GENTEMP"></a>Function: <strong>GENTEMP</strong> <em>(&amp;optional (prefix &quot;t&quot;) (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates a new symbol interned in the package PACKAGE with the given PREFIX.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RENAME_002dPACKAGE"></a>Function: <strong>RENAME-PACKAGE</strong> <em>(package new-name &amp;optional (new-nicknames nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Replaces the old name and nicknames of PACKAGE with NEW-NAME and
+NEW-NICKNAMES.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNINTERN"></a>Function: <strong>UNINTERN</strong> <em>(symbol &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes SYMBOL no longer present in PACKAGE.  Returns T if SYMBOL was present;
+NIL otherwise.  If PACKAGE is the home package of SYMBOL, then makes SYMBOL
+uninterned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNEXPORT"></a>Function: <strong>UNEXPORT</strong> <em>(symbols &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes SYMBOLS no longer accessible as external symbols in PACKAGE.  SYMBOLS
+must be a list of symbols or a symbol.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PACKAGE_002dNICKNAMES"></a>Function: <strong>PACKAGE-NICKNAMES</strong> <em>(package)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns as a list the nickname strings for the specified PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-IMPORT"></a>Function: <strong>IMPORT</strong> <em>(symbols &amp;optional (package *package*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes SYMBOLS internal symbols of PACKAGE.  SYMBOLS must be a list of symbols
+or a symbol.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET"></a>Function: <strong>GET</strong> <em>(symbol indicator &amp;optional (default nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Looks on the property list of SYMBOL for the specified INDICATOR.  If this
+is found, returns the associated value.  Otherwise, returns DEFAULT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIND_002dALL_002dSYMBOLS"></a>Function: <strong>FIND-ALL-SYMBOLS</strong> <em>(string-or-symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of all symbols that have the specified name.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FMAKUNBOUND"></a>Function: <strong>FMAKUNBOUND</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Discards the global function definition named by SYMBOL.  Returns SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PACKAGE_002dNAME"></a>Function: <strong>PACKAGE-NAME</strong> <em>(package)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the string that names the specified PACKAGE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FIND_002dPACKAGE"></a>Function: <strong>FIND-PACKAGE</strong> <em>(name)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the specified package if it already exists; NIL otherwise.  NAME may
+be a string that is the name or nickname of the package.  NAME may also be
+a symbol, in which case the symbol&rsquo;s print name is used.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-APROPOS_002dLIST"></a>Function: <strong>APROPOS-LIST</strong> <em>(string &amp;optional (package nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns, as a list, all symbols whose print-names contain STRING as substring.
+If PACKAGE is non-NIL, then only the specified package is searched.
+</p>
+
+</dd></dl>
+
+
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Operating-System.html#Operating-System" accesskey="n" rel="next">Operating System</a>, Previous: <a href="Compilation.html#Compilation" accesskey="p" rel="prev">Compilation</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

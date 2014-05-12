@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Bignums</title>
+
+<meta name="description" content="GCL SI Manual: Bignums">
+<meta name="keywords" content="GCL SI Manual: Bignums">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="GCL-Specific.html#GCL-Specific" rel="up" title="GCL Specific">
+<link href="C-Interface.html#C-Interface" rel="next" title="C Interface">
+<link href="GCL-Specific.html#GCL-Specific" rel="prev" title="GCL Specific">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Bignums"></a>
+<div class="header">
+<p>
+Previous: <a href="GCL-Specific.html#GCL-Specific" accesskey="p" rel="prev">GCL Specific</a>, Up: <a href="GCL-Specific.html#GCL-Specific" accesskey="u" rel="up">GCL Specific</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Bignums-1"></a>
+<h3 class="section">15.1 Bignums</h3>
+
+<p>A directory mp was added to hold the new multi precision arithmetic
+code.  The layout and a fair amount of code in the mp directory is an
+enhanced version of gpari version 34. The gpari c code was rewritten
+to be more efficient, and gcc assembler macros were added to allow
+inlining of operations not possible to do in C.  On a 68K machine,
+this allows the C version to be as efficient as the very carefully
+written assembler in the gpari distribution.  For the main machines,
+an assembler file (produced by gcc) based on this new method, is
+included.   This is for sites which do not have gcc, or do not
+wish to compile the whole system with gcc.
+</p>
+<p>Bignum arithmetic is much faster now.  Many changes were made to
+cmpnew also, to add &rsquo;integer&rsquo; as a new type.  It differs from
+variables of other types, in that storage is associated to each such
+variable, and assignments mean copying the storage.  This allows a
+function which does a good deal of bignum arithmetic, to do very
+little consing in the heap.  An example is the computation of PI-INV
+in scratchpad, which calculates the inverse of pi to a prescribed
+number of bits accuracy.  That function is now about 20 times faster,
+and no longer causes garbage collection.  In versions of GCL  where
+HAVE_ALLOCA is defined, the temporary storage growth is on the C
+stack, although this often not so critical (for example it makes
+virtually no difference in the PI-INV example, since in spite of the
+many operations, only one storage allocation takes place.
+</p>	
+<p>Below is the actual code for PI-INV
+</p>
+<p>On a sun3/280 (cli.com)
+</p>
+<p>Here is the comparison of lucid and gcl before and after
+on that pi-inv.   Times are in seconds with multiples of the
+gcl/akcl time in parentheses.
+</p>
+<p>On a sun3/280 (cli.com)
+</p>
+<div class="example">
+<pre class="example">
+pi-inv   akcl-566  franz        lucid         old kcl/akcl
+----------------------------------------
+10000      3.3     9.2(2.8 X)  15.3 (4.6X)    92.7   (29.5 X)
+20000      12.7    31.0(2.4 X) 62.2 (4.9X)    580.0  (45.5 X)
+
+
+(defun pi-inv (bits &amp;aux (m 0))
+  (declare (integer bits m))
+  (let* ((n (+ bits (integer-length bits) 11))
+         (tt (truncate (ash 1 n) 882))
+         (d (* 4 882 882))
+         (s 0))
+    (declare (integer s d tt n))
+    (do ((i 2 (+ i 2))
+         (j 1123 (+ j 21460)))
+        ((zerop tt) (cons s (- (+ n 2))))
+      (declare (integer i j))
+        (setq s (+ s (* j tt))
+              m (- (* (- i 1) (- (* 2 i) 1) (- (* 2 i) 3)))
+              tt (truncate (* m tt) (* d (the integer (expt i 3))))))))
+
+</pre></div>
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="GCL-Specific.html#GCL-Specific" accesskey="p" rel="prev">GCL Specific</a>, Up: <a href="GCL-Specific.html#GCL-Specific" accesskey="u" rel="up">GCL Specific</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

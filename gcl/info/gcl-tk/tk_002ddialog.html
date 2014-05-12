@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: tk-dialog</title>
+
+<meta name="description" content="GCL TK Manual: tk-dialog">
+<meta name="keywords" content="GCL TK Manual: tk-dialog">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="exit.html#exit" rel="next" title="exit">
+<link href="destroy.html#destroy" rel="prev" title="destroy">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="tk_002ddialog"></a>
+<div class="header">
+<p>
+Next: <a href="exit.html#exit" accesskey="n" rel="next">exit</a>, Previous: <a href="destroy.html#destroy" accesskey="p" rel="prev">destroy</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="tk_002ddialog-1"></a>
+<h3 class="section">3.4 tk-dialog</h3>
+
+<p>tk-dialog \- Create modal dialog and wait for response
+</p><a name="Synopsis-18"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>tk-dialog </b><i>window title text bitmap default string string ...</i>
+</p>
+<a name="Description-15"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>This procedure is part of the Tk script library.
+Its arguments describe a dialog box:
+</p>
+<dl compact="compact">
+<dt><i>window</i></dt>
+<dd><p>Name of top-level window to use for dialog.  Any existing window
+by this name is destroyed.
+</p></dd>
+<dt><i>title</i></dt>
+<dd><p>Text to appear in the window manager&rsquo;s title bar for the dialog.
+</p></dd>
+<dt><i>text</i></dt>
+<dd><p>Message to appear in the top portion of the dialog box.
+</p></dd>
+<dt><i>bitmap</i></dt>
+<dd><p>If non-empty, specifies a bitmap to display in the top portion of
+the dialog, to the left of the text.
+If this is an empty string then no bitmap is displayed in the dialog.
+</p></dd>
+<dt><i>default</i></dt>
+<dd><p>If this is an integer greater than or equal to zero, then it gives
+the index of the button that is to be the default button for the dialog
+(0 for the leftmost button, and so on).
+If less than zero or an empty string then there won&rsquo;t be any default
+button.
+</p></dd>
+<dt><i>string</i></dt>
+<dd><p>There will be one button for each of these arguments.
+Each <i>string</i> specifies text to display in a button,
+in order from left to right.
+</p>
+<p>After creating a dialog box, <b>tk-dialog</b> waits for the user to
+select one of the buttons either by clicking on the button with the
+mouse or by typing return to invoke the default button (if any).
+Then it returns the index of the selected button:  0 for the leftmost
+button, 1 for the button next to it, and so on.
+</p>
+<p>While waiting for the user to respond, <b>tk-dialog</b> sets a local
+grab.  This prevents the user from interacting with the application
+in any way except to invoke the dialog box.
+</p>
+</dd>
+</dl>
+<a name="Keywords-18"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>bitmap, dialog, modal
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="exit.html#exit" accesskey="n" rel="next">exit</a>, Previous: <a href="destroy.html#destroy" accesskey="p" rel="prev">destroy</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

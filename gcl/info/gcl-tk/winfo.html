@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: winfo</title>
+
+<meta name="description" content="GCL TK Manual: winfo">
+<meta name="keywords" content="GCL TK Manual: winfo">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="wm.html#wm" rel="next" title="wm">
+<link href="update.html#update" rel="prev" title="update">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="winfo"></a>
+<div class="header">
+<p>
+Next: <a href="wm.html#wm" accesskey="n" rel="next">wm</a>, Previous: <a href="update.html#update" accesskey="p" rel="prev">update</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="winfo-1"></a>
+<h3 class="section">3.24 winfo</h3>
+
+<p>winfo \- Return window-related information
+</p><a name="Synopsis-36"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>winfo</b><span class="roman"> </span><i>option </i><span class="roman">?</span><i>arg arg ...</i>?
+</p>
+<a name="Description-35"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>winfo</b> command is used to retrieve information about windows
+managed by Tk.  It can take any of a number of different forms,
+depending on the <i>option</i> argument.  The legal forms are:
+</p>
+<dl compact="compact">
+<dt><b>winfo :atom </b><i>name</i></dt>
+<dd><p>Returns a decimal string giving the integer identifier for the
+atom whose name is <i>name</i>.  If no atom exists with the name
+<i>name</i> then a new one is created.
+</p></dd>
+<dt><b>winfo :atomname </b><i>id</i></dt>
+<dd><p>Returns the textual name for the atom whose integer identifier is
+<i>id</i>.
+This command is the inverse of the <b>winfo :atom</b> command.
+Generates an error if no such atom exists.
+</p></dd>
+<dt><b>winfo :cells </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the number of cells in the
+color map for <i>window</i>.
+</p></dd>
+<dt><b>winfo :children </b><i>window</i></dt>
+<dd><p>Returns a list containing the path names of all the children
+of <i>window</i>.  Top-level windows are returned as children
+of their logical parents.
+</p></dd>
+<dt><b>winfo :class </b><i>window</i></dt>
+<dd><p>Returns the class name for <i>window</i>.
+</p></dd>
+<dt><b>winfo :containing </b><i>rootX rootY</i></dt>
+<dd><p>Returns the path name for the window containing the point given
+by <i>rootX</i><span class="roman"> and </span><i>rootY</i>.
+<i>RootX</i><span class="roman"> and </span><i>rootY</i> are specified in screen units (i.e.
+any form acceptable to <b>Tk_GetPixels</b>) in the coordinate
+system of the root window (if a virtual-root window manager is in
+use then the coordinate system of the virtual root window is used).
+If no window in this application contains the point then an empty
+string is returned.
+In selecting the containing window, children are given higher priority
+than parents and among siblings the highest one in the stacking order is
+chosen.
+</p></dd>
+<dt><b>winfo :depth </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the depth of <i>window</i> (number
+of bits per pixel).
+</p></dd>
+<dt><b>winfo :exists </b><i>window</i></dt>
+<dd><p>Returns 1 if there exists a window named <i>window</i>, 0 if no such
+window exists.
+</p></dd>
+<dt><b>winfo :fpixels </b><i>window</i><span class="roman"> </span><i>number</i></dt>
+<dd><p>Returns a floating-point value giving the number of pixels
+in <i>window</i><span class="roman"> corresponding to the distance given by </span><i>number</i>.
+<i>Number</i> may be specified in any of the forms acceptable
+to <b>Tk_GetScreenMM</b>, such as &ldquo;2.0c&rdquo; or &ldquo;1i&rdquo;.
+The return value may be fractional;  for an integer value, use
+<b>winfo :pixels</b>.
+</p></dd>
+<dt><b>winfo :geometry </b><i>window</i></dt>
+<dd><p>Returns the geometry for <i>window</i>, in the form
+<i>width</i><b>x</b><i>height</i><b>+</b><i>x</i><b>+</b><i>y</i>.  All dimensions are
+in pixels.
+</p></dd>
+<dt><b>winfo :height </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving <i>window</i>&rsquo;s height in pixels.
+When a window is first created its height will be 1 pixel;  the
+height will eventually be changed by a geometry manager to fulfill
+the window&rsquo;s needs.
+If you need the true height immediately after creating a widget,
+invoke <b>update</b> to force the geometry manager to arrange it,
+or use <b>winfo :reqheight</b> to get the window&rsquo;s requested height
+instead of its actual height.
+</p></dd>
+<dt><b>winfo :id </b><i>window</i></dt>
+<dd><p>Returns a hexadecimal string indicating the X identifier for <i>window</i>.
+</p></dd>
+<dt><b>winfo :interps</b></dt>
+<dd><p>Returns a list whose members are the names of all Tcl interpreters
+(e.g. all Tk-based applications) currently registered for the
+display of the invoking application.
+</p></dd>
+<dt><b>winfo :ismapped </b><i>window</i></dt>
+<dd><p>Returns <b>1</b><span class="roman"> if </span><i>window</i><span class="roman"> is currently mapped, </span><b>0</b> otherwise.
+</p></dd>
+<dt><b>winfo :name </b><i>window</i></dt>
+<dd><p>Returns <i>window</i>&rsquo;s name (i.e. its name within its parent, as opposed
+to its full path name).
+The command <b>winfo :name .</b> will return the name of the application.
+</p></dd>
+<dt><b>winfo :parent </b><i>window</i></dt>
+<dd><p>Returns the path name of <i>window</i>&rsquo;s parent, or an empty string
+if <i>window</i> is the main window of the application.
+</p></dd>
+<dt><b>winfo :pathname </b><i>id</i></dt>
+<dd><p>Returns the path name of the window whose X identifier is <i>id</i>.
+<i>Id</i> must be a decimal, hexadecimal, or octal integer and must
+correspond to a window in the invoking application.
+</p></dd>
+<dt><b>winfo :pixels </b><i>window</i><span class="roman"> </span><i>number</i></dt>
+<dd><p>Returns the number of pixels in <i>window</i> corresponding
+to the distance given by <i>number</i>.
+<i>Number</i> may be specified in any of the forms acceptable
+to <b>Tk_GetPixels</b>, such as &ldquo;2.0c&rdquo; or &ldquo;1i&rdquo;.
+The result is rounded to the nearest integer value;  for a
+fractional result, use <b>winfo :fpixels</b>.
+</p></dd>
+<dt><b>winfo :reqheight </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving <i>window</i>&rsquo;s requested height,
+in pixels.  This is the value used by <i>window</i>&rsquo;s geometry
+manager to compute its geometry.
+</p></dd>
+<dt><b>winfo :reqwidth </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving <i>window</i>&rsquo;s requested width,
+in pixels.  This is the value used by <i>window</i>&rsquo;s geometry
+manager to compute its geometry.
+</p></dd>
+<dt><b>winfo :rgb </b><i>window color</i></dt>
+<dd><p>Returns a list containing three decimal values, which are the
+red, green, and blue intensities that correspond to <i>color</i> in
+the window given by <i>window</i><span class="roman">.  </span><i>Color</i>
+may be specified in any of the forms acceptable for a color
+option.
+</p></dd>
+<dt><b>winfo :rootx </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the x-coordinate, in the root
+window of the screen, of the
+upper-left corner of <i>window</i><span class="roman">&rsquo;s border (or </span><i>window</i> if it
+has no border).
+</p></dd>
+<dt><b>winfo :rooty </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the y-coordinate, in the root
+window of the screen, of the
+upper-left corner of <i>window</i><span class="roman">&rsquo;s border (or </span><i>window</i> if it
+has no border).
+</p></dd>
+<dt><b>winfo :screen </b><i>window</i></dt>
+<dd><p>Returns the name of the screen associated with <i>window</i>, in
+the form <i>displayName</i><span class="roman">.</span><i>screenIndex</i>.
+</p></dd>
+<dt><b>winfo :screencells </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the number of cells in the default
+color map for <i>window</i>&rsquo;s screen.
+</p></dd>
+<dt><b>winfo :screendepth </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the depth of the root window
+of <i>window</i>&rsquo;s screen (number of bits per pixel).
+</p></dd>
+<dt><b>winfo :screenheight </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the height of <i>window</i>&rsquo;s screen,
+in pixels.
+</p></dd>
+<dt><b>winfo :screenmmheight </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the height of <i>window</i>&rsquo;s screen,
+in millimeters.
+</p></dd>
+<dt><b>winfo :screenmmwidth </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the width of <i>window</i>&rsquo;s screen,
+in millimeters.
+</p></dd>
+<dt><b>winfo :screenvisual </b><i>window</i></dt>
+<dd><p>Returns one of the following strings to indicate the default visual
+type for <i>window</i><span class="roman">&rsquo;s screen: </span><b>directcolor</b><span class="roman">, </span><b>grayscale</b>,
+<b>pseudocolor</b><span class="roman">, </span><b>staticcolor</b><span class="roman">, </span><b>staticgray</b>, or
+<b>truecolor</b>.
+</p></dd>
+<dt><b>winfo :screenwidth </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the width of <i>window</i>&rsquo;s screen,
+in pixels.
+</p></dd>
+<dt><b>winfo :toplevel </b><i>window</i></dt>
+<dd><p>Returns the path name of the top-level window containing <i>window</i>.
+</p></dd>
+<dt><b>winfo :visual </b><i>window</i></dt>
+<dd><p>Returns one of the following strings to indicate the visual
+type for <i>window</i><span class="roman">: </span><b>directcolor</b><span class="roman">, </span><b>grayscale</b>,
+<b>pseudocolor</b><span class="roman">, </span><b>staticcolor</b><span class="roman">, </span><b>staticgray</b>, or
+<b>truecolor</b>.
+</p></dd>
+<dt><b>winfo :vrootheight </b><i>window</i></dt>
+<dd><p>Returns the height of the virtual root window associated with <i>window</i>
+if there is one;  otherwise returns the height of <i>window</i>&rsquo;s screen.
+</p></dd>
+<dt><b>winfo :vrootwidth </b><i>window</i></dt>
+<dd><p>Returns the width of the virtual root window associated with <i>window</i>
+if there is one;  otherwise returns the width of <i>window</i>&rsquo;s screen.
+</p></dd>
+<dt><b>winfo :vrootx </b><i>window</i></dt>
+<dd><p>Returns the x-offset of the virtual root window associated with <i>window</i>,
+relative to the root window of its screen.
+This is normally either zero or negative.
+Returns 0 if there is no virtual root window for <i>window</i>.
+</p></dd>
+<dt><b>winfo :vrooty </b><i>window</i></dt>
+<dd><p>Returns the y-offset of the virtual root window associated with <i>window</i>,
+relative to the root window of its screen.
+This is normally either zero or negative.
+Returns 0 if there is no virtual root window for <i>window</i>.
+</p></dd>
+<dt><b>winfo :width </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving <i>window</i>&rsquo;s width in pixels.
+When a window is first created its width will be 1 pixel;  the
+width will eventually be changed by a geometry manager to fulfill
+the window&rsquo;s needs.
+If you need the true width immediately after creating a widget,
+invoke <b>update</b> to force the geometry manager to arrange it,
+or use <b>winfo :reqwidth</b> to get the window&rsquo;s requested width
+instead of its actual width.
+</p></dd>
+<dt><b>winfo :x </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the x-coordinate, in <i>window</i>&rsquo;s
+parent, of the
+upper-left corner of <i>window</i><span class="roman">&rsquo;s border (or </span><i>window</i> if it
+has no border).
+</p></dd>
+<dt><b>winfo :y </b><i>window</i></dt>
+<dd><p>Returns a decimal string giving the y-coordinate, in <i>window</i>&rsquo;s
+parent, of the
+upper-left corner of <i>window</i><span class="roman">&rsquo;s border (or </span><i>window</i> if it
+has no border).
+</p>
+</dd>
+</dl>
+<a name="Keywords-38"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>atom, children, class, geometry, height, identifier, information, interpreters,
+mapped, parent, path name, screen, virtual root, width, window
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="wm.html#wm" accesskey="n" rel="next">wm</a>, Previous: <a href="update.html#update" accesskey="p" rel="prev">update</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>
