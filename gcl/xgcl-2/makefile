@@ -1,7 +1,7 @@
 -include ../makedefs
 
 
-all: objects docs
+all: objects #docs
 
 objects: $(LISP)
 	echo '(load "sysdef.lisp")(xlib::compile-xgcl)' | $(LISP)
@@ -21,9 +21,11 @@ dwdoc.pdf: dwdoc.tex
 	pdflatex $<
 
 clean:
-	rm -f *.o *.data saved_*  cmpinclude.h dwdoc.pdf dwdoc.aux dwdoc.log gmon.out
+	rm -f *.o *.data saved_*  cmpinclude.h dwdoc.aux dwdoc.log gmon.out
 	rm -f gcl*c gcl*h gcl*data gcl_xrecompile* user-init*
-	rm -rf dwdoc
+
+clean-docs:
+	rm -rf dwdoc dwdoc.pdf
 
 install:
 	-mkdir -p $(DESTDIR)$(INFO_DIR)../doc

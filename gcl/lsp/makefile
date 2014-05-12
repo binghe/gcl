@@ -19,30 +19,12 @@ OBJS	= gcl_sharp.o gcl_arraylib.o gcl_assert.o gcl_defmacro.o gcl_defstruct.o \
 # export.o autoload.o auto_new.o
 
 
-COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-file \
-	-o-file nil -h-file -compile
-#CFLAGS	= -c -O -I../h 
+COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-file -h-file -compile
 
-.lsp.c: 
-	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl$(EXE) \
-	"rm -f $*.c $*.h $*.data $*.o" \
-	"$(COMPILE_FILE) $* "
-
-.lsp.o: 
-	 @ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl$(EXE) \
-	"rm -f $*.c $*.h $*.data $*.o" \
-	"$(COMPILE_FILE) $* " \
-	"$(CC) $(OFLAG) $(CFLAGS) -c $*.c " \
-	"${APPEND} ${NULLFILE} $*.data $*.o "
-
+%.o: $(PORTDIR)/saved_pre_gcl$(EXE) %.lsp
+	$(COMPILE_FILE) $*
 
 all:	$(OBJS) #$(RL_OBJS)
-
-
-
-.c.o:
-	$(CC) $(OFLAG) $(CFLAGS) -c $*.c
-	${APPEND} ${NULLFILE} $*.data  $*.o
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
 	../xbin/make-fn $*.lsp

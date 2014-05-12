@@ -15,31 +15,15 @@ OBJS	= gcl_cmpbind.o gcl_cmpblock.o gcl_cmpcall.o gcl_cmpcatch.o gcl_cmpenv.o gc
 
 FNS:= $(OBJS:.o=.fn)
 
-COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-file \
-	-o-file nil -h-file -compile
-#CFLAGS	= -c -O -I../h 
+COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-file -h-file -compile
 
-.lsp.c:
-	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl$(EXE) \
-	"rm -f $*.c $*.h $*.data $*.o" \
-	"$(COMPILE_FILE) $* "
-
-.lsp.o:
-	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl$(EXE) \
-	"rm -f $*.c $*.h $*.data $*.o" \
-	"$(COMPILE_FILE) $* " \
-	"$(CC) $(OFLAG) $(CFLAGS) -c $*.c" \
-	"${APPEND} ${NULLFILE} $*.data $*.o"
+%.o: $(PORTDIR)/saved_pre_gcl$(EXE) %.lsp
+	$(COMPILE_FILE) $*
 
 all:	$(OBJS)
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
 	../xbin/make-fn $*.lsp
-
-
-.c.o:  
-	$(CC) $(OFLAG) $(CFLAGS) -c $*.c
-	${APPEND} ${NULLFILE} $*.data  $*.o
 
 gcl_collectfn.o:
 	$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR)/ -compile $*.lsp
