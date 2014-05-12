@@ -268,13 +268,10 @@ Cannot compile ~a.~%"
                       data-pathname
                      :direction :output)
     (progn 
-      (setq *fasd-data*      		      
-	    (cond  ((if system-p (eq *fasd-data* :system-p)
-		      *fasd-data*)
-		    (list
-		     (si::open-fasd *compiler-output-data* :output nil nil)
-		     ;(si::open-fasd *compiler-output-i* :output nil nil)
-		     ))))
+
+      (when *fasd-data*
+	(setq *fasd-data*
+	      (list (si::open-fasd *compiler-output-data* :output nil nil))))
 
       (wt-data-begin)
 
