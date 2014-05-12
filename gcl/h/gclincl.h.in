@@ -174,8 +174,53 @@
 /* output_bfd element present */
 #undef HAVE_OUTPUT_BFD
 
+/* Define to 1 if you have the `print_insn_alpha' function. */
+#undef HAVE_PRINT_INSN_ALPHA
+
+/* Define to 1 if you have the `print_insn_avr' function. */
+#undef HAVE_PRINT_INSN_AVR
+
+/* Define to 1 if you have the `print_insn_big_arm' function. */
+#undef HAVE_PRINT_INSN_BIG_ARM
+
+/* Define to 1 if you have the `print_insn_big_mips' function. */
+#undef HAVE_PRINT_INSN_BIG_MIPS
+
+/* Define to 1 if you have the `print_insn_big_powerpc' function. */
+#undef HAVE_PRINT_INSN_BIG_POWERPC
+
+/* Define to 1 if you have the `print_insn_hppa' function. */
+#undef HAVE_PRINT_INSN_HPPA
+
 /* Define to 1 if you have the `print_insn_i386' function. */
 #undef HAVE_PRINT_INSN_I386
+
+/* Define to 1 if you have the `print_insn_ia64' function. */
+#undef HAVE_PRINT_INSN_IA64
+
+/* Define to 1 if you have the `print_insn_little_arm' function. */
+#undef HAVE_PRINT_INSN_LITTLE_ARM
+
+/* Define to 1 if you have the `print_insn_little_mips' function. */
+#undef HAVE_PRINT_INSN_LITTLE_MIPS
+
+/* Define to 1 if you have the `print_insn_little_powerpc' function. */
+#undef HAVE_PRINT_INSN_LITTLE_POWERPC
+
+/* Define to 1 if you have the `print_insn_m68k' function. */
+#undef HAVE_PRINT_INSN_M68K
+
+/* Define to 1 if you have the `print_insn_s390' function. */
+#undef HAVE_PRINT_INSN_S390
+
+/* Define to 1 if you have the `print_insn_sh' function. */
+#undef HAVE_PRINT_INSN_SH
+
+/* Define to 1 if you have the `print_insn_sh64' function. */
+#undef HAVE_PRINT_INSN_SH64
+
+/* Define to 1 if you have the `print_insn_sparc' function. */
+#undef HAVE_PRINT_INSN_SPARC
 
 /* have putenv call */
 #undef HAVE_PUTENV
@@ -332,6 +377,9 @@
 
 /* system pagewidth */
 #undef PAGEWIDTH
+
+/* instruction disassemble routine */
+#undef PRINT_INSN
 
 /* have sigcontext in signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT

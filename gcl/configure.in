@@ -561,7 +561,7 @@ if test "$enable_gprof" = "yes" ; then
 	fi			   
 fi
 
-if $CC -v 2>&1 | tail -n 1 | grep -q "gcc version 4.6.1" ; then
+if $CC -v 2>&1 | tail -1 | grep "gcc version 4.6.1" >/dev/null ; then
    case "$use" in	
      arm*)	
      #FIXME report and remove this when done
@@ -1027,13 +1027,13 @@ if test "$enable_statsysbfd" = "yes" || test "$enable_dynsysbfd" = "yes" ; then
 		echo 'int main() {bfd_init();bfd_openr("/dev/null",0);return 0;}' >foo.c
 		MP=`$CC [ -Wl,-M ] -static -o foo foo.c -lbfd -liberty -ldl 2>&1 | grep -v : | tr '()' '\012\012' | $AWK '{print $NF}' | sort | uniq`
 		rm -f foo.c foo
-		if echo $MP | tr ' ' '\012' | grep -q libbfd.a ; then
+		if echo $MP | tr ' ' '\012' | grep libbfd.a >/dev/null; then
 		   LIBBFD="`echo $MP | tr ' ' '\012' | grep libbfd.a | $AWK '{i=split($1,A,"/");for (j=1;j<=i;j++) if (j>1 && A[[j]]=="..") {j--;i-=2;for (k=j;k<=i;k++) A[[k]]=A[[k+2]];j--;}} END {for (j=1;j<=i;j++) printf("%s%s",A[[j]],j!=i ? "/" : "")}'`"
 		else
 		   echo Guessing path to libbfd.a due to gcc bug
 		   LIBBFD="/usr/lib/libbfd.a"
 		fi   
-		if echo $MP | tr ' ' '\012' | grep -q libiberty.a ; then
+		if echo $MP | tr ' ' '\012' | grep libiberty.a >/dev/null ; then
 		   LIBIBERTY="`echo $MP | tr ' ' '\012' | grep libiberty.a | $AWK '{i=split($1,A,"/");for (j=1;j<=i;j++) if (j>1 && A[[j]]=="..") {j--;i-=2;for (k=j;k<=i;k++) A[[k]]=A[[k+2]];j--;}} END {for (j=1;j<=i;j++) printf("%s%s",A[[j]],j!=i ? "/" : "")}'`"
 		else
 		   echo Guessing path to libiberty.a due to gcc bug
@@ -1163,10 +1163,11 @@ case $use in
      ia64*) ;;    #FIXME
      *) 
      AC_MSG_CHECKING(__builtin___clear_cache)
-     		AC_TRY_COMPILE([],
-			       [void *v,*ve;
-			        __builtin___clear_cache(v,ve);
-				],
+	AC_RUN_IFELSE([
+		AC_LANG_PROGRAM([[]],[[
+			void *v,*ve;
+			__builtin___clear_cache(v,ve);
+				]])],
 				[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE,1,[have __builtin__clear_cache instruction])
 				 AC_MSG_RESULT(yes)],
 				 AC_MSG_RESULT(no));;
@@ -1678,7 +1679,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
    touch unixport/gcl.script
    echo "int main() {return 0;}" >foo.c
    $CC -Wl,--verbose foo.c -o foo 2>&1 | \
-       $AWK '/==================================================/ {i=1-i;next} {if (i) print}' >gcl.script
+       $AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
    rm -rf foo.c foo
 
    if test "`cat gcl.script | wc -l`" != "0" ; then
@@ -2418,8 +2419,23 @@ AC_CHECK_FUNCS(sigaltstack)
 AC_CHECK_FUNCS(feenableexcept)
 
 AC_CHECK_HEADERS(dis-asm.h,
-	AC_CHECK_LIB(opcodes,print_insn_i386))
-AC_CHECK_FUNCS(print_insn_i386)
+	AC_CHECK_LIB(opcodes,init_disassemble_info)
+	AC_CHECK_FUNCS(print_insn_alpha,AC_DEFINE([PRINT_INSN],[print_insn_alpha],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_avr,AC_DEFINE([PRINT_INSN],[print_insn_avr],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_big_arm,AC_DEFINE([PRINT_INSN],[insn_big_arm],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_big_mips,AC_DEFINE([PRINT_INSN],[insn_big_mips],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_big_powerpc,AC_DEFINE([PRINT_INSN],[insn_big_powerpc],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_hppa,AC_DEFINE([PRINT_INSN],[print_insn_hppa],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_i386,AC_DEFINE([PRINT_INSN],[print_insn_i386],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_ia64,AC_DEFINE([PRINT_INSN],[print_insn_ia64],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_little_arm,AC_DEFINE([PRINT_INSN],[insn_little_arm],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_little_mips,AC_DEFINE([PRINT_INSN],[insn_little_mips],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_little_powerpc,AC_DEFINE([PRINT_INSN],[insn_little_powerpc],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_m68k,AC_DEFINE([PRINT_INSN],[print_insn_m68k],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_s390,AC_DEFINE([PRINT_INSN],[print_insn_s390],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_sh64,AC_DEFINE([PRINT_INSN],[print_insn_sh64],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_sh,AC_DEFINE([PRINT_INSN],[print_insn_sh],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_sparc,AC_DEFINE([PRINT_INSN],[print_insn_sparc],[instruction disassemble routine]))))))))))))))))))
 
 #if test $use = "386-linux" ; then
 	AC_CHECK_HEADERS(asm/sigcontext.h)
