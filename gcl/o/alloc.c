@@ -1030,7 +1030,6 @@ gcl_init_alloc(void *cs_start) {
 #if defined(BSD) && defined(RLIMIT_STACK)
   {
     struct rlimit rl;
-    unsigned long mss;
   
   /* Maybe the soft limit for data segment size is lower than the
    * hard limit.  In that case, we want as much as possible.
@@ -1041,12 +1040,9 @@ gcl_init_alloc(void *cs_start) {
       massert(!setrlimit(RLIMIT_DATA, &rl));
     }
 
-    mss=rl.rlim_cur/64;
     massert(!getrlimit(RLIMIT_STACK, &rl));
-    if (rl.rlim_max != RLIM_INFINITY && rl.rlim_max < mss)
-      mss=rl.rlim_max;
-    if (rl.rlim_cur == RLIM_INFINITY || rl.rlim_cur != mss) {
-      rl.rlim_cur=mss;
+    if (rl.rlim_cur!=RLIM_INFINITY && (rl.rlim_max == RLIM_INFINITY || rl.rlim_max > rl.rlim_cur)) {
+      rl.rlim_cur = rl.rlim_max == RLIM_INFINITY ? rl.rlim_max : rl.rlim_max/64;
 #ifdef __MIPS__
       if (setrlimit(RLIMIT_STACK,&rl))
 	fprintf(stderr,"Cannot set stack rlimit\n");/*FIXME work around make bug on mips*/
