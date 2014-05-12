@@ -321,6 +321,9 @@
 /* system pagewidth */
 #undef PAGEWIDTH
 
+/* instruction disassemble routine */
+#undef PRINT_INSN
+
 /* have sigcontext in signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT
 
