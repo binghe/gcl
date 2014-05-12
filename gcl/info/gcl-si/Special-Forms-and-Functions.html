@@ -1,0 +1,1279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Special Forms and Functions</title>
+
+<meta name="description" content="GCL SI Manual: Special Forms and Functions">
+<meta name="keywords" content="GCL SI Manual: Special Forms and Functions">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Compilation.html#Compilation" rel="next" title="Compilation">
+<link href="Streams-and-Reading.html#Streams-and-Reading" rel="prev" title="Streams and Reading">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Special-Forms-and-Functions"></a>
+<div class="header">
+<p>
+Next: <a href="Compilation.html#Compilation" accesskey="n" rel="next">Compilation</a>, Previous: <a href="Streams-and-Reading.html#Streams-and-Reading" accesskey="p" rel="prev">Streams and Reading</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Special-Forms-and-Functions-1"></a>
+<h2 class="chapter">6 Special Forms and Functions</h2>
+
+<dl>
+<dt><a name="index-LAMBDA_002dLIST_002dKEYWORDS"></a>Constant: <strong>LAMBDA-LIST-KEYWORDS</strong></dt>
+<dd><p>Package:LISP
+List of all the lambda-list keywords used in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET_002dSETF_002dMETHOD"></a>Function: <strong>GET-SETF-METHOD</strong> <em>(form)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the five values (or five &rsquo;gangs&rsquo;) constituting the SETF method for
+FORM.  See the doc of DEFINE-SETF-METHOD for the meanings of the gangs.  It
+is an error if the third value (i.e., the list of store variables) is not a
+one-element list.  See the doc of GET-SETF-METHOD-MULTIPLE-VALUE for
+comparison.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-THE"></a>Special Form: <strong>THE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(the value-type form)
+</pre></div>
+
+<p>Declares that the value of FORM must be of VALUE-TYPE.  Signals an error if
+this is not the case.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SETF"></a>Special Form: <strong>SETF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(setf {place newvalue}*)
+</pre></div>
+
+<p>Replaces the value in PLACE with the value of NEWVALUE, from left to right.
+Returns the value of the last NEWVALUE.  Each PLACE may be any one of the
+following:
+</p><ul class="no-bullet">
+<li> A symbol that names a variable.
+</li><li> A function call form whose first element is the name of the following
+    functions:
+<div class="example">
+<pre class="example">nth	elt	subseq	rest	first ... tenth
+c?r	c??r	c???r	c????r
+aref	svref	char	schar	bit	sbit	fill-poiter
+get	getf	documentation	symbol-value	symbol-function
+symbol-plist	macro-function	gethash
+char-bit	ldb	mask-field
+apply
+</pre></div>
+<p>where &rsquo;?&rsquo; stands for either &rsquo;a&rsquo; or &rsquo;d&rsquo;.
+</p></li><li> the form (THE type place) with PLACE being a place recognized by SETF.
+</li><li> a macro call which expands to a place recognized by SETF.
+</li><li> any form for which a DEFSETF or DEFINE-SETF-METHOD declaration has been
+    made.
+</li></ul>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WHEN"></a>Special Form: <strong>WHEN</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(when test {form}*)
+</pre></div>
+
+<p>If TEST evaluates to non-NIL, then evaluates FORMs as a PROGN.  If not,
+simply returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CCASE"></a>Macro: <strong>CCASE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(ccase keyplace {({key | ({key}*)} {form}*)}*)
+</pre></div>
+
+<p>Evaluates KEYPLACE and tries to find the KEY that is EQL to the value of
+KEYPLACE.  If one is found, then evaluates FORMs that follow the KEY and
+returns the value(s) of the last FORM.  If not, signals a correctable error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MACROEXPAND"></a>Function: <strong>MACROEXPAND</strong> <em>(form &amp;optional (env nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If FORM is a macro form, then expands it repeatedly until it is not a macro
+any more.  Returns two values: the expanded form and a T-or-NIL flag
+indicating whether the original form was a macro.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MULTIPLE_002dVALUE_002dCALL"></a>Special Form: <strong>MULTIPLE-VALUE-CALL</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(multiple-value-call function {form}*)
+</pre></div>
+
+<p>Calls FUNCTION with all the values of FORMs as arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFSETF"></a>Macro: <strong>DEFSETF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defsetf access-fun {update-fun [doc] |
+                             lambda-list (store-var) {decl | doc}*
+{form}*)
+</pre></div>
+
+<p>Defines how to SETF a generalized-variable reference of the form
+(ACCESS-FUN ...).  The doc-string DOC, if supplied, is saved as a SETF doc and
+can be retrieved by (documentation &rsquo;NAME &rsquo;setf).
+</p>
+<div class="example">
+<pre class="example">(defsetf access-fun update-fun) defines an expansion from
+(setf (ACCESS-FUN arg1 ... argn) value) to (UPDATE-FUN arg1 ... argn value).
+
+(defsetf access-fun lambda-list (store-var) . body) defines a macro which
+</pre></div>
+<p>expands
+</p>
+<div class="example">
+<pre class="example">(setf (ACCESS-FUN arg1 ... argn) value) into the form
+	(let* ((temp1 ARG1) ... (tempn ARGn) (temp0 value)) rest)
+</pre></div>
+<p>where REST is the value of BODY with parameters in LAMBDA-LIST bound to the
+symbols TEMP1 ... TEMPn and with STORE-VAR bound to the symbol TEMP0.
+</p>
+</dd></dl>
+
+<dl>
+<dt><a name="index-TAGBODY"></a>Special Form: <strong>TAGBODY</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(tagbody {tag | statement}*)
+</pre></div>
+
+<p>Executes STATEMENTs and returns NIL if it falls off the end.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-ETYPECASE"></a>Macro: <strong>ETYPECASE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(etypecase keyform {(type {form}*)}*)
+</pre></div>
+
+<p>Evaluates KEYFORM and tries to find the TYPE in which the value of KEYFORM
+belongs.  If one is found, then evaluates FORMs that follow the KEY and
+returns the value(s) of the last FORM.  If not, signals an error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LET_002a"></a>Special Form: <strong>LET*</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(let* ({var | (var [value])}*) {decl}* {form}*)
+</pre></div>
+
+<p>Initializes VARs, binding them to the values of VALUEs (which defaults to NIL)
+from left to right, then evaluates FORMs as a PROGN.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROG1"></a>Special Form: <strong>PROG1</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(prog1 first {form}*)
+</pre></div>
+
+<p>Evaluates FIRST and FORMs in order, and returns the (single) value of FIRST.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFUN"></a>Special Form: <strong>DEFUN</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defun name lambda-list {decl | doc}* {form}*)
+</pre></div>
+
+<p>Defines a function as the global function definition of the symbol NAME.
+The complete syntax of a lambda-list is:
+	({var}*
+	 [&amp;optional {var | (var [initform [svar]])}*]
+	 [&amp;rest var]
+	 [&amp;key {var | ({var | (keyword var)} [initform [svar]])}*
+	       [&amp;allow-other-keys]]
+	 [&amp;aux {var | (var [initform])}*])
+The doc-string DOC, if supplied, is saved as a FUNCTION doc and can be
+retrieved by (documentation &rsquo;NAME &rsquo;function).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MULTIPLE_002dVALUE_002dBIND"></a>Special Form: <strong>MULTIPLE-VALUE-BIND</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(multiple-value-bind ({var}*) values-form {decl}* {form}*)
+</pre></div>
+
+<p>Binds the VARiables to the results of VALUES-FORM, in order (defaulting to
+NIL) and evaluates FORMs in order.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DECLARE"></a>Special Form: <strong>DECLARE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(declare {decl-spec}*)
+</pre></div>
+
+<p>Gives a declaration.  Possible DECL-SPECs are:
+  (SPECIAL {var}*)
+  (TYPE type {var}*)
+     where &rsquo;TYPE&rsquo; is one of the following symbols
+</p><div class="example">
+<pre class="example">array		fixnum		package		simple-bit-vector
+atom		float		pathname	simple-string
+bignum		function	random-state	simple-vector
+bit		hash-table	ratio		single-float
+bit-vector	integer		rational	standard-char
+character	keyword		readtable	stream
+common		list		sequence	string
+compiled-function  long-float	short-float	string-char
+complex		nil		signed-byte	symbol
+cons		null		unsigned-byte	t
+double-float	number		simple-array	vector
+</pre></div>
+<p>&rsquo;TYPE&rsquo; may also be a list containing one of the above symbols as
+its first element and more specific information later in the list.
+For example	
+</p><div class="example">
+<pre class="example">(vector long-float 80) ; vector of 80 long-floats.
+(array long-float *)   ; array of long-floats
+(array fixnum)         ; array of fixnums
+(array * 30)           ; an array of length 30 but unspecified type
+</pre></div>
+
+<p>A list of 1 element may be replaced by the symbol alone, and a list ending
+      in &rsquo;*&rsquo; may drop the the final  &rsquo;*&rsquo;.
+ </p><div class="example">
+<pre class="example">(OBJECT {var}*)
+(FTYPE type {function-name}*)
+    eg: ;; function of two required args and optional args and one value:
+     (ftype (function (t t *) t) sort reduce)
+        ;; function with 1 arg of general type returning 1 fixnum as value.
+     (ftype (function (t) fixnum) length)
+(FUNCTION function-name ({arg-type}*) {return-type}*)
+(INLINE {function-name}*)
+(NOTINLINE {function-name}*)
+(IGNORE {var}*)
+(OPTIMIZE {({SPEED | SPACE | SAFETY | COMPILATION-SPEED} {0 | 1 | 2 | 3})}*)
+(DECLARATION {non-standard-decl-name}*)
+(:DYNAMIC-EXTENT {var}*) ;GCL-specific.
+</pre></div>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFMACRO"></a>Special Form: <strong>DEFMACRO</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defmacro name defmacro-lambda-list {decl | doc}* {form}*)
+</pre></div>
+
+<p>Defines a macro as the global macro definition of the symbol NAME.
+The complete syntax of a defmacro-lambda-list is:
+</p>
+<p>( [&amp;whole var]
+  [&amp;environment var]
+  {pseudo-var}*
+  [&amp;optional {var | (pseudo-var [initform [pseudo-var]])}*]
+  {[{&amp;rest | &amp;body} pseudo-var]
+   [&amp;key {var | ({var | (keyword pseudo-var)} [initform [pseudo-var]])}*
+         [&amp;allow-other-keys]]
+   [&amp;aux {var | (pseudo-var [initform])}*]
+  |  . var})
+</p>
+<p>where pseudo-var is either a symbol or a list of the following form:
+</p>
+<p>( {pseudo-var}*
+  [&amp;optional {var | (pseudo-var [initform [pseudo-var]])}*]
+  {[{&amp;rest | &amp;body} pseudo-var]
+   [&amp;key {var | ({var | (keyword pseudo-var)} [initform [pseudo-var]])}*
+         [ &amp;allow-other-keys ] ]
+   [&amp;aux {var | (pseudo-var [initform])}*]
+  |  . var})
+</p>
+<p>As a special case, a non-NIL symbol is accepcted as a defmacro-lambda-list:
+(DEFMACRO &lt;name&gt; &lt;symbol&gt; ...) is equivalent to
+(DEFMACRO &lt;name&gt; (&amp;REST &lt;symbol&gt;) ...).
+     The doc-string DOC, if supplied, is saved as a FUNCTION doc and can be
+retrieved by (documentation &rsquo;NAME &rsquo;function).
+See the type doc of LIST for the backquote macro useful for defining macros.
+Also, see the function doc of PPRINT for the output-formatting.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aEVALHOOK_002a"></a>Variable: <strong>*EVALHOOK*</strong></dt>
+<dd><p>Package:LISP
+If *EVALHOOK* is not NIL, its value must be a function that can receive
+two arguments: a form to evaluate and an environment.  This function does
+the evaluation instead of EVAL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FUNCTIONP"></a>Function: <strong>FUNCTIONP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a function, suitable for use by FUNCALL or APPLY.  Returns
+NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LAMBDA_002dPARAMETERS_002dLIMIT"></a>Constant: <strong>LAMBDA-PARAMETERS-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The exclusive upper bound on the number of distinct parameter names that may
+appear in a single lambda-list.  Actually, however, there is no such upper
+bound in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLET"></a>Special Form: <strong>FLET</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(flet ({(name lambda-list {decl | doc}* {form}*)}*) . body)
+</pre></div>
+
+<p>Evaluates BODY as a PROGN, with local function definitions in effect.  BODY is
+the scope of each local function definition.  Since the scope does not include
+the function definitions themselves, the local function can reference
+externally defined functions of the same name.  See the doc of DEFUN for the
+complete syntax of a lambda-list.  Doc-strings for local functions are simply
+ignored.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ECASE"></a>Macro: <strong>ECASE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(ecase keyform {({key | ({key}*)} {form}*)}*)
+</pre></div>
+
+<p>Evaluates KEYFORM and tries to find the KEY that is EQL to the value of
+KEYFORM.  If one is found, then evaluates FORMs that follow the KEY and
+returns the value(s) of the last FORM.  If not, signals an error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROG2"></a>Special Form: <strong>PROG2</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(prog2 first second {forms}*)
+</pre></div>
+
+<p>Evaluates FIRST, SECOND, and FORMs in order, and returns the (single) value
+of SECOND.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROGV"></a>Special Form: <strong>PROGV</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(progv symbols values {form}*)
+</pre></div>
+
+<p>SYMBOLS must evaluate to a list of variables.  VALUES must evaluate to a list
+of initial values.  Evaluates FORMs as a PROGN, with each variable bound (as
+special) to the corresponding value.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-QUOTE"></a>Special Form: <strong>QUOTE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(quote x)
+</pre></div>
+<p>or &rsquo;x
+Simply returns X without evaluating it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DOTIMES"></a>Special Form: <strong>DOTIMES</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(dotimes (var countform [result]) {decl}* {tag | statement}*)
+</pre></div>
+
+<p>Executes STATEMENTs, with VAR bound to each number between 0 (inclusive) and
+the value of COUNTFORM (exclusive).  Then returns the value(s) of RESULT
+(which defaults to NIL).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SPECIAL_002dFORM_002dP"></a>Function: <strong>SPECIAL-FORM-P</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if SYMBOL globally names a special form; NIL otherwise.
+The special forms defined in Steele&rsquo;s manual are:
+</p><div class="example">
+<pre class="example">block		if			progv
+catch		labels			quote
+compiler-let	let			return-from
+declare		let*			setq
+eval-when	macrolet		tagbody
+flet		multiple-value-call	the
+function	multiple-value-prog1	throw
+go		progn			unwind-protect
+</pre></div>
+
+<p>In addition, GCL implements the following macros as special forms, though
+of course macro-expanding functions such as MACROEXPAND work correctly for
+these macros.
+</p>
+<div class="example">
+<pre class="example">and		incf			prog1
+case		locally			prog2
+cond		loop			psetq
+decf		multiple-value-bind	push
+defmacro	multiple-value-list	return
+defun		multiple-value-set	setf
+do		or			unless
+do*		pop			when
+dolist		prog
+dotimes		prog* 
+</pre></div>
+
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FUNCTION"></a>Special Form: <strong>FUNCTION</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(function x)
+</pre></div>
+<p>or #&rsquo;x
+If X is a lambda expression, creates and returns a lexical closure of X in
+the current lexical environment.  If X is a symbol that names a function,
+returns that function.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MULTIPLE_002dVALUES_002dLIMIT"></a>Constant: <strong>MULTIPLE-VALUES-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The exclusive upper bound on the number of values that may be returned from
+a function.  Actually, however, there is no such upper bound in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-APPLYHOOK"></a>Function: <strong>APPLYHOOK</strong> <em>(function args evalhookfn applyhookfn &amp;optional (env nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUNCTION to ARGS, with *EVALHOOK* bound to EVALHOOKFN and with
+*APPLYHOOK* bound to APPLYHOOKFN.  Ignores the hook function once, for the
+top-level application of FUNCTION to ARGS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aMACROEXPAND_002dHOOK_002a"></a>Variable: <strong>*MACROEXPAND-HOOK*</strong></dt>
+<dd><p>Package:LISP
+Holds a function that can take two arguments (a macro expansion function
+and the macro form to be expanded) and returns the expanded form.  This
+function is whenever a macro-expansion takes place.  Initially this is set to
+#&rsquo;FUNCALL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROG_002a"></a>Special Form: <strong>PROG*</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(prog* ({var | (var [init])}*) {decl}* {tag | statement}*)
+</pre></div>
+
+<p>Creates a NIL block, binds VARs sequentially, and then executes STATEMENTs.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BLOCK"></a>Special Form: <strong>BLOCK</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(block name {form}*)
+</pre></div>
+
+<p>The FORMs are evaluated in order, but it is possible to exit the block
+using (RETURN-FROM name value).  The RETURN-FROM must be lexically contained
+within the block.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROGN"></a>Special Form: <strong>PROGN</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(progn {form}*)
+</pre></div>
+
+<p>Evaluates FORMs in order, and returns whatever the last FORM returns.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-APPLY"></a>Function: <strong>APPLY</strong> <em>(function arg &amp;rest more-args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUNCTION.  The arguments to the function consist of all ARGs
+except for the last, and all elements of the last ARG.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LABELS"></a>Special Form: <strong>LABELS</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(labels ({(name lambda-list {decl | doc}* {form}*)}*) . body)
+</pre></div>
+
+<p>Evaluates BODY as a PROGN, with the local function definitions in effect.  The
+scope of the locally defined functions include the function definitions
+themselves, so their definitions may include recursive references.  See the doc
+of DEFUN for the complete syntax of a lambda-list.  Doc-strings for local
+functions are simply ignored.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RETURN"></a>Special Form: <strong>RETURN</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(return [result])
+</pre></div>
+
+<p>Returns from the lexically surrounding NIL block.  The value of RESULT,
+which defaults to NIL, is returned as the value of the block.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TYPECASE"></a>Macro: <strong>TYPECASE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(typecase keyform {(type {form}*)}*)
+</pre></div>
+
+<p>Evaluates KEYFORM and tries to find the TYPE in which the value of KEYFORM
+belongs.  If one is found, then evaluates FORMs that follow the KEY and
+returns the value of the last FORM.  If not, simply returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-AND"></a>Special Form: <strong>AND</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(and {form}*)
+</pre></div>
+
+<p>Evaluates FORMs in order from left to right.  If any FORM evaluates to NIL,
+returns immediately with the value NIL.  Else, returns the value(s) of the
+last FORM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LET"></a>Special Form: <strong>LET</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(let ({var | (var [value])}*) {decl}* {form}*)
+</pre></div>
+
+<p>Initializes VARs, binding them to the values of VALUEs (which defaults to NIL)
+all at once, then evaluates FORMs as a PROGN.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COND"></a>Special Form: <strong>COND</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(cond {(test {form}*)}*)
+</pre></div>
+<p>Evaluates each
+TEST in order until one evaluates to a non-NIL value.  Then evaluates
+the associated FORMs in order and returns the value(s) of the last
+FORM.  If no forms follow the TEST, then returns the value of the
+TEST.  Returns NIL, if all TESTs evaluate to NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET_002dSETF_002dMETHOD_002dMULTIPLE_002dVALUE"></a>Function: <strong>GET-SETF-METHOD-MULTIPLE-VALUE</strong> <em>(form)</em></dt>
+<dd><p>Package:LISP
+ Returns the five values (or five &rsquo;gangs&rsquo;)
+constituting the SETF method for FORM.  See the doc of
+DEFINE-SETF-METHOD for the meanings of the gangs.  The third value
+(i.e., the list of store variables) may consist of any number of
+elements.  See the doc of GET-SETF-METHOD for
+comparison.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CATCH"></a>Special Form: <strong>CATCH</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(catch tag {form}*)
+</pre></div>
+
+<p>Sets up a catcher with
+that value TAG.  Then evaluates FORMs as a PROGN, but may possibly
+abort the evaluation by a THROW form that specifies the value EQ to
+the catcher tag.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFINE_002dMODIFY_002dMACRO"></a>Macro: <strong>DEFINE-MODIFY-MACRO</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(define-modify-macro name lambda-list fun [doc])
+</pre></div>
+
+<p>Defines a read-modify-write macro, like PUSH and INCF.  The defined macro will
+expand a form (NAME place val1 ... valn) into a form that in effect SETFs the
+value of the call (FUN PLACE arg1 ... argm) into PLACE, where arg1 ... argm
+are parameters in LAMBDA-LIST which are bound to the forms VAL1 ... VALn.
+The doc-string DOC, if supplied, is saved as a FUNCTION doc and can be
+retrieved by (documentation &rsquo;NAME &rsquo;function).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MACROEXPAND_002d1"></a>Function: <strong>MACROEXPAND-1</strong> <em>(form &amp;optional (env nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If FORM is a macro form, then expands it once.  Returns two values: the
+expanded form and a T-or-NIL flag indicating whether the original form was
+a macro.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FUNCALL"></a>Function: <strong>FUNCALL</strong> <em>(function &amp;rest arguments)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Applies FUNCTION to the ARGUMENTs
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CALL_002dARGUMENTS_002dLIMIT"></a>Constant: <strong>CALL-ARGUMENTS-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The upper exclusive bound on the number of arguments that may be passed to
+a function.  Actually, however, there is no such upper bound in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CASE"></a>Special Form: <strong>CASE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(case keyform {({key | ({key}*)} {form}*)}*)
+</pre></div>
+
+<p>Evaluates KEYFORM and tries to find the KEY that is EQL to the value of
+KEYFORM.  If one is found, then evaluates FORMs that follow the KEY and
+returns the value(s) of the last FORM.  If not, simply returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFINE_002dSETF_002dMETHOD"></a>Macro: <strong>DEFINE-SETF-METHOD</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(define-setf-method access-fun defmacro-lambda-list {decl | doc}*
+          {form}*)
+</pre></div>
+
+<p>Defines how to SETF a generalized-variable reference of the form
+(ACCESS-FUN ...).  When a form (setf (ACCESS-FUN arg1 ... argn) value) is
+being evaluated, the FORMs are first evaluated as a PROGN with the parameters
+in DEFMACRO-LAMBDA-LIST bound to ARG1 ... ARGn.  Assuming that the last FORM
+returns five values
+	(temp-var-1 ... temp-var-k)
+	(value-from-1 ... value-form-k)
+	(store-var)
+	storing-form
+	access-form
+in order, the whole SETF is then expanded into
+	(let* ((temp-var-1 value-from-1) ... (temp-k value-form-k)
+	       (store-var VALUE))
+	  storing-from)
+Incidentally, the five values are called the five gangs of a SETF method.
+The doc-string DOC, if supplied, is saved as a SETF doc and can be retrieved
+by (documentation &rsquo;NAME &rsquo;setf).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COMPILER_002dLET"></a>Special Form: <strong>COMPILER-LET</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(compiler-let ({var | (var [value])}*) {form}*)
+</pre></div>
+
+<p>When interpreted, this form works just like a LET form with all VARs declared
+special.  When compiled, FORMs are processed with the VARs bound at compile
+time, but no bindings occur when the compiled code is executed.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-VALUES"></a>Function: <strong>VALUES</strong> <em>(&amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns ARGs in order, as values.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MULTIPLE_002dVALUE_002dLIST"></a>Special Form: <strong>MULTIPLE-VALUE-LIST</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(multiple-value-list form)
+</pre></div>
+
+<p>Evaluates FORM, and returns a list of multiple values it returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MULTIPLE_002dVALUE_002dPROG1"></a>Special Form: <strong>MULTIPLE-VALUE-PROG1</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(multiple-value-prog1 form {form}*)
+</pre></div>
+
+<p>Evaluates the first FORM, saves all the values produced, then evaluates
+the other FORMs.  Returns the saved values.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MACROLET"></a>Special Form: <strong>MACROLET</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(macrolet ({(name defmacro-lambda-list {decl | doc}* . body)}*)
+          {form}*)
+</pre></div>
+
+<p>Evaluates FORMs as a PROGN, with the local macro definitions in effect.
+See the doc of DEFMACRO for the complete syntax of a defmacro-lambda-list.
+Doc-strings for local macros are simply ignored.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GO"></a>Special Form: <strong>GO</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(go tag)
+</pre></div>
+
+<p>Jumps to the specified TAG established by a lexically surrounding TAGBODY.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROG"></a>Special Form: <strong>PROG</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(prog ({var | (var [init])}*) {decl}* {tag | statement}*)
+</pre></div>
+
+<p>Creates a NIL block, binds VARs in parallel, and then executes STATEMENTs.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aAPPLYHOOK_002a"></a>Variable: <strong>*APPLYHOOK*</strong></dt>
+<dd><p>Package:LISP
+Used to substitute another function for the implicit APPLY normally done
+within EVAL.  If *APPLYHOOK* is not NIL, its value must be a function 
+which takes three arguments: a function to be applied, a list of arguments,
+and an environment.  This function does the application instead of APPLY.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RETURN_002dFROM"></a>Special Form: <strong>RETURN-FROM</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(return-from name [result])
+</pre></div>
+
+<p>Returns from the lexically surrounding block whose name is NAME.  The value
+of RESULT, which defaults to NIL, is returned as the value of the block.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNLESS"></a>Special Form: <strong>UNLESS</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(unless test {form}*)
+</pre></div>
+
+<p>If TEST evaluates to NIL, then evaluates FORMs as a PROGN.  If not,
+simply returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MULTIPLE_002dVALUE_002dSETQ"></a>Special Form: <strong>MULTIPLE-VALUE-SETQ</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(multiple-value-setq variables form)
+</pre></div>
+
+<p>Sets each variable in the list VARIABLES to the corresponding value of FORM.
+Returns the value assigned to the first variable.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOCALLY"></a>Special Form: <strong>LOCALLY</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(locally {decl}* {form}*)
+</pre></div>
+
+<p>Gives local pervasive declarations.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-IDENTITY"></a>Function: <strong>IDENTITY</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Simply returns X.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NOT"></a>Function: <strong>NOT</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is NIL; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFCONSTANT"></a>Macro: <strong>DEFCONSTANT</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defconstant name initial-value [doc])
+</pre></div>
+
+<p>Declares that the variable NAME is a constant whose value is the value of
+INITIAL-VALUE.  The doc-string DOC, if supplied, is saved as a VARIABLE doc
+and can be retrieved by (documentation &rsquo;NAME &rsquo;variable).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-VALUES_002dLIST"></a>Function: <strong>VALUES-LIST</strong> <em>(list)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns all of the elements of LIST in order, as values.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ERROR"></a>Function: <strong>ERROR</strong> <em>(control-string &amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Signals a fatal error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-IF"></a>Special Form: <strong>IF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(if test then [else])
+</pre></div>
+
+<p>If TEST evaluates to non-NIL, then evaluates THEN and returns the result.
+If not, evaluates ELSE (which defaults to NIL) and returns the result.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNWIND_002dPROTECT"></a>Special Form: <strong>UNWIND-PROTECT</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(unwind-protect protected-form {cleanup-form}*)
+</pre></div>
+
+<p>Evaluates PROTECTED-FORM and returns whatever it returned.  Guarantees that
+CLEANUP-FORMs be always evaluated before exiting from the UNWIND-PROTECT
+form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EVALHOOK"></a>Function: <strong>EVALHOOK</strong> <em>(form evalhookfn applyhookfn &amp;optional (env nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Evaluates FORM with *EVALHOOK* bound to EVALHOOKFN and *APPLYHOOK* bound
+to APPLYHOOKFN.  Ignores these hooks once, for the top-level evaluation
+of FORM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-OR"></a>Special Form: <strong>OR</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(or {form}*)
+</pre></div>
+
+<p>Evaluates FORMs in order from left to right.  If any FORM evaluates to
+non-NIL, quits and returns that (single) value.  If the last FORM is reached,
+returns whatever values it returns.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CTYPECASE"></a>Macro: <strong>CTYPECASE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(ctypecase keyplace {(type {form}*)}*)
+</pre></div>
+
+<p>Evaluates KEYPLACE and tries to find the TYPE in which the value of KEYPLACE
+belongs.  If one is found, then evaluates FORMs that follow the KEY and
+returns the value(s) of the last FORM.  If not, signals a correctable error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EVAL"></a>Function: <strong>EVAL</strong> <em>(exp)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Evaluates EXP and returns the result(s).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PSETF"></a>Macro: <strong>PSETF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(psetf {place newvalue}*)
+</pre></div>
+
+<p>Similar to SETF, but evaluates all NEWVALUEs first, and then replaces the
+value in each PLACE with the value of the corresponding NEWVALUE.  Returns
+NIL always.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-THROW"></a>Special Form: <strong>THROW</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(throw tag result)
+</pre></div>
+
+<p>Evaluates TAG and aborts the execution of the most recent CATCH form that sets
+up a catcher with the same tag value.  The CATCH form returns whatever RESULT
+returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFPARAMETER"></a>Macro: <strong>DEFPARAMETER</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defparameter name initial-value [doc])
+</pre></div>
+
+<p>Declares the variable NAME as a special variable and initializes the value.
+The doc-string DOC, if supplied, is saved as a VARIABLE doc and can be
+retrieved by (documentation &rsquo;NAME &rsquo;variable).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFVAR"></a>Macro: <strong>DEFVAR</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defvar name [initial-value [doc]])
+</pre></div>
+
+<p>Declares the variable NAME as a special variable and, optionally, initializes
+it.  The doc-string DOC, if supplied, is saved as a VARIABLE doc and can be
+retrieved by (documentation &rsquo;NAME &rsquo;variable).
+</p>
+
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Compilation.html#Compilation" accesskey="n" rel="next">Compilation</a>, Previous: <a href="Streams-and-Reading.html#Streams-and-Reading" accesskey="p" rel="prev">Streams and Reading</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

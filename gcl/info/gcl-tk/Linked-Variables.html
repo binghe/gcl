@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: Linked Variables</title>
+
+<meta name="description" content="GCL TK Manual: Linked Variables">
+<meta name="keywords" content="GCL TK Manual: Linked Variables">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html#General" rel="up" title="General">
+<link href="tkconnect.html#tkconnect" rel="next" title="tkconnect">
+<link href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics" rel="prev" title="Lisp Functions Invoked from Graphics">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Linked-Variables"></a>
+<div class="header">
+<p>
+Next: <a href="tkconnect.html#tkconnect" accesskey="n" rel="next">tkconnect</a>, Previous: <a href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics" accesskey="p" rel="prev">Lisp Functions Invoked from Graphics</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="Linked-Variables-1"></a>
+<h3 class="section">1.7 Linked Variables</h3>
+
+<p>It is possible to link lisp variables to <b>TK</b> variables.  In general
+when the <b>TK</b> variable is changed, by for instance clicking on a
+radiobutton, the linked lisp variable will be changed.  Conversely
+changing the lisp variable will be noticed by the <b>TK</b> graphics side, if
+one does the assignment in lisp using <code>setk</code> instead of
+<code>setq</code>.
+</p>
+<div class="example">
+<pre class="example">(button '.hello :textvariable '*message* :text &quot;hi there&quot;)
+(pack '.hello)
+</pre></div>
+
+<p>This causes linking of the global variable <code>*message*</code> in lisp
+to a corresponding variable in <b>TK</b>.  Moreover the message that is in
+the button <code>.hello</code> will be whatever the value of this global
+variable is (so long as the <b>TK</b> side is notified of the change!).
+</p>
+<p>Thus if one does
+</p>
+<div class="example">
+<pre class="example">(setk *message* &quot;good bye&quot;)
+</pre></div>
+
+<p>then the button will change to have <i>good bye</i> as its text.
+The lisp macro <code>setk</code> expands into
+</p>
+<div class="example">
+<pre class="example">(prog1 (setf *message* &quot;good bye&quot;) (notice-text-variables))
+</pre></div>
+
+<p>which does the assignment, and then goes thru the linked variables
+checking for those that have changed, and updating the <b>TK</b> side should
+there be any.   Thus if you have a more complex program which might
+have done the assignment of your global variable, you may include
+the call to <code>notice-text-variables</code> at the end, to assure that
+the graphics side knows about the changes.
+</p>
+<p>A variable which is linked using the keyword <code>:textvariable</code> is
+always a variable containing a string.
+</p>
+<p>However it is possible to have other types of variables.
+</p>
+<div class="example">
+<pre class="example">(checkbutton '.checkbutton1 :text &quot;A button&quot; :variable '(boolean *joe*))
+(checkbutton '.checkbutton2 :text &quot;A button&quot; :variable '*joe*)
+(checkbutton '.checkbutton3 :text &quot;Debugging&quot; :variable '(t *debug*)
+              :onvalue 100 :offvalue -1)
+</pre></div>
+
+<p>The first two examples are the same in that the default variable type
+for a checkbutton is <code>boolean</code>.  Notice that the specification of a
+variable type is by <code>(<i>type</i> variable)</code>.  The types which are
+permissible are those which have coercion-fucntions, See <a href="Return-Values.html#Return-Values">Return Values</a>.  In the first example a variable <code>*joe*</code> will be linked, and
+its default initial value will be set to nil, since the default initial
+state of the check button is off, and the default off value is nil.
+Actually on the <b>TK</b> side, the corresponding boolean values are <code>&quot;1&quot;</code>
+and <code>&quot;0&quot;</code>, but the <code>boolean</code> type makes these become <code>t</code>
+and <code>nil</code>.
+</p>
+<p>In the third example the variable *debug* may have any lisp value (here
+<i>type</i> is <code>t</code>).   The initial value will be made to be <code>-1</code>,
+since the checkbutton is off.   Clicking on <code>.checkbutton3</code> will
+result in the value of <code>*debug*</code> being changed to 100, and the light
+in the button will be toggled to on, See <a href="checkbutton.html#checkbutton">checkbutton</a>.  You may
+set the variable to be another value besides 100.
+</p>
+<p>You may also call
+</p>
+<div class="example">
+<pre class="example">(link-text-variable '*joe* 'boolean)
+</pre></div>
+
+<p>to cause the linking of a variable named *joe*.  This is done
+automatically
+whenever the variable is specified after one of the keys
+</p>
+<div class="example">
+<pre class="example">:variable   :textvariable.
+</pre></div>
+
+<p>Just as one must be cautious about using global variables in lisp, one
+must be cautious in making such linked variables.  In particular note
+that the <b>TK</b> side, uses variables for various purposes.  If you make a
+checkbutton with pathname <code>.a.b.c</code> then unless you specify a
+<code>:variable</code> option, the variable <code>c</code> will become associated to
+the <b>TK</b> value of the checkbutton.  We do NOT link this variable by
+default, feeling that one might inadvertently alter global variables,
+and that they would not typically use the lisp convention of being of
+the form <code>*c*</code>.  You must specify the <code>:variable</code> option, or
+call <code>link-variable</code>.
+</p>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="tkconnect.html#tkconnect" accesskey="n" rel="next">tkconnect</a>, Previous: <a href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics" accesskey="p" rel="prev">Lisp Functions Invoked from Graphics</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Characters</title>
+
+<meta name="description" content="GCL SI Manual: Characters">
+<meta name="keywords" content="GCL SI Manual: Characters">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Lists.html#Lists" rel="next" title="Lists">
+<link href="Sequences-and-Arrays-and-Hash-Tables.html#Sequences-and-Arrays-and-Hash-Tables" rel="prev" title="Sequences and Arrays and Hash Tables">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Characters"></a>
+<div class="header">
+<p>
+Next: <a href="Lists.html#Lists" accesskey="n" rel="next">Lists</a>, Previous: <a href="Sequences-and-Arrays-and-Hash-Tables.html#Sequences-and-Arrays-and-Hash-Tables" accesskey="p" rel="prev">Sequences and Arrays and Hash Tables</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Characters-1"></a>
+<h2 class="chapter">3 Characters</h2>
+
+<dl>
+<dt><a name="index-NAME_002dCHAR"></a>Function: <strong>NAME-CHAR</strong> <em>(name)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Given an argument acceptable to string,
+Returns a character object whose name is NAME if one exists.  Returns NIL
+otherwise.  NAME must be an object that can be coerced to a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dNAME"></a>Function: <strong>CHAR-NAME</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the name for CHAR as a string; NIL if CHAR has no name.
+Only #\Backspace, #\Tab, #\Newline (or #\Linefeed), #\Page, #\Return,
+and #\Rubout have names.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOTH_002dCASE_002dP"></a>Function: <strong>BOTH-CASE-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is an alphabetic character; NIL otherwise.  Equivalent to
+ALPHA-CHAR-P.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SCHAR"></a>Function: <strong>SCHAR</strong> <em>(simple-string index)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the character object representing the INDEX-th character in STRING.
+This is faster than CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dSUPER_002dBIT"></a>Constant: <strong>CHAR-SUPER-BIT</strong></dt>
+<dd><p>Package:LISP
+The bit that indicates a super character.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dFONT_002dLIMIT"></a>Constant: <strong>CHAR-FONT-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The upper exclusive bound on values produced by CHAR-FONT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dDOWNCASE"></a>Function: <strong>CHAR-DOWNCASE</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the lower-case equivalent of CHAR, if any.
+If not, simply returns CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STRING_002dCHAR_002dP"></a>Function: <strong>STRING-CHAR-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR can be stored in a string.  In GCL, this function always
+returns T since any character in GCL can be stored in a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dNOT_002dLESSP"></a>Function: <strong>CHAR-NOT-LESSP</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly non-increasing order; NIL
+otherwise.  For a lower-case character, the code of its upper-case equivalent
+is used.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DISASSEMBLE"></a>Function: <strong>DISASSEMBLE</strong> <em>(thing)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Compiles the form specified by THING and prints the intermediate C language
+code for that form.  But does NOT install the result of compilation.
+If THING is a symbol that names a not-yet-compiled function, the function
+definition is disassembled.
+If THING is a lambda expression, it is disassembled as a function definition.
+Otherwise, THING itself is disassembled as a top-level form.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-LOWER_002dCASE_002dP"></a>Function: <strong>LOWER-CASE-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is a lower-case character; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_003c_003d"></a>Function: <strong>CHAR&lt;=</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly non-decreasing order; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dHYPER_002dBIT"></a>Constant: <strong>CHAR-HYPER-BIT</strong></dt>
+<dd><p>Package:LISP
+The bit that indicates a hyper character.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CODE_002dCHAR"></a>Function: <strong>CODE-CHAR</strong> <em>(code &amp;optional (bits 0) (font 0))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a character object with the specified code, if any.
+If not, returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dCODE"></a>Function: <strong>CHAR-CODE</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the code attribute of CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dCONTROL_002dBIT"></a>Constant: <strong>CHAR-CONTROL-BIT</strong></dt>
+<dd><p>Package:LISP
+The bit that indicates a control character.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dLESSP"></a>Function: <strong>CHAR-LESSP</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly increasing order; NIL
+otherwise.  For a lower-case character, the code of its upper-case equivalent
+is used.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dFONT"></a>Function: <strong>CHAR-FONT</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the font attribute of CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_003c"></a>Function: <strong>CHAR&lt;</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly increasing order; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_003e_003d"></a>Function: <strong>CHAR&gt;=</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly non-increasing order; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dMETA_002dBIT"></a>Constant: <strong>CHAR-META-BIT</strong></dt>
+<dd><p>Package:LISP
+The bit that indicates a meta character.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GRAPHIC_002dCHAR_002dP"></a>Function: <strong>GRAPHIC-CHAR-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is a printing character, i.e., #\Space through #\~;
+NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dNOT_002dEQUAL"></a>Function: <strong>CHAR-NOT-EQUAL</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if no two of CHARs are the same character; NIL otherwise.
+Upper case character and its lower case equivalent are regarded the same.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dBITS_002dLIMIT"></a>Constant: <strong>CHAR-BITS-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The upper exclusive bound on values produced by CHAR-BITS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHARACTERP"></a>Function: <strong>CHARACTERP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a character; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_003d"></a>Function: <strong>CHAR=</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if all CHARs are the same character; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ALPHA_002dCHAR_002dP"></a>Function: <strong>ALPHA-CHAR-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is an alphabetic character, A-Z or a-z; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UPPER_002dCASE_002dP"></a>Function: <strong>UPPER-CASE-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is an upper-case character; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dBIT"></a>Function: <strong>CHAR-BIT</strong> <em>(char name)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the named bit is on in the character CHAR; NIL otherwise.
+In GCL, this function always returns NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dCHAR"></a>Function: <strong>MAKE-CHAR</strong> <em>(char &amp;optional (bits 0) (font 0))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a character object with the same code attribute as CHAR and with
+the specified BITS and FONT attributes.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHARACTER"></a>Function: <strong>CHARACTER</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Coerces X into a character object if possible.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dEQUAL"></a>Function: <strong>CHAR-EQUAL</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if all of its arguments are the same character; NIL otherwise.
+Upper case character and its lower case equivalent are regarded the same.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dNOT_002dGREATERP"></a>Function: <strong>CHAR-NOT-GREATERP</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly non-decreasing order; NIL
+otherwise.  For a lower-case character, the code of its upper-case equivalent
+is used.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_003e"></a>Function: <strong>CHAR&gt;</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly decreasing order; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STANDARD_002dCHAR_002dP"></a>Function: <strong>STANDARD-CHAR-P</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is a standard character, i.e., one of the 95 ASCII printing
+characters #\Space to #\~ and #Newline; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dUPCASE"></a>Function: <strong>CHAR-UPCASE</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the upper-case equivalent of CHAR, if any.
+If not, simply returns CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DIGIT_002dCHAR_002dP"></a>Function: <strong>DIGIT-CHAR-P</strong> <em>(char &amp;optional (radix 10))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If CHAR represents a digit in RADIX, then returns the weight as an integer.
+Otherwise, returns nil.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002f_003d"></a>Function: <strong>CHAR/=</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if no two of CHARs are the same character; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dGREATERP"></a>Function: <strong>CHAR-GREATERP</strong> <em>(char &amp;rest more-chars)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the codes of CHARs are in strictly decreasing order; NIL
+otherwise.  For a lower-case character, the code of its upper-case equivalent
+is used.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ALPHANUMERICP"></a>Function: <strong>ALPHANUMERICP</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if CHAR is either numeric or alphabetic; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dBITS"></a>Function: <strong>CHAR-BITS</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bits attribute (which is always 0 in GCL) of CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DIGIT_002dCHAR"></a>Function: <strong>DIGIT-CHAR</strong> <em>(digit &amp;optional (radix 10) (font 0))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a character object that represents the DIGIT in the specified RADIX.
+Returns NIL if no such character exists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SET_002dCHAR_002dBIT"></a>Function: <strong>SET-CHAR-BIT</strong> <em>(char name newvalue)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a character just like CHAR except that the named bit is set or
+cleared, according to whether NEWVALUE is non-NIL or NIL.  This function
+is useless in GCL.
+</p>
+
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Lists.html#Lists" accesskey="n" rel="next">Lists</a>, Previous: <a href="Sequences-and-Arrays-and-Hash-Tables.html#Sequences-and-Arrays-and-Hash-Tables" accesskey="p" rel="prev">Sequences and Arrays and Hash Tables</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

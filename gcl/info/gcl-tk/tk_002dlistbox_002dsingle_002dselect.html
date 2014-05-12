@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: tk-listbox-single-select</title>
+
+<meta name="description" content="GCL TK Manual: tk-listbox-single-select">
+<meta name="keywords" content="GCL TK Manual: tk-listbox-single-select">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="lower.html#lower" rel="next" title="lower">
+<link href="grab.html#grab" rel="prev" title="grab">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="tk_002dlistbox_002dsingle_002dselect"></a>
+<div class="header">
+<p>
+Next: <a href="lower.html#lower" accesskey="n" rel="next">lower</a>, Previous: <a href="grab.html#grab" accesskey="p" rel="prev">grab</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="tk_002dlistbox_002dsingle_002dselect-1"></a>
+<h3 class="section">3.8 tk-listbox-single-select</h3>
+
+<p>tk-listbox-single-select \- Allow only one selected element in listbox(es)
+</p><a name="Synopsis-22"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>tk-listbox-single-select </b><i>arg </i><span class="roman">?</span><i>arg arg ...</i>?
+</p>
+<a name="Description-19"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>This command is a Tcl procedure provided as part of the Tk script library.
+It takes as arguments the path names of one or more listbox widgets,
+or the value <b>Listbox</b>.
+For each named widget, <b>tk-listbox-single-select</b> modifies the
+bindings of the widget so that only a single element may be selected
+at a time (the normal configuration allows multiple elements to be
+selected).
+If the keyword <b>Listbox</b><span class="roman"> is among the </span><i>window</i> arguments,
+then the class bindings for listboxes are changed so that all
+listboxes have the one-selection-at-a-time behavior.
+</p>
+<a name="Keywords-22"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>listbox, selection
+</p>
+
+
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: listbox</title>
+
+<meta name="description" content="GCL TK Manual: listbox">
+<meta name="keywords" content="GCL TK Manual: listbox">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="scale.html#scale" rel="next" title="scale">
+<link href="button.html#button" rel="prev" title="button">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="listbox"></a>
+<div class="header">
+<p>
+Next: <a href="scale.html#scale" accesskey="n" rel="next">scale</a>, Previous: <a href="button.html#button" accesskey="p" rel="prev">button</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="listbox-1"></a>
+<h3 class="section">2.2 listbox</h3>
+
+<p>listbox \- Create and manipulate listbox widgets
+</p><a name="Synopsis-1"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>listbox</b><i> </i><i>pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options-1"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">background       foreground  selectBackground   xScrollCommand  
+borderWidth      font        selectBorderWidth  yScrollCommand  
+cursor           geometry    selectForeground   
+exportSelection  relief      setGrid            
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Listbox"></a>
+<h4 class="unnumberedsubsec">Arguments for Listbox</h4>
+
+
+<p>None.
+</p>
+<a name="Description-1"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>listbox</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a listbox widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the listbox such as its colors, font,
+text, and relief.  The <b>listbox</b> command returns its
+<i>pathName</i> argument.  At the time this command is invoked,
+there must not exist a window named <i>pathName</i>, but
+<i>pathName</i>&rsquo;s parent must exist.
+</p>
+<p>A listbox is a widget that displays a list of strings, one per line.
+When first created, a new listbox has no elements in its list.
+Elements may be added or deleted using widget commands described
+below.  In addition, one or more elements may be selected as described
+below.
+If a listbox is exporting its selection (see <b>exportSelection</b>
+option), then it will observe the standard X11 protocols
+for handling the selection;  listbox selections are available
+as type <b>STRING</b>, consisting of a Tcl list with one entry
+for each selected element.
+</p>
+<p>For large lists only a subset of the list elements will be
+displayed in the listbox window at once;  commands described below
+may be used to change the view in the window.  Listboxes allow
+scrolling in both directions using the standard <b>xScrollCommand</b>
+and <b>yScrollCommand</b> options.
+They also support scanning, as described below.
+</p>
+<a name="A-Listbox_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Listbox&rsquo;s Arguments</h4>
+
+<p>The <b>listbox</b> command creates a new Tcl command whose
+name is <i>pathName</i>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for listbox widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>listbox</b>
+command.
+</p></dd>
+<dt><i>pathName </i><b>:curselection</b></dt>
+<dd><p>Returns a list containing the indices of
+all of the elements in the listbox that are currently selected.
+If there are no elements selected in the listbox then an empty
+string is returned.
+</p></dd>
+<dt><i>pathName </i><b>:delete </b><i>first </i><span class="roman">?</span><i>last</i>?</dt>
+<dd><p>Delete one or more elements of the listbox.  <i>First</i><span class="roman"> and </span><i>last</i>
+give the integer indices of the first and last elements in the range
+to be deleted.  If <i>last</i> isn&rsquo;t specified it defaults to
+<i>first</i>, i.e. a single element is deleted.  An index of
+<b>0</b> corresponds to the first element in the listbox.  Either
+<i>first</i><span class="roman"> or </span><i>last</i><span class="roman"> may be specified as </span><b>end</b>, in which
+case it refers to the last element of the listbox.  This command
+returns an empty string
+</p></dd>
+<dt><i>pathName </i><b>:get </b><i>index</i></dt>
+<dd><p>Return the contents of the listbox element indicated by <i>index</i>.
+<i>Index</i> must be a non-negative integer (0 corresponds to
+the first element in the listbox), or it may also be specified as
+<b>end</b> to indicate the last element in the listbox.
+</p></dd>
+<dt><i>pathName </i><b>:insert </b><i>index </i><span class="roman">?</span><i>element element ...</i>?</dt>
+<dd><p>Insert zero or more new elements in the list just before the
+element given by <i>index</i><span class="roman">.  If </span><i>index</i> is specified as
+<b>end</b> then the new elements are added to the end of the
+list.  Returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:nearest </b><i>y</i></dt>
+<dd><p>Given a y-coordinate within the listbox window, this command returns
+the index of the (visible) listbox element nearest to that y-coordinate.
+</p></dd>
+<dt><i>pathName </i><b>:scan</b><span class="roman"> </span><i>option args</i></dt>
+<dd><p>This command is used to implement scanning on listboxes.  It has
+two forms, depending on <i>option</i>:
+</p><dl compact="compact">
+<dt><i>pathName </i><b>:scan :mark </b><i>x y</i></dt>
+<dd><p>Records <i>x</i><span class="roman"> and </span><i>y</i> and the current view in the listbox
+window;  used in conjunction with later <b>scan dragto</b> commands.
+Typically this command is associated with a mouse button press in
+the widget.  It returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:scan :dragto </b><i>x y</i>.</dt>
+<dd><p>This command computes the difference between its <i>x</i><span class="roman"> and </span><i>y</i>
+arguments and the <i>x</i><span class="roman"> and </span><i>y</i> arguments to the last
+<b>scan mark</b> command for the widget.
+It then adjusts the view by 10 times the
+difference in coordinates.  This command is typically associated
+with mouse motion events in the widget, to produce the effect of
+dragging the list at high speed through the window.  The return
+value is an empty string.
+</p></dd>
+</dl>
+</dd>
+<dt><i>pathName </i><b>:select </b><i>option arg</i></dt>
+<dd><p>This command is used to adjust the selection within a listbox.  It
+has several forms, depending on <i>option</i>.  In all of the forms
+the index <b>end</b> refers to the last element in the listbox.
+</p><dl compact="compact">
+<dt><i>pathName </i><b>:select :adjust </b><i>index</i></dt>
+<dd><p>Locate the end of the selection nearest to the element given by
+<i>index</i><span class="roman">, and adjust that end of the selection to be at </span><i>index</i>
+(i.e including but not going beyond <i>index</i>).  The other
+end of the selection is made the anchor point for future
+<b>select to</b> commands.  If the selection
+isn&rsquo;t currently in the listbox, then this command is identical to
+the <b>select from</b> widget command.
+Returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:select :clear</b></dt>
+<dd><p>If the selection is in this listbox then it is cleared so that
+none of the listbox&rsquo;s elements are selected anymore.
+</p></dd>
+<dt><i>pathName </i><b>:select :from </b><i>index</i></dt>
+<dd><p>Set the selection to consist of element <i>index</i>, and make
+<i>index</i><span class="roman"> the anchor point for future </span><b>select to</b> widget
+commands.  Returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:select :to </b><i>index</i></dt>
+<dd><p>Set the selection to consist of the elements from the anchor
+point to element <i>index</i>, inclusive.  The anchor point is
+determined by the most recent <b>select from</b><span class="roman"> or </span><b>select adjust</b>
+command in this widget.  If the selection isn&rsquo;t in this widget,
+this command is identical to <b>select from</b>.
+Returns an empty string.
+</p></dd>
+</dl>
+
+</dd>
+<dt><i>pathName </i><b>:size</b></dt>
+<dd><p>Returns a decimal string indicating the total number of elements
+in the listbox.
+</p></dd>
+<dt><i>pathName </i><b>:xview </b><i>index</i></dt>
+<dd><p>Adjust the view in the listbox so that character position <i>index</i>
+is displayed at the left edge of the widget.
+Returns an empty string.
+</p></dd>
+<dt><i>pathName </i><b>:yview </b><i>index</i></dt>
+<dd><p>Adjust the view in the listbox so that element <i>index</i> is
+displayed at the top of the widget.
+If <i>index</i><span class="roman"> is specified as </span><b>end</b> it indicates the last
+element of the listbox.  Returns an empty string.
+</p>
+</dd>
+</dl>
+<a name="g_t_0022Default-Bindings_0022-1"></a>
+<h4 class="unnumberedsubsec">&quot;Default Bindings&quot;</h4>
+
+<p>Tk automatically creates class bindings for listboxes that give them
+the following default behavior:
+</p><ul class="no-bullet">
+<li> [1]
+When button 1 is pressed over a listbox, the element underneath the
+mouse cursor is selected.  The mouse can be dragged to select a
+range of elements.
+</li><li> [2]
+The ends of the selection can be adjusted by dragging with mouse
+button 1 while the shift key is down;  this will adjust the end
+of the selection that was nearest to the mouse cursor when button
+1 was pressed.
+</li><li> [3]
+The view in the listbox can be adjusted by dragging with mouse button 2.
+</li></ul>
+
+<p>The behavior of listboxes can be changed by defining new bindings for
+individual widgets or by redefining the class bindings.
+In addition, the procedure <b>tk_listboxSingleSelect</b> may be
+invoked to change listbox behavior so that only a single element
+may be selected at once.
+</p>
+<a name="Keywords-1"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>listbox, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="scale.html#scale" accesskey="n" rel="next">scale</a>, Previous: <a href="button.html#button" accesskey="p" rel="prev">button</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

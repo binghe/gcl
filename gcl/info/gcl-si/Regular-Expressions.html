@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Regular Expressions</title>
+
+<meta name="description" content="GCL SI Manual: Regular Expressions">
+<meta name="keywords" content="GCL SI Manual: Regular Expressions">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="System-Definitions.html#System-Definitions" rel="up" title="System Definitions">
+<link href="Debugging.html#Debugging" rel="next" title="Debugging">
+<link href="System-Definitions.html#System-Definitions" rel="prev" title="System Definitions">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Regular-Expressions"></a>
+<div class="header">
+<p>
+Previous: <a href="System-Definitions.html#System-Definitions" accesskey="p" rel="prev">System Definitions</a>, Up: <a href="System-Definitions.html#System-Definitions" accesskey="u" rel="up">System Definitions</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Regular-Expressions-1"></a>
+<h3 class="section">17.1 Regular Expressions</h3>
+
+<p>The function <code>string-match</code> (*Index string-match::) is used to
+match a regular expression against a string.  If the variable
+<code>*case-fold-search*</code> is not nil, case is ignored in the match.
+To determine the extent of the match use *Index match-beginning:: and
+*Index match-end::.
+</p>
+<p>Regular expressions are implemented using Henry Spencer&rsquo;s package
+(thank you  Henry!), and much of the description of regular expressions
+below is copied verbatim from his manual entry.  Code for delimited
+searches, case insensitive searches, and speedups to allow fast
+searching of long files was contributed by W. Schelter.  The speedups
+use an adaptation by Schelter of the Boyer and Moore string search
+algorithm to the case of branched regular expressions.  These allow
+such expressions as &rsquo;not_there|really_not&rsquo; to be searched for 30 times
+faster than in GNU emacs (1995), and 200 times faster than in the
+original Spencer method.  Expressions such as [a-u]bcdex get a speedup
+of 60 and 194 times respectively.  This is based on searching a string
+of 50000 characters (such as the file tk.lisp).
+</p>
+<ul>
+<li> A regular expression is a string containing zero or more <i>branches</i> which are separated by <code>|</code>.  A match of the regular expression against a string is simply a match of the string with one of the branches.
+</li><li> Each branch consists of zero or more <i>pieces</i>, concatenated.   A matching
+string must contain an initial substring  matching the first piece, immediately
+followed by a second substring matching the second piece and so on.
+</li><li> Each piece is an <i>atom</i> optionally followed by  <code>+</code>, <code>*</code>, or <code>?</code>.
+</li><li> An atom followed by <code>+</code> matches a sequence of 1 or more matches of the atom.
+</li><li> An atom followed by <code>*</code> matches a sequence of 0 or more matches of the atom.
+</li><li> An atom followed by <code>?</code> matches a match of the atom, or the null string.
+</li><li> An atom is
+<ul class="no-bullet">
+<li>- a regular expression in parentheses matching a match for the regular expression
+</li><li>- a <i>range</i> see below
+</li><li>- a <code>.</code> matching any single character
+</li><li>- a <code>^</code> matching the null string at the beginning of the input string
+</li><li>- a <code>$</code> matching the null string at the end of the input string
+</li><li>- a <code>\</code> followed by a single character matching that character
+</li><li>- a single character with no other significance
+(matching that character).
+</li></ul>
+</li><li> A <i>range</i> is a sequence of characters enclosed in <code>[]</code>.
+It normally matches any single character from the sequence.
+<ul class="no-bullet">
+<li>- If the sequence begins with <code>^</code>,
+it matches any single character <i>not</i> from the rest of the sequence.
+</li><li>- If two characters in the sequence are separated by <code>-</code>, this is shorthand
+for the full list of ASCII characters between them
+(e.g. <code>[0-9]</code> matches any decimal digit).
+</li><li>- To include a literal <code>]</code> in the sequence, make it the first character
+(following a possible <code>^</code>).
+</li><li>- To include a literal <code>-</code>, make it the first or last character.
+</li></ul>
+</li></ul>
+
+<a name="Ordering-Multiple-Matches"></a>
+<h4 class="unnumberedsubsec">Ordering Multiple Matches</h4>
+
+<p>In general there may be more than one way to match a regular expression
+to an input string.  For example, consider the command
+</p>
+<div class="example">
+<pre class="example"> (string-match &quot;(a*)b*&quot;  &quot;aabaaabb&quot;)
+</pre></div>
+
+<p>Considering only the rules given so far, the value of (list-matches 0 1)
+might be <code>(&quot;aabb&quot; &quot;aa&quot;)</code> or <code>(&quot;aaab&quot; &quot;aaa&quot;)</code> or <code>(&quot;ab&quot; &quot;a&quot;)</code> 
+or any of several other combinations.
+To resolve this potential ambiguity <b>string-match</b> chooses among
+alternatives using the rule <i>first then longest</i>.
+In other words, it considers the possible matches in order working
+from left to right across the input string and the pattern, and it
+attempts to match longer pieces of the input string before shorter
+ones.  More specifically, the following rules apply in decreasing
+order of priority:
+</p><ul class="no-bullet">
+<li> [1]
+If a regular expression could match two different parts of an input string
+then it will match the one that begins earliest.
+</li><li> [2]
+If a regular expression contains <b>|</b> operators then the leftmost
+matching sub-expression is chosen.
+</li><li> [3]
+In <b>*</b><span class="roman">, </span><b>+</b><span class="roman">, and </span><b>?</b> constructs, longer matches are chosen
+in preference to shorter ones.
+</li><li> [4]
+In sequences of expression components the components are considered
+from left to right.
+</li></ul>
+
+<p>In the example from above, <b>(a*)b*</b><span class="roman"> matches </span><b>aab</b><span class="roman">:  the </span><b>(a*)</b>
+portion of the pattern is matched first and it consumes the leading
+<b>aa</b><span class="roman">; then the </span><b>b*</b> portion of the pattern consumes the
+next <b>b</b>.  Or, consider the following example:
+</p>
+<div class="example">
+<pre class="example"> (string-match &quot;(ab|a)(b*)c&quot;  &quot;xabc&quot;) ==&gt; 1
+ (list-matches 0 1 2 3) ==&gt; (&quot;abc&quot; &quot;ab&quot; &quot;&quot; NIL)
+ (match-beginning 0) ==&gt; 1
+ (match-end 0) ==&gt; 4
+ (match-beginning 1) ==&gt; 1
+ (match-end 1) ==&gt; 3
+ (match-beginning 2) ==&gt; 3
+ (match-end 2) ==&gt; 3
+ (match-beginning 3) ==&gt; -1
+ (match-end 3) ==&gt; -1
+
+</pre></div>
+
+<p>In the above example the return value of <code>1</code> (which is <code>&gt; -1</code>)
+indicates that a match was found.   The entire match runs from
+1 to 4. 
+Rule 4 specifies that <b>(ab|a)</b> gets first shot at the input
+string and Rule 2 specifies that the <b>ab</b> sub-expression
+is checked before the <b>a</b> sub-expression.
+Thus the <b>b</b><span class="roman"> has already been claimed before the </span><b>(b*)</b>
+component is checked and <b>(b*)</b> must match an empty string.
+</p>
+<p>The special characters in the string <code>&quot;\()[]+.*|^$?&quot;</code>,
+must be quoted, if a simple string search is desired.   The function
+re-quote-string is provided for this purpose.
+</p><div class="example">
+<pre class="example">(re-quote-string &quot;*standard*&quot;) ==&gt; &quot;\\*standard\\*&quot;
+
+(string-match (re-quote-string &quot;*standard*&quot;) &quot;X *standard* &quot;)
+ ==&gt; 2
+
+(string-match &quot;*standard*&quot; &quot;X *standard* &quot;)
+Error: Regexp Error: ?+* follows nothing
+</pre></div>
+<p>Note there is actually just one <code>\</code> before the <code>*</code>
+but the printer makes two so that the string can be read, since
+<code>\</code> is also the lisp quote character.   In the last example
+an error is signalled since the special character <code>*</code> must
+follow an atom if it is interpreted as a regular expression.
+</p>
+
+
+
+
+
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="System-Definitions.html#System-Definitions" accesskey="p" rel="prev">System Definitions</a>, Up: <a href="System-Definitions.html#System-Definitions" accesskey="u" rel="up">System Definitions</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: option</title>
+
+<meta name="description" content="GCL TK Manual: option">
+<meta name="keywords" content="GCL TK Manual: option">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="options.html#options" rel="next" title="options">
+<link href="tk_002dmenu_002dbar.html#tk_002dmenu_002dbar" rel="prev" title="tk-menu-bar">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="option"></a>
+<div class="header">
+<p>
+Next: <a href="options.html#options" accesskey="n" rel="next">options</a>, Previous: <a href="tk_002dmenu_002dbar.html#tk_002dmenu_002dbar" accesskey="p" rel="prev">tk-menu-bar</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="option-1"></a>
+<h3 class="section">3.11 option</h3>
+
+<p>option \- Add/retrieve window options to/from the option database
+</p><a name="Synopsis-25"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>option :add </b><i>pattern value </i><span class="roman">?</span><i>priority</i>?
+</p><br>
+<p><b>option :clear</b>
+</p><br>
+<p><b>option :get </b><i>window name class</i>
+</p><br>
+<p><b>option :readfile </b><i>fileName </i><span class="roman">?</span><i>priority</i>?
+</p>
+<a name="Description-22"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>option</b> command allows you to add entries to the Tk option
+database or to retrieve options from the database.  The <b>add</b>
+form of the command adds a new option to the database.
+<i>Pattern</i> contains
+the option being specified, and consists of names and/or classes
+separated by asterisks or dots, in the usual X format.  <i>Value</i>
+contains a text string to associate with <i>pattern</i>;  this is the
+value that will be returned in calls to <b>Tk_GetOption</b> or by
+invocations of the <b>option :get</b><span class="roman"> command.  If </span><i>priority</i>
+is specified, it indicates the priority level for this option (see
+below for legal values);  it defaults to <b>interactive</b>.
+This command always returns an empty string.
+</p>
+<p>The <b>option :clear</b> command clears the option database.  Default
+options (in the
+<b>RESOURCE_MANAGER</b><span class="roman"> property or the </span><b>.Xdefaults</b>
+file) will be reloaded automatically the next time an
+option is added to the database or removed from it.  This command
+always returns an empty string.
+</p>
+<p>The <b>option :get</b> command returns the value of the option
+specified for <i>window</i>
+under <i>name</i><span class="roman"> and </span><i>class</i>.  If several entries in the option
+database match <i>window</i><span class="roman">, </span><i>name</i><span class="roman">, and </span><i>class</i>, then
+the command returns whichever was created with highest
+<i>priority</i> level.  If there are several matching
+entries at the same priority level, then it returns whichever entry
+was most recently entered into the option database.  If there are
+no matching entries, then the empty string is returned.
+</p>
+<p>The <b>readfile</b><span class="roman"> form of the command reads </span><i>fileName</i>,
+which should have the standard format for an
+X resource database such as <b>.Xdefaults</b>, and adds all the
+options specified in that file to the option database.  If <i>priority</i>
+is specified, it indicates the priority level at which to enter the
+options;  <i>priority</i><span class="roman"> defaults to </span><b>interactive</b>.
+</p>
+<p>The <i>priority</i><span class="roman"> arguments to the </span><b>option</b> command are
+normally specified symbolically using one of the following values:
+</p>
+<dl compact="compact">
+<dt><b>widgetDefault</b></dt>
+<dd><p>Level 20.  Used for default values hard-coded into widgets.
+</p></dd>
+<dt><b>startupFile</b></dt>
+<dd><p>Level 40.  Used for options specified in application-specific
+startup files.
+</p></dd>
+<dt><b>userDefault</b></dt>
+<dd><p>Level 60.  Used for options specified in user-specific defaults
+files, such as <b>.Xdefaults</b>, resource databases loaded into
+the X server, or user-specific startup files.
+</p></dd>
+<dt><b>interactive</b></dt>
+<dd><p>Level 80.  Used for options specified interactively after the application
+starts running.  If <i>priority</i> isn&rsquo;t specified, it defaults to
+this level.
+</p></dd>
+</dl>
+
+
+<p>Any of the above keywords may be abbreviated.  In addition, priorities
+may be specified numerically using integers between 0 and 100,
+inclusive.  The numeric form is probably a bad idea except for new priority
+levels other than the ones given above.
+</p>
+<a name="Keywords-25"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>database, option, priority, retrieve
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="options.html#options" accesskey="n" rel="next">options</a>, Previous: <a href="tk_002dmenu_002dbar.html#tk_002dmenu_002dbar" accesskey="p" rel="prev">tk-menu-bar</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

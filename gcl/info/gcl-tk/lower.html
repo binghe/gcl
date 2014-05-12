@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: lower</title>
+
+<meta name="description" content="GCL TK Manual: lower">
+<meta name="keywords" content="GCL TK Manual: lower">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="tk_002dmenu_002dbar.html#tk_002dmenu_002dbar" rel="next" title="tk-menu-bar">
+<link href="tk_002dlistbox_002dsingle_002dselect.html#tk_002dlistbox_002dsingle_002dselect" rel="prev" title="tk-listbox-single-select">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="lower"></a>
+<div class="header">
+<p>
+Next: <a href="tk_002dmenu_002dbar.html#tk_002dmenu_002dbar" accesskey="n" rel="next">tk-menu-bar</a>, Previous: <a href="tk_002dlistbox_002dsingle_002dselect.html#tk_002dlistbox_002dsingle_002dselect" accesskey="p" rel="prev">tk-listbox-single-select</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="lower-1"></a>
+<h3 class="section">3.9 lower</h3>
+
+<p>lower \- Change a window&rsquo;s position in the stacking order
+</p><a name="Synopsis-23"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>lower </b><i>window </i><span class="roman">?</span><i>belowThis</i>?
+</p>
+<a name="Description-20"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>If the <i>belowThis</i> argument is omitted then the command lowers
+<i>window</i> so that it is below all of its siblings in the stacking
+order (it will be obscured by any siblings that overlap it and
+will not obscure any siblings).
+If <i>belowThis</i> is specified then it must be the path name of
+a window that is either a sibling of <i>window</i> or the descendant
+of a sibling of <i>window</i>.
+In this case the <b>lower</b> command will insert
+<i>window</i><span class="roman"> into the stacking order just below </span><i>belowThis</i>
+(or the ancestor of <i>belowThis</i><span class="roman"> that is a sibling of </span><i>window</i>);
+this could end up either raising or lowering <i>window</i>.
+</p>
+<a name="Keywords-23"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>lower, obscure, stacking order
+</p>
+
+
+</body>
+</html>

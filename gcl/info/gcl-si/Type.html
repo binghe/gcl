@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Type</title>
+
+<meta name="description" content="GCL SI Manual: Type">
+<meta name="keywords" content="GCL SI Manual: Type">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="GCL-Specific.html#GCL-Specific" rel="next" title="GCL Specific">
+<link href="Doc.html#Doc" rel="prev" title="Doc">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Type"></a>
+<div class="header">
+<p>
+Next: <a href="GCL-Specific.html#GCL-Specific" accesskey="n" rel="next">GCL Specific</a>, Previous: <a href="Doc.html#Doc" accesskey="p" rel="prev">Doc</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Type-1"></a>
+<h2 class="chapter">14 Type</h2>
+
+<dl>
+<dt><a name="index-COERCE"></a>Function: <strong>COERCE</strong> <em>(x type)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Coerces X to an object of the type TYPE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TYPE_002dOF"></a>Function: <strong>TYPE-OF</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the type of X.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CONSTANTP"></a>Function: <strong>CONSTANTP</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the variable named by SYMBOL is a constant; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TYPEP"></a>Function: <strong>TYPEP</strong> <em>(x type)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is of the type TYPE; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COMMONP"></a>Function: <strong>COMMONP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a Common Lisp object; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SUBTYPEP"></a>Function: <strong>SUBTYPEP</strong> <em>(type1 type2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if TYPE1 is a subtype of TYPE2; NIL otherwise.  If it could not
+determine, then returns NIL as the second value.  Otherwise, the second value
+is T.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHECK_002dTYPE"></a>Macro: <strong>CHECK-TYPE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(check-type place typespec [string])
+</pre></div>
+
+<p>Signals an error, if the contents of PLACE are not of the specified type.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASSERT"></a>Macro: <strong>ASSERT</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(assert test-form [({place}*) [string {arg}*]])
+</pre></div>
+
+<p>Signals an error if the value of TEST-FORM is NIL.  STRING is an format string
+used as the error message.  ARGs are arguments to the format string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEFTYPE"></a>Macro: <strong>DEFTYPE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(deftype name lambda-list {decl | doc}* {form}*)
+</pre></div>
+
+<p>Defines a new type-specifier abbreviation in terms of an &rsquo;expansion&rsquo; function
+	(lambda lambda-list1 {decl}* {form}*)
+where lambda-list1 is identical to LAMBDA-LIST except that all optional
+parameters with no default value specified in LAMBDA-LIST defaults to the
+symbol &rsquo;*&rsquo;, but not to NIL.  When the type system of GCL encounters a
+type specifier (NAME arg1 ... argn), it calls the expansion function with
+the arguments arg1 ... argn, and uses the returned value instead of the
+original type specifier.  When the symbol NAME is used as a type specifier,
+the expansion function is called with no argument.  The doc-string DOC, if
+supplied, is saved as the TYPE doc of NAME, and is retrieved by
+(documentation &rsquo;NAME &rsquo;type).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DYNAMIC_002dEXTENT"></a>Declaration: <strong>DYNAMIC-EXTENT</strong></dt>
+<dd><p>Package:LISP
+Declaration to allow locals to be cons&rsquo;d on the C stack.
+For example
+(defun foo (&amp;rest l) (declare (:dynamic-extent l)) ...)
+will cause l to be a list formed on the C stack of the foo function
+frame.
+Of course passing L out as a value of foo will cause havoc.
+(setq x (make-list n))
+(setq x (cons a b))
+(setq x (list a  b c ..))
+also are handled on the stack, for dynamic-extent x.
+</p>
+
+
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="GCL-Specific.html#GCL-Specific" accesskey="n" rel="next">GCL Specific</a>, Previous: <a href="Doc.html#Doc" accesskey="p" rel="prev">Doc</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

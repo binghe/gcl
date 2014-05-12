@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: Return Values</title>
+
+<meta name="description" content="GCL TK Manual: Return Values">
+<meta name="keywords" content="GCL TK Manual: Return Values">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html#General" rel="up" title="General">
+<link href="Argument-Lists.html#Argument-Lists" rel="next" title="Argument Lists">
+<link href="Common-Features-of-Widgets.html#Common-Features-of-Widgets" rel="prev" title="Common Features of Widgets">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Return-Values"></a>
+<div class="header">
+<p>
+Next: <a href="Argument-Lists.html#Argument-Lists" accesskey="n" rel="next">Argument Lists</a>, Previous: <a href="Common-Features-of-Widgets.html#Common-Features-of-Widgets" accesskey="p" rel="prev">Common Features of Widgets</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="Return-Values-1"></a>
+<h3 class="section">1.4 Return Values</h3>
+
+<a name="Widget-Constructor-Return-Values"></a>
+<h4 class="subsection">1.4.1 Widget Constructor Return Values</h4>
+
+<p>On successful completion, the widget constructor functions return the
+symbol passed in as the first argument.   It will now have a functional
+binding.   It is an error to pass in a symbol which already corresponds
+to a widget, without first calling the <code>destroy</code> command.   On failure,
+an error is signalled.
+</p>
+<a name="Widget-Return-Values"></a>
+<h4 class="subsection">1.4.2 Widget Return Values</h4>
+
+<p>The <i>widget</i> functions themselves, do not normally return any value.
+Indeed the lisp process does not wait for them to return, but merely
+dispatches the commands, such as to change the text in themselves.
+Sometimes however you either wish to wait, in order to synchronize, or
+you wish to see if your command fails or succeeds.  You request values
+by passing the keyword :return and a value indicating the type.   
+</p>
+<div class="example">
+<pre class="example">(.hello :configure :text &quot;Bye World&quot; :return 'string)
+==&gt; &quot;&quot; 
+==&gt; T
+</pre></div>
+<p>the empty string is returned as first value, and the second value
+<code>T</code> indicates that the new text value was successfully set.  LISP
+will not continue until the tkclsrv process indicates back that the
+function call has succeeded.  While waiting of course LISP will continue
+to process other graphics events which arrive, since otherwise a
+deadlock would arise: the user for instance might click on a mouse, just after
+we had decided to wait for a return value from the <code>.hello</code> function.
+More generally a user program may be running in <b>GCL</b> and be interrupted
+to receive and act on communications from the <samp>gcltksrv</samp>
+process.   If an error occurred then the second return value of the
+lisp function will be NIL.  In this case the first value, the string
+is usually an informative message about the type of error.
+</p>
+<p>A special variable <code>tk::*break-on-errors*</code> which if not
+<code>nil</code>, requests that that <b>LISP</b> signal an error when a message
+is received indicating a function failed.  Whenever a command fails,
+whether a return value was requested or not, <samp>gcltksrv</samp> returns a
+message indicating failure.  The default is to not go into the
+debugger.  When debugging your windows it may be convenient however to
+set this variable to <code>T</code> to track down incorrect messages.
+</p>
+<p>The <samp>gcltksrv</samp> process always returns strings as values.
+If <code>:return</code> <i>type</i> is specified, then conversion to <i>type</i>
+is accomplished by calling
+</p>
+<div class="example">
+<pre class="example">(coerce-result <i>return-string</i> <i>type</i>)
+</pre></div>
+
+<p>Here <i>type</i> must be a symbol with a <code>coercion-functions</code>
+property.
+The builtin return types which may be requested are:
+</p>
+<dl compact="compact">
+<dt><code>T</code></dt>
+<dd><p>in which case
+the string passed back from the <samp>gcltksrv</samp> process, will be read by the
+lisp reader.
+</p></dd>
+<dt><code>number</code></dt>
+<dd><p>the string is converted to a number using the current *read-base*
+</p></dd>
+<dt><code>list-strings</code></dt>
+<dd>
+<div class="example">
+<pre class="example">(coerce-result &quot;a b {c d} e&quot; 'list-strings)
+==&gt; (&quot;a&quot; &quot;b&quot; &quot;c d&quot; &quot;e&quot;)
+</pre></div>
+</dd>
+<dt><code>boolean</code></dt>
+<dd><p>(coerce-result &quot;1&quot; &rsquo;boolean)
+==&gt; T
+(coerce-result &quot;0&quot; &rsquo;boolean)
+==&gt; NIL
+</p></dd>
+</dl>
+
+<p>The above symbols are in the <code>TK</code> or <code>LISP</code> package.
+It would be possible to add new types just as the <code>:return t</code>
+is done:
+</p>
+<div class="example">
+<pre class="example">(setf (get 't 'coercion-functions)
+      (cons #'(lambda (x) (our-read-from-string x 0))
+	    #'(lambda (x) (format nil &quot;~s&quot; x))))
+</pre></div>
+
+<p>The <code>coercion-functions</code> property of a symbol, is a cons whose
+<code>car</code> is the coercion form from a string to some possibly different
+lisp object, and whose <code>cdr</code> is a function which builds a string
+to send to the graphics server.   Often the two functions are inverse
+functions one of the other up to equal.
+</p>
+<a name="Control-Function-Return-Values"></a>
+<h4 class="subsection">1.4.3 Control Function Return Values</h4>
+
+<p>The <i>control</i> funcions (see <a href="Control.html#Control">Control</a>)  do not return a value
+or wait unless requested to do so, using the <code>:return</code> keyword.
+The types and method of specification are the same as for the
+Widget Functions in the previous section.
+</p>
+<div class="example">
+<pre class="example">(winfo :width '.hello :return 'number)
+==&gt; 120
+</pre></div>
+<p>indicates that the <code>.hello</code> button is actually 120 pixels
+wide.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Argument-Lists.html#Argument-Lists" accesskey="n" rel="next">Argument Lists</a>, Previous: <a href="Common-Features-of-Widgets.html#Common-Features-of-Widgets" accesskey="p" rel="prev">Common Features of Widgets</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

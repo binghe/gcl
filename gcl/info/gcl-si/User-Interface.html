@@ -1,0 +1,485 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: User Interface</title>
+
+<meta name="description" content="GCL SI Manual: User Interface">
+<meta name="keywords" content="GCL SI Manual: User Interface">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Doc.html#Doc" rel="next" title="Doc">
+<link href="Iteration-and-Tests.html#Iteration-and-Tests" rel="prev" title="Iteration and Tests">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="User-Interface"></a>
+<div class="header">
+<p>
+Next: <a href="Doc.html#Doc" accesskey="n" rel="next">Doc</a>, Previous: <a href="Iteration-and-Tests.html#Iteration-and-Tests" accesskey="p" rel="prev">Iteration and Tests</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="User-Interface-1"></a>
+<h2 class="chapter">12 User Interface</h2>
+
+<dl>
+<dt><a name="index-_002d-1"></a>Special Variable: <strong>-</strong></dt>
+<dd><p>Package:LISP
+Holds the top-level form that GCL is currently evaluating.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002d"></a>Function: <strong>-</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Subtracts the second and all subsequent NUMBERs from the first NUMBER.
+With one arg, negates it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNTRACE"></a>Macro: <strong>UNTRACE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(untrace {function-name}*)
+</pre></div>
+
+<p>Removes tracing from the specified functions.  With no FUNCTION-NAMEs,
+untraces all functions.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002a_002a_002a"></a>Variable: <strong>***</strong></dt>
+<dd><p>Package:LISP
+Gets the previous value of ** when GCL evaluates a top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSTRING_002dINPUT_002dSTREAM-1"></a>Function: <strong>MAKE-STRING-INPUT-STREAM</strong> <em>(string &amp;optional (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an input stream which will supply the characters of String between
+Start and End in order.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STEP"></a>Macro: <strong>STEP</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(step form)
+</pre></div>
+
+<p>Evaluates FORM in the single-step mode and returns the value.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aBREAK_002dENABLE_002a"></a>Variable: <strong>*BREAK-ENABLE*</strong></dt>
+<dd><p>Package:LISP
+GCL specific:  When an error occurrs, control enters to the break loop only
+if the value of this variable is non-NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002f-1"></a>Special Variable: <strong>/</strong></dt>
+<dd><p>Package:LISP
+Holds a list of the values of the last top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DESCRIBE"></a>Function: <strong>DESCRIBE</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Prints a description of the object X.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ED"></a>Function: <strong>ED</strong> <em>(&amp;optional x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Invokes the editor.  The action depends on the version of GCL.  
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aDEBUG_002dIO_002a"></a>Variable: <strong>*DEBUG-IO*</strong></dt>
+<dd><p>Package:LISP
+Holds the I/O stream used by the GCL debugger.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aBREAK_002dON_002dWARNINGS_002a"></a>Variable: <strong>*BREAK-ON-WARNINGS*</strong></dt>
+<dd><p>Package:LISP
+When the function WARN is called, control enters to the break loop only
+if the value of this varialbe is non-NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CERROR"></a>Function: <strong>CERROR</strong> <em>(continue-format-string error-format-string &amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Signals a correctable error.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002a_002a"></a>Variable: <strong>**</strong></dt>
+<dd><p>Package:LISP
+Gets the previous value of * when GCL evaluates a top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002b_002b_002b"></a>Special Variable: <strong>+++</strong></dt>
+<dd><p>Package:LISP
+Gets the previous value of ++ when GCL evaluates a top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INSPECT"></a>Function: <strong>INSPECT</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Shows the information about the object X in an interactive manner
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002f_002f"></a>Special Variable: <strong>//</strong></dt>
+<dd><p>Package:LISP
+Gets the previous value of / when GCL evaluates a top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aTRACE_002dOUTPUT_002a"></a>Variable: <strong>*TRACE-OUTPUT*</strong></dt>
+<dd><p>Package:LISP
+The trace output stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002b_002b"></a>Special Variable: <strong>++</strong></dt>
+<dd><p>Package:LISP
+Gets the previous value of + when GCL evaluates a top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aERROR_002dOUTPUT_002a"></a>Variable: <strong>*ERROR-OUTPUT*</strong></dt>
+<dd><p>Package:LISP
+Holds the output stream for error messages.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DRIBBLE"></a>Function: <strong>DRIBBLE</strong> <em>(&amp;optional pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If PATHNAME is given, begins to record the interaction to the specified file.
+If PATHNAME is not given, ends the recording.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002a-1"></a>Variable: <strong>*</strong></dt>
+<dd><p>Package:LISP
+Holds the value of the last top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002f_002f_002f"></a>Special Variable: <strong>///</strong></dt>
+<dd><p>Package:LISP
+Gets the previous value of // when GCL evaluates a top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WARN"></a>Function: <strong>WARN</strong> <em>(format-string &amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Formats FORMAT-STRING and ARGs to *ERROR-OUTPUT* as a warning message.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BREAK"></a>Function: <strong>BREAK</strong> <em>(&amp;optional (format-string nil) &amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Enters a break loop.  If FORMAT-STRING is non-NIL, formats FORMAT-STRING
+and ARGS to *ERROR-OUTPUT* before entering a break loop.
+Typing :HELP at the break loop will list the break-loop commands.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002b-1"></a>Special Variable: <strong>+</strong></dt>
+<dd><p>Package:LISP
+Holds the last top-level form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TRACE"></a>Macro: <strong>TRACE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(trace {function-name}*)
+</pre></div>
+
+<p>Traces the specified functions.  With no FUNCTION-NAMEs, returns a list of
+functions currently being traced.
+</p>
+<p>Additional Keywords are allowed in GCL with the
+syntax (trace {fn | (fn {:kw form}*)}*)
+</p>
+<p>For each FN naming a function, traces that function.  Each :KW should
+be one of the ones listed below, and FORM should have the
+corresponding form.  No :KW may be given more than once for the same
+FN.  Returns a list of all FNs now traced which weren&rsquo;t already
+traced.
+</p>
+
+<p>EXAMPLE (Try this with your favorite factorial function FACT):
+</p>
+<div class="example">
+<pre class="example">;; print entry args and exit values
+
+(trace FACT)
+
+;; Break coming out of FACT if the value is bigger than 1000.
+
+(trace (fact :exit
+	     (progn
+	       (if (&gt; (car values) 1000)(break &quot;big result&quot;))
+	       (car values))))
+
+;; Hairy example:
+
+;;make arglist available without the si:: prefix
+(import 'si::arglist)
+
+(trace (fact
+        :DECLARATIONS
+        ((in-string &quot;Here comes input: &quot;)
+         (out-string &quot;Here comes output: &quot;)
+         all-values
+         (silly (+ 3 4)))
+        :COND
+        (equal (rem (car arglist) 2) 0)
+        :ENTRY
+        (progn
+          (cond
+           ((equal (car arglist) 8)
+            (princ &quot;Entering FACT on input 8!! &quot;)
+            (setq out-string &quot;Here comes output from inside (FACT 8): &quot;))
+           (t
+            (princ in-string)))
+          (car arglist))
+        :EXIT
+        (progn
+          (setq all-values (cons (car values) all-values))
+          (princ out-string)
+          (when (equal (car arglist) 8)
+                ;; reset out-string
+                (setq out-string &quot;Here comes output: &quot;))
+          (cons 'fact values))
+        :ENTRYCOND
+        (not (= (car arglist) 6))
+        :EXITCOND
+        (not (= (car values) (* 6 (car arglist))))
+        :DEPTH
+        5))
+</pre></div>
+
+<p>Syntax is <code>:keyword</code> <i>form1</i> <code>:keyword</code> <i>form2</i> ...
+</p>
+<dl compact="compact">
+<dt><code>:declarations</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT: NIL
+</pre></div>
+
+<p>FORM is ((var1  form1 )(var2  form2 )...), where
+the var_i  are symbols distinct from each other and from
+all symbols which are similarly declared for currently
+traced functions.  Each form  is evaluated immediately.
+Upon any invocation of a traced function when not already
+inside a traced function call, each var  is bound to
+that value of form .
+</p>
+</dd>
+<dt><code>:COND</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT: T
+</pre></div>
+
+<p>Here, FORM is any Lisp form to be evaluated (by EVAL)
+upon entering a call of FN, in the environment where si::ARGLIST
+is bound to the current list of arguments of FN.  Note that
+even if the evaluation of FORM changes the value of SI::ARGLIST
+(e.g. by evaluation of (SETQ si::ARGLIST ...)), the list of
+arguments passed to FN is unchanged.  Users may alter args passed
+by destructively modifying the list structure of SI::ARGLIST
+however. The call is traced 
+(thus invoking the :ENTRYCOND and :EXITCOND forms, at least)
+if and only if FORM does not evaluate to NIL.
+</p>
+</dd>
+<dt><code>:ENTRYCOND</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT: T
+</pre></div>
+
+<p>This is evaluated (by EVAL) if the :COND form evaluates to
+non-NIL, both in an environment where SI::ARGLIST is bound to the
+current list of arguments of FN.  If non-NIL, the :ENTRY form
+is then evaluated and printed with the trace &quot;prompt&quot;.
+</p>
+</dd>
+<dt><code>:ENTRY</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT: (CONS (QUOTE x) SI::ARGLIST),
+</pre></div>
+
+<p>where x is the symbol we call FN
+If the :COND and :ENTRYCOND forms evaluate to non-NIL,
+then the trace &quot;prompt&quot; is printed and then this FORM is
+evaluated (by EVAL) in an environment where SI::ARGLIST is bound
+to the current list of arguments of FN.  The result is then
+printed.
+</p>
+</dd>
+<dt><code>:EXITCOND</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT: T
+</pre></div>
+
+<p>This is evaluated (by EVAL) in the environment described
+below for the :EXIT form.  The :EXIT form is then evaluated
+and printed with the &quot;prompt&quot; if and only if the result here
+is non-NIL.
+</p>
+</dd>
+<dt><code>:EXIT</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT: (CONS (QUOTE x) VALUES),
+</pre></div>
+
+<p>where x is the symbol we call FN
+Upon exit from tracing a given call, this FORM is
+evaluated (after the appropriate trace &quot;prompt&quot; is printed),
+using EVAL in an environment where SI::ARGLIST is bound to the
+current list of arguments of FN and VALUES is bound to the
+list of values returned by FN (recalling that Common Lisp
+functions may return multiple values).
+</p>
+</dd>
+<dt><code>:DEPTH</code></dt>
+<dd><div class="example">
+<pre class="example">DEFAULT:  No depth limit
+</pre></div>
+
+<p>FORM is simply a positive integer specifying the maximum
+nesting of traced calls of FN, i.e. of calls of FN in which
+the :COND form evaluated to non-NIL.  For calls of FN in
+which this limit is exceeded, even the :COND form is not
+evaluated, and the call is not traced.
+</p>
+</dd>
+</dl>
+
+</dd></dl>
+
+
+
+
+
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Doc.html#Doc" accesskey="n" rel="next">Doc</a>, Previous: <a href="Iteration-and-Tests.html#Iteration-and-Tests" accesskey="p" rel="prev">Iteration and Tests</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

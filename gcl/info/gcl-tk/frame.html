@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: frame</title>
+
+<meta name="description" content="GCL TK Manual: frame">
+<meta name="keywords" content="GCL TK Manual: frame">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="label.html#label" rel="next" title="label">
+<link href="message.html#message" rel="prev" title="message">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="frame"></a>
+<div class="header">
+<p>
+Next: <a href="label.html#label" accesskey="n" rel="next">label</a>, Previous: <a href="message.html#message" accesskey="p" rel="prev">message</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="frame-1"></a>
+<h3 class="section">2.12 frame</h3>
+
+<p>frame \- Create and manipulate frame widgets
+</p><a name="Synopsis-11"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>frame</b><i> </i><i>pathName </i><span class="roman">?</span><b>:class </b><i>className</i><span class="roman">? ?</span><i>options</i>?
+</p><a name="Standard-Options-11"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">background             cursor             relief           
+borderWidth            geometry           
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Frame"></a>
+<h4 class="unnumberedsubsec">Arguments for Frame</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:height</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>height</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Height</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired height for the window in any of the forms
+acceptable to <b>Tk_GetPixels</b>.
+This option is only used if the <b>:geometry</b> option is
+unspecified.
+If this option is less than or equal to zero (and <b>:geometry</b>
+is not specified) then the window will not request any size at
+all.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired width for the window in any of the forms
+acceptable to <b>Tk_GetPixels</b>.
+This option is only used if the <b>:geometry</b> option is
+unspecified.
+If this option is less than or equal to zero (and <b>:geometry</b>
+is not specified) then the window will not request any size at
+all.
+</p></dd>
+</dl>
+
+<a name="Description-8"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>frame</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a frame widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the frame such as its background color
+and relief.  The <b>frame</b> command returns the
+path name of the new window.
+</p>
+<p>A frame is a simple widget.  Its primary purpose is to act as a
+spacer or container for complex window layouts.  The only features
+of a frame are its background color and an optional 3-D border to make the
+frame appear raised or sunken.
+</p>
+<p>In addition to the standard options listed above, a <b>:class</b>
+option may be specified on the command line.  If it is specified, then
+the new widget&rsquo;s class will be set to <i>className</i> instead of
+<b>Frame</b>.  Changing the class of a frame widget may be useful
+in order to use a special class name in database options referring
+to this widget and its children.  Note:  <b>:class</b> is handled
+differently than other command-line options and cannot be specified
+using the option database (it has to be processed
+before the other options are even looked up, since the new class
+name will affect the lookup of the other options).  In addition,
+the <b>:class</b> option may not be queried or changed using the
+<b>config</b> command described below.
+</p>
+<a name="A-Frame-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Frame Widget&rsquo;s Arguments</h4>
+
+<p>The <b>frame</b> command creates a new Tcl command whose
+name is the same as the path name of the frame&rsquo;s window.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>PathName</i> is the name of the command, which is the same as
+the frame widget&rsquo;s path name.  <i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for frame widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? </span><i>?value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>frame</b>
+command.
+</p>
+</dd>
+</dl>
+<a name="Bindings-5"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>When a new frame is created, it has no default event bindings:
+frames are not intended to be interactive.
+</p>
+<a name="Keywords-11"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>frame, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="label.html#label" accesskey="n" rel="next">label</a>, Previous: <a href="message.html#message" accesskey="p" rel="prev">message</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

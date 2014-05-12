@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: tkerror</title>
+
+<meta name="description" content="GCL TK Manual: tkerror">
+<meta name="keywords" content="GCL TK Manual: tkerror">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="tkvars.html#tkvars" rel="next" title="tkvars">
+<link href="tk.html#tk" rel="prev" title="tk">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="tkerror"></a>
+<div class="header">
+<p>
+Next: <a href="tkvars.html#tkvars" accesskey="n" rel="next">tkvars</a>, Previous: <a href="tk.html#tk" accesskey="p" rel="prev">tk</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="tkerror-1"></a>
+<h3 class="section">3.20 tkerror</h3>
+
+<p>tkerror \- Command invoked to process background errors
+</p><a name="Synopsis-33"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>tkerror </b><i>message</i>
+</p>
+<a name="Description-31"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>tkerror</b> command doesn&rsquo;t exist as built-in part of Tk.  Instead,
+individual applications or users can define a <b>tkerror</b>
+command (e.g. as a Tcl procedure) if they wish to handle background
+errors.
+</p>
+<p>A background error is one that occurs in a command that didn&rsquo;t
+originate with the application.  For example, if an error occurs
+while executing a command specified with a <b>bind</b><span class="roman"> of </span><b>after</b>
+command, then it is a background error.  For a non-background error,
+the error can simply be returned up through nested Tcl command
+evaluations until it reaches the top-level code in the application;
+then the application can report the error in whatever way it
+wishes.  When a background error occurs, the unwinding ends in
+the Tk library and there is no obvious way for Tk to report
+the error.
+</p>
+<p>When Tk detects a background error, it invokes the <b>tkerror</b>
+command, passing it the error message as its only argument.
+Tk assumes that the application has implemented the <b>tkerror</b>
+command, and that the command will report the error in a way that
+makes sense for the application.  Tk will ignore any result returned
+by the <b>tkerror</b> command.
+</p>
+<p>If another Tcl error occurs within the <b>tkerror</b> command
+then Tk reports the error itself by writing a message
+to stderr.
+</p>
+<p>The Tk script library includes a default <b>tkerror</b> procedure
+that posts a dialog box containing the error message and offers
+the user a chance to see a stack trace that shows where the
+error occurred.
+</p>
+<a name="Keywords-34"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>background error, reporting
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="tkvars.html#tkvars" accesskey="n" rel="next">tkvars</a>, Previous: <a href="tk.html#tk" accesskey="p" rel="prev">tk</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

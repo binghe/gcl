@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: after</title>
+
+<meta name="description" content="GCL TK Manual: after">
+<meta name="keywords" content="GCL TK Manual: after">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="bind.html#bind" rel="next" title="bind">
+<link href="Control.html#Control" rel="prev" title="Control">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="after"></a>
+<div class="header">
+<p>
+Next: <a href="bind.html#bind" accesskey="n" rel="next">bind</a>, Previous: <a href="Control.html#Control" accesskey="p" rel="prev">Control</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="after-1"></a>
+<h3 class="section">3.1 after</h3>
+
+<p>after - Execute a command after a time delay
+</p><a name="Synopsis-15"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>after </b><i>ms </i><span class="roman">?</span><i>arg1 arg2 arg3 ...</i>?
+</p>
+<a name="Description-12"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>This command is used to delay execution of the program or to execute
+a command in background after a delay.  The <i>ms</i> argument gives
+a time in milliseconds.
+If <i>ms</i><span class="roman"> is the only argument to </span><b>after</b>
+then the command sleeps for <i>ms</i> milliseconds and returns.
+While the command is sleeping the application does not respond to
+X events and other events.
+</p>
+<p>If additional arguments are
+present after <i>ms</i>, then a Tcl command is formed by concatenating
+all the additional arguments in the same fashion as the <b>concat</b>
+command.  <b>After</b> returns immediately but arranges for the command
+to be executed <i>ms</i> milliseconds later in background.
+The command will be executed at global level (outside the context
+of any Tcl procedure).
+If an error occurs while executing the delayed command then the
+<b>tkerror</b> mechanism is used to report the error.
+</p>
+<p>The <b>after</b> command always returns an empty string.
+</p>
+<p>See <a href="tkerror.html#tkerror">tkerror</a>.
+</p>
+<a name="Keywords-15"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>delay, sleep, time
+</p>
+
+
+</body>
+</html>

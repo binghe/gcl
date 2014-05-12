@@ -1,0 +1,328 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: scale</title>
+
+<meta name="description" content="GCL TK Manual: scale">
+<meta name="keywords" content="GCL TK Manual: scale">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="canvas.html#canvas" rel="next" title="canvas">
+<link href="listbox.html#listbox" rel="prev" title="listbox">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="scale"></a>
+<div class="header">
+<p>
+Next: <a href="canvas.html#canvas" accesskey="n" rel="next">canvas</a>, Previous: <a href="listbox.html#listbox" accesskey="p" rel="prev">listbox</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="scale-1"></a>
+<h3 class="section">2.3 scale</h3>
+
+<p>scale \- Create and manipulate scale widgets
+</p><a name="Synopsis-2"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>scale</b><i> </i><i>pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options-2"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">activeForeground     borderWidth     font           orient     
+background           cursor          foreground     relief     
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Scale"></a>
+<h4 class="unnumberedsubsec">Arguments for Scale</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:command</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>command</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Command</b>&quot;</code>
+</p><br>
+
+<p>Specifies the prefix of a Tcl command to invoke whenever the value of
+the scale is changed interactively.  The actual command consists
+of this option followed by
+a space and a number.  The number indicates the new value of the
+scale.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:from</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>from</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>From</b>&quot;</code>
+</p><br>
+
+<p>Specifies the value corresponding to the left or top end of the
+scale.  Must be an integer.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:label</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>label</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Label</b>&quot;</code>
+</p><br>
+
+<p>Specifies a string to displayed  as a label for the scale.  For
+vertical scales the label is displayed just to the right of the
+top end of the scale.  For horizontal scales the label is displayed
+just above the left end of the scale.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:length</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>length</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Length</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired long dimension of the scale in screen units,
+that is in any of the forms acceptable to <b>Tk_GetPixels</b>.
+For vertical scales this is the scale&rsquo;s height;  for horizontal scales
+it is the scale&rsquo;s width.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:showvalue</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>showValue</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>ShowValue</b>&quot;</code>
+</p><br>
+
+<p>Specifies a boolean value indicating whether or not the current
+value of the scale is to be displayed.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:sliderforeground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>sliderForeground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>sliderForeground</b>&quot;</code>
+</p><br>
+
+<p>Specifies the color to use for drawing the slider under normal conditions.
+When the mouse is in the slider window then the slider&rsquo;s color is
+determined by the <b>activeForeground</b> option.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:sliderlength</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>sliderLength</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>SliderLength</b>&quot;</code>
+</p><br>
+
+<p>Specfies the size of the slider, measured in screen units along the slider&rsquo;s
+long dimension.  The value may be specified in any of the forms acceptable
+to <b>Tk_GetPixels</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:state</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>state</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>State</b>&quot;</code>
+</p><br>
+
+<p>Specifies one of two states for the scale:  <b>normal</b><span class="roman"> or </span><b>disabled</b>.
+If the scale is disabled then the value may not be changed and the scale
+won&rsquo;t activate when the mouse enters it.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:tickinterval</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>tickInterval</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>TickInterval</b>&quot;</code>
+</p><br>
+
+<p>Must be an integer value.  Determines the spacing between numerical
+tick-marks displayed below or to the left of the slider.  If specified
+as 0, then no tick-marks will be displayed.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:to</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>to</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>To</b>&quot;</code>
+</p><br>
+
+<p>Specifies the value corresponding to the right or bottom end of the
+scale.  Must be an integer.  This value may be either less than or
+greater than the <b>from</b> option.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired narrow dimension of the scale in screen units
+(i.e. any of the forms acceptable to <b>Tk_GetPixels</b>).
+For vertical scales this is the scale&rsquo;s width;  for horizontal scales
+this is the scale&rsquo;s height.
+</p></dd>
+</dl>
+
+<a name="Description-2"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>scale</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a scale widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the scale such as its colors, orientation,
+and relief.  The <b>scale</b> command returns its
+<i>pathName</i> argument.  At the time this command is invoked,
+there must not exist a window named <i>pathName</i>, but
+<i>pathName</i>&rsquo;s parent must exist.
+</p>
+<p>A scale is a widget that displays a rectangular region and a
+small <i>slider</i>.  The rectangular region corresponds to a range
+of integer values (determined by the <b>from</b><span class="roman"> and </span><b>to</b> options),
+and the position of the slider selects a particular integer value.
+The slider&rsquo;s position (and hence the scale&rsquo;s value) may be adjusted
+by clicking or dragging with the mouse as described in the BINDINGS
+section below.  Whenever the scale&rsquo;s value is changed, a Tcl
+command is invoked (using the <b>command</b> option) to notify
+other interested widgets of the change.
+</p>
+<p>Three annotations may be displayed in a scale widget:  a label
+appearing at the top-left of the widget (top-right for vertical
+scales), a number displayed just underneath the slider
+(just to the left of the slider for vertical scales), and a collection
+of numerical tick-marks just underneath the current value (just to the left of
+the current value for vertical scales).  Each of these three
+annotations may be selectively enabled or disabled using the
+configuration options.
+</p>
+<a name="A-Scale_0027s_0022Argumentsommand_0022"></a>
+<h4 class="unnumberedsubsec">A Scale&rsquo;s&quot;Argumentsommand&quot;</h4>
+
+<p>The <b>scale</b> command creates a new Tcl command whose
+name is <i>pathName</i>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for scale widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>scale</b>
+command.
+</p></dd>
+<dt><i>pathName </i><b>:get</b></dt>
+<dd><p>Returns a decimal string giving the current value of the scale.
+</p></dd>
+<dt><i>pathName </i><b>:set</b><span class="roman"> </span><i>value</i></dt>
+<dd><p>This command is invoked to change the current value of the scale,
+and hence the position at which the slider is displayed.  <i>Value</i>
+gives the new value for the scale.
+</p>
+</dd>
+</dl>
+<a name="Bindings"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>When a new scale is created, it is given the following initial
+behavior by default:
+</p>
+<dl compact="compact">
+<dt><b>&lt;Enter&gt;</b></dt>
+<dd><p>Change the slider display to use <b>activeForeground</b> instead of
+<b>sliderForeground</b>.
+</p></dd>
+<dt><b>&lt;Leave&gt;</b></dt>
+<dd><p>Reset the slider display to use <b>sliderForeground</b> instead of
+<b>activeForeground</b>.
+</p></dd>
+<dt><b>&lt;ButtonPress-1&gt;</b></dt>
+<dd><p>Change the slider display so that the slider appears sunken rather
+than raised.  Move the slider (and adjust the scale&rsquo;s value)
+to correspond to the current mouse position.
+</p></dd>
+<dt><b>&lt;Button1-Motion&gt;</b></dt>
+<dd><p>Move the slider (and adjust the scale&rsquo;s value) to correspond to
+the current mouse position.
+</p></dd>
+<dt><b>&lt;ButtonRelease-1&gt;</b></dt>
+<dd><p>Reset the slider display so that the slider appears raised again.
+</p>
+</dd>
+</dl>
+<a name="Keywords-2"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>scale, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="canvas.html#canvas" accesskey="n" rel="next">canvas</a>, Previous: <a href="listbox.html#listbox" accesskey="p" rel="prev">listbox</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

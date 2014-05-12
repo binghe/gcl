@@ -1,0 +1,1174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Streams and Reading</title>
+
+<meta name="description" content="GCL SI Manual: Streams and Reading">
+<meta name="keywords" content="GCL SI Manual: Streams and Reading">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Special-Forms-and-Functions.html#Special-Forms-and-Functions" rel="next" title="Special Forms and Functions">
+<link href="Lists.html#Lists" rel="prev" title="Lists">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Streams-and-Reading"></a>
+<div class="header">
+<p>
+Next: <a href="Special-Forms-and-Functions.html#Special-Forms-and-Functions" accesskey="n" rel="next">Special Forms and Functions</a>, Previous: <a href="Lists.html#Lists" accesskey="p" rel="prev">Lists</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Streams-and-Reading-1"></a>
+<h2 class="chapter">5 Streams and Reading</h2>
+
+<dl>
+<dt><a name="index-MAKE_002dECHO_002dSTREAM"></a>Function: <strong>MAKE-ECHO-STREAM</strong> <em>(input-stream output-stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a bidirectional stream which gets its input from INPUT-STREAM and
+sends its output to OUTPUT-STREAM.  In addition, all input is echoed to
+OUTPUT-STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aREADTABLE_002a"></a>Variable: <strong>*READTABLE*</strong></dt>
+<dd><p>Package:LISP
+The current readtable.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOAD"></a>Function: <strong>LOAD</strong> <em>(filename &amp;key (verbose *load-verbose*) (print nil) (if-does-not-exist :error))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Loads the file named by FILENAME into GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-OPEN"></a>Function: <strong>OPEN</strong> <em>(filename &amp;key (direction :input) (element-type 'string-char) (if-exists :error) (if-does-not-exist :error))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Opens the file specified by FILENAME, which may be a string, a pathname,
+or a stream.  Returns a stream for the open file.
+DIRECTION is  :INPUT, :OUTPUT, :IO or :PROBE.
+ELEMENT-TYPE is  STRING-CHAR, (UNSIGNED-BYTE n),
+UNSIGNED-BYTE, (SIGNED-BYTE n), SIGNED-BYTE, CHARACTER, BIT, (MOD n), or
+:DEFAULT.
+IF-EXISTS is :ERROR, :NEW-VERSION, :RENAME,
+:RENAME-AND-DELETE, :OVERWRITE, :APPEND, :SUPERSEDE, or NIL.
+IF-DOES-NOT-EXIST is  :ERROR, :CREATE, or NIL.
+</p>
+<p>If FILENAME begins with a vertical pipe sign: &rsquo;|&rsquo;  then the resulting
+stream is actually a one way pipe.   It will be open for reading
+or writing depending on the direction given.   The rest
+of FILENAME in this case is passed to the /bin/sh command.   See
+the posix description of popen for more details.
+</p><div class="example">
+<pre class="example">(setq pipe (open &quot;| wc &lt; /tmp/jim&quot;))
+(format t &quot;File has ~%d lines&quot; (read pipe))
+(close pipe)
+</pre></div>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dBASE_002a"></a>Variable: <strong>*PRINT-BASE*</strong></dt>
+<dd><p>Package:LISP
+The radix in which the GCL printer prints integers and rationals.
+The value must be an integer from 2 to 36, inclusive.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSTRING_002dINPUT_002dSTREAM"></a>Function: <strong>MAKE-STRING-INPUT-STREAM</strong> <em>(string &amp;optional (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an input stream which will supply the characters of String between
+Start and End in order.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PPRINT"></a>Function: <strong>PPRINT</strong> <em>(object &amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Pretty-prints OBJECT.  Returns OBJECT.  Equivalent to
+	(WRITE :STREAM STREAM :PRETTY T)
+The SI:PRETTY-PRINT-FORMAT property N (which must be a non-negative integer)
+of a symbol SYMBOL controls the pretty-printing of form
+	(SYMBOL f1 ... fN fN+1 ... fM)
+in such a way that the subforms fN+1, ..., fM are regarded as the &rsquo;body&rsquo; of
+the entire form.  For instance, the property value of 2 is initially given
+to the symbol DO.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aREAD_002dDEFAULT_002dFLOAT_002dFORMAT_002a"></a>Variable: <strong>*READ-DEFAULT-FLOAT-FORMAT*</strong></dt>
+<dd><p>Package:LISP
+The floating-point format the GCL reader uses when reading floating-point
+numbers that have no exponent marker or have e or E for an exponent marker.
+Must be one of SHORT-FLOAT, SINGLE-FLOAT, DOUBLE-FLOAT, and LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dPRESERVING_002dWHITESPACE"></a>Function: <strong>READ-PRESERVING-WHITESPACE</strong> <em>(&amp;optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Reads an object from STREAM, preserving the whitespace that followed the
+object.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STREAMP"></a>Function: <strong>STREAMP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a stream object; NIL otherwise.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-SET_002dDISPATCH_002dMACRO_002dCHARACTER"></a>Function: <strong>SET-DISPATCH-MACRO-CHARACTER</strong> <em>(disp-char sub-char function &amp;optional (readtable *readtable*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Causes FUNCTION to be called when the DISP-CHAR followed by SUB-CHAR is
+read.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WITH_002dOUTPUT_002dTO_002dSTRING"></a>Macro: <strong>WITH-OUTPUT-TO-STRING</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(with-output-to-string (var [string]) {decl}* {form}*)
+</pre></div>
+
+<p>Binds VAR to a string output stream that puts characters into STRING, which
+defaults to a new string.  The stream is automatically closed on exit and
+the string is returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FILE_002dLENGTH"></a>Function: <strong>FILE-LENGTH</strong> <em>(file-stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the length of the specified file stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dCASE_002a"></a>Variable: <strong>*PRINT-CASE*</strong></dt>
+<dd><p>Package:LISP
+The case in which the GCL printer should print ordinary symbols.
+The value must be one of the keywords :UPCASE, :DOWNCASE, and :CAPITALIZE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PRINT"></a>Function: <strong>PRINT</strong> <em>(object &amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs a newline character, and then prints OBJECT in the mostly readable
+representation.  Returns OBJECT.  Equivalent to
+	(PROGN (TERPRI STREAM) (WRITE OBJECT :STREAM STREAM :ESCAPE T)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SET_002dMACRO_002dCHARACTER"></a>Function: <strong>SET-MACRO-CHARACTER</strong> <em>(char function &amp;optional (non-terminating-p nil) (readtable *readtable*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Causes CHAR to be a macro character that, when seen by READ, causes FUNCTION
+to be called.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FORCE_002dOUTPUT"></a>Function: <strong>FORCE-OUTPUT</strong> <em>(&amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Attempts to force any buffered output to be sent.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dARRAY_002a"></a>Variable: <strong>*PRINT-ARRAY*</strong></dt>
+<dd><p>Package:LISP
+Whether the GCL printer should print array elements.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-STREAM_002dELEMENT_002dTYPE"></a>Function: <strong>STREAM-ELEMENT-TYPE</strong> <em>(stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a type specifier for the kind of object returned by STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WRITE_002dBYTE"></a>Function: <strong>WRITE-BYTE</strong> <em>(integer stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs INTEGER to the binary stream STREAM.  Returns INTEGER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dCONCATENATED_002dSTREAM"></a>Function: <strong>MAKE-CONCATENATED-STREAM</strong> <em>(&amp;rest streams)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a stream which takes its input from each of the STREAMs in turn,
+going on to the next at end of stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PRIN1"></a>Function: <strong>PRIN1</strong> <em>(object &amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Prints OBJECT in the mostly readable representation.  Returns OBJECT.
+Equivalent to (WRITE OBJECT :STREAM STREAM :ESCAPE T).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PRINC"></a>Function: <strong>PRINC</strong> <em>(object &amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Prints OBJECT without escape characters.  Returns OBJECT.  Equivalent to
+	(WRITE OBJECT :STREAM STREAM :ESCAPE NIL).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CLEAR_002dOUTPUT"></a>Function: <strong>CLEAR-OUTPUT</strong> <em>(&amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Clears the output stream STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TERPRI"></a>Function: <strong>TERPRI</strong> <em>(&amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs a newline character.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FINISH_002dOUTPUT"></a>Function: <strong>FINISH-OUTPUT</strong> <em>(&amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Attempts to ensure that all output sent to STREAM has reached its destination,
+and only then returns.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WITH_002dOPEN_002dFILE"></a>Macro: <strong>WITH-OPEN-FILE</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(with-open-file (stream filename {options}*) {decl}* {form}*)
+</pre></div>
+
+<p>Opens the file whose name is FILENAME, using OPTIONs, and binds the variable
+STREAM to a stream to/from the file.  Then evaluates FORMs as a PROGN.
+The file is automatically closed on exit.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DO"></a>Special Form: <strong>DO</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(do ({(var [init [step]])}*) (endtest {result}*)
+          {decl}* {tag | statement}*)
+</pre></div>
+
+<p>Creates a NIL block, binds each VAR to the value of the corresponding INIT,
+and then executes STATEMENTs repeatedly until ENDTEST is satisfied.  After
+each iteration, assigns to each VAR the value of the corresponding STEP.  When
+ENDTEST is satisfied, evaluates RESULTs as a PROGN and returns the value(s) of
+the last RESULT (or NIL if no RESULTs are supplied).  Performs variable
+bindings and assignments all at once, just like LET and PSETQ do.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dFROM_002dSTRING"></a>Function: <strong>READ-FROM-STRING</strong> <em>(string &amp;optional (eof-error-p t) (eof-value nil) &amp;key (start 0) (end (length string)) (preserve-whitespace nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Reads an object from STRING.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WRITE_002dSTRING"></a>Function: <strong>WRITE-STRING</strong> <em>(string &amp;optional (stream *standard-output*) &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs STRING and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dLEVEL_002a"></a>Variable: <strong>*PRINT-LEVEL*</strong></dt>
+<dd><p>Package:LISP
+How many levels deep the GCL printer should print.  Unlimited if NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dRADIX_002a"></a>Variable: <strong>*PRINT-RADIX*</strong></dt>
+<dd><p>Package:LISP
+Whether the GCL printer should print the radix indicator when printing
+integers and rationals.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-Y_002dOR_002dN_002dP"></a>Function: <strong>Y-OR-N-P</strong> <em>(&amp;optional (format-string nil) &amp;rest args)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Asks the user a question whose answer is either &rsquo;Y&rsquo; or &rsquo;N&rsquo;.  If FORMAT-STRING
+is non-NIL, then FRESH-LINE operation is performed, a message is printed as
+if FORMAT-STRING and ARGs were given to FORMAT, and then a prompt
+&quot;(Y or N)&quot; is printed.  Otherwise, no prompt will appear.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dBROADCAST_002dSTREAM"></a>Function: <strong>MAKE-BROADCAST-STREAM</strong> <em>(&amp;rest streams)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an output stream which sends its output to all of the given streams.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dCHAR"></a>Function: <strong>READ-CHAR</strong> <em>(&amp;optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Reads a character from STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PEEK_002dCHAR"></a>Function: <strong>PEEK-CHAR</strong> <em>(&amp;optional (peek-type nil) (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Peeks at the next character in the input stream STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-OUTPUT_002dSTREAM_002dP"></a>Function: <strong>OUTPUT-STREAM-P</strong> <em>(stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns non-nil if STREAM can handle output operations; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aQUERY_002dIO_002a"></a>Variable: <strong>*QUERY-IO*</strong></dt>
+<dd><p>Package:LISP
+The query I/O stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aREAD_002dBASE_002a"></a>Variable: <strong>*READ-BASE*</strong></dt>
+<dd><p>Package:LISP
+The radix that the GCL reader reads numbers in.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WITH_002dOPEN_002dSTREAM"></a>Macro: <strong>WITH-OPEN-STREAM</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(with-open-stream (var stream) {decl}* {form}*)
+</pre></div>
+
+<p>Evaluates FORMs as a PROGN with VAR bound to the value of STREAM.  The stream
+is automatically closed on exit.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WITH_002dINPUT_002dFROM_002dSTRING"></a>Macro: <strong>WITH-INPUT-FROM-STRING</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(with-input-from-string (var string {keyword value}*) {decl}*
+{form}*)
+</pre></div>
+
+<p>Binds VAR to an input stream that returns characters from STRING and evaluates
+the FORMs.  The stream is automatically closed on exit.  Allowed keywords are
+:INDEX, :START, and :END.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CLEAR_002dINPUT"></a>Function: <strong>CLEAR-INPUT</strong> <em>(&amp;optional (stream *standard-input*))</em></dt>
+<dd><p>Package:LISP
+ Clears the input
+stream STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aTERMINAL_002dIO_002a"></a>Variable: <strong>*TERMINAL-IO*</strong></dt>
+<dd><p>Package:LISP
+The terminal I/O stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LISTEN"></a>Function: <strong>LISTEN</strong> <em>(&amp;optional (stream *standard-input*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if a character is available on STREAM; NIL otherwise.  This function
+does not correctly work in some versions of GCL because of the lack of such
+mechanism in the underlying operating system.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dPATHNAME"></a>Function: <strong>MAKE-PATHNAME</strong> <em>(&amp;key (defaults (parse-namestring &quot;&quot; (pathname-host *default-pathname-defaults*))) (host (pathname-host defaults)) (device (pathname-device defaults)) (directory (pathname-directory defaults)) (name (pathname-name defaults)) (type (pathname-type defaults)) (version (pathname-version defaults)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Create a pathname from HOST, DEVICE, DIRECTORY, NAME, TYPE and VERSION.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAME_002dTYPE"></a>Function: <strong>PATHNAME-TYPE</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the type slot of PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dGENSYM_002a"></a>Variable: <strong>*PRINT-GENSYM*</strong></dt>
+<dd><p>Package:LISP
+Whether the GCL printer should prefix symbols with no home package
+with &quot;#:&quot;.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dLINE"></a>Function: <strong>READ-LINE</strong> <em>(&amp;optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a line of text read from STREAM as a string, discarding the newline
+character.
+</p>
+<p>Note that when using line at a time input under unix,
+input forms will always be followed by a #\newline.   Thus if you
+do
+</p>
+<p>&gt;(read-line)
+&quot;&quot;
+nil
+</p>
+<p>the empty string will be returned.  After lisp reads the (read-line)
+it then invokes (read-line).  This happens before it does anything
+else and so happens before the newline character immediately following
+(read-line) has been read.  Thus read-line immediately encounters a
+#\newline and so returns the empty string.  If there had been other
+characters before the #\newline it would have been different:
+</p>
+<p>&gt;(read-line) how are you
+&quot; how are you&quot;
+nil
+</p>
+<p>If you want to throw away &quot;&quot; input, you can do that with
+the following:
+</p>
+<p>(sloop::sloop while (equal (setq input (read-line)) &quot;&quot;))
+</p>
+<p>You may also want to use character at a time input, but that
+makes input editing harder.
+nicolas% stty cbreak
+nicolas% gcl
+GCL (GNU Common Lisp)  Version(1.1.2) Mon Jan  9 12:58:22 MET 1995
+Licensed under GNU Public Library License
+Contains Enhancements by W. Schelter
+</p>
+<p>&gt;(let ((ifilename nil))
+    (format t &quot;~%Input file name: &quot;)
+    (setq ifilename (read-line)))
+Input file name: /tmp/myfile
+&quot;/tmp/myfile&quot;
+</p>
+<p>&gt;(bye)Bye.
+</p>
+
+
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WRITE_002dTO_002dSTRING"></a>Function: <strong>WRITE-TO-STRING</strong> <em>(object &amp;key (escape *print-escape*) (radix *print-radix*) (base *print-base*) (circle *print-circle*) (pretty *print-pretty*) (level *print-level*) (length *print-length*) (case *print-case*) (array *print-array*) (gensym *print-gensym*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns as a string the printed representation of OBJECT in the specified
+mode.  See the variable docs of *PRINT-...* for the mode.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAMEP"></a>Function: <strong>PATHNAMEP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a pathname object; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READTABLEP"></a>Function: <strong>READTABLEP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a readtable object; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ"></a>Function: <strong>READ</strong> <em>(&amp;optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursivep nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Reads in the next object from STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NAMESTRING"></a>Function: <strong>NAMESTRING</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the full form of PATHNAME as a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-UNREAD_002dCHAR"></a>Function: <strong>UNREAD-CHAR</strong> <em>(character &amp;optional (stream *standard-input*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Puts CHARACTER back on the front of the input stream STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CLOSE"></a>Function: <strong>CLOSE</strong> <em>(stream &amp;key (abort nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Closes STREAM.  A non-NIL value of :ABORT indicates an abnormal termination.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dLENGTH_002a"></a>Variable: <strong>*PRINT-LENGTH*</strong></dt>
+<dd><p>Package:LISP
+How many elements the GCL printer should print at each level of nested data
+object.  Unlimited if NIL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SET_002dSYNTAX_002dFROM_002dCHAR"></a>Function: <strong>SET-SYNTAX-FROM-CHAR</strong> <em>(to-char from-char &amp;optional (to-readtable *readtable*) (from-readtable nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Makes the syntax of TO-CHAR in TO-READTABLE be the same as the syntax of
+FROM-CHAR in FROM-READTABLE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INPUT_002dSTREAM_002dP"></a>Function: <strong>INPUT-STREAM-P</strong> <em>(stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns non-NIL if STREAM can handle input operations; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAME"></a>Function: <strong>PATHNAME</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Turns X into a pathname.  X may be a string, symbol, stream, or pathname.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FILE_002dNAMESTRING"></a>Function: <strong>FILE-NAMESTRING</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the written representation of PATHNAME as a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dDISPATCH_002dMACRO_002dCHARACTER"></a>Function: <strong>MAKE-DISPATCH-MACRO-CHARACTER</strong> <em>(char &amp;optional (non-terminating-p nil) (readtable *readtable*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Causes the character CHAR to be a dispatching macro character in READTABLE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aSTANDARD_002dOUTPUT_002a"></a>Variable: <strong>*STANDARD-OUTPUT*</strong></dt>
+<dd><p>Package:LISP
+The default output stream used by the GCL printer.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dTWO_002dWAY_002dSTREAM"></a>Function: <strong>MAKE-TWO-WAY-STREAM</strong> <em>(input-stream output-stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a bidirectional stream which gets its input from INPUT-STREAM and
+sends its output to OUTPUT-STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dESCAPE_002a"></a>Variable: <strong>*PRINT-ESCAPE*</strong></dt>
+<dd><p>Package:LISP
+Whether the GCL printer should put escape characters whenever appropriate.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COPY_002dREADTABLE"></a>Function: <strong>COPY-READTABLE</strong> <em>(&amp;optional (from-readtable *readtable*) (to-readtable nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a copy of the readtable FROM-READTABLE.  If TO-READTABLE is non-NIL,
+then copies into TO-READTABLE.  Otherwise, creates a new readtable.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DIRECTORY_002dNAMESTRING"></a>Function: <strong>DIRECTORY-NAMESTRING</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the directory part of PATHNAME as a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TRUENAME"></a>Function: <strong>TRUENAME</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the pathname for the actual file described by PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aREAD_002dSUPPRESS_002a"></a>Variable: <strong>*READ-SUPPRESS*</strong></dt>
+<dd><p>Package:LISP
+When the value of this variable is NIL, the GCL reader operates normally.
+When it is non-NIL, then the reader parses input characters but much of what
+is read is not interpreted.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET_002dDISPATCH_002dMACRO_002dCHARACTER"></a>Function: <strong>GET-DISPATCH-MACRO-CHARACTER</strong> <em>(disp-char sub-char &amp;optional (readtable *readtable*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the macro-character function for SUB-CHAR under DISP-CHAR.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAME_002dDEVICE"></a>Function: <strong>PATHNAME-DEVICE</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the device slot of PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dCHAR_002dNO_002dHANG"></a>Function: <strong>READ-CHAR-NO-HANG</strong> <em>(&amp;optional (stream *standard-input*) (eof-error-p t) (eof-value nil) (recursive-p nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the next character from STREAM if one is available; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FRESH_002dLINE"></a>Function: <strong>FRESH-LINE</strong> <em>(&amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs a newline if it is not positioned at the beginning of a line.  Returns
+T if it output a newline; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WRITE_002dCHAR"></a>Function: <strong>WRITE-CHAR</strong> <em>(char &amp;optional (stream *standard-output*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs CHAR and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PARSE_002dNAMESTRING"></a>Function: <strong>PARSE-NAMESTRING</strong> <em>(thing &amp;optional host (defaults *default-pathname-defaults*) &amp;key (start 0) (end (length thing)) (junk-allowed nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Parses a string representation of a pathname into a pathname.  HOST
+is ignored.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAME_002dDIRECTORY"></a>Function: <strong>PATHNAME-DIRECTORY</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the directory slot of PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET_002dMACRO_002dCHARACTER"></a>Function: <strong>GET-MACRO-CHARACTER</strong> <em>(char &amp;optional (readtable *readtable*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the function associated with CHAR and, as a second value, returns
+the non-terminating-p flag.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FORMAT"></a>Function: <strong>FORMAT</strong> <em>(destination control-string &amp;rest arguments)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Provides various facilities for formatting output.
+DESTINATION controls where the result will go.  If DESTINATION is T, then
+the output is sent to the standard output stream.  If it is NIL, then the
+output is returned in a string as the value of the call.  Otherwise,
+DESTINATION must be a stream to which the output will be sent.
+</p>
+<p>CONTROL-STRING is a string to be output, possibly with embedded
+formatting directives, which are flagged with the escape character
+&quot;~&quot;.  Directives generally expand into additional text to be output,
+usually consuming one or more of ARGUMENTs in the process.
+</p>
+
+
+<p>A few useful directives are:
+</p><div class="example">
+<pre class="example">
+~A, ~nA, ~n@A	Prints one argument as if by PRINC
+~S, ~nS, ~n@S	Prints one argument as if by PRIN1
+~D, ~B, ~O, ~X	Prints one integer in decimal, binary, octal, and hexa
+~%		Does TERPRI
+~&amp;		Does FRESH-LINE
+</pre></div>
+
+<p>where n is the minimal width of the field in which the object is printed.
+~nA and ~nS put padding spaces on the right; ~n@A and ~n@S put on the left.
+</p>
+<div class="example">
+<pre class="example">~R  is for printing numbers in various formats.
+
+  ~nR   prints arg in radix n.
+  ~R    prints arg as a cardinal english number: two
+  ~:R   prints arg as an ordinal english number: third
+  ~@R   prints arg as an a Roman Numeral: VII
+  ~:@R   prints arg as an old Roman Numeral: IIII
+
+~C prints a character.
+  ~:C represents non printing characters by their pretty names,eg Space
+  ~@C uses the #\ syntax to allow the reader to read it.
+
+~F prints a floating point number arg.
+  The full form is ~w,d,k,overflowchar,padcharF
+  w represents the total width of the printed representation (variable if
+    not present)
+  d the number of fractional digits to display
+    (format nil &quot;~,2f&quot; 10010.0314) --&gt; &quot;10010.03&quot;
+  k arg is multiplied by 10^k before printing it as a decimal number.
+  overflowchar width w characters copies of the overflow character will
+    be printed.   eg(format t &quot;X&gt;~5,2,,'?F&lt;X&quot; 100.034) --&gt; X&gt;?????&lt;X
+  padchar is the character to pad with
+    (format t &quot;X&gt;~10,2,1,'?,'bF&lt;X&quot; 100.03417) --&gt;X&gt;bbb1000.34&lt;X
+  @ makes + sign print if the arg is positive
+
+~@[print-if-true~]
+</pre></div>
+<p>if arg is not nil, then it is retained as an arg for further printing,
+   otherwise it is used up
+</p>
+<div class="example">
+<pre class="example">   (format nil &quot;~@[x = ~d~]~a&quot; nil 'bil) --&gt; &quot;BIL&quot;
+   (format nil &quot;~@[x = ~d ~]~a&quot; 8) --&gt; &quot;x = 8 BIL&quot;
+</pre></div>
+
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAME_002dNAME"></a>Function: <strong>PATHNAME-NAME</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the name slot of PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSTRING_002dOUTPUT_002dSTREAM"></a>Function: <strong>MAKE-STRING-OUTPUT-STREAM</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an output stream which will accumulate all output given it for
+the benefit of the function GET-OUTPUT-STREAM-STRING.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dSYNONYM_002dSTREAM"></a>Function: <strong>MAKE-SYNONYM-STREAM</strong> <em>(symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a stream which performs its operations on the stream which is the
+value of the dynamic variable named by SYMBOL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aLOAD_002dVERBOSE_002a"></a>Variable: <strong>*LOAD-VERBOSE*</strong></dt>
+<dd><p>Package:LISP
+The default for the VERBOSE argument to LOAD.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dCIRCLE_002a"></a>Variable: <strong>*PRINT-CIRCLE*</strong></dt>
+<dd><p>Package:LISP
+Whether the GCL printer should take care of circular lists.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aPRINT_002dPRETTY_002a"></a>Variable: <strong>*PRINT-PRETTY*</strong></dt>
+<dd><p>Package:LISP
+Whether the GCL printer should pretty-print.  See the function doc of PPRINT
+for more information about pretty-printing.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FILE_002dWRITE_002dDATE"></a>Function: <strong>FILE-WRITE-DATE</strong> <em>(file)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the time at which the specified file is written, as an integer in
+universal time format.  FILE may be a string or a stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PRIN1_002dTO_002dSTRING"></a>Function: <strong>PRIN1-TO-STRING</strong> <em>(object)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns as a string the printed representation of OBJECT in the mostly
+readable representation.
+Equivalent to (WRITE-TO-STRING OBJECT :ESCAPE T).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MERGE_002dPATHNAMES"></a>Function: <strong>MERGE-PATHNAMES</strong> <em>(pathname &amp;optional (defaults *default-pathname-defaults*) default-version)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Fills in unspecified slots of PATHNAME from DEFAULTS.  DEFAULT-VERSION
+is ignored in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dBYTE"></a>Function: <strong>READ-BYTE</strong> <em>(stream &amp;optional (eof-error-p t) (eof-value nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Reads the next byte from STREAM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PRINC_002dTO_002dSTRING"></a>Function: <strong>PRINC-TO-STRING</strong> <em>(object)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns as a string the printed representation of OBJECT without escape
+characters.  Equivalent to
+	(WRITE-TO-STRING OBJECT :ESCAPE NIL).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aSTANDARD_002dINPUT_002a"></a>Variable: <strong>*STANDARD-INPUT*</strong></dt>
+<dd><p>Package:LISP
+The default input stream used by the GCL reader.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PROBE_002dFILE"></a>Function: <strong>PROBE-FILE</strong> <em>(file)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the truename of file if the file exists.
+Returns NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PATHNAME_002dVERSION"></a>Function: <strong>PATHNAME-VERSION</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the version slot of PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WRITE_002dLINE"></a>Function: <strong>WRITE-LINE</strong> <em>(string &amp;optional (stream *standard-output*) &amp;key (start 0) (end (length string)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Outputs STRING and then outputs a newline character.  Returns STRING.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-WRITE"></a>Function: <strong>WRITE</strong> <em>(object &amp;key (stream *standard-output*) (escape *print-escape*) (radix *print-radix*) (base *print-base*) (circle *print-circle*) (pretty *print-pretty*) (level *print-level*) (length *print-length*) (case *print-case*) (array *print-array*) (gensym *print-gensym*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Prints OBJECT in the specified mode.  See the variable docs of *PRINT-...*
+for the mode.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GET_002dOUTPUT_002dSTREAM_002dSTRING"></a>Function: <strong>GET-OUTPUT-STREAM-STRING</strong> <em>(stream)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string of all the characters sent to STREAM made by
+MAKE-STRING-OUTPUT-STREAM since the last call to this function.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READ_002dDELIMITED_002dLIST"></a>Function: <strong>READ-DELIMITED-LIST</strong> <em>(char &amp;optional (stream *standard-input*) (recursive-p nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Reads objects from STREAM until the next character after an object&rsquo;s
+representation is CHAR.  Returns a list of the objects read.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READLINE_002dON"></a>Function: <strong>READLINE-ON</strong> <em>()</em></dt>
+<dd><p>Package:SI
+</p>
+<p>Begins readline command editing mode when possible.  In addition to
+the basic readline editing features, command word completion is
+implemented according to the following scheme:
+</p>
+<p>[[pkg]:[:]]txt
+</p>
+<p>pkg &ndash; an optional package specifier.  Defaults to the current
+package.  The symbols in this package and those in the packages in
+this package&rsquo;s use list will be searched.
+</p>
+<p>:[:] &ndash; an optional internal/external specifier.  Defaults to
+external.  The keyword package is denoted by a single colon at the
+beginning of the token.  Only symbols of this type will be searched
+for completion.
+</p>
+<p>txt &ndash; a string.  Symbol names beginning with this string are
+completed.  The comparison is case insensitive.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-READLINE_002dOFF"></a>Function: <strong>READLINE-OFF</strong> <em>()</em></dt>
+<dd><p>Package:SI
+</p>
+<p>Disables readline command editing mode.
+</p>
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aREADLINE_002dPREFIX_002a"></a>Variable: <strong>*READLINE-PREFIX*</strong></dt>
+<dd><p>Package:SI
+</p>
+<p>A string implicitly prepended to input text for use in readline
+command completion.  If this string contains one or more colons, it is
+used to specify the default package and internal/external setting for
+searched symbols in the case that the supplied text itself contains no
+explicit package specification.  If this string contains characters
+after the colon(s), or contains no colons at all, it is treated as a
+symbol name prefix.  In this case, the prefix is matched first, then
+the supplied text, and the completion returned is relative to the
+supplied text itself, i.e. contains no prefix.  For example, the
+setting &ldquo;maxima::$&rdquo; will complete input text &ldquo;int&rdquo; according to
+the internal symbols in the maxima package of the form
+&ldquo;maxima::$int...&rdquo;, and return suggestions to the user of the form
+&ldquo;int...&rdquo;.
+</p>
+</dd></dl>
+
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Special-Forms-and-Functions.html#Special-Forms-and-Functions" accesskey="n" rel="next">Special Forms and Functions</a>, Previous: <a href="Lists.html#Lists" accesskey="p" rel="prev">Lists</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

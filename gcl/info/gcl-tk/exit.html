@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: exit</title>
+
+<meta name="description" content="GCL TK Manual: exit">
+<meta name="keywords" content="GCL TK Manual: exit">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="focus.html#focus" rel="next" title="focus">
+<link href="tk_002ddialog.html#tk_002ddialog" rel="prev" title="tk-dialog">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="exit"></a>
+<div class="header">
+<p>
+Next: <a href="focus.html#focus" accesskey="n" rel="next">focus</a>, Previous: <a href="tk_002ddialog.html#tk_002ddialog" accesskey="p" rel="prev">tk-dialog</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="exit-1"></a>
+<h3 class="section">3.5 exit</h3>
+
+<p>exit \- Exit the process
+</p><a name="Synopsis-19"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>exit </b><span class="roman">?</span><i>returnCode</i>?
+</p>
+<a name="Description-16"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>Terminate the process, returning <i>returnCode</i> (an integer) to the
+system as the exit status.
+If <i>returnCode</i> isn&rsquo;t specified then it defaults
+to 0.
+This command replaces the Tcl command by the same name.
+It is identical to Tcl&rsquo;s <b>exit</b> command except that
+before exiting it destroys all the windows managed by
+the process.
+This allows various cleanup operations to be performed, such
+as removing application names from the global registry of applications.
+</p>
+<a name="Keywords-19"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>exit, process
+</p>
+
+
+</body>
+</html>

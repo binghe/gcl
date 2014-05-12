@@ -1,0 +1,1560 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Numbers</title>
+
+<meta name="description" content="GCL SI Manual: Numbers">
+<meta name="keywords" content="GCL SI Manual: Numbers">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Sequences-and-Arrays-and-Hash-Tables.html#Sequences-and-Arrays-and-Hash-Tables" rel="next" title="Sequences and Arrays and Hash Tables">
+<link href="index.html#Top" rel="prev" title="Top">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Numbers"></a>
+<div class="header">
+<p>
+Next: <a href="Sequences-and-Arrays-and-Hash-Tables.html#Sequences-and-Arrays-and-Hash-Tables" accesskey="n" rel="next">Sequences and Arrays and Hash Tables</a>, Previous: <a href="index.html#Top" accesskey="p" rel="prev">Top</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Numbers-1"></a>
+<h2 class="chapter">1 Numbers</h2>
+
+
+<dl>
+<dt><a name="index-SIGNUM"></a>Function: <strong>SIGNUM</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If NUMBER is zero, returns NUMBER; else returns (/ NUMBER (ABS NUMBER)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGNOT"></a>Function: <strong>LOGNOT</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit-wise logical NOT of INTEGER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dPOSITIVE_002dSHORT_002dFLOAT"></a>Constant: <strong>MOST-POSITIVE-SHORT-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The short-float closest in value to positive infinity.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INTEGER_002dDECODE_002dFLOAT"></a>Function: <strong>INTEGER-DECODE-FLOAT</strong> <em>(float)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns, as three values, the integer interpretation of significand F,
+the exponent E, and the sign S of the given float, so that
+			 E
+	FLOAT = S * F * B	where B = (FLOAT-RADIX FLOAT)
+</p>
+<p>F is a non-negative integer, E is an integer, and S is either 1 or -1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MINUSP"></a>Function: <strong>MINUSP</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if NUMBER &lt; 0; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGORC1"></a>Function: <strong>LOGORC1</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the logical OR of (LOGNOT INTEGER1) and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dNEGATIVE_002dSINGLE_002dFLOAT"></a>Constant: <strong>MOST-NEGATIVE-SINGLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as MOST-NEGATIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dC1"></a>Constant: <strong>BOOLE-C1</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return the complement of INTEGER1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dPOSITIVE_002dSHORT_002dFLOAT"></a>Constant: <strong>LEAST-POSITIVE-SHORT-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The positive short-float closest in value to zero.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dNAND"></a>Function: <strong>BIT-NAND</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical NAND  on the elements of BIT-ARRAY1 and
+BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+</dd></dl>
+
+<dl>
+<dt><a name="index-INT_002dCHAR"></a>Function: <strong>INT-CHAR</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs the inverse of CHAR-INT.  Equivalent to CODE-CHAR in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dINT"></a>Function: <strong>CHAR-INT</strong> <em>(char)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the font, bits, and code attributes as a single non-negative integer.
+Equivalent to CHAR-CODE in GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dNEGATIVE_002dSINGLE_002dFLOAT"></a>Constant: <strong>LEAST-NEGATIVE-SINGLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as LEAST-NEGATIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002f_003d"></a>Function: <strong>/=</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if no two of its arguments are numerically equal; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LDB_002dTEST"></a>Function: <strong>LDB-TEST</strong> <em>(bytespec integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if at least one of the bits in the specified bytes of INTEGER is 1;
+NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CHAR_002dCODE_002dLIMIT"></a>Constant: <strong>CHAR-CODE-LIMIT</strong></dt>
+<dd><p>Package:LISP
+The upper exclusive bound on values produced by CHAR-CODE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RATIONAL"></a>Function: <strong>RATIONAL</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Converts NUMBER into rational accurately and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PI"></a>Constant: <strong>PI</strong></dt>
+<dd><p>Package:LISP
+The floating-point number that is appropriately equal to the ratio of the
+circumference of the circle to the diameter.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SIN"></a>Function: <strong>SIN</strong> <em>(radians)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the sine of RADIANS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dORC2"></a>Constant: <strong>BOOLE-ORC2</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGORC2 of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NUMERATOR"></a>Function: <strong>NUMERATOR</strong> <em>(rational)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns as an integer the numerator of the given rational number.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MASK_002dFIELD"></a>Function: <strong>MASK-FIELD</strong> <em>(bytespec integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Extracts the specified byte from INTEGER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INCF"></a>Special Form: <strong>INCF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(incf place [delta])
+</pre></div>
+
+<p>Adds the number produced by DELTA (which defaults to 1) to the number
+in PLACE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SINH"></a>Function: <strong>SINH</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the hyperbolic sine of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PHASE"></a>Function: <strong>PHASE</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the angle part of the polar representation of a complex number.
+For non-complex numbers, this is 0.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE"></a>Function: <strong>BOOLE</strong> <em>(op integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an integer produced by performing the logical operation specified by
+OP on the two integers.  OP must be the value of one of the following
+constants:
+	BOOLE-CLR	BOOLE-C1	BOOLE-XOR	BOOLE-ANDC1
+	BOOLE-SET	BOOLE-C2	BOOLE-EQV	BOOLE-ANDC2
+	BOOLE-1		BOOLE-AND	BOOLE-NAND	BOOLE-ORC1
+	BOOLE-2		BOOLE-IOR	BOOLE-NOR	BOOLE-ORC2
+See the variable docs of these constants for their operations.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SHORT_002dFLOAT_002dEPSILON"></a>Constant: <strong>SHORT-FLOAT-EPSILON</strong></dt>
+<dd><p>Package:LISP
+The smallest positive short-float that satisfies
+	(not (= (float 1 e) (+ (float 1 e) e))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGORC2"></a>Function: <strong>LOGORC2</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the logical OR of INTEGER1 and (LOGNOT INTEGER2).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dC2"></a>Constant: <strong>BOOLE-C2</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return the complement of INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REALPART"></a>Function: <strong>REALPART</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Extracts the real part of NUMBER.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt><a name="index-BOOLE_002dCLR"></a>Constant: <strong>BOOLE-CLR</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return 0.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dIOR"></a>Constant: <strong>BOOLE-IOR</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGIOR of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FTRUNCATE"></a>Function: <strong>FTRUNCATE</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Values: (quotient remainder)
+Same as TRUNCATE, but returns first value as a float.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EQL"></a>Function: <strong>EQL</strong> <em>(x y)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X and Y are EQ, or if they are numbers of the same type with
+the same value, or if they are character objects that represent the same
+character.  Returns NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOG"></a>Function: <strong>LOG</strong> <em>(number &amp;optional base)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the logarithm of NUMBER in the base BASE.  BASE defaults to the base
+of natural logarithms.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DOUBLE_002dFLOAT_002dNEGATIVE_002dEPSILON"></a>Constant: <strong>DOUBLE-FLOAT-NEGATIVE-EPSILON</strong></dt>
+<dd><p>Package:LISP
+Same as LONG-FLOAT-NEGATIVE-EPSILON.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGIOR"></a>Function: <strong>LOGIOR</strong> <em>(&amp;rest integers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit-wise INCLUSIVE OR of its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dNEGATIVE_002dDOUBLE_002dFLOAT"></a>Constant: <strong>MOST-NEGATIVE-DOUBLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as MOST-NEGATIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002f"></a>Function: <strong>/</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Divides the first NUMBER by each of the subsequent NUMBERS.
+With one arg, returns the reciprocal of the number.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002aRANDOM_002dSTATE_002a"></a>Variable: <strong>*RANDOM-STATE*</strong></dt>
+<dd><p>Package:LISP
+The default random-state object used by RAMDOM.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-1_002b"></a>Function: <strong>1+</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns NUMBER + 1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dNEGATIVE_002dDOUBLE_002dFLOAT"></a>Constant: <strong>LEAST-NEGATIVE-DOUBLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as LEAST-NEGATIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FCEILING"></a>Function: <strong>FCEILING</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Same as CEILING, but returns a float as the first value.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dPOSITIVE_002dFIXNUM"></a>Constant: <strong>MOST-POSITIVE-FIXNUM</strong></dt>
+<dd><p>Package:LISP
+The fixnum closest in value to positive infinity.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dANDC1"></a>Function: <strong>BIT-ANDC1</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical ANDC1 on the elements of BIT-ARRAY1 and
+BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TAN"></a>Function: <strong>TAN</strong> <em>(radians)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the tangent of RADIANS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dNAND"></a>Constant: <strong>BOOLE-NAND</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGNAND of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TANH"></a>Function: <strong>TANH</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the hyperbolic tangent of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASIN"></a>Function: <strong>ASIN</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the arc sine of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BYTE"></a>Function: <strong>BYTE</strong> <em>(size position)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a byte specifier.  In GCL, a byte specifier is represented by
+a dotted pair (&lt;size&gt; . &lt;position&gt;).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASINH"></a>Function: <strong>ASINH</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the hyperbolic arc sine of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dPOSITIVE_002dLONG_002dFLOAT"></a>Constant: <strong>MOST-POSITIVE-LONG-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The long-float closest in value to positive infinity.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SHIFTF"></a>Macro: <strong>SHIFTF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(shiftf {place}+ newvalue)
+</pre></div>
+
+<p>Evaluates all PLACEs and NEWVALUE in turn, then assigns the value of each
+form to the PLACE on its left.  Returns the original value of the leftmost
+form.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dPOSITIVE_002dLONG_002dFLOAT"></a>Constant: <strong>LEAST-POSITIVE-LONG-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The positive long-float closest in value to zero.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DEPOSIT_002dFIELD"></a>Function: <strong>DEPOSIT-FIELD</strong> <em>(newbyte bytespec integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an integer computed by replacing the specified byte of INTEGER with
+the specified byte of NEWBYTE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dAND"></a>Function: <strong>BIT-AND</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical AND on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGNAND"></a>Function: <strong>LOGNAND</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the complement of the logical AND of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BYTE_002dPOSITION"></a>Function: <strong>BYTE-POSITION</strong> <em>(bytespec)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the position part (in GCL, the cdr part) of the byte specifier.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ROTATEF"></a>Macro: <strong>ROTATEF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(rotatef {place}*)
+</pre></div>
+
+<p>Evaluates PLACEs in turn, then assigns to each PLACE the value of the form to
+its right.  The rightmost PLACE gets the value of the leftmost PLACE.
+Returns NIL always.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dANDC2"></a>Function: <strong>BIT-ANDC2</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical ANDC2 on the elements of BIT-ARRAY1 and
+BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-TRUNCATE"></a>Function: <strong>TRUNCATE</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Values: (quotient remainder)
+Returns NUMBER/DIVISOR as an integer, rounded toward 0.  The second returned
+value is the remainder.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dEQV"></a>Constant: <strong>BOOLE-EQV</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGEQV of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dSET"></a>Constant: <strong>BOOLE-SET</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return -1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LDB"></a>Function: <strong>LDB</strong> <em>(bytespec integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Extracts and right-justifies the specified byte of INTEGER, and returns the
+result.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BYTE_002dSIZE"></a>Function: <strong>BYTE-SIZE</strong> <em>(bytespec)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the size part (in GCL, the car part) of the byte specifier.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SHORT_002dFLOAT_002dNEGATIVE_002dEPSILON"></a>Constant: <strong>SHORT-FLOAT-NEGATIVE-EPSILON</strong></dt>
+<dd><p>Package:LISP
+The smallest positive short-float that satisfies
+	(not (= (float 1 e) (- (float 1 e) e))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-REM"></a>Function: <strong>REM</strong> <em>(number divisor)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the second value of (TRUNCATE NUMBER DIVISOR).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MIN"></a>Function: <strong>MIN</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the least of its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EXP"></a>Function: <strong>EXP</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Calculates e raised to the power NUMBER, where e is the base of natural
+logarithms.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DECODE_002dFLOAT"></a>Function: <strong>DECODE-FLOAT</strong> <em>(float)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns, as three values, the significand F, the exponent E, and the sign S
+of the given float, so that
+			 E
+	FLOAT = S * F * B	where B = (FLOAT-RADIX FLOAT)
+</p>
+<p>S and F are floating-point numbers of the same float format as FLOAT, and E
+is an integer.
+</p>
+
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LONG_002dFLOAT_002dEPSILON"></a>Constant: <strong>LONG-FLOAT-EPSILON</strong></dt>
+<dd><p>Package:LISP
+The smallest positive long-float that satisfies
+	(not (= (float 1 e) (+ (float 1 e) e))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FROUND"></a>Function: <strong>FROUND</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Same as ROUND, but returns first value as a float.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGEQV"></a>Function: <strong>LOGEQV</strong> <em>(&amp;rest integers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit-wise EQUIVALENCE of its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dNEGATIVE_002dSHORT_002dFLOAT"></a>Constant: <strong>MOST-NEGATIVE-SHORT-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The short-float closest in value to negative infinity.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BIT_002dNOR"></a>Function: <strong>BIT-NOR</strong> <em>(bit-array1 bit-array2 &amp;optional (result-bit-array nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Performs a bit-wise logical NOR  on the elements of BIT-ARRAY1 and BIT-ARRAY2.
+Puts the results into a new bit array if RESULT-BIT-ARRAY is NIL, into
+BIT-ARRAY1 if RESULT-BIT-ARRAY is T, or into RESULT-BIT-ARRAY otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CEILING"></a>Function: <strong>CEILING</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the smallest integer not less than or NUMBER/DIVISOR.  Returns the
+remainder as the second value.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dNEGATIVE_002dSHORT_002dFLOAT"></a>Constant: <strong>LEAST-NEGATIVE-SHORT-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The negative short-float closest in value to zero.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-1_002d"></a>Function: <strong>1-</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns NUMBER - 1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_003c_003d"></a>Function: <strong>&lt;=</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if arguments are in strictly non-decreasing order; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-IMAGPART"></a>Function: <strong>IMAGPART</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Extracts the imaginary part of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INTEGERP"></a>Function: <strong>INTEGERP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is an integer (fixnum or bignum); NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ASH"></a>Function: <strong>ASH</strong> <em>(integer count)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Shifts INTEGER left by COUNT places.  Shifts right if COUNT is negative.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LCM"></a>Function: <strong>LCM</strong> <em>(integer &amp;rest more-integers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the least common multiple of the arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COS"></a>Function: <strong>COS</strong> <em>(radians)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the cosine of RADIANS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DECF"></a>Special Form: <strong>DECF</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(decf place [delta])
+</pre></div>
+<p>Subtracts the number
+produced by DELTA (which defaults to 1) from the number in
+PLACE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ATAN"></a>Function: <strong>ATAN</strong> <em>(x &amp;optional (y 1))</em></dt>
+<dd><p>Package:LISP
+ Returns the arc tangent of
+X/Y.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dANDC1"></a>Constant: <strong>BOOLE-ANDC1</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGANDC1 of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COSH"></a>Function: <strong>COSH</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+ Returns the hyperbolic cosine of
+NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOAT_002dRADIX"></a>Function: <strong>FLOAT-RADIX</strong> <em>(float)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the representation radix (or base) of the floating-point
+number.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ATANH"></a>Function: <strong>ATANH</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the hyperbolic arc tangent of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EVENP"></a>Function: <strong>EVENP</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+ Returns T
+if INTEGER is even.  Returns NIL if INTEGER is odd.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ZEROP"></a>Function: <strong>ZEROP</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+ Returns T if NUMBER = 0; NIL
+otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOATP"></a>Function: <strong>FLOATP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a floating-point number; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SXHASH"></a>Function: <strong>SXHASH</strong> <em>(object)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Computes a hash code for OBJECT and returns it as an integer.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002d1"></a>Constant: <strong>BOOLE-1</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return INTEGER1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dPOSITIVE_002dSINGLE_002dFLOAT"></a>Constant: <strong>MOST-POSITIVE-SINGLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as MOST-POSITIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGANDC1"></a>Function: <strong>LOGANDC1</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the logical AND of (LOGNOT INTEGER1) and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dPOSITIVE_002dSINGLE_002dFLOAT"></a>Constant: <strong>LEAST-POSITIVE-SINGLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as LEAST-POSITIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COMPLEXP"></a>Function: <strong>COMPLEXP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a complex number; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dAND"></a>Constant: <strong>BOOLE-AND</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGAND of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAX"></a>Function: <strong>MAX</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the greatest of its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOAT_002dSIGN"></a>Function: <strong>FLOAT-SIGN</strong> <em>(float1 &amp;optional (float2 (float 1 float1)))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a floating-point number with the same sign as FLOAT1 and with the
+same absolute value as FLOAT2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dANDC2"></a>Constant: <strong>BOOLE-ANDC2</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGANDC2 of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DENOMINATOR"></a>Function: <strong>DENOMINATOR</strong> <em>(rational)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the denominator of RATIONAL as an integer.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOAT"></a>Function: <strong>FLOAT</strong> <em>(number &amp;optional other)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Converts a non-complex number to a floating-point number.  If NUMBER is
+already a float, FLOAT simply returns NUMBER.  Otherwise, the format of
+the returned float depends on OTHER;  If OTHER is not provided, FLOAT returns
+a SINGLE-FLOAT.  If OTHER is provided, the result is in the same float format
+as OTHER&rsquo;s.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ROUND"></a>Function: <strong>ROUND</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Rounds NUMBER/DIVISOR to nearest integer.  The second returned value is the
+remainder.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGAND"></a>Function: <strong>LOGAND</strong> <em>(&amp;rest integers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit-wise AND of its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002d2"></a>Constant: <strong>BOOLE-2</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002a"></a>Function: <strong>*</strong> <em>(&amp;rest numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the product of its arguments.  With no args, returns 1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_003c"></a>Function: <strong>&lt;</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if its arguments are in strictly increasing order; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-COMPLEX"></a>Function: <strong>COMPLEX</strong> <em>(realpart &amp;optional (imagpart 0))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a complex number with the given real and imaginary parts.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SINGLE_002dFLOAT_002dEPSILON"></a>Constant: <strong>SINGLE-FLOAT-EPSILON</strong></dt>
+<dd><p>Package:LISP
+Same as LONG-FLOAT-EPSILON.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGANDC2"></a>Function: <strong>LOGANDC2</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the logical AND of INTEGER1 and (LOGNOT INTEGER2).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INTEGER_002dLENGTH"></a>Function: <strong>INTEGER-LENGTH</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of significant bits in the absolute value of INTEGER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dNEGATIVE_002dFIXNUM"></a>Constant: <strong>MOST-NEGATIVE-FIXNUM</strong></dt>
+<dd><p>Package:LISP
+The fixnum closest in value to negative infinity.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LONG_002dFLOAT_002dNEGATIVE_002dEPSILON"></a>Constant: <strong>LONG-FLOAT-NEGATIVE-EPSILON</strong></dt>
+<dd><p>Package:LISP
+The smallest positive long-float that satisfies
+	(not (= (float 1 e) (- (float 1 e) e))).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_003e_003d"></a>Function: <strong>&gt;=</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if arguments are in strictly non-increasing order; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dNOR"></a>Constant: <strong>BOOLE-NOR</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGNOR of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ACOS"></a>Function: <strong>ACOS</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the arc cosine of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MAKE_002dRANDOM_002dSTATE"></a>Function: <strong>MAKE-RANDOM-STATE</strong> <em>(&amp;optional (state *random-state*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Creates and returns a copy of the specified random state.  If STATE is NIL,
+then the value of *RANDOM-STATE* is used.  If STATE is T, then returns a
+random state object generated from the universal time.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-EXPT"></a>Function: <strong>EXPT</strong> <em>(base-number power-number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns BASE-NUMBER raised to the power POWER-NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SQRT"></a>Function: <strong>SQRT</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the principal square root of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SCALE_002dFLOAT"></a>Function: <strong>SCALE-FLOAT</strong> <em>(float integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns (* FLOAT (expt (float-radix FLOAT) INTEGER)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ACOSH"></a>Function: <strong>ACOSH</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the hyperbolic arc cosine of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dNEGATIVE_002dLONG_002dFLOAT"></a>Constant: <strong>MOST-NEGATIVE-LONG-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The long-float closest in value to negative infinity.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dNEGATIVE_002dLONG_002dFLOAT"></a>Constant: <strong>LEAST-NEGATIVE-LONG-FLOAT</strong></dt>
+<dd><p>Package:LISP
+The negative long-float closest in value to zero.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FFLOOR"></a>Function: <strong>FFLOOR</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Same as FLOOR, but returns a float as the first value.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGNOR"></a>Function: <strong>LOGNOR</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the complement of the logical OR of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PARSE_002dINTEGER"></a>Function: <strong>PARSE-INTEGER</strong> <em>(string &amp;key (start 0) (end (length string)) (radix 10) (junk-allowed nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Parses STRING for an integer and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_002b"></a>Function: <strong>+</strong> <em>(&amp;rest numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the sum of its arguments.  With no args, returns 0.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_003d"></a>Function: <strong>=</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if all of its arguments are numerically equal; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-NUMBERP"></a>Function: <strong>NUMBERP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is any kind of number; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOST_002dPOSITIVE_002dDOUBLE_002dFLOAT"></a>Constant: <strong>MOST-POSITIVE-DOUBLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as MOST-POSITIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGTEST"></a>Function: <strong>LOGTEST</strong> <em>(integer1 integer2)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if LOGAND of INTEGER1 and INTEGER2 is not zero; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RANDOM_002dSTATE_002dP"></a>Function: <strong>RANDOM-STATE-P</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is a random-state object; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LEAST_002dPOSITIVE_002dDOUBLE_002dFLOAT"></a>Constant: <strong>LEAST-POSITIVE-DOUBLE-FLOAT</strong></dt>
+<dd><p>Package:LISP
+Same as LEAST-POSITIVE-LONG-FLOAT.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOAT_002dPRECISION"></a>Function: <strong>FLOAT-PRECISION</strong> <em>(float)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of significant radix-B digits used to represent the
+significand F of the floating-point number, where B = (FLOAT-RADIX FLOAT).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dXOR"></a>Constant: <strong>BOOLE-XOR</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGXOR of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DPB"></a>Function: <strong>DPB</strong> <em>(newbyte bytespec integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns an integer computed by replacing the specified byte of INTEGER with
+NEWBYTE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ABS"></a>Function: <strong>ABS</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the absolute value of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CONJUGATE"></a>Function: <strong>CONJUGATE</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the complex conjugate of NUMBER.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-CIS"></a>Function: <strong>CIS</strong> <em>(radians)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns e raised to i*RADIANS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ODDP"></a>Function: <strong>ODDP</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if INTEGER is odd; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RATIONALIZE"></a>Function: <strong>RATIONALIZE</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Converts NUMBER into rational approximately and returns it.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-ISQRT"></a>Function: <strong>ISQRT</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the greatest integer less than or equal to the square root of the
+given non-negative integer.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGXOR"></a>Function: <strong>LOGXOR</strong> <em>(&amp;rest integers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the bit-wise EXCLUSIVE OR of its arguments.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-_003e"></a>Function: <strong>&gt;</strong> <em>(number &amp;rest more-numbers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if its arguments are in strictly decreasing order; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGBITP"></a>Function: <strong>LOGBITP</strong> <em>(index integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if the INDEX-th bit of INTEGER is 1.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-DOUBLE_002dFLOAT_002dEPSILON"></a>Constant: <strong>DOUBLE-FLOAT-EPSILON</strong></dt>
+<dd><p>Package:LISP
+Same as LONG-FLOAT-EPSILON.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-LOGCOUNT"></a>Function: <strong>LOGCOUNT</strong> <em>(integer)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If INTEGER is negative, returns the number of 0 bits.  Otherwise, returns
+the number of 1 bits.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-GCD"></a>Function: <strong>GCD</strong> <em>(&amp;rest integers)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the greatest common divisor of INTEGERs.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RATIONALP"></a>Function: <strong>RATIONALP</strong> <em>(x)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if X is an integer or a ratio; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MOD"></a>Function: <strong>MOD</strong> <em>(number divisor)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the second result of (FLOOR NUMBER DIVISOR).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-MODF"></a>Function: <strong>MODF</strong> <em>(number)</em></dt>
+<dd><p>Package:SYSTEM
+</p>
+<p>Returns the integer and fractional part of a floating point number mod 1.0.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-BOOLE_002dORC1"></a>Constant: <strong>BOOLE-ORC1</strong></dt>
+<dd><p>Package:LISP
+Makes BOOLE return LOGORC1 of INTEGER1 and INTEGER2.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-SINGLE_002dFLOAT_002dNEGATIVE_002dEPSILON"></a>Constant: <strong>SINGLE-FLOAT-NEGATIVE-EPSILON</strong></dt>
+<dd><p>Package:LISP
+Same as LONG-FLOAT-NEGATIVE-EPSILON.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOOR"></a>Function: <strong>FLOOR</strong> <em>(number &amp;optional (divisor 1))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the largest integer not larger than the NUMBER divided by DIVISOR.
+The second returned value is (- NUMBER (* first-value DIVISOR)).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-PLUSP"></a>Function: <strong>PLUSP</strong> <em>(number)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns T if NUMBER &gt; 0; NIL otherwise.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-FLOAT_002dDIGITS"></a>Function: <strong>FLOAT-DIGITS</strong> <em>(float)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the number of radix-B digits used to represent the significand F of
+the floating-point number, where B = (FLOAT-RADIX FLOAT).
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-RANDOM"></a>Function: <strong>RANDOM</strong> <em>(number &amp;optional (state *random-state*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Generates a uniformly distributed pseudo-random number between zero
+(inclusive) and NUMBER (exclusive), by using the random state object STATE.
+</p>
+
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Sequences-and-Arrays-and-Hash-Tables.html#Sequences-and-Arrays-and-Hash-Tables" accesskey="n" rel="next">Sequences and Arrays and Hash Tables</a>, Previous: <a href="index.html#Top" accesskey="p" rel="prev">Top</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: destroy</title>
+
+<meta name="description" content="GCL TK Manual: destroy">
+<meta name="keywords" content="GCL TK Manual: destroy">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="tk_002ddialog.html#tk_002ddialog" rel="next" title="tk-dialog">
+<link href="bind.html#bind" rel="prev" title="bind">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="destroy"></a>
+<div class="header">
+<p>
+Next: <a href="tk_002ddialog.html#tk_002ddialog" accesskey="n" rel="next">tk-dialog</a>, Previous: <a href="bind.html#bind" accesskey="p" rel="prev">bind</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="destroy-1"></a>
+<h3 class="section">3.3 destroy</h3>
+
+<p>destroy \- Destroy one or more windows
+</p><a name="Synopsis-17"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>destroy </b><span class="roman">?</span><i>window window ...</i>?
+</p>
+<a name="Description-14"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>This command deletes the windows given by the
+<i>window</i> arguments, plus all of their descendants.
+If a <i>window</i> &ldquo;.&rdquo; is deleted then the entire application
+will be destroyed.
+The <i>window</i>s are destroyed in order, and if an error occurs
+in destroying a window the command aborts without destroying the
+remaining windows.
+</p>
+<a name="Keywords-17"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>application, destroy, window
+</p>
+
+
+</body>
+</html>

@@ -1,0 +1,117 @@
+<HTML> <HEAD> <TITLE>dwdoc  p. 2</TITLE> </HEAD>
+<BODY>
+
+<P>
+<H2>Data Types</H2>
+<P>
+<PRE>
+
+(window (listobject  (parent          drawable)
+                     (gcontext        anything)
+                     (drawable-height integer)
+                     (drawable-width  integer)
+                     (label           string)
+                     (font            anything) )
+</PRE>
+
+<P>
+<P>
+
+<P>
+<PRE>
+
+(menu (listobject (menu-window     window)
+                  (flat            boolean)
+                  (parent-window   drawable)
+                  (parent-offset-x integer)
+                  (parent-offset-y integer)
+                  (picture-width   integer)
+                  (picture-height  integer)
+                  (title           string)
+                  (permanent       boolean)
+                  (menu-font       symbol)
+                  (item-width      integer)
+                  (item-height     integer)
+                  (items           (listof symbol)) )
+</PRE>
+
+<P>
+<P>
+
+<P>
+<PRE>
+
+(picmenu (listobject (menu-window     window)
+                     (flat            boolean)
+                     (parent-window   drawable)
+                     (parent-offset-x integer)
+                     (parent-offset-y integer)
+                     (picture-width   integer)
+                     (picture-height  integer)
+                     (title           string)
+                     (permanent       boolean)
+                     (spec            (transparent picmenu-spec))
+                     (boxflg          boolean)
+                     (deleted-buttons (listof symbol)) )
+</PRE>
+
+<P>
+<P>
+
+<P>
+<PRE>
+
+(picmenu-spec (listobject (drawing-width   integer)
+                          (drawing-height  integer)
+                          (buttons         (listof picmenu-button))
+                          (dotflg          boolean)
+                          (drawfn          anything)
+                          (menu-font       symbol) ))
+</PRE>
+
+<P>
+<P>
+
+<P>
+<PRE>
+
+(picmenu-button (list (buttonname     symbol)
+                      (offset         vector)
+                      (size           vector)
+                      (highlightfn    anything)
+                      (unhighlightfn  anything))
+</PRE>
+
+<P>
+<P>
+
+<P>
+<PRE>
+
+(barmenu (listobject (menu-window     window)
+                     (flat            boolean)
+                     (parent-window   drawable)
+                     (parent-offset-x integer)
+                     (parent-offset-y integer)
+                     (picture-width   integer)
+                     (picture-height  integer)
+                     (title           string)
+                     (permanent       boolean)
+                     (color           rgb)
+                     (value           integer)
+                     (maxval          integer)
+                     (barwidth        integer)
+                     (horizontal      boolean)
+                     (subtrackfn      anything)
+                     (subtrackparms   (listof anything)))
+</PRE>
+
+<P>
+<P>
+
+<a href="dwdoccontents.html">Contents</a>&nbsp&nbsp&nbsp
+<a href="dwdoc1.html">Prev</a>&nbsp&nbsp&nbsp
+<a href="dwdoc3.html">Next</a>&nbsp&nbsp&nbsp
+<a href="dwdoc12.html">Page+10</a>&nbsp&nbsp&nbsp
+<a href="dwdocindex.html">Index</a>&nbsp&nbsp&nbsp
+</BODY></HTML>

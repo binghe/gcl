@@ -1,0 +1,666 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: options</title>
+
+<meta name="description" content="GCL TK Manual: options">
+<meta name="keywords" content="GCL TK Manual: options">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="pack_002dold.html#pack_002dold" rel="next" title="pack-old">
+<link href="option.html#option" rel="prev" title="option">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="options"></a>
+<div class="header">
+<p>
+Next: <a href="pack_002dold.html#pack_002dold" accesskey="n" rel="next">pack-old</a>, Previous: <a href="option.html#option" accesskey="p" rel="prev">option</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="options-1"></a>
+<h3 class="section">3.12 options</h3>
+
+<p>options \- Standard options supported by widgets
+</p>
+<a name="Description-23"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+<p>This manual entry describes the common configuration options supported
+by widgets in the Tk toolkit.  Every widget does not necessarily support
+every option (see the manual entries for individual widgets for a list
+of the standard options supported by that widget), but if a widget does
+support an option with one of the names listed below, then the option
+has exactly the effect described below.
+</p>
+<p>In the descriptions below,
+&ldquo;Name&rdquo; refers to the option&rsquo;s name in the option database (e.g.
+in .Xdefaults files).  &ldquo;Class&rdquo; refers to the option&rsquo;s class value
+in the option database.  &ldquo;Command-Line Switch&rdquo; refers to the
+switch used in widget-creation and <b>configure</b> widget commands to
+set this value.  For example, if an option&rsquo;s command-line switch is
+<b>:foreground</b><span class="roman"> and there exists a widget </span><b>.a.b.c</b>, then the
+command
+</p>
+<div class="example">
+<pre class="example">
+(.a.b.c  :configure  :foreground &quot;black&quot;)<!-- /@w -->
+</pre></div>
+
+<p>may be used to specify the value <b>black</b> for the option in the
+the widget <b>.a.b.c</b>.  Command-line switches may be abbreviated,
+as long as the abbreviation is unambiguous.
+</p>
+
+<dl compact="compact">
+<dt><code><b>:activebackground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>activeBackground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Foreground</b>&quot;</code>
+</p><br>
+
+<p>Specifies background color to use when drawing active elements.
+An element (a widget or portion of a widget) is active if the
+mouse cursor is positioned over the element and pressing a mouse button
+will cause some action to occur.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:activeborderwidth</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>activeBorderWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>BorderWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating
+the width of the 3-D border drawn around active elements.  See above for
+definition of active elements.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+This option is typically only available in widgets displaying more
+than one element at a time (e.g. menus but not buttons).
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:activeforeground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>activeForeground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Background</b>&quot;</code>
+</p><br>
+
+<p>Specifies foreground color to use when drawing active elements.
+See above for definition of active elements.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:anchor</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>anchor</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Anchor</b>&quot;</code>
+</p><br>
+
+<p>Specifies how the information in a widget (e.g. text or a bitmap)
+is to be displayed in the widget.
+Must be one of the values <b>n</b><span class="roman">, </span><b>ne</b><span class="roman">, </span><b>e</b><span class="roman">, </span><b>se</b>,
+<b>s</b><span class="roman">, </span><b>sw</b><span class="roman">, </span><b>w</b><span class="roman">, </span><b>nw</b><span class="roman">, or </span><b>center</b>.
+For example, <b>nw</b> means display the information such that its
+top-left corner is at the top-left corner of the widget.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:background or :bg</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>background</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Background</b>&quot;</code>
+</p><br>
+
+<p>Specifies the normal background color to use when displaying the
+widget.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:bitmap</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>bitmap</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Bitmap</b>&quot;</code>
+</p><br>
+
+<p>Specifies a bitmap to display in the widget, in any of the forms
+acceptable to <b>Tk_GetBitmap</b>.
+The exact way in which the bitmap is displayed may be affected by
+other options such as <b>anchor</b><span class="roman"> or </span><b>justify</b>.
+Typically, if this option is specified then it overrides other
+options that specify a textual value to display in the widget;
+the <b>bitmap</b> option may be reset to an empty string to re-enable
+a text display.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:borderwidth or :bd</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>borderWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>BorderWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating the width
+of the 3-D border to draw around the outside of the widget (if such a
+border is being drawn;  the <b>relief</b> option typically determines
+this).  The value may also be used when drawing 3-D effects in the
+interior of the widget.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:cursor</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>cursor</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Cursor</b>&quot;</code>
+</p><br>
+
+<p>Specifies the mouse cursor to be used for the widget.
+The value may have any of the forms acceptable to <b>Tk_GetCursor</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:cursorbackground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>cursorBackground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Foreground</b>&quot;</code>
+</p><br>
+
+<p>Specifies the color to use as background in the area covered by the
+insertion cursor.  This color will normally override either the normal
+background for the widget (or the selection background if the insertion
+cursor happens to fall in the selection).
+\fIThis option is obsolete and is gradually being replaced by
+the <b>insertBackground</b><span class="roman"> option.</span>
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:cursorborderwidth</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>cursorBorderWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>BorderWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating the width
+of the 3-D border to draw around the insertion cursor.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+\fIThis option is obsolete and is gradually being replaced by
+the <b>insertBorderWidth</b><span class="roman"> option.</span>
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:cursorofftime</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>cursorOffTime</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>OffTime</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative integer value indicating the number of
+milliseconds the cursor should remain &ldquo;off&rdquo; in each blink cycle.
+If this option is zero then the cursor doesn&rsquo;t blink:  it is on
+all the time.
+\fIThis option is obsolete and is gradually being replaced by
+the <b>insertOffTime</b><span class="roman"> option.</span>
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:cursorontime</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>cursorOnTime</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>OnTime</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative integer value indicating the number of
+milliseconds the cursor should remain &ldquo;on&rdquo; in each blink cycle.
+\fIThis option is obsolete and is gradually being replaced by
+the <b>insertOnTime</b><span class="roman"> option.</span>
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:cursorwidth</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>cursorWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>CursorWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a  value indicating the total width of the insertion cursor.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+If a border has been specified for
+the cursor (using the <b>cursorBorderWidth</b> option), the border
+will be drawn inside the width specified by the <b>cursorWidth</b>
+option.
+\fIThis option is obsolete and is gradually being replaced by
+the <b>insertWidth</b><span class="roman"> option.</span>
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:disabledforeground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>disabledForeground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>DisabledForeground</b>&quot;</code>
+</p><br>
+
+<p>Specifies foreground color to use when drawing a disabled element.
+If the option is specified as an empty string (which is typically the
+case on monochrome displays), disabled elements are drawn with the
+normal fooreground color but they are dimmed by drawing them
+with a stippled fill pattern.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:exportselection</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>exportSelection</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>ExportSelection</b>&quot;</code>
+</p><br>
+
+<p>Specifies whether or not a selection in the widget should also be
+the X selection.
+The value may have any of the forms accepted by <b>Tcl_GetBoolean</b>,
+such as <b>true</b><span class="roman">, </span><b>false</b><span class="roman">, </span><b>0</b><span class="roman">, </span><b>1</b><span class="roman">, </span><b>yes</b><span class="roman">, or </span><b>no</b>.
+If the selection is exported, then selecting in the widget deselects
+the current X selection, selecting outside the widget deselects any
+widget selection, and the widget will respond to selection retrieval
+requests when it has a selection.  The default is usually for widgets
+to export selections.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:font</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>font</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Font</b>&quot;</code>
+</p><br>
+
+<p>Specifies the font to use when drawing text inside the widget.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:foreground or :fg</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>foreground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Foreground</b>&quot;</code>
+</p><br>
+
+<p>Specifies the normal foreground color to use when displaying the widget.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:geometry</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>geometry</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Geometry</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired geometry for the widget&rsquo;s window, in the
+form <i>width</i><b>x</b><i>height</i><span class="roman">, where </span><i>width</i> is the desired
+width of the window and <i>height</i> is the desired height.  The
+units for <i>width</i><span class="roman"> and </span><i>height</i> depend on the particular
+widget.  For widgets displaying text the units are usually the
+size of the characters in the font being displayed;  for other
+widgets the units are usually pixels.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:insertbackground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>insertBackground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Foreground</b>&quot;</code>
+</p><br>
+
+<p>Specifies the color to use as background in the area covered by the
+insertion cursor.  This color will normally override either the normal
+background for the widget (or the selection background if the insertion
+cursor happens to fall in the selection).
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:insertborderwidth</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>insertBorderWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>BorderWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating the width
+of the 3-D border to draw around the insertion cursor.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:insertofftime</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>insertOffTime</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>OffTime</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative integer value indicating the number of
+milliseconds the insertion cursor should remain &ldquo;off&rdquo; in each blink cycle.
+If this option is zero then the cursor doesn&rsquo;t blink:  it is on
+all the time.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:insertontime</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>insertOnTime</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>OnTime</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative integer value indicating the number of
+milliseconds the insertion cursor should remain &ldquo;on&rdquo; in each blink cycle.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:insertwidth</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>insertWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>InsertWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a  value indicating the total width of the insertion cursor.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+If a border has been specified for the insertion
+cursor (using the <b>insertBorderWidth</b> option), the border
+will be drawn inside the width specified by the <b>insertWidth</b>
+option.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:orient</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>orient</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Orient</b>&quot;</code>
+</p><br>
+
+<p>For widgets that can lay themselves out with either a horizontal
+or vertical orientation, such as scrollbars, this option specifies
+which orientation should be used.  Must be either <b>horizontal</b>
+or <b>vertical</b> or an abbreviation of one of these.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:padx</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>padX</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Pad</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating how much extra space
+to request for the widget in the X-direction.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+When computing how large a window it needs, the widget will
+add this amount to the width it would normally need (as determined
+by the width of the things displayed in the widget);  if the geometry
+manager can satisfy this request, the widget will end up with extra
+internal space to the left and/or right of what it displays inside.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:pady</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>padY</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Pad</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating how much extra space
+to request for the widget in the Y-direction.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+When computing how large a window it needs, the widget will add
+this amount to the height it would normally need (as determined by
+the height of the things displayed in the widget);  if the geometry
+manager can satisfy this request, the widget will end up with extra
+internal space above and/or below what it displays inside.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:relief</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>relief</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Relief</b>&quot;</code>
+</p><br>
+
+<p>Specifies the 3-D effect desired for the widget.  Acceptable
+values are <b>raised</b><span class="roman">, </span><b>sunken</b><span class="roman">, </span><b>flat</b><span class="roman">, </span><b>ridge</b>,
+and <b>groove</b>.
+The value
+indicates how the interior of the widget should appear relative
+to its exterior;  for example, <b>raised</b> means the interior of
+the widget should appear to protrude from the screen, relative to
+the exterior of the widget.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:repeatdelay</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>repeatDelay</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>RepeatDelay</b>&quot;</code>
+</p><br>
+
+<p>Specifies the number of milliseconds a button or key must be held
+down before it begins to auto-repeat.  Used, for example, on the
+up- and down-arrows in scrollbars.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:repeatinterval</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>repeatInterval</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>RepeatInterval</b>&quot;</code>
+</p><br>
+
+<p>Used in conjunction with <b>repeatDelay</b>:  once auto-repeat
+begins, this option determines the number of milliseconds between
+auto-repeats.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:scrollcommand</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>scrollCommand</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>ScrollCommand</b>&quot;</code>
+</p><br>
+
+<p>Specifies the prefix for a command used to communicate with scrollbar
+widgets.  When the view in the widget&rsquo;s window changes (or
+whenever anything else occurs that could change the display in a
+scrollbar, such as a change in the total size of the widget&rsquo;s
+contents), the widget will
+generate a Tcl command by concatenating the scroll command and four
+numbers.  The four numbers are, in order:  the total size of the
+widget&rsquo;s contents, in unspecified units
+(&ldquo;unit&rdquo; is a widget-specific term;  for widgets
+displaying text, the unit is a line);  the maximum number of units that
+may be displayed at once in the widget&rsquo;s window, given its current size;  the
+index of the top-most or left-most unit currently visible in the window
+(index 0 corresponds to the first unit); and the index of the bottom-most
+or right-most unit currently visible in the window.  This command is
+then passed to the Tcl interpreter for execution.  Typically the
+<b>scrollCommand</b> option consists of the path name of a scrollbar
+widget followed by &ldquo;set&rdquo;, e.g. &ldquo;.x.scrollbar set&rdquo;:  this will cause
+the scrollbar to be updated whenever the view in the window changes.
+If this option is not specified, then no command will be executed.
+</p>
+<p>The <b>scrollCommand</b> option is used for widgets that support scrolling
+in only one direction.
+For widgets that support scrolling in both directions, this
+option is replaced with the <b>xScrollCommand</b><span class="roman"> and </span><b>yScrollCommand</b>
+options.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:selectbackground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>selectBackground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Foreground</b>&quot;</code>
+</p><br>
+
+<p>Specifies the background color to use when displaying selected
+items.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:selectborderwidth</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>selectBorderWidth</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>BorderWidth</b>&quot;</code>
+</p><br>
+
+<p>Specifies a non-negative value indicating the width
+of the 3-D border to draw around selected items.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:selectforeground</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>selectForeground</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Background</b>&quot;</code>
+</p><br>
+
+<p>Specifies the foreground color to use when displaying selected
+items.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:setgrid</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>setGrid</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>SetGrid</b>&quot;</code>
+</p><br>
+
+<p>Specifies a boolean value that determines whether this widget controls the
+resizing grid for its top-level window.
+This option is typically used in text widgets, where the information
+in the widget has a natural size (the size of a character) and it makes
+sense for the window&rsquo;s dimensions to be integral numbers of these units.
+These natural window sizes form a grid.
+If the <b>setGrid</b> option is set to true then the widget will
+communicate with the window manager so that when the user interactively
+resizes the top-level window that contains the widget, the dimensions of
+the window will be displayed to the user in grid units and the window
+size will be constrained to integral numbers of grid units.
+See the section GRIDDED GEOMETRY MANAGEMENT in the <b>wm</b> manual
+entry for more details.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:text</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>text</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Text</b>&quot;</code>
+</p><br>
+
+<p>Specifies a string to be displayed inside the widget.  The way in which
+the string is displayed depends on the particular widget and may be
+determined by other options, such as <b>anchor</b><span class="roman"> or </span><b>justify</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:textvariable</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>textVariable</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Variable</b>&quot;</code>
+</p><br>
+
+<p>Specifies the name of a variable.  The value of the variable is a text
+string to be displayed inside the widget;  if the variable value changes
+then the widget will automatically update itself to reflect the new value.
+The way in which the string is displayed in the widget depends on the
+particular widget and may be determined by other options, such as
+<b>anchor</b><span class="roman"> or </span><b>justify</b>.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:underline</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>underline</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Underline</b>&quot;</code>
+</p><br>
+
+<p>Specifies the integer index of a character to underline in the widget.
+This option is typically used to indicate keyboard traversal characters
+in menu buttons and menu entries.  0 corresponds to the first character
+of the text displayed in the widget, 1 to the next character, and so
+on.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:xscrollcommand</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>xScrollCommand</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>ScrollCommand</b>&quot;</code>
+</p><br>
+
+<p>Specifies the prefix for a command used to communicate with horizontal
+scrollbars.  This option is treated in the same way as the
+<b>scrollCommand</b> option, except that it is used for horizontal
+scrollbars associated with widgets that support both horizontal
+and vertical scrolling.
+See the description of <b>scrollCommand</b> for complete details
+on how this option is used.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:yscrollcommand</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>yScrollCommand</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>ScrollCommand</b>&quot;</code>
+</p><br>
+
+<p>Specifies the prefix for a command used to communicate with vertical
+scrollbars.  This option is treated in the same way as the
+<b>scrollCommand</b> option, except that it is used for vertical
+scrollbars associated with widgets that support both horizontal
+and vertical scrolling.
+See the description of <b>scrollCommand</b> for complete details
+on how this option is used.
+</p>
+</dd>
+</dl>
+<a name="Keywords-26"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>class, name, standard option, switch
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="pack_002dold.html#pack_002dold" accesskey="n" rel="next">pack-old</a>, Previous: <a href="option.html#option" accesskey="p" rel="prev">option</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

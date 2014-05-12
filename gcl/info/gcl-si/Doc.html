@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL SI Manual: Doc</title>
+
+<meta name="description" content="GCL SI Manual: Doc">
+<meta name="keywords" content="GCL SI Manual: Doc">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html#Function-and-Variable-Index" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html#Top" rel="up" title="Top">
+<link href="Type.html#Type" rel="next" title="Type">
+<link href="User-Interface.html#User-Interface" rel="prev" title="User Interface">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Doc"></a>
+<div class="header">
+<p>
+Next: <a href="Type.html#Type" accesskey="n" rel="next">Type</a>, Previous: <a href="User-Interface.html#User-Interface" accesskey="p" rel="prev">User Interface</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<a name="Doc-1"></a>
+<h2 class="chapter">13 Doc</h2>
+
+<dl>
+<dt><a name="index-APROPOS"></a>Function: <strong>APROPOS</strong> <em>(string &amp;optional (package nil))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Prints those symbols whose print-names contain STRING as substring.
+If PACKAGE is non-NIL, then only the specified package is searched.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt><a name="index-INFO"></a>Function: <strong>INFO</strong> <em>(string &amp;optional (list-of-info-files *default-info-files*))</em></dt>
+<dd><p>PACKAGE:SI
+</p>
+<p>Find all documentation about STRING in LIST-OF-INFO-FILES.  The search
+is done for STRING as a substring of a node name, or for STRING in the
+indexed entries in the first index for each info file.  Typically that
+should be a variable and function definition index, if the info file is
+about a programming language.  If the windowing system is connected,
+then a choice box is offered and double clicking on an item brings up
+its documentation.
+</p>
+<p>Otherwise a list of choices is offered and the user may select some of
+these choices.
+</p>
+<p>list-of-info-files is of the form
+</p><div class="example">
+<pre class="example"> (&quot;gcl-si.info&quot; &quot;gcl-tk.info&quot; &quot;gcl.info&quot;)
+</pre></div>
+<p>The above list is the default value of *default-info-files*,
+a variable in the SI package.   To find these files in the file
+system, the search path *info-paths* is consulted as is the master
+info directory <samp>dir</samp>.
+</p>
+<p>see *Index *default-info-files*:: and *Index *info-paths*::.
+For example
+</p><div class="example">
+<pre class="example">(info &quot;defun&quot;)
+
+ 0: DEFUN :(gcl-si.info)Special Forms and Functions.
+ 1: (gcl.info)defun.
+Enter n, all, none, or multiple choices eg 1 3 : 1
+
+Info from file /home/wfs/gcl-doc/gcl.info:
+defun                                                               [Macro]
+---------------------------------------------------------------------------
+`Defun'  function-name lambda-list [[{declaration}* | documentation]]
+...
+
+</pre></div>
+<p>would list the node <code>(gcl.info)defun</code>.
+That is the node entitled <code>defun</code> from the info file gcl.info.   That
+documentation is based on the ANSI common lisp standard.   The choice
+</p><div class="example">
+<pre class="example">DEFUN :(gcl-si.info)Special Forms and Functions.
+</pre></div>
+
+<p>refers to the documentation on DEFUN from the info file gcl-si.info in
+the node <i>Special Forms And Functions</i>.  This is an index reference
+and only the part of the node which refers to <code>defun</code> will be
+printed.
+</p>
+<div class="example">
+<pre class="example">(info &quot;factor&quot; '(&quot;maxima.info&quot;))
+</pre></div>
+<p>would search the maxima info files index and nodes for <code>factor</code>.
+</p>
+</dd></dl>
+
+
+
+
+
+<dl>
+<dt><a name="index-_002ainfo_002dpaths_002a"></a>Variable: <strong>*info-paths*</strong></dt>
+<dd><p>Package SI:
+</p>
+<p>A list of strings such as
+</p><div class="example">
+<pre class="example">  '(&quot;&quot; &quot;/usr/info/&quot; &quot;/usr/local/lib/info/&quot; &quot;/usr/local/info/&quot;
+    &quot;/usr/local/gnu/info/&quot; )
+</pre></div>
+<p>saying where to look for the info files.   It is used implicitly
+by <code>info</code>, see *Index info::.
+</p>
+<p>Looking for maxima.info would look for the file
+maxima.info in all the directories listed in *info-paths*.  If nto found
+then it would look for <samp>dir</samp> in the *info-paths* directories,
+and if it were found it would look in the <samp>dir</samp> for a menu item
+such as
+</p>
+<div class="example">
+<pre class="example">* maxima: (/home/wfs/maxima-5.0/info/maxima.info).
+</pre></div>
+
+<p>If such an entry exists then the directory there would be used for the
+purpose of finding <code>maxima.info</code>
+</p>
+</dd></dl>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Type.html#Type" accesskey="n" rel="next">Type</a>, Previous: <a href="User-Interface.html#User-Interface" accesskey="p" rel="prev">User Interface</a>, Up: <a href="index.html#Top" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html#Function-and-Variable-Index" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

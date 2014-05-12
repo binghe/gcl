@@ -1,0 +1,964 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: wm</title>
+
+<meta name="description" content="GCL TK Manual: wm">
+<meta name="keywords" content="GCL TK Manual: wm">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="winfo.html#winfo" rel="prev" title="winfo">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="wm"></a>
+<div class="header">
+<p>
+Previous: <a href="winfo.html#winfo" accesskey="p" rel="prev">winfo</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="wm-1"></a>
+<h3 class="section">3.25 wm</h3>
+
+<p>wm \- Communicate with window manager
+</p><a name="Synopsis-37"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>wm</b><span class="roman"> </span><i>option window </i><span class="roman">?</span><i>args</i>?
+</p>
+<a name="Description-36"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>wm</b> command is used to interact with window managers in
+order to control such things as the title for a window, its geometry,
+or the increments in terms of which it may be resized.  The <b>wm</b>
+command can take any of a number of different forms, depending on
+the <i>option</i> argument.  All of the forms expect at least one
+additional argument, <i>window</i>, which must be the path name of a
+top-level window.
+</p>
+<p>The legal forms for the <b>wm</b> command are:
+</p>
+<dl compact="compact">
+<dt><b>wm :aspect </b><i>window</i><span class="roman"> ?</span><i>minNumer minDenom maxNumer maxDenom</i>?</dt>
+<dd><p>If <i>minNumer</i><span class="roman">, </span><i>minDenom</i><span class="roman">, </span><i>maxNumer</i><span class="roman">, and </span><i>maxDenom</i>
+are all specified, then they will be passed to the window manager
+and the window manager should use them to enforce a range of
+acceptable aspect ratios for <i>window</i>.  The aspect ratio of
+<i>window</i> (width/length) will be constrained to lie
+between <i>minNumer</i><span class="roman">/</span><i>minDenom</i><span class="roman"> and </span><i>maxNumer</i><span class="roman">/</span><i>maxDenom</i>.
+If <i>minNumer</i> etc. are all specified as empty strings, then
+any existing aspect ratio restrictions are removed.
+If <i>minNumer</i> etc. are specified, then the command returns an
+empty string.  Otherwise, it returns
+a Tcl list containing four elements, which are the current values
+of <i>minNumer</i><span class="roman">, </span><i>minDenom</i><span class="roman">, </span><i>maxNumer</i><span class="roman">, and </span><i>maxDenom</i>
+(if no aspect restrictions are in effect, then an empty string is
+returned).
+</p></dd>
+<dt><b>wm :client </b><i>window</i><span class="roman"> ?</span><i>name</i>?</dt>
+<dd><p>If <i>name</i><span class="roman"> is specified, this command stores </span><i>name</i> (which
+should be the name of
+the host on which the application is executing) in <i>window</i>&rsquo;s
+<b>WM_CLIENT_MACHINE</b> property for use by the window manager or
+session manager.
+The command returns an empty string in this case.
+If <i>name</i> isn&rsquo;t specified, the command returns the last name
+set in a <b>wm :client</b><span class="roman"> command for </span><i>window</i>.
+If <i>name</i> is specified as an empty string, the command deletes the
+<b>WM_CLIENT_MACHINE</b><span class="roman"> property from </span><i>window</i>.
+</p></dd>
+<dt><b>wm :command </b><i>window</i><span class="roman"> ?</span><i>value</i>?</dt>
+<dd><p>If <i>value</i><span class="roman"> is specified, this command stores </span><i>value</i><span class="roman"> in </span><i>window</i>&rsquo;s
+<b>WM_COMMAND</b> property for use by the window manager or
+session manager and returns an empty string.
+<i>Value</i> must have proper list structure;  the elements should
+contain the words of the command used to invoke the application.
+If <i>value</i> isn&rsquo;t specified then the command returns the last value
+set in a <b>wm :command</b><span class="roman"> command for </span><i>window</i>.
+If <i>value</i> is specified as an empty string, the command
+deletes the <b>WM_COMMAND</b><span class="roman"> property from </span><i>window</i>.
+</p></dd>
+<dt><b>wm :deiconify </b><i>window</i></dt>
+<dd><p>Arrange for <i>window</i> to be displayed in normal (non-iconified) form.
+This is done by mapping the window.  If the window has never been
+mapped then this command will not map the window, but it will ensure
+that when the window is first mapped it will be displayed
+in de-iconified form.  Returns an empty string.
+</p></dd>
+<dt><b>wm :focusmodel </b><i>window</i><span class="roman"> ?</span><b>active</b><span class="roman">|</span><b>passive</b>?</dt>
+<dd><p>If <b>active</b><span class="roman"> or </span><b>passive</b> is supplied as an optional argument
+to the command, then it specifies the focus model for <i>window</i>.
+In this case the command returns an empty string.  If no additional
+argument is supplied, then the command returns the current focus
+model for <i>window</i>.
+An <b>active</b><span class="roman"> focus model means that </span><i>window</i> will claim the
+input focus for itself or its descendants, even at times when
+the focus is currently in some other application.  <b>Passive</b> means that
+<i>window</i> will never claim the focus for itself:  the window manager
+should give the focus to <i>window</i> at appropriate times.  However,
+once the focus has been given to <i>window</i> or one of its descendants,
+the application may re-assign the focus among <i>window</i>&rsquo;s descendants.
+The focus model defaults to <b>passive</b><span class="roman">, and Tk&rsquo;s </span><b>focus</b> command
+assumes a passive model of focussing.
+</p></dd>
+<dt><b>wm :frame </b><i>window</i></dt>
+<dd><p>If <i>window</i> has been reparented by the window manager into a
+decorative frame, the command returns the X window identifier for
+the outermost frame that contains <i>window</i> (the window whose
+parent is the root or virtual root).  If <i>window</i> hasn&rsquo;t been
+reparented by the window manager then the command returns the
+X window identifier for <i>window</i>.
+</p></dd>
+<dt><b>wm :geometry </b><i>window</i><span class="roman"> ?</span><i>newGeometry</i>?</dt>
+<dd><p>If <i>newGeometry</i><span class="roman"> is specified, then the geometry of </span><i>window</i>
+is changed and an empty string is returned.  Otherwise the current
+geometry for <i>window</i> is returned (this is the most recent
+geometry specified either by manual resizing or
+in a <b>wm :geometry</b><span class="roman"> command).  </span><i>NewGeometry</i> has
+the form <b>=</b><i>width</i><b>x</b><i>height</i><b>\(+-</b><i>x</i><b>\(+-</b><i>y</i>, where
+any of <b>=</b><span class="roman">, </span><i>width</i><b>x</b><i>height</i><span class="roman">, or </span><b>\(+-</b><i>x</i><b>\(+-</b><i>y</i>
+may be omitted.  <i>Width</i><span class="roman"> and </span><i>height</i> are positive integers
+specifying the desired dimensions of <i>window</i><span class="roman">.  If </span><i>window</i>
+is gridded (see GRIDDED GEOMETRY MANAGEMENT below) then the dimensions
+are specified in grid units;  otherwise they are specified in pixel
+units.  <i>X</i><span class="roman"> and </span><i>y</i> specify the desired location of
+<i>window</i> on the screen, in pixels.
+If <i>x</i><span class="roman"> is preceded by </span><b>+</b>, it specifies
+the number of pixels between the left edge of the screen and the left
+edge of <i>window</i><span class="roman">&rsquo;s border;  if preceded by </span><b>-</b> then
+<i>x</i> specifies the number of pixels
+between the right edge of the screen and the right edge of <i>window</i>&rsquo;s
+border.  If <i>y</i><span class="roman"> is preceded by </span><b>+</b> then it specifies the
+number of pixels between the top of the screen and the top
+of <i>window</i><span class="roman">&rsquo;s border;  if </span><i>y</i><span class="roman"> is preceded by </span><b>-</b> then
+it specifies the number of pixels between the bottom of <i>window</i>&rsquo;s
+border and the bottom of the screen.
+If <i>newGeometry</i> is specified as an empty string then any
+existing user-specified geometry for <i>window</i> is cancelled, and
+the window will revert to the size requested internally by its
+widgets.
+</p></dd>
+<dt><b>wm :grid </b><i>window</i><span class="roman"> ?</span><i>baseWidth baseHeight widthInc heightInc</i>?</dt>
+<dd><p>This command indicates that <i>window</i> is to be managed as a
+gridded window.
+It also specifies the relationship between grid units and pixel units.
+<i>BaseWidth</i><span class="roman"> and </span><i>baseHeight</i> specify the number of grid
+units corresponding to the pixel dimensions requested internally
+by <i>window</i><span class="roman"> using </span><b>Tk_GeometryRequest</b><span class="roman">.  </span><i>WidthInc</i>
+and <i>heightInc</i> specify the number of pixels in each horizontal
+and vertical grid unit.
+These four values determine a range of acceptable sizes for
+<i>window</i>, corresponding to grid-based widths and heights
+that are non-negative integers.
+Tk will pass this information to the window manager;  during
+manual resizing, the window manager will restrict the window&rsquo;s size
+to one of these acceptable sizes.
+Furthermore, during manual resizing the window manager will display
+the window&rsquo;s current size in terms of grid units rather than pixels.
+If <i>baseWidth</i> etc. are all specified as empty strings, then
+<i>window</i> will no longer be managed as a gridded window.  If
+<i>baseWidth</i> etc. are specified then the return value is an
+empty string.
+Otherwise the return value is a Tcl list containing
+four elements corresponding to the current <i>baseWidth</i>,
+<i>baseHeight</i><span class="roman">, </span><i>widthInc</i><span class="roman">, and </span><i>heightInc</i>;  if
+<i>window</i> is not currently gridded, then an empty string
+is returned.
+Note: this command should not be needed very often, since the
+<b>Tk_SetGrid</b><span class="roman"> library procedure and the </span><b>setGrid</b> option
+provide easier access to the same functionality.
+</p></dd>
+<dt><b>wm :group </b><i>window</i><span class="roman"> ?</span><i>pathName</i>?</dt>
+<dd><p>If <i>pathName</i> is specified, it gives the path name for the leader of
+a group of related windows.  The window manager may use this information,
+for example, to unmap all of the windows in a group when the group&rsquo;s
+leader is iconified.  <i>PathName</i> may be specified as an empty string to
+remove <i>window</i><span class="roman"> from any group association.  If </span><i>pathName</i> is
+specified then the command returns an empty string;  otherwise it
+returns the path name of <i>window</i>&rsquo;s current group leader, or an empty
+string if <i>window</i> isn&rsquo;t part of any group.
+</p></dd>
+<dt><b>wm :iconbitmap </b><i>window</i><span class="roman"> ?</span><i>bitmap</i>?</dt>
+<dd><p>If <i>bitmap</i> is specified, then it names a bitmap in the standard
+forms accepted by Tk (see the <b>Tk_GetBitmap</b> manual entry for details).
+This bitmap is passed to the window manager to be displayed in
+<i>window</i>&rsquo;s icon, and the command returns an empty string.  If
+an empty string is specified for <i>bitmap</i>, then any current icon
+bitmap is cancelled for <i>window</i>.
+If <i>bitmap</i> is specified then the command returns an empty string.
+Otherwise it returns the name of
+the current icon bitmap associated with <i>window</i>, or an empty
+string if <i>window</i> has no icon bitmap.
+</p></dd>
+<dt><b>wm :iconify </b><i>window</i></dt>
+<dd><p>Arrange for <i>window</i><span class="roman"> to be iconified.  It </span><i>window</i> hasn&rsquo;t
+yet been mapped for the first time, this command will arrange for
+it to appear in the iconified state when it is eventually mapped.
+</p></dd>
+<dt><b>wm :iconmask </b><i>window</i><span class="roman"> ?</span><i>bitmap</i>?</dt>
+<dd><p>If <i>bitmap</i> is specified, then it names a bitmap in the standard
+forms accepted by Tk (see the <b>Tk_GetBitmap</b> manual entry for details).
+This bitmap is passed to the window manager to be used as a mask
+in conjunction with the <b>iconbitmap</b> option:  where the mask
+has zeroes no icon will be displayed;  where it has ones, the bits
+from the icon bitmap will be displayed.  If
+an empty string is specified for <i>bitmap</i> then any current icon
+mask is cancelled for <i>window</i> (this is equivalent to specifying
+a bitmap of all ones).  If <i>bitmap</i> is specified
+then the command returns an empty string.  Otherwise it
+returns the name of the current icon mask associated with
+<i>window</i>, or an empty string if no mask is in effect.
+</p></dd>
+<dt><b>wm :iconname </b><i>window</i><span class="roman"> ?</span><i>newName</i>?</dt>
+<dd><p>If <i>newName</i> is specified, then it is passed to the window
+manager;  the window manager should display <i>newName</i> inside
+the icon associated with <i>window</i>.  In this case an empty
+string is returned as result.  If <i>newName</i> isn&rsquo;t specified
+then the command returns the current icon name for <i>window</i>,
+or an empty string if no icon name has been specified (in this
+case the window manager will normally display the window&rsquo;s title,
+as specified with the <b>wm :title</b> command).
+</p></dd>
+<dt><b>wm :iconposition </b><i>window</i><span class="roman"> ?</span><i>x y</i>?</dt>
+<dd><p>If <i>x</i><span class="roman"> and </span><i>y</i> are specified, they are passed to the window
+manager as a hint about where to position the icon for <i>window</i>.
+In this case an empty string is returned.  If <i>x</i><span class="roman"> and </span><i>y</i> are
+specified as empty strings then any existing icon position hint is cancelled.
+If neither <i>x</i><span class="roman"> nor </span><i>y</i> is specified, then the command returns
+a Tcl list containing two values, which are the current icon position
+hints (if no hints are in effect then an empty string is returned).
+</p></dd>
+<dt><b>wm :iconwindow </b><i>window</i><span class="roman"> ?</span><i>pathName</i>?</dt>
+<dd><p>If <i>pathName</i> is specified, it is the path name for a window to
+use as icon for <i>window</i><span class="roman">: when </span><i>window</i> is iconified then
+<i>pathName</i><span class="roman"> should be mapped to serve as icon, and when </span><i>window</i>
+is de-iconified then <i>pathName</i> will be unmapped again.  If
+<i>pathName</i> is specified as an empty string then any existing
+icon window association for <i>window</i> will be cancelled.  If
+the <i>pathName</i> argument is specified then an empty string is
+returned.  Otherwise the command returns the path name of the
+current icon window for <i>window</i>, or an empty string if there
+is no icon window currently specified for <i>window</i>.  Note:
+not all window managers support the notion of an icon window.
+</p></dd>
+<dt><b>wm :maxsize </b><i>window</i><span class="roman"> ?</span><i>width height</i>?</dt>
+<dd><p>If <i>width</i><span class="roman"> and </span><i>height</i><span class="roman"> are specified, then </span><i>window</i>
+becomes resizable and <i>width</i><span class="roman"> and </span><i>height</i> give its
+maximum permissible dimensions.
+For gridded windows the dimensions are specified in
+grid units;  otherwise they are specified in pixel units.
+During manual sizing, the window manager
+should restrict the window&rsquo;s dimensions to be less than or
+equal to <i>width</i><span class="roman"> and </span><i>height</i>.
+If <i>width</i><span class="roman"> and </span><i>height</i> are specified as empty strings,
+then the maximum size option is cancelled for <i>window</i>.
+If <i>width</i><span class="roman"> and </span><i>height</i> are
+specified, then the command returns an empty string.  Otherwise
+it returns a Tcl list with two elements, which are the
+maximum width and height currently in effect;  if no maximum
+dimensions are in effect for <i>window</i> then an empty
+string is returned.  See the sections on geometry management
+below for more information.
+</p></dd>
+<dt><b>wm :minsize </b><i>window</i><span class="roman"> ?</span><i>width height</i>?</dt>
+<dd><p>If <i>width</i><span class="roman"> and </span><i>height</i><span class="roman"> are specified, then </span><i>window</i>
+becomes resizable and <i>width</i><span class="roman"> and </span><i>height</i> give its
+minimum permissible dimensions.
+For gridded windows the dimensions are specified in
+grid units;  otherwise they are specified in pixel units.
+During manual sizing, the window manager
+should restrict the window&rsquo;s dimensions to be greater than or
+equal to <i>width</i><span class="roman"> and </span><i>height</i>.
+If <i>width</i><span class="roman"> and </span><i>height</i> are specified as empty strings,
+then the minimum size option is cancelled for <i>window</i>.
+If <i>width</i><span class="roman"> and </span><i>height</i> are
+specified, then the command returns an empty string.  Otherwise
+it returns a Tcl list with two elements, which are the
+minimum width and height currently in effect;  if no minimum
+dimensions are in effect for <i>window</i> then an empty
+string is returned.  See the sections on geometry management
+below for more information.
+</p></dd>
+<dt><b>wm :overrideredirect </b><i>window</i><span class="roman"> ?</span><i>boolean</i>?</dt>
+<dd><p>If <i>boolean</i> is specified, it must have a proper boolean form and
+the override-redirect flag for <i>window</i> is set to that value.
+If <i>boolean</i><span class="roman"> is not specified then </span><b>1</b><span class="roman"> or </span><b>0</b> is
+returned to indicate whether or not the override-redirect flag
+is currently set for <i>window</i>.
+Setting the override-redirect flag for a window causes
+it to be ignored by the window manager;  among other things, this means
+that the window will not be reparented from the root window into a
+decorative frame and the user will not be able to manipulate the
+window using the normal window manager mechanisms.
+</p></dd>
+<dt><b>wm :positionfrom </b><i>window</i><span class="roman"> ?</span><i>who</i>?</dt>
+<dd><p>If <i>who</i><span class="roman"> is specified, it must be either </span><b>program</b> or
+<b>user</b>, or an abbreviation of one of these two.  It indicates
+whether <i>window</i>&rsquo;s current position was requested by the
+program or by the user.  Many window managers ignore program-requested
+initial positions and ask the user to manually position the window;  if
+<b>user</b> is specified then the window manager should position the
+window at the given place without asking the user for assistance.
+If <i>who</i> is specified as an empty string, then the current position
+source is cancelled.
+If <i>who</i> is specified, then the command returns an empty string.
+Otherwise it returns <b>user</b><span class="roman"> or </span><b>window</b> to indicate the
+source of the window&rsquo;s current position, or an empty string if
+no source has been specified yet.  Most window managers interpret
+&ldquo;no source&rdquo; as equivalent to <b>program</b>.
+Tk will automatically set the position source to <b>user</b>
+when a <b>wm :geometry</b> command is invoked, unless the source has
+been set explicitly to <b>program</b>.
+</p></dd>
+<dt><b>wm :protocol </b><i>window</i><span class="roman"> ?</span><i>name</i><span class="roman">? ?</span><i>command</i>?</dt>
+<dd><p>This command is used to manage window manager protocols such as
+<b>WM_DELETE_WINDOW</b>.
+<i>Name</i> is the name of an atom corresponding to a window manager
+protocol, such as <b>WM_DELETE_WINDOW</b><span class="roman"> or </span><b>WM_SAVE_YOURSELF</b>
+or <b>WM_TAKE_FOCUS</b>.
+If both <i>name</i><span class="roman"> and </span><i>command</i><span class="roman"> are specified, then </span><i>command</i>
+is associated with the protocol specified by <i>name</i>.
+<i>Name</i><span class="roman"> will be added to </span><i>window</i><span class="roman">&rsquo;s </span><b>WM_PROTOCOLS</b>
+property to tell the window manager that the application has a
+protocol handler for <i>name</i><span class="roman">, and </span><i>command</i> will
+be invoked in the future whenever the window manager sends a
+message to the client for that protocol.
+In this case the command returns an empty string.
+If <i>name</i><span class="roman"> is specified but </span><i>command</i> isn&rsquo;t, then the current
+command for <i>name</i> is returned, or an empty string if there
+is no handler defined for <i>name</i>.
+If <i>command</i> is specified as an empty string then the current
+handler for <i>name</i> is deleted and it is removed from the
+<b>WM_PROTOCOLS</b><span class="roman"> property on </span><i>window</i>;  an empty string is
+returned.
+Lastly, if neither <i>name</i><span class="roman"> nor </span><i>command</i> is specified, the
+command returns a list of all the protocols for which handlers
+are currently defined for <i>window</i>.
+</p></dd>
+</dl>
+
+
+<p>Tk always defines a protocol handler for <b>WM_DELETE_WINDOW</b>, even if
+you haven&rsquo;t asked for one with <b>wm :protocol</b>.
+If a <b>WM_DELETE_WINDOW</b> message arrives when you haven&rsquo;t defined
+a handler, then Tk handles the message by destroying the window for
+which it was received.
+.RE
+</p>
+<dl compact="compact">
+<dt><b>wm :sizefrom </b><i>window</i><span class="roman"> ?</span><i>who</i>?</dt>
+<dd><p>If <i>who</i><span class="roman"> is specified, it must be either </span><b>program</b> or
+<b>user</b>, or an abbreviation of one of these two.  It indicates
+whether <i>window</i>&rsquo;s current size was requested by the
+program or by the user.  Some window managers ignore program-requested
+sizes and ask the user to manually size the window;  if
+<b>user</b> is specified then the window manager should give the
+window its specified size without asking the user for assistance.
+If <i>who</i> is specified as an empty string, then the current size
+source is cancelled.
+If <i>who</i> is specified, then the command returns an empty string.
+Otherwise it returns <b>user</b><span class="roman"> or </span><b>window</b> to indicate the
+source of the window&rsquo;s current size, or an empty string if
+no source has been specified yet.  Most window managers interpret
+&ldquo;no source&rdquo; as equivalent to <b>program</b>.
+</p></dd>
+<dt><b>wm :state </b><i>window</i></dt>
+<dd><p>Returns the current state of <i>window</i><span class="roman">:  either </span><b>normal</b>,
+<b>iconic</b><span class="roman">, or </span><b>withdrawn</b>.
+</p></dd>
+<dt><b>wm :title </b><i>window</i><span class="roman"> ?</span><i>string</i>?</dt>
+<dd><p>If <i>string</i> is specified, then it will be passed to the window
+manager for use as the title for <i>window</i> (the window manager
+should display this string in <i>window</i>&rsquo;s title bar).  In this
+case the command returns an empty string.  If <i>string</i> isn&rsquo;t
+specified then the command returns the current title for the
+<i>window</i>.  The title for a window defaults to its name.
+</p></dd>
+<dt><b>wm :transient </b><i>window</i><span class="roman"> ?</span><i>master</i>?</dt>
+<dd><p>If <i>master</i> is specified, then the window manager is informed
+that <i>window</i> is a transient window (e.g. pull-down menu) working
+on behalf of <i>master</i><span class="roman"> (where </span><i>master</i> is the
+path name for a top-level window).  Some window managers will use
+this information to manage <i>window</i><span class="roman"> specially.  If </span><i>master</i>
+is specified as an empty string then <i>window</i> is marked as not
+being a transient window any more.  If <i>master</i> is specified,
+then the command returns an empty string.  Otherwise the command
+returns the path name of <i>window</i>&rsquo;s current master, or an
+empty string if <i>window</i> isn&rsquo;t currently a transient window.
+</p></dd>
+<dt><b>wm :withdraw </b><i>window</i></dt>
+<dd><p>Arranges for <i>window</i> to be withdrawn from the screen.  This
+causes the window to be unmapped and forgotten about by the window
+manager.  If the window
+has never been mapped, then this command
+causes the window to be mapped in the withdrawn state.  Not all
+window managers appear to know how to handle windows that are
+mapped in the withdrawn state.
+Note: it sometimes seems to be necessary to withdraw a
+window and then re-map it (e.g. with <b>wm :deiconify</b>) to get some
+window managers to pay attention to changes in window attributes
+such as group.
+</p>
+</dd>
+</dl>
+<a name="g_t_0022Sources-Of-Geometry-Information_0022"></a>
+<h4 class="unnumberedsubsec">&quot;Sources Of Geometry Information&quot;</h4>
+
+<p>Size-related information for top-level windows
+can come from three sources.
+First, geometry requests come from the widgets that are descendants
+of a top-level window.
+Each widget requests a particular size for itself
+by calling <b>Tk_GeometryRequest</b>.  This information is passed to
+geometry managers, which then request large enough sizes for parent
+windows so that they can layout the children properly.
+Geometry information passes upwards through the window hierarchy
+until eventually a particular size is requested for each top-level
+window.
+These requests are called <i>internal requests</i> in the discussion
+below.
+The second source of width and height information is through the
+<b>wm :geometry</b> command.  Third, the user can
+request a particular size for a window using the
+interactive facilities of the window manager.
+The second and third types of geometry requests are called
+<i>external requests</i> in the discussion below;  Tk treats
+these two kinds of requests identically.
+</p>
+<a name="g_t_0022Ungridded-Geometry-Management_0022"></a>
+<h4 class="unnumberedsubsec">&quot;Ungridded Geometry Management&quot;</h4>
+
+<p>Tk allows the geometry of a top-level window to be managed in
+either of two general ways: ungridded or gridded.
+The ungridded form occurs if no <b>wm :grid</b> command
+has been issued for a top-level window.
+Ungridded management has several variants.
+In the simplest variant of ungridded windows,
+no <b>wm :geometry</b><span class="roman">, </span><b>wm :minsize</b><span class="roman">, or </span><b>wm :maxsize</b>
+commands have been invoked either.
+In this case, the window&rsquo;s size is
+determined totally by the internal requests emanating from the
+widgets inside the window:  Tk will ask the window manager not to
+permit the user to resize the window interactively.
+</p>
+<p>If a <b>wm :geometry</b> command is invoked on an ungridded window,
+then the size in that command overrides any size requested by the
+window&rsquo;s widgets;  from now on, the window&rsquo;s size will be determined
+entirely by the most recent information from <b>wm :geometry</b>
+commands.  To go back to using the size requested by the window&rsquo;s
+widgets, issue a <b>wm :geometry</b><span class="roman"> command with an empty </span><i>geometry</i>
+string.
+</p>
+<p>To enable interactive resizing of an ungridded window, one or both
+of the <b>wm :maxsize</b>
+and <b>wm :minsize</b> commands must be issued.
+The information from these commands will be passed to the window
+manager, and size changes within the specified range will be permitted.
+For ungridded windows the limits refer to the top-level window&rsquo;s
+dimensions in pixels.
+If only a <b>wm :maxsize</b> command is issued then the minimum
+dimensions default to 1;  if only a <b>wm :minsize</b> command is
+issued then the maximum dimensions default to the size of the display.
+If the size of a window is changed interactively, it has the same
+effect as if <b>wm :geometry</b> had been invoked:  from now on, internal
+geometry requests will be ignored.
+To return to internal control over the window&rsquo;s size, issue a
+<b>wm :geometry</b><span class="roman"> command with an empty </span><i>geometry</i> argument.
+If a window has been manually resized or moved, the <b>wm :geometry</b>
+command will return the geometry that was requested interactively.
+</p>
+<a name="g_t_0022Gridded-Geometry-Management_0022"></a>
+<h4 class="unnumberedsubsec">&quot;Gridded Geometry Management&quot;</h4>
+
+<p>The second style of geometry management is called <i>gridded</i>.
+This approach occurs when one of the widgets of an application
+supports a range of useful sizes.
+This occurs, for example, in a text editor where the scrollbars,
+menus, and other adornments are fixed in size but the edit widget
+can support any number of lines of text or characters per line.
+In this case, it is usually desirable to let the user specify the
+number of lines or characters-per-line, either with the
+<b>wm :geometry</b> command or by interactively resizing the window.
+In the case of text, and in other interesting cases also, only
+discrete sizes of the window make sense, such as integral numbers
+of lines and characters-per-line;  arbitrary pixel sizes are not useful.
+</p>
+<p>Gridded geometry management provides support for this kind of
+application.
+Tk (and the window manager) assume that there is a grid of some
+sort within the application and that the application should be
+resized in terms of <i>grid units</i> rather than pixels.
+Gridded geometry management is typically invoked by turning on
+the <b>setGrid</b> option for a widget;  it can also be invoked
+with the <b>wm :grid</b><span class="roman"> command or by calling </span><b>Tk_SetGrid</b>.
+In each of these approaches the particular widget (or sometimes
+code in the application as a whole) specifies the relationship between 
+integral grid sizes for the window and pixel sizes.
+To return to non-gridded geometry management, invoke
+<b>wm :grid</b> with empty argument strings.
+</p>
+<p>When gridded geometry management is enabled then all the dimensions specified
+in <b>wm :minsize</b><span class="roman">, </span><b>wm :maxsize</b><span class="roman">, and </span><b>wm :geometry</b> commands
+are treated as grid units rather than pixel units.
+Interactive resizing is automatically enabled, and it will be
+carried out in even numbers of grid units rather than pixels.
+By default there are no limits on the minimum or maximum dimensions
+of a gridded window.
+As with ungridded windows, interactive resizing has exactly the
+same effect as invoking the <b>wm :geometry</b> command.
+For gridded windows, internally- and externally-requested dimensions
+work together: the externally-specified width and height determine
+the size of the window in grid units, and the information from the
+last <b>wm :grid</b> command maps from grid units to pixel units.
+</p>
+<a name="Bugs-3"></a>
+<h4 class="unnumberedsubsec">Bugs</h4>
+
+<p>The window manager interactions seem too complicated, especially
+for managing geometry.  Suggestions on how to simplify this would
+be greatly appreciated.
+</p>
+<p>Most existing window managers appear to have bugs that affect the
+operation of the <b>wm</b> command.  For example, some changes won&rsquo;t
+take effect if the window is already active:  the window will have
+to be withdrawn and de-iconified in order to make the change happen.
+</p>
+<a name="Keywords-39"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>aspect ratio, deiconify, focus model, geometry, grid, group, icon, iconify, increments, position, size, title, top-level window, units, window manager
+</p>
+<a name="SEC_Overview"></a>
+<h2 class="shortcontents-heading">Short Table of Contents</h2>
+
+<div class="shortcontents">
+<ul class="no-bullet">
+<li><a name="stoc-General-1" href="#toc-General-1">1 General</a></li>
+<li><a name="stoc-Widgets-1" href="#toc-Widgets-1">2 Widgets</a></li>
+<li><a name="stoc-Control-1" href="#toc-Control-1">3 Control</a></li>
+</ul>
+</div>
+
+<a name="SEC_Contents"></a>
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+
+<ul class="no-bullet">
+  <li><a name="toc-General-1" href="General.html#General">1 General</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Introduction-1" href="Introduction.html#Introduction">1.1 Introduction</a></li>
+    <li><a name="toc-Getting-Started-1" href="Getting-Started.html#Getting-Started">1.2 Getting Started</a></li>
+    <li><a name="toc-Common-Features-of-Widgets-1" href="Common-Features-of-Widgets.html#Common-Features-of-Widgets">1.3 Common Features of Widgets</a></li>
+    <li><a name="toc-Return-Values-1" href="Return-Values.html#Return-Values">1.4 Return Values</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Widget-Constructor-Return-Values" href="Return-Values.html#Widget-Constructor-Return-Values">1.4.1 Widget Constructor Return Values</a></li>
+      <li><a name="toc-Widget-Return-Values" href="Return-Values.html#Widget-Return-Values">1.4.2 Widget Return Values</a></li>
+      <li><a name="toc-Control-Function-Return-Values" href="Return-Values.html#Control-Function-Return-Values">1.4.3 Control Function Return Values</a></li>
+    </ul></li>
+    <li><a name="toc-Argument-Lists-1" href="Argument-Lists.html#Argument-Lists">1.5 Argument Lists</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Widget-Functions" href="Argument-Lists.html#Widget-Functions">1.5.1 Widget Functions</a></li>
+      <li><a name="toc-Widget-Constructor-Argument-Lists" href="Argument-Lists.html#Widget-Constructor-Argument-Lists">1.5.2 Widget Constructor Argument Lists</a></li>
+      <li><a name="toc-Concatenation-Using-_0060_003a_0027-in-Argument-List" href="Argument-Lists.html#Concatenation-Using-_0060_003a_0027-in-Argument-List">1.5.3 Concatenation Using &lsquo;:&rsquo; in Argument List</a></li>
+    </ul></li>
+    <li><a name="toc-Lisp-Functions-Invoked-from-Graphics-1" href="Lisp-Functions-Invoked-from-Graphics.html#Lisp-Functions-Invoked-from-Graphics">1.6 Lisp Functions Invoked from Graphics</a></li>
+    <li><a name="toc-Linked-Variables-1" href="Linked-Variables.html#Linked-Variables">1.7 Linked Variables</a></li>
+    <li><a name="toc-tkconnect-1" href="tkconnect.html#tkconnect">1.8 tkconnect</a></li>
+  </ul></li>
+  <li><a name="toc-Widgets-1" href="Widgets.html#Widgets">2 Widgets</a>
+  <ul class="no-bullet">
+    <li><a name="toc-button-1" href="button.html#button">2.1 button</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis" href="button.html#Synopsis">Synopsis</a></li>
+      <li><a name="toc-Standard-Options" href="button.html#Standard-Options">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Button" href="button.html#Arguments-for-Button">Arguments for Button</a></li>
+      <li><a name="toc-Description" href="button.html#Description">Description</a></li>
+      <li><a name="toc-A-Button-Widget_0027s-Arguments" href="button.html#A-Button-Widget_0027s-Arguments">A Button Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-_0022Default-Bindings_0022" href="button.html#g_t_0022Default-Bindings_0022">&quot;Default Bindings&quot;</a></li>
+      <li><a name="toc-Keywords" href="button.html#Keywords">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-listbox-1" href="listbox.html#listbox">2.2 listbox</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-1" href="listbox.html#Synopsis-1">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-1" href="listbox.html#Standard-Options-1">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Listbox" href="listbox.html#Arguments-for-Listbox">Arguments for Listbox</a></li>
+      <li><a name="toc-Description-1" href="listbox.html#Description-1">Description</a></li>
+      <li><a name="toc-A-Listbox_0027s-Arguments" href="listbox.html#A-Listbox_0027s-Arguments">A Listbox&rsquo;s Arguments</a></li>
+      <li><a name="toc-_0022Default-Bindings_0022-1" href="listbox.html#g_t_0022Default-Bindings_0022-1">&quot;Default Bindings&quot;</a></li>
+      <li><a name="toc-Keywords-1" href="listbox.html#Keywords-1">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-scale-1" href="scale.html#scale">2.3 scale</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-2" href="scale.html#Synopsis-2">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-2" href="scale.html#Standard-Options-2">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Scale" href="scale.html#Arguments-for-Scale">Arguments for Scale</a></li>
+      <li><a name="toc-Description-2" href="scale.html#Description-2">Description</a></li>
+      <li><a name="toc-A-Scale_0027s_0022Argumentsommand_0022" href="scale.html#A-Scale_0027s_0022Argumentsommand_0022">A Scale&rsquo;s&quot;Argumentsommand&quot;</a></li>
+      <li><a name="toc-Bindings" href="scale.html#Bindings">Bindings</a></li>
+      <li><a name="toc-Keywords-2" href="scale.html#Keywords-2">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-canvas-1" href="canvas.html#canvas">2.4 canvas</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-3" href="canvas.html#Synopsis-3">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-3" href="canvas.html#Standard-Options-3">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Canvas" href="canvas.html#Arguments-for-Canvas">Arguments for Canvas</a></li>
+      <li><a name="toc-Introduction-2" href="canvas.html#Introduction-2">Introduction</a></li>
+      <li><a name="toc-Display-List" href="canvas.html#Display-List">Display List</a></li>
+      <li><a name="toc-Item-Ids-And-Tags" href="canvas.html#Item-Ids-And-Tags">Item Ids And Tags</a></li>
+      <li><a name="toc-Coordinates" href="canvas.html#Coordinates">Coordinates</a></li>
+      <li><a name="toc-Transformations" href="canvas.html#Transformations">Transformations</a></li>
+      <li><a name="toc-Indices" href="canvas.html#Indices">Indices</a></li>
+      <li><a name="toc-A-Canvas-Widget_0027s-Arguments" href="canvas.html#A-Canvas-Widget_0027s-Arguments">A Canvas Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Overview-Of-Item-Types" href="canvas.html#Overview-Of-Item-Types">Overview Of Item Types</a></li>
+      <li><a name="toc-Arc-Items" href="canvas.html#Arc-Items">Arc Items</a></li>
+      <li><a name="toc-Bitmap-Items" href="canvas.html#Bitmap-Items">Bitmap Items</a></li>
+      <li><a name="toc-Line-Items" href="canvas.html#Line-Items">Line Items</a></li>
+      <li><a name="toc-Oval-Items" href="canvas.html#Oval-Items">Oval Items</a></li>
+      <li><a name="toc-Polygon-Items" href="canvas.html#Polygon-Items">Polygon Items</a></li>
+      <li><a name="toc-Rectangle-Items" href="canvas.html#Rectangle-Items">Rectangle Items</a></li>
+      <li><a name="toc-Text-Items" href="canvas.html#Text-Items">Text Items</a></li>
+      <li><a name="toc-Window-Items" href="canvas.html#Window-Items">Window Items</a></li>
+      <li><a name="toc-Application_002dDefined-Item-Types" href="canvas.html#Application_002dDefined-Item-Types">Application-Defined Item Types</a></li>
+      <li><a name="toc-Bindings-1" href="canvas.html#Bindings-1">Bindings</a></li>
+      <li><a name="toc-Credits" href="canvas.html#Credits">Credits</a></li>
+      <li><a name="toc-Keywords-3" href="canvas.html#Keywords-3">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-menu-1" href="menu.html#menu">2.5 menu</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-4" href="menu.html#Synopsis-4">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-4" href="menu.html#Standard-Options-4">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Menu" href="menu.html#Arguments-for-Menu">Arguments for Menu</a></li>
+      <li><a name="toc-Introduction-3" href="menu.html#Introduction-3">Introduction</a></li>
+      <li><a name="toc-Command-Entries" href="menu.html#Command-Entries">Command Entries</a></li>
+      <li><a name="toc-Separator-Entries" href="menu.html#Separator-Entries">Separator Entries</a></li>
+      <li><a name="toc-Check_002dButton-Entries" href="menu.html#Check_002dButton-Entries">Check-Button Entries</a></li>
+      <li><a name="toc-Radio_002dButton-Entries" href="menu.html#Radio_002dButton-Entries">Radio-Button Entries</a></li>
+      <li><a name="toc-Cascade-Entries" href="menu.html#Cascade-Entries">Cascade Entries</a></li>
+      <li><a name="toc-A-Menu-Widget_0027s-Arguments" href="menu.html#A-Menu-Widget_0027s-Arguments">A Menu Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Default-Bindings" href="menu.html#Default-Bindings">Default Bindings</a></li>
+      <li><a name="toc-Bugs" href="menu.html#Bugs">Bugs</a></li>
+      <li><a name="toc-Keywords-4" href="menu.html#Keywords-4">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-scrollbar-1" href="scrollbar.html#scrollbar">2.6 scrollbar</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-5" href="scrollbar.html#Synopsis-5">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-5" href="scrollbar.html#Standard-Options-5">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Scrollbar" href="scrollbar.html#Arguments-for-Scrollbar">Arguments for Scrollbar</a></li>
+      <li><a name="toc-Description-3" href="scrollbar.html#Description-3">Description</a></li>
+      <li><a name="toc-A-Scrollbar-Widget_0027s-Arguments" href="scrollbar.html#A-Scrollbar-Widget_0027s-Arguments">A Scrollbar Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-2" href="scrollbar.html#Bindings-2">Bindings</a></li>
+      <li><a name="toc-Keywords-5" href="scrollbar.html#Keywords-5">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-checkbutton-1" href="checkbutton.html#checkbutton">2.7 checkbutton</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-6" href="checkbutton.html#Synopsis-6">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-6" href="checkbutton.html#Standard-Options-6">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Checkbutton" href="checkbutton.html#Arguments-for-Checkbutton">Arguments for Checkbutton</a></li>
+      <li><a name="toc-Description-4" href="checkbutton.html#Description-4">Description</a></li>
+      <li><a name="toc-A-Checkbutton-Widget_0027s-Arguments" href="checkbutton.html#A-Checkbutton-Widget_0027s-Arguments">A Checkbutton Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-3" href="checkbutton.html#Bindings-3">Bindings</a></li>
+      <li><a name="toc-Keywords-6" href="checkbutton.html#Keywords-6">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-menubutton-1" href="menubutton.html#menubutton">2.8 menubutton</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-7" href="menubutton.html#Synopsis-7">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-7" href="menubutton.html#Standard-Options-7">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Menubutton" href="menubutton.html#Arguments-for-Menubutton">Arguments for Menubutton</a></li>
+      <li><a name="toc-Introduction-4" href="menubutton.html#Introduction-4">Introduction</a></li>
+      <li><a name="toc-A-Menubutton-Widget_0027s-Arguments" href="menubutton.html#A-Menubutton-Widget_0027s-Arguments">A Menubutton Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-_0022Default-Bindings_0022-2" href="menubutton.html#g_t_0022Default-Bindings_0022-2">&quot;Default Bindings&quot;</a></li>
+      <li><a name="toc-Keywords-7" href="menubutton.html#Keywords-7">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-text-1" href="text.html#text">2.9 text</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-8" href="text.html#Synopsis-8">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-8" href="text.html#Standard-Options-8">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Text" href="text.html#Arguments-for-Text">Arguments for Text</a></li>
+      <li><a name="toc-Description-5" href="text.html#Description-5">Description</a></li>
+      <li><a name="toc-Indices-1" href="text.html#Indices-1">Indices</a></li>
+      <li><a name="toc-Tags" href="text.html#Tags">Tags</a></li>
+      <li><a name="toc-Marks" href="text.html#Marks">Marks</a></li>
+      <li><a name="toc-Windows" href="text.html#Windows">Windows</a></li>
+      <li><a name="toc-The-Selection" href="text.html#The-Selection">The Selection</a></li>
+      <li><a name="toc-The-Insertion-Cursor" href="text.html#The-Insertion-Cursor">The Insertion Cursor</a></li>
+      <li><a name="toc-A-Text-Widget_0027s-Arguments" href="text.html#A-Text-Widget_0027s-Arguments">A Text Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-4" href="text.html#Bindings-4">Bindings</a></li>
+      <li><a name="toc-_0022Performance-Issues_0022" href="text.html#g_t_0022Performance-Issues_0022">&quot;Performance Issues&quot;</a></li>
+      <li><a name="toc-Keywords-8" href="text.html#Keywords-8">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-entry-1" href="entry.html#entry">2.10 entry</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-9" href="entry.html#Synopsis-9">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-9" href="entry.html#Standard-Options-9">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Entry" href="entry.html#Arguments-for-Entry">Arguments for Entry</a></li>
+      <li><a name="toc-Description-6" href="entry.html#Description-6">Description</a></li>
+      <li><a name="toc-A-Entry-Widget_0027s-Arguments" href="entry.html#A-Entry-Widget_0027s-Arguments">A Entry Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-_0022Default-Bindings_0022-3" href="entry.html#g_t_0022Default-Bindings_0022-3">&quot;Default Bindings&quot;</a></li>
+      <li><a name="toc-Keywords-9" href="entry.html#Keywords-9">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-message-1" href="message.html#message">2.11 message</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-10" href="message.html#Synopsis-10">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-10" href="message.html#Standard-Options-10">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Message" href="message.html#Arguments-for-Message">Arguments for Message</a></li>
+      <li><a name="toc-Description-7" href="message.html#Description-7">Description</a></li>
+      <li><a name="toc-A-Message-Widget_0027s-Arguments" href="message.html#A-Message-Widget_0027s-Arguments">A Message Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-_0022Default-Bindings_0022-4" href="message.html#g_t_0022Default-Bindings_0022-4">&quot;Default Bindings&quot;</a></li>
+      <li><a name="toc-Bugs-1" href="message.html#Bugs-1">Bugs</a></li>
+      <li><a name="toc-Keywords-10" href="message.html#Keywords-10">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-frame-1" href="frame.html#frame">2.12 frame</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-11" href="frame.html#Synopsis-11">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-11" href="frame.html#Standard-Options-11">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Frame" href="frame.html#Arguments-for-Frame">Arguments for Frame</a></li>
+      <li><a name="toc-Description-8" href="frame.html#Description-8">Description</a></li>
+      <li><a name="toc-A-Frame-Widget_0027s-Arguments" href="frame.html#A-Frame-Widget_0027s-Arguments">A Frame Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-5" href="frame.html#Bindings-5">Bindings</a></li>
+      <li><a name="toc-Keywords-11" href="frame.html#Keywords-11">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-label-1" href="label.html#label">2.13 label</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-12" href="label.html#Synopsis-12">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-12" href="label.html#Standard-Options-12">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Label" href="label.html#Arguments-for-Label">Arguments for Label</a></li>
+      <li><a name="toc-Description-9" href="label.html#Description-9">Description</a></li>
+      <li><a name="toc-A-Label-Widget_0027s-Arguments" href="label.html#A-Label-Widget_0027s-Arguments">A Label Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-6" href="label.html#Bindings-6">Bindings</a></li>
+      <li><a name="toc-Keywords-12" href="label.html#Keywords-12">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-radiobutton-1" href="radiobutton.html#radiobutton">2.14 radiobutton</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-13" href="radiobutton.html#Synopsis-13">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-13" href="radiobutton.html#Standard-Options-13">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Radiobutton" href="radiobutton.html#Arguments-for-Radiobutton">Arguments for Radiobutton</a></li>
+      <li><a name="toc-Description-10" href="radiobutton.html#Description-10">Description</a></li>
+      <li><a name="toc-A-Radiobutton-Widget_0027s-Arguments" href="radiobutton.html#A-Radiobutton-Widget_0027s-Arguments">A Radiobutton Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-7" href="radiobutton.html#Bindings-7">Bindings</a></li>
+      <li><a name="toc-Keywords-13" href="radiobutton.html#Keywords-13">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-toplevel-1" href="toplevel.html#toplevel">2.15 toplevel</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-14" href="toplevel.html#Synopsis-14">Synopsis</a></li>
+      <li><a name="toc-Standard-Options-14" href="toplevel.html#Standard-Options-14">Standard Options</a></li>
+      <li><a name="toc-Arguments-for-Toplevel" href="toplevel.html#Arguments-for-Toplevel">Arguments for Toplevel</a></li>
+      <li><a name="toc-Description-11" href="toplevel.html#Description-11">Description</a></li>
+      <li><a name="toc-A-Toplevel-Widget_0027s-Arguments" href="toplevel.html#A-Toplevel-Widget_0027s-Arguments">A Toplevel Widget&rsquo;s Arguments</a></li>
+      <li><a name="toc-Bindings-8" href="toplevel.html#Bindings-8">Bindings</a></li>
+      <li><a name="toc-Keywords-14" href="toplevel.html#Keywords-14">Keywords</a></li>
+    </ul></li>
+  </ul></li>
+  <li><a name="toc-Control-1" href="Control.html#Control">3 Control</a>
+  <ul class="no-bullet">
+    <li><a name="toc-after-1" href="after.html#after">3.1 after</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-15" href="after.html#Synopsis-15">Synopsis</a></li>
+      <li><a name="toc-Description-12" href="after.html#Description-12">Description</a></li>
+      <li><a name="toc-Keywords-15" href="after.html#Keywords-15">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-bind-1" href="bind.html#bind">3.2 bind</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-16" href="bind.html#Synopsis-16">Synopsis</a></li>
+      <li><a name="toc-Description-13" href="bind.html#Description-13">Description</a></li>
+      <li><a name="toc-Keywords-16" href="bind.html#Keywords-16">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-destroy-1" href="destroy.html#destroy">3.3 destroy</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-17" href="destroy.html#Synopsis-17">Synopsis</a></li>
+      <li><a name="toc-Description-14" href="destroy.html#Description-14">Description</a></li>
+      <li><a name="toc-Keywords-17" href="destroy.html#Keywords-17">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tk_002ddialog-1" href="tk_002ddialog.html#tk_002ddialog">3.4 tk-dialog</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-18" href="tk_002ddialog.html#Synopsis-18">Synopsis</a></li>
+      <li><a name="toc-Description-15" href="tk_002ddialog.html#Description-15">Description</a></li>
+      <li><a name="toc-Keywords-18" href="tk_002ddialog.html#Keywords-18">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-exit-1" href="exit.html#exit">3.5 exit</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-19" href="exit.html#Synopsis-19">Synopsis</a></li>
+      <li><a name="toc-Description-16" href="exit.html#Description-16">Description</a></li>
+      <li><a name="toc-Keywords-19" href="exit.html#Keywords-19">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-focus-1" href="focus.html#focus">3.6 focus</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-20" href="focus.html#Synopsis-20">Synopsis</a></li>
+      <li><a name="toc-Description-17" href="focus.html#Description-17">Description</a></li>
+      <li><a name="toc-_0022Focus-Events_0022" href="focus.html#g_t_0022Focus-Events_0022">&quot;Focus Events&quot;</a></li>
+      <li><a name="toc-Keywords-20" href="focus.html#Keywords-20">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-grab-1" href="grab.html#grab">3.7 grab</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-21" href="grab.html#Synopsis-21">Synopsis</a></li>
+      <li><a name="toc-Description-18" href="grab.html#Description-18">Description</a></li>
+      <li><a name="toc-Bugs-2" href="grab.html#Bugs-2">Bugs</a></li>
+      <li><a name="toc-Keywords-21" href="grab.html#Keywords-21">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tk_002dlistbox_002dsingle_002dselect-1" href="tk_002dlistbox_002dsingle_002dselect.html#tk_002dlistbox_002dsingle_002dselect">3.8 tk-listbox-single-select</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-22" href="tk_002dlistbox_002dsingle_002dselect.html#Synopsis-22">Synopsis</a></li>
+      <li><a name="toc-Description-19" href="tk_002dlistbox_002dsingle_002dselect.html#Description-19">Description</a></li>
+      <li><a name="toc-Keywords-22" href="tk_002dlistbox_002dsingle_002dselect.html#Keywords-22">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-lower-1" href="lower.html#lower">3.9 lower</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-23" href="lower.html#Synopsis-23">Synopsis</a></li>
+      <li><a name="toc-Description-20" href="lower.html#Description-20">Description</a></li>
+      <li><a name="toc-Keywords-23" href="lower.html#Keywords-23">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tk_002dmenu_002dbar-1" href="tk_002dmenu_002dbar.html#tk_002dmenu_002dbar">3.10 tk-menu-bar</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-24" href="tk_002dmenu_002dbar.html#Synopsis-24">Synopsis</a></li>
+      <li><a name="toc-Description-21" href="tk_002dmenu_002dbar.html#Description-21">Description</a></li>
+      <li><a name="toc-_0022Menu-Traversal-Bindings_0022" href="tk_002dmenu_002dbar.html#g_t_0022Menu-Traversal-Bindings_0022">&quot;Menu Traversal Bindings&quot;</a></li>
+      <li><a name="toc-Keywords-24" href="tk_002dmenu_002dbar.html#Keywords-24">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-option-1" href="option.html#option">3.11 option</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-25" href="option.html#Synopsis-25">Synopsis</a></li>
+      <li><a name="toc-Description-22" href="option.html#Description-22">Description</a></li>
+      <li><a name="toc-Keywords-25" href="option.html#Keywords-25">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-options-1" href="options.html#options">3.12 options</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Description-23" href="options.html#Description-23">Description</a></li>
+      <li><a name="toc-Keywords-26" href="options.html#Keywords-26">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-pack_002dold-1" href="pack_002dold.html#pack_002dold">3.13 pack-old</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-26" href="pack_002dold.html#Synopsis-26">Synopsis</a></li>
+      <li><a name="toc-Description-24" href="pack_002dold.html#Description-24">Description</a></li>
+      <li><a name="toc-Keywords-27" href="pack_002dold.html#Keywords-27">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-pack-1" href="pack.html#pack">3.14 pack</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-27" href="pack.html#Synopsis-27">Synopsis</a></li>
+      <li><a name="toc-Description-25" href="pack.html#Description-25">Description</a></li>
+      <li><a name="toc-_0022The-Packer-Algorithm_0022" href="pack.html#g_t_0022The-Packer-Algorithm_0022">&quot;The Packer Algorithm&quot;</a></li>
+      <li><a name="toc-_0022Expansion_0022" href="pack.html#g_t_0022Expansion_0022">&quot;Expansion&quot;</a></li>
+      <li><a name="toc-_0022Geometry-Propagation_0022" href="pack.html#g_t_0022Geometry-Propagation_0022">&quot;Geometry Propagation&quot;</a></li>
+      <li><a name="toc-_0022Restrictions-On-Master-Windows_0022" href="pack.html#g_t_0022Restrictions-On-Master-Windows_0022">&quot;Restrictions On Master Windows&quot;</a></li>
+      <li><a name="toc-_0022Packing-Order_0022" href="pack.html#g_t_0022Packing-Order_0022">&quot;Packing Order&quot;</a></li>
+      <li><a name="toc-Keywords-28" href="pack.html#Keywords-28">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-place-1" href="place.html#place">3.15 place</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-28" href="place.html#Synopsis-28">Synopsis</a></li>
+      <li><a name="toc-Description-26" href="place.html#Description-26">Description</a></li>
+      <li><a name="toc-_0022Fine-Points_0022" href="place.html#g_t_0022Fine-Points_0022">&quot;Fine Points&quot;</a></li>
+      <li><a name="toc-Keywords-29" href="place.html#Keywords-29">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-raise-1" href="raise.html#raise">3.16 raise</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-29" href="raise.html#Synopsis-29">Synopsis</a></li>
+      <li><a name="toc-Description-27" href="raise.html#Description-27">Description</a></li>
+      <li><a name="toc-Keywords-30" href="raise.html#Keywords-30">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-selection-1" href="selection.html#selection">3.17 selection</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-30" href="selection.html#Synopsis-30">Synopsis</a></li>
+      <li><a name="toc-Description-28" href="selection.html#Description-28">Description</a></li>
+      <li><a name="toc-Keywords-31" href="selection.html#Keywords-31">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-send-1" href="send.html#send">3.18 send</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-31" href="send.html#Synopsis-31">Synopsis</a></li>
+      <li><a name="toc-Description-29" href="send.html#Description-29">Description</a></li>
+      <li><a name="toc-Security" href="send.html#Security">Security</a></li>
+      <li><a name="toc-Keywords-32" href="send.html#Keywords-32">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tk-1" href="tk.html#tk">3.19 tk</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-32" href="tk.html#Synopsis-32">Synopsis</a></li>
+      <li><a name="toc-Description-30" href="tk.html#Description-30">Description</a></li>
+      <li><a name="toc-Keywords-33" href="tk.html#Keywords-33">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tkerror-1" href="tkerror.html#tkerror">3.20 tkerror</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-33" href="tkerror.html#Synopsis-33">Synopsis</a></li>
+      <li><a name="toc-Description-31" href="tkerror.html#Description-31">Description</a></li>
+      <li><a name="toc-Keywords-34" href="tkerror.html#Keywords-34">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tkvars-1" href="tkvars.html#tkvars">3.21 tkvars</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Description-32" href="tkvars.html#Description-32">Description</a></li>
+      <li><a name="toc-Keywords-35" href="tkvars.html#Keywords-35">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-tkwait-1" href="tkwait.html#tkwait">3.22 tkwait</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-34" href="tkwait.html#Synopsis-34">Synopsis</a></li>
+      <li><a name="toc-Description-33" href="tkwait.html#Description-33">Description</a></li>
+      <li><a name="toc-Keywords-36" href="tkwait.html#Keywords-36">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-update-1" href="update.html#update">3.23 update</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-35" href="update.html#Synopsis-35">Synopsis</a></li>
+      <li><a name="toc-Description-34" href="update.html#Description-34">Description</a></li>
+      <li><a name="toc-Keywords-37" href="update.html#Keywords-37">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-winfo-1" href="winfo.html#winfo">3.24 winfo</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-36" href="winfo.html#Synopsis-36">Synopsis</a></li>
+      <li><a name="toc-Description-35" href="winfo.html#Description-35">Description</a></li>
+      <li><a name="toc-Keywords-38" href="winfo.html#Keywords-38">Keywords</a></li>
+    </ul></li>
+    <li><a name="toc-wm-1" href="#wm">3.25 wm</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Synopsis-37" href="#Synopsis-37">Synopsis</a></li>
+      <li><a name="toc-Description-36" href="#Description-36">Description</a></li>
+      <li><a name="toc-_0022Sources-Of-Geometry-Information_0022" href="#g_t_0022Sources-Of-Geometry-Information_0022">&quot;Sources Of Geometry Information&quot;</a></li>
+      <li><a name="toc-_0022Ungridded-Geometry-Management_0022" href="#g_t_0022Ungridded-Geometry-Management_0022">&quot;Ungridded Geometry Management&quot;</a></li>
+      <li><a name="toc-_0022Gridded-Geometry-Management_0022" href="#g_t_0022Gridded-Geometry-Management_0022">&quot;Gridded Geometry Management&quot;</a></li>
+      <li><a name="toc-Bugs-3" href="#Bugs-3">Bugs</a></li>
+      <li><a name="toc-Keywords-39" href="#Keywords-39">Keywords</a></li>
+    </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="winfo.html#winfo" accesskey="p" rel="prev">winfo</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

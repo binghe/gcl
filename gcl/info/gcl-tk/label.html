@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: label</title>
+
+<meta name="description" content="GCL TK Manual: label">
+<meta name="keywords" content="GCL TK Manual: label">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="radiobutton.html#radiobutton" rel="next" title="radiobutton">
+<link href="frame.html#frame" rel="prev" title="frame">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="label"></a>
+<div class="header">
+<p>
+Next: <a href="radiobutton.html#radiobutton" accesskey="n" rel="next">radiobutton</a>, Previous: <a href="frame.html#frame" accesskey="p" rel="prev">frame</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="label-1"></a>
+<h3 class="section">2.13 label</h3>
+
+<p>label \- Create and manipulate label widgets
+</p><a name="Synopsis-12"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>label</b><i> </i><i>pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options-12"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">anchor           borderWidth     foreground     relief           
+background       cursor          padX           text             
+bitmap           font            padY           textVariable     
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Label"></a>
+<h4 class="unnumberedsubsec">Arguments for Label</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:height</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>height</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Height</b>&quot;</code>
+</p><br>
+
+<p>Specifies a desired height for the label.
+If a bitmap is being displayed in the label then the value is in
+screen units (i.e. any of the forms acceptable to <b>Tk_GetPixels</b>);
+for text it is in lines of text.
+If this option isn&rsquo;t specified, the label&rsquo;s desired height is computed
+from the size of the bitmap or text being displayed in it.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies a desired width for the label.
+If a bitmap is being displayed in the label then the value is in
+screen units (i.e. any of the forms acceptable to <b>Tk_GetPixels</b>);
+for text it is in characters.
+If this option isn&rsquo;t specified, the label&rsquo;s desired width is computed
+from the size of the bitmap or text being displayed in it.
+</p></dd>
+</dl>
+
+<a name="Description-9"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>label</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a label widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the label such as its colors, font,
+text, and initial relief.  The <b>label</b> command returns its
+<i>pathName</i> argument.  At the time this command is invoked,
+there must not exist a window named <i>pathName</i>, but
+<i>pathName</i>&rsquo;s parent must exist.
+</p>
+<p>A label is a widget
+that displays a textual string or bitmap.
+The label can be manipulated in a few simple ways, such as
+changing its relief or text, using the commands described below.
+</p>
+<a name="A-Label-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Label Widget&rsquo;s Arguments</h4>
+
+<p>The <b>label</b> command creates a new Tcl command whose
+name is <i>pathName</i>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for label widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>label</b>
+command.
+</p>
+</dd>
+</dl>
+<a name="Bindings-6"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>When a new label is created, it has no default event bindings:
+labels are not intended to be interactive.
+</p>
+<a name="Keywords-12"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>label, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="radiobutton.html#radiobutton" accesskey="n" rel="next">radiobutton</a>, Previous: <a href="frame.html#frame" accesskey="p" rel="prev">frame</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

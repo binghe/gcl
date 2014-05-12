@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: scrollbar</title>
+
+<meta name="description" content="GCL TK Manual: scrollbar">
+<meta name="keywords" content="GCL TK Manual: scrollbar">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="checkbutton.html#checkbutton" rel="next" title="checkbutton">
+<link href="menu.html#menu" rel="prev" title="menu">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="scrollbar"></a>
+<div class="header">
+<p>
+Next: <a href="checkbutton.html#checkbutton" accesskey="n" rel="next">checkbutton</a>, Previous: <a href="menu.html#menu" accesskey="p" rel="prev">menu</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="scrollbar-1"></a>
+<h3 class="section">2.6 scrollbar</h3>
+
+<p>scrollbar \- Create and manipulate scrollbar widgets
+</p><a name="Synopsis-5"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>scrollbar</b><i> pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options-5"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">activeForeground       cursor           relief               
+background             foreground       repeatDelay          
+borderWidth            orient           repeatInterval       
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Scrollbar"></a>
+<h4 class="unnumberedsubsec">Arguments for Scrollbar</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:command</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>command</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Command</b>&quot;</code>
+</p><br>
+
+<p>Specifies the prefix of a Tcl command to invoke to change the view
+in the widget associated with the scrollbar.  When a user requests
+a view change by manipulating the scrollbar, a Tcl command is
+invoked.  The actual command consists of this option followed by
+a space and a number.  The number indicates the logical unit that
+should appear at the top of the associated window.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies the desired narrow dimension of the scrollbar window,
+not including 3-D border, if any.  For vertical
+scrollbars this will be the width and for horizontal scrollbars
+this will be the height.
+The value may have any of the forms acceptable to <b>Tk_GetPixels</b>.
+</p></dd>
+</dl>
+
+<a name="Description-3"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>scrollbar</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a scrollbar widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the scrollbar such as its colors, orientation,
+and relief.  The <b>scrollbar</b> command returns its
+<i>pathName</i> argument.  At the time this command is invoked,
+there must not exist a window named <i>pathName</i>, but
+<i>pathName</i>&rsquo;s parent must exist.
+</p>
+<p>A scrollbar is a widget that displays two arrows, one at each end of
+the scrollbar, and a <i>slider</i> in the middle portion of the
+scrollbar.  A scrollbar is used to provide information about what
+is visible in an <i>associated window</i> that displays an object
+of some sort (such as a file being edited or a drawing).
+The position and size of the slider indicate which portion of the
+object is visible in the associated window.  For example, if the
+slider in a vertical scrollbar covers the top third of the area
+between the two arrows, it means that the associated window displays
+the top third of its object.
+</p>
+<p>Scrollbars can be used to adjust the view in the associated window
+by clicking or dragging with the mouse.  See the BINDINGS section
+below for details.
+</p>
+<a name="A-Scrollbar-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Scrollbar Widget&rsquo;s Arguments</h4>
+
+<p>The <b>scrollbar</b> command creates a new Tcl command whose
+name is <i>pathName</i>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for scrollbar widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>scrollbar</b>
+command.
+</p></dd>
+<dt><i>pathName </i><b>:get</b></dt>
+<dd><p>Returns a Tcl list containing four decimal values, which are
+the current <i>totalUnits</i><span class="roman">, </span><i>widnowUnits</i><span class="roman">, </span><i>firstUnit</i>,
+and <i>lastUnit</i> values for the scrollbar.  These are the values
+from the most recent <b>set</b> widget command on the scrollbar.
+</p></dd>
+<dt><i>pathName </i><b>:set</b><span class="roman"> </span><i>totalUnits windowUnits firstUnit lastUnit</i></dt>
+<dd><p>This command is invoked to give the scrollbar information about the
+widget associated with the scrollbar.  <i>TotalUnits</i> is an integer
+value giving the total size of the object being displayed in the
+associated widget.  The meaning of one unit depends on the associated
+widget;  for example, in a text editor widget units might
+correspond to lines of
+text.  <i>WindowUnits</i> indicates the total number of units that
+can fit in the associated window at one time.  <i>FirstUnit</i>
+and <i>lastUnit</i> give the indices of the first and last units
+currently visible in the associated window (zero corresponds to the
+first unit of the object).  This command should
+be invoked by the associated widget whenever its object or window
+changes size and whenever it changes the view in its window.
+</p>
+</dd>
+</dl>
+<a name="Bindings-2"></a>
+<h4 class="unnumberedsubsec">Bindings</h4>
+
+<p>The description below assumes a vertically-oriented scrollbar.
+For a horizontally-oriented scrollbar replace the words &ldquo;up&rdquo;, &ldquo;down&rdquo;,
+&ldquo;top&rdquo;, and &ldquo;bottom&rdquo; with &ldquo;left&rdquo;, &ldquo;right&rdquo;, &ldquo;left&rdquo;,
+and &ldquo;right&rdquo;, respectively
+</p>
+<p>A scrollbar widget is divided into five distinct areas.  From top
+to bottom, they are:  the top arrow, the top gap (the empty space
+between the arrow and the slider), the slider, the bottom gap,
+and the bottom arrow.  Pressing mouse button 1 in each area has
+a different effect:
+</p>
+<dl compact="compact">
+<dt><b>top arrow</b></dt>
+<dd><p>Causes the view in the associated window to shift up by one unit
+(i.e. the object appears to move down one unit in its window).
+If the button is held down the action will auto-repeat.
+</p></dd>
+<dt><b>top gap</b></dt>
+<dd><p>Causes the view in the associated window to shift up by one
+less than the number of units in the window
+(i.e. the portion of the object that used to appear at the very
+top of the window will now appear at the very bottom).
+If the button is held down the action will auto-repeat.
+</p></dd>
+<dt><b>slider</b></dt>
+<dd><p>Pressing button 1 in this area has no immediate effect except to
+cause the slider to appear sunken rather than raised.  However,
+if the mouse is moved with the button down then the slider will
+be dragged, adjusting the view as the mouse is moved.
+</p></dd>
+<dt><b>bottom gap</b></dt>
+<dd><p>Causes the view in the associated window to shift down by one
+less than the number of units in the window
+(i.e. the portion of the object that used to appear at the very
+bottom of the window will now appear at the very top).
+If the button is held down the action will auto-repeat.
+</p></dd>
+<dt><b>bottom arrow</b></dt>
+<dd><p>Causes the view in the associated window to shift down by one unit
+(i.e. the object appears to move up one unit in its window).
+If the button is held down the action will auto-repeat.
+</p>
+<p>Note:  none of the actions described above has an immediate impact
+on the position of the slider in the scrollbar.  It simply invokes
+the command specified in the <b>command</b> option to notify the
+associated widget that a change in view is desired.  If the view is
+actually changed then the associated widget must invoke the
+scrollbar&rsquo;s <b>set</b> widget command to change what is displayed in
+the scrollbar.
+</p>
+</dd>
+</dl>
+<a name="Keywords-5"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>scrollbar, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="checkbutton.html#checkbutton" accesskey="n" rel="next">checkbutton</a>, Previous: <a href="menu.html#menu" accesskey="p" rel="prev">menu</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

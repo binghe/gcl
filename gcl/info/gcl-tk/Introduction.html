@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: Introduction</title>
+
+<meta name="description" content="GCL TK Manual: Introduction">
+<meta name="keywords" content="GCL TK Manual: Introduction">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html#General" rel="up" title="General">
+<link href="Getting-Started.html#Getting-Started" rel="next" title="Getting Started">
+<link href="General.html#General" rel="prev" title="General">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="Introduction"></a>
+<div class="header">
+<p>
+Next: <a href="Getting-Started.html#Getting-Started" accesskey="n" rel="next">Getting Started</a>, Previous: <a href="General.html#General" accesskey="p" rel="prev">General</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="Introduction-1"></a>
+<h3 class="section">1.1 Introduction</h3>
+
+<p><b>GCL-TK</b> is a windowing interface for <b>GNU Common Lisp</b>.   It provides the
+functionality of the <b>TK</b> widget set, which in turn implements a widget
+set which has the look and feel of <b>Motif</b>.
+</p>
+<p>The interface allows the user to draw graphics, get input from menus,
+make regions mouse sensitive, and bind lisp commands to regions.  It
+communicates over a socket with a <samp>gcltksrv</samp> process, which speaks to the
+display via the <b>TK</b> library.  The displaying process may run on
+a machine which is closer to the display, and so involves less
+communication.  It also may remain active even though the lisp is
+involved in a separate user computation.  The display server can, however,
+interrupt the lisp at will, to inquire about variables and run
+commands.   
+</p>
+<p>The user may also interface with existing <code>TCL/TK</code> programs,
+binding some buttons, or tracking some objects.
+</p>
+<p>The size of the program is moderate.   In its current form it adds only
+about 45K bytes to the lisp image, and the <samp>gcltksrv</samp> program uses shared
+libraries, and is on the order of 150Kbytes on a sparc.
+</p>
+<p>This chapter describes some of the common features of the command
+structure of widgets, and of control functions.   The actual functions
+for construction of windows 
+are discussed in <a href="Widgets.html#Widgets">Widgets</a>, and more general functions
+for making them appear, lowering them, querying about them in <a href="Control.html#Control">Control</a>.
+</p>
+
+
+
+</body>
+</html>

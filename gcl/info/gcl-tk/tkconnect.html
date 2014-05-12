@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: tkconnect</title>
+
+<meta name="description" content="GCL TK Manual: tkconnect">
+<meta name="keywords" content="GCL TK Manual: tkconnect">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html#General" rel="up" title="General">
+<link href="Widgets.html#Widgets" rel="next" title="Widgets">
+<link href="Linked-Variables.html#Linked-Variables" rel="prev" title="Linked Variables">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="tkconnect"></a>
+<div class="header">
+<p>
+Previous: <a href="Linked-Variables.html#Linked-Variables" accesskey="p" rel="prev">Linked Variables</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="tkconnect-1"></a>
+<h3 class="section">1.8 tkconnect</h3>
+
+<div class="example">
+<pre class="example"><i>tkconnect</i> &amp;key host display can-rsh gcltksrv
+</pre></div>
+
+<p>This function provides a connection to a graphics server process, which
+in turn connects to possibly several graphics display screens.   The
+graphics server process, called <samp>gcltksrv</samp> may or may not run
+on the same machine as the lisp to which it is attached.
+<code>display</code>
+indicates the name of the default display to connect to, and this
+in turn defaults to the value of the environment variable <code>DISPLAY</code>.
+</p>
+<p>When <i>tkconnect</i> is invoked, a socket is opened and it waits for 
+a graphics process to connect to it.  If the host argument is not
+supplied, then a process will be spawned which will connect back to
+the lisp process.   The name of the command for invoking the process
+is the value of the <samp>gcltksrv</samp> argument, which defaults to
+the value of the environment variable <code>GCL_TK_SERVER</code>.   If that variable
+is not set, then the lisp <code>*lib-directory*</code> is searched for
+an entry <samp>gcl-tk/gcltksrv</samp>.
+</p>
+<p>If <code>host</code> is supplied, then a command to run on the remote machine
+will be printed on standard output.   If <code>can-rsh</code> is not nil,
+then the command will not be printed, but rather an attempt will be
+made to rsh to the machine, and to run the command.
+</p>
+<p>Thus
+</p>
+<div class="example">
+<pre class="example">(tkconnect)
+</pre></div>
+
+<p>would start the process on the local machine, and use for <code>display</code>
+the value of the environment variable <code>DISPLAY</code>.
+</p>
+<div class="example">
+<pre class="example">(tkconnect :host &quot;max.ma.utexas.edu&quot; :can-rsh t)
+</pre></div>
+
+<p>would cause an attempt to rsh to <code>max</code> and to run the command
+there, to connect back to the appropriate port on the localhost.
+</p>
+<p>You may indicate that different <i>toplevel</i> windows be on different
+displays, by using the <code>:display</code> argument when creating the
+window, See <a href="toplevel.html#toplevel">toplevel</a>.
+</p>
+<p>Clearly you must have a copy of the program <samp>gcltksrv</samp> and <b>TK</b>
+libraries installed on the machine where you wish to run the server.
+</p>
+
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Linked-Variables.html#Linked-Variables" accesskey="p" rel="prev">Linked Variables</a>, Up: <a href="General.html#General" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

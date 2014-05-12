@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: send</title>
+
+<meta name="description" content="GCL TK Manual: send">
+<meta name="keywords" content="GCL TK Manual: send">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="tk.html#tk" rel="next" title="tk">
+<link href="selection.html#selection" rel="prev" title="selection">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="send"></a>
+<div class="header">
+<p>
+Next: <a href="tk.html#tk" accesskey="n" rel="next">tk</a>, Previous: <a href="selection.html#selection" accesskey="p" rel="prev">selection</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="send-1"></a>
+<h3 class="section">3.18 send</h3>
+
+<p>send \- Execute a command in a different interpreter
+</p><a name="Synopsis-31"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>send </b><i>interp cmd </i><span class="roman">?</span><i>arg arg ...</i>?
+</p>
+<a name="Description-29"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>This command arranges for <i>cmd</i><span class="roman"> (and </span><i>arg</i>s) to be executed in the
+interpreter named by <i>interp</i>.  It returns the result or
+error from that command execution.  <i>Interp</i> must be the
+name of an interpreter registered on the display associated with
+the interpreter in which the command is invoked;  it need not
+be within the same process or application.  If no <i>arg</i>
+arguments are present, then the command to be executed is
+contained entirely within the <i>cmd</i> argument.  If one or
+more <i>arg</i>s are present, they are concatenated to form the
+command to be executed, just as for the <b>eval</b> Tcl command.
+</p>
+<a name="Security"></a>
+<h4 class="unnumberedsubsec">Security</h4>
+
+<p>The <b>send</b> command is potentially a serious security loophole,
+since any application that can connect to your X server can send
+scripts to your applications.
+These incoming scripts can use Tcl to read and
+write your files and invoke subprocesses under your name.
+Host-based access control such as that provided by <b>xhost</b>
+is particularly insecure, since it allows anyone with an account
+on particular hosts to connect to your server, and if disabled it
+allows anyone anywhere to connect to your server.
+In order to provide at least a small amount of
+security, Tk checks the access control being used by the server
+and rejects incoming sends unless (a) <b>xhost</b>-style access control
+is enabled (i.e. only certain hosts can establish connections) and (b) the
+list of enabled hosts is empty.
+This means that applications cannot connect to your server unless
+they use some other form of authorization
+such as that provide by <b>xauth</b>.
+</p>
+<a name="Keywords-32"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>interpreter, remote execution, security, send
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="tk.html#tk" accesskey="n" rel="next">tk</a>, Previous: <a href="selection.html#selection" accesskey="p" rel="prev">selection</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

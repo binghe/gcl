@@ -1,0 +1,490 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: bind</title>
+
+<meta name="description" content="GCL TK Manual: bind">
+<meta name="keywords" content="GCL TK Manual: bind">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="destroy.html#destroy" rel="next" title="destroy">
+<link href="after.html#after" rel="prev" title="after">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="bind"></a>
+<div class="header">
+<p>
+Next: <a href="destroy.html#destroy" accesskey="n" rel="next">destroy</a>, Previous: <a href="after.html#after" accesskey="p" rel="prev">after</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="bind-1"></a>
+<h3 class="section">3.2 bind</h3>
+
+<p>bind \- Arrange for X events to invoke Tcl commands
+</p><a name="Synopsis-16"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<br><p><b>bind</b><i>&nbsp;windowSpec</i><!-- /@w --><br>
+<br><b>bind</b><i>&nbsp;windowSpec&nbsp;sequence</i><!-- /@w --><br>
+<br><b>bind</b><i>&nbsp;windowSpec&nbsp;sequence&nbsp;command</i><!-- /@w --><br>
+<b>bind</b><i> windowSpec sequence </i><b>+</b><i>command</i>
+</p>
+<a name="Description-13"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>If all three arguments are specified, <b>bind</b> will
+arrange for <i>command</i> (a Tcl
+command) to be executed whenever the sequence of events given
+by <i>sequence</i><span class="roman"> occurs in the window(s) identified by </span><i>windowSpec</i>.
+If <i>command</i> is prefixed with a &ldquo;+&rdquo;, then it is appended to
+any existing binding for <i>sequence</i><span class="roman">;  otherwise </span><i>command</i> replaces
+the existing binding, if any.  If <i>command</i>
+is an empty string then the current binding for <i>sequence</i>
+is destroyed, leaving <i>sequence</i> unbound.  In all of the cases
+where a <i>command</i><span class="roman"> argument is provided, </span><b>bind</b> returns
+an empty string.
+</p>
+<p>If <i>sequence</i><span class="roman"> is specified without a </span><i>command</i>, then the
+command currently bound to <i>sequence</i> is returned, or
+an empty string if there is no binding for <i>sequence</i>.  If
+neither <i>sequence</i><span class="roman"> nor </span><i>command</i> is specified, then the
+return value is a list whose elements are all the sequences
+for which there exist bindings for <i>windowSpec</i>.
+</p>
+<p>The <i>windowSpec</i> argument selects which window(s) the binding
+applies to.
+It may have one of three forms.
+If <i>windowSpec</i> is the path name for a window, then the binding
+applies to that particular window.
+If <i>windowSpec</i> is the name of a class of widgets, then the
+binding applies to all widgets in that class.
+Lastly, <i>windowSpec</i><span class="roman"> may have the value </span><b>all</b>, in which case
+the binding applies to all windows in the application.
+</p>
+<p>The <i>sequence</i> argument specifies a sequence of one or more
+event patterns, with optional white space between the patterns.  Each
+event pattern may
+take either of two forms.  In the simplest case it is a single
+printing ASCII character, such as <b>a</b><span class="roman"> or </span><b>[</b>.  The character
+may not be a space character or the character <b>&lt;</b>.  This form of
+pattern matches a <b>KeyPress</b> event for the particular
+character.  The second form of pattern is longer but more general.
+It has the following syntax:
+</p>
+<div class="example">
+<pre class="example"><b>&lt;</b><i>modifier-modifier-type-detail</i><b>&gt;</b>
+</pre></div>
+
+<p>The entire event pattern is surrounded by angle brackets.
+Inside the angle brackets are zero or more modifiers, an event
+type, and an extra piece of information (<i>detail</i>) identifying
+a particular button or keysym.  Any of the fields may be omitted,
+as long as at least one of <i>type</i><span class="roman"> and </span><i>detail</i> is present.
+The fields must be separated by white space or dashes.
+</p>
+
+<p>Modifiers may consist of any of the values in the following list:
+</p>
+<div class="example">
+<pre class="example">Control                  Any                            
+Shift                    Double                         
+Lock                     Triple                         
+Button1, B1              Mod1, M1, Meta, M              
+Button2, B2              Mod2, M2, Alt                  
+Button3, B3              Mod3, M3                       
+Button4, B4              Mod4, M4                       
+Button5, B5              Mod5, M5                       
+</pre></div>
+
+<p>Where more than one value is listed, separated by commas, the values
+are equivalent.   All of the modifiers except <b>Any</b>,
+<b>Double</b><span class="roman">, and </span><b>Triple</b> have
+the obvious X meanings.  For example, <b>Button1</b> requires that
+button 1 be depressed when the event occurs.  Under normal conditions
+the button and modifier state at the time of the event must
+match exactly those specified in the <b>bind</b> command.  If
+no modifiers are specified, then events will match only if no modifiers
+are present.  If the <b>Any</b> modifier is specified, then additional
+modifiers may be present besides those specified explicitly.  For
+example, if button 1 is pressed while the shift and control keys
+are down, the specifier <b>&lt;Any-Control-Button-1&gt;</b> will match
+the event, but the specifier <b>&lt;Control-Button-1&gt;</b> will not.
+</p>
+
+<p>The <b>Double</b><span class="roman"> and </span><b>Triple</b> modifiers are a convenience
+for specifying double mouse clicks and other repeated
+events. They cause a particular event pattern to be
+repeated 2 or 3 times, and also place a time and space requirement
+on the sequence:  for a sequence of events to match a <b>Double</b>
+or <b>Triple</b> pattern, all of the events must occur close together
+in time and without substantial mouse motion in between.
+For example, <b>&lt;Double-Button-1&gt;</b>
+is equivalent to <b>&lt;Button-1&gt;&lt;Button-1&gt;</b> with the extra
+time and space requirement.
+</p>
+
+<p>The <i>type</i> field may be any of the standard X event types, with a
+few extra abbreviations.  Below is a list of all the valid types;
+where two name appear together, they are synonyms.
+</p>
+<div class="example">
+<pre class="example">ButtonPress, Button      Expose             Leave              
+ButtonRelease            FocusIn            Map                
+Circulate                FocusOut           Property           
+CirculateRequest         Gravity            Reparent           
+Colormap                 Keymap             ResizeRequest      
+Configure                KeyPress, Key      Unmap              
+ConfigureRequest         KeyRelease         Visibility         
+Destroy                  MapRequest         
+Enter                    Motion             
+</pre></div>
+
+
+
+<p>The last part of a long event specification is <i>detail</i>.  In the
+case of a <b>ButtonPress</b><span class="roman"> or </span><b>ButtonRelease</b> event, it is the
+number of a button (1-5).  If a button number is given, then only an
+event on that particular button will match;  if no button number is
+given, then an event on any button will match.  Note:  giving a
+specific button number is different than specifying a button modifier;
+in the first case, it refers to a button being pressed or released,
+while in the second it refers to some other button that is already
+depressed when the matching event occurs.  If a button
+number is given then <i>type</i> may be omitted:  if will default
+to <b>ButtonPress</b><span class="roman">.  For example, the specifier </span><b>&lt;1&gt;</b>
+is equivalent to <b>&lt;ButtonPress-1&gt;</b>.
+</p>
+
+<p>If the event type is <b>KeyPress</b><span class="roman"> or </span><b>KeyRelease</b>, then
+<i>detail</i> may be specified in the form of an X keysym.  Keysyms
+are textual specifications for particular keys on the keyboard;
+they include all the alphanumeric ASCII characters (e.g. &ldquo;a&rdquo; is
+the keysym for the ASCII character &ldquo;a&rdquo;), plus descriptions for
+non-alphanumeric characters (&ldquo;comma&rdquo; is the keysym for the comma
+character), plus descriptions for all the non-ASCII keys on the
+keyboard (&ldquo;Shift_L&rdquo; is the keysm for the left shift key, and
+&ldquo;F1&rdquo; is the keysym for the F1 function key, if it exists).  The
+complete list of keysyms is not presented here;  it should be
+available in other X documentation.  If necessary, you can use the
+<b>%K</b> notation described below to print out the keysym name for
+an arbitrary key.  If a keysym <i>detail</i> is given, then the
+<i>type</i><span class="roman"> field may be omitted;  it will default to </span><b>KeyPress</b>.
+For example, <b>&lt;Control-comma&gt;</b> is equivalent to
+<b>&lt;Control-KeyPress-comma&gt;</b><span class="roman">.  If a keysym </span><i>detail</i> is specified
+then the <b>Shift</b> modifier need not be specified and will be
+ignored if specified:  each keysym already implies a particular
+state for the shift key.
+</p>
+
+<p>The <i>command</i><span class="roman"> argument to </span><b>bind</b> is a Tcl command string,
+which will be executed whenever the given event sequence occurs.
+<i>Command</i> will be executed in the same interpreter that the
+<b>bind</b><span class="roman"> command was executed in.  If </span><i>command</i> contains
+any <b>%</b> characters, then the command string will not be
+executed directly.  Instead, a new command string will be
+generated by replacing each <b>%</b>, and the character following
+it, with information from the current event.  The replacement
+depends on the character following the <b>%</b>, as defined in the
+list below.  Unless otherwise indicated, the
+replacement string is the decimal value of the given field from
+the current event.
+Some of the substitutions are only valid for
+certain types of events;  if they are used for other types of events
+the value substituted is undefined.
+</p>
+<dl compact="compact">
+<dt><b>%%</b></dt>
+<dd><p>Replaced with a single percent.
+</p></dd>
+<dt><b>|%#|</b></dt>
+<dd><p>The number of the last client request processed by the server
+(the <i>serial</i> field from the event).  Valid for all event
+types.
+</p></dd>
+<dt><b>|%a|</b></dt>
+<dd><p>The <i>above</i> field from the event.
+Valid only for <b>ConfigureNotify</b> events.
+</p></dd>
+<dt><b>|%b|</b></dt>
+<dd><p>The number of the button that was pressed or released.  Valid only
+for <b>ButtonPress</b><span class="roman"> and </span><b>ButtonRelease</b> events.
+</p></dd>
+<dt><b>|%c|</b></dt>
+<dd><p>The <i>count</i><span class="roman"> field from the event.  Valid only for </span><b>Expose</b>,
+<b>GraphicsExpose</b><span class="roman">, and </span><b>MappingNotify</b> events.
+</p></dd>
+<dt><b>|%d|</b></dt>
+<dd><p>The <i>detail</i><span class="roman"> field from the event.  The </span><b>|%d|</b> is replaced by
+a string identifying the detail.  For <b>EnterNotify</b>,
+<b>LeaveNotify</b><span class="roman">, </span><b>FocusIn</b><span class="roman">, and </span><b>FocusOut</b> events,
+the string will be one of the following:
+</p>
+<div class="example">
+<pre class="example">NotifyAncestor            NotifyNonlinearVirtual          
+NotifyDetailNone          NotifyPointer                   
+NotifyInferior            NotifyPointerRoot               
+NotifyNonlinear           NotifyVirtual                   
+</pre></div>
+
+<p>For <b>ConfigureRequest</b> events, the substituted string will be
+one of the following:
+</p>
+<div class="example">
+<pre class="example">Above                     Opposite                  
+Below                     TopIf                     
+BottomIf                  
+</pre></div>
+
+<p>For events other than these, the substituted string is undefined.
+.RE
+</p></dd>
+<dt><b>|%f|</b></dt>
+<dd><p>The <i>focus</i><span class="roman"> field from the event (</span><b>0</b><span class="roman"> or </span><b>1</b>).  Valid only
+for <b>EnterNotify</b><span class="roman"> and </span><b>LeaveNotify</b> events.
+</p></dd>
+<dt><b>|%h|</b></dt>
+<dd><p>The <i>height</i><span class="roman"> field from the event.  Valid only for </span><b>Configure</b>,
+<b>ConfigureNotify</b><span class="roman">, </span><b>Expose</b><span class="roman">, </span><b>GraphicsExpose</b>, and
+<b>ResizeRequest</b> events.
+</p></dd>
+<dt><b>|%k|</b></dt>
+<dd><p>The <i>keycode</i><span class="roman"> field from the event.  Valid only for </span><b>KeyPress</b>
+and <b>KeyRelease</b> events.
+</p></dd>
+<dt><b>|%m|</b></dt>
+<dd><p>The <i>mode</i> field from the event.  The substituted string is one of
+<b>NotifyNormal</b><span class="roman">, </span><b>NotifyGrab</b><span class="roman">, </span><b>NotifyUngrab</b>, or
+<b>NotifyWhileGrabbed</b><span class="roman">.  Valid only for </span><b>EnterWindow</b>,
+<b>FocusIn</b><span class="roman">, </span><b>FocusOut</b><span class="roman">, and </span><b>LeaveWindow</b> events.
+</p></dd>
+<dt><b>|%o|</b></dt>
+<dd><p>The <i>override_redirect</i> field from the event.  Valid only for
+<b>CreateNotify</b><span class="roman">, </span><b>MapNotify</b><span class="roman">, </span><b>ReparentNotify</b>,
+and <b>ConfigureNotify</b> events.
+</p></dd>
+<dt><b>|%p|</b></dt>
+<dd><p>The <i>place</i> field from the event, substituted as one of the
+strings <b>PlaceOnTop</b><span class="roman"> or </span><b>PlaceOnBottom</b>.  Valid only
+for <b>CirculateNotify</b><span class="roman"> and </span><b>CirculateRequest</b> events.
+</p></dd>
+<dt><b>|%s|</b></dt>
+<dd><p>The <i>state</i><span class="roman"> field from the event.  For </span><b>ButtonPress</b>,
+<b>ButtonRelease</b><span class="roman">, </span><b>EnterNotify</b><span class="roman">, </span><b>KeyPress</b><span class="roman">, </span><b>KeyRelease</b>,
+<b>LeaveNotify</b><span class="roman">, and </span><b>MotionNotify</b> events,
+a decimal string
+is substituted.  For <b>VisibilityNotify</b>, one of the strings
+<b>VisibilityUnobscured</b><span class="roman">, </span><b>VisibilityPartiallyObscured</b>,
+and <b>VisibilityFullyObscured</b> is substituted.
+</p></dd>
+<dt><b>|%t|</b></dt>
+<dd><p>The <i>time</i> field from the event.  Valid only for events that
+contain a <i>time</i> field.
+</p></dd>
+<dt><b>|%v|</b></dt>
+<dd><p>The <i>value_mask</i> field from the event.  Valid only for
+<b>ConfigureRequest</b> events.
+</p></dd>
+<dt><b>|%w|</b></dt>
+<dd><p>The <i>width</i> field from the event.  Valid only for
+<b>Configure</b><span class="roman">, </span><b>ConfigureRequest</b><span class="roman">, </span><b>Expose</b>,
+<b>GraphicsExpose</b><span class="roman">, and </span><b>ResizeRequest</b> events.
+</p></dd>
+<dt><b>|%x|</b></dt>
+<dd><p>The <i>x</i> field from the event.  Valid only for events containing
+an <i>x</i> field.
+</p></dd>
+<dt><b>|%y|</b></dt>
+<dd><p>The <i>y</i> field from the event.  Valid only for events containing
+a <i>y</i> field.
+</p></dd>
+<dt><b>%A</b></dt>
+<dd><p>Substitutes the ASCII character corresponding to the event, or
+the empty string if the event doesn&rsquo;t correspond to an ASCII character
+(e.g. the shift key was pressed).  <b>XLookupString</b> does all the
+work of translating from the event to an ASCII character.
+Valid only for <b>KeyPress</b><span class="roman"> and </span><b>KeyRelease</b> events.
+</p></dd>
+<dt><b>%B</b></dt>
+<dd><p>The <i>border_width</i> field from the event.  Valid only for
+<b>ConfigureNotify</b><span class="roman"> and </span><b>CreateWindow</b> events.
+</p></dd>
+<dt><b>%D</b></dt>
+<dd><p>The <i>display</i> field from the event.  Valid for all event types.
+</p></dd>
+<dt><b>%E</b></dt>
+<dd><p>The <i>send_event</i> field from the event.  Valid for all event types.
+</p></dd>
+<dt><b>%K</b></dt>
+<dd><p>The keysym corresponding to the event, substituted as a textual
+string.  Valid only for <b>KeyPress</b><span class="roman"> and </span><b>KeyRelease</b> events.
+</p></dd>
+<dt><b>%N</b></dt>
+<dd><p>The keysym corresponding to the event, substituted as
+a decimal
+number.  Valid only for <b>KeyPress</b><span class="roman"> and </span><b>KeyRelease</b> events.
+</p></dd>
+<dt><b>%R</b></dt>
+<dd><p>The <i>root</i> window identifier from the event.  Valid only for
+events containing a <i>root</i> field.
+</p></dd>
+<dt><b>%S</b></dt>
+<dd><p>The <i>subwindow</i> window identifier from the event.  Valid only for
+events containing a <i>subwindow</i> field.
+</p></dd>
+<dt><b>%T</b></dt>
+<dd><p>The <i>type</i> field from the event.  Valid for all event types.
+</p></dd>
+<dt><b>%W</b></dt>
+<dd><p>The path name of the window to which the event was reported (the
+<i>window</i> field from the event).  Valid for all event types.
+</p></dd>
+<dt><b>%X</b></dt>
+<dd><p>The <i>x_root</i> field from the event.
+If a virtual-root window manager is being used then the substituted
+value is the corresponding x-coordinate in the virtual root.
+Valid only for
+<b>ButtonPress</b><span class="roman">, </span><b>ButtonRelease</b><span class="roman">, </span><b>KeyPress</b><span class="roman">, </span><b>KeyRelease</b>,
+and <b>MotionNotify</b> events.
+</p></dd>
+<dt><b>%Y</b></dt>
+<dd><p>The <i>y_root</i> field from the event.
+If a virtual-root window manager is being used then the substituted
+value is the corresponding y-coordinate in the virtual root.
+Valid only for
+<b>ButtonPress</b><span class="roman">, </span><b>ButtonRelease</b><span class="roman">, </span><b>KeyPress</b><span class="roman">, </span><b>KeyRelease</b>,
+and <b>MotionNotify</b> events.
+</p></dd>
+</dl>
+
+
+<p>If the replacement string
+for a %-replacement contains characters that are interpreted
+specially by the Tcl parser (such as backslashes or square
+brackets or spaces) additional backslashes are added
+during replacement so that the result after parsing is the original
+replacement string.
+For example, if <i>command</i> is
+</p>
+<div class="example">
+<pre class="example">insert %A
+</pre></div>
+
+<p>and the character typed is an open square bracket, then the command
+actually executed will be
+</p>
+<div class="example">
+<pre class="example">insert \e[
+</pre></div>
+
+<p>This will cause the <b>insert</b> to receive the original replacement
+string (open square bracket) as its first argument.
+If the extra backslash hadn&rsquo;t been added, Tcl would not have been
+able to parse the command correctly.
+</p>
+
+<p>At most one binding will trigger for any given X event.
+If several bindings match the recent events, the most specific binding
+is chosen and its command will be executed.
+The following tests are applied, in order, to determine which of
+several matching sequences is more specific:
+(a) a binding whose <i>windowSpec</i> names a particular window is
+more specific than a binding for a class,
+which is more specific than a binding whose <i>windowSpec</i> is
+<b>all</b>;
+(b) a longer sequence (in terms of number
+of events matched) is more specific than a shorter sequence;
+(c) an event pattern that specifies a specific button or key is more specific
+than one that doesn&rsquo;t;  (e) an event pattern that requires a particular
+modifier is more specific than one that doesn&rsquo;t require the modifier;
+(e) an event pattern specifying the <b>Any</b> modifier is less specific
+than one that doesn&rsquo;t.  If the matching sequences contain more than
+one event, then tests (c)-(e) are applied in order from the most
+recent event to the least recent event in the sequences.  If these
+tests fail to determine a winner, then the most recently registered
+sequence is the winner.
+</p>
+
+<p>If an X event does not match any of the existing bindings, then the
+event is ignored (an unbound event is not considered to be an error).
+</p>
+
+<p>When a <i>sequence</i><span class="roman"> specified in a </span><b>bind</b> command contains
+more than one event pattern, then its command is executed whenever
+the recent events (leading up to and including the current event)
+match the given sequence.  This means, for example, that if button 1 is
+clicked repeatedly the sequence <b>&lt;Double-ButtonPress-1&gt;</b> will match
+each button press but the first.
+If extraneous events that would prevent a match occur in the middle
+of an event sequence then the extraneous events are
+ignored unless they are <b>KeyPress</b><span class="roman"> or </span><b>ButtonPress</b> events.
+For example, <b>&lt;Double-ButtonPress-1&gt;</b> will match a sequence of
+presses of button 1, even though there will be <b>ButtonRelease</b>
+events (and possibly <b>MotionNotify</b> events) between the
+<b>ButtonPress</b> events.
+Furthermore, a <b>KeyPress</b> event may be preceded by any number
+of other <b>KeyPress</b> events for modifier keys without the
+modifier keys preventing a match.
+For example, the event sequence <b>aB</b> will match a press of the
+<b>a</b><span class="roman"> key, a release of the </span><b>a</b><span class="roman"> key, a press of the </span><b>Shift</b>
+key, and a press of the <b>b</b><span class="roman"> key:  the press of </span><b>Shift</b> is
+ignored because it is a modifier key.
+Finally, if several <b>MotionNotify</b> events occur in a row, only
+the last one is used for purposes of matching binding sequences.
+</p>
+
+<p>If an error occurs in executing the command for a binding then the
+<b>tkerror</b> mechanism is used to report the error.
+The command will be executed at global level (outside the context
+of any Tcl procedure).
+</p>
+<p>See <a href="tkerror.html#tkerror">tkerror</a>.
+</p>
+<a name="Keywords-16"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>form, manual
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="destroy.html#destroy" accesskey="n" rel="next">destroy</a>, Previous: <a href="after.html#after" accesskey="p" rel="prev">after</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

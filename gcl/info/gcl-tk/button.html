@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: button</title>
+
+<meta name="description" content="GCL TK Manual: button">
+<meta name="keywords" content="GCL TK Manual: button">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Widgets.html#Widgets" rel="up" title="Widgets">
+<link href="listbox.html#listbox" rel="next" title="listbox">
+<link href="Widgets.html#Widgets" rel="prev" title="Widgets">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="button"></a>
+<div class="header">
+<p>
+Next: <a href="listbox.html#listbox" accesskey="n" rel="next">listbox</a>, Previous: <a href="Widgets.html#Widgets" accesskey="p" rel="prev">Widgets</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="button-1"></a>
+<h3 class="section">2.1 button</h3>
+
+<p>button \- Create and manipulate button widgets
+</p><a name="Synopsis"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>button</b><i> </i><i>pathName </i><span class="roman">?</span><i>options</i>?
+</p><a name="Standard-Options"></a>
+<h4 class="unnumberedsubsec">Standard Options</h4>
+
+
+<div class="example">
+<pre class="example">activeBackground  bitmap              font        relief        
+activeForeground  borderWidth         foreground  text          
+anchor            cursor              padX        textVariable  
+background        disabledForeground  padY        
+</pre></div>
+
+
+<p>See <a href="options.html#options">options</a>, for more information.
+</p><a name="Arguments-for-Button"></a>
+<h4 class="unnumberedsubsec">Arguments for Button</h4>
+
+
+<dl compact="compact">
+<dt><code><b>:command</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>command</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Command</b>&quot;</code>
+</p><br>
+
+<p>Specifies a Tcl command to associate with the button.  This command
+is typically invoked when mouse button 1 is released over the button
+window.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:height</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>height</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Height</b>&quot;</code>
+</p><br>
+
+<p>Specifies a desired height for the button.
+If a bitmap is being displayed in the button then the value is in
+screen units (i.e. any of the forms acceptable to <b>Tk_GetPixels</b>);
+for text it is in lines of text.
+If this option isn&rsquo;t specified, the button&rsquo;s desired height is computed
+from the size of the bitmap or text being displayed in it.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:state</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>state</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>State</b>&quot;</code>
+</p><br>
+
+<p>Specifies one of three states for the button:  <b>normal</b><span class="roman">, </span><b>active</b>,
+or <b>disabled</b>.  In normal state the button is displayed using the
+<b>foreground</b><span class="roman"> and </span><b>background</b> options.  The active state is
+typically used when the pointer is over the button.  In active state
+the button is displayed using the <b>activeForeground</b> and
+<b>activeBackground</b> options.  Disabled state means that the button
+is insensitive:  it doesn&rsquo;t activate and doesn&rsquo;t respond to mouse
+button presses.  In this state the <b>disabledForeground</b> and
+<b>background</b> options determine how the button is displayed.
+</p></dd>
+</dl>
+
+
+<dl compact="compact">
+<dt><code><b>:width</b></code></dt>
+<dd><p align="right">Name=<code>&quot;<b>width</b><span class="roman">&quot;</span> Class=<code>&quot;</code><b>Width</b>&quot;</code>
+</p><br>
+
+<p>Specifies a desired width for the button.
+If a bitmap is being displayed in the button then the value is in
+screen units (i.e. any of the forms acceptable to <b>Tk_GetPixels</b>);
+for text it is in characters.
+If this option isn&rsquo;t specified, the button&rsquo;s desired width is computed
+from the size of the bitmap or text being displayed in it.
+</p></dd>
+</dl>
+
+<a name="Description"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>button</b> command creates a new window (given by the
+<i>pathName</i> argument) and makes it into a button widget.
+Additional
+options, described above, may be specified on the command line
+or in the option database
+to configure aspects of the button such as its colors, font,
+text, and initial relief.  The <b>button</b> command returns its
+<i>pathName</i> argument.  At the time this command is invoked,
+there must not exist a window named <i>pathName</i>, but
+<i>pathName</i>&rsquo;s parent must exist.
+</p>
+<p>A button is a widget
+that displays a textual string or bitmap.
+It can display itself in either of three different ways, according
+to
+the <b>state</b> option; 
+it can be made to appear raised, sunken, or flat;
+and it can be made to flash.  When a user invokes the
+button (by pressing mouse button 1 with the cursor over the
+button), then the Tcl command specified in the <b>:command</b>
+option is invoked.
+</p>
+<a name="A-Button-Widget_0027s-Arguments"></a>
+<h4 class="unnumberedsubsec">A Button Widget&rsquo;s Arguments</h4>
+
+<p>The <b>button</b> command creates a new Tcl command whose
+name is <i>pathName</i>.  This
+command may be used to invoke various
+operations on the widget.  It has the following general form:
+</p>
+<div class="example">
+<pre class="example"><i>pathName option </i><span class="roman">?</span><i>arg arg ...</i>?
+</pre></div>
+
+<p><i>Option</i><span class="roman"> and the </span><i>arg</i>s
+determine the exact behavior of the command.  The following
+commands are possible for button widgets:
+</p>
+<dl compact="compact">
+<dt><i>pathName </i><b>:activate</b></dt>
+<dd><p>Change the button&rsquo;s state to <b>active</b> and redisplay the button
+using its active foreground and background colors instead of normal
+colors.
+This command is ignored if the button&rsquo;s state is <b>disabled</b>.
+This command is obsolete and will eventually be removed;
+use &ldquo;<i>pathName </i><b>:configure :state active</b>&rdquo; instead.
+</p></dd>
+<dt><i>pathName </i><b>:configure</b><span class="roman"> ?</span><i>option</i><span class="roman">? ?</span><i>value option value ...</i>?</dt>
+<dd><p>Query or modify the configuration options of the widget.
+If no <i>option</i> is specified, returns a list describing all of
+the available options for <i>pathName</i><span class="roman"> (see </span><b>Tk_ConfigureInfo</b> for
+information on the format of this list).  If <i>option</i> is specified
+with no <i>value</i>, then the command returns a list describing the
+one named option (this list will be identical to the corresponding
+sublist of the value returned if no <i>option</i> is specified).  If
+one or more <i>option:value</i> pairs are specified, then the command
+modifies the given widget option(s) to have the given value(s);  in
+this case the command returns an empty string.
+<i>Option</i><span class="roman"> may have any of the values accepted by the </span><b>button</b>
+command.
+</p></dd>
+<dt><i>pathName </i><b>:deactivate</b></dt>
+<dd><p>Change the button&rsquo;s state to <b>normal</b> and redisplay the button
+using its normal foreground and background colors.
+This command is ignored if the button&rsquo;s state is <b>disabled</b>.
+This command is obsolete and will eventually be removed;
+use &ldquo;<i>pathName </i><b>:configure :state normal</b>&rdquo; instead.
+</p></dd>
+<dt><i>pathName </i><b>:flash</b></dt>
+<dd><p>Flash the button.  This is accomplished by redisplaying the button
+several times, alternating between active and normal colors.  At
+the end of the flash the button is left in the same normal/active
+state as when the command was invoked.
+This command is ignored if the button&rsquo;s state is <b>disabled</b>.
+</p></dd>
+<dt><i>pathName </i><b>:invoke</b></dt>
+<dd><p>Invoke the Tcl command associated with the button, if there is one.
+The return value is the return value from the Tcl command, or an
+empty string if there is no command associated with the button.
+This command is ignored if the button&rsquo;s state is <b>disabled</b>.
+</p>
+</dd>
+</dl>
+<a name="g_t_0022Default-Bindings_0022"></a>
+<h4 class="unnumberedsubsec">&quot;Default Bindings&quot;</h4>
+
+<p>Tk automatically creates class bindings for buttons that give them
+the following default behavior:
+</p><ul class="no-bullet">
+<li> [1]
+The button activates whenever the mouse passes over it and deactivates
+whenever the mouse leaves the button.
+</li><li> [2]
+The button&rsquo;s relief is changed to sunken whenever mouse button 1 is
+pressed over the button, and the relief is restored to its original
+value when button 1 is later released.
+</li><li> [3]
+If mouse button 1 is pressed over the button and later released over
+the button, the button is invoked.  However, if the mouse is not
+over the button when button 1 is released, then no invocation occurs.
+</li></ul>
+
+<p>If the button&rsquo;s state is <b>disabled</b> then none of the above
+actions occur:  the button is completely non-responsive.
+</p>
+<p>The behavior of buttons can be changed by defining new bindings for
+individual widgets or by redefining the class bindings.
+</p>
+<a name="Keywords"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>button, widget
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="listbox.html#listbox" accesskey="n" rel="next">listbox</a>, Previous: <a href="Widgets.html#Widgets" accesskey="p" rel="prev">Widgets</a>, Up: <a href="Widgets.html#Widgets" accesskey="u" rel="up">Widgets</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

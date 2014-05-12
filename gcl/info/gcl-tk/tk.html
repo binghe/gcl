@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>GCL TK Manual: tk</title>
+
+<meta name="description" content="GCL TK Manual: tk">
+<meta name="keywords" content="GCL TK Manual: tk">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="index.html#Top" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html#Control" rel="up" title="Control">
+<link href="tkerror.html#tkerror" rel="next" title="tkerror">
+<link href="send.html#send" rel="prev" title="send">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<a name="tk"></a>
+<div class="header">
+<p>
+Next: <a href="tkerror.html#tkerror" accesskey="n" rel="next">tkerror</a>, Previous: <a href="send.html#send" accesskey="p" rel="prev">send</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<a name="tk-1"></a>
+<h3 class="section">3.19 tk</h3>
+
+<p>tk \- Manipulate Tk internal state
+</p><a name="Synopsis-32"></a>
+<h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>tk</b><span class="roman"> </span><i>option </i><span class="roman">?</span><i>arg arg ...</i>?
+</p>
+<a name="Description-30"></a>
+<h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>tk</b> command provides access to miscellaneous
+elements of Tk&rsquo;s internal state.
+Most of the information manipulated by this command pertains to the
+application as a whole, or to a screen or display, rather than to a
+particular window.
+The command can take any of a number of different forms
+depending on the <i>option</i> argument.  The legal forms are:
+</p>
+<dl compact="compact">
+<dt><b>tk :colormodel </b><i>window</i><span class="roman"> ?</span><i>newValue</i>?</dt>
+<dd><p>If <i>newValue</i> isn&rsquo;t specified, this command returns the current
+color model in use for <i>window</i>&rsquo;s screen, which will be either
+<b>color</b><span class="roman"> or </span><b>monochrome</b>.
+If <i>newValue</i><span class="roman"> is specified, then it must be either </span><b>color</b>
+or <b>monochrome</b> or an abbreviation of one of them;
+the color model for <i>window</i>&rsquo;s screen is set to this value.
+</p></dd>
+</dl>
+
+
+<p>The color model is used by Tk and its widgets to determine whether
+it should display in black and white only or use colors.
+A single color model is shared by all of the windows managed by one
+process on a given screen.
+The color model for a screen is set initially by Tk to <b>monochrome</b>
+if the display has four or fewer bit planes and to <b>color</b> otherwise.
+The color model will automatically be changed from <b>color</b> to
+<b>monochrome</b> if Tk fails to allocate a color because all entries
+in the colormap were in use.
+An application can change its own color model at any time (e.g. it
+might change the model to <b>monochrome</b> in order to conserve
+colormap entries, or it might set the model to <b>color</b>
+to use color on a four-bit display in special circumstances), but
+an application is not allowed to change the color model to <b>color</b>
+unless the screen has at least two bit planes.
+.RE
+</p>
+<a name="Keywords-33"></a>
+<h4 class="unnumberedsubsec">Keywords</h4>
+<p>color model, internal state
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="tkerror.html#tkerror" accesskey="n" rel="next">tkerror</a>, Previous: <a href="send.html#send" accesskey="p" rel="prev">send</a>, Up: <a href="Control.html#Control" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>
