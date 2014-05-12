@@ -4915,12 +4915,12 @@ File: gcl-si.info,  Node: Operating System Definitions,  Prev: Command Line,  Up
      no arguments, report the exceptions currently trapped.  Disable the
      break by setting the key to nil, e.g.
 
-     > (break-on-floaint-point-exceptions :division-by-zero t)
+     > (break-on-floaing-point-exceptions :division-by-zero t)
      (DIVISION-BY-ZERO)
 
-     > (break-on-floaint-point-exceptions) (DIVISION-BY-ZERO)
+     > (break-on-floaing-point-exceptions) (DIVISION-BY-ZERO)
 
-     > (break-on-floaint-point-exceptions :division-by-zero nil) NIL
+     > (break-on-floaing-point-exceptions :division-by-zero nil) NIL
 
      On some of the most common platforms, the offending instruction
      will be disassembled, and the register arguments looked up in the

@@ -34,7 +34,7 @@ TESTDIR = ansi-tests
 
 VERSION=`cat majvers`.`cat minvers`
 
-all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk do-info
+all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk # do-info
 
 system: $(PORTDIR)/$(FLISP)
 #	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && make saved_xgcl LISP=../$< && mv saved_xgcl ../$(PORTDIR)/$(FLISP))
@@ -202,7 +202,7 @@ install1:
 #	(cd $(DESTDIR)$(INSTALL_LIB_DIR)/gcl-tk/demos ; \
 #	echo '(load "../tkl.o")(TK::GET-AUTOLOADS (directory "*.lisp"))' | ../../$(PORTDIR)/$(FLISP)$(EXE)) ; fi
 	if test "$(EMACS_SITE_LISP)" != "" ; then (cd elisp ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
-	if test "$(INFO_DIR)" != "unknown"; then (cd info ; $(MAKE) ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
+	if test "$(INFO_DIR)" != "unknown"; then (cd info ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
 	if test "$(INFO_DIR)" != "unknown"; then (cd xgcl-2 ; $(MAKE) install DESTDIR=$(DESTDIR)) ; fi
 	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then cp COPYING.LIB-2.0 readme-bin.mingw $(prefix) ; fi
 	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then cp gcl.ico $(prefix)/bin ; fi
