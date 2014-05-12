@@ -1,148 +1,933 @@
-gcl (2.6.9-1) unstable; urgency=low
+gcl (2.6.10-10) unstable; urgency=high
+
+  * 2.6.11pre test 9
+
+ -- Camm Maguire <camm@debian.org>  Wed, 07 May 2014 17:10:30 +0000
+
+gcl (2.6.10-9) unstable; urgency=high
+
+  * 2.6.11pre test 8
+
+ -- Camm Maguire <camm@debian.org>  Fri, 25 Apr 2014 19:53:10 +0000
+
+gcl (2.6.10-8) unstable; urgency=high
+
+  * 2.6.11pre test 7
+
+ -- Camm Maguire <camm@debian.org>  Mon, 21 Apr 2014 14:09:37 +0000
+
+gcl (2.6.10-7) unstable; urgency=high
+
+  * 2.6.11pre test 6
+
+ -- Camm Maguire <camm@debian.org>  Sat, 19 Apr 2014 17:52:17 +0000
+
+gcl (2.6.10-6) unstable; urgency=high
+
+  * 2.6.11pre test 5
+
+ -- Camm Maguire <camm@debian.org>  Fri, 18 Apr 2014 15:06:09 +0000
+
+gcl (2.6.10-5) unstable; urgency=high
+
+  * 2.6.11pre test 4
+
+ -- Camm Maguire <camm@debian.org>  Tue, 15 Apr 2014 20:30:13 +0000
+
+gcl (2.6.10-4) unstable; urgency=high
+
+  * 2.6.11pre test 3
+  * Bug fix: "debian/rules uses DEB_BUILD_* macros instead of DEB_HOST_*
+    macros", thanks to Matthias Klose (Closes: #743520).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 09 Apr 2014 13:15:32 +0000
+
+gcl (2.6.10-3) unstable; urgency=high
+
+  * 2.6.11pre test 2
+
+ -- Camm Maguire <camm@debian.org>  Thu, 03 Apr 2014 14:24:23 +0000
+
+gcl (2.6.10-2) unstable; urgency=high
+
+  * 2.6.11pre test 1
+  * Bug fix: "FTBFS: gcl_readline.d:472:39: error: &#39;CPPFunction&#39;
+    undeclared (first use in this function)", thanks to David Suárez
+    (Closes: #741819).
+
+ -- Camm Maguire <camm@debian.org>  Mon, 24 Mar 2014 15:47:01 +0000
+
+gcl (2.6.10-1) unstable; urgency=high
 
   * New upstream release
-  * two word cons
-  * word sized fixnum
-  * immediate fixnums
-  * dynamic maxpage
 
- -- Camm Maguire <camm@debian.org>  Thu, 06 Jun 2013 17:50:00 +0000
+ -- Camm Maguire <camm@debian.org>  Wed, 13 Nov 2013 18:39:19 +0000
 
-gcl (2.6.8-1) unstable; urgency=low
+gcl (2.6.9-17) unstable; urgency=high
+
+  * 2.6.10pre test 17
+
+ -- Camm Maguire <camm@debian.org>  Mon, 11 Nov 2013 19:41:45 +0000
+
+gcl (2.6.9-16) unstable; urgency=high
+
+  * 2.6.10pre test 16
+  * Bug fix: "gcl 2.6.7+dfsga-20 needs 1 GB disk space on amd64", thanks
+    to Edi Meier (Closes: #714507).
+  * Bug fix: "[INTL:ja] New Japanese translation", thanks to victory
+    (Closes: #718925).
+
+ -- Camm Maguire <camm@debian.org>  Sat, 09 Nov 2013 13:34:32 +0000
+
+gcl (2.6.9-15) unstable; urgency=high
+
+  * 2.6.10pre test 15
+
+ -- Camm Maguire <camm@debian.org>  Sat, 02 Nov 2013 22:21:16 +0000
+
+gcl (2.6.9-14) unstable; urgency=high
+
+  * 2.6.10pre test 14
+
+ -- Camm Maguire <camm@debian.org>  Wed, 23 Oct 2013 17:44:14 +0000
+
+gcl (2.6.9-13) unstable; urgency=high
+
+  * environment allocation unrandomize.h
+
+ -- Camm Maguire <camm@debian.org>  Mon, 21 Oct 2013 00:20:16 +0000
+
+gcl (2.6.9-12) unstable; urgency=high
+
+  * 2.6.10pre test 13
+
+ -- Camm Maguire <camm@debian.org>  Fri, 18 Oct 2013 14:18:17 +0000
+
+gcl (2.6.9-11) unstable; urgency=high
+
+  * 2.6.10pre test 12, s390, mingw cleanup, make_bignum bug fix
+
+ -- Camm Maguire <camm@debian.org>  Tue, 15 Oct 2013 23:32:09 +0000
+
+gcl (2.6.9-10) unstable; urgency=high
+
+  * fast-fixnums
+
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Oct 2013 15:05:58 +0000
+
+gcl (2.6.9-9) unstable; urgency=high
+
+  * 2.6.10pre test 10 and 11
+
+ -- Camm Maguire <camm@debian.org>  Wed, 02 Oct 2013 19:12:36 +0000
+
+gcl (2.6.9-8) unstable; urgency=high
+
+  * 2.6.10pre test 8 and 9
+
+ -- Camm Maguire <camm@debian.org>  Tue, 01 Oct 2013 21:00:19 +0000
+
+gcl (2.6.9-7) unstable; urgency=high
+
+  * 2.6.10pre test 6 and 7
+
+ -- Camm Maguire <camm@debian.org>  Mon, 30 Sep 2013 19:34:38 +0000
+
+gcl (2.6.9-6) unstable; urgency=high
+
+  * 2.6.10pre test 5
+
+ -- Camm Maguire <camm@debian.org>  Tue, 24 Sep 2013 17:03:24 +0000
+
+gcl (2.6.9-5) unstable; urgency=high
+
+  * 2.6.10pre test 4
+
+ -- Camm Maguire <camm@debian.org>  Mon, 23 Sep 2013 19:27:36 +0000
+
+gcl (2.6.9-4) unstable; urgency=high
+
+  * 2.6.10pre test 3
+
+ -- Camm Maguire <camm@debian.org>  Mon, 23 Sep 2013 16:30:09 +0000
+
+gcl (2.6.9-3) unstable; urgency=high
+
+  * 2.6.10pre test 2
+
+ -- Camm Maguire <camm@debian.org>  Sun, 22 Sep 2013 03:27:10 +0000
+
+gcl (2.6.9-2) unstable; urgency=high
+
+  * 2.6.10pre test
+
+ -- Camm Maguire <camm@debian.org>  Sat, 21 Sep 2013 04:14:55 +0000
+
+gcl (2.6.9-1) unstable; urgency=high
 
   * New upstream release
-  * fdollars in identifiers and gcc 4.0 for arm
-  * Fix 64bit fixnum coersion bug using code from cvs HEAD
-  * 64bit fixnum fasd data format fix from cvs head
-  * Fix long-call gcc configure bug for ppc
-  * revert 64bit coersion (gmp_big.c, maybe_replace_big) and replace with
-    code in siLnani (main.c) to get addresses from bignums.  2.7.0 will
-    have 64bit fixnums on 64bit machines, but this should not be
-    backported to 2.6.x
-  * Remove gcc-3.3 for arm in debian/rules
-  * make default maxpage depend on SIZEOF_LONG and PAGEWIDTH in a sane
-    fashion
-  * Fix read-char-no-hang
-  * Strip emacs warnings when finding site-lisp directory
-  * mach-o update for latest binutils
-  * Latext bfd mach-o support from Aurelien
-  * revert to locbfd default on ppc-macosx
-  * More ppc macosx fixes from Aurelien
-  * revert a few macosx changes
-  * default to void * prototype on my_sbrk for latest macosx pending
-    Aureliens #ifdef
-  * Fix plt.h parsing on macosx
-  * Fix leading_underscore detection on mac
-  * macosx name mangling fixes
-  * multi-process safe gazonk names in compiler::*tmp-dir*
-  * Add underscore-mangled setjmp calls to plttest.c for macosx
-  * Fix POTFILES.in, Closes: #336207.
-  * Update templates, Closes: #324636
-  * New French and Swedish translations, Closes: #333654, Closes: #336757.
-  * Add feof to plttest.c for macosx
-  * Cleanup LEADING_UNDERSCORE case in plt.c et.al for macosx et.al.
-  * pass devices if present in compiler::get-temp-dir, fix disassemble
-    for new gazonk name pattern
-  * fix configure
-  * Add mount declaration to plt.c
-  * Use internal gettext for bfd
-  * Restore xgcl2
-  * Set compiler::*tmp-dir* at runtime
-  * report tmp-dir setting with system-banner to enable clean -eval -
-    batch operation; fix listen on socket streams; use (abs (getpid)) in
-    tmp names for Windows
-  * fix configure unbalanced quotes
-  * support for bignums in nth et.al.
-  * Fix branch cut of atanh
-  * Fix typep on simple-arrays
-  * prevent nested free errors
-  * revert atanh branch cut change
-  * Fix function documentation wrapping by compile
-  * cond evalmacro from cvs head
-  * Fix fixnum declarations in new smallnthcdr/bignthcdr
-  * fix simple-array typep
-  * updates for lsp/sys-proclaim
-  * fix read-char-no-hang
-  * string comparison functions are not predicates
-  * xgcl integration
-  * Add missing build dependencies, omit html generation to avoid non-free
-    dependencies, CLoses: #372574.
-  * Remove references to null constant in gcl_Xinit.lsp
-  * Fix cs.po
-  * update fr and sv po files
-  * clean xgcl-2/gmon.out
-  * xgcl merge from cvs head
-  * cleanup latest gcc warnings
-  * defentry C proclamations and xgcl cleanup
-  * remove emacs build dependency
-  * synch xgcl-2 with Novak edits
-  * fix build errors
-  * Remove power of two limit to MAXPAGE;fix X lib paths
-  * configure cleanup
-  * delete-file works on directories;build xgcl the old way;latest xgcl
-    from Gordon Novak
-  * xgcl upgrade
-  * parse_number from cvs head with *read-base* fixes
-  * fix object_to_string
-  * install xgcl-2/sysdef.lisp
-  * fix info dir and emacs site lisp dir installation
-  * New xgcl readme
-  * Remove bashism from debian/rules
-  * Fix dwdoc doc-base error
-  * fix ia64 build
-  * fix socket write error
-  * HAVE_SYS_SOCKIO_H for solaris
-  * autolocbfd for solaris
-  * no -Wall when no gcc
-  * no -fomit-frame-pointer on m68k
-  * no profiling on mips
-  * $(AWK) instead of awk
-  * si::stat function
-  * fix 'the boolean type coersion error
-  * no varargs on cygwin
-  * while eval macro
-  * gensym counter fixes
-  * xgcl updates
-  * fix lstat for mingw
-  * backoff to gcc-3.4 on alpha,arm,hppa, and m68k
-  * build-dep on gcc3.4 where appropriate
-  * Newer standards
-  * fix typeo in object_to_string
-  * Fix large float read bug in c1constant-value
-  * more default stack space
-  * unrestricted gcc for alpha
-  * si::gettimeofday function for HOL88 build
-  * macosx fixes
-  * unrestricted gcc for m68k
-  * no profiling for hppa, allow C optimization on hppa
-  * make sure *tmp-dir* is set
-  * makeinfo is optional
-  * no C optimization on hppa, gcc 4.x on hppa
-  * update cs.po, Closes: #389211
-  * static function pointers for hppa
-  * Fix leading underscore behavior of my_plt
-  * add sqrt to plttest.c
-  * disable-nls added to the binutils subconfigures to avoid msgfmt
-    dependency
-  * remove -lintl from powerpc-macosx.defs
-  * update to make-user-init from cvs head to support hol88, fix link on
-    mingw
-  * solaris-i386 support
-  * fix read-char-no-hang on mingw
-  * fast compile without wrap-literals
-  * sigaltstack support
-  * fix cerror
-  * add read-byte,read-sequence,write-byte,write-sequence support
-  * fix some float parsing inaccuracies
-  * support GNU_HASH sections, Closes: #426135
-  * safety 2 for certain low level functions in gcl_listlib.lsp, CLoses:
-    #415266
-  * solaris i386 is little endian
-  * drop gcc-3.4 on arm, Closes: #440421
-  * Depend on emacs22 | emacsen, Closes: #440190
-  * debconf translations Closes: #410683, Closes: #419736, Closes: #423706, Closes: #441408
-  * statsysbfd in Debian, incoporating modules into libgcl.a for
-    compiler::link support
+
+ -- Camm Maguire <camm@debian.org>  Wed, 28 Aug 2013 16:49:18 +0000
+
+gcl (2.6.7+dfsga-40) unstable; urgency=high
+
+  * fix allocate functions
+
+ -- Camm Maguire <camm@debian.org>  Tue, 06 Aug 2013 22:36:37 +0000
+
+gcl (2.6.7+dfsga-39) unstable; urgency=high
+
+  * lower initial contiguous and relblock allocations, set *ihs-top*
+    properly on startup, protect memory->cfd.cfd_start initialization from
+    gc
+
+ -- Camm Maguire <camm@debian.org>  Mon, 05 Aug 2013 17:38:22 +0000
+
+gcl (2.6.7+dfsga-38) unstable; urgency=high
+
+  * robustify near oom handling to fix axiom compile of EXPEXPAN on mips
+
+ -- Camm Maguire <camm@debian.org>  Fri, 02 Aug 2013 16:25:16 +0000
+
+gcl (2.6.7+dfsga-37) unstable; urgency=high
+
+  * ppc64 gprof fix
+
+ -- Camm Maguire <camm@debian.org>  Fri, 26 Jul 2013 23:40:14 +0000
+
+gcl (2.6.7+dfsga-36) unstable; urgency=high
+
+  * min_pagewidth=14 on mips
+
+ -- Camm Maguire <camm@debian.org>  Fri, 26 Jul 2013 02:20:56 +0000
+
+gcl (2.6.7+dfsga-35) unstable; urgency=high
+
+  * latest gcc on all platforms, no gprof ppc64, -O1 ia64, -O0 alpha
+
+ -- Camm Maguire <camm@debian.org>  Thu, 25 Jul 2013 14:42:48 +0000
+
+gcl (2.6.7+dfsga-34) unstable; urgency=high
+
+  * sgc link_array mark fix;rb_end across save fix;more stable gcc on older arches
+
+ -- Camm Maguire <camm@debian.org>  Tue, 23 Jul 2013 17:11:23 +0000
+
+gcl (2.6.7+dfsga-33) unstable; urgency=high
+
+  * fix mark_link_array for marked sLAlink_arrayA->s.s_dbind
+
+ -- Camm Maguire <camm@debian.org>  Mon, 22 Jul 2013 19:00:43 +0000
+
+gcl (2.6.7+dfsga-32) unstable; urgency=high
+
+  * protect mark_link_array in sgc
+
+ -- Camm Maguire <camm@debian.org>  Sat, 20 Jul 2013 00:16:07 +0000
+
+gcl (2.6.7+dfsga-31) unstable; urgency=high
+
+  * properly clean link array on gc
+
+ -- Camm Maguire <camm@debian.org>  Fri, 19 Jul 2013 20:34:34 +0000
+
+gcl (2.6.7+dfsga-30) unstable; urgency=high
+
+  * fix gcl.script compiler::link, darwin compile warnings
+
+ -- Camm Maguire <camm@debian.org>  Mon, 15 Jul 2013 20:35:03 +0000
+
+gcl (2.6.7+dfsga-29) unstable; urgency=high
+
+  * fix compiler::link in presence of gcl.script
+
+ -- Camm Maguire <camm@debian.org>  Mon, 15 Jul 2013 16:23:33 +0000
+
+gcl (2.6.7+dfsga-28) unstable; urgency=high
+
+  * install unixport/gcl.script
+
+ -- Camm Maguire <camm@debian.org>  Sat, 13 Jul 2013 18:42:28 +0000
+
+gcl (2.6.7+dfsga-27) unstable; urgency=high
+
+  * workaround for ia64 and hurd brk issues
+
+ -- Camm Maguire <camm@debian.org>  Fri, 12 Jul 2013 21:44:54 +0000
+
+gcl (2.6.7+dfsga-26) unstable; urgency=high
+
+  * -- command line support, map-shared in unexec
+
+ -- Camm Maguire <camm@debian.org>  Fri, 12 Jul 2013 00:52:35 +0000
+
+gcl (2.6.7+dfsga-25) unstable; urgency=high
+
+  * alpha, mips, 68k
+
+ -- Camm Maguire <camm@debian.org>  Wed, 10 Jul 2013 18:29:37 +0000
+
+gcl (2.6.7+dfsga-24) unstable; urgency=high
+
+  * sgc and reloc fixes
+
+ -- Camm Maguire <camm@debian.org>  Mon, 08 Jul 2013 13:56:33 +0000
+
+gcl (2.6.7+dfsga-23) unstable; urgency=high
+
+  * fix for maxima on kfbsd and sparc
+
+ -- Camm Maguire <camm@debian.org>  Wed, 03 Jul 2013 19:19:16 +0000
+
+gcl (2.6.7+dfsga-22) unstable; urgency=high
+
+  * fix stack definition issues on i386
+
+ -- Camm Maguire <camm@debian.org>  Tue, 02 Jul 2013 18:27:54 +0000
+
+gcl (2.6.7+dfsga-21) unstable; urgency=high
+
+  * near out of memory robustification
+
+ -- Camm Maguire <camm@debian.org>  Tue, 02 Jul 2013 15:32:58 +0000
+
+gcl (2.6.7+dfsga-20) unstable; urgency=high
+
+  * fix 3GB workaround for gprof
+
+ -- Camm Maguire <camm@debian.org>  Fri, 21 Jun 2013 11:09:01 -0400
+
+gcl (2.6.7+dfsga-19) unstable; urgency=high
+
+  * work around 3GB personality/alloca/malloc bug
+
+ -- Camm Maguire <camm@debian.org>  Fri, 21 Jun 2013 02:46:49 +0000
+
+gcl (2.6.7+dfsga-18) unstable; urgency=high
+
+  * alpha NULL_OR_ON_C_STACK, attempt to get 32 immfix space with
+    ADDR_LIMIT_3GB|ADDR_COMPAT_LAYOUT personality, clean compile with no
+    immfix
+
+ -- Camm Maguire <camm@debian.org>  Thu, 20 Jun 2013 20:24:29 +0000
+
+gcl (2.6.7+dfsga-17) unstable; urgency=high
+
+  * small optimizations, #= nil fix
+
+ -- Camm Maguire <camm@debian.org>  Wed, 19 Jun 2013 16:23:27 +0000
+
+gcl (2.6.7+dfsga-16) unstable; urgency=high
+
+  * no linker script on hurd;fix OBJ_ALIGN
+
+ -- Camm Maguire <camm@debian.org>  Thu, 13 Jun 2013 15:35:00 +0000
+
+gcl (2.6.7+dfsga-15) unstable; urgency=high
+
+  * ia64 fix
+
+ -- Camm Maguire <camm@debian.org>  Thu, 13 Jun 2013 02:38:47 +0000
+
+gcl (2.6.7+dfsga-14) unstable; urgency=high
+
+  * eliminate maxpage/dbegin, restore windows and macosx builds
+
+ -- Camm Maguire <camm@debian.org>  Wed, 12 Jun 2013 21:42:29 +0000
+
+gcl (2.6.7+dfsga-13) unstable; urgency=low
+
+  * ia64/hurd/s390 and SGC
+
+ -- Camm Maguire <camm@debian.org>  Sun, 09 Jun 2013 00:23:51 +0000
+
+gcl (2.6.7+dfsga-12) unstable; urgency=low
+
+  * ia64/hurd/s390
+
+ -- Camm Maguire <camm@debian.org>  Sat, 08 Jun 2013 15:24:46 +0000
+
+gcl (2.6.7+dfsga-11) unstable; urgency=high
+
+  * 2.6.9 test
+
+ -- Camm Maguire <camm@debian.org>  Fri, 07 Jun 2013 21:46:41 +0000
+
+gcl (2.6.7+dfsga-10) unstable; urgency=high
+
+  * output mips make bug text to stderr
+
+ -- Camm Maguire <camm@debian.org>  Sat, 25 May 2013 12:24:35 +0000
+
+gcl (2.6.7+dfsga-9) unstable; urgency=high
+
+  * mips make bug workaround
+
+ -- Camm Maguire <camm@debian.org>  Wed, 22 May 2013 14:23:43 +0000
+
+gcl (2.6.7+dfsga-8) unstable; urgency=high
+
+  * revert doubled default maxpage
+  * export *read-eval*
+
+ -- Camm Maguire <camm@debian.org>  Tue, 21 May 2013 14:42:05 +0000
+
+gcl (2.6.7+dfsga-7) unstable; urgency=high
+
+  * export ansi symbols
+
+ -- Camm Maguire <camm@debian.org>  Sat, 11 May 2013 21:36:56 +0000
+
+gcl (2.6.7+dfsga-6) unstable; urgency=high
+
+  * fast hash-equal in compiler
+
+ -- Camm Maguire <camm@debian.org>  Sat, 11 May 2013 19:11:42 +0000
+
+gcl (2.6.7+dfsga-5) unstable; urgency=high
+
+  * Bug fix: "FTBFS: cp: cannot stat
+    &#39;debian/tmp/usr/share/info/gcl-si.info&#39;: No such file or
+    directory", thanks to Lucas Nussbaum (Closes: #707490).
+
+ -- Camm Maguire <camm@debian.org>  Fri, 10 May 2013 18:09:14 +0000
+
+gcl (2.6.7+dfsga-4) unstable; urgency=high
+
+  * sgc-on fix with latest gcc
+
+ -- Camm Maguire <camm@debian.org>  Tue, 23 Apr 2013 18:45:11 +0000
+
+gcl (2.6.7+dfsga-3) unstable; urgency=high
+
+  * hash depth bug fix
+  * new s390 reloc
+
+ -- Camm Maguire <camm@debian.org>  Thu, 24 Jan 2013 19:46:30 +0000
+
+gcl (2.6.7+dfsga-2) unstable; urgency=high
+  
+  * more arm relocs supported;check default timezone dynamically;follow
+    bash ~ semantics in user-homedir-pathname
+
+ -- Camm Maguire <camm@debian.org>  Mon, 21 Jan 2013 18:41:06 +0000
+
+gcl (2.6.7+dfsga-1) unstable; urgency=high
+
+  * Acknowledge Non-maintainer upload. 
+  (thanks David PrÃ©vot <taffit@debian.org>) 
+  * Remove unused and non DFSG-compliant gmp3/gmp.* from source. 
+  (Closes: #695721)
+  * Show translated debconf templates, thanks to Denis Barbier for the
+    analysis and the proposed fixes. (Closes: #691946)
+  * trim excess digits from printed floats
+
+ -- Camm Maguire <camm@debian.org>  Tue, 15 Jan 2013 20:46:25 +0000
+
+gcl (2.6.7-108) unstable; urgency=high
+
+  * Depend on emacs23 | emacsen to allow wheezy propagation
+
+ -- Camm Maguire <camm@debian.org>  Mon, 08 Oct 2012 18:08:36 +0000
+
+gcl (2.6.7-107) unstable; urgency=high
+
+  * mode 644 on ucf newfile
+
+ -- Camm Maguire <camm@debian.org>  Wed, 03 Oct 2012 20:38:43 +0000
+
+gcl (2.6.7-106) unstable; urgency=high
+
+  * Bug fix: "modifies conffiles (policy 10.7.3): /etc/default/gcl",
+    thanks to Andreas Beckmann (Closes: #688201).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 03 Oct 2012 16:52:10 +0000
+
+gcl (2.6.7-105) unstable; urgency=high
+
+  * restore #DEBHELPER# to postinst and postrm scripts
+
+ -- Camm Maguire <camm@debian.org>  Mon, 01 Oct 2012 17:31:43 +0000
+
+gcl (2.6.7-104) unstable; urgency=high
+
+  * Bug fix: "modifies conffiles (policy 10.7.3): /etc/default/gcl",
+    thanks to Andreas Beckmann (Closes: #688201).
+
+ -- Camm Maguire <camm@debian.org>  Mon, 01 Oct 2012 15:32:52 +0000
+
+gcl (2.6.7-103) unstable; urgency=high
+
+  * sfaslelf.c: FIX_HIDDEN_SYMBOLS
+
+ -- Camm Maguire <camm@debian.org>  Wed, 22 Aug 2012 15:13:12 +0000
+
+gcl (2.6.7-102) unstable; urgency=high
+
+  * Fix hash key distribution bug, bitvector equal bug
+  * distinguish car position in equal-hash of lists
+
+ -- Camm Maguire <camm@debian.org>  Mon, 20 Aug 2012 17:33:26 +0000
+
+gcl (2.6.7-101) unstable; urgency=high
+
+  * add alpha, ppc, ppc64, and ia64 to __builtin__clear_cache exception
+    list as per gcc maintainers
+  * lintian cleanups
+
+ -- Camm Maguire <camm@debian.org>  Sat, 05 May 2012 23:18:56 +0000
+
+gcl (2.6.7-100) unstable; urgency=high
+
+  * nil case keylist support
+  * Bug fix: "[INTL:da] Danish translation of the debconf templates gcl",
+    thanks to Joe Dalton (Closes: #666528).
+
+ -- Camm Maguire <camm@debian.org>  Fri, 20 Apr 2012 02:25:26 +0000
+
+gcl (2.6.7-99) unstable; urgency=low
+
+  * case default error checking
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Mar 2012 14:14:44 +0000
+
+gcl (2.6.7-98) unstable; urgency=low
+
+  * restore traditional make-sequence,make-array, and coerce, and
+    optimize replace, as 2.6.8 compiler is still too weak re: inlines
+
+ -- Camm Maguire <camm@debian.org>  Fri, 20 Jan 2012 19:55:45 +0000
+
+gcl (2.6.7-97) unstable; urgency=low
+
+  * evade __builtin___clear_cache on hppa
+  * make-array;make-sequence;replace;coerce
+
+ -- Camm Maguire <camm@debian.org>  Fri, 20 Jan 2012 05:13:22 +0000
+
+gcl (2.6.7-96) unstable; urgency=low
+
+  * better XDR detection; no __builtin_clear_cache on sh4
+
+ -- Camm Maguire <camm@debian.org>  Wed, 18 Jan 2012 01:32:43 +0000
+
+gcl (2.6.7-95) unstable; urgency=low
+
+  * clear_cache after mprotect
+
+ -- Camm Maguire <camm@debian.org>  Tue, 17 Jan 2012 03:54:56 +0000
+
+gcl (2.6.7-94) unstable; urgency=low
+
+  * optimize unwind at O0 to workaround gcc bug; centralize on
+    __builtin__clear_cache when available;arm_thm_call reloc support
+
+ -- Camm Maguire <camm@debian.org>  Mon, 16 Jan 2012 20:10:07 +0000
+
+gcl (2.6.7-93) unstable; urgency=low
+
+  * remove C_GC_OFFSET for sparc64
+  * remove ncurses dependency for readline
+  * Bug fix: "FTBFS: dpkg-buildpackage: error: dpkg-source -b gcl-2.6.7
+    gave error exit status 2", thanks to Didier Raboud (Closes: #643131).
+  * Bug fix: "drops readline support if rebuilt", thanks to Sven Joachim
+    (Closes: #646735).
+  * lower opts on sparc64 asof gcc 4.6.1
+
+ -- Camm Maguire <camm@debian.org>  Wed, 11 Jan 2012 21:04:23 +0000
+
+gcl (2.6.7-92) unstable; urgency=low
+
+  * remove gprof on arm as mcount calls are 24/22bit -- marginally
+    accessible
+
+ -- Camm Maguire <camm@debian.org>  Sat, 07 Jan 2012 02:42:06 +0000
+
+gcl (2.6.7-91) unstable; urgency=low
+
+  * s390x reloc support
+  * lower C optimization on ia64, arm and mips for now
+
+ -- Camm Maguire <camm@debian.org>  Thu, 05 Jan 2012 17:30:01 +0000
+
+gcl (2.6.7-90) unstable; urgency=low
+
+  * libtirpc check for newest glibc
+  * read_preserving_whitespace fix
+  * armhf reloc support
+  * s390x support
+  * try C_GC_OFFSET for sparc64
+
+ -- Camm Maguire <camm@debian.org>  Wed, 04 Jan 2012 19:51:13 +0000
+
+gcl (2.6.7-89) unstable; urgency=low
+
+  * support new mips relocs
+  * lower opt to work around gcc 4.6 bug on arm
+
+ -- Camm Maguire <camm@debian.org>  Wed, 11 May 2011 20:06:04 +0000
+
+gcl (2.6.7-88) unstable; urgency=low
+
+  * Bug fix: "FTBFS: gcl_arraylib.c:4:42: error: &#39;VV&#39; undeclared
+    (first use in this function)", thanks to Lucas Nussbaum (Closes:
+    #625032).
+
+ -- Camm Maguire <camm@debian.org>  Mon, 09 May 2011 16:00:21 +0000
+
+gcl (2.6.7-87) unstable; urgency=low
+
+  * mips reloc fix;configure default dlopen fix;clean rules and makefiles
+
+ -- Camm Maguire <camm@debian.org>  Fri, 05 Nov 2010 13:29:05 +0000
+
+gcl (2.6.7-86) unstable; urgency=low
+
+  * remove binutils subdir, configure and make changes
+
+ -- Camm Maguire <camm@debian.org>  Thu, 04 Nov 2010 17:55:48 +0000
+
+gcl (2.6.7-85) unstable; urgency=low
+
+  * fix mips relocs for non-static clines
+
+ -- Camm Maguire <camm@debian.org>  Tue, 02 Nov 2010 13:56:40 +0000
+
+gcl (2.6.7-84) unstable; urgency=low
+
+  * better mips relocs, fix link on mingw32
+
+ -- Camm Maguire <camm@debian.org>  Sat, 30 Oct 2010 00:07:39 +0000
+
+gcl (2.6.7-83) unstable; urgency=low
+
+  * fix alpha stubs; fix sparc64 typo; print armhf relocs
+
+ -- Camm Maguire <camm@debian.org>  Thu, 28 Oct 2010 13:43:16 +0000
+
+gcl (2.6.7-82) unstable; urgency=low
+
+  * mips64 fixes
+
+ -- Camm Maguire <camm@debian.org>  Tue, 26 Oct 2010 18:20:04 +0000
+
+gcl (2.6.7-81) unstable; urgency=low
+
+  * sparc64;mips64
+
+ -- Camm Maguire <camm@debian.org>  Tue, 26 Oct 2010 03:33:52 +0000
+
+gcl (2.6.7-80) unstable; urgency=low
+
+  * alpha stubs; sgc mips kernel bug test; mips GPREL32 reloc
+
+ -- Camm Maguire <camm@debian.org>  Mon, 25 Oct 2010 19:52:51 +0000
+
+gcl (2.6.7-79) unstable; urgency=low
+
+  * mips ld_bind_now, disable sgc workaround mips SIGBUS bug
+
+ -- Camm Maguire <camm@debian.org>  Wed, 20 Oct 2010 15:31:59 +0000
+
+gcl (2.6.7-78) unstable; urgency=low
+
+  * mips local got relocs
+
+ -- Camm Maguire <camm@debian.org>  Tue, 12 Oct 2010 17:15:35 +0000
+
+gcl (2.6.7-77) unstable; urgency=low
+
+  * workaround gcc alpha bug
+  * fix alpha reloc
+
+ -- Camm Maguire <camm@debian.org>  Fri, 01 Oct 2010 21:25:11 +0000
+
+gcl (2.6.7-76) unstable; urgency=low
+
+  * fix page_multiple usage for runtime pagesize variance and stable mipsel builds
+  * sparc64 support
+
+ -- Camm Maguire <camm@debian.org>  Fri, 01 Oct 2010 19:18:47 +0000
+
+gcl (2.6.7-75) unstable; urgency=low
+
+  * fix alpha bug
+
+ -- Camm Maguire <camm@debian.org>  Tue, 28 Sep 2010 20:23:21 +0000
+
+gcl (2.6.7-74) unstable; urgency=low
+
+  * fix alpha relocs for axiom
+
+ -- Camm Maguire <camm@debian.org>  Tue, 28 Sep 2010 16:07:38 +0000
+
+gcl (2.6.7-73) unstable; urgency=low
+
+  * sparc reloc updates
+  * fast-link fix
+
+ -- Camm Maguire <camm@debian.org>  Fri, 24 Sep 2010 19:23:16 +0000
+
+gcl (2.6.7-72) unstable; urgency=low
+
+  * remove unused symbols from gcl_cmpopt.lsp
+  * reloc updates
+  * clear gcc warning
+  * default tilde expansion to HOME env in absence of passwd
+  * configure typo fix
+
+ -- Camm Maguire <camm@debian.org>  Wed, 22 Sep 2010 19:32:52 +0000
+
+gcl (2.6.7-71) unstable; urgency=low
+
+  * print sparc64 relocs
+
+ -- Camm Maguire <camm@debian.org>  Sat, 28 Aug 2010 14:50:00 +0000
+
+gcl (2.6.7-70) unstable; urgency=low
+
+  * sparc64/m68k
+
+ -- Camm Maguire <camm@debian.org>  Fri, 27 Aug 2010 16:54:11 +0000
+
+gcl (2.6.7-69) unstable; urgency=low
+
+  * Bug fix: "non-standard gcc/g++ used for build (gcc-4.3)", thanks to
+    Matthias Klose (Closes: #594280).
+
+ -- Camm Maguire <camm@debian.org>  Thu, 26 Aug 2010 19:08:39 +0000
+
+gcl (2.6.7-68) unstable; urgency=low
+
+  * ppc/mips elf reloc fixes
+
+ -- Camm Maguire <camm@debian.org>  Mon, 23 Aug 2010 20:54:30 +0000
+
+gcl (2.6.7-67) unstable; urgency=low
+
+  * Fix compiler::link ansi combo
+
+ -- Camm Maguire <camm@debian.org>  Sat, 21 Aug 2010 02:05:37 +0000
+
+gcl (2.6.7-66) unstable; urgency=low
+
+  * ppc autobuild fix
+  * Bug fix: "FTBFS: sfasli.c:139: error: invalid initializer", thanks to
+    Lucas Nussbaum (Closes: #593037).
+  * Bug fix: "FTBFS on powerpc: Error: The function TK::GET-AUTOLOADS is
+    undefined.", thanks to Mehdi Dogguy (Closes: #593191).
+
+ -- Camm Maguire <camm@debian.org>  Fri, 20 Aug 2010 01:25:09 +0000
+
+gcl (2.6.7-65) unstable; urgency=low
+
+  * autobuilder fixes
+
+ -- Camm Maguire <camm@debian.org>  Sat, 14 Aug 2010 11:30:46 +0000
+
+gcl (2.6.7-64) unstable; urgency=low
+
+  * configure fix
+
+ -- Camm Maguire <camm@debian.org>  Fri, 13 Aug 2010 23:26:07 +0000
+
+gcl (2.6.7-63) unstable; urgency=low
+
+  * macosx support, ppc, i386 and x86_64 -- sfaslmacho.c
+  * windows/wine support -- sfaslcoff.c
+  * better custreloc support obviating my_plt -- sfaslelf.c
+  * debian default custreloc build where supported, all but ia64 and hppa
+  * fix mingw/wine path issues
+
+ -- Camm Maguire <camm@debian.org>  Fri, 13 Aug 2010 16:08:49 +0000
+
+gcl (2.6.7-62) unstable; urgency=high
+
+  * more stable sgc detection via h/tsgc.h
+  * fix plt.h bug on hppa
+  * sublis1-inline fix for acl2
+
+ -- Camm Maguire <camm@debian.org>  Mon, 26 Jul 2010 16:03:54 +0000
+
+gcl (2.6.7-61) unstable; urgency=high
+
+  * mac osx support
+  * fix undef sgc bug in cmpinclude.h
+
+ -- Camm Maguire <camm@debian.org>  Tue, 20 Jul 2010 14:50:19 +0000
+
+gcl (2.6.7-60) unstable; urgency=high
+
+  * fix sh4 support
+
+ -- Camm Maguire <camm@debian.org>  Thu, 29 Apr 2010 18:09:04 +0000
+
+gcl (2.6.7-59) unstable; urgency=high
+
+  * fix hurd support
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Apr 2010 17:12:54 +0000
+
+gcl (2.6.7-58) unstable; urgency=high
+
+  * hurd support
+  * sh4 support
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Apr 2010 05:09:29 +0000
+
+gcl (2.6.7-57) unstable; urgency=high
+
+  * static function pointer wrapper for gcl_gmp_allocfun, stabilizing gmp
+    on hppa/ia64
+
+ -- Camm Maguire <camm@debian.org>  Mon, 12 Apr 2010 22:28:41 +0000
+
+gcl (2.6.7-56) unstable; urgency=high
+
+  * __builtin___clear_cache on arm
+  * gcc-4.3 on alpha
+
+ -- Camm Maguire <camm@debian.org>  Thu, 28 Jan 2010 00:32:16 +0000
+
+gcl (2.6.7-55) unstable; urgency=low
+
+  * SGC fix, debian override fix, xgcl update
+  * SGC fix for relocatable and contiguous gmp storage
+  * configure fix for arm and hppa
+
+ -- Camm Maguire <camm@debian.org>  Tue, 26 Jan 2010 19:43:08 +0000
+
+gcl (2.6.7-54) unstable; urgency=low
+
+  * robustify user_match, unrandomize, read-char-no-hang for sockets
+  * SA_SIGINFO for 386-linux
+  * if cmpinclude.h is not available, use *cmpinclude-string* in compiler-pass2
+
+ -- Camm Maguire <camm@debian.org>  Wed, 20 Jan 2010 19:02:28 +0000
+
+gcl (2.6.7-53) unstable; urgency=low
+
+  * revert round ratio to nearest
+
+ -- Camm Maguire <camm@debian.org>  Tue, 05 Jan 2010 03:06:59 +0000
+
+gcl (2.6.7-52) unstable; urgency=low
+
+  * SIGINFO for kfreebsd-386
+
+ -- Camm Maguire <camm@debian.org>  Mon, 04 Jan 2010 17:49:05 +0000
+
+gcl (2.6.7-51) unstable; urgency=low
+
+  * user_match exscapes once only
+
+ -- Camm Maguire <camm@debian.org>  Sun, 03 Jan 2010 05:31:20 +0000
+
+gcl (2.6.7-50) unstable; urgency=low
+
+  * gcc 4.4 warning cleanups
+
+ -- Camm Maguire <camm@debian.org>  Thu, 31 Dec 2009 20:43:39 +0000
+
+gcl (2.6.7-49) unstable; urgency=low
+
+  * Bug fix: "/bin/sh: line 6: /bin/gcl: Permission denied", thanks to
+    Nobuhiro Iwamatsu (Closes: #561554).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 30 Dec 2009 23:04:39 +0000
+
+gcl (2.6.7-48) unstable; urgency=low
+
+  * round to nearest in ratio to double
+
+ -- Camm Maguire <camm@debian.org>  Wed, 16 Dec 2009 15:01:55 +0000
+
+gcl (2.6.7-47) unstable; urgency=low
+
+  * Bug fix: "configure: error: Need zlib for bfd linking", thanks to
+    Cyril Brulebois (Closes: #560761).
+  * Bug fix: "Disfunctional maintainer address", thanks to Joerg Jaspert
+    (Closes: #560752).
+
+ -- Camm Maguire <camm@debian.org>  Mon, 14 Dec 2009 19:06:45 +0000
+
+gcl (2.6.7-46) unstable; urgency=low
+
+  * support newer binutils with output_bfd element
+  * Fix 64bit interrupt bug
+  * reader error fix
+  * Ensure plt entries are not blank
+  * plt table reading fix
+  * Bug fix: "FTBFS: current binutils static libs need -lz", thanks to
+    Daniel Schepler (Closes: #521929).
+  * Bug fix: "replacing libreadline5-dev build dependency with
+    libreadline-dev", thanks to Matthias Klose (Closes: #553761).
+  * Bug fix: "crash after ctrl-C", thanks to Miroslaw Kwasniak (Closes:
+    #519903).
+  * Bug fix: "FTBFS with binutils-gold", thanks to Peter Fritzsche
+    (Closes: #554418). -ldl added to bfd linker args
+  * Bug fix: "[INTL:es] Spanish debconf template translation for gcl",
+    thanks to Francisco Javier Cuadrado (Closes: #508728).
+  * Bug fix: "[INTL:it] Italian translation", thanks to Vincenzo
+    Campanella (Closes: #560364).
+  * gcc error/warning cleanups
+  * fix plt table awk
+
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Dec 2009 17:45:14 +0000
+
+gcl (2.6.7-45) unstable; urgency=high
+
+  * proper word order detection macro, fixes armel
+
+ -- Camm Maguire <camm@enhanced.com>  Mon, 01 Sep 2008 13:48:16 +0000
+
+gcl (2.6.7-44) unstable; urgency=high
+
+  * backoff on arm opts
+  * more careful handling of GCL_GPROF_START
+
+ -- Camm Maguire <camm@maguirefamily.org>  Sat, 23 Aug 2008 21:28:52 +0000
+
+gcl (2.6.7-43) unstable; urgency=low
+
+  * redo unrandomize.h to enable compilation under -O2 -- FIXME; Closes: 494153
+
+ -- Camm Maguire <camm@maguirefamily.org>  Wed, 20 Aug 2008 21:18:43 +0000
+
+gcl (2.6.7-42) unstable; urgency=low
+
+  * more div/rem symbols for alpha
+
+ -- Camm Maguire <camm@sacrifice.m.enhanced.com>  Sun, 03 Aug 2008 11:18:51 +0000
+
+gcl (2.6.7-41) unstable; urgency=low
+
+  * more div/rem symbols for arm and hppa
+
+ -- Camm Maguire <camm@sacrifice.m.enhanced.com>  Sat, 02 Aug 2008 00:36:07 +0000
+
+gcl (2.6.7-40) unstable; urgency=low
+
+  * default gcc with pic enabled on mips/mipsel
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 01 Aug 2008 13:28:00 -0400
+
+gcl (2.6.7-39) unstable; urgency=high
+
+  * gcc 4.2 for mips/mipsel for now
+  * __divdi3 et. al. symbols for ia64 and arm
+  * clean some compiler warnings
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 01 Aug 2008 12:53:07 -0400
+
+gcl (2.6.7-38) unstable; urgency=low
+
+  * No infinite unrandomization loops
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 31 Jul 2008 15:18:37 -0400
+
+gcl (2.6.7-37) unstable; urgency=low
+
   * Non-maintainer upload to fix pending l10n issues
   * Debconf templates and debian/control reviewed by the debian-l10n-
     english team as part of the Smith review project. Closes: #457025
@@ -169,101 +954,283 @@ gcl (2.6.8-1) unstable; urgency=low
     patch.
   * Bug fix: "gcl: Builds broken package with gcc-4.3", thanks to Daniel
     Schepler (Closes: #467474).  Added sincos to plttest.c
-  * No infinite unrandomization loops
-  * gcc 4.2 for mips/mipsel for now
-  * __divdi3 et. al. symbols for ia64 and arm
-  * clean some compiler warnings
-  * default gcc with pic enabled on mips/mipsel
-  * more div/rem symbols for arm and hppa
-  * more div/rem symbols for alpha
-  * redo unrandomize.h to enable compilation under -O2 -- FIXME; Closes: 494153
-  * backoff arm opts
-  * more careful handling of GCL_GPROF_START
-  * proper word order detection macro, fixes armel
-  * support newer binutils with output_bfd element
-  * Fix 64bit interrupt bug
-  * reader error fix
-  * Ensure plt entries are not blank
-  * plt table reading fix
-  * Bug fix: "FTBFS: current binutils static libs need -lz", thanks to
-    Daniel Schepler (Closes: #521929).
-  * Bug fix: "replacing libreadline5-dev build dependency with
-    libreadline-dev", thanks to Matthias Klose (Closes: #553761).
-  * Bug fix: "crash after ctrl-C", thanks to Miroslaw Kwasniak (Closes:
-    #519903).
-  * Bug fix: "FTBFS with binutils-gold", thanks to Peter Fritzsche
-    (Closes: #554418). -ldl added to bfd linker args
-  * Bug fix: "[INTL:es] Spanish debconf template translation for gcl",
-    thanks to Francisco Javier Cuadrado (Closes: #508728).
-  * Bug fix: "[INTL:it] Italian translation", thanks to Vincenzo
-    Campanella (Closes: #560364).
-  * gcc error/warning cleanups
-  * fix plt table awk
-  * Bug fix: "configure: error: Need zlib for bfd linking", thanks to
-    Cyril Brulebois (Closes: #560761).
-  * Bug fix: "Disfunctional maintainer address", thanks to Joerg Jaspert
-    (Closes: #560752).
-  * round to nearest in ratio to double
-  * Bug fix: "/bin/sh: line 6: /bin/gcl: Permission denied", thanks to
-    Nobuhiro Iwamatsu (Closes: #561554).
-  * gcc 4.4 warning cleanups
-  * user_match escapes once only
-  * SIGINFO for kfreebsd-386
-  * revert round ratio to nearest
-  * robustify user_match, unrandomize, read-char-no-hang for sockets
-  * SA_SIGINFO for 386-linux
-  * if cmpinclude.h is not available, use *cmpinclude-string* in compiler-pass2
-  * SGC fix, debian override fix, xgcl update
-  * SGC fix for relocatable and contiguous gmp storage
-  * __builtin___clear_cache on arm
-  * gcc-4.3 on alpha
-  * static function pointer wrapper for gcl_gmp_allocfun, stabilizing gmp
-    on hppa/ia64
-  * hurd support
-  * sh4 support
-  * macosx support
-  * windows/wine support
-  * custreloc support with no plt
-  * default debian custreloc builds where supported (all but ia64 and hppa)
-  * mingw/wine path fixes
-  * mips local got relocs
-  * VOL fix to prog.c and print.d, thanks Jerry James
-  * support new mips relocs
-  * lower opt to work around gcc 4.6 bug on arm
-  * configure time check for -Wno-unused-but-set-variable
-  * libtirpc check for newest glibc;read_preserving_whitespace fix;armhf
-    reloc support; s390x support; try C_GC_OFFSET for sparc64
-  * s390x support
-  * lower C optimization on ia64, arm and mips for now
-  * remove gprof on arm as mcount calls are 24/22bit -- marginally
-    accessible
-  * remove C_GC_OFFSET for sparc64
-  * remove ncurses dependency for readline
-  * Bug fix: "FTBFS: dpkg-buildpackage: error: dpkg-source -b gcl-2.6.7
-    gave error exit status 2", thanks to Didier Raboud (Closes: #643131).
-  * Bug fix: "drops readline support if rebuilt", thanks to Sven Joachim
-    (Closes: #646735).
-  * lower opts on sparc64 asof gcc 4.6.1
-  * optimize unwind at O0 to workaround gcc bug; centralize on
-    __builtin__clear_cache when available;arm_thm_call reloc support
-  * clear_cache after mprotect
-  * better XDR detection; no __builtin_clear_cache on sh4
-  * evade __builtin___clear_cache on hppa
-  * make-array;make-sequence;replace;coerce
-  * restore traditional make-sequence,make-array, and coerce, and
-    optimize replace, as 2.6.8 compiler is still too weak re: inlines
-  * case default error checking
-  * nil case keylist support
-  * add alpha, ppc, ppc64, and ia64 to __builtin__clear_cache exception
-    list as per gcc maintainers
-  * Fix hash key distribution bug, bitvector equal bug
-  * distinguish car position in equal-hash of lists
-  * do not modify conffiles
-  * trim excess digits from printed floats
-  * more arm relocs supported;check default timezone dynamically;follow
-    bash ~ semantics in user-homedir-pathname
 
- -- Camm Maguire <camm@debian.org>  Mon, 21 Jan 2013 18:38:14 +0000
+ -- Camm Maguire <camm@enhanced.com>  Thu, 31 Jul 2008 15:18:15 -0400
+
+gcl (2.6.7-36) unstable; urgency=low
+
+  * statsysbfd in Debian, incoporating modules into libgcl.a for
+    compiler::link support
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 30 Nov 2007 12:03:31 -0500
+
+gcl (2.6.7-35) unstable; urgency=low
+
+  * drop gcc-3.4 on arm, Closes: #440421
+  * Depend on emacs22 | emacsen, Closes: #440190
+  * debconf translations Closes: #410683, Closes: #419736, Closes: #423706, Closes: #441408
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 23 Nov 2007 10:25:23 -0500
+
+gcl (2.6.7-34) unstable; urgency=low
+
+  * add read-byte,read-sequence,write-byte,write-sequence support
+  * fix some float parsing inaccuracies
+  * support GNU_HASH sections, Closes: #426135
+  * safety 2 for certain low level functions in gcl_listlib.lsp, CLoses:
+    #415266
+
+ -- Camm Maguire <camm@enhanced.com>  Wed,  4 Jul 2007 16:23:25 -0400
+
+gcl (2.6.7-33) unstable; urgency=low
+
+  * Fix leading underscore behavior of my_plt
+  * add sqrt to plttest.c
+  * disable-nls added to the binutils subconfigures to avoid msgfmt
+    dependency
+  * remove -lintl from powerpc-macosx.defs
+  * update to make-user-init from cvs head to support hol88, fix link on
+    mingw
+  * solaris-i386 support
+  * fix read-char-no-hang on mingw
+  * fast compile without wrap-literals
+  * sigaltstack support
+  * fix cerror
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 16 May 2007 12:45:40 -0400
+
+gcl (2.6.7-32) unstable; urgency=low
+
+  * static function pointers for hppa
+
+ -- Camm Maguire <camm@enhanced.com>  Sun, 29 Oct 2006 02:15:13 -0500
+
+gcl (2.6.7-31) unstable; urgency=low
+
+  * no C optimization on hppa, gcc 4.x on hppa
+  * update cs.po, Closes: #389211
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 27 Oct 2006 13:06:55 -0400
+
+gcl (2.6.7-30) unstable; urgency=low
+
+  * make sure *tmp-dir* is set
+  * makeinfo is optional
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 25 Oct 2006 17:37:54 -0400
+
+gcl (2.6.7-29) unstable; urgency=low
+
+  * Fix build issues on hppa and m68k
+
+ -- Camm Maguire <camm@enhanced.com>  Sat, 21 Oct 2006 15:10:41 -0400
+
+gcl (2.6.7-28) unstable; urgency=low
+
+  * si::gettimeofday function for HOL88 build;macosx fixes
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 18 Oct 2006 13:21:26 -0400
+
+gcl (2.6.7-27) unstable; urgency=low
+
+  * unrestricted gcc for alpha
+  * more default stack space
+
+ -- Camm Maguire <camm@enhanced.com>  Tue, 17 Oct 2006 16:33:43 -0400
+
+gcl (2.6.7-26) unstable; urgency=low
+
+  * Fix large float read bug in c1constant-value
+
+ -- Camm Maguire <camm@enhanced.com>  Mon, 16 Oct 2006 12:41:03 -0400
+
+gcl (2.6.7-25) unstable; urgency=low
+
+  * build-dep on gcc3.4 where appropriate
+  * Newer standards
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 12 Oct 2006 09:37:08 -0400
+
+gcl (2.6.7-24) unstable; urgency=low
+
+  * build-dep on gcc3.4 where appropriate
+  * Newer standards
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 12 Oct 2006 02:22:04 -0400
+
+gcl (2.6.7-23) unstable; urgency=low
+
+  * backoff to gcc-3.4 on alpha,arm,hppa, and m68k
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 11 Oct 2006 10:16:59 -0400
+
+gcl (2.6.7-22) unstable; urgency=low
+
+  * HAVE_SYS_SOCKIO_H for solaris
+  * autolocbfd for solaris
+  * no -Wall when no gcc
+  * no -fomit-frame-pointer on m68k
+  * no profiling on mips
+  * $(AWK) instead of awk
+  * si::stat function
+  * fix 'the boolean type coersion error
+  * no varargs on cygwin
+  * while eval macro
+  * gensym counter fixes
+  * xgcl updates
+
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 15 Sep 2006 13:48:28 -0400
+
+gcl (2.6.7-21) unstable; urgency=low
+
+  * Fix socket write error
+
+ -- Camm Maguire <camm@enhanced.com>  Wed,  6 Sep 2006 09:59:50 -0400
+
+gcl (2.6.7-20) unstable; urgency=low
+
+  * fix ia64 build
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 31 Aug 2006 15:14:18 -0400
+
+gcl (2.6.7-19) unstable; urgency=low
+
+  * xgcl upgrade
+  * parse_number from cvs head with *read-base* fixes
+  * fix object_to_string
+  * install xgcl-2/sysdef.lisp
+  * fix info dir and emacs site lisp dir installation
+  * New xgcl readme
+  * Remove bashism from debian/rules, Closes: #376806, Closes: #385176.
+  * Fix dwdoc doc-base error, Closes: #385126
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 30 Aug 2006 12:13:46 -0400
+
+gcl (2.6.7-18) unstable; urgency=low
+
+  * remove emacs build dependency
+  * synch xgcl-2 with Novak edits
+  * fix build errors
+  * Remove power of two limit to MAXPAGE;fix X lib paths
+  * configure cleanup
+  * delete-file works on directories;build xgcl the old way;latest xgcl
+    from Gordon Novak
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 23 Aug 2006 14:19:51 -0400
+
+gcl (2.6.7-17) unstable; urgency=low
+
+  * Bug fix: "gcl: [INTL:sv] Swedish debconf templates translation",
+    thanks to Daniel Nylander (Closes: #343695).
+  * Bug fix: "gcl: French debconf templates translation update", thanks to
+    Sylvain Archenault (Closes: #344629).
+  * clean xgcl-2/gmon.out
+  * cleanup latest gcc type-punning warnings
+  * defentry C proclamations and xgcl cleanup
+
+ -- Camm Maguire <camm@enhanced.com>  Mon, 26 Jun 2006 16:45:09 +0000
+
+gcl (2.6.7-16) unstable; urgency=high
+
+  * Add missing build dependencies, omit html generation to avoid non-free
+    dependencies, CLoses: #372574.
+
+ -- Camm Maguire <camm@enhanced.com>  Mon, 19 Jun 2006 14:05:59 +0000
+
+gcl (2.6.7-15) unstable; urgency=low
+
+  * Use internal gettext for bfd
+  * Restore xgcl2
+  * Set compiler::*tmp-dir* at runtime
+  * report tmp-dir setting with system-banner to enable clean -eval -
+    batch operation; fix listen on socket streams; use (abs (getpid)) in
+    tmp names for Windows
+  * fix configure unbalanced quotes
+  * support for bignums in nth et.al.
+  * Fix branch cut of atanh
+  * Fix typep on simple-arrays
+  * prevent nested free errors
+  * revert atanh branch cut change
+  * Fix function documentation wrapping by compile
+  * cond evalmacro from cvs head
+  * Fix fixnum declarations in new smallnthcdr/bignthcdr
+  * fix simple-array typep
+  * updates for lsp/sys-proclaim
+  * xgcl integration
+
+ -- Camm Maguire <camm@enhanced.com>  Fri,  9 Jun 2006 17:52:22 +0000
+
+gcl (2.6.7-14) unstable; urgency=low
+
+  * Add mount declaration to plt.c
+
+ -- Camm Maguire <camm@enhanced.com>  Sun, 18 Dec 2005 12:56:51 +0000
+
+gcl (2.6.7-13) unstable; urgency=low
+
+  * Add feof to plttest.c for macosx
+  * plt related fixes for macosx
+  * fix configure
+  * Cleanup LEADING_UNDERSCORE case in plt.c et.al for macosx et.al.
+  * pass devices if present in compiler::get-temp-dir, fix disassemble
+    for new gazonk name pattern
+
+ -- Camm Maguire <camm@enhanced.com>  Sat, 17 Dec 2005 15:22:40 +0000
+
+gcl (2.6.7-12) unstable; urgency=low
+
+  * Fix read-char-no-hang
+  * Strip emacs warnings when finding site-lisp directory
+  * mach-o update for latest binutils
+  * Latext bfd mach-o support from Aurelien
+  * revert to locbfd default on ppc-macosx
+  * More ppc macosx fixes from Aurelien
+  * revert a few macosx changes
+  * default to void * prototype on my_sbrk for latest macosx pending
+    Aureliens #ifdef
+  * Fix plt.h parsing on macosx
+  * Fix leading_underscore detection on mac
+  * macosx name mangling fixes
+  * multi-process safe gazonk names in compiler::*tmp-dir*
+  * Add underscore-mangled setjmp calls to plttest.c for macosx
+  * Fix POTFILES.in, Closes: #336207.
+  * Update templates, Closes: #324636
+  * New French and Swedish translations, Closes: #333654, Closes: #336757.
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 14 Dec 2005 18:52:49 +0000
+
+gcl (2.6.7-11) unstable; urgency=low
+
+  * Remove gcc-3.3 for arm in debian/rules
+  * make default maxpage depend on SIZEOF_LONG and PAGEWIDTH in a sane
+    fashion
+
+ -- Camm Maguire <camm@enhanced.com>  Thu, 20 Oct 2005 00:08:37 +0000
+
+gcl (2.6.7-10) unstable; urgency=low
+
+  * Fix long-call gcc configure bug for ppc, add fdollars in 
+    identifiers on arm
+  * remove gcc restrictions on arm
+  * revert 64bit coersion (gmp_big.c, maybe_replace_big) and replace with
+    code in siLnani (main.c) to get addresses from bignums.  2.7.0 will
+    have 64bit fixnums on 64bit machines, but this should not be
+    backported to 2.6.x
+
+ -- Camm Maguire <camm@enhanced.com>  Wed, 12 Oct 2005 23:11:12 +0000
+
+gcl (2.6.7-9) unstable; urgency=low
+
+  * 64bit fixnum fasd data format fix from cvs head
+
+ -- Camm Maguire <camm@enhanced.com>  Wed,  5 Oct 2005 18:49:50 +0000
+
+gcl (2.6.7-8) unstable; urgency=low
+
+  * Fix 64bit fixnum coersion bug using code from cvs HEAD
+
+ -- Camm Maguire <camm@enhanced.com>  Fri, 30 Sep 2005 22:14:38 +0000
 
 gcl (2.6.7-7) unstable; urgency=high
 
