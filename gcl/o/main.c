@@ -1000,7 +1000,7 @@ init_main(void) {
 #include "writable.h"
 #endif
 
-#ifdef HAVE_PRINT_INSN_I386
+#ifdef PRINT_INSN
 
 #include "dis-asm.h"
 
@@ -1044,7 +1044,7 @@ DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE
   i.print_address_func=my_pa;
   bp=b;
   
-  j=print_insn_i386(addr,&i);
+  j=PRINT_INSN(addr,&i);
   my_fprintf(NULL," ;");
   return MMcons(make_simple_string(b),make_fixnum(j));
 

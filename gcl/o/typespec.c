@@ -484,6 +484,11 @@ DEF_ORDINARY("SIGNED-SHORT",sLsigned_short,LISP,"");
 DEF_ORDINARY("UNSIGNED-SHORT",sLunsigned_short,LISP,"");
 DEF_ORDINARY("*",sLA,LISP,"");
 DEF_ORDINARY("PLUSP",sLplusp,LISP,"");
+DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,"");
 
 #ifdef ANSI_COMMON_LISP
 /* New ansi types */
@@ -498,17 +503,12 @@ DEF_ORDINARY("CLASS",sLclass,LISP,"");
 DEF_ORDINARY("CONCATENATED-STREAM",sLconcatenated_stream,LISP,"");
 DEF_ORDINARY("CONDITION",sLcondition,LISP,"");
 DEF_ORDINARY("CONTROL-ERROR",sLcontrol_error,LISP,"");
-DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,"");
 DEF_ORDINARY("ECHO-STREAM",sLecho_stream,LISP,"");
 DEF_ORDINARY("END-OF-FILE",sLend_of_file,LISP,"");
 DEF_ORDINARY("ERROR",sLerror,LISP,"");
 DEF_ORDINARY("EXTENDED-CHAR",sLextended_char,LISP,"");
 DEF_ORDINARY("FILE-ERROR",sLfile_error,LISP,"");
 DEF_ORDINARY("FILE-STREAM",sLfile_stream,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,"");
 DEF_ORDINARY("GENERIC-FUNCTION",sLgeneric_function,LISP,"");
 DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
 DEF_ORDINARY("METHOD",sLmethod,LISP,"");

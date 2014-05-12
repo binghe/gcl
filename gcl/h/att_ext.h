@@ -564,14 +564,15 @@ EXTER object sLcompiled_function,sLpathname,sLcharacter,sLnumber,sLrational,sLfl
 EXTER object sLinteger,sLratio,sLshort_float,sLstandard_char,sLfixnum,sLpositive_fixnum, sLcomplex;
 EXTER object sLsingle_float,sLpackage,sLbignum,sLrandom_state,sLdouble_float,sLstream,sLbit,sLreadtable;
 EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean;
+EXTER object sLdivision_by_zero,sLfloating_point_inexact,sLfloating_point_invalid_operation;
+EXTER object sLfloating_point_overflow,sLfloating_point_underflow;
 
 #ifdef ANSI_COMMON_LISP
 /* new ansi types */
 EXTER object sLarithmetic_error,sLbase_char,sLbase_string,sLbroadcast_stream,sLbuilt_in_class;
-EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLcontrol_error,sLdivision_by_zero;
+EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLcontrol_error;
 EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLfile_stream;
-EXTER object sLfloating_point_inexact,sLfloating_point_invalid_operation,sLfloating_point_overflow;
-EXTER object sLfloating_point_underflow,sLgeneric_function,sLlogical_pathname,sLmethod,sLpackage_error;
+EXTER object sLgeneric_function,sLlogical_pathname,sLmethod,sLpackage_error;
 EXTER object sLparse_error,sLprint_not_readable,sLprogram_error,sLreader_error,sLserious_condition;
 EXTER object sLsimple_base_string,sLsimple_condition,sLsimple_type_error,sLsimple_warning,sLstandard_class;
 EXTER object sLstandard_generic_function,sLstandard_method,sLstandard_object,sLstorage_condition;

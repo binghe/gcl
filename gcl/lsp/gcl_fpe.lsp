@@ -141,6 +141,7 @@
   (break-on-floating-point-exceptions :suspend t)
   (unwind-protect
     (let* ((fun (function-by-address addr))(m (read-instruction addr context)))
-      (error (or (caar (member code +fe-list+ :key 'cadr)) 'arithmetic-error) 
-	     :operation (list :insn (pop m) :op (pop m) :fun fun :addr addr) :operands m))
+      ((lambda (&rest r) (apply 'error (if (find-package :conditions) r (list (format nil "~s" r)))))
+		 (or (caar (member code +fe-list+ :key 'cadr)) 'arithmetic-error) 
+		 :operation (list :insn (pop m) :op (pop m) :fun fun :addr addr) :operands m))
     (break-on-floating-point-exceptions)))
