@@ -199,10 +199,10 @@ object read_fasl_data();
 
 #ifdef UNIX
 /*  unixfsys.c  */
-FILE *backup_fopen();
+void *backup_fopen();
 #else
 /*  filesystem.c  */
-FILE *backup_fopen();
+void *backup_fopen();
 #endif
 
 /*  frame.c  */
@@ -628,7 +628,6 @@ EXTER object sSPmemory;
 EXTER object sSPinit;
 object sLfset();
 object MakeAfun();
-extern  object Cstd_key_defaults[];   
 extern object call_proc0();
 /* extern object call_proc(); */
 /* extern object call_vproc(); */

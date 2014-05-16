@@ -395,7 +395,7 @@ file_exists(object file)
 		return(FALSE);
 }
 
-FILE *
+void *
 fopen_not_dir(char *filename,char * option) {
 
   struct stat ss;
@@ -407,7 +407,7 @@ fopen_not_dir(char *filename,char * option) {
 
 }
 
-FILE *
+void *
 backup_fopen(char *filename, char *option)
 {
 	char backupfilename[MAXPATHLEN];
@@ -420,7 +420,7 @@ backup_fopen(char *filename, char *option)
 }
 
 int
-file_len(FILE *fp)
+file_len(void *fp)
 {
 	struct stat filestatus;
 

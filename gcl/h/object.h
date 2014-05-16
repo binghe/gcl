@@ -105,210 +105,11 @@ union int_object {object o; fixnum i;};
 	Definition of each implementation type.
 */
 
-struct fixnum_struct {
-		FIRSTWORD;
-	fixnum	FIXVAL;		/*  fixnum value  */
-};
 /* #define	Mfix(obje)	(obje)->FIX.FIXVAL */
 /* #define fix(x) Mfix(x) */
 
 #define	SMALL_FIXNUM_LIMIT	1024
 
-#if defined (LOW_SHFT)
-
-#define LOW_IM_FIX (1L<<(LOW_SHFT-1))
-#define INT_IN_BITS(a_,b_) ({fixnum _a=(fixnum)(a_);_a>>(b_)==_a>>(CHAR_SIZE*SIZEOF_LONG-1);})
-
-#define      make_imm_fixnum(a_)        ((object)a_)
-#define       fix_imm_fixnum(a_)        ((fixnum)a_)
-#define      mark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)+(LOW_IM_FIX<<1))))
-#define    unmark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)-(LOW_IM_FIX<<1))))
-#define        is_imm_fixnum(a_)        ((fixnum)(a_)<(fixnum)OBJNULL)
-#define is_unmrkd_imm_fixnum(a_)        ((fixnum)(a_)<LOW_IM_FIX)
-#define is_marked_imm_fixnum(a_)        (is_imm_fixnum(a_)*!is_unmrkd_imm_fixnum(a_))
-#define           is_imm_fix(a_)        INT_IN_BITS(a_,LOW_SHFT-1)
-#elif defined (IM_FIX_BASE) && defined(IM_FIX_LIM)
-#define      make_imm_fixnum(a_)        ((object)((a_)+(IM_FIX_BASE+(IM_FIX_LIM>>1))))
-#define       fix_imm_fixnum(a_)        (((fixnum)(a_))-(IM_FIX_BASE+(IM_FIX_LIM>>1)))
-#define      mark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) | IM_FIX_LIM)))
-#define    unmark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) &~ IM_FIX_LIM)))
-#define        is_imm_fixnum(a_)        (((ufixnum)(a_))>=IM_FIX_BASE)
-#define is_unmrkd_imm_fixnum(a_)        (is_imm_fixnum(a_)&&!is_marked_imm_fixnum(a_))
-#define is_marked_imm_fixnum(a_)        (((fixnum)(a_))&IM_FIX_LIM)
-#define           is_imm_fix(a_)        (!(((a_)+(IM_FIX_LIM>>1))&-IM_FIX_LIM))
-/* #define        un_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_))&~(IM_FIX_BASE)))) */
-#else
-#define      make_imm_fixnum(a_)        make_fixnum1(a_)
-#define       fix_imm_fixnum(a_)        ((a_)->FIX.FIXVAL)
-#define      mark_imm_fixnum(a_)        
-#define    unmark_imm_fixnum(a_)        
-#define        is_imm_fixnum(a_)        0
-#define is_unmrkd_imm_fixnum(a_)        0
-#define is_marked_imm_fixnum(a_)        0
-#define           is_imm_fix(a_)        0
-/* #define        un_imm_fixnum(a_)         */
-#endif
-
-#define make_fixnum(a_)  ({register fixnum _q1=(a_);register object _q4; \
-      _q4=is_imm_fix(_q1) ? make_imm_fixnum(_q1) : make_fixnum1(_q1);_q4;})
-#define fix(a_)          ({register object _q2=(a_);register fixnum _q3;		\
-      _q3=is_imm_fixnum(_q2) ? fix_imm_fixnum(_q2) :  (_q2)->FIX.FIXVAL;_q3;})
-#define Mfix(a_)         fix(a_)
-#define small_fixnum(a_) make_fixnum(a_) /*make_imm_fixnum(a_)*/
-#define set_fix(a_,b_)   ((a_)->FIX.FIXVAL=(b_))
-
-#define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
-
-#ifndef WIDE_CONS
-
-#ifndef USE_SAFE_CDR
-#define SAFE_CDR(a_)             a_
-#define imcdr(a_)                is_imm_fixnum(Zcdr(a_))
-#else
-#define SAFE_CDR(a_)             ({object _a=(a_);is_imm_fixnum(_a) ? make_fixnum1(fix(_a)) : _a;})
-#ifdef DEBUG_SAFE_CDR
-#define imcdr(a_)                (is_imm_fixnum(Zcdr(a_)) && (error("imfix cdr"),1))
-#else
-#define imcdr(a_)                0
-#endif
-#endif
-
-#else
-
-#define SAFE_CDR(a_)             a_
-#define imcdr(a_)                0
-
-#endif
-
-#define is_marked(a_)            (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->d.m)
-#define is_marked_or_free(a_)    (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->md.mf)
-#define mark(a_)                 if (imcdr(a_)) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
-#define unmark(a_)               if (imcdr(a_)) unmark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=0
-#define is_free(a_)              (!is_imm_fixnum(a_) && !imcdr(a_) && (a_)->d.f)
-#define make_free(a_)            ({(a_)->fw=0;(a_)->d.f=1;(a_)->fw|=(fixnum)OBJNULL;})/*set_type_of(a_,t_other)*/
-#define make_unfree(a_)          {(a_)->d.f=0;}
-
-#ifdef WIDE_CONS
-#define valid_cdr(a_)            0
-#else
-#define valid_cdr(a_)            (!(a_)->d.e || imcdr(a_))
-#endif
-
-#define type_of(x)       ({register object _z=(object)(x);\
-                           (is_imm_fixnum(_z) ? t_fixnum : \
-			    (valid_cdr(_z) ?  (_z==Cnil ? t_symbol : t_cons)  : _z->d.t));})
-
-#ifdef WIDE_CONS
-#define TYPEWORD_TYPE_P(y_) 1
-#else
-#define TYPEWORD_TYPE_P(y_) (y_!=t_cons)
-#endif
-  
-/*Note preserve sgc flag here                                         VVV*/
-#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;\
-    if (TYPEWORD_TYPE_P(_y)) {_x->d.e=1;_x->d.t=_y;_x->fw|=(fixnum)OBJNULL;}})
-
-#ifndef WIDE_CONS
-
-#define cdr_listp(x)     valid_cdr(x)
-#define consp(x)         ({register object _z=(object)(x);\
-                           (!is_imm_fixnum(_z) && valid_cdr(_z) && _z!=Cnil);})
-#define listp(x)         ({register object _z=(object)(x);\
-                           (!is_imm_fixnum(_z) && valid_cdr(_z));})
-#define atom(x)          ({register object _z=(object)(x);\
-                           (is_imm_fixnum(_z) || !valid_cdr(_z) || _z==Cnil);})
-
-#else
-
-#define cdr_listp(x)     listp(x)
-#define consp(x)         (type_of(x)==t_cons)
-#define listp(x)         ({object _x=x;type_of(_x)==t_cons || _x==Cnil;})
-#define atom(x)          !consp(x)
-
-#endif
-
-/* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
-/* #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector) */
-
-
-
-struct shortfloat_struct {
-			FIRSTWORD;
-	shortfloat	SFVAL;	/*  shortfloat value  */
-};
-#define	Msf(obje)	(obje)->SF.SFVAL
-#define sf(x) Msf(x)
-
-struct longfloat_struct {
-  FIRSTWORD;
-  longfloat	LFVAL;	/*  longfloat value  */
-  SPAD;
-};
-#define	Mlf(obje)	(obje)->LF.LFVAL
-#define lf(x) Mlf(x)
-
-
-
-/*  #ifdef _MP_H */
-
-/*  #else */
-/*  typedef struct */
-/*  { */
-/*    int _mp_alloc;		 Number of *limbs* allocated and pointed  */
-/*  				   to by the _mp_d field.  */
-/*    int _mp_size;			 abs(_mp_size) is the number of limbs the  */
-/*  				   last field points to.  If _mp_size is  */
-/*  				   negative this is a negative number.   */
-/*    void *_mp_d;		 Pointer to the limbs.  */
-/*  } our_mpz_struct; */
-/*  #endif */
-
-struct bignum {
-  FIRSTWORD;
-#ifdef GMP
-  __mpz_struct big_mpz_t;
-#else
-  plong             *big_self;	/*  bignum body  */
-  int		big_length;	/*  bignum length  */
-#endif  
-};
-
-struct ratio {
-  FIRSTWORD;
-  object	rat_den;	/*  denominator  */
-				/*  must be an integer  */
-  object	rat_num;	/*  numerator  */
-				/*  must be an integer  */
-  SPAD;
-
-};
-
-struct ocomplex {
-  FIRSTWORD;
-  object	cmp_real;	/*  real part  */
-				/*  must be a number  */
-  object	cmp_imag;	/*  imaginary part  */
-				/*  must be a number  */
-  SPAD;
-};
-
-struct character {
-  FIRSTWORD;
-  unsigned short	ch_code;	/*  code  */
-  unsigned char	ch_font;	/*  font  */
-  unsigned char	ch_bits;	/*  bits  */
-};
-
-
-
-/* struct character character_table1[256+128]; */
-/* EXTER  */
-/* union lispunion character_table1[256+128]; */
-/* #define character_table (character_table1+128) */
-/* #define	code_char(c)		(object)(character_table+(c)) */
-/* #define	char_code(obje)		((object)obje)->ch.ch_code */
-/* #define	char_font(obje)		((object)obje)->ch.ch_font */
-/* #define	char_bits(obje)		((object)obje)->ch.ch_bits */
 
 enum stype {			/*  symbol type  */
 	stp_ordinary,		/*  ordinary  */
@@ -325,53 +126,7 @@ enum stype {			/*  symbol type  */
 #define	s_fillp		st_fillp
 #define	s_self		st_self
 
-struct symbol {
-  FIRSTWORD;
-  object	s_dbind;	/*  dynamic binding  */
-  void	(*s_sfdef)();	/*  special form definition  */
-  /*  This field coincides with c_car  */
-  char	*s_self;	/*  print name  */
-  /*  These fields coincide with  */
-  /*  st_fillp and st_self.  */
-  int	s_fillp;	/*  print name length  */
-  
-  object	s_gfdef;        /*  global function definition  */
-				/*  For a macro,  */
-				/*  its expansion function  */
-				/*  is to be stored.  */
-  object	s_plist;	/*  property list  */
-  object	s_hpack;	/*  home package  */
-				/*  Cnil for uninterned symbols  */
-  short	s_stype;	/*  symbol type  */
-  /*  of enum stype  */
-  short	s_mflag;	/*  macro flag  */
-  SPAD;
-
-};
-
 #define NOT_OBJECT_ALIGNED(a_) ({union lispunion _t={.vw=(void *)(a_)};_t.td.emf;})
-
-EXTER union lispunion Cnil_body OBJ_ALIGN;
-EXTER union lispunion Ct_body OBJ_ALIGN;
-
-struct package {
-  FIRSTWORD;
-  object	p_name;		/*  package name  */
-				/*  a string  */
-  object	p_nicknames;	/*  nicknames  */
-				/*  list of strings  */
-  object	p_shadowings;	/*  shadowing symbol list  */
-  object	p_uselist;	/*  use-list of packages  */
-  object	p_usedbylist;	/*  used-by-list of packages  */
-  object	*p_internal;	/*  hashtable for internal symbols  */
-  object	*p_external;	/*  hashtable for external symbols  */
-  int p_internal_size;    /* size of internal hash table*/
-  int p_external_size;     /* size of external hash table */
-  int p_internal_fp;       /* [rough] number of symbols */
-  int p_external_fp;    /* [rough]  number of symbols */
-  struct package *p_link;	/*  package link  */
-  SPAD;
-};
 
 /*
 	The values returned by intern and find_symbol.
@@ -392,35 +147,10 @@ EXTER struct package *pack_pointer;	/*  package pointer  */
 #define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
 #endif
 
-struct cons {
-#ifdef WIDE_CONS
-  FIRSTWORD;
-#endif
-  object	c_cdr;		/*  cdr  */
-  object	c_car;		/*  car  */
-};
-
 enum httest {			/*  hash table key test function  */
 	htt_eq,			/*  eq  */
 	htt_eql,		/*  eql  */
 	htt_equal		/*  equal  */
-};
-
-struct htent {			/*  hash table entry  */
-  object	hte_key;	/*  key  */
-  object	hte_value;	/*  value  */
-};
-
-struct hashtable {		/*  hash table header  */
-  FIRSTWORD;
-  struct htent *ht_self;	/*  pointer to the hash table  */
-  object	ht_rhsize;	/*  rehash size  */
-  object	ht_rhthresh;	/*  rehash threshold  */
-  int	ht_nent;	/*  number of entries  */
-  int	ht_size;	/*  hash table size  */
-  short	ht_test;	/*  key test function  */
-  SPAD;
-				/*  of enum httest  */
 };
 
 enum aelttype {			/*  array element type  */
@@ -437,62 +167,6 @@ enum aelttype {			/*  array element type  */
 	aet_last
 	  };
 
-struct array {			/*  array header  */
-  FIRSTWORD;
-  object	a_displaced;	/*  displaced  */
-  short	a_rank;		/*  array rank  */
-  short	a_elttype;	/*  element type  */
-  object	*a_self;	/*  pointer to the array  */
-  short	a_adjustable;	/*  adjustable flag  */
-  short	a_offset;	/*  bitvector offset  */
-  int	a_dim;		/*  dimension  */
-  int	*a_dims;	/*  table of dimensions  */
-  SPAD;
-
-};
-
-
-
-struct vector {			/*  vector header  */
-  FIRSTWORD;
-  object v_displaced;	/*  displaced  */
-  short	v_hasfillp;	/*  has-fill-pointer flag  */
-  short	v_elttype;	/*  element type  */
-  object *v_self;	/*  pointer to the vector  */
-  int	v_fillp;	/*  fill pointer  */
-  /*  For simple vectors,  */
-  /*  v_fillp is equal to v_dim.  */
-  int	v_dim;		/*  dimension  */
-  short	v_adjustable;	/*  adjustable flag  */
-  short	v_offset;	/*  not used  */
-  SPAD;
-};
-
-struct string {			/*  string header  */
-  FIRSTWORD;
-  object	st_displaced;	/*  displaced  */
-  short	st_hasfillp;	/*  has-fill-pointer flag  */
-  short	st_adjustable;	/*  adjustable flag  */
-  char	*st_self;	/*  pointer to the string  */
-  int	st_fillp;	/*  fill pointer  */
-  /*  For simple strings,  */
-  /*  st_fillp is equal to st_dim.  */
-  int	st_dim;		/*  dimension  */
-};
-
-struct ustring {
-  FIRSTWORD;
-  object	ust_displaced;
-  short	ust_hasfillp;
-  short	ust_adjustable;		
-  unsigned char *ust_self;
-  int	ust_fillp;
-  
-  int	ust_dim;
-  
-
-};
-
 #define USHORT_GCL(x,i) (((unsigned short *)(x)->ust.ust_self)[i])
 #define SHORT_GCL(x,i) ((( short *)(x)->ust.ust_self)[i])
 
@@ -502,98 +176,11 @@ struct ustring {
 #define SET_BV_OFFSET(x,val) ((type_of(x)==t_bitvector ? x->bv.bv_offset = val : \
 		       type_of(x)== t_array ? x->a.a_offset=val : (abort(),0)))
 
-
-		       
-
-struct bitvector {		/*  bitvector header  */
-  FIRSTWORD;
-  object bv_displaced;	/*  displaced  */
-  short	bv_hasfillp;	/*  has-fill-pointer flag  */
-  short	bv_elttype;	/*  not used  */
-  char	*bv_self;	/*  pointer to the bitvector  */
-  int	bv_fillp;	/*  fill pointer  */
-  /*  For simple bitvectors,  */
-  /*  st_fillp is equal to st_dim.  */
-  int	bv_dim;		/*  dimension  */
-  /*  number of bits  */
-  short	bv_adjustable;	/*  adjustable flag  */
-  short	bv_offset;	/*  bitvector offset  */
-  /*  the position of the first bit  */
-  /*  in the first byte  */
-  SPAD;
-};
-
-struct fixarray {		/*  fixnum array header  */
-  FIRSTWORD;
-  object	fixa_displaced;	/*  displaced  */
-  short	fixa_rank;	/*  array rank  */
-  short	fixa_elttype;	/*  element type  */
-  fixnum	*fixa_self;	/*  pointer to the array  */
-  short	fixa_adjustable;/*  adjustable flag  */
-  short	fixa_offset;	/*  not used  */
-  int	fixa_dim;	/*  dimension  */
-  int	*fixa_dims;	/*  table of dimensions  */
-  SPAD;
-
-};
-
-struct sfarray {		/*  short-float array header  */
-  FIRSTWORD;
-  object	sfa_displaced;	/*  displaced  */
-  short	sfa_rank;	/*  array rank  */
-  short	sfa_elttype;	/*  element type  */
-  shortfloat
-  *sfa_self;	/*  pointer to the array  */
-  short	sfa_adjustable;	/*  adjustable flag  */
-  short	sfa_offset;	/*  not used  */
-  int	sfa_dim;	/*  dimension  */
-  
-  int	*sfa_dims;	/*  table of dimensions  */
-  
-  SPAD;
-
-};
-
-struct lfarray {		/*  plong-float array header  */
-  FIRSTWORD;
-  object	lfa_displaced;	/*  displaced  */
-  short	lfa_rank;	/*  array rank  */
-  short	lfa_elttype;	/*  element type  */
-  longfloat
-  *lfa_self;	/*  pointer to the array  */
-  short	lfa_adjustable;	/*  adjustable flag  */
-  short	lfa_offset;	/*  not used  */
-  int	lfa_dim;		/*  dimension  */
-  int	*lfa_dims;	/*  table of dimensions  */
-  SPAD;
-
-};
-
-struct structure {		/*  structure header  */
-  FIRSTWORD;
-  object	str_def;	/*  structure definition (a structure)  */
-  object	*str_self;	/*  structure self  */
-  SPAD;
-};
-
-struct s_data {object name;
-	       fixnum   length;
-	       object raw;
-	       object included;
-	       object includes;
-	       object staticp;
-	       object print_function;
-	       object slot_descriptions;
-	       object slot_position;
-	       fixnum   size;
-	       object has_holes;
-	     };
-
 #define S_DATA(x) ((struct s_data *)((x)->str.str_self))
 #define SLOT_TYPE(def,i) (((S_DATA(def))->raw->ust.ust_self[i]))
 #define SLOT_POS(def,i) USHORT_GCL(S_DATA(def)->slot_position,i)
 #define STREF(type,x,i) (*((type *)(((char *)((x)->str.str_self))+(i))))
-
+#define STSET(type,x,i,val)  do{SGC_TOUCH(x);STREF(type,x,i) = (val);} while(0)
 
 
 enum smmode {			/*  stream mode  */
@@ -635,19 +222,6 @@ enum smmode {			/*  stream mode  */
 /* for smm_string_{input,output} */
 #define STRING_STREAM_STRING(strm) ((strm)->sm.sm_object0)
 
-struct stream {
-  FIRSTWORD;
-  FILE	*sm_fp;		/*  file pointer  */
-  object	sm_object0;	/*  some object  */
-  object	sm_object1;	/*  some object */
-  int	sm_int0;	/*  some int  */
-  int	sm_int1;	/*  column for input or output, stream */
-  char  	*sm_buffer;     /*  ptr to BUFSIZE block of storage */
-  char	sm_mode;	/*  stream mode  */
-  unsigned char    sm_flags;         /* flags from gcl_sm_flags */
-  short sm_fd;         /* stream fd */
-  
-};
 /* flags */
 #define GET_STREAM_FLAG(strm,name) ((strm)->sm.sm_flags & (1<<(name)))
 #define SET_STREAM_FLAG(strm,name,val) {if (val) (strm)->sm.sm_flags |= (1<<(name)); else (strm)->sm.sm_flags &= ~(1<<(name));} 
@@ -687,14 +261,6 @@ enum gcl_sm_flags {
 
 #endif
 
-struct random {
-
-  FIRSTWORD;
-
-  __gmp_randstate_struct  rnd_state;
-
-};
-
 enum chattrib {			/*  character attribute  */
 	cat_whitespace,		/*  whitespace  */
 	cat_terminating,	/*  terminating macro  */
@@ -715,164 +281,8 @@ struct rtent {				/*  read table entry  */
 					/*  non-macro character  */
 };
 
-struct readtable {			/*  read table  */
-  FIRSTWORD;
-  struct rtent	*rt_self;	/*  read table itself  */
-};
-
-struct pathname {
-  FIRSTWORD;
-  object	pn_host;	/*  host  */
-  object	pn_device;	/*  device  */
-  object	pn_directory;	/*  directory  */
-  object	pn_name;	/*  name  */
-  object	pn_type;	/*  type  */
-  object	pn_version;	/*  version  */
-  SPAD;
-};
-
-struct cfun {			/*  compiled function header  */
-  FIRSTWORD;
-  object	cf_name;	/*  compiled function name  */
-  void	(*cf_self)();	/*  entry address  */
-  object	cf_data;	/*  data the function uses  */
-				/*  for GBC  */
-};
-
-struct cclosure {		/*  compiled closure header  */
-  FIRSTWORD;
-  object	cc_name;	/*  compiled closure name  */
-  void	(*cc_self)();	/*  entry address  */
-  object	cc_env;		/*  environment  */
-  object	cc_data;	/*  data the closure uses  */
-				/*  for GBC  */
-  int cc_envdim;
-  object	*cc_turbo;	/*  turbo charger */
-  SPAD;
-};
-
-struct closure {
-  FIRSTWORD; 
-  object	cl_name;       /* name */
-  object	(*cl_self)();  /* C start address of code */
-  object	cl_data;       /* To object holding VV vector */
-  int cl_argd;           /* description of args + number */
-  int cl_envdim;         /* length of the environment vector */
-  object *cl_env;        /* environment vector referenced by cl_self()*/
-  SPAD;
-};
-
-struct sfun {
-  FIRSTWORD; 
-  object	sfn_name;       /* name */
-  object	(*sfn_self)();  /* C start address of code */
-  object	sfn_data;       /* To object holding VV vector */
-  int sfn_argd;           /* description of args + number */
-  SPAD;
-};
-
-struct vfun {
-  FIRSTWORD; 
-  object	vfn_name;       /* name */
-  object	(*vfn_self)();  /* C start address of code */
-  object	vfn_data;       /* To object holding VV data */
-  unsigned short vfn_minargs; /* Min args and where varargs start */
-  unsigned short vfn_maxargs;    /* Max number of args */
-  SPAD;
- 
-};
-struct cfdata {
-  FIRSTWORD;
-  char *cfd_start;             /* beginning of contblock for fun */
-  int cfd_size;              /* size of contblock */
-  int cfd_fillp;             /* size of self */
-  object *cfd_self;          /* body */
-  SPAD;
-};
-
-struct spice {
-  FIRSTWORD;
-  int	spc_dummy;
-};
-
-/*
-	dummy type
-*/
-struct dummy {
-  FIRSTWORD;
-};
-struct ff         {ufixnum ff;};
-struct fstpw      {FSTPWORD;};
-union  fstp       {ufixnum ff;struct fstpw t;};
-struct mark       {MARKWORD;};
-struct typew      {TYPEWORD;};
-struct sgcm       {SGCMWORD;};
-
-/*
-	Definition of lispunion.
-*/
-union lispunion {
-	struct fixnum_struct
-			FIX;	/*  fixnum  */
-	struct bignum	big;	/*  bignum  */
-	struct ratio	rat;	/*  ratio  */
-	struct shortfloat_struct
-			SF;	/*  short floating-point number  */
-	struct longfloat_struct
-			LF;	/*  plong floating-point number  */
-	struct ocomplex	cmp;	/*  complex number  */
-	struct character
-			ch;	/*  character  */
-	struct symbol	s;	/*  symbol  */
-	struct package	p;	/*  package  */
-	struct cons	c;	/*  cons  */
-	struct hashtable
-			ht;	/*  hash table  */
-	struct array	a;	/*  array  */
-	struct vector	v;	/*  vector  */
-	struct string	st;	/*  string  */
-	struct ustring	ust;
-	struct bitvector
-			bv;	/*  bit-vector  */
-	struct structure
-			str;	/*  structure  */
-	struct stream	sm;	/*  stream  */
-	struct random	rnd;	/*  random-states  */
-	struct readtable
-			rt;	/*  read table  */
-	struct pathname	pn;	/*  path name  */
-	struct cfun	cf;	/*  compiled function  uses value stack] */
-	struct cclosure	cc;	/*  compiled closure  uses value stack */
-	struct closure	cl;	/*  compiled closure  uses c stack */
-	struct sfun     sfn;    /*  simple function */
-	struct vfun     vfn;    /*  function with variable number of args */
-	struct cfdata   cfd;    /* compiled fun data */
-	struct spice	spc;	/*  spice  */
-
-	struct dummy      d;	/*  dummy  */
-
-        struct fstpw   fstp; /*  fast type  */
-        struct ff        ff; /*  fast type  */
-        struct mark      md; /*  mark dummy  */
-        struct sgcm     smd; /*  sgc mark dummy  */
-        struct typew     td; /*  type dummy  */
-        fixnum           fw;
-        void *           vw;
-
-	struct fixarray	fixa;	/*  fixnum array  */
-	struct sfarray	sfa;	/*  short-float array  */
-	struct lfarray	lfa;	/*  plong-float array  */
-
-};
-
 
 /* struct character character_table1[256+128]; */
-EXTER union lispunion character_table1[256+128] OBJ_ALIGN;
-#define character_table (character_table1+128)
-#define	code_char(c)		(object)(character_table+((unsigned char)(c)))
-#define	char_code(obje)		((object)obje)->ch.ch_code
-#define	char_font(obje)		((object)obje)->ch.ch_font
-#define	char_bits(obje)		((object)obje)->ch.ch_bits
 
 /* EXTER */
 /* union lispunion small_fixnum_table[2*SMALL_FIXNUM_LIMIT]; */
@@ -1113,17 +523,8 @@ EXTER object MVloc[10];
 
 /* Number of args supplied to a variable arg t_vfun
  Used by the C function to set optionals */
-
-struct call_data { 
-  object fun;
-  int argd;
-  int nvalues;
-  object values[50];
-  double double_return;
-};
-EXTER struct call_data fcall;
-
 #define  VFUN_NARGS fcall.argd
+
 #define RETURN2(x,y) do{/*  object _x = (void *) x;  */\
 			  fcall.values[2]=y;fcall.nvalues=2; \
 			  return (x) ;} while(0)
@@ -1141,14 +542,6 @@ EXTER struct call_data fcall;
 /* #define CALL(n,form) (VFUN_NARGS=n,form) */
 
 	
-
-/* we sometimes have to touch the header of arrays or structures
-   to make sure the page is writable */
-#ifdef SGC
-#define SGC_TOUCH(x) if (is_marked(x)) system_error(); unmark(x)
-#else
-#define SGC_TOUCH(x)
-#endif
 
 object funcall_cfun(void(*)(),int,...);
 object clear_compiler_properties();
@@ -1192,6 +585,130 @@ EXTER unsigned plong signals_allowed, signals_pending  ;
 EXTER struct symbol Dotnil_body;
 #define Dotnil ((object)&Dotnil_body)
 
+#if defined (LOW_SHFT)
+
+#define LOW_IM_FIX (1L<<(LOW_SHFT-1))
+#define INT_IN_BITS(a_,b_) ({fixnum _a=(fixnum)(a_);_a>>(b_)==_a>>(CHAR_SIZE*SIZEOF_LONG-1);})
+
+#define      make_imm_fixnum(a_)        ((object)a_)
+#define       fix_imm_fixnum(a_)        ((fixnum)a_)
+#define      mark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)+(LOW_IM_FIX<<1))))
+#define    unmark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)-(LOW_IM_FIX<<1))))
+#define        is_imm_fixnum(a_)        ((fixnum)(a_)<(fixnum)OBJNULL)
+#define is_unmrkd_imm_fixnum(a_)        ((fixnum)(a_)<LOW_IM_FIX)
+#define is_marked_imm_fixnum(a_)        (is_imm_fixnum(a_)*!is_unmrkd_imm_fixnum(a_))
+#define           is_imm_fix(a_)        INT_IN_BITS(a_,LOW_SHFT-1)
+#elif defined (IM_FIX_BASE) && defined(IM_FIX_LIM)
+#define      make_imm_fixnum(a_)        ((object)((a_)+(IM_FIX_BASE+(IM_FIX_LIM>>1))))
+#define       fix_imm_fixnum(a_)        (((fixnum)(a_))-(IM_FIX_BASE+(IM_FIX_LIM>>1)))
+#define      mark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) | IM_FIX_LIM)))
+#define    unmark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) &~ IM_FIX_LIM)))
+#define        is_imm_fixnum(a_)        (((ufixnum)(a_))>=IM_FIX_BASE)
+#define is_unmrkd_imm_fixnum(a_)        (is_imm_fixnum(a_)&&!is_marked_imm_fixnum(a_))
+#define is_marked_imm_fixnum(a_)        (((fixnum)(a_))&IM_FIX_LIM)
+#define           is_imm_fix(a_)        (!(((a_)+(IM_FIX_LIM>>1))&-IM_FIX_LIM))
+/* #define        un_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_))&~(IM_FIX_BASE)))) */
+#else
+#define      make_imm_fixnum(a_)        make_fixnum1(a_)
+#define       fix_imm_fixnum(a_)        ((a_)->FIX.FIXVAL)
+#define      mark_imm_fixnum(a_)        
+#define    unmark_imm_fixnum(a_)        
+#define        is_imm_fixnum(a_)        0
+#define is_unmrkd_imm_fixnum(a_)        0
+#define is_marked_imm_fixnum(a_)        0
+#define           is_imm_fix(a_)        0
+/* #define        un_imm_fixnum(a_)         */
+#endif
+
+#define make_fixnum(a_)  ({register fixnum _q1=(a_);register object _q4; \
+      _q4=is_imm_fix(_q1) ? make_imm_fixnum(_q1) : make_fixnum1(_q1);_q4;})
+#define fix(a_)          ({register object _q2=(a_);register fixnum _q3;		\
+      _q3=is_imm_fixnum(_q2) ? fix_imm_fixnum(_q2) :  (_q2)->FIX.FIXVAL;_q3;})
+#define Mfix(a_)         fix(a_)
+#define small_fixnum(a_) make_fixnum(a_) /*make_imm_fixnum(a_)*/
+#define set_fix(a_,b_)   ((a_)->FIX.FIXVAL=(b_))
+
+#define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
+
+#ifndef WIDE_CONS
+
+#ifndef USE_SAFE_CDR
+#define SAFE_CDR(a_)             a_
+#define imcdr(a_)                is_imm_fixnum(Zcdr(a_))
+#else
+#define SAFE_CDR(a_)             ({object _a=(a_);is_imm_fixnum(_a) ? make_fixnum1(fix(_a)) : _a;})
+#ifdef DEBUG_SAFE_CDR
+#define imcdr(a_)                (is_imm_fixnum(Zcdr(a_)) && (error("imfix cdr"),1))
+#else
+#define imcdr(a_)                0
+#endif
+#endif
+
+#else
+
+#define SAFE_CDR(a_)             a_
+#define imcdr(a_)                0
+
+#endif
+
+#define is_marked(a_)            (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->d.m)
+#define is_marked_or_free(a_)    (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->md.mf)
+#define mark(a_)                 if (imcdr(a_)) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
+#define unmark(a_)               if (imcdr(a_)) unmark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=0
+#define is_free(a_)              (!is_imm_fixnum(a_) && !imcdr(a_) && (a_)->d.f)
+#define make_free(a_)            ({(a_)->fw=0;(a_)->d.f=1;(a_)->fw|=(fixnum)OBJNULL;})/*set_type_of(a_,t_other)*/
+#define make_unfree(a_)          {(a_)->d.f=0;}
+
+#ifdef WIDE_CONS
+#define valid_cdr(a_)            0
+#else
+#define valid_cdr(a_)            (!(a_)->d.e || imcdr(a_))
+#endif
+
+#define type_of(x)       ({register object _z=(object)(x);\
+                           (is_imm_fixnum(_z) ? t_fixnum : \
+			    (valid_cdr(_z) ?  (_z==Cnil ? t_symbol : t_cons)  : _z->d.t));})
+
+#ifdef WIDE_CONS
+#define TYPEWORD_TYPE_P(y_) 1
+#else
+#define TYPEWORD_TYPE_P(y_) (y_!=t_cons)
+#endif
+  
+/*Note preserve sgc flag here                                         VVV*/
+#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;\
+    if (TYPEWORD_TYPE_P(_y)) {_x->d.e=1;_x->d.t=_y;_x->fw|=(fixnum)OBJNULL;}})
+
+#ifndef WIDE_CONS
+
+#define cdr_listp(x)     valid_cdr(x)
+#define consp(x)         ({register object _z=(object)(x);\
+                           (!is_imm_fixnum(_z) && valid_cdr(_z) && _z!=Cnil);})
+#define listp(x)         ({register object _z=(object)(x);\
+                           (!is_imm_fixnum(_z) && valid_cdr(_z));})
+#define atom(x)          ({register object _z=(object)(x);\
+                           (is_imm_fixnum(_z) || !valid_cdr(_z) || _z==Cnil);})
+
+#else
+
+#define cdr_listp(x)     listp(x)
+#define consp(x)         (type_of(x)==t_cons)
+#define listp(x)         ({object _x=x;type_of(_x)==t_cons || _x==Cnil;})
+#define atom(x)          !consp(x)
+
+#endif
+
+/* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
+/* #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector) */
+
+
+
+#define	Msf(obje)	(obje)->SF.SFVAL
+#define sf(x) Msf(x)
+
+#define	Mlf(obje)	(obje)->LF.LFVAL
+#define lf(x) Mlf(x)
+
 #define endp_prop(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : (FEwrong_type_argument(sLlist, (a)),FALSE)))
 #define endp(a) endp_prop(a)
     
@@ -1202,3 +719,18 @@ EXTER struct symbol Dotnil_body;
 #define eql(a_,b_)    ({register object _a=(a_);register object _b=(b_);_a==_b || (!IMMNIL(_a)&&!IMMNIL(_b)&&eql1(_a,_b));})
 #define equal(a_,b_)  ({register object _a=(a_);register object _b=(b_);_a==_b || (!IMMNIL(_a)&&!IMMNIL(_b)&&equal1(_a,_b));})
 #define equalp(a_,b_) ({register object _a=(a_);register object _b=(b_);_a==_b || (_a!=Cnil&&_b!=Cnil&&equalp1(_a,_b));})
+
+#define character_table (character_table1+128)
+#define	code_char(c)		(object)(character_table+((unsigned char)(c)))
+#define	char_code(obje)		((object)obje)->ch.ch_code
+#define	char_font(obje)		((object)obje)->ch.ch_font
+#define	char_bits(obje)		((object)obje)->ch.ch_bits
+
+/* we sometimes have to touch the header of arrays or structures
+   to make sure the page is writable */
+#ifdef SGC
+#define SGC_TOUCH(x) if (is_marked(x)) system_error(); unmark(x)
+#else
+#define SGC_TOUCH(x)
+#endif
+

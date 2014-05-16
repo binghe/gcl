@@ -1246,8 +1246,8 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	#define EXTER
 	#include "$MP_INCLUDE"
 	#include "./h/enum.h"
-	#include "./h/bits.h"
 	#define OBJ_ALIGN
+	#include "./h/bits.h"
 	#include "./h/object.h"
 	]],[[
 	unsigned long i;

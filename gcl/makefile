@@ -243,24 +243,34 @@ clean: gclclean
 #	-cd binutils/intl && $(MAKE) distclean
 #	-cd binutils/bfd && $(MAKE) distclean
 #	-cd binutils/libiberty && $(MAKE) distclean
-
-CMPINCLUDE_FILES=$(HDIR)cmpincl1.h $(HDIR)gclincl.h $(HDIR)compbas.h $(HDIR)enum.h $(HDIR)mgmp.h $(HDIR)bits.h $(HDIR)object.h $(HDIR)vs.h \
+#$(HDIR)compbas.h $(HDIR)cmponly.h 
+# $(HDIR)/protoize.h $(HDIR)att_ext.h $(HDIR)new_decl.h $(HDIR)compat.h $(ODIR)/regexp.h $(HDIR)funlink.h $(HDIR)gclincl.h $(HDIR)object.h
+CMPINCLUDE_FILES=$(HDIR)cmpincl1.h $(HDIR)compbas.h $(HDIR)enum.h $(HDIR)mgmp.h $(HDIR)mbits.h $(HDIR)compproto.h  $(HDIR)vs.h \
 	$(HDIR)bds.h $(HDIR)frame.h \
-	$(HDIR)lex.h $(HDIR)eval.h    $(HDIR)funlink.h \
-	$(HDIR)att_ext.h $(HDIR)new_decl.h $(HDIR)compbas2.h \
-	$(HDIR)compat.h $(HDIR)cmponly.h $(ODIR)/regexp.h $(HDIR)/protoize.h $(HDIR)/immnum.h
+	$(HDIR)lex.h $(HDIR)eval.h \
+	$(HDIR)compbas2a.h \
+	$(HDIR)/compbas3.h $(HDIR)/immnum.h
 
 OTHERS=$(HDIR)notcomp.h $(HDIR)rgbc.h $(HDIR)stacks.h 
 
 $(HDIR)new_decl.h:
 	(cd o && $(MAKE) ../$@)
 
-$(HDIR)cmpinclude.h: $(CMPINCLUDE_FILES) $(HDIR)config.h
+$(HDIR)mbits.h: $(HDIR)gclincl.h $(HDIR)bits.h
+	echo "#include \"gclincl.h\"\n#include \"bits.h\"" | cpp -I $(HDIR) > $@
+
+$(HDIR)mcompdefs.h: $(HDIR)include.h $(HDIR)compdefs.h $(HDIR)compdefs1.h 
+	$(CC) -E -dD $< | grep -E "`awk '{printf(\"^#define %s\\\\(?|\",$$1);}' $(HDIR)/compdefs.h |sed 's,|$$,,1'`" >$@
+	cat $(HDIR)compdefs1.h >>$@
+
+
+$(HDIR)cmpinclude.h: $(HDIR)mcompdefs.h $(CMPINCLUDE_FILES) $(HDIR)config.h
 	cat $(HDIR)config.h | sed -e "1,/Begin for cmpincl/d" -e "/End for cmpinclude/,50000d" > $(@F)
-	cd h && cpp tsgc.h 2>/dev/null| grep -v '^ *$$' | tail -1l | tr -d '"' >>../$(@F)
-	cat $(CMPINCLUDE_FILES)  >> $(@F)
-	$(CC) -E -I./$(HDIR)  -dD $(@F) | \
-	awk '/#define  *(__STDC_(_|HOSTED__) |(pu|ge)tc|__GCC_ATOMIC_|__GNU_PATCHLEVEL__ |__VERSION__ )/ {next}{print}' >tmpx1 && mv tmpx1 $(@F)
+#	cd h && cpp tsgc.h 2>/dev/null| grep -v '^ *$$' | tail -1l | tr -d '"' >>../$(@F)
+	cat $< $(CMPINCLUDE_FILES) |\
+	$(CC) -E -I./$(HDIR) - | \
+	awk '/^# |^$$/ {next}{print}' >tmpx1 && mv tmpx1 $(@F)
+	cat $< >>$(@F)
 	./xbin/move-if-changed mv $(@F) $@
 	./xbin/move-if-changed cp $@ o/$(@F)
 

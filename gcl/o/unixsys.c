@@ -245,7 +245,7 @@ un_mmap(void *v1,void *ve) {
 #include <sys/mman.h>
 
 void *
-get_mmap(FILE *fp,void **ve) {
+get_mmap(void *fp,void **ve) {
   
   int n;
   void *v1;

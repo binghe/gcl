@@ -6414,8 +6414,8 @@ else
 	#define EXTER
 	#include "$MP_INCLUDE"
 	#include "./h/enum.h"
-	#include "./h/bits.h"
 	#define OBJ_ALIGN
+	#include "./h/bits.h"
 	#include "./h/object.h"
 
 int

@@ -139,8 +139,8 @@
 	     (call-next-method))))
 
 (define-condition internal-simple-condition (internal-condition simple-condition) ())
-(define-condition internal-simple-error (internal-simple-condition error) ())
-(define-condition internal-simple-warning (internal-simple-condition warning) ())
+(define-condition internal-simple-error (internal-error simple-error) ())
+(define-condition internal-simple-warning (internal-warning simple-warning) ())
 
 (defun symcat (x y) (values (intern (concatenate 'string (string x) (string y)) 'conditions)))
 

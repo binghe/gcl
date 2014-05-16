@@ -42,9 +42,9 @@ int mpz_to_mpz1(MP_INT *,MP_INT *,void *);
 void isetq_fix(MP_INT *,int);
 MP_INT * otoi(object x);
 
-#ifndef HAVE_ALLOCA
-#error Need alloca for GMP
-#endif
+/* #ifndef HAVE_ALLOCA */
+/* #error Need alloca for GMP */
+/* #endif */
 
 /* Add fourth argument af to the SETQ macros to allow for malloc allocation */
 /* inside setjmp frames, and faster alloca allocation otherwise.*/
@@ -74,3 +74,4 @@ MP_INT * otoi(object x);
 
 #define	cclosure_call	funcall
 
+/* typedef struct {char c[200];} jmp_buf; */
