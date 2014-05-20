@@ -36,6 +36,12 @@
 ;;ASH
 (push '((t t) t #.(compiler::flags) "immnum_shft(#0,#1)") (get 'ash 'compiler::inline-always))
 
+;;GCD
+(push '((t t) t #.(compiler::flags) "immnum_gcd(#0,#1)") (get 'gcd 'compiler::inline-always))
+
+;;LCM
+(push '((t t) t #.(compiler::flags) "immnum_lcm(#0,#1)") (get 'lcm 'compiler::inline-always))
+
 ;;BOOLE
 (push '((t t t) t #.(compiler::flags) "immnum_bool(#0,#1,#2)") (get 'boole 'compiler::inline-always))
 (push '((fixnum t t) t #.(compiler::flags) "immnum_boole(#0,#1,#2)") (get 'boole 'compiler::inline-always))
