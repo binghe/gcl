@@ -3,7 +3,7 @@
 #define ELF_R_ADDEND(a) (((ELF64_R_TYPE(a)>>8)^0x800000)-0x800000)
 
 static int
-label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
   return 0;
 

@@ -560,7 +560,7 @@ fasload(object faslfile) {
   massert(!parse_map(v1,&sec1,&sece,&sn,&sym1,&syme,&st1,&end,&dsym1,&dsyme,&dst1));
   
 #ifdef SPECIAL_RELOC_H
-  massert(!label_got_symbols(v1,sec1,sece,sym1,syme,st1,got));
+  massert(!label_got_symbols(v1,sec1,sece,sym1,syme,st1,sn,got));
 #endif
 
   massert(memory=load_memory(sec1,sece,v1,&got,&gote));

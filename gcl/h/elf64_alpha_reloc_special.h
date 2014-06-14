@@ -59,7 +59,7 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 }
 
 static int
-label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
   Rela *r;
   Sym *sym;
