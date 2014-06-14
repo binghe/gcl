@@ -27,6 +27,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/mman.h>
 
 #include "include.h"
 #include "page.h"
@@ -1075,6 +1076,9 @@ gcl_init_alloc(void *cs_start) {
   
   install_segmentation_catcher();
   
+  if (data_start)
+    mprotect(data_start,(void *)core_end-data_start,PROT_READ|PROT_WRITE|PROT_EXEC);
+
 #ifdef SGC
 
   massert(getpagesize()<=PAGESIZE);
