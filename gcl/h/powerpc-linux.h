@@ -23,4 +23,10 @@
                            asm __volatile__ ("dcbst 0,%0\n\tsync\n\ticbi 0,%0\n\tsync\n\tisync": : "r" (v) : "memory");\
                         } while(0)
 
+#if SIZEOF_LONG == 4
 #define RELOC_H "elf32_ppc_reloc.h"
+#else
+#define RELOC_H "elf64_ppc_reloc.h"
+#define SPECIAL_RELOC_H "elf64_ppc_reloc_special.h"
+#define STATIC_FUNCTION_POINTERS
+#endif

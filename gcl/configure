@@ -3054,7 +3054,7 @@ case $use in
 # def_static -- Function descriptors are currently realized at runtime in a non-reproducible fashion
 # on these architectures -- CM
      	        powerpc*)
-			if test "$host_cpu" = "powerpc64" ; then def_dlopen="yes" ; def_custreloc="no" ; fi
+#			if test "$host_cpu" = "powerpc64" ; then def_dlopen="yes" ; def_custreloc="no" ; fi
 			;;
 		ia64*)
 			def_dlopen="yes" ; def_custreloc="no" ;;
