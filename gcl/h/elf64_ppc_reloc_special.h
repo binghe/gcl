@@ -62,9 +62,9 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   for (r=v;v<ve;v+=sec->sh_entsize,r=v) 
     if (ELF_R_TYPE(r->r_info) && !ds1[ELF_R_SYM(r->r_info)].st_value) {
       memcpy(u,tramp,sizeof(tramp));
-      ((unsigned long *)u)[0]=((unsigned long *)u)+4;
-      ((unsigned long *)u)[1]=((unsigned long *)u)+3;
-      ((unsigned long *)u)[3]=r->r_offset;
+      ((ul *)u)[0]=(ul)(((ul *)u)+4);
+      ((ul *)u)[1]=(ul)(((ul *)u)+3);
+      ((ul *)u)[3]=r->r_offset;
       ds1[ELF_R_SYM(r->r_info)].st_value=(ul)u;
       u+=sizeof(tramp);
     }
