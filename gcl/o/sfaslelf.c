@@ -90,6 +90,8 @@ ovchku(ul v,ul m) {
 
 }
 
+static char *init_section_name=".text"; 
+
 #ifdef SPECIAL_RELOC_H
 #include SPECIAL_RELOC_H
 #endif
@@ -197,7 +199,7 @@ find_init_address(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,
     if (sec<sec1 || sec>=sece)
       continue;
 
-    if (strcmp(sn+sec->sh_name,".text") && strcmp(sn+sec->sh_name,".toc"))/*FIXME*/
+    if (strcmp(sn+sec->sh_name,init_section_name))
       continue;
 
     if (memcmp("init_",st1+sym->st_name,4))

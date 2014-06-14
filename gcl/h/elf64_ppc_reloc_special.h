@@ -46,6 +46,8 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   massert(sec=get_section(".got",sec1,sece,sn));
   toc=sec->sh_addr;
 
+  init_section_name=".opd";
+
   massert((sec=get_section(".rel.dyn",sec1,sece,sn))||
 	  (sec=get_section(".rela.dyn",sec1,sece,sn)));
 
