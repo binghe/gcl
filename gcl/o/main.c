@@ -162,7 +162,7 @@ update_real_maxpage(void) {
   massert(!mbrk(cur));
 
 #ifdef HAVE_SYSCONF_PHYS_PAGES
-  phys_pages=data_start ? sysconf(_SC_PHYS_PAGES) : 0;
+  phys_pages=raw_image ? 0 : sysconf(_SC_PHYS_PAGES);
 #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
   if (phys_pages>0 && real_maxpage>phys_pages+first_data_page) real_maxpage=phys_pages+first_data_page;
 #endif
