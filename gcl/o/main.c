@@ -154,7 +154,7 @@ update_real_maxpage(void) {
 
   massert(cur=sbrk(0));
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
-    if ((end=data_start+i+j-PAGESIZE)>cur)
+    if ((end=(data_start ? data_start : cur)+i+j-PAGESIZE)>cur)
       if (!mbrk(end)) {
 	real_maxpage=page(end);
 	i+=j;
