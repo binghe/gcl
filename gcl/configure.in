@@ -2682,7 +2682,7 @@ AC_SUBST(NOTIFY)
 # for sgbc the mprotect capabilities.
 
 # the time handling for unixtime, add timezone
-
+AC_CHECK_HEADERS(sys/mman.h,AC_CHECK_FUNCS(mprotect))
 AC_CHECK_HEADERS(alloca.h)
 AC_FUNC_ALLOCA
 

@@ -159,6 +159,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the `mprotect' function. */
+#undef HAVE_MPROTECT
+
 /* can use nsocket library */
 #undef HAVE_NSOCKET
 
@@ -212,6 +215,9 @@
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
+
+/* Define to 1 if you have the <sys/mman.h> header file. */
+#undef HAVE_SYS_MMAN_H
 
 /* Define to 1 if you have the <sys/sockio.h> header file. */
 #undef HAVE_SYS_SOCKIO_H
@@ -320,9 +326,6 @@
 
 /* system pagewidth */
 #undef PAGEWIDTH
-
-/* instruction disassemble routine */
-#undef PRINT_INSN
 
 /* have sigcontext in signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT
