@@ -259,7 +259,7 @@ $(HDIR)new_decl.h:
 $(HDIR)mcompdefs.h: $(HDIR)compdefs.h $(HDIR)new_decl.h
 	awk 'BEGIN {print "#include \"include.h\"";print "#include \"cmponly.h\"";print "---"} {print "\"#define " $$1 "\" " $$1}' $< |\
 	cpp -I$(HDIR) |\
-	awk '/^---$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
+	awk '/^\-\-\-$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
 
 $(HDIR)cmpinclude.h: $(HDIR)mcompdefs.h $(CMPINCLUDE_FILES) $(HDIR)config.h
 	cp $< $(@F)
