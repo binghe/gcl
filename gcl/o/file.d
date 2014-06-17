@@ -40,16 +40,16 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #ifdef HAVE_READLINE
 #include <readline/readline.h>
-#define kclgetc(FP)		rl_getc_em(FP)
-#define kclungetc(C, FP)	rl_ungetc_em(C, FP)
-#define kclputc(C, FP)		rl_putc_em(C, FP)
+#define kclgetc(FP)		rl_getc_em(((FILE *)FP))
+#define kclungetc(C, FP)	rl_ungetc_em(C, ((FILE *)FP))
+#define kclputc(C, FP)		rl_putc_em(C, ((FILE *)FP))
 #else
-#define	kclgetc(FP)		getc(FP)
-#define	kclungetc(C, FP)	ungetc(C, FP)
-#define	kclputc(C, FP)		putc(C, FP)
+#define	kclgetc(FP)		getc(((FILE *)FP))
+#define	kclungetc(C, FP)	ungetc(C, ((FILE *)FP))
+#define	kclputc(C, FP)		putc(C, ((FILE *)FP))
 #endif /* HAVE_READLINE */
 
-#define	xkclfeof(c,FP)		feof(FP)
+#define	xkclfeof(c,FP)		feof(((FILE *)FP))
 
 #ifdef HAVE_AOUT
 #undef ATT
