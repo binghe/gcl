@@ -101,7 +101,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <math.h>
 #include <complex.h>
+#ifdef HAVE_ALLOCA
 #include <alloca.h>
+#endif
 
 #include "../h/sfun_argd.h"
 #include "../h/compbas.h"
