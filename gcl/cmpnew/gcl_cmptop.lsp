@@ -1319,7 +1319,7 @@
 (defun rep-type (type)
        (case type
              (fixnum "long ")
-	     (integer "GEN ")
+	     (integer "MP_INT * ")
              (character "unsigned char ")
              (short-float "float ")
              (long-float "double ")

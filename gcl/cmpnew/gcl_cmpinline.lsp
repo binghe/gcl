@@ -437,7 +437,7 @@
                     (case coersion
                      ((nil) (wt "object V" cvar "= ") (wt-loc loc1))
                      (FIXNUM-LOC (wt "int V" cvar "= ") (wt-fixnum-loc loc))
-		     (integer-loc (wt "GEN V" cvar "= ") (wt-integer-loc loc
+		     (integer-loc (wt "MP_INT * V" cvar "= ") (wt-integer-loc loc
 									 'get-inline-locs))
                      (CHARACTER-LOC
                       (wt "unsigned char V" cvar "= ") (wt-character-loc loc))
