@@ -373,7 +373,7 @@
   (cond
    ((cadr fd)
     (push-args args)
-    (wt-nl "cclosure_call(") (wt-ccb-vs (fun-ref-ccb (car fd))) (wt ");"))
+    (wt-nl "funcall(") (wt-ccb-vs (fun-ref-ccb (car fd))) (wt ");"))
    ((and (listp args)
          *do-tail-recursion*
          *tail-recursion-info*

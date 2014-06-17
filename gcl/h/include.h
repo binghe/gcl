@@ -97,9 +97,20 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../h/mp.h"
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <complex.h>
+#include <alloca.h>
+
+#include "../h/sfun_argd.h"
 #include "../h/compbas.h"
 #include "../h/enum.h"
-#include "../h/bits.h"
+#include "../h/pageinfo.h"
+#include "../h/lu.h"
+#include "../h/globals.h"
+#include "../h/fixnum.h"
+#include "../h/type.h"
 #include "../h/object.h"
 #include "../h/vs.h"
 #include "../h/bds.h"

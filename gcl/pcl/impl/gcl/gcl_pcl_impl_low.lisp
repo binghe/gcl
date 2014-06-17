@@ -174,7 +174,7 @@ static object set_cclosure (object result_cc,object value_cc,fixnum available_si
   /* If we are currently using fast linking,     */
   /* make sure to remove the link for result_cc. */
   /*  (VFUN_NARGS=2,fSuse_fast_links_2(sLnil,result_cc));*/
-  fSuse_fast_links_2(sLnil,result_cc);
+  fSuse_fast_links_2(Cnil,result_cc);
 
 /*  use_fast_links(3,Cnil,result_cc); */
 

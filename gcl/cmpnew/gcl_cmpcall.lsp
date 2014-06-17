@@ -280,6 +280,7 @@
      ((setq fd (or (get fname 'Lfun) (get fname 'Ufun)))
       (check-fname-args fname args)
       (push-args args)
+      (wt-h "void " fd "();")
       (wt-nl fd "();")
       (unwind-exit 'fun-val nil fname)
       )

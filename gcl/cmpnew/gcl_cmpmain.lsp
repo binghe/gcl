@@ -592,7 +592,7 @@ SYSTEM_SPECIAL_INIT
 			 #+expect-unresolved "-expect_unresolved '*'"
 			 na na na))	
 			    
-	     #+bsd "-w"
+	     #+bsd ""; "-w"
 	     #-(or aix3 bsd irix3) " 2> /dev/null ")
 		  
 		 

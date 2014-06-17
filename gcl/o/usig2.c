@@ -265,7 +265,7 @@ before_interrupt(struct save_for_interrupt *p, int allowed)
  p->token_st_dim = MINN(token->st.st_dim,tok_leng+1);
  if (p->token_st_dim < sizeof(p->token_buf))
    p->token_bufp = p->token_buf;
- else { p->token_bufp= (void *)OUR_ALLOCA(p->token_st_dim);}
+ else { p->token_bufp= (void *)alloca(p->token_st_dim);}
  bcopy(token->st.st_self,p->token_bufp,p->token_st_dim);
   
 }

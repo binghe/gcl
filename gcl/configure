@@ -6414,8 +6414,9 @@ else
 	#define EXTER
 	#include "$MP_INCLUDE"
 	#include "./h/enum.h"
-	#include "./h/bits.h"
 	#define OBJ_ALIGN
+	#include "./h/type.h"
+	#include "./h/lu.h"
 	#include "./h/object.h"
 
 int
@@ -6503,7 +6504,8 @@ else
 	#define EXTER
 	#include "$MP_INCLUDE"
 	#include "h/enum.h"
-	#include "h/bits.h"
+	#include "h/type.h"
+	#include "h/lu.h"
 	#include "h/object.h"
 	int main(int argc,char **argv,char **envp) {
 	FILE *f=fopen("conftest1","w");
@@ -6531,7 +6533,8 @@ else
 	#define EXTER
 	#include "$MP_INCLUDE"
 	#include "`pwd`/h/enum.h"
-	#include "`pwd`/h/bits.h"
+	#include "`pwd`/h/type.h"
+	#include "`pwd`/h/lu.h"
 	#include "`pwd`/h/object.h"
 	int main(int argc,char **argv,char **envp) {
 	FILE *f=fopen("conftest1","w");
