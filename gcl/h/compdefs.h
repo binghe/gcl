@@ -116,3 +116,4 @@ ISETQ_FIX(x,y,z)
 aset
 save_avma
 restore_avma
+stp_ordinary

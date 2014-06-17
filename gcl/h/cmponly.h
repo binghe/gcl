@@ -49,3 +49,4 @@
 
 #define save_avma 
 #define restore_avma 
+#define stp_ordinary 0 /*FIXME maxima*/
