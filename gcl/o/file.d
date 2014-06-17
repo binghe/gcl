@@ -1122,7 +1122,7 @@ BEGIN:
 	case smm_input:
 		if (strm->sm.sm_fp == NULL)
 			closed_stream(strm);
-		if (isatty(fileno(strm->sm.sm_fp)) && !listen_stream(strm))
+		if (isatty(fileno((FILE *)strm->sm.sm_fp)) && !listen_stream(strm))
 		  return(feof(strm->sm.sm_fp) ? TRUE : FALSE);
 		{int prev_signals_allowed = signals_allowed;
 	       AGAIN:
