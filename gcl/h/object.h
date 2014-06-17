@@ -458,7 +458,7 @@ object make_si_sfun();
 /* we sometimes have to touch the header of arrays or structures
    to make sure the page is writable */
 #ifdef SGC
-#define SGC_TOUCH(x) if (is_marked(x)) system_error(); unmark(x)
+#define SGC_TOUCH(x) (x)->d.e=1 /*if (is_marked(x)) system_error(); unmark(x)*/
 #else
 #define SGC_TOUCH(x)
 #endif
