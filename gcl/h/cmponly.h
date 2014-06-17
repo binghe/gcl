@@ -47,3 +47,5 @@
                                       mpz_to_mpz1(_xx,(var),af(_n));}}
 #define ISETQ_FIX(a,b,c) isetq_fix(a,c)
 
+#define save_avma 
+#define restore_avma 

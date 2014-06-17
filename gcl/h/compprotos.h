@@ -181,3 +181,4 @@ void isetq_fix(MP_INT *,int);
 MP_INT * otoi(object x);
 object read_byte1();
 int not_a_variable(object);
+object make_integer();

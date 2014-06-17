@@ -112,5 +112,7 @@ EQ(x,y)
 IDECL(x,y,z)
 SETQ_IO(x,y,z,w)
 SETQ_II(x,y,z,w)
-ISETQ_DIX(x,y,z)
+ISETQ_FIX(x,y,z)
 aset
+save_avma
+restore_avma
