@@ -2683,6 +2683,7 @@ AC_SUBST(NOTIFY)
 
 # the time handling for unixtime, add timezone
 
+AC_CHECK_HEADERS(alloca.h)
 AC_FUNC_ALLOCA
 
 # alloca
