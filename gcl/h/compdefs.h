@@ -109,3 +109,8 @@ ON_STACK_MAKE_LIST
 SAFE_CDR(x)
 Scons
 EQ(x,y)
+IDECL(x,y,z)
+SETQ_IO(x,y,z,w)
+SETQ_II(x,y,z,w)
+ISETQ_DIX(x,y,z)
+aset

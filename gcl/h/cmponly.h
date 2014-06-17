@@ -36,3 +36,14 @@
 #define ON_STACK_LIST_VECTOR_NEW on_stack_list_vector_new
 #define ON_STACK_MAKE_LIST on_stack_make_list
 #define KEYTYPE void *
+#define IDECL(a,b,c) mp_limb_t *c=(mp_limb_t *)alloca(1*sizeof(mp_limb_t));MP_INT b={1,1,c}; a = &b 
+#define SETQ_IO(var,alloc,val,af) { object _xx = (val); \
+                                    int _n; \
+                                    if ((_n=obj_to_mpz(_xx,(var)))) {\
+                                      obj_to_mpz1(_xx,(var),af(_n));}}
+#define SETQ_II(var,alloc,val,af) { MP_INT * _xx = (val); \
+                                    int _n; \
+                                    if ((_n=mpz_to_mpz(_xx,(var)))) {\
+                                      mpz_to_mpz1(_xx,(var),af(_n));}}
+#define ISETQ_FIX(a,b,c) isetq_fix(a,c)
+

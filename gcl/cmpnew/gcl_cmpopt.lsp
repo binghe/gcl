@@ -117,7 +117,7 @@
 
 ;;SYMBOL-LENGTH
  (push '((t) fixnum #.(flags rfa)
-  "@0;(type_of(#0)==t_symbol ? (#0)->s.st_fillp :not_a_variable((#0)))")
+  "@0;(type_of(#0)==t_symbol ? (#0)->s.s_fillp :not_a_variable((#0)))")
    (get 'symbol-length 'inline-always))
 
 ;;VECTOR-TYPE
