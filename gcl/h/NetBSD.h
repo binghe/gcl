@@ -55,7 +55,7 @@
 #undef LISTEN_FOR_INPUT		/* default in bsd.h is loser in 386bsd */
 
 #define LISTEN_FOR_INPUT(fp) \
-  if((fp)->_r <=0 && (c=0,ioctl((fp)->_file, FIONREAD, &c),c<=0)) \
+  if(((FILE *)fp)->_r <=0 && (c=0,ioctl(((FILE *)fp)->_file, FIONREAD, &c),c<=0)) \
   return 0;
 
 /* end listen for input */

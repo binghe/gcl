@@ -170,7 +170,7 @@ int main(void)
 #undef LISTEN_FOR_INPUT
 #define LISTEN_FOR_INPUT(fp)                                            \
 do {int c=0;                                                            \
-    if ((fp)->_r <=0 && (c=0, ioctl((fp)->_file, FIONREAD, &c), c<=0))  \
+  if (((FILE *)fp)->_r <=0 && (c=0, ioctl(((FILE *)fp)->_file, FIONREAD, &c), c<=0)) \
         return(FALSE);                                                  \
 } while (0)
 
