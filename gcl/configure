@@ -4159,7 +4159,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 if test "$GCC" = "yes" ; then
 
-   TCFLAGS="-Wall -DVOL=volatile -fsigned-char"
+   TCFLAGS="-Wall -fsigned-char"
 
    #FIXME -Wno-unused-but-set-variable when time
    TMPF=-Wno-unused-but-set-variable
@@ -4190,7 +4190,7 @@ fi
    CFLAGS=$CFLAGS_ORI
 
 else
-   TCFLAGS="-DVOL=volatile -fsigned-char"
+   TCFLAGS="-fsigned-char"
 fi
 if test "$GCC" = "yes" ; then
 	TCFLAGS="$TCFLAGS -pipe"

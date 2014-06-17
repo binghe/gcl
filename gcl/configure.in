@@ -480,7 +480,7 @@ AC_SUBST(CC)
 
 if test "$GCC" = "yes" ; then
 
-   TCFLAGS="-Wall -DVOL=volatile -fsigned-char"
+   TCFLAGS="-Wall -fsigned-char"
 
    #FIXME -Wno-unused-but-set-variable when time
    TMPF=-Wno-unused-but-set-variable
@@ -491,7 +491,7 @@ if test "$GCC" = "yes" ; then
    CFLAGS=$CFLAGS_ORI
 
 else
-   TCFLAGS="-DVOL=volatile -fsigned-char"
+   TCFLAGS="-fsigned-char"
 fi
 if test "$GCC" = "yes" ; then
 	TCFLAGS="$TCFLAGS -pipe"
