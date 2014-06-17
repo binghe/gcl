@@ -1495,7 +1495,7 @@ read_fasl_vector(object in)
  object orig = in;
  object d;
  int tem;
- if (((tem=getc(in->sm.sm_fp)) == EOF) && feof(in->sm.sm_fp))
+ if (((tem=getc(in->sm.sm_fp)) == EOF) && feof(((FILE *)in->sm.sm_fp)))
    { d = coerce_to_pathname(in);
      d = make_pathname(d->pn.pn_host,
 		       d->pn.pn_device,
