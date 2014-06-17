@@ -87,7 +87,7 @@
 
   /* if there is no input there return false */
 #define LISTEN_FOR_INPUT(fp) \
-  if((fp)->_cnt <=0 && (c=0,ioctl((fp)->_file, FIONREAD, &c),c<=0)) \
+   if(((FILE *)fp)->_cnt <=0 && (c=0,ioctl(((FILE *)fp)->_file, FIONREAD, &c),c<=0)) \
      return 0
 
  /* have sys/ioctl.h */
