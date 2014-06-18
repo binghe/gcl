@@ -74,7 +74,6 @@ char object_to_char(object);
 void not_a_symbol(object);
 object number_expt(object,object);
 object fLrow_major_aref(object,fixnum);
-void * alloca(unsigned long);
 object car(object);
 object cdr(object);
 object caar(object);
@@ -175,6 +174,7 @@ double sin(double);
 double sqrt(double);
 double tan(double);
 #ifdef CMPINCLUDE
+void * alloca(unsigned long);
 int feof(void *);
 int getc(void *);
 int putc(int,void *);
