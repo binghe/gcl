@@ -330,6 +330,15 @@ doConnect(host,port)
 
 #define SOCKET_FD(strm) ((strm)->sm.sm_fp ? fileno((strm)->sm.sm_fp) : -1)
 
+static void
+check_socket(object x)
+{
+
+ if (type_of(x) != t_stream || x->sm.sm_mode != smm_socket) 
+   FEwrong_type_argument(sSsocket,x);
+  
+}
+
 DEFUN_NEW("GETPEERNAME",object,fSgetpeername,SI,1,1,NONE,OO,OO,OO,OO,(object sock),
  "Return a list of three elements: the address, the hostname and the port for the other end of the socket.  If hostname is not available it will be equal to the address.  Invalid on server sockets. Return NIL on failure.")
 {

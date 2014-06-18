@@ -757,15 +757,6 @@ illegal_index(object x, object i)
 }
 
 void
-check_socket(object x)
-{
-
- if (type_of(x) != t_stream || x->sm.sm_mode != smm_socket) 
-   FEwrong_type_argument(sSsocket,x);
-  
-}
-
-void
 check_stream(object strm)
 {
 if (type_of(strm) != t_stream)
