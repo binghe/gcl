@@ -1,13 +1,18 @@
 #include "pbits.h"
 
-typedef long long              lfixnum;
-typedef unsigned long long    ulfixnum;
+#undef bool
+typedef int bool;
 
-typedef long            fixnum;
-typedef unsigned long   ufixnum;
+typedef long long lfixnum;
+typedef unsigned long long ulfixnum;
 
-typedef float  shortfloat;
+typedef long fixnum;
+typedef unsigned long ufixnum;
+
+typedef float shortfloat;
 typedef double longfloat;
+
+typedef union lispunion *object;
 
 #ifndef WORDS_BIGENDIAN
 
@@ -35,24 +40,19 @@ typedef double longfloat;
 #define SPAD
 #endif
 
-typedef union lispunion * object;
-
-#undef bool
-typedef int bool;
-
 struct fixnum_struct {
   FIRSTWORD;
-  fixnum	FIXVAL;		/*  fixnum value  */
+  fixnum FIXVAL;
 };
 
 struct shortfloat_struct {
-			FIRSTWORD;
-	shortfloat	SFVAL;	/*  shortfloat value  */
+  FIRSTWORD;
+  shortfloat SFVAL;
 };
 
 struct longfloat_struct {
   FIRSTWORD;
-  longfloat	LFVAL;	/*  longfloat value  */
+  longfloat LFVAL;
   SPAD;
 };
 
@@ -61,78 +61,63 @@ struct bignum {
 #ifdef GMP
   __mpz_struct big_mpz_t;
 #else
-  plong             *big_self;	/*  bignum body  */
-  int		big_length;	/*  bignum length  */
-#endif  
+  plong *big_self;
+  int big_length;
+#endif
 };
 
 struct ratio {
   FIRSTWORD;
-  object	rat_den;	/*  denominator  */
-				/*  must be an integer  */
-  object	rat_num;	/*  numerator  */
-				/*  must be an integer  */
+  object rat_den;
+  object rat_num;
   SPAD;
 
 };
 
 struct ocomplex {
   FIRSTWORD;
-  object	cmp_real;	/*  real part  */
-				/*  must be a number  */
-  object	cmp_imag;	/*  imaginary part  */
-				/*  must be a number  */
+  object cmp_real;
+  object cmp_imag;
   SPAD;
 };
 
 struct character {
   FIRSTWORD;
-  unsigned short	ch_code;	/*  code  */
-  unsigned char	ch_font;	/*  font  */
-  unsigned char	ch_bits;	/*  bits  */
+  unsigned short ch_code;
+  unsigned char ch_font;
+  unsigned char ch_bits;
 };
 
 
 struct symbol {
   FIRSTWORD;
-  object	s_dbind;	/*  dynamic binding  */
-  void	(*s_sfdef)();	/*  special form definition  */
-  /*  This field coincides with c_car  */
-  char	*s_self;	/*  print name  */
-  /*  These fields coincide with  */
-  /*  st_fillp and st_self.  */
-  int	s_fillp;	/*  print name length  */
-  
-  object	s_gfdef;        /*  global function definition  */
-				/*  For a macro,  */
-				/*  its expansion function  */
-				/*  is to be stored.  */
-  object	s_plist;	/*  property list  */
-  object	s_hpack;	/*  home package  */
-				/*  Cnil for uninterned symbols  */
-  short	s_stype;	/*  symbol type  */
-  /*  of enum stype  */
-  short	s_mflag;	/*  macro flag  */
+  object s_dbind;
+  void (*s_sfdef) ();
+  char *s_self;
+  int s_fillp;
+  object s_gfdef;
+  object s_plist;
+  object s_hpack;
+  short s_stype;
+  short s_mflag;
   SPAD;
 
 };
 
 struct package {
   FIRSTWORD;
-  object	p_name;		/*  package name  */
-				/*  a string  */
-  object	p_nicknames;	/*  nicknames  */
-				/*  list of strings  */
-  object	p_shadowings;	/*  shadowing symbol list  */
-  object	p_uselist;	/*  use-list of packages  */
-  object	p_usedbylist;	/*  used-by-list of packages  */
-  object	*p_internal;	/*  hashtable for internal symbols  */
-  object	*p_external;	/*  hashtable for external symbols  */
-  int p_internal_size;    /* size of internal hash table*/
-  int p_external_size;     /* size of external hash table */
-  int p_internal_fp;       /* [rough] number of symbols */
-  int p_external_fp;    /* [rough]  number of symbols */
-  struct package *p_link;	/*  package link  */
+  object p_name;
+  object p_nicknames;
+  object p_shadowings;
+  object p_uselist;
+  object p_usedbylist;
+  object *p_internal;
+  object *p_external;
+  int p_internal_size;
+  int p_external_size;
+  int p_internal_fp;
+  int p_external_fp;
+  struct package *p_link;
   SPAD;
 };
 
@@ -140,336 +125,306 @@ struct cons {
 #ifdef WIDE_CONS
   FIRSTWORD;
 #endif
-  object	c_cdr;		/*  cdr  */
-  object	c_car;		/*  car  */
+  object c_cdr;
+  object c_car;
 };
 
-struct htent {			/*  hash table entry  */
-  object	hte_key;	/*  key  */
-  object	hte_value;	/*  value  */
+struct htent {
+  object hte_key;
+  object hte_value;
 };
 
-struct hashtable {		/*  hash table header  */
+struct hashtable {
   FIRSTWORD;
-  struct htent *ht_self;	/*  pointer to the hash table  */
-  object	ht_rhsize;	/*  rehash size  */
-  object	ht_rhthresh;	/*  rehash threshold  */
-  int	ht_nent;	/*  number of entries  */
-  int	ht_size;	/*  hash table size  */
-  short	ht_test;	/*  key test function  */
-  SPAD;
-				/*  of enum httest  */
-};
-
-struct array {			/*  array header  */
-  FIRSTWORD;
-  object	a_displaced;	/*  displaced  */
-  short	a_rank;		/*  array rank  */
-  short	a_elttype;	/*  element type  */
-  object	*a_self;	/*  pointer to the array  */
-  short	a_adjustable;	/*  adjustable flag  */
-  short	a_offset;	/*  bitvector offset  */
-  int	a_dim;		/*  dimension  */
-  int	*a_dims;	/*  table of dimensions  */
+  struct htent *ht_self;
+  object ht_rhsize;
+  object ht_rhthresh;
+  int ht_nent;
+  int ht_size;
+  short ht_test;
   SPAD;
 
 };
 
-
-
-struct vector {			/*  vector header  */
+struct array {
   FIRSTWORD;
-  object v_displaced;	/*  displaced  */
-  short	v_hasfillp;	/*  has-fill-pointer flag  */
-  short	v_elttype;	/*  element type  */
-  object *v_self;	/*  pointer to the vector  */
-  int	v_fillp;	/*  fill pointer  */
-  /*  For simple vectors,  */
-  /*  v_fillp is equal to v_dim.  */
-  int	v_dim;		/*  dimension  */
-  short	v_adjustable;	/*  adjustable flag  */
-  short	v_offset;	/*  not used  */
+  object a_displaced;
+  short a_rank;
+  short a_elttype;
+  object *a_self;
+  short a_adjustable;
+  short a_offset;
+  int a_dim;
+  int *a_dims;
+  SPAD;
+
+};
+
+
+
+struct vector {
+  FIRSTWORD;
+  object v_displaced;
+  short v_hasfillp;
+  short v_elttype;
+  object *v_self;
+  int v_fillp;
+  int v_dim;
+  short v_adjustable;
+  short v_offset;
   SPAD;
 };
 
-struct string {			/*  string header  */
+struct string {
   FIRSTWORD;
-  object	st_displaced;	/*  displaced  */
-  short	st_hasfillp;	/*  has-fill-pointer flag  */
-  short	st_adjustable;	/*  adjustable flag  */
-  char	*st_self;	/*  pointer to the string  */
-  int	st_fillp;	/*  fill pointer  */
-  /*  For simple strings,  */
-  /*  st_fillp is equal to st_dim.  */
-  int	st_dim;		/*  dimension  */
+  object st_displaced;
+  short st_hasfillp;
+  short st_adjustable;
+  char *st_self;
+  int st_fillp;
+  int st_dim;
 };
 
 struct ustring {
   FIRSTWORD;
-  object	ust_displaced;
-  short	ust_hasfillp;
-  short	ust_adjustable;		
+  object ust_displaced;
+  short ust_hasfillp;
+  short ust_adjustable;
   unsigned char *ust_self;
-  int	ust_fillp;
-  
-  int	ust_dim;
-  
-
+  int ust_fillp;
+  int ust_dim;
 };
 
-struct bitvector {		/*  bitvector header  */
+struct bitvector {
   FIRSTWORD;
-  object bv_displaced;	/*  displaced  */
-  short	bv_hasfillp;	/*  has-fill-pointer flag  */
-  short	bv_elttype;	/*  not used  */
-  char	*bv_self;	/*  pointer to the bitvector  */
-  int	bv_fillp;	/*  fill pointer  */
-  /*  For simple bitvectors,  */
-  /*  st_fillp is equal to st_dim.  */
-  int	bv_dim;		/*  dimension  */
-  /*  number of bits  */
-  short	bv_adjustable;	/*  adjustable flag  */
-  short	bv_offset;	/*  bitvector offset  */
-  /*  the position of the first bit  */
-  /*  in the first byte  */
+  object bv_displaced;
+  short bv_hasfillp;
+  short bv_elttype;
+  char *bv_self;
+  int bv_fillp;
+  int bv_dim;
+  short bv_adjustable;
+  short bv_offset;
   SPAD;
 };
 
-struct fixarray {		/*  fixnum array header  */
+struct fixarray {
   FIRSTWORD;
-  object	fixa_displaced;	/*  displaced  */
-  short	fixa_rank;	/*  array rank  */
-  short	fixa_elttype;	/*  element type  */
-  fixnum	*fixa_self;	/*  pointer to the array  */
-  short	fixa_adjustable;/*  adjustable flag  */
-  short	fixa_offset;	/*  not used  */
-  int	fixa_dim;	/*  dimension  */
-  int	*fixa_dims;	/*  table of dimensions  */
+  object fixa_displaced;
+  short fixa_rank;
+  short fixa_elttype;
+  fixnum *fixa_self;
+  short fixa_adjustable;
+  short fixa_offset;
+  int fixa_dim;
+  int *fixa_dims;
   SPAD;
-
 };
 
-struct sfarray {		/*  short-float array header  */
+struct sfarray {
   FIRSTWORD;
-  object	sfa_displaced;	/*  displaced  */
-  short	sfa_rank;	/*  array rank  */
-  short	sfa_elttype;	/*  element type  */
-  shortfloat
-  *sfa_self;	/*  pointer to the array  */
-  short	sfa_adjustable;	/*  adjustable flag  */
-  short	sfa_offset;	/*  not used  */
-  int	sfa_dim;	/*  dimension  */
-  
-  int	*sfa_dims;	/*  table of dimensions  */
-  
+  object sfa_displaced;
+  short sfa_rank;
+  short sfa_elttype;
+  shortfloat *sfa_self;
+  short sfa_adjustable;
+  short sfa_offset;
+  int sfa_dim;
+  int *sfa_dims;
   SPAD;
-
 };
 
-struct lfarray {		/*  plong-float array header  */
+struct lfarray {
   FIRSTWORD;
-  object	lfa_displaced;	/*  displaced  */
-  short	lfa_rank;	/*  array rank  */
-  short	lfa_elttype;	/*  element type  */
-  longfloat
-  *lfa_self;	/*  pointer to the array  */
-  short	lfa_adjustable;	/*  adjustable flag  */
-  short	lfa_offset;	/*  not used  */
-  int	lfa_dim;		/*  dimension  */
-  int	*lfa_dims;	/*  table of dimensions  */
+  object lfa_displaced;
+  short lfa_rank;
+  short lfa_elttype;
+  longfloat *lfa_self;
+  short lfa_adjustable;
+  short lfa_offset;
+  int lfa_dim;
+  int *lfa_dims;
   SPAD;
-
 };
 
-struct s_data {object name;
-	       fixnum length;
-	       object raw;
-	       object included;
-	       object includes;
-	       object staticp;
-	       object print_function;
-	       object slot_descriptions;
-	       object slot_position;
-	       fixnum   size;
-	       object has_holes;
-	     };
+struct s_data {
+  object name;
+  fixnum length;
+  object raw;
+  object included;
+  object includes;
+  object staticp;
+  object print_function;
+  object slot_descriptions;
+  object slot_position;
+  fixnum size;
+  object has_holes;
+};
 
-struct structure {		/*  structure header  */
+struct structure {
   FIRSTWORD;
-  object	str_def;	/*  structure definition (a structure)  */
-  object	*str_self;	/*  structure self  */
+  object str_def;
+  object *str_self;
   SPAD;
 };
 
 struct stream {
   FIRSTWORD;
-  void	*sm_fp;		/*  file pointer  */
-  object	sm_object0;	/*  some object  */
-  object	sm_object1;	/*  some object */
-  int	sm_int0;	/*  some int  */
-  int	sm_int1;	/*  column for input or output, stream */
-  char  	*sm_buffer;     /*  ptr to BUFSIZE block of storage */
-  char	sm_mode;	/*  stream mode  */
-  unsigned char    sm_flags;         /* flags from gcl_sm_flags */
-  short sm_fd;         /* stream fd */
-  
+  void *sm_fp;
+  object sm_object0;
+  object sm_object1;
+  int sm_int0;
+  int sm_int1;
+  char *sm_buffer;
+  char sm_mode;
+  unsigned char sm_flags;
+  short sm_fd;
 };
 
 struct random {
-
   FIRSTWORD;
-
-  __gmp_randstate_struct  rnd_state;
-
+  __gmp_randstate_struct rnd_state;
 };
 
 
-struct readtable {			/*  read table  */
+struct readtable {
   FIRSTWORD;
-  struct rtent	*rt_self;	/*  read table itself  */
+  struct rtent *rt_self;
 };
 
 struct pathname {
   FIRSTWORD;
-  object	pn_host;	/*  host  */
-  object	pn_device;	/*  device  */
-  object	pn_directory;	/*  directory  */
-  object	pn_name;	/*  name  */
-  object	pn_type;	/*  type  */
-  object	pn_version;	/*  version  */
+  object pn_host;
+  object pn_device;
+  object pn_directory;
+  object pn_name;
+  object pn_type;
+  object pn_version;
   SPAD;
 };
 
-struct cfun {			/*  compiled function header  */
+struct cfun {
   FIRSTWORD;
-  object	cf_name;	/*  compiled function name  */
-  void	(*cf_self)();	/*  entry address  */
-  object	cf_data;	/*  data the function uses  */
-				/*  for GBC  */
+  object cf_name;
+  void (*cf_self) ();
+  object cf_data;
 };
 
-struct cclosure {		/*  compiled closure header  */
+struct cclosure {
   FIRSTWORD;
-  object	cc_name;	/*  compiled closure name  */
-  void	(*cc_self)();	/*  entry address  */
-  object	cc_env;		/*  environment  */
-  object	cc_data;	/*  data the closure uses  */
-				/*  for GBC  */
+  object cc_name;
+  void (*cc_self) ();
+  object cc_env;
+  object cc_data;
   int cc_envdim;
-  object	*cc_turbo;	/*  turbo charger */
+  object *cc_turbo;
   SPAD;
 };
 
 struct closure {
-  FIRSTWORD; 
-  object	cl_name;       /* name */
-  object	(*cl_self)();  /* C start address of code */
-  object	cl_data;       /* To object holding VV vector */
-  int cl_argd;           /* description of args + number */
-  int cl_envdim;         /* length of the environment vector */
-  object *cl_env;        /* environment vector referenced by cl_self()*/
-  SPAD;
+  FIRSTWORD;
+  object cl_name;
+  object (*cl_self) ();
+  object cl_data;
+  int cl_argd;
+  int cl_envdim;
+  object *cl_env;
 };
 
 struct sfun {
-  FIRSTWORD; 
-  object	sfn_name;       /* name */
-  object	(*sfn_self)();  /* C start address of code */
-  object	sfn_data;       /* To object holding VV vector */
-  int sfn_argd;           /* description of args + number */
+  FIRSTWORD;
+  object sfn_name;
+  object (*sfn_self) ();
+  object sfn_data;
+  int sfn_argd;
   SPAD;
 };
 
 struct vfun {
-  FIRSTWORD; 
-  object	vfn_name;       /* name */
-  object	(*vfn_self)();  /* C start address of code */
-  object	vfn_data;       /* To object holding VV data */
-  unsigned short vfn_minargs; /* Min args and where varargs start */
-  unsigned short vfn_maxargs;    /* Max number of args */
+  FIRSTWORD;
+  object vfn_name;
+  object (*vfn_self) ();
+  object vfn_data;
+  unsigned short vfn_minargs;
+  unsigned short vfn_maxargs;
   SPAD;
- 
 };
 struct cfdata {
   FIRSTWORD;
-  char *cfd_start;             /* beginning of contblock for fun */
-  int cfd_size;              /* size of contblock */
-  int cfd_fillp;             /* size of self */
-  object *cfd_self;          /* body */
+  char *cfd_start;
+  int cfd_size;
+  int cfd_fillp;
+  object *cfd_self;
   SPAD;
 };
 
 struct spice {
   FIRSTWORD;
-  int	spc_dummy;
+  int spc_dummy;
 };
 
-/*
-	dummy type
-*/
 struct dummy {
   FIRSTWORD;
 };
-struct ff         {ufixnum ff;};
-struct fstpw      {FSTPWORD;};
-union  fstp       {ufixnum ff;struct fstpw t;};
-struct mark       {MARKWORD;};
-struct typew      {TYPEWORD;};
-struct sgcm       {SGCMWORD;};
+struct ff {
+  ufixnum ff;
+};
+struct fstpw {
+  FSTPWORD;
+};
+union fstp
+{
+  ufixnum ff;
+  struct fstpw t;
+};
+struct mark {
+  MARKWORD;
+};
+struct typew {
+  TYPEWORD;
+};
+struct sgcm {
+  SGCMWORD;
+};
 
-/*
-	Definition of lispunion.
-*/
 union lispunion {
-	struct fixnum_struct
-			FIX;	/*  fixnum  */
-	struct bignum	big;	/*  bignum  */
-	struct ratio	rat;	/*  ratio  */
-	struct shortfloat_struct
-			SF;	/*  short floating-point number  */
-	struct longfloat_struct
-			LF;	/*  plong floating-point number  */
-	struct ocomplex	cmp;	/*  complex number  */
-	struct character
-			ch;	/*  character  */
-	struct symbol	s;	/*  symbol  */
-	struct package	p;	/*  package  */
-	struct cons	c;	/*  cons  */
-	struct hashtable
-			ht;	/*  hash table  */
-	struct array	a;	/*  array  */
-	struct vector	v;	/*  vector  */
-	struct string	st;	/*  string  */
-	struct ustring	ust;
-	struct bitvector
-			bv;	/*  bit-vector  */
-	struct structure
-			str;	/*  structure  */
-	struct stream	sm;	/*  stream  */
-	struct random	rnd;	/*  random-states  */
-	struct readtable
-			rt;	/*  read table  */
-	struct pathname	pn;	/*  path name  */
-	struct cfun	cf;	/*  compiled function  uses value stack] */
-	struct cclosure	cc;	/*  compiled closure  uses value stack */
-	struct closure	cl;	/*  compiled closure  uses c stack */
-	struct sfun     sfn;    /*  simple function */
-	struct vfun     vfn;    /*  function with variable number of args */
-	struct cfdata   cfd;    /* compiled fun data */
-	struct spice	spc;	/*  spice  */
-
-	struct dummy      d;	/*  dummy  */
-
-        struct fstpw   fstp; /*  fast type  */
-        struct ff        ff; /*  fast type  */
-        struct mark      md; /*  mark dummy  */
-        struct sgcm     smd; /*  sgc mark dummy  */
-        struct typew     td; /*  type dummy  */
-        fixnum           fw;
-        void *           vw;
-
-	struct fixarray	fixa;	/*  fixnum array  */
-	struct sfarray	sfa;	/*  short-float array  */
-	struct lfarray	lfa;	/*  plong-float array  */
-
+  struct fixnum_struct FIX;
+  struct bignum big;
+  struct ratio rat;
+  struct shortfloat_struct SF;
+  struct longfloat_struct LF;
+  struct ocomplex cmp;
+  struct character ch;
+  struct symbol s;
+  struct package p;
+  struct cons c;
+  struct hashtable ht;
+  struct array a;
+  struct vector v;
+  struct string st;
+  struct ustring ust;
+  struct bitvector bv;
+  struct structure str;
+  struct stream sm;
+  struct random rnd;
+  struct readtable rt;
+  struct pathname pn;
+  struct cfun cf;
+  struct cclosure cc;
+  struct closure cl;
+  struct sfun sfn;
+  struct vfun vfn;
+  struct cfdata cfd;
+  struct spice spc;
+  struct dummy d;
+  struct fstpw fstp;
+  struct ff ff;
+  struct mark md;
+  struct sgcm smd;
+  struct typew td;
+  fixnum fw;
+  void *vw;
+  struct fixarray fixa;
+  struct sfarray sfa;
+  struct lfarray lfa;
 };

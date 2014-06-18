@@ -121,6 +121,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../h/eval.h"
 
 #include "../h/protoize.h"
+#include "../h/compprotos.h"
 #include "../h/notcomp.h"
 #include "../h/funlink.h"
 #include "../h/att_ext.h"
