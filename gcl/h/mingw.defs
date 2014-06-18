@@ -16,11 +16,11 @@ UNIX_SAVE_DEP = unexnt.c
 
 RSYM	     = rsym.exe
 SPECIAL_RSYM = rsym_nt.c
-SFASL	     = $(ODIR)/sfasl.o
-FIRST_FILE   = $(ODIR)/firstfile.o
-LAST_FILE    = $(ODIR)/lastfile.o
+SFASL	     = sfasl.o
+FIRST_FILE   = firstfile.o
+LAST_FILE    = lastfile.o
 LIBFILES     = bcmp.o bzero.o bcopy.o
-EXTRAS       = ${ODIR}/mingwin.o ${ODIR}/mingfile.o
+EXTRAS       = mingwin.o mingfile.o
 
 # When using SFASL it is good to have (si::build-symbol-table)
 INITFORM     = (si::build-symbol-table)

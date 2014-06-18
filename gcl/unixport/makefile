@@ -16,9 +16,9 @@ CLCSDIR = ../clcs
 PCLDIR  = ../pcl
 PORTDIR = $(shell pwd)
 
-LD_FLAGS=$(LDFLAGS) $(FIRST_FILE)
+LD_FLAGS=$(LDFLAGS) $(ODIR)/$(FIRST_FILE)
 LD_LIBS_PRE=$(addprefix -u ,$(PATCHED_SYMBOLS))
-LD_LIBS_POST=$(LIBS) $(LIBC) -lgclp $(LAST_FILE)
+LD_LIBS_POST=$(LIBS) $(LIBC) -lgclp $(ODIR)/$(LAST_FILE)
 
 ifeq ($(ARRS),)
 ARRS:=ar rs
@@ -47,8 +47,8 @@ bfdfiles: $(shell ! [ -d ../binutils ] || find ../binutils -name "*.o")
 	touch $@
 
 OOBJS:=$(shell j=$$(ar t $(ODIR)/gcllib.a) ; for i in $$(find $(ODIR) -name "*.o") ; do if ! echo $$j |grep $$(basename $$i) >/dev/null 2>&1 ; then echo $$i ; fi ; done)
-OOBJS:=$(filter-out $(FIRST_FILE),$(OOBJS))
-OOBJS:=$(filter-out $(LAST_FILE),$(OOBJS))
+OOBJS:=$(filter-out $(ODIR)/$(FIRST_FILE),$(OOBJS))
+OOBJS:=$(filter-out $(ODIR)/$(LAST_FILE),$(OOBJS))
 OOBJS:=$(filter-out $(ODIR)/plttest.o,$(OOBJS))
 OBJS:=$(OOBJS) $(shell find $(LSPDIR) -name "*.o")
 OBJS:=$(OBJS) $(shell find $(XDIR) -name "*.o")
