@@ -257,7 +257,7 @@ $(HDIR)new_decl.h:
 
 $(HDIR)mcompdefs.h: $(HDIR)compdefs.h $(HDIR)new_decl.h
 	$(AWK) 'BEGIN {print "#include \"include.h\"";print "#include \"cmponly.h\"";print "---"} {print "\"#define " $$1 "\" " $$1}' $< |\
-	cpp -I$(HDIR) |\
+	cpp -I./$(HDIR) |\
 	$(AWK) '/^\-\-\-$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
 
 $(HDIR)cmpinclude.h: $(HDIR)mcompdefs.h $(CMPINCLUDE_FILES) $(HDIR)config.h
