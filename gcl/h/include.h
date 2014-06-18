@@ -126,7 +126,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../h/funlink.h"
 #include "../h/att_ext.h"
 #include "../h/new_decl.h"
-#include "compbas2.h"
 #include "compat.h"
 
 #include "../h/rgbc.h"
