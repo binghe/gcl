@@ -16,9 +16,15 @@ CLCSDIR = ../clcs
 PCLDIR  = ../pcl
 PORTDIR = $(shell pwd)
 
-LD_FLAGS=$(LDFLAGS) $(ODIR)/$(FIRST_FILE)
-LD_LIBS_PRE=$(addprefix -u ,$(PATCHED_SYMBOLS))
-LD_LIBS_POST=$(LIBS) $(LIBC) -lgclp $(ODIR)/$(LAST_FILE)
+LD_FLAGS:=$(LDFLAGS)
+ifneq ($(FIRST_FILE),)
+LD_FLAGS:=$(LD_FLAGS) $(ODIR)/$(FIRST_FILE)
+endif
+LD_LIBS_PRE:=$(addprefix -u ,$(PATCHED_SYMBOLS))
+LD_LIBS_POST:=$(LIBS) $(LIBC) -lgclp
+ifneq ($(LAST_FILE),)
+LD_LIBS_POST:=$(LD_LIBS_POST) $(ODIR)/$(LAST_FILE)
+endif
 
 ifeq ($(ARRS),)
 ARRS:=ar rs
