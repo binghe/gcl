@@ -234,7 +234,7 @@ gclclean:
 		windows/install.lsp windows/sysdir.bat
 	rm -rf windows/Output
 	rm -f ansi-tests/test_results ansi-tests/gazonk*lsp
-	rm -rf autom4te.cache
+	rm -rf autom4te.cache h/mcompdefs.h
 	rm -f config.log config.cache config.status tmpx $(PORTDIR)/gmon.out gcl.script machine system
 
 clean: gclclean
@@ -248,7 +248,7 @@ CMPINCLUDE_FILES=$(HDIR)cmpincl1.h $(HDIR)gclincl.h $(HDIR)compbas.h $(HDIR)type
 	$(HDIR)lu.h $(HDIR)globals.h  $(HDIR)vs.h \
 	$(HDIR)bds.h $(HDIR)frame.h \
 	$(HDIR)lex.h \
-	$(HDIR)compprotos.h  $(HDIR)/immnum.h
+	$(HDIR)compprotos.h  $(HDIR)immnum.h
 
 OTHERS=$(HDIR)notcomp.h $(HDIR)rgbc.h $(HDIR)stacks.h 
 
@@ -283,4 +283,4 @@ kcp:
 	(cd go ; $(MAKE)  "CFLAGS = -I../h -pg  -c -g ")
 	(cd unixport ; $(MAKE) gcp)
 
-.INTERMEDIATE: $(HDIR)/mcompdefs.h
+.INTERMEDIATE: $(HDIR)mcompdefs.h
