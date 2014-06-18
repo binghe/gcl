@@ -193,7 +193,6 @@ typedef int (*FUNC)();
 /* error.c:641:OF */ extern void not_a_symbol (object obj); /* (obj) object obj; */
 /* error.c:647:OF */ extern int not_a_variable (object obj); /* (obj) object obj; */
 /* error.c:653:OF */ extern void illegal_index (object x, object i); /* (x, i) object x; object i; */
-/* error.c:660:OF */ extern void check_socket (object x); /* (x) object x; */
 /* error.c:670:OF */ extern void check_stream (object strm); /* (strm) object strm; */
 /* error.c:697:OF */ extern void check_arg_range (int n, int m); /* (n, m) int n; int m; */
 /* error.c:727:OF */ extern void gcl_init_error (void); /* () */
