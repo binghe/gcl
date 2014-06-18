@@ -262,7 +262,7 @@ $(HDIR)mcompdefs.h: $(HDIR)compdefs.h $(HDIR)new_decl.h
 
 $(HDIR)cmpinclude.h: $(HDIR)mcompdefs.h $(CMPINCLUDE_FILES) $(HDIR)config.h
 	cp $< $(@F)
-	cat $(CMPINCLUDE_FILES) | $(CC) -E -I./$(HDIR) - | $(AWK) '/^# |^$$/ {next}{print}' >> $(@F)
+	cat $(CMPINCLUDE_FILES) | $(CC) -E -I./$(HDIR) - | $(AWK) '/^# |^$$|^#pragma/ {next}{print}' >> $(@F)
 	./xbin/move-if-changed mv $(@F) $@
 	./xbin/move-if-changed cp $@ o/$(@F)
 
