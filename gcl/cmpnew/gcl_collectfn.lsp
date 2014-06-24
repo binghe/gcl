@@ -188,6 +188,8 @@
   (sloop::sloop for (ke val) in-table *call-table*
 	 do (progn ke) (setf (fn-no-emit val) 1)))
 
+(defun set-closure ()
+  (setf (fn-def (current-fn)) 'closure))
   
 (defun make-proclaims ( &optional (st *standard-output*)
 				  &aux (ht (make-hash-table :test 'equal))
@@ -201,15 +203,18 @@
   (sloop::sloop with ret with at
 		for (ke val) in-table *call-table* 
 		do
-		(cond ((or (eql 1 (fn-no-emit val))
+		(cond ((eq (fn-def val) 'closure)
+		       (push ke (gethash 'proclaimed-closure ht)))
+		      ((or (eql 1 (fn-no-emit val))
 			   (not (eq (fn-def val) 'defun))))
 		      (t (setq ret (get-value-type ke))
 			 (setq at (fn-arg-types val))
-			 (push ke   (gethash (list at ret)  ht)))))
+			 (push ke   (gethash (list at ret) ht)))))
   (sloop::sloop for (at fns) in-table ht
 		do 
 		(print
-		 `(proclaim '(ftype (function ,@ at) ,@ fns))
+		 (if (symbolp at) `(mapc (lambda (x) (setf (get x 'compiler::proclaimed-closure) t)) '(,@fns))
+		   `(proclaim '(ftype (function ,@ at) ,@ fns)))
 		 st)))
 		 
 (defun setup-sys-proclaims()
