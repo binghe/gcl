@@ -251,7 +251,7 @@ object on_stack_list_vector_new(int n,object first,va_list ap)
 #ifdef WIDE_CONS
  set_type_of(p,t_cons);
 #endif
- p->c_car= jj ? va_arg(ap,object) : first;
+ p->c_car= jj||first==OBJNULL ? va_arg(ap,object) : first;
  jj=1;
  if (--n == 0)
    {p->c_cdr = Cnil;
@@ -281,7 +281,7 @@ object list_vector_new(int n,object first,va_list ap)
 {object ans,*p;
  
  if (n == 0) return Cnil;
- ans = make_cons(first,Cnil);
+ ans = make_cons(first==OBJNULL ? va_arg(ap,object) : first,Cnil);
  p = & (ans->c.c_cdr); 
  while (--n > 0)
    { *p = make_cons(va_arg(ap,object),Cnil);

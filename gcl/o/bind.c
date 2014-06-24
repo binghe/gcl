@@ -913,7 +913,7 @@ object Cstd_key_defaults[15]={Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,
 int
 parse_key_new_new(int n, object *base, struct key *keys, object first, va_list ap)
 {object *new;
- COERCE_VA_LIST_NEW(new,first,ap,n);
+ COERCE_VA_LIST_KR_NEW(new,first,ap,n);
 
  /* from here down identical to parse_key_rest */
  new = new + n ;
@@ -1015,7 +1015,7 @@ parse_key_new_new(int n, object *base, struct key *keys, object first, va_list a
 int
 parse_key_rest_new(object rest, int n, object *base, struct key *keys, object first,va_list ap)
 {object *new;
- COERCE_VA_LIST_NEW(new,first,ap,n);
+ COERCE_VA_LIST_KR_NEW(new,first,ap,n);
 
  /* copy the rest arg */
  {object *p = new;

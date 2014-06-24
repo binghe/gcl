@@ -825,10 +825,11 @@
 (defun t3defun-vararg (fname cfun lambda-expr sp &aux  reqs *vararg-use-vs*
 			     block-p labels (deflt t) key-offset
 			     (*inline-blocks* 0) rest-var
-			     (ll (lambda-list lambda-expr)) va-start
+			     (ll (lambda-list lambda-expr))
 			     (is-var-arg (or (ll-rest ll)
 					     (ll-optionals ll)
-					     (ll-keywords-p ll))))
+					     (ll-keywords-p ll)))
+			     (first (unless (car ll) is-var-arg)))
   (dolist (v (car ll))
 	  (push (list 'cvar (next-cvar)) reqs))
  
@@ -846,9 +847,8 @@
 		(wt ",")
 		(setq tmp (concatenate 'string tmp ","))))))
     (when is-var-arg
-      (when reqs (progn (wt ",") (setq tmp (concatenate 'string tmp ","))))
-      (wt "object first,...")
-      (setq tmp (concatenate 'string tmp "object,...")))
+      (when first (wt "object first") (setq tmp (concatenate 'string tmp "object")))
+      (wt ",...") (setq tmp (concatenate 'string tmp ",...")))
     (wt ")")
     (wt-h "static object " (c-function-name "LI" cfun fname) "(" tmp ");"))
 
@@ -874,7 +874,7 @@
 	  (cons fname (car ll))))
 	(*unwind-exit* *unwind-exit*))
     (wt-nl1 "{	")
-    (when is-var-arg	  (wt-nl "va_list ap;"))
+    (when is-var-arg (wt-nl "va_list ap;"))
     (wt-nl "int narg = VFUN_NARGS;")
 
     (assign-down-vars (cadr lambda-expr) cfun
@@ -915,8 +915,8 @@
   ;  (if *vararg-use-vs* t (progn (wt-nl "Vcs[0]=Vcs[0];")))
 
   ;;; start va_list at beginning
-    (if (or (ll-optionals ll) (ll-rest ll) (ll-keywords-p ll))
-	(unless va-start (setq va-start t) (wt-nl "va_start(ap,first);")))
+    (when is-var-arg
+      (wt-nl "va_start(ap," (if first "first" (car (last reqs))) ");"))
       
   ;;; Check arguments.
     (when (and (or *safe-compile* *compiler-check-args*) (car ll))
@@ -946,19 +946,15 @@
 	    (*unwind-exit* *unwind-exit*)
 	    (*ccb-vs* *ccb-vs*))
 	(wt-nl "narg = narg - " (length reqs) ";")
-	(let ((first t))
-	  (dolist** (opt (ll-optionals ll))
-		    (push (next-label) labels)
-		    (wt-nl "if (" (if (cdr labels) "--" "") "narg <= 0) ")
-		    (wt-go (car labels))
-		    (wt-nl "else {" )
-		    (unless va-start (setq va-start t) (wt-nl "va_start(ap,first);"))
-		    (c2bind-loc (car opt) (if first (list 'first-var-arg) (list 'next-var-arg)))
-		    (setq first nil)
-		    (wt "}")
-		    (when (caddr opt) (c2bind-loc (caddr opt) t)))
-	  (when (and (not first) (or (ll-rest ll) (ll-keywords ll)))
-	    (wt-nl "first=va_arg(ap,object);"))))
+	(dolist** (opt (ll-optionals ll))
+		  (push (next-label) labels)
+		  (wt-nl "if (" (if (cdr labels) "--" "") "narg <= 0) ")
+		  (wt-go (car labels))
+		  (wt-nl "else {" )
+		  (c2bind-loc (car opt) (if first (list 'first-var-arg) (list 'next-var-arg)))
+		  (setq first nil)
+		  (wt "}")
+		  (when (caddr opt) (c2bind-loc (caddr opt) t))))
       (setq labels (nreverse labels))
       
       (let ((label (next-label)))
@@ -981,7 +977,6 @@
 	  (setq rest-var (cs-push))
 	  (cond ((ll-optionals ll))
 		(t (wt-nl "narg= narg - " (length (car ll)) ";")))
-	  (unless va-start (setq va-start t) (wt-nl "va_start(ap,first);"))
 	  (wt-nl "V" rest-var " = ")
 	  
 	  (let ((*rest-on-stack*
@@ -992,16 +987,15 @@
 		       (wt "(ALLOCA_CONS(narg),ON_STACK_MAKE_LIST(narg));"))
 		      (t (wt "make_list(narg);")))
 	      (cond (*rest-on-stack*
-		     (wt "(ALLOCA_CONS(narg),ON_STACK_LIST_VECTOR_NEW(narg,first,ap));"
+		     (wt "(ALLOCA_CONS(narg),ON_STACK_LIST_VECTOR_NEW(narg," (if first "first" "OBJNULL") ",ap));"
 			 ))
-		    (t  (wt "list_vector_new(narg,first,ap);"))))
+		    (t  (wt "list_vector_new(narg," (if first "first" "OBJNULL") ",ap);"))))
 	    (c2bind-loc (ll-rest ll) (list 'cvar rest-var)))))
     (when (ll-keywords-p ll)
       (cond ((ll-rest ll))
 	    ((ll-optionals ll))
 	    (t (wt-nl "narg= narg - " (length (car ll)) ";")))
       
-      (unless va-start (setq va-start t) (wt-nl "va_start(ap,first);"))
       (setq deflt (mapcar 'caddr (ll-keywords ll)))
       (let ((vkdefaults nil)
 	    (n (length (ll-keywords ll))))
@@ -1076,7 +1070,7 @@
 	      (t (wt-nl "parse_key_new_new(")))
 	(if (eql 0 *cs*)(setq *cs* 1))
 	(wt "narg," (if *vararg-use-vs* "base " (progn (setq *vcs-used* t) "Vcs "))
-	    "+" key-offset",(struct key *)(void *)&LI" cfun "key,first,ap);")
+	    "+" key-offset",(struct key *)(void *)&LI" cfun "key," (if first "first" "OBJNULL") ",ap);")
 	
 	))
     
@@ -1114,7 +1108,7 @@
     
     ;;; End va_list at function end
 
-    (when va-start (setq va-start nil) (wt-nl "va_end(ap);"))
+    (when is-var-arg (wt-nl "va_end(ap);"))
 
 ;;; Use base if defined for lint
     (if (and (zerop *max-vs*) (not *sup-used*) (not *base-used*)) t (wt-nl "base[0]=base[0];"))
