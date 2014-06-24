@@ -1783,3 +1783,25 @@
 
 
 
+(defun fset-fn-name (form)
+  (when (eq (car form) 'location)
+    (when (listp (caddr form))
+      (when (eq 'vv (caaddr form))
+	(let ((s (car (rassoc (cadr (caddr form)) *objects* :key 'car))))
+	  (when s `(defun ,s)))))))
+
+(defun c1fset (args)
+  (let* ((info (make-info))
+	 (fn (c1expr* (pop args) info))
+	 (*current-form* (or (fset-fn-name fn) *current-form*))
+	 (lam (c1expr* (car args) info)))
+    (when *record-call-info* 
+      (when (info-referred-array (cadr lam))
+	(set-closure)))
+    (list 'si::fset info fn lam)))
+
+(defun c2fset (&rest args)
+  (c2call-global 'si::fset args nil t))
+
+(si::putprop 'si::fset 'c1fset  'c1)
+(si::putprop 'si::fset 'c2fset  'c2)
