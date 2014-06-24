@@ -418,6 +418,13 @@
 
 )
 
+(defmacro mdotimes ((var form &optional ret) &rest body &aux (v (gensym)))
+  `(do ((,v ,form)
+	(,var 0 (1+ ,var)))
+       ((>= ,var ,v) ,ret)
+     (declare (fixnum ,var ,v))
+     ,@body))
+
 #+structure-wrapper
 (progn
 
@@ -425,7 +432,7 @@
 (defun make-wrapper-cache-number-vector ()
   (let ((cnv (make-array #.wrapper-cache-number-vector-length
 			 :element-type 'fixnum)))
-    (dotimes (i #.wrapper-cache-number-vector-length)
+    (mdotimes (i #.wrapper-cache-number-vector-length)
       (setf (aref cnv i) (get-wrapper-cache-number)))
     cnv))
 
@@ -514,7 +521,7 @@
 	  (values si::*all-t-s-type* si::*standard-slot-positions*)
 	  (values (make-array size :element-type 'unsigned-char)
 		  (let ((array (make-array size :element-type 'unsigned-short)))
-		    (dotimes (i size)
+		    (mdotimes (i size)
 		      (declare (fixnum i))
 		      (setf (aref array i) (* #.(si::size-of t) i))))))
     (make-wrapper-internal :length size
@@ -791,7 +798,7 @@
 	 (old-vector (cache-vector old-cache))
 	 (new-vector (get-cache-vector size)))
     (declare (simple-vector old-vector new-vector))
-    (dotimes (i size)
+    (mdotimes (i size)
       (setf (svref new-vector i) (svref old-vector i)))
     (setf (cache-vector new-cache) new-vector)
     new-cache))
@@ -913,7 +920,7 @@
     (declare (type field-type field)
 	     (type non-negative-fixnum result mask nkeys)
 	     (simple-vector cache-vector))
-    (dotimes (i nkeys)
+    (mdotimes (i nkeys)
       (let* ((wrapper (cache-vector-ref cache-vector (+ i from-location)))
 	     (wcn (wrapper-cache-number-vector-ref wrapper field)))
 	(declare (type non-negative-fixnum wcn))
@@ -1140,7 +1147,7 @@
 
 (defconstant *local-cache-functions*
   '((cache () .cache.)
-    (nkeys () (cache-nkeys .cache.))
+    (nkeys () (the non-negative-fixnum (cache-nkeys .cache.)))
     (line-size () (cache-line-size .cache.))
     (vector () (cache-vector .cache.))
     (valuep () (cache-valuep .cache.))
@@ -1206,7 +1213,7 @@
 	  (let ((list (make-list (nkeys)))
 		(vector (vector)))
 	    (declare (simple-vector vector))
-	    (dotimes (i (nkeys) list)
+	    (mdotimes (i (nkeys) list)
 	      (setf (nth i list) (cache-vector-ref vector (+ location i)))))))
     ;;
     ;; Given a line number, return true IFF the line's
@@ -1223,7 +1230,7 @@
 	(declare (simple-vector cache-vector))
 	(if (= (nkeys) 1)
 	    (eq wrappers (cache-vector-ref cache-vector loc))
-	    (dotimes (i (nkeys) t)
+	    (mdotimes (i (nkeys) t)
 	      (unless (eq (pop wrappers)
 			  (cache-vector-ref cache-vector (+ loc i)))
 		(return nil))))))
@@ -1264,7 +1271,7 @@
       (let ((cache-vector (vector))
 	    (wrappers-mismatch-p (null wrappers)))
 	(declare (simple-vector cache-vector))
-	(dotimes (i (nkeys) wrappers-mismatch-p)
+	(mdotimes (i (nkeys) wrappers-mismatch-p)
 	  (let ((wrapper (cache-vector-ref cache-vector (+ loc i))))
 	    (when (or (null wrapper)
 		      (invalid-wrapper-p wrapper))
@@ -1375,7 +1382,7 @@
   (with-local-cache-functions (cache)
     (let ((location (if (= (nkeys) 1) 0 1))
 	  (limit (funcall (limit-fn) (nlines))))
-      (dotimes (i (nlines) cache)
+      (mdotimes (i (nlines) cache)
 	(when (and (not (location-reserved-p location))
 		   (line-full-p i))
 	  (let* ((home-loc (compute-primary-cache-location-from-location 
@@ -1399,7 +1406,7 @@
       (declare (type non-negative-fixnum location limit))
       (when (location-reserved-p location)
 	(setq location (next-location location)))
-      (dotimes (i (the non-negative-fixnum (1+ limit)))
+      (mdotimes (i (the non-negative-fixnum (1+ limit)))
 	(when (location-matches-wrappers-p location wrappers)
 	  (return-from probe-cache (or (not (valuep))
 				       (location-value location))))
@@ -1413,7 +1420,7 @@
 (defun map-cache (function cache &optional set-p)
   (with-local-cache-functions (cache)
     (let ((set-p (and set-p (valuep))))
-      (dotimes (i (nlines) cache)
+      (mdotimes (i (nlines) cache)
 	(unless (or (line-reserved-p i) (not (line-valid-p i nil)))
 	  (let ((value (funcall function (line-wrappers i) (line-value i))))
 	    (when set-p
@@ -1429,7 +1436,7 @@
   (with-local-cache-functions (cache)
     (let ((count 0))
       (declare (type non-negative-fixnum count))
-      (dotimes (i (nlines) count)
+      (mdotimes (i (nlines) count)
 	(unless (line-reserved-p i)
 	  (when (line-full-p i)
 	    (incf count)))))))
@@ -1437,7 +1444,7 @@
 (defun entry-in-cache-p (cache wrappers value)
   (declare (ignore value))
   (with-local-cache-functions (cache)
-    (dotimes (i (nlines))
+    (mdotimes (i (nlines))
       (unless (line-reserved-p i)
 	(when (equal (line-wrappers i) wrappers)
 	  (return t))))))
@@ -1503,7 +1510,7 @@
 		      (to-loc (line-location to-line)))
 		  (declare (type non-negative-fixnum from-loc to-loc))
 		  (modify-cache to-cache-vector
-				(dotimes (i (line-size))
+				(mdotimes (i (line-size))
 				  (setf (cache-vector-ref to-cache-vector
 							  (+ to-loc i))
 					(cache-vector-ref from-cache-vector
@@ -1534,7 +1541,7 @@
 		     (fill-cache-from-cache-p nil ncache cache line))
 		   (try-one-fill (wrappers value)
 		     (fill-cache-p nil ncache wrappers value)))
-	    (if (and (dotimes (i (nlines) t)
+	    (if (and (mdotimes (i (nlines) t)
 		       (when (and (null (line-reserved-p i))
 				  (line-valid-p i wrappers))
 			 (unless (try-one-fill-from-line i) (return nil))))
@@ -1563,7 +1570,7 @@
 				  (fill-cache-p t ncache wrappers value))))
 	       (try-one-fill (wrappers value)
 		 (fill-cache-p nil ncache wrappers value)))
-	(dotimes (i (nlines))
+	(mdotimes (i (nlines))
 	  (when (and (null (line-reserved-p i))
 		     (line-valid-p i wrappers))
 	    (do-one-fill-from-line i)))
@@ -1638,7 +1645,7 @@
 	   (declare (type non-negative-fixnum from-loc to-loc)
 		    (simple-vector cache-vector))
 	   (modify-cache cache-vector
-			 (dotimes (i (line-size))
+			 (mdotimes (i (line-size))
 			   (setf (cache-vector-ref cache-vector (+ to-loc i))
 				 (cache-vector-ref cache-vector (+ from-loc i)))
 			   (setf (cache-vector-ref cache-vector (+ from-loc i))
