@@ -214,6 +214,7 @@
 		    call-next-method
 		    change-class
 		    class-name
+		    classp
 		    class-of
 		    compute-applicable-methods
 		    defclass
