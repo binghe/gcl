@@ -427,6 +427,12 @@ object make_si_sfun();
   new=Xxvl; \
   if (n >= 65) FEerror("va_list too long",0); \
   for (i=0 ; i < (n); i++) new[i]=i ? va_arg(vl,object) : fst;}
+#define COERCE_VA_LIST_KR_NEW(new,fst,vl,n) \
+ object Xxvl[65]; \
+ {int i; \
+  new=Xxvl; \
+  if (n >= 65) FEerror("va_list too long",0); \
+  for (i=0 ; i < (n); i++) new[i]=i||fst==OBJNULL ? va_arg(vl,object) : fst;}
 #endif
 
 
