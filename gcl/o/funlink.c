@@ -22,6 +22,25 @@ vpush_extend(void *,object);
 object sLAlink_arrayA;
 int Rset = 0;
 
+DEFVAR("*LINK-LIST*",sSAlink_listA,SI,0,"");
+
+static inline void
+append_link_list(object sym,int n) {
+
+  object x;
+  int i;
+
+  if (!Rset || !sSAlink_listA->s.s_dbind) return;
+  for (x=sSAlink_listA->s.s_dbind;x!=Cnil && x->c.c_car->c.c_car!=sym;x=x->c.c_cdr);
+  if (x==Cnil) 
+    sSAlink_listA->s.s_dbind=MMcons((x=list(6,sym,make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0))),sSAlink_listA->s.s_dbind);
+  else 
+    x=x->c.c_car;
+  for (x=x->c.c_cdr,i=0;i<n;i++,x=x->c.c_cdr);
+  x->c.c_car=one_plus(x->c.c_car);
+}
+
+
 /* cleanup link */
 void
 call_or_link(object sym, void **link )
@@ -54,7 +73,9 @@ call_or_link(object sym, void **link )
 #endif         
 	 (*(void (*)())(fun->cf.cf_self))();
        }
-   else funcall(fun);}
+   else {
+     append_link_list(sym,0);
+     funcall(fun);}}
 
 void
 call_or_link_closure(object sym, void **link, void **ptr)
@@ -70,7 +91,9 @@ call_or_link_closure(object sym, void **link, void **ptr)
      *link = (void *) (fun->cf.cf_self);
      MMccall(fun, fun->cc.cc_turbo);}
     else
-      {MMccall(fun, fun->cc.cc_turbo);}
+      { 
+	append_link_list(sym,1);
+	MMccall(fun, fun->cc.cc_turbo);}
     return;}
  if (Rset==0) funcall(fun);
    else
@@ -83,7 +106,9 @@ call_or_link_closure(object sym, void **link, void **ptr)
          *link = (void *) (fun->cf.cf_self);
 	 (*(void (*)())(fun->cf.cf_self))();
        }
-   else funcall(fun);}
+   else {
+     	append_link_list(sym,2);
+	funcall(fun);}}
 
 /* for pushing item into an array, where item is an address if array-type = t
 or a fixnum if array-type = fixnum */
@@ -260,6 +285,7 @@ clean_link_array(object *ar, object *ar_end)
 value.  This function is called by the static lnk function in the reference
 file */
 
+
 static object
 call_proc(object sym, void **link, int argd, va_list ll)
 {object fun;
@@ -325,6 +351,9 @@ call_proc(object sym, void **link, int argd, va_list ll)
      register object *base;
      enum ftype result_type;
      /* we check they are valid functions before calling this */
+
+     append_link_list(sym,3);
+
      if(type_of(sym)==t_symbol) fun = symbol_function(sym);
      else fun = sym;
      vs_base= (base =   vs_top);
@@ -428,6 +457,9 @@ call_proc_new(object sym, void **link, int argd, object first, va_list ll)
      object fun;
      register object *base;
      enum ftype result_type;
+
+     append_link_list(sym,4);
+
      /* we check they are valid functions before calling this */
      if(type_of(sym)==t_symbol) fun = symbol_function(sym);
      else fun = sym;
