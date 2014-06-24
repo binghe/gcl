@@ -352,7 +352,9 @@
    (get '/= 'inline-always))
 
 ;;1+
- (push '((t) t #.(flags ans)"one_plus(#0)")
+ ;; (push '((t) t #.(flags ans)"one_plus(#0)")
+ ;;   (get '1+ 'inline-always))
+ (push '((t) t #.(flags ans)"immnum_plus(#0,make_fixnum(1))")
    (get '1+ 'inline-always))
 (push '((fixnum-float) short-float #.(flags)"(double)(#0)+1")
    (get '1+ 'inline-always))
@@ -363,7 +365,9 @@
 
 
 ;;1-
- (push '((t) t #.(flags ans)"one_minus(#0)")
+ ;; (push '((t) t #.(flags ans)"one_minus(#0)")
+ ;;   (get '1- 'inline-always))
+ (push '((t) t #.(flags ans)"immnum_plus(#0,make_fixnum(-1))")
    (get '1- 'inline-always))
 (push '((fixnum) fixnum #.(flags)"(#0)-1")
    (get '1- 'inline-always))
