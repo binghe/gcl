@@ -258,11 +258,7 @@ one_plus(object x)
 	switch (type_of(x)) {
 
 	case t_fixnum:
-	  
-	  if (fix(x)< MOST_POSITIVE_FIX-1) {
-	    return make_fixnum(fix(x)+1);
-	  }
-	  MPOP(return,addss,1,fix(x));
+	  return fixnum_add(fix(x),1);
 	case t_bignum:
 	  MPOP(return,addsi,1,MP(x));
 	case t_ratio:
@@ -446,7 +442,7 @@ one_minus(object x)
 	switch (type_of(x)) {
 
 	case t_fixnum:
-	  MPOP(return,addss,fix(x),-1);
+	  return fixnum_sub(fix(x),1);
 	case t_bignum:
 	  MPOP(return,addsi,-1,MP(x));
 	case t_ratio:
