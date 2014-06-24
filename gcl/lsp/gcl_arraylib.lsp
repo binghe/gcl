@@ -42,26 +42,14 @@
 
 (proclaim '(optimize (safety 2) (space 3)))
 
+(defvar *baet-hash* (make-hash-table :test 'equal))
 (defun best-array-element-type (type)
-  (cond ((or (eql t type) (null type))
-	 t)
-	((memq type '(bit unsigned-char signed-char
-				    unsigned-short
-				    signed-short fixnum))
-	       type)
-	((subtypep type 'fixnum)
-	 (dolist (v '(bit unsigned-char signed-char
-				    unsigned-short
-				    signed-short)
-		    'fixnum)
-		 (cond ((subtypep type v)
-			(return v)))))
-	((eql type 'character) 'string-char)
-	(t (or (dolist (v '(string-char bit short-float
-				    long-float))
-		   (cond ((subtypep type v)
-			  (return v))))
-	       t))))
+  (or (gethash type *baet-hash*)
+      (setf (gethash type *baet-hash*)
+	    (if type
+		(car (member type '(string-char bit signed-char unsigned-char signed-short unsigned-short
+					fixnum short-float long-float t)
+			     :test 'subtypep)) t)))))
 	 
 (defun upgraded-array-element-type (type &optional environment)
   (declare (ignore environment))
