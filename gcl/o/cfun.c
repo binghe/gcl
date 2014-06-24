@@ -91,6 +91,7 @@ make_cclosure_new(void (*self)(), object name, object env, object data)
 	cc->cc.cc_env = env;
 	cc->cc.cc_data = data;
 	cc->cc.cc_turbo = NULL;
+	turbo_closure(cc);
 	return(cc);
 }
 
@@ -331,7 +332,7 @@ turbo_closure(object fun)
   object l,*block;
   int n;
 
-  if(fun->cc.cc_turbo==NULL)
+  if(1)/*(fun->cc.cc_turbo==NULL)*/
     {BEGIN_NO_INTERRUPT;
      for (n = 0, l = fun->cc.cc_env;  !endp(l);  n++, l = l->c.c_cdr);
     {
