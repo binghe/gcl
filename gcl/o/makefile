@@ -15,7 +15,7 @@ DECL     := $(HDIR)/new_decl.h
 ALIB     := ${LIBFILES} ${EXTRA_LIB}
 
 
-OBJS:=$(addsuffix .o,main alloc gbc bitop typespec eval macros lex bds frame predicate reference assignment\
+OBJS:=$(addsuffix .o,typespec main alloc gbc bitop eval macros lex bds frame predicate reference assignment\
 	bind let conditional block iteration mapfun prog multival catch symbol cfun cmpaux package big number\
 	num_pred num_comp num_arith num_sfun num_co num_log num_rand earith character sequence list hash\
 	array string regexpr structure toplevel file read backq print format pathname unixfsys unixfasl\

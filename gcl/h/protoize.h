@@ -33,7 +33,7 @@
 /* array.c::OF */ extern object fSmake_vector1_1 (fixnum n,fixnum elt_type,object staticp); 
 /* array.c:738:OF */ extern void adjust_displaced (object x, long diff); /* (x, diff) object x; int diff; */
 /* array.c:790:OF */ extern void gset (void *p1, void *val, int n, int typ); /* (p1, val, n, typ) char *p1; char *val; int n; int typ; */
-/* array.c:831:OF */ extern object fScopy_array_portion (object x, object y,fixnum i1,fixnum i2, object n1); /* (x, y, i1, i2, n1) object x; object y; int i1; int i2; int n1; */
+/* array.c:831:OF */ extern object fScopy_array_portion (object x, object y,object i1,object i2, object n1); /* (x, y, i1, i2, n1) object x; object y; int i1; int i2; int n1; */
 /* array.c:879:OF */ extern void array_allocself (object x, int staticp, object dflt); /* (x, staticp, dflt) object x; int staticp; object dflt; */
 /* array.c:920:OF */ extern void siLfill_pointer_set (void); /* () */
 /* array.c:923:OF */ extern object fSfill_pointer_set (object x,fixnum i); /* (x, i) object x; int i; */
@@ -52,7 +52,7 @@
 /* array.c:1023:OF */ extern object fLarray_dimension (object x,fixnum i); /* (x, i) object x; int i; */
 /* array.c:1090:OF */ extern void siLreplace_array (void); /* () */
 /* array.c:1093:OF */ extern object fSreplace_array (object old, object new); /* (old, new) object old; object new; */
-/* array.c:1132:OF */ extern object fLarray_total_size (object x); /* (x) object x; */
+/* array.c:1132:OF */ extern fixnum fLarray_total_size (object x); /* (x) object x; */
 /* array.c:1140:OF */ extern object fSaset_by_cursor (object array, object val, object cursor); /* (array, val, cursor) object array; object val; object cursor; */
 /* array.c:1160:OF */ extern void gcl_init_array_function (void); /* () */
 /* assignment.c:62:OF */ extern void setq (object sym, object val); /* (sym, val) object sym; object val; */
@@ -312,6 +312,8 @@ typedef void (*funcvoid)(void);
 /* /\* makefun.c:131:OF *\/ extern void LISP_makefun (char *strg, object (*fn) (/\* ??? *\/), unsigned int argd); /\* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; *\/ */
 /* makefun.c:122:OF */ extern void SI_makefun (char *,void *,unsigned int); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
 /* makefun.c:131:OF */ extern void LISP_makefun (char *,void *,unsigned int); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
+/* makefun.c:122:OF */ extern void SI_makefunm (char *,void *,unsigned int); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
+/* makefun.c:131:OF */ extern void LISP_makefunm (char *,void *,unsigned int); /* (strg, fn, argd) char *strg; object (*fn)(); unsigned int argd; */
 /* makefun.c:167:OF */ extern object fSinvoke (object x); /* (x) object x; */
 /* mapfun.c:324:OF */ extern void gcl_init_mapfun (void); /* () */
 /* multival.c:32:OF */ extern void Lvalues (void); /* () */

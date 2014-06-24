@@ -63,9 +63,10 @@ extern short aet_sizes[];
 #define N_FIXNUM_ARGS 6
 
 DEFUNO_NEW("AREF", object, fLaref, LISP, 1, ARRAY_RANK_LIMIT,
-       NONE, OO, II, II, II,void,Laref,(object x,fixnum i, ...),"")
+       NONE, OO, OO, OO, OO,void,Laref,(object x,object oi, ...),"")
 { int n = VFUN_NARGS;
   int i1;
+  fixnum i=fix(oi);
   va_list ap;
   if (type_of(x) == t_array)
     {int m ;
@@ -75,7 +76,7 @@ DEFUNO_NEW("AREF", object, fLaref, LISP, 1, ARRAY_RANK_LIMIT,
        FEerror(" ~a has wrong rank",1,x);
      if (rank == 1) return fLrow_major_aref(x,i);
      if (rank == 0) return fLrow_major_aref(x,0);
-     va_start(ap,i);
+     va_start(ap,oi);
      m = 0;
      k = i;
      /* index into 1 dimensional array */
@@ -90,7 +91,7 @@ DEFUNO_NEW("AREF", object, fLaref, LISP, 1, ARRAY_RANK_LIMIT,
 	 if (m <= rank)
 	   { i1 = i1 * x->a.a_dims[m];
 	     if (m < N_FIXNUM_ARGS)
-	       { k = va_arg(ap,fixnum);}
+	       { k = fixint(va_arg(ap,object));}
 	     else {object x = va_arg(ap,object);
 		   check_type(x,t_fixnum);
 		   k = Mfix(x);}
@@ -874,12 +875,13 @@ gset(void *p1, void *val, int n, int typ)
    */
 
 DEFUN_NEW("COPY-ARRAY-PORTION",object,fScopy_array_portion,SI,4,
-      5,NONE,OO,OI,IO,OO,(object x,object y,fixnum i1,fixnum i2,object n1o),
+      5,NONE,OO,OO,OO,OO,(object x,object y,object oi1,object oi2,object n1o),
    "Copy elements from X to Y starting at x[i1] to x[i2] and doing N1 \
 elements if N1 is supplied otherwise, doing the length of X - I1 \
 elements.  If the types of the arrays are not the same, this has \
 implementation dependent results.")
-{ enum aelttype typ1=Iarray_element_type(x);
+{ fixnum i1=fix(oi1),i2=fix(oi2);
+  enum aelttype typ1=Iarray_element_type(x);
   enum aelttype typ2=Iarray_element_type(y);
   int n1=fix(n1o),nc;
   if (VFUN_NARGS==4)
@@ -1158,10 +1160,9 @@ DEFUNO_NEW("REPLACE-ARRAY",object,fSreplace_array,SI,2,2,NONE,
   return old;
 }
 
-DEFUN_NEW("ARRAY-TOTAL-SIZE",object,fLarray_total_size,LISP,1,1,
-       NONE,OO,OO,OO,OO,(object x),"")
+DEFUN_NEW("ARRAY-TOTAL-SIZE",fixnum,fLarray_total_size,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"")
 { x = IisArray(x);
-  return make_fixnum(x->a.a_dim);
+  return (x->a.a_dim);
 }
 
 

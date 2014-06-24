@@ -1107,7 +1107,7 @@ call_applyhook(object fun)
 }
 
 
-DEFUNO_NEW("FUNCALL",object,fLfuncall,LISP
+DEFUNOM_NEW("FUNCALL",object,fLfuncall,LISP
        ,1,MAX_ARGS,NONE,OO,OO,OO,OO,void,Lfuncall,(object fun,...),"")
 { va_list ap;
   object *new;
@@ -1120,7 +1120,7 @@ DEFUNO_NEW("FUNCALL",object,fLfuncall,LISP
 }
 
 
-DEFUNO_NEW("APPLY",object,fLapply,LISP
+DEFUNOM_NEW("APPLY",object,fLapply,LISP
        ,2,MAX_ARGS,NONE,OO,OO,OO,OO,void,Lapply,(object fun,...),"")
 {	int m,n=VFUN_NARGS;
 	object list;
@@ -1144,7 +1144,7 @@ DEFUNO_NEW("APPLY",object,fLapply,LISP
       }
 	
 
-DEFUNO_NEW("EVAL",object,fLeval,LISP
+DEFUNOM_NEW("EVAL",object,fLeval,LISP
        ,1,1,NONE,OO,OO,OO,OO,void,Leval,(object x0),"")
 {
 	object *lex = lex_env;

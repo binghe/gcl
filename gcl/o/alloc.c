@@ -786,7 +786,7 @@ inline object on_stack_cons(object x, object y) {
 }
 
 
-DEFUN_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"")
+DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"")
 { struct typemanager *tm=(&tm_table[t_from_type(typ)]);
   tm = & tm_table[tm->tm_type];
   if (tm->tm_type == t_relocatable)
@@ -1493,7 +1493,7 @@ DEFUN_NEW("SET-STARTING-RELBLOCK-HEAP-MULTIPLE",fixnum,fSset_starting_relb_heap_
   return starting_relb_heap_mult;
 }
   
-DEFUN_NEW("SET-HOLE-SIZE",object,fSset_hole_size,SI,1,2,NONE,OI,IO,OO,OO,(fixnum npages,...),"") {
+DEFUNM_NEW("SET-HOLE-SIZE",object,fSset_hole_size,SI,1,2,NONE,OI,IO,OO,OO,(fixnum npages,...),"") {
 
   printf("This function is obsolete -- use SET-STARTING-HOLE-DIVISOR instead\n");
 

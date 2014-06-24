@@ -512,8 +512,9 @@ do_hash(object obj, int dot)
    }
  
 static void write_fasd(object obj);
-static object
-FFN(write_fasd_top)(object obj, object x)
+DEFUN_NEW("WRITE-FASD-TOP",object,fSwrite_fasd_top,SI,2,2,NONE,OO,OO,OO,OO,(object obj, object x),"")
+/* static object */
+/* FFN(write_fasd_top)(object obj, object x) */
 {struct fasd *fd = (struct fasd *) x->v.v_self;
   if (fd->direction == sKoutput)
     SETUP_FASD_IN(fd);
@@ -534,8 +535,9 @@ FFN(write_fasd_top)(object obj, object x)
 #define MAYBE_PATCH(result) \
   if (needs_patching)  result =fasd_patch_sharp(result,0)
 
-static object
-FFN(read_fasd_top)(object x)
+DEFUN_NEW("READ-FASD-TOP",object,fSread_fasd_top,SI,1,1,NONE,OO,OO,OO,OO,(object x),"")
+/* static object */
+/* FFN(read_fasd_top)(object x) */
 {  struct fasd *fd = (struct fasd *)  x->v.v_self;
    VOL int e=0;
    object result;
@@ -580,8 +582,9 @@ object sLeq;
 object sSPinit;
 void Lmake_hash_table();
 
-static object
-FFN(open_fasd)(object stream, object direction, object eof, object tabl)
+DEFUN_NEW("OPEN-FASD",object,fSopen_fasd,SI,4,4,NONE,OO,OO,OO,OO,(object stream, object direction, object eof, object tabl),"")
+/* static object */
+/* FFN(open_fasd)(object stream, object direction, object eof, object tabl) */
 {  object str=Cnil;
    object result;
    if(direction==sKinput)
@@ -631,8 +634,9 @@ FFN(open_fasd)(object stream, object direction, object eof, object tabl)
     return result;
   }}
 
-static object
-FFN(close_fasd)(object ar)
+DEFUN_NEW("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"")
+/* static object */
+/* FFN(close_fasd)(object ar) */
 {  struct fasd *fd= (struct fasd *)(ar->v.v_self);
    check_type(ar,t_vector);
    if (type_of(fd->table)==t_vector)
@@ -1054,8 +1058,9 @@ find_sharing(object x)
 	return;
 }
 
-static object
-FFN(find_sharing_top)(object x, object table)
+DEFUN_NEW("FIND-SHARING-TOP",object,fSfind_sharing_top,SI,2,2,NONE,OO,OO,OO,OO,(object x, object table),"")
+/* static object */
+/* FFN(find_sharing_top)(object x, object table) */
 {sharing_table=table;
  find_sharing(x);
  return Ct;
@@ -1518,7 +1523,7 @@ read_fasl_vector(object in)
      if (ch== d_begin_dump){
        unreadc_stream(ch,in);
        break;}}
- {object ar=FFN(open_fasd)(in,sKinput,0,Cnil);
+ {object ar=FFN(fSopen_fasd)(in,sKinput,0,Cnil);
   int n=fix(current_fasd.table_length);
   object result,last;
   { BEGIN_NO_INTERRUPT;
@@ -1534,13 +1539,13 @@ read_fasl_vector(object in)
   gset( current_fasd.table->v.v_self,0,n,aet_object);
   END_NO_INTERRUPT;
   }  
-  result=FFN(read_fasd_top)(ar);
+  result=FFN(fSread_fasd_top)(ar);
   if (type_of(result) !=t_vector) goto ERROR;
   last=result->v.v_self[result->v.v_fillp-1];
   if(type_of(last)!=t_cons || last->c.c_car !=sSPinit)
     goto ERROR;
   current_fasd.table->v.v_self = 0;
-  FFN(close_fasd)(ar);
+  FFN(fSclose_fasd)(ar);
   if (orig != in)
     close_stream(in);
   return result;
@@ -1584,10 +1589,10 @@ object IfaslInStream;
 static void
 init_fasdump(void)
 {
-  make_si_sfun("READ-FASD-TOP",read_fasd_top,1);
-  make_si_sfun("WRITE-FASD-TOP",write_fasd_top,2);
-  make_si_sfun("OPEN-FASD",open_fasd,4);  
-  make_si_sfun("CLOSE-FASD",close_fasd,1);
-/*  make_si_sfun("FASD-I-DATA",fasd_i_macro,1); */
-  make_si_sfun("FIND-SHARING-TOP",find_sharing_top,2);
+/*   make_si_sfun("READ-FASD-TOP",read_fasd_top,1); */
+/*   make_si_sfun("WRITE-FASD-TOP",write_fasd_top,2); */
+/*   make_si_sfun("OPEN-FASD",open_fasd,4);   */
+/*   make_si_sfun("CLOSE-FASD",close_fasd,1); */
+/* /\*  make_si_sfun("FASD-I-DATA",fasd_i_macro,1); *\/ */
+/*   make_si_sfun("FIND-SHARING-TOP",find_sharing_top,2); */
 }

@@ -597,10 +597,10 @@ segmentation_catcher(int i) {
 /* } */
 
 DEFUNO_NEW("BYE",object,fLbye,LISP
-       ,0,1,NONE,OI,OO,OO,OO,void,Lby,(fixnum exitc),"")
+       ,0,1,NONE,OO,OO,OO,OO,void,Lby,(object exitc),"")
 {	int n=VFUN_NARGS;
 	int exit_code;
-	if (n>=1) exit_code=exitc;else exit_code=0;
+	if (n>=1) exit_code=fix(exitc);else exit_code=0;
 
 /*	printf("Bye.\n"); */
 	exit(exit_code);
@@ -609,7 +609,7 @@ DEFUNO_NEW("BYE",object,fLbye,LISP
 
 
 DEFUN_NEW("QUIT",object,fLquit,LISP
-       ,0,1,NONE,OI,OO,OO,OO,(fixnum exitc),"")
+       ,0,1,NONE,OO,OO,OO,OO,(object exitc),"")
 {	return FFN(fLbye)(exitc); }
  
 /* DEFUN_NEW("EXIT",object,fLexit,LISP */

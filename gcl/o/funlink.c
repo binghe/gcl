@@ -268,6 +268,7 @@ call_proc(object sym, void **link, int argd, va_list ll)
  fun=sym->s.s_gfdef;
  if (fun && (type_of(fun)==t_sfun
 	     || type_of(fun)==t_gfun
+	     || type_of(fun)==t_afun
 	     || type_of(fun)== t_vfun)
 	     && Rset) /* the && Rset is to allow tracing */
    {object (*fn)();
@@ -285,6 +286,20 @@ call_proc(object sym, void **link, int argd, va_list ll)
 	   goto   AFTER_LINK;
 	 }
       }
+    else if (type_of(fun)==t_afun) {
+      ufixnum at=F_TYPES(fun->sfn.sfn_argd)>>F_TYPE_WIDTH;
+      ufixnum ma=F_MIN_ARGS(fun->sfn.sfn_argd);
+      ufixnum xa=F_MAX_ARGS(fun->sfn.sfn_argd);
+      ufixnum rt=F_RESULT_TYPE(fun->sfn.sfn_argd);
+
+      nargs=SFUN_NARGS(argd);
+      if (nargs<ma || nargs > xa)
+	goto WRONG_ARGS;
+      if (((argd>>8)&0x3)!=rt)
+	  FEerror("Return type mismatch in call to  ~s",1,sym);
+      if ((argd>>12)!=at)
+	  FEerror("Arg type mismatch in call to  ~s",1,sym);
+    }
     else /* t_gfun,t_sfun */
       { nargs= SFUN_NARGS(argd);
 	if ((argd & (~VFUN_NARG_BIT)) != fun->sfn.sfn_argd) 
@@ -356,6 +371,7 @@ call_proc_new(object sym, void **link, int argd, object first, va_list ll)
  fun=sym->s.s_gfdef;
  if (fun && (type_of(fun)==t_sfun
 	     || type_of(fun)==t_gfun
+	     || type_of(fun)==t_afun
 	     || type_of(fun)== t_vfun)
      && Rset) /* the && Rset is to allow tracing */
    {object (*fn)();
@@ -373,6 +389,20 @@ call_proc_new(object sym, void **link, int argd, object first, va_list ll)
 	   goto   AFTER_LINK;
 	 }
      }
+    else if (type_of(fun)==t_afun) {
+      ufixnum at=F_TYPES(fun->sfn.sfn_argd)>>F_TYPE_WIDTH;
+      ufixnum ma=F_MIN_ARGS(fun->sfn.sfn_argd);
+      ufixnum xa=F_MAX_ARGS(fun->sfn.sfn_argd);
+      ufixnum rt=F_RESULT_TYPE(fun->sfn.sfn_argd);
+
+      nargs=SFUN_NARGS(argd);
+      if (nargs<ma || nargs > xa)
+	goto WRONG_ARGS;
+      if (((argd>>8)&0x3)!=rt)
+	  FEerror("Return type mismatch in call to  ~s",1,sym);
+      if ((argd>>12)!=at)
+	  FEerror("Arg type mismatch in call to  ~s",1,sym);
+    }
    else /* t_gfun,t_sfun */
      { nargs= SFUN_NARGS(argd);
      if ((argd & (~VFUN_NARG_BIT)) != fun->sfn.sfn_argd) 

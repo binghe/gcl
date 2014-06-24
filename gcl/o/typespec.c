@@ -427,6 +427,9 @@ LFD(Ltype_of)(void)
 	}
 }
 
+DEF_ORDINARY("PROCLAIMED-ARG-TYPES",sSproclaimed_arg_types,SI,"");
+DEF_ORDINARY("PROCLAIMED-RETURN-TYPE",sSproclaimed_return_type,SI,"");
+DEF_ORDINARY("PROCLAIMED-FUNCTION",sSproclaimed_function,SI,"");
 DEF_ORDINARY("COMMON",sLcommon,LISP,"");
 DEF_ORDINARY("NULL",sLnull,LISP,"");
 DEF_ORDINARY("CONS",sLcons,LISP,"");
