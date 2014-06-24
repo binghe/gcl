@@ -348,7 +348,7 @@
 			       fname leng
 			       (length argtypes))))
 	     (unless
-	      (cddr (setq link-info (assoc fname *function-links*)))
+	      (cddr (setq link-info (car (member-if (lambda (x) (and (eq fname (car x)) (stringp (cadr x)))) *function-links*))))
 	      (setq link-string
 		    (with-output-to-string
 		     (st)
