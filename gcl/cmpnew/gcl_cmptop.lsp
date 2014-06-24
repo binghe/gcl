@@ -1385,12 +1385,10 @@
 
    ))
 
-
-
 (defun t1ordinary (form &aux tem )
   (setq *non-package-operation* t)
   ;; check for top level functions
-  (cond (*compile-ordinaries*
+  (cond ((or *compile-ordinaries* (when (listp form) (member (car form) '(let let* flet labels))))
 	 (maybe-eval nil form)
 	 (let ((gen (gensym "progn 'compile")))
 	   (proclaim `(function ,gen nil t))
