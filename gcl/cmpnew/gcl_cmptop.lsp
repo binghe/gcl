@@ -115,6 +115,7 @@
 
 (si:putprop 'eval-when 't1eval-when 't1)
 (si:putprop 'progn 't1progn 't1)
+(si:putprop 'macrolet 't1macrolet 't1)
 (si:putprop 'defun 't1defun 't1)
 (si:putprop 'defmacro 't1defmacro 't1)
 (si:putprop 'clines 't1clines 't1)
@@ -264,7 +265,7 @@
                     (when *compile-print* (print-current-form))
                     (t1expr (cmp-macroexpand-1 form)))
                    ((get fun 'c1) (t1ordinary form))
-                   ((setq fd (macro-function fun))
+                   ((setq fd (or (macro-function fun) (cadr (assoc fun *funs*))))
 		    (let ((res
 			   (cmp-expand-macro fd fun (copy-list (cdr form)))
 			   ))
@@ -432,6 +433,13 @@
 	  (compile-flag
 	   (cmp-eval (cons 'progn (cdr args)))))))
 
+(defun t1macrolet(args &aux (*funs* *funs*))
+  (dolist (def (car args))
+    (push (list (car def)
+                (caddr (si:defmacro* (car def) (cadr def) (cddr def))))
+          *funs*))
+  (dolist (form (cdr args))
+    (t1expr form)))
 
 (defvar *compile-ordinaries* nil)
 
