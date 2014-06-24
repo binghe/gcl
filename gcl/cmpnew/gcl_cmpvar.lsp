@@ -167,7 +167,7 @@
           (let ((type (var-type var)))
                (declare (object type))
                (cond ((type>= 'fixnum type) 'FIXNUM)
-		     ((type>= 'integer type) 'INTEGER)
+;		     ((type>= 'integer type) 'INTEGER)
                      ((type>= 'CHARACTER type) 'CHARACTER)
                      ((type>= 'long-float type) 'LONG-FLOAT)
                      ((type>= 'short-float type) 'SHORT-FLOAT)
