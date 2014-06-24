@@ -352,7 +352,7 @@ number_abs(object x) {
   switch(type_of(x)) {
 
   case t_complex:
-    if (number_zerop(x)) return x;
+    if (number_zerop(x)) return x->cmp.cmp_real;
     r=number_abs(x->cmp.cmp_real);
     i=number_abs(x->cmp.cmp_imag);
     if (number_compare(r,i)<0) {
