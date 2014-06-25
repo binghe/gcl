@@ -502,6 +502,7 @@
          (unless (and (inline-possible (caddr funob))
                       (or (get (caddr funob) 'Lfun)
                           (get (caddr funob) 'Ufun)
+                          (get (caddr funob) 'proclaimed-function)
                           (assoc (caddr funob) *global-funs*)))
            (let ((temp (list 'vs (vs-push))))
                 (if *safe-compile*
