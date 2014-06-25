@@ -172,3 +172,4 @@ int feof(void *);
 int getc(void *);
 int putc(int,void *);
 #endif
+void vfun_wrong_number_of_args(object);
