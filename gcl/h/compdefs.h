@@ -111,3 +111,4 @@ Scons
 EQ(x,y)
 aset
 stp_ordinary
+SIGNED_CHAR(x)

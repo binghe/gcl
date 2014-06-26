@@ -89,9 +89,9 @@
   (wt-nl "vs_base=vs_top=base+" *vs* ";")
   (base-used)
   (wt-nl "for(p= " loc ";!endp(p);p=MMcdr(p))vs_push(MMcar(p));")
-  (wt-nl "if(active)unwind(fr,tag);else{")
+  (wt-nl "if(active)unwind(fr,tag);")
   (unwind-exit 'fun-val nil (if top-data (car top-data)))
-  (wt "}}")
+  (wt "}")
   )
 
 (defun c1throw (args &aux (info (make-info)) tag)

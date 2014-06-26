@@ -602,7 +602,7 @@
   (cond
    ((eq val nil) (c1nil))
    ((eq val t) (c1t))
-   ((si:fixnump val)
+   ((when (si:fixnump val) (< most-negative-fixnum val))
     (list 'LOCATION (make-info :type 'fixnum)
           (list 'FIXNUM-VALUE (and (>= (abs val) 1024)(add-object val))
 		val)))
