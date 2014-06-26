@@ -157,7 +157,7 @@
 			   (prog1 (funcall x o ,@(cdr f))
 			     (fset ',z (symbol-function x))))
 			  ((setq e (get ',z 'early)) (values (funcall e o ,@(cdr f)))))))
-	       '("CLASSP" "CLASS-PRECEDENCE-LIST" "FIND-CLASS" "CLASS-OF")))))
+	       '("CLASSP" "CLASS-PRECEDENCE-LIST" "FIND-CLASS" "CLASS-OF" "CLASS-NAME")))))
 (clh)
 
 ;; (defun class-of (object)
@@ -288,9 +288,9 @@
     (if (atom type)
         (setq tp type i nil)
         (setq tp (car type) i (cdr type)))
-    (if (get tp 'deftype-definition)
-        (setq type (apply (get tp 'deftype-definition) i))
-        (return-from normalize-type (if (atom type) (list type) type)))))
+    (cond ((si-classp tp) (return-from normalize-type (list (si-class-name tp))))
+	  ((get tp 'deftype-definition) (setq type (apply (get tp 'deftype-definition) i)))
+	  ((return-from normalize-type (if (atom type) (list type) type))))))
 
 
 ;;; KNOWN-TYPE-P answers if the given type is a known base type.
