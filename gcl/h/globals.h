@@ -17,6 +17,7 @@ EXTER char *alloca_val;
 EXTER object keyword_package;
 
 EXTER object sLlist;
+EXTER object sLstring;
 EXTER object sLcons;
 EXTER object sLhash_table;
 
