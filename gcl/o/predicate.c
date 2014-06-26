@@ -333,13 +333,13 @@ DEFUNO_NEW("FUNCTIONP",object,fLfunctionp,LISP
 	    || t == t_closure|| t == t_afun
 	    || t == t_vfun)
 		x0 = Ct;
-	else if (t == t_symbol) {
-		if (x0->s.s_gfdef != OBJNULL &&
-		    x0->s.s_mflag == FALSE)
-			x0 = Ct;
-		else
-			x0 = Cnil;
-	} else if (t == t_cons) {
+	/* else if (t == t_symbol) { */
+	/* 	if (x0->s.s_gfdef != OBJNULL && */
+	/* 	    x0->s.s_mflag == FALSE) */
+	/* 		x0 = Ct; */
+	/* 	else */
+	/* 		x0 = Cnil; } */
+	else if (t == t_cons) {
 		x = x0->c.c_car;
 		if (x == sLlambda || x == sLlambda_block ||
 		    x == sSlambda_block_expanded ||

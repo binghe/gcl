@@ -95,7 +95,7 @@
 	(cond
 	 (*multiply-stacks* (setq *multiply-stacks* nil))
 	 ((probe-file "init.lsp") (load "init.lsp"))))
-      (and (functionp *top-level-hook*)(funcall   *top-level-hook*)))
+      (and (or (fboundp *top-level-hook*) (functionp *top-level-hook*))(funcall *top-level-hook*)))
 
     (when (boundp '*system-banner*)
       (format t *system-banner*)
