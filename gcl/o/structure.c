@@ -59,9 +59,9 @@ DEFUN_NEW("STRUCTURE-DEF",object,fSstructure_def,SI,1,1,NONE,OO,OO,OO,OO,(object
   return (x)->str.str_def;
 }
 
-DEFUN_NEW("STRUCTURE-LENGTH",fixnum,fSstructure_length,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+DEFUN_NEW("STRUCTURE-LENGTH",object,fSstructure_length,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   check_type_structure(x);
-  return S_DATA(x)->length;
+  return (object)S_DATA(x)->length;
 }
 
 DEFUN_NEW("STRUCTURE-REF",object,structure_ref,SI,3,3,NONE,OO,OI,OO,OO,(object x,object name,fixnum i),"") {

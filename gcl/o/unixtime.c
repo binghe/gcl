@@ -260,7 +260,7 @@ int usleep ( unsigned int microseconds )
 
 #endif
 
-DEFUN_NEW("CURRENT-TIMEZONE",fixnum,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
+DEFUN_NEW("CURRENT-TIMEZONE",object,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
 
 #if defined(__MINGW32__)
 
@@ -271,19 +271,19 @@ DEFUN_NEW("CURRENT-TIMEZONE",fixnum,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(
   
   /* Now UTC = (local time + bias), in units of minutes, so */
   /*fprintf ( stderr, "Bias = %ld\n", tzi.Bias );*/
-  return tzi.Bias/60;                                    
+  return (object)tzi.Bias/60;                                    
   
 #elif defined NO_SYSTEM_TIME_ZONE
-  return 0;
+  return (object)0;
 #elif defined __CYGWIN__
   struct tm gt,lt;
   fixnum _t=0;
   gmtime_r(&_t, &gt);
   localtime_r(&_t, &lt);
-  return (lt.tm_mday == gt.tm_mday) ? -(lt.tm_hour) : (24 - lt.tm_hour);
+  return (object)((lt.tm_mday == gt.tm_mday) ? -(lt.tm_hour) : (24 - lt.tm_hour));
 #else
   fixnum _t=time(0);
-  return -localtime(&_t)->tm_gmtoff/3600;
+  return (object)(-localtime(&_t)->tm_gmtoff/3600);
 #endif
 }
 

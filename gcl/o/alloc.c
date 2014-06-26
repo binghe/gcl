@@ -1481,16 +1481,16 @@ DEFUN_NEW("GPROF-QUIT",object,fSgprof_quit,SI
 
 #endif
 
-DEFUN_NEW("SET-STARTING-HOLE-DIVISOR",fixnum,fSset_starting_hole_divisor,SI,1,1,NONE,II,OO,OO,OO,(fixnum div),"") {
+DEFUN_NEW("SET-STARTING-HOLE-DIVISOR",object,fSset_starting_hole_divisor,SI,1,1,NONE,II,OO,OO,OO,(fixnum div),"") {
   if (div>0 && div <100)
     starting_hole_div=div;
-  return starting_hole_div;
+  return (object)starting_hole_div;
 }
   
-DEFUN_NEW("SET-STARTING-RELBLOCK-HEAP-MULTIPLE",fixnum,fSset_starting_relb_heap_multiple,SI,1,1,NONE,II,OO,OO,OO,(fixnum mult),"") {
+DEFUN_NEW("SET-STARTING-RELBLOCK-HEAP-MULTIPLE",object,fSset_starting_relb_heap_multiple,SI,1,1,NONE,II,OO,OO,OO,(fixnum mult),"") {
   if (mult>=0)
     starting_relb_heap_mult=mult;
-  return starting_relb_heap_mult;
+  return (object)starting_relb_heap_mult;
 }
   
 DEFUNM_NEW("SET-HOLE-SIZE",object,fSset_hole_size,SI,1,2,NONE,OI,IO,OO,OO,(fixnum npages,...),"") {

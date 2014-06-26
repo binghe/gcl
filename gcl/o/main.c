@@ -230,7 +230,7 @@ minimize_image(void) {
   
 }
 
-DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,OO,OO,(fixnum l),"") {
+DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,OO,OO,(fixnum l),"") {
 
   void *end,*dend;
   fixnum def=sizeof(fixnum)*8-1;
@@ -245,7 +245,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,
     update_real_maxpage();
   }
 
-  return log_maxpage_bound;
+  return (object)log_maxpage_bound;
 
 }
 

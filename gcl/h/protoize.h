@@ -52,7 +52,6 @@
 /* array.c:1023:OF */ extern object fLarray_dimension (object x,fixnum i); /* (x, i) object x; int i; */
 /* array.c:1090:OF */ extern void siLreplace_array (void); /* () */
 /* array.c:1093:OF */ extern object fSreplace_array (object old, object new); /* (old, new) object old; object new; */
-/* array.c:1132:OF */ extern fixnum fLarray_total_size (object x); /* (x) object x; */
 /* array.c:1140:OF */ extern object fSaset_by_cursor (object array, object val, object cursor); /* (array, val, cursor) object array; object val; object cursor; */
 /* array.c:1160:OF */ extern void gcl_init_array_function (void); /* () */
 /* assignment.c:62:OF */ extern void setq (object sym, object val); /* (sym, val) object sym; object val; */

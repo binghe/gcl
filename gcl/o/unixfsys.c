@@ -784,14 +784,14 @@ LFD(Ldirectory)()
 #include <sys/types.h>
 #include <dirent.h>
 
-DEFUN_NEW("OPENDIR",fixnum,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+DEFUN_NEW("OPENDIR",object,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   DIR *d;
   char filename[MAXPATHLEN];
   check_type_string(&x);
   memcpy(filename,x->st.st_self,x->st.st_fillp);
   filename[x->st.st_fillp]=0;
   d=opendir(filename);
-  return (fixnum)d;
+  return (object)d;
 }
 
 #ifdef HAVE_D_TYPE

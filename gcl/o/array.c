@@ -1160,9 +1160,9 @@ DEFUNO_NEW("REPLACE-ARRAY",object,fSreplace_array,SI,2,2,NONE,
   return old;
 }
 
-DEFUN_NEW("ARRAY-TOTAL-SIZE",fixnum,fLarray_total_size,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"")
+DEFUN_NEW("ARRAY-TOTAL-SIZE",object,fLarray_total_size,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"")
 { x = IisArray(x);
-  return (x->a.a_dim);
+  return (object)(fixnum)x->a.a_dim;
 }
 
 
