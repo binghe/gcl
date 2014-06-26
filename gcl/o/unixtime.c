@@ -271,7 +271,7 @@ DEFUN_NEW("CURRENT-TIMEZONE",object,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(
   
   /* Now UTC = (local time + bias), in units of minutes, so */
   /*fprintf ( stderr, "Bias = %ld\n", tzi.Bias );*/
-  return (object)tzi.Bias/60;                                    
+  return (object)(tzi.Bias/60);
   
 #elif defined NO_SYSTEM_TIME_ZONE
   return (object)0;
