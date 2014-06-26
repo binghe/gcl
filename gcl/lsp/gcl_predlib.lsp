@@ -747,43 +747,28 @@
 (deftype double-float (&optional (low '*) (high '*)) `(long-float ,low ,high))
 
 
-#.`(defun coerce (object type &aux (ot type) nt (l (listp type))(ctp (if l (car type) type))(i (when l (cdr type))))
+#.`(defun coerce (object type &aux (l (listp type))(ctp (if l (car type) type))(i (when l (cdr type))))
      (when 
 	 (case type
-	   ,@(mapcar (lambda (x) `(,x (,(get x 'type-predicate) object))) '(list cons vector string array character float complex function))
+	   ,@(mapcar (lambda (x) `(,x (,(get x 'type-predicate) object))) 
+	   	     '(string list vector bit-vector array character float cons))
 	   (otherwise (typep object type)))
        (return-from coerce object))
-  (case ctp
-    (list
-     (do ((l nil (cons (aref object i) l))
-          (i (1- (length object)) (1- i)))
-         ((< i 0) l)
-       (declare (fixnum i))))
-    ((array simple-array vector simple-vector string)
-     (unless (or (endp i)
-                 (endp (cdr i))
-                 (eq (cadr i) '*)
-                 (endp (cdr (cadr i))))
-             (error "Cannot coerce to an multi-dimensional array."))
-     (do ((seq (make-sequence ot (length object)))
-          (i 0 (1+ i))
-	  (lo (listp object))
-	  (o object (if lo (cdr o) o))
-          (l (length object)))
-         ((>= i l) seq)
-	 (declare (fixnum i l))
-	 (setf (aref seq i) (if lo (car o) (aref o i)))))
-    (character (character object))
-    (float (float object))
-    ((short-float) (float object 0.0S0))
-    ((single-float double-float long-float) (float object 0.0L0))
-    (complex
-     (if (typep object type) object (if (or (null i) (null (car i)) (eq (car i) '*))
-         (complex (realpart object) (imagpart object))
-         (complex (coerce (realpart object) (car i))
-                  (coerce (imagpart object) (car i))))))
-    (t (cond ((and (setq nt (normalize-type type)) (not (eq nt type))) (coerce object nt))
-	     (t (error "Cannot coerce ~S to ~S." object type))))))
+     (case ctp
+       	((string list vector bit-vector simple-string simple-vector simple-bit-vector array cons null member) 
+	 (replace (make-sequence type (length object)) object))
+	(function (symbol-function object))
+	(character (character object))
+	(float (float object))
+	((short-float) (float object 0.0S0))
+	((single-float double-float long-float) (float object 0.0L0))
+	(complex
+	 (let* ((re (realpart object))(im (imagpart object))
+		(rt (car i))(rt (unless (eq rt '*) rt))
+		(re (if rt (coerce re rt) re))(im (if rt (coerce im rt) im)))
+	   (complex re im)))
+       (t (cond ((let ((nt (normalize-type type))) (unless (eq nt type) (coerce object nt))))
+		(t (error "Cannot coerce ~S to ~S." object type))))))
 
 ;; set by unixport/init_kcl.lsp
 ;; warn if a file was comopiled in another version
