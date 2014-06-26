@@ -173,3 +173,4 @@ int getc(void *);
 int putc(int,void *);
 #endif
 void vfun_wrong_number_of_args(object);
+void ihs_overflow (void);
