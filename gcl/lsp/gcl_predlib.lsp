@@ -177,15 +177,10 @@
 ;;; FIXME --optimize with most likely cases first
 (defun typep (object type &optional env &aux tp i tem)
   (declare (ignore env))
-  (when (si-classp type)
-    (return-from typep (if (member type (si-class-precedence-list (funcall 'si-class-of object))) t nil)))
   (if (atom type)
       (setq tp type i nil)
       (setq tp (car type) i (cdr type)))
   (if (eq tp 'structure-object) (setq tp 'structure))
-  (unless i 
-    (let ((f (get tp 'type-predicate)))
-      (when f (return-from typep (funcall f object)))))
   (case tp
     (member (member object i))
     (not (not (typep object (car i))))
@@ -272,11 +267,14 @@
 		  (match-dimensions (array-dimensions object) (cadr i))
 		(eql (array-rank object) (cadr i))))))
     (t 
-     (cond ((setq tem (get tp 'si::s-data))
+     (cond ((si-classp tp)
+	    (if (member type (si-class-precedence-list (si-class-of object))) t nil))
+	   ((setq tem (if (structurep tp) tp (get tp 'si::s-data)))
 	    (structure-subtype-p object tem))
+	   ((setq tem (get tp 'type-predicate))
+	    (funcall tem object))
            ((setq tem (get tp 'deftype-definition))
-	      (typep object
-		     (apply tem i)))))))
+	      (typep object (apply tem i)))))))
 
 
 ;;; NORMALIZE-TYPE normalizes the type using the DEFTYPE definitions.
