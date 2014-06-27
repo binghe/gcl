@@ -999,3 +999,91 @@ init_main(void) {
 #ifdef SGC
 #include "writable.h"
 #endif
+
+#ifdef PRINT_INSN
+
+#include "dis-asm.h"
+
+static char b[4096],*bp;
+
+static int
+my_fprintf(void *v,const char *f,...) {
+  va_list va;
+  int r;
+  va_start(va,f);
+  bp+=(r=vsnprintf(bp,sizeof(b)-(bp-b),f,va));
+  va_end(va);
+  return r;
+}
+
+static int
+my_read(bfd_vma memaddr, bfd_byte *myaddr, unsigned int length, struct disassemble_info *dinfo) {
+  memcpy(myaddr,(void *)memaddr,length);
+  return 0;
+}
+
+static void
+my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
+  dinfo->fprintf_func(dinfo->stream,"%p",(void *)addr);
+}
+
+#endif
+
+DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+
+#ifdef HAVE_PRINT_INSN_I386
+
+  static disassemble_info i;
+  /* static int k; */
+  int j;
+
+  /* if (!k) {init_disassemble_info(&i,NULL,my_fprintf);k=1;} */
+  memset(&i,0,sizeof(i));
+  i.fprintf_func=my_fprintf;
+  i.read_memory_func=my_read;
+  i.print_address_func=my_pa;
+  bp=b;
+  
+  j=PRINT_INSN(addr,&i);
+  my_fprintf(NULL," ;");
+  return MMcons(make_simple_string(b),make_fixnum(j));
+
+#else
+
+  return MMcons(make_simple_string("fnop ;"),make_fixnum(0));
+
+#endif
+}
+
+typedef struct {
+  enum type tt;
+  struct typemanager *tp;
+} Tbl;
+
+#define Tblof(a_)       {(a_),tm_of(a_)}
+#define tblookup(a_,b_) ({Tbl *tb=tb1;(b_)=(a_);for (;tb->tt && tb->b_!=(b_);tb++);tb->tt;})
+#define mtm_of(a_)      (a_)>=t_other ? NULL : tm_of(a_)
+
+DEFUN_NEW("FUNCTION-BY-ADDRESS",object,fSfunction_by_address,SI,1,1,NONE,OI,OO,OO,OO,(fixnum ad),"") {
+
+  ufixnum m=-1,mm,j;
+  void *o;
+  object x,xx=Cnil;
+  Tbl tb1[]={Tblof(t_sfun),Tblof(t_cfun),Tblof(t_vfun),Tblof(t_afun),Tblof(t_gfun),Tblof(t_closure),Tblof(t_cclosure),{0}};
+  struct typemanager *tp;
+  enum type tt;
+  struct pageinfo *v;
+
+  if (VALID_DATA_ADDRESS_P(ad))
+    for (v=cell_list_head;v;v=v->next)
+      if (tblookup(mtm_of(v->type),tp))
+	for (o=pagetochar(page(v)),j=tp->tm_nppage;j--;o+=tp->tm_size)
+	  if (tblookup(type_of((x=o)),tt))
+	    if (!is_free(x) && (mm=ad-(ufixnum)x->sfn.sfn_self)<m) {
+	      m=mm;
+	      xx=x;
+	    }
+  
+  return xx;
+
+}

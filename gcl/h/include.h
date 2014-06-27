@@ -93,6 +93,13 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define EXTER extern 
 #endif
 
+#include <stdio.h>
+#include <setjmp.h>
+#include <math.h>
+#include <complex.h>
+#include <alloca.h>
+
+
 #if defined(GMP) || defined(NEED_MP_H)
 #include "../h/mp.h"
 #endif

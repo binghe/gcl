@@ -150,13 +150,11 @@ enum aelttype {			/*  array element type  */
 #define SET_BV_OFFSET(x,val) ((type_of(x)==t_bitvector ? x->bv.bv_offset = val : \
 		       type_of(x)== t_array ? x->a.a_offset=val : (abort(),0)))
 
-
 #define S_DATA(x) ((struct s_data *)((x)->str.str_self))
 #define SLOT_TYPE(def,i) (((S_DATA(def))->raw->ust.ust_self[i]))
 #define SLOT_POS(def,i) USHORT_GCL(S_DATA(def)->slot_position,i)
 #define STREF(type,x,i) (*((type *)(((char *)((x)->str.str_self))+(i))))
 #define STSET(type,x,i,val)  do{SGC_TOUCH(x);STREF(type,x,i) = (val);} while(0)
-
 
 
 enum smmode {			/*  stream mode  */
@@ -442,8 +440,8 @@ object make_si_sfun();
 
 /* Number of args supplied to a variable arg t_vfun
  Used by the C function to set optionals */
-
 #define  VFUN_NARGS fcall.argd
+
 #define RETURN2(x,y) do{/*  object _x = (void *) x;  */\
 			  fcall.values[2]=y;fcall.nvalues=2; \
 			  return (x) ;} while(0)
@@ -508,6 +506,130 @@ void raise_pending_signals();
 
 EXTER unsigned plong signals_allowed, signals_pending;
 
+#if defined (LOW_SHFT)
+
+#define LOW_IM_FIX (1L<<(LOW_SHFT-1))
+#define INT_IN_BITS(a_,b_) ({fixnum _a=(fixnum)(a_);_a>>(b_)==_a>>(CHAR_SIZE*SIZEOF_LONG-1);})
+
+#define      make_imm_fixnum(a_)        ((object)a_)
+#define       fix_imm_fixnum(a_)        ((fixnum)a_)
+#define      mark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)+(LOW_IM_FIX<<1))))
+#define    unmark_imm_fixnum(a_)        ((a_)=((object)((fixnum)(a_)-(LOW_IM_FIX<<1))))
+#define        is_imm_fixnum(a_)        ((fixnum)(a_)<(fixnum)OBJNULL)
+#define is_unmrkd_imm_fixnum(a_)        ((fixnum)(a_)<LOW_IM_FIX)
+#define is_marked_imm_fixnum(a_)        (is_imm_fixnum(a_)*!is_unmrkd_imm_fixnum(a_))
+#define           is_imm_fix(a_)        INT_IN_BITS(a_,LOW_SHFT-1)
+#elif defined (IM_FIX_BASE) && defined(IM_FIX_LIM)
+#define      make_imm_fixnum(a_)        ((object)((a_)+(IM_FIX_BASE+(IM_FIX_LIM>>1))))
+#define       fix_imm_fixnum(a_)        (((fixnum)(a_))-(IM_FIX_BASE+(IM_FIX_LIM>>1)))
+#define      mark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) | IM_FIX_LIM)))
+#define    unmark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) &~ IM_FIX_LIM)))
+#define        is_imm_fixnum(a_)        (((ufixnum)(a_))>=IM_FIX_BASE)
+#define is_unmrkd_imm_fixnum(a_)        (is_imm_fixnum(a_)&&!is_marked_imm_fixnum(a_))
+#define is_marked_imm_fixnum(a_)        (((fixnum)(a_))&IM_FIX_LIM)
+#define           is_imm_fix(a_)        (!(((a_)+(IM_FIX_LIM>>1))&-IM_FIX_LIM))
+/* #define        un_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_))&~(IM_FIX_BASE)))) */
+#else
+#define      make_imm_fixnum(a_)        make_fixnum1(a_)
+#define       fix_imm_fixnum(a_)        ((a_)->FIX.FIXVAL)
+#define      mark_imm_fixnum(a_)        
+#define    unmark_imm_fixnum(a_)        
+#define        is_imm_fixnum(a_)        0
+#define is_unmrkd_imm_fixnum(a_)        0
+#define is_marked_imm_fixnum(a_)        0
+#define           is_imm_fix(a_)        0
+/* #define        un_imm_fixnum(a_)         */
+#endif
+
+#define make_fixnum(a_)  ({register fixnum _q1=(a_);register object _q4; \
+      _q4=is_imm_fix(_q1) ? make_imm_fixnum(_q1) : make_fixnum1(_q1);_q4;})
+#define fix(a_)          ({register object _q2=(a_);register fixnum _q3;		\
+      _q3=is_imm_fixnum(_q2) ? fix_imm_fixnum(_q2) :  (_q2)->FIX.FIXVAL;_q3;})
+#define Mfix(a_)         fix(a_)
+#define small_fixnum(a_) make_fixnum(a_) /*make_imm_fixnum(a_)*/
+#define set_fix(a_,b_)   ((a_)->FIX.FIXVAL=(b_))
+
+#define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
+
+#ifndef WIDE_CONS
+
+#ifndef USE_SAFE_CDR
+#define SAFE_CDR(a_)             a_
+#define imcdr(a_)                is_imm_fixnum(Zcdr(a_))
+#else
+#define SAFE_CDR(a_)             ({object _a=(a_);is_imm_fixnum(_a) ? make_fixnum1(fix(_a)) : _a;})
+#ifdef DEBUG_SAFE_CDR
+#define imcdr(a_)                (is_imm_fixnum(Zcdr(a_)) && (error("imfix cdr"),1))
+#else
+#define imcdr(a_)                0
+#endif
+#endif
+
+#else
+
+#define SAFE_CDR(a_)             a_
+#define imcdr(a_)                0
+
+#endif
+
+#define is_marked(a_)            (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->d.m)
+#define is_marked_or_free(a_)    (imcdr(a_) ? is_marked_imm_fixnum(Zcdr(a_)) : (a_)->md.mf)
+#define mark(a_)                 if (imcdr(a_)) mark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=1
+#define unmark(a_)               if (imcdr(a_)) unmark_imm_fixnum(Zcdr(a_)); else (a_)->d.m=0
+#define is_free(a_)              (!is_imm_fixnum(a_) && !imcdr(a_) && (a_)->d.f)
+#define make_free(a_)            ({(a_)->fw=0;(a_)->d.f=1;(a_)->fw|=(fixnum)OBJNULL;})/*set_type_of(a_,t_other)*/
+#define make_unfree(a_)          {(a_)->d.f=0;}
+
+#ifdef WIDE_CONS
+#define valid_cdr(a_)            0
+#else
+#define valid_cdr(a_)            (!(a_)->d.e || imcdr(a_))
+#endif
+
+#define type_of(x)       ({register object _z=(object)(x);\
+                           (is_imm_fixnum(_z) ? t_fixnum : \
+			    (valid_cdr(_z) ?  (_z==Cnil ? t_symbol : t_cons)  : _z->d.t));})
+
+#ifdef WIDE_CONS
+#define TYPEWORD_TYPE_P(y_) 1
+#else
+#define TYPEWORD_TYPE_P(y_) (y_!=t_cons)
+#endif
+  
+/*Note preserve sgc flag here                                         VVV*/
+#define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;\
+    if (TYPEWORD_TYPE_P(_y)) {_x->d.e=1;_x->d.t=_y;_x->fw|=(fixnum)OBJNULL;}})
+
+#ifndef WIDE_CONS
+
+#define cdr_listp(x)     valid_cdr(x)
+#define consp(x)         ({register object _z=(object)(x);\
+                           (!is_imm_fixnum(_z) && valid_cdr(_z) && _z!=Cnil);})
+#define listp(x)         ({register object _z=(object)(x);\
+                           (!is_imm_fixnum(_z) && valid_cdr(_z));})
+#define atom(x)          ({register object _z=(object)(x);\
+                           (is_imm_fixnum(_z) || !valid_cdr(_z) || _z==Cnil);})
+
+#else
+
+#define cdr_listp(x)     listp(x)
+#define consp(x)         (type_of(x)==t_cons)
+#define listp(x)         ({object _x=x;type_of(_x)==t_cons || _x==Cnil;})
+#define atom(x)          !consp(x)
+
+#endif
+
+/* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
+/* #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector) */
+
+
+
+#define	Msf(obje)	(obje)->SF.SFVAL
+#define sf(x) Msf(x)
+
+#define	Mlf(obje)	(obje)->LF.LFVAL
+#define lf(x) Mlf(x)
+
 #define endp_prop(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : (FEwrong_type_argument(sLlist, (a)),FALSE)))
 #define endp(a) endp_prop(a)
     
@@ -518,3 +640,18 @@ EXTER unsigned plong signals_allowed, signals_pending;
 #define eql(a_,b_)    ({register object _a=(a_);register object _b=(b_);_a==_b || (!IMMNIL(_a)&&!IMMNIL(_b)&&eql1(_a,_b));})
 #define equal(a_,b_)  ({register object _a=(a_);register object _b=(b_);_a==_b || (!IMMNIL(_a)&&!IMMNIL(_b)&&equal1(_a,_b));})
 #define equalp(a_,b_) ({register object _a=(a_);register object _b=(b_);_a==_b || (_a!=Cnil&&_b!=Cnil&&equalp1(_a,_b));})
+
+#define character_table (character_table1+128)
+#define	code_char(c)		(object)(character_table+((unsigned char)(c)))
+#define	char_code(obje)		((object)obje)->ch.ch_code
+#define	char_font(obje)		((object)obje)->ch.ch_font
+#define	char_bits(obje)		((object)obje)->ch.ch_bits
+
+/* we sometimes have to touch the header of arrays or structures
+   to make sure the page is writable */
+#ifdef SGC
+#define SGC_TOUCH(x) if (is_marked(x)) system_error(); unmark(x)
+#else
+#define SGC_TOUCH(x)
+#endif
+

@@ -2419,6 +2419,26 @@ int joe=SIGEMT;
 AC_MSG_RESULT(no))
 
 AC_CHECK_FUNCS(sigaltstack)
+AC_CHECK_FUNCS(feenableexcept)
+
+AC_CHECK_HEADERS(dis-asm.h,
+	AC_CHECK_LIB(opcodes,init_disassemble_info)
+	AC_CHECK_FUNCS(print_insn_alpha,AC_DEFINE([PRINT_INSN],[print_insn_alpha],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_avr,AC_DEFINE([PRINT_INSN],[print_insn_avr],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_big_arm,AC_DEFINE([PRINT_INSN],[insn_big_arm],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_big_mips,AC_DEFINE([PRINT_INSN],[insn_big_mips],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_big_powerpc,AC_DEFINE([PRINT_INSN],[insn_big_powerpc],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_hppa,AC_DEFINE([PRINT_INSN],[print_insn_hppa],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_i386,AC_DEFINE([PRINT_INSN],[print_insn_i386],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_ia64,AC_DEFINE([PRINT_INSN],[print_insn_ia64],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_little_arm,AC_DEFINE([PRINT_INSN],[insn_little_arm],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_little_mips,AC_DEFINE([PRINT_INSN],[insn_little_mips],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_little_powerpc,AC_DEFINE([PRINT_INSN],[insn_little_powerpc],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_m68k,AC_DEFINE([PRINT_INSN],[print_insn_m68k],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_s390,AC_DEFINE([PRINT_INSN],[print_insn_s390],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_sh64,AC_DEFINE([PRINT_INSN],[print_insn_sh64],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_sh,AC_DEFINE([PRINT_INSN],[print_insn_sh],[instruction disassemble routine]),
+	AC_CHECK_FUNCS(print_insn_sparc,AC_DEFINE([PRINT_INSN],[print_insn_sparc],[instruction disassemble routine]))))))))))))))))))
 
 #if test $use = "386-linux" ; then
 	AC_CHECK_HEADERS(asm/sigcontext.h)

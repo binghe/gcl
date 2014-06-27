@@ -19,6 +19,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
+#define _GNU_SOURCE 1
+#include <fenv.h>
+
 #ifdef __MINGW32__
 #include <sys/types.h>          /* sigset_t */
 #endif
@@ -67,7 +70,7 @@ gcl_signal(int signo, void (*handler) (/* ??? */))
 #endif      
       ;
     sigemptyset(&action.sa_mask);
-    sigaddset(&action.sa_mask,signo);
+    /* sigaddset(&action.sa_mask,signo); */
     sigaction(signo,&action,0);
 #else
 #ifdef HAVE_SIGVEC
@@ -131,13 +134,128 @@ unblock_sigusr_sigio(void)
 #endif
 }
 
+DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,FPE_INIT,"");
+
+#if defined(__x86_64__) || defined(__i386__)
+
+#define ASM __asm__ __volatile__
+
+DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
+  double d;
+  ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val));
+  RETURN1(make_longfloat(d));
+}
+
+#endif
+
+DEFUN_NEW("*FIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") {
+  RETURN1(*(fixnum *)addr);
+}
+DEFUN_NEW("*FLOAT",object,fSAfloat,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+  RETURN1(make_shortfloat(*(float *)addr));
+}
+DEFUN_NEW("*DOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+  RETURN1(make_longfloat(*(double *)addr));
+}
+
+DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
+
+#ifdef HAVE_FEENABLEEXCEPT
+
+  x=feenableexcept(x);
+
+#elif defined(__x86_64__) || defined(__i386__)
+#define ASM __asm__ __volatile__
+  {
+    unsigned short s;
+    unsigned int i;
+    ASM("fnstcw %0" :: "m" (s));
+    s=(s|FE_ALL_EXCEPT)&(~x);
+    ASM("fldcw %0" : "=m" (s));
+    ASM("stmxcsr %0" :: "m" (i));
+    i=(i|(FE_ALL_EXCEPT<<7))&(~(x<<7));
+    ASM("ldmxcsr %0" : "=m" (i));
+  }    
+#endif
+
+  RETURN1(x);
+
+}
+
+DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
+
+  fixnum x;
+
+#ifdef HAVE_FEENABLEEXCEPT
+
+  feclearexcept(FE_ALL_EXCEPT);
+  x=fedisableexcept(FE_ALL_EXCEPT);
+
+#elif defined(__x86_64__) || defined(__i386__)
+#define ASM __asm__ __volatile__
+  {
+    unsigned int i;
+    ASM("fnclex");
+    ASM("stmxcsr %0" :: "m" (i));
+    i=(i|(FE_ALL_EXCEPT<<7));
+    ASM("ldmxcsr %0" : "=m" (i));
+    x=0;
+  }
+#endif
+
+  RETURN1(x);
+}
+
+#if defined(__x86_64__) || defined(__i386__)
+
+#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(~((mxcsr_)>>7)&excepts_)
+
+DEFUN_NEW("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
+
+  RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV :
+	  (FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV :
+	   (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF :
+	    (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND :
+	     (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0)))));
+}
+
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+
+DEFUN_NEW("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+  unsigned short t;
+  ASM ("fnstsw %0" :: "m" (t));
+  RETURN1(t);
+}
+DEFUN_NEW("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+  unsigned int t;
+  ASM ("stmxcsr %0" :: "m" (t));
+  RETURN1(t);
+}
+
+#endif
+#endif
+
 
 static void
-sigfpe1(void)
-{
-	gcl_signal(SIGFPE, sigfpe1);
-	FEerror("Floating-point exception.", 0);
+sigfpe3(int sig,void *i,void *v) {
+
+  unblock_signals(SIGFPE,SIGFPE);
+#ifdef __MINGW32__
+  gcl_signal(SIGFPE,sigfpe3);
+#endif
+  ifuncall3(sSfloating_point_error,FPE_CODE(i,v),FPE_ADDR(i,v),FPE_CTXT(v));
+
 }
+
+DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
+					 list(3,sLdivision_by_zero,make_fixnum(FPE_FLTDIV),make_fixnum(FE_DIVBYZERO)),
+					 list(3,sLfloating_point_overflow,make_fixnum(FPE_FLTOVF),make_fixnum(FE_OVERFLOW)),
+					 list(3,sLfloating_point_underflow,make_fixnum(FPE_FLTUND),make_fixnum(FE_UNDERFLOW)),
+					 list(3,sLfloating_point_inexact,make_fixnum(FPE_FLTRES),make_fixnum(FE_INEXACT)),
+					 list(3,sLfloating_point_invalid_operation,make_fixnum(FPE_FLTINV),make_fixnum(FE_INVALID))),"");
+
+DEF_ORDINARY("FLOATING-POINT-ERROR",sSfloating_point_error,SI,"");
+
 static void
 sigpipe(void)
 {
@@ -180,7 +298,7 @@ sigio(void)
 
 void
 install_default_signals(void)
-{	gcl_signal(SIGFPE, sigfpe1);
+{	gcl_signal(SIGFPE, sigfpe3);
 	gcl_signal(SIGPIPE, sigpipe);
 	gcl_signal(SIGINT, sigint);
 	gcl_signal(SIGUSR1, sigusr1);

@@ -219,3 +219,24 @@ extern int mingwlisten(FILE *);
 #define DBEGIN _dbegin
 
 #define NOFREE_ERR
+
+#define FPE_CODE(i_,v_) make_fixnum(fSfpe_code(FFN(fSfnstsw)(),FFN(fSstmxcsr)()))
+#define FPE_ADDR(i_,v_) make_fixnum(0)
+#define FPE_CTXT(v_) Cnil
+
+#define FPE_INIT Cnil
+
+#define FE_INVALID 1
+#define FE_DIVBYZERO 4
+#define FE_OVERFLOW 8
+#define FE_UNDERFLOW 16
+#define FE_INEXACT 32
+
+#define FPE_FLTDIV 3
+#define FPE_FLTOVF 4
+#define FPE_FLTUND 5
+#define FPE_FLTRES 6
+#define FPE_FLTINV 7
+
+
+

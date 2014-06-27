@@ -163,7 +163,6 @@
                            (h-file *default-h-file*)
                            (data-file *default-data-file*)
 			   (c-debug nil)
-                           #+aosvs (ob-file nil)
                            (system-p *default-system-p*)
 			   (print nil)
                            (load nil)
@@ -174,15 +173,11 @@
 			   (*compile-print* (or print *compile-print*))
                            (*package* *package*)
 			   (*DEFAULT-PATHNAME-DEFAULTS* #"")
-			   (*data* (list (make-array 50 :fill-pointer 0
-						     :adjustable t
-						     )
-					 nil ;inits
-					 nil
-					 ))
+			   (*data* (list (make-array 50 :fill-pointer 0 :adjustable t) nil nil))
 			   *init-name* 	
 			   (*fasd-data* *fasd-data*)
                            (*error-count* 0))
+
   (declare (special *c-debug* *init-name* system-p))
 
   (cond (*compiler-in-use*
@@ -201,36 +196,28 @@ Cannot compile ~a.~%"
     (return-from compile-file1 (values)))
 
   (when *compile-verbose*
-    (format t "~&Compiling ~a.~%"
-            (namestring (merge-pathnames input-pathname #".lsp"))))
+    (format t "~&Compiling ~a.~%" (namestring (merge-pathnames input-pathname #".lsp"))))
 
   (and *record-call-info* (clear-call-table))
 
   (with-open-file
-          (*compiler-input* (merge-pathnames input-pathname #".lsp"))
-
-
-    (cond ((numberp *split-files*)
-	   (if (< (file-length *compiler-input*) *split-files*)
-	       (setq *split-files* nil)
-	     ;;*split-files* = ( section-length split-file-names next-section-start-file-position
-	     ;;                           package-ops)
-	     (setq *split-files* (list *split-files* nil 0 nil)))))
-
-    (cond ((consp *split-files*)
-	   (file-position *compiler-input* (third *split-files*))
-	   (setq output-file
-		 (make-pathname :directory (pathname-directory output-file)
-				:name (format nil "~a~a"
-					      (length (second *split-files*))
-					      (pathname-name (pathname output-file)))
-				:type "o"))
+   (*compiler-input* (merge-pathnames input-pathname #".lsp"))
+   
+   
+   (cond ((numberp *split-files*)
+	  (if (< (file-length *compiler-input*) *split-files*)
+	      (setq *split-files* nil)
+	    (setq *split-files* (list *split-files* nil 0 nil)))))
+   
+   (cond ((consp *split-files*)
+	  (file-position *compiler-input* (third *split-files*))
+	  (setq output-file
+		(make-pathname :directory (pathname-directory output-file)
+			       :name (format nil "~a~a" (length (second *split-files*)) (pathname-name (pathname output-file)))
+			       :type "o"))
+	  
+	  (push (pathname-name output-file)   (second *split-files*))))
 	   
-	   (push (pathname-name output-file)   (second *split-files*))
-	   ))
-	   
-    
-	 
     
   (let* ((eof (cons nil nil))
          (dir (or (and (not (null output-file))
@@ -240,20 +227,18 @@ Cannot compile ~a.~%"
                         (pathname-name output-file))
                    (pathname-name input-pathname)))
 	 (device (or (and (not (null output-file))
-                        (pathname-device output-file))
-                   (pathname-device input-pathname)))
-
+			  (pathname-device output-file))
+		     (pathname-device input-pathname)))
+	 
          (o-pathname (get-output-pathname o-file "o" name dir device))
          (c-pathname (get-output-pathname c-file "c" name dir device))
          (h-pathname (get-output-pathname h-file "h" name dir device))
-         (data-pathname (get-output-pathname data-file "data" name dir device))
-;	 (i-pathname  (get-output-pathname data-file "i" name dir))
-         #+aosvs (ob-pathname (get-output-pathname ob-file "ob" name dir device))
-         )
+         (data-pathname (get-output-pathname data-file "data" name dir device)))
+
     (declare (special dir name ))
-
+    
     (init-env)
-
+    
     (and (boundp 'si::*gcl-version*)
 	 (not system-p)
 	 (add-init `(si::warn-version ,si::*gcl-major-version*
@@ -261,20 +246,12 @@ Cannot compile ~a.~%"
 				      ,si::*gcl-extra-version*)))
 
     (when (probe-file "./gcl_cmpinit.lsp")
-      (load  "./gcl_cmpinit.lsp"
-            :verbose *compile-verbose*))
+      (load "./gcl_cmpinit.lsp" :verbose *compile-verbose*))
 
-    (with-open-file (*compiler-output-data*
-                      data-pathname
-                     :direction :output)
-    (progn 
-      (setq *fasd-data*      		      
-	    (cond  ((if system-p (eq *fasd-data* :system-p)
-		      *fasd-data*)
-		    (list
-		     (si::open-fasd *compiler-output-data* :output nil nil)
-		     ;(si::open-fasd *compiler-output-i* :output nil nil)
-		     ))))
+    (with-open-file (*compiler-output-data* data-pathname :direction :output)
+
+      (when *fasd-data*
+	(setq *fasd-data* (list (si::open-fasd *compiler-output-data* :output nil nil))))
 
       (wt-data-begin)
 
@@ -287,8 +264,7 @@ Cannot compile ~a.~%"
 			  (get-dispatch-macro-character #\# #\, rtb))))
 	  (if (and prev (eq prev (get-dispatch-macro-character
 				  #\# #\, (si:standard-readtable))))
-	      (set-dispatch-macro-character #\# #\,
-					    'si:sharp-comma-reader-for-compiler rtb)
+	      (set-dispatch-macro-character #\# #\, 'si:sharp-comma-reader-for-compiler rtb)
 	    (setq prev nil))
 	  
 	  ;; t1expr the package ops again..
@@ -308,59 +284,21 @@ Cannot compile ~a.~%"
 		   ((and *split-files* (check-end form eof))
 		    (setf (fourth *split-files*) (reverse (third *data*)))
 		    (return nil))
-		   ((eq form eof) (return nil)))
-		  )
+		   ((eq form eof) (return nil))))
 	    
-	    
-            (when prev (set-dispatch-macro-character #\# #\, prev rtb))))))
+            (when prev (set-dispatch-macro-character #\# #\, prev rtb)))))
       
       (setq *init-name* (init-name input-pathname system-p))
-;    (let ((x (merge-pathnames #".o" o-pathname)))
-;      (with-open-file (s x :if-does-not-exist :create)
-;		      (setq *init-name* (init-name x system-p)))
-;      (mdelete-file x))
 
       (when (zerop *error-count*)
         (when *compile-verbose* (format t "~&End of Pass 1.  ~%"))
         (compiler-pass2 c-pathname h-pathname system-p ))
-	
 
-      (wt-data-end)
-
-      ) ;;; *compiler-output-data* closed.
+      (wt-data-end)) ;;; *compiler-output-data* closed.
 
     (init-env)
 
     (if (zerop *error-count*)
-
-        #+aosvs
-        (progn
-          (when *compile-verbose* (format t "~&End of Pass 2.  ~%"))
-          (when data-file
-            (with-open-file (in fasl-pathname)
-              (with-open-file (out data-pathname :direction :output)
-                (si:copy-stream in out))))
-          (cond ((or fasl-file ob-file)
-                 (compiler-cc c-pathname ob-pathname)
-                 (cond ((probe-file ob-pathname)
-                        (when fasl-file
-                              (compiler-build ob-pathname fasl-pathname)
-                              (when load (load fasl-pathname)))
-                        (unless ob-file (mdelete-file ob-pathname))
-                        (when *compile-verbose*
-                              (print-compiler-info)
-                              (format t "~&Finished compiling ~a.~%" (namestring output-file))
-			      ))
-                       (t (format t "~&Your C compiler failed to compile the intermediate file.~%")
-                          (setq *error-p* t))))
-                (*compile-verbose*
-                 (print-compiler-info)
-                 (format t "~&Finished compiling ~a.~%" (namestring output-file)
-			 )))
-          (unless c-file (mdelete-file c-pathname))
-          (unless h-file (mdelete-file h-pathname))
-          (unless fasl-file (mdelete-file fasl-pathname)))
-
 
         (progn
           (when *compile-verbose* (format t "~&End of Pass 2.  ~%"))
@@ -497,11 +435,10 @@ Cannot compile ~a.~%"
 				  (ci *cmpinclude*)
 				  (ci (when (stringp ci) (subseq ci 1 (1- (length ci)))))
 				  (ci (concatenate 'string si::*system-directory* "../h/" ci))
-				  (system-p (when (or (eq system-p 'disassemble) (probe-file ci)) system-p)))
+				  (system-p (when (probe-file ci) system-p)))
   (declare (special *init-name*))
   (with-open-file (st c-pathname :direction :output)
-    (let ((*compiler-output1* (if (eq system-p 'disassemble) *standard-output*
-				st)))
+    (let ((*compiler-output1* st))
       (declare (special *compiler-output1*))
     (with-open-file (*compiler-output2* h-pathname :direction :output)
       (cond ((and 
@@ -515,19 +452,9 @@ Cannot compile ~a.~%"
 	        (make-pathname :name
 	          (pathname-name h-pathname)
 	           :type (pathname-type h-pathname)))
-
-              #+aosvs (string-downcase (namestring h-pathname))
               "\"")
 
       (catch *cmperr-tag* (ctop-write *init-name*))
-      (if system-p
-	  (wt
-	   "
-
-#ifdef SYSTEM_SPECIAL_INIT
-SYSTEM_SPECIAL_INIT
-#endif
-"))
 
       (terpri *compiler-output1*)
       ;; write ctl-z at end to make sure preprocessor stops!

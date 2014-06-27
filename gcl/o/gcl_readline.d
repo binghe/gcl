@@ -215,7 +215,7 @@ int rl_putc_em(int c, FILE *f) {
 
 }
 
-int rl_getc_em(FILE *f) {
+int rl_getc_em(void *f) {
 
   static char *line = NULL;
   static int linepos = 0;
