@@ -646,12 +646,3 @@ EXTER unsigned plong signals_allowed, signals_pending;
 #define	char_code(obje)		((object)obje)->ch.ch_code
 #define	char_font(obje)		((object)obje)->ch.ch_font
 #define	char_bits(obje)		((object)obje)->ch.ch_bits
-
-/* we sometimes have to touch the header of arrays or structures
-   to make sure the page is writable */
-#ifdef SGC
-#define SGC_TOUCH(x) if (is_marked(x)) system_error(); unmark(x)
-#else
-#define SGC_TOUCH(x)
-#endif
-
