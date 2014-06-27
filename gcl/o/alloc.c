@@ -1253,15 +1253,16 @@ DEFUN_NEW("ALLOCATE-GROWTH",object,fSallocate_growth,SI,5,5,NONE,OO,II,II,OO,
 
 
 
-DEFUN_NEW("ALLOCATE-CONTIGUOUS-PAGES",object,fSallocate_contiguous_pages,SI,1,2,NONE,OI,OO,OO,OO,(fixnum npages,...),"") {
+DEFUN_NEW("ALLOCATE-CONTIGUOUS-PAGES",object,fSallocate_contiguous_pages,SI,1,2,NONE,OO,OO,OO,OO,(object onpages,...),"") {
 
   int nargs=VFUN_NARGS;
   object really_do;
   va_list ap;
+  fixnum npages=fixint(onpages);
   
   really_do=Cnil;
   if (nargs>=2) {
-    va_start(ap,npages);
+    va_start(ap,onpages);
     really_do=va_arg(ap,object);
     va_end(ap);
   }
@@ -1295,15 +1296,16 @@ DEFUN_NEW("MAXIMUM-CONTIGUOUS-PAGES",object,fSmaximum_contiguous_pages,SI,0,0,NO
 }
 
 
-DEFUN_NEW("ALLOCATE-RELOCATABLE-PAGES",object,fSallocate_relocatable_pages,SI,1,2,NONE,OI,OO,OO,OO,(fixnum npages,...),"") {
+DEFUN_NEW("ALLOCATE-RELOCATABLE-PAGES",object,fSallocate_relocatable_pages,SI,1,2,NONE,OO,OO,OO,OO,(object onpages,...),"") {
 
   int nargs=VFUN_NARGS;
   object really_do;
   va_list ap;
+  fixnum npages=fixint(onpages);
   
   really_do=Cnil;
   if (nargs>=2) {
-    va_start(ap,npages);
+    va_start(ap,onpages);
     really_do=va_arg(ap,object);
     va_end(ap);
   }
@@ -1321,17 +1323,18 @@ DEFUN_NEW("ALLOCATE-RELOCATABLE-PAGES",object,fSallocate_relocatable_pages,SI,1,
 
 }
 
-DEFUN_NEW("ALLOCATE",object,fSallocate,SI,2,3,NONE,OO,IO,OO,OO,(object type,fixnum npages,...),"") {
+DEFUN_NEW("ALLOCATE",object,fSallocate,SI,2,3,NONE,OO,OO,OO,OO,(object type,object onpages,...),"") {
 
   int nargs=VFUN_NARGS;
   object really_do;
   va_list ap;
   struct typemanager *tm;
+  fixnum npages=fixint(onpages);
   int t;
   
   really_do=Cnil;
   if (nargs>=3) {
-    va_start(ap,npages);
+    va_start(ap,onpages);
     really_do=va_arg(ap,object);
     va_end(ap);
   }
@@ -1339,9 +1342,9 @@ DEFUN_NEW("ALLOCATE",object,fSallocate,SI,2,3,NONE,OO,IO,OO,OO,(object type,fixn
   CHECK_ARG_RANGE(2,3);
   t= t_from_type(type);
   if (t == t_contiguous) 
-    RETURN1(FUNCALL(2,FFN(fSallocate_contiguous_pages)(npages,really_do)));
+    RETURN1(FUNCALL(2,FFN(fSallocate_contiguous_pages)(make_fixnum(npages),really_do)));
   else if (t==t_relocatable) 
-    RETURN1(FUNCALL(2,FFN(fSallocate_relocatable_pages)(npages,really_do)));
+    RETURN1(FUNCALL(2,FFN(fSallocate_relocatable_pages)(make_fixnum(npages),really_do)));
 
 
   if  (npages <= 0)
@@ -1493,7 +1496,7 @@ DEFUN_NEW("SET-STARTING-RELBLOCK-HEAP-MULTIPLE",object,fSset_starting_relb_heap_
   return (object)starting_relb_heap_mult;
 }
   
-DEFUNM_NEW("SET-HOLE-SIZE",object,fSset_hole_size,SI,1,2,NONE,OI,IO,OO,OO,(fixnum npages,...),"") {
+DEFUNM_NEW("SET-HOLE-SIZE",object,fSset_hole_size,SI,1,2,NONE,OO,OO,OO,OO,(object onpages,...),"") {
 
   printf("This function is obsolete -- use SET-STARTING-HOLE-DIVISOR instead\n");
 

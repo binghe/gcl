@@ -349,12 +349,13 @@ DEFUNO_NEW("SVSET", object, fSsvset, SI, 3, 3, NONE, OO, IO, OO,
 */ 
 
 
-DEFUN_NEW("MAKE-VECTOR1",object,fSmake_vector1,SI,3,8,NONE,OI,
-      IO,OO,OO,(fixnum n,fixnum elt_type,object staticp,...),"")
+DEFUN_NEW("MAKE-VECTOR1",object,fSmake_vector1,SI,3,8,NONE,OO,
+      OO,OO,OO,(object on,object oelt_type,object staticp,...),"")
   
 { 
     int displaced_index_offset=0;
     int Inargs = VFUN_NARGS - 3;
+    fixnum n=fixint(on),elt_type=fixint(oelt_type);
     va_list Iap;object fillp;object initial_element;object displaced_to;object V9;
     Inargs = VFUN_NARGS - 3 ;
     { object x;
@@ -442,7 +443,7 @@ DEFUN_NEW("MAKE-VECTOR1",object,fSmake_vector1,SI,3,8,NONE,OI,
 object 
 fSmake_vector1_1(fixnum n,fixnum elt_type,object staticp) {
   VFUN_NARGS=3;
-  return FFN(fSmake_vector1)(n,elt_type,staticp);
+  return FFN(fSmake_vector1)(make_fixnum(n),make_fixnum(elt_type),staticp);
 }
 
 
@@ -507,8 +508,8 @@ DEFUNO_NEW("MAKE-VECTOR",object,fSmake_vector,SI,7,8,NONE,
   /* 8 args */
 
   VFUN_NARGS = 8;
-  x = FFN(fSmake_vector1)(Mfix(x1),  /* n */
-		     fix(fSget_aelttype(x0)), /*aelt type */
+  x = FFN(fSmake_vector1)(x1,  /* n */
+		     fSget_aelttype(x0), /*aelt type */
 		     x6, /* staticp */
 		     x3, /* fillp */ 
 		     initial_elt, /* initial element */
