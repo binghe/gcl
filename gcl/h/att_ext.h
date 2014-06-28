@@ -199,10 +199,10 @@ object read_fasl_data();
 
 #ifdef UNIX
 /*  unixfsys.c  */
-void *backup_fopen();
+FILE *backup_fopen();
 #else
 /*  filesystem.c  */
-void *backup_fopen();
+FILE *backup_fopen();
 #endif
 
 /*  frame.c  */

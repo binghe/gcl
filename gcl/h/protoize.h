@@ -324,7 +324,7 @@ typedef void (*funcvoid)(void);
 /* nsocket.c:329:OF */ extern object fSgetpeername (object sock); /* (sock) object sock; */
 /* nsocket.c:353:OF */ extern object fSgetsockname (object sock); /* (sock) object sock; */
 /* nsocket.c:385:OF */ extern object fSset_blocking (object sock, object setBlocking); /* (sock, setBlocking) object sock; object setBlocking; */
-/* nsocket.c:484:OF */ extern int getOneChar (void *fp); /* (fp) FILE *fp; */
+/* nsocket.c:484:OF */ extern int getOneChar (FILE *fp); /* (fp) FILE *fp; */
 /* nsocket.c:539:OF */ extern void ungetCharGclSocket (int c, object strm); /* (c, strm) int c; object strm; */
 #ifndef __MINGW32__
 /* nsocket.c:592:OF */ extern void tcpCloseSocket (int fd); /* (fd) int fd; */
@@ -510,9 +510,9 @@ typedef void (*funcvoid)(void);
 /* unixfsys.c:145:OF */ extern char *getwd (char *buffer); /* (buffer) char *buffer; */
 /* unixfsys.c:209:OF */ extern void coerce_to_filename (object pathname, char *p); /* (pathname, p) object pathname; char *p; */
 /* unixfsys.c:329:OF */ extern bool file_exists (object file); /* (file) object file; */
-/* unixfsys.c:359:OF */ extern void *backup_fopen (char *filename, char *option); /* (filename, option) char *filename; char *option; */
-/* unixfsys.c:359:OF */ extern void *fopen_not_dir (char *filename, char *option); /* (filename, option) char *filename; char *option; */
-/* unixfsys.c:372:OF */ extern int file_len (void *fp); /* (fp) FILE *fp; */
+/* unixfsys.c:359:OF */ extern FILE *backup_fopen (char *filename, char *option); /* (filename, option) char *filename; char *option; */
+/* unixfsys.c:359:OF */ extern FILE *fopen_not_dir (char *filename, char *option); /* (filename, option) char *filename; char *option; */
+/* unixfsys.c:372:OF */ extern int file_len (FILE *fp); /* (fp) FILE *fp; */
 /* unixfsys.c:382:OF */ extern object truename (object); /* () */
 /* unixfsys.c:382:OF */ extern void Ltruename (void); /* () */
 /* unixfsys.c:418:OF */ extern object fSsetenv (object variable, object value); /* (variable, value) object variable; object value; */
@@ -556,521 +556,778 @@ typedef void (*funcvoid)(void);
 
 /*  readline.d */
 extern int readline_on;
-void gcl_init_readline(void);
+void
+gcl_init_readline(void);
 
-void gcl_init_readline_function(void);
+void
+gcl_init_readline_function(void);
 
 /*  sys_gcl.c */
-void gcl_init_init(void);
+void
+gcl_init_init(void);
 
 /* misc */
-void gcl_init_symbol(void);
+void
+gcl_init_symbol(void);
 
-void gcl_init_package(void);
+void
+gcl_init_package(void);
 
-void gcl_init_character(void);
+void
+gcl_init_character(void);
 
-void gcl_init_read(void);
+void
+gcl_init_read(void);
 
-void gcl_init_pathname(void);
+void
+gcl_init_pathname(void);
 
-void gcl_init_print(void);
+void
+gcl_init_print(void);
 
-void gcl_init_character_function(void);
+void
+gcl_init_character_function(void);
 
-void gcl_init_file_function(void);
+void
+gcl_init_file_function(void);
 
-void gcl_init_list_function(void);
+void
+gcl_init_list_function(void);
 
-void gcl_init_package_function(void);
+void
+gcl_init_package_function(void);
 
-void gcl_init_pathname_function(void);
+void
+gcl_init_pathname_function(void);
 
-void gcl_init_print_function(void);
+void
+gcl_init_print_function(void);
 
-void gcl_init_read_function(void);
+void
+gcl_init_read_function(void);
 
-void gcl_init_sequence_function(void);
+void
+gcl_init_sequence_function(void);
 
-void gcl_init_string_function(void);
+void
+gcl_init_string_function(void);
 
-void gcl_init_symbol_function(void);
+void
+gcl_init_symbol_function(void);
 
-void gcl_init_socket_function(void);
+void
+gcl_init_socket_function(void);
 
-void gcl_init_hash(void);
+void
+gcl_init_hash(void);
 
-void import(object,object);
+void
+import(object,object);
 
-void export(object,object);
+void
+export(object,object);
 
-void NewInit(void);
+void
+NewInit(void);
 
-void gcl_init_system(object);
+void
+gcl_init_system(object);
 
-void set_up_string_register(char *);
+void
+set_up_string_register(char *);
 
-bool endp1(object);
+bool
+endp1(object);
 
-void stack_cons(void);
+void
+stack_cons(void);
 
-bool char_equal(object,object);
+bool
+char_equal(object,object);
 
-bool string_equal(object,object);
+bool
+string_equal(object,object);
 
-bool string_eq(object,object);
+bool
+string_eq(object,object);
 
-bool remf(object *,object);
+bool
+remf(object *,object);
 
-bool keywordp(object);
+bool
+keywordp(object);
 
-int pack_hash(object);
+int
+pack_hash(object);
 
-void load(const char *);
+void
+load(const char *);
 
-bool member_eq(object,object);
+bool
+member_eq(object,object);
 
-void delete_eq(object,object *);
+void
+delete_eq(object,object *);
 
-int length(object);
+int
+length(object);
 
-int rl_getc_em(void *);
+int
+rl_getc_em(FILE *);
 
-void setupPRINTdefault(object);
+void
+setupPRINTdefault(object);
 
-void write_str(char *);
+void
+write_str(char *);
 
-void write_object(object,int);
+void
+write_object(object,int);
 
-void cleanupPRINT(void);
+void
+cleanupPRINT(void);
 
-int fasload(object);
+int
+fasload(object);
 
-int readc_stream(object);
+int
+readc_stream(object);
 
-void unreadc_stream(int,object);
+void
+unreadc_stream(int,object);
 
-void end_of_stream(object);
+void
+end_of_stream(object);
 
-bool stream_at_end(object);
+bool
+stream_at_end(object);
 
-int digitp(int,int);
+int
+digitp(int,int);
 
-bool char_eq(object,object);
+bool
+char_eq(object,object);
 
-bool listen_stream(object);
+bool
+listen_stream(object);
 
-void get_string_start_end(object,object,object,int *,int *);
+void
+get_string_start_end(object,object,object,int *,int *);
 
-int file_column(object);
+int
+file_column(object);
 
-int writec_stream(int,object);
+int
+writec_stream(int,object);
 
-int digit_weight(int,int);
+int
+digit_weight(int,int);
 
-void flush_stream(object);
+void
+flush_stream(object);
 
-void writestr_stream(char *,object);
+void
+writestr_stream(char *,object);
 
-void write_string(object,object);
+void
+write_string(object,object);
 
-void edit_double(int, double, int *, char *, int *);
+void
+edit_double(int, double, int *, char *, int *);
 
-void sethash(object,object,object);
+void
+sethash(object,object,object);
 
-int file_position(object);
+int
+file_position(object);
 
-int file_position_set(object, int);
+int
+file_position_set(object, int);
 
-void princ_str(char *s, object);
+void
+princ_str(char *s, object);
 
-void close_stream(object);
+void
+close_stream(object);
 
-void build_symbol_table(void);
+void
+build_symbol_table(void);
 
-void gcl_init_file(void);
+void
+gcl_init_file(void);
 
-object aset1(object,fixnum,object);
+object
+aset1(object,fixnum,object);
 
-void dfprintf(void *,char *,...);
+void
+dfprintf(FILE *,char *,...);
 
-void Lmake_list(void);
+void
+Lmake_list(void);
 
-void Llast(void);
+void
+Llast(void);
 
+void
+Lgensym(void);
+
+void
+Lldiff(void);
+
+void
+Lintern(void);
+
+void
+Lgensym(void);
+
+void
+Lldiff(void);
+
+void
+Lgensym(void);
+
+void
+Lintern(void);
+
+void
+Lintern(void);
+
+void
+Lreconc(void);
+
+void
+Lmember(void);
+
+void
+Ladjoin(void);
+
+void
+Llist(void);
+
+void
+Lappend(void);
+
+void
+Lread(void);
+
+void
+Lread_char(void);
+
+void
+Lchar_eq(void);
+
+void
+Lwrite_char(void);
+
+void
+Lforce_output(void);
+
+void
+Lchar_neq(void);
+
+void
+Llist(void);
+
+void
+Lwrite(void);
+
+void
+Lfresh_line(void);
+
+void
+Lsymbol_package(void);
+
+void
+Lfind_package(void);
+
+void
+Lfind_symbol(void);
+
+void
+Lpackage_name(void);
+
+void
+Lsymbol_plist(void);
+
+void
+Lpackage_nicknames(void);
+
+void
+Lpackage_use_list(void);
+
+void
+Lpackage_used_by_list(void);
+
+void
+Lstandard_char_p(void);
+
+void
+Lstring_char_p(void);
+
+void
+Lchar_code(void);
+
+void
+Lchar_bits(void);
+
+void
+Lchar_font(void);
+
+void
+Lread_line(void);
+
+void
+siLpackage_internal(void);
+
+void
+siLpackage_external(void);
+
+void
+Llist_all_packages(void);
+
+void
+Lgensym(void);
+
+void
+Lread(void);
+
+void
+Lwrite(void);
+
+void
+Lstring_equal(void);
+
+void
+Lclose(void);
+
+void
+Lnamestring(void);
+
+void
+Lmake_echo_stream(void);
+
+void
+Lmake_broadcast_stream(void);
+
+void
+Lmake_two_way_stream(void);
+
+void
+Lbutlast(void);
+
+void
+Ladjoin(void);
+
+void
+Lstring_downcase(void);
+
+void
+Lmember(void);
+
+void
+Lgensym(void);
+
+void
+Llist_all_packages(void);
+
+void
+Lfind_symbol(void);
+
+void
+Lstring_equal(void);
+
+void
+Lfind_package(void);
+
+void
+siLpackage_internal(void);
+
+void
+siLpackage_external(void);
+
+void
+Lpackage_use_list(void);
+
+void
+Lreconc(void);
+
+void
+Lstandard_char_p(void);
+
+void
+Lstring_char_p(void);
+
+void
+Lcharacter(void);
+
+void
+Llength(void);
+
+void
+Lreconc(void);
+
+void
+Llength(void);
+
+void
+Lgensym(void);
+
+void
+Llist_length(void);
+
+void
+Lgensym(void);
+
+void
+Lbutlast(void);
+
+void
+Lnconc(void);
+
+void
+Lfind_package(void);
+
+void
+Lpackage_name(void);
+
+void
+Llist(void);
+
+void
+Lfresh_line(void);
+
+void
+Lread_char(void);
+
+void
+Lunread_char(void);
+
+void
+Lread_line(void);
+
+void
+Lread(void);
+
+void
+Lforce_output(void);
+
+void
+Lwrite(void);
+
+void
+Lmember(void);
+
+void
+siLpackage_internal(void);
+
+void
+siLpackage_external(void);
+
+void
+Lmake_pathname(void);
+
+void
+Lnamestring(void);
+
+void
+Lclose(void);
+
+void
+Lgensym(void);
+
+void
+Lfresh_line(void);
+
+void
+Llist(void);
+
+void
+Lread_char(void);
+
+void
+Lchar_eq(void);
+
+void
+Lfinish_output(void);
+
+void
+Lchar_neq(void);
+
+void
+Lwrite(void);
+
+void
+Lgensym(void);
+
+void
+Lmember(void);
+
+void
+Lappend(void);
+
+void
+Lcopy_tree(void);
+
+void
+Ladjoin(void);
+
+void
+Lgetf(void);
+
+void
+Lsubst(void);
+
+void
+Lsymbol_package(void);
+
+void
+Lcopy_list(void);
+
+void
+Lintern(void);
+
+void
+Lfind_package(void);
+
+void
+LlistA(void);
+
+void
+Llist(void);
+
+void
+Lgetf(void);
+
+void
+Lstreamp(void);
+
+void
+Lpeek_char(void);
+
+void
+Lread_char(void);
+
+void
+Lread_line(void);
+
+void
+Lset_macro_character(void);
+
+void
+Lclrhash(void);
+
+void
+siLhash_set(void);
+
+void
+Lgethash(void);
+
+void
+Lremhash(void);
+
+void
+Llist_all_packages(void);
+
+void
+Lintern(void);
+
+void
+Lunintern(void);
+
+void
+Lsubseq(void);
+
+void
+Lsymbol_package(void);
+
+void
+Lfind_package(void);
+
+void
+siLpackage_internal(void);
+
+void
+siLpackage_external(void);
+
+void
+Lread_char(void);
+
+void
+Lfile_length(void);
+
+void
+Lfile_position(void);
+
+void
+Lclose(void);
+
+void
+Lsubseq(void);
+
+void
+Lnamestring(void);
+
+void
+Lmerge_pathnames(void);
+
+void
+Lcopy_list(void);
+
+void
+Lread_line(void);
+
+void
+Lgensym(void);
+
+void
+Lcopy_list(void);
+
+void
+Lintern(void);
+
+void
+Lappend(void);
+
+void
+Lgensym(void);
+
+void
+Lcopy_list(void);
+
+void
+Lmember(void);
+
+void
+Lintern(void);
+
+void
+Lappend(void);
+
+void
+Lfind_package(void);
+
+void
+Lpackage_name(void);
+
+void
+Lpackage_nicknames(void);
+
+void
+Lpackage_use_list(void);
+
+void
+siLpackage_external(void);
+
+void
+siLpackage_internal(void);
+
+void
+Lsymbol_package(void);
+
+void
+Lappend(void);
+
+void
+Lgentemp(void);
+
+void
+Lgensym(void);
+
+void
+Lassoc(void);
+
+void
+Ladjoin(void);
+
+void
+Lstring_eq(void);
+
+void
+Lmember(void);
+
+void
+Lgethash(void);
+
+void
+Lfinish_output(void);
+
+void
+Lread(void);
+
+void
+Lmake_hash_table(void);
+
+void
+siLhash_set(void);
+
+void
+Lrevappend(void);
+
+void
+Lreconc(void);
+
+void
+Lcopy_list(void);
+
+void
+LlistA(void);
+
+void
+Lfind_package(void);
+
+void
+siLpackage_internal(void);
+
+void
+siLpackage_external(void);
+
+void
+princ_char(int,object);
+
+void
+Ldigit_char_p(void);
+
+void
+Lwrite_byte(void);
+
+void
+FEpackage_error(object,const char *s);
+
+int
+system_time_zone_helper(void);
+
+object
+call_proc_new(object,void **,int,object,va_list);
+
+object 
+call_vproc_new(object,void *,object,va_list);
+
+void
+funcall_with_catcher(object, object);
+
+void
+siLset_symbol_plist(void);
+
+void
+Lhash_table_p(void);
+
+void
+Lreadtablep(void);
+
+int 
+fixnum_expt(int, int);
+
+void
+check_alist(object);
+
+void
+ck_larg_at_least(int,object);
+
+void
+vfun_wrong_number_of_args(object);
+
+/* FIXME from lfun_list.lsp -- should be automatically generated */
 void Lgensym(void);
-
-void Lldiff(void);
-
-void Lintern(void);
-
-void Lgensym(void);
-
-void Lldiff(void);
-
-void Lgensym(void);
-
-void Lintern(void);
-
-void Lintern(void);
-
-void Lreconc(void);
-
-void Lmember(void);
-
-void Ladjoin(void);
-
-void Llist(void);
-
-void Lappend(void);
-
-void Lread(void);
-
-void Lread_char(void);
-
-void Lchar_eq(void);
-
-void Lwrite_char(void);
-
-void Lforce_output(void);
-
-void Lchar_neq(void);
-
-void Llist(void);
-
-void Lwrite(void);
-
-void Lfresh_line(void);
-
-void Lsymbol_package(void);
-
-void Lfind_package(void);
-
-void Lfind_symbol(void);
-
-void Lpackage_name(void);
-
-void Lsymbol_plist(void);
-
-void Lpackage_nicknames(void);
-
-void Lpackage_use_list(void);
-
-void Lpackage_used_by_list(void);
-
-void Lstandard_char_p(void);
-
-void Lstring_char_p(void);
-
-void Lchar_code(void);
-
-void Lchar_bits(void);
-
-void Lchar_font(void);
-
-void Lread_line(void);
-
-void siLpackage_internal(void);
-
-void siLpackage_external(void);
-
-void Llist_all_packages(void);
-
-void Lgensym(void);
-
-void Lread(void);
-
-void Lwrite(void);
-
-void Lstring_equal(void);
-
-void Lclose(void);
-
-void Lnamestring(void);
-
-void Lmake_echo_stream(void);
-
-void Lmake_broadcast_stream(void);
-
-void Lmake_two_way_stream(void);
-
-void Lbutlast(void);
-
-void Ladjoin(void);
-
-void Lstring_downcase(void);
-
-void Lmember(void);
-
-void Lgensym(void);
-
-void Llist_all_packages(void);
-
-void Lfind_symbol(void);
-
-void Lstring_equal(void);
-
-void Lfind_package(void);
-
-void siLpackage_internal(void);
-
-void siLpackage_external(void);
-
-void Lpackage_use_list(void);
-
-void Lreconc(void);
-
-void Lstandard_char_p(void);
-
-void Lstring_char_p(void);
-
-void Lcharacter(void);
-
-void Llength(void);
-
-void Lreconc(void);
-
-void Llength(void);
-
-void Lgensym(void);
-
-void Llist_length(void);
-
-void Lgensym(void);
-
-void Lbutlast(void);
-
-void Lnconc(void);
-
-void Lfind_package(void);
-
-void Lpackage_name(void);
-
-void Llist(void);
-
-void Lfresh_line(void);
-
-void Lread_char(void);
-
-void Lunread_char(void);
-
-void Lread_line(void);
-
-void Lread(void);
-
-void Lforce_output(void);
-
-void Lwrite(void);
-
-void Lmember(void);
-
-void siLpackage_internal(void);
-
-void siLpackage_external(void);
-
-void Lmake_pathname(void);
-
-void Lnamestring(void);
-
-void Lclose(void);
-
-void Lgensym(void);
-
-void Lfresh_line(void);
-
-void Llist(void);
-
-void Lread_char(void);
-
-void Lchar_eq(void);
-
-void Lfinish_output(void);
-
-void Lchar_neq(void);
-
-void Lwrite(void);
-
-void Lgensym(void);
-
-void Lmember(void);
-
-void Lappend(void);
-
-void Lcopy_tree(void);
-
-void Ladjoin(void);
-
-void Lgetf(void);
-
-void Lsubst(void);
-
-void Lsymbol_package(void);
-
-void Lcopy_list(void);
-
-void Lintern(void);
-
-void Lfind_package(void);
-
-void LlistA(void);
-
-void Llist(void);
-
-void Lgetf(void);
-
-void Lstreamp(void);
-
-void Lpeek_char(void);
-
-void Lread_char(void);
-
-void Lread_line(void);
-
-void Lset_macro_character(void);
-
-void Lclrhash(void);
-
-void siLhash_set(void);
-
-void Lgethash(void);
-
-void Lremhash(void);
-
-void Llist_all_packages(void);
-
-void Lintern(void);
-
-void Lunintern(void);
-
-void Lsubseq(void);
-
-void Lsymbol_package(void);
-
-void Lfind_package(void);
-
-void siLpackage_internal(void);
-
-void siLpackage_external(void);
-
-void Lread_char(void);
-
-void Lfile_length(void);
-
-void Lfile_position(void);
-
-void Lclose(void);
-
-void Lsubseq(void);
-
-void Lnamestring(void);
-
-void Lmerge_pathnames(void);
-
-void Lcopy_list(void);
-
-void Lread_line(void);
-
-void Lgensym(void);
-
-void Lcopy_list(void);
-
-void Lintern(void);
-
-void Lappend(void);
-
-void Lgensym(void);
-
-void Lcopy_list(void);
-
-void Lmember(void);
-
-void Lintern(void);
-
-void Lappend(void);
-
-void Lfind_package(void);
-
-void Lpackage_name(void);
-
-void Lpackage_nicknames(void);
-
-void Lpackage_use_list(void);
-
-void siLpackage_external(void);
-
-void siLpackage_internal(void);
-
-void Lsymbol_package(void);
-
-void Lappend(void);
-
-void Lgentemp(void);
-
-void Lgensym(void);
-
-void Lassoc(void);
-
-void Ladjoin(void);
-
-void Lstring_eq(void);
-
-void Lmember(void);
-
-void Lgethash(void);
-
-void Lfinish_output(void);
-
-void Lread(void);
-
-void Lmake_hash_table(void);
-
-void siLhash_set(void);
-
-void Lrevappend(void);
-
-void Lreconc(void);
-
-void Lcopy_list(void);
-
-void LlistA(void);
-
-void Lfind_package(void);
-
-void siLpackage_internal(void);
-
-void siLpackage_external(void);
-
-void princ_char(int,object);
-
-void Ldigit_char_p(void);
-
-void Lwrite_byte(void);
-
-void FEpackage_error(object,const char *s);
-
-int system_time_zone_helper(void);
-
-object call_proc_new(object,void **,int,object,va_list);
-
-object  call_vproc_new(object,void *,object,va_list);
-
-void funcall_with_catcher(object, object);
-
-void siLset_symbol_plist(void);
-
-void Lhash_table_p(void);
-
-void Lreadtablep(void);
-
-int  fixnum_expt(int, int);
-
-void check_alist(object);
-
-void ck_larg_at_least(int,object);
-
-void vfun_wrong_number_of_args(object);
-
-/* FIXME from lfun_list.lsp -- should be automatically generated */ void Lgensym(void);
 void Lsubseq(void);
 void Lminusp(void);
 void Linteger_decode_float(void);
@@ -1479,26 +1736,38 @@ void siLrem_f(void);
 void siLset_symbol_plist(void);
 void siLbit_array_op(void);
 
-object cmod(object);
-object ctimes(object,object);
-object cdifference(object,object);
-object cplus(object,object);
+object
+cmod(object);
+object
+ctimes(object,object);
+object
+cdifference(object,object);
+object
+cplus(object,object);
 
-object Icall_error_handler(object,object,int,...);
+object
+Icall_error_handler(object,object,int,...);
 
-void * gcl_gmp_alloc(size_t);
+void *
+gcl_gmp_alloc(size_t);
 
-int my_plt(const char *,unsigned long *);
+int
+my_plt(const char *,unsigned long *);
 
-int parse_plt(void);
+int
+parse_plt(void);
 
-int sgc_count_read_only_type(int);
+int
+sgc_count_read_only_type(int);
 
-int  gcl_isnormal_double(double);
+int 
+gcl_isnormal_double(double);
 
-int  gcl_isnormal_float(float);
+int 
+gcl_isnormal_float(float);
 
-object find_init_name1(char *,unsigned);
+object
+find_init_name1(char *,unsigned);
 
 #ifdef SGC
 void
@@ -1526,75 +1795,112 @@ void recreate_heap1 ( void );
 #endif
 
 #ifdef GCL_GPROF
-void gprof_cleanup(void);
+void
+gprof_cleanup(void);
 #endif
 
-int msystem(const char *);
+int
+msystem(const char *);
 
-void assert_error(const char *,unsigned,const char *,const char *);
+void
+assert_error(const char *,unsigned,const char *,const char *);
 
 #ifdef _WIN32
-void detect_wine(void);
+void
+detect_wine(void);
 
-void init_shared_memory(void);
+void
+init_shared_memory(void);
 
-void * alloca(size_t);
+void *
+alloca(size_t);
 
-object find_init_string(const char *);
+object
+find_init_string(const char *);
 
 #endif
 
-void * get_mmap(void *,void **);
+void *
+get_mmap(FILE *,void **);
 
-int un_mmap(void *,void *);
+int
+un_mmap(void *,void *);
 
-object fSuse_fast_links_2(object,object);
+object
+fSuse_fast_links_2(object,object);
 
-MP_INT * otoi(object);
-void isetq_fix(MP_INT *,int);
-int mpz_to_mpz1(MP_INT *,MP_INT *,void *);
-int mpz_to_mpz(MP_INT *,MP_INT *);
-int obj_to_mpz1(object,MP_INT *,void *);
-int obj_to_mpz(object,MP_INT *);
- struct htent *gethash(object,object);
+MP_INT *
+otoi(object);
+void
+isetq_fix(MP_INT *,int);
+int
+mpz_to_mpz1(MP_INT *,MP_INT *,void *);
+int
+mpz_to_mpz(MP_INT *,MP_INT *);
+int
+obj_to_mpz1(object,MP_INT *,void *);
+int
+obj_to_mpz(object,MP_INT *);
 
-int update_real_maxpage(void);
+struct htent *gethash(object,object);
 
-inline fixnum set_tm_maxpage(struct typemanager *,fixnum);
+int
+update_real_maxpage(void);
 
-void init_gmp_rnd_state(__gmp_randstate_struct *);
+inline fixnum
+set_tm_maxpage(struct typemanager *,fixnum);
 
-inline void set_sgc_bit(struct pageinfo *,void *);
+void
+init_gmp_rnd_state(__gmp_randstate_struct *);
 
-void reinit_gmp(void);
+inline void
+set_sgc_bit(struct pageinfo *,void *);
 
-object mod(object,object);
+void
+reinit_gmp(void);
 
-inline void intdivrem(object,object,fixnum,object *,object *);
+object
+mod(object,object);
 
-inline object integer_count(object);
+inline void
+intdivrem(object,object,fixnum,object *,object *);
 
-inline object integer_length(object);
+inline object
+integer_count(object);
 
-inline bool integer_bitp(object,object);
+inline object
+integer_length(object);
 
-inline object  fixnum_times(fixnum,fixnum);
+inline bool
+integer_bitp(object,object);
 
-inline object log_op2(fixnum,object,object);
+inline object 
+fixnum_times(fixnum,fixnum);
 
-inline object fixnum_big_shift(fixnum,fixnum);
+inline object
+log_op2(fixnum,object,object);
 
-inline object integer_shift(object,object);
+inline object
+fixnum_big_shift(fixnum,fixnum);
 
-object number_abs(object);
+inline object
+integer_shift(object,object);
 
-object number_signum(object);
+object
+number_abs(object);
+
+object
+number_signum(object);
 
 
-object number_ldb(object,object);
-object number_ldbt(object,object);
-object number_dpb(object,object,object);
-object number_dpf(object,object,object);
+object
+number_ldb(object,object);
+object
+number_ldbt(object,object);
+object
+number_dpb(object,object,object);
+object
+number_dpf(object,object,object);
 
 #if defined(DARWIN)
 void init_darwin_zone_compat ();

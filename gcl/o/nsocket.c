@@ -504,7 +504,7 @@ joe(int x) { return x; }
   the EOF, but the stream is not closed.
 */   
 int
-getOneChar(void *fp)
+getOneChar(FILE *fp)
 {
   fd_set readfds;
   struct timeval timeout;

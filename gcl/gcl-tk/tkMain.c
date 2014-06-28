@@ -108,7 +108,7 @@ int debug = 0;
 static void guiCreateCommand _ANSI_ARGS_((int idLispObject, int iSlot , char *arglist));
 
 void
-dfprintf(void *fp,char *s,...) {
+dfprintf(FILE *fp,char *s,...) {
 
   va_list args;
 
