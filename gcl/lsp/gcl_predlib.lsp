@@ -755,6 +755,7 @@
 	 (case type
 	   ,@(mapcar (lambda (x) `(,x (,(get x 'type-predicate) object))) 
 	   	     '(string list vector bit-vector array character float cons))
+	   (function (unless (symbolp object) (functionp object)));FIXME
 	   (otherwise (typep object type)))
        (return-from coerce object))
      (case ctp
