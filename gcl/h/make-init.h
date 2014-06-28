@@ -79,3 +79,4 @@
 #define DO_INIT(x) x
 
 #include <signal.h>
+#include <fenv.h>
