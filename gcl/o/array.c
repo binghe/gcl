@@ -66,7 +66,7 @@ DEFUNO_NEW("AREF", object, fLaref, LISP, 1, ARRAY_RANK_LIMIT,
        NONE, OO, OO, OO, OO,void,Laref,(object x,object oi, ...),"")
 { int n = VFUN_NARGS;
   int i1;
-  fixnum i=fix(oi);
+  fixnum i=n>1 ? fix(oi) : 0;
   va_list ap;
   if (type_of(x) == t_array)
     {int m ;
