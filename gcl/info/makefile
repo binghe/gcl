@@ -32,7 +32,7 @@ GCL_MAN= chap-1.texi chap-2.texi chap-3.texi chap-4.texi chap-5.texi \
 	 chap-24.texi chap-25.texi chap-26.texi chap-a.texi
 
 %.pdf: %.dvi
-	dvipdfm $*
+	dvipdfm $<
 
 gcl-si.dvi: ${GCL_SI} gcl-si.texi
 	TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl-si.texi || true
