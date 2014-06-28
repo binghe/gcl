@@ -52,7 +52,7 @@
 	 (defentry ,n ,(mapcar 'car args) (,rt ,(string-downcase (symbol-name n)))))))
   
   (deft fdivp object ((object x) (object y))
-    "{double a=lf(x),b=lf(y),c;"
+    "{volatile double a=lf(x),b=lf(y),c;"
     "__asm__ __volatile__ (\"fldl %1;fldl %0;fdivp %%st,%%st(1);fstpl %2;fwait\" "
     ": \"=m\" (a), \"=m\" (b) : \"m\" (c));"
     "return make_longfloat(c);}")
@@ -78,25 +78,25 @@
     "return z;}")
   
   (deft divsd object ((object x) (object y))
-    "{double a=lf(x),b=lf(y),c;"
+    "{volatile double a=lf(x),b=lf(y),c;"
     "__asm__ __volatile__ (\"movsd %0,%%xmm0;movsd %1,%%xmm1;divsd %%xmm1,%%xmm0;movsd %%xmm0,%2\" "
     ": \"=m\" (a), \"=m\" (b) : \"m\" (c));"
     "return make_longfloat(c);}")
   
   (deft divsdm object ((object x) (object y))
-    "{double a=lf(x),b=lf(y),c;"
+    "{volatile double a=lf(x),b=lf(y),c;"
     "__asm__ __volatile__ (\"movsd %0,%%xmm0;divsd %1,%%xmm0;movsd %%xmm0,%2\" "
     ": \"=m\" (a), \"=m\" (b) : \"m\" (c));"
     "return make_longfloat(c);}")
   
   (deft divss object ((object x) (object y))
-    "{float a=sf(x),b=sf(y),c;"
+    "{volatile float a=sf(x),b=sf(y),c;"
     "__asm__ __volatile__ (\"movss %0,%%xmm0;movss %1,%%xmm1;divss %%xmm1,%%xmm0;movss %%xmm0,%2\" "
     ": \"=m\" (a), \"=m\" (b) : \"m\" (c));"
     "return make_shortfloat(c);}")
   
   (deft divssm object ((object x) (object y))
-    "{float a=sf(x),b=sf(y),c;"
+    "{volatile float a=sf(x),b=sf(y),c;"
     "__asm__ __volatile__ (\"movss %0,%%xmm0;divss %1,%%xmm0;movss %%xmm0,%2\" "
     ": \"=m\" (a), \"=m\" (b) : \"m\" (c));"
     "return make_shortfloat(c);}")
