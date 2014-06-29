@@ -79,7 +79,7 @@ gcl/index.html: gcl.texi
 	touch $@
 	-$(HTML_CMD) gcl.texi
 
-install: $(GCL_PDF) $(GCL_HTML)
+install: #$(GCL_PDF) $(GCL_HTML)
 	mkdir -p $(DESTDIR)${INFO_DIR}
 	[ -f $(DESTDIR)$(INFO_DIR)dir ] || touch $(DESTDIR)$(INFO_DIR)dir
 	grep gcl-si $(DESTDIR)${INFO_DIR}dir >/dev/null 2>&1 || \
