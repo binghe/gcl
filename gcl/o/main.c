@@ -1018,13 +1018,13 @@ my_fprintf(void *v,const char *f,...) {
 
 static int
 my_read(bfd_vma memaddr, bfd_byte *myaddr, unsigned int length, struct disassemble_info *dinfo) {
-  memcpy(myaddr,(void *)memaddr,length);
+  memcpy(myaddr,(void *)(long)memaddr,length);
   return 0;
 }
 
 static void
 my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
-  dinfo->fprintf_func(dinfo->stream,"%p",(void *)addr);
+  dinfo->fprintf_func(dinfo->stream,"%p",(void *)(long)addr);
 }
 
 #endif
@@ -1034,16 +1034,17 @@ DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE
 #ifdef HAVE_PRINT_INSN_I386
 
   static disassemble_info i;
-  /* static int k; */
   int j;
 
-  /* if (!k) {init_disassemble_info(&i,NULL,my_fprintf);k=1;} */
   memset(&i,0,sizeof(i));
+#ifdef __i386__
+  i.disassembler_options="i386";
+#endif
   i.fprintf_func=my_fprintf;
   i.read_memory_func=my_read;
   i.print_address_func=my_pa;
   bp=b;
-  
+
   j=PRINT_INSN(addr,&i);
   my_fprintf(NULL," ;");
   return MMcons(make_simple_string(b),make_fixnum(j));
