@@ -155,7 +155,7 @@ do { int c = 0; \
 #define UC(a_) ((ucontext_t *)a_)
 #define SF(a_) ((siginfo_t *)a_)
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__linux__) && (defined(__x86_64__) || defined(__i386__))
 
 /* #define FPE_CODE(i_) make_fixnum((fixnum)SF(i_)->si_code) */
 #ifdef __i386__
