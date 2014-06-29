@@ -167,7 +167,7 @@ DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixn
 #elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
-    unsigned short s;
+    unsigned short s=0;
     unsigned int i;
     ASM("fnstcw %0" :: "m" (s));
     s=(s|FE_ALL_EXCEPT)&(~x);
@@ -194,7 +194,7 @@ DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(vo
 #elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
-    unsigned int i;
+    unsigned int i=0;
     ASM("fnclex");
     ASM("stmxcsr %0" :: "m" (i));
     i=(i|(FE_ALL_EXCEPT<<7));
