@@ -85,7 +85,7 @@ fasload(object faslfile) {
 
   if (!(dlp = dlopen(buf,RTLD_NOW))) {
     fputs(dlerror(),stderr);
-    FEerror("Cannot open for dynamic link ~a",1,make_simple_string(faslfile));
+    FEerror("Cannot open for dynamic link ~a",1,make_simple_string(filename));
   }
   
 
@@ -95,7 +95,7 @@ fasload(object faslfile) {
   b[x->st.st_fillp]=0;
   if (!(fptr=dlsym(dlp,b))) {
     fputs(dlerror(),stderr);
-    FEerror("Cannot lookup ~a in ~a",2,make_simple_string(b),make_simple_string(faslfile));
+    FEerror("Cannot lookup ~a in ~a",2,make_simple_string(b),make_simple_string(filename));
   }
 
   SEEK_TO_END_OFILE(faslstream->sm.sm_fp);

@@ -175,3 +175,4 @@ int putc(int,void *);
 void vfun_wrong_number_of_args(object);
 void ihs_overflow (void);
 double object_to_double(object);
+void gcl_init_or_load1(void (*)(void),const char *);

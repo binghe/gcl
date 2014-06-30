@@ -47,13 +47,13 @@ where 'FUN' is the LISP object with pname FUN, etc.
 
 */
 
-#define lex_copy()	ihs_top->ihs_base = vs_top;  \
+#define lex_copy()	if (ihs_top>=ihs_org) ihs_top->ihs_base = vs_top;  \
 			vs_push(lex_env[0]);  \
                   	vs_push(lex_env[1]);  \
                   	vs_push(lex_env[2]);  \
 			lex_env = vs_top - 3
 
-#define lex_new()	ihs_top->ihs_base = vs_top;  \
+#define lex_new()	if (ihs_top>=ihs_org) ihs_top->ihs_base = vs_top; \
 			lex_env = vs_top;  \
 			vs_top[0] = vs_top[1] = vs_top[2] = Cnil;  \
 			vs_top += 3
