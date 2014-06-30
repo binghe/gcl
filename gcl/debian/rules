@@ -38,9 +38,9 @@ RELOC?=custreloc
 ifeq ($(ARCHT),ia64)
 RELOC=dlopen
 endif
-ifeq ($(ARCHT),ppc64)
-RELOC=dlopen
-endif
+# ifeq ($(ARCHT),ppc64)
+# RELOC=dlopen
+# endif
 #ifeq ($(ARCHT),hppa)
 #RELOC=dlopen
 #endif
