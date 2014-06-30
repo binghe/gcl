@@ -67,7 +67,7 @@ void princ_str(char *,object);
 void sethash(object,object,object);
 void setq(object,object);
 void super_funcall_no_event(object);
-void unwind(frame_ptr,object);
+void unwind(frame_ptr,object) NO_RETURN;
 int object_to_int(object);
 fixnum object_to_fixnum(object);
 char object_to_char(object);

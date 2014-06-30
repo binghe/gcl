@@ -1271,6 +1271,13 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
 AC_MSG_RESULT($obj_align)
 AC_DEFINE_UNQUOTED(OBJ_ALIGN,$obj_align,[can use C extension for object alignment])
 
+AC_MSG_CHECKING([for C extension noreturn function attribute])
+AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
+	    extern int v() __attribute__ ((noreturn));
+	    return 0;]])],[no_return="__attribute__ ((noreturn))"],[no_return=])
+AC_MSG_RESULT($no_return)
+AC_DEFINE_UNQUOTED(NO_RETURN,$no_return,[can use C extension for functions that do not return])
+
 AC_MSG_CHECKING(sizeof struct contblock)
 
 # work around MSYS pwd result incompatibility

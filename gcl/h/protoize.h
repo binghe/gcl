@@ -225,7 +225,7 @@ typedef void (*funcvoid)(void);
 /* format.c::OF */ extern object fLformat_1(object strm, object control,object x);
 /* format.c:2084:OF */ extern void Lformat (void); /* () */
 /* format.c:2171:OF */ extern void gcl_init_format (void); /* () */
-/* frame.c:32:OF */ extern void unwind (frame_ptr fr, object tag); /* (fr, tag) frame_ptr fr; object tag; */
+/* frame.c:32:OF */ extern void unwind (frame_ptr fr, object tag) NO_RETURN; /* (fr, tag) frame_ptr fr; object tag; */
 /* frame.c:58:OF */ extern frame_ptr frs_sch (object frame_id); /* (frame_id) object frame_id; */
 /* frame.c:69:OF */ extern frame_ptr frs_sch_catch (object frame_id); /* (frame_id) object frame_id; */
 /* funlink.c:19:OF */ extern void call_or_link (object sym, void **link); /* (sym, link) object sym; void **link; */
