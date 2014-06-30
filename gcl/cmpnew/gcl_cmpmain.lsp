@@ -717,10 +717,13 @@ Cannot compile ~a.~%"
 				   (format st "load2(\"~a\");~%" tem)))))
 		    (format st "return Cnil;}~%~%")
 
+		    (format st "static int my_strncmp(const char *s1,const char *s2,unsigned long n) {")
+		    (format st "  for (;n--;) if (*s1++!=*s2++) return 1; return 0;}")
+
 		    (format st "int user_match(const char *s,int n) {~%")
 		    (format st "  Fnlst *f;~%")
 		    (format st "  for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
-		    (format st "     if (f->s && !strncmp(s,f->s,n)) {~%")
+		    (format st "     if (f->s && !my_strncmp(s,f->s,n)) {~%")
 		    (format st "        my_load(f->fn,f->s);~%")
 		    (format st "        return 1;~%")
 		    (format st "     }~%")
