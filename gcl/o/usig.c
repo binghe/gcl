@@ -141,7 +141,7 @@ DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,FPE_INIT,"");
 #define ASM __asm__ __volatile__
 
 DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
-  double d;
+  volatile double d;
   ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val));
   RETURN1(make_longfloat(d));
 }
@@ -167,8 +167,8 @@ DEFUN_NEW("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixn
 #elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
-    unsigned short s=0;
-    unsigned int i;
+    volatile unsigned short s=0;
+    volatile unsigned int i;
     ASM("fnstcw %0" :: "m" (s));
     s=(s|FE_ALL_EXCEPT)&(~x);
     ASM("fldcw %0" : "=m" (s));
@@ -194,7 +194,7 @@ DEFUN_NEW("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(vo
 #elif defined(__x86_64__) || defined(__i386__)
 #define ASM __asm__ __volatile__
   {
-    unsigned int i=0;
+    volatile unsigned int i=0;
     ASM("fnclex");
     ASM("stmxcsr %0" :: "m" (i));
     i=(i|(FE_ALL_EXCEPT<<7));
@@ -222,12 +222,12 @@ DEFUN_NEW("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fix
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 
 DEFUN_NEW("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
-  unsigned short t;
+  volatile unsigned short t;
   ASM ("fnstsw %0" :: "m" (t));
   RETURN1(t);
 }
 DEFUN_NEW("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
-  unsigned int t;
+  volatile unsigned int t;
   ASM ("stmxcsr %0" :: "m" (t));
   RETURN1(t);
 }
