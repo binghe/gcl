@@ -8,34 +8,11 @@
 	 (assert (eql r rr))
 	 (when (and chk cc)
 	   (unless (eq 'fnop (cadr (member :op (arithmetic-error-operation cc))))
-	     (assert (every 'eql (symbol-name f) (symbol-name (cadr (member :op (arithmetic-error-operation cc))))))
+	     (assert (eq (symbol-function f) (cadr (member :fun (arithmetic-error-operation cc)))))
 	     (assert (or (every 'equalp (mapcar (lambda (x) (if (numberp x) x (coerce x 'list))) a)
 				(arithmetic-error-operands cc))
 			 (every 'equalp (nreverse (mapcar (lambda (x) (if (numberp x) x (coerce x 'list))) a))
 				(arithmetic-error-operands cc)))))))))
-
-(defun l/ (x y) (declare (long-float x y)) (/ x y))
-(defun s/ (x y) (declare (short-float x y)) (/ x y))
-(defun lsqrt (x) (declare (long-float x)) (the long-float (sqrt x)))
-
-(test-fpe 'l/ (list 1.0 2.0) 0.5)
-(test-fpe 'l/ (list 1.0 0.0) :division-by-zero)
-(test-fpe 'l/ (list 0.0 0.0) :floating-point-invalid-operation)
-(test-fpe 'l/ (list most-positive-long-float least-positive-normalized-long-float) :floating-point-overflow)
-(test-fpe 'l/ (list least-positive-normalized-long-float most-positive-long-float) :floating-point-underflow)
-(test-fpe 'l/ (list 1.2 1.3) :floating-point-inexact)
-
-(test-fpe 's/ (list 1.0s0 2.0s0) 0.5s0)
-(test-fpe 's/ (list 1.0s0 0.0s0) :division-by-zero)
-(test-fpe 's/ (list 0.0s0 0.0s0) :floating-point-invalid-operation)
-(test-fpe 's/ (list most-positive-short-float least-positive-normalized-short-float) :floating-point-overflow)
-(test-fpe 's/ (list least-positive-normalized-short-float most-positive-short-float) :floating-point-underflow)
-(test-fpe 's/ (list 1.2s0 1.3s0) :floating-point-inexact)
-
-(test-fpe 'lsqrt (list 4.0) 2.0)
-(test-fpe 'lsqrt (list -1.0) :floating-point-invalid-operation)
-(test-fpe 'lsqrt (list 1.2) :floating-point-inexact))
-
 
 #+(or x86_64 i386)
 (progn
@@ -209,3 +186,27 @@
   (test-fpe 'sqrtpd (list da db dr) dr t)
   (test-fpe 'sqrtpd (list dn db dr) :floating-point-invalid-operation t)
   (test-fpe 'sqrtpd (list da db dr) :floating-point-inexact t))
+
+
+(defun l/ (x y) (declare (long-float x y)) (/ x y))
+(defun s/ (x y) (declare (short-float x y)) (/ x y))
+(defun lsqrt (x) (declare (long-float x)) (the long-float (sqrt x)))
+
+
+(test-fpe 'l/ (list 1.0 2.0) 0.5 t)
+(test-fpe 'l/ (list 1.0 0.0) :division-by-zero t)
+(test-fpe 'l/ (list 0.0 0.0) :floating-point-invalid-operation t)
+(test-fpe 'l/ (list most-positive-long-float least-positive-normalized-long-float) :floating-point-overflow t)
+(test-fpe 'l/ (list least-positive-normalized-long-float most-positive-long-float) :floating-point-underflow t)
+(test-fpe 'l/ (list 1.2 1.3) :floating-point-inexact t)
+
+(test-fpe 's/ (list 1.0s0 2.0s0) 0.5s0 t)
+(test-fpe 's/ (list 1.0s0 0.0s0) :division-by-zero t)
+(test-fpe 's/ (list 0.0s0 0.0s0) :floating-point-invalid-operation t)
+(test-fpe 's/ (list most-positive-short-float least-positive-normalized-short-float) :floating-point-overflow t)
+(test-fpe 's/ (list least-positive-normalized-short-float most-positive-short-float) :floating-point-underflow t)
+(test-fpe 's/ (list 1.2s0 1.3s0) :floating-point-inexact t)
+
+(test-fpe 'lsqrt (list 4.0) 2.0 t)
+(test-fpe 'lsqrt (list -1.0) :floating-point-invalid-operation t)
+(test-fpe 'lsqrt (list 1.2) :floating-point-inexact t)
