@@ -576,12 +576,7 @@ if test "$enable_debug" = "yes" ; then
 	# for subconfigurations
 	CFLAGS="$CFLAGS -g"
 else
-	# gcc 4.9.0 misomcpiles call_or_link in funlink.c at -O3
-	if $CC -v 2>&1 | grep -q "gcc version 4.9.0" && echo $use |grep -q "^386-" ; then
-		TO3FLAGS="-O2"
-	else
-		TO3FLAGS="-O3 $TFPFLAG"
-	fi
+	TO3FLAGS="-O3 $TFPFLAG"
 	TO2FLAGS="-O"
 fi
 
