@@ -384,7 +384,7 @@
 		(args (fourth x))
 		(newtype nil))
 	    (cond ((eq type 'proclaimed-closure)
-		   (wt-h "static object *Lclptr"num";")
+		   (wt-h "static object Lclptr"num";")
 		   (setq newtype ""))
 		  (t
 		   (setq newtype (if type (Rep-type type) ""))))
@@ -1733,10 +1733,12 @@
   (wt-comment "local function " (if (fun-name fun) (fun-name fun) nil))
   (wt-h   "static void " (c-function-name (if closure-p "LC" "L") (fun-cfun fun) (fun-name fun)) "();")
   (wt-nl1 "static void " (c-function-name (if closure-p "LC" "L") (fun-cfun fun) (fun-name fun)) "(")
-  (dotimes* (n level (wt "base" n ")")) (wt "base" n ","))
-  (wt-nl1  "register object ")
-  (dotimes* (n level (wt "*"*volatile*"base" n ";"))
-	    (wt "*"*volatile*"base" n ","))
+  (cond (closure-p (wt "fun)") (wt-nl "object fun;"))
+	(t 
+	 (dotimes* (n level (wt "base" n ")")) (wt "base" n ","))
+	 (wt-nl1  "register object ")
+	 (dotimes* (n level (wt "*"*volatile*"base" n ";"))
+		   (wt "*"*volatile*"base" n ","))))
   (analyze-regs (cadr lambda-expr) 2)
   (let-pass3
    ((*clink* clink) (*ccb-vs* ccb-vs)

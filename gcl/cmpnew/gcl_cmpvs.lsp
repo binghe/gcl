@@ -65,6 +65,8 @@
 	((eq (car vs) 'cs)
 	 (setq *vcs-used* t)
 	 (wt "Vcs[" (cdr vs) "]"))
+	((eq (car vs) 'fun-env)
+	 (wt "fun->cc.cc_turbo[" (cdr vs) "]"))
 	(t
 	 (if (= (car vs) *level*)
 	     (wt "base[" (cdr vs) "]")
@@ -74,7 +76,7 @@
   (wt "(" )(wt-vs vs) (wt "->c.c_car)"))
 
 (defun wt-ccb-vs (ccb-vs)
-  (wt "(base0[" (- *initial-ccb-vs* ccb-vs) "]->c.c_car)"))
+  (wt "(fun->cc.cc_turbo[" (- *initial-ccb-vs* ccb-vs) "]->c.c_car)"))
 
 (defun clink (vs) (setq *clink* vs))
 

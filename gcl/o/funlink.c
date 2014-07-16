@@ -52,8 +52,8 @@ call_or_link(object sym, void **link )
  if (fun == OBJNULL) {FEinvalid_function(sym); return;}
  if (type_of(fun) == t_cclosure
      && (fun->cc.cc_turbo))
-   {if (Rset==0) {MMccall(fun, fun->cc.cc_turbo);}
-    else (*(fun)->cf.cf_self)(fun->cc.cc_turbo);
+   {if (Rset==0) {MMccall(fun);}
+    else (*(fun)->cf.cf_self)(fun);
     return;}
  if (Rset==0) funcall(fun);
    else
@@ -87,13 +87,13 @@ call_or_link_closure(object sym, void **link, void **ptr)
    {if (Rset) {
      (void) vpush_extend( link,sLAlink_arrayA->s.s_dbind);
      (void) vpush_extend( *link,sLAlink_arrayA->s.s_dbind);
-     *ptr = (void *)(fun->cc.cc_turbo);
+     *ptr = (void *)fun;
      *link = (void *) (fun->cf.cf_self);
-     MMccall(fun, fun->cc.cc_turbo);}
+     MMccall(fun);}
     else
       { 
 	append_link_list(sym,1);
-	MMccall(fun, fun->cc.cc_turbo);}
+	MMccall(fun);}
     return;}
  if (Rset==0) funcall(fun);
    else

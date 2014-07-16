@@ -56,7 +56,7 @@
           (compiler::wt-nl
            "{object _funobj = " loc ";"
            "if(type_of(_funobj)==t_cclosure && (_funobj->cc.cc_turbo))
-                   (*(_funobj->cc.cc_self))(_funobj->cc.cc_turbo);
+                   (*(_funobj->cc.cc_self))(_funobj);
                else if (type_of(_funobj)==t_cfun) (*(_funobj->cc.cc_self))();
                else super_funcall_no_event(_funobj);}")))
 

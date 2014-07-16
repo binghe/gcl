@@ -1400,15 +1400,15 @@ make_trampoline(function)
 }
 
 static void
-make_trampoline_internal(base0)
-     object *base0;
-{super_funcall_no_event(base0[0]->c.c_car);}
+make_trampoline_internal(fun)
+     object fun;
+{super_funcall_no_event(fun->cc.cc_turbo[0]->c.c_car);}
 
 static void
-make_turbo_trampoline_internal(base0)
-     object *base0;
-{ object function=base0[0]->c.c_car;
-  (*function->cc.cc_self)(function->cc.cc_turbo);
+make_turbo_trampoline_internal(fun)
+     object fun;
+{ object function=fun->cc.cc_turbo[0]->c.c_car;
+  (*function->cc.cc_self)(function);
 }
 
 ")

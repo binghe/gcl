@@ -119,7 +119,7 @@
 
 (defun c2downward-function (funob)
   (let ((fun (make-fun :name 'closure :cfun (next-cfun))))
-              (push (list 'dclosure (if (null *clink*) nil (cons 0 0))
+              (push (list 'dclosure (if (null *clink*) nil (cons 'fun-env 0))
                           *ccb-vs* fun funob)
                     *local-funs*)
               (push fun *closures*)

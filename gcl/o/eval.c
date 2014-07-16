@@ -171,26 +171,13 @@ funcall(object fun)
 	     while (--n> 0 ) b[n] = fcall.values[n];
 	     b[0] = res;
 	     return;}		
-      case t_cclosure:
 
-	{
-		object *top, *base, l;
+        case t_cclosure:
+	
+	  MMccall(fun);
+	  CHECK_AVMA;
+	  return;
 
-		if (fun->cc.cc_turbo != NULL) {
-			MMccall(fun, fun->cc.cc_turbo);
-			CHECK_AVMA; return;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		MMccall(fun, top);
-		CHECK_AVMA; return;
-	}
-		
 	case t_symbol:
 	     {object x = fun->s.s_gfdef;
 	      if (x) { fun = x; goto TOP;}
@@ -329,23 +316,8 @@ funcall_no_event(object fun)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
-
-		if (fun->cc.cc_turbo != NULL) {
-			(*fun->cc.cc_self)(fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		(*fun->cc.cc_self)(top);
-		break;
-	}
+	  (*fun->cc.cc_self)(fun);
+	  break;
 
 	case t_sfun:
 /*  		call_sfun_no_check(fun); return; */
@@ -377,26 +349,11 @@ lispcall(object *funp, int narg)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
+	  MMccall(fun);
+	  break;
 
-		if (fun->cc.cc_turbo != NULL) {
-			MMccall(fun, fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		MMccall(fun, top);
-		break;
-	}
-
-	      default:
-		funcall(fun);
+	default:
+	  funcall(fun);
 
 	}
   CHECK_AVMA;
@@ -419,27 +376,12 @@ lispcall_no_event(object *funp, int narg)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
 
-		if (fun->cc.cc_turbo != NULL) {
-			(*fun->cc.cc_self)(fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		(*fun->cc.cc_self)(top);
-		break;
-	}
-
+	  (*fun->cc.cc_self)(fun);
+	  break;
 
 	default:
-		funcall(fun);
+	  funcall(fun);
 
 	}
 	 CHECK_AVMA;
@@ -462,23 +404,8 @@ symlispcall(object sym, object *base, int narg)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
-
-		if (fun->cc.cc_turbo != NULL) {
-			MMccall(fun, fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		MMccall(fun, top);
-		break;
-	}
+	  MMccall(fun);
+	  break;
 
 	default:
 		funcall(fun);
@@ -503,26 +430,11 @@ symlispcall_no_event(object sym, object *base, int narg)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
-
-		if (fun->cc.cc_turbo != NULL) {
-			(*fun->cc.cc_self)(fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		(*fun->cc.cc_self)(top);
-		break;
-	}
+	  (*fun->cc.cc_self)(fun);
+	  break;
 
 	default:
-		funcall(fun);
+	  funcall(fun);
 
 	}
 	CHECK_AVMA;
@@ -546,26 +458,12 @@ simple_lispcall(object *funp, int narg)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
-
-		if (fun->cc.cc_turbo != NULL) {
-			MMccall(fun, fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		MMccall(fun, top);
-		break;
-	}
+	  MMccall(fun);
+	  break;
 
 	default:
-		funcall(fun);
+	  funcall(fun);
+
 	}
 	vs_top = sup;
 	CHECK_AVMA;
@@ -636,26 +534,11 @@ simple_symlispcall(object sym, object *base, int narg)
 		break;
 
 	case t_cclosure:
-	{
-		object *top, *base, l;
-
-		if (fun->cc.cc_turbo != NULL) {
-			MMccall(fun, fun->cc.cc_turbo);
-			break;
-		}
-		top = vs_top;
-		base = vs_base;
-		for (l = fun->cc.cc_env;  !endp(l);  l = l->c.c_cdr)
-			vs_push(l);
-		vs_base = vs_top;
-		while (base < top)
-			vs_push(*base++);
-		MMccall(fun, top);
-		break;
-	}
+	  MMccall(fun);
+	  break;
 
 	default:
-		funcall(fun);
+	  funcall(fun);
 
 	}
 	vs_top = sup;
@@ -1359,8 +1242,9 @@ int i=fcall.argd;
   	do{object fun=fcall.fun;
 		object *top, *base, l;
 
+		massert(fun->cc.cc_turbo);
 		if (fun->cc.cc_turbo != NULL) {
-			(*fun->cc.cc_self)(fun->cc.cc_turbo);
+			(*fun->cc.cc_self)(fun);
 			break;
 		}
 		top = vs_top;

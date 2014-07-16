@@ -154,7 +154,7 @@
   ;;; Setup closures.
   (dolist** (def closures)
     (push (list 'closure
-                (if (null *clink*) nil (cons 0 0))
+                (if (null *clink*) nil (cons 'fun-env 0))
                 *ccb-vs* (car def) (cadr def))
           *local-funs*)
     (push (car def) *closures*)
@@ -291,7 +291,7 @@
 
   ;;; Then make closures.
   (dolist** (def closures)
-    (push (list 'closure (if (null *clink*) nil (cons 0 0))
+    (push (list 'closure (if (null *clink*) nil (cons 'fun-env 0))
                 *ccb-vs* (car def) (cadr def))
           *local-funs*)
     (push (car def) *closures*)
