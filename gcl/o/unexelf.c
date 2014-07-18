@@ -655,7 +655,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   char *old_section_names;
 
   ElfW(Addr) old_bss_addr, new_bss_addr;
-  ElfW(Word) old_bss_size, new_data2_size;
+  ElfW(Word) old_bss_size, new_data2_size,old_bss_offset;
   ElfW(Off)  new_data2_offset;
   ElfW(Addr) new_data2_addr;
 
@@ -725,12 +725,14 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   if (old_sbss_index == -1)
     {
       old_bss_addr = OLD_SECTION_H (old_bss_index).sh_addr;
+      old_bss_offset = OLD_SECTION_H (old_bss_index).sh_offset;
       old_bss_size = OLD_SECTION_H (old_bss_index).sh_size;
       new_data2_index = old_bss_index;
     }
   else
     {
       old_bss_addr = OLD_SECTION_H (old_sbss_index).sh_addr;
+      old_bss_offset = OLD_SECTION_H (old_sbss_index).sh_offset;
       old_bss_size = OLD_SECTION_H (old_bss_index).sh_size
 	+ OLD_SECTION_H (old_sbss_index).sh_size;
       new_data2_index = old_sbss_index;
@@ -773,7 +775,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   if (new_file < 0)
     fatal ("Can't creat (%s): errno %d\n", new_name, errno);
 
-  new_file_size = stat_buf.st_size + old_file_h->e_shentsize + new_data2_size;
+  new_file_size = stat_buf.st_size + old_file_h->e_shentsize + new_data2_size + (new_data2_offset-old_bss_offset);
 
   if (ftruncate (new_file, new_file_size))
     fatal ("Can't ftruncate (%s): errno %d\n", new_name, errno);
@@ -957,7 +959,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 #else
 	  if (NEW_SECTION_H (nn).sh_offset + NEW_SECTION_H (nn).sh_size
 	      > new_data2_offset)
-	    NEW_SECTION_H (nn).sh_offset += new_data2_size;
+	    NEW_SECTION_H (nn).sh_offset += new_data2_size+(new_data2_offset-old_bss_offset);
 #endif
 	  /* Any section that was originally placed after the section
 	     header table should now be off by the size of one section
