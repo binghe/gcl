@@ -1,3 +1,14 @@
+/* prelink support for gcl images:
+   if GCL references variables (as opposed to functions) defined in
+   external shared libraries, ld will place COPY relocations in
+   .rela.dyn pointing to a location in .bss for these references.
+   Unexec will later incorporate this into a second .data section,
+   causing prelink to fail.  While one might prelink the raw images,
+   which would then be inherited by the saved images, this is not
+   convenient as part of the build process, so here we isolate the
+   problematic references and compile as position independent code,
+   changing the COPY reloc to some form of GOT.
+ */
 #ifdef NO_PRELINK_UNEXEC_DIVERSION
 #define PRELINK_EXTER
 #else
