@@ -645,7 +645,7 @@ DEFUN_NEW("UNIVERSAL-ERROR-HANDLER",object,fSuniversal_error_handler,SI
 	int i;
 	/* 5 args */
 	for (i = 0;  i < error_fmt_string->st.st_fillp;  i++)
-		putchar(error_fmt_string->st.st_self[i]);
+	  fputc(error_fmt_string->st.st_self[i],stdout);
 	printf("\nLisp initialization failed.\n");
 	exit(0);
 	RETURN1(x0);

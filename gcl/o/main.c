@@ -266,6 +266,7 @@ main(int argc, char **argv, char **envp) {
 #include "ld_bind_now.h"
 #endif
   
+  prelink_init();
   
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);

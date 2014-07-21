@@ -104,6 +104,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
+#ifdef HAVE_READLINE
+#include <readline/readline.h>
+#endif
 
 #include "../h/sfun_argd.h"
 #include "../h/compbas.h"

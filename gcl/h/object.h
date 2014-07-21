@@ -456,6 +456,7 @@ object make_si_sfun();
 #define RETURNO(n,val1,listvals) RETURN(n,object,val1,listvals)
 
 /* eg: RETURN(3,object,val1,(RV(val2),RV(val3))) */
+#undef RETURN
 #define RETURN(n,typ,val1,listvals) \
    do{typ _val1 = val1; object *_p=&fcall.values[1]; listvals; fcall.nvalues= n; return _val1;}while(0)
 

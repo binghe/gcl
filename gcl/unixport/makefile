@@ -128,6 +128,8 @@ saved_%:raw_% $(RSYM) init_%.lsp raw_%_map msys \
 	echo " (in-package \"USER\")(system:save-system \"$@\")" >>foo
 	ar x lib$*.a $$(ar t lib$*.a |grep ^gcl_)
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
+#       check that saved image can be prelinked
+	! [ -x /usr/bin/objdump ] || ! /usr/bin/objdump -f $@ | grep "file format" | grep "elf" || ! /usr/bin/objdump -R $@ |grep R_.*_COPY
 
 $(RSYM): $(SPECIAL_RSYM) $(HDIR)/mdefs.h
 	$(CC) $(LD_FLAGS) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)

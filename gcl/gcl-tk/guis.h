@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+#define NO_PRELINK_UNEXEC_DIVERSION
 #include "include.h"
 
 #ifdef NeXT

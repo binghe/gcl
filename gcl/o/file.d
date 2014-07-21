@@ -39,7 +39,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 
 #ifdef HAVE_READLINE
-#include <readline/readline.h>
 #define kclgetc(FP)		rl_getc_em(((FILE *)FP))
 #define kclungetc(C, FP)	rl_ungetc_em(C, ((FILE *)FP))
 #define kclputc(C, FP)		rl_putc_em(C, ((FILE *)FP))

@@ -996,16 +996,16 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
       /* Write out the sections. .data and .data1 (and data2, called
 	 ".data" in the strings table) get copied from the current process
 	 instead of the old file.  */
-      if (!strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".data")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+      if (!strcmp (old_section_names + NEW_SECTION_H (nn).sh_name, ".data")
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".sdata")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".lit4")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".lit8")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".sdata1")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".data1")
 	  || !strcmp (old_section_names + NEW_SECTION_H (nn).sh_name,
 		      ".sbss"))

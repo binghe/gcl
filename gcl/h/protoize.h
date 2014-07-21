@@ -1905,3 +1905,6 @@ number_dpf(object,object,object);
 #if defined(DARWIN)
 void init_darwin_zone_compat ();
 #endif
+
+void
+prelink_init(void);

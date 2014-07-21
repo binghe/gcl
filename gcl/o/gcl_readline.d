@@ -43,13 +43,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#if 1
-#include <readline/readline.h>
 #include <readline/history.h>
-#else
-#include <readline.h>
-#include <history.h>
-#endif
 
 int readline_on = 0;		/* On (1) or off (0) */
 static int rl_ungetc_em_char = -1;
