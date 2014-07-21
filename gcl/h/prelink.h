@@ -33,13 +33,13 @@
 #endif
 #endif
 
-PRELINK_EXTER void *my_stdin;
-PRELINK_EXTER void *my_stdout;
-PRELINK_EXTER void *my_stderr;
+PRELINK_EXTER FILE *my_stdin;
+PRELINK_EXTER FILE *my_stdout;
+PRELINK_EXTER FILE *my_stderr;
 
 #ifdef HAVE_READLINE
-PRELINK_EXTER void *my_rl_instream;
-PRELINK_EXTER void *my_rl_completion_entry_function;
+PRELINK_EXTER FILE *my_rl_instream;
+PRELINK_EXTER rl_compentry_func_t *my_rl_completion_entry_function;
 PRELINK_EXTER const char *my_rl_readline_name;
 PRELINK_EXTER char *my_rl_line_buffer;
 #endif
