@@ -751,7 +751,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 #endif
   new_data2_addr = old_bss_addr;
   new_data2_size = new_bss_addr - old_bss_addr;
-  new_data2_offset  = OLD_SECTION_H (old_data_index).sh_offset +
+  new_data2_offset  = OLD_SECTION_H (old_data_index).sh_offset + /*to preserve data offset alignment*/
     (new_data2_addr - OLD_SECTION_H (old_data_index).sh_addr);
 
 #ifdef DEBUG
@@ -787,7 +787,8 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   new_file_h = (ElfW(Ehdr) *) new_base;
   new_program_h = (ElfW(Phdr) *) ((byte *) new_base + old_file_h->e_phoff);
   new_section_h = (ElfW(Shdr) *)
-    ((byte *) new_base + old_file_h->e_shoff + new_data2_size);
+    ((byte *) new_base + old_file_h->e_shoff + new_data2_size + (new_data2_offset-old_bss_offset));
+
 
   /* Make our new file, program and section headers as copies of the
    * originals.
@@ -804,7 +805,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
    * further away now.
    */
 
-  new_file_h->e_shoff += new_data2_size;
+  new_file_h->e_shoff += new_data2_size + (new_data2_offset-old_bss_offset);
   new_file_h->e_shnum += 1;
 
 #ifdef DEBUG
@@ -957,8 +958,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 	      >= OLD_SECTION_H (old_bss_index-1).sh_offset)
 	    NEW_SECTION_H (nn).sh_offset += new_data2_size;
 #else
-	  if (NEW_SECTION_H (nn).sh_offset + NEW_SECTION_H (nn).sh_size
-	      > new_data2_offset)
+	  if (NEW_SECTION_H (nn).sh_offset >= new_data2_offset)
 	    NEW_SECTION_H (nn).sh_offset += new_data2_size+(new_data2_offset-old_bss_offset);
 #endif
 	  /* Any section that was originally placed after the section
@@ -1249,6 +1249,3 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 #ifdef UNIXSAVE
 #include "save.c"
 #endif
-
-
-
