@@ -958,7 +958,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 	      >= OLD_SECTION_H (old_bss_index-1).sh_offset)
 	    NEW_SECTION_H (nn).sh_offset += new_data2_size;
 #else
-	  if (NEW_SECTION_H (nn).sh_offset >= new_data2_offset)
+	  if (NEW_SECTION_H (nn).sh_offset >= old_bss_offset)
 	    NEW_SECTION_H (nn).sh_offset += new_data2_size+(new_data2_offset-old_bss_offset);
 #endif
 	  /* Any section that was originally placed after the section
