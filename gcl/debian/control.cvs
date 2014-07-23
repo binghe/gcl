@@ -9,7 +9,7 @@ Standards-Version: 3.9.5
 Package: gclcvs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${gcc}, debconf (>= 1.2.0), emacs24 | emacsen, ucf
-Conflicts: emacsen-common (<< 2.0.0)
+Breaks: emacsen-common (<< 2.0.0)
 Suggests: gclcvs-doc
 Description: GNU Common Lisp compiler, CVS snapshot
  GNU Common Lisp (GCL) is a Common Lisp compiler and interpreter

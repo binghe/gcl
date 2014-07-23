@@ -65,12 +65,15 @@ Load the file whose
 is specified after
 .BR \-load .
 .TP
+.BR \-f
+.RB
 Open the file following
-.BR \-f  for input, skip the first line, and
+.BR \-f
+for input, skip the first line, and
 then read and eval the rest of the forms in the file.
 Replaces si::*command\-args* by the the list starting after
-.BR \-f .   This can
-be used as with the shells to write small shell programs:
+.BR \-f .
+This can be used as with the shells to write small shell programs:
 
 .LP
 .br
