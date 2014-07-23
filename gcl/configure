@@ -4348,6 +4348,7 @@ case $use in
 		hppa*)
 			TCFLAGS="$TCFLAGS -mlong-calls "
 			TLIBS="$TLIBS -lgcc_s" # workaround hppa __moddi3 local func symbols with default linker flags
+			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O2" ; TFPFLAG=""; fi #FIXME needed asof gcc 4.8.1
 #			TCFLAGS="$TCFLAGS -ffunction-sections"
 #			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O $TFPFLAG" ; fi
 #			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
