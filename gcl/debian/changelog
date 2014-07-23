@@ -1,8 +1,134 @@
+gcl (2.6.10-31) unstable; urgency=medium
+
+  * dpkg-buildflags trial
+
+ -- Camm Maguire <camm@debian.org>  Tue, 22 Jul 2014 20:06:10 +0000
+
+gcl (2.6.10-30) unstable; urgency=medium
+
+  * fix offsets ppc
+
+ -- Camm Maguire <camm@debian.org>  Tue, 22 Jul 2014 17:12:27 +0000
+
+gcl (2.6.10-29) unstable; urgency=medium
+
+  * fix unexec file offsets
+
+ -- Camm Maguire <camm@debian.org>  Tue, 22 Jul 2014 15:36:45 +0000
+
+gcl (2.6.10-28) unstable; urgency=high
+
+  * enable prelink
+
+ -- Camm Maguire <camm@debian.org>  Fri, 18 Jul 2014 19:24:38 +0000
+
+gcl (2.6.10-27) unstable; urgency=high
+
+  * protect closure calls from gc
+
+ -- Camm Maguire <camm@debian.org>  Wed, 16 Jul 2014 16:15:33 +0000
+
+gcl (2.6.10-26) unstable; urgency=high
+
+  * Bug fix: "packages should not build-depend on binutils-dev", thanks to
+    Matthias Klose (Closes: #754840).  Please note that gcl has long
+    depended on binutils-dev for good reason -- happily it is no longer
+    necessary
+
+ -- Camm Maguire <camm@debian.org>  Tue, 15 Jul 2014 16:04:04 +0000
+
+gcl (2.6.10-25) unstable; urgency=high
+
+  * rebuild to get gcc fixes on i386
+
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Jul 2014 03:14:45 +0000
+
+gcl (2.6.10-24) unstable; urgency=high
+
+  * try default gcc 4.9
+  * access libopcodes without link dependency via dlopen
+  * Bug fix: "please switch to emacs24", thanks to Gabriele Giacone
+    (Closes: #754012).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 09 Jul 2014 17:34:21 +0000
+
+gcl (2.6.10-23) unstable; urgency=high
+
+  * rebuild latest binutils
+
+ -- Camm Maguire <camm@debian.org>  Sat, 05 Jul 2014 23:19:27 +0000
+
+gcl (2.6.10-22) unstable; urgency=high
+
+  * gcc-4.8 on i386, 4.9 has bugs at present
+
+ -- Camm Maguire <camm@debian.org>  Fri, 04 Jul 2014 01:36:06 +0000
+
+gcl (2.6.10-21) unstable; urgency=high
+
+  * 2.6.11pre test 20
+
+ -- Camm Maguire <camm@debian.org>  Mon, 30 Jun 2014 22:43:27 +0000
+
+gcl (2.6.10-20) unstable; urgency=high
+
+  * 2.6.11pre test 19
+
+ -- Camm Maguire <camm@debian.org>  Sun, 29 Jun 2014 17:59:59 +0000
+
+gcl (2.6.10-19) unstable; urgency=high
+
+  * 2.6.11pre test 18
+
+ -- Camm Maguire <camm@debian.org>  Sun, 29 Jun 2014 16:00:07 +0000
+
+gcl (2.6.10-18) unstable; urgency=high
+
+  * 2.6.11pre test 17
+
+ -- Camm Maguire <camm@debian.org>  Sat, 28 Jun 2014 16:57:54 +0000
+
+gcl (2.6.10-17) unstable; urgency=high
+
+  * 2.6.11pre test 16
+
+ -- Camm Maguire <camm@debian.org>  Thu, 26 Jun 2014 18:06:42 +0000
+
+gcl (2.6.10-16) unstable; urgency=high
+
+  * 2.6.11pre test 15
+
+ -- Camm Maguire <camm@debian.org>  Wed, 18 Jun 2014 17:37:36 +0000
+
+gcl (2.6.10-15) unstable; urgency=high
+
+  * 2.6.11pre test 14
+
+ -- Camm Maguire <camm@debian.org>  Tue, 17 Jun 2014 00:39:35 +0000
+
+gcl (2.6.10-14) unstable; urgency=high
+
+  * 2.6.11pre test 13
+
+ -- Camm Maguire <camm@debian.org>  Sat, 14 Jun 2014 13:43:57 +0000
+
+gcl (2.6.10-13) unstable; urgency=high
+
+  * 2.6.11pre test 12
+
+ -- Camm Maguire <camm@debian.org>  Tue, 20 May 2014 16:00:22 +0000
+
+gcl (2.6.10-12) unstable; urgency=high
+
+  * 2.6.11pre test 11
+
+ -- Camm Maguire <camm@debian.org>  Fri, 16 May 2014 17:41:33 +0000
+
 gcl (2.6.10-11) unstable; urgency=high
 
   * 2.6.11pre test 10
 
- -- Camm Maguire <camm@debian.org>  Mon, 12 May 2014 15:36:51 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 16 May 2014 13:18:07 +0000
 
 gcl (2.6.10-10) unstable; urgency=high
 

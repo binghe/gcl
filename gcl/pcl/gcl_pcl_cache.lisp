@@ -1505,7 +1505,7 @@
 		(to-line free))
 	    (declare (type non-negative-fixnum to-line))
 	    (if (line-reserved-p to-line)
-		(error "transfering something into a reserved cache line.")
+		(error "transferring something into a reserved cache line.")
 		(let ((from-loc (line-location from-line))
 		      (to-loc (line-location to-line)))
 		  (declare (type non-negative-fixnum from-loc to-loc))
