@@ -37,3 +37,5 @@
 #define SGC
 
 #define RELOC_H "elf32_arm_reloc.h"
+
+#define NEED_STACK_CHK_GUARD
