@@ -3,7 +3,7 @@
 #include "include.h"
 
 #ifdef NEED_STACK_CHK_GUARD
-unsigned long __stack_chk_guard;
+unsigned long __stack_chk_guard=0;
 #endif
 
 void
