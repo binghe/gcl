@@ -197,6 +197,10 @@ install-stamp: build-stamp debian/control $(INS)
 	[ "$(EXT)" = "" ] || \
 		mv debian/tmp/usr/share/doc/gcl-doc debian/tmp/usr/share/doc/gcl$(EXT)-doc 
 
+	[ "$(EXT)" = "" ] || \
+		(cat debian/tmp/usr/share/man/man1/gcl.1 |sed -e 's, gcl , gcl$(EXT) ,g' 's, GCL , GCL$(EXT) ,g' >debian/foo && \
+			mv debian/foo debian/tmp/usr/share/man/man1/gcl$(EXT).1)
+
 	cat debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp | \
 		sed "s,$$(pwd)/debian/tmp,,1" >debian/foo
 	mv debian/foo debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp

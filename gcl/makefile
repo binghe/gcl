@@ -182,7 +182,7 @@ install1:
 	MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
 	$(MAKE) install-command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
 	rm -f $(DESTDIR)$(prefix)/bin/gcl.exe
-	tar cf - $(PORTDIR)/$(FLISP)$(EXE) info/*.info* $(LISP_LIB) \
+	tar cf - $(PORTDIR)/$(FLISP)$(EXE) info/*.info* man $(LISP_LIB) \
 	$(TCL_EXES)  |  (cd $(DESTDIR)$(INSTALL_LIB_DIR) ;tar xf -)
 	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then if grep -i oncrpc makedefs >/dev/null 2>&1 ; then cp /mingw/bin/oncrpc.dll $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR); fi ; fi
 	cd $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR) && \
