@@ -72,3 +72,5 @@
 #define MAX_BRK 0x70000000 /*GNU Hurd fragmentation bug*/
 
 #define RELOC_H "elf32_i386_reloc.h"
+
+#define NEED_STACK_CHK_GUARD

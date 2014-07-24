@@ -29,4 +29,5 @@
 #define RELOC_H "elf64_ppc_reloc.h"
 #define SPECIAL_RELOC_H "elf64_ppc_reloc_special.h"
 #define STATIC_FUNCTION_POINTERS
+#define C_GC_OFFSET 4
 #endif
