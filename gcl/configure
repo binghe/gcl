@@ -624,6 +624,7 @@ use
 GNU_LD
 LEADING_UNDERSCORE
 EXTRA_LOBJS
+PRELINK_CHECK
 O2FLAGS
 O3FLAGS
 NIFLAGS
@@ -739,6 +740,7 @@ enable_option_checking
 enable_widecons
 enable_safecdr
 enable_safecdrdbg
+enable_prelink
 enable_fastimmfix
 enable_holepage
 enable_vssize
@@ -1399,6 +1401,7 @@ Optional Features:
 use a three word cons with simplified typing
 protect cdr from immfix and speed up type processing
 debug safecdr code
+--enable-prelink will insist that the produced images may be prelinked
 --enable-fastimmfix=XXXX will reject low immediate fixnums unless 1<<XXXX can be attained
  --enable-holepage=XXXX will compile in a XXX-sized hole between the heap and relocatable memory area (eg '--enable-holepage=64*1024' would give 64K pages allowing 256 MB if pages are 4K each)
  --enable-vssize=XXXX will compile in a value stack of size XXX
@@ -2526,6 +2529,14 @@ if test "${enable_safecdrdbg+set}" = set; then :
   enableval=$enable_safecdrdbg;
 $as_echo "#define DEBUG_SAFE_CDR 1" >>confdefs.h
 
+fi
+
+
+# Check whether --enable-prelink was given.
+if test "${enable_prelink+set}" = set; then :
+  enableval=$enable_prelink; PRELINK_CHECK=t
+else
+  PRELINK_CHECK=
 fi
 
 
@@ -9327,6 +9338,8 @@ CFLAGS="$CFLAGS $CPPFLAGS $TCFLAGS $TO3FLAGS $PROCESSOR_FLAGS -I\$(GCLDIR)/o"
 O3FLAGS=$TO3FLAGS
 
 O2FLAGS=$TO2FLAGS
+
+
 
 
 

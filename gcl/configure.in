@@ -36,6 +36,8 @@ if test "$enable_safecdr" = "yes" ; then
 fi
 AC_ARG_ENABLE(safecdrdbg,[debug safecdr code],[AC_DEFINE([DEBUG_SAFE_CDR],[1],[debug safecdr code])])
 
+AC_ARG_ENABLE([prelink],[--enable-prelink will insist that the produced images may be prelinked],[PRELINK_CHECK=t],[PRELINK_CHECK=])
+
 AC_ARG_ENABLE([fastimmfix],[--enable-fastimmfix=XXXX will reject low immediate fixnums unless 1<<XXXX can be attained],
 ,[enable_fastimmfix=64])
 
@@ -2754,6 +2756,8 @@ O3FLAGS=$TO3FLAGS
 AC_SUBST(O3FLAGS)
 O2FLAGS=$TO2FLAGS
 AC_SUBST(O2FLAGS)
+
+AC_SUBST(PRELINK_CHECK)
 
 AC_SUBST(EXTRA_LOBJS)
 AC_SUBST(LEADING_UNDERSCORE)

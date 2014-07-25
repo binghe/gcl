@@ -76,3 +76,5 @@ int cacheflush(void *,int,int,int);
 #define C_GC_OFFSET 2
 
 #define RELOC_H "elf32_m68k_reloc.h"
+
+#define NEED_STACK_CHK_GUARD

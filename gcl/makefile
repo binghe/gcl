@@ -122,7 +122,7 @@ $(GMPDIR)/libgmp.a: $(GMPDIR)/Makefile
 	cd $(GMPDIR) && $(MAKE) && rm -f libgmp.a &&  ar qc libgmp.a *.o */*.o
 
 gmp_all: $(GMPDIR)/Makefile
-	cd $(GMPDIR) && $(MAKE) 
+	cd $(GMPDIR) && echo '#include <stdio.h>' >> gmp.h && echo "#include \"`pwd`/../h/prelink.h\"" >> gmp.h && $(MAKE) 
 	touch $@
 
 $(GMPDIR)/mpn/mul_n.o $(GMPDIR)/mpn/lshift.o $(GMPDIR)/mpn/rshift.o: $(GMPDIR)/Makefile

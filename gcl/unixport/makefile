@@ -129,7 +129,11 @@ saved_%:raw_% $(RSYM) init_%.lsp raw_%_map msys \
 	ar x lib$*.a $$(ar t lib$*.a |grep ^gcl_)
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
 #       check that saved image can be prelinked
-	! [ -x /usr/bin/objdump ] || ! /usr/bin/objdump -f $@ | grep "file format" | grep "elf" || ! /usr/bin/objdump -R $@ |grep R_.*_COPY
+	[ "$(PRELINK_CHECK)" = "" ] || \
+		! [ -x /usr/bin/objdump ] || \
+		! /usr/bin/objdump -f $@ | grep "file format" | grep "elf" || \
+		! /usr/bin/objdump -R $@ |grep R_.*_COPY || \
+		! echo "$@ cannot be prelinked"
 
 $(RSYM): $(SPECIAL_RSYM) $(HDIR)/mdefs.h
 	$(CC) $(LD_FLAGS) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)

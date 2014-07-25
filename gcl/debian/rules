@@ -92,6 +92,7 @@ configure-%-stamp: $(CFGS)
 		--disable-statsysbfd \
 		--disable-custreloc \
 		--disable-dlopen \
+		--enable-prelink \
 		--enable-$(RELOC) \
 		$(GMP) \
 		$(DEBUG) \
