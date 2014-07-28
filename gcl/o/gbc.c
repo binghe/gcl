@@ -1368,7 +1368,7 @@ GBC(enum type t) {
     
     if (rb_start < rb_start1) {
       j = (rb_pointer-rb_start + PAGESIZE - 1)/PAGESIZE;
-      memcpy(rb_start,rb_start1,j*PAGESIZE);
+      memmove(rb_start,rb_start1,j*PAGESIZE);
     }
     
 #ifdef SGC
@@ -1573,7 +1573,7 @@ copy_relblock(char *p, int s)
  rb_pointer += s;
  rb_pointer1 += s;
  
- memcpy(q,p,s);
+ memmove(q,p,s);
  /* while (--s >= 0) */
  /*   { *q++ = *p++;} */
  

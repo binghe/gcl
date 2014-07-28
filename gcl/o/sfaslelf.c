@@ -230,6 +230,9 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
 
     else if ((a=find_sym_ptable(st1+sym->st_name)))
       sym->st_value=a->address;
+
+    else if (ELF_ST_BIND(sym->st_info)!=STB_LOCAL)
+      massert(!fprintf(stderr,"Unrelocated non-local symbol: %s\n",st1+sym->st_name));
 	
   }
 
