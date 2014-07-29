@@ -468,7 +468,15 @@ DEF_ORDINARY("DIRECTORY",sKdirectory,KEYWORD,"");
 DEF_ORDINARY("LINK",sKlink,KEYWORD,"");
 DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
 
-/* extern char *ctime_r(const time_t *,char *); */
+/* export these for AXIOM */
+int gcl_putenv(char *s) {return putenv(s);}
+char *gcl_strncpy(char *d,const char *s,size_t z) {return strncpy(d,s,z);}
+uid_t gcl_geteuid(void) {return geteuid();}
+uid_t gcl_getegid(void) {return getegid();}
+int gcl_dup2(int o,int n) {return dup2(o,n);}
+char *gcl_gets(char *s,int z) {return fgets(s,z,stdin);}
+int gcl_fputs(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
+
 
 DEFUN_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object path),"") {
 
