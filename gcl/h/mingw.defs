@@ -54,6 +54,8 @@ TCL_LIB_SPEC=
 TCL_DL_LIBS=
 TCL_LIBS=
 
+PWD=pwd -W
+
 #
 # End h/mingw.defs
 #
