@@ -143,6 +143,8 @@ relocate_symbols(struct nlist *n1,struct nlist *ne,char *st1,ul start) {
       n->n_value+=start; 
     else if ((nd=find_sym_ptable(st1+n->n_un.n_strx)))
       n->n_value=nd->address; 
+    else if (n->n_type&(N_PEXT|N_EXT))
+      massert(!fprintf(stderr,"Unrelocated non-local symbol: %s\n",st1+n->n_un.n_strx));
 
   return 0;
   

@@ -163,12 +163,22 @@ relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char 
 
     else if (!sym->n_scnum) {
 
-      if (sym->n.n.n_zeroes)
-	STOP(sym->n.n_name,answ=find_sym_ptable(sym->n.n_name));
-      else
-	answ=find_sym_ptable(st1+sym->n.n.n_offset);
+      char c=0,*s;
 
-      if (answ) sym->n_value=answ->address;
+      if (sym->n.n.n_zeroes) {
+	c=sym->n.n_name[8];
+	sym->n.n_name[8]=0;
+	s=sym->n.n_name;
+      } else
+	s=st1+sym->n.n.n_offset;
+
+      if ((answ=find_sym_ptable(s))) 
+	sym->n_value=answ->address;
+      else
+	massert(!fprintf(stderr,"Unrelocated non-local symbol: %s\n",s));
+
+      if (c)
+	sym->n.n_name[8]=c;
 
     }
 
