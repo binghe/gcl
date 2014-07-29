@@ -475,7 +475,7 @@ uid_t gcl_geteuid(void) {return geteuid();}
 uid_t gcl_getegid(void) {return getegid();}
 int gcl_dup2(int o,int n) {return dup2(o,n);}
 char *gcl_gets(char *s,int z) {return fgets(s,z,stdin);}
-int gcl_fputs(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
+int gcl_puts(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
 
 
 DEFUN_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object path),"") {
