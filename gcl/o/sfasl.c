@@ -66,7 +66,7 @@ DEFUN_NEW("FIND-SYM-PTABLE",object,fSfind_sym_ptable,SI,1,1,NONE,IO,OO,OO,OO,(ob
 
   check_type_string(&x);
 
-  x=x->st.st_self[x->st.st_fillp];
+  c=x->st.st_self[x->st.st_fillp];
   x->st.st_self[x->st.st_fillp]=0;
   a=find_sym_ptable(x->st.st_self);
   x->st.st_self[x->st.st_fillp]=c;
