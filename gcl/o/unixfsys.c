@@ -471,6 +471,9 @@ DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
 /* export these for AXIOM */
 int gcl_putenv(char *s) {return putenv(s);}
 char *gcl_strncpy(char *d,const char *s,size_t z) {return strncpy(d,s,z);}
+#ifdef __MINGW32__ 
+#define uid_t int
+#endif
 uid_t gcl_geteuid(void) {
 #ifndef __MINGW32__ 
   return geteuid();
