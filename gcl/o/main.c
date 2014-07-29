@@ -50,7 +50,7 @@ void initialize_process();
 #include <signal.h>
 #include "page.h"
 
-bool saving_system ;
+bool saving_system=FALSE;
 
 #ifdef BSD
 #include <sys/time.h>
@@ -319,7 +319,6 @@ main(int argc, char **argv, char **envp) {
     
   } else {
 
-    saving_system = FALSE;
     terminal_io->sm.sm_object0->sm.sm_fp = stdin;
     terminal_io->sm.sm_object1->sm.sm_fp = stdout;
 #ifdef LD_BIND_NOW /*FIXME currently mips only, verify that these two requirements are the same*/
@@ -864,8 +863,9 @@ FFN(siLsave_system)(void) {
 
   minimize_image();
 
-  Lsave();
   saving_system = FALSE;
+
+  Lsave();
   alloc_page(-(holepage+nrbpage));
 
 }

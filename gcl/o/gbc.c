@@ -249,7 +249,6 @@ bool ovm_process_created;
 #endif
 
 
-bool saving_system;
 static int gc_time = -1;
 static int gc_start = 0;
 static int gc_recursive = 0;
