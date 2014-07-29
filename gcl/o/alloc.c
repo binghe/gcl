@@ -1660,7 +1660,7 @@ free(void *ptr) {
 #ifdef NOFREE_ERR
   return;
 #else	
-  if (!saving_system || core_end-heap_end<sizeof(ptr) || ptr!=*(void **)heap_end) {
+  if (core_end-heap_end<sizeof(ptr) || ptr!=*(void **)heap_end) {
     static void *old_ptr;
     if (old_ptr==ptr) return;
     old_ptr=ptr;
