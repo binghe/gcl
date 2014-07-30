@@ -54,7 +54,7 @@ unwind(frame_ptr fr, object tag)
 	bds_unwind(frs_top->frs_bds_top);
 	in_signal_handler = frs_top->frs_in_signal_handler;
 	signals_allowed=sig_normal;
-	longjmp(*(jmp_buf *)&frs_top->frs_jmpbuf, 0);
+	longjmp((void *)frs_top->frs_jmpbuf, 0);
 	/* never reached */
 }
 

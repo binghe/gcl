@@ -119,7 +119,7 @@ EXTER frame_ptr frs_top;		/* frame stack top */
 	_frs_top->frs_val = (val);  \
 	_frs_top->frs_ihs = ihs_top;  \
          frs_top=_frs_top; \
-        setjmp(_frs_top->frs_jmpbuf); \
+	 setjmp((void *)_frs_top->frs_jmpbuf);	\
 	} while (0)
 
 #define frs_pop()	frs_top--
