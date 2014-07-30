@@ -493,6 +493,12 @@ char *gcl_gets(char *s,int z) {return fgets(s,z,stdin);}
 int gcl_puts(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
 
 
+int gcl_feof(void *v) {return feof(v);}
+int gcl_getc(void *v) {return getc(v);}
+int gcl_putc(int i,void *v) {return putc(i,v);}
+
+
+
 DEFUN_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object path),"") {
 
   char filename[4096];

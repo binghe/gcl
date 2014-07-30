@@ -67,18 +67,18 @@
    (get 'long-float-p 'inline-always))
 
 ;;SFEOF
- (push '((object) boolean #.(flags set)"(feof((#0)->sm.sm_fp))")
+ (push '((object) boolean #.(flags set)"(gcl_feof((#0)->sm.sm_fp))")
    (get 'sfeof 'inline-unsafe))
 
 
 ;;SGETC1
- (push '((object) fixnum #.(flags set rfa) "getc((#0)->sm.sm_fp)")
+ (push '((object) fixnum #.(flags set rfa) "gcl_getc((#0)->sm.sm_fp)")
    (get 'sgetc1 'inline-unsafe))
 
 ;;SPUTC
- (push '((fixnum object) fixnum #.(flags set rfa)"(putc(#0,(#1)->sm.sm_fp))")
+ (push '((fixnum object) fixnum #.(flags set rfa)"(gcl_putc(#0,(#1)->sm.sm_fp))")
    (get 'sputc 'inline-unsafe))
-(push '((character object) fixnum #.(flags set rfa)"(putc(#0,(#1)->sm.sm_fp))")
+(push '((character object) fixnum #.(flags set rfa)"(gcl_putc(#0,(#1)->sm.sm_fp))")
    (get 'sputc 'inline-unsafe))
 
 ;;READ-BYTE1
