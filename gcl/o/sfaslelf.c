@@ -48,6 +48,7 @@ License for more details.
 #define  ELF_R_INFO(a,b)       Mjoin(ELF,_R_INFO)(a,b)
 #define ELF_ST_BIND(a)         Mjoin(ELF,_ST_BIND)(a)
 #define ELF_ST_TYPE(a)         Mjoin(ELF,_ST_TYPE)(a)
+#define ELF_ST_INFO(a,b)       Mjoin(ELF,_ST_INFO)(a,b)
 #define ELF_ST_VISIBILITY(a)   Mjoin(ELF,_ST_VISIBILITY)(a)
 
 

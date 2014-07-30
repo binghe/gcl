@@ -73,14 +73,16 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   void *v,*ve;
   ul q;
 
-  for (q=0,sym=sym1;sym<syme;sym++)
-    if (!strcmp(st1+sym->st_name,"_gp_disp")) {
+  for (q=0,sym=sym1;sym<syme;sym++) {
+    if (!strcmp(st1+sym->st_name,"_gp_disp"))
       sym->st_other=1;
-      q++;
-    } else if (!strcmp(st1+sym->st_name,"__gnu_local_gp")) {
+    else if (!strcmp(st1+sym->st_name,"__gnu_local_gp"))
       sym->st_other=2;
+    if (sym->st_other) {
       q++;
+      sym->st_info=ELF_ST_INFO(STB_LOCAL,ELF_ST_TYPE(sym->st_info));
     }
+  }
   massert(q<=1);
   
   for (sym=sym1;sym<syme;sym++)
