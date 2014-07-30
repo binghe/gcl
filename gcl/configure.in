@@ -719,7 +719,22 @@ case $use in
 esac
 
 
-	
+AC_CHECK_HEADERS(setjmp.h,
+	AC_MSG_CHECKING([sizeof jmp_buf])
+	AC_RUN_IFELSE([
+		AC_LANG_SOURCE([[
+			#include <stdio.h>
+			#include <setjmp.h>
+			int main() {
+			   FILE *fp=fopen("conftest1","w");
+			   fprintf(fp,"%lu\n",sizeof(jmp_buf));
+			   fclose(fp);
+			   return 0;
+			}]])],
+			[sizeof_jmp_buf=`cat conftest1`
+			 AC_MSG_RESULT($sizeof_jmp_buf)
+			 AC_DEFINE_UNQUOTED(SIZEOF_JMP_BUF,$sizeof_jmp_buf,[sizeof jmp_buf])],
+			 [AC_MSG_RESULT(no)]))
 
 # sysconf
 

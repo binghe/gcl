@@ -195,6 +195,9 @@
 /* have setenv call */
 #undef HAVE_SETENV
 
+/* Define to 1 if you have the <setjmp.h> header file. */
+#undef HAVE_SETJMP_H
+
 /* Define to 1 if you have the `sigaltstack' function. */
 #undef HAVE_SIGALTSTACK
 
@@ -347,6 +350,9 @@
 
 /* sizeof linked list for contiguous pages */
 #undef SIZEOF_CONTBLOCK
+
+/* sizeof jmp_buf */
+#undef SIZEOF_JMP_BUF
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG

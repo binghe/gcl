@@ -97,6 +97,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../h/mp.h"
 #endif
 
+#include <setjmp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

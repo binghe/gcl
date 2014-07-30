@@ -166,11 +166,12 @@ double cos(double);
 double sin(double);
 double sqrt(double);
 double tan(double);
+int gcl_feof(void *);
+int gcl_getc(void *);
+int gcl_putc(int,void *);
 #ifdef CMPINCLUDE
-void * alloca(unsigned long);
-int feof(void *);
-int getc(void *);
-int putc(int,void *);
+int setjmp();
+int _setjmp();
 #endif
 void vfun_wrong_number_of_args(object);
 void ihs_overflow (void);
