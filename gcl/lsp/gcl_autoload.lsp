@@ -259,7 +259,8 @@
 	    "cstack alignment:     ~a bytes~%"
 	    "cstack max:           ~a bytes~%"
 	    "immfix start:         0x~x~%"
-	    "immfix size:          ~a fixnums~%"))
+	    "immfix size:          ~a fixnums~%"
+	    "physical memory:      ~a pages~%"))
 	(v (multiple-value-list (si::heap-report))))
     
     (do ((v v (cdr v)) (f f (cdr f))) ((not (car v)))

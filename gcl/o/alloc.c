@@ -419,10 +419,8 @@ opt_maxpage(struct typemanager *my_tm) {
   struct typemanager *tm,*tme;
   long mro=0,tro=0;
 
-#ifdef HAVE_SYSCONF_PHYS_PAGES
-  if (page(heap_end)-first_data_page+nrbpage>=phys_pages)
+  if (phys_pages>0 && page(heap_end)-first_data_page+nrbpage>=phys_pages)
     return 0;
-#endif
 
   if (page(core_end)>0.8*real_maxpage)
     return 0;
@@ -1019,6 +1017,8 @@ gcl_init_alloc(void *cs_start) {
 
   fixnum cssize=(1L<<23);
 
+  prelink_init();
+  
 #ifdef RECREATE_HEAP
   if (!raw_image) RECREATE_HEAP;
 #endif

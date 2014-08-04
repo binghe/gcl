@@ -27,6 +27,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>
 
 static void
 init_main(void);
@@ -138,6 +139,25 @@ mbrk(void *v) {
   return uc==(ufixnum)sbrk(uv-uc) ? 0 : -1;
 }
     
+ufixnum
+get_phys_pages_no_malloc(void) {
+  int l;
+  char b[PAGESIZE],*c;
+  const char *k="MemTotal:",*f="/proc/meminfo";
+  ufixnum res=0,n;
+  
+  if ((l=open(f,O_RDONLY))!=-1) {
+    if ((n=read(l,b,sizeof(b)))<sizeof(b) && 
+	!(b[n]=0) && 
+	(c=strstr(b,k)) && 
+	sscanf(c+strlen(k),"%lu",&n)==1)
+      res=n;
+    close(l);
+  }
+  return res>>(PAGEWIDTH-10);
+}
+
+
 int
 update_real_maxpage(void) {
 
@@ -161,11 +181,10 @@ update_real_maxpage(void) {
       }
   massert(!mbrk(cur));
 
-#ifdef HAVE_SYSCONF_PHYS_PAGES
-  phys_pages=raw_image ? 0 : sysconf(_SC_PHYS_PAGES);
+  phys_pages=get_phys_pages_no_malloc();
+
 #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
   if (phys_pages>0 && real_maxpage>phys_pages+first_data_page) real_maxpage=phys_pages+first_data_page;
-#endif
 #endif
 
   available_pages=real_maxpage-first_data_page;
@@ -265,8 +284,6 @@ main(int argc, char **argv, char **envp) {
 #include <stdlib.h>
 #include "ld_bind_now.h"
 #endif
-  
-  prelink_init();
   
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);

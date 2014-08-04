@@ -754,21 +754,22 @@ AC_CHECK_HEADERS(unistd.h,
 			    AC_DEFINE_UNQUOTED(HZ,$hz,[time system constant])
 			    ,hz=0,hz=0)
 	        [AC_MSG_RESULT($hz)]
-		AC_MSG_CHECKING(_SC_PHYS_PAGES)
-		AC_RUN_IFELSE([
-			AC_LANG_SOURCE([[
-			#include <stdio.h>
-			#include <unistd.h>
-			int main() {
-			   FILE *fp=fopen("conftest1","w");
-			   fprintf(fp,"%lu\n",sysconf(_SC_PHYS_PAGES));
-			   fclose(fp);
-			   return 0;
-			}]])],
-			[phys=`cat conftest1`
-			 AC_MSG_RESULT($phys)
-			 AC_DEFINE(HAVE_SYSCONF_PHYS_PAGES,$phys,[probe runtime phys pages for gc performance])],
-			 [AC_MSG_RESULT(no)])))
+		dnl AC_MSG_CHECKING(_SC_PHYS_PAGES)
+		dnl AC_RUN_IFELSE([
+		dnl 	AC_LANG_SOURCE([[
+		dnl 	#include <stdio.h>
+		dnl 	#include <unistd.h>
+		dnl 	int main() {
+		dnl 	   FILE *fp=fopen("conftest1","w");
+		dnl 	   fprintf(fp,"%lu\n",sysconf(_SC_PHYS_PAGES));
+		dnl 	   fclose(fp);
+		dnl 	   return 0;
+		dnl 	}]])],
+		dnl 	[phys=`cat conftest1`
+		dnl 	 AC_MSG_RESULT($phys)
+		dnl 	 AC_DEFINE(HAVE_SYSCONF_PHYS_PAGES,$phys,[probe runtime phys pages for gc performance])],
+		dnl 	 [AC_MSG_RESULT(no)])
+			 ))
 
 
 #MY_SUBDIRS=

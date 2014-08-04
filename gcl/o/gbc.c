@@ -1508,6 +1508,7 @@ FFN(siLheap_report)(void) {
   vs_push(make_fixnum(0));
   vs_push(make_fixnum(0));
 #endif
+  vs_push(make_fixnum(phys_pages));
 
 }  
 
