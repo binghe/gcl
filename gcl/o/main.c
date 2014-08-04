@@ -139,6 +139,46 @@ mbrk(void *v) {
   return uc==(ufixnum)sbrk(uv-uc) ? 0 : -1;
 }
     
+#if defined(__CYGWIN__)||defined(__MINGW32__)
+
+#include <Windows.h>
+
+ufixnum
+get_phys_pages_no_malloc(void) {
+  MEMORYSTATUS m;
+
+  m.dwLength=sizeof(m);
+  GlobalMemoryStatus(&m);
+  return m.dwTotalPhys>>PAGEWIDTH;
+
+}
+
+#elif defined (DARWIN)
+
+#include <sys/sysctl.h>
+
+ufixnum
+get_phys_pages_no_malloc(void) {
+  uint64_t s;
+  size_t z=sizeof(s);
+  int m[2]={CTL_HW,HW_MEMSIZE};
+  
+  if (sysctl(m,2,&s,&z,NULL,0)==0)
+    return s>>PAGEWIDTH;
+
+}
+
+#elif defined(__sun__)
+
+ufixnum
+get_phys_pages_no_malloc(void) {
+
+  return sysconf(_SC_PHYS_PAGES);
+
+}
+
+#else 
+
 ufixnum
 get_phys_pages_no_malloc(void) {
   int l;
@@ -157,6 +197,7 @@ get_phys_pages_no_malloc(void) {
   return res>>(PAGEWIDTH-10);
 }
 
+#endif
 
 int
 update_real_maxpage(void) {
