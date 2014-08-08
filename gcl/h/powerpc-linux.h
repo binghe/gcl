@@ -11,13 +11,6 @@
 
 #define CLEAR_CACHE_LINE_SIZE 32
 #define CLEAR_CACHE do {void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size; \
-                        void *p=(void *)((unsigned long)v & ~(PAGESIZE-1));	\
-			void *pe=(void *)((unsigned long)ve & ~(PAGESIZE-1)) + PAGESIZE-1; \
-                        if (mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC)) {		\
-			  fprintf(stderr,"%p %p\n",p,pe);		\
-			  perror("");					\
-			  FEerror("Cannot mprotect", 0);		\
-			}						\
                         v=(void *)((unsigned long)v & ~(CLEAR_CACHE_LINE_SIZE - 1));\
                         for (;v<ve;v+=CLEAR_CACHE_LINE_SIZE) \
                            asm __volatile__ ("dcbst 0,%0\n\tsync\n\ticbi 0,%0\n\tsync\n\tisync": : "r" (v) : "memory");\

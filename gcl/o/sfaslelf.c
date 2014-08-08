@@ -532,16 +532,11 @@ static int
 clear_protect_memory(object memory) {
 
   void *p,*pe;
-  int i;
 
   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1));
   pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size + PAGESIZE-1) & ~(PAGESIZE-1));
 
-  i=mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
-
-  __builtin___clear_cache((void *)memory->cfd.cfd_start,(void *)memory->cfd.cfd_start+memory->cfd.cfd_size);
-
-  return i;
+  return mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
 
 }
 #endif
@@ -583,12 +578,12 @@ fasload(object faslfile) {
   massert(!un_mmap(v1,ve));
   close_stream(faslfile);
   
-#ifdef HAVE_BUILTIN_CLEAR_CACHE
   massert(!clear_protect_memory(memory));
-#else
-#ifdef CLEAR_CACHE
+
+#if defined(HAVE_BUILTIN_CLEAR_CACHE)
+  __builtin___clear_cache((void *)memory->cfd.cfd_start,(void *)memory->cfd.cfd_start+memory->cfd.cfd_size);
+#elif defined(CLEAR_CACHE)
   CLEAR_CACHE;
-#endif
 #endif  
 
   init_address-=(ul)memory->cfd.cfd_start;

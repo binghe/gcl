@@ -48,9 +48,9 @@
 #ifdef IN_SFASL
 #include <sys/mman.h>
 #define CLEAR_CACHE {\
-   void *p,*pe; \
-   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1)); \
-   pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size) & ~(PAGESIZE-1)) + PAGESIZE-1; \
+   void *p=memory->cfd.cfd_start,*pe=p+memory->cfd.cfd_size; \
+   p=(void *)((unsigned long)p & ~(PAGESIZE-1)); \
+   /*+=PAGESIZE?*/
    for (;p<pe;p++) asm __volatile__ ("ocbp @%0\n\t": : "r" (p) : "memory");\
 }
 #endif
