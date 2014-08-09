@@ -527,7 +527,6 @@ seek_to_end_ofile(FILE *fp) {
 
 }
 
-#ifdef HAVE_BUILTIN_CLEAR_CACHE
 static int
 clear_protect_memory(object memory) {
 
@@ -539,7 +538,6 @@ clear_protect_memory(object memory) {
   return mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
 
 }
-#endif
 
 int
 fasload(object faslfile) {
