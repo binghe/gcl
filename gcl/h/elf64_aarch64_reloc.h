@@ -41,3 +41,6 @@
     case R_AARCH64_LDST64_ABS_LO12_NC: /* LD/ST64: (S+A) & 0xff8 */
       store_val(where,MASK(12) << 10,((s+a) & 0xff8) << 7);
       break;
+    case R_AARCH64_LDST128_ABS_LO12_NC: /* LD/ST128: (S+A) & 0xff8 */
+      store_val(where,MASK(12) << 10,((s+a) & 0xff0) << 6);
+      break;
