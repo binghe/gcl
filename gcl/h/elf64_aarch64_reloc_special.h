@@ -1,9 +1,7 @@
 /* #define R_AARCH64_TRAMP 1 */
 ul gotp;
 
-static int tramp[]={0x0,        /*64bit absolute address*/
-		    0x0,        /*64bit absolute address*/
-		    0x58ffffd0, /*ldr 19bit pc relative x16*/
+static int tramp[]={0x58ffffd0, /*ldr 19bit pc relative x16*/
 		    0xd61f0200};/*br x16*/
 
 static int
@@ -33,7 +31,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	    ELF_R_TYPE(r->r_info)==R_AARCH64_CALL26) {
 
 	  /*FIXME try to figure out earlier if this space is needed*/
-	  (*gs)+=sizeof(tramp)/sizeof(*gs);
+	  (*gs)+=1+(sizeof(tramp)/sizeof(*gs));
 	  /* r->r_info=ELF_R_INFO(ELF_R_SYM(r->r_info),R_AARCH64_TRAMP); */
 
 	}

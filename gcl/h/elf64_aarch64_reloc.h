@@ -9,10 +9,11 @@
       {
 	long x=((long)(s+a-p))/4;
 	if (abs(x)&(~MASK(26))) {
-	  *(ul *)tramp=s+a;
 	  got+=gotp;
-	  gotp+=sizeof(tramp)/sizeof(*got);
+	  *got++=s+a;
+	  gotp++;
 	  memcpy(got,tramp,sizeof(tramp));
+	  gotp+=sizeof(tramp)/sizeof(*got);
 	  x=((long)(got+1))/4;
 	}
 	store_vals(where,MASK(26),x);
@@ -27,6 +28,12 @@
       break;
     case R_AARCH64_ADD_ABS_LO12_NC: /* ADD:    (S+A) & 0xfff */
       store_val(where,MASK(12) << 10,(s+a) << 10);
+      break;
+    case R_AARCH64_LDST8_ABS_LO12_NC: /* LD/ST8: (S+A) & 0xfff */
+      store_val(where,MASK(12) << 10,((s+a) & 0xfff) << 10);
+      break;
+    case R_AARCH64_LDST16_ABS_LO12_NC: /* LD/ST16: (S+A) & 0xffc */
+      store_val(where,MASK(12) << 10,((s+a) & 0xffe) << 9);
       break;
     case R_AARCH64_LDST32_ABS_LO12_NC: /* LD/ST32: (S+A) & 0xffc */
       store_val(where,MASK(12) << 10,((s+a) & 0xffc) << 8);
