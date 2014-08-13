@@ -2890,6 +2890,9 @@ case $canonical in
      sparc*linux*)
      	use=sparc-linux;;
 
+     aarch64*linux*)
+        use=aarch64-linux;;
+
      arm*linux*)
      	use=arm-linux;;
 
@@ -4356,6 +4359,8 @@ case $use in
 			;;
 #		m68k*)
 #			TCFLAGS="$TCFLAGS -ffloat-store";;
+		aarch64*)
+			TLIBS="$TLIBS -lgcc_s";;
 		hppa*)
 			TCFLAGS="$TCFLAGS -mlong-calls "
 			TLIBS="$TLIBS -lgcc_s" # workaround hppa __moddi3 local func symbols with default linker flags

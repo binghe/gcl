@@ -312,7 +312,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
 int
 main(int argc, char **argv, char **envp) {
 
-  gcl_init_alloc(&argc);
+  gcl_init_alloc(&argv);
 
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include <stdio.h>
@@ -753,7 +753,7 @@ FFN(siLcatch_fatal)(int i) {
 
 LFD(siLreset_stack_limits)(void)
 {
-  int i=0;
+  long i=0;
 
   check_arg(0);
   if(catch_fatal <0) catch_fatal=1;

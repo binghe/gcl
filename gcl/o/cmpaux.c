@@ -556,7 +556,7 @@ find_init_name1(char *s,unsigned len) {
   if (fread(tmp,1,ss.st_size,f)!=ss.st_size)
     FEerror("Error reading binary file",0);
   fclose(f);
-  for (s=tmp;s<tmp+ss.st_size && strncmp(s,"init_",5);q=strstr(s+1,"init_"),s=q ? q : s+strlen(s)+1);
+  for (s=tmp+1;s<tmp+ss.st_size && (strncmp(s,"init_",5) || s[-1]);q=strstr(s+1,"init_"),s=q ? q : s+strlen(s)+1);
   if (strncmp(s,"init_",5))
     FEerror("Init name not found",0);
   return make_simple_string(s);
