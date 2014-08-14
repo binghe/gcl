@@ -337,11 +337,11 @@ random_ulong() {
 int
 main(int argc, char **argv, char **envp) {
 
+  gcl_init_alloc(&argv);
+
 #ifdef NEED_STACK_CHK_GUARD
   __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
 #endif
-
-  gcl_init_alloc(&argv);
 
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include <stdio.h>
