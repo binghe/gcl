@@ -8,13 +8,13 @@
     case R_AARCH64_CALL26: /* BL:     ((S+A-P) >> 2) & 0x3ffffff.  */
       {
 	long x=((long)(s+a-p))/4;
-	if (abs(x)&(~MASK(26))) {
+	if (abs(x)&(~MASK(25))) {
 	  got+=gotp;
 	  *got++=s+a;
 	  gotp++;
 	  memcpy(got,tramp,sizeof(tramp));
 	  gotp+=sizeof(tramp)/sizeof(*got);
-	  x=((long)(got+1))/4;
+	  x=((long)got-p)/4;
 	}
 	store_vals(where,MASK(26),x);
       }
