@@ -309,8 +309,37 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
 
 }
 
+#ifdef NEED_STACK_CHK_GUARD
+
+unsigned long __stack_chk_guard=0;
+
+static unsigned long
+random_ulong() {
+ 
+  object y;
+  
+  if (raw_image) return 0;
+
+  vs_top=vs_base;
+  vs_push(Ct);
+  Lmake_random_state();
+  y=vs_pop;
+  vs_push(number_negate(find_symbol(make_simple_string("MOST-NEGATIVE-FIXNUM"),system_package)->s.s_dbind));
+  vs_push(y);
+  Lrandom();
+
+  return fixint(vs_pop);
+
+}
+#endif
+
+
 int
 main(int argc, char **argv, char **envp) {
+
+#ifdef NEED_STACK_CHK_GUARD
+  __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
+#endif
 
   gcl_init_alloc(&argv);
 
