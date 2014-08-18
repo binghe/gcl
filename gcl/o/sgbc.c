@@ -1554,7 +1554,7 @@ memory_protect(int on) {
   if (on==0) {
     sgc_mprotect(first_protectable_page,end-first_protectable_page,SGC_WRITABLE);
     install_segmentation_catcher();
-    return;
+    return 0;
   }
 
   INSTALL_MPROTECT_HANDLER;
