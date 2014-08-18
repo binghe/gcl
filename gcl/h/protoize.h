@@ -243,7 +243,7 @@ typedef void (*funcvoid)(void);
 #ifndef __MINGW32__
 /* #include <signal.h> */
 #endif
-/* sgbc.c:1246:OF */ extern void memory_protect (int on); /* (on) int on; */
+/* sgbc.c:1246:OF */ extern int memory_protect (int on); /* (on) int on; */
 /* sgbc.c:1306:OF */ extern void perm_writable (char *p, long n); /* (p, n) char *p; int n; */
 /* sgbc.c:1321:OF */ extern void system_error (void); /* () */
 /* gbc.c:1357:OF */ extern void gcl_init_GBC (void); /* () */

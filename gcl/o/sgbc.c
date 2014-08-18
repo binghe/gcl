@@ -10,10 +10,6 @@
 static void
 sgc_mark_object1(object);
 
-static void
-sgc_mprotect(long, long, int);
-
-
 #ifdef BSD
 /* ulong may have been defined in mp.h but the define is no longer needed */
 #undef ulong
@@ -1332,8 +1328,9 @@ sgc_start(void) {
      and modified the tm_table;
      Turn  memory protection on for the pages which are writable.
   */
-  memory_protect(1);
   sgc_enabled=1;
+  if (memory_protect(1)) 
+    sgc_quit();
   if (sSAnotify_gbcA->s.s_dbind != Cnil) {
     printf("[SGC on]"); 
     fflush(stdout);
@@ -1521,7 +1518,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
 
 }
 
-static void
+static int
 sgc_mprotect(long pbeg, long n, int writable) {
   /* CHECK_RANGE(pbeg,n);  */
 #ifdef DEBUG_MPROTECT
@@ -1532,13 +1529,18 @@ sgc_mprotect(long pbeg, long n, int writable) {
   fflush(stdout);
 #endif  
   if(mprotect(pagetoinfo(pbeg),n*PAGESIZE,
-	      (writable & SGC_WRITABLE ? PROT_READ_WRITE_EXEC : PROT_READ_EXEC)))
-    FEerror("Couldn't protect",0);
+	      (writable & SGC_WRITABLE ? PROT_READ_WRITE_EXEC : PROT_READ_EXEC))) {
+    perror("mprotect failure, sgc disabled");
+    return -1;
+  }
+
+  return 0;
+
 }
 
 
 
-void
+int
 memory_protect(int on) {
 
   unsigned long i,beg,end= page(core_end);
@@ -1563,11 +1565,14 @@ memory_protect(int on) {
 
     if (writable==IS_WRITABLE(i) && i<=end) continue;
 
-    sgc_mprotect(beg,i-beg,writable);
+    if (sgc_mprotect(beg,i-beg,writable)) 
+      return -1;
     writable=1-writable;
     beg=i;
 
   }
+
+  return 0;
 
 }
 

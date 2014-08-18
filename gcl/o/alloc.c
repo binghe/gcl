@@ -1089,7 +1089,8 @@ gcl_init_alloc(void *cs_start) {
   massert(getpagesize()<=PAGESIZE);
   memprotect_test_reset();
   if (sgc_enabled)
-    memory_protect(1);
+    if (memory_protect(1))
+      sgc_quit();
 
 #endif
 
