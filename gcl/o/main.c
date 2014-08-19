@@ -166,6 +166,8 @@ get_phys_pages_no_malloc(void) {
   if (sysctl(m,2,&s,&z,NULL,0)==0)
     return s>>PAGEWIDTH;
 
+  return 0;
+
 }
 
 #elif defined(__sun__)
