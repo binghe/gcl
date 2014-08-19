@@ -28,6 +28,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/mman.h>
 
 static void
 init_main(void);
@@ -338,7 +339,7 @@ gcl_mprotect(void *v,size_t l,int p) {
   char b[80];
 
   if ((i=mprotect(v,l,p))) {
-    snprintf(b,sizeof(b),"mprotect failure: %p %u %d\b",c,l,p);
+    snprintf(b,sizeof(b),"mprotect failure: %p %lu %d\b",v,l,p);
     perror(b);
   }
 
