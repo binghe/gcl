@@ -333,7 +333,7 @@ random_ulong() {
 #endif
 
 int
-gcl_mprotect(void *v,size_t l,int p) {
+gcl_mprotect(void *v,unsigned long l,int p) {
 
   int i;
   char b[80];

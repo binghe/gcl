@@ -1910,4 +1910,4 @@ void
 prelink_init(void);
 
 int
-gcl_mprotect(void *,size_t,int);
+gcl_mprotect(void *,unsigned long,int);
