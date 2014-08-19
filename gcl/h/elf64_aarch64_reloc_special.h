@@ -1,8 +1,8 @@
 /* #define R_AARCH64_TRAMP 1 */
-ul gotp;
-
 static int tramp[]={0x58ffffd0, /*ldr 19bit pc relative x16*/
 		    0xd61f0200};/*br x16*/
+static ul gotp,tz=1+sizeof(tramp)/sizeof(ul);
+
 
 static int
 find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
@@ -22,7 +22,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
   gotp=0;
   for (sym=sym1;sym<syme;sym++)
-    sym->st_other=sym->st_size=0;
+    sym->st_size=0;
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
     if (sec->sh_type==SHT_RELA)
@@ -30,12 +30,24 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	if (ELF_R_TYPE(r->r_info)==R_AARCH64_JUMP26 ||
 	    ELF_R_TYPE(r->r_info)==R_AARCH64_CALL26) {
 
-	  /*FIXME try to figure out earlier if this space is needed*/
-	  (*gs)+=1+(sizeof(tramp)/sizeof(*gs));
-	  /* r->r_info=ELF_R_INFO(ELF_R_SYM(r->r_info),R_AARCH64_TRAMP); */
+	  if (r->r_addend)
+
+	    (*gs)+=tz;
+
+	  else {
+	  
+	    sym=sym1+ELF_R_SYM(r->r_info);
+	    
+	    if (!sym->st_size) 
+	      sym->st_size=++gotp;
+
+	  }
 
 	}
 
+  gotp*=tz;
+  (*gs)+=gotp;
+  
   return 0;
   
 }

@@ -9,11 +9,13 @@
       {
 	long x=((long)(s+a-p))/4;
 	if (abs(x)&(~MASK(25))) {
-	  got+=gotp;
+	  if (a) {
+	    got+=gotp;
+	    gotp+=tz;
+	  } else
+	    got+=(sym->st_size-1)*tz;
 	  *got++=s+a;
-	  gotp++;
 	  memcpy(got,tramp,sizeof(tramp));
-	  gotp+=sizeof(tramp)/sizeof(*got);
 	  x=((long)got-p)/4;
 	}
 	store_vals(where,MASK(26),x);
