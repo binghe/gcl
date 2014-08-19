@@ -31,6 +31,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 #include "page.h"
 
+#ifdef HAVE_MPROTECT
+#include <sys/mman.h>
+#endif
+
 static int
 t_from_type(object);
 
