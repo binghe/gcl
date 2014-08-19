@@ -1081,7 +1081,7 @@ gcl_init_alloc(void *cs_start) {
   
 #ifdef HAVE_MPROTECT
   if (data_start)
-    mprotect(data_start,(void *)core_end-data_start,PROT_READ|PROT_WRITE|PROT_EXEC);
+    massert(!gcl_mprotect(data_start,(void *)core_end-data_start,PROT_READ|PROT_WRITE|PROT_EXEC));
 #endif
 
 #ifdef SGC

@@ -1908,3 +1908,6 @@ void init_darwin_zone_compat ();
 
 void
 prelink_init(void);
+
+int
+gcl_mprotect(void *,size_t,int);

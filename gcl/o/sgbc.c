@@ -904,7 +904,7 @@ memprotect_handler_test(int sig, long code, void *scp, char *addr) {
     memprotect_result=memprotect_bad_fault_address;
   else
     memprotect_result=memprotect_none;
-  mprotect(memprotect_test_address,PAGESIZE,PROT_READ_WRITE_EXEC);
+  gcl_mprotect(memprotect_test_address,PAGESIZE,PROT_READ_WRITE_EXEC);
 
 }
 
@@ -949,7 +949,7 @@ memprotect_test(void) {
   { /* mips kernel bug test -- SIGBUS with no faddr when floating point is emulated. */
     float *f1=(void *)memprotect_test_address,*f2=(void *)b2,*f1e=f1+p/sizeof(*f1);
   
-    if (mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
+    if (gcl_mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
       memprotect_result=memprotect_cannot_protect;
       return -1;
     }
@@ -965,7 +965,7 @@ memprotect_test(void) {
     memprotect_handler_invocations=0;
 
   }
-  if (mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
+  if (gcl_mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
     memprotect_result=memprotect_cannot_protect;
     return -1;
   }
@@ -1502,7 +1502,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
     INSTALL_MPROTECT_HANDLER;
 #endif
 
-    mprotect(pagetoinfo(p),PAGESIZE,PROT_READ_WRITE_EXEC);
+    massert(!gcl_mprotect(pagetoinfo(p),PAGESIZE,PROT_READ_WRITE_EXEC));
     SET_WRITABLE(p);
     fault_pages++;
 
@@ -1528,9 +1528,8 @@ sgc_mprotect(long pbeg, long n, int writable) {
 	 pagetoinfo(pbeg), n * PAGESIZE, sbrk(0));
   fflush(stdout);
 #endif  
-  if(mprotect(pagetoinfo(pbeg),n*PAGESIZE,
-	      (writable & SGC_WRITABLE ? PROT_READ_WRITE_EXEC : PROT_READ_EXEC))) {
-    perror("mprotect failure, sgc disabled");
+  if(gcl_mprotect(pagetoinfo(pbeg),n*PAGESIZE,(writable & SGC_WRITABLE ? PROT_READ_WRITE_EXEC : PROT_READ_EXEC))) {
+    perror("sgc disabled");
     return -1;
   }
 

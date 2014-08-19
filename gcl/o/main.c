@@ -331,6 +331,21 @@ random_ulong() {
 }
 #endif
 
+int
+gcl_mprotect(void *v,size_t l,int p) {
+
+  int i;
+  char b[80];
+
+  if ((i=mprotect(v,l,p))) {
+    snprintf(b,sizeof(b),"mprotect failure: %p %u %d\b",c,l,p);
+    perror(b);
+  }
+
+  return i;
+
+}
+
 
 int
 main(int argc, char **argv, char **envp) {
