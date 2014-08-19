@@ -318,8 +318,6 @@ random_ulong() {
  
   object y;
   
-  if (raw_image) return 0;
-
   vs_top=vs_base;
   vs_push(Ct);
   Lmake_random_state();
@@ -338,10 +336,6 @@ int
 main(int argc, char **argv, char **envp) {
 
   gcl_init_alloc(&argv);
-
-#ifdef NEED_STACK_CHK_GUARD
-  __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
-#endif
 
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include <stdio.h>
@@ -414,6 +408,9 @@ main(int argc, char **argv, char **envp) {
     gcl_init_big1();
 #ifdef HAVE_READLINE
     gcl_init_readline_function();
+#endif
+#ifdef NEED_STACK_CHK_GUARD
+  __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
 #endif
 
   }
