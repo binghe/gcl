@@ -153,3 +153,5 @@ extern DBEGIN_TY _dbegin;
 #define FPE_CTXT(v_) Cnil
 
 #define FPE_INIT Cnil
+
+#undef HAVE_MPROTECT /*buggy on cygwin and unnecessary*/

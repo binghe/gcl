@@ -28,7 +28,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 
 static void
 init_main(void);
@@ -332,6 +331,8 @@ random_ulong() {
 }
 #endif
 
+#ifdef HAVE_MPROTECT
+#include <sys/mman.h>
 int
 gcl_mprotect(void *v,unsigned long l,int p) {
 
@@ -346,7 +347,7 @@ gcl_mprotect(void *v,unsigned long l,int p) {
   return i;
 
 }
-
+#endif
 
 int
 main(int argc, char **argv, char **envp) {
