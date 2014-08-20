@@ -52,6 +52,7 @@
       add_vals(where,~0L,s);
       break;
     case R_ARM_CALL:
+    case R_ARM_JUMP24:
       add_vals(where,MASK(24),((long)(s+a-p))>>2);
       break;
     case R_ARM_ABS32:
