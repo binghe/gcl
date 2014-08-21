@@ -10,7 +10,8 @@
 
   {
 
-    long pers = personality(0xffffffffUL);
+    /*READ_IMPLIES_EXEC is for selinux, but selinux will reset it in the child*/
+    long pers = personality(READ_IMPLIES_EXEC|personality(0xffffffffUL));
     long flag = ADDR_NO_RANDOMIZE;
 
     if (sizeof(long)==4) flag|=ADDR_LIMIT_3GB|ADDR_COMPAT_LAYOUT;
