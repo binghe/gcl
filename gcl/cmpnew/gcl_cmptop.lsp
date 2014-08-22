@@ -1722,10 +1722,11 @@
 ;; will let it default to ccb-vs, which will be the value of *ccb-vs*
 ;; prevalent at the time the environment stack was pushed and the
 ;; closure was created.  CM 20031130
+(defvar *closure-p* nil)
 (defun t3local-fun (closure-p clink ccb-vs fun lambda-expr &optional (initial-ccb-vs ccb-vs)
                               &aux (level (if closure-p 0 (fun-level fun)))
 			      (*volatile* (volatile (cadr lambda-expr)))
-			      *downward-closures*)
+			      *downward-closures* (*closure-p* closure-p))
   (declare (fixnum level))
   (if (eq closure-p 'dclosure)
       (return-from t3local-fun
