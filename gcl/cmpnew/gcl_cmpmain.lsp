@@ -370,12 +370,15 @@ Cannot compile ~a.~%"
 	   (unless (and (fboundp 'si::init-cmp-anon) (or (si::init-cmp-anon) (fmakunbound 'si::init-cmp-anon)))
 	     (with-open-file
 	      (st (setq gaz (gazonk-name)) :direction :output))
-	     (let ((fi (let ((*compiler-compile* `(defun ,na ,@ (ecase (car tem)
-								       (lambda (cdr tem))
-								       (lambda-block (cddr tem))))))
-			 (compile-file gaz))))
-	       (load fi)
-	       (mdelete-file fi))
+	     (let* ((*compiler-compile* 
+		     `(defun ,na 
+			,@(ecase (car tem)
+				 (lambda (cdr tem))
+				 (lambda-block (cddr tem)))))
+		    (fi (compile-file gaz)))
+	       (when (pathnamep fi)
+		 (load fi)
+		 (mdelete-file fi)))
 	     (unless *keep-gaz* (mdelete-file gaz)))
 	   (or (eq na name) (setf (symbol-function name) (symbol-function na)))
 	 ;; FIXME -- support warnings-p and failures-p.  CM 20041119
