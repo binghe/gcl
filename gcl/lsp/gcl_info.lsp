@@ -1,11 +1,5 @@
 (in-package "SI"  )
 
-(eval-when (compile)
-
-
-(proclaim '(ftype (function (t t &optional fixnum) fixnum) string-match))
-(proclaim '(ftype (function (fixnum) fixnum)
-		  match-beginning match-end)))
 (eval-when (compile eval)
 (defmacro while (test &body body)
   `(slooP::sloop while ,test do ,@ body))
