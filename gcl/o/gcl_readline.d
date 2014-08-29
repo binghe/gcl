@@ -228,7 +228,7 @@ int rl_getc_em(FILE *f) {
       putc('\r', stdout);
       line = readline(rl_putc_em_line);
       rl_putc_em('\r', stdout);
-      if (line==NULL) return *rl_line_buffer=EOF;
+      if (line==NULL) {if (rl_line_buffer) *rl_line_buffer=EOF;return EOF;}
       if (line[0] != 0) add_history(line);
     } else {
       return getc(f);

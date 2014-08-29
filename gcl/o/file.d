@@ -1239,7 +1239,12 @@ BEGIN:
 
 #ifdef HAVE_READLINE
 	  if (readline_on && strm->sm.sm_fp==rl_instream)
-	    if (rl_line_buffer) return *rl_line_buffer ? TRUE : FALSE;
+	    if (rl_line_buffer) {
+	      if (*rl_line_buffer == 0 || *rl_line_buffer == EOF)
+	        return FALSE;
+	      else
+	        return TRUE;
+	    }
 #endif
 		if (strm->sm.sm_fp == NULL)
 			closed_stream(strm);
