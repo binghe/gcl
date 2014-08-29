@@ -779,8 +779,8 @@ First directory is checked for first name and all extensions etc."
  
 (defun do-f (file &aux *break-enable*)
   (catch *quit-tag*
-    (labels ((read-loop (st &aux (tem (read st nil 'eof))) (when (eq tem 'eof) (bye)) (eval tem) (read-file st))
-	     (read-file (st) (read-line st) (read-loop st)))
+    (labels ((read-loop (st &aux (tem (read st nil 'eof))) (when (eq tem 'eof) (bye)) (eval tem) (read-loop st))
+	     (read-file (st) (read-line st nil 'eof) (read-loop st)))
 	    (if file
 		(with-open-file
 		 (st file)
