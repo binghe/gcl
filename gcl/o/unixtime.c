@@ -271,16 +271,16 @@ DEFUN_NEW("CURRENT-TIMEZONE",object,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(
   
   /* Now UTC = (local time + bias), in units of minutes, so */
   /*fprintf ( stderr, "Bias = %ld\n", tzi.Bias );*/
-  return (object)(tzi.Bias/60);
+  return (object)((tzi.Bias+tzi.DaylightBias)/60);
   
 #elif defined NO_SYSTEM_TIME_ZONE
   return (object)0;
 #elif defined __CYGWIN__
   struct tm gt,lt;
-  fixnum _t=0;
+  fixnum _t=time(0);
   gmtime_r(&_t, &gt);
   localtime_r(&_t, &lt);
-  return (object)((lt.tm_mday == gt.tm_mday) ? -(lt.tm_hour) : (24 - lt.tm_hour));
+  return (object)(gt.tm_hour-lt.tm_hour+24*(gt.tm_yday!=lt.tm_yday ? (gt.tm_year>lt.tm_year||gt.tm_yday>lt.tm_yday ? 1 : -1) : 0));
 #else
   fixnum _t=time(0);
   return (object)(-localtime(&_t)->tm_gmtoff/3600);
