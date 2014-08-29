@@ -550,7 +550,7 @@ DEFUN_NEW("MAKE-ARRAY1",object,fSmake_array1,SI,6,6,
       { x->a.a_dims[i] = FIX_CHECK(Mcar(v));
 	if (x->a.a_dims[i] < 0)
 	  { FEerror("Dimension must be non negative",0);}
-	if (x->a.a_dims[i]>((1UL<<(sizeof(dim)*8-1))-1)/dim)
+	if (dim && x->a.a_dims[i]>((1UL<<(sizeof(dim)*8-1))-1)/dim)
 	  FEerror("Total dimension overflow on dimensions ~s",1,dimensions);
 	dim *= x->a.a_dims[i++];
 	v = Mcdr(v);}
