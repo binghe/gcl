@@ -5817,14 +5817,12 @@ fi
 		if echo $MP | tr ' ' '\012' | grep libbfd.a >/dev/null; then
 		   LIBBFD="`echo $MP | tr ' ' '\012' | grep libbfd.a | $AWK '{i=split($1,A,"/");for (j=1;j<=i;j++) if (j>1 && A[j]=="..") {j--;i-=2;for (k=j;k<=i;k++) A[k]=A[k+2];j--;}} END {for (j=1;j<=i;j++) printf("%s%s",A[j],j!=i ? "/" : "")}'`"
 		else
-		   echo Guessing path to libbfd.a due to gcc bug
-		   LIBBFD="/usr/lib/libbfd.a"
+		   as_fn_error $? "cannot locate external libbfd.a" "$LINENO" 5
 		fi
 		if echo $MP | tr ' ' '\012' | grep libiberty.a >/dev/null ; then
 		   LIBIBERTY="`echo $MP | tr ' ' '\012' | grep libiberty.a | $AWK '{i=split($1,A,"/");for (j=1;j<=i;j++) if (j>1 && A[j]=="..") {j--;i-=2;for (k=j;k<=i;k++) A[k]=A[k+2];j--;}} END {for (j=1;j<=i;j++) printf("%s%s",A[j],j!=i ? "/" : "")}'`"
 		else
-		   echo Guessing path to libiberty.a due to gcc bug
-		   LIBIBERTY="/usr/lib/libiberty.a"
+		   as_fn_error $? "cannot locate external libiberty.a" "$LINENO" 5
 		fi
 		BUILD_BFD=copy_bfd
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inflate in -lz" >&5
