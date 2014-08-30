@@ -729,25 +729,19 @@ First directory is checked for first name and all extensions etc."
     (when (and s (symbol-value s))
       (list *system-directory*))))
 	 
-(defun get-temp-dir ()
- (dolist (x `(,@(wine-tmp-redirect)
-	      ,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
-   (when x
+
+(defun get-temp-dir nil
+ (dolist (x `(,@(wine-tmp-redirect) ,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
+   (when (or (stringp x) (pathnamep x))
      (let* ((x (pathname x))
-	    (x (if (pathname-name x) x 
-		 (merge-pathnames
-		  (make-pathname :directory (butlast (pathname-directory x)) 
-				 :name (car (last (pathname-directory x))))
-		  x))))
-       (when (stat x) 
-	 (return-from 
-	     get-temp-dir 
+	    (y (namestring (make-pathname :name (pathname-name x) :type (pathname-type x) :version (pathname-version x))))
+	    (y (unless (zerop (length y)) y)))
+       (when (eq :directory (car (stat x)))
+	 (return-from get-temp-dir 
 	   (namestring 
 	    (make-pathname 
 	     :device (pathname-device x)
-	     :directory (when (or (pathname-directory x) (pathname-name x))
-			  (append (pathname-directory x) (list (pathname-name x))))))))))))
-
+	     :directory (append (pathname-directory x) (list y))))))))))
 
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
