@@ -205,7 +205,7 @@ int
 update_real_maxpage(void) {
 
   ufixnum i,j,k;
-  void *end,*cur;
+  void *end,*cur,*beg;
 #ifdef __MINGW32__
   static fixnum n;
 
@@ -216,8 +216,9 @@ update_real_maxpage(void) {
 #endif
 
   massert(cur=sbrk(0));
+  beg=data_start ? data_start : cur;
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
-    if ((end=(data_start ? data_start : cur)+i+j-PAGESIZE)>cur)
+    if ((end=beg+i+j-PAGESIZE)>cur)
       if (!mbrk(end)) {
 	real_maxpage=page(end);
 	i+=j;
@@ -227,10 +228,10 @@ update_real_maxpage(void) {
   phys_pages=get_phys_pages_no_malloc();
 
 #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
-  if (phys_pages>0 && real_maxpage>phys_pages+first_data_page) real_maxpage=phys_pages+first_data_page;
+  if (phys_pages>0 && real_maxpage>phys_pages+page(beg)) real_maxpage=phys_pages+page(beg);
 #endif
 
-  available_pages=real_maxpage-first_data_page;
+  available_pages=real_maxpage-page(beg);
   for (i=t_start,j=0;i<t_other;i++) {
     k=tm_table[i].tm_maxpage;
     if (tm_table[i].tm_type==t_relocatable)
