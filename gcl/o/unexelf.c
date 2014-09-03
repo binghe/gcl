@@ -847,7 +847,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 	  && (round_up ((NEW_PROGRAM_H (n)).p_vaddr
 			+ (NEW_PROGRAM_H (n)).p_filesz,
 			alignment)
-	      == round_up (old_bss_addr, alignment)))
+	      <= round_up (old_bss_addr, alignment)))
 	break;
     }
   if (n < 0)
