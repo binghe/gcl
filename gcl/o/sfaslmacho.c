@@ -508,6 +508,18 @@ label_got_symbols(void *v1,struct section *sec,struct nlist *n1,struct nlist *ne
   
 }
 
+static int
+clear_protect_memory(object memory) {
+
+  void *p,*pe;
+
+  p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1));
+  pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size + PAGESIZE-1) & ~(PAGESIZE-1));
+
+  return gcl_mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
+
+}
+
 
 int
 fasload(object faslfile) {
@@ -546,6 +558,8 @@ fasload(object faslfile) {
   fseek(fp,(void *)ste-v1,SEEK_SET);
   data = feof(fp) ? 0 : read_fasl_vector(faslfile);
   
+  massert(!clear_protect_memory(memory));
+
 #ifdef CLEAR_CACHE
   CLEAR_CACHE;
 #endif
