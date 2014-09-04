@@ -15,6 +15,9 @@
 /* binding stack size */
 #undef BDSSIZE
 
+/* sscanf terminates prematurely */
+#undef BROKEN_WINDOWS_SSCANF
+
 /* can prevent sbrk from returning random values */
 #undef CAN_UNRANDOMIZE_SBRK
 

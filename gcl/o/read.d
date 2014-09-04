@@ -144,6 +144,9 @@ parse_number(char *s,int radix) {
     }
     n=sscanf(s,"%lf%n",&f,&m);
     *q=c;
+#ifdef BROKEN_WINDOWS_SSCANF
+    for (;s[m]>='0' && s[m]<='9';m++);
+#endif
     if (n!=1||s[m]) return OBJNULL;
 
     switch (ch=='e' || ch=='E' ? READdefault_float_format : ch) {
