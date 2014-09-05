@@ -4284,7 +4284,7 @@ done
 # Work around system/gprof mips/hppa hang
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking working gprof" >&5
 $as_echo_n "checking working gprof... " >&6; }
-old_enable_gprof=enable_gprof
+old_enable_gprof=$enable_gprof
 case $use in
   powerpc*) if test "$host_cpu" = "powerpc64le" ; then enable_gprof="no"; fi;;
   sh4*)  enable_gprof="no";;

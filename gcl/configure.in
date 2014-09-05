@@ -534,7 +534,7 @@ AC_CHECK_PROGS(AWK,[gawk nawk awk])
 
 # Work around system/gprof mips/hppa hang
 AC_MSG_CHECKING([working gprof])
-old_enable_gprof=enable_gprof
+old_enable_gprof=$enable_gprof
 case $use in
   powerpc*) if test "$host_cpu" = "powerpc64le" ; then enable_gprof="no"; fi;;
   sh4*)  enable_gprof="no";;
