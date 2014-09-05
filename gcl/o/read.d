@@ -142,11 +142,16 @@ parse_number(char *s,int radix) {
       	return OBJNULL;
       *q='E';
     }
+#ifdef BUGGY_MAXIMUM_SSCANF_LENGTH
+    if (strlen(s)>BUGGY_MAXIMUM_SSCANF_LENGTH) {
+      char *q1=s+BUGGY_MAXIMUM_SSCANF_LENGTH-strlen(q);
+      fprintf(stderr,"Chopping\n");fflush(stderr);
+      memmove(q1,q,strlen(q)+1);
+      q=q1;
+    }
+#endif
     n=sscanf(s,"%lf%n",&f,&m);
     *q=c;
-#ifdef BROKEN_WINDOWS_SSCANF
-    for (;s[m]>='0' && s[m]<='9';m++);
-#endif
     if (n!=1||s[m]) return OBJNULL;
 
     switch (ch=='e' || ch=='E' ? READdefault_float_format : ch) {

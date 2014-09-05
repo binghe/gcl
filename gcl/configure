@@ -4282,7 +4282,11 @@ done
 
 
 # Work around system/gprof mips/hppa hang
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking working gprof" >&5
+$as_echo_n "checking working gprof... " >&6; }
+old_enable_gprof=enable_gprof
 case $use in
+  powerpc*) if test "$host_cpu" = "powerpc64le" ; then enable_gprof="no"; fi;;
   sh4*)  enable_gprof="no";;
   ia64*)  enable_gprof="no";;
 #  mips*) enable_gprof="no";;
@@ -4290,6 +4294,13 @@ case $use in
   arm*)  enable_gprof="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
   *gnu)  enable_gprof="no";;
 esac
+if test "$enable_gprof" = "$old_enable_gprof" ; then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+$as_echo "ok" >&6; }
+else
+   { $as_echo "$as_me:${as_lineno-$LINENO}: result: disabled" >&5
+$as_echo "disabled" >&6; }
+fi
 
 if test "$enable_gprof" = "yes" ; then
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for text start" >&5
@@ -7791,8 +7802,8 @@ else
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for broken windows sscanf" >&5
-$as_echo_n "checking for broken windows sscanf... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for buggy maximum sscanf length" >&5
+$as_echo_n "checking for buggy maximum sscanf length... " >&6; }
 if test "$cross_compiling" = yes; then :
   { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
@@ -7803,31 +7814,44 @@ else
 /* end confdefs.h.  */
 
 
-	  int main() {
-	    char *s= "2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320030599218174135966290435729003342952605956307381323286279434907632338298807531952510190115738341879307021540891499348841675092447614606680822648001684774118537423454424371075390777449920695517027618386062613313845830007520449338265602976067371132007093287091274437470472306969772093101416928368190255151086574637721112523897844250569536967707854499699679468644549059879316368892300987931277361782154249992295763514822082698951936680331825288693984964651058209392398294887933203625094431173012381970684161404";
+            #include <stdio.h>
+
+int
+main ()
+{
+
+            char *s= "2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320030599218174135966290435729003342952605956307381323286279434907632338298807531952510190115738341879307021540891499348841675092447614606680822648001684774118537423454424371075390777449920695517027618386062613313845830007520449338265602976067371132007093287091274437470472306969772093101416928368190255151086574637721112523897844250569536967707854499699679468644549059879316368892300987931277361782154249992295763514822082698951936680331825288693984964651058209392398294887933203625094431173012381970684161404";
 	    int n, m;
 	    double f;
 	    char *endptr;
+            FILE *fp=fopen("conftest1","w");
 
 	    n=sscanf(s,"%lf%n",&f,&m);
+	    fprintf(fp,"%d",m);
+	    fclose(fp);
 	    return s[m];
-	  }
+
+  ;
+  return 0;
+}
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
+$as_echo "none" >&6; }
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
+  buggy_maximum_sscanf_length=`cat conftest1`
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $buggy_maximum_sscanf_length" >&5
+$as_echo "$buggy_maximum_sscanf_length" >&6; }
 
 cat >>confdefs.h <<_ACEOF
-#define BROKEN_WINDOWS_SSCANF 1
+#define BUGGY_MAXIMUM_SSCANF_LENGTH $buggy_maximum_sscanf_length
 _ACEOF
 
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
+
 
 
 EXTRA_LOBJS=

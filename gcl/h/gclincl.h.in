@@ -15,8 +15,8 @@
 /* binding stack size */
 #undef BDSSIZE
 
-/* sscanf terminates prematurely */
-#undef BROKEN_WINDOWS_SSCANF
+/* sscanf terminates prematurely (Windows XP) */
+#undef BUGGY_MAXIMUM_SSCANF_LENGTH
 
 /* can prevent sbrk from returning random values */
 #undef CAN_UNRANDOMIZE_SBRK
