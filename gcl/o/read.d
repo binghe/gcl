@@ -145,7 +145,6 @@ parse_number(char *s,int radix) {
 #ifdef BUGGY_MAXIMUM_SSCANF_LENGTH
     if (strlen(s)>BUGGY_MAXIMUM_SSCANF_LENGTH) {
       char *q1=s+BUGGY_MAXIMUM_SSCANF_LENGTH-strlen(q);
-      fprintf(stderr,"Chopping\n");fflush(stderr);
       memmove(q1,q,strlen(q)+1);
       q=q1;
     }
