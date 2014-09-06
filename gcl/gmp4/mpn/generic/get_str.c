@@ -7,23 +7,34 @@
    FACT, IT IS ALMOST GUARANTEED THAT THEY WILL CHANGE OR DISAPPEAR IN A FUTURE
    GNU MP RELEASE.
 
-Copyright 1991, 1992, 1993, 1994, 1996, 2000, 2001, 2002, 2004, 2006, 2007,
-2008 Free Software Foundation, Inc.
+Copyright 1991-1994, 1996, 2000-2002, 2004, 2006-2008, 2011, 2012 Free Software
+Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -350,7 +361,8 @@ mpn_dc_get_str (unsigned char *str, size_t len,
 
 
 /* There are no leading zeros on the digits generated at str, but that's not
-   currently a documented feature.  */
+   currently a documented feature.  The current mpz_out_str and mpz_get_str
+   rely on it.  */
 
 size_t
 mpn_get_str (unsigned char *str, int base, mp_ptr up, mp_size_t un)
@@ -382,7 +394,7 @@ mpn_get_str (unsigned char *str, int base, mp_ptr up, mp_size_t un)
       int bit_pos;
       mp_size_t i;
       unsigned char *s = str;
-      unsigned long bits;
+      mp_bitcnt_t bits;
 
       n1 = up[un - 1];
       count_leading_zeros (cnt, n1);
@@ -391,11 +403,11 @@ mpn_get_str (unsigned char *str, int base, mp_ptr up, mp_size_t un)
 	 R + bits_per_digit * n when input ends in nth least significant
 	 nibble. */
 
-      bits = GMP_NUMB_BITS * un - cnt + GMP_NAIL_BITS;
+      bits = (mp_bitcnt_t) GMP_NUMB_BITS * un - cnt + GMP_NAIL_BITS;
       cnt = bits % bits_per_digit;
       if (cnt != 0)
 	bits += bits_per_digit - cnt;
-      bit_pos = bits - (un - 1) * GMP_NUMB_BITS;
+      bit_pos = bits - (mp_bitcnt_t) (un - 1) * GMP_NUMB_BITS;
 
       /* Fast loop for bit output.  */
       i = un - 1;
@@ -439,9 +451,12 @@ mpn_get_str (unsigned char *str, int base, mp_ptr up, mp_size_t un)
     mp_size_t n_pows, xn, pn, exptab[GMP_LIMB_BITS], bexp;
     mp_limb_t cy;
     mp_size_t shift;
+    size_t ndig;
+
+    DIGITS_IN_BASE_PER_LIMB (ndig, un, base);
+    xn = 1 + ndig / mp_bases[base].chars_per_limb; /* FIXME: scalar integer division */
 
     n_pows = 0;
-    xn = 1 + un*(mp_bases[base].chars_per_bit_exactly*GMP_NUMB_BITS)/mp_bases[base].chars_per_limb;
     for (pn = xn; pn != 1; pn = (pn + 1) >> 1)
       {
 	exptab[n_pows] = pn;
@@ -473,7 +488,7 @@ mpn_get_str (unsigned char *str, int base, mp_ptr up, mp_size_t un)
 
 	ASSERT_ALWAYS (powtab_mem_ptr < powtab_mem + mpn_dc_get_str_powtab_alloc (un));
 
-	mpn_sqr_n (t, p, n);
+	mpn_sqr (t, p, n);
 
 	digits_in_base *= 2;
 	n *= 2;  n -= t[n - 1] == 0;
@@ -531,7 +546,7 @@ mpn_get_str (unsigned char *str, int base, mp_ptr up, mp_size_t un)
 
   /* Using our precomputed powers, now in powtab[], convert our number.  */
   tmp = TMP_BALLOC_LIMBS (mpn_dc_get_str_itch (un));
-  out_len = mpn_dc_get_str (str, 0, up, un, powtab - 1 + pi, tmp) - str;
+  out_len = mpn_dc_get_str (str, 0, up, un, powtab + (pi - 1), tmp) - str;
   TMP_FREE;
 
   return out_len;

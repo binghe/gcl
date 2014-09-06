@@ -1,21 +1,32 @@
 dnl  PPC-32 mpn_divrem_2 -- Divide an mpn number by a normalized 2-limb number.
 
-dnl  Copyright 2007, 2008 Free Software Foundation, Inc.
+dnl  Copyright 2007, 2008, 2012 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
-
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
-dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 3 of the License, or (at
-dnl  your option) any later version.
-
+dnl  it under the terms of either:
+dnl
+dnl    * the GNU Lesser General Public License as published by the Free
+dnl      Software Foundation; either version 3 of the License, or (at your
+dnl      option) any later version.
+dnl
+dnl  or
+dnl
+dnl    * the GNU General Public License as published by the Free Software
+dnl      Foundation; either version 2 of the License, or (at your option) any
+dnl      later version.
+dnl
+dnl  or both in parallel, as here.
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
 dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-dnl  License for more details.
-
-dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+dnl  for more details.
+dnl
+dnl  You should have received copies of the GNU General Public License and the
+dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
+dnl  see https://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
@@ -84,9 +95,9 @@ C Compute di from d1
 	bge-	cr7, L(9)
 	add	r0, r0, r10
 	cmplw	cr7, r0, r10
-	cmplw	cr6, r0, r6
+	cmplw	cr6, r6, r0
 	addi	r31, r31, -1		C q1--
-	cror	28, 28, 25
+	crorc	28, 28, 25
 	bc+	12, 28, L(9)
 	addi	r31, r31, -1		C q1--
 	add	r0, r0, r10
@@ -101,9 +112,9 @@ L(9):	subf	r0, r6, r0
 	bge-	cr7, L(13)
 	add	r0, r0, r10
 	cmplw	cr7, r0, r10
-	cmplw	cr6, r0, r11
+	cmplw	cr6, r11, r0
 	addi	r6, r6, -1		C q0--
-	cror	28, 28, 25
+	crorc	28, 28, 25
 	bc+	12, 28, L(13)
 C	add	r0, r0, r10		C final remainder
 	addi	r6, r6, -1		C q0--

@@ -1,21 +1,32 @@
 dnl  PowerPC-32 mpn_mod_34lsub1 -- mpn remainder mod 2^24-1.
 
-dnl  Copyright 2002, 2003, 2005, 2006, 2007 Free Software Foundation, Inc.
+dnl  Copyright 2002, 2003, 2005-2007, 2012 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
-
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
-dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 3 of the License, or (at
-dnl  your option) any later version.
-
+dnl  it under the terms of either:
+dnl
+dnl    * the GNU Lesser General Public License as published by the Free
+dnl      Software Foundation; either version 3 of the License, or (at your
+dnl      option) any later version.
+dnl
+dnl  or
+dnl
+dnl    * the GNU General Public License as published by the Free Software
+dnl      Foundation; either version 2 of the License, or (at your option) any
+dnl      later version.
+dnl
+dnl  or both in parallel, as here.
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
 dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-dnl  License for more details.
-
-dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+dnl  for more details.
+dnl
+dnl  You should have received copies of the GNU General Public License and the
+dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
+dnl  see https://www.gnu.org/licenses/.
 
 
 include(`../config.m4')
@@ -135,15 +146,15 @@ L(large):
 
 	andi.	r7, up, 15
 	vxor	a0, v0, v0
-	lis	r0, 0xaaaa
+	lis	r9, 0xaaaa
 	vxor	a1, v0, v0
-	ori	r0, r0, 0xaaab
+	ori	r9, r9, 0xaaab
 	vxor	a2, v0, v0
 	li	r5, 16
 	vxor	c0, v0, v0
 	li	r6, 32
 	vxor	c1, v0, v0
-	LEAL(	r11, cnsts)
+	LEAL(	r11, cnsts)		C CAUTION clobbers r0 for elf, darwin
 	vxor	c2, v0, v0
 	vxor	z, v0, v0
 
@@ -158,7 +169,7 @@ L(large):
 	vsldoi	a2, z, a2, 12
 
 	addi	n, n, 9
-	mulhwu	r0, n, r0
+	mulhwu	r0, n, r9
 	srwi	r0, r0, 3		C r0 = floor(n/12)
 	mtctr	r0
 
@@ -174,7 +185,7 @@ L(na4):	bne	cr7, L(na8)
 	vsldoi	a1, z, a1, 8
 
 	addi	n, n, 6
-	mulhwu	r0, n, r0
+	mulhwu	r0, n, r9
 	srwi	r0, r0, 3		C r0 = floor(n/12)
 	mtctr	r0
 
@@ -188,7 +199,7 @@ L(na8):
 	vsldoi	a0, z, a0, 4
 
 	addi	n, n, 3
-	mulhwu	r0, n, r0
+	mulhwu	r0, n, r9
 	srwi	r0, r0, 3		C r0 = floor(n/12)
 	mtctr	r0
 
@@ -197,7 +208,7 @@ L(na8):
 	b	L(0)
 
 L(aligned16):
-	mulhwu	r0, n, r0
+	mulhwu	r0, n, r9
 	srwi	r0, r0, 3		C r0 = floor(n/12)
 	mtctr	r0
 

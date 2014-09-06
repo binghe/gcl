@@ -1,21 +1,32 @@
 dnl  Alpha ev6 nails mpn_mul_1.
 
 dnl  Copyright 2002, 2005, 2006 Free Software Foundation, Inc.
-dnl
+
 dnl  This file is part of the GNU MP Library.
 dnl
-dnl  The GNU MP Library is free software; you can redistribute it and/or
-dnl  modify it under the terms of the GNU Lesser General Public License as
-dnl  published by the Free Software Foundation; either version 3 of the
-dnl  License, or (at your option) any later version.
+dnl  The GNU MP Library is free software; you can redistribute it and/or modify
+dnl  it under the terms of either:
 dnl
-dnl  The GNU MP Library is distributed in the hope that it will be useful,
-dnl  but WITHOUT ANY WARRANTY; without even the implied warranty of
-dnl  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-dnl  Lesser General Public License for more details.
+dnl    * the GNU Lesser General Public License as published by the Free
+dnl      Software Foundation; either version 3 of the License, or (at your
+dnl      option) any later version.
 dnl
-dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+dnl  or
+dnl
+dnl    * the GNU General Public License as published by the Free Software
+dnl      Foundation; either version 2 of the License, or (at your option) any
+dnl      later version.
+dnl
+dnl  or both in parallel, as here.
+dnl
+dnl  The GNU MP Library is distributed in the hope that it will be useful, but
+dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+dnl  for more details.
+dnl
+dnl  You should have received copies of the GNU General Public License and the
+dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
+dnl  see https://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
@@ -25,10 +36,10 @@ C EV5:    18
 C EV6:     3.25
 
 C TODO
-C  * Reroll loop for 3.0 c/l with current 4-way unrulling.
+C  * Reroll loop for 3.0 c/l with current 4-way unrolling.
 C  * The loop is overscheduled wrt loads and wrt multiplies, in particular
 C    umulh.
-C  * Use FP loop count and multiple exit points, that would simpily feed-in lp0
+C  * Use FP loop count and multiple exit points, that would simplify feed-in lp0
 C    and would work since the loop structure is really regular.
 
 C  INPUT PARAMETERS

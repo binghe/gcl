@@ -1,21 +1,32 @@
 /* mpz_cdiv_r_2exp, mpz_fdiv_r_2exp -- remainder from mpz divided by 2^n.
 
-Copyright 2001, 2002, 2004 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2004, 2012 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -27,11 +38,11 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 /* dir==1 for ceil, dir==-1 for floor */
 
-static void __gmpz_cfdiv_r_2exp __GMP_PROTO ((REGPARM_3_1 (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir))) REGPARM_ATTR (1);
+static void __gmpz_cfdiv_r_2exp (REGPARM_3_1 (mpz_ptr, mpz_srcptr, mp_bitcnt_t, int)) REGPARM_ATTR (1);
 #define cfdiv_r_2exp(w,u,cnt,dir)  __gmpz_cfdiv_r_2exp (REGPARM_3_1 (w, u, cnt, dir))
 
 REGPARM_ATTR (1) static void
-cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir)
+cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, mp_bitcnt_t cnt, int dir)
 {
   mp_size_t  usize, abs_usize, limb_cnt, i;
   mp_srcptr  up;
@@ -58,26 +69,25 @@ cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir)
       /* Round towards zero, means just truncate */
 
       if (w == u)
-        {
-          /* if already smaller than limb_cnt then do nothing */
-          if (abs_usize <= limb_cnt)
-            return;
-          wp = PTR(w);
-        }
+	{
+	  /* if already smaller than limb_cnt then do nothing */
+	  if (abs_usize <= limb_cnt)
+	    return;
+	  wp = PTR(w);
+	}
       else
-        {
-          i = MIN (abs_usize, limb_cnt+1);
-          MPZ_REALLOC (w, i);
-          wp = PTR(w);
-          MPN_COPY (wp, up, i);
+	{
+	  i = MIN (abs_usize, limb_cnt+1);
+	  wp = MPZ_REALLOC (w, i);
+	  MPN_COPY (wp, up, i);
 
-          /* if smaller than limb_cnt then only the copy is needed */
-          if (abs_usize <= limb_cnt)
-            {
-              SIZ(w) = usize;
-              return;
-            }
-        }
+	  /* if smaller than limb_cnt then only the copy is needed */
+	  if (abs_usize <= limb_cnt)
+	    {
+	      SIZ(w) = usize;
+	      return;
+	    }
+	}
     }
   else
     {
@@ -85,16 +95,16 @@ cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir)
 
       /* if u!=0 and smaller than divisor, then must negate */
       if (abs_usize <= limb_cnt)
-        goto negate;
+	goto negate;
 
       /* if non-zero low limb, then must negate */
       for (i = 0; i < limb_cnt; i++)
-        if (up[i] != 0)
-          goto negate;
+	if (up[i] != 0)
+	  goto negate;
 
       /* if non-zero partial limb, then must negate */
       if ((up[limb_cnt] & LOW_MASK (cnt)) != 0)
-        goto negate;
+	goto negate;
 
       /* otherwise low bits of u are zero, so that's the result */
       SIZ(w) = 0;
@@ -103,18 +113,17 @@ cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir)
     negate:
       /* twos complement negation to get 2**cnt-u */
 
-      MPZ_REALLOC (w, limb_cnt+1);
+      wp = MPZ_REALLOC (w, limb_cnt+1);
       up = PTR(u);
-      wp = PTR(w);
 
       /* Ones complement */
       i = MIN (abs_usize, limb_cnt+1);
-      mpn_com_n (wp, up, i);
+      mpn_com (wp, up, i);
       for ( ; i <= limb_cnt; i++)
-        wp[i] = GMP_NUMB_MAX;
+	wp[i] = GMP_NUMB_MAX;
 
       /* Twos complement.  Since u!=0 in the relevant part, the twos
-         complement never gives 0 and a carry, so can use MPN_INCR_U. */
+	 complement never gives 0 and a carry, so can use MPN_INCR_U. */
       MPN_INCR_U (wp, limb_cnt+1, CNST_LIMB(1));
 
       usize = -usize;
@@ -130,10 +139,10 @@ cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir)
     {
       limb_cnt--;
       if (limb_cnt < 0)
-        {
-          SIZ(w) = 0;
-          return;
-        }
+	{
+	  SIZ(w) = 0;
+	  return;
+	}
       high = wp[limb_cnt];
     }
 
@@ -143,13 +152,13 @@ cfdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt, int dir)
 
 
 void
-mpz_cdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt)
+mpz_cdiv_r_2exp (mpz_ptr w, mpz_srcptr u, mp_bitcnt_t cnt)
 {
   cfdiv_r_2exp (w, u, cnt, 1);
 }
 
 void
-mpz_fdiv_r_2exp (mpz_ptr w, mpz_srcptr u, unsigned long cnt)
+mpz_fdiv_r_2exp (mpz_ptr w, mpz_srcptr u, mp_bitcnt_t cnt)
 {
   cfdiv_r_2exp (w, u, cnt, -1);
 }

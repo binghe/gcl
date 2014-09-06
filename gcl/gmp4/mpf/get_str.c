@@ -4,23 +4,33 @@
    example, the number 3.1416 would be returned as "31416" in DIGIT_PTR and
    1 in EXP.
 
-Copyright 1993, 1994, 1995, 1996, 1997, 2000, 2001, 2002, 2003, 2005, 2006 Free
-Software Foundation, Inc.
+Copyright 1993-1997, 2000-2003, 2005, 2006, 2011 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include <stdlib.h>		/* for NULL */
 #include "gmp.h"
@@ -67,7 +77,7 @@ mpn_pow_1_highpart (mp_ptr rp, mp_size_t *ignp,
   count_leading_zeros (cnt, exp);
   for (i = GMP_LIMB_BITS - cnt - 2; i >= 0; i--)
     {
-      mpn_sqr_n (tp, rp + off, rn);
+      mpn_sqr (tp, rp + off, rn);
       rn = 2 * rn;
       rn -= tp[rn - 1] == 0;
       ign <<= 1;
@@ -131,7 +141,7 @@ mpf_get_str (char *dbuf, mp_exp_t *exp, int base, size_t n_digits, mpf_srcptr u)
   if (base >= 0)
     {
       num_to_text = "0123456789abcdefghijklmnopqrstuvwxyz";
-      if (base == 0)
+      if (base <= 1)
 	base = 10;
       else if (base > 36)
 	{
@@ -143,6 +153,10 @@ mpf_get_str (char *dbuf, mp_exp_t *exp, int base, size_t n_digits, mpf_srcptr u)
   else
     {
       base = -base;
+      if (base <= 1)
+	base = 10;
+      else if (base > 36)
+	return NULL;
       num_to_text = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     }
 
@@ -174,8 +188,7 @@ mpf_get_str (char *dbuf, mp_exp_t *exp, int base, size_t n_digits, mpf_srcptr u)
      conversion.)  */
   tstr = (unsigned char *) TMP_ALLOC (n_digits + 2 * GMP_LIMB_BITS + 3);
 
-  n_limbs_needed = 2 + (mp_size_t)
-    (n_digits / (GMP_NUMB_BITS * mp_bases[base].chars_per_bit_exactly));
+  LIMBS_PER_DIGIT_IN_BASE (n_limbs_needed, n_digits, base);
 
   if (ue <= n_limbs_needed)
     {
@@ -184,7 +197,7 @@ mpf_get_str (char *dbuf, mp_exp_t *exp, int base, size_t n_digits, mpf_srcptr u)
       unsigned long e;
 
       n_more_limbs_needed = n_limbs_needed - ue;
-      e = (unsigned long) n_more_limbs_needed * (GMP_NUMB_BITS * mp_bases[base].chars_per_bit_exactly);
+      DIGITS_IN_BASE_PER_LIMB (e, n_more_limbs_needed, base);
 
       if (un > n_limbs_needed)
 	{
@@ -221,7 +234,7 @@ mpf_get_str (char *dbuf, mp_exp_t *exp, int base, size_t n_digits, mpf_srcptr u)
       mp_ptr dummyp, xp;
 
       n_less_limbs_needed = ue - n_limbs_needed;
-      e = (unsigned long) n_less_limbs_needed * (GMP_NUMB_BITS * mp_bases[base].chars_per_bit_exactly);
+      DIGITS_IN_BASE_PER_LIMB (e, n_less_limbs_needed, base);
 
       if (un > n_limbs_needed)
 	{

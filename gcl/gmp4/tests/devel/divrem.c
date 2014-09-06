@@ -1,21 +1,20 @@
 /*
-Copyright 1996, 1997, 1998, 2000, 2001, 2007, 2009 Free Software Foundation,
-Inc.
+Copyright 1996-1998, 2000, 2001, 2007, 2009 Free Software Foundation, Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,7 +87,7 @@ main ()
 
       mpn_random2 (nptr, nsize);
       mpn_random2 (dptr, dsize);
-      dptr[dsize - 1] |= (mp_limb_t) 1 << (BITS_PER_MP_LIMB - 1);
+      dptr[dsize - 1] |= (mp_limb_t) 1 << (GMP_LIMB_BITS - 1);
 
       MPN_COPY (rptr, nptr, nsize);
       qlimb = mpn_divrem (qptr, (mp_size_t) 0, rptr, nsize, dptr, dsize);

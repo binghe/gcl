@@ -1,31 +1,44 @@
 dnl  AMD64 mpn_sublsh1_n -- rp[] = up[] - (vp[] << 1)
 
-dnl  Copyright 2003, 2005, 2006, 2007 Free Software Foundation, Inc.
+dnl  Copyright 2003, 2005-2007, 2011, 2012 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
-
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
-dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 3 of the License, or (at
-dnl  your option) any later version.
-
+dnl  it under the terms of either:
+dnl
+dnl    * the GNU Lesser General Public License as published by the Free
+dnl      Software Foundation; either version 3 of the License, or (at your
+dnl      option) any later version.
+dnl
+dnl  or
+dnl
+dnl    * the GNU General Public License as published by the Free Software
+dnl      Foundation; either version 2 of the License, or (at your option) any
+dnl      later version.
+dnl
+dnl  or both in parallel, as here.
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
 dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-dnl  License for more details.
-
-dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+dnl  for more details.
+dnl
+dnl  You should have received copies of the GNU General Public License and the
+dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
+dnl  see https://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
 
 C	     cycles/limb
-C K8,K9:	 2.2
-C K10:		 2.2
-C P4:		12.75
-C P6-15:	 3.45
-
+C AMD K8,K9	 2.2
+C AMD K10	 2.2
+C Intel P4	12.75
+C Intel core2	 3.45
+C Intel corei	 ?
+C Intel atom	 ?
+C VIA nano	 3.25
 
 C Sometimes speed degenerates, supposedly related to that some operand
 C alignments cause cache conflicts.
@@ -39,10 +52,14 @@ define(`up',`%rsi')
 define(`vp',`%rdx')
 define(`n', `%rcx')
 
+ABI_SUPPORT(DOS64)
+ABI_SUPPORT(STD64)
+
 ASM_START()
 	TEXT
 	ALIGN(16)
 PROLOGUE(mpn_sublsh1_n)
+	FUNC_ENTRY(4)
 	push	%rbx
 	push	%rbp
 
@@ -102,7 +119,7 @@ L(b01):	add	%r8, %r8
 L(ent):	jns	L(end)
 
 	ALIGN(16)
-L(oop):	add	R32(%rax), R32(%rax)	C restore scy
+L(top):	add	R32(%rax), R32(%rax)	C restore scy
 
 	mov	(vp,n,8), %r8
 L(b00):	adc	%r8, %r8
@@ -131,12 +148,13 @@ L(b00):	adc	%r8, %r8
 
 	sbb	R32(%rbp), R32(%rbp)	C save acy
 	add	$4, n
-	js	L(oop)
+	js	L(top)
 
 L(end):	add	R32(%rbp), R32(%rax)
 	neg	R32(%rax)
 
 	pop	%rbp
 	pop	%rbx
+	FUNC_EXIT()
 	ret
 EPILOGUE()

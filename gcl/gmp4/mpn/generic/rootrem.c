@@ -8,29 +8,37 @@
    ONLY SAFE TO REACH THEM THROUGH DOCUMENTED INTERFACES.  IN FACT, IT'S ALMOST
    GUARANTEED THAT THEY'LL CHANGE OR DISAPPEAR IN A FUTURE GNU MP RELEASE.
 
-Copyright 2002, 2005, 2009 Free Software Foundation, Inc.
+Copyright 2002, 2005, 2009-2012 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 /* FIXME:
-   (a) Once there is a native mpn_tdiv_q function in GMP (division without
-       remainder), replace the quick-and-dirty implementation below by it.
-   (b) The implementation below is not optimal when remp == NULL, since the
-       complexity is M(n) where n is the input size, whereas it should be
-       only M(n/k) on average.
+     This implementation is not optimal when remp == NULL, since the complexity
+     is M(n), whereas it should be M(n/k) on average.
 */
 
 #include <stdio.h>		/* for NULL */
@@ -41,8 +49,6 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 static mp_size_t mpn_rootrem_internal (mp_ptr, mp_ptr, mp_srcptr, mp_size_t,
 				       mp_limb_t, int);
-static void mpn_tdiv_q (mp_ptr, mp_ptr, mp_size_t, mp_srcptr, mp_size_t,
-			mp_srcptr, mp_size_t);
 
 #define MPN_RSHIFT(cy,rp,up,un,cnt) \
   do {									\
@@ -84,14 +90,15 @@ mp_size_t
 mpn_rootrem (mp_ptr rootp, mp_ptr remp,
 	     mp_srcptr up, mp_size_t un, mp_limb_t k)
 {
+  mp_size_t m;
   ASSERT (un > 0);
   ASSERT (up[un - 1] != 0);
   ASSERT (k > 1);
 
-  if ((remp == NULL) && (un / k > 2))
-    /* call mpn_rootrem recursively, padding {up,un} with k zero limbs,
-       which will produce an approximate root with one more limb,
-       so that in most cases we can conclude. */
+  m = (un - 1) / k;		/* ceil(un/k) - 1 */
+  if (remp == NULL && m > 2)
+    /* Pad {up,un} with k zero limbs.  This will produce an approximate root
+       with one more limb, allowing us to compute the exact integral result. */
     {
       mp_ptr sp, wp;
       mp_size_t rn, sn, wn;
@@ -99,21 +106,21 @@ mpn_rootrem (mp_ptr rootp, mp_ptr remp,
       TMP_MARK;
       wn = un + k;
       wp = TMP_ALLOC_LIMBS (wn); /* will contain the padded input */
-      sn = (un - 1) / k + 2; /* ceil(un/k) + 1 */
+      sn = m + 2; /* ceil(un/k) + 1 */
       sp = TMP_ALLOC_LIMBS (sn); /* approximate root of padded input */
       MPN_COPY (wp + k, up, un);
       MPN_ZERO (wp, k);
       rn = mpn_rootrem_internal (sp, NULL, wp, wn, k, 1);
-      /* the approximate root S = {sp,sn} is either the correct root of
-	 {sp,sn}, or one too large. Thus unless the least significant limb
-	 of S is 0 or 1, we can deduce the root of {up,un} is S truncated by
-	 one limb. (In case sp[0]=1, we can deduce the root, but not decide
+      /* The approximate root S = {sp,sn} is either the correct root of
+	 {sp,sn}, or 1 too large.  Thus unless the least significant limb of
+	 S is 0 or 1, we can deduce the root of {up,un} is S truncated by one
+	 limb.  (In case sp[0]=1, we can deduce the root, but not decide
 	 whether it is exact or not.) */
       MPN_COPY (rootp, sp + 1, sn - 1);
       TMP_FREE;
       return rn;
     }
-  else /* remp <> NULL */
+  else
     {
       return mpn_rootrem_internal (rootp, remp, up, un, k, 0);
     }
@@ -124,12 +131,11 @@ static mp_size_t
 mpn_rootrem_internal (mp_ptr rootp, mp_ptr remp, mp_srcptr up, mp_size_t un,
 		      mp_limb_t k, int approx)
 {
-  mp_ptr qp, rp, sp, wp;
+  mp_ptr qp, rp, sp, wp, scratch;
   mp_size_t qn, rn, sn, wn, nl, bn;
   mp_limb_t save, save2, cy;
   unsigned long int unb; /* number of significant bits of {up,un} */
   unsigned long int xnb; /* number of significant bits of the result */
-  unsigned int cnt;
   unsigned long b, kk;
   unsigned long sizes[GMP_NUMB_BITS + 1];
   int ni, i;
@@ -139,25 +145,19 @@ mpn_rootrem_internal (mp_ptr rootp, mp_ptr remp, mp_srcptr up, mp_size_t un,
 
   TMP_MARK;
 
-  /* qp and wp need enough space to store S'^k where S' is an approximate
-     root. Since S' can be as large as S+2, the worst case is when S=2 and
-     S'=4. But then since we know the number of bits of S in advance, S'
-     can only be 3 at most. Similarly for S=4, then S' can be 6 at most.
-     So the worst case is S'/S=3/2, thus S'^k <= (3/2)^k * S^k. Since S^k
-     fits in un limbs, the number of extra limbs needed is bounded by
-     ceil(k*log2(3/2)/GMP_NUMB_BITS). */
-#define EXTRA 2 + (mp_size_t) (0.585 * (double) k / (double) GMP_NUMB_BITS)
-  qp = TMP_ALLOC_LIMBS (un + EXTRA); /* will contain quotient and remainder
-					of R/(k*S^(k-1)), and S^k */
   if (remp == NULL)
-    rp = TMP_ALLOC_LIMBS (un);     /* will contain the remainder */
+    {
+      rp = TMP_ALLOC_LIMBS (un + 1);     /* will contain the remainder */
+      scratch = rp;			 /* used by mpn_div_q */
+    }
   else
-    rp = remp;
+    {
+      scratch = TMP_ALLOC_LIMBS (un + 1); /* used by mpn_div_q */
+      rp = remp;
+    }
   sp = rootp;
-  wp = TMP_ALLOC_LIMBS (un + EXTRA); /* will contain S^(k-1), k*S^(k-1),
-					and temporary for mpn_pow_1 */
-  count_leading_zeros (cnt, up[un - 1]);
-  unb = un * GMP_NUMB_BITS - cnt + GMP_NAIL_BITS;
+
+  MPN_SIZEINBASE_2EXP(unb, up, un, 1);
   /* unb is the number of bits of the input U */
 
   xnb = (unb - 1) / k + 1;	/* ceil (unb / k) */
@@ -215,6 +215,19 @@ mpn_rootrem_internal (mp_ptr rootp, mp_ptr remp, mp_srcptr up, mp_size_t un,
      sizes[i] <= 2 * sizes[i+1].
      Newton iteration will first compute sizes[ni-1] extra bits,
      then sizes[ni-2], ..., then sizes[0] = b. */
+
+  /* qp and wp need enough space to store S'^k where S' is an approximate
+     root. Since S' can be as large as S+2, the worst case is when S=2 and
+     S'=4. But then since we know the number of bits of S in advance, S'
+     can only be 3 at most. Similarly for S=4, then S' can be 6 at most.
+     So the worst case is S'/S=3/2, thus S'^k <= (3/2)^k * S^k. Since S^k
+     fits in un limbs, the number of extra limbs needed is bounded by
+     ceil(k*log2(3/2)/GMP_NUMB_BITS). */
+#define EXTRA 2 + (mp_size_t) (0.585 * (double) k / (double) GMP_NUMB_BITS)
+  qp = TMP_ALLOC_LIMBS (un + EXTRA); /* will contain quotient and remainder
+					of R/(k*S^(k-1)), and S^k */
+  wp = TMP_ALLOC_LIMBS (un + EXTRA); /* will contain S^(k-1), k*S^(k-1),
+					and temporary for mpn_pow_1 */
 
   wp[0] = 1; /* {sp,sn}^(k-1) = 1 */
   wn = 1;
@@ -291,13 +304,8 @@ mpn_rootrem_internal (mp_ptr rootp, mp_ptr remp, mp_srcptr up, mp_size_t un,
 	}
       else
 	{
-	  mp_ptr tp;
 	  qn = rn - wn; /* expected quotient size */
-	  /* tp must have space for wn limbs.
-	     The quotient needs rn-wn+1 limbs, thus quotient+remainder
-	     need altogether rn+1 limbs. */
-	  tp = qp + qn + 1;	/* put remainder in Q buffer */
-	  mpn_tdiv_q (qp, tp, 0, rp, rn, wp, wn);
+	  mpn_div_q (qp, rp, rn, wp, wn, scratch);
 	  qn += qp[qn] != 0;
 	}
 
@@ -392,7 +400,7 @@ mpn_rootrem_internal (mp_ptr rootp, mp_ptr remp, mp_srcptr up, mp_size_t un,
       ASSERT_ALWAYS (rn >= qn);
 
       /* R = R - Q = floor(U/2^kk) - S^k */
-      if ((i > 1) || (approx == 0))
+      if (i > 1 || approx == 0)
 	{
 	  mpn_sub (rp, rp, rn, qp, qn);
 	  MPN_NORMALIZE (rp, rn);
@@ -404,48 +412,4 @@ mpn_rootrem_internal (mp_ptr rootp, mp_ptr remp, mp_srcptr up, mp_size_t un,
 
   TMP_FREE;
   return rn;
-}
-
-/* return the quotient Q = {np, nn} divided by {dp, dn} only */
-static void
-mpn_tdiv_q (mp_ptr qp, mp_ptr rp, mp_size_t qxn, mp_srcptr np, mp_size_t nn,
-	    mp_srcptr dp, mp_size_t dn)
-{
-  mp_size_t qn = nn - dn; /* expected quotient size is qn+1 */
-  mp_size_t cut;
-
-  ASSERT_ALWAYS (qxn == 0);
-  if (dn <= qn + 3)
-    {
-      mpn_tdiv_qr (qp, rp, 0, np, nn, dp, dn);
-    }
-  else
-    {
-      mp_ptr tp;
-      TMP_DECL;
-      TMP_MARK;
-      tp = TMP_ALLOC_LIMBS (qn + 2);
-      cut = dn - (qn + 3);
-      /* perform a first division with divisor cut to dn-cut=qn+3 limbs
-	 and dividend to nn-(cut-1) limbs, i.e. the quotient will be one
-	 limb more than the final quotient.
-	 The quotient will have qn+2 < dn-cut limbs,
-	 and the remainder dn-cut = qn+3 limbs. */
-      mpn_tdiv_qr (tp, rp, 0, np + cut - 1, nn - cut + 1, dp + cut, dn - cut);
-      /* let Q' be the quotient of B * {np, nn} by {dp, dn} [qn+2 limbs]
-	 and T  be the approximation of Q' computed above, where
-	 B = 2^GMP_NUMB_BITS.
-	 We have Q' <= T <= Q'+1, and since floor(Q'/B) = Q, we have
-	 Q = floor(T/B), unless the last limb of T only consists of zeroes. */
-      if (tp[0] != 0)
-	{
-	  /* simply truncate one limb of T */
-	  MPN_COPY (qp, tp + 1, qn + 1);
-	}
-      else /* too bad: perform the expensive division */
-	{
-	  mpn_tdiv_qr (qp, rp, 0, np, nn, dp, dn);
-	}
-      TMP_FREE;
-    }
 }

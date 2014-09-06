@@ -1,22 +1,22 @@
 /* Test conversion using mpz_get_str and mpz_set_str.
 
-Copyright 1993, 1994, 1996, 1999, 2000, 2001, 2002, 2006, 2007 Free Software
-Foundation, Inc.
+Copyright 1993, 1994, 1996, 1999-2002, 2006, 2007 Free Software Foundation,
+Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +26,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 #include "gmp-impl.h"
 #include "tests.h"
 
-void debug_mp __GMP_PROTO ((mpz_t, int));
+void debug_mp (mpz_t, int);
 
 
 void
@@ -35,7 +35,7 @@ string_urandomb (char *bp, size_t len, int base, gmp_randstate_ptr rands)
   mpz_t bs;
   unsigned long bsi;
   int d, l;
-  char *collseq = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const char *collseq = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
   mpz_init (bs);
 
@@ -78,12 +78,11 @@ main (int argc, char **argv)
   size_t len;
 
   tests_start ();
+  TESTS_REPS (reps, argv, argc);
+
   rands = RANDS;
 
   mpz_init (bs);
-
-  if (argc == 2)
-     reps = atoi (argv[1]);
 
   mpz_init (op1);
   mpz_init (op2);
@@ -93,8 +92,8 @@ main (int argc, char **argv)
       /* 1. Generate random mpz_t and convert to a string and back to mpz_t
 	 again.  */
       mpz_urandomb (bs, rands, 32);
-      size_range = mpz_get_ui (bs) % 15 + 2;	/* 2..16 */
-      mpz_urandomb (bs, rands, size_range);	/* 3..65536 bits */
+      size_range = mpz_get_ui (bs) % 17 + 2;	/* 2..18 */
+      mpz_urandomb (bs, rands, size_range);	/* 3..262144 bits */
       size = mpz_get_ui (bs);
       mpz_rrandomb (op1, rands, size);
 
@@ -127,10 +126,10 @@ main (int argc, char **argv)
       /* 2. Generate random string and convert to mpz_t and back to a string
 	 again.  */
       mpz_urandomb (bs, rands, 32);
-      size_range = mpz_get_ui (bs) % 14 + 1;	/* 1..14 */
-      mpz_urandomb (bs, rands, size_range);	/* 1..16384 digits */
+      size_range = mpz_get_ui (bs) % 16 + 1;	/* 1..16 */
+      mpz_urandomb (bs, rands, size_range);	/* 1..65536 digits */
       len = mpz_get_ui (bs) + 1;
-      buf = (*__gmp_allocate_func) (len + 1);
+      buf = (char *) (*__gmp_allocate_func) (len + 1);
       if (base == 0)
 	base = 10;
       string_urandomb (buf, len, base, rands);

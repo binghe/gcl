@@ -2,20 +2,20 @@
 
 Copyright 1991, 1993, 1994, 1996, 2000, 2001, 2009 Free Software Foundation, Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 #include "gmp-impl.h"
 #include "tests.h"
 
-void debug_mp __GMP_PROTO ((mpz_t, int));
+void debug_mp (mpz_t, int);
 
 void
 check_one (mpz_t root1, mpz_t x2, unsigned long nth, int i)
@@ -49,7 +49,7 @@ check_one (mpz_t root1, mpz_t x2, unsigned long nth, int i)
   mpz_add (temp2, temp, rem2);
 
   /* Is power of result > argument?  */
-  if (mpz_cmp (root1, root2) != 0 || mpz_cmp (x2, temp2) != 0 || mpz_cmp (temp, x2) > 0)
+  if (mpz_cmp (root1, root2) != 0 || mpz_cmp (x2, temp2) != 0 || mpz_cmpabs (temp, x2) > 0)
     {
       fprintf (stderr, "ERROR after test %d\n", i);
       debug_mp (x2, 10);
@@ -68,7 +68,7 @@ check_one (mpz_t root1, mpz_t x2, unsigned long nth, int i)
       abort ();
     }
 
-  if (nth <= 10000)		/* skip too expensive test */
+  if (nth <= 10000 && mpz_sgn(x2) > 0)		/* skip too expensive test */
     {
       mpz_add_ui (temp2, root1, 1L);
       mpz_pow_ui (temp2, temp2, nth);
@@ -98,19 +98,18 @@ main (int argc, char **argv)
   mpz_t root1;
   mp_size_t x2_size;
   int i;
-  int reps = 5000;
+  int reps = 500;
   unsigned long nth;
   gmp_randstate_ptr rands;
   mpz_t bs;
   unsigned long bsi, size_range;
 
   tests_start ();
+  TESTS_REPS (reps, argv, argc);
+
   rands = RANDS;
 
   mpz_init (bs);
-
-  if (argc == 2)
-     reps = atoi (argv[1]);
 
   mpz_init (x2);
   mpz_init (root1);
@@ -123,7 +122,7 @@ main (int argc, char **argv)
   for (i = 0; i < reps; i++)
     {
       mpz_urandomb (bs, rands, 32);
-      size_range = mpz_get_ui (bs) % 12 + 2;
+      size_range = mpz_get_ui (bs) % 17 + 2;
 
       mpz_urandomb (bs, rands, size_range);
       x2_size = mpz_get_ui (bs) + 10;
@@ -151,6 +150,13 @@ main (int argc, char **argv)
 	}
 
       check_one (root1, x2, nth, i);
+
+      if (((nth & 1) != 0) && ((bsi & 2) != 0))
+	{
+	  mpz_neg (x2, x2);
+	  mpz_neg (root1, root1);
+	  check_one (root1, x2, nth, i);
+	}
     }
 
   mpz_clear (bs);

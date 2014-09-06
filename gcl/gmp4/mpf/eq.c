@@ -1,32 +1,43 @@
 /* mpf_eq -- Compare two floats up to a specified bit #.
 
-Copyright 1993, 1995, 1996, 2001, 2002, 2008, 2009 Free Software Foundation,
-Inc.
+Copyright 1993, 1995, 1996, 2001, 2002, 2008, 2009, 2012 Free Software
+Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 
 int
-mpf_eq (mpf_srcptr u, mpf_srcptr v, unsigned long int n_bits)
+mpf_eq (mpf_srcptr u, mpf_srcptr v, mp_bitcnt_t n_bits)
 {
   mp_srcptr up, vp, p;
-  mp_size_t usize, vsize, minsize, maxsize, n_limbs, i;
+  mp_size_t usize, vsize, minsize, maxsize, n_limbs, i, size;
   mp_exp_t uexp, vexp;
   mp_limb_t diff;
   int cnt;
@@ -100,32 +111,37 @@ mpf_eq (mpf_srcptr u, mpf_srcptr v, unsigned long int n_bits)
 	return 0;
     }
 
-  if (minsize != maxsize)
+  n_bits -= (maxsize - 1) * GMP_NUMB_BITS;
+
+  size = maxsize - minsize;
+  if (size != 0)
     {
       if (up[0] != vp[0])
 	return 0;
+
+      /* Now either U or V has its limbs consumed, i.e, continues with an
+	 infinite number of implicit zero limbs.  Check that the other operand
+	 has just zeros in the corresponding, relevant part.  */
+
+      if (usize > vsize)
+	p = up - size;
+      else
+	p = vp - size;
+
+      for (i = size - 1; i > 0; i--)
+	{
+	  if (p[i] != 0)
+	    return 0;
+	}
+
+      diff = p[0];
     }
-
-  /* Now either U or V has its limbs consumed.  Check the the other operand
-     has just zeros in the corresponding, relevant part.  */
-
-  if (usize > vsize)
-    p = up + minsize - maxsize;
   else
-    p = vp + minsize - maxsize;
-
-  for (i = maxsize - minsize - 1; i > 0; i--)
     {
-      if (p[i] != 0)
-	return 0;
+      /* Both U or V has its limbs consumed.  */
+
+      diff = up[0] ^ vp[0];
     }
-
-  n_bits -= (maxsize - 1) * GMP_NUMB_BITS;
-
-  if (minsize != maxsize)
-    diff = p[0];
-  else
-    diff = up[0] ^ vp[0];
 
   if (n_bits < GMP_NUMB_BITS)
     diff >>= GMP_NUMB_BITS - n_bits;

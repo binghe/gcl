@@ -1,21 +1,32 @@
 /* mpz_fib_ui -- calculate Fibonacci numbers.
 
-Copyright 2000, 2001, 2002, 2005 Free Software Foundation, Inc.
+Copyright 2000-2002, 2005, 2012 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include "gmp.h"
@@ -61,27 +72,26 @@ mpz_fib_ui (mpz_ptr fn, unsigned long n)
 
   n2 = n/2;
   xalloc = MPN_FIB2_SIZE (n2) + 1;
-  MPZ_REALLOC (fn, 2*xalloc+1);
-  fp = PTR (fn);
+  fp = MPZ_REALLOC (fn, 2*xalloc+1);
 
   TMP_MARK;
   TMP_ALLOC_LIMBS_2 (xp,xalloc, yp,xalloc);
   size = mpn_fib2_ui (xp, yp, n2);
 
   TRACE (printf ("mpz_fib_ui last step n=%lu size=%ld bit=%lu\n",
-                 n >> 1, size, n&1);
-         mpn_trace ("xp", xp, size);
-         mpn_trace ("yp", yp, size));
+		 n >> 1, size, n&1);
+	 mpn_trace ("xp", xp, size);
+	 mpn_trace ("yp", yp, size));
 
   if (n & 1)
     {
       /* F[2k+1] = (2F[k]+F[k-1])*(2F[k]-F[k-1]) + 2*(-1)^k  */
       mp_size_t  xsize, ysize;
 
-#if HAVE_NATIVE_mpn_addsub_n
+#if HAVE_NATIVE_mpn_add_n_sub_n
       xp[size] = mpn_lshift (xp, xp, size, 1);
       yp[size] = 0;
-      ASSERT_NOCARRY (mpn_addsub_n (xp, yp, xp, yp, size+1));
+      ASSERT_NOCARRY (mpn_add_n_sub_n (xp, yp, xp, yp, size+1));
       xsize = size + (xp[size] != 0);
       ysize = size + (yp[size] != 0);
 #else
@@ -104,16 +114,16 @@ mpz_fib_ui (mpz_ptr fn, unsigned long n)
       fp[0] += (n & 2 ? -CNST_LIMB(2) : CNST_LIMB(2));
 #else
       if (n & 2)
-        {
-          ASSERT (fp[0] >= 2);
-          fp[0] -= 2;
-        }
+	{
+	  ASSERT (fp[0] >= 2);
+	  fp[0] -= 2;
+	}
       else
-        {
-          ASSERT (c != GMP_NUMB_MAX); /* because it's the high of a mul */
-          c += mpn_add_1 (fp, fp, size-1, CNST_LIMB(2));
-          fp[size-1] = c;
-        }
+	{
+	  ASSERT (c != GMP_NUMB_MAX); /* because it's the high of a mul */
+	  c += mpn_add_1 (fp, fp, size-1, CNST_LIMB(2));
+	  fp[size-1] = c;
+	}
 #endif
     }
   else
@@ -136,7 +146,7 @@ mpz_fib_ui (mpz_ptr fn, unsigned long n)
   SIZ(fn) = size;
 
   TRACE (printf ("done special, size=%ld\n", size);
-         mpn_trace ("fp ", fp, size));
+	 mpn_trace ("fp ", fp, size));
 
   TMP_FREE;
 }
