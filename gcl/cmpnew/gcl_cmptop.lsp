@@ -616,7 +616,7 @@
 
 (defun wt-if-proclaimed (fname cfun lambda-expr)
   (cond ((fast-link-proclaimed-type-p fname)
-	 (cond ((assoc fname *inline-functions*)
+	 (cond ((unless (member '* (get fname 'proclaimed-arg-types)) (assoc fname *inline-functions*))
 		(add-init `(si::mfsfun ',fname ,(add-address (c-function-name "LI" cfun fname))
 				   ,(proclaimed-argd (get fname 'proclaimed-arg-types)
 						     (get fname 'proclaimed-return-type)
