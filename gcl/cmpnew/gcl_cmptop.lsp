@@ -21,7 +21,9 @@
 
 (in-package 'compiler)
 
-(defvar *objects* nil)
+(defvar *objects* (make-hash-table :test 'eq))
+(defvar *rev-objects* (make-hash-table :test 'eql))
+;(defvar *objects* nil)
 (defvar *constants* nil)
 (defvar *sharp-commas* nil)
 (defvar *function-links* nil)
@@ -377,7 +379,7 @@
 
    (wt-data-file)
 
- 
+;  (break "f")
   (dolist (x *function-links* )
 	  (let ((num (second x))
 		(type (third x))
@@ -1043,9 +1045,10 @@
 		      ((and (eq (setq tem (third (car v))) nil))
 		       (wt "-2"))
 		      ((and (consp tem) (eq (car tem) 'vv))
-		       (wt  (second tem) ))
+		       (wt  (add-object2 (add-object (second tem))) ))
 		      ((and (consp tem) (eq (car tem) 'fixnum-value))
-		       (wt (add-object(third tem)) ))
+;		       (print (setq ttem tem)) (break)
+		       (wt (add-object2 (add-object (third tem))) ))
 		      (t (baboon)))
 		
 		(if (cdr v) (wt ",")))
@@ -1068,7 +1071,8 @@
 		;; We write this list backwards for convenience
 		;; in stepping through it in parse_key
 		(wt "(void *)")
-		(wt  (add-symbol (caar v))  )
+;		(print (setq ss v))(break "h")
+		(wt (add-object2 (add-symbol (caar v))))
 		(if (cdr v) (wt ",")))
 	    (wt "}"))
 	  (wt "};")
@@ -1425,7 +1429,7 @@
 	   nil
 	   ))))
 
-(defun t2ordinary (form)
+(defun t3ordinary (form)
   (cond ((atom form))
 	((constantp form))
 	(t (add-init form ))))
@@ -1796,7 +1800,7 @@
   (when (eq (car form) 'location)
     (when (listp (caddr form))
       (when (eq 'vv (caaddr form))
-	(let ((s (car (rassoc (cadr (caddr form)) *objects* :key 'car))))
+	(let ((s (gethash (cadr (caddr form)) *rev-objects*)))
 	  (when s `(defun ,s)))))))
 
 (defun c1fset (args)

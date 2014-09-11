@@ -588,7 +588,7 @@
   (if rest (wt ",TRUE,") (wt ",FALSE,"))
   (if allow-other-keys (wt "TRUE,") (wt "FALSE,"))
   (wt (length keywords))
-  (dolist** (kwd keywords) (wt ",VV[" (add-symbol (car kwd)) "]"))
+  (dolist** (kwd keywords) (wt "," (vv-str (add-symbol (car kwd)))))
   (wt ");")
 
   ;;; Bind required parameters.

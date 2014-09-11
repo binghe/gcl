@@ -326,7 +326,7 @@
 
 
 (defun add-fast-link (fname type args)
-  (let (link link-info (n (add-symbol fname)) vararg)
+  (let (link link-info (n (add-object2 (add-symbol fname))) vararg)
     (cond (type  
 	   ;;should do some args checking in that case too.
 	   (let* (link-string tem argtypes
@@ -409,10 +409,10 @@
     (cond
       ((null type)
        (wt-nl1 "static void LnkT"
-	       num "(){ call_or_link(" (vv-str num) ",(void **)(void *)&Lnk" num");}"))
+	       num "(){ call_or_link(VV[" num "],(void **)(void *)&Lnk" num");}"))
       ((eql type 'proclaimed-closure)
        (wt-nl1 "static void LnkT" num
-	       "(ptr) object *ptr;{ call_or_link_closure(" (vv-str num) ",(void **)(void *)&Lnk" num",(void **)(void *)&Lclptr" num");}"))
+	       "(ptr) object *ptr;{ call_or_link_closure(VV[" num "],(void **)(void *)&Lnk" num",(void **)(void *)&Lclptr" num");}"))
       (t
        ;;change later to include above.
        ;;(setq type (cdr (assoc type '((t . "object")(:btpr . "bptr")))))

@@ -132,12 +132,9 @@
               (push fun *closures*)
 	      (cond (*clink*
 		     (unwind-exit (list 'make-cclosure (fun-cfun fun) *clink* (fun-name fun))))
-		    (t (push-data-incf nil)
-		       (add-init `(si::setvv ,*next-vv*
-					     (si::mc nil ,(add-address
-							   (c-function-name "&LC" (fun-cfun fun) (fun-name fun)))))
-				 t) 
-		       (unwind-exit (list 'vv *next-vv*)))))
+		    (t (unwind-exit (list 'vv (cons 'si::|#,| 
+						    `(si::mc nil ,(add-address
+								   (c-function-name "&LC" (fun-cfun fun) (fun-name fun))))))))))
              ))
   )
 
