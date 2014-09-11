@@ -39,7 +39,8 @@
   (setq *next-vv* -1)
   (setq *next-cfun* 0)
   (setq *last-label* 0)
-  (setq *objects* nil)
+  (clrhash *objects*)
+  (clrhash *rev-objects*)
   (setq *hash-eq* nil)
   (setq *constants* nil)
   (setq *local-funs* nil)
@@ -68,12 +69,17 @@
 
 (defmacro next-cfun () '(incf *next-cfun*))
 
-(defun add-symbol (symbol)
-  (let ((x (assoc symbol *objects*)))
-       (cond (x (cadr x))
-             (t (push-data-incf symbol)
-                (push (list symbol *next-vv*) *objects*)
-		*next-vv*))))
+(defun add-symbol (symbol) (add-object symbol))
+
+(defun add-object2 (object)
+  (let* ((init (when (si::contains-sharp-comma object)
+		 (if (when (consp object) (eq (car object) 'si::|#,|))
+		     (cdr object) (si::string-to-object (wt-to-string object)))))
+	 (object (if (when (consp init) (eq (car init) 'si::nani)) (si::nani (cadr init)) object)))
+    (cond ((gethash object *objects*))
+	  ((push-data-incf (unless init object))
+	   (when init (add-init `(si::setvv ,*next-vv* ,init)))
+	   (setf (gethash *next-vv* *rev-objects*) object (gethash object *objects*) *next-vv*)))))
 
 ;; Write to a string with all the *print-.. levels bound appropriately.
 (defun wt-to-string (x &aux
@@ -82,47 +88,16 @@
   (wt-data1 x)
   (get-output-stream-string *compiler-output-data*))
 
-(defun add-object (object &aux x)
-  ;;; Used only during Pass 1.
-  (cond ((si:contains-sharp-comma object)
-         ;;; SI:CONTAINS-SHARP-COMMA returns T iff OBJECT
-         ;;; contains a sharp comma OR a structure.
-	 ;; there will be an eval and we want the eval to happen
-	 (cond ((and
-		 (consp object)
-		 (eq (car object) 'si::|#,|)
-		 (not (si:contains-sharp-comma (cdr object))))
-		(setq object (cdr object)))
-	       (t (setq object `(si::string-to-object
-				 ,(wt-to-string object)))))
-	 (push-data-incf nil)
-         (push (list *next-vv* object) *sharp-commas*)
-         *next-vv*)
-        ((setq x (assoc object *objects*))
-         (cadr x))
-	((typep object 'compiled-function)
-	 (push-data-incf nil)
-         (push (list *next-vv* `(function 
-				 ,(or (si::compiled-function-name
-				       object)
-				      (cmperr "Can't dump un named compiled funs")
-				      )))
-				 *sharp-commas*)
-         *next-vv*
-	 )
-        (t 
-	   (push-data-incf object)
-           (push (list object *next-vv*) *objects*)
-           *next-vv*)))
+(defun ltvp (val)
+  (when (consp val) (eq (car val) 'si::|#,|)))
 
-(defun add-constant (symbol &aux x)
-  ;;; Used only during Pass 1.
-  (cond ((setq x (assoc symbol *constants*))
-         (cadr x))
-        (t (push-data-incf nil)
-           (push (list *next-vv* symbol) *sharp-commas*)
-           (push (list symbol *next-vv*) *constants*)
-           *next-vv*)))
+(defun add-object (object) 
+  (cond ((ltvp object) object)
+	((and *compiler-compile* (not *keep-gaz*)) (cons 'si::|#,| `(si::nani ,(si::address object))))
+	(object)))
+
+(defun add-constant (symbol) 
+  (add-object (cons 'si::|#,| symbol)))
 
 (defmacro next-cvar () '(incf *next-cvar*))
 (defmacro next-cmacro () '(incf *next-cmacro*))
