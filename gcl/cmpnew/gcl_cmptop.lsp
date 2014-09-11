@@ -1429,7 +1429,7 @@
 	   nil
 	   ))))
 
-(defun t2ordinary (form)
+(defun t3ordinary (form)
   (cond ((atom form))
 	((constantp form))
 	(t (add-init form ))))
