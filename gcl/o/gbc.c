@@ -770,11 +770,13 @@ mark_object(object x) {
     break;
     
   case t_closure:
-    { int i ;
-    if (what_to_collect == t_contiguous)
-      mark_contblock(x->cc.cc_turbo,x->cc.cc_envdim);
-    for (i= 0 ; i < x->cc.cc_envdim ; i++) {
-      mark_object(x->cc.cc_turbo[i]);}}
+    { 
+      int i ;
+      for (i= 0 ; i < x->cl.cl_envdim ; i++)
+	mark_object(x->cl.cl_env[i]);
+      if (COLLECT_RELBLOCK_P)
+	x->cl.cl_env=(void *)copy_relblock((void *)x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
+    }
     
   case t_cfun:
   case t_sfun:
@@ -800,11 +802,10 @@ mark_object(object x) {
     mark_object(x->cc.cc_name);
     mark_object(x->cc.cc_env);
     mark_object(x->cc.cc_data);
-    if (x->cc.cc_turbo!=NULL) mark_object(*(x->cc.cc_turbo-1));
-    if (what_to_collect == t_contiguous) {
-      if (x->cc.cc_turbo != NULL)
-	mark_contblock((char *)(x->cc.cc_turbo-1),
-		       (1+fix(*(x->cc.cc_turbo-1)))*sizeof(object));
+    if (x->cc.cc_turbo!=NULL) {
+      mark_object(*(x->cc.cc_turbo-1));
+      if (COLLECT_RELBLOCK_P)
+	x->cc.cc_turbo=(void *)copy_relblock((char *)(x->cc.cc_turbo-1),(1+fix(*(x->cc.cc_turbo-1)))*sizeof(object))+sizeof(object);
     }
     break;
     
