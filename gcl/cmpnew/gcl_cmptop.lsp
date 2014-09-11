@@ -690,8 +690,16 @@
 (defun t2defun (fname cfun lambda-expr doc sp)
   (declare (ignore  sp))
   (cond ((get fname 'no-global-entry)(return-from t2defun nil)))
+  (cond ((< *space* 2)
+	 (setf (get fname 'debug-prop) t)
+	 )))
 
-  (when doc (add-init `(si::putprop ',fname ,doc 'si::function-documentation) ))
+(defun si::add-debug (fname x)
+  (si::putprop fname x  'si::debug))
+
+(defun t3init-fun (fname cfun lambda-expr doc)
+
+  (when doc (add-init `(si::putprop ',fname ,doc 'si::function-documentation)))
   
   (cond ((wt-if-proclaimed fname cfun lambda-expr))
 	((vararg-p fname)
@@ -710,16 +718,9 @@
 		   ))))
 	((numberp cfun)
          (wt-h "static void " (c-function-name "L" cfun fname) "();")
-	 (add-init `(si::mf ',fname ,(add-address (c-function-name "L" cfun fname))) ))
+	 (add-init `(si::mf ',fname ,(add-address (c-function-name "L" cfun fname)))))
         (t (wt-h cfun "();")
-	   (add-init `(si::mf ',fname ,(add-address (c-function-name "" cfun fname) )) )))
-           
-    (cond ((< *space* 2)
-           (setf (get fname 'debug-prop) t)
-	   )))
-
-(defun si::add-debug (fname x)
-  (si::putprop fname x  'si::debug))
+	   (add-init `(si::mf ',fname ,(add-address (c-function-name "" cfun fname)))))))
 
 (defun t3defun (fname cfun lambda-expr doc sp &aux inline-info 
 		      (*current-form* (list 'defun fname))
@@ -759,6 +760,9 @@
     (t3defun-aux 't3defun-normal 'return fname cfun lambda-expr sp)))
   
   (wt-downward-closure-macro cfun)
+
+  (t3init-fun fname cfun lambda-expr doc)
+
   (add-debug-info fname lambda-expr))
 
 (defun t3defun-aux (f *exit* &rest lis)
