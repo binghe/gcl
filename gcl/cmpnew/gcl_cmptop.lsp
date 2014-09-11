@@ -136,7 +136,6 @@
 (si:putprop 'defun 't2defun 't2)
 (si:putprop 'defmacro 't2defmacro 't2)
 (si:putprop 'declare 't2declare 't2)
-(si:putprop 'sharp-comma 't2sharp-comma 't2)
 (si:putprop 'defentry 't2defentry 't2)
 (si:putprop 'si:putprop 't2putprop 't2)
 
@@ -145,6 +144,7 @@
 (si:putprop 'defun 't3defun 't3)
 (si:putprop 'defmacro 't3defmacro 't3)
 (si:putprop 'ordinary 't3ordinary 't3)
+(si:putprop 'sharp-comma 't3sharp-comma 't3)
 (si:putprop 'clines 't3clines 't3)
 (si:putprop 'defcfun 't3defcfun 't3)
 (si:putprop 'defentry 't3defentry 't3)
@@ -1439,7 +1439,7 @@
 	   (cond ((atom vv) (wfs-error)))
     (push (cons 'sharp-comma vv) *top-level-forms*)))
 
-(defun t2sharp-comma (vv val)
+(defun t3sharp-comma (vv val)
   (add-init `(si::setvv ,vv ,val) ))
 
 (defun t2declare (vv) vv
