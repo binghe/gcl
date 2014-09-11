@@ -135,7 +135,6 @@
 
 (si:putprop 'defun 't2defun 't2)
 (si:putprop 'defmacro 't2defmacro 't2)
-(si:putprop 'ordinary 't2ordinary 't2)
 (si:putprop 'declare 't2declare 't2)
 (si:putprop 'sharp-comma 't2sharp-comma 't2)
 (si:putprop 'defentry 't2defentry 't2)
@@ -145,6 +144,7 @@
 
 (si:putprop 'defun 't3defun 't3)
 (si:putprop 'defmacro 't3defmacro 't3)
+(si:putprop 'ordinary 't3ordinary 't3)
 (si:putprop 'clines 't3clines 't3)
 (si:putprop 'defcfun 't3defcfun 't3)
 (si:putprop 'defentry 't3defentry 't3)
