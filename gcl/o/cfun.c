@@ -336,7 +336,7 @@ turbo_closure(object fun)
     {BEGIN_NO_INTERRUPT;
      for (n = 0, l = fun->cc.cc_env;  !endp(l);  n++, l = l->c.c_cdr);
     {
-     block= AR_ALLOC(alloc_contblock,(1+n),object);
+     block= AR_ALLOC(alloc_relblock,(1+n),object);
      *block=make_fixnum(n);
      fun->cc.cc_turbo = block+1; /* equivalent to &block[1] */
      for (n = 0, l = fun->cc.cc_env;  !endp(l);  n++, l = l->c.c_cdr)
