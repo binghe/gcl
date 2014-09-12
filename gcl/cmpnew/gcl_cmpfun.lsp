@@ -913,7 +913,7 @@
 		   (sublis1 ,s ,(second args) ',test))))))
 
 (defun sublis1-inline (a b c)
-  (let ((tst (cadr c)))
+  (let ((tst (ltvp-eval (cadr c))))
     (or (member tst '(eq equal eql)) (error "bad test"))
     (wt "(check_alist("	a "),sublis1("a "," b "," (format nil "&o~(~a~)))" tst))))
 
