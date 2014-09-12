@@ -22,7 +22,6 @@
 (in-package 'compiler)
 
 (defvar *objects* (make-hash-table :test 'eq))
-(defvar *rev-objects* (make-hash-table :test 'eql))
 ;(defvar *objects* nil)
 (defvar *constants* nil)
 (defvar *sharp-commas* nil)
@@ -1804,7 +1803,7 @@
   (when (eq (car form) 'location)
     (when (listp (caddr form))
       (when (eq 'vv (caaddr form))
-	(let ((s (gethash (cadr (caddr form)) *rev-objects*)))
+	(let ((s (ltvp-eval (cadr (caddr form)))))
 	  (when s `(defun ,s)))))))
 
 (defun c1fset (args)
