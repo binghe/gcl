@@ -40,7 +40,6 @@
   (setq *next-cfun* 0)
   (setq *last-label* 0)
   (clrhash *objects*)
-  (clrhash *rev-objects*)
   (setq *hash-eq* nil)
   (setq *constants* nil)
   (setq *local-funs* nil)
@@ -79,7 +78,7 @@
     (cond ((gethash object *objects*))
 	  ((push-data-incf (unless init object))
 	   (when init (add-init `(si::setvv ,*next-vv* ,init)))
-	   (setf (gethash *next-vv* *rev-objects*) object (gethash object *objects*) *next-vv*)))))
+	   (setf (gethash object *objects*) *next-vv*)))))
 
 ;; Write to a string with all the *print-.. levels bound appropriately.
 (defun wt-to-string (x &aux
@@ -87,6 +86,12 @@
 		       *fasd-data*)
   (wt-data1 x)
   (get-output-stream-string *compiler-output-data*))
+
+(defun ltvp-eval (form)
+  (cond ((atom form) form)
+	((eq (car form) 'si::|#,|) (ltvp-eval (cdr form)))
+	((eq (car form) 'si::nani) (si::nani (cadr form)))
+	(form)))
 
 (defun ltvp (val)
   (when (consp val) (eq (car val) 'si::|#,|)))
