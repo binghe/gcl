@@ -688,7 +688,7 @@
   (prog1 *vind* (incf *vind*)))
 
 (defun t2defun (fname cfun lambda-expr doc sp)
-  (declare (ignore  sp))
+  (declare (ignore cfun lambda-expr doc sp))
   (cond ((get fname 'no-global-entry)(return-from t2defun nil)))
   (cond ((< *space* 2)
 	 (setf (get fname 'debug-prop) t)
@@ -726,7 +726,6 @@
 		      (*current-form* (list 'defun fname))
 		      (*volatile* (volatile (second lambda-expr)))
 		      *downward-closures*)
-  (declare (ignore doc))
   (cond
    ((dolist (v *inline-functions*)
       (or (si::fixnump (nth 3 v))
