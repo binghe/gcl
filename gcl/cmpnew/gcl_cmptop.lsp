@@ -1356,18 +1356,13 @@
 
 (defun t2defmacro (fname cfun macro-lambda doc ppn sp)
 
-  (declare (ignore macro-lambda sp))
-  (when doc (add-init `(si::putprop ',fname ,doc 'si::function-documentation) ))
-  (when ppn
-	(add-init `(si::putprop ',fname ',ppn 'si::pretty-print-format) ))
+  (declare (ignore macro-lambda doc ppn sp))
   (wt-h "static void " (c-function-name "L" cfun fname) "();")
-  (add-init `(si::MM ',fname ,(add-address (c-function-name "L" cfun fname))) )
   )
 
 (defun t3defmacro (fname cfun macro-lambda doc ppn sp
                          &aux (*volatile* (if (get fname 'contains-setjmp)
 					      " VOL " "")))
-  (declare (ignore doc ppn))
   (let-pass3
    ((*exit* 'return))
    (wt-comment "macro definition for " fname)
@@ -1388,6 +1383,11 @@
    (push (cons *reservation-cmacro* *max-vs*) *reservations*)
    (wt-h "#define VC" *reservation-cmacro*)
    (wt-cvars)
+
+   (when doc (add-init `(si::putprop ',fname ,doc 'si::function-documentation) ))
+   (when ppn
+     (add-init `(si::putprop ',fname ',ppn 'si::pretty-print-format) ))
+   (add-init `(si::MM ',fname ,(add-address (c-function-name "L" cfun fname))) )
 
    ))
 
