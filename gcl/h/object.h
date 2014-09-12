@@ -487,14 +487,14 @@ EXTER object sSlambda_block_expanded;
 #endif
 	
 
-#define CHECK_INTERRUPT   if (signals_pending) raise_pending_signals(sig_safe)
+#define CHECK_INTERRUPT   /* if (signals_pending) raise_pending_signals(sig_safe) */
 
 #define BEGIN_NO_INTERRUPT \
  plong old_signals_allowed = signals_allowed; \
   signals_allowed = 0
 
 #define END_NO_INTERRUPT \
-  signals_allowed = old_signals_allowed
+  ({signals_allowed = old_signals_allowed; if (signals_pending) raise_pending_signals(sig_use_signals_allowed_value);})
 /* could add:   if (signals_pending)
    raise_pending_signals(sig_use_signals_allowed_value) */
 
