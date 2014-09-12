@@ -344,8 +344,11 @@
 (defun break-quit (&optional (level 0)
                    &aux (current-level (length *break-level*)))
   (when (and (>= level 0) (< level current-level))
-    (let ((x (nth (- current-level level 1) *quit-tags*)))
-      (throw (cdr x) (cdr x))))
+    (let ((x (nthcdr (- current-level level 1) *quit-tags*))
+	  (y (member nil *quit-tags* :key 'cdr)))
+      (if (tailp x y)
+	  (format *debug-io* "The *quit-tag* is disabled at level ~s.~%" (length y))
+	(throw (cdar x) (cdar x)))))
   (break-current))
 
 (defun break-previous (&optional (offset 1))
