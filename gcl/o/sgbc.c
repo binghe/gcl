@@ -490,10 +490,11 @@ sgc_mark_object1(object x) {
   case t_closure:
     { 
       int i ;
-      if (what_to_collect == t_contiguous)
-	mark_contblock(x->cc.cc_turbo,x->cc.cc_envdim);
-      for (i= 0 ; i < x->cc.cc_envdim ; i++) 
-	sgc_mark_object(x->cc.cc_turbo[i]);
+      for (i= 0 ; i < x->cl.cl_envdim ; i++) 
+	sgc_mark_object(x->cl.cl_env[i]);
+      if (SGC_RELBLOCK_P(x->cl.cl_env) && COLLECT_RELBLOCK_P)
+	x->cl.cl_env=(void *)copy_relblock((void *)x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
+
     }
     
   case t_cfun:
@@ -521,10 +522,10 @@ sgc_mark_object1(object x) {
     sgc_mark_object(x->cc.cc_name);
     sgc_mark_object(x->cc.cc_env);
     sgc_mark_object(x->cc.cc_data);
-    if (x->cc.cc_turbo!=NULL) sgc_mark_object(*(x->cc.cc_turbo-1));
-    if (what_to_collect == t_contiguous) {
-      if (x->cc.cc_turbo != NULL)
-	mark_contblock((char *)(x->cc.cc_turbo-1),(1+fix(*(x->cc.cc_turbo-1)))*sizeof(object));
+    if (x->cc.cc_turbo!=NULL) {
+      sgc_mark_object(*(x->cc.cc_turbo-1));
+      if (SGC_RELBLOCK_P(x->cc.cc_turbo) && COLLECT_RELBLOCK_P)
+	x->cc.cc_turbo=(void *)copy_relblock((char *)(x->cc.cc_turbo-1),(1+fix(*(x->cc.cc_turbo-1)))*sizeof(object))+sizeof(object);
     }
     break;
     

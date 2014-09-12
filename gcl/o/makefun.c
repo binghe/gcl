@@ -50,7 +50,7 @@ IsetClosure(object x, int n, va_list ap)
   if (type_of(x) != t_closure)
     { FEerror("Not a closure",0);}
   if (x->cl.cl_envdim < n)
-    {BEGIN_NO_INTERRUPT; x->cl.cl_env = (object *)alloc_contblock(n);
+    {BEGIN_NO_INTERRUPT; x->cl.cl_env = (object *)alloc_relblock(n);
      x->cl.cl_envdim = n;
      END_NO_INTERRUPT;
    }
