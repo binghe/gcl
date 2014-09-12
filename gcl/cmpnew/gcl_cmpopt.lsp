@@ -1265,3 +1265,8 @@ type_of(#0)==t_bitvector")
  (push '((t t) t #.(flags) "cdifference(#0,#1)")
    (get 'system:cdifference 'inline-always))
 
+;;si::static-inverse-cons
+(push '((t) t #.(compiler::flags) "({object _y=(object)fixint(#0);is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-always))
+(push '((fixnum) t #.(compiler::flags) "({object _y=(object)#0;is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-always))
+(push '((t) t #.(compiler::flags) "({object _y=(object)fix(#0);is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-unsafe))
+(push '((fixnum) t #.(compiler::flags) "({object _y=(object)#0;is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-unsafe))

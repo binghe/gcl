@@ -1387,6 +1387,14 @@ object x, *lp;
 		}
 }
 
+DEFUN_NEW("STATIC-INVERSE-CONS",object,fSstatic_inverse_cons,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
+
+   object y=(object)x;
+
+   return is_imm_fixnum(y) ? Cnil : (is_imm_fixnum(y->c.c_cdr) ? y : (y->d.f||y->d.e ? Cnil : y));
+
+}
+
 void
 gcl_init_list_function()
 {
