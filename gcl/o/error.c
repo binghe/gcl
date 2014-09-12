@@ -417,19 +417,20 @@ CEerror(char *error_str, char *cont_str, int num, object arg1, object arg2, obje
 	Lisp interface to IHS
 */
 
-static ihs_ptr get_ihs_ptr(object x)
-{
-	ihs_ptr p;
+static ihs_ptr get_ihs_ptr(object x) {
 
-	if (type_of(x) != t_fixnum)
-		goto ILLEGAL;
-	p = ihs_org + fix(x);
-	if (fix(x)==0) return p;
-	if (ihs_org <= p && p <= ihs_top)
-		return(p);
-ILLEGAL:
-	FEerror("~S is an illegal ihs index.", 1, x);
-	return(NULL);
+  ihs_ptr p;
+  
+  if (type_of(x) != t_fixnum)
+    goto ILLEGAL;
+  p = ihs_org + fix(x);
+  p=p<ihs_org ? ihs_org : p;
+  p=p>ihs_top ? ihs_top : p;
+  return p;
+ ILLEGAL:
+  FEerror("~S is an illegal ihs index.", 1, x);
+  return(NULL);
+
 }
 
 DEFUNO_NEW("IHS-TOP",object,fSihs_top,SI
@@ -456,19 +457,21 @@ DEFUN_NEW("IHS-VS",object,fSihs_vs,SI
 	RETURN1(x0);
 }
 
-static frame_ptr get_frame_ptr(object x)
-{
-	frame_ptr p;
+static frame_ptr get_frame_ptr(object x) {
 
-	if (type_of(x) != t_fixnum)
-		goto ILLEGAL;
-	p = frs_org + fix(x);
-	if (fix(x)==0) return p;
-	if (frs_org <= p && p <= frs_top)
-		return(p);
-ILLEGAL:
-	FEerror("~S is an illegal frs index.", 1, x);
-	return NULL;
+  frame_ptr p;
+  
+  if (type_of(x) != t_fixnum)
+    goto ILLEGAL;
+  p = frs_org + fix(x);
+  if (fix(x)==0) return p;
+  p=p<frs_org ? frs_org : p;
+  p=p>frs_top ? frs_top : p;
+  return p;
+ ILLEGAL:
+  FEerror("~S is an illegal frs index.", 1, x);
+  return NULL;
+
 }
 
 DEFUN_NEW("FRS-TOP",object,fSfrs_top,SI
@@ -528,19 +531,21 @@ DEFUN_NEW("FRS-IHS",object,fSfrs_ihs,SI
 	RETURN1(x0);
 }
 
-static bds_ptr get_bds_ptr(object x)
-{
-	bds_ptr p;
+static bds_ptr get_bds_ptr(object x) {
 
-	if (type_of(x) != t_fixnum)
-		goto ILLEGAL;
-	p = bds_org + fix(x);
-	if (0 == fix(x)) return p;
-	if (bds_org <= p && p <= bds_top)
-		return(p);
-ILLEGAL:
-	FEerror("~S is an illegal bds index.", 1, x);
-	return NULL;
+  bds_ptr p;
+  
+  if (type_of(x) != t_fixnum)
+    goto ILLEGAL;
+  p = bds_org + fix(x);
+  if (0 == fix(x)) return p;
+  p=p<bds_org ? bds_org : p;
+  p=p>bds_top ? bds_top : p;
+  return p;
+ ILLEGAL:
+  FEerror("~S is an illegal bds index.", 1, x);
+  return NULL;
+
 }
 
 DEFUN_NEW("BDS-TOP",object,fSbds_top,SI
@@ -567,18 +572,20 @@ DEFUN_NEW("BDS-VAL",object,fSbds_val,SI
 	RETURN1(x0);
 }
 
-static object *get_vs_ptr(object x)
-{
-	object *p;
+static object *get_vs_ptr(object x) {
 
-	if (type_of(x) != t_fixnum)
-		goto ILLEGAL;
-	p = vs_org + fix(x);
-	if (vs_org <= p && p < vs_top)
-		return(p);
-ILLEGAL:
-	FEerror("~S is an illegal vs index.", 1, x);
-	return NULL;
+  object *p;
+  
+  if (type_of(x) != t_fixnum)
+    goto ILLEGAL;
+  p = vs_org + fix(x);
+  p=p<vs_org ? vs_org : p;
+  p=p>=vs_top ? vs_top-1 : p;
+  return p;
+ ILLEGAL:
+  FEerror("~S is an illegal vs index.", 1, x);
+  return NULL;
+
 }
 
 DEFUN_NEW("VS-TOP",object,fSvs_top,SI
