@@ -782,3 +782,6 @@ First directory is checked for first name and all extensions etc."
 	      (read-file *standard-input*))))
   (bye 1))
 
+(defmacro without-interrupts (&rest formst)
+  `(let (*quit-tag*)
+     ,@forms))
