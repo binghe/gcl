@@ -64,7 +64,7 @@
 (defvar *kcl-top-restarts* nil)
 
 (defun make-kcl-top-restart (quit-tag)
-  (make-restart :name 'abort
+  (make-restart :name 'gcl-top-restart
 		:function #'(lambda () (throw (car (list quit-tag)) quit-tag))
 		:report-function 
 		#'(lambda (stream) 
