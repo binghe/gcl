@@ -124,8 +124,13 @@
       (error "Console interrupt -- cannot continue.")))
 
 (defun clcs-break-quit (&optional (level 0))
-  (let ((abort (nth level (reverse *abort-restarts*))))
-    (when abort (invoke-restart-interactively abort)))
+  (let* ((ar (reverse *abort-restarts*))
+	 (tr (find-restart 'conditions::gcl-top-restart))
+	 (ar (if tr (cons tr ar) ar))
+	 (abort (nth level ar)))
+    (if abort
+	(invoke-restart-interactively abort)
+      (format *debug-io* "No abort restart is active.~%")))
   (break-current))
 
 (setq conditions::*debugger-function* 'break-level)
@@ -180,3 +185,8 @@ Low level commands:
 ")
 	  (values)
 	  )
+
+(defmacro without-interrupts (&rest forms)
+  `(let (*quit-tag* conditions::*restart-clusters*)
+     ,@forms))
+

@@ -64,7 +64,7 @@
 (defvar *kcl-top-restarts* nil)
 
 (defun make-kcl-top-restart (quit-tag)
-  (make-restart :name 'abort
+  (make-restart :name 'gcl-top-restart
 		:function #'(lambda () (throw (car (list quit-tag)) quit-tag))
 		:report-function 
 		#'(lambda (stream) 
@@ -88,8 +88,8 @@
 		      *kcl-top-restarts*)))))
 
 (defun kcl-top-restarts ()
-  (let* ((old-tags (mapcan #'(lambda (e) (when (cdr e) (list (cdr e))))
-			   si::*quit-tags*))
+  (let* ((old-tags (ldiff si::*quit-tags* (member nil si::*quit-tags* :key 'cdr)))
+	 (old-tags (mapcan #'(lambda (e) (when (cdr e) (list (cdr e)))) old-tags))
 	 (tags (if si::*quit-tag* (cons si::*quit-tag* old-tags) old-tags))
 	 (restarts (mapcar #'find-kcl-top-restart tags)))
     (setq *kcl-top-restarts* (mapcar #'cons tags restarts))
