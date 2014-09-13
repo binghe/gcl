@@ -180,3 +180,8 @@ Low level commands:
 ")
 	  (values)
 	  )
+
+(defmacro without-interrupts (&rest forms)
+  `(let (*quit-tag* conditions::*restart-clusters*)
+     ,@forms))
+
