@@ -261,73 +261,59 @@
     (aref vector (the fixnum (1- fp)))))
 
 
+(defun maset (array x dim &optional (cx (cons x -1)) (cur (make-list (length dim) :initial-element 0)) (ind cur))
+  (declare (dynamic-extent cur))
+  (cond (dim (dotimes (i (pop dim)) (setf (car cur) i) (maset array x dim cx (cdr cur) ind)))
+	((incf (cdr cx))
+	 (when (apply 'array-in-bounds-p array ind) 
+	   (row-major-aset (apply 'aref array ind) (car cx) (cdr cx))))))
+
 (defun adjust-array (array new-dimensions
-                     &rest r
 		     &key element-type
 			  initial-element
-			  initial-contents
+			  (initial-contents nil initial-contents-supplied-p)
 			  fill-pointer
 			  displaced-to
-			  displaced-index-offset
-			  static
-                     &aux fill-pointer-spec
-                      )
-  (declare (ignore 
-                   initial-element
-                   initial-contents
-                   fill-pointer
-                   displaced-to
-                   displaced-index-offset
-                   static))
-  (declare (:dynamic-extent r new-dimensions))
-  (when (integerp new-dimensions)
-        (setq new-dimensions (list new-dimensions)))
-  (if (setq fill-pointer-spec (member :fill-pointer r))
-      (unless (array-has-fill-pointer-p array)
-	      (error ":fill-pointer specified for array with no fill pointer"))
-    (when (array-has-fill-pointer-p array)
-      (push (fill-pointer array) r) (push :fill-pointer r)))
+			  (displaced-index-offset 0)
+			  (static (staticp array))
+                     &aux (fill-pointer (or fill-pointer (when (array-has-fill-pointer-p array) (fill-pointer array)))))
 
-  (setq element-type (array-element-type array))
-  (unless (eq element-type t) (push element-type r)
-	  (push :element-type r))
-  (unless (member :static r)
-        (push (staticp array) r) (push :static r))
-  (let ((x (apply #'make-array new-dimensions :adjustable t r)))	
-    (cond ((or (null (cdr new-dimensions))
-	       (and (equal (cdr new-dimensions)
-			   (cdr (array-dimensions array)))
-		    (or (not (eq element-type 'bit))
-			(eql 0 (the fixnum
-				    (mod
-				      (the fixnum (car (last new-dimensions)))
-				      char-size))))))
-	   (copy-array-portion array   x
-			       0 0
-			       (min (array-total-size x)
-				    (array-total-size array))))
-	  (t
-	    (do ((cursor (make-list (length new-dimensions)
-				    :initial-element 0)))
-		(nil)
-		(declare (:dynamic-extent cursor))
-		(when (apply #'array-in-bounds-p array cursor)
-		      (aset-by-cursor x
-				      (apply #'aref array cursor)
-				      cursor))
-		(when (increment-cursor cursor new-dimensions)
-		      (return nil)))))
+  (declare (ignore element-type))
+
+  (let ((x (if initial-contents-supplied-p
+	       (make-array new-dimensions
+		       :adjustable t
+		       :static static
+		       :element-type (array-element-type array)
+		       :fill-pointer fill-pointer
+		       :initial-contents initial-contents
+		       :displaced-to displaced-to
+		       :displaced-index-offset displaced-index-offset)
+	     (make-array new-dimensions
+		       :adjustable t
+		       :static static
+		       :element-type (array-element-type array)
+		       :fill-pointer fill-pointer
+		       :initial-element initial-element 
+		       :displaced-to displaced-to
+		       :displaced-index-offset displaced-index-offset))))	
+
+    (unless (or displaced-to initial-contents-supplied-p)
+
+      (cond ((or (atom new-dimensions)
+		 (null (cdr new-dimensions))
+		 (when (equal (cdr new-dimensions) (cdr (array-dimensions array)))
+		      (or (not (eq element-type 'bit))
+			  (eql 0 (the fixnum (mod (the fixnum (car (last new-dimensions))) char-size))))))
+	     (copy-array-portion array x 0 0 (min (array-total-size x) (array-total-size array))))
+	    ((maset array x new-dimensions))))
     
     (si:replace-array array x)
-    (setf fill-pointer-spec (cadr fill-pointer-spec))
-    (when fill-pointer-spec
-        (cond ((eql t fill-pointer-spec)
-	       (setf (fill-pointer array) (array-total-size array)))
-	      ((typep fill-pointer-spec 'fixnum)
-	       (setf (fill-pointer array) fill-pointer-spec))
-	      (t (error "bad :fill-pointer arg: ~a" fill-pointer-spec))))
-    array
-    ))
+
+    (when fill-pointer
+      (setf (fill-pointer array) (if (eq fill-pointer t) (array-total-size array) fill-pointer)))
+    array))
+
 
 
 
