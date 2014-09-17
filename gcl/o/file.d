@@ -2390,7 +2390,7 @@ object x=Cnil;
 
     sigaction(SIGCHLD,&sa,NULL);
 
-    switch((pid=fork())) {
+    switch((pid=pfork())) {
     case -1:
       FEerror("Cannot fork", 0);
       break;
@@ -2400,7 +2400,7 @@ object x=Cnil;
 	FEerror("setsid error", 0);
 
       if (daemon == sKpersistent)
-	switch(fork()) {
+	switch(pfork()) {
 	case -1:
 	  FEerror("daemon fork error", 0);
 	  break;
@@ -2452,7 +2452,7 @@ object x=Cnil;
 	  
 	  sigaction(SIGCHLD,&sa,NULL);
 	  
-	  switch((pid=fork())) {
+	  switch((pid=pfork())) {
 	  case 0:
 	    ifuncall1(server,y);
 	    exit(0);

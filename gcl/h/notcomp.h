@@ -347,3 +347,21 @@ extern bool writable_malloc;
   ({object _b=(b_);while (type_of(_b)!=t_hashtable) _b=wrong_type_argument(sLhash_table,_b);sethash(a_,_b,c_);})
 
 #include "prelink.h"
+
+#ifdef GCL_PROF
+#define prof_block(x) ({\
+      sigset_t prof,old;						\
+      int r;								\
+      sigemptyset(&prof);						\
+      sigaddset(&prof,SIGPROF);						\
+      sigprocmask(SIG_BLOCK,&prof,&old);				\
+      r=x;								\
+      sigprocmask(SIG_SETMASK,&old);					\
+      r;})
+#else
+#define prof_block(x) x
+#endif
+
+#define psystem(x) prof_block(system(x))
+#define pfork() prof_block(fork())
+
