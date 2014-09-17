@@ -139,7 +139,7 @@
 		       (or
 			(eq *value-to-go* 'trash)
 			(and (consp *value-to-go*)
-			     (eq (car *value-to-go*) 'var))
+			     (member (car *value-to-go*) '(var cvar jump-false jump-true)))
 			(and info (equal (info-type info) '(values t)))
 			))
 		  (c2funcall-sfun form args info)
