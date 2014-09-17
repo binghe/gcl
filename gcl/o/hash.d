@@ -520,6 +520,18 @@ DEFUN_NEW("HASH-TABLE-SIZE",object,fLhash_table_size,LISP,1,1,NONE,OO,OO,OO,OO,(
 
 }
 
+DEFUN_NEW("HASH-TABLE-REHASH-SIZE",object,fLhash_table_rehash_size,LISP,1,1,NONE,OO,OO,OO,OO,(object table),"")
+{
+  check_type_hash_table(&table);
+  RETURN1(table->ht.ht_rhsize);
+}
+
+DEFUN_NEW("HASH-TABLE-REHASH-THRESHOLD",object,fLhash_table_rehash_threshold,LISP,1,1,NONE,OO,OO,OO,OO,(object table),"")
+{
+  check_type_hash_table(&table);
+  RETURN1(table->ht.ht_rhthresh);
+}
+
 
 
 void
