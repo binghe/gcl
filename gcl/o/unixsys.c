@@ -110,7 +110,7 @@ detect_wine() {
   
   massert(snprintf(b,sizeof(b),"%-.*smsys /tmp/ out%0d tmp%0d log%0d",
 		   o->st.st_fillp,o->st.st_self,mpid,mpid,mpid)>0);
-  massert(!system(b));
+  massert(!psystem(b));
 
   sSAwine_detectedA->s.s_dbind=Ct;
   
@@ -121,8 +121,6 @@ detect_wine() {
 
 int
 msystem(const char *s) {
-
-  int r;
 
 #ifdef _WIN32
 
@@ -161,9 +159,8 @@ msystem(const char *s) {
   } else
 
 #endif
-    r=system(s);
-    
-  return r;
+
+  return psystem(s);
 
 }
 
