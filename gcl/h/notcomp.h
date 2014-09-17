@@ -348,7 +348,9 @@ extern bool writable_malloc;
 
 #include "prelink.h"
 
-#ifdef GCL_PROF
+#include <signal.h>
+
+#ifdef GCL_GPROF
 #define prof_block(x) ({\
       sigset_t prof,old;						\
       int r;								\
@@ -356,7 +358,7 @@ extern bool writable_malloc;
       sigaddset(&prof,SIGPROF);						\
       sigprocmask(SIG_BLOCK,&prof,&old);				\
       r=x;								\
-      sigprocmask(SIG_SETMASK,&old);					\
+      sigprocmask(SIG_SETMASK,&old,NULL);				\
       r;})
 #else
 #define prof_block(x) x
