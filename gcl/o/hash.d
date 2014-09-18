@@ -312,13 +312,16 @@ object hashtable;
 	END_NO_INTERRUPT;}
 }
 
+DEFVAR("*DEFAULT-HASH-TABLE-SIZE*",sSAdefault_hash_table_sizeA,SI,make_fixnum(1024),"");
+DEFVAR("*DEFAULT-HASH-TABLE-REHASH-SIZE*",sSAdefault_hash_table_rehash_sizeA,SI,make_shortfloat((shortfloat)1.5),"");
+DEFVAR("*DEFAULT-HASH-TABLE-REHASH-THRESHOLD*",sSAdefault_hash_table_rehash_thresholdA,SI,make_shortfloat((shortfloat)0.7),"");
 
 @(defun make_hash_table (&key (test sLeql)
-			      (size `make_fixnum(1024)`)
+			      (size `sSAdefault_hash_table_sizeA->s.s_dbind`)
 			      (rehash_size
-			       `make_shortfloat((shortfloat)1.5)`)
+			       `sSAdefault_hash_table_rehash_sizeA->s.s_dbind`)
 			      (rehash_threshold
-			       `make_shortfloat((shortfloat)0.7)`)
+			       `sSAdefault_hash_table_rehash_thresholdA->s.s_dbind`)
 			 &aux h)
 	enum httest htt=0;
 	int i;
