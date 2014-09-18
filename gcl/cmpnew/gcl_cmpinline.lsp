@@ -30,8 +30,8 @@
 ;;;  are large, as occurs at present in running the random-int-form tester.
 ;;;  20040320 CM
 
-
-(defmacro mia (x y) `(make-array ,x :adjustable t :fill-pointer ,y))
+(defmacro mia (x y) `(si:make-vector t ,x t ,y nil 0 nil nil))
+;(defmacro mia (x y) `(make-array ,x :adjustable t :fill-pointer ,y))
 (defmacro eql-not-nil (x y) `(and ,x (eql ,x ,y)))
 
 (defstruct (info (:copier old-copy-info))
