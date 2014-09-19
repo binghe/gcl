@@ -30,8 +30,8 @@
 ;;;  are large, as occurs at present in running the random-int-form tester.
 ;;;  20040320 CM
 
-
-(defmacro mia (x y) `(make-array ,x :adjustable t :fill-pointer ,y))
+(defmacro mia (x y) `(si:make-vector t ,x t ,y nil 0 nil nil))
+;(defmacro mia (x y) `(make-array ,x :adjustable t :fill-pointer ,y))
 (defmacro eql-not-nil (x y) `(and ,x (eql ,x ,y)))
 
 (defstruct (info (:copier old-copy-info))
@@ -485,21 +485,7 @@
 	(when (and (eq (car x) fname)
 		   (setq ii (inline-type-matches (cdr x) args return-type)))
 	              (return-from get-inline-info ii)))
-  ;; ( n . string , function ) or string , function
-  
-  (when (and (setq x (get fname 'vfun))
-	     (if (and (consp x) (typep (car x) 'fixnum))
-		 (prog1 (>= (length args)  (car x)) (setq x (cdr x)))
-	       t))
-	(return-from get-inline-info
-		     (list (make-list (length args) :initial-element t)
-			   t (flags allocates-new-storage side-effect-p)
-			   #'(lambda (&rest l)
-			       (wt "(VFUN_NARGS="(length l) ",")
-			       (wt-inline-loc x l)
-			       (wt ")")))))
-  nil
-  )
+  nil)
 
 (defun inline-type-matches (inline-info arg-types return-type
                                         &aux (rts nil))
