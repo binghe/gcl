@@ -32,7 +32,7 @@
 	   #+kcl (si::break-level si::clcs-break-level)
 	   #+kcl (si::terminal-interrupt si::clcs-terminal-interrupt)
 	   #+kcl (si::break-quit si::clcs-break-quit)
-	   #+kcl (si::error-set clcs-error-set)
+;	   #+kcl (si::error-set clcs-error-set)
 	   #+kcl (si::universal-error-handler clcs-universal-error-handler))))
 
 (defun install-clcs-symbols ()
