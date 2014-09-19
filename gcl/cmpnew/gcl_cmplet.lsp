@@ -56,7 +56,8 @@
                                            (cadr x)))
                         forms)))))
 
-  (dolist* (v (reverse vars)) (push v *vars*))
+  (setq *vars* (append vars *vars*))
+;  (dolist* (v (reverse vars)) (push v *vars*))
 
   (check-vdecl vnames ts is)
 
@@ -69,7 +70,7 @@
 
 
     (or (eql setjmps *setjmps*) (setf (info-volatile info) t))
-	(list 'let info (reverse vars) (reverse forms) body)
+	(list 'let info (nreverse vars) (nreverse forms) body)
   )
 
 (defun c2let (vars forms body
@@ -145,10 +146,10 @@
 
   (setq block-p (write-block-open vars))
 
-  (dolist* (binding (reverse initials))
+  (dolist* (binding (nreverse initials))
 	   (let ((*value-to-go* (second binding)))
 	      (c2expr* (third binding))))
-  (dolist* (binding (reverse bindings))
+  (dolist* (binding (nreverse bindings))
     (if (cdr binding)
         (c2bind-loc (car binding) (cadr binding))
         (c2bind (car binding))))
@@ -191,8 +192,8 @@
   (add-info info (cadr body))
   (setf (info-type info) (info-type (cadr body)))
   (dolist** (var vars) (check-vref var))
-(or (eql setjmps *setjmps*) (setf (info-volatile info) t))
-  (list 'let*  info (reverse vars) (reverse forms) body)
+  (or (eql setjmps *setjmps*) (setf (info-volatile info) t))
+  (list 'let*  info (nreverse vars) (nreverse forms) body)
   )
 
 (defun c2let* (vars forms body

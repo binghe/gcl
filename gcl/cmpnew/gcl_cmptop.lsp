@@ -293,7 +293,7 @@
 		*current-form* *vcs-used*)
   (declare (special *current-form* *vcs-used*))
 
-  (setq *top-level-forms* (reverse *top-level-forms*))
+  (setq *top-level-forms* (nreverse *top-level-forms*))
 
   ;;; Initialization function.
   (wt-nl1     "void init_" name "(){"
@@ -1502,7 +1502,7 @@
                         body))
                  (t (cmperr "The defCfun body ~s is illegal." s))))
           (t (cmperr "The defCfun body ~s is illegal." s))))
-  (push (list 'defcfun (car args) (cadr args) (reverse body))
+  (push (list 'defcfun (car args) (cadr args) (nreverse body))
         *top-level-forms*)
   )
 
@@ -1662,7 +1662,7 @@
 (defun t1defla (args) (declare (ignore args)))
 
 (defun parse-cvspecs (x &aux (cvspecs nil))
-  (dolist** (cvs x (reverse cvspecs))
+  (dolist** (cvs x (nreverse cvspecs))
     (cond ((symbolp cvs)
            (push (list 'object (string-downcase (symbol-name cvs))) cvspecs))
           ((stringp cvs) (push (list 'object cvs) cvspecs))

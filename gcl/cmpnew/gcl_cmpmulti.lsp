@@ -157,7 +157,7 @@
           (push var vrefs)
           (push-changed (car var) info)
           )
-  (list 'multiple-value-setq info (reverse vrefs) (c1expr* (cadr args) info))
+  (list 'multiple-value-setq info (nreverse vrefs) (c1expr* (cadr args) info))
   )
 
 
@@ -215,7 +215,8 @@
 
   (setq init-form (c1expr* (cadr args) info))
 
-  (dolist* (v (reverse vars)) (push v *vars*))
+  (setq *vars* (append vars *vars*))
+;  (dolist* (v (reverse vars)) (push v *vars*))
 
   (check-vdecl vnames ts is)
 
@@ -226,7 +227,7 @@
 
   (dolist** (var vars) (check-vref var))
 
-  (list 'multiple-value-bind info (reverse vars) init-form body)
+  (list 'multiple-value-bind info (nreverse vars) init-form body)
   )
 
 
@@ -272,7 +273,7 @@
   (let ((label (next-label)))
     (wt-nl) (wt-go label)
 
-    (setq labels (reverse labels))
+    (setq labels (nreverse labels))
 
     (dolist** (v vars)
       (wt-label (car labels))

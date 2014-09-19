@@ -120,7 +120,7 @@
        (body1 nil) (ref nil) (ref-clb nil) (ref-ccb nil))
       ((endp l)
        (if (or ref-ccb ref-clb ref)
-           (progn (setq body1 (reverse body1))
+           (progn (setq body1 (nreverse body1))
 		  ;; If ref-ccb is set, we will cons up the environment, hence
 		  ;; all tags which had level boundary references must be changed
 		  ;; to ccb references.  FIXME -- review this logic carefully
@@ -134,7 +134,7 @@
 			(t
 	                 (add-loop-registers body1 )))
 	           (list 'tagbody info ref-clb ref-ccb body1))
-           (list 'progn info (reverse (cons (c1nil) body1)))))
+           (list 'progn info (nreverse (cons (c1nil) body1)))))
     (declare (object l ref ref-clb ref-ccb))
     (if (typep (car l) 'tag)
         (cond ((tag-ref-ccb (car l))
