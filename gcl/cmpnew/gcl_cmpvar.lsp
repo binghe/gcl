@@ -341,7 +341,7 @@
         (t
          (do ((pairs args (cddr pairs))
               (forms nil))
-             ((endp pairs) (c1expr (cons 'progn (reverse forms))))
+             ((endp pairs) (c1expr (cons 'progn (nreverse forms))))
              (declare (object pairs))
              (cmpck (endp (cdr pairs))
                     "No form was given for the value of ~s." (car pairs))
@@ -437,7 +437,7 @@
             (push-changed (car vref) info)
             (add-info info (cadar forms)))
       )
-  (list 'psetq info (reverse vrefs) (reverse forms))
+  (list 'psetq info (nreverse vrefs) (nreverse forms))
   )
 
 (defun c2psetq (vrefs forms &aux (*vs* *vs*) (saves nil) (blocks 0))

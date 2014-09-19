@@ -171,7 +171,7 @@
 		 (format t "~%;;~s~% " sym)
        (sloop::sloop for u in '(inline-always inline-safe inline-unsafe)
 		     do (sloop::sloop
-			 for w in (reverse (remove-duplicates
+			 for w in (nreverse (remove-duplicates
 					    (copy-list (get sym u))
 					    :test 'equal))
 			 do (output-opt w  sym u))))))
@@ -235,7 +235,7 @@
                                                    fl)
                                              (pop arg-types)
                                              (pop args))))
-                                  (setq forms (reverse fl)))))
+                                  (setq forms (nreverse fl)))))
                   (list 'call-local info (cddr fd) forms))
              (c1expr (cmp-expand-macro fd fname args))))
 	((and (setq fd (get fname 'co1))
@@ -291,7 +291,7 @@
                             (fl1 nil)
                             (al args (cdr al)))
                            ((endp fl)
-                            (setq forms (reverse fl1)))
+                            (setq forms (nreverse fl1)))
                            (cond ((endp arg-types) (push (car fl) fl1))
                                  (t (push (and-form-type (car arg-types)
                                                          (car fl)
@@ -439,7 +439,7 @@
                         (push form fl)
                         (add-info info (cadr form)))
                 (setf (info-type info) (info-type (cadar fl)))
-                (list 'progn info (reverse fl))
+                (list 'progn info (nreverse fl))
                 )))
   )
 

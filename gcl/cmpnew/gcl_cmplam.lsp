@@ -310,11 +310,11 @@
       (go Laux1)
       )
    )
-  (setq requireds (reverse requireds)
-        optionals (reverse optionals)
-        keywords (reverse keywords)
-        aux-vars (reverse aux-vars)
-        aux-inits (reverse aux-inits))
+  (setq requireds (nreverse requireds)
+        optionals (nreverse optionals)
+        keywords (nreverse keywords)
+        aux-vars (nreverse aux-vars)
+        aux-inits (nreverse aux-inits))
 
   (check-vdecl vnames ts is)
 
@@ -491,7 +491,7 @@
          (let ((label (next-label)))
            (wt-nl) (wt-go label)
 
-           (setq labels (reverse labels))
+           (setq labels (nreverse labels))
 
            ;;; Bind unspecified optional parameters.
            (dolist** (opt optionals)
@@ -615,7 +615,7 @@
                  (when (caddar opts) (c2bind-loc (caddar opts) t))
                  (when (cdr opts) (wt-nl "vs_base++;"))))
 
-        (setq labels (reverse labels))
+        (setq labels (nreverse labels))
         )
 
   (reset-top)
@@ -755,8 +755,8 @@
      (when vl
            (when restp (dm-bad-key '&rest))
            (setq rest (c1dm-v vl ss is ts)))
-     (values (list (reverse requireds) (reverse optionals) rest key-flag
-                   (reverse keywords) allow-other-keys (reverse auxs))
+     (values (list (nreverse requireds) (nreverse optionals) rest key-flag
+                   (nreverse keywords) allow-other-keys (nreverse auxs))
              ppn)
      )
     (let ((v (car vl)))

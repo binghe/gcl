@@ -136,7 +136,7 @@
    (do ((l args (cddr l))
         (forms nil)
         (bindings nil))
-       ((endp l) (list* 'let* (reverse bindings) (reverse (cons nil forms))))
+       ((endp l) (list* 'let* (nreverse bindings) (nreverse (cons nil forms))))
        (declare (object l))
        (let ((sym (gensym)))
             (push (list sym (cadr l)) bindings)
@@ -218,7 +218,7 @@
        (sym (gensym))
        (bind nil)
        (n 0 (1+ n)))
-      ((endp vl) `(let* ((,sym (multiple-value-list ,form)) ,@(reverse bind))
+      ((endp vl) `(let* ((,sym (multiple-value-list ,form)) ,@(nreverse bind))
                         ,@body))
       (declare (fixnum n) (object vl))
       (push `(,(car vl) (nth ,n ,sym)) bind))
@@ -240,12 +240,12 @@
             (push (car c) step)
             (push (caddr c) step)))
   `(block nil
-          (let ,(reverse vl)
+          (let ,(nreverse vl)
                ,@decl
                (tagbody
                 ,label (if ,test (return (progn ,@result)))
                        (tagbody ,@body)
-                       (psetq ,@(reverse step))
+                       (psetq ,@(nreverse step))
                        (go ,label)))))
 
 (defmacro do* (control (test . result) &rest body
@@ -264,12 +264,12 @@
             (push (car c) step)
             (push (caddr c) step)))
   `(block nil
-          (let* ,(reverse vl)
+          (let* ,(nreverse vl)
                 ,@decl
                 (tagbody
                  ,label (if ,test (return (progn ,@result)))
                         (tagbody ,@body)
-                        (setq ,@(reverse step))
+                        (setq ,@(nreverse step))
                         (go ,label))))
   )
 

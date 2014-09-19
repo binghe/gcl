@@ -433,16 +433,12 @@ static ihs_ptr get_ihs_ptr(object x) {
 
 }
 
-DEFUNO_NEW("IHS-TOP",object,fSihs_top,SI
-       ,0,0,NONE,OO,OO,OO,OO,static void,siLihs_top,(void),"")
-
-{
+DEFUN_NEW("IHS-TOP",object,fSihs_top,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
 	/* 0 args */
-RETURN1(make_fixnum(ihs_top - ihs_org));
+  RETURN1(make_fixnum(ihs_top - ihs_org));
 }
 
-DEFUN_NEW("IHS-FUN",object,fSihs_fun,SI
-       ,1,1,NONE,OO,OO,OO,OO,(object x0),"")
+DEFUN_NEW("IHS-FUN",object,fSihs_fun,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"")
 {
 	/* 1 args */
 	x0 = get_ihs_ptr(x0)->ihs_function;
@@ -830,7 +826,7 @@ gcl_init_error(void)
 {
 	make_function("ERROR", Lerror);
 	make_function("CERROR", Lcerror);
-	make_si_function("IHS-TOP", siLihs_top);
+	/* make_si_function("IHS-TOP", siLihs_top); */
 	null_string = make_simple_string("");
 	enter_mark_origin(&null_string);
 }

@@ -5,6 +5,8 @@
 ;;; Make a Defpackage Form From Package State **********************
 ;;; ****************************************************************
 
+(in-package :si)
+
 (defun make-defpackage-form (package-name)
   "Given a package, returns a defpackage form that could recreate the 
    current state of the package, more or less."

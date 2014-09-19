@@ -203,13 +203,13 @@
         ((stringp (car forms))
          (dolist** (form (cdr forms)
                          (list* 'progn `(princ ,(concatenate 'string "
-" (car forms)) *compiler-output1*) (reverse (cons nil fl))))
+" (car forms)) *compiler-output1*) (nreverse (cons nil fl))))
                    (if (stringp form)
                        (push `(princ ,form *compiler-output1*) fl)
                        (push `(wt1 ,form) fl))))
         (t (dolist** (form forms
                            (list* 'progn '(princ "
-" *compiler-output1*) (reverse (cons nil fl))))
+" *compiler-output1*) (nreverse (cons nil fl))))
                      (if (stringp form)
                          (push `(princ ,form *compiler-output1*) fl)
                          (push `(wt1 ,form) fl))))))
