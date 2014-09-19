@@ -25,13 +25,19 @@ all:	$(OBJS)
 .lsp.fn: ../cmpnew/gcl_collectfn.o
 	../xbin/make-fn $*.lsp
 
+fns1:	$(FNS)
+
+fns:	../cmpnew/gcl_collectfn.o
+	$(MAKE) fns1 -e "FNS=`echo ${OBJS} | sed -e 's:\.o:\.fn:g'`"
+
 gcl_collectfn.o:
 	$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR)/ -compile $*.lsp
 
 .lisp.o:
 	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl$(EXE) \
 	"$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR)/ -compile $*.lisp " 
-sys-proclaim.lisp: $(FNS)
+
+sys-proclaim.lisp: fns
 	echo '(in-package "COMPILER")' \
 	'(load "../cmpnew/gcl_collectfn")(load "../lsp/sys-proclaim.lisp")'\
 	'(compiler::make-all-proclaims "*.fn")' | ../xbin/gcl
