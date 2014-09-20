@@ -122,6 +122,8 @@ detect_wine() {
 int
 msystem(const char *s) {
 
+  int r;
+
 #ifdef _WIN32
 
   if (sSAwine_detectedA->s.s_dbind==Ct) {
@@ -160,7 +162,9 @@ msystem(const char *s) {
 
 #endif
 
-  return psystem(s);
+    r=psystem(s);
+
+  return r;
 
 }
 
