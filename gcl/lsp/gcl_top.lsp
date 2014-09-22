@@ -738,13 +738,13 @@ First directory is checked for first name and all extensions etc."
    (when (or (stringp x) (pathnamep x))
      (let* ((x (truename (pathname x)))
 	    (y (namestring (make-pathname :name (pathname-name x) :type (pathname-type x) :version (pathname-version x))))
-	    (y (unless (zerop (length y)) y)))
+	    (y (unless (zerop (length y)) (list y))))
        (when (eq :directory (car (stat x)))
 	 (return-from get-temp-dir 
 	   (namestring 
 	    (make-pathname 
 	     :device (pathname-device x)
-	     :directory (append (pathname-directory x) (list y))))))))))
+	     :directory (append (pathname-directory x) y)))))))))
 
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
