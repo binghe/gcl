@@ -736,7 +736,7 @@ First directory is checked for first name and all extensions etc."
 (defun get-temp-dir nil
  (dolist (x `(,@(wine-tmp-redirect) ,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
    (when (or (stringp x) (pathnamep x))
-     (let* ((x (pathname x))
+     (let* ((x (truename (pathname x)))
 	    (y (namestring (make-pathname :name (pathname-name x) :type (pathname-type x) :version (pathname-version x))))
 	    (y (unless (zerop (length y)) y)))
        (when (eq :directory (car (stat x)))
