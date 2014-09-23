@@ -1274,9 +1274,9 @@ type_of(#0)==t_bitvector")
 ;;symbol-value
 (push '((t) t #.(compiler::flags) "(#0)->s.s_dbind") 
       (get 'symbol-value 'compiler::inline-unsafe))
-(push '((t) t #.(compiler::flags) "@0;type_of(#0)!=t_symbol ? (not_a_symbol(#0),Cnil) : ((#0)->s.s_dbind==OBJNULL ? (FEunbound_variable(#0),Cnil) : (#0)->s.s_dbind)") 
+(push '((t) t #.(compiler::flags) "@0;type_of(#0)!=t_symbol ? (not_a_symbol(#0),Cnil) : ((#0)->s.s_dbind==OBJNULL ? (FEerror(\"unbound variable\",0),Cnil) : (#0)->s.s_dbind)") 
       (get 'symbol-value 'compiler::inline-always))
-(push '((symbol) t #.(compiler::flags) "@0;(#0)->s.s_dbind==OBJNULL ? (FEunbound_variable(#0),Cnil) : (#0)->s.s_dbind") 
+(push '((symbol) t #.(compiler::flags) "@0;(#0)->s.s_dbind==OBJNULL ? (FEerror(\"unbound variable\",0),Cnil) : (#0)->s.s_dbind") 
       (get 'symbol-value 'compiler::inline-always))
 
 ;;acons
