@@ -883,32 +883,37 @@ FFN(siLuser_init)(void) {
   vs_base[0] = Cnil;
 }
 
-static void
-FFN(siLaddress)(void) {
-  check_arg(1);
-  vs_base[0] = make_fixnum((long)vs_base[0]);
-}
+/* static void */
+/* FFN(siLaddress)(void) { */
+/*   check_arg(1); */
+/*   vs_base[0] = make_fixnum((long)vs_base[0]); */
+/* } */
 
-static void
-FFN(siLnani)(void) {
-  check_arg(1);
+DEFUN_NEW("NANI",object,fSnani,SI,1,1,NONE,OI,OO,OO,OO,(fixnum address),"") {
 
-  /*This is temporary, 2.6.x does not have 64bit fixnums on 64bit machines*/
-  switch (type_of(vs_base[0])) {
-  case t_fixnum:
-    vs_base[0]=(object)fix(vs_base[0]);
-    break;
-  case t_bignum:
-    if (mpz_fits_slong_p(MP(vs_base[0]))) {
-      MP_INT *u = MP(vs_base[0]);
-      vs_base[0]=(object)mpz_get_si(u);
-      break;
-    }
-  default:
-    FEerror("Cannot coerce ~s to an address",1,vs_base[0]);
-  }
+  RETURN1((object)address);
 
 }
+
+DEFUN_NEW("ADDRESS",object,fSaddress,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+
+  RETURN1(x);
+
+}
+
+/* static void */
+/* FFN(siLnani)(void) { */
+/*   check_arg(1); */
+
+/*   switch (type_of(vs_base[0])) { */
+/*   case t_fixnum: */
+/*     vs_base[0]=(object)fix(vs_base[0]); */
+/*     break; */
+/*   default: */
+/*     FEerror("Cannot coerce ~s to an address",1,vs_base[0]); */
+/*   } */
+
+/* } */
 
 static void
 FFN(siLinitialization_failure)(void) {
@@ -994,8 +999,8 @@ init_main(void) {
   make_si_function("RESET-STACK-LIMITS", siLreset_stack_limits);
   make_si_function("INIT-SYSTEM", siLinit_system);
   make_si_function("USER-INIT", siLuser_init);
-  make_si_function("ADDRESS", siLaddress);
-  make_si_function("NANI", siLnani);
+  /* make_si_function("ADDRESS", siLaddress); */
+  /* make_si_function("NANI", siLnani); */
   make_si_function("INITIALIZATION-FAILURE",
 		   siLinitialization_failure);
   
