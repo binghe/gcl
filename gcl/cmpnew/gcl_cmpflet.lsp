@@ -264,7 +264,7 @@
   (add-info info (cadr body))
 
   (if (or local-funs closures)
-      (list 'labels info (nreverse local-funs) (mreverse closures) body)
+      (list 'labels info (nreverse local-funs) (nreverse closures) body)
       body))
 
 (defun c2labels (local-funs closures body &aux (*vs* *vs*) (*clink* *clink*) (*ccb-vs* *ccb-vs*))
