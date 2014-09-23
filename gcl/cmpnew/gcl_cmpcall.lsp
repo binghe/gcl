@@ -137,7 +137,7 @@
 		       *use-sfuncall*
 		       ;;Determine if only one value at most is required:
 		       (or
-			(eq *value-to-go* 'trash)
+			(member *value-to-go* '(return-object trash))
 			(and (consp *value-to-go*)
 			     (member (car *value-to-go*) '(var cvar jump-false jump-true)))
 			(and info (equal (info-type info) '(values t)))
@@ -165,25 +165,15 @@
 
 
 (defun fcalln-inline (&rest args &aux (f (car args)) length)
-  (wt #\()
-  (unless (and (consp f) (eq (car f) 'var))
-	  (setq f (list 'cvar (cs-push)))
-	  (wt-nl f " = " (car args) ","))
-   (wt-nl "(type_of(" f ") == t_sfun ?"
-;	  "(*(object (*)())((" f ")->sfn.sfn_self)):")
-	  "(*((" f ")->sfn.sfn_self)):")
-   (when (< *space* 3)
-	 (setq length t)
-	 (wt-nl "(fcall.argd="  (length (cdr args)) ",type_of("f")==t_vfun) ?")
-;	 (wt-nl  "(*(object (*)())((" f ")->sfn.sfn_self)):"))
-	 (wt-nl  "(*((" f ")->sfn.sfn_self)):"))
-   (wt-nl  "(fcall.fun=(" f "),")
-   (unless length
-	   (wt "fcall.argd="  (length (cdr args)) ","))
-   (wt   "fcalln))(")
-   (when (cdr args) (wt (cadr args))
-	 (dolist (loc (cddr args)) (wt #\, loc)))
-   (wt #\) #\)  ))
+  (wt-nl "({object _f=" (car args) ";enum type _t=type_of(_f);")
+  (wt-nl "_f = _t==t_symbol && _f->s.s_gfdef!=OBJNULL ? (_t=type_of(_f->s.s_gfdef),_f->s.s_gfdef) : _f;")  
+  (wt-nl "_t==t_sfun ? _f->sfn.sfn_self : ")
+  (wt-nl "(fcall.argd= " (length (cdr args)) ",_t==t_vfun ? _f->vfn.vfn_self : ")
+  (wt-nl "(fcall.fun=_f,fcalln));})")
+  (wt-nl "(")
+  (when (cdr args) (wt (cadr args))
+	(dolist (loc (cddr args)) (wt #\, loc)))
+  (wt-nl ")"))
 
 (defun c2call-lambda (lambda-expr args &aux (lambda-list (caddr lambda-expr)))
   (declare (object lambda-list))
