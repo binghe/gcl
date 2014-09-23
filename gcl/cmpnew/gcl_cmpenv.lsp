@@ -132,12 +132,12 @@
 	(do ((al arg-types (cdr al))
 	     (i 0 (the fixnum (+ 1 i))))
 	    ((endp al)
-	     (reverse types))
+	     (nreverse types))
 	    (declare (fixnum i))
 	    (cond ((or (member (car al) '(&optional &rest &key))
 		       (equal (car al) '* ))
 		   (setq vararg t)
-		   (return (reverse (cons '* types)))))
+		   (return (nreverse (cons '* types)))))
 	    ;; only the first 9 args may have proclaimed type different from T
 	    (push       (cond 
 			       ((< i 9)
