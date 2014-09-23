@@ -299,59 +299,67 @@ object list_vector_new(int n,object first,va_list ap)
  va_end(ap);
  return res;
 }*/
+#ifdef WIDE_CONS
+#define maybe_set_type_of(a,b) set_type_of(a,b)
+#else
+#define maybe_set_type_of(a,b)
+#endif
+
+
+#define multi_cons(n_,next_,last_)					\
+  ({static struct typemanager *_tm=tm_table+t_cons;			\
+    object _lis=OBJNULL;						\
+									\
+    if (n<=_tm->tm_nfree) {						\
+									\
+      object _tail=_tm->tm_free;					\
+									\
+      _lis=_tail;							\
+      									\
+      BEGIN_NO_INTERRUPT;						\
+      									\
+      _tm->tm_nfree -= n_;						\
+      while (--n_) {							\
+	pageinfo(_tail)->in_use++;					\
+	maybe_set_type_of(_tail,t_cons);				\
+	_tail->c.c_cdr=OBJ_LINK(_tail);					\
+	_tail->c.c_car=next_;						\
+	_tail=_tail->c.c_cdr;						\
+      }									\
+      _tm->tm_free=OBJ_LINK(_tail);					\
+      pageinfo(_tail)->in_use++;					\
+      maybe_set_type_of(_tail,t_cons);					\
+      _tail->c.c_car=next_;						\
+      _tail->c.c_cdr=SAFE_CDR(last_);					\
+									\
+      END_NO_INTERRUPT;							\
+    }									\
+    _lis;})
+
 
    
 object listqA(int a,int n,va_list ap) { 
 
-  struct typemanager *tm=(&tm_table[(int)t_cons]);
-  object tail=tm->tm_free,lis=tail;
+  object x,*p;
 
   if (n<=0) return Cnil;
 
+  if ((x=multi_cons(n,va_arg(ap,object),a ? va_arg(ap,object) : Cnil))!=OBJNULL)
+    return x;
+
   CHECK_INTERRUPT;
 
-  if (/* stack_alloc_start || */ tm->tm_nfree < n )  {
-    
-    object *p = vs_top;
-    
-    vs_push(Cnil);
-    while(--n>=0)
-      { *p=make_cons(va_arg(ap,object),Cnil);
-      p= &((*p)->c.c_cdr);
-      }
-    if (a) 
-      *p=SAFE_CDR(va_arg(ap,object));
-    return(vs_pop);
-
+  p = vs_top;
+  
+  vs_push(Cnil);
+  while(--n>=0) {
+    *p=make_cons(va_arg(ap,object),Cnil);
+    p= &((*p)->c.c_cdr);
   }
+  if (a) 
+    *p=SAFE_CDR(va_arg(ap,object));
 
-   
-  {
-
-    BEGIN_NO_INTERRUPT;
-
-    tm->tm_nfree -= n;
-    while (--n) {
-      pageinfo(tail)->in_use++;
-#ifdef WIDE_CONS
-      set_type_of(tail,t_cons);
-#endif
-      tail->c.c_cdr=OBJ_LINK(tail);
-      tail->c.c_car=va_arg(ap,object); 
-      tail=tail->c.c_cdr;
-    }
-    tm->tm_free=OBJ_LINK(tail);
-    pageinfo(tail)->in_use++;
-#ifdef WIDE_CONS
-      set_type_of(tail,t_cons);
-#endif
-    tail->c.c_car=va_arg(ap,object); 
-    tail->c.c_cdr=a ? SAFE_CDR(va_arg(ap,object)) : Cnil;
-    
-    END_NO_INTERRUPT;
-    return lis;
-    
-  }
+  return(vs_pop);
 
 }
 
@@ -407,26 +415,55 @@ BEGIN:
 }
 
 object
-append(x, y)
-object x, y;
-{
-	object z;
+append(object x, object y) {
 
-	if (endp(x))
-		return(y);
-	z = make_cons(Cnil, Cnil);
-	vs_push(z);
-	for (;;) {
-		z->c.c_car = x->c.c_car;
-		x = x->c.c_cdr;
-		if (endp(x))
-			break;
-		z->c.c_cdr = make_cons(Cnil, Cnil);
-		z = z->c.c_cdr;
-	}
-	z->c.c_cdr = SAFE_CDR(y);
-	return(vs_pop);
+  object z;
+  fixnum n;
+
+  if (endp(x))
+    return(y);
+
+  for (z=x,n=0;!endp(z);z=z->c.c_cdr,n++);
+  if ((z=multi_cons(n,({object _t=x->c.c_car;x=x->c.c_cdr;_t;}),y))!=OBJNULL)
+    return z;
+
+  z = make_cons(Cnil, Cnil);
+  vs_push(z);
+  for (;;) {
+    z->c.c_car = x->c.c_car;
+    x = x->c.c_cdr;
+    if (endp(x))
+      break;
+    z->c.c_cdr = make_cons(Cnil, Cnil);
+    z = z->c.c_cdr;
+  }
+  z->c.c_cdr = SAFE_CDR(y);
+  return(vs_pop);
 }
+
+
+
+/* object */
+/* append(x, y) */
+/* object x, y; */
+/* { */
+/* 	object z; */
+
+/* 	if (endp(x)) */
+/* 		return(y); */
+/* 	z = make_cons(Cnil, Cnil); */
+/* 	vs_push(z); */
+/* 	for (;;) { */
+/* 		z->c.c_car = x->c.c_car; */
+/* 		x = x->c.c_cdr; */
+/* 		if (endp(x)) */
+/* 			break; */
+/* 		z->c.c_cdr = make_cons(Cnil, Cnil); */
+/* 		z = z->c.c_cdr; */
+/* 	} */
+/* 	z->c.c_cdr = SAFE_CDR(y); */
+/* 	return(vs_pop); */
+/* } */
 
 /*
 	Copy_list(x) copies list x.
