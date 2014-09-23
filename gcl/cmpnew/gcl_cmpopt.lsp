@@ -1270,3 +1270,15 @@ type_of(#0)==t_bitvector")
 (push '((fixnum) t #.(compiler::flags) "({object _y=(object)#0;is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-always))
 (push '((t) t #.(compiler::flags) "({object _y=(object)fix(#0);is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-unsafe))
 (push '((fixnum) t #.(compiler::flags) "({object _y=(object)#0;is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-unsafe))
+
+;;symbol-value
+(push '((t) t #.(compiler::flags) "(#0)->s.s_dbind") 
+      (get 'symbol-value 'compiler::inline-unsafe))
+(push '((t) t #.(compiler::flags) "@0;type_of(#0)!=t_symbol ? (not_a_symbol(#0),Cnil) : ((#0)->s.s_dbind==OBJNULL ? (FEerror(\"unbound variable\",0),Cnil) : (#0)->s.s_dbind)") 
+      (get 'symbol-value 'compiler::inline-always))
+(push '((symbol) t #.(compiler::flags) "@0;(#0)->s.s_dbind==OBJNULL ? (FEerror(\"unbound variable\",0),Cnil) : (#0)->s.s_dbind") 
+      (get 'symbol-value 'compiler::inline-always))
+
+;;acons
+(push '((t t t) t #.(compiler::flags) "MMcons(MMcons((#0),(#1)),(#2))") 
+      (get 'acons 'compiler::inline-always))

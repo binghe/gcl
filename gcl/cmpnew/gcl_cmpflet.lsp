@@ -86,7 +86,7 @@
 
     (setq info (copy-info (cadr body))))
   
-  (dolist* (def (reverse defs1))
+  (dolist* (def (setq defs1 (nreverse defs1)))
 	   (when (fun-ref-ccb (car def))
 	     (let ((*vars* (cons 'cb *vars*))
 		   (*funs* (cons 'cb *funs*))
@@ -123,8 +123,8 @@
   ;; lambda lists
 
   (let ((*funs* *funs*))
-    (dolist* (def defs1)
-	     (push (car def) *funs*))
+
+    (setq *funs* (nconc (mapcar 'car defs1) *funs*))
     
     (multiple-value-setq (body ss ts is other-decl) (c1body (cdr args) t))
     
@@ -137,7 +137,7 @@
     (add-info info (cadr body)))
   
   (if (or local-funs closures)
-      (list 'flet info (reverse local-funs) (reverse closures) body)
+      (list 'flet info (nreverse local-funs) (nreverse closures) body)
       body))
 
 (defun c2flet (local-funs closures body
@@ -191,7 +191,7 @@
          (push fun *funs*)
          (push (list fun nil nil (cdr def)) defs1)))
 
-  (setq defs1 (reverse defs1))
+  (setq defs1 (nreverse defs1))
 
   ;;; Now DEFS1 holds ( { ( fun-object NIL NIL body ) }* ).
 
@@ -264,7 +264,7 @@
   (add-info info (cadr body))
 
   (if (or local-funs closures)
-      (list 'labels info (reverse local-funs) (reverse closures) body)
+      (list 'labels info (nreverse local-funs) (nreverse closures) body)
       body))
 
 (defun c2labels (local-funs closures body &aux (*vs* *vs*) (*clink* *clink*) (*ccb-vs* *ccb-vs*))
