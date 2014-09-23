@@ -130,7 +130,11 @@
 	 (abort (nth level ar)))
     (if abort
 	(invoke-restart-interactively abort)
-      (format *debug-io* "No abort restart is active.~%")))
+      (let ((y (member nil *quit-tags* :key 'cdr)))
+	(format *debug-io* "No abort restart is active")
+	(when y
+	  (format *debug-io* ", perhaps because interrupts are disabled at break level ~s" (length y)))
+	(format *debug-io* ".~%Consider using :r to continue, as :q is disabled.~%"))))
   (break-current))
 
 (setq conditions::*debugger-function* 'break-level)
