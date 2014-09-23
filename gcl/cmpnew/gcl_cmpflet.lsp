@@ -86,7 +86,7 @@
 
     (setq info (copy-info (cadr body))))
   
-  (dolist* (def (nreverse defs1))
+  (dolist* (def (setq defs1 (nreverse defs1)))
 	   (when (fun-ref-ccb (car def))
 	     (let ((*vars* (cons 'cb *vars*))
 		   (*funs* (cons 'cb *funs*))
@@ -123,8 +123,8 @@
   ;; lambda lists
 
   (let ((*funs* *funs*))
-    (dolist* (def defs1)
-	     (push (car def) *funs*))
+
+    (setq *funs* (nconc (mapcar 'car defs1) *funs*))
     
     (multiple-value-setq (body ss ts is other-decl) (c1body (cdr args) t))
     
