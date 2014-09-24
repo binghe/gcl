@@ -614,7 +614,7 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
     (do ((actions))
 	((null var-val-pairs)
 	 (if (null (cdr actions)) (car actions) `(progn ,@(nreverse actions))))
-      (setq actions (revappend
+      (setq actions (nreconc;revappend
 		      (loop-desetq-internal (pop var-val-pairs) (pop var-val-pairs))
 		      actions)))))
 
