@@ -329,8 +329,8 @@ deallocate_stream_buffer(object strm) {
 
 DEFVAR("*ALLOW-GZIPPED-FILE*",sSAallow_gzipped_fileA,SI,sLnil,"");
 
-static void
-too_long_file_name(object);
+/* static void */
+/* too_long_file_name(object); */
 static void
 cannot_open(object);
 static void
@@ -348,8 +348,7 @@ object if_exists, if_does_not_exist;
 {
 	object x;
 	FILE *fp=NULL;
-	char fname[BUFSIZ];
-	int i;
+	char fname[PATH_MAX];
 	object unzipped = 0;
 	vs_mark;
 
@@ -357,12 +356,13 @@ object if_exists, if_does_not_exist;
 	if (type_of(fn) != t_string)
 		FEwrong_type_argument(sLstring, fn);
 */
-	if (fn->st.st_fillp > BUFSIZ - 1)
-		too_long_file_name(fn);
-	for (i = 0;  i < fn->st.st_fillp;  i++)
-		fname[i] = fn->st.st_self[i];
+	/* if (fn->st.st_fillp > BUFSIZ - 1) */
+	/* 	too_long_file_name(fn); */
+	/* for (i = 0;  i < fn->st.st_fillp;  i++) */
+	/* 	fname[i] = fn->st.st_self[i]; */
 	
-	fname[i] = '\0';
+	/* fname[i] = '\0'; */
+	coerce_to_filename(fn,fname);
 	if (smm == smm_input || smm == smm_probe) {
                 if(fname[0]=='|')
 		  fp = popen(fname+1,"r");
@@ -2027,12 +2027,12 @@ LFD(siLcopy_stream)()
 #endif
 }
 
-static void
-too_long_file_name(fn)
-object fn;
-{
-	FEerror("~S is a too long file name.", 1, fn);
-}
+/* static void */
+/* too_long_file_name(fn) */
+/* object fn; */
+/* { */
+/* 	FEerror("~S is a too long file name.", 1, fn); */
+/* } */
 
 static void
 cannot_open(fn)
