@@ -175,28 +175,6 @@ typedef char *rl_compentry_func_t(const char *, int);
 
 #endif
 
-static int
-my_getc(FILE *f) {
-
-  int c;
-
-  BEGIN_NO_INTERRUPT;
-  c=getc(f);
-  END_NO_INTERRUPT;
-  return c;
-
-}
-
-static int
-my_putc(int c,FILE *f) {
-
-  BEGIN_NO_INTERRUPT;
-  c=putc(c,f);
-  END_NO_INTERRUPT;
-  return c;
-
-}
-
 int rl_putc_em(int c, FILE *f) {
 
   static int allocated_length = 0;
@@ -227,17 +205,17 @@ int rl_putc_em(int c, FILE *f) {
   rl_putc_em_line[current_length] = 0;
   
  tail:
-  return my_putc(c, f);
+  return putc(c, f);
 
 }
 
 int rl_getc_em(FILE *f) {
 
   static char *line = NULL;
-  static int linepos = 0;
+  static int linepos,nlp;
   int r;
   
-  if (f!=stdin || !isatty(fileno(f)) ) return my_getc(f);
+  if (f!=stdin || !isatty(fileno(f)) ) return getc(f);
   
   if (rl_ungetc_em_char!=-1) {
     r = rl_ungetc_em_char;
@@ -245,15 +223,31 @@ int rl_getc_em(FILE *f) {
     return r;
   }
   
+  if (!nlp&&readline_on==0) {
+    fd_set fds;
+    int n=fileno(f);
+    FD_ZERO(&fds);
+    FD_SET(n,&fds);
+    while (select(n+1,&fds,NULL,NULL,NULL)<=0);
+    nlp=1;
+  }
+
   if (line==NULL) {
     if (readline_on==1) {
-      my_putc('\r', stdout);
+      putc('\r', stdout);
+      {BEGIN_NO_INTERRUPT;
+      /* fprintf(stderr,"beginning readline\n",line); */
       line = readline(rl_putc_em_line);
+      /* fprintf(stderr,"readline returns %s\n",line); */
+      END_NO_INTERRUPT;
+      }
       rl_putc_em('\r', stdout);
       if (line==NULL) {if (rl_line_buffer) *rl_line_buffer=EOF;return EOF;}
       if (line[0] != 0) add_history(line);
     } else {
-      return my_getc(f);
+      int c=getc(f);
+      if (c==10) nlp=0;
+      return c;
     }
   }
   
@@ -262,6 +256,7 @@ int rl_getc_em(FILE *f) {
     line = NULL;
     linepos = 0;
     if (rl_line_buffer) *rl_line_buffer=0;
+    nlp=0;
     return '\n';
   }
   
