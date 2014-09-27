@@ -175,6 +175,24 @@ typedef char *rl_compentry_func_t(const char *, int);
 
 #endif
 
+static int
+my_getc(FILE *f) {
+  int c;
+  BEGIN_NO_INTERRUPT;
+  c=getc(f);
+  END_NO_INTERRUPT;
+  return c;
+}
+
+static int
+my_putc(int c,FILE *f) {
+  BEGIN_NO_INTERRUPT;
+  c=putc(c,f);
+  END_NO_INTERRUPT;
+  return c;
+}
+
+
 int rl_putc_em(int c, FILE *f) {
 
   static int allocated_length = 0;
@@ -205,7 +223,7 @@ int rl_putc_em(int c, FILE *f) {
   rl_putc_em_line[current_length] = 0;
   
  tail:
-  return putc(c, f);
+  return my_putc(c, f);
 
 }
 
@@ -233,7 +251,7 @@ call_readline() {
     line=malloc(1);
     line[0]=0;
   } else {
-    putc('\r', stdout);
+    my_putc('\r', stdout);
     sigaction(SIGINT,&siga,&old_siga);
     line=readline(rl_putc_em_line);
     sigaction(SIGINT,&old_siga,NULL);
@@ -250,7 +268,7 @@ int rl_getc_em(FILE *f) {
   static char *line;
   static int linepos;
   
-  if (f!=stdin || !isatty(fileno(f))) return getc(f);
+  if (f!=stdin || !isatty(fileno(f))) return my_getc(f);
   
   if (rl_ungetc_em_char!=-1) {
     int r = rl_ungetc_em_char;
@@ -280,7 +298,7 @@ int rl_getc_em(FILE *f) {
 	nlp=1;
       }
 
-      c=getc(f);
+      c=my_getc(f);
 
       if (c==10) nlp=0;
 
