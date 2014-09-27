@@ -110,7 +110,7 @@ FILE *fp;
 {
 
 #ifdef HAVE_READLINE
-  if (readline_on && fp==rl_instream && rl_line_buffer && *rl_line_buffer==EOF)
+  if (rl_stream_p(fp) && rl_eof_p(fp))
     return TRUE;
 #endif
 	if (!feof(fp))
@@ -1238,13 +1238,8 @@ BEGIN:
 	case smm_io:
 
 #ifdef HAVE_READLINE
-	  if (readline_on && strm->sm.sm_fp==rl_instream)
-	    if (rl_line_buffer) {
-	      if (*rl_line_buffer == 0 || *rl_line_buffer == EOF)
-	        return FALSE;
-	      else
-	        return TRUE;
-	    }
+	  if (rl_stream_p(strm->sm.sm_fp))
+	    return rl_pending_buffered_input_p(strm->sm.sm_fp);
 #endif
 		if (strm->sm.sm_fp == NULL)
 			closed_stream(strm);

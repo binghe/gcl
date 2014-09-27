@@ -209,45 +209,83 @@ int rl_putc_em(int c, FILE *f) {
 
 }
 
+#include <setjmp.h>
+
+static jmp_buf readline_jmp_buf;
+
+static void
+readline_sigint_handler(int c,siginfo_t *i,void *v) {
+  longjmp(readline_jmp_buf,1);
+}
+
+static char *
+call_readline() {
+
+  struct sigaction siga,old_siga;
+  char *line;
+
+  sigaction(SIGINT,NULL,&old_siga);
+  siga=old_siga;
+  siga.sa_sigaction=readline_sigint_handler;
+  if (setjmp(readline_jmp_buf)) {
+    sigaction(SIGINT,&old_siga,NULL);
+    sigint();
+    line=malloc(1);
+    line[0]=0;
+  } else {
+    putc('\r', stdout);
+    sigaction(SIGINT,&siga,&old_siga);
+    line=readline(rl_putc_em_line);
+    sigaction(SIGINT,&old_siga,NULL);
+    rl_putc_em('\r', stdout);
+  }    
+  return line;
+  
+}
+
+static int line_eof_p,line_eol_p;
+
 int rl_getc_em(FILE *f) {
 
-  static char *line = NULL;
-  static int linepos,nlp;
-  int r;
+  static char *line;
+  static int linepos;
   
-  if (f!=stdin || !isatty(fileno(f)) ) return getc(f);
+  if (f!=stdin || !isatty(fileno(f))) return getc(f);
   
   if (rl_ungetc_em_char!=-1) {
-    r = rl_ungetc_em_char;
+    int r = rl_ungetc_em_char;
     rl_ungetc_em_char = -1;
     return r;
   }
   
-  if (!nlp&&readline_on==0) {
-    fd_set fds;
-    int n=fileno(f);
-    FD_ZERO(&fds);
-    FD_SET(n,&fds);
-    while (select(n+1,&fds,NULL,NULL,NULL)<=0);
-    nlp=1;
-  }
-
+  line_eof_p=line_eol_p=0;
   if (line==NULL) {
+
     if (readline_on==1) {
-      putc('\r', stdout);
-      {BEGIN_NO_INTERRUPT;
-      /* fprintf(stderr,"beginning readline\n",line); */
-      line = readline(rl_putc_em_line);
-      /* fprintf(stderr,"readline returns %s\n",line); */
-      END_NO_INTERRUPT;
-      }
-      rl_putc_em('\r', stdout);
-      if (line==NULL) {if (rl_line_buffer) *rl_line_buffer=EOF;return EOF;}
+
+      line = call_readline();
+      if (line==NULL) {line_eof_p=1;return EOF;}
       if (line[0] != 0) add_history(line);
+
     } else {
-      int c=getc(f);
+
+      static int c,nlp;
+
+      if (!nlp) {
+	fd_set fds;
+	int n=fileno(f);
+	FD_ZERO(&fds);
+	FD_SET(n,&fds);
+	while (select(n+1,&fds,NULL,NULL,NULL)<=0);
+	nlp=1;
+      }
+
+      c=getc(f);
+
       if (c==10) nlp=0;
+
       return c;
+
     }
   }
   
@@ -255,13 +293,27 @@ int rl_getc_em(FILE *f) {
     free(line);
     line = NULL;
     linepos = 0;
-    if (rl_line_buffer) *rl_line_buffer=0;
-    nlp=0;
+    line_eol_p=1;
     return '\n';
   }
   
   return line[linepos++];
 
+}
+
+int
+rl_stream_p(FILE *f) {
+  return readline_on && f==stdin && isatty(fileno(f));
+}
+
+int
+rl_pending_buffered_input_p(FILE *f) {
+  return line_eof_p||line_eol_p ? FALSE :TRUE;
+}
+
+int
+rl_eof_p(FILE *f) {
+  return line_eof_p ? TRUE : FALSE;
 }
 
 int rl_ungetc_em(int c, FILE *f) {
@@ -304,9 +356,9 @@ void
 gcl_init_readline_function(void) {
   char *cp=getenv("TERM");
 
-  rl_readline_name="GCL";
+  *my_rl_readline_name_ptr="GCL";
 #ifdef RL_COMPLETION
-  rl_completion_entry_function = rl_completion_words;
+  *my_rl_completion_entry_function_ptr = rl_completion_words;
 #endif			
   if (isatty(0) && (!cp || strcmp(cp,"dumb")))
     readline_on=1;

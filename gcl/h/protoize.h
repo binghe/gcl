@@ -1911,3 +1911,15 @@ prelink_init(void);
 
 int
 gcl_mprotect(void *,unsigned long,int);
+
+int
+rl_pending_buffered_input_p(FILE *f);
+
+int
+rl_eof_p(FILE *f);
+
+int
+rl_stream_p(FILE *f);
+
+void
+sigint(void);

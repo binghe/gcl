@@ -9,10 +9,8 @@ prelink_init(void) {
   my_stdout=stdout;
   my_stderr=stderr;
 #ifdef HAVE_READLINE
-  my_rl_instream=rl_instream;
-  my_rl_completion_entry_function=rl_completion_entry_function;
-  my_rl_readline_name=rl_readline_name;
-  my_rl_line_buffer=rl_line_buffer;
+  my_rl_completion_entry_function_ptr=&rl_completion_entry_function;
+  my_rl_readline_name_ptr=&rl_readline_name;
 #endif
 
 }
