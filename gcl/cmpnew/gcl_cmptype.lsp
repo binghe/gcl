@@ -124,7 +124,7 @@
 			((and (eq (car type) 'satisfies)
 			    (symbolp (second type))
 			    (get (second type) 'type-filter)))
-                        (t t)))
+                        (t '*)))
                )))))
 
 
