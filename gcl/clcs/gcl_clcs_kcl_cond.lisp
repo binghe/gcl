@@ -41,10 +41,10 @@
 				     &aux (internal-error-parms
 					   (list error-name correctable function-name
 						 continue-format-control error-format-string)))
-  (when (equal internal-error-parms *internal-error-parms*)
-    (format t "Universal error handler called recursively ~S~%"
-	    internal-error-parms)
-	    (return-from clcs-universal-error-handler))
+  ;; (when (equal internal-error-parms *internal-error-parms*)
+  ;;   (format t "Universal error handler called recursively ~S~%"
+  ;; 	    internal-error-parms)
+  ;; 	    (return-from clcs-universal-error-handler))
   (let* ((*internal-error-parms* (list error-name correctable function-name
 				       continue-format-control error-format-string))
 	 (e-d (find-internal-error-data error-name)))

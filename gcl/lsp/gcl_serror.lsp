@@ -148,11 +148,11 @@ signaled at this point in the stack.  For the moment the rest of the VARIABLES a
 
 (defun #. (if (boundp '*error-handler-function*) *error-handler-function* 'joe)
   (&rest error-handler-args)
-  (when (equal error-handler-args *error-handler-args*)
-    (format t "Error handler called recursively ~S~%"
-	    error-handler-args)
-    ;; FIXME
-    (return-from si::universal-error-handler nil))
+  ;; (when (equal error-handler-args *error-handler-args*)
+  ;;   (format t "Error handler called recursively ~S~%"
+  ;; 	    error-handler-args)
+  ;;   ;; FIXME
+  ;;   (return-from si::universal-error-handler nil))
   (let ((*error-handler-args* error-handler-args))
     (when *show-all-debug-info*
       (si::simple-backtrace)(si::backtrace) (si::break-vs))
