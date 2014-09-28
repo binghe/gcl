@@ -191,6 +191,6 @@ Low level commands:
 	  )
 
 (defmacro without-interrupts (&rest forms)
-  `(let (*quit-tag* conditions::*restart-clusters*)
+  `(let* (*quit-tag* *quit-tags* conditions::*restart-clusters*)
      ,@forms))
 
