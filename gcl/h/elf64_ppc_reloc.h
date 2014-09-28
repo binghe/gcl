@@ -17,3 +17,6 @@
     case R_PPC64_TOC:
       store_val(where,~0L,toc);
       break;
+    case R_PPC64_REL32:
+      store_val(where,MASK(32)<<32,(s+a-p)<<32);
+      break;
