@@ -46,69 +46,74 @@
   (let* ((*break-message* (if (or (stringp at) (conditionp at)) ;***
 			      at *break-message*))  ;***
 	 (*quit-tags* (cons (cons *break-level* *quit-tag*) *quit-tags*)) ;***
-         (*quit-tag* nil)    ;***
+         *quit-tag*;(cons nil nil))    ;***
          (*break-level* (if (conditionp at) (cons t *break-level*) *break-level*))
          (*ihs-base* (1+ *ihs-top*))
          (*ihs-top* (1- (ihs-top)))
          (*current-ihs* *ihs-top*)
          (*frs-base* (or (sch-frs-base *frs-top* *ihs-base*) (1+ (frs-top))))
          (*frs-top* (frs-top))
-         (*break-env* nil)
+         *break-env*
 	 ;;(be *break-enable*) ;***
 	 ;;(*break-enable*               ;***
 	  ;;(progn                       ;***
 	    ;;(if (stringp at) nil be))) ;***
 	 ;;(*standard-input* *terminal-io*)
          (*readtable* (or *break-readtable* *readtable*))
-         (*read-suppress* nil)
+         *read-suppress*
          (+ +) (++ ++) (+++ +++)
          (- -)
          (* *) (** **) (*** ***)
-         (/ /) (// //) (/// ///)
-         )
+         (/ /) (// //) (/// ///) (first t))
     ;;(terpri *error-output*)
     (with-clcs-break-level-bindings ;***
-      (if (consp at)
-	  (set-back at env)
-	  (with-simple-restart (abort "Return to debug level ~D." DEBUG-LEVEL) ;***
-	    (format *debug-io* "~&~A~2%" *break-message*) ;***
-	    (when (> (length *link-array*) 0)
-	      (format *debug-io* 
-		      "Fast links are on: do (use-fast-links nil) for debugging~%"))
-	    (set-current)		;***
-	    (setq *no-prompt* nil)
-	    (show-restarts)))		;***
-      (catch-fatal 1)
-      (setq *interrupt-enable* t)
+
       (loop 
+
        (setq +++ ++ ++ + + -)
-       (cond (*no-prompt* (setq *no-prompt* nil))
-	     (t
-	      (format *debug-io* "~&~a~a>~{~*>~}"
-		      (if (stringp at) "" "dbl:")
-		      (if (eq *package* (find-package 'user)) ""
-			(package-name *package*))
-		      *break-level*)))
+
        (unless ;***
 	(with-simple-restart (abort "Return to debug level ~D." DEBUG-LEVEL) ;***
 	  (not
 	    (catch 'step-continue
+
+	      (when first
+		(if (consp at)
+		    (set-back at env)
+		  (progn
+		    (format *debug-io* "~&~A~2%" *break-message*) ;***
+		    (when (> (length *link-array*) 0)
+		      (format *debug-io* "Fast links are on: do (use-fast-links nil) for debugging~%"))
+		    (set-current)		;***
+		    (setq *no-prompt* nil)
+		    (show-restarts)))		;***
+		(catch-fatal 1)
+		(setq *interrupt-enable* t first nil))
+	      
+	      (if *no-prompt*
+		  (setq *no-prompt* nil)
+		(format *debug-io* "~&~a~a>~{~*>~}"
+			(if (stringp at) "" "dbl:")
+			(if (eq *package* (find-package 'user)) ""
+			  (package-name *package*))
+			*break-level*))
+	      
 	      (setq - (locally (declare (notinline read))
-			(dbl-read *debug-io* nil *top-eof*)))
+			       (dbl-read *debug-io* nil *top-eof*)))
 	      (when (eq - *top-eof*) (bye))
-	      (let* ( break-command
+	      (let* (break-command
 		     (values
 		      (multiple-value-list
-			  (LOCALLY (declare (notinline break-call evalhook))
-			    (if (or (keywordp -) (integerp -)) ;***
-				(setq - (cons - nil)))
-			    (cond ((and (consp -) (keywordp (car -)))
-				   (setq break-command t)
-				   (break-call (car -) (cdr -)))
-				  ((and (consp -) (integerp (car -))) ;***
-				   (setq break-command t) ;***
-				   (clcs-break-level-invoke-restart (car -))) ;***
-				  (t (evalhook - nil nil *break-env*))))))) ;***
+		       (LOCALLY (declare (notinline break-call evalhook))
+				(if (or (keywordp -) (integerp -)) ;***
+				    (setq - (cons - nil)))
+				(cond ((and (consp -) (keywordp (car -)))
+				       (setq break-command t)
+				       (break-call (car -) (cdr -)))
+				      ((and (consp -) (integerp (car -))) ;***
+				       (setq break-command t) ;***
+				       (clcs-break-level-invoke-restart (car -))) ;***
+				      (t (evalhook - nil nil *break-env*))))))) ;***
 		(setq /// // // / / values *** ** ** * * (car /))
 		(fresh-line *debug-io*)
 		(dolist (val /)
