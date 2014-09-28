@@ -75,14 +75,13 @@ enum fr_class {
 
 EXTER int in_signal_handler;
 struct frame {
-  char     frs_jmpbuf[SIZEOF_JMP_BUF];
+  char     frs_jmpbuf[SIZEOF_JMP_BUF] __attribute__ ((__aligned__ (OBJ_ALIGNMENT*2)));
   object  *frs_lex;
   bds_ptr  frs_bds_top;
   object   frs_val;
   ihs_ptr  frs_ihs;
   char     frs_class;
   char     frs_in_signal_handler;
-  char     frs_pad[6]; /*Keep frs_jumpbuf 8 byte aligned*/
 };
 
 typedef struct frame *frame_ptr;
