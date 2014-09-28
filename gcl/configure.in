@@ -1297,7 +1297,7 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 AC_MSG_CHECKING([for C extension variable alignment])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
 	    char *v __attribute__ ((aligned ($obj_align)));
-	    return 0;]])],[obj_align="__attribute__ ((aligned ($obj_align)))"],[obj_align=])
+	    return 0;]])],[obj_align="__attribute__ ((aligned ($obj_align)))"],[AC_MSG_ERROR([Need alignment attributes])])
 AC_MSG_RESULT($obj_align)
 AC_DEFINE_UNQUOTED(OBJ_ALIGN,$obj_align,[can use C extension for object alignment])
 

@@ -6515,7 +6515,7 @@ _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
   obj_align="__attribute__ ((aligned ($obj_align)))"
 else
-  obj_align=
+  as_fn_error $? "Need alignment attributes" "$LINENO" 5
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
