@@ -240,5 +240,6 @@ extern int mingwlisten(FILE *);
 #define FPE_FLTRES 6
 #define FPE_FLTINV 7
 
+#include <limits.h>
 
 
