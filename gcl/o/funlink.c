@@ -33,9 +33,12 @@ append_link_list(object sym,int n) {
   if (!Rset || !sSAlink_listA->s.s_dbind) return;
   for (x=sSAlink_listA->s.s_dbind;x!=Cnil && x->c.c_car->c.c_car!=sym;x=x->c.c_cdr);
   if (x==Cnil) 
-    sSAlink_listA->s.s_dbind=MMcons((x=list(6,sym,make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0))),sSAlink_listA->s.s_dbind);
+    sSAlink_listA->s.s_dbind=MMcons((x=list(7,sym,make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0),make_fixnum(0))),sSAlink_listA->s.s_dbind);
   else 
     x=x->c.c_car;
+  x=x->c.c_cdr;
+  if (listp(sym->s.s_gfdef))
+    x->c.c_car=one_plus(x->c.c_car);
   for (x=x->c.c_cdr,i=0;i<n;i++,x=x->c.c_cdr);
   x->c.c_car=one_plus(x->c.c_car);
 }
