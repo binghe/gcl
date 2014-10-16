@@ -125,7 +125,7 @@
 
 
 (defmacro tp-error (x y)
-  `(specific-error :wrong-type-argument "~S is not of type ~S." ,x ',y))
+  `(error 'type-error :datum ,x :expected-type ',y))
 
 (defun smallnthcdr (n x)
   (declare (fixnum n))

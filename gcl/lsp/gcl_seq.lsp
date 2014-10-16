@@ -48,22 +48,19 @@
                (when (subtypep (car type) 'list)
 		 (if (or (and (eq 'null (car type)) (not (equal size 0)))
 			 (and (eq 'cons (car type)) (equal size 0)))
-		     (specific-error :wrong-type-argument "~S is not of type ~S." 
-				     type (format nil "list (size ~S)" size)))
+		     (error 'type-error :datum type :expected-type (format nil "list (size ~S)" size)))
                      (return-from make-sequence
                       (if iesp
                           (make-list size :initial-element initial-element)
                           (make-list size))))
                (unless (or (eq (car type) 'array)
 			   (eq (car type) 'simple-array))
-		 (specific-error :wrong-type-argument "~S is not of type ~S." 
-				 type 'sequence))
+		 (error 'type-error :datum type :expected-type 'sequence))
 	       (let ((ssize (caddr type)))
 		 (if (listp ssize) (setq ssize (car ssize)))
 		 (if (not (si::fixnump ssize)) (setq ssize size))
 		 (unless (equal ssize size)
-		 (specific-error :wrong-type-argument "~S is not of type ~S." 
-				 type (format nil "~S (size ~S)" type size))))
+		 (error 'type-error :datum type :expected-type (format nil "~S (size ~S)" type size))))
                (or (cadr type) t))))
   (setq element-type (si::best-array-element-type element-type))
   (setq sequence (si:make-vector element-type size nil nil nil nil nil))
