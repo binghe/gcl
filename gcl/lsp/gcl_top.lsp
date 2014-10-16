@@ -451,9 +451,13 @@
       (break-go ihs)
       (return))))
 
+(defun break-resume ()
+  (if *debug-continue* 
+      (invoke-restart *debug-continue*)
+    :resume))
 
 (putprop :b 'simple-backtrace 'break-command)
-(putprop :r '(lambda () :resume) 'break-command)
+(putprop :r 'break-resume 'break-command)
 (putprop :resume (get :r 'break-command) 'break-command)
 (putprop :bds 'break-bds 'break-command)
 (putprop :blocks 'break-blocks 'break-command)
