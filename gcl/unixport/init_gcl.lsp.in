@@ -1,7 +1,6 @@
 (make-package "COMPILER" :use '("LISP"))
 (import '(si::proclaimed-function si::proclaimed-closure si::proclaimed-return-type si::proclaimed-arg-types) :compiler)
 (make-package "SLOOP" :use '("LISP"))
-(make-package "SERROR" :use '("LISP" "SLOOP"))
 (make-package "ANSI-LOOP" :use '("LISP"))
 (make-package "DEFPACKAGE" :use '("LISP"))
 (make-package "TK" :use '("LISP" "SLOOP"))
