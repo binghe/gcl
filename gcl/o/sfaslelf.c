@@ -181,6 +181,7 @@ relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
 #include RELOC_H
 
   default:
+    fprintf(stderr, "Unknown reloc type %lu\n", tp);
     massert(tp&~tp);
 
   }
