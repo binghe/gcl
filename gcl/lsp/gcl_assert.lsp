@@ -53,8 +53,7 @@
 			   "Please input the new value for the place ~:@(~S~): "
 			   ',place)
 		   (finish-output *error-output*)
-		   (setf ,place (read)))) places)
-     (format *error-output* "Now continuing ...~%")))
+		   (setf ,place (read)))) places)))
 
 (defmacro typecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform (sgen "TYPECASE"))))
   (declare (optimize (safety 2)))
@@ -77,6 +76,6 @@
   (declare (optimize (safety 2)))
 ;  (check-type clauses (list-of proper-list))
   (let ((tp `(or ,@(mapcar 'car clauses))))
-    `(typecase ,keyform ,@clauses (t (error 'type-error :datum ,key :expected-type ',tp)))))
+    `(let ((,key ,keyform)) (typecase ,key ,@clauses (t (error 'type-error :datum ,key :expected-type ',tp))))))
 
 
