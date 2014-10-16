@@ -31,6 +31,9 @@
 ;(eval-when (eval compile) (defun si:clear-compiler-properties (symbol)))
 (eval-when (eval compile) (setq si:*inhibit-macro-special* nil))
 
+(defmacro sgen (&optional (pref "G"))
+  `(load-time-value (gensym ,pref)))
+
 
 (defmacro defvar (var &optional (form nil form-sp) doc-string)
   `(progn (si:*make-special ',var)
@@ -286,21 +289,27 @@
 			  `(if ,(if (when (eq a v) (listp v)) (m (mapcar #'sw v) 'or) (sw v)) ,(m c 'progn) ,y))
 			c :initial-value df)))))
 
-;; (defmacro case (keyform &rest clauses &aux (form nil) (key (gensym)))
-;;   (dolist (clause (reverse clauses) `(let ((,key ,keyform)) ,form))
-;;           (declare (object clause))
-;;     (cond ((or (eq (car clause) 't) (eq (car clause) 'otherwise))
-;;            (setq form `(progn ,@(cdr clause))))
-;;           ((consp (car clause))
-;;            (setq form `(if (member ,key ',(car clause))
-;;                            (progn ,@(cdr clause))
-;;                            ,form)))
-;;           ((car clause)
-;;            (setq form `(if (eql ,key ',(car clause))
-;;                            (progn ,@(cdr clause))
-;;                            ,form)))))
-;;   )
+(defmacro ecase (keyform &rest clauses &aux (key (sgen "ECASE")))
+  (declare (optimize (safety 2)))
+  `(let ((,key ,keyform))
+     (declare (ignorable ,key))
+     (case ,key
+	   ,@(mapcar (lambda (x) (if (member (car x) '(t otherwise)) (cons (list (car x)) (cdr x)) x)) clauses)
+	   (otherwise
+	    (error 'type-error :datum ,key
+		   :expected-type '(member ,@(apply 'append (mapcar (lambda (x &aux (x (car x))) (if (listp x) x (list x))) clauses))))))))
 
+
+(defmacro ccase (keyform &rest clauses &aux (key (sgen "CCASE")))
+  (declare (optimize (safety 2)))
+  `(let ((,key ,keyform))
+     (declare (ignorable ,key))
+     (do nil (nil)
+      (case ,key
+	    ,@(mapcar (lambda (x &aux (k (pop x)))
+			`(,(if (member k '(t otherwise)) (list k) k) (return ,(if (cdr x) (cons 'progn x) (car x))))) clauses)
+	    (otherwise 
+	     (check-type ,key (member ,@(apply 'append (mapcar (lambda (x &aux (x (car x))) (if (listp x) x (list x))) clauses)))))))))
 
 (defmacro return (&optional (val nil)) `(return-from nil ,val))
 
