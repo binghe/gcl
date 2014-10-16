@@ -239,6 +239,10 @@ DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,"");
 DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,"");
+DEF_ORDINARY("PROGRAM-ERROR",sLprogram_error,LISP,"");
+DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
+DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
+DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
 
 #ifdef ANSI_COMMON_LISP
 /* New ansi types */
@@ -263,10 +267,8 @@ DEF_ORDINARY("GENERIC-FUNCTION",sLgeneric_function,LISP,"");
 DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
 DEF_ORDINARY("METHOD",sLmethod,LISP,"");
 /* FIXME -- need this for types in predlib.lsp, why can't we use the keyword sKpackage_error ? */
-DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
 DEF_ORDINARY("PARSE-ERROR",sLparse_error,LISP,"");
 DEF_ORDINARY("PRINT-NOT-READABLE",sLprint_not_readable,LISP,"");
-DEF_ORDINARY("PROGRAM-ERROR",sLprogram_error,LISP,"");
 DEF_ORDINARY("READER-ERROR",sLreader_error,LISP,"");
 DEF_ORDINARY("SERIOUS-CONDITION",sLserious_condition,LISP,"");
 DEF_ORDINARY("SIMPLE-BASE-STRING",sLsimple_base_string,LISP,"");
@@ -287,8 +289,6 @@ DEF_ORDINARY("SYNONYM-STREAM",sLsynonym_stream,LISP,"");
 DEF_ORDINARY("TWO-WAY-STREAM",sLtwo_way_stream,LISP,"");
 DEF_ORDINARY("TYPE-ERROR",sLtype_error,LISP,"");
 DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,"");
-DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
-DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
 DEF_ORDINARY("WARNING",sLwarning,LISP,"");
 #endif
 
