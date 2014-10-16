@@ -1,13 +1,8 @@
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: "CONDITIONS"; Base: 10 -*-
 
-(in-package "CONDITIONS" :USE '("LISP" "PCL"))
+;(in-package "CONDITIONS" :USE '(:cl #+(and clos (not pcl)) "CLOS" #+pcl "PCL"))
 
-(eval-when (compile load eval)
-  (when (fboundp 'remove-clcs-symbols)
-    (remove-clcs-symbols)))
-
-(eval-when (compile load eval)
-  (defvar *condition-class-list* nil))
+(in-package :conditions)
 
 (defun slot-sym (base slot)
   (values (intern (concatenate 'string (string base) "-" (string slot)))))
@@ -23,21 +18,24 @@
 	    (call-next-method)
 	    (format s ,(car x) ,@(mapcar (lambda (st) `(if (slot-boundp c ',st) (,(slot-sym y st) c) 'unbound)) (cdr x)))))))
 
-(DEFMACRO DEFINE-CONDITION (NAME PARENT-LIST SLOT-SPECS &REST OPTIONS)
+(defun default-report (x)
+  `(lambda (c s) (call-next-method) (format s "~s " ',x)))
+
+(defmacro define-condition (name parent-list slot-specs &rest options)
   (unless (or parent-list (eq name 'condition))
 	  (setq parent-list (list 'condition)))
-  (let* ((REPORT-FUNCTION nil)
-	 (DEFAULT-INITARGS nil)
-	 (DOCUMENTATION nil))
-    (DO ((O OPTIONS (CDR O)))
-	((NULL O))
-      (LET ((OPTION (CAR O)))
-	(CASE (CAR OPTION)
-	  (:REPORT (SETQ REPORT-FUNCTION (coerce-to-fn (cadr option) name)))
-	  (:DEFAULT-INITARGS (SETQ DEFAULT-INITARGS OPTION))
-	  (:DOCUMENTATION (SETQ DOCUMENTATION (CADR OPTION)))
-	  (OTHERWISE (CERROR "Ignore this DEFINE-CONDITION option."
-			     "Invalid DEFINE-CONDITION option: ~S" OPTION)))))
+  (let* ((report-function nil)
+	 (default-initargs nil)
+	 (documentation nil))
+    (do ((o options (cdr o)))
+	((null o))
+      (let ((option (car o)))
+	(case (car option)
+	  (:report (setq report-function (coerce-to-fn (cadr option) name)))
+	  (:default-initargs (setq default-initargs option)) 
+	  (:documentation (setq documentation (cadr option)))
+	  (otherwise (cerror "ignore this define-condition option."
+			     "invalid define-condition option: ~s" option)))))
     `(progn
        (eval-when (compile)
 	 (setq pcl::*defclass-times* '(compile load eval)))
@@ -45,60 +43,43 @@
        `(defclass ,name ,parent-list ,slot-specs ,default-initargs)
        `(defclass ,name ,parent-list ,slot-specs))
        (eval-when (compile load eval)
-	 (pushnew '(,name ,parent-list
-		    ,@(mapcan #'(lambda (slot-spec)
-				  (let* ((ia (getf (cdr slot-spec) ':initarg)))
-				    (when ia
-				      (list
-				       (cons ia
-					     (or (getf (cdr slot-spec) ':type)
-						 t))))))
-		       SLOT-SPECS))
-		  *condition-class-list*)
-	 (setf (get ',name 'si::s-data) nil)
 ;	 (setf (get ',name 'documentation) ',documentation)
-	 )
-      ,@(when REPORT-FUNCTION
-	   `((DEFMETHOD PRINT-OBJECT ((X ,NAME) STREAM)
-	       (IF *PRINT-ESCAPE*
-		   (CALL-NEXT-METHOD)
-		   (,REPORT-FUNCTION X STREAM)))))
-      ',NAME)))
+	 (setf (get ',name 'si::s-data) nil))
+      ,@(when report-function
+	   `((defmethod print-object ((x ,name) stream)
+	       (if *print-escape*
+		   (call-next-method)
+		   (,report-function x stream)))))
+      ',name)))
 
 (eval-when (compile load eval)
-  (define-condition condition () ())
+  (define-condition condition nil nil))
 
-(when (fboundp 'pcl::proclaim-incompatible-superclasses)
-  (mapc
-   'pcl::proclaim-incompatible-superclasses
-   '((condition pcl::metaobject)))))
+(defmethod pcl::make-load-form ((object condition) &optional env)
+  (declare (ignore env))
+  (error "~@<default ~s method for ~s called.~@>" 'pcl::make-load-form object))
 
-(defun conditionp (object)
-  (typep object 'condition))
+(mapc 'pcl::proclaim-incompatible-superclasses '((condition pcl::metaobject)))
 
-(DEFMETHOD PRINT-OBJECT ((X condition) STREAM)
-  (IF *PRINT-ESCAPE* 
-      (FORMAT STREAM "#<~S.~D>" (class-name (class-of x)) (UNIQUE-ID x))
-      (FORMAT STREAM "~A: " (class-name (class-of x)))));(TYPE-OF x)
+(defun conditionp (object) (typep object 'condition))
 
-(defvar *condition-class* (find-class 'condition))
+(defun is-condition (x) (conditionp x))
+(defun is-warning (x) (typep x 'warning))
 
-(defun condition-class-p (TYPE)
-  (when (symbolp TYPE)
-    (setq TYPE (find-class TYPE)))
-  (and (typep TYPE 'standard-class)
-       (member *condition-class* 
-	       (#+pcl pcl::class-precedence-list
-		#-pcl clos::class-precedence-list
-		  type))))
+(defmethod print-object ((x condition) stream)
+  (let ((y (class-name (class-of x))))
+    (if *print-escape* 
+	(format stream "#<~s.~d>" y (unique-id x))
+      (format stream "~a: " y))));(type-of x)
 
-(DEFUN MAKE-CONDITION (TYPE &REST SLOT-INITIALIZATIONS)
-  (unless (condition-class-p TYPE)
-    (ERROR 'SIMPLE-TYPE-ERROR
-	   :DATUM TYPE
-	   :EXPECTED-TYPE '(SATISFIES condition-class-p)
-	   :FORMAT-CONTROL "Not a condition type: ~S"
-	   :FORMAT-ARGUMENTS (LIST TYPE)))
-  (apply #'make-instance TYPE SLOT-INITIALIZATIONS))
-
+(defun make-condition (type &rest slot-initializations)
+  (when (and (consp type) (eq (car type) 'or))
+    (return-from make-condition (apply 'make-condition (cadr type) slot-initializations)));FIXME
+  (unless (condition-class-p type)
+    (error 'simple-type-error
+	   :datum type
+	   :expected-type '(satisfies condition-class-p)
+	   :format-control "not a condition type: ~s"
+	   :format-arguments (list type)))
+  (apply 'make-instance type slot-initializations))
 

@@ -30,6 +30,7 @@ gcl_init_system(object no_init)
   lsp_init("../lsp/gcl_arraylib.lsp");
   lsp_init("../lsp/gcl_assert.lsp");
   lsp_init("../lsp/gcl_defstruct.lsp");
+  lsp_init("../lsp/gcl_restart.lsp");
   lsp_init("../lsp/gcl_describe.lsp");
 #ifdef HAVE_JAPI_H
   lsp_init("../lsp/gcl_japi.lsp");

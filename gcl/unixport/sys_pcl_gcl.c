@@ -32,6 +32,7 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_arraylib,no_init);
   ar_check_init(gcl_assert,no_init);
   ar_check_init(gcl_defstruct,no_init);
+  ar_check_init(gcl_restart,no_init);
   ar_check_init(gcl_describe,no_init);
 #ifdef HAVE_JAPI_H
   ar_check_init(gcl_japi,no_init);

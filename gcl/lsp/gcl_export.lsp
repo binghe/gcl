@@ -307,4 +307,8 @@ with-standard-io-syntax
 
 dynamic-extent
 
+restart-case
+store-value
+loop
+check-type assert typecase etypecase ctypecase case ecase ccase
 ))

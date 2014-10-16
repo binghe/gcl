@@ -317,3 +317,9 @@
 	 (if f 
 	     (w-f f)
 	   (reduce (lambda (z x) (or z (w-f x))) ',g :initial-value nil)))))
+
+(defun maybe-clear-input (&optional (x *standard-input*))
+  (cond ((not (typep x 'stream)) nil)
+	((typep x 'synonym-stream) (maybe-clear-input (symbol-value (synonym-stream-symbol x))))
+	((typep x 'two-way-stream) (maybe-clear-input (two-way-stream-input-stream x)))
+	((terminal-input-stream-p x) (clear-input t))))

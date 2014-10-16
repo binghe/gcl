@@ -12,36 +12,23 @@
 ;;; file will define a bunch of functions which work like a condition system. Redefining
 ;;; existing condition systems is beyond the goal of this implementation attempt.
 
-(MAKE-PACKAGE "CONDITIONS" :USE '("LISP" #+lucid "LUCID-COMMON-LISP"))
-(IN-PACKAGE "CONDITIONS" :USE '("LISP" #+lucid "LUCID-COMMON-LISP"))
+(make-package :conditions :use '(:lisp))
+(in-package :conditions :use '(:lisp))
 
-#-(or lucid excl genera cmu )
-(SHADOW '(BREAK ERROR CERROR WARN CHECK-TYPE ASSERT ETYPECASE
-	  CTYPECASE ECASE CCASE))
 
-#+gcl
-(EXPORT '(;; Shadowed symbols
-	    BREAK ERROR CERROR WARN CHECK-TYPE ASSERT ETYPECASE
-	    CTYPECASE ECASE CCASE))
+(import '(si::*handler-clusters* si::unique-id si::condition-class-p si::make-condition))
 
-(EXPORT '(;; New symbols
-	  *BREAK-ON-SIGNALS* *DEBUGGER-HOOK* SIGNAL
-	  HANDLER-CASE HANDLER-BIND IGNORE-ERRORS DEFINE-CONDITION MAKE-CONDITION
-	  WITH-SIMPLE-RESTART RESTART-CASE RESTART-BIND RESTART-NAME
-	  RESTART-NAME FIND-RESTART COMPUTE-RESTARTS INVOKE-RESTART
-	  INVOKE-RESTART-INTERACTIVELY ABORT CONTINUE MUFFLE-WARNING
-	  STORE-VALUE USE-VALUE INVOKE-DEBUGGER RESTART CONDITION
-	  WARNING SERIOUS-CONDITION SIMPLE-CONDITION SIMPLE-WARNING SIMPLE-ERROR
-	  SIMPLE-CONDITION-FORMAT-CONTROL SIMPLE-CONDITION-FORMAT-ARGUMENTS
-	  STORAGE-CONDITION STACK-OVERFLOW STORAGE-EXHAUSTED TYPE-ERROR
-	  TYPE-ERROR-DATUM TYPE-ERROR-EXPECTED-TYPE SIMPLE-TYPE-ERROR
-	  PROGRAM-ERROR CONTROL-ERROR STREAM-ERROR STREAM-ERROR-STREAM
-	  END-OF-FILE FILE-ERROR FILE-ERROR-PATHNAME CELL-ERROR
-	  UNBOUND-VARIABLE UNDEFINED-FUNCTION ARITHMETIC-ERROR
-	  ARITHMETIC-ERROR-OPERATION ARITHMETIC-ERROR-OPERANDS
-	  PACKAGE-ERROR PACKAGE-ERROR-PACKAGE
-	  DIVISION-BY-ZERO FLOATING-POINT-OVERFLOW FLOATING-POINT-UNDERFLOW))
+(export '(handler-case handler-bind ignore-errors define-condition make-condition
+	  condition warning serious-condition simple-condition-format-control simple-condition-format-arguments
+	  storage-condition stack-overflow storage-exhausted type-error
+	  type-error-datum type-error-expected-type simple-type-error
+	  program-error control-error stream-error stream-error-stream
+	  end-of-file file-error file-error-pathname cell-error
+	  unbound-variable undefined-function arithmetic-error
+	  arithmetic-error-operation arithmetic-error-operands
+	  package-error package-error-package
+	  division-by-zero floating-point-overflow floating-point-underflow))
 
-(DEFVAR *THIS-PACKAGE* (FIND-PACKAGE "CONDITIONS"))
+(defvar *this-package* (find-package :conditions))
 
 

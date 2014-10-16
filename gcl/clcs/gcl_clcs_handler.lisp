@@ -1,141 +1,39 @@
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: "CONDITIONS"; Base: 10 -*-
 
-(IN-PACKAGE "CONDITIONS")
+(in-package :conditions)
 
-(DEFVAR *HANDLER-CLUSTERS* NIL)
+(defmacro handler-bind (bindings &body forms)
+  (declare (optimize (safety 2)))
+  `(let ((*handler-clusters* (cons (list ,@(mapcar (lambda (x) `(cons ',(car x) ,(cadr x))) bindings))
+				   *handler-clusters*)))
+     ,@forms))
 
-(DEFMACRO HANDLER-BIND (BINDINGS &BODY FORMS)
-  (UNLESS (EVERY #'(LAMBDA (X) (AND (LISTP X) (= (LENGTH X) 2))) BINDINGS)
-    (ERROR "Ill-formed handler bindings."))
-  `(LET ((*HANDLER-CLUSTERS* (CONS (LIST ,@(MAPCAR #'(LAMBDA (X) `(CONS ',(CAR X) ,(CADR X)))
-						   BINDINGS))
-				   *HANDLER-CLUSTERS*)))
-     ,@FORMS))
 
-(DEFVAR *BREAK-ON-SIGNALS* NIL)
+(defmacro handler-case (form &rest cases)
+  (declare (optimize (safety 2)))
+  (let ((no-error-clause (assoc ':no-error cases)))
+    (if no-error-clause
+	(let ((normal-return (gensym)) (error-return  (gensym)))
+	  `(block ,error-return
+	     (multiple-value-call (lambda ,@(cdr no-error-clause))
+	       (block ,normal-return
+		 (return-from ,error-return
+		   (handler-case (return-from ,normal-return ,form)
+		     ,@(remove no-error-clause cases)))))))
+	(let ((block (gensym))(var (gensym))(tcases (mapcar (lambda (x) (cons (gensym) x)) cases)))
+	  `(block ,block
+	     (let (,var)
+	       (declare (ignorable ,var))
+	       (tagbody
+		 (handler-bind ,(mapcar (lambda (x &aux (tag (pop x))(type (pop x))(ll (car x)))
+					  (list type `(lambda (x) ,(if ll `(setq ,var x) `(declare (ignore x))) (go ,tag))))
+					tcases)
+			       (return-from ,block ,form))
+		 ,@(mapcan (lambda (x &aux (tag (pop x))(type (pop x))(ll (pop x))(body x))
+			     (list tag `(return-from ,block (let ,(when ll `((,(car ll) ,var))) ,@body))))
+			   tcases))))))))
 
-(DEFUN SIGNAL (DATUM &REST ARGUMENTS)
-  (LET ((CONDITION (COERCE-TO-CONDITION DATUM ARGUMENTS 'SIMPLE-CONDITION 'SIGNAL))
-        (*HANDLER-CLUSTERS* *HANDLER-CLUSTERS*))
-    (IF (TYPEP CONDITION *BREAK-ON-SIGNALS*)
-	(BREAK "~A~%Break entered because of *BREAK-ON-SIGNALS*."
-	       CONDITION))
-    (LOOP (IF (NOT *HANDLER-CLUSTERS*) (RETURN))
-          (LET ((CLUSTER (POP *HANDLER-CLUSTERS*)))
-	    (DOLIST (HANDLER CLUSTER)
-	      (WHEN (TYPEP CONDITION (CAR HANDLER))
-		    (FUNCALL (CDR HANDLER) CONDITION)
-		(RETURN NIL) ;?
-		))))
-    NIL))
-
-;;; COERCE-TO-CONDITION
-;;;  Internal routine used in ERROR, CERROR, BREAK, and WARN for parsing the
-;;;  hairy argument conventions into a single argument that's directly usable 
-;;;  by all the other routines.
-
-(DEFUN COERCE-TO-CONDITION (DATUM ARGUMENTS DEFAULT-TYPE FUNCTION-NAME)
-  (COND ((CONDITIONP DATUM)
-	 (IF ARGUMENTS
-	     (CERROR "Ignore the additional arguments."
-		     'SIMPLE-TYPE-ERROR
-		     :DATUM ARGUMENTS
-		     :EXPECTED-TYPE 'NULL
-		     :FORMAT-CONTROL "You may not supply additional arguments ~
-				     when giving ~S to ~S."
-		     :FORMAT-ARGUMENTS (LIST DATUM FUNCTION-NAME)))
-	 DATUM)
-        ((OR (SYMBOLP DATUM) (CONDITION-CLASS-P DATUM))
-	 (let* ((n (if (symbolp datum) datum (class-name datum)))
-		(c (find-class (symcat (if (simple-condition-class-p n) "INTERNAL-" "INTERNAL-SIMPLE-") n) nil)))
-	   (if c
-	       (apply 'make-condition (class-name c) (append arguments (list :function-name (si::ihs-fname si::*ihs-top*))));FIXME
-	     (apply #'make-condition datum arguments))))
-        ((STRINGP DATUM)
-	 (MAKE-CONDITION DEFAULT-TYPE
-                         :FORMAT-CONTROL DATUM
-                         :FORMAT-ARGUMENTS ARGUMENTS))
-        (T
-         (ERROR 'SIMPLE-TYPE-ERROR
-		:DATUM DATUM
-		:EXPECTED-TYPE '(OR SYMBOL STRING)
-		:FORMAT-CONTROL "Bad argument to ~S: ~S"
-		:FORMAT-ARGUMENTS (LIST FUNCTION-NAME DATUM)))))
-
-(DEFUN ERROR (DATUM &REST ARGUMENTS)
-  (LET ((CONDITION (COERCE-TO-CONDITION DATUM ARGUMENTS 'SIMPLE-ERROR 'ERROR)))
-    (SIGNAL CONDITION)
-    (INVOKE-DEBUGGER CONDITION)))
-
-(DEFUN CERROR (CONTINUE-STRING DATUM &REST ARGUMENTS)
-  (WITH-SIMPLE-RESTART (CONTINUE "~A" (APPLY #'FORMAT NIL CONTINUE-STRING ARGUMENTS))
-    (APPLY #'ERROR DATUM ARGUMENTS))
-  NIL)
-
-(DEFUN BREAK (&OPTIONAL (FORMAT-CONTROL "Break") &REST FORMAT-ARGUMENTS)
-  (WITH-SIMPLE-RESTART (CONTINUE "Return from BREAK.")
-    (INVOKE-DEBUGGER
-      (MAKE-CONDITION 'SIMPLE-CONDITION
-		      :FORMAT-CONTROL   FORMAT-CONTROL
-		      :FORMAT-ARGUMENTS FORMAT-ARGUMENTS)))
-  NIL)
-
-(DEFUN WARN (DATUM &REST ARGUMENTS)
-  (LET ((CONDITION
-	  (COERCE-TO-CONDITION DATUM ARGUMENTS 'SIMPLE-WARNING 'WARN)))
-    (CHECK-TYPE CONDITION WARNING "a warning condition")
-    (IF *BREAK-ON-WARNINGS*
-	(BREAK "~A~%Break entered because of *BREAK-ON-WARNINGS*."
-	       CONDITION))
-    (RESTART-CASE (SIGNAL CONDITION)
-      (MUFFLE-WARNING ()
-	  :REPORT "Skip warning."
-	(RETURN-FROM WARN NIL)))
-    (FORMAT *ERROR-OUTPUT* "~&Warning:~%~A~%" CONDITION)
-    NIL))
-
-(DEFMACRO HANDLER-CASE (FORM &REST CASES)
-  (LET ((NO-ERROR-CLAUSE (ASSOC ':NO-ERROR CASES)))
-    (IF NO-ERROR-CLAUSE
-	(LET ((NORMAL-RETURN (MAKE-SYMBOL "NORMAL-RETURN"))
-	      (ERROR-RETURN  (MAKE-SYMBOL "ERROR-RETURN")))
-	  `(BLOCK ,ERROR-RETURN
-	     (MULTIPLE-VALUE-CALL #'(LAMBDA ,@(CDR NO-ERROR-CLAUSE))
-	       (BLOCK ,NORMAL-RETURN
-		 (RETURN-FROM ,ERROR-RETURN
-		   (HANDLER-CASE (RETURN-FROM ,NORMAL-RETURN ,FORM)
-		     ,@(REMOVE NO-ERROR-CLAUSE CASES)))))))
-	(LET ((TAG (GENSYM))
-	      (VAR (GENSYM))
-	      (ANNOTATED-CASES (MAPCAR #'(LAMBDA (CASE) (CONS (GENSYM) CASE))
-				       CASES)))
-	  `(BLOCK ,TAG
-	     (LET ((,VAR NIL))
-	       ,VAR				;ignorable
-	       (TAGBODY
-		 (HANDLER-BIND ,(MAPCAR #'(LAMBDA (ANNOTATED-CASE)
-					    (LIST (CADR ANNOTATED-CASE)
-						  `#'(LAMBDA (TEMP)
-						       ,@(IF (CADDR ANNOTATED-CASE)
-							     `((SETQ ,VAR TEMP)))
-						       (GO ,(CAR ANNOTATED-CASE)))))
-					ANNOTATED-CASES)
-			       (RETURN-FROM ,TAG ,FORM))
-		 ,@(MAPCAN #'(LAMBDA (ANNOTATED-CASE)
-			       (LIST (CAR ANNOTATED-CASE)
-				     (LET ((BODY (CDDDR ANNOTATED-CASE)))
-				       `(RETURN-FROM ,TAG
-					  ,(COND ((CADDR ANNOTATED-CASE)
-						  `(LET ((,(CAADDR ANNOTATED-CASE)
-							  ,VAR))
-						     ,@BODY))
-						 ((NOT (CDR BODY))
-						  (CAR BODY))
-						 (T
-						  `(PROGN ,@BODY)))))))
-			   ANNOTATED-CASES))))))))
-
-(DEFMACRO IGNORE-ERRORS (&REST FORMS)
-  `(HANDLER-CASE (PROGN ,@FORMS)
-     (ERROR (CONDITION) (VALUES NIL CONDITION))))
+(defmacro ignore-errors (&rest forms)
+  `(handler-case (progn ,@forms)
+     (error (condition) (values nil condition))))
 

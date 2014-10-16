@@ -62,7 +62,8 @@
 (defvar *load-types* '(".o" ".lsp" ".lisp"))
 
 (defvar *lisp-initialized* nil)
-(defvar *quit-tag* (cons nil nil))
+(defconstant +top-level-quit-tag+ (cons nil nil))
+(defvar *quit-tag* +top-level-quit-tag+)
 (defvar *quit-tags* nil)
 (defvar *break-level* '())
 (defvar *break-env* nil)
@@ -182,145 +183,7 @@
 	(t (read stream eof-error-p eof-value))))
 
 
-(defun break-level (at &optional env)
-  (let* ((*break-message* (if (stringp at) at *break-message*))
-	 (*quit-tags* (cons (cons *break-level* *quit-tag*) *quit-tags*))
-         (*quit-tag* (cons nil nil))
-         (*break-level* (if (not at) *break-level* (cons t *break-level*)))
-         (*ihs-base* (1+ *ihs-top*))
-         (*ihs-top* (1- (ihs-top)))
-         (*current-ihs* *ihs-top*)
-         (*frs-base* (or (sch-frs-base *frs-top* *ihs-base*) (1+ (frs-top))))
-         (*frs-top* (frs-top))
-         (*break-env* nil)
-	 (be *break-enable*)
-	 (*break-enable*
-	  (progn 
-	    (if (stringp at) nil be)))
-					;(*standard-input* *terminal-io*)
-         (*readtable* (or *break-readtable* *readtable*))
-         (*read-suppress* nil)
-         (+ +) (++ ++) (+++ +++)
-         (- -)
-         (* *) (** **) (*** ***)
-         (/ /) (// //) (/// ///)
-         )
-					; (terpri *error-output*)
-    (unless (or be (not (stringp at)))
-      (simple-backtrace)
-      (break-quit (length (cdr *break-level*))))
-    (catch-fatal 1)
-    (setq *interrupt-enable* t)
-    (cond ((stringp at) (set-current)(terpri *error-output*)
-	   (setq *no-prompt* nil)
-	   )
-	  (t (set-back at env)))
-      (loop 
-       (setq +++ ++ ++ + + -)
-       (cond (*no-prompt* (setq *no-prompt* nil))
-	     (t
-	      (format *debug-io* "~&~a~a>~{~*>~}"
-		      (if (stringp at) "" "dbl:")
-		      (if (eq *package* (find-package 'user)) ""
-			(package-name *package*))
-		      *break-level*)))
-       (force-output *error-output*)
-       (when
-	(catch 'step-continue
-        (catch *quit-tag*
-          (setq - (locally (declare (notinline read))
-			   (dbl-read *debug-io* nil *top-eof*)))
-          (when (eq - *top-eof*) (bye -1))
-          (let* ( break-command
-		 (values
-		  (multiple-value-list
-		  (LOCALLY (declare (notinline break-call evalhook))
-			   (if (keywordp -)(setq - (cons - nil)))
-			   (cond ((and (consp -) (keywordp (car -)))
-				  (setq break-command t)
-				  (break-call (car -) (cdr -) 'si::break-command))
-				 (t (evalhook - nil nil *break-env*)))))))
-	    (and break-command (eq (car values) :resume )(return))
-            (setq /// // // / / values *** ** ** * * (car /))
-            (fresh-line *debug-io*)
-            (dolist (val /)
-		    (locally (declare (notinline prin1)) (prin1 val *debug-io*))
-		    (terpri *debug-io*)))
-          nil))
-        (terpri *debug-io*)
-        (break-current))))))
-
 (defvar *debug-print-level* 3)
-
-(defun warn (format-string &rest args)
-  (let ((*print-level* 4)
-        (*print-length* 4)
-        (*print-case* :upcase))
-    (cond (*break-on-warnings*
-           (apply #'break format-string args))
-          (t (format *error-output* "~&Warning: ")
-             (let ((*indent-formatted-output* t))
-               (apply #'format *error-output* format-string args))
-             nil))))
-
-(defun universal-error-handler
-  (error-name correctable function-name
-   continue-format-string error-format-string
-   &rest args &aux message)
-  (declare (ignore error-name))
-  (let ((*print-pretty* nil)
-        (*print-level* *debug-print-level*)
-        (*print-length* *debug-print-level*)
-        (*print-case* :upcase))
-       (terpri *error-output*)
-       (cond ((and correctable *break-enable*)
-              (format *error-output* "~&Correctable error: ")
-              (let ((*indent-formatted-output* t))
-                (apply 'format *error-output* error-format-string args))
-              (terpri *error-output*)
-              (setq message (apply 'format nil error-format-string args))
-              (if function-name
-                  (format *error-output*
-                          "Signalled by ~:@(~S~).~%" function-name)
-                  (format *error-output*
-                          "Signalled by an anonymous function.~%"))
-              (format *error-output* "~&If continued: ")
-              (let ((*indent-formatted-output* t))
-                (format *error-output* "~?~&" continue-format-string args))
-              )
-             (t
-              (format *error-output* "~&Error: ")
-              (let ((*indent-formatted-output* t))
-                (apply 'format *error-output* error-format-string args))
-              (terpri *error-output*)
-	      (if (> (length *link-array*) 0)
-		  (format *error-output* "Fast links are on: do (si::use-fast-links nil) for debugging~%"))
-              (setq message (apply 'format nil error-format-string args))
-              (if function-name
-                  (format *error-output*
-                          "Error signalled by ~:@(~S~).~%" function-name)
-                  (format *error-output*
-                          "Error signalled by an anonymous function.~%")))))
-  (force-output *error-output*)
-  (break-level message)
-  (unless correctable (throw *quit-tag* *quit-tag*)))
-
-(defun break (&optional format-string &rest args &aux message)
-  (let ((*print-pretty* nil)
-        (*print-level* 4)
-        (*print-length* 4)
-        (*print-case* :upcase))
-       (terpri *error-output*)
-    (cond (format-string
-           (format *error-output* "~&Break: ")
-           (let ((*indent-formatted-output* t))
-             (apply 'format *error-output* format-string args))
-           (terpri *error-output*)
-           (setq message (apply 'format nil format-string args)))
-          (t (format *error-output* "~&Break.~%")
-             (setq message ""))))
-  (let ((*break-enable* t)) (break-level message))
-  nil)
 
 (defun terminal-interrupt (correctablep)
   (let ((*break-enable* t))
@@ -784,7 +647,3 @@ First directory is checked for first name and all extensions etc."
 		 (read-file st))
 	      (read-file *standard-input*))))
   (bye 1))
-
-(defmacro without-interrupts (&rest forms)
-  `(let (*quit-tag*)
-     ,@forms))
