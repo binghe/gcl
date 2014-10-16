@@ -1,8 +1,4 @@
 ;; -*-Lisp-*-
-(in-package :lisp)
-
-(export '(simple-condition simple-error simple-warning invoke-debugger *debugger-hook* *break-on-signals*))
-
 (in-package :si)
 
 (macrolet 
@@ -22,6 +18,7 @@
  (make-condition-classp condition)
  (make-condition-classp simple-condition))
  
+(proclaim '(ftype (function (t *) t) make-condition))
 
 (defun coerce-to-condition (datum arguments default-type function-name)
   (cond ((conditionp datum)

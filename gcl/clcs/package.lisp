@@ -15,19 +15,7 @@
 (make-package :conditions :use '(:lisp))
 (in-package :conditions :use '(:lisp))
 
-
 (import '(si::*handler-clusters* si::unique-id si::condition-class-p si::make-condition))
-
-(export '(handler-case handler-bind ignore-errors define-condition make-condition
-	  condition warning serious-condition simple-condition-format-control simple-condition-format-arguments
-	  storage-condition stack-overflow storage-exhausted type-error
-	  type-error-datum type-error-expected-type simple-type-error
-	  program-error control-error stream-error stream-error-stream
-	  end-of-file file-error file-error-pathname cell-error
-	  unbound-variable undefined-function arithmetic-error
-	  arithmetic-error-operation arithmetic-error-operands
-	  package-error package-error-package
-	  division-by-zero floating-point-overflow floating-point-underflow))
 
 (defvar *this-package* (find-package :conditions))
 

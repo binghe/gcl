@@ -307,8 +307,27 @@ with-standard-io-syntax
 
 dynamic-extent
 
-restart-case
-store-value
 loop
 check-type assert typecase etypecase ctypecase case ecase ccase
+
+restart-bind restart-case with-condition-restarts muffle-warning continue abort
+		       store-value use-value
+		       restart restart-name restart-function restart-report-function
+		       restart-interactive-function restart-test-function
+		       compute-restarts find-restart invoke-restart invoke-restart-interactively
+		       with-simple-restart signal
+
+simple-condition simple-error simple-warning invoke-debugger *debugger-hook* *break-on-signals*
+
+handler-case handler-bind ignore-errors define-condition make-condition
+	  condition warning serious-condition simple-condition-format-control simple-condition-format-arguments
+	  storage-condition stack-overflow storage-exhausted type-error
+	  type-error-datum type-error-expected-type simple-type-error
+	  program-error control-error stream-error stream-error-stream
+	  end-of-file file-error file-error-pathname cell-error cell-error-name
+	  unbound-variable undefined-function arithmetic-error
+	  arithmetic-error-operation arithmetic-error-operands
+	  package-error package-error-package
+	  division-by-zero floating-point-overflow floating-point-underflow
+
 ))

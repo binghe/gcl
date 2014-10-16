@@ -1,14 +1,5 @@
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: "CONDITIONS"; Base: 10 -*-
 
-(in-package :lisp)
-
-(export '(restart-bind restart-case with-condition-restarts muffle-warning continue abort
-		       store-value use-value
-		       restart restart-name restart-function restart-report-function
-		       restart-interactive-function restart-test-function
-		       compute-restarts find-restart invoke-restart invoke-restart-interactively
-		       with-simple-restart signal))
-
 (in-package :si)
 
 (defvar *restarts* nil)
