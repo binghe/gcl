@@ -83,11 +83,6 @@
   "Takes a non-keyword symbol, symbol, and returns the corresponding keyword."
   (intern (symbol-name symbol) (find-package "KEYWORD")))
 
-(defun defmacro-error (problem kind name)
-; FIXME check this
-  (declare (ignore kind))
-  (specific-error :wrong-type-argument "~S is not of type ~S~%" problem name))
-
 (defun verify-keywords (key-list valid-keys allow-other-keys)
   (do ((already-processed nil)
        (unknown-keyword nil)
@@ -159,8 +154,7 @@
 	       (cond ((and (cdr rest-of-args) (symbolp (cadr rest-of-args)))
 		      (setf rest-of-args (cdr rest-of-args))
 		      (push-let-binding (car rest-of-args) arg-list-name nil))
-		     (t
-		      (defmacro-error "&WHOLE" error-kind name))))
+		     (t (error "Bad &WHOLE"))))
 	      ((eq var '&environment)
 	       (cond (env-illegal
 		      (error "&Environment not valid with ~S." error-kind))
@@ -171,8 +165,7 @@
 		      (setf rest-of-args (cdr rest-of-args))
 		      (push-let-binding (car rest-of-args) env-arg-name nil)
 		      (setf env-arg-used t))
-		     (t
-		      (defmacro-error "&ENVIRONMENT" error-kind name))))
+		     (t (error "Bad &ENVIRONMENT"))))
 	      ((or (eq var '&rest) (eq var '&body))
 	       (cond ((and (cdr rest-of-args) (symbolp (cadr rest-of-args)))
 		      (setf rest-of-args (cdr rest-of-args))
@@ -209,8 +202,7 @@
 			(when doc-string-name
 			  (push-let-binding doc-string-name
 					    `(caddr ,parse-body-values) nil))))
-		     (t
-		      (defmacro-error (symbol-name var) error-kind name))))
+		     (t (error "Bad lambda list"))))
 	      ((eq var '&optional)
 	       (setf now-processing :optionals))
 	      ((eq var '&key)

@@ -142,7 +142,7 @@
 	((macro-function (car form))
 	 (get-setf-method-multiple-value (macroexpand form)))
 	(t
-	 (error "Cannot expand the SETF form ~S." form))))
+	 (error 'program-error :format-control "Cannot expand the SETF form ~S." :format-arguments (list form)))))
 
 
 ;;;; SETF definitions.

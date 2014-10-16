@@ -968,7 +968,8 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
 (defun loop-error (format-string &rest format-args)
   #+(or Genera CLOE) (declare (dbg:error-reporter))
   #+Genera (setq format-args (copy-list format-args))	;Don't ask.
-  (specific-error :invalid-form "~?~%Current LOOP context:~{ ~S~}." format-string format-args (loop-context)))
+  (error 'program-error :format-control "~?~%Current LOOP context:~{ ~S~}."
+	 :format-arguments (list format-string format-args (loop-context))))
 
 
 (defun loop-warn (format-string &rest format-args)
@@ -1115,9 +1116,9 @@ collected result will be returned as the value of the LOOP."
   (push (loop-construct-return form) *loop-after-epilogue*)
   (when *loop-final-value-culprit*
     (if *loop-collection-no-into*
-	(specific-error :invalid-form "LOOP clause is providing a value for the iteration,~@
+	(error 'program-error :format-control "LOOP clause is providing a value for the iteration,~@
 	        however one was already established by a ~S clause."
-			*loop-final-value-culprit*)
+			:format-arguments (list *loop-final-value-culprit*))
       (loop-warn "LOOP clause is providing a value for the iteration,~@
 	        however one was already established by a ~S clause."
 		 *loop-final-value-culprit*)))

@@ -155,9 +155,8 @@
 				 (rest (first result)))))
 	  (sloop for option in '(:size :documentation)
 		 when (<= 2 (count option options ':key #'car))
-		 do (specific-error :invalid-form 
-				    "DEFPACKAGE option ~s specified more than once."
-				    option))
+		 do (error 'program-error :format-control "DEFPACKAGE option ~s specified more than once."
+			     :format-arguments (list option)))
 	  (setq name (string name))
 	  (let ((nicknames (mapcar #'string (option-values ':nicknames options)))
 		(documentation (first (option-values ':documentation options)))
@@ -203,29 +202,31 @@
 			  (sloop for list in imported-from-symbol-names-list 
 				 append (rest list)))
 			 do
-			 (specific-error 
-			  :invalid-form 
-			  "The symbol ~s cannot coexist in these lists:~{ ~s~}" 
-			  (first duplicate)
-			  (sloop for num in (rest duplicate)
-				 collect 
-				 (case num 
-				       (1 ':SHADOW)
-				       (2 ':INTERN)
-				       (3 ':SHADOWING-IMPORT-FROM)
-				       (4 ':IMPORT-FROM)))))
+			 (error 
+			    'program-error
+			    :format-control "The symbol ~s cannot coexist in these lists:~{ ~s~}" 
+			    :format-arguments 
+			    (list (first duplicate)
+				  (sloop for num in (rest duplicate)
+					 collect 
+					 (case num 
+					       (1 :SHADOW)
+					       (2 :INTERN)
+					       (3 :SHADOWING-IMPORT-FROM)
+					       (4 :IMPORT-FROM))))))
 		  (sloop for duplicate in 
 			 (find-duplicates exported-symbol-names interned-symbol-names)
 			 do
-			 (specific-error 
-			  :invalid-form 
-			  "The symbol ~s cannot coexist in these lists:~{ ~s~}" 
-			  (first duplicate)
-			  (sloop for num in 
-				 (rest duplicate) 
-				 collect (case num 
-					       (1 ':EXPORT)
-					       (2 ':INTERN))))))
+			 (error 
+			    'program-error
+			    :format-control "The symbol ~s cannot coexist in these lists:~{ ~s~}" 
+			    :format-arguments 
+			    (list (first duplicate)
+				  (sloop for num in 
+					 (rest duplicate) 
+					 collect (case num 
+						       (1 :EXPORT)
+						       (2 :INTERN)))))))
 	    `(eval-when (load eval compile)
 			(if (find-package ,name)
 			    (progn (rename-package ,name ,name)
@@ -265,12 +266,12 @@
 			      (mapcar #'(lambda (list)
 					  `(SHADOWING-IMPORT 
 					    (mapcar #'(lambda (symbol) 
-							(if (find-symbol symbol ,(first list))
-							    (intern symbol ,(first list))
-; FIXME better error messages
-							  (specific-correctable-error :package-error
-									  "" ,(first list) 
-									  (format nil "Symbol ~S not present~%" symbol))))
+							(unless (multiple-value-bind (s p) (find-symbol symbol ,(first list)) p)
+							    (cerror "Continue anyway" 'package-error
+								    :package (first list)
+								    :format-control "~%Symbol ~a not present"
+								    :format-arguments (list symbol)))
+							(intern symbol ,(first list)))
 						    ',(rest list))))
 				      SHADOWING-IMPORTed-from-symbol-names-list))
 			  (USE-PACKAGE ',(if (member ':USE options ':test #'option-test)
@@ -279,12 +280,12 @@
 			  ,@(when IMPORTed-from-symbol-names-list
 			      (mapcar #'(lambda (list) 
 					  `(IMPORT (mapcar #'(lambda (symbol) 
-							(if (find-symbol symbol ,(first list))
-							       (intern symbol ,(first list))
-; FIXME better error messages
-							  (specific-correctable-error :package-error
-									  "" ,(first list) 
-									  (format nil "Symbol ~S not present~%" symbol))))
+							       (unless (multiple-value-bind (s p) (find-symbol symbol ,(first list)) p)
+								 (cerror "Continue anyway" 'package-error
+									 :package (first list)
+									 :format-control "~%Symbol ~a not present"
+									 :format-arguments (list symbol)))
+							       (intern symbol ,(first list)))
 							   ',(rest list))))
 				      IMPORTed-from-symbol-names-list))
 			  ,@(when INTERNed-symbol-names 

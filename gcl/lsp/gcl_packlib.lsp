@@ -181,7 +181,7 @@
         (x (gensym))(y (gensym)) (access (gensym)) declaration)
     (multiple-value-setq (declaration body) (si::find-declarations body))
     (if (null symbol-types)
-	(specific-error :too-few-arguments "Symbol type specifiers must be supplied"))
+	(error 'program-error :format-control "Symbol type specifiers must be supplied"))
     `(let ((,p (cons t (if (atom ,plist) (list ,plist) ,plist))) (,q nil) (,l nil)
 	   (,i -1) (,x 0) (,y 0) (,dum nil) (,access nil))
        (declare (fixnum ,x ,y))
