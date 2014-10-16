@@ -164,7 +164,7 @@
     ))
 
 
-(defun fcalln-inline (&rest args &aux (f (car args)) length)
+(defun fcalln-inline (&rest args)
   (wt-nl "({object _f=" (car args) ";enum type _t=type_of(_f);")
   (wt-nl "_f = _t==t_symbol && _f->s.s_gfdef!=OBJNULL ? (_t=type_of(_f->s.s_gfdef),_f->s.s_gfdef) : _f;")  
   (wt-nl "_t==t_sfun ? _f->sfn.sfn_self : ")
@@ -383,11 +383,6 @@
 				 ))))
     (pushnew link-info    *function-links* :test 'equal)
     n))
-
-(defun declaration-type (type) 
-  (cond ((equal type "") "void")
-	((equal type "long ") "object ")
-	(t type)))
 
 ;;make a function which will be called hopefully only once,
 ;;and will establish the link.
