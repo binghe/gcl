@@ -1985,7 +1985,7 @@ FFN(siLget_string_input_stream_index)()
 }
 
 DEFUN_NEW("TERMINAL-INPUT-STREAM-P",object,fSterminal_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_input && x->sm.sm_fp && isatty(fileno(x->sm.sm_fp)) ? Ct : Cnil);
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_input && x->sm.sm_fp && isatty(fileno((FILE *)x->sm.sm_fp)) ? Ct : Cnil);
 }
 
 LFD(siLmake_string_output_stream_from_string)()
