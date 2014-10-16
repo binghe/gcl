@@ -112,3 +112,5 @@ EQ(x,y)
 aset
 stp_ordinary
 SIGNED_CHAR(x)
+FEerror(x,y...)
+FEwrong_type_argument(x,y)

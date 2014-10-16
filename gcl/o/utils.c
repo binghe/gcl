@@ -7,7 +7,6 @@
    argument.   They may in future allow resetting the argument.
 */
 
-object CEerror(char *error_str, char *cont_str, int num, object arg1, object arg2, object arg3, object arg4);
 object
 IisSymbol(object f)
 { if (type_of(f) != t_symbol)

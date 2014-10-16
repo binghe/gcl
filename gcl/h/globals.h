@@ -21,5 +21,15 @@ EXTER object sLstring;
 EXTER object sLcons;
 EXTER object sLhash_table;
 
+EXTER object sLerror;
+EXTER object sKformat_control;
+EXTER object sKformat_arguments;
+
+EXTER object sLtype_error;
+EXTER object sKdatum;
+EXTER object sKexpected_type;
+
+
 EXTER object MVloc[10];
 
+EXTER object null_string;

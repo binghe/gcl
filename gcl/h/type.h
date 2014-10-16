@@ -7,19 +7,19 @@ enum type {
   t_shortfloat,
   t_longfloat,
   t_complex,
+  t_pathname,
+  t_string,
+  t_bitvector,
+  t_vector,
+  t_array,
+  t_hashtable,
+  t_structure,
   t_character,
   t_symbol,
   t_package,
-  t_hashtable,
-  t_array,
-  t_vector,
-  t_string,
-  t_bitvector,
-  t_structure,
   t_stream,
   t_random,
   t_readtable,
-  t_pathname,
   t_cfun,
   t_cclosure,
   t_sfun,
@@ -105,3 +105,31 @@ enum type {
 #define atom(x)          !consp(x)
 
 #endif
+
+#define SPP(a_,b_) (type_of(a_)==Join(t_,b_))
+#define streamp(a_)    SPP(a_,stream)
+#define packagep(a_)   SPP(a_,package)
+#define hashtablep(a_) SPP(a_,hashtable)
+#define randomp(a_)    SPP(a_,random)
+#define characterp(a_) SPP(a_,character)
+#define symbolp(a_)    SPP(a_,symbol)
+#define stringp(a_)    SPP(a_,string)
+#define fixnump(a_)    SPP(a_,fixnum)
+#define readtablep(a_) SPP(a_,readtable)
+#define functionp(a_)  ({enum type _t=type_of(a_);_t>=t_cfun && _t<=t_closure;})
+#define compiled_functionp(a_)  functionp(a_)
+
+#define integerp(a_) ({enum type _tp=type_of(a_); _tp >= t_fixnum     && _tp <= t_bignum;})
+#define non_negative_integerp(a_) ({enum type _tp=type_of(a_); (_tp == t_fixnum && fix(a_)>=0) || (_tp==t_bignum && big_sign(a_)>=0);})
+#define rationalp(a_)({enum type _tp=type_of(a_); _tp >= t_fixnum     && _tp <= t_ratio;})
+#define floatp(a_)   ({enum type _tp=type_of(a_); _tp == t_shortfloat || _tp == t_longfloat;})
+#define realp(a_)    ({enum type _tp=type_of(a_); _tp >= t_fixnum     && _tp < t_complex;})
+#define numberp(a_)  ({enum type _tp=type_of(a_); _tp >= t_fixnum     && _tp <= t_complex;})
+#define arrayp(a_)   ({enum type _tp=type_of(a_); _tp >= t_string     && _tp <= t_array;})
+#define vectorp(a_)  ({enum type _tp=type_of(a_); _tp >= t_string     && _tp < t_array;})
+
+#define string_symbolp(a_)                 ({enum type _tp=type_of(a_); _tp == t_string || _tp == t_symbol;})
+#define pathname_string_symbolp(a_)        ({enum type _tp=type_of(a_); _tp==t_pathname || _tp == t_string\
+                                                                     || _tp == t_symbol;})
+#define pathname_string_symbol_streamp(a_) ({enum type _tp=type_of(a_); _tp==t_pathname || _tp == t_string\
+                                                                     || _tp == t_symbol || _tp==t_stream;})

@@ -25,6 +25,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "include.h"
 
+/*FIXME this symbol is needed my maxima MAKE_SPECIAL*/
+void
+check_type_symbol(object *x) {
+  check_type_sym(x);
+}
+
 static void
 odd_plist(object);
 
@@ -366,7 +372,7 @@ object s;
 /*
 	if (type_of(s) != t_symbol) {
 		vs_push(s);
-		check_type_symbol(&vs_head);
+		check_type_sym(&vs_head);
 		vs_pop;
 	}
 	if (s->s.s_hpack == OBJNULL)
@@ -377,7 +383,7 @@ object s;
 
 @(defun get (sym indicator &optional deflt)
 @
-	check_type_symbol(&sym);
+	check_type_sym(&sym);
 	@(return `getf(sym->s.s_plist, indicator, deflt)`)
 @)
 
@@ -385,7 +391,7 @@ LFD(Lremprop)()
 {
 	check_arg(2);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	if (remf(&vs_base[0]->s.s_plist, vs_base[1]))
 		vs_base[0] = Ct;
 	else
@@ -397,7 +403,7 @@ LFD(Lsymbol_plist)()
 {
 	check_arg(1);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	vs_base[0] = vs_base[0]->s.s_plist;
 }
 
@@ -463,7 +469,7 @@ LFD(Lmake_symbol)()
 
 @(defun copy_symbol (sym &optional cp &aux x)
 @
-	check_type_symbol(&sym);
+	check_type_sym(&sym);
 	x = make_symbol(sym);
 	if (cp == Cnil)
 		@(return x)
@@ -577,7 +583,7 @@ LFD(Lsymbol_package)()
 {
 	check_arg(1);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	vs_base[0] = vs_base[0]->s.s_hpack;
 }
 
@@ -629,7 +635,7 @@ LFD(siLset_symbol_plist)(void)
 {
 	check_arg(2);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	vs_base[0]->s.s_plist = vs_base[1];
 	vs_base[0] = vs_base[1];
 	vs_popp;
@@ -639,7 +645,7 @@ LFD(siLputprop)()
 {
 	check_arg(3);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	vs_base[0]->s.s_plist
 	= putf(vs_base[0]->s.s_plist, vs_base[1], vs_base[2]);
 	vs_base[0] = vs_base[1];

@@ -367,3 +367,4 @@ extern bool writable_malloc;
 #define psystem(x) prof_block(system(x))
 #define pfork() prof_block(fork())
 
+#include "error.h"

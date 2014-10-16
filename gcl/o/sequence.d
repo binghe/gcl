@@ -112,9 +112,7 @@ int index;
 E:
 	vs_push(make_fixnum(index));
 	/* FIXME message should indicate out of range */
-	Icall_error_handler(sKwrong_type_argument,
-		     make_simple_string("The index, ~S, is too large."),
-		     1,vs_head);
+	TYPE_ERROR(make_fixnum(index),MMcons(sLinteger,MMcons(make_fixnum(0),MMcons(make_fixnum(length(seq)),Cnil))));
 	return(Cnil);
 }
 

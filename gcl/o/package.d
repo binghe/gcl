@@ -895,7 +895,7 @@ LFD(Llist_all_packages)()
 
 @(defun unintern (symbl &optional (p `current_package()`))
 @
-	check_type_symbol(&symbl);
+	check_type_sym(&symbl);
 	check_package_designator(p);
 	p = coerce_to_package(p);
 	if (unintern(symbl, p))
@@ -924,7 +924,7 @@ BEGIN:
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)
@@ -950,7 +950,7 @@ BEGIN:
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)
@@ -975,7 +975,7 @@ BEGIN:
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)
@@ -1000,7 +1000,7 @@ BEGIN:
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)

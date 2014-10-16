@@ -113,8 +113,6 @@ object call_vproc_new(object,void *,object,va_list);
 void check_arg_failed (int);
 void check_other_key (object,int, ...);
 object elt_set(object,int,object);
-void FEerror(char *,int,...);
-void FEwrong_type_argument(object,object);
 void funcall(object);
 object getf(object,object,object);
 struct htent * gethash(object,object);
@@ -179,3 +177,6 @@ double object_to_double(object);
 void gcl_init_or_load1(void (*)(void),const char *);
 char *gcl_gets(char *,int);
 int gcl_puts(const char *);
+int endp_error(object);
+object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
+

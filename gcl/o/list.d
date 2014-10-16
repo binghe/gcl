@@ -727,8 +727,14 @@ LFD(Lcddadr)(){check_arg(1); vs_base[0] = cdr(cdr(car(cdr(vs_base[0]))));}
 LFD(Lcdddar)(){check_arg(1); vs_base[0] = cdr(cdr(cdr(car(vs_base[0]))));}
 LFD(Lcddddr)(){check_arg(1); vs_base[0] = cdr(cdr(cdr(cdr(vs_base[0]))));}
 
-DEFUNO_NEW("NTH",object,fLnth,LISP,2,2,NONE,OI,OO,OO,OO,void,Lnth,(fixnum index,object list),"")
-{ object x = list;
+int
+endp_error(object x) {
+  FEwrong_type_argument(sLlist,x);
+  return 0;
+}
+
+DEFUNO_NEW("NTH",object,fLnth,LISP,2,2,NONE,OI,OO,OO,OO,void,Lnth,(fixnum index,object y),"")
+{ object x = y;
   if (index < 0)
     FEerror("Negative index: ~D.", 1, make_fixnum(index));
   while (1)
@@ -737,7 +743,7 @@ DEFUNO_NEW("NTH",object,fLnth,LISP,2,2,NONE,OI,OO,OO,OO,void,Lnth,(fixnum index,
 	   RETURN1(Mcar(x));
 	 else {x = Mcdr(x); index--;}}
       else if (x == sLnil) RETURN1(sLnil);
-      else FEwrong_type_argument(sLlist, list);}
+      else FEwrong_type_argument(sLlist, y);}
 }   
 #ifdef STATIC_FUNCTION_POINTERS
 object

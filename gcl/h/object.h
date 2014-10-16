@@ -509,7 +509,7 @@ void raise_pending_signals();
 
 EXTER unsigned plong signals_allowed, signals_pending;
 
-#define endp_prop(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : (FEwrong_type_argument(sLlist, (a)),FALSE)))
+#define endp_prop(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : endp_error(a)))
 #define endp(a) endp_prop(a)
     
 #define proper_list(a) (type_of(a)==t_cons || (a)==Cnil)

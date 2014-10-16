@@ -101,7 +101,7 @@ static void
 FFN(siLAmake_special)(void)
 {
 	check_arg(1);
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	if ((enum stype)vs_base[0]->s.s_stype == stp_constant)
 		FEerror("~S is a constant.", 1, vs_base[0]);
 	vs_base[0]->s.s_stype = (short)stp_special;
@@ -111,7 +111,7 @@ static void
 FFN(siLAmake_constant)(void)
 {
 	check_arg(2);
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	if ((enum stype)vs_base[0]->s.s_stype == stp_special)
 		FEerror(
 		 "The argument ~S to DEFCONSTANT is a special variable.",

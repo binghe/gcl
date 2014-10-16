@@ -296,7 +296,7 @@ call_proc(object sym, void **link, int argd, va_list ll) {
   object fun;
   int nargs;
 
-  check_type_symbol(&sym);
+  check_type_sym(&sym);
 
   fun=sym->s.s_gfdef;
   if (fun && (type_of(fun)==t_sfun
@@ -403,7 +403,7 @@ call_proc_new(object sym, void **link, int argd, object first, va_list ll) {
 
   object fun;
   int nargs;
-  check_type_symbol(&sym);
+  check_type_sym(&sym);
   fun=sym->s.s_gfdef;
 
   if (fun && (type_of(fun)==t_sfun

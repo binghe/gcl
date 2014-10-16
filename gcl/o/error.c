@@ -30,8 +30,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 object siSuniversal_error_handler;
 
-static object null_string;
-
 object sSterminal_interrupt;
 
 void
@@ -112,7 +110,7 @@ ihs_function_name(object x)
 	}
 }
 
-static object
+object
 ihs_top_function_name(ihs_ptr h)
 {
 	object x;
@@ -127,291 +125,29 @@ ihs_top_function_name(ihs_ptr h)
 	return(Cnil);
 }
 
-/* static void */
-/* call_error_handler(void) */
-/* { */
-/* 	super_funcall(siSuniversal_error_handler); */
-/* } */
-
-
-
 object
-Icall_error_handler(object error_name,object error_format_string,int nfmt_args,...)
-{ object b[20];
-  b[0]= error_name;
-  b[1]= Cnil;  /* continue format */
+Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) { 
+
+  object *b;
+  ufixnum i;
+  va_list ap;
+
+  n+=5;
+  b=alloca(n*sizeof(*b));
+  b[0]= en;
+  b[1]= ci; 
   b[2] = ihs_top_function_name(ihs_top);
-  b[3] = null_string;  /*continue format arg*/
-  b[4] = error_format_string;
-  {int i = 0;
-   va_list ap;
-   va_start(ap,nfmt_args);
-   while (i++ < nfmt_args)
-     { b[i+4]= va_arg(ap,object);
-     }
-    va_end(ap);
-  }
-  return IapplyVector(sSuniversal_error_handler,nfmt_args+5,b);
-}
-
-static object
-Icall_continue_error_handler(object error_name,object error_format_string,int nfmt_args,...)
-{ object b[20];
-  b[0]= error_name;
-  b[1]= Ct;  /* continue format */
-  b[2] = ihs_top_function_name(ihs_top);
-  b[3] = null_string;  /*continue format arg*/
-  b[4] = error_format_string;
-  {int i = 0;
-   va_list ap;
-   va_start(ap,nfmt_args);
-   while (i++ < nfmt_args)
-     { b[i+4]= va_arg(ap,object);
-     }
-    va_end(ap);
-  }
-  return IapplyVector(sSuniversal_error_handler,nfmt_args+5,b);
-}
-
-DEFUNO_NEW("ERROR",object,fLerror,LISP
-       ,1,F_ARG_LIMIT,NONE,OO,OO,OO,OO,void,Lerror,(object fmt_string,...),"")
-{ int n = VFUN_NARGS,i=0;
-  object b[F_ARG_LIMIT];
-  va_list ap;
-
-  b[0]=sKerror;
-  b[1]=Cnil;
-  b[2]=ihs_top_function_name(ihs_top-1);
-  b[3]=null_string;
-  b[4]=fmt_string;
-  i=4;
-  va_start(ap,fmt_string);
-  while (--n)
-    b[++i]=va_arg(ap,object);
+  b[3] = cs;
+  b[4] = es;
+   
+  va_start(ap,n);
+  for (i=5;i<n;i++)
+    b[i]= va_arg(ap,object);
   va_end(ap);
-  RETURN1(IapplyVector(sSuniversal_error_handler,++i,b));
-/*    RETURN1(Iapply_fun_n2(sSuniversal_error_handler,5,n-1, */
-/*  			  sKerror, */
-/*  			  Cnil, */
-/*  			  ihs_top_function_name(ihs_top-1), */
-/*  			  null_string,fmt_string, */
-/*  		       &ap)); */
-}
 
-DEFUN_NEW("SPECIFIC-ERROR",object,fLspecific_error,LISP
-       ,1,F_ARG_LIMIT,NONE,OO,OO,OO,OO,(object error_name,object fmt_string,...),"")
-{ int n = VFUN_NARGS,i=0;
-  object b[F_ARG_LIMIT];
-  va_list ap;
-
-  b[0]=error_name;
-  b[1]=Cnil;
-  b[2]=ihs_top_function_name(ihs_top-1);
-  b[3]=null_string;
-  b[4]=fmt_string;
-  i=4;
-  va_start(ap,fmt_string);
-  n--;
-  while (--n)
-    b[++i]=va_arg(ap,object);
-  va_end(ap);
-  RETURN1(IapplyVector(sSuniversal_error_handler,++i,b));
-}
-
-
-DEFUN_NEW("SPECIFIC-CORRECTABLE-ERROR",object,fLspecific_correctable_error,LISP
-       ,1,F_ARG_LIMIT,NONE,OO,OO,OO,OO,
-       (object error_name,object fmt_string,...),"")
-{ int n = VFUN_NARGS,i=0;
-  object b[F_ARG_LIMIT];
-  va_list ap;
-
-  b[0]=error_name;
-  b[1]=Ct;
-  b[2]=ihs_top_function_name(ihs_top-1);
-  b[3]=null_string;
-  b[4]=fmt_string;
-  i=4;
-  va_start(ap,fmt_string);
-  n--;
-  while (--n)
-    b[++i]=va_arg(ap,object);
-  va_end(ap);
-  RETURN1(IapplyVector(sSuniversal_error_handler,++i,b));
-}
-
-
-DEFUNO_NEW("CERROR",object,fLcerror,LISP
-       ,2,F_ARG_LIMIT,NONE,OO,OO,OO,OO,void,Lcerror,(object continue_fmt_string,object fmt_string,...),"")
-{ int n = VFUN_NARGS,i=0;
-  object b[F_ARG_LIMIT];
-  va_list ap;
-
-  b[0]=sKerror;
-  b[1]=Ct;
-  b[2]=ihs_top_function_name(ihs_top-1);
-  b[3]=continue_fmt_string;
-  b[4]=fmt_string;
-  i=4;
-  n--;
-  va_start(ap,fmt_string);
-  while (--n)
-    b[++i]=va_arg(ap,object);
-  va_end(ap);
-  RETURN1(IapplyVector(sSuniversal_error_handler,++i,b));
-/*    RETURN1(Iapply_fun_n2(sSuniversal_error_handler,5,n-2, */
-/*  			  sKerror, */
-/*  			  Ct, */
-/*  			  ihs_top_function_name(ihs_top-1), */
-/*  		       continue_fmt_string,fmt_string, */
-/*  		       &ap)); */
-}
-
-
-/*  void */
-/*  FEerror(char *s, int num, object arg1, object arg2, object arg3, object arg4) */
-void
-FEerror(char *s,int num,...) 
-{  
-  char *p = s;
-  int last = 0;
-  int count = 0;
-  int i;
-  object arg1,arg2,arg3,arg4;
-  va_list args;
-
-  while (*p) {    if (*p=='~' && last != '~')
-		    count ++;
-		  last = *p ; p++;}
-  VFUN_NARGS = (count == 0 ? 1 : (num > 50 ? count+1 : num+1));
-
-  arg1=arg2=arg3=arg4=Cnil;
-  i=VFUN_NARGS;
-  va_start(args,num);
-  if (i && --i)
-    arg1=va_arg(args,object);
-  if (i && --i)
-    arg2=va_arg(args,object);
-  if (i && --i)
-    arg3=va_arg(args,object);
-  if (i && --i)
-    arg4=va_arg(args,object);
-  va_end(args);
-
-  FFN(fLerror)(make_simple_string(s),arg1,arg2,arg3,arg4);
-  
-}
-
-
-void
-FEwrong_type_argument(object type, object value)
-{Icall_error_handler(sKwrong_type_argument,
-		     make_simple_string("~S is not of type ~S."),
-		     2,(value),(type));
-}
-
-void
-FEtoo_few_arguments(object *base, object *top)
-{    Icall_error_handler(sKtoo_few_arguments,
-			 (make_simple_string("~S [or a callee] requires more than ~R argument~:p.")),
-			 2,(ihs_top_function_name(ihs_top)),
-			 (make_fixnum(top - base)));
+  return IapplyVector(sSuniversal_error_handler,n,b);
 
 }
-
-void
-FEtoo_few_argumentsF(object args)
-{Icall_error_handler(sKtoo_few_arguments,
-		     make_simple_string("Too few arguments."),
-		     2,(ihs_top_function_name(ihs_top)),
-		     (args));
-}
-
-void
-FEtoo_many_arguments(object *base, object *top)
-{      Icall_error_handler(sKtoo_many_arguments,
-			   (make_simple_string("~S [or a callee] requires less than ~R argument~:p.")),
-			   2,(ihs_top_function_name(ihs_top)),(make_fixnum(top - base)));
-}
-
-void
-FEtoo_many_argumentsF(object args)
-{
-  Icall_error_handler(sKtoo_many_arguments,
-		      make_simple_string("Too many arguments."),0);
-}
-
-static void
-FEinvalid_macro_call(void)
-{Icall_error_handler(sKinvalid_form,
-		     (make_simple_string("Invalid macro call to ~S.")),
-		     1,(ihs_top_function_name(ihs_top)));
-}
-
-void
-FEunexpected_keyword(object key)
-{/* 	if (!keywordp(key)) */
-/* 		not_a_keyword(key); */
-
-  Icall_error_handler(sKunexpected_keyword,
-		      make_simple_string("~S does not allow the keyword ~S."),
-		      2,(ihs_top_function_name(ihs_top)),(key));
-		     
-}
-
-void
-FEinvalid_form(char *s, object form)
-{Icall_error_handler(sKinvalid_form,make_simple_string(s),
-		     1,(form));
-
-}
-
-void
-FEunbound_variable(object sym)
-{Icall_error_handler(sKunbound_variable,
-		     make_simple_string("The variable ~S is unbound."),
-		     1,(sym));
-}
-
-void
-FEinvalid_variable(char *s, object obj)
-{Icall_error_handler(sKinvalid_variable,make_simple_string(s),
-		     1,(obj));
-}
-
-void
-FEundefined_function(object fname)
-{Icall_error_handler(sKundefined_function,
-		     make_simple_string("The function ~S is undefined."),
-		     1,(fname));
-}
-
-void
-FEinvalid_function(object obj)
-{Icall_error_handler(sKinvalid_function,
-		     make_simple_string("~S is invalid as a function."),
-		     1,(obj));
-		     
-}
-
-void
-FEpackage_error(object obj,const char *s)
-{
-  Icall_continue_error_handler(sKpackage_error,
-			       make_simple_string("A package error occurred on ~S: ~S."),
-			       2,(obj),make_simple_string(s));
-}
-
-
-object
-CEerror(char *error_str, char *cont_str, int num, object arg1, object arg2, object arg3, object arg4)
-{
-        VFUN_NARGS=num+2; 
-        return FFN(fLcerror)(make_simple_string(cont_str),
-			make_simple_string(error_str),
-			arg1,arg2,arg3,arg4);
-}
-
 
 /*
 	Lisp interface to IHS
@@ -696,24 +432,6 @@ invalid_macro_call(void)
 	FEinvalid_macro_call();
 }
 
-/* static void */
-/* keyword_value_mismatch(void) */
-/* { */
-/* 	FEerror("Keywords and values do not match.", 0); */
-/* } */
-
-/* static void */
-/* not_a_keyword(object x) */
-/* { */
-/* 	FEunexpected_keyword(x); */
-/* } */
-
-/* static void */
-/* unexpected_keyword(object key) */
-/* { */
-/* 	FEunexpected_keyword(key); */
-/* } */
-
 object
 wrong_type_argument(object typ, object obj)
 {
@@ -727,11 +445,6 @@ illegal_declare(object form)
 {
 	FEinvalid_form("~S is an illegal declaration form.", form);
 }
-
-/* static void */
-/* not_a_string(object obj) */
-/* { FEwrong_type_argument(sLstring,obj); */
-/* } */
 
 void
 not_a_string_or_symbol(object x)
@@ -766,16 +479,6 @@ if (type_of(strm) != t_stream)
 			FEwrong_type_argument(sLstream, strm);
 }
 
-/* static object */
-/* LVerror(object first,...) */
-/* {va_list ap; */
-/*  va_start(ap,first); */
-/*  fcall.fun= make_cfun(Lerror,Cnil,Cnil,0,0); */
-/*  fcalln_general(first,ap); */
-/*  va_end(ap); */
-/*  return Cnil; */
-/* } */
-     
 void
 vfun_wrong_number_of_args(object x)
 {
@@ -816,6 +519,11 @@ DEF_ORDINARY("INVALID-VARIABLE",sKinvalid_variable,KEYWORD,"");
 DEF_ORDINARY("UNDEFINED-FUNCTION",sKundefined_function,KEYWORD,"");
 DEF_ORDINARY("INVALID-FUNCTION",sKinvalid_function,KEYWORD,"");
 DEF_ORDINARY("PACKAGE-ERROR",sKpackage_error,KEYWORD,"");
+DEF_ORDINARY("DATUM",sKdatum,KEYWORD,"");
+DEF_ORDINARY("EXPECTED-TYPE",sKexpected_type,KEYWORD,"");
+DEF_ORDINARY("PACKAGE",sKpackage,KEYWORD,"");
+DEF_ORDINARY("FORMAT-CONTROL",sKformat_control,KEYWORD,"");
+DEF_ORDINARY("FORMAT-ARGUMENTS",sKformat_arguments,KEYWORD,"");
 DEF_ORDINARY("CATCH",sKcatch,KEYWORD,"");
 DEF_ORDINARY("PROTECT",sKprotect,KEYWORD,"");
 DEF_ORDINARY("CATCHALL",sKcatchall,KEYWORD,"");
@@ -824,9 +532,6 @@ DEF_ORDINARY("CATCHALL",sKcatchall,KEYWORD,"");
 void
 gcl_init_error(void)
 {
-	make_function("ERROR", Lerror);
-	make_function("CERROR", Lcerror);
-	/* make_si_function("IHS-TOP", siLihs_top); */
 	null_string = make_simple_string("");
 	enter_mark_origin(&null_string);
 }
