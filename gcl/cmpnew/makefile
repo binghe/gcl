@@ -15,7 +15,8 @@ OBJS	= gcl_cmpbind.o gcl_cmpblock.o gcl_cmpcall.o gcl_cmpcatch.o gcl_cmpenv.o gc
 
 FNS:= $(OBJS:.o=.fn)
 
-COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-file -h-file -compile
+LISP=$(PORTDIR)/saved_pre_gcl$(EXE)
+COMPILE_FILE=$(LISP) $(PORTDIR) -system-p -c-file -data-file -h-file -compile
 
 %.o: $(PORTDIR)/saved_pre_gcl$(EXE) %.lsp
 	$(COMPILE_FILE) $*
@@ -23,7 +24,7 @@ COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-f
 all:	$(OBJS)
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
-	../xbin/make-fn $*.lsp
+	../xbin/make-fn $*.lsp $(LISP)
 
 fns1:	$(FNS)
 

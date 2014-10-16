@@ -18,8 +18,8 @@ OBJS	= gcl_sharp.o gcl_arraylib.o gcl_assert.o gcl_defmacro.o gcl_defstruct.o \
 	  gcl_destructuring_bind.o gcl_defpackage.o gcl_make_defpackage.o gcl_loop.o $(EXTRA_LOBJS)
 # export.o autoload.o auto_new.o
 
-
-COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-file -h-file -compile
+LISP=$(PORTDIR)/saved_pre_gcl$(EXE)
+COMPILE_FILE=$(LISP) $(PORTDIR) -system-p -c-file -data-file -h-file -compile
 
 %.o: $(PORTDIR)/saved_pre_gcl$(EXE) %.lsp
 	$(COMPILE_FILE) $*
@@ -27,7 +27,7 @@ COMPILE_FILE=$(PORTDIR)/saved_pre_gcl$(EXE) $(PORTDIR) -system-p -c-file -data-f
 all:	$(OBJS) #$(RL_OBJS)
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
-	../xbin/make-fn $*.lsp
+	../xbin/make-fn $*.lsp $(LISP)
 
 all:	$(OBJS)
 
