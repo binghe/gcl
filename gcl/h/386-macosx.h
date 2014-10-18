@@ -193,3 +193,7 @@ if (realpath (buf, fub) == 0) {                             \
 #define FPE_INIT ({ucontext_t v;list(3,MMcons(make_simple_string(({const char *s=FPE_RLST;s;})),REG_LIST(21,MC(__ss))),	\
 				     REG_LIST(8,MCF(__fpu_stmm0)),REG_LIST(16,MCF(__fpu_xmm0)));})
 
+
+#include <sys/param.h>/*PATH_MAX MAXPATHLEN*/
+#undef MIN
+#undef MAX
