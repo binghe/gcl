@@ -459,6 +459,8 @@ main(int argc, char **argv, char **envp) {
 /* catch certain signals */
 void install_segmentation_catcher(void)
 {
+  unblock_signals(SIGSEGV,SIGSEGV);
+  unblock_signals(SIGBUS,SIGBUS);
   (void) gcl_signal(SIGSEGV,segmentation_catcher);
   (void) gcl_signal(SIGBUS,segmentation_catcher);
 }
