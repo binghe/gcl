@@ -244,7 +244,7 @@ DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
 DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
 DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
 
-#ifdef ANSI_COMMON_LISP
+/* #ifdef ANSI_COMMON_LISP */
 /* New ansi types */
 DEF_ORDINARY("METHOD-COMBINATION",sLmethod_combination,LISP,"");
 DEF_ORDINARY("ARITHMETIC-ERROR",sLarithmetic_error,LISP,"");
@@ -290,7 +290,7 @@ DEF_ORDINARY("TWO-WAY-STREAM",sLtwo_way_stream,LISP,"");
 DEF_ORDINARY("TYPE-ERROR",sLtype_error,LISP,"");
 DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,"");
 DEF_ORDINARY("WARNING",sLwarning,LISP,"");
-#endif
+/* #endif */
 
 DEFCONST("CHAR-SIZE",sSchar_size,SI,small_fixnum(CHAR_SIZE),"Size in bits of a character");
 DEFCONST("SHORT-SIZE",sSshort_size,SI,small_fixnum(CHAR_SIZE*sizeof(short)),"Size in bits of a short integer");
