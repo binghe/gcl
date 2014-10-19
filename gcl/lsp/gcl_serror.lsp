@@ -73,13 +73,12 @@
   `(let (*quit-tag* *quit-tags* *restarts*)
      ,@forms))
 
-(defun process-args (args &optional fc fa others);FIXME do this without consing, could be oom
-  (cond ((not args) (nconc (nreverse others) (when (and fc fa) (list (apply 'format nil fc fa)))))
-	((eq (car args) :format-control)
-	 (process-args (cddr args) (cadr args) fa others))
-	((eq (car args) :format-arguments)
-	 (process-args (cddr args) fc (cadr args) others))
-	((process-args (cdr args) fc fa (cons (car args) others)))))
+(defun process-args (args &aux (control (member :format-control args)))
+  (labels ((r (x &aux (z (member-if (lambda (x) (member x '(:format-control :format-arguments))) x)))
+	      (if z (nconc (ldiff x z) (r (cddr z))) x)))
+    (if control
+	(nconc (r args) (list (apply 'format nil (cadr control) (cadr (member :format-arguments args)))))
+      args)))    
 
 (defun coerce-to-string (datum args) 
   (cond ((stringp datum)
