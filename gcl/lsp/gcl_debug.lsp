@@ -704,7 +704,7 @@
 				line env (i 0))
   (loop
    (mv-setq  (ihs fun line file  env)  (next-stack-frame ihs))
-   (or fun (return nil))
+   (or (and ihs fun) (return nil))
    (print-stack-frame i nil ihs fun line file env)
    (incf i)
    (cond ((fb >= i m) (return (values))))
