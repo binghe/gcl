@@ -631,7 +631,6 @@ gcl_init_character_function()
 {
 	make_function("STANDARD-CHAR-P", Lstandard_char_p);
 	make_function("GRAPHIC-CHAR-P", Lgraphic_char_p);
-	make_function("STRING-CHAR-P", Lstring_char_p);
 	make_function("ALPHA-CHAR-P", Lalpha_char_p);
 	make_function("UPPER-CASE-P", Lupper_case_p);
 	make_function("LOWER-CASE-P", Llower_case_p);

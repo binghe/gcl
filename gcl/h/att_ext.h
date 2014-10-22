@@ -565,7 +565,7 @@ EXTER object sSfunction_documentation;
 /*  typespec.c  */
 EXTER object sLcommon,sLnull,sLcons,sLlist,sLsymbol,sLarray,sLvector,sLbit_vector,sLstring;
 EXTER object sLsequence,sLsimple_array,sLsimple_vector,sLsimple_bit_vector,sLsimple_string;
-EXTER object sLcompiled_function,sLpathname,sLcharacter,sLnumber,sLrational,sLfloat,sLstring_char;
+EXTER object sLcompiled_function,sLpathname,sLcharacter,sLnumber,sLrational,sLfloat;
 EXTER object sLinteger,sLreal,sLratio,sLshort_float,sLstandard_char,sLfixnum,sLpositive_fixnum, sLcomplex;
 EXTER object sLsingle_float,sLpackage,sLbignum,sLrandom_state,sLdouble_float,sLstream,sLbit,sLreadtable;
 EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean;

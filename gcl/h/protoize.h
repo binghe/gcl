@@ -862,9 +862,6 @@ void
 Lstandard_char_p(void);
 
 void
-Lstring_char_p(void);
-
-void
 Lchar_code(void);
 
 void
@@ -953,9 +950,6 @@ Lreconc(void);
 
 void
 Lstandard_char_p(void);
-
-void
-Lstring_char_p(void);
 
 void
 Lcharacter(void);
@@ -1405,7 +1399,6 @@ void Lforce_output(void);
 void Lnthcdr(void);
 void Llogior(void);
 void Lchar_downcase(void);
-void Lstring_char_p(void);
 void Lstream_element_type(void);
 void Lpackage_used_by_list(void);
 void Ldivide(void);
