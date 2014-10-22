@@ -22,11 +22,7 @@
 ;;;;         defines SI:DEFMACRO*, the defmacro preprocessor
 
 
-(in-package 'lisp)
-(export '(&whole &environment &body))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (eval-when (compile) (proclaim '(optimize (safety 2) (space 3))))

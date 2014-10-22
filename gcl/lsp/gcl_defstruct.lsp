@@ -22,18 +22,10 @@
 ;;;;        The structure routines.
 
 
-(in-package 'lisp)
-(export 'defstruct)
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))
-
-
-
-;(in-package 'system)
 
 
 

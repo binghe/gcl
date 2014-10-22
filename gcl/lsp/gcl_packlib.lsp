@@ -22,14 +22,7 @@
 ;;;;                    package routines
 
 
-(in-package 'lisp)
-
-
-(export '(find-all-symbols do-symbols do-external-symbols do-all-symbols with-package-iterator))
-(export '(apropos apropos-list))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))

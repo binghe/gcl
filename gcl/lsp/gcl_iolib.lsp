@@ -22,21 +22,7 @@
 ;;;;        The IO library.
 
 
-(in-package 'lisp)
-
-
-(export '(with-open-stream with-input-from-string with-output-to-string 
-			   ensure-directories-exist wild-pathname-p
-			   read-byte write-byte read-sequence write-sequence))
-(export '(read-from-string))
-(export '(write-to-string prin1-to-string princ-to-string))
-(export 'with-open-file)
-(export '(y-or-n-p yes-or-no-p))
-(export 'dribble)
-
-
-(in-package 'system)
-
+(in-package :si)
 
 (proclaim '(optimize (safety 2) (space 3)))
 

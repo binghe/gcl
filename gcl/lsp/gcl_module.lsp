@@ -22,13 +22,7 @@
 ;;;;                            module routines
 
 
-(in-package 'lisp)
-
-(export '(*modules* provide require))
-(export 'documentation)
-(export '(variable function structure type setf))
-
-(in-package 'system)
+(in-package :si)
 
 
 (eval-when (compile) (proclaim '(optimize (safety 2) (space 3))))

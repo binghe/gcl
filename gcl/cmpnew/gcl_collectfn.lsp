@@ -13,7 +13,7 @@
 ;; Additionally cross reference information about functions in the system is
 ;; collected.
 
-(in-package 'compiler)
+(in-package :compiler)
 (import 'sloop::sloop)
 
 (defstruct fn

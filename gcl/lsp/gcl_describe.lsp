@@ -22,12 +22,7 @@
 ;;;;                           DESCRIBE and INSPECT
 
 
-(in-package 'lisp)
-
-(export '(describe inspect))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))

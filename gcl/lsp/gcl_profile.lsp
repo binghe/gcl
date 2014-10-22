@@ -1,5 +1,5 @@
 
-(in-package 'si)
+(in-package :si)
 (use-package "SLOOP")
 
 ;; Sample Usage:

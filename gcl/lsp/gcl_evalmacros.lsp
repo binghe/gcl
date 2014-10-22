@@ -20,11 +20,7 @@
 ;;;;	evalmacros.lsp
 
 
-(in-package "LISP")
-
-(export '(defvar defparameter defconstant))
-
-(in-package "SYSTEM")
+(in-package :si)
 
 
 (eval-when (compile) (proclaim '(optimize (safety 2) (space 3))))

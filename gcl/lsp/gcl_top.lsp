@@ -24,24 +24,14 @@
 ;;;;  Revised on July 11, by Carl Hoffman.
 
 
-(in-package "LISP")
-;(export 'lisp)
-(export '(+ ++ +++ - * ** *** / // ///))
-(export '(break warn))
-(export '*break-on-warnings*)
-(export '*break-enable*)
-
-(in-package 'system)
+(in-package :si)
 
 (export '*break-readtable*)
 (export '(loc *debug-print-level*))
 
 (export '(vs ihs-vs ihs-fun frs-vs frs-bds frs-ihs bds-var bds-val super-go))
 
-(eval-when 
-    (compile)
-  (proclaim '(optimize (safety 2) (space 3)))
-  (defvar *command-args* nil))
+(defvar *command-args* nil)
 
 (defvar +)
 (defvar ++)

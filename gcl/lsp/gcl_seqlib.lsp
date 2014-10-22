@@ -22,24 +22,7 @@
 ;;;;                           sequence routines
 
 
-(in-package 'lisp)
-
-
-(export '(reduce fill replace
-          remove remove-if remove-if-not
-          delete delete-if delete-if-not
-          count count-if count-if-not
-          substitute substitute-if substitute-if-not
-          nsubstitute nsubstitute-if nsubstitute-if-not
-          find find-if find-if-not
-          position position-if position-if-not
-          remove-duplicates delete-duplicates
-          mismatch search
-	  with-hash-table-iterator
-          sort stable-sort merge map-into))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))

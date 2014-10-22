@@ -8,9 +8,7 @@
 ;;; in DEFMACRO are the reason this isn't as easy as it sounds.
 ;;;
 
-(in-package 'lisp)
-
-(export '(destructuring-bind))
+(in-package :si)
 
 (defvar *arg-tests* ()
   "A list of tests that do argument counting at expansion time.")

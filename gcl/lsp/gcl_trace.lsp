@@ -27,13 +27,7 @@
 ;; If you are working in another package you should (import 'si::arglist)
 ;; to avoid typing the si::
 
-(in-package 'lisp)
-
-(export '(trace untrace))
-(export 'step)
-
-
-(in-package 'system)
+(in-package :si)
 
 ;;(proclaim '(optimize (safety 2) (space 3)))
 

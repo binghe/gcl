@@ -24,7 +24,7 @@
 ;;;		*****************
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 
 (export '(*compile-print* *compile-verbose*))

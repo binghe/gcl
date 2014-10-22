@@ -22,9 +22,7 @@
 ;;;;                              predicate routines
 
 
-(in-package 'system)
-
-(export '(lisp::deftype lisp::typep lisp::subtypep lisp::coerce) 'lisp)
+(in-package :si)
 
 (eval-when (compile)
 (proclaim '(optimize (safety 2) (space 3)))

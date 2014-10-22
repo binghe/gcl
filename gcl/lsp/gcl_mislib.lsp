@@ -20,15 +20,7 @@
 ;;;; This file is IMPLEMENTATION-DEPENDENT.
 
 
-(in-package 'lisp)
-
-
-(export 'time)
-(export '(reset-sys-paths decode-universal-time encode-universal-time compile-file-pathname complement constantly))
-
-
-(in-package 'system)
-
+(in-package :si)
 
 (proclaim '(optimize (safety 2) (space 3)))
 

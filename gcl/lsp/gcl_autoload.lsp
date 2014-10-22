@@ -21,8 +21,9 @@
 ;;;;    AUTOLOAD
 
 
-;;; Go into LISP.
-(in-package 'lisp)
+(in-package :si)
+
+(export '(clines defentry defcfun object void int double))
 
 ;(defvar *features*)
 
@@ -411,7 +412,7 @@ Good luck!				 The GCL Development Team")
 (setf (get 'with-output-to-string 'si:pretty-print-format) 1)
 
 
-(in-package 'si)
+(in-package :si)
 
 (defvar *lib-directory* (namestring (truename "../")))
 

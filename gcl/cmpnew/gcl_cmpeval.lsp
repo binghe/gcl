@@ -23,9 +23,9 @@
 
 (export '(si::define-compiler-macro
 	  si::undef-compiler-macro
-          si::define-inline-function) 'system)
+          si::define-inline-function) :system)
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (si:putprop 'progn 'c1progn 'c1special)
 (si:putprop 'progn 'c2progn 'c2)

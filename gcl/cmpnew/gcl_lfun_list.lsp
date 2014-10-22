@@ -3,7 +3,7 @@
 ;; and making the arglists correct if they have optional args.
 ;;
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (DEFSYSFUN 'GENSYM "Lgensym" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'SUBSEQ "Lsubseq" '(T T *) 'T NIL NIL) 

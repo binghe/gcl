@@ -22,11 +22,7 @@
 ;;;;                           sequence routines
 
 
-(in-package 'lisp)
-
-(export '(make-sequence concatenate map some every notany notevery))
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))

@@ -1,8 +1,8 @@
 ;;Copyright William F. Schelter 1990, All Rights Reserved 
 
 
-(In-package "SYSTEM")
-(import 'sloop::sloop)
+(In-package :si)
+(import '(sloop::sloop))
 
 (eval-when (compile eval)
   (proclaim '(optimize (safety 2) (space 3)))

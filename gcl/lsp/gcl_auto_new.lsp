@@ -1,4 +1,4 @@
-(in-package 'si)
+(in-package :si)
 ;;; Autoloaders.
 
 

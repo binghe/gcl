@@ -71,7 +71,7 @@
 ;;; some other package.
 
 
-(in-package "SLOOP"  :use '(LISP))  
+(in-package "SLOOP"  :use '(:LISP))  
 (eval-when (compile eval load)
 
 (export '(loop-return sloop def-loop-collect def-loop-map
