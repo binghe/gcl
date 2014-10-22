@@ -168,41 +168,6 @@ FFN(Fmultiple_value_bind)(object form)
 }
 
 static void
-FFN(Fcompiler_let)(object form)
-{
-
-	object body;
-	object *old_lex;
-	bds_ptr old_bds_top;
-	struct bind_temp *start, *end, *bt;
-	
-	if (endp(form))
-		FEerror("No argument to COMPILER-LET.", 0);
-
-	body = form->c.c_cdr;
-
-	old_lex = lex_env;
-	lex_copy();
-	old_bds_top = bds_top;
-
-	start = (struct bind_temp *)vs_top;
-	let_var_list(form->c.c_car);
-	end = (struct bind_temp *)vs_top;
-	for (bt = start;  bt < end;  bt++) {
-		eval_assign(bt->bt_init, bt->bt_init);
-	}
-	for (bt = start;  bt < end;  bt++)
-		bind_var(bt->bt_var, bt->bt_init, Ct);
-
-	vs_top = (object *)start;
-
-	Fprogn(body);
-
-	lex_env = old_lex;
-	bds_unwind(old_bds_top);
-}
-
-static void
 FFN(Fflet)(object args)
 {
 
@@ -315,7 +280,6 @@ gcl_init_let(void)
 	make_special_form("LET", Flet);
 	make_special_form("LET*", FletA);
 	make_special_form("MULTIPLE-VALUE-BIND", Fmultiple_value_bind);
-	make_special_form("COMPILER-LET", Fcompiler_let);
 	make_special_form("FLET",Fflet);
 	make_special_form("LABELS",Flabels);
 	make_special_form("MACROLET",Fmacrolet);
