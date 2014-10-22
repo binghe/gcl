@@ -194,6 +194,7 @@
 (defun make-proclaims ( &optional (st *standard-output*)
 				  &aux (ht (make-hash-table :test 'equal))
 				  *print-length* *print-level* 
+				  (si::*print-package* t)
 				  )
 ;  (require "VLFUN"
 ;	 (concatenate 'string si::*system-directory*
