@@ -659,7 +659,7 @@ gcl_init_character_function()
 	make_function("CHAR-DOWNCASE", Lchar_downcase);
 	make_function("DIGIT-CHAR", Ldigit_char);
 	make_function("CHAR-INT", Lchar_int);
-/*	make_function("INT-CHAR", Lint_char);*/
+	make_function("INT-CHAR", Lint_char);
 	make_function("CHAR-NAME", Lchar_name);
 	make_function("NAME-CHAR", Lname_char);
 /*	make_function("CHAR-BIT", Lchar_bit);
