@@ -1,4 +1,4 @@
-(in-package 'compiler)
+(in-package :compiler)
 
 ;; The optimizers have been redone to allow more flags
 ;; The old style optimizations  correspond to the first 2
@@ -136,7 +136,7 @@
    (get 'system:aset 'inline-unsafe))
 (push '(((array t) fixnum t) t #.(flags set)"(#0)->v.v_self[#1]= (#2)")
    (get 'system:aset 'inline-unsafe))
-(push '(((array string-char) fixnum character) character #.(flags rfa set)"(#0)->ust.ust_self[#1]= (#2)")
+(push '(((array character) fixnum character) character #.(flags rfa set)"(#0)->ust.ust_self[#1]= (#2)")
    (get 'system:aset 'inline-unsafe))
 (push '(((array fixnum) fixnum fixnum) fixnum #.(flags set rfa)"(#0)->fixa.fixa_self[#1]= (#2)")
    (get 'system:aset 'inline-unsafe))
@@ -159,7 +159,7 @@
 (push '(((array t) fixnum fixnum t) t #.(flags set)
   "@0;(#0)->a.a_self[(#1)*(#0)->a.a_dims[1]+#2]= (#3)")
    (get 'system:aset 'inline-unsafe))
-(push '(((array string-char) fixnum fixnum character) character
+(push '(((array character) fixnum fixnum character) character
 	#.(flags rfa set)
   "@0;(#0)->ust.ust_self[(#1)*(#0)->a.a_dims[1]+#2]= (#3)")
    (get 'system:aset 'inline-unsafe))
@@ -433,7 +433,7 @@
    (get 'aref 'inline-unsafe))
 (push '(((array t) fixnum) t #.(flags)"(#0)->v.v_self[#1]")
    (get 'aref 'inline-unsafe))
-(push '(((array string-char) fixnum) character #.(flags rfa)"(#0)->ust.ust_self[#1]")
+(push '(((array character) fixnum) character #.(flags rfa)"(#0)->ust.ust_self[#1]")
    (get 'aref 'inline-unsafe))
 (push '(((array fixnum) fixnum) fixnum #.(flags rfa)"(#0)->fixa.fixa_self[#1]")
    (get 'aref 'inline-unsafe))
@@ -456,7 +456,7 @@
 (push '(((array t) fixnum fixnum) t #.(flags )
   "@0;(#0)->a.a_self[(#1)*(#0)->a.a_dims[1]+#2]")
    (get 'aref 'inline-unsafe))
-(push '(((array string-char) fixnum fixnum) character #.(flags rfa)
+(push '(((array character) fixnum fixnum) character #.(flags rfa)
   "@0;(#0)->ust.ust_self[(#1)*(#0)->a.a_dims[1]+#2]")
    (get 'aref 'inline-unsafe))
 (push '(((array fixnum) fixnum fixnum) fixnum #.(flags rfa)

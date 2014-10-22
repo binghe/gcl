@@ -186,7 +186,6 @@
 (defun inspect-character (character)
   (format t
           (cond ((standard-char-p character) "~S - standard character")
-                ((string-char-p character) "~S - string character")
                 (t "~S - character"))
           character)
   (inspect-print "code:  #x~X" (char-code character))

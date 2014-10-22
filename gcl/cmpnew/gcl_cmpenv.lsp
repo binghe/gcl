@@ -337,7 +337,7 @@
       readtable sequence short-float simple-array simple-bit-vector
       simple-string simple-vector single-float standard-char stream string
       dynamic-extent :dynamic-extent
-      string-char symbol t vector signed-byte unsigned-byte)
+      symbol t vector signed-byte unsigned-byte)
      (proclaim-var (car decl) (cdr decl)))
     (otherwise
      (unless (member (car decl) *alien-declarations*)
@@ -449,7 +449,7 @@
 				 integer keyword list long-float nil null number package pathname
 				 random-state ratio rational readtable sequence simple-array
 				 simple-bit-vector simple-string simple-base-string simple-vector single-float
-				 standard-char stream string string-char symbol t vector
+				 standard-char stream string symbol t vector
 				 signed-byte unsigned-byte)
 			 (let ((type (type-filter stype)))
 			   (when type
@@ -667,7 +667,7 @@
       readtable sequence short-float simple-array simple-bit-vector
       simple-string simple-vector single-float standard-char stream string
       dynamic-extent :dynamic-extent
-      string-char symbol t vector signed-byte unsigned-byte)
+      symbol t vector signed-byte unsigned-byte)
      (let ((type (type-filter (car decl))))
           (dolist** (var (cdr decl) t)
             (if (symbolp var)

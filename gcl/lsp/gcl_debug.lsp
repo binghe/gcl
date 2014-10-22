@@ -583,7 +583,7 @@
 ;; in other common lisps this should be a string output stream.
 
 (defvar *display-string*
-  (make-array 100 :element-type 'string-char :fill-pointer 0 :adjustable t))
+  (make-array 100 :element-type 'character :fill-pointer 0 :adjustable t))
 
 (defun display-env (n env)
   (do ((v (reverse env) (cdr v)))

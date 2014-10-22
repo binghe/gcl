@@ -565,7 +565,7 @@
 		      (equal (third type) '(*)))))
 	    (setq tem (si::best-array-element-type
 		       (second type)))
-	    (cond ((eq tem 'string-char) `(stringp ,x))
+	    (cond ((eq tem 'character) `(stringp ,x))
 		  ((eq tem 'bit) `(bit-vector-p ,x))
 		  ((setq tem (position tem *aet-types*))
 		   `(the boolean (vector-type ,x ,tem)))))
@@ -811,7 +811,7 @@
 (defun aet-c-type (type)
   (ecase type
     ((t) "object")
-    ((string-char signed-char) "char")
+    ((character signed-char) "char")
     (fixnum "fixnum")
     (unsigned-char "unsigned char")
     (unsigned-short "unsigned short")

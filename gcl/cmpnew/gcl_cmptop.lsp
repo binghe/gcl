@@ -572,7 +572,7 @@
 (defun make-inline-string (cfun args fname)
   (if (null args)
       (format nil "~d()" (c-function-name "LI" cfun fname))
-      (let ((o (make-array 100 :element-type 'string-char :fill-pointer 0
+      (let ((o (make-array 100 :element-type 'character :fill-pointer 0
 			   :adjustable t )))
            (format o "~d(" (c-function-name "LI" cfun fname))
            (do ((l args (cdr l))

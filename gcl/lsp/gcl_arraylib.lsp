@@ -31,7 +31,7 @@
   (or (gethash type *baet-hash*)
       (setf (gethash type *baet-hash*)
 	    (if type
-		(car (member type '(string-char bit signed-char unsigned-char signed-short unsigned-short
+		(car (member type '(character bit signed-char unsigned-char signed-short unsigned-short
 					fixnum short-float long-float t)
 			     :test 'subtypep)) t)))))
 	 
