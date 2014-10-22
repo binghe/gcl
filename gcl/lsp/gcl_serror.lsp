@@ -53,7 +53,7 @@
     nil))
 
 (defvar *debugger-hook* nil)
-(defvar *debug-level* 0)
+(defvar *debug-level* 1)
 (defvar *debug-restarts* nil)
 (defvar *debug-abort* nil)
 (defvar *debug-continue* nil)
