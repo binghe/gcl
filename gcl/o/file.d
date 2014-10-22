@@ -268,7 +268,7 @@ BEGIN:
 		return(strm->sm.sm_object0);
 
 	case smm_socket:
-	    return (sLstring_char);
+	    return (sLcharacter);
 	    
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
@@ -295,10 +295,10 @@ BEGIN:
 		return(stream_element_type(STREAM_INPUT_STREAM(strm)));
 
 	case smm_string_input:
-		return(sLstring_char);
+		return(sLcharacter);
 
 	case smm_string_output:
-		return(sLstring_char);
+		return(sLcharacter);
 
 	default:
 		error("illegal stream mode");
@@ -512,7 +512,7 @@ object if_exists, if_does_not_exist;
 	x->sm.sm_fp = fp;
 
 	x->sm.sm_buffer = 0;
-	x->sm.sm_object0 = (unzipped ? make_cons(sSAallow_gzipped_fileA,unzipped) : sLstring_char);
+	x->sm.sm_object0 = (unzipped ? make_cons(sSAallow_gzipped_fileA,unzipped) : sLcharacter);
 	x->sm.sm_object1 = fn;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
 	vs_push(x);
@@ -1715,7 +1715,7 @@ LFD(Lstream_element_type)()
 
 @(static defun open (filename
 	      &key (direction sKinput)
-		   (element_type sLstring_char)
+		   (element_type sLcharacter)
 		   (if_exists Cnil iesp)
 		   (if_does_not_exist Cnil idnesp)
 	      &aux strm)
@@ -2534,7 +2534,7 @@ gcl_init_file(void)
 	standard_input->sm.sm_mode = (short)smm_input;
 	standard_input->sm.sm_fp = stdin;
 	standard_input->sm.sm_buffer = 0;
-	standard_input->sm.sm_object0 = sLstring_char;
+	standard_input->sm.sm_object0 = sLcharacter;
 	standard_input->sm.sm_object1
 #ifdef UNIX
 	= make_simple_string("stdin");
@@ -2546,7 +2546,7 @@ gcl_init_file(void)
 	standard_output->sm.sm_mode = (short)smm_output;
 	standard_output->sm.sm_fp = stdout;
 	standard_output->sm.sm_buffer = 0;
-	standard_output->sm.sm_object0 = sLstring_char;
+	standard_output->sm.sm_object0 = sLcharacter;
 	standard_output->sm.sm_object1
 #ifdef UNIX
 	= make_simple_string("stdout");

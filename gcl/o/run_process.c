@@ -432,7 +432,7 @@ enum smmode smm;
 	stream->sm.sm_fp = fp;
 	stream->sm.sm_buffer = 0;
 
-	stream->sm.sm_object0 = sLstring_char;
+	stream->sm.sm_object0 = sLcharacter;
 	stream->sm.sm_object1 = host_l;
 	stream->sm.sm_int0 = stream->sm.sm_int1 = 0;
 	vs_push(stream);

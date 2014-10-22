@@ -73,7 +73,7 @@ LFD(Ltype_of)(void)
 			if ((' ' <= i && i < '\177') || i == '\n')
 				vs_base[0] = sLstandard_char;
 			else
-				vs_base[0] = sLstring_char;
+				vs_base[0] = sLcharacter;
 		}
 		break;
 
