@@ -7,6 +7,10 @@ void
 gcl_init_init()
 {
 
+  object features;
+  features=find_symbol(make_simple_string("*FEATURES*"),system_package);
+  features->s.s_dbind=make_cons(make_keyword("ANSI-CL"),make_cons(make_keyword("COMMON-LISP"),features->s.s_dbind));
+
   build_symbol_table();
 
   lsp_init("../lsp/gcl_export.lsp");
@@ -86,7 +90,7 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_cmpmain,no_init);
 
 #ifdef HAVE_XGCL
-  lsp_init("../xgcl-2/sysdef.lisp");
+  lsp_init("../xgcl-2/package.lisp");
   ar_check_init(gcl_Xlib,no_init);
   ar_check_init(gcl_Xutil,no_init);
   ar_check_init(gcl_X,no_init);

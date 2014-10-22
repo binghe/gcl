@@ -1,0 +1,71 @@
+(make-package :compiler :use '(:lisp :si))
+(make-package :sloop :use '(:lisp))
+(make-package :ansi-loop :use'(:lisp))
+(make-package :defpackage :use '(:lisp))
+(make-package :tk :use '(:lisp :sloop))
+(make-package :fpe :use '(:lisp))
+
+(in-package :system)
+(use-package :fpe)
+
+#+(or pcl ansi-cl)(load "../pcl/package.lisp")
+#+ansi-cl(load "../clcs/package.lisp")
+
+(init-system) 
+(in-package :si)
+(gbc t)
+
+(unless *link-array*
+  (setq *link-array* (make-array (ash 1 11) :element-type 'character :fill-pointer 0)))
+(use-fast-links t)
+
+(let* ((x (append (pathname-directory *system-directory*) (list :parent)))
+       (lsp (append x (list "lsp")))
+       (cmpnew (append x (list "cmpnew")))
+       (h (append x (list "h")))
+       (xgcl-2 (append x (list "xgcl-2")))
+       (pcl (append x (list "pcl")))
+       (clcs (append x (list "clcs")))
+       (gtk (append x (list "gcl-tk"))))
+  (dolist (d (list lsp cmpnew #-pre-gcl xgcl-2 #+(or pcl ansi-cl) pcl #+ansi-cl clcs))
+    (load (make-pathname :name "sys-proclaim" :type "lisp" :directory d)))
+  (load (make-pathname :name "tk-package" :type "lsp" :directory gtk))
+  (load (make-pathname :name "gcl_lfun_list" :type "lsp" :directory cmpnew))
+  (load (make-pathname :name "gcl_cmpopt" :type "lsp" :directory cmpnew))
+  (load (make-pathname :name "gcl_auto_new" :type "lsp" :directory lsp))
+  
+  (gbc t))
+
+(setf (symbol-function 'clear-compiler-properties)
+      (symbol-function 'compiler::compiler-clear-compiler-properties))
+
+(terpri)
+(setq *inhibit-macro-special* t)
+(gbc t)
+(reset-gbc-count)
+
+(defun top-level nil (gcl-top-level))
+
+(set-up-top-level)
+
+(setq *gcl-extra-version* @LI-EXTVERS@
+      *gcl-minor-version* @LI-MINVERS@ 
+      *gcl-major-version* @LI-MAJVERS@)
+
+(defvar *system-banner* (default-system-banner))
+(setq *optimize-maximum-pages* t)
+
+(fmakunbound 'init-cmp-anon)
+(when (fboundp 'user-init) (user-init))
+(in-package :compiler)
+(setq *cc* @LI-CC@
+      *ld* @LI-LD@
+      *ld-libs* @LI-LD-LIBS@
+      *opt-three* @LI-OPT-THREE@
+      *opt-two* @LI-OPT-TWO@
+      *init-lsp* @LI-INIT-LSP@)
+
+(in-package :user)
+#+ansi-cl (use-package :pcl)
+(import 'si::(clines defentry defcfun object void int double info))
+
