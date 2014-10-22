@@ -145,8 +145,8 @@ object simple_lispcall();
 object simple_lispcall_no_event();
 object simple_symlispcall();
 object simple_symlispcall_no_event();
-EXTER object Vevalhook;
-EXTER object Vapplyhook;
+EXTER object siVevalhook;
+EXTER object siVapplyhook;
 object ieval();
 object ifuncall(object,int,...);
 object ifuncall1();
@@ -301,13 +301,13 @@ EXTER object sLquote;
 
 EXTER object sLlambda;
 
-EXTER object sLlambda_block;
-EXTER object sLlambda_closure;
-EXTER object sLlambda_block_closure;
+EXTER object sSlambda_block;
+EXTER object sSlambda_closure;
+EXTER object sSlambda_block_closure;
 
 EXTER object sLfunction;
-EXTER object sLmacro;
-EXTER object sLtag;
+EXTER object sSmacro;
+EXTER object sStag;
 EXTER object sLblock;
 
 
@@ -595,10 +595,10 @@ EXTER object sLvalues;
 EXTER object sLmod;
 EXTER object sLsigned_byte;
 EXTER object sLunsigned_byte;
-EXTER object sLsigned_char;
-EXTER object sLunsigned_char;
-EXTER object sLsigned_short;
-EXTER object sLunsigned_short;
+EXTER object sSsigned_char;
+EXTER object sSunsigned_char;
+EXTER object sSsigned_short;
+EXTER object sSunsigned_short;
 EXTER object sLA;
 EXTER object sLplusp;
 EXTER object TSor_symbol_string;

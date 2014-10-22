@@ -608,7 +608,7 @@
       (push `(,(car f) .  (function  . (,#'unbound-lexical-function . nil)))
 	    lexicals))
     (dolist (m macros)
-      (push `(,(car m)  .  (macro . ( ,(cadr m) . nil))) 
+      (push `(,(car m)  .  (si::macro . ( ,(cadr m) . nil))) 
 	    lexicals))
     (list first lexicals third)))
 
@@ -623,7 +623,7 @@
   (when env
 	(let ((entry (assoc macro (second env))))
 	  (and entry
-	       (eq (cadr entry) 'macro)
+	       (eq (cadr entry) 'si::macro)
 	       (caddr entry)))))
 );#+(or KCL IBCL)
 
@@ -1202,7 +1202,7 @@
 
 #+(or KCL IBCL)
 (progn
-  (define-walker-template lambda-block walk-named-lambda);Not really right,
+  (define-walker-template si::lambda-block walk-named-lambda);Not really right,
 							 ;we don't hack block
 						         ;names anyways.
   )

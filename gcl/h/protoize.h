@@ -467,7 +467,7 @@ typedef void (*funcvoid)(void);
 /* regexp.c:1588:OF */ extern void regerror (char *s); /* (s) char *s; */
 /* regexpr.c:48:OF */ extern object fSmatch_beginning (fixnum i); /* (i) int i; */
 /* regexpr.c:57:OF */ extern object fSmatch_end (fixnum i); /* (i) int i; */
-/* save.c:17:OF */ extern void Lsave (void); /* () */
+/* save.c:17:OF */ extern void siLsave (void); /* () */
 #include <unistd.h>
 /* sbrk.c:9:OF */ /*  extern void * sbrk (int n); */ /* (n) int n; */
 /* strcspn.c:3:OF */ /*  extern size_t strcspn (const char *s1, const char *s2); */ /* (s1, s2) char *s1; char *s2; */

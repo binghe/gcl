@@ -23,6 +23,6 @@ object sLquote;
 
 object sLlambda;
 
-object sLlambda_block;
-object sLlambda_closure;
-object sLlambda_block_closure;
+object sSlambda_block;
+object sSlambda_closure;
+object sSlambda_block_closure;

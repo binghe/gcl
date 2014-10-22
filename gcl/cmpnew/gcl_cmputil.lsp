@@ -214,7 +214,7 @@
 (defun cmp-toplevel-eval (form)
    (let* ((si::*ihs-base* si::*ihs-top*)
           (si::*ihs-top* (1- (si::ihs-top)))
-          (*break-enable* *compiler-break-enable*)
+          (si::*break-enable* *compiler-break-enable*)
           (si::*break-hidden-packages*
            (cons (find-package 'compiler)
                  si::*break-hidden-packages*)))

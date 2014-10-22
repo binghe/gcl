@@ -128,13 +128,13 @@
 
 ;;; Allocator.
 
-(import 'si::allocate)
-(export '(allocate
+;(import 'si::allocate)
+;(export '(allocate
 	  ;allocated-pages maximum-allocatable-pages
           ;allocate-contiguous-pages
           ;allocated-contiguous-pages maximum-contiguous-pages
           ;allocate-relocatable-pages allocated-relocatable-pages 
-          sfun gfun cfun cclosure spice structure))
+;          sfun gfun cfun cclosure spice structure))
 
 ;(defvar type-character-alist
 ;             '((cons . #\.)
@@ -415,4 +415,4 @@ Good luck!				 The GCL Development Team")
 
 (defvar *lib-directory* (namestring (truename "../")))
 
-(import '(*lib-directory* *load-path* *system-directory*) 'si::user) 
+(import '(*lib-directory* *load-path* *system-directory*) :user) 

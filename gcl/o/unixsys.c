@@ -169,7 +169,7 @@ msystem(const char *s) {
 }
 
 static void
-FFN(Lsystem)(void)
+FFN(siLsystem)(void)
 {
 	char command[32768];
 	int i;
@@ -284,6 +284,6 @@ un_mmap(void *v1,void *ve) {
 void
 gcl_init_unixsys(void) {
 
-  make_function("SYSTEM", Lsystem);
+  make_si_function("SYSTEM", siLsystem);
 
 }

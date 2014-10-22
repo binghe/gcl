@@ -457,15 +457,15 @@ static longfloat DFLT_aet_lf = 0.0;
 static object Iname_t = sLt;
 static struct { char * dflt; object *namep;} aet_types[] =
 {   {(char *)	&DFLT_aet_object,	&Iname_t,},	/*  t  */
-    {(char *)	&DFLT_aet_ch, &sLstring_char,},/*  string-char  */
+    {(char *)	&DFLT_aet_ch, &sLcharacter,},/*  character  */
     {(char *)	&DFLT_aet_fix, &sLbit,},		/*  bit  */
     {(char *)	&DFLT_aet_fix,	&sLfixnum,}, 	/*  fixnum  */
     {(char *)	&DFLT_aet_sf, &sLshort_float,},			/*  short-float  */
     {(char *)	&DFLT_aet_lf, &sLlong_float,},	/*  long-float  */
-    {(char *)	&DFLT_aet_char,&sLsigned_char,},               /* signed char */
-    {(char *)    &DFLT_aet_char,&sLunsigned_char,},               /* unsigned char */
-    {(char *)	&DFLT_aet_short,&sLsigned_short,},              /* signed short */
-    {(char *)	&DFLT_aet_short, &sLunsigned_short},    /*  unsigned short   */
+    {(char *)	&DFLT_aet_char,&sSsigned_char,},               /* signed char */
+    {(char *)    &DFLT_aet_char,&sSunsigned_char,},               /* unsigned char */
+    {(char *)	&DFLT_aet_short,&sSsigned_short,},              /* signed short */
+    {(char *)	&DFLT_aet_short, &sSunsigned_short},    /*  unsigned short   */
 	};
 
 DEFUN_NEW("GET-AELTTYPE",object,fSget_aelttype,SI,1,1,NONE,OO,OO,OO,OO,(object x),"")

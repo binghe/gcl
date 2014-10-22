@@ -365,7 +365,7 @@
 (DEFSYSFUN 'ASSOC-IF "Lassoc_if" '(T T) 'T NIL NIL) 
 (DEFSYSFUN 'GET-PROPERTIES "Lget_properties" '(T T) '* NIL NIL) 
 (DEFSYSFUN 'STRING<= "Lstring_le" '(T T *) 'T NIL NIL) 
-(DEFSYSFUN 'EVALHOOK "Levalhook" '(T T T *) 'T NIL NIL) 
+(DEFSYSFUN 'EVALHOOK "siLevalhook" '(T T T *) 'T NIL NIL) 
 (DEFSYSFUN 'FILE-WRITE-DATE "Lfile_write_date" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'LOGCOUNT "Llogcount" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'MERGE-PATHNAMES "Lmerge_pathnames" '(T *) 'T NIL NIL) 

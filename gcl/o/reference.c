@@ -82,7 +82,7 @@ LFD(Lsymbol_function)(void)
 		FEundefined_function(sym);
 	if (sym->s.s_mflag) {
 		vs_push(sym->s.s_gfdef);
-		vs_base[0] = sLmacro;
+		vs_base[0] = sSmacro;
 		stack_cons();
 		return;
 	}
@@ -131,7 +131,7 @@ FFN(Ffunction)(object form)
 		vs_base[0] = MMcons(lex_env[2], vs_base[0]);
 		vs_base[0] = MMcons(lex_env[1], vs_base[0]);
 		vs_base[0] = MMcons(lex_env[0], vs_base[0]);
-		vs_base[0] = MMcons(sLlambda_closure, vs_base[0]);
+		vs_base[0] = MMcons(sSlambda_closure, vs_base[0]);
 	} else
 		FEinvalid_function(fun);
 }

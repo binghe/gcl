@@ -36,8 +36,8 @@
 (progn (allocate 'cons 100) (allocate 'string 40)
  (system:init-system) (gbc t)
  (si::multiply-bignum-stack 25)
- (or lisp::*link-array*
-  (setq lisp::*link-array*
+ (or si::*link-array*
+  (setq si::*link-array*
      (make-array 500 :element-type 'fixnum :fill-pointer 0)))
  (use-fast-links t)
 (setq compiler::*cmpinclude* "<cmpinclude.h>") (load #"../cmpnew/cmpmain.lsp") (gbc t) (load #"../cmpnew/lfun_list.lsp")

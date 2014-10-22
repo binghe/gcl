@@ -1800,7 +1800,7 @@ LFD(Lfile_length)()
 		vs_base[0] = make_fixnum(i);
 }
 
-object sSAload_pathnameA;
+object sLAload_pathnameA;
 DEFVAR("*COLLECT-BINARY-MODULES*",sSAcollect_binary_modulesA,SI,sLnil,"");
 DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 
@@ -1861,7 +1861,7 @@ DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 		}
 		package = symbol_value(sLApackageA);
 		bds_bind(sLApackageA, package);
-		bds_bind(sSAload_pathnameA,fasl_filename);
+		bds_bind(sLAload_pathnameA,fasl_filename);
 		if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
 		  object _x=sSAbinary_modulesA->s.s_dbind;
 		  object _y=Cnil;
@@ -1920,7 +1920,7 @@ DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 		flush_stream(PRINTstream);
 	}
 	package = symbol_value(sLApackageA);
-	bds_bind(sSAload_pathnameA,pathname);
+	bds_bind(sLAload_pathnameA,pathname);
 	bds_bind(sLApackageA, package);
 	bds_bind(sLAstandard_inputA, strm);
 	frs_push(FRS_PROTECT, Cnil);
@@ -2571,7 +2571,7 @@ gcl_init_file(void)
 }
 
 DEFVAR("*IGNORE-EOF-ON-TERMINAL-IO*",sSAignore_eof_on_terminal_ioA,SI,Cnil,"");
-DEFVAR("*LOAD-PATHNAME*",sSAload_pathnameA,SI,Cnil,"");
+DEFVAR("*LOAD-PATHNAME*",sLAload_pathnameA,LISP,Cnil,"");
 DEFVAR("*LOAD-VERBOSE*",sLAload_verboseA,LISP,Ct,"");
 
 DEF_ORDINARY("ABORT",sKabort,KEYWORD,"");

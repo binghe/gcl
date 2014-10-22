@@ -227,7 +227,7 @@ funcall(object fun)
 	  c = FALSE;
 	  fun = fun->c.c_cdr;
 
-	}else if (x == sLlambda_block) {
+	}else if (x == sSlambda_block) {
 	  b = TRUE;
 	  c = FALSE;
 	  if(sSlambda_block_expanded->s.s_dbind!=OBJNULL)
@@ -237,14 +237,14 @@ funcall(object fun)
 
 
 	
-	} else if (x == sLlambda_closure) {
+	} else if (x == sSlambda_closure) {
 		b = FALSE;
 		c = TRUE;
 		fun = fun->c.c_cdr;
 	} else if (x == sLlambda) {
 		b = c = FALSE;
 		fun = fun->c.c_cdr;
-	} else if (x == sLlambda_block_closure) {
+	} else if (x == sSlambda_block_closure) {
 		b = c = TRUE;
 		fun = fun->c.c_cdr;
 	} else
@@ -644,13 +644,13 @@ EVAL:
 
 	vs_check;
 
-	if (Vevalhook->s.s_dbind != Cnil && eval1 == 0)
+	if (siVevalhook->s.s_dbind != Cnil && eval1 == 0)
 	{
 		bds_ptr old_bds_top = bds_top;
-		object hookfun = symbol_value(Vevalhook);
+		object hookfun = symbol_value(siVevalhook);
 		/*  check if Vevalhook is unbound  */
 
-		bds_bind(Vevalhook, Cnil);
+		bds_bind(siVevalhook, Cnil);
 		form = Ifuncall_n(hookfun,2,form,list(3,lex_env[0],lex_env[1],lex_env[2]));
 		bds_unwind(old_bds_top);
 		return form;
@@ -721,7 +721,7 @@ APPLICATION:
 	for (x = lex_env[1];  type_of(x) == t_cons;  x = x->c.c_cdr)
 		if (x->c.c_car->c.c_car == fun) {
 			x = x->c.c_car;
-			if (MMcadr(x) == sLmacro) {
+			if (MMcadr(x) == sSmacro) {
 				x = MMcaddr(x);
 				goto EVAL_MACRO;
 			}
@@ -755,10 +755,10 @@ EVAL_ARGS:
 	  vs_top = ++top;
 	  form = MMcdr(form);}
 	  n =top - base; /* number of args */
-	if (Vapplyhook->s.s_dbind != Cnil) {
+	if (siVapplyhook->s.s_dbind != Cnil) {
 	  base[0]= (object)n;
 	  base[0] = c_apply_n(list,n+1,base);
-	  x = Ifuncall_n(Vapplyhook->s.s_dbind,3,
+	  x = Ifuncall_n(siVapplyhook->s.s_dbind,3,
 			 x, /* the function */
 			 base[0], /* the arg list */
 			 list(3,lex_env[0],lex_env[1],lex_env[2]));
@@ -775,7 +775,7 @@ EVAL_ARGS:
 
 LAMBDA:
 	if (type_of(fun) == t_cons && MMcar(fun) == sLlambda) {
-	  x = listA(4,sLlambda_closure,lex_env[0],lex_env[1],lex_env[2],Mcdr(fun));
+	  x = listA(4,sSlambda_closure,lex_env[0],lex_env[1],lex_env[2],Mcdr(fun));
 	  goto EVAL_ARGS;
 	}
 	FEinvalid_function(fun);
@@ -805,13 +805,13 @@ EVAL:
 
 	vs_check;
 
-	if (Vevalhook->s.s_dbind != Cnil && eval1 == 0)
+	if (siVevalhook->s.s_dbind != Cnil && eval1 == 0)
 	{
 		bds_ptr old_bds_top = bds_top;
-		object hookfun = symbol_value(Vevalhook);
-		/*  check if Vevalhook is unbound  */
+		object hookfun = symbol_value(siVevalhook);
+		/*  check if siVevalhook is unbound  */
 
-		bds_bind(Vevalhook, Cnil);
+		bds_bind(siVevalhook, Cnil);
 		vs_base = vs_top;
 		vs_push(form);
 		vs_push(lex_env[0]);
@@ -903,7 +903,7 @@ APPLICATION:
 	for (x = lex_env[1];  type_of(x) == t_cons;  x = x->c.c_cdr)
 		if (x->c.c_car->c.c_car == fun) {
 			x = x->c.c_car;
-			if (MMcadr(x) == sLmacro) {
+			if (MMcadr(x) == sSmacro) {
 				x = MMcaddr(x);
 				goto EVAL_MACRO;
 			}
@@ -940,7 +940,7 @@ EVAL_ARGS:
 		form = MMcdr(form);
 	}
 	vs_base = base;
-	if (Vapplyhook->s.s_dbind != Cnil) {
+	if (siVapplyhook->s.s_dbind != Cnil) {
 		call_applyhook(fun);
 		return;
 	}
@@ -959,7 +959,7 @@ LAMBDA:
 		temporary = make_cons(lex_env[2], fun->c.c_cdr);
 		temporary = make_cons(lex_env[1], temporary);
 		temporary = make_cons(lex_env[0], temporary);
-		x = make_cons(sLlambda_closure, temporary);
+		x = make_cons(sSlambda_closure, temporary);
 		vs_push(x);
 		goto EVAL_ARGS;
 	}
@@ -972,7 +972,7 @@ call_applyhook(object fun)
 	object ah;
 	object *v;
 
-	ah = symbol_value(Vapplyhook);
+	ah = symbol_value(siVapplyhook);
 	v = vs_base + 1;
 	vs_push(Cnil);
 	while (vs_top > v)
@@ -1040,7 +1040,7 @@ DEFUNOM_NEW("EVAL",object,fLeval,LISP
 	return Ivs_values();
 }
 
-LFD(Levalhook)(void)
+LFD(siLevalhook)(void)
 {
 	object env;
 	bds_ptr old_bds_top = bds_top;
@@ -1062,15 +1062,15 @@ LFD(Levalhook)(void)
 		vs_push(car(env));
 	} else
 		too_many_arguments();
-	bds_bind(Vevalhook, vs_base[1]);
-	bds_bind(Vapplyhook, vs_base[2]);
+	bds_bind(siVevalhook, vs_base[1]);
+	bds_bind(siVapplyhook, vs_base[2]);
 	eval1 = 1;
 	eval(vs_base[0]);
 	lex_env = lex;
 	bds_unwind(old_bds_top);
 }
 
-LFD(Lapplyhook)(void)
+LFD(siLapplyhook)(void)
 {
 
 	object env;
@@ -1094,8 +1094,8 @@ LFD(Lapplyhook)(void)
 		vs_push(car(env));
 	} else
 		too_many_arguments();
-	bds_bind(Vevalhook, vs_base[2]);
-	bds_bind(Vapplyhook, vs_base[3]);
+	bds_bind(siVevalhook, vs_base[2]);
+	bds_bind(siVapplyhook, vs_base[3]);
 	z = vs_top;
 	for (l = vs_base[1];  !endp(l);  l = l->c.c_cdr)
 		vs_push(l->c.c_car);
@@ -1392,15 +1392,15 @@ gcl_init_eval(void)
         make_constant("CALL-ARGUMENTS-LIMIT", make_fixnum(64));
 
 
-	Vevalhook = make_special("*EVALHOOK*", Cnil);
-	Vapplyhook = make_special("*APPLYHOOK*", Cnil);
+	siVevalhook = make_si_special("*EVALHOOK*", Cnil);
+	siVapplyhook = make_si_special("*APPLYHOOK*", Cnil);
 
 
 	three_nils.nil3_self[0] = Cnil;
 	three_nils.nil3_self[1] = Cnil;
 	three_nils.nil3_self[2] = Cnil;
 
-	make_function("EVALHOOK", Levalhook);
-	make_function("APPLYHOOK", Lapplyhook);
+	make_si_function("EVALHOOK", siLevalhook);
+	make_si_function("APPLYHOOK", siLapplyhook);
 
 }

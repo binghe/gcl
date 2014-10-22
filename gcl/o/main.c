@@ -549,22 +549,10 @@ initlisp(void) {
 	import(Ct, lisp_package);
 	export(Ct, lisp_package);
 
-#ifdef ANSI_COMMON_LISP
-/*  	Cnil->s.s_hpack = common_lisp_package; */
-	import(Cnil, common_lisp_package);
-	export(Cnil, common_lisp_package);
-
-/*  	Ct->s.s_hpack = common_lisp_package; */
-	import(Ct, common_lisp_package);
-	export(Ct, common_lisp_package);
-#endif
-
-/* 	sLquote = make_ordinary("QUOTE"); */
-/* 	sLfunction = make_ordinary("FUNCTION"); */
 	sLlambda = make_ordinary("LAMBDA");
-	sLlambda_block = make_ordinary("LAMBDA-BLOCK");
-	sLlambda_closure = make_ordinary("LAMBDA-CLOSURE");
-	sLlambda_block_closure = make_ordinary("LAMBDA-BLOCK-CLOSURE");
+	sSlambda_block = make_si_ordinary("LAMBDA-BLOCK");
+	sSlambda_closure = make_si_ordinary("LAMBDA-CLOSURE");
+	sSlambda_block_closure = make_si_ordinary("LAMBDA-BLOCK-CLOSURE");
 	sLspecial = make_ordinary("SPECIAL");
 
 	
@@ -702,7 +690,7 @@ segmentation_catcher(int i) {
 /* 	error("end of file"); */
 /* } */
 
-DEFUNO_NEW("BYE",object,fLbye,LISP
+DEFUNO_NEW("BYE",object,fSbye,SI
        ,0,1,NONE,OO,OO,OO,OO,void,Lby,(object exitc),"")
 {	int n=VFUN_NARGS;
 	int exit_code;
@@ -714,9 +702,9 @@ DEFUNO_NEW("BYE",object,fLbye,LISP
 }
 
 
-DEFUN_NEW("QUIT",object,fLquit,LISP
+DEFUN_NEW("QUIT",object,fSquit,SI
        ,0,1,NONE,OO,OO,OO,OO,(object exitc),"")
-{	return FFN(fLbye)(exitc); }
+{	return FFN(fSbye)(exitc); }
  
 /* DEFUN_NEW("EXIT",object,fLexit,LISP */
 /*        ,0,1,NONE,OI,OO,OO,OO,(fixnum exitc),"") */
@@ -976,7 +964,7 @@ FFN(siLsave_system)(void) {
 
   saving_system = FALSE;
 
-  Lsave();
+  siLsave();
   alloc_page(-(holepage+nrbpage));
 
 }
@@ -990,7 +978,7 @@ DEFVAR("*COMMAND-ARGS*",sSAcommand_argsA,SI,sLnil,"");
 static void
 init_main(void) {
 
-  make_function("BY", Lby);
+  make_si_function("BY", Lby);
   make_si_function("ARGC", siLargc);
   make_si_function("ARGV", siLargv);
   

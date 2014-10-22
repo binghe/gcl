@@ -191,7 +191,7 @@ is an illegal function definition in FLET.",
 		top[0] = MMcons(lex[2], def);
 		top[0] = MMcons(lex[1], top[0]);
 		top[0] = MMcons(lex[0], top[0]);
-		top[0] = MMcons(sLlambda_block_closure, top[0]);
+		top[0] = MMcons(sSlambda_block_closure, top[0]);
 		lex_fun_bind(MMcar(def), top[0]);
 		def_list = MMcdr(def_list);
 	}
@@ -227,7 +227,7 @@ is an illegal function definition in LABELS.",
 		top[0] = MMcons(Cnil, top[0]);
 		top[1] = MMcons(top[0], top[1]);
 		top[0] = MMcons(lex[0], top[0]);
-		top[0] = MMcons(sLlambda_block_closure, top[0]);
+		top[0] = MMcons(sSlambda_block_closure, top[0]);
 		lex_fun_bind(MMcar(def), top[0]);
 		def_list = MMcdr(def_list);
 	}

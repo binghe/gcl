@@ -336,15 +336,15 @@ mark_link_array(void *v,void *ve) {
   if (NULL_OR_ON_C_STACK(v))
     return;
 
-  if (sLAlink_arrayA->s.s_dbind==Cnil)
+  if (sSAlink_arrayA->s.s_dbind==Cnil)
     return;
 
-  p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
-  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  p=(void *)sSAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sSAlink_arrayA->s.s_dbind->v.v_fillp;
 
-  if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P
+  if (is_marked(sSAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P
 #ifdef SGC
-      && (!sgc_enabled || SGC_RELBLOCK_P(sLAlink_arrayA->s.s_dbind->v.v_self))
+      && (!sgc_enabled || SGC_RELBLOCK_P(sSAlink_arrayA->s.s_dbind->v.v_self))
 #endif
       ) {
     fixnum j=rb_pointer1-rb_pointer;
@@ -368,11 +368,11 @@ prune_link_array(void) {
 
   void **p,**pe,**n,**ne;
 
-  if (sLAlink_arrayA->s.s_dbind==Cnil)
+  if (sSAlink_arrayA->s.s_dbind==Cnil)
     return;
 
-  ne=n=p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
-  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  ne=n=p=(void *)sSAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sSAlink_arrayA->s.s_dbind->v.v_fillp;
 
   while (p<pe) {
     if (*p) {
@@ -382,7 +382,7 @@ prune_link_array(void) {
       p+=2;
   }
 
-  sLAlink_arrayA->s.s_dbind->v.v_fillp=(ne-n)*sizeof(*n);
+  sSAlink_arrayA->s.s_dbind->v.v_fillp=(ne-n)*sizeof(*n);
 
 }
 
@@ -392,11 +392,11 @@ sweep_link_array(void) {
 
   void ***p,***pe;
 
-  if (sLAlink_arrayA->s.s_dbind==Cnil)
+  if (sSAlink_arrayA->s.s_dbind==Cnil)
     return;
 
-  p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
-  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  p=(void *)sSAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sSAlink_arrayA->s.s_dbind->v.v_fillp;
   for (;p<pe;p+=2)
     if (*p) {
       if (LINK_ARRAY_MARKED(p))
@@ -1604,7 +1604,7 @@ mark_contblock(void *p, int s) {
     set_mark_bits(v,x,y);
 }
 
-DEFUN_NEW("GBC",object,fLgbc,LISP,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
+DEFUN_NEW("GBC",object,fSgbc,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
 
   /* 1 args */
   
