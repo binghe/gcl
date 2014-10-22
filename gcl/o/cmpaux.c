@@ -48,7 +48,7 @@ DEFUNO_NEW("SPECIALP",object,fSspecialp,SI
 	RETURN1(sym);
 }
 
-DEF_ORDINARY("DEBUG",sSdebug,SI,"");
+DEF_ORDINARY("DEBUGGER",sSdebugger,SI,"");
 
 DEFUN_NEW("DEFVAR1",object,fSdefvar1,SI
        ,2,3,NONE,OO,OO,OO,OO,(object sym,object val,...),"")
@@ -71,10 +71,10 @@ DEFUN_NEW("DEFVAR1",object,fSdefvar1,SI
       }
 
 
-DEFUN_NEW("DEBUG",object,fSdebug,SI
+DEFUN_NEW("DEBUG",object,fLdebug,LISP
        ,2,2,NONE,OO,OO,OO,OO,(object sym,object val),"")
 { /* 2 args */
-  putprop(sym,val,sSdebug);
+  putprop(sym,val,sSdebugger);
   RETURN1(sym);
 }
 

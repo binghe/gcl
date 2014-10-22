@@ -696,7 +696,7 @@
 	 )))
 
 (defun si::add-debug (fname x)
-  (si::putprop fname x  'si::debug))
+  (si::putprop fname x  'si::debugger))
 
 (defun t3init-fun (fname cfun lambda-expr doc)
 
@@ -1237,10 +1237,10 @@
 			 (si::fixnump (cdr (var-ref va))))
 		    (setf (nth (cdr (var-ref va)) locals)
 			  (var-name va))))
-      (setf (get fname 'si::debug) locals)
-      (let ((locals (get fname 'si::debug)))
+      (setf (get fname 'si::debugger) locals)
+      (let ((locals (get fname 'si::debugger)))
 	(if (and locals (or (cdr locals) (not (null (car locals)))))
-	    (add-init `(si::debug ',fname ',locals) )
+	    (add-init `(debug ',fname ',locals) )
 	    ))
       ))))
 
