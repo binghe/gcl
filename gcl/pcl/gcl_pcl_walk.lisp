@@ -1367,7 +1367,7 @@
 			 #+cmu17
 			 (special-operator-p fn)
 			 #-cmu17
-			 (special-form-p fn))
+			 (special-operator-p fn))
 		    (error
 		     "~S is a special form, not defined in the CommonLisp.~%~
 		      manual This code walker doesn't know how to walk it.~%~

@@ -114,7 +114,7 @@
 (defun print-symbol-apropos (symbol)
   (prin1 symbol)
   (when (fboundp symbol)
-        (if (special-form-p symbol)
+        (if (special-operator-p symbol)
             (princ "  Special form")
             (if (macro-function symbol)
                 (princ "  Macro")

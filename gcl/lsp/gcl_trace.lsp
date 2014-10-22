@@ -163,7 +163,7 @@
   (when (null (fboundp fname))
         (format *trace-output* "The function ~S is not defined.~%" fname)
         (return-from trace-one nil))
-  (when (special-form-p fname)
+  (when (special-operator-p fname)
         (format *trace-output* "~S is a special form.~%" fname)
         (return-from trace-one nil))
   (when (macro-function fname)

@@ -129,7 +129,7 @@
 (DEFSYSFUN 'STRING-NOT-GREATERP "Lstring_not_greaterp" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'STRING> "Lstring_g" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'FINISH-OUTPUT "Lfinish_output" '(*) 'T NIL NIL) 
-(DEFSYSFUN 'SPECIAL-FORM-P "Lspecial_form_p" '(T) 'T NIL T) 
+(DEFSYSFUN 'SPECIAL-OPERATOR-P "Lspecial_operator_p" '(T) 'T NIL T) 
 (DEFSYSFUN 'STRINGP "Lstringp" '(T) 'T NIL T) 
 (DEFSYSFUN 'GET-INTERNAL-RUN-TIME "Lget_internal_run_time" 'NIL 'T NIL
     NIL) 

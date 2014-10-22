@@ -173,7 +173,7 @@ LFD(Lmacro_function)(void)
 		vs_base[0] = Cnil;
 }
 
-LFD(Lspecial_form_p)(void)
+LFD(Lspecial_operator_p)(void)
 {
 	check_arg(1);
 	if (type_of(vs_base[0]) != t_symbol)
@@ -194,7 +194,6 @@ gcl_init_reference(void)
 	make_function("SYMBOL-VALUE", Lsymbol_value);
 	make_function("BOUNDP", Lboundp);
 	make_function("MACRO-FUNCTION", Lmacro_function);
-	make_function("SPECIAL-FORM-P", Lspecial_form_p);
-	make_function("SPECIAL-OPERATOR-P", Lspecial_form_p);
+	make_function("SPECIAL-OPERATOR-P", Lspecial_operator_p);
 }
 

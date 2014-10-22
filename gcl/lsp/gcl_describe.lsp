@@ -347,7 +347,7 @@
                (find-package "SYSTEM")
                *package*)))
 
-    (cond ((special-form-p symbol)
+    (cond ((special-operator-p symbol)
            (doc1 (or (documentation symbol 'function) "")
                  (if (macro-function symbol)
                      "[Special form and Macro]"

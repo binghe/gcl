@@ -320,7 +320,7 @@
                      (lambda-block-closure (cddddr fun))
                      (t (cond
 			 ((and (symbolp (car fun))
-			       (or (special-form-p(car fun))
+			       (or (special-operator-p(car fun))
 				   (fboundp (car fun))))
 			  (car fun))
 			 (t '(:zombi))))))
@@ -374,7 +374,7 @@
              (lambda-block-closure (nth 4 fun))
              (lambda-closure 'lambda-closure)
              (t (if (and (symbolp (car fun))
-			 (or (special-form-p (car fun))
+			 (or (special-operator-p (car fun))
 			     (fboundp (car fun))))
 		    (car fun) :zombi)
 		    )))
