@@ -204,7 +204,7 @@
       (do-macro-expansion '(macroexpand-1) form)
     form))
 
-(defun cmp-expand-macro (fd fname args &aux env (form (cons fname args)))
+(defun cmp-expand-macro (fd fname args &aux (form (cons fname args)))
   (if (macro-def-p form)
       (do-macro-expansion `(funcall *macroexpand-hook* ',fd) form)
     form))
