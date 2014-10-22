@@ -9,9 +9,7 @@ GFILES:=$(addprefix gcl_pcl_gazonk,$(GFILES1))
 
 AFILES:=$(FILES) $(GFILES)
 
-SETUP='(load "sys-package.lisp")' \
-	'(setq *features* (delete (quote :kcl) *features*))'\
-	'(load "defsys.lisp")(push (quote :kcl) *features*)' \
+SETUP='(load "defsys.lisp")' \
 	'(setq pcl::*default-pathname-extensions* (cons "lisp" "o"))' \
 	'(setq pcl::*pathname-extensions* (cons "lisp" "o"))' \
 	'(load "sys-proclaim.lisp")' \

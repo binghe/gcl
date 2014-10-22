@@ -277,17 +277,17 @@ static object set_cclosure (object result_cc,object value_cc,fixnum available_si
   (fourth slotd))
 
 (defun renew-sys-files()
-  ;; packages:
-  (compiler::get-packages "sys-package.lisp")
-  (with-open-file (st "sys-package.lisp"
-			  :direction :output
-			  :if-exists :append)
-	(format st "(lisp::in-package \"SI\")
-(export '(%structure-name
-          %compiled-function-name
-          %set-compiled-function-name))
-(in-package \"PCL\")
-"))
+;;   ;; packages:
+;;   (compiler::get-packages "sys-package.lisp")
+;;   (with-open-file (st "sys-package.lisp"
+;; 			  :direction :output
+;; 			  :if-exists :append)
+;; 	(format st "(lisp::in-package \"SI\")
+;; (export '(%structure-name
+;;           %compiled-function-name
+;;           %set-compiled-function-name))
+;; (in-package \"PCL\")
+;; "))
 
   ;; proclaims
   (compiler::make-all-proclaims "*.fn")
