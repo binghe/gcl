@@ -357,6 +357,19 @@ main(int argc, char **argv, char **envp) {
 
   gcl_init_alloc(&argv);
 
+#ifdef GET_FULL_PATH_SELF
+  GET_FULL_PATH_SELF(kcl_self);
+#else
+  kcl_self = argv[0];
+#endif
+#ifdef __MINGW32__
+  {
+    char *s=kcl_self;
+    for (;*s;s++) if (*s=='\\') *s='/';
+  }
+#endif	
+  *argv=kcl_self;
+  
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include <stdio.h>
 #include <stdlib.h>
@@ -380,19 +393,6 @@ main(int argc, char **argv, char **envp) {
   ARGC = argc;
   ARGV = argv;
   ENVP = envp;
-  
-#ifdef GET_FULL_PATH_SELF
-  GET_FULL_PATH_SELF(kcl_self);
-#else
-  kcl_self = argv[0];
-#endif
-#ifdef __MINGW32__
-  {
-    char *s=kcl_self;
-    for (;*s;s++) if (*s=='\\') *s='/';
-  }
-#endif	
-  *argv=kcl_self;
   
   vs_top = vs_base = vs_org;
   ihs_top = ihs_org-1;
