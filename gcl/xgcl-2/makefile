@@ -4,10 +4,13 @@
 all: objects #docs
 
 objects: $(LISP)
-	echo '(load "sysdef.lisp")(xlib::compile-xgcl)' | $(LISP)
+	echo '(load "sysdef.lisp")(load "sys-proclaim.lisp")(xlib::compile-xgcl)' | $(LISP)
 
 saved_xgcl: $(LISP)
-	echo '(load "sysdef.lisp")(xlib::compile-xgcl)(xlib::save-xgcl "$@")' | $(LISP)
+	echo '(load "sysdef.lisp")(load "sys-proclaim.lisp")(xlib::compile-xgcl)(xlib::save-xgcl "$@")' | $(LISP)
+
+sys-proclaim.lisp:
+	echo '(load "sysdef.lisp")(compiler::emit-fn t)(xlib::compile-xgcl)(compiler::make-all-proclaims "*.fn")' | $(LISP)
 
 docs: dwdoc/dwdoccontents.html dwdoc.pdf
 
@@ -22,7 +25,7 @@ dwdoc.pdf: dwdoc.tex
 
 clean:
 	rm -f *.o *.data saved_*  cmpinclude.h dwdoc.aux dwdoc.log gmon.out
-	rm -f gcl*c gcl*h gcl*data gcl_xrecompile* user-init*
+	rm -f gcl*c gcl*h gcl*data gcl_xrecompile* user-init* *fn
 
 clean-docs:
 	rm -rf dwdoc dwdoc.pdf
