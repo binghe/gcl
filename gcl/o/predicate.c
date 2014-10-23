@@ -358,6 +358,14 @@ fLfunctionp(object x) {
 #endif
 
 
+DEFUNO_NEW("COMMONP",object,fScommonp,SI,1,1,NONE,OO,OO,OO,OO,void,siLcommonp,(object x0),"") {
+  if (type_of(x0) != t_spice)
+    x0 = Ct;
+  else
+    x0 = Cnil;
+  RETURN1(x0);
+}
+
 DEFUNO_NEW("COMPILED-FUNCTION-P",object,fLcompiled_function_p,LISP
    ,1,1,NONE,OO,OO,OO,OO,void,Lcompiled_function_p,(object x0),"")
 

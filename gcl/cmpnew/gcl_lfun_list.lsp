@@ -303,7 +303,7 @@
 (DEFSYSFUN '= "Lall_the_same" '(T *) 'T NIL T) 
 (DEFSYSFUN 'GENTEMP "Lgentemp" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'RENAME-PACKAGE "Lrename_package" '(T T *) 'T NIL NIL) 
-(DEFSYSFUN 'COMMONP "Lcommonp" '(T) 'T NIL T) 
+(DEFSYSFUN 'COMMONP "siLcommonp" '(T) 'T NIL T) 
 (DEFSYSFUN 'NUMBERP "Lnumberp" '(T) 'T NIL T) 
 (DEFSYSFUN 'COPY-READTABLE "Lcopy_readtable" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'RANDOM-STATE-P "Lrandom_state_p" '(T) 'T NIL T) 
