@@ -238,6 +238,8 @@
 
 (defvar *file-table* (make-hash-table :test 'eq)) 
 
+(defvar *warn-on-multiple-fn-definitions* t)
+
 (defun add-fn-data (lis &aux tem file)
   (let ((file (and (setq file (si::fp-input-stream *standard-input*))
 		   (truename file))))
@@ -248,12 +250,12 @@
 						 (namestring file))))
 		 (setf (get (fn-name v) 'other-form) t)))
 	  (setf (gethash (fn-name v) *call-table*) v)
-	  (if (setq tem (gethash (fn-name v) *file-table*))
-	      (or (equal tem file)
-		  (format t "~% Warn ~a redefined in ~a. Originally in ~a."
-			  (fn-name v) file tem)))
-	  (setf (gethash (fn-name v) *file-table*)
-		file))))
+	  (when *warn-on-multiple-fn-definitions*
+	    (when (setq tem (gethash (fn-name v) *file-table*))
+	      (unless (equal tem file)
+		(warn 'simple-warning :format-control "~% ~a redefined in ~a. Originally in ~a."
+		      :format-arguments (list (fn-name v) file tem)))))
+	  (setf (gethash (fn-name v) *file-table*) file))))
 
 (defun dump-fn-data (&optional (file "fn-data.lsp")
 			       &aux (*package* (find-package "COMPILER"))
