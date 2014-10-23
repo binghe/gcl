@@ -306,6 +306,15 @@ make_special_form_internal(char *s, void (*f)())
 	return(x);
 }
 
+object
+make_si_special_form_internal(char *s, void (*f)())
+{
+	object x;
+	x = make_si_ordinary(s);
+	x->s.s_sfdef = f;
+	return(x);
+}
+
 DEFUN_NEW("COMPILED-FUNCTION-NAME",object,fScompiled_function_name,SI
    ,1,1,NONE,OO,OO,OO,OO,(object fun),"")
 
