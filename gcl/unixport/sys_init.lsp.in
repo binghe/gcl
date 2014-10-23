@@ -4,6 +4,7 @@
 (make-package :defpackage :use '(:lisp))
 (make-package :tk :use '(:lisp :sloop))
 (make-package :fpe :use '(:lisp))
+(make-package :cltl1-compat)
 
 (in-package :system)
 (use-package :fpe)
@@ -65,7 +66,17 @@
       *opt-two* @LI-OPT-TWO@
       *init-lsp* @LI-INIT-LSP@)
 
-(in-package :user)
-#+ansi-cl (use-package :pcl)
-(import 'si::(clines defentry defcfun object void int double info))
+(import 'si::(clines defentry defcfun object void int double
+		     quit bye gbc system commonp
+		     get-setf-method *break-on-warnings*
+		     make-char char-bits char-font char-bit set-char-bit string-char-p int-char
+		     char-font-limit char-bits-limit char-control-bit
+		     char-meta-bit char-super-bit char-hyper-bit compiler-let) :cltl1-compat)
+(deftype cltl1-compat::string-char nil 'character)
+(do-symbols (s :cltl1-compat) (export s :cltl1-compat))
 
+#-ansi-cl(use-package :cltl1-compat :lisp)
+#-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp)))
+(export '*load-pathname* :si);For maxima, at least as of 5.34.1
+
+#+ansi-cl (use-package :pcl :user)
