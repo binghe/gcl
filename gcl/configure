@@ -7569,9 +7569,6 @@ fi
 
 if test "$enable_ansi" = "yes" ; then
 	SYSTEM=ansi_gcl
-
-$as_echo "#define ANSI_COMMON_LISP 1" >>confdefs.h
-
 	CLSTANDARD=ANSI
 else
 	SYSTEM=gcl

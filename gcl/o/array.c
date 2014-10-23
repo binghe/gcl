@@ -463,7 +463,7 @@ static struct { char * dflt; object *namep;} aet_types[] =
     {(char *)	&DFLT_aet_sf, &sLshort_float,},			/*  short-float  */
     {(char *)	&DFLT_aet_lf, &sLlong_float,},	/*  long-float  */
     {(char *)	&DFLT_aet_char,&sSsigned_char,},               /* signed char */
-    {(char *)    &DFLT_aet_char,&sSunsigned_char,},               /* unsigned char */
+    {(char *)   &DFLT_aet_char,&sSunsigned_char,},               /* unsigned char */
     {(char *)	&DFLT_aet_short,&sSsigned_short,},              /* signed short */
     {(char *)	&DFLT_aet_short, &sSunsigned_short},    /*  unsigned short   */
 	};
