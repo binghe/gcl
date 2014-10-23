@@ -65,8 +65,6 @@
 (defvar *break-enable* t)
 (defvar *break-message* "")
 
-(defvar *break-on-warnings* nil)
-
 (defvar *break-readtable* nil)
 
 (defvar *top-level-hook* nil)

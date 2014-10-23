@@ -100,6 +100,8 @@
 	     args))))
 	("unknown error")))
 
+(defvar *break-on-warnings* nil)
+
 (defun warn (datum &rest arguments)
   (declare (optimize (safety 2)))
   (let ((c (process-error datum arguments 'simple-warning)))
