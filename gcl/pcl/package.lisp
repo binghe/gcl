@@ -18,3 +18,4 @@
 (defvar *the-pcl-package* (find-package :pcl))
 (defun load-truename (&optional errorp) *load-pathname*)
 (import 'si::(clines defentry defcfun object void int double))
+(import 'si::compiler-let :walker)
