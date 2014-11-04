@@ -227,7 +227,7 @@ sgc_mark_object1(object x) {
     if (x->ht.ht_self == NULL)
       break;
     for (i = 0, j = x->ht.ht_size;  i < j;  i++) {
-      if (ON_WRITABLE_PAGE(&x->ht.ht_self[i])) {
+      if (x->ht.ht_self[i].hte_key!=OBJNULL && ON_WRITABLE_PAGE(&x->ht.ht_self[i])) {
 	sgc_mark_object(x->ht.ht_self[i].hte_key);
 	sgc_mark_object(x->ht.ht_self[i].hte_value);
       }
