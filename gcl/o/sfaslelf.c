@@ -58,7 +58,7 @@ License for more details.
 #define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info),_t=ELF_ST_TYPE(sym->st_info);	\
       sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK || (_t>=STT_LOPROC && _t<=STT_HIPROC));})
 
-#define MASK(n) (~(~0L << (n)))
+#define MASK(n) (~(~0ULL << (n)))
 
 
 
