@@ -918,8 +918,8 @@ parse_key_new_new(int n, object *base, struct key *keys, object first, va_list a
  /* from here down identical to parse_key_rest */
  new = new + n ;
   {int j=keys->n;
-   object *p= (object *)(keys->defaults);
-   while (--j >=0) base[j]=p[j];
+   object **p= (object **)(keys->defaults);
+   while (--j >=0) base[j]=*(p[j]);
  }
  {if (n==0){ return 0;}
  {int allow = keys->allow_other_keys;
@@ -935,11 +935,11 @@ parse_key_new_new(int n, object *base, struct key *keys, object first, va_list a
  top:
   while (n>=2)
     {int i= keys->n;
-     iobject *ke=keys->keys ;
+     iobject **ke=keys->keys ;
      new = new -2;
      k = *new;
      while(--i >= 0)
-       {if ((*(ke++)).o == k)
+       {if ((**(ke++)).o == k)
 	  {base[i]= new[1];
 	   n=n-2;
 	   goto top;
@@ -1026,8 +1026,8 @@ parse_key_rest_new(object rest, int n, object *base, struct key *keys, object fi
     
  new = new + n ;
   {int j=keys->n;
-   object *p= (object *)(keys->defaults);
-   while (--j >=0) base[j]=p[j];
+   object **p= (object *)(keys->defaults);
+   while (--j >=0) base[j]=*(p[j]);
  }
  {if (n==0){ return 0;}
  {int allow = keys->allow_other_keys;
@@ -1043,11 +1043,11 @@ parse_key_rest_new(object rest, int n, object *base, struct key *keys, object fi
  top:
   while (n>=2)
     {int i= keys->n;
-     iobject *ke=keys->keys ;
+     iobject **ke=keys->keys ;
      new = new -2;
      k = *new;
      while(--i >= 0)
-       {if ((*(ke++)).o == k)
+       {if ((**(ke++)).o == k)
 	  {base[i]= new[1];
 	   n=n-2;
 	   goto top;
@@ -1066,18 +1066,19 @@ parse_key_rest_new(object rest, int n, object *base, struct key *keys, object fi
   return -1;
 }}}
 
+static object foo[2]={Cnil,OBJNULL};
   
 void
 set_key_struct(struct key *ks, object data)
 {int i=ks->n;
  while (--i >=0)
-   {ks->keys[i].o =   data->cfd.cfd_self[ ks->keys[i].i ];
+   {ks->keys[i].o =   data->cfd.cfd_self+ks->keys[i].i;
     if (ks->defaults != (void *)Cstd_key_defaults)
       {fixnum m=ks->defaults[i].i;
         ks->defaults[i].o=
-	  (m==-2 ? Cnil :
-	   m==-1 ? OBJNULL :
-	   data->cfd.cfd_self[m]);}
+	  (m==-2 ? foo :
+	   m==-1 ? foo+1 :
+	   data->cfd.cfd_self+m);}
 }}
 
 #undef AUX
