@@ -1286,34 +1286,15 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    i=rb_pointer-REAL_RB_START+PAGESIZE;/*FIXME*/
-
 #ifdef SGC
     if (sgc_enabled==0)
 #endif
       rb_start = heap_end + PAGESIZE*holepage;
-    
-    rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
-    
-    if (rb_start < rb_pointer)
-      rb_start1 = (char *)
-	((long)(rb_pointer + PAGESIZE-1) & -(unsigned long)PAGESIZE);
-    else
-      rb_start1 = rb_start;
-    
-    /* as we walk through marking data, we replace the
-       relocatable pointers
-       in objects by the rb_pointer, advance that
-       by the size, and copy the actual
-       data there to rb_pointer1, and advance it by the size
-       at the end [rb_start1,rb_pointer1] is copied
-       to [rb_start,rb_pointer]
-    */
-    rb_pointer = rb_start;  /* where the new relblock will start */
-    rb_pointer1 = rb_start1;/* where we will copy it to during gc*/
-    
-    i = (rb_end < (rb_start1 + i) ? (rb_start1 + i) : rb_end) - heap_end;
-    alloc_page(-(i + PAGESIZE - 1)/PAGESIZE);
+    rb_end = heap_end + (holepage + 2*nrbpage) *PAGESIZE;
+
+    rb_pointer=(rb_pointer>=rb_start && rb_pointer<rb_start+(rb_end-rb_start)/2) ? rb_start+(rb_end-rb_start)/2 : rb_start;
+    rb_limit=rb_pointer+nrbpage*PAGESIZE-2*RB_GETA;
+    alloc_page(-(holepage+2*nrbpage));/*FIXME only needed on image startup*/
     
   }
   
@@ -1365,12 +1346,7 @@ GBC(enum type t) {
 #endif
   
   if (COLLECT_RELBLOCK_P) {
-    
-    if (rb_start < rb_start1) {
-      j = (rb_pointer-rb_start + PAGESIZE - 1)/PAGESIZE;
-      memmove(rb_start,rb_start1,j*PAGESIZE);
-    }
-    
+
 #ifdef SGC
     if (sgc_enabled)
       wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
@@ -1384,7 +1360,6 @@ GBC(enum type t) {
 	massert(IS_WRITABLE(i));
     }    
 #endif		
-    rb_limit = rb_end - 2*RB_GETA;
     
   }
 
@@ -1567,18 +1542,15 @@ FFN(siLreset_gbc_count)(void) {
 */
 
 static char *
-copy_relblock(char *p, int s)
-{ char *res = rb_pointer;
- char *q = rb_pointer1;
+copy_relblock(char *p, int s) {
+ char *q = rb_pointer;
+
  s = ROUND_UP_PTR(s);
  rb_pointer += s;
- rb_pointer1 += s;
- 
  memmove(q,p,s);
- /* while (--s >= 0) */
- /*   { *q++ = *p++;} */
- 
- return res;
+
+ return q;
+
 }
 
 

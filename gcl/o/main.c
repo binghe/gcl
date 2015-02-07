@@ -977,7 +977,7 @@ FFN(siLsave_system)(void) {
   saving_system = FALSE;
 
   Lsave();
-  alloc_page(-(holepage+nrbpage));
+  alloc_page(-(holepage+2*nrbpage));
 
 }
 

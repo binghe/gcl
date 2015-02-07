@@ -619,10 +619,10 @@ add_pages(struct typemanager *tm,fixnum m) {
   case t_relocatable:
 
     nrbpage+=m;
-    rb_end=heap_end+(holepage+nrbpage)*PAGESIZE;
-    rb_limit=rb_end-2*RB_GETA;
+    rb_end+=2*m*PAGESIZE;
+    rb_limit+=m*PAGESIZE;
 
-    alloc_page(-(nrbpage+holepage));
+    alloc_page(-(2*nrbpage+holepage));
 
     break;
 
@@ -1162,11 +1162,11 @@ gcl_init_alloc(void *cs_start) {
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
 
-  alloc_page(-(holepage + nrbpage));
+  alloc_page(-(holepage + 2*nrbpage));
   
   rb_start = rb_pointer = heap_end + PAGESIZE*holepage;
-  rb_end = rb_start + PAGESIZE*nrbpage;
-  rb_limit = rb_end - 2*RB_GETA;
+  rb_end = rb_start + PAGESIZE*2*nrbpage;
+  rb_limit = rb_end - PAGESIZE*nrbpage-2*RB_GETA;
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
