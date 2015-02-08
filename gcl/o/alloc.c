@@ -618,6 +618,8 @@ add_pages(struct typemanager *tm,fixnum m) {
 
   case t_relocatable:
 
+    if (rb_pointer>rb_end)
+      GBC(t_relocatable);
     nrbpage+=m;
     rb_end+=m*PAGESIZE;
     rb_limit+=m*PAGESIZE;
