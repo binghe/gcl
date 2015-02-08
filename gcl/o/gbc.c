@@ -1290,7 +1290,8 @@ GBC(enum type t) {
     char *new_start=heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
     
     rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
-
+    rb_limit=rb_pointer+(new_end-new_start)-2*RB_GETA;
+    
     relb_shift=0;
     if (new_start<rb_start) {
       if (rb_pointer==rb_start)
@@ -1304,8 +1305,6 @@ GBC(enum type t) {
     	relb_shift=new_end-rb_pointer;
     }
     
-    rb_limit=rb_pointer+nrbpage*PAGESIZE-2*RB_GETA;
-
     alloc_page(-(holepage+2*nrbpage));
     
   }
