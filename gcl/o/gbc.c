@@ -328,6 +328,8 @@ bool collect_both=0;
 
 #define COLLECT_RELBLOCK_P (what_to_collect == t_relocatable || collect_both)
 
+static fixnum relb_shift;
+
 static void
 mark_link_array(void *v,void *ve) {
 
@@ -347,7 +349,7 @@ mark_link_array(void *v,void *ve) {
       && (!sgc_enabled || SGC_RELBLOCK_P(sLAlink_arrayA->s.s_dbind->v.v_self))
 #endif
       ) {
-    fixnum j=rb_pointer1-rb_pointer;
+    fixnum j=relb_shift;
     p=(void *)p+j;
     pe=(void *)pe+j;
   }
@@ -532,10 +534,9 @@ mark_object(object x) {
     
     switch((enum aelttype)x->a.a_elttype){
 #define  ROUND_RB_POINTERS_DOUBLE \
-{int tem =  ((long)rb_pointer1) & (sizeof(double)-1); \
+{int tem =  ((long)rb_pointer) & (sizeof(double)-1); \
    if (tem) \
      { rb_pointer +=  (sizeof(double) - tem); \
-       rb_pointer1 +=  (sizeof(double) - tem); \
      }}
     case aet_lf:
       j= sizeof(longfloat)*x->lfa.lfa_dim;
@@ -1197,7 +1198,6 @@ char *old_rb_start;
 /* } */
 
 fixnum fault_pages=0;
-static fixnum relb_shift;
 
 void
 GBC(enum type t) {
