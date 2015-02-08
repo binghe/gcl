@@ -1197,6 +1197,7 @@ char *old_rb_start;
 /* } */
 
 fixnum fault_pages=0;
+static fixnum relb_shift;
 
 void
 GBC(enum type t) {
@@ -1286,15 +1287,26 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-#ifdef SGC
-    if (sgc_enabled==0)
-#endif
-      rb_start = heap_end + PAGESIZE*holepage;
-    rb_end = heap_end + (holepage + 2*nrbpage) *PAGESIZE;
+    char *new_start=heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
+    
+    rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
 
-    rb_pointer=(rb_pointer>=rb_start && rb_pointer<rb_start+(rb_end-rb_start)/2) ? rb_start+(rb_end-rb_start)/2 : rb_start;
+    relb_shift=0;
+    if (new_start<rb_start) {
+      if (rb_pointer==rb_start)
+    	rb_pointer=new_start;
+      else
+    	relb_shift=new_start-rb_pointer;
+    } else if (new_start>rb_start) {
+      if (rb_pointer==rb_end)
+    	rb_pointer=new_end;
+      else
+    	relb_shift=new_end-rb_pointer;
+    }
+    
     rb_limit=rb_pointer+nrbpage*PAGESIZE-2*RB_GETA;
-    alloc_page(-(holepage+2*nrbpage));/*FIXME only needed on image startup*/
+
+    alloc_page(-(holepage+2*nrbpage));
     
   }
   
@@ -1346,6 +1358,22 @@ GBC(enum type t) {
 #endif
   
   if (COLLECT_RELBLOCK_P) {
+
+    if (relb_shift) {
+      char *v=rb_pointer<rb_end ? rb_start : rb_end;
+      fprintf(stderr,"Processing relb_shift of %ld\n",relb_shift);
+      fflush(stderr);
+      memmove(v+relb_shift,v,rb_pointer-v);
+      rb_pointer+=relb_shift;
+      rb_limit+=relb_shift;
+    }
+
+#ifdef SGC
+    if (sgc_enabled==0)
+#endif
+      rb_start = heap_end + PAGESIZE*holepage;
+    rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
+    
 
 #ifdef SGC
     if (sgc_enabled)
@@ -1549,7 +1577,7 @@ copy_relblock(char *p, int s) {
  rb_pointer += s;
  memmove(q,p,s);
 
- return q;
+ return q+relb_shift;
 
 }
 

@@ -619,7 +619,7 @@ add_pages(struct typemanager *tm,fixnum m) {
   case t_relocatable:
 
     nrbpage+=m;
-    rb_end+=2*m*PAGESIZE;
+    rb_end+=m*PAGESIZE;
     rb_limit+=m*PAGESIZE;
 
     alloc_page(-(2*nrbpage+holepage));
@@ -789,7 +789,7 @@ DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"
   tm = & tm_table[tm->tm_type];
   if (tm->tm_type == t_relocatable)
     { tm->tm_npage = (rb_end-rb_start)/PAGESIZE;
-      tm->tm_nfree = rb_end -rb_pointer;
+      tm->tm_nfree = rb_limit -rb_pointer;
     }
   else if (tm->tm_type == t_contiguous)
     { int cbfree =0;
@@ -1165,8 +1165,8 @@ gcl_init_alloc(void *cs_start) {
   alloc_page(-(holepage + 2*nrbpage));
   
   rb_start = rb_pointer = heap_end + PAGESIZE*holepage;
-  rb_end = rb_start + PAGESIZE*2*nrbpage;
-  rb_limit = rb_end - PAGESIZE*nrbpage-2*RB_GETA;
+  rb_end = rb_start + PAGESIZE*nrbpage;
+  rb_limit = rb_end - 2*RB_GETA;
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
