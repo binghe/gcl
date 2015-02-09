@@ -1287,7 +1287,11 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    char *new_start=heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
+    char *new_start=
+#ifdef SGC
+      sgc_enabled ? rb_start :
+#endif
+      heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
     
     rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
     rb_limit=rb_pointer+(new_end-new_start)-2*RB_GETA;

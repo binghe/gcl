@@ -344,8 +344,8 @@ EXTER char *rb_start;			/*  relblock start  */
 EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */
 EXTER char *rb_pointer;		/*  relblock pointer  */
-EXTER char *rb_start1;		/*  relblock start in copy space  */
-EXTER char *rb_pointer1;		/*  relblock pointer in copy space  */
+/* EXTER char *rb_start1;		/\*  relblock start in copy space  *\/ */
+/* EXTER char *rb_pointer1;		/\*  relblock pointer in copy space  *\/ */
 
 EXTER char *heap_end;			/*  heap end  */
 EXTER char *core_end;			/*  core end  */
