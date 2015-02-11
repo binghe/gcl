@@ -517,6 +517,8 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
     break;
 
   case t_relocatable:
+    if (rb_pointer>rb_end && rb_pointer+n>rb_limit && rb_pointer+n<rb_end+nrbpage*PAGESIZE)
+      rb_limit=rb_pointer+n;
     if (rb_limit-rb_pointer>=n)
       return ((rb_pointer+=n)-n);
     break;
@@ -554,7 +556,7 @@ too_full_p(struct typemanager *tm) {
 
   switch (tm->tm_type) {
   case t_relocatable:
-    return 100*(rb_limit-rb_pointer)<pf*(rb_limit-rb_start);
+    return 100*(rb_limit-rb_pointer)<pf*(rb_end-rb_start);
     break;
   case t_contiguous:
     for (cbp=cb_pointer,k=0;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
