@@ -1292,22 +1292,31 @@ GBC(enum type t) {
       sgc_enabled ? rb_start :
 #endif
       heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
+    char *start=rb_pointer<rb_end ? rb_start : rb_end;
+    ufixnum size=rb_pointer-start;
     
     rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
     rb_limit=rb_pointer+(new_end-new_start)-2*RB_GETA;
     
     relb_shift=0;
-    if (new_start<rb_start) {
-      if (rb_pointer==rb_start)
-    	rb_pointer=new_start;
+    if (new_start!=rb_start) {
+      if ((new_start<start && new_start+size>=start) ||
+	  (new_start<start+size && new_start+size>=start+size))
+	relb_shift=new_start-rb_pointer;
       else
-    	relb_shift=new_start-rb_pointer;
-    } else if (new_start>rb_start) {
-      if (rb_pointer==rb_end)
-    	rb_pointer=new_end;
-      else
-    	relb_shift=new_end-rb_pointer;
+	rb_pointer=new_start;
     }
+    /* if (new_start<rb_start) { */
+    /*   if (rb_pointer==rb_start) */
+    /* 	rb_pointer=new_start; */
+    /*   else */
+    /* 	relb_shift=new_start-rb_pointer; */
+    /* } else if (new_start>rb_start) { */
+    /*   if (rb_pointer==rb_end) */
+    /* 	rb_pointer=new_start; */
+    /*   else */
+    /* 	relb_shift=new_end-rb_pointer; */
+    /* } */
     
     alloc_page(-(holepage+2*nrbpage));
     

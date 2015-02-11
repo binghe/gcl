@@ -1196,18 +1196,25 @@ sgc_start(void) {
   /* Now  allocate the sgc relblock.   We do this as the tail
      end of the ordinary rb.     */  
   {
-    char *new;
+    /* char *new; */
     tm=tm_of(t_relocatable);
     
     {
+      if (rb_pointer>rb_end) {
+	fprintf(stderr,"Moving relblock low at sgc start\n");
+	fflush(stderr);
+	GBC(t_relocatable);
+      }
       old_rb_start=rb_start;
-      if(((unsigned long)WSGC(tm)) && allocate_more_pages) {
-	new=alloc_relblock(((unsigned long)WSGC(tm))*PAGESIZE);
-	/* the above may cause a gc, shifting the relblock */
-	old_rb_start=rb_start;
-	new= PAGE_ROUND_UP(new);
-      } else new=PAGE_ROUND_UP(rb_pointer);
-      rb_start=rb_pointer=new;
+      rb_start=rb_pointer=PAGE_ROUND_UP(rb_pointer);
+	
+      /* 	if(((unsigned long)WSGC(tm)) && allocate_more_pages) { */
+      /* 	new=alloc_relblock(((unsigned long)WSGC(tm))*PAGESIZE); */
+      /* 	/\* the above may cause a gc, shifting the relblock *\/ */
+      /* 	old_rb_start=rb_start; */
+      /* 	new= PAGE_ROUND_UP(new); */
+      /* } else new=PAGE_ROUND_UP(rb_pointer); */
+      /* rb_start=rb_pointer=new; */
     }
   }
   /* the relblock has been allocated */

@@ -270,6 +270,10 @@ minimize_image(void) {
   holepage=new_holepage=1;
   GBC(t_relocatable);
   if (in_sgc) sgc_start();
+  if (rb_pointer>rb_end) {
+    fprintf(stderr,"Moving relblock low before image save\n");
+    fflush(stderr);
+  }
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   core_end = new;
   rb_end=rb_limit=new;
