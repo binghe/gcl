@@ -702,7 +702,7 @@ sgc_start(void) {
 
   }
 
-  sSAwritableA->s.s_dbind=fSmake_vector1_1((page(heap_end)-first_data_page),aet_bit,Cnil);/*FIXME*/
+  sSAwritableA->s.s_dbind=fSmake_vector1_1((page(heap_end)-first_data_page),aet_bit,Ct);
   wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 
   /* now move the sgc free lists into place.   alt_free should
@@ -803,6 +803,12 @@ sgc_start(void) {
 	if (x->c.c_car->st.st_adjustable)
 	  for (i=page(x->c.c_car->st.st_self);i<=page(x->c.c_car->st.st_self+x->c.c_car->st.st_fillp-1);i++)
 	    SET_WRITABLE(i);
+    }
+
+    {
+      object v=sSAwritableA->s.s_dbind;
+      for (i=page(v->v.v_self);i<=page(v->v.v_self+v->v.v_dim-1);i++)
+	SET_WRITABLE(i);
     }
 
     tm_of(t_relocatable)->tm_alt_npage=0;
