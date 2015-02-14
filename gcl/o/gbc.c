@@ -75,6 +75,31 @@ mark_object(object);
 #error Do not recognize CPTR_SIZE
 #endif
 
+void *
+cb_in(void *p) {
+  struct contblock **cbpp;
+  int i;
+  
+  for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++) {
+    if (*cbpp<=p && ((*cbpp)+(*cbpp)->cb_size) >p)
+      return *cbpp;
+  }
+  return NULL;
+}
+
+int
+cb_print(void) {
+  struct contblock **cbpp;
+  int i;
+  
+  for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++) {
+    fprintf(stderr,"%u at %p\n",(*cbpp)->cb_size,*cbpp);
+    fflush(stderr);
+  }
+  fprintf(stderr,"%u blocks\n",i);
+  return 0;
+}
+
 #ifdef CONTBLOCK_MARK_DEBUG
 int
 cb_check(void) {
@@ -411,42 +436,95 @@ sweep_link_array(void) {
 
 }
 
+static inline fixnum
+leaf_bytes(fixnum def_type,object x) {
+
+  switch(def_type ? def_type : x->v.v_elttype){
+  case aet_lf:
+    return sizeof(longfloat)*x->v.v_dim;
+  case aet_bit:
+#define W_SIZE (8*sizeof(fixnum))
+    return sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
+  case aet_char:
+  case aet_uchar:
+    return sizeof(char)*x->v.v_dim;
+  case aet_short:
+  case aet_ushort:
+    return sizeof(short)*x->v.v_dim;
+  default:
+    return sizeof(fixnum)*x->v.v_dim;
+  }
+}
+
+#define inrelb(a_) ((char *)(a_)>=rb_start&&(char *)(a_)<rb_start1)
+#define MARK_LEAF_DATA(a_,b_)					\
+  if (inheap((a_))) {						\
+    if (what_to_collect == t_contiguous)			\
+      mark_contblock((a_),(b_));				\
+  } else if ((a_) && COLLECT_RELBLOCK_P)			\
+    (a_) = (void *)copy_relblock((void *)(a_),(b_));
+
+static ufixnum relb_copied;
+DEFVAR("*STATIC-PROMOTION-AREA*",sSAstatic_promotion_areaA,SI,Cnil,"");
+
+static inline void
+mark_leaf_data(object x,void **pp,ufixnum s) {
+  void *p=*pp,*e=heap_end;
+  ufixnum rs=s;/* ROUND_UP_PTR_CONT(s); */
+  if (p>=data_start && p<e) {
+    if (what_to_collect==t_contiguous)
+      mark_contblock(p,s);
+  } else if (p>=e && COLLECT_RELBLOCK_P) {
+    object st=sSAstatic_promotion_areaA->s.s_dbind;
+    if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st) {
+      *pp=memcpy(st->st.st_self+st->st.st_fillp,p,s);
+      st->st.st_fillp+=rs;
+      /* fprintf(stderr,"Promoting %p %lu -> %p\n",p,s,*pp); */
+      /* fflush(stderr); */
+      /* mark_contblock(*pp,s); */
+    } else {
+      *pp=(void *)copy_relblock(p,s);
+      if (x) x->d.st++;
+      relb_copied+=s;
+    }
+  }
+}
+
 static void
 mark_object(object x) {
   
-  fixnum i,j;
-  object *p;
-  char *cp;
-  enum type tp;
-  
- BEGIN:
-  /* if the body of x is in the c stack, its elements
-     are marked anyway by the c stack mark carefully, and
-     if this x is somehow hanging around in a cons that
-     should be dead, we dont want to mark it. -wfs
-  */
-  
-  if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))
-    return;
+  fixnum i,j=0;/*FIXME*/
 
-  tp=type_of(x);
-
-  if (tp==t_cons) {
-    mark_cons(x);
+  if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))  /*FIXME*/
     return;
-  }
 
   mark(x);
 
-  switch (tp) {
+  switch (type_of(x)) {
+
+  case t_cons:
+    mark_object(x->c.c_car);
+    mark_object(Scdr(x));/*FIXME*/
+    break;
 
   case t_fixnum:
     break;
     
+#define inrelb(a_) ((char *)(a_)>=rb_start&&(char *)(a_)<rb_start1)
+#define MARK_LEAF_DATA(a_,b_)					\
+    if (inheap((a_))) {						\
+      if (what_to_collect == t_contiguous)			\
+	mark_contblock((a_),(b_));				\
+    } else if ((a_) && COLLECT_RELBLOCK_P)			\
+      (a_) = (void *)copy_relblock((void *)(a_),(b_));
+
+  case t_bignum:
+    mark_leaf_data(x,(void **)&MP_SELF(x),MP_ALLOCATED(x)*MP_LIMB_SIZE);
+    break;
+
   case t_ratio:
     mark_object(x->rat.rat_num);
-    x = x->rat.rat_den;
-    goto BEGIN;
+    mark_object(x->rat.rat_den);
     
   case t_shortfloat:
     break;
@@ -456,8 +534,7 @@ mark_object(object x) {
     
   case t_complex:
     mark_object(x->cmp.cmp_imag);
-    x = x->cmp.cmp_real;
-    goto BEGIN;
+    mark_object(x->cmp.cmp_real);
     
   case t_character:
     break;
@@ -466,13 +543,7 @@ mark_object(object x) {
     mark_object(x->s.s_plist);
     mark_object(x->s.s_gfdef);
     mark_object(x->s.s_dbind);
-    if (x->s.s_self == NULL)
-      break;
-    if (inheap(x->s.s_self)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(x->s.s_self,x->s.s_fillp);
-    } else if (COLLECT_RELBLOCK_P)
-	x->s.s_self = copy_relblock(x->s.s_self, x->s.s_fillp);
+    mark_leaf_data(x,(void **)&x->s.s_self,x->s.s_fillp);
     break;
     
   case t_package:
@@ -481,197 +552,92 @@ mark_object(object x) {
     mark_object(x->p.p_shadowings);
     mark_object(x->p.p_uselist);
     mark_object(x->p.p_usedbylist);
-    if (what_to_collect != t_contiguous)
-      break;
-    if (x->p.p_internal != NULL)
-      mark_contblock((char *)(x->p.p_internal),
-		     x->p.p_internal_size*sizeof(object));
-    if (x->p.p_external != NULL)
-      mark_contblock((char *)(x->p.p_external),
-		     x->p.p_external_size*sizeof(object));
+    if (x->p.p_internal)
+      for (i=0;i<x->p.p_internal_size;i++)
+	mark_object(x->p.p_internal[i]);
+    if (x->p.p_external)
+      for (i=0;i<x->p.p_external_size;i++)
+	mark_object(x->p.p_external[i]);
+    mark_leaf_data(x,(void **)&x->p.p_internal,x->p.p_internal_size*sizeof(object));
+    mark_leaf_data(x,(void **)&x->p.p_external,x->p.p_external_size*sizeof(object));
     break;
     
   case t_hashtable:
     mark_object(x->ht.ht_rhsize);
     mark_object(x->ht.ht_rhthresh);
-    if (x->ht.ht_self == NULL)
-      break;
-    for (i = 0, j = x->ht.ht_size;  i < j;  i++) {
-      mark_object(x->ht.ht_self[i].hte_key);
-      mark_object(x->ht.ht_self[i].hte_value);
-    }
-    if (inheap(x->ht.ht_self)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock((char *)x->ht.ht_self,j*sizeof(struct htent));
-    } else if (COLLECT_RELBLOCK_P)
-      x->ht.ht_self=(void *)copy_relblock((char *)x->ht.ht_self,j*sizeof(struct htent));;
+    if (x->ht.ht_self)
+      for (i=0;i<x->ht.ht_size;i++) {
+	mark_object(x->ht.ht_self[i].hte_key);
+	mark_object(x->ht.ht_self[i].hte_value);
+      }
+    mark_leaf_data(x,(void **)&x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
+    /* MARK_LEAF_DATA(x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self)); */
     break;
     
   case t_array:
-    if ((x->a.a_displaced) != Cnil)
-      mark_displaced_field(x);
-    if (x->a.a_dims != NULL) {
-      if (inheap(x->a.a_dims)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)(x->a.a_dims),sizeof(int)*x->a.a_rank);
-      } else if (COLLECT_RELBLOCK_P)
-	x->a.a_dims = (int *) copy_relblock((char *)(x->a.a_dims),sizeof(int)*x->a.a_rank);
-    }
-    if ((enum aelttype)x->a.a_elttype == aet_ch)
-      goto CASE_STRING;
-    if ((enum aelttype)x->a.a_elttype == aet_bit)
-      goto CASE_BITVECTOR;
-    if ((enum aelttype)x->a.a_elttype == aet_object)
-      goto CASE_GENERAL;
-    
-  CASE_SPECIAL:
-    cp = (char *)(x->fixa.fixa_self);
-    if (cp == NULL)
-      break;
-    /* set j to the size in char of the body of the array */
-    
-    switch((enum aelttype)x->a.a_elttype){
-#define  ROUND_RB_POINTERS_DOUBLE \
-{int tem =  ((long)rb_pointer1) & (sizeof(double)-1); \
-   if (tem) \
-     { rb_pointer +=  (sizeof(double) - tem); \
-       rb_pointer1 +=  (sizeof(double) - tem); \
-     }}
+    mark_leaf_data(x,(void **)&x->a.a_dims,sizeof(int)*x->a.a_rank);
+
+  case t_vector:
+  case t_bitvector:
+
+    switch(j ? j : (enum aelttype)x->v.v_elttype) {
+#define  ROUND_RB_POINTERS_DOUBLE				\
+      {int tem =  ((long)rb_pointer1) & (sizeof(double)-1);	\
+	if (tem)						\
+	  { rb_pointer +=  (sizeof(double) - tem);		\
+	    rb_pointer1 +=  (sizeof(double) - tem);		\
+	  }}
     case aet_lf:
-      j= sizeof(longfloat)*x->lfa.lfa_dim;
-      if ((COLLECT_RELBLOCK_P) &&  !(inheap(cp)))
+      j= sizeof(longfloat)*x->v.v_dim;
+      if ((COLLECT_RELBLOCK_P) &&  (inrelb(x->v.v_self)))
 	ROUND_RB_POINTERS_DOUBLE;/*FIXME gc space violation*/
+      break;
+    case aet_bit:
+#define W_SIZE (8*sizeof(fixnum))
+      j= sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
       break;
     case aet_char:
     case aet_uchar:
-      j=sizeof(char)*x->a.a_dim;
+      j=sizeof(char)*x->v.v_dim;
       break;
     case aet_short:
     case aet_ushort:
-      j=sizeof(short)*x->a.a_dim;
+      j=sizeof(short)*x->v.v_dim;
       break;
+    case aet_object:
+      if (x->v.v_displaced->c.c_car==Cnil && x->v.v_self)
+	for (i=0;i<x->v.v_dim;i++)
+	  mark_object(x->v.v_self[i]);
     default:
-      j=sizeof(fixnum)*x->fixa.fixa_dim;}
-    
-    goto COPY;
-    
-  CASE_GENERAL:
-    p = x->a.a_self;
-    if (p == NULL
-#ifdef HAVE_ALLOCA
-	|| (char *)p >= core_end
-#endif  
-	)
-      break;
-    j=0;
-    if (x->a.a_displaced->c.c_car == Cnil)
-      for (i = 0, j = x->a.a_dim;  i < j;  i++)
-	mark_object(p[i]);
-    cp = (char *)p;
-    j *= sizeof(object);
-  COPY:
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (COLLECT_RELBLOCK_P) {
-      if (x->a.a_displaced == Cnil) {
-#ifdef HAVE_ALLOCA
-	if (!NULL_OR_ON_C_STACK(cp))  /* only if body of array not on C stack */
-#endif			  
-	  x->a.a_self = (object *)copy_relblock(cp, j);
-      } else if (x->a.a_displaced->c.c_car == Cnil) {
-	i = (long)(object *)copy_relblock(cp, j)  - (long)(x->a.a_self);
-	adjust_displaced(x, i);
-      }
+      j=sizeof(fixnum)*x->v.v_dim;
     }
-    break;
-    
-  case t_vector:
-    if ((x->v.v_displaced) != Cnil)
-      mark_displaced_field(x);
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      goto CASE_GENERAL;
-    else
-      goto CASE_SPECIAL;
-    
-  case t_bignum:
-#ifndef GMP_USE_MALLOC
-    if ((int)what_to_collect >= (int)t_contiguous) {
-      j = MP_ALLOCATED(x);
-      cp = (char *)MP_SELF(x);
-      if (cp == 0)
-	break;
-#ifdef PARI
-      if (j != lg(MP(x))  &&
-	  /* we don't bother to zero this register,
-	     and its contents may get over written */
-	  ! (x == big_register_1 &&
-	     (int)(cp) <= top &&
-	     (int) cp >= bot))
-	printf("bad length 0x%x ",x);
-#endif
-      j = j * MP_LIMB_SIZE;
-      if (inheap(cp)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock(cp, j);
-      } else if (COLLECT_RELBLOCK_P) {
-	MP_SELF(x) = (void *) copy_relblock(cp, j);}}
-#endif /* not GMP_USE_MALLOC */
-    break;
-    
-  CASE_STRING:
-  case t_string:
-    if ((x->st.st_displaced) != Cnil)
-      mark_displaced_field(x);
-    j = x->st.st_dim;
-    cp = x->st.st_self;
-    if (cp == NULL)
-      break;
-  COPY_STRING:
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (COLLECT_RELBLOCK_P) {
-      if (x->st.st_displaced == Cnil)
-	x->st.st_self = copy_relblock(cp, j);
-      else if (x->st.st_displaced->c.c_car == Cnil) {
-	i = copy_relblock(cp, j) - cp;
-	adjust_displaced(x, i);
+
+  case t_string:/*FIXME*/
+    j=j ? j : x->st.st_dim;
+
+    if (x->v.v_displaced->c.c_car==Cnil) {
+      void *p=x->v.v_self;
+      mark_leaf_data(x,(void **)&x->v.v_self,j);
+      if (x->v.v_displaced!=Cnil) {
+	j=(void *)x->v.v_self-p;
+	x->v.v_self=p;
+	adjust_displaced(x,j);
       }
-    }
+    } 
+    mark_object(x->v.v_displaced);
     break;
-    
-  CASE_BITVECTOR:
-  case t_bitvector:
-    if ((x->bv.bv_displaced) != Cnil)
-      mark_displaced_field(x);
-    /* We make bitvectors multiple of sizeof(int) in size allocated
-       Assume 8 = number of bits in char */
-    
-#define W_SIZE (8*sizeof(fixnum))
-    j= sizeof(fixnum) *
-      ((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
-    cp = x->bv.bv_self;
-    if (cp == NULL)
-      break;
-    goto COPY_STRING;
     
   case t_structure:
-    mark_object(x->str.str_def);
-    p = x->str.str_self;
-    if (p == NULL)
-      break;
     {
       object def=x->str.str_def;
-      unsigned char * s_type = &SLOT_TYPE(def,0);
-      unsigned short *s_pos= & SLOT_POS(def,0);
-      for (i = 0, j = S_DATA(def)->length;  i < j;  i++)
-	if (s_type[i]==0) mark_object(STREF(object,x,s_pos[i]));
-      if (inheap(x->str.str_self)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)p,S_DATA(def)->size);
-      } else if (COLLECT_RELBLOCK_P)
-	x->str.str_self = (object *)copy_relblock((char *)p, S_DATA(def)->size);
+      unsigned char *s_type= &SLOT_TYPE(def,0);
+      unsigned short *s_pos= &SLOT_POS(def,0);
+      mark_object(x->str.str_def);
+      if (x->str.str_self)
+	for (i=0,j=S_DATA(def)->length;i<j;i++)
+	  if (s_type[i]==0)
+	    mark_object(STREF(object,x,s_pos[i]));
+      mark_leaf_data(x,(void **)&x->str.str_self,S_DATA(def)->size);
     }
     break;
     
@@ -684,12 +650,11 @@ mark_object(object x) {
     case smm_probe:
       mark_object(x->sm.sm_object0);
       mark_object(x->sm.sm_object1);
-      if (what_to_collect == t_contiguous &&
-	  x->sm.sm_fp &&
-	  x->sm.sm_buffer)
-	mark_contblock(x->sm.sm_buffer, BUFSIZ);
+      if (x->sm.sm_fp) {
+	mark_leaf_data(x,(void **)&x->sm.sm_buffer,BUFSIZ);
+      }
       break;
-      
+    
     case smm_synonym:
       mark_object(x->sm.sm_object0);
       break;
@@ -720,44 +685,21 @@ mark_object(object x) {
     }
     break;
     
-#define MARK_CP(a_,b_) {fixnum _t=(b_);if (inheap(a_)) {\
-	if (what_to_collect == t_contiguous) mark_contblock((void *)(a_),_t); \
-      } else if (COLLECT_RELBLOCK_P) (a_)=(void *)copy_relblock((void *)(a_),_t);}
-
-#define MARK_MP(a_) {if ((a_)->_mp_d) \
-                        MARK_CP((a_)->_mp_d,(a_)->_mp_alloc*MP_LIMB_SIZE);}
-
   case t_random:
-    if ((int)what_to_collect >= (int)t_contiguous) {
-      MARK_MP(x->rnd.rnd_state._mp_seed);
-#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION  == 4 && __GNU_MP_VERSION_MINOR < 2)
-      if (x->rnd.rnd_state._mp_algdata._mp_lc) {
-	MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_a);
-	if (!x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m2exp) MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m);
-	MARK_CP(x->rnd.rnd_state._mp_algdata._mp_lc,sizeof(*x->rnd.rnd_state._mp_algdata._mp_lc));
-      }
-#endif
-    }
+    mark_leaf_data(NULL,(void **)&x->rnd.rnd_state._mp_seed->_mp_d,x->rnd.rnd_state._mp_seed->_mp_alloc*MP_LIMB_SIZE);/*FIXME alignment*/
     break;
     
   case t_readtable:
-    if (x->rt.rt_self == NULL)
-      break;
-    if (what_to_collect == t_contiguous)
-      mark_contblock((char *)(x->rt.rt_self),
-		     RTABSIZE*sizeof(struct rtent));
-    for (i = 0;  i < RTABSIZE;  i++) {
-      mark_object(x->rt.rt_self[i].rte_macro);
-      if (x->rt.rt_self[i].rte_dtab != NULL) {
-	/**/
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)(x->rt.rt_self[i].rte_dtab),
-			 RTABSIZE*sizeof(object));
-	for (j = 0;  j < RTABSIZE;  j++)
-	  mark_object(x->rt.rt_self[i].rte_dtab[j]);
-	/**/
+    if (x->rt.rt_self)
+      for (i=0;i<RTABSIZE;i++) {
+	mark_object(x->rt.rt_self[i].rte_macro);
+	if (x->rt.rt_self[i].rte_dtab) {
+	  for (j=0;j<RTABSIZE;j++)
+	    mark_object(x->rt.rt_self[i].rte_dtab[j]);
+	  mark_leaf_data(x,(void **)&x->rt.rt_self[i].rte_dtab,RTABSIZE*sizeof(object));
+	}
       }
-    }
+    mark_leaf_data(x,(void **)&x->rt.rt_self,RTABSIZE*sizeof(struct rtent));
     break;
     
   case t_pathname:
@@ -770,13 +712,9 @@ mark_object(object x) {
     break;
     
   case t_closure:
-    { 
-      int i ;
-      for (i= 0 ; i < x->cl.cl_envdim ; i++)
-	mark_object(x->cl.cl_env[i]);
-      if (COLLECT_RELBLOCK_P)
-	x->cl.cl_env=(void *)copy_relblock((void *)x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
-    }
+    for (i= 0;i<x->cl.cl_envdim;i++)
+      mark_object(x->cl.cl_env[i]);
+    mark_leaf_data(x,(void **)&x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
     
   case t_cfun:
   case t_sfun:
@@ -789,35 +727,39 @@ mark_object(object x) {
     
   case t_cfdata:
     
-    if (x->cfd.cfd_self != NULL)
-      {int i=x->cfd.cfd_fillp;
-      while(i-- > 0)
-	mark_object(x->cfd.cfd_self[i]);}
-    if (what_to_collect == t_contiguous) {
-      mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
+    if (x->cfd.cfd_self)
+      for (i=0;i<x->cfd.cfd_fillp;i++)
+	mark_object(x->cfd.cfd_self[i]);
+    if (what_to_collect == t_contiguous)
       mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
-    }
+    mark_leaf_data(x,(void **)&x->cfd.cfd_start,x->cfd.cfd_size);
     break;
-  case t_cclosure:
+
+ case t_cclosure:
     mark_object(x->cc.cc_name);
     mark_object(x->cc.cc_env);
     mark_object(x->cc.cc_data);
-    if (x->cc.cc_turbo!=NULL) {
-      mark_object(*(x->cc.cc_turbo-1));
-      if (COLLECT_RELBLOCK_P)
-	x->cc.cc_turbo=(void *)copy_relblock((char *)(x->cc.cc_turbo-1),(1+fix(*(x->cc.cc_turbo-1)))*sizeof(object))+sizeof(object);
+    if (x->cc.cc_turbo) {
+      x->cc.cc_turbo--;
+      for (i=0;i<=fix(x->cc.cc_turbo[0]);i++)
+ 	mark_object(x->cc.cc_turbo[i]);
+      mark_leaf_data(x,(void **)&x->cc.cc_turbo,(1+fix(x->cc.cc_turbo[0]))*sizeof(*x->cc.cc_turbo));
+      x->cc.cc_turbo++;
     }
     break;
     
   case t_spice:
     break;
-  default:
+
+ default:
 #ifdef DEBUG
     if (debug)
       printf("\ttype = %d\n", type_of(x));
 #endif
     error("mark botch");
+
   }
+
 }
 
 static long *c_stack_where;
@@ -930,10 +872,6 @@ mark_phase(void) {
   
   for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link)
     mark_object((object)pp);
-#ifdef KCLOVM
-  if (ovm_process_created)
-    mark_all_stacks();
-#endif
   
 #ifdef DEBUG
   if (debug) {
@@ -947,18 +885,18 @@ mark_phase(void) {
     (int)what_to_collect < (int)t_contiguous) {
   */
   
-  {int size;
+  /* {int size; */
   
-  for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link) {
-    size = pp->p_internal_size;
-    if (pp->p_internal != NULL)
-      for (i = 0;  i < size;  i++)
-	mark_object(pp->p_internal[i]);
-    size = pp->p_external_size;
-    if (pp->p_external != NULL)
-      for (i = 0;  i < size;  i++)
-	mark_object(pp->p_external[i]);
-  }}
+  /* for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link) { */
+  /*   size = pp->p_internal_size; */
+  /*   if (pp->p_internal != NULL) */
+  /*     for (i = 0;  i < size;  i++) */
+  /* 	mark_object(pp->p_internal[i]); */
+  /*   size = pp->p_external_size; */
+  /*   if (pp->p_external != NULL) */
+  /*     for (i = 0;  i < size;  i++) */
+  /* 	mark_object(pp->p_external[i]); */
+  /* }} */
   
   /* mark the c stack */
 #ifndef N_RECURSION_REQD
@@ -1199,6 +1137,20 @@ char *old_rb_start;
 fixnum fault_pages=0;
 
 void
+allocate_static_promotion_area(void) {
+  if (relb_copied &&
+      (sSAstatic_promotion_areaA->s.s_dbind==Cnil ||
+       sSAstatic_promotion_areaA->s.s_dbind->v.v_dim-sSAstatic_promotion_areaA->s.s_dbind->v.v_fillp<relb_copied)) {
+    relb_copied=(relb_copied+((PAGESIZE<<8)-1)) & ~((PAGESIZE<<8)-1);
+    sSAstatic_promotion_areaA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(relb_copied),make_fixnum(aet_char),Ct,make_fixnum(0)));
+    fprintf(stderr,"Making static promotion area %lu bytes\n",relb_copied);
+    fflush(stderr);
+    relb_copied=0;
+  }
+
+}
+
+void
 GBC(enum type t) {
 
   long i,j;
@@ -1286,6 +1238,8 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
+    relb_copied=0;
+
     i=rb_pointer-REAL_RB_START+PAGESIZE;/*FIXME*/
 
 #ifdef SGC
@@ -1366,6 +1320,8 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
     
+    /* sSAstatic_promotion_areaA->s.s_dbind=Cnil; */
+
     if (rb_start < rb_start1) {
       j = (rb_pointer-rb_start + PAGESIZE - 1)/PAGESIZE;
       memmove(rb_start,rb_start1,j*PAGESIZE);
@@ -1410,6 +1366,54 @@ GBC(enum type t) {
 #endif
   }
   
+
+/*   { */
+/*     static int promoting; */
+/*     if (!promoting && promotion_pointer>promotion_pointer1) { */
+/*       object *p,st; */
+/*       promoting=1; */
+/*       st=alloc_simple_string(""); */
+/*       for (p=promotion_pointer1;p<promotion_pointer;p++) { */
+/* 	fixnum j; */
+/* 	object x=*p; */
+	
+/* 	if (type_of(x)==t_string) */
+
+/*  	  j=x->st.st_dim; */
+
+/* 	else switch (x->v.v_elttype) { */
+
+/* 	  case aet_lf: */
+/* 	    j=sizeof(longfloat)*x->v.v_dim; */
+/* 	    break; */
+/* 	  case aet_bit: */
+/* #define W_SIZE (8*sizeof(fixnum)) */
+/* 	    j=sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE); */
+/* 	    break; */
+/* 	  case aet_char: */
+/* 	  case aet_uchar: */
+/* 	    j=sizeof(char)*x->v.v_dim; */
+/* 	    break; */
+/* 	  case aet_short: */
+/* 	  case aet_ushort: */
+/* 	    j=sizeof(short)*x->v.v_dim; */
+/* 	    break; */
+/* 	  default: */
+/* 	    j=sizeof(fixnum)*x->v.v_dim; */
+/* 	  } */
+
+/* 	st->st.st_dim=j; */
+/* 	st->st.st_self=alloc_contblock(st->st.st_dim); */
+/* 	fprintf(stderr,"Promoting vector leaf bytes %lu at %p, %p -> %p\n",j,x,x->v.v_self,st->st.st_self); */
+/* 	fflush(stderr); */
+/* 	memcpy(st->st.st_self,x->v.v_self,st->st.st_dim); */
+/* 	x->v.v_self=(void *)st->st.st_self; */
+/*       } */
+/*       promoting=0; */
+/*     } */
+/*   } */
+	
+
 #ifdef DEBUG
   if (debug) {
     for (i = 0, j = 0;  i < (int)t_end;  i++) {
@@ -1467,6 +1471,23 @@ GBC(enum type t) {
       opt_maxpage(tm_table+t);
     
   }
+
+  /* {static int mv; */
+  /*   if (!mv  && COLLECT_RELBLOCK_P) { */
+  /*     mv=1; */
+  /*     if (relb_copied) { */
+  /* 	sSAstatic_promotion_areaA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(relb_copied),make_fixnum(aet_char),Ct,make_fixnum(0))); */
+  /* 	fprintf(stderr,"Making static promotion area %lu bytes\n",relb_copied); */
+  /* 	fflush(stderr); */
+  /* 	relb_copied=0; */
+  /*     } else { */
+  /* 	fprintf(stderr,"Releasing static promotion area\n"); */
+  /* 	fflush(stderr); */
+  /* 	sSAstatic_promotion_areaA->s.s_dbind=Cnil; */
+  /*     } */
+  /*     mv=0; */
+  /*   } */
+  /* } */
 
   collect_both=0;
 

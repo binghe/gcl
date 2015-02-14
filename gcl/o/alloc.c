@@ -748,7 +748,9 @@ alloc_contblock(size_t n) {
 inline void *
 alloc_relblock(size_t n) {
 
-  return alloc_mem(tm_of(t_relocatable),ROUND_UP_PTR(n));
+  void *p=alloc_mem(tm_of(t_relocatable),ROUND_UP_PTR(n));
+  allocate_static_promotion_area();
+  return p;
 
 }
 
@@ -1642,11 +1644,11 @@ free(void *ptr) {
   for (p = &malloc_list,pp=*p; pp && !endp(pp);  p = &((pp)->c.c_cdr),pp=pp->c.c_cdr)
     if ((pp)->c.c_car->st.st_self == ptr) {
       /* SGC contblock pages: Its possible this is on an old page CM 20030827 */
-#ifdef SGC
-      insert_maybe_sgc_contblock((pp)->c.c_car->st.st_self,(pp)->c.c_car->st.st_dim);
-#else
-      insert_contblock((pp)->c.c_car->st.st_self,(pp)->c.c_car->st.st_dim);
-#endif
+/* #ifdef SGC */
+/*       insert_maybe_sgc_contblock((pp)->c.c_car->st.st_self,(pp)->c.c_car->st.st_dim); */
+/* #else */
+/*       insert_contblock((pp)->c.c_car->st.st_self,(pp)->c.c_car->st.st_dim); */
+/* #endif */
       (pp)->c.c_car->st.st_self = NULL;
       *p = pp->c.c_cdr;
 #ifdef GCL_GPROF
@@ -1707,11 +1709,11 @@ realloc(void *ptr, size_t size) {
 	for (i = 0;  i < size;  i++)
 	  x->st.st_self[i] = ((char *)ptr)[i];
 /* SGC contblock pages: Its possible this is on an old page CM 20030827 */
-#ifdef SGC
- 	insert_maybe_sgc_contblock(ptr, j);
-#else
- 	insert_contblock(ptr, j);
-#endif
+/* #ifdef SGC */
+/*  	insert_maybe_sgc_contblock(ptr, j); */
+/* #else */
+/*  	insert_contblock(ptr, j); */
+/* #endif */
 	return(x->st.st_self);
       }
     }
