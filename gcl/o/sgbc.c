@@ -1048,7 +1048,6 @@ sgc_start(void) {
   double tmp,scale;
 
   sSAoptimize_maximum_pagesA->s.s_dbind=Cnil;
-  sSAstatic_promotion_areaA=Cnil;
   
   if (memprotect_result!=memprotect_success && do_memprotect_test())
     return 0;
@@ -1339,6 +1338,7 @@ sgc_start(void) {
   }
 
   sSAoptimize_maximum_pagesA->s.s_dbind=omp;
+  sSAstatic_promotion_areaA=Cnil;
 
   return 1;
   
