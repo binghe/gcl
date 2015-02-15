@@ -1338,7 +1338,7 @@ sgc_start(void) {
   }
 
   sSAoptimize_maximum_pagesA->s.s_dbind=omp;
-  sSAstatic_promotion_areaA=Cnil;
+  sSAstatic_promotion_areaA->s.s_dbind==Cnil;
 
   return 1;
   
