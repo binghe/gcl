@@ -456,14 +456,6 @@ leaf_bytes(fixnum def_type,object x) {
   }
 }
 
-#define inrelb(a_) ((char *)(a_)>=rb_start&&(char *)(a_)<rb_start1)
-#define MARK_LEAF_DATA(a_,b_)					\
-  if (inheap((a_))) {						\
-    if (what_to_collect == t_contiguous)			\
-      mark_contblock((a_),(b_));				\
-  } else if ((a_) && COLLECT_RELBLOCK_P)			\
-    (a_) = (void *)copy_relblock((void *)(a_),(b_));
-
 static ufixnum relb_copied;
 DEFVAR("*STATIC-PROMOTION-AREA*",sSAstatic_promotion_areaA,SI,Cnil,"");
 
@@ -476,7 +468,7 @@ mark_leaf_data(object x,void **pp,ufixnum s) {
       mark_contblock(p,s);
   } else if (p>=e && COLLECT_RELBLOCK_P) {
     object st=sSAstatic_promotion_areaA->s.s_dbind;
-    if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st) {
+    if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st>2) {
       *pp=memcpy(st->st.st_self+st->st.st_fillp,p,s);
       st->st.st_fillp+=rs;
       /* fprintf(stderr,"Promoting %p %lu -> %p\n",p,s,*pp); */
@@ -510,14 +502,6 @@ mark_object(object x) {
   case t_fixnum:
     break;
     
-#define inrelb(a_) ((char *)(a_)>=rb_start&&(char *)(a_)<rb_start1)
-#define MARK_LEAF_DATA(a_,b_)					\
-    if (inheap((a_))) {						\
-      if (what_to_collect == t_contiguous)			\
-	mark_contblock((a_),(b_));				\
-    } else if ((a_) && COLLECT_RELBLOCK_P)			\
-      (a_) = (void *)copy_relblock((void *)(a_),(b_));
-
   case t_bignum:
     mark_leaf_data(x,(void **)&MP_SELF(x),MP_ALLOCATED(x)*MP_LIMB_SIZE);
     break;
@@ -589,7 +573,7 @@ mark_object(object x) {
 	  }}
     case aet_lf:
       j= sizeof(longfloat)*x->v.v_dim;
-      if ((COLLECT_RELBLOCK_P) &&  (inrelb(x->v.v_self)))
+      if ((COLLECT_RELBLOCK_P) &&  x->v.v_self>=heap_end)
 	ROUND_RB_POINTERS_DOUBLE;/*FIXME gc space violation*/
       break;
     case aet_bit:
