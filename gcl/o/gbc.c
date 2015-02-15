@@ -367,7 +367,7 @@ mark_link_array(void *v,void *ve) {
   p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
   pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
 
-  if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P
+  if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P && p>=heap_end
 #ifdef SGC
       && (!sgc_enabled || SGC_RELBLOCK_P(sLAlink_arrayA->s.s_dbind->v.v_self))
 #endif
