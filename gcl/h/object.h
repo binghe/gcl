@@ -306,7 +306,7 @@ EXTER struct typemanager tm_table[ 32  /* (int) t_relocatable */];
 */
 EXTER bool prefer_low_mem_contblock;
 struct contblock {		/*  contiguous block header  */
-	int	cb_size;	/*  size in bytes  */
+	ufixnum	cb_size;	/*  size in bytes  */
 	struct contblock
 		*cb_link;	/*  contiguous block link  */
 };

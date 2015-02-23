@@ -898,7 +898,7 @@ DEFUN_NEW("PRINT-FREE-CONTBLOCK-LIST",object,fSprint_free_contblock_list,SI,0,0,
 }
 
 void
-insert_contblock(char *p, int s) {
+insert_contblock(char *p, ufixnum s) {
 
   struct contblock **cbpp, *cbp;
   
