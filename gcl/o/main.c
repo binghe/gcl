@@ -182,21 +182,29 @@ get_phys_pages_no_malloc(void) {
 #else 
 
 ufixnum
-get_phys_pages_no_malloc(void) {
-  int l;
+get_proc_meminfo_value_in_pages(const char *k) {
+  int l,m;
   char b[PAGESIZE],*c;
-  const char *k="MemTotal:",*f="/proc/meminfo";
-  ufixnum res=0,n;
+  ufixnum n;
   
-  if ((l=open(f,O_RDONLY))!=-1) {
-    if ((n=read(l,b,sizeof(b)))<sizeof(b) && 
-	!(b[n]=0) && 
-	(c=strstr(b,k)) && 
-	sscanf(c+strlen(k),"%lu",&n)==1)
-      res=n;
-    close(l);
-  }
-  return res>>(PAGEWIDTH-10);
+  massert((l=open("/proc/meminfo",O_RDONLY))!=-1);
+  massert((n=read(l,b,sizeof(b)))<sizeof(b));
+  b[n]=0;
+  massert(!close(l));
+  massert((c=strstr(b,k)));
+  c+=strlen(k);
+  massert(sscanf(c,"%lu%n",&n,&m)==1);
+  massert(!strncmp(c+m," kB\n",4));
+  return n>>(PAGEWIDTH-10);
+}
+  
+ufixnum
+get_phys_pages_no_malloc(char freep) {
+  return freep ? 
+    get_proc_meminfo_value_in_pages("MemFree:")+
+    get_proc_meminfo_value_in_pages("Buffers:")+
+    get_proc_meminfo_value_in_pages("Cached:") :
+    get_proc_meminfo_value_in_pages("MemTotal:");
 }
 
 #endif
@@ -225,13 +233,14 @@ update_real_maxpage(void) {
       }
   massert(!mbrk(cur));
 
-  phys_pages=get_phys_pages_no_malloc();
+  phys_pages=get_phys_pages_no_malloc(0);
 
 #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
   if (phys_pages>0 && real_maxpage>phys_pages+page(beg)) real_maxpage=phys_pages+page(beg);
 #endif
 
   available_pages=real_maxpage-page(beg);
+
   for (i=t_start,j=0;i<t_other;i++) {
     k=tm_table[i].tm_maxpage;
     if (tm_table[i].tm_type==t_relocatable)
@@ -244,11 +253,33 @@ update_real_maxpage(void) {
   available_pages-=resv_pages;
 
   new_holepage=available_pages/starting_hole_div;
-  k=available_pages/20;
-  j*=starting_relb_heap_mult;
-  j=j<k ? j : k;
-  if (maxrbpage<j)
-    set_tm_maxpage(tm_table+t_relocatable,j);
+
+  for (i=t_start,j=0;i<t_other;i++)
+    j+=tm_table[i].tm_npage;
+  j+=tm_table[t_relocatable].tm_npage;
+
+  if (j) {
+
+    free_phys_pages=get_phys_pages_no_malloc(1);
+    
+    for (i=t_start;i<t_other;i++)
+      if (tm_table[i].tm_npage)
+	massert(set_tm_maxpage(tm_table+i,((double)free_phys_pages/j)*tm_table[i].tm_npage));
+    
+    new_holepage=0;
+    for (i=t_start;i<t_relocatable;i++)
+      new_holepage+=tm_table[i].tm_maxpage-tm_table[i].tm_npage;
+
+    /* add_pages(tm_table+t_contiguous,4000); */
+    
+  }
+
+  /* new_holepage=available_pages/starting_hole_div; */
+  /* k=available_pages/20; */
+  /* j*=starting_relb_heap_mult; */
+  /* j=j<k ? j : k; */
+  /* if (maxrbpage<j) */
+  /*   set_tm_maxpage(tm_table+t_relocatable,j); */
 
   return 0;
 

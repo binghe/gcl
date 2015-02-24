@@ -110,7 +110,7 @@ extern fixnum writable_pages;
 #define IS_WRITABLE(i) is_writable(i)
 
 
-EXTER long first_data_page,real_maxpage,phys_pages,available_pages;
+EXTER long first_data_page,real_maxpage,phys_pages,free_phys_pages,available_pages;
 EXTER void *data_start;
 
 #if !defined(IN_MAIN) && defined(SGC)
