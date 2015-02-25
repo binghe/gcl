@@ -1163,7 +1163,7 @@ contblock_sweep_phase(void) {
 #ifdef DEBUG
   if (debug) {
     for (cbp = cb_pointer; cbp != NULL; cbp = cbp->cb_link)
-      printf("%d-byte contblock\n", cbp->cb_size);
+      printf("%lud-byte contblock\n", cbp->cb_size);
     fflush(stdout);
   }
 #endif
@@ -1642,7 +1642,6 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
       object o=p;
       void *d=NULL;
       ufixnum s=0;
-      enum type tp=type_of(o);
       if (!is_free(o)) {
  	switch (type_of(o)) {
  	case t_array:
@@ -1691,7 +1690,7 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
  	default:
  	  break;
  	}
- 	if (d>=data_start && d<heap_end && s) {
+ 	if (d>=data_start && d<(void *)heap_end && s) {
  	  fprintf(stderr,"%lu %s bytes at %p\n",s,tm_table[type_of(o)].tm_name,d);
  	  i+=s;
  	  j++;

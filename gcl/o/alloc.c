@@ -886,11 +886,11 @@ DEFUN_NEW("PRINT-FREE-CONTBLOCK-LIST",object,fSprint_free_contblock_list,SI,0,0,
   struct contblock *cbp,*cbp1;
 
   for (cbp=cb_pointer;cbp;cbp=cbp->cb_link) {
-    printf("%p %d\n",cbp,cbp->cb_size);
+    printf("%p %lu\n",cbp,cbp->cb_size);
     for (cbp1=cbp;cbp1;cbp1=cbp1->cb_link) 
       if ((void *)cbp+cbp->cb_size==(void *)cbp1 ||
 	  (void *)cbp1+cbp1->cb_size==(void *)cbp)
-	printf("  adjacent to %p %d\n",cbp1,cbp1->cb_size);
+	printf("  adjacent to %p %lu\n",cbp1,cbp1->cb_size);
   }
 
   return Cnil;
