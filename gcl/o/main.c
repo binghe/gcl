@@ -254,17 +254,24 @@ update_real_maxpage(void) {
 
   new_holepage=available_pages/starting_hole_div;
 
-  for (i=t_start,j=0;i<t_other;i++)
-    j+=tm_table[i].tm_npage;
-  j+=tm_table[t_relocatable].tm_npage;
+  if (getenv("GCL_LARGE") && strlen(getenv("GCL_LARGE"))) {
 
-  if (j) {
+    ufixnum free_phys_pages=get_phys_pages_no_malloc(1);
 
-    free_phys_pages=get_phys_pages_no_malloc(1);
+    fprintf(stderr,"Running large\n");
+    fflush(stderr);
     
-    for (i=t_start;i<t_other;i++)
-      if (tm_table[i].tm_npage)
-	massert(set_tm_maxpage(tm_table+i,((double)free_phys_pages/j)*tm_table[i].tm_npage));
+    for (i=t_start,j=0;i<t_relocatable;i++)
+      j+=tm_table[i].tm_npage;
+    j+=tm_table[t_relocatable].tm_npage*2;
+    /* j*=3; */
+    
+    if (j<free_phys_pages) {
+      for (i=t_start;i<t_other;i++)/*t_relocatable*/
+	if (tm_table[i].tm_npage)
+	  massert(set_tm_maxpage(tm_table+i,((double)free_phys_pages/j)*tm_table[i].tm_npage));
+      /* massert(set_tm_maxpage(tm_table+t_relocatable,((double)free_phys_pages/j)*(j/3))); */
+    }
     
     new_holepage=0;
     for (i=t_start;i<t_relocatable;i++)
