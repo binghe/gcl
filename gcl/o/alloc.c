@@ -425,12 +425,30 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 
   if (j+d>phys_pages) {
 
+    ufixnum k=0;
+
     for (i=t_start;i<t_other;i++)
-      if (tm_table[i].tm_npage && tm_table[i].tm_npage>((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage))
-	return 0;
+      if (tm_table+i!=my_tm)
+	k+=(tm_table[i].tm_maxpage-tm_table[i].tm_npage)*(i==t_relocatable ? 2 : 1);
+
+    if (k<(j+d-phys_pages))
+      return 0;
+
     for (i=t_start;i<t_other;i++)
-      if (tm_table[i].tm_npage)
-	massert(set_tm_maxpage(tm_table+i,((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage)));
+      if (tm_table[i].tm_npage) {
+	if (tm_table+i==my_tm) {
+	  massert(set_tm_maxpage(tm_table+i,z));
+	} else {
+	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+(1.0-(double)(j+d-phys_pages)/k)*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
+	}
+      }
+    
+    /* for (i=t_start;i<t_other;i++) */
+    /*   if (tm_table[i].tm_npage && tm_table[i].tm_npage>((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage)) */
+    /* 	return 0; */
+    /* for (i=t_start;i<t_other;i++) */
+    /*   if (tm_table[i].tm_npage) */
+    /* 	massert(set_tm_maxpage(tm_table+i,((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage))); */
 
     return 1;
     
