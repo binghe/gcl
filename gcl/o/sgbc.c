@@ -244,13 +244,6 @@ sgc_contblock_sweep_phase(void) {
 
 }
 
-
-
-#define PAGE_ROUND_UP(adr) \
-    ((char *)(PAGESIZE*(((long)(adr)+PAGESIZE -1) >> PAGEWIDTH)))
-
-/* char *old_rb_start; */
-
 #undef tm
 
 #ifdef SDEBUG
@@ -980,7 +973,6 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
   faddr = addr;
 #endif 
   p = page(faddr);
-  /* p = ROUND_DOWN_PAGE_NO(p); */
   if (p >= first_protectable_page
       && faddr < (void *)core_end
       && !(WRITABLE_PAGE_P(p))) {
@@ -1052,10 +1044,10 @@ memory_protect(int on) {
   INSTALL_MPROTECT_HANDLER;
 
   beg=first_protectable_page;
-  writable = IS_WRITABLE(beg);
+  writable = WRITABLE_PAGE_P(beg);
   for (i=beg ; ++i<= end; ) {
 
-    if (writable==IS_WRITABLE(i) && i<end) continue;
+    if (writable==WRITABLE_PAGE_P(i) && i<end) continue;
 
     if (sgc_mprotect(beg,i-beg,writable)) 
       return -1;

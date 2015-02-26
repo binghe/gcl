@@ -726,13 +726,13 @@ alloc_object(enum type t)  {
 
 inline void *
 alloc_contblock(size_t n) {
-  return alloc_mem(tm_of(t_contiguous),ROUND_UP_PTR_CONT(n));
+  return alloc_mem(tm_of(t_contiguous),CEI(n,CPTR_SIZE));
 }
 
 inline void *
 alloc_relblock(size_t n) {
 
-  void *p=alloc_mem(tm_of(t_relocatable),ROUND_UP_PTR(n));
+  void *p=alloc_mem(tm_of(t_relocatable),CEI(n,PTR_ALIGN));
   /* allocate_static_promotion_area(); */
   return p;
 
@@ -868,7 +868,7 @@ insert_contblock(char *p, int s) {
   /* SGC cont pages: allocated sizes may not be zero mod CPTR_SIZE,
      e.g. string fillp, but alloc_contblock rounded up the allocation
      like this, which we follow here.  CM 20030827 */
-  cbp->cb_size = ROUND_UP_PTR_CONT(s);
+  cbp->cb_size = CEI(s,CPTR_SIZE);
 
   for (cbpp=&cb_pointer;*cbpp;) {
     if ((void *)(*cbpp)+(*cbpp)->cb_size==(void *)cbp) {
@@ -947,7 +947,7 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
     return;
   }
   tm_table[(int)t].tm_type = t;
-  tm_table[(int)t].tm_size = elsize ? ROUND_UP_PTR(elsize) : 1;
+  tm_table[(int)t].tm_size = elsize ? CEI(elsize,PTR_ALIGN) : 1;
   tm_table[(int)t].tm_nppage = (PAGESIZE-sizeof(struct pageinfo))/tm_table[(int)t].tm_size;
   tm_table[(int)t].tm_free = OBJNULL;
   tm_table[(int)t].tm_nfree = 0;
@@ -1541,7 +1541,7 @@ static char *baby_malloc(n)
 {
   char *res= last_baby;
   int m;
-  n = ROUND_UP_PTR(n);
+  n = CEI(n,PTR_ALIGN);
    m = n+ sizeof(int);
   if ((res +m-baby_malloc_data) > sizeof(baby_malloc_data))
     {

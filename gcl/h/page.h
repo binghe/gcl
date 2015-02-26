@@ -21,9 +21,6 @@
 #define PTR_ALIGN SIZEOF_LONG
 #endif
 
-#define ROUND_UP_PTR(n)	(((long)(n) + (PTR_ALIGN-1)) & ~(PTR_ALIGN-1))
-#define ROUND_DOWN_PTR(n) (((long)(n)  & ~(PTR_ALIGN-1)))
-
 /* minimum size required for contiguous pointers */
 #if PTR_ALIGN < SIZEOF_CONTBLOCK
 #define CPTR_SIZE SIZEOF_CONTBLOCK
@@ -31,11 +28,10 @@
 #define CPTR_SIZE PTR_ALIGN
 #endif
 
-#define ROUND_UP_PTR_CONT(n)	(((long)(n) + (CPTR_SIZE-1)) & ~(CPTR_SIZE-1))
-#define ROUND_DOWN_PTR_CONT(n) (((long)(n)  & ~(CPTR_SIZE-1)))
-
-#define RND(x,r) (((x)+(r-1))&~(r-1))
-#define PRND(x,r) ((void *)RND((ufixnum)x,r))
+#define FLR(x,r) (((x))&~(r-1))
+#define CEI(x,r) FLR((x)+(r-1),r)
+#define PFLR(x,r) ((void *)FLR((ufixnum)x,r))
+#define PCEI(x,r) ((void *)CEI((ufixnum)x,r))
 
 #ifdef SGC
 
@@ -48,11 +44,6 @@
 #define SGC_PERM_WRITABLE 2    
 
 #define SGC_WRITABLE  (SGC_PERM_WRITABLE | SGC_PAGE_FLAG)
-
-#define WRITABLE_PAGE_P(p)  IS_WRITABLE(p)
-#define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
-
-#define  IF_WRITABLE(x,if_code) ({if (IS_WRITABLE(page(x))) {if_code;}})/*FIXME maxpage*/
 
 /* When not 0, the free lists in the type manager are freelists
    on SGC_PAGE's, for those types supporting sgc.
@@ -104,7 +95,9 @@ extern fixnum writable_pages;
 
 #define CLEAR_WRITABLE(i) set_writable(i,0)
 #define SET_WRITABLE(i) set_writable(i,1)
-#define IS_WRITABLE(i) is_writable(i)
+#define WRITABLE_PAGE_P(i) is_writable(i)
+#define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
+
 
 
 EXTER long first_data_page,real_maxpage,phys_pages,available_pages;

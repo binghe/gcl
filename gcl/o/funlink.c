@@ -129,7 +129,7 @@ vpush_extend(void *item, object ar)
     return(ar->v.v_fillp = ind);}
        else
     { 
-      int newdim= ROUND_UP_PTR((2 + (int) (1.3 * ind)));
+      int newdim= CEI((2 + (int) (1.3 * ind)),PTR_ALIGN);
       unsigned char *newself;
       newself = (void *)alloc_relblock(newdim);
       bcopy(ar->ust.ust_self,newself,ind);

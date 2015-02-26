@@ -358,7 +358,7 @@ mark_link_array(void *v,void *ve) {
     if (*p>=v && *p<ve) {
       massert(!LINK_ARRAY_MARKED(p));
 #ifdef SGC
-      if(!sgc_enabled || IS_WRITABLE(page(p)))
+      if(!sgc_enabled || WRITABLE_PAGE_P(page(p)))
 #endif
 	MARK_LINK_ARRAY(p);
     }
@@ -442,14 +442,14 @@ DEFVAR("*LEAF-COLLECTION*",sSAleaf_collectionA,SI,Cnil,"");
 static inline void
 mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
   void *p=*pp,*e=heap_end;
-  ufixnum rs=(s+(r-1))&(~(r-1));/* ROUND_UP_PTR_CONT(s); */
+  ufixnum rs=(s+(r-1))&(~(r-1));
   object st=sSAleaf_collectionA->s.s_dbind;
   
   if (p<data_start || p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P)
     return;
 
   if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st>=ngc_thresh) {
-    void *dp=PRND(st->st.st_self+st->st.st_fillp,r);
+    void *dp=PCEI(st->st.st_self+st->st.st_fillp,r);
     *pp=memcpy(dp,p,s);
     st->st.st_fillp=dp+s-(void *)st->st.st_self;
     x->d.st=0;
@@ -460,10 +460,10 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
 
   if (p>=e) {
     *pp=(void *)copy_relblock(p,s);
-    nrbm+=s+(RND(nrbm,r)-nrbm);
+    nrbm+=s+(CEI(nrbm,r)-nrbm);
   } else {
     mark_contblock(p,s);
-    ncbm+=s+(RND(ncbm,r)-ncbm);
+    ncbm+=s+(CEI(ncbm,r)-ncbm);
   }
 }
 
@@ -552,11 +552,10 @@ mark_object1(object x) {
 
     switch(j ? j : (enum aelttype)x->v.v_elttype) {
 #define  ROUND_RB_POINTERS_DOUBLE				\
-      {int tem =  ((long)rb_pointer1) & (sizeof(double)-1);	\
-	if (tem)						\
-	  { rb_pointer +=  (sizeof(double) - tem);		\
-	    rb_pointer1 +=  (sizeof(double) - tem);		\
-	  }}
+      {								\
+	rb_pointer=PCEI(rb_pointer,sizeof(double));		\
+	rb_pointer1=PCEI(rb_pointer1,sizeof(double));		\
+      }
     case aet_lf:
       j= sizeof(longfloat)*x->v.v_dim;
       if ((COLLECT_RELBLOCK_P) &&  (void *)x->v.v_self>=(void *)heap_end)
@@ -1264,14 +1263,6 @@ GBC(enum type t) {
       wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 #endif
 
-#ifdef SGC
-    /* we don't know which pages have relblock on them */
-    if(sgc_enabled) {
-      fixnum i;
-      for (i=page(rb_start);i<page(rb_pointer+PAGESIZE-1);i++)
-	massert(IS_WRITABLE(i));
-    }    
-#endif		
     rb_limit = rb_end - 2*RB_GETA;
     
   }
@@ -1518,7 +1509,7 @@ static char *
 copy_relblock(char *p, int s)
 { char *res = rb_pointer;
  char *q = rb_pointer1;
- s = ROUND_UP_PTR(s);
+ s = CEI(s,PTR_ALIGN);
  rb_pointer += s;
  rb_pointer1 += s;
  
@@ -1543,8 +1534,8 @@ mark_contblock(void *p, int s) {
   q = p + s;
   /* SGC cont pages: contblock pages must be no smaller than
      sizeof(struct contblock).  CM 20030827 */
-  x = (char *)ROUND_DOWN_PTR_CONT(p);
-  y = (char *)ROUND_UP_PTR_CONT(q);
+  x = (char *)PFLR(p,CPTR_SIZE);
+  y = (char *)PCEI(q,CPTR_SIZE);
   v=get_pageinfo(x);
 #ifdef SGC
   if (!sgc_enabled || (v->sgc_flags&SGC_PAGE_FLAG))
