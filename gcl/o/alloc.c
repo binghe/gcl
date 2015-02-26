@@ -191,9 +191,7 @@ alloc_page(long n) {
 
   void *e=heap_end;
   fixnum d,m;
-#ifdef SGC
-  int in_sgc=sgc_enabled;
-#endif
+
   if (n>=0) {
 
     if (n>(holepage - (in_signal_handler? 0 :
@@ -217,23 +215,9 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
       
       holepage = d + n;
 
-#ifdef SGC
-      if (in_sgc) sgc_quit();
-#endif
-
       GBC(t_relocatable);
       tm_table[t_relocatable].tm_adjgbccnt--;/* hole overrun is not a call for more relocatable */
 
-
-#ifdef SGC
-      /* starting sgc can use up some pages
-	 and may move heap end, so start over
-      */
-      if (in_sgc) {
-	sgc_start();
-	return alloc_page(n);
-      }
-#endif
     }
 
     holepage -= n;
@@ -749,7 +733,7 @@ inline void *
 alloc_relblock(size_t n) {
 
   void *p=alloc_mem(tm_of(t_relocatable),ROUND_UP_PTR(n));
-  allocate_static_promotion_area();
+  /* allocate_static_promotion_area(); */
   return p;
 
 }
