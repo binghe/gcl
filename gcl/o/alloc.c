@@ -1096,6 +1096,7 @@ gcl_init_alloc(void *cs_start) {
 
 #endif
 
+  initial_sbrk=NULL;
   update_real_maxpage();
 
   if (gcl_alloc_initialized) return;
