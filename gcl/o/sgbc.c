@@ -545,13 +545,13 @@ sgc_start(void) {
   object omp=sSAoptimize_maximum_pagesA->s.s_dbind;
   double tmp,scale;
 
+  if (sgc_enabled)
+    return 1;
+
   sSAoptimize_maximum_pagesA->s.s_dbind=Cnil;
   
   if (memprotect_result!=memprotect_success && do_memprotect_test())
     return 0;
-
-  if (sgc_enabled)
-    return 1;
 
   {
     extern ufixnum ngc_thresh,nrbm;
