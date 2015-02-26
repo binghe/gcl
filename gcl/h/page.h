@@ -34,6 +34,8 @@
 #define ROUND_UP_PTR_CONT(n)	(((long)(n) + (CPTR_SIZE-1)) & ~(CPTR_SIZE-1))
 #define ROUND_DOWN_PTR_CONT(n) (((long)(n)  & ~(CPTR_SIZE-1)))
 
+#define RND(x,r) (((x)+(r-1))&~(r-1))
+#define PRND(x,r) ((void *)RND((ufixnum)x,r))
 
 #ifdef SGC
 
@@ -51,8 +53,6 @@
 #define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
 
 #define  IF_WRITABLE(x,if_code) ({if (IS_WRITABLE(page(x))) {if_code;}})/*FIXME maxpage*/
-
-#define sgc_mark_object(x) IF_WRITABLE(x,if(!is_marked(x)) sgc_mark_object1(x))
 
 /* When not 0, the free lists in the type manager are freelists
    on SGC_PAGE's, for those types supporting sgc.

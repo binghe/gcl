@@ -55,10 +55,6 @@ mark_c_stack(jmp_buf, int, void (*)(void *,void *,int));
 static void
 mark_contblock(void *, int);
 
-static void
-mark_object(object);
-
-
 /* the following in line definitions seem to be twice as fast (at
    least on mc68020) as going to the assembly function calls in bitop.c so
    since this is more portable and faster lets use them --W. Schelter
@@ -81,7 +77,7 @@ cb_in(void *p) {
   int i;
   
   for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++) {
-    if (*cbpp<=p && ((*cbpp)+(*cbpp)->cb_size) >p)
+    if ((void *)*cbpp<=p && ((void *)(*cbpp)+(*cbpp)->cb_size) >p)
       return *cbpp;
   }
   return NULL;
@@ -325,21 +321,6 @@ enter_mark_origin(object *p) {
 
 }
 
-inline void
-mark_cons(object x) {
-  
-  do {
-    object d=x->c.c_cdr;
-    mark(x);
-    mark_object(x->c.c_car);
-    x=d;
-    if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))/*catches Cnil*/
-      return;
-  } while (cdr_listp(x));
-  mark_object(x);
-
-}
-
 /* Whenever two arrays are linked together by displacement,
    if one is live, the other will be made live */
 #define mark_displaced_field(ar) mark_object(ar->a.a_displaced)
@@ -367,11 +348,7 @@ mark_link_array(void *v,void *ve) {
   p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
   pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
 
-  if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P && p>=heap_end
-#ifdef SGC
-      && (!sgc_enabled || SGC_RELBLOCK_P(sLAlink_arrayA->s.s_dbind->v.v_self))
-#endif
-      ) {
+  if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P && (void *)p>=(void *)heap_end) {
     fixnum j=rb_pointer1-rb_pointer;
     p=(void *)p+j;
     pe=(void *)pe+j;
@@ -456,38 +433,48 @@ leaf_bytes(fixnum def_type,object x) {
   }
 }
 
-static ufixnum relb_copied;
-DEFVAR("*STATIC-PROMOTION-AREA*",sSAstatic_promotion_areaA,SI,Cnil,"");
+ufixnum ncbm,nrbm,ngc_thresh;
+DEFVAR("*LEAF-COLLECTION*",sSAleaf_collectionA,SI,Cnil,"");
+
+#define MARK_LEAF_DATA(a_,b_,c_) mark_leaf_data(a_,(void **)&b_,c_,1)
+#define MARK_LEAF_DATA_ALIGNED(a_,b_,c_,d_) mark_leaf_data(a_,(void **)&b_,c_,d_)
 
 static inline void
-mark_leaf_data(object x,void **pp,ufixnum s) {
+mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
   void *p=*pp,*e=heap_end;
-  ufixnum rs=s;/* ROUND_UP_PTR_CONT(s); */
-  if (p>=data_start && p<e) {
-    if (what_to_collect==t_contiguous)
-      mark_contblock(p,s);
-  } else if (p>=e && COLLECT_RELBLOCK_P) {
-    object st=sSAstatic_promotion_areaA->s.s_dbind;
-    if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st>2) {
-      *pp=memcpy(st->st.st_self+st->st.st_fillp,p,s);
-      st->st.st_fillp+=rs;
-      /* fprintf(stderr,"Promoting %p %lu -> %p\n",p,s,*pp); */
-      /* fflush(stderr); */
-      /* mark_contblock(*pp,s); */
-    } else {
-      *pp=(void *)copy_relblock(p,s);
-      if (x) x->d.st++;
-      relb_copied+=s;
-    }
+  ufixnum rs=(s+(r-1))&(~(r-1));/* ROUND_UP_PTR_CONT(s); */
+  object st=sSAleaf_collectionA->s.s_dbind;
+  
+  if (p<data_start || p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P)
+    return;
+
+  if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st>=ngc_thresh) {
+    void *dp=PRND(st->st.st_self+st->st.st_fillp,r);
+    *pp=memcpy(dp,p,s);
+    st->st.st_fillp=dp+s-(void *)st->st.st_self;
+    x->d.st=0;
+    return;
+  } 
+
+  if (x) x->d.st++;
+
+  if (p>=e) {
+    *pp=(void *)copy_relblock(p,s);
+    nrbm+=s+(RND(nrbm,r)-nrbm);
+  } else {
+    mark_contblock(p,s);
+    ncbm+=s+(RND(ncbm,r)-ncbm);
   }
 }
 
+#define mark_object(x) if (sgc_enabled ? ON_WRITABLE_PAGE(x) : !NULL_OR_ON_C_STACK(x)) mark_object1(x)
+
 static void
-mark_object(object x) {
+mark_object1(object x) {
   
   fixnum i,j=0;/*FIXME*/
 
-  if (NULL_OR_ON_C_STACK(x) || is_marked_or_free(x))  /*FIXME*/
+  if (is_marked_or_free(x))
     return;
 
   mark(x);
@@ -503,7 +490,7 @@ mark_object(object x) {
     break;
     
   case t_bignum:
-    mark_leaf_data(x,(void **)&MP_SELF(x),MP_ALLOCATED(x)*MP_LIMB_SIZE);
+    MARK_LEAF_DATA(x,MP_SELF(x),MP_ALLOCATED(x)*MP_LIMB_SIZE);
     break;
 
   case t_ratio:
@@ -527,7 +514,7 @@ mark_object(object x) {
     mark_object(x->s.s_plist);
     mark_object(x->s.s_gfdef);
     mark_object(x->s.s_dbind);
-    mark_leaf_data(x,(void **)&x->s.s_self,x->s.s_fillp);
+    MARK_LEAF_DATA(x,x->s.s_self,x->s.s_fillp);
     break;
     
   case t_package:
@@ -542,8 +529,8 @@ mark_object(object x) {
     if (x->p.p_external)
       for (i=0;i<x->p.p_external_size;i++)
 	mark_object(x->p.p_external[i]);
-    mark_leaf_data(x,(void **)&x->p.p_internal,x->p.p_internal_size*sizeof(object));
-    mark_leaf_data(x,(void **)&x->p.p_external,x->p.p_external_size*sizeof(object));
+    MARK_LEAF_DATA(x,x->p.p_internal,x->p.p_internal_size*sizeof(object));
+    MARK_LEAF_DATA(x,x->p.p_external,x->p.p_external_size*sizeof(object));
     break;
     
   case t_hashtable:
@@ -554,12 +541,11 @@ mark_object(object x) {
 	mark_object(x->ht.ht_self[i].hte_key);
 	mark_object(x->ht.ht_self[i].hte_value);
       }
-    mark_leaf_data(x,(void **)&x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
-    /* MARK_LEAF_DATA(x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self)); */
+    MARK_LEAF_DATA(x,x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
     break;
     
   case t_array:
-    mark_leaf_data(x,(void **)&x->a.a_dims,sizeof(int)*x->a.a_rank);
+    MARK_LEAF_DATA(x,x->a.a_dims,sizeof(int)*x->a.a_rank);
 
   case t_vector:
   case t_bitvector:
@@ -573,7 +559,7 @@ mark_object(object x) {
 	  }}
     case aet_lf:
       j= sizeof(longfloat)*x->v.v_dim;
-      if ((COLLECT_RELBLOCK_P) &&  x->v.v_self>=heap_end)
+      if ((COLLECT_RELBLOCK_P) &&  (void *)x->v.v_self>=(void *)heap_end)
 	ROUND_RB_POINTERS_DOUBLE;/*FIXME gc space violation*/
       break;
     case aet_bit:
@@ -601,7 +587,7 @@ mark_object(object x) {
 
     if (x->v.v_displaced->c.c_car==Cnil) {
       void *p=x->v.v_self;
-      mark_leaf_data(x,(void **)&x->v.v_self,j);
+      MARK_LEAF_DATA(x,x->v.v_self,j);
       if (x->v.v_displaced!=Cnil) {
 	j=(void *)x->v.v_self-p;
 	x->v.v_self=p;
@@ -621,7 +607,7 @@ mark_object(object x) {
 	for (i=0,j=S_DATA(def)->length;i<j;i++)
 	  if (s_type[i]==0)
 	    mark_object(STREF(object,x,s_pos[i]));
-      mark_leaf_data(x,(void **)&x->str.str_self,S_DATA(def)->size);
+      MARK_LEAF_DATA(x,x->str.str_self,S_DATA(def)->size);
     }
     break;
     
@@ -635,7 +621,7 @@ mark_object(object x) {
       mark_object(x->sm.sm_object0);
       mark_object(x->sm.sm_object1);
       if (x->sm.sm_fp) {
-	mark_leaf_data(x,(void **)&x->sm.sm_buffer,BUFSIZ);
+	MARK_LEAF_DATA(x,x->sm.sm_buffer,BUFSIZ);
       }
       break;
     
@@ -670,7 +656,7 @@ mark_object(object x) {
     break;
     
   case t_random:
-    mark_leaf_data(NULL,(void **)&x->rnd.rnd_state._mp_seed->_mp_d,x->rnd.rnd_state._mp_seed->_mp_alloc*MP_LIMB_SIZE);/*FIXME alignment*/
+    MARK_LEAF_DATA_ALIGNED(x,x->rnd.rnd_state._mp_seed->_mp_d,x->rnd.rnd_state._mp_seed->_mp_alloc*MP_LIMB_SIZE,MP_LIMB_SIZE);
     break;
     
   case t_readtable:
@@ -680,10 +666,10 @@ mark_object(object x) {
 	if (x->rt.rt_self[i].rte_dtab) {
 	  for (j=0;j<RTABSIZE;j++)
 	    mark_object(x->rt.rt_self[i].rte_dtab[j]);
-	  mark_leaf_data(x,(void **)&x->rt.rt_self[i].rte_dtab,RTABSIZE*sizeof(object));
+	  MARK_LEAF_DATA(x,x->rt.rt_self[i].rte_dtab,RTABSIZE*sizeof(object));
 	}
       }
-    mark_leaf_data(x,(void **)&x->rt.rt_self,RTABSIZE*sizeof(struct rtent));
+    MARK_LEAF_DATA(x,x->rt.rt_self,RTABSIZE*sizeof(struct rtent));
     break;
     
   case t_pathname:
@@ -698,7 +684,7 @@ mark_object(object x) {
   case t_closure:
     for (i= 0;i<x->cl.cl_envdim;i++)
       mark_object(x->cl.cl_env[i]);
-    mark_leaf_data(x,(void **)&x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
+    MARK_LEAF_DATA(x,x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
     
   case t_cfun:
   case t_sfun:
@@ -716,7 +702,7 @@ mark_object(object x) {
 	mark_object(x->cfd.cfd_self[i]);
     if (what_to_collect == t_contiguous)
       mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
-    mark_leaf_data(x,(void **)&x->cfd.cfd_start,x->cfd.cfd_size);
+    MARK_LEAF_DATA(NULL,x->cfd.cfd_start,x->cfd.cfd_size);/*Code cannot move*/
     break;
 
  case t_cclosure:
@@ -727,7 +713,7 @@ mark_object(object x) {
       x->cc.cc_turbo--;
       for (i=0;i<=fix(x->cc.cc_turbo[0]);i++)
  	mark_object(x->cc.cc_turbo[i]);
-      mark_leaf_data(x,(void **)&x->cc.cc_turbo,(1+fix(x->cc.cc_turbo[0]))*sizeof(*x->cc.cc_turbo));
+      MARK_LEAF_DATA(x,x->cc.cc_turbo,(1+fix(x->cc.cc_turbo[0]))*sizeof(*x->cc.cc_turbo));
       x->cc.cc_turbo++;
     }
     break;
@@ -751,11 +737,6 @@ static long *c_stack_where;
 void **contblock_stack_list=NULL;
 
 #define PAGEINFO_P(pi) (pi->magic==PAGE_MAGIC && pi->type<=t_contiguous)
-
-#ifdef SGC
-static void
-sgc_mark_object1(object);
-#endif
 
 static void
 mark_stack_carefully(void *topv, void *bottomv, int offset) {
@@ -805,13 +786,10 @@ mark_stack_carefully(void *topv, void *bottomv, int offset) {
 
     if (is_marked_or_free(x)) continue;
 
-#ifdef SGC
-    if (sgc_enabled)
-      sgc_mark_object(x);
-    else
-#endif
-      mark_object(x);
+    mark_object(x);
+
   }
+
 }
 
 
@@ -1120,26 +1098,9 @@ int (*GBC_exit_hook)() = NULL;
 fixnum fault_pages=0;
 
 void
-allocate_static_promotion_area(void) {
-  if (relb_copied &&
-      (sSAstatic_promotion_areaA->s.s_dbind==Cnil ||
-       sSAstatic_promotion_areaA->s.s_dbind->v.v_dim-sSAstatic_promotion_areaA->s.s_dbind->v.v_fillp<relb_copied)) {
-    relb_copied=(relb_copied+((PAGESIZE<<8)-1)) & ~((PAGESIZE<<8)-1);
-    sSAstatic_promotion_areaA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(relb_copied),make_fixnum(aet_char),Ct,make_fixnum(0)));
-    fprintf(stderr,"Making static promotion area %lu bytes\n",relb_copied);
-    fflush(stderr);
-    relb_copied=0;
-  }
-
-}
-
-void
 GBC(enum type t) {
 
   long i,j;
-#ifdef SGC
-  int in_sgc = sgc_enabled;
-#endif
 #ifdef DEBUG
   int tm=0;
 #endif
@@ -1150,6 +1111,10 @@ GBC(enum type t) {
     collect_both=1;
     t=t_contiguous;
   }
+  if (t==t_contiguous)
+    ncbm=0;
+  if (COLLECT_RELBLOCK_P)
+    nrbm=0;
 
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");
@@ -1177,9 +1142,6 @@ GBC(enum type t) {
 	}
 
     t = t_relocatable; gc_time = -1;
-#ifdef SGC
-    if(sgc_enabled) sgc_quit();
-#endif    
     }
 
 
@@ -1257,14 +1219,7 @@ GBC(enum type t) {
 #endif
 #ifdef SGC
   if(sgc_enabled)
-    { if (t < t_end && tm_of(t)->tm_sgc == 0)
-      {sgc_quit();
-      if (sSAnotify_gbcA->s.s_dbind != Cnil)
-	{fprintf(stdout, " (doing full gc)");
-	fflush(stdout);}
-      mark_phase();}
-    else
-      sgc_mark_phase();}
+    sgc_mark_phase();
   else
 #endif	
     mark_phase();
@@ -1417,11 +1372,6 @@ GBC(enum type t) {
 #endif
   
   interrupt_enable = TRUE;
-  
-#ifdef SGC
-  if (in_sgc && sgc_enabled==0)
-    sgc_start();
-#endif
   
   if (GBC_exit_hook != NULL)
     (*GBC_exit_hook)();

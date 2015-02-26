@@ -7,9 +7,6 @@
     
 */
 
-static void
-sgc_mark_object1(object);
-
 #ifdef BSD
 /* ulong may have been defined in mp.h but the define is no longer needed */
 #undef ulong
@@ -51,80 +48,11 @@ int gclmprotect ( void *addr, size_t len, int prot ) {
 
 #include <signal.h>
 
-/*  void segmentation_catcher(void); */
-
-
-#define sgc_mark_pack_list(u)      \
-do {register object xtmp = u;  \
- while (xtmp != Cnil) \
-   {if (ON_WRITABLE_PAGE(xtmp)) {mark(xtmp);}	\
-     sgc_mark_object(xtmp->c.c_car); \
-     xtmp=Scdr(xtmp);}}while(0) 
-
-
 #ifdef SDEBUG
 object sdebug;
 joe1(){;}
 joe() {;}     
 #endif
-
-/* static void */
-/* sgc_mark_cons(object x) { */
-  
-/*   cs_check(x); */
-  
-/*   /\*  x is already marked.  *\/ */
-  
-/*  BEGIN: */
-/* #ifdef SDEBUG */
-/*   if(x==sdebug) joe1(); */
-/* #endif */
-/*   sgc_mark_object(x->c.c_car); */
-/* #ifdef OLD */
-/*   IF_WRITABLE(x->c.c_car, goto MARK_CAR;); */
-/*   goto MARK_CDR; */
-  
-/*  MARK_CAR: */
-/*   if (!is_marked_or_free(x->c.c_car)) { */
-/*     if (consp(x->c.c_car)) { */
-/*       mark(x->c.c_car); */
-/*       sgc_mark_cons(x->c.c_car); */
-/*     } else */
-/*       sgc_mark_object1(x->c.c_car);} */
-/*  MARK_CDR:   */
-/* #endif */
-/*   /\* if (is_imm_fixnum(x->c.c_cdr)) return; *\/ */
-/*   x = Scdr(x); */
-/*   IF_WRITABLE(x, goto WRITABLE_CDR;); */
-/*   return; */
-/*  WRITABLE_CDR: */
-/*   if (is_marked_or_free(x)) return; */
-/*   if (consp(x)) { */
-/*     mark(x); */
-/*     goto BEGIN; */
-/*   } */
-/*   sgc_mark_object1(x); */
-/* } */
-
-inline void
-sgc_mark_cons(object x) {
-  
-  do {
-    object d=x->c.c_cdr;
-    mark(x);
-    sgc_mark_object(x->c.c_car);
-    x=d;
-    if (!IS_WRITABLE(page(x)) || is_marked_or_free(x))/*catches Cnil*/
-      return;
-  } while (cdr_listp(x));
-  sgc_mark_object(x);
-
-}
-
-/* Whenever two arrays are linked together by displacement,
-   if one is live, the other will be made live */
-#define sgc_mark_displaced_field(ar) sgc_mark_object(ar->a.a_displaced)
-
 
 /* structures and arrays of type t, need to be marked if their
    bodies are not write protected even if the headers are.
@@ -133,415 +61,6 @@ sgc_mark_cons(object x) {
    header, that way we won't have to keep the headers in memory.
    This takes only 1.47 as opposed to 1.33 microseconds per set.
 */
-static void
-sgc_mark_object1(object x) {
-
-  fixnum i,j;
-  object *p;
-  char *cp;
-  enum type tp;
-  
-  cs_check(x);
- BEGIN:
-#ifdef SDEBUG
-  if (x == OBJNULL || !ON_WRITABLE_PAGE(x))
-    return;
-  IF_WRITABLE(x,goto OK);
-  joe();
- OK:
-#endif 
-  if (is_marked_or_free(x))
-    return;
-#ifdef SDEBUG
-  if(x==sdebug) joe1();
-#endif
-  
-  tp=type_of(x);
-
-  if (tp==t_cons) {
-    sgc_mark_cons(x);
-    return;
-  }
-
-  mark(x);
-
-  switch (tp) {
-
-  case t_fixnum:
-    break;
-    
-  case t_ratio:
-    sgc_mark_object(x->rat.rat_num);
-    x = x->rat.rat_den;
-    IF_WRITABLE(x,if(!is_marked_or_free(x)) goto BEGIN);
-    
-  case t_shortfloat:
-    break;
-    
-  case t_longfloat:
-    break;
-    
-  case t_complex:
-    sgc_mark_object(x->cmp.cmp_imag);
-    x = x->cmp.cmp_real;
-    IF_WRITABLE(x,if(!is_marked_or_free(x)) goto BEGIN);
-    
-  case t_character:
-    break;
-    
-  case t_symbol:
-    IF_WRITABLE(x->s.s_plist,if(!is_marked_or_free(x->s.s_plist))
-    {/* mark(x->s.s_plist); */
-    sgc_mark_cons(x->s.s_plist);});
-    sgc_mark_object(x->s.s_gfdef);
-    sgc_mark_object(x->s.s_dbind);
-    if (x->s.s_self == NULL)
-      break;
-    /* to do */
-    if (inheap(x->s.s_self)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(x->s.s_self,x->s.s_fillp);
-    } else if (SGC_RELBLOCK_P(x->s.s_self) && COLLECT_RELBLOCK_P)
-      x->s.s_self = copy_relblock(x->s.s_self, x->s.s_fillp);
-    break;
-    
-  case t_package:
-    sgc_mark_object(x->p.p_name);
-    sgc_mark_object(x->p.p_nicknames);
-    sgc_mark_object(x->p.p_shadowings);
-    sgc_mark_object(x->p.p_uselist);
-    sgc_mark_object(x->p.p_usedbylist);
-    if (what_to_collect == t_contiguous) {
-      if (x->p.p_internal != NULL)
-	mark_contblock((char *)(x->p.p_internal),
-		       x->p.p_internal_size*sizeof(object));
-      if (x->p.p_external != NULL)
-	mark_contblock((char *)(x->p.p_external),
-		       x->p.p_external_size*sizeof(object));
-    }
-    break;
-    
-  case t_hashtable:
-    sgc_mark_object(x->ht.ht_rhsize);
-    sgc_mark_object(x->ht.ht_rhthresh);
-    if (x->ht.ht_self == NULL)
-      break;
-    for (i = 0, j = x->ht.ht_size;  i < j;  i++) {
-      if (ON_WRITABLE_PAGE(&x->ht.ht_self[i])) {
-	sgc_mark_object(x->ht.ht_self[i].hte_key);
-	sgc_mark_object(x->ht.ht_self[i].hte_value);
-      }
-    }
-    if (inheap(x->ht.ht_self)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock((char *)(x->ht.ht_self),j * sizeof(struct htent));
-    } else if (SGC_RELBLOCK_P(x->ht.ht_self) && COLLECT_RELBLOCK_P)
-      x->ht.ht_self=(void *)copy_relblock((char *)x->ht.ht_self,j*sizeof(struct htent));;
-    break;
-    
-  case t_array:
-    if ((x->a.a_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    if (x->a.a_dims != NULL) {
-      if (inheap(x->a.a_dims)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)(x->a.a_dims),sizeof(int)*x->a.a_rank);
-      } else if (SGC_RELBLOCK_P(x->a.a_dims) && COLLECT_RELBLOCK_P)
-	x->a.a_dims = (int *) copy_relblock((char *)(x->a.a_dims),sizeof(int)*x->a.a_rank);
-    }
-    if ((enum aelttype)x->a.a_elttype == aet_ch)
-      goto CASE_STRING;
-    if ((enum aelttype)x->a.a_elttype == aet_bit)
-      goto CASE_BITVECTOR;
-    if ((enum aelttype)x->a.a_elttype == aet_object)
-      goto CASE_GENERAL;
-    
-  CASE_SPECIAL:
-    cp = (char *)(x->fixa.fixa_self);
-    if (cp == NULL)
-      break;
-    /* set j to the size in char of the body of the array */
-    
-    switch((enum aelttype)x->a.a_elttype){
-    case aet_lf:
-      j= sizeof(longfloat)*x->lfa.lfa_dim;
-      if ((COLLECT_RELBLOCK_P) && !(inheap(cp)) && SGC_RELBLOCK_P(x->a.a_self))
-	ROUND_RB_POINTERS_DOUBLE;/*FIXME gc space violation*/
-      break;
-    case aet_char:
-    case aet_uchar:
-      j=sizeof(char)*x->a.a_dim;
-      break;
-    case aet_short:
-    case aet_ushort:
-      j=sizeof(short)*x->a.a_dim;
-      break;
-    default:
-      j=sizeof(fixnum)*x->fixa.fixa_dim;}
-    
-    goto COPY;
-    
-  CASE_GENERAL:
-    p = x->a.a_self;
-    if (p == NULL
-#ifdef HAVE_ALLOCA
-	|| (char *)p >= core_end
-#endif  
-	
-	)
-      break;
-    j=0;
-    if (x->a.a_displaced->c.c_car == Cnil)
-      for (i = 0, j = x->a.a_dim;  i < j;  i++)
-	if (ON_WRITABLE_PAGE(&p[i]))
-	  sgc_mark_object(p[i]);
-    cp = (char *)p;
-    j *= sizeof(object);
-  COPY:
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (SGC_RELBLOCK_P(cp) && COLLECT_RELBLOCK_P) {
-      if (x->a.a_displaced == Cnil) {
-#ifdef HAVE_ALLOCA
-	if (!NULL_OR_ON_C_STACK(cp))  /* only if body of array not on C stack */
-#endif			  
-	  x->a.a_self = (object *)copy_relblock(cp, j);
-      } else if (x->a.a_displaced->c.c_car == Cnil) {
-	i = (long)(object *)copy_relblock(cp, j) - (long)(x->a.a_self);
-	adjust_displaced(x, i);
-      }
-    }
-    break;
-    
-  case t_vector:
-    if ((x->v.v_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      goto CASE_GENERAL;
-    else
-      goto CASE_SPECIAL;
-    
-  case t_bignum:
-#ifdef SDEBUG
-    if (TYPE_MAP(page(x->big.big_self)) < t_contiguous)
-	printf("bad body for %x (%x)\n",x,cp);
-#endif
-#ifndef GMP_USE_MALLOC
-    j = MP_ALLOCATED(x);
-    cp = (char *)MP_SELF(x);
-    if (cp == 0)
-      break;
-    j = j * MP_LIMB_SIZE;
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (SGC_RELBLOCK_P(cp) && COLLECT_RELBLOCK_P)
-      MP_SELF(x) = (void *) copy_relblock(cp, j);
-#endif /* not GMP_USE_MALLOC */
-    break;
-    
-    
-  CASE_STRING:
-  case t_string:
-    if ((x->st.st_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    j = x->st.st_dim;
-    cp = x->st.st_self;
-    if (cp == NULL)
-      break;
-    
-  COPY_STRING:
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (SGC_RELBLOCK_P(cp) && COLLECT_RELBLOCK_P) {
-      if (x->st.st_displaced == Cnil)
-	x->st.st_self = copy_relblock(cp, j);
-      else if (x->st.st_displaced->c.c_car == Cnil) {
-	i = copy_relblock(cp, j) - cp;
-	adjust_displaced(x, i);
-      }
-    }
-    break;
-    
-  CASE_BITVECTOR:
-  case t_bitvector:
-    if ((x->bv.bv_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    /* We make bitvectors multiple of sizeof(int) in size allocated
-       Assume 8 = number of bits in char */
-    
-#define W_SIZE (8*sizeof(fixnum))
-    j= sizeof(fixnum) *
-      ((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
-    cp = x->bv.bv_self;
-    if (cp == NULL)
-      break;
-    goto COPY_STRING;
-    
-  case t_structure:
-    sgc_mark_object(x->str.str_def);
-    p = x->str.str_self;
-    if (p == NULL)
-      break;
-    {
-      object def=x->str.str_def;
-      unsigned char  *s_type = &SLOT_TYPE(def,0);
-      unsigned short *s_pos  = &SLOT_POS (def,0);
-      for (i = 0, j = S_DATA(def)->length;  i < j;  i++)
-	if (s_type[i]==0 && ON_WRITABLE_PAGE(&STREF(object,x,s_pos[i])))
-	  sgc_mark_object(STREF(object,x,s_pos[i]));
-      if (inheap(x->str.str_self)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)p,S_DATA(def)->size);
-      } else if (SGC_RELBLOCK_P(p) && (COLLECT_RELBLOCK_P))
-	x->str.str_self = (object *) copy_relblock((char *)p, S_DATA(def)->size);
-    }
-    break;
-    
-  case t_stream:
-    switch (x->sm.sm_mode) {
-    case smm_input:
-    case smm_output:
-    case smm_io:
-    case smm_socket:  
-    case smm_probe:
-      sgc_mark_object(x->sm.sm_object0);
-      sgc_mark_object(x->sm.sm_object1);
-      if (what_to_collect == t_contiguous &&
-	  x->sm.sm_fp &&
-	  x->sm.sm_buffer)
-	mark_contblock(x->sm.sm_buffer, BUFSIZ);
-      break;
-      
-    case smm_synonym:
-      sgc_mark_object(x->sm.sm_object0);
-      break;
-      
-    case smm_broadcast:
-    case smm_concatenated:
-      sgc_mark_object(x->sm.sm_object0);
-      break;
-      
-    case smm_two_way:
-    case smm_echo:
-      sgc_mark_object(x->sm.sm_object0);
-      sgc_mark_object(x->sm.sm_object1);
-      break;
-      
-    case smm_string_input:
-    case smm_string_output:
-      sgc_mark_object(x->sm.sm_object0);
-      break;
-#ifdef USER_DEFINED_STREAMS
-    case smm_user_defined:
-      sgc_mark_object(x->sm.sm_object0);
-      sgc_mark_object(x->sm.sm_object1);
-      break;
-#endif
-    default:
-      error("mark stream botch");
-    }
-    break;
-    
-#define SGC_MARK_CP(a_,b_) {fixnum _t=(b_);if (inheap((a_))) {\
-	if (what_to_collect == t_contiguous) mark_contblock((void *)(a_),_t); \
-      } else if (SGC_RELBLOCK_P((a_)) && COLLECT_RELBLOCK_P) (a_)=(void *)copy_relblock((void *)(a_),_t);}
-
-#define SGC_MARK_MP(a_) {if ((a_)->_mp_d) SGC_MARK_CP((a_)->_mp_d,(a_)->_mp_alloc*MP_LIMB_SIZE);}
-
-  case t_random:
-    SGC_MARK_MP(x->rnd.rnd_state._mp_seed);
-#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR < 2)
-    if (x->rnd.rnd_state._mp_algdata._mp_lc) {
-      SGC_MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_a);
-      if (!x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m2exp) SGC_MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m);
-      SGC_MARK_CP(x->rnd.rnd_state._mp_algdata._mp_lc,sizeof(*x->rnd.rnd_state._mp_algdata._mp_lc));
-    }
-#endif
-    break;
-    
-  case t_readtable:
-    if (x->rt.rt_self == NULL)
-      break;
-    if (what_to_collect == t_contiguous)
-      mark_contblock((char *)(x->rt.rt_self),RTABSIZE*sizeof(struct rtent));
-    for (i = 0;  i < RTABSIZE;  i++) {
-      sgc_mark_object(x->rt.rt_self[i].rte_macro);
-      if (x->rt.rt_self[i].rte_dtab != NULL) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)(x->rt.rt_self[i].rte_dtab),RTABSIZE*sizeof(object));
-	for (j = 0;  j < RTABSIZE;  j++)
-	  sgc_mark_object(x->rt.rt_self[i].rte_dtab[j]);
-      }
-    }
-    break;
-    
-  case t_pathname:
-    sgc_mark_object(x->pn.pn_host);
-    sgc_mark_object(x->pn.pn_device);
-    sgc_mark_object(x->pn.pn_directory);
-    sgc_mark_object(x->pn.pn_name);
-    sgc_mark_object(x->pn.pn_type);
-    sgc_mark_object(x->pn.pn_version);
-    break;
-    
-  case t_closure:
-    { 
-      int i ;
-      for (i= 0 ; i < x->cl.cl_envdim ; i++) 
-	sgc_mark_object(x->cl.cl_env[i]);
-      if (SGC_RELBLOCK_P(x->cl.cl_env) && COLLECT_RELBLOCK_P)
-	x->cl.cl_env=(void *)copy_relblock((void *)x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
-
-    }
-    
-  case t_cfun:
-  case t_sfun:
-  case t_vfun:
-  case t_afun:
-  case t_gfun:
-    sgc_mark_object(x->cf.cf_name);
-    sgc_mark_object(x->cf.cf_data);
-    break;
-    
-  case t_cfdata:
-    
-    if (x->cfd.cfd_self != NULL) {
-      int i=x->cfd.cfd_fillp;
-      while(i-- > 0)
-	sgc_mark_object(x->cfd.cfd_self[i]);
-    }
-    if (what_to_collect == t_contiguous) {
-      mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
-      mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
-    }
-    break;
-  case t_cclosure:
-    sgc_mark_object(x->cc.cc_name);
-    sgc_mark_object(x->cc.cc_env);
-    sgc_mark_object(x->cc.cc_data);
-    if (x->cc.cc_turbo!=NULL) {
-      sgc_mark_object(*(x->cc.cc_turbo-1));
-      if (SGC_RELBLOCK_P(x->cc.cc_turbo) && COLLECT_RELBLOCK_P)
-	x->cc.cc_turbo=(void *)copy_relblock((char *)(x->cc.cc_turbo-1),(1+fix(*(x->cc.cc_turbo-1)))*sizeof(object))+sizeof(object);
-    }
-    break;
-    
-  case t_spice:
-    break;
-    
-  default:
-#ifdef DEBUG
-    if (debug)
-      printf("\ttype = %d\n", type_of(x));
-#endif
-    error("mark botch");
-  }
-  
-}
-
 static void
 sgc_mark_phase(void) {
 
@@ -552,8 +71,8 @@ sgc_mark_phase(void) {
   STATIC ihs_ptr ihsp;
   STATIC struct pageinfo *v;
   
-  sgc_mark_object(Cnil->s.s_plist);
-  sgc_mark_object(Ct->s.s_plist);
+  mark_object(Cnil->s.s_plist);
+  mark_object(Ct->s.s_plist);
   
   /* mark all non recent data on writable pages */
   {
@@ -571,7 +90,7 @@ sgc_mark_phase(void) {
       for (j = tm->tm_nppage; --j >= 0; p += tm->tm_size) {
 	object x = (object) p; 
 	if (SGC_OR_M(x)) continue;
-	sgc_mark_object1(x);
+	mark_object(x);
       }
     }
   }
@@ -595,24 +114,24 @@ sgc_mark_phase(void) {
   mark_stack_carefully(MVloc+(sizeof(MVloc)/sizeof(object)),MVloc,0);
 
   for (bdp = bds_org;  bdp<=bds_top;  bdp++) {
-    sgc_mark_object(bdp->bds_sym);
-    sgc_mark_object(bdp->bds_val);
+    mark_object(bdp->bds_sym);
+    mark_object(bdp->bds_val);
   }
   
   for (frp = frs_org;  frp <= frs_top;  frp++)
-    sgc_mark_object(frp->frs_val);
+    mark_object(frp->frs_val);
   
   for (ihsp = ihs_org;  ihsp <= ihs_top;  ihsp++)
-    sgc_mark_object(ihsp->ihs_function);
+    mark_object(ihsp->ihs_function);
   
   for (i = 0;  i < mark_origin_max;  i++)
-    sgc_mark_object(*mark_origin[i]);
+    mark_object(*mark_origin[i]);
   for (i = 0;  i < mark_origin_block_max;  i++)
     for (j = 0;  j < mark_origin_block[i].mob_size;  j++)
-      sgc_mark_object(mark_origin_block[i].mob_addr[j]);
+      mark_object(mark_origin_block[i].mob_addr[j]);
   
   for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link)
-    sgc_mark_object((object)pp);
+    mark_object((object)pp);
 #ifdef KCLOVM
   if (ovm_process_created)
     sgc_mark_all_stacks();
@@ -624,20 +143,6 @@ sgc_mark_phase(void) {
     fflush(stdout);
   }
 #endif	
-  {
-    int size;
-  
-    for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link) {
-      size = pp->p_internal_size;
-      if (pp->p_internal != NULL)
-	for (i = 0;  i < size;  i++)
-	  sgc_mark_pack_list(pp->p_internal[i]);
-      size = pp->p_external_size;
-      if (pp->p_external != NULL)
-	for (i = 0;  i < size;  i++)
-	  sgc_mark_pack_list(pp->p_external[i]);
-    }
-  }
   
   mark_c_stack(0,N_RECURSION_REQD,mark_stack_carefully);
   
@@ -1326,7 +831,6 @@ sgc_start(void) {
   }
 
   sSAoptimize_maximum_pagesA->s.s_dbind=omp;
-  sSAstatic_promotion_areaA->s.s_dbind==Cnil;
 
   return 1;
   
@@ -1551,7 +1055,7 @@ memory_protect(int on) {
   writable = IS_WRITABLE(beg);
   for (i=beg ; ++i<= end; ) {
 
-    if (writable==IS_WRITABLE(i) && i<=end) continue;
+    if (writable==IS_WRITABLE(i) && i<end) continue;
 
     if (sgc_mprotect(beg,i-beg,writable)) 
       return -1;
