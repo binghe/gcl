@@ -4,8 +4,8 @@ set_writable(fixnum i,fixnum m) {
   fixnum j;
   object v;
 
-  if (i<first_data_page || i>=page(core_end))
-    error("out of core in set_writable");
+  if (i<first_data_page || i>=page(heap_end))
+    error("out of heap in set_writable");
 
   if ((v=sSAwritableA ? sSAwritableA->s.s_dbind : Cnil)==Cnil)
     error("no wrimap in set_writable");
@@ -36,6 +36,9 @@ is_writable(fixnum i) {
   if (i<first_data_page || i>=page(core_end))
     return 0;
 
+  if (i>=page(heap_end))
+    return 1;
+  
   if ((v=sSAwritableA ? sSAwritableA->s.s_dbind : Cnil)==Cnil)
     return 1;
 
