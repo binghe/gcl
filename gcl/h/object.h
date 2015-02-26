@@ -77,7 +77,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	Definition of the type of LISP objects.
 */
 typedef union int_object iobject;
-union int_object {object o; fixnum i;};
+union int_object {object *o; fixnum i;};
 
 #define	SMALL_FIXNUM_LIMIT	1024
 

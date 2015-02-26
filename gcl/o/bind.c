@@ -935,11 +935,11 @@ parse_key_new_new(int n, object *base, struct key *keys, object first, va_list a
  top:
   while (n>=2)
     {int i= keys->n;
-     iobject **ke=keys->keys ;
+     iobject *ke=keys->keys ;
      new = new -2;
      k = *new;
      while(--i >= 0)
-       {if ((**(ke++)).o == k)
+       {if (*(*(ke++)).o == k)
 	  {base[i]= new[1];
 	   n=n-2;
 	   goto top;
@@ -1026,8 +1026,7 @@ parse_key_rest_new(object rest, int n, object *base, struct key *keys, object fi
     
  new = new + n ;
   {int j=keys->n;
-   object **p= (object *)(keys->defaults);
-   while (--j >=0) base[j]=*(p[j]);
+   while (--j >=0) base[j]=*keys->defaults[j].o;
  }
  {if (n==0){ return 0;}
  {int allow = keys->allow_other_keys;
@@ -1043,11 +1042,11 @@ parse_key_rest_new(object rest, int n, object *base, struct key *keys, object fi
  top:
   while (n>=2)
     {int i= keys->n;
-     iobject **ke=keys->keys ;
+     iobject *ke=keys->keys ;
      new = new -2;
      k = *new;
      while(--i >= 0)
-       {if ((**(ke++)).o == k)
+       {if (*(*(ke++)).o == k)
 	  {base[i]= new[1];
 	   n=n-2;
 	   goto top;
