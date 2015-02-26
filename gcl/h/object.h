@@ -337,9 +337,6 @@ EXTER long holepage;			/*  hole pages  */
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
   
 
-#ifdef SGC
-EXTER char *old_rb_start;			/*  read-only relblock start  */
-#endif
 EXTER char *rb_start;			/*  relblock start  */
 EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */

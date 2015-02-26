@@ -257,23 +257,18 @@ update_real_maxpage(void) {
 static int
 minimize_image(void) {
 
-#ifdef SGC
-  int in_sgc=sgc_enabled;
-#else
-  int in_sgc=0;
-#endif
   extern long new_holepage;
   fixnum old_holepage=new_holepage,i;
   void *new;
   
-  if (in_sgc) sgc_quit();
   holepage=new_holepage=1;
   GBC(t_relocatable);
-  if (in_sgc) sgc_start();
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
+  if (new<initial_sbrk)
+    new=initial_sbrk;
   core_end = new;
   rb_end=rb_limit=new;
-  set_tm_maxpage(tm_table+t_relocatable,(nrbpage=((char *)new-REAL_RB_START)/PAGESIZE));
+  set_tm_maxpage(tm_table+t_relocatable,(nrbpage=((char *)new-rb_start)/PAGESIZE));
   new_holepage=old_holepage;
   
 #ifdef GCL_GPROF
@@ -301,7 +296,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
   l=l<def ? l : def;
   end=data_start+(1L<<l)-PAGESIZE;
   GBC(t_relocatable);
-  dend=heap_end+PAGESIZE+(((rb_pointer-REAL_RB_START)+PAGESIZE-1)&(-PAGESIZE));
+  dend=heap_end+PAGESIZE+(((rb_pointer-rb_start)+PAGESIZE-1)&(-PAGESIZE));
   if (end >= dend) {
     minimize_image();
     log_maxpage_bound=l;

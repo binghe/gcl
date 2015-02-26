@@ -1097,7 +1097,6 @@ contblock_sweep_phase(void) {
 
 int (*GBC_enter_hook)() = NULL;
 int (*GBC_exit_hook)() = NULL;
-char *old_rb_start;
 
 /* void */
 /* ttss(void) { */
@@ -1211,7 +1210,7 @@ GBC(enum type t) {
 #ifdef SGC
     if(sgc_enabled)
       printf("(%ld faulted pages, %ld writable, %ld read only)..",fault_pages,sgc_count_writable(),
-	     (page(core_end)-first_data_page)-(page(old_rb_start)-page(heap_end))-sgc_count_writable());
+	     (page(core_end)-first_data_page)-(page(rb_start)-page(heap_end))-sgc_count_writable());
 #endif	  
     fflush(stdout);
   }
@@ -1222,16 +1221,10 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    relb_copied=0;
+    i=rb_pointer-rb_start+PAGESIZE;/*FIXME*/
 
-    i=rb_pointer-REAL_RB_START+PAGESIZE;/*FIXME*/
-
-#ifdef SGC
-    if (sgc_enabled==0)
-#endif
-      rb_start = heap_end + PAGESIZE*holepage;
-    
-    rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
+    rb_start = heap_end + PAGESIZE*holepage;
+    rb_end   = heap_end + (holepage + nrbpage) *PAGESIZE;
     
     if (rb_start < rb_pointer)
       rb_start1 = (char *)

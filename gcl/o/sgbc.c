@@ -767,7 +767,7 @@ fixnum writable_pages=0;
 static fixnum
 sgc_count_writable(void) { 
 
-  return page(core_end)-page(rb_start)+writable_pages-(page(old_rb_start)-page(heap_end));
+  return page(core_end)-page(rb_start)+writable_pages;
 
 }
 
@@ -1055,6 +1055,17 @@ sgc_start(void) {
   if (sgc_enabled)
     return 1;
 
+  {
+    extern ufixnum ngc_thresh,nrbm;
+
+    GBC(t_relocatable);
+    sSAleaf_collectionA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(nrbm),make_fixnum(aet_char),Ct,make_fixnum(0)));/*FIXME*/
+    ngc_thresh=0;
+    GBC(t_relocatable);
+    sSAleaf_collectionA->s.s_dbind=Cnil;
+    massert(rb_pointer==rb_start);
+  }
+
   /* Reset maxpage statistics if not invoked automatically on a hole
      overrun. 20040804 CM*/
   /* if (!hole_overrun) { */
@@ -1193,26 +1204,7 @@ sgc_start(void) {
 
   }
 
-  /* Now  allocate the sgc relblock.   We do this as the tail
-     end of the ordinary rb.     */  
-  {
-    char *new;
-    tm=tm_of(t_relocatable);
-    
-    {
-      old_rb_start=rb_start;
-      if(((unsigned long)WSGC(tm)) && allocate_more_pages) {
-	new=alloc_relblock(((unsigned long)WSGC(tm))*PAGESIZE);
-	/* the above may cause a gc, shifting the relblock */
-	old_rb_start=rb_start;
-	new= PAGE_ROUND_UP(new);
-      } else new=PAGE_ROUND_UP(rb_pointer);
-      rb_start=rb_pointer=new;
-    }
-  }
-  /* the relblock has been allocated */
-  
-  sSAwritableA->s.s_dbind=fSmake_vector1_1((page(rb_start)-first_data_page),aet_bit,Cnil);
+  sSAwritableA->s.s_dbind=fSmake_vector1_1((page(heap_end)-first_data_page),aet_bit,Cnil);/*FIXME*/
   wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 
   /* now move the sgc free lists into place.   alt_free should
@@ -1315,11 +1307,7 @@ sgc_start(void) {
 	    SET_WRITABLE(i);
     }
 
-    for (i=page(heap_end);i<page(old_rb_start);i++)
-	SET_WRITABLE(i);
-    tm_of(t_relocatable)->tm_alt_npage=page(rb_start)-page(old_rb_start);
-    for (i=page(rb_start);i<page(core_end);i++)
-	SET_WRITABLE(i);
+    tm_of(t_relocatable)->tm_alt_npage=0;
 
     fault_pages=0;
 
@@ -1380,7 +1368,6 @@ sgc_quit(void) {
   wrimap=NULL;
 
   sgc_enabled=0;
-  rb_start = old_rb_start;
 
   /* SGC cont pages: restore contblocks, each tmp_cb_pointer coming
      from the new list is guaranteed not to be on the old. Need to

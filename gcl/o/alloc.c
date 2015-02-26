@@ -277,7 +277,7 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   
   fixnum r=tm->tm_type==t_relocatable,j=tm->tm_maxpage,z=(n-j)*(r ? 2 : 1);
   if (z>available_pages) return 0;
-  if (r && 2*n+page(REAL_RB_START)>real_maxpage) return 0;
+  if (r && 2*n+page(rb_start)>real_maxpage) return 0;
   available_pages-=z;
   tm->tm_adjgbccnt*=((double)j)/n;
   tm->tm_maxpage=n;
@@ -670,7 +670,7 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
   if (tm->tm_type>=t_end) return NULL;
 
-  reloc_min=npage(rb_pointer-REAL_RB_START);
+  reloc_min=npage(rb_pointer-rb_start);
 
   if (m<2*(nrbpage-reloc_min)) {
 

@@ -69,9 +69,6 @@ enum sgc_type { SGC_NORMAL,   /* not allocated since the last sgc */
 
 #define TM_BASE_TYPE_P(i) (tm_table[i].tm_type == i)
 
-/* check if a relblock address is new relblock */
-#define SGC_RELBLOCK_P(x)  ((char *)(x) >= rb_start)
-
 /* is this an sgc cell? encompasses all free cells.  Used where cell cannot yet be marked */
 #define SGC_OR_M(x)  (!TYPEWORD_TYPE_P(pageinfo(x)->type)  ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s)
 
@@ -111,16 +108,10 @@ extern fixnum writable_pages;
 
 
 EXTER long first_data_page,real_maxpage,phys_pages,available_pages;
-EXTER void *data_start;
+EXTER void *data_start,*initial_sbrk;
 
 #if !defined(IN_MAIN) && defined(SGC)
 #include "writable.h"
-#endif
-
-#ifdef SGC
-#define REAL_RB_START (sgc_enabled ? old_rb_start : rb_start)
-#else
-#define REAL_RB_START rb_start
 #endif
 
 #define CB_BITS     CPTR_SIZE*CHAR_SIZE
