@@ -634,7 +634,7 @@ find_section (char *name, char *section_names, char *file_name, ElfW(Ehdr) *old_
 static void
 unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bss_start, unsigned int entry_address)
 {
-  int new_file, old_file, new_file_size;
+  int new_file, old_file;
 
   /* Pointers to the base of the image of the two files. */
   caddr_t old_base, new_base;
@@ -654,17 +654,14 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   /* Point to the section name table in the old file */
   char *old_section_names;
 
-  ElfW(Addr) old_bss_addr, new_bss_addr;
-  ElfW(Word) old_bss_size, new_data2_size,old_bss_offset;
-  ElfW(Off)  new_data2_offset;
-  ElfW(Addr) new_data2_addr;
+  ElfW(Addr) old_bss_addr, new_bss_addr,new_data2_addr;
+  ElfW(Off)  old_bss_size, new_data2_size,old_bss_offset,new_data2_offset,old_file_size,new_file_size;
 
   int n, nn;
   int old_bss_index, old_sbss_index;
   int old_data_index, new_data2_index;
   int old_mdebug_index;
   struct stat stat_buf;
-  int old_file_size;
 
   /* Open the old file, allocate a buffer of the right size, and read
      in the file contents.  */
