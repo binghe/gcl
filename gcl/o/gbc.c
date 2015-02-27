@@ -537,10 +537,11 @@ mark_object1(object x) {
     mark_object(x->ht.ht_rhsize);
     mark_object(x->ht.ht_rhthresh);
     if (x->ht.ht_self)
-      for (i=0;i<x->ht.ht_size;i++) {
-	mark_object(x->ht.ht_self[i].hte_key);
-	mark_object(x->ht.ht_self[i].hte_value);
-      }
+      for (i=0;i<x->ht.ht_size;i++)
+	if (x->ht.ht_self[i].hte_key!=OBJNULL) {
+	  mark_object(x->ht.ht_self[i].hte_key);
+	  mark_object(x->ht.ht_self[i].hte_value);
+	}
     MARK_LEAF_DATA(x,x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
     break;
     
