@@ -1062,7 +1062,7 @@ contblock_sweep_phase(void) {
 #ifdef DEBUG
   if (debug) {
     for (cbp = cb_pointer; cbp != NULL; cbp = cbp->cb_link)
-      printf("%d-byte contblock\n", cbp->cb_size);
+      printf("%lud-byte contblock\n", cbp->cb_size);
     fflush(stdout);
   }
 #endif
@@ -1540,12 +1540,142 @@ mark_contblock(void *p, int s) {
 #ifdef SGC
   if (!sgc_enabled || (v->sgc_flags&SGC_PAGE_FLAG))
 #endif
-    set_mark_bits(v,x,y);
+     set_mark_bits(v,x,y);
+ }
+ 
+DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO,(void),"") {
+  
+  struct contblock **cbpp;
+  struct pageinfo *v;
+  ufixnum i,j;
+  struct typemanager *tm=tm_of(t_cfdata);
+  
+  for (i=j=0,cbpp=&cb_pointer;(*cbpp);i+=(*cbpp)->cb_size,j++,cbpp=&(*cbpp)->cb_link)
+    fprintf(stderr,"%lu at %p\n",(unsigned long)(*cbpp)->cb_size,*cbpp);
+  fprintf(stderr,"\nTotal free %lu in %lu pieces\n\n",i,j);
+  
+  for (i=j=0,v=contblock_list_head;v;i+=v->in_use,j++,v=v->next) 
+    fprintf(stderr,"%lu pages at %p\n",(unsigned long)v->in_use,v);
+  fprintf(stderr,"\nTotal pages %lu in %lu pieces\n\n",i,j);
+  
+  for (i=j=0,v=cell_list_head;v;v=v->next)
+    if (tm->tm_type==v->type) {
+      void *p;
+      ufixnum k;
+      for (p=pagetochar(page(v)),k=0;k<tm->tm_nppage;k++,p+=tm->tm_size) {
+ 	object o=p;
+ 	if (!is_free(o) && type_of(o)==t_cfdata && (void *)o->cfd.cfd_start>=data_start) {
+ 	  fprintf(stderr,"%lu code bytes at %p\n",(unsigned long)o->cfd.cfd_size,o->cfd.cfd_start);
+ 	  i+=o->cfd.cfd_size;
+ 	  j++;
+ 	}
+      }
+    }
+  fprintf(stderr,"\nTotal code bytes %lu in %lu pieces\n",i,j);
+  
+  for (i=j=0,v=cell_list_head;v;v=v->next) {
+    struct typemanager *tm=tm_of(v->type);
+    void *p;
+    ufixnum k;
+    for (p=pagetochar(page(v)),k=0;k<tm->tm_nppage;k++,p+=tm->tm_size) {
+      object o=p;
+      void *d=NULL;
+      ufixnum s=0;
+      if (!is_free(o)) {
+ 	switch (type_of(o)) {
+ 	case t_array:
+ 	case t_vector:
+ 	  d=o->a.a_self;
+ 	  s=o->a.a_dim*sizeof(object);
+ 	  break;
+ 	case t_hashtable:
+ 	  d=o->ht.ht_self;
+ 	  s=o->ht.ht_size*sizeof(object)*2;
+ 	  break;
+ 	case t_string:
+ 	case t_symbol:
+ 	case t_bitvector:
+ 	  d=o->a.a_self;
+ 	  s=o->a.a_dim;
+ 	  break;
+ 	case t_package:
+ 	  d=o->p.p_external;
+ 	  s=(o->p.p_external_size+o->p.p_internal_size)*sizeof(object);
+ 	  break;
+ 	case t_bignum:
+ 	  d=o->big.big_mpz_t._mp_d;
+ 	  s=o->big.big_mpz_t._mp_alloc*MP_LIMB_SIZE;
+ 	  break;
+ 	case t_structure:
+ 	  d=o->str.str_self;
+ 	  s=S_DATA(o->str.str_def)->length*sizeof(object);
+ 	  break;
+ 	case t_random:
+ 	  d=o->rnd.rnd_state._mp_seed->_mp_d;
+ 	  s=o->rnd.rnd_state._mp_seed->_mp_alloc*MP_LIMB_SIZE;
+ 	  break;
+ 	case t_cclosure:
+ 	  d=o->cc.cc_turbo;
+ 	  s=fix(o->cc.cc_turbo[-1]);
+ 	  break;
+ 	case t_cfdata:
+ 	  d=o->cfd.cfd_start;
+ 	  s=o->cfd.cfd_size;
+ 	  break;
+ 	case t_readtable:
+ 	  d=o->rt.rt_self;
+ 	  s=RTABSIZE*(sizeof(struct rtent));/*FIXME*/
+ 	  break;
+ 	default:
+ 	  break;
+ 	}
+ 	if (d>=data_start && d<(void *)heap_end && s) {
+ 	  fprintf(stderr,"%lu %s bytes at %p\n",s,tm_table[type_of(o)].tm_name,d);
+ 	  i+=s;
+ 	  j++;
+ 	}
+      }
+    }
+  }
+  fprintf(stderr,"\nTotal leaf bytes %lu in %lu pieces\n",i,j);
+  
+  return Cnil;
+
+}
+
+DEFUN_NEW("SCALE-HEAP-TO",object,fSscale_heap_to,SI,1,1,NONE,II,OO,OO,OO,(fixnum mem),"") {
+  
+  fixnum i;
+  enum type t;
+  double scale;
+  
+  for (t=i=0;t<t_other;t++)
+    if (tm_table+t==tm_of(t))
+      i+=tm_table[t].tm_maxpage;
+  
+  scale=(double)(mem>>PAGEWIDTH)/i;
+  
+  for (t=i=0;t<t_other;t++)
+    if (tm_table+t==tm_of(t)) {
+      if (!set_tm_maxpage(tm_table+t,tm_table[t].tm_maxpage*scale))
+ 	FEerror("Cannot scale heap",0);
+      if (t<t_relocatable)
+ 	i+=tm_table[t].tm_maxpage;
+    }
+  
+  if ((t=sgc_enabled))
+    sgc_quit();
+  holepage=new_holepage=i;
+  GBC(t_relocatable);
+  if (t)
+    sgc_start();
+  add_pages(tm_table+t_contiguous,tm_table[t_contiguous].tm_maxpage-ncbpage);
+  return (object)mem;
 }
 
 DEFUN_NEW("GBC",object,fLgbc,LISP,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
-
-  /* 1 args */
+ 
+   /* 1 args */
   
   if (x0 == Ct)
     GBC(t_other);

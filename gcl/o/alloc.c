@@ -395,6 +395,54 @@ DEFVAR("*OPTIMIZE-MAXIMUM-PAGES*",sSAoptimize_maximum_pagesA,SI,sLnil,"");
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 DEFVAR("*NOTIFY-OPTIMIZE-MAXIMUM-PAGES*",sSAnotify_optimize_maximum_pagesA,SI,sLnil,"");
 #define MMAX_PG(a_) (a_)->tm_maxpage
+static int
+rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
+
+  fixnum d;
+  ufixnum i,j;
+  
+  
+  d=(z-my_tm->tm_maxpage)*(my_tm->tm_type==t_relocatable ? 2 : 1);
+  for (i=t_start,j=0;i<t_other;i++)
+    j+=tm_table[i].tm_maxpage;
+  j+=tm_table[t_relocatable].tm_maxpage;
+
+  if (j+d>phys_pages) {
+
+    ufixnum k=0;
+
+    for (i=t_start;i<t_other;i++)
+      if (tm_table+i!=my_tm)
+	k+=(tm_table[i].tm_maxpage-tm_table[i].tm_npage)*(i==t_relocatable ? 2 : 1);
+
+    if (k<(j+d-phys_pages))
+      return 0;
+
+    for (i=t_start;i<t_other;i++)
+      if (tm_table[i].tm_npage) {
+	if (tm_table+i==my_tm) {
+	  massert(set_tm_maxpage(tm_table+i,z));
+	} else {
+	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+(1.0-(double)(j+d-phys_pages)/k)*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
+	}
+      }
+    
+    /* for (i=t_start;i<t_other;i++) */
+    /*   if (tm_table[i].tm_npage && tm_table[i].tm_npage>((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage)) */
+    /* 	return 0; */
+    /* for (i=t_start;i<t_other;i++) */
+    /*   if (tm_table[i].tm_npage) */
+    /* 	massert(set_tm_maxpage(tm_table+i,((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage))); */
+
+    return 1;
+    
+  } else
+
+    return set_tm_maxpage(my_tm,z);
+
+}
+	
+
 inline long
 opt_maxpage(struct typemanager *my_tm) {
 
@@ -436,7 +484,7 @@ opt_maxpage(struct typemanager *my_tm) {
   if (sSAnotify_optimize_maximum_pagesA->s.s_dbind!=sLnil)
     printf("[type %u max %lu(%lu) opt %lu   y %lu(%lu) gbcrat %f sav %f]\n",
 	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r);
-  return r<=0.95 && set_tm_maxpage(my_tm,z+mro) ? 1 : 0;
+  return r<=0.95 && rebalance_maxpages(my_tm,z+mro) ? 1 : 0;
 
 }
 
@@ -604,7 +652,7 @@ add_pages(struct typemanager *tm,fixnum m) {
 
     nrbpage+=m;
     rb_end=heap_end+(holepage+nrbpage)*PAGESIZE;
-    rb_limit=rb_end-2*RB_GETA;
+    rb_limit=rb_end;/* rb_end-2*RB_GETA>rb_pointer+m*PAGESIZE ? rb_end-2*RB_GETA : rb_end; */
 
     alloc_page(-(nrbpage+holepage));
 
@@ -842,11 +890,11 @@ DEFUN_NEW("PRINT-FREE-CONTBLOCK-LIST",object,fSprint_free_contblock_list,SI,0,0,
   struct contblock *cbp,*cbp1;
 
   for (cbp=cb_pointer;cbp;cbp=cbp->cb_link) {
-    printf("%p %d\n",cbp,cbp->cb_size);
+    printf("%p %lu\n",cbp,cbp->cb_size);
     for (cbp1=cbp;cbp1;cbp1=cbp1->cb_link) 
       if ((void *)cbp+cbp->cb_size==(void *)cbp1 ||
 	  (void *)cbp1+cbp1->cb_size==(void *)cbp)
-	printf("  adjacent to %p %d\n",cbp1,cbp1->cb_size);
+	printf("  adjacent to %p %lu\n",cbp1,cbp1->cb_size);
   }
 
   return Cnil;
@@ -854,7 +902,7 @@ DEFUN_NEW("PRINT-FREE-CONTBLOCK-LIST",object,fSprint_free_contblock_list,SI,0,0,
 }
 
 void
-insert_contblock(char *p, int s) {
+insert_contblock(char *p, ufixnum s) {
 
   struct contblock **cbpp, *cbp;
   
