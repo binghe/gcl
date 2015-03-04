@@ -867,8 +867,7 @@ sgc_quit(void) {
 
   struct typemanager *tm;
   struct contblock *tmp_cb_pointer,*next;
-  unsigned long i,j,np;
-  char *p;
+  unsigned long i,np;
   struct pageinfo *v;
 
   memory_protect(0);

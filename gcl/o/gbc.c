@@ -89,7 +89,7 @@ cb_print(void) {
   int i;
   
   for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++) {
-    fprintf(stderr,"%u at %p\n",(*cbpp)->cb_size,*cbpp);
+    fprintf(stderr,"%lu at %p\n",(*cbpp)->cb_size,*cbpp);
     fflush(stderr);
   }
   fprintf(stderr,"%u blocks\n",i);
