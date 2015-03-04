@@ -552,6 +552,7 @@ sgc_start(void) {
   object omp=sSAoptimize_maximum_pagesA->s.s_dbind;
   double tmp,scale;
 
+  allocate_more_pages=0;
   if (sgc_enabled)
     return 1;
 
