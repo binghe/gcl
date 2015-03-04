@@ -2,7 +2,7 @@ EXTER fixnum last_page;
 EXTER int last_result;
 
 EXTER inline int
-set_writable(fixnum i,fixnum m) {
+set_writable(fixnum i,bool m) {
 
   fixnum j;
   object v;
@@ -21,12 +21,12 @@ set_writable(fixnum i,fixnum m) {
   if ((void *)wrimap!=(void *)v->v.v_self)
     error("set_writable called in gc");
 
+  writable_pages+=m-((wrimap[j/8]>>(j%8))&0x1);
+
   if (m)
     wrimap[j/8]|=(1<<(j%8));
   else
     wrimap[j/8]&=~(1<<(j%8));
-
-  writable_pages+=m ? 1 : -1;
 
   return 0;
 
