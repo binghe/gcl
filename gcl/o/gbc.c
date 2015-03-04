@@ -467,7 +467,37 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
   }
 }
 
-#define mark_object(x) if (sgc_enabled ? ON_WRITABLE_PAGE(x) : !NULL_OR_ON_C_STACK(x)) mark_object1(x)
+static void mark_object1(object);
+#define mark_object(x) if (sgc_enabled ? ON_WRITABLE_PAGE_CACHED(x) : !NULL_OR_ON_C_STACK(x)) mark_object1(x)
+    
+static inline void
+mark_object_address(object *o,int f) {
+
+  static ufixnum lp;
+  static ufixnum lr;
+
+  ufixnum p=page(o);
+  
+  if (lp!=p || !f) {
+    lp=p;
+    lr=sgc_enabled ? WRITABLE_PAGE_P(lp) : 1;
+  }
+
+  if (lr)
+    mark_object(*o);
+
+}
+
+static inline void
+mark_object_array(object *o,object *oe) {
+  int f=0;
+
+  if (o)
+    for (;o<oe;o++,f=1)
+      mark_object_address(o,f);
+
+}
+
 
 static void
 mark_object1(object x) {
@@ -523,13 +553,9 @@ mark_object1(object x) {
     mark_object(x->p.p_shadowings);
     mark_object(x->p.p_uselist);
     mark_object(x->p.p_usedbylist);
-    if (x->p.p_internal)
-      for (i=0;i<x->p.p_internal_size;i++)
-	mark_object(x->p.p_internal[i]);
-    if (x->p.p_external)
-      for (i=0;i<x->p.p_external_size;i++)
-	mark_object(x->p.p_external[i]);
+    mark_object_array(x->p.p_internal,x->p.p_internal+x->p.p_internal_size);
     MARK_LEAF_DATA(x,x->p.p_internal,x->p.p_internal_size*sizeof(object));
+    mark_object_array(x->p.p_external,x->p.p_external+x->p.p_external_size);
     MARK_LEAF_DATA(x,x->p.p_external,x->p.p_external_size*sizeof(object));
     break;
     
@@ -539,8 +565,8 @@ mark_object1(object x) {
     if (x->ht.ht_self)
       for (i=0;i<x->ht.ht_size;i++)
 	if (x->ht.ht_self[i].hte_key!=OBJNULL) {
-	  mark_object(x->ht.ht_self[i].hte_key);
-	  mark_object(x->ht.ht_self[i].hte_value);
+	  mark_object_address(&x->ht.ht_self[i].hte_key,i);
+	  mark_object_address(&x->ht.ht_self[i].hte_value,i+1);
 	}
     MARK_LEAF_DATA(x,x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
     break;
@@ -552,34 +578,37 @@ mark_object1(object x) {
   case t_bitvector:
 
     switch(j ? j : (enum aelttype)x->v.v_elttype) {
-#define  ROUND_RB_POINTERS_DOUBLE				\
-      {								\
-	rb_pointer=PCEI(rb_pointer,sizeof(double));		\
-	rb_pointer1=PCEI(rb_pointer1,sizeof(double));		\
-      }
+
     case aet_lf:
       j= sizeof(longfloat)*x->v.v_dim;
-      if ((COLLECT_RELBLOCK_P) &&  (void *)x->v.v_self>=(void *)heap_end)
-	ROUND_RB_POINTERS_DOUBLE;/*FIXME gc space violation*/
+      if ((COLLECT_RELBLOCK_P) &&  (void *)x->v.v_self>=(void *)heap_end)  {
+	rb_pointer=PCEI(rb_pointer,sizeof(double));		/*FIXME GC space violation*/
+	rb_pointer1=PCEI(rb_pointer1,sizeof(double));		
+      }
       break;
+
     case aet_bit:
 #define W_SIZE (8*sizeof(fixnum))
       j= sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
       break;
+
     case aet_char:
     case aet_uchar:
       j=sizeof(char)*x->v.v_dim;
       break;
+
     case aet_short:
     case aet_ushort:
       j=sizeof(short)*x->v.v_dim;
       break;
+
     case aet_object:
-      if (x->v.v_displaced->c.c_car==Cnil && x->v.v_self)
-	for (i=0;i<x->v.v_dim;i++)
-	  mark_object(x->v.v_self[i]);
+      if (x->v.v_displaced->c.c_car==Cnil)
+	mark_object_array(x->v.v_self,x->v.v_self+x->v.v_dim);
+
     default:
       j=sizeof(fixnum)*x->v.v_dim;
+
     }
 
   case t_string:/*FIXME*/
@@ -606,7 +635,7 @@ mark_object1(object x) {
       if (x->str.str_self)
 	for (i=0,j=S_DATA(def)->length;i<j;i++)
 	  if (s_type[i]==0)
-	    mark_object(STREF(object,x,s_pos[i]));
+	    mark_object_address(&STREF(object,x,s_pos[i]),i);
       MARK_LEAF_DATA(x,x->str.str_self,S_DATA(def)->size);
     }
     break;
@@ -660,15 +689,14 @@ mark_object1(object x) {
     break;
     
   case t_readtable:
-    if (x->rt.rt_self)
+    if (x->rt.rt_self) {
+      for (i=0;i<RTABSIZE;i++)
+	mark_object_address(&x->rt.rt_self[i].rte_macro,i);
       for (i=0;i<RTABSIZE;i++) {
-	mark_object(x->rt.rt_self[i].rte_macro);
-	if (x->rt.rt_self[i].rte_dtab) {
-	  for (j=0;j<RTABSIZE;j++)
-	    mark_object(x->rt.rt_self[i].rte_dtab[j]);
-	  MARK_LEAF_DATA(x,x->rt.rt_self[i].rte_dtab,RTABSIZE*sizeof(object));
-	}
+	mark_object_array(x->rt.rt_self[i].rte_dtab,x->rt.rt_self[i].rte_dtab+RTABSIZE);
+	MARK_LEAF_DATA(x,x->rt.rt_self[i].rte_dtab,RTABSIZE*sizeof(object));
       }
+    }
     MARK_LEAF_DATA(x,x->rt.rt_self,RTABSIZE*sizeof(struct rtent));
     break;
     
@@ -682,8 +710,7 @@ mark_object1(object x) {
     break;
     
   case t_closure:
-    for (i= 0;i<x->cl.cl_envdim;i++)
-      mark_object(x->cl.cl_env[i]);
+    mark_object_array(x->cl.cl_env,x->cl.cl_env+x->cl.cl_envdim);
     MARK_LEAF_DATA(x,x->cl.cl_env,x->cl.cl_envdim*sizeof(object));
     
   case t_cfun:
@@ -697,9 +724,7 @@ mark_object1(object x) {
     
   case t_cfdata:
     
-    if (x->cfd.cfd_self)
-      for (i=0;i<x->cfd.cfd_fillp;i++)
-	mark_object(x->cfd.cfd_self[i]);
+    mark_object_array(x->cfd.cfd_self,x->cfd.cfd_self+x->cfd.cfd_fillp);
     if (what_to_collect == t_contiguous)
       mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
     MARK_LEAF_DATA(NULL,x->cfd.cfd_start,x->cfd.cfd_size);/*Code cannot move*/
@@ -711,8 +736,7 @@ mark_object1(object x) {
     mark_object(x->cc.cc_data);
     if (x->cc.cc_turbo) {
       x->cc.cc_turbo--;
-      for (i=0;i<=fix(x->cc.cc_turbo[0]);i++)
- 	mark_object(x->cc.cc_turbo[i]);
+      mark_object_array(x->cc.cc_turbo,x->cc.cc_turbo+fix(x->cc.cc_turbo[0]));
       MARK_LEAF_DATA(x,x->cc.cc_turbo,(1+fix(x->cc.cc_turbo[0]))*sizeof(*x->cc.cc_turbo));
       x->cc.cc_turbo++;
     }
