@@ -397,7 +397,7 @@ grow_linear(fixnum old, fixnum fract, fixnum grow_min, fixnum grow_max,fixnum ma
 DEFVAR("*OPTIMIZE-MAXIMUM-PAGES*",sSAoptimize_maximum_pagesA,SI,sLnil,"");
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 DEFVAR("*NOTIFY-OPTIMIZE-MAXIMUM-PAGES*",sSAnotify_optimize_maximum_pagesA,SI,sLnil,"");
-#define MMAX_PG(a_) (a_)->tm_maxpage
+#define MMAX_PG(a_) (a_)->tm_maxpage-(a_)->tm_alt_npage
 static int
 rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 
@@ -454,9 +454,6 @@ opt_maxpage(struct typemanager *my_tm) {
   struct typemanager *tm,*tme;
   long mro=0,tro=0;
 
-  if (phys_pages>0 && page(heap_end)-first_data_page+nrbpage>=phys_pages)
-    return 0;
-
   if (page(core_end)>0.8*real_maxpage)
     return 0;
 
@@ -477,7 +474,7 @@ opt_maxpage(struct typemanager *my_tm) {
   z*=(y-mmax_page)*mmax_page;
   z=sqrt(z);
   z=z-mmax_page>available_pages ? mmax_page+available_pages : z;
-  my_tm->tm_opt_maxpage=(long)z>my_tm->tm_opt_maxpage ? (long)z : my_tm->tm_opt_maxpage;
+  my_tm->tm_opt_maxpage=(long)(z+my_tm->tm_alt_npage)>my_tm->tm_opt_maxpage ? (long)(z+my_tm->tm_alt_npage) : my_tm->tm_opt_maxpage;
 
   if (z<=mmax_page)
     return 0;
@@ -487,7 +484,7 @@ opt_maxpage(struct typemanager *my_tm) {
   if (sSAnotify_optimize_maximum_pagesA->s.s_dbind!=sLnil)
     printf("[type %u max %lu(%lu) opt %lu   y %lu(%lu) gbcrat %f sav %f]\n",
 	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r);
-  return r<=0.95 && rebalance_maxpages(my_tm,z+mro) ? 1 : 0;
+  return r<=0.95 && rebalance_maxpages(my_tm,z+mro+my_tm->tm_alt_npage) ? 1 : 0;
 
 }
 
