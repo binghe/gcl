@@ -226,7 +226,6 @@ update_real_maxpage(void) {
 #endif
 
   massert(cur=sbrk(0));
-  if (!initial_sbrk) initial_sbrk=cur;
   beg=data_start ? data_start : cur;
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
     if ((end=beg+i+j-PAGESIZE)>cur)

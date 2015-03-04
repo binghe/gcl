@@ -1128,7 +1128,6 @@ gcl_init_alloc(void *cs_start) {
 
 #endif
 
-  initial_sbrk=NULL;
   update_real_maxpage();
 
   if (gcl_alloc_initialized) return;
@@ -1137,7 +1136,7 @@ gcl_init_alloc(void *cs_start) {
   INIT_ALLOC;
 #endif  
 
-  data_start=heap_end;
+  initial_sbrk=data_start=heap_end;
   first_data_page=page(data_start);
   
   holepage=new_holepage;
