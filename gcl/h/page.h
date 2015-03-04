@@ -51,17 +51,19 @@
    
 int sgc_on;
 
+#define SGC_WHOLE_PAGE /* disallow old data on sgc pages*/
 
+#ifndef SGC_WHOLE_PAGE
 /* for the S field of the FIRSTWORD */
 enum sgc_type { SGC_NORMAL,   /* not allocated since the last sgc */
                 SGC_RECENT    /* allocated since last sgc */
 		};
-
+#define SGC_OR_M(x)  (!TYPEWORD_TYPE_P(pageinfo(x)->type)  ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s)
+#endif
 
 #define TM_BASE_TYPE_P(i) (tm_table[i].tm_type == i)
 
 /* is this an sgc cell? encompasses all free cells.  Used where cell cannot yet be marked */
-#define SGC_OR_M(x)  (!TYPEWORD_TYPE_P(pageinfo(x)->type)  ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s)
 
 #ifndef SIGPROTV
 #define SIGPROTV SIGSEGV

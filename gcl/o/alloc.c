@@ -301,8 +301,11 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
 
  if (sgc_enabled && tm->tm_sgc)
    pp->sgc_flags=SGC_PAGE_FLAG;
+
+#ifndef SGC_WHOLE_PAGE
  if (TYPEWORD_TYPE_P(pp->type))
    x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
+#endif
 
  /* array headers must be always writable, since a write to the
     body does not touch the header.   It may be desirable if there

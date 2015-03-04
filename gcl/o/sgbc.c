@@ -82,15 +82,17 @@ sgc_mark_phase(void) {
     
     for (v=cell_list_head;v;v=v->next) {
       i=page(v);
-      if (!WRITABLE_PAGE_P(i)) continue;
+      if (v->sgc_flags&SGC_PAGE_FLAG || !WRITABLE_PAGE_P(i)) continue;
 
       t=v->type;
       tm=tm_of(t);
       p=pagetochar(i);
       for (j = tm->tm_nppage; --j >= 0; p += tm->tm_size) {
 	object x = (object) p; 
-	if (SGC_OR_M(x)) continue;
-	mark_object(x);
+#ifndef SGC_WHOLE_PAGE
+	if (TYPEWORD_TYPE_P(v->type) && x->d.s) continue;
+#endif
+	mark_object1(x);
       }
     }
   }
@@ -162,9 +164,6 @@ sgc_sweep_phase(void) {
 
     tm = tm_of((enum type)v->type);
     
-    if (!WRITABLE_PAGE_P(page(v))) 
-      continue;
-
     p = pagetochar(page(v));
     f = tm->tm_free;
     k = 0;
@@ -183,14 +182,18 @@ sgc_sweep_phase(void) {
 	  continue;
 	}
 
-	if (TYPEWORD_TYPE_P(pageinfo(x)->type) && x->d.s == SGC_NORMAL)
+#ifndef SGC_WHOLE_PAGE
+	if (TYPEWORD_TYPE_P(v->type) && x->d.s == SGC_NORMAL)
 	  continue;
+#endif
 	
 	/* it is ok to free x */
 	
 	SET_LINK(x,f);
 	make_free(x);
+#ifndef SGC_WHOLE_PAGE
 	if (TYPEWORD_TYPE_P(v->type)) x->d.s = SGC_RECENT;
+#endif
 	f = x;
 	k++;
 
@@ -199,7 +202,7 @@ sgc_sweep_phase(void) {
       tm->tm_nfree += k;
       v->in_use-=k;
 
-    } else /*non sgc_page */
+    } else if (WRITABLE_PAGE_P(page(v))) /*non sgc_page */
       for (j = tm->tm_nppage; --j >= 0;  p += size) {
 	x = (object)p;
 	if (is_marked(x) && !is_free(x)) {
@@ -529,7 +532,11 @@ memprotect_test_reset(void) {
 /* If opt_maxpage is set, add full pages to the sgc set if needed
    too. 20040804 CM*/
 /* #define FSGC(tm) (tm->tm_type==t_cons ? tm->tm_nppage : (tm->tm_opt_maxpage ? 0 : tm->tm_sgc_minfree)) */
+#ifdef SGC_WHOLE_PAGE
+#define FSGC(tm) tm->tm_nppage
+#else
 #define FSGC(tm) (!TYPEWORD_TYPE_P(tm->tm_type) ? tm->tm_nppage : tm->tm_sgc_minfree)
+#endif
 
 DEFVAR("*WRITABLE*",sSAwritableA,SI,Cnil,"");
 
@@ -721,12 +728,16 @@ sgc_start(void) {
 #endif
 	if (pageinfo(f)->sgc_flags&SGC_PAGE_FLAG) {
 	  SET_LINK(f,x);
+#ifndef SGC_WHOLE_PAGE
 	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_RECENT;
+#endif
 	  x=f;
 	  count++;
 	} else {
 	  SET_LINK(f,y);
+#ifndef SGC_WHOLE_PAGE
  	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_NORMAL;
+#endif
 	  y=f;
 	}
 	f=next;
@@ -931,11 +942,13 @@ sgc_quit(void) {
 
   /*FIXME*/
   /* remove the recent flag from any objects on sgc pages */
-  for (v=cell_list_head;v;v=v->next) 
+#ifndef SGC_WHOLE_PAGE
+  for (v=cell_list_head;v;v=v->next)
     if (v->type==(tm=tm_of(v->type))->tm_type && TYPEWORD_TYPE_P(v->type) && v->sgc_flags & SGC_PAGE_FLAG)
       for (p=pagetochar(page(v)),j=tm->tm_nppage;j>0;--j,p+=tm->tm_size)
-	((object) p)->d.s=SGC_NORMAL;
-
+  	((object) p)->d.s=SGC_NORMAL;
+#endif
+  
   for (v=contblock_list_head;v;v=v->next) 
     if (v->sgc_flags&SGC_PAGE_FLAG) 
       bzero(CB_SGCF_START(v),CB_DATA_START(v)-CB_SGCF_START(v));
