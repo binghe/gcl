@@ -96,7 +96,9 @@ extern fixnum writable_pages;
 #define CLEAR_WRITABLE(i) set_writable(i,0)
 #define SET_WRITABLE(i) set_writable(i,1)
 #define WRITABLE_PAGE_P(i) is_writable(i)
+#define CACHED_WRITABLE_PAGE_P(i) is_writable_cached(i)
 #define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
+#define ON_WRITABLE_PAGE_CACHED(x) CACHED_WRITABLE_PAGE_P(page(x))
 
 
 
