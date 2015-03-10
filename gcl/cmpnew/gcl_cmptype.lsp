@@ -142,7 +142,9 @@
         ((eq type1 t) type2)
 	((eq type2 'object) type1)
         ((eq type2 t) type1)
-        ((consp type1)
+        ((subtypep type2 type1) type2)
+	((subtypep type1 type2) type1)
+	((consp type1)
          (case (car type1)
                (array
                 (case (cadr type1)
