@@ -1457,7 +1457,7 @@
 (setf (get 'si::define-structure 't1) 't1define-structure)
 
 (defun t1define-structure (args)
-  (maybe-eval t `(si::define-structure ,@args ,(not (maybe-eval nil nil))))
+  (maybe-eval t `(si::define-structure ,@(copy-tree args) ,(not (maybe-eval nil nil))));FIXME
   (t1ordinary (cons 'si::define-structure args)))
 
 
