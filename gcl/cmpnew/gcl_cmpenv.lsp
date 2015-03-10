@@ -366,6 +366,12 @@
           (t
            (warn "The variable name ~s is not a symbol." var)))))
 
+(defun mexpand-deftype (tp &aux (l (listp tp))(i (when l (cdr tp)))(tp (if l (car tp) tp)))
+  (when (symbolp tp)
+    (let ((fn (get tp 'si::deftype-definition)))
+      (when fn
+	(apply fn i)))))
+
 (defun c1body (body doc-p &aux (ss nil) (is nil) (ts nil) (others nil)
                     doc form)
   (loop
@@ -383,10 +389,8 @@
 ;;; 20040320 CM		
 		(cmpck (not (consp decl))
 		       "The declaration ~s is illegal." decl)
-		(let* ((dtype (car decl)))
-;; Can process user deftypes here in the future -- 20040318 CM
-;;		       (dft (and (symbolp dtype) (get dtype 'si::deftype-definition)))
-;;		       (dtype (or (and dft (funcall dft)) dtype)))
+		(let* ((dtype (car decl))
+		       (dtype (or (mexpand-deftype dtype) dtype)))
 		  (if (consp dtype)
 		    (let ((stype (car dtype)))
 		      (cmpck (or (not (symbolp stype)) (cdddr dtype)) "The declaration ~s is illegal." decl)

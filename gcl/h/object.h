@@ -150,6 +150,12 @@ enum aelttype {			/*  array element type  */
 #define SET_BV_OFFSET(x,val) ((type_of(x)==t_bitvector ? x->bv.bv_offset = val : \
 		       type_of(x)== t_array ? x->a.a_offset=val : (abort(),0)))
 
+#if !defined(DOUBLE_BIGENDIAN)
+#define BIT_ENDIAN(a_) (7-(a_))
+#else
+#define BIT_ENDIAN(a_) (a_)
+#endif
+
 
 #define S_DATA(x) ((struct s_data *)((x)->str.str_self))
 #define SLOT_TYPE(def,i) (((S_DATA(def))->raw->ust.ust_self[i]))
