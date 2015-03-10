@@ -180,9 +180,8 @@
 				
 
 (defun result-type-from-args(f args &aux tem)
-  (when (and (setq tem (get f 'return-type))
-             (not (eq tem '*))
-	     (not (consp tem)))
+  (when (if (setq tem (get f 'return-type))
+             (and (not (eq tem '*)) (not (consp tem))) t)
     (dolist (v '(inline-always inline-unsafe))
       (dolist (w (get f v))
 	(fix-opt w)
