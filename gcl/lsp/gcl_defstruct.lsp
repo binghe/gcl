@@ -99,7 +99,10 @@
 		      (setq dont-overwrite t)
 		      )
 		     (t  (setf (get access-function 'structure-access)
-			       (cons (if type type name) offset)))))))
+			       (cons (if type type name) offset))
+			 (when slot-type
+			   (proclaim `(ftype (function (,name) ,slot-type) ,access-function)))
+			 )))))
     nil))
 
 
@@ -569,9 +572,7 @@
 	      (setf (symbol-function predicate)
 		    #'(lambda (x)
 			(si::structure-subtype-p x name))))
-	  (setf (get predicate 'compiler::co1)
-		'compiler::co1structure-predicate)
-	  (setf (get predicate 'struct-predicate) name)
+	  (proclaim `(ftype (function (,name) t) ,predicate));FIXME boolean is unboxed
 	  )
   ) nil)
 
