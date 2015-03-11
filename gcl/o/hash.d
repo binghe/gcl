@@ -30,6 +30,7 @@ object sLequal;
 object sKsize;
 object sKrehash_size;
 object sKrehash_threshold;
+object sKstatic;
 
 #define MHSH(a_) ((a_) & ~(1UL<<(sizeof(a_)*CHAR_SIZE-1)))
 
@@ -551,6 +552,7 @@ gcl_init_hash()
 	sKtest = make_keyword("TEST");
 	sKrehash_size = make_keyword("REHASH-SIZE");
 	sKrehash_threshold = make_keyword("REHASH-THRESHOLD");
+	sKstatic = make_keyword("STATIC");
 	
 	make_function("MAKE-HASH-TABLE", Lmake_hash_table);
 	make_function("HASH-TABLE-P", Lhash_table_p);
