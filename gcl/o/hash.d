@@ -295,8 +295,9 @@ object hashtable;
 		hashtable->ht.ht_rhthresh =
 		make_fixnum(fix(hashtable->ht.ht_rhthresh) +
 			    (new_size - old->ht.ht_size));
-	hashtable->ht.ht_self =
-	(struct htent *)alloc_relblock(new_size * sizeof(struct htent));
+	hashtable->ht.ht_self = hashtable->ht.ht_static ? 
+	  (struct htent *)alloc_contblock(new_size * sizeof(struct htent)) : 
+	  (struct htent *)alloc_relblock(new_size * sizeof(struct htent));
 	for (i = 0;  i < new_size;  i++) {
 		hashtable->ht.ht_self[i].hte_key = OBJNULL;
 		hashtable->ht.ht_self[i].hte_value = OBJNULL;
@@ -322,6 +323,7 @@ DEFVAR("*DEFAULT-HASH-TABLE-REHASH-THRESHOLD*",sSAdefault_hash_table_rehash_thre
 			       `sSAdefault_hash_table_rehash_sizeA->s.s_dbind`)
 			      (rehash_threshold
 			       `sSAdefault_hash_table_rehash_thresholdA->s.s_dbind`)
+  			      (static `Cnil`)
 			 &aux h)
 	enum httest htt=0;
 	int i;
@@ -363,9 +365,11 @@ DEFVAR("*DEFAULT-HASH-TABLE-REHASH-THRESHOLD*",sSAdefault_hash_table_rehash_thre
 	h->ht.ht_rhsize = rehash_size;
 	h->ht.ht_rhthresh = rehash_threshold;
         h->ht.ht_nent = 0;
+        h->ht.ht_static = static!=Cnil ? 1 : 0;
 	h->ht.ht_self = NULL;
-	h->ht.ht_self = (struct htent *)
-	alloc_relblock(fix(size) * sizeof(struct htent));
+	h->ht.ht_self = h->ht.ht_static ?
+	  (struct htent *)alloc_contblock(fix(size) * sizeof(struct htent)) :
+	  (struct htent *)alloc_relblock(fix(size) * sizeof(struct htent));
 	for(i = 0;  i < fix(size);  i++) {
 		h->ht.ht_self[i].hte_key = OBJNULL;
 		h->ht.ht_self[i].hte_value = OBJNULL;
