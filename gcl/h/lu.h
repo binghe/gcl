@@ -142,6 +142,7 @@ struct hashtable {
   int ht_nent;
   int ht_size;
   short ht_test;
+  short ht_static;
   SPAD;
 
 };
