@@ -351,7 +351,7 @@ mark_link_array(void *v,void *ve) {
   pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
 
   if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P && (void *)p>=(void *)heap_end) {
-    fixnum j=rb_pointer1-rb_pointer;
+    fixnum j=relb_shift;
     p=(void *)p+j;
     pe=(void *)pe+j;
   }
@@ -583,10 +583,8 @@ mark_object1(object x) {
 
     case aet_lf:
       j= sizeof(longfloat)*x->v.v_dim;
-      if ((COLLECT_RELBLOCK_P) &&  (void *)x->v.v_self>=(void *)heap_end)  {
+      if ((COLLECT_RELBLOCK_P) &&  (void *)x->v.v_self>=(void *)heap_end)
 	rb_pointer=PCEI(rb_pointer,sizeof(double));		/*FIXME GC space violation*/
-	rb_pointer1=PCEI(rb_pointer1,sizeof(double));		
-      }
       break;
 
     case aet_bit:
@@ -1210,11 +1208,7 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    char *new_start=
-#ifdef SGC
-      sgc_enabled ? rb_start :
-#endif
-      heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
+    char *new_start=heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
     char *start=rb_pointer<rb_end ? rb_start : rb_end;
     ufixnum size=rb_pointer-start;
     
@@ -1296,10 +1290,7 @@ GBC(enum type t) {
       rb_limit+=relb_shift;
     }
 
-#ifdef SGC
-    if (sgc_enabled==0)
-#endif
-      rb_start = heap_end + PAGESIZE*holepage;
+    rb_start = heap_end + PAGESIZE*holepage;
     rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
     
 
@@ -1308,8 +1299,6 @@ GBC(enum type t) {
       wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 #endif
 
-    rb_limit = rb_end - 2*RB_GETA;
-    
   }
 
   if (t == t_contiguous) {
@@ -1554,7 +1543,7 @@ static char *
 copy_relblock(char *p, int s) {
  char *q = rb_pointer;
 
- s = ROUND_UP_PTR(s);
+ s = CEI(s,PTR_ALIGN);
  rb_pointer += s;
  memmove(q,p,s);
 
