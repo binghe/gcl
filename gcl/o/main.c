@@ -255,8 +255,6 @@ update_real_maxpage(void) {
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
 
-  new_holepage=available_pages/starting_hole_div;
-
   if (getenv("GCL_LARGE") && strlen(getenv("GCL_LARGE"))) {
 
     for (i=t_start,j=0;i<t_relocatable;i++)
@@ -275,6 +273,9 @@ update_real_maxpage(void) {
     for (i=t_start;i<t_relocatable;i++)
       new_holepage+=tm_table[i].tm_maxpage-tm_table[i].tm_npage;
     
+  } else {
+    new_holepage=available_pages/starting_hole_div;
+    set_tm_maxpage(tm_table+t_relocatable,free_phys_pages/5);
   }
 
 
