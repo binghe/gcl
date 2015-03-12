@@ -216,6 +216,7 @@ update_real_maxpage(void) {
 
   ufixnum i,j,k;
   void *end,*cur,*beg;
+  ufixnum free_phys_pages=get_phys_pages_no_malloc(1),maxpages;
 #ifdef __MINGW32__
   static fixnum n;
 
@@ -235,22 +236,22 @@ update_real_maxpage(void) {
       }
   massert(!mbrk(cur));
 
-  phys_pages=get_phys_pages_no_malloc(0);
+/*   phys_pages=get_phys_pages_no_malloc(0); */
 
-#ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
-  if (phys_pages>0 && real_maxpage>phys_pages+page(beg)) real_maxpage=phys_pages+page(beg);
-#endif
+/* #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION */
+/*   if (phys_pages>0 && real_maxpage>phys_pages+page(beg)) real_maxpage=phys_pages+page(beg); */
+/* #endif */
 
-  available_pages=real_maxpage-page(beg);
+  maxpages=real_maxpage-page(beg);
 
-  for (i=t_start,j=0;i<t_other;i++) {
-    k=tm_table[i].tm_maxpage;
-    if (tm_table[i].tm_type==t_relocatable)
-      k*=2;
-    else
+  free_phys_pages=free_phys_pages>maxpages ? maxpages : free_phys_pages;
+
+  for (i=t_start,j=0;i<t_other;i++)
+    if (tm_table[i].tm_npage) {
+      massert(k=(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage)));
       j+=k;
-    available_pages-=k;
-  }
+    }
+  available_pages=maxpages-j-tm_table[t_relocatable].tm_maxpage;
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
 
@@ -258,37 +259,24 @@ update_real_maxpage(void) {
 
   if (getenv("GCL_LARGE") && strlen(getenv("GCL_LARGE"))) {
 
-    ufixnum free_phys_pages=get_phys_pages_no_malloc(1);
-
-    fprintf(stderr,"Running large\n");
-    fflush(stderr);
-    
     for (i=t_start,j=0;i<t_relocatable;i++)
-      j+=tm_table[i].tm_npage;
-    j+=tm_table[t_relocatable].tm_npage*2;
-    /* j*=3; */
+      j+=tm_table[i].tm_maxpage;
     
     if (j<free_phys_pages) {
-      for (i=t_start;i<t_other;i++)/*t_relocatable*/
-	if (tm_table[i].tm_npage)
-	  massert(set_tm_maxpage(tm_table+i,((double)free_phys_pages/j)*tm_table[i].tm_npage));
-      /* massert(set_tm_maxpage(tm_table+t_relocatable,((double)free_phys_pages/j)*(j/3))); */
+      for (i=t_start,k=0;i<t_relocatable;i++)
+	if (tm_table[i].tm_maxpage) {
+	  massert(set_tm_maxpage(tm_table+i,((double)0.7*free_phys_pages/j)*tm_table[i].tm_maxpage));
+	  k+=tm_table[i].tm_maxpage;
+	}
+      set_tm_maxpage(tm_table+t_relocatable,(free_phys_pages-k)>>1);
     }
     
     new_holepage=0;
     for (i=t_start;i<t_relocatable;i++)
       new_holepage+=tm_table[i].tm_maxpage-tm_table[i].tm_npage;
-
-    /* add_pages(tm_table+t_contiguous,4000); */
     
   }
 
-  /* new_holepage=available_pages/starting_hole_div; */
-  /* k=available_pages/20; */
-  /* j*=starting_relb_heap_mult; */
-  /* j=j<k ? j : k; */
-  /* if (maxrbpage<j) */
-  /*   set_tm_maxpage(tm_table+t_relocatable,j); */
 
   return 0;
 
@@ -301,12 +289,12 @@ minimize_image(void) {
   fixnum old_holepage=new_holepage,i;
   void *new;
   
-  holepage=new_holepage=1;
-  GBC(t_relocatable);
-  if (rb_pointer>rb_end) {
-    fprintf(stderr,"Moving relblock low before image save\n");
+  if (rb_pointer<=rb_end) {
+    fprintf(stderr,"Moving relblock high before image save and hole minimization\n");
     fflush(stderr);
   }
+  holepage=new_holepage=1;
+  GBC(t_relocatable);
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   if (new<initial_sbrk)
     new=initial_sbrk;
@@ -340,7 +328,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
   l=l<def ? l : def;
   end=data_start+(1L<<l)-PAGESIZE;
   GBC(t_relocatable);
-  dend=heap_end+PAGESIZE+(((rb_pointer-rb_start)+PAGESIZE-1)&(-PAGESIZE));
+  dend=heap_end+PAGESIZE+CEI(rb_pointer-(rb_pointer<rb_end ? rb_start : rb_end),PAGESIZE);
   if (end >= dend) {
     minimize_image();
     log_maxpage_bound=l;

@@ -213,6 +213,11 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
       d=d<0 ? 0 : d;
       d=new_holepage<d ? new_holepage : d;
       
+      if (rb_pointer>rb_end) {
+	fprintf(stderr,"Moving relblock low prior to hole expansion\n");
+	fflush(stderr);
+      }
+
       holepage = d + n;
 
       GBC(t_relocatable);
@@ -551,7 +556,7 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
   case t_relocatable:
     if (rb_pointer>rb_end && rb_pointer+n>rb_limit && rb_pointer+n<rb_end+nrbpage*PAGESIZE)
       rb_limit=rb_pointer+n;
-    if (rb_limit-rb_pointer>=n)
+    if (rb_limit-rb_pointer>n)
       return ((rb_pointer+=n)-n);
     break;
 

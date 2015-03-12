@@ -334,8 +334,6 @@ bool collect_both=0;
 
 #define COLLECT_RELBLOCK_P (what_to_collect == t_relocatable || collect_both)
 
-static fixnum relb_shift;
-
 static void
 mark_link_array(void *v,void *ve) {
 
@@ -349,12 +347,6 @@ mark_link_array(void *v,void *ve) {
 
   p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
   pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
-
-  if (is_marked(sLAlink_arrayA->s.s_dbind) && COLLECT_RELBLOCK_P && (void *)p>=(void *)heap_end) {
-    fixnum j=relb_shift;
-    p=(void *)p+j;
-    pe=(void *)pe+j;
-  }
 
   for (;p<pe;p+=2)
     if (*p>=v && *p<ve) {
@@ -435,30 +427,34 @@ leaf_bytes(fixnum def_type,object x) {
   }
 }
 
-ufixnum ncbm,nrbm,ngc_thresh;
+ufixnum ncbm,nrbm;
 DEFVAR("*LEAF-COLLECTION*",sSAleaf_collectionA,SI,Cnil,"");
+DEFVAR("*LEAF-COLLECTION-THRESHOLD*",sSAleaf_collection_thresholdA,SI,make_fixnum(2),"");
 
 #define MARK_LEAF_DATA(a_,b_,c_) mark_leaf_data(a_,(void **)&b_,c_,1)
 #define MARK_LEAF_DATA_ALIGNED(a_,b_,c_,d_) mark_leaf_data(a_,(void **)&b_,c_,d_)
 
+
 static inline void
 mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
-  void *p=*pp,*e=heap_end;
-  ufixnum rs=(s+(r-1))&(~(r-1));
-  object st=sSAleaf_collectionA->s.s_dbind;
+  void *p=*pp,*e=heap_end,*dp;
+  object st;
+  static union {struct dummy d;ufixnum f;} rst={.f=-1};
+  ufixnum ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
   
-  if (p<data_start || p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P)
+  if (p<data_start || (p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P))
     return;
 
-  if (st!=Cnil && rs<=st->st.st_dim-st->st.st_fillp && x && x->d.st>=ngc_thresh) {
-    void *dp=PCEI(st->st.st_self+st->st.st_fillp,r);
+  if ((st=sSAleaf_collectionA->s.s_dbind)!=Cnil && (dp=PCEI(st->st.st_self+st->st.st_fillp,r)) && dp+s<=(void *)st->st.st_self+st->st.st_dim
+      && x && x->d.st>=ngc_thresh) {
     *pp=memcpy(dp,p,s);
     st->st.st_fillp=dp+s-(void *)st->st.st_self;
     x->d.st=0;
+    st=0;
     return;
   } 
 
-  if (x) x->d.st++;
+  if (x && x->d.st<rst.d.st) x->d.st++;
 
   if (p>=e) {
     *pp=(void *)copy_relblock(p,s);
@@ -545,7 +541,7 @@ mark_object1(object x) {
   case t_symbol:
     mark_object(x->s.s_plist);
     mark_object(x->s.s_gfdef);
-    mark_object(x->s.s_dbind);
+    if (x!=sSAleaf_collectionA) mark_object(x->s.s_dbind);
     MARK_LEAF_DATA(x,x->s.s_self,x->s.s_fillp);
     break;
     
@@ -1213,28 +1209,14 @@ GBC(enum type t) {
     ufixnum size=rb_pointer-start;
     
     rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
-    rb_limit=rb_pointer+(new_end-new_start)-2*RB_GETA;
+    rb_limit=rb_pointer+(new_end-new_start);
     
-    relb_shift=0;
     if (new_start!=rb_start) {
-      if ((new_start<start && new_start+size>=start) ||
-	  (new_start<start+size && new_start+size>=start+size))
-	relb_shift=new_start-rb_pointer;
-      else
-	rb_pointer=new_start;
+      /*FIXME hole_move routine*/
+      massert(!((new_start<start && new_start+size>=start) || (new_start<start+size && new_start+size>=start+size)));
+      rb_pointer=new_start;
     }
-    /* if (new_start<rb_start) { */
-    /*   if (rb_pointer==rb_start) */
-    /* 	rb_pointer=new_start; */
-    /*   else */
-    /* 	relb_shift=new_start-rb_pointer; */
-    /* } else if (new_start>rb_start) { */
-    /*   if (rb_pointer==rb_end) */
-    /* 	rb_pointer=new_start; */
-    /*   else */
-    /* 	relb_shift=new_end-rb_pointer; */
-    /* } */
-    
+
     alloc_page(-(holepage+2*nrbpage));
     
   }
@@ -1280,15 +1262,6 @@ GBC(enum type t) {
 #endif
   
   if (COLLECT_RELBLOCK_P) {
-
-    if (relb_shift) {
-      char *v=rb_pointer<rb_end ? rb_start : rb_end;
-      fprintf(stderr,"Processing relb_shift of %ld\n",relb_shift);
-      fflush(stderr);
-      memmove(v+relb_shift,v,rb_pointer-v);
-      rb_pointer+=relb_shift;
-      rb_limit+=relb_shift;
-    }
 
     rb_start = heap_end + PAGESIZE*holepage;
     rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
@@ -1500,8 +1473,8 @@ FFN(siLroom_report)(void) {
   vs_push(make_fixnum(ncb));
   vs_push(make_fixnum(cbgbccount));
   vs_push(make_fixnum(holepage));
-  vs_push(make_fixnum(rb_pointer - rb_start));
-  vs_push(make_fixnum(rb_end - rb_pointer));
+  vs_push(make_fixnum(rb_pointer - (rb_pointer<rb_end ? rb_start : rb_end)));
+  vs_push(make_fixnum((rb_pointer<rb_end ? rb_end : (rb_end+(rb_end-rb_start))) - rb_pointer));
   vs_push(make_fixnum(nrbpage));
   vs_push(make_fixnum(maxrbpage));
   vs_push(make_fixnum(rbgbccount));
@@ -1545,9 +1518,9 @@ copy_relblock(char *p, int s) {
 
  s = CEI(s,PTR_ALIGN);
  rb_pointer += s;
- memmove(q,p,s);
+ memmove(q,p,s);/*FIXME memcpy*/
 
- return q+relb_shift;
+ return q;
 
 }
 
@@ -1623,8 +1596,11 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
  	  d=o->ht.ht_self;
  	  s=o->ht.ht_size*sizeof(object)*2;
  	  break;
- 	case t_string:
  	case t_symbol:
+ 	  d=o->s.s_self;
+ 	  s=o->s.s_fillp;
+ 	  break;
+ 	case t_string:
  	case t_bitvector:
  	  d=o->a.a_self;
  	  s=o->a.a_dim;
