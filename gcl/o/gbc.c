@@ -334,6 +334,8 @@ bool collect_both=0;
 
 #define COLLECT_RELBLOCK_P (what_to_collect == t_relocatable || collect_both)
 
+static fixnum relb_shift;
+
 static void
 mark_link_array(void *v,void *ve) {
 
@@ -1208,30 +1210,38 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    i=rb_pointer-rb_start+PAGESIZE;/*FIXME*/
-
-    rb_start = heap_end + PAGESIZE*holepage;
-    rb_end   = heap_end + (holepage + nrbpage) *PAGESIZE;
+    char *new_start=
+#ifdef SGC
+      sgc_enabled ? rb_start :
+#endif
+      heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
+    char *start=rb_pointer<rb_end ? rb_start : rb_end;
+    ufixnum size=rb_pointer-start;
     
-    if (rb_start < rb_pointer)
-      rb_start1 = (char *)
-	((long)(rb_pointer + PAGESIZE-1) & -(unsigned long)PAGESIZE);
-    else
-      rb_start1 = rb_start;
+    rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
+    rb_limit=rb_pointer+(new_end-new_start)-2*RB_GETA;
     
-    /* as we walk through marking data, we replace the
-       relocatable pointers
-       in objects by the rb_pointer, advance that
-       by the size, and copy the actual
-       data there to rb_pointer1, and advance it by the size
-       at the end [rb_start1,rb_pointer1] is copied
-       to [rb_start,rb_pointer]
-    */
-    rb_pointer = rb_start;  /* where the new relblock will start */
-    rb_pointer1 = rb_start1;/* where we will copy it to during gc*/
+    relb_shift=0;
+    if (new_start!=rb_start) {
+      if ((new_start<start && new_start+size>=start) ||
+	  (new_start<start+size && new_start+size>=start+size))
+	relb_shift=new_start-rb_pointer;
+      else
+	rb_pointer=new_start;
+    }
+    /* if (new_start<rb_start) { */
+    /*   if (rb_pointer==rb_start) */
+    /* 	rb_pointer=new_start; */
+    /*   else */
+    /* 	relb_shift=new_start-rb_pointer; */
+    /* } else if (new_start>rb_start) { */
+    /*   if (rb_pointer==rb_end) */
+    /* 	rb_pointer=new_start; */
+    /*   else */
+    /* 	relb_shift=new_end-rb_pointer; */
+    /* } */
     
-    i = (rb_end < (rb_start1 + i) ? (rb_start1 + i) : rb_end) - heap_end;
-    alloc_page(-(i + PAGESIZE - 1)/PAGESIZE);
+    alloc_page(-(holepage+2*nrbpage));
     
   }
   
@@ -1276,14 +1286,23 @@ GBC(enum type t) {
 #endif
   
   if (COLLECT_RELBLOCK_P) {
-    
-    /* sSAstatic_promotion_areaA->s.s_dbind=Cnil; */
 
-    if (rb_start < rb_start1) {
-      j = (rb_pointer-rb_start + PAGESIZE - 1)/PAGESIZE;
-      memmove(rb_start,rb_start1,j*PAGESIZE);
+    if (relb_shift) {
+      char *v=rb_pointer<rb_end ? rb_start : rb_end;
+      fprintf(stderr,"Processing relb_shift of %ld\n",relb_shift);
+      fflush(stderr);
+      memmove(v+relb_shift,v,rb_pointer-v);
+      rb_pointer+=relb_shift;
+      rb_limit+=relb_shift;
     }
+
+#ifdef SGC
+    if (sgc_enabled==0)
+#endif
+      rb_start = heap_end + PAGESIZE*holepage;
+    rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
     
+
 #ifdef SGC
     if (sgc_enabled)
       wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
@@ -1532,18 +1551,15 @@ FFN(siLreset_gbc_count)(void) {
 */
 
 static char *
-copy_relblock(char *p, int s)
-{ char *res = rb_pointer;
- char *q = rb_pointer1;
- s = CEI(s,PTR_ALIGN);
+copy_relblock(char *p, int s) {
+ char *q = rb_pointer;
+
+ s = ROUND_UP_PTR(s);
  rb_pointer += s;
- rb_pointer1 += s;
- 
  memmove(q,p,s);
- /* while (--s >= 0) */
- /*   { *q++ = *p++;} */
- 
- return res;
+
+ return q+relb_shift;
+
 }
 
 

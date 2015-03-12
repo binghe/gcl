@@ -303,6 +303,11 @@ minimize_image(void) {
   
   holepage=new_holepage=1;
   GBC(t_relocatable);
+  if (in_sgc) sgc_start();
+  if (rb_pointer>rb_end) {
+    fprintf(stderr,"Moving relblock low before image save\n");
+    fflush(stderr);
+  }
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   if (new<initial_sbrk)
     new=initial_sbrk;
@@ -1012,7 +1017,7 @@ FFN(siLsave_system)(void) {
   saving_system = FALSE;
 
   Lsave();
-  alloc_page(-(holepage+nrbpage));
+  alloc_page(-(holepage+2*nrbpage));
 
 }
 

@@ -549,6 +549,8 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
     break;
 
   case t_relocatable:
+    if (rb_pointer>rb_end && rb_pointer+n>rb_limit && rb_pointer+n<rb_end+nrbpage*PAGESIZE)
+      rb_limit=rb_pointer+n;
     if (rb_limit-rb_pointer>=n)
       return ((rb_pointer+=n)-n);
     break;
@@ -586,7 +588,7 @@ too_full_p(struct typemanager *tm) {
 
   switch (tm->tm_type) {
   case t_relocatable:
-    return 100*(rb_limit-rb_pointer)<pf*(rb_limit-rb_start);
+    return 100*(rb_limit-rb_pointer)<pf*(rb_end-rb_start);
     break;
   case t_contiguous:
     for (cbp=cb_pointer,k=0;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
@@ -650,11 +652,16 @@ add_pages(struct typemanager *tm,fixnum m) {
 
   case t_relocatable:
 
+    if (rb_pointer>rb_end) {
+      fprintf(stderr,"Moving relblock low before expanding relblock pages\n");
+      fflush(stderr);
+      GBC(t_relocatable);
+    }
     nrbpage+=m;
-    rb_end=heap_end+(holepage+nrbpage)*PAGESIZE;
-    rb_limit=rb_end;/* rb_end-2*RB_GETA>rb_pointer+m*PAGESIZE ? rb_end-2*RB_GETA : rb_end; */
+    rb_end+=m*PAGESIZE;
+    rb_limit+=m*PAGESIZE;
 
-    alloc_page(-(nrbpage+holepage));
+    alloc_page(-(2*nrbpage+holepage));
 
     break;
 
@@ -823,7 +830,7 @@ DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"
   tm = & tm_table[tm->tm_type];
   if (tm->tm_type == t_relocatable)
     { tm->tm_npage = (rb_end-rb_start)/PAGESIZE;
-      tm->tm_nfree = rb_end -rb_pointer;
+      tm->tm_nfree = rb_limit -rb_pointer;
     }
   else if (tm->tm_type == t_contiguous)
     { int cbfree =0;
@@ -1196,7 +1203,7 @@ gcl_init_alloc(void *cs_start) {
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
 
-  alloc_page(-(holepage + nrbpage));
+  alloc_page(-(holepage + 2*nrbpage));
   
   rb_start = rb_pointer = heap_end + PAGESIZE*holepage;
   rb_end = rb_start + PAGESIZE*nrbpage;
