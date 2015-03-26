@@ -1923,3 +1923,6 @@ rl_stream_p(FILE *f);
 
 void
 sigint(void);
+
+void
+allocate_code_block_reserve(void);

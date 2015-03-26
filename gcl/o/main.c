@@ -295,7 +295,8 @@ minimize_image(void) {
     fflush(stderr);
   }
   holepage=new_holepage=1;
-  GBC(t_relocatable);
+  sSAcode_block_reserveA->s.s_dbind=Cnil;
+  GBC(t_other);
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   if (new<initial_sbrk)
     new=initial_sbrk;
@@ -380,6 +381,8 @@ gcl_mprotect(void *v,unsigned long l,int p) {
 }
 #endif
 
+DEFVAR("*CODE-BLOCK-RESERVE*",sSAcode_block_reserveA,SI,Cnil,"");
+
 int
 main(int argc, char **argv, char **envp) {
 
@@ -458,9 +461,10 @@ main(int argc, char **argv, char **envp) {
     gcl_init_readline_function();
 #endif
 #ifdef NEED_STACK_CHK_GUARD
-  __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
+    __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
 #endif
-
+    allocate_code_block_reserve();
+  
   }
 
 #ifdef _WIN32

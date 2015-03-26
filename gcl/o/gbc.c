@@ -1161,7 +1161,8 @@ GBC(enum type t) {
 	    close_stream(o);
 	}
 
-    t = t_relocatable; gc_time = -1;
+    /* t = t_relocatable; */
+    gc_time = -1;
     }
 
 

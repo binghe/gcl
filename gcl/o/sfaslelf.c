@@ -242,6 +242,46 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
   
 }
 
+#ifndef MAX_CODE_ADDRESS
+#define MAX_CODE_ADDRESS -1UL
+#endif
+
+static void *
+alloc_memory(ul sz) {
+
+  void *v;
+
+  contblock_lim=MAX_CODE_ADDRESS;
+  v=alloc_contblock(sz);
+  contblock_lim=-1UL;
+
+  if ((ul)(v+sz)>=MAX_CODE_ADDRESS && sSAcode_block_reserveA &&
+      sSAcode_block_reserveA->s.s_dbind!=Cnil && sSAcode_block_reserveA->s.s_dbind->st.st_dim>=sz) {
+    v=sSAcode_block_reserveA->s.s_dbind->st.st_self;
+    sSAcode_block_reserveA->s.s_dbind->st.st_self+=sz;
+    sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
+  }
+
+  massert(v && (ul)(v+sz)<MAX_CODE_ADDRESS);
+
+  return v;
+
+}
+
+void
+allocate_code_block_reserve(void) {
+
+  const char *s=getenv("GCL_CODESPACE");
+  ul n;
+
+  if (!s || sscanf(s,"%lu",&n)!=1)
+    return;
+
+  sSAcode_block_reserveA->s.s_dbind=alloc_simple_string(n);
+  sSAcode_block_reserveA->s.s_dbind->st.st_self=alloc_memory(n);
+
+}
+
 static object
 load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 
@@ -275,9 +315,7 @@ load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
   memory->cfd.cfd_size=sz;
   memory->cfd.cfd_self=0;
   memory->cfd.cfd_start=0;
-  prefer_low_mem_contblock=TRUE;
-  memory->cfd.cfd_start=alloc_contblock(sz);
-  prefer_low_mem_contblock=FALSE;
+  memory->cfd.cfd_start=alloc_memory(sz);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;
