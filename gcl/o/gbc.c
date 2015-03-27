@@ -442,7 +442,7 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
   static union {struct dummy d;ufixnum f;} rst={.f=-1};
   ufixnum ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
   
-  if (p<data_start || (p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P))
+  if (p<data_start || p>=core_end || (p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P))
     return;
 
   if ((st=sSAleaf_collectionA->s.s_dbind)!=Cnil && (dp=PCEI(st->st.st_self+st->st.st_fillp,r)) && dp+s<=(void *)st->st.st_self+st->st.st_dim
