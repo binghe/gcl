@@ -295,7 +295,6 @@ minimize_image(void) {
     fflush(stderr);
   }
   holepage=new_holepage=1;
-  sSAcode_block_reserveA->s.s_dbind=Cnil;
   GBC(t_other);
   new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
   if (new<initial_sbrk)
