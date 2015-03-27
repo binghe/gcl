@@ -260,6 +260,7 @@ alloc_memory(ul sz) {
     v=sSAcode_block_reserveA->s.s_dbind->st.st_self;
     sSAcode_block_reserveA->s.s_dbind->st.st_self+=sz;
     sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
+    sSAcode_block_reserveA->s.s_dbind->st.st_fillp=sSAcode_block_reserveA->s.s_dbind->st.st_dim;
   }
 
   massert(v && (ul)(v+sz)<MAX_CODE_ADDRESS);
