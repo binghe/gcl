@@ -1056,11 +1056,9 @@ static void
 contblock_sweep_phase(void) {
 
   STATIC char *s, *e, *p, *q;
-  STATIC struct contblock *cbp;
   STATIC struct pageinfo *v;
   
   cb_pointer = NULL;
-  ncb = 0;
 
   for (v=contblock_list_head;v;v=v->next) {
     bool z;
@@ -1471,7 +1469,12 @@ FFN(siLroom_report)(void) {
   vs_push(make_fixnum(available_pages));
   vs_push(make_fixnum(ncbpage));
   vs_push(make_fixnum(maxcbpage));
-  vs_push(make_fixnum(ncb));
+  {
+    ufixnum ncb;
+    struct contblock *cbp;
+    for (ncb=0,cbp=cb_pointer;cbp;cbp=cbp->cb_link,ncb++);
+    vs_push(make_fixnum(ncb));
+  }
   vs_push(make_fixnum(cbgbccount));
   vs_push(make_fixnum(holepage));
   vs_push(make_fixnum(rb_pointer - (rb_pointer<rb_end ? rb_start : rb_end)));

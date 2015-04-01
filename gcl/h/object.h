@@ -330,7 +330,6 @@ EXTER struct contblock *old_cb_pointer;	/*  old contblock pointer when in SGC  *
 /*
 	Variables for memory management.
 */
-EXTER long ncb;			/*  number of contblocks  */
 #define ncbpage tm_table[t_contiguous].tm_npage
 #define maxcbpage tm_table[t_contiguous].tm_maxpage
 #define cbgbccount tm_table[t_contiguous].tm_gbccount  

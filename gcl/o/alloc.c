@@ -554,7 +554,6 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
       p=(void *)(*cbpp);
       i=(*cbpp)->cb_size-n;
       *cbpp=(*cbpp)->cb_link;
-      --ncb;
       insert_contblock(p+n,i);
       return(p);
     }
@@ -930,7 +929,6 @@ insert_contblock(char *p, ufixnum s) {
      should never be called with s<=0 to begin with.  CM 20030827*/
   if (s<=0)
     return;
-  ncb++;
   cbp = (struct contblock *)p;
   /* SGC cont pages: allocated sizes may not be zero mod CPTR_SIZE,
      e.g. string fillp, but alloc_contblock rounded up the allocation
@@ -1204,7 +1202,6 @@ gcl_init_alloc(void *cs_start) {
   init_tm(t_contiguous, "_CONTIGUOUS-BLOCKS", 0,0,20,1);
   
   
-  ncb = 0;
   ncbpage = 0;
   set_tm_maxpage(tm_table+t_contiguous,1);
 #ifdef GCL_GPROF

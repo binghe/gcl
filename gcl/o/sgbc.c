@@ -221,7 +221,7 @@ sgc_contblock_sweep_phase(void) {
   STATIC struct pageinfo *v;
   
   cb_pointer = NULL;
-  ncb = 0;
+
   for (v=contblock_list_head;v;v=v->next) {
     bool z;
 
