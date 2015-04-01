@@ -264,15 +264,6 @@ sgc_count(object yy) {
 
 fixnum writable_pages=0;
 
-/* count read-only pages */
-static fixnum
-sgc_count_read_only(void) { 
-
-  return sgc_enabled ? sSAwritableA->s.s_dbind->v.v_dim-writable_pages : 0;
-
-}
-
-
 fixnum
 sgc_count_type(int t) {
 

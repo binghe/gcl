@@ -24,7 +24,7 @@
   IMPLEMENTATION-DEPENDENT
 */
 
-#define	DEBUG
+/* #define	DEBUG */
 
 #define IN_GBC
 #define NEED_MP_H
@@ -43,9 +43,6 @@ sgc_sweep_phase(void);
 
 static void
 sgc_mark_phase(void);
-
-static fixnum
-sgc_count_read_only(void);
 
 #endif
 
@@ -405,26 +402,6 @@ sweep_link_array(void) {
 
   prune_link_array();
 
-}
-
-static inline fixnum
-leaf_bytes(fixnum def_type,object x) {
-
-  switch(def_type ? def_type : x->v.v_elttype){
-  case aet_lf:
-    return sizeof(longfloat)*x->v.v_dim;
-  case aet_bit:
-#define W_SIZE (8*sizeof(fixnum))
-    return sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
-  case aet_char:
-  case aet_uchar:
-    return sizeof(char)*x->v.v_dim;
-  case aet_short:
-  case aet_ushort:
-    return sizeof(short)*x->v.v_dim;
-  default:
-    return sizeof(fixnum)*x->v.v_dim;
-  }
 }
 
 ufixnum ncbm,nrbm;
@@ -1136,7 +1113,6 @@ fixnum fault_pages=0;
 void
 GBC(enum type t) {
 
-  long i,j;
 #ifdef DEBUG
   int tm=0;
 #endif
@@ -1753,5 +1729,5 @@ gcl_init_GBC(void) {
 #ifdef SGC
   make_si_function("SGC-ON",siLsgc_on);
 #endif
-
+  
 }
