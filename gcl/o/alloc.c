@@ -706,7 +706,7 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
 
   }
 
-  m=tm->tm_maxpage-tm->tm_npage;
+  /* m=tm->tm_maxpage-tm->tm_npage; */
   add_pages(tm,m);
 
   return alloc_from_freelist(tm,n);
