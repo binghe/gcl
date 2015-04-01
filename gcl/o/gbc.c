@@ -434,39 +434,57 @@ DEFVAR("*LEAF-COLLECTION-THRESHOLD*",sSAleaf_collection_thresholdA,SI,make_fixnu
 #define MARK_LEAF_DATA(a_,b_,c_) mark_leaf_data(a_,(void **)&b_,c_,1)
 #define MARK_LEAF_DATA_ALIGNED(a_,b_,c_,d_) mark_leaf_data(a_,(void **)&b_,c_,d_)
 
+static inline bool
+marking(void *p) {
+  return (sgc_enabled ? ON_WRITABLE_PAGE_CACHED(p) : !NULL_OR_ON_C_STACK(p));
+}
+
+static inline bool
+collecting(void *p) {
+  return (p<(void *)heap_end ? what_to_collect==t_contiguous : COLLECT_RELBLOCK_P);
+}
+
+static ufixnum ngc_thresh;
+static union {struct dummy d;ufixnum f;} rst={.f=-1};
+static object lcv=Cnil;
 
 static inline void
 mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
-  void *p=*pp,*e=heap_end,*dp;
-  object st;
-  static union {struct dummy d;ufixnum f;} rst={.f=-1};
-  ufixnum ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
+
+  void *p=*pp,*dp,*dpe;
   
-  if (p<data_start || p>=(void *)core_end || (p<e ? what_to_collect!=t_contiguous : !COLLECT_RELBLOCK_P))/*FIXME sgc, NULL_OR_ON_C_STACK*/
+  if (!marking(p)||!collecting(p))
     return;
 
-  if ((st=sSAleaf_collectionA->s.s_dbind)!=Cnil && (dp=PCEI(st->st.st_self+st->st.st_fillp,r)) && dp+s<=(void *)st->st.st_self+st->st.st_dim
+  if (lcv!=Cnil && !collecting(lcv->st.st_self) &&
+      (dp=PCEI(lcv->st.st_self,r)) && dp+s<=(dpe=lcv->st.st_self+lcv->st.st_dim)
       && x && x->d.st>=ngc_thresh) {
+
+    /* fprintf(stderr,"Promoting %p,%lu to %p\n",p,s,dp); */
+    /* fflush(stderr); */
+
     *pp=memcpy(dp,p,s);
-    st->st.st_fillp=dp+s-(void *)st->st.st_self;
+    lcv->st.st_fillp=lcv->st.st_dim=(dpe-(void *)(lcv->st.st_self=dp+s));
     x->d.st=0;
-    st=0;
+
     return;
+
   } 
 
   if (x && x->d.st<rst.d.st) x->d.st++;
 
-  if (p>=e) {
+  if (p>=(void *)heap_end) {
     *pp=(void *)copy_relblock(p,s);
     nrbm+=s+(CEI(nrbm,r)-nrbm);
   } else {
     mark_contblock(p,s);
     ncbm+=s+(CEI(ncbm,r)-ncbm);
   }
+
 }
 
 static void mark_object1(object);
-#define mark_object(x) if (sgc_enabled ? ON_WRITABLE_PAGE_CACHED(x) : !NULL_OR_ON_C_STACK(x)) mark_object1(x)
+#define mark_object(x) if (marking(x)) mark_object1(x)
     
 static inline void
 mark_object_address(object *o,int f) {
@@ -541,7 +559,7 @@ mark_object1(object x) {
   case t_symbol:
     mark_object(x->s.s_plist);
     mark_object(x->s.s_gfdef);
-    if (x!=sSAleaf_collectionA) mark_object(x->s.s_dbind);
+    mark_object(x->s.s_dbind);
     MARK_LEAF_DATA(x,x->s.s_self,x->s.s_fillp);
     break;
     
@@ -1131,8 +1149,18 @@ GBC(enum type t) {
   }
   if (t==t_contiguous)
     ncbm=0;
-  if (COLLECT_RELBLOCK_P)
+  if (COLLECT_RELBLOCK_P) {
+    static int n;
+    if (!n && sSAleaf_collectionA) {
+      n=1;
+      lcv=sSAleaf_collectionA->s.s_dbind;
+      if (lcv==Cnil || nrbm>lcv->st.st_dim)
+	sSAleaf_collectionA->s.s_dbind=lcv=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(10*nrbm),make_fixnum(aet_char),Ct));
+      ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
+      n=0;
+    }
     nrbm=0;
+  }
 
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");

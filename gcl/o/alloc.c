@@ -798,9 +798,7 @@ alloc_contblock(size_t n) {
 inline void *
 alloc_relblock(size_t n) {
 
-  void *p=alloc_mem(tm_of(t_relocatable),CEI(n,PTR_ALIGN));
-  /* allocate_static_promotion_area(); */
-  return p;
+  return alloc_mem(tm_of(t_relocatable),CEI(n,PTR_ALIGN));
 
 }
 
