@@ -226,6 +226,8 @@ update_real_maxpage(void) {
   }
 #endif
 
+  phys_pages=get_phys_pages_no_malloc(0);
+
   massert(cur=sbrk(0));
   beg=data_start ? data_start : cur;
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
