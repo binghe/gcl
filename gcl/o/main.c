@@ -290,14 +290,9 @@ minimize_image(void) {
   fixnum old_holepage=new_holepage,i;
   void *new;
   
-  if (rb_pointer<=rb_end) {
-    fprintf(stderr,"Moving relblock high before image save and hole minimization\n");
-    fflush(stderr);
-  }
-  holepage=new_holepage=1;
-  GBC(t_other);
-  new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
-  if (new<initial_sbrk)
+  new_holepage=1;
+  resize_hole(1,t_other);
+  if ((new=PCEI(rb_pointer,PAGESIZE))<initial_sbrk)
     new=initial_sbrk;
   core_end = new;
   rb_end=rb_limit=new;

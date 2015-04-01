@@ -1926,3 +1926,6 @@ sigint(void);
 
 void
 allocate_code_block_reserve(void);
+
+inline void
+resize_hole(ufixnum,enum type);

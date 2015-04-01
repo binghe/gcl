@@ -186,10 +186,31 @@ int reserve_pages_for_signal_handler=30;
    If not in_signal_handler then try to keep a minimum of
    reserve_pages_for_signal_handler pages on hand in the hole
  */
+
+inline void
+resize_hole(ufixnum hp,enum type tp) {
+  
+  char *new_start=heap_end+hp*PAGESIZE;
+  char *start=rb_pointer<rb_end ? rb_start : rb_end;
+  ufixnum size=rb_pointer-start;
+
+  if ((new_start<start && new_start+size>=start) || (new_start<start+size && new_start+size>=start+size)) {
+    fprintf(stderr,"Toggling relblock when resizing hole to %lu\n",hp);
+    fflush(stderr);
+    GBC(t_relocatable);
+    tm_table[t_relocatable].tm_adjgbccnt--;
+    return resize_hole(hp,tp);
+  }
+
+  holepage=hp;
+  GBC(tp);
+  tm_of(tp)->tm_adjgbccnt--;
+  
+}
+
 inline void *
 alloc_page(long n) {
 
-  void *e=heap_end;
   fixnum d,m;
 
   if (n>=0) {
@@ -213,15 +234,7 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
       d=d<0 ? 0 : d;
       d=new_holepage<d ? new_holepage : d;
       
-      if (rb_pointer>rb_end) {
-	fprintf(stderr,"Moving relblock low prior to hole expansion\n");
-	fflush(stderr);
-      }
-
-      holepage = d + n;
-
-      GBC(t_relocatable);
-      tm_table[t_relocatable].tm_adjgbccnt--;/* hole overrun is not a call for more relocatable */
+      resize_hole(d+n,t_relocatable);
 
     }
 
@@ -233,9 +246,12 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
       core_end+=PAGESIZE*n;
     }
 
-    heap_end+=PAGESIZE*n;
+    {
+      void *e=heap_end;
+      heap_end+=PAGESIZE*n;
 
-    return(e);
+      return(e);
+    }
 
   }
 
@@ -245,13 +261,13 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
   m=(core_end-heap_end)/PAGESIZE;
 
   if (n<=m)
-    return(e);
+    return(heap_end);
 
   IF_ALLOCATE_ERR error("Can't allocate.  Good-bye!");
 
   core_end+=PAGESIZE*(n-m);
 
-  return(e);
+  return(heap_end);
 
 }
 

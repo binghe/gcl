@@ -1227,21 +1227,16 @@ GBC(enum type t) {
 #endif
   if (gc_time >=0 && !gc_recursive++) {gc_start=runtime();}
   
-  /* maxpage = page(heap_end); */
-  
   if (COLLECT_RELBLOCK_P) {
 
     char *new_start=heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
-    char *start=rb_pointer<rb_end ? rb_start : rb_end;
-    ufixnum size=rb_pointer-start;
-    
-    rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
-    rb_limit=rb_pointer+(new_end-new_start);
     
     if (new_start!=rb_start) {
-      /*FIXME hole_move routine*/
-      massert(!((new_start<start && new_start+size>=start) || (new_start<start+size && new_start+size>=start+size)));
       rb_pointer=new_start;
+      rb_limit=new_end;
+    } else {
+      rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
+      rb_limit=rb_pointer+(new_end-new_start);
     }
 
     alloc_page(-(holepage+2*nrbpage));
