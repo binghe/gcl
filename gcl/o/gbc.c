@@ -1126,14 +1126,14 @@ GBC(enum type t) {
   if (t==t_contiguous)
     ncbm=0;
   if (COLLECT_RELBLOCK_P) {
-    static int n;
-    if (!n && sSAleaf_collectionA) {
-      n=1;
-      lcv=sSAleaf_collectionA->s.s_dbind;
-      if (lcv==Cnil || nrbm>lcv->st.st_dim)
-	sSAleaf_collectionA->s.s_dbind=lcv=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(10*nrbm),make_fixnum(aet_char),Ct));
-      ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
-      n=0;
+    if (sSAleaf_collectionA && (lcv=sSAleaf_collectionA->s.s_dbind)!=Cnil) {
+      static int n;
+      if (!n && nrbm>lcv->st.st_dim) {
+	n=1;
+	sSAleaf_collectionA->s.s_dbind=lcv=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(nrbm),make_fixnum(aet_char),Ct));
+	ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
+	n=0;
+      }
     }
     nrbm=0;
   }
