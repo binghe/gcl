@@ -559,7 +559,7 @@ sgc_start(void) {
 
     if (sSAleaf_collectionA->s.s_dbind==Cnil) {
       lc=1;
-      sSAleaf_collectionA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(0),make_fixnum(aet_char),Ct));
+      sSAleaf_collectionA->s.s_dbind=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(0),make_fixnum(aet_char),Ct));
     }
 
     sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
