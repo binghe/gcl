@@ -555,14 +555,21 @@ sgc_start(void) {
   {
     extern ufixnum nrbm;
     object o=sSAleaf_collection_thresholdA->s.s_dbind;
+    bool lc;
 
-    GBC(t_relocatable);
-    sSAleaf_collectionA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(nrbm),make_fixnum(aet_char),Ct,make_fixnum(0)));/*FIXME*/
+    if (sSAleaf_collectionA->s.s_dbind==Cnil) {
+      lc=1;
+      sSAleaf_collectionA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(0),make_fixnum(aet_char),Ct));
+    }
+
     sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
-    GBC(t_relocatable);
-    sSAleaf_collectionA->s.s_dbind=Cnil;
+    for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;)
+      GBC(t_relocatable);
     sSAleaf_collection_thresholdA->s.s_dbind=o;
-    massert(rb_pointer==rb_start||rb_pointer==rb_end);
+
+    if (lc)
+      sSAleaf_collectionA->s.s_dbind=Cnil;
+    
   }
 
   /* Reset maxpage statistics if not invoked automatically on a hole
