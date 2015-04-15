@@ -197,14 +197,14 @@ resize_hole(ufixnum hp,enum type tp) {
   if ((new_start<start && new_start+size>=start) || (new_start<start+size && new_start+size>=start+size)) {
     fprintf(stderr,"Toggling relblock when resizing hole to %lu\n",hp);
     fflush(stderr);
-    GBC(t_relocatable);
     tm_table[t_relocatable].tm_adjgbccnt--;
+    GBC(t_relocatable);
     return resize_hole(hp,tp);
   }
 
   holepage=hp;
-  GBC(tp);
   tm_of(tp)->tm_adjgbccnt--;
+  GBC(tp);
   
 }
 
@@ -419,6 +419,19 @@ DEFVAR("*OPTIMIZE-MAXIMUM-PAGES*",sSAoptimize_maximum_pagesA,SI,sLnil,"");
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 DEFVAR("*NOTIFY-OPTIMIZE-MAXIMUM-PAGES*",sSAnotify_optimize_maximum_pagesA,SI,sLnil,"");
 #define MMAX_PG(a_) (a_)->tm_maxpage-(a_)->tm_alt_npage
+
+static inline ufixnum
+sum_maxpages(void) {
+
+  ufixnum i,j;
+
+  for (i=t_start,j=0;i<t_other;i++)
+    j+=tm_table[i].tm_maxpage;
+
+  return j+tm_table[t_relocatable].tm_maxpage;
+
+}
+
 static int
 rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 
@@ -427,9 +440,7 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
   
   
   d=(z-my_tm->tm_maxpage)*(my_tm->tm_type==t_relocatable ? 2 : 1);
-  for (i=t_start,j=0;i<t_other;i++)
-    j+=tm_table[i].tm_maxpage;
-  j+=tm_table[t_relocatable].tm_maxpage;
+  j=sum_maxpages();
 
   if (j+d>phys_pages) {
 
@@ -439,7 +450,8 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
       if (tm_table+i!=my_tm)
 	k+=(tm_table[i].tm_maxpage-tm_table[i].tm_npage)*(i==t_relocatable ? 2 : 1);
 
-    if (k<(j+d-phys_pages))
+    d=d>k+phys_pages-j ? k+phys_pages-j : d;
+    if (d<=0)
       return 0;
 
     for (i=t_start;i<t_other;i++)
@@ -465,7 +477,6 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
     return set_tm_maxpage(my_tm,z);
 
 }
-	
 
 inline long
 opt_maxpage(struct typemanager *my_tm) {
@@ -473,7 +484,7 @@ opt_maxpage(struct typemanager *my_tm) {
   double x=0.0,y=0.0,z,r;
   long mmax_page;
   struct typemanager *tm,*tme;
-  long mro=0,tro=0;
+  long mro=0,tro=0,j;
 
   if (page(core_end)>0.8*real_maxpage)
     return 0;
@@ -502,10 +513,15 @@ opt_maxpage(struct typemanager *my_tm) {
 
   r=((x-my_tm->tm_adjgbccnt)+ my_tm->tm_adjgbccnt*mmax_page/z)*(y-mmax_page+z);
   r/=x*y;
+
+  j=r<=0.95 && rebalance_maxpages(my_tm,z+mro+my_tm->tm_alt_npage);
+
   if (sSAnotify_optimize_maximum_pagesA->s.s_dbind!=sLnil)
-    printf("[type %u max %lu(%lu) opt %lu   y %lu(%lu) gbcrat %f sav %f]\n",
-	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r);
-  return r<=0.95 && rebalance_maxpages(my_tm,z+mro+my_tm->tm_alt_npage) ? 1 : 0;
+    printf("[type %u max %lu(%lu) opt %lu   y %lu(%lu) gbcrat %f sav %f  new %lu sum %lu phys %lu]\n",
+	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r,
+	   my_tm->tm_maxpage,sum_maxpages(),phys_pages);
+
+  return j ? 1 : 0;
 
 }
 
@@ -1151,8 +1167,8 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
     set_tm_maxpage(tm_table+t_relocatable,reloc_min);
     nrbpage=reloc_min;
 
-    GBC(t_relocatable);
     tm_table[t_relocatable].tm_adjgbccnt--;
+    GBC(t_relocatable);
 
     return alloc_after_adding_pages(tm,n);
 
