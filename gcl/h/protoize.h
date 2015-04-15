@@ -7,7 +7,7 @@
 /* alloc.c:364:OF */ extern object on_stack_cons (object x, object y); /* (x, y) object x; object y; */
 /* alloc.c:376:OF */ extern object fSallocated (object typ); /* (typ) object typ; */
 /* alloc.c:401:OF */ extern object fSreset_number_used (object typ); /* (typ) object typ; */
-/* alloc.c:480:OF */ extern void insert_contblock (char *p, ufixnum s); /* (p, s) char *p; int s; */
+/* alloc.c:480:OF */ extern void insert_contblock (void *p, ufixnum s); /* (p, s) char *p; int s; */
 /* alloc.c:480:OF */ extern void insert_maybe_sgc_contblock (char *p, int s); /* (p, s) char *p; int s; */
 /* alloc.c:611:OF */ extern void set_maxpage (void); /* () */
 /* alloc.c:635:OF */ extern void gcl_init_alloc (void *); /* () */
@@ -1933,3 +1933,5 @@ resize_hole(ufixnum,enum type);
 inline void *
 alloc_contblock_no_gc(size_t);
 
+inline void
+reset_contblock_freelist(void);

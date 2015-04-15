@@ -554,69 +554,6 @@ Use ALLOCATE to expand the space.",
 #endif
 ufixnum contblock_lim=-1L;
 
-static inline struct contblock **
-find_cbpp_lin(struct contblock **cbpp,ufixnum n) {
-
-  for (;*cbpp && (*cbpp)->cb_size<n;cbpp=&(*cbpp)->cb_link);
-
-  return cbpp;
-
-}
-
-static inline struct contblock **
-find_contblock0(ufixnum n,void **p) {
-
-  return find_cbpp_lin(&cb_pointer,n);
-
-}
-  
-static inline void
-delete_contblock0(void *p,struct contblock **cbpp) {
-
-  *cbpp=(*cbpp)->cb_link;
-
-}
-
-static void
-insert_contblock0(void *p, ufixnum s) {
-
-  struct contblock **cbpp, *cbp;
-
-  s=CEI(s,CPTR_SIZE);
-
-  cbpp=find_contblock0(s,NULL);
-
-  cbp = p;
-  cbp->cb_size = s;
-  cbp->cb_link=*cbpp;
-  *cbpp=cbp;
-
-}
-
-static inline void
-reset_contblock_freelist0(void) {
-
-  cb_pointer=NULL;
-  
-}
-
-static inline void
-print_cb0(void) {
-
-  struct contblock *cbp;
-  
-  for (cbp=cb_pointer;cbp;cbp=cbp->cb_link)
-    fprintf(stderr,"%lu at %p\n",cbp->cb_size,cbp);
-
-  fflush(stderr);
-  
-}
-
-
-
-/* DEFVAR("*CONTBLOCK-INDEX**",sSAcontblock_indexA,SI,sLnil,""); */
-/* static struct contblock **cbsrchb[16],***cbsrch1=cbsrchb,***cbsrche=cbsrchb; */
-/* static struct contblock ***cbsrch1,***cbsrch1,***cbsrche; */
 static object cbv=Cnil;
 #define cbsrch1 ((struct contblock ***)cbv->v.v_self)
 #define cbsrche (cbsrch1+cbv->v.v_fillp)
@@ -717,14 +654,14 @@ find_cbpp(struct contblock ***cbppp,ufixnum n) {
 
 
 static inline struct contblock **
-find_contblock1(ufixnum n,void **p) {
+find_contblock(ufixnum n,void **p) {
 
   *p=find_cbppp_by_n(n);
   return find_cbpp(*p,n);
 }
 
-static inline void
-print_cb1(int print) {
+inline void
+print_cb(int print) {
 
   struct contblock *cbp,***cbppp,**cbpp=&cb_pointer;
   ufixnum k;
@@ -745,12 +682,12 @@ print_cb1(int print) {
 
 }
   
-static inline void
-insert_contblock1(void *p,ufixnum s) {
+inline void
+insert_contblock(void *p,ufixnum s) {
 
   struct contblock *cbp=p,**cbpp,***cbppp;
 
-  cbpp=find_contblock1(s,(void **)&cbppp);
+  cbpp=find_contblock(s,(void **)&cbppp);
 
   cbp->cb_size=s;
   cbp->cb_link=*cbpp;
@@ -764,7 +701,7 @@ insert_contblock1(void *p,ufixnum s) {
 }
 
 static inline void
-delete_contblock1(void *p,struct contblock **cbpp) {
+delete_contblock(void *p,struct contblock **cbpp) {
 
   struct contblock ***cbppp=p;
   ufixnum s=(*cbpp)->cb_size;
@@ -776,206 +713,13 @@ delete_contblock1(void *p,struct contblock **cbpp) {
 
 }
 
-static inline void
-reset_contblock_freelist1(void) {
+inline void
+reset_contblock_freelist(void) {
 
   cb_pointer=NULL;
   cbv->v.v_fillp=0;
   
 }
-
-
-
-
-
-
-static struct contblock **cbs1[4096],***cbse=cbs1+sizeof(cbs1)/sizeof(*cbs1);
-
-static inline void
-register_cbs(ufixnum s,struct contblock **cbpp) {
-
-  s/=sizeof(struct contblock);
-  if (s<=cbse-cbs1)
-    cbs1[s-1]=cbpp;
-}
-
-static inline struct contblock **
-find_cbpp2(struct contblock **cbpp,ufixnum n) {
-
-  for (;*cbpp && (*cbpp)->cb_size<n;cbpp=&(*cbpp)->cb_link);
-
-  return cbpp;
-
-}
-    
-static inline struct contblock **
-find_cbpp1(ufixnum n) {
-
-  struct contblock ***cbsi=cbs1+n/sizeof(struct contblock),***cbs;
-
-  if (cbsi>cbse)
-    cbsi=cbse;
-  
-  for (cbs=cbsi;cbs<=cbse;cbs++)
-    if (cbs[-1])
-      return cbs[-1];
-
-  for (cbs=cbsi-1;cbs>cbs1;cbs--)
-    if (cbs[-1])
-      return find_cbpp2(cbs[-1],n);
-
-  return &cb_pointer;
-
-}
-  
-static inline struct contblock **
-find_contblock2(ufixnum n,void **p) {
-
-  return find_cbpp1(n);
-
-}
-
-static inline void
-insert_contblock2(void *p,ufixnum s) {
-
-  struct contblock *cbp=p,**cbpp=find_contblock2(s,NULL);
-
-  massert(s);
-
-  cbp->cb_size=s;
-
-  if (*cbpp && s!=(*cbpp)->cb_size)
-    register_cbs((*cbpp)->cb_size,&cbp->cb_link);
-  cbp->cb_link=*cbpp;
-
-  if (!*cbpp || s!=(*cbpp)->cb_size)
-    register_cbs(cbp->cb_size,cbpp);
-  *cbpp=cbp;
-
-}
-  
-
-static inline void
-delete_contblock2(void *p,struct contblock **cbpp) {
-
-  if (*cbpp && (!(*cbpp)->cb_link || (*cbpp)->cb_size!=(*cbpp)->cb_link->cb_size))
-    register_cbs((*cbpp)->cb_size,NULL);
-  if (*cbpp && (*cbpp)->cb_link && (*cbpp)->cb_size!=(*cbpp)->cb_link->cb_size)
-    register_cbs((*cbpp)->cb_link->cb_size,cbpp);
-  *cbpp=(*cbpp)->cb_link;
-
-}
-
-inline void
-reset_contblock_freelist2(void) {
-
-  cb_pointer=NULL;
-  memset(cbs1,0,sizeof(cbs1));
-  
-}
-
-static inline void
-print_cb2(void) {
-
-  struct contblock *cbp,***cbppp;
-
-  for (cbp=cb_pointer;cbp;cbp=cbp->cb_link)
-    fprintf(stderr,"%lu at %p\n",cbp->cb_size,cbp);
-
-  for (cbppp=cbs1;cbppp<cbse;cbppp++) 
-    if (*cbppp)
-      fprintf(stderr,"%lu %p %p %lu\n",cbppp-cbs1,*cbppp,**cbppp,(**cbppp)->cb_size);
-
-  fflush(stderr);
-
-}
-  
-
-
-int contblock_method=1;
-
-
-inline void
-insert_contblock(char *p,ufixnum s) {
-
-  switch(contblock_method) {
-  case 0:
-    insert_contblock0(p,s);
-    break;
-  case 1:
-    insert_contblock1(p,s);
-    break;
-  case 2:
-    insert_contblock2(p,s);
-    break;
-  }
-
-}
-
-inline void
-delete_contblock(void *p,struct contblock **cbpp) {
-
-  switch(contblock_method) {
-  case 0:
-    delete_contblock0(p,cbpp);
-    break;
-  case 1:
-    delete_contblock1(p,cbpp);
-    break;
-  case 2:
-    delete_contblock2(p,cbpp);
-    break;
-  }
-
-
-}
-
-inline struct contblock **
-find_contblock(ufixnum n,void **p) {
-
-  switch(contblock_method) {
-  case 0:
-    return find_contblock0(n,p);
-  case 1:
-    return find_contblock1(n,p);
-  case 2:
-    return find_contblock2(n,p);
-  }
-
-  return NULL;
-  
-}
-
-inline void
-reset_contblock_freelist(void) {
-  switch(contblock_method) {
-  case 0:
-    reset_contblock_freelist0();
-    break;
-  case 1:
-    reset_contblock_freelist1();
-    break;
-  case 2:
-    reset_contblock_freelist2();
-    break;
-  }
-}
-
-inline void
-print_cb(void) {
-  switch(contblock_method) {
-  case 0:
-    print_cb0();
-    break;
-  case 1:
-    print_cb1(1);
-    break;
-  case 2:
-    print_cb2();
-    break;
-  }
-}
-
 
 inline void *
 alloc_from_freelist(struct typemanager *tm,fixnum n) {
