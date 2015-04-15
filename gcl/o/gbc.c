@@ -1570,11 +1570,14 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
   
   struct contblock **cbpp;
   struct pageinfo *v;
-  ufixnum i,j;
+  ufixnum i,j,k,s;
   struct typemanager *tm=tm_of(t_cfdata);
+  void *p;
   
-  for (i=j=0,cbpp=&cb_pointer;(*cbpp);i+=(*cbpp)->cb_size,j++,cbpp=&(*cbpp)->cb_link)
-    fprintf(stderr,"%lu at %p\n",(unsigned long)(*cbpp)->cb_size,*cbpp);
+  for (i=j=0,cbpp=&cb_pointer;(*cbpp);) {
+    for (k=0,s=(*cbpp)->cb_size,p=*cbpp;*cbpp && (*cbpp)->cb_size==s;i+=(*cbpp)->cb_size,j++,k++,cbpp=&(*cbpp)->cb_link);
+    fprintf(stderr,"%lu %lu starting at %p\n",k,s,p);
+  }
   fprintf(stderr,"\nTotal free %lu in %lu pieces\n\n",i,j);
   
   for (i=j=0,v=contblock_list_head;v;i+=v->in_use,j++,v=v->next) 
