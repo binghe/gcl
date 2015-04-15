@@ -1052,9 +1052,10 @@ contblock_sweep_phase(void) {
 
   STATIC char *s, *e, *p, *q;
   STATIC struct pageinfo *v;
+  extern void reset_contblock_freelist(void);
+    
+  reset_contblock_freelist();
   
-  cb_pointer = NULL;
-
   for (v=contblock_list_head;v;v=v->next) {
     bool z;
 
