@@ -44,6 +44,9 @@ sgc_sweep_phase(void);
 static void
 sgc_mark_phase(void);
 
+static fixnum
+sgc_count_read_only(void);
+
 #endif
 
 static void
@@ -1178,10 +1181,15 @@ GBC(enum type t) {
   tm_table[(int)t].tm_gbccount++;
   tm_table[(int)t].tm_adjgbccnt++;
   
+  if (sSAnotify_gbcA->s.s_dbind != Cnil
 #ifdef DEBUG
-  if (debug || (sSAnotify_gbcA->s.s_dbind != Cnil)) {
-    
-    if (gc_time < 0) gc_time=0;
+      || debug
+#endif
+      ) {
+
+    if (gc_time < 0)
+      gc_time=0;
+
 #ifdef SGC
     printf("[%s for %ld %s pages..",
 	   (sgc_enabled ? "SGC" : "GC"),
@@ -1193,15 +1201,18 @@ GBC(enum type t) {
 	   (tm_of(t)->tm_npage),
 	   (tm_table[(int)t].tm_name)+1);
 #endif
+
 #ifdef SGC
     if(sgc_enabled)
       printf("(%ld faulted pages, %ld writable, %ld read only)..",
 	     fault_pages,(page(core_end)-first_data_page)-(page(rb_start)-page(heap_end))-sgc_count_read_only(),
 	     sgc_count_read_only());
 #endif	  
+
     fflush(stdout);
+
   }
-#endif
+
   if (gc_time >=0 && !gc_recursive++) {gc_start=runtime();}
   
   if (COLLECT_RELBLOCK_P) {
