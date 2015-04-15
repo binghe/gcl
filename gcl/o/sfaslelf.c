@@ -251,18 +251,22 @@ alloc_memory(ul sz) {
 
   void *v;
 
-  contblock_lim=MAX_CODE_ADDRESS;
-  v=alloc_contblock(sz);
-  contblock_lim=-1UL;
-
-  if ((ul)(v+sz)>=MAX_CODE_ADDRESS && sSAcode_block_reserveA &&
+  if (sSAcode_block_reserveA &&
       sSAcode_block_reserveA->s.s_dbind!=Cnil && sSAcode_block_reserveA->s.s_dbind->st.st_dim>=sz) {
+    
     v=sSAcode_block_reserveA->s.s_dbind->st.st_self;
     sSAcode_block_reserveA->s.s_dbind->st.st_self+=sz;
     sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
     sSAcode_block_reserveA->s.s_dbind->st.st_fillp=sSAcode_block_reserveA->s.s_dbind->st.st_dim;
+    
+  } else {
+    
+    contblock_lim=MAX_CODE_ADDRESS;
+    v=alloc_contblock(sz);
+    contblock_lim=-1UL;
+    
   }
-
+  
   massert(v && (ul)(v+sz)<MAX_CODE_ADDRESS);
 
   return v;
