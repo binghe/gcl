@@ -765,9 +765,13 @@ sgc_start(void) {
 
     {
 
-      struct contblock *new_cb_pointer=NULL,*tmp_cb_pointer=NULL,**cbpp;
+      struct contblock **cbpp;
       void *p=NULL,*pe;
       struct pageinfo *pi;
+      extern void reset_contblock_freelist(void);
+      
+      old_cb_pointer=cb_pointer;
+      reset_contblock_freelist();
 
       for (pi=contblock_list_head;pi;pi=pi->next) {
 	
@@ -776,25 +780,16 @@ sgc_start(void) {
 	p=CB_DATA_START(pi);
 	pe=p+CB_DATA_SIZE(pi->in_use);
 	
-	for (cbpp=&cb_pointer;*cbpp;)
+	for (cbpp=&old_cb_pointer;*cbpp;)
 	  if ((void *)*cbpp>=p && (void *)*cbpp<pe) {
 	    void *s=*cbpp,*e=s+(*cbpp)->cb_size,*l=(*cbpp)->cb_link;
 	    set_sgc_bits(pi,s,e);
-	    tmp_cb_pointer=cb_pointer;
-	    cb_pointer=new_cb_pointer;
 	    insert_contblock(s,e-s);
-	    new_cb_pointer=cb_pointer;
-	    cb_pointer=tmp_cb_pointer;
 	    *cbpp=l;
 	  } else
 	    cbpp=&(*cbpp)->cb_link;
 
       }
-      
-      /* SGC contblock pages: switch to new free SGC contblock list. CM
-	 20030827 */
-      old_cb_pointer=cb_pointer;
-      cb_pointer=new_cb_pointer;
       
 #ifdef SGC_CONT_DEBUG
       overlap_check(old_cb_pointer,cb_pointer);
@@ -901,9 +896,7 @@ sgc_quit(void) {
 #ifdef SGC_CONT_DEBUG
     overlap_check(old_cb_pointer,cb_pointer);
 #endif
-    tmp_cb_pointer=cb_pointer;
-    cb_pointer=old_cb_pointer;
-    for (;tmp_cb_pointer;  tmp_cb_pointer=next) {
+    for (tmp_cb_pointer=old_cb_pointer;tmp_cb_pointer;  tmp_cb_pointer=next) {
       next=tmp_cb_pointer->cb_link;
       insert_contblock((void *)tmp_cb_pointer,tmp_cb_pointer->cb_size);
     }
