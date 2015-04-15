@@ -1220,6 +1220,24 @@ alloc_contblock(size_t n) {
 }
 
 inline void *
+alloc_contblock_no_gc(size_t n) {
+
+  struct typemanager *tm=tm_of(t_contiguous);
+  void *p;
+  
+  n=CEI(n,CPTR_SIZE);
+  
+  if ((p=alloc_from_freelist(tm,n)))
+    return p;
+
+  if (tpage(tm,n)<(rb_start-heap_end)>>PAGEWIDTH && (p=alloc_after_adding_pages(tm,n)))
+    return p;
+
+  return NULL;
+
+}
+
+inline void *
 alloc_relblock(size_t n) {
 
   return alloc_mem(tm_of(t_relocatable),CEI(n,PTR_ALIGN));

@@ -409,7 +409,7 @@ sweep_link_array(void) {
 
 ufixnum ncbm,nrbm;
 DEFVAR("*LEAF-COLLECTION*",sSAleaf_collectionA,SI,Cnil,"");
-DEFVAR("*LEAF-COLLECTION-THRESHOLD*",sSAleaf_collection_thresholdA,SI,make_fixnum(2),"");
+DEFVAR("*LEAF-COLLECTION-THRESHOLD*",sSAleaf_collection_thresholdA,SI,make_fixnum(0),"");
 
 #define MARK_LEAF_DATA(a_,b_,c_) mark_leaf_data(a_,(void **)&b_,c_,1)
 #define MARK_LEAF_DATA_ALIGNED(a_,b_,c_,d_) mark_leaf_data(a_,(void **)&b_,c_,d_)
@@ -431,20 +431,24 @@ static object lcv=Cnil;
 static inline void
 mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
 
-  void *p=*pp,*dp,*dpe;
+  void *p=*pp,*dp/* ,*dpe */;
   
   if (!marking(p)||!collecting(p))
     return;
 
-  if (lcv!=Cnil && !collecting(lcv->st.st_self) &&
-      (dp=PCEI(lcv->st.st_self,r)) && dp+s<=(dpe=lcv->st.st_self+lcv->st.st_dim)
-      && x && x->d.st>=ngc_thresh) {
+  /* if (lcv!=Cnil && !collecting(lcv->st.st_self) && */
+  /*     (dp=PCEI(lcv->st.st_self,r)) && dp+s<=(dpe=lcv->st.st_self+lcv->st.st_dim) */
+  /*     && x && x->d.st>=ngc_thresh) { */
 
+  if (what_to_collect!=t_contiguous && 
+      (dp=alloc_contblock_no_gc(s)) &&
+      x && x->d.st>=ngc_thresh) {
+    
     /* fprintf(stderr,"Promoting %p,%lu to %p\n",p,s,dp); */
     /* fflush(stderr); */
 
     *pp=memcpy(dp,p,s);
-    lcv->st.st_fillp=lcv->st.st_dim=(dpe-(void *)(lcv->st.st_self=dp+s));
+    /* lcv->st.st_fillp=lcv->st.st_dim=(dpe-(void *)(lcv->st.st_self=dp+s)); */
     x->d.st=0;
 
     return;
@@ -1135,10 +1139,10 @@ GBC(enum type t) {
       if (!n && nrbm>lcv->st.st_dim) {
 	n=1;
 	sSAleaf_collectionA->s.s_dbind=lcv=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(nrbm),make_fixnum(aet_char),Ct));
-	ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
 	n=0;
       }
     }
+    ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
     nrbm=0;
   }
 
