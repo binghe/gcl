@@ -226,7 +226,7 @@ update_real_maxpage(void) {
   }
 #endif
 
-  phys_pages=get_phys_pages_no_malloc(0);
+  phys_pages=get_phys_pages_no_malloc(1);
 
   massert(cur=sbrk(0));
   beg=data_start ? data_start : cur;
