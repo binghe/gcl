@@ -539,39 +539,447 @@ Use ALLOCATE to expand the space.",
 ufixnum contblock_lim=-1L;
 
 static inline struct contblock **
-find_free_contblock(ufixnum n) {
+find_cbpp_lin(struct contblock **cbpp,ufixnum n) {
 
-  void *v=NULL;
-  struct contblock **cbpp;
+  for (;*cbpp && (*cbpp)->cb_size<n;cbpp=&(*cbpp)->cb_link);
 
-  for (cbpp=&cb_pointer;*cbpp;cbpp=&(*cbpp)->cb_link)
-    if ((*cbpp)->cb_size>=n) {
-      v=v ? v : cbpp;
-      if ((ufixnum)(*cbpp)+n<contblock_lim)
-	return cbpp;
-    }
+  return cbpp;
 
-  return v;
+}
+
+static inline struct contblock **
+find_contblock0(ufixnum n,void **p) {
+
+  return find_cbpp_lin(&cb_pointer,n);
+
+}
+  
+static inline void
+delete_contblock0(void *p,struct contblock **cbpp) {
+
+  *cbpp=(*cbpp)->cb_link;
+
+}
+
+static void
+insert_contblock0(void *p, ufixnum s) {
+
+  struct contblock **cbpp, *cbp;
+
+  s=CEI(s,CPTR_SIZE);
+
+  cbpp=find_contblock0(s,NULL);
+
+  cbp = p;
+  cbp->cb_size = s;
+  cbp->cb_link=*cbpp;
+  *cbpp=cbp;
+
+}
+
+static inline void
+reset_contblock_freelist0(void) {
+
+  cb_pointer=NULL;
   
 }
+
+static inline void
+print_cb0(void) {
+
+  struct contblock *cbp;
+  
+  for (cbp=cb_pointer;cbp;cbp=cbp->cb_link)
+    fprintf(stderr,"%lu at %p\n",cbp->cb_size,cbp);
+
+  fflush(stderr);
+  
+}
+
+
+
+/* DEFVAR("*CONTBLOCK-INDEX**",sSAcontblock_indexA,SI,sLnil,""); */
+/* static struct contblock **cbsrchb[16],***cbsrch1=cbsrchb,***cbsrche=cbsrchb; */
+/* static struct contblock ***cbsrch1,***cbsrch1,***cbsrche; */
+static object cbv=Cnil;
+#define cbsrch1 ((struct contblock ***)cbv->v.v_self)
+#define cbsrche (cbsrch1+cbv->v.v_fillp)
+
+static inline void
+expand_contblock_index_space(void) {
+
+  if (cbv==Cnil) {
+    cbv=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(16),make_fixnum(aet_fix),Cnil,make_fixnum(0)));
+    cbv->v.v_self[0]=(object)&cb_pointer;
+    enter_mark_origin(&cbv);
+  }
+
+  if (cbv->v.v_fillp+1==cbv->v.v_dim) {
+
+    void *v=alloc_relblock(2*cbv->v.v_dim*sizeof(fixnum));
+
+    memcpy(v,cbv->v.v_self,cbv->v.v_dim*sizeof(fixnum));
+    cbv->v.v_self=v;
+    cbv->v.v_dim*=2;
+
+  }
+
+}
+
+static inline void *
+expand_contblock_index(struct contblock ***cbppp) {
+
+  ufixnum i=cbppp-cbsrch1;
+
+  expand_contblock_index_space();
+
+  cbppp=cbsrch1+i;
+  memmove(cbppp+1,cbppp,(cbsrche-cbppp+1)*sizeof(*cbppp));
+  cbv->v.v_fillp++;
+
+  return cbppp;
+
+}
+
+static inline void
+contract_contblock_index(struct contblock ***cbppp) {
+
+  memmove(cbppp+1,cbppp+2,(cbsrche-cbppp-1)*sizeof(*cbppp));
+  cbv->v.v_fillp--;
+
+}
+
+static inline int
+cbcomp(const void *v1,const void *v2) {
+
+  ufixnum u1=(**(struct contblock ** const *)v1)->cb_size;
+  ufixnum u2=(**(struct contblock ** const *)v2)->cb_size;
+
+  return u1<u2 ? -1 : (u1==u2 ? 0 : 1);
+
+}
+
+static inline void *
+bsearchleq(void *i,void *v1,size_t n,size_t s,int (*c)(const void *,const void *)) {
+
+  ufixnum nn=n>>1;
+  void *v=v1+nn*s;
+  int j=c(i,v);
+
+  if (nn)
+    return !j ? v : (j>0 ? bsearchleq(i,v,n-nn,s,c) : bsearchleq(i,v1,nn,s,c));
+  else
+    return j<=0 ? v : v+s;
+
+}
+		     
+
+static inline struct contblock ***
+find_cbppp(struct contblock *cbp) {
+
+  struct contblock **cbpp=&cbp;
+
+  return cbsrche==cbsrch1 ? cbsrch1 : bsearchleq(&cbpp,cbsrch1,cbsrche-cbsrch1,sizeof(*cbsrch1),cbcomp);
+
+}
+
+static inline struct contblock ***
+find_cbppp_by_n(ufixnum n) {
+
+  struct contblock cb={n,NULL};
+
+  return find_cbppp(&cb);
+
+}
+
+static inline struct contblock **
+find_cbpp(struct contblock ***cbppp,ufixnum n) {
+
+  return *cbppp;
+
+}
+
+
+static inline struct contblock **
+find_contblock1(ufixnum n,void **p) {
+
+  *p=find_cbppp_by_n(n);
+  return find_cbpp(*p,n);
+}
+
+static inline void
+print_cb1(int print) {
+
+  struct contblock *cbp,***cbppp,**cbpp=&cb_pointer;
+  ufixnum k;
+  
+  for (cbp=cb_pointer,cbppp=cbsrch1;cbp;cbppp++) {
+    massert(cbppp<cbsrche);
+    massert(*cbppp);
+    massert(**cbppp==cbp);
+    for (k=0;cbp && cbp->cb_size==(**cbppp)->cb_size;cbpp=&cbp->cb_link,cbp=cbp->cb_link,k++);
+    if (print)
+      fprintf(stderr,"%lu %p %p %lu %lu\n",cbppp-cbsrch1,*cbppp,**cbppp,(**cbppp)->cb_size,k);
+  }
+  massert(cbppp==cbsrche);
+  massert(*cbppp==cbpp);
+  massert(!**cbppp);
+
+  fflush(stderr);
+
+}
+  
+static inline void
+insert_contblock1(void *p,ufixnum s) {
+
+  struct contblock *cbp=p,**cbpp,***cbppp;
+
+  cbpp=find_contblock1(s,(void **)&cbppp);
+
+  cbp->cb_size=s;
+  cbp->cb_link=*cbpp;
+  *cbpp=cbp;
+  
+  if ((!cbp->cb_link || cbp->cb_link->cb_size!=s)) {
+    cbppp=expand_contblock_index(cbppp);
+    cbppp[1]=&cbp->cb_link;
+  }
+
+}
+
+static inline void
+delete_contblock1(void *p,struct contblock **cbpp) {
+
+  struct contblock ***cbppp=p;
+  ufixnum s=(*cbpp)->cb_size;
+
+  (*cbpp)=(*cbpp)->cb_link;
+
+  if ((!(*cbpp) || (*cbpp)->cb_size!=s))
+    contract_contblock_index(cbppp);
+
+}
+
+static inline void
+reset_contblock_freelist1(void) {
+
+  cb_pointer=NULL;
+  cbv->v.v_fillp=0;
+  
+}
+
+
+
+
+
+
+static struct contblock **cbs1[4096],***cbse=cbs1+sizeof(cbs1)/sizeof(*cbs1);
+
+static inline void
+register_cbs(ufixnum s,struct contblock **cbpp) {
+
+  s/=sizeof(struct contblock);
+  if (s<=cbse-cbs1)
+    cbs1[s-1]=cbpp;
+}
+
+static inline struct contblock **
+find_cbpp2(struct contblock **cbpp,ufixnum n) {
+
+  for (;*cbpp && (*cbpp)->cb_size<n;cbpp=&(*cbpp)->cb_link);
+
+  return cbpp;
+
+}
+    
+static inline struct contblock **
+find_cbpp1(ufixnum n) {
+
+  struct contblock ***cbsi=cbs1+n/sizeof(struct contblock),***cbs;
+
+  if (cbsi>cbse)
+    cbsi=cbse;
+  
+  for (cbs=cbsi;cbs<=cbse;cbs++)
+    if (cbs[-1])
+      return cbs[-1];
+
+  for (cbs=cbsi-1;cbs>cbs1;cbs--)
+    if (cbs[-1])
+      return find_cbpp2(cbs[-1],n);
+
+  return &cb_pointer;
+
+}
+  
+static inline struct contblock **
+find_contblock2(ufixnum n,void **p) {
+
+  return find_cbpp1(n);
+
+}
+
+static inline void
+insert_contblock2(void *p,ufixnum s) {
+
+  struct contblock *cbp=p,**cbpp=find_contblock2(s,NULL);
+
+  massert(s);
+
+  cbp->cb_size=s;
+
+  if (*cbpp && s!=(*cbpp)->cb_size)
+    register_cbs((*cbpp)->cb_size,&cbp->cb_link);
+  cbp->cb_link=*cbpp;
+
+  if (!*cbpp || s!=(*cbpp)->cb_size)
+    register_cbs(cbp->cb_size,cbpp);
+  *cbpp=cbp;
+
+}
+  
+
+static inline void
+delete_contblock2(void *p,struct contblock **cbpp) {
+
+  if (*cbpp && (!(*cbpp)->cb_link || (*cbpp)->cb_size!=(*cbpp)->cb_link->cb_size))
+    register_cbs((*cbpp)->cb_size,NULL);
+  if (*cbpp && (*cbpp)->cb_link && (*cbpp)->cb_size!=(*cbpp)->cb_link->cb_size)
+    register_cbs((*cbpp)->cb_link->cb_size,cbpp);
+  *cbpp=(*cbpp)->cb_link;
+
+}
+
+inline void
+reset_contblock_freelist2(void) {
+
+  cb_pointer=NULL;
+  memset(cbs1,0,sizeof(cbs1));
+  
+}
+
+static inline void
+print_cb2(void) {
+
+  struct contblock *cbp,***cbppp;
+
+  for (cbp=cb_pointer;cbp;cbp=cbp->cb_link)
+    fprintf(stderr,"%lu at %p\n",cbp->cb_size,cbp);
+
+  for (cbppp=cbs1;cbppp<cbse;cbppp++) 
+    if (*cbppp)
+      fprintf(stderr,"%lu %p %p %lu\n",cbppp-cbs1,*cbppp,**cbppp,(**cbppp)->cb_size);
+
+  fflush(stderr);
+
+}
+  
+
+
+int contblock_method=1;
+
+
+inline void
+insert_contblock(char *p,ufixnum s) {
+
+  switch(contblock_method) {
+  case 0:
+    insert_contblock0(p,s);
+    break;
+  case 1:
+    insert_contblock1(p,s);
+    break;
+  case 2:
+    insert_contblock2(p,s);
+    break;
+  }
+
+}
+
+inline void
+delete_contblock(void *p,struct contblock **cbpp) {
+
+  switch(contblock_method) {
+  case 0:
+    delete_contblock0(p,cbpp);
+    break;
+  case 1:
+    delete_contblock1(p,cbpp);
+    break;
+  case 2:
+    delete_contblock2(p,cbpp);
+    break;
+  }
+
+
+}
+
+inline struct contblock **
+find_contblock(ufixnum n,void **p) {
+
+  switch(contblock_method) {
+  case 0:
+    return find_contblock0(n,p);
+  case 1:
+    return find_contblock1(n,p);
+  case 2:
+    return find_contblock2(n,p);
+  }
+
+  return NULL;
+  
+}
+
+inline void
+reset_contblock_freelist(void) {
+  switch(contblock_method) {
+  case 0:
+    reset_contblock_freelist0();
+    break;
+  case 1:
+    reset_contblock_freelist1();
+    break;
+  case 2:
+    reset_contblock_freelist2();
+    break;
+  }
+}
+
+inline void
+print_cb(void) {
+  switch(contblock_method) {
+  case 0:
+    print_cb0();
+    break;
+  case 1:
+    print_cb1(1);
+    break;
+  case 2:
+    print_cb2();
+    break;
+  }
+}
+
 
 inline void *
 alloc_from_freelist(struct typemanager *tm,fixnum n) {
 
-  void *p,*vp;
-  struct contblock **cbpp;
-  fixnum i;
+  void *p;
 
   switch (tm->tm_type) {
 
   case t_contiguous:
-    if ((vp=find_free_contblock(n))) {
-      cbpp=vp;
-      p=(void *)(*cbpp);
-      i=(*cbpp)->cb_size-n;
-      *cbpp=(*cbpp)->cb_link;
-      insert_contblock(p+n,i);
-      return(p);
+    {
+      void *pp;
+      struct contblock **cbpp=find_contblock(n,&pp);
+      
+      if ((p=*cbpp)) {
+	ufixnum s=(*cbpp)->cb_size;
+	delete_contblock(pp,cbpp);
+	if (n<s)
+	  insert_contblock(p+n,s-n);
+      }
+      return p;
     }
     break;
 
@@ -894,66 +1302,6 @@ DEFUN_NEW("PRINT-FREE-CONTBLOCK-LIST",object,fSprint_free_contblock_list,SI,0,0,
 
 }
 
-void
-insert_contblock(char *p, ufixnum s) {
-
-  struct contblock **cbpp, *cbp;
-  
-  /* SGC cont pages: This used to return when s<CBMINSIZE, but we need
-     to be able to sweep small (e.g. bignum) contblocks.  FIXME:
-     should never be called with s<=0 to begin with.  CM 20030827*/
-  if (s<=0)
-    return;
-  cbp = (struct contblock *)p;
-  /* SGC cont pages: allocated sizes may not be zero mod CPTR_SIZE,
-     e.g. string fillp, but alloc_contblock rounded up the allocation
-     like this, which we follow here.  CM 20030827 */
-  cbp->cb_size = CEI(s,CPTR_SIZE);
-
-  for (cbpp=&cb_pointer;*cbpp;) {
-    if ((void *)(*cbpp)+(*cbpp)->cb_size==(void *)cbp) {
-      /* printf("Merge contblock %p %d %p %d\n",cbp,cbp->cb_size,*cbpp,(*cbpp)->cb_size); */
-      /* fflush(stdout); */
-      (*cbpp)->cb_size+=cbp->cb_size;
-      cbp=*cbpp;
-      *cbpp=(*cbpp)->cb_link;
-    } else if ((void *)(*cbpp)==(void *)cbp+cbp->cb_size) {
-      /* printf("Merge contblock %p %d %p %d\n",cbp,cbp->cb_size,*cbpp,(*cbpp)->cb_size); */
-      /* fflush(stdout); */
-      cbp->cb_size+=(*cbpp)->cb_size;
-      *cbpp=(*cbpp)->cb_link;
-    } else
-      cbpp=&(*cbpp)->cb_link;
-  }
-  s=cbp->cb_size;
-  
-  for (cbpp = &cb_pointer;  *cbpp;  cbpp = &((*cbpp)->cb_link))
-    if ((*cbpp)->cb_size >= s) {
-#ifdef SGC_CONT_DEBUG
-      if (*cbpp==cbp) {
-	fprintf(stderr,"Trying to install a circle at %p\n",cbp);
-	exit(1);
-      }
-      if (sgc_enabled) 
-	overlap_check(old_cb_pointer,cb_pointer);
-#endif
-      cbp->cb_link = *cbpp;
-      *cbpp = cbp;
-#ifdef SGC_CONT_DEBUG
-      if (sgc_enabled) 
-	overlap_check(old_cb_pointer,cb_pointer);
-#endif
-      return;
-    }
-  cbp->cb_link = NULL;
-  *cbpp = cbp;
-#ifdef SGC_CONT_DEBUG
-  if (sgc_enabled) 
-    overlap_check(old_cb_pointer,cb_pointer);
-#endif
-
-}
-
 /* Add a tm_distinct field to prevent page type sharing if desired.
    Not used now, as its never desirable from an efficiency point of
    view, and as the only known place one must separate is cons and
@@ -1196,6 +1544,8 @@ gcl_init_alloc(void *cs_start) {
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
   
+  expand_contblock_index_space();
+
   gcl_alloc_initialized=1;
   
 }
