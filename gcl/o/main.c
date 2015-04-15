@@ -257,7 +257,7 @@ update_real_maxpage(void) {
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
 
-  if (getenv("GCL_LARGE") && strlen(getenv("GCL_LARGE"))) {
+  if (sSAoptimize_maximum_pagesA && sSAoptimize_maximum_pagesA->s.s_dbind!=Cnil) {
 
     for (i=t_start,j=0;i<t_relocatable;i++)
       j+=tm_table[i].tm_maxpage;
