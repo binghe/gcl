@@ -287,18 +287,12 @@ static int
 minimize_image(void) {
 
   extern long new_holepage;
-  fixnum old_holepage=new_holepage,i;
-  void *new;
+  fixnum i;
   
-  new_holepage=1;
-  resize_hole(1,t_other);
-  if ((new=PCEI(rb_pointer,PAGESIZE))<initial_sbrk)
-    new=initial_sbrk;
-  core_end = new;
-  rb_end=rb_limit=new;
-  set_tm_maxpage(tm_table+t_relocatable,(nrbpage=((char *)new-rb_start)/PAGESIZE));
-  new_holepage=old_holepage;
-  
+  empty_relblock();
+  holepage=nrbpage=0;
+  core_end=rb_start=rb_end=rb_limit=rb_pointer=heap_end;
+
 #ifdef GCL_GPROF
   gprof_cleanup();
 #endif
