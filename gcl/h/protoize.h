@@ -1929,3 +1929,9 @@ alloc_contblock_no_gc(size_t);
 
 inline void
 reset_contblock_freelist(void);
+
+inline void
+empty_relblock(void);
+
+fixnum
+check_avail_pages(void);

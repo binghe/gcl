@@ -561,15 +561,7 @@ sgc_start(void) {
   if (memprotect_result!=memprotect_success && do_memprotect_test())
     return 0;
 
-  {
-    object o=sSAleaf_collection_thresholdA->s.s_dbind;
-
-    sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
-    for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;)
-      GBC(t_relocatable);
-    sSAleaf_collection_thresholdA->s.s_dbind=o;
-
-  }
+  empty_relblock();
 
   /* Reset maxpage statistics if not invoked automatically on a hole
      overrun. 20040804 CM*/

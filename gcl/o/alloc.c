@@ -188,6 +188,18 @@ int reserve_pages_for_signal_handler=30;
  */
 
 inline void
+empty_relblock(void) {
+
+  object o=sSAleaf_collection_thresholdA->s.s_dbind;
+  
+  sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
+  for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;)
+    GBC(t_relocatable);
+  sSAleaf_collection_thresholdA->s.s_dbind=o;
+
+}
+
+inline void
 resize_hole(ufixnum hp,enum type tp) {
   
   char *new_start=heap_end+hp*PAGESIZE;
