@@ -562,23 +562,13 @@ sgc_start(void) {
     return 0;
 
   {
-    extern ufixnum nrbm;
     object o=sSAleaf_collection_thresholdA->s.s_dbind;
-    bool lc;
-
-    if (sSAleaf_collectionA->s.s_dbind==Cnil) {
-      lc=1;
-      sSAleaf_collectionA->s.s_dbind=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(0),make_fixnum(aet_char),Ct));
-    }
 
     sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
     for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;)
       GBC(t_relocatable);
     sSAleaf_collection_thresholdA->s.s_dbind=o;
 
-    if (lc)
-      sSAleaf_collectionA->s.s_dbind=Cnil;
-    
   }
 
   /* Reset maxpage statistics if not invoked automatically on a hole

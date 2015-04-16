@@ -407,12 +407,10 @@ sweep_link_array(void) {
 
 }
 
-ufixnum ncbm,nrbm;
-DEFVAR("*LEAF-COLLECTION*",sSAleaf_collectionA,SI,Cnil,"");
 DEFVAR("*LEAF-COLLECTION-THRESHOLD*",sSAleaf_collection_thresholdA,SI,make_fixnum(0),"");
 
-#define MARK_LEAF_DATA(a_,b_,c_) mark_leaf_data(a_,(void **)&b_,c_,1)
 #define MARK_LEAF_DATA_ALIGNED(a_,b_,c_,d_) mark_leaf_data(a_,(void **)&b_,c_,d_)
+#define MARK_LEAF_DATA(a_,b_,c_) MARK_LEAF_DATA_ALIGNED(a_,b_,c_,1)
 
 static inline bool
 marking(void *p) {
@@ -426,7 +424,7 @@ collecting(void *p) {
 
 static ufixnum ngc_thresh;
 static union {struct dummy d;ufixnum f;} rst={.f=-1};
-static object lcv=Cnil;
+/* static object lcv=Cnil; */
 
 static inline void
 mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
@@ -457,13 +455,10 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
 
   if (x && x->d.st<rst.d.st) x->d.st++;
 
-  if (p>=(void *)heap_end) {
+  if (p>=(void *)heap_end)
     *pp=(void *)copy_relblock(p,s);
-    nrbm+=s+(CEI(nrbm,r)-nrbm);
-  } else {
+  else
     mark_contblock(p,s);
-    ncbm+=s+(CEI(ncbm,r)-ncbm);
-  }
 
 }
 
@@ -1130,20 +1125,8 @@ GBC(enum type t) {
     collect_both=1;
     t=t_contiguous;
   }
-  if (t==t_contiguous)
-    ncbm=0;
-  if (COLLECT_RELBLOCK_P) {
-    if (sSAleaf_collectionA && (lcv=sSAleaf_collectionA->s.s_dbind)!=Cnil) {
-      static int n;
-      if (!n && nrbm>lcv->st.st_dim) {
-	n=1;
-	sSAleaf_collectionA->s.s_dbind=lcv=(VFUN_NARGS=3,fSmake_vector1(make_fixnum(nrbm),make_fixnum(aet_char),Ct));
-	n=0;
-      }
-    }
-    ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
-    nrbm=0;
-  }
+
+  ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
 
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");
