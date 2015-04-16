@@ -318,7 +318,7 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   available_pages-=z;
   tm->tm_adjgbccnt*=((double)j)/n;
   tm->tm_maxpage=n;
-  massert(!check_avail_pages());
+  /* massert(!check_avail_pages()); */
   return 1;
 }
   
