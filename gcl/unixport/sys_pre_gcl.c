@@ -4,6 +4,10 @@ void
 gcl_init_init()
 {
 
+  object features;
+  features=find_symbol(make_simple_string("*FEATURES*"),system_package);
+  features->s.s_dbind=make_cons(make_keyword("PRE-GCL"),features->s.s_dbind);
+
   build_symbol_table();
 
   lsp_init("../lsp/gcl_export.lsp");
@@ -80,6 +84,7 @@ gcl_init_system(object no_init)
   lsp_init("../cmpnew/gcl_cmpvar.lsp");
   lsp_init("../cmpnew/gcl_cmpvs.lsp");
   lsp_init("../cmpnew/gcl_cmpwt.lsp");
+  lsp_init("../cmpnew/gcl_cmpmain.lsp");
 
   
 }

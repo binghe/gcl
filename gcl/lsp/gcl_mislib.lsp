@@ -20,15 +20,7 @@
 ;;;; This file is IMPLEMENTATION-DEPENDENT.
 
 
-(in-package 'lisp)
-
-
-(export 'time)
-(export '(reset-sys-paths decode-universal-time encode-universal-time compile-file-pathname complement constantly))
-
-
-(in-package 'system)
-
+(in-package :si)
 
 (proclaim '(optimize (safety 2) (space 3)))
 
@@ -37,13 +29,13 @@
   (let ((real-start (gensym)) (real-end (gensym)) (gbc-time-start (gensym))
 	(gbc-time (gensym)) (x (gensym)) (run-start (gensym)) (run-end (gensym))
 	(child-run-start (gensym)) (child-run-end (gensym)))
-  `(let (,real-start ,real-end (,gbc-time-start (si::gbc-time)) ,gbc-time ,x)
+  `(let (,real-start ,real-end (,gbc-time-start (gbc-time)) ,gbc-time ,x)
      (setq ,real-start (get-internal-real-time))
      (multiple-value-bind (,run-start ,child-run-start) (get-internal-run-time)
-       (si::gbc-time 0)
+       (gbc-time 0)
        (setq ,x (multiple-value-list ,form))
-       (setq ,gbc-time (si::gbc-time))
-       (si::gbc-time (+ ,gbc-time-start ,gbc-time))
+       (setq ,gbc-time (gbc-time))
+       (gbc-time (+ ,gbc-time-start ,gbc-time))
        (multiple-value-bind (,run-end ,child-run-end) (get-internal-run-time)
 	 (setq ,real-end (get-internal-real-time))
 	 (fresh-line *trace-output*)
@@ -139,7 +131,7 @@ x))
 	    *gcl-major-version* *gcl-minor-version* *gcl-extra-version*
 	    (if (member :ansi-cl *features*) "ANSI" "CLtL1")
 	    (if (member :gprof *features*) "profiling" "")
-	    (si::gcl-compile-time)
+	    (gcl-compile-time)
 	    "Source License: LGPL(gcl,gmp), GPL(unexec,bfd,xgcl)"
 	    "Binary License: "
 	    (if gpled-modules (format nil "GPL due to GPL'ed components: ~a" gpled-modules)
@@ -150,13 +142,13 @@ x))
 
  (defun lisp-implementation-version nil
    (format nil "GCL ~a.~a.~a"
-	   si::*gcl-major-version*
-	   si::*gcl-minor-version*
-	   si::*gcl-extra-version*))
+	   *gcl-major-version*
+	   *gcl-minor-version*
+	   *gcl-extra-version*))
 
 (defun objlt (x y)
   (declare (object x y))
-  (let ((x (si::address x)) (y (si::address y)))
+  (let ((x (address x)) (y (address y)))
     (declare (fixnum x y))
     (if (< y 0)
 	(if (< x 0) (< x y) t)
@@ -164,10 +156,10 @@ x))
 
 (defun reset-sys-paths (s)
   (declare (string s))
-  (setq si::*lib-directory* s)
-  (setq si::*system-directory* (si::string-concatenate s "unixport/"))
+  (setq *lib-directory* s)
+  (setq *system-directory* (string-concatenate s "unixport/"))
   (let (nl)
     (dolist (l '("cmpnew/" "gcl-tk/" "lsp/" "xgcl-2/"))
-      (push (si::string-concatenate s l) nl))
-    (setq si::*load-path* nl))
+      (push (string-concatenate s l) nl))
+    (setq *load-path* nl))
   nil)

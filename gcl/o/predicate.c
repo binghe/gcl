@@ -341,9 +341,9 @@ DEFUNO_NEW("FUNCTIONP",object,fLfunctionp,LISP
 			x0 = Cnil; }
 	else if (t == t_cons) {
 		x = x0->c.c_car;
-		if (x == sLlambda || x == sLlambda_block ||
+		if (x == sLlambda || x == sSlambda_block ||
 		    x == sSlambda_block_expanded ||
-		    x == sLlambda_closure || x == sLlambda_block_closure)
+		    x == sSlambda_closure || x == sSlambda_block_closure)
 			x0 = Ct;
 		else
 			x0 = Cnil;
@@ -357,6 +357,14 @@ fLfunctionp(object x) {
 }
 #endif
 
+
+DEFUNO_NEW("COMMONP",object,fScommonp,SI,1,1,NONE,OO,OO,OO,OO,void,siLcommonp,(object x0),"") {
+  if (type_of(x0) != t_spice)
+    x0 = Ct;
+  else
+    x0 = Cnil;
+  RETURN1(x0);
+}
 
 DEFUNO_NEW("COMPILED-FUNCTION-P",object,fLcompiled_function_p,LISP
    ,1,1,NONE,OO,OO,OO,OO,void,Lcompiled_function_p,(object x0),"")
@@ -374,18 +382,6 @@ DEFUNO_NEW("COMPILED-FUNCTION-P",object,fLcompiled_function_p,LISP
 	    
 	    
 	    )
-		x0 = Ct;
-	else
-		x0 = Cnil;
-RETURN1(x0);}
-
-DEFUNO_NEW("COMMONP",object,fLcommonp,LISP
-   ,1,1,NONE,OO,OO,OO,OO,void,Lcommonp,(object x0),"")
-
-{
-	/* 1 args */;
-
-	if (type_of(x0) != t_spice)
 		x0 = Ct;
 	else
 		x0 = Cnil;

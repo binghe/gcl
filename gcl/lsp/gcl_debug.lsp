@@ -1,8 +1,8 @@
 ;;Copyright William F. Schelter 1990, All Rights Reserved 
 
 
-(In-package "SYSTEM")
-(import 'sloop::sloop)
+(In-package :si)
+(import '(sloop::sloop))
 
 (eval-when (compile eval)
   (proclaim '(optimize (safety 2) (space 3)))
@@ -98,7 +98,7 @@
 	 (cond ((compiled-function-p fun)
 		(setq name (compiled-function-name fun)))
 	       (t (setq name fun)))
-         (if (symbolp name)(setq args (get name 'debug)))
+         (if (symbolp name)(setq args (get name 'debugger)))
 	 (let ((next (ihs-vs (f + 1 *current-ihs*))))
 	   (cond (next
 		  (format *debug-io* ">> ~a():" name)
@@ -583,7 +583,7 @@
 ;; in other common lisps this should be a string output stream.
 
 (defvar *display-string*
-  (make-array 100 :element-type 'string-char :fill-pointer 0 :adjustable t))
+  (make-array 100 :element-type 'character :fill-pointer 0 :adjustable t))
 
 (defun display-env (n env)
   (do ((v (reverse env) (cdr v)))
@@ -625,7 +625,7 @@
        (mv-values nil j))
     (let
 	((na  (ihs-fname j)))
-      (cond ((special-form-p na))
+      (cond ((special-operator-p na))
 	    ((get na 'dbl-invisible))
 	    ((fboundp na)(return (mv-values na j)))))))
 
@@ -677,7 +677,7 @@
 					(vs (1+ k))
 					(vs (+ k 2)))
 				  )))))))
-	 ((special-form-p na) nil)
+	 ((special-operator-p na) nil)
 	 ((get na 'dbl-invisible))
 	 ((fboundp na)
 	  (mv-values i na nil nil
@@ -717,7 +717,7 @@
 				      (end (min (ihs-vs (1+ ihs)) (vs-top))))
   (format *display-string* "")
   (do ((i base )
-       (v (get (ihs-fname ihs) 'debug) (cdr v)))
+       (v (get (ihs-fname ihs) 'debugger) (cdr v)))
       ((or (fb >= i end)(fb > (fill-pointer *display-string*) plength)))
     (format *display-string* "~a~@[~d~]=~s~@[,~]"
 	    (or (car v)  'loc) (if (not (car v)) (f - i base)) (vs i)

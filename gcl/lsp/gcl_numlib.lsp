@@ -22,20 +22,7 @@
 ;;;;                           number routines
 
 
-(in-package 'lisp)
-(export
- '(isqrt abs phase signum cis asin acos sinh cosh tanh
-   asinh acosh atanh
-   rational rationalize
-   ffloor fround ftruncate fceiling
-   lognand lognor logandc1 logandc2 logorc1 logorc2
-   lognot logtest
-   byte byte-size byte-position
-   ldb ldb-test mask-field dpb deposit-field
-   ))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))

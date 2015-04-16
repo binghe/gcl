@@ -19,7 +19,7 @@
 ;; Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (si:putprop 'multiple-value-call 'c1multiple-value-call 'c1special)
 (si:putprop 'multiple-value-call 'c2multiple-value-call 'c2)

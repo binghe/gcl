@@ -172,7 +172,7 @@ DEFUNO_NEW("FSET",object,fSfset,SI
 		sym->s.s_mflag = FALSE;
 	} else if (car(function) == sLspecial)
 		FEerror("Cannot define a special form.", 0);
-	else if (function->c.c_car == sLmacro) {
+	else if (function->c.c_car == sSmacro) {
 		sym->s.s_gfdef = function->c.c_cdr;
 		sym->s.s_mflag = TRUE;
 	} else {

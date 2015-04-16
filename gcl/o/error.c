@@ -67,27 +67,27 @@ ihs_function_name(object x)
 		y = x->c.c_car;
 		if (y == sLlambda)
 			return(sLlambda);
-		if (y == sLlambda_closure)
-			return(sLlambda_closure);
-		if (y == sLlambda_block || y == sSlambda_block_expanded) {
+		if (y == sSlambda_closure)
+			return(sSlambda_closure);
+		if (y == sSlambda_block || y == sSlambda_block_expanded) {
 			x = x->c.c_cdr;
 			if (type_of(x) != t_cons)
-				return(sLlambda_block);
+				return(sSlambda_block);
 			return(x->c.c_car);
 		}
-		if (y == sLlambda_block_closure) {
+		if (y == sSlambda_block_closure) {
 			x = x->c.c_cdr;
 			if (type_of(x) != t_cons)
-				return(sLlambda_block_closure);
+				return(sSlambda_block_closure);
 			x = x->c.c_cdr;
 			if (type_of(x) != t_cons)
-				return(sLlambda_block_closure);
+				return(sSlambda_block_closure);
 			x = x->c.c_cdr;
 			if (type_of(x) != t_cons)
-				return(sLlambda_block_closure);
+				return(sSlambda_block_closure);
 			x = x->c.c_cdr;
 			if (type_of(x) != t_cons)
-				return(sLlambda_block_closure);
+				return(sSlambda_block_closure);
 			return(x->c.c_car);
 		}
 		/* a general special form */

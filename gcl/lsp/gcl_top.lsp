@@ -24,24 +24,14 @@
 ;;;;  Revised on July 11, by Carl Hoffman.
 
 
-(in-package "LISP")
-;(export 'lisp)
-(export '(+ ++ +++ - * ** *** / // ///))
-(export '(break warn))
-(export '*break-on-warnings*)
-(export '*break-enable*)
-
-(in-package 'system)
+(in-package :si)
 
 (export '*break-readtable*)
 (export '(loc *debug-print-level*))
 
 (export '(vs ihs-vs ihs-fun frs-vs frs-bds frs-ihs bds-var bds-val super-go))
 
-(eval-when 
-    (compile)
-  (proclaim '(optimize (safety 2) (space 3)))
-  (defvar *command-args* nil))
+(defvar *command-args* nil)
 
 (defvar +)
 (defvar ++)
@@ -74,8 +64,6 @@
 (defvar *frs-top* 0)
 (defvar *break-enable* t)
 (defvar *break-message* "")
-
-(defvar *break-on-warnings* nil)
 
 (defvar *break-readtable* nil)
 
@@ -330,7 +318,7 @@
                      (lambda-block-closure (cddddr fun))
                      (t (cond
 			 ((and (symbolp (car fun))
-			       (or (special-form-p(car fun))
+			       (or (special-operator-p(car fun))
 				   (fboundp (car fun))))
 			  (car fun))
 			 (t '(:zombi))))))
@@ -384,7 +372,7 @@
              (lambda-block-closure (nth 4 fun))
              (lambda-closure 'lambda-closure)
              (t (if (and (symbolp (car fun))
-			 (or (special-form-p (car fun))
+			 (or (special-operator-p (car fun))
 			     (fboundp (car fun))))
 		    (car fun) :zombi)
 		    )))

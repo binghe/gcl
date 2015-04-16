@@ -73,7 +73,7 @@ LFD(Ltype_of)(void)
 			if ((' ' <= i && i < '\177') || i == '\n')
 				vs_base[0] = sLstandard_char;
 			else
-				vs_base[0] = sLstring_char;
+				vs_base[0] = sLcharacter;
 		}
 		break;
 
@@ -176,7 +176,6 @@ LFD(Ltype_of)(void)
 DEF_ORDINARY("PROCLAIMED-ARG-TYPES",sSproclaimed_arg_types,SI,"");
 DEF_ORDINARY("PROCLAIMED-RETURN-TYPE",sSproclaimed_return_type,SI,"");
 DEF_ORDINARY("PROCLAIMED-FUNCTION",sSproclaimed_function,SI,"");
-DEF_ORDINARY("COMMON",sLcommon,LISP,"");
 DEF_ORDINARY("NULL",sLnull,LISP,"");
 DEF_ORDINARY("CONS",sLcons,LISP,"");
 DEF_ORDINARY("LIST",sLlist,LISP,"");
@@ -197,7 +196,6 @@ DEF_ORDINARY("CHARACTER",sLcharacter,LISP,"");
 DEF_ORDINARY("NUMBER",sLnumber,LISP,"");
 DEF_ORDINARY("RATIONAL",sLrational,LISP,"");
 DEF_ORDINARY("FLOAT",sLfloat,LISP,"");
-DEF_ORDINARY("STRING-CHAR",sLstring_char,LISP,"");
 DEF_ORDINARY("REAL",sLreal,LISP,"");
 DEF_ORDINARY("INTEGER",sLinteger,LISP,"");
 DEF_ORDINARY("RATIO",sLratio,LISP,"");
@@ -205,7 +203,6 @@ DEF_ORDINARY("SHORT-FLOAT",sLshort_float,LISP,"");
 DEF_ORDINARY("STANDARD-CHAR",sLstandard_char,LISP,"");
 DEF_ORDINARY("BOOLEAN",sLboolean,LISP,"");
 DEF_ORDINARY("FIXNUM",sLfixnum,LISP,"");
-DEF_ORDINARY("POSITIVE-FIXNUM",sLpositive_fixnum,LISP,"");
 DEF_ORDINARY("COMPLEX",sLcomplex,LISP,"");
 DEF_ORDINARY("SINGLE-FLOAT",sLsingle_float,LISP,"");
 DEF_ORDINARY("PACKAGE",sLpackage,LISP,"");
@@ -228,10 +225,10 @@ DEF_ORDINARY("VALUES",sLvalues,LISP,"");
 DEF_ORDINARY("MOD",sLmod,LISP,"");
 DEF_ORDINARY("SIGNED-BYTE",sLsigned_byte,LISP,"");
 DEF_ORDINARY("UNSIGNED-BYTE",sLunsigned_byte,LISP,"");
-DEF_ORDINARY("SIGNED-CHAR",sLsigned_char,LISP,"");
-DEF_ORDINARY("UNSIGNED-CHAR",sLunsigned_char,LISP,"");
-DEF_ORDINARY("SIGNED-SHORT",sLsigned_short,LISP,"");
-DEF_ORDINARY("UNSIGNED-SHORT",sLunsigned_short,LISP,"");
+DEF_ORDINARY("SIGNED-CHAR",sSsigned_char,SI,"");
+DEF_ORDINARY("UNSIGNED-CHAR",sSunsigned_char,SI,"");
+DEF_ORDINARY("SIGNED-SHORT",sSsigned_short,SI,"");
+DEF_ORDINARY("UNSIGNED-SHORT",sSunsigned_short,SI,"");
 DEF_ORDINARY("*",sLA,LISP,"");
 DEF_ORDINARY("PLUSP",sLplusp,LISP,"");
 DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,"");
@@ -244,8 +241,6 @@ DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
 DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
 DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
 
-/* #ifdef ANSI_COMMON_LISP */
-/* New ansi types */
 DEF_ORDINARY("METHOD-COMBINATION",sLmethod_combination,LISP,"");
 DEF_ORDINARY("ARITHMETIC-ERROR",sLarithmetic_error,LISP,"");
 DEF_ORDINARY("BASE-CHAR",sLbase_char,LISP,"");
@@ -290,7 +285,6 @@ DEF_ORDINARY("TWO-WAY-STREAM",sLtwo_way_stream,LISP,"");
 DEF_ORDINARY("TYPE-ERROR",sLtype_error,LISP,"");
 DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,"");
 DEF_ORDINARY("WARNING",sLwarning,LISP,"");
-/* #endif */
 
 DEFCONST("CHAR-SIZE",sSchar_size,SI,small_fixnum(CHAR_SIZE),"Size in bits of a character");
 DEFCONST("SHORT-SIZE",sSshort_size,SI,small_fixnum(CHAR_SIZE*sizeof(short)),"Size in bits of a short integer");

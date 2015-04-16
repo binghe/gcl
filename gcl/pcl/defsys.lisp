@@ -52,23 +52,9 @@
 
 (in-package :user)
 
-#+kcl (in-package :walker :use '(:lisp))
-#+kcl (in-package :iterate :use '(:lisp :walker))
-#+kcl (in-package :pcl :use '(:walker :iterate :lisp))
+(load "package.lisp")
 
 (eval-when (compile load eval)
-
-(if (find-package ':walker)
-    (use-package '(:lisp) ':walker)
-    (make-package ':walker :use '(:lisp)))
-
-(if (find-package ':iterate)
-    (use-package '(:lisp :walker) ':iterate)
-    (make-package ':iterate :use '(:lisp :walker)))
-
-(if (find-package ':pcl)
-    (use-package '(:walker :iterate :lisp) ':pcl)
-    (make-package ':pcl :use '(:walker :iterate :lisp)))
 
 (export (intern (symbol-name :iterate)		;Have to do this here,
 		(find-package :iterate))	;because in the defsystem
@@ -90,7 +76,7 @@
 
 (eval-when (compile load eval)
 (defvar *pcl-proclaim*
-  '(optimize (speed 3) (safety #+kcl 0 #-kcl 1) (space 0)
+  '(optimize (speed 3) (safety 1) (space 0)
              #+lucid (compilation-speed 0)))
 )
 
@@ -261,7 +247,6 @@ and load your system with:
 	    #+Xerox-Medley         (Xerox-Medley xerox)
 	    #+TI                   TI 
 	    #+(and dec vax common) Vaxlisp
-	    #+KCL                  KCL
 	    #+IBCL                 IBCL
 	    #+gcl                  gcl
 	    #+excl                 (excl franz)
@@ -305,7 +290,6 @@ and load your system with:
 	 #+Cloe-Runtime                      ("l"     . "fasl")
 	 #+(and dec common vax (not ultrix)) ("LSP"   . "FAS")
 	 #+(and dec common vax ultrix)       ("lsp"   . "fas")
-	 #+KCL                               ("lsp"   . "o")
 	 #+IBCL                              ("lsp"   . "o")
 	 #+Xerox                             ("lisp"  . "dfasl")
 	 #+(and Lucid MC68000)               ("lisp"  . "lbin")
@@ -675,7 +659,7 @@ and load your system with:
     ;; 3.0 it's in the LUCID-COMMON-LISP package.
     ;;
     #+LUCID (or lucid::*source-pathname* (bad-time))
-    #+akcl   si:*load-pathname*
+    #+akcl  *load-pathname*
     #+cmu17 *load-truename*
     #-(or Lispm excl Xerox (and dec vax common) LUCID akcl cmu17) nil))
 

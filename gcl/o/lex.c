@@ -58,7 +58,7 @@ lex_macro_bind(object name, object exp_fun)
 {
 	object *top = vs_top;
 	vs_push(make_cons(exp_fun, Cnil));
-	top[0] = make_cons(sLmacro, top[0]);
+	top[0] = make_cons(sSmacro, top[0]);
 	top[0] = make_cons(name, top[0]);
 	lex_env[1]=make_cons(top[0], lex_env[1]);			  
 	vs_top = top;
@@ -70,7 +70,7 @@ lex_tag_bind(object tag, object id)
 	object *top = vs_top;
 
 	vs_push(make_cons(id, Cnil));
-	top[0] = make_cons(sLtag, top[0]);
+	top[0] = make_cons(sStag, top[0]);
 	top[0] = make_cons(tag, top[0]);
 	lex_env[2] =make_cons(top[0], lex_env[2]);
 	vs_top = top;
@@ -95,7 +95,7 @@ lex_tag_sch(object tag)
 	object alist = lex_env[2];
 
 	while (!endp(alist)) {
-		if (eql(MMcaar(alist), tag) && MMcadar(alist) == sLtag)
+		if (eql(MMcaar(alist), tag) && MMcadar(alist) == sStag)
 			return(MMcar(alist));
 		alist = MMcdr(alist);
 	}
@@ -120,10 +120,10 @@ gcl_init_lex(void)
 {
 /* 	sLfunction = make_ordinary("FUNCTION"); */
 /* 	enter_mark_origin(&sLfunction); */
-	sLmacro = make_ordinary("MACRO");
-	enter_mark_origin(&sLmacro);
-	sLtag = make_ordinary("TAG");
-	enter_mark_origin(&sLtag);
+	sSmacro = make_si_ordinary("MACRO");
+	enter_mark_origin(&sSmacro);
+	sStag = make_si_ordinary("TAG");
+	enter_mark_origin(&sStag);
 	sLblock =  make_ordinary("BLOCK");
 	enter_mark_origin(&sLblock);
 }

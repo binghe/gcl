@@ -22,9 +22,7 @@
 ;;;;                              predicate routines
 
 
-(in-package 'system)
-
-(export '(lisp::deftype lisp::typep lisp::subtypep lisp::coerce) 'lisp)
+(in-package :si)
 
 (eval-when (compile)
 (proclaim '(optimize (safety 2) (space 3)))
@@ -87,7 +85,7 @@
 (deftype vector (&optional element-type size)
   `(array ,element-type (,size)))
 (deftype string (&optional size)
-  `(vector string-char ,size))
+  `(vector character ,size))
 (deftype base-string (&optional size)
   `(vector base-char ,size))
 (deftype bit-vector (&optional size)
@@ -96,7 +94,7 @@
 (deftype simple-vector (&optional size)
   `(simple-array t (,size)))
 (deftype simple-string (&optional size)
-  `(simple-array string-char (,size)))
+  `(simple-array character (,size)))
 (deftype simple-base-string (&optional size)
   `(simple-array base-char (,size)))
 (deftype simple-bit-vector (&optional size)
@@ -206,8 +204,8 @@
     (ratio (eq (type-of object) 'ratio))
     (standard-char
      (and (characterp object) (standard-char-p object)))
-    ((base-char string-char)
-     (and (characterp object) (string-char-p object)))
+    ((base-char character)
+     (characterp object))
     (integer
      (and (integerp object) (in-interval-p object i)))
     (rational
@@ -309,7 +307,7 @@
 		      signed-char unsigned-char signed-short unsigned-short
 		      number integer bignum rational ratio float method-combination
 		      short-float single-float double-float long-float complex
-		      character standard-char string-char real 
+		      character standard-char character real 
 		      package stream pathname readtable hash-table random-state
 		      structure array simple-array function compiled-function
 		      arithmetic-error base-char base-string broadcast-stream 
@@ -583,23 +581,23 @@
        	       (if (sub-interval-p '(* *) i2) (values t t) (values nil t)))
        	      (t (values nil ntp2))))
        	   (standard-char
-	    (if (member t2 '(base-char string-char character))
+	    (if (member t2 '(base-char character character))
 	        (values t t)
 	        (values nil ntp2)))
        	   (base-char
-	    (if (member t2 '(character string-char))
+	    (if (member t2 '(character character))
 	        (values t t)
 	        (values nil ntp2)))
        	   (extended-char
-	    (if (member t2 '(character string-char))
+	    (if (member t2 '(character character))
 	        (values t t)
 	        (values nil ntp2)))
-	   (string-char
+	   (character
 	    (if (eq t2 'character)
 	        (values t t)
 	        (values nil ntp2)))
 	   (character
-	    (if (eq t2 'string-char)
+	    (if (eq t2 'character)
 	        (values t t)
 	        (values nil ntp2)))
 	   (integer
@@ -635,7 +633,7 @@
 	                       (unless (or (equal (car i1) (car i2))
 					   ; FIXME
 					   (and (eq (car i1) 'base-char)
-						(eq (car i2) 'string-char)))
+						(eq (car i2) 'character)))
 	                               ;; Unless the element type matches,
 	                               ;;  return NIL T.
 	                               ;; Is this too strict?
@@ -658,7 +656,7 @@
 	                       (unless (or (equal (car i1) (car i2))
 					   ; FIXME
 					   (and (eq (car i1) 'base-char)
-						(eq (car i2) 'string-char)))
+						(eq (car i2) 'character)))
 	                               (return-from subtypep
 	                                            (values nil t)))))
 	           (when (or (endp (cdr i1)) (eq (cadr i1) '*))

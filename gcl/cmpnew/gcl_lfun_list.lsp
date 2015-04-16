@@ -3,7 +3,7 @@
 ;; and making the arglists correct if they have optional args.
 ;;
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (DEFSYSFUN 'GENSYM "Lgensym" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'SUBSEQ "Lsubseq" '(T T *) 'T NIL NIL) 
@@ -129,7 +129,7 @@
 (DEFSYSFUN 'STRING-NOT-GREATERP "Lstring_not_greaterp" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'STRING> "Lstring_g" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'FINISH-OUTPUT "Lfinish_output" '(*) 'T NIL NIL) 
-(DEFSYSFUN 'SPECIAL-FORM-P "Lspecial_form_p" '(T) 'T NIL T) 
+(DEFSYSFUN 'SPECIAL-OPERATOR-P "Lspecial_operator_p" '(T) 'T NIL T) 
 (DEFSYSFUN 'STRINGP "Lstringp" '(T) 'T NIL T) 
 (DEFSYSFUN 'GET-INTERNAL-RUN-TIME "Lget_internal_run_time" 'NIL 'T NIL
     NIL) 
@@ -303,7 +303,7 @@
 (DEFSYSFUN '= "Lall_the_same" '(T *) 'T NIL T) 
 (DEFSYSFUN 'GENTEMP "Lgentemp" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'RENAME-PACKAGE "Lrename_package" '(T T *) 'T NIL NIL) 
-(DEFSYSFUN 'COMMONP "Lcommonp" '(T) 'T NIL T) 
+(DEFSYSFUN 'COMMONP "siLcommonp" '(T) 'T NIL T) 
 (DEFSYSFUN 'NUMBERP "Lnumberp" '(T) 'T NIL T) 
 (DEFSYSFUN 'COPY-READTABLE "Lcopy_readtable" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'RANDOM-STATE-P "Lrandom_state_p" '(T) 'T NIL T) 
@@ -365,7 +365,7 @@
 (DEFSYSFUN 'ASSOC-IF "Lassoc_if" '(T T) 'T NIL NIL) 
 (DEFSYSFUN 'GET-PROPERTIES "Lget_properties" '(T T) '* NIL NIL) 
 (DEFSYSFUN 'STRING<= "Lstring_le" '(T T *) 'T NIL NIL) 
-(DEFSYSFUN 'EVALHOOK "Levalhook" '(T T T *) 'T NIL NIL) 
+(DEFSYSFUN 'EVALHOOK "siLevalhook" '(T T T *) 'T NIL NIL) 
 (DEFSYSFUN 'FILE-WRITE-DATE "Lfile_write_date" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'LOGCOUNT "Llogcount" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'MERGE-PATHNAMES "Lmerge_pathnames" '(T *) 'T NIL NIL) 

@@ -1,6 +1,6 @@
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (defvar *cmpinclude-string* nil)
 

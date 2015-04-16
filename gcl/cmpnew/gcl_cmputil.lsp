@@ -19,7 +19,7 @@
 ;; Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (export '(*suppress-compiler-warnings*
           *suppress-compiler-notes*
@@ -204,7 +204,7 @@
       (do-macro-expansion '(macroexpand-1) form)
     form))
 
-(defun cmp-expand-macro (fd fname args &aux env (form (cons fname args)))
+(defun cmp-expand-macro (fd fname args &aux (form (cons fname args)))
   (if (macro-def-p form)
       (do-macro-expansion `(funcall *macroexpand-hook* ',fd) form)
     form))
@@ -214,7 +214,7 @@
 (defun cmp-toplevel-eval (form)
    (let* ((si::*ihs-base* si::*ihs-top*)
           (si::*ihs-top* (1- (si::ihs-top)))
-          (*break-enable* *compiler-break-enable*)
+          (si::*break-enable* *compiler-break-enable*)
           (si::*break-hidden-packages*
            (cons (find-package 'compiler)
                  si::*break-hidden-packages*)))

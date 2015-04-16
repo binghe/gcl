@@ -68,12 +68,12 @@ FFN(Fdefun)(object args)
 	}
 	vs_base = vs_top;
 	if (lex_env[0] == Cnil && lex_env[1] == Cnil && lex_env[2] == Cnil) {
-		vs_push(MMcons(sLlambda_block, args));
+		vs_push(MMcons(sSlambda_block, args));
 	} else {
 		vs_push(MMcons(lex_env[2], args));
 		vs_base[0] = MMcons(lex_env[1], vs_base[0]);
 		vs_base[0] = MMcons(lex_env[0], vs_base[0]);
-		vs_base[0] = MMcons(sLlambda_block_closure, vs_base[0]);
+		vs_base[0] = MMcons(sSlambda_block_closure, vs_base[0]);
 	}
 	{object fname =  clear_compiler_properties(name,vs_base[0]);
 	 fname->s.s_gfdef = vs_base[0];

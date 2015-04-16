@@ -22,16 +22,7 @@
 ;;;;                                setf routines
 
 
-(in-package 'lisp)
-
-
-(export '(setf psetf shiftf rotatef
-          define-modify-macro defsetf
-          getf remf incf decf push pushnew pop
-          define-setf-method get-setf-method get-setf-method-multiple-value))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (eval-when (compile) (proclaim '(optimize (safety 2) (space 3))))

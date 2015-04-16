@@ -145,8 +145,8 @@ object simple_lispcall();
 object simple_lispcall_no_event();
 object simple_symlispcall();
 object simple_symlispcall_no_event();
-EXTER object Vevalhook;
-EXTER object Vapplyhook;
+EXTER object siVevalhook;
+EXTER object siVapplyhook;
 object ieval();
 object ifuncall(object,int,...);
 object ifuncall1();
@@ -301,13 +301,13 @@ EXTER object sLquote;
 
 EXTER object sLlambda;
 
-EXTER object sLlambda_block;
-EXTER object sLlambda_closure;
-EXTER object sLlambda_block_closure;
+EXTER object sSlambda_block;
+EXTER object sSlambda_closure;
+EXTER object sSlambda_block_closure;
 
 EXTER object sLfunction;
-EXTER object sLmacro;
-EXTER object sLtag;
+EXTER object sSmacro;
+EXTER object sStag;
 EXTER object sLblock;
 
 
@@ -359,9 +359,6 @@ object shift_integer();
 /*  package.d  */
 EXTER object lisp_package;
 EXTER object user_package;
-#ifdef ANSI_COMMON_LISP
-EXTER object common_lisp_package;
-#endif
 EXTER object keyword_package;
 EXTER object system_package;
 EXTER object sLApackageA;
@@ -565,15 +562,13 @@ EXTER object sSfunction_documentation;
 /*  typespec.c  */
 EXTER object sLcommon,sLnull,sLcons,sLlist,sLsymbol,sLarray,sLvector,sLbit_vector,sLstring;
 EXTER object sLsequence,sLsimple_array,sLsimple_vector,sLsimple_bit_vector,sLsimple_string;
-EXTER object sLcompiled_function,sLpathname,sLcharacter,sLnumber,sLrational,sLfloat,sLstring_char;
+EXTER object sLcompiled_function,sLpathname,sLcharacter,sLnumber,sLrational,sLfloat;
 EXTER object sLinteger,sLreal,sLratio,sLshort_float,sLstandard_char,sLfixnum,sLpositive_fixnum, sLcomplex;
 EXTER object sLsingle_float,sLpackage,sLbignum,sLrandom_state,sLdouble_float,sLstream,sLbit,sLreadtable;
 EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean;
 EXTER object sLdivision_by_zero,sLfloating_point_inexact,sLfloating_point_invalid_operation;
 EXTER object sLfloating_point_overflow,sLfloating_point_underflow;
 
-/* #ifdef ANSI_COMMON_LISP */
-/* new ansi types */
 EXTER object sLarithmetic_error,sLbase_char,sLbase_string,sLbroadcast_stream,sLbuilt_in_class;
 EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLcontrol_error;
 EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLfile_stream;
@@ -584,7 +579,6 @@ EXTER object sLstandard_generic_function,sLstandard_method,sLstandard_object,sLs
 EXTER object sLstream_error,sLstring_stream,sLstructure_class,sLstyle_warning,sLsynonym_stream;
 EXTER object sLtwo_way_stream,sLtype_error,sLunbound_slot,sLunbound_variable,sLundefined_function,sLwarning;
 EXTER object sLmethod_combination,sLstructure_object;
-/* #endif */
 
 EXTER object sLsatisfies;
 EXTER object sLmember;
@@ -595,10 +589,10 @@ EXTER object sLvalues;
 EXTER object sLmod;
 EXTER object sLsigned_byte;
 EXTER object sLunsigned_byte;
-EXTER object sLsigned_char;
-EXTER object sLunsigned_char;
-EXTER object sLsigned_short;
-EXTER object sLunsigned_short;
+EXTER object sSsigned_char;
+EXTER object sSunsigned_char;
+EXTER object sSsigned_short;
+EXTER object sSunsigned_short;
 EXTER object sLA;
 EXTER object sLplusp;
 EXTER object TSor_symbol_string;

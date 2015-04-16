@@ -140,7 +140,7 @@ char *original_file, *save_file;
 
 extern void _cleanup();
 
-LFD(Lsave)() {
+LFD(siLsave)() {
   char filename[256];
   
   check_arg(1);
@@ -159,6 +159,6 @@ LFD(Lsave)() {
 void
 gcl_init_unixsave(void)
 {
-	make_function("SAVE", Lsave);
+	make_si_function("SAVE", siLsave);
 }
 

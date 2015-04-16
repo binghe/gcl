@@ -22,18 +22,10 @@
 ;;;;        The structure routines.
 
 
-(in-package 'lisp)
-(export 'defstruct)
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))
-
-
-
-;(in-package 'system)
 
 
 
@@ -507,7 +499,7 @@
 	 ;bootstrapping code!
 	 (setq def (make-s-data-structure
 		     (make-array (* leng (size-of t))
-				 :element-type 'string-char :static t)
+				 :element-type 'character :static t)
 		     (make-t-type leng nil slot-descriptions)
 		     *standard-slot-positions*
 		     slot-descriptions

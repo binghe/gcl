@@ -22,11 +22,7 @@
 ;;;;                           sequence routines
 
 
-(in-package 'lisp)
-
-(export '(make-sequence concatenate map some every notany notevery))
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))
@@ -40,7 +36,7 @@
                 (if iesp
                     (make-list size :initial-element initial-element)
                     (make-list size))))
-              ((or (eq type 'simple-string) (eq type 'string)) 'string-char)
+              ((or (eq type 'simple-string) (eq type 'string)) 'character)
               ((or (eq type 'simple-bit-vector) (eq type 'bit-vector)) 'bit)
               ((or (eq type 'simple-vector) (eq type 'vector)) t)
               (t

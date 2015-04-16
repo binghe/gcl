@@ -19,7 +19,7 @@
 ;; Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (defvar *objects* (make-hash-table :test 'eq))
 ;(defvar *objects* nil)
@@ -572,7 +572,7 @@
 (defun make-inline-string (cfun args fname)
   (if (null args)
       (format nil "~d()" (c-function-name "LI" cfun fname))
-      (let ((o (make-array 100 :element-type 'string-char :fill-pointer 0
+      (let ((o (make-array 100 :element-type 'character :fill-pointer 0
 			   :adjustable t )))
            (format o "~d(" (c-function-name "LI" cfun fname))
            (do ((l args (cdr l))
@@ -696,7 +696,7 @@
 	 )))
 
 (defun si::add-debug (fname x)
-  (si::putprop fname x  'si::debug))
+  (si::putprop fname x  'si::debugger))
 
 (defun t3init-fun (fname cfun lambda-expr doc)
 
@@ -1237,10 +1237,10 @@
 			 (si::fixnump (cdr (var-ref va))))
 		    (setf (nth (cdr (var-ref va)) locals)
 			  (var-name va))))
-      (setf (get fname 'si::debug) locals)
-      (let ((locals (get fname 'si::debug)))
+      (setf (get fname 'si::debugger) locals)
+      (let ((locals (get fname 'si::debugger)))
 	(if (and locals (or (cdr locals) (not (null (car locals)))))
-	    (add-init `(si::debug ',fname ',locals) )
+	    (add-init `(debug ',fname ',locals) )
 	    ))
       ))))
 
@@ -1406,7 +1406,7 @@
 	((and (consp form)
 	      (symbolp (car form))
 	      (or (eq (car form) 'setq)
-		  (not (special-form-p (car form))))
+		  (not (special-operator-p (car form))))
 	      (do ((v (cdr form) (and (consp v) (cdr v)))
 		   (i 1 (the fixnum (+ 1 i))))
 		  ((or (>= i 1000)
@@ -1484,7 +1484,7 @@
     (cond ((stringp s) (push s body))
           ((consp s)
            (cond ((symbolp (car s))
-                  (cmpck (special-form-p (car s))
+                  (cmpck (special-operator-p (car s))
                          "Special form ~s is not allowed in defCfun." (car s))
                   (push (list (cons (car s) (parse-cvspecs (cdr s)))) body))
                  ((and (consp (car s)) (symbolp (caar s))
@@ -1493,7 +1493,7 @@
                                     (not (endp (cddar s)))
                                     (endp (cdr s))
                                     (not (endp (cddr s))))
-                                (special-form-p (caar s)))))
+                                (special-operator-p (caar s)))))
                   (push (cons (cons (caar s)
                                     (if (eq (caar s) 'quote)
                                         (list (add-object (cadar s)))

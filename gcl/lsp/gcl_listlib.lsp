@@ -25,13 +25,7 @@
 ; rather than recursion, as needed for large data sets.
 
 
-(in-package 'lisp)
-
-(export '(union nunion intersection nintersection
-          set-difference nset-difference set-exclusive-or nset-exclusive-or
-          subsetp nth nth-value nthcdr first second third fourth fifth sixth seventh eighth ninth tenth))
-
-(in-package 'system)
+(in-package :si)
 
 (eval-when (compile)
   (proclaim '(optimize (safety 0) (space 3)))

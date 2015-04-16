@@ -19,7 +19,7 @@
 ;; Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 (si:putprop 'princ 'c1princ 'c1)
 (si:putprop 'princ 'c2princ 'c2)
@@ -565,7 +565,7 @@
 		      (equal (third type) '(*)))))
 	    (setq tem (si::best-array-element-type
 		       (second type)))
-	    (cond ((eq tem 'string-char) `(stringp ,x))
+	    (cond ((eq tem 'character) `(stringp ,x))
 		  ((eq tem 'bit) `(bit-vector-p ,x))
 		  ((setq tem (position tem *aet-types*))
 		   `(the boolean (vector-type ,x ,tem)))))
@@ -803,7 +803,7 @@
 
 
 (defvar *aet-types*
-  #(T STRING-CHAR SIGNED-CHAR FIXNUM SHORT-FLOAT LONG-FLOAT
+  #(T CHARACTER SIGNED-CHAR FIXNUM SHORT-FLOAT LONG-FLOAT
 			SIGNED-CHAR
 			UNSIGNED-CHAR SIGNED-SHORT UNSIGNED-SHORT))
 
@@ -811,7 +811,7 @@
 (defun aet-c-type (type)
   (ecase type
     ((t) "object")
-    ((string-char signed-char) "char")
+    ((character signed-char) "char")
     (fixnum "fixnum")
     (unsigned-char "unsigned char")
     (unsigned-short "unsigned short")

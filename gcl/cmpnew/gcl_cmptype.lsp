@@ -19,7 +19,7 @@
 ;; Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 ;;; CL-TYPE is any valid type specification of Common Lisp.
 ;;;
@@ -51,7 +51,7 @@
   (let ((type (type-of thing)))
     (case type
       ((fixnum short-float long-float) type)
-      ((string-char standard-char character) 'character)
+      ((standard-char character) 'character)
       ((string bit-vector) type)
       (vector (list 'vector (array-element-type thing)))
       (array (list 'array (array-element-type thing)))
@@ -82,7 +82,7 @@
 				(and (consp (caddr type))
 				     (= (length (caddr type)) 1))))
                        (case element-type
-                         (string-char 'string)
+                         (character 'string)
                          (bit 'bit-vector)
                          (t (list 'vector element-type))))
                       (t (list 'array element-type))))
@@ -109,8 +109,8 @@
                         ((subtypep type '(vector long-float))
                          '(vector long-float))
                         ((subtypep type '(array t)) '(array t))
-                        ((subtypep type '(array string-char))
-                         '(array string-char))
+                        ((subtypep type '(array character))
+                         '(array character))
                         ((subtypep type '(array bit)) '(array bit))
                         ((subtypep type '(array fixnum)) '(array fixnum))
                         ((subtypep type '(array short-float))
@@ -148,7 +148,7 @@
          (case (car type1)
                (array
                 (case (cadr type1)
-                      (string-char (if (eq type2 'string) type2 nil))
+                      (character (if (eq type2 'string) type2 nil))
                       (bit (if (eq type2 'bit-vector) type2 nil))
                       (t (if (and (consp type2)
                                   (eq (car type2) 'vector)
@@ -162,7 +162,7 @@
         (t (case type1
                  (string
                   (if (and (consp type2) (eq (car type2) 'array)
-                           (eq (cadr type2) 'string-char))
+                           (eq (cadr type2) 'character))
                       type1 nil))
                  (bit-vector
                   (if (and (consp type2) (eq (car type2) 'array)

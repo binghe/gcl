@@ -176,11 +176,8 @@
   
   nil))
 
-#+kcl
-(progn
-(import '(si:structurep si:structure-def si:structure-ref))
-(shadow 'lisp:dotimes)
-)
+#+kcl(import '(si:structurep si:structure-def si:structure-ref))
+
 #+kcl
 (in-package "SI")
 #+kcl

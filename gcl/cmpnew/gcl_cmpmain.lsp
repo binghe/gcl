@@ -24,7 +24,7 @@
 ;;;		*****************
 
 
-(in-package 'compiler)
+(in-package :compiler)
 
 
 (export '(*compile-print* *compile-verbose*))
@@ -49,7 +49,11 @@
 (defvar *cmpinclude* "\"cmpinclude.h\"")
 ;;If the following is a string, then it is inserted instead of
 ;; the include file cmpinclude.h, EXCEPT for system-p calls.
-(defvar *cmpinclude-string* t)
+(defvar *cmpinclude-string* 
+  (si::file-to-string 
+   (namestring
+    (make-pathname :directory (append (pathname-directory si::*system-directory*) (list :parent "h"))
+		   :name "cmpinclude" :type "h"))))
 
 
 ;; Let the user write dump c-file etc to  /dev/null.

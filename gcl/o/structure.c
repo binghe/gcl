@@ -257,7 +257,7 @@ LFD(siLmake_structure)(void)
 }
 
 static void
-FFN(siLcopy_structure)(void)
+FFN(Lcopy_structure)(void)
 {
 	object x, y;
 	struct s_data *def;
@@ -452,7 +452,7 @@ gcl_init_structure_function(void)
 
 	make_si_function("MAKE-STRUCTURE", siLmake_structure);
 	make_si_function("MAKE-S-DATA-STRUCTURE",siLmake_s_data_structure);
-	make_si_function("COPY-STRUCTURE", siLcopy_structure);
+	make_function("COPY-STRUCTURE", Lcopy_structure);
 	make_si_function("STRUCTURE-NAME", siLstructure_name);
 	/* make_si_function("STRUCTURE-REF", siLstructure_ref); */
 	/* make_si_function("STRUCTURE-DEF", siLstructure_def); */

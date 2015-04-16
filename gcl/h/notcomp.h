@@ -22,9 +22,6 @@ void segmentation_catcher();
 EXTER int gc_enabled, saving_system;
 
 EXTER object lisp_package,user_package;
-#ifdef ANSI_COMMON_LISP
-EXTER object common_lisp_package;
-#endif
 EXTER char *core_end;
 EXTER int catch_fatal;
 EXTER long real_maxpage;
@@ -105,6 +102,7 @@ void old(void) \
 #define make_function(a_,b_) make_function_internal(a_,FFN(b_))
 #define make_si_function(a_,b_) make_si_function_internal(a_,FFN(b_))
 #define make_special_form(a_,b_) make_special_form_internal(a_,FFN(b_))
+#define make_si_special_form(a_,b_) make_si_special_form_internal(a_,FFN(b_))
 #define make_si_sfun(a_,b_,c_) make_si_sfun_internal(a_,FFN(b_),c_)
 #define STATD static
 #else
@@ -114,6 +112,7 @@ void old(void) \
 #define make_function(a_,b_) make_function_internal(a_,b_)
 #define make_si_function(a_,b_) make_si_function_internal(a_,b_)
 #define make_special_form(a_,b_) make_special_form_internal(a_,b_)
+#define make_si_special_form(a_,b_) make_si_special_form_internal(a_,b_)
 #define make_si_sfun(a_,b_,c_) make_si_sfun_internal(a_,b_,c_)
 #define STATD
 #endif

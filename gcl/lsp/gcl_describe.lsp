@@ -22,12 +22,7 @@
 ;;;;                           DESCRIBE and INSPECT
 
 
-(in-package 'lisp)
-
-(export '(describe inspect))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))
@@ -191,7 +186,6 @@
 (defun inspect-character (character)
   (format t
           (cond ((standard-char-p character) "~S - standard character")
-                ((string-char-p character) "~S - string character")
                 (t "~S - character"))
           character)
   (inspect-print "code:  #x~X" (char-code character))
@@ -353,7 +347,7 @@
                (find-package "SYSTEM")
                *package*)))
 
-    (cond ((special-form-p symbol)
+    (cond ((special-operator-p symbol)
            (doc1 (or (documentation symbol 'function) "")
                  (if (macro-function symbol)
                      "[Special form and Macro]"

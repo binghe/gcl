@@ -21,8 +21,9 @@
 ;;;;    AUTOLOAD
 
 
-;;; Go into LISP.
-(in-package 'lisp)
+(in-package :si)
+
+(export '(clines defentry defcfun object void int double))
 
 ;(defvar *features*)
 
@@ -127,13 +128,13 @@
 
 ;;; Allocator.
 
-(import 'si::allocate)
-(export '(allocate
+;(import 'si::allocate)
+;(export '(allocate
 	  ;allocated-pages maximum-allocatable-pages
           ;allocate-contiguous-pages
           ;allocated-contiguous-pages maximum-contiguous-pages
           ;allocate-relocatable-pages allocated-relocatable-pages 
-          sfun gfun cfun cclosure spice structure))
+;          sfun gfun cfun cclosure spice structure))
 
 ;(defvar type-character-alist
 ;             '((cons . #\.)
@@ -411,8 +412,8 @@ Good luck!				 The GCL Development Team")
 (setf (get 'with-output-to-string 'si:pretty-print-format) 1)
 
 
-(in-package 'si)
+(in-package :si)
 
 (defvar *lib-directory* (namestring (truename "../")))
 
-(import '(*lib-directory* *load-path* *system-directory*) 'si::user) 
+(import '(*lib-directory* *load-path* *system-directory*) :user) 

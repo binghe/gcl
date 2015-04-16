@@ -342,11 +342,11 @@ mark_link_array(void *v,void *ve) {
   if (NULL_OR_ON_C_STACK(v))
     return;
 
-  if (sLAlink_arrayA->s.s_dbind==Cnil)
+  if (sSAlink_arrayA->s.s_dbind==Cnil)
     return;
 
-  p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
-  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  p=(void *)sSAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sSAlink_arrayA->s.s_dbind->v.v_fillp;
 
   for (;p<pe;p+=2)
     if (*p>=v && *p<ve) {
@@ -364,11 +364,11 @@ prune_link_array(void) {
 
   void **p,**pe,**n,**ne;
 
-  if (sLAlink_arrayA->s.s_dbind==Cnil)
+  if (sSAlink_arrayA->s.s_dbind==Cnil)
     return;
 
-  ne=n=p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
-  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  ne=n=p=(void *)sSAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sSAlink_arrayA->s.s_dbind->v.v_fillp;
 
   while (p<pe) {
     if (*p) {
@@ -378,7 +378,7 @@ prune_link_array(void) {
       p+=2;
   }
 
-  sLAlink_arrayA->s.s_dbind->v.v_fillp=(ne-n)*sizeof(*n);
+  sSAlink_arrayA->s.s_dbind->v.v_fillp=(ne-n)*sizeof(*n);
 
 }
 
@@ -388,11 +388,11 @@ sweep_link_array(void) {
 
   void ***p,***pe;
 
-  if (sLAlink_arrayA->s.s_dbind==Cnil)
+  if (sSAlink_arrayA->s.s_dbind==Cnil)
     return;
 
-  p=(void *)sLAlink_arrayA->s.s_dbind->v.v_self;
-  pe=(void *)p+sLAlink_arrayA->s.s_dbind->v.v_fillp;
+  p=(void *)sSAlink_arrayA->s.s_dbind->v.v_self;
+  pe=(void *)p+sSAlink_arrayA->s.s_dbind->v.v_fillp;
   for (;p<pe;p+=2)
     if (*p) {
       if (LINK_ARRAY_MARKED(p))
@@ -1654,35 +1654,7 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
 
 }
 
-DEFUN_NEW("SCALE-HEAP-TO",object,fSscale_heap_to,SI,1,1,NONE,II,OO,OO,OO,(fixnum mem),"") {
-  
-  fixnum i;
-  enum type t;
-  double scale;
-  
-  for (t=i=0;t<t_other;t++)
-    if (tm_table+t==tm_of(t))
-      i+=tm_table[t].tm_maxpage;
-  
-  scale=(double)(mem>>PAGEWIDTH)/i;
-  
-  for (t=i=0;t<t_other;t++)
-    if (tm_table+t==tm_of(t)) {
-      if (!set_tm_maxpage(tm_table+t,tm_table[t].tm_maxpage*scale))
- 	FEerror("Cannot scale heap",0);
-      if (t<t_relocatable)
- 	i+=tm_table[t].tm_maxpage;
-    }
-  
-  if ((t=sgc_enabled))
-    sgc_quit();
-  holepage=new_holepage=i;
-  GBC(t_relocatable);
-  if (t)
-    sgc_start();
-  add_pages(tm_table+t_contiguous,tm_table[t_contiguous].tm_maxpage-ncbpage);
-  return (object)mem;
-}
+DEFUN_NEW("GBC",object,fSgbc,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
 
 DEFUN_NEW("GBC",object,fLgbc,LISP,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
  

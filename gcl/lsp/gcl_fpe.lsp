@@ -1,8 +1,8 @@
-(in-package :fpe :use '(:lisp))
+(in-package :fpe)
 
 (import 'si::(disassemble-instruction feenableexcept fedisableexcept fld *fixnum *float *double
 				      +fe-list+ +mc-context-offsets+ floating-point-error 
-				      function-by-address))
+				      function-by-address clines defentry))
 (export '(break-on-floating-point-exceptions read-instruction))
 
 (eval-when

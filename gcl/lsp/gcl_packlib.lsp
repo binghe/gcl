@@ -22,14 +22,7 @@
 ;;;;                    package routines
 
 
-(in-package 'lisp)
-
-
-(export '(find-all-symbols do-symbols do-external-symbols do-all-symbols with-package-iterator))
-(export '(apropos apropos-list))
-
-
-(in-package 'system)
+(in-package :si)
 
 
 (proclaim '(optimize (safety 2) (space 3)))
@@ -121,7 +114,7 @@
 (defun print-symbol-apropos (symbol)
   (prin1 symbol)
   (when (fboundp symbol)
-        (if (special-form-p symbol)
+        (if (special-operator-p symbol)
             (princ "  Special form")
             (if (macro-function symbol)
                 (princ "  Macro")

@@ -50,14 +50,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	@(return Cnil)
 @)
 
-@(defun string_char_p (c)
-@
-	check_type_character(&c);
-	if (char_font(c) != 0 || char_bits(c) != 0)
-		@(return Cnil)
-	@(return Ct)
-@)
-
 @(defun alpha_char_p (c)
 	int i;
 @
@@ -358,18 +350,6 @@ BEGIN:
 	@(return `make_fixnum(char_code(c))`)
 @)
 
-@(defun char_bits (c)
-@
-	check_type_character(&c);
-	@(return `small_fixnum(char_bits(c))`)
-@)
-
-@(defun char_font (c)
-@
-	check_type_character(&c);
-	@(return `small_fixnum(char_font(c))`)
-@)
-
 @(defun code_char (c &o (b `make_fixnum(0)`) (f `make_fixnum(0)`))
 	object x;
 @
@@ -388,29 +368,6 @@ BEGIN:
 		@(return `code_char(fix(c))`)
 	x = alloc_object(t_character);
 	char_code(x) = fix(c);
-	char_bits(x) = fix(b);
-	char_font(x) = fix(f);
-	@(return x)
-@)
-
-@(defun make_char (c &o (b `make_fixnum(0)`) (f `make_fixnum(0)`))
-	object x;
-	int code;
-@
-	check_type_character(&c);
-	code = char_code(c);
-	check_type_non_negative_integer(&b);
-	check_type_non_negative_integer(&f);
-	if (type_of(b) == t_bignum)
-		@(return Cnil)
-	if (type_of(f) == t_bignum)
-		@(return Cnil)
-	if (fix(b)>=CHBITSLIM || fix(f)>=CHFONTLIM)
-		@(return Cnil)
-	if (fix(b) == 0 && fix(f) == 0)
-		@(return `code_char(code)`)
-	x = alloc_object(t_character);
-	char_code(x) = code;
 	char_bits(x) = fix(b);
 	char_font(x) = fix(f);
 	@(return x)
@@ -489,30 +446,6 @@ int w, r;
 	@(return `make_fixnum(i)`)
 @)
 
-@(defun int_char (x)
-	int i, c, b, f;
-@
-	check_type_non_negative_integer(&x);
-	if (type_of(x) == t_bignum)
-		@(return Cnil)
-	i = fix(x);
-	c = i % CHCODELIM;
-	i /= CHCODELIM;
-	b = i % CHBITSLIM;
-	i /= CHBITSLIM;
-	f = i % CHFONTLIM;
-	i /= CHFONTLIM;
-	if (i > 0)
-		@(return Cnil)
-	if (b == 0 && f == 0)
-		@(return `code_char(c)`)
-	x = alloc_object(t_character);
-	char_code(x) = c;
-	char_bits(x) = b;
-	char_font(x) = f;
-	@(return x)
-@)
-
 @(defun char_name (c)
 @
 	check_type_character(&c);
@@ -563,18 +496,6 @@ int w, r;
 	@(return Cnil)
 @)
 
-@(defun char_bit (c n)
-@
-	check_type_character(&c);
-	FEerror("Cannot get char-bit of ~S.", 1, c);
-@)
-
-@(defun set_char_bit (c n v)
-@
-	check_type_character(&c);
-	FEerror("Cannot set char-bit of ~S.", 1, c);
-@)
-
 void
 gcl_init_character()
 {
@@ -599,8 +520,8 @@ gcl_init_character()
 #endif
 
  	make_constant("CHAR-CODE-LIMIT", make_fixnum(CHCODELIM));
- 	make_constant("CHAR-FONT-LIMIT", make_fixnum(CHFONTLIM));
- 	make_constant("CHAR-BITS-LIMIT", make_fixnum(CHBITSLIM));
+ 	make_si_constant("CHAR-FONT-LIMIT", make_fixnum(CHFONTLIM));
+ 	make_si_constant("CHAR-BITS-LIMIT", make_fixnum(CHBITSLIM));
 
 	STreturn = make_simple_string("Return");
 	enter_mark_origin(&STreturn);
@@ -620,18 +541,97 @@ gcl_init_character()
 	STnewline = make_simple_string("Newline");
 	enter_mark_origin(&STnewline);
 
-	make_constant("CHAR-CONTROL-BIT", make_fixnum(0));
-	make_constant("CHAR-META-BIT", make_fixnum(0));
-	make_constant("CHAR-SUPER-BIT", make_fixnum(0));
-	make_constant("CHAR-HYPER-BIT", make_fixnum(0));
+	make_si_constant("CHAR-CONTROL-BIT", make_fixnum(0));
+	make_si_constant("CHAR-META-BIT", make_fixnum(0));
+	make_si_constant("CHAR-SUPER-BIT", make_fixnum(0));
+	make_si_constant("CHAR-HYPER-BIT", make_fixnum(0));
+
 }
+
+@(defun make_char (c &o (b `make_fixnum(0)`) (f `make_fixnum(0)`))
+	object x;
+	int code;
+@
+	check_type_character(&c);
+	code = char_code(c);
+	check_type_non_negative_integer(&b);
+	check_type_non_negative_integer(&f);
+	if (type_of(b) == t_bignum)
+		@(return Cnil)
+	if (type_of(f) == t_bignum)
+		@(return Cnil)
+	if (fix(b)>=CHBITSLIM || fix(f)>=CHFONTLIM)
+		@(return Cnil)
+	if (fix(b) == 0 && fix(f) == 0)
+		@(return `code_char(code)`)
+	x = alloc_object(t_character);
+	char_code(x) = code;
+	char_bits(x) = fix(b);
+	char_font(x) = fix(f);
+	@(return x)
+@)
+
+@(defun char_bits (c)
+@
+	check_type_character(&c);
+	@(return `small_fixnum(char_bits(c))`)
+@)
+
+@(defun char_font (c)
+@
+	check_type_character(&c);
+	@(return `small_fixnum(char_font(c))`)
+@)
+
+@(defun char_bit (c n)
+@
+	check_type_character(&c);
+	FEerror("Cannot get char-bit of ~S.", 1, c);
+@)
+
+@(defun set_char_bit (c n v)
+@
+	check_type_character(&c);
+	FEerror("Cannot set char-bit of ~S.", 1, c);
+@)
+
+@(defun string_char_p (c)
+@
+	check_type_character(&c);
+	if (char_font(c) != 0 || char_bits(c) != 0)
+		@(return Cnil)
+	@(return Ct)
+@)
+
+@(defun int_char (x)
+	int i, c, b, f;
+@
+	check_type_non_negative_integer(&x);
+	if (type_of(x) == t_bignum)
+		@(return Cnil)
+	i = fix(x);
+	c = i % CHCODELIM;
+	i /= CHCODELIM;
+	b = i % CHBITSLIM;
+	i /= CHBITSLIM;
+	f = i % CHFONTLIM;
+	i /= CHFONTLIM;
+	if (i > 0)
+		@(return Cnil)
+	if (b == 0 && f == 0)
+		@(return `code_char(c)`)
+	x = alloc_object(t_character);
+	char_code(x) = c;
+	char_bits(x) = b;
+	char_font(x) = f;
+	@(return x)
+@)
 
 void
 gcl_init_character_function()
 {
 	make_function("STANDARD-CHAR-P", Lstandard_char_p);
 	make_function("GRAPHIC-CHAR-P", Lgraphic_char_p);
-	make_function("STRING-CHAR-P", Lstring_char_p);
 	make_function("ALPHA-CHAR-P", Lalpha_char_p);
 	make_function("UPPER-CASE-P", Lupper_case_p);
 	make_function("LOWER-CASE-P", Llower_case_p);
@@ -652,17 +652,18 @@ gcl_init_character_function()
 	make_function("CHAR-NOT-LESSP", Lchar_not_lessp);
 	make_function("CHARACTER", Lcharacter);
 	make_function("CHAR-CODE", Lchar_code);
-	make_function("CHAR-BITS", Lchar_bits);
-	make_function("CHAR-FONT", Lchar_font);
 	make_function("CODE-CHAR", Lcode_char);
-	make_function("MAKE-CHAR", Lmake_char);
 	make_function("CHAR-UPCASE", Lchar_upcase);
 	make_function("CHAR-DOWNCASE", Lchar_downcase);
 	make_function("DIGIT-CHAR", Ldigit_char);
 	make_function("CHAR-INT", Lchar_int);
-	make_function("INT-CHAR", Lint_char);
 	make_function("CHAR-NAME", Lchar_name);
 	make_function("NAME-CHAR", Lname_char);
-	make_function("CHAR-BIT", Lchar_bit);
-	make_function("SET-CHAR-BIT", Lset_char_bit);
+	make_si_function("INT-CHAR", Lint_char);
+	make_si_function("MAKE-CHAR", Lmake_char);
+	make_si_function("CHAR-BITS", Lchar_bits);
+	make_si_function("CHAR-FONT", Lchar_font);
+	make_si_function("CHAR-BIT", Lchar_bit);
+	make_si_function("SET-CHAR-BIT", Lset_char_bit);
+	make_si_function("STRING-CHAR-P", Lstring_char_p);
 }

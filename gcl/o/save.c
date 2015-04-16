@@ -16,7 +16,7 @@ memory_save(char *original_file, char *save_file)
 extern void _cleanup();
 #endif
 
-LFD(Lsave)(void) {
+LFD(siLsave)(void) {
 
   char filename[256];
   extern char *kcl_self;

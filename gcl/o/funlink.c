@@ -19,7 +19,7 @@ typedef object (*object_func)();
 static int     
 vpush_extend(void *,object);
 
-object sLAlink_arrayA;
+object sSAlink_arrayA;
 int Rset = 0;
 
 DEFVAR("*LINK-LIST*",sSAlink_listA,SI,0,"");
@@ -67,8 +67,8 @@ call_or_link(object sym, void **link) {
   if (Rset==0)
     funcall(fun);
   else if (type_of(fun) == t_cfun) {
-    (void) vpush_extend( link,sLAlink_arrayA->s.s_dbind);
-    (void) vpush_extend( *link,sLAlink_arrayA->s.s_dbind);	 
+    (void) vpush_extend( link,sSAlink_arrayA->s.s_dbind);
+    (void) vpush_extend( *link,sSAlink_arrayA->s.s_dbind);	 
     *link = (void *) (fun->cf.cf_self);
     (*(void (*)())(fun->cf.cf_self))();
   } else {
@@ -89,8 +89,8 @@ call_or_link_closure(object sym, void **link, void **ptr) {
  }
  if (type_of(fun) == t_cclosure && (fun->cc.cc_turbo)) {
    if (Rset) {
-     (void) vpush_extend( link,sLAlink_arrayA->s.s_dbind);
-     (void) vpush_extend( *link,sLAlink_arrayA->s.s_dbind);
+     (void) vpush_extend( link,sSAlink_arrayA->s.s_dbind);
+     (void) vpush_extend( *link,sSAlink_arrayA->s.s_dbind);
      *ptr = (void *)fun;
      *link = (void *) (fun->cf.cf_self);
      MMccall(fun);
@@ -105,8 +105,8 @@ call_or_link_closure(object sym, void **link, void **ptr) {
  /* can't do this if invoking foo(a) is illegal when foo is not defined
     to take any arguments.   In the majority of C's this is legal */
  else if (type_of(fun) == t_cfun) {
-   (void) vpush_extend(link,sLAlink_arrayA->s.s_dbind);
-   (void) vpush_extend(*link,sLAlink_arrayA->s.s_dbind);	 
+   (void) vpush_extend(link,sSAlink_arrayA->s.s_dbind);
+   (void) vpush_extend(*link,sSAlink_arrayA->s.s_dbind);	 
    *link = (void *)fun->cf.cf_self;
    (*(void (*)())fun->cf.cf_self)();
  } else {
@@ -180,8 +180,8 @@ is supplied and FLAG is nil, then this function is deleted from the fast links")
  LDEFAULT2: sym = Cnil ;
  LEND_VARARG: va_end(ap);}
 
-  if (sLAlink_arrayA ==0)    RETURN1(Cnil);
-  link_ar = sLAlink_arrayA->s.s_dbind;
+  if (sSAlink_arrayA ==0)    RETURN1(Cnil);
+  link_ar = sSAlink_arrayA->s.s_dbind;
   if (link_ar==Cnil && flag==Cnil) RETURN1(Cnil);
   check_type_array(&link_ar);
   if (type_of(link_ar) != t_string)
@@ -339,8 +339,8 @@ call_proc(object sym, void **link, int argd, va_list ll) {
 
     }
    
-    (void) vpush_extend(link,sLAlink_arrayA->s.s_dbind);
-    (void) vpush_extend(*link,sLAlink_arrayA->s.s_dbind);	 
+    (void) vpush_extend(link,sSAlink_arrayA->s.s_dbind);
+    (void) vpush_extend(*link,sSAlink_arrayA->s.s_dbind);	 
     *link = (void *)fn;
 
   AFTER_LINK:	
@@ -443,8 +443,8 @@ call_proc_new(object sym, void **link, int argd, object first, va_list ll) {
 
     }
    
-    (void) vpush_extend(link,sLAlink_arrayA->s.s_dbind);
-    (void) vpush_extend(*link,sLAlink_arrayA->s.s_dbind);	 
+    (void) vpush_extend(link,sSAlink_arrayA->s.s_dbind);
+    (void) vpush_extend(*link,sSAlink_arrayA->s.s_dbind);	 
     *link = (void *)fn;
 
   AFTER_LINK:	
@@ -607,7 +607,7 @@ FFN(mv_ref)(unsigned int i)
 #include "xdrfuns.c"
 
 DEF_ORDINARY("CDEFN",sScdefn,SI,"");
-DEFVAR("*LINK-ARRAY*",sLAlink_arrayA,LISP,Cnil,"");
+DEFVAR("*LINK-ARRAY*",sSAlink_arrayA,SI,Cnil,"");
 
 void
 gcl_init_links(void)

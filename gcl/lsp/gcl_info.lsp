@@ -1,4 +1,4 @@
-(in-package "SI"  )
+(in-package :si)
 
 (eval-when (compile eval)
 (defmacro while (test &body body)
@@ -11,7 +11,7 @@
 (eval-when (compile eval load)
 (defun sharp-u-reader (stream subchar arg)
   subchar arg
-  (let ((tem (make-array 10 :element-type 'string-char :fill-pointer 0)))
+  (let ((tem (make-array 10 :element-type 'character :fill-pointer 0)))
     (or (eql (read-char stream) #\")
 	(error "sharp-u-reader reader needs a \" right after it"))
     (loop
@@ -44,7 +44,7 @@
    (or (and (<= 0 start ) (<= start len))
        (error "illegal file start ~a" start))
    (let ((tem (make-array (- len start)
-			  :element-type 'string-char)))
+			  :element-type 'character)))
      (if (> start 0) (file-position st start))
      (si::fread tem 0 (length tem) st) tem)))
 
@@ -105,7 +105,7 @@
 	     ((> extra 0)
 	      (setq tem 
 		    (make-array (f + (length x) extra)
-				:element-type 'string-char :fill-pointer 0))
+				:element-type 'character :fill-pointer 0))
 	      (setq i 0)
 	      (go AGAIN))
 	     (t (setq tem x)))

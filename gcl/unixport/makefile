@@ -69,42 +69,7 @@ $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 	[ "$(RL_OBJS)" = "" ] || \
 		echo "(AUTOLOAD 'init-readline '|readline|)" >>$@
 
-init_gcl.lsp.tmp: init_gcl.lsp.in
-	cp $< $@
-
-init_pre_gcl.lsp.tmp: init_pre_gcl.lsp.in
-	cp $< $@
-
-init_mod_gcl.lsp.tmp: init_mod_gcl.lsp.in
-	cp $< $@
-
-init_xgcl.lsp.tmp: init_gcl.lsp.tmp
-	ln -snf $< $@
-
-init_pcl_gcl.lsp.tmp: init_pcl_gcl.lsp.in ../cmpnew/gcl_cmpmain.lsp \
-		../pcl/sys-package.lisp ../clcs/package.lisp \
-		$(shell find ../clcs/ -name "clcs_*.lisp")
-
-	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} {if (i==0) print}' $< >$@
-#	cat ../cmpnew/gcl_cmpmain.lsp >>$@
-	cat ../pcl/sys-package.lisp >>$@
-	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} {if (i==1) print}' $< >>$@
-
-init_ansi_gcl.lsp.tmp: init_ansi_gcl.lsp.in ../cmpnew/gcl_cmpmain.lsp \
-		../pcl/sys-package.lisp ../clcs/package.lisp
-
-	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} \
-		/^ *@LI-CLCS-PACKAGE@/{i=2;next} {if (i==0) print}' $< >$@
-#	cat ../cmpnew/gcl_cmpmain.lsp >>$@
-	cat ../pcl/sys-package.lisp >>$@
-	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} \
-		/^ *@LI-CLCS-PACKAGE@/{i=2;next} {if (i==1) print}' $< >>$@
-	cat ../clcs/package.lisp >>$@
-	awk '/^ *@LI-PCL-PACKAGE@/{i=1;next} \
-		/^ *@LI-CLCS-PACKAGE@/{i=2;next} {if (i==2) print}' $< >>$@
-
-
-init_%.lsp: init_%.lsp.tmp
+sys_init.lsp: sys_init.lsp.in
 
 	cat $< | sed \
 		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `date`#1" \
@@ -118,14 +83,14 @@ init_%.lsp: init_%.lsp.tmp
 		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
 		-e "s#@LI-INIT-LSP@#\"$@\"#1" >$@
 
-saved_%:raw_% $(RSYM) init_%.lsp raw_%_map msys \
+saved_%:raw_% $(RSYM) sys_init.lsp raw_%_map msys \
 		$(CMPDIR)/gcl_cmpmain.lsp \
 		$(CMPDIR)/gcl_lfun_list.lsp \
 		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
 		$(LSPDIR)/gcl_auto_new.lsp
 
-	cp init_$*.lsp foo
-	echo " (in-package \"USER\")(system:save-system \"$@\")" >>foo
+	cp sys_init.lsp foo
+	echo "(unless si::*quit-tags* (in-package \"USER\")(system:save-system \"$@\"))" >>foo
 	ar x lib$*.a $$(ar t lib$*.a |grep ^gcl_)
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
 #       check that saved image can be prelinked
@@ -194,7 +159,7 @@ map_%:
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
-		gazonk*.lsp plt*h *_map saved_* lib* raw_* msys out* log* tmp* gcl.script
+		gazonk*.lsp plt*h *_map saved_* lib* raw_* msys out* log* tmp* gcl.script sys_init.lsp
 
 .INTERMEDIATE: init_ansi_gcl.lsp.tmp init_gcl.lsp.tmp raw_gcl raw_ansi_gcl
 .PRECIOUS: init_pre_gcl.lsp init_gcl.lsp init_ansi_gcl.lsp

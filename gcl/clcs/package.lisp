@@ -20,3 +20,4 @@
 (defvar *this-package* (find-package :conditions))
 
 
+(import 'si::(clines defentry defcfun object void int double))
