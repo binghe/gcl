@@ -68,7 +68,7 @@
 
 (import 'si::(clines defentry defcfun object void int double
 		     quit bye gbc system commonp
-		     get-setf-method *break-on-warnings*
+		     *break-on-warnings*
 		     make-char char-bits char-font char-bit set-char-bit string-char-p int-char
 		     char-font-limit char-bits-limit char-control-bit
 		     char-meta-bit char-super-bit char-hyper-bit compiler-let) :cltl1-compat)

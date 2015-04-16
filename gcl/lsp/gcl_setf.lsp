@@ -77,10 +77,10 @@
           ',access-fn))
 
 
-;;; GET-SETF-METHOD.
+;;; GET-SETF-EXPANSION.
 ;;; It just calls GET-SETF-METHOD-MULTIPLE-VALUE
 ;;;  and checks the number of the store variable.
-(defun get-setf-method (form &optional env)
+(defun get-setf-expansion (form &optional env)
   (multiple-value-bind (vars vals stores store-form access-form)
       (get-setf-method-multiple-value form env)
     (unless (= (list-length stores) 1)
@@ -209,7 +209,7 @@
 
 (define-setf-method getf (&environment env place indicator &optional default)
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method place env)
+      (get-setf-expansion place env)
     (let ((itemp (gensym)) (store (gensym)))
       (values `(,@vars ,itemp)
               `(,@vals ,indicator)
@@ -225,7 +225,7 @@
 
 (define-setf-method the (&environment env type form)
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method form env)
+      (get-setf-expansion form env)
     (let ((store (gensym)))
       (values vars vals (list store)
 	      `(let ((,(car stores) (the ,type ,store))) ,store-form)
@@ -237,7 +237,7 @@
 	       (null (cddr fn)))
 	  (error "Can't get the setf-method of ~S." fn))
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method (cons (cadr fn) rest) env)
+      (get-setf-expansion (cons (cadr fn) rest) env)
     (unless (eq (car (last store-form)) (car (last vars)))
             (error "Can't get the setf-method of ~S." fn))
     (values vars vals stores
@@ -252,7 +252,7 @@
                (null (cddr fn)))
     (error "Can't get the setf-method of ~S." fn))
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method (cons (cadr fn) rest) env)
+      (get-setf-expansion (cons (cadr fn) rest) env)
     (cond ((eq (car (last store-form)) (car (last vars)))
            (values vars vals stores
                    `(apply #',(car store-form) ,@(cdr store-form))
@@ -268,7 +268,7 @@
 
 (define-setf-method char-bit (&environment env char name)
   (multiple-value-bind (temps vals stores store-form access-form)
-      (get-setf-method char env)
+      (get-setf-expansion char env)
     (let ((ntemp (gensym))
 	  (store (gensym))
 	  (stemp (first stores)))
@@ -281,7 +281,7 @@
 
 (define-setf-method ldb (&environment env bytespec int)
   (multiple-value-bind (temps vals stores store-form access-form)
-      (get-setf-method int env)
+      (get-setf-expansion int env)
     (let ((btemp (gensym))
 	  (store (gensym))
 	  (stemp (first stores)))
@@ -294,7 +294,7 @@
 
 (define-setf-method mask-field (&environment env bytespec int)
   (multiple-value-bind (temps vals stores store-form access-form)
-      (get-setf-method int env)
+      (get-setf-expansion int env)
     (let ((btemp (gensym))
 	  (store (gensym))
 	  (stemp (first stores)))
@@ -337,7 +337,7 @@
 	   (setf-structure-access (cadr place) (car g) (cdr g) newvalue))))
 	     
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method place env)
+      (get-setf-expansion place env)
     (declare (ignore access-form))
     `(let* ,(mapcar #'list
 		    (append vars stores)
@@ -388,7 +388,7 @@
 		 nil))
 	   (when (endp (cdr r)) (error "~S is an illegal PSETF form." rest))
 	   (multiple-value-bind (vars vals stores store-form access-form)
-	       (get-setf-method (car r) env)
+	       (get-setf-expansion (car r) env)
              (declare (ignore access-form))
 	     (setq store-forms (cons store-form store-forms))
 	     (setq pairs
@@ -417,7 +417,7 @@
 	    ,@store-forms
 	    ,g))
     (multiple-value-bind (vars vals stores1 store-form access-form)
-	(get-setf-method (car r) env)
+	(get-setf-expansion (car r) env)
       (setq pairs (nconc pairs (mapcar #'list vars vals)))
       (setq stores (cons (car stores1) stores))
       (setq store-forms (cons store-form store-forms))
@@ -442,7 +442,7 @@
 	    nil
 	    ))
     (multiple-value-bind (vars vals stores1 store-form access-form)
-	(get-setf-method (car r) env)
+	(get-setf-expansion (car r) env)
       (setq pairs (nconc pairs (mapcar #'list vars vals)))
       (setq stores (cons (car stores1) stores))
       (setq store-forms (cons store-form store-forms))
@@ -471,7 +471,7 @@
                (let ((access-form reference))
                  (list 'setq reference ,update-form))))
        (multiple-value-bind (vars vals stores store-form access-form)
-	   (get-setf-method reference env)
+	   (get-setf-expansion reference env)
          (list 'let*
 	       (mapcar #'list
 		       (append vars stores)
@@ -483,7 +483,7 @@
 
 (defmacro remf (&environment env place indicator)
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method place env)
+      (get-setf-expansion place env)
     `(let* ,(mapcar #'list vars vals)
        (multiple-value-bind (,(car stores) flag)
            (si:rem-f ,access-form ,indicator)
@@ -499,7 +499,7 @@
       (return-from push `(let* ((,myitem ,item))
 			   (setq ,place (cons ,myitem ,place)))))
     (multiple-value-bind (vars vals stores store-form access-form)
-			 (get-setf-method place env)
+			 (get-setf-expansion place env)
 			 `(let* ,(mapcar #'list
 					 (append (list myitem) vars stores)
 					 (append (list   item) vals (list (list 'cons myitem access-form))))
@@ -511,7 +511,7 @@
 	   (return-from pushnew `(let* ((,myitem ,item))
 				   (setq ,place (adjoin ,myitem ,place ,@rest))))))
     (multiple-value-bind (vars vals stores store-form access-form)
-			 (get-setf-method place env)
+			 (get-setf-expansion place env)
 			 `(let* ,(mapcar #'list
 					 (append (list myitem) vars stores)
 					 (append (list   item) vals
@@ -526,7 +526,7 @@
                 (setq ,place (cdr ,place))
                 ,temp))))
   (multiple-value-bind (vars vals stores store-form access-form)
-      (get-setf-method place env)
+      (get-setf-expansion place env)
     `(let* ,(mapcar #'list
 		    (append vars stores)
 		    (append vals (list (list 'cdr access-form))))

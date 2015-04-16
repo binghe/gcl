@@ -8,18 +8,6 @@ List of all the lambda-list keywords used in GCL.
 
 @end defvr
 
-@defun GET-SETF-METHOD (form)
-Package:LISP
-
-Returns the five values (or five 'gangs') constituting the SETF method for
-FORM.  See the doc of DEFINE-SETF-METHOD for the meanings of the gangs.  It
-is an error if the third value (i.e., the list of store variables) is not a
-one-element list.  See the doc of GET-SETF-METHOD-MULTIPLE-VALUE for
-comparison.
-
-
-@end defun
-
 @deffn {Special Form} THE 
 Package:LISP
 
