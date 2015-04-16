@@ -1656,8 +1656,6 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
 
 DEFUN_NEW("GBC",object,fSgbc,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
 
-DEFUN_NEW("GBC",object,fLgbc,LISP,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
- 
    /* 1 args */
   
   if (x0 == Ct)
