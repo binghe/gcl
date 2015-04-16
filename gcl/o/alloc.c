@@ -316,7 +316,7 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   if (z>available_pages) return 0;
   if (r && 2*n+page(rb_start)>real_maxpage) return 0;
   available_pages-=z;
-  tm->tm_adjgbccnt*=((double)j)/n;
+  tm->tm_adjgbccnt*=((double)j+1)/(n+1);
   tm->tm_maxpage=n;
   /* massert(!check_avail_pages()); */
   return 1;
@@ -522,7 +522,7 @@ opt_maxpage(struct typemanager *my_tm) {
   }
 #endif
 
-  z=my_tm->tm_adjgbccnt-1;
+  z=my_tm->tm_adjgbccnt/* -1 */;
   z/=(1+x-0.9*my_tm->tm_adjgbccnt);
   z*=(y-mmax_page)*mmax_page;
   z=sqrt(z);
@@ -539,7 +539,7 @@ opt_maxpage(struct typemanager *my_tm) {
 
   if (sSAnotify_optimize_maximum_pagesA->s.s_dbind!=sLnil)
     printf("[type %u max %lu(%lu) opt %lu   y %lu(%lu) gbcrat %f sav %f  new %lu sum %lu phys %lu]\n",
-	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt-1)/(1+x-0.9*my_tm->tm_adjgbccnt),r,
+	   my_tm->tm_type,mmax_page,mro,(long)z,(long)y,tro,(my_tm->tm_adjgbccnt/* -1 */)/(1+x-0.9*my_tm->tm_adjgbccnt),r,
 	   my_tm->tm_maxpage,sum_maxpages(),phys_pages);
 
   return j ? 1 : 0;
