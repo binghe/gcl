@@ -142,13 +142,23 @@ off_check(void *v,void *ve,fixnum i,struct pageinfo *pi) {
 }
 #endif
 
+#define PAGEINFO_P(pi) (pi->magic==PAGE_MAGIC && pi->type<=t_contiguous)
 
 inline struct pageinfo *
 get_pageinfo(void *x) {
-  struct pageinfo *v=contblock_list_head;void *vv;
-  for (;(vv=v) && (vv>=x || vv+v->in_use*PAGESIZE<=x);v=v->next);
+  void *p;
+  struct pageinfo *v;
+  for (p=pageinfo(x);(v=p) && (!PAGEINFO_P(v) || v->type!=t_contiguous || p+v->in_use*PAGESIZE<=x || ((void *)v->next && (void *)v->next<=x));p-=PAGESIZE);
   return v;
 }
+
+
+/* inline struct pageinfo * */
+/* get_pageinfo(void *x) { */
+/*   struct pageinfo *v=contblock_list_head;void *vv; */
+/*   for (;(vv=v) && (vv>=x || vv+v->in_use*PAGESIZE<=x);v=v->next); */
+/*   return v; */
+/* } */
 
 inline char
 get_bit(char *v,struct pageinfo *pi,void *x) {
@@ -752,8 +762,6 @@ mark_object1(object x) {
 static long *c_stack_where;
 
 void **contblock_stack_list=NULL;
-
-#define PAGEINFO_P(pi) (pi->magic==PAGE_MAGIC && pi->type<=t_contiguous)
 
 static void
 mark_stack_carefully(void *topv, void *bottomv, int offset) {
