@@ -68,7 +68,7 @@ sbrk1(n)
 long starting_hole_div=10;
 long starting_relb_heap_mult=2;
 long new_holepage;
-long resv_pages=40;
+long resv_pages=0;
 
 #ifdef BSD
 #include <sys/time.h>
@@ -289,6 +289,26 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 
 struct pageinfo *cell_list_head=NULL,*cell_list_tail=NULL;;
 
+inline ufixnum
+sum_maxpages(void) {
+
+  ufixnum i,j;
+
+  for (i=t_start,j=0;i<t_other;i++)
+    j+=tm_table[i].tm_maxpage;
+
+  return j+tm_table[t_relocatable].tm_maxpage;
+
+}
+
+fixnum
+check_avail_pages(void) {
+  
+  return real_maxpage-page(data_start ? data_start : sbrk(0))-available_pages-resv_pages-sum_maxpages();
+
+}
+
+
 inline fixnum
 set_tm_maxpage(struct typemanager *tm,fixnum n) {
   
@@ -298,7 +318,8 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   available_pages-=z;
   tm->tm_adjgbccnt*=((double)j)/n;
   tm->tm_maxpage=n;
-  return n;
+  massert(!check_avail_pages());
+  return 1;
 }
   
 
@@ -431,18 +452,6 @@ DEFVAR("*OPTIMIZE-MAXIMUM-PAGES*",sSAoptimize_maximum_pagesA,SI,sLnil,"");
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 DEFVAR("*NOTIFY-OPTIMIZE-MAXIMUM-PAGES*",sSAnotify_optimize_maximum_pagesA,SI,sLnil,"");
 #define MMAX_PG(a_) (a_)->tm_maxpage-(a_)->tm_alt_npage
-
-static inline ufixnum
-sum_maxpages(void) {
-
-  ufixnum i,j;
-
-  for (i=t_start,j=0;i<t_other;i++)
-    j+=tm_table[i].tm_maxpage;
-
-  return j+tm_table[t_relocatable].tm_maxpage;
-
-}
 
 static int
 rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
@@ -1260,7 +1269,13 @@ gcl_init_alloc(void *cs_start) {
 
   update_real_maxpage();
 
-  if (gcl_alloc_initialized) return;
+  if (gcl_alloc_initialized) {
+    massert(rb_start==heap_end &&rb_end==heap_end && rb_limit==heap_end && rb_pointer==heap_end);
+    holepage=new_holepage;
+    alloc_page(-holepage);
+    rb_start=rb_end=rb_limit=rb_pointer=heap_end+(holepage<<PAGEWIDTH);
+    return;
+  }
   
 #ifdef INIT_ALLOC  
   INIT_ALLOC;

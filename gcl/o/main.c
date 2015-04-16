@@ -248,15 +248,16 @@ update_real_maxpage(void) {
 
   free_phys_pages=free_phys_pages>maxpages ? maxpages : free_phys_pages;
 
-  for (i=t_start,j=0;i<t_other;i++)
-    if (tm_table[i].tm_npage) {
-      massert(k=(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage)));
-      j+=k;
-    }
-  available_pages=maxpages-j-tm_table[t_relocatable].tm_maxpage;
+  resv_pages=available_pages=0;
+  available_pages=check_avail_pages();
+  
+  for (i=t_start,j=0;i<t_other;i++) {
+    massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage));
+    j+=tm_table[i].tm_maxpage;
+  }
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
-
+  
   if (sSAoptimize_maximum_pagesA && sSAoptimize_maximum_pagesA->s.s_dbind!=Cnil) {
 
     for (i=t_start,j=0;i<t_relocatable;i++)
@@ -275,11 +276,8 @@ update_real_maxpage(void) {
     for (i=t_start;i<t_relocatable;i++)
       new_holepage+=tm_table[i].tm_maxpage-tm_table[i].tm_npage;
     
-  } else {
+  } else
     new_holepage=available_pages/starting_hole_div;
-    set_tm_maxpage(tm_table+t_relocatable,free_phys_pages/5);
-  }
-
 
   return 0;
 
