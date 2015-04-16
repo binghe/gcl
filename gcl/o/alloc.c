@@ -573,7 +573,6 @@ Use ALLOCATE to expand the space.",
 #else
 #define TOTAL_THIS_TYPE(tm) (tm->tm_nppage * tm->tm_npage)
 #endif
-ufixnum contblock_lim=-1L;
 
 static object cbv=Cnil;
 #define cbsrch1 ((struct contblock ***)cbv->v.v_self)

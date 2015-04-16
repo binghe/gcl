@@ -259,14 +259,9 @@ alloc_memory(ul sz) {
     sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
     sSAcode_block_reserveA->s.s_dbind->st.st_fillp=sSAcode_block_reserveA->s.s_dbind->st.st_dim;
     
-  } else {
-    
-    contblock_lim=MAX_CODE_ADDRESS;
+  } else
     v=alloc_contblock(sz);
-    contblock_lim=-1UL;
-    
-  }
-  
+
   massert(v && (ul)(v+sz)<MAX_CODE_ADDRESS);
 
   return v;
