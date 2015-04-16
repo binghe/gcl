@@ -345,14 +345,14 @@ getd(str)
 #define READ_BYTE1() getc(fas_stream)
 
 #define GET8(varx ) \
- do{unsigned long var=(unsigned long)READ_BYTE1();  \
-   var |=  ((unsigned long)READ_BYTE1() << SIZE_BYTE); \
-   var |=  ((unsigned long)READ_BYTE1() << (2*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (3*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (4*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (5*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (6*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (7*SIZE_BYTE)); \
+ do{unsigned long long var=READ_BYTE1();  \
+   var |=  ((unsigned long long)READ_BYTE1() << SIZE_BYTE); \
+   var |=  ((unsigned long long)READ_BYTE1() << (2*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (3*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (4*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (5*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (6*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (7*SIZE_BYTE)); \
    DPRINTF("{8byte:varx= %ld}", var); \
      varx=var;} while (0)
 
@@ -386,7 +386,7 @@ getd(str)
 #define GETFIX(v_) Join(GET,SIZEOF_LONG)(v_)
 
 #define PUT8(varx ) \
- do{unsigned long var= varx ; \
+ do{unsigned long long var= varx ; \
      DPRINTF("{8byte:varx= %ld}", var); \
        WRITE_BYTEI(var,0); \
      WRITE_BYTEI(var,1); \
@@ -808,7 +808,7 @@ write_fasd(object obj)
      {int l = MP(obj)->_mp_size;
      int m = (l >= 0 ? l : -l);
       
-     unsigned long *u = (unsigned long *) MP(obj)->_mp_d;
+     mp_limb_t *u = MP(obj)->_mp_d;
      /* fix this */
      /* if (sizeof(mp_limb_t) != 4) { FEerror("fix for gmp",0);} */
      PUT4(l);
@@ -1279,7 +1279,7 @@ read_fasd1(int i, object *loc)
       case DP( d_bignum:)
 	{int j,m;
 	 object tem;
-	 unsigned long *u;
+	 mp_limb_t *u;
 	 GET4(j);
 #ifdef GMP
 	 tem = new_bignum();
@@ -1287,7 +1287,7 @@ read_fasd1(int i, object *loc)
 	 _mpz_realloc(MP(tem),m);
 	 MP(tem)->_mp_size = j;
 	 j = m;
-	 u = (unsigned long *) MP(tem)->_mp_d;
+	 u = MP(tem)->_mp_d;
 #else	 
         { BEGIN_NO_INTERRUPT;
 	 tem = alloc_object(t_bignum);
