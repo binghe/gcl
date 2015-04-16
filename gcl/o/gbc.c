@@ -441,8 +441,8 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
   /*     && x && x->d.st>=ngc_thresh) { */
 
   if (what_to_collect!=t_contiguous && 
-      (dp=alloc_contblock_no_gc(s)) &&
-      x && x->d.st>=ngc_thresh) {
+      x && x->d.st>=ngc_thresh &&
+      (dp=alloc_contblock_no_gc(s))) {
     
     /* fprintf(stderr,"Promoting %p,%lu to %p\n",p,s,dp); */
     /* fflush(stderr); */
