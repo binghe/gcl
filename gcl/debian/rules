@@ -117,7 +117,7 @@ build-%-stamp: configure-%-stamp
 		tmp=debian/$*; old=/usr/lib/gcl-$(VERS); new=$$old-prof;\
 		if [ "$(findstring ansi,$*)" = "" ] ; then i=saved_gcl ; else i=saved_ansi_gcl ; fi;\
 		mv $$tmp/$$old $$tmp/$$new ;\
-		echo "(reset-sys-paths \"$$new/\")(si::save-system \"debian/tmp-image\")" | $$tmp/$$new/unixport/$$i &&\
+		echo "(si::reset-sys-paths \"$$new/\")(si::save-system \"debian/tmp-image\")" | $$tmp/$$new/unixport/$$i &&\
 		mv debian/tmp-image $$tmp/$$new/unixport/$$i;)
 
 	touch $@
