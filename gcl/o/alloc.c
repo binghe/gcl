@@ -1815,25 +1815,19 @@ void
 free(void *ptr) {
 
   object *p,pp;
+  static void *initial_monstartup_pointer_echo;
   
   if (ptr == 0)
     return;
   
   for (p = &malloc_list,pp=*p; pp && !endp(pp);  p = &((pp)->c.c_cdr),pp=pp->c.c_cdr)
     if ((pp)->c.c_car->st.st_self == ptr) {
-      /* SGC contblock pages: Its possible this is on an old page CM 20030827 */
-/* #ifdef SGC */
-/*       insert_maybe_sgc_contblock((pp)->c.c_car->st.st_self,(pp)->c.c_car->st.st_dim); */
-/* #else */
-/*       insert_contblock((pp)->c.c_car->st.st_self,(pp)->c.c_car->st.st_dim); */
-/* #endif */
       (pp)->c.c_car->st.st_self = NULL;
       *p = pp->c.c_cdr;
 #ifdef GCL_GPROF
       if (initial_monstartup_pointer==ptr) {
+	initial_monstartup_pointer_echo=ptr;
 	initial_monstartup_pointer=NULL;
-	if (core_end-heap_end>=sizeof(ptr))
-	  *(void **)heap_end=ptr;
       }
 #endif
       return;
@@ -1841,12 +1835,13 @@ free(void *ptr) {
 #ifdef NOFREE_ERR
   return;
 #else	
-  if (core_end-heap_end<sizeof(ptr) || ptr!=*(void **)heap_end) {
+  if (ptr!=initial_monstartup_pointer_echo) {
     static void *old_ptr;
     if (old_ptr==ptr) return;
     old_ptr=ptr;
     FEerror("free(3) error.",0);
   }
+  initial_monstartup_pointer_echo=NULL;
   return;
 #endif	
 }
