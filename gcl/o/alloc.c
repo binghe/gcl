@@ -684,7 +684,7 @@ print_cb(int print) {
     massert(**cbppp==cbp);
     for (k=0;cbp && cbp->cb_size==(**cbppp)->cb_size;cbpp=&cbp->cb_link,cbp=cbp->cb_link,k++);
     if (print)
-      fprintf(stderr,"%lu %p %p %lu %lu\n",cbppp-cbsrch1,*cbppp,**cbppp,(**cbppp)->cb_size,k);
+      fprintf(stderr,"%lu %p %p %lu %lu\n",(unsigned long)(cbppp-cbsrch1),*cbppp,**cbppp,(**cbppp)->cb_size,k);
   }
   massert(cbppp==cbsrche);
   massert(*cbppp==cbpp);
