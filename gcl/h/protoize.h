@@ -1935,3 +1935,6 @@ empty_relblock(void);
 
 fixnum
 check_avail_pages(void);
+
+inline int
+mbrk(void *);

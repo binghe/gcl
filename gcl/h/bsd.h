@@ -33,39 +33,7 @@ filecpy(save, original, stsize - sizeof(stsize))
 
 extern char etext;
 
-
-
-
-/* #define SET_REAL_MAXPAGE do { struct rlimit data_rlimit; \ */
-/* 				extern char etext; \ */
-/* 			     real_maxpage = MAXPAGE ; \ */
-/*      	getrlimit(RLIMIT_DATA, &data_rlimit); \ */
-/* 	real_maxpage = ((unsigned int)&etext/PAGESIZE + data_rlimit.rlim_cur/PAGESIZE); \ */
-/* 	if (real_maxpage > MAXPAGE) \ */
-/* 		real_maxpage = MAXPAGE ; } while(0) */
-     
-#define ROUND_UP_SBRK(x)  \
-       do {long i; \
-	     if ((i = ((long)x & (PAGESIZE - 1)))) \
-	       x=sbrk(PAGESIZE - i); } while(0);
-
-#define FIX_RANDOM_SBRK \
-do {char *x=sbrk(0); \
-  if (core_end != x) \
-   { ROUND_UP_SBRK(x); x=sbrk(0);\
-     while (core_end < x) \
-       { \
-	 core_end = core_end + PAGESIZE;} \
-     if (core_end !=x) error("Someone allocated my memory");}} while (0)
- 
-     
-#define INIT_ALLOC \
-     	heap_end = sbrk(0); ROUND_UP_SBRK(heap_end);\
-	heap_end = core_end = sbrk(0);
-
-#define IF_ALLOCATE_ERR \
-        FIX_RANDOM_SBRK; \
-	if (core_end != sbrk(PAGESIZE*(n - m)))
+#define INIT_ALLOC heap_end = core_end = sbrk(0);
 
 #define SYM_EXTERNAL_P(sym) ((sym)->n_type & N_EXT)
      

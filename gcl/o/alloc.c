@@ -223,61 +223,53 @@ resize_hole(ufixnum hp,enum type tp) {
 inline void *
 alloc_page(long n) {
 
-  fixnum d,m;
+  bool s=n<0;
+  ufixnum nn=s ? -n : n;
+  void *v,*e;
+  
+  if (!s) {
 
-  if (n>=0) {
-
-    if (n>(holepage - (in_signal_handler? 0 :
+    if (nn>(holepage - (in_signal_handler? 0 :
 		       available_pages-n<=reserve_pages_for_signal_handler ? 0 : 
 		       reserve_pages_for_signal_handler))) {
 
 
-      if (in_signal_handler) {
-	fprintf(stderr,"Cant do relocatable gc in signal handler. \
-Try to allocate more space to save for allocation during signals: \
-eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ", 
-		new_holepage, 20+ reserve_pages_for_signal_handler); fflush(stderr); exit(1);
-      }
+      fixnum d=available_pages-nn;
 
-
-      d=available_pages-n;
       d*=0.2;
       d=d<0.01*real_maxpage ? available_pages-n : d;
       d=d<0 ? 0 : d;
       d=new_holepage<d ? new_holepage : d;
       
-      resize_hole(d+n,t_relocatable);
+      if (in_signal_handler)/*FIXME*/
+	fprintf(stderr,"Can't do relocatable gc in signal handler. \
+Try to allocate more space to save for allocation during signals: \
+eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ", 
+		new_holepage, 20+ reserve_pages_for_signal_handler); fflush(stderr); exit(1);
+
+      resize_hole(d+nn,t_relocatable);
 
     }
+  }
 
-    holepage -= n;
+  e=heap_end;
+  v=e+nn*PAGESIZE;
 
-    if (heap_end==core_end) {
-      /* can happen when mallocs occur before rel block set up..*/
-      sbrk(PAGESIZE*n);
-      core_end+=PAGESIZE*n;
-    }
+  if (!s) {
 
-    {
-      void *e=heap_end;
-      heap_end+=PAGESIZE*n;
-
-      return(e);
-    }
+    holepage -= nn;
+    heap_end=v;
+    return e;
 
   }
 
-  /* n < 0 , then this says ensure there are -n pages
-     starting at heap_end, and return pointer to heap_end */
-  n=-n;
-  m=(core_end-heap_end)/PAGESIZE;
-
-  if (n<=m)
+  if (nn<=(core_end-heap_end)/PAGESIZE)
     return(heap_end);
 
-  IF_ALLOCATE_ERR error("Can't allocate.  Good-bye!");
+  if (mbrk(v))
+    error("Can't allocate.  Good-bye!");
 
-  core_end+=PAGESIZE*(n-m);
+  core_end=v;
 
   return(heap_end);
 
