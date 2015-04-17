@@ -142,17 +142,42 @@ off_check(void *v,void *ve,fixnum i,struct pageinfo *pi) {
 }
 #endif
 
-#define PAGEINFO_P(pi) (pi->magic==PAGE_MAGIC && pi->type<=t_contiguous)
+void **contblock_stack_list=NULL;
+
+static inline bool
+pageinfo_p(void *v) {
+
+  struct pageinfo *pi=v;
+
+  return pi->magic==PAGE_MAGIC && pi->type<=t_contiguous &&
+    (!pi->next || (void *)pi->next>=v+(pi->type==t_contiguous ? pi->in_use : 1)*PAGESIZE);
+
+}
+    
+static inline bool
+in_contblock_stack_list(void *p,void ***ap) {
+  void **a;
+  for (a=*ap;a && a[0]>p;a=a[1]);
+  *ap=a;
+  /* if (a && a[0]==p) fprintf(stderr,"Skipping %p\n",p); */
+  return a && a[0]==p;
+}
 
 inline struct pageinfo *
 get_pageinfo(void *x) {
-  void *p;
+
+  void *p=pageinfo(x),**a=contblock_stack_list;
   struct pageinfo *v;
-  for (p=pageinfo(x);(v=p) && (!PAGEINFO_P(v) || v->type!=t_contiguous || p+v->in_use*PAGESIZE<=x || ((void *)v->next && (void *)v->next<=x));p-=PAGESIZE);
-  return v;
+
+  for (;!pageinfo_p(p) || in_contblock_stack_list(p,&a);p-=PAGESIZE);
+
+  v=p;
+  massert(v->type==t_contiguous && p+v->in_use*PAGESIZE>x);
+
+  return p;
+
 }
-
-
+  
 /* inline struct pageinfo * */
 /* get_pageinfo(void *x) { */
 /*   struct pageinfo *v=contblock_list_head;void *vv; */
@@ -761,8 +786,6 @@ mark_object1(object x) {
 
 static long *c_stack_where;
 
-void **contblock_stack_list=NULL;
-
 static void
 mark_stack_carefully(void *topv, void *bottomv, int offset) {
 
@@ -797,10 +820,9 @@ mark_stack_carefully(void *topv, void *bottomv, int offset) {
     
     pageoffset=v-(void *)pagetochar(p);
     pi=pagetoinfo(p);
-    if (!PAGEINFO_P(pi)) continue;
+    if (!pageinfo_p(pi)) continue;
     
-    for (a=contblock_stack_list;a && a[0]!=pi;a=a[1]);
-    if (a) continue;
+    if ((a=contblock_stack_list) && in_contblock_stack_list(pi,&a)) continue;
 
     tm=tm_of(pi->type);
     if (tm->tm_type>=t_end) continue;
@@ -980,42 +1002,27 @@ mark_c_stack(jmp_buf env1, int n, void (*fn)(void *,void *,int)) {
 #ifndef C_GC_OFFSET
 #define C_GC_OFFSET 0
 #endif
-    {
-      struct pageinfo *v,*tv;void **a;
-      fixnum i;
-      for (v=contblock_list_head,contblock_stack_list=NULL;v;v=v->next)
-	for (i=1;i<v->in_use;i++) {
-	  tv=pagetoinfo(page(v)+i);
-	  if (PAGEINFO_P(tv)) {
-	    a=contblock_stack_list;
-	    /* printf("%p\n",tv); */
-	    contblock_stack_list=alloca(2*sizeof(a));
-	    contblock_stack_list[0]=tv;
-	    contblock_stack_list[1]=a;
-	  }}
+    if (&where > cs_org)
+      (*fn)(0,cs_org,C_GC_OFFSET);
+    else
+      (*fn)(cs_org,0,C_GC_OFFSET);
 
-      if (&where > cs_org)
-	(*fn)(0,cs_org,C_GC_OFFSET);
-      else
-	(*fn)(cs_org,0,C_GC_OFFSET);
-
-      contblock_stack_list=NULL;
-    }}
+  }
   
 #if defined(__ia64__)
-    {
-       extern void * __libc_ia64_register_backing_store_base;
-       void * bst=GC_save_regs_in_stack();
-       void * bsb=__libc_ia64_register_backing_store_base;
-
-       if (bsb>bst)
-          (*fn)(bsb,bst,C_GC_OFFSET);
-       else
-          (*fn)(bst,bsb,C_GC_OFFSET);
-       
-    }
+  {
+    extern void * __libc_ia64_register_backing_store_base;
+    void * bst=GC_save_regs_in_stack();
+    void * bsb=__libc_ia64_register_backing_store_base;
+    
+    if (bsb>bst)
+      (*fn)(bsb,bst,C_GC_OFFSET);
+    else
+      (*fn)(bst,bsb,C_GC_OFFSET);
+    
+  }
 #endif
-
+  
 }
 
 static void
@@ -1136,6 +1143,24 @@ GBC(enum type t) {
 
   ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
 
+  { /*FIXME try to get this below the setjmp in mark_c_stack*/
+    struct pageinfo *v,*tv;
+    ufixnum i;
+    void *a;
+    
+    for (v=contblock_list_head,contblock_stack_list=NULL;v;v=v->next)
+      for (i=1;i<v->in_use;i++) {
+	tv=pagetoinfo(page(v)+i);
+	if (pageinfo_p(tv)) {
+	  a=contblock_stack_list;
+	  /* fprintf(stderr,"pushing %p\n",tv); */
+	  contblock_stack_list=alloca(2*sizeof(a));
+	  contblock_stack_list[0]=tv;
+	  contblock_stack_list[1]=a;
+	}
+      }
+  }
+  
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");
   
