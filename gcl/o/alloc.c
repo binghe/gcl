@@ -1177,6 +1177,15 @@ object malloc_list=Cnil;
 #include <signal.h>
 
 void
+maybe_set_hole_from_maxpages(void) {
+  if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start) {
+    holepage=new_holepage;
+    alloc_page(-holepage);
+    rb_start=rb_end=rb_limit=rb_pointer=heap_end+(holepage<<PAGEWIDTH);
+  }
+}
+
+void
 gcl_init_alloc(void *cs_start) {
 
   fixnum cssize=(1L<<23);
@@ -1261,11 +1270,7 @@ gcl_init_alloc(void *cs_start) {
   update_real_maxpage();
 
   if (gcl_alloc_initialized) {
-    if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start) {
-      holepage=new_holepage;
-      alloc_page(-holepage);
-      rb_start=rb_end=rb_limit=rb_pointer=heap_end+(holepage<<PAGEWIDTH);
-    }
+    maybe_set_hole_from_maxpages();
     return;
   }
   

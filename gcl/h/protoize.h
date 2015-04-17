@@ -1938,3 +1938,6 @@ check_avail_pages(void);
 
 inline int
 mbrk(void *);
+
+void
+maybe_set_hole_from_maxpages(void);

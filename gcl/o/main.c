@@ -327,6 +327,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
     minimize_image();
     log_maxpage_bound=l;
     update_real_maxpage();
+    maybe_set_hole_from_maxpages();
   }
 
   return (object)log_maxpage_bound;
