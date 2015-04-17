@@ -268,20 +268,6 @@ alloc_memory(ul sz) {
 
 }
 
-void
-allocate_code_block_reserve(void) {
-
-  const char *s=getenv("GCL_CODESPACE");
-  ul n;
-
-  if (!s || sscanf(s,"%lu",&n)!=1)
-    return;
-
-  sSAcode_block_reserveA->s.s_dbind=alloc_simple_string(n);
-  sSAcode_block_reserveA->s.s_dbind->st.st_self=alloc_memory(n);
-
-}
-
 static object
 load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 

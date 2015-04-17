@@ -451,7 +451,6 @@ main(int argc, char **argv, char **envp) {
 #ifdef NEED_STACK_CHK_GUARD
     __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
 #endif
-    allocate_code_block_reserve();
   
   }
 
