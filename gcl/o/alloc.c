@@ -1269,10 +1269,11 @@ gcl_init_alloc(void *cs_start) {
   update_real_maxpage();
 
   if (gcl_alloc_initialized) {
-    massert(rb_start==heap_end &&rb_end==heap_end && rb_limit==heap_end && rb_pointer==heap_end);
-    holepage=new_holepage;
-    alloc_page(-holepage);
-    rb_start=rb_end=rb_limit=rb_pointer=heap_end+(holepage<<PAGEWIDTH);
+    if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start) {
+      holepage=new_holepage;
+      alloc_page(-holepage);
+      rb_start=rb_end=rb_limit=rb_pointer=heap_end+(holepage<<PAGEWIDTH);
+    }
     return;
   }
   
