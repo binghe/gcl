@@ -533,8 +533,8 @@ DEFVAR("*GENSYM-COUNTER*",sLgensym_counter,LISP,make_fixnum(0),"");
 	set_up_string_register("");
 	sym = make_symbol(string_register);
 	{BEGIN_NO_INTERRUPT;	
-	sym->s.s_fillp = i;
 	sym->s.s_self = alloc_relblock(i);
+	sym->s.s_fillp = i;
 	i=this_gensym_prefix->st.st_fillp;
 	for (j = 0;  j < i;  j++)
 		sym->s.s_self[j] = this_gensym_prefix->st.st_self[j];
