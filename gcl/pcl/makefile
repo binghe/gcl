@@ -17,8 +17,7 @@ SETUP='(load "defsys.lisp")' \
 	'(setq compiler::*default-c-file* t)'\
 	'(setq compiler::*default-data-file* t)'\
 	'(setq compiler::*default-system-p* t)' \
-	'(setq si::*optimize-maximum-pages* nil)' \
-	'(si::set-log-maxpage-bound (1+ (integer-length most-positive-fixnum)))' \
+	'(setq si::*code-block-reserve* (make-array 10000000 :element-type (quote character) :static t) a nil)' \
 	'(setq compiler::*keep-gaz* t compiler::*tmp-dir* "")'
 
 all: $(addsuffix .c,$(AFILES)) $(addsuffix .o,$(AFILES)) 
