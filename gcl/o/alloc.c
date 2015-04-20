@@ -229,9 +229,7 @@ alloc_page(long n) {
   
   if (!s) {
 
-    if (nn>(holepage - (in_signal_handler? 0 :
-		       available_pages-n<=reserve_pages_for_signal_handler ? 0 : 
-		       reserve_pages_for_signal_handler))) {
+    if (nn>holepage) {
 
 
       fixnum d=available_pages-nn;
@@ -241,12 +239,6 @@ alloc_page(long n) {
       d=d<0 ? 0 : d;
       d=new_holepage<d ? new_holepage : d;
       
-      if (in_signal_handler)/*FIXME*/
-	fprintf(stderr,"Can't do relocatable gc in signal handler. \
-Try to allocate more space to save for allocation during signals: \
-eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ", 
-		new_holepage, 20+ reserve_pages_for_signal_handler); fflush(stderr); exit(1);
-
       resize_hole(d+nn,t_relocatable);
 
     }
