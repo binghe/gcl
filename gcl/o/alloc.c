@@ -259,19 +259,15 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 
     holepage -= nn;
     heap_end=v;
-    return e;
 
+  } else if (v>(void *)core_end) {
+    
+    massert(!mbrk(v));
+    core_end=v;
+    
   }
-
-  if (nn<=(core_end-heap_end)/PAGESIZE)
-    return(heap_end);
-
-  if (mbrk(v))
-    error("Can't allocate.  Good-bye!");
-
-  core_end=v;
-
-  return(heap_end);
+  
+  return(e);
 
 }
 
