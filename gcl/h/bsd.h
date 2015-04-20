@@ -33,7 +33,7 @@ filecpy(save, original, stsize - sizeof(stsize))
 
 extern char etext;
 
-#define INIT_ALLOC heap_end = core_end = sbrk(0);
+#define INIT_ALLOC heap_end = core_end = PCEI(sbrk(0),PAGESIZE);
 
 #define SYM_EXTERNAL_P(sym) ((sym)->n_type & N_EXT)
      
