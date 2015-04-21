@@ -88,7 +88,8 @@ extern int reserve_pages_for_signal_handler;
 /* #define CONT_MARK_PAGE (((page(heap_end)-first_data_page)*(PAGESIZE/(CPTR_SIZE*CHAR_SIZE))+PAGESIZE-1)/PAGESIZE) */
 /* #define	available_pages	((fixnum)(real_maxpage-page(heap_end)-2*nrbpage-CONT_MARK_PAGE-resv_pages)) */
 
-extern struct pageinfo *cell_list_head,*cell_list_tail,*contblock_list_head,*contblock_list_tail;
+extern struct pageinfo *cell_list_head,*cell_list_tail/* ,*contblock_list_head,*contblock_list_tail */;
+extern object contblock_array;
 
 #define PAGE_MAGIC 0x2e
 

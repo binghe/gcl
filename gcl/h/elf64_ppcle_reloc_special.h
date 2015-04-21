@@ -15,8 +15,6 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   Shdr *sec;
   Rela *r;
   void *ve;
-  ul j,*u;
-
 
   massert((sec=get_section(".rela.plt",sec1,sece,sn)));
 

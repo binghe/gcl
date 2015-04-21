@@ -1941,3 +1941,12 @@ mbrk(void *);
 
 void
 maybe_set_hole_from_maxpages(void);
+
+void *
+alloc_code_space(size_t);
+
+object 
+fSmake_vector1_2(fixnum,fixnum,object,object);
+
+inline struct pageinfo *
+get_pageinfo(void *);

@@ -99,7 +99,7 @@ sgc_mark_phase(void) {
   
   /* mark all non recent data on writable contiguous pages */
   if (what_to_collect == t_contiguous)
-    for (v=contblock_list_head;v;v=v->next)
+    for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++)
       if (v->sgc_flags&SGC_PAGE_FLAG) {
 	void *s=CB_DATA_START(v),*e=CB_DATA_END(v),*p,*q;
 	bool z=get_sgc_bit(v,s);
@@ -219,10 +219,12 @@ sgc_contblock_sweep_phase(void) {
 
   STATIC char *s, *e, *p, *q;
   STATIC struct pageinfo *v;
-    
+  ufixnum i;
+  
   reset_contblock_freelist();
   
-  for (v=contblock_list_head;v;v=v->next) {
+  for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++) {
+
     bool z;
 
     if (!(v->sgc_flags&SGC_PAGE_FLAG)) continue;
@@ -664,7 +666,7 @@ sgc_start(void) {
     
     tm=tm_of(t_contiguous);
 
-    for (pi=contblock_list_head;pi && count<WSGC(tm);pi=pi->next) {
+    for (i=0;i<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[i]) && count<WSGC(tm);i++) {
 
       p=CB_DATA_START(pi);
       pe=CB_DATA_END(pi);
@@ -685,7 +687,7 @@ sgc_start(void) {
       /* SGC cont pages: allocate more if necessary, dumping possible
 	 GBC freed pages onto the old contblock list.  CM 20030827*/
       unsigned long z=(i-count)+1;
-      void *old_contblock_list_tail=contblock_list_tail;
+      ufixnum fp=contblock_array->v.v_fillp;
 
       if (maxcbpage<ncbpage+z)
 	if (!set_tm_maxpage(tm_table+t_contiguous,ncbpage+z))
@@ -693,9 +695,9 @@ sgc_start(void) {
 
       add_pages(tm_table+t_contiguous,z);
 
-      massert(old_contblock_list_tail!=contblock_list_tail);
+      massert(fp!=contblock_array->v.v_fillp);
 
-      contblock_list_tail->sgc_flags=SGC_PAGE_FLAG;
+      ((struct pageinfo *)contblock_array->v.v_self[fp])->sgc_flags=SGC_PAGE_FLAG;
 
     }
 
@@ -743,17 +745,19 @@ sgc_start(void) {
   {
 
     struct pageinfo *pi;
-
+    ufixnum j;
+    
     {
 
       struct contblock **cbpp;
       void *p=NULL,*pe;
       struct pageinfo *pi;
+      ufixnum i;
       
       old_cb_pointer=cb_pointer;
       reset_contblock_freelist();
 
-      for (pi=contblock_list_head;pi;pi=pi->next) {
+      for (i=0;i<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[i]);i++) {
 	
 	if (pi->sgc_flags!=SGC_PAGE_FLAG) continue;
 	
@@ -786,7 +790,7 @@ sgc_start(void) {
       else
 	tm_of(pi->type)->tm_alt_npage++;
     }
-    for (pi=contblock_list_head;pi;pi=pi->next)/*FIXME*/
+    for (j=0;i<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[j]);j++)
       if (pi->sgc_flags&SGC_WRITABLE)
 	for (i=0;i<pi->in_use;i++)
 	  SET_WRITABLE(page(pi)+i);
@@ -932,7 +936,7 @@ sgc_quit(void) {
   	((object) p)->d.s=SGC_NORMAL;
 #endif
   
-  for (v=contblock_list_head;v;v=v->next) 
+  for (i=0;i<contblock_array->v.v_fillp &&(v=(void *)contblock_array->v.v_self[i]);i++)
     if (v->sgc_flags&SGC_PAGE_FLAG) 
       bzero(CB_SGCF_START(v),CB_DATA_START(v)-CB_SGCF_START(v));
   
@@ -940,7 +944,7 @@ sgc_quit(void) {
     struct pageinfo *pi;
     for (pi=cell_list_head;pi;pi=pi->next)
       pi->sgc_flags&=SGC_PERM_WRITABLE;
-    for (pi=contblock_list_head;pi;pi=pi->next)
+    for (i=0;i<contblock_array->v.v_fillp &&(pi=(void *)contblock_array->v.v_self[i]);i++)
       pi->sgc_flags&=SGC_PERM_WRITABLE;
   }
   

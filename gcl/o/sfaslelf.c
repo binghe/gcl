@@ -242,32 +242,6 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
   
 }
 
-#ifndef MAX_CODE_ADDRESS
-#define MAX_CODE_ADDRESS -1UL
-#endif
-
-static void *
-alloc_memory(ul sz) {
-
-  void *v;
-
-  if (sSAcode_block_reserveA &&
-      sSAcode_block_reserveA->s.s_dbind!=Cnil && sSAcode_block_reserveA->s.s_dbind->st.st_dim>=sz) {
-    
-    v=sSAcode_block_reserveA->s.s_dbind->st.st_self;
-    sSAcode_block_reserveA->s.s_dbind->st.st_self+=sz;
-    sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
-    sSAcode_block_reserveA->s.s_dbind->st.st_fillp=sSAcode_block_reserveA->s.s_dbind->st.st_dim;
-    
-  } else
-    v=alloc_contblock(sz);
-
-  massert(v && (ul)(v+sz)<MAX_CODE_ADDRESS);
-
-  return v;
-
-}
-
 static object
 load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 
@@ -301,7 +275,7 @@ load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
   memory->cfd.cfd_size=sz;
   memory->cfd.cfd_self=0;
   memory->cfd.cfd_start=0;
-  memory->cfd.cfd_start=alloc_memory(sz);
+  memory->cfd.cfd_start=alloc_code_space(sz);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;

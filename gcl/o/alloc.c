@@ -78,6 +78,72 @@ struct rlimit data_rlimit;
 #endif
 #endif
 
+static inline void *
+bsearchleq(void *i,void *v1,size_t n,size_t s,int (*c)(const void *,const void *)) {
+
+  ufixnum nn=n>>1;
+  void *v=v1+nn*s;
+  int j=c(i,v);
+
+  if (nn)
+    return !j ? v : (j>0 ? bsearchleq(i,v,n-nn,s,c) : bsearchleq(i,v1,nn,s,c));
+  else
+    return j<=0 ? v : v+s;
+
+}
+		     
+
+object contblock_array=Cnil;
+
+static inline void
+expand_contblock_array(void) {
+
+  if (contblock_array==Cnil) {
+    contblock_array=fSmake_vector1_2(16,aet_fix,Cnil,make_fixnum(0));
+    contblock_array->v.v_self[0]=(object)&cb_pointer;
+    enter_mark_origin(&contblock_array);
+  }
+
+  if (contblock_array->v.v_fillp==contblock_array->v.v_dim) {
+
+    void *v=alloc_relblock(2*contblock_array->v.v_dim*sizeof(fixnum));
+
+    memcpy(v,contblock_array->v.v_self,contblock_array->v.v_dim*sizeof(fixnum));
+    contblock_array->v.v_self=v;
+    contblock_array->v.v_dim*=2;
+
+  }
+
+}
+
+static void
+contblock_array_push(void *p) {
+
+  expand_contblock_array();
+  contblock_array->v.v_self[contblock_array->v.v_fillp]=p;
+  contblock_array->v.v_fillp++;
+
+}
+  
+static inline int
+acomp(const void *v1,const void *v2) {
+
+  void *p1=*(void * const *)v1,*p2=*(void * const *)v2;
+
+  return p1<p2 ? -1 : (p1==p2 ? 0 : 1);
+
+}
+
+inline struct pageinfo *
+get_pageinfo(void *x) {
+
+  struct pageinfo **pp=bsearchleq(&x,contblock_array->v.v_self,contblock_array->v.v_fillp,sizeof(*contblock_array->v.v_self),acomp);
+  struct pageinfo *p=pp>contblock_array->v.v_self ? pp[-1] : NULL;
+  
+  return p && (void *)p+p->in_use*PAGESIZE>x ? p : NULL;
+
+}
+
 inline void
 add_page_to_contblock_list(void *p,fixnum m) {
  
@@ -89,13 +155,8 @@ add_page_to_contblock_list(void *p,fixnum m) {
   massert(pp->in_use==m);
   pp->magic=PAGE_MAGIC;
   
-  if (contblock_list_head==NULL)
-    contblock_list_tail=contblock_list_head=p;
-  else if (pp > contblock_list_tail) {
-    contblock_list_tail->next=p;
-    contblock_list_tail=p;
-  }
-  
+  contblock_array_push(p);
+
   bzero(pagetochar(page(pp)),CB_DATA_START(pp)-(void *)pagetochar(page(pp)));
 #ifdef SGC
   if (sgc_enabled && tm_table[t_contiguous].tm_sgc) {
@@ -562,7 +623,7 @@ static inline void
 expand_contblock_index_space(void) {
 
   if (cbv==Cnil) {
-    cbv=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(16),make_fixnum(aet_fix),Cnil,make_fixnum(0)));
+    cbv=fSmake_vector1_2(256,aet_fix,Cnil,make_fixnum(0));
     cbv->v.v_self[0]=(object)&cb_pointer;
     enter_mark_origin(&cbv);
   }
@@ -611,21 +672,6 @@ cbcomp(const void *v1,const void *v2) {
   return u1<u2 ? -1 : (u1==u2 ? 0 : 1);
 
 }
-
-static inline void *
-bsearchleq(void *i,void *v1,size_t n,size_t s,int (*c)(const void *,const void *)) {
-
-  ufixnum nn=n>>1;
-  void *v=v1+nn*s;
-  int j=c(i,v);
-
-  if (nn)
-    return !j ? v : (j>0 ? bsearchleq(i,v,n-nn,s,c) : bsearchleq(i,v1,nn,s,c));
-  else
-    return j<=0 ? v : v+s;
-
-}
-		     
 
 static inline struct contblock ***
 find_cbppp(struct contblock *cbp) {
@@ -777,7 +823,7 @@ grow_linear1(struct typemanager *tm) {
 static inline int
 too_full_p(struct typemanager *tm) {
 
-  fixnum j,k,pf=tm->tm_percent_free ? tm->tm_percent_free : 30;
+  fixnum i,j,k,pf=tm->tm_percent_free ? tm->tm_percent_free : 30;
   struct contblock *cbp;
   struct pageinfo *pi;
 
@@ -787,11 +833,13 @@ too_full_p(struct typemanager *tm) {
     break;
   case t_contiguous:
     for (cbp=cb_pointer,k=0;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
-    for (pi=contblock_list_head,j=0;pi;pi=pi->next)
+    for (i=j=0;i<contblock_array->v.v_fillp;i++) {
+      pi=(void *)contblock_array->v.v_self[i];
 #ifdef SGC
       if (!sgc_enabled || pi->sgc_flags&SGC_PAGE_FLAG)
 #endif
 	j+=pi->in_use;
+    }
     return 100*k<pf*j*PAGESIZE;
     break;
   default:
@@ -832,8 +880,6 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
     return NULL;
 
 }
-
-struct pageinfo *contblock_list_head=NULL,*contblock_list_tail=NULL;
 
 inline void
 add_pages(struct typemanager *tm,fixnum m) {
@@ -879,6 +925,9 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   
   fixnum m=tpage(tm,n);
 
+  if (tm->tm_type==t_contiguous)
+    m=MAX(m,contblock_array!=Cnil && contblock_array->v.v_fillp ? ((struct pageinfo *)contblock_array->v.v_self[contblock_array->v.v_fillp-1])->in_use*2 : 256);
+  
   if (tm->tm_npage+m>tm->tm_maxpage) {
 
     if (!IGNORE_MAX_PAGES) return NULL;
@@ -890,7 +939,6 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
 
   }
 
-  /* m=tm->tm_maxpage-tm->tm_npage; */
   add_pages(tm,m);
 
   return alloc_from_freelist(tm,n);
@@ -994,6 +1042,34 @@ alloc_contblock_no_gc(size_t n) {
     return p;
 
   return NULL;
+
+}
+
+#ifndef MAX_CODE_ADDRESS
+#define MAX_CODE_ADDRESS -1UL
+#endif
+
+void *
+alloc_code_space(size_t sz) {
+
+  void *v;
+
+  sz=CEI(sz,CPTR_SIZE);
+
+  if (sSAcode_block_reserveA &&
+      sSAcode_block_reserveA->s.s_dbind!=Cnil && sSAcode_block_reserveA->s.s_dbind->st.st_dim>=sz) {
+    
+    v=sSAcode_block_reserveA->s.s_dbind->st.st_self;
+    sSAcode_block_reserveA->s.s_dbind->st.st_self+=sz;
+    sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
+    sSAcode_block_reserveA->s.s_dbind->st.st_fillp=sSAcode_block_reserveA->s.s_dbind->st.st_dim;
+    
+  } else
+    v=alloc_contblock(sz);
+
+  massert(v && (unsigned long)(v+sz)<MAX_CODE_ADDRESS);
+
+  return v;
 
 }
 
@@ -1316,6 +1392,7 @@ gcl_init_alloc(void *cs_start) {
   
   
   ncbpage = 0;
+  tm_table[t_contiguous].tm_min_grow=256;
   set_tm_maxpage(tm_table+t_contiguous,1);
 #ifdef GCL_GPROF
   if (maxcbpage<textpage)

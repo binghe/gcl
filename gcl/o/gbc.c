@@ -142,8 +142,6 @@ off_check(void *v,void *ve,fixnum i,struct pageinfo *pi) {
 }
 #endif
 
-void **contblock_stack_list=NULL;
-
 static inline bool
 pageinfo_p(void *v) {
 
@@ -162,28 +160,6 @@ in_contblock_stack_list(void *p,void ***ap) {
   /* if (a && a[0]==p) fprintf(stderr,"Skipping %p\n",p); */
   return a && a[0]==p;
 }
-
-inline struct pageinfo *
-get_pageinfo(void *x) {
-
-  void *p=pageinfo(x),**a=contblock_stack_list;
-  struct pageinfo *v;
-
-  for (;!pageinfo_p(p) || in_contblock_stack_list(p,&a);p-=PAGESIZE);
-
-  v=p;
-  massert(v->type==t_contiguous && p+v->in_use*PAGESIZE>x);
-
-  return p;
-
-}
-  
-/* inline struct pageinfo * */
-/* get_pageinfo(void *x) { */
-/*   struct pageinfo *v=contblock_list_head;void *vv; */
-/*   for (;(vv=v) && (vv>=x || vv+v->in_use*PAGESIZE<=x);v=v->next); */
-/*   return v; */
-/* } */
 
 inline char
 get_bit(char *v,struct pageinfo *pi,void *x) {
@@ -811,7 +787,7 @@ mark_stack_carefully(void *topv, void *bottomv, int offset) {
   
   for (j=top ; j >= bottom ; j--) {
     
-    void *v=(void *)(*j),**a;
+    void *v=(void *)(*j);
     struct pageinfo *pi;
     
     if (!VALID_DATA_ADDRESS_P(v)) continue;
@@ -822,7 +798,7 @@ mark_stack_carefully(void *topv, void *bottomv, int offset) {
     pi=pagetoinfo(p);
     if (!pageinfo_p(pi)) continue;
     
-    if ((a=contblock_stack_list) && in_contblock_stack_list(pi,&a)) continue;
+    if (get_pageinfo(pi)) continue;
 
     tm=tm_of(pi->type);
     if (tm->tm_type>=t_end) continue;
@@ -1068,11 +1044,12 @@ static void
 contblock_sweep_phase(void) {
 
   STATIC char *s, *e, *p, *q;
-  STATIC struct pageinfo *v;
+  ufixnum i;
     
   reset_contblock_freelist();
   
-  for (v=contblock_list_head;v;v=v->next) {
+  for (i=0;i<contblock_array->v.v_fillp;i++) {
+    struct pageinfo *v=(void *)contblock_array->v.v_self[i];
     bool z;
 
     s=CB_DATA_START(v);
@@ -1143,24 +1120,6 @@ GBC(enum type t) {
 
   ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
 
-  { /*FIXME try to get this below the setjmp in mark_c_stack*/
-    struct pageinfo *v,*tv;
-    ufixnum i;
-    void *a;
-    
-    for (v=contblock_list_head,contblock_stack_list=NULL;v;v=v->next)
-      for (i=1;i<v->in_use;i++) {
-	tv=pagetoinfo(page(v)+i);
-	if (pageinfo_p(tv)) {
-	  a=contblock_stack_list;
-	  /* fprintf(stderr,"pushing %p\n",tv); */
-	  contblock_stack_list=alloca(2*sizeof(a));
-	  contblock_stack_list[0]=tv;
-	  contblock_stack_list[1]=a;
-	}
-      }
-  }
-  
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");
   
@@ -1574,7 +1533,7 @@ mark_contblock(void *p, int s) {
      sizeof(struct contblock).  CM 20030827 */
   x = (char *)PFLR(p,CPTR_SIZE);
   y = (char *)PCEI(q,CPTR_SIZE);
-  v=get_pageinfo(x);
+  massert(v=get_pageinfo(x));
 #ifdef SGC
   if (!sgc_enabled || (v->sgc_flags&SGC_PAGE_FLAG))
 #endif
@@ -1595,7 +1554,7 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
   }
   fprintf(stderr,"\nTotal free %lu in %lu pieces\n\n",i,j);
   
-  for (i=j=0,v=contblock_list_head;v;i+=v->in_use,j++,v=v->next) 
+  for (i=j=k=0;k<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[k]);k++,i+=v->in_use,j++) 
     fprintf(stderr,"%lu pages at %p\n",(unsigned long)v->in_use,v);
   fprintf(stderr,"\nTotal pages %lu in %lu pieces\n\n",i,j);
   

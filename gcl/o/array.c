@@ -445,6 +445,11 @@ fSmake_vector1_1(fixnum n,fixnum elt_type,object staticp) {
   VFUN_NARGS=3;
   return FFN(fSmake_vector1)(make_fixnum(n),make_fixnum(elt_type),staticp);
 }
+object 
+fSmake_vector1_2(fixnum n,fixnum elt_type,object staticp,object fillp) {
+  VFUN_NARGS=4;
+  return FFN(fSmake_vector1)(make_fixnum(n),make_fixnum(elt_type),staticp,fillp);
+}
 
 
 static object DFLT_aet_object = Cnil;	
