@@ -740,7 +740,7 @@ insert_contblock(void *p,ufixnum s) {
   *cbpp=cbp;
   
   if ((!cbp->cb_link || cbp->cb_link->cb_size!=s)) {
-    cbppp=expand_contblock_index(cbppp);
+    cbppp=expand_contblock_index(cbppp);/*FIXME called in gc and can call gc*/
     cbppp[1]=&cbp->cb_link;
   }
 
@@ -926,7 +926,7 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   fixnum m=tpage(tm,n);
 
   if (tm->tm_type==t_contiguous)
-    m=MAX(m,contblock_array!=Cnil && contblock_array->v.v_fillp ? ((struct pageinfo *)contblock_array->v.v_self[contblock_array->v.v_fillp-1])->in_use*2 : 256);
+    m=CEI(m,256);
   
   if (tm->tm_npage+m>tm->tm_maxpage) {
 
