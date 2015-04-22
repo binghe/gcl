@@ -138,7 +138,7 @@ inline struct pageinfo *
 get_pageinfo(void *x) {
 
   struct pageinfo **pp=bsearchleq(&x,contblock_array->v.v_self,contblock_array->v.v_fillp,sizeof(*contblock_array->v.v_self),acomp);
-  struct pageinfo *p=pp>contblock_array->v.v_self ? pp[-1] : NULL;
+  struct pageinfo *p=(void *)pp>(void *)contblock_array->v.v_self ? pp[-1] : NULL;
   
   return p && (void *)p+p->in_use*PAGESIZE>x ? p : NULL;
 
