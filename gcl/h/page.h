@@ -115,7 +115,7 @@ EXTER void *data_start,*initial_sbrk;
 #define CB_BITS     CPTR_SIZE*CHAR_SIZE
 #define ceil(a_,b_) (((a_)+(b_)-1)/(b_))
 #define npage(m_)   ceil(m_,PAGESIZE)
-#define cpage(m_)   ({ufixnum _m=(m_);ceil(sizeof(struct pageinfo)+_m+2*ceil(_m,(CB_BITS-2)),PAGESIZE);})
+#define cpage(m_)   CEI(({ufixnum _m=(m_);ceil(sizeof(struct pageinfo)+_m+2*ceil(_m,(CB_BITS-2)),PAGESIZE);}),256)
 #define mbytes(p_)  ceil((p_)*PAGESIZE-sizeof(struct pageinfo),CB_BITS)
 #define tpage(tm_,m_) (tm_->tm_type==t_relocatable ? npage(m_-(rb_limit-rb_pointer)+1) : (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_)))
 
