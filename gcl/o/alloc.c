@@ -524,7 +524,7 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+f*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
 	}
     
-    massert(set_tm_maxpage(my_tm,(my_tm->tm_maxpage+(phys_pages-sum_maxpages())))/(my_tm->tm_type==t_relocatable ? 2 : 1));
+    massert(set_tm_maxpage(my_tm,(my_tm->tm_maxpage+(phys_pages-sum_maxpages()))/(my_tm->tm_type==t_relocatable ? 2 : 1)));
 
     return 1;
     
