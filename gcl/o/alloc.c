@@ -506,31 +506,25 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 
   if (j+d>phys_pages) {
 
-    ufixnum k=0;
+    ufixnum k,e=j+d-phys_pages;
+    double f;
 
-    for (i=t_start;i<t_other;i++)
+    for (k=0,i=t_start;i<t_other;i++)
       if (tm_table+i!=my_tm)
 	k+=(tm_table[i].tm_maxpage-tm_table[i].tm_npage)*(i==t_relocatable ? 2 : 1);
 
-    d=d>k+phys_pages-j ? k+phys_pages-j : d;
-    if (d<=0)
+    e=e>k ? k : e;
+    if (e+phys_pages-j<=0)
       return 0;
 
+    f=1.0-(double)e/k;
+
     for (i=t_start;i<t_other;i++)
-      if (tm_table[i].tm_npage) {
-	if (tm_table+i==my_tm) {
-	  massert(set_tm_maxpage(tm_table+i,z) || !fprintf(stderr,"%lu %lu %lu %lu %lu\n",i,z,tm_table[i].tm_npage,tm_table[i].tm_maxpage,available_pages));
-	} else {
-	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+(1.0-(double)(j+d-phys_pages)/k)*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
+      if (tm_table[i].tm_npage && tm_table+i!=my_tm) {
+	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+f*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
 	}
-      }
     
-    /* for (i=t_start;i<t_other;i++) */
-    /*   if (tm_table[i].tm_npage && tm_table[i].tm_npage>((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage)) */
-    /* 	return 0; */
-    /* for (i=t_start;i<t_other;i++) */
-    /*   if (tm_table[i].tm_npage) */
-    /* 	massert(set_tm_maxpage(tm_table+i,((double)phys_pages/(j+d))*(tm_table+i==my_tm ? z : tm_table[i].tm_maxpage))); */
+    massert(set_tm_maxpage(my_tm,(my_tm->tm_maxpage+(phys_pages-sum_maxpages())))/(my_tm->tm_type==t_relocatable ? 2 : 1));
 
     return 1;
     
