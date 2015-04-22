@@ -519,7 +519,7 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
     for (i=t_start;i<t_other;i++)
       if (tm_table[i].tm_npage) {
 	if (tm_table+i==my_tm) {
-	  massert(set_tm_maxpage(tm_table+i,z));
+	  massert(set_tm_maxpage(tm_table+i,z) || !fprintf(stderr,"%lu %lu %lu %lu %lu\n",i,z,tm_table[i].tm_npage,tm_table[i].tm_maxpage,available_pages));
 	} else {
 	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+(1.0-(double)(j+d-phys_pages)/k)*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
 	}
