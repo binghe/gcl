@@ -623,7 +623,7 @@ static inline void
 expand_contblock_index_space(void) {
 
   if (cbv==Cnil) {
-    cbv=fSmake_vector1_2(256,aet_fix,Cnil,make_fixnum(0));
+    cbv=fSmake_vector1_2(16,aet_fix,Cnil,make_fixnum(0));
     cbv->v.v_self[0]=(object)&cb_pointer;
     enter_mark_origin(&cbv);
   }
@@ -740,7 +740,7 @@ insert_contblock(void *p,ufixnum s) {
   *cbpp=cbp;
   
   if ((!cbp->cb_link || cbp->cb_link->cb_size!=s)) {
-    cbppp=expand_contblock_index(cbppp);/*FIXME called in gc and can call gc*/
+    cbppp=expand_contblock_index(cbppp);
     cbppp[1]=&cbp->cb_link;
   }
 
@@ -925,9 +925,6 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   
   fixnum m=tpage(tm,n);
 
-  if (tm->tm_type==t_contiguous)
-    m=CEI(m,256);
-  
   if (tm->tm_npage+m>tm->tm_maxpage) {
 
     if (!IGNORE_MAX_PAGES) return NULL;

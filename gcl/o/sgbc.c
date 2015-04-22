@@ -213,42 +213,6 @@ sgc_sweep_phase(void) {
   }
 }
 
-
-static void
-sgc_contblock_sweep_phase(void) {
-
-  STATIC char *s, *e, *p, *q;
-  STATIC struct pageinfo *v;
-  ufixnum i;
-  
-  reset_contblock_freelist();
-  
-  for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++) {
-
-    bool z;
-
-    if (!(v->sgc_flags&SGC_PAGE_FLAG)) continue;
-
-    s=CB_DATA_START(v);
-    e=CB_DATA_END(v);
-
-    z=get_mark_bit(v,s);
-    for (p=s;p<e;) {
-      q=get_mark_bits(v,p);
-      if (!z)
-	insert_contblock(p,q-p);
-      z=1-z;
-      p=q;
-    }
-
-    bzero(CB_MARK_START(v),CB_SGCF_START(v)-CB_MARK_START(v));
-
-  }
-
-  sweep_link_array();
-
-}
-
 #undef tm
 
 #ifdef SDEBUG

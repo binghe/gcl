@@ -36,9 +36,6 @@
 
 #ifdef SGC
 static void
-sgc_contblock_sweep_phase(void);
-
-static void
 sgc_sweep_phase(void);
 
 static void
@@ -1043,15 +1040,24 @@ sweep_phase(void) {
 static void
 contblock_sweep_phase(void) {
 
+  struct pageinfo *v;
   STATIC char *s, *e, *p, *q;
+  object o;
   ufixnum i;
     
   reset_contblock_freelist();
-  
-  for (i=0;i<contblock_array->v.v_fillp;i++) {
-    struct pageinfo *v=(void *)contblock_array->v.v_self[i];
+
+  o=sSAleaf_collection_thresholdA->s.s_dbind;
+  sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(-1);
+
+  for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++) {
+
     bool z;
 
+#ifdef SGC
+    if (sgc_enabled && !(v->sgc_flags&SGC_PAGE_FLAG)) continue;
+#endif
+    
     s=CB_DATA_START(v);
     e=(void *)v+v->in_use*PAGESIZE;
 
@@ -1067,14 +1073,9 @@ contblock_sweep_phase(void) {
     bzero(CB_MARK_START(v),CB_SGCF_START(v)-CB_MARK_START(v));
 
   }
-#ifdef DEBUG
-  if (debug) {
-    for (cbp = cb_pointer; cbp != NULL; cbp = cbp->cb_link)
-      printf("%lud-byte contblock\n", cbp->cb_size);
-    fflush(stdout);
-  }
-#endif
-  
+
+  sSAleaf_collection_thresholdA->s.s_dbind=o;
+
   sweep_link_array();
 
 }
@@ -1271,12 +1272,7 @@ GBC(enum type t) {
     }
 #endif
     
-#ifdef SGC
-    if (sgc_enabled)
-      sgc_contblock_sweep_phase();
-    else
-#endif
-      contblock_sweep_phase();
+    contblock_sweep_phase();
 #ifdef DEBUG
     if (debug)
       printf("contblock sweep ended (%d)\n",
