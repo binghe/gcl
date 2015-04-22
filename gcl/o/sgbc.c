@@ -790,7 +790,7 @@ sgc_start(void) {
       else
 	tm_of(pi->type)->tm_alt_npage++;
     }
-    for (j=0;i<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[j]);j++)
+    for (j=0;j<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[j]);j++)
       if (pi->sgc_flags&SGC_WRITABLE)
 	for (i=0;i<pi->in_use;i++)
 	  SET_WRITABLE(page(pi)+i);
