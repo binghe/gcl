@@ -626,7 +626,12 @@ expand_contblock_index_space(void) {
 
   if (cbv->v.v_fillp+1==cbv->v.v_dim) {
 
-    void *v=alloc_relblock(2*cbv->v.v_dim*sizeof(fixnum));
+    void *v;
+    object o=sSAleaf_collection_thresholdA->s.s_dbind;
+
+    sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(-1);
+    v=alloc_relblock(2*cbv->v.v_dim*sizeof(fixnum));
+    sSAleaf_collection_thresholdA->s.s_dbind=o;
 
     memcpy(v,cbv->v.v_self,cbv->v.v_dim*sizeof(fixnum));
     cbv->v.v_self=v;
@@ -733,12 +738,13 @@ insert_contblock(void *p,ufixnum s) {
 
   cbp->cb_size=s;
   cbp->cb_link=*cbpp;
-  *cbpp=cbp;
   
   if ((!cbp->cb_link || cbp->cb_link->cb_size!=s)) {
     cbppp=expand_contblock_index(cbppp);
     cbppp[1]=&cbp->cb_link;
   }
+
+  *cbpp=cbp;
 
 }
 

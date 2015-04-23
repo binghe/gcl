@@ -1042,13 +1042,9 @@ contblock_sweep_phase(void) {
 
   struct pageinfo *v;
   STATIC char *s, *e, *p, *q;
-  object o;
   ufixnum i;
     
   reset_contblock_freelist();
-
-  o=sSAleaf_collection_thresholdA->s.s_dbind;
-  sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(-1);
 
   for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++) {
 
@@ -1073,8 +1069,6 @@ contblock_sweep_phase(void) {
     bzero(CB_MARK_START(v),CB_SGCF_START(v)-CB_MARK_START(v));
 
   }
-
-  sSAleaf_collection_thresholdA->s.s_dbind=o;
 
   sweep_link_array();
 
