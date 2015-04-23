@@ -500,10 +500,10 @@ static int
 rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 
   fixnum d;
-  ufixnum i,j;
+  ufixnum i,j,r=(my_tm->tm_type==t_relocatable ? 2 : 1);
   
   
-  d=(z-my_tm->tm_maxpage)*(my_tm->tm_type==t_relocatable ? 2 : 1);
+  d=(z-my_tm->tm_maxpage)*r;
   j=sum_maxpages();
 
   if (j+d>phys_pages) {
@@ -519,14 +519,14 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
     if (e+phys_pages-j<=0)
       return 0;
 
-    f=1.0-(double)e/k;
+    f=k ? 1.0-(double)e/k : 1.0;
 
     for (i=t_start;i<t_other;i++)
       if (tm_table[i].tm_npage && tm_table+i!=my_tm) {
 	  massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage+f*(tm_table[i].tm_maxpage-tm_table[i].tm_npage)));
 	}
     
-    massert(set_tm_maxpage(my_tm,(my_tm->tm_maxpage+(phys_pages-sum_maxpages()))/(my_tm->tm_type==t_relocatable ? 2 : 1)));
+    massert(set_tm_maxpage(my_tm,(my_tm->tm_maxpage*r+(phys_pages-sum_maxpages()))/r));
 
     return 1;
     
