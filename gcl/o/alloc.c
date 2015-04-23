@@ -254,8 +254,10 @@ empty_relblock(void) {
   object o=sSAleaf_collection_thresholdA->s.s_dbind;
   
   sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
-  for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;)
+  for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;) {
+    tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
+  }
   sSAleaf_collection_thresholdA->s.s_dbind=o;
 
 }
@@ -890,6 +892,7 @@ add_pages(struct typemanager *tm,fixnum m) {
     if (rb_pointer>rb_end) {
       fprintf(stderr,"Moving relblock low before expanding relblock pages\n");
       fflush(stderr);
+      tm_table[t_relocatable].tm_adjgbccnt--;
       GBC(t_relocatable);
     }
     nrbpage+=m;

@@ -1646,14 +1646,18 @@ DEFUN_NEW("GBC",object,fSgbc,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
 
    /* 1 args */
   
-  if (x0 == Ct)
+  if (x0 == Ct) {
+    tm_table[t_contiguous].tm_adjgbccnt--;
     GBC(t_other);
-  else if (x0 == Cnil)
+  } else if (x0 == Cnil) {
+    tm_table[t_cons].tm_adjgbccnt--;
     GBC(t_cons);
-  else if (eql(small_fixnum(0),x0))
+  } else if (eql(small_fixnum(0),x0)) {
+    tm_table[t_contiguous].tm_adjgbccnt--;
     GBC(t_contiguous);
-  else {
+  } else {
     x0 = small_fixnum(1);
+    tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
   }
   RETURN1(x0);
