@@ -147,8 +147,8 @@ mbrk(void *v) {
 
 #include <Windows.h>
 
-ufixnum
-get_phys_pages_no_malloc(void) {
+static ufixnum
+get_phys_pages_no_malloc(char n) {
   MEMORYSTATUS m;
 
   m.dwLength=sizeof(m);
@@ -161,8 +161,8 @@ get_phys_pages_no_malloc(void) {
 
 #include <sys/sysctl.h>
 
-ufixnum
-get_phys_pages_no_malloc(void) {
+static ufixnum
+get_phys_pages_no_malloc(char n) {
   uint64_t s;
   size_t z=sizeof(s);
   int m[2]={CTL_HW,HW_MEMSIZE};
@@ -176,8 +176,8 @@ get_phys_pages_no_malloc(void) {
 
 #elif defined(__sun__)
 
-ufixnum
-get_phys_pages_no_malloc(void) {
+static ufixnum
+get_phys_pages_no_malloc(char n) {
 
   return sysconf(_SC_PHYS_PAGES);
 
@@ -202,7 +202,7 @@ get_proc_meminfo_value_in_pages(const char *k) {
   return n>>(PAGEWIDTH-10);
 }
   
-ufixnum
+static ufixnum
 get_phys_pages_no_malloc(char freep) {
   return freep ? 
     get_proc_meminfo_value_in_pages("MemFree:")+
