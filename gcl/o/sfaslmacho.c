@@ -207,9 +207,7 @@ load_memory(struct section *sec1,struct section *sece,void *v1,
   memory->cfd.cfd_size=sz; 
   memory->cfd.cfd_self=0; 
   memory->cfd.cfd_start=0; 
-  prefer_low_mem_contblock=TRUE;
-  memory->cfd.cfd_start=alloc_contblock(sz);
-  prefer_low_mem_contblock=FALSE;
+  memory->cfd.cfd_start=alloc_code_space(sz);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;
