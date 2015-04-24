@@ -422,7 +422,11 @@ DEFVAR("*LEAF-COLLECTION-THRESHOLD*",sSAleaf_collection_thresholdA,SI,make_fixnu
 
 static inline bool
 marking(void *p) {
-  return (sgc_enabled ? ON_WRITABLE_PAGE_CACHED(p) : !NULL_OR_ON_C_STACK(p));
+  return (
+#ifdef SGC
+	  sgc_enabled ? ON_WRITABLE_PAGE_CACHED(p) :
+#endif
+	  !NULL_OR_ON_C_STACK(p));
 }
 
 static inline bool
@@ -483,7 +487,11 @@ mark_object_address(object *o,int f) {
   
   if (lp!=p || !f) {
     lp=p;
-    lr=sgc_enabled ? WRITABLE_PAGE_P(lp) : 1;
+    lr=
+#ifdef SGC
+      sgc_enabled ? WRITABLE_PAGE_P(lp) :
+#endif
+      1;
   }
 
   if (lr)
