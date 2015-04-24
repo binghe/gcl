@@ -29,7 +29,7 @@ void *malloc(size_t);
 void *realloc(void *,size_t);
 /* void * memalign(size_t,size_t); */
 void *alloc_contblock(size_t);
-void *alloc_relblock(size_t);
+inline void *alloc_relblock(size_t);
 /* object fSallocate_contiguous_pages(); */
 /* object fSallocate_relocatable_pages(); */
 
