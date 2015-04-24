@@ -77,6 +77,5 @@
 
 #-ansi-cl(use-package :cltl1-compat :lisp)
 #-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp)))
-(export '*load-pathname* :si);For maxima, at least as of 5.34.1
 
 #+ansi-cl (use-package :pcl :user)
