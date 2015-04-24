@@ -28,7 +28,7 @@
        (pcl (append x (list "pcl")))
        (clcs (append x (list "clcs")))
        (gtk (append x (list "gcl-tk"))))
-  (dolist (d (list lsp cmpnew #-pre-gcl xgcl-2 #+(or pcl ansi-cl) pcl #+ansi-cl clcs))
+  (dolist (d (list lsp cmpnew #+(and xgcl (not pre-gcl)) xgcl-2 #+(or pcl ansi-cl) pcl #+ansi-cl clcs))
     (load (make-pathname :name "sys-proclaim" :type "lisp" :directory d)))
   (load (make-pathname :name "tk-package" :type "lsp" :directory gtk))
   (load (make-pathname :name "gcl_lfun_list" :type "lsp" :directory cmpnew))
