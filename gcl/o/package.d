@@ -114,7 +114,7 @@ static int package_sizes[]={
   32749, 65521, 131071, 262139,   524287, 1048573};
 
 static int
-suitable_package_size(n)
+suitable_package_size(int n)
 {int *i=package_sizes;
  if (n>= 1000000) return 1048573;
  while(*i < n) { i++;}
