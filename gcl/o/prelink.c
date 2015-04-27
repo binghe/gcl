@@ -2,6 +2,12 @@
 
 #include "include.h"
 
+extern FILE *stdin __attribute__((weak));
+extern FILE *stderr __attribute__((weak));
+extern FILE *stdout __attribute__((weak));
+extern rl_compentry_func_t *rl_completion_entry_function __attribute__((weak));
+extern const char *rl_readline_name __attribute__((weak));
+
 void
 prelink_init(void) {
   
