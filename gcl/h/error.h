@@ -8,12 +8,8 @@ extern enum type t_vtype;
 extern int vtypep_fn(object);
 extern void Check_type(object *,int (*)(object),object);
 
+#define PFN(a_) INLINE int Join(a_,_fn)(object x) {return a_(x);}
 
-#ifdef IN_MAIN
-#define PFN(a_) int Join(a_,_fn)(object x) {return a_(x);}
-#else
-#define PFN(a_) extern int Join(a_,_fn)(object x);
-#endif
 PFN(integerp)
 PFN(non_negative_integerp)
 PFN(rationalp)

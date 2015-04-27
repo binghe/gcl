@@ -93,6 +93,7 @@ object big_fixnum1;
 void
 gcl_init_big1(void) {
     mp_set_memory_functions( gcl_gmp_alloc,gcl_gmp_realloc,gcl_gmp_free);
+    jmp_gmp=0;
 }
 
 #else

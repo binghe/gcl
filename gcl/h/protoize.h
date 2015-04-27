@@ -1,13 +1,12 @@
 /* alloc.c:89:OF */ extern void *alloc_page (long n); /* (n) int n; */
-/* alloc.c:149:OF */ inline void add_page_to_freelist (char *p, struct typemanager *tm); /* (p, tm) char *p; struct typemanager *tm; */
 /* alloc.c:196:OF */ extern object type_name (int t); /* (t) int t; */
-/* alloc.c:213:OF */ inline object alloc_object (enum type t); /* (t) enum type t; */
-/* alloc.c:213:OF */ inline void add_pages(struct typemanager *,fixnum);
-/* alloc.c:296:OF */ extern inline object make_cons (object a, object d); /* (a, d) object a; object d; */
+/* alloc.c:213:OF */ object alloc_object (enum type t); /* (t) enum type t; */
+/* alloc.c:213:OF */ void add_pages(struct typemanager *,fixnum);
+/* alloc.c:296:OF */ extern object make_cons (object a, object d); /* (a, d) object a; object d; */
 /* alloc.c:364:OF */ extern object on_stack_cons (object x, object y); /* (x, y) object x; object y; */
 /* alloc.c:376:OF */ extern object fSallocated (object typ); /* (typ) object typ; */
 /* alloc.c:401:OF */ extern object fSreset_number_used (object typ); /* (typ) object typ; */
-/* alloc.c:480:OF */ extern inline void insert_contblock (void *p, ufixnum s); /* (p, s) char *p; int s; */
+/* alloc.c:480:OF */ extern void insert_contblock (void *p, ufixnum s); /* (p, s) char *p; int s; */
 /* alloc.c:480:OF */ extern void insert_maybe_sgc_contblock (char *p, int s); /* (p, s) char *p; int s; */
 /* alloc.c:611:OF */ extern void set_maxpage (void); /* () */
 /* alloc.c:635:OF */ extern void gcl_init_alloc (void *); /* () */
@@ -1841,14 +1840,11 @@ struct htent *gethash(object,object);
 int
 update_real_maxpage(void);
 
-inline fixnum
+fixnum
 set_tm_maxpage(struct typemanager *,fixnum);
 
 void
 init_gmp_rnd_state(__gmp_randstate_struct *);
-
-inline void
-set_sgc_bit(struct pageinfo *,void *);
 
 void
 reinit_gmp(void);
@@ -1856,28 +1852,28 @@ reinit_gmp(void);
 object
 mod(object,object);
 
-inline void
+void
 intdivrem(object,object,fixnum,object *,object *);
 
-inline object
+object
 integer_count(object);
 
-inline object
+object
 integer_length(object);
 
-inline bool
+bool
 integer_bitp(object,object);
 
-inline object 
+object 
 fixnum_times(fixnum,fixnum);
 
-inline object
+object
 log_op2(fixnum,object,object);
 
-inline object
+object
 fixnum_big_shift(fixnum,fixnum);
 
-inline object
+object
 integer_shift(object,object);
 
 object
@@ -1921,22 +1917,19 @@ sigint(void);
 void
 allocate_code_block_reserve(void);
 
-inline void
-resize_hole(ufixnum,enum type);
-
-inline void *
+void *
 alloc_contblock_no_gc(size_t);
 
-inline void
+void
 reset_contblock_freelist(void);
 
-inline void
+void
 empty_relblock(void);
 
 fixnum
 check_avail_pages(void);
 
-inline int
+int
 mbrk(void *);
 
 void
@@ -1948,5 +1941,8 @@ alloc_code_space(size_t);
 object 
 fSmake_vector1_2(fixnum,fixnum,object,object);
 
-inline struct pageinfo *
+struct pageinfo *
 get_pageinfo(void *);
+
+void
+add_page_to_freelist(char *, struct typemanager *);

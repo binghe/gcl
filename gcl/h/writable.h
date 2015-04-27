@@ -1,7 +1,7 @@
 EXTER fixnum last_page;
 EXTER int last_result;
 
-EXTER inline int
+INLINE int
 set_writable(fixnum i,bool m) {
 
   fixnum j;
@@ -32,7 +32,7 @@ set_writable(fixnum i,bool m) {
 
 }
 
-EXTER inline int
+INLINE int
 is_writable(fixnum i) {
 
   fixnum j;
@@ -51,7 +51,7 @@ is_writable(fixnum i) {
   
 }
 
-EXTER inline int
+INLINE int
 is_writable_cached(fixnum i) {
 
   if (last_page==i)

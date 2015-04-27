@@ -134,7 +134,7 @@ acomp(const void *v1,const void *v2) {
 
 }
 
-inline struct pageinfo *
+struct pageinfo *
 get_pageinfo(void *x) {
 
   struct pageinfo **pp=bsearchleq(&x,contblock_array->v.v_self,contblock_array->v.v_fillp,sizeof(*contblock_array->v.v_self),acomp);
@@ -144,7 +144,7 @@ get_pageinfo(void *x) {
 
 }
 
-inline void
+static inline void
 add_page_to_contblock_list(void *p,fixnum m) {
  
   struct pageinfo *pp=pageinfo(p);
@@ -176,7 +176,70 @@ icomp(const void *v1,const void *v2) {
   return *f1<*f2 ? -1 : *f1==*f2 ? 0 : +1;
 }
 
-inline void
+
+void
+add_page_to_freelist(char *p, struct typemanager *tm) {
+
+  short t,size;
+  long i=tm->tm_nppage,fw;
+  object x,f;
+  struct pageinfo *pp;
+
+ t=tm->tm_type;
+
+ size=tm->tm_size;
+ f=tm->tm_free;
+ pp=pageinfo(p);
+ bzero(pp,sizeof(*pp));
+ pp->type=t;
+ pp->magic=PAGE_MAGIC;
+
+ if (cell_list_head==NULL) 
+   cell_list_tail=cell_list_head=pp;
+ else if (pp > cell_list_tail) {
+   cell_list_tail->next=pp;
+   cell_list_tail=pp;
+ }
+
+ x= (object)pagetochar(page(p));
+ /* set_type_of(x,t); */
+ make_free(x);
+
+#ifdef SGC
+
+ if (sgc_enabled && tm->tm_sgc)
+   pp->sgc_flags=SGC_PAGE_FLAG;
+
+#ifndef SGC_WHOLE_PAGE
+ if (TYPEWORD_TYPE_P(pp->type))
+   x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
+#endif
+
+ /* array headers must be always writable, since a write to the
+    body does not touch the header.   It may be desirable if there
+    are many arrays in a system to make the headers not writable,
+    but just SGC_TOUCH the header each time you write to it.   this
+    is what is done with t_structure */
+  if (t==(tm_of(t_array)->tm_type))
+    pp->sgc_flags|=SGC_PERM_WRITABLE;
+   
+#endif 
+
+ fw= *(fixnum *)x;
+ while (--i >= 0) {
+   *(fixnum *)x=fw;
+   SET_LINK(x,f);
+   f=x;
+   x= (object) ((char *)x + size);
+ }
+
+ tm->tm_free=f;
+ tm->tm_nfree += tm->tm_nppage;
+ tm->tm_npage++;
+
+}
+
+static inline void
 maybe_reallocate_page(struct typemanager *ntm,ufixnum count) {
 
   void **y,**n;
@@ -248,7 +311,7 @@ int reserve_pages_for_signal_handler=30;
    reserve_pages_for_signal_handler pages on hand in the hole
  */
 
-inline void
+void
 empty_relblock(void) {
 
   object o=sSAleaf_collection_thresholdA->s.s_dbind;
@@ -262,7 +325,7 @@ empty_relblock(void) {
 
 }
 
-inline void
+static inline void
 resize_hole(ufixnum hp,enum type tp) {
   
   char *new_start=heap_end+hp*PAGESIZE;
@@ -283,7 +346,7 @@ resize_hole(ufixnum hp,enum type tp) {
   
 }
 
-inline void *
+void *
 alloc_page(long n) {
 
   bool s=n<0;
@@ -332,7 +395,7 @@ alloc_page(long n) {
 
 struct pageinfo *cell_list_head=NULL,*cell_list_tail=NULL;;
 
-inline ufixnum
+static inline ufixnum
 sum_maxpages(void) {
 
   ufixnum i,j;
@@ -352,7 +415,7 @@ check_avail_pages(void) {
 }
 
 
-inline fixnum
+fixnum
 set_tm_maxpage(struct typemanager *tm,fixnum n) {
   
   fixnum r=tm->tm_type==t_relocatable,j=tm->tm_maxpage,z=(n-j)*(r ? 2 : 1);
@@ -365,69 +428,6 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   return 1;
 }
   
-
-inline void
-add_page_to_freelist(char *p, struct typemanager *tm) {
-
-  short t,size;
-  long i=tm->tm_nppage,fw;
-  object x,f;
-  struct pageinfo *pp;
-
- t=tm->tm_type;
-
- size=tm->tm_size;
- f=tm->tm_free;
- pp=pageinfo(p);
- bzero(pp,sizeof(*pp));
- pp->type=t;
- pp->magic=PAGE_MAGIC;
-
- if (cell_list_head==NULL) 
-   cell_list_tail=cell_list_head=pp;
- else if (pp > cell_list_tail) {
-   cell_list_tail->next=pp;
-   cell_list_tail=pp;
- }
-
- x= (object)pagetochar(page(p));
- /* set_type_of(x,t); */
- make_free(x);
-
-#ifdef SGC
-
- if (sgc_enabled && tm->tm_sgc)
-   pp->sgc_flags=SGC_PAGE_FLAG;
-
-#ifndef SGC_WHOLE_PAGE
- if (TYPEWORD_TYPE_P(pp->type))
-   x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
-#endif
-
- /* array headers must be always writable, since a write to the
-    body does not touch the header.   It may be desirable if there
-    are many arrays in a system to make the headers not writable,
-    but just SGC_TOUCH the header each time you write to it.   this
-    is what is done with t_structure */
-  if (t==(tm_of(t_array)->tm_type))
-    pp->sgc_flags|=SGC_PERM_WRITABLE;
-   
-#endif 
-
- fw= *(fixnum *)x;
- while (--i >= 0) {
-   *(fixnum *)x=fw;
-   SET_LINK(x,f);
-   f=x;
-   x= (object) ((char *)x + size);
- }
-
- tm->tm_free=f;
- tm->tm_nfree += tm->tm_nppage;
- tm->tm_npage++;
-
-}
-
 object
 type_name(int t) {
   return make_simple_string(tm_table[(int)t].tm_name+1);
@@ -435,7 +435,7 @@ type_name(int t) {
 
 
 static void
-call_after_gbc_hook(t) {
+call_after_gbc_hook(int t) {
   if (sSAafter_gbc_hookA && sSAafter_gbc_hookA->s.s_dbind!= Cnil) {
     set_up_string_register(tm_table[(int)t].tm_name+1);
     ifuncall1(sSAafter_gbc_hookA->s.s_dbind,intern(string_register,system_package));
@@ -536,7 +536,7 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 
 }
 
-inline long
+long
 opt_maxpage(struct typemanager *my_tm) {
 
   double x=0.0,y=0.0,z,r;
@@ -707,7 +707,7 @@ find_contblock(ufixnum n,void **p) {
   return find_cbpp(*p,n);
 }
 
-inline void
+void
 print_cb(int print) {
 
   struct contblock *cbp,***cbppp,**cbpp=&cb_pointer;
@@ -729,7 +729,7 @@ print_cb(int print) {
 
 }
   
-inline void
+void
 insert_contblock(void *p,ufixnum s) {
 
   struct contblock *cbp=p,**cbpp,***cbppp;
@@ -761,7 +761,7 @@ delete_contblock(void *p,struct contblock **cbpp) {
 
 }
 
-inline void
+void
 reset_contblock_freelist(void) {
 
   cb_pointer=NULL;
@@ -769,7 +769,7 @@ reset_contblock_freelist(void) {
   
 }
 
-inline void *
+static inline void *
 alloc_from_freelist(struct typemanager *tm,fixnum n) {
 
   void *p;
@@ -851,7 +851,7 @@ too_full_p(struct typemanager *tm) {
 
 }
 
-inline void *
+static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
   if (tm->tm_npage+tpage(tm,n)>tm->tm_maxpage && GBC_enable) {
@@ -883,7 +883,7 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
 
 }
 
-inline void
+void
 add_pages(struct typemanager *tm,fixnum m) {
 
   switch (tm->tm_type) {
@@ -923,7 +923,7 @@ add_pages(struct typemanager *tm,fixnum m) {
 
 }
 
-inline void *
+static inline void *
 alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   
   fixnum m=tpage(tm,n);
@@ -945,7 +945,7 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-inline void *
+static inline void *
 alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
   fixnum m=tpage(tm,n),reloc_min;
@@ -972,10 +972,10 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-inline void *alloc_mem(struct typemanager *,fixnum);
+static inline void *alloc_mem(struct typemanager *,fixnum);
 
 #ifdef SGC
-inline void *
+static inline void *
 alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
 
   if (!sgc_enabled) return NULL;
@@ -985,7 +985,7 @@ alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
 }
 #endif
 
-inline void *
+static inline void *
 alloc_mem(struct typemanager *tm,fixnum n) {
 
   void *p;
@@ -1007,7 +1007,7 @@ alloc_mem(struct typemanager *tm,fixnum n) {
   return exhausted_report(tm->tm_type,tm);
 }
 
-inline object
+object
 alloc_object(enum type t)  {
 
   object obj;
@@ -1022,12 +1022,12 @@ alloc_object(enum type t)  {
   
 }
 
-inline void *
+void *
 alloc_contblock(size_t n) {
   return alloc_mem(tm_of(t_contiguous),CEI(n,CPTR_SIZE));
 }
 
-inline void *
+void *
 alloc_contblock_no_gc(size_t n) {
 
   struct typemanager *tm=tm_of(t_contiguous);
@@ -1073,7 +1073,7 @@ alloc_code_space(size_t sz) {
 
 }
 
-inline void *
+void *
 alloc_relblock(size_t n) {
 
   return alloc_mem(tm_of(t_relocatable),CEI(n,PTR_ALIGN));
@@ -1089,7 +1089,7 @@ load_cons(object p,object a,object d) {
   p->c.c_car=a;
 }
 
-inline object
+object
 make_cons(object a,object d) {
 
   static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
@@ -1105,7 +1105,7 @@ make_cons(object a,object d) {
 
 
 
-inline object on_stack_cons(object x, object y) {
+object on_stack_cons(object x, object y) {
   object p = (object) alloca_val;
   load_cons(p,x,y);
   return p;

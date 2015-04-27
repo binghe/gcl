@@ -158,7 +158,7 @@ in_contblock_stack_list(void *p,void ***ap) {
   return a && a[0]==p;
 }
 
-inline char
+static inline char
 get_bit(char *v,struct pageinfo *pi,void *x) {
   void *ve=CB_DATA_START(pi);
   fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
@@ -168,7 +168,7 @@ get_bit(char *v,struct pageinfo *pi,void *x) {
   return (v[i]>>s)&0x1;
 }
 
-inline void
+static inline void
 set_bit(char *v,struct pageinfo *pi,void *x) {
   void *ve=CB_DATA_START(pi);
   fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
@@ -183,7 +183,7 @@ set_bit(char *v,struct pageinfo *pi,void *x) {
 #define ptr_get(v,i,s) (v+(((i<<LOG_BITS_CHAR)|s)<<LOG_BYTES_CONTBLOCK))
 #define ptr_set(x,v,i,s) ({fixnum _o=(x-v)>>LOG_BYTES_CONTBLOCK;i=_o>>LOG_BITS_CHAR;s=_o&~(~0UL<<LOG_BITS_CHAR);})
 
-inline void
+static inline void
 set_bits(char *v,struct pageinfo *pi,void *x1,void *x2) {
 
   void *ds=CB_DATA_START(pi);
@@ -206,7 +206,7 @@ set_bits(char *v,struct pageinfo *pi,void *x1,void *x2) {
 
 }
 
-inline void *
+static inline void *
 get_bits(char *v,struct pageinfo *pi,void *x) {
 
   void *ds=CB_DATA_START(pi),*de=CB_DATA_END(pi);
@@ -232,42 +232,42 @@ get_bits(char *v,struct pageinfo *pi,void *x) {
   return ds<de ? ds : de;
 }
 
-inline char
+static inline char
 get_mark_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_MARK_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_mark_bit(struct pageinfo *pi,void *x) {
   set_bit(CB_MARK_START(pi),pi,x);
 }
 
-inline void *
+static inline void *
 get_mark_bits(struct pageinfo *pi,void *x) {
   return get_bits(CB_MARK_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_mark_bits(struct pageinfo *pi,void *x1,void *x2) {
   set_bits(CB_MARK_START(pi),pi,x1,x2);
 }
 
-inline char
+static inline char
 get_sgc_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_SGCF_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_sgc_bit(struct pageinfo *pi,void *x) {
   set_bit(CB_SGCF_START(pi),pi,x);
 }
 
-inline void *
+static inline void *
 get_sgc_bits(struct pageinfo *pi,void *x) {
   return get_bits(CB_SGCF_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_sgc_bits(struct pageinfo *pi,void *x1,void *x2) {
   set_bits(CB_SGCF_START(pi),pi,x1,x2);
 }

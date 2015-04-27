@@ -47,6 +47,11 @@ int ovm_process_created;
 void initialize_process();
 #endif
 
+
+#define EXTER
+#define INLINE
+
+
 #include "include.h"
 #include <signal.h>
 #include "page.h"
@@ -1119,10 +1124,6 @@ init_main(void) {
   make_si_function("WARN-VERSION",Lidentity);
   
 }
-
-#ifdef SGC
-#include "writable.h"
-#endif
 
 #ifdef HAVE_PRINT_INSN_I386
 
