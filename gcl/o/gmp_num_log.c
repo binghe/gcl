@@ -46,7 +46,7 @@ integer_log_op2(fixnum op,object x,enum type tx,object y,enum type ty) {
 
 }
 
-inline object
+object
 log_op2(fixnum op,object x,object y) {
 
   enum type tx=type_of(x),ty=type_of(y);

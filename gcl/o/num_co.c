@@ -277,7 +277,7 @@ LFD(Ldenominator)(void)
 		vs_base[0] = small_fixnum(1);
 }
 
-inline void
+void
 intdivrem(object x,object y,fixnum d,object *q,object *r) {
 
   enum type tx=type_of(x),ty=type_of(y);

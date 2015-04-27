@@ -62,7 +62,7 @@ object fixnum_sub(fixnum i, fixnum j)
    }
 }
 
-inline object 
+object 
 fixnum_times(fixnum i, fixnum j) {
 
 #ifdef HAVE_CLZL

@@ -121,7 +121,7 @@ cstack_dir(fixnum j) {
 
 fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
 
-inline int
+int
 mbrk(void *v) {
 
   ufixnum uv=(ufixnum)v,uc=(ufixnum)sbrk(0),ux,um;

@@ -37,12 +37,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 
-inline object
+object
 fixnum_big_shift(fixnum x,fixnum w) {
   MPOP(return,shifti,SI_TO_MP(x,big_fixnum1),w);
 }
 
-inline object
+object
 integer_fix_shift(object x, fixnum w) { 
   if (type_of(x)==t_fixnum) {
     fixnum fx=fix(x);
@@ -51,7 +51,7 @@ integer_fix_shift(object x, fixnum w) {
   MPOP(return,shifti,MP(x),w);
 }
 	
-inline object
+object
 integer_shift(object x,object y) {
   enum type tx=type_of(x),ty=type_of(y);
   if (ty==t_fixnum)
@@ -66,12 +66,12 @@ integer_shift(object x,object y) {
   }
 }
       
-inline object
+object
 integer_length(object x) {
   return make_fixnum(type_of(x)==t_fixnum ? fixnum_length(fix(x)) : MP_SIZE_IN_BASE2(MP(x)));
 }
 
-inline object
+object
 integer_count(object x) {
   return make_fixnum(type_of(x)==t_fixnum ? fixnum_count(fix(x)) : MP_BITCOUNT(MP(x)));
 }
@@ -120,7 +120,7 @@ LFD(Lboole)(void)
 
 }
 
-inline bool
+bool
 integer_bitp(object p,object x) {
   enum type tp=type_of(p),tx=type_of(x);
 
