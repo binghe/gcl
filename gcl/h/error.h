@@ -1,4 +1,7 @@
-#define Icall_error_handler(a_,b_,c_,d_...) \
+#ifndef ERROR_H
+#define ERROR_H
+
+#define Icall_error_handler(a_,b_,c_,d_...)			\
   Icall_gen_error_handler(Cnil,null_string,a_,b_,c_,##d_)
 #define Icall_continue_error_handler(a_,b_,c_,d_,e_...) \
   Icall_gen_error_handler(Ct,a_,b_,c_,d_,##e_)
@@ -197,3 +200,4 @@ object ihs_top_function_name(ihs_ptr h);
    abort();\
  })
 
+#endif /*ERROR_H*/
