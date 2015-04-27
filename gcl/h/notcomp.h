@@ -28,10 +28,7 @@ EXTER long real_maxpage;
 char *getenv();
 EXTER char *this_lisp;
 
-#ifndef IN_MAIN
-EXTER
-char stdin_buf[], stdout_buf[];
-#endif
+EXTER char stdin_buf[],stdout_buf[];
 
 EXTER object user_package;
 

@@ -38,8 +38,6 @@ initlisp(void);
 static int
 multiply_stacks(int);
 
-#define IN_MAIN
-
 #ifdef KCLOVM
 #include <ovm/ovm.h>
 void change_contexts();

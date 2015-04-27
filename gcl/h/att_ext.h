@@ -291,9 +291,7 @@ EXTER object sSAsystem_directoryA;
 #ifdef UNIX
 EXTER char *kcl_self;
 #endif
-#if !defined(IN_MAIN) || !defined(ATT)
 EXTER bool raw_image;
-#endif
 char *merge_system_directory();
 
 

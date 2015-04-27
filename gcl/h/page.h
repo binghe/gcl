@@ -106,7 +106,7 @@ extern fixnum writable_pages;
 EXTER long first_data_page,real_maxpage,phys_pages,available_pages;
 EXTER void *data_start,*initial_sbrk;
 
-#if !defined(IN_MAIN) && defined(SGC)
+#if defined(SGC)
 #include "writable.h"
 #endif
 
