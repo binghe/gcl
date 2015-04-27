@@ -212,19 +212,24 @@ IapplyVector(object fun, int nargs, object *base)
     else { abase = vs_top;
 	   for (i=0; i < nargs ; i++, atypes >>= F_TYPE_WIDTH)
 	     { object next = base[i];
-	       int atyp = atypes & MASK_RANGE(0,F_TYPE_WIDTH);
-	       if (atyp == F_object)
-		 next = next;
-	       else if (atyp == F_int)
-		 { ASSURE_TYPE(next,t_fixnum);
-		   next = COERCE_F_TYPE(next,F_object,F_int);}
-	       else if (atyp == F_shortfloat)
-		 { ASSURE_TYPE(next,t_shortfloat);
-		   next = COERCE_F_TYPE(next,F_object,F_shortfloat);}
-	       else if (atyp == F_double_ptr)
-		 { ASSURE_TYPE(next,t_longfloat);
-		   next = COERCE_F_TYPE(next,F_object,F_double_ptr);}
-	       else {FEerror("cant get here!",0);}
+	       switch (atypes & MASK_RANGE(0,F_TYPE_WIDTH)) {
+	       case F_object:
+		 break;
+	       case F_int:
+		 ASSURE_TYPE(next,t_fixnum);
+		 next = COERCE_F_TYPE(next,F_object,F_int);
+		 break;
+	       case F_shortfloat:
+		 ASSURE_TYPE(next,t_shortfloat);
+		 next = COERCE_F_TYPE(next,F_object,F_shortfloat);
+		 break;
+	       case F_double_ptr:
+		 ASSURE_TYPE(next,t_longfloat);
+		 next = COERCE_F_TYPE(next,F_object,F_double_ptr);
+		 break;
+	       default:
+		 FEerror("cant get here!",0);
+	       }
 	       vs_push(next);}
 
 	 }

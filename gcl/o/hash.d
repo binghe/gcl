@@ -152,7 +152,7 @@ BEGIN:
   if (depth++ <=3)
     switch ((tx=type_of(x))) {
     case t_cons:
-      h^=ihash_equal(x->c.c_car,depth)^rtb[abs(depth%(sizeof(rtb)/sizeof(*rtb)))];
+      h^=ihash_equal(x->c.c_car,depth)^rtb[abs((int)(depth%(sizeof(rtb)/sizeof(*rtb))))];/*FIXME: clang faulty warning*/
       x = x->c.c_cdr;
       goto BEGIN;
       break;

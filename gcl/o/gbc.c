@@ -149,15 +149,6 @@ pageinfo_p(void *v) {
 
 }
     
-static inline bool
-in_contblock_stack_list(void *p,void ***ap) {
-  void **a;
-  for (a=*ap;a && a[0]>p;a=a[1]);
-  *ap=a;
-  /* if (a && a[0]==p) fprintf(stderr,"Skipping %p\n",p); */
-  return a && a[0]==p;
-}
-
 static inline char
 get_bit(char *v,struct pageinfo *pi,void *x) {
   void *ve=CB_DATA_START(pi);
@@ -168,15 +159,15 @@ get_bit(char *v,struct pageinfo *pi,void *x) {
   return (v[i]>>s)&0x1;
 }
 
-static inline void
-set_bit(char *v,struct pageinfo *pi,void *x) {
-  void *ve=CB_DATA_START(pi);
-  fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
-#ifdef CONTBLOCK_MARK_DEBUG
-  off_check(v,ve,i,pi);
-#endif
-  v[i]|=(1UL<<s);
-}
+/* static inline void */
+/* set_bit(char *v,struct pageinfo *pi,void *x) { */
+/*   void *ve=CB_DATA_START(pi); */
+/*   fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR); */
+/* #ifdef CONTBLOCK_MARK_DEBUG */
+/*   off_check(v,ve,i,pi); */
+/* #endif */
+/*   v[i]|=(1UL<<s); */
+/* } */
 
 #define bit_get(v,i,s) ((v[i]>>s)&0x1)
 #define bit_set(v,i,s) (v[i]|=(1UL<<s))
@@ -237,10 +228,10 @@ get_mark_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_MARK_START(pi),pi,x);
 }
 
-static inline void
-set_mark_bit(struct pageinfo *pi,void *x) {
-  set_bit(CB_MARK_START(pi),pi,x);
-}
+/* static inline void */
+/* set_mark_bit(struct pageinfo *pi,void *x) { */
+/*   set_bit(CB_MARK_START(pi),pi,x); */
+/* } */
 
 static inline void *
 get_mark_bits(struct pageinfo *pi,void *x) {
@@ -252,15 +243,17 @@ set_mark_bits(struct pageinfo *pi,void *x1,void *x2) {
   set_bits(CB_MARK_START(pi),pi,x1,x2);
 }
 
+#ifdef SGC
+
 static inline char
 get_sgc_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_SGCF_START(pi),pi,x);
 }
 
-static inline void
-set_sgc_bit(struct pageinfo *pi,void *x) {
-  set_bit(CB_SGCF_START(pi),pi,x);
-}
+/* static inline void */
+/* set_sgc_bit(struct pageinfo *pi,void *x) { */
+/*   set_bit(CB_SGCF_START(pi),pi,x); */
+/* } */
 
 static inline void *
 get_sgc_bits(struct pageinfo *pi,void *x) {
@@ -271,6 +264,8 @@ static inline void
 set_sgc_bits(struct pageinfo *pi,void *x1,void *x2) {
   set_bits(CB_SGCF_START(pi),pi,x1,x2);
 }
+
+#endif
 
 #ifdef KCLOVM
 void mark_all_stacks();
@@ -1067,7 +1062,7 @@ contblock_sweep_phase(void) {
 
     z=get_mark_bit(v,s);
     for (p=s;p<e;) {
-      q=get_bits(CB_MARK_START(v),v,p);
+      q=get_mark_bits(v,p);
       if (!z)
 	insert_contblock(p,q-p);
       z=1-z;
@@ -1425,10 +1420,10 @@ FFN(siLheap_report)(void) {
   i=sizeof(fixnum)*CHAR_SIZE-2;
   i=1<<i;
   vs_push(make_fixnum(((unsigned long)cs_base+i-1)&-i));
-  vs_push(make_fixnum(abs(cs_base-cs_org)));
+  vs_push(make_fixnum(labs(cs_base-cs_org)));
   vs_push(make_fixnum((CSTACK_DIRECTION+1)>>1));
   vs_push(make_fixnum(CSTACK_ALIGNMENT));
-  vs_push(make_fixnum(abs(cs_limit-cs_org)));/*CSSIZE*/
+  vs_push(make_fixnum(labs(cs_limit-cs_org)));/*CSSIZE*/
 #if defined(IM_FIX_BASE) && defined(IM_FIX_LIM)
 #ifdef LOW_IM_FIX
   vs_push(make_fixnum(-LOW_IM_FIX));

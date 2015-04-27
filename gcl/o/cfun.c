@@ -343,7 +343,8 @@ turbo_closure(object fun)
 
   if(1)/*(fun->cc.cc_turbo==NULL)*/
     {BEGIN_NO_INTERRUPT;
-     for (n = 0, l = fun->cc.cc_env;  !endp(l);  n++, l = l->c.c_cdr);
+     for (n = 0, l = fun->cc.cc_env;  !endp(l);  n++, l = l->c.c_cdr)
+       ;
     {
      block= AR_ALLOC(alloc_relblock,(1+n),object);
      *block=make_fixnum(n);
