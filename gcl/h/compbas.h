@@ -4,7 +4,7 @@
 #define EXTER extern
 #endif
 #ifndef INLINE
-#if defined(__GNUC__) && __GNUC__ <= 4
+#if (defined(__GNUC__) && __GNUC__ <= 4) && !defined __clang__
 #define INLINE extern inline
 #else
 #define INLINE inline
