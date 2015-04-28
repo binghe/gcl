@@ -62,6 +62,7 @@
 	((and (eq (car clause) 'go)
 	      (tag-p (setq tem (cadddr (cdr clause))))
 	      (eq (tag-name tem) tag-name)))
+	((eq (car clause) 'location) nil)
 	(t (or (jumps-to-p (car clause) tag-name)
 	       (jumps-to-p (cdr clause) tag-name)))))
 
