@@ -976,9 +976,13 @@
 	   (wt-nl "}}")
 	   (wt-nl "vs_top=(vs_base=base+" base ")+" (- *vs* base) ";")
 	   (unwind-exit 'fun-val nil (cons 'values 2))))
-	((unwind-exit (get-inline-loc `((t t) t #.(flags rfa) 
-					,(concatenate 'string
-						      "({struct htent *_z=gethash"
-						      (if *safe-compile* "_with_check" "")
-						      "(#0,#1);_z->hte_key==OBJNULL ? (#2) : _z->hte_value;})"))
-					args)))))
+	((let ((*inline-blocks* 0)
+	       (*restore-avma*  *restore-avma*)
+	       (fd `((t t) t #.(flags rfa) 
+		     ,(concatenate 'string
+				   "({struct htent *_z=gethash"
+				   (if *safe-compile* "_with_check" "")
+				   "(#0,#1);_z->hte_key==OBJNULL ? (#2) : _z->hte_value;})")))) 
+	   (save-avma fd)
+	   (unwind-exit (get-inline-loc fd args))
+	   (close-inline-blocks)))))
