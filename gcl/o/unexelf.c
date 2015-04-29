@@ -660,7 +660,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   int n, nn;
   int old_bss_index, old_sbss_index;
   int old_data_index, new_data2_index;
-  int old_mdebug_index;
+  /* int old_mdebug_index; */
   struct stat stat_buf;
 
   /* Open the old file, allocate a buffer of the right size, and read
@@ -703,8 +703,8 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 
   /* Find the mdebug section, if any.  */
 
-  old_mdebug_index = find_section (".mdebug", old_section_names,
-				   old_name, old_file_h, old_section_h, 1);
+  /* old_mdebug_index = find_section (".mdebug", old_section_names, */
+  /* 				   old_name, old_file_h, old_section_h, 1); */
 
   /* Find the old .bss section.  Figure out parameters of the new
    * data2 and bss sections.

@@ -1912,7 +1912,7 @@ void *
 realloc(void *ptr, size_t size) {
 
   object x;
-  int i, j;
+  int i;
   /* was allocated by baby_malloc */
 #ifdef BABY_MALLOC_SIZE	
   if (ptr >= (void*)baby_malloc_data && ptr - (void*)baby_malloc_data <BABY_MALLOC_SIZE)
@@ -1938,17 +1938,10 @@ realloc(void *ptr, size_t size) {
 	x->st.st_fillp = size;
 	return(ptr);
       } else {
-	j = x->st.st_dim;
 	x->st.st_self = alloc_contblock(size);
 	x->st.st_fillp = x->st.st_dim = size;
 	for (i = 0;  i < size;  i++)
 	  x->st.st_self[i] = ((char *)ptr)[i];
-/* SGC contblock pages: Its possible this is on an old page CM 20030827 */
-/* #ifdef SGC */
-/*  	insert_maybe_sgc_contblock(ptr, j); */
-/* #else */
-/*  	insert_contblock(ptr, j); */
-/* #endif */
 	return(x->st.st_self);
       }
     }

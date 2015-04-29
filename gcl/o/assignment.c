@@ -259,7 +259,7 @@ DEFUNO_NEW("FMAKUNBOUND",object,fLfmakunbound,LISP
 static void
 FFN(Fsetf)(object form)
 {
-	object result,*t,*t1;
+	object *t,*t1;
 	if (endp(form)) {
 		vs_base = vs_top;
 		vs_push(Cnil);
@@ -269,7 +269,7 @@ FFN(Fsetf)(object form)
 			vs_top = top;
 			if (endp(MMcdr(form)))
 			FEinvalid_form("No value for ~S.", form->c.c_car);
-			result = setf(MMcar(form), MMcadr(form));
+			setf(MMcar(form), MMcadr(form));
 			form = MMcddr(form);
 		} while (!endp(form));
 		t=vs_base;

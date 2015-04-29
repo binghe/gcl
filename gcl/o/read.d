@@ -2476,6 +2476,7 @@ object in;
 
         /* to prevent longjmp clobber */
         i=(long)&vsp;
+	i+=i;
 	vsp=&vspo;
 	old_READtable = READtable;
 	old_READdefault_float_format = READdefault_float_format;

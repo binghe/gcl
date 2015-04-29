@@ -354,7 +354,6 @@ static int open_connection(host,server)
 char	*host;
 int	server;
 {
-	int res;
 	int pid;
 	int	sock;
 	struct	hostent	*hp;
@@ -396,9 +395,9 @@ int	server;
 	}
 
 #ifdef OVM_IO
-	res = fcntl(sock,F_SETFL,FASYNC | FNDELAY);
+	fcntl(sock,F_SETFL,FASYNC | FNDELAY);
 #else
-	res = fcntl(sock,F_SETFL,FASYNC);
+	fcntl(sock,F_SETFL,FASYNC);
 #endif
 	return(sock);
 }
