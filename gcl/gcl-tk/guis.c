@@ -455,7 +455,7 @@ struct connection_state *sfd;
   int tot;
   struct message_header *msg;
   msg = (struct message_header *) buf;
-  m= read1(sfd,msg,MESSAGE_HEADER_SIZE,DEFAULT_TIMEOUT_FOR_TK_READ);
+  m= read1(sfd,(void *)msg,MESSAGE_HEADER_SIZE,DEFAULT_TIMEOUT_FOR_TK_READ);
   if (m == MESSAGE_HEADER_SIZE)
     {
      if ( msg->magic1!=MAGIC1
@@ -468,7 +468,7 @@ struct connection_state *sfd;
       if (tot >= bufleng)
          {msg = (void *)malloc(tot+1);
 	  bcopy(buf,msg,MESSAGE_HEADER_SIZE);}
-     m = read1(sfd,&(msg->body),
+      m = read1(sfd,(void *)&(msg->body),
 		   body_length,DEFAULT_TIMEOUT_FOR_TK_READ);
      if (m == body_length)
        { return msg;}}

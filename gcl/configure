@@ -4171,18 +4171,52 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 #fi
 # subst GCC not only under 386-linux, but where available -- CM
 
+TCFLAGS="-fsigned-char"
+
 if test "$GCC" = "yes" ; then
 
-   TCFLAGS="-Wall -fsigned-char"
+   TCFLAGS="$TCFLAGS -Wall"
 
-   #FIXME -Wno-unused-but-set-variable when time
-   TMPF=-Wno-unused-but-set-variable
-   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CFLAG $TMPF" >&5
-$as_echo_n "checking for CFLAG $TMPF... " >&6; }
-   CFLAGS_ORI=$CFLAGS
-   CFLAGS="$CFLAGS $TMPF"
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang" >&5
+$as_echo_n "checking for clang... " >&6; }
 
 if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+		int main() {
+		return
+		#ifdef __clang__
+		0
+		#else
+		1
+		#endif
+		;}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+	 clang="yes"
+	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body"
+
+$as_echo "#define CLANG 1" >>confdefs.h
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+	 #FIXME -Wno-unused-but-set-variable when time
+	 TMPF=-Wno-unused-but-set-variable
+	 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CFLAG $TMPF" >&5
+$as_echo_n "checking for CFLAG $TMPF... " >&6; }
+	 CFLAGS_ORI=$CFLAGS
+	 CFLAGS="$CFLAGS $TMPF"
+	 if test "$cross_compiling" = yes; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 else
@@ -4201,11 +4235,14 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-   CFLAGS=$CFLAGS_ORI
-
-else
-   TCFLAGS="-fsigned-char"
+	 CFLAGS=$CFLAGS_ORI
 fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
 if test "$GCC" = "yes" ; then
 	TCFLAGS="$TCFLAGS -pipe"
 	case $use in

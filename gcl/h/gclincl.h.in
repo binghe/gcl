@@ -9,9 +9,6 @@
 /* punt guess for no randomize value */
 #undef ADDR_NO_RANDOMIZE
 
-/* compile ansi compliant image */
-#undef ANSI_COMMON_LISP
-
 /* binding stack size */
 #undef BDSSIZE
 
@@ -20,6 +17,9 @@
 
 /* can prevent sbrk from returning random values */
 #undef CAN_UNRANDOMIZE_SBRK
+
+/* running clang compiler */
+#undef CLANG
 
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.

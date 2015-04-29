@@ -61,7 +61,7 @@
 
 ;; General routines.
 (defCfun "object lisp_string(object a_string, fixnum c_string) " 0
-  "extern long strlen(const char *);"
+  "extern unsigned long strlen(const char *);"
   "fixnum len = strlen((void *)c_string);"
   "a_string->st.st_dim = len;"
   "a_string->st.st_fillp = len;"

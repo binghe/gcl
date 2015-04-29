@@ -483,21 +483,37 @@ AC_SUBST(CC)
 #fi
 # subst GCC not only under 386-linux, but where available -- CM
 
+TCFLAGS="-fsigned-char"
+
 if test "$GCC" = "yes" ; then
 
-   TCFLAGS="-Wall -fsigned-char"
+   TCFLAGS="$TCFLAGS -Wall"
 
-   #FIXME -Wno-unused-but-set-variable when time
-   TMPF=-Wno-unused-but-set-variable
-   AC_MSG_CHECKING([for CFLAG $TMPF])
-   CFLAGS_ORI=$CFLAGS
-   CFLAGS="$CFLAGS $TMPF"
-   AC_TRY_RUN([int main() {return 0;}],TCFLAGS="$TCFLAGS $TMPF";AC_MSG_RESULT(yes),AC_MSG_RESULT(no),AC_MSG_RESULT(no))
-   CFLAGS=$CFLAGS_ORI
-
-else
-   TCFLAGS="-fsigned-char"
+   AC_MSG_CHECKING([for clang])
+   AC_RUN_IFELSE([
+   	AC_LANG_SOURCE([[
+		int main() {
+		return
+		#ifdef __clang__
+		0
+		#else
+		1
+		#endif
+		;}]])],
+	[AC_MSG_RESULT([yes])
+	 clang="yes"
+	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body"
+	 AC_DEFINE([CLANG],[1],[running clang compiler])],	
+	[AC_MSG_RESULT([no])
+	 #FIXME -Wno-unused-but-set-variable when time
+	 TMPF=-Wno-unused-but-set-variable
+	 AC_MSG_CHECKING([for CFLAG $TMPF])
+	 CFLAGS_ORI=$CFLAGS
+	 CFLAGS="$CFLAGS $TMPF"
+	 AC_TRY_RUN([int main() {return 0;}],TCFLAGS="$TCFLAGS $TMPF";AC_MSG_RESULT(yes),AC_MSG_RESULT(no),AC_MSG_RESULT(no))
+	 CFLAGS=$CFLAGS_ORI])
 fi
+
 if test "$GCC" = "yes" ; then
 	TCFLAGS="$TCFLAGS -pipe"
 	case $use in
