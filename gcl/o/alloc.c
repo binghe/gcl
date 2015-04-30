@@ -895,15 +895,19 @@ add_pages(struct typemanager *tm,fixnum m) {
 
   case t_relocatable:
 
-    if (rb_pointer>rb_end) {
+    if (rb_pointer>rb_end && m>holepage) {
       fprintf(stderr,"Moving relblock low before expanding relblock pages\n");
       fflush(stderr);
       tm_table[t_relocatable].tm_adjgbccnt--;
       GBC(t_relocatable);
     }
     nrbpage+=m;
-    rb_end+=m*PAGESIZE;
     rb_limit+=m*PAGESIZE;
+    if (rb_pointer>rb_end) {
+      rb_start-=m*PAGESIZE;
+      holepage-=m;
+    } else
+      rb_end+=m*PAGESIZE;
 
     alloc_page(-(2*nrbpage+holepage));
 
