@@ -207,11 +207,19 @@ get_proc_meminfo_value_in_pages(const char *k) {
   
 static ufixnum
 get_phys_pages_no_malloc(char freep) {
-  return freep ? 
+  ufixnum k=freep ? 
     get_proc_meminfo_value_in_pages("MemFree:")+
     get_proc_meminfo_value_in_pages("Buffers:")+
     get_proc_meminfo_value_in_pages("Cached:") :
     get_proc_meminfo_value_in_pages("MemTotal:");
+  const char *e=getenv("GCL_MEM_MULTIPLE");
+  if (e) {
+    double d;
+    massert(sscanf(e,"%lf",&d)==1);
+    massert(d>=0.0);
+    k*=d;
+  }
+  return k;
 }
 
 #endif
@@ -221,9 +229,9 @@ void *initial_sbrk=NULL;
 int
 update_real_maxpage(void) {
 
-  ufixnum i,j,k;
+  ufixnum i,j;
   void *end,*cur,*beg;
-  ufixnum free_phys_pages=get_phys_pages_no_malloc(1),maxpages;
+  ufixnum maxpages;
 #ifdef __MINGW32__
   static fixnum n;
 
@@ -233,7 +241,7 @@ update_real_maxpage(void) {
   }
 #endif
 
-  phys_pages=get_phys_pages_no_malloc(1);
+  phys_pages=get_phys_pages_no_malloc(0);
 
   massert(cur=sbrk(0));
   beg=data_start ? data_start : cur;
@@ -253,15 +261,14 @@ update_real_maxpage(void) {
 
   maxpages=real_maxpage-page(beg);
 
-  free_phys_pages=free_phys_pages>maxpages ? maxpages : free_phys_pages;
+  phys_pages=phys_pages>maxpages ? maxpages : phys_pages;
 
   resv_pages=available_pages=0;
   available_pages=check_avail_pages();
   
-  for (i=t_start,j=0;i<t_other;i++) {
+  for (i=t_start;i<t_other;i++)
     massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage));
-    j+=tm_table[i].tm_maxpage;
-  }
+
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
   
@@ -270,13 +277,11 @@ update_real_maxpage(void) {
     for (i=t_start,j=0;i<t_relocatable;i++)
       j+=tm_table[i].tm_maxpage;
     
-    if (j<free_phys_pages) {
-      for (i=t_start,k=0;i<t_relocatable;i++)
-	if (tm_table[i].tm_maxpage) {
-	  massert(set_tm_maxpage(tm_table+i,((double)0.7*free_phys_pages/j)*tm_table[i].tm_maxpage));
-	  k+=tm_table[i].tm_maxpage;
-	}
-      set_tm_maxpage(tm_table+t_relocatable,(free_phys_pages-k)>>1);
+    if (j<phys_pages) {
+      for (i=t_start;i<t_relocatable;i++)
+	if (tm_table[i].tm_maxpage)
+	  massert(set_tm_maxpage(tm_table+i,((double)0.7*phys_pages/j)*tm_table[i].tm_maxpage));
+      set_tm_maxpage(tm_table+t_relocatable,(phys_pages+(tm_table[t_relocatable].tm_maxpage<<1)-sum_maxpages())>>1);
     }
     
     new_holepage=0;

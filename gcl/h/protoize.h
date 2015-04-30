@@ -1946,3 +1946,6 @@ get_pageinfo(void *);
 
 void
 add_page_to_freelist(char *, struct typemanager *);
+
+ufixnum
+sum_maxpages(void);

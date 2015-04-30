@@ -395,7 +395,7 @@ alloc_page(long n) {
 
 struct pageinfo *cell_list_head=NULL,*cell_list_tail=NULL;;
 
-static inline ufixnum
+ufixnum
 sum_maxpages(void) {
 
   ufixnum i,j;
