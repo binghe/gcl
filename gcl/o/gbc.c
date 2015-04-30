@@ -24,7 +24,7 @@
   IMPLEMENTATION-DEPENDENT
 */
 
-/* #define	DEBUG */
+#define	DEBUG
 
 #define IN_GBC
 #define NEED_MP_H
@@ -1102,6 +1102,19 @@ int (*GBC_exit_hook)() = NULL;
 
 fixnum fault_pages=0;
 
+static ufixnum
+count_contblocks(void) {
+
+  ufixnum ncb;
+  struct contblock *cbp;
+
+  for (ncb=0,cbp=cb_pointer;cbp;cbp=cbp->cb_link,ncb++);
+
+  return ncb;
+  
+}
+ 
+
 void
 GBC(enum type t) {
 
@@ -1327,6 +1340,7 @@ GBC(enum type t) {
 
 #ifdef DEBUG
   if (debug) {
+    int i,j;
     for (i = 0, j = 0;  i < (int)t_end;  i++) {
       if (tm_table[i].tm_type == (enum type)i) {
 	printf("%13s: %8ld used %8ld free %4ld/%ld pages\n",
@@ -1341,7 +1355,7 @@ GBC(enum type t) {
 	       tm_table[i].tm_name,
 	       tm_table[(int)tm_table[i].tm_type].tm_name);
     }
-    printf("contblock: %ld blocks %ld pages\n", ncb, ncbpage);
+    printf("contblock: %ld blocks %ld pages\n", count_contblocks(), ncbpage);
     printf("hole: %ld pages\n", holepage);
     printf("relblock: %ld bytes used %ld bytes free %ld pages\n",
 	   (long)(rb_pointer - rb_start), (long)(rb_end - rb_pointer), nrbpage);
@@ -1451,12 +1465,7 @@ FFN(siLroom_report)(void) {
   vs_push(make_fixnum(available_pages));
   vs_push(make_fixnum(ncbpage));
   vs_push(make_fixnum(maxcbpage));
-  {
-    ufixnum ncb;
-    struct contblock *cbp;
-    for (ncb=0,cbp=cb_pointer;cbp;cbp=cbp->cb_link,ncb++);
-    vs_push(make_fixnum(ncb));
-  }
+  vs_push(make_fixnum(count_contblocks()));
   vs_push(make_fixnum(cbgbccount));
   vs_push(make_fixnum(holepage));
   vs_push(make_fixnum(rb_pointer - (rb_pointer<rb_end ? rb_start : rb_end)));
