@@ -1949,3 +1949,9 @@ add_page_to_freelist(char *, struct typemanager *);
 
 ufixnum
 sum_maxpages(void);
+
+void
+resize_hole(ufixnum,enum type);
+
+void
+setup_rb(void);

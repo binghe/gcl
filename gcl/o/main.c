@@ -302,15 +302,15 @@ minimize_image(void) {
   fixnum i;
   
   empty_relblock();
-  holepage=nrbpage=0;
-  core_end=rb_start=rb_end=rb_limit=rb_pointer=heap_end;
+  nrbpage=0;
+  resize_hole(0,t_relocatable);
 
 #ifdef GCL_GPROF
   gprof_cleanup();
 #endif
   
 #if defined(BSD) || defined(ATT)  
-  mbrk(core_end);
+  mbrk(core_end=heap_end);
 #endif
   
   cbgbccount = tm_table[t_contiguous].tm_adjgbccnt = tm_table[t_contiguous].tm_opt_maxpage = 0;
@@ -997,7 +997,6 @@ FFN(siLsave_system)(void) {
   saving_system = FALSE;
 
   siLsave();
-  alloc_page(-(holepage+2*nrbpage));
 
 }
 

@@ -1204,21 +1204,8 @@ GBC(enum type t) {
 
   if (gc_time >=0 && !gc_recursive++) {gc_start=runtime();}
   
-  if (COLLECT_RELBLOCK_P) {
-
-    char *new_start=heap_end+holepage*PAGESIZE,*new_end=new_start+nrbpage*PAGESIZE;
-    
-    if (new_start!=rb_start) {
-      rb_pointer=new_start;
-      rb_limit=new_end;
-    } else {
-      rb_pointer=(rb_pointer<rb_end) ? rb_end : rb_start;
-      rb_limit=rb_pointer+(new_end-new_start);
-    }
-
-    alloc_page(-(holepage+2*nrbpage));
-    
-  }
+  if (COLLECT_RELBLOCK_P)
+    setup_rb();
   
 #ifdef DEBUG
   if (debug) {
@@ -1262,8 +1249,8 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    rb_start = heap_end + PAGESIZE*holepage;
-    rb_end = heap_end + (holepage + nrbpage) *PAGESIZE;
+    /* rb_start = new_rb_start; */
+    /* rb_end = rb_start + nrbpage*PAGESIZE; */
     
 
 #ifdef SGC
@@ -1356,7 +1343,7 @@ GBC(enum type t) {
 	       tm_table[(int)tm_table[i].tm_type].tm_name);
     }
     printf("contblock: %ld blocks %ld pages\n", count_contblocks(), ncbpage);
-    printf("hole: %ld pages\n", holepage);
+    printf("hole: %ld pages\n", ((rb_start-heap_end)>>PAGEWIDTH));
     printf("relblock: %ld bytes used %ld bytes free %ld pages\n",
 	   (long)(rb_pointer - rb_start), (long)(rb_end - rb_pointer), nrbpage);
     printf("GBC ended\n");
@@ -1467,7 +1454,7 @@ FFN(siLroom_report)(void) {
   vs_push(make_fixnum(maxcbpage));
   vs_push(make_fixnum(count_contblocks()));
   vs_push(make_fixnum(cbgbccount));
-  vs_push(make_fixnum(holepage));
+  vs_push(make_fixnum((rb_start-heap_end)>>PAGEWIDTH));
   vs_push(make_fixnum(rb_pointer - (rb_pointer<rb_end ? rb_start : rb_end)));
   vs_push(make_fixnum((rb_pointer<rb_end ? rb_end : (rb_end+(rb_end-rb_start))) - rb_pointer));
   vs_push(make_fixnum(nrbpage));

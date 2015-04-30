@@ -325,14 +325,29 @@ empty_relblock(void) {
 
 }
 
-static inline void
+void
+setup_rb(void) {
+
+  int init=new_rb_start!=rb_start || rb_pointer>=rb_end;
+
+  rb_start=new_rb_start;
+  rb_end=rb_start+(nrbpage<<PAGEWIDTH);
+  rb_pointer=init ? rb_start : rb_end;
+  rb_limit=rb_pointer+(nrbpage<<PAGEWIDTH);
+
+  alloc_page(-(2*nrbpage+((new_rb_start-heap_end)>>PAGEWIDTH)));
+ 
+}
+  
+void
 resize_hole(ufixnum hp,enum type tp) {
   
-  char *new_start=heap_end+hp*PAGESIZE;
   char *start=rb_pointer<rb_end ? rb_start : rb_end;
   ufixnum size=rb_pointer-start;
 
-  if ((new_start<start && new_start+size>=start) || (new_start<start+size && new_start+size>=start+size)) {
+  new_rb_start=heap_end+hp*PAGESIZE;
+  
+  if ((new_rb_start<start && new_rb_start+size>=start) || (new_rb_start<start+size && new_rb_start+size>=start+size)) {
     fprintf(stderr,"Toggling relblock when resizing hole to %lu\n",hp);
     fflush(stderr);
     tm_table[t_relocatable].tm_adjgbccnt--;
@@ -340,9 +355,11 @@ resize_hole(ufixnum hp,enum type tp) {
     return resize_hole(hp,tp);
   }
 
-  holepage=hp;
-  tm_of(tp)->tm_adjgbccnt--;
-  GBC(tp);
+  if (size) {
+    tm_of(tp)->tm_adjgbccnt--;
+    GBC(tp);
+  } else
+    setup_rb();
   
 }
 
@@ -355,7 +372,7 @@ alloc_page(long n) {
   
   if (!s) {
 
-    if (nn>holepage) {
+    if (nn>((rb_start-heap_end)>>PAGEWIDTH)) {
 
 
       fixnum d=available_pages-nn;
@@ -373,12 +390,11 @@ alloc_page(long n) {
   e=heap_end;
   v=e+nn*PAGESIZE;
 
-  if (!s) {
+  if (!s)
 
-    holepage -= nn;
     heap_end=v;
 
-  } else if (v>(void *)core_end) {
+  else if (v>(void *)core_end) {
     
     massert(!mbrk(v));
     core_end=v;
@@ -895,7 +911,7 @@ add_pages(struct typemanager *tm,fixnum m) {
 
   case t_relocatable:
 
-    if (rb_pointer>rb_end && m>holepage) {
+    if (rb_pointer>rb_end && m>((rb_start-heap_end)>>PAGEWIDTH)) {
       fprintf(stderr,"Moving relblock low before expanding relblock pages\n");
       fflush(stderr);
       tm_table[t_relocatable].tm_adjgbccnt--;
@@ -903,13 +919,12 @@ add_pages(struct typemanager *tm,fixnum m) {
     }
     nrbpage+=m;
     rb_limit+=m*PAGESIZE;
-    if (rb_pointer>rb_end) {
+    if (rb_pointer>rb_end)
       rb_start-=m*PAGESIZE;
-      holepage-=m;
-    } else
+    else
       rb_end+=m*PAGESIZE;
 
-    alloc_page(-(2*nrbpage+holepage));
+    alloc_page(-(2*nrbpage+((rb_start-heap_end)>>PAGEWIDTH)));
 
     break;
 
@@ -1120,7 +1135,7 @@ DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"
 { struct typemanager *tm=(&tm_table[t_from_type(typ)]);
   tm = & tm_table[tm->tm_type];
   if (tm->tm_type == t_relocatable)
-    { tm->tm_npage = (rb_end-rb_start)/PAGESIZE;
+    { tm->tm_npage = (rb_end-rb_start)>>PAGEWIDTH;
       tm->tm_nfree = rb_limit -rb_pointer;
     }
   else if (tm->tm_type == t_contiguous)
@@ -1246,11 +1261,8 @@ object malloc_list=Cnil;
 
 void
 maybe_set_hole_from_maxpages(void) {
-  if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start) {
-    holepage=new_holepage;
-    alloc_page(-holepage);
-    rb_start=rb_end=rb_limit=rb_pointer=heap_end+(holepage<<PAGEWIDTH);
-  }
+  if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start)
+    resize_hole(new_holepage,t_relocatable);
 }
 
 void
@@ -1349,11 +1361,9 @@ gcl_init_alloc(void *cs_start) {
   initial_sbrk=data_start=heap_end;
   first_data_page=page(data_start);
   
-  holepage=new_holepage;
-
 #ifdef GCL_GPROF
-  if (holepage<textpage)
-     holepage=textpage;
+  if (new_holepage<textpage)
+     new_holepage=textpage;
 #endif
 
   /* Unused (at present) tm_distinct flag added.  Note that if cons
@@ -1405,12 +1415,8 @@ gcl_init_alloc(void *cs_start) {
 
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
-
-  alloc_page(-(holepage + 2*nrbpage));
   
-  rb_start = rb_pointer = heap_end + PAGESIZE*holepage;
-  rb_end = rb_start + PAGESIZE*nrbpage;
-  rb_limit = rb_end - 2*RB_GETA;
+  resize_hole(new_holepage,t_relocatable);
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
