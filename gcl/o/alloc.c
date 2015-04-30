@@ -516,7 +516,7 @@ rebalance_maxpages(struct typemanager *my_tm,fixnum z) {
 	k+=(tm_table[i].tm_maxpage-tm_table[i].tm_npage)*(i==t_relocatable ? 2 : 1);
 
     e=e>k ? k : e;
-    if (e+phys_pages-j<=0)
+    if (e+phys_pages<=j)
       return 0;
 
     f=k ? 1.0-(double)e/k : 1.0;
