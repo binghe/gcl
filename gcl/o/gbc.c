@@ -431,29 +431,21 @@ collecting(void *p) {
 
 static ufixnum ngc_thresh;
 static union {struct dummy d;ufixnum f;} rst={.f=-1};
-/* static object lcv=Cnil; */
+static void *static_promotion_limit;
 
 static inline void
 mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
 
-  void *p=*pp,*dp/* ,*dpe */;
+  void *p=*pp,*dp;
   
   if (!marking(p)||!collecting(p))
     return;
 
-  /* if (lcv!=Cnil && !collecting(lcv->st.st_self) && */
-  /*     (dp=PCEI(lcv->st.st_self,r)) && dp+s<=(dpe=lcv->st.st_self+lcv->st.st_dim) */
-  /*     && x && x->d.st>=ngc_thresh) { */
-
   if (what_to_collect!=t_contiguous && 
       x && x->d.st>=ngc_thresh &&
-      (dp=alloc_contblock_no_gc(s))) {
+      (dp=alloc_contblock_no_gc(s,static_promotion_limit))) {
     
-    /* fprintf(stderr,"Promoting %p,%lu to %p\n",p,s,dp); */
-    /* fflush(stderr); */
-
     *pp=memcpy(dp,p,s);
-    /* lcv->st.st_fillp=lcv->st.st_dim=(dpe-(void *)(lcv->st.st_self=dp+s)); */
     x->d.st=0;
 
     return;
@@ -1204,8 +1196,10 @@ GBC(enum type t) {
 
   if (gc_time >=0 && !gc_recursive++) {gc_start=runtime();}
   
-  if (COLLECT_RELBLOCK_P)
+  if (COLLECT_RELBLOCK_P) {
+    static_promotion_limit=rb_start<new_rb_start ? rb_start : new_rb_start;/*do not allow static promotion to go past this point*/
     setup_rb();
+  }
   
 #ifdef DEBUG
   if (debug) {

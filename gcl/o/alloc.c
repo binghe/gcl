@@ -1047,7 +1047,7 @@ alloc_contblock(size_t n) {
 }
 
 void *
-alloc_contblock_no_gc(size_t n) {
+alloc_contblock_no_gc(size_t n,char *limit) {
 
   struct typemanager *tm=tm_of(t_contiguous);
   void *p;
@@ -1057,7 +1057,7 @@ alloc_contblock_no_gc(size_t n) {
   if ((p=alloc_from_freelist(tm,n)))
     return p;
 
-  if (tpage(tm,n)<(rb_start-heap_end)>>PAGEWIDTH && (p=alloc_after_adding_pages(tm,n)))
+  if (tpage(tm,n)<(limit-heap_end)>>PAGEWIDTH && (p=alloc_after_adding_pages(tm,n)))
     return p;
 
   return NULL;

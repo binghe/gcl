@@ -1918,7 +1918,7 @@ void
 allocate_code_block_reserve(void);
 
 void *
-alloc_contblock_no_gc(size_t);
+alloc_contblock_no_gc(size_t,char *);
 
 void
 reset_contblock_freelist(void);
