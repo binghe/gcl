@@ -340,7 +340,8 @@ EXTER long holepage;			/*  hole pages  */
 #define maxrbpage tm_table[t_relocatable].tm_maxpage
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
-  
+
+EXTER ufixnum gc_page_threshold;
 
 EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
 EXTER char *rb_start;           	/*  relblock start  */

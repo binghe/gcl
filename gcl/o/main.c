@@ -219,6 +219,15 @@ get_phys_pages_no_malloc(char freep) {
     massert(d>=0.0);
     k*=d;
   }
+  {
+    double d=0.75;
+    if ((e=getenv("GCL_GC_THRESH"))) {
+      double d;
+      massert(sscanf(e,"%lf",&d)==1);
+      massert(d>=0.0);
+    }
+    gc_page_threshold=k*d;
+  }
   return k;
 }
 
