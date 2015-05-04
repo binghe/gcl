@@ -91,6 +91,9 @@ $(DECL): $(HDIR)/make-decl.h $(INI_FILES)
 grab_defs: grab_defs.c
 	${CC} $(OFLAGS) -o grab_defs  grab_defs.c
 
+wpool: wpool.c
+	$(CC) $(CFLAGS) $(DEFS) -o $@ $<
+
 $(GCLIB): ${ALIB} 
 	rm -f gcllib.a
 	$(AR) gcllib.a ${ALIB}
@@ -98,6 +101,6 @@ $(GCLIB): ${ALIB}
 
 clean:
 	rm -f $(OBJS) ${ALIB} new_init.o  $(LAST_FILE) $(FIRST_FILE) *.a grab_defs$(EXE) *.ini tmpx foo.c
-	rm -f  cmpinclude.h new_init.c $(DECL) def undef udef.h void.h TAGS boot.h
+	rm -f  cmpinclude.h new_init.c $(DECL) def undef udef.h void.h TAGS boot.h wpool
 
 .INTERMEDIATE: $(patsubst %.d,%.c,$(shell ls -1 *.d))
