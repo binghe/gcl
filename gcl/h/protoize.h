@@ -1955,3 +1955,9 @@ resize_hole(ufixnum,enum type);
 
 void
 setup_rb(void);
+
+void
+close_pool(void);
+
+void
+gcl_cleanup(int);

@@ -38,6 +38,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 static int
 t_from_type(object);
 
+#include "pool.h"
+
 
 DEFVAR("*AFTER-GBC-HOOK*",sSAafter_gbc_hookA,SI,sLnil,"");
 DEFVAR("*IGNORE-MAXIMUM-PAGES*",sSAignore_maximum_pagesA,SI,sLt,"");
@@ -330,11 +332,13 @@ setup_rb(void) {
 
   int init=new_rb_start!=rb_start || rb_pointer>=rb_end;
 
+  update_pool(2*(nrbpage-((rb_end-rb_start)>>PAGEWIDTH)));
   rb_start=new_rb_start;
   rb_end=rb_start+(nrbpage<<PAGEWIDTH);
   rb_pointer=init ? rb_start : rb_end;
   rb_limit=rb_pointer+(nrbpage<<PAGEWIDTH);
-
+  pool_check();
+  
   alloc_page(-(2*nrbpage+((new_rb_start-heap_end)>>PAGEWIDTH)));
  
 }
@@ -390,11 +394,13 @@ alloc_page(long n) {
   e=heap_end;
   v=e+nn*PAGESIZE;
 
-  if (!s)
+  if (!s) {
 
     heap_end=v;
-
-  else if (v>(void *)core_end) {
+    update_pool(nn);
+    pool_check();
+    
+  } else if (v>(void *)core_end) {
     
     massert(!mbrk(v));
     core_end=v;
@@ -870,7 +876,7 @@ too_full_p(struct typemanager *tm) {
 static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
-  if (tm->tm_npage+tpage(tm,n)>tm->tm_maxpage && GBC_enable) {
+  if (get_pool()>gc_page_threshold && tm->tm_npage+tpage(tm,n)>tm->tm_maxpage && GBC_enable) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
@@ -919,11 +925,13 @@ add_pages(struct typemanager *tm,fixnum m) {
     }
     nrbpage+=m;
     rb_limit+=m*PAGESIZE;
+    update_pool(2*m);
     if (rb_pointer>rb_end)
       rb_start-=m*PAGESIZE;
     else
       rb_end+=m*PAGESIZE;
 
+    pool_check();
     alloc_page(-(2*nrbpage+((rb_start-heap_end)>>PAGEWIDTH)));
 
     break;
