@@ -89,7 +89,7 @@
 
     (when (boundp '*system-banner*)
       (format t *system-banner*)
-      (format t "Temporary directory for compiler files set to ~a~%" *tmp-dir*))
+      (format t "Temporary directory for compiler files:~%~a~%" *tmp-dir*))
 
     (loop
       (setq +++ ++ ++ + + -)
