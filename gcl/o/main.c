@@ -543,6 +543,12 @@ void install_segmentation_catcher(void)
   (void) gcl_signal(SIGBUS,segmentation_catcher);
 }
 
+void
+do_gcl_abort(void) {
+  gcl_cleanup(0);
+  abort();
+}
+
 int catch_fatal=1;
 void
 error(char *s)
@@ -558,7 +564,7 @@ error(char *s)
 	   FEerror("Caught fatal error [memory may be damaged]",0); }
 	printf("\nUnrecoverable error: %s.\n", s);
 	fflush(stdout);
-	abort();
+	do_gcl_abort();
 }
 
 static void

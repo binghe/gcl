@@ -1961,3 +1961,6 @@ close_pool(void);
 
 void
 gcl_cleanup(int);
+
+void
+do_gcl_abort(void);

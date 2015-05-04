@@ -2457,7 +2457,7 @@ object x=Cnil;
 	    exit(0);
 	    break;
 	  case -1:
-	    abort();
+	    do_gcl_abort();
 	    break;
 	  default:
 	    close_stream(y);

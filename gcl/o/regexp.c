@@ -1488,7 +1488,7 @@ min_initial_branch_length(regexp *x, unsigned char *buf, int advance)
     { op = OP(s);
       next = (s) + NEXT(s);
       if (op != END && op != BRANCH)
-	abort();
+	do_gcl_abort();
       s = s+3;
       { int this = 0;
 	int anythis =0;
