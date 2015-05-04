@@ -204,7 +204,7 @@ get_proc_meminfo_value_in_pages(const char *k) {
   massert(!strncmp(c+m," kB\n",4));
   return n>>(PAGEWIDTH-10);
 }
-  
+
 static ufixnum
 get_phys_pages_no_malloc(char freep) {
   ufixnum k=freep ? 
@@ -383,6 +383,43 @@ gcl_mprotect(void *v,unsigned long l,int p) {
 #endif
 
 DEFVAR("*CODE-BLOCK-RESERVE*",sSAcode_block_reserveA,SI,Cnil,"");
+
+#define HAVE_GCL_CLEANUP
+
+void
+gcl_cleanup(int gc) {
+
+  if (getenv("GCL_WAIT"))
+    sleep(30);
+  
+#ifdef CLEANUP_CODE
+  CLEANUP_CODE
+#elif defined(USE_CLEANUP)
+    _cleanup();
+#endif
+
+#ifdef GCL_GPROF
+  gprof_cleaup();
+#endif
+
+  if (gc) {
+
+    saving_system=TRUE;
+    GBC(t_other);
+    saving_system=FALSE;
+    
+    minimize_image();
+    
+    raw_image=FALSE;
+    cs_org=0;
+    initial_sbrk=core_end;
+
+  }
+
+  close_pool();
+
+}
+
 
 int
 main(int argc, char **argv, char **envp) {
@@ -970,7 +1007,6 @@ DEFUN_NEW("LISP-IMPLEMENTATION-VERSION",object,fLlisp_implementation_version,LIS
 	RETURN1((make_simple_string(LISP_IMPLEMENTATION_VERSION)));
 }
 
-
 static void
 FFN(siLsave_system)(void) {
   
@@ -990,12 +1026,6 @@ FFN(siLsave_system)(void) {
   DO_BEFORE_SAVE
 #endif	
     
-  saving_system = TRUE;
-
-  minimize_image();
-
-  saving_system = FALSE;
-
   siLsave();
 
 }

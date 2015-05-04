@@ -49,10 +49,10 @@
 	}
 	n[k]="GCL_UNRANDOMIZE=t";
 	n[k+1]=0;
-#ifdef GCL_GPROF
-	gprof_cleanup();
-#endif
 	errno=0;
+#ifdef HAVE_GCL_CLEANUP	
+	gcl_cleanup(0);
+#endif
 	execve(*a,a,n);
 	printf("execve failure %d\n",errno);
 	exit(-1);
