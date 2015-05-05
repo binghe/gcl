@@ -342,6 +342,7 @@ EXTER long holepage;			/*  hole pages  */
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
 
 EXTER ufixnum gc_page_threshold,gc_allocation_threshold,recent_allocation;
+EXTER bool use_pool;
 
 EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
 EXTER char *rb_start;           	/*  relblock start  */

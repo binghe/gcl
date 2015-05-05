@@ -69,26 +69,32 @@ open_pool(void) {
 static void
 update_pool(fixnum val) {
 
-  /* open_pool(); */
-  /* lock_pool(); */
-  /* Pool->s+=val; */
-  /* unlock_pool(); */
+  if (use_pool) {
+    open_pool();
+    lock_pool();
+    Pool->s+=val;
+    unlock_pool();
+  }
 
 }
 
 static ufixnum
 get_pool(void) {
 
-  /* ufixnum s; */
-  
-  /* open_pool(); */
-  /* lock_pool(); */
-  /* s=Pool->s; */
-  /* unlock_pool(); */
+  if (use_pool) {
 
-  /* return s; */
+    ufixnum s;
+    
+    open_pool();
+    lock_pool();
+    s=Pool->s;
+    unlock_pool();
+    
+  } else
 
-  return data_pages();
+    s=data_pages();
+
+  return s;
   
 }
 

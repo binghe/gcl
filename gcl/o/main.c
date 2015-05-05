@@ -235,6 +235,8 @@ get_phys_pages_no_malloc(char freep) {
     }
     gc_allocation_threshold=k*d;
   }
+  use_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
+  
   return k;
 }
 
