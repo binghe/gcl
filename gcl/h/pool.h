@@ -57,6 +57,7 @@ open_pool(void) {
 
   if (pool==-1) {
     if ((pool=open("/tmp/gcl_pool",O_CREAT|O_EXCL|O_RDWR,0644))!=-1) {
+      massert(!ftruncate(pool,0));
       massert(!ftruncate(pool,sizeof(struct pool)));
     } else
       massert((pool=open("/tmp/gcl_pool",O_RDWR))>=0);
