@@ -1964,3 +1964,8 @@ gcl_cleanup(int);
 
 void
 do_gcl_abort(void);
+
+#ifdef GCL_GPROF
+void
+gprof_cleanup(void);
+#endif
