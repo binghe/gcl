@@ -404,7 +404,7 @@ gcl_cleanup(int gc) {
 #endif
 
 #ifdef GCL_GPROF
-  gprof_cleaup();
+  gprof_cleanup();
 #endif
 
   if (gc) {
