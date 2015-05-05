@@ -281,24 +281,7 @@ update_real_maxpage(void) {
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
   
-  if (0 && sSAoptimize_maximum_pagesA && sSAoptimize_maximum_pagesA->s.s_dbind!=Cnil) {
-
-    for (i=t_start,j=0;i<t_relocatable;i++)
-      j+=tm_table[i].tm_maxpage;
-    
-    if (j<phys_pages) {
-      for (i=t_start;i<t_relocatable;i++)
-	if (tm_table[i].tm_maxpage)
-	  massert(set_tm_maxpage(tm_table+i,((double)0.7*phys_pages/j)*tm_table[i].tm_maxpage));
-      set_tm_maxpage(tm_table+t_relocatable,(phys_pages+(tm_table[t_relocatable].tm_maxpage<<1)-sum_maxpages())>>1);
-    }
-    
-    new_holepage=0;
-    for (i=t_start;i<t_relocatable;i++)
-      new_holepage+=tm_table[i].tm_maxpage-tm_table[i].tm_npage;
-    
-  } else
-    new_holepage=available_pages/starting_hole_div;
+  new_holepage=available_pages/starting_hole_div;
 
   return 0;
 
