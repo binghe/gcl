@@ -812,14 +812,14 @@ void sigterm()
 #ifdef SIGABRT
 void sigabrt()
 {
-  exit(SIGABRT);
+  do_gcl_abort();
 }
 #endif
 
 
 void sigkill()
 {
-  exit(SIGKILL);
+  do_gcl_abort();
 }
 
 

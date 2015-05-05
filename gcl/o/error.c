@@ -41,7 +41,7 @@ assert_error(const char *a,unsigned l,const char *f,const char *n) {
 	    make_simple_string(f),make_simple_string(n));
   else {
     fprintf(stderr,"The assertion %s on line %d of %s in function %s failed",a,l,f,n);
-    exit(-1);
+    do_gcl_abort();
   }
 
 }
@@ -386,7 +386,7 @@ DEFUN_NEW("UNIVERSAL-ERROR-HANDLER",object,fSuniversal_error_handler,SI
 	for (i = 0;  i < error_fmt_string->st.st_fillp;  i++)
 	  fputc(error_fmt_string->st.st_self[i],stdout);
 	printf("\nLisp initialization failed.\n");
-	exit(0);
+	do_gcl_abort();
 	RETURN1(x0);
 }
 

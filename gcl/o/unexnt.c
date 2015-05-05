@@ -108,7 +108,7 @@ void recreate_heap1()
   if (GetModuleFileName (NULL, executable_path, MAX_PATH) == 0) 
     {
       printf ("Failed to find path for executable.\n");
-      exit (1);
+      do_gcl_abort();
     }
     recreate_heap (executable_path);
   }
@@ -156,7 +156,7 @@ _start (void)
       if (GetModuleFileName (NULL, executable_path, MAX_PATH) == 0) 
 	{
 	  printf ("Failed to find path for executable.\n");
-	  exit (1);
+	  do_gcl_abort();
 	}
 
 #if 1
@@ -284,7 +284,7 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
     {
       printf ("Failed to open %s (%ld)...bailing.\n", 
 	      in_filename, GetLastError ());
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Get the interesting section info, like start and size of .bss...  */
@@ -305,7 +305,7 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
     {
       printf ("Failed to open %s (%ld)...bailing.\n", 
 	      out_filename, GetLastError ());
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Set the flag (before dumping).  */
@@ -452,7 +452,7 @@ get_bss_info_from_map_file (file_data *p_infile, PUCHAR *p_bss_start,
     {
       printf ("Failed to open map file %s, error %d...bailing out.\n",
 	      map_filename, GetLastError ());
-      exit (-1);
+      do_gcl_abort();
     }
 
   while (fgets (buffer, sizeof (buffer), map))
@@ -463,7 +463,7 @@ get_bss_info_from_map_file (file_data *p_infile, PUCHAR *p_bss_start,
       if (n != 2)
 	{
 	  printf ("Failed to scan the .bss section line:\n%s", buffer);
-	  exit (-1);
+	  do_gcl_abort();
 	}
       break;
     }
@@ -534,7 +534,7 @@ get_section_info (file_data *p_infile)
   if (dos_header->e_magic != IMAGE_DOS_SIGNATURE) 
     {
       printf ("Unknown EXE header in %s...bailing.\n", p_infile->name);
-      exit (1);
+      do_gcl_abort();
     }
   nt_header = (PIMAGE_NT_HEADERS) (((unsigned long) dos_header) + 
 				   dos_header->e_lfanew);
@@ -542,7 +542,7 @@ get_section_info (file_data *p_infile)
     {
       printf ("Failed to find IMAGE_NT_HEADER in %s...bailing.\n", 
 	     p_infile->name);
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Check the NT header signature ...  */
@@ -729,7 +729,7 @@ read_in_bss (char *filename)
   if (file == INVALID_HANDLE_VALUE) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Seek to where the .bss section is tucked away after the heap...  */
@@ -737,7 +737,7 @@ read_in_bss (char *filename)
   if (SetFilePointer (file, index, NULL, FILE_BEGIN) == 0xFFFFFFFF) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   
@@ -746,7 +746,7 @@ read_in_bss (char *filename)
   if (!ReadFile (file, bss_start, bss_size, &n_read, (void *)NULL))
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   CloseHandle (file);
@@ -767,7 +767,7 @@ map_in_heap (char *filename)
   if (file == INVALID_HANDLE_VALUE) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
   
   size = GetFileSize (file, &upper_size);
@@ -776,7 +776,7 @@ map_in_heap (char *filename)
   if (!file_mapping) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
     
   size = get_committed_heap_size ();
@@ -797,7 +797,7 @@ map_in_heap (char *filename)
 		    MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE) == NULL)
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Seek to the location of the heap data in the executable.  */
@@ -805,7 +805,7 @@ map_in_heap (char *filename)
   if (SetFilePointer (file, i, NULL, FILE_BEGIN) == 0xFFFFFFFF)
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Read in the data.  */
@@ -813,7 +813,7 @@ map_in_heap (char *filename)
 		 get_committed_heap_size (), &n_read, (void *)NULL))
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   CloseHandle (file);
@@ -1009,7 +1009,7 @@ sbrk (ptrdiff_t increment)
       if (((unsigned long) data_region_base & ~VALMASK) != 0) 
 	{
 	  printf ("Error: The heap was allocated in upper memory.\n");
-	  exit (1);
+	  do_gcl_abort();
 	}
 
       data_region_end = data_region_base;
@@ -1090,7 +1090,7 @@ recreate_heap (char *executable_path) {
 		      MEM_RESERVE,
 		      PAGE_NOACCESS);
   if (!tmp)
-    exit (1);
+    do_gcl_abort();
 
   /* We read in the data for the .bss section from the executable
      first and map in the heap from the executable second to prevent

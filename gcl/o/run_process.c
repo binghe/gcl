@@ -545,7 +545,7 @@ char **argv;
 	{
 	  fprintf(stderr, "\n***** Error in process spawning *******");
 	  fflush(stderr);
-	  exit(1);
+	  do_gcl_abort();
 	}
     }
 
@@ -604,7 +604,7 @@ getpagesize()
 }
 
 dlclose()
-{fprintf(stderr,"calling 'dl' function sun did not supply..exitting") ;exit(1);}
+{fprintf(stderr,"calling 'dl' function sun did not supply..exitting") ;do_gcl_abort();}
 dgettext()
 {dlclose();}
 dlopen()

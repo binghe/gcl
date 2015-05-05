@@ -1824,7 +1824,7 @@ static char *baby_malloc(n)
   if ((res +m-baby_malloc_data) > sizeof(baby_malloc_data))
     {
      printf("failed in baby malloc");
-     exit(1);
+     do_gcl_abort();
     }
   last_baby += m;
   *((int *)res)=n;

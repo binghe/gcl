@@ -236,8 +236,10 @@ get_phys_pages_no_malloc(char freep) {
     gc_allocation_threshold=k*d;
   }
   use_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
+  wait_on_abort=(e=getenv("GCL_WAIT_ON_ABORT")) && *e;
   
   return k;
+
 }
 
 #endif
@@ -539,6 +541,8 @@ void install_segmentation_catcher(void)
 
 void
 do_gcl_abort(void) {
+  if (wait_on_abort)
+    sleep(3600);
   gcl_cleanup(0);
   abort();
 }
@@ -987,7 +991,7 @@ static void
 FFN(siLinitialization_failure)(void) {
   check_arg(0);
   printf("lisp initialization failed\n");
-  exit(0);
+  do_gcl_abort();
 }
 
 DEFUNO_NEW("IDENTITY",object,fLidentity,LISP

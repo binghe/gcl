@@ -554,7 +554,7 @@ regatom(int *flagp)
 		}
 		 if (regcp - buf > sizeof(buf))
 		   { fprintf(stderr,"wow that is badly defined regexp..");
-		     exit(1);}
+		     do_gcl_abort();}
 		regcp --;
 		{ char *p=buf;
 

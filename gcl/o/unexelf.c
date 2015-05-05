@@ -401,7 +401,7 @@ Filesz      Memsz       Flags       Align
    Instead we read the whole file, modify it, and write it out.  */
 
 #ifndef emacs
-#define fatal(a, b...) fprintf (stderr, a, ##b), exit (1)
+#define fatal(a, b...) fprintf (stderr, a, ##b), do_gcl_abort()
 #else
 #include "config.h"
 extern void fatal (char *, ...);

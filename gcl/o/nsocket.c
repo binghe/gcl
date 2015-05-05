@@ -65,7 +65,7 @@
 #endif
 
 #define VOID void
-#define ERROR_MESSAGE(msg)     do{ fprintf(stderr,msg); exit(1) ; } while(0)    
+#define ERROR_MESSAGE(msg)     do{ fprintf(stderr,msg); do_gcl_abort() ; } while(0)    
 
 #ifdef STAND
 
@@ -87,7 +87,7 @@ main(argc,argv)
   fd = doConnect(argv[1],atoi(argv[2]));
   if (fd < 0) {
     perror("cant connect");
-    exit(1);
+    do_gcl_abort();
   }
 
   while (1) { int high;

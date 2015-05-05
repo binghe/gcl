@@ -309,7 +309,7 @@ unexec_error (char *format, ...)
   vfprintf (stderr, format, ap);
   fprintf (stderr, "\n");
   va_end (ap);
-  exit (1);
+  do_gcl_abort();
 }
 
 /* More informational messages routines.  */

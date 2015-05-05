@@ -81,10 +81,10 @@ update_pool(fixnum val) {
 static ufixnum
 get_pool(void) {
 
+  ufixnum s;
+
   if (use_pool) {
 
-    ufixnum s;
-    
     open_pool();
     lock_pool();
     s=Pool->s;

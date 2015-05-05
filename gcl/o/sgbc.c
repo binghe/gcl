@@ -266,32 +266,32 @@ overlap_check(struct contblock *t1,struct contblock *t2) {
 
     if (!inheap(t1)) {
       fprintf(stderr,"%p not in heap\n",t1);
-      exit(1);
+      do_gcl_abort();
     }
 
     for (p=t2;p;p=p->cb_link) {
 
       if (!inheap(p)) {
 	fprintf(stderr,"%p not in heap\n",t1);
-	exit(1);
+	do_gcl_abort();
       }
 
       if ((p<=t1 && (void *)p+p->cb_size>(void *)t1) ||
 	  (t1<=p && (void *)t1+t1->cb_size>(void *)p)) {
 	fprintf(stderr,"Overlap %u %p  %u %p\n",t1->cb_size,t1,p->cb_size,p);
-	exit(1);
+	do_gcl_abort();
       }
       
       if (p==p->cb_link) {
 	fprintf(stderr,"circle detected at %p\n",p);
-	exit(1);
+	do_gcl_abort();
       }
 
     }
 	
     if (t1==t1->cb_link) {
       fprintf(stderr,"circle detected at %p\n",t1);
-      exit(1);
+      do_gcl_abort();
     }
 
   }
@@ -365,7 +365,7 @@ memprotect_handler_test(int sig, long code, void *scp, char *addr) {
 
   if (memprotect_handler_invocations) {
     memprotect_result=memprotect_multiple_invocations;
-    exit(-1);
+    do_gcl_abort();
   }
   memprotect_handler_invocations=1;
   if (faddr!=memprotect_test_address)
@@ -385,9 +385,9 @@ memprotect_test(void) {
 
   if (memprotect_result!=memprotect_none)
     return memprotect_result!=memprotect_success;
-  if (atexit(memprotect_print)) {
+  if (do_gcl_abort()) {
     fprintf(stderr,"Cannot setup memprotect_print on exit\n");
-    exit(-1);
+    do_gcl_abort();
   }
 
   if (!(b1=alloca(2*p))) {
