@@ -385,7 +385,7 @@ memprotect_test(void) {
 
   if (memprotect_result!=memprotect_none)
     return memprotect_result!=memprotect_success;
-  if (do_gcl_abort()) {
+  if (atexit(memprotect_print)) {
     fprintf(stderr,"Cannot setup memprotect_print on exit\n");
     do_gcl_abort();
   }
