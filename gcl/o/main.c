@@ -221,12 +221,19 @@ get_phys_pages_no_malloc(char freep) {
   }
   {
     double d=0.75;
-    if ((e=getenv("GCL_GC_THRESH"))) {
-      double d;
+    if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
       massert(sscanf(e,"%lf",&d)==1);
       massert(d>=0.0);
     }
     gc_page_threshold=k*d;
+  }
+  {
+    double d=0.125;
+    if ((e=getenv("GCL_GC_ALLOCATION_THRESH"))) {
+      massert(sscanf(e,"%lf",&d)==1);
+      massert(d>=0.0);
+    }
+    gc_allocation_threshold=k*d;
   }
   return k;
 }
@@ -283,6 +290,8 @@ update_real_maxpage(void) {
   
   new_holepage=available_pages/starting_hole_div;
 
+  recent_allocation=0;
+  
   return 0;
 
 }

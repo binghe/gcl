@@ -877,7 +877,9 @@ static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
   if ((!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil || get_pool()>gc_page_threshold)
-      && tm->tm_npage+tpage(tm,n)>tm->tm_maxpage && GBC_enable) {
+      && page(recent_allocation) > gc_allocation_threshold
+      /* && tm->tm_npage+tpage(tm,n)>tm->tm_maxpage */
+      && GBC_enable) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
@@ -1020,6 +1022,8 @@ alloc_mem(struct typemanager *tm,fixnum n) {
 
   CHECK_INTERRUPT;
   
+  recent_allocation+=n;
+
   if ((p=alloc_from_freelist(tm,n)))
     return p;
   if ((p=alloc_after_gc(tm,n)))

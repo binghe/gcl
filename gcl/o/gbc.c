@@ -1122,7 +1122,8 @@ GBC(enum type t) {
   }
 
   ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
-
+  recent_allocation=0;
+  
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");
   
