@@ -876,9 +876,9 @@ too_full_p(struct typemanager *tm) {
 static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
-  if ((!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil || get_pool()>gc_page_threshold)
-      && page(recent_allocation) > gc_allocation_threshold
-      /* && tm->tm_npage+tpage(tm,n)>tm->tm_maxpage */
+  if (((!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil) ?
+      tm->tm_npage+tpage(tm,n)>tm->tm_maxpage : 
+       (get_pool()>gc_page_threshold && page(recent_allocation) > gc_allocation_threshold))
       && GBC_enable) {
 
     switch (jmp_gmp) {
