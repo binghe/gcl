@@ -2,6 +2,7 @@
 
 #define NO_PRELINK_UNEXEC_DIVERSION
 char *rb_end=NULL,*rb_start=NULL,*heap_end=NULL;
+int use_pool=1;
 
 #include "include.h"
 #include "page.h"
@@ -20,7 +21,7 @@ main(int argc,char * argv[],char * envp[]) {
   open_pool();
   for (;;) {
     lock_pool();
-    fprintf(stderr,"%lu processess %lu pages\n",Pool->n,Pool->s);
+    fprintf(stderr,"master pid %lu %lu processess %lu pages\n",Pool->pid,Pool->n,Pool->s);
     fflush(stderr);
     unlock_pool();
     sleep(s);

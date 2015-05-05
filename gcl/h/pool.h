@@ -5,18 +5,27 @@
 
 static int pool=-1;
 static struct pool {
+  ufixnum pid;
   ufixnum n;
   ufixnum s;
 } *Pool;
 
+static struct flock pl;
+
 static void
 lock_pool(void) {
-  massert(!lockf(pool,F_LOCK,0));
+
+  pl.l_type=F_WRLCK;
+  massert(!fcntl(pool,F_SETLK,&pl));
+
 }
 
 static void
 unlock_pool(void) {
-  massert(!lockf(pool,F_ULOCK,0));
+
+  pl.l_type=F_UNLCK;
+  massert(!fcntl(pool,F_SETLK,&pl));
+
 }
 
 static ufixnum
@@ -56,15 +65,47 @@ static void
 open_pool(void) {
 
   if (pool==-1) {
-    if ((pool=open("/tmp/gcl_pool",O_CREAT|O_EXCL|O_RDWR,0644))!=-1) {
-      massert(!ftruncate(pool,0));
-      massert(!ftruncate(pool,sizeof(struct pool)));
-    } else
-      massert((pool=open("/tmp/gcl_pool",O_RDWR))>=0);
+
+    struct flock f;
+
+    massert((pool=open("/tmp/gcl_pool",O_CREAT|O_RDWR,0644))!=-1);
+    massert(!ftruncate(pool,sizeof(struct pool)));
     massert((Pool=mmap(NULL,sizeof(struct pool),PROT_READ|PROT_WRITE,MAP_SHARED,pool,0))!=(void *)-1);
+
+    pl.l_type=F_WRLCK;
+    pl.l_whence=SEEK_SET;
+    pl.l_start=sizeof(Pool->pid);;
+    pl.l_len=0;
+
+    f=pl;
+    f.l_start=0;
+    f.l_len=sizeof(Pool->pid);
+    
+    if (!fcntl(pool,F_SETLK,&f)) {
+
+      Pool->pid=getpid();
+
+      lock_pool();
+      Pool->n=0;
+      Pool->s=0;
+      unlock_pool();
+
+      f.l_type=F_UNLCK;
+      massert(!fcntl(pool,F_SETLK,&f));
+
+      fprintf(stderr,"Initializing pool\n");
+      fflush(stderr);
+
+    }
+
+    f.l_type=F_RDLCK;
+    massert(!fcntl(pool,F_SETLK,&f));
+
     register_pool(1);
     massert(!atexit(close_pool));
+
   }
+
 }
 
 static void

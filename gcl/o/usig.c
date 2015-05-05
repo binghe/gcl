@@ -295,12 +295,18 @@ sigio(void)
 {ifuncall1(sSsigio_interrupt,Cnil);}
 
 
+static void
+sigterm(void)
+{do_gcl_abort();}
+
+
 
 void
 install_default_signals(void)
 {	gcl_signal(SIGFPE, sigfpe3);
 	gcl_signal(SIGPIPE, sigpipe);
 	gcl_signal(SIGINT, sigint);
+	gcl_signal(SIGTERM, sigterm);
 	gcl_signal(SIGUSR1, sigusr1);
 	gcl_signal(SIGIO, sigio);
 	gcl_signal(SIGALRM, sigalrm);
