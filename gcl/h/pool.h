@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <errno.h>
 
 static int pool=-1;
 static struct pool {
@@ -12,11 +13,26 @@ static struct pool {
 
 static struct flock pl;
 
+static const char *gcl_pool="/tmp/gcl_pool";
+
+static int
+set_lock(void) {
+  
+  errno=0;
+  if (fcntl(pool,F_SETLKW,&pl)) {
+    if (errno==EINTR)
+      set_lock();
+    return -1;
+  }
+  return 0;
+
+}
+  
 static void
 lock_pool(void) {
 
   pl.l_type=F_WRLCK;
-  massert(!fcntl(pool,F_SETLK,&pl));
+  massert(!set_lock());
 
 }
 
@@ -24,7 +40,7 @@ static void
 unlock_pool(void) {
 
   pl.l_type=F_UNLCK;
-  massert(!fcntl(pool,F_SETLK,&pl));
+  massert(!set_lock());
 
 }
 
