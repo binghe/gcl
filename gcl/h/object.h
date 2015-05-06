@@ -350,6 +350,10 @@ EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */
 EXTER char *rb_pointer;		/*  relblock pointer  */
 
+#ifndef INLINE
+#define INLINE
+#endif
+
 INLINE bool
 rb_high(void) {
   return rb_pointer>=rb_end;
