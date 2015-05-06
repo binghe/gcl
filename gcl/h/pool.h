@@ -71,7 +71,7 @@ close_pool(void) {
     unlock_pool();
     massert(!close(pool));
     massert(!munmap(Pool,sizeof(struct pool)));
-    massert(n || !unlink("/tmp/gcl_pool"));
+    massert(n || !unlink(gcl_pool));
     pool=-1;
   }
 
@@ -84,7 +84,7 @@ open_pool(void) {
 
     struct flock f;
 
-    massert((pool=open("/tmp/gcl_pool",O_CREAT|O_RDWR,0644))!=-1);
+    massert((pool=open(gcl_pool,O_CREAT|O_RDWR,0644))!=-1);
     massert(!ftruncate(pool,sizeof(struct pool)));
     massert((Pool=mmap(NULL,sizeof(struct pool),PROT_READ|PROT_WRITE,MAP_SHARED,pool,0))!=(void *)-1);
 
