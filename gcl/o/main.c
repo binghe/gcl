@@ -308,7 +308,7 @@ minimize_image(void) {
   
   empty_relblock();
   nrbpage=0;
-  resize_hole(0,t_relocatable);
+  resize_hole(0,t_relocatable,0);
 
 #ifdef GCL_GPROF
   gprof_cleanup();

@@ -1199,7 +1199,7 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
     static_promotion_limit=rb_start<new_rb_start ? rb_start : new_rb_start;/*do not allow static promotion to go past this point*/
-    setup_rb();
+    setup_rb(0);
   }
   
 #ifdef DEBUG

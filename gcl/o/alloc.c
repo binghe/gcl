@@ -328,15 +328,16 @@ empty_relblock(void) {
 }
 
 void
-setup_rb(void) {
+setup_rb(bool preserve_rb_pointerp) {
 
-  int init=new_rb_start!=rb_start || rb_pointer>=rb_end;
+  int lowp=new_rb_start!=rb_start || rb_pointer>=rb_end;
 
   update_pool(2*(nrbpage-((rb_end-rb_start)>>PAGEWIDTH)));
   rb_start=new_rb_start;
   rb_end=rb_start+(nrbpage<<PAGEWIDTH);
-  rb_pointer=init ? rb_start : rb_end;
-  rb_limit=rb_pointer+(nrbpage<<PAGEWIDTH);
+  if (!preserve_rb_pointerp)
+    rb_pointer=lowp ? rb_start : rb_end;
+  rb_limit=(rb_pointer>=rb_end ? rb_end : rb_start)+(nrbpage<<PAGEWIDTH);
   pool_check();
   
   alloc_page(-(2*nrbpage+((new_rb_start-heap_end)>>PAGEWIDTH)));
@@ -344,26 +345,28 @@ setup_rb(void) {
 }
   
 void
-resize_hole(ufixnum hp,enum type tp) {
+resize_hole(ufixnum hp,enum type tp,bool in_placep) {
   
   char *start=rb_pointer<rb_end ? rb_start : rb_end;
   ufixnum size=rb_pointer-start;
 
   new_rb_start=heap_end+hp*PAGESIZE;
   
-  if ((new_rb_start<start && new_rb_start+size>=start) || (new_rb_start<start+size && new_rb_start+size>=start+size)) {
+  if (!in_placep &&
+      ((new_rb_start<=start && start<new_rb_start+size) || (new_rb_start<start+size && start+size<=new_rb_start+size))) {
     fprintf(stderr,"Toggling relblock when resizing hole to %lu\n",hp);
     fflush(stderr);
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
-    return resize_hole(hp,tp);
+    return resize_hole(hp,tp,in_placep);
   }
 
-  if (size) {
+  if (!size || in_placep)
+    setup_rb(in_placep);
+  else {
     tm_of(tp)->tm_adjgbccnt--;
     GBC(tp);
-  } else
-    setup_rb();
+  }
   
 }
 
@@ -386,7 +389,7 @@ alloc_page(long n) {
       d=d<0 ? 0 : d;
       d=new_holepage<d ? new_holepage : d;
       
-      resize_hole(d+nn,t_relocatable);
+      resize_hole(d+nn,t_relocatable,0);
 
     }
   }
@@ -927,16 +930,7 @@ add_pages(struct typemanager *tm,fixnum m) {
       GBC(t_relocatable);
     }
     nrbpage+=m;
-    rb_limit+=m*PAGESIZE;
-    update_pool(2*m);
-    if (rb_pointer>rb_end)
-      rb_start-=m*PAGESIZE;
-    else
-      rb_end+=m*PAGESIZE;
-
-    pool_check();
-    alloc_page(-(2*nrbpage+((rb_start-heap_end)>>PAGEWIDTH)));
-
+    resize_hole(page(rb_start-heap_end)-(rb_pointer>rb_end ? m : 0),t_relocatable,1);
     break;
 
   default:
@@ -1275,7 +1269,7 @@ object malloc_list=Cnil;
 void
 maybe_set_hole_from_maxpages(void) {
   if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start)
-    resize_hole(new_holepage,t_relocatable);
+    resize_hole(new_holepage,t_relocatable,0);
 }
 
 void
@@ -1429,7 +1423,7 @@ gcl_init_alloc(void *cs_start) {
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
   
-  resize_hole(new_holepage,t_relocatable);
+  resize_hole(new_holepage,t_relocatable,0);
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif

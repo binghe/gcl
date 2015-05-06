@@ -1951,10 +1951,10 @@ ufixnum
 sum_maxpages(void);
 
 void
-resize_hole(ufixnum,enum type);
+resize_hole(ufixnum,enum type,bool);
 
 void
-setup_rb(void);
+setup_rb(bool);
 
 void
 close_pool(void);
