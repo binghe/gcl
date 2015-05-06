@@ -319,7 +319,7 @@ empty_relblock(void) {
   object o=sSAleaf_collection_thresholdA->s.s_dbind;
   
   sSAleaf_collection_thresholdA->s.s_dbind=make_fixnum(0);
-  for (;rb_pointer!=rb_start&&rb_pointer!=rb_end;) {
+  for (;!rb_emptyp();) {
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
   }
@@ -330,14 +330,14 @@ empty_relblock(void) {
 void
 setup_rb(bool preserve_rb_pointerp) {
 
-  int lowp=new_rb_start!=rb_start || rb_pointer>=rb_end;
+  int lowp=new_rb_start!=rb_start || rb_high();
 
-  update_pool(2*(nrbpage-((rb_end-rb_start)>>PAGEWIDTH)));
+  update_pool(2*(nrbpage-page(rb_size())));
   rb_start=new_rb_start;
   rb_end=rb_start+(nrbpage<<PAGEWIDTH);
   if (!preserve_rb_pointerp)
     rb_pointer=lowp ? rb_start : rb_end;
-  rb_limit=(rb_pointer>=rb_end ? rb_end : rb_start)+(nrbpage<<PAGEWIDTH);
+  rb_limit=rb_begin()+(nrbpage<<PAGEWIDTH);
   pool_check();
   
   alloc_page(-(2*nrbpage+((new_rb_start-heap_end)>>PAGEWIDTH)));
@@ -347,7 +347,7 @@ setup_rb(bool preserve_rb_pointerp) {
 void
 resize_hole(ufixnum hp,enum type tp,bool in_placep) {
   
-  char *start=rb_pointer<rb_end ? rb_start : rb_end;
+  char *start=rb_begin();
   ufixnum size=rb_pointer-start;
 
   new_rb_start=heap_end+hp*PAGESIZE;
@@ -817,8 +817,8 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
     break;
 
   case t_relocatable:
-    if (rb_pointer>rb_end && rb_pointer+n>rb_limit && rb_pointer+n<rb_end+nrbpage*PAGESIZE)
-      rb_limit=rb_pointer+n;
+    /* if (rb_pointer>rb_end && rb_pointer+n>rb_limit && rb_pointer+n<rb_end+nrbpage*PAGESIZE)/\**\/ */
+    /*   rb_limit=rb_pointer+n; */
     if (rb_limit-rb_pointer>n)
       return ((rb_pointer+=n)-n);
     break;
@@ -856,7 +856,7 @@ too_full_p(struct typemanager *tm) {
 
   switch (tm->tm_type) {
   case t_relocatable:
-    return 100*(rb_limit-rb_pointer)<pf*(rb_end-rb_start);
+    return 100*(rb_limit-rb_pointer)<pf*rb_size();
     break;
   case t_contiguous:
     for (cbp=cb_pointer,k=0;cbp;cbp=cbp->cb_link) k+=cbp->cb_size;
@@ -923,14 +923,14 @@ add_pages(struct typemanager *tm,fixnum m) {
 
   case t_relocatable:
 
-    if (rb_pointer>rb_end && m>((rb_start-heap_end)>>PAGEWIDTH)) {
+    if (rb_high() && m>((rb_start-heap_end)>>PAGEWIDTH)) {
       fprintf(stderr,"Moving relblock low before expanding relblock pages\n");
       fflush(stderr);
       tm_table[t_relocatable].tm_adjgbccnt--;
       GBC(t_relocatable);
     }
     nrbpage+=m;
-    resize_hole(page(rb_start-heap_end)-(rb_pointer>rb_end ? m : 0),t_relocatable,1);
+    resize_hole(page(rb_start-heap_end)-(rb_high() ? m : 0),t_relocatable,1);
     break;
 
   default:
@@ -1142,7 +1142,7 @@ DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"
 { struct typemanager *tm=(&tm_table[t_from_type(typ)]);
   tm = & tm_table[tm->tm_type];
   if (tm->tm_type == t_relocatable)
-    { tm->tm_npage = (rb_end-rb_start)>>PAGEWIDTH;
+    { tm->tm_npage = page(rb_size());
       tm->tm_nfree = rb_limit -rb_pointer;
     }
   else if (tm->tm_type == t_contiguous)

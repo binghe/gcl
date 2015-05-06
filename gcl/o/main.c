@@ -335,7 +335,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
   l=l<def ? l : def;
   end=data_start+(1L<<l)-PAGESIZE;
   GBC(t_relocatable);
-  dend=heap_end+PAGESIZE+CEI(rb_pointer-(rb_pointer<rb_end ? rb_start : rb_end),PAGESIZE);
+  dend=heap_end+PAGESIZE+CEI(rb_pointer-rb_begin(),PAGESIZE);
   if (end >= dend) {
     minimize_image();
     log_maxpage_bound=l;

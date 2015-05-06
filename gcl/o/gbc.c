@@ -1244,10 +1244,6 @@ GBC(enum type t) {
   
   if (COLLECT_RELBLOCK_P) {
 
-    /* rb_start = new_rb_start; */
-    /* rb_end = rb_start + nrbpage*PAGESIZE; */
-    
-
 #ifdef SGC
     if (sgc_enabled)
       wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
@@ -1450,8 +1446,8 @@ FFN(siLroom_report)(void) {
   vs_push(make_fixnum(count_contblocks()));
   vs_push(make_fixnum(cbgbccount));
   vs_push(make_fixnum((rb_start-heap_end)>>PAGEWIDTH));
-  vs_push(make_fixnum(rb_pointer - (rb_pointer<rb_end ? rb_start : rb_end)));
-  vs_push(make_fixnum((rb_pointer<rb_end ? rb_end : (rb_end+(rb_end-rb_start))) - rb_pointer));
+  vs_push(make_fixnum(rb_pointer - rb_begin()));
+  vs_push(make_fixnum((rb_begin()+rb_size()) - rb_pointer));
   vs_push(make_fixnum(nrbpage));
   vs_push(make_fixnum(maxrbpage));
   vs_push(make_fixnum(rbgbccount));
