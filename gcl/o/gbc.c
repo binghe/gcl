@@ -1359,34 +1359,6 @@ GBC(enum type t) {
 
   }
   
-  {
-    extern long opt_maxpage(struct typemanager *);
-
-#define IGNORE_MAX_PAGES (sSAignore_maximum_pagesA ==0 || sSAignore_maximum_pagesA->s.s_dbind !=sLnil) 
-#define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
-
-    if (IGNORE_MAX_PAGES && OPTIMIZE_MAX_PAGES)
-      opt_maxpage(tm_table+t);
-    
-  }
-
-  /* {static int mv; */
-  /*   if (!mv  && COLLECT_RELBLOCK_P) { */
-  /*     mv=1; */
-  /*     if (relb_copied) { */
-  /* 	sSAstatic_promotion_areaA->s.s_dbind=(VFUN_NARGS=4,fSmake_vector1(make_fixnum(relb_copied),make_fixnum(aet_char),Ct,make_fixnum(0))); */
-  /* 	fprintf(stderr,"Making static promotion area %lu bytes\n",relb_copied); */
-  /* 	fflush(stderr); */
-  /* 	relb_copied=0; */
-  /*     } else { */
-  /* 	fprintf(stderr,"Releasing static promotion area\n"); */
-  /* 	fflush(stderr); */
-  /* 	sSAstatic_promotion_areaA->s.s_dbind=Cnil; */
-  /*     } */
-  /*     mv=0; */
-  /*   } */
-  /* } */
-
   collect_both=0;
 
   END_NO_INTERRUPT;
