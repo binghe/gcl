@@ -4203,7 +4203,7 @@ if ac_fn_c_try_run "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	 clang="yes"
-	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body"
+	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign"
 
 $as_echo "#define CLANG 1" >>confdefs.h
 

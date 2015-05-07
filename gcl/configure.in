@@ -502,7 +502,7 @@ if test "$GCC" = "yes" ; then
 		;}]])],
 	[AC_MSG_RESULT([yes])
 	 clang="yes"
-	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body"
+	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign"
 	 AC_DEFINE([CLANG],[1],[running clang compiler])],	
 	[AC_MSG_RESULT([no])
 	 #FIXME -Wno-unused-but-set-variable when time
