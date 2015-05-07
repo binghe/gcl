@@ -146,6 +146,15 @@ use_symbols(double d,...) {
 
 }
 #endif
+#else
+int
+use_symbols(double d,...) {
+
+  d=sin(d)+cos(d);
+
+  return (int)d;
+
+}
 #endif
 
 void
