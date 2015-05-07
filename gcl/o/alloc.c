@@ -69,7 +69,6 @@ sbrk1(n)
 
 long starting_hole_div=10;
 long starting_relb_heap_mult=2;
-long new_holepage;
 long resv_pages=0;
 
 #ifdef BSD
@@ -385,10 +384,13 @@ alloc_page(long n) {
       fixnum d=available_pages-nn;
 
       d*=0.2;
-      d=d<0.01*real_maxpage ? available_pages-n : d;
+      d=d<0.01*real_maxpage ? available_pages-nn : d;
       d=d<0 ? 0 : d;
-      d=new_holepage<d ? new_holepage : d;
+      d=(available_pages/3)<d ? (available_pages/3) : d;
       
+      fprintf(stderr,"Hole overrun\n");
+      fflush(stderr);
+
       resize_hole(d+nn,t_relocatable,0);
 
     }
@@ -1181,7 +1183,7 @@ object malloc_list=Cnil;
 void
 maybe_set_hole_from_maxpages(void) {
   if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start)
-    resize_hole(new_holepage,t_relocatable,0);
+    resize_hole(phys_pages,t_relocatable,0);
 }
 
 void
@@ -1280,10 +1282,10 @@ gcl_init_alloc(void *cs_start) {
   initial_sbrk=data_start=heap_end;
   first_data_page=page(data_start);
   
-#ifdef GCL_GPROF
-  if (new_holepage<textpage)
-     new_holepage=textpage;
-#endif
+/* #ifdef GCL_GPROF */
+/*   if (new_holepage<textpage) */
+/*      new_holepage=textpage; */
+/* #endif */
 
   /* Unused (at present) tm_distinct flag added.  Note that if cons
      and fixnum share page types, errors will be introduced.
@@ -1335,7 +1337,7 @@ gcl_init_alloc(void *cs_start) {
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
   
-  resize_hole(new_holepage,t_relocatable,0);
+  resize_hole(phys_pages,t_relocatable,0);
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
@@ -1539,7 +1541,7 @@ DEFUN_NEW("ALLOCATED-RELOCATABLE-PAGES",object,fSallocated_relocatable_pages,SI,
 
 DEFUN_NEW("GET-HOLE-SIZE",object,fSget_hole_size,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   /* 0 args */
-  RETURN1((make_fixnum(new_holepage)));
+  RETURN1(make_fixnum((rb_start-heap_end)>>PAGEWIDTH));
 }
 
 
@@ -1670,9 +1672,7 @@ DEFUN_NEW("SET-STARTING-RELBLOCK-HEAP-MULTIPLE",object,fSset_starting_relb_heap_
   
 DEFUNM_NEW("SET-HOLE-SIZE",object,fSset_hole_size,SI,1,2,NONE,OO,OO,OO,OO,(object onpages,...),"") {
 
-  printf("This function is obsolete -- use SET-STARTING-HOLE-DIVISOR instead\n");
-
-  RETURN2(make_fixnum(new_holepage),make_fixnum(reserve_pages_for_signal_handler));
+  RETURN2(make_fixnum((rb_start-heap_end)>>PAGEWIDTH),make_fixnum(reserve_pages_for_signal_handler));
 
 }
 

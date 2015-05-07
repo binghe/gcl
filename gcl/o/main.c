@@ -292,8 +292,6 @@ update_real_maxpage(void) {
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
   
-  new_holepage=available_pages/starting_hole_div;
-
   recent_allocation=0;
   
   return 0;
@@ -303,7 +301,6 @@ update_real_maxpage(void) {
 static int
 minimize_image(void) {
 
-  extern long new_holepage;
   fixnum i;
   
   empty_relblock();

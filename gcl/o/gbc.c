@@ -285,7 +285,6 @@ long  first_protectable_page =0;
 static char *copy_relblock(char *p, int s);
 
 long real_maxpage;
-long new_holepage;
 
 struct apage {
   char apage_self[PAGESIZE];
