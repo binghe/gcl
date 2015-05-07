@@ -261,14 +261,14 @@ get_phys_pages(char freep) {
     k*=d;
   }
 
-  d=0.75;
+  d=0.5;
   if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
     massert(sscanf(e,"%lf",&d)==1);
     massert(d>=0.0);
   }
   gc_page_threshold=k*d;
 
-  d=0.95;
+  d=0.75;
   if ((e=getenv("GCL_GC_PAGE_MAX"))) {
     massert(sscanf(e,"%lf",&d)==1);
     massert(d>=0.0);
