@@ -790,13 +790,47 @@ too_full_p(struct typemanager *tm) {
 
 }
 
+static inline double
+gc_burden(struct typemanager *tm) {
+
+  return (double)tm->tm_adjgbccnt/(tm->tm_npage+1);
+
+}
+
+static inline bool
+balanced_gc_p(struct typemanager *my_tm) {
+
+  double d,dd,x;
+  struct typemanager *tm;
+  int i;
+
+  for (i=0,d=dd=0.0,tm=tm_table;tm<tm_table+t_end;tm++)
+    if (tm->tm_npage) {
+      x=gc_burden(tm);
+      d+=x;
+      dd+=x*x;
+      i++;
+    }
+  d/=i;
+  dd/=i;
+  dd-=d*d;
+  dd=sqrt(dd);
+
+  return gc_burden(my_tm)<=d+gc_imbalance_tolerance*dd;
+
+}
+    
+
 static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
-  if (((!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil) ?
-      tm->tm_npage+tpage(tm,n)>tm->tm_maxpage : 
-       (get_pool()>gc_page_threshold && page(recent_allocation) > gc_allocation_threshold))
-      && GBC_enable) {
+  ufixnum cpool;
+  
+  if (GBC_enable &&
+      (!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil ?
+       tm->tm_npage+tpage(tm,n)>tm->tm_maxpage :
+       (cpool=get_pool())>gc_page_threshold &&
+       (balanced_gc_p(tm) || cpool > gc_page_max))) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
