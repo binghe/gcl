@@ -793,26 +793,34 @@ too_full_p(struct typemanager *tm) {
 static inline double
 gc_burden(struct typemanager *tm) {
 
-  return (double)tm->tm_adjgbccnt/(tm->tm_npage+1);
+  return (double)tm->tm_gbccount/(tm->tm_npage+1);
 
+}
+
+static inline int
+dcomp(const void *v1,const void *v2) {
+  const double *d1=v1,*d2=v2;
+  return *d1<*d2 ? -1 : (*d1==*d2 ? 0 : 1);
 }
 
 static inline bool
 balanced_gc_p(struct typemanager *my_tm) {
 
-  double d,dd,x;
+  double d,dd;
   struct typemanager *tm;
-  int i;
+  double ds[t_other];
+  int i,j;
 
-  for (i=0,d=dd=0.0,tm=tm_table;tm<tm_table+t_end;tm++)
-    if (tm->tm_npage) {
-      x=gc_burden(tm);
-      d+=x;
-      dd+=x*x;
-      i++;
-    }
-  d/=i;
-  dd/=i;
+  for (i=0,tm=tm_table;tm<tm_table+t_other;tm++)
+    if (tm->tm_npage)
+      ds[i++]=gc_burden(tm);
+  if (!i) return TRUE;
+
+  qsort(ds,i,sizeof(*ds),dcomp);
+  d=i%2 ? ds[(i-1)/2] : (ds[i/2]+ds[(i/2)+1])/2;
+  for (j=1,dd=0.0;j<i-1;j++)
+    dd+=ds[j]*ds[j];
+  dd/=i>2 ? i-2 : 1;
   dd-=d*d;
   dd=sqrt(dd);
 
