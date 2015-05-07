@@ -341,7 +341,8 @@ EXTER long holepage;			/*  hole pages  */
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
 
-EXTER ufixnum gc_page_threshold,gc_allocation_threshold,recent_allocation;
+EXTER ufixnum gc_page_threshold,gc_page_max,recent_allocation;
+EXTER double gc_imbalance_tolerance;
 EXTER bool use_pool,wait_on_abort;
 
 EXTER char *new_rb_start;		/*  desired relblock start after next gc  */

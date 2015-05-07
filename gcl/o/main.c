@@ -228,12 +228,17 @@ get_phys_pages_no_malloc(char freep) {
     gc_page_threshold=k*d;
   }
   {
-    double d=0.125;
-    if ((e=getenv("GCL_GC_ALLOCATION_THRESH"))) {
+    double d=0.95;
+    if ((e=getenv("GCL_GC_PAGE_MAX"))) {
       massert(sscanf(e,"%lf",&d)==1);
       massert(d>=0.0);
     }
-    gc_allocation_threshold=k*d;
+    gc_page_max=k*d;
+  }
+  gc_imbalance_tolerance=1.0;
+  if ((e=getenv("GCL_GC_IMBALANCE_TOLERANCE"))) {
+    massert(sscanf(e,"%lf",&gc_imbalance_tolerance)==1);
+    massert(gc_imbalance_tolerance>=0.0);
   }
   use_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
   wait_on_abort=(e=getenv("GCL_WAIT_ON_ABORT")) && *e;
@@ -272,12 +277,6 @@ update_real_maxpage(void) {
 	i+=j;
       }
   massert(!mbrk(cur));
-
-/*   phys_pages=get_phys_pages_no_malloc(0); */
-
-/* #ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION */
-/*   if (phys_pages>0 && real_maxpage>phys_pages+page(beg)) real_maxpage=phys_pages+page(beg); */
-/* #endif */
 
   maxpages=real_maxpage-page(beg);
 
