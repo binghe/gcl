@@ -249,6 +249,46 @@ get_phys_pages_no_malloc(char freep) {
 
 #endif
 
+static ufixnum
+get_phys_pages(char freep) {
+  ufixnum k=get_phys_pages_no_malloc(freep);
+  const char *e;;
+  double d;
+  
+  if ((e=getenv("GCL_MEM_MULTIPLE"))) {
+    massert(sscanf(e,"%lf",&d)==1);
+    massert(d>=0.0);
+    k*=d;
+  }
+
+  d=0.75;
+  if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
+    massert(sscanf(e,"%lf",&d)==1);
+    massert(d>=0.0);
+  }
+  gc_page_threshold=k*d;
+
+  d=0.95;
+  if ((e=getenv("GCL_GC_PAGE_MAX"))) {
+    massert(sscanf(e,"%lf",&d)==1);
+    massert(d>=0.0);
+  }
+  gc_page_max=k*d;
+
+  gc_imbalance_tolerance=1.0;
+  if ((e=getenv("GCL_GC_IMBALANCE_TOLERANCE"))) {
+    massert(sscanf(e,"%lf",&gc_imbalance_tolerance)==1);
+    massert(gc_imbalance_tolerance>=0.0);
+  }
+
+  use_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
+
+  wait_on_abort=(e=getenv("GCL_WAIT_ON_ABORT")) && *e;
+  
+  return k;
+
+}
+
 void *initial_sbrk=NULL;
 
 int
@@ -266,7 +306,7 @@ update_real_maxpage(void) {
   }
 #endif
 
-  phys_pages=get_phys_pages_no_malloc(0);
+  phys_pages=get_phys_pages(0);
 
   massert(cur=sbrk(0));
   beg=data_start ? data_start : cur;
