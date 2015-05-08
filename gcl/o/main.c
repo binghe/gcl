@@ -207,44 +207,13 @@ get_proc_meminfo_value_in_pages(const char *k) {
 
 static ufixnum
 get_phys_pages_no_malloc(char freep) {
-  ufixnum k=freep ? 
+
+  return freep ? 
     get_proc_meminfo_value_in_pages("MemFree:")+
     get_proc_meminfo_value_in_pages("Buffers:")+
     get_proc_meminfo_value_in_pages("Cached:") :
     get_proc_meminfo_value_in_pages("MemTotal:");
-  const char *e=getenv("GCL_MEM_MULTIPLE");
-  if (e) {
-    double d;
-    massert(sscanf(e,"%lf",&d)==1);
-    massert(d>=0.0);
-    k*=d;
-  }
-  {
-    double d=0.75;
-    if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
-      massert(sscanf(e,"%lf",&d)==1);
-      massert(d>=0.0);
-    }
-    gc_page_threshold=k*d;
-  }
-  {
-    double d=0.95;
-    if ((e=getenv("GCL_GC_PAGE_MAX"))) {
-      massert(sscanf(e,"%lf",&d)==1);
-      massert(d>=0.0);
-    }
-    gc_page_max=k*d;
-  }
-  gc_imbalance_tolerance=1.0;
-  if ((e=getenv("GCL_GC_IMBALANCE_TOLERANCE"))) {
-    massert(sscanf(e,"%lf",&gc_imbalance_tolerance)==1);
-    massert(gc_imbalance_tolerance>=0.0);
-  }
-  use_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
-  wait_on_abort=(e=getenv("GCL_WAIT_ON_ABORT")) && *e;
   
-  return k;
-
 }
 
 #endif
