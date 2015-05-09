@@ -231,6 +231,13 @@ get_phys_pages(char freep) {
   }
 
   d=0.5;
+  if ((e=getenv("GCL_GC_ALLOC_THRESH"))) {
+    massert(sscanf(e,"%lf",&d)==1);
+    massert(d>=0.0);
+  }
+  gc_alloc_threshold=d;
+
+  d=0.5;
   if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
     massert(sscanf(e,"%lf",&d)==1);
     massert(d>=0.0);

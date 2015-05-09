@@ -838,7 +838,9 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
       (!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil ?
        tm->tm_npage+tpage(tm,n)>tm->tm_maxpage :
        (cpool=get_pool())>gc_page_threshold &&
-       (balanced_gc_p(tm) || cpool > gc_page_max))) {
+       (page(recent_allocation)>gc_alloc_threshold*data_pages() 
+	/* balanced_gc_p(tm) */
+	|| cpool > gc_page_max))) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
