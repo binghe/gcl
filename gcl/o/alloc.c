@@ -346,19 +346,19 @@ setup_rb(bool preserve_rb_pointerp) {
 void
 resize_hole(ufixnum hp,enum type tp,bool in_placep) {
   
-  char *start=rb_begin();
+  char *start=rb_begin(),*new_start=heap_end+hp*PAGESIZE;
   ufixnum size=rb_pointer-start;
 
-  new_rb_start=heap_end+hp*PAGESIZE;
-  
   if (!in_placep &&
-      ((new_rb_start<=start && start<new_rb_start+size) || (new_rb_start<start+size && start+size<=new_rb_start+size))) {
+      ((new_start<=start && start<new_start+size) || (new_start<start+size && start+size<=new_start+size))) {
     fprintf(stderr,"Toggling relblock when resizing hole to %lu\n",hp);
     fflush(stderr);
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
     return resize_hole(hp,tp,in_placep);
   }
+
+  new_rb_start=new_start;
 
   if (!size || in_placep)
     setup_rb(in_placep);
