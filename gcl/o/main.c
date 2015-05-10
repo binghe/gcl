@@ -220,36 +220,39 @@ get_phys_pages_no_malloc(char freep) {
 
 static ufixnum
 get_phys_pages(char freep) {
-  ufixnum k=get_phys_pages_no_malloc(freep);
+
+  return get_phys_pages_no_malloc(freep);
+
+}
+
+static void
+get_gc_environ(void) {
+
   const char *e;;
-  double d;
   
+  mem_multiple=1.0;
   if ((e=getenv("GCL_MEM_MULTIPLE"))) {
-    massert(sscanf(e,"%lf",&d)==1);
-    massert(d>=0.0);
-    k*=d;
+    massert(sscanf(e,"%lf",&mem_multiple)==1);
+    massert(mem_multiple>=0.0);
   }
 
-  d=0.5;
+  gc_alloc_thresh=0.5;
   if ((e=getenv("GCL_GC_ALLOC_THRESH"))) {
-    massert(sscanf(e,"%lf",&d)==1);
-    massert(d>=0.0);
+    massert(sscanf(e,"%lf",&gc_alloc_thresh)==1);
+    massert(gc_alloc_thresh>=0.0);
   }
-  gc_alloc_threshold=d;
 
-  d=0.5;
+  gc_page_thresh=0.5;
   if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
-    massert(sscanf(e,"%lf",&d)==1);
-    massert(d>=0.0);
+    massert(sscanf(e,"%lf",&gc_page_thresh)==1);
+    massert(gc_page_thresh>=0.0);
   }
-  gc_page_threshold=k*d;
 
-  d=0.75;
+  gc_page_max=0.75;
   if ((e=getenv("GCL_GC_PAGE_MAX"))) {
-    massert(sscanf(e,"%lf",&d)==1);
-    massert(d>=0.0);
+    massert(sscanf(e,"%lf",&gc_page_max)==1);
+    massert(gc_page_max>=0.0);
   }
-  gc_page_max=k*d;
 
   gc_imbalance_tolerance=1.0;
   if ((e=getenv("GCL_GC_IMBALANCE_TOLERANCE"))) {
@@ -257,11 +260,37 @@ get_phys_pages(char freep) {
     massert(gc_imbalance_tolerance>=0.0);
   }
 
-  use_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
+  multiprocess_memory_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
 
   wait_on_abort=(e=getenv("GCL_WAIT_ON_ABORT")) && *e;
   
-  return k;
+}
+
+static void
+setup_maxpages(double scale) {
+
+  void *beg=data_start ? data_start : sbrk(0);
+  ufixnum maxpages=real_maxpage-page(beg),npages,i;
+
+  for (npages=0,i=t_start;i<t_other;i++)
+    npages+=tm_table[i].tm_npage;
+
+  massert(scale*maxpages>=npages||!fprintf(stderr,"%lf %lu %lu\n",scale,maxpages,npages));
+
+  maxpages*=scale;
+  phys_pages*=scale;
+  real_maxpage=maxpages+page(beg);
+  
+  resv_pages=available_pages=0;
+  available_pages=check_avail_pages();
+  
+  for (i=t_start;i<t_other;i++)
+    massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage));
+  
+  resv_pages=40<available_pages ? 40 : available_pages;
+  available_pages-=resv_pages;
+  
+  recent_allocation=0;
 
 }
 
@@ -282,8 +311,6 @@ update_real_maxpage(void) {
   }
 #endif
 
-  phys_pages=get_phys_pages(0);
-
   massert(cur=sbrk(0));
   beg=data_start ? data_start : cur;
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
@@ -296,18 +323,11 @@ update_real_maxpage(void) {
 
   maxpages=real_maxpage-page(beg);
 
+  phys_pages=get_phys_pages(0);
   phys_pages=phys_pages>maxpages ? maxpages : phys_pages;
 
-  resv_pages=available_pages=0;
-  available_pages=check_avail_pages();
-  
-  for (i=t_start;i<t_other;i++)
-    massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage));
-
-  resv_pages=40<available_pages ? 40 : available_pages;
-  available_pages-=resv_pages;
-  
-  recent_allocation=0;
+  get_gc_environ();
+  setup_maxpages(mem_multiple);
   
   return 0;
 
@@ -350,7 +370,7 @@ DEFUN_NEW("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,
   dend=heap_end+PAGESIZE+CEI(rb_pointer-rb_begin(),PAGESIZE);
   if (end >= dend) {
     minimize_image();
-    log_maxpage_bound=l;
+    log_maxpage_bound=l;/*FIXME maybe this should be under mem_multiple, not over*/
     update_real_maxpage();
     maybe_set_hole_from_maxpages();
   }

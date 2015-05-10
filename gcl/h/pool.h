@@ -127,7 +127,7 @@ open_pool(void) {
 static void
 update_pool(fixnum val) {
 
-  if (use_pool) {
+  if (multiprocess_memory_pool) {
     open_pool();
     lock_pool();
     Pool->s+=val;
@@ -141,7 +141,7 @@ get_pool(void) {
 
   ufixnum s;
 
-  if (use_pool) {
+  if (multiprocess_memory_pool) {
 
     open_pool();
     lock_pool();

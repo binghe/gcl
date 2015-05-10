@@ -341,9 +341,9 @@ EXTER long holepage;			/*  hole pages  */
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
 
-EXTER ufixnum gc_page_threshold,gc_page_max,recent_allocation;
-EXTER double gc_imbalance_tolerance,gc_alloc_threshold;
-EXTER bool use_pool,wait_on_abort;
+EXTER ufixnum recent_allocation;
+EXTER double gc_imbalance_tolerance,gc_alloc_thresh,mem_multiple,gc_page_thresh,gc_page_max;
+EXTER bool multiprocess_memory_pool,wait_on_abort;
 
 EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
 EXTER char *rb_start;           	/*  relblock start  */
@@ -373,6 +373,16 @@ rb_emptyp(void) {
 INLINE ufixnum
 rb_size(void) {
   return rb_end-rb_start;
+}
+
+INLINE ufixnum
+ufmin(ufixnum a,ufixnum b) {
+  return a<=b ? a : b;
+}
+
+INLINE ufixnum
+ufmax(ufixnum a,ufixnum b) {
+  return a>=b ? a : b;
 }
 
 EXTER char *heap_end;			/*  heap end  */

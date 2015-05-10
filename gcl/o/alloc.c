@@ -827,7 +827,6 @@ balanced_gc_p(struct typemanager *my_tm) {
   return gc_burden(my_tm)<=d+gc_imbalance_tolerance*dd;
 
 }
-    
 
 static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
@@ -837,10 +836,11 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
   if (GBC_enable &&
       (!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil ?
        tm->tm_npage+tpage(tm,n)>tm->tm_maxpage :
-       (cpool=get_pool())>gc_page_threshold &&
-       (page(recent_allocation)>gc_alloc_threshold*data_pages() 
+       (cpool=get_pool())>gc_page_thresh*phys_pages &&
+       (page(recent_allocation)>gc_alloc_thresh*ufmin(data_pages(),available_pages)
 	/* balanced_gc_p(tm) */
-	|| cpool > gc_page_max))) {
+	/* || cpool > gc_page_max */
+	))) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
@@ -1227,7 +1227,7 @@ object malloc_list=Cnil;
 void
 maybe_set_hole_from_maxpages(void) {
   if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start)
-    resize_hole(phys_pages,t_relocatable,0);
+    resize_hole(available_pages/3,t_relocatable,0);
 }
 
 void
