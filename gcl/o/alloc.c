@@ -790,57 +790,31 @@ too_full_p(struct typemanager *tm) {
 
 }
 
-static inline double
-gc_burden(struct typemanager *tm) {
-
-  return (double)tm->tm_gbccount/(tm->tm_npage+1);
-
-}
-
-static inline int
-dcomp(const void *v1,const void *v2) {
-  const double *d1=v1,*d2=v2;
-  return *d1<*d2 ? -1 : (*d1==*d2 ? 0 : 1);
-}
-
 static inline bool
-balanced_gc_p(struct typemanager *my_tm) {
+do_gc_p(struct typemanager *tm,fixnum n) {
 
-  double d,dd;
-  struct typemanager *tm;
-  double ds[t_other];
-  int i,j;
+  ufixnum cpool,pp;
+  
+  if (!GBC_enable)
+    return FALSE;
 
-  for (i=0,tm=tm_table;tm<tm_table+t_other;tm++)
-    if (tm->tm_npage)
-      ds[i++]=gc_burden(tm);
-  if (!i) return TRUE;
+  if (!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil)
+    return tm->tm_npage+tpage(tm,n)>tm->tm_maxpage;
 
-  qsort(ds,i,sizeof(*ds),dcomp);
-  d=i%2 ? ds[(i-1)/2] : (ds[i/2]+ds[(i/2)+1])/2;
-  for (j=1,dd=0.0;j<i-1;j++)
-    dd+=ds[j]*ds[j];
-  dd/=i>2 ? i-2 : 1;
-  dd-=d*d;
-  dd=sqrt(dd);
+  if ((cpool=get_pool())<=gc_page_min*phys_pages)
+    return FALSE;
 
-  return gc_burden(my_tm)<=d+gc_imbalance_tolerance*dd;
+  pp=gc_page_max*phys_pages;
+
+  return page(recent_allocation)>(1.0+gc_alloc_min-(double)ufmin(cpool,pp)/pp)*data_pages();
 
 }
-
+  
+      
 static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
-  ufixnum cpool;
-  
-  if (GBC_enable &&
-      (!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil ?
-       tm->tm_npage+tpage(tm,n)>tm->tm_maxpage :
-       (cpool=get_pool())>gc_page_thresh*phys_pages &&
-       (page(recent_allocation)>gc_alloc_thresh*ufmin(data_pages(),gc_max_alloc*phys_pages)
-	/* balanced_gc_p(tm) */
-	/* || cpool > gc_page_max */
-	))) {
+  if (do_gc_p(tm,n)) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/

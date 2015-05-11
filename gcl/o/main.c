@@ -236,28 +236,22 @@ get_gc_environ(void) {
     massert(mem_multiple>=0.0);
   }
 
-  gc_alloc_thresh=0.5;
-  if ((e=getenv("GCL_GC_ALLOC_THRESH"))) {
-    massert(sscanf(e,"%lf",&gc_alloc_thresh)==1);
-    massert(gc_alloc_thresh>=0.0);
+  gc_alloc_min=0.1;
+  if ((e=getenv("GCL_GC_ALLOC_MIN"))) {
+    massert(sscanf(e,"%lf",&gc_alloc_min)==1);
+    massert(gc_alloc_min>=0.0);
   }
 
-  gc_page_thresh=0.5;
+  gc_page_min=0.5;
   if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
-    massert(sscanf(e,"%lf",&gc_page_thresh)==1);
-    massert(gc_page_thresh>=0.0);
+    massert(sscanf(e,"%lf",&gc_page_min)==1);
+    massert(gc_page_min>=0.0);
   }
 
-  gc_max_alloc=1.0;
-  if ((e=getenv("GCL_GC_MAX_ALLOC"))) {
-    massert(sscanf(e,"%lf",&gc_max_alloc)==1);
-    massert(gc_max_alloc>=0.0);
-  }
-
-  gc_imbalance_tolerance=1.0;
-  if ((e=getenv("GCL_GC_IMBALANCE_TOLERANCE"))) {
-    massert(sscanf(e,"%lf",&gc_imbalance_tolerance)==1);
-    massert(gc_imbalance_tolerance>=0.0);
+  gc_page_max=0.75;
+  if ((e=getenv("GCL_GC_PAGE_MAX"))) {
+    massert(sscanf(e,"%lf",&gc_page_max)==1);
+    massert(gc_page_max>=0.0);
   }
 
   multiprocess_memory_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
