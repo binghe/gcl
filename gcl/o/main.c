@@ -248,10 +248,10 @@ get_gc_environ(void) {
     massert(gc_page_thresh>=0.0);
   }
 
-  gc_page_max=0.75;
-  if ((e=getenv("GCL_GC_PAGE_MAX"))) {
-    massert(sscanf(e,"%lf",&gc_page_max)==1);
-    massert(gc_page_max>=0.0);
+  gc_max_alloc=1.0;
+  if ((e=getenv("GCL_GC_MAX_ALLOC"))) {
+    massert(sscanf(e,"%lf",&gc_max_alloc)==1);
+    massert(gc_max_alloc>=0.0);
   }
 
   gc_imbalance_tolerance=1.0;

@@ -342,7 +342,7 @@ EXTER long holepage;			/*  hole pages  */
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
 
 EXTER ufixnum recent_allocation;
-EXTER double gc_imbalance_tolerance,gc_alloc_thresh,mem_multiple,gc_page_thresh,gc_page_max;
+EXTER double gc_imbalance_tolerance,gc_alloc_thresh,mem_multiple,gc_page_thresh,gc_max_alloc;
 EXTER bool multiprocess_memory_pool,wait_on_abort;
 
 EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
