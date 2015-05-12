@@ -1,3 +1,5 @@
+#ifndef NO_FILE_LOCKING
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -117,17 +119,21 @@ open_pool(void) {
   }
 
 }
+#endif
+
 
 static void
 update_pool(fixnum val) {
 
+#ifndef NO_FILE_LOCKING
   if (multiprocess_memory_pool) {
     open_pool();
     lock_pool();
     Pool->s+=val;
     unlock_pool();
   }
-
+#endif
+  
 }
 
 static ufixnum
@@ -135,6 +141,7 @@ get_pool(void) {
 
   ufixnum s;
 
+#ifndef NO_FILE_LOCKING
   if (multiprocess_memory_pool) {
 
     open_pool();
@@ -143,7 +150,8 @@ get_pool(void) {
     unlock_pool();
     
   } else
-
+#endif
+    
     s=data_pages();
 
   return s;

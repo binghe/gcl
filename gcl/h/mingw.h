@@ -243,3 +243,4 @@ extern int mingwlisten(FILE *);
 #include <limits.h>
 
 
+#define NO_FILE_LOCKING /*FIXME*/
