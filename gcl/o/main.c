@@ -256,7 +256,9 @@ get_gc_environ(void) {
 
   multiprocess_memory_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
 
-  wait_on_abort=(e=getenv("GCL_WAIT_ON_ABORT")) && *e;
+  wait_on_abort=0;
+  if ((e=getenv("GCL_WAIT_ON_ABORT")))
+    massert(sscanf(e,"%lu",&wait_on_abort)==1);
   
 }
 
@@ -568,7 +570,7 @@ void install_segmentation_catcher(void)
 void
 do_gcl_abort(void) {
   if (wait_on_abort)
-    sleep(3600);
+    sleep(wait_on_abort);
   gcl_cleanup(0);
   abort();
 }

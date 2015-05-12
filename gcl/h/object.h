@@ -341,9 +341,9 @@ EXTER long holepage;			/*  hole pages  */
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
 EXTER long new_holepage,starting_hole_div,starting_relb_heap_mult;
 
-EXTER ufixnum recent_allocation;
+EXTER ufixnum recent_allocation,wait_on_abort;
 EXTER double gc_alloc_min,mem_multiple,gc_page_min,gc_page_max;
-EXTER bool multiprocess_memory_pool,wait_on_abort;
+EXTER bool multiprocess_memory_pool;
 
 EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
 EXTER char *rb_start;           	/*  relblock start  */
