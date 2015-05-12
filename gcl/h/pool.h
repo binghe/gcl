@@ -62,16 +62,10 @@ register_pool(int s) {
 void
 close_pool(void) {
 
-  ufixnum n;
-  
   if (pool!=-1) {
     register_pool(-1);
-    lock_pool();
-    n=Pool->n;
-    unlock_pool();
     massert(!close(pool));
     massert(!munmap(Pool,sizeof(struct pool)));
-    massert(n || !unlink(gcl_pool));
     pool=-1;
   }
 
