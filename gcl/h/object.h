@@ -386,7 +386,7 @@ ufmax(ufixnum a,ufixnum b) {
 }
 
 #include <unistd.h>
-void
+INLINE void
 emsg(const char *s) {
   write(2,s,strlen(s));
 }
