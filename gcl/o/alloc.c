@@ -388,8 +388,7 @@ alloc_page(long n) {
       d=d<0 ? 0 : d;
       d=(available_pages/3)<d ? (available_pages/3) : d;
       
-      fprintf(stderr,"Hole overrun\n");
-      fflush(stderr);
+      emsg("Hole overrun\n");
 
       resize_hole(d+nn,t_relocatable,0);
 

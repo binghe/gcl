@@ -385,6 +385,11 @@ ufmax(ufixnum a,ufixnum b) {
   return a>=b ? a : b;
 }
 
+void
+emsg(const char *s) {
+  write(2,s,strlen(s));
+}
+
 EXTER char *heap_end;			/*  heap end  */
 EXTER char *core_end;			/*  core end  */
 EXTER 
