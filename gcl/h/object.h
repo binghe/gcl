@@ -355,9 +355,14 @@ EXTER char *rb_pointer;		/*  relblock pointer  */
 #define INLINE
 #endif
 
+INLINE ufixnum
+rb_size(void) {
+  return rb_end-rb_start;
+}
+
 INLINE bool
 rb_high(void) {
-  return rb_pointer>=rb_end;
+  return rb_pointer>=rb_end&&rb_size();
 }
 
 INLINE char *
@@ -368,11 +373,6 @@ rb_begin(void) {
 INLINE bool
 rb_emptyp(void) {
   return rb_pointer == rb_begin();
-}
-
-INLINE ufixnum
-rb_size(void) {
-  return rb_end-rb_start;
 }
 
 INLINE ufixnum
