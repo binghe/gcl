@@ -351,8 +351,7 @@ resize_hole(ufixnum hp,enum type tp,bool in_placep) {
 
   if (!in_placep &&
       ((new_start<=start && start<new_start+size) || (new_start<start+size && start+size<=new_start+size))) {
-    fprintf(stderr,"Toggling relblock when resizing hole to %lu\n",hp);
-    fflush(stderr);
+    emsg("Toggling relblock when resizing hole\n");
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
     return resize_hole(hp,tp,in_placep);
@@ -855,8 +854,7 @@ add_pages(struct typemanager *tm,fixnum m) {
   case t_relocatable:
 
     if (rb_high() && m>((rb_start-heap_end)>>PAGEWIDTH)) {
-      fprintf(stderr,"Moving relblock low before expanding relblock pages\n");
-      fflush(stderr);
+      emsg("Moving relblock low before expanding relblock pages\n");
       tm_table[t_relocatable].tm_adjgbccnt--;
       GBC(t_relocatable);
     }
