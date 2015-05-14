@@ -1333,7 +1333,7 @@ GBC(enum type t) {
 	       tm_table[(int)tm_table[i].tm_type].tm_name);
     }
     printf("contblock: %ld blocks %ld pages\n", count_contblocks(), ncbpage);
-    printf("hole: %ld pages\n", ((rb_start-heap_end)>>PAGEWIDTH));
+    printf("hole: %lu pages\n", (ufixnum)page(rb_start-heap_end)));
     printf("relblock: %ld bytes used %ld bytes free %ld pages\n",
 	   (long)(rb_pointer - rb_start), (long)(rb_end - rb_pointer), nrbpage);
     printf("GBC ended\n");

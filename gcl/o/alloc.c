@@ -1841,18 +1841,16 @@ free(void *ptr) {
 #endif
       return;
     }
-#ifdef NOFREE_ERR
-  return;
-#else	
   if (ptr!=initial_monstartup_pointer_echo) {
     static void *old_ptr;
     if (old_ptr==ptr) return;
     old_ptr=ptr;
+#ifndef NOFREE_ERR
     FEerror("free(3) error.",0);
+#endif
   }
   initial_monstartup_pointer_echo=NULL;
   return;
-#endif	
 }
  
 void *

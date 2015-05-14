@@ -244,7 +244,7 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   strcat(filename, (strcmp (ptr, ".exe") && strcmp (ptr, ".EXE"))?".exe":"");
   cygwin_conv_to_full_win32_path(filename,out_filename);
 #else 
-  file_data in_file, out_file;
+  static file_data in_file, out_file;
   char out_filename[MAX_PATH], in_filename[MAX_PATH];
   unsigned long size;
   char *ptr;
