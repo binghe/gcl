@@ -385,6 +385,7 @@ ufmax(ufixnum a,ufixnum b) {
   return a>=b ? a : b;
 }
 
+#include <unistd.h>
 void
 emsg(const char *s) {
   write(2,s,strlen(s));
