@@ -1,3 +1,10 @@
+static ufixnum
+data_pages(void) {
+
+  return page(2*(rb_end-rb_start)+((void *)heap_end-data_start));
+
+}
+  
 #ifndef NO_FILE_LOCKING
 
 #include <sys/types.h>
@@ -46,13 +53,6 @@ unlock_pool(void) {
 
 }
 
-static ufixnum
-data_pages(void) {
-
-  return page(2*(rb_end-rb_start)+((void *)heap_end-data_start));
-
-}
-  
 static void
 register_pool(int s) {
   lock_pool();
@@ -61,18 +61,6 @@ register_pool(int s) {
   unlock_pool();
 }
   
-void
-close_pool(void) {
-
-  if (pool!=-1) {
-    register_pool(-1);
-    massert(!close(pool));
-    massert(!munmap(Pool,sizeof(struct pool)));
-    pool=-1;
-  }
-
-}
-
 static void
 open_pool(void) {
 
@@ -121,6 +109,19 @@ open_pool(void) {
 }
 #endif
 
+void
+close_pool(void) {
+
+#ifndef NO_FILE_LOCKING
+  if (pool!=-1) {
+    register_pool(-1);
+    massert(!close(pool));
+    massert(!munmap(Pool,sizeof(struct pool)));
+    pool=-1;
+  }
+#endif
+  
+}
 
 static void
 update_pool(fixnum val) {

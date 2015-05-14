@@ -244,3 +244,5 @@ extern int mingwlisten(FILE *);
 
 
 #define NO_FILE_LOCKING /*FIXME*/
+
+#define sleep(n) Sleep(1000*n)

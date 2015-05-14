@@ -28,11 +28,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#define sleep(n) Sleep(1000 * n)
-#endif
-
 #ifdef ATT3B2
 #include <signal.h>
 int

@@ -1355,7 +1355,7 @@ gcl_init_alloc(void *cs_start) {
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
   
-  resize_hole(phys_pages,t_relocatable,0);
+  resize_hole(ufmin(phys_pages,available_pages/3),t_relocatable,0);
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
