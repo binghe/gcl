@@ -269,9 +269,9 @@ setup_maxpages(double scale) {
   ufixnum maxpages=real_maxpage-page(beg),npages,i;
 
   for (npages=0,i=t_start;i<t_other;i++)
-    npages+=tm_table[i].tm_npage;
+    npages+=tm_table[i].tm_maxpage=tm_table[i].tm_npage;
 
-  massert(scale*maxpages>=npages||!fprintf(stderr,"%lf %lu %lu\n",scale,maxpages,npages));
+  massert(scale*maxpages>=npages);
 
   maxpages*=scale;
   phys_pages*=scale;
@@ -279,9 +279,6 @@ setup_maxpages(double scale) {
   
   resv_pages=available_pages=0;
   available_pages=check_avail_pages();
-  
-  for (i=t_start;i<t_other;i++)
-    massert(set_tm_maxpage(tm_table+i,tm_table[i].tm_npage));
   
   resv_pages=40<available_pages ? 40 : available_pages;
   available_pages-=resv_pages;
@@ -297,7 +294,6 @@ update_real_maxpage(void) {
 
   ufixnum i,j;
   void *end,*cur,*beg;
-  ufixnum maxpages;
 #ifdef __MINGW32__
   static fixnum n;
 
@@ -317,10 +313,7 @@ update_real_maxpage(void) {
       }
   massert(!mbrk(cur));
 
-  maxpages=real_maxpage-page(beg);
-
-  phys_pages=get_phys_pages(0);
-  phys_pages=phys_pages>maxpages ? maxpages : phys_pages;
+  phys_pages=ufmin(get_phys_pages(0)+page(beg),real_maxpage)-page(beg);
 
   get_gc_environ();
   setup_maxpages(mem_multiple);
