@@ -526,7 +526,7 @@ if test "$GCC" = "yes" ; then
 #	        echo "WARNING: Remove -fno-zero-initialized-in-bss from makedefs if gcc less than 3.3.1."
 #	        echo "         It is otherwise needed for the Unexec stuff to work."
 #		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
-		TCFLAGS="$TCFLAGS -I/usr/include/tirpc -fno-zero-initialized-in-bss -mms-bitfields";;
+		TCFLAGS="$TCFLAGS -fno-zero-initialized-in-bss -mms-bitfields";;
         esac
 fi
 #if test -f /proc/sys/kernel/exec-shield ; then
@@ -1165,9 +1165,14 @@ fi
 
 if test "$enable_xdr" = "yes" ; then
    AC_CHECK_FUNC(xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions]),
-   	   AC_CHECK_LIB(tirpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions]) TLIBS="$TLIBS -ltirpc",
-	   AC_CHECK_LIB(rpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions]) TLIBS="$TLIBS -lrpc",
-	   AC_CHECK_LIB(oncrpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions]) TLIBS="$TLIBS -loncrpc"))))
+   	   AC_CHECK_LIB(tirpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
+	                TLIBS="$TLIBS -ltirpc" TCFLAGS="$TCFLAGS -I/usr/include/tirpc",
+	   AC_CHECK_LIB(gssrpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
+	                TLIBS="$TLIBS -lgssrpc" TCFLAGS="$TCFLAGS -I/usr/include/gssrpc",
+	   AC_CHECK_LIB(rpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
+	                TLIBS="$TLIBS -lrpc" TCFLAGS="$TCFLAGS -I/usr/include/rpc",
+	   AC_CHECK_LIB(oncrpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
+	                TLIBS="$TLIBS -loncrpc" TCFLAGS="$TCFLAGS -I/usr/include/oncrpc")))))
 fi
 
 

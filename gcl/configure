@@ -4255,7 +4255,7 @@ if test "$GCC" = "yes" ; then
 #	        echo "WARNING: Remove -fno-zero-initialized-in-bss from makedefs if gcc less than 3.3.1."
 #	        echo "         It is otherwise needed for the Unexec stuff to work."
 #		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
-		TCFLAGS="$TCFLAGS -Iusr/include/tirpc -fno-zero-initialized-in-bss -mms-bitfields";;
+		TCFLAGS="$TCFLAGS -fno-zero-initialized-in-bss -mms-bitfields";;
         esac
 fi
 #if test -f /proc/sys/kernel/exec-shield ; then
@@ -6076,7 +6076,50 @@ $as_echo "$ac_cv_lib_tirpc_xdr_double" >&6; }
 if test "x$ac_cv_lib_tirpc_xdr_double" = xyes; then :
 
 $as_echo "#define HAVE_XDR 1" >>confdefs.h
- TLIBS="$TLIBS -ltirpc"
+
+	                TLIBS="$TLIBS -ltirpc" TCFLAGS="$TCFLAGS -I/usr/include/tirpc"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for xdr_double in -lgssrpc" >&5
+$as_echo_n "checking for xdr_double in -lgssrpc... " >&6; }
+if ${ac_cv_lib_gssrpc_xdr_double+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgssrpc  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char xdr_double ();
+int
+main ()
+{
+return xdr_double ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gssrpc_xdr_double=yes
+else
+  ac_cv_lib_gssrpc_xdr_double=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gssrpc_xdr_double" >&5
+$as_echo "$ac_cv_lib_gssrpc_xdr_double" >&6; }
+if test "x$ac_cv_lib_gssrpc_xdr_double" = xyes; then :
+
+$as_echo "#define HAVE_XDR 1" >>confdefs.h
+
+	                TLIBS="$TLIBS -lgssrpc" TCFLAGS="$TCFLAGS -I/usr/include/gssrpc"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for xdr_double in -lrpc" >&5
 $as_echo_n "checking for xdr_double in -lrpc... " >&6; }
@@ -6117,7 +6160,8 @@ $as_echo "$ac_cv_lib_rpc_xdr_double" >&6; }
 if test "x$ac_cv_lib_rpc_xdr_double" = xyes; then :
 
 $as_echo "#define HAVE_XDR 1" >>confdefs.h
- TLIBS="$TLIBS -lrpc"
+
+	                TLIBS="$TLIBS -lrpc" TCFLAGS="$TCFLAGS -I/usr/include/rpc"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for xdr_double in -loncrpc" >&5
 $as_echo_n "checking for xdr_double in -loncrpc... " >&6; }
@@ -6158,7 +6202,10 @@ $as_echo "$ac_cv_lib_oncrpc_xdr_double" >&6; }
 if test "x$ac_cv_lib_oncrpc_xdr_double" = xyes; then :
 
 $as_echo "#define HAVE_XDR 1" >>confdefs.h
- TLIBS="$TLIBS -loncrpc"
+
+	                TLIBS="$TLIBS -loncrpc" TCFLAGS="$TCFLAGS -I/usr/include/oncrpc"
+fi
+
 fi
 
 fi
