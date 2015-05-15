@@ -441,7 +441,7 @@ fill pointer, and this will be advanced.")
      if (downcase)
      while (--len>=0)
        { char c = *p++;
-	 c=tolower(c);
+	 c=tolower((int)c);
 	 if(needs_quoting[(unsigned char)c])
 	   PUSH('\\');
 	 PUSH(c);}

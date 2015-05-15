@@ -567,8 +567,8 @@ regatom(int *flagp)
 		  while (p < regcp)
 		    { result[*(unsigned char *)p] = matches;
 		      if (case_fold_search)
-			{result[tolower(*p)] = matches;
-			 result[toupper(*p)] = matches; p++;}
+			{result[tolower((int)*p)] = matches;
+			  result[toupper((int)*p)] = matches; p++;}
 		      else
 		      result[*(unsigned char *)p++] = matches;
 		      
@@ -912,9 +912,9 @@ regexec(register regexp *prog, register char *string, char *start, int length)
 	if (prog->regstart != '\0')
 		/* We know what char it must start with. */
 	  { if (case_fold_search)
-	      {char ch = tolower(prog->regstart);
+	      {char ch = tolower((int)prog->regstart);
 	       while (*s)
-		 { if (tolower(*s)==ch)
+		 { if (tolower((int)*s)==ch)
 		     {if (regtry(prog, s))
 			RETURN_VAL(1);}
 		   s++;}}
@@ -1055,7 +1055,7 @@ regmatch(char *prog)
 				opnd = OPERAND(scan);
 				if (case_fold_search)
 				while (*opnd )
-				  { if (tolower(*opnd) != tolower(*ch))
+				  { if (tolower((int)*opnd) != tolower(*ch))
 				       return 0;
 				    else { ch++; opnd++;}}
 				else
@@ -1175,7 +1175,7 @@ regmatch(char *prog)
 				if (OP(next) == EXACTLY)
 					nextch = *OPERAND(next);
 				if (case_fold_search)
-				  nextch = tolower(nextch);
+				  nextch = tolower((int)nextch);
 				min = (OP(scan) == STAR) ? 0 : 1;
 				save = reginput;
 				no = regrepeat(OPERAND(scan));
@@ -1184,7 +1184,7 @@ regmatch(char *prog)
 					if (nextch == '\0' ||
 					    *reginput == nextch
 					    || (case_fold_search &&
-					      tolower(*reginput) == nextch))
+						tolower((int)*reginput) == nextch))
 						if (regmatch(next))
 							return(1);
 					/* Couldn't or didn't -- back up. */
@@ -1237,8 +1237,8 @@ regrepeat(char *p)
 	case EXACTLY:
 		{ char ch = *opnd;
 		if (case_fold_search)
-		  { ch = tolower(*opnd);
-		    while (ch == tolower(*scan))
+		  { ch = tolower((int)*opnd);
+		    while (ch == tolower((int)*scan))
 		      {
 			count++;
 			scan++;}}
@@ -1509,8 +1509,8 @@ min_initial_branch_length(regexp *x, unsigned char *buf, int advance)
 		    n--;
 		    while(1)
 		      { if (case_fold_search)
-			  {MINIMIZE(buf[tolower(*ss)],n);
-			   MINIMIZE(buf[toupper(*ss)],n);
+			  {MINIMIZE(buf[tolower((int)*ss)],n);
+			    MINIMIZE(buf[toupper((int)*ss)],n);
 			  }
 			else
 			  { MINIMIZE(buf[*(unsigned char *)ss],n);}

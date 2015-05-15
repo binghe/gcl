@@ -42,6 +42,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <string.h>
 #include <readline/history.h>
 

@@ -390,14 +390,14 @@ edit_double(int n, double d, int *sp, char *s, int *ep) {
 
   truncate_double(b,d,n!=7);
 
-  if (isdigit(b[0])) {
+  if (isdigit((int)b[0])) {
     b[1]=b[0];
     (*ep)++;
   }
   if (b[2]=='0') (*ep)++;
   b[2] = b[1];
   p = b + 2;
-  for (i=0;i<n && i<FPRC+1 && isdigit(p[i]);i++)
+  for (i=0;i<n && i<FPRC+1 && isdigit((int)p[i]);i++)
       s[i] = p[i];
   for (;i<n;i++)
     s[i] = '0';
