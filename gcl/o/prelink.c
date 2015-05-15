@@ -2,7 +2,7 @@
 
 #include "include.h"
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
 extern FILE *stdin __attribute__((weak));
 extern FILE *stderr __attribute__((weak));
 extern FILE *stdout __attribute__((weak));
