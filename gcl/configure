@@ -5198,7 +5198,7 @@ $as_echo_n "checking \"for leading underscore in object symbols\"... " >&6; }
 cat>foo.c <<EOFF
 #include <math.h>
 #include <stdio.h>
-int main() {FILE *f;double d=0.0;getc(f);cos(d);return 0;}
+int main() {FILE *f;double d=0.0;getc(f);d=cos(d);return 0;}
 EOFF
 $CC -c foo.c -o foo.o
 if nm foo.o |grep " U " | grep "_cos" >/dev/null || nm foo.o |grep " U " | grep " _getc" >/dev/null ; then
