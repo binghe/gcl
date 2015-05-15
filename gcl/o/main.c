@@ -421,7 +421,7 @@ gcl_cleanup(int gc) {
 #ifdef CLEANUP_CODE
   CLEANUP_CODE
 #elif defined(USE_CLEANUP)
-    _cleanup();
+    {extern void _cleanup(void);_cleanup();}
 #endif
 
 #ifdef GCL_GPROF
