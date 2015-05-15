@@ -1055,7 +1055,7 @@ regmatch(char *prog)
 				opnd = OPERAND(scan);
 				if (case_fold_search)
 				while (*opnd )
-				  { if (tolower((int)*opnd) != tolower(*ch))
+				  { if (tolower((int)*opnd) != tolower((int)*ch))
 				       return 0;
 				    else { ch++; opnd++;}}
 				else
