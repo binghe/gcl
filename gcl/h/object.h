@@ -400,8 +400,7 @@ emsg(const char *s,...) {
   va_start(args,s);
   vsnprintf(v,n,s,args);
   va_end(args);
-  write(2,v,n-1);
-  return -1;
+  return write(2,v,n-1)||-1;
 }
 
 EXTER char *heap_end;			/*  heap end  */
