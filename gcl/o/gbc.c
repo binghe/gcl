@@ -85,11 +85,9 @@ cb_print(void) {
   struct contblock **cbpp;
   int i;
   
-  for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++) {
-    fprintf(stderr,"%lu at %p\n",(*cbpp)->cb_size,*cbpp);
-    fflush(stderr);
-  }
-  fprintf(stderr,"%u blocks\n",i);
+  for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++)
+    emsg("%lu at %p\n",(*cbpp)->cb_size,*cbpp);
+  emsg("%u blocks\n",i);
   return 0;
 }
 
@@ -1501,13 +1499,13 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
   
   for (i=j=0,cbpp=&cb_pointer;(*cbpp);) {
     for (k=0,s=(*cbpp)->cb_size,p=*cbpp;*cbpp && (*cbpp)->cb_size==s;i+=(*cbpp)->cb_size,j++,k++,cbpp=&(*cbpp)->cb_link);
-    fprintf(stderr,"%lu %lu starting at %p\n",k,s,p);
+    emsg("%lu %lu starting at %p\n",k,s,p);
   }
-  fprintf(stderr,"\nTotal free %lu in %lu pieces\n\n",i,j);
+  emsg("\nTotal free %lu in %lu pieces\n\n",i,j);
   
   for (i=j=k=0;k<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[k]);k++,i+=v->in_use,j++) 
-    fprintf(stderr,"%lu pages at %p\n",(unsigned long)v->in_use,v);
-  fprintf(stderr,"\nTotal pages %lu in %lu pieces\n\n",i,j);
+    emsg("%lu pages at %p\n",(unsigned long)v->in_use,v);
+  emsg("\nTotal pages %lu in %lu pieces\n\n",i,j);
   
   for (i=j=0,v=cell_list_head;v;v=v->next)
     if (tm->tm_type==v->type) {
@@ -1516,13 +1514,13 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
       for (p=pagetochar(page(v)),k=0;k<tm->tm_nppage;k++,p+=tm->tm_size) {
  	object o=p;
  	if (!is_free(o) && type_of(o)==t_cfdata && (void *)o->cfd.cfd_start>=data_start) {
- 	  fprintf(stderr,"%lu code bytes at %p\n",(unsigned long)o->cfd.cfd_size,o->cfd.cfd_start);
+ 	  emsg("%lu code bytes at %p\n",(unsigned long)o->cfd.cfd_size,o->cfd.cfd_start);
  	  i+=o->cfd.cfd_size;
  	  j++;
  	}
       }
     }
-  fprintf(stderr,"\nTotal code bytes %lu in %lu pieces\n",i,j);
+  emsg("\nTotal code bytes %lu in %lu pieces\n",i,j);
   
   for (i=j=0,v=cell_list_head;v;v=v->next) {
     struct typemanager *tm=tm_of(v->type);
@@ -1584,14 +1582,14 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
  	  break;
  	}
  	if (d>=data_start && d<(void *)heap_end && s) {
- 	  fprintf(stderr,"%lu %s bytes at %p\n",s,tm_table[type_of(o)].tm_name,d);
+ 	  emsg("%lu %s bytes at %p\n",s,tm_table[type_of(o)].tm_name,d);
  	  i+=s;
  	  j++;
  	}
       }
     }
   }
-  fprintf(stderr,"\nTotal leaf bytes %lu in %lu pieces\n",i,j);
+  emsg("\nTotal leaf bytes %lu in %lu pieces\n",i,j);
   
   return Cnil;
 

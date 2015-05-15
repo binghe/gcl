@@ -175,7 +175,7 @@ relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char 
       if ((answ=find_sym_ptable(s))) 
 	sym->n_value=answ->address;
       else
-	massert(!fprintf(stderr,"Unrelocated non-local symbol: %s\n",s));
+	massert(!emsg("Unrelocated non-local symbol: %s\n",s));
 
       if (c)
 	sym->n.n_name[8]=c;

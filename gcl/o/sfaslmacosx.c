@@ -37,17 +37,7 @@ typedef int (*func) ();
 /* Externalize the command line used to build loadable object files (a.k.a. bundles).  */
 object sSAmacosx_ldcmdA = 0L;
 
-static void sfasl_error (char *format, ...)
-{
-    va_list ap;
-    
-    va_start (ap, format);
-    fprintf (stderr, "fasload: ");
-    vfprintf (stderr, format, ap);
-    fprintf (stderr, "\n");
-    va_end (ap);
-    exit (1);
-}
+#define sfasl_error(a,b...) {emsg(a,b);do_gcl_abort();}
 
 /* static void get_init_name (object faslfile, char *init_fun) */
 /* { */

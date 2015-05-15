@@ -351,7 +351,7 @@ resize_hole(ufixnum hp,enum type tp,bool in_placep) {
 
   if (!in_placep &&
       ((new_start<=start && start<new_start+size) || (new_start<start+size && start+size<=new_start+size))) {
-    emsg("Toggling relblock when resizing hole\n");
+    emsg("Toggling relblock when resizing hole to %lu\n",hp);
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
     return resize_hole(hp,tp,in_placep);
@@ -656,13 +656,11 @@ print_cb(int print) {
     massert(**cbppp==cbp);
     for (k=0;cbp && cbp->cb_size==(**cbppp)->cb_size;cbpp=&cbp->cb_link,cbp=cbp->cb_link,k++);
     if (print)
-      fprintf(stderr,"%lu %p %p %lu %lu\n",(unsigned long)(cbppp-cbsrch1),*cbppp,**cbppp,(**cbppp)->cb_size,k);
+      emsg("%lu %p %p %lu %lu\n",(unsigned long)(cbppp-cbsrch1),*cbppp,**cbppp,(**cbppp)->cb_size,k);
   }
   massert(cbppp==cbsrche);
   massert(*cbppp==cbpp);
   massert(!**cbppp);
-
-  fflush(stderr);
 
 }
   

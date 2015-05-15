@@ -181,7 +181,7 @@ relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
 #include RELOC_H
 
   default:
-    fprintf(stderr, "Unknown reloc type %lu\n", tp);
+    emsg("Unknown reloc type %lu\n", tp);
     massert(tp&~tp);
 
   }
@@ -234,7 +234,7 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
       sym->st_value=a->address;
 
     else if (ELF_ST_BIND(sym->st_info)!=STB_LOCAL)
-      massert(!fprintf(stderr,"Unrelocated non-local symbol: %s\n",st1+sym->st_name));
+      massert(!emsg("Unrelocated non-local symbol: %s\n",st1+sym->st_name));
 	
   }
 

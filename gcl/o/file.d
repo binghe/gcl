@@ -548,10 +548,8 @@ BEGIN:
 
 
 	case smm_socket:
-	  if (SOCKET_STREAM_FD(strm) < 2) {
-	    fprintf(stderr,"tried Clsing %d ! as scoket \n",SOCKET_STREAM_FD(strm));
-	    fflush(stderr);
-	  }
+	  if (SOCKET_STREAM_FD(strm) < 2)
+	    emsg("tried Closing %d ! as socket \n",SOCKET_STREAM_FD(strm));
 	  else {
 #ifdef HAVE_NSOCKET
           if (GET_STREAM_FLAG(strm,gcl_sm_output))
@@ -2180,10 +2178,7 @@ FFN(siLfp_input_stream)()
 #ifdef HAVE_NSOCKET
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     

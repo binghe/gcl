@@ -401,7 +401,7 @@ Filesz      Memsz       Flags       Align
    Instead we read the whole file, modify it, and write it out.  */
 
 #ifndef emacs
-#define fatal(a, b...) fprintf (stderr, a, ##b), do_gcl_abort()
+#define fatal(a, b...) emsg(a,##b),do_gcl_abort()
 #else
 #include "config.h"
 extern void fatal (char *, ...);
@@ -604,7 +604,7 @@ find_section (char *name, char *section_names, char *file_name, ElfW(Ehdr) *old_
   for (idx = 1; idx < old_file_h->e_shnum; idx++)
     {
 #ifdef DEBUG
-      fprintf (stderr, "Looking for %s - found %s\n", name,
+      emsg("Looking for %s - found %s\n", name,
 	       section_names + OLD_SECTION_H (idx).sh_name);
 #endif
       if (!strcmp (section_names + OLD_SECTION_H (idx).sh_name,
@@ -752,13 +752,13 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
     (new_data2_addr - OLD_SECTION_H (old_data_index).sh_addr);
 
 #ifdef DEBUG
-  fprintf (stderr, "old_bss_index %d\n", old_bss_index);
-  fprintf (stderr, "old_bss_addr %x\n", old_bss_addr);
-  fprintf (stderr, "old_bss_size %x\n", old_bss_size);
-  fprintf (stderr, "new_bss_addr %x\n", new_bss_addr);
-  fprintf (stderr, "new_data2_addr %x\n", new_data2_addr);
-  fprintf (stderr, "new_data2_size %x\n", new_data2_size);
-  fprintf (stderr, "new_data2_offset %x\n", new_data2_offset);
+  emsg("old_bss_index %d\n", old_bss_index);
+  emsg("old_bss_addr %x\n", old_bss_addr);
+  emsg("old_bss_size %x\n", old_bss_size);
+  emsg("new_bss_addr %x\n", new_bss_addr);
+  emsg("new_data2_addr %x\n", new_data2_addr);
+  emsg("new_data2_size %x\n", new_data2_size);
+  emsg("new_data2_offset %x\n", new_data2_offset);
 #endif
 
   if ((unsigned) new_bss_addr < (unsigned) old_bss_addr + old_bss_size)
@@ -806,10 +806,10 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   new_file_h->e_shnum += 1;
 
 #ifdef DEBUG
-  fprintf (stderr, "Old section offset %x\n", old_file_h->e_shoff);
-  fprintf (stderr, "Old section count %d\n", old_file_h->e_shnum);
-  fprintf (stderr, "New section offset %x\n", new_file_h->e_shoff);
-  fprintf (stderr, "New section count %d\n", new_file_h->e_shnum);
+  emsg("Old section offset %x\n", old_file_h->e_shoff);
+  emsg("Old section count %d\n", old_file_h->e_shnum);
+  emsg("New section offset %x\n", new_file_h->e_shoff);
+  emsg("New section count %d\n", new_file_h->e_shnum);
 #endif
 
   /* Fix up a new program header.  Extend the writable data segment so

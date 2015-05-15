@@ -4,10 +4,7 @@
 #include <string.h>
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     
@@ -65,7 +62,7 @@
 #endif
 
 #define VOID void
-#define ERROR_MESSAGE(msg)     do{ fprintf(stderr,msg); do_gcl_abort() ; } while(0)    
+#define ERROR_MESSAGE(msg)     do{ emsg(msg); do_gcl_abort() ; } while(0)    
 
 #ifdef STAND
 
@@ -512,8 +509,7 @@ getOneChar(FILE *fp)
   int high;
   /*  fprintf(stderr,"<socket 0x%x>",fp);
   fflush(stderr); */
-  fprintf(stderr,"in getOneChar, fd=%d,fp=%p",fd,fp);
-  fflush(stderr);
+  emsg("in getOneChar, fd=%d,fp=%p",fd,fp);
   if (fd == 0)
    { joe(fd);
    return -1;
@@ -529,16 +525,14 @@ getOneChar(FILE *fp)
   if (high > 0)
     {
       int ch ;
-      fprintf(stderr,"in getOneChar, fd=%d,fp=%p",fd,fp);
-      fflush(stderr);
+      emsg("in getOneChar, fd=%d,fp=%p",fd,fp);
       ch = getc(fp);
       if ( ch != EOF || feof(fp) ) {
 	/*      fprintf(stderr,"< 0x%x returning %d,%c>\n",fp,ch,ch);
       fflush(stderr);
       */
       }
-      fprintf(stderr,"in getOneChar, ch= %c,%d\n",ch,ch);
-      fflush(stderr);
+      emsg("in getOneChar, ch= %c,%d\n",ch,ch);
       CHECK_INTERRUPT;	 
       if (ch != EOF) return ch;
       if (feof(fp)) return EOF;
@@ -548,10 +542,7 @@ getOneChar(FILE *fp)
 }
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     

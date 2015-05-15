@@ -70,7 +70,7 @@ int w32_socket_init(void)
     } else {
         if (WSAStartup(0x0101, &WSAData)) {
             w32_socket_initialisations = 0;
-            fprintf ( stderr, "WSAStartup failed\n" );
+            emsg("WSAStartup failed\n" );
             WSACleanup();
             rv = -1;
         }
@@ -158,13 +158,9 @@ the socket.  If PORT is zero do automatic allocation of port")
 #endif                
                 (cRetry < BIND_MAX_RETRY));
       if (0)
-	{
-	  fprintf(stderr,
-  "\nAssigned automatic address to socket : port(%d), errno(%d), bind_rc(%d), iLastAddressUsed(%d), retries(%d)\n"
+	  emsg("\nAssigned automatic address to socket : port(%d), errno(%d), bind_rc(%d), iLastAddressUsed(%d), retries(%d)\n"
 		  , addr.sin_port, errno, rc, iLastAddressUsed, cRetry
 		  );
-	  fflush(stderr);
-	}
     }
   else
     {
@@ -221,8 +217,7 @@ and returns (list* named_socket fd name1) when one is established")
   fd = accept(fix(car(named_socket)) , (struct sockaddr *)&addr, &n);
   if (fd < 0)
     {
-      perror("ERROR ! accept on socket failed in sock_accept_connection");
-      fflush(stderr);
+      emsg("ERROR ! accept on socket failed in sock_accept_connection");
       return Cnil;
     }
   x = alloc_simple_string(sizeof(struct connection_state));

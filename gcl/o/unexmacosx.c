@@ -299,18 +299,7 @@ unexec_copy (off_t dest, off_t src, ssize_t count)
 
 /* Debugging and informational messages routines.  */
 
-static void
-unexec_error (char *format, ...)
-{
-  va_list ap;
-
-  va_start (ap, format);
-  fprintf (stderr, "unexec: ");
-  vfprintf (stderr, format, ap);
-  fprintf (stderr, "\n");
-  va_end (ap);
-  do_gcl_abort();
-}
+#define unexec_error(a,b...) emsg(a,##b),do_gcl_abort()
 
 /* More informational messages routines.  */
 

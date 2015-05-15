@@ -553,7 +553,7 @@ regatom(int *flagp)
 			*flagp |= HASWIDTH|SIMPLE;
 		}
 		 if (regcp - buf > sizeof(buf))
-		   { fprintf(stderr,"wow that is badly defined regexp..");
+		   { emsg("wow that is badly defined regexp..");
 		     do_gcl_abort();}
 		regcp --;
 		{ char *p=buf;
@@ -1025,12 +1025,12 @@ regmatch(char *prog)
 	scan = prog;
 #ifdef DEBUG
 	if (scan != NULL && regnarrate)
-		fprintf(stderr, "%s(\n", regprop(scan));
+		emsg("%s(\n", regprop(scan));
 #endif
 	while (scan != NULL) {
 #ifdef DEBUG
 		if (regnarrate)
-			fprintf(stderr, "%s...\n", regprop(scan));
+			emsg("%s...\n", regprop(scan));
 #endif
 		next = regnext(scan);
 
@@ -1575,7 +1575,7 @@ min_initial_branch_length(regexp *x, unsigned char *buf, int advance)
 void
 regerror(char *s)
 {
-    fprintf(stderr, "regexp error %s\n", s);
+    emsg("regexp error %s\n", s);
 }
 #endif
   

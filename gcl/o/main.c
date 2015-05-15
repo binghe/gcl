@@ -600,7 +600,7 @@ initlisp(void) {
 	    || NULL_OR_ON_C_STACK(pagetoinfo(first_data_page))
 	    || NULL_OR_ON_C_STACK(core_end-1)) {
 	  /* check person has correct definition of above */
-	  fprintf(stderr,"%p %d "
+	  emsg("%p %d "
 #if defined(IM_FIX_BASE)
 		  "%p %d %p %d "
 #endif

@@ -105,7 +105,7 @@ char *original_file, *save_file;
 */	
 
 	if (stdin != original || original->_file != 0) {
-		fprintf(stderr, "Can't open the original file.\n");
+		emsg("Can't open the original file.\n");
 		do_gcl_abort();
 	}
 	setbuf(original, stdin_buf);
@@ -113,7 +113,7 @@ char *original_file, *save_file;
 	unlink(save_file);
 	n = open(save_file, O_CREAT|O_WRONLY, 0777);
 	if (n != 1 || (save = fdopen(n, "w")) != stdout) {
-		fprintf(stderr, "Can't open the save file.\n");
+		emsg("Can't open the save file.\n");
 		do_gcl_abort();
 	}
 	setbuf(save, stdout_buf);

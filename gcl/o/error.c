@@ -40,7 +40,7 @@ assert_error(const char *a,unsigned l,const char *f,const char *n) {
 	    make_simple_string(a),make_fixnum(l),
 	    make_simple_string(f),make_simple_string(n));
   else {
-    fprintf(stderr,"The assertion %s on line %d of %s in function %s failed",a,l,f,n);
+    emsg("The assertion %s on line %d of %s in function %s failed",a,l,f,n);
     do_gcl_abort();
   }
 

@@ -140,19 +140,19 @@ void run_process ( char *name )
     if ( ! CloseHandle ( hChildStderrWrite ) ) DisplayError ( "CloseHandle: Error write" );
 
 #if 0
-    fprintf ( stderr, "Before write\n" );
+    emsg("Before write\n" );
     WriteFile ( hChildStdinWrite, chBuf, strlen ( chBuf ), 
                &dwWritten, NULL);
     FlushFileBuffers ( hChildStdinWrite );
     FlushFileBuffers ( hChildStdoutRead );
-    fprintf ( stderr, "Before read\n" );
+    emsg("Before read\n" );
     if ( ! ReadFile( hChildStdoutRead, chBuf, 2, &dwRead, NULL ) || 
          dwRead == 0 ) {
         DisplayError ( "Nothing read\n" );
     } else {
-        fprintf ( stderr, "Got Back: %s\n", chBuf );
+        emsg("Got Back: %s\n", chBuf );
     }
-    fprintf ( stderr, "After read\n" );
+    emsg("After read\n" );
 #endif
 
     
@@ -168,8 +168,7 @@ void run_process ( char *name )
         fprintf ( ifp, "button .wibble\n" );
         fflush (ifp);
         fgets ( buf, 2, ofp );
-        fprintf ( stderr, 
-                  "run_process: ofd = %x, ofp = %x, ifd = %x, ifp = %x, buf[0] = %x, buf[1] = %x, buf = %s\n",
+        emsg("run_process: ofd = %x, ofp = %x, ifd = %x, ifp = %x, buf[0] = %x, buf[1] = %x, buf = %s\n",
                   ofd, ofp, ifd, ifp, buf[0], buf[1], buf );
     }
 #endif
@@ -276,7 +275,7 @@ void siLrun_process()
         strcat ( cmdline, " ");
       }
       strcat ( cmdline,  vs_base[i]->st.st_self );
-      fprintf ( stderr, "siLrun_process: cmdline=%s\n", cmdline );
+      emsg("siLrun_process: cmdline=%s\n", cmdline );
       argc++;
     }
     signals_allowed = sig_at_read;
@@ -540,11 +539,10 @@ char **argv;
       massert(dup(fdin)>=0);
       close(1);
       massert(dup(fdout)>=0);
-      fprintf(stderr, "\n***** Spawning process %s ", pname);
+      emsg("\n***** Spawning process %s ", pname);
       if (execvp(pname, argv) == -1)
 	{
-	  fprintf(stderr, "\n***** Error in process spawning *******");
-	  fflush(stderr);
+	  emsg("\n***** Error in process spawning *******");
 	  do_gcl_abort();
 	}
     }
@@ -604,7 +602,7 @@ getpagesize()
 }
 
 dlclose()
-{fprintf(stderr,"calling 'dl' function sun did not supply..exitting") ;do_gcl_abort();}
+{emsg("calling 'dl' function sun did not supply..exitting") ;do_gcl_abort();}
 dgettext()
 {dlclose();}
 dlopen()

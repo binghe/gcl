@@ -8,10 +8,7 @@
 #include "stdlib.h"
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     
@@ -237,8 +234,7 @@ InitSockets()
 	 * Initialize the winsock library and check the version number.
 	 */
 	if ((*winSock.WSAStartup)(MAKEWORD(2,2), &wsaData) != 0) {
-	  fprintf(stderr,"unloading");
-	  fflush(stderr);
+	  emsg("unloading");
 	    goto unloadLibrary;
 	}
 #ifdef WSA_VERSION_REQD
@@ -380,10 +376,8 @@ CreateSocketAddress(sockaddrPtr, host, port)
 #ifdef DEBUG
 static void myerr(char *s,int d)
 {
-  if (0) {
-  fprintf(stderr,s,d);
-  fflush(stderr);
-  }
+  if (0)
+    emsg(s,d);
 
 }
 #else
@@ -769,8 +763,7 @@ sigint()
 #if 0
 BOOL WINAPI inthandler(DWORD i)
 {
-  fprintf(stderr,"in handler %d",i);
-      fflush(stderr); 
+  emsg("in handler %d",i);
   terminal_interrupt(1);
   return TRUE;
 }

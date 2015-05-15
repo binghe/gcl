@@ -386,9 +386,20 @@ ufmax(ufixnum a,ufixnum b) {
 }
 
 #include <unistd.h>
-INLINE void
-emsg(const char *s) {
-  write(2,s,strlen(s));
+INLINE int
+emsg(const char *s,...) {
+  va_list args;
+  ufixnum n=0;
+  void *v=NULL;
+  va_start(args,s);
+  n=vsnprintf(v,n,s,args)+1;
+  va_end(args);
+  v=alloca(n);
+  va_start(args,s);
+  vsnprintf(v,n,s,args);
+  va_end(args);
+  write(2,v,n-1);
+  return -1;
 }
 
 EXTER char *heap_end;			/*  heap end  */
