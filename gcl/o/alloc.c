@@ -749,11 +749,15 @@ alloc_from_freelist(struct typemanager *tm,fixnum n) {
 static inline void
 grow_linear1(struct typemanager *tm) {
   
-  fixnum maxgro=resv_pages ? available_pages : 0;
+  if (!sSAoptimize_maximum_pagesA || sSAoptimize_maximum_pagesA->s.s_dbind==Cnil) {
 
-  if (tm->tm_type==t_relocatable) maxgro>>=1;
+    fixnum maxgro=resv_pages ? available_pages : 0;
 
-  set_tm_maxpage(tm,grow_linear(tm->tm_npage,tm->tm_growth_percent,tm->tm_min_grow, tm->tm_max_grow,maxgro));
+    if (tm->tm_type==t_relocatable) maxgro>>=1;
+
+    set_tm_maxpage(tm,grow_linear(tm->tm_npage,tm->tm_growth_percent,tm->tm_min_grow, tm->tm_max_grow,maxgro));
+
+  }
 
 }
 
@@ -802,7 +806,8 @@ do_gc_p(struct typemanager *tm,fixnum n) {
 
   pp=gc_page_max*phys_pages;
 
-  return page(recent_allocation)>(1.0+gc_alloc_min-(double)ufmin(cpool,pp)/pp)*data_pages();
+  return page(recent_allocation)>(1.0+gc_alloc_min-(double)ufmin(cpool,pp)/pp)*data_pages() ||
+    2*tpage(tm,n)>available_pages;
 
 }
   

@@ -236,7 +236,7 @@ get_gc_environ(void) {
     massert(mem_multiple>=0.0);
   }
 
-  gc_alloc_min=0.1;
+  gc_alloc_min=0.05;
   if ((e=getenv("GCL_GC_ALLOC_MIN"))) {
     massert(sscanf(e,"%lf",&gc_alloc_min)==1);
     massert(gc_alloc_min>=0.0);
@@ -280,7 +280,7 @@ setup_maxpages(double scale) {
   resv_pages=available_pages=0;
   available_pages=check_avail_pages();
   
-  resv_pages=40<available_pages ? 40 : available_pages;
+  resv_pages=available_pages/100;
   available_pages-=resv_pages;
   
   recent_allocation=0;
