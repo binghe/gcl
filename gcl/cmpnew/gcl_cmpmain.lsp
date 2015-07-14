@@ -82,7 +82,7 @@
 
 (defun safe-system (string)
  (multiple-value-bind
-  (code result) (system (ts string))
+  (code result) (system (mysub (ts string) "$" "\\$"))
     (unless (and (zerop code) (zerop result))
       (cerror "Continues anyway."
               "(SYSTEM ~S) returned a non-zero value ~D."
