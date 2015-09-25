@@ -38,23 +38,28 @@
 
 
 (defmacro with-input-from-string ((var string &key index start end) . body)
-  (multiple-value-bind (ds b)
-      (find-declarations body)
-    `(let ((,var (make-string-input-stream ,string ,start ,end)))
-       ,@ds
-       (unwind-protect
-	   (progn ,@b)
-	 (when ,index (setf ,index (si:get-string-input-stream-index ,var)))
-	 (when ,var (close ,var))))))
-
+  (let ((x (sgen "X")))
+    (multiple-value-bind (ds b)
+	(find-declarations body)
+      `(let ((,var (make-string-input-stream ,string ,start ,end)))
+	 ,@ds
+	 (unwind-protect
+	     ,(let ((f `(progn ,@b)))
+		(if index
+		    `(let ((,x (multiple-value-list ,f))) (setf ,index (get-string-input-stream-index ,var)) (values-list ,x))
+		  f))
+	 (close ,var))))))
+  
 (defmacro with-output-to-string ((var &optional string &key element-type) . body)
-  (multiple-value-bind (ds b)
-      (find-declarations body)
-    `(let ((,var ,(if string `(make-string-output-stream-from-string ,string) `(make-string-output-stream))))
-       ,@ds
-       (unwind-protect
-	   (progn ,@b ,@(unless string `((get-output-stream-string ,var))))
-	 (when ,var (close ,var))))))
+  (let ((s (sgen "STRING"))(bl (sgen "BLOCK"))(e (sgen "ELEMENT-TYPE"))(x (sgen "X")))
+    (multiple-value-bind (ds b)
+	(find-declarations body)
+      `(let* ((,s ,string)(,e ,element-type)
+	      (,var (if ,s (make-string-output-stream-from-string ,s) (make-string-output-stream :element-type ,e))))
+	 ,@ds
+	 (unwind-protect
+	     (let ((,x (multiple-value-list (progn ,@b)))) (if ,s (values-list ,x) (get-output-stream-string ,var)))
+	   (close ,var))))))
 
 
 (defun read-from-string (string

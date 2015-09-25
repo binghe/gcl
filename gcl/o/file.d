@@ -1668,12 +1668,11 @@ for the string ~S.",
 		3, istart, iend, strng);
 @)
 
-static void
-FFN(Lmake_string_output_stream)()
-{
-	check_arg(0);
-	vs_push(make_string_output_stream(64));
-}
+@(static defun make_string_output_stream (&k element_type)
+@
+        element_type=Cnil;/*FIXME*/
+        @(return `make_string_output_stream(64)`)
+@)
 
 LFD(Lget_output_stream_string)()
 {
