@@ -71,29 +71,53 @@
 
 (defun cis (x) (exp (* imag-one x)))
 
-(defun asin (x)
-       (let ((c (- (* imag-one
-                      (log (+ (* imag-one x)
-                              (sqrt (- 1.0d0 (* x x)))))))))
-            (if (or (and (not (complexp x))
-			  (<= x 1.0d0)
-			   (>= x -1.0d0)
-			    )
-		        (zerop (imagpart c)))
-                (realpart c)
-                c)))
+(defun real-asinh (x)
+  (declare (real x))
+  (float (log (+ x (sqrt (+ 1.0 (* x x))))) (float x)))
 
-(defun acos (x)
-       (let ((c (- (* imag-one
-                      (log (+ x (* imag-one
-                                   (sqrt (- 1.0d0 (* x x))))))))))
-            (if (or (and (not (complexp x))
-			  (<= x 1.0d0)
-			   (>= x -1.0d0)
-			    )
-		        (zerop (imagpart c)))
-                (realpart c)
-                c)))
+(defun asin (z)
+  (declare (optimize (safety 1)))
+  (check-type z number)
+  (if (unless (complexp z) (<= -1 z 1))
+      (atan z (sqrt (- 1 (* z z))))
+    (let* ((a (sqrt (- 1 z)))
+	   (b (sqrt (+ 1 z))))
+      (complex (atan (realpart z) (realpart (* a b)))
+	       (real-asinh (imagpart (* (conjugate a) b)))))))
+
+(defun acos (z)
+  (declare (optimize (safety 1)))
+  (check-type z number)
+  (if (unless (complexp z) (<= -1 z 1))
+      (* 2 (atan (- 1 z) (sqrt (- 1 (* z z)))))
+    (let* ((a (sqrt (- 1 z)))
+	   (b (sqrt (+ 1 z))))
+      (complex (* 2 (atan (realpart a) (realpart b)))
+	       (real-asinh (imagpart (* (conjugate b) a)))))))
+
+(defun asinh (x)
+  (declare (optimize (safety 1)))
+  (check-type x number)
+  (if (realp x)
+      (real-asinh x)
+    (let* ((r (asin (complex (- (imagpart x)) (realpart x)))))
+      (complex (imagpart r) (- (realpart r))))))
+
+(defun acosh (z)
+  (declare (optimize (safety 1)))
+  (check-type z number)
+  (if (unless (complexp z) (>= z 1))
+      (real-asinh (sqrt (- (* z z) 1)))
+    (let* ((a (sqrt (- z 1)))
+	   (b (sqrt (+ z 1))))
+      (complex (real-asinh (realpart (* (conjugate a) b))) (* 2 (atan (imagpart a) (realpart b)))))))
+
+(defun atanh (x)
+  (declare (optimize (safety 1)))
+  (check-type x number)
+  (if (unless (complexp x) (< -1 x 1))
+      (/ (log (/ (+ 1 x) (- 1 x))) 2)
+    (/ (- (log (+ 1 x)) (log (- 1 x))) 2)))
 
 
 (defun sinh (z)
@@ -139,27 +163,6 @@
 	   (* 1/2 (+ e (/ e)))))))
 ;(defun cosh (x) (/ (+ (exp x) (exp (- x))) 2.0d0))
 (defun tanh (x) (/ (sinh x) (cosh x)))
-
-(defun asinh (x) (log (+ x (sqrt (+ 1.0d0 (* x x))))))
-;(defun acosh (x)
-;  (log (+ x
-;	  (* (1+ x)
-;	     (sqrt (/ (1- x) (1+ x)))))))
-;(defun acosh (x)
-;       (log (+ x
-;	       (sqrt (* (1- x) (1+ x))))))
-(defun acosh (x)
-  (* 2 (log (+ (sqrt (/ (1+ x) 2)) (sqrt (/ (1- x) 2))))))
-(defun atanh (x)
-       (when (or (= x 1.0d0) (= x -1.0d0))
-             (error "The argument, ~s, is a logarithmic singularity.~
-                    ~%Don't be foolish, GLS."
-                    x))
-       (log (/ (1+ x) (sqrt (- 1 (* x x))))))
-;;        (let ((y (log (/ (1+ x) (sqrt (- 1 (* x x)))))))
-;; 	 (if (and (= (imagpart x) 0) (complexp y))
-;; 	     (complex (realpart y) (- (imagpart y)))
-;; 	   y)))
 
 
 (defun rational (x)
