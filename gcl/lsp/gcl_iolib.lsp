@@ -38,26 +38,24 @@
 
 
 (defmacro with-input-from-string ((var string &key index start end) . body)
-  (if index
-      (multiple-value-bind (ds b)
-          (find-declarations body)
-        `(let ((,var (make-string-input-stream ,string ,start ,end)))
-           ,@ds
-           (unwind-protect
-             (progn ,@b)
-             (setf ,index (si:get-string-input-stream-index ,var)))))
-      `(let ((,var (make-string-input-stream ,string ,start ,end)))
-         ,@body)))
+  (multiple-value-bind (ds b)
+      (find-declarations body)
+    `(let ((,var (make-string-input-stream ,string ,start ,end)))
+       ,@ds
+       (unwind-protect
+	   (progn ,@b)
+	 (when ,index (setf ,index (si:get-string-input-stream-index ,var)))
+	 (when ,var (close ,var))))))
 
+(defmacro with-output-to-string ((var &optional string &key element-type) . body)
+  (multiple-value-bind (ds b)
+      (find-declarations body)
+    `(let ((,var ,(if string `(make-string-output-stream-from-string ,string) `(make-string-output-stream))))
+       ,@ds
+       (unwind-protect
+	   (progn ,@b ,@(unless string `((get-output-stream-string ,var))))
+	 (when ,var (close ,var))))))
 
-(defmacro with-output-to-string ((var &optional string) . body)
-  (if string
-      `(let ((,var (make-string-output-stream-from-string ,string)))
-         ,@body)
-      `(let ((,var (make-string-output-stream)))
-         ,@body
-         (get-output-stream-string ,var))))
-        
 
 (defun read-from-string (string
                          &optional (eof-error-p t) eof-value

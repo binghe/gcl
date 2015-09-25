@@ -523,7 +523,41 @@ object if_exists, if_does_not_exist;
 
 static void
 gclFlushSocket(object);
-/*
+
+
+DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  check_type_stream(&x);
+
+  switch(x->sm.sm_mode) {
+  case smm_output:
+  case smm_input:
+  case smm_io:
+  case smm_probe:
+  case smm_socket:
+  case smm_string_input:
+  case smm_string_output:
+    return x->d.tt==1 ? Cnil : Ct;
+  case smm_synonym:
+    return FFN(fLopen_stream_p)(symbol_value(x->sm.sm_object0));
+  case smm_broadcast:
+  case smm_concatenated:
+    for (x=x->sm.sm_object0;!endp(x);x=x->c.c_cdr)
+      if (!FFN(fLopen_stream_p(x)))
+	return Cnil;
+    return Ct;
+  case smm_two_way:
+  case smm_echo:
+    if (FFN(fLopen_stream_p(STREAM_INPUT_STREAM(x)))==Cnil)
+      return Cnil;
+    return FFN(fLopen_stream_p(STREAM_OUTPUT_STREAM(x)));
+  default:
+    error("illegal stream mode");
+    return Cnil;
+  }
+
+}
+    /*
 	Close_stream(strm) closes stream strm.
 	The abort_flag is not used now.
 */
@@ -535,6 +569,8 @@ object strm;
 	object x;
 
 BEGIN:
+	strm->d.tt=1;
+
 	switch (strm->sm.sm_mode) {
 	case smm_output:
 		if (strm->sm.sm_fp == stdout)
