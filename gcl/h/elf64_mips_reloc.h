@@ -15,10 +15,7 @@
       gote=got+(a>>32)-1;
       a&=MASK(32);
       store_val(where,MASK(16),((void *)gote-(void *)got));
-      if (s>=ggot && s<ggote) {
-        massert(!write_stub(s,got,gote));
-      } else
-        *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
+      *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
       break;
     case R_MIPS_GOT_OFST:
       store_val(where,MASK(16),a);
@@ -40,8 +37,9 @@
       a&=~MASK(16);
       {
         Rela *ra=(void *)r;				
-        for (hr=hr ? hr : (void *)ra;--ra>=hr && ELF_R_TYPE(ra->r_info)==R_MIPS_HI16;)
-	  relocate(sym1,ra,ra->r_addend|(1L<<32)|(a<<32),start,got,gote);
+        for (hr=hr ? hr : (void *)ra;--ra>=hr;)
+	  if (ELF_R_TYPE(ra->r_info)==R_MIPS_HI16)
+	    relocate(sym1,ra,ra->r_addend|(1L<<32)|(a<<32),start,got,gote);
       }
       hr=NULL;
       break;

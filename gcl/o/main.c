@@ -471,12 +471,6 @@ main(int argc, char **argv, char **envp) {
 #include "unrandomize.h"
 #endif
   
-#ifdef LD_BIND_NOW
-#include <stdio.h>
-#include <stdlib.h>
-#include "ld_bind_now.h"
-#endif
-  
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
 #ifdef _WIN32

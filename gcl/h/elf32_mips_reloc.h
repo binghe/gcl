@@ -19,10 +19,7 @@
     case R_MIPS_CALL16:
       gote=got+sym->st_size-1;
       store_val(where,MASK(16),((void *)gote-(void *)got));
-      if (s>=ggot && s<ggote) {
-        massert(!write_stub(s,got,gote));
-      } else
-        *gote=s;
+      *gote=s;
       break;
     case R_MIPS_HI16:
       if (sym->st_other) s=gpd=(ul)got-(sym->st_other==2 ? 0 : (ul)where);
@@ -37,7 +34,8 @@
       a+=(a&0x8000)<<1; 
       store_val(where,MASK(16),a);
       a=0x10000|(a>>16);
-      for (hr=hr ? hr : r;--r>=hr && ELF_R_TYPE(r->r_info)==R_MIPS_HI16;)
-        relocate(sym1,r,a,start,got,gote);
+      for (hr=hr ? hr : r;--r>=hr;)
+	if (ELF_R_TYPE(r->r_info)==R_MIPS_HI16)
+	  relocate(sym1,r,a,start,got,gote);
       hr=NULL;gpd=0;
       break;

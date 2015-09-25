@@ -21,5 +21,4 @@
 #define SPECIAL_RELOC_H "elf64_mips_reloc_special.h"
 #endif
 
-/*Remove when .MIPS.stubs are replaced with callable .plt entries*/
-#define LD_BIND_NOW
+#define NEED_STACK_CHK_GUARD
