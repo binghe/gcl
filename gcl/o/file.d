@@ -543,14 +543,14 @@ DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(obje
   case smm_broadcast:
   case smm_concatenated:
     for (x=x->sm.sm_object0;!endp(x);x=x->c.c_cdr)
-      if (!FFN(fLopen_stream_p(x)))
+      if (!FFN(fLopen_stream_p)(x))
 	return Cnil;
     return Ct;
   case smm_two_way:
   case smm_echo:
-    if (FFN(fLopen_stream_p(STREAM_INPUT_STREAM(x)))==Cnil)
+    if (FFN(fLopen_stream_p)(STREAM_INPUT_STREAM(x))==Cnil)
       return Cnil;
-    return FFN(fLopen_stream_p(STREAM_OUTPUT_STREAM(x)));
+    return FFN(fLopen_stream_p)(STREAM_OUTPUT_STREAM(x));
   default:
     error("illegal stream mode");
     return Cnil;
