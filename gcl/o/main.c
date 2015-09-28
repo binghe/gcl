@@ -511,9 +511,9 @@ main(int argc, char **argv, char **envp) {
 
     terminal_io->sm.sm_object0->sm.sm_fp = stdin;
     terminal_io->sm.sm_object1->sm.sm_fp = stdout;
-#ifdef LD_BIND_NOW /*FIXME currently mips only, verify that these two requirements are the same*/
+
     reinit_gmp();
-#endif
+
     gcl_init_big1();
 #ifdef HAVE_READLINE
     gcl_init_readline_function();
