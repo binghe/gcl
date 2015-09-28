@@ -79,3 +79,4 @@
 #-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp)))
 
 #+ansi-cl (use-package :pcl :user)
+#+ansi-cl (import 'si::(clines defentry defcfun object void int double quit bye gbc system) :user)
