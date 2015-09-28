@@ -104,34 +104,6 @@ trap_gcl_gmp_allocfun(size_t size){
 }
 #endif
 
-#if __GNU_MP_VERSION > 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR >= 2)
-extern void
-__gmp_randget_mt ();
-extern void
-__gmp_randclear_mt ();
-extern void
-__gmp_randiset_mt ();
-
-typedef struct {void *a,*b,*c,*d;} gmp_randfnptr_t;
-static gmp_randfnptr_t Mersenne_Twister_Generator_Noseed = {
-  NULL,
-  __gmp_randget_mt,
-  __gmp_randclear_mt,
-  __gmp_randiset_mt
-};
-#endif
-
-void
-reinit_gmp() {
-
-#if __GNU_MP_VERSION > 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR >= 2)
-  Mersenne_Twister_Generator_Noseed.b=__gmp_randget_mt;
-  Mersenne_Twister_Generator_Noseed.c=__gmp_randclear_mt;
-  Mersenne_Twister_Generator_Noseed.d=__gmp_randiset_mt;
-#endif
-
-}
-
 void
 init_gmp_rnd_state(__gmp_randstate_struct *x) {
 

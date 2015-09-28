@@ -512,8 +512,6 @@ main(int argc, char **argv, char **envp) {
     terminal_io->sm.sm_object0->sm.sm_fp = stdin;
     terminal_io->sm.sm_object1->sm.sm_fp = stdout;
 
-    reinit_gmp();
-
     gcl_init_big1();
 #ifdef HAVE_READLINE
     gcl_init_readline_function();

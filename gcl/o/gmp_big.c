@@ -81,27 +81,6 @@ static object verify_big_or_zero(object big)
 #define verify_big_or_zero(x)
 #endif
 
-
- 
-
-
-#ifndef GMP_USE_MALLOC
-object big_gcprotect;
-object big_fixnum1;
-
-#include "gmp.c"
-void
-gcl_init_big1(void) {
-    mp_set_memory_functions( gcl_gmp_alloc,gcl_gmp_realloc,gcl_gmp_free);
-    jmp_gmp=0;
-}
-
-#else
-gcl_init_big1()
-{
-}
-#endif  
-
 object
 new_bignum(void)
 { object ans;

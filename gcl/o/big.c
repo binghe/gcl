@@ -70,6 +70,32 @@ DEFUN_NEW("SET-GMP-ALLOCATE-RELOCATABLE",object,fSset_gmp_allocate_relocatable,S
   RETURN1(flag);
 }
 
+#ifndef GMP_USE_MALLOC
+object big_gcprotect;
+object big_fixnum1;
+
+#include "gmp.c"
+
+void
+gcl_init_big1(void) {
+
+  mp_set_memory_functions( gcl_gmp_alloc,gcl_gmp_realloc,gcl_gmp_free);
+  jmp_gmp=0;
+
+#if __GNU_MP_VERSION > 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR >= 2)
+  Mersenne_Twister_Generator_Noseed.b=__gmp_randget_mt;
+  Mersenne_Twister_Generator_Noseed.c=__gmp_randclear_mt;
+  Mersenne_Twister_Generator_Noseed.d=__gmp_randiset_mt;
+#endif
+
+}
+
+#else
+gcl_init_big1()
+{
+}
+#endif
+
 #ifdef GMP
 #include "gmp_big.c"
 #else
@@ -92,7 +118,6 @@ void zero_big(object x)
 {
   ZERO_BIG(x);
 }
-
 
 #ifndef HAVE_MP_COERCE_TO_STRING
 
