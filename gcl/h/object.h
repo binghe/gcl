@@ -349,11 +349,7 @@ EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
 EXTER char *rb_start;           	/*  relblock start  */
 EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */
-EXTER char *rb_pointer;		/*  relblock pointer  */
-
-#ifndef INLINE
-#define INLINE
-#endif
+EXTER char *rb_pointer;                 /*  relblock pointer  */
 
 INLINE ufixnum
 rb_size(void) {

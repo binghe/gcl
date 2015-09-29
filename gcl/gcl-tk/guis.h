@@ -7,6 +7,7 @@
 #define IMMNUM_H
 #define GMP_WRAPPERS_H
 #define ERROR_H
+#undef INLINE
 
 #include "include.h"
 

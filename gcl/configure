@@ -6553,6 +6553,7 @@ else
 
         #include <stdio.h>
 	#define EXTER
+	#define INLINE
 	#include "$MP_INCLUDE"
 	#include "./h/enum.h"
 	#define OBJ_ALIGN
@@ -6681,6 +6682,7 @@ else
 /* end confdefs.h.  */
 #include <stdio.h>
 	#define EXTER
+	#define INLINE
 	#include "$MP_INCLUDE"
 	#include "h/enum.h"
 	#include "h/type.h"
@@ -6710,6 +6712,7 @@ else
 /* end confdefs.h.  */
 #include <stdio.h>
 	#define EXTER
+	#define INLINE
 	#include "$MP_INCLUDE"
 	#include "`pwd`/h/enum.h"
 	#include "`pwd`/h/type.h"

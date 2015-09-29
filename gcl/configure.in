@@ -1301,6 +1301,7 @@ AC_MSG_CHECKING([for required object alignment])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
         #include <stdio.h>
 	#define EXTER
+	#define INLINE
 	#include "$MP_INCLUDE"
 	#include "./h/enum.h"
 	#define OBJ_ALIGN
@@ -1341,6 +1342,7 @@ AC_MSG_CHECKING(sizeof struct contblock)
 if test "$use" = "mingw" ; then
 AC_TRY_RUN([#include <stdio.h>
 	#define EXTER
+	#define INLINE
 	#include "$MP_INCLUDE"
 	#include "h/enum.h"
 	#include "h/type.h"
@@ -1357,6 +1359,7 @@ AC_TRY_RUN([#include <stdio.h>
 else
 AC_TRY_RUN([#include <stdio.h>
 	#define EXTER
+	#define INLINE
 	#include "$MP_INCLUDE"
 	#include "`pwd`/h/enum.h"
 	#include "`pwd`/h/type.h"
