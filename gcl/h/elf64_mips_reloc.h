@@ -15,7 +15,10 @@
       gote=got+(a>>32)-1;
       a&=MASK(32);
       store_val(where,MASK(16),((void *)gote-(void *)got));
-      *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
+      if (s>=ggot && s<ggote) {
+        massert(!write_stub(s,got,gote));
+      } else
+        *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
       break;
     case R_MIPS_GOT_OFST:
       store_val(where,MASK(16),a);
