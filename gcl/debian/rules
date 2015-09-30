@@ -87,7 +87,7 @@ configure-%-stamp: $(CFGS)
 	[ "$*" != "ansi" ] || FLAGS="--enable-ansi" ; \
 	[ "$*" != "gprof" ] || FLAGS="--enable-gprof" ; \
 	[ "$*" != "ansi-gprof" ] || FLAGS="--enable-ansi --enable-gprof" ; \
-	eval `dpkg-buildflags --export=sh |sed -e 's,-O2,,g' -e 's,-g,,g'` && CC=$(MCC) ./configure \
+	eval `dpkg-buildflags --export=sh'` && CC=$(MCC) ./configure \
 		--host=$$(dpkg-architecture -qDEB_HOST_GNU_TYPE) \
 		--disable-statsysbfd \
 		--disable-custreloc \
