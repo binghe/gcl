@@ -66,8 +66,9 @@
       *opt-two* @LI-OPT-TWO@
       *init-lsp* @LI-INIT-LSP@)
 
-(import 'si::(commonp *break-on-warnings*
-		     make-char char-bits char-font char-bit set-char-bit string-char-p int-char
+(import 'si::(clines defentry defcfun object void int double quit bye gbc system
+		     commonp *break-on-warnings* make-char char-bits char-font
+		     char-bit set-char-bit string-char-p int-char
 		     char-font-limit char-bits-limit char-control-bit
 		     char-meta-bit char-super-bit char-hyper-bit compiler-let) :cltl1-compat)
 (deftype cltl1-compat::string-char nil 'character)
@@ -77,4 +78,4 @@
 #-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp)))
 
 #+ansi-cl (use-package :pcl :user)
-(import 'si::(clines defentry defcfun object void int double quit bye gbc system) :user)
+#+ansi-cl (import 'si::(clines defentry defcfun object void int double quit bye gbc system) :user)
