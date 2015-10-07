@@ -645,11 +645,11 @@ getCharGclSocket(object strm, object block)
       { int high;
       AGAIN:      
       /* under cygwin a too large timout like (1<<30) does not work */
-      timeout.tv_sec = (block != Ct ?  0 : 0);
+      timeout.tv_sec = 0;
       timeout.tv_usec = 10000;
       FD_ZERO(&readfds);
       FD_SET(fd,&readfds);
-      high = select(fd+1,&readfds,NULL,NULL,&timeout);
+      high = select(fd+1,&readfds,NULL,NULL,block==Ct ? NULL : &timeout);
       if (high > 0)
 	{ object bufp = SOCKET_STREAM_BUFFER(strm);
 	int n;
