@@ -4,7 +4,12 @@
       add_val(where,~0L,s+a-(ul)got);
       break;
     case R_MIPS_26:
-      add_val(where,MASK(26),(s+a)>>2);
+      if (((s+a)>>28)!=(((ul)where)>>28)) {
+	gote=got+sym->st_size-1;
+	massert(!write_26_stub(s+a,got,gote));
+	store_val(where,MASK(26),((ul)gote)>>2);
+      } else
+        add_val(where,MASK(26),(s+a)>>2);
       break;
     case R_MIPS_32:
       add_val(where,~0L,s+a);
@@ -19,7 +24,10 @@
     case R_MIPS_CALL16:
       gote=got+sym->st_size-1;
       store_val(where,MASK(16),((void *)gote-(void *)got));
-      *gote=s;
+      if (s>=ggot && s<ggote) {
+        massert(!write_stub(s,got,gote));
+      } else
+        *gote=s;
       break;
     case R_MIPS_HI16:
       if (sym->st_other) s=gpd=(ul)got-(sym->st_other==2 ? 0 : (ul)where);
