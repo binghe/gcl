@@ -1789,10 +1789,14 @@ void *
 malloc(size_t size) {
 
   static bool in_malloc;
+  extern bool gcl_unrandomized;
 
   if (in_malloc)
     return NULL;
   in_malloc=1;
+
+  if (!gcl_unrandomized)
+    return sbrk(size);
 
   if (!gcl_alloc_initialized)
     gcl_init_alloc(&size);

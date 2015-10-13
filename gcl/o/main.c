@@ -412,6 +412,8 @@ DEFVAR("*CODE-BLOCK-RESERVE*",sSAcode_block_reserveA,SI,Cnil,"");
 
 #define HAVE_GCL_CLEANUP
 
+bool gcl_unrandomized=1;
+
 void
 gcl_cleanup(int gc) {
 
@@ -439,6 +441,9 @@ gcl_cleanup(int gc) {
     raw_image=FALSE;
     cs_org=0;
     initial_sbrk=core_end;
+
+    if (getenv("GCL_UNRANDOMIZE"))
+      gcl_unrandomized=0;
 
   }
 
