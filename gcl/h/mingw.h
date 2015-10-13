@@ -47,13 +47,6 @@
 #define DBEGIN_TY unsigned int
 extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
 
-/* define if there is no _cleanup,   do here what needs
-   to be done before calling unexec
-   */   
-#define CLEANUP_CODE \
-  setbuf(stdin,0); \
-  setbuf(stdout,0);
-
 #define NO_SYS_PARAM_H
 #define NO_SYS_TIMES_H
 

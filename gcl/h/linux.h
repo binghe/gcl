@@ -130,10 +130,6 @@ do { int c = 0; \
 
 #define SET_SESSION_ID() (setpgrp() ? -1 : 0)
 
-#define CLEANUP_CODE \
-  setbuf(stdin,0); \
-   setbuf(stdout,0);
-
 #include <limits.h>
 #include <sys/stat.h>
 #define GET_FULL_PATH_SELF(a_) do {\

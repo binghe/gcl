@@ -7,15 +7,6 @@
 #define DBEGIN_TY unsigned long
 extern DBEGIN_TY _dbegin;
 
-
-
-/* define if there is no _cleanup,   do here what needs
-   to be done before calling unexec
-   */   
-#define CLEANUP_CODE \
-  setbuf(stdin,0); \
-   setbuf(stdout,0);
-
 /* size to use for mallocs done  */
 /* #define BABY_MALLOC_SIZE 0x5000 */
 

@@ -217,6 +217,10 @@ frame_ptr frs_sch_catch();
 /*  gbc.c  */
 EXTER bool GBC_enable;
 
+#ifdef CAN_UNRANDOMIZE_SBRK
+EXTER bool gcl_unrandomized;
+#endif
+
 /*  let.c  */
 
 /*  lex.c  */

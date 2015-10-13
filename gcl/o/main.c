@@ -412,7 +412,9 @@ DEFVAR("*CODE-BLOCK-RESERVE*",sSAcode_block_reserveA,SI,Cnil,"");
 
 #define HAVE_GCL_CLEANUP
 
-bool gcl_unrandomized=1;
+#ifdef CAN_UNRANDOMIZE_SBRK
+bool gcl_unrandomized=FALSE;
+#endif
 
 void
 gcl_cleanup(int gc) {
@@ -420,10 +422,8 @@ gcl_cleanup(int gc) {
   if (getenv("GCL_WAIT"))
     sleep(30);
   
-#ifdef CLEANUP_CODE
-  CLEANUP_CODE
-#elif defined(USE_CLEANUP)
-    {extern void _cleanup(void);_cleanup();}
+#if defined(USE_CLEANUP)
+  {extern void _cleanup(void);_cleanup();}
 #endif
 
 #ifdef GCL_GPROF
@@ -442,8 +442,9 @@ gcl_cleanup(int gc) {
     cs_org=0;
     initial_sbrk=core_end;
 
-    if (getenv("GCL_UNRANDOMIZE"))
-      gcl_unrandomized=0;
+#ifdef CAN_UNRANDOMIZE_SBRK
+    gcl_unrandomized=FALSE;
+#endif
 
   }
 
@@ -454,6 +455,13 @@ gcl_cleanup(int gc) {
 
 int
 main(int argc, char **argv, char **envp) {
+
+#ifdef CAN_UNRANDOMIZE_SBRK
+#include <stdio.h>
+#include <stdlib.h>
+#include "unrandomize.h"
+  gcl_unrandomized=TRUE;
+#endif
 
   gcl_init_alloc(&argv);
 
@@ -469,12 +477,6 @@ main(int argc, char **argv, char **envp) {
   }
 #endif	
   *argv=kcl_self;
-  
-#ifdef CAN_UNRANDOMIZE_SBRK
-#include <stdio.h>
-#include <stdlib.h>
-#include "unrandomize.h"
-#endif
   
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
