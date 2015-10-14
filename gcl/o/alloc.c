@@ -1652,22 +1652,15 @@ DEFUN_NEW("GPROF-QUIT",object,fSgprof_quit,SI
   if (!gprof_on)
     return Cnil;
 
-  if (!getcwd(b,sizeof(b)))
-    FEerror("Cannot get working directory", 0);
-  if (chdir(P_tmpdir))
-    FEerror("Cannot change directory to tmpdir", 0);
+  massert(getcwd(b,sizeof(b)));
+  massert(!chdir(P_tmpdir));
   _mcleanup();
-  if (snprintf(b1,sizeof(b1),"gprof %s",kcl_self)<=0)
-    FEerror("Cannot write gprof command line", 0);
-  if (!(pp=popen(b1,"r")))
-    FEerror("Cannot open gprof pipe", 0);
+  massert(snprintf(b1,sizeof(b1),"gprof %s",kcl_self)>0);
+  massert((pp=popen(b1,"r")));
   while ((n=fread(b1,1,sizeof(b1),pp)))
-    if (!fwrite(b1,1,n,stdout))
-      FEerror("Cannot write gprof output",0);
-  if (pclose(pp)<0)
-    FEerror("Cannot close gprof pipe", 0);
-  if (chdir(b))
-    FEerror("Cannot restore working directory", 0);
+    massert(fwrite(b1,1,n,stdout));
+  massert(pclose(pp)>=0);
+  massert(!chdir(b));
   gprof_on=0;
 
   return Cnil;

@@ -23,6 +23,7 @@
 	int i,j,k;
 	char **n,**a;
 	void *v;
+	argv[0]="/proc/self/exe";
 	for (i=j=0;argv[i];i++)
 	  j+=strlen(argv[i])+1;
 	for (k=0;envp[k];k++)
