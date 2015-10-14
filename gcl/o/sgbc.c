@@ -789,10 +789,8 @@ sgc_start(void) {
   sgc_enabled=1;
   if (memory_protect(1)) 
     sgc_quit();
-  if (sSAnotify_gbcA->s.s_dbind != Cnil) {
-    printf("[SGC on]"); 
-    fflush(stdout);
-  }
+  if (sSAnotify_gbcA->s.s_dbind != Cnil)
+    emsg("[SGC on]");
 
   sSAoptimize_maximum_pagesA->s.s_dbind=omp;
 
@@ -826,7 +824,7 @@ sgc_quit(void) {
   memory_protect(0);
 
   if(sSAnotify_gbcA->s.s_dbind != Cnil) 
-    printf("[SGC off]"); fflush(stdout);
+    emsg("[SGC off]");
 
   if (sgc_enabled==0) 
     return 0;

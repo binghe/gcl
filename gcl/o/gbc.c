@@ -1170,15 +1170,15 @@ GBC(enum type t) {
       gc_time=0;
 
 #ifdef SGC
-    printf("[%s for %ld %s pages..",
-	   (sgc_enabled ? "SGC" : "GC"),
-	   (sgc_enabled ? sgc_count_type(t) : tm_of(t)->tm_npage),
-	   (tm_table[(int)t].tm_name)+1);
+    emsg("[%s for %ld %s pages..",
+	 (sgc_enabled ? "SGC" : "GC"),
+	 (sgc_enabled ? sgc_count_type(t) : tm_of(t)->tm_npage),
+	 (tm_table[(int)t].tm_name)+1);
 #else
-    printf("[%s for %ld %s pages..",
-	   ("GC"),
-	   (tm_of(t)->tm_npage),
-	   (tm_table[(int)t].tm_name)+1);
+    emsg("[%s for %ld %s pages..",
+	 ("GC"),
+	 (tm_of(t)->tm_npage),
+	 (tm_table[(int)t].tm_name)+1);
 #endif
 
 #ifdef SGC
@@ -1349,10 +1349,9 @@ GBC(enum type t) {
   if (sSAnotify_gbcA->s.s_dbind != Cnil) {
     
     if (gc_recursive)
-      fprintf(stdout, "(T=...).GC finished]\n");
+      emsg("(T=...).GC finished]\n");
     else
-      fprintf(stdout, "(T=%d).GC finished]\n",gc_start);
-    fflush(stdout);
+      emsg("(T=%d).GC finished]\n",gc_start);
 
   }
   

@@ -351,7 +351,8 @@ resize_hole(ufixnum hp,enum type tp,bool in_placep) {
 
   if (!in_placep &&
       ((new_start<=start && start<new_start+size) || (new_start<start+size && start+size<=new_start+size))) {
-    emsg("Toggling relblock when resizing hole to %lu\n",hp);
+    if (sSAnotify_gbcA->s.s_dbind != Cnil)
+      emsg("Toggling relblock when resizing hole to %lu\n",hp);
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
     return resize_hole(hp,tp,in_placep);
@@ -387,7 +388,8 @@ alloc_page(long n) {
       d=d<0 ? 0 : d;
       d=(available_pages/3)<d ? (available_pages/3) : d;
       
-      emsg("Hole overrun\n");
+      if (sSAnotify_gbcA->s.s_dbind != Cnil)
+	emsg("Hole overrun\n");
 
       resize_hole(d+nn,t_relocatable,0);
 
@@ -857,7 +859,8 @@ add_pages(struct typemanager *tm,fixnum m) {
   case t_relocatable:
 
     if (rb_high() && m>((rb_start-heap_end)>>PAGEWIDTH)) {
-      emsg("Moving relblock low before expanding relblock pages\n");
+      if (sSAnotify_gbcA->s.s_dbind != Cnil)
+	emsg("Moving relblock low before expanding relblock pages\n");
       tm_table[t_relocatable].tm_adjgbccnt--;
       GBC(t_relocatable);
     }
