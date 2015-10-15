@@ -205,21 +205,21 @@ get_proc_meminfo_value_in_pages(const char *k) {
   return n>>(PAGEWIDTH-10);
 }
 
+#include <sys/sysinfo.h>
+
 static ufixnum
 get_phys_pages_no_malloc(char freep) {
 
-  return freep ? 
-    get_proc_meminfo_value_in_pages("MemFree:")+
-    get_proc_meminfo_value_in_pages("Buffers:")+
-    get_proc_meminfo_value_in_pages("Cached:") :
-    get_proc_meminfo_value_in_pages("MemTotal:");
+  struct sysinfo s;
+  sysinfo(&s);
+  return (freep ? s.freeram : s.totalram)>>PAGEWIDTH;
   
 }
 
 #endif
 
 static ufixnum
-get_phys_pages(char freep) {
+get_phys_pages1(char freep) {
 
   return get_phys_pages_no_malloc(freep);
 
@@ -313,7 +313,7 @@ update_real_maxpage(void) {
       }
   massert(!mbrk(cur));
 
-  phys_pages=ufmin(get_phys_pages(0)+page(beg),real_maxpage)-page(beg);
+  phys_pages=ufmin(get_phys_pages1(0)+page(beg),real_maxpage)-page(beg);
 
   get_gc_environ();
   setup_maxpages(mem_multiple);
@@ -412,10 +412,6 @@ DEFVAR("*CODE-BLOCK-RESERVE*",sSAcode_block_reserveA,SI,Cnil,"");
 
 #define HAVE_GCL_CLEANUP
 
-#ifdef CAN_UNRANDOMIZE_SBRK
-bool gcl_unrandomized=FALSE;
-#endif
-
 void
 gcl_cleanup(int gc) {
 
@@ -442,10 +438,6 @@ gcl_cleanup(int gc) {
     cs_org=0;
     initial_sbrk=core_end;
 
-#ifdef CAN_UNRANDOMIZE_SBRK
-    gcl_unrandomized=FALSE;
-#endif
-
   }
 
   close_pool();
@@ -460,7 +452,6 @@ main(int argc, char **argv, char **envp) {
 #include <stdio.h>
 #include <stdlib.h>
 #include "unrandomize.h"
-  gcl_unrandomized=TRUE;
 #endif
 
   gcl_init_alloc(&argv);

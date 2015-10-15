@@ -388,7 +388,7 @@ alloc_page(long n) {
       d=d<0 ? 0 : d;
       d=(available_pages/3)<d ? (available_pages/3) : d;
       
-      if (sSAnotify_gbcA->s.s_dbind != Cnil)
+      if (sSAnotify_gbcA && sSAnotify_gbcA->s.s_dbind != Cnil)
 	emsg("Hole overrun\n");
 
       resize_hole(d+nn,t_relocatable,0);
@@ -1781,28 +1781,37 @@ static char *baby_malloc(n)
 
 bool writable_malloc=0;
 
-void *
-malloc(size_t size) {
+static void *
+malloc_internal(size_t size) {
 
-  static bool in_malloc;
-
-  if (in_malloc)
-    return NULL;
-  in_malloc=1;
-
-  if (!gcl_alloc_initialized)
-    gcl_init_alloc(&size);
 #ifdef CAN_UNRANDOMIZE_SBRK
-  else if (!gcl_unrandomized)
-    return sbrk(size);
+  if (core_end && core_end!=sbrk(0))/*malloc before main in saved_image*/
+    return sbrk(size);/*will never get to gcl_init_alloc, so brk point irrelevant*/
 #endif
-  
+  if (!gcl_alloc_initialized) {
+    static bool recursive_malloc;
+    if (recursive_malloc)
+      error("Bad malloc");
+    recursive_malloc=1;
+    gcl_init_alloc(&size);
+    recursive_malloc=0;
+  }
+
   CHECK_INTERRUPT;
   
   malloc_list = make_cons(alloc_simple_string(size), malloc_list);
   malloc_list->c.c_car->st.st_self = alloc_contblock(size);
   malloc_list->c.c_car->st.st_adjustable=writable_malloc;
   
+  return(malloc_list->c.c_car->st.st_self);
+
+}
+
+void *
+malloc(size_t size) {
+
+  void *v=malloc_internal(size);;
+
   /* FIXME: this is just to handle clean freeing of the
      monstartup memory allocated automatically on raw image
      startup.  In saved images, monstartup memory is only
@@ -1810,12 +1819,11 @@ malloc(size_t size) {
 #ifdef GCL_GPROF
   if (raw_image && size>(textend-textstart) && !initial_monstartup_pointer) {
     massert(!atexit(gprof_cleanup));
-    initial_monstartup_pointer=malloc_list->c.c_car->st.st_self;
+    initial_monstartup_pointer=v;
   }
 #endif
   
-  in_malloc=0;
-  return(malloc_list->c.c_car->st.st_self);
+  return v;
   
 }
 
