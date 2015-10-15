@@ -1203,8 +1203,8 @@ object malloc_list=Cnil;
 
 void
 maybe_set_hole_from_maxpages(void) {
-  if (rb_start==heap_end && rb_end==rb_start && rb_limit==rb_start && rb_pointer==rb_start)
-    resize_hole(available_pages/3,t_relocatable,0);
+  if (rb_pointer==rb_begin())
+    resize_hole(ufmin(phys_pages,available_pages/3),t_relocatable,0);
 }
 
 void
@@ -1358,7 +1358,7 @@ gcl_init_alloc(void *cs_start) {
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
   
-  resize_hole(ufmin(phys_pages,available_pages/3),t_relocatable,0);
+  maybe_set_hole_from_maxpages();
 #ifdef SGC	
   tm_table[(int)t_relocatable].tm_sgc = 50;
 #endif
