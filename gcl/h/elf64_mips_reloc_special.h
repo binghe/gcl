@@ -6,18 +6,28 @@ static ul ggot,ggote; static Rela *hr;
 #define ELF_R_TYPE(a_) (((a_>>40)&0xff) ? ((a_>>40)&0xff) : ((a_>>56)&0xff)) 
 #define ELF_R_FTYPE(a_) ((a_>>56)&0xff)
 
+typedef struct {
+  ul entry,gotoff;
+  unsigned int ld_gotoff,lw,jr,lwcan;
+} call_16_tramp;
+
 static int
 write_stub(ul s,ul *got,ul *gote) {
 
-  int *goti;
+  static call_16_tramp t1={0,0,
+			   (0x37<<26)|(0x1c<<21)|(0x19<<16), /*ld t9,(0)gp*/
+			   (0x37<<26)|(0x19<<21)|(0x19<<16), /*ld t9,(0)t9*/
+			   0x03200008,                       /*jr t9*/
+			   0                                 /*nop*/
+  };
+  call_16_tramp *t=(void *)gote;
 
-  *gote=(ul)(goti=(void *)(gote+2));
-  *++gote=s;
-  s=((void *)gote-(void *)got);
-  *goti++=(0x37<<26)|(0x1c<<21)|(0x19<<16)|s;
-  *goti++=(0x37<<26)|(0x19<<21)|(0x19<<16)|0;
-  *goti++=0x03200008;
-  *goti++=0x00200825;
+  *t=t1;
+  *got=can_gp;
+
+  t->entry=(ul)(gote+2);
+  t->gotoff=s;
+  t->ld_gotoff|=((void *)(gote+1)-(void *)got);
 
   return 0;
 
@@ -31,7 +41,7 @@ make_got_room_for_stub(Shdr *sec1,Shdr *sece,Sym *sym,const char *st1,ul *gs) {
   if ((ssec>=sece || !ALLOC_SEC(ssec)) &&
       (a=find_sym_ptable(st1+sym->st_name)) &&
       a->address>=ggot && a->address<ggote)
-    (*gs)+=3;
+    (*gs)+=sizeof(call_16_tramp)/sizeof(ul)-1;
 
   return 0;
 
