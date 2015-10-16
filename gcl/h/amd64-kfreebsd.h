@@ -23,3 +23,4 @@
 #define RELOC_H "elf64_i386_reloc.h"
 
 #define BRK_DOES_NOT_GUARANTEE_ALLOCATION
+#define FREEBSD

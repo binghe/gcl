@@ -152,6 +152,7 @@ mbrk(void *v) {
 
 static ufixnum
 get_phys_pages_no_malloc(char n) {
+
   MEMORYSTATUS m;
 
   m.dwLength=sizeof(m);
@@ -166,6 +167,7 @@ get_phys_pages_no_malloc(char n) {
 
 static ufixnum
 get_phys_pages_no_malloc(char n) {
+
   uint64_t s;
   size_t z=sizeof(s);
   int m[2]={CTL_HW,HW_MEMSIZE};
@@ -186,24 +188,21 @@ get_phys_pages_no_malloc(char n) {
 
 }
 
-#else 
+#elif defined(FREEBSD)
 
-ufixnum
-get_proc_meminfo_value_in_pages(const char *k) {
-  int l,m;
-  char b[PAGESIZE],*c;
-  ufixnum n;
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
+static ufixnum
+get_phys_pages_no_malloc(char n) {
+
+  size_t i,len=sizeof(i);
+
+  return (sysctlbyname("hw.physmem",&i,&len,NULL,0) ? 0 : i)>>PAGEWIDTH;
   
-  massert((l=open("/proc/meminfo",O_RDONLY))!=-1);
-  massert((n=read(l,b,sizeof(b)))<sizeof(b));
-  b[n]=0;
-  massert(!close(l));
-  massert((c=strstr(b,k)));
-  c+=strlen(k);
-  massert(sscanf(c,"%lu%n",&n,&m)==1);
-  massert(!strncmp(c+m," kB\n",4));
-  return n>>(PAGEWIDTH-10);
 }
+
+#else /*Linux*/
 
 #include <sys/sysinfo.h>
 
@@ -211,8 +210,8 @@ static ufixnum
 get_phys_pages_no_malloc(char freep) {
 
   struct sysinfo s;
-  sysinfo(&s);
-  return ((freep ? s.freeram : s.totalram)>>PAGEWIDTH)*s.mem_unit;
+
+  return sysinfo(&s) ? 0 : ((freep ? s.freeram : s.totalram)>>PAGEWIDTH)*s.mem_unit;
   
 }
 
