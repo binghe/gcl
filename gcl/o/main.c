@@ -212,7 +212,7 @@ get_phys_pages_no_malloc(char freep) {
 
   struct sysinfo s;
   sysinfo(&s);
-  return (freep ? s.freeram : s.totalram)>>PAGEWIDTH;
+  return ((freep ? s.freeram : s.totalram)>>PAGEWIDTH)*s.mem_unit;
   
 }
 
