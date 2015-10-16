@@ -23,7 +23,6 @@ write_stub(ul s,ul *got,ul *gote) {
   call_16_tramp *t=(void *)gote;
 
   *t=t1;
-  *got=can_gp;
 
   t->entry=(ul)(gote+2);
   t->gotoff=s;
