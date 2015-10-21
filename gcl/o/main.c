@@ -179,7 +179,7 @@ get_phys_pages_no_malloc(char n) {
 
 }
 
-#elif defined(__sun__)
+#elif defined(__sun__) || defined(__GNU__)
 
 static ufixnum
 get_phys_pages_no_malloc(char n) {
