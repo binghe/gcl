@@ -3,7 +3,7 @@ static ul ggot,ggote; static Rela *hr;
 #undef ELF_R_SYM 
 #define ELF_R_SYM(a_) (a_&0xffffffff) 
 #undef ELF_R_TYPE 
-#define ELF_R_TYPE(a_) (((a_>>40)&0xff) ? ((a_>>40)&0xff) : ((a_>>56)&0xff)) 
+#define ELF_R_TYPE(a_) (((a_>>40)&0xff) ? ((a_>>40)&0xff) : (((a_>>48)&0xff) ? ((a_>>48)&0xff) : ((a_>>56)&0xff)))
 #define ELF_R_FTYPE(a_) ((a_>>56)&0xff)
 
 typedef struct {

@@ -1,6 +1,7 @@
     case R_MIPS_JALR:
       break;
     case R_MIPS_64:
+      if (ELF_R_FTYPE(r->r_info)==R_MIPS_GPREL32) s-=(ul)got;
       add_val(where,~0L,s+a);
       break;
     case R_MIPS_GPREL32:
