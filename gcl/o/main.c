@@ -443,6 +443,23 @@ gcl_cleanup(int gc) {
 
 }
 
+/*gcc boolean expression tail position bug*/
+
+void *
+cclear_stack(unsigned long size) {
+  void *v=alloca(size);
+  memset(v,0,size);
+  return v;
+}
+
+DEFUN_NEW("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,1,NONE,II,OO,OO,OO,(fixnum s),"") {
+  object x0=make_list(s/sizeof(object)),x1=make_list(s/sizeof(object));
+  char *u=cclear_stack(s),*w;
+  fLequal(x0,x1);
+  for (w=u;w<u+s && !*w;w++);
+  RETURN1((object)(w-u));
+}
+
 
 int
 main(int argc, char **argv, char **envp) {

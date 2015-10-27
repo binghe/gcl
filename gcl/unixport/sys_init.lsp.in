@@ -79,3 +79,7 @@
 
 #+ansi-cl (use-package :pcl :user)
 #+ansi-cl (import 'si::(clines defentry defcfun object void int double quit bye gbc system) :user)
+
+(let* ((i 4096)(j (si::equal-tail-recursion-check i)))
+  (unless (eql i j)
+    (warn "equal is not tail recursive ~s ~s" i j)))
