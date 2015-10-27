@@ -161,7 +161,7 @@
 
 
 (defun compile-file1 (input-pathname
-                      &key (output-file input-pathname)
+                      &key (output-file (truename input-pathname))
                            (o-file t)
                            (c-file *default-c-file*)
                            (h-file *default-h-file*)
