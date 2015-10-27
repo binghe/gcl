@@ -1,10 +1,21 @@
-static ul ggot,ggote; static Rela *hr;
+static ul ggot,ggote,la; static Rela *hr,*lr;
 
 #undef ELF_R_SYM 
 #define ELF_R_SYM(a_) (a_&0xffffffff) 
+#define ELF_R_TYPE1(a_) ((a_>>56)&0xff)
+#define ELF_R_TYPE2(a_) ((a_>>48)&0xff)
+#define ELF_R_TYPE3(a_) ((a_>>40)&0xff)
+#define recurse(val) ({							\
+      if (ELF_R_TYPE2(r->r_info)) {					\
+	ul i=r->r_info;							\
+	r->r_info=(((r->r_info>>32)&MASK(24))<<40)|(r->r_info&MASK(32)); \
+	relocate(sym1,r,(val)-s,start,got,gote);			\
+	r->r_info=i;							\
+	break;								\
+      }})
+
 #undef ELF_R_TYPE 
-#define ELF_R_TYPE(a_) (((a_>>40)&0xff) ? ((a_>>40)&0xff) : (((a_>>48)&0xff) ? ((a_>>48)&0xff) : ((a_>>56)&0xff)))
-#define ELF_R_FTYPE(a_) ((a_>>56)&0xff)
+#define ELF_R_TYPE(a_) ELF_R_TYPE1(a_)
 
 typedef struct {
   ul entry,gotoff;
