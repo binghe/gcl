@@ -501,6 +501,12 @@ oequal(object x,object y) {
 DEFUN_NEW("EQUAL",object,fLequal,LISP,2,2,NONE,OO,OO,OO,OO,(object x0,object x1),"") {
   RETURN1(equal(x0, x1) ? Ct : Cnil);
 }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fLequal(object x,object y) {
+  return FFN(fLequal)(x,y);
+}
+#endif
 
 bool
 equalp1(register object x, register object y) {
