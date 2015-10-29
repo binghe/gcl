@@ -111,46 +111,17 @@ LFD(build_symbol_table)(void) {
 
 }
 
-extern int mcount();
-extern int _mcount();
-extern int __divdi3();
-extern int __moddi3();
-extern int __udivdi3();
-extern int __umoddi3();
-extern void sincos(double,double *,double *);
-extern int __divsi3();
-extern int __modsi3();
-extern int __udivsi3();
-extern int __umodsi3();
-extern int $$divI();
-extern int $$divU();
-extern int $$remI();
-extern int $$remU();
-extern int __divq();
-extern int __divqu();
-extern int __remq();
-extern int __remqu();
-
-#ifndef DARWIN
 #ifndef _WIN32
 int
 use_symbols(double d,...) {
 
+#ifndef DARWIN
+  extern void sincos(double,double *,double *);
+
   sincos(d,&d,&d);
-
-#ifdef GCL_GPROF
-  _mcount();
-#endif
-  
-  return (int)d;
-
-}
-#endif
 #else
-int
-use_symbols(double d,...) {
-
   d=sin(d)+cos(d);
+#endif
 
   return (int)d;
 
