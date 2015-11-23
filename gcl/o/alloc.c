@@ -1658,7 +1658,7 @@ DEFUN_NEW("GPROF-QUIT",object,fSgprof_quit,SI
   massert(getcwd(b,sizeof(b)));
   massert(!chdir(P_tmpdir));
   _mcleanup();
-  massert(snprintf(b1,sizeof(b1),"gprof %s",kcl_self)>0);
+  massert(snprintf(b1,sizeof(b1),"gprof '%s'",kcl_self)>0);
   massert((pp=popen(b1,"r")));
   while ((n=fread(b1,1,sizeof(b1),pp)))
     massert(fwrite(b1,1,n,stdout));
