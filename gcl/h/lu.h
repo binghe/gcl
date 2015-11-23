@@ -301,7 +301,7 @@ struct pathname {
   object pn_name;
   object pn_type;
   object pn_version;
-  SPAD;
+  object pn_namestring;
 };
 
 struct cfun {

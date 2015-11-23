@@ -394,10 +394,11 @@ EXTER object sKname;
 EXTER object sKtype;
 EXTER object sKversion;
 EXTER object sKdefaults;
-EXTER object sKroot;
-EXTER object sKcurrent;
-EXTER object sKparent;
-EXTER object sKper;
+
+EXTER object sKabsolute;
+EXTER object sKrelative;
+EXTER object sKup;
+
 /* object parse_namestring(); */
 object coerce_to_pathname();
 /* object default_device(); */

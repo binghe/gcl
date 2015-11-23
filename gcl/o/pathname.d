@@ -28,6 +28,84 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "include.h"
 
+DEFUN_NEW("C-SET-T-TT",object,fSc_set_t_tt,SI,2,2,NONE,OO,IO,OO,OO,(object x,fixnum y),"") {
+  x->d.tt=y;
+  RETURN1(x);
+}
+
+
+DEFUN_NEW("C-T-TT",object,fSc_t_tt,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)(fixnum)x->d.tt);
+}
+
+
+DEFUN_NEW("C-SET-PATHNAME-NAMESTRING",object,fSc_set_pathname_namestring,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+  check_type_pathname(&x);
+  x->pn.pn_namestring=y;
+  RETURN1(x);
+}
+
+DEFUN_NEW("C-PATHNAME-HOST",object,fSc_pathname_host,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_host);
+}
+DEFUN_NEW("C-PATHNAME-DEVICE",object,fSc_pathname_device,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_device);
+}
+DEFUN_NEW("C-PATHNAME-DIRECTORY",object,fSc_pathname_directory,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_directory);
+}
+DEFUN_NEW("C-PATHNAME-NAME",object,fSc_pathname_name,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_name);
+}
+DEFUN_NEW("C-PATHNAME-TYPE",object,fSc_pathname_type,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_type);
+}
+DEFUN_NEW("C-PATHNAME-VERSION",object,fSc_pathname_version,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_version);
+}
+DEFUN_NEW("C-PATHNAME-NAMESTRING",object,fSc_pathname_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_pathname(&x);
+  RETURN1(x->pn.pn_namestring);
+}
+
+
+DEFUN_NEW("C-STREAM-OBJECT0",object,fSc_stream_object0,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(x->sm.sm_object0);
+}
+
+DEFUN_NEW("C-STREAM-OBJECT1",object,fSc_stream_object1,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(x->sm.sm_object1);
+}
+
+DEFUN_NEW("C-SET-STREAM-OBJECT1",object,fSc_set_stream_object1,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+  x->sm.sm_object1=y;
+  RETURN1(x);
+}
+
+
+
+DEFUN_NEW("INIT-PATHNAME",object,fSinit_pathname,SI,7,7,NONE,OO,OO,OO,OO,
+      (object host,object device,object directory,object name,object type,object version,object namestring),"") {
+
+  object x=alloc_object(t_pathname);
+
+  x->pn.pn_host=host;
+  x->pn.pn_device=device;
+  x->pn.pn_directory=directory;
+  x->pn.pn_name=name;
+  x->pn.pn_type=type;
+  x->pn.pn_version=version;
+  x->pn.pn_namestring=namestring;
+
+  RETURN1(x);
+
+}
 
 object
 make_pathname(host, device, directory, name, type, version)
@@ -42,6 +120,7 @@ object host, device, directory, name, type, version;
 	x->pn.pn_name = name;
 	x->pn.pn_type = type;
 	x->pn.pn_version = version;
+	x->pn.pn_namestring = Cnil;
 	return(x);
 }
 
@@ -104,17 +183,17 @@ int start, end, *ep;
 #endif
 			if (j == start && i == start) {
 				i++;
-				vs_push(sKroot);
+				vs_push(sKabsolute);
 				j = i;
 				continue;
 			}
 #ifdef UNIX
 			if (i-j == 1 && s->st.st_self[j] == '.') {
-				vs_push(sKcurrent);
+				vs_push(sKrelative);
 			} else if (i-j == 1 && s->st.st_self[j] == '*') {
 				vs_push(sKwild);
 			} else if (i-j==2 && s->st.st_self[j]=='.' && s->st.st_self[j+1]=='.') {
-				vs_push(sKparent);
+				vs_push(sKup);
 			} else {
 				make_one(&s->st.st_self[j], i-j);
                         }
@@ -276,7 +355,7 @@ object path, defaults, default_version;
 
 	if (defaults->pn.pn_directory==Cnil || 
 	   (type_of(path->pn.pn_directory)==t_cons
-	    && path->pn.pn_directory->c.c_car==sKroot))
+	    && path->pn.pn_directory->c.c_car==sKabsolute))
 		directory=path->pn.pn_directory;
 	else 
 	  directory=path->pn.pn_directory==Cnil ? 
@@ -309,6 +388,12 @@ object x;
 	int i, j;
 	object l, y;
 
+	if (type_of(x)==t_string)
+	  return x;
+	if (type_of(x)==t_pathname && x->pn.pn_namestring!=Cnil)
+	  return x->pn.pn_namestring;
+	/* return make_simple_string(""); */
+
 	i = 0;
 
 	l = x->pn.pn_device;
@@ -325,7 +410,7 @@ D:	l = x->pn.pn_directory;
 	if (endp(l))
 		goto L;
 	y = l->c.c_car;
-	if (y == sKroot) {
+	if (y == sKabsolute) {
 #ifdef UNIX
 		token->st.st_self[i++] = '/';
 #endif
@@ -334,7 +419,7 @@ D:	l = x->pn.pn_directory;
 	for (;  !endp(l);  l = l->c.c_cdr) {
 		y = l->c.c_car;
 #ifdef UNIX
-		if (y == sKcurrent) {
+		if (y == sKrelative) {
 			token->st.st_self[i++] = '.';
 			token->st.st_self[i++] = '/';
 			continue;
@@ -342,7 +427,7 @@ D:	l = x->pn.pn_directory;
 			token->st.st_self[i++] = '*';
 			token->st.st_self[i++] = '/';
 			continue;
-		} else if (y == sKparent) {
+		} else if (y == sKup) {
 			token->st.st_self[i++] = '.';
 			token->st.st_self[i++] = '.';
 			token->st.st_self[i++] = '/';
@@ -743,10 +828,14 @@ gcl_init_pathname(void)
 	sKversion = make_keyword("VERSION");
 	sKdefaults = make_keyword("DEFAULTS");
 
-	sKroot = make_keyword("ROOT");
-	sKcurrent = make_keyword("CURRENT");
-	sKparent = make_keyword("PARENT");
-	sKper = make_keyword("PER");
+	/* sKroot = make_keyword("ROOT"); */
+	/* sKcurrent = make_keyword("CURRENT"); */
+	/* sKparent = make_keyword("PARENT"); */
+	/* sKper = make_keyword("PER"); */
+
+	sKabsolute = make_keyword("ABSOLUTE");
+	sKrelative = make_keyword("RELATIVE");
+	sKup = make_keyword("UP");
 }
 
 void

@@ -52,7 +52,7 @@
 (defvar *cmpinclude-string* 
   (si::file-to-string 
    (namestring
-    (make-pathname :directory (append (pathname-directory si::*system-directory*) (list :parent "h"))
+    (make-pathname :directory (append (pathname-directory si::*system-directory*) (list :back "h"))
 		   :name "cmpinclude" :type "h"))))
 
 
@@ -797,7 +797,7 @@ Cannot compile ~a.~%"
 
     (with-open-file (st (namestring map) :direction :output))
     (safe-system 
-     (let* ((par (namestring (make-pathname :directory '(:parent))))
+     (let* ((par (namestring (make-pathname :directory '(:back))))
 	    (i (concatenate 'string " " par))
 	    (j (concatenate 'string " " si::*system-directory* par)))
        (format nil "~a ~a ~a ~a -L~a ~a ~a ~a"

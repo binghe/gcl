@@ -113,6 +113,7 @@ enum type {
 #define randomp(a_)    SPP(a_,random)
 #define characterp(a_) SPP(a_,character)
 #define symbolp(a_)    SPP(a_,symbol)
+#define pathnamep(a_)  SPP(a_,pathname)
 #define stringp(a_)    SPP(a_,string)
 #define fixnump(a_)    SPP(a_,fixnum)
 #define readtablep(a_) SPP(a_,readtable)

@@ -307,15 +307,50 @@
      #-(or GCL CMU ECL) (make-hash-table :test #'equalp)
      ))
 
-(defvar *pathnames*
-    (list
-     (make-pathname :name "foo")
-     (make-pathname :name "bar")
-     (make-pathname :name "foo" :type "txt")
-     (make-pathname :name "bar" :type "txt")
-     (make-pathname :name :wild)
-     (make-pathname :name :wild :type "txt")
-     ))
+(defparameter *pathnames*
+  (locally
+   (declare (optimize safety))
+   (loop for form in '((make-pathname :name "foo")
+		       (make-pathname :name "FOO" :case :common)
+		       (make-pathname :name "bar")
+		       (make-pathname :name "foo" :type "txt")
+		       (make-pathname :name "bar" :type "txt")
+		       (make-pathname :name "XYZ" :type "TXT" :case :common)
+		       (make-pathname :name nil)
+		       (make-pathname :name :wild)
+		       (make-pathname :name nil :type "txt")
+		       (make-pathname :name :wild :type "txt")
+		       (make-pathname :name :wild :type "TXT" :case :common)
+		       (make-pathname :name :wild :type "abc" :case :common)
+		       (make-pathname :directory :wild)
+		       (make-pathname :type :wild)
+		       (make-pathname :version :wild)
+		       (make-pathname :version :newest))
+	 append (ignore-errors (eval `(list ,form))))))
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (locally
+   (declare (optimize safety))
+   (ignore-errors
+     (setf (logical-pathname-translations "CLTESTROOT")
+	   `(("**;*.*.*" ,(make-pathname :directory '(:absolute :wild-inferiors)
+					 :name :wild :type :wild)))))
+   (ignore-errors
+     (setf (logical-pathname-translations "CLTEST")
+	   `(("**;*.*.*" ,(make-pathname
+			   :directory (append
+				       (pathname-directory
+					(truename (make-pathname)))
+				       '(:wild-inferiors))
+			   :name :wild :type :wild)))))
+   ))
+
+(defparameter *logical-pathnames*
+  (locally
+   (declare (optimize safety))
+   (append
+    (ignore-errors (list (logical-pathname "CLTESTROOT:")))
+    )))
 
 (defvar *streams*
     (remove-duplicates

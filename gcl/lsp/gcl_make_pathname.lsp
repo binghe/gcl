@@ -1,0 +1,106 @@
+(in-package :si)
+
+(defun directory-list-check (l)
+  (when (listp l)
+    (when (member (car l) '(:absolute :relative))
+      (mapl (lambda (x &aux (c (car x))(d (cadr x)))
+	      (when (and (member d '(:up :back)) (member c '(:absolute :wild-inferiors)))
+		(return-from directory-list-check nil))) l))))
+    
+(defun canonicalize-pathname-directory (l)
+  (cond ((eq l :wild) (canonicalize-pathname-directory '(:absolute :wild-inferiors)))
+	((stringp l) (canonicalize-pathname-directory (list :absolute l)))
+	((mapl (lambda (x &aux (c (car x)))
+		 (when (and (or (stringp c) (eq c :wild)) (eq (cadr x) :back))
+		   (return-from canonicalize-pathname-directory
+		     (canonicalize-pathname-directory (nconc (ldiff l x) (cddr x)))))) l))))
+
+;; (defun canonicalize-pathname-version (x)
+;;   (when x
+;;     (let ((x (string-upcase x)))
+;;       (cond ((string= "NEWEST" ) :newest)
+;; 	  ((
+
+(defun toggle-local-common (x &aux (u (find-if 'upper-case-p x))(d (find-if 'lower-case-p x)))
+  (cond ((and u d) x)
+	(u (string-downcase x))
+	(d (string-upcase x))
+	(x)))
+
+(defun make-pathname (&key host device directory name type version defaults (case :local) namestring
+			   &aux (h (or host (pathname-host (or defaults *default-pathname-defaults*)))))
+  (declare (optimize (safety 1)))
+  (check-type host (or (member nil :unspecific) string))
+  (check-type device (member nil :unspecific))
+  (check-type directory (or (member nil :unspecific :wild) string list))
+  (check-type name (or string (member nil :unspecific :wild)))
+  (check-type type (or string (member nil :unspecific :wild)))
+  (check-type version (or (integer 1) (member nil :unspecific :wild :newest)))
+  (check-type defaults (or null pathname));FIXME
+  (check-type case (member :common :local))
+  (check-type namestring (or null string))
+  (let* ((d (canonicalize-pathname-directory directory))
+	 (lp (logical-pathname-translations h))
+	 (p (init-pathname h device d name type version namestring))
+	 (p (cond (defaults (merge-pathnames p defaults nil))
+		  (namestring p)
+		  ((let* ((s (to-regexp1 (list h device d name type version) nil lp))
+			  (q (parse-namestring s)))
+		     (init-pathname (or (pathname-host q) h)
+				    (or (pathname-device q) device)
+				    (or (pathname-directory q) d)
+				    (or (pathname-name q) name)
+				    (or (pathname-type q) type)
+				    (or (pathname-version q) version)
+				    s)))))
+	 (p (if lp (logical-pathname p) p)))
+;	 (p (c-set-t-tt p (if lp 1 0))));logical-pathname
+    (unless (eq (pathname-directory p) (directory-list-check (pathname-directory p)))
+      (error 'file-error :pathname p :format-control "Bad directory list"))
+;    (print p)
+    p))
+;;     (let ((p (if defaults (merge-pathnames p defaults nil) p)))
+;; ;      (if namestring p (merge-pathnames (parse-namestring (namestring p)) p)))))
+
+;;       (unless namestring (c-set-pathname-namestring p (namestring p)))
+;;       p)))
+;; ;      (if namestring p (values (parse-namestring (namestring p)))))))
+
+(defun process-case (x c)
+  (cond ((eq c :local) x)
+	((symbolp x) x)
+	((listp x) (mapcar (lambda (x) (process-case x c)) x))
+	((find-if 'char-upcase x) (if (find-if 'char-downcase x) x (string-downcase x)))
+	((find-if 'char-downcase x) (string-upcase x))
+	(x)))
+
+(defun pathname-host (p &key (case :local) &aux (pn (pathname p)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (process-case (c-pathname-host pn) case))
+
+(defun pathname-device (p &key (case :local) &aux (pn (pathname p)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (process-case (c-pathname-device pn) case))
+
+(defun pathname-directory (p &key (case :local) &aux (pn (pathname p)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (process-case (c-pathname-directory pn) case))
+
+(defun pathname-name (p &key (case :local) &aux (pn (pathname p)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (process-case (c-pathname-name pn) case))
+
+(defun pathname-type (p &key (case :local) &aux (pn (pathname p)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (process-case (c-pathname-type pn) case))
+
+(defun pathname-version (p &key (case :local) &aux (pn (pathname p)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (process-case (c-pathname-version pn) case))
+

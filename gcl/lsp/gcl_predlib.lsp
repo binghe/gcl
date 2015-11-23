@@ -110,6 +110,7 @@
        (not (array-has-fill-pointer-p x))
        (not (si:displaced-array-p x))))
 
+(defun logical-pathnamep (x) (when (pathnamep x) (eql (c-t-tt x) 1)))
 
 (do ((l '((null . null)
           (symbol . symbolp)
@@ -124,7 +125,10 @@
           (character . characterp)
           (package . packagep)
           (stream . streamp)
+          (file-stream . file-stream-p)
+          (synonym-stream . synonym-stream-p)
           (pathname . pathnamep)
+          (logical-pathname . logical-pathnamep)
           (readtable . readtablep)
           (hash-table . hash-table-p)
           (random-state . random-state-p)
@@ -196,6 +200,8 @@
          ((null l) t)
        (unless (typep object (car l)) (return nil))))
     (satisfies (funcall (car i) object))
+    (eql (eql (car i) object))
+    (member (member object i))
     ((t) t)
     ((nil) nil)
     (boolean (or (eq object 't) (eq object 'nil)))

@@ -524,6 +524,56 @@ object if_exists, if_does_not_exist;
 static void
 gclFlushSocket(object);
 
+DEFUN_NEW("OPEN-INT",object,fSopen_int,SI,8,8,NONE,OO,OO,OO,OO,
+	  (object fn,object direction,object element_type,object if_exists,
+	   object iesp,object if_does_not_exist,object idnesp,
+	   object external_format),"") {
+
+  enum smmode smm=0;
+  vs_mark;
+  object strm,filename;
+
+  filename=fn;
+  if (direction == sKinput) {
+    smm = smm_input;
+    if (idnesp==Cnil)
+      if_does_not_exist = sKerror;
+  } else if (direction == sKoutput) {
+    smm = smm_output;
+    if (iesp==Cnil)
+      if_exists = sKnew_version;
+    if (idnesp==Cnil) {
+      if (if_exists == sKoverwrite ||
+	  if_exists == sKappend)
+	if_does_not_exist = sKerror;
+      else
+	if_does_not_exist = sKcreate;
+    }
+  } else if (direction == sKio) {
+    smm = smm_io;
+    if (iesp==Cnil)
+      if_exists = sKnew_version;
+    if (idnesp==Cnil) {
+      if (if_exists == sKoverwrite ||
+	  if_exists == sKappend)
+	if_does_not_exist = sKerror;
+      else
+	if_does_not_exist = sKcreate;
+    }
+  } else if (direction == sKprobe) {
+    smm = smm_probe;
+    if (idnesp==Cnil)
+      if_does_not_exist = Cnil;
+  } else
+    FEerror("~S is an illegal DIRECTION for OPEN.", 1, direction);
+  strm = open_stream(filename, smm, if_exists, if_does_not_exist);
+  if (type_of(strm) == t_stream) {
+    strm->sm.sm_object0 = element_type;
+    strm->sm.sm_object1 = fn;
+  }
+  vs_reset;
+  RETURN1(strm);
+}
 
 DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
@@ -1699,6 +1749,17 @@ LFD(siLoutput_stream_string)()
 		FEerror("~S is not a string-output stream.", 1, vs_base[0]);
 	vs_base[0] = vs_base[0]->sm.sm_object0;
 }
+
+DEFUN_NEW("FILE-STREAM-P",object,fSfile_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream &&
+	  (x->sm.sm_mode==smm_input || x->sm.sm_mode==smm_output || x->sm.sm_mode==smm_io || x->sm.sm_mode==smm_probe)
+	  ? Ct : Cnil);
+}
+
+DEFUN_NEW("SYNONYM-STREAM-P",object,fSsynonym_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_synonym ? Ct : Cnil);
+}
+
 
 LFD(Lstreamp)()
 {

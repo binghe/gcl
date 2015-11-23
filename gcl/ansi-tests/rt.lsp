@@ -110,48 +110,48 @@ them.")
 (defun do-test (&optional (name *test*))
   (do-entry (get-entry name)))
 
+(defun my-aref (a &rest args)
+  (apply #'aref a args))
+
+(defun my-row-major-aref (a index)
+  (row-major-aref a index))
+
 (defun equalp-with-case (x y)
   "Like EQUALP, but doesn't do case conversion of characters.
    Currently doesn't work on arrays of dimension > 2."
   (cond
+   ((eq x y) t)
    ((consp x)
     (and (consp y)
 	 (equalp-with-case (car x) (car y))
 	 (equalp-with-case (cdr x) (cdr y))))
    ((and (typep x 'array)
 	 (= (array-rank x) 0))
-    (equalp-with-case (aref x) (aref y)))
+    (equalp-with-case (my-aref x) (my-aref y)))
    ((typep x 'vector)
     (and (typep y 'vector)
 	 (let ((x-len (length x))
 	       (y-len (length y)))
 	   (and (eql x-len y-len)
 		(loop
-		 for e1 across x
-		 for e2 across y
+		 for i from 0 below x-len
+		 for e1 = (my-aref x i)
+		 for e2 = (my-aref y i)
 		 always (equalp-with-case e1 e2))))))
    ((and (typep x 'array)
 	 (typep y 'array)
 	 (not (equal (array-dimensions x)
 		     (array-dimensions y))))
     nil)
-   #|
-   ((and (typep x 'array)
-	 (= (array-rank x) 2))
-    (let ((dim (array-dimensions x)))
-      (loop for i from 0 below (first dim)
-	    always (loop for j from 0 below (second dim)
-			 always (equalp-with-case (aref x i j)
-						  (aref y i j))))))
-   |#
 
    ((typep x 'array)
     (and (typep y 'array)
 	 (let ((size (array-total-size x)))
 	   (loop for i from 0 below size
-		 always (equalp-with-case (row-major-aref x i)
-					  (row-major-aref y i))))))
-
+		 always (equalp-with-case (my-row-major-aref x i)
+					  (my-row-major-aref y i))))))
+   ((typep x 'pathname)
+    (equal x y))
    (t (eql x y))))
 
 (defun do-entry (entry &optional

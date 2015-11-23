@@ -297,6 +297,164 @@ the condition to go uncaught if it cannot be classified."
   `(classify-error** ',form))
 
 ;;;
+(defun typef (type) #'(lambda (x) (typep x type)))
+
+(defmacro signals-error (form error-name &key (safety 3) (name nil name-p) (inline nil))
+  `(handler-bind
+    ((warning #'(lambda (c) (declare (ignore c))
+			      (muffle-warning))))
+    (proclaim '(optimize (safety 3)))
+    (handler-case
+     (apply #'values
+	    nil
+	    (multiple-value-list
+	     ,(cond
+	       (inline form)
+	       (regression-test::*compile-tests*
+		`(funcall (compile nil '(lambda ()
+					  (declare (optimize (safety ,safety)))
+					  ,form))))
+	       (t `(eval ',form)))))
+     (,error-name (c)
+		  (cond
+		   ,@(case error-name
+		       (type-error
+			`(((typep (type-error-datum c)
+				  (type-error-expected-type c))
+			   (values
+			    nil
+			    (list (list 'typep (list 'quote
+						     (type-error-datum c))
+					(list 'quote
+					      (type-error-expected-type c)))
+				  "==> true")))))
+		       ((undefined-function unbound-variable)
+			(and name-p
+			     `(((not (eq (cell-error-name c) ',name))
+				(values
+				 nil
+				 (list 'cell-error-name "==>"
+				       (cell-error-name c)))))))
+		       ((stream-error end-of-file reader-error)
+			`(((not (streamp (stream-error-stream c)))
+			   (values
+			    nil
+			    (list 'stream-error-stream "==>"
+				  (stream-error-stream c))))))
+		       (file-error
+			`(((not (pathnamep (pathname (file-error-pathname c))))
+			   (values
+			    nil
+			    (list 'file-error-pathname "==>"
+				  (file-error-pathname c))))))
+		       (t nil))
+		   (t (printable-p c)))))))
+
+(defmacro signals-error-always (form error-name)
+  `(values
+    (signals-error ,form ,error-name)
+    (signals-error ,form ,error-name :safety 0)))
+
+(defmacro signals-type-error (var datum-form form &key (safety 3) (inline nil))
+  (let ((lambda-form
+	 `(lambda (,var)
+	    (declare (optimize (safety ,safety)))
+	    ,form)))
+    `(let ((,var ,datum-form))
+       (declare (optimize safety))
+       (handler-bind
+	((warning #'(lambda (c) (declare (ignore c))
+		      (muffle-warning))))
+					; (proclaim '(optimize (safety 3)))
+	(handler-case
+	 (apply #'values
+		nil
+		(multiple-value-list
+		 (funcall
+		 ,(cond
+		   (inline `(function ,lambda-form))
+		   (regression-test::*compile-tests*
+		     `(compile nil ',lambda-form))
+		   (t `(eval ',lambda-form)))
+		  ,var)))
+	 (type-error
+	  (c)
+	  (let ((datum (type-error-datum c))
+		(expected-type (type-error-expected-type c)))
+	    (cond
+	     ((not (eql ,var datum))
+	      (list :datum-mismatch ,var datum))
+	     ((typep datum expected-type)
+	      (list :is-typep datum expected-type))
+	     (t (printable-p c))))))))))
+
+(declaim (special *mini-universe*))
+
+(defun check-type-error* (pred-fn guard-fn &optional (universe *mini-universe*))
+  "Check that for all elements in some set, either guard-fn is true or
+   pred-fn signals a type error."
+  (let (val)
+    (loop for e in universe
+	  unless (or (funcall guard-fn e)
+		     (equal
+		      (setf val (multiple-value-list
+				 (signals-type-error x e (funcall pred-fn x) :inline t)))
+		      '(t)))
+	collect (list e val))))
+
+(defmacro check-type-error (&body args)
+  `(locally (declare (optimize safety)) (check-type-error* ,@args)))
+
+(defun printable-p (obj)
+  "Returns T iff obj can be printed to a string."
+  (with-standard-io-syntax
+   (let ((*print-readably* nil)
+	 (*print-escape* nil))
+     (declare (optimize safety))
+     (handler-case (and (stringp (write-to-string obj)) t)
+		   (condition (c) (declare (ignore c)) nil)))))
+
+(defun make-special-string (string &key fill adjust displace base)
+  (let* ((len (length string))
+	 (len2 (if fill (+ len 4) len))
+	 (etype (if base 'base-char 'character)))
+    (if displace
+	(let ((s0 (make-array (+ len2 5)
+			      :initial-contents
+			      (concatenate 'string
+					   (make-string 2 :initial-element #\X)
+					   string
+					   (make-string (if fill 7 3)
+							:initial-element #\Y))
+			      :element-type etype)))
+	  (make-array len2 :element-type etype
+		      :adjustable adjust
+		      :fill-pointer (if fill len nil)
+		      :displaced-to s0
+		      :displaced-index-offset 2))
+      (make-array len2 :element-type etype
+		  :initial-contents
+		  (if fill (concatenate 'string string "ZZZZ") string)
+		  :fill-pointer (if fill len nil)
+		  :adjustable adjust))))
+
+(defmacro do-special-strings ((var string-form &optional ret-form) &body forms)
+  (let ((string (gensym))
+	(fill (gensym "FILL"))
+	(adjust (gensym "ADJUST"))
+	(base (gensym "BASE"))
+	(displace (gensym "DISPLACE")))
+    `(let ((,string ,string-form))
+       (dolist (,fill '(nil t) ,ret-form)
+	 (dolist (,adjust '(nil t))
+	   (dolist (,base '(nil t))
+	     (dolist (,displace '(nil t))
+	       (let ((,var (make-special-string
+			    ,string
+			    :fill ,fill :adjust ,adjust
+			    :base ,base :displace ,displace)))
+		 ,@forms))))))))
+
 ;;; A scaffold is a structure that is used to remember the object
 ;;; identities of the cons cells in a (noncircular) data structure.
 ;;; This lets us check if the data structure has been changed by

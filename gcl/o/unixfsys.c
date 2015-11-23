@@ -840,6 +840,38 @@ DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") 
 }
 #endif
 
+DEFUN_NEW("READDIR3",object,fSreaddir3,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,object s),"") {
+  struct dirent *e;
+  object z;
+  long tl;
+  size_t l;
+  if (!x) RETURN1(Cnil);
+  tl=telldir((DIR *)x);
+#ifdef HAVE_D_TYPE
+  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && e->d_type!=y;);
+#endif
+  if (!e) RETURN1(Cnil);
+  if (s==Cnil)
+    z=make_simple_string(e->d_name);
+  else {
+    check_type_string(&s);
+    l=strlen(e->d_name);
+    if (s->st.st_dim-s->st.st_fillp>=l) {
+      memcpy(s->st.st_self+s->st.st_fillp,e->d_name,l);
+      s->st.st_fillp+=l;
+      z=s;
+    } else {
+      seekdir((DIR *)x,tl);
+      RETURN1(make_fixnum(l));
+    }
+  }
+#ifdef HAVE_D_TYPE
+  if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(e->d_type));
+#endif
+  RETURN1(z);
+}
+
+
 DEFUN_NEW("READDIR",object,fSreaddir,SI,2,2,NONE,OI,IO,OO,OO,(fixnum x,fixnum y),"") {
   struct dirent *e;
   object z;
@@ -882,6 +914,45 @@ DEFUN_NEW("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
 }
 
+#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+DEFUN_NEW("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object s),"") {
+  char *b1,*b2=NULL;
+  ssize_t l,z1,z2;
+  check_type_string(&s);
+  /* l=s->st.st_hasfillp ? s->st.st_fillp : s->st.st_dim; */
+  z1=length(s);
+  massert((b1=alloca(z1+1)));
+  memcpy(b1,s->st.st_self,z1);
+  b1[z1]=0;
+  for (l=z2=0;l>=z2;) {
+    memset(b2,0,z2);
+    z2+=z2+10;
+    massert((b2=alloca(z2)));
+    massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,b1,b2,z2))>=0);
+  }
+  b2[l]=0;
+  s=make_simple_string(b2);
+  memset(b1,0,z1);
+  memset(b2,0,z2);
+  RETURN1(s);
+}
+
+DEFUN_NEW("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
+  char *b=NULL;
+  size_t z;
+  object s;
+
+  for (z=0;!(errno=0) && !getcwd(b,z) && errno==ERANGE;b=memset(b,0,z),z+=z+10,({massert((b=alloca(z)));}));
+  massert((b=getcwd(b,z)));
+  s=make_simple_string(b);
+  memset(b,0,z);
+  RETURN1(s);
+
+}
 
 
 

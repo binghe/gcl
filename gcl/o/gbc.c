@@ -700,6 +700,7 @@ mark_object1(object x) {
     mark_object(x->pn.pn_name);
     mark_object(x->pn.pn_type);
     mark_object(x->pn.pn_version);
+    mark_object(x->pn.pn_namestring);
     break;
     
   case t_closure:

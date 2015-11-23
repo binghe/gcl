@@ -58,6 +58,15 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_sharp,no_init);
   ar_check_init(gcl_fpe,no_init);
 
+  ar_check_init(gcl_sharp_uv,no_init);
+  ar_check_init(gcl_namestring,no_init);
+  ar_check_init(gcl_parse_namestring,no_init);
+  ar_check_init(gcl_make_pathname,no_init);
+  ar_check_init(gcl_translate_pathname,no_init);
+  ar_check_init(gcl_logical_pathname_translations,no_init);
+  ar_check_init(gcl_directory,no_init);
+  ar_check_init(gcl_merge_pathnames,no_init);
+  ar_check_init(gcl_truename,no_init);
 	
   ar_check_init(gcl_cmpinline,no_init);
   ar_check_init(gcl_cmputil,no_init);
