@@ -11,7 +11,7 @@
 
 (defvar *up-key* :up)
 
-(defun mfr (x b i) (make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b))
+(defun mfr (x b i) (subseq x b i));  (make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b)
 
 (defvar *sym-sub-alist* '((:host . nil)
 			  (:device . nil)
@@ -54,7 +54,6 @@
       (let ((host (or host mhost dhost)))
 	(when (logical-pathname-translations host)
 	  (list (match-end 0)
-		:namestring (if (unless mhost host) (concatenate 'string (string-upcase host) ":" x) x)
 		:device :unspecific
 		:host host
 		:directory (dir-parse (match-component x 2 :none) ";" :relative)
@@ -65,7 +64,6 @@
 (defun pathname-parse (x)
   (when (zerop (string-match +generic-physical-pathname-regexp+ x))
     (list (match-end 0)
-	  :namestring x
 	  :directory (dir-parse (match-component x 1 :none) "/" :absolute)
 	  :name (match-component x 2 :name)
 	  :type (match-component x 3 :type))))
