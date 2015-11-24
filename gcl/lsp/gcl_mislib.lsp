@@ -114,13 +114,15 @@
      (* (+ h tz) 3600) (* min 60) sec))
 
 (defun compile-file-pathname (pathname)
-(make-pathname :defaults pathname :type "o"))
+  (make-pathname :defaults pathname :type "o"))
+
 (defun constantly (x)
-#'(lambda (&rest args)
+  (lambda (&rest args)
     (declare (ignore args) (:dynamic-extent args))
-x))
+    x))
+
 (defun complement (fn)
-#'(lambda (&rest args) (not (apply fn args))))
+  (lambda (&rest args) (not (apply fn args))))
 
 (defun default-system-banner ()
   (let (gpled-modules)
