@@ -1,4 +1,4 @@
-EXTER inline int
+INLINE int
 set_writable(fixnum i,fixnum m) {
 
   fixnum j;
@@ -27,7 +27,7 @@ set_writable(fixnum i,fixnum m) {
 
 }
 
-EXTER inline int
+INLINE int
 is_writable(fixnum i) {
 
   fixnum j;

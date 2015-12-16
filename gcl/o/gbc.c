@@ -107,14 +107,14 @@ off_check(void *v,void *ve,fixnum i,struct pageinfo *pi) {
 #endif
 
 
-inline struct pageinfo *
+static inline struct pageinfo *
 get_pageinfo(void *x) {
   struct pageinfo *v=contblock_list_head;void *vv;
   for (;(vv=v) && (vv>=x || vv+v->in_use*PAGESIZE<=x);v=v->next);
   return v;
 }
 
-inline char
+static inline char
 get_bit(char *v,struct pageinfo *pi,void *x) {
   void *ve=CB_DATA_START(pi);
   fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
@@ -124,7 +124,7 @@ get_bit(char *v,struct pageinfo *pi,void *x) {
   return (v[i]>>s)&0x1;
 }
 
-inline void
+static inline void
 set_bit(char *v,struct pageinfo *pi,void *x) {
   void *ve=CB_DATA_START(pi);
   fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR);
@@ -139,7 +139,7 @@ set_bit(char *v,struct pageinfo *pi,void *x) {
 #define ptr_get(v,i,s) (v+(((i<<LOG_BITS_CHAR)|s)<<LOG_BYTES_CONTBLOCK))
 #define ptr_set(x,v,i,s) ({fixnum _o=(x-v)>>LOG_BYTES_CONTBLOCK;i=_o>>LOG_BITS_CHAR;s=_o&~(~0UL<<LOG_BITS_CHAR);})
 
-inline void
+static inline void
 set_bits(char *v,struct pageinfo *pi,void *x1,void *x2) {
 
   void *ds=CB_DATA_START(pi);
@@ -162,7 +162,7 @@ set_bits(char *v,struct pageinfo *pi,void *x1,void *x2) {
 
 }
 
-inline void *
+static inline void *
 get_bits(char *v,struct pageinfo *pi,void *x) {
 
   void *ds=CB_DATA_START(pi),*de=CB_DATA_END(pi);
@@ -188,32 +188,32 @@ get_bits(char *v,struct pageinfo *pi,void *x) {
   return ds<de ? ds : de;
 }
 
-inline char
+static inline char
 get_mark_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_MARK_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_mark_bit(struct pageinfo *pi,void *x) {
   set_bit(CB_MARK_START(pi),pi,x);
 }
 
-inline void *
+static inline void *
 get_mark_bits(struct pageinfo *pi,void *x) {
   return get_bits(CB_MARK_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_mark_bits(struct pageinfo *pi,void *x1,void *x2) {
   set_bits(CB_MARK_START(pi),pi,x1,x2);
 }
 
-inline char
+static inline char
 get_sgc_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_SGCF_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_sgc_bit(struct pageinfo *pi,void *x) {
   set_bit(CB_SGCF_START(pi),pi,x);
 }
@@ -250,12 +250,12 @@ mark_object(object);
    These assume that DBEGIN is divisible by 32, or else we should have
    #define Shamt(x) (((((int) x -DBEGIN) >> 2) & ~(~0 << 5)))
 */ 
-inline void *
+static inline void *
 get_sgc_bits(struct pageinfo *pi,void *x) {
   return get_bits(CB_SGCF_START(pi),pi,x);
 }
 
-inline void
+static inline void
 set_sgc_bits(struct pageinfo *pi,void *x1,void *x2) {
   set_bits(CB_SGCF_START(pi),pi,x1,x2);
 }
@@ -337,7 +337,7 @@ enter_mark_origin(object *p) {
 
 static void *mcsh,*mcsl;
 
-inline void
+static inline void
 mark_cons(object x) {
   
   do {
@@ -1517,7 +1517,7 @@ GBC(enum type t) {
     
   }
 
-  ZALLOCA(abs(mcsl-mcsh));
+  ZALLOCA(labs(mcsl-mcsh));
   
   collect_both=0;
 
@@ -1544,10 +1544,10 @@ FFN(siLheap_report)(void) {
   i=sizeof(fixnum)*CHAR_SIZE-2;
   i=1<<i;
   vs_push(make_fixnum(((unsigned long)cs_base+i-1)&-i));
-  vs_push(make_fixnum(abs(cs_base-cs_org)));
+  vs_push(make_fixnum(labs(cs_base-cs_org)));
   vs_push(make_fixnum((CSTACK_DIRECTION+1)>>1));
   vs_push(make_fixnum(CSTACK_ALIGNMENT));
-  vs_push(make_fixnum(abs(cs_limit-cs_org)));/*CSSIZE*/
+  vs_push(make_fixnum(labs(cs_limit-cs_org)));/*CSSIZE*/
 #if defined(IM_FIX_BASE) && defined(IM_FIX_LIM)
 #ifdef LOW_IM_FIX
   vs_push(make_fixnum(-LOW_IM_FIX));

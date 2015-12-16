@@ -172,7 +172,7 @@ DEFUNM("GET-INTERNAL-RUN-TIMES",object,fSget_internal_run_times,SI,0,0,NONE,OO,O
 
 DEFUN("GET-INTERNAL-RUN-TIME",object,fLget_internal_run_time,LISP
 	   ,0,0,NONE,OO,OO,OO,OO,(void),"") {
-  object x=FFN(fSget_internal_run_times)(0);
+  object x=FFN(fSget_internal_run_times)();
   RETURN1(x);
 }
 

@@ -108,7 +108,7 @@ number_exp(object x)
 	}
 }
 
-inline object
+static inline object
 number_fix_iexpt(object x,fixnum y,fixnum ly,fixnum j) {
   object z;
   
@@ -117,7 +117,7 @@ number_fix_iexpt(object x,fixnum y,fixnum ly,fixnum j) {
   return fixnum_bitp(j,y) ? number_times(x,z) : z;
 }
 
-inline object
+static inline object
 number_big_iexpt(object x,object y,fixnum ly,fixnum j) {
   object z;
   
@@ -127,7 +127,7 @@ number_big_iexpt(object x,object y,fixnum ly,fixnum j) {
 
 }
 
-inline object
+static inline object
 number_zero_expt(object x,bool promote_short_p) {
 
   switch (type_of(x)) {
@@ -149,7 +149,7 @@ number_zero_expt(object x,bool promote_short_p) {
 }
 
 
-inline object
+static inline object
 number_ui_expt(object x,fixnum fy) {
 
   switch (type_of(x)) {
@@ -182,17 +182,17 @@ number_ui_expt(object x,fixnum fy) {
     
 }
 
-inline object
+static inline object
 number_ump_expt(object x,object y) {
   return number_big_iexpt(x,y,fix(integer_length(y)),0);
 }
 
-inline object
+static inline object
 number_log_expt(object x,object y) {
   return number_zerop(y) ? number_zero_expt(y,type_of(x)==t_longfloat) : number_exp(number_times(number_nlog(x),y));
 }
 
-inline object
+static inline object
 number_invert(object x,object y,object z) {
 
   switch (type_of(z)) {
@@ -207,7 +207,7 @@ number_invert(object x,object y,object z) {
 }
     
 
-inline object 
+static inline object
 number_si_expt(object x,object y) {
   switch (type_of(y)) {
   case t_fixnum:

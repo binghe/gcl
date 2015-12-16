@@ -23,7 +23,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 /*  alloc.c  */
-void *alloc_page();
 object alloc_object();
 void *malloc(size_t);
 void *realloc(void *,size_t);

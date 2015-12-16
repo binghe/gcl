@@ -1098,7 +1098,7 @@ DEFUN("SHARP-\\-READER",object,fSsharp_sl_reader,SI,3,3,NONE,OO,OO,OO,OO,(object
     if (type_of(y)!=t_fixnum ||	fix(y) != 0)
       FEerror("~S is an illegal CHAR-FONT.", 1, y);
   /*  assuming that CHAR-FONT-LIMIT is 1  */
-  unread_char(character_table+'\\', s);
+  unread_char(((object)(character_table+'\\')), s);
   if (READsuppress) {
     (void)read_object(s);
     RETURN1(Cnil);

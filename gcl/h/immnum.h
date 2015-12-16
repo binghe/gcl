@@ -19,10 +19,10 @@
 #define iif2(x,y) is_imm_fixnum2(x,y)
 
 
-EXTER inline fixnum
+INLINE fixnum
 lnabs(fixnum x) {return x<0 ? ~x : x;}
 
-EXTER inline char
+INLINE char
 clz(ufixnum x) {
 #ifdef HAVE_CLZL
   return x ? __builtin_clzl(x) : sizeof(x)*8;
@@ -31,7 +31,7 @@ clz(ufixnum x) {
 #endif
 }
 
-EXTER inline char
+INLINE char
 ctz(ufixnum x) {
 #ifdef HAVE_CTZL
   return __builtin_ctzl(x);/*x ? __builtin_clzl(x) : sizeof(x)*8;*/
@@ -40,11 +40,11 @@ ctz(ufixnum x) {
 #endif
 }
 
-EXTER inline char
+INLINE char
 fixnum_length(fixnum x) {return sizeof(x)*8-clz(lnabs(x));}
 
-EXTER inline object
-immnum_length(object x) {return iif(x) ? mif(fixnum_length(fif(x))) : integer_length(x);}
+INLINE object
+immnum_length(object x) {return iif(x) ? mif((fixnum)fixnum_length(fif(x))) : integer_length(x);}
 
 
 #if SIZEOF_LONG == 8
@@ -59,7 +59,7 @@ immnum_length(object x) {return iif(x) ? mif(fixnum_length(fif(x))) : integer_le
 #define POPD 0x3F
 #endif
 
-EXTER inline char
+INLINE char
 fixnum_popcount(ufixnum x) {
   x-=POPA&(x>>1);
   x=(x&POPB)+((x>>2)&POPB);
@@ -72,34 +72,34 @@ fixnum_popcount(ufixnum x) {
   return x&POPD;
 }
 
-EXTER inline char
+INLINE char
 /* fixnum_count(fixnum x) {return __builtin_popcountl(lnabs(x));} */
 fixnum_count(fixnum x) {return fixnum_popcount(lnabs(x));}
 
-EXTER inline object
-immnum_count(object x) {return iif(x) ? mif(fixnum_count(fif(x))) : integer_count(x);}
+INLINE object
+immnum_count(object x) {return iif(x) ? mif((fixnum)fixnum_count(fif(x))) : integer_count(x);}
 
 /*bs=sizeof(long)*8;
   lb=bs-clz(labs(x));|x*y|=|x|*|y|<2^(lbx+lby)<2^(bs-1);
   0 bounded by 2^0, +-1 by 2^1,mpf by 2^(bs-1), which is sign bit
   protect labs from most negative fix, here all immfix ok*/
 long int labs(long int j);
-EXTER inline bool
+INLINE bool
 fixnum_mul_safe_abs(fixnum x,fixnum y) {return clz(x)+clz(y)>sizeof(x)*8+1;}
-EXTER inline object
+INLINE object
 safe_mul_abs(fixnum x,fixnum y) {return fixnum_mul_safe_abs(x,y) ? make_fixnum(x*y) : fixnum_times(x,y);}
-EXTER inline bool
+INLINE bool
 fixnum_mul_safe(fixnum x,fixnum y) {return fixnum_mul_safe_abs(labs(x),labs(y));}
-EXTER inline object
+INLINE object
 safe_mul(fixnum x,fixnum y) {return fixnum_mul_safe(x,y) ? make_fixnum(x*y) : fixnum_times(x,y);}
-EXTER inline object
+INLINE object
 immnum_times(object x,object y) {return iif2(x,y) ? safe_mul(fif(x),fif(y)) : number_times(x,y);}
 
-EXTER inline object
+INLINE object
 immnum_plus(object x,object y) {return iif2(x,y) ? make_fixnum(fif(x)+fif(y)) : number_plus(x,y);}
-EXTER inline object
+INLINE object
 immnum_minus(object x,object y) {return iif2(x,y) ? make_fixnum(fif(x)-fif(y)) : number_minus(x,y);}
-EXTER inline object
+INLINE object
 immnum_negate(object x) {return iif(x) ? make_fixnum(-fif(x)) : number_negate(x);}
 
 #define BOOLCLR		0
@@ -119,7 +119,7 @@ immnum_negate(object x) {return iif(x) ? make_fixnum(-fif(x)) : number_negate(x)
 #define BOOLORC1	015
 #define BOOLORC2	013
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_boole(fixnum op,fixnum x,fixnum y) {
   switch(op) {
   case BOOLCLR:	 return 0;
@@ -142,7 +142,7 @@ fixnum_boole(fixnum op,fixnum x,fixnum y) {
   return 0;/*FIXME error*/
 }
   
-EXTER inline object
+INLINE object
 immnum_boole(fixnum o,object x,object y) {return iif2(x,y) ? mif(fixnum_boole(o,fif(x),fif(y))) : log_op2(o,x,y);}
 
 #define immnum_bool(o,x,y) immnum_boole(fixint(o),x,y)
@@ -159,93 +159,93 @@ immnum_boole(fixnum o,object x,object y) {return iif2(x,y) ? mif(fixnum_boole(o,
 #define immnum_orc1(x,y)  immnum_boole(BOOLORC1,x,y)
 #define immnum_orc2(x,y)  immnum_boole(BOOLORC2,x,y)
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_div(fixnum x,fixnum y,fixnum d) {
   fixnum z=x/y;
   if (d && x!=y*z && (x*d>0 ? y>0 : y<0))
     z+=d;
   return z;
 }
-EXTER inline fixnum
+INLINE fixnum
 fixnum_rem(fixnum x,fixnum y,fixnum d) {
   fixnum z=x%y;
   if (d && z && (x*d>0 ? y>0 : y<0))
     z+=y;
   return z;
 }
-EXTER inline object
+INLINE object
 immnum_truncate(object x,object y) {return iif2(x,y)&&y!=make_fixnum(0) ? mif(fixnum_div(fif(x),fif(y),0)) : (intdivrem(x,y,0,&x,0),x);}
-EXTER inline object
+INLINE object
 immnum_floor(object x,object y) {return iif2(x,y)&&y!=make_fixnum(0) ? mif(fixnum_div(fif(x),fif(y),-1)) : (intdivrem(x,y,-1,&x,0),x);}
-EXTER inline object
+INLINE object
 immnum_ceiling(object x,object y) {return iif2(x,y)&&y!=make_fixnum(0) ? mif(fixnum_div(fif(x),fif(y),1)) : (intdivrem(x,y,1,&x,0),x);}
-EXTER inline object
+INLINE object
 immnum_mod(object x,object y) {return iif2(x,y)&&y!=make_fixnum(0) ? mif(fixnum_rem(fif(x),fif(y),-1)) : (intdivrem(x,y,-1,0,&y),y);}
-EXTER inline object
+INLINE object
 immnum_rem(object x,object y) {return iif2(x,y)&&y!=make_fixnum(0) ? mif(fixnum_rem(fif(x),fif(y),0)) : (intdivrem(x,y,0,0,&y),y);}
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_rshft(fixnum x,fixnum y) {
   return y>=sizeof(x)*8 ? (x<0 ? -1 : 0) : x>>y;
 }
-EXTER inline object
+INLINE object
 fixnum_lshft(fixnum x,fixnum y) {
   return clz(labs(x))>y ? make_fixnum(x<<y) : (x ? fixnum_big_shift(x,y) : make_fixnum(0));
 }
-EXTER inline object
+INLINE object
 fixnum_shft(fixnum x,fixnum y) {
   return y<0 ? make_fixnum(fixnum_rshft(x,-y)) : fixnum_lshft(x,y);
 }
-EXTER inline object
+INLINE object
 immnum_shft(object x,object y) {return iif2(x,y) ? fixnum_shft(fif(x),fif(y)) : integer_shift(x,y);}
 
-EXTER inline bool
+INLINE bool
 fixnum_bitp(fixnum p,fixnum x) {return fixnum_rshft(x,p)&0x1;}
 
-EXTER inline bool
+INLINE bool
 immnum_bitp(object x,object y) {return iif2(x,y) ? fixnum_bitp(fif(x),fif(y)) : integer_bitp(x,y);}
 
 
 #define immnum_comp(x,y,c) iif2(x,y) ? (x c y) : (number_compare(x,y) c 0)
 
-EXTER inline bool
+INLINE bool
 immnum_lt(object x,object y) {return immnum_comp(x,y,<);}
-EXTER inline bool
+INLINE bool
 immnum_le(object x,object y) {return immnum_comp(x,y,<=);}
-EXTER inline bool
+INLINE bool
 immnum_eq(object x,object y) {return immnum_comp(x,y,==);}
-EXTER inline bool
+INLINE bool
 immnum_ne(object x,object y) {return immnum_comp(x,y,!=);}
-EXTER inline bool
+INLINE bool
 immnum_gt(object x,object y) {return immnum_comp(x,y,>);}
-EXTER inline bool
+INLINE bool
 immnum_ge(object x,object y) {return immnum_comp(x,y,>=);}
 
-EXTER inline bool
+INLINE bool
 immnum_minusp(object x) {return iif(x) ? ((ufixnum)x)<((ufixnum)make_fixnum(0)) : number_minusp(x);}
-EXTER inline bool
+INLINE bool
 immnum_plusp(object x) {return iif(x) ? ((ufixnum)x)>((ufixnum)make_fixnum(0)) : number_plusp(x);}
-EXTER inline bool
+INLINE bool
 immnum_zerop(object x) {return iif(x) ? ((ufixnum)x)==((ufixnum)make_fixnum(0)) : number_zerop(x);}
-EXTER inline bool
+INLINE bool
 immnum_evenp(object x) {return iif(x) ? !(((ufixnum)x)&0x1) : number_evenp(x);}
-EXTER inline bool
+INLINE bool
 immnum_oddp(object x) {return iif(x) ? (((ufixnum)x)&0x1) : number_oddp(x);}
 
-EXTER inline object
+INLINE object
 immnum_signum(object x) {
   ufixnum ux=(ufixnum)x,uz=((ufixnum)make_fixnum(0));
   return iif(x) ? (ux<uz ? mif(-1) : (ux==uz ? mif(0) : mif(1))) : number_signum(x);
 }
-EXTER inline object
+INLINE object
 immnum_abs(object x) {return iif(x) ? make_fixnum(labs(fif(x))) : number_abs(x);}
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_ldb(fixnum s,fixnum p,fixnum i) {
   return ((1UL<<s)-1)&fixnum_rshft(i,p);
 }
 
-EXTER inline object
+INLINE object
 immnum_ldb(object x,object i) {
   if (iif(i))
     if (consp(x)) {
@@ -259,7 +259,7 @@ immnum_ldb(object x,object i) {
   return number_ldb(x,i);
 }
 
-EXTER inline bool
+INLINE bool
 immnum_ldbt(object x,object i) {
   if (iif(i))
     if (consp(x)) {
@@ -273,13 +273,13 @@ immnum_ldbt(object x,object i) {
   return number_ldbt(x,i)!=Cnil;
 }
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_dpb(fixnum s,fixnum p,fixnum n,fixnum i) {
   fixnum z=(1UL<<s)-1;
   return (i&~(z<<p))|((n&z)<<p);
 }
 
-EXTER inline object
+INLINE object
 immnum_dpb(object n,object x,object i) {
   if (iif2(n,i))
     if (consp(x)) {
@@ -293,13 +293,13 @@ immnum_dpb(object n,object x,object i) {
   return number_dpb(n,x,i);
 }
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_dpf(fixnum s,fixnum p,fixnum n,fixnum i) {
   fixnum z=((1UL<<s)-1)<<p;
   return (i&~z)|(n&z);
 }
 
-EXTER inline object
+INLINE object
 immnum_dpf(object n,object x,object i) {
   if (iif2(n,i))
     if (consp(x)) {
@@ -313,15 +313,15 @@ immnum_dpf(object n,object x,object i) {
   return number_dpf(n,x,i);
 }
 
-EXTER inline object
+INLINE object
 immnum_max(object x,object y) {return iif2(x,y) ? ((ufixnum)x>=(ufixnum)y ? x : y) : (number_compare(x,y)>=0?x:y);}
-EXTER inline object
+INLINE object
 immnum_min(object x,object y) {return iif2(x,y) ? ((ufixnum)x<=(ufixnum)y ? x : y) : (number_compare(x,y)<=0?x:y);}
 
-EXTER inline bool
+INLINE bool
 immnum_logt(object x,object y) {return iif2(x,y) ? fixnum_boole(BOOLAND,fif(x),fif(y))!=0 : !number_zerop(log_op2(BOOLAND,x,y));}
 
-EXTER inline fixnum
+INLINE fixnum
 fixnum_gcd(fixnum x,fixnum y) {
 
   fixnum t;
@@ -346,16 +346,16 @@ fixnum_gcd(fixnum x,fixnum y) {
 
 }
 
-EXTER inline object
+INLINE object
 immnum_gcd(object x,object y) {return iif2(x,y) ? mif(fixnum_gcd(labs(fif(x)),labs(fif(y)))) : get_gcd(x,y);}
 
-EXTER inline object
+INLINE object
 fixnum_lcm(fixnum x,fixnum y) {
   fixnum g=fixnum_gcd(x,y);
   return g ? safe_mul_abs(x,fixnum_div(y,g,0)) : make_fixnum(0);
 }
 
-EXTER inline object
+INLINE object
 immnum_lcm(object x,object y) {return iif2(x,y) ? fixnum_lcm(labs(fif(x)),labs(fif(y))) : get_lcm(x,y);}
 
 #endif

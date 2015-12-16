@@ -217,22 +217,24 @@ DEFUN("TAILP",object,fLtailp,LISP,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
   RETURN1(eql(x,y) ? Ct : Cnil);
 }
 
+static inline object
+subst(object tree,object new,object x,object key,object test,object test_not) {
+
+  if (TESTA(x,tree,key,test,test_not))
+    return new;
+  else if (consp(tree)) {
+    object a=subst(tree->c.c_car,new,x,key,test,test_not),d=subst(tree->c.c_cdr,new,x,key,test,test_not);
+    return a==tree->c.c_car && d==tree->c.c_cdr ? tree : MMcons(a,d);
+  } else
+    return tree;
+
+}
+
 DEFUN("SUBST",object,fLsubst,LISP,3,63,NONE,OO,OO,OO,OO,(object new,object x,object y,...),"") {
   									
   fixnum n=INIT_NARGS(3);						
   object l=Cnil,f=OBJNULL,*base=vs_top,z,key,test,test_not;		
   va_list ap;								
-  object subst(object tree) {	
-    
-    if (MTEST(tree))			
-      return new;				
-    else if (consp(tree)) {
-      object a=subst(tree->c.c_car),d=subst(tree->c.c_cdr);
-      return a==tree->c.c_car && d==tree->c.c_cdr ? tree : MMcons(a,d);
-    } else								
-      return tree;							
-    
-  }									
 
   va_start(ap,y);							
   for (;(z=NEXT_ARG(n,ap,l,f,OBJNULL))!=OBJNULL;)			
@@ -242,7 +244,7 @@ DEFUN("SUBST",object,fLsubst,LISP,3,63,NONE,OO,OO,OO,OO,(object new,object x,obj
   parse_key(base,FALSE,FALSE,3,sKtest,sKtest_not,sKkey);		
   key=base[2];test=base[0];test_not=base[1];vs_top=base;		
   									
-  RETURN1(subst(y));							
+  RETURN1(subst(y,new,x,key,test,test_not));
   									
 }
 
@@ -488,14 +490,12 @@ DEFUN("MAKE-LIST",object,fSmake_list,LISP,1,63,NONE,OI,OO,OO,OO,(fixnum x,...),"
 
 }
 
+static inline object
+copy_tree(object x) {
+  return consp(x) ? MMcons(copy_tree(x->c.c_car),copy_tree(x->c.c_cdr)) : x;
+}
+
 DEFUN("COPY-TREE",object,fScopy_tree,LISP,1,2,NONE,OO,OO,OO,OO,(object x),"") {
-  object copy_tree(object x) {
-    if (consp(x)) {
-      object a=copy_tree(x->c.c_car),d=copy_tree(x->c.c_cdr);
-      return a==x->c.c_car && d==x->c.c_cdr ? x : MMcons(a,d);
-    } else
-      return x;
-  }
   RETURN1(copy_tree(x));
 }
 
@@ -589,26 +589,24 @@ DEFUN("NINTH",object,fLninth,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"")
 DEFUN("TENTH",object,fLtenth,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"")
 { return FFN(fLnth)(make_fixnum(9),x);}
 
+static inline object
+sublis(object alist,object tree,object key,object test,object test_not) {
+  object z;
 
-DEFKTFUN("SUBLIS",fLsublis,LISP,({\
-  object sublis(object tree) {	
-    
-    object z;
-
-    for (z = x;  !endp(z);  z = z->c.c_cdr) {
-      object w=z->c.c_car;
-      if (TESTA(w->c.c_car,tree,key,test,test_not)) 
-	return w->c.c_cdr;
-    }
-    if (consp(tree)) {
-      object a=sublis(tree->c.c_car),d=sublis(tree->c.c_cdr);
-      return a==tree->c.c_car && d==tree->c.c_cdr ? tree : MMcons(a,d);
-    } else
-      return tree;
-    
-    
+  for (z = alist;  !endp(z);  z = z->c.c_cdr) {
+    object w=z->c.c_car;
+    if (TESTA(w->c.c_car,tree,key,test,test_not))
+      return w->c.c_cdr;
   }
-  sublis(y);}))
+  if (consp(tree)) {
+    object a=sublis(alist,tree->c.c_car,key,test,test_not),d=sublis(alist,tree->c.c_cdr,key,test,test_not);
+    return a==tree->c.c_car && d==tree->c.c_cdr ? tree : MMcons(a,d);
+  } else
+    return tree;
+
+}
+
+DEFKTFUN("SUBLIS",fLsublis,LISP,sublis(x,y,key,test,test_not))
 
 DEFUN("WILD-PATHNAME-P",object,fLwild_pathname_p,LISP,1,2,NONE,OO,OO,OO,OO,(object x,...),"") {
   return Cnil;

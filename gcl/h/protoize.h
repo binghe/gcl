@@ -1,9 +1,9 @@
 /* alloc.c:89:OF */ extern void *alloc_page (long n); /* (n) int n; */
-/* alloc.c:149:OF */ inline void add_page_to_freelist (char *p, struct typemanager *tm); /* (p, tm) char *p; struct typemanager *tm; */
+/* alloc.c:149:OF */ void add_page_to_freelist (char *p, struct typemanager *tm); /* (p, tm) char *p; struct typemanager *tm; */
 /* alloc.c:196:OF */ extern object type_name (int t); /* (t) int t; */
-/* alloc.c:213:OF */ inline object alloc_object (enum type t); /* (t) enum type t; */
-/* alloc.c:213:OF */ inline void add_pages(struct typemanager *,fixnum);
-/* alloc.c:296:OF */ extern inline object make_cons (object a, object d); /* (a, d) object a; object d; */
+/* alloc.c:213:OF */ object alloc_object (enum type t); /* (t) enum type t; */
+/* alloc.c:213:OF */ void add_pages(struct typemanager *,fixnum);
+/* alloc.c:296:OF */ extern object make_cons (object a, object d); /* (a, d) object a; object d; */
 /* alloc.c:364:OF */ extern object on_stack_cons (object x, object y); /* (x, y) object x; object y; */
 /* alloc.c:480:OF */ extern void insert_contblock (char *p, int s); /* (p, s) char *p; int s; */
 /* alloc.c:480:OF */ extern void insert_maybe_sgc_contblock (char *p, int s); /* (p, s) char *p; int s; */
@@ -1466,27 +1466,27 @@ fixnum elt_size(fixnum);
 
 void init_gmp_rnd_state(__gmp_randstate_struct *);
 
-inline void set_sgc_bit(struct pageinfo *,void *);
+/* void set_sgc_bit(struct pageinfo *,void *); */
 
 void reinit_gmp(void);
 
 object mod(object,object);
 
-inline void intdivrem(object,object,fixnum,object *,object *);
+void intdivrem(object,object,fixnum,object *,object *);
 
-inline object integer_count(object);
+object integer_count(object);
 
-inline object integer_length(object);
+object integer_length(object);
 
-inline bool integer_bitp(object,object);
+bool integer_bitp(object,object);
 
-inline object  fixnum_times(fixnum,fixnum);
+object  fixnum_times(fixnum,fixnum);
 
-inline object log_op2(fixnum,object,object);
+object log_op2(fixnum,object,object);
 
-inline object fixnum_big_shift(fixnum,fixnum);
+object fixnum_big_shift(fixnum,fixnum);
 
-inline object integer_shift(object,object);
+object integer_shift(object,object);
 
 object number_abs(object);
 

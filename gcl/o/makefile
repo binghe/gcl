@@ -48,7 +48,7 @@ boot.o: boot.c $(DECL) boot.h
 
 boot.ini: boot.c grab_defs
 	$(CC) -DINICOMP -DNO_DEFUN -DNO_BOOT_H $(CFLAGS) $(DEFS) -E $*.c |\
-		 sed -e 's,DEFUN,\nDEFUN,g' -e 's,^.* DEFUNB,DEFUNB,g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $@
+		 sed -e 's,DEFUN,\'$$'\nDEFUN,g' -e 's,^.* DEFUNB,DEFUNB,g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $@
 
 boot.h: boot.ini
 	echo '#include "make-init.h"' > $@

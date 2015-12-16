@@ -1,12 +1,5 @@
-#ifndef GMP_EXTERN
-#define GMP_EXTERN extern
-#endif
-#ifndef GMP_EXTERN_INLINE
-#define GMP_EXTERN_INLINE GMP_EXTERN __inline__
-#endif
-
-GMP_EXTERN jmp_buf gmp_jmp;
-GMP_EXTERN int jmp_gmp,gmp_relocatable;
+EXTER jmp_buf gmp_jmp;
+EXTER int jmp_gmp,gmp_relocatable;
 
 #define join(a_,b_) a_ ## b_
 #define Join(a_,b_) join(a_,b_)
@@ -179,7 +172,7 @@ GMP_EXTERN int jmp_gmp,gmp_relocatable;
    set to -1 otherwise.  20040815 CM*/
 
 #define MEM_GMP_CALL(n_,rt_,a_,s_,b_...) \
-   GMP_EXTERN_INLINE Join(RF_,rt_) Join(m,a_)(Join(P,n_)(b_)) { \
+   INLINE Join(RF_,rt_) Join(m,a_)(Join(P,n_)(b_)) { \
            int j;\
            Join(RD_,rt_);\
            if (gmp_relocatable) {\

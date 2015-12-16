@@ -227,7 +227,7 @@
   (if (minusp z) (- z) z))
 
 
-(defdlfun (:fixnum "__gmpz_cmp") :fixnum :fixnum)
-#.(let ((x (truncate fixnum-length char-length)))
-    `(defun mpz_cmp (x y) (|libgmp|:|__gmpz_cmp| (+ ,x (address x)) (+ ,x (address y)))));FIXME
-(setf (get 'mpz_cmp 'compiler::cmp-inline) t)
+;; (defdlfun (:fixnum "__gmpz_cmp") :fixnum :fixnum)
+;; #.(let ((x (truncate fixnum-length char-length)))
+;;     `(defun mpz_cmp (x y) (|libgmp|:|__gmpz_cmp| (+ ,x (address x)) (+ ,x (address y)))));FIXME
+;; (setf (get 'mpz_cmp 'compiler::cmp-inline) t)

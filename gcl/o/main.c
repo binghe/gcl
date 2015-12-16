@@ -40,6 +40,8 @@ int ovm_process_created;
 void initialize_process();
 #endif
 
+#define INLINE
+
 #include "include.h"
 #include <signal.h>
 #include "page.h"
@@ -131,7 +133,7 @@ clear_c_stack(VOL unsigned n) {
 
 fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
 
-inline int
+static inline int
 mbrk(void *v) {
   ufixnum uv=(ufixnum)v,uc=(ufixnum)sbrk(0),ux,um;
   fixnum m=((1UL<<(sizeof(fixnum)*8-1))-1);
@@ -244,6 +246,8 @@ minimize_image(void) {
   
 }
 
+#include <dlfcn.h>
+
 void
 init_boot(void) {
 
@@ -340,7 +344,7 @@ main(int argc, char **argv, char **envp) {
     }
 
     initlisp();
-    lex_new();
+    ihs_top++;lex_new();/*FIXME*/
     
     GBC_enable = TRUE;
     

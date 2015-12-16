@@ -72,7 +72,7 @@ struct rlimit data_rlimit;
 #endif
 #endif
 
-inline void
+static inline void
 add_page_to_contblock_list(void *p,fixnum m) {
  
   struct pageinfo *pp=pageinfo(p);
@@ -109,7 +109,10 @@ icomp(const void *v1,const void *v2) {
   return *f1<*f2 ? -1 : *f1==*f2 ? 0 : +1;
 }
 
-inline void
+void
+add_page_to_freelist(char *, struct typemanager *);
+
+static inline void
 maybe_reallocate_page(struct typemanager *ntm,ufixnum count) {
 
   void **y,**n;
@@ -180,7 +183,7 @@ int reserve_pages_for_signal_handler=30;
    If not in_signal_handler then try to keep a minimum of
    reserve_pages_for_signal_handler pages on hand in the hole
  */
-inline void *
+void *
 alloc_page(long n) {
 
   void *e=heap_end;
@@ -266,7 +269,7 @@ eg to add 20 more do (si::set-hole-size %ld %d)\n...start over ",
 
 struct pageinfo *cell_list_head=NULL,*cell_list_tail=NULL;;
 
-inline fixnum
+fixnum
 set_tm_maxpage(struct typemanager *tm,fixnum n) {
   
   fixnum r=tm->tm_type==t_relocatable,j=tm->tm_maxpage,z=(n-j)*(r ? 2 : 1);
@@ -279,7 +282,7 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
 }
   
 
-inline void
+void
 add_page_to_freelist(char *p, struct typemanager *tm) {
 
   short t,size;
@@ -397,7 +400,7 @@ DEFVAR("*OPTIMIZE-MAXIMUM-PAGES*",sSAoptimize_maximum_pagesA,SI,sLnil,"");
 #define OPTIMIZE_MAX_PAGES (sSAoptimize_maximum_pagesA ==0 || sSAoptimize_maximum_pagesA->s.s_dbind !=sLnil) 
 DEFVAR("*NOTIFY-OPTIMIZE-MAXIMUM-PAGES*",sSAnotify_optimize_maximum_pagesA,SI,sLnil,"");
 #define MMAX_PG(a_) (a_)->tm_maxpage
-inline long
+long
 opt_maxpage(struct typemanager *my_tm) {
 
   double x=0.0,y=0.0,z,r;
@@ -471,7 +474,7 @@ Use ALLOCATE to expand the space.",
 #endif
 bool prefer_low_mem_contblock=FALSE;
 
-inline void *
+static inline void *
 alloc_from_freelist(struct typemanager *tm,fixnum n) {
 
   void *p,*v,*vp;
@@ -558,7 +561,7 @@ too_full_p(struct typemanager *tm) {
 
 }
 
-inline void *
+static inline void *
 alloc_after_gc(struct typemanager *tm,fixnum n) {
 
   if (tm->tm_npage+tpage(tm,n)>=tm->tm_maxpage && GBC_enable) {
@@ -590,7 +593,7 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
 
 struct pageinfo *contblock_list_head=NULL,*contblock_list_tail=NULL;
 
-inline void
+void
 add_pages(struct typemanager *tm,fixnum m) {
 
   switch (tm->tm_type) {
@@ -624,7 +627,7 @@ add_pages(struct typemanager *tm,fixnum m) {
 
 }
 
-inline void *
+static inline void *
 alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
   
   fixnum m=tpage(tm,n);
@@ -647,7 +650,7 @@ alloc_after_adding_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-inline void *
+static inline void *
 alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
   fixnum m=tpage(tm,n),reloc_min;
@@ -674,10 +677,10 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
 }
 
-inline void *alloc_mem(struct typemanager *,fixnum);
+static inline void *alloc_mem(struct typemanager *,fixnum);
 
 #ifdef SGC
-inline void *
+static inline void *
 alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
 
   if (!sgc_enabled) return NULL;
@@ -687,7 +690,7 @@ alloc_after_turning_off_sgc(struct typemanager *tm,fixnum n) {
 }
 #endif
 
-inline void *
+static inline void *
 alloc_mem(struct typemanager *tm,fixnum n) {
 
   void *p;
@@ -711,7 +714,7 @@ alloc_mem(struct typemanager *tm,fixnum n) {
   return exhausted_report(tm->tm_type,tm);
 }
 
-inline object
+object
 alloc_object(enum type t)  {
 
   object obj;
@@ -726,12 +729,12 @@ alloc_object(enum type t)  {
   
 }
 
-inline void *
+void *
 alloc_contblock(size_t n) {
   return alloc_mem(tm_of(t_contiguous),ROUND_UP_PTR_CONT(n));
 }
 
-inline void *
+void *
 alloc_relblock(size_t n) {
 
   return alloc_mem(tm_of(t_relocatable),ROUND_UP_PTR(n));
@@ -739,7 +742,7 @@ alloc_relblock(size_t n) {
 }
 
 
-inline object
+object
 make_cons(object a,object d) {
 
   static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
@@ -757,7 +760,7 @@ make_cons(object a,object d) {
 
 
 
-inline object on_stack_cons(object x, object y)
+object on_stack_cons(object x, object y)
 {object p = (object) alloca_val;
  /* set_type_of(p,t_cons); */
  p->c.c_car=x;

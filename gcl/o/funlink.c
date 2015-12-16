@@ -406,7 +406,7 @@ call_proc_new(object sym,ufixnum clp,ufixnum vld,void **link,ufixnum argd,object
     
     res=vs_base[0];
     if (larg) {
-      object *tmp=vs_base+1,*tl=(void *)larg,*tle=tl+abs(vald);/*FIXME avoid if pushed*/
+      object *tmp=vs_base+1,*tl=(void *)larg,*tle=tl+labs(vald);/*FIXME avoid if pushed*/
       for (;tl<tle && tmp<vs_top;)
 	*tl++=*tmp++;
       if (vald<0)

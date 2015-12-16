@@ -1940,7 +1940,7 @@ if test "$mem_top" != "0x0" ; then
    return 0;
    ]])],[mem_range=`cat conftest1`],[mem_range="0x0"])
    AC_MSG_RESULT($mem_range)
-   if test "$mem_range" != "0x0" ; then 
+   if test "$mem_range" != "0x0" ; then
 	AC_DEFINE_UNQUOTED(MEM_TOP,$mem_top,[beginning address for immediate fixnum range])
         AC_DEFINE_UNQUOTED(MEM_RANGE,$mem_range,[size of immediate fixnum address space])
    fi
@@ -1954,7 +1954,6 @@ if test "$enable_immfix" = "yes" ; then
      fi
   fi
 fi
-
 
 AC_MSG_CHECKING([sizeof long long int])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[

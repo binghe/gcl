@@ -166,7 +166,7 @@ funcall_ap(object fun,fixnum n,va_list ap) {
   object *b,*t;
   ufixnum i,j;
 
-  j=i=abs(n);
+  j=i=labs(n);
   t=b=ZALLOCA(j*sizeof(*b));
   for (;j--;)
     *t++=va_arg(ap,object);
@@ -965,7 +965,7 @@ DEFUNM("EVAL-SRC",object,fSeval_src,SI,0,63,NONE,OO,OO,OO,OO,(object first,...),
   va_list ap;
 
   f=fun->fun.fun_plist->c.c_cdr->c.c_cdr->c.c_car;
-  j=abs(narg)+((narg < 0) ? 0 : 1);
+  j=labs(narg)+((narg < 0) ? 0 : 1);
   va_start(ap,first);
   vs_base=vs_top;
   for (i=1;j--;) {

@@ -125,7 +125,7 @@ DEFUN("DLADDR",object,fSdladdr,SI,2,2,NONE,OI,OO,OO,OO,(fixnum ad,object n),"") 
 
 DEFUN("DLOPEN",object,fSdlopen,SI,1,1,NONE,OO,OO,OO,OO,(object name),"") {
 
-  char ch;
+  char ch,*err;
   void *v;
 
   dlerror();
@@ -133,8 +133,8 @@ DEFUN("DLOPEN",object,fSdlopen,SI,1,1,NONE,OO,OO,OO,OO,(object name),"") {
   name->st.st_self[name->st.st_fillp]=0;
   v=dlopen(name->st.st_fillp ? name->st.st_self : 0,RTLD_LAZY|RTLD_GLOBAL);
   name->st.st_self[name->st.st_fillp]=ch;
-  if (dlerror())
-    FEerror("dlopen faiure on ~s",1,name);
+  if ((err=dlerror()))
+    FEerror("dlopen failure on ~s: ~s",2,name,make_simple_string(err));
   
   RETURN1(make_fixnum((fixnum)v));
 

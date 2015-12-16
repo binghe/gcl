@@ -13,7 +13,7 @@
 #define           is_imm_fix(a_)        INT_IN_BITS(a_,LOW_SHFT-1)
 #elif defined (IM_FIX_BASE) && defined(IM_FIX_LIM)
 #define      make_imm_fixnum(a_)        ((object)((a_)+(IM_FIX_BASE+(IM_FIX_LIM>>1))))
-#define       fix_imm_fixnum(a_)        (((fixnum)(a_))-(IM_FIX_BASE+(IM_FIX_LIM>>1)))
+#define       fix_imm_fixnum(a_)        ((fixnum)(((fixnum)(a_))-(IM_FIX_BASE+(IM_FIX_LIM>>1))))
 #define      mark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) | IM_FIX_LIM)))
 #define    unmark_imm_fixnum(a_)        ((a_)=((object)(((fixnum)(a_)) &~ IM_FIX_LIM)))
 #define        is_imm_fixnum(a_)        (((ufixnum)(a_))>=IM_FIX_BASE)
