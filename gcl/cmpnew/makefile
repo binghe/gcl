@@ -38,7 +38,7 @@ all:	$(OBJS)
 	${APPEND} ${NULLFILE} $*.data  $*.o
 
 gcl_collectfn.o:
-	$(PORTDIR)/saved_pre_gcl $(PORTDIR)/ $(LISPFLAGS) -compile $*
+	$(PORTDIR)/saved_gcl $(PORTDIR)/ $(LISPFLAGS) -compile $*
 
 .lisp.o:
 	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl \

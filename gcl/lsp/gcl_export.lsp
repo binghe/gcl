@@ -611,16 +611,20 @@
 	     (:sfarray    ""                     (array short-float))
 	     (:lfarray    ""                     (array long-float))
 
-	     (:real       
+	     (:real       ""                     real)
 
 	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
 	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
 	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
-	     (:void*      nil                    nil             (or array symbol character) "->v.v_self"))))
+	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
   (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l))))
+
+(defun proclaim (&rest args) nil);FIXME
+
 
 (if (member :ansi-cl *features*)
     (in-package :cl-user)
   (in-package :user))
 
 (si::import-internal 'si::while)
+

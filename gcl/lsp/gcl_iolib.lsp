@@ -60,31 +60,31 @@
 (defun concatenated-stream-streams (stream)
   (declare (optimize (safety 2)))
   (check-type stream concatenated-stream)
-  (stream-object0 stream))
+  (c-stream-object0 stream))
 (defun broadcast-stream-streams (stream)
   (declare (optimize (safety 2)))
   (check-type stream broadcast-stream)
-  (stream-object0 stream))
+  (c-stream-object0 stream))
 (defun two-way-stream-input-stream (stream)
   (declare (optimize (safety 2)))
   (check-type stream two-way-stream)
-  (stream-object0 stream))
+  (c-stream-object0 stream))
 (defun echo-stream-input-stream (stream)
   (declare (optimize (safety 2)))
   (check-type stream echo-stream)
-  (stream-object0 stream))
+  (c-stream-object0 stream))
 (defun two-way-stream-output-stream (stream)
   (declare (optimize (safety 2)))
   (check-type stream two-way-stream)
-  (stream-object1 stream))
+  (c-stream-object1 stream))
 (defun echo-stream-output-stream (stream)
   (declare (optimize (safety 2)))
   (check-type stream echo-stream)
-  (stream-object1 stream))
+  (c-stream-object1 stream))
 (defun synonym-stream-symbol (stream)
   (declare (optimize (safety 2)))
   (check-type stream synonym-stream)
-  (stream-object0 stream))
+  (c-stream-object0 stream))
 
 (defun maybe-clear-input (&optional (x *standard-input*))
   (cond ((not (typep x 'stream)) nil)
@@ -374,157 +374,6 @@
              (format t "~&Starts dribbling to ~A (~d/~d/~d, ~d:~d:~d)."
                      namestring year month day hour min sec))))))
 
-;;; new logical pathname translation
-;
-;;; examples :
-;
-;; (setf (logical-pathname-translations "source")
-;;       '(("SRC;**;*.*.*" "/home/kraehe/lisp/**/*.*")
-;;         ("LIB;**;*.*.*" "/usr/local/lib/**/*.*")
-;;         ("BIN;*.*.*" "/usr/local/bin/*.*")))
-;
-;; (setf (logical-pathname-translations "var")
-;;       '(("**;*.*.*" "/var/**/*.*")))
-;
-;; This is tricky ! Translate a logical pathname into something unix like.
-;
-;; (setf (logical-pathname-translations "home")
-;;       '(("*;**;*.*.*" "~*/**/*.*")))
-;
-;; Try: (TRUENAME "home:games;zork.exec")
-
-(setq si:*pathname-logical* nil)
-(setq si:*pathname-virtual* nil)
-(setq si:*pathname-device* nil)
-
-#-(or dos winnt) (setq si:*pathname-resolve* '(:host))
-#+(or dos winnt) (setq si:*pathname-resolve* '(:host :device))
-
-(defun map-pathname-translations (key value)
-    (if (listp value)
-	(mapcar #'(lambda (s) (list
-		(if (stringp (car s)) (parse-namestring (car s) key) (car s))
-		(if (stringp (cadr s)) (parse-namestring (cadr s)) (cadr s))))
-		value)
-	value))
-
-(defun map-pathname-searchlist (key value)
-    (if (listp value)
-	(mapcar #'(lambda (s) (cons
-	        (if (stringp (car s)) (parse-namestring (car s) key) (car s))
-	        (mapcar #'(lambda (p) 
-		        (if (stringp p) (parse-namestring p) p))
-		        (cdr s))))
-	        value)
-	value))
-
-(defun map-search-list (key value)
-    (if (listp value)
-        (list (cons
-	  (make-pathname :host key :directory '(:absolute :wild-inferiors))
-	  (mapcar #'(lambda (s)
-		(cond
-		  ((stringp s)
-		    (make-pathname :directory (append
-		    	(pathname-directory (parse-namestring s))
-			'(:wild-inferiors))))
-		  ((eq (type-of s) 'pathname)
-		    (make-pathname :directory (append
-			(pathname-directory s)
-		        '(:wild-inferiors))))
-		  (t s)))
-	    value)))
-      value))
-
-(defun logical-pathname-translations (key)
-  (declare (optimize (safety 2)))
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-      (cdr (si:pathname-lookup k si:*pathname-logical*))))
-
-(defun set-logical-pathname-translations (key value)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-    (setq si:*pathname-logical*
-	  (si:set-pathname-lookup k si:*pathname-logical* t))
-    (setq si:*pathname-logical*
-          (si:set-pathname-lookup k si:*pathname-logical* (si::map-pathname-translations k value)))
-    (cdr (si:pathname-lookup k si:*pathname-logical*))))
-
-(defsetf logical-pathname-translations si::set-logical-pathname-translations)
-
-(defun virtual-pathname-searchlist (key)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-      (cdr (si:pathname-lookup k si:*pathname-virtual*))))
-
-(defun set-virtual-pathname-searchlist (key value)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-    (setq si:*pathname-virtual*
-	  (si:set-pathname-lookup k si:*pathname-virtual* t))
-    (setq si:*pathname-virtual*
-          (si:set-pathname-lookup k si:*pathname-virtual*
-	  (si::map-pathname-searchlist k value)))
-    (cdr (si:pathname-lookup k si:*pathname-virtual*))))
-
-(defsetf virtual-pathname-searchlist set-virtual-pathname-searchlist)
-
-(defun device-pathname-searchlist (key)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-      (cdr (si:pathname-lookup k si:*pathname-device*))))
-
-(defun set-device-pathname-searchlist (key value)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-    (setq si:*pathname-device*
-	  (si:set-pathname-lookup k si:*pathname-device* t))
-    (setq si:*pathname-device*
-          (si:set-pathname-lookup k si:*pathname-device*
-	  (si::map-pathname-searchlist nil value)))
-    (cdr (si:pathname-lookup k si:*pathname-device*))))
-
-(defsetf device-pathname-searchlist set-device-pathname-searchlist)
-
-(defun load-logical-pathname-translations (host)
-  (if (endp (cdr (si:pathname-lookup (string-downcase host) si:*pathname-logical*)))
-  (let (n p) (block nil
-    (setq n (concatenate 'string host "-translations"))
-    (setq p (make-pathname :name n :type "lisp" :directory :current))
-    (when (probe-file p) (return (load (truename p) :verbose nil)))
-#-(or dos winnt)(progn
-    (setq n (concatenate 'string "." host "-translations"))
-    (setq p (make-pathname :name n :type "lisp"
-	      :directory (pathname-directory (user-homedir-pathname))))
-    (when (probe-file p) (return (load (truename p) :verbose nil))))
-    (setq n (concatenate 'string host "-translations"))
-    (setq p (make-pathname :directory
-	      (append (pathname-directory SI::*LIB-DIRECTORY*) '("lsp"))
-	      :name host :type "translations"))
-    (when (probe-file p) (return (load (truename p) :verbose nil)))
-    (error "Cannot find host ~S." host)) t) nil))
-
-;; CMUCL look like Search Lists
-
-(defun search-list (key)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-      (cdr (si:pathname-lookup k si:*pathname-virtual*))))
-
-(defun search-list-defined-p (key)
-  (if (search-list key) t nil))
-
-(defun clear-search-list (key)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-    (setq si:*pathname-virtual*
-	  (si:set-pathname-lookup k si:*pathname-virtual* nil)))
-  (search-list key))
-
-(defun set-search-list (key value)
-  (let ((k (if (stringp key) (string-right-trim ":" (string-downcase key)) key)))
-    (setq si:*pathname-virtual*
-	  (si:set-pathname-lookup k si:*pathname-virtual* t))
-    (setq si:*pathname-virtual*
-          (si:set-pathname-lookup k si:*pathname-virtual*
-	  (si::map-search-list k value)))
-    (cdr (si:pathname-lookup k si:*pathname-virtual*))))
-
-(defsetf search-list set-search-list)
-
 ; simple formatter macro
 
 (defmacro formatter ( control-string )
@@ -712,36 +561,51 @@
 	       (if-does-not-exist nil idnesp)
 	       (external-format :default))
   (let* ((f (pathname f))
-	 (f1 (if (typep f 'logical-pathname) (translate-logical-pathname f) f))
-	 (s (open-int f1 direction (restrict-stream-element-type element-type)
-		      if-exists iesp if-does-not-exist idnesp external-format)))
-    (when (typep s 'stream) (c-set-stream-object1 s f) s)))
+	 (pf (translate-logical-pathname f)))
+    (when (wild-pathname-p pf)
+      (error 'file-error :pathname pf :format-control "Pathname is wild."))
+    (let ((s (open-int pf direction (restrict-stream-element-type element-type)
+		       if-exists iesp if-does-not-exist idnesp external-format)))
+      (when (typep s 'stream) (c-set-stream-object1 s f) s))))
 
-(defun load (f &rest args)
-  (values (apply 'load1 f args)))
+(defun load-pathname (p print if-does-not-exist
+			&aux (pp (merge-pathnames p))
+			(epp (reduce (lambda (y x) (or y (probe-file (translate-pathname x "" p))))
+				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
+  (if epp
+      (let* ((*load-pathname* pp)(*load-truename* epp))
+	  (if (string= "o" (pathname-type pp))
+	      (load-fasl epp print)
+	    (let ((s (open epp)))
+	      (unwind-protect (load-stream s print)
+		(close s)))))
+    (when if-does-not-exist
+      (error 'file-error :pathname pp :format-control "File does not exist."))))
+
+(defun load (p &key (verbose *load-verbose*) (print *load-print*) (if-does-not-exist :error)
+	       (external-format :default) &aux (*readtable* *readtable*)(*package* *package*))
+  (declare (optimize (safety 1)))
+  (check-type p (or stream pathname-designator))
+  (when verbose (format t ";; Loading ~s~%" p))
+  (prog1
+      (typecase p
+	(pathname-designator (load-pathname (pathname p) print if-does-not-exist))
+	(stream (load-stream p print)))
+    (when verbose (format t ";; Finished loading ~s~%" p))))
 
 (defun ensure-directories-exist (ps &key verbose &aux created)
+  (declare (optimize (safety 1)))
+  (check-type ps pathname-designator)
   (when (wild-pathname-p ps)
     (error 'file-error :pathname ps :format-control "Pathname is wild"))
-  (labels ((d (x y &aux (z (ldiff x y)) (p (make-pathname :directory z)))
+  (labels ((d (x y &aux (z (ldiff x y)) (n (namestring (make-pathname :directory z))))
 	      (when (when z (stringp (car (last z))))
-		(unless (eq :directory (car (stat p)))
-		  (mkdir (namestring p))
+		(unless (eq :directory (stat n))
+		  (mkdir n)
 		  (setq created t)
-		  (when verbose (format *standard-output* "Creating directory ~s~%" p))))
+		  (when verbose (format *standard-output* "Creating directory ~s~%" n))))
 	      (when y (d x (cdr y)))))
     (let ((pd (pathname-directory ps)))
       (d pd (cdr pd)))
     (values ps created)))
 
-#.(let ((g '(:host :device :directory :name :type :version)))
-     `(defun wild-pathname-p (pd &optional f &aux (p (pathname pd)))
-       (declare (optimize (safety 1)))
-       (check-type f (or null (member ,@g)))
-       (labels ((w-f (x)
-		     (case x
-		       ,@(mapcar (lambda (x &aux (f (intern (concatenate 'string "PATHNAME-" (string-upcase x)))))
-				   `(,x ,(if (eq x :directory) `(when (member :wild (,f p)) t) `(eq :wild (,f p))))) g))))
-	 (if f 
-	     (w-f f)
-	   (reduce (lambda (z x) (or z (w-f x))) ',g :initial-value nil)))))

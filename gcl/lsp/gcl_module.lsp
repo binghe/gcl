@@ -44,7 +44,7 @@
 		       :directory (append (pathname-directory (pathname *system-directory*))
 					  (list :up "modules")))))
 
-(defun require (module-name &optional (pl (default-module-pathlist module-name))  &aux (*default-pathname-defaults* #""))
+(defun require (module-name &optional (pl (default-module-pathlist module-name))  &aux (*default-pathname-defaults* (make-pathname)))
   (unless (member (module-string module-name) *modules* :test 'string=)
     (when pl
       (load (pop pl))

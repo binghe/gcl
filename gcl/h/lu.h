@@ -354,7 +354,7 @@ struct pathname {
   direl  pn_name;      /*  name  */
   direl  pn_type;      /*  type  */
   direl  pn_version;   /*  version  */
-  SPAD;
+  string pn_namestring;/*  cached namestring */
 
 };
 

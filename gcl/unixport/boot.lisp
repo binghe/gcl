@@ -35,6 +35,9 @@
   
   (with-open-file (s "../lsp/gcl_recompile.lsp" :direction :output))
   (dolist (l '(recompile callhash assert defmacro defstruct describe evalmacros sc
+			 logical_pathname_translations make_pathname parse_namestring merge_pathnames
+			 pathname_match_p namestring wild_pathname_p translate_pathname truename directory
+			 rename_file
 			 iolib mislib module numlib packlib setf top trace sloop debug info serror mnum))
     (doitf l "lsp" 'identity cmpl?)))
 

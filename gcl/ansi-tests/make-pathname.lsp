@@ -148,12 +148,10 @@
 
 ;; The next test is correct, but was causing very large amounts of time to be spent
 ;; in buggy implementations
-#|
 (deftest make-pathname-error-absolute-wild-inferiors-up
   (signals-error (directory (make-pathname :directory '(:absolute :wild-inferiors :up)))
 		 file-error)
   t)
-|#
 
 (deftest make-pathname-error-relative-wild-inferiors-up
   (signals-error (length (directory (make-pathname :directory '(:relative :wild-inferiors :up))))

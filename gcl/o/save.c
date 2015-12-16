@@ -18,12 +18,11 @@ extern void _cleanup();
 
 LFD(Lsave)(void) {
 
-  char filename[256];
   extern char *kcl_self;
 
   check_arg(1);
   check_type_or_pathname_string_symbol_stream(&vs_base[0]);
-  coerce_to_filename(vs_base[0], filename);
+  coerce_to_filename(vs_base[0], FN1);
 
 #ifdef CLEANUP_CODE
   CLEANUP_CODE
@@ -35,9 +34,9 @@ LFD(Lsave)(void) {
   cs_org=0;
 
 #ifdef MEMORY_SAVE
-  MEMORY_SAVE(kcl_self,filename);
+  MEMORY_SAVE(kcl_self,FN1);
 #else	  
-  memory_save(kcl_self, filename);
+  memory_save(kcl_self, FN1);
 #endif	
 
   /*  no return  */

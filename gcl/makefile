@@ -354,9 +354,12 @@ $(HDIR)new_decl.h:
 	(cd o && $(MAKE) ../$@)
 
 $(HDIR)mcompdefs.h: $(HDIR)compdefs.h $(HDIR)new_decl.h
-	awk 'BEGIN {print "#include \"include.h\"";print "---"} {print "\"#define " $$1 "\" " $$1}' $< |\
-	cpp -I$(HDIR) |\
-	awk '/^---$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
+	$(AWK) 'BEGIN {print "#include \"include.h\"";print "---"} {a=$$1;gsub("\\.\\.\\.","",a);print "\"#define " $$1 "\" " a}' $< |\
+	$(CC) -E -P -I./$(HDIR) - |\
+	$(AWK) '/^\-\-\-$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
+	# awk 'BEGIN {print "#include \"include.h\"";print "---"} {print "\"#define " $$1 "\" " $$1}' $< |\
+	# cpp -I$(HDIR) |\
+	# awk '/^---$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
 
 $(HDIR)cmpinclude.h: $(HDIR)mcompdefs.h $(CMPINCLUDE_FILES) $(HDIR)config.h $(HDIR)cmponly_last.h
 	cp $< $(@F)

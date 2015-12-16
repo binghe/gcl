@@ -865,10 +865,6 @@
 (push '((t) t #.(flags set)"print(#0,Cnil)")
    (get 'print 'inline-always))
 
-;;PROBE-FILE
- (push '((t) boolean #.(flags)"(file_exists(#0))")
-   (get 'probe-file 'inline-always))
-
 ;;RATIOP
 (push '((t) boolean #.(flags rfa) "type_of(#0)==t_ratio")
       (get 'ratiop 'inline-always))

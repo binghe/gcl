@@ -438,7 +438,7 @@ DEFUN("TYPE-OF-C",object,siLtype_of_c,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
     else if ((x->sm.sm_mode == smm_string_input) ||
 	  (x->sm.sm_mode == smm_string_output))
 	x = sLstring_stream;
-    else if (x->sm.sm_mode == smm_synonym)
+    else if (x->sm.sm_mode == smm_synonym || x->sm.sm_mode == smm_file_synonym)
       x = sLsynonym_stream;
     else if (x->sm.sm_mode == smm_broadcast)
       x = sLbroadcast_stream;
@@ -463,7 +463,7 @@ DEFUN("TYPE-OF-C",object,siLtype_of_c,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
     break;
     
   case t_pathname:
-    if (pathname_lookup(x->pn.pn_host,sSApathname_logicalA->s.s_dbind)!=Cnil)
+    if (x->d.tt)
       x = sLlogical_pathname;
     else
       x = sLpathname;

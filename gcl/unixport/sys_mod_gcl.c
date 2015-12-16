@@ -76,6 +76,7 @@ gcl_init_init()
   ar_init(gcl_top);
   ar_init(gcl_module);
   ar_init(gcl_setf);
+  ar_init(gcl_arraylib);
 
   lsp_init("../lsp/gcl_autoload.lsp");
 
@@ -88,7 +89,6 @@ gcl_init_system(object no_init)
   if (type_of(no_init)!=t_symbol)
     error("Supplied no_init is not of type symbol\n");
 
-  ar_check_init(gcl_arraylib,no_init);
   ar_check_init(gcl_seq,no_init);
   ar_check_init(gcl_serror,no_init);
   ar_check_init(gcl_seqlib,no_init);
@@ -96,6 +96,19 @@ gcl_init_system(object no_init)
   ar_check_init(gcl_assert,no_init);
   ar_check_init(gcl_defstruct,no_init);
   ar_check_init(gcl_sharp,no_init);
+
+  ar_check_init(gcl_logical_pathname_translations,no_init);
+  ar_check_init(gcl_make_pathname,no_init);
+  ar_check_init(gcl_parse_namestring,no_init);
+  ar_check_init(gcl_merge_pathnames,no_init);
+  ar_check_init(gcl_pathname_match_p,no_init);
+  ar_check_init(gcl_namestring,no_init);
+  ar_check_init(gcl_wild_pathname_p,no_init);
+  ar_check_init(gcl_translate_pathname,no_init);
+  ar_check_init(gcl_truename,no_init);
+  ar_check_init(gcl_directory,no_init);
+  ar_check_init(gcl_rename_file,no_init);
+  
   ar_check_init(gcl_callhash,no_init);
   ar_check_init(gcl_describe,no_init);
 #ifdef HAVE_JAPI_H

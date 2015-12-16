@@ -133,7 +133,7 @@
       (progn 
 	(cond
 	 (*multiply-stacks* (setq *multiply-stacks* nil))
-	 ((probe-file "init.lsp") (load "init.lsp"))))
+	 ((stat "init.lsp") (load "init.lsp"))))
       (and (functionp *top-level-hook*)(funcall   *top-level-hook*)))
 
     (when (boundp '*system-banner*)
@@ -809,25 +809,18 @@ First directory is checked for first name and all extensions etc."
 
 (defvar *tmp-dir*)
 
+(defun ensure-dir-string (str)
+  (if (and (eq (stat str) :directory) (not (eql #\/ (aref str (1- (length str))))))
+      (string-concatenate str "/")
+    str))
+
 (defun get-temp-dir ()
   (dolist (x `(,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
     (when x
-      (let* ((x (pathname x))
-	     (x (if (pathname-name x) x 
-		  (merge-pathnames
-		   (make-pathname :directory (butlast (pathname-directory x)) 
-				  :name (car (last (pathname-directory x))))
-		   x))))
-	(when (stat x) 
-	  (return-from 
-	   get-temp-dir 
-	   (namestring 
-	    (make-pathname 
-	     :device (pathname-device x)
-	     :directory (when (or (pathname-directory x) (pathname-name x))
-			  (append (pathname-directory x) (list (pathname-name x))))))))))))
+      (when (eq (stat x) :directory)
+	(return-from get-temp-dir (ensure-dir-string x))))))
 
-(defvar si::*lib-directory* (namestring (make-pathname :directory (list :parent))))
+(defvar si::*lib-directory* nil)
 
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))

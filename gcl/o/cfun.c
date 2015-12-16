@@ -96,11 +96,12 @@ DEFUN("DLSYM",object,fSdlsym,SI,2,2,NONE,OI,OO,OO,OO,(fixnum h,object name),"") 
 
 }
 
-DEFUN("DLADDR",object,fSdladdr,SI,1,1,NONE,OI,OO,OO,OO,(fixnum ad),"") {
+DEFUN("DLADDR",object,fSdladdr,SI,2,2,NONE,OI,OO,OO,OO,(fixnum ad,object n),"") {
 
   Dl_info info;
   unsigned long u;
   const char *c;
+  char *d,*de;
 
   dlerror();
   dladdr((void *)ad,&info);
@@ -108,10 +109,17 @@ DEFUN("DLADDR",object,fSdladdr,SI,1,1,NONE,OI,OO,OO,OO,(fixnum ad),"") {
     FEerror("dladdr lookup failure on ~s",1,make_fixnum(ad));
   u=(unsigned long)info.dli_fbase;
   c=info.dli_fname;
+  if (n!=Cnil) {
+    d=alloca(strlen(c)+1);
+    strcpy(d,c);
+    for (de=d+strlen(d);de>d && de[-1]!='/';de--)
+      if (*de=='.') *de=0;
+    c=de;
+  }
   if (u>=(ufixnum)data_start && u<(unsigned long)core_end)
     c="";
-
-  RETURN1(coerce_to_pathname(make_simple_string(c)));
+  
+  RETURN1(make_simple_string(c));
 
 }
 

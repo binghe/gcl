@@ -3,6 +3,12 @@
 
 #include <stdlib.h>
 
+#define NO_PRELINK_UNEXEC_DIVERSION
+#define IMMNUM_H
+#define GMP_WRAPPERS_H
+#define ERROR_H
+#undef INLINE
+
 #include "include.h"
 
 #ifdef NeXT

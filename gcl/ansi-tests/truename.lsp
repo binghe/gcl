@@ -55,7 +55,7 @@
   t nil t t)
 
 (deftest truename.5
-  (let* ((lpn "CLTEST:foo.txt")
+  (let* ((lpn "CLTEST:FOO.TXT")
 	 (pn (translate-logical-pathname lpn)))
     (unless (probe-file lpn)
       (with-open-file (s lpn :direction :output) (format s "Stuff~%")))
@@ -96,7 +96,7 @@
   t t)
 
 (deftest truename.error.5
-  (signals-error-always (truename (logical-pathname "CLTESTROOT:nonexistent")) file-error)
+  (signals-error-always (truename (logical-pathname "CLTESTROOT:NONEXISTENT")) file-error)
   t t)
 
 (deftest truename.error.6

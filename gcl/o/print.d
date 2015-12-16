@@ -1411,6 +1411,7 @@ int level;
 			write_ch('>');
 			break;
 
+		case smm_file_synonym:
 		case smm_synonym:
 			write_str("#<synonym stream to ");
 			write_object(x->sm.sm_object0, level);
@@ -1534,65 +1535,24 @@ int level;
 		break;
 
 	case t_pathname:
-		if (x == sSApathname_errorA->s.s_dbind) {
-			write_ch('#');
-			write_ch('P');
-			vs_push(expand_pathname(x));
-			write_object(vs_head, level);
-			vs_popp;
-		} else
 		if (PRINTescape) {
 			write_ch('#');
 			write_ch('P');
-			vs_push(namestring(x));
+			vs_push(x->pn.pn_namestring);
 			write_object(vs_head, level);
 			vs_popp;
 		} else {
-			vs_push(namestring(x));
+			vs_push(x->pn.pn_namestring);
 			write_object(vs_head, level);
 			vs_popp;
 		}
 		break;
-	/* case t_cfun: */
-	/* 	write_str("#<compiled-function "); */
-	/* 	if (x->cf.cf_name != Cnil) */
-	/* 		write_object(x->cf.cf_name, level); */
-	/* 	else */
-	/* 		write_addr(x); */
-	/* 	write_str(">"); */
-	/* 	break; */
 
 	case t_function:
 		write_str("#<function ");
 		write_addr(x);
 		write_str(">");
 		break;
-
-	/* case t_ifun: */
-	/*   if (PRINTcircle) { */
-	/*     for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2) */
-	/*       if (x == *vp) { */
-	/* 	if (vp[1] != Cnil) { */
-	/* 	  write_ch('#'); */
-	/* 	  write_decimal((vp-PRINTvs_top)/2+1); */
-	/* 	  write_ch('#'); */
-	/* 	  return; */
-	/* 	} else { */
-	/* 	  write_ch('#'); */
-	/* 	  write_decimal((vp-PRINTvs_top)/2+1); */
-	/* 	  write_ch('='); */
-	/* 	  vp[1] = Ct; */
-	/* 	  break; */
-	/* 	} */
-	/*       } */
-	/*   } */
-	/*   write_str("#<interpreted-function "); */
-	/*   if (x->ifn.ifn_self != Cnil) */
-	/*     write_object(x->ifn.ifn_self, level); */
-	/*   else */
-	/*     write_addr(x); */
-	/*   write_str(">"); */
-	/*   break; */
 
 	case t_spice:
 		write_str("#<\100");

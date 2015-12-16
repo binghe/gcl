@@ -122,7 +122,7 @@ fLfunctionp(object x) {
 #endif
 
 DEFUN("LOGICAL-PATHNAME-P",object,fSlogical_pathname_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_pathname && pathname_lookup(x->pn.pn_host,sSApathname_logicalA->s.s_dbind)!=Cnil ? Ct : Cnil);
+  RETURN1(type_of(x)==t_pathname && x->d.tt ? Ct : Cnil);
 }
 
 DEFUN("COMPILED-FUNCTION-P",object,fLcompiled_function_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {

@@ -443,7 +443,9 @@
     least-negative-double-float
     least-negative-long-float
     least-negative-normalized-double-float
-    least-negative-normalized-long-float
+    least-negative-normalized-long-float)
+
+(defstruct-with-tests struct-test-65A
     least-negative-normalized-short-float
     least-negative-normalized-single-float
     least-negative-short-float

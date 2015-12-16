@@ -47,18 +47,6 @@ static void sfasl_error (char *format, ...)
     exit (1);
 }
 
-/* static void get_init_name (object faslfile, char *init_fun) */
-/* { */
-/*     object path = coerce_to_pathname (faslfile); */
-/*     char *p; */
-  
-/*     strcpy (init_fun, "_init_"); */
-/*     coerce_to_filename (path->pn.pn_name, init_fun + 6); */
-  
-/*     for (p = init_fun + 6 ; *p ; p++) */
-/*       if (*p == '-') *p = '_'; */
-/* } */
-
 static NSSymbol
 get_init_sym(NSModule module,object ff) {
 

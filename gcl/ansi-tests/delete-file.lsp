@@ -28,7 +28,7 @@
   t (t) nil)
 
 (deftest delete-file.3
-  (let ((pn "CLTEST:scratchfile.txt"))
+  (let ((pn "CLTEST:SCRATCHFILE.TXT"))
     (assert (typep (pathname pn) 'logical-pathname))
     (unless (probe-file pn)
       (with-open-file (s pn :direction :output)
@@ -40,7 +40,7 @@
   t (t) nil)
 
 (deftest delete-file.4
-  (let ((pn "CLTEST:scratchfile.txt"))
+  (let ((pn "CLTEST:SCRATCHFILE.TXT"))
     (assert (typep (pathname pn) 'logical-pathname))
     (unless (probe-file pn)
       (with-open-file (s pn :direction :output)

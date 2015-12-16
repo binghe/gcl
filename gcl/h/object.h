@@ -197,6 +197,7 @@ enum smmode {      /*  stream mode  */
  smm_output,       /*  output  */
  smm_io,           /*  input-output  */
  smm_probe,        /*  probe  */
+ smm_file_synonym, /*  synonym to file stream  */
  smm_synonym,      /*  synonym  */
  smm_broadcast,    /*  broadcast  */
  smm_concatenated, /*  concatenated  */

@@ -107,8 +107,8 @@
   t nil t (t t t nil nil) t nil t)
 
 (deftest rename-file.5
-  (let ((pn1 "CLTEST:file-to-be-renamed.txt")
-	(pn2 "CLTEST:file-that-was-renamed.txt"))
+  (let ((pn1 "CLTEST:FILE-TO-BE-RENAMED.TXT")
+	(pn2 "CLTEST:FILE-THAT-WAS-RENAMED.TXT"))
     (delete-all-versions pn1)
     (delete-all-versions pn2)
     (assert (typep (pathname pn1) 'logical-pathname))

@@ -513,7 +513,6 @@ fasload(object faslfile) {
 
   FILE *fp;
   object data;
-  char filename[256];
   ul init_address=-1;
   object memory;
   void *v1,*ve,*p;
@@ -522,7 +521,6 @@ fasload(object faslfile) {
   char *st1=NULL,*ste=NULL;
   ul gs,*got=&gs,*gote,*io1=NULL,rls,start;
 
-  coerce_to_filename(faslfile, filename);
   faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
   fp = faslfile->sm.sm_fp;
 

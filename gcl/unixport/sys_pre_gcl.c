@@ -109,6 +109,19 @@ gcl_init_system(object no_init)
   lsp_init("../lsp/gcl_defstruct.lsp");
   lsp_init("../lsp/gcl_sharp.lsp");
   lsp_init("../lsp/gcl_callhash.lsp");
+
+  lsp_init("../lsp/gcl_logical_pathname_translations.lsp");
+  lsp_init("../lsp/gcl_make_pathname.lsp");
+  lsp_init("../lsp/gcl_parse_namestring.lsp");
+  lsp_init("../lsp/gcl_merge_pathnames.lsp");
+  lsp_init("../lsp/gcl_pathname_match_p.lsp");
+  lsp_init("../lsp/gcl_namestring.lsp");
+  lsp_init("../lsp/gcl_wild_pathname_p.lsp");
+  lsp_init("../lsp/gcl_translate_pathname.lsp");
+  lsp_init("../lsp/gcl_truename.lsp");
+  lsp_init("../lsp/gcl_directory.lsp");
+  lsp_init("../lsp/gcl_rename_file.lsp");
+  
   lsp_init("../lsp/gcl_describe.lsp");
 #ifdef HAVE_JAPI_H
   lsp_init("../mod/gcl_japi.lsp");

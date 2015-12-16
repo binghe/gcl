@@ -199,11 +199,6 @@
   (declare (ignore external-format))
 ;  (declare (special *c-debug* system-p))
 
-  (when input-pathname
-    (setq input-pathname (si:search-local-pathname input-pathname)))
-  (when output-file
-    (setq output-file (si:search-local-pathname output-file)))
-  
   (cond (*compiler-in-use*
          (format t "~&The compiler was called recursively.~%~
 Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-default-type*)))

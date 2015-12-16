@@ -47,7 +47,7 @@
 	   (make-array (ash 1 11)  :element-type 'character :fill-pointer 0)))
  (si::use-fast-links t)
 
- (let* ((x (append (pathname-directory si::*system-directory*) (list :parent)))
+ (let* ((x (append (pathname-directory si::*system-directory*) (list :back)))
 	(lsp (append x (list "lsp")))
 	(cmpnew (append x (list "cmpnew")))
 	(h (append x (list "h")))

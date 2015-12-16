@@ -4,7 +4,7 @@
 
 (defun lib-name (p)
   (if (or (string= p "") (string= p "libc") (string= p "libm")) "" 
-    (string-concatenate p ".so")))
+    (string-concatenate p ".so")));FIXME
 
 (defun mdl (n p vad)
   (let* ((sym (mdlsym n (lib-name p)))
@@ -17,7 +17,7 @@
   (let* ((pk (or (find-package "LIB") (make-package "LIB")))
 	 (k  (if np (dlopen n) 0))
 	 (ad (dlsym k str))
-	 (p (or (pathname-name (dladdr ad)) ""))
+	 (p (or (dladdr ad t) ""));FIXME work around dladdr here, not posix
 	 (psym (intern p pk))
 	 (npk (or (find-package psym) (make-package psym :use '(:cl))))
 	 (sym (and (shadow str npk) (intern str npk))))

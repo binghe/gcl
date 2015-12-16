@@ -176,7 +176,6 @@ int
 fasload(object faslfile) {
 
   object data;
-  char filename[256];
   int init_address=-1;
   object memory;
   int max_align=0;
@@ -224,9 +223,9 @@ fasload(object faslfile) {
 
   }
   
-  coerce_to_filename(faslfile, filename);
+  coerce_to_filename(faslfile, FN1);
 
-  if (!(b=bfd_openr(filename,0)))
+  if (!(b=bfd_openr(FN1,0)))
     FEerror("Cannot open bfd",0);
   if ((myerr=bfd_get_error()) && myerr!=3) 
     FEerror("Unknown bfd error code on openr",0);

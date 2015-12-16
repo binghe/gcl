@@ -111,6 +111,7 @@
 (si:putprop 'progn 't1progn 't1)
 (si:putprop 'defun 't1defun 't1)
 (si:putprop 'defmacro 't1defmacro 't1)
+(si:putprop 'macrolet 't1macrolet 't1)
 (si:putprop 'clines 't1clines 't1)
 (si:putprop 'defcfun 't1defcfun 't1)
 ;(si:putprop 'defentry 't1defentry 't1)
@@ -255,7 +256,7 @@
                     (when *compile-print* (print-current-form))
                     (t1expr (cmp-macroexpand-1 form)))
                    ((get fun 'c1) (t1ordinary form))
-                   ((setq fd (macro-function fun))
+                   ((setq fd (macro-function fun *macrolet-env*))
 		    (let ((res
 			   (cmp-expand-macro fd fun (copy-list (cdr form)))
 			   ))
@@ -2182,6 +2183,18 @@
 ;;   (t1expr `(defun ,n ,@(cdr (si::defmacro-lambda n ll args))))
 ;;   (maybe-eval (not (macro-function n)) (cons 'defmacro w));FIXME?
 ;;   (push `(mflag ,n) *top-level-forms*))
+
+(defun t1macrolet (args &aux env (*funs* *funs*) (*vars* *vars*) (*macrolet-env* *macrolet-env*))
+  (when (endp args) (too-few-args 'macrolet 1 0))
+  (dolist (def (car args))
+    (let* ((x (car def))(y (si::funid-sym x))) (unless (eq x y) (setq def (cons y (cdr def)))))
+    (cmpck (or (endp def) (endp (cdr def)))
+           "The macro definition ~s is illegal." def)
+    (let* ((n (car def))
+	   (b (si::defmacro-lambda n (cadr def) (cddr def))))
+      (push (list n 'macro b) env)))
+  (when env (setq *macrolet-env* (list nil (append (cadr *macrolet-env*) (nreverse env)) nil)))
+  (mapc 't1expr (cdr args)))
 
 (defun t1defmacro (args &aux (w args)(n (pop args))
 			(macp (when (listp n) (eq 'macro (car n))))(n (if macp (cdr n) n)))

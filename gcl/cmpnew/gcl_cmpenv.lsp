@@ -425,7 +425,7 @@
   (setq type (cmp-norm-tp type))
   (dolist** (var vl)
     (cond ((symbolp var)
-           (let ((type1 (get var 'cmp-type))
+           (let ((type1 (get var 'cmp-type t))
                  (v (sch-global var)))
 	     (let ((t2 (type-and type1 type)))
 	       (when (and type type1 (not t2))

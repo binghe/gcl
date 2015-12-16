@@ -224,6 +224,7 @@ BEGIN:
 	case smm_probe:
 		return(FALSE);
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -280,6 +281,7 @@ BEGIN:
 	case smm_probe:
 		return(FALSE);
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -327,6 +329,7 @@ BEGIN:
 	case smm_socket:
 	    return (sLcharacter);
 	    
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -387,8 +390,6 @@ deallocate_stream_buffer(object strm) {
 DEFVAR("*ALLOW-GZIPPED-FILE*",sSAallow_gzipped_fileA,SI,sLnil,"");
 
 static void
-too_long_file_name(object);
-static void
 cannot_open(object);
 static void
 cannot_create(object);
@@ -398,158 +399,146 @@ cannot_create(object);
 	Fn is a namestring.
 */
 object
-open_stream(fn, smm, if_exists, if_does_not_exist)
-object fn;
-enum smmode smm;
-object if_exists, if_does_not_exist;
-{
-	object x;
-	FILE *fp=NULL;
-	char fname[BUFSIZ];
-	int i;
-	vs_mark;
+open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exist) {
 
-	if ((type_of(fn) != t_string) ||
-	    (fn->st.st_self[0] != '|'))
-		coerce_to_local_filename(fn,fname);
-	else {
-	    if (fn->st.st_fillp > BUFSIZ - 1)
-		    too_long_file_name(fn);
-	    for (i = 0;  i < fn->st.st_fillp;  i++)
-		    fname[i] = fn->st.st_self[i];
-	    fname[i] = '\0';
-	}
-
-	if (smm == smm_input || smm == smm_probe) {
-                if(fname[0]=='|')
-		    fp = popen(fname+1,"r");
-		else 
-		    fp = fopen_not_dir(fname, "r");
-		
-		if ((fp == NULL) &&
-		    (sSAallow_gzipped_fileA->s.s_dbind != sLnil)) { 
-		  union lispunion st;
-		  char buf[256];
-		  if (snprintf(buf,sizeof(buf),"%s.gz",fname)<=0)
-		    FEerror("Cannot write .gz filename",0);
-		  st.st.st_self=buf;
-		  st.st.st_dim=st.st.st_fillp=strlen(buf);
-		  set_type_of(&st,t_string);
-		  if (file_exists((object)&st)) {
-		    FILE *pp;
-		    int n;
-		    if (!(fp=tmpfile()))
-		      FEerror("Cannot create temporary file",0);
-		    if (snprintf(buf,sizeof(buf),"zcat %s.gz",fname)<=0)
-		      FEerror("Cannot write zcat pipe name",0);
-		    if (!(pp=popen(buf,"r")))
-		      FEerror("Cannot open zcat pipe",0);
-		    while((n=fread(buf,1,sizeof(buf),pp)))
-		      if (!fwrite(buf,1,n,fp))
-			FEerror("Cannot write pipe output to temporary file",0);
-		    if (pclose(pp)<0)
-		      FEerror("Cannot close zcat pipe",0);
-		    if (fseek(fp,0,SEEK_SET))
-		      FEerror("Cannot rewind temporary file\n",0); 
-		  }
-		}
-		if (fp == NULL) {
-			if (if_does_not_exist == sKerror)
-				cannot_open(fn);
-			else if (if_does_not_exist == sKcreate) {
-				fp = fopen_not_dir(fname, "w");
-				if (fp == NULL)
-					cannot_create(fn);
-				fclose(fp);
-				fp = fopen_not_dir(fname, "r");
-				if (fp == NULL)
-					cannot_open(fn);
-			} else if (if_does_not_exist == Cnil)
-				return(Cnil);
-			else
-			 FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
-				 1, if_does_not_exist);
-		}
-	} else if (smm == smm_output || smm == smm_io) {
-		if (fname[0] == '|')
-			fp = NULL;
-		else
-			fp = fopen_not_dir(fname, "r");
-		if (fp != NULL) {
-			fclose(fp);
-			if (if_exists == sKerror)
-			  FILE_ERROR(fn,"File exists");
-			else if (if_exists == sKrename) {
-				if (smm == smm_output)
-					fp = backup_fopen(fname, "w");
-				else
-					fp = backup_fopen(fname, "w+");
-				if (fp == NULL)
-					cannot_create(fn);
-			} else if (if_exists == sKrename_and_delete ||
-				   if_exists == sKnew_version ||
-				   if_exists == sKsupersede) {
-				if (smm == smm_output)
-					fp = fopen_not_dir(fname, "w");
-				else
-					fp = fopen_not_dir(fname, "w+");
-				if (fp == NULL)
-					cannot_create(fn);
-			} else if (if_exists == sKoverwrite) {
-				fp = fopen_not_dir(fname, "r+");
-				if (fp == NULL)
-					cannot_open(fn);
-			} else if (if_exists == sKappend) {
-				if (smm == smm_output)
-					fp = fopen_not_dir(fname, "a");
-				else
-					fp = fopen_not_dir(fname, "a+");
-				if (fp == NULL)
-				FEerror("Cannot append to the file ~A.",1,fn);
-			} else if (if_exists == Cnil)
-				return(Cnil);
-			else
-				FEerror("~S is an illegal IF-EXISTS option.",
-					1, if_exists);
-		} else {
-			if (if_does_not_exist == sKerror)
-				FILE_ERROR(fn,"The file does not exist");
-			else if (if_does_not_exist == sKcreate) {
-				if (smm == smm_output) {
-				    if(fname[0]=='|')
-				        fp = popen(fname+1,"w");
-				    else 
-		                        fp = fopen_not_dir(fname, "w");
-				} else
-					fp = fopen_not_dir(fname, "w+");
-				if (fp == NULL)
-					cannot_create(fn);
-			} else if (if_does_not_exist == Cnil)
-				return(Cnil);
-			else
-			    FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
-				 1, if_does_not_exist);
-		}
+  object x;
+  FILE *fp=NULL;
+  vs_mark;
+  
+  coerce_to_filename(fn,FN1);
+  if (smm == smm_input || smm == smm_probe) {
+    if(FN1[0]=='|')
+      fp = popen(FN1+1,"r");
+    else 
+      fp = fopen_not_dir(FN1, "r");
+    
+    if ((fp == NULL) &&
+	(sSAallow_gzipped_fileA->s.s_dbind != sLnil)) { 
+      union lispunion st;
+      char buf[256];
+      if (snprintf(buf,sizeof(buf),"%s.gz",FN1)<=0)
+	FEerror("Cannot write .gz filename",0);
+      st.st.st_self=buf;
+      st.st.st_dim=st.st.st_fillp=strlen(buf);
+      set_type_of(&st,t_string);
+      if (fSstat((object)&st)!=Cnil) {
+	FILE *pp;
+	int n;
+	if (!(fp=tmpfile()))
+	  FEerror("Cannot create temporary file",0);
+	if (snprintf(buf,sizeof(buf),"zcat %s.gz",FN1)<=0)
+	  FEerror("Cannot write zcat pipe name",0);
+	if (!(pp=popen(buf,"r")))
+	  FEerror("Cannot open zcat pipe",0);
+	while((n=fread(buf,1,sizeof(buf),pp)))
+	  if (!fwrite(buf,1,n,fp))
+	    FEerror("Cannot write pipe output to temporary file",0);
+	if (pclose(pp)<0)
+	  FEerror("Cannot close zcat pipe",0);
+	if (fseek(fp,0,SEEK_SET))
+	  FEerror("Cannot rewind temporary file\n",0); 
+      }
+    }
+    if (fp == NULL) {
+      if (if_does_not_exist == sKerror)
+	cannot_open(fn);
+      else if (if_does_not_exist == sKcreate) {
+	fp = fopen_not_dir(FN1, "w");
+	if (fp == NULL)
+	  cannot_create(fn);
+	fclose(fp);
+	fp = fopen_not_dir(FN1, "r");
+	if (fp == NULL)
+	  cannot_open(fn);
+      } else if (if_does_not_exist == Cnil)
+	return(Cnil);
+      else
+	FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
+		1, if_does_not_exist);
+    }
+  } else if (smm == smm_output || smm == smm_io) {
+    if (FN1[0] == '|')
+      fp = NULL;
+    else
+      fp = fopen_not_dir(FN1, "r");
+    if (fp != NULL) {
+      fclose(fp);
+      if (if_exists == sKerror)
+	FILE_ERROR(fn,"File exists");
+      else if (if_exists == sKrename) {
+	massert(snprintf(FN2,sizeof(FN2),"%s.BAK",FN1)>=0);
+	massert(!rename(FN1,FN2));
+	if (smm == smm_output)
+	  fp = fopen(FN1, "w");
+	else
+	  fp = fopen(FN1, "w+");
+	if (fp == NULL)
+	  cannot_create(fn);
+      } else if (if_exists == sKrename_and_delete ||
+		 if_exists == sKnew_version ||
+		 if_exists == sKsupersede) {
+	if (smm == smm_output)
+	  fp = fopen_not_dir(FN1, "w");
+	else
+	  fp = fopen_not_dir(FN1, "w+");
+	if (fp == NULL)
+	  cannot_create(fn);
+      } else if (if_exists == sKoverwrite) {
+	fp = fopen_not_dir(FN1, "r+");
+	if (fp == NULL)
+	  cannot_open(fn);
+      } else if (if_exists == sKappend) {
+	if (smm == smm_output)
+	  fp = fopen_not_dir(FN1, "a");
+	else
+	  fp = fopen_not_dir(FN1, "a+");
+	if (fp == NULL)
+	  FEerror("Cannot append to the file ~A.",1,fn);
+      } else if (if_exists == Cnil)
+	return(Cnil);
+      else
+	FEerror("~S is an illegal IF-EXISTS option.",
+		1, if_exists);
+    } else {
+      if (if_does_not_exist == sKerror)
+	FILE_ERROR(fn,"The file does not exist");
+      else if (if_does_not_exist == sKcreate) {
+	if (smm == smm_output) {
+	  if(FN1[0]=='|')
+	    fp = popen(FN1+1,"w");
+	  else 
+	    fp = fopen_not_dir(FN1, "w");
 	} else
-		FEerror("Illegal open mode for ~S.",1,fn);
+	  fp = fopen_not_dir(FN1, "w+");
+	if (fp == NULL)
+	  cannot_create(fn);
+      } else if (if_does_not_exist == Cnil)
+	return(Cnil);
+      else
+	FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
+		1, if_does_not_exist);
+    }
+  } else
+    FEerror("Illegal open mode for ~S.",1,fn);
+  
+  vs_push(make_simple_string(FN1));
+  x = alloc_object(t_stream);
+  x->sm.tt=x->sm.sm_mode = (short)smm;
+  x->sm.sm_fp = fp;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = sLcharacter;
+  x->sm.sm_object1 = vs_head;
+  x->sm.sm_int0 = x->sm.sm_int1 = 0;
+  vs_push(x);
+  
+  setup_stream_buffer(x);
+  vs_reset;
+  
+  if (smm==smm_probe)
+    close_stream(x);
+  
+  return(x);
 
-	vs_push(make_simple_string(fname));
-	x = alloc_object(t_stream);
-	x->sm.tt=x->sm.sm_mode = (short)smm;
-	x->sm.sm_fp = fp;
-	x->sm.sm_buffer = 0;
-	x->sm.sm_object0 = sLcharacter;
-	x->sm.sm_object1 = vs_head;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
-	vs_push(x);
-
-	setup_stream_buffer(x);
-	vs_reset;
-
-	if (smm==smm_probe)
-	  close_stream(x);
-
-	return(x);
 }
 
 static void
@@ -614,6 +603,7 @@ object strm;
 		strm->sm.sm_fd = -1;
 		break;
 
+	case smm_file_synonym:
 	case smm_synonym:
 /* 		strm = symbol_value(strm->sm.sm_object0); */
 /* 		if (type_of(strm) != t_stream) { */
@@ -674,6 +664,7 @@ object strm;
 		return Ct;
 		break;
 
+	case smm_file_synonym:
 	case smm_synonym:
 	case smm_broadcast:
 	case smm_concatenated:
@@ -720,6 +711,7 @@ interactive_stream_p(object strm)
 		    	return Ct;
 		return Cnil;
 		break;
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -864,6 +856,7 @@ BEGIN:
 		/* strm->sm.sm_int0++; */
 		return(c==EOF ? c : (c&0377));
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -966,6 +959,7 @@ BEGIN:
 		/* --strm->sm.sm_int0; */  /* use ftell now for position */
 		break;
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1067,6 +1061,7 @@ BEGIN:
 
 		break;
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1432,6 +1427,7 @@ BEGIN:
 #endif
 		  closed_stream(strm);
 		break;
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1517,6 +1513,7 @@ BEGIN:
 	case smm_probe:
 		return(FALSE);
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		check_stream(strm);
@@ -1644,6 +1641,7 @@ BEGIN:
 #endif
 		return TRUE;
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1712,6 +1710,7 @@ BEGIN:
 	case smm_string_output:
 		return(STRING_STREAM_STRING(strm)->st.st_fillp);
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1761,6 +1760,7 @@ BEGIN:
 		}
 		return(0);
 
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1804,6 +1804,7 @@ object strm;
 	    goto BEGIN;
 	  }
 
+	case smm_file_synonym:
 	case smm_synonym:
 
 		strm = symbol_value(strm->sm.sm_object0);
@@ -1843,6 +1844,7 @@ BEGIN:
 	case smm_two_way:
            strm=STREAM_OUTPUT_STREAM(strm);
            goto BEGIN;
+	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1909,6 +1911,22 @@ const char *s;
 
 
 
+static int
+file_synonym_stream_p(object x) {
+  switch(x->sm.sm_mode) {
+  case smm_input:
+  case smm_output:
+  case smm_io:
+  case smm_probe:
+  case smm_file_synonym:
+    return 1;
+  case smm_synonym:
+    return file_synonym_stream_p(x->sm.sm_object0->s.s_dbind);
+  default:
+    return 0;
+  }
+}
+
 LFD(Lmake_synonym_stream)()
 {
 	object x;
@@ -1916,7 +1934,7 @@ LFD(Lmake_synonym_stream)()
 	check_arg(1);
 	check_type_symbol(&vs_base[0]);
 	x = alloc_object(t_stream);
-	x->sm.tt=x->sm.sm_mode = (short)smm_synonym;
+	x->sm.tt=x->sm.sm_mode = file_synonym_stream_p(vs_base[0]) ? (short)smm_file_synonym : (short)smm_synonym;
 	x->sm.sm_fp = NULL;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
@@ -2009,6 +2027,7 @@ stream_to_handle(object s, int output)
 	case smm_io:
 		f = s->sm.sm_fp;
 		break;
+	case smm_file_synonym:
 	case smm_synonym:
 		s = symbol_value(s->sm.sm_object0);
 		goto BEGIN;
@@ -2448,15 +2467,7 @@ DEFUN("OPEN-INT",object,fSopen_int,SI,8,8,NONE,OO,OO,OO,OO,
   vs_mark;
   object strm,filename;
   
-  if ((type_of(fn) != t_string) || (fn->st.st_self[0] != '|')) {
-    check_type_or_pathname_string_symbol_stream(&fn);
-    if (ifuncall2(sLwild_pathname_p,fn,Cnil) == Ct) {
-      WILD_PATH(fn);
-      RETURN1(Cnil);
-    }
-    filename = coerce_to_local_namestring(fn);
-  } else
-    filename=fn;
+  filename=fn;
   if (direction == sKinput) {
     smm = smm_input;
     if (idnesp==Cnil)
@@ -2568,204 +2579,78 @@ LFD(siLfile_column)()
 		vs_base[0] = make_fixnum(i);
 }
 
-extern object truename();
+/* extern object truename(); */
 
 DEFVAR("*COLLECT-BINARY-MODULES*",sSAcollect_binary_modulesA,SI,sLnil,"");
 DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 DEFVAR("*DISABLE-RECOMPILE*",sSAdisable_recompile,SI,Ct,"");
 
-@(static defun load1 (pathname
-	      &key (verbose `symbol_value(sLAload_verboseA)`)
-		   (print `symbol_value(sLAload_printA)`)
-		    (if_does_not_exist sKerror) (external_format Cnil)
-	      &aux pntype fasl_filename lsp_filename filename
-		   defaults strm stdoutput x
-		   package readtable)
-	bds_ptr old_bds_top;
-	int i;
-	object strm1;
-@
-	check_type_or_pathname_string_symbol_stream(&pathname);
-        if (type_of(pathname)==t_stream) {old_bds_top=bds_top;strm=strm1=pathname;goto STREAM;}
-	pathname = coerce_to_pathname(pathname);
-	defaults = symbol_value(Vdefault_pathname_defaults);
-	defaults = coerce_to_pathname(defaults);
-	pathname = merge_pathnames(pathname, defaults, sKnewest);
-	pntype = pathname->pn.pn_type;
-        if (ifuncall2(sLwild_pathname_p,pathname,Cnil) == Ct) {
-	    WILD_PATH(pathname);
-	    @(return Cnil)
-	}
-	filename = coerce_to_local_namestring(pathname);
-	if (user_match(filename->st.st_self,filename->st.st_fillp))
-		@(return Cnil)
-        old_bds_top=bds_top;
-  	if (pntype == Cnil || pntype == sKwild || pntype == sKunspecific ||
-	    (type_of(pntype) == t_string && string_eq(pntype, FASL_string))) {
-		pathname->pn.pn_type = FASL_string;
-		fasl_filename = coerce_to_local_namestring(pathname);
-	}
-        if (fasl_filename == Cnil) {
-	  FILE *f;
-	  char b[32],fn[4096];/*FIXME*/
-	  int i,n;
-	  coerce_to_local_filename(pathname,fn);
-	  n=0;
-	  if ((f=fopen(fn,"rb"))) {
-	    n=fread(b,sizeof(b),1,f);
-	    fclose(f);
-	  }
-	  for (i=0;i<n && (!iscntrl(b[i]) || isspace(b[i]));i++);
-	  if (i<n)
-	    fasl_filename = coerce_to_local_namestring(pathname);
-	}
+DEFUN("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object strm,object print),"") {
 
-	if (fasl_filename != Cnil && file_exists(fasl_filename)) {
-		if (verbose != Cnil) {
-			SETUP_PRINT_DEFAULT(fasl_filename);
-			if (file_column(PRINTstream) != 0)
-				write_str("\n");
-			write_str(";; Loading ");
-			PRINTescape = FALSE;
-			write_object(fasl_filename, 0);
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-		package = symbol_value(sLApackageA);
-		bds_bind(sLApackageA, package);
-		readtable = symbol_value(Vreadtable);
-		bds_bind(Vreadtable, readtable);
-		bds_bind(sSAload_pathnameA,pathname);
-		bds_bind(sSAload_truenameA,truename(pathname));
-		if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
-		  object _x=sSAbinary_modulesA->s.s_dbind;
-		  object _y=Cnil;
-		  while (_x!=Cnil) {
-		    _y=_x;
-		    _x=_x->c.c_cdr;
-		  }
-		  if (_y==Cnil)
-		    sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
-		  else 
-		    _y->c.c_cdr=make_cons(fasl_filename,Cnil);
-		}
-		i = fasload(fasl_filename);
-		if (print != Cnil) {
-			SETUP_PRINT_DEFAULT(Cnil);
-			vs_top = PRINTvs_top;
-			if (file_column(PRINTstream) != 0)
-				write_str("\n");
-			write_str(";; Fasload successfully ended.");
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-		bds_unwind(old_bds_top);
-		if (verbose != Cnil) {
-			SETUP_PRINT_DEFAULT(fasl_filename);
-			if (file_column(PRINTstream) != 0)
-				write_str("\n");
-			write_str(";; Finished loading ");
-			PRINTescape = FALSE;
-			write_object(fasl_filename, 0);
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-		@(return `make_fixnum(i)`)
-	}
-	if (pntype == Cnil || pntype == sKwild || pntype == sKunspecific ||
-	    (type_of(pntype) == t_string && string_eq(pntype, LSP_string))) {
-		pathname->pn.pn_type = LSP_string;
-		lsp_filename = coerce_to_local_namestring(pathname);
-	} 
-	if (lsp_filename != Cnil && file_exists(lsp_filename))
-		filename = lsp_filename;
-	else
-	if (pntype == Cnil || pntype == sKwild || pntype == sKunspecific ||
-	    (type_of(pntype) == t_string && string_eq(pntype, LISP_string))) {
-		pathname->pn.pn_type = LISP_string;
-		lsp_filename = coerce_to_local_namestring(pathname);
-		if (file_exists(lsp_filename))
-		    filename = lsp_filename;
-	}
-	if (if_does_not_exist != Cnil)
-		if_does_not_exist = sKerror;
-	strm1 = strm
-	= open_stream(filename, smm_input, Cnil, if_does_not_exist);
-	if (strm == Cnil)
-		@(return Cnil)
-  STREAM:
-	if (verbose != Cnil) {
-		SETUP_PRINT_DEFAULT(filename);
-		if (file_column(PRINTstream) != 0)
-			write_str("\n");
-		write_str(";; Loading ");
-		PRINTescape = FALSE;
-		write_object(filename, 0);
-		write_str("\n");
-		CLEANUP_PRINT_DEFAULT;
-		flush_stream(PRINTstream);
-	}
-	package = symbol_value(sLApackageA);
-	bds_bind(sSAload_pathnameA,pathname);
-        pathname=(type_of(pathname)==t_stream) ? Cnil : truename(pathname);
-	bds_bind(sSAload_truenameA,pathname);
-	bds_bind(sLApackageA, package);
-        readtable = symbol_value(Vreadtable);
-        bds_bind(Vreadtable, readtable);
-	bds_bind(sLAstandard_inputA, strm);
-	frs_push(FRS_PROTECT, Cnil);
-	if (nlj_active) {
-		close_stream(strm1);
-		nlj_active = FALSE;
-		frs_pop();
-		bds_unwind(old_bds_top);
-		unwind(nlj_fr, nlj_tag);
-	}
-	for (;;) {
-		preserving_whitespace_flag = FALSE;
-		detect_eos_flag = TRUE;
-		x = read_object_non_recursive(strm);
-		if (x == OBJNULL)
-			break;
-		{
-			object *base = vs_base, *top = vs_top, *lex = lex_env;
-			object xx;
+  object x;
+  
+  for (;;) {
+    preserving_whitespace_flag = FALSE;
+    detect_eos_flag = TRUE;
+    x = read_object_non_recursive(strm);
+    if (x == OBJNULL)
+      break;
+    {
+      object *base = vs_base, *top = vs_top, *lex = lex_env;
+      object xx;
+      
+      lex_new();
+      eval(x);
+      xx = vs_base[0];
+      lex_env = lex;
+      vs_top = top;
+      vs_base = base;
+      x = xx;
+    }
+    if (print != Cnil) {
+      SETUP_PRINT_DEFAULT(x);
+      write_object(x, 0);
+      write_str("\n");
+      CLEANUP_PRINT_DEFAULT;
+      flush_stream(PRINTstream);
+    }
+  }
 
-			lex_new();
-			eval(x);
-			xx = vs_base[0];
-			lex_env = lex;
-			vs_top = top;
-			vs_base = base;
-			x = xx;
-		}
-		if (print != Cnil) {
-			SETUP_PRINT_DEFAULT(x);
-			write_object(x, 0);
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-	}
-	close_stream(strm);
-	frs_pop();
-	bds_unwind(old_bds_top);
-	if (verbose != Cnil) {
-		SETUP_PRINT_DEFAULT(filename);
-		if (file_column(PRINTstream) != 0)
-			write_str("\n");
-		write_str(";; Finished loading ");
-		PRINTescape = FALSE;
-		write_object(filename, 0);
-		write_str("\n");
-		CLEANUP_PRINT_DEFAULT;
-		flush_stream(PRINTstream);
-	}
-	@(return Ct)
-@)
+  RETURN1(Ct);
+  
+}
+
+DEFUN("LOAD-FASL",object,fSload_fasl,SI,2,2,NONE,OO,OO,OO,OO,(object fasl_filename,object print),"") {
+  
+  int i;
+
+  if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
+    object _x=sSAbinary_modulesA->s.s_dbind;
+    object _y=Cnil;
+    while (_x!=Cnil) {
+      _y=_x;
+      _x=_x->c.c_cdr;
+    }
+    if (_y==Cnil)
+      sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
+    else 
+      _y->c.c_cdr=make_cons(fasl_filename,Cnil);
+  }
+  i = fasload(fasl_filename);
+  if (print != Cnil) {
+    SETUP_PRINT_DEFAULT(Cnil);
+    vs_top = PRINTvs_top;
+    if (file_column(PRINTstream) != 0)
+      write_str("\n");
+    write_str(";; Fasload successfully ended.");
+    write_str("\n");
+    CLEANUP_PRINT_DEFAULT;
+    flush_stream(PRINTstream);
+  }
+  
+  RETURN1(make_fixnum(i));
+  
+}
 
 static void
 FFN(siLget_string_input_stream_index)()
@@ -2812,13 +2697,6 @@ LFD(siLcopy_stream)()
 #ifdef AOSVS
 
 #endif
-}
-
-static void
-too_long_file_name(fn)
-object fn;
-{
-	FEerror("~S is a too long file name.", 1, fn);
 }
 
 static void
@@ -2895,6 +2773,7 @@ int out;
  if (type_of(strm) != t_stream)
    FEwrong_type_argument(sLstream, strm);
  switch (strm->sm.sm_mode){
+ case smm_file_synonym:
  case smm_synonym:
   strm = symbol_value(strm->sm.sm_object0);
   if (type_of(strm) != t_stream)
@@ -3469,7 +3348,7 @@ gcl_init_file_function()
 /* 	make_function("READ-SEQUENCE", Lread_sequence); */
 /* 	make_function("WRITE-SEQUENCE", Lwrite_sequence); */
 
-	make_si_function("LOAD1", Lload1);
+	/* make_si_function("LOAD1", Lload1); */
 
 	make_si_function("GET-STRING-INPUT-STREAM-INDEX",
 			 siLget_string_input_stream_index);

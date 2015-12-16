@@ -396,6 +396,9 @@
 (deftype stream () `(or broadcast-stream concatenated-stream echo-stream
 			file-stream string-stream synonym-stream two-way-stream))
 (deftype file-stream nil `(or file-input-stream file-output-stream file-io-stream file-probe-stream))
+(deftype path-stream nil `(or file-stream file-synonym-stream))
+(deftype pathname-designator nil `(or pathname string path-stream))
+(deftype synonym-stream nil `(or file-synonym-stream non-file-synonym-stream))
 (deftype string-stream nil `(or string-input-stream string-output-stream))
 
 (deftype input-stream ()  `(and stream (satisfies  input-stream-p)))
@@ -619,7 +622,7 @@
 				      broadcast-stream concatenated-stream echo-stream
 				      file-input-stream file-output-stream file-io-stream file-probe-stream
 				      string-input-stream string-output-stream
-				      synonym-stream two-way-stream 
+				      file-synonym-stream non-file-synonym-stream two-way-stream 
 				      non-logical-pathname logical-pathname
 				      readtable 
 				      hash-table-eq hash-table-eql hash-table-equal hash-table-equalp

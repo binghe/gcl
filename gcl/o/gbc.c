@@ -740,6 +740,7 @@ mark_object(object x) {
       break;
       
     case smm_synonym:
+    case smm_file_synonym:
       mark_object(x->sm.sm_object0);
       break;
       
@@ -816,6 +817,7 @@ mark_object(object x) {
     mark_object(x->pn.pn_name);
     mark_object(x->pn.pn_type);
     mark_object(x->pn.pn_version);
+    mark_object(x->pn.pn_namestring);
     break;
     
   /* case t_cfun: */

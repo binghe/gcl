@@ -396,6 +396,7 @@ sgc_mark_object1(object x) {
 	mark_contblock(x->sm.sm_buffer, BUFSIZ);
       break;
       
+    case smm_file_synonym:
     case smm_synonym:
       sgc_mark_object(x->sm.sm_object0);
       break;
@@ -468,6 +469,7 @@ sgc_mark_object1(object x) {
     sgc_mark_object(x->pn.pn_name);
     sgc_mark_object(x->pn.pn_type);
     sgc_mark_object(x->pn.pn_version);
+    sgc_mark_object(x->pn.pn_namestring);
     break;
     
   /* case t_cfun: */
