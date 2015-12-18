@@ -147,7 +147,7 @@ pre_init.lsp post_init.lsp:
 	touch $@
 
 libboot.so: ../o/boot.o
-	$(CC) -shared $< -o $@
+	$(CC) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
 
 saved_%:raw_% $(RSYM) init_%.lsp pre_init.lsp post_init.lsp raw_%_map \
 		$(CMPDIR)/gcl_lfun_list.lsp \

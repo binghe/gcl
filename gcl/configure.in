@@ -515,6 +515,9 @@ if test "$GCC" = "yes" ; then
 
    #FIXME -Wno-unused-but-set-variable when time
    TMPF=-Wno-unused-but-set-variable
+   case $use in
+   	*macosx*) TMPF=-Wno-unused-const-variable;;#FIXME
+   esac
    AC_MSG_CHECKING([for CFLAG $TMPF])
    CFLAGS_ORI=$CFLAGS
    CFLAGS="$CFLAGS $TMPF"
