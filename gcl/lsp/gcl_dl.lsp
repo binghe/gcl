@@ -4,7 +4,7 @@
 
 (defun lib-name (p)
   (if (or (string= p "") (string= p "libc") (string= p "libm")) "" 
-    (string-concatenate p ".so")));FIXME
+    (string-concatenate #+darwin "/usr/lib/system/" p #+darwin ".dylib" #-darwin ".so")));FIXME
 
 (defun mdl (n p vad)
   (let* ((sym (mdlsym n (lib-name p)))

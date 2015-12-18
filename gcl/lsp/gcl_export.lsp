@@ -510,6 +510,7 @@
   (or (find-symbol "libm" :lib) (make-package (intern "libm" :lib)))
   (or (find-symbol "libc" :lib) (make-package (intern "libc" :lib)))
   (or (find-symbol "libgmp" :lib) (make-package (intern "libgmp" :lib))))
+  #+darwin(or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))))
 (use-package :s)
 
 (let ((l (package-used-by-list (find-package :old-lisp))))
