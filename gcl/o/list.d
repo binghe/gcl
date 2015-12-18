@@ -55,6 +55,13 @@ object x;
 }
 
 
+void
+stack_cons(void)
+{
+	object d=vs_pop,a=vs_pop;
+	*vs_top++ = make_cons(a,d);
+}
+
 object on_stack_list_vector_new(fixnum n,object first,va_list ap)
 {object res=(object) alloca_val;
  struct cons *p;

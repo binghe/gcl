@@ -41,7 +41,6 @@ XS(lex_env);
 XS(key_function);
 XS(test_function);
 XS(item_compared);
-XS(reverse_comparison);
 XSI(intern_flag);
 XS(printStructBufp);
 XS(sfaslp);

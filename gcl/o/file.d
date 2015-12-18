@@ -1932,7 +1932,7 @@ LFD(Lmake_synonym_stream)()
 	object x;
 
 	check_arg(1);
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	x = alloc_object(t_stream);
 	x->sm.tt=x->sm.sm_mode = file_synonym_stream_p(vs_base[0]) ? (short)smm_file_synonym : (short)smm_synonym;
 	x->sm.sm_fp = NULL;

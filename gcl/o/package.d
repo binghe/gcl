@@ -402,7 +402,7 @@ DEFUN("PACK-HASH",fixnum,fSpack_hash,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
 
 DEFUN("SET-SYMBOL-HPACK",object,fSset_symbol_hpack,SI,2,2,NONE,OO,OO,OO,OO,(object p,object s),"") { 
   check_type_package(&p); 
-  check_type_symbol(&s);
+  check_type_sym(&s);
   RETURN1(s->s.s_hpack=p); 
 } 
 
@@ -1024,7 +1024,7 @@ LFD(Llist_all_packages)()
 
 @(defun unintern (symbl &optional (p `current_package()`))
 @
-	check_type_symbol(&symbl);
+	check_type_sym(&symbl);
 	check_package_designator(p);
 	p = coerce_to_package(p);
 	if (unintern(symbl, p))
@@ -1049,13 +1049,13 @@ BEGIN:
 
 	case t_cons:
 	  for (l = symbols;  !endp(l);  l = l->c.c_cdr) {
-	    check_type_symbol(&l->c.c_car);
+	    check_type_sym(&l->c.c_car);
 	    export(l->c.c_car, pack);
 	  }
 	  break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)
@@ -1077,13 +1077,13 @@ BEGIN:
 
 	case t_cons:
 	  for (l = symbols;  !endp(l);  l = l->c.c_cdr) {
-	    check_type_symbol(&l->c.c_car);
+	    check_type_sym(&l->c.c_car);
 	    unexport(l->c.c_car, pack);
 	  }
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)
@@ -1108,7 +1108,7 @@ BEGIN:
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)
@@ -1133,7 +1133,7 @@ BEGIN:
 		break;
 
 	default:
-		check_type_symbol(&symbols);
+		check_type_sym(&symbols);
 		goto BEGIN;
 	}
 	@(return Ct)

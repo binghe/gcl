@@ -414,7 +414,7 @@ object s;
 
 @(defun get (sym indicator &optional deflt)
 @
-	check_type_symbol(&sym);
+	check_type_sym(&sym);
 	@(return `getf(sym->s.s_plist, indicator, deflt)`)
 @)
 
@@ -422,7 +422,7 @@ LFD(Lremprop)()
 {
 	check_arg(2);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	if (remf(&vs_base[0]->s.s_plist, vs_base[1]))
 		vs_base[0] = Ct;
 	else
@@ -431,7 +431,7 @@ LFD(Lremprop)()
 }
 
 DEFUN("SYMBOL-PLIST",object,fLsymbol_plist,LISP,1,1,NONE,OO,OO,OO,OO,(object sym),"") {
-  check_type_symbol(&sym);
+  check_type_sym(&sym);
   RETURN1(sym->s.s_plist);
 }
 
@@ -503,7 +503,7 @@ DEFUN("MAKE-SYMBOL",object,fLmake_symbol,LISP,1,1,NONE,OO,OO,OO,OO,(object name)
 
 @(defun copy_symbol (sym &optional cp &aux x)
 @
-	check_type_symbol(&sym);
+	check_type_sym(&sym);
 	x = make_symbol(sym);
 	if (cp == Cnil)
 		@(return x)
@@ -648,7 +648,7 @@ ONCE_MORE:
 @)
 
 DEFUN("SYMBOL-PACKAGE",object,fLsymbol_package,LISP,1,1,NONE,OO,OO,OO,OO,(object sym),"") {
-  check_type_symbol(&sym);
+  check_type_sym(&sym);
   RETURN1(sym->s.s_hpack);
 }
 
@@ -694,7 +694,7 @@ LFD(siLset_symbol_plist)(void)
 {
 	check_arg(2);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	vs_base[0]->s.s_plist = vs_base[1];
 	vs_base[0] = vs_base[1];
 	vs_popp;
@@ -704,7 +704,7 @@ LFD(siLputprop)()
 {
 	check_arg(3);
 
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	vs_base[0]->s.s_plist
 	= putf(vs_base[0]->s.s_plist, vs_base[1], vs_base[2]);
 	vs_base[0] = vs_base[1];

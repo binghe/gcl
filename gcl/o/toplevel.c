@@ -110,7 +110,7 @@ static void
 FFN(siLAmake_special)(void)
 {
 	check_arg(1);
-	check_type_symbol(&vs_base[0]);
+	check_type_sym(&vs_base[0]);
 	if ((enum stype)vs_base[0]->s.s_stype == stp_constant)
 		FEerror("~S is a constant.", 1, vs_base[0]);
 	vs_base[0]->s.s_stype = (short)stp_special;
@@ -121,7 +121,7 @@ DEFUN("OBJNULL",fixnum,fSobjnull,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {return (fix
 DEFUN("*MAKE-CONSTANT",object,fSAmake_constant,SI,2,2,NONE,OO,OO,OO,OO, \
 	  (object s,object v),"") { 
 
-  check_type_symbol(&s);
+  check_type_sym(&s);
   switch(s->s.s_stype) {
   case stp_special:
     FEerror("The argument ~S to DEFCONSTANT is a special variable.", 1, s);
@@ -143,7 +143,7 @@ DEFUN("*MAKE-CONSTANT",object,fSAmake_constant,SI,2,2,NONE,OO,OO,OO,OO, \
 /* FFN(siLAmake_constant)(void) */
 /* { */
 /* 	check_arg(2); */
-/* 	check_type_symbol(&vs_base[0]); */
+/* 	check_type_sym(&vs_base[0]); */
 /* 	if ((enum stype)vs_base[0]->s.s_stype == stp_special) */
 /* 		FEerror( */
 /* 		 "The argument ~S to DEFCONSTANT is a special variable.", */
