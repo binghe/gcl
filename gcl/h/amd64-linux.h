@@ -26,3 +26,4 @@
 #endif
 
 #define RELOC_H "elf64_i386_reloc.h"
+#define MAX_CODE_ADDRESS (1L<<31)/*large memory model broken gcc 4.8*/
