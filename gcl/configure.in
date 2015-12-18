@@ -200,10 +200,10 @@ case $canonical in
      	use=386-macosx
 	if test "$build_cpu" = "x86_64" ; then 
 	   CFLAGS="-m64 $CFLAGS";
-	   LDFLAGS="-m64 -Wl,-headerpad,72 -Wl,-no_pie $LDFLAGS"; 
+	   LDFLAGS="-m64 -Wl,-headerpad,72 -Wl,-no_pie -Wl,-stack_size -Wl,32768 $LDFLAGS"; 
 	else 
 	   CFLAGS="-m32 $CFLAGS";
-	   LDFLAGS="-m32  -Wl,-headerpad,56 -Wl,-no_pie $LDFLAGS"; 
+	   LDFLAGS="-m32  -Wl,-headerpad,56 -Wl,-no_pie -Wl,-stack_size -Wl,32768 $LDFLAGS"; 
         fi;;
      
      alpha-dec-osf)
