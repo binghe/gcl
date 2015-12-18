@@ -197,7 +197,14 @@ case $canonical in
      	use=powerpc-macosx;;
      
      *86*darwin*)
-     	use=386-macosx;;
+     	use=386-macosx
+	if test "$build_cpu" = "x86_64" ; then 
+	   CFLAGS="-m64 $CFLAGS";
+	   LDFLAGS="-m64 -Wl,-headerpad,72 -Wl,-no_pie $LDFLAGS"; 
+	else 
+	   CFLAGS="-m32 $CFLAGS";
+	   LDFLAGS="-m32  -Wl,-headerpad,56 -Wl,-no_pie $LDFLAGS"; 
+        fi;;
      
      alpha-dec-osf)
      use=alpha-osf1;;

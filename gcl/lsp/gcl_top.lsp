@@ -817,8 +817,9 @@ First directory is checked for first name and all extensions etc."
 (defun get-temp-dir ()
   (dolist (x `(,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
     (when x
-      (when (eq (stat x) :directory)
-	(return-from get-temp-dir (ensure-dir-string x))))))
+      (let ((x (if (eql #\/ (aref x (1- (length x)))) x (string-concatenate x "/"))))
+	(when (eq (stat x) :directory)
+	  (return-from get-temp-dir x))))))
 
 (defvar si::*lib-directory* nil)
 
