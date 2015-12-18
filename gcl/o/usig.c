@@ -148,16 +148,6 @@ DEFUN("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
 
 #endif
 
-DEFUN("*FIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") {
-  RETURN1(*(fixnum *)addr);
-}
-DEFUN("*FLOAT",object,fSAfloat,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
-  RETURN1(make_shortfloat(*(float *)addr));
-}
-DEFUN("*DOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
-  RETURN1(make_longfloat(*(double *)addr));
-}
-
 DEFUN("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
 
 #ifdef HAVE_FEENABLEEXCEPT
@@ -237,7 +227,7 @@ DEFUN("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
 
 
 static void
-sigfpe3(int sig,siginfo_t *i,void *p) {
+sigfpe3(int sig,siginfo_t *i,void *v) {
 
   unblock_signals(SIGFPE,SIGFPE);
 #ifdef __MINGW32__
@@ -293,7 +283,7 @@ sigio(int s,siginfo_t *a,void *b)
 
 
 static void
-sigterm(void)
+sigterm(int s,siginfo_t *a,void *b)
 {do_gcl_abort();}
 
 
