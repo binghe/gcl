@@ -4,8 +4,7 @@
 (progn
   (declaim (optimize (safety 3)))
   (unless (fboundp 'logandc2) (defun logandc2 (x y) (boole boole-andc2 x y)))
-  (unless (fboundp 'lognot) (defun lognot (x) (boole boole-c1 x 0)))
-  (defun mc nil (si::make-anonymous-closure)))
+  (unless (fboundp 'lognot) (defun lognot (x) (boole boole-c1 x 0))))
 
 (mapc 'compile (nconc #-pre-gcl '(mapcar mapc mapl maplist)
 		      'si::(listp typep ibb ib <= coerce < > >= + - set-array concatenate mta mtv eql-is-eq)

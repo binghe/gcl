@@ -293,10 +293,10 @@ funcall(object fun) {
     
   case t_cons:
     if (fun->c.c_car!=sLlambda &&
-	fun->c.c_car!=sLlambda_closure &&
-	fun->c.c_car!=sLlambda_block &&
+	fun->c.c_car!=sSlambda_closure &&
+	fun->c.c_car!=sSlambda_block &&
 	fun->c.c_car!=sSlambda_block_expanded &&
-	fun->c.c_car!=sLlambda_block_closure)
+	fun->c.c_car!=sSlambda_block_closure)
       FEinvalid_function(fun);
     break;
     
@@ -339,7 +339,7 @@ funcall(object fun) {
       c = FALSE;
       fun = fun->c.c_cdr;
       
-    } else if (x == sLlambda_block) {
+    } else if (x == sSlambda_block) {
       b = TRUE;
       c = FALSE;
       if(sSlambda_block_expanded->s.s_dbind!=OBJNULL)
@@ -349,14 +349,14 @@ funcall(object fun) {
       
       
       
-    } else if (x == sLlambda_closure) {
+    } else if (x == sSlambda_closure) {
       b = FALSE;
       c = TRUE;
       fun = fun->c.c_cdr;
     } else if (x == sLlambda) {
       b = c = FALSE;
       fun = fun->c.c_cdr;
-    } else if (x == sLlambda_block_closure) {
+    } else if (x == sSlambda_block_closure) {
       b = c = TRUE;
       fun = fun->c.c_cdr;
     } else
@@ -792,11 +792,11 @@ LAMBDA:
 		temporary = make_cons(lex_env[2], fun->c.c_cdr);
 		temporary = make_cons(lex_env[1], temporary);
 		temporary = make_cons(lex_env[0], temporary);
-		x = make_cons(sLlambda_closure, temporary);
+		x = make_cons(sSlambda_closure, temporary);
 		vs_push(x);
 		goto EVAL_ARGS;
 	}
-	if (consp(fun) && (MMcar(fun) == sLlambda_closure || MMcar(fun) == sLlambda_block || MMcar(fun) == sLlambda_block_closure)) {
+	if (consp(fun) && (MMcar(fun) == sSlambda_closure || MMcar(fun) == sSlambda_block || MMcar(fun) == sSlambda_block_closure)) {
 		vs_push(x=fun);
 		goto EVAL_ARGS;
 	}

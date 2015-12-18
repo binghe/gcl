@@ -25,13 +25,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <unistd.h>
+#include <fcntl.h>
 
 static void init_main(void);
 static void initlisp(void);
 static int  multiply_stacks(int);
 void install_segmentation_catcher(void);
-
-#define IN_MAIN
 
 #ifdef KCLOVM
 #include <ovm/ovm.h>
@@ -40,13 +39,14 @@ int ovm_process_created;
 void initialize_process();
 #endif
 
+#define EXTER
 #define INLINE
 
 #include "include.h"
 #include <signal.h>
 #include "page.h"
 
-bool saving_system ;
+bool saving_system=FALSE;
 
 #ifdef BSD
 #include <sys/time.h>
@@ -133,8 +133,9 @@ clear_c_stack(VOL unsigned n) {
 
 fixnum log_maxpage_bound=sizeof(fixnum)*8-1;
 
-static inline int
+int
 mbrk(void *v) {
+
   ufixnum uv=(ufixnum)v,uc=(ufixnum)sbrk(0),ux,um;
   fixnum m=((1UL<<(sizeof(fixnum)*8-1))-1);
 
@@ -149,16 +150,161 @@ mbrk(void *v) {
     um=uc;
     ux=uv;
   }
+
   if (((fixnum)(ux-um))<0)
     return mbrk((void *)uc+(uv<uc ? -m : m)) || mbrk(v);
+
   return uc==(ufixnum)sbrk(uv-uc) ? 0 : -1;
+
 }
     
+#if defined(__CYGWIN__)||defined(__MINGW32__)
+
+#include <Windows.h>
+
+static ufixnum
+get_phys_pages_no_malloc(char n) {
+
+  MEMORYSTATUS m;
+
+  m.dwLength=sizeof(m);
+  GlobalMemoryStatus(&m);
+  return m.dwTotalPhys>>PAGEWIDTH;
+
+}
+
+#elif defined (DARWIN)
+
+#include <sys/sysctl.h>
+
+static ufixnum
+get_phys_pages_no_malloc(char n) {
+
+  uint64_t s;
+  size_t z=sizeof(s);
+  int m[2]={CTL_HW,HW_MEMSIZE};
+
+  if (sysctl(m,2,&s,&z,NULL,0)==0)
+    return s>>PAGEWIDTH;
+
+  return 0;
+
+}
+
+#elif defined(__sun__) || defined(__GNU__)
+
+static ufixnum
+get_phys_pages_no_malloc(char n) {
+
+  return sysconf(_SC_PHYS_PAGES);
+
+}
+
+#elif defined(FREEBSD)
+
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
+static ufixnum
+get_phys_pages_no_malloc(char n) {
+
+  size_t i,len=sizeof(i);
+
+  return (sysctlbyname("hw.physmem",&i,&len,NULL,0) ? 0 : i)>>PAGEWIDTH;
+
+}
+
+#else /*Linux*/
+
+#include <sys/sysinfo.h>
+
+static ufixnum
+get_phys_pages_no_malloc(char freep) {
+
+  struct sysinfo s;
+
+  return sysinfo(&s) ? 0 : ((freep ? s.freeram : s.totalram)>>PAGEWIDTH)*s.mem_unit;
+
+}
+
+#endif
+
+static ufixnum
+get_phys_pages1(char freep) {
+
+  return get_phys_pages_no_malloc(freep);
+
+}
+
+static void
+get_gc_environ(void) {
+
+  const char *e;;
+
+  mem_multiple=1.0;
+  if ((e=getenv("GCL_MEM_MULTIPLE"))) {
+    massert(sscanf(e,"%lf",&mem_multiple)==1);
+    massert(mem_multiple>=0.0);
+  }
+
+  gc_alloc_min=0.05;
+  if ((e=getenv("GCL_GC_ALLOC_MIN"))) {
+    massert(sscanf(e,"%lf",&gc_alloc_min)==1);
+    massert(gc_alloc_min>=0.0);
+  }
+
+  gc_page_min=0.5;
+  if ((e=getenv("GCL_GC_PAGE_THRESH"))) {
+    massert(sscanf(e,"%lf",&gc_page_min)==1);
+    massert(gc_page_min>=0.0);
+  }
+
+  gc_page_max=0.75;
+  if ((e=getenv("GCL_GC_PAGE_MAX"))) {
+    massert(sscanf(e,"%lf",&gc_page_max)==1);
+    massert(gc_page_max>=0.0);
+  }
+
+  multiprocess_memory_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
+
+  wait_on_abort=0;
+  if ((e=getenv("GCL_WAIT_ON_ABORT")))
+    massert(sscanf(e,"%lu",&wait_on_abort)==1);
+
+}
+
+static void
+setup_maxpages(double scale) {
+
+  void *beg=data_start ? data_start : sbrk(0);
+  ufixnum maxpages=real_maxpage-page(beg),npages,i;
+
+  for (npages=0,i=t_start;i<t_other;i++)
+    npages+=tm_table[i].tm_maxpage=tm_table[i].tm_npage;
+
+  massert(scale*maxpages>=npages);
+
+  maxpages*=scale;
+  phys_pages*=scale;
+  real_maxpage=maxpages+page(beg);
+
+  resv_pages=available_pages=0;
+  available_pages=check_avail_pages();
+
+  resv_pages=available_pages/100;
+  available_pages-=resv_pages;
+
+  recent_allocation=0;
+
+}
+
+void *initial_sbrk=NULL;
+
 int
 update_real_maxpage(void) {
 
-  ufixnum i,j,k;
-  void *end,*cur;
+  ufixnum i,j;
+  void *end,*cur,*beg;
 #ifdef __MINGW32__
   static fixnum n;
 
@@ -169,39 +315,19 @@ update_real_maxpage(void) {
 #endif
 
   massert(cur=sbrk(0));
+  beg=data_start ? data_start : cur;
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
-    if ((end=data_start+i+j-PAGESIZE)>cur)
+    if ((end=beg+i+j-PAGESIZE)>cur)
       if (!mbrk(end)) {
 	real_maxpage=page(end);
 	i+=j;
       }
   massert(!mbrk(cur));
 
-#ifdef HAVE_SYSCONF_PHYS_PAGES
-  phys_pages=sysconf(_SC_PHYS_PAGES);
-#ifdef BRK_DOES_NOT_GUARANTEE_ALLOCATION
-  if (phys_pages>0 && real_maxpage>phys_pages+first_data_page) real_maxpage=phys_pages+first_data_page;
-#endif
-#endif
+  phys_pages=ufmin(get_phys_pages1(0)+page(beg),real_maxpage)-page(beg);
 
-  available_pages=real_maxpage-first_data_page;
-  for (i=t_start,j=0;i<t_other;i++) {
-    k=tm_table[i].tm_maxpage;
-    if (tm_table[i].tm_type==t_relocatable)
-      k*=2;
-    else
-      j+=k;
-    available_pages-=k;
-  }
-  resv_pages=40<available_pages ? 40 : available_pages;
-  available_pages-=resv_pages;
-
-  new_holepage=available_pages/starting_hole_div;
-  k=available_pages/20;
-  j*=starting_relb_heap_mult;
-  j=j<k ? j : k;
-  if (maxrbpage<j)
-    set_tm_maxpage(tm_table+t_relocatable,j);
+  get_gc_environ();
+  setup_maxpages(mem_multiple);
 
   return 0;
 
@@ -210,31 +336,18 @@ update_real_maxpage(void) {
 static int
 minimize_image(void) {
 
-#ifdef SGC
-  int in_sgc=sgc_enabled;
-#else
-  int in_sgc=0;
-#endif
-  extern long new_holepage;
-  fixnum old_holepage=new_holepage,i;
-  void *new;
+  fixnum i;
   
-  if (in_sgc) sgc_quit();
-  holepage=new_holepage=1;
-  GBC(t_relocatable);
-  if (in_sgc) sgc_start();
-  new = (void *)(((((ufixnum)rb_pointer)+ PAGESIZE-1)/PAGESIZE)*PAGESIZE);
-  core_end = new;
-  rb_end=rb_limit=new;
-  set_tm_maxpage(tm_table+t_relocatable,(nrbpage=((char *)new-REAL_RB_START)/PAGESIZE));
-  new_holepage=old_holepage;
-  
+  empty_relblock();
+  nrbpage=0;
+  resize_hole(0,t_relocatable,0);
+
 #ifdef GCL_GPROF
   gprof_cleanup();
 #endif
   
 #if defined(BSD) || defined(ATT)  
-  mbrk(core_end);
+  mbrk(core_end=heap_end);
 #endif
   
   cbgbccount = tm_table[t_contiguous].tm_adjgbccnt = tm_table[t_contiguous].tm_opt_maxpage = 0;
@@ -244,6 +357,26 @@ minimize_image(void) {
   
   return 0;
   
+}
+
+DEFUN("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,OO,OO,(fixnum l),"") {
+
+  void *end,*dend;
+  fixnum def=sizeof(fixnum)*8-1;
+
+  l=l<def ? l : def;
+  end=data_start+(1L<<l)-PAGESIZE;
+  GBC(t_relocatable);
+  dend=heap_end+PAGESIZE+CEI(rb_pointer-rb_begin(),PAGESIZE);
+  if (end >= dend) {
+    minimize_image();
+    log_maxpage_bound=l;/*FIXME maybe this should be under mem_multiple, not over*/
+    update_real_maxpage();
+    maybe_set_hole_from_maxpages();
+  }
+
+  return log_maxpage_bound;
+
 }
 
 #include <dlfcn.h>
@@ -264,44 +397,105 @@ init_boot(void) {
 
 }
 
-DEFUN("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,OO,OO,(fixnum l),"") {
-
-  void *end,*dend;
-  fixnum def=sizeof(fixnum)*8-1;
-
-  l=l<def ? l : def;
-  end=data_start+(1L<<l)-PAGESIZE;
-  GBC(t_relocatable);
-  dend=heap_end+PAGESIZE+(((rb_pointer-REAL_RB_START)+PAGESIZE-1)&(-PAGESIZE));
-  if (end >= dend) {
-    minimize_image();
-    log_maxpage_bound=l;
-    update_real_maxpage();
-  }
-
-  return log_maxpage_bound;
-
-}
-
 int pre_gcl=0;
 object def_env1[2]={(object)1,Cnil},*def_env=def_env1+1;
 object src_env1[2]={(object)1,Cnil},*src_env=src_env1+1;
 
+#ifdef HAVE_MPROTECT
+#include <sys/mman.h>
+int
+gcl_mprotect(void *v,unsigned long l,int p) {
+
+  int i;
+  char b[80];
+
+  if ((i=mprotect(v,l,p))) {
+    snprintf(b,sizeof(b),"mprotect failure: %p %lu %d\b",v,l,p);
+    perror(b);
+  }
+
+  return i;
+
+}
+#endif
+
+DEFVAR("*CODE-BLOCK-RESERVE*",sSAcode_block_reserveA,SI,Cnil,"");
+
+#define HAVE_GCL_CLEANUP
+
+void
+gcl_cleanup(int gc) {
+
+  if (getenv("GCL_WAIT"))
+    sleep(30);
+
+#if defined(USE_CLEANUP)
+  {extern void _cleanup(void);_cleanup();}
+#endif
+
+#ifdef GCL_GPROF
+  gprof_cleanup();
+#endif
+
+  if (gc) {
+
+    saving_system=TRUE;
+    GBC(t_other);
+    saving_system=FALSE;
+
+    minimize_image();
+
+    raw_image=FALSE;
+    cs_org=0;
+    initial_sbrk=core_end;
+
+  }
+
+  close_pool();
+
+}
+
+/*gcc boolean expression tail position bug*/
+
+void *
+cclear_stack(unsigned long size) {
+  void *v=alloca(size);
+  memset(v,0,size);
+  return v;
+}
+
+DEFUN("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,1,NONE,II,OO,OO,OO,(fixnum s),"") {
+  object x0=make_list(s/sizeof(object)),x1=make_list(s/sizeof(object));
+  char *u=cclear_stack(s),*w;
+  fLequal(x0,x1);
+  for (w=u;w<u+s && !*w;w++);
+  RETURN1((object)(w-u));
+}
+
+
 int
 main(int argc, char **argv, char **envp) {
 
-  gcl_init_alloc(&argc);
-
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include <stdio.h>
+#include <stdlib.h>
 #include "unrandomize.h"
 #endif
-  
-#ifdef LD_BIND_NOW
-#include <stdio.h>
-#include "ld_bind_now.h"
+
+  gcl_init_alloc(&argv);
+
+#ifdef GET_FULL_PATH_SELF
+  GET_FULL_PATH_SELF(kcl_self);
+#else
+  kcl_self = argv[0];
 #endif
-  
+#ifdef __MINGW32__
+  {
+    char *s=kcl_self;
+    for (;*s;s++) if (*s=='\\') *s='/';
+  }
+#endif
+  *argv=kcl_self;
   
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
@@ -314,19 +508,6 @@ main(int argc, char **argv, char **envp) {
   ARGC = argc;
   ARGV = argv;
   ENVP = envp;
-  
-#ifdef GET_FULL_PATH_SELF
-  GET_FULL_PATH_SELF(kcl_self);
-#else
-  kcl_self = argv[0];
-#endif
-#ifdef __MINGW32__
-  {
-    char *s=kcl_self;
-    for (;*s;s++) if (*s=='\\') *s='/';
-  }
-#endif	
-  *argv=kcl_self;
   
   vs_top = vs_base = vs_org;
   ihs_top = ihs_org-1;
@@ -354,12 +535,9 @@ main(int argc, char **argv, char **envp) {
     
   } else {
 
-    saving_system = FALSE;
     terminal_io->sm.sm_object0->sm.sm_fp = stdin;
     terminal_io->sm.sm_object1->sm.sm_fp = stdout;
-#ifdef LD_BIND_NOW /*FIXME currently mips only, verify that these two requirements are the same*/
-    reinit_gmp();
-#endif
+
     gcl_init_big1();
 #ifdef HAVE_READLINE
     gcl_init_readline_function();
@@ -393,8 +571,18 @@ main(int argc, char **argv, char **envp) {
 /* catch certain signals */
 void install_segmentation_catcher(void)
 {
+  unblock_signals(SIGSEGV,SIGSEGV);
+  unblock_signals(SIGBUS,SIGBUS);
   (void) gcl_signal(SIGSEGV,segmentation_catcher);
   (void) gcl_signal(SIGBUS,segmentation_catcher);
+}
+
+void
+do_gcl_abort(void) {
+  if (wait_on_abort)
+    sleep(wait_on_abort);
+  gcl_cleanup(0);
+  abort();
 }
 
 int catch_fatal=1;
@@ -428,15 +616,6 @@ static void
 initlisp(void) {
 
         void *v=&v;
-	object a;
-
-	a=Cnil;
-	if (NOT_OBJECT_ALIGNED(a))
-	  error("Cnil is not properly aligned");
-
-	a=Ct;
-	if (NOT_OBJECT_ALIGNED(a))
-	  error("Ct is not properly aligned");
 
 	if (NULL_OR_ON_C_STACK(v) == 0
 #if defined(IM_FIX_BASE)
@@ -447,7 +626,7 @@ initlisp(void) {
 	    || NULL_OR_ON_C_STACK(pagetoinfo(first_data_page))
 	    || NULL_OR_ON_C_STACK(core_end-1)) {
 	  /* check person has correct definition of above */
-	  fprintf(stderr,"%p %d "
+	  emsg("%p %d "
 #if defined(IM_FIX_BASE)
 		  "%p %d %p %d "
 #endif
@@ -462,6 +641,8 @@ initlisp(void) {
 	  error("NULL_OR_ON_C_STACK macro invalid");
 	}
 
+	Cnil->fw=0;
+	set_type_of(Cnil,t_symbol);
  	Cnil->c.c_cdr=Cnil;
  	Cnil->s.s_dbind = Cnil;
  	Cnil->s.s_sfdef = NOT_SPECIAL;
@@ -500,18 +681,10 @@ initlisp(void) {
 	import(Ct, lisp_package);
 	export(Ct, lisp_package);
 
-/* #ifdef ANSI_COMMON_LISP */
-/* 	import(Cnil, common_lisp_package); */
-/* 	export(Cnil, common_lisp_package); */
-
-/* 	import(Ct, common_lisp_package); */
-/* 	export(Ct, common_lisp_package); */
-/* #endif */
-
 	sLlambda = make_ordinary("LAMBDA");
-	sLlambda_block = make_si_ordinary("LAMBDA-BLOCK");
-	sLlambda_closure = make_si_ordinary("LAMBDA-CLOSURE");
-	sLlambda_block_closure = make_si_ordinary("LAMBDA-BLOCK-CLOSURE");
+	sSlambda_block = make_si_ordinary("LAMBDA-BLOCK");
+	sSlambda_closure = make_si_ordinary("LAMBDA-CLOSURE");
+	sSlambda_block_closure = make_si_ordinary("LAMBDA-BLOCK-CLOSURE");
 	sLspecial = make_ordinary("SPECIAL");
 
 	NewInit();
@@ -680,6 +853,7 @@ FFN(siLargv)(void) {
       i >= ARGC)
     FEerror("Illegal argument index: ~S.", 1, vs_base[0]);
   vs_base[0] = make_simple_string(ARGV[i]);
+
 }
 
 static void
@@ -736,7 +910,7 @@ DEFUN("CATCH-FATAL",object,fScatch_fatal,SI,1,1,NONE,OI,OO,OO,OO,(fixnum i),"") 
 
 LFD(siLreset_stack_limits)(void)
 {
-  int i=0;
+  long i=0;
 
   check_arg(0);
   if(catch_fatal <0) catch_fatal=1;
@@ -821,28 +995,15 @@ FFN(siLuser_init)(void) {
   vs_base[0] = Cnil;
 }
 
-static void
-FFN(siLaddress)(void) {
-  check_arg(1);
-  vs_base[0] = make_fixnum((long)vs_base[0]);
+DEFUN("NANI",object,fSnani,SI,1,1,NONE,OI,OO,OO,OO,(fixnum address),"") {
+
+  RETURN1((object)address);
+
 }
 
-static void
-FFN(siLnani)(void) {
-  check_arg(1);
-  switch(type_of(vs_base[0])) {
-  case t_fixnum:
-    vs_base[0] = (object)fixint(vs_base[0]);
-    break;
-  case t_bignum:
-    if (mpz_fits_slong_p(MP(vs_base[0]))) {
-      MP_INT *u = MP(vs_base[0]);
-      vs_base[0]=(object)mpz_get_si(u);
-      break;
-    }
-  default:
-    FEerror("Cannot coerce ~s to an address",1,vs_base[0]);
-  }
+DEFUN("ADDRESS",object,fSaddress,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+
+  RETURN1(x);
 
 }
 
@@ -850,7 +1011,7 @@ static void
 FFN(siLinitialization_failure)(void) {
   check_arg(0);
   printf("lisp initialization failed\n");
-  exit(0);
+  do_gcl_abort();
 }
 
 DEFUN("IDENTITY",object,fLidentity,LISP,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
@@ -885,13 +1046,7 @@ FFN(siLsave_system)(void) {
   DO_BEFORE_SAVE
 #endif	
     
-  saving_system = TRUE;
-
-  minimize_image();
-
-  Lsave();
-  saving_system = FALSE;
-  alloc_page(-(holepage+nrbpage));
+  siLsave();
 
 }
 
@@ -915,8 +1070,6 @@ init_main(void) {
   make_si_function("RESET-STACK-LIMITS", siLreset_stack_limits);
   make_si_function("INIT-SYSTEM", siLinit_system);
   make_si_function("USER-INIT", siLuser_init);
-  make_si_function("ADDRESS", siLaddress);
-  make_si_function("NANI", siLnani);
   make_si_function("INITIALIZATION-FAILURE",
 		   siLinitialization_failure);
   
@@ -1030,11 +1183,67 @@ init_main(void) {
   
 }
 
-#ifdef SGC
-#include "writable.h"
+#ifdef HAVE_PRINT_INSN_I386
+
+#include "dis-asm.h"
+
+static char b[4096],*bp;
+
+static int
+my_fprintf(void *v,const char *f,...) {
+  va_list va;
+  int r;
+  va_start(va,f);
+  bp+=(r=vsnprintf(bp,sizeof(b)-(bp-b),f,va));
+  va_end(va);
+  return r;
+}
+
+static int
+my_read(bfd_vma memaddr, bfd_byte *myaddr, unsigned int length, struct disassemble_info *dinfo) {
+  memcpy(myaddr,(void *)(long)memaddr,length);
+  return 0;
+}
+
+static void
+my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
+  dinfo->fprintf_func(dinfo->stream,"%p",(void *)(long)addr);
+}
+
 #endif
 
-/* #include \"page.h\" */
+DEFUN("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+
+#ifdef HAVE_PRINT_INSN_I386
+
+  static disassemble_info i;
+  void *v;
+  int (*s)();
+  int j;
+
+  memset(&i,0,sizeof(i));
+#ifdef __i386__
+  i.disassembler_options="i386";
+#endif
+  i.fprintf_func=my_fprintf;
+  i.read_memory_func=my_read;
+  i.print_address_func=my_pa;
+  bp=b;
+
+  if ((v=dlopen("libopcodes.so",RTLD_NOW))) {
+    if ((s=dlsym(v,"print_insn_i386"))) {
+      j=s(addr,&i);
+      my_fprintf(NULL," ;");
+      return MMcons(make_simple_string(b),make_fixnum(j));
+    }
+    massert(!dlclose(v));
+  }
+
+#endif
+
+  return MMcons(make_simple_string("fnop ;"),make_fixnum(0));
+
+}
 
 typedef struct {
   enum type tt;
@@ -1064,119 +1273,7 @@ DEFUN("FUNCTION-BY-ADDRESS",object,fSfunction_by_address,SI,1,1,NONE,OI,OO,OO,OO
 	      m=mm;
 	      xx=x;
 	    }
-  
+
   return xx;
 
 }
-
-
-#ifdef PRINT_INSN
-
-#define MC(b_) v.uc_mcontext.b_
-#define REG_LIST(a_,b_) list(3,make_fixnum((void *)&(a_)-(void *)(b_)),make_fixnum(sizeof(a_)),make_fixnum(sizeof(*a_)))
-#define MCF(b_) (((struct _fpstate *)MC(fpregs))->b_)
-
-DEFCONST("+MC-CONTEXT-OFFSETS+",sSPmc_context_offsetsP,SI,
-	 ({ucontext_t v;list(4,REG_LIST(MC(gregs),&v),REG_LIST(MC(fpregs),&v),
-			     REG_LIST(MCF(_st),MC(fpregs)),REG_LIST(MCF(_xmm),MC(fpregs)));}),"");
-
-#define ASM __asm__ __volatile__
-
-DEFUN("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
-  unsigned short t;
-  ASM ("fnstsw %0" : "=m" (t));
-  RETURN1(t);
-}
-
-DEFUN("FNSTCW",fixnum,fSfnstcw,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
-  unsigned short t;
-  ASM ("fnstcw %0" : "=m" (t));
-  RETURN1(t);
-}
-DEFUN("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
-  unsigned int t;
-  ASM ("stmxcsr %0" : "=m" (t));
-  RETURN1(t);
-}
-DEFUN("CPUID",fixnum,fScpuid,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
-  unsigned int t;
-  ASM ("movl $1,%%eax;cpuid;movl %%edx,%0":"=m"(t)::"eax","ebx","ecx","edx");
-  RETURN1(t);
-}
-DEFUN("FNCLEX",object,fSfnclex,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-  ASM ("fnclex");
-  RETURN1(Cnil);
-}
-DEFUN("LDMXCSR",fixnum,fSldmxcsr,SI,1,1,NONE,II,OO,OO,OO,(fixnum val),"") {
-  ASM ("ldmxcsr %0" :: "m" (val));
-  RETURN1(val);
-}
-DEFUN("FLDCW",fixnum,fSfldcw,SI,1,1,NONE,II,OO,OO,OO,(fixnum val),"") {
-  ASM ("fldcw %0" :: "m" (val));
-  RETURN1(val);
-}
-DEFUN("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
-  double d;
-  ASM ("fldt %1;fstpl %0" : "=m" (d): "m" (*(char *)val));
-  RETURN1(make_longfloat(d));
-}
-
-DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
-					 list(3,sLdivision_by_zero,make_fixnum(FPE_FLTDIV),make_fixnum(FE_DIVBYZERO)),
-					 list(3,sLfloating_point_overflow,make_fixnum(FPE_FLTOVF),make_fixnum(FE_OVERFLOW)),
-					 list(3,sLfloating_point_underflow,make_fixnum(FPE_FLTUND),make_fixnum(FE_UNDERFLOW)),
-					 list(3,sLfloating_point_inexact,make_fixnum(FPE_FLTRES),make_fixnum(FE_INEXACT)),
-					 list(3,sLfloating_point_invalid_operation,make_fixnum(FPE_FLTINV),make_fixnum(FE_INVALID))),"");
-
-static object disassemble_instruction(fixnum);
-
-DEFUN("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
-  return disassemble_instruction(addr);
-}
-
-#include "dis-asm.h"
-
-static char b[4096],*bp;
-
-static int
-my_fprintf(void *v,const char *f,...) {
-  va_list va;
-  int r;
-  va_start(va,f);
-  bp+=(r=vsnprintf(bp,sizeof(b)-(bp-b),f,va));
-  va_end(va);
-  return r;
-}
-
-static int
-my_read(bfd_vma memaddr, bfd_byte *myaddr, unsigned int length, struct disassemble_info *dinfo) {
-  memcpy(myaddr,(void *)memaddr,length);
-  return 0;
-}
-
-static void
-my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
-  dinfo->fprintf_func(dinfo->stream,"%p",(void *)addr);
-}
-
-static object
-disassemble_instruction(fixnum addr) {
-
-  static disassemble_info i;
-  /* static int k; */
-  int j;
-
-  /* if (!k) {init_disassemble_info(&i,NULL,my_fprintf);k=1;} */
-  memset(&i,0,sizeof(i));
-  i.fprintf_func=my_fprintf;
-  i.read_memory_func=my_read;
-  i.print_address_func=my_pa;
-  bp=b;
-  
-  j=PRINT_INSN(addr,&i);
-  my_fprintf(NULL," ;");
-  return MMcons(make_simple_string(b),make_fixnum(j));
-}
-
-
-#endif

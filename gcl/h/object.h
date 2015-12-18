@@ -411,15 +411,69 @@ EXTER fixnum holepage;   /*  hole pages  */
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
 EXTER fixnum new_holepage,starting_hole_div,starting_relb_heap_mult;
 
-#ifdef SGC
-EXTER char *old_rb_start;			/*  read-only relblock start  */
-#endif
+EXTER ufixnum recent_allocation,wait_on_abort;
+EXTER double gc_alloc_min,mem_multiple,gc_page_min,gc_page_max;
+EXTER bool multiprocess_memory_pool;
+
+EXTER char *new_rb_start;		/*  relblock start  */
 EXTER char *rb_start;			/*  relblock start  */
 EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */
 EXTER char *rb_pointer;		/*  relblock pointer  */
 EXTER char *rb_start1;		/*  relblock start in copy space  */
 EXTER char *rb_pointer1;		/*  relblock pointer in copy space  */
+
+#include <unistd.h>
+#include <stdio.h>
+#include <stdarg.h>
+#ifndef INLINE
+#define INLINE
+#endif
+
+INLINE ufixnum
+rb_size(void) {
+  return rb_end-rb_start;
+}
+
+INLINE bool
+rb_high(void) {
+  return rb_pointer>=rb_end&&rb_size();
+}
+
+INLINE char *
+rb_begin(void) {
+  return rb_high() ? rb_end : rb_start;
+}
+
+INLINE bool
+rb_emptyp(void) {
+  return rb_pointer == rb_begin();
+}
+
+INLINE ufixnum
+ufmin(ufixnum a,ufixnum b) {
+  return a<=b ? a : b;
+}
+
+INLINE ufixnum
+ufmax(ufixnum a,ufixnum b) {
+  return a>=b ? a : b;
+}
+
+INLINE int
+emsg(const char *s,...) {
+  va_list args;
+  ufixnum n=0;
+  void *v=NULL;
+  va_start(args,s);
+  n=vsnprintf(v,n,s,args)+1;
+  va_end(args);
+  v=alloca(n);
+  va_start(args,s);
+  vsnprintf(v,n,s,args);
+  va_end(args);
+  return write(2,v,n-1) ? n : -1;
+}
 
 EXTER char *heap_end;			/*  heap end  */
 EXTER char *core_end;			/*  core end  */
@@ -545,6 +599,7 @@ EXTER object MVloc[10];
 #define RETURNO(n,val1,listvals) RETURN(n,object,val1,listvals)
 
 /* eg: RETURN(3,object,val1,(RV(val2),RV(val3))) */
+#undef RETURN
 #define RETURN(n,typ,val1,listvals) \
   do{typ _val1 = val1; object *_p=(object *)vals; listvals; vs_top=_p ? _p : base; return _val1;} while(0)
 /* #define CALL(n,form) (VFUN_NARGS=n,form) */

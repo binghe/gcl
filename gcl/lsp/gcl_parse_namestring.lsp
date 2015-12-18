@@ -104,7 +104,7 @@
     (string (let* ((e (or end (length thing)))
 		   (l (logical-pathname-parse thing host default-pathname start e))
 		   (l (or l (unless host (pathname-parse thing start e)))))
-	      (cond (junk-allowed (values l (match-end 0)))
+	      (cond (junk-allowed (values l (max 0 (match-end 0))))
 		    (l (values l e))
 		    ((error 'parse-error :format-control "~s is not a valid pathname on host ~s" :format-arguments (list thing host))))))
     (stream (apply 'parse-namestring (path-stream-name thing) host default-pathname r))

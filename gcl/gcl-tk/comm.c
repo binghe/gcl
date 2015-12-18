@@ -65,7 +65,7 @@ fScheck_fd_for_input(fixnum fd,fixnum timeout) {
 
 
 struct connection_state *
-setup_connection_state(fd)
+setup_connection_state(int fd)
 { struct connection_state * res;
   res = (void *)malloc(sizeof(struct connection_state));
   bzero(res,sizeof(struct connection_state));

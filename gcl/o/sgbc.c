@@ -7,13 +7,6 @@
     
 */
 
-static void
-sgc_mark_object1(object);
-
-static void
-sgc_mprotect(long, long, int);
-
-
 #ifdef BSD
 /* ulong may have been defined in mp.h but the define is no longer needed */
 #undef ulong
@@ -55,48 +48,11 @@ int gclmprotect ( void *addr, size_t len, int prot ) {
 
 #include <signal.h>
 
-/*  void segmentation_catcher(void); */
-
-
-#define sgc_mark_pack_list(u)      \
-do {register object xtmp = u;  \
- while (xtmp != Cnil) \
-   {if (ON_WRITABLE_PAGE(xtmp)) {mark(xtmp);}	\
-     sgc_mark_object(xtmp->c.c_car); \
-     xtmp=Scdr(xtmp);}}while(0) 
-
-
 #ifdef SDEBUG
 object sdebug;
 joe1(){;}
 joe() {;}     
 #endif
-
-static void *mcsh,*mcsl;
-extern int cstack_dir;
-
-inline void
-sgc_mark_cons(object x) {
-  
-  if (cstack_dir==-1 ? mcsl>(void *)&x : mcsl<(void *)&x)
-    mcsl=&x;
-
-  do {
-    object d=x->c.c_cdr;
-    mark(x);
-    sgc_mark_object(x->c.c_car);
-    x=d;
-    if (!IS_WRITABLE(page(x)) || is_marked_or_free(x))
-      return;
-  } while (valid_cdr(x));
-  if (x!=Cnil) sgc_mark_object1(x);
-
-}
-
-/* Whenever two arrays are linked together by displacement,
-   if one is live, the other will be made live */
-#define sgc_mark_displaced_field(ar) sgc_mark_object(ar->a.a_displaced)
-
 
 /* structures and arrays of type t, need to be marked if their
    bodies are not write protected even if the headers are.
@@ -105,421 +61,6 @@ sgc_mark_cons(object x) {
    header, that way we won't have to keep the headers in memory.
    This takes only 1.47 as opposed to 1.33 microseconds per set.
 */
-static void
-sgc_mark_object1(object x) {
-
-  fixnum i,j;
-  object *p;
-  void *cp;
-  enum type tp;
-  
-  cs_check(x);
-
-  if (cstack_dir==-1 ? mcsl>(void *)&cp : mcsl<(void *)&cp)
-    mcsl=&cp;
-
- BEGIN:
-#ifdef SDEBUG
-  if (x == OBJNULL || !ON_WRITABLE_PAGE(x))
-    return;
-  IF_WRITABLE(x,goto OK);
-  joe();
- OK:
-#endif 
-  if (is_marked_or_free(x))
-    return;
-#ifdef SDEBUG
-  if(x==sdebug) joe1();
-#endif
-  
-  tp=type_of(x);
-
-  if (tp==t_cons) {
-    sgc_mark_cons(x);
-    return;
-  }
-
-  mark(x);
-
-  switch (tp) {
-
-  case t_fixnum:
-    break;
-    
-  case t_ratio:
-    sgc_mark_object(x->rat.rat_num);
-    x = x->rat.rat_den;
-    IF_WRITABLE(x,if(!is_marked_or_free(x)) goto BEGIN);
-    
-  case t_shortfloat:
-    break;
-    
-  case t_longfloat:
-    break;
-    
-  case t_complex:
-    sgc_mark_object(x->cmp.cmp_imag);
-    x = x->cmp.cmp_real;
-    IF_WRITABLE(x,if(!is_marked_or_free(x)) goto BEGIN);
-    
-  case t_character:
-    break;
-    
-  case t_symbol:
-    IF_WRITABLE(x->s.s_plist,if(!is_marked_or_free(x->s.s_plist))
-    {/* mark(x->s.s_plist); */
-    sgc_mark_cons(x->s.s_plist);});
-    sgc_mark_object(x->s.s_gfdef);
-    sgc_mark_object(x->s.s_dbind);
-    if (x->s.s_hpack!=Cnil && x->s.s_hpack->p.p_name==Cnil) {
-      x->s.s_hpack=Cnil;
-      x->s.tt=0;
-    }
-/*       sgc_mark_object(x->s.s_hpack); */
-    if (x->s.s_self == NULL)
-      break;
-    /* to do */
-    if (inheap(x->s.s_self)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(x->s.s_self,x->s.s_fillp);
-    } else if (SGC_RELBLOCK_P(x->s.s_self) && COLLECT_RELBLOCK_P)
-      x->s.s_self = copy_relblock(x->s.s_self, x->s.s_fillp);
-    break;
-    
-  case t_package:
-    sgc_mark_object(x->p.p_name);
-    sgc_mark_object(x->p.p_nicknames);
-    sgc_mark_object(x->p.p_shadowings);
-    sgc_mark_object(x->p.p_uselist);
-    sgc_mark_object(x->p.p_usedbylist);
-    if (what_to_collect == t_contiguous) {
-      if (x->p.p_internal != NULL)
-	mark_contblock((char *)(x->p.p_internal),
-		       x->p.p_internal_size*sizeof(object));
-      if (x->p.p_external != NULL)
-	mark_contblock((char *)(x->p.p_external),
-		       x->p.p_external_size*sizeof(object));
-    }
-    break;
-    
-  case t_hashtable:
-    sgc_mark_object(x->ht.ht_rhsize);
-    sgc_mark_object(x->ht.ht_rhthresh);
-    if (x->ht.ht_self == NULL)
-      break;
-    for (i = 0, j = x->ht.ht_size;  i < j;  i++) {
-      if (ON_WRITABLE_PAGE(&x->ht.ht_self[i])) {
-	sgc_mark_object(x->ht.ht_self[i].c_cdr);
-	sgc_mark_object(x->ht.ht_self[i].c_car);
-      }
-    }
-    if (inheap(x->ht.ht_self)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock((char *)(x->ht.ht_self),j * sizeof(struct cons));
-    } else if (SGC_RELBLOCK_P(x->ht.ht_self) && COLLECT_RELBLOCK_P)
-      x->ht.ht_self=(void *)copy_relblock((char *)x->ht.ht_self,j*sizeof(struct cons));;
-    break;
-    
-  case t_array:
-    if ((x->a.a_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    if (x->a.a_dims != NULL) {
-      if (inheap(x->a.a_dims)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)(x->a.a_dims),sizeof(fixnum)*x->a.a_rank);
-      } else if (SGC_RELBLOCK_P(x->a.a_dims) && COLLECT_RELBLOCK_P)
-	x->a.a_dims =  copy_relblock((char *)(x->a.a_dims),sizeof(fixnum)*x->a.a_rank);
-    }
-    if ((enum aelttype)x->a.a_elttype == aet_ch)
-      goto CASE_STRING;
-    if ((enum aelttype)x->a.a_elttype == aet_bit)
-      goto CASE_BITVECTOR;
-    if ((enum aelttype)x->a.a_elttype == aet_object)
-      goto CASE_GENERAL;
-    
-  CASE_SPECIAL:
-    cp = x->a.a_self;
-    if (cp == NULL)
-      break;
-    /* set j to the size in char of the body of the array */
-    
-    switch((enum aelttype)x->a.a_elttype){
-    case aet_lf:
-      j= sizeof(longfloat)*x->a.a_dim;
-      if ((COLLECT_RELBLOCK_P) && !(inheap(cp)) && SGC_RELBLOCK_P(x->a.a_self))
-	ROUND_RB_POINTERS_DOUBLE;
-      break;
-    case aet_nnchar:
-    case aet_char:
-    case aet_uchar:
-      j=sizeof(char)*x->a.a_dim;
-      break;
-    case aet_nnshort:
-    case aet_short:
-    case aet_ushort:
-      j=sizeof(short)*x->a.a_dim;
-      break;
-    case aet_nnint:
-    case aet_int:
-    case aet_uint:
-      j=sizeof(int)*x->a.a_dim;
-      break;
-    default:
-      j=sizeof(fixnum)*x->a.a_dim;}
-    
-    goto COPY;
-    
-  CASE_GENERAL:
-    p = x->a.a_self;
-    if (p == NULL
-#ifdef HAVE_ALLOCA
-	|| (char *)p >= core_end
-#endif  
-	
-	)
-      break;
-    j=0;
-    if (x->a.a_displaced->c.c_car == Cnil)
-      for (i = 0, j = x->a.a_dim;  i < j;  i++)
-	if (ON_WRITABLE_PAGE(&p[i]))
-	  sgc_mark_object(p[i]);
-    cp = p;
-    j *= sizeof(object);
-  COPY:
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (SGC_RELBLOCK_P(cp) && COLLECT_RELBLOCK_P) {
-      if (x->a.a_displaced == Cnil) {
-#ifdef HAVE_ALLOCA
-	if (!NULL_OR_ON_C_STACK(cp))  /* only if body of array not on C stack */
-#endif			  
-	  x->a.a_self = (object *)copy_relblock(cp, j);
-      } else if (x->a.a_displaced->c.c_car == Cnil) {
-	i = (long)(object *)copy_relblock(cp, j) - (long)(x->a.a_self);
-	adjust_displaced(x, i);
-      }
-    }
-    break;
-    
-  case t_vector:
-    if ((x->v.v_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      goto CASE_GENERAL;
-    else
-      goto CASE_SPECIAL;
-    
-  case t_bignum:
-    j = MP_ALLOCATED(x);
-    cp = (char *)MP_SELF(x);
-    if (cp == 0)
-      break;
-    j = j * MP_LIMB_SIZE;
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (SGC_RELBLOCK_P(cp) && COLLECT_RELBLOCK_P)
-      MP_SELF(x) = (void *) copy_relblock(cp, j);
-    break;
-    
-    
-  CASE_STRING:
-  case t_string:
-    if ((x->st.st_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    j = x->st.st_dim;
-    cp = x->st.st_self;
-    if (cp == NULL)
-      break;
-    
-  COPY_STRING:
-    if (inheap(cp)) {
-      if (what_to_collect == t_contiguous)
-	mark_contblock(cp, j);
-    } else if (SGC_RELBLOCK_P(cp) && COLLECT_RELBLOCK_P) {
-      if (x->st.st_displaced == Cnil)
-	x->st.st_self = copy_relblock(cp, j);
-      else if (x->st.st_displaced->c.c_car == Cnil) {
-	i = copy_relblock(cp, j) - cp;
-	adjust_displaced(x, i);
-      }
-    }
-    break;
-    
-  CASE_BITVECTOR:
-  case t_bitvector:
-    if ((x->bv.bv_displaced) != Cnil)
-      sgc_mark_displaced_field(x);
-    /* We make bitvectors multiple of sizeof(int) in size allocated
-       Assume 8 = number of bits in char */
-    
-    j= sizeof(fixnum) *
-      ((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
-    cp = x->bv.bv_self;
-    if (cp == NULL)
-      break;
-    goto COPY_STRING;
-    
-  case t_structure:
-    sgc_mark_object(x->str.str_def);
-    p = x->str.str_self;
-    if (p == NULL)
-      break;
-    {
-      object def=x->str.str_def;
-      unsigned char  *s_type = &SLOT_TYPE(def,0);
-      unsigned short *s_pos  = &SLOT_POS (def,0);
-      for (i = 0, j = S_DATA(def)->length;  i < j;  i++)
-	if (s_type[i]==aet_object && ON_WRITABLE_PAGE(&STREF(object,x,s_pos[i])))
-	  sgc_mark_object(STREF(object,x,s_pos[i]));
-      if (inheap(x->str.str_self)) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)p,S_DATA(def)->size);
-      } else if (SGC_RELBLOCK_P(p) && (COLLECT_RELBLOCK_P))
-	x->str.str_self = copy_relblock((char *)p, S_DATA(def)->size);
-    }
-    break;
-    
-  case t_stream:
-    switch (x->sm.sm_mode) {
-    case smm_input:
-    case smm_output:
-    case smm_io:
-    case smm_socket:  
-    case smm_probe:
-      sgc_mark_object(x->sm.sm_object0);
-      sgc_mark_object(x->sm.sm_object1);
-      if (what_to_collect == t_contiguous &&
-	  x->sm.sm_fp &&
-	  x->sm.sm_buffer)
-	mark_contblock(x->sm.sm_buffer, BUFSIZ);
-      break;
-      
-    case smm_file_synonym:
-    case smm_synonym:
-      sgc_mark_object(x->sm.sm_object0);
-      break;
-      
-    case smm_broadcast:
-    case smm_concatenated:
-      sgc_mark_object(x->sm.sm_object0);
-      break;
-      
-    case smm_two_way:
-    case smm_echo:
-      sgc_mark_object(x->sm.sm_object0);
-      sgc_mark_object(x->sm.sm_object1);
-      break;
-      
-    case smm_string_input:
-    case smm_string_output:
-      sgc_mark_object(x->sm.sm_object0);
-      break;
-#ifdef USER_DEFINED_STREAMS
-    case smm_user_defined:
-      sgc_mark_object(x->sm.sm_object0);
-      sgc_mark_object(x->sm.sm_object1);
-      break;
-#endif
-    default:
-      error("mark stream botch");
-    }
-    break;
-    
-    /*FIXME: centralize this*/
-    /*FIXME: SGC_CONTBLOCK_P? */
-#define SGC_MARK_CP(a_,b_) {fixnum _t=(b_);if (inheap((a_))) {\
-	if (what_to_collect == t_contiguous) mark_contblock((void *)(a_),_t); \
-      } else if (SGC_RELBLOCK_P((a_)) && COLLECT_RELBLOCK_P) (a_)=(void *)copy_relblock((void *)(a_),_t);}
-
-#define SGC_MARK_MP(a_) {if ((a_)->_mp_d) SGC_MARK_CP((a_)->_mp_d,(a_)->_mp_alloc*MP_LIMB_SIZE);}
-
-  case t_random:
-    SGC_MARK_MP(x->rnd.rnd_state._mp_seed);
-#if __GNU_MP_VERSION < 4 || (__GNU_MP_VERSION == 4 && __GNU_MP_VERSION_MINOR < 2)
-    if (x->rnd.rnd_state._mp_algdata._mp_lc) {
-      SGC_MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_a);
-      if (!x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m2exp) SGC_MARK_MP(x->rnd.rnd_state._mp_algdata._mp_lc->_mp_m);
-      SGC_MARK_CP(x->rnd.rnd_state._mp_algdata._mp_lc,sizeof(*x->rnd.rnd_state._mp_algdata._mp_lc));
-    }
-#endif
-    break;
-    
-  case t_readtable:
-    if (x->rt.rt_self == NULL)
-      break;
-    if (what_to_collect == t_contiguous)
-      mark_contblock((char *)(x->rt.rt_self),RTABSIZE*sizeof(struct rtent));
-    for (i = 0;  i < RTABSIZE;  i++) {
-      sgc_mark_object(x->rt.rt_self[i].rte_macro);
-      if (x->rt.rt_self[i].rte_dtab != NULL) {
-	if (what_to_collect == t_contiguous)
-	  mark_contblock((char *)(x->rt.rt_self[i].rte_dtab),RTABSIZE*sizeof(object));
-	for (j = 0;  j < RTABSIZE;  j++)
-	  sgc_mark_object(x->rt.rt_self[i].rte_dtab[j]);
-      }
-    }
-    break;
-    
-  case t_pathname:
-    sgc_mark_object(x->pn.pn_host);
-    sgc_mark_object(x->pn.pn_device);
-    sgc_mark_object(x->pn.pn_directory);
-    sgc_mark_object(x->pn.pn_name);
-    sgc_mark_object(x->pn.pn_type);
-    sgc_mark_object(x->pn.pn_version);
-    sgc_mark_object(x->pn.pn_namestring);
-    break;
-    
-  /* case t_cfun: */
-  /*   sgc_mark_object(x->cf.cf_name); */
-  /*   sgc_mark_object(x->cf.cf_data); */
-  /*   sgc_mark_object(x->cf.cf_call); */
-  /*   break; */
-    
-  case t_function:	
-    sgc_mark_object(x->fun.fun_data);
-    sgc_mark_object(x->fun.fun_plist);
-    if (x->fun.fun_env != def_env && x->fun.fun_env != src_env) {
-      sgc_mark_object(x->fun.fun_env[0]);
-      if (COLLECT_RELBLOCK_P) {
-	object *p=x->fun.fun_env-1;
-	if(SGC_RELBLOCK_P(p)) {
-	  ufixnum n=*(ufixnum *)p;
-	  p=copy_relblock((char *)p,n);
-	  x->fun.fun_env=p+1;
-	}
-      }
-    }
-    break;
-    
-  case t_cfdata:
-    
-    sgc_mark_object(x->cfd.cfd_dlist);
-    if (x->cfd.cfd_self != NULL) {
-      int i=x->cfd.cfd_fillp;
-      while(i-- > 0)
-	sgc_mark_object(x->cfd.cfd_self[i]);
-    }
-    if (what_to_collect == t_contiguous) {
-      mark_contblock(x->cfd.cfd_start, x->cfd.cfd_size);
-      mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);
-    }
-    break;
-  case t_spice:
-    break;
-    
-  default:
-#ifdef DEBUG
-    if (debug)
-      printf("\ttype = %d\n", type_of(x));
-#endif
-    error("mark botch");
-  }
-  
-}
-
 static void
 sgc_mark_phase(void) {
 
@@ -530,8 +71,8 @@ sgc_mark_phase(void) {
   STATIC ihs_ptr ihsp;
   STATIC struct pageinfo *v;
   
-  sgc_mark_object(Cnil->s.s_plist);
-  sgc_mark_object(Ct->s.s_plist);
+  mark_object(Cnil->s.s_plist);
+  mark_object(Ct->s.s_plist);
   
   /* mark all non recent data on writable pages */
   {
@@ -541,22 +82,24 @@ sgc_mark_phase(void) {
     
     for (v=cell_list_head;v;v=v->next) {
       i=page(v);
-      if (!WRITABLE_PAGE_P(i)) continue;
+      if (v->sgc_flags&SGC_PAGE_FLAG || !WRITABLE_PAGE_P(i)) continue;
 
       t=v->type;
       tm=tm_of(t);
       p=pagetochar(i);
       for (j = tm->tm_nppage; --j >= 0; p += tm->tm_size) {
 	object x = (object) p; 
-	if (SGC_OR_M(x)) continue;
-	sgc_mark_object1(x);
+#ifndef SGC_WHOLE_PAGE
+	if (TYPEWORD_TYPE_P(v->type) && x->d.s) continue;
+#endif
+	mark_object1(x);
       }
     }
   }
   
   /* mark all non recent data on writable contiguous pages */
   if (what_to_collect == t_contiguous)
-    for (v=contblock_list_head;v;v=v->next)
+    for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++)
       if (v->sgc_flags&SGC_PAGE_FLAG) {
 	void *s=CB_DATA_START(v),*e=CB_DATA_END(v),*p,*q;
 	bool z=get_sgc_bit(v,s);
@@ -573,24 +116,24 @@ sgc_mark_phase(void) {
   mark_stack_carefully(MVloc+(sizeof(MVloc)/sizeof(object)),MVloc,0);
 
   for (bdp = bds_org;  bdp<=bds_top;  bdp++) {
-    sgc_mark_object(bdp->bds_sym);
-    sgc_mark_object(bdp->bds_val);
+    mark_object(bdp->bds_sym);
+    mark_object(bdp->bds_val);
   }
   
   for (frp = frs_org;  frp <= frs_top;  frp++)
-    sgc_mark_object(frp->frs_val);
+    mark_object(frp->frs_val);
   
   for (ihsp = ihs_org;  ihsp <= ihs_top;  ihsp++)
-    sgc_mark_object(ihsp->ihs_function);
+    mark_object(ihsp->ihs_function);
   
   for (i = 0;  i < mark_origin_max;  i++)
-    sgc_mark_object(*mark_origin[i]);
+    mark_object(*mark_origin[i]);
   for (i = 0;  i < mark_origin_block_max;  i++)
     for (j = 0;  j < mark_origin_block[i].mob_size;  j++)
-      sgc_mark_object(mark_origin_block[i].mob_addr[j]);
+      mark_object(mark_origin_block[i].mob_addr[j]);
   
   for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link)
-    sgc_mark_object((object)pp);
+    mark_object((object)pp);
 #ifdef KCLOVM
   if (ovm_process_created)
     sgc_mark_all_stacks();
@@ -602,20 +145,6 @@ sgc_mark_phase(void) {
     fflush(stdout);
   }
 #endif	
-  {
-    int size;
-  
-    for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link) {
-      size = pp->p_internal_size;
-      if (pp->p_internal != NULL)
-	for (i = 0;  i < size;  i++)
-	  sgc_mark_pack_list(pp->p_internal[i]);
-      size = pp->p_external_size;
-      if (pp->p_external != NULL)
-	for (i = 0;  i < size;  i++)
-	  sgc_mark_pack_list(pp->p_external[i]);
-    }
-  }
   
   mark_c_stack(0,N_RECURSION_REQD,mark_stack_carefully);
   
@@ -635,9 +164,6 @@ sgc_sweep_phase(void) {
 
     tm = tm_of((enum type)v->type);
     
-    if (!WRITABLE_PAGE_P(page(v))) 
-      continue;
-
     p = pagetochar(page(v));
     f = tm->tm_free;
     k = 0;
@@ -656,14 +182,18 @@ sgc_sweep_phase(void) {
 	  continue;
 	}
 
-	if (pageinfo(x)->type!=t_cons && x->d.s == SGC_NORMAL)
+#ifndef SGC_WHOLE_PAGE
+	if (TYPEWORD_TYPE_P(v->type) && x->d.s == SGC_NORMAL)
 	  continue;
+#endif
 	
 	/* it is ok to free x */
 	
 	SET_LINK(x,f);
 	make_free(x);
-	if (v->type!=t_cons) x->d.s = SGC_RECENT;
+#ifndef SGC_WHOLE_PAGE
+	if (TYPEWORD_TYPE_P(v->type)) x->d.s = SGC_RECENT;
+#endif
 	f = x;
 	k++;
 
@@ -672,7 +202,7 @@ sgc_sweep_phase(void) {
       tm->tm_nfree += k;
       v->in_use-=k;
 
-    } else /*non sgc_page */
+    } else if (WRITABLE_PAGE_P(page(v))) /*non sgc_page */
       for (j = tm->tm_nppage; --j >= 0;  p += size) {
 	x = (object)p;
 	if (is_marked(x) && !is_free(x)) {
@@ -682,47 +212,6 @@ sgc_sweep_phase(void) {
     
   }
 }
-
-
-static void
-sgc_contblock_sweep_phase(void) {
-
-  STATIC char *s, *e, *p, *q;
-  STATIC struct pageinfo *v;
-  
-  cb_pointer = NULL;
-  ncb = 0;
-  for (v=contblock_list_head;v;v=v->next) {
-    bool z;
-
-    if (!(v->sgc_flags&SGC_PAGE_FLAG)) continue;
-
-    s=CB_DATA_START(v);
-    e=CB_DATA_END(v);
-
-    z=get_mark_bit(v,s);
-    for (p=s;p<e;) {
-      q=get_mark_bits(v,p);
-      if (!z)
-	insert_contblock(p,q-p);
-      z=1-z;
-      p=q;
-    }
-
-    bzero(CB_MARK_START(v),CB_SGCF_START(v)-CB_MARK_START(v));
-
-  }
-
-  sweep_link_array();
-
-}
-
-
-
-#define PAGE_ROUND_UP(adr) \
-    ((char *)(PAGESIZE*(((long)(adr)+PAGESIZE -1) >> PAGEWIDTH)))
-
-/* char *old_rb_start; */
 
 #undef tm
 
@@ -741,11 +230,11 @@ sgc_count(object yy) {
 
 fixnum writable_pages=0;
 
-/* count writable pages excluding the hole */
+/* count read-only pages */
 static fixnum
-sgc_count_writable(void) { 
+sgc_count_read_only(void) { 
 
-  return page(core_end)-page(rb_start)+writable_pages-(page(old_rb_start)-page(heap_end));
+  return sgc_enabled ? sSAwritableA->s.s_dbind->v.v_dim-writable_pages : 0;
 
 }
 
@@ -777,32 +266,32 @@ overlap_check(struct contblock *t1,struct contblock *t2) {
 
     if (!inheap(t1)) {
       fprintf(stderr,"%p not in heap\n",t1);
-      exit(1);
+      do_gcl_abort();
     }
 
     for (p=t2;p;p=p->cb_link) {
 
       if (!inheap(p)) {
 	fprintf(stderr,"%p not in heap\n",t1);
-	exit(1);
+	do_gcl_abort();
       }
 
       if ((p<=t1 && (void *)p+p->cb_size>(void *)t1) ||
 	  (t1<=p && (void *)t1+t1->cb_size>(void *)p)) {
 	fprintf(stderr,"Overlap %u %p  %u %p\n",t1->cb_size,t1,p->cb_size,p);
-	exit(1);
+	do_gcl_abort();
       }
       
       if (p==p->cb_link) {
 	fprintf(stderr,"circle detected at %p\n",p);
-	exit(1);
+	do_gcl_abort();
       }
 
     }
 	
     if (t1==t1->cb_link) {
       fprintf(stderr,"circle detected at %p\n",t1);
-      exit(1);
+      do_gcl_abort();
     }
 
   }
@@ -876,14 +365,14 @@ memprotect_handler_test(int sig, long code, void *scp, char *addr) {
 
   if (memprotect_handler_invocations) {
     memprotect_result=memprotect_multiple_invocations;
-    exit(-1);
+    do_gcl_abort();
   }
   memprotect_handler_invocations=1;
   if (faddr!=memprotect_test_address)
     memprotect_result=memprotect_bad_fault_address;
   else
     memprotect_result=memprotect_none;
-  mprotect(memprotect_test_address,PAGESIZE,PROT_READ_WRITE_EXEC);
+  gcl_mprotect(memprotect_test_address,PAGESIZE,PROT_READ_WRITE_EXEC);
 
 }
 
@@ -898,7 +387,7 @@ memprotect_test(void) {
     return memprotect_result!=memprotect_success;
   if (atexit(memprotect_print)) {
     fprintf(stderr,"Cannot setup memprotect_print on exit\n");
-    exit(-1);
+    do_gcl_abort();
   }
 
   if (!(b1=alloca(2*p))) {
@@ -928,7 +417,7 @@ memprotect_test(void) {
   { /* mips kernel bug test -- SIGBUS with no faddr when floating point is emulated. */
     float *f1=(void *)memprotect_test_address,*f2=(void *)b2,*f1e=f1+p/sizeof(*f1);
   
-    if (mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
+    if (gcl_mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
       memprotect_result=memprotect_cannot_protect;
       return -1;
     }
@@ -944,7 +433,7 @@ memprotect_test(void) {
     memprotect_handler_invocations=0;
 
   }
-  if (mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
+  if (gcl_mprotect(memprotect_test_address,p,PROT_READ_EXEC)) {
     memprotect_result=memprotect_cannot_protect;
     return -1;
   }
@@ -1009,7 +498,11 @@ memprotect_test_reset(void) {
 /* If opt_maxpage is set, add full pages to the sgc set if needed
    too. 20040804 CM*/
 /* #define FSGC(tm) (tm->tm_type==t_cons ? tm->tm_nppage : (tm->tm_opt_maxpage ? 0 : tm->tm_sgc_minfree)) */
-#define FSGC(tm) (tm->tm_type==t_cons ? tm->tm_nppage : tm->tm_sgc_minfree)
+#ifdef SGC_WHOLE_PAGE
+#define FSGC(tm) tm->tm_nppage
+#else
+#define FSGC(tm) (!TYPEWORD_TYPE_P(tm->tm_type) ? tm->tm_nppage : tm->tm_sgc_minfree)
+#endif
 
 DEFVAR("*WRITABLE*",sSAwritableA,SI,Cnil,"");
 
@@ -1025,13 +518,16 @@ sgc_start(void) {
   object omp=sSAoptimize_maximum_pagesA->s.s_dbind;
   double tmp,scale;
 
+  allocate_more_pages=0;
+  if (sgc_enabled)
+    return 1;
+
   sSAoptimize_maximum_pagesA->s.s_dbind=Cnil;
   
   if (memprotect_result!=memprotect_success && do_memprotect_test())
     return 0;
 
-  if (sgc_enabled)
-    return 1;
+  empty_relblock();
 
   /* Reset maxpage statistics if not invoked automatically on a hole
      overrun. 20040804 CM*/
@@ -1134,7 +630,7 @@ sgc_start(void) {
     
     tm=tm_of(t_contiguous);
 
-    for (pi=contblock_list_head;pi && count<WSGC(tm);pi=pi->next) {
+    for (i=0;i<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[i]) && count<WSGC(tm);i++) {
 
       p=CB_DATA_START(pi);
       pe=CB_DATA_END(pi);
@@ -1155,7 +651,7 @@ sgc_start(void) {
       /* SGC cont pages: allocate more if necessary, dumping possible
 	 GBC freed pages onto the old contblock list.  CM 20030827*/
       unsigned long z=(i-count)+1;
-      void *old_contblock_list_tail=contblock_list_tail;
+      ufixnum fp=contblock_array->v.v_fillp;
 
       if (maxcbpage<ncbpage+z)
 	if (!set_tm_maxpage(tm_table+t_contiguous,ncbpage+z))
@@ -1163,34 +659,15 @@ sgc_start(void) {
 
       add_pages(tm_table+t_contiguous,z);
 
-      massert(old_contblock_list_tail!=contblock_list_tail);
+      massert(fp!=contblock_array->v.v_fillp);
 
-      contblock_list_tail->sgc_flags=SGC_PAGE_FLAG;
+      ((struct pageinfo *)contblock_array->v.v_self[fp])->sgc_flags=SGC_PAGE_FLAG;
 
     }
 
   }
 
-  /* Now  allocate the sgc relblock.   We do this as the tail
-     end of the ordinary rb.     */  
-  {
-    char *new;
-    tm=tm_of(t_relocatable);
-    
-    {
-      old_rb_start=rb_start;
-      if(((unsigned long)WSGC(tm)) && allocate_more_pages) {
-	new=alloc_relblock(((unsigned long)WSGC(tm))*PAGESIZE);
-	/* the above may cause a gc, shifting the relblock */
-	old_rb_start=rb_start;
-	new= PAGE_ROUND_UP(new);
-      } else new=PAGE_ROUND_UP(rb_pointer);
-      rb_start=rb_pointer=new;
-    }
-  }
-  /* the relblock has been allocated */
-  
-  sSAwritableA->s.s_dbind=fSmake_vector(sLbit,(page(rb_start)-first_data_page),Ct,Cnil,Cnil,0,Cnil,Cnil);
+  sSAwritableA->s.s_dbind=fSmake_vector(sLbit,(page(rb_start)-first_data_page),Ct,Cnil,Cnil,0,Ct,Cnil);
   wrimap=(void *)sSAwritableA->s.s_dbind->v.v_self;
 
   /* now move the sgc free lists into place.   alt_free should
@@ -1209,12 +686,16 @@ sgc_start(void) {
 #endif
 	if (pageinfo(f)->sgc_flags&SGC_PAGE_FLAG) {
 	  SET_LINK(f,x);
-	  if (pageinfo(f)->type!=t_cons) f->d.s = SGC_RECENT;
+#ifndef SGC_WHOLE_PAGE
+	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_RECENT;
+#endif
 	  x=f;
 	  count++;
 	} else {
 	  SET_LINK(f,y);
- 	  if (pageinfo(f)->type!=t_cons) f->d.s = SGC_NORMAL;
+#ifndef SGC_WHOLE_PAGE
+ 	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_NORMAL;
+#endif
 	  y=f;
 	}
 	f=next;
@@ -1228,39 +709,35 @@ sgc_start(void) {
   {
 
     struct pageinfo *pi;
-
+    ufixnum j;
+    
     {
 
-      struct contblock *new_cb_pointer=NULL,*tmp_cb_pointer=NULL,**cbpp;
+      struct contblock **cbpp;
       void *p=NULL,*pe;
       struct pageinfo *pi;
+      ufixnum i;
 
-      for (pi=contblock_list_head;pi;pi=pi->next) {
+      old_cb_pointer=cb_pointer;
+      reset_contblock_freelist();
+
+      for (i=0;i<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[i]);i++) {
 	
 	if (pi->sgc_flags!=SGC_PAGE_FLAG) continue;
 	
 	p=CB_DATA_START(pi);
 	pe=p+CB_DATA_SIZE(pi->in_use);
 	
-	for (cbpp=&cb_pointer;*cbpp;)
+	for (cbpp=&old_cb_pointer;*cbpp;)
 	  if ((void *)*cbpp>=p && (void *)*cbpp<pe) {
 	    void *s=*cbpp,*e=s+(*cbpp)->cb_size,*l=(*cbpp)->cb_link;
 	    set_sgc_bits(pi,s,e);
-	    tmp_cb_pointer=cb_pointer;
-	    cb_pointer=new_cb_pointer;
 	    insert_contblock(s,e-s);
-	    new_cb_pointer=cb_pointer;
-	    cb_pointer=tmp_cb_pointer;
 	    *cbpp=l;
 	  } else
 	    cbpp=&(*cbpp)->cb_link;
 
       }
-      
-      /* SGC contblock pages: switch to new free SGC contblock list. CM
-	 20030827 */
-      old_cb_pointer=cb_pointer;
-      cb_pointer=new_cb_pointer;
       
 #ifdef SGC_CONT_DEBUG
       overlap_check(old_cb_pointer,cb_pointer);
@@ -1277,7 +754,7 @@ sgc_start(void) {
       else
 	tm_of(pi->type)->tm_alt_npage++;
     }
-    for (pi=contblock_list_head;pi;pi=pi->next)/*FIXME*/
+    for (j=0;j<contblock_array->v.v_fillp && (pi=(void *)contblock_array->v.v_self[j]);j++)
       if (pi->sgc_flags&SGC_WRITABLE)
 	for (i=0;i<pi->in_use;i++)
 	  SET_WRITABLE(page(pi)+i);
@@ -1293,11 +770,13 @@ sgc_start(void) {
 	    SET_WRITABLE(i);
     }
 
-    for (i=page(heap_end);i<page(old_rb_start);i++)
+    {
+      object v=sSAwritableA->s.s_dbind;
+      for (i=page(v->v.v_self);i<=page(v->v.v_self+CEI(v->bv.bv_offset+v->v.v_dim-1,8*sizeof(fixnum))/(8*sizeof(fixnum)));i++)
 	SET_WRITABLE(i);
-    tm_of(t_relocatable)->tm_alt_npage=page(rb_start)-page(old_rb_start);
-    for (i=page(rb_start);i<page(core_end);i++)
-	SET_WRITABLE(i);
+    }
+
+    tm_of(t_relocatable)->tm_alt_npage=0;
 
     fault_pages=0;
 
@@ -1307,12 +786,11 @@ sgc_start(void) {
      and modified the tm_table;
      Turn  memory protection on for the pages which are writable.
   */
-  memory_protect(1);
   sgc_enabled=1;
-  if (sSAnotify_gbcA->s.s_dbind != Cnil) {
-    printf("[SGC on]"); 
-    fflush(stdout);
-  }
+  if (memory_protect(1))
+    sgc_quit();
+  if (sSAnotify_gbcA->s.s_dbind != Cnil)
+    emsg("[SGC on]");
 
   sSAoptimize_maximum_pagesA->s.s_dbind=omp;
 
@@ -1320,19 +798,33 @@ sgc_start(void) {
   
 }
 
+/* int */
+/* pdebug(void) { */
+
+/*   extern object malloc_list; */
+/*   object x=malloc_list; */
+/*   struct pageinfo *v; */
+/*   for (;x!=Cnil;x=x->c.c_cdr)  */
+/*     printf("%p %d\n",x->c.c_car->st.st_self,x->c.c_car->st.st_dim); */
+
+/*   for (v=contblock_list_head;v;v=v->next) */
+/*     printf("%p %ld\n",v,v->in_use<<12); */
+/*   return 0; */
+/* } */
+
+
 int
 sgc_quit(void) { 
 
   struct typemanager *tm;
   struct contblock *tmp_cb_pointer,*next;
-  unsigned long i,j,np;
-  char *p;
+  unsigned long i,np;
   struct pageinfo *v;
 
   memory_protect(0);
 
   if(sSAnotify_gbcA->s.s_dbind != Cnil) 
-    printf("[SGC off]"); fflush(stdout);
+    emsg("[SGC off]");
 
   if (sgc_enabled==0) 
     return 0;
@@ -1341,7 +833,6 @@ sgc_quit(void) {
   wrimap=NULL;
 
   sgc_enabled=0;
-  rb_start = old_rb_start;
 
   /* SGC cont pages: restore contblocks, each tmp_cb_pointer coming
      from the new list is guaranteed not to be on the old. Need to
@@ -1351,9 +842,7 @@ sgc_quit(void) {
 #ifdef SGC_CONT_DEBUG
     overlap_check(old_cb_pointer,cb_pointer);
 #endif
-    tmp_cb_pointer=cb_pointer;
-    cb_pointer=old_cb_pointer;
-    for (;tmp_cb_pointer;  tmp_cb_pointer=next) {
+    for (tmp_cb_pointer=old_cb_pointer;tmp_cb_pointer;  tmp_cb_pointer=next) {
       next=tmp_cb_pointer->cb_link;
       insert_contblock((void *)tmp_cb_pointer,tmp_cb_pointer->cb_size);
     }
@@ -1402,12 +891,14 @@ sgc_quit(void) {
 
   /*FIXME*/
   /* remove the recent flag from any objects on sgc pages */
-  for (v=cell_list_head;v;v=v->next) 
-    if (v->type==(tm=tm_of(v->type))->tm_type && v->type!=t_cons && v->sgc_flags & SGC_PAGE_FLAG)
+#ifndef SGC_WHOLE_PAGE
+  for (v=cell_list_head;v;v=v->next)
+    if (v->type==(tm=tm_of(v->type))->tm_type && TYPEWORD_TYPE_P(v->type) && v->sgc_flags & SGC_PAGE_FLAG)
       for (p=pagetochar(page(v)),j=tm->tm_nppage;j>0;--j,p+=tm->tm_size)
-	((object) p)->d.s=SGC_NORMAL;
+  	((object) p)->d.s=SGC_NORMAL;
+#endif
 
-  for (v=contblock_list_head;v;v=v->next) 
+  for (i=0;i<contblock_array->v.v_fillp &&(v=(void *)contblock_array->v.v_self[i]);i++)
     if (v->sgc_flags&SGC_PAGE_FLAG) 
       bzero(CB_SGCF_START(v),CB_DATA_START(v)-CB_SGCF_START(v));
   
@@ -1415,7 +906,7 @@ sgc_quit(void) {
     struct pageinfo *pi;
     for (pi=cell_list_head;pi;pi=pi->next)
       pi->sgc_flags&=SGC_PERM_WRITABLE;
-    for (pi=contblock_list_head;pi;pi=pi->next)
+    for (i=0;i<contblock_array->v.v_fillp &&(pi=(void *)contblock_array->v.v_self[i]);i++)
       pi->sgc_flags&=SGC_PERM_WRITABLE;
   }
   
@@ -1438,17 +929,18 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
 #ifdef DEBUG_MPROTECT
   printf("fault:0x%x [%d] (%d)  ",faddr,page(faddr),faddr >= core_end);
 #endif 
-/*   if (faddr >= core_end || (unsigned long)faddr < DBEGIN) { */
-/*     if (fault_count > 300) error("fault count too high"); */
-/*     fault_count ++; */
-/*     INSTALL_MPROTECT_HANDLER; */
-/*     return; */
-/*   } */
+  if (faddr >= (void *)core_end || faddr < data_start) {
+    static void *old_faddr;
+    if (old_faddr==faddr)
+      if (fault_count++ > 300) error("fault count too high");
+    old_faddr=faddr;
+    INSTALL_MPROTECT_HANDLER;
+    return;
+  }
 #else
   faddr = addr;
 #endif 
   p = page(faddr);
-  /* p = ROUND_DOWN_PAGE_NO(p); */
   if (p >= first_protectable_page
       && faddr < (void *)core_end
       && !(WRITABLE_PAGE_P(p))) {
@@ -1463,7 +955,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
     INSTALL_MPROTECT_HANDLER;
 #endif
 
-    mprotect(pagetoinfo(p),PAGESIZE,PROT_READ_WRITE_EXEC);
+    massert(!gcl_mprotect(pagetoinfo(p),PAGESIZE,PROT_READ_WRITE_EXEC));
     SET_WRITABLE(p);
     fault_pages++;
 
@@ -1479,7 +971,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
 
 }
 
-static void
+static int
 sgc_mprotect(long pbeg, long n, int writable) {
   /* CHECK_RANGE(pbeg,n);  */
 #ifdef DEBUG_MPROTECT
@@ -1489,14 +981,18 @@ sgc_mprotect(long pbeg, long n, int writable) {
 	 pagetoinfo(pbeg), n * PAGESIZE, sbrk(0));
   fflush(stdout);
 #endif  
-  if(mprotect(pagetoinfo(pbeg),n*PAGESIZE,
-	      (writable & SGC_WRITABLE ? PROT_READ_WRITE_EXEC : PROT_READ_EXEC)))
-    FEerror("Couldn't protect",0);
+  if(gcl_mprotect(pagetoinfo(pbeg),n*PAGESIZE,(writable & SGC_WRITABLE ? PROT_READ_WRITE_EXEC : PROT_READ_EXEC))) {
+    perror("sgc disabled");
+    return -1;
+  }
+
+  return 0;
+
 }
 
 
 
-void
+int
 memory_protect(int on) {
 
   unsigned long i,beg,end= page(core_end);
@@ -1510,22 +1006,25 @@ memory_protect(int on) {
   if (on==0) {
     sgc_mprotect(first_protectable_page,end-first_protectable_page,SGC_WRITABLE);
     install_segmentation_catcher();
-    return;
+    return 0;
   }
 
   INSTALL_MPROTECT_HANDLER;
 
   beg=first_protectable_page;
-  writable = IS_WRITABLE(beg);
+  writable = WRITABLE_PAGE_P(beg);
   for (i=beg ; ++i<= end; ) {
 
-    if (writable==IS_WRITABLE(i) && i<=end) continue;
+    if (writable==WRITABLE_PAGE_P(i) && i<end) continue;
 
-    sgc_mprotect(beg,i-beg,writable);
+    if (sgc_mprotect(beg,i-beg,writable))
+      return -1;
     writable=1-writable;
     beg=i;
 
   }
+
+  return 0;
 
 }
 

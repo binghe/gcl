@@ -170,6 +170,7 @@ min_initial_branch_length(regexp *, unsigned char *, int);
 
 #define	FAIL(m)	{ regerror(m); return(NULL); }
 #define	ISMULT(c)	((c) == '*' || (c) == '+' || (c) == '?')
+#undef META
 #define	META	"^$.[()|?+*\\"
 
 /*

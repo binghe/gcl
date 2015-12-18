@@ -38,7 +38,6 @@ typedef object (*object_func)();
 static int     
 vpush_extend(void *,object);
 
-object sLAlink_arrayA;
 int Rset = 0;
 
 /* for pushing item into an array, where item is an address if array-type = t
@@ -58,7 +57,7 @@ vpush_extend(void *item, object ar) {
     ind += sizeof(void *); 
     return(ar->v.v_fillp = ind);
   } else { 
-    int newdim= ROUND_UP_PTR((2 + (int) (1.3 * ind)));
+    int newdim= CEI((2 + (int) (1.3 * ind)),PTR_ALIGN);
     unsigned char *newself;
     newself = (void *)alloc_relblock(newdim);
     bcopy(ar->ust.ust_self,newself,ind);
@@ -118,10 +117,10 @@ is supplied and FLAG is nil, then this function is deleted from the fast links")
  va_start(ap,flag);
  sym=NEXT_ARG(n,ap,l,f,Cnil);
  
- if (sLAlink_arrayA==0)
+ if (sSAlink_arrayA==0)
    RETURN1(Cnil);
 
- link_ar=sLAlink_arrayA->s.s_dbind;
+ link_ar=sSAlink_arrayA->s.s_dbind;
  if (link_ar==Cnil && flag==Cnil) 
    RETURN1(Cnil);
 
@@ -345,8 +344,8 @@ call_proc_new(object sym,ufixnum clp,ufixnum vld,void **link,ufixnum argd,object
   if (fas) {
 
     if (do_link && link) {
-      (void) vpush_extend(link,sLAlink_arrayA->s.s_dbind);
-      (void) vpush_extend(*link,sLAlink_arrayA->s.s_dbind);	 
+      (void) vpush_extend(link,sSAlink_arrayA->s.s_dbind);
+      (void) vpush_extend(*link,sSAlink_arrayA->s.s_dbind);
       *link = (void *)fun->fun.fun_self;
     }
 
@@ -523,7 +522,7 @@ DEFUN("MV-REF",object,fSmv_ref,SI,1,1,NONE,OI,OO,OO,OO,(ufixnum i),"") {
 #include "xdrfuns.c"
 
 DEF_ORDINARY("CDEFN",sScdefn,SI,"");
-DEFVAR("*LINK-ARRAY*",sLAlink_arrayA,SI,Cnil,"");
+DEFVAR("*LINK-ARRAY*",sSAlink_arrayA,SI,Cnil,"");
 
 void
 gcl_init_links(void) {	

@@ -509,139 +509,137 @@ bool shortp;
 }
 
 static void
-call_print_function(func,x, level, nargs)
-object func,x;
-int level;
-{
-	int i;
-	bool eflag;
-	bds_ptr old_bds_top;
+call_print_function(object func,object x, fixnum level, ufixnum nargs) {
 
-	void (*wf)(int) = write_ch_fun;
+  int i;
+  bool eflag;
+  bds_ptr old_bds_top;
 
-	object *vt = PRINTvs_top;
-	object *vl = PRINTvs_limit;
-	bool e = PRINTescape;
-	bool ra = PRINTreadably;
-	bool r = PRINTradix;
-	int b = PRINTbase;
-	bool c = PRINTcircle;
-	bool p = PRINTpretty;
-	int lv = PRINTlevel;
-	int ln = PRINTlength;
-	bool g = PRINTgensym;
-	bool a = PRINTarray;
-
-/*
-	short oq[Q_SIZE];
-*/
-	short ois[IS_SIZE];
-
-	int oqh;
-	int oqt;
-	int oqc;
-	int oisp;
-	int oiisp;
-
-ONCE_MORE:
-	if (interrupt_flag) {
-		interrupt_flag = FALSE;
+  void (*wf)(int) = write_ch_fun;
+  
+  object *vt = PRINTvs_top;
+  object *vl = PRINTvs_limit;
+  bool e = PRINTescape;
+  bool ra = PRINTreadably;
+  bool r = PRINTradix;
+  int b = PRINTbase;
+  bool c = PRINTcircle;
+  bool p = PRINTpretty;
+  int lv = PRINTlevel;
+  int ln = PRINTlength;
+  bool g = PRINTgensym;
+  bool a = PRINTarray;
+  
+  /*
+    short oq[Q_SIZE];
+  */
+  short ois[IS_SIZE];
+  
+  int oqh;
+  int oqt;
+  int oqc;
+  int oisp;
+  int oiisp;
+  
+ ONCE_MORE:
+  if (interrupt_flag) {
+    interrupt_flag = FALSE;
 #ifdef UNIX
-		alarm(0);
+    alarm(0);
 #endif
-		terminal_interrupt(TRUE);
-		goto ONCE_MORE;
-	}
-
-	if (PRINTpretty)
-		flush_queue(TRUE);
-
-	oqh = qh;
-	oqt = qt;
-	oqc = qc;
-	oisp = isp;
-	oiisp = iisp;
-
-/*	No need to save the queue, since it is flushed.
+    terminal_interrupt(TRUE);
+    goto ONCE_MORE;
+  }
+  
+  if (PRINTpretty)
+    flush_queue(TRUE);
+  
+  oqh = qh;
+  oqt = qt;
+  oqc = qc;
+  oisp = isp;
+  oiisp = iisp;
+  
+  /*	No need to save the queue, since it is flushed.
 	for (i = 0;  i < Q_SIZE;  i++)
-		oq[i] = queue[i];
-*/
-	if (PRINTpretty)
-	for (i = 0;  i <= isp;  i++)
-		ois[i] = indent_stack[i];
+	oq[i] = queue[i];
+  */
+  if (PRINTpretty)
+    for (i = 0;  i <= isp;  i++)
+      ois[i] = indent_stack[i];
+  
+  vs_push(PRINTstream);
+  vs_push(PRINTcase);
+  
+  vs_push(make_fixnum(level));
 
-	vs_push(PRINTstream);
-	vs_push(PRINTcase);
-
-	vs_push(make_fixnum(level));
-
-	old_bds_top = bds_top;
-	bds_bind(sLAprint_escapeA, PRINTescape?Ct:Cnil);
-	bds_bind(sLAprint_readablyA, PRINTreadably?Ct:Cnil);
-	bds_bind(sLAprint_radixA, PRINTradix?Ct:Cnil);
-	bds_bind(sLAprint_baseA, make_fixnum(PRINTbase));
-	bds_bind(sLAprint_circleA, PRINTcircle?Ct:Cnil);
-	bds_bind(sLAprint_prettyA, PRINTpretty?Ct:Cnil);
-	bds_bind(sLAprint_levelA, PRINTlevel<0?Cnil:make_fixnum(PRINTlevel));
-	bds_bind(sLAprint_lengthA, PRINTlength<0?Cnil:make_fixnum(PRINTlength));
-	bds_bind(sLAprint_gensymA, PRINTgensym?Ct:Cnil);
-	bds_bind(sLAprint_arrayA, PRINTarray?Ct:Cnil);
-	bds_bind(sLAprint_caseA, PRINTcase);
-
-	frs_push(FRS_PROTECT, Cnil);
-	if (nlj_active) {
-		eflag = TRUE;
-		goto L;
-	}
-
-	if (nargs == 3)
-	    ifuncall3(func, x, PRINTstream, vs_head);
-	else
-	if (nargs == 2) /* pprint is other way round */
-	    ifuncall2(func, PRINTstream, x);
-
-	vs_popp;
-	eflag = FALSE;
-
-L:
-	frs_pop();
-	bds_unwind(old_bds_top);
-
-/*
-	for (i = 0;  i < Q_SIZE;  i++)
-		queue[i] = oq[i];
-*/
-	if (PRINTpretty)
-	for (i = 0;  i <= oisp;  i++)
-		indent_stack[i] = ois[i];
-
-	iisp = oiisp;
-	isp = oisp;
-	qc = oqc;
-	qt = oqt;
-	qh = oqh;
-
-	PRINTcase = vs_pop;
-	PRINTstream = vs_pop;
-	PRINTarray = a;
-	PRINTgensym = g;
-	PRINTlength = ln;
-	PRINTlevel = lv;
-	PRINTpretty = p;
-	PRINTcircle = c;
-	PRINTbase = b;
-	PRINTradix = r;
-	PRINTescape = e;
-	PRINTreadably = ra;
-	PRINTvs_limit = vl;
-	PRINTvs_top = vt;
-
-	write_ch_fun = wf;
-
-	if (eflag) {
-		nlj_active = FALSE;
-		unwind(nlj_fr, nlj_tag);
-	}
+  old_bds_top = bds_top;
+  bds_bind(sLAprint_escapeA, PRINTescape?Ct:Cnil);
+  bds_bind(sLAprint_readablyA, PRINTreadably?Ct:Cnil);
+  bds_bind(sLAprint_radixA, PRINTradix?Ct:Cnil);
+  bds_bind(sLAprint_baseA, make_fixnum(PRINTbase));
+  bds_bind(sLAprint_circleA, PRINTcircle?Ct:Cnil);
+  bds_bind(sLAprint_prettyA, PRINTpretty?Ct:Cnil);
+  bds_bind(sLAprint_levelA, PRINTlevel<0?Cnil:make_fixnum(PRINTlevel));
+  bds_bind(sLAprint_lengthA, PRINTlength<0?Cnil:make_fixnum(PRINTlength));
+  bds_bind(sLAprint_gensymA, PRINTgensym?Ct:Cnil);
+  bds_bind(sLAprint_arrayA, PRINTarray?Ct:Cnil);
+  bds_bind(sLAprint_caseA, PRINTcase);
+  
+  frs_push(FRS_PROTECT, Cnil);
+  if (nlj_active) {
+    eflag = TRUE;
+    goto L;
+  }
+  
+  if (nargs == 3)
+    ifuncall3(func, x, PRINTstream, vs_head);
+  else
+    if (nargs == 2) /* pprint is other way round */
+      ifuncall2(func, PRINTstream, x);
+  
+  vs_popp;
+  eflag = FALSE;
+  
+ L:
+  frs_pop();
+  bds_unwind(old_bds_top);
+  
+  /*
+    for (i = 0;  i < Q_SIZE;  i++)
+    queue[i] = oq[i];
+  */
+  if (PRINTpretty)
+    for (i = 0;  i <= oisp;  i++)
+      indent_stack[i] = ois[i];
+  
+  iisp = oiisp;
+  isp = oisp;
+  qc = oqc;
+  qt = oqt;
+  qh = oqh;
+  
+  PRINTcase = vs_pop;
+  PRINTstream = vs_pop;
+  PRINTarray = a;
+  PRINTgensym = g;
+  PRINTlength = ln;
+  PRINTlevel = lv;
+  PRINTpretty = p;
+  PRINTcircle = c;
+  PRINTbase = b;
+  PRINTradix = r;
+  PRINTescape = e;
+  PRINTreadably = ra;
+  PRINTvs_limit = vl;
+  PRINTvs_top = vt;
+  
+  write_ch_fun = wf;
+  
+  if (eflag) {
+    nlj_active = FALSE;
+    unwind(nlj_fr, nlj_tag);
+  }
 }
 
 static void

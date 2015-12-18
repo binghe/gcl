@@ -16,7 +16,7 @@ memory_save(char *original_file, char *save_file)
 extern void _cleanup();
 #endif
 
-LFD(Lsave)(void) {
+LFD(siLsave)(void) {
 
   extern char *kcl_self;
 
@@ -24,15 +24,8 @@ LFD(Lsave)(void) {
   check_type_or_pathname_string_symbol_stream(&vs_base[0]);
   coerce_to_filename(vs_base[0], FN1);
 
-#ifdef CLEANUP_CODE
-  CLEANUP_CODE
-#elif defined(USE_CLEANUP)
-    _cleanup();
-#endif
+  gcl_cleanup(1);
   
-  raw_image=FALSE;
-  cs_org=0;
-
 #ifdef MEMORY_SAVE
   MEMORY_SAVE(kcl_self,FN1);
 #else	  

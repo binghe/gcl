@@ -1,3 +1,4 @@
+#include <string.h>
 
 #include "windows.h"
 
@@ -150,6 +151,16 @@ find_init_address(struct syment *sym,struct syment *sye,ul *ptr,char *st1) {
 
 }    
 
+static ul
+get_sym_value(const char *name) {
+
+  struct node *answ;
+
+  return (answ=find_sym_ptable(name)) ? answ->address :
+    ({massert(!emsg("Unrelocated non-local symbol: %s\n",name));0;});
+
+}
+
 static void
 relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char *st1) {
 
@@ -163,11 +174,9 @@ relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char 
     else if (!sym->n_scnum) {
 
       if (sym->n.n.n_zeroes)
-	STOP(sym->n.n_name,answ=find_sym_ptable(sym->n.n_name));
+	STOP(sym->n.n_name,sym->n_value=get_sym_value(sym->n.n_name));
       else
-	answ=find_sym_ptable(st1+sym->n.n.n_offset);
-
-      if (answ) sym->n_value=answ->address;
+	sym->n_value=get_sym_value(st1+sym->n.n.n_offset);
 
     }
 
@@ -193,11 +202,9 @@ load_memory(struct scnhdr *sec1,struct scnhdr *sece,void *st) {
   memory = alloc_object(t_cfdata);
   memory->cfd.cfd_size=sz;
   memory->cfd.cfd_self=0;
-  memory->cfd.cfd_start=0;
+  memory->cfd.cfd_start=0;/*gc protect*/
   memory->cfd.cfd_dlist=Cnil;
-  prefer_low_mem_contblock=TRUE;
-  memory->cfd.cfd_start=alloc_contblock(sz);
-  prefer_low_mem_contblock=FALSE;
+  memory->cfd.cfd_start=alloc_code_space(sz);
 
   for (sec=sec1;sec<sece;sec++) {
     sec->s_paddr+=(ul)memory->cfd.cfd_start;

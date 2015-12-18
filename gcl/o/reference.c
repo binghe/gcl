@@ -194,7 +194,7 @@ FFN(Ffunction)(object form)
 		vs_base[0] = MMcons(lex_env[2], vs_base[0]);
 		vs_base[0] = MMcons(lex_env[1], vs_base[0]);
 		vs_base[0] = MMcons(lex_env[0], vs_base[0]);
-		vs_base[0] = MMcons(sLlambda_closure, vs_base[0]);
+		vs_base[0] = MMcons(sSlambda_closure, vs_base[0]);
 		{
 		  vs_base[0]=fSfset_in(Cnil,vs_base[0]);
 		}

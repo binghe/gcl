@@ -21,9 +21,6 @@
 #define PTR_ALIGN SIZEOF_LONG
 #endif
 
-#define ROUND_UP_PTR(n)	(((long)(n) + (PTR_ALIGN-1)) & ~(PTR_ALIGN-1))
-#define ROUND_DOWN_PTR(n) (((long)(n)  & ~(PTR_ALIGN-1)))
-
 /* minimum size required for contiguous pointers */
 #if PTR_ALIGN < SIZEOF_CONTBLOCK
 #define CPTR_SIZE SIZEOF_CONTBLOCK
@@ -31,9 +28,10 @@
 #define CPTR_SIZE PTR_ALIGN
 #endif
 
-#define ROUND_UP_PTR_CONT(n)	(((long)(n) + (CPTR_SIZE-1)) & ~(CPTR_SIZE-1))
-#define ROUND_DOWN_PTR_CONT(n) (((long)(n)  & ~(CPTR_SIZE-1)))
-
+#define FLR(x,r) (((x))&~(r-1))
+#define CEI(x,r) FLR((x)+(r-1),r)
+#define PFLR(x,r) ((void *)FLR((ufixnum)x,r))
+#define PCEI(x,r) ((void *)CEI((ufixnum)x,r))
 
 #ifdef SGC
 
@@ -47,33 +45,25 @@
 
 #define SGC_WRITABLE  (SGC_PERM_WRITABLE | SGC_PAGE_FLAG)
 
-#define WRITABLE_PAGE_P(p)  IS_WRITABLE(p)
-#define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
-
-#define  IF_WRITABLE(x,if_code) ({if (IS_WRITABLE(page(x))) {if_code;}})/*FIXME maxpage*/
-
-#define sgc_mark_object(x) IF_WRITABLE(x,if(!is_marked(x)) sgc_mark_object1(x))
-
 /* When not 0, the free lists in the type manager are freelists
    on SGC_PAGE's, for those types supporting sgc.
    Marking and sweeping is done specially */
    
 int sgc_on;
 
+#define SGC_WHOLE_PAGE /* disallow old data on sgc pages*/
 
+#ifndef SGC_WHOLE_PAGE
 /* for the S field of the FIRSTWORD */
 enum sgc_type { SGC_NORMAL,   /* not allocated since the last sgc */
                 SGC_RECENT    /* allocated since last sgc */
 		};
-
+#define SGC_OR_M(x)  (!TYPEWORD_TYPE_P(pageinfo(x)->type)  ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s)
+#endif
 
 #define TM_BASE_TYPE_P(i) (tm_table[i].tm_type == i)
 
-/* check if a relblock address is new relblock */
-#define SGC_RELBLOCK_P(x)  ((char *)(x) >= rb_start)
-
 /* is this an sgc cell? encompasses all free cells.  Used where cell cannot yet be marked */
-#define SGC_OR_M(x)  (pageinfo(x)->type==t_cons  ? pageinfo(x)->sgc_flags&SGC_PAGE_FLAG : ((object)x)->d.s)
 
 #ifndef SIGPROTV
 #define SIGPROTV SIGSEGV
@@ -95,10 +85,9 @@ extern int sgc_enabled;
 
 extern long resv_pages;
 extern int reserve_pages_for_signal_handler;
-/* #define CONT_MARK_PAGE (((page(heap_end)-first_data_page)*(PAGESIZE/(CPTR_SIZE*CHAR_SIZE))+PAGESIZE-1)/PAGESIZE) */
-/* #define	available_pages	((fixnum)(real_maxpage-page(heap_end)-2*nrbpage-CONT_MARK_PAGE-resv_pages)) */
 
-extern struct pageinfo *cell_list_head,*cell_list_tail,*contblock_list_head,*contblock_list_tail;
+extern struct pageinfo *cell_list_head,*cell_list_tail;
+extern object contblock_array;
 
 #define PAGE_MAGIC 0x2e
 
@@ -107,28 +96,25 @@ extern fixnum writable_pages;
 
 #define CLEAR_WRITABLE(i) set_writable(i,0)
 #define SET_WRITABLE(i) set_writable(i,1)
-#define IS_WRITABLE(i) is_writable(i)
+#define WRITABLE_PAGE_P(i) is_writable(i)
+#define CACHED_WRITABLE_PAGE_P(i) is_writable_cached(i)
+#define ON_WRITABLE_PAGE(x) WRITABLE_PAGE_P(page(x))
+#define ON_WRITABLE_PAGE_CACHED(x) CACHED_WRITABLE_PAGE_P(page(x))
 
 
 EXTER long first_data_page,real_maxpage,phys_pages,available_pages;
-EXTER void *data_start;
+EXTER void *data_start,*initial_sbrk;
 
-#if !defined(IN_MAIN) && defined(SGC)
+#if defined(SGC)
 #include "writable.h"
-#endif
-
-#ifdef SGC
-#define REAL_RB_START (sgc_enabled ? old_rb_start : rb_start)
-#else
-#define REAL_RB_START rb_start
 #endif
 
 #define CB_BITS     CPTR_SIZE*CHAR_SIZE
 #define ceil(a_,b_) (((a_)+(b_)-1)/(b_))
 #define npage(m_)   ceil(m_,PAGESIZE)
-#define cpage(m_)   ({ufixnum _m=(m_);ceil(sizeof(struct pageinfo)+_m+2*ceil(_m,(CB_BITS-2)),PAGESIZE);})
+#define cpage(m_)   CEI(({ufixnum _m=(m_);ceil(sizeof(struct pageinfo)+_m+2*ceil(_m,(CB_BITS-2)),PAGESIZE);}),256)
 #define mbytes(p_)  ceil((p_)*PAGESIZE-sizeof(struct pageinfo),CB_BITS)
-#define tpage(tm_,m_) (tm_->tm_type==t_relocatable ? npage(m_-(rb_limit-rb_pointer)) : (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_)))
+#define tpage(tm_,m_) (tm_->tm_type==t_relocatable ? npage(m_-(rb_limit-rb_pointer)+1) : (tm_->tm_type==t_contiguous ? cpage(m_) : npage(m_)))
 
 #define CB_DATA_SIZE(z_)   ({fixnum _z=(z_);_z*PAGESIZE-2*mbytes(_z)-sizeof(struct pageinfo);})
 #define CB_MARK_START(pi_) ((void *)(pi_)+sizeof(struct pageinfo))

@@ -16,7 +16,7 @@ DEFUN("SET-FUNCTION-ENVIRONMENT",object,fSset_function_environment,SI,2,2,NONE,O
 
     {
       BEGIN_NO_INTERRUPT; 
-      p=(object *)alloc_relblock(n*sizeof(object));
+      p=(object *)alloc_contblock(n*sizeof(object));/*(object *)alloc_relblock(n*sizeof(object)); Cannot be promoted, FIXME?*/
       END_NO_INTERRUPT;
     }
 
@@ -61,11 +61,6 @@ make_fun(void *addr,object data,object call,object env,ufixnum argd,ufixnum size
 }
 
 #define GET_DATA(d_,a_) ((d_)!=Cnil ? (d_) : ((a_) && (a_)->s.s_dbind!=OBJNULL && type_of((a_)->s.s_dbind)==t_cfdata ? (a_)->s.s_dbind : 0))
-
-DEFUN("ANONYMOUS-CLOSURE",object,fSanonymous_closure,SI,0,0,NONE,OO,OO,OO,OO,(),"") {
-  object f=fcall.fun;
-  RETURN1(f->fun.fun_env[0]->c.c_car);
-}
 
 DEFUN("FUNCTION-ENVIRONMENT",object,fSfunction_environment,SI,1,1,NONE,OO,OO,OO,OO,(object f),"") {
 
@@ -115,12 +110,6 @@ fSinit_function(object x,object y,object z,object w,fixnum a,fixnum b,fixnum c) 
   return FFN(fSinit_function)(x,y,z,w,a,b,c);
 }
 #endif
-
-DEFUN("MAKE-ANONYMOUS-CLOSURE",object,fSmake_anonymous_closure,SI,0,0,NONE,OO,OO,OO,OO,(),"") {
-  
-  RETURN1(FFN(fSinit_function)(list(5,Cnil,Cnil,Cnil,Cnil,Cnil),(void *)FFN(fSanonymous_closure),Cnil,MMcons(MMcons(Cnil,Cnil),Cnil),-1,0,0));
-
-}
 
 DEFUN("SET-KEY-STRUCT",object,fSset_key_struct,SI,1,1,NONE,OO,OO,OO,OO,(object key_struct_ind),
       "Called inside the loader.  The keystruct is set up in the file with \

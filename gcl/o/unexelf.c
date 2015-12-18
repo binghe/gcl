@@ -1,11 +1,4 @@
-/* Copyright (C) 1985, 1986, 1987, 1988, 1990, 1992, 1999, 2000, 2001,
-                 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
-
-This file is part of GNU Emacs.
-
-GNU Emacs is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
+/* Foundation; either version 2, or (at your option)
 any later version.
 
 GNU Emacs is distributed in the hope that it will be useful,
@@ -15,8 +8,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with GNU Emacs; see the file COPYING.  If not, write to
-the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-Boston, MA 02110-1301, USA.
+the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.
 
 In other words, you are welcome to use, share and improve this program.
 You are forbidden to forbid anyone else to use, share and improve
@@ -89,224 +82,224 @@ raid:/nfs/raid/src/dist-18.56/src> dump -h temacs
 temacs:
 
            **** SECTION HEADER TABLE ****
- [No]    Type    Flags   Addr         Offset       Size          Name
-         Link    Info    Adralgn      Entsize
+[No]    Type    Flags   Addr         Offset       Size          Name
+        Link    Info    Adralgn      Entsize
 
- [1]     1       2       0x80480d4    0xd4         0x13          .interp
-         0       0       0x1          0
+[1]     1       2       0x80480d4    0xd4         0x13          .interp
+        0       0       0x1          0
 
- [2]     5       2       0x80480e8    0xe8         0x388         .hash
-         3       0       0x4          0x4
+[2]     5       2       0x80480e8    0xe8         0x388         .hash
+        3       0       0x4          0x4
 
- [3]     11      2       0x8048470    0x470        0x7f0         .dynsym
-         4       1       0x4          0x10
+[3]     11      2       0x8048470    0x470        0x7f0         .dynsym
+        4       1       0x4          0x10
 
- [4]     3       2       0x8048c60    0xc60        0x3ad         .dynstr
-         0       0       0x1          0
+[4]     3       2       0x8048c60    0xc60        0x3ad         .dynstr
+        0       0       0x1          0
 
- [5]     9       2       0x8049010    0x1010       0x338         .rel.plt
-         3       7       0x4          0x8
+[5]     9       2       0x8049010    0x1010       0x338         .rel.plt
+        3       7       0x4          0x8
 
- [6]     1       6       0x8049348    0x1348       0x3           .init
-         0       0       0x4          0
+[6]     1       6       0x8049348    0x1348       0x3           .init
+        0       0       0x4          0
 
- [7]     1       6       0x804934c    0x134c       0x680         .plt
-         0       0       0x4          0x4
+[7]     1       6       0x804934c    0x134c       0x680         .plt
+        0       0       0x4          0x4
 
- [8]     1       6       0x80499cc    0x19cc       0x3c56f       .text
-         0       0       0x4          0
+[8]     1       6       0x80499cc    0x19cc       0x3c56f       .text
+        0       0       0x4          0
 
- [9]     1       6       0x8085f3c    0x3df3c      0x3           .fini
-         0       0       0x4          0
+[9]     1       6       0x8085f3c    0x3df3c      0x3           .fini
+        0       0       0x4          0
 
- [10]    1       2       0x8085f40    0x3df40      0x69c         .rodata
-         0       0       0x4          0
+[10]    1       2       0x8085f40    0x3df40      0x69c         .rodata
+        0       0       0x4          0
 
- [11]    1       2       0x80865dc    0x3e5dc      0xd51         .rodata1
-         0       0       0x4          0
+[11]    1       2       0x80865dc    0x3e5dc      0xd51         .rodata1
+        0       0       0x4          0
 
- [12]    1       3       0x8088330    0x3f330      0x20afc       .data
-         0       0       0x4          0
+[12]    1       3       0x8088330    0x3f330      0x20afc       .data
+        0       0       0x4          0
 
- [13]    1       3       0x80a8e2c    0x5fe2c      0x89d         .data1
-         0       0       0x4          0
+[13]    1       3       0x80a8e2c    0x5fe2c      0x89d         .data1
+        0       0       0x4          0
 
- [14]    1       3       0x80a96cc    0x606cc      0x1a8         .got
-         0       0       0x4          0x4
+[14]    1       3       0x80a96cc    0x606cc      0x1a8         .got
+        0       0       0x4          0x4
 
- [15]    6       3       0x80a9874    0x60874      0x80          .dynamic
-         4       0       0x4          0x8
+[15]    6       3       0x80a9874    0x60874      0x80          .dynamic
+        4       0       0x4          0x8
 
- [16]    8       3       0x80a98f4    0x608f4      0x449c        .bss
-         0       0       0x4          0
+[16]    8       3       0x80a98f4    0x608f4      0x449c        .bss
+        0       0       0x4          0
 
- [17]    2       0       0            0x608f4      0x9b90        .symtab
-         18      371     0x4          0x10
+[17]    2       0       0            0x608f4      0x9b90        .symtab
+        18      371     0x4          0x10
 
- [18]    3       0       0            0x6a484      0x8526        .strtab
-         0       0       0x1          0
+[18]    3       0       0            0x6a484      0x8526        .strtab
+        0       0       0x1          0
 
- [19]    3       0       0            0x729aa      0x93          .shstrtab
-         0       0       0x1          0
+[19]    3       0       0            0x729aa      0x93          .shstrtab
+        0       0       0x1          0
 
- [20]    1       0       0            0x72a3d      0x68b7        .comment
-         0       0       0x1          0
+[20]    1       0       0            0x72a3d      0x68b7        .comment
+        0       0       0x1          0
 
- raid:/nfs/raid/src/dist-18.56/src> dump -h xemacs
+raid:/nfs/raid/src/dist-18.56/src> dump -h xemacs
 
- xemacs:
+xemacs:
 
-            **** SECTION HEADER TABLE ****
- [No]    Type    Flags   Addr         Offset       Size          Name
-         Link    Info    Adralgn      Entsize
+           **** SECTION HEADER TABLE ****
+[No]    Type    Flags   Addr         Offset       Size          Name
+        Link    Info    Adralgn      Entsize
 
- [1]     1       2       0x80480d4    0xd4         0x13          .interp
-         0       0       0x1          0
+[1]     1       2       0x80480d4    0xd4         0x13          .interp
+        0       0       0x1          0
 
- [2]     5       2       0x80480e8    0xe8         0x388         .hash
-         3       0       0x4          0x4
+[2]     5       2       0x80480e8    0xe8         0x388         .hash
+        3       0       0x4          0x4
 
- [3]     11      2       0x8048470    0x470        0x7f0         .dynsym
-         4       1       0x4          0x10
+[3]     11      2       0x8048470    0x470        0x7f0         .dynsym
+        4       1       0x4          0x10
 
- [4]     3       2       0x8048c60    0xc60        0x3ad         .dynstr
-         0       0       0x1          0
+[4]     3       2       0x8048c60    0xc60        0x3ad         .dynstr
+        0       0       0x1          0
 
- [5]     9       2       0x8049010    0x1010       0x338         .rel.plt
-         3       7       0x4          0x8
+[5]     9       2       0x8049010    0x1010       0x338         .rel.plt
+        3       7       0x4          0x8
 
- [6]     1       6       0x8049348    0x1348       0x3           .init
-         0       0       0x4          0
+[6]     1       6       0x8049348    0x1348       0x3           .init
+        0       0       0x4          0
 
- [7]     1       6       0x804934c    0x134c       0x680         .plt
-         0       0       0x4          0x4
+[7]     1       6       0x804934c    0x134c       0x680         .plt
+        0       0       0x4          0x4
 
- [8]     1       6       0x80499cc    0x19cc       0x3c56f       .text
-         0       0       0x4          0
+[8]     1       6       0x80499cc    0x19cc       0x3c56f       .text
+        0       0       0x4          0
 
- [9]     1       6       0x8085f3c    0x3df3c      0x3           .fini
-         0       0       0x4          0
+[9]     1       6       0x8085f3c    0x3df3c      0x3           .fini
+        0       0       0x4          0
 
- [10]    1       2       0x8085f40    0x3df40      0x69c         .rodata
-         0       0       0x4          0
+[10]    1       2       0x8085f40    0x3df40      0x69c         .rodata
+        0       0       0x4          0
 
- [11]    1       2       0x80865dc    0x3e5dc      0xd51         .rodata1
-         0       0       0x4          0
+[11]    1       2       0x80865dc    0x3e5dc      0xd51         .rodata1
+        0       0       0x4          0
 
- [12]    1       3       0x8088330    0x3f330      0x20afc       .data
-         0       0       0x4          0
+[12]    1       3       0x8088330    0x3f330      0x20afc       .data
+        0       0       0x4          0
 
- [13]    1       3       0x80a8e2c    0x5fe2c      0x89d         .data1
-         0       0       0x4          0
+[13]    1       3       0x80a8e2c    0x5fe2c      0x89d         .data1
+        0       0       0x4          0
 
- [14]    1       3       0x80a96cc    0x606cc      0x1a8         .got
-         0       0       0x4          0x4
+[14]    1       3       0x80a96cc    0x606cc      0x1a8         .got
+        0       0       0x4          0x4
 
- [15]    6       3       0x80a9874    0x60874      0x80          .dynamic
-         4       0       0x4          0x8
+[15]    6       3       0x80a9874    0x60874      0x80          .dynamic
+        4       0       0x4          0x8
 
- [16]    8       3       0x80c6800    0x7d800      0             .bss
-         0       0       0x4          0
+[16]    8       3       0x80c6800    0x7d800      0             .bss
+        0       0       0x4          0
 
- [17]    2       0       0            0x7d800      0x9b90        .symtab
-         18      371     0x4          0x10
+[17]    2       0       0            0x7d800      0x9b90        .symtab
+        18      371     0x4          0x10
 
- [18]    3       0       0            0x87390      0x8526        .strtab
-         0       0       0x1          0
+[18]    3       0       0            0x87390      0x8526        .strtab
+        0       0       0x1          0
 
- [19]    3       0       0            0x8f8b6      0x93          .shstrtab
-         0       0       0x1          0
+[19]    3       0       0            0x8f8b6      0x93          .shstrtab
+        0       0       0x1          0
 
- [20]    1       0       0            0x8f949      0x68b7        .comment
-         0       0       0x1          0
+[20]    1       0       0            0x8f949      0x68b7        .comment
+        0       0       0x1          0
 
- [21]    1       3       0x80a98f4    0x608f4      0x1cf0c       .data
-         0       0       0x4          0
+[21]    1       3       0x80a98f4    0x608f4      0x1cf0c       .data
+        0       0       0x4          0
 
-  * This is an example of how the file header is changed.  "Shoff" is
-  * the section header offset within the file.  Since that table is
-  * after the new .data section, it is moved.  "Shnum" is the number of
-  * sections, which we increment.
-  *
-  * "Phoff" is the file offset to the program header.  "Phentsize" and
-  * "Shentsz" are the program and section header entries sizes respectively.
-  * These can be larger than the apparent struct sizes.
+ * This is an example of how the file header is changed.  "Shoff" is
+ * the section header offset within the file.  Since that table is
+ * after the new .data section, it is moved.  "Shnum" is the number of
+ * sections, which we increment.
+ *
+ * "Phoff" is the file offset to the program header.  "Phentsize" and
+ * "Shentsz" are the program and section header entries sizes respectively.
+ * These can be larger than the apparent struct sizes.
 
- raid:/nfs/raid/src/dist-18.56/src> dump -f temacs
+raid:/nfs/raid/src/dist-18.56/src> dump -f temacs
 
- temacs:
+temacs:
 
-                     **** ELF HEADER ****
- Class        Data       Type         Machine     Version
- Entry        Phoff      Shoff        Flags       Ehsize
- Phentsize    Phnum      Shentsz      Shnum       Shstrndx
+                    **** ELF HEADER ****
+Class        Data       Type         Machine     Version
+Entry        Phoff      Shoff        Flags       Ehsize
+Phentsize    Phnum      Shentsz      Shnum       Shstrndx
 
- 1            1          2            3           1
- 0x80499cc    0x34       0x792f4      0           0x34
- 0x20         5          0x28         21          19
+1            1          2            3           1
+0x80499cc    0x34       0x792f4      0           0x34
+0x20         5          0x28         21          19
 
- raid:/nfs/raid/src/dist-18.56/src> dump -f xemacs
+raid:/nfs/raid/src/dist-18.56/src> dump -f xemacs
 
- xemacs:
+xemacs:
 
-                     **** ELF HEADER ****
- Class        Data       Type         Machine     Version
- Entry        Phoff      Shoff        Flags       Ehsize
- Phentsize    Phnum      Shentsz      Shnum       Shstrndx
+                    **** ELF HEADER ****
+Class        Data       Type         Machine     Version
+Entry        Phoff      Shoff        Flags       Ehsize
+Phentsize    Phnum      Shentsz      Shnum       Shstrndx
 
- 1            1          2            3           1
- 0x80499cc    0x34       0x96200      0           0x34
- 0x20         5          0x28         22          19
+1            1          2            3           1
+0x80499cc    0x34       0x96200      0           0x34
+0x20         5          0x28         22          19
 
-  * These are the program headers.  "Offset" is the file offset to the
-  * segment.  "Vaddr" is the memory load address.  "Filesz" is the
-  * segment size as it appears in the file, and "Memsz" is the size in
-  * memory.  Below, the third segment is the code and the fourth is the
-  * data: the difference between Filesz and Memsz is .bss
+ * These are the program headers.  "Offset" is the file offset to the
+ * segment.  "Vaddr" is the memory load address.  "Filesz" is the
+ * segment size as it appears in the file, and "Memsz" is the size in
+ * memory.  Below, the third segment is the code and the fourth is the
+ * data: the difference between Filesz and Memsz is .bss
 
- raid:/nfs/raid/src/dist-18.56/src> dump -o temacs
+raid:/nfs/raid/src/dist-18.56/src> dump -o temacs
 
- temacs:
-  ***** PROGRAM EXECUTION HEADER *****
- Type        Offset      Vaddr       Paddr
- Filesz      Memsz       Flags       Align
+temacs:
+ ***** PROGRAM EXECUTION HEADER *****
+Type        Offset      Vaddr       Paddr
+Filesz      Memsz       Flags       Align
 
- 6           0x34        0x8048034   0
- 0xa0        0xa0        5           0
+6           0x34        0x8048034   0
+0xa0        0xa0        5           0
 
- 3           0xd4        0           0
- 0x13        0           4           0
+3           0xd4        0           0
+0x13        0           4           0
 
- 1           0x34        0x8048034   0
- 0x3f2f9     0x3f2f9     5           0x1000
+1           0x34        0x8048034   0
+0x3f2f9     0x3f2f9     5           0x1000
 
- 1           0x3f330     0x8088330   0
- 0x215c4     0x25a60     7           0x1000
+1           0x3f330     0x8088330   0
+0x215c4     0x25a60     7           0x1000
 
- 2           0x60874     0x80a9874   0
- 0x80        0           7           0
+2           0x60874     0x80a9874   0
+0x80        0           7           0
 
- raid:/nfs/raid/src/dist-18.56/src> dump -o xemacs
+raid:/nfs/raid/src/dist-18.56/src> dump -o xemacs
 
- xemacs:
-  ***** PROGRAM EXECUTION HEADER *****
- Type        Offset      Vaddr       Paddr
- Filesz      Memsz       Flags       Align
+xemacs:
+ ***** PROGRAM EXECUTION HEADER *****
+Type        Offset      Vaddr       Paddr
+Filesz      Memsz       Flags       Align
 
- 6           0x34        0x8048034   0
- 0xa0        0xa0        5           0
+6           0x34        0x8048034   0
+0xa0        0xa0        5           0
 
- 3           0xd4        0           0
- 0x13        0           4           0
+3           0xd4        0           0
+0x13        0           4           0
 
- 1           0x34        0x8048034   0
- 0x3f2f9     0x3f2f9     5           0x1000
+1           0x34        0x8048034   0
+0x3f2f9     0x3f2f9     5           0x1000
 
- 1           0x3f330     0x8088330   0
- 0x3e4d0     0x3e4d0     7           0x1000
+1           0x3f330     0x8088330   0
+0x3e4d0     0x3e4d0     7           0x1000
 
- 2           0x60874     0x80a9874   0
- 0x80        0           7           0
+2           0x60874     0x80a9874   0
+0x80        0           7           0
 
 
  */
@@ -336,71 +329,71 @@ temacs:
  * The above example now should look like:
 
            **** SECTION HEADER TABLE ****
- [No]    Type    Flags   Addr         Offset       Size          Name
-         Link    Info    Adralgn      Entsize
+[No]    Type    Flags   Addr         Offset       Size          Name
+        Link    Info    Adralgn      Entsize
 
- [1]     1       2       0x80480d4    0xd4         0x13          .interp
-         0       0       0x1          0
+[1]     1       2       0x80480d4    0xd4         0x13          .interp
+        0       0       0x1          0
 
- [2]     5       2       0x80480e8    0xe8         0x388         .hash
-         3       0       0x4          0x4
+[2]     5       2       0x80480e8    0xe8         0x388         .hash
+        3       0       0x4          0x4
 
- [3]     11      2       0x8048470    0x470        0x7f0         .dynsym
-         4       1       0x4          0x10
+[3]     11      2       0x8048470    0x470        0x7f0         .dynsym
+        4       1       0x4          0x10
 
- [4]     3       2       0x8048c60    0xc60        0x3ad         .dynstr
-         0       0       0x1          0
+[4]     3       2       0x8048c60    0xc60        0x3ad         .dynstr
+        0       0       0x1          0
 
- [5]     9       2       0x8049010    0x1010       0x338         .rel.plt
-         3       7       0x4          0x8
+[5]     9       2       0x8049010    0x1010       0x338         .rel.plt
+        3       7       0x4          0x8
 
- [6]     1       6       0x8049348    0x1348       0x3           .init
-         0       0       0x4          0
+[6]     1       6       0x8049348    0x1348       0x3           .init
+        0       0       0x4          0
 
- [7]     1       6       0x804934c    0x134c       0x680         .plt
-         0       0       0x4          0x4
+[7]     1       6       0x804934c    0x134c       0x680         .plt
+        0       0       0x4          0x4
 
- [8]     1       6       0x80499cc    0x19cc       0x3c56f       .text
-         0       0       0x4          0
+[8]     1       6       0x80499cc    0x19cc       0x3c56f       .text
+        0       0       0x4          0
 
- [9]     1       6       0x8085f3c    0x3df3c      0x3           .fini
-         0       0       0x4          0
+[9]     1       6       0x8085f3c    0x3df3c      0x3           .fini
+        0       0       0x4          0
 
- [10]    1       2       0x8085f40    0x3df40      0x69c         .rodata
-         0       0       0x4          0
+[10]    1       2       0x8085f40    0x3df40      0x69c         .rodata
+        0       0       0x4          0
 
- [11]    1       2       0x80865dc    0x3e5dc      0xd51         .rodata1
-         0       0       0x4          0
+[11]    1       2       0x80865dc    0x3e5dc      0xd51         .rodata1
+        0       0       0x4          0
 
- [12]    1       3       0x8088330    0x3f330      0x20afc       .data
-         0       0       0x4          0
+[12]    1       3       0x8088330    0x3f330      0x20afc       .data
+        0       0       0x4          0
 
- [13]    1       3       0x80a8e2c    0x5fe2c      0x89d         .data1
-         0       0       0x4          0
+[13]    1       3       0x80a8e2c    0x5fe2c      0x89d         .data1
+        0       0       0x4          0
 
- [14]    1       3       0x80a96cc    0x606cc      0x1a8         .got
-         0       0       0x4          0x4
+[14]    1       3       0x80a96cc    0x606cc      0x1a8         .got
+        0       0       0x4          0x4
 
- [15]    6       3       0x80a9874    0x60874      0x80          .dynamic
-         4       0       0x4          0x8
+[15]    6       3       0x80a9874    0x60874      0x80          .dynamic
+        4       0       0x4          0x8
 
- [16]    1       3       0x80a98f4    0x608f4      0x1cf0c       .data
-         0       0       0x4          0
+[16]    1       3       0x80a98f4    0x608f4      0x1cf0c       .data
+        0       0       0x4          0
 
- [17]    8       3       0x80c6800    0x7d800      0             .bss
-         0       0       0x4          0
+[17]    8       3       0x80c6800    0x7d800      0             .bss
+        0       0       0x4          0
 
- [18]    2       0       0            0x7d800      0x9b90        .symtab
-         19      371     0x4          0x10
+[18]    2       0       0            0x7d800      0x9b90        .symtab
+        19      371     0x4          0x10
 
- [19]    3       0       0            0x87390      0x8526        .strtab
-         0       0       0x1          0
+[19]    3       0       0            0x87390      0x8526        .strtab
+        0       0       0x1          0
 
- [20]    3       0       0            0x8f8b6      0x93          .shstrtab
-         0       0       0x1          0
+[20]    3       0       0            0x8f8b6      0x93          .shstrtab
+        0       0       0x1          0
 
- [21]    1       0       0            0x8f949      0x68b7        .comment
-         0       0       0x1          0
+[21]    1       0       0            0x8f949      0x68b7        .comment
+        0       0       0x1          0
 
  */
 
@@ -408,16 +401,18 @@ temacs:
    Instead we read the whole file, modify it, and write it out.  */
 
 #ifndef emacs
-#define fatal(a, b...) fprintf (stderr, a, ##b), exit (1)
+#define fatal(a, b...) emsg(a,##b),do_gcl_abort()
 #else
 #include "config.h"
-extern void fatal (const char *msgid, ...);
+extern void fatal (char *, ...);
 #endif
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <memory.h>
+#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -432,9 +427,6 @@ extern void fatal (const char *msgid, ...);
 #if __sgi
 #include <syms.h> /* for HDRR declaration */
 #endif /* __sgi */
-#ifdef BROKEN_NOCOMBRELOC
-#include <assert.h>
-#endif
 
 #ifndef MAP_ANON
 #ifdef MAP_ANONYMOUS
@@ -478,7 +470,7 @@ typedef struct {
 	long cbFdOffset;
 	long cbRfdOffset;
 	long cbExtOffset;
-} HDRR, *pHDRR;
+} HDRR, *pHDRR; 
 #define cbHDRR sizeof(HDRR)
 #define hdrNil ((pHDRR)0)
 #endif
@@ -487,7 +479,7 @@ typedef struct {
 /*
  * NetBSD does not have normal-looking user-land ELF support.
  */
-# if defined __alpha__ || defined __sparc_v9__
+# ifdef __alpha__
 #  define ELFSIZE	64
 # else
 #  define ELFSIZE	32
@@ -496,9 +488,6 @@ typedef struct {
 
 # ifndef PT_LOAD
 #  define PT_LOAD	Elf_pt_load
-#  if 0						/* was in pkgsrc patches for 20.7 */
-#   define SHT_PROGBITS Elf_sht_progbits
-#  endif
 #  define SHT_SYMTAB	Elf_sht_symtab
 #  define SHT_DYNSYM	Elf_sht_dynsym
 #  define SHT_NULL	Elf_sht_null
@@ -509,18 +498,13 @@ typedef struct {
 #  define SHN_UNDEF	Elf_eshn_undefined
 #  define SHN_ABS	Elf_eshn_absolute
 #  define SHN_COMMON	Elf_eshn_common
-# endif /* !PT_LOAD */
+# endif
 
 # ifdef __alpha__
 #  include <sys/exec_ecoff.h>
 #  define HDRR		struct ecoff_symhdr
 #  define pHDRR		HDRR *
-# endif /* __alpha__ */
-
-#ifdef __mips__			/* was in pkgsrc patches for 20.7 */
-# define SHT_MIPS_DEBUG	DT_MIPS_FLAGS
-# define HDRR		struct Elf_Shdr
-#endif /* __mips__ */
+# endif
 #endif /* __NetBSD__ */
 
 #ifdef __OpenBSD__
@@ -620,7 +604,7 @@ find_section (char *name, char *section_names, char *file_name, ElfW(Ehdr) *old_
   for (idx = 1; idx < old_file_h->e_shnum; idx++)
     {
 #ifdef DEBUG
-      fprintf (stderr, "Looking for %s - found %s\n", name,
+      emsg("Looking for %s - found %s\n", name,
 	       section_names + OLD_SECTION_H (idx).sh_name);
 #endif
       if (!strcmp (section_names + OLD_SECTION_H (idx).sh_name,
@@ -650,9 +634,9 @@ find_section (char *name, char *section_names, char *file_name, ElfW(Ehdr) *old_
 static void
 unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bss_start, unsigned int entry_address)
 {
-  int new_file, old_file, new_file_size;
+  int new_file, old_file;
 
-  /* Pointers to the base of the image of the two files.  */
+  /* Pointers to the base of the image of the two files. */
   caddr_t old_base, new_base;
 
 #if MAP_ANON == 0
@@ -667,25 +651,17 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   ElfW(Phdr) *old_program_h, *new_program_h;
   ElfW(Shdr) *old_section_h, *new_section_h;
 
-  /* Point to the section name table in the old file.  */
+  /* Point to the section name table in the old file */
   char *old_section_names;
 
-  ElfW(Addr) old_bss_addr, new_bss_addr;
-  ElfW(Word) old_bss_size, new_data2_size;
-  ElfW(Off)  new_data2_offset;
-  ElfW(Addr) new_data2_addr;
+  ElfW(Addr) old_bss_addr, new_bss_addr,new_data2_addr;
+  ElfW(Off)  old_bss_size, new_data2_size,old_bss_offset,new_data2_offset,old_file_size,new_file_size;
 
   int n, nn;
-  int old_bss_index, old_sbss_index, old_plt_index;
+  int old_bss_index, old_sbss_index;
   int old_data_index, new_data2_index;
-#if (defined (__sony_news) && defined (_SYSTYPE_SYSV)) || defined(__sgi)
-  int old_mdebug_index;
-#endif
+  /* int old_mdebug_index; */
   struct stat stat_buf;
-  int old_file_size;
-#ifdef BROKEN_NOCOMBRELOC
-  int unreloc_sections[10], n_unreloc_sections;
-#endif
 
   /* Open the old file, allocate a buffer of the right size, and read
      in the file contents.  */
@@ -727,12 +703,12 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 
   /* Find the mdebug section, if any.  */
 
-#if (defined (__sony_news) && defined (_SYSTYPE_SYSV)) || defined(__sgi)
-  old_mdebug_index = find_section (".mdebug", old_section_names,
-				   old_name, old_file_h, old_section_h, 1);
-#endif
+  /* old_mdebug_index = find_section (".mdebug", old_section_names, */
+  /* 				   old_name, old_file_h, old_section_h, 1); */
+
   /* Find the old .bss section.  Figure out parameters of the new
-     data2 and bss sections.  */
+   * data2 and bss sections.
+   */
 
   old_bss_index = find_section (".bss", old_section_names,
 				old_name, old_file_h, old_section_h, 0);
@@ -740,37 +716,20 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   old_sbss_index = find_section (".sbss", old_section_names,
 				 old_name, old_file_h, old_section_h, 1);
   if (old_sbss_index != -1)
-    if (OLD_SECTION_H (old_sbss_index).sh_type != SHT_NOBITS)
+    if (OLD_SECTION_H (old_sbss_index).sh_type == SHT_PROGBITS)
       old_sbss_index = -1;
 
-  /* PowerPC64 has .plt in the BSS section.  */
-  old_plt_index = find_section (".plt", old_section_names,
-				old_name, old_file_h, old_section_h, 1);
-  if (old_plt_index != -1)
-    if (OLD_SECTION_H (old_plt_index).sh_type != SHT_NOBITS)
-      old_plt_index = -1;
-
-  if (old_sbss_index == -1 && old_plt_index == -1)
+  if (old_sbss_index == -1)
     {
       old_bss_addr = OLD_SECTION_H (old_bss_index).sh_addr;
+      old_bss_offset = OLD_SECTION_H (old_bss_index).sh_offset;
       old_bss_size = OLD_SECTION_H (old_bss_index).sh_size;
       new_data2_index = old_bss_index;
-    }
-  else if (old_plt_index != -1
-	   && (old_sbss_index == -1
-	       || (OLD_SECTION_H (old_sbss_index).sh_addr
-		   > OLD_SECTION_H (old_plt_index).sh_addr)))
-    {
-      old_bss_addr = OLD_SECTION_H (old_plt_index).sh_addr;
-      old_bss_size = OLD_SECTION_H (old_bss_index).sh_size
-	+ OLD_SECTION_H (old_plt_index).sh_size;
-      if (old_sbss_index != -1)
-	old_bss_size += OLD_SECTION_H (old_sbss_index).sh_size;
-      new_data2_index = old_plt_index;
     }
   else
     {
       old_bss_addr = OLD_SECTION_H (old_sbss_index).sh_addr;
+      old_bss_offset = OLD_SECTION_H (old_sbss_index).sh_offset;
       old_bss_size = OLD_SECTION_H (old_bss_index).sh_size
 	+ OLD_SECTION_H (old_sbss_index).sh_size;
       new_data2_index = old_sbss_index;
@@ -787,25 +746,19 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 #else
   new_bss_addr = old_bss_addr + old_bss_size + 0x1234;
 #endif
-#if defined (emacs) || !defined (DEBUG)
-  if ((unsigned) new_bss_addr < (unsigned) old_bss_addr + old_bss_size) {
-    sbrk(PAGESIZE*(((unsigned) old_bss_addr + old_bss_size-(unsigned) new_bss_addr+PAGESIZE-1)/PAGESIZE));
-    new_bss_addr=(ElfW(Addr))sbrk(0);
-  }
-#endif
   new_data2_addr = old_bss_addr;
   new_data2_size = new_bss_addr - old_bss_addr;
-  new_data2_offset  = OLD_SECTION_H (old_data_index).sh_offset +
+  new_data2_offset  = OLD_SECTION_H (old_data_index).sh_offset + /*to preserve data offset alignment*/
     (new_data2_addr - OLD_SECTION_H (old_data_index).sh_addr);
 
 #ifdef DEBUG
-  fprintf (stderr, "old_bss_index %d\n", old_bss_index);
-  fprintf (stderr, "old_bss_addr %x\n", old_bss_addr);
-  fprintf (stderr, "old_bss_size %x\n", old_bss_size);
-  fprintf (stderr, "new_bss_addr %x\n", new_bss_addr);
-  fprintf (stderr, "new_data2_addr %x\n", new_data2_addr);
-  fprintf (stderr, "new_data2_size %x\n", new_data2_size);
-  fprintf (stderr, "new_data2_offset %x\n", new_data2_offset);
+  emsg("old_bss_index %d\n", old_bss_index);
+  emsg("old_bss_addr %x\n", old_bss_addr);
+  emsg("old_bss_size %x\n", old_bss_size);
+  emsg("new_bss_addr %x\n", new_bss_addr);
+  emsg("new_data2_addr %x\n", new_data2_addr);
+  emsg("new_data2_size %x\n", new_data2_size);
+  emsg("new_data2_offset %x\n", new_data2_offset);
 #endif
 
   if ((unsigned) new_bss_addr < (unsigned) old_bss_addr + old_bss_size)
@@ -819,7 +772,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   if (new_file < 0)
     fatal ("Can't creat (%s): errno %d\n", new_name, errno);
 
-  new_file_size = stat_buf.st_size + old_file_h->e_shentsize + new_data2_size;
+  new_file_size = stat_buf.st_size + old_file_h->e_shentsize + new_data2_size + (new_data2_offset-old_bss_offset);
 
   if (ftruncate (new_file, new_file_size))
     fatal ("Can't ftruncate (%s): errno %d\n", new_name, errno);
@@ -831,10 +784,12 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   new_file_h = (ElfW(Ehdr) *) new_base;
   new_program_h = (ElfW(Phdr) *) ((byte *) new_base + old_file_h->e_phoff);
   new_section_h = (ElfW(Shdr) *)
-    ((byte *) new_base + old_file_h->e_shoff + new_data2_size);
+    ((byte *) new_base + old_file_h->e_shoff + new_data2_size + (new_data2_offset-old_bss_offset));
+
 
   /* Make our new file, program and section headers as copies of the
-     originals.  */
+   * originals.
+   */
 
   memcpy (new_file_h, old_file_h, old_file_h->e_ehsize);
   memcpy (new_program_h, old_program_h,
@@ -844,24 +799,26 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   PATCH_INDEX (new_file_h->e_shstrndx);
 
   /* Fix up file header.  We'll add one section.  Section header is
-     further away now.  */
+   * further away now.
+   */
 
-  new_file_h->e_shoff += new_data2_size;
+  new_file_h->e_shoff += new_data2_size + (new_data2_offset-old_bss_offset);
   new_file_h->e_shnum += 1;
 
 #ifdef DEBUG
-  fprintf (stderr, "Old section offset %x\n", old_file_h->e_shoff);
-  fprintf (stderr, "Old section count %d\n", old_file_h->e_shnum);
-  fprintf (stderr, "New section offset %x\n", new_file_h->e_shoff);
-  fprintf (stderr, "New section count %d\n", new_file_h->e_shnum);
+  emsg("Old section offset %x\n", old_file_h->e_shoff);
+  emsg("Old section count %d\n", old_file_h->e_shnum);
+  emsg("New section offset %x\n", new_file_h->e_shoff);
+  emsg("New section count %d\n", new_file_h->e_shnum);
 #endif
 
   /* Fix up a new program header.  Extend the writable data segment so
-     that the bss area is covered too. Find that segment by looking
-     for a segment that ends just before the .bss area.  Make sure
-     that no segments are above the new .data2.  Put a loop at the end
-     to adjust the offset and address of any segment that is above
-     data2, just in case we decide to allow this later.  */
+   * that the bss area is covered too. Find that segment by looking
+   * for a segment that ends just before the .bss area.  Make sure
+   * that no segments are above the new .data2.  Put a loop at the end
+   * to adjust the offset and address of any segment that is above
+   * data2, just in case we decide to allow this later.
+   */
 
   for (n = new_file_h->e_phnum - 1; n >= 0; n--)
     {
@@ -887,7 +844,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 	  && (round_up ((NEW_PROGRAM_H (n)).p_vaddr
 			+ (NEW_PROGRAM_H (n)).p_filesz,
 			alignment)
-	      == round_up (old_bss_addr, alignment)))
+	      <= round_up (old_bss_addr, alignment)))
 	break;
     }
   if (n < 0)
@@ -911,10 +868,11 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 #endif
 
   /* Fix up section headers based on new .data2 section.  Any section
-     whose offset or virtual address is after the new .data2 section
-     gets its value adjusted.  .bss size becomes zero and new address
-     is set.  data2 section header gets added by copying the existing
-     .data header and modifying the offset, address and size.  */
+   * whose offset or virtual address is after the new .data2 section
+   * gets its value adjusted.  .bss size becomes zero and new address
+   * is set.  data2 section header gets added by copying the existing
+   * .data header and modifying the offset, address and size.
+   */
   for (old_data_index = 1; old_data_index < (int) old_file_h->e_shnum;
        old_data_index++)
     if (!strcmp (old_section_names + OLD_SECTION_H (old_data_index).sh_name,
@@ -945,7 +903,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 	     bss section by any other application. */
 	  NEW_SECTION_H (nn).sh_addralign = OLD_SECTION_H (n).sh_addralign;
 	  /* for gcl make the NEW_SECTION_H executable since it will
-	     have code in it. */
+             have code in it. */
 	  NEW_SECTION_H (nn).sh_flags |= SHF_EXECINSTR;
 
 	  /* Now copy over what we have in the memory now. */
@@ -957,11 +915,11 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 
       memcpy (&NEW_SECTION_H (nn), &OLD_SECTION_H (n),
 	      old_file_h->e_shentsize);
-
+      
       if (n == old_bss_index
 	  /* The new bss and sbss section's size is zero, and its file offset
 	     and virtual address should be off by NEW_DATA2_SIZE.  */
-	  || n == old_sbss_index || n == old_plt_index
+	  || n == old_sbss_index
 	  )
 	{
 	  /* NN should be `old_s?bss_index + 1' at this point. */
@@ -997,9 +955,10 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 	      >= OLD_SECTION_H (old_bss_index-1).sh_offset)
 	    NEW_SECTION_H (nn).sh_offset += new_data2_size;
 #else
-	  if (NEW_SECTION_H (nn).sh_offset + NEW_SECTION_H (nn).sh_size
-	      > new_data2_offset)
-	    NEW_SECTION_H (nn).sh_offset += new_data2_size;
+	  if (NEW_SECTION_H (nn).sh_offset >= old_bss_offset ||
+	      /* solaris has symtab straddling bss offset */
+	      NEW_SECTION_H (nn).sh_offset+NEW_SECTION_H (nn).sh_size > old_bss_offset)
+	    NEW_SECTION_H (nn).sh_offset += new_data2_size+(new_data2_offset-old_bss_offset);
 #endif
 	  /* Any section that was originally placed after the section
 	     header table should now be off by the size of one section
@@ -1018,11 +977,11 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
       if (NEW_SECTION_H (nn).sh_type != SHT_SYMTAB
 	  && NEW_SECTION_H (nn).sh_type != SHT_DYNSYM)
 	PATCH_INDEX (NEW_SECTION_H (nn).sh_info);
-
+      
       if (old_sbss_index != -1)
 	if (!strcmp (old_section_names + NEW_SECTION_H (nn).sh_name, ".sbss"))
 	  {
-	    NEW_SECTION_H (nn).sh_offset =
+	    NEW_SECTION_H (nn).sh_offset = 
 	      round_up (NEW_SECTION_H (nn).sh_offset,
 			NEW_SECTION_H (nn).sh_addralign);
 	    NEW_SECTION_H (nn).sh_type = SHT_PROGBITS;
@@ -1036,42 +995,18 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
       /* Write out the sections. .data and .data1 (and data2, called
 	 ".data" in the strings table) get copied from the current process
 	 instead of the old file.  */
-      if (!strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".data")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+      if (!strcmp (old_section_names + NEW_SECTION_H (nn).sh_name, ".data")
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".sdata")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".lit4")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".lit8")
-	  /* The conditional bit below was in Oliva's original code
-	     (1999-08-25) and seems to have been dropped by mistake
-	     subsequently.  It prevents a crash at startup under X in
-	     `IRIX64 6.5 6.5.17m', whether compiled on that relase or
-	     an earlier one.  It causes no trouble on the other ELF
-	     platforms I could test (Irix 6.5.15m, Solaris 8, Debian
-	     Potato x86, Debian Woody SPARC); however, it's reported
-	     to cause crashes under some version of GNU/Linux.  It's
-	     not yet clear what's changed in that Irix version to
-	     cause the problem, or why the fix sometimes fails under
-	     GNU/Linux.  There's probably no good reason to have
-	     something Irix-specific here, but this will have to do
-	     for now.  IRIX6_5 is the most specific macro we have to
-	     test.  -- fx 2002-10-01
-
-	     The issue _looks_ as though it's gone away on 6.5.18m,
-	     but maybe it's still lurking, to be triggered by some
-	     change in the binary.  It appears to concern the dynamic
-	     loader, but I never got anywhere with an SGI support call
-	     seeking clues.  -- fx 2002-11-29.  */
-#ifdef IRIX6_5
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
-		      ".got")
-#endif
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".sdata1")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
 		      ".data1")
-	  || !strcmp ((old_section_names + NEW_SECTION_H (n).sh_name),
+	  || !strcmp (old_section_names + NEW_SECTION_H (nn).sh_name,
 		      ".sbss"))
 	src = (caddr_t) OLD_SECTION_H (n).sh_addr;
       else
@@ -1103,10 +1038,10 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 
 #if defined (__sony_news) && defined (_SYSTYPE_SYSV)
       if (NEW_SECTION_H (nn).sh_type == SHT_MIPS_DEBUG
-	  && old_mdebug_index != -1)
-	{
-	  int diff = NEW_SECTION_H(nn).sh_offset
-		- OLD_SECTION_H(old_mdebug_index).sh_offset;
+	  && old_mdebug_index != -1) 
+        {
+	  int diff = NEW_SECTION_H(nn).sh_offset 
+	 	- OLD_SECTION_H(old_mdebug_index).sh_offset;
 	  HDRR *phdr = (HDRR *)(NEW_SECTION_H (nn).sh_offset + new_base);
 
 	  if (diff)
@@ -1127,7 +1062,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 #endif /* __sony_news && _SYSTYPE_SYSV */
 
 #if __sgi
-      /* Adjust  the HDRR offsets in .mdebug and copy the
+      /* Adjust  the HDRR offsets in .mdebug and copy the 
 	 line data if it's in its usual 'hole' in the object.
 	 Makes the new file debuggable with dbx.
 	 patches up two problems: the absolute file offsets
@@ -1226,136 +1161,50 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 
   /* This loop seeks out relocation sections for the data section, so
      that it can undo relocations performed by the runtime linker.  */
-#ifndef BROKEN_NOCOMBRELOC
   for (n = new_file_h->e_shnum - 1; n; n--)
     {
       ElfW(Shdr) section = NEW_SECTION_H (n);
-
-      /* Cause a compilation error if anyone uses n instead of nn below.  */
-      struct {int a;} n;
-      (void)n.a;		/* Prevent `unused variable' warnings.  */
-
-      switch (section.sh_type)
-	{
-	default:
-	  break;
-	case SHT_REL:
-	case SHT_RELA:
-	  /* This code handles two different size structs, but there should
-	     be no harm in that provided that r_offset is always the first
-	     member.  */
-	  if (!(nn = section.sh_info)) break;
-	  if (!strcmp (old_section_names + NEW_SECTION_H (nn).sh_name, ".data")
-	      || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
-			  ".sdata")
-	      || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
-			  ".lit4")
-	      || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
-			  ".lit8")
-#ifdef IRIX6_5			/* see above */
-	      || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
-			  ".got")
-#endif
-	      || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
-			  ".sdata1")
-	      || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
-			  ".data1"))
-	    {
-	      ElfW(Addr) offset = (NEW_SECTION_H (nn).sh_addr
-				   - NEW_SECTION_H (nn).sh_offset);
-	      caddr_t reloc = old_base + section.sh_offset, end;
-	      for (end = reloc + section.sh_size; reloc < end;
-		   reloc += section.sh_entsize)
-		{
-		  ElfW(Addr) addr = ((ElfW(Rel) *) reloc)->r_offset - offset;
+      switch (section.sh_type) {
+      default:
+	break;
+      case SHT_REL:
+      case SHT_RELA:
+	/* This code handles two different size structs, but there should
+	   be no harm in that provided that r_offset is always the first
+	   member.  */
+	nn = section.sh_info;
+	if (nn && (!strcmp (old_section_names + NEW_SECTION_H (nn).sh_name, ".data")
+	    || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
+			".sdata")
+	    || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
+			".lit4")
+	    || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
+			".lit8")
+	    || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
+			".sdata1")
+	    || !strcmp ((old_section_names + NEW_SECTION_H (nn).sh_name),
+			".data1")))
+	  {
+	    ElfW(Addr) offset = NEW_SECTION_H (nn).sh_addr -
+	      NEW_SECTION_H (nn).sh_offset;
+	    caddr_t reloc = old_base + section.sh_offset, end;
+	    for (end = reloc + section.sh_size; reloc < end;
+		 reloc += section.sh_entsize)
+	      {
+		ElfW(Addr) addr = ((ElfW(Rel) *) reloc)->r_offset - offset;
 #ifdef __alpha__
-		  /* The Alpha ELF binutils currently have a bug that
-		     sometimes results in relocs that contain all
-		     zeroes.  Work around this for now...  */
-		  if (((ElfW(Rel) *) reloc)->r_offset == 0)
+		/* The Alpha ELF binutils currently have a bug that
+		   sometimes results in relocs that contain all
+		   zeroes.  Work around this for now...  */
+		if (((ElfW(Rel) *) reloc)->r_offset == 0)
 		    continue;
 #endif
-		  memcpy (new_base + addr, old_base + addr, sizeof(ElfW(Addr)));
-		}
-	    }
-	  break;
-	}
-    }
-#else /* BROKEN_NOCOMBRELOC */
-  for (n = 1, n_unreloc_sections = 0; n < new_file_h->e_shnum; n++)
-    if (!strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".data")
-	|| !strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".sdata")
-	|| !strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".lit4")
-	|| !strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".lit8")
-#ifdef IRIX6_5			/* see above */
-	|| !strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".got")
-#endif
-	|| !strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".sdata1")
-	|| !strcmp (old_section_names + NEW_SECTION_H (n).sh_name, ".data1"))
-      {
-	assert (n_unreloc_sections
-		< (sizeof (unreloc_sections) / sizeof (unreloc_sections[0])));
-	unreloc_sections[n_unreloc_sections++] = n;
-#ifdef DEBUG
-	fprintf (stderr, "section %d: %s\n", n,
-		 old_section_names + NEW_SECTION_H (n).sh_name);
-#endif
+		memcpy (new_base + addr, old_base + addr, sizeof(ElfW(Addr)));
+	      }
+	  }
+	break;
       }
-
-  for (n = new_file_h->e_shnum - 1; n; n--)
-    {
-      ElfW(Shdr) section = NEW_SECTION_H (n);
-      caddr_t reloc, end;
-      ElfW(Addr) addr, offset;
-      int target;
-
-      switch (section.sh_type)
-	{
-	default:
-	  break;
-	case SHT_REL:
-	case SHT_RELA:
-	  /* This code handles two different size structs, but there should
-	     be no harm in that provided that r_offset is always the first
-	     member.  */
-	  for (reloc = old_base + section.sh_offset,
-		 end = reloc + section.sh_size;
-	       reloc < end;
-	       reloc += section.sh_entsize)
-	    {
-	      addr = ((ElfW(Rel) *) reloc)->r_offset;
-#ifdef __alpha__
-	      /* The Alpha ELF binutils currently have a bug that
-		 sometimes results in relocs that contain all
-		 zeroes.  Work around this for now...  */
-	      if (addr == 0)
-		continue;
-#endif
-	      for (nn = 0; nn < n_unreloc_sections; nn++)
-		{
-		  target = unreloc_sections[nn];
-		  if (NEW_SECTION_H (target).sh_addr <= addr
-		      && addr < (NEW_SECTION_H (target).sh_addr +
-				 NEW_SECTION_H (target).sh_size))
-		    {
-		      offset = (NEW_SECTION_H (target).sh_addr -
-				NEW_SECTION_H (target).sh_offset);
-		      memcpy (new_base + addr - offset,
-			      old_base + addr - offset,
-			      sizeof (ElfW(Addr)));
-#ifdef DEBUG
-		      fprintf (stderr, "unrelocate: [%08lx] <= %08lx\n",
-			       (long) addr,
-			       (long) *((long *) (new_base + addr - offset)));
-#endif
-		      break;
-		    }
-		}
-	    }
-	  break;
-	}
     }
-#endif	/* BROKEN_NOCOMBRELOC */
 
   /* Write out new_file, and free the buffers.  */
 
@@ -1387,10 +1236,14 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
   if (chmod (new_name, stat_buf.st_mode) == -1)
     fatal ("Can't chmod (%s): errno %d\n", new_name, errno);
 }
-/* All of the above is from the emacs-22.2 file.  This comment and the
+/* All of the above is from the emacs-20.7 file.  This comment and the
    following are added for gcl.  Also we changed the above (near "for
    gcl") we make the NEW_SECTION_H executable since it will have code
    in it.  NEW_SECTION_H (nn).sh_flags |= SHF_EXECINSTR;
+   
+   Partly synchronized with Emacs HEAD of 2004-04-12 by Magnus Henoch.
+   The files themselves are no longer mmap'ed, but memory is allocated
+   with mmap, and everything is written to the new file at the end.
 */
 #ifdef UNIXSAVE
 #include "save.c"

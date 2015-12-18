@@ -16,10 +16,13 @@ License for more details.
 */
 
 
+#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <string.h>
 #include <elf.h>
 
 #include "gclincl.h"
@@ -45,6 +48,7 @@ License for more details.
 #define  ELF_R_INFO(a,b)       Mjoin(ELF,_R_INFO)(a,b)
 #define ELF_ST_BIND(a)         Mjoin(ELF,_ST_BIND)(a)
 #define ELF_ST_TYPE(a)         Mjoin(ELF,_ST_TYPE)(a)
+#define ELF_ST_INFO(a,b)       Mjoin(ELF,_ST_INFO)(a,b)
 #define ELF_ST_VISIBILITY(a)   Mjoin(ELF,_ST_VISIBILITY)(a)
 
 
@@ -54,7 +58,7 @@ License for more details.
 #define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info),_t=ELF_ST_TYPE(sym->st_info);	\
       sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK || (_t>=STT_LOPROC && _t<=STT_HIPROC));})
 
-#define MASK(n) (~(~0L << (n)))
+#define MASK(n) (~(~0ULL << (n)))
 
 
 
@@ -86,6 +90,8 @@ ovchku(ul v,ul m) {
   return !(v&=m);
 
 }
+
+static char *init_section_name=".text";
 
 #ifdef SPECIAL_RELOC_H
 #include SPECIAL_RELOC_H
@@ -175,6 +181,7 @@ relocate(Sym *sym1,void *v,ul a,ul start,ul *got,ul *gote) {
 #include RELOC_H
 
   default:
+    emsg("Unknown reloc type %lu\n", tp);
     massert(tp&~tp);
 
   }
@@ -194,7 +201,7 @@ find_init_address(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,
     if (sec<sec1 || sec>=sece)
       continue;
 
-    if (strcmp(sn+sec->sh_name,".text"))
+    if (strcmp(sn+sec->sh_name,init_section_name))
       continue;
 
     if (memcmp("init_",st1+sym->st_name,4))
@@ -225,6 +232,9 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
 
     else if ((a=find_sym_ptable(st1+sym->st_name)))
       sym->st_value=a->address;
+
+    else if (ELF_ST_BIND(sym->st_info)!=STB_LOCAL)
+      massert(!emsg("Unrelocated non-local symbol: %s\n",st1+sym->st_name));
 	
   }
 
@@ -266,9 +276,7 @@ load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
   memory->cfd.cfd_self=0;
   memory->cfd.cfd_start=0;/*gc protect*/
   memory->cfd.cfd_dlist=Cnil;
-  prefer_low_mem_contblock=TRUE;
-  memory->cfd.cfd_start=alloc_contblock(sz);
-  prefer_low_mem_contblock=FALSE;
+  memory->cfd.cfd_start=alloc_code_space(sz);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;
@@ -519,24 +527,17 @@ seek_to_end_ofile(FILE *fp) {
 
 }
 
-#ifdef HAVE_BUILTIN_CLEAR_CACHE
 static int
 clear_protect_memory(object memory) {
 
   void *p,*pe;
-  int i;
 
   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1));
   pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size + PAGESIZE-1) & ~(PAGESIZE-1));
 
-  i=mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
-
-  __builtin___clear_cache((void *)memory->cfd.cfd_start,(void *)memory->cfd.cfd_start+memory->cfd.cfd_size);
-
-  return i;
+  return gcl_mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
 
 }
-#endif
 
 int
 fasload(object faslfile) {
@@ -557,7 +558,7 @@ fasload(object faslfile) {
   massert(!parse_map(v1,&sec1,&sece,&sn,&sym1,&syme,&st1,&end,&dsym1,&dsyme,&dst1));
   
 #ifdef SPECIAL_RELOC_H
-  massert(!label_got_symbols(v1,sec1,sece,sym1,syme,st1,got));
+  massert(!label_got_symbols(v1,sec1,sece,sym1,syme,st1,sn,got));
 #endif
 
   massert(memory=load_memory(sec1,sece,v1,&got,&gote));
@@ -574,12 +575,12 @@ fasload(object faslfile) {
   massert(!un_mmap(v1,ve));
   close_stream(faslfile);
   
-#ifdef HAVE_BUILTIN_CLEAR_CACHE
   massert(!clear_protect_memory(memory));
-#else
-#ifdef CLEAR_CACHE
+
+#if defined(HAVE_BUILTIN_CLEAR_CACHE)
+  __builtin___clear_cache((void *)memory->cfd.cfd_start,(void *)memory->cfd.cfd_start+memory->cfd.cfd_size);
+#elif defined(CLEAR_CACHE)
   CLEAR_CACHE;
-#endif
 #endif  
 
   init_address-=(ul)memory->cfd.cfd_start;

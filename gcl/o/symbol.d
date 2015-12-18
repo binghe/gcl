@@ -552,8 +552,8 @@ gensym_int(object this_gensym_prefix,object this_gensym_counter) {
   sym = make_symbol(string_register);
   {
     BEGIN_NO_INTERRUPT;	
-    sym->s.s_fillp = i;
     sym->s.s_self = alloc_relblock(i);
+    sym->s.s_fillp = i;
     i=this_gensym_prefix==OBJNULL ? 1 : this_gensym_prefix->st.st_fillp;
     for (j = 0;  j < i;  j++)
       sym->s.s_self[j] = this_gensym_prefix==OBJNULL ? 'G' : this_gensym_prefix->st.st_self[j];

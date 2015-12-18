@@ -382,7 +382,7 @@ DEFUN("MAKE-VECTOR",object,fSmake_vector,SI,8,8,NONE,OO,IO,OO,IO,
 	  (object etp,fixnum n,object adjp,object fp,object displaced_to,fixnum V9,object staticp,object initial_element),"") {
 
   object x;
-  fixnum elt_type=fix(fSget_aelttype(etp)),fillp=fp==Cnil ? -1 : (fp==Ct ? n : Mfix(fp));
+  fixnum elt_type=type_of(etp)==t_symbol ? fix(fSget_aelttype(etp)) : fix(etp),fillp=fp==Cnil ? -1 : (fp==Ct ? n : Mfix(fp));
 
   BEGIN_NO_INTERRUPT;
 

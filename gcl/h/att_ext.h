@@ -297,9 +297,9 @@ EXTER object sLquote;
 
 EXTER object sLlambda;
 
-EXTER object sLlambda_block;
-EXTER object sLlambda_closure;
-EXTER object sLlambda_block_closure;
+EXTER object sSlambda_block;
+EXTER object sSlambda_closure;
+EXTER object sSlambda_block_closure;
 
 EXTER object sLfunction,sLfunction_identifier;
 EXTER object sLmacro;

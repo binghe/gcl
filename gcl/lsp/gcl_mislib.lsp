@@ -174,6 +174,7 @@
 	    "cstack direction:     ~[downward~;upward~;~]~%"
 	    "cstack alignment:     ~a bytes~%"
 	    "cstack max:           ~a bytes~%"
+	    "physical pages:       ~a~%"
 	    "immfix start:         0x~x~%"
 	    "immfix size:          ~a fixnums~%"))
 	(v (multiple-value-list (si::heap-report))))

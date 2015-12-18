@@ -5,7 +5,7 @@
 /* alloc.c:213:OF */ void add_pages(struct typemanager *,fixnum);
 /* alloc.c:296:OF */ extern object make_cons (object a, object d); /* (a, d) object a; object d; */
 /* alloc.c:364:OF */ extern object on_stack_cons (object x, object y); /* (x, y) object x; object y; */
-/* alloc.c:480:OF */ extern void insert_contblock (char *p, int s); /* (p, s) char *p; int s; */
+/* alloc.c:480:OF */ extern void insert_contblock (void *p, ufixnum s); /* (p, s) char *p; int s; */
 /* alloc.c:480:OF */ extern void insert_maybe_sgc_contblock (char *p, int s); /* (p, s) char *p; int s; */
 /* alloc.c:611:OF */ extern void set_maxpage (void); /* () */
 /* alloc.c:635:OF */ extern void gcl_init_alloc (void *); /* () */
@@ -161,7 +161,7 @@ typedef void (*funcvoid)(void);
 #ifndef __MINGW32__
 /* #include <signal.h> */
 #endif
-/* sgbc.c:1246:OF */ extern void memory_protect (int on); /* (on) int on; */
+/* sgbc.c:1246:OF */ extern int memory_protect (int on); /* (on) int on; */
 /* sgbc.c:1306:OF */ extern void perm_writable (char *p, long n); /* (p, n) char *p; int n; */
 /* sgbc.c:1321:OF */ extern void system_error (void); /* () */
 /* gbc.c:1357:OF */ extern void gcl_init_GBC (void); /* () */
@@ -325,7 +325,7 @@ object funcall_vec(object,ufixnum,object *);
 /* reference.c:191:OF */ extern void gcl_init_reference (void); /* () */
 /*  #include "regexp.h" */
 /* regexp.c:1588:OF */ extern void regerror (char *s); /* (s) char *s; */
-/* save.c:17:OF */ extern void Lsave (void); /* () */
+/* save.c:17:OF */ extern void siLsave (void); /* () */
 #include <unistd.h>
 /* sbrk.c:9:OF */ /*  extern void * sbrk (int n); */ /* (n) int n; */
 /* strcspn.c:3:OF */ /*  extern size_t strcspn (const char *s1, const char *s2); */ /* (s1, s2) char *s1; char *s2; */
@@ -1504,3 +1504,49 @@ void init_darwin_zone_compat ();
 #endif
 
 int get_cstack_dir(VOL fixnum);
+
+int
+gcl_mprotect(void *,unsigned long,int);
+
+void *
+alloc_code_space(size_t);
+
+void *
+alloc_contblock_no_gc(size_t,char *);
+
+struct pageinfo *
+get_pageinfo(void *);
+
+void
+reset_contblock_freelist(void);
+
+void
+setup_rb(bool);
+
+void
+empty_relblock(void);
+
+void
+close_pool(void);
+
+void
+gcl_cleanup(int);
+
+void
+do_gcl_abort(void);
+
+int
+mbrk(void *);
+
+void
+prelink_init(void);
+
+fixnum
+check_avail_pages(void);
+
+void
+resize_hole(ufixnum,enum type,bool);
+
+void
+maybe_set_hole_from_maxpages(void);
+

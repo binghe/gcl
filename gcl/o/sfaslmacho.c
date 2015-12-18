@@ -143,6 +143,8 @@ relocate_symbols(struct nlist *n1,struct nlist *ne,char *st1,ul start) {
       n->n_value+=start; 
     else if ((nd=find_sym_ptable(st1+n->n_un.n_strx)))
       n->n_value=nd->address; 
+    else if (n->n_type&(N_PEXT|N_EXT))
+      massert(!emsg("Unrelocated non-local symbol: %s\n",st1+n->n_un.n_strx));
 
   return 0;
   
@@ -204,11 +206,9 @@ load_memory(struct section *sec1,struct section *sece,void *v1,
   memory=alloc_object(t_cfdata); 
   memory->cfd.cfd_size=sz; 
   memory->cfd.cfd_self=0; 
-  memory->cfd.cfd_start=0; 
+  memory->cfd.cfd_start=0;/*gc protect*/
   memory->cfd.cfd_dlist=Cnil;
-  prefer_low_mem_contblock=TRUE;
-  memory->cfd.cfd_start=alloc_contblock(sz);
-  prefer_low_mem_contblock=FALSE;
+  memory->cfd.cfd_start=alloc_code_space(sz);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;
@@ -507,6 +507,18 @@ label_got_symbols(void *v1,struct section *sec,struct nlist *n1,struct nlist *ne
   
 }
 
+static int
+clear_protect_memory(object memory) {
+
+  void *p,*pe;
+
+  p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1));
+  pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size + PAGESIZE-1) & ~(PAGESIZE-1));
+
+  return gcl_mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC);
+
+}
+
 
 int
 fasload(object faslfile) {
@@ -543,6 +555,8 @@ fasload(object faslfile) {
   fseek(fp,(void *)ste-v1,SEEK_SET);
   data = feof(fp) ? 0 : read_fasl_vector(faslfile);
   
+  massert(!clear_protect_memory(memory));
+
 #ifdef CLEAR_CACHE
   CLEAR_CACHE;
 #endif
