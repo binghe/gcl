@@ -1278,17 +1278,12 @@ gcl_init_package()
 {
 
 	lisp_package
-	= make_package(make_simple_string("LISP"),
-		       Cnil, Cnil,47,509);
+	= make_package(make_simple_string("COMMON-LISP"),
+		       list(2,make_simple_string("CL"),make_simple_string("LISP")),Cnil,47,509);
 	user_package
-	= make_package(make_simple_string("USER"),
-		       Cnil,
+	= make_package(make_simple_string("COMMON-LISP-USER"),
+		       list(2,make_simple_string("CL-USER"),make_simple_string("USER")),
 		       make_cons(lisp_package, Cnil),509,97);
-/* #ifdef ANSI_COMMON_LISP */
-/* 	common_lisp_package */
-/* 	= make_package(make_simple_string("COMMON-LISP"), */
-/* 		       Cnil, Cnil,47,509); */
-/* #endif */
 	keyword_package
 	= make_package(make_simple_string("KEYWORD"),
 		       Cnil, Cnil,11,509);

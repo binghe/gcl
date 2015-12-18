@@ -24,14 +24,6 @@
 
 (in-package :si)
 
-(rename-package :lisp :old-lisp)
-(make-package :common-lisp :use nil :nicknames (list :cl :lisp))
-
-(let (r (p (find-package :old-lisp))) 
-  (dotimes (i (package-external_size p)) (setq r (append r (package-external p i))))
-  (import-internal r :common-lisp)
-  (dolist (l r) (set-symbol-hpack (find-package :common-lisp) l)))
-
 (in-package :common-lisp)
 
 (export '(
@@ -505,20 +497,51 @@
 
 (in-package :si)
 
+(defun eval-feature (x);FIXME
+  (cond ((atom x)
+         (member x *features*))
+        ((eq (car x) :and)
+         (dolist (x (cdr x) t) (unless (eval-feature x) (return nil))))
+        ((eq (car x) :or)
+         (dolist (x (cdr x) nil) (when (eval-feature x) (return t))))
+        ((eq (car x) :not)
+	 (not (eval-feature (cadr x))))
+	(t (error "~S is not a feature expression." x))))
+
+
+(defun sharp-+-reader (stream subchar arg)
+  (declare (ignore subchar arg))
+  (if (eval-feature (let ((*read-suppress* nil)
+			  (*read-base* 10.)
+			  (*package* (load-time-value (find-package 'keyword))))
+		      (read stream t nil t)))
+      (values (read stream t nil t))
+    (let ((*read-suppress* t)) (read stream t nil t) (values))))
+
+(set-dispatch-macro-character #\# #\+ 'sharp-+-reader)
+(set-dispatch-macro-character #\# #\+ 'sharp-+-reader
+                              (si::standard-readtable))
+
+(defun sharp---reader (stream subchar arg)
+  (declare (ignore subchar arg))
+  (if (eval-feature (let ((*read-suppress* nil)
+			  (*read-base* 10.)
+			  (*package* (load-time-value (find-package 'keyword))))
+		      (read stream t nil t)))
+      (let ((*read-suppress* t)) (read stream t nil t) (values))
+    (values (read stream t nil t))))
+
+(set-dispatch-macro-character #\# #\- 'sharp---reader)
+(set-dispatch-macro-character #\# #\- 'sharp---reader
+                              (si::standard-readtable))
+
 (unless (member :pre-gcl *features*);FIXME
   (or (find-package :lib) (make-package :lib))
   (or (find-symbol "libm" :lib) (make-package (intern "libm" :lib)))
   (or (find-symbol "libc" :lib) (make-package (intern "libc" :lib)))
   (or (find-symbol "libgmp" :lib) (make-package (intern "libgmp" :lib)))
-  (or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))));FIXME #+darwin
+  #+darwin(or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))))
 (use-package :s)
-
-(let ((l (package-used-by-list (find-package :old-lisp))))
-  (dolist (l l) 
-    (unuse-package :old-lisp    l)
-    (use-package   :common-lisp l)))
-
-;(delete-package-internal :old-lisp)
 
 (make-package :COMPILER :use '(:lisp :si :s))
 
