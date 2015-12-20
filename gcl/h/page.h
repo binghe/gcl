@@ -1,5 +1,5 @@
 #define MAYBE_DATA_P(pp) ((char *)(pp)>= (char *) data_start)/*DBEGIN*/
-#define VALID_DATA_ADDRESS_P(pp) (MAYBE_DATA_P(pp) &&  ((char *)(pp) < heap_end))
+#define VALID_DATA_ADDRESS_P(pp) (MAYBE_DATA_P(pp) &&  inheap(pp))
 
 
 #ifndef page

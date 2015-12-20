@@ -1245,7 +1245,7 @@ gcl_init_alloc(void *cs_start) {
 
     massert(!getrlimit(RLIMIT_STACK, &rl));
     if (rl.rlim_cur!=RLIM_INFINITY && (rl.rlim_max == RLIM_INFINITY || rl.rlim_max > rl.rlim_cur)) {
-      rl.rlim_cur = rl.rlim_max == RLIM_INFINITY ? rl.rlim_max : rl.rlim_max/64;
+      rl.rlim_cur = rl.rlim_max; /* == RLIM_INFINITY ? rl.rlim_max : rl.rlim_max/64; */
       massert(!setrlimit(RLIMIT_STACK,&rl));
     }
     cssize = rl.rlim_cur/sizeof(*cs_org);

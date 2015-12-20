@@ -367,7 +367,7 @@ truncate_double(char *b,double d,int dp) {
   for (p=c1;*p && *p!='e';p++);
   pp=p>c1 && p[-1]!='.' ? p-1 : p;
   for (;pp>c1 && pp[-1]=='0';pp--);
-  strcpy(pp,p);
+  memmove(pp,p,strlen(p)+1);
   if (pp!=p && COMP(c1,&pp,d,dp))
     k=truncate_double(n=c1,d,dp);
 

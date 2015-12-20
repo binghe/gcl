@@ -1530,21 +1530,7 @@ read_fasl_vector(object in)
  object orig = in;
  object d;
  int tem;
- if (((tem=(unsigned char)readc_stream(in)) == EOF) && stream_at_end(in))
-   { d = coerce_to_pathname(in);
-     d = make_pathname(d->pn.pn_host,
-		       d->pn.pn_device,
-		       d->pn.pn_directory,
-		       d->pn.pn_name,
-		       make_simple_string("data"),
-		       d->pn.pn_version,
-		       Cnil);
-     d = coerce_to_namestring(d);
-     in = open_stream(d,smm_input,Cnil,Cnil);
-     if (in == Cnil) 
-       FEerror("Can't open file ~s",1,d);
-   }
- else if (tem != EOF)
+ if ((tem=(unsigned char)readc_stream(in)) != EOF)
    { unreadc_stream(tem,in);}
   while (1)
    { ch=(unsigned char)readc_stream(in);

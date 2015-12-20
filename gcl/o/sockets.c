@@ -336,7 +336,7 @@ DEFUN("OUR-READ-WITH-OFFSET",object,fSour_read_with_offset,SI,5,5,NONE,
 	  OO,OI,II,OO,(object fd,object buffer,fixnum offset,fixnum nbytes,fixnum timeout),
       "Read from STATE-FD into string BUFFER putting data at OFFSET and reading NBYTES, waiting for TIMEOUT before failing")
 
-{ return make_fixnum(read1(OBJ_TO_CONNECTION_STATE(fd),&((buffer)->ust.ust_self[offset]),nbytes,timeout));
+{ return make_fixnum(read1(OBJ_TO_CONNECTION_STATE(fd),&((buffer)->st.st_self[offset]),nbytes,timeout));
 }
 
 

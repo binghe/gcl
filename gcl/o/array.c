@@ -114,9 +114,9 @@ DEFUN("AREF",object,fLaref,LISP,1,ARRAY_RANK_LIMIT,ONE_VAL,OO,II,II,II,(object x
 }
 
 static void
-fScheck_bounds_bounds(object x, int i)
+fScheck_bounds_bounds(object x, fixnum i)
 {
-    if ( ( (unsigned int) i >= x->a.a_dim ) || ( (unsigned int) i < 0 ) ) {
+    if ( ( i >= x->a.a_dim ) || ( i < 0 ) ) {
         FEerror("Array index ~a out of bounds for ~a", 2,  make_fixnum(i),x);
     }
 }
@@ -410,7 +410,7 @@ DEFUN("MAKE-VECTOR",object,fSmake_vector,SI,8,8,NONE,OO,IO,OO,IO,
     x->v.v_fillp = n;
   } else  {	
     x->v.v_fillp = fillp;
-    if (x->v.v_fillp > n || x->v.v_fillp < 0) 
+    if (x->v.v_fillp > n) 
       FEerror("bad fillp",0);
     x->v.v_hasfillp = 1;
   }
@@ -645,8 +645,6 @@ DEFUN("MAKE-ARRAY1",object,fSmake_array1,SI,7,7,NONE,OO,OO,OI,OO,
     v = dimensions;
     while (i < rank)
       { x->a.a_dims[i] = FIX_CHECK(Mcar(v));
-	if (x->a.a_dims[i] < 0)
-	  { FEerror("Dimension must be non negative",0);}
 	dim *= x->a.a_dims[i++];
 	v = Mcdr(v);}
     x->a.a_dim = dim;

@@ -6,6 +6,8 @@
   (unless (fboundp 'logandc2) (defun logandc2 (x y) (boole boole-andc2 x y)))
   (unless (fboundp 'lognot) (defun lognot (x) (boole boole-c1 x 0))))
 
+(progn (setq si::*code-block-reserve* (make-array 30000000 :element-type 'character :static t)) nil)
+
 (mapc 'compile (nconc #-pre-gcl '(mapcar mapc mapl maplist)
 		      'si::(listp typep ibb ib <= coerce < > >= + - set-array concatenate mta mtv eql-is-eq)
 		      '(info-p info-ref info-type info-flags info-ch info-ref-ccb info-ref-clb c1constant-value-object

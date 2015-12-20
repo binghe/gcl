@@ -477,7 +477,7 @@ object y;
    {BEGIN_NO_INTERRUPT;		
     y = alloc_simple_string(x->s.s_fillp);
     vs_push(y);
-   if (x->s.s_self < heap_end)
+    if (inheap(x->s.s_self))
 		y->st.st_self = x->s.s_self;
 	else {int i;
 		y->st.st_self = alloc_relblock(x->s.s_fillp);
