@@ -28,10 +28,12 @@
 #define CPTR_SIZE PTR_ALIGN
 #endif
 
-#define FLR(x,r) (((x))&~(r-1))
+#define FLR(x,r) ((x)&~(r-1))
 #define CEI(x,r) FLR((x)+(r-1),r)
 #define PFLR(x,r) ((void *)FLR((ufixnum)x,r))
 #define PCEI(x,r) ((void *)CEI((ufixnum)x,r))
+
+#define OBJ_ALIGNED_STACK_ALLOC(x) ({void *v=alloca((x)+OBJ_ALIGNMENT-1);PCEI(v,OBJ_ALIGNMENT);})
 
 #ifdef SGC
 
