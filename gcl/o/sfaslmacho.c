@@ -568,7 +568,7 @@ fasload(object faslfile) {
   call_init(init_address,memory,data,0);
   
   if(symbol_value(sLAload_verboseA)!=Cnil)
-    printf("start address -T %p ",memory->cfd.cfd_start);
+    printf(";; start address -T %p/n",memory->cfd.cfd_start);
   
   return(memory->cfd.cfd_size);
 
