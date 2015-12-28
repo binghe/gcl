@@ -39,7 +39,7 @@
   (dolist (l '(recompile callhash assert defmacro defstruct describe evalmacros sc
 			 logical_pathname_translations make_pathname parse_namestring merge_pathnames
 			 pathname_match_p namestring wild_pathname_p translate_pathname truename directory
-			 rename_file
+			 rename_file restart
 			 iolib mislib module numlib packlib setf top trace sloop debug info serror mnum fpe))
     (doitf l "lsp" 'identity cmpl?)))
 
