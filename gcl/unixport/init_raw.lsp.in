@@ -13,6 +13,18 @@
 (in-package :si)
 (gbc t)
 
+(do-symbols (s)
+  (when (get s 'proclaimed-function)
+    (unless (sig s)
+      (let* ((fun (symbol-function s)))
+	(c-set-function-plist
+	 fun
+	 (apply 'make-function-plist
+		(list (get s 'proclaimed-arg-types) (get s 'proclaimed-return-type))
+		(or (cdr (c-function-plist fun)) (list nil nil nil nil s))))))
+    (dolist (l '(proclaimed-function proclaimed-arg-types proclaimed-return-type))
+      (remprop s l))))
+
 (unless *link-array*
   (setq *link-array* (make-array (ash 1 11) :element-type 'character :fill-pointer 0)))
 (use-fast-links t)
