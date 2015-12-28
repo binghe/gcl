@@ -133,7 +133,7 @@ $(HDIR)/mdefs.h: $(HDIR)/include.h
 sys_%.o: sys_init.c sys.c
 	$(CC) $(CFLAGS) -c -D $* -D FLAVOR="$*" $< -o $@
 
-libpre_gcl.a: $(OOBJS) sys_pre_gcl.o gmpfiles bfdfiles
+libpre_gcl.a: $(OOBJS) sys_pre_gcl.o gmpfiles bfdfiles libboot.so
 	rm -rf $@
 	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
 
