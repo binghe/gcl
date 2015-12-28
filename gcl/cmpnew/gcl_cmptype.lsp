@@ -313,7 +313,7 @@
 
 (defun apply-fn (f bndf tp r)
   (let* ((r (mapcar (lambda (x) (funcall bndf tp x)) r))
-	 (x (let ((si::*ignore-floating-point-errors* t)) (apply f r))))
+	 (x (apply f r)))
     (if (numberp x) x nan)))
 
 (defun mfc (f tp &rest r)
@@ -855,7 +855,7 @@
 	     (= (abs x) 1) 
 	     (= (abs x) 0) 
 	     (typep y #t(or float ratio (integer 0 #.(integer-length most-positive-fixnum)))))
-	 (let ((si::*ignore-floating-point-errors* t)) (expt x y)))
+	 (expt x y))
 	((> y 0)
 	 (cond ((> x 1) +inf)
 	       ((< x -1) -inf)

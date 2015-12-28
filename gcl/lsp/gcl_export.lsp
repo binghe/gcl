@@ -544,6 +544,7 @@
 ;;   (or (find-symbol "libgmp" :lib) (make-package (intern "libgmp" :lib)))
 ;;   #+darwin(or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))))
 (use-package :s)
+(use-package :gmp)
 (export 'si::(object double system cmp-inline cmp-eval type-propagator c1no-side-effects strcat defcfun clines defentry) :si)
 
 ;(make-package :COMPILER :use '(:lisp :si :s))
