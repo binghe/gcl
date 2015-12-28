@@ -93,7 +93,7 @@ pre_init.lsp post_init.lsp:
 libboot.so: ../o/boot.o
 	$(CC) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
 
-raw_init.lsp: raw_init.lsp.in
+init_raw.lsp: init_raw.lsp.in
 
 	cat $< | sed \
 		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `date`#1" \
@@ -107,13 +107,13 @@ raw_init.lsp: raw_init.lsp.in
 		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
 		-e "s#@LI-INIT-LSP@#\"$@\"#1" >$@
 
-saved_%:raw_% $(RSYM) raw_init.lsp raw_%_map msys \
+saved_%:raw_% $(RSYM) init_raw.lsp raw_%_map msys \
 		$(CMPDIR)/gcl_cmpmain.lsp \
 		$(CMPDIR)/gcl_lfun_list.lsp \
 		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
 		$(LSPDIR)/gcl_auto_new.lsp
 
-	cp raw_init.lsp foo
+	cp init_raw.lsp foo
 	echo "(unless si::*quit-tags* (in-package \"USER\")(system:save-system \"$@\"))" >>foo
 	ar x lib$*.a $$(ar t lib$*.a |grep ^gcl_)
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
@@ -171,7 +171,7 @@ clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
 		gazonk*.lsp *_map saved_* lib* raw_* gcl.script gcl_recompile* \
-		pre_init.lsp post_init.lsp final recompile.h raw_init.lsp
+		pre_init.lsp post_init.lsp final recompile.h init_raw.lsp
 
 .INTERMEDIATE: raw_gcl raw_ansi_gcl recompile.h pre_init.lsp post_init.lsp
 .PRECIOUS: libboot.so
