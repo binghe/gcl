@@ -25,7 +25,7 @@
 (export '(si::define-compiler-macro
           si::compiler-macro-function
 	  si::undef-compiler-macro
-          si::define-inline-function) 'system)
+          si::define-inline-function) :si)
 
 (in-package :compiler)
 

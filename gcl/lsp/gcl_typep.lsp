@@ -2,7 +2,7 @@
 
 (defun infer-type (x y z) (declare (ignore x y)) z);avoid macroexpansion in bootstrap
 (define-compiler-macro infer-type (x y z)
-  `(infer-tp ,(compiler::cmp-eval x) ,(compiler::cmp-eval y) ,z))
+  `(infer-tp ,(cmp-eval x) ,(cmp-eval y) ,z))
 
 (defun mkinf (f tp z &aux (z (if (cdr z) `(progn ,@z) (car z))))
   `(infer-type ',f ',tp ,z))
@@ -12,7 +12,7 @@
 	 (l (if a l (car l)))
 	 (l (unless (eq '* l) l)))
     (or (not l) (if f (if a (<= l o) (< l o)) (if a (<= o l) (< o l))))))
-(setf (get 'ib 'compiler::cmp-inline) t)
+(setf (get 'ib 'cmp-inline) t)
 
 (defun db (o tp)
   (let* ((b (car tp))(i -1))
@@ -27,31 +27,33 @@
      (cond ((not tp))
 	   ((eq b '*))
 	   ((eql (c-array-dim o) b)))))
-(setf (get 'db 'compiler::cmp-inline) t)
-(setf (get 'dbv 'compiler::cmp-inline) t)
+(setf (get 'db 'cmp-inline) t)
+(setf (get 'dbv 'cmp-inline) t)
 
 
 (defun ibb (o tp)
   (and (ib o (car tp) t) (ib o (cadr tp))))
-(setf (get 'ibb 'compiler::cmp-inline) t)
+(setf (get 'ibb 'cmp-inline) t)
 
 (defun sdata-includes (x)
   (the (or s-data null) (*object (c-structure-self x) 4 nil nil)));FIXME s-data-name boostrap loop
-(setf (get 'sdata-includes 'compiler::cmp-inline) t)
+(setf (get 'sdata-includes 'cmp-inline) t)
 (defun sdata-included (x)
   (the proper-list (*object (c-structure-self x) 3 nil nil)));FIXME s-data-name boostrap loop
-(setf (get 'sdata-included 'compiler::cmp-inline) t)
+(setf (get 'sdata-included 'cmp-inline) t)
 (defun sdata-name (x)
   (the symbol (*object (c-structure-self x) 0 nil nil)));FIXME s-data-name boostrap loop
 (defun sdata-type (x)
   (the symbol (*object (c-structure-self x) 16 nil nil)));FIXME s-data-name boostrap loop
-(setf (get 'sdata-name 'compiler::cmp-inline) t)
+(setf (get 'sdata-name 'cmp-inline) t)
 
 ;; (defun mss (o sn) (or (eq o sn) (when (sdata-included sn) (let ((o (sdata-includes o))) (when o (mss o sn))))))
-;; (setf (get 'mss 'compiler::cmp-inline) t)
+;; (setf (get 'mss 'cmp-inline) t)
+(defun mss (o sn) (when o (or (eq (sdata-name o) sn) (mss (sdata-includes o) sn))))
+(setf (get 'mss 'cmp-inline) t)
 
 (defun structure-name (o) (sdata-name (c-structure-def o)))
-(setf (get 'structure-name 'compiler::cmp-inline) t)
+(setf (get 'structure-name 'cmp-inline) t)
 
 
 (eval-when
@@ -67,8 +69,8 @@
    (case x
 	 ((immfix bfix bignum integer ratio single-float double-float short-float long-float float rational real) `(ibb ,o ,tp))
 	 (proper-cons `(unless (improper-consp ,o) t))
-;	 ((structure structure-object) `(if tp (mss (c-structure-def ,o) (car tp)) t))
-	 ((structure structure-object) `(if tp (when (member (structure-name ,o) tp) t) t))
+	 ((structure structure-object) `(if tp (mss (c-structure-def ,o) (car tp)) t))
+;	 ((structure structure-object) `(if tp (when (member (structure-name ,o) tp) t) t))
 	 (std-instance `(if tp (when (member (car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
 	 (mod `(let ((s (pop ,tp))) (<= 0 ,o (1- s))));FIXME error null tp
 	 (signed-byte `(if tp (let* ((s (pop ,tp))(s (when s (ash 1 (1- s))))) (<= (- s) ,o (1- s))) t))
@@ -84,7 +86,7 @@
 			 `(,n ,(cfn (car x) `(and (ibb (realpart o) tp) (ibb (imagpart o) tp))))) +ctps+)
 	   (otherwise ,(cfn 'complex '(if tp (and (typep (realpart o) otp) (typep (imagpart o) otp) t) t)))))
 					;FIXME the mutual recursion on typep prevents return type determination
-(setf (get 'mtc 'compiler::cmp-inline) t)
+(setf (get 'mtc 'cmp-inline) t)
 		       
 
 #.`(defun mta (o tp &aux (lp (listp tp))(ctp (if lp (car tp) tp))(tp (when lp (cdr tp))))
@@ -93,7 +95,7 @@
 			    `(,n ,(cfn (car x) t))) (mapcar (lambda (x y) `(,(car x) (or ,(cadr x) ,(cadr y)))) +vtps+ +atps+))
 		(otherwise ,(cfn 'array t)))
 	  (db o tp)))
-(setf (get 'mta 'compiler::cmp-inline) t)
+(setf (get 'mta 'cmp-inline) t)
 
 
 #.`(defun mtv (o tp &aux (lp (listp tp))(ctp (if lp (car tp) tp))(tp (when lp (cdr tp))))
@@ -102,19 +104,19 @@
 			    `(,n ,(cfn (car x) t))) +vtps+)
 		(otherwise ,(cfn 'vector t)))
 	  (dbv o tp)))
-(setf (get 'mtv 'compiler::cmp-inline) t)
+(setf (get 'mtv 'cmp-inline) t)
 
 		       
 (defun vtp (tp &aux (dims (cadr tp)))
   (cond ((eql 1 dims) `(,(car tp) *))
 	((or (atom dims) (cdr dims)) nil)
 	(tp)))
-(setf (get 'vtp 'compiler::cmp-inline) t)
+(setf (get 'vtp 'cmp-inline) t)
 
 (defun valid-class-name (class &aux (name (si-class-name class)))
   (when (eq class (si-find-class name nil))
     name))
-(setf (get 'valid-class-name 'compiler::cmp-inline) t)
+(setf (get 'valid-class-name 'cmp-inline) t)
 
 (eval-when
  (compile eval)
@@ -132,15 +134,18 @@
 
  (eval-when (eval compile) (defun tpc (&rest x) (tps-ints (type-and-list (mapcar 'cmp-norm-tp x)) (cdr (assoc 'tp7 +rs+)))))
 
+#.`(defun type-spec-p (otp)
+     (case (tp7 otp)
+       (,(tpc 'std-instance) (si-classp otp))
+       (,(tpc 'symbol) (not (eq otp 'values)))
+       (,(tpc 'cons) (unless (improper-consp otp) 
+		       (case (car otp) (function (not (cdr otp)))(values nil)(otherwise t))))
+       (,(tpc 'structure) t)))
+(setf (get 'type-spec-p 'cmp-inline) t)
+
 #.`(defun typep (o otp &optional env &aux (lp (listp otp)))
      (declare (ignore env))
-     (unless ;Cannot use check-type here
-	 (case (tp7 otp)
-	       (,(tpc 'std-instance) (si-classp otp))
-	       (,(tpc 'symbol) (not (eq otp 'values)))
-	       (,(tpc 'cons) (unless (improper-consp otp) 
-			       (case (car otp) (function (not (cdr otp)))(values nil)(otherwise t))))
-	       (,(tpc 'structure) t))
+     (unless (type-spec-p otp);Cannot use check-type here
        (error 'type-error :datum otp :expected-type 'type-spec))
      (labels ((tpi (o ctp tp &aux (ntp (when (eq ctp 'array) (vtp tp)))(ctp (if ntp 'vector ctp))(tp (or ntp tp)))
 		   (case ctp

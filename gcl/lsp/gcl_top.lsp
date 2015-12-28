@@ -54,7 +54,8 @@
 (defvar *load-types* '(".o" ".lsp" ".lisp"))
 
 (defvar *lisp-initialized* nil)
-(defvar *quit-tag* (cons nil nil))
+(defconstant +top-level-quit-tag+ (cons nil nil))
+(defvar *quit-tag* +top-level-quit-tag+)
 (defvar *quit-tags* nil)
 (defvar *break-level* '())
 (defvar *break-env* nil)
@@ -254,154 +255,7 @@
 	   (cons x (read-from-string (string-concatenate "(" (read-line stream eof-error-p eof-value) ")"))))
 	  (x))))
 
-
-;; (defun break-level (at &optional env)
-;;   (let* ((*break-message* (if (stringp at) at *break-message*))
-;; 	 (quit-tags1 (cons *break-level* *quit-tag*))
-;; 	 (quit-tags (cons quit-tags1 *quit-tags*))
-;;          (quit-tag (cons nil nil))
-;; 	 (break-level1 (cons t *break-level*))
-;;          (break-level (if (not at) *break-level* break-level1))
-;;          (*ihs-base* (1+ *ihs-top*))
-;;          (*ihs-top* (1- (ihs-top)))
-;;          (*current-ihs* *ihs-top*)
-;;          (*frs-base* (or (sch-frs-base *frs-top* *ihs-base*) (1+ (frs-top))))
-;;          (*frs-top* (frs-top))
-;;          (*break-env* nil)
-;; 	 (be *break-enable*)
-;; 	 (*break-enable* (unless (stringp at) be))
-;;          (*readtable* (or *break-readtable* *readtable*))
-;;          (*read-suppress* nil)
-;;          (+ +) (++ ++) (+++ +++)
-;;          (- -)
-;;          (* *) (** **) (*** ***)
-;;          (/ /) (// //) (/// ///))
-;;     (declare (:dynamic-extent quit-tags quit-tags1 quit-tag break-level1))
-
-;;     (unless (or be (not (stringp at)))
-;;       (simple-backtrace)
-;;       (break-quit (length *break-level*)))
-;;     (catch-fatal 1)
-;;     (setq *interrupt-enable* t)
-;;     (cond ((stringp at) 
-;; 	   (set-current)
-;; 	   (terpri *error-output*)
-;; 	   (setq *no-prompt* nil))
-;; 	  ((set-back at env)))
-;;     (loop 
-;;      (setq +++ ++ ++ + + -)
-;;      (if *no-prompt* 
-;; 	 (setq *no-prompt* nil)
-;;        (format *debug-io* "~&~a~a>~{~*>~}"
-;; 	       (if (stringp at) "" "dbl:")
-;; 	       (if (eq *package* (find-package 'user)) "" (package-name *package*))
-;; 	       break-level))
-;;      (force-output *error-output*)
-;;      (when
-;; 	 (catch 'step-continue
-;; 	   (let ((*break-level* break-level)(*quit-tags* quit-tags)(*quit-tag* quit-tag))
-;; 	     (catch *quit-tag*
-;; 	       (setq - (locally (declare (notinline dbl-read))
-;; 				(dbl-read *debug-io* nil *top-eof*)))
-;; 	       (when (eq - *top-eof*) (bye -1))
-;; 	       (let* (break-command
-;; 		      (values
-;; 		       (multiple-value-list
-;; 			(LOCALLY (declare (notinline break-call evalhook))
-;; 				 (cond 
-;; 				  ((keywordp -)
-;; 				   (setq break-command t)
-;; 				   (break-call - nil 'si::break-command))
-;; 				  ((and (consp -) (keywordp (car -)))
-;; 				   (setq break-command t)
-;; 				   (break-call (car -) (cdr -) 'si::break-command))
-;; 				  (t (evalhook - nil nil *break-env*)))))))
-;; 		 (and break-command (eq (car values) :resume )(return))
-;; 		 (setq /// // // / / values *** ** ** * * (car /))
-;; 		 (fresh-line *debug-io*)
-;; 		 (dolist (val /)
-;; 		   (locally (declare (notinline prin1)) (prin1 val *debug-io*))
-;; 		   (terpri *debug-io*)))
-;; 	       nil)))
-;;        (terpri *debug-io*)
-;;        (break-current)))))
-
 (defvar *debug-print-level* 3)
-
-;;FIXME elim
-;; (defun warn (format-string &rest args)
-;;   (let ((*print-level* 4)
-;;         (*print-length* 4)
-;;         (*print-case* :upcase))
-;;     (cond (*break-on-warnings*
-;;            (apply #'break format-string args))
-;;           (t (format *error-output* "~&Warning: ")
-;;              (let ((*indent-formatted-output* t))
-;;                (apply #'format *error-output* format-string args))
-;; 	     (terpri *error-output*)
-;;              nil))))
-
-;; (defun universal-error-handler
-;;   (error-name correctable function-name
-;;    continue-format-string error-format-string
-;;    &rest args &aux message)
-;;   (declare (:dynamic-extent args))
-;;   (let ((*print-pretty* nil)
-;;         (*print-level* *debug-print-level*)
-;;         (*print-length* *debug-print-level*)
-;;         (*print-case* :upcase))
-;;     (unless (stringp error-format-string)
-;;       (setq args (cons error-format-string args))
-;;       (setq error-format-string (apply 'string-concatenate (cons error-name (make-list (length args) :initial-element " ~s")))))
-;;        (terpri *error-output*)
-;;        (cond ((and correctable *break-enable*)
-;;               (format *error-output* "~&Correctable error: ")
-;;               (let ((*indent-formatted-output* t))
-;;                 (apply 'format *error-output* error-format-string args))
-;;               (terpri *error-output*)
-;;               (setq message (apply 'format nil error-format-string args))
-;;               (if function-name
-;;                   (format *error-output*
-;;                           "Signalled by ~:@(~S~).~%" function-name)
-;;                   (format *error-output*
-;;                           "Signalled by an anonymous function.~%"))
-;;               (format *error-output* "~&If continued: ")
-;;               (let ((*indent-formatted-output* t))
-;;                 (format *error-output* "~?~&" continue-format-string args))
-;;               )
-;;              (t
-;;               (format *error-output* "~&Error: ")
-;;               (let ((*indent-formatted-output* t))
-;;                 (apply 'format *error-output* error-format-string args))
-;;               (terpri *error-output*)
-;; 	      (if (> (length *link-array*) 0)
-;; 		  (format *error-output* "Fast links are on: do (si::use-fast-links nil) for debugging~%"))
-;;               (setq message (apply 'format nil error-format-string args))
-;;               (if function-name
-;;                   (format *error-output*
-;;                           "Error signalled by ~:@(~S~).~%" function-name)
-;;                   (format *error-output*
-;;                           "Error signalled by an anonymous function.~%")))))
-;;   (force-output *error-output*)
-;;   (break-level message)
-;;   (unless correctable (throw *quit-tag* *quit-tag*)))
-
-;; (defun break (&optional format-string &rest args &aux message)
-;;   (let ((*print-pretty* nil)
-;;         (*print-level* 4)
-;;         (*print-length* 4)
-;;         (*print-case* :upcase))
-;;        (terpri *error-output*)
-;;     (cond (format-string
-;;            (format *error-output* "~&Break: ")
-;;            (let ((*indent-formatted-output* t))
-;;              (apply 'format *error-output* format-string args))
-;;            (terpri *error-output*)
-;;            (setq message (apply 'format nil format-string args)))
-;;           (t (format *error-output* "~&Break.~%")
-;;              (setq message ""))))
-;;   (let ((*break-enable* t)) (break-level message))
-;;   nil)
 
 (defun terminal-interrupt (correctablep)
   (let ((*break-enable* t))
@@ -593,7 +447,7 @@
   (let ((fun (ihs-fun ihs-index)))
     (cond ((symbolp fun) fun)
 	  ((when (compiled-function-p fun) (compiled-function-name fun)));FIXME
-	  ((functionp fun) (sixth (c-function-plist fun)));(name fun)
+	  ((functionp fun) (fun-name fun));(name fun)
 	   ;; (multiple-value-bind ;FIXME faster
 	   ;;  (x y fun) 
 	   ;;  (function-lambda-expression fun)
@@ -838,10 +692,7 @@ First directory is checked for first name and all extensions etc."
       (setq *load-path* (cons (string-concatenate *lib-directory* "lsp/") *load-path*))
       (setq *load-path* (cons (string-concatenate *lib-directory* "mod/") *load-path*))
       (setq *load-path* (cons (string-concatenate *lib-directory* "gcl-tk/") *load-path*))
-      (setq *load-path* (cons (string-concatenate *lib-directory* "xgcl-2/") *load-path*)))
-    (when (not (boundp '*system-directory*)) 
-      (setq *system-directory* 
-	    (namestring	(truename (make-pathname :name nil :type nil :defaults (argv 0))))))))
+      (setq *load-path* (cons (string-concatenate *lib-directory* "xgcl-2/") *load-path*)))))
 
 (defun do-f (file &aux *break-enable*)
   (catch *quit-tag*

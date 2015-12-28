@@ -4,6 +4,22 @@
 #include <sys/stat.h>
 #include "../h/include.h"
 
+#if defined(pre_gcl)
+#define libname "libpre_gcl.a"
+#elif defined(gcl)
+#define libname "libgcl.a"
+#elif defined(mod_gcl)
+#define libname "libmod_gcl.a"
+#elif defined(pcl_gcl)
+#define libname "libpcl_gcl.a"
+#elif defined(ansi_gcl)
+#define libname "libansi_gcl.a"
+#else
+#define libname ""
+#error "No flavor defined"
+#endif
+
+#ifndef pre_gcl
 static void
 ar_init_fn(void (fn)(void),const char *s) {
 
@@ -12,7 +28,7 @@ ar_init_fn(void (fn)(void),const char *s) {
   object sysd=sSAsystem_directoryA->s.s_dbind;
   
   if (stat(s,&ss)) {
-    assert(snprintf(b,sizeof(b),"ar x %-.*slib%sgcl.a %s",sysd->st.st_fillp,sysd->st.st_self,FLAVOR,s)>0);
+    assert(snprintf(b,sizeof(b),"ar x %-.*s%s %s",(int)sysd->st.st_fillp,sysd->st.st_self,libname,s)>0);
     assert(!msystem(b));
 #ifdef _WIN32
     if (sSAwine_detectedA->s.s_dbind!=Cnil) {
@@ -43,6 +59,7 @@ ar_check_init_fn(void (fn)(void),char *s,object b,char *o) {
      ar_init_fn(fn,o);
 
 }
+#endif
 
 #define proc(init,fn,args...) {extern void init(void);fn(init,##args);}
 
@@ -51,14 +68,24 @@ ar_check_init_fn(void (fn)(void),char *s,object b,char *o) {
 
 
 static void
-lsp_init(const char *a) {
+lsp_init(const char *a,const char *b) {
 
-   char b[200];
+   char c[200];
    object sysd=sSAsystem_directoryA->s.s_dbind;
 
-   assert(snprintf(b,sizeof(b),"%-.*s%s",sysd->st.st_fillp,sysd->st.st_self,a)>0)
-   printf("loading %s\n",b);
+   assert(snprintf(c,sizeof(c),"%-.*s../%s/%s%s",(int)sysd->st.st_fillp,sysd->st.st_self,a,b,strchr(b,'.') ? "" : ".lsp")>0)
+   printf("loading %s\n",c);
    fflush(stdout);
-   load(b);
+   load(c);
 
 }
+
+#ifdef pre_gcl
+#define init(a,b) lsp_init(a,b)
+#define check_init(a,b,c) lsp_init(#a,#b)
+#else
+#define init(a,b) ar_init(b)
+#define check_init(a,b,c) ar_check_init(b,c)
+#endif
+
+

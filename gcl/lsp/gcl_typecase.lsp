@@ -9,7 +9,7 @@
 
 (defmacro etypecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform (gensym))))
   (declare (optimize (safety 2)))
-  (check-type clauses (list-of proper-list))
+;  (check-type clauses (list-of proper-list))
   (let ((tp `(or ,@(mapcar 'car clauses))))
     `(typecase ,keyform ,@clauses (t (error 'type-error :datum ,key :expected-type ',tp)))))
 
@@ -114,7 +114,7 @@
      (declare (fixnum tp))
      (case tp
 	    ,@(let (r) (dotimes (i +xi+) (push `(,(1+ i) ,(mtp8b (1+ i))) r)) (nreverse r))))
-(setf (get 'num-comp 'compiler::cmp-inline) t)
+(setf (get 'num-comp 'cmp-inline) t)
 
 (defun eql (x y)
   (or (eq x y)
@@ -128,4 +128,4 @@
       (let ((ty (tp8 y))) 
 	(when (= tx ty)
 	  (num-comp x y tx)))))
-(setf (get 'eql-with-tx 'compiler::cmp-inline) t)
+(setf (get 'eql-with-tx 'cmp-inline) t)

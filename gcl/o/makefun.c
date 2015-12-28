@@ -1,5 +1,6 @@
 #include "include.h"
 #include "funlink.h"
+#include "page.h"
 
 DEFUN("SET-FUNCTION-ENVIRONMENT",object,fSset_function_environment,SI,2,2,NONE,OO,OO,OO,OO, \
 	  (object f,object env),"") { 
@@ -85,7 +86,7 @@ DEFUN("INIT-FUNCTION",object,fSinit_function,SI,7,7,NONE,OO,OO,OI,II, \
   d=data!=Cnil ? data : m;
   i=sSPinit;
   i=i ? i->s.s_dbind : i;
-  s=i && i!=OBJNULL && type_of(addr)==t_fixnum ? i->v.v_self[fix(addr)] : addr;
+  s=i && i!=OBJNULL && !get_pageinfo(addr) && ((void *)addr)>=data_start && type_of(addr)==t_fixnum ? i->v.v_self[fix(addr)] : addr;
   z=type_of(sc)==t_cons && sc->c.c_car==sLmacro; /*FIXME limited no. of args.*/
   sc=z ? sc->c.c_cdr : sc;
   sc=type_of(sc)==t_function ? sc->fun.fun_plist : sc;

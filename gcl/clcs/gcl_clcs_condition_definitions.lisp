@@ -2,26 +2,11 @@
 
 (IN-PACKAGE :CONDITIONS)
 
-(eval-when (compile load eval)
-	   (pushnew :clos-conditions *features*))
+(define-condition warning (condition) nil)
+(define-condition style-warning (warning) nil)
 
-(eval-when (compile load eval)
-	   (when (and (member :clos-conditions *features*)
-		      (member :defstruct-conditions *features*))
-	     (dolist (sym '(simple-condition-format-control simple-condition-format-arguments
-							   type-error-datum type-error-expected-type
-							   case-failure-name case-failure-possibilities
-							   stream-error-stream file-error-pathname package-error-package
-							   cell-error-name arithmetic-error-operation
-							   internal-error-function-name))
-	       (when (fboundp sym) (fmakunbound sym)))
-	     (setq *features* (remove :defstruct-conditions *features*))))
-
-(define-condition warning (condition) ())
-(define-condition style-warning (warning) ())
-
-(define-condition serious-condition (condition) ())
-(define-condition error (serious-condition) ())
+(define-condition serious-condition (condition) nil)
+(define-condition error (serious-condition) nil)
 
 (define-condition simple-condition (condition)
   ((format-control :type string
@@ -37,12 +22,12 @@
 		    (simple-condition-format-control c)
 		    (simple-condition-format-arguments c)))))
 
-(define-condition simple-warning (simple-condition warning) ())
-(define-condition simple-error (simple-condition error) ())
+(define-condition simple-warning (simple-condition warning) nil)
+(define-condition simple-error (simple-condition error) nil)
 
-(define-condition storage-condition (serious-condition) ())
-(define-condition stack-overflow    (storage-condition) ())
-(define-condition storage-exhausted (storage-condition) ())
+(define-condition storage-condition (serious-condition) nil)
+(define-condition stack-overflow    (storage-condition) nil)
+(define-condition storage-exhausted (storage-condition) nil)
 
 (define-condition type-error (error)
   ((datum :initarg :datum
@@ -50,11 +35,11 @@
    (expected-type :initarg :expected-type
 		  :reader type-error-expected-type))
   (:report ("~s is not of type ~s: " datum expected-type)))
-(define-condition simple-type-error (simple-error type-error) ())
+(define-condition simple-type-error (simple-error type-error) nil)
 
-(define-condition program-error (error) ())
-(define-condition control-error (error) ())
-(define-condition parse-error (error) ())
+(define-condition program-error (error) nil)
+(define-condition control-error (error) nil)
+(define-condition parse-error (error) nil)
 
 (define-condition print-not-readable (error) 
   ((object :initarg :object
@@ -66,16 +51,18 @@
 	   :reader stream-error-stream))
   (:report ("Stream error on stream ~s: " stream)))
 
-(define-condition reader-error (parse-error stream-error) ())
+(define-condition reader-error (parse-error stream-error) nil)
 
 (define-condition end-of-file (stream-error)
-  ()
+  nil
   (:report ("Unexpected end of file: ")))
 
 (define-condition file-error (error)
   ((pathname :initarg :pathname
 	     :reader file-error-pathname))
   (:report ("File error on ~s: " pathname)))
+
+(define-condition pathname-error (file-error) nil)
 
 (define-condition package-error (error)
   ((package :initarg :package
@@ -88,7 +75,7 @@
   (:report ("Cell error on ~s: " name)))
 
 (define-condition unbound-variable (cell-error)
-  ()
+  nil
   (:report ("Unbound variable: ")))
 
 (define-condition unbound-slot (cell-error)
@@ -97,7 +84,7 @@
   (:report ("Slot is unbound in ~s: " instance)))
   
 (define-condition undefined-function (cell-error)
-  ()
+  nil
   (:report ("Undefined function: ")))
 
 (define-condition arithmetic-error (ERROR)
@@ -107,13 +94,16 @@
 	      :reader arithmetic-error-operands))
   (:report ("~%Arithmetic error when performing ~s on ~s: " operation operands)))
 
-(define-condition division-by-zero (arithmetic-error) ())
-(define-condition floating-point-overflow (arithmetic-error) ())
-(define-condition floating-point-invalid-operation (arithmetic-error) ())
-(define-condition floating-point-inexact (arithmetic-error) ())
-(define-condition floating-point-underflow (arithmetic-error) ())
+(define-condition division-by-zero (arithmetic-error) nil)
+(define-condition floating-point-overflow (arithmetic-error) nil)
+(define-condition floating-point-invalid-operation (arithmetic-error) nil)
+(define-condition floating-point-inexact (arithmetic-error) nil)
+(define-condition floating-point-underflow (arithmetic-error) nil)
 
-(define-condition pathname-error (file-error) ())
+(define-condition fpe-ux (floating-point-underflow floating-point-inexact) nil)
+(define-condition fpe-id (floating-point-invalid-operation division-by-zero) nil)
+(define-condition fpe-ou (floating-point-overflow floating-point-underflow) nil)
+
 
 (define-condition case-failure (type-error)
  ((name :initarg :name
@@ -127,27 +117,7 @@
 	      (case-failure-name condition)
 	      (case-failure-possibilities condition)))))
 
-(define-condition abort-failure (control-error) () (:report "abort failed."))
-
-(define-condition internal-warning (warning)
-  ((function-name :initarg :function-name
-		  :reader internal-error-function-name
-		  :initform nil))
-  (:report (lambda (condition stream)
-	     (when (internal-error-function-name condition)
-	       (format stream "Warning in ~S [or a callee]: "
-		       (internal-error-function-name condition)))
-	     (call-next-method))))
-
-(define-condition internal-error (error)
-  ((function-name :initarg :function-name
-		  :reader internal-error-function-name
-		  :initform nil))
-  (:report (lambda (condition stream)
-	     (when (internal-error-function-name condition)
-	       (format stream "Error in ~S [or a callee]: "
-		       (internal-error-function-name condition)))
-	     (call-next-method))))
+(define-condition abort-failure (control-error) nil (:report "abort failed."))
 
 (define-condition internal-condition (condition)
   ((function-name :initarg :function-name
@@ -159,42 +129,22 @@
 		       (internal-condition-function-name condition)))
 	     (call-next-method))))
 
-(define-condition internal-simple-condition (internal-condition simple-condition) ())
+(define-condition internal-simple-condition (internal-condition simple-condition) nil)
 
-(define-condition internal-simple-error (internal-condition simple-error) ())
-(define-condition internal-simple-type-error (internal-condition simple-type-error) ())
-(define-condition internal-simple-warning (internal-condition simple-warning) ())
+(define-condition internal-simple-error (internal-condition simple-error) nil)
+(define-condition internal-simple-type-error (internal-condition simple-type-error) nil)
+(define-condition internal-simple-warning (internal-condition simple-warning) nil)
 
-(defun symcat (x y) (values (intern (concatenate 'string (string x) (string y)) 'conditions)))
-
-#.`(eval-when 
-    (compile load eval) 
-    ,@(mapcar (lambda (x) 
-		`(define-condition ,(symcat "INTERNAL-SIMPLE-" x)  (internal-condition simple-condition ,x) ())) 
-	      `(stack-overflow storage-exhausted print-not-readable end-of-file style-warning
-			       unbound-variable unbound-slot undefined-function division-by-zero
-			       case-failure abort-failure
-			      ,@(mapcar (lambda (x) (symcat "FLOATING-POINT-" x)) 
-					'(overflow underflow invalid-operation inexact))
-			      ,@(mapcar (lambda (x) (symcat x "-ERROR"))
-					'(program control parse stream reader file
-					       package cell arithmetic pathname)))))
-
-(defvar *simple-condition-class* (find-class 'simple-condition))
-(defvar *internal-error-class*   (find-class 'internal-error))
-(defvar *internal-warning-class*   (find-class 'internal-error));fixme
-
-(defun simple-condition-class-p (type)
-  (when (symbolp type)
-    (setq type (find-class type)))
-  (and (typep type 'standard-class)
-       (member *simple-condition-class* 
-	       (pcl::class-precedence-list type))))
-
-(defun internal-simple-condition-class-p (type)
-  (let ((type (if (symbolp type) (find-class type) type))
-	(cpl (pcl::class-precedence-list type)))
-    (and (typep type 'standard-class)
-	 (member *simple-condition-class* cpl)
-	 (or (member *internal-error-class* cpl)
-	     (member *internal-warning-class* cpl)))))
+#.`(progn
+     ,@(mapcar (lambda (x) 
+		 `(define-condition
+		    ,(intern (concatenate 'string "INTERNAL-SIMPLE-" (string x)))
+		    (internal-condition simple-condition ,x) nil)) 
+	       `(stack-overflow storage-exhausted print-not-readable end-of-file style-warning
+				unbound-variable unbound-slot undefined-function division-by-zero
+				case-failure abort-failure
+				,@(mapcar (lambda (x) (intern (concatenate 'string "FLOATING-POINT-" (string x))))
+					  '(overflow underflow invalid-operation inexact))
+				,@(mapcar (lambda (x) (intern (concatenate 'string (string x) "-ERROR")))
+					  '(program control parse stream reader file
+						    package cell arithmetic pathname)))))

@@ -148,7 +148,7 @@
 ;(declaim (inline atomic-tp))
 
 (defun t-to-nil (x) (unless (eq x t) x))
-(setf (get 't-to-nil 'compiler::cmp-inline) t)
+(setf (get 't-to-nil 'cmp-inline) t)
 
 (defun type-and (t1 t2 &aux h1 h2 r f c1 c2);m1 m2
   (cond
@@ -293,7 +293,7 @@
 
 (eval-when
  (compile eval)
- (defun msym (x) (intern (string-concatenate (string x) "-TYPE-PROPAGATOR") :compiler)))
+ (defun msym (x) (intern (string-concatenate (string x) "-TYPE-PROPAGATOR") :si)))
 
 #.`(progn
      ,@(mapcar (lambda (x &aux (s (msym x))) 
@@ -301,8 +301,8 @@
 		    (defun ,s (f x &aux (rl (load-time-value (cdr (assoc ',x +rs+)))))
 		      (declare (ignore f))
 		      (cmp-norm-tp (cons 'member (tps-ints (type-and-list (list x)) rl))))
-		    (setf (get ',x 'compiler::type-propagator) ',s)
-		    (setf (get ',x 'compiler::c1no-side-effects) t))) +tfns1+))
+		    (setf (get ',x 'type-propagator) ',s)
+		    (setf (get ',x 'c1no-side-effects) t))) +tfns1+))
 
 (mapc (lambda (x) 
 	(setf (gethash x *and-tp-hash*) (make-hash-table :test 'eq :size 256))

@@ -172,13 +172,7 @@
 (defun exp (x)
   (declare (inline rawexp))
   (check-type x number)
-  (let ((z (rawexp x)))
-    (when (zerop z) 
-      (error 'floating-point-underflow :operation 'exp :operands x))
-    (let ((z (abs z)))
-      (when (and (isinf z) (not (isinf (abs x))))
-	(error 'floating-point-overflow :operation 'exp :operands x)))
-    z))
+  (rawexp x))
 
 (defrmfun "atan2"  rawatan2)
 (defmfun "atan" rawatan)
@@ -198,9 +192,7 @@
   (check-type b (or null number))
   (if b 
       (/ (log x) (log b))
-    (let ((z (rawlog x)))
-      (when (isinf (abs z)) (error 'floating-point-overflow :operation 'log :operands x))
-      z)))
+    (rawlog x)))
   
 (defmfun "acosh" acosh (>= x 1))
 (defmfun "atanh" atanh (and (>= x -1) (<= x 1)))

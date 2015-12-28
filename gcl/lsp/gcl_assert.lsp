@@ -21,61 +21,45 @@
 ;;;;    assert.lsp
 
 
-;; (in-package 'lisp)
+(in-package :si)
 
+(defun read-evaluated-form nil
+  (format *query-io* "~&type a form to be evaluated:~%")
+  (list (eval (read *query-io*))))
 
-;; (export '(check-type assert
-;;           ecase ccase typecase etypecase ctypecase))
+(defun check-type-symbol (symbol value type &optional type-string 
+				 &aux (type-string (when type-string (concatenate 'string ": need a " type-string))))
+  (restart-case 
+   (cerror "Check type again." 'type-error :datum value :expected-type type)
+   (store-value (v) 
+		:report (lambda (stream) (format stream "Supply a new value of ~s. ~a" symbol (or type-string "")))
+		:interactive read-evaluated-form
+		(setf value v)))
+  (if (typep value type) value (check-type-symbol symbol value type type-string)))
 
-
-(in-package :system)
-
-
-(defun check-type-symbol (symbol value typespec &optional s)
-  (do nil
-      ((typep value typespec) value)
-      (let ((*print-level* 4) (*print-length* 4))
-	(cerror "choose a new value" 'type-error :datum value :expected-type (or s typespec)))
-;		(format nil "The value ~:@(~S~) bound to variable ~:@(~S~) is not ~A -- choose a new value" 
-;			value symbol (or s typespec))
-      (progn (format  *error-output*
-		      "Please input a new form (to be evaluated) for the place ~:@(~S~): "
-		      symbol)
-	     (finish-output *error-output*)
-	     (setf value (eval (read))))))
-
-
-(defun ask-for-form (place)
-  `(progn (format  *error-output*
-                   "Please input a new form (to be evaluated) for the place ~:@(~S~): "
-                   ',place)
-          (finish-output *error-output*)
-          (setf ,place (eval (read)))))
+(defmacro check-type (place typespec &optional string)
+  (declare (optimize (safety 2)))
+  `(progn (,(if (symbolp place) 'setq 'setf) ,place 
+	   (the ,typespec (if (typep ,place ',typespec) ,place (check-type-symbol ',place ,place ',typespec ',string)))) nil))
 
 
 (defmacro assert (test-form &optional places string &rest args)
-  (declare (optimize (safety 2)))
-  `(do nil ;((*print-level* 4) (*print-length* 4))
+  `(do nil;(*print-level* 4) (*print-length* 4)
        (,test-form nil)
      ,(if string
 	  `(cerror "" ,string ,@args)
 	`(cerror "" "The assertion ~:@(~S~) failed." ',test-form))
-     ,@(mapcar 'ask-for-form places)))
+     ,@(mapcan (lambda (place)
+		 `((format *error-output*
+			   "Please input the new value for the place ~:@(~S~): "
+			   ',place)
+		   (finish-output *error-output*)
+		   (setf ,place (read)))) places)))
 
-
-(defun clause-type (clauses)
-  `(or ,@(mapcan (lambda (x) (mapcar (lambda (y) `(eql ,y)) (if (listp (car x)) (car x) (list (car x))))) clauses)))
-	
-;; (defmacro etypecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform (gensym))))
-;;   (declare (optimize (safety 2)))
-;;   (check-type clauses (list-of proper-list))
-;;   (let ((tp `(or ,@(mapcar 'car clauses))))
-;;     `(typecase ,keyform ,@clauses (t (error 'type-error :datum ,key :expected-type ',tp)))))
-
-(defmacro ctypecase (keyform &rest clauses &aux (key (gensym)))
+(defmacro ctypecase (keyform &rest clauses &aux (key (sgen "CTYPECASE")))
   (declare (optimize (safety 2)))
-  (check-type clauses (list-of proper-list))
-  `(loop
+;  (check-type clauses (list-of proper-list))
+  `(do nil (nil)
     (typecase ,keyform
       ,@(mapcar (lambda (l)
 		  `(,(car l) (return (progn ,@(subst key keyform (cdr l))))))

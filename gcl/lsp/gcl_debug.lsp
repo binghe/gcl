@@ -182,14 +182,7 @@
 (defun dbl ()
   (break-level nil nil))
 
-(eval-when 
- (eval)
- (defun stream-name (str) (namestring (pathname str))))
-(clines "static object stream_name(str) object str;{
-     if (str->sm.sm_object1 != 0 && type_of(str->sm.sm_object1)==t_string)
-     return str->sm.sm_object1; else return Cnil; }")
-
-(defentry stream-name (object) (static object "stream_name"))
+(defun stream-name (str) (namestring (pathname str)))
 
 (defstruct instream stream (line 0 :type fixnum) stream-name)
 
@@ -201,8 +194,8 @@
 
 (defun cleanup ()
   (dolist (v *stream-alist*)
-    (if (closedp (instream-stream v))
-	(setq *stream-alist* (delete v *stream-alist*)))))
+    (unless (open-stream-p (instream-stream v))
+      (setq *stream-alist* (delete v *stream-alist*)))))
 
 (defun get-instream (str)
   (or (dolist (v *stream-alist*)
@@ -350,10 +343,6 @@
 (defun instream-name (instr)
   (or (instream-stream-name instr)
       (stream-name (instream-stream instr))))
-
-(clines "static object closedp(str) object str;{return (str->sm.sm_fp==0 ? Ct :Cnil); }")
-
-(defentry closedp (object) (static object "closedp"))
 
 (defun find-line-in-fun (form env fun  counter &aux tem)
   (setq tem (get fun 'line-info))

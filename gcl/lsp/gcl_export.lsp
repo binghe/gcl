@@ -495,6 +495,8 @@
 ;; (unless (find-package :type)
 ;;   (make-package :type :use '(:cl :s :si)))
 
+(export 's::(object double strcat) :s)
+
 (in-package :si)
 
 (defun eval-feature (x);FIXME
@@ -535,15 +537,16 @@
 (set-dispatch-macro-character #\# #\- 'sharp---reader
                               (si::standard-readtable))
 
-(unless (member :pre-gcl *features*);FIXME
-  (or (find-package :lib) (make-package :lib))
-  (or (find-symbol "libm" :lib) (make-package (intern "libm" :lib)))
-  (or (find-symbol "libc" :lib) (make-package (intern "libc" :lib)))
-  (or (find-symbol "libgmp" :lib) (make-package (intern "libgmp" :lib)))
-  #+darwin(or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))))
+;; (unless (member :pre-gcl *features*);FIXME
+;;   (or (find-package :lib) (make-package :lib))
+;;   (or (find-symbol "libm" :lib) (make-package (intern "libm" :lib)))
+;;   (or (find-symbol "libc" :lib) (make-package (intern "libc" :lib)))
+;;   (or (find-symbol "libgmp" :lib) (make-package (intern "libgmp" :lib)))
+;;   #+darwin(or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))))
 (use-package :s)
+(export 'si::(object double system cmp-inline cmp-eval type-propagator c1no-side-effects strcat defcfun clines defentry) :si)
 
-(make-package :COMPILER :use '(:lisp :si :s))
+;(make-package :COMPILER :use '(:lisp :si :s))
 
 ;FIXME bootstrap code
 
@@ -595,7 +598,7 @@
 (defun lremove-if-not (f l) (lremove (lambda (x) (not (funcall f x))) l :test 'funcall))
 
 (let (lists)
-  (defun make-function-plist (&rest args &aux (b (fboundp 'cmp-norm-tp)))
+  (defun make-function-plist (&rest args &aux (b (and (fboundp 'cmp-norm-tp) (fboundp 'typep))))
     (when b (setq lists (lremove-if 'normalize-function-plist lists)))
     (or (when b (normalize-function-plist args)) (car (push args lists)))))
 

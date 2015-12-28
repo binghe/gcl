@@ -1,6 +1,6 @@
 (in-package :s)
 
- (defun strcat (&rest r) (declare (:dynamic-extent r)) (nstring-downcase (apply 'string-concatenate r)))
+(defun strcat (&rest r) (declare (:dynamic-extent r)) (nstring-downcase (apply 'string-concatenate r)))
 
 (eval-when
  (eval compile) 
@@ -107,22 +107,22 @@
 	 ((keywordp k) :object)
 	 (:fixnum)))
  
-(defun mktp (z &aux (z (string-upcase z))) (or (find-symbol z :cl) (get (find-symbol z :keyword) 'lisp-type)))
-
-(defun btp (z) (or (cmp-norm-tpp (mktp z)) t))
-
-(defun idefun (args &aux (n (pop args)))
-  `(progn
-     (defun ,n ,@args)
-     (si::putprop ',n t 'compiler::cmp-inline)
-     (export ',n)))
-
-(defun afn (n tp body &optional ytp) 
-  (idefun `(,n (x ,@(when ytp `(y))) 
-	       (declare (optimize (safety 1)))
-	       ,@(unless (eq tp t) `((check-type x ,tp))),@(when ytp `((check-type y ,ytp)))
+ (defun mktp (z &aux (z (string-upcase z))) (or (find-symbol z :cl) (get (find-symbol z :keyword) 'lisp-type)))
+ 
+ (defun btp (z) (or (cmp-norm-tpp (mktp z)) t))
+ 
+ (defun idefun (args &aux (n (pop args)))
+   `(progn
+      (defun ,n ,@args)
+      (si::putprop ',n t 'si::cmp-inline)
+      (export ',n)))
+ 
+ (defun afn (n tp body &optional ytp) 
+   (idefun `(,n (x ,@(when ytp `(y))) 
+		(declare (optimize (safety 1)))
+		,@(unless (eq tp t) `((check-type x ,tp))),@(when ytp `((check-type y ,ytp)))
 	       ,@body)))
-
+ 
  (defun gbe (f tp o s sz b a)  `((the ,tp ,(m& (m>> `(,f ,a ,o nil nil) s) (when (< (+ s sz) b) (mm (1- (ash 1 sz))))))))
  (defun sbe (f    o s sz b a) 
    `((,f ,a ,o t ,(m\| (m<< 'y s) (when (< sz b) `(& (,f ,a ,o nil nil) ,(~ (mm (ash (1- (ash 1 sz)) s))))))) y))
@@ -130,36 +130,36 @@
  (defun fnk (k) (intern (string-concatenate "*" (string k))))
  
  (defun mnn (r z f) (intern (nstring-upcase (string-concatenate r z "-" f))))
-
+ 
  (defun mn (z p f &aux (f (strcat f))) (list (mnn "C-" z f) (mnn "C-SET-" z f)))
  
  (defun afn2 (z p c sz y &aux (b (sb c sz))(k (gk b y))(f (fnk k))(rtp (mtpp k y))(tp (btp z))(nl (mn z p (cadr y))))
    (multiple-value-bind
-    (o s)
-    (truncate c b)
-    (multiple-value-bind
-     (bo s)
-     (truncate s 8)
-     (let ((a (m+ `(address x) bo)))
-       (list (afn (pop nl) tp (gbe f rtp o s sz b a))
-	     (afn (car nl) tp (sbe f o s sz b a) rtp))))))
+       (o s)
+       (truncate c b)
+     (multiple-value-bind
+	 (bo s)
+	 (truncate s 8)
+       (let ((a (m+ `(address x) bo)))
+	 (list (afn (pop nl) tp (gbe f rtp o s sz b a))
+	       (afn (car nl) tp (sbe f o s sz b a) rtp))))))
  
  (defun nmf (x y &aux (p (strcat (cadr x) "_"))(f (strcat (cadr y)))(s (string= p (subseq f 0 (min (length f) (length p))))))
    (when s (rplaca (cdr y) (intern (subseq f (length p)))) t))
-
+ 
  (defun fp (c x y) 
    (cond ((nmf x y) x)
 	 ((< c fixnum-length) (cons '(|struct| |t|) (cons '|t| (cddr x))))))
  
  (defun mrd (x &key test key)
    (mapcan 'identity
-	  (maplist #'(lambda (x) (unless (member (funcall key (car x)) (cdr x) :test test :key key) (list (car x)))) x)))
-
+	   (maplist #'(lambda (x) (unless (member (funcall key (car x)) (cdr x) :test test :key key) (list (car x)))) x)))
+ 
  (defun macc nil 
    (mrd
     (mapcan #'(lambda (x &aux (c 0))
-	      (mapcan #'(lambda (y &aux (y (or (pp y) y))(sz (bs y))(c (prog1 c (incf c sz)))(x (fp c x y)))
-			(when x `((,(cadar x) ,(cadr x) ,c ,sz ,y)))) (caddr x))) (slist)) :test 'equal :key 'cddr)))
+		(mapcan #'(lambda (y &aux (y (or (pp y) y))(sz (bs y))(c (prog1 c (incf c sz)))(x (fp c x y)))
+			    (when x `((,(cadar x) ,(cadr x) ,c ,sz ,y)))) (caddr x))) (slist)) :test 'equal :key 'cddr)))
 
 #.`(progn ,@(mapcan #'(lambda (x) (apply 'afn2 x)) (macc)))
 

@@ -198,15 +198,17 @@ DEFUN("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),
 
 #if defined(__x86_64__) || defined(__i386__)
 
-#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(~((mxcsr_)>>7)&excepts_)
+#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(~((mxcsr_)>>7)&(excepts_))
 
 DEFUN("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
 
-  RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV :
-	  (FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV :
-	   (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF :
-	    (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND :
-	     (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0)))));
+  RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW|FE_INEXACT));
+  
+  /* RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV : */
+  /* 	  (FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV : */
+  /* 	   (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND : */
+  /* 	    (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF : */
+  /* 	     (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0))))); */
 }
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
@@ -238,11 +240,11 @@ sigfpe3(int sig,siginfo_t *i,void *v) {
 }
 
 DEFCONST("+FE-LIST+",sSPfe_listP,SI,list(5,
+					 list(3,sLfloating_point_invalid_operation,make_fixnum(FPE_FLTINV),make_fixnum(FE_INVALID)),
 					 list(3,sLdivision_by_zero,make_fixnum(FPE_FLTDIV),make_fixnum(FE_DIVBYZERO)),
 					 list(3,sLfloating_point_overflow,make_fixnum(FPE_FLTOVF),make_fixnum(FE_OVERFLOW)),
 					 list(3,sLfloating_point_underflow,make_fixnum(FPE_FLTUND),make_fixnum(FE_UNDERFLOW)),
-					 list(3,sLfloating_point_inexact,make_fixnum(FPE_FLTRES),make_fixnum(FE_INEXACT)),
-					 list(3,sLfloating_point_invalid_operation,make_fixnum(FPE_FLTINV),make_fixnum(FE_INVALID))),"");
+					 list(3,sLfloating_point_inexact,make_fixnum(FPE_FLTRES),make_fixnum(FE_INEXACT))),"");
 
 DEF_ORDINARY("FLOATING-POINT-ERROR",sSfloating_point_error,SI,"");
 

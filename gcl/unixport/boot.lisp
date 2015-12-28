@@ -4,12 +4,13 @@
 (progn
   (declaim (optimize (safety 3)))
   (unless (fboundp 'logandc2) (defun logandc2 (x y) (boole boole-andc2 x y)))
-  (unless (fboundp 'lognot) (defun lognot (x) (boole boole-c1 x 0))))
+  (unless (fboundp 'lognot) (defun lognot (x) (boole boole-c1 x 0)))
+  (unless (fboundp 'abs) (defun abs (x) (if (< x 0) (- x) x))))
 
 (progn (setq si::*code-block-reserve* (make-array 30000000 :element-type 'character :static t)) nil)
 
 (mapc 'compile (nconc #-pre-gcl '(mapcar mapc mapl maplist)
-		      'si::(listp typep ibb ib <= coerce < > >= + - set-array concatenate mta mtv eql-is-eq)
+		      'si::(listp type-spec-p ibb ib typep <= coerce < > >= + - set-array concatenate mta mtv eql-is-eq)
 		      '(info-p info-ref info-type info-flags info-ch info-ref-ccb info-ref-clb c1constant-value-object
 			     var-p var-name var-kind var-ref var-ref-ccb var-loc var-dt var-type var-mt var-tag var-store
 			     c-array-rank c-array-dim c-array-elttype c-array-eltsize c-array-self c-array-hasfillp
@@ -39,7 +40,7 @@
 			 logical_pathname_translations make_pathname parse_namestring merge_pathnames
 			 pathname_match_p namestring wild_pathname_p translate_pathname truename directory
 			 rename_file
-			 iolib mislib module numlib packlib setf top trace sloop debug info serror mnum))
+			 iolib mislib module numlib packlib setf top trace sloop debug info serror mnum fpe))
     (doitf l "lsp" 'identity cmpl?)))
 
 (doit (if (boundp 'noload) 'identity 'load) 'compile-file)

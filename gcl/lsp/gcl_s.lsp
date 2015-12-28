@@ -10,7 +10,7 @@
 
 (eval-when 
   (compile)
-  (defmacro idefun (n &rest args) `(progn (defun ,n ,@args) (si::putprop ',n t 'compiler::cmp-inline) (export ',n)))
+  (defmacro idefun (n &rest args) `(progn (defun ,n ,@args) (si::putprop ',n t 'si::cmp-inline) (export ',n)))
   (defmacro mffe nil
     `(progn
        ,@(mapcar (lambda (z &aux (x (pop z))(s (pop z))(m (car z))(n (intern (string-concatenate "*" (string-upcase x)))))
@@ -61,7 +61,7 @@
 		     `(progn (defun ,n (x o s y)
 			       (declare (fixnum x o)(boolean s))
 			       (cref (c+ x (<< o ,s)) ,(<< 1 s) ,m (if s 1 0) y))
-			     (si::putprop ',n t 'compiler::cmp-inline)
+			     (si::putprop ',n t 'si::cmp-inline)
 			     (export ',n)))
 		 +ks+))
   (defun mffe nil nil)

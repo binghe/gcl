@@ -14,7 +14,7 @@ PREFS:= s sf dl fle rm typep type typecase hash sym lr nr recompile sharp callha
 	  iolib listlib mislib module numlib mnum \
 	  packlib predlib \
 	  seq seqlib setf top trace sloop \
-          debug info serror bnum c sc
+          debug info serror bnum c sc restart
 NPREFS:= export autoload auto_new
 SRC:= $(addprefix gcl_,$(addsuffix .lsp,$(PREFS) $(NCPREFS)))
 OBJS:=$(addprefix gcl_,$(addsuffix .o,$(PREFS)))

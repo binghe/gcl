@@ -443,6 +443,7 @@ check_avail_pages(void) {
 
 }
 
+#include <fenv.h>
 
 fixnum
 set_tm_maxpage(struct typemanager *tm,fixnum n) {
@@ -450,7 +451,7 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   fixnum r=tm->tm_type==t_relocatable,j=tm->tm_maxpage,z=(n-j)*(r ? 2 : 1);
   if (z>available_pages) return 0;
   available_pages-=z;
-  tm->tm_adjgbccnt*=((double)j+1)/(n+1);
+  ({fenv_t f;feholdexcept(&f);tm->tm_adjgbccnt*=((double)j+1)/(n+1);fesetenv(&f);});
   tm->tm_maxpage=n;
   /* massert(!check_avail_pages()); */
   return 1;

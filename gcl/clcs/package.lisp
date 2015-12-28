@@ -12,38 +12,12 @@
 ;;; file will define a bunch of functions which work like a condition system. Redefining
 ;;; existing condition systems is beyond the goal of this implementation attempt.
 
-(unless (find-package :conditions)
-  (make-package :conditions :use '(:cl)))
+(make-package :conditions :use '(:lisp))
+(in-package :conditions :use '(:lisp))
 
-(in-package :conditions)
-
-(export '(*break-on-signals* *debugger-hook* signal
-			     with-condition-restarts
-			     handler-case handler-bind ignore-errors define-condition make-condition
-			     with-simple-restart restart-case restart-bind restart-name
-			     restart-name find-restart compute-restarts invoke-restart
-			     invoke-restart-interactively abort continue muffle-warning
-			     store-value use-value invoke-debugger restart condition
-			     warning serious-condition simple-condition simple-warning simple-error
-			     simple-condition-format-control simple-condition-format-arguments
-			     storage-condition stack-overflow storage-exhausted type-error
-			     type-error-datum type-error-expected-type simple-type-error
-			     program-error control-error stream-error stream-error-stream
-			     end-of-file file-error file-error-pathname cell-error cell-error-name
-			     unbound-variable unbound-slot unbound-slot-name unbound-slot-instance undefined-function
-			     arithmetic-error print-not-readable-object
-			     arithmetic-error-operation arithmetic-error-operands
-			     package-error package-error-package
-			     division-by-zero floating-point-overflow floating-point-underflow))
-
-(import '(with-simple-restart abort continue compute-restarts
-	  *debug-level* *debug-restarts* *number-of-debug-restarts*
-	  *debug-abort* *debug-continue* *debug-condition* *debug-eval*
-	  find-restart invoke-restart invoke-restart-interactively invoke-debugger
-	  restart-name ignore-errors show-restarts conditionp signal store-value
-	  read-evaluated-form restart-case muffle-warning)
-	:si)
+(import '(si::*handler-clusters* si::unique-id si::condition-class-p si::make-condition))
 
 (defvar *this-package* (find-package :conditions))
 
 
+(import 'si::(clines defentry defcfun object void int double))

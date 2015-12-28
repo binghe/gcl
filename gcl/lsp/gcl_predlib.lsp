@@ -273,7 +273,7 @@
 (deftype extended-function-designator nil `(or function-designator (cons (member setf) (cons symbol null))))
 
 (deftype hash-table nil `(or hash-table-eq hash-table-eql hash-table-equal hash-table-equalp))
-(deftype compiler::funcallable-symbol nil `(satisfies compiler::funcallable-symbol-p));FIXME
+;(deftype compiler::funcallable-symbol nil `(satisfies compiler::funcallable-symbol-p));FIXME
 
 (defconstant +ifb+ (- (car (last (multiple-value-list (si::heap-report))))))
 (defconstant +ifr+ (ash (- +ifb+)  -1))
@@ -292,7 +292,7 @@
    (immfix t)
    (number nil)
    (otherwise t)))
-(setf (get 'eql-is-eq 'compiler::cmp-inline) t)
+(setf (get 'eql-is-eq 'cmp-inline) t)
 
 ;To pevent typep/predicate loops
 ;(defun eql-is-eq (x) (typep x (funcall (get 'eql-is-eq-tp 'deftype-definition))))
@@ -300,7 +300,7 @@
 (defun equalp-is-eq (x) (typep x (funcall (get 'equalp-is-eq-tp 'deftype-definition))))
 
 (defun seqindp (x) (and (fixnump x) (>= x 0) (< x array-dimension-limit)))
-(si::putprop 'seqindp t 'compiler::cmp-inline)
+(si::putprop 'seqindp t 'cmp-inline)
 
 (deftype non-negative-char () `(non-negative-byte ,char-length))
 (deftype negative-char () `(negative-byte ,char-length))
@@ -530,23 +530,23 @@
   (or (vectorp x) (proper-listp x)))
 
 (deftype not-type nil 'null)
-(deftype list-of (y) 
-  (let* ((sym (intern (string-concatenate "LIST-OF-" (symbol-name y)) 'si))) 
-    (unless (fboundp sym)
-      (eval `(defun ,sym (x) 
-	       (declare (proper-list x))
-	       (not (member-if-not (lambda (x) (typep x ',y)) x)))) )
-    `(and proper-list (satisfies ,sym))))
+;; (deftype list-of (y) 
+;;   (let* ((sym (intern (string-concatenate "LIST-OF-" (symbol-name y)) 'si))) 
+;;     (unless (fboundp sym)
+;;       (eval `(defun ,sym (x) 
+;; 	       (declare (proper-list x))
+;; 	       (not (member-if-not (lambda (x) (typep x ',y)) x)))) )
+;;     `(and proper-list (satisfies ,sym))))
 
-#.`(eval-when 
-    (compile load eval) 
-    ,@(mapcar (lambda (x) 
-		`(defun ,(intern (string-concatenate "LIST-OF-" (symbol-name x))) (w)
-		   (declare (proper-list w))
-		   (not (member-if-not (lambda (z) (typep z ',x)) w))))
-	      '(symbol seqind proper-list)))
+;; #.`(eval-when 
+;;     (compile load eval) 
+;;     ,@(mapcar (lambda (x) 
+;; 		`(defun ,(intern (string-concatenate "LIST-OF-" (symbol-name x))) (w)
+;; 		   (declare (proper-list w))
+;; 		   (not (member-if-not (lambda (z) (typep z ',x)) w))))
+;; 	      '(symbol seqind proper-list)))
 
-(deftype type-spec nil `(or symbol class structure proper-cons))
+(deftype type-spec nil `(satisfies type-spec-p))
 (deftype fpvec nil `(and vector (satisfies array-has-fill-pointer-p)))
 
 ;; (defun non-generic-compiled-function-p (x)
@@ -712,7 +712,7 @@
 
 ;;FIXME --remove these when compiler is ready
 
-(mapc (lambda (x) (setf (get x 'compiler::cmp-inline) t))
+(mapc (lambda (x) (setf (get x 'cmp-inline) t))
       '(lremove lremove-if lremove-if-not lremove-duplicates lreduce lsubstitute ldelete ldelete-if ldelete-if-not))
 
 (defun lremove (q l &key (key #'identity) (test #'eql))
@@ -1489,7 +1489,7 @@
 
 (defun expand-deftype (type &aux (atp (listp type)) (ctp (if atp (car type) type)) (tp (when atp (cdr type))))
   (cond ((unless (symbolp ctp) (si-classp ctp)) (or (valid-class-name ctp) `(std-instance ,ctp)));FIXME classp loop, also accept s-data?
-	((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem)))) (cons 'structure (get-included ctp)))
+	((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem)))) `(structure ,ctp)); (cons 'structure (get-included ctp))
 	((let ((tem (get ctp 'deftype-definition)))
 	   (when tem
 	     (let ((ntype (apply tem tp)))

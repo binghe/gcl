@@ -10048,7 +10048,8 @@ if test "x$ac_cv_header_dis_asm_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_DIS_ASM_H 1
 _ACEOF
- { $as_echo "$as_me:${as_lineno-$LINENO}: checking for init_disassemble_info in -lopcodes" >&5
+ MLIBS=$LIBS
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for init_disassemble_info in -lopcodes" >&5
 $as_echo_n "checking for init_disassemble_info in -lopcodes... " >&6; }
 if ${ac_cv_lib_opcodes_init_disassemble_info+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -10093,228 +10094,56 @@ _ACEOF
 
 fi
 
-	for ac_func in print_insn_alpha
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_alpha" "ac_cv_func_print_insn_alpha"
-if test "x$ac_cv_func_print_insn_alpha" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_ALPHA 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_alpha" >>confdefs.h
-
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
+$as_echo_n "checking for dlopen in -ldl... " >&6; }
+if ${ac_cv_lib_dl_dlopen+:} false; then :
+  $as_echo_n "(cached) " >&6
 else
-  for ac_func in print_insn_avr
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_avr" "ac_cv_func_print_insn_avr"
-if test "x$ac_cv_func_print_insn_avr" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_AVR 1
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-ldl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
 _ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_avr" >>confdefs.h
-
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_dl_dlopen=yes
 else
-  for ac_func in print_insn_big_arm
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_big_arm" "ac_cv_func_print_insn_big_arm"
-if test "x$ac_cv_func_print_insn_big_arm" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_BIG_ARM 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN insn_big_arm" >>confdefs.h
-
-else
-  for ac_func in print_insn_big_mips
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_big_mips" "ac_cv_func_print_insn_big_mips"
-if test "x$ac_cv_func_print_insn_big_mips" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_BIG_MIPS 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN insn_big_mips" >>confdefs.h
-
-else
-  for ac_func in print_insn_big_powerpc
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_big_powerpc" "ac_cv_func_print_insn_big_powerpc"
-if test "x$ac_cv_func_print_insn_big_powerpc" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_BIG_POWERPC 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN insn_big_powerpc" >>confdefs.h
-
-else
-  for ac_func in print_insn_hppa
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_hppa" "ac_cv_func_print_insn_hppa"
-if test "x$ac_cv_func_print_insn_hppa" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_HPPA 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_hppa" >>confdefs.h
-
-else
-  for ac_func in print_insn_i386
+  ac_cv_lib_dl_dlopen=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_dl_dlopen" >&5
+$as_echo "$ac_cv_lib_dl_dlopen" >&6; }
+if test "x$ac_cv_lib_dl_dlopen" = xyes; then :
+  #opcodes changes too quickly to link directly
+		for ac_func in print_insn_i386
 do :
   ac_fn_c_check_func "$LINENO" "print_insn_i386" "ac_cv_func_print_insn_i386"
 if test "x$ac_cv_func_print_insn_i386" = xyes; then :
   cat >>confdefs.h <<_ACEOF
 #define HAVE_PRINT_INSN_I386 1
 _ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_i386" >>confdefs.h
-
-else
-  for ac_func in print_insn_ia64
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_ia64" "ac_cv_func_print_insn_ia64"
-if test "x$ac_cv_func_print_insn_ia64" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_IA64 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_ia64" >>confdefs.h
-
-else
-  for ac_func in print_insn_little_arm
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_little_arm" "ac_cv_func_print_insn_little_arm"
-if test "x$ac_cv_func_print_insn_little_arm" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_LITTLE_ARM 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN insn_little_arm" >>confdefs.h
-
-else
-  for ac_func in print_insn_little_mips
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_little_mips" "ac_cv_func_print_insn_little_mips"
-if test "x$ac_cv_func_print_insn_little_mips" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_LITTLE_MIPS 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN insn_little_mips" >>confdefs.h
-
-else
-  for ac_func in print_insn_little_powerpc
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_little_powerpc" "ac_cv_func_print_insn_little_powerpc"
-if test "x$ac_cv_func_print_insn_little_powerpc" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_LITTLE_POWERPC 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN insn_little_powerpc" >>confdefs.h
-
-else
-  for ac_func in print_insn_m68k
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_m68k" "ac_cv_func_print_insn_m68k"
-if test "x$ac_cv_func_print_insn_m68k" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_M68K 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_m68k" >>confdefs.h
-
-else
-  for ac_func in print_insn_s390
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_s390" "ac_cv_func_print_insn_s390"
-if test "x$ac_cv_func_print_insn_s390" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_S390 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_s390" >>confdefs.h
-
-else
-  for ac_func in print_insn_sh64
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_sh64" "ac_cv_func_print_insn_sh64"
-if test "x$ac_cv_func_print_insn_sh64" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_SH64 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_sh64" >>confdefs.h
-
-else
-  for ac_func in print_insn_sh
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_sh" "ac_cv_func_print_insn_sh"
-if test "x$ac_cv_func_print_insn_sh" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_SH 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_sh" >>confdefs.h
-
-else
-  for ac_func in print_insn_sparc
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_sparc" "ac_cv_func_print_insn_sparc"
-if test "x$ac_cv_func_print_insn_sparc" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_PRINT_INSN_SPARC 1
-_ACEOF
-
-$as_echo "#define PRINT_INSN print_insn_sparc" >>confdefs.h
-
+ LIBS="$MLIBS -ldl"
 fi
 done
 
 fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
-
-fi
-done
 
 fi
 

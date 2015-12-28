@@ -397,7 +397,7 @@ init_boot(void) {
 
 }
 
-int pre_gcl=0;
+int in_pre_gcl=0;
 object def_env1[2]={(object)1,Cnil},*def_env=def_env1+1;
 object src_env1[2]={(object)1,Cnil},*src_env=src_env1+1;
 
@@ -543,7 +543,7 @@ main(int argc, char **argv, char **envp) {
     gcl_init_readline_function();
 #endif
 
-    if (pre_gcl) init_boot();
+    if (in_pre_gcl) init_boot();
 
   }
 
