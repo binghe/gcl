@@ -69,7 +69,7 @@
 (deftype cltl1-compat::string-char nil 'character)
 (do-symbols (s :cltl1-compat) (export s :cltl1-compat))
 
-#-ansi-cl(use-package :cltl1-compat :lisp)
+;#-ansi-cl(use-package :cltl1-compat :lisp)
 ;#-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp))
 
 #+ansi-cl (use-package :pcl :user)
