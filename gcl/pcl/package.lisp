@@ -11,7 +11,7 @@
     (make-package :iterate :use '(:lisp :walker)))
 
 (if (find-package :pcl)
-    (use-package '(:walker :iterate :lisp) :pcl)
+    (use-package '(:walker :iterate :lisp :s) :pcl)
     (make-package :pcl :use '(:walker :iterate :lisp))))
 
 (in-package :pcl)

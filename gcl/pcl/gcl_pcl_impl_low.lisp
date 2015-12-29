@@ -3,7 +3,7 @@
           %compiled-function-name
           %set-compiled-function-name))
 (in-package :pcl)
-(use-package :s)
+
 (eval-when
  (compile eval load)
  (setq  *EVAL-WHEN-COMPILE* t))

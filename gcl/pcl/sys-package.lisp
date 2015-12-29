@@ -1,5 +1,5 @@
 (make-package :slot-accessor-name :use '(:cl) :nicknames '(:s-a-n))
 (make-package :walker :use '(:cl))
 (make-package :iterate :use '(:cl :walker))
-(make-package :pcl :use '(:cl :iterate :walker))
+(make-package :pcl :use '(:cl :iterate :walker :s))
 (import 'si::std-instance :pcl)
