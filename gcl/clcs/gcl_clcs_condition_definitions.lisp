@@ -94,16 +94,22 @@
 	      :reader arithmetic-error-operands))
   (:report ("~%Arithmetic error when performing ~s on ~s: " operation operands)))
 
-(define-condition division-by-zero (arithmetic-error) nil)
-(define-condition floating-point-overflow (arithmetic-error) nil)
-(define-condition floating-point-invalid-operation (arithmetic-error) nil)
-(define-condition floating-point-inexact (arithmetic-error) nil)
-(define-condition floating-point-underflow (arithmetic-error) nil)
-
-(define-condition fpe-ux (floating-point-underflow floating-point-inexact) nil)
-(define-condition fpe-id (floating-point-invalid-operation division-by-zero) nil)
-(define-condition fpe-ou (floating-point-overflow floating-point-underflow) nil)
-
+(macrolet ((make-fpe-conditions
+	    (&aux (n "indoux"))
+	    (labels ((make-sub-fpe-conditions
+		      (l &optional c)
+		      (cond (l (let ((x (pop l)))
+				 (append (make-sub-fpe-conditions l (cons x c)) (make-sub-fpe-conditions l c))))
+			    ((cdr c)
+			     `((,(intern (concatenate 'string "FPE-"
+						      (nstring-upcase
+						       (coerce
+							(mapcar (lambda (x) (aref n (1- (integer-length (caddr x))))) c) 'string))))
+				,(mapcar 'car c))))
+			    (c `((,(caar c) (arithmetic-error)))))))
+	      `(progn ,@(mapcar (lambda (x) `(define-condition ,@x nil))
+				(make-sub-fpe-conditions fpe::+fe-list+))))))
+  (make-fpe-conditions))
 
 (define-condition case-failure (type-error)
  ((name :initarg :name
