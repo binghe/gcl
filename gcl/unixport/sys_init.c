@@ -41,8 +41,13 @@ gcl_init_system(object no_init)
   check_init(lsp,gcl_evalmacros,no_init);
   check_init(lsp,gcl_module,no_init);
   check_init(lsp,gcl_predlib,no_init);
+#ifdef pre_gcl/*FIXME coerce in compiled funcall*/
   check_init(lsp,gcl_type,no_init);
+#endif
   check_init(lsp,gcl_typep,no_init);
+#ifndef pre_gcl
+  check_init(lsp,gcl_type,no_init);
+#endif
   check_init(lsp,gcl_typecase,no_init);
   check_init(lsp,gcl_assert,no_init);
 
@@ -80,13 +85,13 @@ gcl_init_system(object no_init)
   
   check_init(lsp,gcl_callhash,no_init);
   check_init(lsp,gcl_describe,no_init);
-  check_init(lsp,gcl_numlib,no_init);
-  check_init(lsp,gcl_mislib,no_init);
-  check_init(lsp,gcl_iolib,no_init);
+  check_init(lsp,gcl_bnum,no_init);
 #ifndef pre_gcl
   check_init(lsp,gcl_mnum,no_init);
 #endif
-  check_init(lsp,gcl_bnum,no_init);
+  check_init(lsp,gcl_numlib,no_init);
+  check_init(lsp,gcl_mislib,no_init);
+  check_init(lsp,gcl_iolib,no_init);
   check_init(lsp,gcl_nr,no_init);
 #ifndef pre_gcl
   check_init(lsp,gcl_lr,no_init);
@@ -130,6 +135,7 @@ gcl_init_system(object no_init)
 
 #ifndef pre_gcl  
 
+#ifndef gcl
 #ifdef HAVE_XGCL
   lsp_init("xgcl-2","sysdef.lisp");
   check_init(xgcl-2,gcl_Xlib,no_init);
@@ -148,7 +154,6 @@ gcl_init_system(object no_init)
   check_init(xgcl-2,gcl_index,no_init);
 #endif
   
-#ifndef gcl
   check_init(mod,gcl_destructuring_bind,no_init);
   check_init(mod,gcl_loop,no_init);
   check_init(mod,gcl_defpackage,no_init);

@@ -14,7 +14,7 @@
 
 (defun isnormal (x)
   (and (isfinite x)
-       (>= (abs x) least-positive-normalized-long-float)))
+       (>= (if (< x 0) (- x) x) least-positive-normalized-long-float)));FIXME abs bootstrap
 
 (defun ratio-to-double (x &aux nx ny)
   (declare (inline isnormal))
@@ -75,3 +75,16 @@
    x
    (integer 1)
    (otherwise (c-ratio-den x))))
+
+(defun rational (x)
+  (declare (optimize (safety 1)))
+  (check-type x real)
+  (typecase x
+    (float
+      (multiple-value-bind
+       (i e s) (integer-decode-float x)
+       (let ((x (if (>= e 0) (ash i e) (/ i (ash 1 (- e))))))
+	 (if (>= s 0) x (- x)))))
+    (rational x)))
+(setf (symbol-function 'rationalize) (symbol-function 'rational))
+
