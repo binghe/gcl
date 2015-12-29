@@ -35,4 +35,6 @@
 (when *load-pathname*
   (mapc #'regression-test:rem-test '(load-pathname.1 load-truename.1)))
 
+#+gcl(fpe::break-on-floating-point-exceptions :division-by-zero t :floating-point-overflow t :floating-point-underflow t)
+
 (time (regression-test:do-tests))
