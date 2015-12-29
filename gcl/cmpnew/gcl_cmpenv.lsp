@@ -382,9 +382,8 @@
 	(proclaim-var (cadr decl) (cddr decl)))
        (ftype
 	(let* ((d (cdr decl))(def (pop d)))
-	  (assert (subtypep def 'function))
-	  (when (listp def)
-	    (add-function-proclamation (pop d) (cdr def) d))))
+	  (assert (when (listp def) (eq (car def) 'function)))
+	  (add-function-proclamation (pop d) (cdr def) d)))
        (function
 	(add-function-proclamation (cadr decl) (cddr decl) nil))
        (inline
