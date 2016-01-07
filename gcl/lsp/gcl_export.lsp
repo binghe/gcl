@@ -495,10 +495,10 @@
 
 ;FIXME bootstrap code
 
-;; (fset 'intersection #'intersection-eq)
+(fset 'intersection #'intersection-eq)
 (fset 'union #'union-eq)
 (fset 'set-difference #'set-difference-eq)
-;; (fset 'nunion #'nunion-eq)
+(fset 'nunion #'nunion-eq)
 
 (*make-special '*pahl*)
 (setq *pahl* nil)
