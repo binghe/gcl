@@ -43,18 +43,27 @@
 	   (the ,typespec (if (typep ,place ',typespec) ,place (check-type-symbol ',place ,place ',typespec ',string)))) nil))
 
 
+(defun assert-places (places values string &rest args)
+  (declare (dynamic-extent args))
+  (restart-case
+   (apply 'cerror "Repeat assertion." string args)
+   (store-value (&rest r)
+		:report (lambda (stream) (format stream "Supply a new values for ~s (old values are ~s)." places values))
+		:interactive (lambda nil
+			       (mapcar (lambda (x)
+					 (format *query-io* "~&type a form to be evaluated for ~s:~%" x)
+					 (eval (read *query-io*))) places))
+		:test (lambda (c) places)
+		(declare (dynamic-extent r))
+		(values-list r))))
+
 (defmacro assert (test-form &optional places string &rest args)
-  `(do nil;(*print-level* 4) (*print-length* 4)
-       (,test-form nil)
-     ,(if string
-	  `(cerror "" ,string ,@args)
-	`(cerror "" "The assertion ~:@(~S~) failed." ',test-form))
-     ,@(mapcan (lambda (place)
-		 `((format *error-output*
-			   "Please input the new value for the place ~:@(~S~): "
-			   ',place)
-		   (finish-output *error-output*)
-		   (setf ,place (read)))) places)))
+  (declare (dynamic-extent args))
+  `(do nil (,test-form nil)
+     (multiple-value-setq
+	 ,places
+       (apply 'assert-places ',places (list ,@places)
+	      ,@(if string `(,string (list ,@args)) `("The assertion ~:@(~S~) failed." ',test-form nil))))))
 
 (defmacro ctypecase (keyform &rest clauses &aux (key (sgen "CTYPECASE")))
   (declare (optimize (safety 2)))
