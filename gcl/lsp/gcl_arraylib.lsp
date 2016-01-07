@@ -91,10 +91,6 @@
 ;;   `(let ((q (array-total-size ,a)))
 ;;      (unless (< ,i q) (error 'type-error :datum ,i :expected-type `(integer 0 (,q))))))
 
-(defun array-in-bound (i)
-  (< i (array-total-size *array*)))
-(declaim (inline array-in-bound))
-
 #.`(defun row-major-aref-int (a i)
      (ecase
 	 (c-array-elttype a)
@@ -111,7 +107,7 @@
      (declare (optimize (safety 1)))
      (check-type a array)
      (check-type i seqind)
-     (let ((*array* a)) (check-type i (satisfies array-in-bound)))
+     (assert (< i (array-total-size a)) (i) 'type-error :datum i :expected-type `(integer 0 (,(array-total-size a))))
      (row-major-aref-int a i))
 
 #.`(defun row-major-aset (v a i)
@@ -156,14 +152,10 @@
     (*uchar (c-array-self array) ind t (if (zerop bit) (logandc2 byte val) (logior byte val)))
     bit))
 
-(defun array-in-bounds (i) (apply 'array-in-bounds-p *array* i))
-(declaim (inline array-in-bounds))
-
-
 (defun array-row-major-index (array &rest indices)
   (declare (:dynamic-extent indices)(optimize (safety 2)))
   (check-type array array)
-  (let* ((*array* array)(i indices))(check-type i (satisfies array-in-bounds)))
+  (assert (apply 'array-in-bounds-p array indices));FIXME type-error??
   (labels ((cpt (i j k l) (the seqind (if (zerop k) i (c+ i (c* j l)))));FIXME
 	   (armi-loop (s &optional (j 0) (k 0)) 
 		      (declare (rnkind k));FIXME
@@ -205,18 +197,12 @@
 ;; 			      ((< -1 (car i) (array-dimension a j)) (aibp-loop (cdr i) (1+ j))))))
 ;; 	    (aibp-loop i))))
 
-(defvar *array* nil)
-(defvar *dim* nil)
-
-(defun array-dimension-index-less-than-rank (i) (< i *dim*))
-(declaim (inline array-dimension-index-less-than-rank))
-
 (defun array-dimension (x i)
   (declare (optimize (safety 2)))
   (check-type x array)
   (check-type i rnkind)
   (let ((r (c-array-rank x)));FIXME
-    (unless (< i r) (let ((*dim* r)(i i))(check-type i (satisfies array-dimension-index-less-than-rank))))
+    (assert (< i r) (i) 'type-error :datum i :expected-type `(integer 0 (,r)))
     (if (= 1 r) (c-array-dim x) (array-dims x i))));(the seqind (*fixnum (c-array-dims x) i nil nil))
 
 ;; (defun array-dimension (x i)
