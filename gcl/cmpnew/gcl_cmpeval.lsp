@@ -2962,11 +2962,11 @@
 	  (nargs (c1args args info))
 	  (tp (info-type (cadar nargs)))
 	  (a (atomic-tp (info-type (cadadr nargs))))
-	  (c (cmp-norm-tp (car a))))
-     (if (unless (eq c '*) (when a (constant-type-p (car a))))
-	 (cond ((type>= c tp) (keep-vars) t)
-	       ((not (type-and c tp)) (keep-vars) nil)
-	       ((unless (member-if-not 'ignorable-form nargs) (when (consp c) (eq (car c) 'or)))
-		(keep-vars) `(typecase ,(car args) (,c t)))
-	       (form));FIXME hash here
-       form))))
+	  (c (if (when a (constant-type-p (car a))) (cmp-norm-tp (car a)) '*)))
+     (if (eq c '*)
+	 form
+       (cond ((type>= c tp) (keep-vars) t)
+	     ((not (type-and c tp)) (keep-vars) nil)
+	     ((unless (member-if-not 'ignorable-form nargs) (when (consp c) (eq (car c) 'or)))
+	      (keep-vars) `(typecase ,(car args) (,c t)))
+	     (form))))));FIXME hash here
