@@ -490,71 +490,15 @@
        user-homedir-pathname                yes-or-no-p               
        values                               zerop))
 
-(unless (find-package :s)
-  (make-package :s :use '(:cl)))
-;; (unless (find-package :type)
-;;   (make-package :type :use '(:cl :s :si)))
-
-(export 's::(object double strcat) :s)
-
 (in-package :si)
 
-(defun eval-feature (x);FIXME
-  (cond ((atom x)
-         (member x *features*))
-        ((eq (car x) :and)
-         (dolist (x (cdr x) t) (unless (eval-feature x) (return nil))))
-        ((eq (car x) :or)
-         (dolist (x (cdr x) nil) (when (eval-feature x) (return t))))
-        ((eq (car x) :not)
-	 (not (eval-feature (cadr x))))
-	(t (error "~S is not a feature expression." x))))
-
-
-(defun sharp-+-reader (stream subchar arg)
-  (declare (ignore subchar arg))
-  (if (eval-feature (let ((*read-suppress* nil)
-			  (*read-base* 10.)
-			  (*package* (load-time-value (find-package 'keyword))))
-		      (read stream t nil t)))
-      (values (read stream t nil t))
-    (let ((*read-suppress* t)) (read stream t nil t) (values))))
-
-(set-dispatch-macro-character #\# #\+ 'sharp-+-reader)
-(set-dispatch-macro-character #\# #\+ 'sharp-+-reader
-                              (si::standard-readtable))
-
-(defun sharp---reader (stream subchar arg)
-  (declare (ignore subchar arg))
-  (if (eval-feature (let ((*read-suppress* nil)
-			  (*read-base* 10.)
-			  (*package* (load-time-value (find-package 'keyword))))
-		      (read stream t nil t)))
-      (let ((*read-suppress* t)) (read stream t nil t) (values))
-    (values (read stream t nil t))))
-
-(set-dispatch-macro-character #\# #\- 'sharp---reader)
-(set-dispatch-macro-character #\# #\- 'sharp---reader
-                              (si::standard-readtable))
-
-;; (unless (member :pre-gcl *features*);FIXME
-;;   (or (find-package :lib) (make-package :lib))
-;;   (or (find-symbol "libm" :lib) (make-package (intern "libm" :lib)))
-;;   (or (find-symbol "libc" :lib) (make-package (intern "libc" :lib)))
-;;   (or (find-symbol "libgmp" :lib) (make-package (intern "libgmp" :lib)))
-;;   #+darwin(or (find-symbol "libsystem_m" :lib) (make-package (intern "libsystem_m" :lib))))
-(use-package :s)
-(use-package :gmp)
-(export 'si::(object double system cmp-inline cmp-eval type-propagator c1no-side-effects strcat defcfun clines defentry) :si)
-
-;(make-package :COMPILER :use '(:lisp :si :s))
 
 ;FIXME bootstrap code
 
-(fset 'intersection #'intersection-eq)
+;; (fset 'intersection #'intersection-eq)
 (fset 'union #'union-eq)
 (fset 'set-difference #'set-difference-eq)
-(fset 'nunion #'nunion-eq)
+;; (fset 'nunion #'nunion-eq)
 
 (*make-special '*pahl*)
 (setq *pahl* nil)
@@ -603,49 +547,6 @@
     (when b (setq lists (lremove-if 'normalize-function-plist lists)))
     (or (when b (normalize-function-plist args)) (car (push args lists)))))
 
-(in-package :s)
-(si::import-internal 'si::(\| & ^ ~ c+ c* << >>
-			   c-object-== c-fixnum-== c-float-== c-double-== c-fcomplex-== c-dcomplex-== fcomplex dcomplex
-			   string-concatenate strcat lit seqind fixnum-length char-length cref address short int
-			   package-internal package-external array-dims cmp-norm-tp tp0 tp1 tp2 tp3 tp4 tp5 tp6 tp7 tp8))
-;(si::import-internal 'compiler::(lisp-type cmp-norm-tp fsf))
-(export '(lisp-type defdlfun strcat))
-
-(dolist (l '((:float      "make_shortfloat"      short-float     cnum)
-	     (:double     "make_longfloat"       long-float      cnum)
-	     (:character  "code_char"            character       cnum)
-	     (:char       "make_fixnum"          char            cnum)
-	     (:short      "make_fixnum"          short           cnum)
-	     (:int        "make_fixnum"          int             cnum)
-	     (:uchar      "make_fixnum"          unsigned-char   cnum)
-	     (:ushort     "make_fixnum"          unsigned-short  cnum)
-	     (:uint       "make_fixnum"          unsigned-int    cnum)
-	     (:fixnum     "make_fixnum"          fixnum          cnum)
-	     (:long       "make_fixnum"          fixnum          cnum)
-	     (:fcomplex   "make_fcomplex"        fcomplex        cnum)
-	     (:dcomplex   "make_dcomplex"        dcomplex        cnum)
-	     (:string     "make_simple_string"   string)
-	     (:object     ""                     t)
-
-	     (:stdesig    ""                     (or symbol string character))
-	     (:longfloat  ""                     long-float)
-	     (:shortfloat ""                     short-float)
-	     (:hashtable  ""                     hash-table)
-	     (:ocomplex   ""                     complex)
-	     (:bitvector  ""                     bit-vector)
-	     (:random     ""                     random-state)
-	     (:ustring    ""                     string)
-	     (:fixarray   ""                     (array fixnum))
-	     (:sfarray    ""                     (array short-float))
-	     (:lfarray    ""                     (array long-float))
-
-	     (:real       ""                     real)
-
-	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
-	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
-	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
-	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
-  (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l))))
 
 (defun proclaim (&rest args) nil);FIXME
 
