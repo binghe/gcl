@@ -668,49 +668,6 @@
 (si::putprop 'comment 'c1comment 'c1)
 (si::putprop 'comment 'c2comment 'c2)
 
-(defun assert-safety (fun form &aux (l (pop form))(b (pop form))(lev (this-safety-level)))
-  (assert (eq 'let* l))
-  (labels ((f (x y) (when (consp x) (eq (car x) y)))
-	   (ff (x) (when (f x 'safety) 
-		     (when (> (cadr x) lev)
-		       (unless (when (listp fun) (eq (car fun) 'lambda))
-			 (keyed-cmpnote (list l 'inline 'safety)
-					"Reducing safety of ~s from ~s to ~s on inline" 
-					fun (cadr x) lev) t)))))
-	  (multiple-value-bind
-	   (doc decl ctps body)
-	   (parse-body-header form)
-	   `(,l ,b ,@(when doc `(doc)) 
-		,@(subst-if `(optimize (safety ,lev)) 
-			    (lambda (x) (or (ff x) (and (f x 'optimize) (ff (cadr x)))))
-			    decl)
-		,@ctps
-		,@body))))
-
-;; (defun assert-safety (form)
-;;   (let* ((l (pop form))(b (pop form)))
-;;     (assert (eq 'let* l))
-;;     (multiple-value-bind
-;;      (doc decl ctps body)
-;;      (parse-body-header form)
-;;      `(,l ,b ,@(when doc `(doc)) 
-;; 	  ,@(subst-if `(optimize (safety ,(this-safety-level))) 
-;; 		      (lambda (x) (labels ((f (x y) (when (consp x) (eq (car x) y)))) 
-;; 					  (or (f x 'safety) (and (f x 'optimize) (f (cadr x) 'safety)))))
-;; 		      decl)
-;; 	  ,@ctps
-;; 	  ,@body))))
-
-;; (defun assert-safety (forms)
-;;   (dolist (form (cddr forms))
-;;     (cond ((stringp form))
-;; 	  ((and (consp form) (eq (car form) 'declare))
-;; 	   (dolist (decl (cdr form))
-;; 	     (cond ((atom decl))
-;; 		   ((when (eq (car decl) 'optimize) (setq decl (cadr decl)) nil))
-;; 		   ((eq (car decl) 'safety) (setf (cadr decl) (this-safety-level))))))
-;; 	  ((return nil)))))
-
 (defun c1inline (args env inls)
   (let* ((cl (pop args))
 	 (fm (pop args))
@@ -1133,8 +1090,7 @@
      res))
      
 (defun mi4 (fn args la src env inls)
-  (c1inline (list (cons fn (append args la)) 
-		  (assert-safety fn (blla (cadr src) args la (cddr src)))) env inls))
+  (c1inline (list (cons fn (append args la)) (blla (cadr src) args la (cddr src))) env inls))
 
 ;; (defun mi4 (fn args la src env inls &aux *callees*)
 ;;   (let* (;(*compiler-check-args* (>= (this-safety-level) 2))

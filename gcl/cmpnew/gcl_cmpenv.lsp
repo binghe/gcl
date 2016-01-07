@@ -445,6 +445,14 @@
 	(cmp-norm-tp `(si::type-max (and t ,tp)))
       n)))
 
+(defun body-safety (others &aux
+			   (*compiler-check-args* *compiler-check-args*)
+			   (*compiler-new-safety* *compiler-new-safety*)
+			   (*compiler-push-events* *compiler-push-events*)
+			   (*safe-compile* *safe-compile*))
+  (mapc (lambda (x) (when (eq (car x) 'optimize) (local-compile-decls (cdr x)))) others)
+  (this-safety-level))
+
 (defun c1body (body doc-p &aux ss is ts others cps)
   (multiple-value-bind
    (doc decls ctps body)
@@ -522,17 +530,19 @@
 
   (dolist (l ctps) 
     (when (and (cadr l) (symbolp (cadr l))) 
-      (let ((tp (max-vtp (caddr l)))) 
+      (let ((tp (or (eq (car l) 'assert) (max-vtp (caddr l)))))
 	(unless (eq tp t) 
 	  (push (cons (cadr l) tp) cps)))))
 
-  (let ((s (> (effective-safety (mapcar (lambda (x) `(declare ,x)) others)) 0)))
+  (let ((s (> (body-safety others) (if (top-level-src-p) 0 1))))
     (when cps
       (unless s
 ;	  (setq body `((let ,(mapcar (lambda (x) (list (car x) (car x))) cps) ,@body)))
 	(setq ts (nconc cps ts))))
-    (when (and ctps s)
-      (setq body (nreconc ctps body))))
+    (when ctps
+      (if s
+	  (setq body (nreconc ctps body))
+	(mapc (lambda (x) (when (eq (car x) 'assert) (push (cadr x) body))) ctps))))
   (values body ss ts is others (when doc-p doc) cps)))
 
 ;; (defun c1body (body doc-p &aux ss is ts others cps)
@@ -908,10 +918,11 @@
 	  (safety
 	   (let* ((tl (this-safety-level))(level (if (>= tl 3) tl (cadr decl))))
 	     (declare (fixnum level))
-	     (setq *compiler-check-args* (>= level 1)
-		   *safe-compile* (>= level 2)
-		   *compiler-new-safety* (>= level 3)
-		   *compiler-push-events* (>= level 4))));FIXME
+	     (when (top-level-src-p)
+	       (setq *compiler-check-args* (>= level 1)
+		     *safe-compile* (>= level 2)
+		     *compiler-new-safety* (>= level 3)
+		     *compiler-push-events* (>= level 4)))));FIXME
 	  (space (setq *space* (cadr decl)))
 	  (notinline (push (cadr decl) *notinline*))
 	  (speed) ;;FIXME

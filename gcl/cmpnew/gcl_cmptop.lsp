@@ -509,7 +509,7 @@
 		form)
 	       (the `(,(car form) ,(cadr form) ,@(portable-source (cddr form) t)))
 	       ((and or) `(,(car form) ,@(portable-source (cdr form) t)))
-	       (check-type form)
+	       ((check-type assert) form)
 	       ((flet labels macrolet) 
 		(let ((fns (mapcar 'car (cadr form))))
 		  `(,(car form)
@@ -1214,11 +1214,17 @@
 ;;   (do-referred-cb (v (cadr l)) (push (list (var-name v) (car (atomic-tp (var-type v)))) r))
 ;;   (nreverse r))
 
+(defvar *top-tag* nil)
+
+(defun top-level-src-p nil (not (member *top-tag* *lexical-env-mask*)))
+
 (defun do-fun (name src e vis b)
   (let* ((*vars*   (when b (cons b *vars*)))
 	 (*funs*   (when b (cons b *funs*)))
 	 (*blocks* (when b (cons b *blocks*)))
 	 (*tags*   (when b (cons b *tags*)))
+	 (*top-tag* (make-tag))
+	 (*tags* (cons *top-tag* *tags*))
 	 (tag (tmpsym))
 	 (*prev-sri* (append *src-inline-recursion* *prev-sri*))
 	 (*src-inline-recursion* (when vis (list (list (list (sir-name name)) tag (ttl-ll (cadr src))))))
