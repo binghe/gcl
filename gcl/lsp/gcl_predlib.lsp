@@ -972,6 +972,19 @@
 (defun adj-bndd (nx inc bot top &optional (hmin top) (hmax top))
   (if (> inc 0) (adj-bnd nx '<= bot top hmin hmax) (adj-bnd nx '>= top bot hmax hmin)))
 
+
+(defun rational (x);FIXME different file -- bootstrap
+  (declare (optimize (safety 1)))
+  (check-type x real)
+  (typecase x
+    (float
+      (multiple-value-bind
+       (i e s) (integer-decode-float x)
+       (let ((x (if (>= e 0) (ash i e) (/ i (ash 1 (- e))))))
+	 (if (>= s 0) x (- x)))))
+    (rational x)))
+(setf (symbol-function 'rationalize) (symbol-function 'rational))
+
 (defun ctp-bnd (x tp inc &aux (a (atom x))(nx (if a x (car x))))
   (cond ((isinf nx) (when (or (< nx 0 inc) (< inc 0 nx)) '*))
 	((case tp
