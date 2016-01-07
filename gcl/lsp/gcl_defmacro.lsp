@@ -87,7 +87,7 @@
   (cond 
    ((unless (or doc ctps) (and (stringp a) (cdr x))) (parse-body-header (cdr x) a decl ctps))
    ((unless ctps (when (consp a) (eq (car a) 'declare)))  (parse-body-header (cdr x) doc (cons a decl) ctps))
-   ((when (consp a) (eq (car a) 'check-type)) (parse-body-header (cdr x) doc decl (cons a ctps)))
+   ((when (consp a) (member (car a) '(check-type assert))) (parse-body-header (cdr x) doc decl (cons a ctps)))
    (t (values doc (nreverse decl) (nreverse ctps) x))))
 
 (defun make-blocked-lambda (ll decls ctps body block)
