@@ -225,7 +225,7 @@
     (case blk
 	  (cb (setq ccb t inner (or inner 'cb)))
 	  (lb (setq clb t inner (or inner 'lb)))
-	  (t (when (eq (blk-name blk) name)
+	  (t (when (when (eq (blk-name blk) name) (not (member blk *lexical-env-mask*)))
 	       (let* ((*c1exit* (blk-exit blk))
 		      (val (c1expr (cadr args)))
 		      (c1fv (when ccb (c1inner-fun-var))))

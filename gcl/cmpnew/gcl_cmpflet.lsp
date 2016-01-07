@@ -917,7 +917,7 @@
 (defun c1local-fun (fname &optional cl &aux ccb inner)
   (dolist (fun *funs*)
     (cond ((not (fun-p fun)) (setq ccb (or (eq fun 'cb) ccb) inner (or inner fun)))
-	  ((eq (fun-name fun) fname)
+	  ((when (eq (fun-name fun) fname) (not (member fun *lexical-env-mask*)))
 	   (let* ((cl (or ccb cl))
 		  (env (fn-get (fun-fn fun) 'df))
 		  (fm (make-fun-c1 fun cl env))

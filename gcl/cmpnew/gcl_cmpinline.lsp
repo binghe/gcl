@@ -173,8 +173,7 @@
   (unless from-info (return-from add-info to-info))
   (macrolet ((mrg (field) `(let* ((r (,field from-info))) 
 			      (when r
-				(setf (,field to-info) (imerge (,field to-info) r *outer-env*)
-				      (,field to-info) (imerge (,field to-info) r *vars*)
+				(setf (,field to-info) (imerge (,field to-info) r *vars*)
 				      (,field to-info) (imerge (,field to-info) r *blocks*)
 				      (,field to-info) (imerge (,field to-info) r *tags*)
 				      (,field to-info) (imerge (,field to-info) r *funs*))))))

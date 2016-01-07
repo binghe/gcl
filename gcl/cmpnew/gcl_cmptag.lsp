@@ -1103,7 +1103,7 @@
     (case tag
 	  (cb (setq ccb t inner (or inner 'cb)))
 	  (lb (setq clb t inner (or inner 'lb)))
-	  (t (when (eq (tag-name tag) name)
+	  (t (when (when (eq (tag-name tag) name) (not (member tag *lexical-env-mask*)))
 	       (tag-throw tag)
 	       (let* ((ltag (list tag))
 		      (info (make-info :type nil))

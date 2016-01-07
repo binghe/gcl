@@ -460,7 +460,7 @@
                     (list var ccb)))
       (cond ((eq var 'cb) (setq ccb t))
             ((eq var 'lb) (setq clb t))
-            ((or (eq (var-name var) name) (eq var name))
+            ((or (when (eq (var-name var) name) (not (member var *lexical-env-mask*))) (eq var name))
 	     (set-var-reffed var)
 	     (keyed-cmpnote (list 'var-ref (var-name var))
 			    "Making variable ~s reference with barrier ~s" (var-name var) (if ccb 'cb (if clb 'lb)))

@@ -217,6 +217,7 @@
 
 (defun coerce-to-funid (fn)
   (cond ((symbolp fn) fn)
+	((local-fun-p fn) fn)
 	((not (functionp fn)) nil)
 	((fn-get fn 'id))
 	((si::function-name fn))))

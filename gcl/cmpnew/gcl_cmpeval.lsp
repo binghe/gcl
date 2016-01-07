@@ -1058,6 +1058,7 @@
   (unless *compiler-new-safety*
     (when (> *speed* 0)
       (cond ((symbolp fn) (inline-sym-src fn))
+	    ((functionp fn) (local-fun-src fn))
 	    ((and (consp fn) (eq (car fn) 'lambda)) fn)))))
 
 (defun ttl-tag-src (src &optional (tag (tmpsym)) (block (tmpsym)) &aux (h (pop src)) (ll (pop src)))
@@ -1257,7 +1258,7 @@
 
 (defun maybe-cons-sir (sir tag ttag src env &aux (id (name-sir sir)))
   (cond ((and (eq src (local-fun-src id))
-	      (not (let ((*funs* (if env (fourth env) *funs*)))
+	      (not (let ((*funs* (if env (fifth env) *funs*)));FIXME?
 			 (eq src (local-fun-src id)))))
 	 *src-inline-recursion*)
 	((cons (list sir tag (cadr src) ttag) *src-inline-recursion*))))
@@ -1415,12 +1416,10 @@
 ;; (defun mod-env (ce e l);FIXME
 ;;   (if ce e l))
 
-(defun mod-env (ce e l);FIXME
-  (if ce 
-      (progn 
-	(dolist (l l) (pushnew l *outer-env*))
-	(append (remove-if-not (lambda (x) (or (symbolp x) (is-fun-var x))) (ldiff l e)) e))
-    l))
+(defun mod-env (ce e l)
+  (setq *lexical-env-mask* (nconc (remove-if (lambda (x) (or (symbolp x) (is-fun-var x))) (ldiff l e)) *lexical-env-mask*))
+  l)
+
 
 ;; (defun mod-env (ce e l);FIXME
 ;;   (if ce (append (remove-if-not (lambda (x) (or (symbolp x) (is-fun-var x))) (ldiff l e)) e) l))
@@ -1438,11 +1437,11 @@
 ;; ;    (unless (equal or ol) (print ol) (print or))
 ;;     r))
 
-(defvar *outer-env* nil)
+(defvar *lexical-env-mask* nil)
 
 (defmacro under-env (env &rest forms &aux (e (tmpsym)))
   `(let* ((,e ,env)
-	  (*outer-env* *outer-env*)
+	  (*lexical-env-mask* (pop ,e))
 	  (*vars*   (mod-env ,e (pop ,e) *vars*))
 	  (*blocks* (mod-env ,e (pop ,e) *blocks*))
 	  (*tags*   (mod-env ,e (pop ,e) *tags*))
@@ -1771,7 +1770,7 @@
   (cond ((not ff) nil)
 	((symbolp ff) (ff-env (local-fun-fn ff)))
 	((consp ff) (let ((x (car (atomic-tp (info-type (cadr ff)))))) (unless (consp x) (ff-env x))));FIXME
-	((functionp ff) (list (fn-get ff 'ce) (fn-get ff 'df))))) 
+	((functionp ff) (list (or (fn-get ff 'ce) (current-env)) (fn-get ff 'df)))))
 	
   ;; (let* ((fn (when ff (coerce-to-local-fn (car (atomic-tp (info-type (cadr ff))))))))
   ;;   (when fn
@@ -1883,7 +1882,7 @@
 ;; (defun unfoo (f)
 ;;   (c1function (caddr f) nil (cadddr f)))
 
-(defun current-env nil (list *vars* *blocks* *tags* *funs*))
+(defun current-env nil (list *lexical-env-mask* *vars* *blocks* *tags* *funs*))
 
 (defun uui (inl &aux (m inl))
   (when (eq (car m) 'inline)
@@ -1951,7 +1950,10 @@
 ;;     res))
 
 (defun local-fun-p (fname)
-  (car (member-if (lambda (x) (when (fun-p x) (eq (fun-name x) fname))) *funs*)))
+  (car (member-if (lambda (x) (when (fun-p x)
+				(or (eq fname x) (eq fname (fun-fn x))
+				    (when (eq fname (fun-name x)) (not (member x *lexical-env-mask*))))))
+		  *funs*)))
 
 (defun local-fun-call (id)
   (let* ((fun (local-fun-p id)))

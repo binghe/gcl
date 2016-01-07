@@ -230,8 +230,10 @@
 	 (ttl-tag (pop ts))
 	 (nv (mapcar (lambda (x) (car (member (cdr x) *vars* :key (lambda (x) (when (var-p x) (var-name x)))))) s))
 	 (ov (mapcar (lambda (x) (car (member (car x) (car ts) :key (lambda (x) (when (var-p x) (var-name x)))))) s))
-	 (*vars* (append (mapc (lambda (x) (set-var-noreplace x)) (append nv ov)) *vars*))
-	 (*tags* (cons ttl-tag *tags*)))
+	 (v (mapc (lambda (x) (set-var-noreplace x)) (append nv ov)))
+	 (*vars* (append v *vars*))
+	 (*tags* (cons ttl-tag *tags*))
+	 (*lexical-env-mask* (remove ttl-tag (set-difference *lexical-env-mask* v))))
     (c1expr `(progn
 	       (setq ,@(mapcan (lambda (x) (list (car x) (cdr x))) s))
 	       (go ,tag)))))
