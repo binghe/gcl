@@ -80,7 +80,7 @@
 				 (ilim (sgen "WPI-ILIM")) (elim (sgen "WPI-ELIM"))
 				 (p (sgen "WPI-P")) (q (sgen "WPI-Q")) (l (sgen "WPI-L"))
 				 (a (sgen "WPI-A")) (x (sgen "WPI-X")) (y (sgen "WPI-Y")))
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (let (int ext inh)
     (dolist (key (cons key keys))
       (ecase key
@@ -214,7 +214,7 @@
   (terpri))
 
 (defun apropos-list (string &optional package &aux list (package (or package (list-all-packages))))
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (setq string (string string))
   (do-symbols (symbol package list) ;FIXME?
 	       (when (search string (string symbol))
@@ -222,7 +222,7 @@
   (stable-sort list 'string< :key 'symbol-name))
 
 (defun apropos (string &optional package)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (dolist (symbol (apropos-list string package))
     (print-symbol-apropos symbol))
   (values))

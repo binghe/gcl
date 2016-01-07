@@ -47,7 +47,7 @@
 			     (check-type type (member list vector))))))))
 
 (defun concatenate (rt &rest seqs)
-  (declare (optimize (safety 2)) (:dynamic-extent seqs))
+  (declare (optimize (safety 1)) (:dynamic-extent seqs))
   (macrolet
    ((++ (x) `(prog1 ,x (incf ,x))))
    (let* ((rs (make-sequence rt (reduce (lambda (y x) (+ y (length x))) seqs :initial-value 0)))
@@ -88,7 +88,7 @@
 (defun map (rt f seq &rest sqs &aux (f (coerce f 'function)) (l (listp seq));FIXME test array-dimension-limit instead of length for lists
 	       (sl (reduce (lambda (y x) (min y (length x))) sqs :initial-value (length seq)))
 	       (x (when rt (make-sequence rt sl))))
-  (declare (optimize (safety 2))(dynamic-extent sqs))
+  (declare (optimize (safety 1))(dynamic-extent sqs))
   (check-type rt type-spec)
   (check-type f function-designator)
   (check-type seq sequence)
@@ -126,8 +126,8 @@
 (defun map-into (rs g &rest seqs &aux 
 		    (h rs) (lp (unless (listp rs) (array-total-size rs))) 
 		    (fp (when lp (array-has-fill-pointer-p rs)))(j 0))
-  (declare (optimize (safety 2)))
-  (declare (:dynamic-extent seqs))
+  (declare (optimize (safety 1))(:dynamic-extent seqs))
+  (check-type rs proper-sequence)
   (when fp (setf (fill-pointer rs) lp))
   (block exit
 	 (apply 'map nil

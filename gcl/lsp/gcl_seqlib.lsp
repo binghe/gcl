@@ -129,7 +129,7 @@
 			 (when ivp (list (list 'initial-value nil 'ivsp)))
 			 (when testp (list 'test 'test-not))
 			 (when countp (list 'count)) +seq-ll+)
-	(declare (optimize (safety 2)))
+	(declare (optimize (safety 1)))
 	(check-type ,seq proper-sequence)
 	(check-type start (or null seqind))
 	(check-type end (or null seqind))
@@ -154,18 +154,20 @@
       ,@(when ifp
 	  `((defun ,(intern (string-concatenate (string n) "-IF")) 
 	      ,(append `(,@il ,seq &key) (when countp (list 'count)) +seq-ll+)
-	      (declare (optimize (safety 2)))
+	      (declare (optimize (safety 1)))
+	      (check-type ,seq proper-sequence)
 	      (,n ,@il ,seq :test 'funcall :key key :start start :end end :from-end from-end 
 		  ,@(when countp `(:count count))))
 	    (defun ,(intern (string-concatenate (string n) "-IF-NOT")) 
 	      ,(append `(,@il ,seq &key) (when countp (list 'count)) +seq-ll+)
-	      (declare (optimize (safety 2)))
+	      (declare (optimize (safety 1)))
+	      (check-type ,seq proper-sequence)
 	      (,n ,@il ,seq :test-not 'funcall :key key :start start :end end :from-end from-end 
 		  ,@(when countp `(:count count)))))))))
 
 
 (defun length (x)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (check-type x sequence)
   (labels ((ll (x i) (declare (seqind i)) (if x (ll (cdr x) (1+ i)) i)))
 	  (if (listp x) (ll x 0) (if (array-has-fill-pointer-p x) (c-vector-fillp x) (array-dimension x 0)))))
@@ -182,7 +184,7 @@
 
 
 (defun elt (seq n)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (check-type seq sequence)
   (check-type n seqind)
   (labels ((err nil (error 'type-error :datum n :expected-type `(integer 0 (,(length seq))))))
@@ -200,7 +202,7 @@
 	  (if (listp s) (lr s) (la))))
 
 (defun reverse (s)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (check-type s sequence);FIXME
   (labels ((lr (tl &optional hd) (if tl (lr (cdr tl) (cons (car tl) hd)) hd))
 	   (la (&optional (ls (length s)) (r (make-array ls :element-type (array-element-type s))) (i 0) (j (1- ls)))
@@ -549,25 +551,25 @@
 ;; (defevsm some  unless or)
 
 (defun every (pred seq &rest seqs &aux (pred (coerce pred 'function)))
-  (declare (optimize (safety 2))(dynamic-extent seqs))
+  (declare (optimize (safety 1))(dynamic-extent seqs))
   (check-type pred function-designator)
   (check-type seq sequence)
   (apply 'map nil (lambda (x &rest r) (unless (apply pred x r) (return-from every nil))) seq seqs)
   t)
 
 (defun some (pred seq &rest seqs &aux (pred (coerce pred 'function)))
-  (declare (optimize (safety 2))(dynamic-extent seqs))
+  (declare (optimize (safety 1))(dynamic-extent seqs))
   (check-type pred function-designator)
   (check-type seq sequence)
   (apply 'map nil (lambda (x &rest r &aux (v (apply pred x r))) (when v (return-from some v))) seq seqs))
 
 (defun notevery (pred seq &rest seqs)
-  (declare (optimize (safety 2))(:dynamic-extent seqs))
+  (declare (optimize (safety 1))(:dynamic-extent seqs))
   (check-type seq proper-sequence)
   (not (apply 'every pred seq seqs)))
 
 (defun notany (pred seq &rest seqs)
-  (declare (optimize (safety 2))(:dynamic-extent seqs))
+  (declare (optimize (safety 1))(:dynamic-extent seqs))
   (check-type seq proper-sequence)
   (not (apply 'some pred seq seqs)))
 
@@ -633,7 +635,7 @@
   
 
 (defun fill (sequence item &key start end );FIXME
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (with-start-end start end sequence
 		  (do ((i start (f+ 1 i)))
 		      ((>= i end) sequence)
@@ -668,7 +670,7 @@
 		      (key #'identity)
 		      start1 start2
 		      end1 end2)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (and test test-not (error "both test and test not supplied"))
   (with-start-end start1 end1 sequence1
    (with-start-end start2 end2 sequence2
@@ -698,7 +700,7 @@
                     key
 		    (start1 0) (start2 0)
 		    end1 end2)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (and test test-not (error "both test and test not supplied"))
   (check-type sequence1 sequence)
   (check-type sequence2 sequence)
@@ -737,7 +739,7 @@
 		  (return nil))))))))
 
 (defun sort (seq pred &key (key 'identity))
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (check-type seq sequence)
   (let* ((k (comp-key key))
 	 (ll (length seq))
@@ -797,7 +799,7 @@
 
 
 (defun stable-sort (sequence predicate &key (key #'identity))
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (check-type sequence sequence)
   (typecase 
    sequence
@@ -811,7 +813,7 @@
 (defun merge (result-type sequence1 sequence2 predicate
 	      &key (key #'identity)
 	      &aux (l1 (length sequence1)) (l2 (length sequence2)))
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (declare (fixnum l1 l2))
   (when (equal key 'nil) (setq key #'identity))
   (do ((newseq (make-sequence result-type (the fixnum (f+ l1 l2))))
@@ -842,7 +844,7 @@
 	   (setf  i2 (f+ 1  i2))))))
 
 (defmacro with-hash-table-iterator ((name hash-table) &body body)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   (let ((table (sgen))
 	(ind (sgen)))
     `(let ((,table ,hash-table)
