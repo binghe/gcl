@@ -34,9 +34,9 @@ gcl_init_system(object no_init)
 
   check_init(lsp,gcl_s,no_init);
   check_init(lsp,gcl_sf,no_init);
+  check_init(lsp,gcl_rm,no_init);
   check_init(lsp,gcl_dl,no_init);
   check_init(lsp,gcl_fle,no_init);
-  check_init(lsp,gcl_rm,no_init);
   check_init(lsp,gcl_defmacro,no_init);
   check_init(lsp,gcl_evalmacros,no_init);
   check_init(lsp,gcl_module,no_init);
