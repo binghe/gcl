@@ -232,7 +232,7 @@
 	 (types (mapcar (lambda (x) (let ((x (coerce-to-one-value (info-type (cadr x))))) (if (type>= #tboolean x) t x))) forms))
 	 (i 0)
 	 (s (mapcar (lambda (x &aux (x (when x (write-to-string (incf i))))) (strcat "@" x "(#" x ")@")) (cdr forms)))
-	 (s (strcat "({" (apply 'strcat s) "#0;})"))
+	 (s (strcat "({" (rep-type (car types)) " _t=#0;" (apply 'strcat s) "_t;})"));FIXME
 	 (s (cons s (mapcar 'inline-type (cdr types))))
 	 (in (list (inline-type (car types)) (flags) s (inline-args forms types))))
     (unwind-exit in nil (cons 'values (length forms)))
