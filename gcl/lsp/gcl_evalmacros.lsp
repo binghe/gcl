@@ -21,13 +21,12 @@
 ;;;;	evalmacros.lsp
 
 
-;; (in-package "LISP")
+(in-package :si)
 
-;; (export '(defvar defparameter defconstant define-symbol-macro import delete-package))
-
-(in-package :SYSTEM)
-
-(export '(lit sgen))
+(export '(*debug* *compiler-check-args* *safe-compile* *compiler-new-safety*
+		  *compiler-push-events* *space* *speed*
+ 		  *alien-declarations*
+ 		  lit sgen cmp-inline cmp-notinline cmp-type))
 
 (eval-when (eval compile) (setq si:*inhibit-macro-special* nil))
 
@@ -444,8 +443,8 @@
 
 (defmacro declaim (&rest l)
   (declare (optimize (safety 2)))
- `(eval-when (compile eval load)
-	     ,@(mapcar #'(lambda (x) `(proclaim ',x)) l)))
+  `(eval-when (compile eval load)
+     ,@(mapcar (lambda (x) `(proclaim ',x)) l)))
 
 (defmacro lambda (&whole l &rest args)
   (declare (optimize (safety 2)) (ignore args))
@@ -531,4 +530,77 @@
     (remprop name 'compiler-macro-prop)))
 
 
+(defvar *safe-compile* nil)
+(defvar *compiler-check-args* nil)
+(defvar *compiler-new-safety* nil)
+(defvar *compiler-push-events* nil)
+(defvar *speed* 3)
+(defvar *space* 0)
+(defvar *debug* 0)
 
+(defvar *alien-declarations* nil)
+
+(defvar *uniq-list* (make-hash-table :test 'equal))
+
+(defun uniq-list (list) (or (gethash list *uniq-list*) (setf (gethash list *uniq-list*) list)))
+
+(defun normalize-function-plist (plist)
+  (labels ((mn (tp &aux (n (cmp-norm-tp tp))) (if (unless (eq tp n) (eq n '*)) (return-from normalize-function-plist nil) n))
+	   (norm-sig (sig) (uniq-list (list (mapcar #'mn (car sig)) (mn (cadr sig))))))
+  (setf (car plist) (norm-sig (car plist)))
+  (setf (cadr plist ) (mapcar (lambda (x) (uniq-list (cons (car x) (norm-sig (cdr x))))) (cadr plist)))
+  plist))
+
+(defvar *function-plists* nil);rely on defvar not resetting to nil on loading this file compiled
+
+(defun make-function-plist (&rest args)
+  (cond ((and (fboundp 'cmp-norm-tp) (fboundp 'typep))
+	 (mapc 'normalize-function-plist *function-plists*)
+	 (unintern '*function-plists*)
+	 (defun make-function-plist (&rest args) (normalize-function-plist args))
+	 (normalize-function-plist args))
+	((car (push args *function-plists*)))))
+
+
+(defun proclaim (decl &aux (a (car decl))(d (cdr decl)))
+ (declare (optimize (safety 1)))
+ (check-type decl list)
+ (check-type (cdr decl) list)
+ (case a
+   (special (mapc (lambda (x) (check-type x symbol) (*make-special x)) d))
+   (optimize
+    (mapc (lambda (y &aux (x (if (symbolp y) (list y 3) y)))
+	    (check-type x (cons t (cons (integer 0 3) null)))
+	    (let ((a (pop x))(ad (car x)))
+	      (ecase a
+		(debug (setq *debug* ad))
+		(safety (setq *compiler-check-args* (>= ad 1))
+			(setq *safe-compile* (>= ad 2))
+			(setq *compiler-new-safety* (>= ad 3))
+			(setq *compiler-push-events* (>= ad 4)))
+		(space (setq *space* ad))
+		(speed (setq *speed* ad))
+		(compilation-speed (setq *speed* (- 3 ad)))))) d))
+   (type  (let ((q (car d))) (check-type q  type-spec) (proclaim d)))
+   (ftype (let ((q (car d))) (check-type q ftype-spec) (proclaim d)))
+   ((inline notinline)
+    (mapc (lambda (x &aux (y (funid-sym x)))
+	    (check-type x function-name)
+	    (putprop y t (if (eq a 'inline) 'cmp-inline    'cmp-notinline))
+	    (remprop y   (if (eq a 'inline) 'cmp-notinline 'cmp-inline))) d))
+   ((ignore ignorable) (mapc (lambda (x) (check-type x function-name)) d))
+   (declaration (mapc (lambda (x) (check-type x symbol) (pushnew x *alien-declarations*)) d))
+   (otherwise
+    (cond ((typep a 'type-spec) (proclaim-var a d))
+	  ((typep a 'ftype-spec)); (add-function-proclamation (pop d) (cdr a) d))
+	  ((unless (member a *alien-declarations*) (warn "The declaration specifier ~s is unknown." a)))
+	  ((symbolp a) (let ((y (get a :proclaim))) (when y (mapc (lambda (x) (funcall y x)) d)))))))
+ nil)
+
+
+(defun proclaim-var (tp l &aux (tp (cmp-norm-tp tp)))
+  (unless (or (eq tp '*) (eq tp t))
+    (mapc (lambda (x)
+	    (check-type x symbol)
+	    (assert (setq tp (type-and tp (get x 'cmp-type t))))
+	    (putprop x tp 'cmp-type)) l)));sch-global, improper-list

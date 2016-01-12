@@ -22,14 +22,6 @@
 
 (in-package :compiler)
 
-(defvar *safe-compile* nil)
-(defvar *compiler-check-args* nil)
-(defvar *compiler-new-safety* nil)
-(defvar *compiler-push-events* nil)
-(defvar *speed* 3)
-(defvar *space* 0)
-(defvar *debug* 0)
-
 ;;; Only these flags are set by the user.
 ;;; If *safe-compile* is ON, some kind of run-time checks are not
 ;;; included in the compiled code.  The default value is OFF.
@@ -213,49 +205,7 @@
 	 (cmp-norm-tp `(,(car return-types) ,@(function-return-type (cdr return-types)))))
         ((cmpt (car return-types))
 	 (cmp-norm-tp `(,(caar return-types) ,@(function-return-type (cdar return-types)))))
-	((mapcar 'readable-tp return-types))))
-;; 	(t (do ((v return-types (cdr v))
-;; 		(result))
-;; 	       ((endp v)(or (null v)
-;; 			    (warn "The function return type ~s is illegal."
-;; 				  return-types))
-;; 		(nreverse result))
-;; 	     (let ((tem  (if (eq (car v) '*) '* (type-filter (car v)))))
-;; 	       (unless (or (not tem) (eq tem '*) (is-local-arg-type tem)) (setq tem t))
-;; 	       (push (or (car (member tem '(* t))) (car v)) result))))));FIXME
-
-(defun put-procls (fname arg-types return-types procl)
-  (declare (ignore procl))
-;  (si::add-hash fname (list arg-types return-types) nil nil nil))
-  (unless *compiler-auto-proclaim* (si::add-hash fname (list arg-types return-types) nil nil nil)))
-
-;;   (if (eq arg-types '*)
-;;       (remprop fname  'proclaimed-arg-types)
-;;     (si:putprop fname  arg-types  'proclaimed-arg-types))
-
-;;   (si:putprop fname return-types  'proclaimed-return-type)
-
-;;   (if procl  (si:putprop fname t 'proclaimed-function)
-;;     (remprop fname 'proclaimed-function)))
-
-
-(defun add-function-proclamation (fname decl list &aux (procl t)
-					arg-types return-types)
-  (check-type list list)
-  (check-type decl list)
-  (check-type (cdr decl) list)
-
-  (setq arg-types (if (or (null decl) (eq (car decl) '*)) '(*) (function-arg-types (car decl))))
-  (setq return-types (function-return-type (cdr decl)))
-  (unless (cmpt return-types)
-    (setq return-types (car return-types)))
-  (unless (and (listp arg-types) (< (length arg-types) call-arguments-limit))
-    (setq procl nil))
-  (dolist (fname (cons fname list))
-    (let ((x (si::funid-sym-p fname)))
-      (if x
-	  (put-procls x arg-types return-types procl)
-	(warn "The function procl ~s ~s is not valid." fname decl)))))
+      	((mapcar 'readable-tp return-types))))
 
 (defun add-function-declaration (fname arg-types return-types)
   (cond ((symbolp fname)
@@ -353,90 +303,6 @@
 ;;   (not (or *compiler-push-events*
 ;; 	   (member fname *notinline*)
 ;; 	   (get fname 'cmp-notinline))))
-
-(defun proclaim (decl)
- (declare (optimize (safety 2)))
- (check-type decl list)
- (check-type (cdr decl) list)
- (case (car decl)
-       (special
-	(dolist (var (cdr decl))
-	  (check-type var symbol)
-	  (si:*make-special var)))
-       (optimize
-	(dolist (x (cdr decl))
-	  (when (symbolp x) (setq x (list x 3)))
-	  (check-type x cons)
-	  (check-type (cdr x) cons)
-	  (check-type (cadr x) (integer 0 3))
-	  (ecase (car x)
-		 (debug (setq *debug* (cadr x)))
-		 (safety (setq *compiler-check-args* (>= (cadr x) 1))
-			 (setq *safe-compile* (>= (cadr x) 2))
-			 (setq *compiler-new-safety* (>= (cadr x) 3))
-			 (setq *compiler-push-events* (>= (cadr x) 4)))
-		 (space (setq *space* (cadr x)))
-		 (speed (setq *speed* (cadr x)))
-		 (compilation-speed (setq *speed* (- 3 (cadr x)))))))
-       (type
-	(proclaim-var (cadr decl) (cddr decl)))
-       (ftype
-	(let* ((d (cdr decl))(def (pop d)))
-	  (assert (when (listp def) (eq (car def) 'function)))
-	  (add-function-proclamation (pop d) (cdr def) d)))
-       (function
-	(add-function-proclamation (cadr decl) (cddr decl) nil))
-       (inline
-	 (dolist (fun (cdr decl))
-	   (check-type fun si::function-identifier)
-	   (when (symbolp fun) 
-	     (si:putprop fun t 'cmp-inline)
-	     (remprop fun 'cmp-notinline))))
-       (notinline
-	(dolist (fun (cdr decl))
-	  (check-type fun si::function-identifier)
-	  (when (symbolp fun) 
-	    (si:putprop fun t 'cmp-notinline)
-	    (remprop fun 'cmp-inline))))
-       ((object ignore ignorable)
-	(dolist (var (cdr decl))
-	  (check-type var si::function-identifier)))
-       (declaration
-	(dolist (x (cdr decl))
-	  (check-type x symbol)
-	  (unless (member x *alien-declarations*)
-	    (push x *alien-declarations*))))
-       (otherwise
-	(cond ((check-type (car decl) si::type-spec))
-	      ((not (eq '* (cmp-norm-tp (car decl))))
-	       (proclaim-var (car decl) (cdr decl)))
-	      (t (unless (member (car decl) *alien-declarations*)
-		   (warn "The declaration specifier ~s is unknown." (car decl)))
-		 (and (symbolp (car decl))
-		      (functionp (get (car decl) :proclaim))
-		      (dolist (v (cdr decl))
-			(funcall (get (car decl) :proclaim) v)))))))
- nil)
-
-(defun proclaim-var (type vl)
-  (declare (optimize (safety 2)))
-  (check-type vl list)
-  (setq type (cmp-norm-tp type))
-  (dolist** (var vl)
-    (cond ((symbolp var)
-           (let ((type1 (get var 'cmp-type t))
-                 (v (sch-global var)))
-	     (let ((t2 (type-and type1 type)))
-	       (when (and type type1 (not t2))
-		 (warn "Inconsistent type declaration was found for the variable ~s." var))
-	       (setq type1 t2))
-	     (when v
-	       (let ((t2 (type-and type1 (var-type v))))
-		 (when (and type1 (var-type v) (not t2))
-		   (warn "Inconsistent type declaration was found for the variable ~s." var))
-		 (setf type1 t2 (var-type v) type1)))
-	     (si:putprop var type1 'cmp-type)))
-          ((warn "The variable name ~s is not a symbol." var)))))
 
 
 (defun max-vtp (tp)

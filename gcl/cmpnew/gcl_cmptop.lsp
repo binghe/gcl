@@ -2297,7 +2297,6 @@
 ;; for eval-when
 (setf (get 'si::*make-special 'eval-at-compile) t)
 (setf (get 'si::*make-constant 'eval-at-compile) t)
-(setf (get 'proclaim 'eval-at-compile) t)
 
 
 (setf (get 'si::define-structure 't1) 't1define-structure)
