@@ -74,6 +74,17 @@
 ;; 	(when star
 ;; 	  (have-provfn (cdr fs))))))
 
+(defun ignorable-form-with-local-unreferenced-changes (form vs)
+  (let* ((i (cadr form))(ch (info-ch i))
+	 (nch (remove-if (lambda (x) (and (member x vs)
+					  (eq (var-kind x) 'lexical)
+					  (not (eq (var-ref x) t))
+					  (not (var-ref-ccb x)))) ch)))
+    (ignorable-form
+     (if (eq nch ch)
+	 form
+       (list* (car form) (let ((i (copy-info i)))(setf (info-ch i) nch) i) (cddr form))))))
+
 (defun trim-vars (vars forms body &optional star)
 
   (do* (nv nf (vs vars (cdr vs)) (fs forms (cdr fs)) 
@@ -87,7 +98,7 @@
 	       (keyed-cmpnote (list 'var-trim (var-name var))
 			      "Trimming ~s; bound form ~a ignorable"
 			      (var-name var) (if (ignorable-form form) "" "not "))
-	       (unless (ignorable-form form) 
+	       (unless (ignorable-form-with-local-unreferenced-changes form (cdr vs));(ignorable-form form) 
 		 (when star (ref-vars form (cdr vs)))
 		 (let* ((*vars* (if nf (if star fv *vars*) av))
 			(f (if nf (car nf) body))
