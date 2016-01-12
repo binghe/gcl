@@ -1,6 +1,47 @@
 (in-package :s)
 
-(export '(+ks+ +fl+))
+(export '(lisp-type defdlfun +ks+ +fl+ strcat))
+(si::import-internal 'si::(\| & ^ ~ c+ c* << >> object double
+			   c-object-== c-fixnum-== c-float-== c-double-== c-fcomplex-== c-dcomplex-== fcomplex dcomplex
+			   string-concatenate lit seqind fixnum-length char-length cref address short int
+			   cnum unsigned-char unsigned-short unsigned-int
+			   package-internal package-external array-dims cmp-norm-tp tp0 tp1 tp2 tp3 tp4 tp5 tp6 tp7 tp8))
+
+(dolist (l '((:float      "make_shortfloat"      short-float     cnum);FIXME repetitive with gcl_cmpopt.lsp
+	     (:double     "make_longfloat"       long-float      cnum)
+	     (:character  "code_char"            character       cnum)
+	     (:char       "make_fixnum"          char            cnum)
+	     (:short      "make_fixnum"          short           cnum)
+	     (:int        "make_fixnum"          int             cnum)
+	     (:uchar      "make_fixnum"          unsigned-char   cnum)
+	     (:ushort     "make_fixnum"          unsigned-short  cnum)
+	     (:uint       "make_fixnum"          unsigned-int    cnum)
+	     (:fixnum     "make_fixnum"          fixnum          cnum)
+	     (:long       "make_fixnum"          fixnum          cnum)
+	     (:fcomplex   "make_fcomplex"        fcomplex        cnum)
+	     (:dcomplex   "make_dcomplex"        dcomplex        cnum)
+	     (:string     "make_simple_string"   string)
+	     (:object     ""                     t)
+
+	     (:stdesig    ""                     (or symbol string character))
+	     (:longfloat  ""                     long-float)
+	     (:shortfloat ""                     short-float)
+	     (:hashtable  ""                     hash-table)
+	     (:ocomplex   ""                     complex)
+	     (:bitvector  ""                     bit-vector)
+	     (:random     ""                     random-state)
+	     (:ustring    ""                     string)
+	     (:fixarray   ""                     (array fixnum))
+	     (:sfarray    ""                     (array short-float))
+	     (:lfarray    ""                     (array long-float))
+
+	     (:real       ""                     real)
+
+	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
+	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
+	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
+	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
+  (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l))))
 
 (si::*make-constant '+fl+ (- (integer-length fixnum-length) 4))
 (si::*make-constant '+ks+ 

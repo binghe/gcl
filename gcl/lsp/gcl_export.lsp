@@ -22,9 +22,7 @@
 ;;;;
 ;;;;                    Exporting external symbols of LISP package
 
-(in-package :si)
-
-(in-package :common-lisp)
+(in-package :cl)
 
 (export '(
        &allow-other-keys            *print-miser-width*          
@@ -500,18 +498,9 @@
 (fset 'set-difference #'set-difference-eq)
 (fset 'nunion #'nunion-eq)
 
-(*make-special '*pahl*)
-(setq *pahl* nil)
-(defun do-recompile (&rest r) nil)
-(defun add-hash (&rest r)
-  (setq *pahl* (cons (cons 'add-hash (mapcar #'(lambda (x) `',x) r)) *pahl*)))
-
 (*make-constant '+array-types+ (si::aelttype-list))
 (*make-constant '+sfix+ (eql (truncate fixnum-length char-length) 4))
 
-(*make-special '*uniq-list*)
-(setq *uniq-list* (make-hash-table :test 'equal))
-(defun uniq-list (list) (or (gethash list *uniq-list*) (setf (gethash list *uniq-list*) list)))
 
 (defun num-comp (x y tp) 
   (if (c-fixnum-== tp 1) (c-fixnum-== x y)
@@ -523,37 +512,3 @@
 	    (if (c-fixnum-== tp 6) (and (eql (realpart x) (realpart y)) (eql (imagpart x) (imagpart y)))
 	      (if (c-fixnum-== tp 7) (c-fcomplex-== x y)
 		(if (c-fixnum-== tp 8) (c-dcomplex-== x y))))))))))
-
-(defun normalize-function-plist (plist)
-  (labels ((mn (tp &aux (n (cmp-norm-tp tp))) (if (unless (eq tp n) (eq n '*)) (return-from normalize-function-plist nil) n))
-	   (norm-sig (sig) (uniq-list (list (mapcar #'mn (car sig)) (mn (cadr sig))))))
-  (setf (car plist) (norm-sig (car plist)))
-  (setf (cadr plist ) (mapcar #'(lambda (x) (uniq-list (cons (car x) (norm-sig (cdr x))))) (cadr plist)))
-  plist))
-
-
-(defun lremove (q l &key (key #'identity) (test #'eql))
-  (labels ((l (l) (when l
-		    (let* ((x (car l))(z (cdr l))(y (l z)))
-		      (if (funcall test q (funcall key x)) y (if (eq y z) l (cons x y)))))))
-	  (l l)))
-
-
-(defun lremove-if (f l) (lremove f l :test 'funcall))
-(defun lremove-if-not (f l) (lremove (lambda (x) (not (funcall f x))) l :test 'funcall))
-
-(let (lists)
-  (defun make-function-plist (&rest args &aux (b (and (fboundp 'cmp-norm-tp) (fboundp 'typep))))
-    (when b (setq lists (lremove-if 'normalize-function-plist lists)))
-    (or (when b (normalize-function-plist args)) (car (push args lists)))))
-
-
-(defun proclaim (&rest args) nil);FIXME
-
-
-(if (member :ansi-cl *features*)
-    (in-package :cl-user)
-  (in-package :user))
-
-(si::import-internal 'si::while)
-

@@ -212,7 +212,7 @@
 	  (eval ns)
 	  (mapc (lambda (x y z) (let ((z (cadr z))) (eval `(defun ,x ,z (,n ,y ,@(lambda-vars z)))))) syms sts fns)
 	  (mapc (lambda (x) (putprop x n 'state-function)) syms)
-	  (dolist (l syms) (add-hash l nil (list (list n)) nil nil))
+;	  (dolist (l syms) (add-hash l nil (list (list n)) nil nil))
 	  (putprop n syms 'mutual-recursion-group)
 	  (add-recompile n 'mutual-recursion nil nil)
 	  n)))))

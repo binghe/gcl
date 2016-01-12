@@ -62,8 +62,8 @@
 		     (check-type list proper-list)
 		     (check-type key (or null function-designator))
 		     (,fn (coerce fd 'function) list ,ts 'funcall :key key))))
-	  (list (sublis `((,s . ,(intern (concatenate 'string (string fn) "-IF")))(,ts . :test)) x)
-		(sublis `((,s . ,(intern (concatenate 'string (string fn) "-IF-NOT")))(,ts . :test-not)) x)))))
+	  (list (sublis `((,s . ,(intern (string-concatenate (string fn) "-IF")))(,ts . :test)) x)
+		(sublis `((,s . ,(intern (string-concatenate (string fn) "-IF-NOT")))(,ts . :test-not)) x)))))
  
  (defmacro defnfn (n ll &rest body &aux (a (member '&aux ll))(ll (ldiff ll a)))
    `(defun ,n ,(append ll `(&key test test-not key &aux ,@(cdr a)
