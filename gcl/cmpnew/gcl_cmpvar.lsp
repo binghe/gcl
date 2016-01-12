@@ -216,7 +216,7 @@
 (defun make-vs (info) (mapcar (lambda (x) (cons x (var-store x))) (remove-if-not 'var-p (info-ref info))))
 
 (defun check-vs (vs &aux (b (member-if-not 'var-p *vars*)))
-  (not (member-if-not (lambda (x &aux (v (pop x))(vv (member v *vars*))) 
+  (not (member-if-not (lambda (x &aux (v (pop x))(vv (unless (member v *lexical-env-mask*) (member v *vars*))) )
 			(and (when vv (tailp b vv))
 			     (when x (unless (eq x +opaque+) (eq (var-store v) x))))) vs)))
 
