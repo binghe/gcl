@@ -74,15 +74,6 @@
 (defmacro check-type-eval (place type)
   `(values (assert (typep ,place ,type) (,place) 'type-error :datum ,place :expected-type ,type)));fixme
 
-(defun function-identifierp (tp)
-  (or (symbolp tp)
-      (and (consp tp) (eq (car tp) 'lambda))
-      (and (consp tp)
-	   (eq (car tp) 'setf)
-	   (consp (cdr tp))
-	   (symbolp (cadr tp))
-	   (not (cddr tp)))))
-
 ;;; COERCE function.
 ;(defconstant +coerce-list+ '(list vector string array character short-float
 ;				  long-float float complex function null cons))
@@ -359,8 +350,8 @@
 (deftype simple-bit-vector (&optional size)
   `(array bit (,size)))
 
-(deftype function-identifier () `(satisfies function-identifierp))
-
+(deftype function-name nil `(or symbol (cons (member setf) (cons symbol null))))
+(deftype function-identifier nil `(or function-name (cons (member lambda) t)));;FIXME? t?
 
 (deftype list () `(or cons null))
 (deftype sequence () `(or list vector))
@@ -547,6 +538,25 @@
 ;; 	      '(symbol seqind proper-list)))
 
 (deftype type-spec nil `(satisfies type-spec-p))
+
+(defun type-list-p (spec r &aux s)
+  (not (member-if-not (lambda (x &aux (q (member x r)))
+			(or (when q (setq s (car q) r (cdr q)) q)
+			    (unless (eq s '&allow-other-keys)
+			      (when (typep x (if (eq s '&key) '(cons keyword (cons type-spec null)) 'type-spec))
+				(if (eq s '&rest) (setq s '&allow-other-keys) t))))) spec)))
+
+(defun arg-list-type-p (x) (type-list-p x '(&optional &rest &key)))
+
+(defun values-list-type-p (x)
+  (if (when (listp x) (eq (car x) 'values))
+      (type-list-p (cdr x) '(&optional &rest &allow-other-keys))
+    (typep x 'type-spec)))
+
+(deftype ftype-spec nil `(cons (member function)
+			       (cons (satisfies arg-list-type-p)
+				     (cons (satisfies values-list-type-p) null))))
+
 (deftype fpvec nil `(and vector (satisfies array-has-fill-pointer-p)))
 
 ;; (defun non-generic-compiled-function-p (x)
