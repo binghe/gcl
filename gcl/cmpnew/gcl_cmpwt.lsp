@@ -229,9 +229,9 @@
 		(cons 'si::|#,| x) x))
 	 (tem (cons (si::hash-equal x -1000) x)))
     (setf (data-dl)
-		    (if endp
-			(nconc (data-dl) (list tem))
-		      (cons tem (data-dl) )))
+	  (if endp
+	      (nconc (data-dl) (list tem))
+	    (cons tem (data-dl) )))
     x))
 
 
@@ -240,13 +240,11 @@
   (let* ((vec (coerce (nreverse (data-inits)) 'vector)))
     (verify-data-vector vec)
     (let* ((dll (length (data-dl)))
-	   (v (make-array (+ 2 dll))))
+	   (v (make-array (1+ dll))))
       (do ((d (nreverse (data-dl)) (cdr d)) (i 0 (1+ i))) ((>= i dll))
 	(setf (aref v i) (cdar d)))
-      (setf (aref v dll) `(let ((si::*disable-recompile* t)) ,@(coerce vec 'list))
-	    (aref v (1+ dll)) `(si::do-recompile)
-	    (aref (data-vector) (- (length (data-vector)) 1))
-	    (cons 'si::%init v)))
+      (setf (aref v dll) `(progn ,@(coerce vec 'list))
+	    (aref (data-vector) (- (length (data-vector)) 1)) (cons 'si::%init v)))
     (setf (data-package-ops) (nreverse (data-package-ops)))
     (cond (*fasd-data*
 	   (wt-fasd-data-file))
