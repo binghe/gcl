@@ -1762,9 +1762,9 @@
 (defun mi1b (fun args last info &optional ff)
   (with-restore-vars
    (let ((res (mi1c fun args last info ff t)))
-     (unless (iflag-p (info-flags (cadr res)) provisional)
-       (keep-vars)
-       res))))
+     (cond ((iflag-p (info-flags (cadr res)) provisional)
+	    (keyed-cmpnote 'provisional "~s has provisional functions, res address ~s" fun (address res)))
+	   (t (keep-vars) res)))))
 
 (defun mi1a (fun args last info &optional ff &aux (i1 (copy-info info)));FIXME side-effects on info
   (or (mi1b fun args last info ff)
