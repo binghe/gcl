@@ -25,7 +25,7 @@
 ;;; Go into LISP.
 (in-package :si)
 
-(export '(clines defentry defcfun defla))
+(export '(clines defentry defcfun)); defla
 
 ;(defconstant +keyword-package+ (find-package 'keyword))
 ;(defvar *features*)
