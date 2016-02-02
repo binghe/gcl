@@ -1388,7 +1388,7 @@ t_from_type(object type) {
        0==strncmp((tm->tm_name)+1,type->st.st_self,type->st.st_fillp)
        )
       return i;}
-  FEerror("Unrecognized type",0);
+  /* FEerror("Unrecognized type",0); */
   return i;
 
 }
@@ -1425,8 +1425,9 @@ DEFUN("ALLOCATE-SGC",object,fSallocate_sgc,SI
 DEFUN("ALLOCATE-GROWTH",object,fSallocate_growth,SI,5,5,NONE,OO,II,II,OO,
       (object type,fixnum min,fixnum max,fixnum percent,fixnum percent_free),"")
 {int  t=t_from_type(type);
- struct typemanager *tm=tm_of(t);
+ struct typemanager *tm=t<t_other ? tm_of(t) : NULL;
  object res,x,x1,x2,x3;
+ if (!tm) RETURN1(Cnil);
  x=make_fixnum(tm->tm_min_grow);
  x1=make_fixnum(tm->tm_max_grow);
  x2=make_fixnum(tm->tm_growth_percent);
