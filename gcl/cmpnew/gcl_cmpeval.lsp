@@ -952,7 +952,7 @@
 
 (defun maybe-reverse-type-prop (dt f)
   (unless (or *safe-compile* (when (consp f) (eq (car f) 'lit)));FIXME push-vbind/c1var copy
-    (set-form-type f dt)))
+    (set-form-type f (coerce-to-one-value dt))))
 
 ;; (defun maybe-reverse-type-prop (dt f)
 ;;   (unless *safe-compile*

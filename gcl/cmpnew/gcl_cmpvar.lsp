@@ -1009,7 +1009,7 @@
          (setq form1 (list* (car form1) info1 (cddr form1)))))
 
   (setf (info-type info) type)
-  (set-form-type form1 type)
+  (maybe-reverse-type-prop type form1)
   (let ((c1fv (when (cadr name1) (c1inner-fun-var))))
     (when c1fv (add-info info (cadr c1fv)))
     (list 'setq info name1 form1 c1fv)))
