@@ -999,7 +999,9 @@
 (si::putprop 'si::make-vector 'make-vector-propagator 'type-propagator)
 (defun make-array1-propagator (f &rest r)
   (declare (ignore f))
-  (cmp-norm-tp `(array ,(or (car (atomic-tp (car r))) '*) ,(or (car (atomic-tp (sixth r))) '*))))
+  (cmp-norm-tp `(array ,(or (car (atomic-tp (car r))) '*) ,(or (let* ((x (car (atomic-tp (sixth r))));FIXME centralize
+								      (x (if (integerp x) (make-list x :initial-element '*) x)))
+								 (mapcar (lambda (x) (if (integerp x) x '*)) x)) '*))))
 (si::putprop 'si::make-array1 'make-array1-propagator 'type-propagator)
 
 ;; This is the begininng of the long-awaited type-handling
