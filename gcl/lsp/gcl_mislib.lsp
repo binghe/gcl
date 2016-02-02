@@ -123,7 +123,10 @@
         seconds-per-day)
      (* (+ h tz) 3600) (* min 60) sec))
 
-; Courtesy Paul Dietz
+(defun get-decoded-time ()
+  (decode-universal-time (get-universal-time)))
+
+;Courtesy Paul Dietz
 (defun compile-file-pathname (pathname)
   (declare (optimize (safety 2)))
   (make-pathname :defaults pathname :type "o"))
