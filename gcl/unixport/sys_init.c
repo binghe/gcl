@@ -6,13 +6,17 @@ gcl_init_init()
 
   build_symbol_table();
 
-#ifdef pre_gcl
+#if defined(pre_gcl) || defined(ansi_gcl)
   {
     object features;
     extern int in_pre_gcl;
     features=find_symbol(make_simple_string("*FEATURES*"),system_package);
+#if defined(pre_gcl)
     features->s.s_dbind=make_cons(make_keyword("PRE-GCL"),features->s.s_dbind);
     in_pre_gcl=1;
+#else
+    features->s.s_dbind=make_cons(make_keyword("ANSI-CL"),make_cons(make_keyword("COMMON-LISP"),features->s.s_dbind));
+#endif
   }
 #endif
   
