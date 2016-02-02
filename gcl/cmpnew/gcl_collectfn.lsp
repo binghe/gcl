@@ -234,22 +234,21 @@
 
 (defvar *file-table* (make-hash-table :test 'eq)) 
 
-(defun add-fn-data (lis &aux tem file)
-  (let ((file (and (setq file (si::fp-input-stream *standard-input*))
-		   (truename file))))
-  (dolist (v lis)
-	  (cond ((eql (fn-name v) 'other-form)
-		 (setf (fn-name v) (intern
-				    (concatenate 'string "OTHER-FORM-"
-						 (namestring file))))
-		 (setf (get (fn-name v) 'other-form) t)))
-	  (setf (gethash (fn-name v) *call-table*) v)
-	  (if (setq tem (gethash (fn-name v) *file-table*))
-	      (or (equal tem file)
-		  (format t "~% Warn ~a redefined in ~a. Originally in ~a."
-			  (fn-name v) file tem)))
-	  (setf (gethash (fn-name v) *file-table*)
-		file))))
+(defun add-fn-data (lis &aux tem)
+  (let ((file (truename *load-pathname*)))
+    (dolist (v lis)
+      (cond ((eql (fn-name v) 'other-form)
+	     (setf (fn-name v) (intern
+				(concatenate 'string "OTHER-FORM-"
+					     (namestring file))))
+	     (setf (get (fn-name v) 'other-form) t)))
+      (setf (gethash (fn-name v) *call-table*) v)
+      (if (setq tem (gethash (fn-name v) *file-table*))
+	  (or (equal tem file)
+	      (format t "~% Warn ~a redefined in ~a. Originally in ~a."
+		      (fn-name v) file tem)))
+      (setf (gethash (fn-name v) *file-table*)
+	    file))))
 
 (defun dump-fn-data (&optional (file "fn-data.lsp")
 			       &aux (*package* (find-package "COMPILER"))
