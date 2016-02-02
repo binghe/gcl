@@ -996,7 +996,9 @@
 ;	   (assert (info-type (cadr form1)))
 	   (setq type (info-type (cadr form1)))
 	   (unless (type>= (var-type (car name1)) (info-type (cadr form1)))
-	     (setf (info-ch-ccb info) (list (cons (car name1) (info-type (cadr form1)))))))
+	     (let* ((z (assoc (car name1) (info-ch-ccb info))))
+	       (if z (setf (cdr z) (type-or1 (cdr z) type))
+		 (push (cons (car name1) type) (info-ch-ccb info))))))
 	  (t 
 	   (do-setq-tp v (list form form1) (info-type (cadr form1)))
 	   (setq type (var-type (car name1)))
