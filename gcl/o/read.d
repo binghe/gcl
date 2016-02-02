@@ -2375,8 +2375,10 @@ DEFUN("SET-READTABLE-CASE",object,fSset_readtable_case,SI,2,2,NONE,OO,OO,OO,OO,(
 	    || rdtbl->rt.rt_self[char_code(dspchr)].rte_dtab == NULL)
 		FEerror("~S is not a dispatch character.", 1, dspchr);
 	if (digitp(char_code(subchr),10) >= 0) @(return Cnil)
-	else @(return `rdtbl->rt.rt_self[char_code(dspchr)]
-		  .rte_dtab[char_code(subchr)]`)
+	  else {
+	    object x=rdtbl->rt.rt_self[char_code(dspchr)].rte_dtab[char_code(subchr)];
+	    @(return `x==default_dispatch_macro ? Cnil : x`)
+	      }
 @)
 
 static object
