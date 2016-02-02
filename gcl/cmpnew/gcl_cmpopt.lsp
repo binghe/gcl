@@ -77,8 +77,8 @@
    (get 'si::write-pointer-object 'inline-unsafe))
 
 ;;READ-BYTE1
- (push '((t t) t #.(flags rfa ans set)"read_byte1(#0,#1)")
-   (get 'read-byte1 'inline-unsafe))
+ ;; (push '((t t) t #.(flags rfa ans set)"read_byte1(#0,#1)")
+ ;;   (get 'read-byte1 'inline-unsafe))
 
 ;;READ-CHAR1
  (push '((t t) t #.(flags rfa ans set)"read_char1(#0,#1)")
@@ -235,7 +235,7 @@
 (push '((t t t) t #.(flags set)
   "@2;((#0)->ust.ust_self[fix(#1)]=char_code(#2),(#2))")
    (get 'system:schar-set 'inline-unsafe))
-(push '((t fixnum character) character #.(flags set rfa)"(code_char((#0)->ust.ust_self[#1]= char_code(#2))")
+(push '((t fixnum character) character #.(flags set rfa)"(code_char((#0)->ust.ust_self[#1]= char_code(#2)))")
    (get 'system:schar-set 'inline-unsafe))
 
 ;;SYSTEM:SET-MV
