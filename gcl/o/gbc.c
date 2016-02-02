@@ -1451,7 +1451,7 @@ DEFUN("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO,(vo
  	  break;
  	case t_function:
  	  d=o->fun.fun_env;
- 	  s=*(ufixnum *)o->fun.fun_env;
+ 	  s=o->fun.fun_env!=def_env && o->fun.fun_env!=src_env ? ((ufixnum *)o->fun.fun_env)[-1]*sizeof(object) : 0;
  	  break;
  	case t_cfdata:
  	  d=o->cfd.cfd_start;
