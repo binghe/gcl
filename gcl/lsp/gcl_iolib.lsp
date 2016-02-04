@@ -574,11 +574,11 @@
 				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
   (if epp
       (let* ((*load-pathname* pp)(*load-truename* epp))
-	  (if (string= "o" (pathname-type epp))
-	      (load-fasl epp print)
+	(if (eql -1 (string-match #v".o$" (pathname-type epp)))
 	    (let ((s (open epp)))
 	      (unwind-protect (load-stream s print)
-		(close s)))))
+		(close s)))
+	  (load-fasl epp print)))
     (when if-does-not-exist
       (error 'file-error :pathname pp :format-control "File does not exist."))))
 
