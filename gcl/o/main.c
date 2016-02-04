@@ -65,8 +65,6 @@ bool saving_system=FALSE;
 
 #define LISP_IMPLEMENTATION_VERSION "April 1994"
 
-char *system_directory;
-
 #define EXTRA_BUFSIZE 8
 char stdin_buf[BUFSIZ + EXTRA_BUFSIZE];
 char stdout_buf[BUFSIZ + EXTRA_BUFSIZE];
@@ -381,14 +379,22 @@ DEFUN("SET-LOG-MAXPAGE-BOUND",fixnum,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,O
 
 #include <dlfcn.h>
 
+size_t
+dir_name_length(const char *s) {
+  size_t m;
+  const char *z;
+  for (m=strlen(s),z=kcl_self+m;z>s && z[-1]!='/';z--,m--);
+  return m;
+}
+
 void
 init_boot(void) {
 
   void *v,*q;
   char *z,*s="libboot.so";
-  size_t m=sSAsystem_directoryA->s.s_dbind->st.st_fillp,n=m+strlen(s)+1;
+  size_t m=dir_name_length(kcl_self),n=m+strlen(s)+1;
   z=alloca(n);
-  snprintf(z,n,"%-*.*s%s",(int)m,(int)m,sSAsystem_directoryA->s.s_dbind->st.st_self,s);
+  snprintf(z,n,"%-*.*s%s",(int)m,(int)m,kcl_self,s);
   if (!(v=dlopen(z,RTLD_LAZY|RTLD_GLOBAL)))
     printf("%s\n",dlerror());
   if (!(q=dlsym(v,"gcl_init_boot")))
@@ -472,6 +478,9 @@ DEFUN("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,1,NO
   RETURN1((object)(w-u));
 }
 
+DEFUN("KCL-SELF",object,fSkcl_self,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
+  RETURN1(make_simple_string(kcl_self));
+}
 
 int
 main(int argc, char **argv, char **envp) {
@@ -519,11 +528,6 @@ main(int argc, char **argv, char **envp) {
     printf("GCL (GNU Common Lisp)  %s  %ld pages\n",LISP_IMPLEMENTATION_VERSION,real_maxpage);
     fflush(stdout);
     
-    if (argc>1) {
-      massert(argv[1][strlen(argv[1])-1]=='/');
-      system_directory=argv[1];
-    }
-
     initlisp();
     ihs_top++;lex_new();/*FIXME*/
     
@@ -1051,7 +1055,7 @@ FFN(siLsave_system)(void) {
 }
 
 DEFVAR("*LISP-MAXPAGES*",sSAlisp_maxpagesA,SI,make_fixnum(real_maxpage),"");
-DEFVAR("*SYSTEM-DIRECTORY*",sSAsystem_directoryA,SI,make_simple_string(system_directory),"");
+DEFVAR("*SYSTEM-DIRECTORY*",sSAsystem_directoryA,SI,Cnil,"");
 DEFVAR("*MULTIPLY-STACKS*",sSAmultiply_stacksA,SI,Cnil,"");
 DEF_ORDINARY("TOP-LEVEL",sStop_level,SI,"");
 DEFVAR("*COMMAND-ARGS*",sSAcommand_argsA,SI,sLnil,"");

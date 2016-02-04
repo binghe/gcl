@@ -154,16 +154,6 @@
 	(if (< x 0) (< x y) t)
       (if (< x 0) nil (< x y)))))
 
-(defun reset-sys-paths (s)
-  (declare (string s))
-  (setq si::*lib-directory* s)
-  (setq si::*system-directory* (si::string-concatenate s "unixport/"))
-  (let (nl)
-    (dolist (l '("cmpnew/" "gcl-tk/" "lsp/" "xgcl-2/"))
-      (push (si::string-concatenate s l) nl))
-    (setq si::*load-path* nl))
-  nil)
-
 (defun heaprep nil
   
   (let ((f (list

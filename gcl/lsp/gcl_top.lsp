@@ -603,12 +603,10 @@ add a new one, add an 'si::break-command property:")
 ;;make sure '/' terminated
 
 (defun coerce-slash-terminated (v)
-  (declare (string v));(return-from coerce-slash-terminated  v)
-  (or (stringp v) (error "not a string ~a" v))
   (let ((n (length v)))
-    (unless (and (> n 0) (eql (aref v (- n 1)) #\/))
-	    (setf v (format nil "~a/" v))))
-  v)
+    (if (and (> n 0) (eql (aref v (1- n)) #\/))
+	v
+      (string-concatenate v "/"))))
 
 (defun fix-load-path (l)
   (when (not (equal l *fixed-load-path*))
@@ -671,11 +669,24 @@ First directory is checked for first name and all extensions etc."
 (defun get-temp-dir ()
   (dolist (x `(,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
     (when x
-      (let ((x (if (eql #\/ (aref x (1- (length x)))) x (string-concatenate x "/"))))
+      (let ((x (coerce-slash-terminated x)))
 	(when (eq (stat x) :directory)
 	  (return-from get-temp-dir x))))))
 
-(defvar si::*lib-directory* nil)
+(defun reset-sys-paths (s)
+  (declare (string s))
+  (setq *lib-directory* s)
+  (setq *system-directory* (string-concatenate s "unixport/"))
+  (let (nl)
+    (dolist (l '("cmpnew/" "gcl-tk/" "lsp/" "xgcl-2/"))
+      (push (string-concatenate s l) nl))
+    (setq *load-path* nl))
+  nil)
+
+(defun dir-name (s &aux (i (string-match "/[^/]*$" s)))
+  (if (eql -1 i) "" (subseq s 0 i)))
+
+(defvar *lib-directory* (coerce-slash-terminated (dir-name (dir-name (kcl-self)))))
 
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
@@ -686,13 +697,9 @@ First directory is checked for first name and all extensions etc."
   (setq tem *lib-directory*)
   (process-some-args *command-args*)
   (let ((dir (getenv "GCL_LIBDIR")))
-    (unless (set-dir '*lib-directory* "-libdir")
-      (when dir (setq *lib-directory* (coerce-slash-terminated dir))))
-    (unless (and *load-path* (equal tem *lib-directory*))
-      (setq *load-path* (cons (string-concatenate *lib-directory* "lsp/") *load-path*))
-      (setq *load-path* (cons (string-concatenate *lib-directory* "mod/") *load-path*))
-      (setq *load-path* (cons (string-concatenate *lib-directory* "gcl-tk/") *load-path*))
-      (setq *load-path* (cons (string-concatenate *lib-directory* "xgcl-2/") *load-path*)))))
+    (when dir (setq *lib-directory* (coerce-slash-terminated dir))))
+  (unless (and *load-path* (equal tem *lib-directory*))
+    (reset-sys-paths *lib-directory*)))
 
 (defun do-f (file &aux *break-enable*)
   (catch *quit-tag*

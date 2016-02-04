@@ -1550,3 +1550,6 @@ resize_hole(ufixnum,enum type,bool);
 void
 maybe_set_hole_from_maxpages(void);
 
+size_t
+dir_name_length(const char *);
+

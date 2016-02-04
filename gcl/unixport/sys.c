@@ -25,10 +25,9 @@ ar_init_fn(void (fn)(void),const char *s) {
 
   char b[200];
   struct stat ss;
-  object sysd=sSAsystem_directoryA->s.s_dbind;
   
   if (stat(s,&ss)) {
-    assert(snprintf(b,sizeof(b),"ar x %-.*s%s %s",(int)sysd->st.st_fillp,sysd->st.st_self,libname,s)>0);
+    assert(snprintf(b,sizeof(b),"ar x %-.*s%s %s",(int)dir_name_length(kcl_self),kcl_self,libname,s)>0);
     assert(!msystem(b));
 #ifdef _WIN32
     if (sSAwine_detectedA->s.s_dbind!=Cnil) {
@@ -71,9 +70,8 @@ static void
 lsp_init(const char *a,const char *b) {
 
    char c[200];
-   object sysd=sSAsystem_directoryA->s.s_dbind;
 
-   assert(snprintf(c,sizeof(c),"%-.*s../%s/%s%s",(int)sysd->st.st_fillp,sysd->st.st_self,a,b,strchr(b,'.') ? "" : ".lsp")>0)
+   assert(snprintf(c,sizeof(c),"%-.*s../%s/%s%s",(int)dir_name_length(kcl_self),kcl_self,a,b,strchr(b,'.') ? "" : ".lsp")>0)
    printf("loading %s\n",c);
    fflush(stdout);
    load(c);
