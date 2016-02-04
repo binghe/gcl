@@ -199,7 +199,7 @@
 ;	 (concatenate 'string si::*system-directory*
 ;		      "../cmpnew/lfun_list.lsp"))
   
-  (print `(in-package :,(package-name *package*)) st)
+  (print `(in-package ,(package-name *package*)) st)
   (sloop::sloop with ret with at
 		for (ke val) in-table *call-table* 
 		do
@@ -355,13 +355,13 @@
 	      (establish
 	       (let ((SYSTEM::*PRINT-PACKAGE* t))
 		 (pr 
-		  `(in-package :,(package-name p) :use nil
+		  `(in-package ,(package-name p) :use nil
 			       ,@ (if (package-nicknames p)
 				      `(:nicknames ',(package-nicknames p)))))))
 	      (export
 	       (let ((SYSTEM::*PRINT-PACKAGE* t))
 		 (pr 
-		  `(in-package :,(package-name p)
+		  `(in-package ,(package-name p)
 			       :use
 			       '(,@
 				 (mapcar 'package-name (package-use-list p)))
@@ -376,7 +376,7 @@
 		 (pr `(export ',ext))))
 	      (shadow
 	       (let ((SYSTEM::*PRINT-PACKAGE* t))
-		 (pr `(in-package :,(package-name p))))
+		 (pr `(in-package ,(package-name p))))
 	       (let (in out (*package* (find-package "LISP")))
 		 (dolist (v (package-shadowing-symbols p))
 			 (cond ((eq (symbol-package v) p)
