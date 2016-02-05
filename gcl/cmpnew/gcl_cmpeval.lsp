@@ -1112,13 +1112,16 @@
   (cadar (member-if (lambda (x) (and (eq (caar x) (car sir)) (cadddr x))) 
 		    (reverse *src-inline-recursion*))))
 
-(defun discrete-tp (tp)
-  (cond ((atomic-tp tp))
-	((and (consp tp) (eq (car tp) 'or)) (not (member-if-not 'discrete-tp (cdr tp))))))
+(defun discrete-tp (tp &optional (i 0))
+  (when (< i 5);FIXME
+    (cond ((atomic-tp tp))
+	  ((when (consp tp) (eq (car tp) 'or))
+	   (not (member-if-not (lambda (x) (discrete-tp x (incf i))) (cdr tp)))))))
 
 (defun bbump-tp (tp)
-  (cond ((type>= #t(and seqind (not (integer 0 0))) tp) #t(and seqind (not (integer 0 0))))
-	((type>= #tseqind tp) #tseqind)
+  (cond ((car (member tp (load-time-value (list #t(and seqind (not (integer 0 0))) #tseqind;FIXME accelerator?
+						#t(or null (and seqind (not (integer 0 0)))) #t(or null seqind)))
+		      :test 'type<=)))
 	((discrete-tp tp) tp)
 	((bump-tp tp))))
 
