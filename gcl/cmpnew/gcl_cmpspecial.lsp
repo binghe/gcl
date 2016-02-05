@@ -330,8 +330,9 @@
   (push a (car (funcall f)))
   f)
 
-(defun fn-get (fn prop)
-  (cdr (assoc prop (car (funcall fn)))))
+(defun fn-get (fn prop &aux (envh (car (*object (c-function-env fn) 0 nil nil))))
+  (when (listp envh)
+    (cdr (assoc prop (car envh)))));quoted fucntions can appear in source, ;(car (funcall fn))
 
 ;; (defun mc nil (let (env) (lambda nil env)))
 
