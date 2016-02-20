@@ -34,7 +34,7 @@
 (defun nval (x)
   (cond ;((type>= #t(returns-exactly) x) 0)
 	((single-type-p x) 1)
-	((consp x) (1- (length x)))))
+	((when (consp x) (eq (car x) 'returns-exactly)) (1- (length x)))))
 
 (defun c1multiple-value-call (args)
   (when (endp args) (too-few-args 'multiple-value-call 1 0))
