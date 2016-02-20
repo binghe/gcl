@@ -31,7 +31,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 LFD(Lvalues)(void)
 {
 	if (vs_base == vs_top) vs_base[0] = Cnil;
-	if (vs_top-vs_base >= MULTIPLE_VALUES_LIMIT)
+	if (vs_top-vs_base > MULTIPLE_VALUES_LIMIT)
 	  FEerror("Too many function call values", 0);
 }
 
@@ -48,7 +48,7 @@ LFD(Lvalues_list)(void)
 		x = MMcdr(x);
 	}
 	if (vs_top == vs_base) vs_base[0] = Cnil;
-	if (vs_top-vs_base >= MULTIPLE_VALUES_LIMIT)
+	if (vs_top-vs_base > MULTIPLE_VALUES_LIMIT)
 	  FEerror("Too many function call values", 0);
 
 }
@@ -134,7 +134,7 @@ FFN(Fmultiple_value_prog1)(object forms)
 void
 gcl_init_multival(void)
 {
-	make_constant("MULTIPLE-VALUES-LIMIT",make_fixnum(MULTIPLE_VALUES_LIMIT));
+	make_constant("MULTIPLE-VALUES-LIMIT",make_fixnum(1+MULTIPLE_VALUES_LIMIT));
 	make_function("VALUES",Lvalues);
 	make_function("VALUES-LIST",Lvalues_list);
 	make_special_form("MULTIPLE-VALUE-CALL",Fmultiple_value_call);
