@@ -1121,7 +1121,7 @@
 	 (rd (cdar *recursion-detected*))
 	 (sig (if rd (list (car sig) (bbump-tp (cadr sig))) sig)))
     (setf (car e) sig); (cadr e) *callees*)
-    (cond ((and rd (not (eq (cadr osig) (cadr sig))))
+    (cond ((when rd (not (type<= (cadr sig) (cadr osig))))
 	   (keyed-cmpnote (list name 'recursion) "Reprocessing ~s: ~s ~s" name osig sig)
 	   (setq *warning-note-stack* wns);FIXME try to use with-restore-vars
 	   (do-l1-fun name src e b))
