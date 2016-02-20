@@ -365,7 +365,7 @@ call_proc_new(object sym,ufixnum clp,ufixnum vld,void **link,ufixnum argd,object
 
     result_type=POP_BITS(argd,2);
 
-    if (vald) larg=(fixnum)fcall.valp;
+    if (vald || u.f.vv) larg=(fixnum)fcall.valp;
 
     if (!pushed) {
       

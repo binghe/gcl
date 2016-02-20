@@ -1423,7 +1423,7 @@
 
 (defun argsizes (args return &optional max pushed)
   (let* ((x (vald return))
-	 (vv (> x 0))
+	 (vv (or (> x 0) (when (zerop x) (not (single-type-p return)))))
 	 (x (if vv x (- x)))
 	 (la (length args))
 	 (varg (eq (car (last args)) '*))
@@ -1438,8 +1438,8 @@
       r)))
 
 (defun vald (tp)
-  (cond ((single-type-p tp) 0)
-	((type>= #t(values t) tp) 1);FIXME
+  (cond ;((single-type-p tp) 0)
+	((type>= #t(values t) tp) 0)
 	((eq tp '*) (1- multiple-values-limit))
 	((> (length tp) (+ 2 multiple-values-limit)) (baboon));FIXME
 	((eq (car tp) 'returns-exactly) (- 2 (length tp)))

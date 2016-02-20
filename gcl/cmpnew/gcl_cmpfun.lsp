@@ -215,7 +215,7 @@
           case 0:  _z=_f->fun.fun_self(#*_l);break;
           default: _z=call_proc_cs2(#*_ll);break;
         }
-        if (!(_f)->fun.fun_neval) vs_top=_v ? (object *)_v : sup;_z;})")
+        if (!(_f)->fun.fun_neval && !(_f)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})")
       (list* (car all) (car (last all)) (butlast (cdr all)))))
     (close-inline-blocks)))
 

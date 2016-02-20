@@ -208,7 +208,7 @@ quick_call_function(object fun) {
   base[0]=quick_call_function_vec_coerce(fun,n,vs_base);
 
   vs_base=base;
-  if (!fun->fun.fun_neval)
+  if (!fun->fun.fun_neval && !fun->fun.fun_vv)
     vs_top=base+1;
 
   return;
@@ -837,7 +837,7 @@ funcall_apply(object fun,fixnum nargs,va_list ap) {
   
   res=funcall_ap(fun,nargs,ap);
 
-  if (type_of(fun)==t_function && !fun->fun.fun_neval && vals)
+  if (type_of(fun)==t_function && !fun->fun.fun_neval && !fun->fun.fun_vv && vals)
     vs_top=vals;
 
   return res;

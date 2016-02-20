@@ -139,7 +139,7 @@
         _z=Rset && !(#0)->fun.fun_argd && 
         fcall.argd>=(#0)->fun.fun_minarg && fcall.argd<=((#0)->fun.fun_maxarg) ? 
            (#0)->fun.fun_self(#*) : call_proc_cs2(#?);
-           if (!(#0)->fun.fun_neval) vs_top=_v ? (object *)_v : sup;_z;})") all))
+           if (!(#0)->fun.fun_neval && !(#0)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})") all))
     (close-inline-blocks)))
 
 
