@@ -2770,7 +2770,7 @@
     (let ((l (c1constant-value-object val (or always (when *compiler-compile* (not *keep-gaz*))))))
       (when l 
 	`(location 
-	  ,(make-info :type (or (ltvp val) (object-type val)))
+	  ,(make-info :type (or (ltvp val) (object-type (if (functionp val) (afe (cons 'df nil) (mf (fle val))) val))))
 	  ,l))))))
 
 ;; (defun c1constant-value (val always-p &aux (val (if (exit-to-fmla-p) (not (not val)) val)))
