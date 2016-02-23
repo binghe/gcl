@@ -1440,8 +1440,8 @@
 (defun vald (tp)
   (cond ;((single-type-p tp) 0)
 	((type>= #t(values t) tp) 0)
-	((eq tp '*) (1- multiple-values-limit))
-	((> (length tp) (+ 2 multiple-values-limit)) (baboon));FIXME
+	((eq tp '*) (- multiple-values-limit 2))
+	((> (length tp) multiple-values-limit) (baboon));FIXME
 	((eq (car tp) 'returns-exactly) (- 2 (length tp)))
 	((- (length tp) 2))))
 
@@ -1898,7 +1898,7 @@
   (let ((rt (get-return-type fname)))
     (unless (single-type-p rt)
       (let ((ns (abs (vald rt))))
-	(unless (= ns (1- multiple-values-limit))
+	(unless (= ns (- multiple-values-limit 2))
 	  (setq *max-vs* (max *max-vs* ns))))))
   (when (is-narg-le lambda-expr)
     (setq nargs (car (last requireds)))
@@ -2624,7 +2624,7 @@
 	  (c-function-name (if closure-p "LC" "L") (fun-cfun fun) (fun-name fun)) "(")
   (unless (single-type-p rt)
     (let ((ns (abs (vald rt))))
-      (unless (= ns (1- multiple-values-limit))
+      (unless (= ns (- multiple-values-limit 2))
 	(setq *max-vs* (max *max-vs* ns)))))
   (when (is-narg-le lambda-expr)
     (setq nargs (car (last requireds)))

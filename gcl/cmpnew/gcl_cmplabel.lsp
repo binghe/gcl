@@ -132,7 +132,7 @@
 	    (let* ((nv (cond ((and (consp fname) (eq (car fname) 'values)) (1- (cdr fname)))
 			     ((or (not fname) (eq fname 'single-value)) 0)
 			     ((abs (vald (get-return-type fname))))))
-		   (nv (if (= nv (1- multiple-values-limit)) 0 nv))
+		   (nv (if (= nv (- multiple-values-limit 2)) 0 nv))
 		   (fv (cs-push (car type.wt) t))
 		   (lbs (mapcar (lambda (x) (declare (ignore x)) (cs-push t t)) (make-list (max 0 nv))))
 		   (*value-to-go* (append (mapcar (lambda (x) (list 'cvar x)) (cons fv lbs)) '(trash))))
