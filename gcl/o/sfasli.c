@@ -116,14 +116,20 @@ int
 use_symbols(double d,...) {
 
 #ifndef DARWIN
-  extern void sincos(double,double *,double *);
 
-  sincos(d,&d,&d);
+  extern void sincos(double,double *,double *);
+  double d2;
+
+  sincos(d,&d,&d2);
+
 #else
+
   d=sin(d)+cos(d);
+  d2=sin(d)+cos(d);
+
 #endif
 
-  return (int)d;
+  return (int)(d+d2);
 
 }
 #endif
