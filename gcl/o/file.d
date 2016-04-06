@@ -2407,17 +2407,18 @@ object x=Cnil;
    inPort = (myport == Cnil ? 0 : fix(Iis_fixnum(myport)));
    
 #ifdef BSD
+
   if (isServer && daemon != Cnil) {
 
     long pid,i;
     struct rlimit r;
-    struct sigaction sa;
+    struct sigaction sa,osa;
 
     sa.sa_handler=SIG_IGN;
     sa.sa_flags=SA_NOCLDWAIT;
     sigemptyset(&sa.sa_mask);
 
-    sigaction(SIGCHLD,&sa,NULL);
+    massert(!sigaction(SIGCHLD,&sa,&osa));
 
     switch((pid=pfork())) {
     case -1:
@@ -2425,8 +2426,7 @@ object x=Cnil;
       break;
     case 0:
 
-      if (setsid()<0)
-	FEerror("setsid error", 0);
+      massert(setsid()>=0);
 
       if (daemon == sKpersistent)
 	switch(pfork()) {
@@ -2440,23 +2440,17 @@ object x=Cnil;
 	  break;
 	}
       
+      massert(!chdir("/"));
+
       memset(&r,0,sizeof(r));
-      if (getrlimit(RLIMIT_NOFILE,&r))
-	FEerror("Cannot get resourse usage",0);
+      massert(!getrlimit(RLIMIT_NOFILE,&r));
       
       for (i=0;i<r.rlim_cur;i++)
-	close(i);
-      errno=0;
+      	close(i);/*FIXME some of this will return error*/
       
-      if ((i=open("/dev/null",O_RDWR))==-1)
-	FEerror("Can't open /dev/null for stdin",0);
-      if ((i=dup(i))==-1)
-	FEerror("Can't dup",0);
-      if ((i=dup(i))==-1)
-	FEerror("Can't dup twice",0);
-      
-      if (chdir("/"))
-	FEerror("Cannot chdir to /",0);
+      massert((i=open("/dev/null",O_RDWR))>=0);
+      massert((i=dup(i))>=0);
+      massert((i=dup(i))>=0);
       
       umask(0);
       
@@ -2473,16 +2467,14 @@ object x=Cnil;
 	
 	FD_ZERO(&fds);
 	FD_SET(fd,&fds);
-	i=select(fd+1,&fds,NULL,NULL,NULL);
 	
-	if (i>0) {
+	if (select(fd+1,&fds,NULL,NULL,NULL)>0) {
 	  
 	  y=maccept(x);
 	  
-	  sigaction(SIGCHLD,&sa,NULL);
-	  
 	  switch((pid=pfork())) {
 	  case 0:
+	    massert(!sigaction(SIGCHLD,&osa,NULL));
 	    ifuncall1(server,y);
 	    exit(0);
 	    break;
@@ -2505,6 +2497,8 @@ object x=Cnil;
 	x=Cnil;
       break;
     }
+
+    massert(!sigaction(SIGCHLD,&osa,NULL));
 
   } else 
 
