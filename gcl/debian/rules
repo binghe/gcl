@@ -84,9 +84,9 @@ configure-%-stamp: $(CFGS)
 
 #	chmod -R +x gmp4/*
 
-	[ "$*" != "ansi" ] || FLAGS="--enable-ansi" ; \
-	[ "$*" != "gprof" ] || FLAGS="--enable-gprof" ; \
-	[ "$*" != "ansi-gprof" ] || FLAGS="--enable-ansi --enable-gprof" ; \
+	[ "$*" != "trad" ] || FLAGS="--disable-ansi" ; \
+	[ "$*" != "gprof" ] || FLAGS="--disable-ansi --enable-gprof" ; \
+	[ "$*" != "ansi-gprof" ] || FLAGS="--enable-gprof" ; \
 	eval `dpkg-buildflags --export=sh` && CC=$(MCC) ./configure \
 		--host=$$(dpkg-architecture -qDEB_HOST_GNU_TYPE) \
 		--disable-statsysbfd \
