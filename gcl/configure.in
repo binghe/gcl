@@ -587,7 +587,10 @@ if test "$enable_gprof" = "yes" ; then
 		     enable_debug=yes;;
 		esac
                 TCFLAGS="$TCFLAGS -pg";
-                TLIBS="$TLIBS -pg";
+		case $use in
+		s390*) ;; # relocation truncation bug in gcc
+		*) TLIBS="$TLIBS -pg";;
+		esac
         	TFPFLAG=""
  		AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
 	else			   

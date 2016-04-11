@@ -4379,7 +4379,10 @@ $as_echo "Reducing optimization on profiling arm build to workaround gcc bug" >&
 		     enable_debug=yes;;
 		esac
                 TCFLAGS="$TCFLAGS -pg";
-                TLIBS="$TLIBS -pg";
+		case $use in
+		s390*) ;; # relocation truncation bug in gcc
+		*) TLIBS="$TLIBS -pg";;
+		esac
         	TFPFLAG=""
 
 $as_echo "#define GCL_GPROF 1" >>confdefs.h
