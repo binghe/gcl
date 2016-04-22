@@ -115,10 +115,9 @@ LFD(build_symbol_table)(void) {
 int
 use_symbols(double d,...) {
 
-#ifndef DARWIN
-
-  extern void sincos(double,double *,double *);
   double d2;
+#ifndef DARWIN
+  extern void sincos(double,double *,double *);
 
   sincos(d,&d,&d2);
 
