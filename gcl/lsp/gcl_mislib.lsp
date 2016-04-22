@@ -131,7 +131,7 @@ x))
 	    *gcl-major-version* *gcl-minor-version* *gcl-extra-version*
 	    (if (member :ansi-cl *features*) "ANSI" "CLtL1")
 	    (if (member :gprof *features*) "profiling" "")
-	    (gcl-compile-time)
+	    *gcl-release-date*
 	    "Source License: LGPL(gcl,gmp), GPL(unexec,bfd,xgcl)"
 	    "Binary License: "
 	    (if gpled-modules (format nil "GPL due to GPL'ed components: ~a" gpled-modules)

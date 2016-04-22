@@ -1028,12 +1028,6 @@ DEFUNO_NEW("IDENTITY",object,fLidentity,LISP
   RETURN1 (x0);
 }
 
-DEFUNO_NEW("GCL-COMPILE-TIME",object,fSgcl_compile_time,SI
-       ,0,0,NONE,OO,OO,OO,OO,void,Lgcl_compile_time,(void),"")
-{
-  RETURN1 (make_simple_string(__DATE__ " " __TIME__));
-}
-
 DEFUNO_NEW("LDB1",object,fSldb1,SI
        ,3,3,NONE,OI,II,OO,OO,void,Lldb1,(fixnum a,fixnum b, fixnum c),"")
 {

@@ -51,7 +51,8 @@
 
 (setq *gcl-extra-version* @LI-EXTVERS@
       *gcl-minor-version* @LI-MINVERS@ 
-      *gcl-major-version* @LI-MAJVERS@)
+      *gcl-major-version* @LI-MAJVERS@
+      *gcl-release-date*  "@LI-RELEASE@")
 
 (defvar *system-banner* (default-system-banner))
 (setq *optimize-maximum-pages* t)
