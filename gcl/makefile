@@ -34,7 +34,7 @@ TESTDIR = ansi-tests
 
 VERSION=`cat majvers`.`cat minvers`
 
-all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk # do-info
+all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk release # do-info
 
 ASRC:=$(shell ls -1 o/*.c lsp/*.lsp cmpnew/*.lsp pcl/*sp clcs/*sp xgcl-2/*p) #o/*.d o/*.h h/*.h
 TAGS: $(ASRC)
@@ -44,7 +44,7 @@ system: $(PORTDIR)/$(FLISP)
 #	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && make saved_xgcl LISP=../$< && mv saved_xgcl ../$(PORTDIR)/$(FLISP))
 	touch $@
 
-release:
+release: majvers minvers
 	date >$@
 
 xgcl: $(PORTDIR)/saved_xgcl
