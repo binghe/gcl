@@ -163,7 +163,8 @@ install: install-stamp
 install-stamp: build-stamp debian/control $(INS)
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+#	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	mkdir -p debian/tmp

@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Camm Maguire <camm@debian.org>
 Homepage: http://gnu.org/software/gcl
 Build-Depends: debhelper (>= 5), libreadline-dev, m4, tk8.6-dev, libgmp-dev, autotools-dev, libxmu-dev, libxaw7-dev, po-debconf, zlib1g-dev
-Standards-Version: 3.9.5
+Standards-Version: 3.9.8
 
 Package: gcl
 Architecture: any
