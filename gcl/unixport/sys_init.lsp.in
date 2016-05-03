@@ -84,3 +84,5 @@
 (let* ((i 4096)(j (si::equal-tail-recursion-check i)))
   (unless (<= (ash i -1) j)
     (warn "equal is not tail recursive ~s ~s" i j)))
+
+(format t "~s heap words available~%" (multiple-value-bind (a b c d) (si::heap-report) (/ (- d c) (/ a 8))))
