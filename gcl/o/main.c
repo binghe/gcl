@@ -464,19 +464,12 @@ DEFUN_NEW("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,
 int
 main(int argc, char **argv, char **envp) {
 
-#ifdef CAN_UNRANDOMIZE_SBRK
-#include <stdio.h>
-#include <stdlib.h>
-#include "unrandomize.h"
-#endif
-
-  gcl_init_alloc(&argv);
-
 #ifdef GET_FULL_PATH_SELF
   GET_FULL_PATH_SELF(kcl_self);
 #else
   kcl_self = argv[0];
 #endif
+
 #ifdef __MINGW32__
   {
     char *s=kcl_self;
@@ -485,6 +478,14 @@ main(int argc, char **argv, char **envp) {
 #endif	
   *argv=kcl_self;
   
+#ifdef CAN_UNRANDOMIZE_SBRK
+#include <stdio.h>
+#include <stdlib.h>
+#include "unrandomize.h"
+#endif
+
+  gcl_init_alloc(&argv);
+
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
 #ifdef _WIN32
