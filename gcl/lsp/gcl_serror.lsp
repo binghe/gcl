@@ -239,6 +239,7 @@
          (- -)
          (* *) (** **) (*** ***)
          (/ /) (// //) (/// ///)
+	 (debug-level *debug-level*)
 	 (*quit-tags* (cons (cons *break-level* *quit-tag*) *quit-tags*))
 	 *quit-tag*
 	 (*break-level* (if p-e-p (cons t *break-level*) *break-level*))
@@ -255,7 +256,7 @@
 	 (*readtable* (or *break-readtable* *readtable*))
 	 *break-env* *read-suppress*)
     
-      (do-break-level at env p-e-p *debug-level*)))
+      (do-break-level at env p-e-p debug-level)))
 
 (putprop 'break-level t 'compiler::cmp-notinline)
 
