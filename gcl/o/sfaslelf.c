@@ -54,9 +54,10 @@ License for more details.
 
 #define ulmax(a_,b_) ({ul _a=a_,_b=b_;_a<_b ? _b : _a;})
 #define ALLOC_SEC(sec) (sec->sh_flags&SHF_ALLOC && (sec->sh_type==SHT_PROGBITS || sec->sh_type==SHT_NOBITS))
-#define  LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
-#define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info),_t=ELF_ST_TYPE(sym->st_info);	\
-      sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK || (_t>=STT_LOPROC && _t<=STT_HIPROC));})
+#define LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
+#define LOAD_SYM_BY_BIND(sym) ({ul _b=ELF_ST_BIND(sym->st_info); sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK);})
+#define LOAD_SYM_BY_NAME(sym,st1) 0
+#define LOAD_SYM(sym,st1) (LOAD_SYM_BY_BIND(sym)||LOAD_SYM_BY_NAME(sym,st1))
 
 #define MASK(n) (~(~0ULL << (n)))
 
@@ -410,7 +411,7 @@ calc_space(ul *ns,ul *sl,Sym *sym1,Sym *syme,const char *st1,Sym *d1,Sym *de,con
 
   for (sym=sym1;sym<syme;sym++) {
     
-    if (!LOAD_SYM(sym))
+    if (!LOAD_SYM(sym,st1))
       continue;
 
     if (d1) {
@@ -436,7 +437,7 @@ load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1,
 
   for (sym=sym1;sym<syme;sym++) {
 
-    if (!LOAD_SYM(sym))
+    if (!LOAD_SYM(sym,st1))
       continue;
 
     if (d1) {
