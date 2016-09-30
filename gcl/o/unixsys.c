@@ -24,9 +24,37 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
+#include <sys/wait.h>
 
 #include "include.h"
+
+int
+vsystem(const char *command) {
+
+  unsigned j,n=strlen(command);
+  char *z=alloca(n+1),**p1,**pp,*c;
+  int s;
+  pid_t pid;
+
+  memcpy(z,command,n+1);
+  for (j=0,c=z;strtok(c," \n\t");c=NULL,j++);
+
+  memcpy(z,command,n+1);
+  p1=alloca((j+1)*sizeof(*p1));
+  for (pp=p1,c=z;(*pp=strtok(c," \n\t"));c=NULL,pp++);
+
+  if (!(pid=vfork())) {
+    execvp(*p1,p1);
+    _exit(2);
+  }
+
+  massert(pid>0);
+  massert(pid==waitpid(pid,&s,0));
+
+  return s;
+
+}
+
 
 #ifdef ATT3B2
 #include <signal.h>
