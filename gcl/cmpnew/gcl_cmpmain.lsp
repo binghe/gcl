@@ -85,9 +85,8 @@
   (code result) (system (mysub (ts string) "$" "\\$"))
     (unless (and (zerop code) (zerop result))
       (cerror "Continues anyway."
-              "(SYSTEM ~S) returned a non-zero value ~D."
-              string
-              result)
+              "(SYSTEM ~S) returned a non-zero value ~D ~D."
+              string code result)
       (setq *error-p* t))
     (values result)))
 
