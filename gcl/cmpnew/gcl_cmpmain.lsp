@@ -488,7 +488,7 @@ Cannot compile ~a.~%"
     (setq na  (namestring
 	       (make-pathname :name name :type (pathname-type(first args)))))
    #+(or dos winnt)
-      (format nil "~a -I~a ~a ~a -c -w ~s -o ~s"
+      (format nil "~a -I~a ~a ~a -c -w ~a -o ~a"
 	      *cc*
 	      (concatenate 'string si::*system-directory* "../h")
 	      (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
@@ -501,7 +501,7 @@ Cannot compile ~a.~%"
 	      )
 
    #-(or dos winnt)
-   (format nil  "~a -I~a ~a ~a -c ~s -o ~s ~a"
+   (format nil  "~a -I~a ~a ~a -c ~a -o ~a ~a"
 	   *cc*
 	   (concatenate 'string si::*system-directory* "../h")
 	   (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
