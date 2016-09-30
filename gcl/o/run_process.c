@@ -502,6 +502,7 @@ make_socket_pair()
   stream_in->sm.sm_buffer = 0;
   stream_in->sm.sm_int0 = sockets_in[1];
   stream_in->sm.sm_int1 = 0;
+  stream_in->sm.sm_object0=stream_in->sm.sm_object1=OBJNULL;
   stream_out = (object) alloc_object(t_stream);
   stream_out->sm.sm_mode = smm_output;
   stream_out->sm.sm_fp = fp2;
@@ -510,6 +511,7 @@ make_socket_pair()
   setup_stream_buffer(stream_out);
   stream_out->sm.sm_int0 = sockets_out[1];
   stream_out->sm.sm_int1 = 0;
+  stream_out->sm.sm_object0=stream_out->sm.sm_object1=OBJNULL;
   stream = make_two_way_stream(stream_in, stream_out);
   return(stream);
 }

@@ -613,7 +613,8 @@ BEGIN:
 		else 
 		  fclose(strm->sm.sm_fp);
 		strm->sm.sm_fp = NULL;
-		if (type_of(strm->sm.sm_object0 ) == t_cons &&
+		if (strm->sm.sm_object0 &&
+		    type_of(strm->sm.sm_object0 ) == t_cons &&
 		    Mcar(strm->sm.sm_object0 ) == sSAallow_gzipped_fileA)
 		  fLdelete_file(Mcdr(strm->sm.sm_object0));
 		break;
