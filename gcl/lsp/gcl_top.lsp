@@ -601,9 +601,21 @@ First directory is checked for first name and all extensions etc."
 	     :device (pathname-device x)
 	     :directory (append (pathname-directory x) y)))))))))
 
+(defun get-path (s &aux (m (string-match "([^/ ]*)( |$)" s))(b (match-beginning 1))(e (match-end 1))
+		   (r (with-open-file (s (concatenate 'string "|which " (subseq s b e))) (read s nil 'eof))))
+  (if (eq r 'eof) s (concatenate 'string (string-downcase r) (subseq s e))))
+
+
+(defvar *cc* "cc")
+(defvar *ld* "ld")
+(defvar *objdump* "objdump --source ")
+
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
-  (setq *tmp-dir* (get-temp-dir))
+  (setq *tmp-dir* (get-temp-dir)
+	*cc* (get-path *cc*)
+	*ld* (get-path *ld*)
+	*objdump* (get-path *objdump*))
   (dotimes (j i) (push (argv j) tem))
   (setq *command-args* (nreverse tem))
   (setq tem *lib-directory*)

@@ -28,7 +28,7 @@
 
 
 (export '(*compile-print* *compile-verbose*))
-(import 'si::*tmp-dir* 'compiler)
+(import 'si::(*tmp-dir* *cc* *ld* *objdump*))
 (import 'si::*error-p* 'compiler)
 
 ;;; This had been true with Linux 1.2.13 a.out or even older
@@ -427,8 +427,8 @@ Cannot compile ~a.~%"
 			     (si::copy-stream st *standard-output*))
 	     (with-open-file (st hn)
 			     (si::copy-stream st *standard-output*))
-	     (when (zerop (system "which objdump >/dev/null"))
-	       (safe-system (si::string-concatenate "objdump --source " (namestring on))))
+	     (when (eql (aref *objdump* 0) #\/);program found at startup in path
+	       (safe-system (si::string-concatenate *objdump* (namestring on))))
 	     (mdelete-file cn)
 	     (mdelete-file dn)
 	     (mdelete-file hn)
@@ -469,8 +469,6 @@ Cannot compile ~a.~%"
       (terpri *compiler-output2*)))))
 
 
-(defvar *cc* "cc")
-(defvar *ld* "ld")
 (defvar *ld-libs* "ld-libs")
 (defvar *opt-three* "")
 (defvar *opt-two* "")
