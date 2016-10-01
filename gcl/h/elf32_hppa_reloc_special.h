@@ -39,3 +39,6 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   return 0;
   
 }
+
+#undef LOAD_SYM_BY_NAME
+#define LOAD_SYM_BY_NAME(sym,st1) (!strncmp(st1+sym->st_name,"$$dyncall",8))
