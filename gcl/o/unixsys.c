@@ -31,16 +31,16 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 int
 vsystem(const char *command) {
 
-  unsigned j,n=strlen(command);
-  char *z=alloca(n+1),**p1,**pp,*c;
+  unsigned j,n=strlen(command)+1;
+  char *z=alloca(n),**p1,**pp,*c;
   int s;
   pid_t pid;
 
-  memcpy(z,command,n+1);
-  for (j=0,c=z;strtok(c," \n\t");c=NULL,j++);
+  memcpy(z,command,n);
+  for (j=1,c=z;strtok(c," \n\t");c=NULL,j++);
 
-  memcpy(z,command,n+1);
-  p1=alloca((j+1)*sizeof(*p1));
+  memcpy(z,command,n);
+  p1=alloca(j*sizeof(*p1));
   for (pp=p1,c=z;(*pp=strtok(c," \n\t"));c=NULL,pp++);
 
   if (!(pid=vfork())) {
