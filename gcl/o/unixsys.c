@@ -32,24 +32,38 @@ int
 vsystem(const char *command) {
 
   unsigned j,n=strlen(command)+1;
-  char *z=alloca(n),**p1,**pp,*c;
+  char *z,*c;
+  const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp;
   int s;
   pid_t pid;
 
-  memcpy(z,command,n);
-  for (j=1,c=z;strtok(c," \n\t");c=NULL,j++);
+  if (strpbrk(command,"\"'$<>"))
 
-  memcpy(z,command,n);
-  p1=alloca(j*sizeof(*p1));
-  for (pp=p1,c=z;(*pp=strtok(c," \n\t"));c=NULL,pp++);
+    (p1=x1)[2]=command;
+
+  else {
+
+    z=alloca(n);
+    memcpy(z,command,n);
+    for (j=1,c=z;strtok(c,spc);c=NULL,j++);
+
+    memcpy(z,command,n);
+    p1=alloca(j*sizeof(*p1));
+    for (pp=p1,c=z;(*pp=strtok(c,spc));c=NULL,pp++);
+
+  }
 
   if (!(pid=vfork())) {
-    execvp(*p1,p1);
-    _exit(2);
+    errno=0;
+    execvp(*p1,(void *)p1);
+    _exit(128|(errno&0x7f));
   }
 
   massert(pid>0);
   massert(pid==waitpid(pid,&s,0));
+
+  if ((s>>8)&128)
+    emsg("execvp failure when executing '%s': %s\n",command,strerror((s>>8)&0x7f));
 
   return s;
 
