@@ -744,14 +744,13 @@ BEGIN:
 	if (tx == t_complex)
 		return(contains_sharp_comma(x->cmp.cmp_real) ||
 		       contains_sharp_comma(x->cmp.cmp_imag));
-	if (tx == t_vector)
-	{
-		int i;
-	   if (x->v.v_elttype == aet_object)
-		for (i = 0;  i < x->v.v_fillp;  i++)
-			if (contains_sharp_comma(x->v.v_self[i]))
-				return(TRUE);
-		return(FALSE);
+	if (tx == t_vector) {
+	  int i;
+	  if (x->v.v_elttype == aet_object)
+	    for (i = 0;  i < x->v.v_fillp;  i++)
+	      if (contains_sharp_comma(x->v.v_self[i]))
+		return(TRUE);
+	  return(FALSE);
 	}
 	if (tx == t_cons) {
 		if (x->c.c_car == siSsharp_comma)

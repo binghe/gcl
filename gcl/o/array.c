@@ -850,31 +850,33 @@ raw_aet_ptr(object x, short int typ)
 	*/     
 
 void
-gset(void *p1, void *val, int n, int typ)
-{ if (val==0)
+gset(void *p1, void *val, int n, int typ) {
+
+  if (val==0)
     val = aet_types[typ].dflt;
-    switch (typ){
+
+  switch (typ){
 
 #define GSET(p,n,typ,val) {typ x = *((typ *) val); GSET1(p,n,typ,x)}
-#define GSET1(p,n,typ,val) while (n-- > 0) \
+#define GSET1(p,n,typ,val) while (n-- > 0)	\
       { *((typ *) p) = val; \
-	  p = p + sizeof(typ); \
-	  } break;
+	p = p + sizeof(typ);			\
+      } break;
 
-    case aet_object: GSET(p1,n,object,val);
-    case aet_ch:     GSET(p1,n,char,val);
-      /* Note n is number of fixnum WORDS for bit */
-    case aet_bit:    GSET(p1,n,fixnum,val);
-    case aet_fix:    GSET(p1,n,fixnum,val);
-    case aet_sf:     GSET(p1,n,shortfloat,val);
-    case aet_lf:     GSET(p1,n,longfloat,val);
-    case aet_char:   GSET(p1,n,char,val);
-    case aet_uchar:  GSET(p1,n,unsigned char,val);
-    case aet_short:  GSET(p1,n,short,val);
-    case aet_ushort: GSET(p1,n,unsigned short,val);
-    default:         FEerror("bad elttype",0);
-    }
+  case aet_object: GSET(p1,n,object,val);
+  case aet_ch:     GSET(p1,n,char,val);
+    /* Note n is number of fixnum WORDS for bit */
+  case aet_bit:    GSET(p1,n,fixnum,val);
+  case aet_fix:    GSET(p1,n,fixnum,val);
+  case aet_sf:     GSET(p1,n,shortfloat,val);
+  case aet_lf:     GSET(p1,n,longfloat,val);
+  case aet_char:   GSET(p1,n,char,val);
+  case aet_uchar:  GSET(p1,n,unsigned char,val);
+  case aet_short:  GSET(p1,n,short,val);
+  case aet_ushort: GSET(p1,n,unsigned short,val);
+  default:         FEerror("bad elttype",0);
   }
+}
 
 
 #define W_SIZE (BV_BITS*sizeof(fixnum))    
@@ -894,38 +896,43 @@ implementation dependent results.")
   int n1=fix(n1o),nc;
   if (VFUN_NARGS==4)
     { n1 = x->v.v_dim - i1;}
-  if (typ1==aet_bit)
-    {if (i1 % CHAR_SIZE)
-     badcopy:
-       FEerror("Bit copies only if aligned",0);
-    else
-      {int rest=n1%CHAR_SIZE;
-       if (rest!=0 )
-	 {if (typ2!=aet_bit)
-	    goto badcopy;
-	    {while(rest> 0)
-	       { fSaset1(y,i2+n1-rest,(fLrow_major_aref(x,i1+n1-rest)));
-		 rest--;}
-	     }}
-       i1=i1/CHAR_SIZE ;
-       n1=n1/CHAR_SIZE;
-       typ1=aet_char;
-     }};
-  if (typ2==aet_bit)
-    {if (i2 % CHAR_SIZE)
-       goto badcopy;
-       i2=i2/CHAR_SIZE ;}
-  if ((typ1 ==aet_object ||
-       typ2  ==aet_object) && typ1 != typ2)
+  if (typ1==aet_bit) {
+    if (i1 % CHAR_SIZE)
+    badcopy:
+      FEerror("Bit copies only if aligned",0);
+    else {
+      int rest=n1%CHAR_SIZE;
+      if (rest!=0) {
+	if (typ2!=aet_bit)
+	  goto badcopy;
+	while(rest> 0) {
+	  fSaset1(y,i2+n1-rest,(fLrow_major_aref(x,i1+n1-rest)));
+	  rest--;
+	}
+      }
+      i1=i1/CHAR_SIZE ;
+      n1=n1/CHAR_SIZE;
+      typ1=aet_char;
+    }
+  }
+
+  if (typ2==aet_bit) {
+    if (i2 % CHAR_SIZE)
+      goto badcopy;
+    i2=i2/CHAR_SIZE ;
+  }
+
+  if ((typ1 ==aet_object || typ2  ==aet_object) && typ1 != typ2)
     FEerror("Can't copy between different array types",0);
   nc=n1 * aet_sizes[(int)typ1];
-  if (i1+n1 > x->a.a_dim
-      || ((y->a.a_dim - i2) *aet_sizes[(int)typ2]) < nc)
+  if (i1+n1 > x->a.a_dim || ((y->a.a_dim - i2) *aet_sizes[(int)typ2]) < nc)
     FEerror("Copy  out of bounds",0);
   bcopy(x->ust.ust_self + (i1*aet_sizes[(int)typ1]),
 	y->ust.ust_self + (i2*aet_sizes[(int)typ2]),
 	nc);
+
   return x;
+
 }
 
 /* X is the header of an array.  This supplies the body which
