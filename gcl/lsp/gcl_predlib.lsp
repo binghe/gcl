@@ -128,6 +128,7 @@
           (file-stream . file-stream-p)
           (synonym-stream . synonym-stream-p)
           (pathname . pathnamep)
+          (pathname-designator . pathname-designatorp)
           (logical-pathname . logical-pathnamep)
           (readtable . readtablep)
           (hash-table . hash-table-p)
