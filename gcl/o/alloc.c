@@ -447,7 +447,6 @@ set_tm_maxpage(struct typemanager *tm,fixnum n) {
   
   fixnum r=tm->tm_type==t_relocatable,j=tm->tm_maxpage,z=(n-j)*(r ? 2 : 1);
   if (z>available_pages) return 0;
-  if (r && 2*n+page(rb_start)>real_maxpage) return 0;
   available_pages-=z;
   tm->tm_adjgbccnt*=((double)j+1)/(n+1);
   tm->tm_maxpage=n;
@@ -909,7 +908,7 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
 
   fixnum m=tpage(tm,n),reloc_min;
 
-  if (tm->tm_type>=t_end) return NULL;
+  if (tm->tm_type>t_end) return NULL;
 
   reloc_min=npage(rb_pointer-rb_start);
 
@@ -924,6 +923,8 @@ alloc_after_reclaiming_pages(struct typemanager *tm,fixnum n) {
     return alloc_after_adding_pages(tm,n);
 
   }
+
+  if (tm->tm_type>=t_end) return NULL;
 
   maybe_reallocate_page(tm,tm->tm_percent_free*tm->tm_npage);
 
@@ -1093,8 +1094,7 @@ DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"
 	     RV(make_fixnum(tm->tm_maxpage)),
 	     RV(make_fixnum(tm->tm_nppage)),
 	     RV(make_fixnum(tm->tm_gbccount)),
-	     RV(make_fixnum(tm->tm_npage*tm->tm_nppage-tm->tm_nfree))
-	     ));
+	     RV(make_fixnum(tm->tm_npage*tm->tm_nppage-tm->tm_nfree))));
 }
  
 #ifdef SGC_CONT_DEBUG
