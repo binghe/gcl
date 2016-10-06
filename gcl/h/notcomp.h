@@ -294,6 +294,8 @@ gcl_init_cmp_anon(void);
 
 #include "gmp_wrappers.h"
 
+char FN1[PATH_MAX],FN2[PATH_MAX],FN3[PATH_MAX],FN4[PATH_MAX],FN5[PATH_MAX];
+
 #include <errno.h>
 #define massert(a_) ({errno=0;if (!(a_)||errno) assert_error(#a_,__LINE__,__FILE__,__FUNCTION__);})
 
