@@ -83,7 +83,7 @@
       (progn 
 	(cond
 	 (*multiply-stacks* (setq *multiply-stacks* nil))
-	 ((probe-file "init.lsp") (load "init.lsp"))))
+	 ((when (fboundp 'probe-file) (probe-file "init.lsp")) (load "init.lsp"))))
       (when (if (symbolp *top-level-hook*) (fboundp *top-level-hook*) (functionp *top-level-hook*))
 	(funcall *top-level-hook*)))
 

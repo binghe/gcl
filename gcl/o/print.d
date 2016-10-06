@@ -1382,7 +1382,7 @@ int level;
 		if (1 || PRINTescape) {
 			write_ch('#');
 			write_ch('p');
-			vs_push(namestring(x));
+			vs_push(x->pn.pn_namestring==Cnil ? make_simple_string("") : x->pn.pn_namestring);
 			write_object(vs_head, level);
 			vs_popp;
 		} else {

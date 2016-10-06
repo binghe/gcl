@@ -17,7 +17,8 @@ OBJS	= gcl_sharp.o gcl_arraylib.o gcl_assert.o gcl_defmacro.o gcl_defstruct.o \
 	  gcl_logical_pathname_translations.o gcl_directory.o gcl_merge_pathnames.o gcl_truename.o gcl_sharp_uv.o\
 	  gcl_seq.o gcl_seqlib.o gcl_setf.o gcl_top.o gcl_trace.o gcl_sloop.o \
           gcl_debug.o gcl_info.o gcl_serror.o gcl_restart.o \
-	  gcl_destructuring_bind.o gcl_defpackage.o gcl_make_defpackage.o gcl_loop.o $(EXTRA_LOBJS)
+          gcl_rename_file.o gcl_pathname_match_p.o gcl_wild_pathname_p.o \
+          gcl_destructuring_bind.o gcl_defpackage.o gcl_make_defpackage.o gcl_loop.o $(EXTRA_LOBJS)
 # export.o autoload.o auto_new.o
 
 LISP=$(PORTDIR)/saved_pre_gcl$(EXE)

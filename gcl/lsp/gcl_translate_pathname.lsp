@@ -1,31 +1,33 @@
 (in-package :si)
 
-(deftype compiled-regexp nil `(vector unsigned-char))
+(defun lenel (x lp)
+  (case x (:wild 1)(:wild-inferiors 2)(:absolute (if lp -1 0))(:relative (if lp 0 -1))
+	((:unspecific nil :newest) -1)(otherwise (length x))))
 
-(defun lenel (x)
-  (case x (:wild 1)(:wild-inferiors 2)(:absolute 0)((:unspecific :relative nil :newest) -1)(otherwise (length x))))
+(defun next-match (&optional (i 1) (k -1) (m (1- (ash (length *match-data*) -1))))
+  (cond ((< k (match-beginning i) (match-end i)) i)
+	((< i m) (next-match (1+ i) k m))
+	(i)))
 
-(defun mme2 (s lel &optional (b 0) (i 1) r el
-	       &aux (e (+ b (lenel (car lel))))(j (match-beginning i))(k (match-end i)))
+(defun mme2 (s lel lp &optional (b 0) (i (next-match)) r el
+	       &aux (e (+ b (lenel (car lel) lp)))(j (match-beginning i))(k (match-end i)))
   (cond
-   ((unless (eql j -1) (eql j k)) (mme2 s lel b (1+ i) r el))
-   ((< (1- b) j k (1+ e))
-    (let ((z (subseq s j k))(r (if el r (cons nil r))))
-      (mme2 s lel b (1+ i) (cons (cons z (car r)) (cdr r)) (or el (car lel)))))
+   ((< (- b 2) j k (+ e 2))
+    (let* ((z (car lel))(b1 (max b j))(e1 (min k e))
+	   (z (if (or (< b b1) (< e1 e)) (subseq z (- b1 b) (- e1 b)) z))
+	   (r (if el r (cons nil r))))
+      (mme2 s lel lp b (next-match i k) (cons (cons z (car r)) (cdr r)) (or el (car lel)))))
    ((< (1- j) b e (1+ k))
     (let ((r (if el r (cons nil r))))
-      (mme2 s (cdr lel) (1+ e) i (cons (cons (car lel) (car r)) (cdr r)) (or el (list (car lel))))))
+      (mme2 s (cdr lel) lp (1+ e) i (cons (cons (car lel) (car r)) (cdr r)) (or el (list (car lel))))))
    ((consp el)
     (let* ((cr (nreverse (car r))))
-      (mme2 s lel b (1+ i) (cons (cons (car el) (list cr)) (cdr r)))))
+      (mme2 s lel lp b (next-match i k) (cons (cons (car el) (list cr)) (cdr r)))))
    (el
     (let* ((cr (nreverse (car r))))
-      (mme2 s (cdr lel) (1+ e) i (cons (cons el cr) (cdr r)))))
-   (lel (mme2 s (cdr lel) (1+ e) i (cons (car lel) r)))
+      (mme2 s (cdr lel) lp (1+ e) i (cons (cons el cr) (cdr r)))))
+   (lel (mme2 s (cdr lel) lp (1+ e) i (cons (car lel) r)))
    ((nreverse r))))
-
-
-(defconstant +pathname-keys+ '(:host :device :directory :name :type :version))
 
 (defun do-repl (x y)
   (labels ((r (x l &optional (b 0) &aux (f (string-match #v"\\*" x b)))
@@ -47,44 +49,32 @@
    ((stringp y) (do-repl (when (listp x) (unless (listp (cadr x)) (cdr x))) y))
    (y)))
 
-#.`(defun mlp (p &aux (p (pathname p)))
-     (labels ((mrxp (x) (if (listp x) (mapcar #'mrxp x) x)))
-       (list
-	,@(mapcar (lambda (x &aux (y (intern (concatenate 'string "PATHNAME-" (string-upcase x)))))
-		    `(mrxp (,y p))) +pathname-keys+))))
-
-(defun pnl1 (x) (list* (pop x) (pop x) (append (pop x) x)))
-(defun lnp (x) (list* (pop x) (pop x) (let ((q (last x 3))) (cons (ldiff x q) q))))
-
-
-(defun pathname-match-p (p w)
-  (zerop (string-match (etypecase w (compiled-regexp w)((or string pathname) (to-regexp w))) (namestring p))))
-
-
-(defun mme3 (sx px)
-  (lnp (mme2 sx (pnl1 (mlp px)))))
-
 (defun list-toggle-case (x f)
   (typecase x
     (string (funcall f x))
     (cons (mapcar (lambda (x) (list-toggle-case x f)) x))
     (otherwise x)))
 
+(defun mme3 (sx px flp tlp)
+  (list-toggle-case
+   (lnp (mme2 sx (pnl1 (mlp px)) flp))
+   (cond ((eq flp tlp) 'identity)
+	 (flp 'string-downcase)
+	 (tlp 'string-upcase))))
+
 (defun translate-pathname (source from to &key
 				  &aux (psource (pathname source))
 				  (pto (pathname to))
-				  (nsource (namestring source))
-				  (case-toggle-p (when (typep psource 'logical-pathname) (not (typep pto 'logical-pathname))));FIXME
 				  (match (pathname-match-p source from)))
   (declare (optimize (safety 1)))
   (check-type source pathname-designator)
   (check-type from pathname-designator)
   (check-type to pathname-designator)
   (check-type match (not null))
-  (apply 'make-pathname :host (pathname-host pto)
+  (apply 'make-pathname :host (pathname-host pto) :device (pathname-device pto)
 	 (mapcan 'list +pathname-keys+
 		 (mapcar 'source-portion
-			 (list-toggle-case (mme3 nsource psource) (if case-toggle-p 'string-downcase 'identity))
+			 (mme3 (namestring source) psource (typep psource 'logical-pathname) (typep pto 'logical-pathname))
 			 (mlp pto)))))
 
 (defun translate-logical-pathname (spec &key &aux (p (pathname spec)))

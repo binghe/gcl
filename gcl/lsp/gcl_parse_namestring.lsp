@@ -1,11 +1,15 @@
 (in-package :si)
 
-(defun sharp-p-reader (stream subchar arg)
-  (declare (ignore subchar arg))
-  (let ((x (parse-namestring (read stream)))) x))
-;  (values (parse-namestring (read stream))));fixme values compiled
+(deftype seqind nil `fixnum)
 
-(set-dispatch-macro-character #\# #\p 'sharp-p-reader)
+(defun match-beginning (i &aux (v *match-data*))
+  (declare ((vector fixnum) v)(seqind i))
+  (the (or (integer -1 -1 ) seqind) (aref v i)))
+(defun match-end (i &aux (v *match-data*))
+  (declare ((vector fixnum) v)(seqind i))
+  (the (or (integer -1 -1 ) seqind) (aref v (+ i (ash (length v) -1)))))
+
+(declaim (inline match-beginning match-end))
 
 (defun dir-conj (x) (if (eq x :relative) :absolute :relative))
 
@@ -22,13 +26,14 @@
 
 (defun element (x b i key)
   (let* ((z (when (> i b) (mfr x b i)))
-	 (w (assoc (string-upcase z) (cdr (assoc key *sym-sub-alist*))  :test 'string-equal)))
-    (subst *up-key* :up (if w (cdr w) z))))
+	 (w (assoc z (cdr (assoc key *sym-sub-alist*)) :test 'string-equal))
+	 (z (if w (cdr w) z)))
+    (if (eq z :up) *up-key* z)))
 
 (defun dir-parse (x sep sepfirst &optional (b 0))
   (when (stringp x)
-    (let ((i (or (search sep x :start2 b) -1)));string-match spoils outer match results
-      (unless (eql i -1)
+    (let ((i (search sep x :start2 b)));string-match spoils outer match results
+      (when i
 	(let* ((y (dir-parse x sep sepfirst (1+ i)))
 	       (z (element x b i :directory))
 	       (y (if z (cons z y) y)))
@@ -42,41 +47,55 @@
 (defun version-parse (x)
   (typecase x
     (string (version-parse (parse-integer x)))
-    (integer (locally (check-type x (integer 1)) x))
+;    (integer (locally (check-type x (integer 1)) x))
     (otherwise x)))
 
-(defun logical-pathname-parse (x host dhost &aux (x (string-upcase x)))
-  (when (zerop (string-match +generic-logical-pathname-regexp+ x))
+(defconstant +generic-logical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +logical-pathname-defaults+)) t t)))
+
+(defun expand-home-dir (dir)
+  (cond ((and (eq (car dir) :relative) (stringp (cadr dir)) (eql #\~ (aref (cadr dir) 0)))
+	 (append (dir-parse (home-namestring (cadr dir)) "/" :absolute) (cddr dir)))
+	(dir)))
+
+(defun logical-pathname-parse (x &optional host def (b 0) (e (length x)))
+  (when (and (eql b (string-match +generic-logical-pathname-regexp+ x b e)) (eql (match-end 0) e))
     (let ((mhost (match-component x 1 :host 0 -1)))
       (when (and host mhost)
-	(unless (string= host mhost)
+	(unless (string-equal host mhost)
 	    (error 'error :format-control "Host part of ~s does not match ~s" :format-arguments (list x host))))
-      (let ((host (or host mhost dhost)))
-	(when (logical-pathname-translations host)
-	  (list (match-end 0)
-		:device :unspecific
-		:host host
-		:directory (dir-parse (match-component x 2 :none) ";" :relative)
-		:name (match-component x 3 :name)
-		:type (match-component x 4 :type)
-		:version (version-parse (match-component x 5 :version))))))))
+      (let ((host (or host mhost (pathname-host def))))
+	(when (logical-pathname-host-p host)
+	  (let* ((dir (dir-parse (match-component x 2 :none) ";" :relative))
+		 (edir (expand-home-dir dir)))
+	  (make-pathname :host host
+			 :device :unspecific
+			 :directory edir
+			 :name (match-component x 6 :name)
+			 :type (match-component x 8 :type 1)
+			 :version (version-parse (match-component x 11 :version 1))
+			 :namestring (when (and mhost (eql b 0) (eql e (length x)) (eq dir edir)) x))))))))
   
-(defun pathname-parse (x)
-  (when (zerop (string-match +generic-physical-pathname-regexp+ x))
-    (list (match-end 0)
-	  :directory (dir-parse (match-component x 1 :none) "/" :absolute)
-	  :name (match-component x 2 :name)
-	  :type (match-component x 3 :type))))
+(defconstant +generic-physical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +physical-pathname-defaults+)) t nil)))
 
-(defun synonym-stream-symbol (x) (c-stream-object0 x))
-(defun pathname-synonym-stream-p (x) (typep (synonym-stream-symbol x) 'pathname-designator))
+(defun pathname-parse (x b e)
+  (when (and (eql b (string-match +generic-physical-pathname-regexp+ x b e)) (eql (match-end 0) e))
+    (let* ((dir (dir-parse (match-component x 1 :none) "/" :absolute))
+	   (edir (expand-home-dir dir)))
+      (make-pathname :directory edir
+		     :name (match-component x 3 :name)
+		     :type (match-component x 4 :type 1)
+		     :namestring (when (and (eql b 0) (eql e (length x)) (eq dir edir)) x)))))
 
-(deftype pathname-designator nil '(or string pathname file-stream (and synonym-stream (satisfies pathname-synonym-stream-p))))
 
-(deftype seqind nil `(integer 0))
+(defun path-stream-name (x)
+  (check-type x pathname-designator)
+  (typecase x
+    (synonym-stream (path-stream-name (symbol-value (synonym-stream-symbol x))))
+    (stream (path-stream-name (c-stream-object1 x)))
+    (otherwise x)))
 
-(defun parse-namestring (thing &optional host (default-pathname *default-pathname-defaults*) &key (start 0) end junk-allowed)
-  (declare (optimize (safety 1)))
+(defun parse-namestring (thing &optional host (default-pathname *default-pathname-defaults*) &rest r &key (start 0) end junk-allowed)
+  (declare (optimize (safety 1))(dynamic-extent r))
   (check-type thing pathname-designator)
   (check-type host (or null (satisfies logical-pathname-translations)))
   (check-type default-pathname pathname-designator)
@@ -84,30 +103,34 @@
   (check-type end (or null seqind))
   
   (typecase thing
-    (string (let* ((l (logical-pathname-parse thing host (pathname-host default-pathname)))
-		   (l (or l (pathname-parse thing)))
-		   (e (pop l)))
-	      (values (when l (apply 'make-pathname l)) e)))
-    (stream (parse-namestring (c-stream-object1 thing)))
+    (string (let* ((e (or end (length thing)))
+		   (l (logical-pathname-parse thing host default-pathname start e))
+		   (l (or l (unless host (pathname-parse thing start e)))))
+	      (cond (junk-allowed (values l (max 0 (match-end 0))))
+		    (l (values l e))
+		    ((error 'parse-error :format-control "~s is not a valid pathname on host ~s" :format-arguments (list thing host))))))
+    (stream (apply 'parse-namestring (path-stream-name thing) host default-pathname r))
     (pathname
      (when host
-       (unless (string= host (pathname-host thing))
+       (unless (string-equal host (pathname-host thing))
 	 (error 'file-error :pathname thing :format-control "Host does not match ~s" :format-arguments (list host))))
      (values thing start))))
-
 
 (defun pathname (spec)
   (declare (optimize (safety 1)))
   (check-type spec pathname-designator)
   (if (typep spec 'pathname) spec (values (parse-namestring spec))))
 
-(defun logical-pathname-host-p (x) (logical-pathname-translations (pathname-host x)))
+(defun sharp-p-reader (stream subchar arg)
+  (declare (ignore subchar arg))
+  (let ((x (parse-namestring (read stream)))) x))
 
-(defun logical-pathname (spec)
-  (declare (optimize (safety 1)))
-  (check-type spec pathname-designator)
-  (let* ((p (pathname spec)))
-    (check-type p (satisfies logical-pathname-host-p))
-    (c-set-t-tt p 1)))
+(defun sharp-dq-reader (stream subchar arg);FIXME arg && read-suppress
+  (declare (ignore subchar arg))
+  (unread-char #\" stream)
+  (let ((x (parse-namestring (read stream)))) x))
 
-  
+(set-dispatch-macro-character #\# #\p 'sharp-p-reader)
+(set-dispatch-macro-character #\# #\P 'sharp-p-reader)
+(set-dispatch-macro-character #\# #\" 'sharp-dq-reader)
+

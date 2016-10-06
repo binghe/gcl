@@ -1564,38 +1564,6 @@ Ldefault_dispatch_macro()
 }
 
 /*
-	#p" ... " returns the pathname with namestring ... .
-*/
-static void
-Lsharp_p_reader()
-{
-	check_arg(3);
-	if (vs_base[2] != Cnil && !READsuppress)
-		extra_argument('p');
-	vs_popp;
-	vs_popp;
-	vs_base[0] = read_object(vs_base[0]);
-	vs_base[0] = coerce_to_pathname(vs_base[0]);
-}
-
-/*
-	#" ... " returns the pathname with namestring ... .
-*/
-static void
-Lsharp_double_quote_reader()
-{
-	check_arg(3);
-
-	if (vs_base[2] != Cnil && !READsuppress)
-		extra_argument('"');
-	vs_popp;
-	unread_char(vs_base[1], vs_base[0]);
-	vs_popp;
-	vs_base[0] = read_object(vs_base[0]);
-	vs_base[0] = coerce_to_pathname(vs_base[0]);
-}
-
-/*
 	#$ fixnum returns a random-state with the fixnum
 	as its content.
 */
@@ -2369,9 +2337,6 @@ gcl_init_read()
 	dtab['<'] = make_cf(Lsharp_less_than_reader);
 */
 	dtab['|'] = make_cf(Lsharp_vertical_bar_reader);
-	dtab['"'] = make_cf(Lsharp_double_quote_reader);
-	dtab['p'] = make_cf(Lsharp_p_reader);
-	dtab['P'] = make_cf(Lsharp_p_reader);
 	/*  This is specific to this implimentation  */
 	dtab['$'] = make_cf(Lsharp_dollar_reader);
 	/*  This is specific to this implimentation  */

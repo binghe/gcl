@@ -2,56 +2,66 @@
 
 (defconstant +d-type-alist+ (d-type-list))
 
-
 (defun ?push (x tp)
   (when (and x (eq tp :directory) (vector-push-extend #\/ x)))
   x)
 
-(defun wreaddir3 (x s &optional y &aux (y (if (rassoc y +d-type-alist+) y :unknown)))
-  (let ((r (readdir3 x (car (rassoc y +d-type-alist+)) s)))
+(defun wreaddir (x s &optional y (ls (length s) lsp) &aux (y (if (rassoc y +d-type-alist+) y :unknown)))
+  (when lsp (setf (fill-pointer s) ls))
+  (let ((r (readdir x (car (rassoc y +d-type-alist+)) s)))
     (typecase r
-      (fixnum (wreaddir3 x (adjust-array s (+ 100 (ash (array-dimension s 0) 1))) y))
+      (fixnum (wreaddir x (adjust-array s (+ 100 (ash (array-dimension s 0) 1))) y))
       (cons (let ((tp (cdr (assoc (cdr r) +d-type-alist+)))) (cons (?push (car r) tp) tp)))
       (otherwise (?push r y)))))
 
+(defun dot-dir-p (r l) (member-if (lambda (x) (string= x r :start2 l)) '("./" "../")))
 
-(defun dot-dir-p (r l &aux (z (length r)))
-  (cond ((eql z (+ l 2)) (when (eql (aref r l) #\.) (eql (aref r (1+ l)) #\/)))
-	((eql z (+ l 3)) (when (eql (aref r l) #\.) (when (eql (aref r (1+ l)) #\.) (eql (aref r (+ l 2)) #\/))))))
+(defun vector-push-string (x s &optional (ss 0) (lx (length x)) &aux (ls (- (length s) ss)))
+  (let ((x (if (> ls (- (array-dimension x 0) lx)) (adjust-array x (+ ls (ash lx 1))) x)))
+    (setf (fill-pointer x) (+ lx ls))
+    (replace x s :start1 lx :start2 ss)))
 
-(defun walk-dir (s f &optional (y :unknown) (d (opendir s)) (l (length s)) &aux (r (wreaddir3 d s y)))
-  (cond (r (unless (dot-dir-p r l) (funcall f r)) (walk-dir s f y d (setf (fill-pointer s) l)))
-	((closedir d))))
+(defun walk-dir (s e f &optional (y :unknown) (d (opendir s)) (l (length s)) (le (length e))
+		   &aux (r (wreaddir d s y l)))
+  (cond (r (unless (dot-dir-p r l) (funcall f r (vector-push-string e r l le) l))
+	   (walk-dir s e f y d l le))
+	((setf (fill-pointer s) l (fill-pointer e) le) (closedir d))))
 
-(defun wild-dir-element-p (x)
-  (or (eq x :wild) (eq x :wild-inferiors)
-      (when (stringp x) (not (eql -1 (string-match #v"(\\*|\\?|\\[|\\{)" x))))))
-
-(defun recurse-dir (x f)
-  (funcall f x)
-  (walk-dir x (lambda (x) (recurse-dir x f)) :directory))
-
-(defun vector-push-string (x s &aux (lx (length x))(ls (length s))
-			     (x (if (> ls (- (array-dimension x 0) lx)) (adjust-array x (+ ls (ash lx 1))) x)))
-  (setf (fill-pointer x) (+ lx ls))
-  (replace x s :start1 lx))
-
-(defun expand-wild-directory (l f &optional (zz (make-frame "")))
-  (let* ((x (member-if 'wild-dir-element-p l))
-	 (z (vector-push-string zz (namestring (make-pathname :directory (ldiff l x))))))
-    (cond ((eq (car x) :wild-inferiors) (recurse-dir z f))
-	  (x (walk-dir z (lambda (q) (expand-wild-directory (cons :relative (cdr x)) f q)) :directory));FIXME
-	  ((funcall f z)))))
+(defun recurse-dir (x y f)
+  (funcall f x y)
+  (walk-dir x y (lambda (x y l) (declare (ignore l)) (recurse-dir x y f)) :directory))
 
 (defun make-frame (s &aux (l (length s)))
-  (make-array (ash l 1) :element-type 'character :adjustable t :fill-pointer l :initial-contents (coerce s 'list)))
+  (replace (make-array l :element-type 'character :adjustable t :fill-pointer l) s))
 
-(defun expand-path (p &aux (v (compile-regexp (to-regexp p)))(filesp (or (pathname-name p) (pathname-type p))) r);;version?
-  (expand-wild-directory
-   (pathname-directory p)
-   (lambda (x) (if filesp (walk-dir x (lambda (y) (when (pathname-match-p y v) (push (truename (copy-seq y)) r))) :file)
-		 (when (pathname-match-p x p) (push (truename (copy-seq x)) r)))))
+(defun expand-wild-directory (l f zz &optional (yy (make-frame zz)))
+  (let* ((x (member-if 'wild-dir-element-p l))
+	 (s (namestring (make-pathname :directory (ldiff l x))))
+	 (z (vector-push-string zz s))
+	 (l (length yy))
+	 (y (link-expand (vector-push-string yy s) l))
+	 (y (if (eq y yy) y (make-frame y))))
+    (when (or (eq (stat z) :directory) (zerop (length z)))
+      (cond ((eq (car x) :wild-inferiors) (recurse-dir z y f))
+	    (x (walk-dir z y (lambda (q e l)
+			       (declare (ignore l))
+			       (expand-wild-directory (cons :relative (cdr x)) f q e)) :directory));FIXME
+	    ((funcall f z y))))))
+
+(defun directory (p &key &aux (p (translate-logical-pathname p))(d (pathname-directory p))
+		    (c (unless (eq (car d) :absolute) (make-frame (concatenate 'string (getcwd) "/"))))
+		    (lc (when c (length c)))
+		    (filesp (or (pathname-name p) (pathname-type p)))
+		    (v (compile-regexp (to-regexp p)))(*up-key* :back) r)
+  (expand-wild-directory d
+   (lambda (dir exp &aux (pexp (pathname (if c (vector-push-string c exp 0 lc) exp))))
+     (if filesp
+	 (walk-dir dir exp
+		   (lambda (dir exp pos)
+		     (declare (ignore exp))
+		     (when (pathname-match-p dir v)
+		       (push (merge-pathnames (parse-namestring dir nil *default-pathname-defaults* :start pos) pexp nil) r)))
+		   :file)
+       (when (pathname-match-p dir v) (push pexp r))))
+   (make-frame (if c "./" "")))
   r)
-
-(defun directory (p &key &aux (p (merge-pathnames (translate-logical-pathname p) (parse-namestring (concatenate 'string (getcwd) "/")) nil)))
-  (expand-path p))
