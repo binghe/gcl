@@ -8,28 +8,6 @@
 	 (,op (the fixnum ,x) (the fixnum ,y))))
 (defmacro fcr (x) `(load-time-value (compile-regexp ,x))))
 
-(eval-when (compile eval load)
-(defun sharp-u-reader (stream subchar arg)
-  subchar arg
-  (let ((tem (make-array 10 :element-type 'character :fill-pointer 0)))
-    (or (eql (read-char stream) #\")
-	(error "sharp-u-reader reader needs a \" right after it"))
-    (loop
-     (let ((ch (read-char stream)))
-       (cond ((eql ch #\") (return tem))
-	     ((eql ch #\\)
-	      (setq ch (read-char stream))
-	      (setq ch (or (cdr (assoc ch '((#\n . #\newline)
-					    (#\t . #\tab)
-					    (#\r . #\return))))
-			   ch))))
-       (vector-push-extend ch tem)))
-    tem))
-
-(set-dispatch-macro-character #\# #\u 'sharp-u-reader)
-
-)
-
 (defconstant +crlu+ (compile-regexp #u""))
 (defconstant +crnp+ (compile-regexp #u"[]"))
 
