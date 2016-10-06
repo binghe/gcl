@@ -175,7 +175,7 @@
 			   (*c-debug* c-debug)
 			   (*compile-print* (or print *compile-print*))
                            (*package* *package*)
-			   (*DEFAULT-PATHNAME-DEFAULTS* #"")
+			   (*DEFAULT-PATHNAME-DEFAULTS* #p"")
 			   (*data* (list (make-array 50 :fill-pointer 0 :adjustable t) nil nil))
 			   *init-name* 	
 			   (*fasd-data* *fasd-data*)
@@ -186,25 +186,25 @@
   (cond (*compiler-in-use*
          (format t "~&The compiler was called recursively.~%~
 Cannot compile ~a.~%"
-                 (namestring (merge-pathnames input-pathname #".lsp")))
+                 (namestring (merge-pathnames input-pathname #p".lsp")))
          (setq *error-p* t)
          (return-from compile-file1 (values)))
         (t (setq *error-p* nil)
            (setq *compiler-in-use* t)))  
 
-  (unless (probe-file (merge-pathnames input-pathname #".lsp"))
+  (unless (probe-file (merge-pathnames input-pathname #p".lsp"))
     (format t "~&The source file ~a is not found.~%"
-            (namestring (merge-pathnames input-pathname #".lsp")))
+            (namestring (merge-pathnames input-pathname #p".lsp")))
     (setq *error-p* t)
     (return-from compile-file1 (values)))
 
   (when *compile-verbose*
-    (format t "~&Compiling ~a.~%" (namestring (merge-pathnames input-pathname #".lsp"))))
+    (format t "~&Compiling ~a.~%" (namestring (merge-pathnames input-pathname #p".lsp"))))
 
   (and *record-call-info* (clear-call-table))
 
   (with-open-file
-   (*compiler-input* (merge-pathnames input-pathname #".lsp"))
+   (*compiler-input* (merge-pathnames input-pathname #p".lsp"))
    
    
    (cond ((numberp *split-files*)
@@ -351,7 +351,7 @@ Cannot compile ~a.~%"
     (wt-data1 form)  ;; this binds all the print stuff
     ))
 
-(defun compile (name &optional def &aux tem gaz (*default-pathname-defaults* #"."))
+(defun compile (name &optional def &aux tem gaz (*default-pathname-defaults* #p"."))
 
   (cond ((not(symbolp name)) (error "Must be a name"))
 	((and (consp def)

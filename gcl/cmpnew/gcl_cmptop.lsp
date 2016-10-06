@@ -209,7 +209,7 @@
 
   (cond ((not sp) "code")
 	((not (pathnamep p)) (init-name (pathname p) sp gp dc nt))
-	(gp (init-name (truename (merge-pathnames p #".lsp")) sp nil dc nt))
+	(gp (init-name (truename (merge-pathnames p #p".lsp")) sp nil dc nt))
 	((pathname-type p)
 	 (init-name (make-pathname
                      :host (pathname-host p)
