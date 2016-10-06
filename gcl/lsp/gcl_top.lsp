@@ -520,15 +520,12 @@ add a new one, add a 'si::break-command property:")
 
 ;;make sure '/' terminated
 
-(defun coerce-slash-terminated (v )
-  (declare (string v))
-  (or (stringp v) (error "not a string ~a" v))
+(defun coerce-slash-terminated (v)
   (let ((n (length v)))
-    (declare (fixnum n))
-    (unless (and (> n 0) (eql
-			  (the character(aref v (the fixnum (- n 1)))) #\/))
-	    (setf v (format nil "~a/" v))))
-  v)
+    (if (and (> n 0) (eql (aref v (1- n)) #\/))
+	v
+      (string-concatenate v "/"))))
+
 (defun fix-load-path (l)
   (when (not (equal l *fixed-load-path*))
       (do ((x l (cdr x)) )
@@ -587,19 +584,17 @@ First directory is checked for first name and all extensions etc."
     (when (and s (symbol-value s))
       (list *system-directory*))))
 	 
+(defun ensure-dir-string (str)
+  (if (eq (stat str) :directory)
+      (coerce-slash-terminated str)
+    str))
 
-(defun get-temp-dir nil
- (dolist (x `(,@(wine-tmp-redirect) ,@(mapcar 'getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
-   (when (or (stringp x) (pathnamep x))
-     (let* ((x (truename (pathname x)))
-	    (y (namestring (make-pathname :name (pathname-name x) :type (pathname-type x) :version (pathname-version x))))
-	    (y (unless (zerop (length y)) (list y))))
-       (when (eq :directory (car (stat x)))
-	 (return-from get-temp-dir 
-	   (namestring 
-	    (make-pathname 
-	     :device (pathname-device x)
-	     :directory (append (pathname-directory x) y)))))))))
+(defun get-temp-dir ()
+  (dolist (x `(,@(wine-tmp-redirect) ,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
+    (when x
+      (let ((x (coerce-slash-terminated x)))
+	(when (eq (stat x) :directory)
+	  (return-from get-temp-dir x))))))
 
 (defun get-path (s &aux (m (string-match "([^/ ]*)( |$)" s))(b (match-beginning 1))(e (match-end 1))
 		   (r (with-open-file (s (concatenate 'string "|which " (subseq s b e))) (read s nil 'eof))))
