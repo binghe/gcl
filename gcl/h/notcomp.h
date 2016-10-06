@@ -47,12 +47,6 @@ EXTER object user_package;
 			 else *__p++ = va_arg(ap,object);} \
   va_end(ap)
 
-/*  #undef endp */
-
-/*  #define	endp(obje)	((enum type)((endp_temp = (obje))->d.t) == t_cons ? \ */
-/*  			 FALSE : endp_temp == Cnil ? TRUE : \ */
-/*  			 endp1(endp_temp)) */
-
 #ifndef NO_DEFUN
 #undef DEFUN
 #define DEFUN(string,ret,fname,pack,min,max, flags, ret0a0,a12,a34,a56,doc) ret fname
@@ -234,7 +228,7 @@ EXTER  bool left_trim;
 EXTER bool right_trim;
 int  (*casefun)();
 
-#define	Q_SIZE		128
+#define	Q_SIZE		256
 #define IS_SIZE		256
 
 struct printStruct {
