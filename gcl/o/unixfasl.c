@@ -279,9 +279,7 @@ AGAIN:
 #define FASLINK
 #ifndef PRIVATE_FASLINK
 
-static int
-faslink(object faslfile, object ldargstring)
-{
+DEFUN_NEW("FASLINK-INT",object,fSfaslink_int,SI,2,2,NONE,II,OO,OO,OO,(object faslfile, object ldargstring),"") {
 #if defined(__ELF__) || defined(DARWIN)
   FEerror("faslink() not supported for ELF or DARWIN yet",0);
   return 0;
@@ -381,36 +379,10 @@ SEEK_TO_END_OFILE(faslfile->sm.sm_fp);
 
 #endif
 
-static void
-FFN(siLfaslink)(void)
-{
-	bds_ptr old_bds_top;
-	int i;
-	object package;
-
-	check_arg(2);
-	check_type_or_pathname_string_symbol_stream(&vs_base[0]);
-	check_type_string(&vs_base[1]);
-	vs_base[0] = coerce_to_pathname(vs_base[0]);
-	vs_base[0]->pn.pn_type = FASL_string;
-	vs_base[0] = namestring(vs_base[0]);
-	package = symbol_value(sLApackageA);
-	old_bds_top = bds_top;
-	bds_bind(sLApackageA, package);
-	i = faslink(vs_base[0], vs_base[1]);
-	bds_unwind(old_bds_top);
-	vs_top = vs_base;
-	vs_push(make_fixnum(i));
-}
-
 #endif
 #endif/*  svr4 */
 #endif /* UNIXFASL */
 
 void
-gcl_init_unixfasl(void)
-{
-#ifdef FASLINK
-	make_si_function("FASLINK", siLfaslink);
-#endif
+gcl_init_unixfasl(void) {
 }
