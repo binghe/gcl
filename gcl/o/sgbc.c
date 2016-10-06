@@ -717,7 +717,7 @@ sgc_start(void) {
       void *p=NULL,*pe;
       struct pageinfo *pi;
       ufixnum i;
-      
+
       old_cb_pointer=cb_pointer;
       reset_contblock_freelist();
 
@@ -787,7 +787,7 @@ sgc_start(void) {
      Turn  memory protection on for the pages which are writable.
   */
   sgc_enabled=1;
-  if (memory_protect(1)) 
+  if (memory_protect(1))
     sgc_quit();
   if (sSAnotify_gbcA->s.s_dbind != Cnil)
     emsg("[SGC on]");
@@ -897,7 +897,7 @@ sgc_quit(void) {
       for (p=pagetochar(page(v)),j=tm->tm_nppage;j>0;--j,p+=tm->tm_size)
   	((object) p)->d.s=SGC_NORMAL;
 #endif
-  
+
   for (i=0;i<contblock_array->v.v_fillp &&(v=(void *)contblock_array->v.v_self[i]);i++)
     if (v->sgc_flags&SGC_PAGE_FLAG) 
       bzero(CB_SGCF_START(v),CB_DATA_START(v)-CB_SGCF_START(v));
@@ -931,7 +931,7 @@ memprotect_handler(int sig, long code, void *scp, char *addr) {
 #endif 
   if (faddr >= (void *)core_end || faddr < data_start) {
     static void *old_faddr;
-    if (old_faddr==faddr) 
+    if (old_faddr==faddr)
       if (fault_count++ > 300) error("fault count too high");
     old_faddr=faddr;
     INSTALL_MPROTECT_HANDLER;
@@ -1017,7 +1017,7 @@ memory_protect(int on) {
 
     if (writable==WRITABLE_PAGE_P(i) && i<end) continue;
 
-    if (sgc_mprotect(beg,i-beg,writable)) 
+    if (sgc_mprotect(beg,i-beg,writable))
       return -1;
     writable=1-writable;
     beg=i;

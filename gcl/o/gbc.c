@@ -57,7 +57,7 @@ mark_contblock(void *, int);
    since this is more portable and faster lets use them --W. Schelter
    These assume that DBEGIN is divisible by 32, or else we should have
    #define Shamt(x) (((((int) x -DBEGIN) >> 2) & ~(~0 << 5)))
-*/ 
+*/
 #define LOG_BITS_CHAR 3
 
 #if CPTR_SIZE == 8
@@ -72,7 +72,7 @@ void *
 cb_in(void *p) {
   struct contblock **cbpp;
   int i;
-  
+
   for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++) {
     if ((void *)*cbpp<=p && ((void *)(*cbpp)+(*cbpp)->cb_size) >p)
       return *cbpp;
@@ -84,7 +84,7 @@ int
 cb_print(void) {
   struct contblock **cbpp;
   int i;
-  
+
   for (cbpp=&cb_pointer,i=0;*cbpp;cbpp=&((*cbpp)->cb_link),i++)
     emsg("%lu at %p\n",(*cbpp)->cb_size,*cbpp);
   emsg("%u blocks\n",i);
@@ -146,7 +146,7 @@ pageinfo_p(void *v) {
     (!pi->next || (void *)pi->next>=v+(pi->type==t_contiguous ? pi->in_use : 1)*PAGESIZE);
 
 }
-    
+
 static inline char
 get_bit(char *v,struct pageinfo *pi,void *x) {
   void *ve=CB_DATA_START(pi);
@@ -156,16 +156,6 @@ get_bit(char *v,struct pageinfo *pi,void *x) {
 #endif
   return (v[i]>>s)&0x1;
 }
-
-/* static inline void */
-/* set_bit(char *v,struct pageinfo *pi,void *x) { */
-/*   void *ve=CB_DATA_START(pi); */
-/*   fixnum off=(x-ve)>>LOG_BYTES_CONTBLOCK,i=off>>LOG_BITS_CHAR,s=off&~(~0UL<<LOG_BITS_CHAR); */
-/* #ifdef CONTBLOCK_MARK_DEBUG */
-/*   off_check(v,ve,i,pi); */
-/* #endif */
-/*   v[i]|=(1UL<<s); */
-/* } */
 
 #define bit_get(v,i,s) ((v[i]>>s)&0x1)
 #define bit_set(v,i,s) (v[i]|=(1UL<<s))
@@ -226,11 +216,6 @@ get_mark_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_MARK_START(pi),pi,x);
 }
 
-/* static inline void */
-/* set_mark_bit(struct pageinfo *pi,void *x) { */
-/*   set_bit(CB_MARK_START(pi),pi,x); */
-/* } */
-
 static inline void *
 get_mark_bits(struct pageinfo *pi,void *x) {
   return get_bits(CB_MARK_START(pi),pi,x);
@@ -247,11 +232,6 @@ static inline char
 get_sgc_bit(struct pageinfo *pi,void *x) {
   return get_bit(CB_SGCF_START(pi),pi,x);
 }
-
-/* static inline void */
-/* set_sgc_bit(struct pageinfo *pi,void *x) { */
-/*   set_bit(CB_SGCF_START(pi),pi,x); */
-/* } */
 
 static inline void *
 get_sgc_bits(struct pageinfo *pi,void *x) {
@@ -438,16 +418,16 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
   if (!marking(p)||!collecting(p))
     return;
 
-  if (what_to_collect!=t_contiguous && 
+  if (what_to_collect!=t_contiguous &&
       x && x->d.st>=ngc_thresh &&
       (dp=alloc_contblock_no_gc(s,static_promotion_limit))) {
-    
+
     *pp=memcpy(dp,p,s);
     x->d.st=0;
 
     return;
 
-  } 
+  }
 
   if (x && x->d.st<rst.d.st) x->d.st++;
 
@@ -460,7 +440,7 @@ mark_leaf_data(object x,void **pp,ufixnum s,ufixnum r) {
 
 static void mark_object1(object);
 #define mark_object(x) if (marking(x)) mark_object1(x)
-    
+
 static inline void
 mark_object_address(object *o,int f) {
 
@@ -468,7 +448,7 @@ mark_object_address(object *o,int f) {
   static ufixnum lr;
 
   ufixnum p=page(o);
-  
+
   if (lp!=p || !f) {
     lp=p;
     lr=
@@ -496,7 +476,7 @@ mark_object_array(object *o,object *oe) {
 
 static void
 mark_object1(object x) {
-  
+
   fixnum i,j=0;/*FIXME*/
 
   if (is_marked_or_free(x))
@@ -567,7 +547,7 @@ mark_object1(object x) {
     break;
     
   case t_array:
-    MARK_LEAF_DATA(x,x->a.a_dims,sizeof(int)*x->a.a_rank);
+    MARK_LEAF_DATA(x,x->a.a_dims,sizeof(*x->a.a_dims)*x->a.a_rank);
 
   case t_vector:
   case t_bitvector:
@@ -615,7 +595,7 @@ mark_object1(object x) {
 	x->v.v_self=p;
 	adjust_displaced(x,j);
       }
-    } 
+    }
     mark_object(x->v.v_displaced);
     break;
     
@@ -627,7 +607,7 @@ mark_object1(object x) {
       mark_object(x->str.str_def);
       if (x->str.str_self)
 	for (i=0,j=S_DATA(def)->length;i<j;i++)
-	  if (s_type[i]==0)
+	  if (s_type[i]==aet_object)
 	    mark_object_address(&STREF(object,x,s_pos[i]),i);
       MARK_LEAF_DATA(x,x->str.str_self,S_DATA(def)->size);
     }
@@ -646,7 +626,8 @@ mark_object1(object x) {
 	MARK_LEAF_DATA(x,x->sm.sm_buffer,BUFSIZ);
       }
       break;
-    
+
+    case smm_file_synonym:
     case smm_synonym:
       mark_object(x->sm.sm_object0);
       break;
@@ -676,7 +657,7 @@ mark_object1(object x) {
       error("mark stream botch");
     }
     break;
-    
+
   case t_random:
     MARK_LEAF_DATA_ALIGNED(x,x->rnd.rnd_state._mp_seed->_mp_d,x->rnd.rnd_state._mp_seed->_mp_alloc*MP_LIMB_SIZE,MP_LIMB_SIZE);
     break;
@@ -855,24 +836,6 @@ mark_phase(void) {
   }
 #endif
   
-  /*
-    if (what_to_collect != t_symbol &&
-    (int)what_to_collect < (int)t_contiguous) {
-  */
-  
-  /* {int size; */
-  
-  /* for (pp = pack_pointer;  pp != NULL;  pp = pp->p_link) { */
-  /*   size = pp->p_internal_size; */
-  /*   if (pp->p_internal != NULL) */
-  /*     for (i = 0;  i < size;  i++) */
-  /* 	mark_object(pp->p_internal[i]); */
-  /*   size = pp->p_external_size; */
-  /*   if (pp->p_external != NULL) */
-  /*     for (i = 0;  i < size;  i++) */
-  /* 	mark_object(pp->p_external[i]); */
-  /* }} */
-  
   /* mark the c stack */
 #ifndef N_RECURSION_REQD
 #define N_RECURSION_REQD 2
@@ -980,15 +943,15 @@ mark_c_stack(jmp_buf env1, int n, void (*fn)(void *,void *,int)) {
     extern void * __libc_ia64_register_backing_store_base;
     void * bst=GC_save_regs_in_stack();
     void * bsb=__libc_ia64_register_backing_store_base;
-    
+
     if (bsb>bst)
       (*fn)(bsb,bst,C_GC_OFFSET);
     else
       (*fn)(bst,bsb,C_GC_OFFSET);
-    
+
   }
 #endif
-  
+
 }
 
 static void
@@ -1036,7 +999,7 @@ contblock_sweep_phase(void) {
   struct pageinfo *v;
   STATIC char *s, *e, *p, *q;
   ufixnum i;
-    
+
   reset_contblock_freelist();
 
   for (i=0;i<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[i]);i++) {
@@ -1046,7 +1009,7 @@ contblock_sweep_phase(void) {
 #ifdef SGC
     if (sgc_enabled && !(v->sgc_flags&SGC_PAGE_FLAG)) continue;
 #endif
-    
+
     s=CB_DATA_START(v);
     e=(void *)v+v->in_use*PAGESIZE;
 
@@ -1071,25 +1034,6 @@ contblock_sweep_phase(void) {
 int (*GBC_enter_hook)() = NULL;
 int (*GBC_exit_hook)() = NULL;
 
-/* void */
-/* ttss(void) { */
-
-/*   struct typemanager *tm; */
-/*   void *x,*y; */
-
-/*   for (tm=tm_table;tm<tm_table+t_end;tm++) { */
-
-/*     for (x=tm->tm_free;x!=OBJNULL;x=(void *)((struct freelist *)x)->f_link) { */
-/*       if (x==Cnil) */
-/* 	printf("barr\n"); */
-/*       /\* for (y=(void *)((struct freelist *)x)->f_link;y!=OBJNULL && y!=x;y=(void *)((struct freelist *)y)->f_link); *\/ */
-/*       /\* if (y==x) *\/ */
-/*       /\* 	printf("circle\n"); *\/ */
-/*     } */
-/*   } */
-
-/* } */
-
 fixnum fault_pages=0;
 
 static ufixnum
@@ -1103,7 +1047,7 @@ count_contblocks(void) {
   return ncb;
   
 }
- 
+
 
 void
 GBC(enum type t) {
@@ -1121,7 +1065,7 @@ GBC(enum type t) {
 
   ngc_thresh=fix(sSAleaf_collection_thresholdA->s.s_dbind);
   recent_allocation=0;
-  
+
   if (in_signal_handler && t == t_relocatable)
     error("cant gc relocatable in signal handler");
   
@@ -1147,7 +1091,6 @@ GBC(enum type t) {
 	    close_stream(o);
 	}
 
-    /* t = t_relocatable; */
     gc_time = -1;
     }
 
@@ -1266,54 +1209,6 @@ GBC(enum type t) {
 #endif
   }
   
-
-/*   { */
-/*     static int promoting; */
-/*     if (!promoting && promotion_pointer>promotion_pointer1) { */
-/*       object *p,st; */
-/*       promoting=1; */
-/*       st=alloc_simple_string(""); */
-/*       for (p=promotion_pointer1;p<promotion_pointer;p++) { */
-/* 	fixnum j; */
-/* 	object x=*p; */
-	
-/* 	if (type_of(x)==t_string) */
-
-/*  	  j=x->st.st_dim; */
-
-/* 	else switch (x->v.v_elttype) { */
-
-/* 	  case aet_lf: */
-/* 	    j=sizeof(longfloat)*x->v.v_dim; */
-/* 	    break; */
-/* 	  case aet_bit: */
-/* #define W_SIZE (8*sizeof(fixnum)) */
-/* 	    j=sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE); */
-/* 	    break; */
-/* 	  case aet_char: */
-/* 	  case aet_uchar: */
-/* 	    j=sizeof(char)*x->v.v_dim; */
-/* 	    break; */
-/* 	  case aet_short: */
-/* 	  case aet_ushort: */
-/* 	    j=sizeof(short)*x->v.v_dim; */
-/* 	    break; */
-/* 	  default: */
-/* 	    j=sizeof(fixnum)*x->v.v_dim; */
-/* 	  } */
-
-/* 	st->st.st_dim=j; */
-/* 	st->st.st_self=alloc_contblock(st->st.st_dim); */
-/* 	fprintf(stderr,"Promoting vector leaf bytes %lu at %p, %p -> %p\n",j,x,x->v.v_self,st->st.st_self); */
-/* 	fflush(stderr); */
-/* 	memcpy(st->st.st_self,x->v.v_self,st->st.st_dim); */
-/* 	x->v.v_self=(void *)st->st.st_self; */
-/*       } */
-/*       promoting=0; */
-/*     } */
-/*   } */
-	
-
 #ifdef DEBUG
   if (debug) {
     int i,j;
@@ -1361,8 +1256,6 @@ GBC(enum type t) {
   END_NO_INTERRUPT;
 
   CHECK_INTERRUPT;
-
-  /* ttss(); */
 
 }
 
@@ -1473,7 +1366,7 @@ mark_contblock(void *p, int s) {
   STATIC char *q;
   STATIC char *x, *y;
   struct pageinfo *v;
-  
+
   if (NULL_OR_ON_C_STACK(p))
     return;
 
@@ -1496,17 +1389,17 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
   ufixnum i,j,k,s;
   struct typemanager *tm=tm_of(t_cfdata);
   void *p;
-  
+
   for (i=j=0,cbpp=&cb_pointer;(*cbpp);) {
     for (k=0,s=(*cbpp)->cb_size,p=*cbpp;*cbpp && (*cbpp)->cb_size==s;i+=(*cbpp)->cb_size,j++,k++,cbpp=&(*cbpp)->cb_link);
     emsg("%lu %lu starting at %p\n",k,s,p);
   }
   emsg("\nTotal free %lu in %lu pieces\n\n",i,j);
-  
-  for (i=j=k=0;k<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[k]);k++,i+=v->in_use,j++) 
+
+  for (i=j=k=0;k<contblock_array->v.v_fillp && (v=(void *)contblock_array->v.v_self[k]);k++,i+=v->in_use,j++)
     emsg("%lu pages at %p\n",(unsigned long)v->in_use,v);
   emsg("\nTotal pages %lu in %lu pieces\n\n",i,j);
-  
+
   for (i=j=0,v=cell_list_head;v;v=v->next)
     if (tm->tm_type==v->type) {
       void *p;
@@ -1521,7 +1414,7 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
       }
     }
   emsg("\nTotal code bytes %lu in %lu pieces\n",i,j);
-  
+
   for (i=j=0,v=cell_list_head;v;v=v->next) {
     struct typemanager *tm=tm_of(v->type);
     void *p;
@@ -1590,15 +1483,13 @@ DEFUN_NEW("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO
     }
   }
   emsg("\nTotal leaf bytes %lu in %lu pieces\n",i,j);
-  
+
   return Cnil;
 
 }
 
 DEFUN_NEW("GBC",object,fSgbc,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
 
-   /* 1 args */
-  
   if (x0 == Ct) {
     tm_table[t_contiguous].tm_adjgbccnt--;
     GBC(t_other);
@@ -1645,5 +1536,5 @@ gcl_init_GBC(void) {
 #ifdef SGC
   make_si_function("SGC-ON",siLsgc_on);
 #endif
-  
+
 }
