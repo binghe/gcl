@@ -231,114 +231,71 @@ DEF_ORDINARY("SIGNED-SHORT",sSsigned_short,SI,"");
 DEF_ORDINARY("UNSIGNED-SHORT",sSunsigned_short,SI,"");
 DEF_ORDINARY("*",sLA,LISP,"");
 DEF_ORDINARY("PLUSP",sLplusp,LISP,"");
-DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,"");
-DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,"");
-DEF_ORDINARY("PROGRAM-ERROR",sLprogram_error,LISP,"");
-DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
-DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
-DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
 
 DEF_ORDINARY("METHOD-COMBINATION",sLmethod_combination,LISP,"");
-DEF_ORDINARY("ARITHMETIC-ERROR",sLarithmetic_error,LISP,"");
 DEF_ORDINARY("BASE-CHAR",sLbase_char,LISP,"");
 DEF_ORDINARY("BASE-STRING",sLbase_string,LISP,"");
 DEF_ORDINARY("BROADCAST-STREAM",sLbroadcast_stream,LISP,"");
 DEF_ORDINARY("BUILT-IN-CLASS",sLbuilt_in_class,LISP,"");
-DEF_ORDINARY("CELL-ERROR",sLcell_error,LISP,"");
 DEF_ORDINARY("CLASS",sLclass,LISP,"");
 DEF_ORDINARY("CONCATENATED-STREAM",sLconcatenated_stream,LISP,"");
-DEF_ORDINARY("CONDITION",sLcondition,LISP,"");
-DEF_ORDINARY("CONTROL-ERROR",sLcontrol_error,LISP,"");
 DEF_ORDINARY("ECHO-STREAM",sLecho_stream,LISP,"");
-DEF_ORDINARY("END-OF-FILE",sLend_of_file,LISP,"");
-DEF_ORDINARY("ERROR",sLerror,LISP,"");
 DEF_ORDINARY("EXTENDED-CHAR",sLextended_char,LISP,"");
-DEF_ORDINARY("FILE-ERROR",sLfile_error,LISP,"");
 DEF_ORDINARY("FILE-STREAM",sLfile_stream,LISP,"");
 DEF_ORDINARY("GENERIC-FUNCTION",sLgeneric_function,LISP,"");
 DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
 DEF_ORDINARY("METHOD",sLmethod,LISP,"");
 /* FIXME -- need this for types in predlib.lsp, why can't we use the keyword sKpackage_error ? */
-DEF_ORDINARY("PARSE-ERROR",sLparse_error,LISP,"");
-DEF_ORDINARY("PRINT-NOT-READABLE",sLprint_not_readable,LISP,"");
-DEF_ORDINARY("READER-ERROR",sLreader_error,LISP,"");
-DEF_ORDINARY("SERIOUS-CONDITION",sLserious_condition,LISP,"");
 DEF_ORDINARY("SIMPLE-BASE-STRING",sLsimple_base_string,LISP,"");
-DEF_ORDINARY("SIMPLE-CONDITION",sLsimple_condition,LISP,"");
-DEF_ORDINARY("SIMPLE-TYPE-ERROR",sLsimple_type_error,LISP,"");
-DEF_ORDINARY("SIMPLE-WARNING",sLsimple_warning,LISP,"");
 DEF_ORDINARY("STANDARD-CLASS",sLstandard_class,LISP,"");
 DEF_ORDINARY("STANDARD-GENERIC-FUNCTION",sLstandard_generic_function,LISP,"");
 DEF_ORDINARY("STANDARD-METHOD",sLstandard_method,LISP,"");
 DEF_ORDINARY("STANDARD-OBJECT",sLstandard_object,LISP,"");
-DEF_ORDINARY("STORAGE-CONDITION",sLstorage_condition,LISP,"");
-DEF_ORDINARY("STREAM-ERROR",sLstream_error,LISP,"");
 DEF_ORDINARY("STRING-STREAM",sLstring_stream,LISP,"");
 DEF_ORDINARY("STRUCTURE-CLASS",sLstructure_class,LISP,"");
 DEF_ORDINARY("STRUCTURE-OBJECT",sLstructure_object,LISP,"");
-DEF_ORDINARY("STYLE-WARNING",sLstyle_warning,LISP,"");
 DEF_ORDINARY("SYNONYM-STREAM",sLsynonym_stream,LISP,"");
 DEF_ORDINARY("TWO-WAY-STREAM",sLtwo_way_stream,LISP,"");
-DEF_ORDINARY("TYPE-ERROR",sLtype_error,LISP,"");
-DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,"");
-DEF_ORDINARY("WARNING",sLwarning,LISP,"");
 
 DEFCONST("CHAR-SIZE",sSchar_size,SI,small_fixnum(CHAR_SIZE),"Size in bits of a character");
 DEFCONST("SHORT-SIZE",sSshort_size,SI,small_fixnum(CHAR_SIZE*sizeof(short)),"Size in bits of a short integer");
 
 void     
-gcl_init_typespec(void)
-{
+gcl_init_typespec(void) {
 }
 
 void
-gcl_init_typespec_function(void)
-{
-	TSor_symbol_string
-	= make_cons(sLor, make_cons(sLsymbol, make_cons(sLstring, Cnil)));
-	enter_mark_origin(&TSor_symbol_string);
-	TSor_string_symbol
-	= make_cons(sLor, make_cons(sLstring, make_cons(sLsymbol, Cnil)));
-	enter_mark_origin(&TSor_string_symbol);
-	TSor_symbol_string_package
-	= make_cons(sLor,
-		    make_cons(sLsymbol,
-			      make_cons(sLstring,
-					make_cons(sLpackage, Cnil))));
-	enter_mark_origin(&TSor_symbol_string_package);
+gcl_init_typespec_function(void) {
 
-	TSnon_negative_integer
-	= make_cons(sLinteger,
-		    make_cons(make_fixnum(0), make_cons(sLA, Cnil)));
-	enter_mark_origin(&TSnon_negative_integer);
-	TSpositive_number = make_cons(sLsatisfies, make_cons(sLplusp, Cnil));
-	enter_mark_origin(&TSpositive_number);
-	TSor_integer_float
-	= make_cons(sLor, make_cons(sLinteger, make_cons(sLfloat, Cnil)));
-	enter_mark_origin(&TSor_integer_float);
-	TSor_rational_float
-	= make_cons(sLor, make_cons(sLrational, make_cons(sLfloat, Cnil)));
-	enter_mark_origin(&TSor_rational_float);
+  TSor_symbol_string=make_cons(sLor, make_cons(sLsymbol, make_cons(sLstring, Cnil)));
+  enter_mark_origin(&TSor_symbol_string);
+
+  TSor_string_symbol=make_cons(sLor, make_cons(sLstring, make_cons(sLsymbol, Cnil)));
+  enter_mark_origin(&TSor_string_symbol);
+
+  TSor_symbol_string_package=make_cons(sLor,make_cons(sLsymbol,make_cons(sLstring,make_cons(sLpackage, Cnil))));
+  enter_mark_origin(&TSor_symbol_string_package);
+
+  TSnon_negative_integer= make_cons(sLinteger,make_cons(make_fixnum(0), make_cons(sLA, Cnil)));
+  enter_mark_origin(&TSnon_negative_integer);
+
+  TSpositive_number=make_cons(sLsatisfies, make_cons(sLplusp, Cnil));
+  enter_mark_origin(&TSpositive_number);
+
+  TSor_integer_float=make_cons(sLor, make_cons(sLinteger, make_cons(sLfloat, Cnil)));
+  enter_mark_origin(&TSor_integer_float);
+
+  TSor_rational_float=make_cons(sLor, make_cons(sLrational, make_cons(sLfloat, Cnil)));
+  enter_mark_origin(&TSor_rational_float);
+
 #ifdef UNIX
-	TSor_pathname_string_symbol
-	= make_cons(sLor,
-		    make_cons(sLpathname,
-			      make_cons(sLstring,
-					make_cons(sLsymbol,
-						  Cnil))));
-	enter_mark_origin(&TSor_pathname_string_symbol);
+  TSor_pathname_string_symbol=make_cons(sLor,make_cons(sLpathname,make_cons(sLstring,make_cons(sLsymbol,Cnil))));
+  enter_mark_origin(&TSor_pathname_string_symbol);
 #endif
-	TSor_pathname_string_symbol_stream
-	= make_cons(sLor,
-		    make_cons(sLpathname,
-			      make_cons(sLstring,
-					make_cons(sLsymbol,
-						  make_cons(sLstream,
-							    Cnil)))));
-	enter_mark_origin(&TSor_pathname_string_symbol_stream);
 
-	make_function("TYPE-OF", Ltype_of);
+  TSor_pathname_string_symbol_stream=make_cons(sLor,make_cons(sLpathname,make_cons(sLstring,make_cons(sLsymbol,make_cons(sLstream,Cnil)))));
+  enter_mark_origin(&TSor_pathname_string_symbol_stream);
+
+  make_function("TYPE-OF", Ltype_of);
+
 }				
