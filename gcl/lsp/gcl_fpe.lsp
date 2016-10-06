@@ -60,7 +60,7 @@
 
 
 (defun rf (addr w)
-  (ecase w (4 (*float addr)) (8 (*double addr))))
+  (ecase w (4 (*float addr 0 nil nil)) (8 (*double addr 0 nil nil))))
 
 (defun ref (addr p w &aux (i -1)) 
   (if p 
@@ -71,7 +71,7 @@
 		  (f (eql #\F (aref z 0))))
   (ref addr (unless f (eql (aref z (- lz 2)) #\P)) (if (or f (eql (aref z (1- lz)) #\D)) 8 4)))
 
-(defun reg-lookup (x) (*fixnum (+ (car *context*) (symbol-value x))))
+(defun reg-lookup (x) (*fixnum (+ (car *context*) (symbol-value x)) 0 nil nil))
 
 (defun st-lookup (x) (fld (+ (cadr *context*) (symbol-value x))))
 (defun xmm-lookup (x) (gref (+ (caddr *context*) (symbol-value x))))

@@ -148,13 +148,15 @@ DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
 
 #endif
 
-DEFUN_NEW("*FIXNUM",fixnum,fSAfixnum,SI,1,1,NONE,II,OO,OO,OO,(fixnum addr),"") {
-  RETURN1(*(fixnum *)addr);
+/* For now ignore last three args governing offsets and data modification, just to
+   support fpe sync with master*/
+DEFUN_NEW("*FIXNUM",object,fSAfixnum,SI,4,4,NONE,OI,OO,OO,OO,(fixnum addr,object x,object y,object z),"") {
+  RETURN1((object)*(fixnum *)addr);
 }
-DEFUN_NEW("*FLOAT",object,fSAfloat,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+DEFUN_NEW("*FLOAT",object,fSAfloat,SI,4,4,NONE,OI,OO,OO,OO,(fixnum addr,object x,object y,object z),"") {
   RETURN1(make_shortfloat(*(float *)addr));
 }
-DEFUN_NEW("*DOUBLE",object,fSAdouble,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
+DEFUN_NEW("*DOUBLE",object,fSAdouble,SI,4,4,NONE,OI,OO,OO,OO,(fixnum addr,object x,object y,object z),"") {
   RETURN1(make_longfloat(*(double *)addr));
 }
 
@@ -264,15 +266,12 @@ sigpipe(void)
 	FEerror("Broken pipe", 0);
 }
 
-
 void
 sigint(void)
 {
   unblock_signals(SIGINT,SIGINT);
   terminal_interrupt(1);
 }
-
-
 
 static void
 sigalrm(void)

@@ -1,6 +1,6 @@
-#.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (si::break-on-floating-point-exceptions))))
+#.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (break-on-floating-point-exceptions))))
      (flet ((set-break (x) (when (keywordp r)
-			     (apply 'si::break-on-floating-point-exceptions (append (unless x o) (list r x))))))
+			     (apply 'break-on-floating-point-exceptions (append (unless x o) (list r x))))))
        (let* ((rr (handler-case (unwind-protect (progn (set-break t) (apply f a)) (set-break nil))
 				,@(mapcar (lambda (x &aux (x (car x))) `(,x (c) (setq cc c) ,(intern (symbol-name x) :keyword)))
 					  (append si::+fe-list+ '((arithmetic-error)(error)))))))
