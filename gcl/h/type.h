@@ -36,6 +36,23 @@ enum type {
 };
 
 
+enum smmode {			/*  stream mode  */
+	smm_input,		/*  input  */
+	smm_output,		/*  output  */
+	smm_io,			/*  input-output  */
+	smm_probe,		/*  probe  */
+	smm_file_synonym,	/*  synonym stream to file_stream  */
+	smm_synonym,		/*  synonym  */
+	smm_broadcast,		/*  broadcast  */
+	smm_concatenated,	/*  concatenated  */
+	smm_two_way,		/*  two way  */
+	smm_echo,		/*  echo  */
+	smm_string_input,	/*  string input  */
+	smm_string_output,	/*  string output  */
+	smm_user_defined,        /*  for user defined */
+	smm_socket		/*  Socket stream  */
+};
+
 #define Zcdr(a_)                 (*(object *)(a_))/* ((a_)->c.c_cdr) */ /*FIXME*/
 
 #ifndef WIDE_CONS

@@ -1260,6 +1260,7 @@ int level;
 			write_ch('>');
 			break;
 
+		case smm_file_synonym:
 		case smm_synonym:
 			write_str("#<synonym stream to ");
 			write_object(x->sm.sm_object0, level);
