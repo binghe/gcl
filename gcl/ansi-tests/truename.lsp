@@ -96,7 +96,7 @@
   t t)
 
 (deftest truename.error.5
-  (signals-error-always (truename (logical-pathname "CLTESTROOT:nonexistent")) file-error)
+  (signals-error-always (truename (logical-pathname "CLTESTROOT:NONEXISTENT")) file-error)
   t t)
 
 (deftest truename.error.6

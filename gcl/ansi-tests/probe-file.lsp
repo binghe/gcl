@@ -26,7 +26,7 @@
 
 (deftest probe-file.4
   (equalpt (truename #p"probe-file.lsp")
-	   (probe-file "CLTEST:probe-file.lsp"))
+	   (probe-file "CLTEST:PROBE-FILE.LSP"))
   t)
 
 ;;; Specialized string tests
