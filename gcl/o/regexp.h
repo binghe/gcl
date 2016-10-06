@@ -1,7 +1,7 @@
 #ifndef _REGEXP
 #define _REGEXP 1
 
-#define NSUBEXP  10
+#define NSUBEXP  19
 typedef struct regexp {
 	char *startp[NSUBEXP];
 	char *endp[NSUBEXP];
