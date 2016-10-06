@@ -81,12 +81,6 @@ PFN(functionp)
                             set_type_of((a_),t_fixnum);\
                             (a_)->FIX.FIXVAL=(b_);}
 
-/*FIXME the stack stuff is dangerous It works for error handling, but
-  simple errors may evan pass the format tring up the stack as a slot
-  in ansi*/
-/* #define TYPE_ERROR(a_,b_) {stack_string(tp_err,"~S is not of type ~S.");\ */
-/*                            Icall_error_handler(sKwrong_type_argument,tp_err,2,(a_),(b_));} */
-
 object ihs_top_function_name(ihs_ptr h);
 #define FEerror(a_,b_...)   Icall_error_handler(sLerror,null_string,\
                             4,sKformat_control,make_simple_string(a_),sKformat_arguments,list(b_))

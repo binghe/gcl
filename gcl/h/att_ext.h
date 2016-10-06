@@ -116,25 +116,14 @@ float object_to_float();
 double object_to_double();
 
 /*  error.c  */
-EXTER object sKerror;
-EXTER object sKwrong_type_argument;
 EXTER object sKcatch;
 EXTER object sKprotect;
 EXTER object sKcatchall;
-EXTER object sKtoo_few_arguments;
-EXTER object sKtoo_many_arguments;
-EXTER object sKunexpected_keyword;
-EXTER object sKinvalid_form;
-EXTER object sKunbound_variable;
-EXTER object sKinvalid_variable;
-EXTER object sKundefined_function;
-EXTER object sKinvalid_function;
 EXTER object sKdatum;
 EXTER object sKexpected_type;
 EXTER object sKpackage;
 EXTER object sKformat_control;
 EXTER object sKformat_arguments;
-EXTER object sKpackage_error;
 object wrong_type_argument();
 EXTER object sSuniversal_error_handler;
 
