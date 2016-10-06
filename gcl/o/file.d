@@ -2636,6 +2636,7 @@ DEF_ORDINARY("SUPERSEDE",sKsupersede,KEYWORD,"");
 DEF_ORDINARY("VERBOSE",sKverbose,KEYWORD,"");
 
 
+DEF_ORDINARY("DELETE-FILE",sLdelete_file,LISP,"");
 
 
 void
