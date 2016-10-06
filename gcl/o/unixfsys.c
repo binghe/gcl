@@ -500,33 +500,28 @@ int gcl_putc(int i,void *v) {return putc(i,((FILE *)v));}
 
 
 
-DEFUN_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object path),"") {
+DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
-  char filename[4096];
   struct stat ss;
-  
 
-  bzero(filename,sizeof(filename));
-  coerce_to_filename(path,filename);
+  check_type_string(&x);
+  coerce_to_filename(x,FN1);
+
 #ifdef __MINGW32__
   {
-    char *p=filename+strlen(filename)-1;
-    for (;p>filename && *p=='/';p--)
+    char *p=FN1+strlen(FN1)-1;
+    for (;p>FN1 && *p=='/';p--)
       *p=0;
   }
 #endif
-  if (lstat(filename,&ss))
+  if (lstat(FN1,&ss))
     RETURN1(Cnil);
-  else {/* ctime_r insufficiently portable */
-    /* int j;
-       ctime_r(&ss.st_ctime,filename);
-       j=strlen(filename);
-       if (isspace(filename[j-1]))
-       filename[j-1]=0;*/
-    RETURN1(list(3,S_ISDIR(ss.st_mode) ? sKdirectory : 
-		 (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
-		 make_fixnum(ss.st_size),make_fixnum(ss.st_ctime)));
-  }
+  else
+    RETURN4(S_ISDIR(ss.st_mode) ? sKdirectory :
+	    (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
+	    make_fixnum(ss.st_size),
+	    make_fixnum(ss.st_ctime),
+	    make_fixnum(ss.st_uid));
 }
 
 DEFUN_NEW("SETENV",object,fSsetenv,SI,2,2,NONE,OO,OO,OO,OO,(object variable,object value),"Set environment VARIABLE to VALUE")
