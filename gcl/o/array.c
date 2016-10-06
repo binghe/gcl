@@ -1139,9 +1139,9 @@ Icheck_displaced(object displaced_list, object ar, int dim)
 /*  } */
 /* } */
 
-DEFUNO_NEW("REPLACE-ARRAY",object,fSreplace_array,SI,2,2,NONE,
-       OO,OO,OO,OO,void,siLreplace_array,(object old,object new),"")
-{ struct dummy fw ;
+DEFUN_NEW("REPLACE-ARRAY",object,fSreplace_array,SI,2,2,NONE,OO,OO,OO,OO,(object old,object new),"") {
+
+  struct dummy fw;
   fw = old->d;
 
   old = IisArray(old);
