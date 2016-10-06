@@ -9,9 +9,6 @@
 (in-package :system)
 (use-package :fpe)
 
-#+(or pcl ansi-cl)(load "../pcl/package.lisp")
-#+ansi-cl(load "../clcs/package.lisp")
-
 (init-system) 
 (in-package :si)
 (gbc t)
@@ -59,6 +56,7 @@
 
 (fmakunbound 'init-cmp-anon)
 (when (fboundp 'user-init) (user-init))
+
 (in-package :compiler)
 (setq *cc* @LI-CC@
       *ld* @LI-LD@
@@ -79,7 +77,9 @@
 #-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp)))
 
 #+ansi-cl (use-package :pcl :user)
-#+ansi-cl (import 'si::(clines defentry defcfun object void int double quit bye gbc system) :user)
+
+(import 'si::(clines defentry defcfun object void int double quit bye gbc system
+		     *lib-directory* *system-directory*) :user)
 
 (let* ((i 4096)(j (si::equal-tail-recursion-check i)))
   (unless (<= (ash i -1) j)

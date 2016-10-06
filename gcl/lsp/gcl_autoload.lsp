@@ -410,10 +410,3 @@ Good luck!				 The GCL Development Team")
 (setf (get 'with-open-file 'si:pretty-print-format) 1)
 (setf (get 'with-open-stream 'si:pretty-print-format) 1)
 (setf (get 'with-output-to-string 'si:pretty-print-format) 1)
-
-
-(in-package :si)
-
-(defvar *lib-directory* (namestring (truename "../")))
-
-(import '(*lib-directory* *load-path* *system-directory*) :user) 

@@ -122,6 +122,8 @@
 
 (defvar *error-p* nil)
 
+(defvar *lib-directory* nil)
+
 (defun process-some-args (args &optional compile &aux *load-verbose*)
   (when args
     (let ((x (pop args)))

@@ -40,13 +40,13 @@
 
 (defun require (module-name
                 &optional (pathname (string-downcase (string module-name))))
-  (let ((*default-pathname-defaults* #""))
+  (let ((*default-pathname-defaults* (make-pathname)))
     (unless (member (string module-name)
                     *modules*
                     :test #'string=)
             (if (atom pathname)
                 (load pathname)
-                (do ((p pathname (cdr p)))
+	      (do ((p pathname (cdr p)))
                     ((endp p))
                   (load (car p)))))))
           
