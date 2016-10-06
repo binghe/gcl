@@ -151,6 +151,16 @@ find_init_address(struct syment *sym,struct syment *sye,ul *ptr,char *st1) {
 
 }    
 
+static ul
+get_sym_value(const char *name) {
+
+  struct node *answ;
+
+  return (answ=find_sym_ptable(name)) ? answ->address :
+    ({massert(!emsg("Unrelocated non-local symbol: %s\n",name));0;});
+
+}
+
 static void
 relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char *st1) {
 
@@ -163,22 +173,10 @@ relocate_symbols(struct syment *sym,struct syment *sye,struct scnhdr *sec1,char 
 
     else if (!sym->n_scnum) {
 
-      char c=0,*s;
-
-      if (sym->n.n.n_zeroes) {
-	c=sym->n.n_name[8];
-	sym->n.n_name[8]=0;
-	s=sym->n.n_name;
-      } else
-	s=st1+sym->n.n.n_offset;
-
-      if ((answ=find_sym_ptable(s))) 
-	sym->n_value=answ->address;
+      if (sym->n.n.n_zeroes)
+	STOP(sym->n.n_name,sym->n_value=get_sym_value(sym->n.n_name));
       else
-	massert(!emsg("Unrelocated non-local symbol: %s\n",s));
-
-      if (c)
-	sym->n.n_name[8]=c;
+	sym->n_value=get_sym_value(st1+sym->n.n.n_offset);
 
     }
 
