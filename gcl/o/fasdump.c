@@ -1501,14 +1501,12 @@ read_fasl_vector(object in)
  object d;
  int tem;
  if (((tem=getc(((FILE *)in->sm.sm_fp))) == EOF) && feof(((FILE *)in->sm.sm_fp)))
-   { d = coerce_to_pathname(in);
-     d = make_pathname(d->pn.pn_host,
-		       d->pn.pn_device,
-		       d->pn.pn_directory,
-		       d->pn.pn_name,
-		       make_simple_string("data"),
-		       d->pn.pn_version);
-     d = coerce_to_namestring(d);
+   { char *pf;
+     coerce_to_filename(in,FN1);
+     for (pf=FN1+strlen(FN1);pf>FN1 && pf[-1]!='.';pf--);
+     if (pf==FN1) {pf=FN1+strlen(FN1);*pf++='.';}
+     snprintf(pf,sizeof(FN1)-(pf-FN1),"data");
+     d=make_simple_string(FN1);
      in = open_stream(d,smm_input,Cnil,Cnil);
      if (in == Cnil) 
        FEerror("Can't open file ~s",1,d);
