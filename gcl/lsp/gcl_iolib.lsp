@@ -356,3 +356,16 @@
 		      if-exists iesp if-does-not-exist idnesp external-format)))
     (when (typep s 'stream) (c-set-stream-object1 s pf) s)))
 
+
+(defun load (p &key (verbose *load-verbose*) print (if-does-not-exist :error)
+	       (external-format :default)
+	       &aux (pp (pathname p))(def (pathname *default-pathname-defaults*))
+	       (pp (merge-pathnames pp def nil))(fn (namestring pp)))
+  (declare (optimize (safety 1)))
+  (check-type p pathname-designator)
+  (load-int pp verbose print if-does-not-exist fn
+	    (let ((x (translate-pathname ".o" "" fn)))
+	      (when (string= "o" (pathname-type x)) (namestring x)))
+	    (let ((x (translate-pathname ".lsp" "" fn)))
+	      (when (string= "lsp" (pathname-type x)) (namestring x)))))
+

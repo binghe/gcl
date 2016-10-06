@@ -1839,54 +1839,6 @@ LFD(Lstream_element_type)()
 	@(return Ct)
 @)
 
-@(static defun open (filename
-	      &key (direction sKinput)
-		   (element_type sLcharacter)
-		   (if_exists Cnil iesp)
-		   (if_does_not_exist Cnil idnesp)
-	      &aux strm)
-	enum smmode smm=0;
-@
-	check_type_or_pathname_string_symbol_stream(&filename);
-	filename = coerce_to_namestring(filename);
-	if (direction == sKinput) {
-		smm = smm_input;
-		if (!idnesp)
-			if_does_not_exist = sKerror;
-	} else if (direction == sKoutput) {
-		smm = smm_output;
-		if (!iesp)
-			if_exists = sKnew_version;
-		if (!idnesp) {
-			if (if_exists == sKoverwrite ||
-			    if_exists == sKappend)
-				if_does_not_exist = sKerror;
-			else
-				if_does_not_exist = sKcreate;
-		}
-	} else if (direction == sKio) {
-		smm = smm_io;
-		if (!iesp)
-			if_exists = sKnew_version;
-		if (!idnesp) {
-			if (if_exists == sKoverwrite ||
-			    if_exists == sKappend)
-				if_does_not_exist = sKerror;
-			else
-				if_does_not_exist = sKcreate;
-		}
-	} else if (direction == sKprobe) {
-		smm = smm_probe;
-		if (!idnesp)
-			if_does_not_exist = Cnil;
-	} else
-		FEerror("~S is an illegal DIRECTION for OPEN.",
-			1, direction);
-	strm = open_stream(filename, smm, if_exists, if_does_not_exist);
-	if (type_of(strm) == t_stream)
-	    strm->sm.sm_object0 = element_type;
-	@(return strm)
-@)
 
 @(defun file_position (file_stream &o position)
 	int i=0;
@@ -1930,175 +1882,144 @@ object sLAload_pathnameA;
 DEFVAR("*COLLECT-BINARY-MODULES*",sSAcollect_binary_modulesA,SI,sLnil,"");
 DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 
-@(static defun load (pathname
-	      &key (verbose `symbol_value(sLAload_verboseA)`)
-		    print
-		    (if_does_not_exist sKerror)
-	      &aux pntype fasl_filename lsp_filename filename
-		   defaults strm stdoutput x
-		   package)
-	bds_ptr old_bds_top;
-	int i;
-	object strm1;
-@
-	check_type_or_pathname_string_symbol_stream(&pathname);
-	pathname = coerce_to_pathname(pathname);
-	defaults = symbol_value(Vdefault_pathname_defaults);
-	defaults = coerce_to_pathname(defaults);
-	pathname = merge_pathnames(pathname, defaults, sKnewest);
-	pntype = pathname->pn.pn_type;
-	filename = coerce_to_namestring(pathname);
-	if (user_match(filename->st.st_self,filename->st.st_fillp))
-		@(return Cnil)
-        old_bds_top=bds_top;
-  	if (pntype == Cnil || pntype == sKwild ||
-	    (type_of(pntype) == t_string &&
-#ifdef UNIX
-	    string_eq(pntype, FASL_string))) {
-#endif
-#ifdef AOSVS
 
-#endif
-		pathname->pn.pn_type = FASL_string;
-		fasl_filename = coerce_to_namestring(pathname);
-	}
-	if (pntype == Cnil || pntype == sKwild ||
-	    (type_of(pntype) == t_string &&
-#ifdef UNIX
-	    string_eq(pntype, LSP_string))) {
-#endif
-#ifdef AOSVS
+DEFUN_NEW("LOAD-INT",object,fSload_int,SI,7,7,NONE,OO,OO,OO,OO,
+	  (object pathname,object verbose,object print,object if_does_not_exist,
+	   object filename,object fasl_filename,object lsp_filename),"") {
 
-#endif
-		pathname->pn.pn_type = LSP_string;
-		lsp_filename = coerce_to_namestring(pathname);
-	}
-	if (fasl_filename != Cnil && file_exists(fasl_filename)) {
-		if (verbose != Cnil) {
-			SETUP_PRINT_DEFAULT(fasl_filename);
-			if (file_column(PRINTstream) != 0)
-				write_str("\n");
-			write_str("Loading ");
-			PRINTescape = FALSE;
-			write_object(fasl_filename, 0);
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-		package = symbol_value(sLApackageA);
-		bds_bind(sLApackageA, package);
-		bds_bind(sLAload_pathnameA,fasl_filename);
-		if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
-		  object _x=sSAbinary_modulesA->s.s_dbind;
-		  object _y=Cnil;
-		  while (_x!=Cnil) {
-		    _y=_x;
-		    _x=_x->c.c_cdr;
-		  }
-		  if (_y==Cnil)
-		    sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
-		  else 
-		    _y->c.c_cdr=make_cons(fasl_filename,Cnil);
-		}
-		i = fasload(fasl_filename);
-		if (print != Cnil) {
-			SETUP_PRINT_DEFAULT(Cnil);
-			vs_top = PRINTvs_top;
-			if (file_column(PRINTstream) != 0)
-				write_str("\n");
-			write_str("Fasload successfully ended.");
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-		bds_unwind(old_bds_top);
-		if (verbose != Cnil) {
-			SETUP_PRINT_DEFAULT(fasl_filename);
-			if (file_column(PRINTstream) != 0)
-				write_str("\n");
-			write_str("Finished loading ");
-			PRINTescape = FALSE;
-			write_object(fasl_filename, 0);
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-		@(return `make_fixnum(i)`)
-	}
-	if (lsp_filename != Cnil && file_exists(lsp_filename)) {
-		filename = lsp_filename;
-	}
-	if (if_does_not_exist != Cnil)
-		if_does_not_exist = sKerror;
-	strm1 = strm
-	= open_stream(filename, smm_input, Cnil, if_does_not_exist);
-	if (strm == Cnil)
-		@(return Cnil)
-	if (verbose != Cnil) {
-		SETUP_PRINT_DEFAULT(filename);
-		if (file_column(PRINTstream) != 0)
-			write_str("\n");
-		write_str("Loading ");
-		PRINTescape = FALSE;
-		write_object(filename, 0);
-		write_str("\n");
-		CLEANUP_PRINT_DEFAULT;
-		flush_stream(PRINTstream);
-	}
-	package = symbol_value(sLApackageA);
-	bds_bind(sLAload_pathnameA,pathname);
-	bds_bind(sLApackageA, package);
-	bds_bind(sLAstandard_inputA, strm);
-	frs_push(FRS_PROTECT, Cnil);
-	if (nlj_active) {
-		close_stream(strm1);
-		nlj_active = FALSE;
-		frs_pop();
-		bds_unwind(old_bds_top);
-		unwind(nlj_fr, nlj_tag);
-	}
-	for (;;) {
-		preserving_whitespace_flag = FALSE;
-		detect_eos_flag = TRUE;
-		x = read_object_non_recursive(strm);
-		if (x == OBJNULL)
-			break;
-		{
-			object *base = vs_base, *top = vs_top, *lex = lex_env;
-			object xx;
+  bds_ptr old_bds_top;
+  int i;
+  object strm1,strm,x,package;
 
-			lex_new();
-			eval(x);
-			xx = vs_base[0];
-			lex_env = lex;
-			vs_top = top;
-			vs_base = base;
-			x = xx;
-		}
-		if (print != Cnil) {
-			SETUP_PRINT_DEFAULT(x);
-			write_object(x, 0);
-			write_str("\n");
-			CLEANUP_PRINT_DEFAULT;
-			flush_stream(PRINTstream);
-		}
-	}
-	close_stream(strm);
-	frs_pop();
-	bds_unwind(old_bds_top);
-	if (verbose != Cnil) {
-		SETUP_PRINT_DEFAULT(filename);
-		if (file_column(PRINTstream) != 0)
-			write_str("\n");
-		write_str("Finished loading ");
-		PRINTescape = FALSE;
-		write_object(filename, 0);
-		write_str("\n");
-		CLEANUP_PRINT_DEFAULT;
-		flush_stream(PRINTstream);
-	}
-	@(return Ct)
-@)
+  if (user_match(filename->st.st_self,filename->st.st_fillp))
+    RETURN1(Cnil);
+  old_bds_top=bds_top;
+  if (fasl_filename != Cnil && file_exists(fasl_filename)) {
+    if (verbose != Cnil) {
+      SETUP_PRINT_DEFAULT(fasl_filename);
+      if (file_column(PRINTstream) != 0)
+	write_str("\n");
+      write_str("Loading ");
+      PRINTescape = FALSE;
+      write_object(fasl_filename, 0);
+      write_str("\n");
+      CLEANUP_PRINT_DEFAULT;
+      flush_stream(PRINTstream);
+    }
+    package = symbol_value(sLApackageA);
+    bds_bind(sLApackageA, package);
+    bds_bind(sLAload_pathnameA,fasl_filename);
+    if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
+      object _x=sSAbinary_modulesA->s.s_dbind;
+      object _y=Cnil;
+      while (_x!=Cnil) {
+	_y=_x;
+	_x=_x->c.c_cdr;
+      }
+      if (_y==Cnil)
+	sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
+      else
+	_y->c.c_cdr=make_cons(fasl_filename,Cnil);
+    }
+    i = fasload(fasl_filename);
+    if (print != Cnil) {
+      SETUP_PRINT_DEFAULT(Cnil);
+      vs_top = PRINTvs_top;
+      if (file_column(PRINTstream) != 0)
+	write_str("\n");
+      write_str("Fasload successfully ended.");
+      write_str("\n");
+      CLEANUP_PRINT_DEFAULT;
+      flush_stream(PRINTstream);
+    }
+    bds_unwind(old_bds_top);
+    if (verbose != Cnil) {
+      SETUP_PRINT_DEFAULT(fasl_filename);
+      if (file_column(PRINTstream) != 0)
+	write_str("\n");
+      write_str("Finished loading ");
+      PRINTescape = FALSE;
+      write_object(fasl_filename, 0);
+      write_str("\n");
+      CLEANUP_PRINT_DEFAULT;
+      flush_stream(PRINTstream);
+    }
+    RETURN1(make_fixnum(i));
+  }
+  if (lsp_filename != Cnil && file_exists(lsp_filename)) {
+    filename = lsp_filename;
+  }
+  if (if_does_not_exist != Cnil)
+    if_does_not_exist = sKerror;
+  strm1 = strm  = open_stream(filename, smm_input, Cnil, if_does_not_exist);
+  if (strm == Cnil)
+    RETURN1(Cnil);
+  if (verbose != Cnil) {
+    SETUP_PRINT_DEFAULT(filename);
+    if (file_column(PRINTstream) != 0)
+      write_str("\n");
+    write_str("Loading ");
+    PRINTescape = FALSE;
+    write_object(filename, 0);
+    write_str("\n");
+    CLEANUP_PRINT_DEFAULT;
+    flush_stream(PRINTstream);
+  }
+  package = symbol_value(sLApackageA);
+  bds_bind(sLAload_pathnameA,pathname);
+  bds_bind(sLApackageA, package);
+  bds_bind(sLAstandard_inputA, strm);
+  frs_push(FRS_PROTECT, Cnil);
+  if (nlj_active) {
+    close_stream(strm1);
+    nlj_active = FALSE;
+    frs_pop();
+    bds_unwind(old_bds_top);
+    unwind(nlj_fr, nlj_tag);
+  }
+  for (;;) {
+    preserving_whitespace_flag = FALSE;
+    detect_eos_flag = TRUE;
+    x = read_object_non_recursive(strm);
+    if (x == OBJNULL)
+      break;
+    {
+      object *base = vs_base, *top = vs_top, *lex = lex_env;
+      object xx;
+
+      lex_new();
+      eval(x);
+      xx = vs_base[0];
+      lex_env = lex;
+      vs_top = top;
+      vs_base = base;
+      x = xx;
+    }
+    if (print != Cnil) {
+      SETUP_PRINT_DEFAULT(x);
+      write_object(x, 0);
+      write_str("\n");
+      CLEANUP_PRINT_DEFAULT;
+      flush_stream(PRINTstream);
+    }
+  }
+  close_stream(strm);
+  frs_pop();
+  bds_unwind(old_bds_top);
+  if (verbose != Cnil) {
+    SETUP_PRINT_DEFAULT(filename);
+    if (file_column(PRINTstream) != 0)
+      write_str("\n");
+    write_str("Finished loading ");
+    PRINTescape = FALSE;
+    write_object(filename, 0);
+    write_str("\n");
+    CLEANUP_PRINT_DEFAULT;
+    flush_stream(PRINTstream);
+  }
+  RETURN1(Ct);
+
+}
 
 static void
 FFN(siLget_string_input_stream_index)()
@@ -2766,12 +2687,8 @@ gcl_init_file_function()
 	make_function("STREAM-ELEMENT-TYPE", Lstream_element_type);
 	make_function("CLOSE", Lclose);
 
-	make_function("OPEN", Lopen);
-
 	make_function("FILE-POSITION", Lfile_position);
 	make_function("FILE-LENGTH", Lfile_length);
-
-	make_function("LOAD", Lload);
 
 	make_si_function("GET-STRING-INPUT-STREAM-INDEX",
 			 siLget_string_input_stream_index);
