@@ -163,24 +163,6 @@ enum aelttype {			/*  array element type  */
 #define STREF(type,x,i) (*((type *)(((char *)((x)->str.str_self))+(i))))
 #define STSET(type,x,i,val)  do{SGC_TOUCH(x);STREF(type,x,i) = (val);} while(0)
 
-
-
-enum smmode {			/*  stream mode  */
-	smm_input,		/*  input  */
-	smm_output,		/*  output  */
-	smm_io,			/*  input-output  */
-	smm_probe,		/*  probe  */
-	smm_synonym,		/*  synonym  */
-	smm_broadcast,		/*  broadcast  */
-	smm_concatenated,	/*  concatenated  */
-	smm_two_way,		/*  two way  */
-	smm_echo,		/*  echo  */
-	smm_string_input,	/*  string input  */
-	smm_string_output,	/*  string output  */
-	smm_user_defined,        /*  for user defined */
-	smm_socket		/*  Socket stream  */
-};
-
 /* for any stream that takes writec_char, directly (not two_way or echo)
    ie. 	 smm_output,smm_io, smm_string_output, smm_socket
  */

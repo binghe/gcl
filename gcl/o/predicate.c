@@ -29,6 +29,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include "include.h"
 
+DEFUN_NEW("PATHNAME-DESIGNATORP",object,fSpathname_designatorp,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(pathname_designatorp(x) ? Ct : Cnil);
+}
+
 DEFUNO_NEW("NULL",object,fLnull,LISP
 	  ,1,1,NONE,OO,OO,OO,OO,void,Lnull,(object x0),"")
 {

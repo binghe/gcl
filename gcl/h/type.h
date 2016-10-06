@@ -7,6 +7,7 @@ enum type {
   t_shortfloat,
   t_longfloat,
   t_complex,
+  t_stream,
   t_pathname,
   t_string,
   t_bitvector,
@@ -17,7 +18,6 @@ enum type {
   t_character,
   t_symbol,
   t_package,
-  t_stream,
   t_random,
   t_readtable,
   t_cfun,
@@ -99,7 +99,7 @@ enum smmode {			/*  stream mode  */
 #else
 #define TYPEWORD_TYPE_P(y_) (y_!=t_cons)
 #endif
-  
+
 /*Note preserve sgc flag here                                         VVV*/
 #define set_type_of(x,y) ({object _x=(object)(x);enum type _y=(y);_x->d.f=0;\
     if (TYPEWORD_TYPE_P(_y)) {_x->d.e=1;_x->d.t=_y;_x->fw|=(fixnum)OBJNULL;}})
@@ -151,3 +151,6 @@ enum smmode {			/*  stream mode  */
                                                                      || _tp == t_symbol;})
 #define pathname_string_symbol_streamp(a_) ({enum type _tp=type_of(a_); _tp==t_pathname || _tp == t_string\
                                                                      || _tp == t_symbol || _tp==t_stream;})
+
+#define pathname_designatorp(a_) ({object _a=(a_);enum type _tp=type_of(a_);\
+      _tp==t_pathname||_tp==t_string||(_tp==t_stream && _a->sm.sm_mode>=smm_input && _a->sm.sm_mode<=smm_file_synonym);})

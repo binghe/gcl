@@ -1170,6 +1170,14 @@ type_of(#0)==t_complex")
  (push '((t) t #.(flags ans)"coerce_to_string(#0)")
    (get 'string 'inline-always))
 
+;;PATHNAME-DESIGNATORP
+(push '((t) boolean #.(flags)"pathname_designatorp(#0)")
+      (get 'si::pathname-designatorp 'inline-always))
+
+;;PATHNAMEP
+(push '((t) boolean #.(flags)"pathnamep(#0)")
+      (get 'pathnamep 'inline-always))
+
 ;;STRINGP
  (push '((t) boolean #.(flags)"type_of(#0)==t_string")
    (get 'stringp 'inline-always))
