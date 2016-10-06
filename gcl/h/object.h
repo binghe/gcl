@@ -478,6 +478,9 @@ object make_si_sfun();
  Used by the C function to set optionals */
 
 #define  VFUN_NARGS fcall.argd
+#define RETURN4(x,y,z,w) do{/*  object _x = (void *) x;  */   \
+			  fcall.values[2]=y;fcall.values[3]=z;fcall.values[4]=w;fcall.nvalues=4; \
+			  return (x) ;} while(0)
 #define RETURN2(x,y) do{/*  object _x = (void *) x;  */\
 			  fcall.values[2]=y;fcall.nvalues=2; \
 			  return (x) ;} while(0)
