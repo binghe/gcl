@@ -774,6 +774,8 @@ sgc_start(void) {
       object v=sSAwritableA->s.s_dbind;
       for (i=page(v->v.v_self);i<=page(v->v.v_self+CEI(v->bv.bv_offset+v->v.v_dim-1,8*sizeof(fixnum))/(8*sizeof(fixnum)));i++)
 	SET_WRITABLE(i);
+      SET_WRITABLE(page(v));
+      SET_WRITABLE(page(sSAwritableA));
     }
 
     tm_of(t_relocatable)->tm_alt_npage=0;
