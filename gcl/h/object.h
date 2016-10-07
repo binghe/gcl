@@ -479,10 +479,10 @@ object make_si_sfun();
 
 #define  VFUN_NARGS fcall.argd
 #define RETURN4(x,y,z,w) do{/*  object _x = (void *) x;  */   \
-			  fcall.values[2]=y;fcall.values[3]=z;fcall.values[4]=w;fcall.nvalues=4; \
+			  fcall.values[1]=y;fcall.values[2]=z;fcall.values[3]=w;fcall.nvalues=4; \
 			  return (x) ;} while(0)
 #define RETURN2(x,y) do{/*  object _x = (void *) x;  */\
-			  fcall.values[2]=y;fcall.nvalues=2; \
+			  fcall.values[1]=y;fcall.nvalues=2; \
 			  return (x) ;} while(0)
 #define RETURN1(x) do{fcall.nvalues=1; return (x) ;} while(0)
 #define RETURN0  do{fcall.nvalues=0; return Cnil ;} while(0)
