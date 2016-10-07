@@ -564,6 +564,18 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
 
 }
 
+DEFUN_NEW("RENAME",object,fSrename,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+
+  check_type_string(&x);
+  check_type_string(&y);
+
+  coerce_to_filename(x,FN1);
+  coerce_to_filename(y,FN2);
+
+  RETURN1(rename(FN1,FN2) ? Cnil : Ct);
+
+}
+
 DEFUN_NEW("UNLINK",object,fSunlink,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
   coerce_to_filename(x,FN1);
