@@ -365,7 +365,7 @@
   (check-type p pathname-designator)
   (load-int pp verbose print if-does-not-exist fn
 	    (let ((x (translate-pathname ".o" "" fn)))
-	      (unless (minusp (string-match ".o$" (pathname-type x))) (namestring x)))
+	      (unless (minusp (string-match "o$" (pathname-type x))) (namestring x)))
 	    (let ((x (translate-pathname ".lsp" "" fn)))
-	      (unless (minusp (string-match ".lsp$" (pathname-type x))) (namestring x)))))
+	      (unless (minusp (string-match "lsp$" (pathname-type x))) (namestring x)))))
 
