@@ -232,8 +232,11 @@ Cannot compile ~a.~%"
 	 (device (or (and (not (null output-file))
 			  (pathname-device output-file))
 		     (pathname-device input-pathname)))
+	 (typ (or (and (not (null output-file))
+		       (pathname-type output-file))
+		  "o"))
 	 
-         (o-pathname (get-output-pathname o-file "o" name dir device))
+         (o-pathname (get-output-pathname o-file typ name dir device))
          (c-pathname (get-output-pathname c-file "c" name dir device))
          (h-pathname (get-output-pathname h-file "h" name dir device))
          (data-pathname (get-output-pathname data-file "data" name dir device)))
