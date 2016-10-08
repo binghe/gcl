@@ -3,7 +3,7 @@
 (defconstant +d-type-alist+ (d-type-list))
 
 (defun ?push (x tp)
-  (when (and x (eq tp :directory) (vector-push-extend #\/ x)))
+  (when (and x (eq tp :directory)) (vector-push-extend #\/ x))
   x)
 
 (defun wreaddir (x s &optional y (ls (length s) lsp) &aux (y (if (rassoc y +d-type-alist+) y :unknown)))
