@@ -150,7 +150,7 @@
 	   (file (cdr (assoc :compile compile)))
 	   (o (cdr (assoc :o compile)))
 	   (compile (remove :o (remove :compile compile :key 'car) :key 'car))
-	   (compile (cons (cons :output-file (or o file)) compile))
++	   (compile (cons (cons :output-file (or o (merge-pathnames ".o" file))) compile))
 	   (result (system:error-set `(apply 'compile-file ,file ',(mapcan (lambda (x) (list (car x) (cdr x))) compile)))))
       (bye (if (or *error-p* (equal result '(nil))) 1 0)))))
 
