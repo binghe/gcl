@@ -151,7 +151,7 @@ FFN(Fmultiple_value_bind)(object form)
 	}
 	{
 	 object *vt = vs_top;
-	 vs_push(find_special(body, start, (struct bind_temp *)vt));
+	 vs_push(find_special(body, start, (struct bind_temp *)vt,NULL)); /*?*/
 	}
 	for (i = 0;  i < n;  i++)
 		bind_var(start[i].bt_var,
@@ -230,7 +230,7 @@ is an illegal function definition in FLET.",
 		lex_fun_bind(MMcar(def), top[0]);
 		def_list = MMcdr(def_list);
 	}
-	vs_push(find_special(MMcdr(args), NULL, NULL));
+	vs_push(find_special(MMcdr(args), NULL, NULL,NULL));
 	Fprogn(vs_head);
 	lex_env = lex;
 }
@@ -271,7 +271,7 @@ is an illegal function definition in LABELS.",
 		MMcaar(closure_list) = lex_env[1];
 		closure_list = MMcdr(closure_list);
 	}
-	vs_push(find_special(MMcdr(args), NULL, NULL));
+	vs_push(find_special(MMcdr(args), NULL, NULL,NULL));
 	Fprogn(vs_head);
 	lex_env = lex;
 }
@@ -304,7 +304,7 @@ is an illegal macro definition in MACROFLET.",
 		lex_macro_bind(MMcar(def), MMcaddr(top[0]));
 		def_list = MMcdr(def_list);
 	}
-	vs_push(find_special(MMcdr(args), NULL, NULL));
+	vs_push(find_special(MMcdr(args), NULL, NULL,NULL));
 	Fprogn(vs_head);
 	lex_env = lex;
 }
