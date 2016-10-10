@@ -291,6 +291,40 @@
 	      (typep object (apply tem i)))))))
 
 
+
+(defun minmax (i1 i2 low-p e &aux (fn (if low-p (if e '< '>) (if e '> '<))))
+  (cond ((eq i1 '*) (if e i1 i2))
+	((eq i2 '*) (if e i2 i1))
+	((funcall fn i1 i2) i1)
+	(i2)))
+
+(defun expand-range (low high bottom top)
+  (let ((low (minmax low bottom t t))(high (minmax high top nil t)))
+    (when (or (eq low '*) (eq high '*) (<= low high)) (list low high))))
+
+(defun nc (tp)
+  (when (consp tp)
+    (case (car tp)
+	  ;; (immfix (let ((m (cadr tp))(x (caddr tp))
+	  ;; 	    (list (list 'integer (if (eq m '*) most-negative-immfix m) (if (eq x '*) most-positive-immfix x)))))
+	  ;; (bfix (let* ((m (cadr tp))(x (caddr tp))(m (if (eq m '*) most-negative-fixnum m))(x (if (eq x '*) most-positive-fixnum x)))
+	  ;; 	  (if (< (* m x) 0)
+	  ;; 	      `((integer ,m ,(1- most-negative-immfix))(integer ,(1+ most-positive-immfix) ,x))
+	  ;; 	    `((integer ,m ,x)))))
+	  ;; (bignum (let* ((m (cadr tp))(x (caddr tp))(sm (or (eq m '*) (< m 0)))(sx (or (eq x '*) (>= x 0))))
+	  ;; 	    (if (and sm sx)
+	  ;; 		`((integer ,m ,(1- most-negative-fixnum))(integer ,(1+ most-positive-fixnum) ,x))
+	  ;; 	      `((integer ,m ,x)))))
+	  ((integer ratio short-float long-float) (list tp))
+	  (otherwise (append (nc (car tp)) (nc (cdr tp)))))))
+
+
+(defun expand-ranges (type)
+  (reduce (lambda (y x &aux (z (assoc (car x) y)))
+	     (if z (subst (cons (car z) (apply 'expand-range (cadr x) (caddr x) (cdr z))) z y)
+	       (cons x y))) (nc type) :initial-value nil))
+
+
 ;;; NORMALIZE-TYPE normalizes the type using the DEFTYPE definitions.
 ;;; The result is always a list.
 (defun normalize-type (type &aux tp i )
