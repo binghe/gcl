@@ -407,6 +407,12 @@
            (c2lambda-expr-without-key lambda-list body)))
   ))
 
+(defun decl-body-safety (body)
+  (case (car body)
+    (decl-body (or (cadr (assoc 'safety (caddr body))) 0))
+    ((let let*) (decl-body-safety (car (last body))))
+    (otherwise 0)))
+
 (defun c2lambda-expr-without-key
        (lambda-list body
         &aux (requireds (car lambda-list))
@@ -439,7 +445,7 @@
         (when rest (do-decl rest))
         )
   ;;; check arguments
-  (when (or *safe-compile* *compiler-check-args*)
+  (when (or *safe-compile* *compiler-check-args* (plusp (decl-body-safety body)));FIXME
     (cond ((or rest optionals)
            (when requireds
              (wt-nl "if(vs_top-vs_base<" (length requireds)
@@ -448,7 +454,7 @@
              (wt-nl "if(vs_top-vs_base>"
                     (+ (length requireds) (length optionals))
                     ") too_many_arguments();")))
-          (t (wt-nl "check_arg(" (length requireds) ");"))))
+          (t (when requireds (wt-nl "check_arg(" (length requireds) ");")))))
 
   ;;; Allocate the parameters.
   (dolist** (var requireds) (setf (var-ref var) (vs-push)))
@@ -562,7 +568,7 @@
                   (when (cadddr kwd) (do-decl (cadddr kwd))))
         )
   ;;; Check arguments.
-  (when (and (or *safe-compile* *compiler-check-args*) requireds)
+  (when (and (or *safe-compile* *compiler-check-args* (plusp (decl-body-safety body))) requireds);FIXME
         (when requireds
               (wt-nl "if(vs_top-vs_base<" (length requireds)
                      ") too_few_arguments();")))
