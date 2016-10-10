@@ -582,33 +582,7 @@ DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(obje
 
   check_type_stream(&x);
 
-  switch(x->sm.sm_mode) {
-  case smm_output:
-  case smm_input:
-  case smm_io:
-  case smm_probe:
-  case smm_socket:
-  case smm_string_input:
-  case smm_string_output:
-    return x->d.tt==1 ? Cnil : Ct;
-  case smm_file_synonym:
-  case smm_synonym:
-    return FFN(fLopen_stream_p)(symbol_value(x->sm.sm_object0));
-  case smm_broadcast:
-  case smm_concatenated:
-    for (x=x->sm.sm_object0;!endp(x);x=x->c.c_cdr)
-      if (!FFN(fLopen_stream_p)(x))
-	return Cnil;
-    return Ct;
-  case smm_two_way:
-  case smm_echo:
-    if (FFN(fLopen_stream_p)(STREAM_INPUT_STREAM(x))==Cnil)
-      return Cnil;
-    return FFN(fLopen_stream_p)(STREAM_OUTPUT_STREAM(x));
-  default:
-    error("illegal stream mode");
-    return Cnil;
-  }
+  return GET_STREAM_FLAG(x,gcl_sm_closed) ? Cnil : Ct;
 
 }
     /*
@@ -616,95 +590,132 @@ DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(obje
 	The abort_flag is not used now.
 */
 void
-close_stream(strm)
-object strm;
-/*bool abort_flag; */	/*  Not used now!  */
-{
-	object x;
+close_stream(object strm)  {
 
-BEGIN:
-	strm->d.tt=1;
+  object x;
 
-	switch (strm->sm.sm_mode) {
-	case smm_output:
-		if (strm->sm.sm_fp == stdout)
-			FEerror("Cannot close the standard output.", 0);
-		if (strm->sm.sm_fp == NULL) break;
-		fflush(strm->sm.sm_fp);
-		deallocate_stream_buffer(strm);
-		fclose(strm->sm.sm_fp);
-		strm->sm.sm_fp = NULL;
-		break;
+  if (FFN(fLopen_stream_p)(strm)==Cnil)
+    return;
 
+  switch (strm->sm.sm_mode) {
+  case smm_output:
+    if (strm->sm.sm_fp == stdout)
+      FEerror("Cannot close the standard output.", 0);
+    fflush(strm->sm.sm_fp);
+    deallocate_stream_buffer(strm);
+    fclose(strm->sm.sm_fp);
+    strm->sm.sm_fp = NULL;
+    strm->sm.sm_fd = -1;
+    break;
 
-	case smm_socket:
-	  if (SOCKET_STREAM_FD(strm) < 2)
-	    emsg("tried Closing %d ! as socket \n",SOCKET_STREAM_FD(strm));
-	  else {
+  case smm_socket:
+    if (SOCKET_STREAM_FD(strm) < 2)
+      emsg("tried Closing %d ! as socket \n",SOCKET_STREAM_FD(strm));
+    else {
 #ifdef HAVE_NSOCKET
-          if (GET_STREAM_FLAG(strm,gcl_sm_output))
-              {	 
-		gclFlushSocket(strm);
-                 /* there are two for one fd so close only one */
-            	  tcpCloseSocket(SOCKET_STREAM_FD(strm));
-               } 
+      if (GET_STREAM_FLAG(strm,gcl_sm_output)) {
+	gclFlushSocket(strm);
+	/* there are two for one fd so close only one */
+	tcpCloseSocket(SOCKET_STREAM_FD(strm));
+      }
 #endif
-	  SOCKET_STREAM_FD(strm)=-1;
-	  }
+      SOCKET_STREAM_FD(strm)=-1;
+    }
 
-	case smm_input:
-		if (strm->sm.sm_fp == stdin)
-			FEerror("Cannot close the standard input.", 0);
-	  
-	case smm_io:
-	case smm_probe:
-		if (strm->sm.sm_fp == NULL) break;
-		deallocate_stream_buffer(strm);
-		if (strm->sm.sm_object1 &&
-		    type_of(strm->sm.sm_object1)==t_string &&
-		    strm->sm.sm_object1->st.st_self[0] =='|')
-		  pclose(strm->sm.sm_fp);
-		else 
-		  fclose(strm->sm.sm_fp);
-		strm->sm.sm_fp = NULL;
-		if (strm->sm.sm_object0 &&
-		    type_of(strm->sm.sm_object0 ) == t_cons &&
-		    Mcar(strm->sm.sm_object0 ) == sSAallow_gzipped_fileA)
-		    ifuncall1(sLdelete_file,Mcdr(strm->sm.sm_object0));
-		break;
+  case smm_input:
+    if (strm->sm.sm_fp == stdin)
+      FEerror("Cannot close the standard input.", 0);
 
-	case smm_file_synonym:
-	case smm_synonym:
-		strm = symbol_value(strm->sm.sm_object0);
-		if (type_of(strm) != t_stream)
-			FEwrong_type_argument(sLstream, strm);
-		goto BEGIN;
+  case smm_io:
+  case smm_probe:
+    deallocate_stream_buffer(strm);
+    if (strm->sm.sm_object1 &&
+	type_of(strm->sm.sm_object1)==t_string &&
+	strm->sm.sm_object1->st.st_self[0] =='|')
+      pclose(strm->sm.sm_fp);
+    else
+      fclose(strm->sm.sm_fp);
+    strm->sm.sm_fp = NULL;
+    strm->sm.sm_fd = -1;
+    if (strm->sm.sm_object0 &&
+	type_of(strm->sm.sm_object0 )==t_cons &&
+	Mcar(strm->sm.sm_object0)==sSAallow_gzipped_fileA)
+      ifuncall1(sLdelete_file,Mcdr(strm->sm.sm_object0));
+    break;
 
-	case smm_broadcast:
-		for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr)
-			close_stream(x->c.c_car);
-		break;
+  case smm_file_synonym:
+  case smm_synonym:
+    strm = symbol_value(strm->sm.sm_object0);
+    if (type_of(strm) != t_stream)
+      TYPE_ERROR(strm,sLstream);
+    close_stream(strm);
+    break;
 
-	case smm_concatenated:
-		for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr)
-			close_stream(x->c.c_car);
-		break;
+  case smm_broadcast:
+  case smm_concatenated:
+    for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr)
+      close_stream(x->c.c_car);
+    break;
 
-	case smm_two_way:
-	case smm_echo:
-		close_stream(STREAM_INPUT_STREAM(strm));
-		close_stream(STREAM_OUTPUT_STREAM(strm));
-		break;
+  case smm_two_way:
+  case smm_echo:
+    close_stream(STREAM_INPUT_STREAM(strm));
+    close_stream(STREAM_OUTPUT_STREAM(strm));
+    break;
 
-	case smm_string_input:
-		break;		/*  There is nothing to do.  */
+  case smm_string_input:
+  case smm_string_output:
+    break;
 
-	case smm_string_output:
-		break;		/*  There is nothing to do.  */
+  default:
+    error("Illegal stream mode");
+  }
 
-	default:
-		error("illegal stream mode");
-	}
+  SET_STREAM_FLAG(strm,gcl_sm_closed,1);
+
+}
+
+DEFUN_NEW("INTERACTIVE-STREAM-P",object,fLinteractive_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(object strm),"") {
+
+  check_type_stream(&strm);
+
+  switch (strm->sm.sm_mode) {
+  case smm_output:
+  case smm_input:
+  case smm_io:
+  case smm_probe:
+    if ((strm->sm.sm_fp == stdin) ||
+	(strm->sm.sm_fp == stdout) ||
+	(strm->sm.sm_fp == stderr))
+      return Ct;
+    return Cnil;
+    break;
+  case smm_file_synonym:
+  case smm_synonym:
+    strm = symbol_value(strm->sm.sm_object0);
+    if (type_of(strm) != t_stream)
+      FEwrong_type_argument(sLstream, strm);
+    break;
+
+  case smm_broadcast:
+  case smm_concatenated:
+    if (( consp(strm->sm.sm_object0) ) &&
+	( type_of(strm->sm.sm_object0->c.c_car) == t_stream ))
+      strm=strm->sm.sm_object0->c.c_car;
+    else
+      return Cnil;
+    break;
+
+  case smm_two_way:
+  case smm_echo:
+    strm=STREAM_INPUT_STREAM(strm);
+    break;
+  default:
+    return Cnil;
+  }
+
+  return Cnil;
+
 }
 
 object
@@ -720,6 +731,7 @@ object istrm, ostrm;
 	STREAM_INPUT_STREAM(strm) = istrm;
 	STREAM_OUTPUT_STREAM(strm) = ostrm;
 	strm->sm.sm_int0 = strm->sm.sm_int1 = 0;
+	strm->sm.sm_flags=0;
 	return(strm);
 }
 
@@ -749,6 +761,7 @@ int istart, iend;
 	strm->sm.sm_object1 = OBJNULL;
 	STRING_INPUT_STREAM_NEXT(strm)= istart;
 	STRING_INPUT_STREAM_END(strm)= iend;
+	strm->sm.sm_flags=0;
 	return(strm);
 }
 
@@ -784,6 +797,7 @@ int line_length;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
 	strm->sm.sm_int0 = STREAM_FILE_COLUMN(strm) = 0;
+	strm->sm.sm_flags=0;
 	vs_reset;
 	return(strm);
 }
@@ -1647,6 +1661,7 @@ LFD(Lmake_synonym_stream)()
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
 
@@ -1670,6 +1685,7 @@ LFD(Lmake_broadcast_stream)()
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
 
@@ -1693,6 +1709,7 @@ LFD(Lmake_concatenated_stream)()
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
 
@@ -2031,9 +2048,6 @@ FFN(siLget_string_input_stream_index)()
 	vs_base[0] = make_fixnum(STRING_INPUT_STREAM_NEXT(vs_base[0]));
 }
 
-DEFUN_NEW("TERMINAL-INPUT-STREAM-P",object,fSterminal_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_input && x->sm.sm_fp && isatty(fileno((FILE *)x->sm.sm_fp)) ? Ct : Cnil);
-}
 
 LFD(siLmake_string_output_stream_from_string)()
 {
@@ -2051,6 +2065,7 @@ LFD(siLmake_string_output_stream_from_string)()
 	strm->sm.sm_object1 = OBJNULL;
 	/* strm->sm.sm_int0 = strng->st.st_fillp; */
 	STREAM_FILE_COLUMN(strm) = 0;
+	strm->sm.sm_flags=0;
 	vs_base[0] = strm;
 }
 
@@ -2580,6 +2595,7 @@ gcl_init_file(void)
 #endif
 	standard_input->sm.sm_int0 = 0; /* unused */
 	standard_input->sm.sm_int1 = 0; /* unused */
+	standard_input->sm.sm_flags=0;
 
 	standard_output = alloc_object(t_stream);
 	standard_output->sm.sm_mode = (short)smm_output;
@@ -2592,6 +2608,7 @@ gcl_init_file(void)
 #endif
 	standard_output->sm.sm_int0 = 0; /* unused */
 	STREAM_FILE_COLUMN(standard_output) = 0;
+	standard_output->sm.sm_flags=0;
 
 	terminal_io = standard
 	= make_two_way_stream(standard_input, standard_output);
@@ -2604,6 +2621,7 @@ gcl_init_file(void)
 	x->sm.sm_object0 = sLAterminal_ioA;
 	x->sm.sm_object1 = OBJNULL;
 	x->sm.sm_int0 = x->sm.sm_int1 = 0; /* unused */
+	x->sm.sm_flags=0;
 	standard_io = x;
 	enter_mark_origin(&standard_io);	
 
@@ -2611,7 +2629,9 @@ gcl_init_file(void)
 
 DEFVAR("*IGNORE-EOF-ON-TERMINAL-IO*",sSAignore_eof_on_terminal_ioA,SI,Cnil,"");
 DEFVAR("*LOAD-PATHNAME*",sLAload_pathnameA,LISP,Cnil,"");
+DEFVAR("*LOAD-TRUENAME*",sSAload_truenameA,LISP,Cnil,"");
 DEFVAR("*LOAD-VERBOSE*",sLAload_verboseA,LISP,Ct,"");
+DEFVAR("*LOAD-PRINT*",sLAload_printA,LISP,Cnil,"");
 
 DEF_ORDINARY("ABORT",sKabort,KEYWORD,"");
 DEF_ORDINARY("APPEND",sKappend,KEYWORD,"");

@@ -199,8 +199,8 @@ enum gcl_sm_flags {
   gcl_sm_tcp_async,
   gcl_sm_input,
   gcl_sm_output,
+  gcl_sm_closed,
   gcl_sm_had_error
-  
   
 };
 
