@@ -173,7 +173,7 @@ FFN(Flocally)(object body)
 	object *oldlex = lex_env;
 
 	lex_copy();
-	body = find_special(body, NULL, NULL);
+	body = find_special(body, NULL, NULL,NULL);
 	vs_push(body);
 	Fprogn(body);
 	lex_env = oldlex;
