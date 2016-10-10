@@ -138,7 +138,7 @@ void
 end_of_stream(strm)
 object strm;
 {
-	FEerror("Unexpected end of ~S.", 1, strm);
+  END_OF_FILE(strm);
 }
 
 /*
@@ -2027,14 +2027,14 @@ static void
 cannot_open(fn)
 object fn;
 {
-	FEerror("Cannot open the file ~A.", 1, fn);
+	FILE_ERROR(fn,"Cannot open");
 }
 
 static void
 cannot_create(fn)
 object fn;
 {
-	FEerror("Cannot create the file ~A.", 1, fn);
+	FILE_ERROR(fn,"Cannot create");
 }
 
 static void
