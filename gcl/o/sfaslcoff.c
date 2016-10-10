@@ -389,13 +389,11 @@ fasload(object faslfile) {
   struct reloc *rel,*rele;
   object memory, data;
   FILE *fp;
-  char filename[MAXPATHLEN],*st1,*ste;
+  char *st1,*ste;
   int i;
   ul init_address=0;
   void *st,*est;
 
-  coerce_to_filename(faslfile, filename);
-  faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
   fp = faslfile->sm.sm_fp;
 
   massert(st=get_mmap(fp,&est));
@@ -425,7 +423,6 @@ fasload(object faslfile) {
   data = read_fasl_vector(faslfile);
 
   massert(!un_mmap(st,est));
-  close_stream(faslfile);
 
 #ifdef CLEAR_CACHE
   CLEAR_CACHE;

@@ -542,15 +542,13 @@ int
 fasload(object faslfile) {
 
   FILE *fp;
-  char filename[256],*sn,*st1,*dst1;
+  char *sn,*st1,*dst1;
   ul init_address=0,end,gs=0,*got=&gs,*gote=got+1;
   object memory,data;
   Shdr *sec1,*sece;
   Sym *sym1,*syme,*dsym1,*dsyme;
   void *v1,*ve;
 
-  coerce_to_filename(faslfile, filename);
-  faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
   fp = faslfile->sm.sm_fp;
   
   massert(v1=get_mmap(fp,&ve));
@@ -573,7 +571,6 @@ fasload(object faslfile) {
   data=feof(fp) ? 0 : read_fasl_vector(faslfile);
   
   massert(!un_mmap(v1,ve));
-  close_stream(faslfile);
   
   massert(!clear_protect_memory(memory));
 

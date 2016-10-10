@@ -1899,101 +1899,10 @@ object sLAload_pathnameA;
 DEFVAR("*COLLECT-BINARY-MODULES*",sSAcollect_binary_modulesA,SI,sLnil,"");
 DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 
+DEFUN_NEW("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object strm,object print),"") {
 
-DEFUN_NEW("LOAD-INT",object,fSload_int,SI,7,7,NONE,OO,OO,OO,OO,
-	  (object pathname,object verbose,object print,object if_does_not_exist,
-	   object filename,object fasl_filename,object lsp_filename),"") {
+  object x;
 
-  bds_ptr old_bds_top;
-  int i;
-  object strm1,strm,x,package;
-
-  if (user_match(filename->st.st_self,filename->st.st_fillp))
-    RETURN1(Cnil);
-  old_bds_top=bds_top;
-  if (fasl_filename != Cnil && file_exists(fasl_filename)) {
-    if (verbose != Cnil) {
-      SETUP_PRINT_DEFAULT(fasl_filename);
-      if (file_column(PRINTstream) != 0)
-	write_str("\n");
-      write_str("Loading ");
-      PRINTescape = FALSE;
-      write_object(fasl_filename, 0);
-      write_str("\n");
-      CLEANUP_PRINT_DEFAULT;
-      flush_stream(PRINTstream);
-    }
-    package = symbol_value(sLApackageA);
-    bds_bind(sLApackageA, package);
-    bds_bind(sLAload_pathnameA,fasl_filename);
-    if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
-      object _x=sSAbinary_modulesA->s.s_dbind;
-      object _y=Cnil;
-      while (_x!=Cnil) {
-	_y=_x;
-	_x=_x->c.c_cdr;
-      }
-      if (_y==Cnil)
-	sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
-      else
-	_y->c.c_cdr=make_cons(fasl_filename,Cnil);
-    }
-    i = fasload(fasl_filename);
-    if (print != Cnil) {
-      SETUP_PRINT_DEFAULT(Cnil);
-      vs_top = PRINTvs_top;
-      if (file_column(PRINTstream) != 0)
-	write_str("\n");
-      write_str("Fasload successfully ended.");
-      write_str("\n");
-      CLEANUP_PRINT_DEFAULT;
-      flush_stream(PRINTstream);
-    }
-    bds_unwind(old_bds_top);
-    if (verbose != Cnil) {
-      SETUP_PRINT_DEFAULT(fasl_filename);
-      if (file_column(PRINTstream) != 0)
-	write_str("\n");
-      write_str("Finished loading ");
-      PRINTescape = FALSE;
-      write_object(fasl_filename, 0);
-      write_str("\n");
-      CLEANUP_PRINT_DEFAULT;
-      flush_stream(PRINTstream);
-    }
-    RETURN1(make_fixnum(i));
-  }
-  if (lsp_filename != Cnil && file_exists(lsp_filename)) {
-    filename = lsp_filename;
-  }
-  if (if_does_not_exist != Cnil)
-    if_does_not_exist = sKerror;
-  strm1 = strm  = open_stream(filename, smm_input, Cnil, if_does_not_exist);
-  if (strm == Cnil)
-    RETURN1(Cnil);
-  if (verbose != Cnil) {
-    SETUP_PRINT_DEFAULT(filename);
-    if (file_column(PRINTstream) != 0)
-      write_str("\n");
-    write_str("Loading ");
-    PRINTescape = FALSE;
-    write_object(filename, 0);
-    write_str("\n");
-    CLEANUP_PRINT_DEFAULT;
-    flush_stream(PRINTstream);
-  }
-  package = symbol_value(sLApackageA);
-  bds_bind(sLAload_pathnameA,pathname);
-  bds_bind(sLApackageA, package);
-  bds_bind(sLAstandard_inputA, strm);
-  frs_push(FRS_PROTECT, Cnil);
-  if (nlj_active) {
-    close_stream(strm1);
-    nlj_active = FALSE;
-    frs_pop();
-    bds_unwind(old_bds_top);
-    unwind(nlj_fr, nlj_tag);
-  }
   for (;;) {
     preserving_whitespace_flag = FALSE;
     detect_eos_flag = TRUE;
@@ -2020,21 +1929,40 @@ DEFUN_NEW("LOAD-INT",object,fSload_int,SI,7,7,NONE,OO,OO,OO,OO,
       flush_stream(PRINTstream);
     }
   }
-  close_stream(strm);
-  frs_pop();
-  bds_unwind(old_bds_top);
-  if (verbose != Cnil) {
-    SETUP_PRINT_DEFAULT(filename);
+
+  RETURN1(Ct);
+
+}
+
+DEFUN_NEW("LOAD-FASL",object,fSload_fasl,SI,2,2,NONE,OO,OO,OO,OO,(object fasl_filename,object print),"") {
+
+  int i;
+
+  if (sSAcollect_binary_modulesA->s.s_dbind==Ct) {
+    object _x=sSAbinary_modulesA->s.s_dbind;
+    object _y=Cnil;
+    while (_x!=Cnil) {
+      _y=_x;
+      _x=_x->c.c_cdr;
+    }
+    if (_y==Cnil)
+      sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
+    else
+      _y->c.c_cdr=make_cons(fasl_filename,Cnil);
+  }
+  i = fasload(fasl_filename);
+  if (print != Cnil) {
+    SETUP_PRINT_DEFAULT(Cnil);
+    vs_top = PRINTvs_top;
     if (file_column(PRINTstream) != 0)
       write_str("\n");
-    write_str("Finished loading ");
-    PRINTescape = FALSE;
-    write_object(filename, 0);
+    write_str(";; Fasload successfully ended.");
     write_str("\n");
     CLEANUP_PRINT_DEFAULT;
     flush_stream(PRINTstream);
   }
-  RETURN1(Ct);
+
+  RETURN1(make_fixnum(i));
 
 }
 

@@ -349,23 +349,52 @@
 	       (if-does-not-exist nil idnesp)
 	       (external-format :default) &aux (pf (pathname f)))
   (declare (optimize (safety 1)))
-  (check-type f (or pathname string stream));FIXME pathname-designator)
-  (check-type pf (not (satisfies wild-pathname-p)))
-  (let* ((pf1 (if (typep pf 'logical-pathname) (translate-logical-pathname pf) pf))
-	 (s (open-int (namestring pf1) direction (restrict-stream-element-type element-type)
+  (check-type f pathname-designator)
+  (when (wild-pathname-p pf)
+    (error 'file-error :pathname pf :format-control "Pathname is wild."))
+  (let* ((s (open-int (namestring (translate-logical-pathname pf)) direction
+		      (restrict-stream-element-type element-type)
 		      if-exists iesp if-does-not-exist idnesp external-format)))
     (when (typep s 'stream) (c-set-stream-object1 s pf) s)))
 
+(defun load-pathname (p print if-does-not-exist
+			&aux (pp (merge-pathnames p))
+			(epp (reduce (lambda (y x) (or y (probe-file (translate-pathname x "" p))))
+				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
+  (if epp
+      (let* ((*load-pathname* pp)(*load-truename* epp))
+	(with-open-file
+	 (s epp)
+	 (if (member (peek-char nil s nil 'eof) '#.(mapcar 'code-char (list 127 #xfe #xff #x4c)))
+	     (load-fasl s print)
+	   (load-stream s print))))
+    (when if-does-not-exist
+      (error 'file-error :pathname pp :format-control "File does not exist."))))
 
-(defun load (p &key (verbose *load-verbose*) print (if-does-not-exist :error)
-	       (external-format :default)
-	       &aux (pp (pathname p))(def (pathname *default-pathname-defaults*))
-	       (pp (merge-pathnames pp def nil))(fn (namestring pp)))
+(defun load (p &key (verbose *load-verbose*) (print *load-print*) (if-does-not-exist :error)
+	       (external-format :default) &aux (*readtable* *readtable*)(*package* *package*))
+  (declare (optimize (safety 1))(ignorable external-format))
+  (check-type p (or stream pathname-designator))
+  (when verbose (format t ";; Loading ~s~%" p))
+  (prog1
+      (typecase p
+	(pathname-designator (load-pathname (pathname p) print if-does-not-exist))
+	(stream (load-stream p print)))
+    (when verbose (format t ";; Finished loading ~s~%" p))))
+
+(defun ensure-directories-exist (ps &key verbose &aux created)
   (declare (optimize (safety 1)))
-  (check-type p pathname-designator)
-  (load-int pp verbose print if-does-not-exist fn
-	    (let ((x (translate-pathname ".o" "" fn)))
-	      (unless (minusp (string-match "o$" (pathname-type x))) (namestring x)))
-	    (let ((x (translate-pathname ".lsp" "" fn)))
-	      (unless (minusp (string-match "lsp$" (pathname-type x))) (namestring x)))))
+  (check-type ps pathname-designator)
+  (when (wild-pathname-p ps)
+    (error 'file-error :pathname ps :format-control "Pathname is wild"))
+  (labels ((d (x y &aux (z (ldiff x y)) (n (namestring (make-pathname :directory z))))
+	      (when (when z (stringp (car (last z))))
+		(unless (eq :directory (stat n))
+		  (mkdir n)
+		  (setq created t)
+		  (when verbose (format *standard-output* "Creating directory ~s~%" n))))
+	      (when y (d x (cdr y)))))
+    (let ((pd (pathname-directory ps)))
+      (d pd (cdr pd)))
+    (values ps created)))
 
