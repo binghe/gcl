@@ -1771,6 +1771,27 @@ DEFUN_NEW("SYNONYM-STREAM-P",object,fSsynonym_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(
   RETURN1(type_of(x)==t_stream && (x->sm.sm_mode==smm_file_synonym || x->sm.sm_mode==smm_synonym) ? Ct : Cnil);
 }
 
+DEFUN_NEW("TERMINAL-INPUT-STREAM-P",object,fSterminal_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_input && x->sm.sm_fp && isatty(fileno((FILE *)x->sm.sm_fp)) ? Ct : Cnil);
+}
+
+DEFUN_NEW("BROADCAST-STREAM-P",object,fSbroadcast_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_broadcast ? Ct : Cnil);
+}
+
+DEFUN_NEW("ECHO-STREAM-P",object,fSecho_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_echo ? Ct : Cnil);
+}
+
+DEFUN_NEW("TWO-WAY-STREAM-P",object,fStwo_way_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_two_way ? Ct : Cnil);
+}
+
+DEFUN_NEW("CONCATENATED-STREAM-P",object,fSconcatenated_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_concatenated ? Ct : Cnil);
+}
+
+
 
 LFD(Lstreamp)()
 {
