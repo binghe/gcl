@@ -24,7 +24,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include "include.h"
-#include <string.h>
 
 static void
 illegal_lambda(void);
@@ -95,17 +94,19 @@ lambda_bind(object *arg_top)
 	struct aux *aux=NULL;
 	int naux;
 	bool special_processed;
+	object s[1],ss;
 	vs_mark;
 
 	bds_check;
 	lambda = vs_head;
-	if (type_of(lambda) != t_cons)
+	if (!consp(lambda))
 		FEerror("No lambda list.", 0);
 	lambda_list = lambda->c.c_car;
 	body = lambda->c.c_cdr;
 
 	required = (struct required *)vs_top;
 	nreq = 0;
+	s[0]=Cnil;
 	for (;;) {
 		if (endp(lambda_list))
 			goto REQUIRED_ONLY;
@@ -152,7 +153,7 @@ OPTIONAL:
 			goto SEARCH_DECLARE;
 		x = lambda_list->c.c_car;
 		lambda_list = lambda_list->c.c_cdr;
-		if (type_of(x) == t_cons) {
+		if (consp(x)) {
 			check_symbol(x->c.c_car);
 			check_var(x->c.c_car);
 			vs_push(x->c.c_car);
@@ -226,9 +227,9 @@ KEYWORD:
 			goto SEARCH_DECLARE;
 		x = lambda_list->c.c_car;
 		lambda_list = lambda_list->c.c_cdr;
-		if (type_of(x) == t_cons) {
-			if (type_of(x->c.c_car) == t_cons) {
-				if (!keywordp(x->c.c_car->c.c_car))
+		if (consp(x)) {
+			if (consp(x->c.c_car)) {
+				if (type_of(x->c.c_car->c.c_car)!=t_symbol)
 				  /* FIXME better message */
 					FEunexpected_keyword(x->c.c_car->c.c_car);
 				vs_push(x->c.c_car->c.c_car);
@@ -296,7 +297,7 @@ AUX_L:
 			goto SEARCH_DECLARE;
 		x = lambda_list->c.c_car;
 		lambda_list = lambda_list->c.c_cdr;
-		if (type_of(x) == t_cons) {
+		if (consp(x)) {
 			check_symbol(x->c.c_car);
 			check_var(x->c.c_car);
 			vs_push(x->c.c_car);
@@ -336,10 +337,10 @@ SEARCH_DECLARE:
 				break;
 			continue;
 		}
-		if (type_of(form)!=t_cons || !isdeclare(form->c.c_car))
+		if (!consp(form) || !isdeclare(form->c.c_car))
 			break;
 		for (ds = form->c.c_cdr; !endp(ds); ds = ds->c.c_cdr) {
-			if (type_of(ds->c.c_car) != t_cons)
+			if (!consp(ds->c.c_car))
 				illegal_declare(form);
 			if (ds->c.c_car->c.c_car == sLspecial) {
 				vs = ds->c.c_car->c.c_cdr;
@@ -381,8 +382,7 @@ SEARCH_DECLARE:
 		}
 	if (special_processed)
 		continue;
-	/*  lex_special_bind(v);  */
-	lex_env[0] = MMcons(MMcons(v, Cnil), lex_env[0]);
+	s[0] = MMcons(MMcons(v, Cnil), s[0]);
 
 /**/
 				}
@@ -496,7 +496,7 @@ SEARCH_DECLARE:
 		eval_assign(temporary, aux[i].aux_init);
 		bind_var(aux[i].aux_var, temporary, aux[i].aux_spp);
 	}
-	if (type_of(body) != t_cons || body->c.c_car == form) {
+	if (!consp(body) || body->c.c_car == form) {
 		vs_reset;
 		vs_head = body;
 	} else {
@@ -504,6 +504,13 @@ SEARCH_DECLARE:
 		vs_reset;
 		vs_head = body;
 	}
+
+	if (s[0]!=Cnil) {
+	  for (ss=s[0];ss->c.c_cdr!=Cnil;ss=ss->c.c_cdr);
+	  ss->c.c_cdr=lex_env[0];
+	  lex_env[0]=s[0];
+	}
+
 	return;
 
 REQUIRED_ONLY:
@@ -519,10 +526,10 @@ REQUIRED_ONLY:
 				break;
 			continue;
 		}
-		if (type_of(form)!=t_cons || !isdeclare(form->c.c_car))
+		if (!consp(form) || !isdeclare(form->c.c_car))
 			break;
 		for (ds = form->c.c_cdr; !endp(ds); ds = ds->c.c_cdr) {
-			if (type_of(ds->c.c_car) != t_cons)
+			if (!consp(ds->c.c_car))
 				illegal_declare(form);
 			if (ds->c.c_car->c.c_car == sLspecial) {
 				vs = ds->c.c_car->c.c_cdr;
@@ -541,7 +548,7 @@ REQUIRED_ONLY:
 		continue;
 	/*  lex_special_bind(v);  */
 	temporary = MMcons(v, Cnil);
-	lex_env[0] = MMcons(temporary, lex_env[0]);
+	s[0] = MMcons(temporary, s[0]);
 
 /**/
 				}
@@ -559,7 +566,7 @@ REQUIRED_ONLY:
 		bind_var(required[i].req_var,
 			 base[i],
 			 required[i].req_spp);
-	if (type_of(body) != t_cons || body->c.c_car == form) {
+	if (!consp(body) || body->c.c_car == form) {
 		vs_reset;
 		vs_head = body;
 	} else {
@@ -567,6 +574,13 @@ REQUIRED_ONLY:
 		vs_reset;
 		vs_head = body;
 	}
+
+	if (s[0]!=Cnil) {
+	  for (ss=s[0];ss->c.c_cdr!=Cnil;ss=ss->c.c_cdr);
+	  ss->c.c_cdr=lex_env[0];
+	  lex_env[0]=s[0];
+	}
+
 }
 
 void
@@ -616,7 +630,7 @@ struct bind_temp {
 */
 
 object
-find_special(object body, struct bind_temp *start, struct bind_temp *end)
+find_special(object body, struct bind_temp *start, struct bind_temp *end,object *s)
 { 
         object temporary;
 	object form=Cnil;
@@ -626,6 +640,7 @@ find_special(object body, struct bind_temp *start, struct bind_temp *end)
 	vs_mark;
 
 	vs_push(Cnil);
+	s=s ? s : lex_env;
 	for (;  !endp(body);  body = body->c.c_cdr) {
 		form = body->c.c_car;
 
@@ -638,10 +653,10 @@ find_special(object body, struct bind_temp *start, struct bind_temp *end)
 				break;
 			continue;
 		}
-		if (type_of(form)!=t_cons || !isdeclare(form->c.c_car))
+		if (!consp(form) || !isdeclare(form->c.c_car))
 			break;
 		for (ds = form->c.c_cdr; !endp(ds); ds = ds->c.c_cdr) {
-			if (type_of(ds->c.c_car) != t_cons)
+			if (!consp(ds->c.c_car))
 				illegal_declare(form);
 			if (ds->c.c_car->c.c_car == sLspecial) {
 				vs = ds->c.c_car->c.c_cdr;
@@ -659,14 +674,14 @@ find_special(object body, struct bind_temp *start, struct bind_temp *end)
 		continue;
 	/*  lex_special_bind(v);  */
 	temporary = MMcons(v, Cnil);
-	lex_env[0] = MMcons(temporary, lex_env[0]);
+	s[0] = MMcons(temporary, s[0]);
 /**/
 				}
 			}
 		}
 	}
 
-	if (body != Cnil && body->c.c_car != form)
+	if (body != Cnil && body->c.c_car != form && type_of(form)==t_cons && isdeclare(form->c.c_car))/*FIXME*/
 		body = make_cons(form, body->c.c_cdr);
 	vs_reset;
 	return(body);
@@ -678,10 +693,10 @@ let_bind(object body, struct bind_temp *start, struct bind_temp *end)
 	struct bind_temp *bt;
 
 	bds_check;
-	vs_push(find_special(body, start, end));
 	for (bt = start;  bt < end;  bt++) {
 		eval_assign(bt->bt_init, bt->bt_init);
 	}
+	vs_push(find_special(body, start, end,NULL));
 	for (bt = start;  bt < end;  bt++) {
 		bind_var(bt->bt_var, bt->bt_init, bt->bt_spp);
 	}
@@ -692,12 +707,19 @@ object
 letA_bind(object body, struct bind_temp *start, struct bind_temp *end)
 {
 	struct bind_temp *bt;
-	
+	object s[1],ss;
+
 	bds_check;
-	vs_push(find_special(body, start, end));
+	s[0]=Cnil;
+	vs_push(find_special(body, start, end,s));
 	for (bt = start;  bt < end;  bt++) {
 		eval_assign(bt->bt_init, bt->bt_init);
 		bind_var(bt->bt_var, bt->bt_init, bt->bt_spp);
+	}
+	if (s[0]!=Cnil) {
+	  for (ss=s[0];ss->c.c_cdr!=Cnil;ss=ss->c.c_cdr);
+	  ss->c.c_cdr=lex_env[0];
+	  lex_env[0]=s[0];
 	}
 	return(vs_pop);
 }
@@ -1117,7 +1139,7 @@ gcl_init_bind(void)
 	make_cons(make_ordinary("&BODY"), Cnil)))))))));
 
 	make_constant("LAMBDA-PARAMETERS-LIMIT",
-		      make_fixnum(64));
+		      make_fixnum(MAX_ARGS+1));
 
 
 
