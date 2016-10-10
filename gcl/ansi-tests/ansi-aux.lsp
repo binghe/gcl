@@ -80,6 +80,10 @@ Results: ~A~%" expected-number form n results))))
   "Like EQUALP, but guaranteed to return T for true."
   (apply #'values (mapcar #'notnot (multiple-value-list (equalp x y)))))
 
+(defun equalpt-or-report (x y)
+  "Like EQUALPT, but return either T or a list of the arguments."
+  (or (equalpt x y) (list x y)))
+
 (defun =t (x &rest args)
   "Like =, but guaranteed to return T for true."
   (apply #'values (mapcar #'notnot (multiple-value-list (apply #'=  x args)))))
@@ -223,6 +227,13 @@ Results: ~A~%" expected-number form n results))))
 			P x p1 x TYPE p2)
 		t)))))
 
+(defun check-predicate (predicate &optional guard (universe *universe*))
+  "Return all elements of UNIVERSE for which the guard (if present) is false
+   and for which PREDICATE is false."
+  (remove-if #'(lambda (e) (or (and guard (funcall guard e))
+			       (funcall predicate e)))
+	     universe))
+
 (declaim (special *catch-error-type*))
 
 (defun catch-continue-debugger-hook (condition dbh)
@@ -295,6 +306,8 @@ the condition to go uncaught if it cannot be classified."
 
 (defmacro classify-error (form)
   `(classify-error** ',form))
+
+(defun sequencep (x) (typep x 'sequence))
 
 ;;;
 (defun typef (type) #'(lambda (x) (typep x type)))
@@ -1464,6 +1477,13 @@ the condition to go uncaught if it cannot be classified."
 	(dolist (using-package used-by)
 	  (unuse-package package using-package)))
       (delete-package package))))
+
+(defun delete-all-versions (pathspec)
+  "Replace the versions field of the pathname specified by pathspec with
+   :wild, and delete all the files this refers to."
+  (let* ((wild-pathname (make-pathname :version :wild :defaults (pathname pathspec)))
+	 (truenames (directory wild-pathname)))
+    (mapc #'delete-file truenames)))
 
 (defconstant +fail-count-limit+ 20)
 

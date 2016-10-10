@@ -21,81 +21,147 @@
  |  SOFTWARE.                                                                 |
  |----------------------------------------------------------------------------|#
 
-;This is the December 19, 1990 version of the regression tester.
+;This was the December 19, 1990 version of the regression tester, but
+;has since been modified.
 
 (in-package :regression-test)
 
+(declaim (ftype (function (t) t) get-entry expanded-eval do-entries))
+(declaim (type list *entries*))
+(declaim (ftype (function (t &rest t) t) report-error))
+(declaim (ftype (function (t &optional t) t) do-entry))
+
 (defvar *test* nil "Current test name")
 (defvar *do-tests-when-defined* nil)
-(defvar *entries* '(nil) "Test database")
+(defvar *entries* (list nil) "Test database.  Has a leading dummy cell that does not contain an entry.")
+(defvar *entries-tail* *entries* "Tail of the *entries* list")
+(defvar *entries-table* (make-hash-table :test #'equal)
+    "Map the names of entries to the cons cell in *entries* that precedes the one whose car is the entry.")
 (defvar *in-test* nil "Used by TEST")
 (defvar *debug* nil "For debugging")
 (defvar *catch-errors* t "When true, causes errors in a test to be caught.")
 (defvar *print-circle-on-failure* nil
   "Failure reports are printed with *PRINT-CIRCLE* bound to this value.")
 
-(defvar *compile-tests* nil "When true, compile the tests before running
-them.")
+(defvar *compile-tests* nil "When true, compile the tests before running them.")
+(defvar *expanded-eval* nil "When true, convert the tests into a form that is less likely to have compiler optimizations.")
 (defvar *optimization-settings* '((safety 3)))
+
+(defvar *failed-tests* nil "After DO-TESTS, becomes the list of names of tests that have failed")
+(defvar *passed-tests* nil "After DO-TESTS, becomes the list of names of tests that have passed")
 
 (defvar *expected-failures* nil
   "A list of test names that are expected to fail.")
 
-(defstruct (entry (:conc-name nil)
-		  (:type list))
-  pend name form)
+(defvar *notes* (make-hash-table :test 'equal)
+  "A mapping from names of notes to note objects.")
+  
+(defstruct (entry (:conc-name nil))
+  pend name props form vals)
 
-(defmacro vals (entry) `(cdddr ,entry))
+;;; Note objects are used to attach information to tests.
+;;; A typical use is to mark tests that depend on a particular
+;;; part of a set of requirements, or a particular interpretation
+;;; of the requirements.
 
-(defmacro defn (entry) `(cdr ,entry))
+(defstruct note
+  name  
+  contents
+  disabled ;; When true, tests with this note are considered inactive
+  )
+
+;; (defmacro vals (entry) `(cdddr ,entry))
+
+(defmacro defn (entry)
+  (let ((var (gensym)))
+    `(let ((,var ,entry))
+       (list* (name ,var) (form ,var) (vals ,var)))))
+
+(defun entry-notes (entry)
+  (let* ((props (props entry))
+	 (notes (getf props :notes)))
+    (if (listp notes)
+	notes
+      (list notes))))
+
+(defun has-disabled-note (entry)
+  (let ((notes (entry-notes entry)))
+    (loop for n in notes
+	  for note = (if (note-p n) n
+		       (gethash n *notes*))
+	  thereis (and note (note-disabled note)))))
+
+(defun has-note (entry note)
+  (unless (note-p note)
+    (let ((new-note (gethash note *notes*)))
+      (setf note new-note)))
+  (and note (not (not (member note (entry-notes entry))))))
 
 (defun pending-tests ()
-  (do ((l (cdr *entries*) (cdr l))
-       (r nil))
-      ((null l) (nreverse r))
-    (when (pend (car l))
-      (push (name (car l)) r))))
+  (loop for entry in (cdr *entries*)
+	when (and (pend entry) (not (has-disabled-note entry)))
+	collect (name entry)))
 
 (defun rem-all-tests ()
   (setq *entries* (list nil))
+  (setq *entries-tail* *entries*)
+  (clrhash *entries-table*)
   nil)
 
 (defun rem-test (&optional (name *test*))
-  (do ((l *entries* (cdr l)))
-      ((null (cdr l)) nil)
-    (when (equal (name (cadr l)) name)
-      (setf (cdr l) (cddr l))
-      (return name))))
+  (let ((pred (gethash name *entries-table*)))
+    (when pred
+      (if (null (cddr pred))
+	  (setq *entries-tail* pred)
+	(setf (gethash (name (caddr pred)) *entries-table*) pred))
+      (setf (cdr pred) (cddr pred))
+      (remhash name *entries-table*)
+      name)))
 
 (defun get-test (&optional (name *test*))
   (defn (get-entry name)))
 
 (defun get-entry (name)
-  (let ((entry (find name (cdr *entries*)
-		     :key #'name
-		     :test #'equal)))
+  (let ((entry ;; (find name (the list (cdr *entries*))
+	       ;;     :key #'name :test #'equal)
+	 (cadr (gethash name *entries-table*))
+	 ))
     (when (null entry)
       (report-error t
         "~%No test with name ~:@(~S~)."
 	name))
     entry))
 
-(defmacro deftest (name form &rest values)
-  `(add-entry '(t ,name ,form .,values)))
+(defmacro deftest (name &rest body)
+  (let* ((p body)
+	 (properties
+	  (loop while (keywordp (first p))
+		unless (cadr p)
+		do (error "Poorly formed deftest: ~A~%"
+			  (list* 'deftest name body))
+		append (list (pop p) (pop p))))
+	 (form (pop p))
+	 (vals p))
+    `(add-entry (make-entry :pend t
+			    :name ',name
+			    :props ',properties
+			    :form ',form
+			    :vals ',vals))))
 
 (defun add-entry (entry)
-  (setq entry (copy-list entry))
-  (do ((l *entries* (cdr l))) (nil)
-    (when (null (cdr l))
-      (setf (cdr l) (list entry))
-      (return nil))
-    (when (equal (name (cadr l)) 
-		 (name entry))
-      (setf (cadr l) entry)
+  (setq entry (copy-entry entry))
+  (let* ((pred (gethash (name entry) *entries-table*)))
+    (cond
+     (pred
+      (setf (cadr pred) entry)
       (report-error nil
         "Redefining test ~:@(~S~)"
-        (name entry))
-      (return nil)))
+        (name entry)))
+     (t
+      (setf (gethash (name entry) *entries-table*) *entries-tail*)
+      (setf (cdr *entries-tail*) (cons entry nil))
+      (setf *entries-tail* (cdr *entries-tail*))
+      )))
   (when *do-tests-when-defined*
     (do-entry entry))
   (setq *test* (name entry)))
@@ -105,10 +171,16 @@ them.")
 	 (apply #'format t args)
 	 (if error? (throw '*debug* nil)))
 	(error? (apply #'error args))
-	(t (apply #'warn args))))
+	(t (apply #'warn args)))
+  nil)
 
-(defun do-test (&optional (name *test*))
-  (do-entry (get-entry name)))
+(defun do-test (&optional (name *test*) &rest key-args)
+  (flet ((%parse-key-args
+	  (&key
+	   ((:catch-errors *catch-errors*) *catch-errors*)
+	   ((:compile *compile-tests*) *compile-tests*))
+	  (do-entry (get-entry name))))
+    (apply #'%parse-key-args key-args)))
 
 (defun my-aref (a &rest args)
   (apply #'aref a args))
@@ -165,49 +237,110 @@ them.")
 	   r)
       ;; (declare (special *break-on-warnings*))
 
-      (flet ((%do
-	      ()
-	      (setf r
-		    (multiple-value-list
-		     (if *compile-tests*
-			 (funcall (compile
-				   nil
-				   `(lambda ()
-				      (declare
-				       (optimize ,@*optimization-settings*))
-				      ,(form entry))))
-		       (eval (form entry)))))))
-	(block aborted
-	  (if *catch-errors*
-	      (handler-bind (#-ecl (style-warning #'muffle-warning)
-				   (error #'(lambda (c)
-					      (setf aborted t)
-					      (setf r (list c))
-					      (return-from aborted nil))))
-			    (%do))
-	    (%do))))
-      
+      (block aborted
+	(setf r
+	      (flet ((%do ()
+			  (handler-bind
+			   #-sbcl nil
+			   #+sbcl ((sb-ext:code-deletion-note #'(lambda (c)
+								  (if (has-note entry :do-not-muffle)
+								      nil
+								    (muffle-warning c)))))
+			   (cond
+			    (*compile-tests*
+			     (multiple-value-list
+			      (funcall (compile
+					nil
+					`(lambda ()
+					   (declare
+					    (optimize ,@*optimization-settings*))
+					   ,(form entry))))))
+			    (*expanded-eval*
+			     (multiple-value-list
+			      (expanded-eval (form entry))))
+			    (t
+			     (multiple-value-list
+			      (eval (form entry))))))))
+		(if *catch-errors*
+		    (handler-bind
+		     (#-ecl (style-warning #'(lambda (c) (if (has-note entry :do-not-muffle-warnings)
+							     c
+							   (muffle-warning c))))
+			    (error #'(lambda (c)
+				       (setf aborted t)
+				       (setf r (list c))
+				       (return-from aborted nil))))
+		     (%do))
+		  (%do)))))
+
       (setf (pend entry)
 	    (or aborted
 		(not (equalp-with-case r (vals entry)))))
+      
       (when (pend entry)
 	(let ((*print-circle* *print-circle-on-failure*))
-	  (format s "~&Test ~:@(~S~) failed~%Form: ~S~%Expected value~P:~%"
-                  *test* (form entry) (length (vals entry)))
-          (dolist (v (vals entry)) (format s "~10t~S~%" v))
-	  (format s "Actual value~P:~%" (length r))
-	  (dolist (v r)
-	    (format s "~10t~S~:[~; [~2:*~A]~]~%"
-		    v (typep v 'condition)))))))
+	  (format s "~&Test ~:@(~S~) failed~
+                   ~%Form: ~S~
+                   ~%Expected value~P: ~
+                      ~{~S~^~%~17t~}~%"
+		  *test* (form entry)
+		  (length (vals entry))
+		  (vals entry))
+	  (handler-case
+	   (let ((st (format nil "Actual value~P: ~
+                      ~{~S~^~%~15t~}.~%"
+			     (length r) r)))
+	     (format s "~A" st))
+	   (error () (format s "Actual value: #<error during printing>~%")))
+	  (finish-output s)))))
   (when (not (pend entry)) *test*))
+
+(defun expanded-eval (form)
+  "Split off top level of a form and eval separately.  This reduces the chance that
+   compiler optimizations will fold away runtime computation."
+  (if (not (consp form))
+      (eval form)
+   (let ((op (car form)))
+     (cond
+      ((eq op 'let)
+       (let* ((bindings (loop for b in (cadr form)
+			      collect (if (consp b) b (list b nil))))
+	      (vars (mapcar #'car bindings))
+	      (binding-forms (mapcar #'cadr bindings)))
+	 (apply
+	  (the function
+	    (eval `(lambda ,vars ,@(cddr form))))
+	  (mapcar #'eval binding-forms))))
+      ((and (eq op 'let*) (cadr form))
+       (let* ((bindings (loop for b in (cadr form)
+			      collect (if (consp b) b (list b nil))))
+	      (vars (mapcar #'car bindings))
+	      (binding-forms (mapcar #'cadr bindings)))
+	 (funcall
+	  (the function
+	    (eval `(lambda (,(car vars) &aux ,@(cdr bindings)) ,@(cddr form))))
+	  (eval (car binding-forms)))))
+      ((eq op 'progn)
+       (loop for e on (cdr form)
+	     do (if (null (cdr e)) (return (eval (car e)))
+		  (eval (car e)))))
+      ((and (symbolp op) (fboundp op)
+	    (not (macro-function op))
+	    (not (special-operator-p op)))
+       (apply (symbol-function op)
+	      (mapcar #'eval (cdr form))))
+      (t (eval form))))))
 
 (defun continue-testing ()
   (if *in-test*
       (throw '*in-test* nil)
       (do-entries *standard-output*)))
 
-(defun do-tests (&optional
-		 (out *standard-output*))
+(defun do-tests (&key (out *standard-output*)
+		      ((:catch-errors *catch-errors*) *catch-errors*)
+		      ((:compile *compile-tests*) *compile-tests*))
+  (setq *failed-tests* nil
+	*passed-tests* nil)
   (dolist (entry (cdr *entries*))
     (setf (pend entry) t))
   (if (streamp out)
@@ -219,13 +352,19 @@ them.")
 (defun do-entries (s)
   (format s "~&Doing ~A pending test~:P ~
              of ~A tests total.~%"
-          (count t (cdr *entries*)
-		 :key #'pend)
+          (count t (the list (cdr *entries*)) :key #'pend)
 	  (length (cdr *entries*)))
+  (finish-output s)
   (dolist (entry (cdr *entries*))
-    (when (pend entry)
-      (format s "~@[~<~%~:; ~:@(~S~)~>~]"
-	      (do-entry entry s))))
+    (when (and (pend entry)
+	       (not (has-disabled-note entry)))
+      (let ((success? (do-entry entry s)))
+	(if success?
+	  (push (name entry) *passed-tests*)
+	  (push (name entry) *failed-tests*))
+	(format s "~@[~<~%~:; ~:@(~S~)~>~]" success?))
+      (finish-output s)
+      ))
   (let ((pending (pending-tests))
 	(expected-table (make-hash-table :test #'equal)))
     (dolist (ex *expected-failures*)
@@ -252,19 +391,46 @@ them.")
                          ~^, ~}~)."
 		    (length new-failures)
 		    new-failures)))
-          (when *expected-failures*
-            (let ((pending-table (make-hash-table :test #'equal)))
-              (dolist (ex pending)
-                (setf (gethash ex pending-table) t))
-              (let ((unexpected-successes
-                     (loop :for ex :in *expected-failures*
-                       :unless (gethash ex pending-table) :collect ex)))
-                (if unexpected-successes
-                    (format t "~&~:D unexpected successes: ~
-                   ~:@(~{~<~%   ~1:;~S~>~
-                         ~^, ~}~)."
-                            (length unexpected-successes)
-                            unexpected-successes)
-                    (format t "~&No unexpected successes.")))))
 	  ))
+      (finish-output s)
       (null pending))))
+
+;;; Note handling functions and macros
+
+(defmacro defnote (name contents &optional disabled)
+  `(eval-when (:load-toplevel :execute)
+     (let ((note (make-note :name ',name
+			    :contents ',contents
+			    :disabled ',disabled)))
+       (setf (gethash (note-name note) *notes*) note)
+       note)))
+
+(defun disable-note (n)
+  (let ((note (if (note-p n) n
+		(setf n (gethash n *notes*)))))
+    (unless note (error "~A is not a note or note name." n))
+    (setf (note-disabled note) t)
+    note))
+
+(defun enable-note (n)
+  (let ((note (if (note-p n) n
+		(setf n (gethash n *notes*)))))
+    (unless note (error "~A is not a note or note name." n))
+    (setf (note-disabled note) nil)
+    note))
+
+;;; Extended random regression
+
+(defun do-extended-tests (&key (tests *passed-tests*) (count nil)
+			       ((:catch-errors *catch-errors*) *catch-errors*)
+			       ((:compile *compile-tests*) *compile-tests*))
+  "Execute randomly chosen tests from TESTS until one fails or until
+   COUNT is an integer and that many tests have been executed."
+  (let ((test-vector (coerce tests 'simple-vector)))
+    (let ((n (length test-vector)))
+      (when (= n 0) (error "Must provide at least one test."))
+      (loop for i from 0
+	    for name = (svref test-vector (random n))
+	    until (eql i count)
+	    do (print name)
+	    unless (do-test name) return (values name (1+ i))))))
