@@ -488,6 +488,17 @@ DEFUN_NEW("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
 }
 
+DEFUN_NEW("RMDIR",object,fSrmdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_string(&x);
+
+  coerce_to_filename(x,FN1);
+
+  RETURN1(rmdir(FN1) ? Cnil : Ct);
+
+}
+
+
+
 #include <sys/types.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -525,6 +536,20 @@ DEFUN_NEW("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   s=make_simple_string(b);
   memset(b,0,z);
   RETURN1(s);
+
+}
+
+DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
+  struct passwd *pwent,pw;
+  char *b;
+  long r;
+
+  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
+  massert(b=alloca(r));
+
+  massert(!getpwuid_r(uid,&pw,b,r,&pwent));
+
+  RETURN1(make_simple_string(pwent->pw_name));
 
 }
 
