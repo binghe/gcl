@@ -61,4 +61,6 @@
    (otherwise x)))
 
 (set-dispatch-macro-character #\# #\= #'sharp-eq-reader)
+(set-dispatch-macro-character #\# #\= #'sharp-eq-reader (standard-readtable))
 (set-dispatch-macro-character #\# #\# #'sharp-sharp-reader)
+(set-dispatch-macro-character #\# #\# #'sharp-sharp-reader (standard-readtable))
