@@ -344,184 +344,147 @@ cannot_create(object);
 	Fn is a namestring.
 */
 object
-open_stream(fn, smm, if_exists, if_does_not_exist)
-object fn;
-enum smmode smm;
-object if_exists, if_does_not_exist;
-{
-	object x;
-	FILE *fp=NULL;
-	char fname[PATH_MAX];
-	object unzipped = 0;
-	vs_mark;
+open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exist) {
 
-/*
-	if (type_of(fn) != t_string)
-		FEwrong_type_argument(sLstring, fn);
-*/
-	/* if (fn->st.st_fillp > BUFSIZ - 1) */
-	/* 	too_long_file_name(fn); */
-	/* for (i = 0;  i < fn->st.st_fillp;  i++) */
-	/* 	fname[i] = fn->st.st_self[i]; */
-	
-	/* fname[i] = '\0'; */
-	coerce_to_filename(fn,fname);
-	if (smm == smm_input || smm == smm_probe) {
-                if(fname[0]=='|')
-		  fp = popen(fname+1,"r");
-		else 
-		  fp = fopen_not_dir(fname, "r");
-		
-	      AGAIN:
-		if (fp == NULL) {
-		        if (sSAallow_gzipped_fileA->s.s_dbind != sLnil)
-			  { 
-			    static struct string st;
-			    char buf[256];
-			    if (snprintf(buf,sizeof(buf),"%s.gz",fname)<=0)
-			      FEerror("Cannot write .gz filename",0);
-			    st.st_self=buf;
-			    st.st_dim=st.st_fillp=strlen(buf);
-			    set_type_of(&st,t_string);
-			    if (file_exists((object)&st)) {
-			      FILE *pp;
-			      int n;
-			      if (!(fp=tmpfile()))
-				FEerror("Cannot create temporary file",0);
-			      if (snprintf(buf,sizeof(buf),"zcat %s.gz",fname)<=0)
-				FEerror("Cannot write zcat pipe name",0);
-			      if (!(pp=popen(buf,"r")))
-				FEerror("Cannot open zcat pipe",0);
-			      while((n=fread(buf,1,sizeof(buf),pp)))
-				if (!fwrite(buf,1,n,fp))
-				  FEerror("Cannot write pipe output to temporary file",0);
-			      if (pclose(pp)<0)
-				FEerror("Cannot close zcat pipe",0);
-			      if (fseek(fp,0,SEEK_SET))
-				FEerror("Cannot rewind temporary file\n",0); 
-			      goto AGAIN;
-			    }
-			  }
-			      
-/* 			    fp = fopen_not_dir(buf,"r"); */
-/* 			    if (fp) */
-/* 			      {  */
-/* #ifdef NO_MKSTEMP */
-/* 	                        char *tmp; */
-/* #else */
-/* 	                        char tmp[200]; */
-/* #endif */
-/* 				char command [500]; */
-/* 				fclose(fp); */
-/* #ifdef NO_MKSTEMP */
-/* 				tmp = tmpnam(0); */
-/* #else */
-/* 				snprintf(tmp,sizeof(tmp),"uzipXXXXXX"); */
-				/* mkstemp(tmp); */ /* fixme: catch errors */
-/* #endif */
-/* 				unzipped = make_simple_string(tmp); */
-/* 				sprintf(command,"gzip -dc %s > %s",buf,tmp); */
-/* 				fp = 0; */
-/* 				if (0 == system(command)) */
-/* 				  { */
-/* 				    fp = fopen_not_dir(tmp,"r"); */
-/* 				    if (fp)  */
-/* 				      goto AGAIN; */
-/* 				    /\* should not get here *\/ */
-/* 				    else { unlink(tmp);}} */
-/* 			      }} */
-			if (if_does_not_exist == sKerror)
-				cannot_open(fn);
-			else if (if_does_not_exist == sKcreate) {
-				fp = fopen_not_dir(fname, "w");
-				if (fp == NULL)
-					cannot_create(fn);
-				fclose(fp);
-				fp = fopen_not_dir(fname, "r");
-				if (fp == NULL)
-					cannot_open(fn);
-			} else if (if_does_not_exist == Cnil)
-				return(Cnil);
-			else
-			 FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
-				 1, if_does_not_exist);
-		}
-	} else if (smm == smm_output || smm == smm_io) {
-		if (if_exists == sKnew_version && if_does_not_exist == sKcreate)
-			goto CREATE;
-		fp = fopen_not_dir(fname, "r");
-		if (fp != NULL) {
-			fclose(fp);
-			if (if_exists == sKerror)
-				FEerror("The file ~A already exists.", 1, fn);
-			else if (if_exists == sKrename) {
-				if (smm == smm_output)
-					fp = backup_fopen(fname, "w");
-				else
-					fp = backup_fopen(fname, "w+");
-				if (fp == NULL)
-					cannot_create(fn);
-			} else if (if_exists == sKrename_and_delete ||
-				   if_exists == sKnew_version ||
-				   if_exists == sKsupersede) {
-				if (smm == smm_output)
-					fp = fopen_not_dir(fname, "w");
-				else
-					fp = fopen_not_dir(fname, "w+");
-				if (fp == NULL)
-					cannot_create(fn);
-			} else if (if_exists == sKoverwrite) {
-				fp = fopen_not_dir(fname, "r+");
-				if (fp == NULL)
-					cannot_open(fn);
-			} else if (if_exists == sKappend) {
-				if (smm == smm_output)
-					fp = fopen_not_dir(fname, "a");
-				else
-					fp = fopen_not_dir(fname, "a+");
-				if (fp == NULL)
-				FEerror("Cannot append to the file ~A.",1,fn);
-			} else if (if_exists == Cnil)
-				return(Cnil);
-			else
-				FEerror("~S is an illegal IF-EXISTS option.",
-					1, if_exists);
-		} else {
-			if (if_does_not_exist == sKerror)
-				FEerror("The file ~A does not exist.", 1, fn);
-			else if (if_does_not_exist == sKcreate) {
-			CREATE:
-				if (smm == smm_output)
-				  {
-				    if(fname[0]=='|')
-				      fp = popen(fname+1,"w");
-				    else 
-		                       fp = fopen_not_dir(fname, "w");
-				  }
-				else
-					fp = fopen_not_dir(fname, "w+");
-				if (fp == NULL)
-					cannot_create(fn);
-			} else if (if_does_not_exist == Cnil)
-				return(Cnil);
-			else
-			 FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
-				 1, if_does_not_exist);
-		}
+  object x;
+  FILE *fp=NULL;
+  vs_mark;
+
+  coerce_to_filename(fn,FN1);
+  if (smm == smm_input || smm == smm_probe) {
+    if(FN1[0]=='|')
+      fp = popen(FN1+1,"r");
+    else
+      fp = fopen_not_dir(FN1, "r");
+
+    if ((fp == NULL) &&
+	(sSAallow_gzipped_fileA->s.s_dbind != sLnil)) {
+      union lispunion st;
+      char buf[256];
+      if (snprintf(buf,sizeof(buf),"%s.gz",FN1)<=0)
+	FEerror("Cannot write .gz filename",0);
+      st.st.st_self=buf;
+      st.st.st_dim=st.st.st_fillp=strlen(buf);
+      set_type_of(&st,t_string);
+      if (fSstat((object)&st)!=Cnil) {
+	FILE *pp;
+	int n;
+	if (!(fp=tmpfile()))
+	  FEerror("Cannot create temporary file",0);
+	if (snprintf(buf,sizeof(buf),"zcat %s.gz",FN1)<=0)
+	  FEerror("Cannot write zcat pipe name",0);
+	if (!(pp=popen(buf,"r")))
+	  FEerror("Cannot open zcat pipe",0);
+	while((n=fread(buf,1,sizeof(buf),pp)))
+	  if (!fwrite(buf,1,n,fp))
+	    FEerror("Cannot write pipe output to temporary file",0);
+	if (pclose(pp)<0)
+	  FEerror("Cannot close zcat pipe",0);
+	if (fseek(fp,0,SEEK_SET))
+	  FEerror("Cannot rewind temporary file\n",0);
+      }
+    }
+    if (fp == NULL) {
+      if (if_does_not_exist == sKerror)
+	cannot_open(fn);
+      else if (if_does_not_exist == sKcreate) {
+	fp = fopen_not_dir(FN1, "w");
+	if (fp == NULL)
+	  cannot_create(fn);
+	fclose(fp);
+	fp = fopen_not_dir(FN1, "r");
+	if (fp == NULL)
+	  cannot_open(fn);
+      } else if (if_does_not_exist == Cnil)
+	return(Cnil);
+      else
+	FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
+		1, if_does_not_exist);
+    }
+  } else if (smm == smm_output || smm == smm_io) {
+    if (FN1[0] == '|')
+      fp = NULL;
+    else
+      fp = fopen_not_dir(FN1, "r");
+    if (fp != NULL) {
+      fclose(fp);
+      if (if_exists == sKerror)
+	FILE_ERROR(fn,"File exists");
+      else if (if_exists == sKrename) {
+	massert(snprintf(FN2,sizeof(FN2),"%s.BAK",FN1)>=0);
+	massert(!rename(FN1,FN2));
+	if (smm == smm_output)
+	  fp = fopen(FN1, "w");
+	else
+	  fp = fopen(FN1, "w+");
+	if (fp == NULL)
+	  cannot_create(fn);
+      } else if (if_exists == sKrename_and_delete ||
+		 if_exists == sKnew_version ||
+		 if_exists == sKsupersede) {
+	if (smm == smm_output)
+	  fp = fopen_not_dir(FN1, "w");
+	else
+	  fp = fopen_not_dir(FN1, "w+");
+	if (fp == NULL)
+	  cannot_create(fn);
+      } else if (if_exists == sKoverwrite) {
+	fp = fopen_not_dir(FN1, "r+");
+	if (fp == NULL)
+	  cannot_open(fn);
+      } else if (if_exists == sKappend) {
+	if (smm == smm_output)
+	  fp = fopen_not_dir(FN1, "a");
+	else
+	  fp = fopen_not_dir(FN1, "a+");
+	if (fp == NULL)
+	  FEerror("Cannot append to the file ~A.",1,fn);
+      } else if (if_exists == Cnil)
+	return(Cnil);
+      else
+	FEerror("~S is an illegal IF-EXISTS option.",
+		1, if_exists);
+    } else {
+      if (if_does_not_exist == sKerror)
+	FILE_ERROR(fn,"The file does not exist");
+      else if (if_does_not_exist == sKcreate) {
+	if (smm == smm_output) {
+	  if(FN1[0]=='|')
+	    fp = popen(FN1+1,"w");
+	  else
+	    fp = fopen_not_dir(FN1, "w");
 	} else
-		error("illegal stream mode");
-	x = alloc_object(t_stream);
-	x->sm.sm_mode = (short)smm;
-	x->sm.sm_fp = fp;
+	  fp = fopen_not_dir(FN1, "w+");
+	if (fp == NULL)
+	  cannot_create(fn);
+      } else if (if_does_not_exist == Cnil)
+	return(Cnil);
+      else
+	FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
+		1, if_does_not_exist);
+    }
+  } else
+    FEerror("Illegal open mode for ~S.",1,fn);
 
-	x->sm.sm_buffer = 0;
-	x->sm.sm_object0 = (unzipped ? make_cons(sSAallow_gzipped_fileA,unzipped) : sLcharacter);
-	x->sm.sm_object1 = fn;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
-	vs_push(x);
-	setup_stream_buffer(x);
-	vs_reset;
-	return(x);
+  vs_push(make_simple_string(FN1));
+  x = alloc_object(t_stream);
+  x->sm.sm_mode = (short)smm;
+  x->sm.sm_fp = fp;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = sLcharacter;
+  x->sm.sm_object1 = vs_head;
+  x->sm.sm_int0 = x->sm.sm_int1 = 0;
+  x->sm.sm_flags=0;
+  vs_push(x);
+
+  setup_stream_buffer(x);
+  vs_reset;
+
+  if (smm==smm_probe)
+    close_stream(x);
+
+  return(x);
+
 }
 
 static void
