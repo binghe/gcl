@@ -79,7 +79,7 @@
 	 (close ,var))))))
   
 (defmacro with-output-to-string ((var &optional string &key element-type) . body)
-  (let ((s (sgen "STRING"))(bl (sgen "BLOCK"))(e (sgen "ELEMENT-TYPE"))(x (sgen "X")))
+  (let ((s (sgen "STRING"))(e (sgen "ELEMENT-TYPE"))(x (sgen "X")))
     (multiple-value-bind (ds b)
 	(find-declarations body)
       `(let* ((,s ,string)(,e ,element-type)
@@ -102,17 +102,56 @@
                 (si:get-string-input-stream-index stream)))))
 
 
-(defun write-to-string (object &rest rest
-                        &key escape radix base
-                             circle pretty level length
-                             case gensym array
+(defun write-to-string (object &rest rest &key
+			    ( escape nil escape-supplied-p )
+			    ( radix nil radix-supplied-p )
+			    ( base nil base-supplied-p )
+			    ( circle nil circle-supplied-p )
+			    ( pretty nil pretty-supplied-p )
+			    ( level nil level-supplied-p )
+			    ( length nil length-supplied-p )
+			    ( case nil case-supplied-p )
+			    ( gensym nil gensym-supplied-p )
+			    ( array nil array-supplied-p )
+			    ( lines nil lines-supplied-p )
+			    ( miser-width nil miser-width-supplied-p )
+			    ( pprint-dispatch nil pprint-dispatch-supplied-p )
+			    ( readably nil readably-supplied-p )
+			    ( right-margin nil right-margin-supplied-p )
                         &aux (stream (make-string-output-stream)))
-  (declare (ignore escape radix base
-                   circle pretty level length
-                   case gensym array))
-  (apply #'write object :stream stream rest)
-  (get-output-stream-string stream))
-
+  (declare (optimize (safety 2)))
+  (let*((*print-array*
+	  (if array-supplied-p array *print-array*))
+	(*print-base*
+	  (if base-supplied-p base *print-base*))
+	(*print-case*
+	  (if case-supplied-p case *print-case*))
+	(*print-circle*
+	  (if circle-supplied-p circle *print-circle*))
+	(*print-escape*
+	  (if escape-supplied-p escape *print-escape*))
+	(*print-gensym*
+	  (if gensym-supplied-p gensym *print-gensym*))
+	(*print-length*
+	  (if length-supplied-p length *print-length*))
+	(*print-level*
+	  (if level-supplied-p level *print-level*))
+	(*print-lines*
+	  (if lines-supplied-p lines *print-lines*))
+	(*print-miser-width*
+	  (if miser-width-supplied-p miser-width *print-miser-width*))
+	(*print-pretty*
+	  (if pretty-supplied-p pretty *print-pretty*))
+	(*print-radix*
+	  (if radix-supplied-p radix *print-radix*))
+	(*print-readably*
+	  (if readably-supplied-p readably *print-readably*))
+	(*print-right-margin*
+	  (if right-margin-supplied-p right-margin *print-right-margin*))
+	(*print-pprint-dispatch*
+	  (if pprint-dispatch-supplied-p pprint-dispatch *print-pprint-dispatch*)))
+      (apply #'write object :stream stream rest)
+      (get-output-stream-string stream)))
 
 (defun prin1-to-string (object
                         &aux (stream (make-string-output-stream)))
@@ -283,6 +322,11 @@
 (defvar *print-miser-width* nil)
 (defvar *print-pprint-dispatch* nil)
 (defvar *print-right-margin* nil)
+
+(defun stream-external-format (s)
+  (declare (optimize (safety 1)))
+  (check-type s stream)
+  :default)
 
 (defmacro with-standard-io-syntax (&body body)
   (declare (optimize (safety 2)))
