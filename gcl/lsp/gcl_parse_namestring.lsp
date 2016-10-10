@@ -131,6 +131,9 @@
   (let ((x (parse-namestring (read stream)))) x))
 
 (set-dispatch-macro-character #\# #\p 'sharp-p-reader)
+(set-dispatch-macro-character #\# #\p 'sharp-p-reader (standard-readtable))
 (set-dispatch-macro-character #\# #\P 'sharp-p-reader)
+(set-dispatch-macro-character #\# #\P 'sharp-p-reader (standard-readtable))
 (set-dispatch-macro-character #\# #\" 'sharp-dq-reader)
+(set-dispatch-macro-character #\# #\" 'sharp-dq-reader (standard-readtable))
 
