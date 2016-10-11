@@ -1633,3 +1633,5 @@ the condition to go uncaught if it cannot be classified."
 		    (list n1)
 		    (random-partition n3 (- p 1 r))))))))))
 
+(defmacro expand-in-current-env (macro-form &environment env)
+  (macroexpand macro-form env))

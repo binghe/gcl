@@ -46,6 +46,15 @@
 ;;; Tests of strings
 (load "load-strings.lsp")
 
+;;; Tests of pathnames
+(load "load-pathnames.lsp")
+
+;;; Tests of file operations
+(load "load-files.lsp")
+
+;;; Tests of streams
+(load "load-streams.lsp")
+
 ;;; Tests for character functions
 (compile-and-load "char-aux.lsp")
 (load "character.lsp")
