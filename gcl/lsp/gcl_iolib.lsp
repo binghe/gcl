@@ -1,3 +1,4 @@
+;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -23,8 +24,6 @@
 
 
 (in-package :si)
-
-(proclaim '(optimize (safety 2) (space 3)))
 
 (defun concatenated-stream-streams (stream)
   (declare (optimize (safety 2)))
@@ -55,166 +54,200 @@
   (check-type stream synonym-stream)
   (c-stream-object0 stream))
 
+(defun maybe-clear-input (&optional (x *standard-input*))
+  (typecase x
+    (synonym-stream (maybe-clear-input (symbol-value (synonym-stream-symbol x))))
+    (two-way-stream (maybe-clear-input (two-way-stream-input-stream x)))
+    (stream (when (terminal-input-stream-p x) (clear-input t)))))
+
 (defmacro with-open-stream ((var stream) . body)
-  (multiple-value-bind (ds b)
-      (find-declarations body)
+  (declare (optimize (safety 1)))
+  (multiple-value-bind (ds b) (find-declarations body)
     `(let ((,var ,stream))
        ,@ds
        (unwind-protect
-         (progn ,@b)
+	   (progn ,@b)
          (close ,var)))))
 
-
 (defmacro with-input-from-string ((var string &key index start end) . body)
-  (let ((x (sgen "X")))
-    (multiple-value-bind (ds b)
-	(find-declarations body)
-      `(let ((,var (make-string-input-stream ,string ,start ,end)))
-	 ,@ds
-	 (unwind-protect
-	     ,(let ((f `(progn ,@b)))
-		(if index
-		    `(let ((,x (multiple-value-list ,f))) (setf ,index (get-string-input-stream-index ,var)) (values-list ,x))
-		  f))
-	 (close ,var))))))
+  (declare (optimize (safety 1)))
+  (multiple-value-bind (ds b) (find-declarations body)
+    `(let ((,var (make-string-input-stream ,string ,start ,end)))
+       ,@ds
+       (unwind-protect
+	   (multiple-value-prog1
+	    (progn ,@b)
+	    ,@(when index `((setf ,index (get-string-input-stream-index ,var)))))
+	 (close ,var)))))
   
 (defmacro with-output-to-string ((var &optional string &key element-type) . body)
-  (let ((s (sgen "STRING"))(e (sgen "ELEMENT-TYPE"))(x (sgen "X")))
-    (multiple-value-bind (ds b)
-	(find-declarations body)
-      `(let* ((,s ,string)(,e ,element-type)
-	      (,var (if ,s (make-string-output-stream-from-string ,s) (make-string-output-stream :element-type ,e))))
+  (declare (optimize (safety 1)))
+  (let ((s (sgen "STRING")))
+    (multiple-value-bind (ds b) (find-declarations body)
+      `(let* ((,s ,string)
+	      (,var (if ,s (make-string-output-stream-from-string ,s) (make-string-output-stream :element-type ,element-type))))
 	 ,@ds
 	 (unwind-protect
-	     (let ((,x (multiple-value-list (progn ,@b)))) (if ,s (values-list ,x) (get-output-stream-string ,var)))
+	     (block nil
+	       (multiple-value-prog1
+		(progn ,@b)
+	      (unless ,s (return (get-output-stream-string ,var)))))
 	   (close ,var))))))
 
 
-(defun read-from-string (string
-                         &optional (eof-error-p t) eof-value
-                         &key (start 0) (end (length string))
-                              preserve-whitespace)
-  (let ((stream (make-string-input-stream string start end)))
-    (if preserve-whitespace
-        (values (read-preserving-whitespace stream eof-error-p eof-value)
-                (si:get-string-input-stream-index stream))
-        (values (read stream eof-error-p eof-value)
-                (si:get-string-input-stream-index stream)))))
+(defun read-from-string (string &optional (eof-error-p t) eof-value
+                         &key (start 0) end preserve-whitespace)
+  (declare (optimize (safety 1)))
+  (check-type string string)
+  (check-type start seqind)
+  (check-type end (or null seqind))
+  (let ((stream (make-string-input-stream string start (or end (length string)))))
+    (values (if preserve-whitespace
+		(read-preserving-whitespace stream eof-error-p eof-value)
+	      (read stream eof-error-p eof-value))
+	    (get-string-input-stream-index stream))))
 
+;; (defun write (x &key stream
+;; 		(array            *print-array*)
+;; 		(base             *print-base*)
+;; 		(case             *print-case*)
+;; 		(circle           *print-circle*)
+;; 		(escape           *print-escape*)
+;; 		(gensym           *print-gensym*)
+;; 		(length           *print-length*)
+;; 		(level            *print-level*)
+;; 		(lines            *print-lines*)
+;; 		(miser-width      *print-miser-width*)
+;; 		(pprint-dispatch  *print-pprint-dispatch*)
+;; 		(pretty           *print-pretty*)
+;; 		(radix            *print-radix*)
+;; 		(readably         *print-readably*)
+;; 		(right-margin     *print-right-margin*))
+;;   (write-int x stream array base case circle escape gensym
+;; 	     length level lines miser-width pprint-dispatch
+;; 	     pretty radix readably right-margin))
 
-(defun write-to-string (object &rest rest &key
-			    ( escape nil escape-supplied-p )
-			    ( radix nil radix-supplied-p )
-			    ( base nil base-supplied-p )
-			    ( circle nil circle-supplied-p )
-			    ( pretty nil pretty-supplied-p )
-			    ( level nil level-supplied-p )
-			    ( length nil length-supplied-p )
-			    ( case nil case-supplied-p )
-			    ( gensym nil gensym-supplied-p )
-			    ( array nil array-supplied-p )
-			    ( lines nil lines-supplied-p )
-			    ( miser-width nil miser-width-supplied-p )
-			    ( pprint-dispatch nil pprint-dispatch-supplied-p )
-			    ( readably nil readably-supplied-p )
-			    ( right-margin nil right-margin-supplied-p )
-                        &aux (stream (make-string-output-stream)))
-  (declare (optimize (safety 2)))
-  (let*((*print-array*
-	  (if array-supplied-p array *print-array*))
-	(*print-base*
-	  (if base-supplied-p base *print-base*))
-	(*print-case*
-	  (if case-supplied-p case *print-case*))
-	(*print-circle*
-	  (if circle-supplied-p circle *print-circle*))
-	(*print-escape*
-	  (if escape-supplied-p escape *print-escape*))
-	(*print-gensym*
-	  (if gensym-supplied-p gensym *print-gensym*))
-	(*print-length*
-	  (if length-supplied-p length *print-length*))
-	(*print-level*
-	  (if level-supplied-p level *print-level*))
-	(*print-lines*
-	  (if lines-supplied-p lines *print-lines*))
-	(*print-miser-width*
-	  (if miser-width-supplied-p miser-width *print-miser-width*))
-	(*print-pretty*
-	  (if pretty-supplied-p pretty *print-pretty*))
-	(*print-radix*
-	  (if radix-supplied-p radix *print-radix*))
-	(*print-readably*
-	  (if readably-supplied-p readably *print-readably*))
-	(*print-right-margin*
-	  (if right-margin-supplied-p right-margin *print-right-margin*))
-	(*print-pprint-dispatch*
-	  (if pprint-dispatch-supplied-p pprint-dispatch *print-pprint-dispatch*)))
-      (apply #'write object :stream stream rest)
-      (get-output-stream-string stream)))
+(defun write-to-string (object &rest rest
+			       &key (escape *print-escape*)(radix *print-radix*)(base *print-base*)
+			       (circle *print-circle*)(pretty *print-pretty*)(level *print-level*)
+			       (length *print-length*)(case *print-case*)(gensym *print-gensym*)
+			       (array *print-array*)(lines *print-lines*)(miser-width *print-miser-width*)
+			       (pprint-dispatch *print-pprint-dispatch*)(readably *print-readably*)
+			       (right-margin *print-right-margin*)
+			       &aux (stream (make-string-output-stream))
+			       (*print-escape* escape)(*print-radix* radix)(*print-base* base)
+			       (*print-circle* circle)(*print-pretty* pretty)(*print-level* level)
+			       (*print-length* length)(*print-case* case)(*print-gensym* gensym)
+			       (*print-array* array)(*print-lines* lines)(*print-miser-width* miser-width)
+			       (*print-pprint-dispatch* pprint-dispatch)(*print-readably* readably )
+			       (*print-right-margin* right-margin))
+  (declare (optimize (safety 1))(dynamic-extent rest))
+  (apply #'write object :stream stream rest)
+  (get-output-stream-string stream))
 
-(defun prin1-to-string (object
-                        &aux (stream (make-string-output-stream)))
-   (prin1 object stream)
-   (get-output-stream-string stream))
+(defun prin1-to-string (object &aux (stream (make-string-output-stream)))
+  (declare (optimize (safety 1)))
+  (prin1 object stream)
+  (get-output-stream-string stream))
 
-
-(defun princ-to-string (object
-                        &aux (stream (make-string-output-stream)))
+(defun princ-to-string (object &aux (stream (make-string-output-stream)))
+  (declare (optimize (safety 1)))
   (princ object stream)
   (get-output-stream-string stream))
 
+;; (defun file-string-length (ostream object)
+;;   (declare (optimize (safety 2)))
+;;   (let ((ostream (if (typep ostream 'broadcast-stream)
+;; 		     (car (last (broadcast-stream-streams ostream)))
+;; 		   ostream)))
+;;     (cond ((not ostream) 1)
+;; 	  ((subtypep1 (stream-element-type ostream) 'character)
+;; 	   (length (let ((*print-escape* nil)) (write-to-string object)))))))
+
+;; (defmacro with-temp-file ((s pn) (tmp ext) &rest body)
+;;   (multiple-value-bind
+;;    (doc decls ctps body)
+;;    (parse-body-header body)
+;;    (declare (ignore doc))
+;;    `(let* ((,s (temp-stream ,tmp ,ext))
+;; 	   (,pn (stream-object1 ,s)))
+;;       ,@decls
+;;       ,@ctps
+;;       (unwind-protect (progn ,@body) (progn (close ,s) (delete-file ,s))))))
+
 
 (defmacro with-open-file ((stream . filespec) . body)
-  (multiple-value-bind (ds b)
-      (find-declarations body)
+  (declare (optimize (safety 1)))
+  (multiple-value-bind (ds b) (find-declarations body)
     `(let ((,stream (open ,@filespec)))
        ,@ds
        (unwind-protect
-         (progn ,@b)
-         (if ,stream (close ,stream))))))
+	   (progn ,@b)
+         (when ,stream (close ,stream))))))
+
+;; (defun pprint-dispatch (obj &optional (table *print-pprint-dispatch*))
+;;   (declare (optimize (safety 2)))
+;;   (let ((fun (si:get-pprint-dispatch obj table)))
+;;     (if fun (values fun t) (values 'si:default-pprint-object nil))))
+
+;; (setq *print-pprint-dispatch* '(pprint-dispatch . nil))
+
+;; (defun set-pprint-dispatch (type-spec function &optional
+;; 			    (priority 0)
+;; 			    (table *print-pprint-dispatch*))
+;;   (declare (optimize (safety 2)))
+;;   (unless (typep priority 'real)
+;;     (error 'type-error :datum priority :expected-type 'real))
+;;   (let ((a (assoc type-spec (cdr table) :test 'equal)))
+;;     (if a (setf (cdr a) (list function priority))
+;; 	(rplacd (last table) `((,type-spec ,function ,priority)))))
+;;   nil)
+
+;; (defun copy-pprint-dispatch (&optional table)
+;;   (declare (optimize (safety 2)))
+;;   (unless table
+;;     (setq table *print-pprint-dispatch*))
+;;   (unless (and (eq (type-of table) 'cons)
+;;   	(eq (car table) 'pprint-dispatch))
+;;     (error 'type-error :datum table :expected-type 'pprint-dispatch))
+;;   (copy-seq table ))
 
 
 (defun y-or-n-p (&optional string &rest args)
-  (do ((reply))
-      (nil)
-    (when string (format *query-io* "~&~?  (Y or N) " string args))
-    (setq reply (read *query-io*))
-    (cond ((string-equal (symbol-name reply) "Y")
-           (return-from y-or-n-p t))
-          ((string-equal (symbol-name reply) "N")
-           (return-from y-or-n-p nil)))))
-
+  (declare (optimize (safety 1)))
+  (when string (format *query-io* "~&~?  (Y or N) " string args))
+  (let ((reply (symbol-name (read *query-io*))))
+    (cond ((string-equal reply "Y") t)
+	  ((string-equal reply "N") nil)
+	  ((apply 'y-or-n-p string args)))))
 
 (defun yes-or-no-p (&optional string &rest args)
-  (do ((reply))
-      (nil)
-    (when string (format *query-io* "~&~?  (Yes or No) " string args))
-    (setq reply (read *query-io*))
-    (cond ((string-equal (symbol-name reply) "YES")
-           (return-from yes-or-no-p t))
-          ((string-equal (symbol-name reply) "NO")
-           (return-from yes-or-no-p nil)))))
-
+  (declare (optimize (safety 1)))
+  (when string (format *query-io* "~&~?  (Yes or No) " string args))
+  (let ((reply (symbol-name (read *query-io*))))
+    (cond ((string-equal reply "YES") t)
+	  ((string-equal reply "NO") nil)
+	  ((apply 'yes-or-no-p string args)))))
 
 (defun sharp-a-reader (stream subchar arg)
   (declare (ignore subchar))
   (let ((initial-contents (read stream nil nil t)))
-    (if *read-suppress*
-        nil
-        (do ((i 0 (1+ i))
-             (d nil (cons (length ic) d))
-             (ic initial-contents (if (zerop (length ic)) ic (elt ic 0))))
-            ((>= i arg)
-             (make-array (nreverse d)
-                         :initial-contents initial-contents))))))
+    (unless *read-suppress*
+      (do ((i 0 (1+ i))
+	   (d nil (cons (length ic) d))
+	   (ic initial-contents (if (zerop (length ic)) ic (elt ic 0))))
+	  ((>= i arg) (make-array (nreverse d) :initial-contents initial-contents))))))
 
 (set-dispatch-macro-character #\# #\a 'sharp-a-reader)
+(set-dispatch-macro-character #\# #\a 'sharp-a-reader (standard-readtable))
 (set-dispatch-macro-character #\# #\A 'sharp-a-reader)
+(set-dispatch-macro-character #\# #\A 'sharp-a-reader (standard-readtable))
 
 ;; defined in defstruct.lsp
 (set-dispatch-macro-character #\# #\s 'sharp-s-reader)
+(set-dispatch-macro-character #\# #\s 'sharp-s-reader (standard-readtable))
 (set-dispatch-macro-character #\# #\S 'sharp-s-reader)
+(set-dispatch-macro-character #\# #\S 'sharp-s-reader (standard-readtable))
 
 (defvar *dribble-stream* nil)
 (defvar *dribble-io* nil)
@@ -222,6 +255,7 @@
 (defvar *dribble-saved-terminal-io* nil)
 
 (defun dribble (&optional (pathname "DRIBBLE.LOG" psp) (f :supersede))
+  (declare (optimize (safety 1)))
   (cond ((not psp)
          (when (null *dribble-stream*) (error "Not in dribble."))
          (if (eq *dribble-io* *terminal-io*)
@@ -250,86 +284,26 @@
              (format t "~&Starts dribbling to ~A (~d/~d/~d, ~d:~d:~d)."
                      namestring year month day hour min sec))))))
 
-(defconstant char-length 8)
-
-(defun get-byte-stream-nchars (s)
-  (check-type s stream)
-  (let* ((tp (stream-element-type s))
-	 (tp (if (consp tp) (cadr tp) char-length))
-	 (nc (ceiling tp char-length)))
-    nc))
-
-(defun write-byte (j s)
-  (declare (optimize (safety 1)))
-  (let ((nc (get-byte-stream-nchars s))
-	(ff (1- (expt 2 char-length))))
-    (do ((k 0 (1+ k))(i j (ash i (- char-length)))) ((>= k nc) j)
-	(write-char (code-char (logand i ff)) s))))
-
-(defun read-byte (s &optional (eof-error-p t) eof-value)
-  (declare (optimize (safety 1)))
-  (let ((nc (get-byte-stream-nchars s)))
-    (do ((j 0 (1+ j)) 
-	 (i 0 (logior i
-	       (ash (char-code (let ((ch (read-char s eof-error-p eof-value)))
-				 (if (and (not eof-error-p) (eq ch eof-value))
-				     (return-from read-byte ch)
-				   ch))) (* j char-length)))))
-	((>= j nc) i))))
-
-
-(defun read-sequence (seq strm &key (start 0) end)
-  (declare (optimize (safety 1)))
-  (check-type seq sequence)
-  (check-type start (integer 0))
-  (check-type end (or null (integer 0)))
-  (let* ((start (min start array-dimension-limit))
-	 (end   (if end (min end array-dimension-limit) (length seq)))
-	 (l (listp seq))
-	 (seq (if (and l (> start 0)) (nthcdr start seq) seq))
-	 (tp (subtypep (stream-element-type strm) 'character)))
-    (do ((i start (1+ i))(seq seq (if l (cdr seq) seq)))
-	((or (>= i end) (when l (endp seq))) i)
-	(declare (fixnum i))
-	(let ((el (if tp (read-char strm nil 'eof) (read-byte strm nil 'eof))))
-	  (when (eq el 'eof) (return i))
-	  (if l (setf (car seq) el) (setf (aref seq i) el))))))
-
-
-(defun write-sequence (seq strm &key (start 0) end)
-  (declare (optimize (safety 1)))
-  (check-type seq sequence)
-  (check-type start (integer 0))
-  (check-type end (or null (integer 0)))
-  (let* ((start (min start array-dimension-limit))
-	 (end   (if end (min end array-dimension-limit) (length seq)))
-	 (l (listp seq))
-	 (tp (subtypep (stream-element-type strm) 'character)))
-    (do ((i start (1+ i))
-	 (seq (if (and l (> start 0)) (nthcdr start seq) seq) (if l (cdr seq) seq))) 
-	((or (>= i end) (when l (endp seq)))) 
-	(declare (fixnum i))
-	(let ((el (if l (car seq) (aref seq i))))
-	  (if tp (write-char el strm) (write-byte el strm))))
-    seq))
-
-(defmacro with-compilation-unit (opt &rest body)   
-  (declare (optimize (safety 2)))
-  (declare (ignore opt)) 
-  `(progn ,@body))
-
-(defvar *print-lines* nil)
-(defvar *print-miser-width* nil)
-(defvar *print-pprint-dispatch* nil)
-(defvar *print-right-margin* nil)
+;; (defmacro formatter ( control-string )
+;;   (declare (optimize (safety 2)))
+;;   `(progn
+;;      (lambda (*standard-output* &rest arguments)
+;;        (let ((*format-unused-args* nil))
+;; 	 (apply 'format t ,control-string arguments)
+;; 	 *format-unused-args*))))
 
 (defun stream-external-format (s)
   (declare (optimize (safety 1)))
   (check-type s stream)
   :default)
 
+(defvar *print-lines* nil)
+(defvar *print-miser-width* nil)
+(defvar *print-pprint-dispatch* nil)
+(defvar *print-right-margin* nil)
+
 (defmacro with-standard-io-syntax (&body body)
-  (declare (optimize (safety 2)))
+  (declare (optimize (safety 1)))
   `(let* ((*package* (find-package :cl-user))
 	  (*print-array* t)
 	  (*print-base* 10)
@@ -341,7 +315,7 @@
 	  (*print-level* nil)
 	  (*print-lines* nil)
 	  (*print-miser-width* nil)
-	  (*print-pprint-dispatch* *print-pprint-dispatch*)
+	  (*print-pprint-dispatch* *print-pprint-dispatch*);FIXME
 	  (*print-pretty* nil)
 	  (*print-radix* nil)
 	  (*print-readably* t)
@@ -350,21 +324,105 @@
 	  (*read-default-float-format* 'single-float)
 	  (*read-eval* t)
 	  (*read-suppress* nil)
-	  (*readtable* (copy-readtable (si::standard-readtable))));FIXME copy?
+	  (*readtable* (copy-readtable (standard-readtable))))
      ,@body))
 
-(defun maybe-clear-input (&optional (x *standard-input*))
-  (cond ((not (typep x 'stream)) nil)
-	((typep x 'synonym-stream) (maybe-clear-input (symbol-value (synonym-stream-symbol x))))
-	((typep x 'two-way-stream) (maybe-clear-input (two-way-stream-input-stream x)))
-	((terminal-input-stream-p x) (clear-input t))))
+;; (defmacro print-unreadable-object
+;; 	  ((object stream &key type identity) &body body)
+;;   (declare (optimize (safety 2)))
+;;   (let ((q `(princ " " ,stream)))
+;;     `(if *print-readably*
+;; 	 (error 'print-not-readable :object ,object)
+;;        (progn
+;; 	 (princ "#<" ,stream)
+;; 	 ,@(when type `((prin1 (type-of ,object) ,stream) ,q))
+;; 	 ,@body
+;; 	 ,@(when identity
+;; 	     (let ((z `(princ (address ,object) ,stream)))
+;; 	       (if (and (not body) type) (list z) (list q z))))
+;; 	 (princ ">" ,stream)
+;; 	 nil))))
+
+;; (defmacro with-compile-file-syntax (&body body)
+;;   `(let ((*print-radix* nil)
+;; 	 (*print-base* 10)
+;; 	 (*print-circle* t)
+;; 	 (*print-pretty* nil)
+;; 	 (*print-level* nil)
+;; 	 (*print-length* nil)
+;; 	 (*print-case* :downcase)
+;; 	 (*print-gensym* t)
+;; 	 (*print-array* t)
+;; 	 (*print-package* t)
+;; 	 (*print-structure* t))
+;;      ,@body))
+
+(defmacro with-compilation-unit (opt &rest body)
+  (declare (optimize (safety 1)))
+  (declare (ignore opt))
+  `(progn ,@body))
+
+(defconstant char-length 8)
+
+(defun get-byte-stream-nchars (s)
+  (let* ((tp (stream-element-type s)))
+    (ceiling (if (consp tp) (cadr tp) char-length) char-length)))
+
+;; (defun parse-integer (s &key start end (radix 10) junk-allowed)
+;;   (declare (optimize (safety 1)))
+;;   (parse-integer-int s start end radix junk-allowed))
+
+(defun write-byte (j s &aux (i j))
+  (declare (optimize (safety 1)))
+  (check-type j integer)
+  (check-type s stream)
+  (dotimes (k (get-byte-stream-nchars s) j)
+    (write-char (code-char (logand i #.(1- (ash 1 char-length)))) s)
+    (setq i (ash i #.(- char-length)))))
+
+
+(defun read-byte (s &optional (eof-error-p t) eof-value &aux (i 0))
+  (declare (optimize (safety 1)))
+  (check-type s stream)
+  (dotimes (k (get-byte-stream-nchars s) i)
+    (setq i (logior i (ash (let ((ch (read-char s eof-error-p eof-value)))
+			     (if (eq ch eof-value) (return ch) (char-code ch)))
+			   (* k char-length))))))
+
+
+(defun read-sequence (seq strm &rest r &key (start 0) end
+			  &aux (l (listp seq))(seqp (when l (nthcdr start seq)))
+			  (cp (eq (stream-element-type strm) 'character)))
+  (declare (optimize (safety 1))(dynamic-extent r))
+  (check-type seq sequence)
+  (check-type strm stream)
+  (check-type start (integer 0))
+  (check-type end (or null (integer 0)))
+  (apply 'reduce (lambda (y x &aux (z (if cp (read-char strm nil 'eof) (read-byte strm nil 'eof))))
+		   (declare (seqind y)(ignorable x))
+		   (when (eq z 'eof) (return-from read-sequence y))
+		   (if l (setf (car seqp) z seqp (cdr seqp)) (setf (aref seq y) z))
+		   (1+ y)) seq :initial-value start r))
+
+
+(defun write-sequence (seq strm &rest r &key (start 0) end
+			   &aux (l (listp seq))(cp (eq (stream-element-type strm) 'character)))
+  (declare (optimize (safety 1))(dynamic-extent r))
+  (check-type seq sequence)
+  (check-type strm stream)
+  (check-type start (integer 0))
+  (check-type end (or null (integer 0)))
+  (apply 'reduce (lambda (y x)
+		   (declare (seqind y))
+		   (if cp (write-char x strm) (write-byte x strm))
+		   (1+ y)) seq :initial-value start r)
+  seq)
 
 (defun restrict-stream-element-type (tp)
-  (cond ((member tp '(unsigned-byte signed-byte)) tp)
-	((or (member tp '(character :default)) (subtypep tp 'character)) 'character)
+  (cond ((or (member tp '(character :default)) (subtypep tp 'character)) 'character)
 	((subtypep tp 'integer)
 	 (let* ((ntp (car (expand-ranges (normalize-type tp))))
-		(min (cadr ntp))(max (caddr ntp))
+		(min (or (cadr ntp) '*))(max (or (caddr ntp) '*))
 		(s (if (or (eq min '*) (< min 0)) 'signed-byte 'unsigned-byte))
 		(lim (unless (or (eq min '*) (eq max '*)) (max (integer-length min) (integer-length max))))
 		(lim (if (and lim (eq s 'signed-byte)) (1+ lim) lim)))
@@ -385,14 +443,14 @@
 		      if-exists iesp if-does-not-exist idnesp external-format)))
     (when (typep s 'stream) (c-set-stream-object1 s pf) s)))
 
-(defun load-pathname (p print if-does-not-exist
+(defun load-pathname (p print if-does-not-exist external-format
 			&aux (pp (merge-pathnames p))
 			(epp (reduce (lambda (y x) (or y (probe-file (translate-pathname x "" p))))
 				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
   (if epp
       (let* ((*load-pathname* pp)(*load-truename* epp))
 	(with-open-file
-	 (s epp)
+	 (s epp :external-format external-format)
 	 (if (member (peek-char nil s nil 'eof) '#.(mapcar 'code-char (list 127 #xfe #xff #x4c)))
 	     (load-fasl s print)
 	   (let ((*standard-input* s)) (load-stream s print)))))
@@ -401,12 +459,12 @@
 
 (defun load (p &key (verbose *load-verbose*) (print *load-print*) (if-does-not-exist :error)
 	       (external-format :default) &aux (*readtable* *readtable*)(*package* *package*))
-  (declare (optimize (safety 1))(ignorable external-format))
+  (declare (optimize (safety 1)))
   (check-type p (or stream pathname-designator))
   (when verbose (format t ";; Loading ~s~%" p))
   (prog1
       (typecase p
-	(pathname-designator (load-pathname (pathname p) print if-does-not-exist))
+	(pathname-designator (load-pathname (pathname p) print if-does-not-exist external-format))
 	(stream (load-stream p print)))
     (when verbose (format t ";; Finished loading ~s~%" p))))
 
