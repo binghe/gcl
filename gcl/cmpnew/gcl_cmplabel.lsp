@@ -44,7 +44,7 @@
   `(when (cdr ,label) (wt-nl "goto T" (car ,label) ";")(wt-nl1 "T" (car ,label) ":;")))
 
 (defmacro wt-go (label)
-  `(progn (rplacd ,label t) (wt "goto T" (car ,label) ";")))
+  `(progn (rplacd ,label t) (wt "goto T" (car ,label) ";")(wt-nl)))
 
 
 (defvar *restore-avma* nil)
