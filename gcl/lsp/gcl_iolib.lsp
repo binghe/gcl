@@ -395,7 +395,7 @@
 	 (s epp)
 	 (if (member (peek-char nil s nil 'eof) '#.(mapcar 'code-char (list 127 #xfe #xff #x4c)))
 	     (load-fasl s print)
-	   (load-stream s print))))
+	   (let ((*standard-input* s)) (load-stream s print)))))
     (when if-does-not-exist
       (error 'file-error :pathname pp :format-control "File does not exist."))))
 
