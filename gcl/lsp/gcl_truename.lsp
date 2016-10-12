@@ -18,20 +18,18 @@
     (pathname (typep x 'logical-pathname))
     (stream (logical-pathname-designator-p (pathname x)))))
 
-;(defvar *current-dir* (pathname (concatenate 'string (getcwd) "/"))) FIXME sync with chdir
-
-(defun truename (pd &aux (ppd (translate-logical-pathname pd))(ns (namestring ppd)))
+(defun truename (pd &aux (ns (namestring (translate-logical-pathname pd))))
   (declare (optimize (safety 1)))
   (check-type pd pathname-designator)
   (when (wild-pathname-p ns)
     (error 'file-error :pathname pd :format-control "Pathname is wild"))
-  (let* ((ns (ensure-dir-string (link-expand ns))))
+  (let* ((ns (ensure-dir-string (link-expand ns)))(ppd (pathname ns)))
     (unless (or (zerop (length ns)) (stat ns))
       (error 'file-error :pathname ns :format-control "Pathname does not exist"))
     (let* ((d (pathname-directory ppd))
 	   (d1 (subst :back :up d))
 	   (ppd (if (eq d d1) ppd (make-pathname :directory d1 :defaults ppd))))
-      (if (eq (car d) :absolute) ppd (merge-pathnames ppd (concatenate 'string (getcwd) "/") nil)))))
+      (if (eq (car d) :absolute) ppd (merge-pathnames ppd *current-directory* nil)))))
 
 
 (defun probe-file (pd &aux (pn (translate-logical-pathname pd)))

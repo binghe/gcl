@@ -607,8 +607,13 @@ First directory is checked for first name and all extensions etc."
 (defvar *ld* "ld")
 (defvar *objdump* "objdump --source ")
 
+(defvar *current-directory* *system-directory*)
+
+(defun current-directory-pathname nil (pathname (concatenate 'string (getcwd) "/")))
+
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
+  (setq *current-directory* (current-directory-pathname))
   (setq *tmp-dir* (get-temp-dir)
 	*cc* (get-path *cc*)
 	*ld* (get-path *ld*)

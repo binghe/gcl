@@ -48,8 +48,12 @@
 			       (expand-wild-directory (cons :relative (cdr x)) f q e)) :directory));FIXME
 	    ((funcall f z y))))))
 
+(defun chdir (s)
+  (when (chdir1 (namestring (pathname s)));to expand ~/
+    (setq *current-directory* (current-directory-pathname))))
+
 (defun directory (p &key &aux (p (translate-logical-pathname p))(d (pathname-directory p))
-		    (c (unless (eq (car d) :absolute) (make-frame (concatenate 'string (getcwd) "/"))))
+		    (c (unless (eq (car d) :absolute) (make-frame (namestring *current-directory*))))
 		    (lc (when c (length c)))
 		    (filesp (or (pathname-name p) (pathname-type p)))
 		    (v (compile-regexp (to-regexp p)))(*up-key* :back) r)
