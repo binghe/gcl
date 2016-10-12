@@ -566,10 +566,6 @@ close_stream(object strm)  {
       fclose(strm->sm.sm_fp);
     strm->sm.sm_fp = NULL;
     strm->sm.sm_fd = -1;
-    if (strm->sm.sm_object0 &&
-	type_of(strm->sm.sm_object0 )==t_cons &&
-	Mcar(strm->sm.sm_object0)==sSAallow_gzipped_fileA)
-      ifuncall1(sLdelete_file,Mcdr(strm->sm.sm_object0));
     break;
 
   case smm_file_synonym:
