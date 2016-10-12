@@ -1724,9 +1724,7 @@ LFD(siLoutput_stream_string)()
 }
 
 DEFUN_NEW("FILE-STREAM-P",object,fSfile_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_stream &&
-	  (x->sm.sm_mode==smm_input || x->sm.sm_mode==smm_output || x->sm.sm_mode==smm_io || x->sm.sm_mode==smm_probe)
-	  ? Ct : Cnil);
+  RETURN1(type_of(x)==t_stream && file_synonym_stream_p(x) ? Ct : Cnil);
 }
 
 DEFUN_NEW("SYNONYM-STREAM-P",object,fSsynonym_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
