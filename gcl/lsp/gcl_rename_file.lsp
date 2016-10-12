@@ -35,6 +35,7 @@
   (check-type spec pathname-designator)
   (multiple-value-bind
       (tp sz tm) (stat (namestring (truename spec)))
+    (declare (ignore tp sz))
     (+ tm (* (+ 17 (* 70 365)) (* 24 60 60)))))
 
   
@@ -43,5 +44,6 @@
   (check-type spec pathname-designator)
   (multiple-value-bind
       (tp sz tm uid) (stat (namestring (truename spec)))
+    (declare (ignore tp sz tm))
     (uid-to-name uid)))
 
