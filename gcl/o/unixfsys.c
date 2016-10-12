@@ -19,8 +19,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -32,140 +30,17 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <pwd.h>
 #endif
 
-#ifdef __MINGW32__ 
-#  include <windows.h> 
+#ifdef __MINGW32__
+#  include <windows.h>
 /* Windows has no symlink, therefore no lstat.  Without symlinks lstat
    is equivalent to stat anyway.  */
 #  define S_ISLNK(a) 0
 #  define lstat stat
-#endif 
-
-#ifdef BSD
-#define HAVE_RENAME
 #endif
-
-#ifdef NEED_GETWD
-#include <sys/dir.h>
-
-
-#ifndef HAVE_GETCWD
-char dotdot[3*16+2] = "../../../../../../../../../../../../../../../../.";
-#include <mnttab.h>
-static char *getwd_buf;
-static int getwd_bufp;
-
-static char *
-getwd(buffer)
-char *buffer;
-{
-	getwd_buf = buffer;
-	getwd1(0);
-	if (getwd_bufp == 0)
-		getwd_buf[getwd_bufp++] = '/';
-	getwd_buf[getwd_bufp] = '\0';
-	return(getwd_buf);
-}
-
-getwd1(n)
-int n;
-{
-	struct stat st, dev_st;
-	struct direct dir;
-	ino_t ino;
-	struct mnttab mnt;
-	FILE *fp;
-	register int i;
-	char buf[BUFSIZ];
-	static char dev_name[64];
-
-	if (stat(dotdot+(16-n)*3, &st) < 0)
-		FEerror("Can't get the current working directory.", 0);
-	ino = st.st_ino;
-	if (ino == 2)
-		goto ROOT;
-	getwd1(n+1);
-	fp = fopen(dotdot+(16-n-1)*3, "r");
-	if (fp == NULL)
-		FEerror("Can't get the current working directory.", 0);
-	setbuf(fp, buf);
-	fread(&dir, sizeof(struct direct), 1, fp);
-	fread(&dir, sizeof(struct direct), 1, fp);
-	for (;;) {
-		if (fread(&dir, sizeof(struct direct), 1, fp) <= 0)
-			break;
-		if (dir.d_ino == ino)
-			goto FOUND;
-	}
-	fclose(fp);
-	FEerror("Can't get the current working directory.", 0);
-
-FOUND:
-	fclose(fp);
-	getwd_buf[getwd_bufp++] = '/';
-	for (i = 0;  i < DIRSIZ && dir.d_name[i] != '\0';  i++)
-		getwd_buf[getwd_bufp++] = dir.d_name[i];
-	return;
-
-ROOT:
-	fp = fopen("/etc/mnttab", "r");
-	if (fp == NULL)
-		FEerror("Can't get the current working directory.", 0);
-	setbuf(fp, buf);
-	for (;;) {
-		if (fread(&mnt, sizeof(struct mnttab), 1, fp) <= 0)
-			break;
-		if (mnt.mt_dev[0] != '/') {
-			strcpy(dev_name, "/dev/dsk/");
-			strcat(dev_name, mnt.mt_dev);
-			stat(dev_name, &dev_st);
-		} else
-			stat(mnt.mt_dev, &dev_st);
-		if (dev_st.st_rdev == st.st_dev)
-			goto DEV_FOUND;
-	}
-	fclose(fp);
-	getwd_bufp = 0;
-	return;
-
-DEV_FOUND:
-	fclose(fp);
-	getwd_bufp = 0;
-	for (i = 0;  mnt.mt_filsys[i] != '\0';  i++)
-		getwd_buf[i] = mnt.mt_filsys[i];
-	/* BUG FIX by Grant J. Munsey */
-	if (i == 1 && *getwd_buf == '/')
-		i = 0;	/* don't add an empty directory name */
-	/* END OF BUG FIX */
-	getwd_bufp = i;
-}
-#endif   /* not HAVE_GETCWD */
-#endif
-
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 512
-#endif
-
-
-#ifdef HAVE_GETCWD
-char *
-getwd(char *buffer) {
-#ifndef _WIN32    
-  char *getcwd(char *, size_t);
-#endif
-  return(getcwd(buffer, MAXPATHLEN));
-}
-#endif
-
-
-#define pcopy(a_,b_,c_,d_) ({\
-      unsigned _c=c_,_d=d_;\
-      if (_c+_d>=MAXPATHLEN-16) FEerror("Can't expand pathname ~a",1,namestring);\
-      bcopy(a_,b_+_c,_d);\
-      b_[_c+_d]=0;\
-      })
 
 static object
 get_string(object x) {
+
   switch(type_of(x)) {
   case t_symbol:
   case t_string:
@@ -180,182 +55,110 @@ get_string(object x) {
     case smm_io:
       return get_string(x->sm.sm_object1);
     case smm_file_synonym:
-    case smm_synonym:
       return get_string(x->sm.sm_object0->s.s_dbind);
     }
   }
-  return Cnil;
-}
 
+  return Cnil;
+
+}
 
 void
-coerce_to_filename(object pathname,char *p) {
+coerce_to_filename1(object spec, char *p,unsigned sz) {
 
-  object namestring=get_string(pathname);
-  unsigned e=namestring->st.st_fillp;
-  char *q=namestring->st.st_self,*qe=q+e;
+  object namestring=get_string(spec);
 
-  if (pathname==Cnil||namestring==Cnil)
-    FEerror ( "NIL argument.", 1, pathname ); 
-  
-  if (*q=='~' && e) {
+  massert(namestring->st.st_fillp<sz);
+  memcpy(p,namestring->st.st_self,namestring->st.st_fillp);
+  p[namestring->st.st_fillp]=0;
 
-    unsigned m=0;
-    char *s=++q,*c;
-
-    for (;s<qe && *s!='/';s++);
-
-    if (s==q && (c=getenv("HOME")))
-
-      pcopy(c,p,0,m=strlen(c));
-
-#if !defined(NO_PWD_H) && !defined(STATIC_LINKING)
-    else {
-#ifndef __STDC__
-      extern struct passwd *getpwuid();
-      extern struct passwd *getpwnam();
-#endif
-      struct passwd *pwent;
-      
-      if (s==q)
-	pwent=getpwuid(getuid());
-      else {
-	*s=0;
-	pwent=getpwnam(q);
-	*s='/';
-      }
-      
-      if (!pwent)
-	FEerror("Can't expand pathname ~a",1,namestring);
-      pcopy(pwent->pw_dir,p,0,m=strlen(pwent->pw_dir));
-      
-    }
-#endif
-
-    pcopy(s,p,m,qe-s);
-    
-  } else
-
-    pcopy(q,p,0,e);
-  
 #ifdef FIX_FILENAME
-  FIX_FILENAME(pathname,p);
+  FIX_FILENAME(spec,p);
 #endif
-    
+
 }
 
-object sSAallow_gzipped_fileA;
+DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
+  struct passwd *pwent,pw;
+  long r;
 
-bool
-file_exists(object file)
-{
-	char filename[MAXPATHLEN];
-	struct stat filestatus;
+  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
+  massert(r<sizeof(FN1));
 
-	coerce_to_filename(file, filename);
+  massert(!getpwuid_r(uid,&pw,FN1,r,&pwent));
 
-#ifdef __MINGW32__
-        {
-            char *p;
-            for (p = filename;  *p != '\0';  p++);
-            if ( (p > filename) &&
-                 ( ( *(p-1) == '/' ) || ( *(p-1) == '\\' ) ) ) {
-               *(p-1) = '\0'; 
-            }
-        }
-#endif        
+  RETURN1(make_simple_string(pwent->pw_name));
 
-	if (stat(filename, &filestatus) >= 0 && !S_ISDIR(filestatus.st_mode))
-	  {
-#ifdef AIX
-	    /* if /tmp/foo is not a directory /tmp/foo/ should not exist */
-	    if (filename[strlen(filename)-1] == '/' &&
-		!( filestatus.st_mode & S_IFDIR))
-		return(FALSE);
-#endif	    
-
-	    return TRUE;
-	  }
-	else
-	  if (sSAallow_gzipped_fileA->s.s_dbind != sLnil
-	      && (strcat(filename,".gz"),
-		  stat(filename, &filestatus) >= 0 && !S_ISDIR(filestatus.st_mode)))
-	      
-	      return TRUE;
-
-	else
-		return(FALSE);
 }
+
+DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
+
+  struct passwd *pwent,pw;
+  long r;
+
+  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
+  massert(r<sizeof(FN1));
+
+  if (nm->st.st_fillp==1)
+
+    if ((pw.pw_dir=getenv("HOME")))
+      pwent=&pw;
+    else
+      massert(!getpwuid_r(getuid(),&pw,FN1,r,&pwent) && pwent);
+
+  else {
+
+    massert(nm->st.st_fillp<sizeof(FN2));
+    memcpy(FN2,nm->st.st_self+1,nm->st.st_fillp-1);
+    FN2[nm->st.st_fillp-1]=0;
+
+    massert(!getpwnam_r(FN2,&pw,FN1,r,&pwent) && pwent);
+
+  }
+
+  massert(strlen(pwent->pw_dir)+2<sizeof(FN3));
+  memcpy(FN3,pwent->pw_dir,strlen(pwent->pw_dir));
+  FN3[strlen(pwent->pw_dir)]='/';
+  FN3[strlen(pwent->pw_dir)+1]=0;
+  RETURN1(make_simple_string(FN3));
+
+}
+
+#define FILE_EXISTS_P(a_,b_) !stat(a_,&b_) && S_ISREG(b_.st_mode)
+#define DIR_EXISTS_P(a_,b_) !stat(a_,&b_) && S_ISDIR(b_.st_mode)
 
 FILE *
-fopen_not_dir(char *filename,char * option) {
+fopen_not_dir(char *filename,char *option) {
 
   struct stat ss;
 
-  if (!stat(filename,&ss) && S_ISDIR(ss.st_mode))
-    return NULL;
-  else
-    return fopen(filename,option);
+  return DIR_EXISTS_P(filename,ss) ? NULL : fopen(filename,option);
 
-}
-
-FILE *
-backup_fopen(char *filename, char *option)
-{
-	char backupfilename[MAXPATHLEN];
-	char command[MAXPATHLEN * 2];
-
-	strcat(strcpy(backupfilename, filename), ".BAK");
-	sprintf(command, "mv %s %s", filename, backupfilename);
-	msystem(command);
-	return(fopen(filename, option));
 }
 
 int
-file_len(FILE *fp)
-{
-	struct stat filestatus;
+file_len(FILE *fp) {/*FIXME dir*/
 
-	if (fstat(fileno(fp), &filestatus)==0) 
-	return(filestatus.st_size);
-	else return 0;
+  struct stat filestatus;
+
+  return fstat(fileno(fp), &filestatus) ? 0 : filestatus.st_size;
+
+}
+
+bool
+file_exists(object x) {
+
+  struct stat ss;
+
+  coerce_to_filename(x,FN1);
+
+  return FILE_EXISTS_P(FN1,ss) ? TRUE : FALSE;
+
 }
 
 DEF_ORDINARY("DIRECTORY",sKdirectory,KEYWORD,"");
 DEF_ORDINARY("LINK",sKlink,KEYWORD,"");
 DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
-
-/* export these for AXIOM */
-int gcl_putenv(char *s) {return putenv(s);}
-char *gcl_strncpy(char *d,const char *s,size_t z) {return strncpy(d,s,z);}
-char *gcl_strncpy_chk(size_t z) {char a[10],b[10];return strncpy(a,b,z);}/*compile in __strncpy_chk with FORTIFY_SOURCE*/
-#ifdef __MINGW32__ 
-#define uid_t int
-#endif
-uid_t gcl_geteuid(void) {
-#ifndef __MINGW32__ 
-  return geteuid();
-#else
-  return 0;
-#endif
-}
-uid_t gcl_getegid(void) {
-#ifndef __MINGW32__ 
-  return getegid();
-#else
-  return 0;
-#endif
-}
-int gcl_dup2(int o,int n) {return dup2(o,n);}
-char *gcl_gets(char *s,int z) {return fgets(s,z,stdin);}
-int gcl_puts(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
-
-
-int gcl_feof(void *v) {return feof(((FILE *)v));}
-int gcl_getc(void *v) {return getc(((FILE *)v));}
-int gcl_putc(int i,void *v) {return putc(i,((FILE *)v));}
-
-
 
 DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
@@ -379,6 +182,31 @@ DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 	    make_fixnum(ss.st_size),
 	    make_fixnum(ss.st_ctime),
 	    make_fixnum(ss.st_uid));
+}
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+DEFUN_NEW("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object s),"") {
+  ssize_t l,z1;
+
+  check_type_string(&s);
+  /* l=s->st.st_hasfillp ? s->st.st_fillp : s->st.st_dim; */
+  z1=length(s);
+  massert(z1<sizeof(FN1));
+  memcpy(FN1,s->st.st_self,z1);
+  FN1[z1]=0;
+  massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,FN1,FN2,sizeof(FN2)))>=0 && l<sizeof(FN2));
+  FN2[l]=0;
+  RETURN1(make_simple_string(FN2));
+
+}
+
+DEFUN_NEW("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
+  massert((getcwd(FN1,sizeof(FN1))));
+  RETURN1(make_simple_string(FN1));
 }
 
 DEFUN_NEW("SETENV",object,fSsetenv,SI,2,2,NONE,OO,OO,OO,OO,(object variable,object value),"Set environment VARIABLE to VALUE")
@@ -407,13 +235,9 @@ DEFUN_NEW("SETENV",object,fSsetenv,SI,2,2,NONE,OO,OO,OO,OO,(object variable,obje
 #include <dirent.h>
 
 DEFUN_NEW("OPENDIR",object,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
-  DIR *d;
-  char filename[MAXPATHLEN];
   check_type_string(&x);
-  memcpy(filename,x->st.st_self,x->st.st_fillp);
-  filename[x->st.st_fillp]=0;
-  d=opendir(filename);
-  return (object)d;
+  coerce_to_filename(x,FN1);
+  return (object)opendir(FN1);
 }
 
 #ifdef HAVE_D_TYPE
@@ -430,19 +254,27 @@ DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") 
 	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
 	       ));
 }
+#else
+#define DT_UNKNOWN 0
 #endif
 
 DEFUN_NEW("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,object s),"") {
+
   struct dirent *e;
   object z;
   long tl;
   size_t l;
+
   if (!x) RETURN1(Cnil);
+
   tl=telldir((DIR *)x);
-#ifdef HAVE_D_TYPE
-  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && e->d_type!=y;);
+
+#ifndef HAVE_D_TYPE
+  y=DT_UNKNOWN;
 #endif
+  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && e->d_type!=y;);
   if (!e) RETURN1(Cnil);
+
   if (s==Cnil)
     z=make_simple_string(e->d_name);
   else {
@@ -457,136 +289,18 @@ DEFUN_NEW("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,
       RETURN1(make_fixnum(l));
     }
   }
+
 #ifdef HAVE_D_TYPE
   if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(e->d_type));
 #endif
+
   RETURN1(z);
+
 }
 
 DEFUN_NEW("CLOSEDIR",object,fSclosedir,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
   closedir((DIR *)x);
   return Cnil;
-}
-
-DEFUN_NEW("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-
-  char filename[MAXPATHLEN];
-
-  check_type_string(&x);
-
-  memcpy(filename,x->st.st_self,x->st.st_fillp);
-  filename[x->st.st_fillp]=0;
-
-#ifdef __MINGW32__
-  if (mkdir(filename) < 0)
-#else        
-  if (mkdir(filename,01777) < 0)
-#endif        
-    FEerror("Cannot make the directory ~S.", 1, vs_base[0]);
-
-  RETURN1(x);
-
-}
-
-DEFUN_NEW("RMDIR",object,fSrmdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  check_type_string(&x);
-
-  coerce_to_filename(x,FN1);
-
-  RETURN1(rmdir(FN1) ? Cnil : Ct);
-
-}
-
-
-
-#include <sys/types.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-DEFUN_NEW("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object s),"") {
-  char *b1,*b2=NULL;
-  ssize_t l,z1,z2;
-  check_type_string(&s);
-  /* l=s->st.st_hasfillp ? s->st.st_fillp : s->st.st_dim; */
-  z1=length(s);
-  massert((b1=alloca(z1+1)));
-  memcpy(b1,s->st.st_self,z1);
-  b1[z1]=0;
-  for (l=z2=0;l>=z2;) {
-    memset(b2,0,z2);
-    z2+=z2+10;
-    massert((b2=alloca(z2)));
-    massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,b1,b2,z2))>=0);
-  }
-  b2[l]=0;
-  s=make_simple_string(b2);
-  memset(b1,0,z1);
-  memset(b2,0,z2);
-  RETURN1(s);
-}
-
-DEFUN_NEW("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-  char *b=NULL;
-  size_t z;
-  object s;
-
-  for (z=0;!(errno=0) && !getcwd(b,z) && errno==ERANGE;b=memset(b,0,z),z+=z+10,({massert((b=alloca(z)));}));
-  massert((b=getcwd(b,z)));
-  s=make_simple_string(b);
-  memset(b,0,z);
-  RETURN1(s);
-
-}
-
-DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
-  struct passwd *pwent,pw;
-  char *b;
-  long r;
-
-  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(b=alloca(r));
-
-  massert(!getpwuid_r(uid,&pw,b,r,&pwent));
-
-  RETURN1(make_simple_string(pwent->pw_name));
-
-}
-
-DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
-
-  struct passwd *pwent,pw;
-  char *b;
-  long r;
-
-  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(b=alloca(r));
-
-  if (nm->st.st_fillp==1)
-
-    if ((pw.pw_dir=getenv("HOME")))
-      pwent=&pw;
-    else
-      massert(!getpwuid_r(getuid(),&pw,b,r,&pwent));
-
-  else {
-
-    char *name;
-
-    massert(name=alloca(nm->st.st_fillp));
-    memcpy(name,nm->st.st_self+1,nm->st.st_fillp-1);
-    name[nm->st.st_fillp-1]=0;
-
-    massert(!getpwnam_r(name,&pw,b,r,&pwent));
-
-  }
-
-  massert((b=alloca(strlen(pwent->pw_dir)+2)));
-  memcpy(b,pwent->pw_dir,strlen(pwent->pw_dir));
-  b[strlen(pwent->pw_dir)]='/';
-  b[strlen(pwent->pw_dir)+1]=0;
-  RETURN1(make_simple_string(b));
-
 }
 
 DEFUN_NEW("RENAME",object,fSrename,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
@@ -603,6 +317,8 @@ DEFUN_NEW("RENAME",object,fSrename,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"
 
 DEFUN_NEW("UNLINK",object,fSunlink,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
+  check_type_string(&x);
+
   coerce_to_filename(x,FN1);
 
   RETURN1(unlink(FN1) ? Cnil : Ct);
@@ -610,23 +326,151 @@ DEFUN_NEW("UNLINK",object,fSunlink,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 }
 
 
-static void
-FFN(siLchdir)(void)
-{
-	char filename[MAXPATHLEN];
+DEFUN_NEW("CHDIR1",object,fSchdir1,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
-	check_arg(1);
-	check_type_or_pathname_string_symbol_stream(&vs_base[0]);
-	coerce_to_filename(vs_base[0], filename);
+  check_type_string(&x);
 
-	if (chdir(filename) < 0)
-		FEerror("Can't change the current directory to ~S.",
-			1, vs_base[0]);
+  coerce_to_filename(x,FN1);
+
+  RETURN1(chdir(FN1) ? Cnil : Ct);
+
 }
+
+DEFUN_NEW("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  check_type_string(&x);
+
+  coerce_to_filename(x,FN1);
+
+  RETURN1(mkdir(FN1
+#ifndef __MINGW32__
+		,01777
+#endif
+		) ? Cnil : Ct);
+
+}
+
+DEFUN_NEW("RMDIR",object,fSrmdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  check_type_string(&x);
+
+  coerce_to_filename(x,FN1);
+
+  RETURN1(rmdir(FN1) ? Cnil : Ct);
+
+}
+
+DEFVAR("*LOAD-WITH-FREAD*",sSAload_with_freadA,SI,Cnil,"");
+
+#ifdef _WIN32
+
+void *
+get_mmap(FILE *fp,void **ve) {
+
+  int n;
+  void *st;
+  size_t sz;
+  HANDLE handle;
+
+  massert((sz=file_len(fp))>0);
+  if (sSAload_with_freadA->s.s_dbind==Cnil) {
+    n=fileno(fp);
+    massert((n=fileno(fp))>2);
+    massert(handle = CreateFileMapping((HANDLE)_get_osfhandle(n), NULL, PAGE_WRITECOPY, 0, 0, NULL));
+    massert(st=MapViewOfFile(handle,FILE_MAP_COPY,0,0,sz));
+    CloseHandle(handle);
+  } else {
+    massert(st=malloc(sz));
+    massert(fread(st,sz,1,fp)==1);
+  }
+
+  *ve=st+sz;
+
+  return st;
+
+}
+
+int
+un_mmap(void *v1,void *ve) {
+
+  if (sSAload_with_freadA->s.s_dbind==Cnil)
+    return UnmapViewOfFile(v1) ? 0 : -1;
+  else {
+    free(v1);
+    return 0;
+  }
+
+}
+
+
+#else
+
+#include <sys/mman.h>
+
+void *
+get_mmap(FILE *fp,void **ve) {
+
+  int n;
+  void *v1;
+  struct stat ss;
+
+  massert((n=fileno(fp))>2);
+  massert(!fstat(n,&ss));
+  if (sSAload_with_freadA->s.s_dbind==Cnil) {
+    massert((v1=mmap(0,ss.st_size,PROT_READ|PROT_WRITE,MAP_PRIVATE,n,0))!=(void *)-1);
+  } else {
+    massert(v1=malloc(ss.st_size));
+    massert(fread(v1,ss.st_size,1,fp)==1);
+  }
+
+  *ve=v1+ss.st_size;
+  return v1;
+
+}
+
+
+int
+un_mmap(void *v1,void *ve) {
+
+  if (sSAload_with_freadA->s.s_dbind==Cnil)
+    return munmap(v1,ve-v1);
+  else {
+    free(v1);
+    return 0;
+  }
+
+}
+
+#endif
+
+/* export these for AXIOM */
+int gcl_putenv(char *s) {return putenv(s);}
+char *gcl_strncpy(char *d,const char *s,size_t z) {return strncpy(d,s,z);}
+char *gcl_strncpy_chk(size_t z) {char a[10],b[10];return strncpy(a,b,z);}/*compile in __strncpy_chk with FORTIFY_SOURCE*/
+#ifdef __MINGW32__
+#define uid_t int
+#endif
+uid_t gcl_geteuid(void) {
+#ifndef __MINGW32__
+  return geteuid();
+#else
+  return 0;
+#endif
+}
+uid_t gcl_getegid(void) {
+#ifndef __MINGW32__
+  return getegid();
+#else
+  return 0;
+#endif
+}
+int gcl_dup2(int o,int n) {return dup2(o,n);}
+char *gcl_gets(char *s,int z) {return fgets(s,z,stdin);}
+int gcl_puts(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
+
+int gcl_feof(void *v) {return feof(((FILE *)v));}
+int gcl_getc(void *v) {return getc(((FILE *)v));}
+int gcl_putc(int i,void *v) {return putc(i,((FILE *)v));}
 
 void
 gcl_init_unixfsys(void) {
-
-  make_si_function("CHDIR", siLchdir);
-
 }
