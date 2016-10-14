@@ -180,7 +180,7 @@ DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
     RETURN4(S_ISDIR(ss.st_mode) ? sKdirectory :
 	    (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
 	    make_fixnum(ss.st_size),
-	    make_fixnum(ss.st_ctime),
+	    make_fixnum(ss.st_mtime),
 	    make_fixnum(ss.st_uid));
 }
 
