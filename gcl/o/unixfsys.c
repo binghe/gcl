@@ -83,7 +83,7 @@ DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid
   long r;
 
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(r<sizeof(FN1));
+  massert(r<=sizeof(FN1));/*FIXME maybe once at image startup*/
 
   massert(!getpwuid_r(uid,&pw,FN1,r,&pwent));
 
@@ -97,7 +97,7 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
   long r;
 
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(r<sizeof(FN1));
+  massert(r<=sizeof(FN1));/*FIXME maybe once at image startup*/
 
   if (nm->st.st_fillp==1)
 
