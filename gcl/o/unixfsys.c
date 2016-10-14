@@ -78,14 +78,16 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 
 }
 
+static char GETPW_BUF[4096];
+
 DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
   struct passwd *pwent,pw;
   long r;
 
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(r<=sizeof(FN1));/*FIXME maybe once at image startup*/
+  massert(r<=sizeof(GETPW_BUF));/*FIXME maybe once at image startup*/
 
-  massert(!getpwuid_r(uid,&pw,FN1,r,&pwent));
+  massert(!getpwuid_r(uid,&pw,GETPW_BUF,r,&pwent));
 
   RETURN1(make_simple_string(pwent->pw_name));
 
@@ -97,14 +99,14 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
   long r;
 
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(r<=sizeof(FN1));/*FIXME maybe once at image startup*/
+  massert(r<=sizeof(GETPW_BUF));/*FIXME maybe once at image startup*/
 
   if (nm->st.st_fillp==1)
 
     if ((pw.pw_dir=getenv("HOME")))
       pwent=&pw;
     else
-      massert(!getpwuid_r(getuid(),&pw,FN1,r,&pwent) && pwent);
+      massert(!getpwuid_r(getuid(),&pw,GETPW_BUF,r,&pwent) && pwent);
 
   else {
 
@@ -112,7 +114,7 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
     memcpy(FN2,nm->st.st_self+1,nm->st.st_fillp-1);
     FN2[nm->st.st_fillp-1]=0;
 
-    massert(!getpwnam_r(FN2,&pw,FN1,r,&pwent) && pwent);
+    massert(!getpwnam_r(FN2,&pw,GETPW_BUF,r,&pwent) && pwent);
 
   }
 
