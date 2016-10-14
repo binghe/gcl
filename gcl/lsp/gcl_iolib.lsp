@@ -451,7 +451,7 @@
       (let* ((*load-pathname* pp)(*load-truename* epp))
 	(with-open-file
 	 (s epp :external-format external-format)
-	 (if (member (peek-char nil s nil 'eof) '#.(mapcar 'code-char (list 127 #xfe #xff #x4c)))
+	 (if (member (peek-char nil s nil 'eof) '#.(mapcar 'code-char (list 127 #xcf #xce #x4c)))
 	     (load-fasl s print)
 	   (let ((*standard-input* s)) (load-stream s print)))))
     (when if-does-not-exist
