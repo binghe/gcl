@@ -3,6 +3,7 @@
 #define ARG_LIMIT 63
 #ifndef DONT_DEFINE_DEFUN
 
+#undef DEFUN
 #define DEFUN(string,ret,fname,pack,min,max, flags, ret0a0,a12,a34,a56,args,doc) EXTER ret fname args;
 #define DEFUNB(string,ret,fname,pack,min,max, flags, ret0a0,a12,a34,a56,args,p,doc) EXTER ret fname args;
 #define DEFUNM(string,ret,fname,pack,min,max, flags, ret0a0,a12,a34,a56,args,doc) EXTER ret fname args;
