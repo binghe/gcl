@@ -74,7 +74,7 @@ vsystem(const char *command) {
     emsg("execvp failure when executing '%s': %s\n",command,strerror((s>>8)&0x7f));
 
   return s;
-
+#endif
 }
 
 
