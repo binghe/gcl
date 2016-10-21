@@ -371,6 +371,7 @@ emsg(const char *s,...) {
   va_list args;
   ufixnum n=0;
   void *v=NULL;
+  extern int vsnprintf();
   va_start(args,s);
   n=vsnprintf(v,n,s,args)+1;
   va_end(args);
