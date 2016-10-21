@@ -537,10 +537,6 @@ main(int argc, char **argv, char **envp) {
   
   }
 
-#ifdef _WIN32
-  detect_wine();
-#endif
-
   sSAlisp_maxpagesA->s.s_dbind = make_fixnum(real_maxpage);
 
   ihs_push(Cnil);

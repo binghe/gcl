@@ -15,16 +15,6 @@ ar_init_fn(void (fn)(void),const char *s) {
   if (stat(s,&ss)) {
     assert(snprintf(b,sizeof(b),"ar x %-.*slib%sgcl.a %s",sysd->st.st_fillp,sysd->st.st_self,FLAVOR,s)>0);
     assert(!msystem(b));
-#ifdef _WIN32
-    if (sSAwine_detectedA->s.s_dbind!=Cnil) {
-      char *n;
-      unsigned l;
-      l=strlen(s)+6;
-      n=alloca(l);
-      snprintf(n,l,"/tmp/%s",s);
-      s=(void *)n;
-    }
-#endif
   }
   gcl_init_or_load1(fn,s);
   assert(!unlink(s));

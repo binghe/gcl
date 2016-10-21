@@ -488,20 +488,6 @@ Cannot compile ~a.~%"
 	  (t (setq dir ".")))
     (setq na  (namestring
 	       (make-pathname :name name :type (pathname-type(first args)))))
-   #+(or dos winnt)
-      (format nil "~a -I~a ~a ~a -c -w ~a -o ~a"
-	      *cc*
-	      (concatenate 'string si::*system-directory* "../h")
-	      (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
-	      (case *speed*
-		    (3 *opt-three* )
-		    (2 *opt-two*) 
-		    (t ""))	
-	      (namestring (make-pathname  :type "c" :defaults (first args)))
-	      (namestring (make-pathname  :type "o" :defaults (first args)))
-	      )
-
-   #-(or dos winnt)
    (format nil  "~a -I~a ~a ~a -c ~a -o ~a ~a"
 	   *cc*
 	   (concatenate 'string si::*system-directory* "../h")
@@ -527,8 +513,8 @@ Cannot compile ~a.~%"
 			 #+expect-unresolved "-expect_unresolved '*'"
 			 na na na))	
 			    
-	     #+bsd ""; "-w"
-	     #-(or aix3 bsd irix3) " 2> /dev/null ")
+	     #+(or winnt bsd) ""; "-w"
+	     #-(or aix3 bsd winnt irix3) " 2> /dev/null ")
 		  
 		 
 	   )
@@ -543,30 +529,14 @@ Cannot compile ~a.~%"
 	  (prep-win-path-acc finish (concatenate 'string acc start "~")))
       (concatenate 'string acc s))))
 
-#+winnt
-(defun no-device (c)
-  (let* ((c (namestring (truename c)))
-	 (p (search ":" c)))
-    (if p (subseq c (1+ p)) c)))
-
-;; #+winnt
-;; (defun prep-win-path (c o)
-;;   (let* ((w si::*wine-detected*)
-;; 	 (c (if w (no-device c) c))
-;; 	 (o (if w (no-device o) o)))
-;;     (prep-win-path-acc (compiler-command c o) "")))
-
 (defun compiler-cc (c-pathname o-pathname)
   (safe-system
    (format
      nil
-     (prog1
-	 #+irix5 (compiler-command c-pathname o-pathname )
-	 #+vax "~a ~@[~*-O ~]-S -I. -w ~a ; as -J -W -o ~A ~A"
-	 #+(or system-v e15 dgux sgi ) "~a ~@[~*-O ~]-c -I. ~a 2> /dev/null"
-	 #+winnt (prep-win-path-acc (compiler-command c-pathname o-pathname) "")
-	 #-winnt (compiler-command c-pathname o-pathname)
-	)
+     #+vax "~a ~@[~*-O ~]-S -I. -w ~a ; as -J -W -o ~A ~A"
+     #+(or system-v e15 dgux sgi ) "~a ~@[~*-O ~]-c -I. ~a 2> /dev/null"
+     #+winnt (prep-win-path-acc (compiler-command c-pathname o-pathname) "")
+     #-(or vax system-v e15 dgux sgi) (compiler-command c-pathname o-pathname)
      *cc*
      (if (or (= *speed* 2) (= *speed* 3)) t nil)
             (namestring c-pathname)
@@ -763,20 +733,9 @@ Cannot compile ~a.~%"
     `(let ((,q (si::string-match ,x ,y ,@(when z (list z)))))
        (if (= ,q -1) (length ,y) ,q)))))
 
-(defun ts (s &optional (r ""))
-  (declare (string s) (ignorable r))
-  #+winnt
-  (if (not si::*wine-detected*) s
-    (let* ((x (sml (fcr #u"[^ \n\t]") s))
-	   (y (sml (fcr #u"[ \n\t]") s x))
-	   (f (subseq s x y))
-	   (l (subseq s y))
-	   (k (when (> (length f) 0) (aref f 0)))
-	   (q (if (eql k #\") (string k) ""))
-	   (f (if (eql k #\") (subseq f 1 (1- (length f))) f))
-	   (f (if (and k (not (eql k #\-))) (namestring (no-device f)) f)))
-      (if k (concatenate 'string r q f q (ts l " ")) "")))
-  #-winnt s)
+(defun ts (s)
+  (declare (string s))
+  s)
 
 (defun mdelete-file (x)
   (delete-file (ts (namestring x))))
@@ -795,8 +754,7 @@ Cannot compile ~a.~%"
 			       raw))
 	 (map (merge-pathnames (make-pathname
 				:name (concatenate 'string (pathname-name raw) "_map")) raw))
-	 #+winnt (raw (merge-pathnames (make-pathname :type "exe") raw))
-	 )
+	 #+winnt (raw (merge-pathnames (make-pathname :type "exe") raw)))
 
     (with-open-file (st (namestring map) :direction :output))
     (safe-system 

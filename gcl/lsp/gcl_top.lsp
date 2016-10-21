@@ -581,26 +581,24 @@ First directory is checked for first name and all extensions etc."
 
 (defvar *tmp-dir*)
 
-(defun wine-tmp-redirect ()
-  (let* ((s (find-symbol "*WINE-DETECTED*" (find-package "SYSTEM"))))
-    (when (and s (symbol-value s))
-      (list *system-directory*))))
-	 
 (defun ensure-dir-string (str)
   (if (eq (stat str) :directory)
       (coerce-slash-terminated str)
     str))
 
 (defun get-temp-dir ()
-  (dolist (x `(,@(wine-tmp-redirect) ,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
+  (dolist (x `(,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
     (when x
-      (let ((x (coerce-slash-terminated x)))
+      (let ((x (coerce-slash-terminated (nsubstitute #\/ #\\ x))))
 	(when (eq (stat x) :directory)
 	  (return-from get-temp-dir x))))))
 
 (defun get-path (s &aux (m (string-match "([^/ ]*)( |$)" s))(b (match-beginning 1))(e (match-end 1))
-		   (r (with-open-file (s (concatenate 'string "|which " (subseq s b e))) (read s nil 'eof))))
-  (if (eq r 'eof) s (concatenate 'string (string-downcase r) (subseq s e))))
+		   (r (with-open-file (s (apply 'string-concatenate "|"
+						(unless (member :winnt *features*);FIXME no #+ here in bootstrap
+						  (list "which " (subseq s b e)))))
+				      (read s nil 'eof))))
+  (if (eq r 'eof) s (string-concatenate (string-downcase r) (subseq s e))))
 
 
 (defvar *cc* "cc")

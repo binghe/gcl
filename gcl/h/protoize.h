@@ -1798,19 +1798,12 @@ msystem(const char *);
 void
 assert_error(const char *,unsigned,const char *,const char *);
 
-#ifdef _WIN32
-void
-detect_wine(void);
-
+#ifdef __MINGW32__
 void
 init_shared_memory(void);
 
-void *
-alloca(size_t);
-
 object
 find_init_string(const char *);
-
 #endif
 
 void *

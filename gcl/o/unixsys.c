@@ -112,104 +112,10 @@ char *command;
 }
 #endif
 
-#ifdef _WIN32
-
-DEFVAR("*WINE-DETECTED*",sSAwine_detectedA,SI,Cnil,"");
-
-#include "windows.h"
-
-static int mpid;
-
-void
-close_msys() {
-
-  msystem("");
-
-}
-
-void
-detect_wine() {
-
-  char b[4096];
-  struct stat ss;
-  const char *s="/proc/self/status";
-  FILE *f;
-  object o;
-
-  sSAwine_detectedA->s.s_dbind=Cnil;
-
-  if (stat(s,&ss))
-    return;
-
-  massert(f=fopen(s,"r"));
-  massert(fscanf(f,"%s",b)==1);
-  massert(fscanf(f,"%s",b)==1);
-  massert(!fclose(f));
-
-  if (strncmp("wineserver",b,9))
-    return;
-
-  massert(o=sSAsystem_directoryA->s.s_dbind);
-  massert(o!=Cnil);
-  mpid=getpid();
-  
-  massert(snprintf(b,sizeof(b),"%-.*smsys /tmp/ out%0d tmp%0d log%0d",
-		   o->st.st_fillp,o->st.st_self,mpid,mpid,mpid)>0);
-  massert(!psystem(b));
-
-  sSAwine_detectedA->s.s_dbind=Ct;
-  
-  massert(!atexit(close_msys));
-  
-}
-#endif  
-
 int
 msystem(const char *s) {
 
-  int r;
-
-#ifdef _WIN32
-
-  if (sSAwine_detectedA->s.s_dbind==Ct) {
-
-    char b[4096],b1[4096],c;
-    FILE *fp;
-
-    massert(snprintf(b,sizeof(b),"/tmp/out%0d",mpid)>0);
-    massert(snprintf(b1,sizeof(b1),"%s1",b)>0);
-
-    massert(fp=fopen(b1,"w"));
-    massert(fprintf(fp,"%s",s)>=0);
-    massert(!fclose(fp));
-
-    massert(MoveFileEx(b1,b,MOVEFILE_REPLACE_EXISTING));
-    
-    if (!*s)
-      return 0;
-    
-    for (;;Sleep(100)) {
-      
-      massert(fp=fopen(b,"r"));
-      massert((c=fgetc(fp))!=EOF);
-      if (c!=s[0]) {
-	massert(ungetc(c,fp)!=EOF);
-	break;
-      }
-      massert(!fclose(fp));
-      
-    }
-    
-    massert(fscanf(fp,"%d",&r)==1);
-    massert(!fclose(fp));
-
-  } else
-
-#endif
-
-    r=psystem(s);
-
-  return r;
+  return psystem(s);
 
 }
 
