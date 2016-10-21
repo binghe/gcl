@@ -2,6 +2,7 @@
 
 
 
+#include "winsock2.h"
 #include "windows.h"
 #include "errno.h"
 #include "signal.h"
