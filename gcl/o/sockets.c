@@ -33,8 +33,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #else
-#  include <windows.h>
 #  include <winsock2.h>
+#  include <windows.h>
 #endif
 
 #ifdef __STDC__
