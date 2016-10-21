@@ -3031,7 +3031,7 @@ case $canonical in
      old)
      use=vax;;
 
-     i*mingw*)
+     i*mingw*|i*msys*)
        if test "$use_common_binary" = "yes"; then
          host=i386-pc-mingw32
 	 PROCESSOR_FLAGS="-march=i386 "
