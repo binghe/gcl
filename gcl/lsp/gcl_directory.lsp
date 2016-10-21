@@ -34,9 +34,9 @@
 (defun make-frame (s &aux (l (length s)))
   (replace (make-array l :element-type 'character :adjustable t :fill-pointer l) s))
 
-(defun expand-wild-directory (l f zz &optional (yy (make-frame zz)))
+(defun expand-wild-directory (d l f zz &optional (yy (make-frame zz)))
   (let* ((x (member-if 'wild-dir-element-p l))
-	 (s (namestring (make-pathname :directory (ldiff l x))))
+	 (s (namestring (make-pathname :device d :directory (ldiff l x))))
 	 (z (vector-push-string zz s))
 	 (l (length yy))
 	 (y (link-expand (vector-push-string yy s) l))
@@ -45,19 +45,15 @@
       (cond ((eq (car x) :wild-inferiors) (recurse-dir z y f))
 	    (x (walk-dir z y (lambda (q e l)
 			       (declare (ignore l))
-			       (expand-wild-directory (cons :relative (cdr x)) f q e)) :directory));FIXME
+			       (expand-wild-directory d (cons :relative (cdr x)) f q e)) :directory));FIXME
 	    ((funcall f z y))))))
-
-(defun chdir (s)
-  (when (chdir1 (namestring (pathname s)));to expand ~/
-    (setq *current-directory* (current-directory-pathname))))
 
 (defun directory (p &key &aux (p (translate-logical-pathname p))(d (pathname-directory p))
 		    (c (unless (eq (car d) :absolute) (make-frame (namestring *current-directory*))))
 		    (lc (when c (length c)))
 		    (filesp (or (pathname-name p) (pathname-type p)))
 		    (v (compile-regexp (to-regexp p)))(*up-key* :back) r)
-  (expand-wild-directory d
+  (expand-wild-directory (pathname-device p) d
    (lambda (dir exp &aux (pexp (pathname (if c (vector-push-string c exp 0 lc) exp))))
      (if filesp
 	 (walk-dir dir exp
@@ -67,5 +63,10 @@
 		       (push (merge-pathnames (parse-namestring dir nil *default-pathname-defaults* :start pos) pexp nil) r)))
 		   :file)
        (when (pathname-match-p dir v) (push pexp r))))
-   (make-frame (if c "./" "")))
+   (make-frame ""))
   r)
+
+(defun chdir (s)
+  (when (chdir1 (namestring (pathname s)));to expand ~/
+    (setq *current-directory* (current-directory-pathname))))
+

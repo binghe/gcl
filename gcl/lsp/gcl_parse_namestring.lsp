@@ -79,11 +79,12 @@
 
 (defun pathname-parse (x b e)
   (when (and (eql b (string-match +generic-physical-pathname-regexp+ x b e)) (eql (match-end 0) e))
-    (let* ((dir (dir-parse (match-component x 1 :none) "/" :absolute))
+    (let* ((dir (dir-parse (match-component x 2 :none) "/" :absolute))
 	   (edir (expand-home-dir dir)))
-      (make-pathname :directory edir
-		     :name (match-component x 3 :name)
-		     :type (match-component x 4 :type 1)
+      (make-pathname :device (match-component x 1 :none 0 -1)
+		     :directory edir
+		     :name (match-component x 4 :name)
+		     :type (match-component x 5 :type 1)
 		     :namestring (when (and (eql b 0) (eql e (length x)) (eq dir edir)) x)))))
 
 
