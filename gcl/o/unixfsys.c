@@ -78,9 +78,12 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 
 }
 
+#ifndef __MINGW32__
 static char GETPW_BUF[4096];
+#endif
 
 DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
+#ifndef __MINGW32__
   struct passwd *pwent,pw;
   long r;
 
@@ -90,11 +93,14 @@ DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid
   massert(!getpwuid_r(uid,&pw,GETPW_BUF,r,&pwent));
 
   RETURN1(make_simple_string(pwent->pw_name));
-
+#else
+  RETURN1(Cnil);
+#endif
 }
 
 DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
 
+#ifndef __MINGW32__
   struct passwd *pwent,pw;
   long r;
 
@@ -118,11 +124,16 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
 
   }
 
-  massert(strlen(pwent->pw_dir)+2<sizeof(FN3));
-  memcpy(FN3,pwent->pw_dir,strlen(pwent->pw_dir));
-  FN3[strlen(pwent->pw_dir)]='/';
-  FN3[strlen(pwent->pw_dir)+1]=0;
+  massert((r=strlen(pwent->pw_dir))+2<sizeof(FN3));
+  memcpy(FN3,pwent->pw_dir,r);
+  FN3[r]='/';
+  FN3[r+1]=0;
   RETURN1(make_simple_string(FN3));
+#else
+  massert(snprintf(FN1,sizeof(FN1)-1,"%s%s",getenv("SystemDrive"),getenv("HOMEPATH"))>=0);
+  {char *p;for (p=FN1;*p;p++) if (*p=='\\') *p='/';*p++='/';*p=0;}
+  RETURN1(make_simple_string(FN1));
+#endif
 
 }
 
@@ -200,7 +211,11 @@ DEFUN_NEW("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,obj
   massert(z1<sizeof(FN1));
   memcpy(FN1,s->st.st_self,z1);
   FN1[z1]=0;
+#ifndef __MINGW32__
   massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,FN1,FN2,sizeof(FN2)))>=0 && l<sizeof(FN2));
+#else
+  l=0;
+#endif
   FN2[l]=0;
   RETURN1(make_simple_string(FN2));
 
@@ -208,6 +223,17 @@ DEFUN_NEW("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,obj
 
 DEFUN_NEW("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   massert((getcwd(FN1,sizeof(FN1))));
+#ifdef __MINGW32__
+  {
+    char *p,*q;
+    for (p=FN1;p<FN1+sizeof(FN1) && *p && *p!='\\';p++);
+    massert(p<FN1+sizeof(FN1) && *p=='\\');
+    for (q=FN2;p<FN1+sizeof(FN1) && *p && q<FN2+sizeof(FN2);)
+      *q++=*p=='\\' ? (p++,'/') : *p++;
+    *q=0;
+    memcpy(FN1,FN2,sizeof(FN1));
+  }
+#endif
   RETURN1(make_simple_string(FN1));
 }
 
@@ -239,13 +265,15 @@ DEFUN_NEW("SETENV",object,fSsetenv,SI,2,2,NONE,OO,OO,OO,OO,(object variable,obje
 DEFUN_NEW("OPENDIR",object,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   check_type_string(&x);
   coerce_to_filename(x,FN1);
-  return (object)opendir(FN1);
+  return (object)opendir(strlen(FN1) ? FN1 : "./");
 }
 
-#ifdef HAVE_D_TYPE
-  
+
 DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") {
-  RETURN1(list(8,
+  RETURN1(
+
+#ifdef HAVE_D_TYPE
+	  list(8,
 	       MMcons(make_fixnum(DT_BLK),make_keyword("BLOCK")),
 	       MMcons(make_fixnum(DT_CHR),make_keyword("CHAR")),
 	       MMcons(make_fixnum(DT_DIR),make_keyword("DIRECTORY")),
@@ -254,11 +282,21 @@ DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") 
 	       MMcons(make_fixnum(DT_REG),make_keyword("FILE")),
 	       MMcons(make_fixnum(DT_SOCK),make_keyword("SOCKET")),
 	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
-	       ));
-}
+	       )
 #else
 #define DT_UNKNOWN 0
+#define DT_REG 1
+#define DT_DIR 2
+	  list(3,
+	       MMcons(make_fixnum(DT_REG),make_keyword("FILE")),
+	       MMcons(make_fixnum(DT_DIR),make_keyword("DIRECTORY")),
+	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
+	       )
 #endif
+	  );
+}
+
+
 
 DEFUN_NEW("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,object s),"") {
 
@@ -266,15 +304,21 @@ DEFUN_NEW("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,
   object z;
   long tl;
   size_t l;
+  long d_type=DT_UNKNOWN;
+#ifdef HAVE_D_TYPE
+#define get_d_type(e,s) e->d_type
+#else
+#define get_d_type(e,s) \
+  ({struct stat ss;\
+    massert(snprintf(FN1,sizeof(FN1),"%-*.*s%s",s->st.st_fillp,s->st.st_fillp,s->st.st_self,e->d_name)>=0);\
+    lstat(FN1,&ss);S_ISDIR(ss.st_mode) ? DT_DIR : DT_REG;})
+#endif
 
   if (!x) RETURN1(Cnil);
 
   tl=telldir((DIR *)x);
 
-#ifndef HAVE_D_TYPE
-  y=DT_UNKNOWN;
-#endif
-  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && e->d_type!=y;);
+  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && y!=(d_type=get_d_type(e,s)););
   if (!e) RETURN1(Cnil);
 
   if (s==Cnil)
@@ -292,9 +336,7 @@ DEFUN_NEW("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,
     }
   }
 
-#ifdef HAVE_D_TYPE
-  if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(e->d_type));
-#endif
+  if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(d_type));
 
   RETURN1(z);
 
