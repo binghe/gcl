@@ -148,7 +148,7 @@ mbrk(void *v) {
     
 #if defined(__CYGWIN__)||defined(__MINGW32__)
 
-#include <Windows.h>
+#include <windows.h>
 
 static ufixnum
 get_phys_pages_no_malloc(char n) {
