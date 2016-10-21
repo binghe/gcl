@@ -170,6 +170,7 @@ int gcl_putc(int,void *);
 #ifdef CMPINCLUDE
 int setjmp();
 int _setjmp();
+int _setjmp3();
 #endif
 void vfun_wrong_number_of_args(object);
 void ihs_overflow (void);
@@ -179,4 +180,3 @@ char *gcl_gets(char *,int);
 int gcl_puts(const char *);
 int endp_error(object);
 object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
-
