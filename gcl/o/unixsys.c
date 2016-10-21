@@ -24,13 +24,21 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifndef __MINGW32__
 #include <sys/wait.h>
+#endif
 
 #include "include.h"
 
 int
 vsystem(const char *command) {
 
+#ifdef __MINGW32__
+  {
+    return system(command);
+  }
+
+#else
   unsigned j,n=strlen(command)+1;
   char *z,*c;
   const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp;
