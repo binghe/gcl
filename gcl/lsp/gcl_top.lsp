@@ -589,17 +589,12 @@ First directory is checked for first name and all extensions etc."
 (defun get-temp-dir ()
   (dolist (x `(,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
     (when x
-      (let ((x (coerce-slash-terminated (nsubstitute #\/ #\\ x))))
+      (let ((x (coerce-slash-terminated x)))
 	(when (eq (stat x) :directory)
 	  (return-from get-temp-dir x))))))
 
-(defun get-path (s &aux (m (string-match "([^/ ]*)( |$)" s))(b (match-beginning 1))(e (match-end 1))
-		   (r (with-open-file (s (apply 'string-concatenate "|"
-						(unless (member :winnt *features*);FIXME no #+ here in bootstrap
-						  (list "which " (subseq s b e)))))
-				      (read s nil 'eof))))
-  (if (eq r 'eof) s (string-concatenate (string-downcase r) (subseq s e))))
-
+(defun get-path (s &aux (m (string-match "([^ ]*)( |$)" s))(b (match-beginning 1))(e (match-end 1)))
+  (string-concatenate (which (pathname-name (subseq s b e))) (subseq s e)))
 
 (defvar *cc* "cc")
 (defvar *ld* "ld")
@@ -607,7 +602,7 @@ First directory is checked for first name and all extensions etc."
 
 (defvar *current-directory* *system-directory*)
 
-(defun current-directory-pathname nil (pathname (concatenate 'string (getcwd) "/")))
+(defun current-directory-pathname nil (pathname (coerce-slash-terminated (getcwd))))
 
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
@@ -625,9 +620,7 @@ First directory is checked for first name and all extensions etc."
       (when dir
 	(setq *lib-directory* (coerce-slash-terminated dir)))))
   (unless (and *load-path* (equal tem *lib-directory*))
-    (setq *load-path* (cons (string-concatenate *lib-directory* "lsp/") *load-path*))
-    (setq *load-path* (cons (string-concatenate *lib-directory* "gcl-tk/") *load-path*))
-    (setq *load-path* (cons (string-concatenate *lib-directory*  "xgcl-2/") *load-path*)))
+    (mapc (lambda (x) (push (string-concatenate *lib-directory* x) *load-path*)) '("lsp/" "gcl-tk/" "xgcl-2/")))
   (unless (boundp '*system-directory*)
     (setq *system-directory* (namestring (truename (make-pathname :name nil :type nil :defaults (argv 0))))))))
 

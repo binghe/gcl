@@ -70,3 +70,8 @@
   (when (chdir1 (namestring (pathname s)));to expand ~/
     (setq *current-directory* (current-directory-pathname))))
 
+(defun which (s)
+  (let ((r (with-open-file (s (apply 'string-concatenate "|" #-winnt "which "
+				     #+winnt "for %i in (" s #+winnt ".exe) do @echo.%~$PATH:i" nil))
+			   (read-line s nil 'eof))))
+    (if (eq r 'eof) s (string-downcase r))))
