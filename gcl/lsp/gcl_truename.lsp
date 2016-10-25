@@ -4,11 +4,11 @@
   (labels ((frame (b e) (make-array (- n b) :element-type 'character
 				    :displaced-to str :displaced-index-offset b :fill-pointer (- e b)))
 	   (set-fr (fr e &aux (fr (or fr (frame 0 b)))) (setf (fill-pointer fr) e) fr))
-    (let* ((i (string-match #v"/" str b))
+    (let* ((i (string-match +dirsep+ str b))
 	   (fr (set-fr fr (if (eql i -1) n i)))
 	   (l (when (eq (stat fr) :link) (readlinkat 0 fr))))
       (cond (l (let ((b (if (eql #\/ (aref l 0)) 0 b)))
-		 (link-expand (concatenate 'string (set-fr fr b) l (frame (if (eql i -1) n i) n)) b)))
+		 (link-expand (string-concatenate (set-fr fr b) l (frame (if (eql i -1) n i) n)) b)))
 	    ((eql i -1) str)
 	    ((link-expand str (1+ i) n fr))))))
 

@@ -30,15 +30,11 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 
+#ifndef __MINGW32__
+
 int
 vsystem(const char *command) {
 
-#ifdef __MINGW32__
-  {
-    return system(command);
-  }
-
-#else
   unsigned j,n=strlen(command)+1;
   char *z,*c;
   const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp;
@@ -51,12 +47,13 @@ vsystem(const char *command) {
 
   else {
 
-    z=alloca(n);
-    memcpy(z,command,n);
+    massert(n<sizeof(FN1));
+    memcpy((z=FN1),command,n);
     for (j=1,c=z;strtok(c,spc);c=NULL,j++);
 
     memcpy(z,command,n);
-    p1=alloca(j*sizeof(*p1));
+    massert(j*sizeof(*p1)<sizeof(FN2));
+    p1=(void *)FN2;
     for (pp=p1,c=z;(*pp=strtok(c,spc));c=NULL,pp++);
 
   }
@@ -74,8 +71,9 @@ vsystem(const char *command) {
     emsg("execvp failure when executing '%s': %s\n",command,strerror((s>>8)&0x7f));
 
   return s;
-#endif
+
 }
+#endif
 
 
 #ifdef ATT3B2

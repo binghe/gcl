@@ -72,10 +72,6 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
   memcpy(p,namestring->st.st_self,namestring->st.st_fillp);
   p[namestring->st.st_fillp]=0;
 
-#ifdef FIX_FILENAME
-  FIX_FILENAME(spec,p);
-#endif
-
 }
 
 #ifndef __MINGW32__
@@ -131,7 +127,6 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
   RETURN1(make_simple_string(FN3));
 #else
   massert(snprintf(FN1,sizeof(FN1)-1,"%s%s",getenv("SystemDrive"),getenv("HOMEPATH"))>=0);
-  {char *p;for (p=FN1;*p;p++) if (*p=='\\') *p='/';*p++='/';*p=0;}
   RETURN1(make_simple_string(FN1));
 #endif
 
@@ -223,17 +218,6 @@ DEFUN_NEW("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,obj
 
 DEFUN_NEW("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   massert((getcwd(FN1,sizeof(FN1))));
-#ifdef __MINGW32__
-  {
-    char *p,*q;
-    for (p=FN1;p<FN1+sizeof(FN1) && *p && *p!='\\';p++);
-    massert(p<FN1+sizeof(FN1) && *p=='\\');
-    for (q=FN2;p<FN1+sizeof(FN1) && *p && q<FN2+sizeof(FN2);)
-      *q++=*p=='\\' ? (p++,'/') : *p++;
-    *q=0;
-    memcpy(FN1,FN2,sizeof(FN1));
-  }
-#endif
   RETURN1(make_simple_string(FN1));
 }
 
