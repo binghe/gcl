@@ -168,6 +168,24 @@ DEF_ORDINARY("DIRECTORY",sKdirectory,KEYWORD,"");
 DEF_ORDINARY("LINK",sKlink,KEYWORD,"");
 DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
 
+object
+file_stream(object x) {
+  if (type_of(x)==t_stream)
+    switch(x->sm.sm_mode) {
+    case smm_input:
+    case smm_output:
+    case smm_io:
+    case smm_probe:
+      return x;
+    case smm_synonym:
+      return file_stream(x->sm.sm_object0->s.s_dbind);
+    default:
+      break;
+  }
+  return Cnil;
+}
+
+
 DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
   struct stat ss;
