@@ -34,7 +34,7 @@ boot.o: boot.c $(DECL) boot.h
 	$(CC) -c $(CFLAGS) $(DEFS) -fPIC $*.c $(AUX_INFO) 
 
 prelink.o: prelink.c $(DECL)
-	$(CC) -fPIE -c $(filter-out -pg,$(CFLAGS)) $(DEFS) $*.c $(AUX_INFO)
+	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
 
 %.o: %.c $(DECL)
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
