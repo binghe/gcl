@@ -206,14 +206,8 @@
 ;; So to stop users from invoking this
 #+sun
 (defun user-homedir-pathname ()
- (let* ((tem (si::getenv "HOME"))
-	(l (- (length tem) 1)))
-   (cond ((null tem) nil)
-	 (t 
-	  (or (and (>= l 0)
-		   (eql (aref tem l) #\/))
-	      (setq tem (concatenate 'string tem "/")))
-	  (pathname tem)))))
-
+ (let* ((tem (si::getenv "HOME")))
+   (when tem
+     (pathname (coerce-slash-terminated tem)))))
 
 (AUTOLOAD 'init-readline '|gcl_readline|)

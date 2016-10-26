@@ -26,21 +26,6 @@
 #define f_nsyms NumberOfSymbols
 #define NO_PWD_H
 
-#define MAXPATHLEN 512
-
-/* alter pathToAlter to fit in with the Clibrary of the system.
-   and report error using name 'x' if you cant do it.
-   The result in pathToAlter should be less
-*/   
-#define FIX_FILENAME(x,pathToAlter) fix_filename(x,pathToAlter)
-
-#define MEMORY_SAVE(self,filename) \
-  do { char buf[MAXPATHLEN]; \
-       strcpy(buf,self); \
-       fix_filename(Cnil,buf); \
-       memory_save(buf,filename); \
-       } while (0)
-
 #define signals_pending *signalsPendingPtr
 
 #undef DBEGIN_TY
