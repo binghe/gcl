@@ -5,107 +5,6 @@ AC_CONFIG_HEADER(h/gclincl.h)
 VERSION=`cat majvers`.`cat minvers`
 AC_SUBST(VERSION)
 
-# some parts of this configure script are taken from the tcl configure.in
-
-#
-# Arguments
-#
-
-dnl help="--enable-maxpage=XXXX will compile in a page table of size XXX (default ${default_maxpage})"
-
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	    #include <stdio.h>
-dnl             #include <unistd.h>
-dnl 	    ]],[[
-dnl 	    FILE *fp=fopen("conftest1","w");
-dnl 	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
-dnl 	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
-
-dnl AC_ARG_ENABLE(maxpage,
-dnl [ --enable-maxpage=XXXX  will compile in a page table of size XXX
-dnl                          (eg '--enable-maxpage=64*1024' would produce
-dnl 			 64K pages allowing 256 MB if pages are 4K each)],
-dnl ,enable_maxpage=$def_maxpage)
-
-AC_ARG_ENABLE(widecons,[use a three word cons with simplified typing],[AC_DEFINE([WIDE_CONS],[1],[three word cons])])
-
-
-AC_ARG_ENABLE(safecdr,[protect cdr from immfix and speed up type processing],,[enable_safecdr="no"])
-if test "$enable_safecdr" = "yes" ; then
-   AC_DEFINE([USE_SAFE_CDR],[1],[protect cdr from immfix and speed up type processing])
-fi
-AC_ARG_ENABLE(safecdrdbg,[debug safecdr code],[AC_DEFINE([DEBUG_SAFE_CDR],[1],[debug safecdr code])])
-
-AC_ARG_ENABLE([prelink],[--enable-prelink will insist that the produced images may be prelinked],[PRELINK_CHECK=t],[PRELINK_CHECK=])
-
-AC_ARG_ENABLE([fastimmfix],[--enable-fastimmfix=XXXX will reject low immediate fixnums unless 1<<XXXX can be attained],
-,[enable_fastimmfix=64])
-
-
-AC_ARG_ENABLE(holepage,[ --enable-holepage=XXXX will compile in a XXX-sized hole between the heap and relocatable memory area (eg '--enable-holepage=64*1024' would give 64K pages allowing 256 MB if pages are 4K each)] ,
-[AC_DEFINE_UNQUOTED(HOLEPAGE,$enable_holepage,[number of pages to use for hole])])
-
-AC_ARG_ENABLE(vssize,[ --enable-vssize=XXXX will compile in a value stack of size XXX] ,
-,enable_vssize=262144)
-AC_DEFINE_UNQUOTED(VSSIZE,$enable_vssize,[value stack size])
-
-AC_ARG_ENABLE(bdssize,[ --enable-bdssize=XXXX will compile in a binding stack of size XXX] ,
-,enable_bdssize=2048)
-AC_DEFINE_UNQUOTED(BDSSIZE,$enable_bdssize,[binding stack size])
-
-AC_ARG_ENABLE(ihssize,[ --enable-ihssize=XXXX will compile in a invocation history stack of size XXX] ,
-,enable_ihssize=4096)
-AC_DEFINE_UNQUOTED(IHSSIZE,$enable_ihssize,[invocation history stack size])
-
-AC_ARG_ENABLE(frssize,[ --enable-frssize=XXXX will compile in a frame stack of size XXX] ,
-,enable_frssize=4096)
-AC_DEFINE_UNQUOTED(FRSSIZE,$enable_frssize,[frame stack size])
-
-AC_ARG_ENABLE(machine,[ --enable-machine=XXXX will force the use of one of the definitions in h/XXXX.defs] ,
-[enable_machine=$enableval],[enable_machine=""])
-
-AC_ARG_ENABLE(immfix,
-[ --enable-immfix        will enable an immediate fixnum table
-                         above the C stack],
-,enable_immfix=yes)
-
-#AC_ARG_ENABLE(gmp,[ --enable-gmp=no will disable use of GMP gnu multiprecision arithmetic, (default is =yes)] ,
-#[use_gmp=$enableval],[use_gmp="yes"])
-
-use_gmp="yes"
-
-AC_ARG_ENABLE(notify,[ --enable-notify=no will disable the automatic notification of gcl maintainers of successful builds/problems] ,
-[enable_notify=$enableval],[enable_notify="yes"])
-
-AC_ARG_ENABLE(tcltk,[ try to build gcl-tk ] ,
-[enable_tcltk=$enableval],[enable_tcltk="yes"])
-
-AC_ARG_ENABLE(tkconfig,[ --enable-tkconfig=XXXX will force the use of a TK_CONFIG_PREFIX=XXXXX as place to look for tkConfig.sh and tclConfig.sh ] ,
-[TK_CONFIG_PREFIX=$enableval],[TK_CONFIG_PREFIX="unknown"])
-
-
-AC_ARG_ENABLE(tclconfig,[ --enable-tclconfig=XXXX will force the use of a TCL_CONFIG_PREFIX=XXXXX as place to look for tclConfig.sh and tclConfig.sh ] ,
-[TCL_CONFIG_PREFIX=$enableval],[TCL_CONFIG_PREFIX="unknown"])
-
-AC_ARG_ENABLE(infodir,[ --enable-infodir=XXXX will force the use of a INFO_DIR=XXXXX as place to look for info ] ,
-[INFO_DIR=$enableval],[INFO_DIR=$prefix/share/info])
-INFO_DIR=`eval echo $INFO_DIR/`
-
-AC_ARG_ENABLE(emacsdir,[ --enable-emacsdir=XXXX will manually specify the location for elisp files ] ,
-[EMACS_SITE_LISP=$enableval],[EMACS_SITE_LISP=$prefix/share/emacs/site-lisp])
-EMACS_SITE_LISP=`eval echo $EMACS_SITE_LISP/`
-
-AC_ARG_ENABLE(common-binary,[ --enable-common-binary=yes forces use of lowest common denominator instruction sets, (default is =yes)] ,
-[use_common_binary=$enableval],[use_common_binary="yes"])
-
-AC_ARG_ENABLE(japi,[ --enable-japi=yes will compile in support for the JAPI graphical interface if present on your system],
-[try_japi=$enableval],[try_japi="no"])
-
-AC_ARG_ENABLE(xdr,[ --enable-xdr=yes will compile in support for XDR],
-[enable_xdr=$enableval],[enable_xdr="yes"])
-
-AC_ARG_ENABLE(xgcl,[ --enable-xgcl=yes will compile in support for XGCL],
-[enable_xgcl=$enableval],[enable_xgcl="yes"])
 
 #
 # Host information 
@@ -119,340 +18,149 @@ my_host_system=`echo $host_os | awk '{j=split($1,A,"-");if (j>=2) print A[[2]]}'
 AC_DEFINE_UNQUOTED(HOST_CPU,"`echo $host_cpu | awk '{print toupper($0)}'`",[Host cpu])
 AC_DEFINE_UNQUOTED(HOST_KERNEL,"`echo $my_host_kernel | awk '{print toupper($0)}'`",[Host kernel])
 if test "$my_host_system" != "" ; then 
-	AC_DEFINE_UNQUOTED(HOST_SYSTEM,"`echo $my_host_system | awk '{print toupper($0)}'`",[Host system])
+    AC_DEFINE_UNQUOTED(HOST_SYSTEM,"`echo $my_host_system | awk '{print toupper($0)}'`",[Host system])
 fi
 ## host=CPU-COMPANY-SYSTEM
 AC_MSG_RESULT(host=$host)
 
-PROCESSOR_FLAGS=${PROCESSOR_FLAGS:-""}
-
 use=unknown
-TLDFLAGS=""
 case $canonical in
-     older)
-     use=386-bsd;;
-
-     sh4*linux*)
-	use=sh4-linux;;
-
-     *x86_64*linux*)
-	use=amd64-linux;;
-
-     *x86_64*kfreebsd*)
-	use=amd64-kfreebsd;;
-
-     *86*linux*)
-	use=386-linux;;
-
-     *86*kfreebsd*)
-	use=386-kfreebsd;;
-
-     *86*gnu*)
-	use=386-gnu;;
-
-# m6800 not working with gcc-3.2
-     m68k*linux*)
-       if test "$use_common_binary" = "yes"; then
-         host=m68020-unknown-linux-gnu
-         echo "The host is canonicalised to $host"
-       fi
-     	use=m68k-linux;;
-
-     alpha*linux*)
-     	use=alpha-linux;;
-
-     mips*linux*)
-     	use=mips-linux;;
-
-     mipsel*linux*)
-     	use=mipsel-linux;;
-
-     sparc*linux*)
-     	use=sparc-linux;;
-
-     aarch64*linux*)
-        use=aarch64-linux;;
-
-     arm*linux*)
-     	use=arm-linux;;
-
-     s390*linux*)
-     	use=s390-linux;;
-
-     ia64*linux*)
-     	use=ia64-linux;;
-
-     hppa*linux*)
-     	use=hppa-linux;;
-
-     powerpc*linux*)
-     	use=powerpc-linux;;
-
-     powerpc-*-darwin*)
-     	use=powerpc-macosx;;
-     
-     *86*darwin*)
-     	use=386-macosx
-	if test "$build_cpu" = "x86_64" ; then 
-	   CFLAGS="-m64 $CFLAGS";
-	   LDFLAGS="-m64 -Wl,-headerpad,72 -Wl,-no_pie $LDFLAGS"; 
-	else 
-	   CFLAGS="-m32 $CFLAGS";
-	   LDFLAGS="-m32  -Wl,-headerpad,56 -Wl,-no_pie $LDFLAGS"; 
+    sh4*linux*) use=sh4-linux;;
+    *x86_64*linux*) use=amd64-linux;;
+    *x86_64*kfreebsd*)	use=amd64-kfreebsd;;
+    *86*linux*) use=386-linux;;
+    *86*kfreebsd*) use=386-kfreebsd;;
+    *86*gnu*)	use=386-gnu;;
+    m68k*linux*) use=m68k-linux;;
+    alpha*linux*) use=alpha-linux;;
+    mips*linux*) use=mips-linux;;
+    mipsel*linux*) use=mipsel-linux;;
+    sparc*linux*) use=sparc-linux;;
+    aarch64*linux*) use=aarch64-linux;;
+    arm*linux*) use=arm-linux;;
+    s390*linux*) use=s390-linux;;
+    ia64*linux*) use=ia64-linux;;
+    hppa*linux*) use=hppa-linux;;
+    powerpc*linux*) use=powerpc-linux;;
+    powerpc-*-darwin*) use=powerpc-macosx;;
+    *86*darwin*) use=386-macosx;;
+    i*mingw*|i*msys*) use=mingw;;
+    i*cygwin*)
+        if $CC -v 2>&1 | fgrep ming > /dev/null ;
+        then use=mingw
+        else use=gnuwin95
         fi;;
-     
-     alpha-dec-osf)
-     use=alpha-osf1;;
-
-     mips-dec-ultrix)
-     use=dec3100;;
-
-     old)
-     use=dos-go32;;
-
-     *86*-freebsd*)
-     use=FreeBSD;;
-
-     hp3*-*hpux*)
-     use=hp300;;
-
-     hp3*-*-*bsd*)
-     use=hp300-bsd;;
-
-     hppa*-*hpux*)
-     use=hp800;;
-
-     mips-sgi-irix)
-       case $system in
-           IRIX5*)
-            use=irix5;;
-           IRIX6*)
-            use=irix6;;
-           IRIX3*)
-            use=sgi4d;;
-       esac ;;
- 
-
-     m68k-apple-aux*)
-     use=mac2;;
-
-     old)
-     use=mp386;;
-
-     *86-ncr-sysv4)
-     use=ncr;;
-
-     *[3-9]86-*netbsd*)
-     use=NetBSD;;
-
-     old)
-     use=NeXT;;
-
-     old)
-     use=NeXT30-m68k;;
-
-     *86-*nextstep*)
-     use=NeXT32-i386;;
-
-     *m68*-*nextstep*)
-     use=NeXT32-m68k;;
-
-     *rs6000-*-aix4*)
-     use=rios;;
-
-     *rs6000-*-aix3*)
-     use=rios-aix3;;
-
-     old)
-     use=rt_aix;;
-
-     old)
-     use=sgi;;
-
-     sparc-sun-solaris*)
-     use=solaris;;
-
-     i?86-pc-solaris*)
-     use=solaris-i386;;
-
-     old)
-     use=sun2r3;;
-
-     old)
-     use=sun3;;
-
-     m68*-sunos*)
-     use=sun3-os4;;
-
-     old)
-     use=sun386i;;
-
-     sparc*sunos*)
-     use=sun4;;
-
-     *86-sequent-dynix)
-     use=symmetry;;
-
-     u370*aix)
-     use=u370_aix;;
-
-     old)
-     use=vax;;
-
-     i*mingw*|i*msys*)
-       if test "$use_common_binary" = "yes"; then
-         host=i386-pc-mingw32
-	 PROCESSOR_FLAGS="-march=i386 "
-         echo "The host is canonicalised to $host"
-       fi
-     use=mingw;;
-
-     i*cygwin*)
-	if $CC -v 2>&1 | fgrep ming > /dev/null ;
-            then use=mingw
-          else  use=gnuwin95
-        fi;;
-
-     *openbsd*)
-	# 'ld -Z' means disable W^X
-	TLDFLAGS="$TLDFLAGS -Z"
-	use=FreeBSD;;
-  
+    *openbsd*) use=FreeBSD;;
+    sparc-sun-solaris*) use=solaris;;
+    i?86-pc-solaris*) use=solaris-i386;;
 esac
 
-AC_SUBST(PROCESSOR_FLAGS)
+AC_ARG_ENABLE([machine],[  --enable-machine=XXXX will force the use of one of the definitions in h/XXXX.defs],
+	      [echo enable_machine=$enableval ; use=$enableval])
 
-echo enable_machine=$enable_machine
-if test "x$enable_machine" != "x" ; then
-  use=$enable_machine
-fi
+AC_MSG_RESULT([use=$use])	
 
 def_dlopen="no"
 def_statsysbfd="no"
 def_custreloc="yes"
-#def_statsysbfd="yes"
-#def_custreloc="no"
-def_locbfd="no"
 def_oldgmp="no"
 def_pic="no";
 def_static="no";
 def_debug="no";
 case $use in 
-     *kfreebsd)
+    *kfreebsd)
 	ln -snf linux.defs h/$use.defs;;
-     *gnu)
+    *gnu)
 	ln -snf linux.defs h/$use.defs;;
-     *linux)
+    *linux)
 	ln -snf linux.defs h/$use.defs;
 	case $use in
-# def_static -- Function descriptors are currently realized at runtime in a non-reproducible fashion
-# on these architectures -- CM			
-     	        powerpc*)
-#			if test "$host_cpu" = "powerpc64" ; then def_dlopen="yes" ; def_custreloc="no" ; fi
-			;;
-		ia64*)
-			def_dlopen="yes" ; def_custreloc="no" ;;
-		hppa*)
-			def_pic="yes" ;;
-#			def_dlopen="yes" ; def_custreloc="no" ; def_pic="yes" ;;
+	    ia64*)
+		def_dlopen="yes" ; def_custreloc="no" ;;
+	    hppa*)
+		def_pic="yes" ;;
 	esac;;
 esac
 
-AC_ARG_ENABLE(dlopen,
-	[ --enable-dlopen uses dlopen for loading objects, which can then not be retained  in saved images ]
-	,,enable_dlopen="$def_dlopen")
-AC_ARG_ENABLE(statsysbfd,
-	[ --enable-statsysbfd uses a static sytem bfd library for loading and relocationing object files ]
-	,,enable_statsysbfd="$def_statsysbfd")
-AC_ARG_ENABLE(dynsysbfd,
-	[ --enable-dynsysbfd uses a dynamic shared sytem bfd library for loading and relocationing object files ]
-	,,enable_dynsysbfd="no")
-#AC_ARG_ENABLE(locbfd,
-#	[ --enable-locbfd uses a static bfd library built from this source tree for loading and relocationing object files ]
-#	,,enable_locbfd="$def_locbfd")
-AC_ARG_ENABLE(custreloc,
-	[ --enable-custreloc uses custom gcl code if available for loading  and relocationing object files ]
-	,,enable_custreloc="$def_custreloc")
-AC_ARG_ENABLE(debug,
-	[ --enable-debug builds gcl with -g in CFLAGS to enable running under gdb ]
-	,,enable_debug="$def_debug")
-AC_ARG_ENABLE(gprof,
-	[ --enable-gprof builds gcl with -pg in CFLAGS to enable profiling with gprof ]
-	,,enable_gprof="no")
-AC_ARG_ENABLE(static,[ --enable-static will link your GCL against static as opposed to shared system libraries ] ,
-        [enable_static=$enableval],[enable_static="$def_static"])
-AC_ARG_ENABLE(pic,
-	[ --enable-pic builds gcl with -fPIC in CFLAGS ]
-	,,enable_pic="$def_pic")
+AC_ARG_ENABLE([widecons],[  --enable-widecons will use a three word cons with simplified typing],
+	      [if test "$enableval" = "yes" ; then AC_DEFINE([WIDE_CONS],[1],[three word cons]) fi])
 
-AC_ARG_ENABLE(oldgmp,
-	[ --enable-oldgmp will link against gmp2 instead of gmp3 ]
-	,,enable_oldgmp="$def_oldgmp")
+AC_ARG_ENABLE([safecdr],[  --enable-safecdr will protect cdr from immfix and speed up type processing],
+	      [if test "$enableval" = "yes" ; then
+		   AC_DEFINE([USE_SAFE_CDR],[1],[protect cdr from immfix and speed up type processing])
+		   AC_ARG_ENABLE([safecdrdbg],[  --enable-safecdrdbg will debug safecdr code],
+				 [if test "$enableval" = "yes" ; then AC_DEFINE([DEBUG_SAFE_CDR],[1],[debug safecdr code]) fi])
+	       fi])
 
-AC_ARG_ENABLE(dynsysgmp,
-	[ --enable-dynsysgmp will link against the system libgmp3 overriding certain functions with patched versions from the local source ]
-	,,enable_dynsysgmp="yes")
+AC_ARG_ENABLE([prelink],[  --enable-prelink will insist that the produced images may be prelinked],
+	      [if test "$enable_prelink" = "yes" ; then PRELINK_CHECK=t; fi])
+AC_SUBST(PRELINK_CHECK)
 
-load_opt="0"
+AC_ARG_ENABLE([vssize],[  --enable-vssize=XXXX will compile in a value stack of size XXX],
+	      [AC_DEFINE_UNQUOTED(VSSIZE,$enableval,[value stack size])])
+AC_ARG_ENABLE([bdssize],[  --enable-bdssize=XXXX will compile in a binding stack of size XXX],
+	      [AC_DEFINE_UNQUOTED(BDSSIZE,$enableval,[binding stack size])])
+AC_ARG_ENABLE([ihssize],[  --enable-ihssize=XXXX will compile in a invocation history stack of size XXX],
+	      [AC_DEFINE_UNQUOTED(IHSSIZE,$enableval,[invocation history stack size])])
+AC_ARG_ENABLE([frssize],[  --enable-frssize=XXXX will compile in a frame stack of size XXX],
+	      [AC_DEFINE_UNQUOTED(FRSSIZE,$enableval,[frame stack size])])
+
+AC_ARG_ENABLE([infodir],[  --enable-infodir=XXXX will force the use of a INFO_DIR=XXXXX as place to look for info],
+	      [INFO_DIR=$enableval],[INFO_DIR=$prefix/share/info])
+INFO_DIR=`eval echo $INFO_DIR/`
+
+AC_ARG_ENABLE([emacsdir],[  --enable-emacsdir=XXXX will manually specify the location for elisp files],
+	      [EMACS_SITE_LISP=$enableval],[EMACS_SITE_LISP=$prefix/share/emacs/site-lisp])
+EMACS_SITE_LISP=`eval echo $EMACS_SITE_LISP/`
+
+AC_ARG_ENABLE([xgcl],[  --enable-xgcl=yes will compile in support for XGCL],,[enable_xgcl=yes])
+
+AC_ARG_ENABLE([dlopen],[  --enable-dlopen uses dlopen for loading objects, which can then not be retained  in saved images],
+	      ,[enable_dlopen=$def_dlopen])
+AC_ARG_ENABLE([statsysbfd],[  --enable-statsysbfd uses a static sytem bfd library for loading and relocationing object files],
+	      ,[enable_statsysbfd=$def_statsysbfd])
+AC_ARG_ENABLE([dynsysbfd],[  --enable-dynsysbfd uses a dynamic shared sytem bfd library for loading and relocationing object files],
+	      ,[enable_dynsysbfd=no])
+AC_ARG_ENABLE([custreloc],[  --enable-custreloc uses custom gcl code if available for loading  and relocationing object files],
+	      ,[enable_custreloc=$def_custreloc])
+
+AC_ARG_ENABLE([debug],[  --enable-debug builds gcl with -g in CFLAGS to enable running under gdb],
+	      ,[enable_debug=$def_debug])
+AC_ARG_ENABLE([static],[  --enable-static will link your GCL against static as opposed to shared system libraries],
+	      ,[enable_static=$def_static])
+AC_ARG_ENABLE([pic],[  --enable-pic builds gcl with -fPIC in CFLAGS],,[enable_pic=$def_pic])
+
+load_opt=0
 if test "$enable_dlopen" = "yes" ; then
-   load_opt=1
+    load_opt=1
 fi
 if test "$enable_statsysbfd" = "yes" ; then
-   case $load_opt in
-   0) load_opt=1;;
-   1) load_opt=2;;
-   esac
+    case $load_opt in
+	0) load_opt=1;;
+	1) load_opt=2;;
+    esac
 fi
 if test "$enable_dynsysbfd" = "yes" ; then
-   case $load_opt in
-   0) load_opt=1;;
-   1) load_opt=2;;
-   2) load_opt=3;;
-   esac
-fi
-if test "$enable_locbfd" = "yes" ; then
-   case $load_opt in
-   0) load_opt=1;;
-   1) load_opt=2;;
-   2) load_opt=3;;
-   3) load_opt=4;;
-   esac
+    case $load_opt in
+	0) load_opt=1;;
+	1) load_opt=2;;
+	2) load_opt=3;;
+    esac
 fi
 if test "$enable_custreloc" = "yes" ; then
-   case $load_opt in
-   0) load_opt=1;;
-   1) load_opt=2;;
-   2) load_opt=3;;
-   3) load_opt=4;;
-   4) load_opt=5;;
-   esac
+    case $load_opt in
+	0) load_opt=1;;
+	1) load_opt=2;;
+	2) load_opt=3;;
+	3) load_opt=4;;
+	4) load_opt=5;;
+    esac
 fi
 
 if test "$load_opt" != "1" ; then
-	echo "Exactly one loader option must be chosen: dlopen=$enable_dlopen statsysbfd=$enable_statsysbfd dynsysbfd=$enable_dynsysbfd locbfd=$enable_locbfd custreloc=$enable_custreloc"
-	exit 1
+    echo "Exactly one loader option must be chosen: dlopen=$enable_dlopen statsysbfd=$enable_statsysbfd dynsysbfd=$enable_dynsysbfd custreloc=$enable_custreloc"
+    AC_MSG_ERROR([loader option failure])
 fi
-
-TLDFLAGS=""
-if test "$enable_static" = "yes" ; then
-   TLDFLAGS="-static -Wl,-zmuldefs $TLDFLAGS"; #FIXME should be in unixport/makefile
-   AC_DEFINE(STATIC_LINKING,1,[staticly linked images])
-fi
-case $use in
-     *gnuwin*)
-	TLDFLAGS="$TLDFLAGS -Wl,--stack,8000000";;
-esac
-
-## finally warn if we did not find a recognized machine.s
-##
-#if test "$use" = "unknown" ; then
-#types=`echo h/*.defs` | sed -e "s:h/::g" -e "s:\.defs:g"`
-#echo got canonical=$canonical, but was not recognized. 
-#echo Unable to guess type to use.  Try one of 
-#exit(1)
-#fi
-
-AC_MSG_RESULT([use=$use])	
 
 
 #
@@ -462,220 +170,249 @@ AC_MSG_RESULT([use=$use])
 # We set the default CFLAGS below, and don't want the autoconf default
 # CM 20040106
 if test "$CFLAGS" = "" ; then
-	CFLAGS=" "
+    CFLAGS=" "
 fi
 if test "$LDFLAGS" = "" ; then
-	LDFLAGS=" "
+    LDFLAGS=" "
 fi
 
 AC_PROG_CC
 AC_PROG_CPP
 AC_SUBST(CC)
-
-
-# can only test for numbers -- CM
-# if test "${GCC}" -eq "yes" ; then
-#if [[ "${GCC}" = "yes" ]] ; then
-# Allog for environment variable overrides on compiler selection -- CM
-#GCC=$CC
-#else
-#GCC=""
-#fi
-# subst GCC not only under 386-linux, but where available -- CM
-
-TCFLAGS="-fsigned-char -fno-builtin-malloc -fno-builtin-free"
-
-if test "$GCC" = "yes" ; then
-
-   TCFLAGS="$TCFLAGS -Wall"
-
-   AC_MSG_CHECKING([for clang])
-   AC_RUN_IFELSE([
-   	AC_LANG_SOURCE([[
-		int main() {
-		return
-		#ifdef __clang__
-		0
-		#else
-		1
-		#endif
-		;}]])],
-	[AC_MSG_RESULT([yes])
-	 clang="yes"
-	 TCFLAGS="$TCFLAGS -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign"
-	 AC_DEFINE([CLANG],[1],[running clang compiler])],	
-	[AC_MSG_RESULT([no])
-	 #FIXME -Wno-unused-but-set-variable when time
-	 TMPF=-Wno-unused-but-set-variable
-	 AC_MSG_CHECKING([for CFLAG $TMPF])
-	 CFLAGS_ORI=$CFLAGS
-	 CFLAGS="$CFLAGS $TMPF"
-	 AC_TRY_RUN([int main() {return 0;}],TCFLAGS="$TCFLAGS $TMPF";AC_MSG_RESULT(yes),AC_MSG_RESULT(no),AC_MSG_RESULT(no))
-	 CFLAGS=$CFLAGS_ORI])
+GCL_CC=`basename $CC`
+if echo $GCL_CC |grep -q gcc |grep -q win; then
+    GCL_CC=gcc
 fi
+AC_SUBST(GCL_CC)
 
-if test "$GCC" = "yes" ; then
-	TCFLAGS="$TCFLAGS -pipe"
-	case $use in
-	     *mingw*)
-#	        echo "WARNING: Remove -fno-zero-initialized-in-bss from makedefs if gcc less than 3.3.1."
-#	        echo "         It is otherwise needed for the Unexec stuff to work."
-#		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
-		TCFLAGS="$TCFLAGS -fno-zero-initialized-in-bss -mms-bitfields";;
-	     *gnuwin*)
-#	        echo "WARNING: Remove -fno-zero-initialized-in-bss from makedefs if gcc less than 3.3.1."
-#	        echo "         It is otherwise needed for the Unexec stuff to work."
-#		if test "$enable_debug" = "yes" ; then TCFLAGS="$TCFLAGS -gstabs" ; fi
-		TCFLAGS="$TCFLAGS -fno-zero-initialized-in-bss -mms-bitfields";;
-        esac
+add_arg_to_tcflags() {
+    
+    local i=1
+    AC_MSG_CHECKING([for CFLAG $1])
+    CFLAGS_ORI=$CFLAGS
+    CFLAGS="$CFLAGS -Werror $1 `echo $1|sed 's,-Wno-,-W,1'`"
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM([[]],[[]])],
+	[TCFLAGS="$TCFLAGS $1";AC_MSG_RESULT([yes]);i=0],
+	[AC_MSG_RESULT([no])],
+	[AC_MSG_RESULT([no])])
+    CFLAGS=$CFLAGS_ORI
+    return $i
+    
+}
+
+assert_arg_to_tcflags() {
+    if ! add_arg_to_tcflags $1 ; then AC_MSG_RESULT([cannot add $1 to CFLAGS]); exit 1 ; fi
+    return 0
+}
+
+add_args_to_tcflags() {
+    
+    while test "$#" -ge 1 ; do
+  	add_arg_to_tcflags $1
+	shift
+    done
+}
+
+add_arg_to_tldflags() {
+    
+    local i=1
+    AC_MSG_CHECKING([for LDFLAG $1])
+    LDFLAGS_ORI=$LDFLAGS
+    LDFLAGS="$LDFLAGS -Werror $1"
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM([[]],[[]])],
+	[TLDFLAGS="$TLDFLAGS $1";AC_MSG_RESULT([yes]);i=0],
+	[AC_MSG_RESULT([no])],
+	[AC_MSG_RESULT([no])])
+    LDFLAGS=$LDFLAGS_ORI
+    return $i
+    
+}
+
+assert_arg_to_tldflags() {
+    if ! add_arg_to_tldflag $1 ; then AC_MSG_RESULT([cannot add $1 to LDFLAGS]); exit 1 ; fi
+    return 0
+}
+
+add_args_to_tldflags() {
+    
+    while test "$#" -ge 1 ; do
+  	add_arg_to_tldflags $1
+	shift
+    done
+}
+
+remove_arg_from_ldflags() {
+    
+    NEW_LDFLAGS=""	  
+    for i in $LDFLAGS; do
+	if ! test "$i" = "$1" ; then
+      	    NEW_LDFLAGS="$NEW_LDFLAGS $i"
+	else
+            AC_MSG_RESULT([removing $1 from LDFLAGS])
+	fi
+    done
+    LDFLAGS=$NEW_LDFLAGS
+    
+    return 0
+    
+}
+
+TCFLAGS=""
+add_args_to_tcflags -fsigned-char -pipe \
+                    -fno-builtin-malloc -fno-builtin-free \
+                    -fno-pie -fno-PIC -fno-pic -no-pie \
+	            -Wall \
+	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
+	            -Wno-unused-but-set-variable -Wno-misleading-indentation
+
+TLDFLAGS=""
+add_args_to_tldflags -Wl,-no_pie -no-pie -Wl,-z,lazy
+
+AC_MSG_CHECKING([for clang])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM([[
+			 #ifdef __clang__
+			 #define RET 0
+			 #else
+			 #define RET 1
+			 #endif
+		     ]],
+		     [[
+			 return RET;
+		     ]])],
+    [AC_MSG_RESULT([yes])
+     clang="yes"
+     remove_arg_from_ldflags -pie
+     AC_DEFINE([CLANG],[1],[running clang compiler])],	
+    [AC_MSG_RESULT([no])])
+
+case $use in
+    *mingw*)
+	assert_arg_to_tcflags -fno-zero-initialized-in-bss
+	assert_arg_to_tcflags -mms-bitfields;;
+    *gnuwin*)
+	assert_arg_to_tcflags -fno-zero-initialized-in-bss
+	assert_arg_to_tcflags -mms-bitfields
+        assert_arg_to_tldflags -Wl,--stack,8000000;;
+    386-macosx)
+	assert_arg_to_tldflags -Wl,-no_pie
+	if test "$build_cpu" = "x86_64" ; then
+	    assert_arg_to_tcflags -m64
+	    assert_arg_to_tldflags -m64
+	    assert_arg_to_tldflags -Wl,-headerpad,72
+        else
+	    assert_arg_to_tcflags -m32
+	    assert_arg_to_tldflags -m32
+	    assert_arg_to_tldflags -Wl,-headerpad,56
+        fi;;
+    FreeBSD) assert_arg_to_tldflags -Z;;
+esac
+
+if test "$enable_static" = "yes" ; then
+    assert_arg_to_tldflags -static
+    assert_arg_to_tldflags -Wl,-zmuldefs
+    AC_DEFINE(STATIC_LINKING,1,[staticly linked images])
 fi
-#if test -f /proc/sys/kernel/exec-shield ; then
-#	exec_stat=`cat /proc/sys/kernel/exec-shield`
-#	if test "$exec_stat" != "0" ; then
-#		# CFLAGS here to hopefully cover the DBEGIN routine below
-#		CFLAGS="$CFLAGS -Wa,--execstack"
-#	fi
-#fi
 
 TO3FLAGS=""
 TO2FLAGS=""
 
-#TFPFLAG="-fomit-frame-pointer"
-# FIXME -- remove when mingw compiler issues are fixed
 case "$use" in
-  *mingw*)
+    *mingw*)
   	TFPFLAG="";;
-  m68k*)#FIXME gcc 4.x bug workaround
+    m68k*)#FIXME gcc 4.x bug workaround
 	TFPFLAG="";;
-  *)
+    *)
 	TFPFLAG="-fomit-frame-pointer";;
 esac
 
 AC_CHECK_PROGS(AWK,[gawk nawk awk])
 
-# Work around system/gprof mips/hppa hang
-AC_MSG_CHECKING([working gprof])
-old_enable_gprof=$enable_gprof
-case $use in
-  powerpc*) if test "$host_cpu" = "powerpc64le" ; then enable_gprof="no"; fi;;
-  sh4*)  enable_gprof="no";;
-  ia64*)  enable_gprof="no";;
-#  mips*) enable_gprof="no";;
-  hppa*) enable_gprof="no";;
-  arm*)  enable_gprof="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
-  *gnu)  enable_gprof="no";;
-esac		     
-if test "$enable_gprof" = "$old_enable_gprof" ; then
-   AC_MSG_RESULT([ok])
-else
-   AC_MSG_RESULT([disabled])
-fi
-
-if test "$enable_gprof" = "yes" ; then
-	AC_MSG_CHECKING(for text start)
-	echo 'int main () {return(0);}' >foo.c
-	$CC foo.c -o foo
-	GCL_GPROF_START=`nm foo | $AWK  '/  *[[TD]]  *__*start$/ {print $NF}'` # D for ppc64 -- FIXME custreloc
-	rm -f foo.c foo
-	if test "$GCL_GPROF_START" != "" ; then
-		AC_MSG_RESULT($GCL_GPROF_START)
-		AC_DEFINE_UNQUOTED(GCL_GPROF_START,$GCL_GPROF_START,[starting address for gprof])
-		case "$use" in	
-		   arm*)	
-	             #FIXME report and remove this when done
-	             AC_MSG_RESULT(Reducing optimization on profiling arm build to workaround gcc bug)
-		     enable_debug=yes;;
-		esac
-                TCFLAGS="$TCFLAGS -pg";
-		case $use in
-		s390*) ;; # relocation truncation bug in gcc
-		*) TLIBS="$TLIBS -pg";;
-		esac
-        	TFPFLAG=""
- 		AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
-	else			   
-                enable_gprof="no";
-	fi			   
-fi
-
-if $CC -v 2>&1 | tail -1 | grep "gcc version 4.6.1" >/dev/null ; then
-   case "$use" in	
-     arm*)	
-     #FIXME report and remove this when done
-	AC_MSG_RESULT(Reducing optimization on arm build to workaround gcc 4.6 bug)
-	enable_debug=yes;;
-   esac
-fi
-
+AC_ARG_ENABLE([gprof],[  --enable-gprof builds gcl with -pg in CFLAGS to enable profiling with gprof],
+	      [if test "$enableval" = "yes" ; then
+		   AC_MSG_CHECKING([working gprof])
+		   case $use in
+		       powerpc*) if test "$host_cpu" = "powerpc64le" ; then enableval="no"; fi;;
+		       sh4*)  enableval="no";;
+		       ia64*) enableval="no";;
+		       hppa*) enableval="no";;
+		       arm*)  enableval="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
+		       *gnu)  enableval="no";;
+		   esac		     
+		   if test "$enableval" != "yes" ; then
+		       AC_MSG_RESULT([disabled])
+		   else
+		       AC_MSG_RESULT([ok])
+		       AC_MSG_CHECKING([for text start])
+		       echo 'int main () {return(0);}' >foo.c
+		       $CC foo.c -o foo
+		       GCL_GPROF_START=`nm foo | $AWK  '/  *[[TD]]  *__*start$/ {print $NF}'` # D for ppc64 -- FIXME custreloc
+		       rm -f foo.c foo
+		       if test "$GCL_GPROF_START" != "" ; then
+			   AC_MSG_RESULT($GCL_GPROF_START)
+			   AC_DEFINE_UNQUOTED(GCL_GPROF_START,$GCL_GPROF_START,[starting address for gprof])
+			   assert_arg_to_tcflags -pg
+			   case $use in
+			       s390*) ;; # relocation truncation bug in gcc
+			       *) TLIBS="$TLIBS -pg";;
+			   esac
+       			   TFPFLAG=""
+			   AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
+		       fi			   
+		   fi
+	       fi])
 
 if test "$enable_debug" = "yes" ; then
-	TCFLAGS="$TCFLAGS -g"
-	# for subconfigurations
-	CFLAGS="$CFLAGS -g"
+    assert_arg_to_tcflags -g
+    # for subconfigurations
+    CFLAGS="$CFLAGS -g"
 else
-	TO3FLAGS="-O3 $TFPFLAG"
-	TO2FLAGS="-O"
+    TO3FLAGS="-O3 $TFPFLAG"
+    TO2FLAGS="-O"
 fi
 
 # gcc on ppc cannot compile our new_init.c with full opts --CM
 TONIFLAGS=""
 case $use in 
-     powerpc*macosx)
-	   TCFLAGS="$TCFLAGS -mlongcall";;
-     *linux)
+    powerpc*macosx) assert_arg_to_tcflags -mlongcall;;
+    *linux)
 	case $use in
-#		amd64*) # stack-boundary option does not work
-#			TCFLAGS="$TCFLAGS -m64 -mpreferred-stack-boundary=8";;  
-		alpha*)
-			TCFLAGS="$TCFLAGS -mieee"
-			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.8.1
-			;;
-#		m68k*)
-#			TCFLAGS="$TCFLAGS -ffloat-store";;
-		aarch64*)
-			TLIBS="$TLIBS -lgcc_s";;
-		hppa*)
-			TCFLAGS="$TCFLAGS -mlong-calls "
-			TLIBS="$TLIBS -lgcc_s" # workaround hppa __moddi3 local func symbols with default linker flags
-			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O2" ; TFPFLAG=""; fi #FIXME needed asof gcc 4.8.1
-#			TCFLAGS="$TCFLAGS -ffunction-sections"
-#			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O $TFPFLAG" ; fi
-#			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
-			;;
-		mips*)
-			case $canonical in
-			mips64*linux*)
-				TLIBS="$TLIBS -Wl,-z -Wl,now";;
-			esac
-#			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.6.2
-			;;
-		ia64*)
-			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.8.1
-			;;
-		arm*)
-			TCFLAGS="$TCFLAGS -mlong-calls -fdollars-in-identifiers -g "
-#			if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.6.2
-#			if test "$enable_debug" != "yes" ; then TO2FLAGS="-O" ; fi
-			;;
-		powerpc*) 
-                        TCFLAGS="$TCFLAGS -mlongcall"
-			;;
-#			if $CC -v 2>&1 | grep -q "gcc version 3.2" ; then
-#			   echo Reducing optimization for buggy gcc-3.2
-#			   if test "$enable_debug" != "yes" ; then TONIFLAGS="-O $TFPFLAG" ; fi
-#			fi;
-#			echo Probing for longcall
-#			if ! $CC -v 2>&1 | $AWK '/^gcc version / {split($3,A,".");if (A[[1]]+0>3 || (A[[1]]+0>=3 && A[[2]]+0>=3)) exit 1;}'; then
-#			   echo Enabling longcall on gcc 3.3 or later
-#			   TCFLAGS="$TCFLAGS -mlongcall"
-#			   echo Reducing optimization for buggy gcc 3.3 or later
-#			   if test "$enable_debug" != "yes" ; then TONIFLAGS="-O $TFPFLAG" ; fi
-#			fi;;
+	    alpha*)
+		assert_arg_to_tcflags -mieee
+		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.8.1
+		;;
+	    aarch64*)
+		TLIBS="$TLIBS -lgcc_s";;
+	    hppa*)
+		assert_arg_to_tcflags -mlong-calls
+		TLIBS="$TLIBS -lgcc_s" # workaround hppa __moddi3 local func symbols with default linker flags
+		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O2" ; TFPFLAG=""; fi #FIXME needed asof gcc 4.8.1
+		;;
+	    mips*)
+		case $canonical in
+		    mips64*linux*)
+			assert_arg_to_tldflags -Wl,-z,now;;
+		esac
+		;;
+	    ia64*)
+		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.8.1
+		;;
+	    arm*)
+		assert_arg_to_tcflags -mlong-calls
+		assert_arg_to_tcflags -fdollars-in-identifiers
+		assert_arg_to_tcflags -g #?
+		;;
+	    powerpc*) 
+		assert_arg_to_tcflags -mlongcall
+		;;
 	esac;;
 esac
 if test "$enable_pic" = "yes" ; then
-	TCFLAGS="$TCFLAGS -fPIC"
+    assert_arg_to_tcflags -fPIC
 fi
+
 
 FDEBUG=`echo $CFLAGS | tr ' ' '\012' |grep "^\-g$"|tr '\012' ' '`
 #CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-g$"`
@@ -693,27 +430,27 @@ FOOPT0=`echo $CFLAGS | tr ' ' '\012' |grep "^\-O0$"|tr '\012' ' '`
 CFLAGS=`echo $CFLAGS | tr ' ' '\012' |grep -v "^\-O0$"|tr '\012' ' '`
 
 if test "$FOOPT0" != "" ; then
-   TO3FLAGS=`echo $TO3FLAGS | sed 's,\-O[[123 ]],-O0 ,g' | sed 's,\-O$,-O0 ,g'`
-   TO2FLAGS=`echo $TO2FLAGS | sed 's,\-O[[123 ]],-O0 ,g' | sed 's,\-O$,-O0 ,g'`
+    TO3FLAGS=`echo $TO3FLAGS | sed 's,\-O[[123 ]],-O0 ,g' | sed 's,\-O$,-O0 ,g'`
+    TO2FLAGS=`echo $TO2FLAGS | sed 's,\-O[[123 ]],-O0 ,g' | sed 's,\-O$,-O0 ,g'`
 else 
-if test "$FOOPT1" != "" ; then
-   TO3FLAGS=`echo $TO3FLAGS | sed 's,\-O[[2-3]],-O1,g'`
-   TO2FLAGS=`echo $TO2FLAGS | sed 's,\-O[[2-3]],-O1,g'`
-else 
-if test "$FOOPT2" != "" ; then
-   TO3FLAGS=`echo "$TO3FLAGS" | sed 's,\-O3,-O2,g'`
-   TO2FLAGS=`echo "$TO2FLAGS" | sed 's,\-O3,-O2,g'`
-fi
-fi
+    if test "$FOOPT1" != "" ; then
+	TO3FLAGS=`echo $TO3FLAGS | sed 's,\-O[[2-3]],-O1,g'`
+	TO2FLAGS=`echo $TO2FLAGS | sed 's,\-O[[2-3]],-O1,g'`
+    else 
+	if test "$FOOPT2" != "" ; then
+	    TO3FLAGS=`echo "$TO3FLAGS" | sed 's,\-O3,-O2,g'`
+	    TO2FLAGS=`echo "$TO2FLAGS" | sed 's,\-O3,-O2,g'`
+	fi
+    fi
 fi
 
 if test "$FDEBUG" != "" ; then
-   TO3FLAGS=`echo $TO3FLAGS | sed 's,\-fomit-frame-pointer,,g'`
-   TO2FLAGS=`echo $TO2FLAGS | sed 's,\-fomit-frame-pointer,,g'`
+    TO3FLAGS=`echo $TO3FLAGS | sed 's,\-fomit-frame-pointer,,g'`
+    TO2FLAGS=`echo $TO2FLAGS | sed 's,\-fomit-frame-pointer,,g'`
 fi
 
 if test "$FOMITF" != "" ; then
-   TO3FLAGS="$TO3FLAGS $FOMITF"
+    TO3FLAGS="$TO3FLAGS $FOMITF"
 fi
 
 # Step 1: set the variable "system" to hold the name and version number
@@ -731,12 +468,12 @@ if test -f /usr/lib/NextStep/software_version; then
 else
     system=`uname -s`-`uname -r`
     if test "$?" -ne 0 ; then
-	AC_MSG_RESULT([unknown (can't find uname command)])
+	AC_MSG_RESULT([unknown (cannot find uname command)])
 	system=unknown
     else
 	# Special check for weird MP-RAS system (uname returns weird
 	# results, and the version is kept in special file).
-    
+	
 	if test -r /etc/.relid -a "X`uname -n`" = "X`uname -s`" ; then
 	    system="MP-RAS-`${AWK} '{print $3}' '/etc/.relid'`"
 	fi
@@ -748,156 +485,130 @@ else
 fi
 
 case $use in
-     *macosx)
+    *macosx)
         AC_CHECK_HEADERS(malloc/malloc.h,,[AC_MSG_ERROR([need malloc.h on macosx])])
 	AC_CHECK_MEMBER([struct _malloc_zone_t.memalign],
- 		AC_DEFINE(HAVE_MALLOC_ZONE_MEMALIGN,1,[memalign element present]), [], 
-		[
-		#include <malloc/malloc.h>
-		])
+ 			AC_DEFINE(HAVE_MALLOC_ZONE_MEMALIGN,1,[memalign element present]), [], 
+			[
+			    #include <malloc/malloc.h>
+			])
 	AC_SUBST(HAVE_MALLOC_ZONE_MEMALIGN)
 	;;
 esac
 
-
-AC_CHECK_HEADERS(setjmp.h,
-	AC_MSG_CHECKING([sizeof jmp_buf])
-	AC_RUN_IFELSE([
-		AC_LANG_SOURCE([[
-			#include <stdio.h>
-			#include <setjmp.h>
-			int main() {
-			   FILE *fp=fopen("conftest1","w");
-			   fprintf(fp,"%lu\n",sizeof(jmp_buf));
-			   fclose(fp);
-			   return 0;
-			}]])],
-			[sizeof_jmp_buf=`cat conftest1`
-			 AC_MSG_RESULT($sizeof_jmp_buf)
-			 AC_DEFINE_UNQUOTED(SIZEOF_JMP_BUF,$sizeof_jmp_buf,[sizeof jmp_buf])],
-			 [AC_MSG_RESULT(no)]))
+AC_CHECK_HEADERS(
+    [setjmp.h],
+    [AC_MSG_CHECKING([sizeof jmp_buf])
+     AC_RUN_IFELSE(
+	 [AC_LANG_PROGRAM(
+		 [[
+		     #include <stdio.h>
+		     #include <setjmp.h>
+		 ]],
+		 [[
+		     FILE *fp=fopen("conftest1","w");
+		     fprintf(fp,"%lu\n",sizeof(jmp_buf));
+		     fclose(fp);
+		 ]])],
+	 [sizeof_jmp_buf=`cat conftest1`
+	  AC_MSG_RESULT($sizeof_jmp_buf)
+	  AC_DEFINE_UNQUOTED(SIZEOF_JMP_BUF,$sizeof_jmp_buf,[sizeof jmp_buf])],
+	 [AC_MSG_RESULT([no])])])
 
 # sysconf
+AC_CHECK_HEADERS(
+    [unistd.h],
+    [AC_CHECK_LIB(
+	    [c],[sysconf],
+	    [AC_MSG_CHECKING([_SC_CLK_TCK])
+	     hz=0
+	     AC_RUN_IFELSE(
+		 [AC_LANG_PROGRAM(
+			 [[
+			     #include <unistd.h>
+			     #include <stdio.h>
+			 ]],
+			 [[
+			     FILE *fp=fopen("conftest1","w");
+			     fprintf(fp,"%lu\n",sysconf(_SC_CLK_TCK));
+			     fclose(fp);
+			 ]],
+			 [hz=`cat conftest1`
+			  AC_DEFINE_UNQUOTED(HZ,$hz,[time system constant])])])
+	     AC_MSG_RESULT($hz)])])
 
-AC_CHECK_HEADERS(unistd.h,
-	AC_CHECK_LIB(c,sysconf,
-		AC_MSG_CHECKING(_SC_CLK_TCK)
-		AC_TRY_RUN([#include <unistd.h>
-		            #include <stdio.h>
-		            int
-			    main() {
-			   	FILE *fp=fopen("conftest1","w");
-				fprintf(fp,"%lu\n",sysconf(_SC_CLK_TCK));
-				fclose(fp);
-			        return 0;
-			    }],
-			    hz=`cat conftest1`
-			    AC_DEFINE_UNQUOTED(HZ,$hz,[time system constant])
-			    ,hz=0,hz=0)
-	        [AC_MSG_RESULT($hz)]
-		dnl AC_MSG_CHECKING(_SC_PHYS_PAGES)
-		dnl AC_RUN_IFELSE([
-		dnl 	AC_LANG_SOURCE([[
-		dnl 	#include <stdio.h>
-		dnl 	#include <unistd.h>
-		dnl 	int main() {
-		dnl 	   FILE *fp=fopen("conftest1","w");
-		dnl 	   fprintf(fp,"%lu\n",sysconf(_SC_PHYS_PAGES));
-		dnl 	   fclose(fp);
-		dnl 	   return 0;
-		dnl 	}]])],
-		dnl 	[phys=`cat conftest1`
-		dnl 	 AC_MSG_RESULT($phys)
-		dnl 	 AC_DEFINE(HAVE_SYSCONF_PHYS_PAGES,$phys,[probe runtime phys pages for gc performance])],
-		dnl 	 [AC_MSG_RESULT(no)])
-			 ))
-
-
-#MY_SUBDIRS=
-
-#
-# GMP
-#
 
 rm -f makedefsafter
 
-MP_INCLUDE=""
-if test $use_gmp = yes ; then
+AC_ARG_ENABLE([dynsysgmp],
+	      [  --enable-dynsysgmp will link against the system libgmp3 overriding certain functions with patched versions from the local source])
 
- PATCHED_SYMBOLS=""
- if test "$enable_dynsysgmp" = "yes" ; then
-	AC_CHECK_HEADERS(gmp.h,
-		AC_CHECK_LIB(gmp,__gmpz_init,
-			AC_MSG_CHECKING("for external gmp version")
-			AC_TRY_RUN([#include <gmp.h>
-				    int main() {
-				    #if __GNU_MP_VERSION > 3
-					return 0;
-				    #else
-					return -1;
-				    #endif
-				    }],
-#				MPFILES=$GMPDIR/mpn/mul_n.o
-#				PATCHED_SYMBOLS=__gmpn_toom3_mul_n
-				MPFILES=
-				PATCHED_SYMBOLS=
-#				if test "$use" = "m68k-linux" ; then
-#					MPFILES="$MPFILES $GMPDIR/mpn/lshift.o $GMPDIR/mpn/rshift.o"
-#					PATCHED_SYMBOLS="$PATCHED_SYMBOLS __gmpn_lshift __gmpn_rshift"
-#				fi
-				TLIBS="$TLIBS -lgmp"
-				echo "#include \"gmp.h\"" >foo.c
-				echo "int main() {return 0;}" >>foo.c
-				MP_INCLUDE=`cpp foo.c | $AWK '/(\/|\\\\)gmp.h/ {if (!i) print $3;i=1}' | tr -d '"'`
-				rm -f foo.c,
-				echo "Cannot use dynamic gmp lib" , echo "Cannot use dynamic gmp lib" ),
-			echo "Cannot use dynamic gmp lib" ,),
-		echo "Cannot use dynamic gmp lib" ,)
+if test "$enable_dynsysgmp" != "no" ; then
+    AC_CHECK_HEADERS(
+	[gmp.h],
+	[AC_CHECK_LIB(
+		[gmp],[__gmpz_init],
+		[AC_MSG_CHECKING([for external gmp version])
+		 AC_RUN_IFELSE(
+		     [AC_LANG_PROGRAM(
+			     [[
+				 #include <gmp.h>
+			     ]],
+			     [[
+				 #if __GNU_MP_VERSION > 3
+				 return 0;
+				 #else
+				 return -1;
+				 #endif
+			     ]])],
+		     [AC_MSG_RESULT([good])
+		      TLIBS="$TLIBS -lgmp"
+		      echo "#include \"gmp.h\"" >foo.c
+		      echo "int main() {return 0;}" >>foo.c
+		      MP_INCLUDE=`cpp foo.c | $AWK '/(\/|\\\\)gmp.h/ {if (!i) print $3;i=1}' | tr -d '"'`
+		      rm -f foo.c])])])
+    
+    if test "$MP_INCLUDE" = "" ; then
+	AC_MSG_RESULT([Cannot use dynamic gmp lib])
+    fi
+    
 fi
 
-NEED_LOCAL_GMP=''
+
 if test "$MP_INCLUDE" = "" ; then			
-	NEED_LOCAL_GMP=1;
-fi
-if test "$PATCHED_SYMBOLS" != "" ; then			
-	NEED_LOCAL_GMP=1;
-fi
-
-if test "$NEED_LOCAL_GMP" != "" ; then			
-
-   	 GMPDIR=gmp4
-	 AC_MSG_CHECKING([use_gmp=yes, doing configure in gmp directory])
-	 echo
-	 echo "#"
-	 echo "#"
-	 echo "# -------------------"
-	 echo "# Subconfigure of GMP"
-	 echo "#"
-	 echo "#"
-
-	 if test "$use_common_binary" = "yes"; then
-	   cd $GMPDIR && ./configure --build=$host && cd ..
-	 else
-	   cd $GMPDIR && ./configure && cd ..
-	 fi
-	#MY_SUBDIRS="$MY_SUBDIRS $GMPDIR" 
-
-	 echo "#"
-	 echo "#"
-	 echo "#"
-	 echo "# Subconfigure of GMP done"
-	 echo "# ------------------------"
-	 echo "#"
-
-	if test "$MP_INCLUDE" = "" ; then
-		cp $GMPDIR/gmp.h h/gmp.h
-		MP_INCLUDE=h/gmp.h
-		MPFILES=gmp_all
-	fi
-
+    
+    GMPDIR=gmp4
+    AC_MSG_CHECKING([doing configure in gmp directory])
+    echo
+    echo "#"
+    echo "#"
+    echo "# -------------------"
+    echo "# Subconfigure of GMP"
+    echo "#"
+    echo "#"
+    
+    if test "$use_common_binary" = "yes"; then
+	cd $GMPDIR && ./configure --build=$host && cd ..
+    else
+	cd $GMPDIR && ./configure && cd ..
+    fi
+    #MY_SUBDIRS="$MY_SUBDIRS $GMPDIR" 
+    
+    echo "#"
+    echo "#"
+    echo "#"
+    echo "# Subconfigure of GMP done"
+    echo "# ------------------------"
+    echo "#"
+    
+    if test "$MP_INCLUDE" = "" ; then
+	cp $GMPDIR/gmp.h h/gmp.h
+	MP_INCLUDE=h/gmp.h
+	MPFILES=gmp_all
+    fi
 fi
 
-AC_MSG_CHECKING("for leading underscore in object symbols")
+AC_MSG_CHECKING([for leading underscore in object symbols])
 cat>foo.c <<EOFF
 #include <math.h>
 #include <stdio.h>
@@ -905,12 +616,12 @@ int main() {FILE *f;double d=0.0;getc(f);d=cos(d);return 0;}
 EOFF
 $CC -c foo.c -o foo.o
 if nm foo.o |grep " U " | grep "_cos" >/dev/null || nm foo.o |grep " U " | grep " _getc" >/dev/null ; then
-	LEADING_UNDERSCORE=1
-	AC_DEFINE(LEADING_UNDERSCORE,1,[symbol name mangling convention])
-	AC_MSG_RESULT("yes")
+    LEADING_UNDERSCORE=1
+    AC_DEFINE(LEADING_UNDERSCORE,1,[symbol name mangling convention])
+    AC_MSG_RESULT("yes")
 else
-	LEADING_UNDERSCORE=""
-	AC_MSG_RESULT("no")
+    LEADING_UNDERSCORE=""
+    AC_MSG_RESULT("no")
 fi
 
 
@@ -918,61 +629,63 @@ AC_MSG_CHECKING("for GNU ld option -Map")
 touch map
 $CC -o foo [ -Wl,-Map ] map foo.o >/dev/null 2>&1
 if test `cat map | wc -l` != "0" ; then
-	AC_MSG_RESULT("yes")
-	AC_DEFINE(HAVE_GNU_LD,1,[gnu linker present])
-	GNU_LD=1
+    AC_MSG_RESULT("yes")
+    AC_DEFINE(HAVE_GNU_LD,1,[gnu linker present])
+    GNU_LD=1
 else
-	AC_MSG_RESULT("no")
-	GNU_LD=
+    AC_MSG_RESULT("no")
+    GNU_LD=
 fi
 rm -f foo.c foo.o foo map
 
 AC_MSG_CHECKING([for size of gmp limbs])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-	#include "$MP_INCLUDE"
-	]],[[
-	FILE *fp=fopen("conftest1","w");
-	fprintf(fp,"%u",sizeof(mp_limb_t));
-	fclose(fp);
-	return 0;
-	]])],[mpsize=`cat conftest1`],[AC_MSG_ERROR([Cannot determine mpsize])])
+				   #include <stdio.h>
+				   #include "$MP_INCLUDE"
+			       ]],
+			       [[
+				   FILE *fp=fopen("conftest1","w");
+				   fprintf(fp,"%u",sizeof(mp_limb_t));
+				   fclose(fp);
+			       ]])],[mpsize=`cat conftest1`],[AC_MSG_ERROR([Cannot determine mpsize])])
 AC_DEFINE_UNQUOTED(MP_LIMB_BYTES,$mpsize,[sizeof mp_limb in gmp library])
 AC_MSG_RESULT($mpsize) 
 
 AC_MSG_CHECKING([_SHORT_LIMB])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-	#include "$MP_INCLUDE"
-	]],[[
-	#ifdef _SHORT_LIMB
-	return 0;
-	#else
-	return 1;
-	#endif
-	]])],[AC_DEFINE(__SHORT_LIMB,1,[short gmp3 limbs]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+				   #include <stdio.h>
+				   #include "$MP_INCLUDE"
+			       ]],
+			       [[
+				   #ifdef _SHORT_LIMB
+				   return 0;
+				   #else
+				   return 1;
+				   #endif
+			       ]])],[AC_DEFINE(__SHORT_LIMB,1,[short gmp3 limbs]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING([_LONG_LONG_LIMB])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	#include "$MP_INCLUDE"
-	]],[[
-	#ifdef _LONG_LONG_LIMB
-	return 0;
-	#else
-	return 1;
-	#endif
-	]])],[AC_DEFINE(__LONG_LONG_LIMB,1,[long gmp3 limbs]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
+				   #include <stdio.h>
+				   #include "$MP_INCLUDE"
+			       ]],
+			       [[
+				   #ifdef _LONG_LONG_LIMB
+				   return 0;
+				   #else
+				   return 1;
+				   #endif
+			       ]])],[AC_DEFINE(__LONG_LONG_LIMB,1,[long gmp3 limbs]) AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
- GMP=1
- AC_DEFINE(GMP,1,[using gmp])
- AC_SUBST(GMP)
- AC_SUBST(GMPDIR)
- echo > makedefsafter
- echo "MPFILES=$MPFILES" >> makedefsafter
- echo "PATCHED_SYMBOLS=$PATCHED_SYMBOLS" >> makedefsafter
- echo >> makedefsafter
-fi
+GMP=1
+AC_DEFINE(GMP,1,[using gmp])
+AC_SUBST(GMP)
+AC_SUBST(GMPDIR)
+echo > makedefsafter
+echo "MPFILES=$MPFILES" >> makedefsafter
+echo "PATCHED_SYMBOLS=$PATCHED_SYMBOLS" >> makedefsafter
+echo >> makedefsafter
+
 
 
 #
@@ -980,30 +693,13 @@ fi
 # 
 
 if test "$enable_xgcl" = "yes" ; then 
-
-   AC_PATH_X
-#   AC_PATH_XTRA
-#   echo $X_CFLAGS
-#   echo $X_LIBS
-#   echo $X_EXTRA_LIBS
-#   echo $X_PRE_LIBS
-
-   miss=0
-#   AC_CHECK_LIB(Xmu,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)#FIXME remove these
-#   AC_CHECK_LIB(Xt,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)
-#   AC_CHECK_LIB(Xext,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)
-#   AC_CHECK_LIB(Xaw,main,X_LIBS="$X_LIBS",miss=1,$X_LIBS)#until here
-   AC_CHECK_LIB(X11,main,X_LIBS="$X_LIBS -lX11",miss=1,$X_LIBS)
- 
-   if test "$miss" = "1" ; then
-      X_CFLAGS=
-      X_LIBS=
-      X_EXTRA_LIBS=
-      X_PRE_LIBS=
-      echo missing x libraries -- cannot compile xgcl
-   else
-      AC_DEFINE(HAVE_XGCL,1,[using xgcl])
-   fi
+    
+    AC_PATH_X
+    
+    AC_CHECK_LIB(X11,main,
+		 [X_LIBS="$X_LIBS -lX11" AC_DEFINE(HAVE_XGCL,1,[using xgcl])],
+		 [AC_MSG_RESULT([missing x libraries -- cannot compile xgcl])])
+    
 fi
 
 
@@ -1015,225 +711,194 @@ AC_SUBST(X_CFLAGS)
 #
 
 if test "$enable_dlopen" = "yes" ; then
+    
+    AC_CHECK_LIB([dl],[dlopen],,AC_MSG_ERROR([Cannot find dlopen]))
+    
+    TLIBS="$TLIBS -ldl -rdynamic"
+    assert_arg_to_tcflags -fPIC
+    AC_DEFINE(USE_DLOPEN,1,[link compiled objects via libdl])
 
- 	AC_CHECK_LIB(dl,dlopen,have_dl=1,have_dl=0)
- 	if test "$have_dl" = "0" ; then
- 		echo "Cannot find dlopen in -dl"
- 		exit 1
- 	fi
-dnl	AC_SEARCH_LIBS(dlopen, dl, have_dl=1, AC_ERROR(dlopen not found))
-dnl LIBS and TLIBS - why not merged from the beginning?
-
-	TLIBS="$TLIBS -ldl -rdynamic"
-	TCFLAGS="-fPIC $TCFLAGS"
-dnl	TLIBS="$TLIBS -rdynamic"
-	AC_DEFINE(USE_DLOPEN,1,[link compiled objects via libdl])
 fi
 
 if test "$enable_statsysbfd" = "yes" || test "$enable_dynsysbfd" = "yes" ; then
-	AC_CHECK_HEADERS(bfd.h,
-		AC_CHECK_LIB(bfd,bfd_init,
-		#
-		# Old binutils appear to need CONST defined to const
-		#
-			AC_MSG_CHECKING(if need to define CONST for bfd)
-			AC_TRY_RUN([#define IN_GCC
-				    #include <bfd.h>
-				    int main() { symbol_info t; return 0;}],
-				AC_MSG_RESULT(no),
-				AC_TRY_RUN([#define CONST const
-                                            #define IN_GCC
-					    #include <bfd.h>
-					    int main() {symbol_info t; return 0;}],
-					AC_MSG_RESULT(yes) 
-					AC_DEFINE(NEED_CONST,1,[binutils requires CONST definition]),
-					AC_MSG_ERROR([cannot use bfd]),
-					AC_MSG_ERROR([cannot use bfd])),
-				AC_MSG_ERROR([cannot use bfd]))
-			,,-liberty))
-
-	AC_DEFINE(HAVE_LIBBFD,1,[use libbfd])
-
-#
-# BFD boolean syntax
-#
-
-	AC_MSG_CHECKING(for useable bfd_boolean)
-	AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-		#define IN_GCC
-		#include <bfd.h>
-		bfd_boolean foo() {return FALSE;}
-		]],[[return 0;]])],
-		[AC_MSG_RESULT(yes) 
-		AC_DEFINE(HAVE_BFD_BOOLEAN,1,[bfd_boolean defined])],
-		[AC_MSG_RESULT(no)])
-
-#
-# bfd_link_info.output_bfd minimal configure change check
-#
-
- 	AC_CHECK_MEMBER([struct bfd_link_info.output_bfd],
- 		AC_DEFINE(HAVE_OUTPUT_BFD,1,[output_bfd element present]), [], 
-		[
-		#include <bfd.h>
-		#include <bfdlink.h>
-		])
-	AC_SUBST(HAVE_OUTPUT_BFD)
-
-#
-# FIXME: Need to workaround mingw before this point -- CM
-#
-	if test "$enable_statsysbfd" = "yes" && ! $CC -v 2>&1 | fgrep ming > /dev/null ; then
-		echo 'int main() {bfd_init();bfd_openr("/dev/null",0);return 0;}' >foo.c
-		MP=`$CC [ -Wl,-M ] -static -o foo foo.c -lbfd -liberty -ldl 2>&1 | grep -v : | tr '()' '\012\012' | $AWK '{print $NF}' | sort | uniq`
-		rm -f foo.c foo
-		if echo $MP | tr ' ' '\012' | grep libbfd.a >/dev/null; then
-		   LIBBFD="`echo $MP | tr ' ' '\012' | grep libbfd.a | $AWK '{i=split($1,A,"/");for (j=1;j<=i;j++) if (j>1 && A[[j]]=="..") {j--;i-=2;for (k=j;k<=i;k++) A[[k]]=A[[k+2]];j--;}} END {for (j=1;j<=i;j++) printf("%s%s",A[[j]],j!=i ? "/" : "")}'`"
-		else
-		   AC_MSG_ERROR([cannot locate external libbfd.a])
-		fi   
-		if echo $MP | tr ' ' '\012' | grep libiberty.a >/dev/null ; then
-		   LIBIBERTY="`echo $MP | tr ' ' '\012' | grep libiberty.a | $AWK '{i=split($1,A,"/");for (j=1;j<=i;j++) if (j>1 && A[[j]]=="..") {j--;i-=2;for (k=j;k<=i;k++) A[[k]]=A[[k+2]];j--;}} END {for (j=1;j<=i;j++) printf("%s%s",A[[j]],j!=i ? "/" : "")}'`"
-		else
-		   AC_MSG_ERROR([cannot locate external libiberty.a])
-		fi   
-		BUILD_BFD=copy_bfd
-		AC_CHECK_LIB(z,inflate,
-			[TLIBS="$TLIBS -lz"],
-			AC_MSG_ERROR([Need zlib for bfd linking]),[])
-		AC_CHECK_LIB(dl,dlsym,
-			[TLIBS="$TLIBS -ldl"],
-			AC_MSG_ERROR([Need libdl for bfd linking]),[])
-		AC_SUBST(BUILD_BFD)
-		AC_SUBST(LIBBFD)
-		AC_SUBST(LIBIBERTY)
-
+    AC_CHECK_HEADERS(
+	[bfd.h],
+	AC_CHECK_LIB(
+	    [bfd],[bfd_init],
+	    #
+	    # Old binutils appear to need CONST defined to const
+	    #
+	    AC_MSG_CHECKING([need to define CONST for bfd])
+	    AC_RUN_IFELSE(
+		[AC_LANG_PROGRAM(
+			[[
+			    #define IN_GCC
+			    #include <bfd.h>
+			]],
+			[[
+			    symbol_info t;
+			]])],
+		AC_MSG_RESULT([no]),
+		AC_RUN_IFELSE(
+		    [AC_LANG_PROGRAM(
+			    [[
+				#define CONST const
+				#define IN_GCC
+				#include <bfd.h>
+			    ]],
+			    [[
+				symbol_info t;
+			    ]])],
+		    AC_MSG_RESULT([yes]) 
+		    AC_DEFINE(NEED_CONST,1,[binutils requires CONST definition]),
+		    AC_MSG_ERROR([cannot use bfd]),
+		    AC_MSG_ERROR([cannot use bfd])),
+		AC_MSG_ERROR([cannot use bfd]))
+	    ,,-liberty))
+    
+    AC_DEFINE(HAVE_LIBBFD,1,[use libbfd])
+    
+    #
+    # BFD boolean syntax
+    #
+    
+    AC_MSG_CHECKING(for useable bfd_boolean)
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[
+		    #define IN_GCC
+		    #include <bfd.h>
+		    bfd_boolean foo() {return FALSE;}
+		]],
+		[[]])],
+	[AC_MSG_RESULT(yes) 
+	 AC_DEFINE(HAVE_BFD_BOOLEAN,1,[bfd_boolean defined])],
+	[AC_MSG_RESULT(no)])
+    
+    #
+    # bfd_link_info.output_bfd minimal configure change check
+    #
+    
+    AC_CHECK_MEMBER([struct bfd_link_info.output_bfd],
+ 		    AC_DEFINE(HAVE_OUTPUT_BFD,1,[output_bfd element present]), [], 
+		    [[
+			#include <bfd.h>
+			#include <bfdlink.h>
+		    ]])
+    AC_SUBST(HAVE_OUTPUT_BFD)
+    
+    #
+    # FIXME: Need to workaround mingw before this point -- CM
+    #
+    if test "$enable_statsysbfd" = "yes" && ! $CC -v 2>&1 | fgrep ming > /dev/null ; then
+	echo 'int main() {bfd_init();bfd_openr("/dev/null",0);return 0;}' >foo.c
+	MP=`$CC [ -Wl,-M ] -static -o foo foo.c -lbfd -liberty -ldl 2>&1 | grep -v : | tr '()' '\012\012' | $AWK '{print $NF}' | sort | uniq`
+	rm -f foo.c foo
+	if echo $MP | tr ' ' '\012' | grep libbfd.a >/dev/null; then
+	    LIBBFD="`echo $MP | tr ' ' '\012' | grep libbfd.a | $AWK '{i=split($1,A,\"/\");for (j=1;j<=i;j++) if (j>1 && A[[j]]==\"..\") {j--;i-=2;for (k=j;k<=i;k++) A[[k]]=A[[k+2]];j--;}} END {for (j=1;j<=i;j++) printf(\"%s%s\",A[[j]],j!=i ? \"/\" : \"\")}'`"
 	else
-		TLIBS="$TLIBS -lbfd -liberty -ldl"
-	fi
-fi
-
-if test "$enable_locbfd" = "yes" ; then
-
-	# check for gettext.  It is part of glibc, but others
-	# need GNU gettext separately.
-#	AC_CHECK_HEADERS(libintl.h, true,
-#			   AC_MSG_ERROR(libintl.h (gettext) not found))
-#	AC_SEARCH_LIBS(dgettext, intl, true, AC_MSG_ERROR(gettext library not found))
- 
-	echo "#"
-	echo "#"
-	echo "# -------------------------"
-	echo "# Subconfigure of LIBINTL"
-	echo "#"
-	echo "#"
-	cd binutils/intl && chmod +x configure && ./configure --disable-nls && cd ../..
-#       MY_SUBDIRS="$MY_SUBDIRS binutils/libiberty " 
-	echo "#"
-	echo "#"
-	echo "#"
-	echo "# Subconfigure of LIBINTL done"
-	echo "# ------------------------------"
-	echo "#"
-	echo "#"
-	echo "#"
-	echo "# -------------------------"
-	echo "# Subconfigure of LIBIBERTY"
-	echo "#"
-	echo "#"
-	cd binutils/libiberty && chmod +x configure && ./configure --disable-nls && cd ../..
-#       MY_SUBDIRS="$MY_SUBDIRS binutils/libiberty " 
-	echo "#"
-	echo "#"
-	echo "#"
-	echo "# Subconfigure of LIBIBERTY done"
-	echo "# ------------------------------"
-	echo "#"
-	echo "#"
-	echo "#"
-	echo "# -------------------"
-	echo "# Subconfigure of BFD"
-	echo "#"
-	echo "#"
-	cd binutils/bfd && chmod +x configure && ./configure --with-included-gettext --disable-nls && cd ../..
-#       MY_SUBDIRS="$MY_SUBDIRS binutils/bfd " 
-	echo "#"
-	echo "#"
-	echo "#"
-	echo "# Subconfigure of BFD done"
-	echo "# ------------------------"
-	echo "#"
-#	TLIBS="$TLIBS `pwd`/binutils/bfd/libbfd.a `pwd`/binutils/libiberty/libiberty.a"
-	AC_DEFINE(HAVE_LIBBFD,1,[use libbfd])
-	BUILD_BFD="h/bfd.h h/bfdlink.h h/ansidecl.h h/symcat.h"
+	    AC_MSG_ERROR([cannot locate external libbfd.a])
+	fi   
+	if echo $MP | tr ' ' '\012' | grep libiberty.a >/dev/null ; then
+	    LIBIBERTY="`echo $MP | tr ' ' '\012' | grep libiberty.a | $AWK '{i=split($1,A,\"/\");for (j=1;j<=i;j++) if (j>1 && A[[j]]==\"..\") {j--;i-=2;for (k=j;k<=i;k++) A[[k]]=A[[k+2]];j--;}} END {for (j=1;j<=i;j++) printf(\"%s%s\",A[[j]],j!=i ? \"/\" : \"\")}'`"
+	else
+	    AC_MSG_ERROR([cannot locate external libiberty.a])
+	fi   
+	BUILD_BFD=copy_bfd
+	AC_CHECK_LIB(z,inflate,
+		     [TLIBS="$TLIBS -lz"],
+		     AC_MSG_ERROR([Need zlib for bfd linking]),[])
+	AC_CHECK_LIB(dl,dlsym,
+		     [TLIBS="$TLIBS -ldl"],
+		     AC_MSG_ERROR([Need libdl for bfd linking]),[])
 	AC_SUBST(BUILD_BFD)
+	AC_SUBST(LIBBFD)
+	AC_SUBST(LIBIBERTY)
+	
+    else
+	TLIBS="$TLIBS -lbfd -liberty -ldl"
+    fi
 fi
 
+AC_ARG_ENABLE([xdr],[  --enable-xdr=yes will compile in support for XDR])
 
-if test "$enable_xdr" = "yes" ; then
-   AC_CHECK_FUNC(xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions]),
-   	   AC_CHECK_LIB(tirpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
-	                TLIBS="$TLIBS -ltirpc" TCFLAGS="$TCFLAGS -I/usr/include/tirpc",
-	   AC_CHECK_LIB(gssrpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
-	                TLIBS="$TLIBS -lgssrpc" TCFLAGS="$TCFLAGS -I/usr/include/gssrpc",
-	   AC_CHECK_LIB(rpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
-	                TLIBS="$TLIBS -lrpc" TCFLAGS="$TCFLAGS -I/usr/include/rpc",
-	   AC_CHECK_LIB(oncrpc,xdr_double,AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
-	                TLIBS="$TLIBS -loncrpc" TCFLAGS="$TCFLAGS -I/usr/include/oncrpc")))))
+if test "$enable_xdr" != "no" ; then
+    XDR_LIB=""
+    AC_CHECK_FUNC([xdr_double],XDR_LIB=" ",
+		  [AC_CHECK_LIB([tirpc],[xdr_double],[XDR_LIB=tirpc],
+				[AC_CHECK_LIB([gssrpc],[xdr_double],[XDR_LIB=gssrpc],
+					      [AC_CHECK_LIB([rpc],[xdr_double],[XDR_LIB=rpc],
+							    [AC_CHECK_LIB([oncrpc],[xdr_double],[XDR_LIB=oncrpc])])])])])
+    
+    if test "$XDR_LIB" != ""; then
+	AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
+	if test "$XDR_LIB" != " "; then
+	    TLIBS="$TLIBS -l$XDR_LIB"
+	    add_arg_to_tcflags -I/usr/include/$XDR_LIB
+	fi
+    fi
 fi
 
 
 AC_MSG_CHECKING([__builtin_clzl])
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-  #include <stdio.h>
-  #include <unistd.h>
-  int main() {
-      unsigned long u;
-      long j;
-      if (__builtin_clzl(0)!=sizeof(long)*8)
-      	 return -1;
-      for (u=1,j=sizeof(long)*8-1;j>=0;j--,u<<=1)
-      	  if (__builtin_clzl(u)!=j)
-  	     return -1;
-      return 0;
-   }]])],[AC_MSG_RESULT([yes])
-	  AC_DEFINE(HAVE_CLZL,[1],[clzl instruction])],
-	  [AC_MSG_RESULT([no])])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#include <unistd.h>
+	    ]],
+	    [[
+		unsigned long u;
+		long j;
+		if (__builtin_clzl(0)!=sizeof(long)*8)
+      		   return -1;
+		   for (u=1,j=sizeof(long)*8-1;j>=0;j--,u<<=1)
+      		       if (__builtin_clzl(u)!=j)
+  			  return -1;
+	    ]])],
+    [AC_MSG_RESULT([yes])
+     AC_DEFINE(HAVE_CLZL,[1],[clzl instruction])],
+    [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING([__builtin_ctzl])
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-  #include <stdio.h>
-  #include <unistd.h>
-  int main() {
-      unsigned long u;
-      long j;
-      if (__builtin_ctzl(0)!=sizeof(long)*8)
-      	 return -1;
-      for (u=1,j=0;j<sizeof(long)*8-1;j++,u<<=1)
-      	  if (__builtin_ctzl(u)!=j)
-  	     return -1;
-      return 0;
-   }]])],[AC_MSG_RESULT([yes])
-	  AC_DEFINE(HAVE_CTZL,[1],[ctzl instruction])],
-	  [AC_MSG_RESULT([no])])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#include <unistd.h>
+	    ]],
+	    [[
+		unsigned long u;
+		long j;
+		if (__builtin_ctzl(0)!=sizeof(long)*8)
+      		   return -1;
+		   for (u=1,j=0;j<sizeof(long)*8-1;j++,u<<=1)
+      		       if (__builtin_ctzl(u)!=j)
+  			  return -1;
+	    ]])],
+    [AC_MSG_RESULT([yes])
+     AC_DEFINE(HAVE_CTZL,[1],[ctzl instruction])],
+    [AC_MSG_RESULT([no])])
 
 
 case $use in
-     sh4*) ;;     #FIXME, these exceptions needed as of gcc 4.7
-     hppa*) ;;    #FIXME
-     powerpc*) ;; #FIXME
-     alpha*) ;;   #FIXME
-     ia64*) ;;    #FIXME
-     *) 
-     AC_MSG_CHECKING(__builtin___clear_cache)
-	AC_RUN_IFELSE([
-		AC_LANG_PROGRAM([[]],[[
+    sh4*) ;;     #FIXME, these exceptions needed as of gcc 4.7
+    hppa*) ;;    #FIXME
+    powerpc*) ;; #FIXME
+    alpha*) ;;   #FIXME
+    ia64*) ;;    #FIXME
+    *) 
+	AC_MSG_CHECKING(__builtin___clear_cache)
+	AC_RUN_IFELSE(
+	    [AC_LANG_PROGRAM(
+		    [[]],
+		    [[
 			void *v,*ve;
 			__builtin___clear_cache(v,ve);
-				]])],
-				[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE,1,[have __builtin__clear_cache instruction])
-				 AC_MSG_RESULT(yes)],
-				 AC_MSG_RESULT(no));;
+		    ]])],
+	    [AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE,1,[have __builtin__clear_cache instruction])
+	     AC_MSG_RESULT(yes)],
+	    AC_MSG_RESULT(no));;
 esac
 
 #AC_CONFIG_SUBDIRS($MY_SUBDIRS)
@@ -1247,547 +912,481 @@ AC_CHECK_SIZEOF(long,0)
 ####  Memory areas and alignment
 
 AC_MSG_CHECKING(for byte order)
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-		]],[[
-
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[]],
+	    [[
 		/* Are we little or big endian?  Adapted from Harbison&Steele.  */
 		union {long l;char c[sizeof(long)];} u;
 		u.l = 1;
 		return u.c[sizeof(long)-1] ? 1 : 0;
-	]])],[
+	    ]])],[
 	AC_MSG_RESULT(little)],
-	[AC_MSG_RESULT(big) 
-	AC_DEFINE(WORDS_BIGENDIAN,1,[big endian byte order])])
+    [AC_MSG_RESULT(big) 
+     AC_DEFINE(WORDS_BIGENDIAN,1,[big endian byte order])])
 AC_SUBST(WORDS_BIGENDIAN)
 
 
 AC_MSG_CHECKING(for word order)
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-		]],[[
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[]],
+	    [[
 		/* Are we little or big endian?  Adapted from Harbison&Steele.  */
 		union {double d;int l[sizeof(double)/sizeof(int)];} u;
 		u.d = 1.0;
 		return u.l[sizeof(double)/sizeof(int)-1] ? 0 : 1;
-	]])],
-	[AC_MSG_RESULT(little)],
-	[AC_MSG_RESULT(big) 
-	AC_DEFINE(DOUBLE_BIGENDIAN,1,[big endian word order])])
+	    ]])],
+    [AC_MSG_RESULT(little)],
+    [AC_MSG_RESULT(big) 
+     AC_DEFINE(DOUBLE_BIGENDIAN,1,[big endian word order])])
 AC_SUBST(DOUBLE_BIGENDIAN)
 
 # pagewidth
 AC_MSG_CHECKING(for pagewidth)
 case $use in
-     mips*) min_pagewidth=14;;
-     *) min_pagewidth=12;;
+    mips*) min_pagewidth=14;;
+    *) min_pagewidth=12;;
 esac
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-	    #include <stdio.h>
-            #include <unistd.h>
-            #ifdef __CYGWIN__
-            #define getpagesize() 4096
-            #endif
-	    ]],[[
-	    size_t i=getpagesize(),j; 
-	    FILE *fp=fopen("conftest1","w");
-	    for (j=0;i>>=1;j++);
-	    j=j<$min_pagewidth ? $min_pagewidth : j;
-	    fprintf(fp,"%u",j);
-	    return 0;
-	]])],
-	[PAGEWIDTH=`cat conftest1`],
-	[PAGEWIDTH=0])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#include <unistd.h>
+		#ifdef __CYGWIN__
+		#define getpagesize() 4096
+		#endif
+	    ]],
+	    [[
+		size_t i=getpagesize(),j; 
+		FILE *fp=fopen("conftest1","w");
+		for (j=0;i>>=1;j++);
+		    j=j<$min_pagewidth ? $min_pagewidth : j;
+		    fprintf(fp,"%u",j);
+	    ]])],
+    [PAGEWIDTH=`cat conftest1`],
+    [PAGEWIDTH=0])
 AC_MSG_RESULT($PAGEWIDTH)
 AC_DEFINE_UNQUOTED(PAGEWIDTH,$PAGEWIDTH,[system pagewidth])
 AC_SUBST(PAGEWIDTH)
 
 AC_MSG_CHECKING([for required object alignment])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-	#define EXTER
-	#define INLINE
-	#include "$MP_INCLUDE"
-	#include "./h/enum.h"
-	#define OBJ_ALIGN
-	#include "./h/type.h"
-	#include "./h/lu.h"
-	#include "./h/object.h"
-	]],[[
-	unsigned long i;
-   	FILE *fp=fopen("conftest1","w");
-	for (i=1;i && NOT_OBJECT_ALIGNED(i); i<<=1);
-	if (!i) return -1;
-	fprintf(fp,"%lu",i);
-	fclose(fp);
-	return 0;
-	]])],
-	 [obj_align=`cat conftest1`
-	 AC_MSG_RESULT($obj_align)
-	 AC_DEFINE_UNQUOTED(OBJ_ALIGNMENT,$obj_align,[needed object alignment in bytes])],
-         [AC_MSG_ERROR([Cannot find object alignent])])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#define EXTER
+		#define INLINE
+		#include "$MP_INCLUDE"
+		#include "./h/enum.h"
+		#define OBJ_ALIGN
+		#include "./h/type.h"
+		#include "./h/lu.h"
+		#include "./h/object.h"
+	    ]],
+	    [[
+		unsigned long i;
+   		FILE *fp=fopen("conftest1","w");
+		for (i=1;i && NOT_OBJECT_ALIGNED(i); i<<=1);
+		    if (!i) return -1;
+		       fprintf(fp,"%lu",i);
+		       fclose(fp);
+		       return 0;
+	    ]])],
+    [obj_align=`cat conftest1`
+     AC_MSG_RESULT($obj_align)
+     AC_DEFINE_UNQUOTED(OBJ_ALIGNMENT,$obj_align,[needed object alignment bytes])],
+    [AC_MSG_ERROR([Cannot find object alignent])])
 
 AC_MSG_CHECKING([for C extension variable alignment])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
-	    char *v __attribute__ ((aligned ($obj_align)));
-	    return 0;]])],[obj_align="__attribute__ ((aligned ($obj_align)))"],[AC_MSG_ERROR([Need alignment attributes])])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM([[]],
+		     [[
+			 char *v __attribute__ ((aligned ($obj_align)));
+		     ]])],[obj_align="__attribute__ ((aligned ($obj_align)))"],[AC_MSG_ERROR([Need alignment attributes])])
 AC_MSG_RESULT($obj_align)
 AC_DEFINE_UNQUOTED(OBJ_ALIGN,$obj_align,[can use C extension for object alignment])
 
 AC_MSG_CHECKING([for C extension noreturn function attribute])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[]],[[
-	    extern int v() __attribute__ ((noreturn));
-	    return 0;]])],[no_return="__attribute__ ((noreturn))"],[no_return=])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM([[]],
+		     [[
+			 extern int v() __attribute__ ((noreturn));
+		     ]])],
+    [no_return="__attribute__ ((noreturn))"],[no_return=])
 AC_MSG_RESULT($no_return)
 AC_DEFINE_UNQUOTED(NO_RETURN,$no_return,[can use C extension for functions that do not return])
 
-AC_MSG_CHECKING(sizeof struct contblock)
+AC_MSG_CHECKING([sizeof struct contblock])
 
-# work around MSYS pwd result incompatibility
-if test "$use" = "mingw" ; then
-AC_TRY_RUN([#include <stdio.h>
-	#define EXTER
-	#define INLINE
-	#include "$MP_INCLUDE"
-	#include "h/enum.h"
-	#include "h/type.h"
-	#include "h/lu.h"
-	#include "h/object.h"
-	int main(int argc,char **argv,char **envp) {
-	FILE *f=fopen("conftest1","w");
-	fprintf(f,"%u",sizeof(struct contblock));
-	fclose(f);
-	return 0;
-	}],sizeof_contblock=`cat conftest1`,
-	   echo Cannot find sizeof struct contblock;exit 1,
-	   echo Cannot find sizeof struct contblock;exit 1)
-else
-AC_TRY_RUN([#include <stdio.h>
-	#define EXTER
-	#define INLINE
-	#include "$MP_INCLUDE"
-	#include "`pwd`/h/enum.h"
-	#include "`pwd`/h/type.h"
-	#include "`pwd`/h/lu.h"
-	#include "`pwd`/h/object.h"
-	int main(int argc,char **argv,char **envp) {
-	FILE *f=fopen("conftest1","w");
-	fprintf(f,"%u",sizeof(struct contblock));
-	fclose(f);
-	return 0;
-	}],sizeof_contblock=`cat conftest1`,
-	   echo Cannot find sizeof struct contblock;exit 1,
-	   echo Cannot find sizeof struct contblock;exit 1)
-fi
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#define EXTER
+		#define INLINE
+		#include "$MP_INCLUDE"
+		#include "h/enum.h"
+		#include "h/type.h"
+		#include "h/lu.h"
+		#include "h/object.h"
+	    ]],
+	    [[
+		FILE *f=fopen("conftest1","w");
+		fprintf(f,"%u",sizeof(struct contblock));
+		fclose(f);
+	    ]])],
+    [sizeof_contblock=`cat conftest1`],
+    [AC_MSG_ERROR([Cannot find sizeof struct contblock])],
+    [AC_MSG_ERROR([Cannot find sizeof struct contblock])])
+
 AC_MSG_RESULT($sizeof_contblock)
 AC_DEFINE_UNQUOTED(SIZEOF_CONTBLOCK,$sizeof_contblock,[sizeof linked list for contiguous pages])
 
 AC_MSG_CHECKING([for sbrk])
 HAVE_SBRK=""
-AC_TRY_RUN([#include <unistd.h>
-	    #include <stdio.h>
-	    int main() {
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <unistd.h>
+		#include <stdio.h>
+	    ]],
+	    [[
 		FILE *f;
 		if (!(f=fopen("conftest1","w")))
-			return -1;
-		fprintf(f,"%u",sbrk(0));
-		return 0;
-		}],
-		HAVE_SBRK=1
-		AC_MSG_RESULT(yes),
-		AC_MSG_RESULT([no: WARNING you must be able to emulate sbrk: as on mingw or macosx]),
-		AC_MSG_RESULT([no: WARNING you must be able to emulate sbrk: as on mingw or macosx]))
+		   return -1;
+		   fprintf(f,"%u",sbrk(0));
+	    ]])],
+    [HAVE_SBRK=1;AC_MSG_RESULT([yes])],
+    AC_MSG_RESULT([no: WARNING you must be able to emulate sbrk: as on mingw or macosx]),
+    AC_MSG_RESULT([no: WARNING you must be able to emulate sbrk: as on mingw or macosx]))
 
 if test "$use" = "386-macosx" ; then
-   AC_MSG_RESULT(emulating sbrk for mac);
-   HAVE_SBRK=0
+    AC_MSG_RESULT([emulating sbrk for mac]);
+    HAVE_SBRK=0
 fi
 
 if test "$HAVE_SBRK" = "1" ; then
-
-   AC_MSG_CHECKING([for ADDR_NO_RANDOMIZE constant])
-   AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-            #include <sys/personality.h>
- 	    #include <stdio.h>
-	    ]],[[
-	    FILE *f;
-	    if (!(f=fopen("conftest1","w"))) return -1;
-	    fprintf(f,"%x",ADDR_NO_RANDOMIZE);
-	    return 0;
-        ]])],
+    
+    AC_MSG_CHECKING([for ADDR_NO_RANDOMIZE constant])
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[
+		    #include <sys/personality.h>
+ 		    #include <stdio.h>
+		]],
+		[[
+		    FILE *f;
+		    if (!(f=fopen("conftest1","w"))) return -1;
+		       fprintf(f,"%x",ADDR_NO_RANDOMIZE);
+		]])],
 	[ADDR_NO_RANDOMIZE=`cat conftest1`
-	AC_MSG_RESULT([yes $ADDR_NO_RANDOMIZE])],
+	 AC_MSG_RESULT([yes $ADDR_NO_RANDOMIZE])],
 	[ADDR_NO_RANDOMIZE=0
-	AC_MSG_RESULT([no assuming 0x40000])
-	AC_DEFINE_UNQUOTED(ADDR_NO_RANDOMIZE,0x40000,[punt guess for no randomize value])])
-
-   AC_MSG_CHECKING([for ADDR_COMPAT_LAYOUT constant])
-   AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-            #include <sys/personality.h>
- 	    #include <stdio.h>
-	    ]],[[
-	    FILE *f;
-	    if (!(f=fopen("conftest1","w"))) return -1;
-	    fprintf(f,"%x",ADDR_COMPAT_LAYOUT);
-	    return 0;
-        ]])],
+	 AC_MSG_RESULT([no assuming 0x40000])
+	 AC_DEFINE_UNQUOTED(ADDR_NO_RANDOMIZE,0x40000,[punt guess for no randomize value])])
+    
+    AC_MSG_CHECKING([for ADDR_COMPAT_LAYOUT constant])
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[
+		    #include <sys/personality.h>
+ 		    #include <stdio.h>
+		]],
+		[[
+		    FILE *f;
+		    if (!(f=fopen("conftest1","w"))) return -1;
+		       fprintf(f,"%x",ADDR_COMPAT_LAYOUT);
+		]])],
 	[ADDR_COMPAT_LAYOUT=`cat conftest1`
-	AC_MSG_RESULT([yes $ADDR_COMPAT_LAYOUT])],
+	 AC_MSG_RESULT([yes $ADDR_COMPAT_LAYOUT])],
 	[ADDR_COMPAT_LAYOUT=0
-	AC_MSG_RESULT([no])]
+	 AC_MSG_RESULT([no])]
 	AC_DEFINE_UNQUOTED(ADDR_COMPAT_LAYOUT,0,[constant to reserve upper 3Gb for C stack]))
-
-   AC_MSG_CHECKING([for ADDR_LIMIT_3GB constant])
-   AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-            #include <sys/personality.h>
- 	    #include <stdio.h>
-	    ]],[[
-	    FILE *f;
-	    if (!(f=fopen("conftest1","w"))) return -1;
-	    fprintf(f,"%x",ADDR_LIMIT_3GB);
-	    return 0;
-        ]])],
+    
+    AC_MSG_CHECKING([for ADDR_LIMIT_3GB constant])
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[
+		    #include <sys/personality.h>
+ 		    #include <stdio.h>
+		]],
+		[[
+		    FILE *f;
+		    if (!(f=fopen("conftest1","w"))) return -1;
+		       fprintf(f,"%x",ADDR_LIMIT_3GB);
+		]])],
 	[ADDR_LIMIT_3GB=`cat conftest1`
-	AC_MSG_RESULT([yes $ADDR_LIMIT_3GB])],
+	 AC_MSG_RESULT([yes $ADDR_LIMIT_3GB])],
 	[ADDR_LIMIT_3GB=0
-	AC_MSG_RESULT([no])]
+	 AC_MSG_RESULT([no])]
 	AC_DEFINE_UNQUOTED(ADDR_LIMIT_3GB,0,[only 3Gb of address space]))
-
-   AC_MSG_CHECKING([for personality(ADDR_NO_RANDOMIZE) support])
-   AC_RUN_IFELSE([
-	AC_LANG_SOURCE([[
-	        #include <stdio.h>
-	        #include <stdlib.h>
- 		int main(int argc,char **argv,char **envp) {
-		#include "h/unrandomize.h"
-		return 0;}]])],
+    
+    AC_MSG_CHECKING([for personality(ADDR_NO_RANDOMIZE) support])
+    AC_RUN_IFELSE(
+	[AC_LANG_SOURCE(
+		[[
+		    #include <stdio.h>
+		    #include <stdlib.h>
+		    int main(int argc,char *argv[],char *envp[]) {
+			#include "h/unrandomize.h"
+			return 0;
+		    }
+		]])],
 	[AC_MSG_RESULT(yes)
-	AC_DEFINE(CAN_UNRANDOMIZE_SBRK,1,[can prevent sbrk from returning random values])],
+	 AC_DEFINE(CAN_UNRANDOMIZE_SBRK,1,[can prevent sbrk from returning random values])],
 	[AC_MSG_RESULT(no)])
 
-	AC_MSG_CHECKING([that sbrk is (now) non-random])
-	AC_TRY_RUN([#include <stdio.h>
-	            #include <stdlib.h>
+    AC_MSG_CHECKING([that sbrk is (now) non-random])
+    SBRK=0
+    AC_RUN_IFELSE(
+	[AC_LANG_SOURCE(
+		[[
+		    #include <stdio.h>
+		    #include <stdlib.h>
+		    int main(int argc,char * argv[],char * envp[]) {
+			FILE *f;
+			#ifdef CAN_UNRANDOMIZE_SBRK
+			#include "h/unrandomize.h"
+			#endif
+			if (!(f=fopen("conftest1","w")))
+			   return -1;
+			   fprintf(f,"%u",sbrk(0));
+			   return 0;
+		    }
+		]])],[SBRK=`cat conftest1`])
+    if test "$SBRK" = "0" ; then
+	AC_MSG_ERROR([cannot trap sbrk])
+    fi
+
+    SBRK1=0
+    AC_RUN_IFELSE(
+	[AC_LANG_SOURCE(
+		[[
+		    #include <stdio.h>
+		    #include <stdlib.h>
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
 			#include "h/unrandomize.h"
 			#endif
 			if (!(f=fopen("conftest1","w"))) return -1;
-			fprintf(f,"%u",sbrk(0));
-			return 0;}],SBRK=`cat conftest1`,SBRK=0,SBRK=0)
-	if test "$SBRK" = "0" ; then
-		AC_MSG_RESULT(cannot trap sbrk)
-		exit 1
-	fi
-	AC_TRY_RUN([#include <stdio.h>
-	            #include <stdlib.h>
-		    int main(int argc,char * argv[],char * envp[]) {
-			FILE *f;
-			#ifdef CAN_UNRANDOMIZE_SBRK
-			#include "h/unrandomize.h"
-			#endif
-			if (!(f=fopen("conftest1","w"))) return -1;
-			fprintf(f,"%u",sbrk(0));
-			return 0;}],SBRK1=`cat conftest1`,SBRK1=0,SBRK1=0)
-	if test "$SBRK1" = "0" ; then
-		AC_MSG_RESULT(cannot trap sbrk)
-		exit 1
-	fi
-	if test "$SBRK" = "$SBRK1" ; then
-		AC_MSG_RESULT(yes)
-	else
-		AC_MSG_RESULT(no)
-		echo "Cannot build with randomized sbrk. Your options:"
-		echo " - upgrade to a kernel/libc that knows about personality(ADDR_NO_RANDOMIZE)"
-		echo " - recompile your kernel with CONFIG_COMPAT_BRK (if it has that option)"
-		echo " - run sysctl kernel.randomize_va_space=0 before using gcl"
-		exit 1
-	fi
+			   fprintf(f,"%u",sbrk(0));
+			   return 0;
+		    }
+		]])],[SBRK1=`cat conftest1`])
+    if test "$SBRK1" = "0" ; then
+	AC_MSG_ERROR([cannot trap sbrk])
+    fi
+    if test "$SBRK" = "$SBRK1" ; then
+	AC_MSG_RESULT([yes])
+    else
+	AC_MSG_RESULT([no])
+	echo "Cannot build with randomized sbrk. Your options:"
+	echo " - upgrade to a kernel/libc that knows about personality(ADDR_NO_RANDOMIZE)"
+	echo " - recompile your kernel with CONFIG_COMPAT_BRK (if it has that option)"
+	echo " - run sysctl kernel.randomize_va_space=0 before using gcl"
+	AC_MSG_ERROR([exiting])
+    fi
 fi
-
-dnl AC_MSG_CHECKING(DBEGIN)
-dnl AC_RUN_IFELSE([AC_LANG_SOURCE([[
-dnl   #include <stdio.h>
-dnl   #include <stdlib.h>
-dnl   #include <unistd.h>
-dnl   void gprof_cleanup() {};
-
-dnl   int main(int argc,char **argv,char **envp) {
-
-dnl   void *b;
-dnl   FILE *fp;
-
-dnl   #ifdef CAN_UNRANDOMIZE_SBRK
-dnl   #include "h/unrandomize.h"
-dnl   #endif
-			
-dnl   fp = fopen("conftest1","w");
-
-dnl   #ifdef _WIN32
-dnl   fprintf ( fp,"0x%lx", 0x3000000 );  /* Windows custom allocation from this point up */
-dnl   #else
-dnl   #if defined (__APPLE__) && defined (__MACH__)
-dnl   fprintf(fp,"0x0");
-dnl   #else
-dnl   b = sbrk(0);
-dnl   fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1));
-dnl   #endif
-dnl   #endif
-dnl   fclose(fp);
-dnl   return 0;}]])],
-dnl   [dbegin=`cat conftest1`],[dbegin=0])
-
-dnl AC_MSG_RESULT($dbegin)
-
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	    #include <stdio.h>
-dnl             #include <unistd.h>
-dnl 	    ]],[[
-dnl 	    FILE *fp=fopen("conftest1","w");
-dnl 	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
-dnl 	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
-
-dnl AC_ARG_ENABLE(maxpage,
-dnl [ --enable-maxpage=XXXX  will compile in a page table of size XXX
-dnl                          (eg '--enable-maxpage=64*1024' would produce
-dnl 			 64K pages allowing 256 MB if pages are 4K each)],
-dnl ,enable_maxpage=$def_maxpage)
-
-
 AC_MSG_CHECKING(CSTACK_ADDRESS)
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	void *
-	foo() {
-	      int i;
-	      return (void *)&i;
-        }
-
-	int main(int argc,char **argv,char **envp) {
-	void *v ;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long i,j;
-
-	#ifdef CAN_UNRANDOMIZE_SBRK
-	#include "h/unrandomize.h"
-	#endif
-	j=1;
-	j<<=$PAGEWIDTH;
-	j<<=16;
-	i=(unsigned long)&v;
-	if (foo()>i) i-=j;
-	j--;
-	i+=j;
-	i&=~j;
-	fprintf(fp,"0x%lx",i-1);
-	fclose(fp);
-	return 0;
-}]])],[cstack_address=`cat conftest1`],[cstack_address=0])
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		void *
+		foo() {
+		    int i;
+		    return (void *)&i;
+		}
+		
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *v ;
+		    FILE *fp = fopen("conftest1","w");
+		    unsigned long i,j;
+		    
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    j=1;
+		    j<<=$PAGEWIDTH;
+		    j<<=16;
+		    i=(unsigned long)&v;
+		    if (foo()>i) i-=j;
+		       j--;
+		       i+=j;
+		       i&=~j;
+		       fprintf(fp,"0x%lx",i-1);
+		       fclose(fp);
+		       return 0;
+		}]])],
+    [cstack_address=`cat conftest1`],[cstack_address=0])
 AC_DEFINE_UNQUOTED(CSTACK_ADDRESS,$cstack_address,[starting C stack address])
 AC_MSG_RESULT($cstack_address)
 
 AC_MSG_CHECKING([cstack bits])
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	void *
-	foo() {
-	      int i;
-	      return (void *)&i;
-        }
-
-	int main(int argc,char **argv,char **envp) {
-	void *v ;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long i,j;
-
-	#ifdef CAN_UNRANDOMIZE_SBRK
-	#include "h/unrandomize.h"
-	#endif
-	j=1;
-	j<<=$PAGEWIDTH;
-	j<<=16;
-	i=(unsigned long)&v;
-	if (foo()>i) i-=j;
-	j--;
-	i+=j;
-	i&=~j;
-	for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
-	fprintf(fp,"%d",j);
-	fclose(fp);
-	return 0;
-}]])],[cstack_bits=`cat conftest1`],[cstack_bits=0])
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		void *
+		foo() {
+		    int i;
+		    return (void *)&i;
+		}
+		
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *v ;
+		    FILE *fp = fopen("conftest1","w");
+		    unsigned long i,j;
+		    
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    j=1;
+		    j<<=$PAGEWIDTH;
+		    j<<=16;
+		    i=(unsigned long)&v;
+		    if (foo()>i) i-=j;
+		       j--;
+		       i+=j;
+		       i&=~j;
+		       for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
+			   fprintf(fp,"%d",j);
+			   fclose(fp);
+			   return 0;
+		}]])],
+    [cstack_bits=`cat conftest1`],[cstack_bits=0])
 AC_DEFINE_UNQUOTED(CSTACK_BITS,$cstack_bits,[log starting C stack address])
 AC_MSG_RESULT($cstack_bits)
 
 AC_MSG_CHECKING(NEG_CSTACK_ADDRESS)
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	int main(int argc,char **argv,char **envp) {
-	#ifdef CAN_UNRANDOMIZE_SBRK
-	#include "h/unrandomize.h"
-	#endif
-	return (long)$cstack_address<0 ? 0 : -1;
-}]])],[AC_MSG_RESULT(yes)
-	neg_cstack_address=1
-	AC_DEFINE(NEG_CSTACK_ADDRESS,1,[C stack address is negative])],
-      [AC_MSG_RESULT(no)
-	neg_cstack_address=0])
-
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		int
+		main(int argc,char **argv,char **envp) {
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    return (long)$cstack_address<0 ? 0 : -1;
+		}]])],
+    [AC_MSG_RESULT(yes)
+     neg_cstack_address=1
+     AC_DEFINE(NEG_CSTACK_ADDRESS,1,[C stack address is negative])],
+    [AC_MSG_RESULT(no)
+     neg_cstack_address=0])
 
 AC_MSG_CHECKING([finding CSTACK_ALIGNMENT])
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	int main(int argc,char **argv,char **envp) {
-	void *b,*c;
-	FILE *fp = fopen("conftest1","w");
-	long n;
-	#ifdef CAN_UNRANDOMIZE_SBRK
-	#include "h/unrandomize.h"
-	#endif
-	b=alloca(sizeof(b));
-	c=alloca(sizeof(c));
-	n=b>c ? b-c : c-b;
-	n=n>sizeof(c) ? n : 1;
-	fprintf(fp,"%ld",n);
-	fclose(fp);
-	return 0;
-}]])],[cstack_alignment=`cat conftest1`],[cstack_alignment=0])
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		int main(int argc,char **argv,char **envp) {
+		    void *b,*c;
+		    FILE *fp = fopen("conftest1","w");
+		    long n;
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    b=alloca(sizeof(b));
+		    c=alloca(sizeof(c));
+		    n=b>c ? b-c : c-b;
+		    n=n>sizeof(c) ? n : 1;
+		    fprintf(fp,"%ld",n);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_alignment=`cat conftest1`],[cstack_alignment=0])
 AC_DEFINE_UNQUOTED(CSTACK_ALIGNMENT,$cstack_alignment,[C stack alignment])
 AC_MSG_RESULT($cstack_alignment)
 
 AC_MSG_CHECKING(CSTACK_DIRECTION)
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	void *
-	foo(void) {
-	int i;
-	return (void *)&i;
-	}
-
-	int main(int argc,char **argv,char **envp) {
-	char *b;
-	FILE *fp = fopen("conftest1","w");
-	#ifdef CAN_UNRANDOMIZE_SBRK
-	#include "h/unrandomize.h"
-	#endif
-	fprintf(fp,"%d",((long) &b) > ((long) foo()) ? -1 : 1);
-	fclose(fp);
-	return 0;
-}]])],[cstack_direction=`cat conftest1`],[cstack_direction=0])
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		void *
+		foo(void) {
+		    int i;
+		    return (void *)&i;
+		}
+		
+		int
+		main(int argc,char **argv,char **envp) {
+		    char *b;
+		    FILE *fp = fopen("conftest1","w");
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    fprintf(fp,"%d",((long) &b) > ((long) foo()) ? -1 : 1);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_direction=`cat conftest1`],[cstack_direction=0])
 AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up or down])
 AC_MSG_RESULT($cstack_direction)
 
+AC_ARG_ENABLE([immfix],[  --enable-immfix will enable an immediate fixnum table above the C stack])
 
-dnl AC_MSG_CHECKING(for shared library/C stack ceiling to heap)
-dnl if test "$use" = "mingw" ; then
-dnl   heap_ceiling=2000000000
-dnl else
-dnl if test "$use" = "solaris-i386" ; then
-dnl   heap_ceiling=0x0
-dnl else
-dnl if test "$enable_static" = "yes" ; then
-dnl   heap_ceiling=0x0
-dnl else
-dnl if ! test -x `which ldd` && ! test -f /proc/self/maps ; then
-dnl    heap_ceiling=0x0
-dnl else
-dnl if test -f /proc/self/maps ; then
-dnl    heap_ceiling=0x`/bin/cat /proc/self/maps | grep "/lib.*/ld-" | cut -f1 -d- | head -1`
-dnl else 
-dnl if test "`which ldd`" = "" ; then 
-dnl    heap_ceiling=0x0
-dnl else
-dnl #echo -e "#include <stdio.h>\n int main() {printf(\"foo\");return 0;}" >foo.c
-dnl #$CC foo.c -o foo
-dnl    AAWK=`which awk`
-dnl # | grep -v ld-kfreebsd needed on some strange bsd amd64 boxes
-dnl    heap_ceiling=`ldd $AAWK | tail -n 1 | $AWK '{print $NF}' | tr -d '()'`
-dnl fi
-dnl fi
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	#include <stdio.h>
-dnl 	]],[[
-dnl 	FILE *fp=fopen("conftest1","w");
-dnl 	unsigned long h=$heap_ceiling,d=$dbegin,c=$cstack_address;
-dnl 	h=h<d ? 0 : h;
-dnl 	h=c>d && c<h ? c : h;
-dnl 	fprintf(fp,"0x%lx",h);
-dnl 	return 0;]])],[heap_ceiling=`cat conftest1`],[AC_MSG_ERROR([failed])])
-dnl fi
-dnl fi
-dnl fi
-dnl fi
-dnl AC_MSG_RESULT($heap_ceiling)
-dnl AC_DEFINE_UNQUOTED(SHARED_LIB_HEAP_CEILING,$heap_ceiling,
-dnl 	[address at which shared lib placement terminates heap growth])
+AC_ARG_ENABLE([fastimmfix],[  --enable-fastimmfix=XXXX will reject low immediate fixnums unless 2^XXX can be attained],,[enable_fastimmfix=64])
 
-dnl ## Don't lower heap start if C stack is below default dbegin, as we're
-dnl # likely to get more heap this way.
-dnl if test "$enable_static" = "yes" ; then 
-dnl    echo "int main() {return !((unsigned long)$dbegin < (unsigned long)$cstack_address);}" >foo.c
-dnl else
-dnl    echo "int main() {return !($heap_ceiling && (unsigned long)$dbegin < (unsigned long)$cstack_address);}" >foo.c
-dnl fi
-dnl $CC foo.c -o foo
-dnl if ./foo ; then
 
 if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(0) remains above, foiling unexec
-
-   AC_MSG_CHECKING([finding default linker script])
-   touch unixport/gcl.script
-   echo "int main() {return 0;}" >foo.c
-   $CC -Wl,--verbose foo.c -o foo 2>&1 | \
-       $AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
-   rm -rf foo.c foo
-
-   if test "`cat gcl.script | wc -l`" != "0" ; then
-      AC_MSG_RESULT(got it)
-      AC_MSG_NOTICE([trying to adjust text start])
-      cp gcl.script gcl.script.def
-
-      n=-1;
-      k=0;
-      lim=`$AWK 'END {printf("%d\n",m*8-2)}' m=$ac_cv_sizeof_long`;
-      max=0;
-      min=$lim;
-      while test $n -lt $lim ; do
-        j=`$AWK 'END {for (i=j=0;j<=n;j++) i=i ? i*2 : 1;printf("%x\n",3*i)}' n=$n </dev/null`
-        cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
-#        diff -u gcl.script.def gcl.script
-        echo "int main() {return 0;}" >foo.c
-        if ( $CC -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
-         if test $n -lt $min ; then min=$n; fi; 
-         if test $n -gt $max; then max=$n; fi; 
-	elif test $max -gt 0 ; then
-	 break;
-        fi;
-        n=`$AWK 'END {print n+1}' n=$n </dev/null`
-      done	  
-
-      AC_MSG_NOTICE([min log text start $min])
-      AC_MSG_NOTICE([max log text start $max])
-
-      if test $neg_cstack_address -eq 1 ; then #FIXME test this
-      	 if test $cstack_bits -lt $max ; then
-	    max=$cstack_bits;
-            AC_MSG_NOTICE([max log text start reduced to $max considering c stack address])
-	 fi	
-      fi
-
-      j=-1;
-      low_shft="";
-      if test $min -le $max ; then
-            if test $max -ge $enable_fastimmfix && test "$enable_immfix" = "yes" ; then
+    
+    AC_MSG_CHECKING([finding default linker script])
+    touch unixport/gcl.script
+    echo "int main() {return 0;}" >foo.c
+    $CC -Wl,--verbose foo.c -o foo 2>&1 | \
+	$AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
+    rm -rf foo.c foo
+    
+    if test "`cat gcl.script | wc -l`" != "0" ; then
+	AC_MSG_RESULT(got it)
+	AC_MSG_NOTICE([trying to adjust text start])
+	cp gcl.script gcl.script.def
+	
+	n=-1;
+	k=0;
+	lim=`$AWK 'END {printf("%d\n",m*8-2)}' m=$ac_cv_sizeof_long`;
+	max=0;
+	min=$lim;
+	while test $n -lt $lim ; do
+            j=`$AWK 'END {for (i=j=0;j<=n;j++) i=i ? i*2 : 1;printf("%x\n",3*i)}' n=$n </dev/null`
+            cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
+	    #        diff -u gcl.script.def gcl.script
+            echo "int main() {return 0;}" >foo.c
+            if ( $CC -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
+		if test $n -lt $min ; then min=$n; fi; 
+		if test $n -gt $max; then max=$n; fi; 
+	    elif test $max -gt 0 ; then
+		break;
+            fi;
+            n=`$AWK 'END {print n+1}' n=$n </dev/null`
+	done	  
+	
+	AC_MSG_NOTICE([min log text start $min])
+	AC_MSG_NOTICE([max log text start $max])
+	
+	if test $neg_cstack_address -eq 1 ; then #FIXME test this
+      	    if test $cstack_bits -lt $max ; then
+		max=$cstack_bits;
+		AC_MSG_NOTICE([max log text start reduced to $max considering c stack address])
+	    fi	
+	fi
+	
+	j=-1;
+	low_shft="";
+	if test $min -le $max ; then
+            if test $max -ge $enable_fastimmfix && test "$enable_immfix" != "no" ; then
 	        j=`$AWK 'END {for (i=j=0;j<=n;j++) i=i ? i*2 : 1;printf("%x\n",3*i)}' n=$max </dev/null`
 		low_shft=`$AWK 'END {print n+1}' n=$max </dev/null`;
 		AC_MSG_NOTICE([raising log text to $j for a $max bit wide low immfix table])
@@ -1795,356 +1394,139 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
 	        j=`$AWK 'END {for (i=j=0;j<=n;j++) i=i ? i*2 : 1;printf("%x\n",3*i)}' n=$min </dev/null`
 		AC_MSG_NOTICE([lowering log text to $j to maximize data area])
 	    fi
-      fi
-
-      if test "$low_shft" != "" ; then
+	fi
+	
+	if test "$low_shft" != "" ; then
             AC_DEFINE_UNQUOTED(LOW_SHFT,$low_shft,[upper immediate fixnum bound])      	 
             AC_DEFINE_UNQUOTED(OBJNULL,(object)0x$j,[lowest address non-object])      	 
-      else				   
+	else				   
             AC_DEFINE_UNQUOTED(OBJNULL,NULL,[lowest address non-object])      	 
-      fi					     
-
-#      echo $j;
-      AC_MSG_CHECKING([our linker script])
-      if test "$j" -ne "-1" ; then
+	fi					     
+	
+	#      echo $j;
+	AC_MSG_CHECKING([our linker script])
+	if test "$j" -ne "-1" ; then
             cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
 	    AC_MSG_RESULT([done])
 	    rm -f gcl.script.def
 	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
 	    cp gcl.script unixport
-      else
-	 AC_MSG_RESULT([none found or not needed])
-	 rm -f gcl.script gcl.script.def
-      fi
-      rm -rf foo.c foo
-  else
-      AC_MSG_RESULT([not found])
-  fi 
-
+	else
+	    AC_MSG_RESULT([none found or not needed])
+	    rm -f gcl.script gcl.script.def
+	fi
+	rm -rf foo.c foo
+    else
+	AC_MSG_RESULT([not found])
+    fi 
+    
 else
- 
-     AC_DEFINE_UNQUOTED(OBJNULL,NULL,[lowest address non-object])      	 
-
+    
+    AC_DEFINE_UNQUOTED(OBJNULL,NULL,[lowest address non-object])      	 
+    
 fi
-
-   dnl old_LDFLAGS="$LDFLAGS"
-   dnl LDFLAGS="$LDFLAGS $TLDFLAGS"
-   dnl AC_MSG_CHECKING([revised DBEGIN])
-   dnl AC_RUN_IFELSE([AC_LANG_SOURCE([[
-   dnl 	#include <stdio.h>
-   dnl 	#include <stdlib.h>
-   dnl 	#include <unistd.h>
-
-   dnl 	int main(int argc,char **argv,char **envp) {
-
-   dnl 	    void *b;
-   dnl 	    FILE *fp;
-
-   dnl 	    #ifdef CAN_UNRANDOMIZE_SBRK
-   dnl 	    #include "h/unrandomize.h"
-   dnl 	    #endif
-   dnl 	    fp = fopen("conftest1","w");
-
-   dnl 	    #ifdef _WIN32
-   dnl 	    fprintf ( fp,"0x%lx", 0x1a000000 );  /* Windows custom allocation from this point up */
-   dnl 	    #else
-   dnl 	    #if defined (__APPLE__) && defined (__MACH__)
-   dnl 	    fprintf(fp,"((unsigned long)get_dbegin())");
-   dnl 	    #else
-   dnl 	    b = sbrk(0);
-   dnl 	    fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)0xffffff);
-   dnl 	    #endif
-   dnl 	    #endif
-   dnl 	    fclose(fp);
-   dnl 	    return 0;}]])],[dbegin=`cat conftest1`],[dbegin=0])
-   dnl AC_MSG_RESULT($dbegin)
-   dnl LDFLAGS="$old_LDFLAGS"
-dnl fi
-dnl dnl AC_DEFINE_UNQUOTED(DBEGIN,$dbegin,[down-rounded beginning address of lisp data])
-dnl rm -rf foo*
-
-dnl AC_MSG_CHECKING(for maxpage revision)
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	#include <stdio.h>
-dnl 	]],[[
-dnl 	char *b;
-dnl 	unsigned long i,j;
-dnl 	FILE *fp = fopen("conftest1","w");
-dnl 	j=((unsigned long)$enable_maxpage <<$PAGEWIDTH) + $dbegin;
-dnl 	j=$heap_ceiling && j>$heap_ceiling ? $heap_ceiling : j;
-dnl 	j-=$dbegin;
-dnl 	/*  for (i=1;i<<1 && i<=j;i<<=1); */
-dnl 	/*  if (i>j) i>>=1; */
-dnl 	i=j;
-dnl 	fprintf(fp,"%ld",i>>$PAGEWIDTH);
-dnl 	fclose(fp);
-dnl 	return 0;
-dnl ]])],[tmp_maxpage=`cat conftest1`],[tmp_maxpage=0])
-dnl if test "$tmp_maxpage" != "$enable_maxpage" ; then
-dnl    enable_maxpage=$tmp_maxpage
-dnl    AC_MSG_RESULT($enable_maxpage)
-dnl else
-dnl    AC_MSG_RESULT($enable_maxpage is OK)
-dnl fi
-dnl AC_DEFINE_UNQUOTED(MAXPAGE,$enable_maxpage,[maximum number of pages to be allocated])
-
-dnl AC_MSG_CHECKING(for C stack size floor from heap)
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	#include <stdio.h>
-dnl 	]],[[
-dnl 	char *b;
-dnl 	FILE *fp = fopen("conftest1","w");
-dnl 	unsigned long j,k;
-
-dnl 	j=$cstack_address + $cstack_direction * $enable_cssize;
-dnl 	k=($dbegin + ((unsigned long)$enable_maxpage << $PAGEWIDTH));
-dnl 	j=abs(j-$cstack_address)!=$enable_cssize || (j<k && $dbegin < $cstack_address) ? k : j;
-dnl 	j-=$cstack_address;
-dnl 	j*=$cstack_direction;
-dnl 	fprintf(fp,"%lu",j);
-dnl 	fclose(fp);
-dnl 	return 0;
-dnl ]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
-dnl if test "$tmp_cssize" != "$enable_cssize" ; then
-dnl    enable_cssize=$tmp_cssize;
-dnl    AC_MSG_RESULT($enable_cssize)
-dnl else
-dnl    AC_MSG_RESULT($enable_cssize is OK)
-dnl fi
-
-dnl AC_MSG_CHECKING(for C stack size limit from fixnum table)
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	#include <stdio.h>
-dnl 	]],[[
-dnl 	char *b;
-dnl 	FILE *fp = fopen("conftest1","w");
-dnl 	unsigned long j,k;
-
-dnl 	j=$cstack_address + $cstack_direction * $enable_cssize;
-dnl 	if ($cstack_direction>0) {
-dnl 	  k=$cstack_address + ((-(unsigned long)$cstack_address)>>1);
-dnl 	  j=j<$cstack_address || j > k ? k : j;
-dnl 	  j=$cstack_address < $dbegin && j > $dbegin ? $dbegin : j;
-dnl 	}
-dnl 	j-=$cstack_address;
-dnl 	j*=$cstack_direction;
-dnl 	fprintf(fp,"%lu",j);
-dnl 	fclose(fp);
-dnl 	return 0;
-dnl ]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
-dnl if test "$tmp_cssize" != "$enable_cssize" ; then
-dnl    enable_cssize=$tmp_cssize;
-dnl    AC_MSG_RESULT($enable_cssize)
-dnl else
-dnl    AC_MSG_RESULT($enable_cssize is OK)
-dnl fi
-
-dnl AC_MSG_CHECKING(for C stack size limit from address wrap)
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	#include <stdio.h>
-dnl 	]],[[
-dnl 	char *b;
-dnl 	FILE *fp = fopen("conftest1","w");
-dnl 	unsigned long j,k;
-
-dnl 	j=-$cstack_address * $cstack_direction;
-dnl 	j=j>$enable_cssize ? $enable_cssize : j;
-dnl 	fprintf(fp,"%lu",j);
-dnl 	fclose(fp);
-dnl 	return 0;
-dnl ]])],[tmp_cssize=`cat conftest1`],[tmp_cssize=0])
-dnl if test "$tmp_cssize" != "$enable_cssize" ; then
-dnl    enable_cssize=$tmp_cssize;
-dnl    AC_MSG_RESULT($enable_cssize)
-dnl else
-dnl    AC_MSG_RESULT($enable_cssize is OK)
-dnl fi
-dnl AC_DEFINE_UNQUOTED(CSSIZE,$enable_cssize,[maximum C stack size])
-
-dnl AC_MSG_CHECKING(for fast NULL_OR_ON_CSTACK macro)
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 	#include <stdio.h>
-dnl 	]],[[
-dnl 	return ((long)$dbegin>=0 &&
-dnl 	       ((long)$dbegin+(long)($enable_maxpage<<$PAGEWIDTH)) >=0 &&
-dnl 	       ((long)$cstack_address<0)) ? 0 : 1;
-dnl ]])],[tmp_fnocm=yes],[tmp_fnocm=no])
-dnl if test "$tmp_fnocm" = "yes" ; then
-dnl    AC_MSG_RESULT(yes)
-dnl    AC_DEFINE(USE_FAST_NULL_OR_ON_CSTACK_MACRO,1,[whether one instruction heap address check can be used])
-dnl else
-dnl    AC_MSG_RESULT(no)
-dnl fi
 
 mem_top=0
 mem_range=0
 AC_MSG_CHECKING(mem top)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	void *v;
-	unsigned long i,j,k,l,m;
-	FILE *fp = fopen("conftest1","w");
-
-	for (i=2,k=1;i;k=i,i<<=1);
-	l=$cstack_address;
-	l=$cstack_direction==1 ? (l<k ? k-1 : -1) : l;
-	for (i=j=k;j && i<l;j>>=1,i|=j);
-	if (j<(k>>3)) i=0;
-	j=1;
-	j<<=$PAGEWIDTH;
-	j<<=4;
-	j--;
-	i+=j;
-	i&=~j;
-	fprintf(fp,"0x%lx",i);
-	fclose(fp);
-	return 0;
-]])],[mem_top=`cat conftest1`],[mem_top="0x0"])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+	    ]],
+	    [[
+		void *v;
+		unsigned long i,j,k,l,m;
+		FILE *fp = fopen("conftest1","w");
+		
+		for (i=2,k=1;i;k=i,i<<=1);
+		    l=$cstack_address;
+		    l=$cstack_direction==1 ? (l<k ? k-1 : -1) : l;
+		    for (i=j=k;j && i<l;j>>=1,i|=j);
+			if (j<(k>>3)) i=0;
+			   j=1;
+			   j<<=$PAGEWIDTH;
+			   j<<=4;
+			   j--;
+			   i+=j;
+			   i&=~j;
+			   fprintf(fp,"0x%lx",i);
+			   fclose(fp);
+			   return 0;
+	    ]])],
+    [mem_top=`cat conftest1`],[mem_top="0x0"])
 AC_MSG_RESULT($mem_top)
-if test "$mem_top" != "0x0" ; then
-   AC_MSG_CHECKING(finding upper mem half range)
-   AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-   #include <stdio.h>
-   ]],[[
-   unsigned long j;
-   FILE *fp = fopen("conftest1","w");
 
-   for (j=1;j && !(j& $mem_top);j<<=1);
-   fprintf(fp,"0x%lx",j>>1);
-   fclose(fp);
-   return 0;
-   ]])],[mem_range=`cat conftest1`],[mem_range="0x0"])
-   AC_MSG_RESULT($mem_range)
-   if test "$mem_range" != "0x0" ; then 
+if test "$mem_top" != "0x0" ; then
+    AC_MSG_CHECKING(finding upper mem half range)
+    AC_RUN_IFELSE(
+	[AC_LANG_PROGRAM(
+		[[
+		    #include <stdio.h>
+		]],
+		[[
+		    unsigned long j;
+		    FILE *fp = fopen("conftest1","w");
+		    
+		    for (j=1;j && !(j& $mem_top);j<<=1);
+			fprintf(fp,"0x%lx",j>>1);
+			fclose(fp);
+			return 0;
+		]])],
+	[mem_range=`cat conftest1`],[mem_range="0x0"])
+    AC_MSG_RESULT($mem_range)
+    if test "$mem_range" != "0x0" ; then 
 	AC_DEFINE_UNQUOTED(MEM_TOP,$mem_top,[beginning address for immediate fixnum range])
         AC_DEFINE_UNQUOTED(MEM_RANGE,$mem_range,[size of immediate fixnum address space])
-   fi
+    fi
 fi
 
-if test "$enable_immfix" = "yes" ; then
-  if test "$mem_top" != "0x0" ; then
-     if test "$mem_range" != "0x0" ; then 
-	AC_DEFINE_UNQUOTED(IM_FIX_BASE,$mem_top,[beginning address for immediate fixnum range])
-        AC_DEFINE_UNQUOTED(IM_FIX_LIM,$mem_range,[size of immediate fixnum address space])
-     fi
-  fi
+if test "$enable_immfix" != "no" ; then
+    if test "$mem_top" != "0x0" ; then
+	if test "$mem_range" != "0x0" ; then 
+	    AC_DEFINE_UNQUOTED(IM_FIX_BASE,$mem_top,[beginning address for immediate fixnum range])
+            AC_DEFINE_UNQUOTED(IM_FIX_LIM,$mem_range,[size of immediate fixnum address space])
+	fi
+    fi
 fi
-
-
-dnl AC_MSG_CHECKING(for word order)
-dnl AC_TRY_RUN([int main () {
-dnl   /* Are we little or big endian?  Adapted from Harbison&Steele.  */
-dnl   union
-dnl   {
-dnl     double d;
-dnl     int l[sizeof(double)/sizeof(int)];
-dnl   } u;
-dnl   u.d = 1.0;
-dnl   return u.l[sizeof(double)/sizeof(int)-1] ? 0 : 1;
-dnl }],AC_MSG_RESULT(little) 
-dnl    AC_DEFINE(LITTLE_END),
-dnl    AC_MSG_RESULT(big),
-dnl    AC_MSG_RESULT([WARNING: ASSUMING LITTLE ENDIAN FOR CROSS COMPILING !!!]
-dnl    AC_DEFINE(LITTLE_END)))
-dnl AC_SUBST(LITTLE_END)
-
-
-# On systems with execshield, brk is randomized.  We need to catch
-# this and restore the traditional behavior here
-
-dnl old_LDFLAGS="$LDFLAGS"
-dnl LDFLAGS="$TLDFLAGS"
-dnl AC_MSG_CHECKING("finding DBEGIN")
-dnl AC_TRY_RUN([#include <stdio.h>
-dnl             #include <stdlib.h>
-
-dnl void gprof_cleanup() {};
-dnl int
-dnl main(int argc,char * argv[],char *envp[])
-dnl {
-dnl   char *b,*b1;
-dnl   FILE *fp;
-
-dnl #ifdef CAN_UNRANDOMIZE_SBRK
-dnl #include "h/unrandomize.h"
-dnl #endif
-dnl   b = (void *) malloc(1000);
-dnl   fp = fopen("conftest1","w");
-
-dnl #ifdef _WIN32
-dnl   fprintf(fp,"_dbegin");
-dnl #else
-dnl #if defined (__APPLE__) && defined (__MACH__)
-dnl   fprintf(fp,"mach_mapstart");
-dnl #else
-dnl   b1=((unsigned long) b) & ~(unsigned long)0xffffff;b=(void *)b1<(void *)&b1 && (void *)b>(void *)&b ? ((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1) : b1;
-dnl   fprintf(fp,"0x%lx",b);
-dnl #endif
-dnl #endif
-dnl   fclose(fp);
-dnl   return 0;
-dnl }],dbegin=`cat conftest1`,dbegin=0,dbegin=0)
-dnl AC_DEFINE_UNQUOTED(DBEGIN,$dbegin /* where data begins */)
-dnl AC_MSG_RESULT(got $dbegin)
-dnl LDFLAGS="$old_LDFLAGS"
-
-
-dnl AC_MSG_CHECKING("finding CSTACK_ADDRESS")
-dnl AC_TRY_RUN([#include <stdio.h>
-dnl main()
-dnl {
-dnl   char *b ;
-dnl   FILE *fp = fopen("conftest1","w");
-dnl   fprintf(fp,"%ld",((long) &b));
-dnl   fclose(fp);
-dnl   return 0;
-dnl }],cstack_address=`cat conftest1`,cstack_address=0,cstack_address=0)
-dnl AC_DEFINE_UNQUOTED(CSTACK_ADDRESS,$cstack_address \
-dnl )
-dnl AC_MSG_RESULT(got $cstack_address)
-
-
 
 AC_MSG_CHECKING([sizeof long long int])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	if (sizeof(long long int) == 2*sizeof(long)) return 0;
-	return 1;
-]])],[AC_DEFINE(HAVE_LONG_LONG,1,[long long is available]) AC_MSG_RESULT(yes)],
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+	    ]],
+	    [[
+		if (sizeof(long long int) == 2*sizeof(long)) return 0;
+		   return 1;
+	    ]])],
+    [AC_DEFINE(HAVE_LONG_LONG,1,[long long is available]) AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)])
 
 AC_SUBST(HAVE_LONG_LONG)
 
-
-AC_CHECK_HEADERS(dirent.h,
-	AC_MSG_CHECKING([for d_type])
-	AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-		#include <dirent.h>
-			]],[[
-		struct dirent d;
-		return d.d_type=0;
-		]])],
-		[AC_MSG_RESULT([yes]) AC_DEFINE(HAVE_D_TYPE,1,[have struct dirent d_type field])],
-		AC_MSG_RESULT([no]),AC_MSG_RESULT([no])))
-
-# readline
-AC_ARG_ENABLE(readline,
-	[--enable-readline    enables command line completion via the readline library ],,
-	enable_readline="yes")
+AC_CHECK_HEADERS([dirent.h],
+		 AC_MSG_CHECKING([for d_type])
+		 AC_RUN_IFELSE(
+		     [AC_LANG_PROGRAM(
+			     [[
+				 #include <dirent.h>
+			     ]],
+			     [[
+				 struct dirent d;
+				 return d.d_type=0;
+			     ]])],
+		     [AC_MSG_RESULT([yes]) AC_DEFINE(HAVE_D_TYPE,1,[have struct dirent d_type field])],
+		     AC_MSG_RESULT([no]),AC_MSG_RESULT([no])))
 
 # ansi lisp
-AC_ARG_ENABLE(ansi,[--enable-ansi builds a large gcl aiming for ansi compliance, 
-		    --disable-ansi builds the smaller traditional CLtL1 image],,enable_ansi="yes")
-
-if test "$enable_ansi" = "yes" ; then
-	SYSTEM=ansi_gcl
-	CLSTANDARD=ANSI
-else
-	SYSTEM=gcl
-	CLSTANDARD=CLtL1
-fi
+SYSTEM=ansi_gcl
+CLSTANDARD=ANSI
+AC_ARG_ENABLE([ansi],[  --enable-ansi builds a large gcl aiming for ansi compliance],
+	      [if test "$enable_ansi" = "no" ; then
+		   SYSTEM=gcl
+		   CLSTANDARD=CLtL1
+	       fi])
 
 FLISP="saved_$SYSTEM"
 AC_SUBST(FLISP)
@@ -2192,51 +1574,44 @@ AC_EGREP_HEADER([gettimeofday],
                 [sys/time.h],
 		[AC_MSG_RESULT([present])],
 		[AC_MSG_RESULT([missing])
-		AC_DEFINE(GETTOD_NOT_DECLARED,1,[No gettimeofday call -- fixme])])
+		 AC_DEFINE(GETTOD_NOT_DECLARED,1,[No gettimeofday call -- fixme])])
 
 
 AC_CHECK_LIB(m,sin,LIBS="${LIBS} -lm",true)
 AC_CHECK_LIB(mingwex,main,LIBS="${LIBS} -lmingwex",true)
 
 AC_MSG_CHECKING([for buggy maximum sscanf length])
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-            #include <stdio.h>
-          ]],[[
-            char *s= "2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320030599218174135966290435729003342952605956307381323286279434907632338298807531952510190115738341879307021540891499348841675092447614606680822648001684774118537423454424371075390777449920695517027618386062613313845830007520449338265602976067371132007093287091274437470472306969772093101416928368190255151086574637721112523897844250569536967707854499699679468644549059879316368892300987931277361782154249992295763514822082698951936680331825288693984964651058209392398294887933203625094431173012381970684161404";
-	    int n, m;
-	    double f;
-	    char *endptr;
-            FILE *fp=fopen("conftest1","w");
-
-	    n=sscanf(s,"%lf%n",&f,&m);
-	    fprintf(fp,"%d",m);
-	    fclose(fp);
-	    return s[m];
-	  ]])],
-	[AC_MSG_RESULT([none])],
-	[buggy_maximum_sscanf_length=`cat conftest1`
-         AC_MSG_RESULT([$buggy_maximum_sscanf_length])
-	 AC_DEFINE_UNQUOTED(BUGGY_MAXIMUM_SSCANF_LENGTH,$buggy_maximum_sscanf_length,[sscanf terminates prematurely (Windows XP)])])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+	    ]],
+	    [[
+		char *s= "2.7182818284590452353602874713526624977572470936999595749669676277240766303535475945713821785251664274274663919320030599218174135966290435729003342952605956307381323286279434907632338298807531952510190115738341879307021540891499348841675092447614606680822648001684774118537423454424371075390777449920695517027618386062613313845830007520449338265602976067371132007093287091274437470472306969772093101416928368190255151086574637721112523897844250569536967707854499699679468644549059879316368892300987931277361782154249992295763514822082698951936680331825288693984964651058209392398294887933203625094431173012381970684161404";
+		int n, m;
+		double f;
+		char *endptr;
+		FILE *fp=fopen("conftest1","w");
+		
+		n=sscanf(s,"%lf%n",&f,&m);
+		fprintf(fp,"%d",m);
+		fclose(fp);
+		return s[m];
+	    ]])],
+    [AC_MSG_RESULT([none])],
+    [buggy_maximum_sscanf_length=`cat conftest1`
+     AC_MSG_RESULT([$buggy_maximum_sscanf_length])
+     AC_DEFINE_UNQUOTED(BUGGY_MAXIMUM_SSCANF_LENGTH,$buggy_maximum_sscanf_length,[sscanf terminates prematurely (Windows XP)])])
 
 
 EXTRA_LOBJS=
-if test "$try_japi" = "yes" ; then
-   AC_CHECK_HEADERS(japi.h,[AC_DEFINE(HAVE_JAPI_H)
-				 EXTRA_LOBJS="${EXTRA_LOBJS} gcl_japi.o"
-			 	 LIBS="${LIBS} -ljapi -lwsock32"] )
-fi
-dnl if test "$use" = "mingw" ; then
-dnl  if test "$try_xdr" = "yes" ; then
-dnl    AC_CHECK_HEADERS(rpc/rpc.h,[AC_DEFINE(HAVE_XDR)
-dnl 			 	 LIBS="${LIBS} -loncrpc"] )
-dnl  fi
-dnl else
-dnl  if test "$try_xdr" = "yes" ; then
-dnl    AC_CHECK_HEADERS(rpc/rpc.h,[AC_DEFINE(HAVE_XDR)
-dnl 			 	 LIBS="${LIBS} -lrpc"] )
-dnl  fi
-dnl fi
+AC_ARG_ENABLE([japi],[  --enable-japi=yes will compile in support for the JAPI graphical interface if present on your system],
+	      [if test "$enable_japi" = "yes" ; then
+		   AC_CHECK_HEADERS([japi.h],
+				    [AC_DEFINE(HAVE_JAPI_H)
+				     EXTRA_LOBJS="${EXTRA_LOBJS} gcl_japi.o"
+				     LIBS="${LIBS} -ljapi -lwsock32"])
+	       fi])
 
 # Should really find a way to check for prototypes, but this 
 # basically works for now.  CM
@@ -2260,76 +1635,53 @@ AC_CHECK_HEADERS(float.h,AC_DEFINE(HAVE_FLOAT_H,1,[have float.h]))
 # test makes sense.  CM
 #
 AC_MSG_CHECKING([for isnormal])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-            #define _GNU_SOURCE
-	    #include <math.h>
-	    ]],[[
-	    float f;
-	    return isnormal(f) || !isnormal(f) ? 0 : 1;
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#define _GNU_SOURCE
+		#include <math.h>
+	    ]],
+	    [[
+		float f;
+		return isnormal(f) || !isnormal(f) ? 0 : 1;
 	    ]])],
-		[AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes)],
-		[AC_MSG_CHECKING([for fpclass in ieeefp.h])
-		 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-			#include <ieeefp.h>
-			]],[[
-			float f;
-			return fpclass(f)>=FP_NZERO || fpclass(f)<FP_NZERO ? 0 : 1;
-			]])],[AC_DEFINE(HAVE_IEEEFP,1,[Have ieeefp fpclass function]) AC_MSG_RESULT(yes)],
-			     [AC_MSG_RESULT(no)])])
+    [AC_DEFINE(HAVE_ISNORMAL,1,[Have isnormal function]) AC_MSG_RESULT(yes)],
+    [AC_MSG_CHECKING([for fpclass of ieeefp.h])
+     AC_RUN_IFELSE(
+	 [AC_LANG_PROGRAM(
+		 [[
+		     #include <ieeefp.h>
+		 ]],
+		 [[
+		     float f;
+		     return fpclass(f)>=FP_NZERO || fpclass(f)<FP_NZERO ? 0 : 1;
+		 ]])],[AC_DEFINE(HAVE_IEEEFP,1,[Have ieeefp fpclass function]) AC_MSG_RESULT(yes)],
+	 [AC_MSG_RESULT(no)])])
 
 AC_MSG_CHECKING([for isfinite])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #define _GNU_SOURCE
-	#include <math.h>
-	]],[[
-	float f;
-	return isfinite(f) || !isfinite(f) ? 0 : 1;
-	]])],[AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes)],
-	     [AC_MSG_CHECKING([for finite()])
-	      AC_RUN_IFELSE([AC_LANG_PROGRAM([[
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#define _GNU_SOURCE
 		#include <math.h>
-		#include <ieeefp.h>
-		]],[[
+	    ]],
+	    [[
 		float f;
-		return finite(f) || !finite(f) ? 0 : 1;
-		]])],[AC_DEFINE(HAVE_FINITE,1,[Have finite function]) AC_MSG_RESULT(yes)],
-   		     [AC_MSG_ERROR(no)])])
-
-dnl AC_MSG_CHECKING([for INFINITY])
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl         #define _GNU_SOURCE
-dnl 	#include <math.h>
-dnl 	]],[[
-dnl 	double d=INFINITY;
-dnl 	return 0;
-dnl 	]])],[AC_MSG_RESULT(yes)],
-dnl 	    [AC_MSG_CHECKING([for builtin_inf()])
-dnl 	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 		#include <math.h>
-dnl 		#include <ieeefp.h>
-dnl 		]],[[
-dnl 		double d=__builtin_inf();
-dnl 		return 0;
-dnl 		]])],[AC_DEFINE_UNQUOTED(INFINITY,__builtin_inf(),[Have builtin_inf]) AC_MSG_RESULT(yes)],
-dnl 		    [AC_MSG_ERROR(no)])])
-
-dnl AC_MSG_CHECKING([for NAN])
-dnl AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl         #define _GNU_SOURCE
-dnl 	#include <math.h>
-dnl 	]],[[
-dnl 	double d=NAN;
-dnl 	return 0;
-dnl 	]])],[AC_MSG_RESULT(yes)],
-dnl 	    [AC_MSG_CHECKING([for builtin_nan()])
-dnl 	    AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-dnl 		#include <math.h>
-dnl 		#include <ieeefp.h>
-dnl 		]],[[
-dnl 		double d=__builtin_nan("0x0");
-dnl 		return 0;
-dnl 		]])],[AC_DEFINE_UNQUOTED(NAN,__builtin_nan("0x0"),[Have builtin_nan]) AC_MSG_RESULT(yes)],
-dnl 		    [AC_MSG_ERROR(no)])])
+		return isfinite(f) || !isfinite(f) ? 0 : 1;
+	    ]])],[AC_DEFINE(HAVE_ISFINITE,1,[Have isfinite function]) AC_MSG_RESULT(yes)],
+    [AC_MSG_CHECKING([for finite()])
+     AC_RUN_IFELSE(
+	 [AC_LANG_PROGRAM(
+		 [[
+		     #include <math.h>
+		     #include <ieeefp.h>
+		 ]],
+		 [[
+		     float f;
+		     return finite(f) || !finite(f) ? 0 : 1;
+		 ]])],
+	 [AC_DEFINE(HAVE_FINITE,1,[Have finite function]) AC_MSG_RESULT(yes)],
+   	 [AC_MSG_ERROR(no)])])
 
 #--------------------------------------------------------------------
 #	Check for the existence of the -lsocket and -lnsl libraries.
@@ -2363,69 +1715,74 @@ if test "$tcl_checkBoth" = 1; then
 fi
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [TLIBS="$TLIBS -lnsl"]))
 
-RL_OBJS=""
-RL_LIB=""
-if test "$enable_readline" = "yes" ; then
-	AC_CHECK_HEADERS(readline/readline.h,
-		AC_CHECK_LIB(readline,rl_initialize,
-			AC_DEFINE(HAVE_READLINE,1,[have readline library]) 
-			TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
-			RL_OBJS=gcl_readline.o
-# Readline support now initialized automatically when compiled in, this lisp
-# object no longer needed -- 20040102 CM
-#			RL_LIB=lsp/gcl_readline.o
-			))
+# readline
+AC_ARG_ENABLE(readline,[  --enable-readline    enables command line completion via the readline library ])
 
-# These tests discover differences between readline 4.1 and 4.3
-	AC_CHECK_LIB(readline,rl_completion_matches,
-			AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
-			AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches]),,)
+if test "$enable_readline" != "no" ; then
+    AC_CHECK_HEADERS([readline/readline.h],
+		     AC_CHECK_LIB([readline],[rl_initialize],
+				  [AC_DEFINE(HAVE_READLINE,1,[have readline library]) 
+				   TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
+				   RL_OBJS=gcl_readline.o]))
+    
+    # These tests discover differences between readline 4.1 and 4.3
+    AC_CHECK_LIB([readline],[rl_completion_matches],
+		 [AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
+		  AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches])])
 fi
 
 AC_SUBST(RL_OBJS)
 AC_SUBST(RL_LIB)
 
-AC_MSG_CHECKING(For network code for nsocket.c)
-AC_TRY_LINK([
-#include <sys/time.h>
-#include <sys/types.h>
-#include <unistd.h>
+# sockets
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-
-/************* for the sockets ******************/ 
-#include <sys/socket.h>		/* struct sockaddr, SOCK_STREAM, ... */
-#ifndef NO_UNAME
-#   include <sys/utsname.h>	/* uname system call. */
-#endif
-#include <netinet/in.h>		/* struct in_addr, struct sockaddr_in */
-#include <arpa/inet.h>		/* inet_ntoa() */
-#include <netdb.h>		/* gethostbyname() */
-],[ connect(0,(struct sockaddr *)0,0);
-    gethostbyname("jil");
-    socket(AF_INET, SOCK_STREAM, 0);
-	],
-[AC_DEFINE(HAVE_NSOCKET,1,[can use nsocket library])
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
-
-
-AC_MSG_CHECKING(check for listen using fcntl)
-AC_TRY_COMPILE([#include <stdio.h>
-#include <fcntl.h>
-],
-[FILE *fp=fopen("configure.in","r");
-  int orig;
-  orig = fcntl(fileno(fp), F_GETFL);
-  if (! (orig & O_NONBLOCK )) return 0;
-],
-[AC_DEFINE(LISTEN_USE_FCNTL,1,[can use fcntl for listen function])
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+AC_MSG_CHECKING([For network code for nsocket.c])
+AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <sys/time.h>
+		#include <sys/types.h>
+		#include <unistd.h>
+		
+		#include <errno.h>
+		#include <fcntl.h>
+		#include <stdio.h>
+		
+		/************* for the sockets ******************/ 
+		#include <sys/socket.h>		/* struct sockaddr, SOCK_STREAM, ... */
+		#ifndef NO_UNAME
+		#   include <sys/utsname.h>	/* uname system call. */
+		#endif
+		#include <netinet/in.h>		/* struct in_addr, struct sockaddr_in */
+		#include <arpa/inet.h>		/* inet_ntoa() */
+		#include <netdb.h>		/* gethostbyname() */
+	    ]],
+	    [[
+		connect(0,(struct sockaddr *)0,0);
+		gethostbyname("jil");
+		socket(AF_INET, SOCK_STREAM, 0);
+	    ]])],
+    [AC_DEFINE(HAVE_NSOCKET,1,[can use nsocket library])
+     AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])])
 
 
+AC_MSG_CHECKING([check for listen using fcntl])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#include <fcntl.h>
+	    ]],
+	    [[
+		FILE *fp=fopen("configure.in","r");
+		int orig;
+		orig = fcntl(fileno(fp), F_GETFL);
+		if (! (orig & O_NONBLOCK )) return 0;
+	    ]])],
+    [AC_DEFINE(LISTEN_USE_FCNTL,1,[can use fcntl for listen function])
+     AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])])
 
 
 AC_CHECK_FUNC(profil, ,[AC_DEFINE(NO_PROFILE,1,[no profil system call])])
@@ -2433,29 +1790,18 @@ AC_SUBST(NO_PROFILE)
 AC_CHECK_FUNC(setenv,[AC_DEFINE(HAVE_SETENV,1,[have setenv call])],no_setenv=1 )
 AC_SUBST(HAVE_SETENV)
 if test "$no_setenv" = "1" ; then
-AC_CHECK_FUNC(putenv,[AC_DEFINE(HAVE_PUTENV,1,[have putenv call])],)
-AC_SUBST(HAVE_PUTENV)
+    AC_CHECK_FUNC(putenv,[AC_DEFINE(HAVE_PUTENV,1,[have putenv call])],)
+    AC_SUBST(HAVE_PUTENV)
 fi
 
 AC_CHECK_FUNC(_cleanup, [AC_DEFINE(USE_CLEANUP,1,[have _cleanup function])],)
 AC_SUBST(USE_CLEANUP)
 gcl_ok=no
 
-dnl AC_HEADER_EGREP(LITTLE_ENDIAN, ctype.h, gcl_ok=yes, gcl_ok=noo)
-dnl if test $gcl_ok = yes ; then
-dnl AC_DEFINE(ENDIAN_ALREADY_DEFINED)
-dnl fi
-
-dnl AC_SUBST(ENDIAN_ALREADY_DEFINED)
-
-
-
-
-# if test "x$enable_machine" = "x" ; then
 AC_MSG_CHECKING([FIONBIO vs. O_NONBLOCK for nonblocking I/O])
 
 case $system in
-       OSF*)
+    OSF*)
 	AC_DEFINE(USE_FIONBIO,1,[use fionbio for non-blocking io])
 	AC_MSG_RESULT(FIONBIO)
 	;;
@@ -2474,103 +1820,85 @@ esac
 
 
 AC_MSG_CHECKING(check for SV_ONSTACK)
-AC_TRY_COMPILE([#include <signal.h>
-int joe=SV_ONSTACK;
-],
-[],
-[AC_DEFINE(HAVE_SV_ONSTACK,1,[have sv_onstack])
- AC_SUBST(HAVE_SV_ONSTACK)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <signal.h>
+		int joe=SV_ONSTACK;
+	    ]],
+	    [[]])],
+    [AC_DEFINE(HAVE_SV_ONSTACK,1,[have sv_onstack])
+     AC_SUBST(HAVE_SV_ONSTACK)
+     AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])])
 
 AC_MSG_CHECKING(check for SIGSYS)
-AC_TRY_COMPILE([#include <signal.h>
-int joe=SIGSYS;
-],
-[],
-[AC_DEFINE(HAVE_SIGSYS,1,[have SIGSYS signal])
- AC_SUBST(HAVE_SIGSYS)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <signal.h>
+		int joe=SIGSYS;
+	    ]],[[]])],
+    [AC_DEFINE(HAVE_SIGSYS,1,[have SIGSYS signal])
+     AC_SUBST(HAVE_SIGSYS)
+     AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])])
 
 
 AC_MSG_CHECKING(check for SIGEMT)
-AC_TRY_COMPILE([#include <signal.h>
-int joe=SIGEMT;
-],
-[],
-[AC_DEFINE(HAVE_SIGEMT,1,[have SIGEMT signal])
- AC_SUBST(HAVE_SIGEMT)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <signal.h>
+		int joe=SIGEMT;
+	    ]],[[]])],
+    [AC_DEFINE(HAVE_SIGEMT,1,[have SIGEMT signal])
+     AC_SUBST(HAVE_SIGEMT)
+     AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])])
 
 AC_CHECK_FUNCS(sigaltstack)
 AC_CHECK_FUNCS(feenableexcept)
 
 AC_CHECK_HEADERS(dis-asm.h,
-	MLIBS=$LIBS
-	AC_CHECK_LIB(opcodes,init_disassemble_info)
-	AC_CHECK_LIB(dl,dlopen,#opcodes changes too quickly to link directly 
-		AC_CHECK_FUNCS(print_insn_i386,LIBS="$MLIBS -ldl")))
+		 MLIBS=$LIBS
+		 AC_CHECK_LIB(opcodes,init_disassemble_info)
+		 AC_CHECK_LIB(dl,dlopen,#opcodes changes too quickly to link directly 
+			      AC_CHECK_FUNCS(print_insn_i386,LIBS="$MLIBS -ldl")))
 
 #if test $use = "386-linux" ; then
-	AC_CHECK_HEADERS(asm/sigcontext.h)
-	AC_CHECK_HEADERS(asm/signal.h)
-	AC_MSG_CHECKING([for sigcontext...])
-        AC_TRY_COMPILE([#include <signal.h>
-       ],
-       [
-        struct sigcontext foo;
-       ],
-       [
-        sigcontext_works=1;
-        AC_DEFINE(SIGNAL_H_HAS_SIGCONTEXT,1,[have sigcontext in signal.h])
-	AC_MSG_RESULT(sigcontext in signal.h)
-       ],
-        
-	[sigcontext_works=0;
-         AC_MSG_RESULT(sigcontext NOT in signal.h)]
-       )
-       if test "$sigcontext_works" = 0 ; then
-       AC_MSG_CHECKING([for sigcontext...])
-       AC_TRY_COMPILE([#include <signal.h>
-             #ifdef HAVE_ASM_SIGCONTEXT_H     
-             #include <asm/sigcontext.h>
-             #endif
-             #ifdef HAVE_ASM_SIGNAL_H          
-             #include <asm/signal.h>
-             #endif
-          ],
-        [ 
-        struct sigcontext foo;
-        ],
-        [
-        AC_DEFINE(HAVE_SIGCONTEXT,1,[have sigcontext])
-	AC_MSG_RESULT(sigcontext in asm files)
-        ],
-        [
-        AC_MSG_RESULT(no sigcontext found)
-     ])
-
-
-       fi
-#	echo 'foo() {}' > conftest1.c
-#	$CC -S conftest1.c
-#	use_underscore=0	
-#	if fgrep _foo conftest1.s ; then use_underscore=1 ; fi
-#	if test $use_underscore = 0 ; then
-#            MPI_FILE=mpi-386_no_under.o
-#          else
-#	     MPI_FILE=mpi-386d.o
-#        fi
-#	AC_SUBST(MPI_FILE)
-#       GCC=$CC
-#        if test -x  /usr/bin/i386-glibc20-linux-gcc ; then
-#          GCC=/usr/bin/i386-glibc20-linux-gcc
-#       fi
-#	AC_SUBST(GCC)
-
-#fi
+AC_CHECK_HEADERS(asm/sigcontext.h)
+AC_CHECK_HEADERS(asm/signal.h)
+AC_MSG_CHECKING([for sigcontext...])
+AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <signal.h>
+	    ]],
+	    [[
+		struct sigcontext foo;
+	    ]])],
+    [AC_DEFINE(SIGNAL_H_HAS_SIGCONTEXT,1,[have sigcontext of signal.h])
+     AC_MSG_RESULT([sigcontext of signal.h])],
+    [AC_MSG_RESULT([sigcontext NOT of signal.h])
+     AC_MSG_CHECKING([for sigcontext...])
+     AC_COMPILE_IFELSE(
+	 [AC_LANG_PROGRAM(
+		 [[
+		     #include <signal.h>
+		     #ifdef HAVE_ASM_SIGCONTEXT_H     
+		     #include <asm/sigcontext.h>
+		     #endif
+		     #ifdef HAVE_ASM_SIGNAL_H          
+		     #include <asm/signal.h>
+		     #endif
+		 ]],
+		 [[
+		     struct sigcontext foo;
+		 ]])],
+	 [AC_DEFINE(HAVE_SIGCONTEXT,1,[have sigcontext])
+	  AC_MSG_RESULT(sigcontext asm files)],
+	 [AC_MSG_RESULT([no sigcontext found])])])
 
 AC_PATH_PROG(EMACS,emacs)
 
@@ -2590,11 +1918,11 @@ EOF
 
 AC_MSG_CHECKING([emacs site lisp directory])
 if [[ "$EMACS_SITE_LISP" = "unknown" ]] ; then
-	if [[ "$EMACS" != "" ]] ; then
-		EMACS_SITE_LISP=`$EMACS -q -batch --no-site-file -l conftest.el 2>&1 | sed -e /Loading/d | sed -e /load/d  |sed -e /Warning:/d`
-	else
-		EMACS_SITE_LISP=""
-	fi
+    if [[ "$EMACS" != "" ]] ; then
+	EMACS_SITE_LISP=`$EMACS -q -batch --no-site-file -l conftest.el 2>&1 | sed -e /Loading/d | sed -e /load/d  |sed -e /Warning:/d`
+    else
+	EMACS_SITE_LISP=""
+    fi
 fi
 AC_MSG_RESULT($EMACS_SITE_LISP)
 AC_SUBST(EMACS_SITE_LISP)
@@ -2613,14 +1941,14 @@ EOF
 
 AC_MSG_CHECKING([emacs default.el])
 if [[ "$EMACS" != "" ]] ; then
-	EMACS_DEFAULT_EL=`$EMACS -q -batch --no-site-file -l conftest.el 2>&1 | sed -e /Loading/d | sed -e /load/d |sed -e /Warning:/d`
+    EMACS_DEFAULT_EL=`$EMACS -q -batch --no-site-file -l conftest.el 2>&1 | sed -e /Loading/d | sed -e /load/d |sed -e /Warning:/d`
 else
-	EMACS_DEFAULT_EL=""
+    EMACS_DEFAULT_EL=""
 fi
 if  test -f "${EMACS_DEFAULT_EL}"  ; then true;else
-  if test -d $EMACS_SITE_LISP ; then
-     EMACS_DEFAULT_EL=${EMACS_SITE_LISP}/default.el
-  fi
+    if test -d $EMACS_SITE_LISP ; then
+	EMACS_DEFAULT_EL=${EMACS_SITE_LISP}/default.el
+    fi
 fi
 AC_MSG_RESULT($EMACS_DEFAULT_EL)
 AC_SUBST(EMACS_DEFAULT_EL)
@@ -2651,93 +1979,98 @@ fi
 AC_MSG_RESULT($INFO_DIR)
 AC_SUBST(INFO_DIR)
 
-if test "$enable_tcltk" = "yes" ; then
+AC_ARG_ENABLE([tcltk],[  --enable-tcltk will try to build gcl-tk])
+AC_ARG_ENABLE([tkconfig],
+	      [  --enable-tkconfig=XXXX will force the use of a TK_CONFIG_PREFIX=XXXXX as place to look for tkConfig.sh and tclConfig.sh],
+	      [TK_CONFIG_PREFIX=$enableval],[TK_CONFIG_PREFIX=unknown])
+AC_ARG_ENABLE([tclconfig],
+	      [  --enable-tclconfig=XXXX will force the use of a TCL_CONFIG_PREFIX=XXXXX as place to look for tclConfig.sh and tclConfig.sh],
+	      [TCL_CONFIG_PREFIX=$enableval],[TCL_CONFIG_PREFIX=unknown])
 
-   AC_MSG_CHECKING([for tcl/tk])
+if test "$enable_tcltk" != "no" ; then
     
-   if test -d "${TCL_CONFIG_PREFIX}"  ; then true ; else
+    AC_MSG_CHECKING([for tcl/tk])
     
-     AC_CHECK_PROG(TCLSH,tclsh,tclsh,${TCLSH})
-   
-     if test "${TCLSH}" = "" ; then true ; else
-   
-        rm -f conftest.tcl
-        cat >> conftest.tcl <<EOF
+    if test -d "${TCL_CONFIG_PREFIX}"  ; then true ; else
+	
+	AC_CHECK_PROG(TCLSH,tclsh,tclsh,${TCLSH})
+	
+	if test "${TCLSH}" = "" ; then true ; else
+	    
+	    rm -f conftest.tcl
+	    cat >> conftest.tcl <<EOF
 [
 puts [set tcl_version]
 ]
 EOF
-   
-        TCL_VERSION=`${TCLSH} < conftest.tcl`
-     fi
-   
-     if test -x /usr/lib/tcl$TCL_VERSION/tclConfig.sh ; then
-       TCL_CONFIG_PREFIX=/usr/lib/tcl$TCL_VERSION
-     fi
+	    
+	    TCL_VERSION=`${TCLSH} < conftest.tcl`
+	fi
+	
+	if test -x /usr/lib/tcl$TCL_VERSION/tclConfig.sh ; then
+	    TCL_CONFIG_PREFIX=/usr/lib/tcl$TCL_VERSION
+	fi
+	
+    fi
     
-   fi
+    if test -f ${TCL_CONFIG_PREFIX}/tclConfig.sh  ; then . ${TCL_CONFIG_PREFIX}/tclConfig.sh ; fi
     
-   if test -f ${TCL_CONFIG_PREFIX}/tclConfig.sh  ; then . ${TCL_CONFIG_PREFIX}/tclConfig.sh ; fi
+    if test -d "${TK_CONFIG_PREFIX}"  ; then true ; else
+	if test -f ${TCL_CONFIG_PREFIX}/tkConfig.sh ; then
+	    TK_CONFIG_PREFIX=${TCL_CONFIG_PREFIX}
+	else
+	    if test -x `echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`/tkConfig.sh ; then
+		TK_CONFIG_PREFIX=`echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`
+	    fi      
+	fi
+    fi
     
-   if test -d "${TK_CONFIG_PREFIX}"  ; then true ; else
-      if test -f ${TCL_CONFIG_PREFIX}/tkConfig.sh ; then
-         TK_CONFIG_PREFIX=${TCL_CONFIG_PREFIX}
-      else
-         if test -x `echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`/tkConfig.sh ; then
-            TK_CONFIG_PREFIX=`echo $TCL_CONFIG_PREFIX | sed 's,tcl,tk,g'`
-         fi      
-      fi
-   fi
+    if test -f ${TK_CONFIG_PREFIX}/tkConfig.sh  ; then . ${TK_CONFIG_PREFIX}/tkConfig.sh ; fi
     
-   if test -f ${TK_CONFIG_PREFIX}/tkConfig.sh  ; then . ${TK_CONFIG_PREFIX}/tkConfig.sh ; fi
-   
-   if test -d ${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION} ; then
-      TCL_LIBRARY=${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION}
-   else
-      if test -d ${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION} ; then
-        TCL_LIBRARY=${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION}
-      fi
-   fi
-   
-   if test -d ${TK_CONFIG_PREFIX}/tk${TK_VERSION} ; then
-      TK_LIBRARY=${TK_CONFIG_PREFIX}/tk${TK_VERSION}
-   else
-      if test -d ${TK_CONFIG_PREFIX}/../tk${TK_VERSION} ; then
-        TK_LIBRARY=${TK_CONFIG_PREFIX}/../tk${TK_VERSION}
-      fi
-   fi
-   
-   if test -f ${TCL_CONFIG_PREFIX}/../include/tcl.h ; then
-      TCL_INCLUDE=-I${TCL_CONFIG_PREFIX}/../include
-   else
-      if test -f /usr/include/tcl${TCL_VERSION}/tcl.h ; then
-        TCL_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
-      fi
-   fi
-   
-   if test -f ${TK_CONFIG_PREFIX}/../include/tk.h ; then
-      TK_INCLUDE=-I${TK_CONFIG_PREFIX}/../include
-   else
-      if test -f /usr/include/tcl${TCL_VERSION}/tk.h ; then
-        TK_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
-      fi	
-   fi
-   
-   TCL_VERSION_DOT_FREE=`echo ${TCL_VERSION} | tr -d .`
-   if test -f ${TK_CONFIG_PREFIX}/../bin/tcl${TCL_VERSION_DOT_FREE}.dll  ; then
-      TCL_LIBS="-L${TK_CONFIG_PREFIX}/../bin -ltk${TCL_VERSION_DOT_FREE} -ltcl${TCL_VERSION_DOT_FREE}"
-      TCL_STUB_LIBS="-L${TK_CONFIG_PREFIX}/lib -ltkstub${TCL_VERSION_DOT_FREE} -ltclstub${TCL_VERSION_DOT_FREE}"
-   else
-      AC_CHECK_LIB(lieee,main,have_ieee=1,have_ieee=0)
-      if test "$have_ieee" = "0" ; then
-        TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-lieee::g" `
-      fi
-      if test "$have_dl" = "0" ; then
-        TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-ldl::g"`
-      fi
-      TCL_STUB_LIBS=""
-   fi
-
+    if test -d ${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION} ; then
+	TCL_LIBRARY=${TCL_CONFIG_PREFIX}/tcl${TCL_VERSION}
+    else
+	if test -d ${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION} ; then
+	    TCL_LIBRARY=${TCL_CONFIG_PREFIX}/../tcl${TCL_VERSION}
+	fi
+    fi
+    
+    if test -d ${TK_CONFIG_PREFIX}/tk${TK_VERSION} ; then
+	TK_LIBRARY=${TK_CONFIG_PREFIX}/tk${TK_VERSION}
+    else
+	if test -d ${TK_CONFIG_PREFIX}/../tk${TK_VERSION} ; then
+	    TK_LIBRARY=${TK_CONFIG_PREFIX}/../tk${TK_VERSION}
+	fi
+    fi
+    
+    if test -f ${TCL_CONFIG_PREFIX}/../include/tcl.h ; then
+	TCL_INCLUDE=-I${TCL_CONFIG_PREFIX}/../include
+    else
+	if test -f /usr/include/tcl${TCL_VERSION}/tcl.h ; then
+	    TCL_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
+	fi
+    fi
+    
+    if test -f ${TK_CONFIG_PREFIX}/../include/tk.h ; then
+	TK_INCLUDE=-I${TK_CONFIG_PREFIX}/../include
+    else
+	if test -f /usr/include/tcl${TCL_VERSION}/tk.h ; then
+	    TK_INCLUDE=-I/usr/include/tcl${TCL_VERSION}
+	fi	
+    fi
+    
+    TCL_VERSION_DOT_FREE=`echo ${TCL_VERSION} | tr -d .`
+    if test -f ${TK_CONFIG_PREFIX}/../bin/tcl${TCL_VERSION_DOT_FREE}.dll  ; then
+	TCL_LIBS="-L${TK_CONFIG_PREFIX}/../bin -ltk${TCL_VERSION_DOT_FREE} -ltcl${TCL_VERSION_DOT_FREE}"
+	TCL_STUB_LIBS="-L${TK_CONFIG_PREFIX}/lib -ltkstub${TCL_VERSION_DOT_FREE} -ltclstub${TCL_VERSION_DOT_FREE}"
+    else
+	AC_CHECK_LIB(lieee,main,have_ieee=1,have_ieee=0)
+	if test "$have_ieee" = "0" ; then
+	    TCL_LIBS=`echo ${TCL_LIBS} | sed -e "s:-lieee::g" `
+	fi
+	TCL_STUB_LIBS=""
+    fi
+    
 fi
 
 AC_SUBST(TK_CONFIG_PREFIX)
@@ -2761,15 +2094,14 @@ AC_SUBST(TCL_LIBS)
 
 
 if test -d "${TK_CONFIG_PREFIX}" ; then
-AC_MSG_RESULT([using TK_VERSION=${TK_VERSION} in ${TK_CONFIG_PREFIX}])
+    AC_MSG_RESULT([using TK_VERSION=${TK_VERSION} of ${TK_CONFIG_PREFIX}])
 else
-AC_MSG_RESULT([not found])
+    AC_MSG_RESULT([not found])
 fi
 
-NOTIFY=$enable_notify
-AC_SUBST(NOTIFY)
-
-      
+AC_ARG_ENABLE([notify],[  --enable-notify=no will disable the automatic notification of gcl maintainers of successful builds/problems],
+	      [NOTIFY=$enable_notify
+	       AC_SUBST(NOTIFY)])
 
 
 # for sgbc the mprotect capabilities.
@@ -2779,76 +2111,37 @@ AC_CHECK_HEADERS(sys/mman.h,AC_CHECK_FUNCS(mprotect))
 AC_CHECK_HEADERS(alloca.h)
 AC_FUNC_ALLOCA
 
-# alloca
 
-# dlopen etc
-# idea make it so you do something dlopen(libX.so,RTLD_GLOBAL)
-# then dlload("foo.o") a lisp file can refer to things in libX.so
-# 
-
-# what machine this is, and include then a machine specific hdr.
-# and machine specific defs.
-
-# check bzero,
-
-# check getcwd, getwd etc..
-
-
-
-
-# check socket stuff..
-
-# getrlimit
-
-# fionread or block
-
-# redhat/cygnus released for some reason a buggy version of gcc,
-# which no one else released.   Catch that here.
-dnl AC_MSG_CHECKING([Checking for buggy gcc version from redhat])
-dnl if  2>&1 $CC -v | fgrep "gcc version 2.96" > /dev/null 
-dnl    then 
-dnl         BROKEN_O4_OPT=1
-dnl         AC_DEFINE(BROKEN_O4_OPT)
-dnl         AC_SUBST(BROKEN_O4_OPT)
-dnl         echo ODIR_DEBUG=-O >> makedefsafter
-dnl 	echo >> makedefsafter
-dnl 	AC_MSG_RESULT([yes .. turning off -O4])
-dnl    else
-dnl 	AC_MSG_RESULT([no])
-dnl fi 
-
-LDFLAGS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'`"
+LDFLAGS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'` $TLDFLAGS"
 AC_SUBST(LDFLAGS)
-LIBS="$X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $LIBS $TLIBS"
+LIBS="$X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $LIBS $TLIBS"
 AC_SUBST(LIBS)
-FINAL_CFLAGS="$CFLAGS $CPPFLAGS $X_CFLAGS $TCFLAGS $PROCESSOR_FLAGS"
+FINAL_CFLAGS="$CFLAGS $CPPFLAGS $X_CFLAGS $TCFLAGS"
 AC_SUBST(FINAL_CFLAGS)
 # Work around bug with gcc on ppc -- CM
-NIFLAGS="$CFLAGS $CPPFLAGS $TCFLAGS $TONIFLAGS $PROCESSOR_FLAGS -I\$(GCLDIR)/o"
+NIFLAGS="$CFLAGS $CPPFLAGS $TCFLAGS $TONIFLAGS -I\$(GCLDIR)/o"
 AC_SUBST(NIFLAGS)
-CFLAGS="$CFLAGS $CPPFLAGS $TCFLAGS $TO3FLAGS $PROCESSOR_FLAGS -I\$(GCLDIR)/o"
+CFLAGS="$CFLAGS $CPPFLAGS $TCFLAGS $TO3FLAGS -I\$(GCLDIR)/o"
 AC_SUBST(CFLAGS)
 O3FLAGS=$TO3FLAGS
 AC_SUBST(O3FLAGS)
 O2FLAGS=$TO2FLAGS
 AC_SUBST(O2FLAGS)
 
-AC_SUBST(PRELINK_CHECK)
-
 AC_SUBST(EXTRA_LOBJS)
 AC_SUBST(LEADING_UNDERSCORE)
 AC_SUBST(GNU_LD)
 if test -f h/$use.defs  ; then
-
-  AC_SUBST(use)
-  AC_OUTPUT(makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp )
-  echo makedefc
-  cat makedefc
-
-  echo    add-defs1 $use
-  CC=$CC ./add-defs1 $use
-
+    
+    AC_SUBST(use)
+    AC_OUTPUT(makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp )
+    echo makedefc
+    cat makedefc
+    
+    echo    add-defs1 $use
+    CC=$CC ./add-defs1 $use
+    
 else
-  echo "Unable to guess machine type"
-  echo use configure --enable-machine=XXX,  for XXX such that h/XXX.defs exists, ie in h/*.defs
+    echo "Unable to guess machine type"
+    echo use configure --enable-machine=XXX,  for XXX such that h/XXX.defs exists, ie in h/*.defs
 fi
