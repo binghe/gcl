@@ -7913,6 +7913,10 @@ if test "${enable_readline+set}" = set; then :
 fi
 
 
+if test "$use" = "mingw" ; then
+    enable_readline=no
+fi
+
 if test "$enable_readline" != "no" ; then
     for ac_header in readline/readline.h
 do :
