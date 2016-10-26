@@ -3978,7 +3978,7 @@ $as_echo "removing $1 from LDFLAGS" >&6; }
 TCFLAGS=""
 add_args_to_tcflags -fsigned-char -pipe \
                     -fno-builtin-malloc -fno-builtin-free \
-                    -fno-pie -fno-PIC -fno-pic \
+                    -fno-PIE -fno-pie -fno-PIC -fno-pic \
 	            -Wall \
 	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
 	            -Wno-unused-but-set-variable -Wno-misleading-indentation
