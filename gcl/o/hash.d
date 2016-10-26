@@ -48,7 +48,7 @@ typedef unsigned char uchar;
 
 static ufixnum rtb[256];
 
-#define MASK(n) (~(~0L << (n)))
+#define MASK(n) (~(~0UL << (n)))
 
 static ufixnum
 ufixhash(ufixnum g) {

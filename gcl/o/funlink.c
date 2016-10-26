@@ -322,10 +322,11 @@ call_proc(object sym, void **link, int argd, va_list ll) {
 
     } else if (type_of(fun)==t_afun) {
 
-      ufixnum at=F_TYPES(fun->sfn.sfn_argd)>>F_TYPE_WIDTH;
-      ufixnum ma=F_MIN_ARGS(fun->sfn.sfn_argd);
-      ufixnum xa=F_MAX_ARGS(fun->sfn.sfn_argd);
-      ufixnum rt=F_RESULT_TYPE(fun->sfn.sfn_argd);
+      ufixnum ad=fun->sfn.sfn_argd;
+      ufixnum at=F_TYPES(ad)>>F_TYPE_WIDTH;
+      ufixnum ma=F_MIN_ARGS(ad);
+      ufixnum xa=F_MAX_ARGS(ad);
+      ufixnum rt=F_RESULT_TYPE(ad);
 
       nargs=SFUN_NARGS(argd);
       if (nargs<ma || nargs > xa || ((argd>>8)&0x3)!=rt || (argd>>12)!=at)

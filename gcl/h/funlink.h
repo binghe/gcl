@@ -54,7 +54,7 @@ enum F_arg_types
   };
 
 /* Make a mask for bits i < j, masking j-i bits */
-#define MASK_RANGE(i,j)  ((~(~0 << (j-i)))<< i)
+#define MASK_RANGE(i,j)  ((~(~0UL << (j-i)))<< i)
 
 #define F_PLAIN(x) (((x) & MASK_RANGE( F_START_TYPES_POS,31)) == 0)
 #define ARG_LIMIT 63

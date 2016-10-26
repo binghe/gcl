@@ -149,7 +149,7 @@ enum dump_type {
 
 /* given SHORT extract top code (say 4 bits) and bottom byte */
 #define TOP(i) (i >> SIZE_BYTE)
-#define BOTTOM(i) (i &  ~(~0 << SIZE_BYTE))
+#define BOTTOM(i) (i &  ~(~0UL << SIZE_BYTE))
 
 #define FASD_VERSION 2
 
@@ -328,7 +328,7 @@ getd(str)
 
       
 #define D_TYPE_OF(byt) \
-  ((enum dump_type )((unsigned int) byt & ~(~0 << SIZE_D_CODE)))
+  ((enum dump_type )((unsigned int) byt & ~(~0UL << SIZE_D_CODE)))
 
 /* this field may be the top of a short for length, or part of an extended
    code */
@@ -379,7 +379,7 @@ getd(str)
 
 
 
-#define MASK ~(~0 << 8)
+#define MASK ~(~0UL << 8)
 #define WRITE_BYTEI(x,i)  putc((((x) >> (i*SIZE_BYTE)) & MASK),fas_stream)
 
 #define PUTFIX(v_) Join(PUT,SIZEOF_LONG)(v_)
@@ -398,7 +398,7 @@ getd(str)
      WRITE_BYTEI(var,7);} while(0)
 
 #define PUT4(varx ) \
- do{int var= varx ; \
+ do{unsigned long var= varx ; \
      DPRINTF("{4byte:varx= %d}", var); \
        WRITE_BYTEI(var,0); \
      WRITE_BYTEI(var,1); \
@@ -406,14 +406,14 @@ getd(str)
      WRITE_BYTEI(var,3);} while(0)
 
 #define PUT2(var ) \
- do{int v=var; \
+ do{unsigned long v=var; \
      DPRINTF("{2byte:var= %d}", v); \
        WRITE_BYTEI(v,0); \
      WRITE_BYTEI(v,1); \
      } while(0)
 
 #define PUT3(var ) \
- do{int v=var; \
+ do{unsigned long v=var; \
      DPRINTF("{3byte:var= %d}", v); \
        WRITE_BYTEI(v,0); \
      WRITE_BYTEI(v,1); \
