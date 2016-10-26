@@ -3945,7 +3945,7 @@ fi
 }
 
 assert_arg_to_tldflags() {
-    if ! add_arg_to_tldflag $1 ; then { $as_echo "$as_me:${as_lineno-$LINENO}: result: cannot add $1 to LDFLAGS" >&5
+    if ! add_arg_to_tldflags $1 ; then { $as_echo "$as_me:${as_lineno-$LINENO}: result: cannot add $1 to LDFLAGS" >&5
 $as_echo "cannot add $1 to LDFLAGS" >&6; }; exit 1 ; fi
     return 0
 }
