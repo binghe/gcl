@@ -470,12 +470,6 @@ main(int argc, char **argv, char **envp) {
   kcl_self = argv[0];
 #endif
 
-#ifdef __MINGW32__
-  {
-    char *s=kcl_self;
-    for (;*s;s++) if (*s=='\\') *s='/';
-  }
-#endif	
   *argv=kcl_self;
   
 #ifdef CAN_UNRANDOMIZE_SBRK

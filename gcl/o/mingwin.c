@@ -924,20 +924,6 @@ sigprocmask (int how , const sigset_t *set,sigset_t *oldset)
   return 0;
 }
   
-void
-fix_filename(object pathname, char *filename1) {
-
-  char *filename=filename1,*p=filename;
-  extern char *getwd();
-
-  while (*p) {
-    if (*p=='\\') *p='/';
-    p++;
-  }
-
-}
-
-
 char *GCLExeName ( void )
 {
     static char module_name_buf[128];

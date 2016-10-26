@@ -4,29 +4,58 @@
 ;;   (declare (optimize (safety 1)))
 ;;   (when (typep x 'pathname) t))
 
+
+(eval-when (compile eval)
+  (defun add-dir-sep (s &optional (i 0) (bp 0) (l (length s)))
+    (when (< i l)
+      (let ((x (aref s i)))
+	(append
+	 (if (eql x #\/)
+	     (if (zerop bp) (list #\[ x #\\ #\]) (list x #\\))
+	   (list x))
+	 (add-dir-sep s (1+ i) (case x (#\[ (1+ bp))(#\] (1- bp))(otherwise bp)) l)))))
+
+  (defun ads (s) #+winnt (coerce (add-dir-sep s) 'string) #-winnt s))
+
+(defconstant +dirsep+ (compile-regexp #.(ads "/")))
+
+(defconstant +glob-to-regexp-alist+ (list (cons #v"{[^}]*}" (lambda (x) (msub '((#\| . #\,)(#\( . #\{)(#\) . #\})) x)))
+					  (cons #v"\\[[^\\]*\\]"
+						(lambda (x)
+						  (string-concatenate "(" (substitute #\^ #\! (subseq x 0 2)) (subseq x 2) ")")))
+					  (cons #v"\\*" (lambda (x) #.(ads "([^/.]*)")))
+					  (cons #v"\\?" (lambda (x) #.(ads "([^/.])")))
+					  (cons #v"\\." (lambda (x) "\\."))))
+
+(defconstant +physical-pathname-defaults+ '(("" "" "")
+					    #+winnt("" "([A-Za-z]:)?" ":") #-winnt("" "()" "")
+					    ("" #.(ads "(/?([^/]+/)*)") "" "" #.(ads "([^/]+/)") "/")
+					    ("" #.(ads "([^/.]*)") "")
+					    ("." #.(ads "(\\.[^/]*)?") "")
+					    ("" "" "")))
+
+(defconstant +logical-pathname-defaults+  '(("" "([-0-9A-Z]+:)?" ":")
+					    ("" "" "")
+					    ("" "(;?((\\*?([-0-9A-Z]+\\*?)+|\\*|\\*\\*);)*)" "" "" "((\\*?([-0-9A-Z]+\\*?)+|\\*);)" ";")
+					    ("" "(\\*?([-0-9A-Z]+\\*?)+|\\*)?" "")
+					    ("." "(\\.(\\*?([-0-9A-Z]+\\*?)+|\\*))?" "")
+					    ("." "(\\.([1-9][0-9]*|newest|NEWEST|\\*))?" "")))
+
 (defun msub (a x) (if a (msub (cdr a) (substitute (caar a) (cdar a) x)) x))
 
-(defvar *glob-to-regexp-alist* (list (cons #v"{[^}]*}" (lambda (x) (msub '((#\| . #\,)(#\( . #\{)(#\) . #\})) x)))
-				     (cons #v"\\[[^\\]*\\]" (lambda (x)
-							      (concatenate 'string "("
-									   (substitute #\^ #\! (subseq x 0 2))
-									   (subseq x 2) ")")))
-				     (cons #v"\\*" (lambda (x) "([^/.]*)"))
-				     (cons #v"\\?" (lambda (x) "([^/.])"))
-				     (cons #v"\\." (lambda (x) "\\."))))
 
 (defun mglist (x &optional (b 0))
   (let* ((y (mapcan (lambda (z &aux (w (string-match (car z) x b)))
 		      (unless (eql w -1)
 			(list (list w (match-end 0) z))))
-		    *glob-to-regexp-alist*))
+		    +glob-to-regexp-alist+))
 	 (z (when y (reduce (lambda (y x) (if (< (car x) (car y)) x y)) y))))
     (when z
       (cons z (mglist x (cadr z))))))
 
 (defun mgsub (x &optional (l (mglist x)) (b 0) &aux (w (pop l)))
   (if w
-      (concatenate 'string
+      (string-concatenate
 		   (subseq x b (car w))
 		   (funcall (cdaddr w) (subseq x (car w) (cadr w)))
 		   (mgsub x l (cadr w)))
@@ -49,21 +78,10 @@
 ;    )
 )
 
-(defconstant +physical-pathname-defaults+ '(("" "" "")
-					    ("" "([A-Za-z]:)?" ":")
-					    ("" "(/?([^/]+/)*)" "" "" "([^/]+/)" "/")
-					    ("" "([^/.]*)" "")
-					    ("." "(\\.[^/]*)?" "")
-					    ("" "" "")))
-(defconstant +logical-pathname-defaults+  '(("" "([-0-9A-Z]+:)?" ":")
-					    ("" "" "")
-					    ("" "(;?((\\*?([-0-9A-Z]+\\*?)+|\\*|\\*\\*);)*)" "" "" "((\\*?([-0-9A-Z]+\\*?)+|\\*);)" ";")
-					    ("" "(\\*?([-0-9A-Z]+\\*?)+|\\*)?" "")
-					    ("." "(\\.(\\*?([-0-9A-Z]+\\*?)+|\\*))?" "")
-					    ("." "(\\.([1-9][0-9]*|newest|NEWEST|\\*))?" "")))
+
 
 (defun to-regexp-or-namestring (x rp lp)
-  (apply 'concatenate 'string
+  (apply 'string-concatenate
 	 (mapcan (lambda (x y) (elsub x y rp lp))
 		 x (if lp +logical-pathname-defaults+ +physical-pathname-defaults+))))
 

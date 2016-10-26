@@ -14,6 +14,7 @@
 (defun dir-conj (x) (if (eq x :relative) :absolute :relative))
 
 (defvar *up-key* :up)
+(defvar *canonicalized* nil)
 
 (defun mfr (x b i) (subseq x b i));  (make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b)
 
@@ -30,15 +31,15 @@
 	 (z (if w (cdr w) z)))
     (if (eq z :up) *up-key* z)))
 
-(defun dir-parse (x sep sepfirst &optional (b 0))
+(defun dir-parse (x &optional lp (b 0))
   (when (stringp x)
-    (let ((i (search sep x :start2 b)));string-match spoils outer match results
-      (when i
-	(let* ((y (dir-parse x sep sepfirst (1+ i)))
+    (let ((i (string-match (if lp #v";" +dirsep+) x b)))
+      (unless (minusp i)
+	(let* ((y (dir-parse x lp (1+ i)))
 	       (z (element x b i :directory))
-	       (y (if z (cons z y) y)))
+	       (y (if z (cons z y) (progn (when (> i b) (setq *canonicalized* t)) y))))
 	  (if (zerop b)
-	      (cons (if (zerop i) sepfirst (dir-conj sepfirst)) y)
+	      (cons (if (if lp (plusp i) (zerop i)) :absolute :relative) y)
 	    y))))))
 
 (defun match-component (x i k &optional (boff 0) (eoff 0))
@@ -52,41 +53,37 @@
 
 (defconstant +generic-logical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +logical-pathname-defaults+)) t t)))
 
-(defun expand-home-dir (dir)
-  (cond ((and (eq (car dir) :relative) (stringp (cadr dir)) (eql #\~ (aref (cadr dir) 0)))
-	 (append (dir-parse (home-namestring (cadr dir)) "/" :absolute) (cddr dir)))
-	(dir)))
-
 (defun logical-pathname-parse (x &optional host def (b 0) (e (length x)))
-  (when (and (eql b (string-match +generic-logical-pathname-regexp+ x b e)) (eql (match-end 0) e))
-    (let ((mhost (match-component x 1 :host 0 -1)))
-      (when (and host mhost)
-	(unless (string-equal host mhost)
+  (when *pathname-logical* ;;accelerator
+    (when (and (eql b (string-match +generic-logical-pathname-regexp+ x b e)) (eql (match-end 0) e))
+      (let ((mhost (match-component x 1 :host 0 -1)))
+	(when (and host mhost)
+	  (unless (string-equal host mhost)
 	    (error 'error :format-control "Host part of ~s does not match ~s" :format-arguments (list x host))))
-      (let ((host (or host mhost (pathname-host def))))
-	(when (logical-pathname-host-p host)
-	  (let* ((dir (dir-parse (match-component x 2 :none) ";" :relative))
-		 (edir (expand-home-dir dir)))
-	  (make-pathname :host host
-			 :device :unspecific
-			 :directory edir
-			 :name (match-component x 6 :name)
-			 :type (match-component x 8 :type 1)
-			 :version (version-parse (match-component x 11 :version 1))
-			 :namestring (when (and mhost (eql b 0) (eql e (length x)) (eq dir edir)) x))))))))
-  
+	(let ((host (or host mhost (pathname-host def))))
+	  (when (logical-pathname-host-p host)
+	    (make-pathname :host host
+			   :device :unspecific
+			   :name (match-component x 6 :name)
+			   :type (match-component x 8 :type 1)
+			   :version (version-parse (match-component x 11 :version 1))
+			   :directory (dir-parse (match-component x 2 :none) t);must be last
+			   :namestring (when (and mhost (eql b 0) (eql e (length x))) x))))))))
+
 (defconstant +generic-physical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +physical-pathname-defaults+)) t nil)))
 
-(defun pathname-parse (x b e)
-  (when (and (eql b (string-match +generic-physical-pathname-regexp+ x b e)) (eql (match-end 0) e))
-    (let* ((dir (dir-parse (match-component x 2 :none) "/" :absolute))
-	   (edir (expand-home-dir dir)))
-      (make-pathname :device (match-component x 1 :none 0 -1)
-		     :directory edir
-		     :name (match-component x 4 :name)
-		     :type (match-component x 5 :type 1)
-		     :namestring (when (and (eql b 0) (eql e (length x)) (eq dir edir)) x)))))
+(defun expand-home-dir (dir)
+  (if (and (eq (car dir) :relative) (stringp (cadr dir)) (eql #\~ (aref (cadr dir) 0)))
+      (prog1 (append (dir-parse (home-namestring (cadr dir))) (cddr dir)) (setq *canonicalized* t))
+    dir))
 
+(defun pathname-parse (x b e &aux (*canonicalized* nil))
+  (when (and (eql b (string-match +generic-physical-pathname-regexp+ x b e)) (eql (match-end 0) e))
+    (make-pathname :device (match-component x 1 :none 0 -1)
+		   :name (match-component x 4 :name)
+		   :type (match-component x 5 :type 1)
+		   :directory (expand-home-dir (dir-parse (match-component x 2 :none)));must be last
+		   :namestring (unless *canonicalized* (when (and (eql b 0) (eql e (length x))) x)))))
 
 (defun path-stream-name (x)
   (check-type x pathname-designator)
