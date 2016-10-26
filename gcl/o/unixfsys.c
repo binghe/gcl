@@ -172,24 +172,39 @@ DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
   struct stat ss;
 
-  check_type_string(&x);
-  coerce_to_filename(x,FN1);
+  if (type_of(x)==t_string) {
+
+    coerce_to_filename(x,FN1);
 
 #ifdef __MINGW32__
-  {
-    char *p=FN1+strlen(FN1)-1;
-    for (;p>FN1 && *p=='/';p--)
-      *p=0;
-  }
+    {char *p=FN1+strlen(FN1)-1;for (;p>FN1 && *p=='/';p--) *p=0;}
 #endif
-  if (lstat(FN1,&ss))
+    if (lstat(FN1,&ss))
+      RETURN1(Cnil);
+  } else if ((x=file_stream(x))!=Cnil&&x->sm.sm_fp) {
+    if (fstat(fileno(x->sm.sm_fp),&ss))
+      RETURN1(Cnil);
+  } else
     RETURN1(Cnil);
-  else
-    RETURN4(S_ISDIR(ss.st_mode) ? sKdirectory :
-	    (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
-	    make_fixnum(ss.st_size),
-	    make_fixnum(ss.st_mtime),
-	    make_fixnum(ss.st_uid));
+
+  RETURN4(S_ISDIR(ss.st_mode) ? sKdirectory :
+	  (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
+	  make_fixnum(ss.st_size),
+	  make_fixnum(ss.st_mtime),
+	  make_fixnum(ss.st_uid));
+
+}
+
+DEFUN_NEW("FTELL",object,fSftell,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+
+  RETURN1((x=file_stream(x))!=Cnil&&x->sm.sm_fp ? (object)ftell(x->sm.sm_fp) : (object)0);
+
+}
+
+DEFUN_NEW("FSEEK",object,fSfseek,SI,2,2,NONE,OO,IO,OO,OO,(object x,fixnum pos),"") {
+
+  RETURN1((x=file_stream(x))!=Cnil&&x->sm.sm_fp&&!fseek(x->sm.sm_fp,pos,SEEK_SET) ? Ct : Cnil);
+
 }
 
 #include <sys/types.h>
