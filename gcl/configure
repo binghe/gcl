@@ -6935,7 +6935,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
 $as_echo_n "checking finding default linker script... " >&6; }
     touch unixport/gcl.script
     echo "int main() {return 0;}" >foo.c
-    $CC -Wl,--verbose foo.c -o foo 2>&1 | \
+    $CC $TLDFLAGS -Wl,--verbose foo.c -o foo 2>&1 | \
 	$AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
     rm -rf foo.c foo
 
@@ -6956,7 +6956,7 @@ $as_echo "$as_me: trying to adjust text start" >&6;}
             cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[0-9]*","0x" j,$0);} {print}' j=$j >gcl.script
 	    #        diff -u gcl.script.def gcl.script
             echo "int main() {return 0;}" >foo.c
-            if ( $CC -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
+            if ( $CC $TLDFLAGS -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
 		if test $n -lt $min ; then min=$n; fi;
 		if test $n -gt $max; then max=$n; fi;
 	    elif test $max -gt 0 ; then
