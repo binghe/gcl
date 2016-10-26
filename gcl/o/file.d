@@ -400,7 +400,7 @@ open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exis
       fclose(fp);
       if (if_exists==sKerror) FILE_ERROR(fn,"File exists");
       else if (if_exists==sKrename) {
-	massert(snprintf(FN2,sizeof(FN2),"%-*.*s~",strlen(FN1)-1,strlen(FN1)-1,FN1)>=0);
+	massert(snprintf(FN2,sizeof(FN2),"%-*.*s~",(int)strlen(FN1)-1,(int)strlen(FN1)-1,FN1)>=0);
 	massert(!unlink(FN2));/*MinGW*/
 	massert(!rename(FN1,FN2));
 	if (!(fp=fopen(FN1,smm==smm_output ? "w" : "w+"))) cannot_create(fn);

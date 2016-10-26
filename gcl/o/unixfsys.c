@@ -21,6 +21,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <unistd.h>
 #include <errno.h>
+#include <string.h>
 
 #define IN_UNIXFSYS
 #include "include.h"
