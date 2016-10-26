@@ -3848,7 +3848,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 GCL_CC=`basename $CC`
-if echo $GCL_CC |grep -q gcc |grep -q win; then
+if echo $GCL_CC |grep gcc |grep -q win; then
     GCL_CC=gcc
 fi
 
@@ -3978,7 +3978,7 @@ $as_echo "removing $1 from LDFLAGS" >&6; }
 TCFLAGS=""
 add_args_to_tcflags -fsigned-char -pipe \
                     -fno-builtin-malloc -fno-builtin-free \
-                    -fno-pie -fno-PIC -fno-pic -no-pie \
+                    -fno-pie -fno-PIC -fno-pic \
 	            -Wall \
 	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
 	            -Wno-unused-but-set-variable -Wno-misleading-indentation
@@ -4886,7 +4886,7 @@ $as_echo_n "checking doing configure in gmp directory... " >&6; }
     if test "$use_common_binary" = "yes"; then
 	cd $GMPDIR && ./configure --build=$host && cd ..
     else
-	cd $GMPDIR && ./configure && cd ..
+	cd $GMPDIR && ./configure --host=$host --build=$build && cd ..
     fi
     #MY_SUBDIRS="$MY_SUBDIRS $GMPDIR"
 
