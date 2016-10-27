@@ -420,7 +420,7 @@
 
 
 (defun write-sequence (seq strm &rest r &key (start 0) end
-			   &aux (l (listp seq))(cp (eq (stream-element-type strm) 'character)))
+			   &aux (cp (eq (stream-element-type strm) 'character)))
   (declare (optimize (safety 1))(dynamic-extent r))
   (check-type seq sequence)
   (check-type strm stream)
