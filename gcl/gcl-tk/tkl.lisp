@@ -1414,7 +1414,6 @@
       (setq 	gcltksrv
 	 (cond (host "gcltksrv")
 	       ((si::getenv "GCL_TK_SERVER"))
-	       ((probe-file (tk-conc si::*lib-directory* "/gcl-tk/gcltksrv")))
 	       ((probe-file (tk-conc si::*lib-directory* "gcl-tk/gcltksrv")))
 	       (t (error "Must setenv GCL_TK_SERVER ")))))
   (let ((pid (if host  -1 (si::getpid)))
@@ -1432,9 +1431,9 @@
 			args
 			)))
       (print command)
-      (cond ((not host) (system command))
+      (cond ((not host) (si::system command))
 	    (can-rsh
-	      (system (tk-conc "rsh " host " "   command
+	      (si::system (tk-conc "rsh " host " "   command
 			        " < /dev/null &")))
 	    (t (format t "Waiting for you to invoke GCL_TK_SERVER,
 on ~a as in: ~s~%" host command )))
