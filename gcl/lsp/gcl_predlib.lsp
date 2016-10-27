@@ -125,6 +125,8 @@
           (character . characterp)
           (package . packagep)
           (stream . streamp)
+          (string-input-stream . string-input-stream-p)
+          (string-output-stream . string-output-stream-p)
           (file-stream . file-stream-p)
           (synonym-stream . synonym-stream-p)
           (broadcast-stream . broadcast-stream-p)
