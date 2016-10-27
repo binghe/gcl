@@ -3980,7 +3980,7 @@ add_args_to_cflags -fsigned-char -pipe \
 	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
 	            -Wno-unused-but-set-variable -Wno-misleading-indentation
 
-add_args_to_ldflags -Wl,-no_pie -no-pie -Wl,-z,lazy
+add_args_to_ldflags -no-pie -Wl,-z,lazy
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang" >&5
 $as_echo_n "checking for clang... " >&6; }
