@@ -83,6 +83,11 @@ DEFUN_NEW("C-STREAM-OBJECT1",object,fSc_stream_object1,SI,1,1,NONE,OO,OO,OO,OO,(
   RETURN1(x->sm.sm_object1);
 }
 
+DEFUN_NEW("C-SET-STREAM-OBJECT0",object,fSc_set_stream_object0,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+  x->sm.sm_object0=y;
+  RETURN1(x);
+}
+
 DEFUN_NEW("C-SET-STREAM-OBJECT1",object,fSc_set_stream_object1,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
   x->sm.sm_object1=y;
   RETURN1(x);

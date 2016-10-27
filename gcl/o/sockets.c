@@ -518,16 +518,6 @@ DEFUN_NEW("SET-SIGIO-FOR-FD",object,fSset_sigio_for_fd,SI,1,1,NONE,OI,OO,OO,OO,(
 
 }
      
-DEFUN_NEW("RESET-STRING-INPUT-STREAM",object,fSreset_string_input_stream,SI,4,4,NONE,OO,OI,IO,OO,(object strm,object string,fixnum start,fixnum end),
-      "Reuse a string output STREAM by setting its output to STRING \
-and positioning the ouput/input to start at START and end at END")
-
-{ strm->sm.sm_object0 = string;
-  strm->sm.sm_int0 = start;
-  strm->sm.sm_int1 = end;
-  return strm;
-}
-
 DEFUN_NEW("CHECK-STATE-INPUT",object,fScheck_state_input,SI,2,2,NONE,OO,IO,OO,OO,(object osfd,fixnum timeout),
       "") 
 {

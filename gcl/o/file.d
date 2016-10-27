@@ -437,7 +437,7 @@ open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exis
   x->sm.sm_buffer = 0;
   x->sm.sm_object0 = sLcharacter;
   x->sm.sm_object1 = vs_head;
-  x->sm.sm_int0 = x->sm.sm_int1 = 0;
+  x->sm.sm_int = 0;
   x->sm.sm_flags=0;
   vs_push(x);
 
@@ -641,7 +641,7 @@ object istrm, ostrm;
 	strm->sm.sm_buffer = 0;
 	STREAM_INPUT_STREAM(strm) = istrm;
 	STREAM_OUTPUT_STREAM(strm) = ostrm;
-	strm->sm.sm_int0 = strm->sm.sm_int1 = 0;
+	strm->sm.sm_int = 0;
 	strm->sm.sm_flags=0;
 	return(strm);
 }
@@ -713,7 +713,7 @@ int line_length;
 	strm->sm.sm_buffer = 0;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
-	strm->sm.sm_int0 = STREAM_FILE_COLUMN(strm) = 0;
+	strm->sm.sm_int = 0;
 	strm->sm.sm_flags=0;
 	vs_reset;
 	return(strm);
@@ -1424,7 +1424,7 @@ LFD(Lmake_synonym_stream)()
 	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_int = 0;
 	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
@@ -1448,7 +1448,7 @@ LFD(Lmake_broadcast_stream)()
 	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_int = 0;
 	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
@@ -1472,7 +1472,7 @@ LFD(Lmake_concatenated_stream)()
 	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_int = 0;
 	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
@@ -1702,17 +1702,6 @@ DEFUN_NEW("LOAD-FASL",object,fSload_fasl,SI,2,2,NONE,OO,OO,OO,OO,(object fasl_fi
   RETURN1(make_fixnum(i));
 
 }
-
-static void
-FFN(siLget_string_input_stream_index)()
-{
-	check_arg(1);
-	check_type_stream(&vs_base[0]);
-	if ((enum smmode)vs_base[0]->sm.sm_mode != smm_string_input)
-		FEerror("~S is not a string-input stream.", 1, vs_base[0]);
-	vs_base[0] = make_fixnum(STRING_INPUT_STREAM_NEXT(vs_base[0]));
-}
-
 
 LFD(siLmake_string_output_stream_from_string)()
 {
@@ -1994,7 +1983,7 @@ object async;
   x->sm.sm_buffer = 0;
   x->sm.sm_object0 = list(3,server,host,port);
   x->sm.sm_object1 = 0;
-  x->sm.sm_int0 = x->sm.sm_int1 = 0;
+  x->sm.sm_int = 0;
   x->sm.sm_flags=0;
   SOCKET_STREAM_FD(x)= fd;
   SET_STREAM_FLAG(x,mode,1);
@@ -2257,8 +2246,7 @@ gcl_init_file(void)
 #ifdef UNIX
 	= make_simple_string("stdin");
 #endif
-	standard_input->sm.sm_int0 = 0; /* unused */
-	standard_input->sm.sm_int1 = 0; /* unused */
+	standard_input->sm.sm_int = 0; /* unused */
 	standard_input->sm.sm_flags=0;
 
 	standard_output = alloc_object(t_stream);
@@ -2270,8 +2258,7 @@ gcl_init_file(void)
 #ifdef UNIX
 	= make_simple_string("stdout");
 #endif
-	standard_output->sm.sm_int0 = 0; /* unused */
-	STREAM_FILE_COLUMN(standard_output) = 0;
+	standard_output->sm.sm_int = 0; /* unused */
 	standard_output->sm.sm_flags=0;
 
 	terminal_io = standard
@@ -2284,7 +2271,7 @@ gcl_init_file(void)
 	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = sLAterminal_ioA;
 	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0; /* unused */
+	x->sm.sm_int = 0; /* unused */
 	x->sm.sm_flags=0;
 	standard_io = x;
 	enter_mark_origin(&standard_io);	
@@ -2370,8 +2357,6 @@ gcl_init_file_function()
 	make_function("STREAM-ELEMENT-TYPE", Lstream_element_type);
 	make_function("CLOSE", Lclose);
 
-	make_si_function("GET-STRING-INPUT-STREAM-INDEX",
-			 siLget_string_input_stream_index);
 	make_si_function("MAKE-STRING-OUTPUT-STREAM-FROM-STRING",
 			 siLmake_string_output_stream_from_string);
 	make_si_function("COPY-STREAM", siLcopy_stream);

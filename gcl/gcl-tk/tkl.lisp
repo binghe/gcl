@@ -293,6 +293,9 @@
    (let ()
      (send-tcl-cmd *tk-connection* tk-command nil))))
 
+(defun fsubseq (s &optional (b 0) (e (length s)))
+  (make-array (- e b) :element-type (array-element-type s) :displaced-to s :displaced-index-offset b :fill-pointer (- e b)))
+
 (defun send-tcl-cmd (c str send-and-wait )
   ;(notice-text-variables)
   (or send-and-wait (setq send-and-wait *send-and-wait*))
@@ -308,7 +311,7 @@
     
     (cond (send-and-wait
 	   (if *debugging*
-	       (store-circle *requests* (subseq str #.(length *header*))
+	       (store-circle *requests* (fsubseq str #.(length *header*))
 			     msg-id))
 	   (store-circle *replies* nil  msg-id)
 	   (execute-tcl-cmd c str))
@@ -932,7 +935,7 @@
 			      #.(+ 1 (length *header*))
 			      3))
   (values
-   (subseq str #.(+ 4 (length *header*)))
+   (fsubseq str #.(+ 4 (length *header*)))
    (eql (aref str #.(+ 1 (length *header*))) #\0)
    reply-from
    (get-circle *requests* reply-from)))
@@ -1082,7 +1085,7 @@
 	     (store-circle *replies*
 			   (cons success
 				 (if (eql (length tk-command) #.(+ 4 (length *header*))) ""
-				   (subseq tk-command #.(+ 4 (length *header*)))))
+				   (fsubseq tk-command #.(+ 4 (length *header*)))))
 			   from-id))
 	  (#.(pos m_call *mtypes*)
 	     ;; Can play a game of if read-and-act called with request-id:
@@ -1114,7 +1117,7 @@
 		    (var (aref *text-variable-locations* lisp-var-id))
 		    (type (get var 'linked-variable-type))
 		    val)
-	       (setq val (coerce-result (subseq tk-command  #.(+ 3 (length *header*))) type))
+	       (setq val (coerce-result (fsubseq tk-command  #.(+ 3 (length *header*))) type))
 	       (setf (aref *text-variable-locations* (the fixnum
 							  ( + lisp-var-id 1)))
 		     val)
@@ -1130,7 +1133,9 @@
   (let* ((s (car *string-streams*))
 	 (*string-streams* (cdr *string-streams*)))
     (or s (setq s (make-string-input-stream "")))
-    (si::reset-string-input-stream s string start (length string))
+    (assert (array-has-fill-pointer-p string))
+    (setf (fill-pointer string) start)
+    (si::c-set-stream-object0 s string)
     (read s nil nil)))
 
 
@@ -1196,7 +1201,7 @@
        (cond (skipping nil)
 	     ((eql brace-level 0)
 	      (if (> i beg)
-		  (setq ans (cons (subseq x beg i) ans)))
+		  (setq ans (cons (fsubseq x beg i) ans)))
 	      
 	      (setq beg (+ i 1))
 		       )))
@@ -1207,12 +1212,12 @@
 		   (setq beg (+ i 1))))
 	    (incf brace-level))
        (#\} (cond ((eql brace-level 1)
-		   (setq ans (cons (subseq x beg i) ans))
+		   (setq ans (cons (fsubseq x beg i) ans))
 		   (setq skipping t)))
 	    (incf brace-level -1)))))
      finally
      (unless skipping
-	     (setq ans (cons (subseq x beg i) ans)))
+	     (setq ans (cons (fsubseq x beg i) ans)))
      (return (nreverse ans))
      ))
 
@@ -1394,7 +1399,7 @@
      (cond (start (pp v no_leading_space) (setq start nil))
 	   (t (pp v normal)))
      (setf x (cdr x)))
-   (subseq tk-command #.(length *header*))))
+   (fsubseq tk-command #.(length *header*))))
 
 
 

@@ -79,6 +79,9 @@
      (make-array l :element-type (array-element-type string) :displaced-to string :displaced-index-offset start :fill-pointer 0)
      0 l)))
 
+(defun get-string-input-stream-index (stream &aux (s (c-stream-object0 stream)))
+  (+ (fill-pointer s) (multiple-value-bind (a b) (array-displacement s) b)))
+
 (defmacro with-input-from-string ((var string &key index (start 0) end) . body)
   (declare (optimize (safety 1)))
   (multiple-value-bind (ds b) (find-declarations body)
@@ -87,7 +90,8 @@
        (unwind-protect
 	   (multiple-value-prog1
 	    (progn ,@b)
-	    ,@(when index `((setf ,index (get-string-input-stream-index ,var)))))
+	    ,@(when index
+		`((setf ,index (get-string-input-stream-index ,var)))))
 	 (close ,var)))))
   
 (defmacro with-output-to-string ((var &optional string &key element-type) . body)

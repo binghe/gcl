@@ -166,18 +166,18 @@ enum aelttype {			/*  array element type  */
 /* for any stream that takes writec_char, directly (not two_way or echo)
    ie. 	 smm_output,smm_io, smm_string_output, smm_socket
  */
-#define STREAM_FILE_COLUMN(str) ((str)->sm.sm_int1)
+#define STREAM_FILE_COLUMN(str) ((str)->sm.sm_int)
 
 /* for smm_echo */
-#define ECHO_STREAM_N_UNREAD(strm) ((strm)->sm.sm_int0)
+#define ECHO_STREAM_N_UNREAD(strm) ((strm)->sm.sm_int)
 
 /* file fd for socket */
 #define SOCKET_STREAM_FD(strm) ((strm)->sm.sm_fd)
 #define SOCKET_STREAM_BUFFER(strm) ((strm)->sm.sm_object1)
 
 /*  for     smm_string_input  */
-#define STRING_INPUT_STREAM_NEXT(strm) ((strm)->sm.sm_int0)
-#define STRING_INPUT_STREAM_END(strm) ((strm)->sm.sm_int1)
+#define STRING_INPUT_STREAM_NEXT(strm) ((strm)->sm.sm_object0->st.st_fillp)
+#define STRING_INPUT_STREAM_END(strm) ((strm)->sm.sm_object0->st.st_dim)
 
 /* for smm_two_way and smm_echo */
 #define STREAM_OUTPUT_STREAM(strm) ((strm)->sm.sm_object1)

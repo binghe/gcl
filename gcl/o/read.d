@@ -2204,7 +2204,7 @@ object x;
 	object in;
 	vs_mark;
 
-	in = make_string_input_stream(x, 0, x->st.st_fillp);
+	in = fSmake_string_input_stream_int(x, 0, x->st.st_fillp);
 	vs_push(in);
 	preserving_whitespace_flag = FALSE;
 	detect_eos_flag = FALSE;

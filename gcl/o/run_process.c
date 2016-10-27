@@ -434,7 +434,7 @@ enum smmode smm;
 
 	stream->sm.sm_object0 = sLcharacter;
 	stream->sm.sm_object1 = host_l;
-	stream->sm.sm_int0 = stream->sm.sm_int1 = 0;
+	stream->sm.sm_int = 0;
 	stream->sm.sm_flags=0;
 	vs_push(stream);
 	setup_stream_buffer(stream);
@@ -503,8 +503,7 @@ make_socket_pair()
   stream_in->sm.sm_mode = smm_input;
   stream_in->sm.sm_fp = fp1;
   stream_in->sm.sm_buffer = 0;
-  stream_in->sm.sm_int0 = sockets_in[1];
-  stream_in->sm.sm_int1 = 0;
+  stream_in->sm.sm_int = sockets_in[1];
   stream_in->sm.sm_object0=stream_in->sm.sm_object1=OBJNULL;
   stream_in->sm.sm_flags = 0;
   stream_out = (object) alloc_object(t_stream);
@@ -513,8 +512,7 @@ make_socket_pair()
   stream_out->sm.sm_buffer = 0;
   setup_stream_buffer(stream_in);
   setup_stream_buffer(stream_out);
-  stream_out->sm.sm_int0 = sockets_out[1];
-  stream_out->sm.sm_int1 = 0;
+  stream_out->sm.sm_int = sockets_out[1];
   stream_out->sm.sm_flags = 0;
   stream_out->sm.sm_object0=stream_out->sm.sm_object1=OBJNULL;
   stream = make_two_way_stream(stream_in, stream_out);
@@ -538,8 +536,8 @@ char **argv;
   int fdout;
   if (istream->sm.sm_fp == NULL || ostream->sm.sm_fp == NULL)
     FEerror("Cannot spawn process with given stream", 0);
-  fdin = istream->sm.sm_int0;
-  fdout = ostream->sm.sm_int0;
+  fdin = istream->sm.sm_int;
+  fdout = ostream->sm.sm_int;
   if (pfork() == 0)
     { /* the child --- replace standard in and out with descriptors given */
       close(0);

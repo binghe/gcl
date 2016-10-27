@@ -271,15 +271,14 @@ struct structure {
 
 struct stream {
   FIRSTWORD;
-  void *sm_fp;
-  object sm_object0;
-  object sm_object1;
-  int sm_int0;
-  int sm_int1;
-  char *sm_buffer;
-  char sm_mode;
-  unsigned char sm_flags;
-  short sm_fd;
+  void   *sm_fp;
+  object  sm_object0;
+  object  sm_object1;
+  char   *sm_buffer;
+  ufixnum sm_mode:4;
+  ufixnum sm_flags:6;
+  ufixnum sm_fd:6;
+  ufixnum sm_int:LM(16);
 };
 
 struct random {

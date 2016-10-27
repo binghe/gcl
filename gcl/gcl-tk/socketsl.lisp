@@ -12,10 +12,6 @@
 (defentry our-write (int object int ) (int "our_write_object"))
 (defentry print-to-string1 (object object object) (object print_to_string1))
 
-(clines "#define reset_string_input_stream1(strm,string,start,end) reset_string_input_stream(strm,string,fix(start),fix(end))")
-(defentry reset-string-input-stream (object object object object)  (object  "reset_string_input_stream1"))
-
-
 ;(clines "#define symbol_value_any(x) ((x)->s.s_dbind)")
 ;(defentry symbol-value-any (object) (object symbol_value_any))
 
