@@ -74,4 +74,12 @@
   (let ((r (with-open-file (s (apply 'string-concatenate "|" #-winnt "which "
 				     #+winnt "for %i in (" s #+winnt ".exe) do @echo.%~$PATH:i" nil))
 			   (read-line s nil 'eof))))
-    (if (eq r 'eof) s (string-downcase r))))
+    (unless (eq r 'eof)
+      (string-downcase r))))
+
+(defun get-path (s &aux
+		   (e (unless (minusp (string-match #v"([^\n\t\r ]+)([\n\t\r ]|$)" s))(match-end 1)))
+		   (w (when e (which (pathname-name (subseq s (match-beginning 1) e))))))
+  (when w
+    (string-concatenate w (subseq s e))))
+

@@ -593,12 +593,11 @@ First directory is checked for first name and all extensions etc."
 	(when (eq (stat x) :directory)
 	  (return-from get-temp-dir x))))))
 
-(defun get-path (s &aux (m (string-match "([^ ]*)( |$)" s))(b (match-beginning 1))(e (match-end 1)))
-  (string-concatenate (which (pathname-name (subseq s b e))) (subseq s e)))
+
 
 (defvar *cc* "cc")
 (defvar *ld* "ld")
-(defvar *objdump* "objdump --source ")
+(defvar *objdump* nil)
 
 (defvar *current-directory* *system-directory*)
 
@@ -608,9 +607,9 @@ First directory is checked for first name and all extensions etc."
   (declare (fixnum i))
   (setq *current-directory* (current-directory-pathname))
   (setq *tmp-dir* (get-temp-dir)
-	*cc* (get-path *cc*)
-	*ld* (get-path *ld*)
-	*objdump* (get-path *objdump*))
+	*cc* (or (get-path *cc*) *cc*)
+	*ld* (or (get-path *ld*) *ld*)
+	*objdump* (get-path "objdump --source "))
   (dotimes (j i) (push (argv j) tem))
   (setq *command-args* (nreverse tem))
   (setq tem *lib-directory*)

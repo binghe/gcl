@@ -430,7 +430,7 @@ Cannot compile ~a.~%"
 			     (si::copy-stream st *standard-output*))
 	     (with-open-file (st hn)
 			     (si::copy-stream st *standard-output*))
-	     (when (eql (aref *objdump* 0) #\/);program found at startup in path
+	     (when *objdump*
 	       (safe-system (si::string-concatenate *objdump* (namestring on))))
 	     (mdelete-file cn)
 	     (mdelete-file dn)
