@@ -1334,133 +1334,6 @@ BEGIN:
 }
 
 int
-file_position(strm)
-object strm;
-{
-BEGIN:
-	switch (strm->sm.sm_mode) {
-	case smm_input:
-	case smm_output:
-	case smm_io:
-		/*  return(strm->sm.sm_int0);  */
-		if (strm->sm.sm_fp == NULL)
-			closed_stream(strm);
-		return(ftell(strm->sm.sm_fp));
-	case smm_socket:
-	   return -1;
-	  
-
-	case smm_string_output:
-		return(STRING_STREAM_STRING(strm)->st.st_fillp);
-
-	case smm_synonym:
-		strm = symbol_value(strm->sm.sm_object0);
-		if (type_of(strm) != t_stream)
-			FEwrong_type_argument(sLstream, strm);
-		goto BEGIN;
-
-	case smm_probe:
-	case smm_broadcast:
-	case smm_concatenated:
-	case smm_two_way:
-	case smm_echo:
-	case smm_string_input:
-		return(-1);
-
-	default:
-		error("illegal stream mode");
-		return(-1);
-	}
-}
-
-int
-file_position_set(strm, disp)
-object strm;
-int disp;
-{
-BEGIN:
-	switch (strm->sm.sm_mode) {
-	case smm_socket:
-	  return -1;
-	case smm_input:
-	case smm_output:
-	case smm_io:
-
-		if (fseek(strm->sm.sm_fp, disp, 0) < 0)
-			return(-1);
-		/* strm->sm.sm_int0 = disp; */
-		return(0);
-
-	case smm_string_output:
-		if (disp < STRING_STREAM_STRING(strm)->st.st_fillp) {
-			STRING_STREAM_STRING(strm)->st.st_fillp = disp;
-			/* strm->sm.sm_int0 = disp; */
-		} else {
-			disp -= STRING_STREAM_STRING(strm)->st.st_fillp;
-			while (disp-- > 0)
-				writec_stream(' ', strm);
-		}
-		return(0);
-
-	case smm_synonym:
-		strm = symbol_value(strm->sm.sm_object0);
-		if (type_of(strm) != t_stream)
-			FEwrong_type_argument(sLstream, strm);
-		goto BEGIN;
-
-	case smm_probe:
-	case smm_broadcast:
-	case smm_concatenated:
-	case smm_two_way:
-	case smm_echo:
-	case smm_string_input:
-		return(-1);
-
-	default:
-		error("illegal stream mode");
-		return(-1);
-	}
-}
-
-static int
-file_length(strm)
-object strm;
-{
-BEGIN:
-	switch (strm->sm.sm_mode) {
-	case smm_input:
-	case smm_output:
-	case smm_io:
-
-		if (strm->sm.sm_fp == NULL)
-			closed_stream(strm);
-		return(file_len(strm->sm.sm_fp));
-		
-
-	  
-	case smm_synonym:
-		strm = symbol_value(strm->sm.sm_object0);
-		if (type_of(strm) != t_stream)
-			FEwrong_type_argument(sLstream, strm);
-		goto BEGIN;
-
-	case smm_socket:
-	case smm_probe:
-	case smm_broadcast:
-	case smm_concatenated:
-	case smm_two_way:
-	case smm_echo:
-	case smm_string_input:
-	case smm_string_output:
-		return(-1);
-
-	default:
-		error("illegal stream mode");
-		return(-1);
-	}
-}
-
-int
 file_column(object strm) {
 	int i;
 	object x;
@@ -1788,43 +1661,6 @@ LFD(Lstream_element_type)()
 @)
 
 
-@(defun file_position (file_stream &o position)
-	int i=0;
-@
-	check_type_stream(&file_stream);
-	if (position == Cnil) {
-		i = file_position(file_stream);
-		if (i < 0)
-			@(return Cnil)
-		@(return `make_fixnum(i)`)
-	} else {
-		if (position == sKstart)
-			i = 0;
-		else if (position == sKend)
-			i = file_length(file_stream);
-		else if (type_of(position) != t_fixnum ||
-		    (i = fix((position))) < 0)
-			FEerror("~S is an illegal file position~%\
-for the file-stream ~S.",
-				2, position, file_stream);
-		if (file_position_set(file_stream, i) < 0)
-			@(return Cnil)
-		@(return Ct)
-	}	
-@)
-
-LFD(Lfile_length)()
-{
-	int i;
-
-	check_arg(1);
-	check_type_stream(&vs_base[0]);
-	i = file_length(vs_base[0]);
-	if (i < 0)
-		vs_base[0] = Cnil;
-	else
-		vs_base[0] = make_fixnum(i);
-}
 
 object sLAload_pathnameA;
 DEFVAR("*COLLECT-BINARY-MODULES*",sSAcollect_binary_modulesA,SI,sLnil,"");
@@ -2565,9 +2401,6 @@ gcl_init_file_function()
 	make_function("OUTPUT-STREAM-P", Loutput_stream_p);
 	make_function("STREAM-ELEMENT-TYPE", Lstream_element_type);
 	make_function("CLOSE", Lclose);
-
-	make_function("FILE-POSITION", Lfile_position);
-	make_function("FILE-LENGTH", Lfile_length);
 
 	make_si_function("GET-STRING-INPUT-STREAM-INDEX",
 			 siLget_string_input_stream_index);

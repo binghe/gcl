@@ -484,3 +484,36 @@
       (d pd (cdr pd)))
     (values ps created)))
 
+(defun file-length (x)
+  (declare (optimize (safety 1)))
+  (check-type x (or broadcast-stream file-stream))
+  (if (typep x 'broadcast-stream)
+      (let ((s (broadcast-stream-streams x))) (if s (file-length (car (last s))) 0))
+    (multiple-value-bind (tp sz) (stat x)
+      (declare (ignore tp))
+      (/ sz (get-byte-stream-nchars x)))))
+
+(defun file-position (x &optional (pos :start pos-p))
+  (declare (optimize (safety 1)))
+  (check-type x (or broadcast-stream file-stream string-stream))
+  (check-type pos (or (member :start :end) (integer 0)))
+  (typecase x
+    (broadcast-stream
+     (let ((s (car (last (broadcast-stream-streams x)))))
+       (if s (if pos-p (file-position s pos) (file-position s)) 0)))
+    (string-stream
+     (let* ((st (c-stream-object0 x))(l (length st))(d (array-dimension st 0))
+	    (p (case pos (:start 0) (:end l) (otherwise pos))))
+       (if pos-p (when (<= p d) (setf (fill-pointer st) p)) l)))
+    (otherwise
+     (let ((n (get-byte-stream-nchars x))
+	   (p (case pos (:start 0) (:end (file-length x)) (otherwise pos))))
+       (if pos-p (when (fseek x (* p n)) p) (/ (ftell x) n))))))
+
+(defun file-string-length (strm obj)
+  (let* ((pos (file-position strm))
+	 (w (write obj :stream strm :escape nil :readably nil))
+	 (pos1 (file-position strm)));(break)
+    (declare (ignore w))
+    (file-position strm pos)
+    (- pos1 pos)))

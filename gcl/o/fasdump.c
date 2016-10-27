@@ -598,7 +598,7 @@ DEFUN_NEW("OPEN-FASD",object,fSopen_fasd,SI,4,4,NONE,OO,OO,OO,OO,(object stream,
       if(tabl==Cnil) tabl=funcall_cfun(Lmake_hash_table,2,sKtest,sLeq);
       else
 	check_type(tabl,t_hashtable);}
-   check_type(str,t_stream);
+   massert(str==stream);
    result=alloc_simple_vector(sizeof(struct fasd)/sizeof(int),aet_object);
    array_allocself(result,1,Cnil);
    {struct fasd *fd= (struct fasd *)result->v.v_self;
@@ -608,7 +608,7 @@ DEFUN_NEW("OPEN-FASD",object,fSopen_fasd,SI,4,4,NONE,OO,OO,OO,OO,(object stream,
     fd->eof=eof;
     fd->index=small_fixnum(0);
     fd->package=symbol_value(sLApackageA);
-    fd->filepos = make_fixnum(file_position(stream));
+    fd->filepos = make_fixnum(ftell(stream->sm.sm_fp));
     
     SETUP_FASD_IN(fd);
     if (direction==sKoutput){
@@ -649,13 +649,13 @@ DEFUN_NEW("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"
        {clrhash(fd->table);
 	SETUP_FASD_IN(fd);
 	PUT_OP(d_end_of_file);
-	{int i = file_position(fd->stream);
+	{int i = ftell(fd->stream->sm.sm_fp);
 	 if(type_of(fd->filepos) == t_fixnum)
-	  { file_position_set(fd->stream,fix(fd->filepos) +2);
+	   { fseek(fd->stream->sm.sm_fp,fix(fd->filepos)+2,SEEK_SET);
 	    /* record the length of array needed to read the indices */
 	    PUT4(fix(fd->index));
 	    /* move back to where we were */
-	    file_position_set(fd->stream,i);
+	    fseek(fd->stream->sm.sm_fp,i,SEEK_SET);
 	  }}
 	 
       }
