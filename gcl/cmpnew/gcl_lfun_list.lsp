@@ -43,7 +43,6 @@
 (DEFSYSFUN 'RASSOC "Lrassoc" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'PPRINT "Lpprint" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'NSUBST-IF-NOT "Lnsubst_if_not" '(T T T *) 'T NIL NIL) 
-(DEFSYSFUN 'FILE-POSITION "Lfile_position" '(T *) 'T NIL NIL) 
 (DEFSYSFUN 'STRING< "Lstring_l" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'REVERSE "Lreverse" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'STREAMP "Lstreamp" '(T) 'T NIL T) 
@@ -67,7 +66,6 @@
 (DEFSYSFUN 'CONS "Lcons" '(T T) 'T NIL NIL) 
 (DEFSYSFUN 'LIST "Llist" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'USE-PACKAGE "Luse_package" '(T *) 'T NIL NIL) 
-(DEFSYSFUN 'FILE-LENGTH "Lfile_length" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'MAKE-SYMBOL "Lmake_symbol" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'STRING-RIGHT-TRIM "Lstring_right_trim" '(T T) 'STRING NIL
     NIL) 
