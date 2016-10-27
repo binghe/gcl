@@ -69,7 +69,17 @@
 	   (progn ,@b)
          (close ,var)))))
 
-(defmacro with-input-from-string ((var string &key index start end) . body)
+(defun make-string-input-stream (string &optional (start 0) end)
+  (declare (optimize (safety 1)))
+  (check-type string string)
+  (check-type start seqind)
+  (check-type end (or null seqind))
+  (let ((l (- (or end (length string)) start)))
+    (make-string-input-stream-int
+     (make-array l :element-type (array-element-type string) :displaced-to string :displaced-index-offset start :fill-pointer 0)
+     0 l)))
+
+(defmacro with-input-from-string ((var string &key index (start 0) end) . body)
   (declare (optimize (safety 1)))
   (multiple-value-bind (ds b) (find-declarations body)
     `(let ((,var (make-string-input-stream ,string ,start ,end)))

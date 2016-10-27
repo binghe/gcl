@@ -657,24 +657,30 @@ object istrm, ostrm;
 	return(strm);
 }
 
-object
-make_string_input_stream(strng, istart, iend)
-object strng;
-int istart, iend;
-{
-	object strm;
+DEFUN_NEW("MAKE-STRING-INPUT-STREAM-INT",object,fSmake_string_input_stream_int,SI,3,3,NONE,OO,II,OO,OO,
+	  (object strng,fixnum istart,fixnum iend),"") {
 
-	strm = alloc_object(t_stream);
-	strm->sm.sm_mode = (short)smm_string_input;
-	strm->sm.sm_fp = NULL;
-	strm->sm.sm_buffer = 0;
-	STRING_STREAM_STRING(strm) = strng;
-	strm->sm.sm_object1 = OBJNULL;
-	STRING_INPUT_STREAM_NEXT(strm)= istart;
-	STRING_INPUT_STREAM_END(strm)= iend;
-	strm->sm.sm_flags=0;
-	return(strm);
+  object strm;
+
+  strm = alloc_object(t_stream);
+  strm->sm.sm_mode = (short)smm_string_input;
+  strm->sm.sm_fp = NULL;
+  strm->sm.sm_buffer = 0;
+  STRING_STREAM_STRING(strm) = strng;
+  strm->sm.sm_object1 = OBJNULL;
+  STRING_INPUT_STREAM_NEXT(strm)= istart;
+  STRING_INPUT_STREAM_END(strm)= iend;
+  strm->sm.sm_flags=0;
+
+  RETURN1(strm);
+
 }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSmake_string_input_stream_int(object x,fixnum y,fixnum z) {
+  return FFN(fSmake_string_input_stream_int)(x,y,z);
+}
+#endif
 
 DEFUN_NEW("STRING-INPUT-STREAM-P",object,fSstring_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
   return type_of(x)==t_stream && x->sm.sm_mode == (short)smm_string_input ? Ct : Cnil;
@@ -1498,32 +1504,6 @@ LFD(Lmake_echo_stream)()
 	vs_base[0] = make_echo_stream(vs_base[0], vs_base[1]);
 	vs_popp;
 }
-
-@(static defun make_string_input_stream (strng &o istart iend)
-	int s, e;
-@
-	check_type_string(&strng);
-	if (istart == Cnil)
-		s = 0;
-	else if (type_of(istart) != t_fixnum)
-		goto E;
-	else
-		s = fix(istart);
-	if (iend == Cnil)
-		e = strng->st.st_fillp;
-	else if (type_of(iend) != t_fixnum)
-		goto E;
-	else
-		e = fix(iend);
-	if (s < 0 || e > strng->st.st_fillp || s > e)
-		goto E;
-	@(return `make_string_input_stream(strng, s, e)`)
-
-E:
-	FEerror("~S and ~S are illegal as :START and :END~%\
-for the string ~S.",
-		3, istart, iend, strng);
-@)
 
 @(static defun make_string_output_stream (&k element_type)
 @
@@ -2372,8 +2352,6 @@ gcl_init_file_function()
 		      Lmake_concatenated_stream);
 	make_function("MAKE-TWO-WAY-STREAM", Lmake_two_way_stream);
 	make_function("MAKE-ECHO-STREAM", Lmake_echo_stream);
-	make_function("MAKE-STRING-INPUT-STREAM",
-		      Lmake_string_input_stream);
 	make_function("MAKE-STRING-OUTPUT-STREAM",
 		      Lmake_string_output_stream);
 	make_function("GET-OUTPUT-STREAM-STRING",
