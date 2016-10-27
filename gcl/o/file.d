@@ -519,8 +519,6 @@ DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(obje
 void
 close_stream(object strm)  {
 
-  object x;
-
   if (FFN(fLopen_stream_p)(strm)==Cnil)
     return;
 
@@ -567,22 +565,14 @@ close_stream(object strm)  {
     break;
 
   case smm_synonym:
-    strm = symbol_value(strm->sm.sm_object0);
-    if (type_of(strm) != t_stream)
-      TYPE_ERROR(strm,sLstream);
-    close_stream(strm);
     break;
 
   case smm_broadcast:
   case smm_concatenated:
-    for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr)
-      close_stream(x->c.c_car);
     break;
 
   case smm_two_way:
   case smm_echo:
-    close_stream(STREAM_INPUT_STREAM(strm));
-    close_stream(STREAM_OUTPUT_STREAM(strm));
     break;
 
   case smm_string_input:
