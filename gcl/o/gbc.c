@@ -627,7 +627,6 @@ mark_object1(object x) {
       }
       break;
 
-    case smm_file_synonym:
     case smm_synonym:
       mark_object(x->sm.sm_object0);
       break;

@@ -41,7 +41,6 @@ enum smmode {			/*  stream mode  */
 	smm_output,		/*  output  */
 	smm_io,			/*  input-output  */
 	smm_probe,		/*  probe  */
-	smm_file_synonym,	/*  synonym stream to file_stream  */
 	smm_synonym,		/*  synonym  */
 	smm_broadcast,		/*  broadcast  */
 	smm_concatenated,	/*  concatenated  */
@@ -152,5 +151,4 @@ enum smmode {			/*  stream mode  */
 #define pathname_string_symbol_streamp(a_) ({enum type _tp=type_of(a_); _tp==t_pathname || _tp == t_string\
                                                                      || _tp == t_symbol || _tp==t_stream;})
 
-#define pathname_designatorp(a_) ({object _a=(a_);enum type _tp=type_of(a_);\
-      _tp==t_pathname||_tp==t_string||(_tp==t_stream && _a->sm.sm_mode>=smm_input && _a->sm.sm_mode<=smm_file_synonym);})
+#define pathname_designatorp(a_) ({object _a=(a_);enum type _tp=type_of(a_);_tp==t_pathname||_tp==t_string||file_stream(_a)!=Cnil;})

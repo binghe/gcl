@@ -180,3 +180,4 @@ char *gcl_gets(char *,int);
 int gcl_puts(const char *);
 int endp_error(object);
 object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
+object file_stream(object);

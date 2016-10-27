@@ -167,7 +167,6 @@ BEGIN:
 	case smm_probe:
 		return(FALSE);
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -224,7 +223,6 @@ BEGIN:
 	case smm_probe:
 		return(FALSE);
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -272,7 +270,6 @@ BEGIN:
 	case smm_socket:
 	    return (sLcharacter);
 	    
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -569,7 +566,6 @@ close_stream(object strm)  {
     strm->sm.sm_fd = -1;
     break;
 
-  case smm_file_synonym:
   case smm_synonym:
     strm = symbol_value(strm->sm.sm_object0);
     if (type_of(strm) != t_stream)
@@ -616,7 +612,6 @@ DEFUN_NEW("INTERACTIVE-STREAM-P",object,fLinteractive_stream_p,LISP,1,1,NONE,OO,
       return Ct;
     return Cnil;
     break;
-  case smm_file_synonym:
   case smm_synonym:
     strm = symbol_value(strm->sm.sm_object0);
     if (type_of(strm) != t_stream)
@@ -777,7 +772,6 @@ BEGIN:
 		/* strm->sm.sm_int0++; */
 		return(c==EOF ? c : (c&0377));
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -880,7 +874,6 @@ BEGIN:
 		/* --strm->sm.sm_int0; */  /* use ftell now for position */
 		break;
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -982,7 +975,6 @@ BEGIN:
 
 		break;
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1093,7 +1085,6 @@ BEGIN:
 #endif
 		  closed_stream(strm);
 		break;
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1182,7 +1173,6 @@ BEGIN:
 	case smm_probe:
 		return(FALSE);
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		check_stream(strm);
@@ -1308,7 +1298,6 @@ BEGIN:
 #endif
 		return TRUE;
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1364,7 +1353,6 @@ BEGIN:
 	case smm_string_output:
 		return(STRING_STREAM_STRING(strm)->st.st_fillp);
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1414,7 +1402,6 @@ BEGIN:
 		}
 		return(0);
 
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1451,7 +1438,6 @@ BEGIN:
 		
 
 	  
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1491,7 +1477,6 @@ BEGIN:
 	case smm_two_way:
            strm=STREAM_OUTPUT_STREAM(strm);
            goto BEGIN;
-	case smm_file_synonym:
 	case smm_synonym:
 		strm = symbol_value(strm->sm.sm_object0);
 		if (type_of(strm) != t_stream)
@@ -1558,22 +1543,6 @@ load(const char *s) {
 
 
 
-static int
-file_synonym_stream_p(object x) {
-  switch(x->sm.sm_mode) {
-  case smm_input:
-  case smm_output:
-  case smm_io:
-  case smm_probe:
-  case smm_file_synonym:
-    return 1;
-  case smm_synonym:
-    return file_synonym_stream_p(x->sm.sm_object0->s.s_dbind);
-  default:
-    return 0;
-  }
-}
-
 LFD(Lmake_synonym_stream)()
 {
 	object x;
@@ -1581,7 +1550,7 @@ LFD(Lmake_synonym_stream)()
 	check_arg(1);
 	check_type_sym(&vs_base[0]);
 	x = alloc_object(t_stream);
-	x->sm.sm_mode = file_synonym_stream_p(vs_base[0]) ? (short)smm_file_synonym : (short)smm_synonym;
+	x->sm.sm_mode = (short)smm_synonym;
 	x->sm.sm_fp = NULL;
 	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
@@ -1724,12 +1693,29 @@ LFD(siLoutput_stream_string)()
 	vs_base[0] = vs_base[0]->sm.sm_object0;
 }
 
+object
+file_stream(object x) {
+  if (type_of(x)==t_stream)
+    switch(x->sm.sm_mode) {
+    case smm_input:
+    case smm_output:
+    case smm_io:
+    case smm_probe:
+      return x;
+    case smm_synonym:
+      return file_stream(x->sm.sm_object0->s.s_dbind);
+    default:
+      break;
+  }
+  return Cnil;
+}
+
 DEFUN_NEW("FILE-STREAM-P",object,fSfile_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_stream && file_synonym_stream_p(x) ? Ct : Cnil);
+  RETURN1(file_stream(x)!=Cnil ? Ct : Cnil);
 }
 
 DEFUN_NEW("SYNONYM-STREAM-P",object,fSsynonym_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_stream && (x->sm.sm_mode==smm_file_synonym || x->sm.sm_mode==smm_synonym) ? Ct : Cnil);
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_synonym ? Ct : Cnil);
 }
 
 DEFUN_NEW("TERMINAL-INPUT-STREAM-P",object,fSterminal_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
@@ -2042,7 +2028,6 @@ int out;
  if (type_of(strm) != t_stream)
    FEwrong_type_argument(sLstream, strm);
  switch (strm->sm.sm_mode){
- case smm_file_synonym:
  case smm_synonym:
   strm = symbol_value(strm->sm.sm_object0);
   if (type_of(strm) != t_stream)
@@ -2488,7 +2473,7 @@ gcl_init_file(void)
 	enter_mark_origin(&terminal_io);
 
 	x = alloc_object(t_stream);
-	x->sm.sm_mode = (short)smm_file_synonym;
+	x->sm.sm_mode = (short)smm_synonym;
 	x->sm.sm_fp = NULL;
 	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = sLAterminal_ioA;
