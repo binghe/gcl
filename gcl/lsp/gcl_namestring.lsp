@@ -27,7 +27,7 @@
      (declare (optimize (safety 1)))
      (check-type x pathname-designator)
      (check-type def pathname-designator)
-     ,(labels ((new? (k &aux (f (intern (concatenate 'string "PATHNAME-" (string k)) :si)))
+     ,(labels ((new? (k &aux (f (intern (string-concatenate "PATHNAME-" (string k)) :si)))
 		     `(let ((k (,f px))) (unless (equal k (,f pdef)) k))))
 	`(namestring (make-pathname
 	  ,@(mapcan (lambda (x) (list x (new? x))) +pathname-keys+)))))

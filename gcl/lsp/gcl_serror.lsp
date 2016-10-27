@@ -2,11 +2,11 @@
 (in-package :si)
 
 (macrolet 
- ((make-conditionp (condition &aux (n (intern (concatenate 'string (string condition) "P"))))
+ ((make-conditionp (condition &aux (n (intern (string-concatenate (string condition) "P"))))
 		   `(defun ,n (x &aux (z (si-find-class ',condition)))
 		      (when z
 			(funcall (setf (symbol-function ',n) (lambda (x) (typep x z))) x))))
-  (make-condition-classp (class &aux (n (intern (concatenate 'string (string class) "-CLASS-P"))))
+  (make-condition-classp (class &aux (n (intern (string-concatenate (string class) "-CLASS-P"))))
 			 `(defun ,n (x &aux (s (si-find-class 'standard-class)) (z (si-find-class ',class)))
 			    (when (and s z)
 			      (funcall (setf (symbol-function ',n)
@@ -124,9 +124,9 @@
 
 (defun process-error (datum args &optional (default-type 'simple-error))
   (let ((internal (cond ((simple-condition-class-p datum)
-			 (find-symbol (concatenate 'string "INTERNAL-" (string datum)) :conditions))
+			 (find-symbol (string-concatenate "INTERNAL-" (string datum)) :conditions))
 			((condition-class-p datum)
-			 (find-symbol (concatenate 'string "INTERNAL-SIMPLE-" (string datum)) :conditions)))))
+			 (find-symbol (string-concatenate "INTERNAL-SIMPLE-" (string datum)) :conditions)))))
     (coerce-to-condition (or internal datum) (if internal (list* :function-name *sig-fn-name* args) args) default-type 'process-error)))
 
 (defun universal-error-handler (n cp fn cs es &rest args &aux (*sig-fn-name* fn))

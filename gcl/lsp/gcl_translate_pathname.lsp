@@ -32,7 +32,7 @@
 (defun do-repl (x y)
   (labels ((r (x l &optional (b 0) &aux (f (string-match #v"\\*" x b)))
 	      (if (eql f -1) (if (eql b 0) x (subseq x b))
-		(concatenate 'string (subseq x b f) (or (car l) "") (r x (cdr l) (1+ f))))))
+		(string-concatenate (subseq x b f) (or (car l) "") (r x (cdr l) (1+ f))))))
     (r y x)))
 
 (defun dir-p (x) (when (consp x) (member (car x) '(:absolute :relative))))

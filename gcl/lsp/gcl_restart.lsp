@@ -73,7 +73,7 @@
 				&aux rr (report (if (stringp report) `(lambda (s) (write-string ,report s)) report)))
   (macrolet ((do-setf (x) 
 		      `(when ,x 
-			 (setf (getf rr ,(intern (concatenate 'string (symbol-name x) "-FUNCTION") :keyword))
+			 (setf (getf rr ,(intern (string-concatenate (symbol-name x) "-FUNCTION") :keyword))
 			       (list 'function ,x)))))
 	    (do-setf report)
 	    (do-setf interactive)
