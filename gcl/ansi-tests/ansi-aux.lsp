@@ -1635,3 +1635,6 @@ the condition to go uncaught if it cannot be classified."
 
 (defmacro expand-in-current-env (macro-form &environment env)
   (macroexpand macro-form env))
+
+(defun typep* (element type)
+  (not (not (typep element type))))
