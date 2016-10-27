@@ -7016,7 +7016,7 @@ $as_echo_n "checking our linker script... " >&6; }
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: done" >&5
 $as_echo "done" >&6; }
 	    rm -f gcl.script.def
-	    assert_arg_to_ldflags -Wl,-T gcl.script
+	    assert_arg_to_ldflags -Wl,-T,gcl.script
 	    cp gcl.script unixport
 	else
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none found or not needed" >&5
