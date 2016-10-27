@@ -1341,7 +1341,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
     AC_MSG_CHECKING([finding default linker script])
     touch unixport/gcl.script
     echo "int main() {return 0;}" >foo.c
-    $CC -Wl,--verbose foo.c -o foo 2>&1 | \
+    $CC $LDFLAGS -Wl,--verbose foo.c -o foo 2>&1 | \
 	$AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
     rm -rf foo.c foo
     
@@ -1360,7 +1360,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
             cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
 	    #        diff -u gcl.script.def gcl.script
             echo "int main() {return 0;}" >foo.c
-            if ( $CC -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
+            if ( $CC $LDFLAGS -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
 		if test $n -lt $min ; then min=$n; fi; 
 		if test $n -gt $max; then max=$n; fi; 
 	    elif test $max -gt 0 ; then
@@ -1405,7 +1405,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
             cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
 	    AC_MSG_RESULT([done])
 	    rm -f gcl.script.def
-	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
+	    assert_arg_to_ldflags -Wl,-T gcl.script
 	    cp gcl.script unixport
 	else
 	    AC_MSG_RESULT([none found or not needed])
