@@ -457,9 +457,15 @@
 		      if-exists iesp if-does-not-exist idnesp external-format)))
     (when (typep s 'stream) (c-set-stream-object1 s pf) s)))
 
+(defun load-pathname-exists (z)
+  (or (probe-file z)
+      (when *allow-gzipped-file*
+	(when (probe-file (string-concatenate (namestring z) ".gz"))
+	  z))))
+
 (defun load-pathname (p print if-does-not-exist external-format
 			&aux (pp (merge-pathnames p))
-			(epp (reduce (lambda (y x) (or y (probe-file (translate-pathname x "" p))))
+			(epp (reduce (lambda (y x) (or y (load-pathname-exists (translate-pathname x "" p))))
 				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
   (if epp
       (let* ((*load-pathname* pp)(*load-truename* epp))
