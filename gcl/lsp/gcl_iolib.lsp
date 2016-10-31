@@ -80,7 +80,7 @@
      0 l)))
 
 (defun get-string-input-stream-index (stream &aux (s (c-stream-object0 stream)))
-  (+ (fill-pointer s) (multiple-value-bind (a b) (array-displacement s) b)))
+  (+ (fill-pointer s) (multiple-value-bind (a b) (array-displacement s) (declare (ignore a)) b)))
 
 (defmacro with-input-from-string ((var string &key index (start 0) end) . body)
   (declare (optimize (safety 1)))

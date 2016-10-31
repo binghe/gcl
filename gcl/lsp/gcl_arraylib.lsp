@@ -262,8 +262,6 @@
 			  (static (staticp array))
                      &aux (fill-pointer (or fill-pointer (when (array-has-fill-pointer-p array) (fill-pointer array)))))
 
-  (declare (ignore element-type))
-
   (let ((x (if initial-contents-supplied-p
 	       (make-array new-dimensions
 		       :adjustable t
