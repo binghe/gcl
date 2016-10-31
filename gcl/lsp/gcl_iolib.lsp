@@ -458,9 +458,9 @@
     (when (typep s 'stream) (c-set-stream-object1 s pf) s)))
 
 (defun load-pathname-exists (z &aux (z (link-expand (namestring z))))
-  (or (probe-file z)
-      (when *allow-gzipped-file*
-	(when (probe-file (string-concatenate (namestring z) ".gz"))
+  (cond ((eq (stat z) :file) z)
+	(*allow-gzipped-file*
+	 (when (eq (stat (string-concatenate (namestring z) ".gz")) :file)
 	  z))))
 
 (defun load-pathname (p print if-does-not-exist external-format
