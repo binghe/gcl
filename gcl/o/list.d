@@ -528,26 +528,26 @@ object x;
 		vs_check_push(x);
 }
 
-/*
-	Subst(new, tree) pushes
-	the result of substituting new in tree
-	onto vs.
-*/
-static void
-subst(new, tree)
-object new, tree;
-{
-	cs_check(new);
+/* /\* */
+/* 	Subst(new, tree) pushes */
+/* 	the result of substituting new in tree */
+/* 	onto vs. */
+/* *\/ */
+/* static void */
+/* subst(new, tree) */
+/* object new, tree; */
+/* { */
+/* 	cs_check(new); */
 
-	if (TEST(tree))
-		vs_check_push(new);
-	else if (type_of(tree) == t_cons) {
-		subst(new, tree->c.c_car);
-		subst(new, tree->c.c_cdr);
-		stack_cons();
-	} else
-		vs_check_push(tree);
-}
+/* 	if (TEST(tree)) */
+/* 		vs_check_push(new); */
+/* 	else if (type_of(tree) == t_cons) { */
+/* 		subst(new, tree->c.c_car); */
+/* 		subst(new, tree->c.c_cdr); */
+/* 		stack_cons(); */
+/* 	} else */
+/* 		vs_check_push(tree); */
+/* } */
 
 /* static object */
 /* subst1(object new, object tree) { */
@@ -1153,25 +1153,25 @@ LFD(Lrplacd)()
 	vs_popp;
 }
 
-@(defun subst (new old tree &key test test_not key)
-	saveTEST;
-@
-	protectTEST;
-	setupTEST(old, test, test_not, key);
-	subst(new, tree);
-	tree = vs_pop;
-        /* if (kf==identity && */
-	/*     tf==test_eql && */
-	/*     (is_imm_fixnum(item_compared) || */
-	/*      ({enum type tp=type_of(item_compared);tp>t_complex || tp<t_fixnum;}))) */
-	/*   tree=subst1qi(new,tree); */
-	/* else */
-	/*   tree=subst1(new,tree); */
-	restoreTEST;
-	@(return tree)
-@)
+/* @(defun subst (new old tree &key test test_not key) */
+/* 	saveTEST; */
+/* @ */
+/* 	protectTEST; */
+/* 	setupTEST(old, test, test_not, key); */
+/* 	subst(new, tree); */
+/* 	tree = vs_pop; */
+/*         /\* if (kf==identity && *\/ */
+/* 	/\*     tf==test_eql && *\/ */
+/* 	/\*     (is_imm_fixnum(item_compared) || *\/ */
+/* 	/\*      ({enum type tp=type_of(item_compared);tp>t_complex || tp<t_fixnum;}))) *\/ */
+/* 	/\*   tree=subst1qi(new,tree); *\/ */
+/* 	/\* else *\/ */
+/* 	/\*   tree=subst1(new,tree); *\/ */
+/* 	restoreTEST; */
+/* 	@(return tree) */
+/* @) */
 
-PREDICATE(Lsubst,Lsubst_if,Lsubst_if_not, 3)
+/* PREDICATE(Lsubst,Lsubst_if,Lsubst_if_not, 3) */
 
 
 @(defun nsubst (new old tree &key test test_not key)
@@ -1506,9 +1506,9 @@ gcl_init_list_function()
 	make_function("LDIFF", Lldiff);
 	make_function("RPLACA", Lrplaca);
 	make_function("RPLACD", Lrplacd);
-	make_function("SUBST", Lsubst);
-	make_function("SUBST-IF", Lsubst_if);
-	make_function("SUBST-IF-NOT", Lsubst_if_not);
+	/* make_function("SUBST", Lsubst); */
+	/* make_function("SUBST-IF", Lsubst_if); */
+	/* make_function("SUBST-IF-NOT", Lsubst_if_not); */
 	make_function("NSUBST", Lnsubst);
 	make_function("NSUBST-IF", Lnsubst_if);
 	make_function("NSUBST-IF-NOT", Lnsubst_if_not);
