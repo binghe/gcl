@@ -200,26 +200,30 @@ gethash(object key, object hashtable) {
 
   enum httest htest;
   long hsize,j,s,q;
-  struct htent *e,*first_objnull=NULL;
+  struct htent *e,*first_open=NULL;
   object hkey;
   static struct htent dummy={OBJNULL,OBJNULL};
   
   if (!hashtable->ht.ht_size)
     return &dummy;
 
+  if (hashtable->ht.ht_cache && hashtable->ht.ht_cache->hte_key==key)
+    return hashtable->ht.ht_cache;
+
   htest = (enum httest)hashtable->ht.ht_test;
   hsize = hashtable->ht.ht_size;
 
 #define eq(x,y) x==y
 #define hash_loop(t_,i_)						\
-  for (s=i_%hsize,q=hsize,e=first_objnull;s>=0;q=s,s=s?0:-1)		\
+  for (s=i_%hsize,q=hsize,e=first_open;s>=0;q=s,s=s?0:-1)		\
     for (j=s;j<q;j++) {							\
-      e = &hashtable->ht.ht_self[j];					\
+      e = hashtable->ht.ht_self+j;					\
       hkey = e->hte_key;						\
       if (hkey==OBJNULL) {						\
-	if (e->hte_value==OBJNULL) return first_objnull ? first_objnull : e; \
-	if (!first_objnull) first_objnull=e;				\
-      } else if (t_(key,hkey)) return e;				\
+	if (e->hte_value==OBJNULL)					\
+	  return first_open ? first_open : e;				\
+	if (!first_open) first_open=e;					\
+      } else if (t_(key,hkey)) return hashtable->ht.ht_cache=e;		\
     }
 
   switch (htest) {
@@ -237,7 +241,7 @@ gethash(object key, object hashtable) {
     return &dummy;
   }
   
-  return first_objnull ? first_objnull : (FEerror("No free spot in hashtable ~S.", 1, hashtable),&dummy);
+  return first_open ? first_open : (FEerror("No free spot in hashtable ~S.", 1, hashtable),&dummy);
 
 }
 
@@ -309,6 +313,7 @@ object hashtable;
 				hashtable,
 				old->ht.ht_self[i].hte_value);
 	}
+	hashtable->ht.ht_cache=NULL;
 	hashtable->ht.ht_nent = old->ht.ht_nent;
 	vs_popp;
 	END_NO_INTERRUPT;}
@@ -365,6 +370,7 @@ DEFVAR("*DEFAULT-HASH-TABLE-REHASH-THRESHOLD*",sSAdefault_hash_table_rehash_thre
 	h->ht.ht_size = fix(size);
 	h->ht.ht_rhsize = rehash_size;
 	h->ht.ht_rhthresh = rehash_threshold;
+	h->ht.ht_cache=NULL;
         h->ht.ht_nent = 0;
         h->ht.ht_static = static!=Cnil ? 1 : 0;
 	h->ht.ht_self = NULL;
