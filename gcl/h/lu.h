@@ -143,7 +143,7 @@ struct hashtable {
   int ht_size;
   short ht_test;
   short ht_static;
-  SPAD;
+  struct htent *ht_cache;
 
 };
 

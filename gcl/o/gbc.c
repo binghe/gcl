@@ -543,7 +543,9 @@ mark_object1(object x) {
 	  mark_object_address(&x->ht.ht_self[i].hte_key,i);
 	  mark_object_address(&x->ht.ht_self[i].hte_value,i+1);
 	}
+    i=x->ht.ht_cache-x->ht.ht_self;
     MARK_LEAF_DATA(x,x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
+    if (x->ht.ht_cache) x->ht.ht_cache=x->ht.ht_self+i;
     break;
     
   case t_array:
