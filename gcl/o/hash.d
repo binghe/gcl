@@ -294,7 +294,7 @@ object hashtable;
 	old = alloc_object(t_hashtable);
 	old->ht = hashtable->ht;
 	vs_push(old);
-	hashtable->ht.ht_self = NULL;
+	hashtable->ht.ht_cache=hashtable->ht.ht_self = NULL;
 	hashtable->ht.ht_size = new_size;
 	if (type_of(hashtable->ht.ht_rhthresh) == t_fixnum)
 		hashtable->ht.ht_rhthresh =
@@ -313,7 +313,6 @@ object hashtable;
 				hashtable,
 				old->ht.ht_self[i].hte_value);
 	}
-	hashtable->ht.ht_cache=NULL;
 	hashtable->ht.ht_nent = old->ht.ht_nent;
 	vs_popp;
 	END_NO_INTERRUPT;}
