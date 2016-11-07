@@ -2,15 +2,6 @@
 
 (deftype seqind nil `fixnum)
 
-(defun match-beginning (i &aux (v *match-data*))
-  (declare ((vector fixnum) v)(seqind i))
-  (the (or (integer -1 -1 ) seqind) (aref v i)))
-(defun match-end (i &aux (v *match-data*))
-  (declare ((vector fixnum) v)(seqind i))
-  (the (or (integer -1 -1 ) seqind) (aref v (+ i (ash (length v) -1)))))
-
-(declaim (inline match-beginning match-end))
-
 (defun dir-conj (x) (if (eq x :relative) :absolute :relative))
 
 (defvar *up-key* :up)
