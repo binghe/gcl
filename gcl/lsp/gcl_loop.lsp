@@ -793,6 +793,8 @@ a LET-like macro, and a SETQ-like macro, which perform LOOP-style destructuring.
   (unless (= (length before-loop) (length after-loop))
     (error "LOOP-BODY called with non-synched before- and after-loop lists."))
   ;;All our work is done from these copies, working backwards from the end:
+  (when (equal before-loop after-loop)
+    (setq main-body (append before-loop main-body) before-loop nil after-loop nil));accelerator
   (setq rbefore (reverse before-loop) rafter (reverse after-loop))
   (labels ((psimp (l)
 	     (let ((ans nil))
