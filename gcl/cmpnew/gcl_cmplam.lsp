@@ -475,9 +475,9 @@
                (*unwind-exit* *unwind-exit*)
                (*ccb-vs* *ccb-vs*))
            (when rest
-             (wt-nl "vs_top[0]=Cnil;")
-             (wt-nl "{object *p=vs_top, *q=vs_base+" (length optionals) ";")
-             (wt-nl " for(;p>q;p--)p[-1]=MMcons(p[-1],p[0]);}"))
+             (wt-nl "{object *q=vs_base+" (length optionals) ",*l;")
+	     (wt-nl " for (l=q;q<vs_top;q++,l=&(*l)->c.c_cdr) *l=MMcons(*q,Cnil);")
+	     (wt-nl " *l=Cnil;}"))
            (do ((opts optionals (cdr opts)))
                ((endp opts))
                (declare (object opts))
@@ -510,11 +510,11 @@
 
              (wt-label label)))
         (rest
-         (wt-nl "vs_top[0]=Cnil;")
-         (wt-nl "{object *p=vs_top;")
-         (wt-nl " for(;p>vs_base;p--)p[-1]="
+	 (wt-nl "{object *q=vs_base,*l;")
+	 (wt-nl " for (l=q;q<vs_top;q++,l=&(*l)->c.c_cdr) *l="
 		(if *rest-on-stack* "ON_STACK_CONS" "MMcons")
-		"(p[-1],p[0]);}")
+		"(*q,Cnil);")
+	 (wt-nl " *l=Cnil;}")
          (c2bind rest)
          (wt-nl)
          (reset-top))
