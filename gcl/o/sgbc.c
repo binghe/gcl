@@ -165,7 +165,7 @@ sgc_sweep_phase(void) {
     tm = tm_of((enum type)v->type);
     
     p = pagetochar(page(v));
-    f = tm->tm_free;
+    f = FREELIST_TAIL(tm);
     k = 0;
     size=tm->tm_size;
 
@@ -189,7 +189,7 @@ sgc_sweep_phase(void) {
 	
 	/* it is ok to free x */
 	
-	SET_LINK(x,f);
+	SET_LINK(f,x);
 	make_free(x);
 #ifndef SGC_WHOLE_PAGE
 	if (TYPEWORD_TYPE_P(v->type)) x->d.s = SGC_RECENT;
@@ -198,7 +198,8 @@ sgc_sweep_phase(void) {
 	k++;
 
       }
-      tm->tm_free = f;
+      SET_LINK(f,OBJNULL);
+      tm->tm_tail = f;
       tm->tm_nfree += k;
       v->in_use-=k;
 
@@ -674,34 +675,38 @@ sgc_start(void) {
      contain the others */
   for (i= t_start; i < t_contiguous ; i++)
     if (TM_BASE_TYPE_P(i) && (np=(tm=tm_of(i))->tm_sgc)) {
-      object f=tm->tm_free ,x,y,next;
+      object f=tm->tm_free,xf,yf;
+      struct freelist x,y;/*the f_link heads have to be separated on the stack*/
       fixnum count=0;
-      x=y=OBJNULL;
       
+      xf=PHANTOM_FREELIST(x.f_link);
+      yf=PHANTOM_FREELIST(y.f_link);
       while (f!=OBJNULL) {
-	next=OBJ_LINK(f);
 #ifdef SDEBUG	     
 	if (!is_free(f))
 	  printf("Not FREE in freelist f=%d",f);
 #endif
 	if (pageinfo(f)->sgc_flags&SGC_PAGE_FLAG) {
-	  SET_LINK(f,x);
+	  SET_LINK(xf,f);
 #ifndef SGC_WHOLE_PAGE
 	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_RECENT;
 #endif
-	  x=f;
+	  xf=f;
 	  count++;
 	} else {
-	  SET_LINK(f,y);
+	  SET_LINK(yf,f);
 #ifndef SGC_WHOLE_PAGE
  	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_NORMAL;
 #endif
-	  y=f;
+	  yf=f;
 	}
-	f=next;
+	f=OBJ_LINK(f);
       }
-      tm->tm_free = x;
-      tm->tm_alt_free = y;
+      SET_LINK(xf,OBJNULL);
+      tm->tm_free = OBJ_LINK(&x);
+      tm->tm_tail = xf;
+      SET_LINK(yf,OBJNULL);
+      tm->tm_alt_free = OBJ_LINK(&y);
       tm->tm_alt_nfree = tm->tm_nfree - count;
       tm->tm_nfree=count;
     }
@@ -853,38 +858,21 @@ sgc_quit(void) {
   for (i= t_start; i < t_contiguous ; i++)
     
     if (TM_BASE_TYPE_P(i) && (np=(tm=tm_of(i))->tm_sgc)) {
-      
-      object f,y;
-      
-      f=tm->tm_free;
-      if (f==OBJNULL) 
-	tm->tm_free=tm->tm_alt_free;
-      else {
-	/* tack the alt_free onto the end of free */
-#ifdef SDEBUG
-	fixnum count=0;
-	f=tm->tm_free;
-	while(y= (object) F_LINK(f)) {
-	  if(y->d.s != SGC_RECENT)
-	    printf("[bad %d]",y);
-	  count++; f=y;
+
+      object n=tm->tm_free,o=tm->tm_alt_free,f=PHANTOM_FREELIST(tm->tm_free);
+
+      for (;n!=OBJNULL && o!=OBJNULL;)
+	if (o!=OBJNULL && (n==OBJNULL || o<n)) {
+	  SET_LINK(f,o);
+	  f=o;
+	  o=OBJ_LINK(o);
+	} else {
+	  SET_LINK(f,n);
+	  f=n;
+	  n=OBJ_LINK(n);
 	}
-	
-	count=0;
-	if (f==tm->tm_alt_free)
-	  while(y= F_LINK(f)) {
-	    if(y->d.s != SGC_NORMAL)
-	      printf("[alt_bad %d]",y);
-	    count++; f=y;
-	  }
-	
-#endif
-	f=tm->tm_free;
-	while((y= (object) F_LINK(f))!=OBJNULL)
-	  f=y;
-	F_LINK(f)= (long)(tm->tm_alt_free);
-      }
-      /* tm->tm_free has all of the free objects */
+      SET_LINK(f,OBJNULL);
+      tm->tm_tail=f;
       tm->tm_nfree += tm->tm_alt_nfree;
       tm->tm_alt_nfree = 0;
       tm->tm_alt_free = OBJNULL;
