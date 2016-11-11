@@ -433,10 +433,11 @@ SEARCH_DECLARE:
 					 optional[i].opt_svar_spp);
 		}
 	if (rest_flag) {
-		vs_push(Cnil);
-		for (i = narg, j = nreq+nopt;  --i >= j;  )
-			vs_head = make_cons(base[i], vs_head);
-		bind_var(rest->rest_var, vs_head, rest->rest_spp);
+	  object *l=vs_top++;
+	  for (i=nreq+nopt;i<narg;i++)
+	    collect(l,make_cons(base[i],Cnil));
+	  *l=Cnil;
+	  bind_var(rest->rest_var, vs_head, rest->rest_spp);
 	}
 	if (key_flag) {
                 int allow_other_keys_found=0;
@@ -824,12 +825,11 @@ parse_key(object *base, bool rest, bool allow_other_keys, int n, ...)
 		}
 	}
 	if (rest) {
-		top = vs_top;
-		vs_push(Cnil);
-		base++;
-		while (base < vs_top)
-			stack_cons();
-		vs_top = top;
+	  object *a,*l;
+	  for (l=a=base;a<vs_top;a++)
+	    collect(l,make_cons(*a,Cnil));
+	  *l=Cnil;
+	  base++;
 	}
 	top = base + n;
 	va_start(ap,n);

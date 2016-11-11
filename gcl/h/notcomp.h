@@ -373,3 +373,4 @@ typedef struct {void *a,*b,*c,*d;} gmp_randfnptr_t;
 EXTER gmp_randfnptr_t Mersenne_Twister_Generator_Noseed;
 #endif
 
+#define collect(p_,f_) (p_)=&(*(p_)=(f_))->c.c_cdr

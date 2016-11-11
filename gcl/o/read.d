@@ -807,46 +807,49 @@ SYMBOL:
 }
 
 static void
-Lleft_parenthesis_reader()
-{
-	object in, x;
-	object *p;
+Lleft_parenthesis_reader() {
 
-	check_arg(2);
-	in = vs_base[0];
-	vs_head = Cnil;
-	p = &vs_head;
-	for (;;) {
-		delimiting_char = code_char(')');
-		in_list_flag = TRUE;
-		x = read_object(in);
-		if (x == OBJNULL)
-			goto ENDUP;
-		if (dot_flag) {
-			if (p == &vs_head)
-	FEerror("A dot appeared after a left parenthesis.", 0);
-			delimiting_char = code_char(')');
-			in_list_flag = TRUE;
-			*p = SAFE_CDR(read_object(in));
-			if (dot_flag)
-	FEerror("Two dots appeared consecutively.", 0);
-			if (*p==OBJNULL)
-	FEerror("Object missing after dot.", 0);
-			delimiting_char = code_char(')');
-			in_list_flag = TRUE;
-			if (read_object(in)!=OBJNULL)
-        FEerror("Two objects after dot.",0);
-			goto ENDUP;
-		}
-		vs_push(x);
-		*p = make_cons(x, Cnil);
-		vs_popp;
-		p = &((*p)->c.c_cdr);
-	}
+  object in, x;
+  object *p;
+  
+  check_arg(2);
+  in = vs_base[0];
+  vs_top=vs_base+1;
+  p = &vs_head;
 
-ENDUP:
-	vs_base[0] = vs_pop;
-	return;
+  for (;;) {
+
+    delimiting_char = code_char(')');
+    in_list_flag = TRUE;
+
+    if ((x=read_object(in))==OBJNULL) {
+      *p=Cnil;
+      break;
+    }
+
+    if (dot_flag) {
+
+      if (p==&vs_head) READER_ERROR(in,"A dot appeared after a left parenthesis.");
+
+      delimiting_char = code_char(')');
+      in_list_flag = TRUE;
+      *p=SAFE_CDR(read_object(in));
+
+      if (dot_flag) READER_ERROR(in,"Two dots appeared consecutively.");
+      if (*p==OBJNULL) READER_ERROR(in,"Object missing after dot.");
+
+      delimiting_char = code_char(')');
+      in_list_flag = TRUE;
+      if (read_object(in)!=OBJNULL) READER_ERROR(in,"Two objects after dot.");
+
+      break;
+
+    }
+
+    collect(p,make_cons(x,Cnil));
+
+  }
+
 }
 
 
@@ -1734,8 +1737,7 @@ READ:
 		x = read_object_recursive(strm);
 		if (x == OBJNULL)
 			break;
-		*p = make_cons(x, Cnil);
-		p = &((*p)->c.c_cdr);
+		collect(p,make_cons(x,Cnil));
 	}
 	if (recursivep == Cnil) {
 	  if (sSAsharp_eq_contextA->s.s_dbind!=Cnil)

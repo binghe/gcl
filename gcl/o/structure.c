@@ -182,22 +182,19 @@ object
 structure_to_list(object x)
 {
 
-	object *p, s;
-	struct s_data *def=S_DATA(x->str.str_def);
-	int i, n;
-	
-	s = def->slot_descriptions;
-	vs_push(def->name);
-	vs_push(Cnil);
-	p = &vs_head;
-	for (i=0, n=def->length;  !endp(s)&&i<n;  s=s->c.c_cdr, i++) {
-		*p = make_cons(car(s->c.c_car), Cnil);
-		p = &((*p)->c.c_cdr);
-		*p = make_cons(structure_ref(x,x->str.str_def,i), Cnil);
-		p = &((*p)->c.c_cdr);
-	}
-	stack_cons();
-	return(vs_pop);
+  object *p,s,v;
+  struct s_data *def=S_DATA(x->str.str_def);
+  int i,n;
+
+  s=def->slot_descriptions;
+  for (p=&v,i=0,n=def->length;!endp(s)&&i<n;s=s->c.c_cdr,i++) {
+    collect(p,make_cons(car(s->c.c_car),Cnil));
+    collect(p,make_cons(structure_ref(x,x->str.str_def,i),Cnil));
+  }
+  *p=Cnil;
+
+  return make_cons(def->name,v);
+
 }
 
 LFD(siLmake_structure)(void)
