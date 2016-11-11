@@ -182,61 +182,61 @@ void
 add_page_to_freelist(char *p, struct typemanager *tm) {
 
   short t,size;
-  long i=tm->tm_nppage,fw;
-  object x,f;
+  long fw;
+  object x,xe,f;
   struct pageinfo *pp;
 
- t=tm->tm_type;
+  t=tm->tm_type;
 
- size=tm->tm_size;
- f=tm->tm_free;
- pp=pageinfo(p);
- bzero(pp,sizeof(*pp));
- pp->type=t;
- pp->magic=PAGE_MAGIC;
+  size=tm->tm_size;
+  pp=pageinfo(p);
+  bzero(pp,sizeof(*pp));
+  pp->type=t;
+  pp->magic=PAGE_MAGIC;
 
- if (cell_list_head==NULL) 
-   cell_list_tail=cell_list_head=pp;
- else if (pp > cell_list_tail) {
-   cell_list_tail->next=pp;
-   cell_list_tail=pp;
- }
+  if (cell_list_head==NULL)
+    cell_list_tail=cell_list_head=pp;
+  else if (pp > cell_list_tail) {
+    cell_list_tail->next=pp;
+    cell_list_tail=pp;
+  }
 
- x= (object)pagetochar(page(p));
- /* set_type_of(x,t); */
- make_free(x);
+  x= (object)pagetochar(page(p));
+  /* set_type_of(x,t); */
+  make_free(x);
 
 #ifdef SGC
 
- if (sgc_enabled && tm->tm_sgc)
-   pp->sgc_flags=SGC_PAGE_FLAG;
+  if (sgc_enabled && tm->tm_sgc)
+    pp->sgc_flags=SGC_PAGE_FLAG;
 
 #ifndef SGC_WHOLE_PAGE
- if (TYPEWORD_TYPE_P(pp->type))
-   x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
+  if (TYPEWORD_TYPE_P(pp->type))
+    x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
 #endif
 
- /* array headers must be always writable, since a write to the
-    body does not touch the header.   It may be desirable if there
-    are many arrays in a system to make the headers not writable,
-    but just SGC_TOUCH the header each time you write to it.   this
-    is what is done with t_structure */
+  /* array headers must be always writable, since a write to the
+     body does not touch the header.   It may be desirable if there
+     are many arrays in a system to make the headers not writable,
+     but just SGC_TOUCH the header each time you write to it.   this
+     is what is done with t_structure */
   if (t==(tm_of(t_array)->tm_type))
     pp->sgc_flags|=SGC_PERM_WRITABLE;
-   
+
 #endif 
 
- fw= *(fixnum *)x;
- while (--i >= 0) {
-   *(fixnum *)x=fw;
-   SET_LINK(x,f);
-   f=x;
-   x= (object) ((char *)x + size);
- }
+  f=FREELIST_TAIL(tm);
+  fw=x->fw;
+  xe=(object)((void *)x+tm->tm_nppage*size);
+  for (;x<xe;f=x,x=(object)((void *)x+size)) {
+    x->fw=fw;
+    SET_LINK(f,x);
+  }
 
- tm->tm_free=f;
- tm->tm_nfree += tm->tm_nppage;
- tm->tm_npage++;
+  SET_LINK(f,OBJNULL);
+  tm->tm_tail=f;
+  tm->tm_nfree+=tm->tm_nppage;
+  tm->tm_npage++;
 
 }
 
@@ -1065,14 +1065,12 @@ make_cons(object a,object d) {
 
 }
 
-
-
-object on_stack_cons(object x, object y) {
+object
+on_stack_cons(object x, object y) {
   object p = (object) alloca_val;
   load_cons(p,x,y);
   return p;
 }
-
 
 DEFUNM_NEW("ALLOCATED",object,fSallocated,SI,1,1,NONE,OO,OO,OO,OO,(object typ),"")
 { struct typemanager *tm=(&tm_table[t_from_type(typ)]);
