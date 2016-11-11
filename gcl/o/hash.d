@@ -196,37 +196,28 @@ DEFUN_NEW("HASH-EQUAL",object,fShash_equal,SI,2,2,NONE,OO,IO,OO,OO,(object x,fix
 
 
 struct htent *
-gethash(object key, object hashtable) {
+gethash(object key, object ht) {
 
-  enum httest htest;
-  long hsize,j,s,q;
-  struct htent *e,*first_open=NULL;
-  object hkey;
+  long s,q;
+  struct htent *e,*ee,*first_open=NULL;
   static struct htent dummy={OBJNULL,OBJNULL};
   
-  if (!hashtable->ht.ht_size)
-    return &dummy;
-
-  if (hashtable->ht.ht_cache && hashtable->ht.ht_cache->hte_key==key)
-    return hashtable->ht.ht_cache;
-
-  htest = (enum httest)hashtable->ht.ht_test;
-  hsize = hashtable->ht.ht_size;
+  if (ht->ht.ht_cache && ht->ht.ht_cache->hte_key==key)
+    return ht->ht.ht_cache;
+  ht->ht.ht_cache=NULL;
 
 #define eq(x,y) x==y
 #define hash_loop(t_,i_)						\
-  for (s=i_%hsize,q=hsize,e=first_open;s>=0;q=s,s=s?0:-1)		\
-    for (j=s;j<q;j++) {							\
-      e = hashtable->ht.ht_self+j;					\
-      hkey = e->hte_key;						\
+  for (q=ht->ht.ht_size,s=i_%q;s>=0;q=s,s=s?0:-1)			\
+    for (e=ht->ht.ht_self,ee=e+q,e+=s;e<ee;e++) {			\
+      object hkey=e->hte_key;						\
       if (hkey==OBJNULL) {						\
-	if (e->hte_value==OBJNULL)					\
-	  return first_open ? first_open : e;				\
+	if (e->hte_value==OBJNULL) return first_open ? first_open : e;	\
 	if (!first_open) first_open=e;					\
-      } else if (t_(key,hkey)) return hashtable->ht.ht_cache=e;		\
+      } else if (t_(key,hkey)) return ht->ht.ht_cache=e;		\
     }
 
-  switch (htest) {
+  switch (ht->ht.ht_test) {
   case htt_eq:
     hash_loop(eq,hash_eq(key));
     break;
@@ -241,7 +232,7 @@ gethash(object key, object hashtable) {
     return &dummy;
   }
   
-  return first_open ? first_open : (FEerror("No free spot in hashtable ~S.", 1, hashtable),&dummy);
+  return first_open ? first_open : (FEerror("No free spot in hashtable ~S.", 1, ht),&dummy);
 
 }
 
