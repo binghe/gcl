@@ -22,7 +22,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 
 #define	attach(x)	(vs_head = make_cons(x, vs_head))
-#define	make_list	(vs_push(Cnil), stack_cons(), stack_cons())
+#define	make_list	(vs_popp,vs_head=list(2,vs_head,*vs_top))
 
 
 #define	QUOTE	1

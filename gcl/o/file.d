@@ -1429,52 +1429,54 @@ LFD(Lmake_synonym_stream)()
 	vs_base[0] = x;
 }
 
-LFD(Lmake_broadcast_stream)()
-{
-	object x;
-	int narg, i;
+LFD(Lmake_broadcast_stream)() {
 
-	narg = vs_top - vs_base;
-	for (i = 0;  i < narg;  i++)
-		if (type_of(vs_base[i]) != t_stream ||
-		    !output_stream_p(vs_base[i]))
-			cannot_write(vs_base[i]);
-	vs_push(Cnil);
-	for (i = narg;  i > 0;  --i)
-		stack_cons();
-	x = alloc_object(t_stream);
-	x->sm.sm_mode = (short)smm_broadcast;
-	x->sm.sm_fp = NULL;
-	x->sm.sm_buffer = 0;
-	x->sm.sm_object0 = vs_base[0];
-	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int = 0;
-	x->sm.sm_flags=0;
-	vs_base[0] = x;
+  object x;
+  int narg, i;
+  
+  narg = vs_top - vs_base;
+  for (i = 0;  i < narg;  i++)
+    if (type_of(vs_base[i]) != t_stream ||
+	!output_stream_p(vs_base[i]))
+      cannot_write(vs_base[i]);
+
+  Llist();
+
+  x = alloc_object(t_stream);
+  x->sm.sm_mode = (short)smm_broadcast;
+  x->sm.sm_fp = NULL;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = vs_base[0];
+  x->sm.sm_object1 = OBJNULL;
+  x->sm.sm_int = 0;
+  x->sm.sm_flags=0;
+  vs_base[0] = x;
+
 }
 
-LFD(Lmake_concatenated_stream)()
-{
-	object x;
-	int narg, i;
+LFD(Lmake_concatenated_stream)() {
 
-	narg = vs_top - vs_base;
-	for (i = 0;  i < narg;  i++)
-		if (type_of(vs_base[i]) != t_stream ||
-		    !input_stream_p(vs_base[i]))
-			cannot_read(vs_base[i]);
-	vs_push(Cnil);
-	for (i = narg;  i > 0;  --i)
-		stack_cons();
-	x = alloc_object(t_stream);
-	x->sm.sm_mode = (short)smm_concatenated;
-	x->sm.sm_fp = NULL;
-	x->sm.sm_buffer = 0;
-	x->sm.sm_object0 = vs_base[0];
-	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int = 0;
-	x->sm.sm_flags=0;
-	vs_base[0] = x;
+  object x;
+  int narg, i;
+  
+  narg = vs_top - vs_base;
+  for (i = 0;  i < narg;  i++)
+    if (type_of(vs_base[i]) != t_stream ||
+	!input_stream_p(vs_base[i]))
+      cannot_read(vs_base[i]);
+
+  Llist();
+
+  x = alloc_object(t_stream);
+  x->sm.sm_mode = (short)smm_concatenated;
+  x->sm.sm_fp = NULL;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = vs_base[0];
+  x->sm.sm_object1 = OBJNULL;
+  x->sm.sm_int = 0;
+  x->sm.sm_flags=0;
+  vs_base[0] = x;
+
 }
 
 LFD(Lmake_two_way_stream)()
