@@ -814,13 +814,7 @@ EVAL:
 		bds_bind(siVevalhook, Cnil);
 		vs_base = vs_top;
 		vs_push(form);
-		vs_push(lex_env[0]);
-		vs_push(lex_env[1]);
-		vs_push(lex_env[2]);
-		vs_push(Cnil);
-		stack_cons();
-		stack_cons();
-		stack_cons();
+		vs_push(list(3,lex_env[0],lex_env[1],lex_env[2]));
 		super_funcall(hookfun);
 		bds_unwind(old_bds_top);
 		return;
@@ -970,22 +964,12 @@ static void
 call_applyhook(object fun)
 {
 	object ah;
-	object *v;
 
 	ah = symbol_value(siVapplyhook);
-	v = vs_base + 1;
-	vs_push(Cnil);
-	while (vs_top > v)
-		stack_cons();
+	Llist();
 	vs_push(vs_base[0]);
 	vs_base[0] = fun;
-	vs_push(lex_env[0]);
-	vs_push(lex_env[1]);
-	vs_push(lex_env[2]);
-	vs_push(Cnil);
-	stack_cons();
-	stack_cons();
-	stack_cons();
+	vs_push(list(3,lex_env[0],lex_env[1],lex_env[2]));
 	super_funcall(ah);
 }
 

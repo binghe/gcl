@@ -388,14 +388,7 @@ EVAL:
 
 OTHERWISE:
 	vs_base = vs_top;
-	vs_push(sLsetf);
-	vs_push(place);
-	vs_push(form);
-	result=vs_top[-1];
-	vs_push(Cnil);
-	stack_cons();
-	stack_cons();
-	stack_cons();
+	vs_push(list(3,sLsetf,place,result=form));
 /***/
 #define VS_PUSH_ENV \
 	if(lex_env[1]){ \
@@ -428,9 +421,7 @@ FFN(Fpush)(object form)
 		return;
 	}
 	vs_base = vs_top;
-	vs_push(sLpush);
-	vs_push(form);
-	stack_cons();
+	vs_push(make_cons(sLpush,form));
 /***/
          VS_PUSH_ENV ;
 /***/
@@ -457,9 +448,7 @@ FFN(Fpop)(object form)
 		return;
 	}
 	vs_base = vs_top;
-	vs_push(sLpop);
-	vs_push(form);
-	stack_cons();
+	vs_push(make_cons(sLpop,form));
 /***/
 	VS_PUSH_ENV ;
 /***/
@@ -495,9 +484,7 @@ FFN(Fincf)(object form)
 		return;
 	}
 	vs_base = vs_top;
-	vs_push(sLincf);
-	vs_push(form);
-	stack_cons();
+	vs_push(make_cons(sLincf,form));
 /***/
 	VS_PUSH_ENV ;
 /***/
@@ -533,9 +520,7 @@ FFN(Fdecf)(object form)
 		return;
 	}
 	vs_base = vs_top;
-	vs_push(sLdecf);
-	vs_push(form);
-	stack_cons();
+	vs_push(make_cons(sLdecf,form));
 /***/
 	VS_PUSH_ENV ;
 /***/

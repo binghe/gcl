@@ -73,18 +73,14 @@ LFD(Lsymbol_function)(void)
 	if (type_of(sym) != t_symbol)
 		not_a_symbol(sym);
 	if (sym->s.s_sfdef != NOT_SPECIAL) {
-		vs_push(make_fixnum((long)(sym->s.s_sfdef)));
-		vs_base[0] = sLspecial;
-		stack_cons();
-		return;
+	  vs_base[0]=make_cons(sLspecial,make_fixnum((long)(sym->s.s_sfdef)));
+	  return;
 	}
 	if (sym->s.s_gfdef==OBJNULL)
 		FEundefined_function(sym);
 	if (sym->s.s_mflag) {
-		vs_push(sym->s.s_gfdef);
-		vs_base[0] = sSmacro;
-		stack_cons();
-		return;
+	  vs_base[0]=make_cons(sSmacro,sym->s.s_gfdef);
+	  return;
 	}
 	vs_base[0] = sym->s.s_gfdef;
 }

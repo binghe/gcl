@@ -959,13 +959,8 @@ static void
 Lsingle_quote_reader()
 {
 	check_arg(2);
-	vs_popp;
-	vs_push(sLquote);
-	vs_push(read_object(vs_base[0]));
-	vs_push(Cnil);
-	stack_cons();
-	stack_cons();
-	vs_base[0] = vs_pop;
+	vs_base[0] = list(2,sLquote,read_object(vs_base[0]));
+	vs_top=vs_base+1;
 }
 
 static void
@@ -1111,14 +1106,8 @@ Lsharp_single_quote_reader()
 	check_arg(3);
 	if(vs_base[2] != Cnil && !READsuppress)
 		extra_argument('#');
-	vs_popp;
-	vs_popp;
-	vs_push(sLfunction);
-	vs_push(read_object(vs_base[0]));
-	vs_push(Cnil);
-	stack_cons();
-	stack_cons();
-	vs_base[0] = vs_pop;
+	vs_base[0] = list(2,sLfunction,read_object(vs_base[0]));
+	vs_top=vs_base+1;
 }
 
 #define	QUOTE	1
@@ -1163,20 +1152,7 @@ Lsharp_left_parenthesis_reader()
 			}	
 			goto L;
 		}
-		vs_push(siScomma);
-		vs_push(sLapply);
-		vs_push(sLquote);
-		vs_push(sLvector);
-		vs_push(Cnil);
-		stack_cons();
-		stack_cons();
-		vs_push(vs_base[2]);
-		vs_push(Cnil);
-		stack_cons();
-		stack_cons();
-		stack_cons();
-		stack_cons();
-		vs_base = vs_top - 1;
+		vs_base[0]=list(4,siScomma,sLapply,list(2,sLquote,sLvector),vs_base[2]);
 		return;
 	}
 	vsp = vs_top;
