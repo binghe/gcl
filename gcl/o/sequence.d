@@ -205,16 +205,7 @@ E:
 		}
 		if (e < 0)
 			@(return `copy_list(sequence)`)
-		for (i = 0;  i < e;  i++) {
-			if (type_of(sequence) != t_cons)
-				goto ILLEGAL_START_END;
-			vs_check_push(sequence->c.c_car);
-			sequence = sequence->c.c_cdr;
-		}
-		vs_push(Cnil);
-		while (e-- > 0)
-			stack_cons();
-		x = vs_pop;
+		x=n_cons_from_x(e,sequence);
 		@(return x)
 
 	case t_vector:

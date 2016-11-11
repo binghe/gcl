@@ -277,93 +277,78 @@ object on_stack_list_vector_new(int n,object first,va_list ap)
  return ans;
 }*/
 
-object list_vector_new(int n,object first,va_list ap)
-{object ans,*p;
- 
- if (n == 0) return Cnil;
- ans = make_cons(first==OBJNULL ? va_arg(ap,object) : first,Cnil);
- p = & (ans->c.c_cdr); 
- while (--n > 0)
-   { *p = make_cons(va_arg(ap,object),Cnil);
-     p = & ((*p)->c.c_cdr);
-   }
- return ans;}
+object
+list_vector_new(int n,object first,va_list ap) {
 
+  object ans,*p;
+ 
+  for (p=&ans;n-->0;first=OBJNULL)
+    collect(p,make_cons(first==OBJNULL ? va_arg(ap,object) : first,Cnil));
+  *p=Cnil;
+ return ans;
+
+}
    
-/* clean this up */
-/* static object on_stack_list(int n, ...)
-{va_list ap;
- object res;
- va_start(ap,n);
- res=on_stack_list_vector(n,ap);
- va_end(ap);
- return res;
-}*/
 #ifdef WIDE_CONS
 #define maybe_set_type_of(a,b) set_type_of(a,b)
 #else
 #define maybe_set_type_of(a,b)
 #endif
 
+void
+free_check(void) {
 
+  int n=tm_table[t_cons].tm_nfree,m;
+  object f=tm_table[t_cons].tm_free;
+  for (m=0;f!=OBJNULL;m++,f=OBJ_LINK(f));
+  massert(n==m);
+}
+  
 #define multi_cons(n_,next_,last_)					\
-  ({static struct typemanager *_tm=tm_table+t_cons;			\
-    object _lis=OBJNULL;						\
-									\
-    if (n<=_tm->tm_nfree) {						\
-									\
-      object _tail=_tm->tm_free;					\
-									\
-      _lis=_tail;							\
-      									\
+  ({_tm->tm_nfree -= n_;						\
+    for(_x=_tm->tm_free,_p=&_x;n_-->0;_p=&(*_p)->c.c_cdr) {		\
+      object _z=*_p;							\
+      pageinfo(_z)->in_use++;						\
+      maybe_set_type_of(_z,t_cons);					\
+      _z->c.c_cdr=OBJ_LINK(_z);						\
+      _z->c.c_car=next_;						\
+    }									\
+    _tm->tm_free=*_p;							\
+    *_p=SAFE_CDR(last_);						\
+    _x;})
+
+#define n_cons(n_,next_,last_)						\
+  ({fixnum _n=n_;object _x=Cnil,*_p;					\
+    static struct typemanager *_tm=tm_table+t_cons;			\
+    if (_n>=0) {/*FIXME vs_top<vs_base*/				\
       BEGIN_NO_INTERRUPT;						\
-      									\
-      _tm->tm_nfree -= n_;						\
-      while (--n_) {							\
-	pageinfo(_tail)->in_use++;					\
-	maybe_set_type_of(_tail,t_cons);				\
-	_tail->c.c_cdr=OBJ_LINK(_tail);					\
-	_tail->c.c_car=next_;						\
-	_tail=_tail->c.c_cdr;						\
+      if (_n<=_tm->tm_nfree)						\
+	_x=multi_cons(_n,next_,last_);					\
+      else {								\
+	for (_p=&_x;_n--;)						\
+	  collect(_p,make_cons(next_,Cnil));				\
+	*_p=SAFE_CDR(last_);						\
       }									\
-      _tm->tm_free=OBJ_LINK(_tail);					\
-      pageinfo(_tail)->in_use++;					\
-      maybe_set_type_of(_tail,t_cons);					\
-      _tail->c.c_car=next_;						\
-      _tail->c.c_cdr=SAFE_CDR(last_);					\
-									\
       END_NO_INTERRUPT;							\
     }									\
-    _lis;})
+    _x;})
+      
+object
+n_cons_from_x(fixnum n,object x) {
 
-
-   
-object listqA(int a,int n,va_list ap) { 
-
-  object x,*p;
-
-  if (n<=0) return Cnil;
-
-  if ((x=multi_cons(n,va_arg(ap,object),a ? va_arg(ap,object) : Cnil))!=OBJNULL)
-    return x;
-
-  CHECK_INTERRUPT;
-
-  p = vs_top;
+  return n_cons(n,({object _z=x->c.c_car;x=x->c.c_cdr;_z;}),Cnil);
   
-  vs_push(Cnil);
-  while(--n>=0) {
-    *p=make_cons(va_arg(ap,object),Cnil);
-    p= &((*p)->c.c_cdr);
-  }
-  if (a) 
-    *p=SAFE_CDR(va_arg(ap,object));
+}
 
-  return(vs_pop);
+
+object
+listqA(int a,int n,va_list ap) {
+
+  return n_cons(n,va_arg(ap,object),a ? va_arg(ap,object) : Cnil);
 
 }
 
-object list(int n,...) { 
+object list(fixnum n,...) {
 
   va_list ap;
   object lis;
@@ -375,7 +360,7 @@ object list(int n,...) {
 
 }
 
-object listA(int n,...) { 
+object listA(fixnum n,...) {
 
   va_list ap;
   object lis;
@@ -417,163 +402,63 @@ BEGIN:
 object
 append(object x, object y) {
 
-  object z;
-  fixnum n;
+  return n_cons(length(x),({object _t=x->c.c_car;x=x->c.c_cdr;_t;}),y);
 
-  if (endp(x))
-    return(y);
-
-  for (z=x,n=0;!endp(z);z=z->c.c_cdr,n++);
-  if ((z=multi_cons(n,({object _t=x->c.c_car;x=x->c.c_cdr;_t;}),y))!=OBJNULL)
-    return z;
-
-  z = make_cons(Cnil, Cnil);
-  vs_push(z);
-  for (;;) {
-    z->c.c_car = x->c.c_car;
-    x = x->c.c_cdr;
-    if (endp(x))
-      break;
-    z->c.c_cdr = make_cons(Cnil, Cnil);
-    z = z->c.c_cdr;
-  }
-  z->c.c_cdr = SAFE_CDR(y);
-  return(vs_pop);
 }
-
-
-
-/* object */
-/* append(x, y) */
-/* object x, y; */
-/* { */
-/* 	object z; */
-
-/* 	if (endp(x)) */
-/* 		return(y); */
-/* 	z = make_cons(Cnil, Cnil); */
-/* 	vs_push(z); */
-/* 	for (;;) { */
-/* 		z->c.c_car = x->c.c_car; */
-/* 		x = x->c.c_cdr; */
-/* 		if (endp(x)) */
-/* 			break; */
-/* 		z->c.c_cdr = make_cons(Cnil, Cnil); */
-/* 		z = z->c.c_cdr; */
-/* 	} */
-/* 	z->c.c_cdr = SAFE_CDR(y); */
-/* 	return(vs_pop); */
-/* } */
 
 /*
 	Copy_list(x) copies list x.
 */
 object
-copy_list(x)
-object x;
-{
-	object y;
-
-	if (type_of(x) != t_cons)
-		return(x);
-	y = make_cons(x->c.c_car, Cnil);
-	vs_push(y);
-	for (x = x->c.c_cdr; type_of(x) == t_cons; x = x->c.c_cdr) {
-		y->c.c_cdr = make_cons(x->c.c_car, Cnil);
-		y = y->c.c_cdr;
-	}
-	y->c.c_cdr = SAFE_CDR(x);
-	return(vs_pop);
+copy_list(object x) {
+  object h,y;
+  
+  if (type_of(x) != t_cons)
+    return(x);
+  h=y=make_cons(x->c.c_car, Cnil);
+  for (x = x->c.c_cdr; type_of(x) == t_cons; x = x->c.c_cdr) {
+    y->c.c_cdr = make_cons(x->c.c_car, Cnil);
+    y=y->c.c_cdr;
+  }
+  y->c.c_cdr=SAFE_CDR(x);
+  return(h);
 }
 
 /*
 	Copy_alist(x) copies alist x.
 */
 static object
-copy_alist(x)
-object x;
-{
-	object y;
+copy_alist(object x) {
 
-	if (endp(x))
-		return(Cnil);
-	y = make_cons(Cnil, Cnil);
-	vs_push(y);
-	for (;;) {
-		y->c.c_car = make_cons(car(x->c.c_car), cdr(x->c.c_car));
-		x = x->c.c_cdr;
-		if (endp(x))
-			break;
-		y->c.c_cdr = make_cons(Cnil, Cnil);
-		y = y->c.c_cdr;
-	}
-	return(vs_pop);
+  object h,y;
+  
+  if (endp(x))
+    return(Cnil);
+  h=y=make_cons(Cnil, Cnil);
+  for (;;) {
+    y->c.c_car=make_cons(car(x->c.c_car), cdr(x->c.c_car));
+    x=x->c.c_cdr;
+    if (endp(x))
+      break;
+    y->c.c_cdr=make_cons(Cnil, Cnil);
+    y=y->c.c_cdr;
+  }
+  return(h);
 }
 
-/*
-	Copy_tree(x) copies tree x
-	and pushes the result onto vs.
-*/
-static void
-copy_tree(x)
-object x;
-{
-	cs_check(x);
+static object
+copy_tree(object x) {
 
-	if (type_of(x) == t_cons) {
-		copy_tree(x->c.c_car);
-		copy_tree(x->c.c_cdr);
-		stack_cons();
-	} else
-		vs_check_push(x);
+  object y;
+  
+  if (type_of(x) == t_cons) {
+    y=make_cons(Cnil,Cnil);
+    y->c.c_car=copy_tree(x->c.c_car);
+    y->c.c_cdr=copy_tree(x->c.c_cdr);
+    x=y;
+  }
+  return x;
 }
-
-/* /\* */
-/* 	Subst(new, tree) pushes */
-/* 	the result of substituting new in tree */
-/* 	onto vs. */
-/* *\/ */
-/* static void */
-/* subst(new, tree) */
-/* object new, tree; */
-/* { */
-/* 	cs_check(new); */
-
-/* 	if (TEST(tree)) */
-/* 		vs_check_push(new); */
-/* 	else if (type_of(tree) == t_cons) { */
-/* 		subst(new, tree->c.c_car); */
-/* 		subst(new, tree->c.c_cdr); */
-/* 		stack_cons(); */
-/* 	} else */
-/* 		vs_check_push(tree); */
-/* } */
-
-/* static object */
-/* subst1(object new, object tree) { */
-
-/*   if (TEST(tree)) */
-/*     return new; */
-/*   else if (type_of(tree) == t_cons) { */
-/*     object oa=tree->c.c_car,a=subst1(new,oa),od=tree->c.c_cdr,d=subst1(new,od); */
-/*     return a==oa && d==od ? tree : make_cons(a,d); */
-/*   } else */
-/*     return tree; */
-
-/* } */
-
-/* static object */
-/* subst1qi(object new, object tree) { */
-
-/*   if (item_compared == tree) */
-/*     return new; */
-/*   else if (type_of(tree) == t_cons) { */
-/*     object oa=tree->c.c_car,a=subst1qi(new,oa),od=tree->c.c_cdr,d=subst1qi(new,od); */
-/*     return a==oa && d==od ? tree : make_cons(a,d); */
-/*   } else */
-/*     return tree; */
-
-/* } */
 
 /*
 	Nsubst(new, treep) stores
@@ -599,27 +484,22 @@ object new, *treep;
 	result of substituting tree by alist
 	onto vs.
 */
-static void
-sublis(alist, tree)
-object alist, tree;
-{
-	object x;
-	cs_check(alist);
+static object
+sublis(object alist, object tree) {
 
-
-	for (x = alist;  !endp(x);  x = x->c.c_cdr) {
-		item_compared = car(x->c.c_car);
-		if (TEST(tree)) {
-			vs_check_push(cdr(x->c.c_car));
-			return;
-		}
-	}
-	if (type_of(tree) == t_cons) {
-		sublis(alist, tree->c.c_car);
-		sublis(alist, tree->c.c_cdr);
-		stack_cons();
-	} else
-		vs_check_push(tree);
+  object x;
+  cs_check(alist);
+  
+  for (x=alist;!endp(x);x=x->c.c_cdr) {
+    item_compared=car(x->c.c_car);
+    if (TEST(tree))
+      return x->c.c_car->c.c_cdr;
+  }
+  if (type_of(tree) == t_cons) {
+    object a=sublis(alist,tree->c.c_car),d=sublis(alist,tree->c.c_cdr);
+    return (a==tree->c.c_car && d==tree->c.c_cdr) ? tree : make_cons(a,d);
+  } else
+    return tree;
 }
 
 /*
@@ -777,7 +657,7 @@ DEFUN_NEW("TENTH",object,fLtenth,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"")
 LFD(Lcons)() {
   
   check_arg(2);
-  stack_cons();
+  vs_base[0]=make_cons(vs_base[0],vs_pop);
 
 }
 
@@ -907,36 +787,28 @@ LFD(Llast)() {
 
 }
 
-LFD(Llist)()
-{
-	vs_push(Cnil);
-	while (vs_top > vs_base + 1)
-		stack_cons();
+LFD(Llist)() {
+
+  object *a;
+
+  a=vs_base;
+  vs_base[0]=n_cons(vs_top-vs_base,*a++,Cnil);
+  vs_top=vs_base+1;
+
 }
 
-LFD(LlistA)()
-{
-	if (vs_top == vs_base)
-		too_few_arguments();
-	while (vs_top > vs_base + 1)
-		stack_cons();
-}
-/* static object copy_off_stack_tree(x) */
-/* object x; */
-/* {object *p; */
-/*  p = &x; */
-/*  TOP: */
-/*  if (type_of(*p) ==t_cons) */
-/*    { if(!inheap(*p)) */
-/*        *p=make_cons(copy_off_stack_tree((*p)->c.c_car),(*p)->c.c_cdr); */
-/*    else */
-/*      (*p)->c.c_car = copy_off_stack_tree((*p)->c.c_car); */
-/*      p = &((*p)->c.c_cdr); */
-/*      goto TOP;} */
-/*  return x; */
-/* } */
+LFD(LlistA)() {
 
-        
+  object *a;
+
+  if (vs_top == vs_base)
+    too_few_arguments();
+
+  a=vs_base;
+  vs_base[0]=n_cons(vs_top-vs_base-1,*a++,vs_head);
+  vs_top=vs_base+1;
+
+}
  
 object on_stack_make_list(n)
 int n;
@@ -957,23 +829,20 @@ int n;
  goto TOP;
 }
 
-object make_list(n)
-int n;
-{object x =Cnil ;
-  while (n-- > 0)
-    x = make_cons(Cnil, x);
- return x;}
+object
+make_list(int n) {
+
+  return n_cons(n,Cnil,Cnil);
+
+}
 
 @(defun make_list (size &key initial_element &aux x)
-	int i;
 @
-	check_type_non_negative_integer(&size);
-	if (type_of(size) != t_fixnum)
-		FEerror("Cannot make a list of the size ~D.", 1, size);
-	i = fix(size);
-	while (i-- > 0)
-		x = make_cons(initial_element, x);
-	@(return x)
+  check_type_non_negative_integer(&size);
+  if (type_of(size) != t_fixnum)
+    FEerror("Cannot make a list of the size ~D.", 1, size);
+  x=n_cons(fix(size),initial_element,Cnil);
+  @(return x)
 @)
 
 LFD(Lappend)()
@@ -1006,22 +875,19 @@ LFD(Lcopy_alist)()
 LFD(Lcopy_tree)()
 {
 	check_arg(1);
-	copy_tree(vs_base[0]);
-	vs_base[0] = vs_pop;
+	vs_base[0]=copy_tree(vs_base[0]);
 }
 
 LFD(Lrevappend)() {
-	object x, y;
 
-	check_arg(2);
-	y = vs_pop;
-	for (x = vs_base[0];  !endp(x);  x = x->c.c_cdr) {
-		vs_push(x->c.c_car);
-		vs_push(y);
-		stack_cons();
-		y = vs_pop;
-	}
-	vs_base[0] = y;
+  object x, y;
+
+  check_arg(2);
+  y=vs_pop;
+  for (x=vs_base[0];!endp(x);x=x->c.c_cdr)
+    y=make_cons(x->c.c_car,y);
+  vs_base[0] = y;
+
 }
 
 object
@@ -1078,26 +944,19 @@ LFD(Lreconc)() {
 }
 
 @(defun butlast (lis &optional (nn `make_fixnum(1)`))
-	int i;
+  int i;
+  object *p,x,y,z;
 @
-	check_type_non_negative_integer(&nn);
-	if (!listp(lis))/*FIXME checktype*/
-	  FEwrong_type_argument(sLlist, lis);
-	if (type_of(nn) != t_fixnum)
-		@(return Cnil)
-	for (i = 0;  consp(lis);  i++, lis = lis->c.c_cdr)
-		vs_check_push(lis->c.c_car);
-	if (i <= fix((nn))) {
-		vs_top -= i;
-		@(return Cnil)
-	}
-	vs_top -= fix((nn));
-	i -= fix((nn));
-	vs_push(Cnil);
-	while (i-- > 0)
-		stack_cons();
-	lis = vs_pop;
-	@(return lis)
+  check_type_non_negative_integer(&nn);
+  if (!listp(lis))/*FIXME checktype*/
+    FEwrong_type_argument(sLlist, lis);
+  if (type_of(nn) != t_fixnum)
+    @(return Cnil)
+      for (x=y=lis,i=0;i<fix(nn) && consp(y);i++,y=y->c.c_cdr);
+  for (p=&z;consp(y);x=x->c.c_cdr,y=y->c.c_cdr)
+    collect(p,make_cons(x->c.c_car,Cnil));
+  *p=i ? Cnil : x;
+  @(return `z`)
 @)
 
 @(defun nbutlast (lis &optional (nn `make_fixnum(1)`))
@@ -1119,21 +978,20 @@ LFD(Lreconc)() {
 @)
 
 LFD(Lldiff)() {
-	fixnum i;
-	object x;
 
-	check_arg(2);
-	x = vs_base[0];
-	if (!listp(x))/*FIXME checktype*/
-	  FEwrong_type_argument(sLlist, x);
-	for (i = 0; consp(x) && x!=vs_base[1] ;  i++, x = x->c.c_cdr)
-	  vs_check_push(x->c.c_car); /*FIXME but a segfault breaker at vs_limit*/
-	x=eql(x,vs_base[1]) ? Cnil : x;
-	vs_check_push(x);
-	while (i-- > 0)
-	  stack_cons();
-	vs_base[0] = vs_pop;
-	vs_popp;
+  fixnum i;
+  object x,y,*p,z;
+
+  check_arg(2);
+  x=vs_base[0];
+  z=vs_pop;
+  if (!listp(x))/*FIXME checktype*/
+    FEwrong_type_argument(sLlist, x);
+  for (p=&y,i=0;consp(x) && x!=z;i++,x=x->c.c_cdr)
+    collect(p,make_cons(x->c.c_car,Cnil));
+  *p=eql(x,z) ? Cnil : x;
+  vs_base[0]=y;
+
 }
 
 LFD(Lrplaca)()
@@ -1187,18 +1045,15 @@ LFD(Lrplacd)()
 PREDICATE(Lnsubst,Lnsubst_if,Lnsubst_if_not, 3)
 
 object
-sublis1(alist,tree,tst)
-     object alist,tree;
-     bool (*tst)();
-{object v;
- for (v=alist ; v!=Cnil; v=v->c.c_cdr)
-   { if ((*tst)(v->c.c_car->c.c_car ,tree))
-       return(v->c.c_car->c.c_cdr);}
- if (type_of(tree)==t_cons)
-   {object ntree=make_cons(sublis1(alist,tree->c.c_car,tst),
-			   tree->c.c_cdr);
-    ntree->c.c_cdr=sublis1(alist,ntree->c.c_cdr,tst);
-    return ntree;
+sublis1(object alist,object tree,bool (*tst)()) {
+
+  object v;
+  for (v=alist;v!=Cnil;v=v->c.c_cdr) {
+    if ((*tst)(v->c.c_car->c.c_car,tree))
+      return(v->c.c_car->c.c_cdr);}
+  if (type_of(tree)==t_cons){
+    object a=sublis1(alist,tree->c.c_car,tst),d=sublis1(alist,tree->c.c_cdr,tst);
+    return a==tree->c.c_car && d==tree->c.c_cdr ? tree : make_cons(a,d);
   }
   return tree;
 }
@@ -1226,8 +1081,7 @@ check_alist(alist)
 @  
 	protectTEST;
 	setupTEST(Cnil, test, test_not, key);
-	sublis(alist, tree);
-	tree = vs_pop;
+	tree=sublis(alist,tree);
 	restoreTEST;
 	@(return tree)
 @)
@@ -1321,27 +1175,25 @@ LFD(Lacons)()
 }
 
 @(defun pairlis (keys data &optional a_list)
-	object *vp, k, d;
+  object k,d,y,z,*p;
 @
-	vp = vs_top + 1;
-	k = keys;
-	d = data;
-	while (!endp(k)) {
-		if (endp(d))
-		 FEerror(
-		  "The keys ~S and the data ~S are not of the same length",
-		  2, keys, data);
-		vs_check_push(make_cons(k->c.c_car, d->c.c_car));
-		k = k->c.c_cdr;
-		d = d->c.c_cdr;
-	}
-	if (!endp(d))
-	    FEerror("The keys ~S and the data ~S are not of the same length",
-		    2, keys, data);
-	vs_push(a_list);
-	while (vs_top > vp)
-		stack_cons();
-	@(return `vp[-1]`)
+  k=keys;
+  d=data;
+  p=&y;
+  while (!endp(k)) {
+    if (endp(d))
+      FEerror("The keys ~S and the data ~S are not of the same length",2,keys,data);
+    z=make_cons(Cnil,Cnil);
+    z->c.c_car=make_cons(k->c.c_car,d->c.c_car);
+    collect(p,z);
+    k = k->c.c_cdr;
+    d = d->c.c_cdr;
+  }
+  if (!endp(d))
+    FEerror("The keys ~S and the data ~S are not of the same length",2,keys,data);
+  *p=a_list;
+  vs_top=vs_base+1;
+  @(return `y`)
 @)
 
 @(static defun assoc_or_rassoc (item a_list &key test test_not key)
