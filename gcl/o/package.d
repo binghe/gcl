@@ -849,17 +849,19 @@ FFN(Lpackage_shadowing_symbols)()
 	vs_base[0] = vs_base[0]->p.p_shadowings;
 }
 
-LFD(Llist_all_packages)()
-{
-	struct package *p;
-	int i;
+LFD(Llist_all_packages)() {
 
-	check_arg(0);
-	for (p = pack_pointer, i = 0;  p != NULL;  p = p->p_link, i++)
-		vs_push((object)p);
-	vs_push(Cnil);
-	while (i-- > 0)
-		stack_cons();
+  struct package *p;
+  object x,*l;
+  int i;
+  
+  check_arg(0);
+
+  for (l=&x,p=pack_pointer,i=0;p!=NULL;p=p->p_link,i++)
+    collect(l,make_cons((object)p,Cnil));
+  *l=Cnil;
+  vs_push(x);
+
 }
 
 @(defun intern (strng &optional (p `current_package()`) &aux sym)

@@ -1130,8 +1130,7 @@ read_fasd1(int i, object *loc)
 	*loc=Cnil;return;
       case DP(d_cons:)
 	read_fasd1(GET_OP(),&tem);
-	*loc=make_cons(tem,Cnil);
-	loc= &((*loc)->c.c_cdr);
+        collect(loc,make_cons(tem,Cnil));
 	i=GET_OP();
 	goto BEGIN;
       case DP(d_list1:) i=1;goto READ_LIST;
@@ -1162,8 +1161,7 @@ read_fasd1(int i, object *loc)
 		read_fasd1(j,&tem);
 		DPRINTF("{Item=",(debug >= 2 ? pp(tem) : 0));
 		DPRINTF("}",0);
-		*loc=make_cons(tem,Cnil);
-		loc= &((*loc)->c.c_cdr);}}
+		collect(loc,make_cons(tem,Cnil));}}
 
       case DP(d_delimiter:)
       case DP(d_dot:)
