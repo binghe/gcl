@@ -249,6 +249,9 @@ struct freelist {
 #define FL_LINK F_LINK
 #define SET_LINK(x,val) F_LINK(x) = (address_int) (val)
 #define OBJ_LINK(x) ((object) INT_TO_ADDRESS(F_LINK(x)))
+#define PHANTOM_FREELIST(x) ({struct freelist f;(object)((void *)&x+((void *)&f-(void *)&f.f_link));})
+#define FREELIST_TAIL(tm_) ({struct typemanager *_tm=tm_;\
+      _tm->tm_free==OBJNULL ? PHANTOM_FREELIST(_tm->tm_free) : _tm->tm_tail;})
 
 #define	FREE	(-1)		/*  free object  */
 
@@ -260,6 +263,8 @@ struct typemanager {
   long	    tm_size;             /*  element size in bytes  */
   long      tm_nppage;           /*  number per page  */
   object    tm_free;             /*  free list  */
+				 /*  Note that it is of type object.  */
+  object    tm_tail;             /*  free list tail  */
 				 /*  Note that it is of type object.  */
   long	    tm_nfree;            /*  number of free elements  */
   long	    tm_npage;            /*  number of pages  */
