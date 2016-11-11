@@ -123,8 +123,8 @@
 
 (defun smallnthcdr (n x)
   (declare (fixnum n))
-  (cond ((atom x) (when x (tp-error x proper-list)))
-	((= n 0) x)
+  (cond ((= n 0) x)
+	((atom x) (when x (tp-error x proper-list)))
 	((smallnthcdr (1- n) (cdr x)))))
 
 (defun bignthcdr (n i s f) 
