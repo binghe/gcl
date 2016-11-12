@@ -143,21 +143,15 @@
    )
 
 ; conditionals
-
-(defmacro cond (&rest clauses &aux (form nil))
-  (let ((x (reverse clauses)))
-    (dolist (l x form)
-      (cond ((endp (cdr l))
-	     (if (or (constantp (car l)) (eq l (car x)))
-		 (setq form (car l))
-	       (let ((sym (gensym)))
-		 (setq form `(let ((,sym ,(car l))) (if ,sym ,sym ,form))))))
-	    ((and (constantp (car l)) (car l))
-	     (setq form (if (endp (cddr l)) (cadr l) `(progn ,@(cdr l)))))
-	    ((setq form (if (endp (cddr l))
-			    `(if ,(car l) ,(cadr l) ,form)
-			  `(if ,(car l) (progn ,@(cdr l)) ,form))))))))
-
+(defun cond-mp (x) (if (cdr x) (cons 'progn x) (car x)))
+(defun cond-loop (s y &aux (x (pop y))(z (pop x))(cz (constantp z))(y (when y (cond-loop s y))))
+  (if cz (if z (if x (cond-mp x) z) y)
+    (if x `(if ,z ,(cond-mp x) ,y)
+      (if y `(let ((,s ,z)) (if ,s ,s ,y))
+	z))))
+(defmacro cond (&rest clauses &aux (s (sgen "COND")))
+  (declare (optimize (safety 1))(dynamic-extent clauses))
+  (cond-loop (sgen "COND") clauses))
 
 (defmacro when (pred &rest body)
   `(if ,pred (progn ,@body)))
