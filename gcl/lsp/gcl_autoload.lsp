@@ -267,7 +267,7 @@
                      (push (list (nth nfree *type-list*) typename)
                            link-alist))))))
     (terpri)
-    (dolist (info (reverse info-list))
+    (dolist (info (nreverse info-list))
       (apply #'format t "~8D/~D~19T~6,1F%~@[~8D~]~35T~{~A~^ ~}"
              (append (cdr info)
                      (if  (assoc (car info) link-alist)

@@ -167,7 +167,7 @@
      ,@ (do ((v (cdr lis) (cdr v))
 	     (i 0 (1+ i))
 	     (res))
-	    ((null v)(reverse res))
+	    ((null v)(nreverse res))
 	  (push `(setf ,(car v) (mv-ref ,i)) res))))
 
 (defmacro mv-values (&rest lis)
@@ -175,7 +175,7 @@
      ,@ (do ((v (cdr lis) (cdr v))
 	     (i 0 (1+ i))
 	     (res))
-	    ((null v)(reverse res))
+	    ((null v)(nreverse res))
 	  (push `(set-mv ,i ,(car v)) res))))
 
 ;;start a lisp debugger loop.   Exit it by using :step
