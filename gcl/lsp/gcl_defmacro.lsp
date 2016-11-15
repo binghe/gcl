@@ -103,7 +103,7 @@
           (push `(unless (endp ,(dm-nth-cdr (cdr ac) (car ac)))
                          (dm-too-many-arguments)) body))
   (unless envp (push `(declare (ignore ,env)) body))
-  (list doc ppn `(lambda-block ,name ,(reverse *dl*) ,@(append decls body)))
+  (list doc ppn `(lambda-block ,name ,(nreverse *dl*) ,@(append decls body)))
   )
 
 (defun dm-vl (vl whole top)
