@@ -1,3 +1,5 @@
+#!/bin/sh
+
 case "$1" in
     purge)
 	    for ext in '~' '%' .bak .ucf-new .ucf-old .ucf-dist;  do
