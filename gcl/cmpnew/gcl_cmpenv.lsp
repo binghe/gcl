@@ -376,9 +376,7 @@
                     doc form)
   (loop
     (when (endp body) (return))
-    (setq form (cmp-macroexpand (car body)))
-    (when (and (consp form) (eq (car form) 'load-time-value))
-      (setq form (cmp-eval form)))
+    (setq form (car body))
     (cond
      ((stringp form)
       (when (or (null doc-p) (endp (cdr body)) doc) (return))

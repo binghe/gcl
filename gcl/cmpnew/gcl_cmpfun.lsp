@@ -877,36 +877,6 @@
 	 (c1expr (cmp-eval (cons f args))))))
 
 
-(si::putprop 'do 'co1special-fix-decl 'co1special)
-(si::putprop 'do* 'co1special-fix-decl 'co1special)
-(si::putprop 'prog 'co1special-fix-decl 'co1special)
-(si::putprop 'prog* 'co1special-fix-decl 'co1special)
-
-(defun co1special-fix-decl (f args)
-  (flet ((fixup (forms &aux decls )
-	  (block nil
-		 (tagbody
-		  top
-		  (or (consp forms) (go end))
-		  (let ((tem (car forms)))
-		    (if (and (consp tem)
-			     (setq tem  (cmp-macroexpand tem))
-			     (eq (car tem) 'declare))
-			(progn (push tem decls) (pop forms))
-		      (go end)))
-		      (go top)
-	      		; all decls made explicit.
-		      end
-		     (return  (nconc (nreverse decls) forms))))))
-	(c1expr
-	  (cmp-macroexpand
-	    (case f
-	      ((do do*) `(,f ,(car args)
-			     ,(second args)
-			     ,@ (fixup (cddr args))))
-	      ((prog prog*)
-	       `(,f ,(car args)
-		    ,@ (fixup (cdr args)))))))))
 (si::putprop 'sublis 'co1sublis 'co1)
 (defun co1sublis (f args &aux test) f
  (and (case (length args)
