@@ -38,5 +38,5 @@
   (check-type pd pathname-designator)
   (when (wild-pathname-p pn)
     (error 'file-error :pathname pn :format-control "Pathname is wild"))
-  (when (eq (stat (namestring pn)) :file)
+  (when (eq (stat (link-expand (namestring pn))) :file)
     (truename pn)))
