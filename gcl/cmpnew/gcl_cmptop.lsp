@@ -135,7 +135,6 @@
 ;;; Pass 2 initializers.
 
 (si:putprop 'defun 't2defun 't2)
-(si:putprop 'defmacro 't2defmacro 't2)
 (si:putprop 'declare 't2declare 't2)
 (si:putprop 'defentry 't2defentry 't2)
 (si:putprop 'si:putprop 't2putprop 't2)
@@ -143,7 +142,6 @@
 ;;; Pass 2 C function generators.
 
 (si:putprop 'defun 't3defun 't3)
-(si:putprop 'defmacro 't3defmacro 't3)
 (si:putprop 'ordinary 't3ordinary 't3)
 (si:putprop 'sharp-comma 't3sharp-comma 't3)
 (si:putprop 'clines 't3clines 't3)
@@ -469,7 +467,7 @@
         (too-few-args 'defun 2 (length args)))
   (cmpck (not (symbolp (car args)))
          "The function name ~s is not a symbol." (car args))
-  (maybe-eval nil  (cons 'defun args))
+  (unless (macro-function (car args)) (maybe-eval nil (cons 'defun args)))
  (tagbody
    top
   (setq *non-package-operation* t)
@@ -615,8 +613,9 @@
      (setq type (f-type (pop args))))))
     
 
-(defun wt-if-proclaimed (fname cfun lambda-expr)
-  (cond ((fast-link-proclaimed-type-p fname)
+(defun wt-if-proclaimed (fname cfun lambda-expr macro-p)
+  (cond (macro-p (add-init `(si::MM ',fname ,(add-address (c-function-name "LI" cfun fname)))))
+	((fast-link-proclaimed-type-p fname)
 	 (cond ((unless (member '* (get fname 'proclaimed-arg-types)) (assoc fname *inline-functions*))
 		(add-init `(si::mfsfun ',fname ,(add-address (c-function-name "LI" cfun fname))
 				   ,(proclaimed-argd (get fname 'proclaimed-arg-types)
@@ -698,11 +697,11 @@
 (defun si::add-debug (fname x)
   (si::putprop fname x  'si::debugger))
 
-(defun t3init-fun (fname cfun lambda-expr doc)
+(defun t3init-fun (fname cfun lambda-expr doc macro-p)
 
   (when doc (add-init `(si::putprop ',fname ,doc 'si::function-documentation)))
   
-  (cond ((wt-if-proclaimed fname cfun lambda-expr))
+  (cond ((wt-if-proclaimed fname cfun lambda-expr macro-p))
 	((vararg-p fname)
 	 (let ((keyp (ll-keywords-p (lambda-list lambda-expr))))
 ;	   (wt-h "static object LI" cfun "();")
@@ -724,6 +723,7 @@
 	   (add-init `(si::mf ',fname ,(add-address (c-function-name "" cfun fname)))))))
 
 (defun t3defun (fname cfun lambda-expr doc sp &aux inline-info 
+		      (macro-p (equal `(mflag ,fname) (cadr (member *current-form* *top-level-forms*))))
 		      (*current-form* (list 'defun fname))
 		      (*volatile* (volatile (second lambda-expr)))
 		      *downward-closures*)
@@ -736,9 +736,9 @@
 		 (return (setq inline-info v))))
 
     ;;; Add global entry information.
-    (when (not (fast-link-proclaimed-type-p fname))
-	  (push (list fname cfun (cadr inline-info) (caddr inline-info))
-		*global-entries*))
+    (unless (or macro-p (fast-link-proclaimed-type-p fname))
+      (push (list fname cfun (cadr inline-info) (caddr inline-info))
+	    *global-entries*))
 
     ;;; Local entry
     (analyze-regs (cadr lambda-expr) 0)
@@ -761,7 +761,7 @@
   
   (wt-downward-closure-macro cfun)
 
-  (t3init-fun fname cfun lambda-expr doc)
+  (t3init-fun fname cfun lambda-expr doc macro-p)
 
   (add-debug-info fname lambda-expr))
 
@@ -1333,63 +1333,13 @@
              (long-float "double ")
              (otherwise "object ")))
 
-
-(defun t1defmacro (args)
-  (when (or (endp args) (endp (cdr args)))
-        (too-few-args 'defmacro 2 (length args)))
-  (cmpck (not (symbolp (car args)))
-         "The macro name ~s is not a symbol." (car args))
-  (maybe-eval t (cons 'defmacro args))
-  (setq *non-package-operation* t)
-  (let ((*vars* nil) (*funs* nil) (*blocks* nil) (*tags* nil)
-        (*sharp-commas* nil) (*special-binding* nil)
-        macro-lambda (cfun (next-cfun)))
-       (setq macro-lambda (c1dm (car args) (cadr args) (cddr args)))
-       (add-load-time-sharp-comma)
-       (push (list 'defmacro (car args) cfun (cddr macro-lambda)
-		   (car macro-lambda)   ;doc
-		   (cadr macro-lambda)  ; ppn
-                   *special-binding*)
-             *top-level-forms*))
-  )
-
-
-(defun t2defmacro (fname cfun macro-lambda doc ppn sp)
-
-  (declare (ignore macro-lambda doc ppn sp))
-  (wt-h "static void " (c-function-name "L" cfun fname) "();")
-  )
-
-(defun t3defmacro (fname cfun macro-lambda doc ppn sp
-                         &aux (*volatile* (if (get fname 'contains-setjmp)
-					      " VOL " "")))
-  (let-pass3
-   ((*exit* 'return))
-   (wt-comment "macro definition for " fname)
-   (wt-nl1 "static void " (c-function-name "L" cfun fname) "()")
-   (wt-nl1 "{register object *" *volatile* "base=vs_base;")
-   (assign-down-vars (nth 4 macro-lambda) cfun ;*dm-info*
-		     't3defun)
-   (wt-nl "register object *"*volatile* "sup=base+VM" *reservation-cmacro* ";")
-   (wt " VC" *reservation-cmacro*)
-   (if *safe-compile*
-       (wt-nl "vs_reserve(VM" *reservation-cmacro* ");")
-     (wt-nl "vs_check;"))
-   (when sp (wt-nl "bds_check;"))
-   (when *compiler-push-events* (wt-nl "ihs_check;"))
-   (c2dm (car macro-lambda) (cadr macro-lambda) (caddr macro-lambda)
-	 (cadddr macro-lambda))
-   (wt-nl1 "}")
-   (push (cons *reservation-cmacro* *max-vs*) *reservations*)
-   (wt-h "#define VC" *reservation-cmacro*)
-   (wt-cvars)
-
-   (when doc (add-init `(si::putprop ',fname ,doc 'si::function-documentation) ))
-   (when ppn
-     (add-init `(si::putprop ',fname ',ppn 'si::pretty-print-format) ))
-   (add-init `(si::MM ',fname ,(add-address (c-function-name "L" cfun fname))) )
-
-   ))
+(defun t1defmacro (args &aux (w args)(n (pop args))(l (symbol-plist n))
+			(macp (when (listp n) (eq 'macro (car n))))(n (if macp (cdr n) n)))
+  (proclaim `(ftype (function (t t) t) ,n))
+  (maybe-eval (not (macro-function n)) (cons 'defmacro w));FIXME?
+  (t1expr `(defun ,n ,@(if macp args (cddr (caddr (si::defmacro* n (pop args) args))))))
+  (setf (symbol-plist n) l)
+  (push `(mflag ,n) *top-level-forms*))
 
 (defun t1ordinary (form &aux tem )
   (setq *non-package-operation* t)

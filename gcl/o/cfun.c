@@ -217,20 +217,21 @@ DEFUN_NEW("MF",object,fSmf,SI
 static object
 MM(object sym, void (*self)(), char *start, int size, object data)
 {
-	object cf;
+	object sfn;
 
 	if (type_of(sym) != t_symbol)
 		not_a_symbol(sym);
 	if (sym->s.s_sfdef != NOT_SPECIAL && sym->s.s_mflag)
 		sym->s.s_sfdef = NOT_SPECIAL;
-	cf = alloc_object(t_cfun);
-	cf->cf.cf_self = self;
-	cf->cf.cf_name = sym;
-	cf->cf.cf_data = data;
+	sfn = alloc_object(t_sfun);
+	sfn->sfn.sfn_self = self;
+	sfn->sfn.sfn_name = sym;
+	sfn->sfn.sfn_data = data;
+	sfn->sfn.sfn_argd=2;
 	data->cfd.cfd_start=start; 
 	data->cfd.cfd_size=size;
-	sym = 	clear_compiler_properties(sym,cf);
-	sym->s.s_gfdef = cf;
+	sym = 	clear_compiler_properties(sym,sfn);
+	sym->s.s_gfdef = sfn;
 	sym->s.s_mflag = TRUE;
 	return sym;
 }
