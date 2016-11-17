@@ -348,7 +348,7 @@ object
 reverse(seq)
 object seq;
 {
-	object x, y, *v;
+	object x, y;
 	int i, j, k;
 
 	switch (type_of(seq)) {
@@ -358,11 +358,7 @@ object seq;
 		FEwrong_type_argument(sLsequence, seq);
 
 	case t_cons:
-		v = vs_top;
-		vs_push(Cnil);
-		for (x = seq;  !endp(x);  x = x->c.c_cdr)
-			*v = make_cons(x->c.c_car, *v);
-		return(vs_pop);
+	  return list_reverse(seq);
 
 	case t_vector:
 		x = seq;

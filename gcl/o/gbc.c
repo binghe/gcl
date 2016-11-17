@@ -487,7 +487,7 @@ mark_object1(object x) {
   switch (type_of(x)) {
 
   case t_cons:
-    mark_object(x->c.c_car);
+    mark_object(Scar(x));/*FIXME*/
     mark_object(Scdr(x));/*FIXME*/
     break;
 

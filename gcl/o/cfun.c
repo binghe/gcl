@@ -224,7 +224,7 @@ MM(object sym, void (*self)(), char *start, int size, object data)
 	if (sym->s.s_sfdef != NOT_SPECIAL && sym->s.s_mflag)
 		sym->s.s_sfdef = NOT_SPECIAL;
 	sfn = alloc_object(t_sfun);
-	sfn->sfn.sfn_self = self;
+	sfn->sfn.sfn_self = (void *)self;/*FIXME*/
 	sfn->sfn.sfn_name = sym;
 	sfn->sfn.sfn_data = data;
 	sfn->sfn.sfn_argd=2;

@@ -1964,3 +1964,6 @@ vsystem(const char *);
 
 object
 n_cons_from_x(fixnum,object);
+
+object
+list_reverse(object);
