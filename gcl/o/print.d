@@ -1437,7 +1437,6 @@ static int dgs;
 static void
 travel_push_new(object x) {
 
-  object y;
   int i;
 
  BEGIN:
@@ -1452,10 +1451,9 @@ travel_push_new(object x) {
     if (dgs && x->s.s_hpack==Cnil) {mark(x);}
     break;
   case t_cons:
-    y=x->c.c_cdr;
     mark(x);
-    travel_push_new(x->c.c_car);
-    x=y;
+    travel_push_new(Scar(x));
+    x=Scdr(x);
     goto BEGIN;
     break;
   case t_array:
