@@ -119,8 +119,8 @@ EXTER struct package *pack_pointer;	/*  package pointer  */
 #define Scdr(a_) (a_)->c.c_cdr
 #define Scar(a_) (a_)->c.c_car
 #else
-#define Scdr(a_) (a_)->c.c_cdr
-#define Scar(a_) ({union lispunion _t={.vw=(a_)->c.c_car};unmark(&_t);_t.vw;})
+#define Scar(a_) (a_)->c.c_car
+#define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
 #endif
 
 enum httest {			/*  hash table key test function  */

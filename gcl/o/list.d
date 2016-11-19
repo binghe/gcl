@@ -310,6 +310,7 @@ free_check(void) {
       object _z=*_p;							\
       pageinfo(_z)->in_use++;						\
       maybe_set_type_of(_z,t_cons);					\
+      _z->c.c_cdr=OBJ_LINK(_z);						\
       _z->c.c_car=next_;						\
     }									\
     _tm->tm_free=*_p;							\
@@ -343,6 +344,7 @@ list_reverse1(object x) {
     return m<=ctm->tm_nfree ? &ctm->tm_free : (p=vs_top++,NULL);
   m++;
   if ((z=list_reverse1(x->c.c_cdr))) {
+    (*z)->c.c_cdr=OBJ_LINK(*z);
     (*z)->c.c_car=x->c.c_car;
     pageinfo(*z)->in_use++;
     return &(*z)->c.c_cdr;
