@@ -460,7 +460,8 @@
 (defun load-pathname-exists (z)
   (or (probe-file z)
       (when *allow-gzipped-file*
-	(probe-file (string-concatenate (namestring z) ".gz")))))
+	(when (probe-file (string-concatenate (namestring z) ".gz"))
+	  z))))
 
 (defun load-pathname (p print if-does-not-exist external-format
 			&aux (pp (merge-pathnames p))
