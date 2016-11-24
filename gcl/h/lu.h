@@ -125,8 +125,8 @@ struct cons {
 #ifdef WIDE_CONS
   FIRSTWORD;
 #endif
-  object c_cdr;
   object c_car;
+  object c_cdr;
 };
 
 struct htent {
