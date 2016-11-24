@@ -310,6 +310,7 @@ free_check(void) {
       object _z=*_p;							\
       pageinfo(_z)->in_use++;						\
       maybe_set_type_of(_z,t_cons);					\
+      _z->c.c_cdr=OBJ_LINK(_z);						\
       _z->c.c_car=next_;						\
     }									\
     _tm->tm_free=*_p;							\
@@ -331,42 +332,7 @@ free_check(void) {
       END_NO_INTERRUPT;							\
     }									\
     _x;})
-
-static object h,*p;
-static fixnum m;
-static struct typemanager *ctm=tm_table+t_cons;
-
-static inline object *
-list_reverse1(object x,fixnum n) {
-  object *z;
-  if (endp(x))
-    return (m=n)<=ctm->tm_nfree ? &ctm->tm_free : NULL;
-  if ((z=list_reverse1(x->c.c_cdr,n+1))) {
-    (*z)->c.c_car=x->c.c_car;
-    pageinfo(*z)->in_use++;
-    return &(*z)->c.c_cdr;
-  }
-  collect(p,make_cons(x->c.c_car,Cnil));
-  return z;
-}
-
-object
-list_reverse(object x) {
-  object *z;
-
-  p=&h;
-  if ((z=list_reverse1(x,0))) {
-    ctm->tm_nfree-=m;
-    recent_allocation+=m*ctm->tm_size;
-    x=ctm->tm_free;
-    ctm->tm_free=*z;
-    *z=Cnil;
-    return x;
-  }
-  *p=Cnil;
-  return h;
-}
-
+      
 object
 n_cons_from_x(fixnum n,object x) {
 

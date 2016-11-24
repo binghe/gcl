@@ -612,9 +612,9 @@ initlisp(void) {
 	  error("NULL_OR_ON_C_STACK macro invalid");
 	}
 	
-	/* Cnil->fw=0; */
-	/* set_type_of(Cnil,t_symbol); */
- 	Cnil->vw=Cnil;
+	Cnil->fw=0;
+	set_type_of(Cnil,t_symbol);
+ 	Cnil->c.c_cdr=Cnil;
 	Cnil_body.s.s_dbind = Cnil;
 	Cnil_body.s.s_sfdef = NOT_SPECIAL;
 	Cnil_body.s.s_fillp = 3;
