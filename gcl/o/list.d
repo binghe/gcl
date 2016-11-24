@@ -305,7 +305,7 @@ free_check(void) {
 }
   
 #define multi_cons(n_,next_,last_)					\
-  ({_tm->tm_nfree -= n_;recent_allocation+=n_*_tm->tm_size;		\
+  ({_tm->tm_nfree -= n_;						\
     for(_x=_tm->tm_free,_p=&_x;n_-->0;_p=&(*_p)->c.c_cdr) {		\
       object _z=*_p;							\
       pageinfo(_z)->in_use++;						\
@@ -332,17 +332,16 @@ free_check(void) {
     }									\
     _x;})
 
-static object *p;
+static object h,*p;
 static fixnum m;
 static struct typemanager *ctm=tm_table+t_cons;
 
 static inline object *
-list_reverse1(object x) {
+list_reverse1(object x,fixnum n) {
   object *z;
   if (endp(x))
-    return m<=ctm->tm_nfree ? &ctm->tm_free : (p=vs_top++,NULL);
-  m++;
-  if ((z=list_reverse1(x->c.c_cdr))) {
+    return (m=n)<=ctm->tm_nfree ? &ctm->tm_free : NULL;
+  if ((z=list_reverse1(x->c.c_cdr,n+1))) {
     (*z)->c.c_car=x->c.c_car;
     pageinfo(*z)->in_use++;
     return &(*z)->c.c_cdr;
@@ -355,8 +354,8 @@ object
 list_reverse(object x) {
   object *z;
 
-  m=0;
-  if ((z=list_reverse1(x))) {
+  p=&h;
+  if ((z=list_reverse1(x,0))) {
     ctm->tm_nfree-=m;
     recent_allocation+=m*ctm->tm_size;
     x=ctm->tm_free;
@@ -364,7 +363,8 @@ list_reverse(object x) {
     *z=Cnil;
     return x;
   }
-  return vs_pop;
+  *p=Cnil;
+  return h;
 }
 
 object
