@@ -970,7 +970,7 @@ sweep_phase(void) {
     tm = tm_of((enum type)v->type);
     
     p = pagetochar(page(v));
-    f = tm->tm_free;
+    f = FREELIST_TAIL(tm);
     k = 0;
     for (j = tm->tm_nppage; j > 0; --j, p += tm->tm_size) {
       x = (object)p;
@@ -981,12 +981,13 @@ sweep_phase(void) {
 	continue;
       }
 
-      SET_LINK(x,f);
+      SET_LINK(f,x);
       make_free(x);
       f = x;
       k++;
     }
-    tm->tm_free = f;
+    SET_LINK(f,OBJNULL);
+    tm->tm_tail = f;
     tm->tm_nfree += k;
     pagetoinfo(page(v))->in_use-=k;
     
