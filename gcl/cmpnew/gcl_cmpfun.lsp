@@ -603,7 +603,9 @@
 		  (t
 		   `(si::structure-subtype-p
 		     ,x ',type))))
-;	   ((and (print (list 'slow 'typep type)) nil))
+	   ((and (symbolp type) (setq tem (get type 'si::deftype-definition)))
+	    `(typep ,x ',(funcall tem)))
+	   ;; ((and (print (list 'slow 'typep type)) nil))
 	   (t nil)))
     (and new (c1expr `(the boolean , new)))))
 
