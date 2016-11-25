@@ -60,38 +60,41 @@ object sSAbreak_stepA;
 /* for t_sfun,t_gfun with args on vs stack */
 
 static void
-quick_call_sfun(object fun)
-{ DEBUG_AVMA
+quick_call_sfun(object fun) {
+
+  DEBUG_AVMA
   int i=fun->sfn.sfn_argd,n=SFUN_NARGS(i);
   enum ftype restype;
-  object *x,res,*base;
-  object *temp_ar=alloca(n*sizeof(object));
-/*   i=fun->sfn.sfn_argd; */
-/*   n=SFUN_NARGS(i); */
-  base = vs_base;
-  if (n != vs_top - base)
-    {check_arg_failed(n);}
+  object *x,*base;
+
+  if (n!=vs_top-vs_base)
+    check_arg_failed(n);
+
   restype = SFUN_RETURN_TYPE(i);
   SFUN_START_ARG_TYPES(i);
-  /* for moment just support object and int */
 #define COERCE_ARG(a,type)  (type==f_object ? a : (object)(fix(a)))
-  if (i==0)
-    x=vs_base;
-  else
-    {int j;
-     x=temp_ar;
-     for (j=0; j<n ; j++)
-       {enum ftype typ=SFUN_NEXT_TYPE(i);
-	x[j]=COERCE_ARG(vs_base[j],typ);}}
-  res=c_apply_n_fun(fun,n,x);
-  base[0]=
-    (restype==f_object ?  res :
-     restype==f_fixnum ? make_fixnum((long)res)
-     :(object) (FEerror("Bad result type",0),Cnil));
-  vs_base = base;
-  vs_top=base+1;
+
+  x=vs_base;
+  if (i) {
+    int j;
+    x=alloca(n*sizeof(object));
+    for (j=0;j<n;j++) {
+      enum ftype typ=SFUN_NEXT_TYPE(i);
+      x[j]=COERCE_ARG(vs_base[j],typ);
+    }
+  }
+
+  base=vs_base;
+  *base=c_apply_n_fun(fun,n,x);
+  if (restype==f_fixnum)
+    *base=make_fixnum((fixnum)*base);
+
+  vs_top=(vs_base=base)+1;
+
   CHECK_AVMA;
-  return;}
+  return;
+
+}
 
 /* only for sfun not gfun !!  Does not check number of args */
 static void
@@ -604,27 +607,33 @@ super_funcall(object fun)
 }
 
 void
-super_funcall_no_event(object fun)
-{
+super_funcall_no_event(object fun) {
+
 #ifdef DEBUGGING_AVMA
   funcall_no_event(fun); return;
 #endif 
-   if (type_of(fun)==t_cfun){(*fun->cf.cf_self)();return;}
-   if (type_of(fun)==t_sfun){call_sfun_no_check(fun); return;}
-   if (type_of(fun)==t_gfun)
-       {quick_call_sfun(fun); return;}
-   if (type_of(fun)==t_vfun)
-       {call_vfun(fun); return;}
-   if (type_of(fun) == t_symbol) {
-	  if (fun->s.s_sfdef != NOT_SPECIAL || fun->s.s_mflag)
-			FEinvalid_function(fun);
-		if (fun->s.s_gfdef == OBJNULL)
-			FEundefined_function(fun);
-		fun = fun->s.s_gfdef;
-		if (type_of(fun)==t_cfun){(*fun->cf.cf_self)();
-					  return;}
-	}
-	funcall_no_event(fun);
+
+  switch(type_of(fun)) {
+  case t_cfun:
+    (*fun->cf.cf_self)();
+    return;
+  case t_sfun:
+    call_sfun_no_check(fun); return;
+  case t_gfun:
+    quick_call_sfun(fun); return;
+  case t_vfun:
+    call_vfun(fun); return;
+  case t_symbol:
+    if (fun->s.s_sfdef != NOT_SPECIAL || fun->s.s_mflag)
+      FEinvalid_function(fun);
+    if (fun->s.s_gfdef == OBJNULL)
+      FEundefined_function(fun);
+    super_funcall_no_event(fun->s.s_gfdef);
+    return;
+  default:
+    funcall_no_event(fun);
+  }
+
 }
 
 #ifdef USE_BROKEN_IEVAL
