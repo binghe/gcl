@@ -51,7 +51,7 @@
 
 (defun list-toggle-case (x f)
   (typecase x
-    (string (funcall f x))
+    (string (values (funcall f x)))
     (cons (mapcar (lambda (x) (list-toggle-case x f)) x))
     (otherwise x)))
 
