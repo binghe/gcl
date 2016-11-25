@@ -380,7 +380,7 @@
 
 (defun get-byte-stream-nchars (s)
   (let* ((tp (stream-element-type s)))
-    (ceiling (if (consp tp) (cadr tp) char-length) char-length)))
+    (values (ceiling (if (consp tp) (cadr tp) char-length) char-length))))
 
 ;; (defun parse-integer (s &key start end (radix 10) junk-allowed)
 ;;   (declare (optimize (safety 1)))
@@ -511,7 +511,7 @@
       (let ((s (broadcast-stream-streams x))) (if s (file-length (car (last s))) 0))
     (multiple-value-bind (tp sz) (stat x)
       (declare (ignore tp))
-      (/ sz (get-byte-stream-nchars x)))))
+      (values (truncate sz (get-byte-stream-nchars x))))))
 
 (defun file-position (x &optional (pos :start pos-p))
   (declare (optimize (safety 1)))
