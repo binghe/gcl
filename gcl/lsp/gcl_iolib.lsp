@@ -495,7 +495,7 @@
     (error 'file-error :pathname ps :format-control "Pathname is wild"))
   (labels ((d (x y &aux (z (ldiff x y)) (n (namestring (make-pathname :directory z))))
 	      (when (when z (stringp (car (last z))))
-		(unless (eq :directory (stat n))
+		(unless (eq :directory (stat1 n))
 		  (mkdir n)
 		  (setq created t)
 		  (when verbose (format *standard-output* "Creating directory ~s~%" n))))

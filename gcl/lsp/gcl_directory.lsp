@@ -41,7 +41,7 @@
 	 (l (length yy))
 	 (y (link-expand (vector-push-string yy s) l))
 	 (y (if (eq y yy) y (make-frame y))))
-    (when (or (eq (stat z) :directory) (zerop (length z)))
+    (when (or (eq (stat1 z) :directory) (zerop (length z)))
       (cond ((eq (car x) :wild-inferiors) (recurse-dir z y f))
 	    (x (walk-dir z y (lambda (q e l)
 			       (declare (ignore l))

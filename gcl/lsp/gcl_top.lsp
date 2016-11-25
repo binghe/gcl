@@ -582,7 +582,7 @@ First directory is checked for first name and all extensions etc."
 (defvar *tmp-dir*)
 
 (defun ensure-dir-string (str)
-  (if (eq (stat str) :directory)
+  (if (eq (stat1 str) :directory)
       (coerce-slash-terminated str)
     str))
 
@@ -590,7 +590,7 @@ First directory is checked for first name and all extensions etc."
   (dolist (x `(,@(mapcar 'si::getenv '("TMPDIR" "TMP" "TEMP")) "/tmp" ""))
     (when x
       (let ((x (coerce-slash-terminated x)))
-	(when (eq (stat x) :directory)
+	(when (eq (stat1 x) :directory)
 	  (return-from get-temp-dir x))))))
 
 

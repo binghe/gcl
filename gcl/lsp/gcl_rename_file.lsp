@@ -26,7 +26,7 @@
 (defun delete-file (f &aux (pf (truename f))(nf (namestring pf)))
   (declare (optimize (safety 1)))
   (check-type f pathname-designator)
-  (unless (if (eq :directory (stat nf)) (rmdir nf) (unlink nf))
+  (unless (if (eq :directory (stat1 nf)) (rmdir nf) (unlink nf))
     (error 'file-error :pathname (pathname nf) :format-control "Cannot delete pathname."))
   t)
 

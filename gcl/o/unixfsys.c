@@ -169,9 +169,8 @@ DEF_ORDINARY("DIRECTORY",sKdirectory,KEYWORD,"");
 DEF_ORDINARY("LINK",sKlink,KEYWORD,"");
 DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
 
-DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-
-  struct stat ss;
+static int
+stat_internal(object x,struct stat *ssp) {
 
   if (type_of(x)==t_string) {
 
@@ -180,19 +179,43 @@ DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 #ifdef __MINGW32__
     {char *p=FN1+strlen(FN1)-1;for (;p>FN1 && *p=='/';p--) *p=0;}
 #endif
-    if (lstat(FN1,&ss))
-      RETURN1(Cnil);
+    if (lstat(FN1,ssp))
+      return 0;
   } else if ((x=file_stream(x))!=Cnil&&x->sm.sm_fp) {
-    if (fstat(fileno(x->sm.sm_fp),&ss))
-      RETURN1(Cnil);
+    if (fstat(fileno(x->sm.sm_fp),ssp))
+      return 0;
   } else
-    RETURN1(Cnil);
+    return 0;
+  return 1;
+}
 
-  RETURN4(S_ISDIR(ss.st_mode) ? sKdirectory :
-	  (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
-	  make_fixnum(ss.st_size),
-	  make_fixnum(ss.st_mtime),
-	  make_fixnum(ss.st_uid));
+static object
+stat_mode_key(struct stat *ssp) {
+
+  return S_ISDIR(ssp->st_mode) ? sKdirectory : (S_ISLNK(ssp->st_mode) ? sKlink : sKfile);
+
+}
+
+DEFUN_NEW("STAT1",object,fSstat1,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  struct stat ss;
+
+  RETURN1(stat_internal(x,&ss) ? stat_mode_key(&ss) : Cnil);
+
+}
+
+
+DEFUNM_NEW("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  struct stat ss;
+
+  if (stat_internal(x,&ss))
+    RETURN4(stat_mode_key(&ss),
+	    make_fixnum(ss.st_size),
+	    make_fixnum(ss.st_mtime),
+	    make_fixnum(ss.st_uid));
+  else
+    RETURN1(Cnil);
 
 }
 
