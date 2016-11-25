@@ -51,7 +51,6 @@ complex
 I
 NOT_SPECIAL
 VOL
-compiled_functionp(x)
 mpz_even_p(x)
 mpz_odd_p(x)
 mpz_sgn(x)
@@ -115,5 +114,12 @@ SIGNED_CHAR(x)
 FEerror(x,y...)
 FEwrong_type_argument(x,y)
 BIT_ENDIAN(x)
+integerp(x)
+rationalp(x)
+floatp(x)
+realp(x)
+numberp(x)
+vectorp(x)
+arrayp(x)
+compiled_function_p(x)
 pathname_designatorp(x)
-pathnamep(x)

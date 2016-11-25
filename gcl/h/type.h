@@ -134,7 +134,7 @@ enum smmode {			/*  stream mode  */
 #define fixnump(a_)    SPP(a_,fixnum)
 #define readtablep(a_) SPP(a_,readtable)
 #define functionp(a_)  ({enum type _t=type_of(a_);_t>=t_cfun && _t<=t_closure;})
-#define compiled_functionp(a_)  functionp(a_)
+#define compiled_function_p(a_)  functionp(a_)
 
 #define integerp(a_) ({enum type _tp=type_of(a_); _tp >= t_fixnum     && _tp <= t_bignum;})
 #define non_negative_integerp(a_) ({enum type _tp=type_of(a_); (_tp == t_fixnum && fix(a_)>=0) || (_tp==t_bignum && big_sign(a_)>=0);})
