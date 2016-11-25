@@ -27,13 +27,13 @@
 (proclaim '(optimize (safety 2) (space 3)))
 
 (defvar *baet-hash* (make-hash-table :test 'equal))
-(defun best-array-element-type (type)
-  (or (gethash type *baet-hash*)
-      (setf (gethash type *baet-hash*)
-	    (if type
-		(car (member type '(character bit signed-char unsigned-char signed-short unsigned-short
-					fixnum short-float long-float t)
-			     :test 'subtypep)) t)))))
+(defun best-array-element-type (type &aux
+				     (tps '(character bit signed-char unsigned-char signed-short unsigned-short
+						      fixnum short-float long-float t)))
+  (when type
+    (or (car (member type tps))
+	(gethash type *baet-hash*)
+	(setf (gethash type *baet-hash*) (car (member type tps :test 'subtypep))))))
 	 
 (defun upgraded-array-element-type (type &optional environment)
   (declare (ignore environment))
