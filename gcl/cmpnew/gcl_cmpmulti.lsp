@@ -108,22 +108,11 @@
   (unwind-exit 'fun-val nil (if top-data (car top-data)))
   )
 
-(defun c1values (args &aux (info (make-info)))
-      (cond ((and args (not (cdr args))
-		  (or (not (consp (car args)))
-		      (and (symbolp (caar args))
-			   (let ((tem (get-return-type (caar args))))
-			     (and tem
-				  (or (atom tem)
-				      (and (consp tem)
-					   (null (cdr tem))
-					   (not (eq '* (car tem))))))))))
-	     ;;the compiler put in unnecessary code
-	     ;;if we just had say (values nil)
-	     ;; so if we know there's one value only:
-	     (c1expr (car args)))
-	    (t  (setq args (c1args args info))
-              (list 'values info args))))
+(defun c1values (args &aux (info (make-info))(s (si::sgen "VALUES")))
+  (cond ((and args (not (cdr args)))
+	 (c1expr `(let ((,s ,(car args))) ,s)))
+	(t  (setq args (c1args args info))
+	    (list 'values info args))))
 
 (defun c2values (forms &aux (base *vs*) (*vs* *vs*))
      (cond ((and (eq *value-to-go* 'return-object)
