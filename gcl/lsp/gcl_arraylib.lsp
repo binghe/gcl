@@ -30,11 +30,11 @@
 (defun best-array-element-type (type &aux
 				     (tps '(character bit signed-char unsigned-char signed-short unsigned-short
 						      fixnum short-float long-float t)))
-  (when type
+  (if type
     (or (car (member type tps))
 	(gethash type *baet-hash*)
-	(setf (gethash type *baet-hash*) (car (member type tps :test 'subtypep))))))
-	 
+	(setf (gethash type *baet-hash*) (car (member type tps :test 'subtypep)))) t))
+
 (defun upgraded-array-element-type (type &optional environment)
   (declare (ignore environment))
   (best-array-element-type type))
