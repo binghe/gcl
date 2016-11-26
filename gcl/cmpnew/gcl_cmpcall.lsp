@@ -27,8 +27,7 @@
 (eval-when (compile eval)
 (defmacro link-arg-p (x)
   `(let ((.u ,x))
-     (not (member .u '(character boolean long-float short-float)))))
-)
+     (not (member .u '(character boolean long-float short-float) :test 'eq)))))
 
 (defun fast-link-proclaimed-type-p (fname &optional args)
   (and 

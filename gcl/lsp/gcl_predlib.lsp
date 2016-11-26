@@ -348,8 +348,7 @@
 ;; FIXME this needs to be more robust
 (defun known-type-p (type)
   (when (consp type) (setq type (car type)))
-  (if (or (equal (string type) "ERROR")
-	  (member type
+  (if (or (member type
                   '(t nil boolean null symbol keyword atom cons list sequence
 		      signed-char unsigned-char signed-short unsigned-short
 		      number integer bignum rational ratio float method-combination
@@ -370,8 +369,9 @@
 		      storage-condition stream-error string-stream structure-class
 		      style-warning synonym-stream two-way-stream structure-object
 		      type-error unbound-slot unbound-variable undefined-function
-		      warning ))
-          (get type 's-data))
+		      warning) :test 'eq)
+          (get type 's-data)
+	  (equal (string type) "ERROR"))
       t
       nil))
 

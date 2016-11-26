@@ -465,7 +465,7 @@
     (t . INLINE)))
 
 (defun inline-type (type)
-  (or (cdr (assoc type *inline-types*)) 'inline))
+  (or (cdr (assoc type *inline-types* :test 'eq)) 'inline))
 
 (defun get-inline-info (fname args return-type &aux x ii)
   (and  (fast-link-proclaimed-type-p fname args)
