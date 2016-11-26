@@ -203,26 +203,20 @@
   (let ((new (copy-seq str)))
     (dash-to-underscore-int new 0 (length new))))
 
-(defun init-name (p &optional sp (gp t) (dc t) (nt t)) 
 
-  (cond ((not sp) "code")
-	((not (pathnamep p)) (init-name (pathname p) sp gp dc nt))
-	(gp (init-name (truename (merge-pathnames p #p".lsp")) sp nil dc nt))
-	((pathname-type p)
-	 (init-name (make-pathname
-                     :host (pathname-host p)
-                     :device (pathname-device p)
-                     :directory (pathname-directory p)
-                     :name (pathname-name p)
-                     :version (pathname-version p)) sp gp dc nt))
-;	#-aosvs(dc (string-downcase (init-name p sp gp nil nt)))
-	((and nt
-	      (let* ((pn (pathname-name p))
-		     (pp (make-pathname :name pn)))
-		(and (not (equal pp p)) 
-		     (eql 4 (string<= "gcl_" pn))
-		     (init-name pp sp gp dc nil)))))
-	((dash-to-underscore (namestring p)))))
+(defun init-name (p &optional sp)
+
+  (if sp
+      (let* ((p (truename (merge-pathnames p #p".lsp")))
+	     (pn (pathname-name p))
+	     (g (zerop (si::string-match #v"^gcl_" pn))))
+	(dash-to-underscore
+	 (namestring
+	  (make-pathname :host (unless g (pathname-host p))
+			 :device (unless g (pathname-device p))
+			 :directory (unless g (pathname-directory p))
+			 :name pn))))
+    "code"))
 
 ;; FIXME consider making this a macro
 (defun c-function-name (prefix num fname)
