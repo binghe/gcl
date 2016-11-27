@@ -425,7 +425,7 @@ eql1(register object x,register object y) {
 
   /*x and y are not == and not Cnil and not immfix*/
 
-  if (valid_cdr(x)||valid_cdr(y)||x->d.t!=y->d.t) return FALSE;
+  /* if (valid_cdr(x)||valid_cdr(y)||x->d.t!=y->d.t) return FALSE; */
   
   switch (x->d.t) {
 

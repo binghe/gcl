@@ -567,6 +567,9 @@ EXTER unsigned plong signals_allowed, signals_pending;
 /* #define equal(a_,b_)  ({register object _a=(a_);register object _b=(b_);_a==_b || (!IMMNIL(_a)&&!IMMNIL(_b)&&equal1(_a,_b));}) */
 /* #define equalp(a_,b_) ({register object _a=(a_);register object _b=(b_);_a==_b || (_a!=Cnil&&_b!=Cnil&&equalp1(_a,_b));}) */
 
-#define eql(a_,b_)    ({register object _a=(a_);register object _b=(b_);_a==_b ? TRUE : (IMMNIL(_a)||IMMNIL(_b) ? FALSE : eql1(_a,_b));})
+#define eql_is_eq(a_) (is_imm_fixnum(a_)||valid_cdr(a_)||(a_->d.t>t_complex))
+
+#define eql(a_,b_)    ({register object _a=(a_);register object _b=(b_);\
+      _a==_b ? TRUE : (eql_is_eq(_a)||eql_is_eq(_b)||_a->d.t!=_b->d.t ? FALSE : eql1(_a,_b));})
 #define equal(a_,b_)  ({register object _a=(a_);register object _b=(b_);_a==_b ? TRUE : (IMMNIL(_a)||IMMNIL(_b) ? FALSE : equal1(_a,_b));})
 #define equalp(a_,b_) ({register object _a=(a_);register object _b=(b_);_a==_b ? TRUE : (_a==Cnil||_b==Cnil ? FALSE : equalp1(_a,_b));})
