@@ -25,7 +25,7 @@
 (in-package :si)
 
 
-(proclaim '(optimize (safety 2) (space 3)))
+;(proclaim '(optimize (safety 2) (space 3)))
 
 
 (proclaim '(function seqtype (t) t))
@@ -274,40 +274,87 @@
         (list 'quote f)))
 
 (defmacro eval-body () *body*)
+(defmacro mcf (x) `(when ,x (coerce ,x 'function)))
+(deftype function-designator nil `(or (and symbol (not boolean)) function))
+(defmacro rcollect (r rp form)
+  `(let ((tmp ,form))
+     (setq ,rp (last (if ,rp (rplacd ,rp tmp) (setq ,r tmp))))))
+
+ (defmacro dcollect (r rp form)
+   `(let ((tmp ,form))
+      (declare (dynamic-extent tmp))
+      (setq ,rp (cond (,rp (rplacd ,rp tmp) tmp) ((setq ,r tmp))))))
+
 )
 
+(defun remove (item sequence &key key test test-not from-end count (start 0) end 
+		 &aux (kf (mcf key))(tf (mcf test))(tnf (mcf test-not)) r rp q qp xz (from-end (when count from-end))
+		 (l (listp sequence))(ln (if l array-dimension-limit (length sequence)))
+		 (e (if end (min ln (max 0 end)) ln))
+		 (c (if count (min ln (max 0 count)) ln)))
 
-(defseq remove () t nil
-  (if (not from-end)
-      `(if (listp sequence)
-           (let ((l sequence) (l1 nil))
-             (do ((i 0 (f+ 1  i)))
-                 ((>= i start))
-               (declare (fixnum i))
-               (push (car l) l1)
-               (pop l))
-             (do ((i start (f+ 1  i)) (j 0))
-                 ((or (>= i end) (>= j count) (endp l))
-                  (nreconc l1 l))
-               (declare (fixnum i j))
-               (cond ((call-test test test-not item (funcall key (car l)))
-                      (setf  j (f+ 1  j))
-                      (pop l))
-                     (t
-                      (push (car l) l1)
-                      (pop l)))))
-           (delete item sequence
-                   :from-end from-end
-                   :test test :test-not test-not
-                   :start start :end end
-                   :count count
-                   :key key))
-      `(delete item sequence
-               :from-end from-end
-               :test test :test-not test-not
-               :start start :end end
-               :count count
-               :key key)))
+  (declare (optimize (safety 1))(dynamic-extent q)(fixnum c e))
+
+  (check-type sequence sequence)
+  (check-type start seqind)
+  (check-type end (or null seqind))
+  (check-type count (or null integer))
+  (check-type key (or null function-designator))
+  (check-type test (or null function-designator))
+  (check-type test-not (or null function-designator))
+
+  (cond ((unless from-end l)
+	 (do ((i start (1+ i))(j 0)(s (if (zerop start) sequence (nthcdr start sequence)) (cdr s)))
+	     ((or (endp s) (>= i e) (>= j c)) (rcollect r rp sequence) r)
+	   (declare (fixnum i j))
+	   (let* ((x (car s))(kx (if kf (funcall kf x) x)))
+	     (when (cond (tf (funcall tf item kx))(tnf (not (funcall tnf item kx)))((eql item kx)))
+	       (do nil ((eq sequence s) (setq sequence (cdr sequence))) (rcollect r rp (cons (pop sequence) nil)))
+	       (incf j)))))
+	(t
+	 (do* ((j 0 (1+ j)))
+	       ((not (when (< j c)
+		       (setq xz (position item sequence
+					  :start (if (unless from-end xz) (1+ xz) start)
+					  :end (if (when from-end xz) xz end)
+					  :key kf :test tf :test-not tnf :from-end from-end)))))
+	   (declare (fixnum j))
+	   (if from-end (push xz q) (dcollect q qp (cons xz nil))))
+;	 (print q)
+	 (cond ((not q) sequence)
+	       (l (do* ((lq -1 (car q))(q q (cdr q))(v sequence (cdr v)))((not q) (rcollect r rp v) r)
+		    (declare (fixnum lq))
+		    (dotimes (i (the fixnum (- (car q) lq 1))) (declare (fixnum i))(rcollect r rp (cons (pop v) nil)))))
+	       ((let ((r (make-array (- (length sequence) (length q)) :element-type (array-element-type sequence))))
+		  (do* ((j 0 (+ j (- (car q) lq 1)))(lq -1 (car q))(q q (cdr q)))
+		      ((when (replace r sequence :start1 j :start2 (1+ lq) :end2 (car q)) (not q)) r)))))))
+)
+
+(defun remove-if (p s &key key from-end count (start 0) end &aux (kf (mcf key)))
+
+  (declare (optimize (safety 1)))
+
+  (check-type p function-designator)
+  (check-type s sequence)
+  (check-type start seqind)
+  (check-type end (or null seqind))
+  (check-type count (or null integer))
+  (check-type key (or null function-designator))
+
+  (remove p s :key kf :test #'funcall :start start :end end :count count :from-end from-end))
+
+(defun remove-if-not (p s &key key from-end count (start 0) end &aux (kf (mcf key)))
+
+  (declare (optimize (safety 1)))
+
+  (check-type p function-designator)
+  (check-type s sequence)
+  (check-type start seqind)
+  (check-type end (or null seqind))
+  (check-type count (or null integer))
+  (check-type key (or null function-designator))
+
+  (remove p s :key kf :test-not #'funcall :start start :end end :count count :from-end from-end))
 
 
 (defseq delete () t t
