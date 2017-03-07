@@ -133,6 +133,7 @@
       (let ((*vs* *vs*) (form (caddr funob)))
            (declare (object form))
 	   (cond ((and (listp args)
+ 		       (< (length args) 12) ;FIXME fcalln1 limitation
 		       *use-sfuncall*
 		       ;;Determine if only one value at most is required:
 		       (or
