@@ -399,6 +399,8 @@ object coerce_to_namestring();
 EXTER object sKupcase;
 EXTER object sKdowncase;
 EXTER object sKcapitalize;
+EXTER object sKpreserve;
+EXTER object sKinvert;
 EXTER object sKstream;
 EXTER object sKreadably;
 EXTER object sKescape;
