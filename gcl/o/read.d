@@ -695,10 +695,29 @@ BEGIN:
 		    goto K;
 		  else
 		    break;
-		}
-		else if ('a' <= char_code(c) && char_code(c) <= 'z')
-			c = code_char(char_code(c) - ('a' - 'A'));
-		else if (char_code(c) == ':') {
+		} else {
+
+		  switch(char_code(c)) {
+		  case '\b':
+		  case '\t':
+		  case '\n':
+		  case '\r':
+		  case '\f':
+		  case ' ':
+		  case '\177':
+		    READER_ERROR(in,"Cannot read character");
+		  default:
+		    break;
+		  }
+
+		  if ('a' <= char_code(c) && char_code(c) <= 'z') {
+		    if ('a' <= char_code(c) && char_code(c) <= 'z' &&
+			(READtable->rt.rt_case==sKupcase || READtable->rt.rt_case==sKinvert))
+		      c = code_char(char_code(c) - ('a' - 'A'));
+		    else if ('A' <= char_code(c) && char_code(c) <= 'Z' &&
+			     (READtable->rt.rt_case==sKdowncase || READtable->rt.rt_case==sKinvert))
+		      c = code_char(char_code(c) + ('a' - 'A'));
+		  } else if (char_code(c) == ':') {
 			if (colon_type == 0) {
 				colon_type = 1;
 				colon = length;
@@ -707,6 +726,7 @@ BEGIN:
 			else
 				colon_type = -1;
 				/*  Colon has appeared twice.  */
+		  }
 		}
         }
 	if (preserving_whitespace_flag || cat(c) != cat_whitespace)
@@ -1612,6 +1632,7 @@ object from, to;
 				rtab[i].rte_dtab[j]
 				= from->rt.rt_self[i].rte_dtab[j];
 		}
+	to->rt.rt_case=from->rt.rt_case;
 	vs_reset;
 	END_NO_INTERRUPT;}
 	return(to);
@@ -2159,6 +2180,18 @@ LFD(Lreadtablep)()
 	@(return Ct)
 @)
 
+DEFUN_NEW("READTABLE-CASE",object,fLreadtable_case,LISP,1,1,NONE,OO,OO,OO,OO,(object rt),"") {
+  check_type_readtable_no_default(&rt);
+  RETURN1(rt->rt.rt_case);
+}
+
+DEFUN_NEW("SET-READTABLE-CASE",object,fSset_readtable_case,SI,2,2,NONE,OO,OO,OO,OO,(object rt,object cas),"") {
+  check_type_readtable_no_default(&rt);
+  if (cas!=sKupcase && cas!=sKdowncase && cas!=sKpreserve && cas!=sKinvert)
+    TYPE_ERROR(cas,list(5,sLmember,sKupcase,sKdowncase,sKpreserve,sKinvert));
+  RETURN1(rt->rt.rt_case=cas);
+}
+
 @(static defun get_dispatch_macro_character (dspchr subchr
 	&optional (rdtbl `current_readtable()`))
 @
@@ -2325,6 +2358,13 @@ gcl_init_read()
 */
 
 	gcl_init_backq();
+
+	sKupcase = make_keyword("UPCASE");
+	sKdowncase = make_keyword("DOWNCASE");
+	sKpreserve = make_keyword("PRESERVE");
+	sKinvert = make_keyword("INVERT");
+
+	standard_readtable->rt.rt_case=sKupcase;
 
 	Vreadtable
  	= make_special("*READTABLE*",

@@ -664,6 +664,7 @@ mark_object1(object x) {
     break;
     
   case t_readtable:
+    mark_object(x->rt.rt_case);
     if (x->rt.rt_self) {
       for (i=0;i<RTABSIZE;i++)
 	mark_object_address(&x->rt.rt_self[i].rte_macro,i);

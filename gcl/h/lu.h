@@ -290,6 +290,8 @@ struct random {
 struct readtable {
   FIRSTWORD;
   struct rtent *rt_self;
+  object rt_case;
+  SPAD;
 };
 
 struct pathname {
