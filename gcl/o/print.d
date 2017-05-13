@@ -621,17 +621,17 @@ object coerce_big_to_string(object,int);
 static bool
 potential_number_p(object,int);
 
-
+#define CASE_OF(x_) ({int _x=(x_);isUpper(_x) ? 1 : (isLower(_x) ? -1 : 0);})
 
 static int
 constant_case(object x) {
 
-  fixnum i,j=0,jj;
-  for (i=0;i<x->s.s_fillp;i++,j=jj ? jj : j) {
-    jj=isUpper(x->s.s_self[i]) ? 1 : (isLower(x->s.s_self[i]) ? -1 : 0);
-    if (j*jj==-1)
+  fixnum i,j,jj;
+
+  for (i=j=0;i<x->s.s_fillp;i++,j=j ? j : jj)
+    if (j*(jj=CASE_OF(x->s.s_self[i]))==-1)
       return 0;
-  }
+
   return j;
 
 }
@@ -640,12 +640,13 @@ static int
 needs_escape (object x) {
 
   fixnum i;
+  char ch;
 
-  if (x->s.s_fillp && *x->s.s_self==' ')
-    return 1;
+  if (!PRINTescape)
+    return 0;
 
   for (i=0;i<x->s.s_fillp;i++)
-    switch(x->s.s_self[i]) {
+    switch((ch=x->s.s_self[i])) {
     case '(':
     case ')':
     case ':':
@@ -656,21 +657,13 @@ needs_escape (object x) {
     case ',':
     case '\n':
       return 1;
+    case ' ':
+      if (!i) return 1;
     default:
-      break;
+      if ((READ_TABLE_CASE==sKupcase   && isLower(ch)) ||
+	  (READ_TABLE_CASE==sKdowncase && isUpper(ch)))
+	return 1;
     }
-
-  if (!PRINTescape)
-    return 0;
-  if (READ_TABLE_CASE==sKupcase) {
-    for (i=0;i<x->s.s_fillp;i++)
-      if (isLower(x->s.s_self[i]))
-	return 1;
-  } else if (READ_TABLE_CASE==sKdowncase) {
-    for (i=0;i<x->s.s_fillp;i++)
-      if (isUpper(x->s.s_self[i]))
-	return 1;
-  }
 
   return !x->s.s_fillp;
 
@@ -681,13 +674,15 @@ all_dots(object x) {
 
   fixnum i;
 
-  for (i=0;i<x->s.s_fillp && x->s.s_self[i]=='.';i++);
+  for (i=0;i<x->s.s_fillp;i++)
+    if (x->s.s_self[i]!='.')
+      return 0;
 
-  return i==x->s.s_fillp;
+  return 1;
 
 }
 
-#define convertible_upper(c) ((READ_TABLE_CASE==sKupcase||READ_TABLE_CASE==sKinvert)&& isUpper(c))
+#define convertible_upper(c) ((READ_TABLE_CASE==sKupcase  ||READ_TABLE_CASE==sKinvert)&& isUpper(c))
 #define convertible_lower(c) ((READ_TABLE_CASE==sKdowncase||READ_TABLE_CASE==sKinvert)&& isLower(c))
 
 static void
