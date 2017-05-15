@@ -637,7 +637,20 @@ constant_case(object x) {
 }
 
 static int
-needs_escape (object x) {
+all_dots(object x) {
+
+  fixnum i;
+
+  for (i=0;i<x->s.s_fillp;i++)
+    if (x->s.s_self[i]!='.')
+      return 0;
+
+  return 1;
+
+}
+
+static int
+needs_escape (object x,int pp) {
 
   fixnum i;
   char ch;
@@ -665,20 +678,11 @@ needs_escape (object x) {
 	return 1;
     }
 
+  if (pp)
+    if (potential_number_p(x, PRINTbase) || all_dots(x))
+      return 1;
+
   return !x->s.s_fillp;
-
-}
-
-static int
-all_dots(object x) {
-
-  fixnum i;
-
-  for (i=0;i<x->s.s_fillp;i++)
-    if (x->s.s_self[i]!='.')
-      return 0;
-
-  return 1;
 
 }
 
@@ -691,8 +695,7 @@ print_symbol_name_body(object x,int pp) {
   int i,j,fc,tc,lw,k,cc;
 
   cc=constant_case(x);
-  k=needs_escape(x);
-  pp=pp && (potential_number_p(x, PRINTbase)||all_dots(x)) ? 0 : 1;
+  k=needs_escape(x,pp);
 
   if (k)
     write_ch('|');
@@ -708,9 +711,7 @@ print_symbol_name_body(object x,int pp) {
 	  (PRINTcase == sKdowncase ? -1 :
 	   (PRINTcase == sKcapitalize ? (i==lw ? 1 : -1) : 0))));
     if (ispunct(j)||isspace(j)) lw=i+1;
-    tc*=pp*fc*fc;
-    fc=tc*tc*(tc-fc)>>1;
-    j+=fc*('A'-'a');
+    j+=(tc*fc && !k ? (tc-fc)>>1 : 0)*('A'-'a');
     write_ch(j);
 
   }
