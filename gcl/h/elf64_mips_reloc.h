@@ -22,14 +22,33 @@
     case R_MIPS_GOT_DISP:
     case R_MIPS_CALL16:
     case R_MIPS_GOT_PAGE:
+    case R_MIPS_GOT_HI16:
+    case R_MIPS_GOT_LO16:
+    case R_MIPS_CALL_HI16:
+    case R_MIPS_CALL_LO16:
       recurse(s+a);
       gote=got+(a>>32)-1;
       a&=MASK(32);
-      store_val(where,MASK(16),((void *)gote-(void *)got));
       if (s>=ggot && s<ggote) {
         massert(!write_stub(s,got,gote));
       } else
         *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
+      ((Rela *)r)->r_addend=((void *)gote-(void *)got)-s;
+      switch(tp) {
+        case R_MIPS_GOT_HI16:
+        case R_MIPS_CALL_HI16:
+	  r->r_info=((ul)R_MIPS_HI16<<56)|(r->r_info&MASK(32));
+	  relocate(sym1,r,((Rela *)r)->r_addend,start,got,gote);
+	  break;
+        case R_MIPS_GOT_LO16:
+        case R_MIPS_CALL_LO16:
+	  r->r_info=((ul)R_MIPS_LO16<<56)|(r->r_info&MASK(32));
+	  relocate(sym1,r,((Rela *)r)->r_addend,start,got,gote);
+	  break;
+        default:
+	  store_val(where,MASK(16),((void *)gote-(void *)got));
+	  break;
+      }
       break;
     case R_MIPS_GOT_OFST:
       recurse(s+a);

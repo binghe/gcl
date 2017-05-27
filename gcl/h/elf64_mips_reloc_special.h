@@ -108,6 +108,10 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
       for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 	if (ELF_R_TYPE(r->r_info)==R_MIPS_CALL16||
 	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_DISP||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_HI16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_LO16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_CALL_HI16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_CALL_LO16||
 	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_PAGE) {
 
 	  sym=sym1+ELF_R_SYM(r->r_info);
