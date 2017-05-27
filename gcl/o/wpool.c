@@ -3,7 +3,7 @@
 #define NO_PRELINK_UNEXEC_DIVERSION
 char *rb_end=NULL,*rb_start=NULL,*heap_end=NULL;
 void *data_start=NULL;
-int use_pool=1;
+int multiprocess_memory_pool=1;
 
 #include "include.h"
 #include "page.h"
@@ -20,9 +20,9 @@ assert_error(const char *a,unsigned l,const char *f,const char *n) {
 int
 main(int argc,char * argv[],char * envp[]) {
 
-  int s;
+  int s=3;
 
-  sscanf(argv[1],"%d",&s);
+  if (argc>1) sscanf(argv[1],"%d",&s);
   open_pool();
   for (;;) {
     lock_pool();

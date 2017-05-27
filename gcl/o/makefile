@@ -91,8 +91,8 @@ $(DECL): $(HDIR)/make-decl.h $(INI_FILES)
 grab_defs: grab_defs.c
 	${CC} $(OFLAGS) -o grab_defs  grab_defs.c
 
-wpool: wpool.c
-	$(CC) $(CFLAGS) $(DEFS) -o $@ $<
+wpool: wpool.o
+	$(CC) $(LDFLAGS) -o $@ $<
 
 $(GCLIB): ${ALIB} 
 	rm -f gcllib.a
