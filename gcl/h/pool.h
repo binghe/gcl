@@ -20,7 +20,7 @@ static struct pool {
   ufixnum s;
 } *Pool;
 
-static struct flock pl;
+static struct flock pl,*plp;
 
 static const char *gcl_pool="/tmp/gcl_pool";
 
@@ -28,7 +28,7 @@ static int
 set_lock(void) {
   
   errno=0;
-  if (fcntl(pool,F_SETLKW,&pl)) {
+  if (fcntl(pool,F_SETLKW,plp)) {
     if (errno==EINTR)
       set_lock();
     return -1;
@@ -90,16 +90,13 @@ open_pool(void) {
       Pool->s=0;
       unlock_pool();
 
-      f.l_type=F_UNLCK;
-      massert(!fcntl(pool,F_SETLK,&f));
-
-      fprintf(stderr,"Initializing pool\n");
-      fflush(stderr);
-
     }
 
     f.l_type=F_RDLCK;
-    massert(!fcntl(pool,F_SETLK,&f));
+    plp=&f;
+    massert(!set_lock());
+
+    plp=&pl;
 
     register_pool(1);
     massert(!atexit(close_pool));
