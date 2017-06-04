@@ -20,7 +20,7 @@ static struct pool {
   ufixnum s;
 } *Pool;
 
-static struct flock pl,*plp;
+static struct flock pl,*plp=&pl;
 
 static const char *gcl_pool="/tmp/gcl_pool";
 
