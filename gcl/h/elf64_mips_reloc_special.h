@@ -98,10 +98,30 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   Sym *sym;
   Shdr *sec;
   void *v,*ve;
-  ul q=0,a,b;
+  ul a,b;
 
   for (sym=sym1;sym<syme;sym++)
-    sym->st_size=0;
+    sym->st_other=sym->st_size=0;
+
+  for (sec=sec1;sec<sece;sec++)
+    if (sec->sh_type==SHT_RELA)
+      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
+	if (ELF_R_TYPE(r->r_info)==R_MIPS_CALL16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_DISP||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_HI16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_LO16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_CALL_HI16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_CALL_LO16||
+	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT_PAGE) {
+
+	  sym=sym1+ELF_R_SYM(r->r_info);
+
+	  a=r->r_addend>>15;
+
+	  if (a+1>sym->st_other)
+	    sym->st_other=a+1;
+
+	}
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
     if (sec->sh_type==SHT_RELA)
@@ -118,22 +138,16 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	  a=r->r_addend>>15;
 
-	  if (2*a>=sizeof(sym->st_size) || !((sym->st_size>>(a*16))&0xffff)) {
-
-	    q=++*gs;
-	    if (2*a<sizeof(sym->st_size)) {
-	      massert(q<=0xffff);
-	      sym->st_size|=(q<<(a*16));
-	    }
-	    
+	  if (sym->st_other) {
+	    sym->st_size=++*gs;
+	    (*gs)+=sym->st_other-1;
 	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
-
+	    sym->st_other=0;
 	  }
 
 	  b=sizeof(r->r_addend)*4; 
 	  massert(!(r->r_addend>>b)); 
-	  q=2*a>=sizeof(sym->st_size) ? q : (sym->st_size>>(a*16))&0xffff; 
-	  r->r_addend|=(q<<=b); 
+	  r->r_addend|=((sym->st_size+a)<<b);
 
 	}
   

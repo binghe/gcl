@@ -389,7 +389,7 @@ case $use in
 	    mips*)
 		case $canonical in
 		    mips64*linux*)
-			assert_arg_to_cflags -mxgot
+#			assert_arg_to_cflags -mxgot
 			assert_arg_to_ldflags -Wl,-z,now;;
 		esac
 		;;
