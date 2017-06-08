@@ -16,6 +16,7 @@ static ul ggot,ggote,la; static Rela *hr,*lr;
 
 #undef ELF_R_TYPE 
 #define ELF_R_TYPE(a_) ELF_R_TYPE1(a_)
+#define MIPS_HIGH(a_) ({ul _a=(a_);(_a-(short)_a)>>16;})
 
 typedef struct {
   ul entry,gotoff;
@@ -116,10 +117,9 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	  sym=sym1+ELF_R_SYM(r->r_info);
 
-	  a=r->r_addend>>15;
-
-	  if (a+1>sym->st_other)
-	    sym->st_other=a+1;
+	  /*unlikely to save got space by recording possible holes in addend range*/
+	  if ((a=MIPS_HIGH(r->r_addend)+1)>sym->st_other)
+	    sym->st_other=a;
 
 	}
 
@@ -136,18 +136,18 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	  sym=sym1+ELF_R_SYM(r->r_info);
 
-	  a=r->r_addend>>15;
-
 	  if (sym->st_other) {
 	    sym->st_size=++*gs;
-	    (*gs)+=sym->st_other-1;
-	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+	    if (sym->st_other>1)
+	      (*gs)+=sym->st_other-1;
+	    else
+	      massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
 	    sym->st_other=0;
 	  }
 
 	  b=sizeof(r->r_addend)*4; 
 	  massert(!(r->r_addend>>b)); 
-	  r->r_addend|=((sym->st_size+a)<<b);
+	  r->r_addend|=((sym->st_size+MIPS_HIGH(r->r_addend))<<b);
 
 	}
   

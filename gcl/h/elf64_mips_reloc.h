@@ -32,10 +32,10 @@
       if (s>=ggot && s<ggote) {
         massert(!write_stub(s,got,gote));
       } else
-        *gote=s+(a&~MASK(16))+((a&0x8000)<<1);
+        *gote=s+(MIPS_HIGH(a)<<16);
       a=(void *)gote-(void *)got;
       if (tp==R_MIPS_GOT_HI16||tp==R_MIPS_CALL_HI16)
-        a=(a-(short)a)>>16;
+        a=MIPS_HIGH(a);
       else if (tp==R_MIPS_GOT_LO16||tp==R_MIPS_CALL_LO16)
 	a&=MASK(16);
       massert(!(a&~MASK(16)));
@@ -54,8 +54,7 @@
     case R_MIPS_LO16:
       recurse(s+a);
       s+=a;
-      a=*where&MASK(16);
-      if (a&0x8000) a|=0xffffffffffff0000; 
+      a=(short)*where;
       a+=s&MASK(16);
       a+=(a&0x8000)<<1; 
       store_val(where,MASK(16),a);
