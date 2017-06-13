@@ -369,7 +369,7 @@ memprotect_handler_test(int sig, long code, void *scp, char *addr) {
     do_gcl_abort();
   }
   memprotect_handler_invocations=1;
-  if (faddr!=memprotect_test_address)
+  if (page(faddr)!=page(memprotect_test_address))
     memprotect_result=memprotect_bad_fault_address;
   else
     memprotect_result=memprotect_none;
