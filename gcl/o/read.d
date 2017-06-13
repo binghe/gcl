@@ -1176,6 +1176,7 @@ Lsharp_left_parenthesis_reader()
 			goto L;
 		}
 		vs_base[0]=list(4,siScomma,sLapply,list(2,sLquote,sLvector),vs_base[2]);
+		vs_top=vs_base+1;
 		return;
 	}
 	vsp = vs_top;
