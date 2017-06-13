@@ -96,18 +96,18 @@ quick_call_sfun(object fun) {
 
 }
 
-/* only for sfun not gfun !!  Does not check number of args */
-static void
-call_sfun_no_check(object fun)
-{ DEBUG_AVMA
-  int n;
-  object *base=vs_base;
-  n=vs_top - base;
-  base[0]=c_apply_n_fun(fun,n,base);
-  vs_top=(vs_base=base)+1;
-  CHECK_AVMA;
-  return;
-}
+/* /\* only for sfun not gfun !!  Does not check number of args *\/ */
+/* static void */
+/* call_sfun_no_check(object fun) */
+/* { DEBUG_AVMA */
+/*   int n; */
+/*   object *base=vs_base; */
+/*   n=vs_top - base; */
+/*   base[0]=c_apply_n_fun(fun,n,base); */
+/*   vs_top=(vs_base=base)+1; */
+/*   CHECK_AVMA; */
+/*   return; */
+/* } */
 static void
 call_vfun(object fun)
 { DEBUG_AVMA
@@ -615,10 +615,11 @@ super_funcall_no_event(object fun) {
 
   switch(type_of(fun)) {
   case t_cfun:
-    (*fun->cf.cf_self)();
-    return;
+    (*fun->cf.cf_self)(); return;
+  case t_cclosure:
+    (*fun->cc.cc_self)(fun); return;
   case t_sfun:
-    call_sfun_no_check(fun); return;
+    /* call_sfun_no_check(fun); return; */
   case t_gfun:
     quick_call_sfun(fun); return;
   case t_vfun:
@@ -631,7 +632,7 @@ super_funcall_no_event(object fun) {
     super_funcall_no_event(fun->s.s_gfdef);
     return;
   default:
-    funcall_no_event(fun);
+    funcall(fun);
   }
 
 }
