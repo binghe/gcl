@@ -63,7 +63,7 @@
 
 
 #define	M68K
-#define SGC
+/* #define SGC *//*FIXME:  Unknown m68k cpu in modern emulators*/
 
 #include <asm/cachectl.h>
 int cacheflush(void *,int,int,int);
