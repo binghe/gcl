@@ -871,7 +871,7 @@ sgc_quit(void) {
 	  f=n;
 	  n=OBJ_LINK(n);
 	}
-      SET_LINK(f,OBJNULL);
+      SET_LINK(f,n!=OBJNULL ? n : o);
       tm->tm_tail=f;
       tm->tm_nfree += tm->tm_alt_nfree;
       tm->tm_alt_nfree = 0;
