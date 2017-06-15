@@ -873,6 +873,7 @@ sgc_quit(void) {
 	}
       SET_LINK(f,n!=OBJNULL ? n : o);
       tm->tm_tail=f;
+      for (;OBJ_LINK(tm->tm_tail)!=OBJNULL;tm->tm_tail=OBJ_LINK(tm->tm_tail));
       tm->tm_nfree += tm->tm_alt_nfree;
       tm->tm_alt_nfree = 0;
       tm->tm_alt_free = OBJNULL;

@@ -966,6 +966,11 @@ sweep_phase(void) {
   STATIC object f;
   STATIC struct pageinfo *v;
   
+  for (j= t_start; j < t_contiguous ; j++) {
+    tm_of(j)->tm_free=OBJNULL;
+    tm_of(j)->tm_nfree=0;
+  }
+
   for (v=cell_list_head;v;v=v->next) {
 
     tm = tm_of((enum type)v->type);
@@ -975,22 +980,23 @@ sweep_phase(void) {
     k = 0;
     for (j = tm->tm_nppage; j > 0; --j, p += tm->tm_size) {
       x = (object)p;
-      if (is_free(x))
-	continue;
-      else if (is_marked(x)) {
+
+      if (is_marked(x)) {
 	unmark(x);
 	continue;
       }
 
-      SET_LINK(f,x);
       make_free(x);
+      SET_LINK(f,x);
       f = x;
       k++;
+
     }
+
     SET_LINK(f,OBJNULL);
     tm->tm_tail = f;
     tm->tm_nfree += k;
-    pagetoinfo(page(v))->in_use-=k;
+    pagetoinfo(page(v))->in_use=tm->tm_nppage-k;
     
   }
 
