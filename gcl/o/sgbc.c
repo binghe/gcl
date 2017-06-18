@@ -152,7 +152,7 @@ sgc_mark_phase(void) {
 
 static void
 sgc_sweep_phase(void) {
-  STATIC long j, k;
+  STATIC long j, k, l;
   STATIC object x;
   STATIC char *p;
   STATIC struct typemanager *tm;
@@ -160,13 +160,18 @@ sgc_sweep_phase(void) {
   int size;
   STATIC struct pageinfo *v;
   
+  for (j= t_start; j < t_contiguous ; j++) {
+    tm_of(j)->tm_free=OBJNULL;
+    tm_of(j)->tm_nfree=0;
+  }
+
   for (v=cell_list_head;v;v=v->next) {
 
     tm = tm_of((enum type)v->type);
     
     p = pagetochar(page(v));
     f = FREELIST_TAIL(tm);
-    k = 0;
+    l = k = 0;
     size=tm->tm_size;
 
     if (v->sgc_flags&SGC_PAGE_FLAG) {
@@ -175,10 +180,9 @@ sgc_sweep_phase(void) {
 
 	x = (object)p;
 	
-	if (is_free(x))
-	  continue;
-	else if (is_marked(x)) {
+	if (is_marked(x)) {
 	  unmark(x);
+	  l++;
 	  continue;
 	}
 
@@ -187,26 +191,26 @@ sgc_sweep_phase(void) {
 	  continue;
 #endif
 	
-	/* it is ok to free x */
-	
-	SET_LINK(f,x);
+	k++;
 	make_free(x);
+	SET_LINK(f,x);
+	f = x;
+
 #ifndef SGC_WHOLE_PAGE
 	if (TYPEWORD_TYPE_P(v->type)) x->d.s = SGC_RECENT;
 #endif
-	f = x;
-	k++;
 
       }
+
       SET_LINK(f,OBJNULL);
       tm->tm_tail = f;
       tm->tm_nfree += k;
-      v->in_use-=k;
+      v->in_use=l;
 
     } else if (WRITABLE_PAGE_P(page(v))) /*non sgc_page */
       for (j = tm->tm_nppage; --j >= 0;  p += size) {
 	x = (object)p;
-	if (is_marked(x) && !is_free(x)) {
+	if (is_marked(x)) {
 	  unmark(x);
 	}
       }

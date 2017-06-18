@@ -959,7 +959,7 @@ mark_c_stack(jmp_buf env1, int n, void (*fn)(void *,void *,int)) {
 static void
 sweep_phase(void) {
 
-  STATIC long j, k;
+  STATIC long j, k, l;
   STATIC object x;
   STATIC char *p;
   STATIC struct typemanager *tm;
@@ -977,26 +977,28 @@ sweep_phase(void) {
     
     p = pagetochar(page(v));
     f = FREELIST_TAIL(tm);
-    k = 0;
+    l = k = 0;
     for (j = tm->tm_nppage; j > 0; --j, p += tm->tm_size) {
       x = (object)p;
 
       if (is_marked(x)) {
 	unmark(x);
+	l++;
 	continue;
       }
+
+      k++;
 
       make_free(x);
       SET_LINK(f,x);
       f = x;
-      k++;
 
     }
 
     SET_LINK(f,OBJNULL);
     tm->tm_tail = f;
     tm->tm_nfree += k;
-    pagetoinfo(page(v))->in_use=tm->tm_nppage-k;
+    pagetoinfo(page(v))->in_use=l;
     
   }
 
