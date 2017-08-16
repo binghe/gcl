@@ -35,12 +35,6 @@ int  line_length = 72;
 #define  WRITEC_NEWLINE(strm) (writec_stream('\n',strm))
 #endif
 
-#define	to_be_escaped(c) \
-	(standard_readtable->rt.rt_self[(c)&0377].rte_chattrib \
-	 != cat_constituent || \
-	 isLower((c)&0377) || (c) == ':')
-
-
 #define READ_TABLE_CASE (Vreadtable->s.s_dbind->rt.rt_case)
 
 #define	mod(x)		((x)%Q_SIZE)
@@ -637,50 +631,31 @@ constant_case(object x) {
 }
 
 static int
-all_dots(object x) {
+needs_escape (object x) {
 
-  fixnum i;
-
-  for (i=0;i<x->s.s_fillp;i++)
-    if (x->s.s_self[i]!='.')
-      return 0;
-
-  return 1;
-
-}
-
-static int
-needs_escape (object x,int pp) {
-
-  fixnum i;
-  char ch;
+  fixnum i,all_dots=1;
+  int ch;
 
   if (!PRINTescape)
     return 0;
 
   for (i=0;i<x->s.s_fillp;i++)
     switch((ch=x->s.s_self[i])) {
-    case '(':
-    case ')':
     case ':':
-    case '`':
-    case '\'':
-    case '"':
-    case ';':
-    case ',':
-    case '\n':
       return 1;
-    case ' ':
-      if (!i) return 1;
+    case '.':
+      break;
     default:
+      all_dots=0;
+      if (Vreadtable->s.s_dbind->rt.rt_self[ch].rte_chattrib!=cat_constituent)
+	return 1;
       if ((READ_TABLE_CASE==sKupcase   && isLower(ch)) ||
 	  (READ_TABLE_CASE==sKdowncase && isUpper(ch)))
 	return 1;
     }
 
-  if (pp)
-    if (potential_number_p(x, PRINTbase) || all_dots(x))
-      return 1;
+  if (potential_number_p(x, PRINTbase) || all_dots)
+    return 1;
 
   return !x->s.s_fillp;
 
@@ -690,12 +665,12 @@ needs_escape (object x,int pp) {
 #define convertible_lower(c) ((READ_TABLE_CASE==sKdowncase||READ_TABLE_CASE==sKinvert)&& isLower(c))
 
 static void
-print_symbol_name_body(object x,int pp) {
+print_symbol_name_body(object x) {
 
   int i,j,fc,tc,lw,k,cc;
 
   cc=constant_case(x);
-  k=needs_escape(x,pp);
+  k=needs_escape(x);
 
   if (k)
     write_ch('|');
@@ -711,7 +686,7 @@ print_symbol_name_body(object x,int pp) {
 	  (PRINTcase == sKdowncase ? -1 :
 	   (PRINTcase == sKcapitalize ? (i==lw ? 1 : -1) : 0))));
     if (ispunct(j)||isspace(j)) lw=i+1;
-    j+=(tc*fc && !k ? (tc-fc)>>1 : 0)*('A'-'a');
+    j+=(tc && fc && !k ? (tc-fc)>>1 : 0)*('A'-'a');
     write_ch(j);
 
   }
@@ -925,7 +900,7 @@ int level;
 		write_ch(':');
 	      } else if (PRINTpackage||find_symbol(x,current_package())!=x || !intern_flag) {
 
-		print_symbol_name_body(x->s.s_hpack->p.p_name,0);
+		print_symbol_name_body(x->s.s_hpack->p.p_name);
 
 		if (find_symbol(x, x->s.s_hpack) != x)
 		  error("can't print symbol");
@@ -939,7 +914,7 @@ int level;
 	      }
 
 	    }
-	    print_symbol_name_body(x,1);
+	    print_symbol_name_body(x);
 	    break;
 	  }
 	case t_array:
