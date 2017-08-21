@@ -677,7 +677,9 @@ print_symbol_name_body(object x) {
 
   for (lw=i=0;i<x->s.s_fillp;i++) {
     j = x->s.s_self[i];
-    if (PRINTescape && (j == '|' || j == '\\'))
+    if (PRINTescape &&
+       (Vreadtable->s.s_dbind->rt.rt_self[j].rte_chattrib==cat_single_escape ||
+	Vreadtable->s.s_dbind->rt.rt_self[j].rte_chattrib==cat_multiple_escape))
       write_ch('\\');
     fc=convertible_upper(j) ? 1 :
         (convertible_lower(j) ? -1 : 0);
@@ -1615,8 +1617,8 @@ object x;
 		vs_push(PRINTstream);
 		FEwrong_type_argument(sLstream, PRINTstream);
 	}
-	PRINTescape = symbol_value(sLAprint_escapeA) != Cnil;
 	PRINTreadably = symbol_value(sLAprint_readablyA) != Cnil;
+	PRINTescape = PRINTreadably || symbol_value(sLAprint_escapeA) != Cnil;
 	PRINTpretty = symbol_value(sLAprint_prettyA) != Cnil;
 	PRINTcircle = symbol_value(sLAprint_circleA) != Cnil;
 	y = symbol_value(sLAprint_baseA);
