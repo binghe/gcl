@@ -885,12 +885,12 @@ int level;
 		    if (x == *vp) {
 		      if (vp[1] != Cnil) {
 			write_ch('#');
-			write_decimal((vp-PRINTvs_top)/2+1);
+			write_decimal((vp-PRINTvs_top)/2);
 			write_ch('#');
 			return;
 		      } else {
 			write_ch('#');
-			write_decimal((vp-PRINTvs_top)/2+1);
+			write_decimal((vp-PRINTvs_top)/2);
 			write_ch('=');
 			vp[1] = Ct;
 		      }
