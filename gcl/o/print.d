@@ -702,18 +702,18 @@ print_symbol_name_body(object x) {
 #define FOUND -1
 
 static int
-write_sharp_eq(object *vp,bool dot) {
+do_write_sharp_eq(object x,bool dot) {
 
-  bool defined=vp[1]!=Cnil;
+  bool defined=x->c.c_cdr!=Cnil;
 
   if (dot) {
     write_str(" . ");
     if (!defined) return FOUND;
   }
 
-  vp[1]=Ct;
+  x->c.c_cdr=Ct;
   write_ch('#');
-  write_decimal((vp-PRINTvs_top)/2);
+  write_decimal(fix(x->c.c_car));
   write_ch(defined ? '#' : '=');
 
   return defined ? DONE : FOUND;
@@ -721,15 +721,12 @@ write_sharp_eq(object *vp,bool dot) {
 }
 
 static int
-write_sharp_eqs(object x,bool dot) {
+write_sharp_eq(object x,bool dot) {
 
-  object *vp;
+  struct htent *e;
 
-  for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2)
-    if (x == *vp)
-      return write_sharp_eq(vp,dot);
-
-  return 0;
+  return PRINTvs_top[0]!=Cnil && (e=gethash(x,PRINTvs_top[0]))->hte_key!=OBJNULL ?
+    do_write_sharp_eq(e->hte_value,dot) : 0;
 
 }
 
@@ -916,7 +913,7 @@ int level;
 	    if (PRINTescape) {
 	      if (x->s.s_hpack == Cnil) {
 		if (PRINTcircle)
-		  if (write_sharp_eqs(x,FALSE)==DONE) return;
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTgensym)
 		  write_str("#:");
 	      } else if (x->s.s_hpack == keyword_package) {
@@ -952,7 +949,7 @@ int level;
 			break;
 		}
 		if (PRINTcircle)
-		  if (write_sharp_eqs(x,FALSE)==DONE) return;
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
@@ -1028,7 +1025,7 @@ int level;
 			break;
 		}
 		if (PRINTcircle)
-		  if (write_sharp_eqs(x,FALSE)==DONE) return;
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
@@ -1099,7 +1096,7 @@ int level;
 			break;
 		}
 		if (PRINTcircle)
-		  if (write_sharp_eqs(x,FALSE)==DONE) return;
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
                 if (PRINTpretty) {
 		if (x->c.c_car == sLquote &&
 		    type_of(x->c.c_cdr) == t_cons &&
@@ -1146,7 +1143,7 @@ int level;
 				break;
 			}
 			if (PRINTcircle)
-			  switch (write_sharp_eqs(x,TRUE)) {
+			  switch (write_sharp_eq(x,TRUE)) {
 			  case FOUND:
 			    write_object(x, level);
 			  case DONE:
@@ -1316,7 +1313,7 @@ int level;
 
 	case t_structure:
 		if (PRINTcircle)
-		  if (write_sharp_eqs(x,FALSE)==DONE) return;
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
@@ -1415,7 +1412,6 @@ travel_push(object x) {
 
     if (!travel_pushed(x)) {
       vs_check_push(x);
-      vs_check_push(Cnil);
       travel_pushed(x)=1;
     }
 
@@ -1519,9 +1515,12 @@ travel_clear(object x) {
 
 }
 
+object sLeq;
 
 static void
 setupPRINTcircle(object x,int dogensyms) {
+
+  object *xp;
 
   BEGIN_NO_INTERRUPT;
   dgs=dogensyms;
@@ -1530,6 +1529,12 @@ setupPRINTcircle(object x,int dogensyms) {
   PRINTvs_limit = vs_top;
   travel_clear(x);
   END_NO_INTERRUPT;
+
+  vs_check_push(PRINTvs_limit>PRINTvs_top ? funcall_cfun(Lmake_hash_table,2,sKtest,sLeq) : Cnil);
+  for (xp=PRINTvs_top;xp<PRINTvs_limit;xp++)
+    sethash(*xp,vs_head,MMcons(make_fixnum(xp-PRINTvs_top),Cnil));
+  PRINTvs_top[0]=vs_head;
+  PRINTvs_limit=vs_top=PRINTvs_top+1;
 
 }
 
