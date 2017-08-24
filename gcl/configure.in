@@ -335,6 +335,7 @@ AC_ARG_ENABLE([gprof],[  --enable-gprof builds gcl with -pg in CFLAGS to enable 
 		       ia64*) enableval="no";;
 		       hppa*) enableval="no";;
 		       arm*)  enableval="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
+		       aarch64*) enableval="no";;#unreproducible buildd bug 20170824
 		       *gnu)  enableval="no";;
 		   esac		     
 		   if test "$enableval" != "yes" ; then
