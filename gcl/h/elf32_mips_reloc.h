@@ -35,7 +35,7 @@
       if (a) add_vals(where,MASK(16),(s>>16)+a);
       break;
     case R_MIPS_LO16:
-      if (sym->st_other) s=gpd;
+      if (sym->st_other) s=gpd ? gpd : ({massert(sym->st_other==2);(ul)got;});
       a=*where&MASK(16);
       if (a&0x8000) a|=0xffff0000; 
       a+=s&MASK(16);
