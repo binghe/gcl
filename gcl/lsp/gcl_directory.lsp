@@ -62,7 +62,7 @@
 		     (when (pathname-match-p dir v)
 		       (push (merge-pathnames (parse-namestring dir nil *default-pathname-defaults* :start pos) pexp nil) r)))
 		   :file)
-       (when (pathname-match-p dir v) (push pexp r))))
+       (when (pathname-match-p dir v) (push (pathname (copy-seq (namestring pexp))) r))))
    (make-frame ""))
   r)
 
