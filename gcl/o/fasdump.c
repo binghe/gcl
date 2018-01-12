@@ -979,7 +979,7 @@ object sharing_table;
 
 DEFUN_NEW("FIND-SHARING-TOP",object,fSfind_sharing_top,SI,2,2,NONE,OO,OO,OO,OO,(object x, object table),"") {
   sharing_table=table;
-  travel_find_sharing(x);
+  travel_find_sharing(x,table);
   return Ct;
 }
 
