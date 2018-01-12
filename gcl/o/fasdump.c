@@ -976,99 +976,12 @@ fasd_patch_sharp(object x, int depth)
 }
 
 object sharing_table;
-static enum circ_ind
-is_it_there(object x)
-{ struct htent *e;
-  object table=sharing_table;
-  switch(type_of(x)){
-  case t_cons:
-  case t_symbol:
-  case t_structure:
-  case t_array:
-  case t_vector:
-  case t_package:
-  e= gethash(x,table);
-    if (e->hte_key ==OBJNULL)
-      {sethash(x,table,make_fixnum(-1));
-       return FIRST_INDEX;
-     }
-    else
-      {int n=fix(e->hte_value);
-       if (n <0)
-	 e->hte_value=make_fixnum(n-1);
-       return LATER_INDEX;}
-  break;
- default:
-  return NOT_INDEXED;}}
 
-
-
-static void
-find_sharing(object x)
-{
-  cs_check(x);
- BEGIN:
-  if(is_it_there(x)!=FIRST_INDEX) return;  
-
-	switch (type_of(x)) {
-
-	case DP(t_cons:)
-
-	  find_sharing(x->c.c_car);
-	  x=x->c.c_cdr;
-	  goto BEGIN; 
-	  
-	  break;
-
-	case DP(t_vector:)
-	{
-		int i;
-
-		if ((enum aelttype)x->v.v_elttype != aet_object)
-		  break;
-
-		for (i = 0;  i < x->v.v_fillp;  i++)
-		  find_sharing(x->v.v_self[i]);
-		break;
-	}
-	case DP(t_array:)
-	{
-		int i, j;
-		
-		if ((enum aelttype)x->a.a_elttype != aet_object)
-		  break;
-
-		for (i = 0, j = 1;  i < x->a.a_rank;  i++)
-			j *= x->a.a_dims[i];
-		for (i = 0;  i < j;  i++)
-			find_sharing(x->a.a_self[i]);
-		break;
-	}
-	case DP(t_structure:)
-	  {object def = x->str.str_def;
-	 int i;
-	 i=S_DATA(def)->length;
-	 while (i--> 0)
-	        find_sharing(structure_ref(x,def,i));
-	 break;
-	  }
-	default:
-	  break;
-	}
-	return;
+DEFUN_NEW("FIND-SHARING-TOP",object,fSfind_sharing_top,SI,2,2,NONE,OO,OO,OO,OO,(object x, object table),"") {
+  sharing_table=table;
+  travel_find_sharing(x);
+  return Ct;
 }
-
-DEFUN_NEW("FIND-SHARING-TOP",object,fSfind_sharing_top,SI,2,2,NONE,OO,OO,OO,OO,(object x, object table),"")
-/* static object */
-/* FFN(find_sharing_top)(object x, object table) */
-{sharing_table=table;
- find_sharing(x);
- return Ct;
-}
-
-
-
-
 
 /* static object            */
 /* read_fasd(int i) */

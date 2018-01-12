@@ -1964,3 +1964,9 @@ vsystem(const char *);
 
 object
 n_cons_from_x(fixnum,object);
+
+int
+seek_to_end_ofile(FILE *);
+
+void
+travel_find_sharing(object,object);

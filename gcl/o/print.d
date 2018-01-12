@@ -490,7 +490,6 @@ int level;
 	void (*wf)(int) = write_ch_fun;
 
 	object *vt = PRINTvs_top;
-	object *vl = PRINTvs_limit;
 	bool e = PRINTescape;
 	bool ra = PRINTreadably;
 	bool r = PRINTradix;
@@ -599,7 +598,6 @@ L:
 	PRINTradix = r;
 	PRINTescape = e;
 	PRINTreadably = ra;
-	PRINTvs_limit = vl;
 	PRINTvs_top = vt;
 
 	write_ch_fun = wf;
@@ -702,18 +700,19 @@ print_symbol_name_body(object x) {
 #define FOUND -1
 
 static int
-do_write_sharp_eq(object x,bool dot) {
+do_write_sharp_eq(struct htent *e,bool dot) {
 
-  bool defined=x->c.c_cdr!=Cnil;
+  fixnum val=fix(e->hte_value);
+  bool defined=val&1;
 
   if (dot) {
     write_str(" . ");
     if (!defined) return FOUND;
   }
 
-  x->c.c_cdr=Ct;
+  if (!defined) e->hte_value=make_fixnum(val|1);
   write_ch('#');
-  write_decimal(fix(x->c.c_car));
+  write_decimal(val>>1);
   write_ch(defined ? '#' : '=');
 
   return defined ? DONE : FOUND;
@@ -726,7 +725,7 @@ write_sharp_eq(object x,bool dot) {
   struct htent *e;
 
   return PRINTvs_top[0]!=Cnil && (e=gethash(x,PRINTvs_top[0]))->hte_key!=OBJNULL ?
-    do_write_sharp_eq(e->hte_value,dot) : 0;
+    do_write_sharp_eq(e,dot) : 0;
 
 }
 
@@ -1392,79 +1391,65 @@ int level;
 	}
 }
 
-static int dgs;
+static int dgs,dga;
 
 #include "page.h"
-
-#define travel_seen(x) x->d.m
-#define travel_pushed(x) x->d.f
-#define travel_bits(x) x->md.mf
 
 static void
 travel_push(object x) {
 
   int i;
 
-  if (NULL_OR_ON_C_STACK(x))
+  if (is_imm_fixnum(x))
     return;
 
-  if (travel_seen(x)) {
+  if (is_marked(x)) {
 
-    if (!travel_pushed(x)) {
+    if (imcdr(x) || !x->d.f)
       vs_check_push(x);
-      travel_pushed(x)=1;
+    if (!imcdr(x))
+      x->d.f=1;
+
+  } else switch (type_of(x)) {
+
+    case t_symbol:
+
+      if (dgs && x->s.s_hpack==Cnil) {
+    	mark(x);
+      }
+      break;
+
+    case t_cons:
+
+      {
+	object y=x->c.c_cdr;
+	mark(x);
+	travel_push(x->c.c_car);
+	travel_push(y);
+      }
+      break;
+
+    case t_vector:
+    case t_array:
+
+      mark(x);
+      if (dga && (enum aelttype)x->a.a_elttype==aet_object)
+	for (i=0;i<x->a.a_dim;i++)
+	  travel_push(x->a.a_self[i]);
+      break;
+
+    case t_structure:
+
+      mark(x);
+      for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
+	travel_push(structure_ref(x,x->str.str_def,i));
+      break;
+
+    default:
+
+      break;
+
     }
-
-    return;
-
-  }
-
-  switch (type_of(x)) {
-
-  case t_symbol:
-
-    if (dgs && x->s.s_hpack==Cnil)
-      travel_seen(x)=1;
-    break;
-
-  case t_cons:
-
-    {
-      object y=x->c.c_cdr;
-      travel_seen(x)=1;
-      travel_push(x->c.c_car);
-      travel_push(y);
-    }
-    break;
-
-  case t_array:
-
-    travel_seen(x)=1;
-    if ((enum aelttype)x->a.a_elttype == aet_object)
-      for (i=0;i<x->a.a_dim;i++)
-	travel_push(x->a.a_self[i]);
-    break;
-
-  case t_vector:
-
-    travel_seen(x)=1;
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      for (i=0;i<x->v.v_fillp;i++)
-	travel_push(x->v.v_self[i]);
-    break;
-
-  case t_structure:
-
-    travel_seen(x)=1;
-    for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
-      travel_push(structure_ref(x,x->str.str_def,i));
-    break;
-
-  default:
-
-    break;
-
-  }
 
 }
 
@@ -1474,10 +1459,15 @@ travel_clear(object x) {
 
   int i;
 
-  if (NULL_OR_ON_C_STACK(x) || !travel_bits(x))
+  if (is_imm_fixnum(x))
     return;
 
-  travel_bits(x)=0;
+  if (!is_marked(x))
+    return;
+
+  unmark(x);
+  if (!imcdr(x))
+    x->d.f=0;
 
   switch (type_of(x)) {
 
@@ -1487,18 +1477,12 @@ travel_clear(object x) {
     travel_clear(x->c.c_cdr);
     break;
 
+  case t_vector:
   case t_array:
 
-    if ((enum aelttype)x->a.a_elttype == aet_object)
+    if (dga && (enum aelttype)x->a.a_elttype == aet_object)
       for (i=0;i<x->a.a_dim;i++)
 	travel_clear(x->a.a_self[i]);
-    break;
-
-  case t_vector:
-
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      for (i=0;i<x->v.v_fillp;i++)
-	travel_clear(x->v.v_self[i]);
     break;
 
   case t_structure:
@@ -1515,26 +1499,47 @@ travel_clear(object x) {
 
 }
 
+static void
+travel(object x,int mdgs,int mdga) {
+
+  BEGIN_NO_INTERRUPT;
+  dgs=mdgs;
+  dga=mdga;
+  travel_push(x);
+  travel_clear(x);
+  END_NO_INTERRUPT;
+
+}
+
 object sLeq;
 
 static void
 setupPRINTcircle(object x,int dogensyms) {
 
-  object *xp;
+  object *vp=vs_top,*v=vp,h;
+  fixnum j;
 
-  BEGIN_NO_INTERRUPT;
-  dgs=dogensyms;
-  travel_push(x);
-  dgs=0;
-  PRINTvs_limit = vs_top;
-  travel_clear(x);
-  END_NO_INTERRUPT;
+  travel(x,dogensyms,PRINTarray);
 
-  vs_check_push(PRINTvs_limit>PRINTvs_top ? funcall_cfun(Lmake_hash_table,2,sKtest,sLeq) : Cnil);
-  for (xp=PRINTvs_top;xp<PRINTvs_limit;xp++)
-    sethash(*xp,vs_head,MMcons(make_fixnum(xp-PRINTvs_top),Cnil));
-  PRINTvs_top[0]=vs_head;
-  PRINTvs_limit=vs_top=PRINTvs_top+1;
+  h=vs_top>vp ? funcall_cfun(Lmake_hash_table,2,sKtest,sLeq) : Cnil;
+  for (j=0;v<vs_top;v++)
+    if (!imcdr(*v) || gethash(*v,h)->hte_key==OBJNULL)
+      sethash(*v,h,make_fixnum((j++)<<1));
+
+  vs_top=vp;
+  vs_push(h);
+
+}
+
+void
+travel_find_sharing(object x,object table) {
+
+  object *vp=vs_top;
+
+  travel(x,1,1);
+
+  for (;vs_top>vp;vs_top--)
+      sethash(vs_head,table,make_fixnum(-2));
 
 }
 
