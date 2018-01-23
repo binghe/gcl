@@ -257,7 +257,7 @@ load_self_symbols() {
 
   for (ns=sl=0,sym=sy1;sym<sye;sym++) {
 
-    if (sym->n_sclass!=2 || sym->n_scnum<1)
+    if (sym->n_sclass<2 || sym->n_sclass>3 || sym->n_scnum<1)
       continue;
     
     ns++;
@@ -268,7 +268,7 @@ load_self_symbols() {
 
   }
 
-  c_table.alloc_length=c_table.length=ns;
+  c_table.alloc_length=ns;
   assert(c_table.ptable=malloc(sizeof(*c_table.ptable)*c_table.alloc_length));
   assert(st=malloc(sl));
 
@@ -294,8 +294,35 @@ load_self_symbols() {
     sym+=sym->n_numaux;
     
   }
-
+  c_table.length=a-c_table.ptable;
   qsort(c_table.ptable,c_table.length,sizeof(*c_table.ptable),node_compare);
+
+  for (c_table.local_ptable=a,sym=sy1;sym<sye;sym++) {
+
+    if (sym->n_sclass!=3 || sym->n_scnum<1)
+      continue;
+
+    NM(sym,st1,s,strcpy(st,s));
+
+    sec=sec1+sym->n_scnum-1;
+    jj=sym->n_value+sec->s_vaddr+h->h_ibase;
+
+#ifdef FIX_ADDRESS
+    FIX_ADDRESS(jj);
+#endif
+
+    a->address=jj;
+    a->string=st;
+
+    a++;
+    st+=strlen(st)+1;
+    sym+=sym->n_numaux;
+
+  }
+  c_table.local_length=a-c_table.local_ptable;
+  qsort(c_table.local_ptable,c_table.local_length,sizeof(*c_table.local_ptable),node_compare);
+
+  massert(c_table.alloc_length==c_table.length+c_table.local_length);
 
   massert(!un_mmap(v1,ve));
   massert(!fclose(f));
