@@ -20,7 +20,7 @@ OBJS:=$(addsuffix .o,typespec main alloc gbc bitop eval macros lex bds frame pre
 	num_pred num_comp num_arith num_sfun num_co num_log num_rand earith character sequence list hash\
 	array string regexpr structure toplevel file read backq print format pathname unixfsys unixfasl\
 	error unixtime unixsys unixsave funlink fat_string run_process nfunlink usig usig2 utils makefun\
-	sockets clxsocket init_pari nsocket sfasl prelink)
+	sockets clxsocket init_pari nsocket sfasl prelink gprof)
 OBJS:=$(OBJS) $(RL_OBJS) $(EXTRAS)
 
 INI_FILES=$(patsubst %.o,%.ini,${OBJS})
@@ -32,6 +32,9 @@ all:  $(OBJECTS)
 
 boot.o: boot.c $(DECL) boot.h
 	$(CC) -c $(CFLAGS) $(DEFS) -fPIC $*.c $(AUX_INFO) 
+
+gprof.o: gprof.c $(DECL)
+	$(CC) -c $(CFLAGS) $(DEFS) -pg $*.c $(AUX_INFO)
 
 prelink.o: prelink.c $(DECL)
 	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
