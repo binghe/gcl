@@ -483,6 +483,12 @@ Cannot compile ~a.~%"
 
 (defvar *use-buggy* nil)
 
+(defun remove-flag (flag flags)
+  (let ((i (search flag flags)))
+    (if i
+	(concatenate 'string (subseq flags 0 i) (remove-flag flag (subseq flags (+ i (length flag)))))
+      flags)))
+
 (defun  compiler-command (&rest args &aux na )
   (declare (special *c-debug*))
   (let ((dirlist (pathname-directory (first args)))
@@ -493,7 +499,7 @@ Cannot compile ~a.~%"
     (setq na  (namestring
 	       (make-pathname :name name :type (pathname-type(first args)))))
    (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a ~a"
-	   *cc*
+	   (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
 	   (if *prof-p* " -pg " "")
 	   (concatenate 'string si::*system-directory* "../h")
 	   (if (and (boundp '*c-debug*) *c-debug*) " -g " "")

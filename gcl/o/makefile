@@ -34,7 +34,7 @@ boot.o: boot.c $(DECL) boot.h
 	$(CC) -c $(CFLAGS) $(DEFS) -fPIC $*.c $(AUX_INFO) 
 
 gprof.o: gprof.c $(DECL)
-	$(CC) -c $(CFLAGS) $(DEFS) -pg $*.c $(AUX_INFO)
+	$(CC) -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO)
 
 prelink.o: prelink.c $(DECL)
 	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
