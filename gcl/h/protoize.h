@@ -1788,10 +1788,8 @@ int sigprocmask ( int how, const sigset_t *set, sigset_t *oldset );
 void recreate_heap1 ( void );
 #endif
 
-#ifdef GCL_GPROF
 void
 gprof_cleanup(void);
-#endif
 
 int
 msystem(const char *);
@@ -1970,3 +1968,6 @@ seek_to_end_ofile(FILE *);
 
 void
 travel_find_sharing(object,object);
+
+object
+new_cfdata(void);
