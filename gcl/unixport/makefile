@@ -69,28 +69,26 @@ $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 	[ "$(RL_OBJS)" = "" ] || \
 		echo "(AUTOLOAD 'init-readline '|readline|)" >>$@
 
-sys_init.lsp: sys_init.lsp.in
-
-	cat $< | sed \
-		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `cat ../release`#1" \
-		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
-		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
-		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
-		-e "s#@LI-RELEASE@#`cat ../release`#1" \
-		-e "s#@LI-CC@#\"$(GCL_CC) -c $(FINAL_CFLAGS)\"#1" \
-		-e "s#@LI-LD@#\"$(GCL_CC) $(LD_FLAGS) -o \"#1" \
-		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)\"#1" \
-		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
-		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
-		-e "s#@LI-INIT-LSP@#\"$@\"#1" >$@
-
-saved_%:raw_% $(RSYM) sys_init.lsp raw_%_map msys \
+saved_%:raw_% $(RSYM) sys_init.lsp.in raw_%_map msys \
 		$(CMPDIR)/gcl_cmpmain.lsp \
 		$(CMPDIR)/gcl_lfun_list.lsp \
 		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
 		$(LSPDIR)/gcl_auto_new.lsp
 
-	cp sys_init.lsp foo
+	cat sys_init.lsp.in | sed \
+		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `cat ../release`#1" \
+		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
+		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
+		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
+		-e "s#@LI-RELEASE@#`cat ../release`#1" \
+		-e "s#@LI-CC@#\"$(GCL_CC) -c $(filter-out -pg,$(FINAL_CFLAGS))\"#1" \
+		-e "s#@LI-DFP@#\"$(filter -pg,$(FINAL_CFLAGS))\"#1" \
+		-e "s#@LI-LD@#\"$(GCL_CC) $(LD_FLAGS) -o \"#1" \
+		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_POST)\"#1" \
+		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
+		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
+		-e "s#@LI-INIT-LSP@#\"$@\"#1" >foo
+
 	echo "(unless si::*quit-tags* (in-package \"USER\")(system:save-system \"$@\"))" >>foo
 	j=$$(ar t lib$*.a |grep ^gcl_);[ "$$j" = "" ] || ar x lib$*.a $$j #accelerator
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
@@ -160,7 +158,7 @@ map_%:
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
-		gazonk*.lsp plt*h *_map saved_* lib* raw_* msys out* log* tmp* gcl.script sys_init.lsp
+		gazonk*.lsp plt*h *_map saved_* lib* raw_* msys out* log* tmp* gcl.script
 
 .INTERMEDIATE: init_ansi_gcl.lsp.tmp init_gcl.lsp.tmp raw_gcl raw_ansi_gcl
 .PRECIOUS: init_pre_gcl.lsp init_gcl.lsp init_ansi_gcl.lsp

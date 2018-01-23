@@ -273,17 +273,15 @@ SEEK_TO_END_OFILE(fp);
 /* allocate some memory */
 #ifndef STAND	
 	{BEGIN_NO_INTERRUPT;
-	memory = alloc_object(t_cfdata);
-	memory->cfd.cfd_self = 0;
-	memory->cfd.cfd_start = 0;
-	memory->cfd.cfd_size = datasize+textsize+bsssize + extra_bss;
-	vs_push(memory);
-        the_start=start_address=        
-	 memory->cfd.cfd_start =	
-	 alloc_contblock(memory->cfd.cfd_size);
-	 sfaslp->s_start_data = start_address + textsize;
-	 sfaslp->s_start_bss = start_address + textsize + datasize;
-	 END_NO_INTERRUPT;
+	  memory=new_cfdata();
+	  memory->cfd.cfd_size = datasize+textsize+bsssize + extra_bss;
+	  vs_push(memory);
+	  the_start=start_address=
+	    memory->cfd.cfd_start=
+	    alloc_contblock(memory->cfd.cfd_size);
+	  sfaslp->s_start_data = start_address + textsize;
+	  sfaslp->s_start_bss = start_address + textsize + datasize;
+	  END_NO_INTERRUPT;
        }
 #else
 	the_start = start_address

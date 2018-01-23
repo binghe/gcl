@@ -146,9 +146,7 @@ object faslfile;
 	fread(&header, sizeof(header), 1, fp);
 #endif
 
-	memory = alloc_object(t_cfdata);
-	memory->cfd.cfd_self = NULL;
-	memory->cfd.cfd_start = NULL;
+	memory=new_cfdata();
 	memory->cfd.cfd_size = textsize + datasize + bsssize;
 	vs_push(memory);
 	/* If the file is smaller than the space asked for, typically the file
@@ -314,12 +312,10 @@ DEFUN_NEW("FASLINK-INT",object,fSfaslink_int,SI,2,2,NONE,II,OO,OO,OO,(object fas
 	setbuf(fp, buf);
 	fread(&header, sizeof(header), 1, fp);
 	{BEGIN_NO_INTERRUPT;
-	memory = alloc_object(t_cfdata);
-	memory->cfd.cfd_self=0;
-	memory->cfd.cfd_start = NULL;
-	memory->cfd.cfd_size = textsize + datasize + bsssize;
-	vs_push(memory);
-	memory->cfd.cfd_start = ALLOC_ALIGNED(alloc_contblock,
+	  memory=new_cfdata();
+	  memory->cfd.cfd_size = textsize + datasize + bsssize;
+	  vs_push(memory);
+	  memory->cfd.cfd_start = ALLOC_ALIGNED(alloc_contblock,
 					      memory->cfd.cfd_size,
 					      sizeof(double));
 	END_NO_INTERRUPT;}

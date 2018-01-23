@@ -355,7 +355,8 @@ struct cfdata {
   FIRSTWORD;
   char *cfd_start;
   int cfd_size;
-  int cfd_fillp;
+  int cfd_fillp:31;
+  int cfd_prof:1;
   object *cfd_self;
   SPAD;
 };

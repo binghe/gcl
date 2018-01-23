@@ -393,6 +393,15 @@ call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
 
    */
 
+DEFUN_NEW("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,
+	  NONE,OO,OO,OO,OO,(void),"") {
+
+  sSPmemory->s.s_dbind->cfd.cfd_prof=1;
+
+  return Cnil;
+
+}
+
 void
 do_init(object *statVV)
 {object fasl_vec=sSPinit->s.s_dbind;
@@ -467,6 +476,22 @@ char *s;
 	
 #endif
 
+object
+new_cfdata(void) {
+
+  object memory=alloc_object(t_cfdata);
+
+  memory->cfd.cfd_size=0;
+  memory->cfd.cfd_fillp=0;
+  memory->cfd.cfd_prof=0;
+  memory->cfd.cfd_self=0;
+  memory->cfd.cfd_start=0;
+
+  return memory;
+
+}
+
+
 void
 gcl_init_or_load1(void (*fn)(void),const char *file) {
 
@@ -476,10 +501,7 @@ gcl_init_or_load1(void (*fn)(void),const char *file) {
     object fasl_data;
     file=FIX_PATH_STRING(file);
     
-    memory=alloc_object(t_cfdata);
-    memory->cfd.cfd_self=0;
-    memory->cfd.cfd_fillp=0;
-    memory->cfd.cfd_size = 0;
+    memory=new_cfdata();
     memory->cfd.cfd_start= (char *)fn;
     printf("Initializing %s\n",file); fflush(stdout);
     fasl_data = read_fasl_data(file);

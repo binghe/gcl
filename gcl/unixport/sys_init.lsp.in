@@ -59,8 +59,10 @@
 
 (in-package :compiler)
 (setq *cc* @LI-CC@
+      *default-prof-p* (> (length @LI-DFP@) 0)
       *ld* @LI-LD@
       *ld-libs* @LI-LD-LIBS@
+      *ld-libs* (concatenate 'string "-l" #+ansi-cl "ansi_" "gcl " *ld-libs*)
       *opt-three* @LI-OPT-THREE@
       *opt-two* @LI-OPT-TWO@
       *init-lsp* @LI-INIT-LSP@)

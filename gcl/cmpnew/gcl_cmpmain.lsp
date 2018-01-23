@@ -98,7 +98,9 @@
 (defvar *default-c-file* nil)
 (defvar *default-h-file* nil)
 (defvar *default-data-file* nil)
+(defvar *default-prof-p* nil)
 (defvar *keep-gaz* nil)
+(defvar *prof-p* nil)
 
 ;;  (list section-length split-file-names next-section-start-file-position)
 ;;  Many c compilers cannot handle the large C files resulting from large lisp files.
@@ -167,10 +169,12 @@
                            (data-file *default-data-file*)
 			   (c-debug nil)
                            (system-p *default-system-p*)
+                           (prof-p *default-prof-p*)
 			   (print nil)
                            (load nil)
                       &aux (*standard-output* *standard-output*)
-                           (*error-output* *error-output*)
+		           (*prof-p* prof-p)
+		           (*error-output* *error-output*)
                            (*compiler-in-use* *compiler-in-use*)
 			   (*c-debug* c-debug)
 			   (*compile-print* (or print *compile-print*))
@@ -488,8 +492,9 @@ Cannot compile ~a.~%"
 	  (t (setq dir ".")))
     (setq na  (namestring
 	       (make-pathname :name name :type (pathname-type(first args)))))
-   (format nil  "~a -I~a ~a ~a -c ~a -o ~a ~a"
+   (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a ~a"
 	   *cc*
+	   (if *prof-p* " -pg " "")
 	   (concatenate 'string si::*system-directory* "../h")
 	   (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
            (case *speed*
