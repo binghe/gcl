@@ -1177,24 +1177,6 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
    call is too fragile.  20050115 CM*/
 static int gcl_alloc_initialized;
 
-
-#ifdef GCL_GPROF
-static unsigned long textstart,textend,textpage;
-static void init_textpage() {
-
-  extern void *GCL_GPROF_START;
-  unsigned long s=(unsigned long)GCL_GPROF_START;
-
-  textstart=(unsigned long)&GCL_GPROF_START;
-  textend=(unsigned long)&etext;
-  if (s<textend && (textstart>textend || s>textstart))
-    textstart=s;
-
-  textpage=2*(textend-textstart)/PAGESIZE;
-  
-}
-#endif
-
 object malloc_list=Cnil;
 
 #include <signal.h>
@@ -1218,10 +1200,6 @@ gcl_init_alloc(void *cs_start) {
 		    
 #if defined(DARWIN)
   init_darwin_zone_compat ();
-#endif
-  
-#ifdef GCL_GPROF
-  init_textpage();
 #endif
   
 #if defined(BSD) && defined(RLIMIT_STACK)
@@ -1301,11 +1279,6 @@ gcl_init_alloc(void *cs_start) {
   initial_sbrk=data_start=heap_end;
   first_data_page=page(data_start);
   
-/* #ifdef GCL_GPROF */
-/*   if (new_holepage<textpage) */
-/*      new_holepage=textpage; */
-/* #endif */
-
   /* Unused (at present) tm_distinct flag added.  Note that if cons
      and fixnum share page types, errors will be introduced.
 
@@ -1348,10 +1321,6 @@ gcl_init_alloc(void *cs_start) {
   ncbpage = 0;
   tm_table[t_contiguous].tm_min_grow=256;
   set_tm_maxpage(tm_table+t_contiguous,1);
-#ifdef GCL_GPROF
-  if (maxcbpage<textpage)
-    set_tm_maxpage(tm_table+t_contiguous,textpage);
-#endif
 
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
@@ -1701,20 +1670,7 @@ malloc_internal(size_t size) {
 void *
 malloc(size_t size) {
 
-  void *v=malloc_internal(size);;
-
-  /* FIXME: this is just to handle clean freeing of the
-     monstartup memory allocated automatically on raw image
-     startup.  In saved images, monstartup memory is only
-     allocated with gprof-start. 20040804 CM*/
-#ifdef GCL_GPROF
-  if (raw_image && size>(textend-textstart) && !initial_monstartup_pointer) {
-    massert(!atexit(gprof_cleanup));
-    initial_monstartup_pointer=v;
-  }
-#endif
-  
-  return v;
+  return malloc_internal(size);
   
 }
 
@@ -1723,7 +1679,6 @@ void
 free(void *ptr) {
 
   object *p,pp;
-  static void *initial_monstartup_pointer_echo;
   
   if (ptr == 0)
     return;
@@ -1732,15 +1687,9 @@ free(void *ptr) {
     if ((pp)->c.c_car->st.st_self == ptr) {
       (pp)->c.c_car->st.st_self = NULL;
       *p = pp->c.c_cdr;
-#ifdef GCL_GPROF
-      if (initial_monstartup_pointer==ptr) {
-	initial_monstartup_pointer_echo=ptr;
-	initial_monstartup_pointer=NULL;
-      }
-#endif
       return;
     }
-  if (ptr!=initial_monstartup_pointer_echo) {
+  {
     static void *old_ptr;
     if (old_ptr==ptr) return;
     old_ptr=ptr;
@@ -1748,7 +1697,6 @@ free(void *ptr) {
     FEerror("free(3) error.",0);
 #endif
   }
-  initial_monstartup_pointer_echo=NULL;
   return;
 }
  

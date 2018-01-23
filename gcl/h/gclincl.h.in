@@ -53,9 +53,6 @@
 /* use gprof profiling */
 #undef GCL_GPROF
 
-/* starting address for gprof */
-#undef GCL_GPROF_START
-
 /* No gettimeofday call -- fixme */
 #undef GETTOD_NOT_DECLARED
 
@@ -152,6 +149,9 @@
 
 /* use libbfd */
 #undef HAVE_LIBBFD
+
+/* Define to 1 if you have the `dl' library (-ldl). */
+#undef HAVE_LIBDL
 
 /* Define to 1 if you have the `opcodes' library (-lopcodes). */
 #undef HAVE_LIBOPCODES
@@ -255,9 +255,6 @@
 /* using xgcl */
 #undef HAVE_XGCL
 
-/* number of pages to use for hole */
-#undef HOLEPAGE
-
 /* Host cpu */
 #undef HOST_CPU
 
@@ -266,9 +263,6 @@
 
 /* Host system */
 #undef HOST_SYSTEM
-
-/* time system constant */
-#undef HZ
 
 /* invocation history stack size */
 #undef IHSSIZE
@@ -321,7 +315,7 @@
 /* can use C extension for object alignment */
 #undef OBJ_ALIGN
 
-/* needed object alignment in bytes */
+/* needed object alignment bytes */
 #undef OBJ_ALIGNMENT
 
 /* Define to the address where bug reports for this package should be sent. */
@@ -345,7 +339,7 @@
 /* system pagewidth */
 #undef PAGEWIDTH
 
-/* have sigcontext in signal.h */
+/* have sigcontext of signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT
 
 /* sizeof linked list for contiguous pages */

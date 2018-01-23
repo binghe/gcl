@@ -4131,30 +4131,11 @@ $as_echo "disabled" >&6; }
 		   else
 		       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
-		       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for text start" >&5
-$as_echo_n "checking for text start... " >&6; }
-		       echo 'int main () {return(0);}' >foo.c
-		       $CC foo.c -o foo
-		       GCL_GPROF_START=`nm foo | $AWK  '/  *[TD]  *__*start$/ {print $NF}'` # D for ppc64 -- FIXME custreloc
-		       rm -f foo.c foo
-		       if test "$GCL_GPROF_START" != "" ; then
-			   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GCL_GPROF_START" >&5
-$as_echo "$GCL_GPROF_START" >&6; }
-
-cat >>confdefs.h <<_ACEOF
-#define GCL_GPROF_START $GCL_GPROF_START
-_ACEOF
-
-			   assert_arg_to_cflags -pg
-			   case $use in
-			       s390*) ;; # relocation truncation bug in gcc
-			       *) TLIBS="$TLIBS -pg";;
-			   esac
-       			   TFPFLAG=""
+     		       assert_arg_to_cflags -pg
+       		       TFPFLAG=""
 
 $as_echo "#define GCL_GPROF 1" >>confdefs.h
 
-		       fi
 		   fi
 	       fi
 fi
