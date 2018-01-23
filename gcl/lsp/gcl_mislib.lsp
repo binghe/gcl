@@ -165,3 +165,27 @@
       (push (string-concatenate s l) nl))
     (setq *load-path* nl))
   nil)
+
+(defun default-symtab nil (concatenate 'string *tmp-dir* "gcl_symtab"))
+
+(defun gprof-output (symtab gmon)
+  (with-open-file
+     (s (format nil "|gprof -S '~a' '~a' '~a'" symtab (kcl-self) gmon))
+     (copy-stream s *standard-output*)))
+
+
+(defun gprof-start (&optional (start 0 start-p) (end 0 end-p) (symtab (default-symtab)))
+  (unless end-p
+    (multiple-value-bind
+     (s e)
+     (gprof-addresses)
+     (setq start (if start-p start s) end e)))
+  (when (monstartup start end)
+    (write-symtab symtab start end)))
+
+(defun gprof-quit (&optional (symtab (default-symtab)) &aux (gmon (mcleanup)))
+  (when gmon
+    (gprof-output symtab gmon)))
+
+
+
