@@ -166,24 +166,45 @@
     (setq *load-path* nl))
   nil)
 
-(defun default-symtab nil (concatenate 'string *tmp-dir* "gcl_symtab"))
-
 (defun gprof-output (symtab gmon)
   (with-open-file
      (s (format nil "|gprof -S '~a' '~a' '~a'" symtab (kcl-self) gmon))
      (copy-stream s *standard-output*)))
 
+(defun write-symtab (symtab start end &aux (*package* (find-package "KEYWORD")))
 
-(defun gprof-start (&optional (start 0 start-p) (end 0 end-p) (symtab (default-symtab)))
-  (unless end-p
-    (multiple-value-bind
-     (s e)
-     (gprof-addresses)
-     (setq start (if start-p start s) end e)))
-  (when (monstartup start end)
-    (write-symtab symtab start end)))
+  (with-open-file
+   (s symtab :direction :output :if-exists :supersede)
 
-(defun gprof-quit (&optional (symtab (default-symtab)) &aux (gmon (mcleanup)))
+   (format s "~16,'0x T ~a~%" start "GCL_MONSTART")
+
+   (dolist (p (list-all-packages))
+     (do-symbols (x p)
+      (when (and (eq (symbol-package x) p) (fboundp x))
+	(let* ((y (symbol-function x))
+	       (y (if (and (consp y) (eq 'macro (car y))) (cdr y) y))
+	       (y (if (compiled-function-p y) (function-start y) 0)))
+	  (when (<= start y end)
+	    (format s "~16,'0x T ~s~%" y x))))))
+
+   (let ((string-register ""))
+     (dotimes (i (ptable-alloc-length))
+       (multiple-value-bind
+	(x y) (ptable i string-register)
+	(when (<= start x end)
+	  (format s "~16,'0x T ~a~%" x y)))))
+
+   (format s "~16,'0x T ~a~%" end "GCL_MONEND"))
+
+  symtab)
+
+(defun gprof-start (&optional (symtab "gcl_symtab") (adrs (gprof-addresses))
+			      &aux (start (car adrs))(end (cdr adrs)))
+  (let ((symtab (write-symtab symtab start end)))
+    (when (monstartup start end)
+      symtab)))
+
+(defun gprof-quit (&optional (symtab "gcl_symtab") &aux (gmon (mcleanup)))
   (when gmon
     (gprof-output symtab gmon)))
 

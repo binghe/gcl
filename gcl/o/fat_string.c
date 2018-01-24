@@ -59,17 +59,16 @@ DEFUN_NEW("PROFILE",object,fSprofile,SI
 }
 
 #endif
-DEFUN_NEW("FUNCTION-START",object,fSfunction_start,SI
-       ,1,1,NONE,OO,OO,OO,OO,(object funobj),"")
-{/* 1 args */
- if(type_of(funobj)!=t_cfun
-    && type_of(funobj)!=t_sfun
-    && type_of(funobj)!=t_vfun
-    && type_of(funobj)!=t_afun
-    && type_of(funobj)!=t_gfun)
-    FEerror("not compiled function",0);
- funobj=make_fixnum((long) (funobj->cf.cf_self));
- RETURN1(funobj);
+DEFUN_NEW("FUNCTION-START",object,fSfunction_start,SI,1,1,NONE,OO,OO,OO,OO,(object funobj),"") {
+
+  switch (type_of(funobj)) {
+  case t_cfun:case t_sfun:case t_vfun:case t_afun:case t_gfun:case t_closure:case t_cclosure:
+    return make_fixnum((long) (funobj->cf.cf_self));
+  default:
+    TYPE_ERROR(funobj,sLcompiled_function);
+    return Cnil;
+  }
+
 }
 
 /* begin fasl stuff*/
