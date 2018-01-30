@@ -5,12 +5,14 @@
 
 #undef MPROTECT_ACTION_FLAGS
 #define MPROTECT_ACTION_FLAGS SA_RESTART|SA_SIGINFO
-#ifdef IN_GBC
-#include <ucontext.h>
-#define GET_FAULT_ADDR(sig,code,scp,addr) \
-  (char *)((struct ucontext *)scp )->uc_mcontext.sc_traparg_a0
-#endif
-#define SGC
+/* #ifdef IN_GBC */
+/* #include <ucontext.h> */
+/* #define GET_FAULT_ADDR(sig,code,scp,addr) \ no longer working*/
+/*   (char *)((struct ucontext *)scp )->uc_mcontext.sc_traparg_a0 */
+/*#define GET_FAULT_ADDR(sig,code,sv,a) ((siginfo_t *)code)->si_addr  perhaps try this when get access*/
+/* #endif */
+/* #define SGC */
+#undef SGC
 
 #define RELOC_H "elf64_alpha_reloc.h"
 #define SPECIAL_RELOC_H "elf64_alpha_reloc_special.h"
