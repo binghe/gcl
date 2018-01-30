@@ -16,7 +16,7 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
   Rela *r;
   void *ve;
 
-  massert((sec=get_section(".rela.plt",sec1,sece,sn)));
+  massert((sec=get_section(".rela.dyn",sec1,sece,sn)));
 
   v+=sec->sh_offset;
   ve=v+sec->sh_size;
