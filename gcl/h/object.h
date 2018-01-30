@@ -401,9 +401,9 @@ char *tmp_alloc;
    */
 
 #define ALLOC_ALIGNED(f, size,align) \
-  (align <= sizeof(plong) ? (char *)((f)(size)) : \
-   (tmp_alloc = (char *)((f)(size+(size ?(align)-1 : 0)))+(align)-1 , \
-   (char *)(align * (((unsigned long)tmp_alloc)/align))))
+  ({ufixnum _size=size,_align=align;_align <= sizeof(plong) ? (char *)((f)(_size)) :	\
+    (tmp_alloc = (char *)((f)(_size+(_size ?(_align)-1 : 0)))+(_align)-1 ,	\
+    (char *)(_align * (((unsigned long)tmp_alloc)/_align)));})
 #define AR_ALLOC(f,n,type) (type *) \
   (ALLOC_ALIGNED(f,(n)*sizeof(type),sizeof(type)))
 

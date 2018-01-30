@@ -47,13 +47,17 @@ DEFUN_NEW("PROFILE",object,fSprofile,SI
   
   object ar=sSAprofile_arrayA->s.s_dbind;
   void *x;
+  fixnum a,s;
 
   if (type_of(ar)!=t_string)
     FEerror("si:*Profile-array* not a string",0);
   if( type_of(start_address)!=t_fixnum ||   type_of(scale)!=t_fixnum)
     FEerror("Needs start address and scale as args",0);
 
-  x=!(fix(start_address)*fix(scale)) ? NULL : (void *) (ar->ust.ust_self);
+  massert((a=fix(start_address))>=0);
+  massert((s=fix(scale))>=0);
+
+  x=a&&s ? (void *) (ar->ust.ust_self) : NULL;
   profil(x, (ar->ust.ust_dim),fix(start_address),fix(scale) << 8);
   RETURN1(start_address);
 }
