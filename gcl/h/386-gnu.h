@@ -59,3 +59,5 @@
 #define RELOC_H "elf32_i386_reloc.h"
 
 #define NEED_STACK_CHK_GUARD
+
+#undef HAVE_D_TYPE /*FIXME defined, but not implemented in readdir*/

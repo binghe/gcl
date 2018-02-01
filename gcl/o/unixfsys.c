@@ -307,8 +307,11 @@ DEFUN_NEW("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") 
 	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
 	       )
 #else
+#undef DT_UNKNOWN
 #define DT_UNKNOWN 0
+#undef DT_REG
 #define DT_REG 1
+#undef DT_DIR
 #define DT_DIR 2
 	  list(3,
 	       MMcons(make_fixnum(DT_REG),make_keyword("FILE")),
