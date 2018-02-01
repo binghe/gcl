@@ -658,7 +658,7 @@ Cannot compile ~a.~%"
 (defun make-user-init (files outn)
 
   (let* ((c (pathname outn))
-	 (c (merge-pathnames c (make-pathname :directory '(:current))))
+	 (c (merge-pathnames c (make-pathname :directory '(:relative))))
 	 (o (merge-pathnames (make-pathname :type "o") c))
 	 (c (merge-pathnames (make-pathname :type "c") c)))
   
@@ -769,7 +769,7 @@ Cannot compile ~a.~%"
 
     (with-open-file (st (namestring map) :direction :output))
     (safe-system 
-     (let* ((par (namestring (make-pathname :directory '(:back))))
+     (let* ((par (namestring (make-pathname :directory '(:relative :back))))
 	    (i (concatenate 'string " " par))
 	    (j (concatenate 'string " " si::*system-directory* par)))
        (format nil "~a ~a ~a ~a -L~a ~a ~a ~a"
