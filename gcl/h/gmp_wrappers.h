@@ -148,6 +148,8 @@ MEM_GMP_CALL(1,gmp_ulint,mpz_popcount,0,mpz_t)
 /*MEM_GMP_CALL(2,void *,mpz_realloc,mpz_t,mp_size_t)*/
 MEM_GMP_CALL(1,size_t,mpz_size,0,mpz_t)
 MEM_GMP_CALL(2,size_t,mpz_sizeinbase,0,mpz_t,int)
+MEM_GMP_CALL(1,void,gmp_randinit_default,0,__gmp_randstate_struct *)
+MEM_GMP_CALL(2,void,gmp_randseed_ui,0,__gmp_randstate_struct *,unsigned long int)
 
      /* FIXME: find a way to have this follow the convention in gmp.h*/
 
@@ -191,5 +193,7 @@ MEM_GMP_CALL(2,size_t,mpz_sizeinbase,0,mpz_t,int)
 /*#define __gmpz_realloc m__gmpz_realloc*/
 #define __gmpz_size m__gmpz_size
 #define __gmpz_sizeinbase m__gmpz_sizeinbase
+#define __gmp_randinit_default m__gmp_randinit_default
+#define __gmp_randseed_ui m__gmp_randseed_ui
 
 #endif /*GMP_WRAPPERS_H*/
