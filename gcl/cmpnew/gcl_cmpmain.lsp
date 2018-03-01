@@ -281,10 +281,8 @@ Cannot compile ~a.~%"
 	  (if (consp *split-files*)
 	      (dolist (v (fourth *split-files*)) (t1expr v)))
 	  (unwind-protect
-	      (do ((form (read *compiler-input* nil eof)
-			 (read *compiler-input* nil eof))
-		   (load-flag (or (eq :defaults *eval-when-defaults*)
-				  (member 'load *eval-when-defaults*))))
+	      (do ((form (read *compiler-input* nil eof)(read *compiler-input* nil eof))
+		   (load-flag (if  *eval-when-defaults* (member 'load *eval-when-defaults*) t)))
 		  (nil)
 		  (cond
 		   ((eq form eof))
