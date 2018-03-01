@@ -35,22 +35,6 @@ object make_pathname ();
 
 static int needs_patching;
 
-
-struct fasd {
-  object stream;   /* lisp object of type stream */
-  object table;  /* hash table used in dumping or vector on input*/
-  object eof;      /* lisp object to be returned on coming to eof mark */
-  object direction;    /* holds Cnil or sKinput or sKoutput */
-  object package;  /* the package symbols are in by default */
-  object index;     /* integer.  The current_dump index on write  */
-  object filepos;   /* nil or the position of the start */ 
-  object table_length; /*    On read it is set to the size dump array needed
-		     or 0
-		     */
-  object evald_items;  /* a list of items which have been eval'd and must
-			  not be walked by fasd_patch_sharp */
-};
-
 struct fasd current_fasd;
 
 
@@ -631,6 +615,7 @@ DEFUN_NEW("OPEN-FASD",object,fSopen_fasd,SI,4,4,NONE,OO,OO,OO,OO,(object stream,
     fd->index=make_fixnum(dump_index);
     fd->filepos=current_fasd.filepos;
     fd->package=current_fasd.package;
+    fd->table_length=current_fasd.table_length;
     return result;
   }}
 
@@ -1401,66 +1386,6 @@ clrhash(object table)
        table->ht.ht_self[i].hte_key = OBJNULL;
        table->ht.ht_self[i].hte_value = OBJNULL;}
    table->ht.ht_nent =0;}
-
-
-
-object read_fasl_vector1();
-object
-read_fasl_vector(object in)
-{char ch;
- object orig = in;
- object d;
- int tem;
- if (((tem=getc(((FILE *)in->sm.sm_fp))) == EOF) && feof(((FILE *)in->sm.sm_fp)))
-   { char *pf;
-     coerce_to_filename(in,FN1);
-     for (pf=FN1+strlen(FN1);pf>FN1 && pf[-1]!='.';pf--);
-     if (pf==FN1) {pf=FN1+strlen(FN1);*pf++='.';}
-     snprintf(pf,sizeof(FN1)-(pf-FN1),"data");
-     d=make_simple_string(FN1);
-     in = open_stream(d,smm_input,Cnil,Cnil);
-     if (in == Cnil) 
-       FEerror("Can't open file ~s",1,d);
-   }
- else if (tem != EOF)
-   { ungetc(tem,in->sm.sm_fp);}
-  while (1)
-   { ch=readc_stream(in);
-     if (ch=='#')
-       {unreadc_stream(ch,in);
-	return read_fasl_vector1(in);}
-     if (ch== d_begin_dump){
-       unreadc_stream(ch,in);
-       break;}}
- {object ar=FFN(fSopen_fasd)(in,sKinput,0,Cnil);
-  int n=fix(current_fasd.table_length);
-  object result,last;
-  { BEGIN_NO_INTERRUPT;
-#ifdef HAVE_ALLOCA
-  current_fasd.table->v.v_self
-    = (object *)alloca(n*sizeof(object));
-#else
-  current_fasd.table->v.v_self
-    = (object *)alloc_relblock(n*sizeof(object));
-#endif
-  current_fasd.table->v.v_dim=n;
-  current_fasd.table->v.v_fillp=n;
-  gset( current_fasd.table->v.v_self,0,n,aet_object);
-  END_NO_INTERRUPT;
-  }  
-  result=FFN(fSread_fasd_top)(ar);
-  if (type_of(result) !=t_vector) goto ERROR;
-  last=result->v.v_self[result->v.v_fillp-1];
-  if(type_of(last)!=t_cons || last->c.c_car !=sSPinit)
-    goto ERROR;
-  current_fasd.table->v.v_self = 0;
-  FFN(fSclose_fasd)(ar);
-  if (orig != in)
-    close_stream(in);
-  return result;
- ERROR: FEerror("Bad fasd stream ~a",1,in);
-  return Cnil;
-}}
 
 object IfaslInStream;
 /* static void */

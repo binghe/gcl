@@ -72,7 +72,6 @@
 
 
 (defvar *top-level-forms* nil)
-(defvar *non-package-operation* nil)
 
 ;;; *top-level-forms* holds ( { top-level-form }* ).
 ;;;
@@ -99,18 +98,7 @@
 
 ;;; Package operations.
 
-(si:putprop 'make-package t 'package-operation)
-(si:putprop 'in-package t 'package-operation)
-(si:putprop 'shadow t 'package-operation)
-(si:putprop 'shadowing-import t 'package-operation)
-(si:putprop 'export t 'package-operation)
-(si:putprop 'unexport t 'package-operation)
-(si:putprop 'use-package t 'package-operation)
-(si:putprop 'unuse-package t 'package-operation)
-(si:putprop 'import t 'package-operation)
-(si:putprop 'provide t 'package-operation)
-(si:putprop 'require t 'package-operation)
-(si:putprop 'defpackage:defpackage t 'package-operation)
+(si:putprop 'in-package t 'eval-at-compile)
 
 ;;; Pass 1 top-levels.
 
@@ -135,6 +123,7 @@
 ;;; Pass 2 initializers.
 
 (si:putprop 'defun 't2defun 't2)
+(si:putprop 'progn 't2progn 't2)
 (si:putprop 'declare 't2declare 't2)
 (si:putprop 'defentry 't2defentry 't2)
 (si:putprop 'si:putprop 't2putprop 't2)
@@ -142,6 +131,7 @@
 ;;; Pass 2 C function generators.
 
 (si:putprop 'defun 't3defun 't3)
+(si:putprop 'progn 't3progn 't3)
 (si:putprop 'ordinary 't3ordinary 't3)
 (si:putprop 'sharp-comma 't3sharp-comma 't3)
 (si:putprop 'clines 't3clines 't3)
@@ -242,15 +232,6 @@
             ((symbolp fun)
              (cond ((eq fun 'si:|#,|)
                     (cmperr "Sharp-comma-macro is in a bad place."))
-                   ((get fun 'package-operation)
-                    (when *non-package-operation*
-                      (cmpwarn "The package operation ~s was in a bad place."
-                               form))
-		    (let ((res (if (setq fd (macro-function fun))
-				   (cmp-expand-macro fd fun (copy-list (cdr form)))
-				 form)))
-		      (maybe-eval t res)
-		      (wt-data-package-operation res)))
                    ((setq fd (get fun 't1))
                     (when *compile-print* (print-current-form))
                     (funcall fd args))
@@ -278,11 +259,24 @@
 (defvar *vaddress-list*)   ;; hold addresses of C functions, and other data
 (defvar *vind*)            ;; index in the VV array where the address is.
 (defvar *Inits*)
+
+(defun t23expr (form prop &aux (def (when (consp form) (get (car form) prop)))
+		     *local-funs* (*first-error* t) *vcs-used*)
+  (when def
+    (apply def (cdr form)))
+  (when (eq prop 't3)
+      ;;; Local function and closure function definitions.
+    (block
+     nil
+     (loop
+      (when (endp *local-funs*) (return))
+      (let (*vcs-used*)
+	(apply 't3local-fun (pop *local-funs*)))))))
+
 (defun ctop-write (name &aux
-			def
-		(*function-links* nil) *c-vars* (*volatile* " VOL ")
-		*vaddress-list* (*vind* 0)  *inits*
-		*current-form* *vcs-used*)
+		   (*function-links* nil) *c-vars* (*volatile* " VOL ")
+		   *vaddress-list* (*vind* 0)  *inits*
+		   *current-form* *vcs-used*)
   (declare (special *current-form* *vcs-used*))
 
   (setq *top-level-forms* (nreverse *top-level-forms*))
@@ -295,32 +289,19 @@
 
 
   ;; write all the inits.
-  (dolist* (*current-form* *top-level-forms*)
-	   (setq *first-error* t)	   
-	   (setq *vcs-used* nil)
-           (when (setq def (get (car *current-form*) 't2))
-                 (apply def (cdr *current-form*))))
-
+  (dolist (*current-form* *top-level-forms*)
+    (t23expr *current-form* 't2))
   
   ;;; C function definitions.
-  (dolist* (*current-form* *top-level-forms*)
-	   (setq *first-error* t)	   
-	   (setq *vcs-used* nil)
-           (when (setq def (get (car *current-form*) 't3))
-                 (apply def (cdr *current-form*))))
-
-  ;;; Local function and closure function definitions.
-  (let (lf)
-       (block local-fun-process
-         (loop
-          (when (endp *local-funs*) (return-from local-fun-process))
-          (setq lf (car *local-funs*))
-          (pop *local-funs*)
-	  (setq *vcs-used* nil)
-          (apply 't3local-fun lf))))
+  (dolist (*current-form* *top-level-forms*)
+    (let* ((inits (data-inits)))
+      (t23expr *current-form* 't3)
+      (unless (or (eq (data-inits) inits) (eq (cdr (data-inits)) inits))
+	(let ((di (data-inits)))
+	  (setf (data-inits) inits)
+	  (add-init (cons 'progn (nreverse (mapcar 'cdr (ldiff di inits)))))))))
 
   ;;; Global entries for directly called functions.
-
   (dolist* (x *global-entries*)
 	   (setq *vcs-used* nil)
            (apply 'wt-global-entry x))
@@ -441,7 +422,17 @@
 	 (let ((*compile-ordinaries* t))
 	   (t1progn (cdr args))))
 	(t
-	 (dolist** (form args) (t1expr form)))))
+	 (let ((f *top-level-forms*))
+	   (dolist (form args) (t1expr form))
+	   (setq *top-level-forms* (cons (cons 'progn (nreverse (ldiff *top-level-forms* f))) f))))))
+
+(defun t3progn (&rest args)
+  (dolist (arg args)
+    (t23expr arg 't3)))
+
+(defun t2progn (&rest args)
+  (dolist (arg args)
+    (t23expr arg 't2)))
 
 ;; (defun foo (x) ..   -> (defun foo (g102 &aux (x g102)) ... 
 (defun  cmpfix-args (args bind &aux tem (lam (copy-list (second args))))
@@ -464,7 +455,6 @@
   (unless (macro-function (car args)) (maybe-eval nil (cons 'defun args)))
  (tagbody
    top
-  (setq *non-package-operation* t)
   (setq *local-functions* nil)
   (let ((*vars* nil) (*funs* nil) (*blocks* nil) (*tags* nil) lambda-expr
          (*special-binding* nil)
@@ -681,8 +671,8 @@
   (push (list a) *vaddress-list*)
   (prog1 *vind* (incf *vind*)))
 
-(defun t2defun (fname cfun lambda-expr doc sp)
-  (declare (ignore cfun lambda-expr doc sp))
+(defun t2defun (fname cfun lambda-expr doc sp &optional macro-p)
+  (declare (ignore cfun lambda-expr doc sp macro-p))
   (cond ((get fname 'no-global-entry)(return-from t2defun nil)))
   (cond ((< *space* 2)
 	 (setf (get fname 'debug-prop) t)
@@ -716,8 +706,7 @@
         (t (wt-h cfun "();")
 	   (add-init `(si::mf ',fname ,(add-address (c-function-name "" cfun fname)))))))
 
-(defun t3defun (fname cfun lambda-expr doc sp &aux inline-info 
-		      (macro-p (equal `(mflag ,fname) (cadr (member *current-form* *top-level-forms*))))
+(defun t3defun (fname cfun lambda-expr doc sp &optional macro-p &aux inline-info
 		      (*current-form* (list 'defun fname))
 		      (*volatile* (volatile (second lambda-expr)))
 		      *downward-closures*)
@@ -1333,47 +1322,29 @@
   (maybe-eval (not (macro-function n)) (cons 'defmacro w));FIXME?
   (t1expr `(defun ,n ,@(if macp args (cddr (caddr (si::defmacro* n (pop args) args))))))
   (setf (symbol-plist n) l)
-  (push `(mflag ,n) *top-level-forms*))
+  (nconc (car *top-level-forms*) '(t)))
 
-(defun t1ordinary (form &aux tem )
-  (setq *non-package-operation* t)
-  ;; check for top level functions
-  (cond ((or *compile-ordinaries* (when (listp form) (member (car form) '(let let* flet labels))))
+(defvar *compiling-ordinary* nil)
+
+(defun compile-ordinary-p (form)
+  (when (consp form)
+    (or (member (car form) '(lambda defun defmacro flet labels))
+	(compile-ordinary-p (car form))
+	(compile-ordinary-p (cdr form)))))
+
+(defun t1ordinary (form)
+  (cond ((unless *compiling-ordinary*
+	   (or *compile-ordinaries* (compile-ordinary-p form)))
 	 (maybe-eval nil form)
-	 (let ((gen (gensym "progn 'compile")))
+	 (let ((gen (gensym))(*compiling-ordinary* t))
 	   (proclaim `(function ,gen nil t))
-	   (t1expr `(defun ,gen (), form nil))
-	   (push (list 'ordinary `(,gen) ) *top-level-forms*)))
-	;;Hack to things like (setq bil #'(lambda () ...)) or (foo nil #'(lambda () ..))
-	;; but not (let ((x ..)) (setq bil #'(lambda () ..)))
-	;; for the latter you must use (progn 'compile ...)
-	((and (consp form)
-	      (symbolp (car form))
-	      (or (eq (car form) 'setq)
-		  (not (special-operator-p (car form))))
-	      (do ((v (cdr form) (and (consp v) (cdr v)))
-		   (i 1 (the fixnum (+ 1 i))))
-		  ((or (>= i 1000)
-		       (not (consp v))) nil)
-		  (declare (fixnum i))
-		  (cond ((and (consp (car v))
-			      (eq (caar v) 'function)
-			      (consp (setq tem (second (car v))))
-			      (eq (car tem) 'lambda))
-			 (let ((gen (gensym)))
-			   (t1expr `(defun ,gen ,@ (cdr tem)))
-			   (return-from t1ordinary
-					(t1ordinary (append
-						     (subseq form 0 i)
-						     `((symbol-function ', gen))
-						     (nthcdr (+ 1 i) form))))))))))
+	   (t1expr `(progn (defun ,gen nil ,form nil) (,gen)))))
 	(t 
 	 (maybe-eval nil form)
 	 (let ((*vars* nil) (*funs* nil) (*blocks* nil) (*tags* nil)
 	       (*sharp-commas* nil))
 	   (push (list 'ordinary  form) *top-level-forms*)
-	   nil
-	   ))))
+	   nil))))
 
 (defun t3ordinary (form)
   (cond ((atom form))

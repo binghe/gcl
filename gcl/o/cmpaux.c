@@ -324,63 +324,18 @@ object_to_string(object x) {
 /* } */
 /* #endif */
 
+
 void
-call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
-{object form;
- FUNC at;
-/* #ifdef CLEAR_CACHE */
-/*  static int n; */
-/*  static sigset_t ss; */
+call_init(int init_address,object memory,object faslfile) {
 
-/*  if (!n) { */
-/*      struct sigaction sa={{(void *)sigh},{{0}},SA_RESTART|SA_SIGINFO,NULL}; */
+  bds_bind(sSPmemory,memory);
+  bds_bind(sSPinit,faslfile);
+  ((FUNC)(memory->cfd.cfd_start+init_address))();
+  bds_unwind1;
+  bds_unwind1;
 
-/*      sigaction(SIGILL,&sa,NULL); */
-/*      sigemptyset(&ss); */
-/*      sigaddset(&ss,SIGILL); */
-/*      sigprocmask(SIG_BLOCK,&ss,NULL); */
-/*      n=1; */
-/*  } */
-/* #endif */
+}
 
-
-  check_type(fasl_vec,t_vector);
-  form=(fasl_vec->v.v_self[fasl_vec->v.v_fillp -1]);
-
- if (fptr) at = fptr;
-  else 
- at=(FUNC)(memory->cfd.cfd_start+ init_address );
- 
-#ifdef VERIFY_INIT
- VERIFY_INIT
-#endif
-   
- if (type_of(form)==t_cons &&
-     form->c.c_car == sSPinit)
-   {bds_bind(sSPinit,fasl_vec);
-    bds_bind(sSPmemory,memory);
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_UNBLOCK,&ss,NULL); */
-/* #endif */
-    (*at)();
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_BLOCK,&ss,NULL); */
-/* #endif */
-    bds_unwind1;
-    bds_unwind1;
-  }
- else
-   /* old style three arg init, with all init being done by C code. */
-   {memory->cfd.cfd_self = fasl_vec->v.v_self;
-    memory->cfd.cfd_fillp = fasl_vec->v.v_fillp;
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_UNBLOCK,&ss,NULL); */
-/* #endif */
-    (*at)(memory->cfd.cfd_start, memory->cfd.cfd_size, memory);
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_BLOCK,&ss,NULL); */
-/* #endif */
-}}
 
 /* statVV is the address of some static storage, which is used by the
    cfunctions to refer to global variables,..
@@ -393,6 +348,59 @@ call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
 
    */
 
+void
+do_init(object *statVV) {
+
+  object faslfile=sSPinit->s.s_dbind;
+  object data=sSPmemory->s.s_dbind;
+  object *p,*q,y;
+  int i,n;
+  object fasl_vec;
+  char ch;
+
+  ch=readc_stream(faslfile);
+  unreadc_stream(ch,faslfile);
+
+  if (ch!='\n') {
+    struct fasd * fd;
+    faslfile=FFN(fSopen_fasd)(faslfile,sKinput,OBJNULL,Cnil);
+    fd=(struct fasd *)faslfile->v.v_self;
+    n=fix(fd->table_length);
+    fd->table->v.v_self=alloca(n*sizeof(object));
+    memset(fd->table->v.v_self,0,n*sizeof(object));
+    fd->table->v.v_dim=faslfile->v.v_self[1]->v.v_fillp=n;
+  }
+
+  n=fix(type_of(faslfile)==t_stream ? read_object(faslfile) : FFN(fSread_fasd_top)(faslfile));
+  sSPinit->s.s_dbind=fasl_vec=fSmake_vector1_1(n,aet_object,Cnil);
+
+  /* switch SPinit to point to a vector of function addresses */
+
+  fasl_vec->v.v_elttype = aet_fix;
+
+  /* swap the entries */
+  for (i=0,p=fasl_vec->v.v_self,q=statVV;i<n;i++) {
+    y=*p;
+    *p++=*q;
+    *q++=y;
+  }
+
+  data->cfd.cfd_self = statVV;
+  data->cfd.cfd_fillp= n;
+  statVV[n-1] = data;
+
+  /* So now the fasl_vec is a fixnum array, containing random addresses of c
+     functions and other stuff from the compiled code.
+     data is what it wants to be for the init
+  */
+  /* Now we can run the forms f1 f2 in form= (%init f1 f2 ...) */
+
+  FFN(fSload_stream)(faslfile,Cnil);
+  if (type_of(faslfile)!=t_stream)
+    FFN(fSclose_fasd)(faslfile);
+
+}
+
 DEFUN_NEW("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,
 	  NONE,OO,OO,OO,OO,(void),"") {
 
@@ -401,57 +409,6 @@ DEFUN_NEW("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,
   return Cnil;
 
 }
-
-void
-do_init(object *statVV)
-{object fasl_vec=sSPinit->s.s_dbind;
- object data = sSPmemory->s.s_dbind;
- {object *p,*q,y;
-  int n=fasl_vec->v.v_fillp -1;
-  int i;
-  object form;
-  check_type(fasl_vec,t_vector);
-  form = fasl_vec->v.v_self[n];
-  dcheck_type(form,t_cons);  
-
-
-  /* switch SPinit to point to a vector of function addresses */
-     
-  fasl_vec->v.v_elttype = aet_fix;
-  fasl_vec->v.v_dim *= (sizeof(object)/sizeof(fixnum));
-  fasl_vec->v.v_fillp *= (sizeof(object)/sizeof(fixnum));
-  
-  /* swap the entries */
-  p = fasl_vec->v.v_self;
-
-  q = statVV;
-  for (i=0; i<=n ; i++)
-    {  y = *p;
-     *p++ = *q;
-     *q++ = y;
-     }
-  
-  data->cfd.cfd_self = statVV;
-  data->cfd.cfd_fillp= n+1;
-  statVV[n] = data;
-  
-
-  /* So now the fasl_vec is a fixnum array, containing random addresses of c
-     functions and other stuff from the compiled code.
-     data is what it wants to be for the init
-  */
-  /* Now we can run the forms f1 f2 in form= (%init f1 f2 ...) */
-
-  form=form->c.c_cdr;
-  {object *top=vs_top;
-   
-   for(i=0 ; i< form->v.v_fillp; i++)
-     { 
-       eval(form->v.v_self[i]);
-       vs_top=top;
-     }
- }
-}}
 
 #ifdef DOS
 #define PATH_LIM 8
@@ -498,14 +455,15 @@ gcl_init_or_load1(void (*fn)(void),const char *file) {
   if (file[strlen(file)-1]=='o') {
 
     object memory;
-    object fasl_data;
+    object faslfile;
     file=FIX_PATH_STRING(file);
     
     memory=new_cfdata();
     memory->cfd.cfd_start= (char *)fn;
     printf("Initializing %s\n",file); fflush(stdout);
-    fasl_data = read_fasl_data(file);
-    call_init(0,memory,fasl_data,0);
+    faslfile=open_stream(make_simple_string(file),smm_input,Cnil,sKerror);
+    SEEK_TO_END_OFILE(faslfile->sm.sm_fp);
+    call_init(0,memory,faslfile);
 
   } else {
     printf("loading %s\n",file); 

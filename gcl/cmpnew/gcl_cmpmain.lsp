@@ -180,7 +180,7 @@
 			   (*compile-print* (or print *compile-print*))
                            (*package* *package*)
 			   (*DEFAULT-PATHNAME-DEFAULTS* #p"")
-			   (*data* (list (make-array 50 :fill-pointer 0 :adjustable t) nil nil))
+			   (*data* (list nil))
 			   *init-name* 	
 			   (*fasd-data* *fasd-data*)
                            (*error-count* 0))
@@ -292,7 +292,7 @@ Cannot compile ~a.~%"
 		   ((maybe-eval nil form)))
 		  (cond
 		   ((and *split-files* (check-end form eof))
-		    (setf (fourth *split-files*) (reverse (third *data*)))
+		    (setf (fourth *split-files*) nil);(reverse (third *data*)) ;FIXME check this
 		    (return nil))
 		   ((eq form eof) (return nil))))
 	    

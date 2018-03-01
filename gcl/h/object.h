@@ -255,6 +255,21 @@ struct freelist {
 
 #define	FREE	(-1)		/*  free object  */
 
+struct fasd {
+  object stream;   /* lisp object of type stream */
+  object table;  /* hash table used in dumping or vector on input*/
+  object eof;      /* lisp object to be returned on coming to eof mark */
+  object direction;    /* holds Cnil or sKinput or sKoutput */
+  object package;  /* the package symbols are in by default */
+  object index;     /* integer.  The current_dump index on write  */
+  object filepos;   /* nil or the position of the start */
+  object table_length; /*    On read it is set to the size dump array needed
+		     or 0
+		     */
+  object evald_items;  /* a list of items which have been eval'd and must
+			  not be walked by fasd_patch_sharp */
+};
+
 /*
 	Storage manager for each type.
 */

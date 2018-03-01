@@ -144,7 +144,7 @@ struct key {short n,allow_other_keys;
 /* cmpaux.c:185:OF */ extern fixnum object_to_fixnum (object x); /* (x) object x; */
 /* cmpaux.c:263:OF */ extern char *object_to_string (object x); /* (x) object x; */
 typedef int (*FUNC)();
-/* cmpaux.c:294:OF */ extern void call_init (int init_address, object memory, object fasl_vec, FUNC fptr); /* (init_address, memory, fasl_vec, fptr) int init_address; object memory; object fasl_vec; FUNC fptr; */
+/* cmpaux.c:294:OF */ extern void call_init (int init_address,object memory,object faslfile); /* (init_address, memory, fasl_vec, fptr) int init_address; object memory; object fasl_vec; FUNC fptr; */
 /* cmpaux.c:339:OF */ extern void do_init (object *statVV); /* (statVV) object *statVV; */
 /* cmpaux.c:416:OF */ extern void gcl_init_or_load1 (void (*fn) (void), const char *file); /* (fn, file) int (*fn)(); char *file; */
 /* conditional.c:200:OF */ extern void gcl_init_conditional (void); /* () */

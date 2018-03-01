@@ -550,7 +550,7 @@ fasload(object faslfile) {
   FILE *fp;
   char *sn,*st1,*dst1;
   ul init_address=0,end,gs=0,*got=&gs,*gote=got+1;
-  object memory,data;
+  object memory;
   Shdr *sec1,*sece;
   Sym *sym1,*syme,*dsym1,*dsyme;
   void *v1,*ve;
@@ -574,7 +574,6 @@ fasload(object faslfile) {
   massert(!relocate_code(v1,sec1,sece,sym1,got,gote));
   
   massert(!fseek(fp,end,SEEK_SET));
-  data=feof(fp) ? 0 : read_fasl_vector(faslfile);
   
   massert(!un_mmap(v1,ve));
   
@@ -587,7 +586,7 @@ fasload(object faslfile) {
 #endif  
 
   init_address-=(ul)memory->cfd.cfd_start;
-  call_init(init_address,memory,data,0);
+  call_init(init_address,memory,faslfile);
   
   if(symbol_value(sLAload_verboseA)!=Cnil)
     printf("start address -T %p ",memory->cfd.cfd_start);

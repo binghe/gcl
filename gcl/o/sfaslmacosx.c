@@ -228,8 +228,6 @@ int fasload (object faslfile)
         sfasl_error ("error seeking to end of object file");
     }
 
-    data = read_fasl_vector (faslstream);
-    
     close_stream (faslstream);
     
     memory=new_cfdata();
@@ -237,7 +235,7 @@ int fasload (object faslfile)
     if (symbol_value (sLAload_verboseA) != Cnil)	
         printf (" start address (dynamic) %p ", fptr);
     
-    call_init (0, memory, data, fptr);
+    call_init (0,memory,faslstream);
     
     unlink (tmpfile);
     

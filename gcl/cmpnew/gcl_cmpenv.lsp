@@ -49,7 +49,6 @@
   (setq *reservations* nil)
   (setq *closures* nil)
   (setq *top-level-forms* nil)
-  (setq *non-package-operation* nil)
   (setq *function-declarations* nil)
   (setq *inline-functions* nil)
   (setq *inline-blocks* 0)
@@ -71,12 +70,10 @@
 (defun add-symbol (symbol) (add-object symbol))
 
 (defun add-object2 (object)
-  (let* ((init (when (si::contains-sharp-comma object)
-		 (if (when (consp object) (eq (car object) 'si::|#,|))
-		     (cdr object) (si::string-to-object (wt-to-string object)))))
+  (let* ((init (if (when (consp object) (eq (car object) '|#,|)) (cdr object) `',object))
 	 (object (if (when (consp init) (eq (car init) 'si::nani)) (si::nani (cadr init)) object)))
     (cond ((gethash object *objects*))
-	  ((push-data-incf (unless init object))
+	  ((push-data-incf nil)
 	   (when init (add-init `(si::setvv ,*next-vv* ,init)))
 	   (setf (gethash object *objects*) *next-vv*)))))
 

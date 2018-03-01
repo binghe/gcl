@@ -333,16 +333,16 @@ setup_READ()
 	backq_level = 0;
 }
 
-static void
-setup_standard_READ()
-{
-	READtable = standard_readtable;
-	READdefault_float_format = 'F';
-	READbase = 10;
-	READsuppress = FALSE;
-	sSAsharp_eq_contextA->s.s_dbind=Cnil;
-	backq_level = 0;
-}
+/* static void */
+/* setup_standard_READ() */
+/* { */
+/* 	READtable = standard_readtable; */
+/* 	READdefault_float_format = 'F'; */
+/* 	READbase = 10; */
+/* 	READsuppress = FALSE; */
+/* 	sSAsharp_eq_contextA->s.s_dbind=Cnil; */
+/* 	backq_level = 0; */
+/* } */
 
 object
 read_char(in)
@@ -1393,28 +1393,6 @@ FFN(siLsharp_comma_reader_for_compiler)()
 	vs_base[0] = make_cons(siSsharp_comma, vs_base[0]);
 }
 
-/*
-	For fasload.
-*/
-static void
-Lsharp_exclamation_reader()
-{
-	check_arg(3);
-	if(vs_base[2] != Cnil && !READsuppress)
-		extra_argument('!');
-	vs_popp;
-	vs_popp;
-	if (READsuppress) {
-		vs_base[0] = Cnil;
-		return;
-	}
-	vs_base[0] = read_object(vs_base[0]);
-	if (sSAsharp_eq_contextA->s.s_dbind!=Cnil)
-		vs_base[0]=patch_sharp(vs_base[0]);
-	ieval(vs_base[0]);
-	vs_popp;
-}
-
 static void
 Lsharp_B_reader()
 {
@@ -2327,8 +2305,6 @@ gcl_init_read()
 	dtab['*'] = make_cf(Lsharp_asterisk_reader);
 	dtab[':'] = make_cf(Lsharp_colon_reader);
 	dtab['.'] = make_cf(Lsharp_dot_reader);
-	dtab['!'] = make_cf(Lsharp_exclamation_reader);
-	/*  Used for fasload only. */
 	dtab[','] = make_cf(Lsharp_comma_reader);
 	dtab['B'] = dtab['b'] = make_cf(Lsharp_B_reader);
 	dtab['O'] = dtab['o'] = make_cf(Lsharp_O_reader);
@@ -2441,96 +2417,96 @@ gcl_init_read_function()
 
 object sSPinit;
 
-object
-read_fasl_vector1(in)
-object in;
-{
-	int dimcount, dim;
-	VOL object *vsp;
-	object vspo;
-	VOL object x;
-	long i;
-	bool e;
-	object old_READtable;
-	int old_READdefault_float_format;
-	int old_READbase;
-	int old_READsuppress;
-	volatile object old_READcontext;
-	int old_backq_level;
+/* object */
+/* read_fasl_vector1(in) */
+/* object in; */
+/* { */
+/* 	int dimcount, dim; */
+/* 	VOL object *vsp; */
+/* 	object vspo; */
+/* 	VOL object x; */
+/* 	long i; */
+/* 	bool e; */
+/* 	object old_READtable; */
+/* 	int old_READdefault_float_format; */
+/* 	int old_READbase; */
+/* 	int old_READsuppress; */
+/* 	volatile object old_READcontext; */
+/* 	int old_backq_level; */
 
-        /* to prevent longjmp clobber */
-        i=(long)&vsp;
-	i+=i;
-	vsp=&vspo;
-	old_READtable = READtable;
-	old_READdefault_float_format = READdefault_float_format;
-	old_READbase = READbase;
-	old_READsuppress = READsuppress;
-	old_READcontext=sSAsharp_eq_contextA->s.s_dbind;
-	/* BUG FIX by Toshiba */
-	vs_push(old_READtable);
-	old_backq_level = backq_level;
+/*         /\* to prevent longjmp clobber *\/ */
+/*         i=(long)&vsp; */
+/* 	i+=i; */
+/* 	vsp=&vspo; */
+/* 	old_READtable = READtable; */
+/* 	old_READdefault_float_format = READdefault_float_format; */
+/* 	old_READbase = READbase; */
+/* 	old_READsuppress = READsuppress; */
+/* 	old_READcontext=sSAsharp_eq_contextA->s.s_dbind; */
+/* 	/\* BUG FIX by Toshiba *\/ */
+/* 	vs_push(old_READtable); */
+/* 	old_backq_level = backq_level; */
 
-	setup_standard_READ();
+/* 	setup_standard_READ(); */
 
-	frs_push(FRS_PROTECT, Cnil);
-	if (nlj_active) {
-		e = TRUE;
-		goto L;
-	}
+/* 	frs_push(FRS_PROTECT, Cnil); */
+/* 	if (nlj_active) { */
+/* 		e = TRUE; */
+/* 		goto L; */
+/* 	} */
 
-	while (readc_stream(in) != '#')
-		;
-	while (readc_stream(in) != '(')
-		;
-	vsp = vs_top;
-	dimcount = 0;
-	for (;;) {
-                sSAsharp_eq_contextA->s.s_dbind=Cnil;
-		backq_level = 0;
-		delimiting_char = code_char(')');
-		preserving_whitespace_flag = FALSE;
-		detect_eos_flag = FALSE;
-		x = read_object(in);
-		if (x == OBJNULL)
-			break;
-		vs_check_push(x);
-		if (sSAsharp_eq_contextA->s.s_dbind!=Cnil)
-			x = vs_head = patch_sharp(x);
-		dimcount++;
-	}
-	if(dimcount==1 && type_of(vs_head)==t_vector)
-	  {/* new style where all read at once */
-	    x=vs_head;
-	    goto DONE;}
-	/* old style separately sharped, and no %init */
-	{BEGIN_NO_INTERRUPT;
-	x=alloc_simple_vector(dimcount,aet_object);
-	vs_push(x);
-	x->v.v_self
-	= (object *)alloc_relblock(dimcount * sizeof(object));
-	END_NO_INTERRUPT;}
-	for (dim = 0; dim < dimcount; dim++)
-		{SGC_TOUCH(x);
-		 x->cfd.cfd_self[dim] = vsp[dim];}
+/* 	while (readc_stream(in) != '#') */
+/* 		; */
+/* 	while (readc_stream(in) != '(') */
+/* 		; */
+/* 	vsp = vs_top; */
+/* 	dimcount = 0; */
+/* 	for (;;) { */
+/*                 sSAsharp_eq_contextA->s.s_dbind=Cnil; */
+/* 		backq_level = 0; */
+/* 		delimiting_char = code_char(')'); */
+/* 		preserving_whitespace_flag = FALSE; */
+/* 		detect_eos_flag = FALSE; */
+/* 		x = read_object(in); */
+/* 		if (x == OBJNULL) */
+/* 			break; */
+/* 		vs_check_push(x); */
+/* 		if (sSAsharp_eq_contextA->s.s_dbind!=Cnil) */
+/* 			x = vs_head = patch_sharp(x); */
+/* 		dimcount++; */
+/* 	} */
+/* 	if(dimcount==1 && type_of(vs_head)==t_vector) */
+/* 	  {/\* new style where all read at once *\/ */
+/* 	    x=vs_head; */
+/* 	    goto DONE;} */
+/* 	/\* old style separately sharped, and no %init *\/ */
+/* 	{BEGIN_NO_INTERRUPT; */
+/* 	x=alloc_simple_vector(dimcount,aet_object); */
+/* 	vs_push(x); */
+/* 	x->v.v_self */
+/* 	= (object *)alloc_relblock(dimcount * sizeof(object)); */
+/* 	END_NO_INTERRUPT;} */
+/* 	for (dim = 0; dim < dimcount; dim++) */
+/* 		{SGC_TOUCH(x); */
+/* 		 x->cfd.cfd_self[dim] = vsp[dim];} */
 	
 		 
-	  DONE:
-	e = FALSE;
+/* 	  DONE: */
+/* 	e = FALSE; */
 
-L:
-	frs_pop();
+/* L: */
+/* 	frs_pop(); */
 
-	READtable = old_READtable;
-	READdefault_float_format = old_READdefault_float_format;
-	READbase = old_READbase;
-	READsuppress = old_READsuppress;
-	sSAsharp_eq_contextA->s.s_dbind=old_READcontext;
-	backq_level = old_backq_level;
-	if (e) {
-		nlj_active = FALSE;
-		unwind(nlj_fr, nlj_tag);
-	}
-	vs_top = (object *)vsp;
-	return(x);
-}
+/* 	READtable = old_READtable; */
+/* 	READdefault_float_format = old_READdefault_float_format; */
+/* 	READbase = old_READbase; */
+/* 	READsuppress = old_READsuppress; */
+/* 	sSAsharp_eq_contextA->s.s_dbind=old_READcontext; */
+/* 	backq_level = old_backq_level; */
+/* 	if (e) { */
+/* 		nlj_active = FALSE; */
+/* 		unwind(nlj_fr, nlj_tag); */
+/* 	} */
+/* 	vs_top = (object *)vsp; */
+/* 	return(x); */
+/* } */

@@ -1645,7 +1645,7 @@ DEFUN_NEW("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object str
   for (;;) {
     preserving_whitespace_flag = FALSE;
     detect_eos_flag = TRUE;
-    x = read_object_non_recursive(strm);
+    x = type_of(strm)==t_stream ? read_object_non_recursive(strm) : FFN(fSread_fasd_top)(strm);
     if (x == OBJNULL)
       break;
     {
@@ -2370,76 +2370,4 @@ gcl_init_file_function()
 #ifdef HAVE_READLINE
 	gcl_init_readline_function();
 #endif
-}
-
-
-object
-read_fasl_data(const char *str) {
-
-	object faslfile, data;
-#ifndef SEEK_TO_END_OFILE
-#if defined(BSD) && defined(UNIX)
-	FILE *fp;
-	int i;
-#ifdef HAVE_AOUT
- 	struct exec header;
-#endif
-#endif
-#ifdef HAVE_FILEHDR
-	struct filehdr fileheader;
-#endif
-#ifdef E15
-	struct exec header;
-#endif
-#endif
-        vs_mark;
-
-	faslfile = make_simple_string(str);
-	vs_push(faslfile);
-	faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
-	vs_push(faslfile);
-
-#ifdef SEEK_TO_END_OFILE
- 	SEEK_TO_END_OFILE(faslfile->sm.sm_fp);
-#else
-
-#ifdef BSD
-	fp = faslfile->sm.sm_fp;
-	fread(&header, sizeof(header), 1, fp);
-	fseek(fp,
-	      header.a_text+header.a_data+
-	      header.a_syms+header.a_trsize+header.a_drsize,
-	      1);
-	fread(&i, sizeof(i), 1, fp);
-	fseek(fp, i - sizeof(i), 1);
-#endif
-
-#ifdef HAVE_FILEHDR
-	fp = faslfile->sm.sm_fp;
-	fread(&fileheader, sizeof(fileheader), 1, fp);
-	fseek(fp,
-	      fileheader.f_symptr+fileheader.f_nsyms*SYMESZ,
-	      0);
-	fread(&i, sizeof(i), 1, fp);
-	fseek(fp, i - sizeof(i), 1);
-	while ((i = getc(fp)) == 0)
-		;
-	ungetc(i, fp);
-#endif
-
-#ifdef E15
-	fp = faslfile->sm.sm_fp;
-	fread(&header, sizeof(header), 1, fp);
-	fseek(fp,
-	      header.a_text+header.a_data+
-	      header.a_syms+header.a_trsize+header.a_drsize,
-	      1);
-#endif
-#endif
-	data = read_fasl_vector(faslfile);
-
-	vs_push(data);
-	close_stream(faslfile);
-	vs_reset;
-	return(data);
 }
