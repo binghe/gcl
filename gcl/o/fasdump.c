@@ -583,7 +583,7 @@ DEFUN_NEW("OPEN-FASD",object,fSopen_fasd,SI,4,4,NONE,OO,OO,OO,OO,(object stream,
       else
 	check_type(tabl,t_hashtable);}
    massert(str==stream);
-   result=alloc_simple_vector(sizeof(struct fasd)/sizeof(int),aet_object);
+   result=alloc_simple_vector(sizeof(struct fasd)/sizeof(object),aet_object);
    array_allocself(result,1,Cnil);
    {struct fasd *fd= (struct fasd *)result->v.v_self;
     fd->table=tabl;
@@ -627,7 +627,7 @@ DEFUN_NEW("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"
    if (type_of(fd->table)==t_vector)
      /* input uses a vector */
      {if (fd->table->v.v_self)
-       gset(fd->table->v.v_self,0,fix(fd->index),aet_object);
+	 fd->table->v.v_dim=0;/*self can be on the stack, and others write there*/
     }
    else
      if(fd->direction==sKoutput)

@@ -421,7 +421,7 @@ load_self_symbols() {
 
   for (a=c_table.ptable,sym=sym1;sym<syme;sym++) {
     
-    if (sym->n_type & N_STAB || !(sym->n_type & N_EXT))
+    if ((sym->n_type & N_STAB) || !(sym->n_type & N_EXT))
       continue;
 
     a->address=sym->n_value;
@@ -435,10 +435,9 @@ load_self_symbols() {
   c_table.length=a-c_table.ptable;
   qsort(c_table.ptable,c_table.length,sizeof(*c_table.ptable),node_compare);
 
-  c_table.local_ptable=a;
-  for (a=c_table.ptable,sym=sym1;sym<syme;sym++) {
+  for (c_table.local_ptable=a,sym=sym1;sym<syme;sym++) {
 
-    if (sym->n_type & N_STAB || sym->n_type & N_EXT)
+    if ((sym->n_type & N_STAB) || sym->n_type & N_EXT)
       continue;
 
     a->address=sym->n_value;
@@ -536,7 +535,6 @@ int
 fasload(object faslfile) {
 
   FILE *fp;
-  object data;
   ul init_address=-1;
   object memory;
   void *v1,*ve,*p;
