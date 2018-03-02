@@ -420,13 +420,13 @@
 	(t
 	 (let ((f *top-level-forms*))
 	   (dolist (form args) (t1expr form))
-	   (setq *top-level-forms* (cons (cons 'progn (nreverse (ldiff *top-level-forms* f))) f))))))
+	   (setq *top-level-forms* (cons `(progn ,(nreverse (ldiff *top-level-forms* f))) f))))))
 
-(defun t3progn (&rest args)
+(defun t3progn (args)
   (dolist (arg args)
     (t23expr arg 't3)))
 
-(defun t2progn (&rest args)
+(defun t2progn (args)
   (dolist (arg args)
     (t23expr arg 't2)))
 
