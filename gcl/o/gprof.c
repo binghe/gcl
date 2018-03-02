@@ -5,6 +5,10 @@
 
 static unsigned long gprof_on;
 
+#ifdef DARWIN
+void _mcleanup() {}
+#endif
+
 DEFUN_NEW("MCLEANUP",object,fSmcleanup,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
 
   extern void _mcleanup(void);
