@@ -363,7 +363,7 @@ do_init(object *statVV) {
 
   if (ch!='\n') {
     struct fasd * fd;
-    faslfile=FFN(fSopen_fasd)(faslfile,sKinput,OBJNULL,Cnil);
+    faslfile=fSopen_fasd(faslfile,sKinput,OBJNULL,Cnil);
     fd=(struct fasd *)faslfile->v.v_self;
     n=fix(fd->table_length);
     fd->table->v.v_self=alloca(n*sizeof(object));
@@ -371,7 +371,7 @@ do_init(object *statVV) {
     fd->table->v.v_dim=faslfile->v.v_self[1]->v.v_fillp=n;
   }
 
-  n=fix(type_of(faslfile)==t_stream ? read_object(faslfile) : FFN(fSread_fasd_top)(faslfile));
+  n=fix(READ_STREAM_OR_FASD(faslfile));
   sSPinit->s.s_dbind=fasl_vec=fSmake_vector1_1(n,aet_object,Cnil);
 
   /* switch SPinit to point to a vector of function addresses */
@@ -395,9 +395,9 @@ do_init(object *statVV) {
   */
   /* Now we can run the forms f1 f2 in form= (%init f1 f2 ...) */
 
-  FFN(fSload_stream)(faslfile,Cnil);
+  fSload_stream(faslfile,Cnil);
   if (type_of(faslfile)!=t_stream)
-    FFN(fSclose_fasd)(faslfile);
+    fSclose_fasd(faslfile);
 
 }
 

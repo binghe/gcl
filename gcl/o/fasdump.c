@@ -561,6 +561,13 @@ DEFUN_NEW("READ-FASD-TOP",object,fSread_fasd_top,SI,1,1,NONE,OO,OO,OO,OO,(object
      { RESTORE_FASD;
      return result;}
  }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSread_fasd_top(object x) {
+  return FFN(fSread_fasd_top)(x);
+}
+#endif
+
 
 object sLeq;
 object sSPinit;
@@ -618,6 +625,12 @@ DEFUN_NEW("OPEN-FASD",object,fSopen_fasd,SI,4,4,NONE,OO,OO,OO,OO,(object stream,
     fd->table_length=current_fasd.table_length;
     return result;
   }}
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSopen_fasd(object stream, object direction, object eof, object tabl) {
+  return FFN(fSopen_fasd)(stream,direction,eof,tabl);
+}
+#endif
 
 DEFUN_NEW("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"")
 /* static object */
@@ -649,6 +662,12 @@ DEFUN_NEW("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"
    return ar;
   
  }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSclose_fasd(object ar) {
+  return FFN(fSclose_fasd)(ar);
+}
+#endif
 
 
 #define HASHP(x) 1

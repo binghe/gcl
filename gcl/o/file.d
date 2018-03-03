@@ -1645,8 +1645,7 @@ DEFUN_NEW("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object str
   for (;;) {
     preserving_whitespace_flag = FALSE;
     detect_eos_flag = TRUE;
-    x = type_of(strm)==t_stream ? read_object_non_recursive(strm) : FFN(fSread_fasd_top)(strm);
-    if (x == OBJNULL)
+    if ((x = READ_STREAM_OR_FASD(strm))==OBJNULL)
       break;
     {
       object *base = vs_base, *top = vs_top, *lex = lex_env;
@@ -1672,6 +1671,12 @@ DEFUN_NEW("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object str
   RETURN1(Ct);
 
 }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSload_stream(object strm,object print) {
+  return FFN(fSload_stream)(strm,print);
+}
+#endif
 
 DEFUN_NEW("LOAD-FASL",object,fSload_fasl,SI,2,2,NONE,OO,OO,OO,OO,(object fasl_filename,object print),"") {
 

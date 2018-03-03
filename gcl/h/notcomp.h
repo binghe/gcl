@@ -374,3 +374,5 @@ EXTER gmp_randfnptr_t Mersenne_Twister_Generator_Noseed;
 #endif
 
 #define collect(p_,f_) (p_)=&(*(p_)=(f_))->c.c_cdr
+#define READ_STREAM_OR_FASD(strm_) \
+  type_of(strm_)==t_stream ? read_object_non_recursive(strm_) : fSread_fasd_top(strm_)
