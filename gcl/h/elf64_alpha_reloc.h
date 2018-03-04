@@ -22,16 +22,14 @@
       store_val(where,MASK(32),s+a);
       break;
     case R_ALPHA_LITERAL:
-      s+=a;
-      if (a || !(sym->st_other&0x1)) {gotp+=1+(sym->st_other>>1);sym->st_other|=1;}
-      gote=got+(a ? gotp : sym->st_size)-1;
-      massert(s); 
+      gote=got+(a>>32)-1;
+      a&=MASK(32);
       if (s>=ggot1 && s<ggote) {
         massert(!write_stub(s,got,gote));
       } else 
-	*gote=s;
+	*gote=s+a;
       s=(gote-got)*sizeof(*got);
-      massert(!(s&0x8000));
+      massert(!(s&~MASK(16)));
       store_val(where,MASK(16),s);
       break;
     case R_ALPHA_GPRELHIGH:

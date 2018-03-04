@@ -1,4 +1,4 @@
-static ul ggot1,ggote,gotp;
+static ul ggot1,ggote;
 
 static int
 write_stub(ul s,ul *got,ul *gote) {
@@ -65,11 +65,23 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   Sym *sym;
   Shdr *sec;
   void *v,*ve;
-  ul q=0;
+  ul q=0,a;
 
-  gotp=0;
   for (sym=sym1;sym<syme;sym++)
     sym->st_other=sym->st_size=0;
+
+  for (sec=sec1;sec<sece;sec++)
+    if (sec->sh_type==SHT_RELA)
+      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
+	if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
+
+	  sym=sym1+ELF_R_SYM(r->r_info);
+
+	  /*unlikely to save got space by recording possible holes in addend range*/
+	  if ((a=r->r_addend+1)>sym->st_other)
+	    sym->st_other=a;
+
+	}
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
     if (sec->sh_type==SHT_RELA)
@@ -78,12 +90,18 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	  sym=sym1+ELF_R_SYM(r->r_info);
 	    
-	  if (!sym->st_size || r->r_addend) { 
-	    q=++*gs; 
-	    if (!sym->st_size) sym->st_size=q;
+	  if (sym->st_other) {
+	    sym->st_size=++*gs;
 	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
-	    sym->st_other=(*gs-q)<<1;
+	    massert((*gs-sym->st_size) || !r->r_addend);
+	    if (sym->st_other>1)
+	      (*gs)+=sym->st_other-1;
+	    sym->st_other=0;
 	  }
+
+	  b=sizeof(r->r_addend)*4;
+	  massert(!(r->r_addend>>b));
+	  r->r_addend|=((sym->st_size+r->r_addend)<<b);
 
 	}
   
