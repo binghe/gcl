@@ -93,7 +93,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	  if (sym->st_other) {
 	    sym->st_size=++*gs;
 	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
-	    massert((*gs-sym->st_size) || !r->r_addend);
+	    massert(!(*gs-sym->st_size) || !r->r_addend);
 	    if (sym->st_other>1)
 	      (*gs)+=sym->st_other-1;
 	    sym->st_other=0;
