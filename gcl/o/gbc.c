@@ -446,6 +446,7 @@ mark_object_address(object *o,int f) {
 
   static ufixnum lp;
   static ufixnum lr;
+  extern object *min_cfd_self;
 
   ufixnum p=page(o);
 
@@ -455,7 +456,7 @@ mark_object_address(object *o,int f) {
 #ifdef SGC
       sgc_enabled ? WRITABLE_PAGE_P(lp) :
 #endif
-      1;
+      (o>=min_cfd_self && o<((object *)core_end));
   }
 
   if (lr)

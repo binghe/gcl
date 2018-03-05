@@ -348,6 +348,8 @@ call_init(int init_address,object memory,object faslfile) {
 
    */
 
+object *min_cfd_self=NULL;
+
 void
 do_init(object *statVV) {
 
@@ -386,6 +388,8 @@ do_init(object *statVV) {
   }
 
   data->cfd.cfd_self = statVV;
+  if (!min_cfd_self || data->cfd.cfd_self<min_cfd_self)
+    min_cfd_self=data->cfd.cfd_self;
   data->cfd.cfd_fillp= n;
   statVV[n-1] = data;
 

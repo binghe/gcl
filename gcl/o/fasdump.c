@@ -640,7 +640,7 @@ DEFUN_NEW("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"
    if (type_of(fd->table)==t_vector)
      /* input uses a vector */
      {if (fd->table->v.v_self)
-	 fd->table->v.v_dim=0;/*self can be on the stack, and others write there*/
+	 gset(fd->table->v.v_self,0,fix(fd->index),aet_object);
     }
    else
      if(fd->direction==sKoutput)
