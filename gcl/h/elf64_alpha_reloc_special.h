@@ -65,7 +65,7 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   Sym *sym;
   Shdr *sec;
   void *v,*ve;
-  ul q=0,a;
+  ul a,b;
 
   for (sym=sym1;sym<syme;sym++)
     sym->st_other=sym->st_size=0;
