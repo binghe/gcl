@@ -29,7 +29,7 @@
       } else 
 	*gote=s+a;
       s=(gote-got)*sizeof(*got);
-      massert(!(s&~MASK(16)));
+      massert(!(s&~MASK(15)));
       store_val(where,MASK(16),s);
       break;
     case R_ALPHA_GPRELHIGH:

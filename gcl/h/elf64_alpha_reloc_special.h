@@ -62,7 +62,6 @@ static int
 label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
   Rela *r,*rr;
-  Sym *sym;
   Shdr *sec;
   void *v,*ve,*vv;
   ul b,q;
@@ -80,8 +79,12 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	       vv-=sec->sh_entsize,rr=vv);
 
 	  b=sizeof(r->r_addend)*4;
-	  q=vv>=v1 ? (rr->r_addend>>b) : ++*gs;
-	  massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+	  if (vv>=v1)
+	    q=rr->r_addend>>b;
+	  else {
+	    q=++*gs;
+	    massert(!make_got_room_for_stub(sec1,sece,sym1+ELF_R_SYM(r->r_info),st1,gs));
+	  }
 	  massert(*gs==q || !r->r_addend);
 	  massert(!(r->r_addend>>b));
 	  r->r_addend|=(q<<b);
