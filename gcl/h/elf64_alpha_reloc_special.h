@@ -61,47 +61,30 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 static int
 label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
-  Rela *r;
+  Rela *r,*rr;
   Sym *sym;
   Shdr *sec;
-  void *v,*ve;
-  ul a,b;
-
-  for (sym=sym1;sym<syme;sym++)
-    sym->st_other=sym->st_size=0;
-
-  for (sec=sec1;sec<sece;sec++)
-    if (sec->sh_type==SHT_RELA)
-      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
-	if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
-
-	  sym=sym1+ELF_R_SYM(r->r_info);
-
-	  /*unlikely to save got space by recording possible holes in addend range*/
-	  if ((a=r->r_addend+1)>sym->st_other)
-	    sym->st_other=a;
-
-	}
+  void *v,*ve,*vv;
+  ul b,q;
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
     if (sec->sh_type==SHT_RELA)
       for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 	if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
 
-	  sym=sym1+ELF_R_SYM(r->r_info);
-	    
-	  if (sym->st_other) {
-	    sym->st_size=++*gs;
-	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
-	    massert(!(*gs-sym->st_size) || !r->r_addend);
-	    if (sym->st_other>1)
-	      (*gs)+=sym->st_other-1;
-	    sym->st_other=0;
-	  }
+	  for (rr=vv=v-sec->sh_entsize;
+	       vv>=v1 &&
+		 (ELF_R_TYPE(rr->r_info)!=ELF_R_TYPE(r->r_info) ||
+		  ELF_R_SYM(rr->r_info)!=ELF_R_SYM(r->r_info) ||
+		  rr->r_addend!=r->r_addend);
+	       vv-=sec->sh_entsize,rr=vv);
 
 	  b=sizeof(r->r_addend)*4;
+	  q=vv>=v1 ? (rr->r_addend>>b) : ++*gs;
+	  massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+	  massert(*gs==q || !r->r_addend);
 	  massert(!(r->r_addend>>b));
-	  r->r_addend|=((sym->st_size+r->r_addend)<<b);
+	  r->r_addend|=(q<<b);
 
 	}
   
