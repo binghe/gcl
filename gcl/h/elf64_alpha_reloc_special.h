@@ -61,36 +61,45 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 static int
 label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
+  Sym *sym;
   Rela *r,*rr;
   Shdr *sec;
   void *v,*ve,*vv;
-  ul b,q;
+  ul q;
+
+  for (sym=sym1;sym<syme;sym++)
+    sym->st_size=0;
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
-    if (sec->sh_type==SHT_RELA)
-      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
-	if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
+    for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 
-	  for (rr=vv=v-sec->sh_entsize;
-	       vv>=v1 &&
-		 (ELF_R_TYPE(rr->r_info)!=ELF_R_TYPE(r->r_info) ||
-		  ELF_R_SYM(rr->r_info)!=ELF_R_SYM(r->r_info) ||
-		  rr->r_addend!=r->r_addend);
-	       vv-=sec->sh_entsize,rr=vv);
+      if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
 
-	  b=sizeof(r->r_addend)*4;
-	  if (vv>=v1)
-	    q=rr->r_addend>>b;
-	  else {
-	    q=++*gs;
-	    massert(!make_got_room_for_stub(sec1,sece,sym1+ELF_R_SYM(r->r_info),st1,gs));
+	if (sec->sh_type!=SHT_RELA || !r->r_addend) {
+
+	  sym=sym1+ELF_R_SYM(r->r_info);
+
+	  if (!sym->st_size) {
+	    sym->st_size=++*gs;
+	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
 	  }
-	  massert(*gs==q || !r->r_addend);
-	  massert(!(r->r_addend>>b));
-	  r->r_addend|=(q<<b);
+
+	} else {
+
+	    for (rr=vv=v-sec->sh_entsize;
+		 vv>=v1 && (ELF_R_TYPE(rr->r_info)!=ELF_R_TYPE(r->r_info) ||
+			    ELF_R_SYM(rr->r_info)!=ELF_R_SYM(r->r_info) ||
+			    rr->r_addend!=r->r_addend);
+		 vv-=sec->sh_entsize,rr=vv);
+
+	    q=vv<v1 ? ++*gs : rr->r_addend>>32;
+	    massert(!(r->r_addend>>32));
+	    r->r_addend|=(q<<32);
 
 	}
-  
+
+      }
+
   return 0;
   
 }

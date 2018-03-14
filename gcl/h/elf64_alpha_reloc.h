@@ -22,12 +22,12 @@
       store_val(where,MASK(32),s+a);
       break;
     case R_ALPHA_LITERAL:
-      gote=got+(a>>32)-1;
-      a&=MASK(32);
+      massert(a || sym->st_size);
+      gote=got+(a ? (a>>32) : sym->st_size)-1;
       if (s>=ggot1 && s<ggote) {
         massert(!write_stub(s,got,gote));
       } else 
-	*gote=s+a;
+	*gote=s+(a&MASK(32));
       s=(gote-got)*sizeof(*got);
       massert(!(s&~MASK(15)));
       store_val(where,MASK(16),s);
