@@ -71,20 +71,21 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
     sym->st_size=0;
 
   for (*gs=0,sec=sec1;sec<sece;sec++)
-    for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
+    if (sec->sh_type==SHT_RELA || sec->sh_type==SHT_REL)
+      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 
-      if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
+	if (ELF_R_TYPE(r->r_info)==R_ALPHA_LITERAL) {
 
-	if (sec->sh_type!=SHT_RELA || !r->r_addend) {
+	  if (sec->sh_type!=SHT_RELA || !r->r_addend) {
 
-	  sym=sym1+ELF_R_SYM(r->r_info);
+	    sym=sym1+ELF_R_SYM(r->r_info);
 
-	  if (!sym->st_size) {
-	    sym->st_size=++*gs;
-	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
-	  }
+	    if (!sym->st_size) {
+	      sym->st_size=++*gs;
+	      massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+	    }
 
-	} else {
+	  } else {
 
 	    for (rr=vv=v-sec->sh_entsize;
 		 vv>=v1 && (ELF_R_TYPE(rr->r_info)!=ELF_R_TYPE(r->r_info) ||
@@ -96,9 +97,9 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	    massert(!(r->r_addend>>32));
 	    r->r_addend|=(q<<32);
 
-	}
+	  }
 
-      }
+	}
 
   return 0;
   
