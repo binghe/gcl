@@ -1,7 +1,8 @@
     case R_ALPHA_GPDISP:
+      gotoff=(ul)(got+(a>>32));
       s=gotoff-p;
       store_val(where,MASK(16),(s-(short)s)>>16);
-      store_val((void *)where+a,MASK(16),s);
+      store_val((void *)where+(a&MASK(32)),MASK(16),s);
       break;
     case R_ALPHA_SREL32:
       store_val(where,MASK(32),s+a-p);
@@ -20,7 +21,7 @@
       break;
     case R_ALPHA_LITERAL:
       s+=a&MASK(32);
-      a=(a ? (a>>32) : sym->st_size)-1;
+      a=(a>>32)-1;
       if (s>=ggot1 && s<ggote) {
         massert(!write_stub(s,(ul *)gotoff,got+a));
       } else 
