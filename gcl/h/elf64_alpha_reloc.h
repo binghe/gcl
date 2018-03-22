@@ -23,7 +23,7 @@
       s+=a&MASK(32);
       a=(a>>32)-1;
       if (s>=ggot1 && s<ggote) {
-        massert(!write_stub(s,(ul *)gotoff,got+a));
+        massert(!write_stub(s,got+a));
       } else 
         got[a]=s;
       store_vals(where,MASK(16),(ul)(got+a)-gotoff);
