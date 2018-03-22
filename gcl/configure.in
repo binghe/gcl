@@ -382,7 +382,7 @@ case $use in
 	case $use in
 	    alpha*)
 		assert_arg_to_cflags -mieee
-		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.8.1
+#		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O0" ; fi #FIXME needed asof gcc 4.8.1
 		;;
 	    aarch64*)
 		TLIBS="$TLIBS -lgcc_s";;
