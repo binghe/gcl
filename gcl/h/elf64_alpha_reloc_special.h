@@ -94,7 +94,10 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 
 	    q=++*gs;
 
-	  massert(!(r->r_addend>>32));
+	  if (r->r_addend>>32)
+	    fprintf(stderr,"zeroing high addend %lx\n",r->r_addend>>32);
+	  r->r_addend&=0xffffffff;
+	  massert((q&0xffffffff)==q);
 	  r->r_addend|=(q<<32);
 
 	  q=(q-gotp)*sizeof(*gs);
@@ -111,6 +114,10 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	    gotp=*gs+1;
 	  }
 
+	  if (r->r_addend>>32)
+	    fprintf(stderr,"zeroing high addend %lx\n",r->r_addend>>32);
+	  r->r_addend&=0xffffffff;
+	  massert((gotp&0xffffffff)==gotp);
 	  r->r_addend|=(gotp<<32);
 
 	  break;
