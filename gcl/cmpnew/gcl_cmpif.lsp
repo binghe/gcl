@@ -428,9 +428,8 @@
 	(wt-label label))))
 
   (if (eq default 't)
-      (progn (wt-nl "FEerror(\"The ECASE key value ~s is illegal.\",1,V" cvar ");")
-	     (unwind-exit nil 'jump))
-      (c2expr default))
+      (wt-nl "FEerror(\"The ECASE key value ~s is illegal.\",1,V" cvar ");")
+    (c2expr default))
 
   (wt "}")
   (close-inline-blocks))

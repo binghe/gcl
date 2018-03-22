@@ -178,7 +178,7 @@
                        (*value-to-go* 'trash))
                   (c2expr (car l))
                   (wt-label *exit*))
-                (unless (eq (caar l) 'go) (unwind-exit nil)))))
+                (unless (member (caar l) '(go return-from)) (unwind-exit nil)))))
       (declare (object l written))
     (cond (written (setq written nil))
           ((typep (car l) 'tag)

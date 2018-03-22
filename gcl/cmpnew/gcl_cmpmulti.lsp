@@ -221,56 +221,36 @@
 
 
 (defun c2multiple-value-bind (vars init-form body
-                   &aux (block-p nil) (labels nil)
-                        (*unwind-exit* *unwind-exit*)
-                        (*vs* *vs*) (*clink* *clink*) (*ccb-vs* *ccb-vs*)
-			top-data)
-       (declare (object block-p))
-    (multiple-value-check vars init-form)
+				   &aux (block-p nil)
+				   (*unwind-exit* *unwind-exit*)
+				   (*vs* *vs*) (*clink* *clink*) (*ccb-vs* *ccb-vs*)
+				   top-data)
 
-  (dolist** (var vars)
+  (multiple-value-check vars init-form)
+
+  (dolist (var vars)
     (let ((kind (c2var-kind var)))
-         (declare (object kind))
       (if kind
           (let ((cvar (next-cvar)))
             (setf (var-kind var) kind)
             (setf (var-loc var) cvar)
             (wt-nl)
             (unless block-p (wt "{") (setq block-p t))
-	    (wt-var-decl var)
-	    )
-          (setf (var-ref var) (vs-push)))))
+	    (wt-var-decl var))
+	(setf (var-ref var) (vs-push)))))
 
   (let ((*value-to-go* 'top) *top-data*)
     (c2expr* init-form) (setq top-data *top-data*))
+
   (and *record-call-info* (record-call-info nil (car top-data)))
-  (let ((*clink* *clink*)
-        (*unwind-exit* *unwind-exit*)
-        (*ccb-vs* *ccb-vs*))
-    (do ((vs vars (cdr vs)))
-        ((endp vs))
-        (declare (object vs))
-      (push (next-label) labels)
-      (wt-nl "if(vs_base>=vs_top){")
-      (reset-top)
-      (wt-go (car labels)) (wt "}")
+
+  (wt-nl "if(vs_base>vs_top) vs_top=vs_base;*vs_top=Cnil;")
+  (do ((vs vars (cdr vs)))
+      ((endp vs))
       (c2bind-loc (car vs) '(vs-base 0))
-      (unless (endp (cdr vs)) (wt-nl "vs_base++;"))))
+      (unless (endp (cdr vs)) (wt-nl "if (vs_base<vs_top) vs_base++;")))
 
   (wt-nl) (reset-top)
 
-  (let ((label (next-label)))
-    (wt-nl) (wt-go label)
-
-    (setq labels (nreverse labels))
-
-    (dolist** (v vars)
-      (wt-label (car labels))
-      (pop labels)
-      (c2bind-loc v nil))
-
-    (wt-label label))
-
   (c2expr body)
-  (when block-p (wt "}"))
-  )
+  (when block-p (wt "}")))
