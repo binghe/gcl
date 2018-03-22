@@ -1,5 +1,5 @@
     case R_ALPHA_GPDISP:
-      gotoff=(ul)(got+(a>>32));
+      gotoff=(ul)(got+(a>>32)-1);
       s=gotoff-p;
       store_val(where,MASK(16),(s-(short)s)>>16);
       store_val((void *)where+(a&MASK(32)),MASK(16),s);
