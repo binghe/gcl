@@ -343,25 +343,11 @@ AC_ARG_ENABLE([gprof],[  --enable-gprof builds gcl with -pg in CFLAGS to enable 
 		       AC_MSG_RESULT([disabled])
 		   else
 		       AC_MSG_RESULT([ok])
-     		       assert_arg_to_cflags -pg
+		       OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
+                       assert_arg_to_cflags -pg
+		       CFLAGS=$OLD_CFLAGS
        		       TFPFLAG=""
 		       AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
-dnl 		       AC_MSG_CHECKING([for text start])
-dnl 		       echo 'int main () {return(0);}' >foo.c
-dnl 		       $CC foo.c -o foo
-dnl 		       GCL_GPROF_START=`nm foo | $AWK  '/  *[[TD]]  *__*start$/ {print $NF}'` # D for ppc64 -- FIXME custreloc
-dnl 		       rm -f foo.c foo
-dnl 		       if test "$GCL_GPROF_START" != "" ; then
-dnl 			   AC_MSG_RESULT($GCL_GPROF_START)
-dnl 			   AC_DEFINE_UNQUOTED(GCL_GPROF_START,$GCL_GPROF_START,[starting address for gprof])
-dnl 			   assert_arg_to_cflags -pg
-dnl #			   case $use in
-dnl #			       s390*) ;; # relocation truncation bug in gcc
-dnl #			       *) TLIBS="$TLIBS -pg";;
-dnl #			   esac
-dnl        			   TFPFLAG=""
-dnl 			   AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
-dnl 		       fi
 		   fi
 	       fi])
 
