@@ -4132,7 +4132,9 @@ $as_echo "disabled" >&6; }
 		   else
 		       { $as_echo "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 $as_echo "ok" >&6; }
-     		       assert_arg_to_cflags -pg
+		       OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
+                       assert_arg_to_cflags -pg
+		       CFLAGS=$OLD_CFLAGS
        		       TFPFLAG=""
 
 $as_echo "#define GCL_GPROF 1" >>confdefs.h
