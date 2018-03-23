@@ -150,7 +150,7 @@ DEFUN_NEW("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
 
 /* For now ignore last three args governing offsets and data modification, just to
    support fpe sync with master*/
-DEFUN_NEW("*FIXNUM",object,fSAfixnum,SI,4,4,NONE,OI,OO,OO,OO,(fixnum addr,object x,object y,object z),"") {
+DEFUN_NEW("*FIXNUM",object,fSAfixnum,SI,4,4,NONE,II,OO,OO,OO,(fixnum addr,object x,object y,object z),"") {
   RETURN1((object)*(fixnum *)addr);
 }
 DEFUN_NEW("*FLOAT",object,fSAfloat,SI,4,4,NONE,OI,OO,OO,OO,(fixnum addr,object x,object y,object z),"") {
