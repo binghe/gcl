@@ -4121,7 +4121,6 @@ $as_echo_n "checking working gprof... " >&6; }
 		       s390*) enableval="no";;#mcount smashes float args in make_shortfloat 20180313
 		       sh4*)  enableval="no";;
 		       ia64*) enableval="no";;
-		       alpha*) enableval="no";;#write_stub currently depends on t12 set in call
 		       hppa*) enableval="no";;
 		       arm*)  enableval="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
 		       aarch64*) enableval="no";;#unreproducible buildd bug 20170824
