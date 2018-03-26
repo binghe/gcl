@@ -87,6 +87,10 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 
 }
 
+#define HIGH(a_) ((a_)>>32)
+#define LOW(a_)  ((a_)&MASK(32))
+#define SET_HIGH(a_,b_) ({ul _a=(a_);(a_)=((b_)<<32)|LOW(_a);})
+
 static int
 label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
@@ -96,12 +100,18 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   void *v,*ve;
   ul q,gotp;
 
-  for (sym=sym1;sym<syme;sym++)
-    sym->st_size=0;
+  for (sym=sym1;sym<syme;sym++) {
+    massert(!HIGH(sym->st_value));
+    massert(!HIGH(sym->st_size));
+  }
 
   for (*gs=gotp=0,sec=sec1;sec<sece;sec++)
     if (sec->sh_type==SHT_RELA)
-      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
+      for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v) {
+
+	if (HIGH(r->r_addend))
+	  fprintf(stderr,"zeroing high addend %lx\n",HIGH(r->r_addend));/*never reached fix(Cnil) code, to be eliminated*/
+	SET_HIGH(r->r_addend,0UL);
 
 	switch(ELF_R_TYPE(r->r_info)) {
 
@@ -110,48 +120,59 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	  if (!r->r_addend) {
 
 	    sym=sym1+ELF_R_SYM(r->r_info);
-	    q=(gotp-sym->st_size)*sizeof(*gs);
+	    q=(HIGH(sym->st_size)-gotp)*sizeof(*gs);
 
-	    if (!sym->st_size || q!=(short)q) {
-	      sym->st_size=++*gs;
+	    if (!HIGH(sym->st_size) || q!=(short)q) {/*new cached got entry if first or out of range*/
+	      SET_HIGH(sym->st_size,++*gs);
 	      massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
 	    }
 
-	    q=sym->st_size;
+	    q=HIGH(sym->st_size);
 
 	  } else
 
 	    q=++*gs;
 
-	  if (r->r_addend>>32)
-	    fprintf(stderr,"zeroing high addend %lx\n",r->r_addend>>32);
-	  r->r_addend&=0xffffffff;
-	  massert((q&0xffffffff)==q);
-	  r->r_addend|=(q<<32);
+	  SET_HIGH(r->r_addend,q);
 
-	  q=(q-gotp)*sizeof(*gs);
+	  q=(q-gotp)*sizeof(*gs);/*check 16bit range gprel address in range*/
 	  massert(q==(short)q);
 
 	  break;
 
 	case R_ALPHA_GPDISP:
 
-	  for (sym=fsym;sym<syme && (sym->st_shndx!=1 || sym->st_value!=r->r_offset);sym++);
+	  for (sym=fsym;sym<syme && (sym->st_shndx!=1 || LOW(sym->st_value)!=r->r_offset);sym++);/*ordered search*/
 
 	  if (sym<syme) {
 	    fsym=sym;
-	    gotp=*gs+1;
+	    SET_HIGH(fsym->st_value,gotp=*gs+1);
 	  }
 
-	  if (r->r_addend>>32)
-	    fprintf(stderr,"zeroing high addend %lx\n",r->r_addend>>32);
-	  r->r_addend&=0xffffffff;
-	  massert((gotp&0xffffffff)==gotp);
-	  r->r_addend|=(gotp<<32);
+	  SET_HIGH(r->r_addend,gotp);
+
+	  break;
+
+	case R_ALPHA_GPREL32:
+
+	  q=LOW(sym1[ELF_R_SYM(r->r_info)].st_value)+r->r_addend;
+
+	  /*unordered search*/
+	  for (sym=sym1;sym<syme && (sym->st_shndx!=1 || LOW(sym->st_value)>q || LOW(sym->st_value)+LOW(sym->st_size)<q);sym++);
+	  massert(sym<syme);
+
+	  SET_HIGH(r->r_addend,HIGH(sym->st_value));
 
 	  break;
 
 	}
+
+      }
+
+  for (sym=sym1;sym<syme;sym++) {
+    SET_HIGH(sym->st_value,0UL);
+    SET_HIGH(sym->st_size,0UL);
+  }
 
   return 0;
   

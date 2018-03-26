@@ -1,14 +1,14 @@
     case R_ALPHA_GPDISP:
-      gotoff=(ul)(got+(a>>32)-1);
+      gotoff=(ul)(got+HIGH(a)-1);
       s=gotoff-p;
       store_val(where,MASK(16),(s-(short)s)>>16);
-      store_val((void *)where+(a&MASK(32)),MASK(16),s);
+      store_val((void *)where+LOW(a),MASK(16),s);
       break;
     case R_ALPHA_SREL32:
       store_val(where,MASK(32),s+a-p);
       break;
     case R_ALPHA_GPREL32:
-      store_val(where,MASK(32),s+a-gotoff);
+      store_val(where,MASK(32),s+LOW(a)-(ul)(got+HIGH(a)-1));
       break;
     case R_ALPHA_LITUSE:
     case R_ALPHA_HINT:
@@ -20,8 +20,8 @@
       store_val(where,MASK(32),s+a);
       break;
     case R_ALPHA_LITERAL:
-      s+=a&MASK(32);
-      a=(a>>32)-1;
+      s+=LOW(a);
+      a=HIGH(a)-1;
       if (s>=ggot1 && s<ggote) {
         massert(!write_stub(s,got+a));
       } else 
