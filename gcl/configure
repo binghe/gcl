@@ -774,6 +774,7 @@ enable_pic
 enable_dynsysgmp
 with_x
 enable_maxpage
+enable_fastimmfix
 enable_readline
 enable_pargcl
 with_mpicc
@@ -1469,6 +1470,8 @@ Optional Features:
  --enable-maxpage=XXXX  will compile in a page table of size XXX
                          (eg '--enable-maxpage=64*1024' would produce
 			 64K pages allowing 256 MB if pages are 4K each)
+  --enable-immfix will enable an immediate fixnum table above the C stack
+  --enable-fastimmfix=XXXX will reject low immediate fixnums unless 2^XXX can be attained
  --enable-readline      enables command line completion via the
                          readline library
  --enable-pargcl        enables ParGCL (for parallel computing),
@@ -3207,14 +3210,6 @@ fi
 
 if test "$load_opt" != "1" ; then
    as_fn_error $? "Exactly one loader option must be chosen: dlopen=$enable_dlopen statsysbfd=$enable_statsysbfd dynsysbfd=$enable_dynsysbfd locbfd=$enable_locbfd custreloc=$enable_custreloc" "$LINENO" 5
-fi
-
-TLIBS=""
-if test "$enable_static" = "yes" ; then
-   TLIBS="-lgclp -static -Wl,-zmuldefs $TLIBS"; #FIXME should be in unixport/makefile
-
-$as_echo "#define STATIC_LINKING 1" >>confdefs.h
-
 fi
 
 ## finally warn if we did not find a recognized machine.s
@@ -5170,6 +5165,207 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+add_arg_to_cflags() {
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CFLAG $1" >&5
+$as_echo_n "checking for CFLAG $1... " >&6; }
+    CFLAGS_ORI=$CFLAGS
+    CFLAGS="$CFLAGS -Werror $1 `echo $1|sed 's,-Wno-,-W,1'`"
+    if test "$cross_compiling" = yes; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  CFLAGS="$CFLAGS_ORI $1";{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; };return 0
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+    CFLAGS=$CFLAGS_ORI
+    return 1
+
+}
+
+assert_arg_to_cflags() {
+    if ! add_arg_to_cflags $1 ; then { $as_echo "$as_me:${as_lineno-$LINENO}: result: cannot add $1 to CFLAGS" >&5
+$as_echo "cannot add $1 to CFLAGS" >&6; }; exit 1 ; fi
+    return 0
+}
+
+add_args_to_cflags() {
+
+    while test "$#" -ge 1 ; do
+  	add_arg_to_cflags $1
+	shift
+    done
+}
+
+add_arg_to_ldflags() {
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LDFLAG $1" >&5
+$as_echo_n "checking for LDFLAG $1... " >&6; }
+    LDFLAGS_ORI=$LDFLAGS
+    LDFLAGS="$LDFLAGS -Werror $1"
+    if test "$cross_compiling" = yes; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  LDFLAGS="$LDFLAGS_ORI $1";{ $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; };return 0
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+    LDFLAGS=$LDFLAGS_ORI
+    return 1
+
+}
+
+assert_arg_to_ldflags() {
+    if ! add_arg_to_ldflags $1 ; then { $as_echo "$as_me:${as_lineno-$LINENO}: result: cannot add $1 to LDFLAGS" >&5
+$as_echo "cannot add $1 to LDFLAGS" >&6; }; exit 1 ; fi
+    return 0
+}
+
+add_args_to_ldflags() {
+
+    while test "$#" -ge 1 ; do
+  	add_arg_to_ldflags $1
+	shift
+    done
+}
+
+remove_arg_from_ldflags() {
+
+    NEW_LDFLAGS=""
+    for i in $LDFLAGS; do
+	if ! test "$i" = "$1" ; then
+      	    NEW_LDFLAGS="$NEW_LDFLAGS $i"
+	else
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: removing $1 from LDFLAGS" >&5
+$as_echo "removing $1 from LDFLAGS" >&6; }
+	fi
+    done
+    LDFLAGS=$NEW_LDFLAGS
+
+    return 0
+
+}
+
+add_args_to_cflags -fsigned-char -pipe \
+                    -fno-builtin-malloc -fno-builtin-free \
+                    -fno-PIE -fno-pie -fno-PIC -fno-pic \
+	            -Wall \
+	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
+	            -Wno-unused-but-set-variable -Wno-misleading-indentation
+
+add_args_to_ldflags -no-pie -Wl,-z,lazy
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for clang" >&5
+$as_echo_n "checking for clang... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+			 #ifdef __clang__
+			 #define RET 0
+			 #else
+			 #define RET 1
+			 #endif
+
+int
+main ()
+{
+
+			 return RET;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+     clang="yes"
+     remove_arg_from_ldflags -pie
+
+$as_echo "#define CLANG 1" >>confdefs.h
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+case $use in
+    *mingw*)
+	assert_arg_to_cflags -fno-zero-initialized-in-bss
+	assert_arg_to_cflags -mms-bitfields;;
+    *gnuwin*)
+	assert_arg_to_cflags -fno-zero-initialized-in-bss
+	assert_arg_to_cflags -mms-bitfields
+        assert_arg_to_ldflags -Wl,--stack,8000000;;
+    386-macosx)
+	assert_arg_to_ldflags -Wl,-no_pie
+	if test "$build_cpu" = "x86_64" ; then
+	    assert_arg_to_cflags -m64
+	    assert_arg_to_ldflags -m64
+	    assert_arg_to_ldflags -Wl,-headerpad,72
+        else
+	    assert_arg_to_cflags -m32
+	    assert_arg_to_ldflags -m32
+	    assert_arg_to_ldflags -Wl,-headerpad,56
+        fi;;
+    FreeBSD) assert_arg_to_ldflags -Z;;
+esac
+
+if test "$enable_static" = "yes" ; then
+    assert_arg_to_ldflags -static
+    assert_arg_to_ldflags -Wl,-zmuldefs
+
+$as_echo "#define STATIC_LINKING 1" >>confdefs.h
+
+fi
 
 # can only test for numbers -- CM
 # if test "${GCC}" -eq "yes" ; then
@@ -8388,17 +8584,29 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_direction" >&5
 $as_echo "$cstack_direction" >&6; }
 
+# Check whether --enable-immfix was given.
+if test "${enable_immfix+set}" = set; then :
+  enableval=$enable_immfix;
+fi
 
 
+# Check whether --enable-fastimmfix was given.
+if test "${enable_fastimmfix+set}" = set; then :
+  enableval=$enable_fastimmfix;
+else
+  enable_fastimmfix=64
+fi
 
-if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(0) remains above, foiling unexec
+
+#hurd can push .data below C stack, but sbrk(0) remains above, foiling unexec
+if test "$use" != "386-gnu" ; then
 
    { $as_echo "$as_me:${as_lineno-$LINENO}: checking finding default linker script" >&5
 $as_echo_n "checking finding default linker script... " >&6; }
    touch unixport/gcl.script
    echo "int main() {return 0;}" >foo.c
-   $CC -Wl,--verbose foo.c -o foo 2>&1 | \
-       $AWK '/==================================================/ {i=1-i;next} {if (i) print}' >gcl.script
+   $CC $LDFLAGS -Wl,--verbose foo.c -o foo 2>&1 | \
+       $AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
    rm -rf foo.c foo
 
    if test "`cat gcl.script | wc -l`" != "0" ; then
@@ -8418,7 +8626,7 @@ $as_echo "$as_me: trying to adjust text start" >&6;}
         cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[0-9]*","0x" j,$0);} {print}' j=$j >gcl.script
 #        diff -u gcl.script.def gcl.script
         echo "int main() {return 0;}" >foo.c
-        if ( $CC -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1 ; then
+        if ( $CC  $LDFLAGS -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1  ; then
          if test $n -lt $min ; then min=$n; fi;
          if test $n -gt $max; then max=$n; fi;
 	elif test $max -gt 0 ; then
@@ -8443,7 +8651,7 @@ $as_echo "$as_me: max log text start reduced to $max considering c stack address
       j=-1;
       low_shft="";
       if test $min -le $max ; then
-            if test $max -ge $enable_fastimmfix && test "$enable_immfix" = "yes" ; then
+            if test $max -ge $enable_fastimmfix && test "$enable_immfix" != "no" ; then
 	        j=`$AWK 'END {for (i=j=0;j<=n;j++) i=i ? i*2 : 1;printf("%x\n",3*i)}' n=$max </dev/null`
 		low_shft=`$AWK 'END {print n+1}' n=$max </dev/null`;
 		{ $as_echo "$as_me:${as_lineno-$LINENO}: raising log text to $j for a $max bit wide low immfix table" >&5
@@ -10866,7 +11074,8 @@ fi
 # redhat/cygnus released for some reason a buggy version of gcc,
 # which no one else released.   Catch that here.
 
-LIBS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'` $X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $TLIBS -ldl $LIBS"
+LDFLAGS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'`"
+LIBS="$X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $TLDFLAGS $TLIBS -ldl $LIBS"
 
 
 FINAL_CFLAGS="$CFLAGS $X_CFLAGS $TCFLAGS $PROCESSOR_FLAGS"

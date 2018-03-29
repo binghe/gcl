@@ -16,8 +16,15 @@ CLCSDIR = ../clcs
 PCLDIR  = ../pcl
 PORTDIR = $(shell pwd)
 
-LD_LIBS_PRE=$(FIRST_FILE) $(addprefix -u ,$(PATCHED_SYMBOLS))
-LD_LIBS_POST=$(LIBS) $(LIBC) -lgclp $(LAST_FILE)
+LD_FLAGS:=$(LDFLAGS)
+ifneq ($(FIRST_FILE),)
+LD_FLAGS:=$(LD_FLAGS) $(ODIR)/$(FIRST_FILE)
+endif
+LD_LIBS_PRE=$(addprefix -u ,$(PATCHED_SYMBOLS))
+LD_LIBS_POST=$(LIBS) $(LIBC) -lgclp
+ifneq ($(LAST_FILE),)
+LD_LIBS_POST:=$(LD_LIBS_POST) $(ODIR)/$(LAST_FILE)
+endif
 
 ifeq ($(ARRS),)
 ARRS:=ar rs
@@ -159,9 +166,9 @@ libansi_gcl.a: $(OBJS) $(ANSIOBJS) sys_ansi_gcl.o gmpfiles bfdfiles
 raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) $(EXTRAS)
 	touch raw_$*_map
 ifeq ($(GNU_LD),1)
-	$(CC) -o raw_$*$(EXE) $(filter %.o,$^) -rdynamic -L. $(EXTRA_LD_LIBS) $(LD_STACK_FLAGS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -rdynamic -L. $(EXTRA_LD_LIBS) $(LD_STACK_FLAGS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 else
-	$(CC) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 endif
 
 map_%:
