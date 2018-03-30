@@ -1904,7 +1904,7 @@ if test "$use" != "386-gnu" ; then
         cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
 #        diff -u gcl.script.def gcl.script
         echo "int main() {return 0;}" >foo.c
-        if ( $CC  $LDFLAGS -Wl,-T gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1  ; then
+        if ( $CC  $LDFLAGS -Wl,-T,gcl.script foo.c -o foo && ./foo ) >/dev/null 2>&1  ; then
          if test $n -lt $min ; then min=$n; fi; 
          if test $n -gt $max; then max=$n; fi; 
 	elif test $max -gt 0 ; then
@@ -1949,7 +1949,7 @@ if test "$use" != "386-gnu" ; then
             cat gcl.script.def | $AWK '/SIZEOF_HEADERS/ {gsub("0x[[0-9]]*","0x" j,$0);} {print}' j=$j >gcl.script
 	    AC_MSG_RESULT([done])
 	    rm -f gcl.script.def
-	    LDFLAGS="$LDFLAGS -Wl,-T gcl.script "
+	    LDFLAGS="$LDFLAGS -Wl,-T,gcl.script "
 	    cp gcl.script unixport
       else
 	 AC_MSG_RESULT([none found or not needed])

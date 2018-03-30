@@ -39,13 +39,13 @@ clean::
 	rm -f ${GUIOS} $(OFILES) gcltkaux gcltksrv gcltksrv.bat *.o */*.o demos/index.lsp *.fn demos/*.fn
 
 .c.o:
-	$(GCLTKCC) -c $(CFLAGS1) ${ODIR_DEBUG}  $*.c
+	$(GCLTKCC) -c $(filter-out -pg,$(CFLAGS1)) -fPIE ${ODIR_DEBUG}  $*.c
 
 
 # for some reason -lieee is on various linux systems in the list of requireds..
 
 gcltkaux:  $(GUIOS)
-	$(LD_ORDINARY_CC) $(GUIOS) -o gcltkaux  ${TK_LIB_SPEC} ${TK_BUILD_LIB_SPEC} ${TK_XLIBSW} ${TK_XINCLUDES} ${TCL_LIB_SPEC} ${TCL_LIBS}  ${LIBS} ${GCLIB}
+	$(LD_ORDINARY_CC) $(GUIOS) $(filter-out %gcl.script,$(LDFLAGS)) -pie -o gcltkaux  ${TK_LIB_SPEC} ${TCL_LIB_SPEC}
 
 gcltksrv: makefile gcltksrv.in gcltksrv.bat.in
 	cat gcltksrv.in | sed -e "s!TK_LIBRARY=.*!TK_LIBRARY=${TK_LIBRARY}!g" \
