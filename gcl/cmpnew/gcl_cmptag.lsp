@@ -55,50 +55,30 @@
 ;;; *tags* when the compiler begins to process a closure.  'LB' will be pushed
 ;;; on *tags* when *level* is incremented.
 
-
-
-(defun jumps-to-p (clause tag-name &aux tem)
-;;Does CLAUSE have a go TAG-NAME in it?
-  (cond ((atom clause)nil)
-	((and (eq (car clause) 'go)
-	      (tag-p (setq tem (cadddr (cdr clause))))
-	      (eq (tag-name tem) tag-name)))
-	(t (or (jumps-to-p (car clause) tag-name)
-	       (jumps-to-p (cdr clause) tag-name)))))
-
 (defvar *reg-amount* 60)
 ;;amount to increase var-register for each variable reference in side a loop
 
 (defun add-reg1 (form)
-;;increase the var-register in FORM for all vars
-  (cond ((atom form)
-	 (cond ((typep form 'var)
-		 (setf (var-register form)
-		      (the fixnum (+ (the fixnum (var-register form))
-				      (the fixnum *reg-amount*))))
-		)))
-	(t (add-reg1 (car form))
-	   (add-reg1 (cdr form)))))
-	 
+  (unless (tag-p form)
+    (mapc (lambda (x)
+	    (when (var-p x)
+	      (incf (var-register x) (the fixnum *reg-amount*))))
+	  (info-ref (cadr form)))))
 
-(defun add-loop-registers (tagbody)
-;;Find a maximal iteration interval in TAGBODY from first to end
-;;then increment the var-register slot.
-  (do ((v tagbody (cdr v))
-       (end nil)
-       (first nil))
-      ((null v)
-       (do ((ww first (cdr ww)))
-	   ((eq ww end)(add-reg1 (car ww)))
-	   (add-reg1 (car ww))))
-   (cond ((typep (car v) 'tag)
-	  (or first (setq first v))
-	  (do ((w (cdr v) (cdr w))
-	       (name (tag-name (car v))))
-	      ((null w) )
-	      (cond ((jumps-to-p (car w) name)
-		     (setq end w))))))))
+(defun intersection-p (l1 l2)
+  (member-if (lambda (x) (member x l2)) l1))
+(setf (get 'intersection-p 'cmp-inline) t)
 
+(defun add-loop-registers (tagbody &aux (first (member-if 'tag-p tagbody))
+				   (tags (cons (pop first) (remove-if-not 'tag-p first)))
+				   (end first))
+
+  (mapl (lambda (x) (unless (tag-p (car x))
+		      (when (intersection-p tags (info-ref (cadar x)))
+			(setf end (cdr x))))) first)
+  (do ((form first (cdr form)))
+      ((eq form end))
+      (add-reg1 (car form))))
 
 (defvar *ttl-tags* nil)
 
