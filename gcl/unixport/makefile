@@ -114,7 +114,7 @@ init_raw.lsp: init_raw.lsp.in
 		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
 		-e "s#@LI-INIT-LSP@#\"$@\"#1" >$@
 
-saved_%:raw_% $(RSYM) init_raw.lsp raw_%_map msys \
+saved_%:raw_% $(RSYM) init_raw.lsp raw_%_map \
 		$(CMPDIR)/gcl_cmpmain.lsp \
 		$(CMPDIR)/gcl_lfun_list.lsp \
 		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
