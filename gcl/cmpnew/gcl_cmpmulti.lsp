@@ -205,13 +205,13 @@
   (wt-nl "vs_base=V" base ";vs_top=V" top ";sup=V" sup ";}")
   (unwind-exit 'fun-val nil (if top-data (car top-data))))
 
-(defun c1values (args &aux (info (make-info)))
-  (let ((a (mapcar (lambda (x) (c1expr* x info)) args)))
-    (setf (info-type info)
-	  (cmp-norm-tp 
-	   (cons 'returns-exactly
-		 (mapcar (lambda (x) (coerce-to-one-value (info-type (cadr x)))) a))))
-    (list 'values info a)))
+(defun c1values (args &aux (nargs (mapcar (lambda (x &aux (x (c1expr x)))
+					    (setf (info-type (cadr x)) (coerce-to-one-value (info-type (cadr x))))
+					    x) args)))
+  (cond ((unless (cdr nargs) (car nargs)))
+	((let ((info (make-info)))
+	   (setf (info-type info) (cmp-norm-tp (cons 'returns-exactly (mapcar (lambda (x &aux (i (cadr x))) (add-info info i) (info-type i)) nargs))))
+	   (list 'values info nargs)))))
 
 ;; (defun c1values (args &aux (info (make-info)))
 ;;       (cond ((and args (not (cdr args)))
