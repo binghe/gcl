@@ -184,7 +184,7 @@
 (defun array-in-bounds-p (a &rest i &aux (j 0))
   (declare (optimize (safety 1)) (:dynamic-extent i))
   (check-type a array)
-  (and (not (member-if-not (lambda (x) (< -1 x (array-dimension a (prog1 j (incf j))))) i))
+  (unless (member-if-not (lambda (x) (< -1 x (array-dimension a (prog1 j (incf j))))) i)
        (= j (c-array-rank a))))
 
 ;; (defun array-in-bounds-p (a &rest i)
