@@ -497,10 +497,7 @@
 
 ;;   (list 'multiple-value-bind info vars init-form body))
 
-(defun max-stack-space (form)
-  (cond ((atom form) 0)
-	((info-p (car form)) (max (abs (vald (info-type (car form)))) (max-stack-space (cdr form))))
-	((max (max-stack-space (car form)) (max-stack-space (cdr form))))))
+(defun max-stack-space (form) (abs (vald (info-type (cadr form)))))
 
 (defun stack-space (form)
   (let* ((tp (info-type (cadr form)))
