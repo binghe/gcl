@@ -1109,7 +1109,7 @@
 ;;       (under-env env (c1inline (list (cons fn (append args la)) src)))))
 
 (defun sir-tag (sir)
-  (cadar (member-if (lambda (x) (and (eq (caar x) (car sir)) (cadddr x))) 
+  (cadar (member-if (lambda (x) (and (eq (caar x) (car sir)) (cdddr x)))
 		    (reverse *src-inline-recursion*))))
 
 (defun discrete-tp (tp &optional (i 0))
@@ -1172,15 +1172,18 @@
 			       )))))) tps sir))
     (not (member-if 'atomic-tp sir))))
 
-(defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))(l (append *src-inline-recursion* *prev-sri*))
-		     (p (member n l :key 'caar))(pp (member n (cdr p) :key 'caar)))
+(defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))
+		     (p (member n *src-inline-recursion* :key 'caar)))
   (when p
-    (if pp
-	(if (or (member f *c1exit*) (member-if 'atomic-tp tp))
-	    (member-if (lambda (x) (when (eq n (caar x)) (arg-types-match (cdar x) tp t))) p)
-;	  t)
-	  (let ((tag (sir-tag sir))) (if tag (throw tag nil) t)))
-      (arg-types-match (cdaar p) tp))))
+    (if (or (member f *c1exit*) (member-if 'atomic-tp tp))
+	(member-if (lambda (x)
+		     (when (eq n (caar x))
+		       (arg-types-match (cdar x) tp (member n (cdr p) :key 'caar))))
+		   p)
+      (let ((tag (sir-tag sir)))
+	(if tag
+	    (throw tag *src-inline-recursion*)
+	  t)))))
 
 ;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))(l (append *src-inline-recursion* *prev-sri*))
 ;; 		     (p (member n l :key 'caar))(pp (member n (cdr p) :key 'caar)))
@@ -1437,9 +1440,15 @@
 	 (targs (if la (append args (list la)) args))
 	 (inls (mapcar 'cons targs fms))
 	 (inl (mi3 fun args la fms tag envl inls)))
-    (cond (inl (keyed-cmpnote (list 'inline (if (fun-p fun) (fun-name fun) fun))
-			      "inlining ~s ~s ~s" fun (mapcar (lambda (x) (info-type (cadr x))) fms) la)
+    (cond ((info-p (cadr inl))
+	   (keyed-cmpnote (list 'inline (if (fun-p fun) (fun-name fun) fun))
+			  "inlining ~s ~s ~s" fun (mapcar (lambda (x) (info-type (cadr x))) fms) la)
 	   inl)
+	  (inl
+	   (setq inl (mapcar (lambda (x) (name-sir (car x))) (ldiff inl *src-inline-recursion*)))
+	   (keyed-cmpnote (list* 'inline 'inline-abort inl) "aborting inline of ~s" inl)
+	   (setq *notinline* (nunion inl *notinline*))
+	   nil)
 	  ((and sir (member fun *c1exit*))
 	   (keyed-cmpnote (list 'tail-recursion fun) "tail recursive call to ~s replaced with iteration" fun)
 	   (c1let-* (cdr (blla-recur tag (caddr sir) args la)) t inls)))))
