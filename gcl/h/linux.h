@@ -132,17 +132,10 @@ do { int c = 0; \
 
 #include <limits.h>
 #include <sys/stat.h>
-#define GET_FULL_PATH_SELF(a_) do {		\
-    static char q[PATH_MAX];			\
-    const char *s="/proc/self/exe";		\
-    struct stat ss;				\
-    if (stat(s,&ss))				\
-      (a_)=argv[0];				\
-    else {					\
-      if (!realpath(s,q))			\
-	error("realpath error");		\
-      (a_)=q;					\
-    }						\
+#define GET_FULL_PATH_SELF(a_) do {				\
+    static char q[PATH_MAX];					\
+    massert(which("/proc/self/exe",q) || which(argv[0],q));	\
+    (a_)=q;							\
   } while(0)
 
 
