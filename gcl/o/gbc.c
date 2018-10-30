@@ -879,9 +879,9 @@ void hppa_save_regs(struct regs);
 
 	asm(".code");
 	asm(".export hppa_save_regs, entry");
+	asm(".label	hppa_save_regs");
 	asm(".proc");
 	asm(".callinfo");
-	asm(".label	hppa_save_regs");
 	asm(".entry");
 
 	asm("stw	%r3,0(%arg0)");
