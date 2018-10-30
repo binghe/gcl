@@ -242,7 +242,7 @@ get_gc_environ(void) {
   }
 
   gc_page_min=0.5;
-  if ((e=getenv("GCL_GC_PAGE_MIN"))) {
+  if ((e=getenv("GCL_GC_PAGE_MIN"))||(e=getenv("GCL_GC_PAGE_THRESH"))) {/*legacy support*/
     massert(sscanf(e,"%lf",&gc_page_min)==1);
     massert(gc_page_min>=0.0);
   }
