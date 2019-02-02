@@ -388,7 +388,7 @@ case $use in
 		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.8.1
 		;;
 	    arm*)
-		assert_arg_to_cflags -mlong-calls
+#		assert_arg_to_cflags -mlong-calls
 		assert_arg_to_cflags -fdollars-in-identifiers
 		assert_arg_to_cflags -g #?
 		;;

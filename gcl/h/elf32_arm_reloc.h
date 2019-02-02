@@ -53,7 +53,17 @@
       break;
     case R_ARM_CALL:
     case R_ARM_JUMP24:
-      add_vals(where,MASK(24),((long)(s+a-p))>>2);
+      massert(!a);
+      {
+	long x=((long)(s-p))/4;
+	if (abs(x)&(~MASK(23))) {
+          got+=(sym->st_size-1)*tz;
+	  memcpy(got,tramp,sizeof(tramp));
+          got[sizeof(tramp)/sizeof(*got)]=s;
+	  x=((long)got-p)/4;
+	}
+	add_vals(where,MASK(24),x);
+      }
       break;
     case R_ARM_ABS32:
       add_vals(where,~0L,s+a);
