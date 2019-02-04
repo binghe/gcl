@@ -37,6 +37,7 @@ case $canonical in
     mipsel*linux*) use=mipsel-linux;;
     sparc*linux*) use=sparc-linux;;
     aarch64*linux*) use=aarch64-linux;;
+    arm*linux*hf) use=armhf-linux;;
     arm*linux*) use=arm-linux;;
     s390*linux*) use=s390-linux;;
     ia64*linux*) use=ia64-linux;;
@@ -335,17 +336,19 @@ AC_ARG_ENABLE([gprof],[  --enable-gprof builds gcl with -pg in CFLAGS to enable 
 		       sh4*)  enableval="no";;
 		       ia64*) enableval="no";;
 		       hppa*) enableval="no";;
-#		       arm*)  enableval="no";;#FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
+#		       arm*)  if echo $canonical |grep -q hf$; then enableval="no"; fi;;#FIXME CALL and JUMP24 veneers needed for thumb 20190201 #FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
 		       aarch64*) enableval="no";;#unreproducible buildd bug 20170824
 		       *gnu)  enableval="no";;
 		   esac		     
-		   if test "$enableval" != "yes" ; then
+                   GP_FLAG=""
+                   if test "$enableval" != "yes" ; then
 		       AC_MSG_RESULT([disabled])
 		   else
 		       AC_MSG_RESULT([ok])
 		       OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
                        assert_arg_to_cflags -pg
-		       CFLAGS=$OLD_CFLAGS
+                       GP_FLAG="-pg"
+                       CFLAGS=$OLD_CFLAGS
        		       TFPFLAG=""
 		       AC_DEFINE(GCL_GPROF,1,[use gprof profiling])
 		   fi
@@ -387,8 +390,13 @@ case $use in
 	    ia64*)
 		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.8.1
 		;;
+	    armhf*)
+	        #FIXME elf corruption unless main.o compiled with -mlong-calls
+		XMAINFLAGS="-mlong-calls"
+		assert_arg_to_cflags -fdollars-in-identifiers
+		assert_arg_to_cflags -g #?
+		;;
 	    arm*)
-#		assert_arg_to_cflags -mlong-calls
 		assert_arg_to_cflags -fdollars-in-identifiers
 		assert_arg_to_cflags -g #?
 		;;
@@ -2108,8 +2116,11 @@ LDFLAGS="`echo $LDFLAGS | sed 's,gcl.script,../unixport/gcl.script,g'`"
 AC_SUBST(LDFLAGS)
 LIBS="$X_PRE_LIBS $X_LIBS $X_EXTRA_LIBS $LIBS $TLIBS"
 AC_SUBST(LIBS)
+CFLAGS="$CFLAGS $GP_FLAG"
 FINAL_CFLAGS="$CFLAGS $CPPFLAGS $X_CFLAGS"
 AC_SUBST(FINAL_CFLAGS)
+# Work around -mlong-calls needed for main on armhf
+AC_SUBST(XMAINFLAGS)
 # Work around bug with gcc on ppc -- CM
 NIFLAGS="$CFLAGS $CPPFLAGS $TONIFLAGS -I\$(GCLDIR)/o"
 AC_SUBST(NIFLAGS)

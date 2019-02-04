@@ -1,6 +1,7 @@
-static int tramp[]={0xe59fc000,   /*ldr r12, [pc]*/ /*FIXME?  Can this refer to an earlier address?*/
-		    0xe12fff1c};  /*br r12*/
-static ul tz=1+sizeof(tramp)/sizeof(ul);
+static int tramp[]={0x0c00f240,  /*movw	r12, #0*/
+		    0x0c00f2c0,  /*movt	r12, #0*/
+		    0xbf004760}; /*bx r12   nop*/
+static ul tz=sizeof(tramp)/sizeof(ul);
 
 static int
 find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
@@ -25,8 +26,9 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
     if (sec->sh_type==SHT_REL)
       for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 	if (
-	    ELF_R_TYPE(r->r_info)==R_ARM_CALL ||
-	    ELF_R_TYPE(r->r_info)==R_ARM_JUMP24
+#define R_ARM_THM_CALL        10
+	    ELF_R_TYPE(r->r_info)==R_ARM_THM_CALL ||
+	    ELF_R_TYPE(r->r_info)==R_ARM_THM_JUMP24
 	    ) {
 
 	  sym=sym1+ELF_R_SYM(r->r_info);

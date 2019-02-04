@@ -39,6 +39,11 @@ gprof.o: gprof.c $(DECL)
 prelink.o: prelink.c $(DECL)
 	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
 
+ifneq ($(XMAINFLAGS),)
+main.o: main.c $(DECL)
+	$(CC) -c $(CFLAGS) $(XMAINFLAGS) $(DEFS) $< -o $@
+endif
+
 %.o: %.c $(DECL)
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
 
