@@ -18,7 +18,7 @@
     case R_ARM_JUMP24:
       {
 	long x=((long)(s+a-p))/4;
-	if (abs(x)&(~MASK(24))) {
+	if (abs(x)&(~MASK(23))) {
           got+=(sym->st_size-1)*tz;
 	  memcpy(got,tramp,sizeof(tramp));
 	  /*recurse on relocate?*/
