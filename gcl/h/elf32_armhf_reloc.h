@@ -4,7 +4,7 @@
      case R_ARM_THM_JUMP24:
       {
     	long x=(long)(s+a-p);
-    	if (1||abs(x)&(~MASK(25))) {
+    	if (abs(x)&(~MASK(24))) {
 
           got+=(sym->st_size-1)*tz;
     	  memcpy(got,tramp,sizeof(tramp));
@@ -32,7 +32,7 @@
     case R_ARM_THM_CALL:
       {
     	long x=(long)(s+a-p);
-    	if (1||abs(x)&(~MASK(23))) {/*24?*/
+    	if (abs(x)&(~MASK(23))) {
           got+=(sym->st_size-1)*tz;
     	  memcpy(got,tramp,sizeof(tramp));
 

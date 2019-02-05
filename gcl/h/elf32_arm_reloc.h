@@ -18,10 +18,10 @@
     case R_ARM_JUMP24:
       {
 	long x=((long)(s+a-p))/4;
-	if (abs(x)&(~MASK(23))) {/*24?*/
+	if (abs(x)&(~MASK(24))) {
           got+=(sym->st_size-1)*tz;
 	  memcpy(got,tramp,sizeof(tramp));
-	  /*relocate*/
+	  /*recurse on relocate?*/
           got[sizeof(tramp)/sizeof(*got)]=s;
 	  x=((long)got-p)/4;
 	}
@@ -29,8 +29,6 @@
       }
       break;
     case R_ARM_V4BX:
-      add_vals(where,~0L,s+a);
-      break;
     case R_ARM_ABS32:
       add_vals(where,~0L,s+a);
       break;
