@@ -6,10 +6,6 @@
 # for main link of raw_gcl
 LIBS=@LIBS@
 
-#The multi precision library stuff
-MPFILES=$(MPDIR)/@MPI_FILE@ $(MPDIR)/libmport.a
-
-
 # root for the installation, eg /usr/local
 # This would cause make install to create /usr/local/bin/gcl and
 # /usr/local/lib/gcl-2-??/* with some basic files.
@@ -49,7 +45,6 @@ GCL_CC=@GCL_CC@
 CFLAGS=@CFLAGS@
 LDFLAGS=@LDFLAGS@
 FINAL_CFLAGS=@FINAL_CFLAGS@
-XMAINFLAGS=@XMAINFLAGS@
 NIFLAGS=@NIFLAGS@
 O3FLAGS=@O3FLAGS@
 O2FLAGS=@O2FLAGS@
