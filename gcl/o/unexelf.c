@@ -887,7 +887,7 @@ unexec (char *new_name, char *old_name, unsigned int data_start, unsigned int bs
 
   /* Walk through all section headers, insert the new data2 section right
      before the new bss section. */
-  for (n = 1, nn = 1; n < (int) old_file_h->e_shnum; n++, nn++)
+  for (n = 0, nn = 0; n < (int) old_file_h->e_shnum; n++, nn++)
     {
       caddr_t src;
       /* If it is (s)bss section, insert the new data2 section before it.  */
