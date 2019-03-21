@@ -169,20 +169,6 @@ Ifuncall_n(object fun,int n,...) {
 /*   return res; */
 /* } */
 
-object
-Icheck_one_type(object x, enum type t)
-{ if (x->d.t != t)
-    { return CEerror("Expected a ~a ","Supply right type",1,type_name(t),Cnil,Cnil,Cnil);
-    }
-  return x;
-}
-
-
-object
-fSincorrect_type(object val, object type)
-{ return CEerror("Got ~a,Expected a ~a","Supply a new one",1,val,type,Cnil,Cnil);
-}
-
 /* static void */
 /* Ineed_in_image(object (*foo) (/\* ??? *\/)) */
 /* {;} */

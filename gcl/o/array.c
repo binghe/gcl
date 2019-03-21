@@ -211,14 +211,18 @@ DEFUN_NEW("ASET1", object, fSaset1, SI, 3, 3, NONE, OO, IO, OO,OO,(object x, fix
       break;
     case aet_bit:
       i +=  BV_OFFSET(x);
-    AGAIN_BIT: 
       ASSURE_TYPE(val,t_fixnum);
-      {int v = Mfix(val);
-       if (v == 0) CLEAR_BITREF(x,i);
-       else if (v == 1) SET_BITREF(x,i);
-       else {val= fSincorrect_type(val,sLbit);
-	     goto AGAIN_BIT;}
-       break;}
+      switch (Mfix(val)) {
+      case 0:
+	CLEAR_BITREF(x,i);
+	break;
+      case 1:
+	SET_BITREF(x,i);
+	break;
+      default:
+	TYPE_ERROR(val,sLbit);
+      }
+      break;
     case aet_fix:
       ASSURE_TYPE(val,t_fixnum);
       (x->fixa.fixa_self[i]) = Mfix(val);

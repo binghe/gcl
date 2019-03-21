@@ -526,16 +526,9 @@ exhausted_report(enum type t,struct typemanager *tm) {
 
   available_pages+=resv_pages;
   resv_pages=0;
-  vs_push(type_name(t));
-  vs_push(make_fixnum(tm->tm_npage));
-  CEerror("The storage for ~A is exhausted.~%\
-Currently, ~D pages are allocated.~%	     \
-Use ALLOCATE to expand the space.",
-	  "Continues execution.",
-	  2, vs_top[-2], vs_top[-1], Cnil, Cnil);
-
-  vs_popp;
-  vs_popp;
+  CEerror("Continues execution.",
+	  "The storage for ~A is exhausted. ~D pages allocated. Use ALLOCATE to expand the space.",
+	  2, type_name(t), make_fixnum(tm->tm_npage));
 
   call_after_gbc_hook(t);
 

@@ -175,7 +175,7 @@ TS_MEMBER(t0,TS(t1)|TS(t2)|TS(t3)...)
 #define TS(s) (1<<s)
 #define TS_MEMBER(t1,ts) ((TS(t1)) & (ts))
 
-#define ASSURE_TYPE(val,t) if(type_of(val)!=t) val= Icheck_one_type(val,t)
+#define ASSURE_TYPE(val,t) if (type_of(val)!=t) TYPE_ERROR(val,type_name(t))
 
 object IisArray();
 
