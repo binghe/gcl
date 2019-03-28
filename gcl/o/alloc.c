@@ -349,9 +349,10 @@ resize_hole(ufixnum hp,enum type tp,bool in_placep) {
   char *start=rb_begin(),*new_start=heap_end+hp*PAGESIZE;
   ufixnum size=rb_pointer-start;
 
+#define OVERLAP(c_,t_,s_) ((t_)<(c_)+(s_) && (c_)<(t_)+(s_))
   if (!in_placep && (rb_high() ?
-		     new_start+size>rb_end :
-		     new_start+(nrbpage<<PAGEWIDTH)<start+size
+		     OVERLAP(start,new_start,size) :
+		     OVERLAP(start,new_start+(nrbpage<<PAGEWIDTH),size)
 		     /* 0 (20190401  never reached)*/
 		     )) {
     if (sSAnotify_gbcA->s.s_dbind != Cnil)
