@@ -14,7 +14,7 @@
     long pers = personality(READ_IMPLIES_EXEC|personality(0xffffffffUL));
     long flag = ADDR_NO_RANDOMIZE;
 
-    if (sizeof(long)==4) flag|=ADDR_LIMIT_3GB|ADDR_COMPAT_LAYOUT;
+    if (sizeof(long)==4) flag|=ADDR_LIMIT_3GB/* |ADDR_COMPAT_LAYOUT */;
 
     if (pers==-1) {printf("personality failure %d\n",errno);exit(-1);}
     if ((pers & flag)!=flag && !getenv("GCL_UNRANDOMIZE")) {

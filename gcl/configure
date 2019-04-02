@@ -6375,7 +6375,7 @@ main ()
 		FILE *f;
 		if (!(f=fopen("conftest1","w")))
 		   return -1;
-		   fprintf(f,"%u",sbrk(0));
+		   fprintf(f,"%p",sbrk(0));
 
   ;
   return 0;
@@ -6591,7 +6591,7 @@ else
 			#endif
 			if (!(f=fopen("conftest1","w")))
 			   return -1;
-			   fprintf(f,"%u",sbrk(0));
+			   fprintf(f,"%p",sbrk(0));
 			   return 0;
 		    }
 
@@ -6625,7 +6625,7 @@ else
 			#include "h/unrandomize.h"
 			#endif
 			if (!(f=fopen("conftest1","w"))) return -1;
-			   fprintf(f,"%u",sbrk(0));
+			   fprintf(f,"%p",sbrk(0));
 			   return 0;
 		    }
 
@@ -6653,6 +6653,60 @@ $as_echo "no" >&6; }
 	as_fn_error $? "exiting" "$LINENO" 5
     fi
 fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CSTACK_DIRECTION" >&5
+$as_echo_n "checking CSTACK_DIRECTION... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		#include <stdio.h>
+		#include <stdlib.h>
+
+		unsigned long w;
+
+		void
+		foo(void) {
+		    int i;
+		    w=(unsigned long)&i;
+		}
+
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *b;
+		    FILE *fp = fopen("conftest1","w");
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    foo();
+		    fprintf(fp,"%d",((unsigned long) &b) > w ? -1 : 1);
+		    fclose(fp);
+		    return 0;
+		}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  cstack_direction=`cat conftest1`
+else
+  cstack_direction=0
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define CSTACK_DIRECTION $cstack_direction
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_direction" >&5
+$as_echo "$cstack_direction" >&6; }
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking CSTACK_ADDRESS" >&5
 $as_echo_n "checking CSTACK_ADDRESS... " >&6; }
 if test "$cross_compiling" = yes; then :
@@ -6666,12 +6720,6 @@ else
 
 		#include <stdio.h>
 		#include <stdlib.h>
-		void *
-		foo() {
-		    int i;
-		    return (void *)&i;
-		}
-
 		int
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
@@ -6685,13 +6733,13 @@ else
 		    j<<=$PAGEWIDTH;
 		    j<<=16;
 		    i=(unsigned long)&v;
-		    if (foo()>i) i-=j;
-		       j--;
-		       i+=j;
-		       i&=~j;
-		       fprintf(fp,"0x%lx",i-1);
-		       fclose(fp);
-		       return 0;
+		    if ($cstack_direction==1) i-=j;
+		    j--;
+		    i+=j;
+		    i&=~j;
+		    fprintf(fp,"0x%lx",i-1);
+		    fclose(fp);
+		    return 0;
 		}
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -6724,12 +6772,6 @@ else
 
 		#include <stdio.h>
 		#include <stdlib.h>
-		void *
-		foo() {
-		    int i;
-		    return (void *)&i;
-		}
-
 		int
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
@@ -6743,14 +6785,14 @@ else
 		    j<<=$PAGEWIDTH;
 		    j<<=16;
 		    i=(unsigned long)&v;
-		    if (foo()>i) i-=j;
-		       j--;
-		       i+=j;
-		       i&=~j;
-		       for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
-			   fprintf(fp,"%d",j);
-			   fclose(fp);
-			   return 0;
+		    if ($cstack_direction==1) i-=j;
+		    j--;
+		    i+=j;
+		    i&=~j;
+		    for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
+		    fprintf(fp,"%ld",j);
+		    fclose(fp);
+		    return 0;
 		}
 _ACEOF
 if ac_fn_c_try_run "$LINENO"; then :
@@ -6853,54 +6895,6 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_alignment" >&5
 $as_echo "$cstack_alignment" >&6; }
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking CSTACK_DIRECTION" >&5
-$as_echo_n "checking CSTACK_DIRECTION... " >&6; }
-if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-		#include <stdio.h>
-		#include <stdlib.h>
-		void *
-		foo(void) {
-		    int i;
-		    return (void *)&i;
-		}
-
-		int
-		main(int argc,char **argv,char **envp) {
-		    char *b;
-		    FILE *fp = fopen("conftest1","w");
-		    #ifdef CAN_UNRANDOMIZE_SBRK
-		    #include "h/unrandomize.h"
-		    #endif
-		    fprintf(fp,"%d",((long) &b) > ((long) foo()) ? -1 : 1);
-		    fclose(fp);
-		    return 0;
-		}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  cstack_direction=`cat conftest1`
-else
-  cstack_direction=0
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define CSTACK_DIRECTION $cstack_direction
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_direction" >&5
-$as_echo "$cstack_direction" >&6; }
 
 # Check whether --enable-immfix was given.
 if test "${enable_immfix+set}" = set; then :
@@ -7050,8 +7044,7 @@ int
 main ()
 {
 
-		void *v;
-		unsigned long i,j,k,l,m;
+		unsigned long i,j,k,l;
 		FILE *fp = fopen("conftest1","w");
 
 		for (i=2,k=1;i;k=i,i<<=1);

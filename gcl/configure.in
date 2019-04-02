@@ -1049,7 +1049,7 @@ AC_RUN_IFELSE(
 		FILE *f;
 		if (!(f=fopen("conftest1","w")))
 		   return -1;
-		   fprintf(f,"%u",sbrk(0));
+		   fprintf(f,"%p",sbrk(0));
 	    ]])],
     [HAVE_SBRK=1;AC_MSG_RESULT([yes])],
     AC_MSG_RESULT([no: WARNING you must be able to emulate sbrk: as on mingw or macosx]),
@@ -1145,7 +1145,7 @@ if test "$HAVE_SBRK" = "1" ; then
 			#endif
 			if (!(f=fopen("conftest1","w")))
 			   return -1;
-			   fprintf(f,"%u",sbrk(0));
+			   fprintf(f,"%p",sbrk(0));
 			   return 0;
 		    }
 		]])],[SBRK=`cat conftest1`])
@@ -1165,7 +1165,7 @@ if test "$HAVE_SBRK" = "1" ; then
 			#include "h/unrandomize.h"
 			#endif
 			if (!(f=fopen("conftest1","w"))) return -1;
-			   fprintf(f,"%u",sbrk(0));
+			   fprintf(f,"%p",sbrk(0));
 			   return 0;
 		    }
 		]])],[SBRK1=`cat conftest1`])
@@ -1183,18 +1183,45 @@ if test "$HAVE_SBRK" = "1" ; then
 	AC_MSG_ERROR([exiting])
     fi
 fi
+
+AC_MSG_CHECKING(CSTACK_DIRECTION)
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+
+		unsigned long w;
+
+		void
+		foo(void) {
+		    int i;
+		    w=(unsigned long)&i;
+		}
+		
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *b;
+		    FILE *fp = fopen("conftest1","w");
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    foo();
+		    fprintf(fp,"%d",((unsigned long) &b) > w ? -1 : 1);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_direction=`cat conftest1`],[cstack_direction=0])
+AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up or down])
+AC_MSG_RESULT($cstack_direction)
+
+
 AC_MSG_CHECKING(CSTACK_ADDRESS)
 AC_RUN_IFELSE(
     [AC_LANG_SOURCE(
 	    [[
 		#include <stdio.h>
 		#include <stdlib.h>
-		void *
-		foo() {
-		    int i;
-		    return (void *)&i;
-		}
-		
 		int
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
@@ -1208,13 +1235,13 @@ AC_RUN_IFELSE(
 		    j<<=$PAGEWIDTH;
 		    j<<=16;
 		    i=(unsigned long)&v;
-		    if (foo()>i) i-=j;
-		       j--;
-		       i+=j;
-		       i&=~j;
-		       fprintf(fp,"0x%lx",i-1);
-		       fclose(fp);
-		       return 0;
+		    if ($cstack_direction==1) i-=j;
+		    j--;
+		    i+=j;
+		    i&=~j;
+		    fprintf(fp,"0x%lx",i-1);
+		    fclose(fp);
+		    return 0;
 		}]])],
     [cstack_address=`cat conftest1`],[cstack_address=0])
 AC_DEFINE_UNQUOTED(CSTACK_ADDRESS,$cstack_address,[starting C stack address])
@@ -1226,12 +1253,6 @@ AC_RUN_IFELSE(
 	    [[
 		#include <stdio.h>
 		#include <stdlib.h>
-		void *
-		foo() {
-		    int i;
-		    return (void *)&i;
-		}
-		
 		int
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
@@ -1245,14 +1266,14 @@ AC_RUN_IFELSE(
 		    j<<=$PAGEWIDTH;
 		    j<<=16;
 		    i=(unsigned long)&v;
-		    if (foo()>i) i-=j;
-		       j--;
-		       i+=j;
-		       i&=~j;
-		       for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
-			   fprintf(fp,"%d",j);
-			   fclose(fp);
-			   return 0;
+		    if ($cstack_direction==1) i-=j;
+		    j--;
+		    i+=j;
+		    i&=~j;
+		    for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
+		    fprintf(fp,"%ld",j);
+		    fclose(fp);
+		    return 0;
 		}]])],
     [cstack_bits=`cat conftest1`],[cstack_bits=0])
 AC_DEFINE_UNQUOTED(CSTACK_BITS,$cstack_bits,[log starting C stack address])
@@ -1301,33 +1322,6 @@ AC_RUN_IFELSE(
     [cstack_alignment=`cat conftest1`],[cstack_alignment=0])
 AC_DEFINE_UNQUOTED(CSTACK_ALIGNMENT,$cstack_alignment,[C stack alignment])
 AC_MSG_RESULT($cstack_alignment)
-
-AC_MSG_CHECKING(CSTACK_DIRECTION)
-AC_RUN_IFELSE(
-    [AC_LANG_SOURCE(
-	    [[
-		#include <stdio.h>
-		#include <stdlib.h>
-		void *
-		foo(void) {
-		    int i;
-		    return (void *)&i;
-		}
-		
-		int
-		main(int argc,char **argv,char **envp) {
-		    char *b;
-		    FILE *fp = fopen("conftest1","w");
-		    #ifdef CAN_UNRANDOMIZE_SBRK
-		    #include "h/unrandomize.h"
-		    #endif
-		    fprintf(fp,"%d",((long) &b) > ((long) foo()) ? -1 : 1);
-		    fclose(fp);
-		    return 0;
-		}]])],
-    [cstack_direction=`cat conftest1`],[cstack_direction=0])
-AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up or down])
-AC_MSG_RESULT($cstack_direction)
 
 AC_ARG_ENABLE([immfix],[  --enable-immfix will enable an immediate fixnum table above the C stack])
 
@@ -1429,8 +1423,7 @@ AC_RUN_IFELSE(
 		#include <stdio.h>
 	    ]],
 	    [[
-		void *v;
-		unsigned long i,j,k,l,m;
+		unsigned long i,j,k,l;
 		FILE *fp = fopen("conftest1","w");
 		
 		for (i=2,k=1;i;k=i,i<<=1);
