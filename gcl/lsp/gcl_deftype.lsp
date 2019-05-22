@@ -1,0 +1,398 @@
+(in-package :si)
+
+(defun default-to-* (x)
+  (let* ((z (member-if (lambda (x) (member x lambda-list-keywords)) x))
+	 (y (ldiff x z)))
+    (if (member-if 'atom y)
+	(nconc (mapcar (lambda (x) (if (atom x) `(,x '*) x)) y) z)
+	x)))
+
+(defun deftype-lambda-list (x)
+  (let* ((y (cdr (member-if (lambda (x) (member x '(&optional &key))) x)))
+	 (z (when y (deftype-lambda-list (default-to-* y)))))
+    (if (eq y z) x (append (ldiff x y) z))))
+
+
+(defmacro deftype (name lambda-list &rest body
+		   &aux (lambda-list (deftype-lambda-list lambda-list))
+		     (fun-name (gensym (string name))))
+  ;; Replace undefaultized optional parameter X by (X '*).
+  (declare (optimize (safety 2)))
+  (multiple-value-bind
+	(doc decls ctps body)
+      (parse-body-header body)
+    `(eval-when (compile eval load)
+       (putprop ',name '(deftype ,name ,lambda-list ,@body) 'deftype-form)
+       (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
+       (putprop ',name ',fun-name 'deftype-definition)
+       (maybe-clear-tp ',name)
+       (putprop ',name ,doc 'type-documentation)
+       ;; ,@(let* ((r (unless lambda-list (eval (cons 'progn body))))
+       ;; 		(p (satisfies-predicate r)))
+       ;; 	   (when p
+       ;; 	     `((putprop ',name ',p 'type-predicate)
+       ;; 	       (putprop ',p ',name 'predicate-type))))
+       ',name)))
+
+;;; Some DEFTYPE definitions.
+
+(deftype function-designator nil
+  `(or (and symbol (not boolean)) function))
+(deftype extended-function-designator nil
+  `(or function-designator (cons (member setf) (cons symbol null))))
+(deftype hash-table nil
+  `(or hash-table-eq hash-table-eql hash-table-equal hash-table-equalp))
+
+;(deftype compiler::funcallable-symbol nil `(satisfies compiler::funcallable-symbol-p));FIXME
+
+(defconstant +ifb+ (- (car (last (multiple-value-list (si::heap-report))))))
+(defconstant +ifr+ (ash (- +ifb+)  -1))
+(defconstant +ift+ (when (> #.+ifr+ 0) '(integer #.(- +ifr+) #.(1- +ifr+))))
+
+;(deftype immfix () +ift+)
+;(deftype bfix nil `(and fixnum (not immfix)))
+(deftype eql-is-eq-tp nil
+  `(or #.+ift+ (not number)))
+(deftype equal-is-eq-tp nil
+  `(or #.+ift+ (not (or cons string bit-vector pathname number))))
+(deftype equalp-is-eq-tp nil
+  `(not (or array hash-table structure cons string  bit-vector pathname number)))
+
+(deftype non-negative-char nil
+  `(non-negative-byte ,char-length))
+(deftype negative-char nil
+  `(negative-byte ,char-length))
+(deftype signed-char nil
+  `(signed-byte ,char-length))
+(deftype unsigned-char nil
+  `(unsigned-byte ,char-length))
+(deftype char nil
+  `(signed-char))
+
+(deftype non-negative-short nil
+  `(non-negative-byte ,short-length))
+(deftype negative-short nil
+  `(negative-byte ,short-length))
+(deftype signed-short nil
+  `(signed-byte ,short-length))
+(deftype unsigned-short nil
+  `(unsigned-byte ,short-length))
+(deftype short nil
+  `(signed-short))
+
+(deftype non-negative-int nil
+  `(non-negative-byte ,int-length))
+(deftype negative-int nil
+  `(negative-byte ,int-length))
+(deftype signed-int nil
+  `(signed-byte ,int-length))
+(deftype unsigned-int nil
+  `(unsigned-byte ,int-length))
+(deftype int nil
+  `(signed-int))
+
+(deftype non-negative-fixnum nil
+  `(non-negative-byte ,fixnum-length))
+(deftype negative-fixnum nil
+  `(negative-byte ,fixnum-length))
+(deftype signed-fixnum nil
+  `(signed-byte ,fixnum-length))
+(deftype unsigned-fixnum nil
+  `(unsigned-byte ,fixnum-length))
+
+(deftype non-negative-lfixnum nil
+`(non-negative-byte ,lfixnum-length))
+(deftype negative-lfixnum nil
+`(negative-byte ,lfixnum-length))
+(deftype signed-lfixnum nil
+`(signed-byte ,lfixnum-length))
+(deftype unsigned-lfixnum nil
+`(unsigned-byte ,lfixnum-length))
+(deftype lfixnum nil
+`(signed-lfixnum))
+
+(deftype fcomplex nil
+  `(complex short-float))
+(deftype dcomplex nil
+  `(complex long-float))
+
+(deftype string (&optional size)
+  `(array character (,size)))
+(deftype base-string (&optional size)
+  `(array base-char (,size)))
+(deftype bit-vector (&optional size)
+  `(array bit (,size)))
+
+(deftype simple-vector (&optional size)
+  `(array t (,size)))
+(deftype simple-string (&optional size)
+  `(array character (,size)))
+(deftype simple-base-string (&optional size)
+  `(array base-char (,size)))
+(deftype simple-bit-vector (&optional size)
+  `(array bit (,size)))
+
+(deftype function-name nil
+  `(or symbol (cons (member setf) (cons symbol null))))
+(deftype function-identifier nil
+  `(or function-name (cons (member lambda) t)));;FIXME? t?
+
+(deftype list nil
+  `(or cons null))
+(deftype sequence nil
+  `(or list vector))
+
+;(deftype proper-list () `(or null (and cons (not (satisfies improper-consp)))))
+
+(deftype extended-char nil
+  nil)
+(deftype base-char nil
+  `(or standard-char non-standard-base-char))
+(deftype character nil
+  `(or base-char extended-char))
+
+(deftype stream nil
+  `(or broadcast-stream concatenated-stream echo-stream
+       file-stream string-stream synonym-stream two-way-stream))
+(deftype file-stream nil
+  `(or file-input-stream file-output-stream file-io-stream file-probe-stream))
+(deftype path-stream nil
+  `(or file-stream file-synonym-stream))
+(deftype pathname-designator nil
+  `(or pathname string path-stream))
+(deftype synonym-stream nil
+  `(or file-synonym-stream non-file-synonym-stream))
+(deftype string-stream nil
+  `(or string-input-stream string-output-stream))
+
+(deftype input-stream nil
+  `(and stream (satisfies  input-stream-p)))
+(deftype output-stream nil
+  `(and stream (satisfies  output-stream-p)))
+
+;(deftype bignum nil `(and integer (not fixnum)))
+(deftype non-negative-bignum nil
+  `(and non-negative-byte (not non-negative-fixnum)))
+(deftype negative-bignum nil
+  `(and negative-byte (not negative-fixnum)))
+
+(defconstant most-negative-immfix (or (cadr +ift+) 1))
+(defconstant most-positive-immfix (or (caddr +ift+) -1))
+
+(deftype rational (&optional low high)
+  `(or (integer ,low ,high) (ratio ,low ,high)))
+
+(deftype float (&optional low high)
+  `(or (short-float ,low ,high) (long-float ,low ,high)))
+(deftype single-float (&optional low high)
+  `(long-float ,low ,high))
+(deftype double-float (&optional low high)
+  `(long-float ,low ,high))
+(deftype real (&optional low high)
+  `(or (rational ,low ,high) (float ,low ,high)))
+(deftype number nil
+  `(or real complex))
+(deftype atom nil
+  `(not cons))
+(deftype compiled-function nil
+  `(or standard-generic-compiled-function non-standard-generic-compiled-function))
+(deftype interpreted-function nil
+  `(or standard-generic-interpreted-function non-standard-generic-interpreted-function))
+(deftype function (&rest r)
+  (declare (ignore r))
+  `(or compiled-function interpreted-function))
+(deftype standard-generic-function nil
+  `(or standard-generic-compiled-function standard-generic-interpreted-function))
+(deftype non-standard-generic-function nil
+  `(and function (not standard-generic-function)))
+
+(defun ctp-bnd (x tp inc &aux (a (atom x))(nx (if a x (car x))))
+  (cond ((isinf nx) (when (or (< nx 0 inc) (< inc 0 nx)) '*))
+	((case tp
+	   (integer
+	    (let* (
+		   (nx (if (unless a (integerp (rationalize nx))) (+ nx inc) nx))
+		   (nx (if (eq nx '*) nx (if (> inc 0) (ceiling nx) (floor nx))))
+		   )
+	      nx))
+	   (ratio (let ((z (if (eq nx '*) nx (rational nx))))
+		    (if (eql z nx) (if (integerp x) (list x) x)
+			(if a z (list z)))))
+	   (short-float (let ((z (if (eq nx '*) nx (float nx 0.0s0))))
+			  (if (eql z nx) x (if a z (list z)))))
+	   (long-float (let ((z (if (eq nx '*) nx (float nx 0.0))))
+			 (if (eql z nx) x (if a z (list z)))))))))
+
+(defun bnd-chk (l h &aux (nl (if (listp l) (car l) l))(nh (if (listp h) (car h) h)))
+  (or (eq l '*) (eq h '*) (< nl nh) (and (eql l h) (eql nl nh) (eql l nl))))
+
+(defun bnd-exp (tp w low high &aux (l (ctp-bnd low tp 1)) (h (ctp-bnd high tp -1)))
+  (when (bnd-chk l h)
+    (if (and (eql l (cadr w)) (eql h (caddr w)))
+	w
+	`(,tp ,l ,h))))
+
+
+(deftype integer (&whole w &optional low high)
+  (bnd-exp 'integer w low high))
+
+(deftype ratio (&whole w &optional low high)
+  (bnd-exp 'ratio w low high))
+
+(deftype short-float (&whole w &optional low high)
+  (bnd-exp 'short-float w low high))
+
+(deftype long-float (&whole w &optional low high)
+  (bnd-exp 'long-float w low high))
+
+
+(deftype array (&whole w &optional et dims)
+  (if (eq et '*)
+      `(or ,@(mapcar (lambda (x) `(array ,x ,dims)) (cons nil +array-types+)))
+      (let* ((e (upgraded-array-element-type et))(d (or dims 0)))
+	(if (and (eq (cadr w) e) (eq (caddr w) d)) w `(array ,e ,d)))))
+
+(deftype simple-array (&rest r)
+  (cons 'array r))
+
+(deftype true nil
+  `(member t))
+(deftype null nil
+  `(member nil))
+(deftype boolean nil
+  `(or true null))
+
+(deftype symbol nil
+  `(or boolean keyword gsym))
+
+(defun ?or (x) (if (cdr x) (cons 'or x) (car x)))
+
+(deftype complex (&whole w &optional rp &aux (r (nc (if (eq rp '*) 'real rp))));FIXME upgraded
+  (let* ((q (mapcar (lambda (x) (cons x (lremove-if-not (lambda (y) (eq x (car y))) r))) +range-types+))
+	 (s (assoc 'ratio q)))
+    (when s (nconc (cdr s) (cdr (assoc 'integer q))))
+    (let ((x (?or (mapcan (lambda (x) (when (cdr x) `((complex ,(?or (cdr x)))))) q))))
+    (if (or (equal w x) (member w x :test 'equal));FIXME
+	w x))))
+
+(deftype cons (&whole w &optional car cdr
+	       &aux (a (normalize-type (if (eq car '*) t car)))
+		 (d (normalize-type (if (eq cdr '*) t cdr))))
+  (if (and (equal a car) (equal d cdr)) w `(cons ,a ,d)));FIXME equal
+  
+(deftype pathname nil
+  `(or non-logical-pathname logical-pathname))
+
+(deftype proper-sequence nil
+  `(or vector proper-list))
+
+(deftype proper-list nil
+  `(or null proper-cons))
+
+(deftype not-type nil
+  'null)
+
+
+(deftype type-spec nil
+  `(satisfies type-spec-p))
+
+(deftype ftype-spec nil
+  `(cons (member function)
+	 (cons (satisfies arg-list-type-p)
+	       (cons (satisfies values-list-type-p) null))))
+
+(deftype fpvec nil
+  `(and vector (satisfies array-has-fill-pointer-p)))
+
+
+(deftype vector (&optional et size)
+  `(array ,et (,size)))
+
+(deftype immfix nil
+  `(signed-byte #.(1+ (integer-length most-positive-immfix))));FIXME check null
+(deftype fixnum nil
+  `(signed-byte #.(1+ (integer-length most-positive-fixnum))))
+(deftype bfix nil
+  `(and fixnum (not immfix)))
+(deftype bignum nil
+  `(or (integer * ,(1- most-negative-fixnum)) (integer ,(1+ most-positive-fixnum) *)))
+
+(deftype function-type-spec nil
+  `(cons (member function) t));fixme
+(deftype full-type-spec nil
+  `(or type-spec function-type-spec))
+
+(deftype seqind nil
+  `(integer 0 ,(1- array-dimension-limit)))
+(deftype rnkind nil
+  `(integer 0 ,(1- array-rank-limit)))
+(deftype mod (n)
+  `(integer 0 ,(1- n)))
+
+(deftype bit nil
+  `(mod 2))
+(deftype non-negative-byte (&optional s)
+  `(unsigned-byte ,(1- s)))
+(deftype negative-byte (&optional s)
+  (normalize-type `(integer  ,(if (eq s '*) s (- (ash 1 (1- s)))) -1)))
+(deftype signed-byte (&optional s)
+  (normalize-type `(integer ,(if (eq s '*) s (- (ash 1 (1- s)))) ,(if (eq s '*) s (1- (ash 1 (1- s)))))))
+(deftype unsigned-byte (&optional s)
+  (normalize-type `(integer 0 ,(if (eq s '*) s (1- (ash 1 s))))))
+
+
+
+
+(defun and-or-norm (op w r &aux (n (mapcar 'normalize-type r)))
+  (if (member nil (mapcar 'eq r n))
+      (cons op n);and-or-flatten
+      w))
+			     
+(deftype or (&whole w &rest r)
+  (when r (and-or-norm 'or w r)))
+
+(deftype and (&whole w &rest r)
+  (if r (and-or-norm 'and w r) t))
+
+(deftype not (&whole w &rest r)
+  (and-or-norm 'not w r));x and-or-flatten
+
+(deftype type-min (&whole w &rest r)
+  (and-or-norm 'type-min w r));x and-or-flatten
+
+(deftype type-max (&whole w &rest r)
+  (and-or-norm 'type-max w r));x and-or-flatten
+
+(deftype satisfies (&whole w pred &aux (tp (get pred 'predicate-type)))
+  (cond ((not tp) w)
+	((eq 'satisfies (car (expand-deftype tp))) w)
+	(tp)))
+
+
+(deftype eql (&rest r)
+  (when r
+    (unless (cdr r)
+      `(member ,@r))))
+
+(deftype member (&whole w &rest r)
+  (when r w))
+
+
+(defun expand-deftype (type &aux tem
+			      (atp (listp type))
+			      (ctp (if atp (car type) type))
+			      (tp (when atp (cdr type))))
+  (cond
+    ((setq tem (coerce-to-standard-class ctp))
+     (if (member (si-class-name tem) '(standard-generic-function generic-function));FIXME
+	 `(or standard-generic-compiled-function standard-generic-interpreted-function)
+	 `(std-instance ,tem)))
+    ((si-classp ctp) (si-class-name ctp));built-in
+    ((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem))))
+     `(structure ,ctp))
+    ((setq tem (macro-function (get ctp 'deftype-definition)))
+     (funcall tem (if atp type (list type)) nil))
+    ((setq tem (get ctp 'deftype-definition));FIXME
+     (let ((ntype (apply tem tp)))
+       (if (eq ctp (if (listp ntype) (car ntype) ntype)) type ntype)))))
+
