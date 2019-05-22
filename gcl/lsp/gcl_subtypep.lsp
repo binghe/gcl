@@ -1,5 +1,7 @@
 (in-package :si)
 
+(defvar *array-types* (cons (cons nil 'array-nil) +array-type-alist+))
+
 (defvar *kingdom-ops*
   `((integer int^ int~ rng-recon)
     ,@(mapcar (lambda (x) `(,x rng^ rng~ rng-recon))
@@ -20,6 +22,38 @@
 	      *array-types*)
     ,@(mapcar (lambda (x) `(,x sing^ sing~ sing-recon))
 	      +singleton-types+)))
+
+#.`(defun k~ (k x)
+     (unless (eq x t)
+       (case k
+	 (integer (int~ x))
+	 ((ratio short-float long-float) (rng~ x))
+	 (complex-integer (cmpi~ x))
+	 (complex-ratio   (cmpr~ x))
+	 ((complex-short-float complex-long-float) (cmp~ x))
+	 (structure (str~ x))
+	 ((std-instance
+	   standard-generic-compiled-function
+	   standard-generic-interpreted-function) (std~ x))
+	 ((proper-cons improper-cons) (cns~ x))
+	 (,(mapcar 'cdr *array-types*) (ar~ x))
+	 (otherwise (sing~ x)))));,+singleton-types+
+
+#.`(defun k^ (k x y)
+     (cond ((eq x t) y)
+	   ((eq y t) x)
+	   ((case k
+	      (integer (int^ x y))
+	      ((ratio short-float long-float) (rng^ x y))
+	      (complex-integer (cmpi^ x y))
+	      ((complex-ratio complex-short-float complex-long-float)   (cmp^ x y))
+	      (structure (str^ x y))
+	      ((std-instance
+		standard-generic-compiled-function
+		standard-generic-interpreted-function) (std^ x y))
+	      ((proper-cons improper-cons) (cns^ x y))
+	      (,(mapcar 'cdr *array-types*) (ar^ x y))
+	      (otherwise (sing^ x y))))));,+singleton-types+
 
 (defmacro ntp-ld (ntp tp)
   `(let ((x ,tp))
@@ -82,8 +116,6 @@
     (let* ((cx (pop x))(cx (if (atom cx) (list cx) cx)))
       (mapcan (lambda (y) (mapcar (lambda (x) (cons x y)) cx))
 	      (if x (disu x) (list x))))))
-
-(defvar *array-types* (cons (cons nil 'array-nil) +array-type-alist+))
 
 (defun ar-recon (x &optional (tp (car (rassoc (pop x) *array-types*)) tpp)(ax (adims x)))
   (cond ((not tpp) (?or (mapcar (lambda (z) (ar-recon z tp)) x)))
@@ -440,6 +472,21 @@
   (op-not (op-not (append x y) ^ ~) ^ ~))
 
 
+(defun kop-and (k x y)
+  (lreduce (lambda (xx x)
+	     (nconc xx
+		    (lreduce (lambda (yy y &aux (z (k^ k x y)))
+			       (if z (nconc yy (list z)) yy)) y :initial-value nil)))
+	   x :initial-value nil))
+
+(defun kop-not (k x)
+  (lreduce (lambda (xx x)
+	     (cond ((eq (car xx) t) (k~ k x))
+		   (xx (kop-and k (k~ k x) xx)))) x :initial-value '(t)))
+
+(defun kop-or (k x y)
+  (kop-not k (kop-not k (append x y))))
+
 
 (defun k-op (op x y &aux (k (car x))(n (cdr (assoc k *kingdom-ops*)))(^ (pop n)) (~ (car n)))
   (cons k
@@ -448,6 +495,13 @@
 	  (or (op-or (cdr x) (cdr y) ^ ~))
 	  (not (op-not (cdr x) ^ ~)))))
 
+
+(defun k-op (op x y &aux (k (car x)))
+  (cons k
+	(case op
+	  (and (kop-and k (cdr x) (cdr y)))
+	  (or (kop-or k (cdr x) (cdr y)))
+	  (not (kop-not k (cdr x))))))
 
 (defun ntp-not (x &aux (z (make-ntp)))
   (mapc (lambda (l) (ntp-ld z (k-op 'not l nil))) (car x))

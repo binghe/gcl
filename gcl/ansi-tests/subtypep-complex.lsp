@@ -114,3 +114,27 @@
 		   types)))
       (subseq results 0 (min 100 (length results)))))
   nil)
+
+(deftest subtypep-complex.9
+    (check-all-not-subtypep
+     '(complex (or (integer 1 2) (integer 5 6)))
+     '(or (complex (integer 1 2)) (complex (integer 5 6))))
+  nil)
+
+(deftest subtypep-complex.10
+    (check-all-subtypep
+     '(or (complex (integer 1 2)) (complex (integer 5 6)))
+     '(complex (or (integer 1 2) (integer 5 6))))
+  nil)
+
+(deftest subtypep-complex.11
+    (check-all-not-subtypep
+     '(complex (rational 1 3/2))
+     '(complex (rational (1) 3/2)))
+  nil)
+
+(deftest subtypep-complex.12
+    (check-all-subtypep
+     '(complex (rational (1) 3/2))
+     '(complex (rational 1 3/2)))
+  nil)

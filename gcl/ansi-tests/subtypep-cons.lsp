@@ -374,3 +374,57 @@
 	  (and (not sub1) (not sub2))))))
   t)
 
+#+gcl
+(deftest subtypep.cons.44
+    (check-all-subtypep
+     'si::proper-list
+     'list)
+  nil)
+#+gcl
+(deftest subtypep.cons.45
+    (check-all-not-subtypep
+     'si::proper-list
+     nil)
+  nil)
+#+gcl
+(deftest subtypep.cons.46
+    (check-all-not-subtypep
+     'list
+     'si::proper-list)
+  nil)
+#+gcl
+(deftest subtypep.cons.47
+    (check-all-subtypep
+     '(cons t (cons t null))
+     'si::proper-list)
+  nil)
+#+gcl
+(deftest subtypep.cons.48
+    (check-all-subtypep
+     '(cons t (cons t si::proper-list))
+     'si::proper-list)
+  nil)
+#+gcl
+(deftest subtypep.cons.49
+    (check-all-not-subtypep
+     'si::proper-list
+     '(cons t (cons t si::proper-list)))
+  nil)
+#+gcl
+(deftest subtypep.cons.50
+    (check-all-not-subtypep
+     '(cons t (cons t (not si::proper-list)))
+     'si::proper-list)
+  nil)
+#+gcl
+(deftest subtypep.cons.51
+    (check-all-not-subtypep
+     '(cons t (cons t (not si::proper-list)))
+     nil)
+  nil)
+#+gcl
+(deftest subtypep.cons.52
+    (check-all-not-subtypep
+     'si::proper-list
+     '(cons t (cons t (not si::proper-list))))
+  nil)

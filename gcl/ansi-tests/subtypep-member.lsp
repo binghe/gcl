@@ -229,3 +229,28 @@
    '(and (integer 0 30) (not (member 3 4 5 9 10 11 17 18 19)))
    '(or (integer 0 2) (integer 6 8) (integer 12 16) (integer 20 30)))
   nil)
+
+
+(deftest subtypep.member.45
+    (check-all-subtypep
+     `(member #c(1 6))
+     `(complex (or (integer 1 2) (integer 5 6))))
+  nil)
+
+(deftest subtypep.member.46
+    (check-all-not-subtypep
+     `(member #c(1 6))
+     `(or (complex (integer 1 2)) (complex (integer 5 6))))
+  nil)
+
+(deftest subtypep.member.47
+    (check-all-subtypep
+     `(member #c(1 3/2))
+     `(complex (rational 1 3/2)))
+  nil)
+
+(deftest subtypep.member.48
+    (check-all-not-subtypep
+     `(member #c(1 3/2))
+     `(complex (rational (1) 3/2)))
+  nil)
