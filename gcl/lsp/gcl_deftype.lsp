@@ -275,11 +275,17 @@
     (if (or (equal w x) (member w x :test 'equal));FIXME
 	w x))))
 
-(deftype cons (&whole w &optional car cdr
-	       &aux (a (normalize-type (if (eq car '*) t car)))
-		 (d (normalize-type (if (eq cdr '*) t cdr))))
-  (if (and (equal a car) (equal d cdr)) w `(cons ,a ,d)));FIXME equal
-  
+(deftype cons (&optional car cdr)
+  `(or (proper-cons ,car ,cdr) (improper-cons ,car ,cdr)))
+
+(deftype proper-cons (&whole w &optional car cdr
+		      &aux (a (normalize-type (if (eq car '*) t car)))
+			(d (normalize-type (if (eq cdr '*) t cdr))))
+  (cond ((and (eq a car) (eq d cdr)) w)
+	((and a d) `(,(car w) ,a ,d))))
+
+(setf (get 'improper-cons 'deftype-definition) (get 'proper-cons 'deftype-definition))
+
 (deftype pathname nil
   `(or non-logical-pathname logical-pathname))
 
@@ -335,19 +341,19 @@
   `(unsigned-byte ,(1- s)))
 (deftype negative-byte (&optional s)
   (normalize-type `(integer  ,(if (eq s '*) s (- (ash 1 (1- s)))) -1)))
-(deftype signed-byte (&optional s)
-  (normalize-type `(integer ,(if (eq s '*) s (- (ash 1 (1- s)))) ,(if (eq s '*) s (1- (ash 1 (1- s)))))))
+(deftype signed-byte (&optional s &aux (n (if (eq s '*) 0 (ash 1 (1- s)))))
+  (normalize-type `(integer ,(if (zerop n) s (- n)) ,(if (zerop n) s (1- n)))))
 (deftype unsigned-byte (&optional s)
   (normalize-type `(integer 0 ,(if (eq s '*) s (1- (ash 1 s))))))
 
 
-
+(defun all-eq (x y)
+  (mapc (lambda (x y) (unless (eq x y) (return-from all-eq nil))) x y)
+  t)
 
 (defun and-or-norm (op w r &aux (n (mapcar 'normalize-type r)))
-  (if (member nil (mapcar 'eq r n))
-      (cons op n);and-or-flatten
-      w))
-			     
+  (if (all-eq r n) w (cons op n)))
+
 (deftype or (&whole w &rest r)
   (when r (and-or-norm 'or w r)))
 
@@ -378,7 +384,7 @@
   (when r w))
 
 
-(defun expand-deftype (type &aux tem
+(defun just-expand-deftype (type &aux tem
 			      (atp (listp type))
 			      (ctp (if atp (car type) type))
 			      (tp (when atp (cdr type))))
@@ -395,4 +401,8 @@
     ((setq tem (get ctp 'deftype-definition));FIXME
      (let ((ntype (apply tem tp)))
        (if (eq ctp (if (listp ntype) (car ntype) ntype)) type ntype)))))
+
+(defun expand-deftype (type &aux (e (just-expand-deftype type)))
+  (unless (eq type e)
+    e))
 
