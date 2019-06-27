@@ -88,7 +88,7 @@
   (logior (logandc2 integer z) (logand newbyte z)))
 
 (defun mask-field (bytespec integer)
-  (declare (optmize (safety 1)))
+  (declare (optimize (safety 1)))
   (check-type bytespec bytespec)
   (check-type integer integer)
   (logand integer (ash (1- (ash 1 (byte-size bytespec))) (byte-position bytespec))))
