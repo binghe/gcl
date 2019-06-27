@@ -864,7 +864,7 @@ raw_aet_ptr(object x, short int typ)
     break;
   case aet_bit:    
     /* STORE_TYPED(&u,fixnum, -Mfix(x)); */
-    u.i=-Mfix(x);
+    u.f=-Mfix(x);
     break;
   case aet_fix:    
   case aet_nnfix:    
@@ -923,7 +923,7 @@ raw_aet_ptr(object x, short int typ)
 	*/     
 
 void
-gset(void *p1, void *val, int n, int typ)
+gset(void *p1, void *val, fixnum n, int typ)
 { if (val==0)
     val = aet_types[typ].dflt;
     switch (typ){

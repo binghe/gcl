@@ -16,7 +16,7 @@
 /* array.c:321:OF */ extern void siLsvset (void); /* () */
 /* array.c:480:OF */ extern void siLmake_vector (void); /* () */
 /* array.c:738:OF */ extern void adjust_displaced (object x, long diff); /* (x, diff) object x; int diff; */
-/* array.c:790:OF */ extern void gset (void *p1, void *val, int n, int typ); /* (p1, val, n, typ) char *p1; char *val; int n; int typ; */
+/* array.c:790:OF */ extern void gset (void *p1, void *val, fixnum n, int typ); /* (p1, val, n, typ) char *p1; char *val; int n; int typ; */
 /* array.c:879:OF */ extern void array_allocself (object x, int staticp, object dflt); /* (x, staticp, dflt) object x; int staticp; object dflt; */
 /* array.c:920:OF */ extern void siLfill_pointer_set (void); /* () */
 /* array.c:944:OF */ extern void Lfill_pointer (void); /* () */
