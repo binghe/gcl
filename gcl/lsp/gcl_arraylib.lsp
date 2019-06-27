@@ -298,13 +298,17 @@
   (declare (:dynamic-extent objects))
   (make-array (length objects) :element-type t :initial-contents objects))
 
+(deftype bit-array nil `(array bit))
+(deftype simple-bit-array nil `(simple-array bit))
+
 (defun bit (bit-array &rest indices)
-  (declare (:dynamic-extent indices))
+  (declare (:dynamic-extent indices)(optimize (safety 1)))
+  (check-type bit-array bit-array)
   (apply 'aref bit-array indices))
 
-
 (defun sbit (bit-array &rest indices)
-  (declare (:dynamic-extent indices))
+  (declare (:dynamic-extent indices)(optimize (safety 1)))
+  (check-type bit-array simple-bit-array)
   (apply 'aref bit-array indices))
 
 
