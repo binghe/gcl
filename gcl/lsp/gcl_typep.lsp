@@ -68,13 +68,16 @@
   (defun mksubb (o tp x)
    (case x
 	 ((immfix bfix bignum integer ratio single-float double-float short-float long-float float rational real) `(ibb ,o ,tp))
-	 (proper-cons `(unless (improper-consp ,o) t))
 	 ((structure structure-object) `(if tp (mss (c-structure-def ,o) (car tp)) t))
-;	 ((structure structure-object) `(if tp (when (member (structure-name ,o) tp) t) t))
 	 (std-instance `(if tp (when (member (car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
 	 (mod `(let ((s (pop ,tp))) (<= 0 ,o (1- s))));FIXME error null tp
 	 (signed-byte `(if tp (let* ((s (pop ,tp))(s (when s (ash 1 (1- s))))) (<= (- s) ,o (1- s))) t))
 	 (unsigned-byte `(if tp (let* ((s (pop ,tp))(s (when s (ash 1 s)))) (<= 0 ,o (1- s))) (<= 0 ,o)))
+	 (proper-list `(unless (improper-consp ,o) t))
+	 (proper-cons `(unless (improper-consp ,o)
+			 (if tp (and (typep (car ,o) (car ,tp)) (typep (cdr ,o) (cadr ,tp)) t) t)))
+	 (improper-cons `(when (improper-consp ,o)
+			   (if tp (and (typep (car ,o) (car ,tp)) (typep (cdr ,o) (cadr ,tp)) t) t)))
 	 (cons `(if tp (and (typep (car ,o) (car ,tp)) (typep (cdr ,o) (cadr ,tp)) t) t))
 	 (otherwise t))))
 
