@@ -1014,6 +1014,10 @@ gcl_init_num_co(void)
 	make_si_constant("-INF",make_longfloat(-INFINITY));
 	make_si_constant("NAN",make_longfloat(NAN));
 
+	make_si_constant("+SINF",make_shortfloat(INFINITY));
+	make_si_constant("-SINF",make_shortfloat(-INFINITY));
+	make_si_constant("SNAN",make_shortfloat(NAN));
+
 	make_constant("MOST-POSITIVE-SHORT-FLOAT",
 		      make_shortfloat(biggest_float));
 	make_constant("LEAST-POSITIVE-SHORT-FLOAT",
