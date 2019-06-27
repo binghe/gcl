@@ -142,8 +142,6 @@
 (deftype sequence nil
   `(or list vector))
 
-;(deftype proper-list () `(or null (and cons (not (satisfies improper-consp)))))
-
 (deftype extended-char nil
   nil)
 (deftype base-char nil
@@ -206,22 +204,21 @@
 (deftype non-standard-generic-function nil
   `(and function (not standard-generic-function)))
 
-(defun ctp-bnd (x tp inc &aux (a (atom x))(nx (if a x (car x))))
-  (cond ((isinf nx) (when (or (< nx 0 inc) (< inc 0 nx)) '*))
-	((case tp
-	   (integer
-	    (let* (
-		   (nx (if (unless a (integerp (rationalize nx))) (+ nx inc) nx))
-		   (nx (if (eq nx '*) nx (if (> inc 0) (ceiling nx) (floor nx))))
-		   )
-	      nx))
-	   (ratio (let ((z (if (eq nx '*) nx (rational nx))))
-		    (if (eql z nx) (if (integerp x) (list x) x)
-			(if a z (list z)))))
-	   (short-float (let ((z (if (eq nx '*) nx (float nx 0.0s0))))
-			  (if (eql z nx) x (if a z (list z)))))
-	   (long-float (let ((z (if (eq nx '*) nx (float nx 0.0))))
-			 (if (eql z nx) x (if a z (list z)))))))))
+(defun ctp-num-bnd (x tp inc &aux (a (atom x))(nx (if a x (car x))))
+  (case tp
+    (integer
+     (let ((nx (if (unless a (integerp (rational nx))) (+ nx inc) nx)))
+       (if (> inc 0) (ceiling nx) (floor nx))))
+    (ratio
+     (let ((z (rational nx)))
+       (if (eql z nx) (if (integerp x) (list x) x)
+	   (if a z (list z)))))
+    ((short-float long-float)
+     (let ((z (float nx (if (eq tp 'short-float) 0.0s0 0.0))))
+       (if (eql z nx) x (if a z (list z)))))))
+
+(defun ctp-bnd (x tp inc)
+  (if (eq x '*) x (ctp-num-bnd x tp inc)))
 
 (defun bnd-chk (l h &aux (nl (if (listp l) (car l) l))(nh (if (listp h) (car h) h)))
   (or (eq l '*) (eq h '*) (< nl nh) (and (eql l h) (eql nl nh) (eql l nl))))
@@ -231,7 +228,6 @@
     (if (and (eql l (cadr w)) (eql h (caddr w)))
 	w
 	`(,tp ,l ,h))))
-
 
 (deftype integer (&whole w &optional low high)
   (bnd-exp 'integer w low high))
@@ -244,6 +240,28 @@
 
 (deftype long-float (&whole w &optional low high)
   (bnd-exp 'long-float w low high))
+
+
+(deftype zero nil `(integer 0 0))
+(deftype one nil `(integer 1 1))
+(deftype non-negative-integer nil `(integer 0))
+(deftype tractable-fixnum nil `(integer ,(- most-positive-fixnum) ,most-positive-fixnum))
+(deftype negative-short-float nil `(short-float * (0.0)))
+(deftype positive-short-float nil `(short-float (0.0)))
+(deftype non-positive-short-float nil `(short-float * 0.0))
+(deftype non-negative-short-float nil `(short-float 0.0))
+(deftype negative-long-float nil `(long-float * (0.0)))
+(deftype positive-long-float nil `(long-float (0.0)))
+(deftype non-positive-long-float nil `(long-float * 0.0))
+(deftype non-negative-long-float nil `(long-float 0.0))
+(deftype negative-float nil `(float * (0.0)))
+(deftype positive-float nil `(float (0.0)))
+(deftype non-positive-float nil `(float * 0.0))
+(deftype non-negative-float nil `(float 0.0))
+(deftype negative-real nil `(real * (0.0)))
+(deftype positive-real nil `(real (0.0)))
+(deftype non-positive-real nil `(real * 0.0))
+(deftype non-negative-real nil `(real 0.0))
 
 
 (deftype array (&whole w &optional et dims)
@@ -390,8 +408,8 @@
 (deftype or (&whole w &rest r)
   (when r (and-or-norm 'or w r)))
 
-(deftype and (&whole w &rest r)
-  (if r (and-or-norm 'and w r) t))
+(deftype and (&whole w &rest r &aux (r (if r r '(t))))
+  (and-or-norm 'and w r))
 
 (deftype not (&whole w &rest r)
   (and-or-norm 'not w r));x and-or-flatten
@@ -405,7 +423,7 @@
 (deftype satisfies (&whole w pred &aux (tp (get pred 'predicate-type)))
   (cond ((not tp) w)
 	((eq 'satisfies (car (expand-deftype tp))) w)
-	(tp)))
+	((normalize-type tp))))
 
 
 (deftype eql (&rest r)
@@ -423,17 +441,15 @@
 			      (tp (when atp (cdr type))))
   (cond
     ((setq tem (coerce-to-standard-class ctp))
-     (if (member (si-class-name tem) '(standard-generic-function generic-function));FIXME
-	 `(or standard-generic-compiled-function standard-generic-interpreted-function)
-	 `(std-instance ,tem)))
+     (let ((name (si-class-name tem)))
+       (if (member name '(standard-generic-function generic-function));FIXME
+	   `(or standard-generic-compiled-function standard-generic-interpreted-function)
+	 `(std-instance ,tem))))
     ((si-classp ctp) (si-class-name ctp));built-in
     ((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem))))
      `(structure ,ctp))
     ((setq tem (macro-function (get ctp 'deftype-definition)))
-     (funcall tem (if atp type (list type)) nil))
-    ((setq tem (get ctp 'deftype-definition));FIXME
-     (let ((ntype (apply tem tp)))
-       (if (eq ctp (if (listp ntype) (car ntype) ntype)) type ntype)))))
+     (funcall tem (if atp type (list type)) nil))))
 
 (defun expand-deftype (type &aux (e (just-expand-deftype type)))
   (unless (eq type e)
