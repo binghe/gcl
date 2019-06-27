@@ -574,7 +574,7 @@
 				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
   (if epp
       (let* ((*load-pathname* pp)(*load-truename* epp))
-	(if (eql -1 (string-match #v"(^o|\\.o)$" (pathname-type epp)))
+	(if (eql -1 (string-match #v"(^o|\\.o)$" (or (pathname-type epp) "")))
 	    (let ((s (open epp)))
 	      (unwind-protect (load-stream s print)
 		(close s)))
