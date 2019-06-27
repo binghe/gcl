@@ -39,6 +39,8 @@
 
 (in-package :system)
 
+(deftype key-test-type nil `(or null function-designator))
+
 (eval-when
  (compile eval)
  
@@ -50,9 +52,9 @@
 		       (tnf (when test-not (coerce test-not 'function))))
 	(declare (optimize (safety 1)))
 	(check-type ,(cadr ll) proper-list)
-	(check-type key (or null function-designator))
-	(check-type test (or null function-designator))
-	(check-type test-not (or null function-designator))
+	(check-type key key-test-type)
+	(check-type test key-test-type)
+	(check-type test-not key-test-type)
 	,@(sublis '((key . kf)(test . tf)(test-not . tnf)) args))
       ,@(let* ((s (gensym))(ts (gensym))
 	       (x `(defun ,s 
@@ -60,7 +62,7 @@
 		     (declare (optimize (safety 1)))
 		     (check-type fd function-designator)
 		     (check-type list proper-list)
-		     (check-type key (or null function-designator))
+		     (check-type key key-test-type)
 		     (,fn (coerce fd 'function) list ,ts 'funcall :key key))))
 	  (list (sublis `((,s . ,(intern (string-concatenate (string fn) "-IF")))(,ts . :test)) x)
 		(sublis `((,s . ,(intern (string-concatenate (string fn) "-IF-NOT")))(,ts . :test-not)) x)))))
@@ -72,9 +74,9 @@
 				 (tnf (when test-not (coerce test-not 'function)))))  
       (declare (optimize (safety 1)))
       ,@(mapcar (lambda (x) `(check-type ,x proper-list)) ll)
-      (check-type key (or null function-designator))
-      (check-type test (or null function-designator))
-      (check-type test-not (or null function-designator))
+      (check-type key key-test-type)
+      (check-type test key-test-type)
+      (check-type test-not key-test-type)
       ,@(sublis '((key . kf)(test . tf)(test-not . tnf)) body)))
  
  (defmacro comp-key (key) 
