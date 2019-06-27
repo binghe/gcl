@@ -367,6 +367,8 @@ setf(object place, object form)
 	
 	if (fun == find_symbol(make_simple_string("SYMBOL-FUNCTION"),find_package(make_simple_string("COMMON-LISP"))))
 	  return Ieval1(MMcons(find_symbol(str("FSET"),system_package),MMcons(MMcar(args),MMcons(form,Cnil))));
+	if (fun == sLsbit)
+	  return Ieval1(MMcons(find_symbol(str("ASET"),system_package),MMcons(form,args)));
 	if (fun == sLaref) 
 	  return Ieval1(MMcons(find_symbol(str("ASET"),system_package),MMcons(form,args)));
 	if (fun == sLsvref)

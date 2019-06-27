@@ -663,6 +663,11 @@ DEFUN("INTERSECTION-EQ",object,fSintersection_eq,SI,2,8,NONE,OO,OO,OO,OO,
 
 }
 
+DEFUN("SBIT",object,fLsbit,LISP,2,2,NONE,IO,IO,OO,OO,(object x,fixnum i),"") {
+  RETURN1((object)fix(fLrow_major_aref(x,i)));
+
+}
+
 #ifndef NO_BOOT_H
 #include "boot.h"
 #endif

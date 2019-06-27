@@ -66,6 +66,7 @@ DEFCONST("ARRAY-DIMENSION-LIMIT", sLarray_dimension_limit,LISP,make_fixnum(((1UL
 DEFCONST("ARRAY-TOTAL-SIZE-LIMIT", sLarray_total_size_limit,LISP,make_fixnum(((1UL<<31)>>3)),"");
 
 DEF_ORDINARY("BIT",sLbit,LISP,"");
+DEF_ORDINARY("SBIT",sLsbit,LISP,"");
 
 /* number of bits in  unit of storage of x->bv.bv_self[0] */
 
