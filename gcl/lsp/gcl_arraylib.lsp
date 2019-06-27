@@ -123,7 +123,7 @@
 			(bit `(set-0-byte-array-self v a i))
 			(otherwise `(,(caddr y) (c-array-self a) i t v)))))
 		 *array-type-info*)))
-(setf (get 'row-major-aset 'consider-inline) t)
+(setf (get 'row-major-aset 'compiler::consider-inline) t)
 
 
 
@@ -137,6 +137,7 @@
 	 (shft (logand off 7))
 	 (shft (- shft #+clx-little-endian 7)))
     (logand (ash byte shft) 1)))
+(declaim (inline 0-byte-array-self))
 
 (defun set-0-byte-array-self (bit array index)
   (declare (optimize (safety 1)))
@@ -151,6 +152,7 @@
 	 (val (ash 1 shft)))
     (*uchar (c-array-self array) ind t (if (zerop bit) (logandc2 byte val) (logior byte val)))
     bit))
+(declaim (inline set-0-byte-array-self))
 
 (defun array-row-major-index (array &rest indices)
   (declare (:dynamic-extent indices)(optimize (safety 2)))
@@ -177,6 +179,7 @@
   (declare (optimize (safety 1)) (:dynamic-extent q))
   (check-type a array)
   (row-major-aset v a (apply 'array-row-major-index a q)))
+(declaim (inline si::aset))
 
 (setf (symbol-function 'array-rank) (symbol-function 'c-array-rank)
       (symbol-function 'array-total-size) (symbol-function 'c-array-dim))

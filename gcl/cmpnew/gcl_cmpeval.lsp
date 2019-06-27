@@ -1257,7 +1257,13 @@
 (defun maybe-inline-src (fun fms src &aux fm)
   (when src
     (cond ((setq fm (type-fm fun fms)) (known-type-p fm))
-	  ((member fun '(row-major-aref si::row-major-aset si::row-major-aref-int si::set-array array-element-type));FIXME
+	  ((member fun '(row-major-aref
+			 si::row-major-aset
+			 si::row-major-aref-int
+			 si::set-array
+			 array-element-type
+			 si::0-byte-array-self
+			 si::set-0-byte-array-self));FIXME
 	   (flet ((tst (tp) (not (or (type>= tp #tarray) (type>= tp #tvector)))))
 	     (tst (info-type (if (eq fun 'si::row-major-aset) (cadadr fms) (cadar fms))))))
 	  ((< (cons-count src) 30))
