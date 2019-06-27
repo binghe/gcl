@@ -155,7 +155,7 @@ enum type {
 #define tp8(x) ({object _x=x;(is_imm_fixnum(_x) ? 0 :  \
 			      (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? \
 			       (_x->d.t<t_complex ? x->d.t :		\
-				(_x->d.t==t_complex&&x->d.tt<2 ? x->d.t :		\
-				 (_x->d.t==t_complex ? x->d.t+x->d.tt-1 : \
+				(_x->d.t==t_complex&&x->d.tt<4 ? x->d.t :		\
+				 (_x->d.t==t_complex ? x->d.t+x->d.tt-3 : \
 				  0))) : 0));})/*FIXME*/
 

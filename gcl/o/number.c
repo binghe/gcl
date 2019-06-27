@@ -222,9 +222,11 @@ make_complex(object r, object i)
 	}			
 	c = alloc_object(t_complex);
 	{enum type tp=type_of(r);
-	  c->cmp.tt= tp==t_longfloat ? 3 : 
-	    (tp==t_shortfloat ? 2 : 
-	     (tp==t_ratio || type_of(i)==t_ratio ?  1 : 0));
+	  c->cmp.tt= tp==t_longfloat ? 5 :
+	    (tp==t_shortfloat ? 4 :
+	     (tp==t_ratio && type_of(i)==t_ratio ?  3 :
+	      (tp==t_ratio ? 2 :
+	       (type_of(i)==t_ratio ? 1 : 0))));
 	}
 	c->cmp.cmp_real = r;
 	c->cmp.cmp_imag = i;
