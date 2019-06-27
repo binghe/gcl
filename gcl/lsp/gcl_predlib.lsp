@@ -82,11 +82,11 @@
 
 #.`(defun coerce (object type &aux ntype (atp (listp type)) (ctp (if atp (car type) type)) (tp (when atp (cdr type))))
   (declare (optimize (safety 2))) ;(print (list 'coerce object type))
-  (check-type type (or (member function) type-spec));FIXME
+;  (check-type type (or (member function) type-spec));FIXME
   (case ctp
 	(function
 	 (let ((object object))
-	   (check-type object (or function (and symbol (not boolean)) (cons (member lambda) t)))
+;	   (check-type object (or function (and symbol (not boolean)) (cons (member lambda) t)))
 	   (typecase
 	    object
 	    (function object) 

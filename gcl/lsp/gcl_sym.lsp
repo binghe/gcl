@@ -3,13 +3,13 @@
 (in-package :si)
 
 (defun macro-function (x &optional env)
-  (declare (optimize (safety 1)))
-  (check-type x symbol)
-  (check-type env proper-list)
+  (declare (optimize (safety 2)))
+;  (check-type x symbol)
+;  (check-type env proper-list)
   (cond ((when env
 	   (let* ((l (cdr (assoc x (cadr env)))))
 	     (when (eq (car l) 'macro) (cadr l)))))
-	((when (/= 0 (c-symbol-mflag x)) (c-symbol-gfdef x)))))
+	((unless (zerop (c-symbol-mflag x)) (c-symbol-gfdef x)))))
 
 (defun special-operator-p (x)
   (declare (optimize (safety 1)))
