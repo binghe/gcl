@@ -1331,7 +1331,8 @@
 		 (multiple-value-bind 
 		  (s f) (gethash x *sigs*) 
 		  (declare (ignore s))
-		  (when f (list x fname osig sig))))) (si::callers fname))))
+		  (when f (list x fname osig sig)))))
+	     (si::callers fname))))
     
     (push (let* ((at (car sig))
 		 (al (mapcar (lambda (x) (link-rt (cmp-norm-tp x) nil)) at))
@@ -1438,7 +1439,7 @@
       r)))
 
 (defun vald (tp)
-  (cond ;((single-type-p tp) 0)
+  (cond ((single-type-p tp) 0)
 	((type>= #t(values t) tp) 0)
 	((eq tp '*) (- multiple-values-limit 2))
 	((> (length tp) multiple-values-limit) (baboon));FIXME

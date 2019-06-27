@@ -163,25 +163,6 @@
 ;;       (list 'call-global info 'terpri (list stream))))
 
 
-(defconstant +list5+ (cmp-norm-tp (reduce (lambda (y x) `(or null (cons t ,y))) (make-list 5) :initial-value 'null)))
-
-(defun last-unroll (fn ll tp l &optional (s (tmpsym)) (c (gensym))
-		       (bind `( (,s ,l) (,c 0))) fm (n 0) new 
-		       (args (mapcar 'car ll)))
-  (let* ((fm (if (type-and #tnull tp) 
-		 (cons `(,n (funcall ',fn ,@args ,@(reverse new))) fm) fm))
-	 (tp (cdr-propagator 'cdr (type-and #t(not null) tp))))
-      (if tp
-	  (let* ((ns (tmpsym))
-		 (bind (cons (list ns `(when ,s (incf ,c) (car ,s))) bind))
-		 (bind (if (type>= #tnull tp) bind (cons `(,s (cdr ,s)) bind))))
-	    (last-unroll fn ll tp l s c bind fm (1+ n) (cons ns new) args))
-	(let ((bind (nreverse bind))(fm (nreverse fm)))
-	  `(let* ,(append ll bind)
-	     (case ,(caar bind)
-		   ,@fm))))))
-
-
 (defun c2apply (funob args)
   (unless (eq 'ordinary (car funob)) (baboon))
   (let* ((fn (caddr funob))
@@ -288,10 +269,9 @@
 ;;     (c1funcall-apply args last)))
 
 
-(defmacro eq-subtp (x y)  ;FIXME axe mult values
-  (let ((s (tmpsym)))
-    `(let ((,s (type>= ,y ,x)))
-       (values ,s (or ,s (type>= (cmp-norm-tp `(not ,,y)) x))))))
+(defun eq-subtp (x y)  ;FIXME axe mult values
+  (let ((s (type>= y x)))
+    (values s (or s (type>= (tp-not y) x)))))
 
 (defun eql-is-eq-tp (x)
   (eq-subtp x #teql-is-eq-tp))
@@ -302,7 +282,7 @@
 (defun equalp-is-eq-tp (x)
   (eq-subtp x #tequalp-is-eq-tp))
 
-(defun do-eq-et-al (fn args)
+(defun do-eq-et-al (fn args &aux a b)
   (let* ((tf (cadr (test-to-tf fn)))
 	 (info (make-info :type #tboolean))
 	 (nargs (c1args args info)))
@@ -312,10 +292,10 @@
 					 'eq fn) nargs)))
       (cond ((not (type-and (info-type (cadar nargs)) (info-type (cadadr nargs))))
 	     (c1nil))
-	    ((and (atomic-tp (info-type (cadar nargs)))
-		  (atomic-tp (info-type (cadadr nargs)))
+	    ((and (setq a (atomic-tp (info-type (cadar nargs))))
+		  (setq b (atomic-tp (info-type (cadadr nargs))))
 		  (cond ((eq (caddr r) 'eq) 
-			 (eql-is-eq (cadr (info-type (cadar nargs)))))
+			 (eql-is-eq (car a)))
 			((eq (caddr r) 'eql))))
 	     (c1expr (ignorable-pivot 
 		      (car args) 
@@ -402,25 +382,6 @@
 ;;bound type comparisons
 ;; only boolean eval const args
 
-
-
-;;FIXME rewrite elim mv
-(defun list-tp-test (tf lt &optional ic &aux aet)
-  (cond 
-   ((setq aet (aref-propagator 'list-tp-test lt))
-     (let ((z (funcall tf aet))) (values z z)));;FIXME second value meaning
-   ((eq lt #tnull) (let ((z (funcall tf lt))) (values z z)))
-   ((or (atom lt) (not (eq (car lt) 'cons)))
-    (let ((z (and ic (funcall tf lt)))) (values z z)))
-   (t 
-    (unless (caddr lt) (return-from list-tp-test (values nil t)))
-    (multiple-value-bind 
-     (m1 f1) (funcall tf (cadr lt))
-     (multiple-value-bind 
-      (m2 f2) (list-tp-test tf (caddr lt) t)
-      (values (and m1 m2) (or f1 f2)))))))
-					;	((and ic (list-tp-test tf (car lt))))))
-					;	(t (values nil nil))))
 
 (defun test-to-tf (test)
   (let ((test (if (constantp test) (cmp-eval test) test)))
@@ -733,12 +694,6 @@
 					    ,(name-sd1
 					       (si::s-data-name sd)))))))))
 
-(defun get-included (name)
-  (let ((sd (get name 'si::s-data)))
-    (cons (si::s-data-name sd)
-	  (mapcan 'get-included
-		  (si::s-data-included sd)))))
-  
 (defun co1schar (f args)
   (declare (ignore f))
   (and (listp (car args)) (not *safe-compile*)
