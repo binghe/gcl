@@ -67,17 +67,28 @@
 		(when sw (funcall sf x s j))))
        (case 
 	   (c-array-eltsize r)
-	 ,@(mapcar (lambda (x &aux (z (pop x)) (y (maybe-cons 'or (mapcar (lambda (x) (list 'array x)) x)))
-			      (w (fifth (assoc (car x) *array-type-info*))))
-		     `(,z (infer-tp 
-			   r ,y (infer-tp 
-				 s ,y 
-				 (sp r i s j 
-				     ,(if (zerop z) `'0-byte-array-self `(lambda (r i) (,w (c-array-self r) i nil nil)))
-				     ,(if (zerop z) `'set-0-byte-array-self `(lambda (v r i) (,w (c-array-self r) i t v))))))))
+	   ,@(mapcar (lambda (x &aux (z (pop x))
+				(y (lreduce 'type-or1 (mapcar (lambda (x) (cmp-norm-tp `(array ,x))) x)))
+				(w (fifth (assoc (car x) *array-type-info*))))
+		       `(,z
+			 (infer-tp
+			  r ,y
+			  (infer-tp
+			   s ,y
+			   (sp r i s j
+			       ,(if (zerop z)
+				    `'0-byte-array-self
+				  `(lambda (r i) (,w (c-array-self r) i nil nil)))
+			       ,(if (zerop z)
+				    `'set-0-byte-array-self
+				  `(lambda (v r i) (,w (c-array-self r) i t v))))))))
 		   (mapcar (lambda (x) 
-			     (cons x (mapcar 'car (lremove-if-not (lambda (y) (= x (caddr y))) *array-type-info*))))
-			   (mapcar 'caddr (lremove nil *array-type-info*)))))))
+			     (cons
+			      x
+			      (mapcar
+			       'car
+			       (lremove-if-not (lambda (y) (eql x (caddr y))) *array-type-info*))))
+			   (lremove-duplicates (mapcar 'caddr *array-type-info*)))))))
 (declaim (inline set-array))
 
 #.`(defun array-element-type (x)
