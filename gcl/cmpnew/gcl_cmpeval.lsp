@@ -1119,8 +1119,10 @@
 	   (not (member-if-not (lambda (x) (discrete-tp x (incf i))) (cdr tp)))))))
 
 (defun bbump-tp (tp)
-  (cond ((car (member tp (load-time-value (list #t(and seqind (not (integer 0 0))) #tseqind;FIXME accelerator?
-						#t(or null (and seqind (not (integer 0 0)))) #t(or null seqind)))
+  (cond ((car (member tp '(#t(and seqind (not (integer 0 0)))
+			     #tseqind
+			     #t(or null (and seqind (not (integer 0 0))))
+			     #t(or null seqind))
 		      :test 'type<=)))
 	((discrete-tp tp) tp)
 	((bump-tp tp))))

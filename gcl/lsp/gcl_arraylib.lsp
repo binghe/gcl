@@ -450,28 +450,32 @@
 
 #.`(defun array-eltsize-propagator (f x)
      (cond
-      ((and (consp x) (eq (car x) 'or)) (reduce 'type-or1 (mapcar (lambda (x) (array-eltsize-propagator f x)) (cdr x)) :initial-value nil))
       ,@(mapcar (lambda (x)
-		  `((type>= (load-time-value (cmp-norm-tp '(array ,(pop x)))) x) (object-type ,(cadr x)))) si::*array-type-info*)
-      ((type>= (load-time-value (cmp-norm-tp 'array)) x) 
-       (load-time-value (cmp-norm-tp ',(cons 'member (lremove-duplicates (mapcar 'caddr *array-type-info*))))))))
+		  `((type>= ',(cmp-norm-tp `(array ,(pop x))) x)
+		    ',(cmp-norm-tp `(member ,(cadr x)))))
+		si::*array-type-info*)
+      ((type>= #tarray x)
+       ',(cmp-norm-tp `(member ,@(lremove-duplicates (mapcar 'caddr *array-type-info*)))))))
 (setf (get 'c-array-eltsize 'type-propagator) 'array-eltsize-propagator)
+
 #.`(defun array-elttype-propagator (f x)
      (cond
-      ((and (consp x) (eq (car x) 'or)) (reduce 'type-or1 (mapcar (lambda (x) (array-elttype-propagator f x)) (cdr x)) :initial-value nil))
-      ,@(mapcar (lambda (x) `((type>= (load-time-value (cmp-norm-tp '(array ,(pop x)))) x) (object-type ,(car x)))) *array-type-info*)))
+      ,@(mapcar (lambda (x)
+		  `((type>= ',(cmp-norm-tp `(array ,(pop x))) x)
+		  ',(cmp-norm-tp `(member ,(car x)))))
+		*array-type-info*)))
 (setf (get 'c-array-elttype 'type-propagator) 'array-elttype-propagator)
 
 (defun array-rank-propagator (f x)
   (cond
-   ((and (consp x) (eq (car x) 'or)) (reduce 'type-or1 (mapcar (lambda (x) (array-rank-propagator f x)) (cdr x)) :initial-value nil))
-   ((type>= (load-time-value (cmp-norm-tp 'vector)) x) (object-type 1))
-   ((and (consp x) (eq (car x) 'array)) 
-    (let ((x (caddr x))) 
-      (typecase x
-		(rnkind (object-type x))
-		(list (object-type (length x)))
-		(otherwise (load-time-value (cmp-norm-tp 'rnkind))))))))
+   ((type>= #tvector x) #t(member 1))
+   ((type>= #tarray x) #trnkind);FIXME
+    ;; (let ((x (caddr x)))
+    ;;   (typecase x
+    ;; 		(rnkind (cmp-norm-tp `(member ,x)))
+    ;; 		(list (cmp-norm-tp `(member ,(length x))))
+    ;; 		(otherwise #trnkind)))
+    ))
 (setf (get 'c-array-rank 'type-propagator) 'array-rank-propagator)
 
 (defun svref (x i) 
