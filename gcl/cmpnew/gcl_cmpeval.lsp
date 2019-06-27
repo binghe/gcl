@@ -1671,7 +1671,7 @@
 	   `(,(if la 'apply 'funcall) ,info ,ord ,fms)))
 	((setq fd (c1local-fun fn))
 	 (add-info info (cadr fd))
-	 (setf (info-type info) (if (eq (info-type (cadr fd)) 'boolean) #tboolean (info-type (cadr fd))));FIXME
+	 (setf (info-type info) (info-type (cadr fd)))
 	 (let ((fm (fifth fd)))
 	   (when fm (or-ccb-assignments (list fm)))
 	   `(call-local ,info ,(nconc (caddr fd) ll) ,(cadddr fd) ,fm ,fms)));FIXME
