@@ -855,10 +855,10 @@
 (si::putprop 'si::>> '>>-propagator 'type-propagator)
 
 (defun pexpt (x y)
-  (cond ((or (typep x #tfloat) 
+  (cond ((or (typep x 'float)
 	     (= (abs x) 1) 
 	     (= (abs x) 0) 
-	     (typep y #t(or float ratio (integer 0 #.(integer-length most-positive-fixnum)))))
+	     (typep y '(or float ratio (integer 0 #.(integer-length most-positive-fixnum)))))
 	 (expt x y))
 	((> y 0)
 	 (cond ((> x 1) +inf)

@@ -202,7 +202,7 @@
 
 (defun fix-opt (opt)
   (let ((a (cddr opt)))
-    (unless (typep (car a ) #tfixnum)
+    (unless (typep (car a ) 'fixnum)
       (if *compiler-in-use*
 	  (cmpwarn "Obsolete optimization: use fix-opt ~s"  opt))
       

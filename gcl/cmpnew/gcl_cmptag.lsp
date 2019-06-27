@@ -1197,7 +1197,7 @@
 
 
 (defun wt-switch-case (x)
-  (cond (x (wt-nl (if (typep x #tfixnum) "case " "") x ":"))))
+  (cond (x (wt-nl (if (typep x 'fixnum) "case " "") x ":"))))
 
 (defun or-branches (trv)
   (mapc (lambda (x &aux (v (pop x))) 
@@ -1223,7 +1223,7 @@
 						     ((type-and st e) (setq skip nil dfp (or df dfp) rt (type-or1 rt e)))
 						     ((keyed-cmpnote 'branch-elimination "Eliminating unreachable switch ~s" b)))))
 					    ((not skip) (when cs (setq st (type-and st (cmp-norm-tp `(not ,rt))) cs nil)) t))) body))
-	       (body (mapcar (lambda (x) (if (tgs-p x) (make-tag :name x :ref t :switch (if (typep x #tfixnum) x "default")) x)) body))
+	       (body (mapcar (lambda (x) (if (tgs-p x) (make-tag :name x :ref t :switch (if (typep x 'fixnum) x "default")) x)) body))
 	       trv
 	       (body (mapcar (lambda (x) (if (tag-p x) x (let ((x (c1branch t nil (list nil x) info))) 
 							   (prog1 (pop x) (setq trv (append trv (car x))))))) body))
