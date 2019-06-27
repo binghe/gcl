@@ -1486,7 +1486,8 @@
 		  
 
 (defun conv-kl (l s &aux (l (if (listp l) (remove-duplicates l) l)))
-  (cond ((atom l) `(= ,s ,l))
+  (cond ((not l) nil)
+	((atom l) `(= ,s ,l))
 	((not (cdr l)) `(= ,s ,(car l)))
 	((let* ((l (sort (copy-list l) '<))
 		(n (car l))
