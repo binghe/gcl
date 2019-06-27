@@ -231,7 +231,7 @@
       (dash-to-underscore fname)
       "__"
       (if (boundp '*compiler-input*)
-	  (subseq (init-name *compiler-input* t) 4)
+	  (subseq *init-name* 4)
 	"")))))
 
 (defvar *top-form* nil)
@@ -1235,7 +1235,7 @@
     (setf (car e) (export-sig (car e))
 	  (second e) (mapcar (lambda (x) (cons x (get-sig x))) (info-ref (cadr l)))
 	  (third e) (list src clv name)
-	  (fourth e) (unless *compiler-compile* (namestring (truename (pathname *compiler-input*))))
+	  (fourth e) *function-filename*
 	  (fifth e) (if (= (length clv) 0) 1 0)
 	  (sixth e) name)
     (when *sig-discovery*

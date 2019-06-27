@@ -170,7 +170,8 @@
    (if (consp *split-files*)
        (setf (car *split-files*) (+ (third *split-files*) section-length)))))
 
-(defvar *init-name*)
+(defvar *init-name* nil)
+(defvar *function-filename* nil)
 (defvar *c-debug* nil)
 (defun compile-file1 (input-pathname
                       &key (output-file (merge-pathnames *o-ext* input-pathname))
@@ -195,7 +196,9 @@
 			   (*DEFAULT-PATHNAME-DEFAULTS* #"")
 			   (*data* (list (make-array 50 :fill-pointer 0 :adjustable t) nil nil nil))
 			   (*fasd-data* *fasd-data*)
-                           (*error-count* 0))
+                           (*error-count* 0)
+			   (*init-name* *init-name*)
+			   (*function-filename* *function-filename*))
   (declare (ignore external-format))
 ;  (declare (special *c-debug* system-p))
 
@@ -233,6 +236,11 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 					(length (second *split-files*)))
 			  :type "o")))
    
+   (with-open-file (s output-file :if-does-not-exist :create))
+   (setq *init-name* (init-name output-file t))
+   (setq *function-filename* (unless *compiler-compile*
+			       (namestring (truename (pathname *compiler-input*)))))
+
    (let* ((eof (cons nil nil))
 	  (dir    (or (unless (null output-file) (pathname-directory output-file)) (pathname-directory input-pathname)))
 	  (name   (or (unless (null output-file) (pathname-name output-file)) (pathname-name input-pathname)))
@@ -310,9 +318,6 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
       
       (when *sig-discovery* (return-from compile-file1 (values)))
 
-      (with-open-file (s output-file :if-does-not-exist :create))
-      (setq *init-name* (init-name output-file system-p))
-      
       (when (zerop *error-count*)
 	(when *compile-verbose* (format t "~&;; End of Pass 1.  ~%"))
 	(compiler-pass2 c-pathname h-pathname system-p ))
@@ -592,7 +597,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
               #+aosvs (string-downcase (namestring h-pathname))
               "\"")
 
-      (catch *cmperr-tag* (ctop-write *init-name*))
+      (catch *cmperr-tag* (ctop-write (init-name c-pathname system-p)))
       (when system-p
 	(wt-nl "")
 	(wt-nl "#ifdef SYSTEM_SPECIAL_INIT")
