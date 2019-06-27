@@ -323,14 +323,14 @@
 
 ;;<
  (push '((t t) boolean #.(flags rfa)"immnum_lt(#0,#1)") (get '< 'inline-always))
-(push '((rcnum rcnum) boolean #.(flags rfa)"(#0)<(#1)") (get '< 'inline-always))
+(push '((creal creal) boolean #.(flags rfa)"(#0)<(#1)") (get '< 'inline-always))
 
 ;;compiler::objlt
  (push '((t t) boolean #.(flags rfa)"((object)(#0))<((object)(#1))") (get 'si::objlt 'inline-always))
 
 ;;<=
  (push '((t t) boolean #.(flags rfa)"immnum_le(#0,#1)") (get '<= 'inline-always))
-(push '((rcnum rcnum) boolean #.(flags rfa)"(#0)<=(#1)") (get '<= 'inline-always))
+(push '((creal creal) boolean #.(flags rfa)"(#0)<=(#1)") (get '<= 'inline-always))
 
 ;;=
  (push '((t t) boolean #.(flags rfa)"immnum_eq(#0,#1)") (get '= 'inline-always))
@@ -338,11 +338,11 @@
 
 ;;>
  (push '((t t) boolean #.(flags rfa)"immnum_gt(#0,#1)") (get '> 'inline-always))
-(push '((rcnum rcnum) boolean #.(flags rfa)"(#0)>(#1)") (get '> 'inline-always))
+(push '((creal creal) boolean #.(flags rfa)"(#0)>(#1)") (get '> 'inline-always))
 
 ;;>=
  (push '((t t) boolean #.(flags rfa)"immnum_ge(#0,#1)") (get '>= 'inline-always))
-(push '((rcnum rcnum) boolean #.(flags rfa)"(#0)>=(#1)") (get '>= 'inline-always))
+(push '((creal creal) boolean #.(flags rfa)"(#0)>=(#1)") (get '>= 'inline-always))
 
 ;;APPEND
 ;;  (push '((t t) t #.(flags ans)"append(#0,#1)")
@@ -778,11 +778,11 @@
     (get 'max 'inline-always));FIXME
 ;(push '((t t) t #.(flags set)"@01;({register int _r=number_compare(#0,#1); fixnum_float_contagion(_r>=0 ? #0 : #1,_r>=0 ? #1 : #0);})")
 ;   (get 'max 'inline-always))
-(push '((rcnum rcnum) long-float #.(flags set)"@01;((double)((#0)>=(#1)?(#0):#1))")
+(push '((creal creal) long-float #.(flags set)"@01;((double)((#0)>=(#1)?(#0):#1))")
    (get 'max 'inline-always))
-(push '((rcnum rcnum) short-float #.(flags set)"@01;((float)((#0)>=(#1)?(#0):#1))")
+(push '((creal creal) short-float #.(flags set)"@01;((float)((#0)>=(#1)?(#0):#1))")
    (get 'max 'inline-always))
-(push '((rcnum rcnum) fixnum #.(flags set)"@01;((fixnum)((#0)>=(#1)?(#0):#1))")
+(push '((creal creal) fixnum #.(flags set)"@01;((fixnum)((#0)>=(#1)?(#0):#1))")
    (get 'max 'inline-always))
 
 ;;MIN
@@ -790,11 +790,11 @@
     (get 'min 'inline-always));FIXME
 ;(push '((t t) t #.(flags set)"@01;({register int _r=number_compare(#0,#1); fixnum_float_contagion(_r<=0 ? #0 : #1,_r<=0 ? #1 : #0);})")
 ;   (get 'min 'inline-always))
-(push '((rcnum rcnum) long-float #.(flags set)"@01;((double)((#0)<=(#1)?(#0):#1))")
+(push '((creal creal) long-float #.(flags set)"@01;((double)((#0)<=(#1)?(#0):#1))")
    (get 'min 'inline-always))
-(push '((rcnum rcnum) short-float #.(flags set)"@01;((float)((#0)<=(#1)?(#0):#1))")
+(push '((creal creal) short-float #.(flags set)"@01;((float)((#0)<=(#1)?(#0):#1))")
    (get 'min 'inline-always))
-(push '((rcnum rcnum) fixnum #.(flags set)"@01;((fixnum)((#0)<=(#1)?(#0):#1))")
+(push '((creal creal) fixnum #.(flags set)"@01;((fixnum)((#0)<=(#1)?(#0):#1))")
    (get 'min 'inline-always))
 
 
