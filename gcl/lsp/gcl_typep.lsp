@@ -146,7 +146,7 @@
 			 structure-object ;FIXME
 			 unsigned-byte
 			 signed-byte))
- (defconstant +rr+ (lremove-if (lambda (x) (type-and (cmp-norm-tp '(or complex array)) (cmp-norm-tp (car x)))) +r+)))
+ (defconstant +rr+ (lremove-if (lambda (x) (type-and #t(or complex array) (cmp-norm-tp (car x)))) +r+)))
 
  (eval-when (eval compile) (defun tpc (&rest x) (tps-ints (type-and-list (mapcar 'cmp-norm-tp x)) (cdr (assoc 'tp7 +rs+)))))
 
