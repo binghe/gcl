@@ -1175,7 +1175,9 @@
 (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))
 		     (p (member n *src-inline-recursion* :key 'caar)))
   (when p
-    (if (or (member f *c1exit*) (member-if 'atomic-tp tp))
+    (if (or (member f *c1exit*)
+	    (member-if 'atomic-tp tp)
+	    (member-if 'atomic-tp (cdaar p)));FIXME
 	(member-if (lambda (x)
 		     (when (eq n (caar x))
 		       (arg-types-match (cdar x) tp (member n (cdr p) :key 'caar))))
