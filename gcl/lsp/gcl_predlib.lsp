@@ -725,11 +725,20 @@
 (mapc (lambda (x) (setf (get x 'cmp-inline) t))
       '(lremove lremove-if lremove-if-not lremove-duplicates lreduce lsubstitute ldelete ldelete-if ldelete-if-not))
 
-(defun lremove (q l &key (key #'identity) (test #'eql))
-  (labels ((l (l) (when l
-		    (let* ((x (car l))(z (cdr l))(y (l z)))
-		      (if (funcall test q (funcall key x)) y (if (eq y z) l (cons x y)))))))
-	  (l l)))
+(defun lremove (q l &key (key #'identity) (test #'eql) &aux r rp (p l))
+  (mapl (lambda (x)
+		(when (funcall test q (funcall key (car x)))
+		  (let ((y (ldiff p x)))
+		    (setq rp (last (if rp (rplacd rp y) (setq r y)))
+			  p (cdr x))))) l)
+  (cond (rp (rplacd rp p) r)
+	(p)))
+
+;; (defun lremove (q l &key (key #'identity) (test #'eql))
+;;   (labels ((l (l) (when l
+;; 		    (let* ((x (car l))(z (cdr l))(y (l z)))
+;; 		      (if (funcall test q (funcall key x)) y (if (eq y z) l (cons x y)))))))
+;; 	  (l l)))
 
 
 (defun lremove-if (f l) (lremove f l :test 'funcall))
