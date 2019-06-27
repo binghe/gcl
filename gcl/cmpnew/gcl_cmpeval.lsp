@@ -503,7 +503,6 @@
 	 (v (c1vref n))
 	 (x (car v))
 	 (tpi (pop args))
-	 (tpi (if (si::t-to-nil (car (atomic-tp tpi))) tpi (cmp-norm-tp tpi)));FIXME
 	 (tp (type-and (var-type x) tpi))
 	 (v1 (c1arg n))
 	 (ref (if (eq (car v1) 'var) (caddr v1) v))
@@ -1892,7 +1891,7 @@
       (let ((t1 (info-type (cadr res)))(t2 (info-type info)))
 	(when (exit-to-fmla-p)
 	  (labels ((tb (tp) (type-or1 (when (type-and #tnull tp) #tnull)
-				      (when (type-and #t(not null) tp) #t(member t)))))
+				      (when (type-and #t(not null) tp) #ttrue))))
 		  (setq t1 (tb t1) t2 (tb t2))))
 	(setf (info-type (cadr res)) (type-and t1 t2))))
     res))

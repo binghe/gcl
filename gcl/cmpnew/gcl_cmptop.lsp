@@ -1083,7 +1083,7 @@
 (defun c2lit (tp inl args stores)
   (let* ((*inline-blocks* 0)
 	 (*restore-avma*  *restore-avma*))
-    (unwind-exit (lit-loc tp inl args stores) nil (cons 'values (if (eq tp #t(returns-exactly)) 0 1)))
+    (unwind-exit (lit-loc tp inl args stores) nil (cons 'values (if (equal tp #t(returns-exactly)) 0 1)))
     (close-inline-blocks)))
 
 ;; (defun c2lit (tp inl args)
@@ -1571,7 +1571,7 @@
 
 (defun xa (l)
   (let ((v (is-narg-le l)))
-    (if v (caddr (var-type v)) (length (caaddr l)))))
+    (if v (or (cadr (real-bnds (var-type v))) (baboon)) (length (caaddr l)))))
 
 (defun global-type-bump (tp)
   (let* ((mv (cmpt tp))

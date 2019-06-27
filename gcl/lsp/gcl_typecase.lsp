@@ -18,25 +18,24 @@
 (defun mkinfm (f tp z &aux (z (?-add 'progn z)))
   `(infer-tp ,f ,tp ,z))
 
+(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
+
 (defun branch (tpsff x f &aux (q (cdr x))(x (car x))(z (cddr (assoc x tpsff))))
   (if q
-      (mapcar (lambda (q) `((typep ,f ',q) ,(mkinfm f q z)))
-	      (if (when (consp q) (eq (car q) 'or)) (cdr q) (list q)))
+      `(((typep ,f ',(cmp-unnorm-tp q)) ,(mkinfm f q z)))
     `((t ,(?-add 'progn z)))))
-
-(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
 
 (defun branch1 (x tpsff f o)
   (let* ((z (mapcan (lambda (x) (branch tpsff x f)) (cdr x)))
 	 (s (lremove nil (mapcar 'cdr (cdr x))))
-	 (z (if s (nconc z `((t ,(mkinfm f `(not ,(?-add 'or s)) (cdar o))))) z)))
+	 (z (if s (nconc z `((t ,(mkinfm f (tp-not (lreduce 'type-or1 s)) (cdar o))))) z)))
     (cons 'cond z)))
-;    (if (member t z :test-not 'eq :key 'car) `(cond ,@z) (cadar z))))
 
 (defun branches (f tpsff fnl o c)
   (mapcar (lambda (x)
 	    `(,(lremove-duplicates (mapcar (lambda (x) (cdr (assoc x fnl))) (car x)))
-	      ,(mkinfm f (?-add 'or (car x)) (list (branch1 x tpsff f o))))) c))
+	      ,(mkinfm f (lreduce 'type-or1 (car x)) (list (branch1 x tpsff f o)))))
+	  c))
 
 (define-compiler-macro typecase (&whole w x &rest ff)
   (let* ((bind (unless (symbolp x) (list (list (gensym) x))));FIXME sgen?
@@ -45,13 +44,21 @@
 	 (ff (if o (ldiff ff o) ff))
 	 (o (list (cons t (cdar o))))
 	 (tps (mapcar 'cmp-norm-tp (mapcar 'car ff)))
-	 (z nil) (tps (mapcar (lambda (x) (prog1 (type-and x (cmp-norm-tp `(not ,z))) (setq z (type-or1 x z)))) tps))
+	 (z nil) (tps (mapcar (lambda (x) (prog1 (type-and x (tp-not z)) (setq z (type-or1 x z)))) tps))
 	 (a (type-and-list tps))(c (calist2 a))
 	 (fn (best-type-of c))
 	 (fm `(case (,fn ,f)
 		    ,@(branches f (mapcar 'cons tps ff) (cdr (assoc fn +rs+)) o c)
-		    (otherwise ,(mkinfm f `(not (or ,@(apply 'append (mapcar 'car c)))) (cdar o))))))
+		    (otherwise
+		     ,(mkinfm f
+			      (tp-not
+			       (lreduce 'type-or1
+					(lreduce 'append
+						 (mapcar 'car c))))
+			      (cdar o))))))
     (if bind `(let ,bind ,fm) fm)))
+
+
 
 (defun funcallable-symbol-function (x) (c-symbol-gfdef x))
 
@@ -95,17 +102,30 @@
 (eval-when
  (compile eval)
  (defun mtp8b (tpi &aux (rl (cdr (assoc 'tp8 +rs+)))
-		   (tp (lreduce 'type-or1 (mapcar 'car (lremove-if-not (lambda (x) (eql tpi (cdr x))) rl)) :initial-value nil)))
+		   (tp (lreduce 'type-or1
+				(mapcar 'car
+					(lremove-if-not
+					 (lambda (x) (eql tpi (cdr x)))
+					 rl))
+				:initial-value nil)))
    `(infer-type
-     'x ',tp
+     'x ,tp
      (infer-type
-      'y ',tp
-      ,(let ((x (car (member-if (lambda (x) (eql tpi (cdr (assoc (cmp-norm-tp `(and ,(get x 'lisp-type) (not immfix))) rl))))
-				'(:fixnum :float :double :fcomplex :dcomplex)))))
+      'y ,tp
+      ,(let ((x (caar (member-if
+		       (lambda (x &aux (z (assoc (cmp-norm-tp (cdr x)) rl :test 'type<=)))
+			 (eql tpi (cdr z)))
+		       '((:fixnum . (and fixnum (not immfix)))
+			 (:float . short-float)
+			 (:double . long-float)
+			 (:fcomplex . fcomplex)
+			 (:dcomplex . dcomplex))))))
 	 (if x `(,(intern (string-upcase (strcat "C-" x "-=="))) x y)
-	   (cond ((eq tp (cmp-norm-tp 'bignum)) `(eql 0 (mpz_cmp x y)))
-		 ((eq tp (cmp-norm-tp 'ratio)) `(and (eql (numerator x) (numerator y)) (eql (denominator x) (denominator y))))
-		 ((eq tp (cmp-norm-tp '(complex rational))) 
+	   (cond ((type<= tp (cmp-norm-tp 'bignum)) `(eql 0 (mpz_cmp x y)))
+		 ((type<= tp (cmp-norm-tp 'ratio))
+		  `(and (eql (numerator x) (numerator y))
+			(eql (denominator x) (denominator y))))
+		 ((type<= tp (cmp-norm-tp '(complex rational)))
 		  `(and (eql (realpart x) (realpart y))
 			(eql (imagpart x) (imagpart y))))
 		 ((error "Unknown tp")))))))))

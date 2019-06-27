@@ -42,9 +42,6 @@
   (keyed-cmpnote (list 'branch-elimination test-form)
 		 "Test form ~S is ~S,~%;; eliminating branch ~S~%" test-form val elim-form))
 
-(defun negate (tp)
-  (or (not tp) (unless (eq tp t) `(not ,tp))))
-
 (defconstant +gen+ (make-var :name (gensym)))
 ;(defconstant +gen+ (gensym))
 
@@ -85,24 +82,16 @@
 	((funcall op nx ny) x)
 	(y)))
 
-(defun real-bnds (tp)
-  (cond ((and (consp tp) (eq (car tp) 'or))
-	 (let ((res (mapcar 'real-bnds (cdr tp))))
-	   (reduce (lambda (x y) 
-		     (list (max-bnd (car x) (car y) '<) (max-bnd (cadr x) (cadr y) '>)))
-		   res :initial-value (car res))))
-	((cdr tp))))
+(defun real-bnds (t1) (num-type-bounds t1))
 
-(defun two-tp-inf (fn t2 &aux (t2 (type-and #treal t2)))
-  (cond ((and (consp t2) (eq (car t2) 'or))
-	 (two-tp-inf fn (cmp-norm-tp (cons 'long-float (real-bnds t2)))))
-	((case fn
-	      (= (cmp-norm-tp `(real ,(or (cadr t2) '*) ,(or (caddr t2) '*))))
-	      (/= (if (atomic-tp t2) (type-and #tnumber (cmp-norm-tp `(not (real ,@(cdr t2))))) #treal))
-	      (>  (cmp-norm-tp `(real ,(cond ((numberp (cadr t2)) (list (cadr t2))) ((cadr t2)) ('*)))))
-	      (>= (cmp-norm-tp `(real ,(or (cadr t2) '*))))
-	      (<  (cmp-norm-tp `(real * ,(cond ((numberp (caddr t2)) (list (caddr t2))) ((caddr t2)) ('*)))))
-	      (<= (cmp-norm-tp `(real * ,(or (caddr t2) '*))))))))
+(defun two-tp-inf (fn t2 &aux (t2 (cons 'long-float (real-bnds (type-and #treal t2)))))
+  (case fn
+	(= (cmp-norm-tp `(real ,(or (cadr t2) '*) ,(or (caddr t2) '*))))
+	(/= (if (atomic-tp t2) (type-and #tnumber (cmp-norm-tp `(not (real ,@(cdr t2))))) #treal))
+	(>  (cmp-norm-tp `(real ,(cond ((numberp (cadr t2)) (list (cadr t2))) ((cadr t2)) ('*)))))
+	(>= (cmp-norm-tp `(real ,(or (cadr t2) '*))))
+	(<  (cmp-norm-tp `(real * ,(cond ((numberp (caddr t2)) (list (caddr t2))) ((caddr t2)) ('*)))))
+	(<= (cmp-norm-tp `(real * ,(or (caddr t2) '*))))))
 
 (defmacro vl-name (x) `(var-name (car (third ,x))))
 ;(defmacro vl-type (x) `(var-type (car (third ,x))))  ; Won't work, ref might be across a function boundary
@@ -271,7 +260,7 @@
 		    (list (cons (car (third (first args))) (cons (cmp-norm-tp pt) (cmp-norm-tp `(not ,pt))))))
 		   ((and (= l 2) (eq fn 'typep) (vlp (first args))
 			 (let ((tp (cmp-norm-tp (get-object-value (second args)))))
-			   (when tp (list (cons (car (third (first args))) (cons tp (cmp-norm-tp `(not ,tp)))))))))
+			   (when tp (list (cons (car (third (first args))) (cons tp (tp-not tp))))))))
 		   ((and (= l 2) rfn)
 		    (nconc
 		     (when (vlp (first args))

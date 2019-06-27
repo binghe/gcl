@@ -45,6 +45,8 @@ gcl_init_system(object no_init)
   check_init(lsp,gcl_evalmacros,no_init);
   check_init(lsp,gcl_module,no_init);
   check_init(lsp,gcl_predlib,no_init);
+  check_init(lsp,gcl_deftype,no_init);
+  check_init(lsp,gcl_subtypep,no_init);
 #ifdef pre_gcl/*FIXME coerce in compiled funcall*/
   check_init(lsp,gcl_type,no_init);
 #endif

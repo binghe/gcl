@@ -1,4 +1,6 @@
-(in-package :compiler)(cdebug)
+(in-package :compiler)(cdebug)(setq *compile-print* t si::*notify-gbc* t)
+
+
 
 #+pre-gcl
 (progn
@@ -9,12 +11,16 @@
 
 (progn (setq si::*code-block-reserve* (make-array 30000000 :element-type 'character :static t)) nil)
 
-(mapc 'compile (nconc #-pre-gcl '(mapcar mapc mapl maplist)
-		      'si::(listp type-spec-p ibb ib typep <= coerce < > >= + - set-array concatenate mta mtv eql-is-eq)
+(mapc 'compile (nconc #-pre-gcl '(sbit si::improper-consp mapcar mapcan mapc mapl maplist
+					 member member-if member-if-not
+					 assoc assoc-if assoc-if-not
+					 rassoc rassoc-if rassoc-if-not)
+		      'si::(listp type-spec-p ibb ib typep <= coerce < > >= + - set-array 0-byte-array-self set-0-byte-array-self  concatenate mta mtv eql-is-eq)
 		      '(info-p info-ref info-type info-flags info-ch info-ref-ccb info-ref-clb c1constant-value-object
 			     var-p var-name var-kind var-ref var-ref-ccb var-loc var-dt var-type var-mt var-tag var-store
-			     c-array-rank c-array-dim c-array-elttype c-array-eltsize c-array-self c-array-hasfillp
-			     array-dimension array-row-major-index row-major-aref si::row-major-aset aref si::aset 
+			     c-array-rank c-array-dim c-array-elttype c-array-self c-array-hasfillp
+			     array-dimension array-row-major-index row-major-aref si::row-major-aset
+			     si::row-major-aref-int aref si::aset
 			     array-has-fill-pointer-p length)))
 (setf (symbol-function 'array-rank) (symbol-function 'c-array-rank)
       (symbol-function 'array-total-size) (symbol-function 'c-array-dim))
@@ -27,11 +33,16 @@
 
 (defun doit (ld? cmpl?)
 
-  (dolist (l '(s sf c listlib predlib type typep typecase arraylib seq seqlib bnum fle dl rm nr lr sym hash sharp))
+  (dolist (l '(s sf))
+    (doitf l "lsp" ld? cmpl?))
+  (dolist (l '(c listlib))
+    (doitf l "lsp" #+pre-gcl 'identity #-pre-gcl ld? cmpl?));fixme
+  (dolist (l '(predlib deftype subtypep type typep typecase arraylib
+		       seq seqlib bnum fle dl rm nr lr sym hash sharp))
     (doitf l "lsp" ld? cmpl?))
   
   (dolist (l '(cmptype cmpeval cmpvar cmpwt cmpif cmplet cmptag cmpinline cmpenv cmplam cmptop
-		       cmpbind cmpblock cmpcall cmpcatch cmpflet cmpfun cmplabel cmploc cmpmap 
+		       cmpbind cmpblock cmpcall cmpcatch cmpflet cmpfun cmplabel cmploc cmpmap
 		       cmpmulti cmpspecial cmputil cmpvs cmpmain))
     (doitf l "cmpnew" ld? cmpl?))
   

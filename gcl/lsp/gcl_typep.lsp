@@ -1,11 +1,11 @@
 (in-package :si)
 
-(defun infer-type (x y z) (declare (ignore x y)) z);avoid macroexpansion in bootstrap
+(defmacro infer-type (x y z) (declare (ignore x y)) z);avoid macroexpansion in bootstrap
 (define-compiler-macro infer-type (x y z)
-  `(infer-tp ,(cmp-eval x) ,(cmp-eval y) ,z))
+  `(infer-tp ,(cmp-eval x) ,y ,z));FIXME
 
 (defun mkinf (f tp z &aux (z (if (cdr z) `(progn ,@z) (car z))))
-  `(infer-type ',f ',tp ,z))
+  `(infer-type ',f ,tp ,z))
 
 (defun ib (o l &optional f)
   (let* ((a (atom l))
@@ -58,13 +58,13 @@
 
 (eval-when
  (compile eval)
- (defun cfn (tp code) 
+ (defun cfn (tp code)
    (let* ((nc (cmp-norm-tp tp))
 	  (a (type-and-list (list nc)))(c (calist2 a))
-	  (f (best-type-of c))(it (caar c))(it (if (cdr it) (cons 'or it) (car it))))
+	  (f (best-type-of c))(it (caar c))(it (when it (lreduce 'tp-or it))))
      `(case (,f o)
 	    (,(tps-ints a (cdr (assoc f +rs+))) ,(mkinf 'o it (list code)))
-	    (otherwise ,(mkinf 'o `(not ,it) '(nil))))))
+	    (otherwise ,(mkinf 'o (tp-not it) '(nil))))))
   (defun mksubb (o tp x)
    (case x
 	 ((immfix bfix bignum integer ratio single-float double-float short-float long-float float rational real) `(ibb ,o ,tp))

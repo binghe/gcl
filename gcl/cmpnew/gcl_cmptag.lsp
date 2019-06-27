@@ -1052,9 +1052,10 @@
     (let ((*unwind-exit* (cons label *unwind-exit*)))
       (c2tagbody-body body))))
 
-(defun mcpt (tp)
-  (when (consp (car (atomic-tp tp)))
-    (list (pop tp) (copy-list (car tp)))))
+(defun mcpt (tp &aux (a (car (atomic-tp tp))))
+  (if (consp a)
+      (subst (copy-list a) a tp);rplacd, etc.
+    tp))
 
 (defun tag-throw (tag)
   (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x))) 
@@ -1222,7 +1223,11 @@
 					       (cond ((and df dfp) (cmperr "default tag must be last~%"))
 						     ((type-and st e) (setq skip nil dfp (or df dfp) rt (type-or1 rt e)))
 						     ((keyed-cmpnote 'branch-elimination "Eliminating unreachable switch ~s" b)))))
-					    ((not skip) (when cs (setq st (type-and st (cmp-norm-tp `(not ,rt))) cs nil)) t))) body))
+					    ((not skip)
+					     (when cs
+					       (setq st (type-and st (tp-not rt)) cs nil))
+					     t)))
+				    body))
 	       (body (mapcar (lambda (x) (if (tgs-p x) (make-tag :name x :ref t :switch (if (typep x 'fixnum) x "default")) x)) body))
 	       trv
 	       (body (mapcar (lambda (x) (if (tag-p x) x (let ((x (c1branch t nil (list nil x) info))) 

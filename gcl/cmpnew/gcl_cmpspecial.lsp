@@ -59,7 +59,7 @@
   (setq dtype (max-vtp (car args)))
   (when *compiler-new-safety* (setq dtype t))
   (when (exit-to-fmla-p) (setq dtype (type-or1 (when (type-and #tnull dtype) #tnull) (when (type-and #t(not null) dtype) #ttrue))));FIXME
-  (when (eq dtype #tboolean) 
+  (when (equal dtype #tboolean)
     (unless (type>= dtype (info-type info))
       (return-from c1the (c1expr `(when ,(cadr args) t)))))
   (setq type (type-and dtype (info-type info)))

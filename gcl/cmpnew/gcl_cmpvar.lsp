@@ -634,7 +634,7 @@
 		  (wt "(" (vv-str (var-loc var)) "->s.s_dbind)")))
         (t (let ((z (cdr (assoc (var-kind var) +wt-c-var-alist+))))
 	     (unless z (baboon))
-	     (when (and (eq #tfixnum (var-kind var)) (zerop *space*)) 
+	     (when (and (equal #tfixnum (var-kind var)) (zerop *space*))
 	       (wt "CMP"))
 	     (wt z)
            (wt "(V" (var-loc var) ")")))

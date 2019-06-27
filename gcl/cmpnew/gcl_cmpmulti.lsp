@@ -503,7 +503,7 @@
   (let* ((tp (info-type (cadr form)))
 	 (vd (vald tp)))
     (cond ((< vd 0) (- vd))
-	  ((eq tp #t(returns-exactly)) 0))))
+	  ((equal tp #t(returns-exactly)) 0))))
 
 (defvar *mvb-vals* nil)
 

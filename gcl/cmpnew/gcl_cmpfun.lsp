@@ -308,11 +308,8 @@
   (si::putprop l 'do-eq-et-al 'c1g))
 
 (defun num-type-bounds (t1)
-  (let ((i 1) j)
-    (mapcar (lambda (x) 
-	      (setq j i i (- i)
-		    x (if (atom x) x 
-			(+ (car x) (* j least-positive-long-float))))) (cdr t1))))
+  (let ((x (tp-bnds t1)))
+    (when x (list (car x) (cdr x)))))
   
 (defun ntrr (x y)
   (and x y

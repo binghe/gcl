@@ -954,7 +954,7 @@
       (when (dolist (arg-type t1 (or (equal t2 '(*)) (endp t2)))
 	      (when (endp t2) (return nil))
 	      (let* ((s (unless ret (and (eq (car t2) '*) (not (cdr t2)))))
-		     (lst (if (and s (not (eq last #topaque))) #tt last));FIXME
+		     (lst (if (unless (type<= last #topaque) s) #tt last));FIXME (cmp-norm-tp 'opaque)
 		     (type (if s lst (pop t2)))
 		     (arg-type (if ret arg-type (coerce-to-one-value arg-type)))
 		     (tp (adj-cnum-tp type arg-type)))

@@ -1064,44 +1064,6 @@
 (push '(((member :address) t) fixnum #.(flags rfa) "object_to_fixnum(#1)") (get 'unbox 'inline-always))
 (push '(((member :address) fixnum) fixnum #.(flags rfa) "(#1)") (get 'unbox 'inline-always))
 
-(deftype long nil 'fixnum)
-
-(setf (get :boolean 'lisp-type) 'boolean)
-(setf (get :void 'lisp-type) nil)
-(setf (get :cnum 'lisp-type) #tcnum)
-(setf (get :creal 'lisp-type) #t(and real cnum))
-
-(dolist (l '((:float      "make_shortfloat"      short-float     cnum)
-	     (:double     "make_longfloat"       long-float      cnum)
-	     (:character  "code_char"            character       cnum)
-	     (:char       "make_fixnum"          char            cnum)
-	     (:short      "make_fixnum"          short           cnum)
-	     (:int        "make_fixnum"          int             cnum)
-	     (:uchar      "make_fixnum"          unsigned-char   cnum)
-	     (:ushort     "make_fixnum"          unsigned-short  cnum)
-	     (:uint       "make_fixnum"          unsigned-int    cnum)
-	     (:fixnum     "make_fixnum"          fixnum          cnum)
-	     (:long       "make_fixnum"          fixnum          cnum)
-	     (:fcomplex   "make_fcomplex"        fcomplex        cnum)
-	     (:dcomplex   "make_dcomplex"        dcomplex        cnum)
-	     (:string     "make_simple_string"   string)
-	     (:object     ""                     t)
-	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
-	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
-	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
-	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
-  (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l)))
-  (when (cadr l)
-    (push `(((member ,(car l)) opaque) t #.(flags rfa) ,(strcat (cadr l) "(#1)")) 
-	  (get 'box   'inline-always))
-    (push `(((member ,(car l)) t) opaque #.(flags rfa) ,(if (eq (car l) :object) "(#1)" (strcat "object_to_" (car l) "(#1)")))  
-	  (get 'unbox 'inline-always)))
-  (when (cadddr l)
-    (push `(((member ,(car l)) ,(cadddr l)) opaque
-	    #.(flags rfa) ,(if (fifth l) (strcat "(#1)" (fifth l)) (strcat "(" (car l) ")" "(#1)")))   
-	  (get 'unbox 'inline-always))))
-
-
 ;; (defun register-key (l tt)
   
 ;;   (push `(((member ,l) t t t) ,tt ,(flags rfa) "((#1)->#2.#3)") 
@@ -1114,17 +1076,6 @@
 ;; 	(get 'set-el 'inline-always))
 
 ;; )
-
-(dolist (l '(char short long int integer keyword character real string structure symbol fixnum))
-  (let ((s (intern (symbol-name l) 'keyword)))
-    (setf (get s 'lisp-type) (cmp-norm-tp l))))
-
-(dolist (l '((object t)(plist proper-list)(float short-float)(double long-float)
-	     (pack (or null package)) (direl (or keyword null string))))
-  (let ((s (intern (symbol-name (car l)) 'keyword)))
-    (setf (get s 'lisp-type) (cmp-norm-tp (cadr l)))))
-
-(defvar *box-alist* (mapcar (lambda (x) (cons x (cmp-norm-tp (get x 'lisp-type)))) '(:char :fixnum :float :double :fcomplex :dcomplex)))
 
 (deftype stdesig nil '(or string symbol character))
 (deftype longfloat nil 'long-float)
@@ -1229,4 +1180,55 @@
 
 ;;SIGNUM
 (push '((t) t #.(compiler::flags) "immnum_signum(#0)") (get 'signum 'compiler::inline-always))
+
+
+
+
+(setf (get :boolean 'lisp-type) (cmp-norm-tp 'boolean))
+(setf (get :void 'lisp-type) (cmp-norm-tp nil))
+(setf (get :cnum 'lisp-type) (cmp-norm-tp 'cnum))
+(setf (get :creal 'lisp-type) (cmp-norm-tp 'creal))
+(dolist (l '((:float      "make_shortfloat"      short-float     cnum)
+	     (:double     "make_longfloat"       long-float      cnum)
+	     (:character  "code_char"            character       cnum)
+	     (:char       "make_fixnum"          char            cnum)
+	     (:short      "make_fixnum"          short           cnum)
+	     (:int        "make_fixnum"          int             cnum)
+	     (:uchar      "make_fixnum"          unsigned-char   cnum)
+	     (:ushort     "make_fixnum"          unsigned-short  cnum)
+	     (:uint       "make_fixnum"          unsigned-int    cnum)
+	     (:fixnum     "make_fixnum"          fixnum          cnum)
+	     (:long       "make_fixnum"          fixnum          cnum)
+	     (:fcomplex   "make_fcomplex"        fcomplex        cnum)
+	     (:dcomplex   "make_dcomplex"        dcomplex        cnum)
+	     (:string     "make_simple_string"   string)
+	     (:object     ""                     t)
+	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
+	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
+	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
+	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
+  (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l)))
+  (when (cadr l)
+    (push `(((member ,(car l)) opaque) t #.(flags rfa) ,(strcat (cadr l) "(#1)"))
+	  (get 'box   'inline-always))
+    (push `(((member ,(car l)) t) opaque #.(flags rfa) ,(if (eq (car l) :object) "(#1)" (strcat "object_to_" (car l) "(#1)")))
+	  (get 'unbox 'inline-always)))
+  (when (cadddr l)
+    (push `(((member ,(car l)) ,(cadddr l)) opaque
+	    #.(flags rfa) ,(if (fifth l) (strcat "(#1)" (fifth l)) (strcat "(" (car l) ")" "(#1)")))
+	  (get 'unbox 'inline-always))))
+
+(dolist (l '(char short long int integer keyword character real string structure symbol fixnum))
+  (let ((s (intern (symbol-name l) 'keyword)))
+    (setf (get s 'lisp-type) l)))
+
+(dolist (l '((object t)(plist proper-list)(float short-float)(double long-float)
+	     (pack (or null package)) (direl (or keyword null string))))
+  (let ((s (intern (symbol-name (car l)) 'keyword)))
+    (setf (get s 'lisp-type) (cadr l))))
+
+(defvar *box-alist* (mapcar (lambda (x) (cons x (get x 'lisp-type))) '(:char :fixnum :float :double :fcomplex :dcomplex)))
+
+
+
 

@@ -4,16 +4,19 @@
 
 (defvar *array-types* (cons (cons nil 'array-nil) +array-type-alist+))
 
+(defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+));FIXME
+
 (defvar *k-ops*
   `((integer int^ int~ rng-recon)
     ((ratio short-float long-float) rng^ rng~ rng-recon)
     (complex-integer cmpi^ cmpi~ cmp-recon)
-    (complex-ratio   cmp^  cmpr~ cmp-recon)
-    ((complex-short-float complex-long-float) cmp^ cmp~ cmp-recon)
-    (structure str^ str~ str-recon)
-    ((std-instance
+    (complex-integer-ratio cmpir^ cmpir~ cmp-recon)
+    (complex-ratio-integer cmpri^ cmpri~ cmp-recon)
+    ((complex-ratio complex-short-float complex-long-float) cmp^ cmp~ cmp-recon)
+    ((std-instance structure
       standard-generic-compiled-function
-      standard-generic-interpreted-function) std^ std~ std-recon)
+      standard-generic-interpreted-function)
+     std^ std~ std-recon)
     ((proper-cons improper-cons) cns^ cns~ cns-recon)
     (,(mapcar 'cdr *array-types*)  ar^ ar~ ar-recon)
     (,+singleton-types+  sing^ sing~ sing-recon))))
@@ -161,7 +164,9 @@
   (if (listp x) (car x) x))
 
 (defun rngcmp (x y f &aux (nx (rngnum x))(ny (rngnum y)))
-  (cond ((eq x '*) y)((eq y '*) x)((funcall f nx ny) y)((funcall f ny nx) x)((eq y ny) x)(y)))
+  (cond ((eq x '*) y)((eq y '*) x)
+	((funcall f nx ny) y)((funcall f ny nx) x)
+	((eq y ny) x)(y)))
 
 (defun ncons (a d &aux (na (rngnum a))(nd (rngnum d)))
   (when (or (eq a '*) (eq d '*) (< na nd) (and (eql a d) (eql na nd) (eql a na)))
@@ -261,50 +266,65 @@
 ;;; CONS
 
 
-(defun cns-list (a d &optional m n)
-  (when (and (or (car a) (cadr a)) (or (car d) (cadr d)))
+(defun cns-list (a d &optional m n &aux (mn (or m n)))
+  (when (and (or (car a) (cadr a) (unless a mn)) (or (car d) (cadr d) (unless d mn)))
     (if (and (unless (car a) (cadr a)) (unless (car d) (cadr d))); (not m) (not n)
 	`(t)
-	`((,a ,d ,m ,n)))))
+      `((,a ,d ,m ,n)))))
+
+(defun cns-and (x y)
+  (if (and x y) (ntp-and x y) (or x y)))
+
+;(defun cns-type (a d) `(cons ,(fourth a) ,(fourth d)))
+(defun cns-type (a d)
+  `(cons ,(nreconstruct-type-int a) ,(nreconstruct-type-int d)));FIXME separage car cdr
+
+(defun cns-match (a d &rest r &aux (tp (when a (cns-type a d))))
+  (if tp (lremove-if-not (lambda (x) (typep x tp)) r) r))
 
 (defun cns^ (x y)
-  (let ((a (ntp-and (car x) (car y)))
-	(d (ntp-and (cadr x) (cadr y))))
-    (when (or (car a) (cadr a))
-      (when (or (car d) (cadr d))
-	(let ((mx (caddr x))(nx (cadddr x))(my (caddr y))(ny (cadddr y)))
-	  (cond ((and mx my) (when (eql mx my) x))
-		((and mx ny) (unless (member mx ny) x))
-		(mx x)
-		((and nx my) (unless (member my nx) y))
-		(my y)
-		((and nx ny) (car (cns-list a d nil (union nx ny))))
-		(nx x)
-		(ny y)
-		((car (cns-list a d)))))))))
+  (let* ((a (cns-and (car x) (car y)))(d (cns-and (cadr x) (cadr y)))
+	 (mx (caddr x))(nx (cadddr x))(my (caddr y))(ny (cadddr y)))
+    (cond (mx (cond (my (when (eql mx my) x))
+		    ((member mx ny) nil)
+		    ((when a (not (typep mx (cns-type a d)))) nil)
+		    (x)))
+	  (my (cns^ y x))
+	  (nx (car (cns-list a d nil (apply 'cns-match a d (union nx ny)))))
+	  (ny (cns^ y x))
+	  ((car (cns-list a d))))))
 
 (defun cns~ (x)
-  (cond ((let ((a (ntp-not (car x)))
-	       (d (ntp-not (cadr x))))
+  (cond ((let ((a (when (car x) (ntp-not (car x))))
+	       (d (when (cadr x) (ntp-not (cadr x)))))
 	   (nconc (cns-list a (cadr x))
 		  (cns-list (car x) d)
 		  (cns-list a d)
 		  (when (caddr x)
 		    (cns-list (car x) (cadr x) nil (list (caddr x))))
-		  (mapcan (lambda (y) (cns-list (car x) (cadr x) y)) (cadddr x)))))))
+		  (mapcan (lambda (y) (cns-list nil nil y)) (cadddr x)))))))
+
+(defconstant +tp-nil+ `(nil nil nil))
+(defconstant +tp-t+   `(nil t nil))
+
+(defun mntp (x)
+  (case x
+    ((t) +tp-t+)
+    ((nil) +tp-nil+)
+    (unknown (list nil t t))
+    (otherwise (list (if (consp (car x)) x (list x)) nil nil))))
 
 (defvar *pcnsk* '(proper-cons null))
-(defvar *pcns-ntp* (list (mapcar (lambda (x) (list x t)) *pcnsk*) nil nil))
-(defvar *pcns-nntp* (list (mapcar (lambda (x) (list x t))
+(defvar *pcns-ntp* (mntp (mapcar (lambda (x) (list x t)) *pcnsk*) ))
+(defvar *pcns-nntp* (mntp (mapcar (lambda (x) (list x t))
 				  (set-difference
 				   (lreduce (lambda (xx x &aux (x (car x)))
 					      (if (listp x) (append x xx) (cons x xx)))
 					    *k-ops* :initial-value nil)
-				   *pcnsk*))
-			  nil nil))
+				   *pcnsk*))))
 
 (defun pcdr (u type &aux (z (ntp-and u (nprocess-type type))))
-  (ntp-prune (car z) (cadr z) (caddr z) (length (car u))))
+  (ntp-prune (pop z) (pop z) (car z) (length (car u))))
 
 (defun pcns (u type)
   (k-mk (pop type) nil (cns-list (nprocess-type (pop type)) (pcdr u (car type)))))
@@ -317,50 +337,23 @@
   (cond ((not cp) (?or (mapcar (lambda (x) (cns-recon x c)) x)))
 	((eq x t) c)
 	((caddr x) `(member ,(caddr x)))
-	((cadddr x) `(not (member ,@(cadddr x))))
+	((cadddr x)
+	 (let ((y `(not (member ,@(cadddr x)))))
+	   (if (car x) `(and ,(cns-recon (list (car x) (cadr x)) c) ,y) y)))
 	(x `(,c ,(nreconstruct-type-int (pop x))
 		,(nreconstruct-type-int (car x))))))
 
-
-;;; STRUCTURE
-
-
-(defun str-def (x) (c-structure-def (if (listp x) (car x) x)))
-
-(defun s-data-tokp (x &aux (x (str-def x)))
-  (eq x (str-def x)))
-
-(defun str~ (x)
-  (cond ((s-data-tokp x) (if (listp x) x `((,x))))
-	((nconc (str~ (str-def x)) (if (listp x) x `((,x)))))))
-
-(defun str^ (x y)
-  (cond ((eq (str-def x) (str-def y)) (rd^ x y))
-	((s-data-tokp x) (when (str^ x (str-def y)) y))
-	((s-data-tokp y) (str^ y x))))
-
-(defun str-ld (x)
-  (cons (pop x)
-	(or (mapcar (lambda (x) (get x 's-data)) (when x (get-included (car x))))
-	    '(t))))
-
-(defun str-recon (x &optional (c (pop x) cp))
-  (cond 
-    ((not cp) (?or (mapcar (lambda (x) (str-recon x c)) x)))
-    ((eq x t) c)
-    ((s-data-tokp x) (if (listp x) (cons 'not x) x))
-    ((listp x) `(and ,(str-def x) (not (member ,@x))))
-    (`(member ,x))))
+;;; STRUCTURE and CLASS
 
 
-;;; CLASS
 
-
-(defun si-subclasses (c)
-  (when c 
-    (cons c (mapcan 'si-subclasses (si-class-direct-subclasses c)))))
   
-(defun std-def (x) (si-class-of (if (listp x) (car x) x)))
+(defun gen-def (x)
+  (cond ((si-classp x) (si-class-of x))
+	((symbolp x) 's-data)
+	((sdata-name (c-structure-def x)))))
+
+(defun std-def (x) (gen-def (if (listp x) (car x) x)))
 
 (defun s-class-p (x &aux (x (std-def x)))
   (eq x (std-def x)))
@@ -374,16 +367,44 @@
 	((s-class-p x) (when (std^ x (std-def y)) y))
 	((s-class-p y) (std^ y x))))
 
+(defun si-subclasses (c)
+  (when c
+    (cons c (mapcan 'si-subclasses (si-class-direct-subclasses c)))))
+
+(defun gen-get-included (x)
+  (if (symbolp x) (get-included x) (lremove-duplicates (si-subclasses x))))
+
 (defun std-ld (x)
-  (cons (pop x) (or (si-subclasses (car x)) '(t))))
+  (cons (pop x) (or (when x (gen-get-included (car x))) '(t))))
+
+
+
+(defun std-matches (x)
+  (intersection (mapcar 'car x) (lreduce 'union (mapcar 'cdr x) :initial-value nil)))
+
+(defun std-pru (x &aux (x (mapcar 'gen-get-included x))(m (std-matches x)))
+  (mapcar (lambda (x)
+	    (cons (car x) (set-difference (cdr x) m)))
+	  (set-difference x m :test (lambda (x y) (eq (car x) y)))))
+
+(defun std-prun (x)
+  (mapcar (lambda (x) (list* 'an (pop x) (mapcar 'car (std-pru x))))
+	  (std-pru x)))
+
+(defun std-prune (x)
+  (if (listp x)
+      (let ((s (lremove t (lremove-if-not 's-class-p x))))
+	(nconc (std-prun s) (mapcar 'std-prune (set-difference x s))))
+    x))
 
 (defun std-recon (x &optional (c (pop x) cp))
   (cond 
-    ((not cp) (?or (mapcar (lambda (x) (std-recon x c)) x)))
+    ((not cp) (?or (mapcar (lambda (x) (std-recon x c)) (std-prune x))))
     ((eq x t) c)
-    ((s-class-p x) (if (listp x) (cons 'not x) x))
-    ((listp x) `(and ,(std-def x) (not (member ,@x))))
-    (`(member ,x))))
+    ((atom x) `(member ,x))
+    ((eq (car x) 'an) (if (cddr x) `(and ,(cadr x) (not ,(?or (cddr x)))) (cadr x)))
+    ((atom (car x)) `(and ,(std-def x) (not (member ,@x))))
+    (`(and ,c ,(?or (cons `(not ,(cadr x)) (cddr x)))))))
 
 
 ;;; INDIVIDUALS
@@ -397,44 +418,35 @@
 	((car x))))
 
 (defun ktype-of (x)
-  (cond ((typep x 'structure) 'structure);FIXME
+  (cond ((not x) 'null);FIXME
+	((eq x t) 'true);FIXME
+	((typep x 'structure) 'structure);FIXME
 	((typep x 'std-instance) 'std-instance);FIXME
 	((improper-consp x) 'improper-cons);FIXME
 	((consp x) 'proper-cons);FIXME
 	((kktype-of (type-of x)))
-	((error "unknown type"))))
+	(t (print x)(error "unknown type"))))
 
-(defun member-reduce (type) 
-  (lreduce (lambda (y x &aux (k (ktype-of x)) (z (assoc k y)))
-	     (if z (progn (nconc z (list x)) y)
-		 (nconc y `((,k ,x)))))
-	   (cdr type) :initial-value nil))
-  
+(defun cons-to-cns-list (x) (cns-list nil nil x))
 
-(defun cons-to-cns-list (u x)
-  (cns-list (nprocess-type `(member ,(car x))) (pcdr u `(member ,(cdr x))) x))
+(defun mcns-ld (c x)
+  (cons c (cons-to-cns-list x)))
 
-(defun mcns-ld (x &aux (c (pop x))(u (if (eq c 'proper-cons) *pcns-ntp* *pcns-nntp*)))
-  (cons c (mapcan (lambda (x) (cons-to-cns-list u x)) x)))
+#.`(defun kmem (x &aux (z (ktype-of x)))
+     (case z
+	   ((proper-cons improper-cons) (mcns-ld z x))
+	   (,+range-types+ `(,z (,x . ,x)))
+	   (null `(,z t))
+	   (otherwise `(,z ,x))))
 
-#.`(defun member-ld (type)
-     (mapcan (lambda (x)
-	     (?cns
-	      (case (car x)
-		((proper-cons improper-cons) (mcns-ld x))
-		(,+range-types+	(cons (pop x) (mapcar (lambda (x) (cons x x)) x)))
-		(,(mapcar 'cadr +ctps+)
-		 (cons (pop x)
-		       (mapcar (lambda (x &aux (r (realpart x))(i (imagpart x)))
-				 `(((,r . ,r)) . ((,i . ,i)))) x)))
-		(otherwise (substitute t nil x)))
-	      nil))
-	     (member-reduce type)))
+(defun member-ld (type)
+  (car (ntp-not
+	(lreduce (lambda (y x) (ntp-and y (ntp-not (mntp (list (kmem x))))))
+		(cdr type) :initial-value +tp-t+))))
 
 
 #.`(defun k^ (k x y)
      (case k
-       (rational (rng^ x y));FIXME ?
        ,@(mapcar (lambda (x) `(,(car x) (,(cadr x) x y))) (butlast *k-ops*))
        (otherwise (,(cadr (car (last *k-ops*))) x y))))
 
@@ -450,7 +462,6 @@
 #.`(defun k~ (k x)
      (unless (eq x t)
        (case k
-	 (rational (rat~ x));FIXME?
 	 ,@(mapcar (lambda (x) `(,(car x) (,(caddr x) x))) (butlast *k-ops*))
 	 (otherwise (,(caddr (car (last *k-ops*))) x)))))
 
@@ -486,48 +497,46 @@
 
 (defun ?cns (x y) (if x (cons x y) y))
 
-(defun ntp-not (x &aux (d (not (cadr x))))
+(defun ntp-not (x &aux (l (pop x)) (d (not (pop x))))
   (apply 'ntp-prune
-   (lreduce (lambda (ll l) (?cns (k-op 'not l nil d) ll)) (car x) :initial-value nil)
-   d
-   (cddr x)))
+   (lreduce (lambda (ll l) (?cns (k-op 'not l nil d) ll)) l :initial-value nil)
+   d (pop x) x))
 
-(defun tp-mod (x d)
+(defun tp-mod (x)
   (cond ((not (caddr x)) x)
 	((/= (let ((x *tp-mod*)) (if (>= x 0) x (- x))) 1) x)
 	((= *tp-mod* 1) +tp-t+)
 	(+tp-nil+)))
 
+(defun ntp-list (op lx ly d dx dy)
+  (lreduce (lambda (ll l &aux (ny (assoc (car l) ly)))
+	     (?cns (cond (ny (k-op op l ny d)) (dy l)) ll))
+	   lx :initial-value
+	   (when dx
+	     (lreduce (lambda (ll l) (?cns (unless (assoc (car l) lx) l) ll))
+		      ly :initial-value nil))))
+
 (defun ntp-and (&rest xy)
   (when xy
-    (let* ((x (tp-mod (car xy) t)) (y (tp-mod (cadr xy) nil))
-	   (lx (car x))(ly (car y))(dx (cadr x))(dy (cadr y))(d (and dx dy)))
-      (cond ((not lx) (if dx y x))
-	    ((not ly) (if dy x y))
+    (let* ((x (tp-mod (car xy))) (y (tp-mod (cadr xy)))
+	   (ox x)(oy y)(lx (pop x))(ly (pop y))(dx (pop x))(dy (pop y))
+	   (d (and dx dy)))
+      (cond ((not lx) (if dx oy ox))
+	    ((not ly) (if dy ox oy))
 	    ((apply 'ntp-prune
-	      (lreduce (lambda (ll l &aux (ny (assoc (car l) ly)))
-			 (?cns (cond (ny (k-op 'and l ny d)) (dy l)) ll))
-		       lx :initial-value
-		       (when dx
-			 (lreduce (lambda (ll l) (?cns (unless (assoc (car l) lx) l) ll))
-				  ly :initial-value nil)))
-	      d (or (caddr x) (caddr y)) (cdddr x)))))))
-
+		    (ntp-list 'and lx ly d dx dy) d
+		    (or (pop x) (pop y)) x))))))
 
 (defun ntp-or (&rest xy)
   (when xy
-    (let* ((x (tp-mod (car xy) t)) (y (tp-mod (cadr xy) nil))
-	   (lx (car x))(ly (car y))(dx (cadr x))(dy (cadr y))(d (or dx dy)))
-      (cond ((not lx) (if dx x y))
-	    ((not ly) (if dy y x))
+    (let* ((x (tp-mod (car xy))) (y (tp-mod (cadr xy)))
+	   (ox x)(oy y)(lx (pop x))(ly (pop y))(dx (pop x))(dy (pop y))
+	   (d (or dx dy)))
+      (cond ((not lx) (if dx ox oy))
+	    ((not ly) (if dy oy ox))
 	    ((apply 'ntp-prune
-	      (lreduce (lambda (ll l &aux (ny (assoc (car l) ly)))
-			 (?cns (cond (ny (k-op 'or l ny d)) ((not dy) l)) ll))
-		       lx :initial-value
-		       (unless dx
-			 (lreduce (lambda (ll l) (?cns (unless (assoc (car l) lx) l) ll))
-				  ly :initial-value nil)))
-	      d (or (caddr x) (caddr y)) (cdddr x)))))))
+		    (ntp-list 'or lx ly d (not dx) (not dy)) d
+		    (or (pop x) (pop y)) x))))))
 
 (defconstant +ntypes+ `(,@+singleton-types+
 			std-instance structure standard-generic-interpreted-function
@@ -548,12 +557,6 @@
 	((eq type (setq e (just-expand-deftype type))) type)
 	((normalize-type e))))
 
-(defun mntp (x)
-  (case x
-    ((t) +tp-t+)
-    ((nil) +tp-nil+)
-    (unknown (list nil t t))
-    (otherwise (list (if (consp (car x)) x (list x)) nil nil))))
 
 #.`(defun ntp-load (type)
      (mntp
@@ -562,11 +565,10 @@
 	 (,+range-types+ (rng-ld type))
 	 (complex* (cmp-ld type))
 	 ((cons proper-cons improper-cons) (cns-ld type))
-	 ((std-instance
+	 ((std-instance structure
 	   standard-generic-interpreted-function
 	   standard-generic-compiled-function)
 	  (std-ld type))
-	 (structure (str-ld type))
 	 (array (ar-ld type))
 	 (,+singleton-types+ (sing-ld type))
 	 (member (member-ld type))

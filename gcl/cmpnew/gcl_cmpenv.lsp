@@ -157,13 +157,13 @@
 
 (defun is-global-arg-type (x)
   (let ((x (promoted-c-type x)))
-    (or (eq x #tt) (member x +c-global-arg-types+))))
+    (or (equal x #tt) (member x +c-global-arg-types+))))
 (defun is-local-arg-type (x)
   (let ((x (promoted-c-type x)))
-    (or (eq x #tt) (member x +c-local-arg-types+))))
+    (or (equal x #tt) (member x +c-local-arg-types+))))
 (defun is-local-var-type (x)
   (let ((x (promoted-c-type x)))
-    (or (eq x #tt) (member x +c-local-var-types+))))
+    (or (equal x #tt) (member x +c-local-var-types+))))
 
 ;; (defun coerce-to-one-value (type)
 ;;   (or (not type) (type-and type t)))
@@ -305,11 +305,7 @@
 ;; 	   (get fname 'cmp-notinline))))
 
 
-(defun max-vtp (tp)
-  (let ((n (cmp-norm-tp tp)))
-    (if (eq n '*)
-	(cmp-norm-tp `(si::type-max (and t ,tp)))
-      n)))
+(defun max-vtp (tp) (coerce-to-one-value (cmp-norm-tp tp)));FIXME lose coerce?
 
 (defun body-safety (others &aux
 			   (*compiler-check-args* *compiler-check-args*)
@@ -388,11 +384,12 @@
 		      (push (cons var 'dynamic-extent) ts)))
 		   (otherwise
 		    (let ((type (max-vtp stype)))
-		      (unless (eq type t)
-			(dolist (var (cdr decl))
-			  (cmpck (not (symbolp var)) "The type declaration ~s contains a non-symbol ~s."
-				 decl var)
-			  (push (cons var type) ts)))))))))))
+		      (if (unless (eq type t) type)
+			  (dolist (var (cdr decl))
+			    (cmpck (not (symbolp var)) "The type declaration ~s contains a non-symbol ~s."
+				   decl var)
+			    (push (cons var type) ts))
+			(push decl others))))))))))
 
   (dolist (l ctps) 
     (when (and (cadr l) (symbolp (cadr l))) 

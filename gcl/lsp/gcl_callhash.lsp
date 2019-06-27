@@ -25,7 +25,7 @@
 				 function-designator
 				 ratio short-float long-float float real number pathname hash-table function)))
 
-(defun ex-type (tp) (or (cdr (assoc tp +et+)) tp))
+(defun ex-type (tp) (or (cdr (assoc tp +et+ :test 'equal)) tp))
 (defun ex-sig (sig) (list (mapcar 'ex-type (car sig)) (ex-type (cadr sig))))
 (defun unex-type (tp) (or (car (rassoc tp +et+)) tp))
 (defun unex-sig (sig) (list (mapcar 'unex-type (car sig)) (unex-type (cadr sig))))
