@@ -136,8 +136,8 @@
 
 (eval-when
  (compile eval)
- (defconstant +s+ `(list sequence function symbol boolean 
-			 proper-cons
+ (defconstant +s+ `(proper-list proper-sequence list sequence function symbol boolean
+			 proper-cons improper-cons
 			 fixnum integer rational float real number;complex
 			 character
 			 hash-table pathname
