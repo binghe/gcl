@@ -669,36 +669,9 @@
 	      (wt-nl "") (wt-down (var-loc var))
 	      (wt "=" loc ";"))
             (t
-	     (cond ((eq (var-kind var) #tinteger)
-		    (let ((first (and (consp loc) (car loc)))
-			  (n (var-loc var)))
-		      (case first
-			(inline-fixnum
-			 (wt-nl "ISETQ_FIX(V"n",V"n"alloc,")
-			 (wt-inline-loc (caddr loc) (cadddr loc)))
-			(fixnum-value (wt-nl "ISETQ_FIX(V"n",V"n"alloc,"(caddr loc)))
-			(var
-			 (cond 
-			  ((eq (var-kind (cadr loc)) #tinteger) 
-			   (wt "SETQ_II(V"n",V"n"alloc,V" (var-loc (cadr loc)) "," (bignum-expansion-storage)))
-			  ((eq (var-kind (cadr loc)) #tfixnum)  
-			   (wt "ISETQ_FIX(V"n",V"n"alloc,V" (var-loc (cadr loc))))
-			  ((wt "SETQ_IO(V"n",V"n"alloc,"loc "," (bignum-expansion-storage)))))
-			(vs (wt "SETQ_IO(V"n",V"n"alloc,"loc ","
-				(bignum-expansion-storage)))
-			(otherwise
-			 (let ((*inline-blocks* 0) (*restore-avma* *restore-avma*))
-			   (save-avma '(nil integer))
-			   (wt-nl "SETQ_II(V"n",V" n"alloc,")
-			   (wt-integer-loc loc)
-			   (wt "," (bignum-expansion-storage) ");")
-			   (close-inline-blocks))
-			 (return-from set-var nil)))
-		      (wt ");")))
-		   (t 
-		    (wt-nl "V" (var-loc var) "= ")
-		    (funcall (or (cdr (assoc (var-kind var) +wt-loc-alist+)) (baboon)) loc)
-		    (wt ";")))))))
+	     (wt-nl "V" (var-loc var) "= ")
+	     (funcall (or (cdr (assoc (var-kind var) +wt-loc-alist+)) (baboon)) loc)
+	     (wt ";")))))
 
 (defun set-cvar (loc cvar)
   (wt-nl "V" cvar "= ")
@@ -891,8 +864,6 @@
 (defun wt-var-decl (var)
   (cond ((var-p var)
 	 (let ((n (var-loc var)))
-	   (when (eq (var-kind var) #tinteger) (wt "IDECL("))
 	   (wt *volatile* (register var) (rep-type (var-kind var)) "V" n )
-	   (when (eq (var-kind var) #tinteger) (wt ",V"n"space,V"n"alloc)"))
 	   (wt ";")))
         (t (wfs-error))))
