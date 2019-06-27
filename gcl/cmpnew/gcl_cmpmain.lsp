@@ -193,7 +193,7 @@
 			   (*compile-print* print)
 			   (*compile-verbose* verbose)
                            (*package* *package*)
-			   (*DEFAULT-PATHNAME-DEFAULTS* #"")
+			   (*DEFAULT-PATHNAME-DEFAULTS* #p"")
 			   (*data* (list (make-array 50 :fill-pointer 0 :adjustable t) nil nil nil))
 			   (*fasd-data* *fasd-data*)
                            (*error-count* 0)
@@ -440,7 +440,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 			  (si::set-function-environment ,f ,o)
 			  ,v)) form) na))))))
 
-(defun compile (name &optional def &aux na tem gaz (*default-pathname-defaults* #"."))
+(defun compile (name &optional def &aux na tem gaz (*default-pathname-defaults* #p"."))
   
   (when (eq name 'cmp-anon)
 ;    (remhash name si::*call-hash-table*)
