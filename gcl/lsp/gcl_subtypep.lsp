@@ -188,46 +188,74 @@
 
 ;;; COMPLEX
 
+(defun cmp-fk (x) (if (eq (car x) 'or) (caadr x) (car x)))
 
-(defun cmp-ld (type &aux (rtp (cadr type)) (o (eq (car rtp) 'or)))
-  `(,(cadr (assoc (if o (caadr rtp) (car rtp)) +ctps+))
-     ,(let ((x (mapcar (lambda (x) (range-cons (cdr x))) (if o (cdr rtp) (list rtp)))))
-	(or (when (listp x) (eq (car x) t)) (cons x x)))))
+(defun cmp-k (x y &aux (kx (cmp-fk x))(ky (cmp-fk y)) )
+  (cadr (assoc (if (eq kx ky) kx (list kx ky)) +ctps+ :test 'equal)))
 
-(defun cmp-cons (a d) (when (and a d) (list (cons a d))))
+(defun cmp-rng (x)
+  (mapcar (lambda (x) (range-cons (cdr x))) (if (eq (car x) 'or) (cdr x) (list x))))
 
-(defun cmpi~ (x);complex integer
-  (let ((a (kop-not 'integer (car x)))(d (kop-not 'integer (cdr x))))
-    (nconc (cmp-cons (car x) d) (cmp-cons a (cdr x)) (cmp-cons a d))))
+(defun cmp-rng2 (x y &aux (rx (cmp-rng x))(ry (cmp-rng y)))
+  (or (and (eq (car rx) t) (eq (car ry) t))
+      (cons rx ry)))
 
-(defun cmpi^ (x y);complex integer
-  (car (cmp-cons (kop-and 'integer (car x) (car y))
-		 (kop-and 'integer (cdr x) (cdr y)))))
+(defun cmp-ld (type &aux (rtp (cadr type))(itp (or (caddr type) rtp)))
+  `(,(cmp-k rtp itp) ,(cmp-rng2 rtp itp)))
 
-(defun rati (x)
-  (if (listp x) (car x) (list x)))
+(defun cmp-irange (x &aux (r (realpart x))(i (imagpart x)))
+  `(((,r . ,r)) . ((,i . ,i))))
 
-(defun rat~ (x)
-  (cond ((eq (car x) '*) (list (cons (rati (cdr x)) '*)))
-	((eq (cdr x) '*) (list (cons '* (rati (car x)))))
-	((nconc (rat~ (cons (car x) '*)) (rat~ (cons '* (cdr x)))))))
+(defun rng-ip (x)
+  (unless (cdr x)
+    (when (consp (car x))
+      (when (atom (caar x))
+	(eql (caar x) (cdar x))))))
+
+(defun cmp-cons (a d)
+  (when (and a d)
+    (if (and (rng-ip a) (rng-ip d))
+	(list (complex (caar a) (caar d)))
+      (list (cons a d)))))
+
+(defun cmpg~ (kr ki x)
+  (cond ((consp x)
+	 (let ((a (kop-not kr (car x)))
+	       (d (kop-not ki (cdr x))))
+	   (nconc (cmp-cons a (cdr x)) (cmp-cons (car x) d) (cmp-cons a d))))
+	((cmpg~ kr ki (cmp-irange x)))))
+
+(defun cmpi~ (x)  (cmpg~ 'integer 'integer x))
+(defun cmpir~ (x) (cmpg~ 'integer 'ratio x))
+(defun cmpri~ (x) (cmpg~ 'ratio   'integer x))
+(defun cmp~ (x)   (cmpg~ 'ratio   'ratio x))
+
+(defun cmpg^ (kr ki x y)
+  (cond ((and (consp x) (consp y))
+	 (car (cmp-cons (kop-and kr (car x) (car y)) (kop-and ki (cdr x) (cdr y)))))
+	((consp x) (when (cmpg^ kr ki x (cmp-irange y)) y))
+	((consp y) (cmpg^ kr ki y x))
+	((rd^ x y))))
 
 
-(defun cmpr~ (x);complex ratio
-  (let ((a (kop-not 'rational (car x)))(d (kop-not 'rational (cdr x))))
-    (nconc (cmp-cons (car x) d) (cmp-cons a (cdr x)) (cmp-cons a d))))
+(defun cmpi^ (x y)  (cmpg^ 'integer 'integer x y))
+(defun cmpir^ (x y) (cmpg^ 'integer 'ratio x y))
+(defun cmpri^ (x y) (cmpg^ 'ratio   'integer x y))
+(defun cmp^ (x y)   (cmpg^ 'ratio   'ratio x y))
 
-(defun cmp^ (x y)
-  (car (cmp-cons (kop-and 'ratio (car x) (car y))
-		 (kop-and 'ratio (cdr x) (cdr y)))))
 
-(defun cmp~ (x)
-  (let ((a (kop-not 'ratio (car x)))(d (kop-not 'ratio (cdr x))))
-    (nconc (cmp-cons (car x) d) (cmp-cons a (cdr x)) (cmp-cons a d))))
+(defun cmp-recon (x &optional (c (car (rassoc (pop x) +ctps+ :key 'car)) cp))
 
-(defun cmp-recon (x &aux (c (car (rassoc (pop x) +ctps+ :key 'car))))
-  (cond ((eq (car x) t) `(complex (,c * *)))
-	((?or (mapcar (lambda (x) `(complex ,(rng-recon (cons c (car x))))) x)))))
+  (cond ((not cp) (?or (mapcar (lambda (x) (cmp-recon x c)) x)))
+	((eq x t) (if (consp c) `(complex* (,(pop c) * *) (,(car c) * *))
+		    `(complex (,c * *))))
+	((consp x)
+	 (let* ((rx (rng-recon (cons (if (consp c) (pop c) c) (car x))))
+		(ry (rng-recon (cons (if (consp c) (car c) c) (cdr x)))))
+	   (if (equal rx ry)
+	       `(complex ,rx)
+	     `(complex* ,rx ,ry))))
+	(`(member ,x))))
 
 
 ;;; CONS
@@ -364,7 +392,8 @@
 (defun kktype-of (x)
   (cond ((atom x) x)
 	((eq (car x) 'array) (cadr (assoc (cadr x) +atps+)))
-	((eq (car x) 'complex) (cadr (assoc (caadr x) +ctps+)))
+	((member (car x) '(complex complex*))
+	 (cmp-k (cadr x) (or (caddr x) (cadr x))))
 	((car x))))
 
 (defun ktype-of (x)
@@ -505,11 +534,17 @@
 			standard-generic-compiled-function
 			t nil))
 
+(defconstant +dtypes+ '(or and not member satisfies
+			integer ratio short-float long-float
+			complex* array proper-cons improper-cons))
+
 (defun normalize-type (type &aux e
 			      (type (if (listp type) type (list type)));FIXME
 			      (ctp (car type)))
   (cond ((eq ctp 'structure-object) `(structure));FIXME
 	((member ctp +ntypes+) type)
+	((member ctp +dtypes+)
+	 (funcall (macro-function (get ctp 'deftype-definition)) type nil));FIXME
 	((eq type (setq e (just-expand-deftype type))) type)
 	((normalize-type e))))
 
@@ -525,7 +560,7 @@
       (case (car type)
 	 ((t nil) (car type))
 	 (,+range-types+ (rng-ld type))
-	 (complex (cmp-ld type))
+	 (complex* (cmp-ld type))
 	 ((cons proper-cons improper-cons) (cns-ld type))
 	 ((std-instance
 	   standard-generic-interpreted-function

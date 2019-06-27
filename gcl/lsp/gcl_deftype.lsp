@@ -265,15 +265,48 @@
 (deftype symbol nil
   `(or boolean keyword gsym))
 
+(defconstant +ctps+ (mapcar (lambda (x)
+			      (list x
+				    (intern
+				     (string-concatenate
+				      "COMPLEX-"
+				      (if (consp x)
+					  (string-concatenate (string (pop x)) "-" (string (car x)))
+				      (string x))))))
+			    (cons '(integer ratio) (cons '(ratio integer) +complex-types+))));FIXME
+
+#.`(progn
+     ,@(mapcar (lambda (x &aux (s (cadr x))(x (car x)))
+		 `(deftype ,s (&optional l h)
+		    ,(if (consp x)
+			 ``(complex* (,',(pop x) ,l ,h) (,',(car x) ,l ,h))
+		       ``(complex (,',x ,l ,h)))))
+	       +ctps+))
+
 (defun ?or (x) (if (cdr x) (cons 'or x) (car x)))
 
-(deftype complex (&whole w &optional rp &aux (r (nc (if (eq rp '*) 'real rp))));FIXME upgraded
-  (let* ((q (mapcar (lambda (x) (cons x (lremove-if-not (lambda (y) (eq x (car y))) r))) +range-types+))
-	 (s (assoc 'ratio q)))
-    (when s (nconc (cdr s) (cdr (assoc 'integer q))))
-    (let ((x (?or (mapcan (lambda (x) (when (cdr x) `((complex ,(?or (cdr x)))))) q))))
-    (if (or (equal w x) (member w x :test 'equal));FIXME
-	w x))))
+(deftype complex (&optional rp) `(complex* ,rp))
+
+(defun make-complex* (r i)
+  (when (and (cdr r) (cdr i)) `((complex* ,(?or (cdr r)) ,(?or (cdr i))))))
+
+(defun group-real-types (y)
+  (mapcar (lambda (x)
+	    (cons x (lremove-if-not (lambda (y) (eq x (car y))) y)))
+	  +range-types+))
+
+(deftype complex* (&whole w &optional rp (ip rp)
+			  &aux (r (nc (if (eq rp '*) 'real rp)))
+			  (i (nc (if (eq ip '*) 'real ip))));FIXME upgraded
+  (let* ((qr (group-real-types r))
+	 (qi (group-real-types i))
+	 (x (?or (nconc
+		  (make-complex* (assoc 'integer qr) (assoc 'ratio qi))
+		  (make-complex* (assoc 'ratio qr) (assoc 'integer qi))
+		  (mapcan (lambda (x) (make-complex* (assoc x qr) (assoc x qi)))  +range-types+)))))
+    x))
+    ;; (if (or (equal w x) (member w x :test 'equal));FIXME
+    ;; 	w x)))
 
 (deftype cons (&optional car cdr)
   `(or (proper-cons ,car ,cdr) (improper-cons ,car ,cdr)))

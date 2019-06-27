@@ -80,12 +80,28 @@
 
 #.`(defun listp (o) ,(cfn 'list t))
 
-#.`(defun mtc (o tp &aux (otp (car tp))(tp otp)(lp (listp tp))(ctp (if lp (car tp) tp))(tp (when lp (cdr tp))))
+(eval-when
+ (compile load eval)
+ (defun cmp-real-sym (x y)
+   (if (eq x y) x
+     (ecase x
+	    (integer (ecase y (ratio 'integer-ratio)))
+	    (ratio (ecase y (integer 'ratio-integer)))))))
+
+#.`(defun mtc (o tp &aux (rtp (car tp))(itp (or (cadr tp) rtp))
+		 (lp (consp rtp))(rctp (if lp (car rtp) rtp))(rtp (when lp (cdr rtp)))
+		 (lp (consp itp))(ictp (if lp (car itp) itp))(itp (when lp (cdr itp)))
+		 (ctp (cmp-real-sym rctp ictp)))
      (case (when ctp (upgraded-complex-part-type ctp))
-	   ,@(mapcar (lambda (x &aux (n (pop x)))
-			 `(,n ,(cfn (car x) `(and (ibb (realpart o) tp) (ibb (imagpart o) tp))))) +ctps+)
-	   (otherwise ,(cfn 'complex '(if tp (and (typep (realpart o) otp) (typep (imagpart o) otp) t) t)))))
-					;FIXME the mutual recursion on typep prevents return type determination
+	   ,@(mapcar (lambda (x &aux (n (pop x))(n (if (consp n) (apply 'cmp-real-sym n) n)))
+		       `(,n ,(cfn (car x) `(and (ibb (realpart o) rtp) (ibb (imagpart o) itp)))))
+		     +ctps+)
+	   (otherwise ,(cfn
+			'complex
+			'(if lp
+			     (and (typep (realpart o) rtp) (typep (imagpart o) itp) t)
+			   t)))))
+;FIXME the mutual recursion on typep prevents return type determination
 (setf (get 'mtc 'cmp-inline) t)
 		       
 
@@ -153,7 +169,7 @@
 				     `(,c ,(cfn c (mksubb 'o 'tp c)))) (append +s+ +rr+))
 			 (member (when (if (cdr tp) (member o tp) (when tp (eql o (car tp)))) t));FIXME
 			 (eql (eql o (car tp)))
-			 (complex (mtc o tp))
+			 ((complex complex*) (mtc o tp))
 			 (vector (mtv o tp))
 			 (array (mta o tp))
 			 (or (when tp (or (typep o (car tp)) (tpi o ctp (cdr tp)))))
@@ -165,17 +181,19 @@
 	     
 	     (tpi o (if lp (car otp) otp) (when lp (cdr otp)))))
 
-
 #.`(defun type-of (x)
      (typecase
       x
       (null 'null)(true 'true)
       ,@(mapcar (lambda (y) `(,y `(,',y ,x ,x))) +range-types+)
       ,@(mapcar (lambda (y &aux (b (pop y))) 
-		 `(,(car y) (let ((r (realpart x))(i (imagpart x))) `(complex (,',b ,(min r i) ,(max r i)))))) +ctps+)
+		  `(,(car y) `(complex* ,(type-of (realpart x)) ,(type-of (imagpart x)))))
+		+ctps+)
       ,@(mapcar (lambda (y &aux (b (car y))) `((array ,b) `(array ,',b ,(array-dimensions x)))) +vtps+)
       (std-instance (let* ((c (si-class-of x))) (or (valid-class-name c) c)))
       (structure (sdata-name (c-structure-def x)))
-      ,@(mapcar (lambda (x) `(,x ',x)) (set-difference +kt+ 
-						       (mapcar 'cmp-norm-tp '(boolean number array structure std-instance))
-						       :test 'type-and))))
+      ,@(mapcar (lambda (x &aux (x (cmp-unnorm-tp x)))
+		  `(,x ',x))
+		(set-difference +kt+
+				(mapcar 'cmp-norm-tp '(boolean number array structure std-instance))
+				:test 'type-and))))
