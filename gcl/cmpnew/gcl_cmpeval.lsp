@@ -2373,11 +2373,12 @@
 (defmacro bll (l a body)
   `(blla ,l ,a nil ,body))
 
-(defun c1funcallable-symbol-function (args)
+(defun c1funcallable-symbol-function (args &aux a)
   (let* ((info (make-info :type #tfunction))
 	 (nargs (c1args args info)))
-    (cond ((atomic-tp (info-type (cadar nargs)))
-	   (c1expr `(function ,(coerce-to-funid (cadr (info-type (cadar nargs)))))))
+    (cond ((setq a (atomic-tp (info-type (cadar nargs))))
+	   (c1expr `(function ,(let ((x (coerce-to-funid (car a))))
+				 (if (functionp x) (fn-get x 'id) x)))))
 	  ((list 'call-global info 'funcallable-symbol-function nargs)))))
 (si::putprop 'funcallable-symbol-function 'c1funcallable-symbol-function 'c1)
 
