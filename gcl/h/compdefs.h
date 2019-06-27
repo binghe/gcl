@@ -79,5 +79,6 @@ FEerror(a,b,c)
 TRUE
 MULTIPLE_VALUES_LIMIT
 is_imm_fixnum(x)
+is_imm_fix(x)
 aref1
 OBJ_ALIGNED_STACK_ALLOC(x)
