@@ -216,7 +216,7 @@
   (check-type start seqind)
   (check-type end (or null seqind))
 
-  (let ((s s)(start start)(end (or end array-dimension-limit)))
+  (let ((s s)(start start)(end (or end (1- array-dimension-limit))));FIXME
     (declare (sequence s) (seqind start end))
     (cond ((listp s)
 	   (do ((i start (1+ i))(r)(rp)(p (nthcdr start s) (cdr p))) ((or (>= i end) (endp p)) r)
@@ -599,22 +599,18 @@
 (defmacro f- (x y) `(the fixnum (- (the fixnum ,x) (the fixnum ,y))))
 
 (defmacro with-start-end (start end seq &body body)
-  `(let ((,start (the-start ,start)))
+  `(let ((,seq ,seq)(,start (the-start ,start)))
      (check-type ,seq sequence)
-     (let ((,seq ,seq));;FIXME
-       (declare (sequence ,seq))
-       (let ((,end (the-end ,end (length ,seq))))
-	 (or (<= ,start ,end) (bad-seq-limit  ,start ,end))
-	 ,@body))))
+     (let ((,end (the-end ,end (length ,seq))))
+       (or (<= ,start ,end) (bad-seq-limit  ,start ,end))
+       ,@body)))
 
 (defmacro with-start-end-length (start end length seq &body body)
-  `(let ((,start (the-start ,start)))
+  `(let ((,seq ,seq)(,start (the-start ,start)))
      (check-type ,seq sequence)
-     (let ((,seq ,seq));;FIXME
-       (declare (sequence ,seq))
-       (let* ((,length (length ,seq))(,end (the-end ,end ,length)))
-	 (or (<= ,start ,end) (bad-seq-limit  ,start ,end))
-	 ,@body)))))
+     (let* ((,length (length ,seq))(,end (the-end ,end ,length)))
+       (or (<= ,start ,end) (bad-seq-limit  ,start ,end))
+       ,@body))))
 
 (defun the-end (x y)
   (declare (seqind y))
