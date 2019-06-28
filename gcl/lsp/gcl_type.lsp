@@ -174,26 +174,6 @@
       p1)))
 
 
-
-(defun bit-not (bit-array &optional result-bit-array)
-  (bit-array-op boole-c1 bit-array bit-array result-bit-array))
-
-(defun bit-and (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-and bit-array1 bit-array2 result-bit-array))
-
-(defun bit-ior (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-ior bit-array1 bit-array2 result-bit-array))
-
-(defun bit-xor (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-xor bit-array1 bit-array2 result-bit-array))
-
-(defun bit-andc2 (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-andc2 bit-array1 bit-array2 result-bit-array))
-
-
-
-
-
 #.`(defun atomic-type (tp)
      (when (consp tp)
        (case (car tp)
@@ -457,8 +437,8 @@
 
 (defun cmp-tp-not (tp)
   (if (atom tp)
-      (bit-not tp);allocates, checks moot
-    (list (bit-not (cadr tp)) (bit-not (car tp)) (ntp-not (caddr tp)))))
+      (bit-not tp (make-btp))
+    (list (bit-not (cadr tp) (make-btp)) (bit-not (car tp) (make-btp)) (ntp-not (caddr tp)))))
 
 (defun tp-not (tp)
   (unless (eq tp t)

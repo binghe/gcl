@@ -312,50 +312,6 @@
   (apply 'aref bit-array indices))
 
 
-(defun bit-and (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-and bit-array1 bit-array2 result-bit-array))
-
-
-(defun bit-ior (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-ior bit-array1 bit-array2 result-bit-array))
-
-
-(defun bit-xor (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-xor bit-array1 bit-array2 result-bit-array))
-
-
-(defun bit-eqv (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-eqv bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-nand (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-nand bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-nor (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-nor bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-andc1 (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-andc1 bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-andc2 (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-andc2 bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-orc1 (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-orc1 bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-orc2 (bit-array1 bit-array2 &optional result-bit-array)
-  (bit-array-op boole-orc2 bit-array1 bit-array2 result-bit-array))
-
-    
-(defun bit-not (bit-array &optional result-bit-array)
-  (bit-array-op boole-c1 bit-array bit-array result-bit-array))
-
-
 (defun vector-push (new-element vector)
   (declare (optimize (safety 2)))
   (check-type vector fpvec)
