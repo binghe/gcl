@@ -216,13 +216,14 @@
 	    (return nil)))))))
 
 (defun atomic-tp (tp)
-  (when tp
-    (unless (eq tp t)
-      (let ((i (one-bit-btp (xtp tp))))
-	(when i
-	  (if (atom tp)
-	      (cadr (assoc i *atomic-btp-alist*))
-	    (atomic-ntp (caddr tp))))))))
+  (unless (or (eq tp '*) (when (listp tp) (member (car tp) '(returns-exactly values))));FIXME
+    (when tp
+      (unless (eq tp t)
+	(let ((i (one-bit-btp (xtp tp))))
+	  (when i
+	    (if (atom tp)
+		(cadr (assoc i *atomic-btp-alist*))
+	      (atomic-ntp (caddr tp)))))))))
 
 #.`(defun object-index (x)
      (etypecase x
