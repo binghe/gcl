@@ -57,10 +57,9 @@
   (let* ((p (find-package "COMPILER")) (s (and p (find-symbol "*NORM-TP-HASH*" p))))
     (when (and s (boundp s)) (remhash sym (symbol-value s)))))
 
-(defmacro check-type (place typespec &optional string)
-  (declare (optimize (safety 2)))
-  `(progn (,(if (symbolp place) 'setq 'setf) ,place 
-	   (the ,typespec (if (typep ,place ',typespec) ,place (check-type-symbol ',place ,place ',typespec ',string)))) nil))
+#+pre-gcl(defun typep (&rest r) t)
+#+pre-gcl(defmacro check-type (&rest r) nil)
+#+pre-gcl(defmacro assert (&rest r) nil)
 
 (defun ratiop (x) (and (rationalp x) (not (integerp x))))
 

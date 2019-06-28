@@ -142,8 +142,6 @@
 (defvar *nil-tp* (make-btp))
 (defvar *t-tp* (make-btp 1))
 
-(defun c-array-self1 (x) (*fixnum (address x) 3 nil nil))
-
 (unless (fboundp 'logandc2) (defun logandc2 (x y) (boole boole-andc2 x y)))
 
 (defconstant +bit-words+ (ceiling +btp-length+ fixnum-length))
@@ -151,7 +149,7 @@
 
 (defun copy-btp (tp &aux (n (make-btp)))
   (dotimes (i +bit-words+ n)
-    (*fixnum (c-array-self1 n) i t (*fixnum (c-array-self1 tp) i nil nil))))
+    (*fixnum (c-array-self n) i t (*fixnum (c-array-self tp) i nil nil))))
 
 (defun copy-tp (x m tp d)
   (cond ((unless (eql d 1)  (equal x *nil-tp*)) nil)
@@ -228,7 +226,7 @@
 
 (defun one-bit-btp (x &aux n)
   (dotimes (i +bit-words+ n)
-    (let* ((y (*fixnum (c-array-self1 x) i nil nil)))
+    (let* ((y (*fixnum (c-array-self x) i nil nil)))
       (unless (zerop y)
 	(let* ((l (integer-length y))(l (if (minusp y) (1+ l) l)))
 	  (if (unless n (eql y (<< 1 (1- l))))
@@ -309,7 +307,7 @@
 
 (defun btp-count (x &aux (j 0))
   (dotimes (i +bit-words+ j)
-    (let* ((y (*fixnum (c-array-self1 x) i nil nil))
+    (let* ((y (*fixnum (c-array-self x) i nil nil))
 	   (q (logcount y)))
       (incf j (if (minusp y) (- fixnum-length q) q)))))
 
