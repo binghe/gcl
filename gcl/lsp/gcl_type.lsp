@@ -2,7 +2,7 @@
 
 (export '(cmp-norm-tp
 	  cmp-unnorm-tp
-	  type-and type-or1 type>= type<= tp-not
+	  type-and type-or1 type>= type<= tp-not tp-and tp-or
 	  atomic-tp tp-bnds object-tp
 	  cmpt t-to-nil returs-exactly funcallable-symbol-function
 	  infer-tp cnum creal long
