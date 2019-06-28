@@ -186,7 +186,7 @@
   (check-type a array)
   (row-major-aref a (apply 'array-row-major-index a q)))
 
-(defun si::aset (v a &rest q)
+#-pre-gcl(defun si::aset (v a &rest q)
   (declare (optimize (safety 1)) (:dynamic-extent q))
   (check-type a array)
   (row-major-aset v a (apply 'array-row-major-index a q)))
@@ -306,7 +306,7 @@
   (check-type bit-array bit-array)
   (apply 'aref bit-array indices))
 
-(defun sbit (bit-array &rest indices)
+#-pre-gcl(defun sbit (bit-array &rest indices)
   (declare (:dynamic-extent indices)(optimize (safety 1)))
   (check-type bit-array simple-bit-array)
   (apply 'aref bit-array indices))
