@@ -347,8 +347,8 @@
 	   (v (list a b c d))
 	   (v (if (and z 
 		       (type-and t2 #t(real 0 0))
-		       (not (type>= #t(real 0) t2))
-		       (not (type>= #t(real * 0) t2)))
+		       (not (type>= #tnon-negative-real t2))
+		       (not (type>= #tnon-positive-real t2)))
 		  (cons +inf (cons -inf v)) v)))
       (unless (member-if (lambda (x) (complexp (bound x))) v)
 	(cmp-norm-tp (mk-tp e (mmin v) (mmax v)))))))
@@ -373,8 +373,8 @@
 	   (v (list a b))
 	   (v (if (and z
 		       (type-and t1 #t(real 0 0))
-		       (not (type>= #t(real 0) t1))
-		       (not (type>= #t(real * 0) t1)))
+		       (not (type>= #tnon-negative-real t1))
+		       (not (type>= #tnon-positive-real t1)))
 		  (cons +inf (cons -inf v)) v)))
       (unless (member-if (lambda (x) (complexp (bound x))) v)
 	(cmp-norm-tp (mk-tp e (mmin v) (mmax v)))))))
@@ -434,27 +434,23 @@
 	(t2p (when (and (type>= #tfixnum t2) (type>= #tfixnum t1)) 
 	       (let ((t1 (bit-type t1))(t2 (bit-type t2)))
 		 (type-or1
-		  (super-range f (type-and #t(integer 0) t1) (type-and #t(integer 0) t2))
+		  (super-range f
+			       (type-and #tnon-negative-integer t1)
+			       (type-and #tnon-negative-integer t2))
 		  (type-or1
-		   (super-range f (type-and #t(integer * (0)) t1) (type-and #t(integer 0) t2))
+		   (super-range f
+				(type-and #tnegative-integer t1)
+				(type-and #tnon-negative-integer t2))
 		   (type-or1
-		    (super-range f (type-and #t(integer 0) t1) (type-and #t(integer * (0)) t2))
-		    (super-range f (type-and #t(integer * (0)) t1) (type-and #t(integer * (0)) t2))))))))
+		    (super-range f
+				 (type-and #tnon-negative-integer t1)
+				 (type-and #tnegative-integer t2))
+		    (super-range f
+				 (type-and #tnegative-integer t1)
+				 (type-and #tnegative-integer t2))))))))
 	(t1p (when (type>= #tfixnum t1) (super-range f t1)))
 	((not t1p) (super-range f))))
 
-;; (defun logand-propagator (f &optional (t1 nil t1p) (t2 nil t2p))
-;;   (cond (t2p (when (and (type>= #tfixnum t2) (type>= #tfixnum t1)) 
-;; 	       (let ((t1 (bit-type t1))(t2 (bit-type t2)))
-;; 		 (type-or1
-;; 		  (super-range f (type-and #t(integer 0) t1) (type-and #t(integer 0) t2))
-;; 		  (type-or1
-;; 		   (super-range f (type-and #t(integer * (0)) t1) (type-and #t(integer 0) t2))
-;; 		   (type-or1
-;; 		    (super-range f (type-and #t(integer 0) t1) (type-and #t(integer * (0)) t2))
-;; 		    (super-range f (type-and #t(integer * (0)) t1) (type-and #t(integer * (0)) t2))))))))
-;; 	(t1p (when (type>= #tfixnum t1) (super-range f t1)))
-;; 	((not t1p) (super-range f))))
 (dolist (l '(logand logior logxor logeqv logandc1 logandc2 logorc1 logorc2 lognand lognor lognot))
   (si::putprop l 'logand-propagator 'type-propagator))
 
@@ -506,8 +502,8 @@
 (defun log-propagator (f t1 &optional (t2 #t(short-float #.(float +e+ 1.0s0) #.(float +e+ 1.0s0))))
   (declare (ignore f))
   (type-or1 (super-range 'log-wrap (type-and t1 #t(not real)) t2)
-	    (type-or1 (super-range 'log-wrap (type-and t1 #t(real 0)) t2)
-		      (super-range 'log-wrap (type-and t1 #t(real * (0))) t2))))
+	    (type-or1 (super-range 'log-wrap (type-and t1 #tnon-negative-real) t2)
+		      (super-range 'log-wrap (type-and t1 #tnegative-real) t2))))
 (si::putprop 'log 'log-propagator 'type-propagator)
 
 (defun last-cons-type (tp &optional l)
@@ -779,8 +775,12 @@
 (defun rem-propagator (f t1 t2)
   (let ((t2 (cmp-norm-tp (mod-propagator f t1 t2))))
     (when t2
-      (cond ((type>= #t(real 0) t1)   (type-or1 (type-and #t(real 0)   t2) (super-range '- (type-and #t(real * 0) t2))))
-	    ((type>= #t(real * 0) t1) (type-or1 (type-and #t(real * 0) t2) (super-range '- (type-and #t(real 0)   t2))))
+      (cond ((type>= #tnon-negative-real t1)
+	     (type-or1 (type-and #tnon-negative-real t2)
+		       (super-range '- (type-and #tnon-positive-real t2))))
+	    ((type>= #tnon-positive-real t1)
+	     (type-or1 (type-and #tnon-positive-real t2)
+		       (super-range '- (type-and #tnon-negative-real t2))))
 	    ((type-or1 t2 (super-range '- t2)))))))
 (si::putprop 'rem 'rem-propagator 'type-propagator)
 
@@ -792,8 +792,8 @@
 
 (defun floor-propagator (f t1 &optional (t2 (type-and (rcnum-types t1) #t(real 1 1))))
   (let ((t1 (type-and t1 #treal))(t2 (type-and t2 #treal)));FIXME
-    (let ((sr (type-or1 (super-range f t1 (type-and t2 #t(real (0))));FIXME real-bnds in s-r
-			(super-range f t1 (type-and t2 #t(real * (0)))))))
+    (let ((sr (type-or1 (super-range f t1 (type-and t2 #tpositive-real));FIXME real-bnds in s-r
+			(super-range f t1 (type-and t2 #tnegative-real)))))
       (when sr
 	`(values ,sr
 		 ,(cond ((member f (sfl floor ffloor))       (mod-propagator f t1 t2))
@@ -846,9 +846,9 @@
 (defun expt-propagator (f t1 t2)
   (declare (ignore f))
   (cond ((or (type-and #tcomplex t1) (type-and #tcomplex t2)) nil)
-	((type-and #t(or ratio (real * (0))) t1) nil)
-	((and (type-and #tinteger t1) (type-and #t(real * (0)) t2)) nil)
-	((type-or1 (super-range 'pexpt (type-and #t(real (0)) t1) t2) 
+	((type-and #t(or ratio negative-real) t1) nil)
+	((and (type-and #tinteger t1) (type-and #tnegative-real t2)) nil)
+	((type-or1 (super-range 'pexpt (type-and #tpositive-real t1) t2)
 		   (super-range 'pexpt (type-and #t(real 0 0) t1) t2)))))
 (si::putprop 'expt 'expt-propagator 'type-propagator)
 
@@ -858,15 +858,17 @@
 ;; (si::putprop 'exp 'exp-propagator 'type-propagator)
 
 (defun integer-length-propagator (f t1)
-  (when (type>= #tfixnum t1) (type-or1 (super-range f (type-and #t(real 0) t1)) (super-range f (type-and #t(real * 0) t1)))))
+  (when (type>= #tfixnum t1)
+    (type-or1 (super-range f (type-and #tnon-negative-real t1))
+	      (super-range f (type-and #tnon-positive-real t1)))))
 (si::putprop 'integer-length 'integer-length-propagator 'type-propagator)
 ;(defconstant +clzl0+ (let ((x (1+ (si::clzl 1)))) (cmp-norm-tp `(integer ,x ,x))))
 ;(defconstant +clzl0+ (let ((x (1- si::fixnum-length))) (cmp-norm-tp `(integer ,x ,x))))
 (defun clzl-propagator (f t1)
   (when (type>= #tfixnum t1)
     (type-or1 (when (type-and #t(real 0 0) t1) +clzl0+)
-	      (type-or1 (super-range f (type-and #t(real (0)) t1))
-			(super-range f (type-and #t(real * (0)) t1))))))
+	      (type-or1 (super-range f (type-and #tpositive-real t1))
+			(super-range f (type-and #tnegative-real t1))))))
 (si::putprop 'si::clzl 'clzl-propagator 'type-propagator)
 (si::putprop 'si::clzl t 'cmp-inline);FIXME no declaim
 
@@ -880,7 +882,7 @@
 
 (defun abs-propagator (f t1)
   (when t1
-    (type-and #t(real 0) 
+    (type-and #tnon-negative-real
 	      (type-or1
 	       (abs-propagator 
 		f
@@ -893,7 +895,8 @@
 
 (defun cosh-propagator (f t1)
   (type-or1 (super-range f (type-and t1 #t(not real)))
-	    (type-or1 (super-range f (type-and t1 #t(real 0))) (super-range f (type-and t1 #t(real * (0)))))))
+	    (type-or1 (super-range f (type-and t1 #tnon-negative-real))
+		      (super-range f (type-and t1 #tnegative-real)))))
 (si::putprop 'cosh 'cosh-propagator 'type-propagator)
 
 (defun shift-range-fmod (t1 m &optional (mod t)
@@ -930,15 +933,15 @@
 
 (defun sqrt-propagator (f t1)
   (type-or1 (super-range f (type-and t1 #tcomplex))
-	    (type-or1 (super-range f (type-and t1 #t(real 0)))
-		      (super-range 'sqrt (to-complex-tp (type-and t1 #t(real * (0))))))));FIXME
+	    (type-or1 (super-range f (type-and t1 #tnon-negative-real))
+		      (super-range 'sqrt (to-complex-tp (type-and t1 #tnegative-real))))));FIXME
 (si::putprop 'sqrt 'sqrt-propagator 'type-propagator)
 
 (defun cos-propagator (f t1)
   (type-or1 (super-range f (type-and t1 #tcomplex))
 	    (let ((z (shift-range-fmod (type-and t1 #treal) +pi+)))
-	      (type-or1 (super-range f (type-and z #t(real 0)))
-			(super-range f (type-and z #t(real * (0))))))))
+	      (type-or1 (super-range f (type-and z #tnon-negative-real))
+			(super-range f (type-and z #tnegative-real))))))
 (si::putprop 'cos 'cos-propagator 'type-propagator)
 
 (defun sin-propagator (f t1)
@@ -951,9 +954,9 @@
   (type-or1 (super-range f (type-and t1 #tcomplex))
 	    (let ((z (shift-range-fmod (shift-range-fmod (type-and t1 #treal) +pid2+ nil) +pi+)))
 	      (type-or1 (super-range (lambda (x) (funcall f (if (floatp x) (+ x (float +pid2+ x)) (+ (float x +pid2+) +pid2+))))
-				     (type-and z #t(real 0)))
+				     (type-and z #tnon-negative-real))
 			(super-range (lambda (x) (funcall f (if (floatp x) (+ x (float +pid2+ x)) (+ (float x +pid2+) +pid2+))))
-				     (type-and z #t(real * (0))))))))
+				     (type-and z #tnegative-real))))))
 (si::putprop 'tan 'tan-propagator 'type-propagator)
 
 (defun asin-propagator (f t1)

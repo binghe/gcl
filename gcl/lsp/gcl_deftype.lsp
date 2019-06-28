@@ -1,5 +1,12 @@
 (in-package :si)
 
+(export '(zero one negative-integer non-negative-integer tractable-fixnum
+	       negative-short-float positive-short-float non-positive-short-float
+	       non-negative-short-float negative-long-float positive-long-float
+	       non-positive-long-float non-negative-long-float negative-float
+	       positive-float non-positive-float non-negative-float negative-real
+	       positive-real non-positive-real non-negative-real));FIXME
+
 (defun default-to-* (x)
   (let* ((z (member-if (lambda (x) (member x lambda-list-keywords)) x))
 	 (y (ldiff x z)))
@@ -245,6 +252,7 @@
 (deftype zero nil `(integer 0 0))
 (deftype one nil `(integer 1 1))
 (deftype non-negative-integer nil `(integer 0))
+(deftype negative-integer nil `(integer * (0)))
 (deftype tractable-fixnum nil `(integer ,(- most-positive-fixnum) ,most-positive-fixnum))
 (deftype negative-short-float nil `(short-float * (0.0)))
 (deftype positive-short-float nil `(short-float (0.0)))
