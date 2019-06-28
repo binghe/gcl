@@ -84,14 +84,15 @@
 
 (defun real-bnds (t1) (num-type-bounds t1))
 
-(defun two-tp-inf (fn t2 &aux (t2 (cons 'long-float (real-bnds (type-and #treal t2)))))
+(defun two-tp-inf (fn t2 &aux (t2 (real-bnds (type-and #treal t2))))
   (case fn
-	(= (cmp-norm-tp `(real ,(or (cadr t2) '*) ,(or (caddr t2) '*))))
-	(/= (if (atomic-tp t2) (type-and #tnumber (cmp-norm-tp `(not (real ,@(cdr t2))))) #treal))
-	(>  (cmp-norm-tp `(real ,(cond ((numberp (cadr t2)) (list (cadr t2))) ((cadr t2)) ('*)))))
-	(>= (cmp-norm-tp `(real ,(or (cadr t2) '*))))
-	(<  (cmp-norm-tp `(real * ,(cond ((numberp (caddr t2)) (list (caddr t2))) ((caddr t2)) ('*)))))
-	(<= (cmp-norm-tp `(real * ,(or (caddr t2) '*))))))
+	(= (cmp-norm-tp `(real ,(or (car t2) '*) ,(or (cadr t2) '*))))
+	(/= (if (eql (car t2) (cadr t2))
+		(type-and #tnumber (cmp-norm-tp `(not (real ,@t2)))) #treal))
+	(>  (cmp-norm-tp `(real ,(cond ((numberp (car t2)) (list (car t2))) ((car t2)) ('*)))))
+	(>= (cmp-norm-tp `(real ,(or (car t2) '*))))
+	(<  (cmp-norm-tp `(real * ,(cond ((numberp (cadr t2)) (list (cadr t2))) ((cadr t2)) ('*)))))
+	(<= (cmp-norm-tp `(real * ,(or (cadr t2) '*))))))
 
 (defmacro vl-name (x) `(var-name (car (third ,x))))
 ;(defmacro vl-type (x) `(var-type (car (third ,x))))  ; Won't work, ref might be across a function boundary
