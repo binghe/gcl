@@ -13,7 +13,9 @@
 (export 'si::(object double cnum system cmp-inline cmp-eval type-propagator c1no-side-effects defcfun clines defentry) :si)
 
 
-(init-system) 
+(setq *features* (cons :raw-image *features*))
+(init-system)
+(setq *features* (remove :raw-image *features*))
 (in-package :si)
 (gbc t)
 

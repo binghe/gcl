@@ -57,9 +57,12 @@
   (let* ((p (find-package "COMPILER")) (s (and p (find-symbol "*NORM-TP-HASH*" p))))
     (when (and s (boundp s)) (remhash sym (symbol-value s)))))
 
-#+pre-gcl(defun typep (&rest r) t)
-#+pre-gcl(defmacro check-type (&rest r) nil)
-#+pre-gcl(defmacro assert (&rest r) nil)
+#+(and pre-gcl raw-image)
+(defun typep (&rest r) t)
+#+(and pre-gcl raw-image)
+(defmacro check-type (&rest r) nil)
+#+(and pre-gcl raw-image)
+(defmacro assert (&rest r) nil)
 
 (defun ratiop (x) (and (rationalp x) (not (integerp x))))
 
