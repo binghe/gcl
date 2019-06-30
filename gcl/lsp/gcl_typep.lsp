@@ -72,6 +72,7 @@
   (defun mksubb (o tp x)
    (case x
 	 ((immfix bfix bignum integer ratio single-float double-float short-float long-float float rational real) `(ibb ,o ,tp))
+	 ((seqind rnkind) `(ibb ,o ',(cdr (normalize-type x))))
 	 ((structure structure-object) `(if tp (mss (c-structure-def ,o) (car tp)) t))
 	 (std-instance `(if tp (when (member (car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
 	 (mod `(let ((s (pop ,tp))) (<= 0 ,o (1- s))));FIXME error null tp
@@ -146,6 +147,7 @@
  (compile eval)
  (defconstant +s+ `(proper-list proper-sequence list sequence function symbol boolean
 			 proper-cons improper-cons
+			 seqind rnkind ;FIXME
 			 fixnum integer rational float real number;complex
 			 character
 			 hash-table pathname
