@@ -101,9 +101,8 @@
 				  (y)
 				  'type-error :datum y
 				  :expected-type `(array-bit ,(array-dimensions x)))))
-		    (assert (when r
-			      (or (eq r t)
-				  (bit-array-dimension-check x r)))
+		    (assert (or (if r (eq r t) t)
+				(bit-array-dimension-check x r))
 			    (y)
 			    'type-error :datum r
 			    :expected-type `(array-bit ,(array-dimensions x)))
