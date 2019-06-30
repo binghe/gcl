@@ -206,7 +206,11 @@
 
 (defun one-bit-btp (x &aux n)
   (dotimes (i +bit-words+ n)
-    (let* ((y (*fixnum (c-array-self x) i nil nil)))
+    (let* ((y (*fixnum (c-array-self x) i nil nil))
+	   (y (if (eql i #.(1- +bit-words+))
+		  (& y #.(let ((z (<< 1 (mod +btp-length+ fixnum-length))))
+			   (if (minusp z) most-positive-fixnum (1- z))))
+		y)))
       (unless (zerop y)
 	(let* ((l (integer-length y))(l (if (minusp y) (1+ l) l)))
 	  (if (unless n (eql y (<< 1 (1- l))))
