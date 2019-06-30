@@ -4,21 +4,21 @@
   (if (eql nbits fixnum-length)
       -1
       (~ (<< -1 nbits))))
-(declaim (inline mask))
+(setf (get 'mask 'compiler::cmp-inline) t)
 
 (defun merge-word (x y m) (\| (& x m) (& y (~ m))))
-(declaim (inline merge-word))
+(setf (get 'merge-word 'compiler::cmp-inline) t)
 
 (defun bit-array-fixnum (a i n)
   (if (<= 0 i n)
       (*fixnum (c-array-self a) i nil 0)
       0))
-(declaim (inline bit-array-fixnum))
+(setf (get 'bit-array-fixnum 'compiler::cmp-inline) t)
 
 (defun set-bit-array-fixnum (a i v);(a i n v)
 ;  (assert (<= 0 i n))
   (*fixnum (c-array-self a) i t v))
-(declaim (inline set-bit-array-fixnum))
+(setf (get 'set-bit-array-fixnum 'compiler::cmp-inline) t)
 
 (defun gw (a i n od)
   (cond ((zerop od) (bit-array-fixnum a i n))
@@ -31,7 +31,7 @@
 	  (>> (bit-array-fixnum a (1- i) n) (+ fixnum-length od))
 	  (<< (bit-array-fixnum a i n) (- od))
 	  (mask (- od))))))
-(declaim (inline gw))
+(setf (get 'gw 'compiler::cmp-inline) t)
 
 (defun bit-array-op (fn ba1 ba2 &optional rba
 		     &aux
@@ -77,7 +77,7 @@
 	   (mask rem))))
        
        rba))))
-(declaim (inline bit-array-op))
+(setf (get 'bit-array-op 'compiler::cmp-inline) t)
 
 ;FIXME array-dimensions allocates....
 (defun bit-array-dimension-check (x y &aux (r (array-rank x)))
@@ -85,7 +85,7 @@
     (dotimes (i r t)
       (unless (eql (array-dimension x i) (array-dimension y i))
 	(return nil)))))
-(declaim (inline bit-array-dimension-check))
+(setf (get 'bit-array-dimension-check 'compiler::cmp-inline) t)
 
 #.`(progn
      ,@(mapcar (lambda (x &aux (n (eq (car x) 'not))
