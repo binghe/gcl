@@ -87,7 +87,7 @@
 (defun two-tp-inf (fn t2 &aux (t2 (real-bnds (type-and #treal t2))))
   (case fn
 	(= (cmp-norm-tp `(real ,(or (car t2) '*) ,(or (cadr t2) '*))))
-	(/= (if (eql (car t2) (cadr t2))
+	(/= (if (when (numberp (car t2)) (eql (car t2) (cadr t2)))
 		(type-and #tnumber (cmp-norm-tp `(not (real ,@t2)))) #treal))
 	(>  (cmp-norm-tp `(real ,(cond ((numberp (car t2)) (list (car t2))) ((car t2)) ('*)))))
 	(>= (cmp-norm-tp `(real ,(or (car t2) '*))))
