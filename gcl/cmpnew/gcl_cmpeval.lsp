@@ -1151,7 +1151,7 @@
 	((or (new-type-p (car a) (car b)) (new-type-p (cdr a) (cdr b))))))
 
 (defun tm (a b &aux (ca (cons-count a)))
-  (when (< ca (if (< ca (cons-count b)) 15 6))
+  (when (< ca (if (< ca (cons-count b)) 25 16));FIXME
     (new-type-p a b)))
 
 ;; (defun tm (ay ax &optional (i 0))
