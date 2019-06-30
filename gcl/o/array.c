@@ -20,6 +20,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include "include.h"
+#include "page.h"
 
 static object Iname_t=Ct;
 static char zero[4*SIZEOF_LONG];/*FIXME*/
@@ -67,19 +68,6 @@ DEFCONST("ARRAY-TOTAL-SIZE-LIMIT", sLarray_total_size_limit,LISP,make_fixnum(((1
 
 DEF_ORDINARY("BIT",sLbit,LISP,"");
 DEF_ORDINARY("SBIT",sLsbit,LISP,"");
-
-/* number of bits in  unit of storage of x->bv.bv_self[0] */
-
-#define BV_BITS 8
-
-#define BITREF(x,i) \
-  ((((1 << (BV_BITS -1)) >> (i % BV_BITS)) & (x->bv.bv_self[i/BV_BITS])) \
-   ? 1 : 0)
-
-#define SET_BITREF(x,i) \
-  (x->bv.bv_self[i/BV_BITS]) |= ((1 << (BV_BITS -1)) >> (i % BV_BITS))
-#define CLEAR_BITREF(x,i) \
-  (x->bv.bv_self[i/BV_BITS]) &= ~(((1 << (BV_BITS -1)) >> (i % BV_BITS)))
 
 #define ARRAY_BODY_PTR(ar,n) \
   (void *)(ar->ust.ust_self + aet_types[Iarray_element_type(ar)].size*n)
@@ -731,7 +719,7 @@ FFN(Larray_displacement)(void) {
   s=aet_types[Iarray_element_type(a)].size;
   n=(void *)array->a.a_self-(void *)a->a.a_self;
   if (Iarray_element_type(a)==aet_bit)
-    n=n*BV_BITS+BV_OFFSET(array);
+    n=n*BV_BITS+BV_OFFSET(array)-BV_OFFSET(a);
   if (n%s)
     FEerror("Array is displaced by fractional elements",0);
 
@@ -760,24 +748,33 @@ FFN(Larray_displacement)(void) {
 static void
 displace(object from_array, object dest_array, int offset)
 {
-  enum aelttype typ,typ1;
+  enum aelttype typ;
   IisArray(from_array);
   IisArray(dest_array);
   typ =Iarray_element_type(from_array);
-  if (typ != (typ1=Iarray_element_type(dest_array)))
-     TYPE_ERROR(from_array,list(2,sLarray,*aet_types[typ1].namep));
-  if (offset + from_array->a.a_dim > dest_array->a.a_dim)
-    { FEerror("Destination array too small to hold other array",0);
-    }
-  if ( offset < 0 )
-    { FEerror("Negative offset",0);
-    }
+
+  if (offset<0) FEerror("Negative offset",0);
+
+  if (typ!=aet_bit) {
+    void *v1;
+    ufixnum n=0;
+    v1=((void *)dest_array->a.a_self)+
+      (Iarray_element_type(dest_array)!=aet_bit ? elt_size(dest_array->a.a_elttype)*offset :
+       FLR((n=offset+BV_OFFSET(dest_array)),CHAR_SIZE)/CHAR_SIZE);
+    if (((unsigned long)v1)%elt_size(from_array->a.a_elttype) || n%CHAR_SIZE)
+      FEerror("Offset produces illegal array alignment.",0);
+  }
+
+#define BIT_SIZE(a_,b_) ((a_)*((b_) ? (b_)*CHAR_SIZE : 1))
+  if (BIT_SIZE(from_array->a.a_dim,elt_size(from_array->a.a_elttype))>
+      BIT_SIZE(((fixnum)dest_array->a.a_dim)-offset,elt_size(dest_array->a.a_elttype)))
+    FEerror("Destination array too small",0);
+
   /* ensure that we have a cons */
   if (dest_array->a.a_displaced == Cnil)
-    { dest_array->a.a_displaced = list(2,Cnil,from_array);}
+    dest_array->a.a_displaced = list(2,Cnil,from_array);
   else
-    Mcdr(dest_array->a.a_displaced) = make_cons(from_array,
-					    Mcdr(dest_array->a.a_displaced));
+    Mcdr(dest_array->a.a_displaced) = make_cons(from_array,Mcdr(dest_array->a.a_displaced));
   from_array->a.a_displaced = make_cons(dest_array,sLnil);
 
   /* now set the actual body of from_array to be the address
@@ -788,7 +785,8 @@ displace(object from_array, object dest_array, int offset)
   
     
   if (typ == aet_bit)
-    { offset += BV_OFFSET(dest_array);
+    { if (Iarray_element_type(dest_array)==aet_bit)
+	offset += BV_OFFSET(dest_array);
       from_array->bv.bv_self = dest_array->bv.bv_self + offset/BV_BITS;
       SET_BV_OFFSET(from_array,offset % BV_BITS);
     }
@@ -953,11 +951,6 @@ gset(void *p1, void *val, fixnum n, int typ)
   }
 
 
-#define W_SIZE (BV_BITS*sizeof(fixnum))    
-
-  /*
-   */
-
 DEFUN("COPY-ARRAY-PORTION",object,fScopy_array_portion,SI,4,
 	  5,NONE,OO,OO,OO,OO,(object x,object y,object o1,object o2,...),
    "Copy elements from X to Y starting at x[i1] to x[i2] and doing N1 \
@@ -1054,8 +1047,8 @@ array_allocself(object x, int staticp, object dflt)
 		x->ust.ust_self = (unsigned char *) AR_ALLOC(*fun,n,int);
 		break;
 	case aet_bit:
-		n = (n+W_SIZE-1)/W_SIZE;
-		SET_BV_OFFSET(x,0);
+	  n=ceil(n,BV_ALLOC);
+	  SET_BV_OFFSET(x,0);
 	case aet_fix:
 	case aet_nnfix:
 	  x->a.a_self = (void *)AR_ALLOC(*fun,n,fixnum);

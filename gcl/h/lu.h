@@ -296,8 +296,8 @@ struct ustring {
 
 struct bitvector {         /*  bitvector header  */
 
-  vtempl(char,bv_);
-  otempl(char,bv_);
+  vtempl(ufixnum,bv_);
+  otempl(ufixnum,bv_);
 
 };
 

@@ -212,11 +212,9 @@
 			   (if (minusp z) most-positive-fixnum (1- z))))
 		y)))
       (unless (zerop y)
-	(let* ((l (integer-length y))(l (if (minusp y) (1+ l) l)))
-	  (if (unless n (eql y (<< 1 (1- l))))
-	      (multiple-value-bind
-	       (d r) (ceiling l char-length)
-	       (setq n (+ (* i fixnum-length) (* char-length (1- d)) (- r))))
+	(let* ((l (1- (integer-length y)))(l (if (minusp y) (1+ l) l)))
+	  (if (unless n (eql y (<< 1 l)))
+	      (setq n (+ (* i fixnum-length) l))
 	    (return nil)))))))
 
 (defun atomic-tp (tp)

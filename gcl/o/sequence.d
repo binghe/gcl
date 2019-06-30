@@ -26,6 +26,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include "include.h"
+#include "page.h"
 
 /* #undef endp */
 
@@ -341,16 +342,14 @@ E:
 			goto ILLEGAL_START_END;
 		{BEGIN_NO_INTERRUPT;
 		x = alloc_simple_bitvector(e - s);
-		x->bv.bv_self = alloc_relblock((e-s+7)/8);
+		x->bv.bv_self = alloc_relblock(ceil((e-s),BV_ALLOC)*sizeof(*x->bv.bv_self));
 		s += sequence->bv.bv_offset;
 		e += sequence->bv.bv_offset;
 		for (i = s, j = 0;  i < e;  i++, j++)
-			if (sequence->bv.bv_self[i/8]&(0200>>i%8))
-				x->bv.bv_self[j/8]
-				|= 0200>>j%8;
-			else
-				x->bv.bv_self[j/8]
-				&= ~(0200>>j%8);
+		  if (BITREF(sequence,i))
+		    SET_BITREF(x,j);
+		  else
+		    CLEAR_BITREF(x,j);
 		END_NO_INTERRUPT;}
 		@(return x)
 
@@ -503,15 +502,14 @@ object seq;
 		{BEGIN_NO_INTERRUPT;	
 		y = alloc_simple_bitvector(x->bv.bv_fillp);
 		vs_push(y);
-		y->bv.bv_self
-		= alloc_relblock((x->bv.bv_fillp+7)/8);
+		y->bv.bv_self=alloc_relblock(ceil(x->bv.bv_fillp,BV_ALLOC)*sizeof(*y->bv.bv_self));
 		for (j = x->bv.bv_fillp - 1, i = x->bv.bv_offset;
 		     j >=0;
 		     --j, i++)
-			if (x->bv.bv_self[i/8]&(0200>>i%8))
-				y->bv.bv_self[j/8] |= 0200>>j%8;
-			else
-				y->bv.bv_self[j/8] &= ~(0200>>j%8);
+		  if (BITREF(x,i))
+		    SET_BITREF(y,j);
+		  else
+		    CLEAR_BITREF(y,j);
 		END_NO_INTERRUPT;}	
 		return(vs_pop);
 
@@ -635,19 +633,15 @@ object seq;
 		     j = x->bv.bv_fillp + x->bv.bv_offset - 1;
 		     i < j;
 		     i++, --j) {
-			k = x->bv.bv_self[i/8]&(0200>>i%8);
-			if (x->bv.bv_self[j/8]&(0200>>j%8))
-				x->bv.bv_self[i/8]
-				|= 0200>>i%8;
-			else
-				x->bv.bv_self[i/8]
-				&= ~(0200>>i%8);
-			if (k)
-				x->bv.bv_self[j/8]
-				|= 0200>>j%8;
-			else
-				x->bv.bv_self[j/8]
-				&= ~(0200>>j%8);
+		  k = BITREF(x,i);
+		  if (BITREF(x,j))
+		    SET_BITREF(x,i);
+		  else
+		    CLEAR_BITREF(x,i);
+		  if (k)
+		    SET_BITREF(x,j);
+		  else
+		    CLEAR_BITREF(x,j);
 		}
 		return(seq);
 

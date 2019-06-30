@@ -561,8 +561,7 @@ mark_object1(object x) {
       break;
 
     case aet_bit:
-#define W_SIZE (8*sizeof(fixnum))
-      j= sizeof(fixnum)*((BV_OFFSET(x) + x->bv.bv_dim + W_SIZE -1)/W_SIZE);
+      j=ceil(BV_OFFSET(x)+x->bv.bv_dim,BV_ALLOC)*sizeof(*x->bv.bv_self);
       break;
 
     case aet_char:

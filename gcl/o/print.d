@@ -1233,10 +1233,7 @@ int level;
 		}
 		write_str("#*");
 		for (i = x->bv.bv_offset;  i < x->bv.bv_fillp + x->bv.bv_offset;  i++)
-			if (x->bv.bv_self[i/8] & (0200 >> i%8))
-				write_ch('1');
-			else
-				write_ch('0');
+		  write_ch(BITREF(x,i) ? '1' : '0');
 		break;
 
 	case t_cons:

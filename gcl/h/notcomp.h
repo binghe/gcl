@@ -340,3 +340,14 @@ extern bool writable_malloc;
 #define pfork() prof_block(fork())
 
 #include "error.h"
+
+
+/* #define BV_BITS CHAR_SIZE */
+/* #define BV_ALLOC (BV_BITS*SIZEOF_LONG) */
+#define BV_BITS (CHAR_SIZE*SIZEOF_LONG)
+#define BV_ALLOC BV_BITS
+#define BV_BIT(i) (1L<<((i)%BV_BITS))
+#define BITREF(x,i) ({ufixnum _i=(i);(BV_BIT(_i)&(x->bv.bv_self[_i/BV_BITS])) ? 1 : 0;})
+#define SET_BITREF(x,i)   ({ufixnum _i=(i);(x->bv.bv_self[_i/BV_BITS]) |= BV_BIT(_i);})
+#define CLEAR_BITREF(x,i) ({ufixnum _i=(i);(x->bv.bv_self[_i/BV_BITS]) &= ~BV_BIT(_i);})
+#define BIT_MASK(n_) ({char _n=n_;(_n==BV_BITS ? -1L : BV_BIT(_n)-1);})

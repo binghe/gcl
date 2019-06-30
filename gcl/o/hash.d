@@ -188,9 +188,15 @@ BEGIN:
       break;
     case t_bitvector:
       {
-	ufixnum l=x->bv.bv_offset+x->bv.bv_fillp;
-	void *v1=x->bv.bv_self+x->bv.bv_offset/CHAR_SIZE,*ve=v1+l/CHAR_SIZE+(x->bv.bv_fillp && l%CHAR_SIZE ? 1 : 0);
-	h^=uarrhash(v1,ve,x->bv.bv_offset%CHAR_SIZE,x->bv.bv_fillp%CHAR_SIZE);
+	ufixnum *u=x->bv.bv_self+x->bv.bv_offset/BV_BITS;
+	ufixnum *ue=x->bv.bv_self+(x->bv.bv_fillp+x->bv.bv_offset)/BV_BITS;
+
+	if (x->bv.bv_offset%BV_BITS)
+	  h^=ufixhash((*u++)&(~(BIT_MASK(x->bv.bv_offset%BV_BITS))));
+	for (;u<ue;u++)
+	  h^=ufixhash(*u);
+	if ((x->bv.bv_fillp+x->bv.bv_offset)%BV_BITS)
+	  h^=ufixhash((*u++)&(BIT_MASK(x->bv.bv_offset%BV_BITS)));
       }
       break;
     case t_pathname:

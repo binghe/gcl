@@ -26,6 +26,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define NEED_ISFINITE
 #include "include.h"
 #include "num_include.h"
+#include "page.h"
 
 static object
 current_readtable(void);
@@ -1364,15 +1365,15 @@ Lsharp_asterisk_reader()
 	{BEGIN_NO_INTERRUPT;
 	x = alloc_simple_bitvector(dimcount);
 	vs_push(x);
-	x->bv.bv_self = alloc_relblock((dimcount + 7)/8);
+	x->bv.bv_self = alloc_relblock(ceil(dimcount,BV_ALLOC)*sizeof(*x->bv.bv_self));
 	vs_popp;
 	for (dim = 0; dim < dimcount; dim++)
 	  switch(char_code(vsp[dim])) {
 	  case '0':
-	    x->bv.bv_self[dim/8] &= ~(0200 >> dim%8);
+	    CLEAR_BITREF(x,dim);
 	    break;
 	  case '1':
-	    x->bv.bv_self[dim/8] |= 0200 >> dim%8;
+	    SET_BITREF(x,dim);
 	    break;
 	  default:
 	    READER_ERROR(in,"Invalid bit vector entry");
