@@ -205,18 +205,19 @@
 (defun abs (z)
   (declare (optimize (safety 2)))
   (check-type z number)
-  (if (complexp z)
-      ;; Compute (sqrt (+ (* x x) (* y y))) carefully to prevent
-      ;; overflow!
-      (let* ((x (abs (realpart z)))
-	     (y (abs (imagpart z))))
-	(if (< x y)
-	    (rotatef x y))
-	(if (zerop x)
-	    x
-	  (let ((r (/  y x)))
-	    (* x (sqrt (+ 1 (* r r))))))))
-  (if (minusp z) (- z) z))
+  (cond ((complexp z)
+	 ;; Compute (sqrt (+ (* x x) (* y y))) carefully to prevent
+	 ;; overflow!
+	 (let* ((x (abs (realpart z)))
+		(y (abs (imagpart z))))
+	   (if (< x y)
+	       (rotatef x y))
+	   (if (zerop x)
+	       x
+	     (let ((r (/ y x)))
+	       (* x (sqrt (+ 1 (* r r))))))))
+	((minusp z) (- z))
+	(z)))
 
 
 ;; (defdlfun (:fixnum "__gmpz_cmp") :fixnum :fixnum)
