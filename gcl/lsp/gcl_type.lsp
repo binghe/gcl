@@ -154,8 +154,6 @@
 (defvar *nil-tp* (make-btp))
 (defvar *t-tp* (make-btp 1))
 
-(unless (fboundp 'logandc2) (defun logandc2 (x y) (boole boole-andc2 x y)))
-
 (defconstant +bit-words+ (ceiling +btp-length+ fixnum-length))
 
 
@@ -503,11 +501,11 @@
        y))))
 
 (defun cmp-norm-tp (x)
-  (cond ((tp-p x) x)
-	((eq x '*) x)
+  (cond ((if x (eq x t) t) x); (tp-p x) (unless (if x (eq x t) t) (break))
+	((eq x '*) x);(print (list 'cmp-norm-tp x))
 	((when (listp x)
 	   (case (car x)
-		 ((returns-exactly values) (cons (car x) (mapcar 'cmp-norm-tp (cdr x)))))))
+		 ((returns-exactly values) (cons (car x) (mapcar 'cmp-norm-tp (cdr x)))))));(print (list 'cmp-norm-tp x))
 	((comp-tp1 x))))
 
 (defun tp-type1 (x)
@@ -663,9 +661,6 @@
 			    (cons x nil)))
 		    (lremove-duplicates (mapcar 'car ra)))))
     (nconc x y)))
-
-(defun logandc2 (x y) (logand x (~ y)))
-
 
 (defconstant +useful-type-list+ `(nil
 				  null
