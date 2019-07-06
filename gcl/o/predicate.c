@@ -224,14 +224,18 @@ equal1(register object x, register object y) {
 	return(FALSE);
       ox = x->bv.bv_offset;
       oy = y->bv.bv_offset;
-      i=0;
       if (!ox && !oy) {
-	for (;i<x->bv.bv_fillp/BV_BITS;i++)
+	for (i=0;i<x->bv.bv_fillp/BV_BITS;i++)
 	  if (x->bv.bv_self[i]!=y->bv.bv_self[i])
 	    return(FALSE);
-	i*=BV_BITS;
+	if (x->bv.bv_fillp%BV_BITS) {
+	  ufixnum m=(~(~0L<<(x->bv.bv_fillp%BV_BITS)));
+	  if ((x->bv.bv_self[i]&m)!=(y->bv.bv_self[i]&m))
+	    return(FALSE);
+	}
+	return(TRUE);
       }
-      for (;i<x->bv.bv_fillp;i++)
+      for (i=0;i<x->bv.bv_fillp;i++)
 	if (BITREF(x,i+ox)!=BITREF(y,i+oy))
 	  return(FALSE);
       return(TRUE);
