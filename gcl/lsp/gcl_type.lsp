@@ -264,7 +264,7 @@
 
 (let ((package-list (mapcar 'find-package '(:si :cl :keyword))))
   (defun hashable-atomp (thing)
-    (cond ((integerp thing) (<= -512 thing 512))
+    (cond ((fixnump thing))
 	  ((symbolp thing)
 	   (member (symbol-package thing) package-list)))))
 
