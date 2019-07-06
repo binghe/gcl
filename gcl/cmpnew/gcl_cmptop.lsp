@@ -433,29 +433,6 @@
 	(t
 	 (dolist** (form args) (t1expr form)))))
 
-;; (defun foo (x) ..   -> (defun foo (g102 &aux (x g102)) ... 
-(defun  cmpfix-args (args bind &aux tem (lam (copy-list (second args))))
-  (dolist (v bind)
-    (setq tem (member (car v) lam))
-    (when tem
-      (setf (car tem) (second v))
-      (do ((f (cddr args) (cdr f))) ((endp f))
-	  (cond ((stringp (car f)))
-		((and (consp (car f)) (eq (caar f) 'declare))
-		 (dolist (l (cdar f))
-		   (let ((l (if (eq (car l) 'type) (cdr l) l)))
-		     (when (not (eq '* (cmp-norm-tp (car l))))
-		       (nsublis (list (cons (car v) (cadr v))) (cdr l))))))
-		((and (consp (car f)) (eq (caar f) 'check-type))
-		 (when (eq (cadar f) (car v))
-		   (setf (cadar f) (cadr v))))
-		((return nil))))))
-  (cond ((setq tem (member '&aux lam))
-	 (setf (cdr tem) (append bind (cdr tem))))
-	(t (setf lam (append lam (cons '&aux bind)))))
-  (list* (car args) lam (cddr args)))
-
-
 (defun function-symbol (name)
   (si::funid-sym name))
 
