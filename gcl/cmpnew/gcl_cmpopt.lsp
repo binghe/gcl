@@ -348,19 +348,6 @@
 ;;  (push '((t t) t #.(flags ans)"append(#0,#1)")
 ;;    (get 'append 'inline-always))
 
-;;CMP-AREF
-(setf (symbol-function 'cmp-aref) (symbol-function 'row-major-aref))
-(si::putprop 'cmp-aref 'aref-propagator 'type-propagator)
-(push '(cmp-aref-inline-types nil #.(flags itf) cmp-aref-inline)
-   (get 'cmp-aref 'inline-always))
-
-;;CMP-ASET
-(setf (symbol-function 'cmp-aset) (symbol-function 'si::aset1))
-(si::putprop 'cmp-aset 'aref-propagator 'type-propagator)
-(push '(cmp-aset-inline-types nil #.(flags itf) cmp-aset-inline)
-   (get 'cmp-aset 'inline-always))
-
-
 ;;ARRAY-DIMENSION
 ;(push '((t fixnum) fixnum #.(flags rfa)"@01;(type_of(#0)==t_array ? (#0)->a.a_dims[(#1)] : (#0)->v.v_dim)")
 ;   (get 'array-dimension 'inline-unsafe))
