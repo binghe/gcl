@@ -327,7 +327,7 @@
     (unless (and (car b1) (car b2))
       (return-from
        dsr2
-       (unless (eq f 'atan);FIXME
+       (unless (member f '(max atan));FIXME
 	 (cmp-norm-tp
 	  (car (member
 		(mfc f p2
