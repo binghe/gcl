@@ -221,7 +221,7 @@
 	((setq x (gethash fname *sigs*)) (caar x))
 	((setq x (si::sig fname)) (car x))
 	((not (symbolp fname)) '(*))
-	((not (eq (setq x (get fname 'proclaimed-arg-types y)) y)) (mapcar 'cmp-norm-tp x))
+;	((not (eq (setq x (get fname 'proclaimed-arg-types y)) y)) (mapcar 'cmp-norm-tp x))
 	('(*))))
 
 (defun get-return-type (fname &aux x (y (load-time-value (tmpsym))))
@@ -230,7 +230,7 @@
 	((setq x (gethash fname *sigs*)) (cadar x))
 	((setq x (si::sig fname)) (cadr x))
 	((not (symbolp fname)) '*)
-	((not (eq (setq x (get fname 'proclaimed-return-type y)) y)) (cmp-norm-tp x));FIXME
+;	((not (eq (setq x (get fname 'proclaimed-return-type y)) y)) (cmp-norm-tp x));FIXME
 	('*)))
 
 (defun get-sig (fname)

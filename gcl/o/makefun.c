@@ -179,7 +179,7 @@ put_fn_procls(object sym,fixnum argd,fixnum oneval,object def,object rdef) {
 /*     ta=MMcons(sLA,Cnil); */
     ta=sLA;
   putprop(sym,ta,sSproclaimed_return_type);
-  if (oneval)
+  /* if (oneval) */
     putprop(sym,Ct,sSproclaimed_function);
 
 }  
