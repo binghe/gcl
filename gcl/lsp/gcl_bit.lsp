@@ -87,86 +87,34 @@
 	(return nil)))))
 (setf (get 'bit-array-dimension-check 'compiler::cmp-inline) t)
 
-#.`(progn
-     ,@(mapcar (lambda (x &aux (n (eq (car x) 'not))
-			  (f (intern (string-concatenate "BIT-" (string (pop x))))))
-		 `(defun ,f (x ,@(unless n `(y)) &optional r)
-		    (declare (optimize (safety 1)))
-		    (check-type x (array bit))
-		    ,@(unless n
-			`((check-type y (array bit))))
-		    (check-type r (or boolean (array bit)))
-		    ,@(unless n
-			`((assert (bit-array-dimension-check x y)
-				  (y)
-				  'type-error :datum y
-				  :expected-type `(array-bit ,(array-dimensions x)))))
-		    (assert (or (if r (eq r t) t)
-				(bit-array-dimension-check x r))
-			    (y)
-			    'type-error :datum r
-			    :expected-type `(array-bit ,(array-dimensions x)))
-		    (bit-array-op ,x x ,(if n 'x 'y) r)))
-	       '((and . #'&)
-		 (ior . #'\|)
-		 (xor . #'^)
-		 (eqv .   (lambda (x y) (~ (^ x y))))
-		 (nand .  (lambda (x y) (~ (& x y))))
-		 (nor .   (lambda (x y) (~ (\| x y))))
-		 (andc1 . (lambda (x y) (& (~ x) y)))
-		 (andc2 . (lambda (x y) (& x (~ y))))
-		 (orc1 .  (lambda (x y) (\| (~ x) y)))
-		 (orc2 .  (lambda (x y) (\| x (~ y))))
-		 (not .   (lambda (x y) (~ x))))))
+(eval-when
+ (compile eval)
+ (defmacro defbitfn (f fn &aux (n (eq f 'bit-not)))
+   `(defun ,f (x ,@(unless n `(y)) &optional r)
+      (declare (optimize (safety 1)))
+      (check-type x (array bit))
+      ,@(unless n `((check-type y (array bit))))
+      (check-type r (or boolean (array bit)))
+      ,@(unless n
+	  `((assert (bit-array-dimension-check x y)
+		    (y)
+		    'type-error :datum y
+		    :expected-type `(array-bit ,(array-dimensions x)))))
+      (assert (or (if r (eq r t) t)
+		  (bit-array-dimension-check x r))
+	      (y)
+	      'type-error :datum r
+	      :expected-type `(array-bit ,(array-dimensions x)))
+      (bit-array-op ,fn x ,(if n 'x 'y) r))))
 
-
-  
-;; (defun bit-and (bit-array1 bit-array2 &optional result-bit-array)
-;;   (declare (optimize (safety 1)))
-;;   (check-type bit-array1 (array bit))
-;;   (check-type bit-array2 (array bit))
-;;   (check-type result-bit-array (or boolean (array bit)))
-;;   (assert (equal (
-;;   (bit-dimension-check bit-array1 bit-array2)
-;;   (bit-dimension-check bit-array1 result-bit-array)
-;;   (bit-array-op #'& bit-array1 bit-array2 result-bit-array))
-
-
-;; (defun bit-ior (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op #'\| bit-array1 bit-array2 result-bit-array))
-
-
-;; (defun bit-xor (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op #'^ bit-array1 bit-array2 result-bit-array))
-
-
-;; (defun bit-eqv (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (~ (^ x y))) bit-array1 bit-array2 result-bit-array))
-
-    
-;; (defun bit-nand (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (~ (& x y))) bit-array1 bit-array2 result-bit-array))
-
-    
-;; (defun bit-nor (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (~ (\| x y))) bit-array1 bit-array2 result-bit-array))
-
-    
-;; (defun bit-andc1 (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (& (~ x) y)) bit-array1 bit-array2 result-bit-array))
-
-    
-;; (defun bit-andc2 (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (& x (~ y))) bit-array1 bit-array2 result-bit-array))
-
-    
-;; (defun bit-orc1 (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (\| (~ x) y)) bit-array1 bit-array2 result-bit-array))
-
-    
-;; (defun bit-orc2 (bit-array1 bit-array2 &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (\| x (~ y))) bit-array1 bit-array2 result-bit-array))
-
-;; (defun bit-not (bit-array &optional result-bit-array)
-;;   (bit-array-op (lambda (x y) (~ x)) bit-array bit-array result-bit-array))
-
+(defbitfn bit-and #'&)
+(defbitfn bit-ior #'\|)
+(defbitfn bit-xor #'^)
+(defbitfn bit-eqv   (lambda (x y) (~ (^ x y))))
+(defbitfn bit-nand  (lambda (x y) (~ (& x y))))
+(defbitfn bit-nor   (lambda (x y) (~ (\| x y))))
+(defbitfn bit-andc1 (lambda (x y) (& (~ x) y)))
+(defbitfn bit-andc2 (lambda (x y) (& x (~ y))))
+(defbitfn bit-orc1  (lambda (x y) (\| (~ x) y)))
+(defbitfn bit-orc2  (lambda (x y) (\| x (~ y))))
+(defbitfn bit-not   (lambda (x y) (~ x)))
