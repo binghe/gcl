@@ -1019,7 +1019,7 @@
   (case (when (listp u) (car u))
 	((or returns-exactly values) (member-if 'unprintable-individualsp (cdr u)))
 	(member (member-if (lambda (x)
-			     (or (si::si-classp x) (typep x '(or function cons array))))
+			     (or (si::si-classp x) (typep x '(or function cons spice array))))
 			   (cdr u)))
 	(otherwise (si::si-classp u))))
 
