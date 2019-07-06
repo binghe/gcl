@@ -418,8 +418,10 @@
 	((car x))))
 
 (defun ktype-of (x)
+;  (unless (fboundp 'type-of) (print (list 'ktype-of x)))
   (cond ((not x) 'null);FIXME
 	((eq x t) 'true);FIXME
+	((spicep x) 'spice);FIXME
 	((typep x 'structure) 'structure);FIXME
 	((typep x 'std-instance) 'std-instance);FIXME
 	((improper-consp x) 'improper-cons);FIXME

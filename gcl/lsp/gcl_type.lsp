@@ -96,7 +96,7 @@
 		   (true t)
 		   (gsym 'a)))
 
-(defconstant +btp-types+
+(defconstant +btp-types1+
   (lremove
    nil
    (mapcar
@@ -116,9 +116,21 @@
 			  '((* (-1))(-1 -1) ((-1) (0)) (0 0) ((0) (1)) (1 1) ((1) *))))
 		'(ratio short-float long-float))
       proper-cons improper-cons (vector nil) (array nil);FIXME
-      ,@(mapcar 'car +r+)))))
+      ,@(lremove 'spice (mapcar 'car +r+))))))
 
-(defconstant +btp-length+ (length +btp-types+))
+(defconstant +btp-types+ ;; pad to fixnum-length with spice
+  (append +btp-types1+
+	  (mapcar
+	   (let (y)
+	     (lambda (x &aux (z y))
+	       (setq y (car (resolve-type (list 'or x y))))
+	       (car (resolve-type `(and ,x (not ,z))))))
+	   (multiple-value-bind
+	    (x y) (ceiling (1+ (length +btp-types1+)) fixnum-length)
+	    (let ((r '(spice)))
+	      (dotimes (i (- y) r) (push `(member ,(alloc-spice)) r)))))))
+
+(defconstant +btp-length+ (length +btp-types+));(length +btp-types+))
 
 (defun make-btp (&optional (i 0)) (make-vector 'bit +btp-length+ nil nil nil 0 nil i))
 
@@ -204,18 +216,17 @@
     (when (singleton-listp (car ntp))
       (singleton-kingdomp (caar ntp)))))
 
-(defun one-bit-btp (x &aux n)
-  (dotimes (i +bit-words+ n)
-    (let* ((y (*fixnum (c-array-self x) i nil nil))
-	   (y (if (eql i #.(1- +bit-words+))
-		  (& y #.(let ((z (<< 1 (mod +btp-length+ fixnum-length))))
-			   (if (minusp z) most-positive-fixnum (1- z))))
-		y)))
-      (unless (zerop y)
-	(let* ((l (1- (integer-length y)))(l (if (minusp y) (1+ l) l)))
-	  (if (unless n (eql y (<< 1 l)))
-	      (setq n (+ (* i fixnum-length) l))
-	    (return nil)))))))
+#.`(defun one-bit-btp (x &aux n)
+     (dotimes (i +bit-words+ n)
+       (let* ((y (*fixnum (c-array-self x) i nil nil))
+	      ,@(let* ((m (mod +btp-length+ fixnum-length))(z (~ (<< -1 m))))
+		  (unless (zerop m)
+		    `((y (if (< i ,(1- +bit-words+)) y (& y ,z)))))))
+	 (unless (zerop y)
+	   (let* ((l (1- (integer-length y)))(l (if (minusp y) (1+ l) l)))
+	     (if (unless n (eql y (<< 1 l)))
+		 (setq n (+ (* i fixnum-length) l))
+	       (return nil)))))))
 
 (defun atomic-tp (tp)
   (unless (or (eq tp '*) (when (listp tp) (member (car tp) '(returns-exactly values))));FIXME
@@ -228,8 +239,11 @@
 	      (atomic-ntp (caddr tp)))))))))
 
 #.`(defun object-index (x)
-     (etypecase x
-      ,@(let ((i -1)) (mapcar (lambda (x) `(,(car x) ,(incf i))) *btps*))))
+     (etypecase
+      x
+      ,@(let ((i -1)) (mapcar (lambda (x) `(,(car x) ,(incf i)))
+			      (butlast *btps* (- (length +btp-types+) (length +btp-types1+)))))
+      (spice ,(1- (length *btps*)))))
 
 
 (defvar *cmp-verbose* nil)
