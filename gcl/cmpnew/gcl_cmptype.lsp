@@ -429,26 +429,39 @@
 		(l (if (eq l '*) l (if (< l 0) (- (1- (ash 1 (integer-length l)))) 0))))
 	   (cmp-norm-tp `(integer ,l ,h))))))
 
+
+(defun logand2-propagator (f t1 t2)
+  (when (and (type>= #tfixnum t2) (type>= #tfixnum t1));FIXME
+    (let ((t1 (bit-type t1))(t2 (bit-type t2)))
+      (type-or1
+       (super-range f
+		    (type-and #tnon-negative-integer t1)
+		    (type-and #tnon-negative-integer t2))
+       (type-or1
+	(super-range f
+		     (type-and #tnegative-integer t1)
+		     (type-and #tnon-negative-integer t2))
+	(type-or1
+	 (super-range f
+		      (type-and #tnon-negative-integer t1)
+		      (type-and #tnegative-integer t2))
+	 (super-range f
+		      (type-and #tnegative-integer t1)
+		      (type-and #tnegative-integer t2))))))))
+
+(dolist (l '(& ^ \|))
+  (si::putprop l 'logand2-propagator 'type-propagator))
+
+(defun logand1-propagator (f t1)
+  (when (type>= #tfixnum t1);FIXME
+    (super-range f t1)))
+
+(si::putprop '~ 'logand1-propagator 'type-propagator)
+
 (defun logand-propagator (f &optional (t1 nil t1p) (t2 nil t2p) &rest r)
   (cond (r (apply 'logand-propagator f (logand-propagator f t1 t2) (car r) (cdr r)))
-	(t2p (when (and (type>= #tfixnum t2) (type>= #tfixnum t1)) 
-	       (let ((t1 (bit-type t1))(t2 (bit-type t2)))
-		 (type-or1
-		  (super-range f
-			       (type-and #tnon-negative-integer t1)
-			       (type-and #tnon-negative-integer t2))
-		  (type-or1
-		   (super-range f
-				(type-and #tnegative-integer t1)
-				(type-and #tnon-negative-integer t2))
-		   (type-or1
-		    (super-range f
-				 (type-and #tnon-negative-integer t1)
-				 (type-and #tnegative-integer t2))
-		    (super-range f
-				 (type-and #tnegative-integer t1)
-				 (type-and #tnegative-integer t2))))))))
-	(t1p (when (type>= #tfixnum t1) (super-range f t1)))
+	(t2p (logand2-propagator f t1 t2))
+	(t1p (logand1-propagator f t1))
 	((not t1p) (super-range f))))
 
 (dolist (l '(logand logior logxor logeqv logandc1 logandc2 logorc1 logorc2 lognand lognor lognot))
