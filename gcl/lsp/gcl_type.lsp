@@ -405,15 +405,18 @@
 	 (and (ntp-and t1 t2))
 	 (or (ntp-or t1 t2))))
 
-(defun new-tp1 (op t1 t2 xp mp)
-  (cond ;((atom t1) (break)(caddr t2));FIXME
-	;((atom t2) (break)(caddr t1));FIXME
-	((atom t1) (new-tp4 (tp-mask (pop t2) (pop t2)) xp mp (if (eq op 'and) -1 1)
-			    (ntp-op op (btp-type2 t1) (car t2))))
-	((atom t2) (new-tp4 (tp-mask (pop t1) (pop t1)) xp mp (if (eq op 'and) -1 1)
-			    (ntp-op op (car t1) (btp-type2 t2))))
-	((new-tp4 (tp-mask (pop t1) (pop t1) (pop t2) (pop t2)) xp mp (if (eq op 'and) -1 1)
-		  (ntp-op op (car t1) (car t2))))))
+(let ((tmp (make-btp)))
+  (defun new-tp1 (op t1 t2 xp mp)
+    (cond
+     ((atom t1)
+      (unless (equal xp mp)
+	(if (eq op 'and)
+	    (ntp-and (caddr t2) (ntp-not (btp-type2 (bit-andc1 t1 (xtp t2) tmp))))
+	  (ntp-or (caddr t2) (btp-type2 (bit-andc2 t1 (mtp t2) tmp))))))
+     ((atom t2) (new-tp1 op t2 t1 xp mp))
+     ((new-tp4 (tp-mask (pop t1) (pop t1) (pop t2) (pop t2)) xp mp (if (eq op 'and) -1 1)
+	       (ntp-op op (car t1) (car t2)))))))
+
 
 (let ((xp (make-btp))(mp (make-btp)))
   (defun cmp-tp-and (t1 t2)
@@ -421,15 +424,16 @@
     (cond ((when (atom t1) (equal xp (xtp t2))) t2)
 	  ((when (atom t2) (equal xp (xtp t1))) t1)
 	  ((and (atom t1) (atom t2)) (copy-tp xp xp nil -1))
-	  ((let ((type (new-tp1 'and t1 t2 xp (bit-and (mtp t1) (mtp t2) mp))))
-	     (cond ((when (atom t1) (equal mp t1)) t1)
-		   ((when (atom t2) (equal mp t2)) t2)
-		   ((copy-tp xp mp type -1))))))))
+	  ((bit-and (mtp t1) (mtp t2) mp)
+	   (cond ((when (atom t1) (equal mp t1)) t1)
+		 ((when (atom t2) (equal mp t2)) t2)
+		 ((copy-tp xp mp (new-tp1 'and t1 t2 xp mp) -1)))))))
 
 (defun tp-and (t1 t2)
   (when (and t1 t2)
     (cond ((eq t1 t) t2)((eq t2 t) t1)
 	  ((cmp-tp-and t1 t2)))))
+
 
 (let ((xp (make-btp))(mp (make-btp)))
   (defun cmp-tp-or (t1 t2)
@@ -437,10 +441,10 @@
     (cond ((when (atom t1) (equal mp (mtp t2))) t2)
 	  ((when (atom t2) (equal mp (mtp t1))) t1)
 	  ((and (atom t1) (atom t2)) (copy-tp mp mp nil 1))
-	  ((let ((type (new-tp1 'or t1 t2 (bit-ior (xtp t1) (xtp t2) xp) mp)))
-	     (cond ((when (atom t1) (equal xp t1)) t1)
-		   ((when (atom t2) (equal xp t2)) t2)
-		   ((copy-tp xp mp type 1))))))))
+	  ((bit-ior (xtp t1) (xtp t2) xp)
+	   (cond ((when (atom t1) (equal xp t1)) t1)
+		 ((when (atom t2) (equal xp t2)) t2)
+		 ((copy-tp xp mp (new-tp1 'or t1 t2 xp mp) 1)))))))
 
 (defun tp-or (t1 t2)
   (cond ((eq t1 t))
