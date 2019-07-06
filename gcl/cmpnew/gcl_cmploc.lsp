@@ -434,7 +434,7 @@
 	 (fit  (car (rassoc cl +inline-types-alist+)))
 	 (fvt  (car (rassoc cl +value-types+)))
 	 (ft   (loc-kind loc))
-	 (tt   (cmp-norm-tp (get key 'lisp-type)))
+	 (tt   (get key 'cmp-lisp-type))
 	 (cast (if (member key '(:cnum :creal)) "" (strcat "(" key ")")))
 	 (pp   (search "*" cast)))
 

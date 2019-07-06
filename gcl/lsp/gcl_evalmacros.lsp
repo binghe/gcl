@@ -545,11 +545,11 @@
 (defun uniq-list (list) (or (gethash list *uniq-list*) (setf (gethash list *uniq-list*) list)))
 
 (defun normalize-function-plist (plist)
-  (labels ((mn (tp &aux (n (cmp-norm-tp tp))) (if (unless (eq tp n) (eq n '*)) (return-from normalize-function-plist nil) n))
-	   (norm-sig (sig) (uniq-list (list (mapcar #'mn (car sig)) (mn (cadr sig))))))
-  (setf (car plist) (norm-sig (car plist)))
-  (setf (cadr plist ) (mapcar (lambda (x) (uniq-list (cons (car x) (norm-sig (cdr x))))) (cadr plist)))
-  plist))
+  (setf (car plist) (uniq-list (car plist))
+	(cadr plist) (mapcar (lambda (x)
+			       (uniq-list (cons (car x) (uniq-list (cdr x)))))
+			     (cadr plist)))
+  plist)
 
 (defvar *function-plists* nil);rely on defvar not resetting to nil on loading this file compiled
 

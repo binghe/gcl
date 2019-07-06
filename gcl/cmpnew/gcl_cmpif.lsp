@@ -131,7 +131,7 @@
 ;;       tp)))
 
 (defun tppra (tp arg f r)
-  (let ((s (cmp-norm-tp (info-type (cadr arg)))))
+  (let ((s (info-type (cadr arg))))
     (cons (type-and tp (two-tp-inf f s)) (type-and tp (two-tp-inf r s)))))
 
 ;; (defun tppra (tp arg f r)
@@ -256,9 +256,9 @@
 		  (srfn (cdr (assoc sfn +bool-inf-op-list+)))
 		  (args (if (eq (car fmla) 'inline) (fourth (fifth fmla)) (fourth fmla)))
 		  (l (length args))
-		  (pt (get fn 'si::predicate-type)));FIXME +cmp-type-alist+
+		  (pt (rassoc fn +cmp-type-alist+)));FIXME +cmp-type-alist+ (get fn 'si::predicate-type)
 	     (cond ((and (= l 1) (vlp (first args)) pt) 
-		    (list (cons (car (third (first args))) (cons (cmp-norm-tp pt) (cmp-norm-tp `(not ,pt))))))
+		    (list (cons (car (third (first args))) (cons (car pt) (tp-not (car pt))))));(cmp-norm-tp pt); FIXME tp-not
 		   ((and (= l 2) (eq fn 'typep) (vlp (first args))
 			 (let ((tp (cmp-norm-tp (get-object-value (second args)))))
 			   (when tp (list (cons (car (third (first args))) (cons tp (tp-not tp))))))))

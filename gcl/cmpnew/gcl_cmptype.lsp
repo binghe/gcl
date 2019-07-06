@@ -773,7 +773,7 @@
 (si::putprop 'lcm 'lcm-propagator 'type-propagator)
 
 (defun rem-propagator (f t1 t2)
-  (let ((t2 (cmp-norm-tp (mod-propagator f t1 t2))))
+  (let ((t2 (mod-propagator f t1 t2)))
     (when t2
       (cond ((type>= #tnon-negative-real t1)
 	     (type-or1 (type-and #tnon-negative-real t2)
@@ -1017,9 +1017,7 @@
 
 (defvar *unique-sigs* (make-hash-table :test 'equal))
 (defun unique-sigs (sig)
-  (let ((sig (list (mapcar (lambda (x) (cmp-norm-tp x)) (car sig))
-		   (cmp-norm-tp (cadr sig)))))
-    (or (gethash sig *unique-sigs*) (setf (gethash sig *unique-sigs*) sig))))
+  (or (gethash sig *unique-sigs*) (setf (gethash sig *unique-sigs*) sig)))
 		  
 (defun bump-tp (tp)
   (cond ((eq tp '*) tp)

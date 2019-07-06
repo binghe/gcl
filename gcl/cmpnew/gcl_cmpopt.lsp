@@ -1098,7 +1098,7 @@
 
 
 ;;si::c-type
-(push '((t) #.(c-type-propagator 'si::c-type #tt) #.(flags rfa) "type_of(#0)") 
+(push '((t) #.(cmp-unnorm-tp (c-type-propagator 'si::c-type #tt)) #.(flags rfa) "type_of(#0)")
       (get 'si::c-type 'inline-always))
 
 (push '((long-float) short-float #.(flags rfa) "((float)#0)" ) (get 'si::long-to-short 'inline-always))
@@ -1184,10 +1184,10 @@
 
 
 
-(setf (get :boolean 'lisp-type) (cmp-norm-tp 'boolean))
-(setf (get :void 'lisp-type) (cmp-norm-tp nil))
-(setf (get :cnum 'lisp-type) (cmp-norm-tp 'cnum))
-(setf (get :creal 'lisp-type) (cmp-norm-tp 'creal))
+(setf (get :boolean 'lisp-type) 'boolean)
+(setf (get :void 'lisp-type) nil)
+(setf (get :cnum 'lisp-type) 'cnum)
+(setf (get :creal 'lisp-type) 'creal)
 (dolist (l '((:float      "make_shortfloat"      short-float     cnum)
 	     (:double     "make_longfloat"       long-float      cnum)
 	     (:character  "code_char"            character       cnum)
@@ -1227,8 +1227,11 @@
   (let ((s (intern (symbol-name (car l)) 'keyword)))
     (setf (get s 'lisp-type) (cadr l))))
 
-(defvar *box-alist* (mapcar (lambda (x) (cons x (get x 'lisp-type))) '(:char :fixnum :float :double :fcomplex :dcomplex)))
+(defvar *box-alist* (mapcar (lambda (x) (cons x (cadr (assoc (get x 'lisp-type) *c-types*))))
+			    '(:char :fixnum :float :double :fcomplex :dcomplex)))
 
-
-
-
+(do-symbols
+ (s :keyword)
+ (let ((z (get s 'lisp-type :opaque)))
+   (unless (eq z :opaque)
+     (setf (get s 'cmp-lisp-type) (cmp-norm-tp z)))))

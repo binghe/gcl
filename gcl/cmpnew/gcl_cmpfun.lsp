@@ -642,11 +642,9 @@
 ;; from x.  
 (defun result-type (x)
   (cond ((symbolp x)
-	 (info-type (cadr (c1arg x))))
-	((constantp x)
-	 (cmp-norm-tp (type-of x)))
-	((and (consp x) (eq (car x) 'the))
-	 (cmp-norm-tp (second x)))
+	 (cmp-unnorm-tp (info-type (cadr (c1arg x)))))
+	((constantp x) (type-of x))
+	((and (consp x) (eq (car x) 'the)) (second x))
 	(t t)))
 
 ;; (defun result-type (x)

@@ -266,7 +266,7 @@
 	   (ba (and be ;(si::dt-apply be (cons f (mapcar 'coerce-to-one-valuea args))))));FIXME
 		    (apply be (cons f (mapcar 'coerce-to-one-value args))))));FIXME
       (when ba
-	(return-from result-type-from-args (if (atomic-tp ba) ba (cmp-norm-tp ba)))))
+	(return-from result-type-from-args ba)))
     (dolist (v '(inline-always inline-unsafe))
       (let* ((w (get f v)))
 	(if (and w (symbolp (caar w)) (flag-p (third (car w)) itf))
@@ -940,12 +940,6 @@
 	      (cons (bind-all-vars (caddr form))
 		    (if (cadddr form) (list (bind-all-vars (cadddr form))))))))
 		
-;FIXME find a better way to avoid expander recursion
-(defconstant +cmp-fn-alist+ '(;(cmp-nthcdr . nthcdr)
-			      ;(cmp-nth . nth)
-			      (cmp-aref . row-major-aref)
-			      (cmp-aset . si::aset1)
-			      (cmp-array-dimension . array-dimension)))
 (defvar *in-inline* nil)
 ;(defvar *callees* nil)
 
@@ -2617,12 +2611,12 @@
     (cond (sd
 	    (let* ((aet-type (aref (si::s-data-raw sd) index))
 		   (type (nth aet-type +cmp-array-types+)))
-	      (cond ((eq (inline-type (cmp-norm-tp type)) 'inline)
+	      (cond ((eq (inline-type type) 'inline)
 		     (or (= aet-type +aet-type-object+) (error "bad type ~a" type))))
-	      (setf (info-type (car arg)) (cmp-norm-tp type))
+	      (setf (info-type (car arg)) type)
 	      (coerce-loc
 		      (list (inline-type
-			     (cmp-norm-tp type))
+			     type)
 		           (flags)
 			    'my-call
 			    (list
@@ -2630,7 +2624,7 @@
 			      (inline-args (list (car form))
 					   '(t)))
 			     'joe index sd))
-		      (cmp-norm-tp type-wanted)))
+		      type-wanted))
 		)
 	  (t (wfs-error)))))
 
@@ -2640,7 +2634,7 @@
   (let ((loc (car (inline-args (list form) '(t))))
 	(type (nth (aref (si::s-data-raw sd) index) +cmp-array-types+)))
        (unwind-exit
-	 (list (inline-type (cmp-norm-tp type))
+	 (list (inline-type type)
 			  (flags) 'my-call
 			  (list  loc  name-vv
 				 index sd))))
@@ -2732,7 +2726,7 @@
   (let* ((raw (si::s-data-raw sd))
   (type (nth (aref raw ind) +cmp-array-types+))
   (spos (si::s-data-slot-position sd))
-  (tftype (cmp-norm-tp type))
+  (tftype type)
   ix iy)
 
    (setq locs (inline-args

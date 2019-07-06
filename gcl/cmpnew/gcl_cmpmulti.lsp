@@ -210,7 +210,12 @@
 					    x) args)))
   (cond ((unless (cdr nargs) (car nargs)))
 	((let ((info (make-info)))
-	   (setf (info-type info) (cmp-norm-tp (cons 'returns-exactly (mapcar (lambda (x &aux (i (cadr x))) (add-info info i) (info-type i)) nargs))))
+	   (setf (info-type info)
+		 (cons 'returns-exactly
+		       (mapcar (lambda (x &aux (i (cadr x)))
+				 (add-info info i)
+				 (info-type i))
+			       nargs)))
 	   (list 'values info nargs)))))
 
 ;; (defun c1values (args &aux (info (make-info)))

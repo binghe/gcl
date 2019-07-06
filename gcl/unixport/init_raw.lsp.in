@@ -26,7 +26,8 @@
 	(c-set-function-plist
 	 fun
 	 (apply 'make-function-plist
-		(list (get s 'proclaimed-arg-types) (get s 'proclaimed-return-type))
+		(list (mapcar 'cmp-norm-tp (get s 'proclaimed-arg-types))
+		      (cmp-norm-tp (get s 'proclaimed-return-type)))
 		(or (cdr (c-function-plist fun)) (list nil nil nil nil s))))))
     (dolist (l '(proclaimed-function proclaimed-arg-types proclaimed-return-type))
       (remprop s l))))

@@ -43,7 +43,8 @@
 ;	     (((t *) nil) . error);fixme
 	     (((*) string) . si::string-concatenate)))
   (let ((x (si::call (cdr l) t)))
-    (cond (x (setf (car x) (car l)) (si::normalize-function-plist x))
+    (cond (x (setf (car x) (list (mapcar 'cmp-norm-tp (caar l)) (cmp-norm-tp (cadar l))))
+	     (si::normalize-function-plist x))
 	  ((print (cdr l))))))
 ;  (si::add-hash (cdr l) (export-sig (car l)) nil nil nil))
 

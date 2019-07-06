@@ -1032,9 +1032,9 @@
 
 (defun c1lit (args)
   (flet ((strcat (&rest r) (apply 'concatenate 'string r)))
-	(let* ((tp (get (pop args) 'lisp-type :opaque))
+	(let* ((tp (get (pop args) 'cmp-lisp-type :opaque))
 					;	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-	       (info (make-info :type (cmp-norm-tp tp))) ;FIXME boolean
+	       (info (make-info :type tp)) ;FIXME boolean
 	       (inl "")(i -1)
 	       (nargs (mapcan (lambda (x &aux (sp (stringp x))) 
 				(setq inl (strcat inl (if sp x (strcat "#" (write-to-string (incf i))))))
@@ -1335,8 +1335,8 @@
 	     (si::callers fname))))
     
     (push (let* ((at (car sig))
-		 (al (mapcar (lambda (x) (link-rt (cmp-norm-tp x) nil)) at))
-		 (rt (link-rt (cmp-norm-tp (cadr sig)) nil)))
+		 (al (mapcar (lambda (x) (link-rt x nil)) at))
+		 (rt (link-rt (cadr sig) nil)))
 	    (list fname al rt
 		  (if (single-type-p rt) (flags set ans) (flags set ans sets-vs-top))
 		  (make-inline-string cfun at fname)))
@@ -1577,7 +1577,7 @@
   (let* ((mv (cmpt tp))
 	 (tpp (nil-to-t (if mv (coerce-to-one-value tp) tp)))
 	 (tppn (car (member tpp `(,@+c-global-arg-types+ ,#tt ,#t*) :test 'type<=))));FIXME
-    (if mv (cmp-norm-tp `(,(car tp) ,@(when (cdr tp) `(,tppn)) ,@(cddr tp))) tppn)))
+    (if mv `(,(car tp) ,@(when (cdr tp) `(,tppn)) ,@(cddr tp)) tppn)))
 
 
 (defun t2defun (fname cfun lambda-expr doc sp)
@@ -2608,7 +2608,7 @@
 			      (*volatile* (volatile (cadr lambda-expr))))
   (declare (fixnum level))
 
-  (setq h (fun-call fun) at (mapcar 'cmp-norm-tp (caar h)) rt (cmp-norm-tp (cadar h)));FIXME
+  (setq h (fun-call fun) at (caar h) rt (cadar h));FIXME
   (dolist (vl requireds)
     (cond ((eq (var-kind vl) 'special)
 	   (push (cons vl (var-loc vl)) specials))
