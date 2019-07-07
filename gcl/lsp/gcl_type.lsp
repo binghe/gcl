@@ -383,14 +383,18 @@
     (when (and m x) (cons m x))))
 
 (defun ntp-bnds (x)
-  (unless (cadr x)
-    (lreduce (lambda (y x)
-	       (lreduce 'rng-bnd
-			(when (member (car x) +range-types+)
-			  (if (eq (cadr x) t) (return-from ntp-bnds '(* . *))
-			    (cdr x)))
-			:initial-value y))
-	     (car x) :initial-value nil)))
+  (lreduce (lambda (y x)
+	     (lreduce 'rng-bnd
+		      (when (member (car x) +range-types+)
+			(if (eq (cadr x) t) (return-from ntp-bnds '(* . *))
+			  (cdr x)))
+		      :initial-value y))
+	   (lreduce (lambda (y z)
+		      (when (cadr x)
+			(unless (assoc z y)
+			  (push (list z t) y))) y)
+		    +range-types+ :initial-value (car x))
+	   :initial-value nil))
 
 (defun tp-bnds (x)
   (when x
