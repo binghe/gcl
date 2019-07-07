@@ -320,6 +320,7 @@
 				 (nconc (mapcar (lambda (x) (cons x (cmp-norm-tp x))) z)
 					(mapcar (lambda (x) (cons x (cmp-norm-tp `(complex ,x)))) z))))
 
+;FIXME zero-pole, roll dsrs together, separate complex contagion
 
 (defun dsr2 (f t1 t2 &aux (p1 (pop t1))(p2 (pop t2)))
   (let* ((z (and (symbolp f) (get f 'zero-pole)))
@@ -327,14 +328,13 @@
     (unless (and (car b1) (car b2))
       (return-from
        dsr2
-       (unless (member f '(max atan));FIXME
-	 (cmp-norm-tp
-	  (car (member
-		(mfc f p2
-		     (complex (contagion-irep 2 p1) (contagion-irep 3 p1))
-		     (complex (contagion-irep 4 p2) (contagion-irep 5 p2)))
-		`((complex integer) (complex ratio) (complex short-float)
-		  (complex long-float) complex) :test 'typep))))))
+       (cmp-norm-tp
+	(car (member
+	      (mfc f p2
+		   (complex (contagion-irep 2 p1) (contagion-irep 3 p1))
+		   (complex (contagion-irep 4 p2) (contagion-irep 5 p2)))
+	      `((complex integer) (complex ratio) (complex short-float)
+		(complex long-float) complex) :test 'typep)))))
     (let* ((n1 (conv-bnd nil p1 (car b1)  -inf))
 	   (x1 (conv-bnd nil p1 (cadr b1) +inf))
 	   (n2 (conv-bnd z p2 (car b2)  -inf))
@@ -407,8 +407,20 @@
 
 (dolist (l '(/ floor ceiling truncate round ffloor fceiling ftruncate fround))
   (si::putprop l t 'zero-pole))
-(dolist (l '(si::number-plus si::number-minus si::number-times + - * exp atan tanh sinh asinh))
+(dolist (l '(si::number-plus si::number-minus si::number-times + - * exp tanh sinh asinh))
   (si::putprop l 'super-range 'type-propagator))
+
+(defun atan-propagator (f t1 &optional (t2 nil t2p))
+  (if t2p
+      (type-or1
+       (super-range f (type-and #tnon-negative-real t1) (type-and #tnon-negative-real t2))
+       (type-or1
+	(super-range f (type-and #tnon-negative-real t1) (type-and #tnegative-real t2))
+	(type-or1
+	 (super-range f (type-and #tnegative-real t1) (type-and #tnon-negative-real t2))
+	 (super-range f (type-and #tnegative-real t1) (type-and #tnegative-real t2)))))
+    (super-range f t1)))
+(si::putprop 'atan 'atan-propagator 'type-propagator)
 
 (defun float-propagator (f t1 &optional (t2 #tnull t2p))
   (if (equal t2 #tnull)

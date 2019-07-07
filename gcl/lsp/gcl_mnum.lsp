@@ -119,10 +119,13 @@
 
  (defmacro defrmfun (x &optional n)
    (let ((b (mdlsym x))
-	 (f (mdlsym (string-concatenate x "f"))))
+	 (f (mdlsym (string-concatenate x "f")))
+	 (tp (get 'atan 'compiler::type-propagator)));FIXME
      `(progn
 	(mdlsym ,x)
 	(mdlsym (string-concatenate ,x "f"))
+	(setf (get ',b 'compiler::type-propagator)  ',tp)
+	(setf (get ',f 'compiler::type-propagator)  ',tp)
 	(defun ,(or n (intern (string-upcase x))) (x z)
 	  ,(unless n `((declare (optimize (safety 2)))
 		       (check-type x real)
