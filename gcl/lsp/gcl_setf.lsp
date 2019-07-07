@@ -142,7 +142,7 @@
 
 (defun get-setf-method-multiple-value (form &optional env &aux tem)
   (cond ((symbolp form)
-	 (let ((store (sgen "GET-SETF-METHOD-MULTIPLE-VALUE")))
+	 (let ((store (gensym "GET-SETF-METHOD-MULTIPLE-VALUE")));FIXME
 	   (values nil nil (list store) `(setq ,form ,store) form)))
 	((or (not (consp form)) (not (symbolp (car form))))
 	 (error "Cannot get the setf-method of ~S." form))
@@ -160,7 +160,7 @@
 	((or (get (car form) 'setf-update-fn)
 	     (setq tem (get (car form) 'si::structure-access)))
 	 (let ((vars (to-gensyms (cdr form)))
-	       (store (sgen "GET-SETF-METHOD-MULTIPLE-VALUE")))
+	       (store (gensym "GET-SETF-METHOD-MULTIPLE-VALUE")))
 	   (values vars (cdr form) (list store)
 	           (cond (tem (setf-structure-access (car vars) (car tem) (cdr tem) store))
 			 ((let ((f (get (car form) 'setf-update-fn)))
@@ -168,7 +168,7 @@
 		   (cons (car form) vars))))
 	((get (car form) 'setf-lambda)
 	 (let* ((vars (to-gensyms (cdr form)))
-		(store (sgen "GET-SETF-METHOD-MULTIPLE-VALUE"))
+		(store (gensym "GET-SETF-METHOD-MULTIPLE-VALUE"))
 		(f (get (car form) 'setf-lambda)))
 		;; this looks bogus to me.  What if l is compiled?--wfs
 ;		(f `(lambda ,(car l) #'(lambda ,(cadr l) ,@(cddr l)))))
@@ -179,7 +179,7 @@
 	 (get-setf-method-multiple-value (macroexpand form env)))
 	(t 
 	 (let ((vars (to-gensyms (cdr form)))
-	       (store (sgen "GET-SETF-METHOD-MULTIPLE-VALUE")))
+	       (store (gensym "GET-SETF-METHOD-MULTIPLE-VALUE")))
 	   (values vars (cdr form) (list store)
 	           `(funcall
 		     #'(setf ,(car form))
