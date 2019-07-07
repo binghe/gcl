@@ -351,14 +351,8 @@ object_to_float(object x)
 object
 make_fcomplex(fcomplex x) {
 
-  object r,i,y;
-  r=make_shortfloat(creal(x));
-  i=make_shortfloat(cimag(x));
-  y=alloc_object(t_complex);
-  y->cmp.cmp_real=r;
-  y->cmp.cmp_imag=i;
-  y->cmp.tt=2;/*FIXME centralize*/
-  return y;
+  return make_complex(make_shortfloat(creal(x)),make_shortfloat(cimag(x)));
+
 }
 
 fcomplex 
@@ -389,14 +383,8 @@ object_to_fcomplex(object x)
 object
 make_dcomplex(dcomplex x) {
 
-  object r,i,y;
-  r=make_longfloat(creal(x));
-  i=make_longfloat(cimag(x));
-  y=alloc_object(t_complex);
-  y->cmp.cmp_real=r;
-  y->cmp.cmp_imag=i;
-  y->cmp.tt=3;/*FIXME centralize*/
-  return y;
+  return make_complex(make_longfloat(creal(x)),make_longfloat(cimag(x)));
+
 }
 
 dcomplex 
