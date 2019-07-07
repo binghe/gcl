@@ -1142,9 +1142,8 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
   if (!distinct)
     for (i = 0;  i < t_end;  i++)
       if (tm_table[i].tm_size != 0 &&
-	  tm_table[i].tm_size >= elsize &&
-	  !tm_table[i].tm_distinct &&
-	  (j < 0 || tm_table[j].tm_size > tm_table[i].tm_size))
+	  tm_table[i].tm_size == elsize &&
+	  !tm_table[i].tm_distinct)
 	j = i;
   if (j >= 0) {
     tm_table[(int)t].tm_type = (enum type)j;
