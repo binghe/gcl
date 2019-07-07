@@ -489,7 +489,7 @@
 (defun ntp-prune (x y z &rest u)
   (cond
     ((not (or x z u)) (if y +tp-t+ +tp-nil+))
-    ((unless (member (not y) x :test-not 'eq :key 'cadr)
+    ((unless (member (not y) x :test-not 'eq :key 'cadr);FIXME? shortest of list and complement?
        (eql (length x) (or (car u)
 			   #.(lreduce (lambda (xx x &aux (x (car x)))
 					(+ (if (listp x) (length x) 1) xx))
