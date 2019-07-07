@@ -226,7 +226,7 @@
       (maybe-coerce-val (boundptr (cddr type)) (car type)))
     type))
 
-(defun conv-bnd (z tp bnd def)
+(defun conv-bnd (z tp bnd def &aux (def (if (eq tp 'short-float) (coerce def tp) def)))
   (cond ((or (not bnd) (eq bnd '*)) def)
 	((and z (realp bnd) (= 0 bnd)) (conv-bnd z tp '(0) def))
 	((or (atom bnd) (not (realp (car bnd))) (not (= 0 (car bnd)))) bnd)

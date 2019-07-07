@@ -2746,7 +2746,7 @@
 (defun sv-wrap (x) `(symbol-value ',x))
 
 (defun infinite-val-symbol (val)
-  (or (car (member val '(+inf -inf nan) :key 'symbol-value))
+  (or (car (member val '(+inf -inf nan +sinf -sinf) :key 'symbol-value))
       (baboon)))
 
 (defun printable-long-float (val)
