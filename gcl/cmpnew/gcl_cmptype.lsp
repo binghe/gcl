@@ -542,25 +542,6 @@
 	   (when a1 (let ((tp (cdar a1))) (unless (or (eq tp +opaque+) (when (symbolp tp) (get tp 'tmp))) (object-type tp))))))
 	;((and (consp t1) (eq (car t1) 'cons)) (caddr t1)) FIXME
 	((type>= #tproper-list t1) #tproper-list)))
-
-;; (defun cdr-propagator (f t1)
-;;   (let ((t1 (type-and #tlist t1)))
-;;     (cond ((and (consp t1) (eq (car t1) 'or))
-;; 	   (reduce 'type-or1 (mapcar (lambda (x) (nil-to-t (cdr-propagator f x))) (cdr t1)) :initial-value nil))
-;; 	  ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
-;; 	  ((let ((a1 (atomic-tp t1)))
-;; 	     (when a1 (let ((tp (cdar a1))) (unless (eq tp +opaque+) (object-type tp))))))
-;; 	  ((and (consp t1) (eq (car t1) 'cons)) (caddr t1))
-;; 	  ((type>= #tproper-list t1) #tproper-list))))
-
-;; (defun cdr-propagator (f t1)
-;;   (let ((t1 (type-and #tlist t1)))
-;;     (cond ((and (consp t1) (eq (car t1) 'or))
-;; 	   (reduce 'type-or1 (mapcar (lambda (x) (cdr-propagator f x)) (cdr t1)) :initial-value nil))
-;; 	  ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
-;; 	  ((and (consp t1) (eq (car t1) 'cons)) (caddr t1))
-;; 	  ((let ((a1 (atomic-tp t1))) (when a1 (object-type (cdar a1)))))
-;; 	  ((type>= #tproper-list t1) #tproper-list))))
 (si::putprop 'cdr 'cdr-propagator 'type-propagator)
 
 (defun make-list-propagator (f t1 &rest r &aux (a (atomic-tp t1)))
@@ -747,23 +728,6 @@
 	;; ((and (consp t1) (eq (car t1) 'cons)) (cadr t1)) ;FIXME
 	))
 
-;; (defun car-propagator (f t1)
-;;   (declare (ignore f))
-;;   (let ((t1 (type-and #tlist t1)))
-;;     (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
-;; 	  ((let ((a1 (atomic-tp t1)))
-;; 	     (when a1 (let ((tp (caar a1))) (unless (eq tp +opaque+) (object-type tp))))))
-;; 	  ((and (consp t1) (eq (car t1) 'cons)) (cadr t1)))))
-
-;; (defun car-propagator (f t1)
-;;   (declare (ignore f))
-;;   (let ((t1 (type-and #tlist t1)))
-;;     (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
-;; 	  ((let ((a1 (atomic-tp t1))) (when a1 (object-type (caar a1)))))
-;; 	  ((and (consp t1) (eq (car t1) 'cons)) (cadr t1)))))
-;; (defun car-propagator (f t1)
-;;   (declare (ignore f))
-;;   (when (type>= #tnull t1) #tnull))
 (si::putprop 'car 'car-propagator 'type-propagator)
 
 (defun contagion (t1 t2)

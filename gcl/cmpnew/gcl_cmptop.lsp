@@ -968,44 +968,6 @@
 (setf (get 'ub 'c1) 'c1ub)
 (setf (get 'unbox 'c1) 'c1ub)
 
-;; (defun c1lit (args)
-;;   (let* ((tp (get (pop args) 'lisp-type :opaque))
-;; 	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-;; 	 (nargs (c1args args info)))
-;;     (when (eq tp :opaque) (baboon))
-;;     (list 'lit info (info-type info) nargs)))
-;; (defun c2lit (tp args)
-;;   (let* ((sig (list (mapcar (lambda (x) (info-type (cadr x))) args) tp))
-;; 	 (i -1)
-;; 	 (inl (reduce (lambda (y x) (strcat y "#" (write-to-string (incf i)))) args :initial-value ""))
-;; 	 (*inline-blocks* 0)
-;; 	 (*restore-avma*  *restore-avma*))
-;;     (unwind-exit (get-inline-loc (list (car sig) (cadr sig) (flags rfa) inl) args)
-;; 		 nil (cons 'values (if (eq (cadr sig) #t(returns-exactly)) 0 1)))
-;;     (close-inline-blocks)))
-;; (setf (get 'lit 'c1) 'c1lit)
-;; (setf (get 'lit 'c2) 'c2lit)
-
-
-;; (defun c1litt (args)
-;;   (let* ((tp (get (pop args) 'lisp-type :opaque))
-;; 	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-;; 	 (inl "")(i -1)
-;; 	 (nargs (mapcan (lambda (x &aux (sp (stringp x))) 
-;; 			  (setq inl (strcat inl (if sp x (strcat "#" (write-to-string (incf i))))))
-;; 			  (unless sp (list (c1expr* (cons 'ub x) info)))) args)))
-;;     (when (eq tp :opaque) (baboon))
-;;     (list 'litt info (info-type info) inl nargs)))
-;; (defun c2litt (tp inl args)
-;;   (let* ((sig (list (mapcar (lambda (x) (info-type (cadr x))) args) tp))
-;; 	 (*inline-blocks* 0)
-;; 	 (*restore-avma*  *restore-avma*))
-;;     (unwind-exit (get-inline-loc (list (car sig) (cadr sig) (flags rfa) inl) args)
-;; 		 nil (cons 'values (if (eq (cadr sig) #t(returns-exactly)) 0 1)))
-;;     (close-inline-blocks)))
-;; (setf (get 'litt 'c1) 'c1litt)
-;; (setf (get 'litt 'c2) 'c2litt)
-
 
 (defun c1lit (args)
   (flet ((strcat (&rest r) (apply 'concatenate 'string r)))
@@ -1020,42 +982,6 @@
 	  (when (search "=" inl) (setf (info-flags info) (logior (iflags side-effects) (info-flags info))))
 	  (list 'lit info (info-type info) inl nargs (make-vs info)))))
 
-;; (defun c1lit (args)
-;;   (flet ((strcat (&rest r) (apply 'concatenate 'string r)))
-;; 	(let* ((tp (get (pop args) 'lisp-type :opaque))
-;; 					;	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-;; 	       (info (make-info :type (cmp-norm-tp tp))) ;FIXME boolean
-;; 	       (inl "")(i -1)
-;; 	       (nargs (mapcan (lambda (x &aux (sp (stringp x))) 
-;; 				(setq inl (strcat inl (if sp x (strcat "#" (write-to-string (incf i))))))
-;; 				(unless sp (list (c1arg (cons 'ub x) info)))) args)))
-;; 	  (when (eq tp :opaque) (baboon))
-;; 	  (when (search "=" inl) (setf (info-flags info) (logior (iflags side-effects) (info-flags info))))
-;; 	  (list 'lit info (info-type info) inl nargs))))
-
-;; (defun c1lit (args)
-;;   (flet ((strcat (&rest r) (apply 'concatenate 'string r)))
-;; 	(let* ((tp (get (pop args) 'lisp-type :opaque))
-;; 					;	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-;; 	       (info (make-info :type (cmp-norm-tp tp))) ;FIXME boolean
-;; 	       (inl "")(i -1)
-;; 	       (nargs (mapcan (lambda (x &aux (sp (stringp x))) 
-;; 				(setq inl (strcat inl (if sp x (strcat "#" (write-to-string (incf i))))))
-;; 				(unless sp (list (c1arg (cons 'ub x) info)))) args)))
-;; 	  (when (eq tp :opaque) (baboon))
-;; 	  (list 'lit info (info-type info) inl nargs))))
-
-;; (defun c1lit (args)
-;;   (flet ((strcat (&rest r) (apply 'concatenate 'string r)))
-;; 	(let* ((tp (get (pop args) 'lisp-type :opaque))
-;; 					;	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-;; 	       (info (make-info :type (cmp-norm-tp tp))) ;FIXME boolean
-;; 	       (inl "")(i -1)
-;; 	       (nargs (mapcan (lambda (x &aux (sp (stringp x))) 
-;; 				(setq inl (strcat inl (if sp x (strcat "#" (write-to-string (incf i))))))
-;; 				(unless sp (list (c1expr* (cons 'ub x) info)))) args)))
-;; 	  (when (eq tp :opaque) (baboon))
-;; 	  (list 'lit info (info-type info) inl nargs))))
 
 (defun c2lit (tp inl args stores)
   (let* ((*inline-blocks* 0)

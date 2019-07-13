@@ -173,20 +173,6 @@
 (defun var-cb (v)
   (or (var-ref-ccb v) (eq 'clb (var-loc v))))
 
-;; (defun var-cbb (v)
-;;   (or (var-ref-ccb v) (eq 'clb (var-loc v)) (eq (var-ref v) 'pb)))
-
-;; (defun c1var (name)
-;;   (let ((info (make-info :referred-array (make-array 1 :fill-pointer 0)))
-;; ;			 :changed-array +empty-info-array+))
-;;         (vref (c1vref name)))
-;;     (push-referred (car vref) info)
-;;     (setf (info-type info) (if (var-cb (car vref)) (var-dt (car vref)) (var-type (car vref))))
-;;     (list 'var info vref)))
-
-;;; A variable reference (vref for short) is a pair
-;;;	( var-object  ccb-reference )
-
 (defun find-v (f)
   (when f (car (member f *vars* :key (lambda (x) (when (var-p x) (var-name x)))))))
 
@@ -206,12 +192,6 @@
   (cond ((cadr vref)  (push (car vref) (info-ref-ccb info)))
 	((caddr vref) (push (car vref) (info-ref-clb info)))
 	((not setq)   (push (car vref) (info-ref     info)))))
-
-;; (defun add-vref (vref info &optional setq)
-;;   (cond ((cadr vref) (push (car vref) (info-vref-ccb info)))
-;; 	((caddr vref) (push (car vref) (info-vref-clb info)))
-;; 	((not setq) (push (car vref) (info-vref info)))))
-
 
 (defun make-vs (info) (mapcar (lambda (x) (cons x (var-store x))) (remove-if-not 'var-p (info-ref info))))
 
@@ -240,70 +220,6 @@
 		       (setf (info-type i) (info-type info))
 		       (list* f i tmp)))))))
 	    ((list 'var info vref c1fv (make-vs info)))))))
-
-;; (defun c1var (name &aux tmp)
-;;   (let* ((info (make-info))
-;; 	 (vref (c1vref name))
-;; 	 (c1fv (when (cadr vref) (c1inner-fun-var))))
-;;     (setf (info-type info) (if (or (cadr vref) (caddr vref)) (var-dt (car vref)) (var-type (car vref))))
-;;     (add-vref vref info)
-;;     (when c1fv
-;;       (add-info info (cadr c1fv)))
-;;     (let ((fmla (exit-to-fmla-p)))
-;;       (cond ((when fmla (type>= #tnull (info-type info))) (c1nil))
-;; 	    ((when fmla (type>= #t(not null) (info-type info))) (c1t))
-;; 	    ((unless (or (cadr vref) (caddr vref))
-;; 	       (let ((tmp (get (var-store (car vref)) 'bindings)))
-;; 		 (when tmp
-;; 		   (unless (member-if-not (lambda (x) (eq (var-store (car x)) (cdr x))) (cdr tmp))
-;; 		     ;; (unless (type>= (var-type (car vref)) (info-type (cadar tmp)))
-;; 		     ;;   (let ((i (copy-info (cadar tmp))))
-;; 		     ;;     (setf (info-type i) (var-type (car vref)) tmp (list (list* (caar tmp) i (cddar tmp))))))
-;; 		     (car tmp))))))
-;; 	    ((list 'var info vref c1fv))))))
-
-;; (defun c1var (name)
-;;   (let* ((info (make-info))
-;; 	 (vref (c1vref name))
-;; 	 (c1fv (when (cadr vref) (c1inner-fun-var))))
-;;     (setf (info-type info) (if (or (cadr vref) (caddr vref)) (var-dt (car vref)) (var-type (car vref))))
-;;     (add-vref vref info)
-;;     (when c1fv
-;;       (add-info info (cadr c1fv)))
-;;     (let ((fmla (exit-to-fmla-p)))
-;;       (cond ((when fmla (type>= #tnull (info-type info))) (c1nil))
-;; 	    ((when fmla (type>= #t(not null) (info-type info))) (c1t))
-;; 	    ((list 'var info vref c1fv))))))
-
-;; (defun c1var (name)
-;;   (let* ((info (make-info))
-;; 	 (vref (c1vref name))
-;; 	 (c1fv (when (cadr vref) (c1inner-fun-var))))
-;;     (setf (info-type info) (if (or (cadr vref) (caddr vref)) (var-dt (car vref)) (var-type (car vref))))
-;;     (add-vref vref info)
-;;     (when c1fv
-;;       (add-info info (cadr c1fv)))
-;;     (let ((fmla (exit-to-fmla-p)))
-;;       (cond ((when fmla (type>= #tnull (info-type info))) (c1nil))
-;; 	    ((when fmla (type>= #t(member t) (info-type info))) (c1t))
-;; 	    ((list 'var info vref c1fv))))))
-
-;; (defun c1var (name)
-;;   (let* ((info (make-info))
-;; 	 (vref (c1vref name))
-;; 	 (c1fv (when (cadr vref) (c1inner-fun-var))))
-;;     (setf (info-type info) (if (or (cadr vref) (caddr vref)) (var-dt (car vref)) (var-type (car vref))))
-;;     (add-vref vref info)
-;;     (when c1fv
-;;       (add-info info (cadr c1fv)))
-;;     (list 'var info vref c1fv)))
-
-;; (defun c1var (name)
-;;   (let* ((info (make-info))
-;; 	 (vref (c1vref name)))
-;;     (setf (info-type info) (if (var-cb (car vref)) (var-dt (car vref)) (var-type (car vref))))
-;;     (push-referred (car vref) info)
-;;     (list 'var info vref)))
 
 (defun ref-obs1 (form obs sccb sclb s &aux (i (cadr form)))
   (mapc (lambda (x)
@@ -389,41 +305,6 @@
 	(setf (get s 'bindings) form))
       (setf (var-store var) s))))
 
-;; (defun push-vbind (var form &aux (s (tmpsym)) (i (when (member (car form) '(lit var)) (cadr form))))
-;;   (when (eq 'lexical (var-kind var))
-;;     (unless (eq (var-store var) +opaque+) 
-;;       (when (and i (info-type i) (not (iflag-p (info-flags i) side-effects)) (not (or (info-ref-clb i) (info-ref-ccb i))))
-;; 	(setf (get s 'bindings) form))
-;;       (setf (var-store var) s))))
-
-;; (defun push-vbind (var form &aux
-;; 		       (s (or (get-vbind form) (tmpsym)))
-;; 		       (i (when (eq (car form) 'lit) (cadr form)))
-;; 		       (vp (and i (not (eq s +opaque+)) (not (iflag-p (info-flags i) side-effects)) (not (or (info-ref-clb i) (info-ref-ccb i)))))
-;; 		       (vs (when vp (remove-if-not 'var-p (info-ref i)))))
-;;   (when (eq 'lexical (var-kind var))
-;;     (unless (eq (var-store var) +opaque+) 
-;;       (when vp (setf (get s 'bindings) (cons form (mapcar (lambda (x) (cons x (var-store x))) vs))))
-;;       (setf (var-store var) s))))
-
-;; (defun push-vbind (var form &aux
-;; 		       (i (when (eq (car form) 'lit) (cadr form)))
-;; 		       (vp (and i (not (iflag-p (info-flags i) side-effects)) (not (or (info-ref-clb i) w(info-ref-ccb i))) 
-;; 				(type>= (var-type var) (info-type i))))
-;; 		       (vs (when vp (remove-if-not 'var-p (info-ref i))))
-;; 		       (s (or (get-vbind form) (tmpsym))))
-;;   (unless (eq (var-store var) +opaque+) 
-;;     (when vp (setf (get s 'bindings) (cons form (mapcar (lambda (x) (cons x (var-store x))) vs))))
-;;     (setf (var-store var) s)))
-
-;; (defun get-vbind (var &aux (var (if (when (consp var) (eq 'var (car var))) (caaddr var) var)))
-;;   (when (var-p var) (var-store var)))
-
-;; (defun push-vbind (var form)
-;;   (unless (eq (var-store var) +opaque+) (setf (var-store var) (or (get-vbind form) (tmpsym)))))
-
-;; (defun push-vbind (var form)
-;;   (setf (var-store var) (or (get-vbind form) (tmpsym))))
 
 (defun get-top-var-binding (bind)
   (labels ((f (l) (member bind l :key (lambda (x) (when (var-p x) (var-store x)))))
@@ -437,14 +318,6 @@
 
 (defun get-var (o &aux (vp (var-p o)))
   (or (get-top-var-binding (if vp (get-vbind o) o)) (when vp o)))
-
-;; (defun get-var (o &aux (vp (var-p o)))
-;;   (let ((y (or (get-top-var-binding (if vp (get-vbind o) o)) (when vp o))))
-;;     (when y
-;;       (unless (eq o y)
-;; 	(maybe-tvc-var y t)
-;; 	(when vp (maybe-tvc-var o t))))
-;;     y))
 
 (defun c1vref (name &aux ccb clb)
   (dolist (var *vars*

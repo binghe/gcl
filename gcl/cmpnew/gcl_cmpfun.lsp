@@ -30,38 +30,8 @@
 (si:putprop 'apply 'c2apply 'c2)
 (si:putprop 'funcall 'c1funcall 'c1)
 
-;; (si:putprop 'rplaca 'c1rplaca 'c1)
-;; (si:putprop 'rplaca 'c2rplaca 'c2)
-;; (si:putprop 'rplacd 'c1rplacd 'c1)
-;; (si:putprop 'rplacd 'c2rplacd 'c2)
-
-;(dolist (l '(si::memq 
-;	     member member-i member-if-not
-;	     assoc assoc-i assoc-if-not
-;	     rassoc rassoc-i rassoc-if-not
-;	     intersection set-difference set-exclusive-or subsetp union))
-;  (si::putprop l (intern (concatenate 'string "C1" (symbol-name l))) 'c1))
-
-;(si:putprop 'si::memq 'c1memq 'c1)
-;(si:putprop 'member 'c1member 'c1)
-;(si:putprop 'member-if 'c1member-if 'c1)
-;(si:putprop 'member-if-not 'c1member-if-not 'c1)
-;(si:putprop 'member!2 'c2member!2 'c2)
-;(si:putprop 'assoc 'c1assoc 'c1)
-;(si:putprop 'rassoc 'c1rassoc 'c1)
-;(si:putprop 'set-difference 'c1set-difference 'c1)
-;(si:putprop 'assoc!2 'c2assoc!2 'c2)
-
-
 (si:putprop 'get 'c1get 'c1)
 (si:putprop 'get 'c2get 'c2)
-
-;(si:putprop 'nth '(c1nth-condition . c1nth) 'c1conditional)
-;(si:putprop 'nthcdr '(c1nthcdr-condition . c1nthcdr) 'c1conditional)
-;(si:putprop 'cmp-nthcdr '(c1nthcdr-condition . c1nthcdr) 'c1conditional)
-;(si:putprop 'si:rplaca-nthcdr 'c1rplaca-nthcdr 'c1)
-;(si:putprop 'si:list-nth 'c1list-nth 'c1)
-;(si:putprop 'list-nth-immediate 'c2list-nth-immediate 'c2)
 
 (defvar *princ-string-limit* 80)
 
@@ -83,25 +53,6 @@
             stream)
       (list 'call-global info 'princ
             (list (c1arg (car args) info) stream))))
-
-;; (defun c1princ (args &aux stream (info (make-info :flags (iflags side-effects))))
-;;   (when (endp args) (too-few-args 'princ 1 0))
-;;   (unless (or (endp (cdr args)) (endp (cddr args)))
-;;           (too-many-args 'princ 2 (length args)))
-;;   (setq stream (if (endp (cdr args))
-;;                    (c1nil)
-;;                    (c1expr* (cadr args) info)))
-;;   (if (and (or (and (stringp (car args))
-;;                     (<= (length (car args)) *princ-string-limit*))
-;;                (characterp (car args)))
-;;            (or (endp (cdr args))
-;;                (and (eq (car stream) 'var)
-;;                     (member (var-kind (caaddr stream)) '(GLOBAL SPECIAL)))))
-;;       (list 'princ info (car args)
-;;             (if (endp (cdr args)) nil (var-loc (caaddr stream)))
-;;             stream)
-;;       (list 'call-global info 'princ
-;;             (list (c1expr* (car args) info) stream))))
 
 (defun c2princ (string vv-index stream)
   (cond ((eq *value-to-go* 'trash)
@@ -386,36 +337,6 @@
 	  ((member test `(equal ,#'equal)) '(equal-is-eq equal-is-eq-tp))
 	  ((member test `(equalp ,#'equalp)) '(equalp-is-eq equalp-is-eq-tp)))))
 
-;; (defun is-eq-test-item-list (test item list rest)
-;;   (declare (ignore list rest))
-;;   (let ((tf (car (test-to-tf test))))
-;;     (and tf (funcall tf item))))
-	
-;; (defun c1is-eq-test-item-list (args)
-;;   (let* ((ltf (test-to-tf (car args)))
-;; 	 (tf (cadr ltf))
-;; 	 (info (make-info)))
-;;     (if (not tf) 
-;; 	(c1nil)
-;;       (let ((nargs (c1args (cdr args) info)))
-;; 	(multiple-value-bind 
-;; 	 (m1 f1) (funcall tf (info-type (cadar nargs)))
-;; 	 (multiple-value-bind 
-;; 	  (m2 f2) (list-tp-test tf (info-type (cadadr nargs)))
-;; 	  (declare (ignore f2))
-;; 	  (let ((m2 (or m2 
-;; 			(let* ((ret (and (constantp (cadddr args)) (cadr (member :ret (cmp-eval (cadddr args))))))
-;; 			       (k1  (when ret (cadr (member :k1  (cadddr args))))))
-;; 			  (when (constantp k1)
-;; 			    (when (constantp (caddr args)) 
-;; 			      (let ((z (cmp-eval (caddr args))))
-;; 				(not (member-if-not (car ltf) (if k1 (mapcar (cmp-eval k1) z) z))))))))))
-;; 	    (cond ((or m1 m2) (c1t))
-;; 		  (f1 (c1nil))
-;; 		  ((let ((info (make-info))) 
-;; 		     (list 'call-global info (car ltf) (c1args (list (cadr args)) info))))))))))))
-;; (si::putprop 'is-eq-test-item-list 'c1is-eq-test-item-list 'c1)
-
 (defun do-predicate (fn args)
   (let* ((info (make-info :type #tboolean))
 	 (nargs (c1args args info))
@@ -425,167 +346,10 @@
       (cond ((type>= tp at) (c1expr (ignorable-pivot (car args) t)))
 	    ((not (type-and at tp)) (c1expr (ignorable-pivot (car args) nil)))
 	    ((list 'call-global info fn nargs))))))
-;(dolist (l +cmp-type-alist+) 
-;  (when (symbolp (cdr l)) 
-;    (si::putprop (cdr l) 'do-predicate 'c1g)))
-
-;(defun c1or (args)
-;  (cond ((null args) (c1expr nil))
-;	((constantp (car args)) (let ((na (cmp-eval (car args)))) (if na (c1expr na) (c1or (cdr args)))))
-;	((null (cdr args)) (c1expr (car args)))
-;	((macro-function 'or) (c1expr (cmp-macroexpand `(or ,@args))))
-;	((let ((info (make-info))) (list 'call-global info 'or (c1args args info))))))
-;(si::putprop 'or 'c1or 'c1)
-
-;; (defun c1array-element-type (args)
-;;   (let* ((info (make-info))
-;; 	 (nargs (c1args args info))
-;; 	 (vt (info-type (cadar nargs)))
-;; 	 (vt (if (type>= #tarray vt) (si::sequence-type-element-type-int vt) 'error))
-;; 	 (vt (if (eq '* vt) 'error vt)))
-;;     (cond ((not (eq 'error vt))
-;; 	   (c1expr `(quote ,vt)))
-;; 	  ((list 'call-global info 'array-element-type nargs)))))
-;; (si::putprop 'array-element-type 'c1array-element-type 'c1)
 
 (defun cons-type-length (type)
   (cond ((and (consp type) (eq (car type) 'cons)) (the seqind (+ 1 (cons-type-length (caddr type)))))
 	(0)))
-
-;; (defmacro one-int-tp (tp)
-;;   `(and (consp ,tp) (eq (car ,tp) 'integer) (cadr ,tp) (eq (cadr ,tp) (caddr ,tp)) `((,(cadr ,tp)))))
-
-;; (defun c1make-array (args)
-;;   (let* ((info (make-info))
-;; 	 (nargs (c1args args info)))
-;;     (let* ((eltp (position :element-type args))
-;; 	   (eltp (when eltp (nth (1+ eltp) nargs)))
-;; 	   (eltp (when eltp (info-type (second eltp))))
-;; 	   (eltp (when eltp (when (atomic-tp eltp) `(,(cadr eltp)))))
-;; 	   (eltp (or eltp  `(*))))
-;;       (let ((szf (let ((st (cmp-norm-tp (info-type (cadar nargs)))))
-;; 		   (cond ((and (constantp (car args)) 
-;; 			       (let ((v (cmp-eval (car args)))) 
-;; 				 (list (if (listp v) v (list v))))))
-;; 			 ((one-int-tp st))
-;; 			 ((not (type-and #tlist (nil-to-t st))) `((*)))
-;; 			 ((and (eq (caar nargs) 'call-global) (eq (caddar nargs) 'list))
-;; 			  `(,(mapcar (lambda (x) (let ((tp (cmp-norm-tp (info-type (cadr x))))) 
-;; 						   (or (caar (one-int-tp tp)) `*)))
-;; 				     (fourth (car nargs)))))
-;; 			 (`(*))))))
-;; 	(setf (info-type info) (cmp-norm-tp `(array ,@eltp ,@szf)))
-;; 	(list 'call-global info 'make-array nargs)))))
-;(si::putprop 'make-array 'c1make-array 'c1)
-
-;(defun all-type (types type)
-;  (if (null types) 
-;      (values t nil)
-;    (let ((m (subtypep (car types) type))
-;	  (f (subtypep type (car types))))
-;      (multiple-value-bind 
-;       (m1 f1)(all-type (cdr types) type)
-;        (values (and m m1) (or (and (not m) (not f)) f1))))))
-    
-;(defun all-type-check (fn type pred args)
-;  (let* ((info (make-info))
-;	(nargs (c1args args info)))
-;    (multiple-value-bind 
-;     (m f) (all-type (mapcar (lambda (x) (info-type (cadr x))) nargs) type)
-;     (cond (m (c1expr t))
-;	   (f (c1expr nil))
-;	   ((c1expr (reduce (lambda (x y) `(and ,x (,pred ,y))) args :initial-value t)))))))
-
-;(defun all-lists (args)
-;  (every 'listp args))
-;(defun c1all-lists (args)
-;  (all-type-check 'all-lists 'list 'listp args))
-;(si::putprop 'all-lists 'c1all-lists 'c1)
-;(defun all-vectors (args)
-;  (every 'vectorp args))
-;(defun c1all-vectors (args)
-;  (all-type-check 'all-vectors 'vector 'vectorp args))
-;(si::putprop 'all-vectors 'c1all-vectors 'c1)
-
-;; (defun boole3 (a b c)  (boole a b c))
-;; (si:putprop 'boole '(c1boole-condition . c1boole3) 'c1conditional)
-
-;; (defun c1boole-condition (args)
-;;    (and (not (endp (cddr args)))
-;; 	(endp (cdddr args))
-;;         (inline-boole3-string (car args))))
-
-;; (defun c1boole3 (args)
-;;   (c1expr (cons 'boole3 args)))
-
-;; (defun inline-boole3 (&rest args)
-;;   (let ((boole-op-arg (second (car args))))
-;;     (or (eq (car boole-op-arg) 'fixnum-value) (error "must be constant"))
-;;     (let ((string (inline-boole3-string  (third boole-op-arg))))
-;;       (or string (error "should not get here boole opt"))
-;;       (wt-inline-loc string (cdr args)))))
-
-;; (defun inline-boole3-string (op-code)
-;;   (and (constantp op-code) (setq op-code (eval op-code)))
-;;   (case op-code
-;; 	(#. boole-andc1 "((~(#0)) &   (#1) )")
-;; 	(#. boole-andc2 "(  (#0)  & (~(#1)))")
-;; 	(#. boole-nor   "(~((#0)  |   (#1)))")
-;; 	(#. boole-orc1  "((~(#0)) |   (#1) )")
-;; 	(#. boole-orc2  "(  (#0)  | (~(#1)))")
-;; 	(#. boole-nand  "(~((#0)  &   (#1)))")
-;; 	(#. boole-eqv	"(~((#0)  ^   (#1)))")
-;; 	(#. boole-and   "(  (#0)  &   (#1))")
-;; 	(#. boole-xor   "(  (#0)  ^   (#1))")
-;; 	(#. boole-ior   "(  (#0)  |   (#1))")))
- 
-;(si:putprop 'ash '(c1ash-condition . c1ash) 'c1conditional)
-
-;(defconstant itop (integer-length most-positive-fixnum))
-;(defconstant ibot (- itop))
-
-;(defun c1ash-condition (args)
-;  (let ((shamt (second args)))
-;    (or (typep shamt `(integer ,ibot ,itop))
-;	(and (consp shamt)
-;	     (eq (car  shamt) 'the)
-;	     (let ((type (cadr  shamt)))
-;	        (type>= `(integer ,ibot ,itop) type))))))
-
-;(defun c1ash (args)
-;  (let  ((shamt (second args))fun)
-;    (cond ((constantp shamt) (setq shamt (eval shamt))
-;	   (or (si:fixnump shamt) (error "integer shift only"))
-;	   (cond ((< shamt 0) (setq fun 'shift>> ))
-;		 ((>= shamt 0) (setq fun 'shift<<))))
-;	  (t (let ((type (second shamt)))
-;	       ;;it had to be a (the type..)
-;	       (cond ((type>= `(integer 0 ,itop) type)
-;		      (setq fun 'shift<< ))
-;		     ((type>= `(integer ,ibot 0) type)
-;		      (setq fun 'shift>> ))
-;		     (t (error "should not get here")))
-;	       )))
-;    (c1expr (cons fun args))))
-;(defun shift>> (a b) (ash a  b))
-;(defun shift<< (a b) (ash a  b))
-;(si:putprop 'ash '(c1ash-condition . c1ash)  'c1conditional)
-;; (si:putprop 'shift>> "Lash" 'lfun)
-;; (si:putprop 'shift<< "Lash" 'lfun)
-
-;; (si:putprop 'length 'c1length 'c1)
-
-;; (defun c1length (args &aux (info (make-info)))
-;;   (setf (info-type info) #tseqind)
-;;   (cond ((and (consp (car args))
-;; 	      (eq (caar args) 'symbol-name)
-;; 	      (let ((args1 (cdr (car args))))
-;; 		(and args1 (not (cddr args1))
-;; 		     (list 'call-global info 'symbol-length
-;; 			   (c1args args1 info))))))
-;; 	(t  (setq args (c1args args info))
-;; 	    (list 'call-global info 'length args ))))
-
 
 (defun c1get (args &aux (info (make-info)))
 
@@ -647,23 +411,6 @@
 	((and (consp x) (eq (car x) 'the)) (second x))
 	(t t)))
 
-;; (defun result-type (x)
-;;   (cond ((symbolp x)
-;; 	 (let ((tem (c1expr x)))
-;; 	   (info-type (second tem))))
-;; 	((constantp x)
-;; 	 (cmp-norm-tp (type-of x)))
-;; 	((and (consp x) (eq (car x) 'the))
-;; 	 (cmp-norm-tp (second x)))
-;; 	(t t)))
-
-;(defun result-type (x)
-;  (info-type (cadr (c1expr x))))
-
-;; (defun lit-eval (form)
-;;   (cond ((atom form) form)
-;; 	((eq (car form) 'quote) (cadr form))
-;; 	((cmp-eval form))))
 
 
 (defun cgss (f)
@@ -721,64 +468,6 @@
 		     (cons 'list (butlast tem))
 		     (cons 'list* tem))))))
 
-;; I don't feel it is good to replace the list call, but rather
-;; usually better the other way around.  We removed c1list
-;; because of possible feedback.
-
-;; (defun c1nth-condition (args)
-;;        (and (not (endp args))
-;;             (not (endp (cdr args)))
-;;             (endp (cddr args))
-;;             (numberp (car args))
-;;             (<= 0 (car args) 7)))
-
-;; (defun c1nth (args)
-;;        (c1expr (case (car args)
-;;                      (0 (cons 'car (cdr args)))
-;;                      (1 (cons 'cadr (cdr args)))
-;;                      (2 (cons 'caddr (cdr args)))
-;;                      (3 (cons 'cadddr (cdr args)))
-;;                      (4 (list 'car (cons 'cddddr (cdr args))))
-;;                      (5 (list 'cadr (cons 'cddddr (cdr args))))
-;;                      (6 (list 'caddr (cons 'cddddr (cdr args))))
-;;                      (7 (list 'cadddr (cons 'cddddr (cdr args))))
-;;                      )))
-
-;; (defun c1nthcdr-condition (args)
-;;        (and (not (endp args))
-;;             (not (endp (cdr args)))
-;;             (endp (cddr args))
-;;             (numberp (car args))
-;;             (<= 0 (car args) 7)))
-
-;; (defun c1nthcdr (args)
-;;        (c1expr (case (car args)
-;;                      (0 (cadr args))
-;;                      (1 (cons 'cdr (cdr args)))
-;;                      (2 (cons 'cddr (cdr args)))
-;;                      (3 (cons 'cdddr (cdr args)))
-;;                      (4 (cons 'cddddr (cdr args)))
-;;                      (5 (list 'cdr (cons 'cddddr (cdr args))))
-;;                      (6 (list 'cddr (cons 'cddddr (cdr args))))
-;;                      (7 (list 'cdddr (cons 'cddddr (cdr args))))
-;;                      )))
-
-;; (defun c1rplaca-nthcdr (args &aux (info (make-info)))
-;;   (when (or (endp args) (endp (cdr args)) (endp (cddr args)))
-;;         (too-few-args 'si:rplaca-nthcdr 3 (length args)))
-;;   (unless (endp (cdddr args))
-;;           (too-few-args 'si:rplaca-nthcdr 3 (length args)))
-;;   (if (and (numberp (cadr args)) (<= 0 (cadr args) 10))
-;;       (let  ((x (tmpsym))(y (tmpsym)))
-;; 	(c1expr
-;; 	 `(let ((,x ,(car args))
-;; 		(,y ,(third args)))
-;; 	    (setf ,x (nthcdr ,(cadr args) ,x))
-;; 	    (setf (car ,x) ,y)
-;; 	    ,y)))
-;;       (list 'call-global info 'si:rplaca-nthcdr (c1args args info))))
-
-
 ;; Facilities for faster reading and writing from file streams.
 ;; You must declare the stream to be :in-file
 ;; or :out-file
@@ -787,8 +476,6 @@
 (si::putprop 'read-char 'co1read-char 'co1)
 (si::putprop 'write-byte 'co1write-byte 'co1)
 (si::putprop 'write-char 'co1write-char 'co1)
-
-
 
 (defun fast-read (args read-fun)
   (cond
@@ -858,26 +545,6 @@
     (when tem 
       (let ((*space* 10))
 	(c1expr tem)))))
-
-;; (defun co1write-byte (f args) f
-;;   (let ((tem (cfast-write args 'write-byte)))
-;;     (if tem (let ((*space* 10))
-;; 	      (c1expr
-;; 		`(let ((.ch ,(car args)))
-;; 		   (declare (fixnum .ch))
-;; 		   ,tem
-;; 		   ,(if (atom (car args)) (car args) '.ch)))))))
-
-;; (defun co1write-char (f args) f
-;;   (let ((tem (cfast-write args 'write-char)))
-;;     (if tem (let ((*space* 10))
-;; 	      (c1expr
-;; 		`(let ((.ch ,(car args)))
-;; 		   (declare (character .ch))
-;; 		   ,tem
-;; 		   ,(if (atom (car args)) (car args) '.ch)))))))
-
-
 
 (defun aet-c-type (type)
   (or (cdr (assoc type +c-type-string-alist+)) (baboon)))
@@ -965,32 +632,6 @@
 
 
   
-;; end new		  
-
-;; (defun c1cons-car-cdr (car args &aux z)
-;;   (let* ((x (when (symbolp (car args))
-;; 	      (let ((v (car (member (car args) *vars* :key (lambda (x) (when (var-p x) (var-name x)))))))
-;; 		(list v (var-ref v) (var-ref-ccb v) (var-loc v)))))
-;; 	 (info (make-info))
-;; 	 (nargs (c1args args info))
-;; 	 (tp (info-type (cadar nargs)))
-;; 	 (ntp (or (if car (car-propagator 'car tp) (cdr-propagator 'cdr tp)) t))
-;; 	 (antp (atomic-tp ntp)))
-;;     (cond ((and nil antp (ignorable-form (car nargs)) (setq z (c1constant-value (car antp) nil)))
-;; 	   (when x
-;; 	     (let ((v (pop x))) 
-;; 	       (setf (var-ref v) (pop x) (var-ref-ccb v) (pop x) (var-loc v) (car x))))
-;; 	   z)
-;; 	  (t (setf (info-type info) ntp) 
-;; 	     (list 'call-global info (if car 'si::cons-car 'si::cons-cdr) nargs nil nil)))));FIXME
-
-;; (defun c1cons-car (args)
-;;   (c1cons-car-cdr t args))
-;; (defun c1cons-cdr (args)
-;;   (c1cons-car-cdr nil args))
-;; (setf (get 'si::cons-car 'c1) 'c1cons-car)	 
-;; (setf (get 'si::cons-cdr 'c1) 'c1cons-cdr)
-
 (defun narg-list-type (nargs &optional dot)
   (let* ((y (mapcar (lambda (x &aux (atp (atomic-tp (info-type (cadr x)))))
 		     (cond ;((get-vbind x))
@@ -1003,36 +644,12 @@
 	    ((when s (type-and #tnull tp)) #tcons)
 	    (t (when dot (setf (cdr (last y 2)) (car (last y)))) (object-type y))))))
 
-;; (defun narg-list-type (nargs &optional dot)
-;;   (let* ((y (mapcar (lambda (x &aux (atp (atomic-tp (info-type (cadr x)))))
-;; 		     (cond ;((get-vbind x))
-;; 			   (atp (car atp));FIXME
-;; 			   ((get-vbind x))
-;; 			   (+opaque+))) nargs)))
-;; ;    (when dot (setf (cdr (last y 2)) (car (last y)))) ;FIXME bump-pcons -- get rid of pcons entirely
-;;     (let ((s (when dot (car (last y))))(tp (info-type (cadar (last nargs)))));FIXME
-;;       (cond ((when s (type>= #tproper-list tp)) #tproper-cons)
-;; 	    ((when s (type-and #tnull tp)) #tcons)
-;; 	    (t (when dot (setf (cdr (last y 2)) (car (last y)))) `(member ,y))))))
-
 (defun c1list (args)
   (let* ((info (make-info))
 	 (nargs (c1args args info)))
     (cond ((not nargs) (c1nil))
 	  ((setf (info-type info) (narg-list-type nargs))
 	   `(call-global ,info list ,nargs)))))
-
-;; (defun c1list (args)
-;;   (let* ((info (make-info))
-;; 	 (nargs (c1args args info)))
-;;     (setf (info-type info) (cond ((not args) #tnull)
-;; 				 ((< (length args) *cdr-limit*)
-;; 				  (cmp-norm-tp
-;; 				   (reduce (lambda (y x)
-;; 					     (declare (ignore x))
-;; 					     `(cons t ,y)) args :initial-value 'null)))
-;; 				 (#tproper-cons)));FIXME
-;;     (list 'call-global info 'list nargs)))
 (si::putprop 'list 'c1list 'c1)
       
 (defun c1list* (args)
@@ -1042,54 +659,5 @@
 	  ((not (cdr nargs)) (car nargs))
 	  ((setf (info-type info) (narg-list-type nargs t))
 	   `(call-global ,info ,(if (cddr nargs) 'list* 'cons) ,nargs)))))
-
-;; (defun c1list* (args)
-;;   (let* ((info (make-info))
-;; 	 (nargs (c1args args info)))
-;;     (setf (info-type info) (cond ((not nargs) #tnull) ((not (cdr nargs)) (info-type (cadar nargs))) 
-;; 				 ((type>= #tproper-list (info-type (cadar (last nargs)))) #tproper-cons)
-;; 				 (#tcons)));FIXME
-;;     (list 'call-global info 'list* nargs)))
 (si::putprop 'list* 'c1list* 'c1)
 (si::putprop 'cons  'c1list* 'c1)
-      
-;; (defun c1append (args)
-;;   (let* ((info (make-info))
-;; 	 (nargs (c1args args info)))
-;;     (setf (info-type info) (cond ((not nargs) #tnull) ((not (cdr nargs)) (info-type (cadar nargs))) 
-;; 				 ((type>= #tproper-list (info-type (cadar (last nargs)))) #tproper-cons)
-;; 				 (#tcons)));FIXME
-;;     (list 'call-global info 'append nargs)))
-;; (si::putprop 'append 'c1append 'c1)
-      
-;; (defun c1list-nth (args &aux (info (make-info)))
-;;   (when (or (endp args) (endp (cdr args)))
-;;         (too-few-args 'si:rplaca-nthcdr 2 (length args)))
-;;   (unless (endp (cddr args))
-;;           (too-few-args 'si:rplaca-nthcdr 2 (length args)))
-;;   (if (and (numberp (car args)) (<= 0 (car args) 10))
-;;       (list 'list-nth-immediate info
-;;             (car args)
-;;             (c1args (list (cadr args)) info))
-;;       (list 'call-global info 'si:list-nth (c1args args info))))
-
-;; (defun c2list-nth-immediate (index args &aux (l (cs-push t t))
-;;                                              (*vs* *vs*) (*inline-blocks* 0))
-;;   (setq args (inline-args args '(t t)))
-;;   (wt-nl "{object V" l "= ")
-;;   (if *safe-compile*
-;;       (progn
-;;        (dotimes** (i index) (wt "cdr("))
-;;        (wt (car args))
-;;        (dotimes** (i index) (wt ")"))
-;;        (wt ";")
-;;        (wt-nl "if((!consp(V" l ")) && (" (car args) "!= Cnil))")
-;;        (wt-nl " FEwrong_type_argument(Scons,V" l ");")
-;;        )
-;;       (progn
-;;        (wt-nl (car args))
-;;        (dotimes** (i index) (wt-nl "->c.c_cdr"))
-;;        (wt ";")))
-;;   (unwind-exit (list 'CAR l))
-;;   (wt "}")
-;;   (close-inline-blocks))
