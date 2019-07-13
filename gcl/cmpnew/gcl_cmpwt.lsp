@@ -120,7 +120,7 @@
 	 (mlist (cons message mlist)))
     (dolist (s mlist)
       (declare (string s))
-      (dotimes** (n (length s))
+      (dotimes (n (length s))
 		 (let ((c (schar s n)))
 		   (declare (character c))
 		   (unless (char= c #\/)
@@ -275,7 +275,7 @@
 ;  (push-data-incf x))
 
 (defmacro wt (&rest forms &aux (fl nil))
-  (dolist** (form forms (cons 'progn (reverse (cons nil fl))))
+  (dolist (form forms (cons 'progn (reverse (cons nil fl))))
     (if (stringp form)
         (push `(princ ,form *compiler-output1*) fl)
         (push `(wt1 ,form) fl))))
@@ -284,13 +284,13 @@
   (cond ((endp forms) '(princ "
 " *compiler-output2*))
         ((stringp (car forms))
-         (dolist** (form (cdr forms)
+         (dolist (form (cdr forms)
                          (list* 'progn `(princ ,(concatenate 'string "
 " (car forms)) *compiler-output2*) (reverse (cons nil fl))))
                    (if (stringp form)
                        (push `(princ ,form *compiler-output2*) fl)
                        (push `(wt-h1 ,form) fl))))
-        (t (dolist** (form forms
+        (t (dolist (form forms
                            (list* 'progn '(princ "
 " *compiler-output2*) (reverse (cons nil fl))))
                      (if (stringp form)
@@ -301,13 +301,13 @@
   (cond ((endp forms) '(princ "
 	" *compiler-output1*))
         ((stringp (car forms))
-         (dolist** (form (cdr forms)
+         (dolist (form (cdr forms)
                          (list* 'progn `(princ ,(concatenate 'string "
 	" (car forms)) *compiler-output1*) (reverse (cons nil fl))))
                    (if (stringp form)
                        (push `(princ ,form *compiler-output1*) fl)
                        (push `(wt1 ,form) fl))))
-        (t (dolist** (form forms
+        (t (dolist (form forms
                            (list* 'progn '(princ "
 	" *compiler-output1*) (reverse (cons nil fl))))
                      (if (stringp form)
@@ -318,13 +318,13 @@
   (cond ((endp forms) '(princ "
 " *compiler-output1*))
         ((stringp (car forms))
-         (dolist** (form (cdr forms)
+         (dolist (form (cdr forms)
                          (list* 'progn `(princ ,(concatenate 'string "
 " (car forms)) *compiler-output1*) (reverse (cons nil fl))))
                    (if (stringp form)
                        (push `(princ ,form *compiler-output1*) fl)
                        (push `(wt1 ,form) fl))))
-        (t (dolist** (form forms
+        (t (dolist (form forms
                            (list* 'progn '(princ "
 " *compiler-output1*) (reverse (cons nil fl))))
                      (if (stringp form)

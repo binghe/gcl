@@ -115,7 +115,7 @@
                 (wt ");"))
                (t
                 (wt-nl "princ_str(\"")
-                (dotimes** (n (length string))
+                (dotimes (n (length string))
                   (let ((char (schar string n)))
                        (cond ((char= char #\\) (wt "\\\\"))
                              ((char= char #\") (wt "\\\""))

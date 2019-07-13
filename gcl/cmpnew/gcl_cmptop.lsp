@@ -321,12 +321,12 @@
 
   ;;; Global entries for directly called functions.
 
-  (dolist* (x *global-entries*)
+  (dolist (x *global-entries*)
 	   (setq *vcs-used* nil)
            (apply 'wt-global-entry x))
   
   ;;; Fastlinks
-  (dolist* (x *function-links*)
+  (dolist (x *function-links*)
 	   (setq *vcs-used* nil)
 	   (wt-function-link x))
 
@@ -335,13 +335,13 @@
   #+sgi3d
   (progn
     (wt-nl1 "" "static void Init_Links () {")
-    (dolist* (x *function-links*)
+    (dolist (x *function-links*)
 	     (let ((num (second x)))
 	       (wt-nl "Lnk" num " = LnkT" num ";")))
     (wt-nl1 "}"))
 
   ;;; Declarations in h-file.
-  (dolist* (x *reservations*)
+  (dolist (x *reservations*)
            (wt-h "#define VM" (car x) " " (cdr x)))
 
   ;;*next-vv* is the index of the last entry pushed onto the data vector
@@ -431,7 +431,7 @@
 	 (let ((*compile-ordinaries* t))
 	   (t1progn (cdr args))))
 	(t
-	 (dolist** (form args) (t1expr form)))))
+	 (dolist (form args) (t1expr form)))))
 
 (defun function-symbol (name)
   (si::funid-sym name))
@@ -2290,11 +2290,11 @@
   (wt-nl (vv-str vv) "->s.s_dbind = " loc ";"))
 
 (defun t1clines (args)
-  (dolist** (s args)
+  (dolist (s args)
     (cmpck (not (stringp s)) "The argument to CLINE, ~s, is not a string." s))
   (push (list 'clines args) *top-level-forms*))
 
-(defun t3clines (ss) (dolist** (s ss) (wt-nl1 s)))
+(defun t3clines (ss) (dolist (s ss) (wt-nl1 s)))
 
 (defun t1defcfun (args &aux (body nil))
   (when (or (endp args) (endp (cdr args)))
@@ -2553,13 +2553,13 @@
 (defun t1defla (args) (declare (ignore args)))
 
 (defun parse-cvspecs (x &aux (cvspecs nil))
-  (dolist** (cvs x (reverse cvspecs))
+  (dolist (cvs x (reverse cvspecs))
     (cond ((symbolp cvs)
            (push (list 'object (string-downcase (symbol-name cvs))) cvspecs))
           ((stringp cvs) (push (list 'object cvs) cvspecs))
           ((and (consp cvs)
                 (member (car cvs) '(object char int float double)))
-           (dolist** (name (cdr cvs))
+           (dolist (name (cdr cvs))
              (push (list (car cvs)
                          (cond ((symbolp name)
                                 (string-downcase (symbol-name name)))

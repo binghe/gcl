@@ -38,7 +38,7 @@
 
 (defun c1eval-when (args)
   (when (endp args) (too-few-args 'eval-when 1 0))
-  (dolist** (situation (car args) (c1nil))
+  (dolist (situation (car args) (c1nil))
     (case situation
           ((eval :execute) (return-from c1eval-when (c1progn (cdr args))))
           ((load compile :load-toplevel :compile-toplevel))
@@ -139,7 +139,7 @@
 
 (defun c1compiler-let (args &aux (symbols nil) (values nil))
   (when (endp args) (too-few-args 'compiler-let 1 0))
-  (dolist** (spec (car args))
+  (dolist (spec (car args))
     (cond ((consp spec)
            (cmpck (not (and (symbolp (car spec))
                             (or (endp (cdr spec))

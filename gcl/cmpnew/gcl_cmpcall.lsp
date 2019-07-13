@@ -641,7 +641,7 @@
            (base-used)))))
 
 (defun push-args-lispcall (args)
-  (dolist** (arg args)
+  (dolist (arg args)
     (let ((*value-to-go* (list 'vs (vs-push))))
       (c2expr* arg))))
 

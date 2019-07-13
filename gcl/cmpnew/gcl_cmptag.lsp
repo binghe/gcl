@@ -1003,7 +1003,7 @@
     (wt-nl "if(nlj_active){")
     (wt-nl "nlj_active=FALSE;")
     ;;; Allocate labels.
-    (dolist** (tag body)
+    (dolist (tag body)
       (when (typep tag 'tag)
         (setf (tag-label tag) (next-label*))
         (setf (tag-unwind-exit tag) label)
@@ -1034,7 +1034,7 @@
     (wt-nl "if(nlj_active){")
     (wt-nl "nlj_active=FALSE;")
     ;;; Allocate labels.
-    (dolist** (tag body)
+    (dolist (tag body)
       (when (typep tag 'tag)
         (setf (tag-label tag) (next-label*))
         (setf (tag-unwind-exit tag) label)

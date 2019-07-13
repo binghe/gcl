@@ -53,13 +53,13 @@
 (defun unwind-bds (bds-cvar bds-bind)
        (when (consp *inline-blocks*) (wt-nl "restore_avma; "))
        (when bds-cvar (wt-nl "bds_unwind(V" bds-cvar ");"))
-       (dotimes* (n bds-bind) (wt-nl "bds_unwind1;")))
+       (dotimes (n bds-bind) (wt-nl "bds_unwind1;")))
 
 (defun unwind-frames-bds (frames bds-cvar bds-bind)
   (dotimes (i frames) (wt-nl "frs_pop();"))
   (when (consp *inline-blocks*) (wt-nl "restore_avma; "))
   (when bds-cvar (wt-nl "bds_unwind(V" bds-cvar ");"))
-  (dotimes* (n bds-bind) (wt-nl "bds_unwind1;")))
+  (dotimes (n bds-bind) (wt-nl "bds_unwind1;")))
 
 (defun unwind-exit (loc &optional (jump-p nil) fname
                         &aux (*vs* *vs*) (bds-cvar nil) (bds-bind 0) type.wt (frames 0))
@@ -77,7 +77,7 @@
         ((and (consp *value-to-go*) (eq (car *value-to-go*) 'jump-false))
          (set-jump-false loc (cadr *value-to-go*))
          (when (null loc) (return-from unwind-exit))))
-  (dolist* (ue *unwind-exit* (baboon))
+  (dolist (ue *unwind-exit* (baboon))
    (cond
     ((consp ue)
      (cond ((eq ue *exit*)

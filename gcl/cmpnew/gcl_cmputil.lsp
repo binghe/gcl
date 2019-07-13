@@ -165,50 +165,6 @@
 ;  (throw *cmperr-tag* '*cmperr-tag*)
 )
 
-;;; Internal Macros with type declarations
-
-(defmacro dolist* ((v l &optional (val nil)) . body)
-  (let ((temp (tmpsym)))
-  `(do* ((,temp ,l (cdr ,temp)) (,v (car ,temp) (car ,temp)))
-	((endp ,temp) ,val)
-	(declare (object ,v))
-	,@body)))
-
-(defmacro dolist** ((v l &optional (val nil)) . body)
-  (let ((temp (tmpsym)))
-  `(do* ((,temp ,l (cdr ,temp)) (,v (car ,temp) (car ,temp)))
-	((endp ,temp) ,val)
-	(declare (object ,temp ,v))
-	,@body)))
-
-(defmacro dotimes* ((v n &optional (val nil)) . body)
-  (let ((temp (tmpsym)))
-   `(do* ((,temp ,n) (,v 0 (1+ ,v)))
-	 ((>= ,v ,temp) ,val)
-	 (declare (fixnum ,v))
-	 ,@body)))
-
-(defmacro dotimes** ((v n &optional (val nil)) . body)
-  (let ((temp (tmpsym)))
-   `(do* ((,temp ,n) (,v 0 (1+ ,v)))
-	 ((>= ,v ,temp) ,val)
-	 (declare (fixnum ,temp ,v))
-	 ,@body)))
-
-;; (defun cmp-eval (form)
-;;   (let ((x (multiple-value-list (cmp-toplevel-eval `(eval ',form)))))
-;;     (if (car x)
-;;         (let ((*print-case* :upcase))
-;;           (incf *error-count*)
-;;           (print-current-form)
-;;           (format t
-;;                   ";;; The form ~s was not evaluated successfully.~%~
-;;                   ;;; You are recommended to compile again.~%"
-;;                   form)
-;;           nil)
-;;         (values-list (cdr x)))))
-
-
 (defun cmp-eval (form)
   (multiple-value-bind 
    (x y) (cmp-toplevel-eval `(eval ',form))

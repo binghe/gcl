@@ -198,7 +198,7 @@
   (wt-nl "{object *V" top "=vs_top,*V" base "=vs_base,*V" sup "=sup;")
   (setq *sup-used* t)
   (wt-nl "vs_base=V" top ";")
-  (dolist** (form forms)
+  (dolist (form forms)
 	    (let ((*value-to-go* 'trash)
 		  (*unwind-exit* (cons (cons 'sup sup) *unwind-exit*)))
 	      (c2expr-top* form top)))
@@ -351,7 +351,7 @@
 	((not v))
 	(set-var-init-type (car v) (or (car t1) #tnull))))
 
-  (dolist* (v vars) (push-var v init-form))
+  (dolist (v vars) (push-var v init-form))
 
   (check-vdecl vnames ts is)
 
@@ -361,7 +361,7 @@
   (setf (info-type info) (info-type (cadr body)))
 
   (ref-vars body vars)
-  (dolist** (var vars) (check-vref var))
+  (dolist (var vars) (check-vref var))
 
   (list 'multiple-value-bind info vars init-form body))
 

@@ -773,7 +773,7 @@
 
 (defun write-block-open (vars)
   (let ( block-p)
-    (dolist**
+    (dolist
      (var vars)
      (let ((kind (var-kind var)))
        (when (or (eq kind 'object) (member kind +c-local-var-types+))

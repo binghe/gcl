@@ -863,7 +863,7 @@
          (t(setf (info-volatile *dm-info*) 1)
            (setf (get macro-name 'contains-setjmp) t)
                ))
-  (dolist* (v *dm-vars*) (check-vref v))
+  (dolist (v *dm-vars*) (check-vref v))
   (list doc ppn whole env vl body *dm-info*)
   )
 
@@ -993,15 +993,15 @@
   )
 
 (defun c2dm-reserve-vl (vl)
-  (dolist** (var (car vl)) (c2dm-reserve-v var))
-  (dolist** (opt (cadr vl))
+  (dolist (var (car vl)) (c2dm-reserve-v var))
+  (dolist (opt (cadr vl))
             (c2dm-reserve-v (car opt))
             (when (caddr opt) (c2dm-reserve-v (caddr opt))))
   (when (caddr vl) (c2dm-reserve-v (caddr vl)))
-  (dolist** (kwd (car (cddddr vl)))
+  (dolist (kwd (car (cddddr vl)))
             (c2dm-reserve-v (cadr kwd))
             (when (cadddr kwd) (c2dm-reserve-v (cadddr kwd))))
-  (dolist** (aux (caddr (cddddr vl)))
+  (dolist (aux (caddr (cddddr vl)))
             (c2dm-reserve-v (car aux)))
   )
 
@@ -1049,7 +1049,7 @@
             (wt-nl "V" cvar "=V" cvar "->c.c_cdr;"))
       (wt "}"))
   (when rest (c2dm-bind-loc rest `(cvar ,cvar)))
-  (dolist** (kwd keywords)
+  (dolist (kwd keywords)
     (let ((cvar1 (cs-push t t)))
          (wt-nl
           "{object V" cvar1 "=getf(V" cvar "," (vv-str (add-symbol (car kwd))) ",OBJNULL);")
@@ -1071,10 +1071,10 @@
              key-flag
              (not allow-other-keys))
         (wt-nl "check_other_key(V" cvar "," (length keywords))
-        (dolist** (kwd keywords)
+        (dolist (kwd keywords)
                   (wt "," (vv-str (add-symbol (car kwd)))))
         (wt ");"))
-  (dolist** (aux auxs)
+  (dolist (aux auxs)
             (c2dm-bind-init (car aux) (cadr aux)))
   )
 
