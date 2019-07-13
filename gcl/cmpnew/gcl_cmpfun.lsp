@@ -411,31 +411,6 @@
 	((and (consp x) (eq (car x) 'the)) (second x))
 	(t t)))
 
-
-
-(defun cgss (f)
-  (cond ((null f))
-	((symbolp f) (unless (or (eq f +opaque+) (get f 'tmp)) f))
-	((atom f))
-	((and (cgss (car f)) (cgss (cdr f))) f)))
-
-;; this is going the wrong way.  want to go up..
-(defun struct-type-opt (x sd)
-  (let ((s (tmpsym))
-	(included (get-included (si::s-data-name sd))))
-    `(let ((,s ,x))
-       (and
-	 (structurep ,s)
-	 ,(cond ((< (length included) 3)
-		 `(or ,@
-		      (mapcar #'(lambda (x)
-				  `(eq (si::structure-def ,s)
-				       ,(name-sd1 x)))
-			      included)))
-		(t `(si::structure-subtype-p ,s
-					    ,(name-sd1
-					       (si::s-data-name sd)))))))))
-
 (defun co1schar (f args)
   (declare (ignore f))
   (and (listp (car args)) (not *safe-compile*)

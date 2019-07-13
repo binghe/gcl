@@ -173,21 +173,6 @@
 (defun var-cb (v)
   (or (var-ref-ccb v) (eq 'clb (var-loc v))))
 
-(defun find-v (f)
-  (when f (car (member f *vars* :key (lambda (x) (when (var-p x) (var-name x)))))))
-
-(defun set-vref (v vl)
-  (let ((ol (list (var-ref-ccb v) (var-loc v) (var-ref v))))
-    (setf (var-ref-ccb v) (pop vl) (var-loc v) (pop vl) (var-ref v) (car vl))
-    ol))
-
-(defun c1prov-expr (form)
-  (let* ((v (find-v form))
-	 (vl (when v (list (var-ref-ccb v) (var-loc v) (var-ref v))))
-	 (e (c1expr form))
-	 (nl (when vl (set-vref v vl))))
-    (if nl (append e (list nl)) e)))
-
 (defun add-vref (vref info &optional setq)
   (cond ((cadr vref)  (push (car vref) (info-ref-ccb info)))
 	((caddr vref) (push (car vref) (info-ref-clb info)))

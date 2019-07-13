@@ -167,22 +167,6 @@
        (eq (car x) 'var) 
        (char= #\Z (aref (symbol-name (var-name (caaddr x))) 0))))
 
-(defun find-ttl-vars (l &optional vars local)
-  (cond ((atom l) nil)
-	((eq (car l) 'let*) 
-	 (let* (nc 
-		(vars (third l))
-		(tmps (remove-if-not (lambda (x) (get (var-name x) 'tmp)) vars))
-		(npp (member-if (lambda (x) (setq nc (get (var-name x) 'no-call))) tmps))
-		(nc  (when npp (remove-if-not (lambda (x) (member (var-name x) nc)) vars)))
-		(vars (set-difference vars tmps))
-		(vars (append (set-difference vars nc) (cons 'no-call nc))))
-	   (find-ttl-vars (fifth l) vars local)))
-	((eq (car l) 'block) vars)
-	((unless local (eq (car l) 'lambda))
-	 (append (car (third l)) (find-ttl-vars (fifth l) vars t)))
-	((or (find-ttl-vars (car l) vars local) (find-ttl-vars (cdr l) vars local)))))
-	
 (defun kp (x y)
   (setf (get y 'kp) x)
   (cons x y))
