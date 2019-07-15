@@ -1,0 +1,6 @@
+gcl_*.c
+gcl_*.h
+dwdoc.aux
+dwdoc.log
+dwdoc.pdf
+dwdoc/

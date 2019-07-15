@@ -1,0 +1,8 @@
+bfdfiles
+gmpfiles
+init_raw.lsp
+*.a
+*.so
+raw_*
+saved_*
+foo
