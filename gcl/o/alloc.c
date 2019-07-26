@@ -535,7 +535,7 @@ exhausted_report(enum type t,struct typemanager *tm) {
 Currently, ~D pages are allocated.~%	     \
 Use ALLOCATE to expand the space.",
 	  "Continues execution.",
-	  2, vs_top[-2], vs_top[-1], Cnil, Cnil);
+	  2, vs_top[-2], vs_top[-1]);
 
   vs_popp;
   vs_popp;
