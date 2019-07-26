@@ -94,11 +94,7 @@ fasload(object faslfile) {
   SEEK_TO_END_OFILE(faslstream->sm.sm_fp);
 
   data = read_fasl_vector(faslstream);
-  memory = alloc_object(t_cfdata);
-  memory->cfd.cfd_self = NULL;
-  memory->cfd.cfd_start = NULL;
-  memory->cfd.cfd_size = 0;
-  memory->cfd.cfd_dlist = Cnil;
+  memory=new_cfdata();
 
   if(symbol_value(sLAload_verboseA)!=Cnil)	
     printf(" ;; start address (dynamic) %p ",fptr);

@@ -54,9 +54,13 @@ License for more details.
 
 #define ulmax(a_,b_) ({ul _a=a_,_b=b_;_a<_b ? _b : _a;})
 #define ALLOC_SEC(sec) (sec->sh_flags&SHF_ALLOC && (sec->sh_type==SHT_PROGBITS || sec->sh_type==SHT_NOBITS))
-#define  LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
-#define  LOAD_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info),_t=ELF_ST_TYPE(sym->st_info);	\
-      sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK || (_t>=STT_LOPROC && _t<=STT_HIPROC));})
+#define LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
+#define EXT_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info); \
+      sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK);})
+#define LOCAL_SYM(sym) (sym->st_value && \
+			ELF_ST_BIND(sym->st_info)==STB_LOCAL)
+			/* && ELF_ST_TYPE(sym->st_info)==STT_FUNC) */
+#define LOAD_SYM(sym) (EXT_SYM(sym)||LOCAL_SYM(sym))
 
 #define MASK(n) (~(~0ULL << (n)))
 
@@ -270,11 +274,8 @@ load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
     sz+=gsz;
   }
 
-  memory=alloc_object(t_cfdata);
+  memory=new_cfdata();
   memory->cfd.cfd_size=sz;
-  memory->cfd.cfd_self=0;
-  memory->cfd.cfd_start=0;/*gc protect*/
-  memory->cfd.cfd_dlist=Cnil;
   memory->cfd.cfd_start=alloc_code_space(sz);
 
   a=(ul)memory->cfd.cfd_start;
@@ -431,13 +432,13 @@ calc_space(ul *ns,ul *sl,Sym *sym1,Sym *syme,const char *st1,Sym *d1,Sym *de,con
 
 static int
 load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1,
-	    Sym *d1,Sym *de,const char *ds1) {
+	    Sym *d1,Sym *de,const char *ds1,ufixnum lp) {
 
   Sym *sym,*d;
 
   for (sym=sym1;sym<syme;sym++) {
 
-    if (!LOAD_SYM(sym))
+    if (!LOAD_SYM(sym) || (LOCAL_SYM(sym) ? !lp : lp))
       continue;
 
     if (d1) {
@@ -488,15 +489,22 @@ load_self_symbols() {
   massert(!calc_space(&ns,&sl,dsym1,dsyme,dst1,NULL,NULL,NULL));
   massert(!calc_space(&ns,&sl,sym1,syme,st1,dsym1,dsyme,dst1));
 
-  c_table.alloc_length=c_table.length=ns;
+  c_table.alloc_length=ns;
   massert(c_table.ptable=malloc(sizeof(*c_table.ptable)*c_table.alloc_length));
   massert(s=malloc(sl));
 
   a=c_table.ptable;
-  massert(!load_ptable(&a,&s,dsym1,dsyme,dst1,NULL,NULL,NULL));
-  massert(!load_ptable(&a,&s,sym1,syme,st1,dsym1,dsyme,dst1));
-  
+  massert(!load_ptable(&a,&s,dsym1,dsyme,dst1,NULL,NULL,NULL,0));
+  massert(!load_ptable(&a,&s,sym1,syme,st1,dsym1,dsyme,dst1,0));
+  c_table.length=a-c_table.ptable;
   qsort(c_table.ptable,c_table.length,sizeof(*c_table.ptable),node_compare);
+
+  c_table.local_ptable=a;
+  massert(!load_ptable(&a,&s,sym1,syme,st1,dsym1,dsyme,dst1,1));
+  c_table.local_length=a-c_table.local_ptable;
+  qsort(c_table.local_ptable,c_table.local_length,sizeof(*c_table.local_ptable),node_compare);
+
+  massert(c_table.alloc_length==c_table.length+c_table.local_length);
 
   massert(!un_mmap(v1,ve));
   massert(!fclose(f));

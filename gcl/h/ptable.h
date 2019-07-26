@@ -38,6 +38,8 @@ typedef struct node TABL[];
 struct  string_address_table
 { struct node *ptable;
   unsigned int length;
+  struct node *local_ptable;
+  unsigned int local_length;
   unsigned int alloc_length;
 };
 

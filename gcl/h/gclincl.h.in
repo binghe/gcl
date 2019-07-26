@@ -56,9 +56,6 @@
 /* use gprof profiling */
 #undef GCL_GPROF
 
-/* starting address for gprof */
-#undef GCL_GPROF_START
-
 /* No gettimeofday call -- fixme */
 #undef GETTOD_NOT_DECLARED
 

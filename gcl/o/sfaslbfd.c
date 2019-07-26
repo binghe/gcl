@@ -327,10 +327,7 @@ fasload(object faslfile) {
   curr_size=(unsigned long)current;
   max_align=1<<max_align;
 
-  memory = alloc_object(t_cfdata);
-  memory->cfd.cfd_dlist = Cnil;
-  memory->cfd.cfd_self = 0;
-  memory->cfd.cfd_start = 0;
+  memory=new_cfdata();
   memory->cfd.cfd_size = curr_size + (max_align > sizeof(char *) ? max_align :0);
   
   memory->cfd.cfd_start=alloc_contblock(memory->cfd.cfd_size);

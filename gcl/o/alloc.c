@@ -1183,24 +1183,6 @@ init_tm(enum type t, char *name, int elsize, int nelts, int sgc,int distinct) {
    call is too fragile.  20050115 CM*/
 static int gcl_alloc_initialized;
 
-
-#ifdef GCL_GPROF
-static unsigned long textstart,textend,textpage;
-static void init_textpage() {
-
-  extern void *GCL_GPROF_START;
-  unsigned long s=(unsigned long)GCL_GPROF_START;
-
-  textstart=(unsigned long)&GCL_GPROF_START;
-  textend=(unsigned long)&etext;
-  if (s<textend && (textstart>textend || s>textstart))
-    textstart=s;
-
-  textpage=2*(textend-textstart)/PAGESIZE;
-  
-}
-#endif
-
 object malloc_list=Cnil;
 
 #include <signal.h>
@@ -1224,10 +1206,6 @@ gcl_init_alloc(void *cs_start) {
 		    
 #if defined(DARWIN)
   init_darwin_zone_compat ();
-#endif
-  
-#ifdef GCL_GPROF
-  init_textpage();
 #endif
   
 #if defined(BSD) && defined(RLIMIT_STACK)
@@ -1307,11 +1285,6 @@ gcl_init_alloc(void *cs_start) {
   initial_sbrk=data_start=heap_end;
   first_data_page=page(data_start);
   
-/* #ifdef GCL_GPROF */
-/*   if (new_holepage<textpage) */
-/*      new_holepage=textpage; */
-/* #endif */
-
   /* Unused (at present) tm_distinct flag added.  Note that if cons
      and fixnum share page types, errors will be introduced.
 
@@ -1348,10 +1321,6 @@ gcl_init_alloc(void *cs_start) {
   ncbpage = 0;
   tm_table[t_contiguous].tm_min_grow=256;
   set_tm_maxpage(tm_table+t_contiguous,1);
-#ifdef GCL_GPROF
-  if (maxcbpage<textpage)
-    set_tm_maxpage(tm_table+t_contiguous,textpage);
-#endif
 
   set_tm_maxpage(tm_table+t_relocatable,1);
   nrbpage=0;
@@ -1550,113 +1519,6 @@ DEFUN("GET-HOLE-SIZE",object,fSget_hole_size,SI,0,0,NONE,OO,OO,OO,OO,(void),"") 
   RETURN1(make_fixnum((rb_start-heap_end)>>PAGEWIDTH));
 }
 
-
-#ifdef GCL_GPROF
-
-static unsigned long start,end,gprof_on;
-static void *initial_monstartup_pointer;
-
-void
-gprof_cleanup(void) {
-
-  extern void _mcleanup(void);
-
-  if (initial_monstartup_pointer) {
-    _mcleanup();
-    gprof_on=0;
-  }
-
-  if (gprof_on) {
-
-    char b[PATH_MAX],b1[PATH_MAX];
-
-    if (!getcwd(b,sizeof(b)))
-      FEerror("Cannot get working directory", 0);
-    if (chdir(P_tmpdir))
-      FEerror("Cannot change directory to tmpdir", 0);
-    _mcleanup();
-    if (snprintf(b1,sizeof(b1),"gmon.out.%u",getpid())<=0)
-      FEerror("Cannot write temporary gmon filename", 0);
-    if (rename("gmon.out",b1))
-      FEerror("Cannot rename gmon.out",0);
-    if (chdir(b))
-      FEerror("Cannot restore working directory", 0);
-    gprof_on=0;
-
-  }
-
-}
-    
-static inline int
-my_monstartup(unsigned long start,unsigned long end) {
-
-  extern void monstartup(unsigned long,unsigned long);
-
-  monstartup(start,end);
-
-  return 0;
-
-}
-
-DEFUN("GPROF-START",object,fSgprof_start,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-
-  extern void *GCL_GPROF_START;
-  static int n;
-
-  if (!gprof_on) {
-    start=start ? start : textstart;
-    end=end ? end : textend;
-    writable_malloc_wrap(my_monstartup,int,start,end);
-    gprof_on=1;
-    if (!n && atexit(gprof_cleanup)) {
-      FEerror("Cannot setup gprof_cleanup on exit", 0);
-      n=1;
-    }
-  }
-
-  return Cnil;
-
-}
-
-DEFUN("GPROF-SET",object,fSgprof_set,SI
-       ,2,2,NONE,OI,IO,OO,OO,(fixnum dstart,fixnum dend),"")
-{
-
-  start=dstart;
-  end=dend;
-
-  return Cnil;
-
-}
-
-DEFUN("GPROF-QUIT",object,fSgprof_quit,SI
-       ,0,0,NONE,OO,OO,OO,OO,(void),"")
-{
-  extern void _mcleanup(void);
-  char b[PATH_MAX],b1[PATH_MAX];
-  FILE *pp;
-  unsigned n;
-
-  if (!gprof_on)
-    return Cnil;
-
-  massert(getcwd(b,sizeof(b)));
-  massert(!chdir(P_tmpdir));
-  _mcleanup();
-  massert(snprintf(b1,sizeof(b1),"gprof '%s'",kcl_self)>0);
-  massert((pp=popen(b1,"r")));
-  while ((n=fread(b1,1,sizeof(b1),pp)))
-    massert(fwrite(b1,1,n,stdout));
-  massert(pclose(pp)>=0);
-  massert(!chdir(b));
-  gprof_on=0;
-
-  return Cnil;
-
-}
-
-#endif
-
 DEFUN("SET-STARTING-HOLE-DIVISOR",object,fSset_starting_hole_divisor,SI,1,1,NONE,II,OO,OO,OO,(fixnum div),"") {
   if (div>0 && div <100)
     starting_hole_div=div;
@@ -1797,20 +1659,7 @@ malloc_internal(size_t size) {
 void *
 malloc(size_t size) {
 
-  void *v=malloc_internal(size);;
-
-  /* FIXME: this is just to handle clean freeing of the
-     monstartup memory allocated automatically on raw image
-     startup.  In saved images, monstartup memory is only
-     allocated with gprof-start. 20040804 CM*/
-#ifdef GCL_GPROF
-  if (raw_image && size>(textend-textstart) && !initial_monstartup_pointer) {
-    massert(!atexit(gprof_cleanup));
-    initial_monstartup_pointer=v;
-  }
-#endif
-  
-  return v;
+  return malloc_internal(size);
   
 }
 
@@ -1819,7 +1668,6 @@ void
 free(void *ptr) {
 
   object *p,pp;
-  static void *initial_monstartup_pointer_echo;
   
   if (ptr == 0)
     return;
@@ -1828,15 +1676,9 @@ free(void *ptr) {
     if ((pp)->c.c_car->st.st_self == ptr) {
       (pp)->c.c_car->st.st_self = NULL;
       *p = pp->c.c_cdr;
-#ifdef GCL_GPROF
-      if (initial_monstartup_pointer==ptr) {
-	initial_monstartup_pointer_echo=ptr;
-	initial_monstartup_pointer=NULL;
-      }
-#endif
       return;
     }
-  if (ptr!=initial_monstartup_pointer_echo) {
+  {
     static void *old_ptr;
     if (old_ptr==ptr) return;
     old_ptr=ptr;
@@ -1844,7 +1686,6 @@ free(void *ptr) {
     FEerror("free(3) error.",0);
 #endif
   }
-  initial_monstartup_pointer_echo=NULL;
   return;
 }
  

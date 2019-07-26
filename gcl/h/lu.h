@@ -377,7 +377,8 @@ struct cfdata {
   char   *cfd_start;             /* beginning of contblock for fun */
   ufixnum cfd_pad:4;             /* unused */
   ufixnum cfd_size:LM4BITS;      /* size of contblock */
-  ufixnum cfd_pad1:4;            /* unused */
+  ufixnum cfd_pad1:3;            /* unused */
+  ufixnum cfd_prof:1;            /* profiling */
   ufixnum cfd_fillp:LM4BITS;     /* size of self */
   object *cfd_self;              /* body */
   plist   cfd_dlist;

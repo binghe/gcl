@@ -271,3 +271,55 @@
   (setq *prof-list* (sort *prof-list* (lambda (x y) (> (reduce (lambda (y x) (+ y (cadr x))) (cdr x) :initial-value 0)
 						       (reduce (lambda (y x) (+ y (cadr x))) (cdr y) :initial-value 0)))))
   (print *prof-list*))
+
+(defun reset-sys-paths (s)
+  (declare (string s))
+  (setq *lib-directory* s)
+  (setq *system-directory* (string-concatenate s "unixport/"))
+  (let (nl)
+    (dolist (l '("cmpnew/" "gcl-tk/" "lsp/" "xgcl-2/"))
+      (push (string-concatenate s l) nl))
+    (setq *load-path* nl))
+  nil)
+
+(defun gprof-output (symtab gmon)
+  (with-open-file
+     (s (format nil "|gprof -S '~a' '~a' '~a'" symtab (kcl-self) gmon))
+     (copy-stream s *standard-output*)))
+
+(defun write-symtab (symtab start end &aux (*package* (find-package "KEYWORD")))
+
+  (with-open-file
+   (s symtab :direction :output :if-exists :supersede)
+
+   (format s "~16,'0x T ~a~%" start "GCL_MONSTART")
+
+   (dolist (p (list-all-packages))
+     (do-symbols (x p)
+      (when (and (eq (symbol-package x) p) (fboundp x))
+	(let* ((y (symbol-function x))
+	       (y (if (and (consp y) (eq 'macro (car y))) (cdr y) y))
+	       (y (if (compiled-function-p y) (function-start y) 0)))
+	  (when (<= start y end)
+	    (format s "~16,'0x T ~s~%" y x))))))
+
+   (let ((string-register ""))
+     (dotimes (i (ptable-alloc-length))
+       (multiple-value-bind
+	(x y) (ptable i string-register)
+	(when (<= start x end)
+	  (format s "~16,'0x T ~a~%" x y)))))
+
+   (format s "~16,'0x T ~a~%" end "GCL_MONEND"))
+
+  symtab)
+
+(defun gprof-start (&optional (symtab "gcl_symtab") (adrs (gprof-addresses))
+			      &aux (start (car adrs))(end (cdr adrs)))
+  (let ((symtab (write-symtab symtab start end)))
+    (when (monstartup start end)
+      symtab)))
+
+(defun gprof-quit (&optional (symtab "gcl_symtab") &aux (gmon (mcleanup)))
+  (when gmon
+    (gprof-output symtab gmon)))

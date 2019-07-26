@@ -340,9 +340,7 @@ minimize_image(void) {
   nrbpage=0;
   resize_hole(0,t_relocatable,0);
 
-#ifdef GCL_GPROF
   gprof_cleanup();
-#endif
   
 #if defined(BSD) || defined(ATT)  
   mbrk(core_end=heap_end);
@@ -439,9 +437,7 @@ gcl_cleanup(int gc) {
   {extern void _cleanup(void);_cleanup();}
 #endif
 
-#ifdef GCL_GPROF
   gprof_cleanup();
-#endif
 
   if (gc) {
 
@@ -476,10 +472,6 @@ DEFUN("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,1,NO
   fLequal(x0,x1);
   for (w=u;w<u+s && !*w;w++);
   RETURN1((object)(w-u));
-}
-
-DEFUN("KCL-SELF",object,fSkcl_self,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-  RETURN1(make_simple_string(kcl_self));
 }
 
 int

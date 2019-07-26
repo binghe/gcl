@@ -1,0 +1,109 @@
+(make-package :s :use '(:cl))
+(make-package :compiler :use '(:cl :si))
+(make-package :sloop :use '(:cl))
+(make-package :ansi-loop :use'(:cl))
+(make-package :defpackage :use '(:cl))
+(make-package :tk :use '(:cl :sloop))
+(make-package :fpe :use '(:cl))
+(make-package :cltl1-compat)
+
+(in-package :system)
+(use-package '(:fpe :s :gmp))
+
+(export 'si::(object double cnum system cmp-inline cmp-eval type-propagator c1no-side-effects defcfun clines defentry) :si);FIXME
+
+(setq *features* (cons :raw-image *features*))
+(init-system)
+(setq *features* (remove :raw-image *features*))
+
+(in-package :si)
+(gbc t)
+
+(do-symbols (s)
+  (when (get s 'proclaimed-function)
+    (unless (sig s)
+      (let* ((fun (symbol-function s)))
+	(c-set-function-plist
+	 fun
+	 (apply 'make-function-plist
+		(list (mapcar 'cmp-norm-tp (get s 'proclaimed-arg-types))
+		      (cmp-norm-tp (get s 'proclaimed-return-type)))
+		(or (cdr (c-function-plist fun)) (list nil nil nil nil s))))))
+    (dolist (l '(proclaimed-function proclaimed-arg-types proclaimed-return-type))
+      (remprop s l))))
+
+(unless *link-array*
+  (setq *link-array* (make-array (ash 1 11) :element-type 'character :fill-pointer 0)))
+(use-fast-links t)
+
+(let* ((x (append (pathname-directory *system-directory*) (list :back)))
+       (lsp (append x (list "lsp")))
+       (cmpnew (append x (list "cmpnew")))
+       (h (append x (list "h")))
+       (xgcl-2 (append x (list "xgcl-2")))
+       (pcl (append x (list "pcl")))
+       (clcs (append x (list "clcs")))
+       (gtk (append x (list "gcl-tk"))))
+  (dolist (d (list lsp cmpnew #+(and xgcl (not pre-gcl)) xgcl-2 #+(or pcl ansi-cl) pcl #+ansi-cl clcs))
+    (load (make-pathname :name "sys-proclaim" :type "lisp" :directory d)))
+  (load (make-pathname :name "tk-package" :type "lsp" :directory gtk))
+  (load (make-pathname :name "gcl_lfun_list" :type "lsp" :directory cmpnew))
+  (load (make-pathname :name "gcl_cmpopt" :type "lsp" :directory cmpnew))
+  (load (make-pathname :name "gcl_auto_new" :type "lsp" :directory lsp))
+  
+  (gbc t))
+
+;; (setf (symbol-function 'clear-compiler-properties)
+;;       (symbol-function 'compiler::compiler-clear-compiler-properties))
+
+(terpri)
+(setq *inhibit-macro-special* t)
+(gbc t)
+(reset-gbc-count)
+
+(defun top-level nil (gcl-top-level))
+
+(set-up-top-level)
+
+(setq *gcl-extra-version* @LI-EXTVERS@
+      *gcl-minor-version* @LI-MINVERS@ 
+      *gcl-major-version* @LI-MAJVERS@
+      *gcl-release-date*  "@LI-RELEASE@")
+
+(defvar *system-banner* (default-system-banner))
+(setq *optimize-maximum-pages* t)
+
+(fmakunbound 'init-cmp-anon)
+(when (fboundp 'user-init) (user-init))
+
+(in-package :compiler)
+(setq *cc* @LI-CC@
+      *default-prof-p* (> (length @LI-DFP@) 0)
+      *ld* @LI-LD@
+      *ld-libs* @LI-LD-LIBS@
+      *ld-libs* (concatenate 'string "-l" #+ansi-cl "ansi_" "gcl " *ld-libs*)
+      *opt-three* @LI-OPT-THREE@
+      *opt-two* @LI-OPT-TWO@
+      *init-lsp* @LI-INIT-LSP@)
+
+(import 'si::(clines defentry defcfun object void int double quit bye gbc system
+		     commonp *break-on-warnings* make-char char-bits char-font
+		     char-bit set-char-bit string-char-p int-char
+		     char-font-limit char-bits-limit char-control-bit
+		     char-meta-bit char-super-bit char-hyper-bit compiler-let) :cltl1-compat)
+(deftype cltl1-compat::string-char nil 'character)
+(do-symbols (s :cltl1-compat) (export s :cltl1-compat))
+
+;; #-ansi-cl(use-package :cltl1-compat :lisp)
+;; #-ansi-cl(do-symbols (s :cltl1-compat) (export s :lisp)))
+
+#+ansi-cl (use-package :pcl :user)
+
+(import 'si::(clines defentry defcfun object void int double quit bye gbc system
+		     *lib-directory* *system-directory* while) :user)
+
+(let* ((i 4096)(j (si::equal-tail-recursion-check i)))
+  (unless (<= (ash i -1) j)
+    (warn "equal is not tail recursive ~s ~s" i j)))
+
+(format t "~s heap words available~%" (multiple-value-bind (a b c d) (si::heap-report) (/ (- d c) (/ a 8))))

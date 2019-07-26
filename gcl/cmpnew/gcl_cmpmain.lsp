@@ -100,7 +100,9 @@
 (defvar *default-c-file* nil)
 (defvar *default-h-file* nil)
 (defvar *default-data-file* nil)
+(defvar *default-prof-p* nil)
 (defvar *keep-gaz* nil)
+(defvar *prof-p* nil)
 
 ;;  (list section-length split-file-names next-section-start-file-position)
 ;;  Many c compilers cannot handle the large C files resulting from large lisp files.
@@ -185,9 +187,11 @@
 			   (print *compile-print*)
 			   (external-format :default)
 			   (verbose *compile-verbose*)
+                           (prof-p *default-prof-p*)
                            (load nil)
                       &aux (*standard-output* *standard-output*)
-                           (*error-output* *error-output*)
+		           (*prof-p* prof-p)
+		           (*error-output* *error-output*)
                            (*compiler-in-use* *compiler-in-use*)
 			   (*c-debug* c-debug)
 			   (*compile-print* print)
@@ -619,40 +623,39 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 
 (defvar *use-buggy* nil)
 
-(defun  compiler-command (&rest args )
-  (declare (special *c-debug*))
+(defun remove-flag (flag flags)
+  (let ((i (search flag flags)))
+    (if i
+	(concatenate 'string (subseq flags 0 i) (remove-flag flag (subseq flags (+ i (length flag)))))
+      flags)))
 
-  #+(or dos winnt)
-  (format nil "~a -I~a ~a ~a -c -w ~s -o ~s"
-	  *cc*
-	  (concatenate 'string si::*system-directory* "../h")
-	  (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
-	  (case *speed*
-		(3 *opt-three* )
-		(2 *opt-two*) 
-		(t ""))	
-	  (namestring (make-pathname  :type "c" :defaults (first args)))
-	  (namestring (make-pathname  :type "o" :defaults (first args)))
-	  )
-  
-  #-(or dos winnt)
-  (format nil  "~a -I~a ~a ~a -c ~a -o ~a ~a"
-	  *cc*
-	  (concatenate 'string si::*system-directory* "../h")
-	  (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
-	  (case *speed*
-		(3 *opt-three* )
-		(2 *opt-two*) 
-		(t ""))	
-	  (namestring (first args))
-	  (namestring (second args))
-	  (prog1
-	      #+aix3
-	    (format nil " -w ;ar x /lib/libc.a fsavres.o  ; ar qc XXXfsave fsavres.o ; echo init_~a > XXexp ; mv  ~a  XXX~a ; ld -r -D-1 -bexport:XXexp -bgc XXX~a -o ~a XXXfsave ; rm -f XXX~a XXexp XXXfsave fsavres.o"
-		    *init-name*
-		    (setq na (namestring (get-output-pathname na "o" nil)))
-		    na na na na na)
-	    #+(or dlopen irix5)
+(defun  compiler-command (&rest args &aux na )
+  (declare (special *c-debug*))
+  (let ((dirlist (pathname-directory (first args)))
+	(name (pathname-name (first args)))
+	dir)
+    (cond (dirlist (setq dir (namestring (make-pathname :directory dirlist))))
+	  (t (setq dir ".")))
+    (setq na  (namestring
+	       (make-pathname :name name :type (pathname-type(first args)))))
+   (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a ~a"
+	   (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
+	   (if *prof-p* " -pg " "")
+	   (concatenate 'string si::*system-directory* "../h")
+	   (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
+           (case *speed*
+		 (3 *opt-three* )
+		 (2 *opt-two*)
+		 (t ""))
+	   (namestring (first args))
+	   (namestring (second args))
+	   (prog1
+	       #+aix3
+	     (format nil " -w ;ar x /lib/libc.a fsavres.o  ; ar qc XXXfsave fsavres.o ; echo init_~a > XXexp ; mv  ~a  XXX~a ; ld -r -D-1 -bexport:XXexp -bgc XXX~a -o ~a XXXfsave ; rm -f XXX~a XXexp XXXfsave fsavres.o"
+		     *init-name*
+		     (setq na (namestring (get-output-pathname na "o" nil)))
+		     na na na na na)
+	     #+(or dlopen irix5)
 	     (if (not system-p)
 		 (format nil
 			 " -w ; mv ~a XX~a ; ld  ~a -shared XX~a  -o ~a -lc ; rm -f XX~a"  

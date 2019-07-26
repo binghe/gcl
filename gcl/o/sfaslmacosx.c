@@ -228,11 +228,7 @@ int fasload (object faslfile)
     
     close_stream (faslstream);
     
-    memory = alloc_object (t_cfdata);
-    memory->cfd.cfd_dlist = Cnil;
-    memory->cfd.cfd_self = NULL;
-    memory->cfd.cfd_start = NULL;
-    memory->cfd.cfd_size = 0;
+    memory=new_cfdata();
     
     if (symbol_value (sLAload_verboseA) != Cnil)	
         printf (" ;; start address (dynamic) %p ", fptr);

@@ -259,8 +259,9 @@ binary-arch: build install #debian/substvars
 	dh_installman -a
 	dh_installdebconf -a
 	dh_installchangelogs ChangeLog -a
-	dh_strip -a -Xlibgcl -Xlibansi_gcl \
-		-Xgcl-$(VERS)-prof/unixport/saved_gcl -Xgcl-$(VERS)-prof/unixport/saved_ansi_gcl
+	dh_strip -a -Xlibgcl -Xlibansi_gcl
+#		-Xgcl-$(VERS)-prof/unixport/saved_gcl -Xgcl-$(VERS)-prof/unixport/saved_ansi_gcl
+	dh_lintian -a
 	dh_link -a
 	dh_compress -a
 	dh_fixperms -a

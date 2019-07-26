@@ -1399,9 +1399,12 @@ int sigismember ( sigset_t *set, int n );
 int sigprocmask ( int how, const sigset_t *set, sigset_t *oldset );
 #endif
 
-#ifdef GCL_GPROF
-void gprof_cleanup(void);
+#if defined (__MINGW32__) || defined (__CYGWIN__)
+void recreate_heap1 ( void );
 #endif
+
+void
+gprof_cleanup(void);
 
 
 unsigned long ihash_equal1(object,int);
@@ -1553,3 +1556,5 @@ maybe_set_hole_from_maxpages(void);
 size_t
 dir_name_length(const char *);
 
+object
+new_cfdata(void);

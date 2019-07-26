@@ -75,52 +75,29 @@ $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 	[ "$(RL_OBJS)" = "" ] || \
 		echo "(AUTOLOAD 'init-readline '|readline|)" >>$@
 
-final: $(FLISP)
-#	echo "(let ((si::*disable-recompile* nil)(compiler::*default-c-file* t)(compiler::*default-h-file* t)(compiler::*default-system-p* t)(compiler::*default-data-file* t))(si::compiler-state-fns)(si::do-recompile nil))" | ./$<
-	echo "(setq si::*optimize-maximum-pages* nil)" >pre_init.lsp;
-	echo "(setq si::*optimize-maximum-pages* t si::*disable-recompile* t)" >post_init.lsp;
-#	echo "(when (> (length si::*needs-recompile*) 0) (format t \"Warning, eliminating recompiles ~s~%\" si::*needs-recompile*)(setf (fill-pointer si::*needs-recompile*) 0))" >>post_init.lsp;
-	$(MAKE) $(FLISP)
-	rm -f pre_init.lsp post_init.lsp #recompile.h #gcl_recompile*
-	touch $@
-
-FORCE:
-
-# recompile.h: FORCE $(ROBJS)
-# 	echo -n $(ROBJS) | sed 's,gcl_recompile.o,gcl_recompileq.o,g' |\
-# 		sed -e 's,gcl_recompile,,g' -e 's,\.o,,g' | \
-# 		tr ' ' '\012' | sort -n | \
-# 		awk '{a=$$1;if (a=="q") a="";printf("  ar_check_init(gcl_recompile%s,no_init);\n",a)}'  >$@;
-
-#sys_ansi_gcl.o sys_gcl.o: recompile.h
-
-pre_init.lsp post_init.lsp:
-	touch $@
-
 libboot.so: ../o/boot.o
 	$(CC) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
 
-init_raw.lsp: init_raw.lsp.in
-
-	cat $< | sed \
-		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `date`#1" \
-		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
-		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
-		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
-		-e "s#@LI-CC@#\"$(CC) -c $(FINAL_CFLAGS)\"#1" \
-		-e "s#@LI-LD@#\"$(CC) $(LD_FLAGS) -o \"#1" \
-		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)\"#1" \
-		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
-		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
-		-e "s#@LI-INIT-LSP@#\"$@\"#1" >$@
-
-saved_%:raw_% $(RSYM) init_raw.lsp raw_%_map \
+saved_%:raw_% $(RSYM) sys_init.lsp.in raw_%_map \
 		$(CMPDIR)/gcl_cmpmain.lsp \
 		$(CMPDIR)/gcl_lfun_list.lsp \
 		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
 		$(LSPDIR)/gcl_auto_new.lsp
 
-	cp init_raw.lsp foo
+	cat sys_init.lsp.in | sed \
+		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `cat ../release`#1" \
+		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
+		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
+		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
+		-e "s#@LI-RELEASE@#`cat ../release`#1" \
+		-e "s#@LI-CC@#\"$(GCL_CC) -c $(filter-out -pg,$(FINAL_CFLAGS))\"#1" \
+		-e "s#@LI-DFP@#\"$(filter -pg,$(FINAL_CFLAGS))\"#1" \
+		-e "s#@LI-LD@#\"$(GCL_CC) $(LD_FLAGS) -o \"#1" \
+		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_POST)\"#1" \
+		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
+		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
+		-e "s#@LI-INIT-LSP@#\"$@\"#1" >foo
+
 	echo "(unless si::*quit-tags* (in-package \"USER\")(system:save-system \"$@\"))" >>foo
 	ar x lib$*.a $$(ar t lib$*.a |grep ^gcl_)
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo
@@ -177,8 +154,7 @@ map_%:
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
-		gazonk*.lsp *_map saved_* lib* raw_* gcl.script gcl_recompile* \
-		pre_init.lsp post_init.lsp final recompile.h init_raw.lsp
+		gazonk*.lsp plt*h *_map saved_* lib* raw_* out* log* tmp* gcl.script
 
 .INTERMEDIATE: raw_gcl raw_ansi_gcl recompile.h pre_init.lsp post_init.lsp
 .PRECIOUS: libboot.so

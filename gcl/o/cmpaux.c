@@ -532,6 +532,14 @@ call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
 
    */
 
+DEFUN("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
+
+  sSPmemory->s.s_dbind->cfd.cfd_prof=1;
+
+  return Cnil;
+
+}
+
 void
 do_init(object *statVV)
 {object fasl_vec=sSPinit->s.s_dbind;
@@ -608,26 +616,43 @@ char *s;
 	
 #endif
 
-void
-gcl_init_or_load1(void (*fn)(void),const char *file)
-{int n=strlen(file);
- if (file[n-1]=='o')
-   { object memory;
-     object fasl_data;
-     /* file=FIX_PATH_STRING(file); */
+object
+new_cfdata(void) {
 
-     memory=alloc_object(t_cfdata);
-     memory->cfd.cfd_self=0;
-     memory->cfd.cfd_fillp=0;
-     memory->cfd.cfd_size = 0;
-     printf("Initializing %s\n",file); fflush(stdout);
-     memory->cfd.cfd_start= (char *)fn;
-     memory->cfd.cfd_dlist=Cnil;
-     fasl_data = read_fasl_data(file);
-     call_init(0,memory,fasl_data,0);
+  object memory=alloc_object(t_cfdata);
+
+  memory->cfd.cfd_size=0;
+  memory->cfd.cfd_fillp=0;
+  memory->cfd.cfd_prof=0;
+  memory->cfd.cfd_self=0;
+  memory->cfd.cfd_start=0;
+  memory->cfd.cfd_dlist=Cnil;
+
+  return memory;
+
+}
+
+
+void
+gcl_init_or_load1(void (*fn)(void),const char *file) {
+
+  if (file[strlen(file)-1]=='o') {
+
+    object memory;
+    object fasl_data;
+    /* file=FIX_PATH_STRING(file); */
+
+    memory=new_cfdata();
+    memory->cfd.cfd_start= (char *)fn;
+    printf("Initializing %s\n",file); fflush(stdout);
+    fasl_data = read_fasl_data(file);
+    call_init(0,memory,fasl_data,0);
+
+  } else {
+    printf("loading %s\n",file);
+    fflush(stdout);
+    load(file);
   }
- else
-  {printf("loading %s\n",file); fflush(stdout);  load(file);}
 }
 
 DEFUN("INIT-CMP-ANON", object, fSinit_cmp_anon, SI, 0, 0,

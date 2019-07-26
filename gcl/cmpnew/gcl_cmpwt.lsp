@@ -236,6 +236,7 @@
 
 
 (defun wt-data-file ()
+  (when *prof-p* (add-init `(si::mark-memory-as-profiling)))
   (verify-data-vector (data-vector))
   (let* ((vec (coerce (nreverse (data-inits)) 'vector)))
     (verify-data-vector vec)
