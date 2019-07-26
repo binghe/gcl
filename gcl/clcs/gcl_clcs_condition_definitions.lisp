@@ -94,22 +94,30 @@
 	      :reader arithmetic-error-operands))
   (:report ("~%Arithmetic error when performing ~s on ~s: " operation operands)))
 
-(macrolet ((make-fpe-conditions
-	    (&aux (n "indoux"))
-	    (labels ((make-sub-fpe-conditions
-		      (l &optional c)
-		      (cond (l (let ((x (pop l)))
-				 (append (make-sub-fpe-conditions l (cons x c)) (make-sub-fpe-conditions l c))))
-			    ((cdr c)
-			     `((,(intern (concatenate 'string "FPE-"
-						      (nstring-upcase
-						       (coerce
-							(mapcar (lambda (x) (aref n (1- (integer-length (caddr x))))) c) 'string))))
-				,(mapcar 'car c))))
-			    (c `((,(caar c) (arithmetic-error)))))))
-	      `(progn ,@(mapcar (lambda (x) `(define-condition ,@x nil))
-				(make-sub-fpe-conditions fpe::+fe-list+))))))
-  (make-fpe-conditions))
+(macrolet
+ ((make-fpe-conditions
+   (&aux (n "indoux"))
+   (labels
+    ((make-sub-fpe-conditions
+      (l &optional c)
+      (cond (l (append
+		(make-sub-fpe-conditions (cdr l) c)
+		(make-sub-fpe-conditions (cdr l) (cons (car l) c))))
+	    ((cdr c)
+	     `((,(intern
+		  (concatenate 'string "FPE-"
+			       (nstring-upcase
+				(coerce
+				 (mapcar (lambda (x) (aref n (1- (integer-length (caddr x))))) c)
+				 'string))))
+		,(mapcar 'car c)))))))
+    `(progn
+       ,@(mapcar (lambda (x) `(define-condition ,(car x) (arithmetic-error) nil)) fpe::+fe-list+)
+       ,@(mapcar (lambda (x) `(define-condition ,@x nil))
+		 (make-sub-fpe-conditions fpe::+fe-list+))))))
+ (make-fpe-conditions))
+
+
 
 (define-condition case-failure (type-error)
  ((name :initarg :name
@@ -141,6 +149,17 @@
 (define-condition internal-simple-type-error (internal-condition simple-type-error) nil)
 (define-condition internal-simple-warning (internal-condition simple-warning) nil)
 
+       (DEFINE-CONDITION DIVISION-BY-ZERO (ARITHMETIC-ERROR) NIL)
+
+       (DEFINE-CONDITION FLOATING-POINT-INVALID-OPERATION
+           (ARITHMETIC-ERROR) NIL)
+
+       (DEFINE-CONDITION FLOATING-POINT-UNDERFLOW (ARITHMETIC-ERROR)
+           NIL)
+(DEFINE-CONDITION FLOATING-POINT-INEXACT (ARITHMETIC-ERROR) NIL)
+
+       (DEFINE-CONDITION FLOATING-POINT-OVERFLOW (ARITHMETIC-ERROR)
+           NIL)
 #.`(progn
      ,@(mapcar (lambda (x) 
 		 `(define-condition
