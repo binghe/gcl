@@ -19,17 +19,62 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
+#include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
+#ifndef __MINGW32__
+#include <sys/wait.h>
+#endif
 
 #include "include.h"
 
-#ifdef _WIN32
-#include <windows.h>
-#define sleep(n) Sleep(1000 * n)
+#ifndef __MINGW32__
+
+int
+vsystem(const char *command) {
+
+  unsigned j,n=strlen(command)+1;
+  char *z,*c;
+  const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp;
+  int s;
+  pid_t pid;
+
+  if (strpbrk(command,"\"'$<>"))
+
+    (p1=x1)[2]=command;
+
+  else {
+
+    massert(n<sizeof(FN1));
+    memcpy((z=FN1),command,n);
+    for (j=1,c=z;strtok(c,spc);c=NULL,j++);
+
+    memcpy(z,command,n);
+    massert(j*sizeof(*p1)<sizeof(FN2));
+    p1=(void *)FN2;
+    for (pp=p1,c=z;(*pp=strtok(c,spc));c=NULL,pp++);
+
+  }
+
+  if (!(pid=vfork())) {
+    errno=0;
+    execvp(*p1,(void *)p1);
+    _exit(128|(errno&0x7f));
+  }
+
+  massert(pid>0);
+  massert(pid==waitpid(pid,&s,0));
+
+  if ((s>>8)&128)
+    emsg("execvp failure when executing '%s': %s\n",command,strerror((s>>8)&0x7f));
+
+  return s;
+
+}
 #endif
+
 
 #ifdef ATT3B2
 #include <signal.h>
@@ -65,108 +110,15 @@ char *command;
 }
 #endif
 
-#ifdef _WIN32
-
-DEFVAR("*WINE-DETECTED*",sSAwine_detectedA,SI,Cnil,"");
-
-#include "windows.h"
-
-static int mpid;
-
-void
-close_msys() {
-
-  msystem("");
-
-}
-
-void
-detect_wine() {
-
-  char b[4096];
-  struct stat ss;
-  const char *s="/proc/self/status";
-  FILE *f;
-  object o;
-
-  sSAwine_detectedA->s.s_dbind=Cnil;
-
-  if (stat(s,&ss))
-    return;
-
-  massert(f=fopen(s,"r"));
-  massert(fscanf(f,"%s",b)==1);
-  massert(fscanf(f,"%s",b)==1);
-  massert(!fclose(f));
-
-  if (strncmp("wineserver",b,9))
-    return;
-
-  massert(o=sSAsystem_directoryA->s.s_dbind);
-  massert(o!=Cnil);
-  mpid=getpid();
-  
-  massert(snprintf(b,sizeof(b),"%-.*smsys /tmp/ out%0d tmp%0d log%0d",
-		   o->st.st_fillp,o->st.st_self,mpid,mpid,mpid)>0);
-  massert(!system(b));
-
-  sSAwine_detectedA->s.s_dbind=Ct;
-  
-  massert(!atexit(close_msys));
-  
-}
-#endif  
-
 int
 msystem(const char *s) {
 
-  int r;
-
-#ifdef _WIN32
-
-  if (sSAwine_detectedA->s.s_dbind==Ct) {
-
-    char b[4096],b1[4096],c;
-    FILE *fp;
-
-    massert(snprintf(b,sizeof(b),"/tmp/out%0d",mpid)>0);
-    massert(snprintf(b1,sizeof(b1),"%s1",b)>0);
-
-    massert(fp=fopen(b1,"w"));
-    massert(fprintf(fp,"%s",s)>=0);
-    massert(!fclose(fp));
-
-    massert(MoveFileEx(b1,b,MOVEFILE_REPLACE_EXISTING));
-    
-    if (!*s)
-      return 0;
-    
-    for (;;Sleep(100)) {
-      
-      massert(fp=fopen(b,"r"));
-      massert((c=fgetc(fp))!=EOF);
-      if (c!=s[0]) {
-	massert(ungetc(c,fp)!=EOF);
-	break;
-      }
-      massert(!fclose(fp));
-      
-    }
-    
-    massert(fscanf(fp,"%d",&r)==1);
-    massert(!fclose(fp));
-
-  } else
-
-#endif
-    r=system(s);
-    
-  return r;
+  return psystem(s);
 
 }
 
 static void
-FFN(Lsystem)(void)
+FFN(siLsystem)(void)
 {
 	char command[32768];
 	int i;
@@ -194,8 +146,9 @@ DEFUN("GETPID",object,fSgetpid,SI,0,0,NONE,OO,OO,OO,OO,(void),
   return make_fixnum(getpid());
 }
 
+
 void
 gcl_init_unixsys(void)
 {
-	make_si_function("SYSTEM", Lsystem);
+	make_si_function("SYSTEM", siLsystem);
 }

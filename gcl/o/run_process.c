@@ -544,7 +544,7 @@ char **argv;
     FEerror("Cannot spawn process with given stream", 0);
   fdin = istream->sm.sm_int0;
   fdout = ostream->sm.sm_int0;
-  if (fork() == 0)
+  if (pfork() == 0)
     { /* the child --- replace standard in and out with descriptors given */
       close(0);
       massert(dup(fdin)>=0);

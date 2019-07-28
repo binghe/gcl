@@ -75,7 +75,7 @@ fasload(object faslfile) {
 
   /* faslstream = open_stream(faslfile, smm_input, Cnil, sKerror); */
   massert(snprintf(FN3,sizeof(FN3),"cc -shared %s -o %s",FN1,FN2)>0);
-  massert(!system(FN3));
+  massert(!psystem(FN3));
 
   if (!(dlp = dlopen(FN2,RTLD_NOW))) {
     fputs(dlerror(),stderr);
