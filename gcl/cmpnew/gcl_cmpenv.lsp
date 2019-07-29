@@ -383,7 +383,7 @@
 			     decl var)
 		      (push (cons var 'dynamic-extent) ts)))
 		   (otherwise
-		    (let ((type (max-vtp stype)))
+		    (let ((type (unless (member stype *alien-declarations*) (max-vtp stype))))
 		      (if (unless (eq type t) type)
 			  (dolist (var (cdr decl))
 			    (cmpck (not (symbolp var)) "The type declaration ~s contains a non-symbol ~s."
