@@ -964,8 +964,7 @@
 	    ((functionp fn) (local-fun-src fn))
 	    ((and (consp fn) (eq (car fn) 'lambda)) fn)))))
 
-(defun ttl-tag-src (src &optional (tag (tmpsym)) (block (tmpsym)) &aux (h (pop src)) (ll (pop src)))
-  (setf (get tag 'ttl-tag) t)
+(defun ttl-tag-src (src tag &optional block &aux (h (pop src)) (ll (pop src)))
   (multiple-value-bind
    (doc decls ctps body)
    (parse-body-header src)
@@ -1104,21 +1103,30 @@
 			       )))))) tps sir))
     (not (member-if 'atomic-tp sir))))
 
+(defun top-tagged-sir (sir &aux tagged-sir)
+  (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq tagged-sir x))))
+	*src-inline-recursion*)
+  tagged-sir)
+
 (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))
 		     (p (member n *src-inline-recursion* :key 'caar)))
   (when p
-    (if (or (member f *c1exit*)
-	    (member-if 'atomic-tp tp)
-	    (member-if 'atomic-tp (cdaar p)));FIXME
-	(member-if (lambda (x)
-		     (when (eq n (caar x))
-		       (arg-types-match (cdar x) tp (member n (cdr p) :key 'caar))))
-		   p)
-      (let ((tag (sir-tag sir)))
-	(if tag
-	    (throw tag *src-inline-recursion*)
+    (when (or (arg-types-match (cdaar p) tp)
+	      (member-if (lambda (x) (when (eq n (caar x)) (arg-types-match (cdar x) tp t))) (cdr p)))
+      (let ((tagged-sir (unless (or (member f *c1exit*) (member-if 'atomic-tp tp)) (top-tagged-sir sir))))
+	(if tagged-sir
+	    (throw tagged-sir *src-inline-recursion*)
 	  t)))))
 
+(defun make-tagged-sir (sir tag ll &optional (ttag nil ttag-p))
+  (list* sir tag ll (when ttag-p (list ttag))))
+
+(defun maybe-cons-tagged-sir (tagged-sir src env &aux (id (name-sir (car tagged-sir))))
+  (cond ((and (eq src (local-fun-src id))
+	      (not (let ((*funs* (if env (fifth env) *funs*)));FIXME?
+			 (eq src (local-fun-src id))))); flet not labels
+	 *src-inline-recursion*)
+	((cons tagged-sir *src-inline-recursion*))))
 
 (defun maybe-cons-sir (sir tag ttag src env &aux (id (name-sir sir)))
   (cond ((and (eq src (local-fun-src id))
@@ -1206,10 +1214,11 @@
   (when src
     (let ((sir (cons (sir-name fun) (mapcar (lambda (x) (when x (info-type (cadr x)))) fms))))
       (unless (prev-sir sir)
-	(let* ((tag (tmpsym))
+	(let* ((tag (make-ttl-tag));(tmpsym)
 	       (tsrc (ttl-tag-src src tag))
-	       (*src-inline-recursion* (maybe-cons-sir sir tag ttag src env)))
-	  (catch tag (mi4 fun args la tsrc env inls)))))))
+	       (tagged-sir (make-tagged-sir sir tag (cadr src) ttag))
+	       (*src-inline-recursion* (maybe-cons-tagged-sir tagged-sir src env)))
+	  (catch tagged-sir (mi4 fun args la tsrc env inls)))))))
 
 ;; (defun mi3 (fun args la fms ttag envl inls &aux (src (under-env (pop envl) (inline-src fun))) (env (car envl)))
 ;;   (when (maybe-inline-src fun fms src)

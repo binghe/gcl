@@ -208,9 +208,8 @@
     (blla sl args last `((tail-recur ,tag ,s)))))
 
 (defun c1tail-recur (args)
-  (let* ((tag (pop args))
-	 (s (car args))
-	 (ts (or (car (member tag *ttl-tags* :key (lambda (x) (tag-name (car x))))) (baboon)))
+  (let* ((s (cadr args))
+	 (ts (or (car (member (car args) *ttl-tags* :key 'car)) (baboon)))
 	 (ttl-tag (pop ts))
 	 (nv (mapcar (lambda (x) (car (member (cdr x) *vars* :key (lambda (x) (when (var-p x) (var-name x)))))) s))
 	 (ov (mapcar (lambda (x) (car (member (car x) (car ts) :key (lambda (x) (when (var-p x) (var-name x)))))) s))
@@ -220,7 +219,7 @@
 	 (*lexical-env-mask* (remove ttl-tag (set-difference *lexical-env-mask* v))))
     (c1expr `(progn
 	       (setq ,@(mapcan (lambda (x) (list (car x) (cdr x))) s))
-	       (go ,tag)))))
+	       (go ,(tag-name ttl-tag))))))
 
 ;; (defun c1tail-recur (args)
 ;;   (let* ((tag (pop args))

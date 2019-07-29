@@ -80,8 +80,6 @@
       ((eq form end))
       (add-reg1 (car form))))
 
-(defvar *ttl-tags* nil)
-
 (defun ref-tags (form tags)
   (ref-obs form tags 
 	   (lambda (x) (setf (tag-ref-ccb x) t))
@@ -163,8 +161,15 @@
 	 (when y (let* ((z (pop y))(*bt* (cons (cons z (mch)) *bt*))) (pt z y)))))
 
 
-(defun nttl-tags (body &aux (x (car body))(y (when (tag-p x) (tag-name x))))
-  (if (when (symbolp y) (get y 'ttl-tag))
+(defconstant +ttl-tag-name+ (gensym "TTL"))
+
+(defun make-ttl-tag nil (make-tag :name +ttl-tag-name+))
+(defun is-ttl-tag (tag) (when (tag-p tag) (eq (tag-name tag) +ttl-tag-name+)))
+
+(defvar *ttl-tags* nil)
+
+(defun nttl-tags (body &aux (x (car body)))
+  (if (is-ttl-tag x)
       (cons (list x *vars*) *ttl-tags*)
     *ttl-tags*))
 
@@ -948,9 +953,6 @@
 ;; 			   (let ((b (car body1)))
 ;; 			     (if (and (consp b) (eq (car b) 'return-from)) body1
 ;; 			       (cons (c1nil) body1)))))))))
-
-(defun is-ttl-tag (x)
-  (when (tag-p x) (when (symbolp (tag-name x)) (get (tag-name x) 'ttl-tag))))
 
 (defun c2tagbody (ref-clb ref-ccb body)
   (cond (ref-ccb (c2tagbody-ccb body))
