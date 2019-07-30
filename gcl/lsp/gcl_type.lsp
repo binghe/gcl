@@ -309,6 +309,12 @@
 
 (defun comp-tp (type &aux (a (atomic-type type)))
   (if a (object-tp (car a)) (comp-tp0 type)))
+(defvar *typep-defined* nil)
+
+(defun comp-tp (type)
+  (if (when *typep-defined* (atomic-type type));FIXME bootstrap NULL
+      (object-tp (car (atomic-type (normalize-type type))));e.g. FLOAT coercion
+    (comp-tp0 type)))
 
 (defun btp-count (x &aux (j 0))
   (dotimes (i +bit-words+ j)

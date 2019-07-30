@@ -1,64 +1,151 @@
 (in-package :si)
 
-(defmacro typecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform (sgen))))
-  (declare (optimize (safety 2)))
-  (labels ((l (x &aux (c (pop x))(tp (pop c))(fm (if (cdr c) (cons 'progn c) (car c)))(y (when x (l x))))
-	      (if (or (eq tp t) (eq tp 'otherwise)) fm `(if (typep ,key ',tp) ,fm ,y))))
-	  (let ((x (l clauses)))
-	    (if (eq key keyform) x `(let ((,key ,keyform)) ,x)))))
+(let ((sym (gensym "TYPECASE")))
+  (defmacro typecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform sym)))
+    (declare (optimize (safety 2)))
+    (labels ((l (x &aux (c (pop x))(tp (pop c))(fm (if (cdr c) (cons 'progn c) (car c)))(y (when x (l x))))
+		(if (or (eq tp t) (eq tp 'otherwise)) fm `(if (typep ,key ',tp) ,fm ,y))))
+	    (let ((x (l clauses)))
+	      (if (eq key keyform) x `(let ((,key ,keyform)) ,x))))))
 
-(defmacro etypecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform (gensym))))
-  (declare (optimize (safety 2)))
-;  (check-type clauses (list-of proper-list))
-  (let ((tp `(or ,@(mapcar 'car clauses))))
-    `(typecase ,keyform ,@clauses (t (error 'type-error :datum ,key :expected-type ',tp)))))
+(let ((sym (gensym "ETYPECASE")))
+  (defmacro etypecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform sym)))
+    (declare (optimize (safety 2)))
+    (let* ((x `((t (error 'type-error :datum ,key :expected-type '(or ,@(mapcar 'car clauses))))))
+	   (x `(typecase ,key ,@(append clauses x))))
+      (if (eq key keyform) x `(let ((,key ,keyform)) ,x)))))
 
 (defmacro infer-tp (x y z) (declare (ignore x y)) z)
 
-(defun mkinfm (f tp z &aux (z (?-add 'progn z)))
-  `(infer-tp ,f ,tp ,z))
+(defvar *expt* nil)
 
-(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
+(defun mib (o l &optional f)
+  (let* ((a (atom l))
+	 (l (if a l (car l)))
+	 (l (unless (eq '* l) l)))
+    (when l
+      (if f (if a `((<= ,l ,o)) `((< ,l ,o))) (if a `((<= ,o ,l)) `((< ,o ,l)))))))
 
-(defun branch (tpsff x f &aux (q (cdr x))(x (car x))(z (cddr (assoc x tpsff))))
+
+(defun ?and-or (op x)
+  (cond ((cdr x) (cons op x))
+	((car x))
+	((eq op 'and))))
+
+(defun mibb (o tp)
+  (?and-or 'and (nconc (mib o (car tp) t) (mib o (cadr tp)))))
+
+(defun mdb (o tp)
+  (let* ((b (car tp)))
+    (cond ((not tp))
+	  ((eq b '*))
+	  ((not (listp b)) (or (eql b 1) `(eql (array-rank ,o) ,b)))
+	  ((let ((l (length b))
+		 (x (?and-or
+		     'and
+		     (let ((i -1))
+		       (mapcan (lambda (x)
+				 (incf i)
+				 (unless (eq x '*) `((eql ,x (array-dimension ,o ,i))))) b)))))
+	     (cond ((eql l 1) x)
+		   ((eq x t) `(eql ,l (array-rank ,o)))
+		   (`(when (eql ,l (array-rank ,o)) ,x))))))))
+
+
+(defun msubt-and-or (and-or o tp y &optional res)
+  (if tp
+      (let ((x (msubt o (pop tp) y)))
+	(if (eq x (eq and-or 'or)) x
+	  (msubt-and-or and-or o tp y (if (eq x (eq and-or 'and)) res (cons x res)))))
+    (?and-or and-or (nreverse res))))
+
+
+(defvar *complex-part-types*
+  (mapcar (lambda (x &aux (x (if (listp x) x (list x x))))
+	    (list (cmp-norm-tp (cons 'complex* x)) (cmp-norm-tp (car x)) (cmp-norm-tp (cadr x))))
+	(list* '(integer ratio) '(ratio integer) +range-types+)))
+
+(defun complex-part-types (z)
+  (lreduce (lambda (y x)
+	     (if (type-and z (pop x))
+		 (mapcar 'type-or1 x y)
+	       y))
+	   *complex-part-types* :initial-value (list nil nil)))
+
+(defun and-form (x y)
+  (when (and x y)
+    (cond ((eq x t) y)
+	  ((eq y t) x)
+	  (`(when ,x ,y)))))
+
+#.`(defun msubt (o tp y &aux (tp (cmp-norm-tp tp))(tp (cond ((type>= tp y) #tt)((not (type-and tp y)) #tnil)(tp)))(tp (cmp-unnorm-tp tp))
+		   (otp (normalize-type tp));FIXME normalize, eg structure
+		   (lp (listp otp))(ctp (if lp (car otp) otp))(tp (when lp (cdr otp))))
+     (case ctp
+	   ((or and) (msubt-and-or ctp o tp y))
+	   (not (let ((x (msubt o (car tp) y))) (cond ((not x))((eq x t) nil)(`(not ,x)))))
+	   (satisfies `(,(car tp) ,o))
+	   (otherwise
+            (ecase ctp
+		   ((t nil) ctp)
+		   (,+range-types+ (mibb o tp))
+		   (member (if (cdr tp) `(member ,o ',tp) `(eql ,o ',(car tp))))
+		   (complex* (let* ((x (complex-part-types y))
+				    (f (and-form (msubt 'r (car tp) (car x)) (msubt 'i (cadr tp) (cadr x)))))
+			       (if (consp f) `(let ((r (realpart ,o))(i (imagpart ,o))) ,f) f)))
+		   ((simple-array non-simple-array) (mdb o (cdr tp)))
+		   ((structure structure-object) (if tp `(mss (c-structure-def ,o) ',(car tp)) t))
+		   ((std-instance standard-generic-interpreted-function standard-generic-compiled-function)
+		    (if tp `(when (member ',(car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
+		   ((proper-cons improper-cons)
+		    (and-form
+		     (and-form (simple-type-case `(car ,o) (car tp)) (simple-type-case `(cdr ,o) (cadr tp)))
+		     (if (eq ctp 'proper-cons)
+			 (or (type>= #tproper-list (cmp-norm-tp (cadr tp))) `(not (improper-consp ,o)))
+		       (or (type>= #t(not proper-list) (cmp-norm-tp (cadr tp))) `(improper-consp ,o)))))
+		   ))))
+
+
+
+(defun spec-tp (f tp y)
+  (if *expt* (msubt f tp y) `(typep ,f ',tp)))
+
+(defun branch (tpsff x f y &aux (q (cdr x))(x (car x))(z (cddr (assoc x tpsff))))
   (if q
-      `(((typep ,f ',(cmp-unnorm-tp q)) ,(mkinfm f q z)))
+      `((,(spec-tp f (tp-type q) y) ,(mkinfm f q z)))
     `((t ,(?-add 'progn z)))))
 
-(defun branch1 (x tpsff f o)
-  (let* ((z (mapcan (lambda (x) (branch tpsff x f)) (cdr x)))
+
+(defun branch1 (x tpsff f o &aux (y (lreduce 'type-or1 (car x))))
+  (let* ((z (mapcan (lambda (x) (branch tpsff x f y)) (cdr x)))
 	 (s (lremove nil (mapcar 'cdr (cdr x))))
 	 (z (if s (nconc z `((t ,(mkinfm f (tp-not (lreduce 'type-or1 s)) (cdar o))))) z)))
     (cons 'cond z)))
 
-(defun branches (f tpsff fnl o c)
-  (mapcar (lambda (x)
-	    `(,(lremove-duplicates (mapcar (lambda (x) (cdr (assoc x fnl))) (car x)))
-	      ,(mkinfm f (lreduce 'type-or1 (car x)) (list (branch1 x tpsff f o)))))
-	  c))
+(defun mkinfm (f tp z &aux (z (?-add 'progn z)))
+  (if (type>= tp #tt) z `(infer-tp ,f ,tp ,z)))
 
 (define-compiler-macro typecase (&whole w x &rest ff)
   (let* ((bind (unless (symbolp x) (list (list (gensym) x))));FIXME sgen?
 	 (f (or (caar bind) x))
-	 (o (member-if (lambda (x) (or (eq (car x) t) (eq (car x) 'otherwise))) ff))
+	 (o (member-if (lambda (x) (or (eq (car x) t) (eq (car x) 'otherwise))) ff));FIXME
 	 (ff (if o (ldiff ff o) ff))
 	 (o (list (cons t (cdar o))))
 	 (tps (mapcar 'cmp-norm-tp (mapcar 'car ff)))
 	 (z nil) (tps (mapcar (lambda (x) (prog1 (type-and x (tp-not z)) (setq z (type-or1 x z)))) tps))
-	 (a (type-and-list tps))(c (calist2 a))
+	 (tpsff (mapcan (lambda (x y) (when x (list (cons x y)))) tps ff))
+	 (a (type-and-list (mapcar 'car tpsff)))(c (calist2 a))
 	 (fn (best-type-of c))
-	 (fm `(case (,fn ,f)
-		    ,@(branches f (mapcar 'cons tps ff) (cdr (assoc fn +rs+)) o c)
-		    (otherwise
-		     ,(mkinfm f
-			      (tp-not
-			       (lreduce 'type-or1
-					(lreduce 'append
-						 (mapcar 'car c))))
-			      (cdar o))))))
-    (if bind `(let ,bind ,fm) fm)))
+	 (oth (unless (eq z t) (mkinfm f (tp-not z) (cdar o))))
+	 (nb (>= (+ (length tpsff) (if oth 1 0)) 2))
+	 (fm (if nb `(case (,fn ,f)
+			   ,@(branches f tpsff (cdr (assoc fn +rs+)) o c)
+			   ,@(when oth `((otherwise ,oth))))
+	       (if z (mkinfm f (caar tpsff) (cddar tpsff)) oth))))
+    (if (when nb bind) `(let ,bind ,fm) fm)))
 
-
+(defun simple-type-case (x type)
+  (let ((*expt* t)) (funcall (get 'typecase 'compiler-macro-prop) `(typecase ,x (,type t)) nil)))
 
 n(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
 
@@ -91,10 +178,10 @@ n(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
 					 (lambda (x) (eql tpi (cdr x)))
 					 rl))
 				:initial-value nil)))
-   `(infer-type
-     'x ,tp
-     (infer-type
-      'y ,tp
+   `(infer-tp
+     x ,tp
+     (infer-tp
+      y ,tp
       ,(let ((x (caar (member-if
 		       (lambda (x &aux (z (assoc (cmp-norm-tp (cdr x)) rl :test 'type<=)))
 			 (eql tpi (cdr z)))

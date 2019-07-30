@@ -1,12 +1,5 @@
 (in-package :si)
 
-(defmacro infer-type (x y z) (declare (ignore x y)) z);avoid macroexpansion in bootstrap
-(define-compiler-macro infer-type (x y z)
-  `(infer-tp ,(cmp-eval x) ,y ,z));FIXME
-
-(defun mkinf (f tp z &aux (z (if (cdr z) `(progn ,@z) (car z))))
-  `(infer-type ',f ,tp ,z))
-
 (defun ib (o l &optional f)
   (let* ((a (atom l))
 	 (l (if a l (car l)))
@@ -19,8 +12,12 @@
     (cond ((not tp))
 	  ((eq b '*))
 	  ((not (listp b)) (eql (c-array-rank o) b))
-	  ((eql (length b) (c-array-rank o)) (not (member-if-not (lambda (x) (incf i) (or (eq x '*) (eql x (array-dims o i)))) b))))))
-	 
+	  ((eql (length b) (c-array-rank o))
+	   (not (member-if-not
+		 (lambda (x)
+		   (incf i)
+		   (or (eq x '*) (eql x (array-dimension o i))))
+		 b))))))
 
 (defun dbv (o tp)
   (let* ((b (car tp))(b (if (listp b) (car b) b)))
@@ -47,163 +44,160 @@
   (the symbol (*object (c-structure-self x) 16 nil nil)));FIXME s-data-name boostrap loop
 (setf (get 'sdata-name 'cmp-inline) t)
 
-;; (defun mss (o sn) (or (eq o sn) (when (sdata-included sn) (let ((o (sdata-includes o))) (when o (mss o sn))))))
-;; (setf (get 'mss 'cmp-inline) t)
 (defun mss (o sn) (when o (or (eq (sdata-name o) sn) (mss (sdata-includes o) sn))))
 (setf (get 'mss 'cmp-inline) t)
 
-(defun structure-name (o) (sdata-name (c-structure-def o)))
-(setf (get 'structure-name 'cmp-inline) t)
-
-
-(eval-when
- (compile eval)
- (defun cfn (tp code)
-   (let* ((nc (cmp-norm-tp tp))
-	  (a (type-and-list (list nc)))(c (calist2 a))
-	  (f (best-type-of c))(rl (cdr (assoc f +rs+)))
-	  (ints (tps-ints a rl))
-	  (tps (ints-tps ints rl))
-;	  (it (caar c))(it (when it (lreduce 'tp-or it)))
-	  )
-     `(case (,f o)
-	    (,(tps-ints a (cdr (assoc f +rs+))) ,(mkinf 'o tps (list code)))
-	    (otherwise ,(mkinf 'o (tp-not tps) '(nil))))))
-  (defun mksubb (o tp x)
-   (case x
-	 ((immfix bfix bignum integer ratio single-float double-float short-float long-float float rational real) `(ibb ,o ,tp))
-	 ((seqind rnkind) `(ibb ,o ',(cdr (normalize-type x))))
-	 ((structure structure-object) `(if tp (mss (c-structure-def ,o) (car tp)) t))
-	 (std-instance `(if tp (when (member (car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
-	 (mod `(let ((s (pop ,tp))) (<= 0 ,o (1- s))));FIXME error null tp
-	 (signed-byte `(if tp (let* ((s (pop ,tp))(s (when s (ash 1 (1- s))))) (<= (- s) ,o (1- s))) t))
-	 (unsigned-byte `(if tp (let* ((s (pop ,tp))(s (when s (ash 1 s)))) (<= 0 ,o (1- s))) (<= 0 ,o)))
-	 (proper-list `(unless (improper-consp ,o) t))
-	 (proper-cons `(unless (improper-consp ,o)
-			 (if tp (and (typep (car ,o) (car ,tp)) (typep (cdr ,o) (cadr ,tp)) t) t)))
-	 (improper-cons `(when (improper-consp ,o)
-			   (if tp (and (typep (car ,o) (car ,tp)) (typep (cdr ,o) (cadr ,tp)) t) t)))
-	 (cons `(if tp (and (typep (car ,o) (car ,tp)) (typep (cdr ,o) (cadr ,tp)) t) t))
-	 (otherwise t))))
-
-#.`(defun listp (o) ,(cfn 'list t))
-
-(eval-when
- (compile load eval)
- (defun cmp-real-sym (x y)
-   (if (eq x y) x
-     (ecase x
-	    (integer (ecase y (ratio 'integer-ratio)))
-	    (ratio (ecase y (integer 'ratio-integer)))))))
-
-#.`(defun mtc (o tp &aux (rtp (car tp))(itp (or (cadr tp) rtp))
-		 (lp (consp rtp))(rctp (if lp (car rtp) rtp))(rtp (when lp (cdr rtp)))
-		 (lp (consp itp))(ictp (if lp (car itp) itp))(itp (when lp (cdr itp)))
-		 (ctp (cmp-real-sym rctp ictp)))
-     (case (when ctp (upgraded-complex-part-type ctp))
-	   ,@(mapcar (lambda (x &aux (n (pop x))(n (if (consp n) (apply 'cmp-real-sym n) n)))
-		       `(,n ,(cfn (car x) `(and (ibb (realpart o) rtp) (ibb (imagpart o) itp)))))
-		     +ctps+)
-	   (otherwise ,(cfn
-			'complex
-			'(if lp
-			     (and (typep (realpart o) rtp) (typep (imagpart o) itp) t)
-			   t)))))
-;FIXME the mutual recursion on typep prevents return type determination
-(setf (get 'mtc 'cmp-inline) t)
-		       
-
-#.`(defun mta (o tp &aux (lp (consp tp))(ctp (if lp (car tp) tp))(tp (when lp (cdr tp))))
-     (and (case (if lp (upgraded-array-element-type ctp) '*)
-		,@(mapcar (lambda (x &aux (n (pop x)))
-			    `(,(if (if n (eq t n) t) (list n) n) ,(cfn (car x) t)))
-			  (mapcar (lambda (x y) `(,(car x) (or ,(cadr x) ,(cadr y))))
-				  +vtpsn+ +atpsn+))
-		(otherwise ,(cfn 'array t)))
-	  (db o tp)))
-(setf (get 'mta 'cmp-inline) t)
-
-#.`(defun mtv (o tp &aux (lp (consp tp))(ctp (if lp (car tp) tp))(tp (when lp (cdr tp))))
-     (and (case (if lp (upgraded-array-element-type ctp) '*)
-		,@(mapcar (lambda (x &aux (n (pop x)))
-			    `(,(if (if n (eq t n) t) (list n) n) ,(cfn (car x) t))) +vtpsn+)
-		(otherwise ,(cfn 'vector t)))
-	  (dbv o tp)))
-(setf (get 'mtv 'cmp-inline) t)
-
-		       
-(defun vtp (tp &aux (dims (cadr tp)))
-  (cond ((eql 1 dims) `(,(car tp) *))
-	((or (atom dims) (cdr dims)) nil)
-	(tp)))
-(setf (get 'vtp 'cmp-inline) t)
+#.`(defun listp (x) ,(simple-type-case 'x 'list))
 
 (defun valid-class-name (class &aux (name (si-class-name class)))
   (when (eq class (si-find-class name nil))
     name))
 (setf (get 'valid-class-name 'cmp-inline) t)
 
-(eval-when
- (compile eval)
- (defconstant +s+ `(proper-list proper-sequence list sequence function symbol boolean
-			 proper-cons improper-cons
-			 seqind rnkind ;FIXME
-			 fixnum integer rational float real number;complex
-			 character
-			 hash-table pathname
-			 stream 
-			 double-float single-float
-			 structure-object ;FIXME
-			 unsigned-byte
-			 signed-byte))
- (defconstant +rr+ (lremove-if (lambda (x) (type-and #t(or complex array) (cmp-norm-tp (car x)))) +r+)))
+(defun lookup-simple-typep-fn (name)
+  (when (symbolp name) (get name 'simple-typep-fn)))
+(defun lookup-typep-fn (name)
+  (when (symbolp name) (get name 'typep-fn)))
 
- (eval-when (eval compile) (defun tpc (&rest x) (tps-ints (type-and-list (mapcar 'cmp-norm-tp x)) (cdr (assoc 'tp7 +rs+)))))
+(defmacro define-typep-fn (name lambda-list &rest body &aux (q (intern (string-concatenate (string name) "-TYPEP-FN"))))
+  `(progn
+     (defun ,q ,lambda-list ,@body)
+     (setf (get ',name 'typep-fn) ',q (get ',q 'cmp-inline) t)))
 
-#.`(defun type-spec-p (otp)
-     (case (tp7 otp)
-       (,(tpc 'std-instance) (si-classp otp))
-       (,(tpc 'symbol) (not (eq otp 'values)))
-       (,(tpc 'cons) (unless (improper-consp otp) 
-		       (case (car otp) (function (not (cdr otp)))(values nil)(otherwise t))))
-       (,(tpc 'structure) t)))
-(setf (get 'type-spec-p 'cmp-inline) t)
 
-#.`(defun typep (o otp &optional env &aux (lp (listp otp)))
-     (declare (ignore env))
-     (unless (type-spec-p otp);Cannot use check-type here
-       (error 'type-error :datum otp :expected-type 'type-spec))
-     (labels ((tpi (o ctp tp &aux (ntp (when (eq ctp 'array) (vtp tp)))(ctp (if ntp 'vector ctp))(tp (or ntp tp)))
-		   (case ctp
-			 ,@(mapcar (lambda (x &aux (c (if (atom x) x (car x)))) 
-				     `(,c ,(cfn c (mksubb 'o 'tp c)))) (append +s+ +rr+))
-			 (member (when (if (cdr tp) (member o tp) (when tp (eql o (car tp)))) t));FIXME
-			 (eql (eql o (car tp)))
-			 ((complex complex*) (mtc o tp))
-			 (vector (mtv o tp))
-			 (array (mta o tp))
-			 (or (when tp (or (typep o (car tp)) (tpi o ctp (cdr tp)))))
-			 (and (if tp (and (typep o (car tp)) (tpi o ctp (cdr tp))) t))
-			 (not (not (typep o (car tp))))
-			 (satisfies (when (funcall (car tp) o) t))
-			 ((nil t) (when ctp t));FIXME ctp not inferred here
-			 (otherwise (let ((tem (expand-deftype otp))) (when tem (typep o tem)))))))
-	     
-	     (tpi o (if lp (car otp) otp) (when lp (cdr otp)))))
+(define-typep-fn or  (o tp) (when tp (or (typep o (pop tp)) (or-typep-fn o tp))))
+(define-typep-fn and (o tp) (if tp (and (typep o (pop tp)) (and-typep-fn o tp)) t))
+(define-typep-fn not (o tp) (not (when tp (typep o (car tp)))))
 
-#.`(defun type-of (x)
-     (typecase
-      x
-      (null 'null)(true 'true)
-      ,@(mapcar (lambda (y) `(,y `(,',y ,x ,x))) +range-types+)
-      ,@(mapcar (lambda (y &aux (b (pop y))) 
-		  `(,(car y) `(complex* ,(type-of (realpart x)) ,(type-of (imagpart x)))))
-		+ctps+)
-      ,@(mapcar (lambda (y &aux (b (car y))) `((array ,b) `(array ,',b ,(array-dimensions x)))) +vtps+)
-      (std-instance (let* ((c (si-class-of x))) (or (valid-class-name c) c)))
-      (structure (sdata-name (c-structure-def x)))
-      ,@(mapcar (lambda (x &aux (x (cmp-unnorm-tp x)))
-		  `(,x ',x))
-		(set-difference +kt+
-				(mapcar 'cmp-norm-tp '(boolean number array structure std-instance))
-				:test 'type-and))))
+(defmacro define-compound-typep-fn (name (o tp) &rest body &aux (q (intern (string-concatenate (string name) "-TYPEP-FN"))))
+  `(progn
+     (defun ,q (,o ,tp) (when ,(simple-type-case o name) ,@body))
+     (setf (get ',name 'typep-fn) ',q (get ',q 'cmp-inline) t)))
+
+
+#.`(progn
+     ,@(mapcar (lambda (y) `(define-compound-typep-fn ,y (o tp) (ibb o tp)))
+	       (append '(real float rational) +range-types+)))
+
+
+(define-typep-fn unsigned-byte (o tp &aux (s (if tp (car tp) '*)))
+  (typecase
+   o
+   (fixnum  (unless (minusp o) (or (eq s '*) (<= (integer-length o) s))))
+   (integer (unless (minusp o) (or (eq s '*) (<= (integer-length o) s))))))
+
+(define-typep-fn signed-byte (o tp &aux (s (if tp (car tp) '*)))
+  (typecase
+   o
+   (fixnum  (or (eq s '*) (< (integer-length o) s)))
+   (integer (or (eq s '*) (< (integer-length o) s)))))
+
+
+#.`(progn
+     ,@(mapcar (lambda (y) `(define-simple-typep-fn ,y))
+	       (cons 'standard-generic-interpreted-function (cons 'standard-generic-compiled-function +singleton-types+))))
+
+
+#.`(progn
+     ,@(mapcan (lambda (x)
+		 (mapcar (lambda (y)
+			   `(deftype ,(cadr y) (&optional dims) `(,',(car x) ,',(car y) ,dims)))
+			 (cdr x)))
+	       +array-typep-alist+)
+     ,@(mapcan (lambda (x)
+		 (mapcar (lambda (y)
+			   `(define-compound-typep-fn ,(cadr y) (o tp) (,(if (eq (car x) 'vector) 'dbv 'db) o tp)))
+			 (cdr x)))
+	       +array-typep-alist+)
+     ,@(mapcan (lambda (x)
+		 `((define-typep-fn ,(car x) (o tp)
+		     (when (funcall (cddr (assoc (upgraded-array-element-type (if tp (pop tp) '*))
+						 (cdr (assoc ',(car x) +array-typep-alist+))))
+				    o)
+		       (,(if (eq (car x) 'vector) 'dbv 'db) o tp)))))
+	       +array-typep-alist+))
+
+(defun cmp-real-tp (x y)
+  (when (member x +range-types+)
+    (when (member y +range-types+)
+      (if (eq x y) x
+	(ecase x
+	       (integer (ecase y (ratio 'integer-ratio)))
+	       (ratio (ecase y (integer 'ratio-integer))))))))
+
+
+(defconstant +complex*-typep-alist+
+  (mapcar (lambda (x &aux (k (cmp-real-tp (if (listp x) (car x) x) (if (listp x) (cadr x) x)))
+		     (q (intern (string-concatenate "COMPLEX*-" (string k)))))
+	    (list* x k q (intern (string-concatenate (string q) "-SIMPLE-TYPEP-FN"))))
+	  (list* '(integer ratio) '(ratio integer) +range-types+)))
+
+#.`(progn
+     ,@(mapcan (lambda (x)
+		 `((deftype ,(caddr x) nil ',`(complex* ,(if (listp (car x)) (caar x) (car x)) ,(if (listp (car x)) (cadar x) (car x))))))
+	       +complex*-typep-alist+))
+
+(define-typep-fn complex* (o tp &aux (rtp (if tp (pop tp) '*))(itp (if tp (car tp) rtp))
+			    (rctp (if (listp rtp) (car rtp) rtp))(ictp (if (listp itp) (car itp) itp))
+			    (rdtp (when (listp rtp) (cdr rtp)))(idtp (when (listp itp) (cdr itp)))
+			    (k (cmp-real-tp rctp ictp)))
+  (if k
+      (when (funcall (cdddr (rassoc k +complex*-typep-alist+ :key 'car)) o)
+	(and (ibb (realpart o) rdtp) (ibb (imagpart o) idtp)))
+    (when (complex*-simple-typep-fn o)
+      (and (or (eq rtp '*) (typep (realpart o) rtp))
+	   (or (eq itp '*) (typep (imagpart o) itp))))))
+
+(define-typep-fn complex (o tp &aux (rtp (if tp (pop tp) '*))
+			   (rlp (listp rtp))(rctp (if rlp (car rtp) rtp))(rdtp (when rlp (cdr rtp)))
+			   (k (cmp-real-tp rctp rctp)))
+  (if k
+      (when (funcall (cdddr (rassoc k +complex*-typep-alist+ :key 'car)) o)
+	(and (ibb (realpart o) rdtp) (ibb (imagpart o) rdtp)))
+    (when (complex-simple-typep-fn o)
+      (or (eq rtp '*) (and (typep (realpart o) rtp) (typep (imagpart o) rtp))))))
+
+
+(define-compound-typep-fn structure (o tp)
+  (if tp (mss (c-structure-def o) (car tp)) t))
+
+(setf (get 'structure-object 'typep-fn) 'structure-typep-fn);FIXME
+
+(define-compound-typep-fn std-instance (o tp)
+  (if tp (when (member (car tp) (si-class-precedence-list (si-class-of o))) t) t))
+
+
+(define-compound-typep-fn proper-cons (o tp)
+  (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))
+(define-compound-typep-fn improper-cons (o tp)
+  (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))
+(define-compound-typep-fn cons (o tp)
+  (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))
+
+(define-typep-fn eql (o tp)
+  (when tp (eql o (car tp))))
+
+(define-typep-fn member (o tp)
+  (when tp (when (member o tp) t)))
+
+(define-simple-typep-fn t)
+(define-simple-typep-fn nil)
+
+
+(define-typep-fn satisfies (o tp)
+  (funcall (car tp) o))
+
+
+(defun typep (x type &optional env
+		&aux (lp (listp type))(ctp (if lp (car type) type))(tp (when lp (cdr type)))
+		(sfn (unless tp (lookup-simple-typep-fn ctp)))(fn (unless sfn (lookup-typep-fn ctp))))
+  (declare (ignore env))
+  (cond (sfn (funcall sfn x))
+	(fn (funcall fn x tp))
+	((case ctp (values t) (function tp) (otherwise (not (or (symbolp ctp) (si-classp ctp)))))
+	 (error 'type-error :datum type :expected-type 'type-spec))
+	((typep x (expand-deftype type)))))
+
+(setq *typep-defined* t);FIXME
+
+

@@ -20,6 +20,39 @@
     (if (eq y z) x (append (ldiff x y) z))))
 
 
+(defun no-reg-vars-p (lambda-list)
+  (case (car lambda-list)
+	((&whole &environment) (no-reg-vars-p (cddr lambda-list)))
+	((nil) t)
+	(otherwise (member (car lambda-list) lambda-list-keywords))))
+
+(defun maybe-clear-tp (sym &aux (z (find-symbol "*NRM-HASH*")))
+  (when z
+    (when (boundp z)
+      (multiple-value-bind
+       (r f) (gethash sym (symbol-value z))
+       (when f
+	 (remhash r (symbol-value (find-symbol "*UNNRM-HASH*")))
+	 (remhash sym (symbol-value z)))))))
+
+(defvar *deftype-simple-typep-fns* nil)
+
+(defmacro define-simple-typep-fn (name)
+  (labels ((q (n) (intern (string-concatenate
+			   (string n) "-SIMPLE-TYPEP-FN")))
+	   (f (n &aux (q (q n)))
+	      `(progn (defun ,q (o) ,(simple-type-case 'o n))
+		      (setf (get ',n 'simple-typep-fn) ',q
+			    (get ',q 'cmp-inline) t))))
+  (cond ((fboundp 'simple-type-case)
+	 `(progn
+	    ,@(mapcar #'f (nreverse *deftype-simple-typep-fns*))
+	    ,@(setq *deftype-simple-typep-fns* nil)
+	    ,(f name)))
+	((setq *deftype-simple-typep-fns* (cons name *deftype-simple-typep-fns*))
+	 nil))))
+
+
 (defmacro deftype (name lambda-list &rest body
 		   &aux (lambda-list (deftype-lambda-list lambda-list))
 		     (fun-name (gensym (string name))))
@@ -28,18 +61,16 @@
   (multiple-value-bind
 	(doc decls ctps body)
       (parse-body-header body)
-    `(eval-when (compile eval load)
-       (putprop ',name '(deftype ,name ,lambda-list ,@body) 'deftype-form)
-       (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
-       (putprop ',name ',fun-name 'deftype-definition)
-       (maybe-clear-tp ',name)
-       (putprop ',name ,doc 'type-documentation)
-       ;; ,@(let* ((r (unless lambda-list (eval (cons 'progn body))))
-       ;; 		(p (satisfies-predicate r)))
-       ;; 	   (when p
-       ;; 	     `((putprop ',name ',p 'type-predicate)
-       ;; 	       (putprop ',p ',name 'predicate-type))))
-       ',name)))
+      `(progn
+	 (eval-when (compile eval load)
+		    (putprop ',name '(deftype ,name ,lambda-list ,@body) 'deftype-form)
+		    (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
+		    (putprop ',name ',fun-name 'deftype-definition)
+		    (maybe-clear-tp ',name)
+		    (putprop ',name ,doc 'type-documentation)
+		    ',name)
+	 ,@(when (no-reg-vars-p lambda-list)
+	     `((define-simple-typep-fn ,name))))))
 
 ;;; Some DEFTYPE definitions.
 

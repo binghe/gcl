@@ -53,10 +53,6 @@
 					+array-types+))
 
 
-(defun maybe-clear-tp (sym)
-  (let* ((p (find-package "COMPILER")) (s (and p (find-symbol "*NORM-TP-HASH*" p))))
-    (when (and s (boundp s)) (remhash sym (symbol-value s)))))
-
 #+(and pre-gcl raw-image)
 (defun array-offset (x) (c-array-offset x))
 #+(and pre-gcl raw-image)
@@ -425,3 +421,13 @@
 	   (not (eql majvers *gcl-major-version*)))
        *load-verbose*
        (format t "[compiled in GCL ~a.~a.~a] " majvers minvers extvers)))
+
+(defconstant +array-typep-alist+
+  (mapcar (lambda (x)
+	    (cons x
+		  (mapcar (lambda (y &aux (q (intern (string-concatenate (string x) "-" (string y))))
+				     (f (intern (string-concatenate (string q) "-SIMPLE-TYPEP-FN"))))
+			    (list* y q f))
+			  (list* '* nil +array-types+))))
+	  '(array simple-array non-simple-array matrix vector)))
+
