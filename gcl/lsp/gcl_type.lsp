@@ -461,7 +461,9 @@
       (if (atom x) (btp-bnds x) (ntp-bnds (caddr x))))))
 
 (defun xtp (tp) (if (listp tp) (car tp) tp))
+(setf (get 'xtp 'cmp-inline) t)
 (defun mtp (tp) (if (listp tp) (cadr tp) tp))
+(setf (get 'mtp 'cmp-inline) t)
 
 (defun ntp-op (op t1 t2)
   (ecase op
