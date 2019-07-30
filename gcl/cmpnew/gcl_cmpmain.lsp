@@ -521,7 +521,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
   (typecase
    x
    (string (if (find-if-not 'standard-char-p x) "fasl code" x))
-   (vector (vec-to-list (coerce x 'list)))
+   ((vector t) (vec-to-list (coerce x 'list)))
    (cons (let ((a (vec-to-list (car x)))(d (vec-to-list (cdr x))))
 	   (if (and (eq a (car x)) (eq d (cdr x))) x (cons a d))))
    (otherwise x)))
