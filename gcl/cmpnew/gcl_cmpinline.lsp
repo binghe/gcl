@@ -1152,14 +1152,14 @@
 	  ((dolist (x x (wt-nl "_p[-1].c_cdr=" l ";_b;})"))
 	     (wt-nl "_p->c_car=" x ";_p->c_cdr=(object)(_p+1);_p++;"))))))
 
-(defun list-inline (&rest x)
+(defun list-inline (&rest x &aux (*values-to-go* nil))
   (cond ((can-allocate-on-stack) (wt-stack-list* x nil))
 	((endp (cdr x)) (wt "make_cons(" (car x) ",Cnil)"))
 	(t 
 	 (wt "list(" (length x))
 	 (dolist (loc x (wt #\))) (wt #\, loc)))))
 
-(defun list*-inline (&rest x)
+(defun list*-inline (&rest x &aux (*values-to-go* nil))
   (if (can-allocate-on-stack)
       (wt-stack-list* (butlast x) (car (last x)))
     (case (length x)
@@ -1168,12 +1168,12 @@
 	  (otherwise
 	   (wt "listA(" (length x)) (dolist (loc x) (wt #\, loc)) (wt #\))))))
   
-(defun make-list-inline (n)
+(defun make-list-inline (n &aux (*values-to-go* nil))
   (if (can-allocate-on-stack)
       (wt-stack-list* nil nil n)
     (wt "make_list(" n ")")))
 
-(defun cons-inline (x y)
+(defun cons-inline (x y &aux (*values-to-go* nil))
   (if (can-allocate-on-stack) 
       (wt-stack-list* (list x) y)
     (wt "make_cons(" x "," y ")")))
