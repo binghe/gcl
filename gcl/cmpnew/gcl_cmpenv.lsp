@@ -27,6 +27,7 @@
 ;;; included in the compiled code.  The default value is OFF.
 
 (defvar *dlinks* (make-hash-table :test 'equal))
+(defvar *bind-hash* (make-hash-table :test 'eq))
 
 (defun init-env ()
   (setq *tmpsyms* +tmpsyms+)
@@ -36,10 +37,11 @@
   (setq *next-vv* -1)
   (setq *next-cfun* 0)
   (setq *last-label* 0)
-  (clrhash *src-hash*)
-  (clrhash *fn-src-fn*)
-  (clrhash *objects*)
-  (clrhash *dlinks*)
+  (setq *src-hash* (make-hash-table :test 'eq))
+  (setq *fn-src-fn* (make-hash-table :test 'eq))
+  (setq *objects* (make-hash-table :test 'eq))
+  (setq *dlinks* (make-hash-table :test 'equal))
+  (setq *bind-hash* (make-hash-table :test 'eq))
   (setq *local-funs* nil)
   (setq *global-funs* nil)
   (setq *global-entries* nil)
@@ -50,7 +52,8 @@
   (setq *inline-functions* nil)
   (setq *function-links* nil)
   (setq *inline-blocks* 0)
-  (setq *notinline* nil))
+  (setq *notinline* nil)
+  )
 
 
 (defvar *next-cvar* 0)

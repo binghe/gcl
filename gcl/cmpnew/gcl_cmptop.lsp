@@ -900,13 +900,16 @@
 (setf (get 'fun-fun 'wt-loc) 'wt-fun-fun)
 
 (defmacro side-effects nil nil)
+
 (defun c1side-effects (args)
   (declare (ignore args))
-  (mapc (lambda (x) (when (var-p x) (remprop (var-store x) 'bindings))) *vars*)
+  (mapc (lambda (x)
+	  (when (var-p x)
+	    (unless (eq (var-store x) +opaque+)
+	      (setf (gethash (var-store x) *bind-hash*) nil))))
+	*vars*)
   (list 'side-effects (make-info :flags (iflags side-effects))))
-;; (defun c1side-effects (args)
-;;   (declare (ignore args))
-;;   (list 'side-effects (make-info :flags (iflags side-effects))))
+
 (defun c2side-effects nil nil)
 (setf (get 'side-effects 'c1) 'c1side-effects)
 (setf (get 'side-effects 'c2) 'c2side-effects)

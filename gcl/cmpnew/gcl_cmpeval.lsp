@@ -507,7 +507,7 @@
 	 (v1 (c1arg n))
 	 (ref (if (eq (car v1) 'var) (caddr v1) v))
 	 (rv (car ref))
-	 (l (cons rv (mapcan (lambda (x) (when (and (var-p x) (eq ref (caddr (get (var-store x) 'bindings)))) (list x)))
+	 (l (cons rv (mapcan (lambda (x) (when (and (var-p x) (eq ref (caddr (get-vbind-form x)))) (list x)))
 			     (ldiff *vars* (member rv *vars*)))))
 	 (l (mapc (lambda (x) (do-setq-tp x nil tp)) l))
 	 (res (c1expr (car args)))
@@ -1069,12 +1069,13 @@
 (defun cln (x &optional (i 0))
   (if (atom x) i (cln (cdr x) (1+ i))))
 
-
-(defun tmpsym-p (a)
-  (when (symbolp a) (get a 'tmp)))
-
 (defun new-type-p (a b)
-  (cond ((atom a) (unless (eql a b) (unless (tmpsym-p a) (unless (tmpsym-p b) t))))
+  (cond ((eql a +opaque+) nil)
+	((eql b +opaque+) nil)
+	((spicep a) nil);;FIXME ????
+	((spicep b) nil)
+	((eql a b) nil)
+	((atom a))
 	((atom b))
 	((or (new-type-p (car a) (car b)) (new-type-p (cdr a) (cdr b))))))
 
@@ -1130,7 +1131,7 @@
 	((cons (list sir tag (cadr src) ttag) *src-inline-recursion*))))
 
 (defun sir-name (id)
-  (cond ((local-fun-p id)) ((symbolp id) id) ((tmpsym))))
+  (cond ((local-fun-p id)) ((symbolp id) id) ((alloc-spice))));FIXME, do not push anonymous?
 
 (defun name-sir (sir &aux (f (car sir)))
   (if (fun-p f)
@@ -1150,7 +1151,8 @@
 (defun constant-type-p (tp)
   (typecase
    tp
-   (symbol (unless (eq tp +opaque+) (unless (get tp 'tmp) t)));FIXME
+   (symbol (unless (eq tp +opaque+) t));FIXME
+   (spice nil)
    (atom t)
    (cons (and (constant-type-p (car tp)) (constant-type-p (cdr tp))))))
 

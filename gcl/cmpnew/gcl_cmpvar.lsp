@@ -197,13 +197,13 @@
     (let ((fmla (exit-to-fmla-p)))
       (cond ((when fmla (type>= #tnull (info-type info))) (c1nil))
 	    ((when fmla (type>= #t(not null) (info-type info))) (c1t))
-	    ((unless (or (cadr vref) (caddr vref))
-	       (let ((tmp (get (var-store (car vref)) 'bindings)))
-		 (when tmp
-		   (when (check-vs (car (last tmp)))
-		     (let* ((f (pop tmp))(i (copy-info (pop tmp))))
-		       (setf (info-type i) (info-type info))
-		       (list* f i tmp)))))))
+	    ((let ((tmp (get-vbind-form (local-var vref))))
+	       (when (and tmp );FIXME (type>= (var-mt (car vref)) (var-mt (caaddr tmp)))
+		 (when (check-vs (car (last tmp)))
+		   (let* ((f (pop tmp))(i (copy-info (pop tmp))))
+		     (setf (info-type i) (var-type (caar tmp)));FIXME
+;		     (setf (info-type i) (type-and (info-type i) (info-type info)))
+		     (list* f i tmp))))))
 	    ((list 'var info vref c1fv (make-vs info)))))))
 
 (defun ref-obs1 (form obs sccb sclb s &aux (i (cadr form)))
@@ -273,6 +273,11 @@
   (unless (or (car vref) (cadr vref))
     v))
 
+(defun get-vbind-form (form &aux (bind (get-vbind form)))
+  (when bind
+    (unless (eq bind +opaque+)
+      (gethash bind *bind-hash*))))
+
 (defun get-vbind (var &aux (var (if (when (consp var) (eq 'var (car var))) (local-var (caddr var)) var)))
   (when (var-p var) (var-store var)))
 
@@ -283,13 +288,22 @@
 	;;        form))
 	))
 
-(defun push-vbind (var form &aux (s (tmpsym))(i (cadr (repeatable-var-binding form))))
+(defun push-vbind (var form)
   (when (eq 'lexical (var-kind var))
     (unless (eq (var-store var) +opaque+) 
-      (when (and i (info-type i) (not (iflag-p (info-flags i) side-effects)) (not (or (info-ref-clb i) (info-ref-ccb i))))
-	(setf (get s 'bindings) form))
-      (setf (var-store var) s))))
-
+      (setf (var-store var)
+	    (or (let ((b (get-vbind form)))
+		  (unless (eq b +opaque+)
+		    (when (multiple-value-bind (r f) (gethash b *bind-hash*) f)
+		      b)));FIXME
+		(let* ((s (alloc-spice))
+		       (i (cadr (repeatable-var-binding form))))
+		  (setf (gethash s *bind-hash*)
+			(when (and i (info-type i)
+				   (not (iflag-p (info-flags i) side-effects))
+				   (not (or (info-ref-clb i) (info-ref-ccb i))))
+			  form))
+		  s))))))
 
 (defun get-top-var-binding (bind)
   (labels ((f (l) (member bind l :key (lambda (x) (when (var-p x) (var-store x)))))

@@ -539,8 +539,8 @@
 (defun cdr-propagator (f t1 &aux (t1 (type-and #tlist t1)))
   (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
 	((let ((a1 (atomic-tp t1)))
-	   (when a1 (let ((tp (cdar a1))) (unless (or (eq tp +opaque+) (when (symbolp tp) (get tp 'tmp))) (object-type tp))))))
-	;((and (consp t1) (eq (car t1) 'cons)) (caddr t1)) FIXME
+	   (when a1 (let ((tp (cdar a1))) (unless (or (spicep tp) (eq tp +opaque+)) (object-type tp))))))
+	((and (consp t1) (eq (car t1) 'cons)) (caddr t1))
 	((type>= #tproper-list t1) #tproper-list)))
 (si::putprop 'cdr 'cdr-propagator 'type-propagator)
 
@@ -714,7 +714,7 @@
     (let ((*in-co1carcdr* t))
       (let* ((tp (car (atomic-tp (info-type (cadr (with-restore-vars (c1arg (car x))))))))
 	     (tp (when (consp tp) (funcall f tp)))
-	     (tp (when (symbolp tp) (when (get tp 'tmp) (unless (eq tp +opaque+) (get-var tp))))))
+	     (tp (unless (eq tp +opaque+) (get-var tp))))
 	(when tp (c1var tp))))))
 
 (setf (get 'car 'co1) 'co1carcdr)
@@ -724,10 +724,8 @@
   (declare (ignore f))
   (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
 	((let ((a1 (atomic-tp t1)))
-	   (when a1 (let ((tp (caar a1))) (unless (or (eq tp +opaque+) (when (symbolp tp) (get tp 'tmp))) (object-type tp))))))
-	;; ((and (consp t1) (eq (car t1) 'cons)) (cadr t1)) ;FIXME
-	))
-
+	   (when a1 (let ((tp (caar a1))) (unless (or (spicep tp) (eq tp +opaque+)) (object-type tp))))))
+	((and (consp t1) (eq (car t1) 'cons)) (cadr t1))))
 (si::putprop 'car 'car-propagator 'type-propagator)
 
 (defun contagion (t1 t2)
