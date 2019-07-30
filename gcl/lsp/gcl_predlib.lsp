@@ -237,10 +237,11 @@
           (random-state . random-state-p)
           (structure . structurep)
           (function . functionp)
+	  (improper-cons . improper-consp)
           ;; (compiled-function . compiled-function-p)
           ;; (non-generic-compiled-function . non-generic-compiled-function-p)
           ;; (generic-function . generic-function-p)
-          (common . commonp)))
+	  ))
 
 (dolist (l +type-alist+)
   (putprop (car l) (cdr l) 'type-predicate)
