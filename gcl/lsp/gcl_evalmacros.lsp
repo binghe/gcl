@@ -117,6 +117,38 @@
   (declare (optimize (safety 2)))
  `(loop (unless ,test (return)) ,@forms))
 
+(defun funid-sym-p (funid &optional err)
+  (cond ((symbolp funid) funid)
+	((when (consp funid);FIXME Too early for typecase
+	   (when (eq (car funid) 'setf)
+	     (when (consp (cdr funid))
+	       (when (symbolp (cadr funid))
+		 (null (cddr funid))))))
+	 (setf-sym (cadr funid)))
+	(t (when err (error 'type-error :datum funid :expected-type 'function-name)))))
+
+(defun funid-sym (funid)
+  (funid-sym-p funid t))
+
+(defun funid-p (funid &optional err)
+  (cond ((symbolp funid) funid)
+	((when (consp funid)
+	   (eq (car funid) 'lambda))
+	 funid)
+	((when (consp funid);FIXME Too early for typecase
+	   (when (eq (car funid) 'setf)
+	     (when (consp (cdr funid))
+	       (when (symbolp (cadr funid))
+		 (null (cddr funid))))))
+	 (setf-sym (cadr funid)))
+	(t (when err (error 'type-error :datum funid :expected-type 'function-name)))))
+
+(defun funid (funid)
+  (funid-p funid t))
+
+(defun funid-to-sym (funid) (funid-sym funid))
+
+
 (defun setf-sym (funid)
   (values       
    (intern (si::string-concatenate
@@ -124,12 +156,6 @@
 	    "::"
 	    (symbol-name funid))
 	   (load-time-value (or (find-package 'setf) (make-package 'setf))))))
-
-(defun funid-sym (funid) funid)
-(defun funid-sym-p (funid) t)
-(defun funid (funid) funid)
-(defun funid-p (funid) t)
-(defun funid-to-sym (funid) (funid-sym funid))
 
 (defmacro defmacro (name vl &rest body)
   (declare (optimize (safety 2)))

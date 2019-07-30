@@ -60,30 +60,13 @@
 
 
 
-(defun funcallable-symbol-function (x) (c-symbol-gfdef x))
+n(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
 
-
-
-(defun funid-sym-p (funid &optional err)
-  (typecase
-   funid
-   (symbol funid)
-   ((cons (member setf) (cons symbol null)) (setf-sym (cadr funid)))
-   (otherwise (when err (error 'type-error :datum funid :expected-type 'function-name)))))
-
-(defun funid-sym (funid)
-  (funid-sym-p funid t))
-
-(defun funid-p (funid &optional err)
-  (typecase
-   funid
-   (symbol funid)
-   ((cons (member lambda) t) funid)
-   ((cons (member setf) (cons symbol null)) (setf-sym (cadr funid)))
-   (otherwise (when err (error 'type-error :datum funid :expected-type 'function-identifier)))))
-
-(defun funid (funid)
-  (funid-p funid t))
+(defun branches (f tpsff fnl o c)
+  (mapcar (lambda (x)
+	    `(,(lremove-duplicates (mapcar (lambda (x) (cdr (assoc x fnl))) (car x)))
+	      ,(mkinfm f (lreduce 'type-or1 (car x)) (list (branch1 x tpsff f o)))))
+	  c))
 
 
 
