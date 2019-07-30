@@ -403,29 +403,35 @@
 			 (convert-to-system-type type2))))))))
 
 (defun do-satisfies-deftype (name predicate)
-  #+cmu17 (declare (ignore name predicate))
-  #+(or :Genera (and :Lucid (not :Prime)) ExCL :coral)
-  (let* ((specifier `(satisfies ,predicate))
-	 (expand-fn #'(lambda (&rest ignore)
-			(declare (ignore ignore))
-			specifier)))
-    ;; Specific ports can insert their own way of doing this.  Many
-    ;; ports may find the expand-fn defined above useful.
-    ;;
-    (or #+:Genera
-	(setf (get name 'deftype) expand-fn)
-	#+(and :Lucid (not :Prime))
-	(system::define-macro `(deftype ,name) expand-fn nil)
-	#+ExCL
-	(setf (get name 'excl::deftype-expander) expand-fn)
-	#+:coral
-	(setf (get name 'ccl::deftype-expander) expand-fn)))
-  #-(or :Genera (and :Lucid (not :Prime)) ExCL :coral cmu17)
-  ;; This is the default for ports for which we don't know any
-  ;; better.  Note that for most ports, providing this definition
-  ;; should just speed up class definition.  It shouldn't have an
-  ;; effect on performance of most user code.
-  (unless (get name 'si::deftype-definition) (eval `(deftype ,name () '(satisfies ,predicate)))))
+  (unless (get name 'si::deftype-definition)
+;    (print `(deftype ,name nil `(si::std-instance ,(si::coerce-to-standard-class ',name))))
+;    (print (si::coerce-to-standard-class name))
+    (eval `(deftype ,name nil t))
+    (remprop name 'si::simple-typep-fn)))
+
+  ;; #+cmu17 (declare (ignore name predicate))
+  ;; #+(or :Genera (and :Lucid (not :Prime)) ExCL :coral)
+  ;; (let* ((specifier `(satisfies ,predicate))
+  ;; 	 (expand-fn #'(lambda (&rest ignore)
+  ;; 			(declare (ignore ignore))
+  ;; 			specifier)))
+  ;;   ;; Specific ports can insert their own way of doing this.  Many
+  ;;   ;; ports may find the expand-fn defined above useful.
+  ;;   ;;
+  ;;   (or #+:Genera
+  ;; 	(setf (get name 'deftype) expand-fn)
+  ;; 	#+(and :Lucid (not :Prime))
+  ;; 	(system::define-macro `(deftype ,name) expand-fn nil)
+  ;; 	#+ExCL
+  ;; 	(setf (get name 'excl::deftype-expander) expand-fn)
+  ;; 	#+:coral
+  ;; 	(setf (get name 'ccl::deftype-expander) expand-fn)))
+  ;; #-(or :Genera (and :Lucid (not :Prime)) ExCL :coral cmu17)
+  ;; ;; This is the default for ports for which we don't know any
+  ;; ;; better.  Note that for most ports, providing this definition
+  ;; ;; should just speed up class definition.  It shouldn't have an
+  ;; ;; effect on performance of most user code.
+  ;; (unless (get name 'si::deftype-definition) (eval `(deftype ,name () '(satisfies ,predicate)))))
 
 (defun make-type-predicate-name (name &optional kind)
   (if (symbol-package name)
