@@ -82,7 +82,19 @@ $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
 	touch $< $@
 
-$(PORTDIR)/saved_gcl: $(PORTDIR)/saved_pre_gcl $(HDIR)cmpinclude.h 
+$(PORTDIR)/saved_gcl0: $(PORTDIR)/saved_pre_gcl $(HDIR)cmpinclude.h
+#	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
+#	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
+	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F)
+	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
+
+$(PORTDIR)/saved_gcl1: $(PORTDIR)/saved_gcl0 $(HDIR)cmpinclude.h
+#	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
+#	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
+	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F)
+	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
+
+$(PORTDIR)/saved_gcl: $(PORTDIR)/saved_gcl1 $(HDIR)cmpinclude.h
 #	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
 #	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
 	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F) && $(MAKE) $(@F)
