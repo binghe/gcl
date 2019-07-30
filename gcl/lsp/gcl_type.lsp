@@ -218,9 +218,9 @@
 
 (let ((p1 (make-btp))(p2 (make-btp)))
   (defun tp-mask (m1 x1 &optional (m2 nil m2p)(x2 nil x2p))
-    (bit-xor m1 x1 p1)
+    (btp-xor m1 x1 p1)
     (if x2p
-	(bit-and p1 (bit-xor m2 x2 p2) t)
+	(btp-and p1 (btp-xor m2 x2 p2) p1)
       p1)))
 
 
@@ -322,23 +322,23 @@
 
     (when *cmp-verbose* (print (list 'computing type)))
 
-    (bit-xor m m t)
-    (bit-xor x x t)
+    (btp-xor m m m)
+    (btp-xor x x x)
 
     (when (cadr z)
-      (bit-not m t)
-      (bit-not x t))
+      (btp-not m m)
+      (btp-not x x))
 
-    (dolist (k (car z))
-      (let ((a (cdr (assoc (car k) *k-bv*))))
-	(if (cadr z)
-	    (bit-andc2 m a t)
-	  (bit-ior x a t))))
+    (if (caddr z)
+	(if (cadr z) (btp-not m m) (btp-not x x))
+      (dolist (k (car z))
+	(let ((a (cdr (assoc (car k) *k-bv*))))
+	  (if (cadr z)
+	      (btp-andc2 m a m)
+	    (btp-ior x a x)))))
 
     (copy-tp x m (new-tp4 (tp-mask m x) x m 0 z) 0)))
 
-(defun comp-tp (type &aux (a (atomic-type type)))
-  (if a (object-tp (car a)) (comp-tp0 type)))
 (defvar *typep-defined* nil)
 
 (defun comp-tp (type)
@@ -364,7 +364,7 @@
 
 (let ((nn (make-btp)))
   (defun btp-type (x &aux (n (>= (btp-count x) #.(ash +btp-length+ -1))))
-    (if n `(not ,(btp-type1 (bit-not x nn))) (btp-type1 x))))
+    (if n `(not ,(btp-type1 (btp-not x nn))) (btp-type1 x))))
 
 ;(defun btp-type (x) (btp-type1 x))
 
@@ -470,11 +470,11 @@
 
 (let ((xp (make-btp))(mp (make-btp)))
   (defun cmp-tp-and (t1 t2)
-    (bit-and (xtp t1) (xtp t2) xp)
+    (btp-and (xtp t1) (xtp t2) xp)
     (cond ((when (atom t1) (equal xp (xtp t2))) t2)
 	  ((when (atom t2) (equal xp (xtp t1))) t1)
 	  ((and (atom t1) (atom t2)) (copy-tp xp xp nil -1))
-	  ((bit-and (mtp t1) (mtp t2) mp)
+	  ((btp-and (mtp t1) (mtp t2) mp)
 	   (cond ((when (atom t1) (equal mp t1)) t1)
 		 ((when (atom t2) (equal mp t2)) t2)
 		 ((copy-tp xp mp (new-tp1 'and t1 t2 xp mp) -1)))))))
@@ -487,11 +487,11 @@
 
 (let ((xp (make-btp))(mp (make-btp)))
   (defun cmp-tp-or (t1 t2)
-    (bit-ior (mtp t1) (mtp t2) mp)
+    (btp-ior (mtp t1) (mtp t2) mp)
     (cond ((when (atom t1) (equal mp (mtp t2))) t2)
 	  ((when (atom t2) (equal mp (mtp t1))) t1)
 	  ((and (atom t1) (atom t2)) (copy-tp mp mp nil 1))
-	  ((bit-ior (xtp t1) (xtp t2) xp)
+	  ((btp-ior (xtp t1) (xtp t2) xp)
 	   (cond ((when (atom t1) (equal xp t1)) t1)
 		 ((when (atom t2) (equal xp t2)) t2)
 		 ((copy-tp xp mp (new-tp1 'or t1 t2 xp mp) 1)))))))
@@ -506,8 +506,8 @@
 
 (defun cmp-tp-not (tp)
   (if (atom tp)
-      (bit-not tp (make-btp))
-    (list (bit-not (cadr tp) (make-btp)) (bit-not (car tp) (make-btp)) (ntp-not (caddr tp)))))
+      (btp-not tp (make-btp))
+    (list (btp-not (cadr tp) (make-btp)) (btp-not (car tp) (make-btp)) (ntp-not (caddr tp)))))
 
 (defun tp-not (tp)
   (unless (eq tp t)
@@ -520,8 +520,8 @@
     (cond ((eq t2 t))
 	  ((not t1))
 	  ((or (not t2) (eq t1 t)) nil)
-	  ((equal *nil-tp* (bit-andc2 (xtp t1) (mtp t2) p1)))
-	  ((equal *nil-tp* (bit-andc2 p1 (bit-andc2 (xtp t2) (mtp t1) p2) t))
+	  ((equal *nil-tp* (btp-andc2 (xtp t1) (mtp t2) p1)))
+	  ((equal *nil-tp* (btp-andc2 p1 (btp-andc2 (xtp t2) (mtp t1) p2) p1))
 	   (eq +tp-nil+ (ntp-and (caddr t1) (ntp-not (caddr t2))))))))
 
 (defun tp>= (t1 t2) (tp<= t2 t1))
