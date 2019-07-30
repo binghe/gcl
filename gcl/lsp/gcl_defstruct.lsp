@@ -416,7 +416,8 @@
     (when (and (null type) predicate)
 	  (record-fn predicate 'defun '(t) t)
 	  (setf (get predicate 'compiler::co1)'compiler::co1structure-predicate)
-	  (setf (get predicate 'struct-predicate) name)))
+	  (setf (get predicate 'struct-predicate) name)
+	  (setf (get predicate 'predicate-type) name)))
   nil)
 
 		  
