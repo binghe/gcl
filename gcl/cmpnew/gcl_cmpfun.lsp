@@ -529,7 +529,7 @@
 (si:putprop 'vector-push-extend 'co1vector-push 'co1)
 (defun co1vector-push (f args) f
   (unless
-   (or *safe-compile*
+   (or *safe-compile* t
        (> *space* 3)
        (null (cdr args))
        )
