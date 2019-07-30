@@ -814,6 +814,7 @@ object strm;
 	object strng;
 
 	strng = copy_simple_string(STRING_STREAM_STRING(strm));
+	STREAM_FILE_COLUMN(strm) = 0;
 	STRING_STREAM_STRING(strm)->st.st_fillp = 0;
 	return(strng);
 }
