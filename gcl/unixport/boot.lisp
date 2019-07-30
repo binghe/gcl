@@ -38,7 +38,7 @@
     (doitf l "lsp" ld? cmpl?))
   (dolist (l '(c listlib))
     (doitf l "lsp" #+pre-gcl 'identity #-pre-gcl ld? cmpl?));fixme
-  (dolist (l '(predlib deftype subtypep bit type typep typecase arraylib
+  (dolist (l '(predlib deftype typeof subtypep bit type typep typecase arraylib
 		       seq seqlib bnum fle dl rm nr lr sym hash sharp))
     (doitf l "lsp" ld? cmpl?))
   

@@ -433,16 +433,8 @@
 	((car x))))
 
 (defun ktype-of (x)
-;  (unless (fboundp 'type-of) (print (list 'ktype-of x)))
-  (cond ((not x) 'null);FIXME
-	((eq x t) 'true);FIXME
-	((spicep x) 'spice);FIXME
-	((typep x 'structure) 'structure);FIXME
-	((typep x 'std-instance) 'std-instance);FIXME
-	((improper-consp x) 'improper-cons);FIXME
-	((consp x) 'proper-cons);FIXME
-	((kktype-of (type-of x)))
-	(t (print x)(error "unknown type"))))
+  (or (kktype-of (type-of x))
+      (error "unknown type")))
 
 (defun cons-to-cns-list (x) (cns-list nil nil x))
 
