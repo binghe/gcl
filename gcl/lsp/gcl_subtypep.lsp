@@ -346,8 +346,10 @@
   (case x
     ((t) +tp-t+)
     ((nil) +tp-nil+)
-    (unknown (list nil t t))
-    (otherwise (list (if (consp (car x)) x (list x)) nil nil))))
+    (otherwise
+     (if (eq (car x) 'satisfies)
+	 (list (list +tp-t+ +tp-nil+ x) nil t)
+       (list (if (consp (car x)) x (list x)) nil nil)))))
 
 (defvar *pcnsk* '(proper-cons null))
 (defvar *pcns-ntp* (mntp (mapcar (lambda (x) (list x t)) *pcnsk*) ))
@@ -526,16 +528,12 @@
 
 (defun ?cns (x y) (if x (cons x y) y))
 
-(defun ntp-not (x &aux (l (pop x)) (d (not (pop x))))
-  (apply 'ntp-prune
-   (lreduce (lambda (ll l) (?cns (k-op 'not l nil d) ll)) l :initial-value nil)
-   d (pop x) x))
-
-(defun tp-mod (x)
-  (cond ((not (caddr x)) x)
-	((/= (let ((x *tp-mod*)) (if (>= x 0) x (- x))) 1) x)
-	((= *tp-mod* 1) +tp-t+)
-	(+tp-nil+)))
+(defun ntp-not (x &aux (l (pop x)) (d (not (pop x))) (u (pop x)))
+  (if u
+      (list (list (ntp-not (cadr l)) (ntp-not (car l)) `(not ,(caddr l))) nil u)
+    (apply 'ntp-prune
+	   (lreduce (lambda (ll l) (?cns (k-op 'not l nil d) ll)) l :initial-value nil)
+	   d u x)))
 
 (defun ntp-list (op lx ly d dx dy)
   (lreduce (lambda (ll l &aux (ny (assoc (car l) ly)))
@@ -545,27 +543,53 @@
 	     (lreduce (lambda (ll l) (?cns (unless (assoc (car l) lx) l) ll))
 		      ly :initial-value nil))))
 
+(defun ntp-subtp (x y)
+  (eq +tp-nil+ (ntp-and x (ntp-not y))))
+
+(defun ntp-and-unknown (ox lx ux oy ly uy d)
+  (let* ((xx (if ux (pop lx) ox))(xy (if uy (pop ly) oy))(x (ntp-and xx xy))
+	 (mx (if ux (pop lx) ox))(my (if uy (pop ly) oy))(m (ntp-and mx my)))
+    (cond ((ntp-subtp x m) x)
+	  ((unless ux (ntp-subtp xy xx)) oy)
+	  ((unless uy (ntp-subtp xx xy)) ox)
+	  ((list (list x m `(and ,(if ux (car lx) (car (nreconstruct-type ox)))
+				 ,(if uy (car ly) (car (nreconstruct-type oy)))))
+		 d t)))))
+
+(defun ntp-or-unknown (ox lx ux oy ly uy d)
+  (let* ((xx (if ux (pop lx) ox))(xy (if uy (pop ly) oy))(x (ntp-or xx xy))
+	 (mx (if ux (pop lx) ox))(my (if uy (pop ly) oy))(m (ntp-or mx my)))
+    (cond ((ntp-subtp x m) x)
+	  ((unless ux (ntp-subtp mx my)) oy)
+	  ((unless uy (ntp-subtp my mx)) ox)
+	  ((list (list x m `(or ,(if ux (car lx) (car (nreconstruct-type ox)))
+				,(if uy (car ly) (car (nreconstruct-type oy)))))
+		 d t)))))
+
+
 (defun ntp-and (&rest xy)
   (when xy
-    (let* ((x (tp-mod (car xy))) (y (tp-mod (cadr xy)))
+    (let* ((x (car xy)) (y (cadr xy))
 	   (ox x)(oy y)(lx (pop x))(ly (pop y))(dx (pop x))(dy (pop y))
-	   (d (and dx dy)))
-      (cond ((not lx) (if dx oy ox))
+	   (d (and dx dy))(ux (pop x))(uy (pop y)))
+      (cond ((or ux uy) (ntp-and-unknown ox lx ux oy ly uy d))
+	    ((not lx) (if dx oy ox))
 	    ((not ly) (if dy ox oy))
 	    ((apply 'ntp-prune
 		    (ntp-list 'and lx ly d dx dy) d
-		    (or (pop x) (pop y)) x))))))
+		    nil x))))))
 
 (defun ntp-or (&rest xy)
   (when xy
-    (let* ((x (tp-mod (car xy))) (y (tp-mod (cadr xy)))
+    (let* ((x (car xy)) (y (cadr xy))
 	   (ox x)(oy y)(lx (pop x))(ly (pop y))(dx (pop x))(dy (pop y))
-	   (d (or dx dy)))
-      (cond ((not lx) (if dx ox oy))
-	    ((not ly) (if dy oy ox))
+	   (d (or dx dy))(ux (pop x))(uy (pop y)))
+      (cond ((or ux uy) (ntp-or-unknown ox lx ux oy ly uy d))
+	    ((not (or (car x) lx)) (if dx ox oy))
+	    ((not (or (car y) ly)) (if dy oy ox))
 	    ((apply 'ntp-prune
 		    (ntp-list 'or lx ly d (not dx) (not dy)) d
-		    (or (pop x) (pop y)) x))))))
+		    nil x))))))
 
 (defconstant +ntypes+ `(,@+singleton-types+
 			std-instance structure standard-generic-interpreted-function
@@ -590,7 +614,7 @@
 
 #.`(defun ntp-load (type)
      (mntp
-      (case (car type)
+      (ecase (car type)
 	 ((t nil) (car type))
 	 (,+range-types+ (rng-ld type))
 	 (complex* (cmp-ld type))
@@ -602,7 +626,7 @@
 	 ((simple-array non-simple-array) (ar-ld type))
 	 (,+singleton-types+ (sing-ld type))
 	 (member (member-ld type))
-	 (otherwise 'unknown))))
+	 (satisfies type))))
 
 (defun nprocess-type (type)
   (case (car type)
@@ -619,7 +643,7 @@
        (otherwise (,(cadddr (car (last *k-ops*))) x))))
 
 (defun nreconstruct-type-int (x)
-  (cond ((caddr x) t)
+  (cond ((caddr x) (caddr (car x)))
 	((cadr x)
 	 (let* ((x (ntp-not x)))
 	   (let ((z (nreconstruct-type-int x)))
