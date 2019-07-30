@@ -204,8 +204,8 @@
 	(reset-trace-declarations (all-trace-declarations)))
   (cond
    ((eval `(let ((arglist (quote ,args))) ,cond))
-    (setq *trace-level* (1+ *trace-level*))
-    (setq indent (min (* *trace-level* 2) 20))
+    (setq *trace-level* (c+ 1 *trace-level*))
+    (setq indent (let ((x (c+ *trace-level* *trace-level*))) (if (si::<2 x 20) x 20)))
     (fresh-line *trace-output*)
     (when (or (eq entrycond t)		;optimization for common value
 	      (eval `(let ((arglist (quote ,args))) ,entrycond)))
