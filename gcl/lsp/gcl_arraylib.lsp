@@ -90,10 +90,6 @@
 	 (c-array-elttype x)
        ,@(mapcar (lambda (x &aux (tp (pop x))) `(,(car x) ',tp)) *array-type-info*)))
 
-;; (defmacro check-bounds (a i)
-;;   `(let ((q (array-total-size ,a)))
-;;      (unless (< ,i q) (error 'type-error :datum ,i :expected-type `(integer 0 (,q))))))
-
 #.`(defun row-major-aref-int (a i)
      (ecase
 	 (c-array-elttype a)
@@ -117,6 +113,7 @@
      (declare (optimize (safety 1)))
      (check-type a array)
      (check-type i seqind)
+     (assert (< i (array-total-size a)) (i) 'type-error :datum i :expected-type `(integer 0 (,(array-total-size a))))
      (ecase
 	 (c-array-elttype a)
        ,@(mapcar (lambda (y &aux (x (pop y)))
