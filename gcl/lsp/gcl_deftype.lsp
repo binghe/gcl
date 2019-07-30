@@ -302,6 +302,7 @@
 (deftype non-positive-real nil `(real * 0.0))
 (deftype non-negative-real nil `(real 0.0))
 
+(deftype double nil 'long-float)
 
 (deftype unadjustable-array nil
   `(or simple-string simple-bit-vector simple-vector))
