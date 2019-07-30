@@ -33,7 +33,7 @@
   (when (eq (var-kind v) 'lexical)
     (setq t1 (coerce-to-one-value t1))
     (setf (var-dt v) (var-type v)
-	  (var-type v) (if *compiler-new-safety* (var-type v) (type-and t1 (var-dt v)))
+	  (var-type v) (ensure-known-type (if *compiler-new-safety* (var-type v) (type-and t1 (var-dt v))))
 	  (var-mt v) (var-type v)
 	  (var-loc v) (unless (and (eq (var-loc v) 'object)
 				   (unless (eq t (var-type v)) (var-type v))) (var-loc v)))

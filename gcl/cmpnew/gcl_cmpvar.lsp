@@ -126,6 +126,11 @@
 		 (eql-not-nil rx ry))
 	 (return-from is-rep-referred t))))))
 
+(defun ensure-known-type (tp)
+  (if (when (listp tp) (third (third tp)))
+      (car tp)
+    tp))
+
 (defun c1make-var (name specials ignores types &aux x)
 
   (let ((var (make-var :name name)))
@@ -141,13 +146,13 @@
 	      (dynamic-extent #+dynamic-extent (set-var-dynamic var))
 	      (t (unless (and (not (get (var-name var) 'tmp));FIXME
 			      *compiler-new-safety*) 
-		   (setf (var-type var) (nil-to-t (type-and (var-type var) (cdr v)))))))))
+		   (setf (var-type var) (ensure-known-type (nil-to-t (type-and (var-type var) (cdr v))))))))))
     
     (cond ((or (member name specials) (si:specialp name))
 	   (setf (var-kind var) 'SPECIAL)
 	   (setf (var-loc var) (add-symbol name))
 	   (when (and (not *compiler-new-safety*) (not (assoc name types)) (setq x (get name 'cmp-type)))
-	     (setf (var-type var) x))
+	     (setf (var-type var) (ensure-known-type x)))
 	   (setq *special-binding* t))
 	  (t
 	   (and (boundp '*c-gc*) *c-gc*
@@ -583,7 +588,7 @@
 (defun do-setq-tp (v form t1)
   (unless nil ; *compiler-new-safety* FIXME
     (when (llvar-p v)
-      (setq t1 (coerce-to-one-value t1))
+      (setq t1 (ensure-known-type (coerce-to-one-value t1)))
       (let* ((tp (type-and (var-dt v) t1)))
 	(unless (or tp (not (and (var-dt v) t1)))
 	  (cmpwarn "Type mismatches between ~s/~s and ~s/~s." (var-name v) (var-dt v) (car form) t1))
