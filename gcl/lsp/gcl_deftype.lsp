@@ -393,7 +393,7 @@
 
 (defun group-real-types (y)
   (mapcar (lambda (x)
-	    (cons x (lremove-if-not (lambda (y) (eq x (car y))) y)))
+	    (cons x (lremove-if-not (lambda (y) (eq x (if (eq (car y) 'or) (caadr y) (car y)))) y)))
 	  +range-types+))
 
 (deftype complex* (&whole w &optional rp (ip rp)
