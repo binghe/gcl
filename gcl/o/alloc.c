@@ -466,8 +466,7 @@ type_name(int t) {
 static void
 call_after_gbc_hook(int t) {
   if (sSAafter_gbc_hookA && sSAafter_gbc_hookA->s.s_dbind!= Cnil) {
-    set_up_string_register(tm_table[(int)t].tm_name+1);
-    ifuncall1(sSAafter_gbc_hookA->s.s_dbind,intern(string_register,system_package));
+    ifuncall1(sSAafter_gbc_hookA->s.s_dbind,intern(str((tm_table[(int)t].tm_name+1)),system_package));
   }
 }
 
