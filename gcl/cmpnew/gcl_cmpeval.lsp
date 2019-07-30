@@ -1138,6 +1138,11 @@
       (fun-name f)
     f))
 
+(defun infer-tp-p (f)
+  (cond ((eq f 'infer-tp))
+	((atom f) nil)
+	((or (infer-tp-p (car f)) (infer-tp-p (cdr f))))))
+
 (defun cons-count (f)
   (cond ((atom f) 0)
 	((+ 1 (cons-count (car f)) (cons-count (cdr f))))))
@@ -1172,14 +1177,16 @@
 			 si::set-0-byte-array-self));FIXME
 	   (flet ((tst (tp) (not (or (type>= tp #tarray) (type>= tp #tvector)))))
 	     (tst (info-type (if (eq fun 'si::row-major-aset) (cadadr fms) (cadar fms))))))
-	  ((< (cons-count src) 30))
+;	  ((< (cons-count src) 30))
 	  ((not (symbolp fun)))
 	  ((let* ((n (symbol-package fun))(n (when n (package-name n)))(p (find-package :lib))) 
 	     (when n (or (when p (find-symbol n p)) (string-equal "S" n)))));FIXME
 	  ((local-fun-p fun))
-	  ((intersection '(&key &rest) (cadr src)))
+	  ((intersection-p '(&key &rest) (cadr src)))
 	  ((member-if-not (lambda (x) (type>= (car x) (cdr x))) 
-			  (mapcar (lambda (x y) (cons (info-type (cadr x)) (coerce-to-one-value y))) fms (get-arg-types fun)))))))
+			  (mapcar (lambda (x y) (cons (info-type (cadr x)) (coerce-to-one-value y))) fms (get-arg-types fun))))
+	  ((infer-tp-p src))
+	  ((< (cons-count src) 30)))));100
 
 (dolist (l '(upgraded-array-element-type row-major-aref row-major-aset si::set-array array-element-type))
   (setf (get l 'consider-inline) t))
