@@ -201,3 +201,9 @@
 (setq *typep-defined* t);FIXME
 
 
+(defun array-offset (x)
+  (typecase
+   x
+   ((and (array bit) adjustable-array) (c-array-offset x))
+   (otherwise 0)))
+(setf (get 'array-offset 'cmp-inline) t)
