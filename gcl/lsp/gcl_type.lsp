@@ -689,12 +689,29 @@
 		    +kt+))
 	  tps))
 
+
+(defconstant +rq+
+  (mapcar (lambda (x)
+	    (cons (pop x)
+		  (lreduce (lambda (y x)
+			     (let ((z (rassoc (cdr x) y)))
+			       (if z
+				    (setf (car z) (type-or1 (car x) (car z)) y y)
+				 (cons (cons (car x) (cdr x)) y))))
+			   x :initial-value nil)))
+	  +rs+))
+
+
 (defun norm-tp-ints (tp rl)
-   (cmp-norm-tp (cons 'member (tps-ints (type-and-list (list tp)) rl))))
+  (cmp-norm-tp
+   (cons 'member
+	 (lreduce (lambda (y x)
+	     (if (tp-and tp (car x)) (cons (cdr x) y) y))
+	   rl :initial-value nil))))
 
 #.`(progn;FIXME macrolet norm-tp-ints can only compile-file, not compile
      ,@(mapcar (lambda (x &aux (s (msym x))) 
-		 `(let* ((rl (cdr (assoc ',x +rs+))))
+		 `(let* ((rl (cdr (assoc ',x +rq+))))
 		    (defun ,s (f x)
 		      (declare (ignore f))
 		      (norm-tp-ints x rl))
