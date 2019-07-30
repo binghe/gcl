@@ -447,7 +447,7 @@
 	     (wt (or (setq p (cdr (assoc tt +to-c-var-alist+ :test 'type<=))) cast))));FIXME prune to-c list
 	  ((equal tt #tt) (wt (or (setq p (cdr (assoc ft +wt-c-var-alist+))) "")))
 	  ((and (type>= #tint tt) (type>= tt ft)))
-	  ((and (type>= #tcnum tt) (type>= #tcnum ft)) (wt cast))
+	  ((and (type>= #tcnum tt) (type>= #t(or character cnum) ft)) (wt cast))
 	  ((baboon)))
 
     (when p (wt "("))
