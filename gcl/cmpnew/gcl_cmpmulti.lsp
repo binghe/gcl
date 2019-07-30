@@ -331,7 +331,9 @@
 (defun c1multiple-value-bind (args &aux (info (make-info))
                                    (vars nil) (vnames nil) init-form
                                    ss is ts body other-decls
-                                   (*vars* *vars*))
+                                   (*vars* *vars*)
+;				   (ov *vars*)
+				   )
   (when (or (endp args) (endp (cdr args)))
     (too-few-args 'multiple-value-bind 2 (length args)))
 
@@ -371,6 +373,10 @@
 
   (ref-vars body vars)
   (dolist (var vars) (check-vref var))
+
+  ;; (let* ((*vars* ov));FIXME
+  ;;   (print (setq fff (trim-vars vars (make-list (length vars) :initial-element init-form) body nil)))
+  ;;   (break))
 
   (list 'multiple-value-bind info vars init-form body))
 
