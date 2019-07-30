@@ -102,7 +102,7 @@
 ;(defmacro vlp (x) `(and (eq 'var (car ,x)) (eq (var-kind (car (third ,x))) 'lexical)))
 
 (defun get-object-value (c1x)
-  (when (and (eq 'location (car c1x)) (eq 'vv (caaddr c1x)))
+  (when (and (eq 'location (car c1x)) (listp (caddr c1x)) (eq 'vv (caaddr c1x)))
     (cadr (caddr c1x))))
 ;; (defun get-object-value (c1x)
 ;;   (when (and (eq 'location (car c1x)) (eq 'vv (caaddr c1x)))
