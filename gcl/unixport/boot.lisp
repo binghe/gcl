@@ -16,15 +16,13 @@
 					;assoc assoc-if assoc-if-not
 					;rassoc rassoc-if rassoc-if-not
 				       )
-		      'si::(listp type-spec-p ibb ib typep <= coerce < > >= + - set-array 0-byte-array-self set-0-byte-array-self  concatenate mta mtv eql-is-eq)
+		      'si::(listp ibb ib typep <= coerce < > >= + - set-array 0-byte-array-self set-0-byte-array-self concatenate eql-is-eq)
 		      '(info-p info-ref info-type info-flags info-ch info-ref-ccb info-ref-clb c1constant-value-object
 			     var-p var-name var-flags var-kind var-ref var-ref-ccb var-loc var-dt var-type var-mt var-tag var-store
 			     c-array-rank c-array-dim c-array-elttype c-array-self c-array-hasfillp
 			     array-dimension array-row-major-index row-major-aref si::row-major-aset
-			     si::row-major-aref-int aref
+			     si::row-major-aref-int aref array-rank array-total-size
 			     array-has-fill-pointer-p length)))
-(setf (symbol-function 'array-rank) (symbol-function 'c-array-rank)
-      (symbol-function 'array-total-size) (symbol-function 'c-array-dim))
 
 (in-package :user)
 
