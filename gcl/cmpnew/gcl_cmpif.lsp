@@ -743,7 +743,12 @@
 			     (do-setq-tp (car rv) nil (type-and (car (caddr rv)) (var-type (car rv)))))))
 
 		     (do (rv) ((not (setq rv (pop trv))))
-			 (setf (var-store (car rv)) (if (eq (var-store (car rv)) (caddr rv)) (var-store (car rv)) +opaque+))
+			 (unless (eq (var-store (car rv)) (caddr rv))
+			   (keyed-cmpnote
+			    (list (var-name (car rv)) 'var-store 'binding '+opaque+)
+			    "~s store set to +opaque+ from ~s/~s across if branches"
+			    (var-name (car rv)) (caddr rv) (var-store (car rv)))
+			   (setf (var-store (car rv)) +opaque+))
 			 (do-setq-tp (car rv) (list args nil) (type-or1 (var-type (car rv)) (cadr rv))))
 
 		     (list 'if info fmla tb fb))
