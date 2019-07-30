@@ -1291,7 +1291,7 @@ DEFUN("ROOM-REPORT",object,fSroom_report,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   x=make_cons(make_fixnum(available_pages),x);
   x=make_cons(make_fixnum(ncbpage),x);
   x=make_cons(make_fixnum(maxcbpage),x);
-  x=make_cons(make_fixnum(ncb),x);
+  x=make_cons(make_fixnum(count_contblocks()),x);
   x=make_cons(make_fixnum(cbgbccount),x);
   x=make_cons(make_fixnum(holepage),x);
   x=make_cons(make_fixnum(rb_pointer - rb_start),x);
@@ -1465,7 +1465,7 @@ DEFUN("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO,(vo
  	  break;
  	}
  	if (d>=data_start && d<(void *)heap_end && s) {
- 	  emsg("%lu %s bytes at %p\n",s,tm_table[type_of(o)].tm_name,d);
+ 	  emsg("%lu %s bytes at %p, object %p\n",s,tm_table[type_of(o)].tm_name,d,o);
  	  i+=s;
  	  j++;
  	}
