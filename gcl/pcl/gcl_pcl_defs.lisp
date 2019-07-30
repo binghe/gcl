@@ -300,7 +300,7 @@
   `(satisfies ,(make-class-eq-predicate class)))
 ||#
 
-#-(or excl cmu17)
+#-(or excl cmu17 gcl)
 (deftype eql (type-object)
   `(member ,type-object))
 
