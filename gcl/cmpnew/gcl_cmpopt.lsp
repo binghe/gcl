@@ -1043,7 +1043,6 @@
 
 ;;New C ffi
 ;;
-(defstruct opaque)
 
 ;(push '((t fixnum opaque *) opaque #.(flags rfa) "(#0(#1))(#2#*)") (get 'addr-call 'inline-always))
 ;(push '((t fixnum) opaque #.(flags rfa) "(#0(#1))()") (get 'addr-call 'inline-always))

@@ -158,8 +158,7 @@
 			 +inline-types-alist+)))
 
 
-
-
+(defstruct opaque)
 
 
 (defmacro nil-to-t (x) `(or ,x t))
