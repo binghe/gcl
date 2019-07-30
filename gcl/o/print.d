@@ -780,7 +780,7 @@ print_symbol_name_body(object x,int pp) {
   cc=constant_case(x);
   k=needs_escape(x);
   k=PRINTescape ? k : 0;
-  pp=k*pp ? 0 : 1;
+  pp=k&&pp ? 0 : 1;
 
 
   if (k)
