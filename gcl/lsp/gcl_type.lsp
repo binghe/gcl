@@ -470,14 +470,18 @@
 	 (and (ntp-and t1 t2))
 	 (or (ntp-or t1 t2))))
 
+(defun min-btp-type2 (x)
+  (if (< (btp-count x) #.(ash +btp-length+ -1)) (btp-type2 x)
+    (ntp-not (btp-type2 (btp-not x x)))))
+
 (let ((tmp (make-btp)))
   (defun new-tp1 (op t1 t2 xp mp)
     (cond
      ((atom t1)
       (unless (equal xp mp)
 	(if (eq op 'and)
-	    (ntp-and (caddr t2) (ntp-not (btp-type2 (bit-andc1 t1 (xtp t2) tmp))))
-	  (ntp-or (caddr t2) (btp-type2 (bit-andc2 t1 (mtp t2) tmp))))))
+	    (ntp-and (caddr t2) (min-btp-type2 (btp-orc2 t1 (xtp t2) tmp)))
+	  (ntp-or (caddr t2) (min-btp-type2 (btp-andc2 t1 (mtp t2) tmp))))))
      ((atom t2) (new-tp1 op t2 t1 xp mp))
      ((new-tp4 (tp-mask (pop t1) (pop t1) (pop t2) (pop t2)) xp mp (if (eq op 'and) -1 1)
 	       (ntp-op op (car t1) (car t2)))))))
