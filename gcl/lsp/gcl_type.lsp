@@ -249,6 +249,22 @@
 	   (,(mapcar 'cdr *all-array-types*) (when (singleton-listp (cdr x)) (when (arrayp (cadr x)) (cdr x))))
 	   (otherwise (singleton-listp (cdr x)))));FIXME others, array....
 
+#.`(defun atomic-ntp-array-dimensions (ntp)
+     (unless (or (cadr ntp) (caddr ntp))
+       (when (singleton-listp (car ntp))
+	 (let ((x (caar ntp)))
+	   (case (car x)
+		 (,(mapcar 'cdr *all-array-types*)
+		  (when (singleton-listp (cdr x))
+		    (when (consp (cadr x))
+		      (unless (improper-consp (cadr x))
+			(unless (member-if 'symbolp (cadr x))
+			  (cdr x)))))))))))
+
+(defun atomic-tp-array-dimensions (tp)
+  (when (consp tp)
+    (atomic-ntp-array-dimensions (caddr tp))))
+
 (defun atomic-ntp (ntp)
   (unless (cadr ntp)
     (when (singleton-listp (car ntp))
