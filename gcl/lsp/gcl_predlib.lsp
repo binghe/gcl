@@ -91,7 +91,9 @@
 	       (check-type m  (integer 0 0))
 	       f))
 	    (cons (the function (eval object))))))
-	((list cons vector array member) (if (typep object type) object (replace (make-sequence type (length object)) object)))
+	;FIXME member
+	((list cons vector array member simple-array non-simple-array)
+	 (if (typep object type) object (replace (make-sequence type (length object)) object)))
 	(character (character object))
 	(short-float (float object 0.0S0))
 	(long-float (float object 0.0L0))
