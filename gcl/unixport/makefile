@@ -78,13 +78,13 @@ $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 libboot.so: ../o/boot.o
 	$(CC) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
 
-saved_%:raw_% $(RSYM) sys_init.lsp.in raw_%_map \
+saved_%:raw_% $(RSYM) init_raw.lsp.in raw_%_map \
 		$(CMPDIR)/gcl_cmpmain.lsp \
 		$(CMPDIR)/gcl_lfun_list.lsp \
 		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
 		$(LSPDIR)/gcl_auto_new.lsp
 
-	cat sys_init.lsp.in | sed \
+	cat init_raw.lsp.in | sed \
 		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `cat ../release`#1" \
 		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
 		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
