@@ -503,24 +503,4 @@
 (deftype creal nil `(and real cnum))
 (deftype long nil 'fixnum)
 
-(defun just-expand-deftype (type &aux tem
-			      (atp (listp type))
-			      (ctp (if atp (car type) type))
-			      (tp (when atp (cdr type))))
-  (cond
-    ((setq tem (coerce-to-standard-class ctp))
-     (let ((name (si-class-name tem)))
-       (if (member name '(standard-generic-function generic-function));FIXME
-	   `(or standard-generic-compiled-function standard-generic-interpreted-function)
-	 `(std-instance ,tem))))
-    ((si-classp ctp) (si-class-name ctp));built-in
-    ((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem))))
-     `(structure ,ctp))
-    ((setq tem (macro-function (get ctp 'deftype-definition)))
-     (funcall tem (if atp type (list type)) nil))))
-
-(defun expand-deftype (type &aux (e (just-expand-deftype type)))
-  (unless (eq type e)
-    e))
-
 (deftype key-test-type nil `(or null function-designator))
