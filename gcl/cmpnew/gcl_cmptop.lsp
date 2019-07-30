@@ -972,18 +972,23 @@
 (setf (get 'unbox 'c1) 'c1ub)
 
 
-(defun c1lit (args)
-  (flet ((strcat (&rest r) (apply 'concatenate 'string r)))
-	(let* ((tp (get (pop args) 'cmp-lisp-type :opaque))
-					;	 (info (make-info :type (cmp-norm-tp tp) :flags (iflags side-effects))) ;FIXME boolean
-	       (info (make-info :type tp)) ;FIXME boolean
-	       (inl "")(i -1)
-	       (nargs (mapcan (lambda (x &aux (sp (stringp x))) 
-				(setq inl (strcat inl (if sp x (strcat "#" (write-to-string (incf i))))))
-				(unless sp (list (c1arg (cons 'ub x) info)))) args)))
-	  (when (eq tp :opaque) (baboon))
-	  (when (search "=" inl) (setf (info-flags info) (logior (iflags side-effects) (info-flags info))))
-	  (list 'lit info (info-type info) inl nargs (make-vs info)))))
+(let ((ars (let ((i -1))
+	     (mapl (lambda (x)
+		     (setf (car x) (concatenate 'string "#" (write-to-string (incf i)))))
+		   (make-list call-arguments-limit)))))
+  (defun c1lit (args &aux (as ars))
+    (flet ((as nil (assert as) (pop as)))
+	  (let* ((tp (get (pop args) 'cmp-lisp-type :opaque))
+		 (info (make-info :type tp)) ;FIXME boolean
+		 (inl (apply 'concatenate 'string
+			     (mapcar (lambda (x) (if (stringp x) x (as))) args)))
+		 (nargs (mapcan (lambda (x)
+				  (unless (stringp x) (list (c1arg (cons 'ub x) info))))
+				args)))
+	    (when (eq tp :opaque) (baboon))
+	    (when (search "=" inl)
+	      (setf (info-flags info) (logior (iflags side-effects) (info-flags info))))
+	    (list 'lit info (info-type info) inl nargs (make-vs info))))))
 
 
 (defun c2lit (tp inl args stores)
