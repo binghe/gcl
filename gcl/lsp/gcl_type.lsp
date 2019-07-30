@@ -683,9 +683,9 @@
  (defun msym (x) (intern (string-concatenate (string x) "-TYPE-PROPAGATOR") :si)))
 
 (defun type-and-list (tps)
-  (mapcan (lambda (x)
-	    (mapcan (lambda (y &aux (z (type-and x y)))
-		      (when z `((,x ,y ,z))))
+  (mapcan (lambda (x &aux (q x))
+	    (mapcan (lambda (y &aux (z (tp-and q y)))
+		      (when z (setq q (tp-and q (tp-not y))) `((,x ,y ,z))))
 		    +kt+))
 	  tps))
 
