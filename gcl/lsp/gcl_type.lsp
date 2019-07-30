@@ -26,15 +26,6 @@
 (defconstant +atpsn+ `((nil array-nil) ,@+atps+))
 
 
-#.`(progn
-     ,@(mapcar (lambda (x &aux (s (cadr x))(x (car x))) 
-		 `(deftype ,s (&optional d) `(vector ,',x ,d)))
-	       +vtpsn+)
-     ,@(mapcar (lambda (x &aux (s (cadr x))(x (car x))) 
-		 `(deftype ,s (&optional d) `(and (array ,',x ,d) (not vector))))
-	       +atpsn+))
-
-
 (defun real-rep (x)
   (case x (integer 1) (ratio 1/2) (short-float 1.0s0) (long-float 1.0)))
 
