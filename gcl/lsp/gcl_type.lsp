@@ -20,11 +20,6 @@
 (defun t-to-nil (x) (unless (eq x t) x))
 (setf (get 't-to-nil 'cmp-inline) t)
 
-(deftype cnum nil `(or fixnum float fcomplex dcomplex))
-(deftype creal nil `(and real cnum))
-(deftype long nil 'fixnum)
-
-
 (defconstant +vtps+ (mapcar (lambda (x) (list x (intern (string-concatenate "VECTOR-"  (string x))))) +array-types+))
 (defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+))
 (defconstant +vtpsn+ `((nil vector-nil) ,@+vtps+))
@@ -48,7 +43,6 @@
 	 (r (real-rep (if s x (car x))))
 	 (i (real-rep (if s x (cadr x)))))
     (complex r i)))
-
 
 (defconstant +r+ `((immfix 1) 
 		   (bfix  most-positive-fixnum)
@@ -184,13 +178,14 @@
 		 (mapc (lambda (x) (setf (aref z (incf i)) x)) *btps*)
 		 z))
 
-
 (defvar *k-bv* (let ((i -1))
-		 (lreduce (lambda (xx x &aux (z (assoc (caaar (cadr x)) xx)))
-			    (unless z
-			      (push (setq z (cons (caaar (cadr x)) (make-btp))) xx))
-			  (setf (sbit (cdr z) (incf i)) 1)
-			  xx) *btps* :initial-value nil)))
+		   (lreduce (lambda (xx x &aux (z (assoc (caaar (cadr x)) xx)))
+			      (unless z
+				(push (setq z (cons (caaar (cadr x)) (make-btp))) xx))
+			      (setf (sbit (cdr z) (incf i)) 1)
+			      xx) *btps* :initial-value nil)))
+
+
 (defvar *nil-tp* (make-btp))
 (defvar *t-tp* (make-btp 1))
 
@@ -208,7 +203,7 @@
 	(tp (list (copy-btp x) (copy-btp m) tp))))
 
 (defun new-tp4 (k x m d z &aux (nz (unless (eql d -1) (ntp-not z)))(j 0));nz
-  (dotimes (i +btp-length+ (progn  (unless (equal x m) z)));(print (list j 'ntp-and-calls d))
+  (dotimes (i +btp-length+ (progn  (unless (equal x m) z)))
     (unless (zerop (sbit k i))
       (let ((a (aref *btpa* i)))
 	(cond ((unless (eql d  1) (incf j) (eq +tp-nil+ (ntp-and (cadr a)  z)))
@@ -303,10 +298,10 @@
 (defvar *cmp-verbose* nil)
 
 (defvar *atomic-btp-alist* (let ((i -1))
-		     (mapcan (lambda (x &aux (z (incf i)))
-			       (when (atomic-type x)
-				 (list (list z (cons (cadr x) (caddr x))))))
-			     +btp-types+)))
+			     (mapcan (lambda (x &aux (z (incf i)))
+				       (when (atomic-type x)
+					 (list (list z (cons (cadr x) (caddr x))))))
+				     +btp-types+)))
 
 (defun object-tp1 (x)
   (when *cmp-verbose* (print (list 'object-type x)))
@@ -657,19 +652,19 @@
 
 
 
-(defconstant +rn+ (mapcar (lambda (x) (cons (cmp-norm-tp (car x)) (cadr x))) +r+))
+#.`(defconstant +rn+ ',(mapcar (lambda (x) (cons (cmp-norm-tp (car x)) (cadr x))) +r+))
+
 
 (defconstant +tfns1+ '(tp0 tp1 tp2 tp3 tp4 tp5 tp6 tp7 tp8))
 
 (defconstant +rs+ (mapcar (lambda (x)
-			    (cons x
-				  (mapcar (lambda (y)
-					    (cons (car y) (funcall x (eval (cdr y)))))
-					  +rn+)))
-			  +tfns1+))
+				 (cons x
+				       (mapcar (lambda (y)
+						 (cons (car y) (funcall x (eval (cdr y)))))
+					       +rn+)))
+			       +tfns1+))
 
 (defconstant +kt+ (mapcar 'car +rn+))
-
 
 (defun tps-ints (a rl)
   (lremove-duplicates (mapcar (lambda (x) (cdr (assoc (cadr x) rl))) a)))

@@ -39,8 +39,6 @@
 
 (in-package :system)
 
-(deftype key-test-type nil `(or null function-designator))
-
 (eval-when
  (compile eval)
  

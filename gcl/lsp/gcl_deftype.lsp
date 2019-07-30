@@ -496,6 +496,9 @@
 (deftype member (&whole w &rest r)
   (when r w))
 
+(deftype cnum nil `(or fixnum float fcomplex dcomplex))
+(deftype creal nil `(and real cnum))
+(deftype long nil 'fixnum)
 
 (defun just-expand-deftype (type &aux tem
 			      (atp (listp type))
@@ -517,3 +520,4 @@
   (unless (eq type e)
     e))
 
+(deftype key-test-type nil `(or null function-designator))
