@@ -53,10 +53,11 @@ static bool
 designate_package(object x,struct package *p) {
 
   switch(type_of(x)) {
-  case t_string: case t_symbol:
+  case t_simple_string:
+  case t_string:
     return string_eq(x,p->p_name) || member_string_eq(x, p->p_nicknames);
     break;
-  case t_character:
+  case t_character: case t_symbol:
     return designate_package(coerce_to_string(x),p);
     break;
   case t_package:
@@ -74,7 +75,7 @@ designate_package(object x,struct package *p) {
 /*                              (memchr((a)->st.st_self,'-',(a)->st.st_fillp) || \ */
 /* 			      ((a)->st.st_self[0]=='*' && (a)->st.st_fillp==1))) */
 
-#define check_package_designator(a) if (type_of(a)!=t_string && \
+#define check_package_designator(a) if (!stringp(a) && \
                                         type_of(a)!=t_character && \
 					type_of(a)!=t_symbol && \
 					type_of(a)!=t_package) \
@@ -136,12 +137,7 @@ int isize,esize;
 	vs_mark;
 	{ BEGIN_NO_INTERRUPT;
 	BEGIN:
-	if (type_of(n) == t_symbol) {
-		vs_push(alloc_simple_string(n->s.s_fillp));
-		vs_head->st.st_self = n->s.s_self;
-		n = vs_head;
-	}
-	if (type_of(n)==t_character) 
+	if (!stringp(n))
 	  n=coerce_to_string(n);
 	if (find_package(n) != Cnil) {
 	  PACKAGE_CERROR(n,"Input new package","Package already exists",0);
@@ -164,12 +160,7 @@ int isize,esize;
 	vs_push(x);
 	for (;  !endp(ns);  ns = ns->c.c_cdr) {
 		n = ns->c.c_car;
-		if (type_of(n) == t_symbol) {
-			vs_push(alloc_simple_string(n->s.s_fillp));
-			vs_head->st.st_self = n->s.s_self;
-			n = vs_head;
-		}
-		if (type_of(n)==t_character)
+		if (!stringp(n))
 		  n=coerce_to_string(n);
 		if (find_package(n) != Cnil) {
 			vs_reset;
@@ -236,11 +227,8 @@ int isize,esize;
 		&x->p.p_internal_size,isize);
 	for (;  !endp(ns);  ns = ns->c.c_cdr) {
 		n = ns->c.c_car;
-		if (type_of(n) == t_symbol) {
-			vs_push(alloc_simple_string(n->s.s_fillp));
-			vs_head->st.st_self = n->s.s_self;
-			n = vs_head;
-		}
+		if (!stringp(n))
+		  n=coerce_to_string(n);
 		y = find_package(n);
 		if (x == y)
 			continue;
@@ -270,12 +258,7 @@ object x, n, ns;
 	vs_mark;
 
  BEGIN:
-	if (type_of(n) == t_symbol) {
-		vs_push(alloc_simple_string(n->s.s_fillp));
-		vs_head->st.st_self = n->s.s_self;
-		n = vs_head;
-	}
-	if (type_of(n)==t_character)
+	if (!stringp(n))
 	  n=coerce_to_string(n);
    	if (!(equal(x->p.p_name,n)) &&
 	    find_package(n) != Cnil) {
@@ -287,12 +270,7 @@ object x, n, ns;
 	x->p.p_nicknames = Cnil;
 	for (;  !endp(ns);  ns = ns->c.c_cdr) {
 		n = ns->c.c_car;
-		if (type_of(n) == t_symbol) {
-			vs_push(alloc_simple_string(n->s.s_fillp));
-			vs_head->st.st_self = n->s.s_self;
-			n = vs_head;
-		}
-		if (type_of(n)==t_character)
+		if (!stringp(n))
 		  n=coerce_to_string(n);
 		y = find_package(n);
 		if (x == y)
@@ -367,7 +345,8 @@ int
 pack_hash(x)
 object x;
 {unsigned int h=0;
- {int len=x->st.st_fillp;
+  if (!stringp(x)) x=coerce_to_string(x);
+  {int len=VLEN(x);
   char *s;
 #define HADD(i,j,k,l) (h+=s[i],h+=s[j]<<8,h+=s[k]<<13,h+=s[l]<<23)
 #define HADD2(i,j) (h+=s[i]<<5,h+=s[j]<<15)
@@ -437,21 +416,19 @@ object st, p;
 	object x, *ip, *ep, l, ul;
 	vs_mark;
 
+	st=coerce_to_string(st);
 	{BEGIN_NO_INTERRUPT;
 	j = pack_hash(st);
 	ip = &P_INTERNAL(p ,j);
-#define string_eq(a,b) \
-   ((a)->st.st_fillp==(b)->st.st_fillp && \
-	 bcmp((a)->st.st_self,(b)->st.st_self,(a)->st.st_fillp)==0)
 
 	for (l = *ip;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, st)) {
+		if (string_eq(l->c.c_car->s.s_name, st)) {
 			intern_flag = INTERNAL;
 			END_NO_INTERRUPT;return(l->c.c_car);
 		}
 	ep = &P_EXTERNAL(p,j);
 	for (l = *ep;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, st)) {
+		if (string_eq(l->c.c_car->s.s_name, st)) {
 			intern_flag = EXTERNAL;
 			END_NO_INTERRUPT;return(l->c.c_car);
 		}
@@ -459,7 +436,7 @@ object st, p;
 		for (l = P_EXTERNAL(ul->c.c_car,j);
 		     consp(l);
 		     l = l->c.c_cdr)
-			if (string_eq(l->c.c_car, st)) {
+			if (string_eq(l->c.c_car->s.s_name, st)) {
 				intern_flag = INHERITED;
 				END_NO_INTERRUPT;return(l->c.c_car);
 			}
@@ -495,17 +472,17 @@ object st, p;
 	int j;
 	object *ip, *ep, l, ul;
 	{BEGIN_NO_INTERRUPT;
-	if (type_of(st)==t_character) st=coerce_to_string(st);
+	if (!stringp(st)) st=coerce_to_string(st);
 	j = pack_hash(st);
 	ip = &P_INTERNAL(p ,j);
 	for (l = *ip;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, st)) {
+		if (string_eq(l->c.c_car->s.s_name, st)) {
 			intern_flag = INTERNAL;
 			END_NO_INTERRUPT;return(l->c.c_car);
 		}
 	ep = &P_EXTERNAL(p,j);
 	for (l = *ep;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, st)) {
+		if (string_eq(l->c.c_car->s.s_name, st)) {
 			intern_flag = EXTERNAL;
 			END_NO_INTERRUPT;return(l->c.c_car);
 		}
@@ -513,7 +490,7 @@ object st, p;
 		for (l = P_EXTERNAL(ul->c.c_car,j);
 		     consp(l);
 		     l = l->c.c_cdr)
-			if (string_eq(l->c.c_car, st)) {
+			if (string_eq(l->c.c_car->s.s_name, st)) {
 				intern_flag = INHERITED;
 				END_NO_INTERRUPT;return(l->c.c_car);
 			}
@@ -679,7 +656,7 @@ object s, p;
 {
 	object x, *ip;
 
-	x = find_symbol(s, p);
+	x=find_symbol(s, p);
 	if (intern_flag && intern_flag != INHERITED) {
 		if (x == s) {
 			if (!member_eq(x, p->p.p_shadowings))
@@ -711,12 +688,12 @@ shadow(s, p)
 object s, p;
 {
 	int j;
-	object *ip;
+	object *ip,x;
 
-	if (type_of(s)==t_character) s=coerce_to_string(s);
-	find_symbol(s, p);
+	if (!stringp(s)) s=coerce_to_string(s);
+	x=find_symbol(s, p);
 	if (intern_flag == INTERNAL || intern_flag == EXTERNAL) {
-		p->p.p_shadowings = make_cons(s, p->p.p_shadowings);
+		p->p.p_shadowings = make_cons(x, p->p.p_shadowings);
 		return;
 	}
 	j = pack_hash(s);
@@ -849,7 +826,7 @@ delete_package(object n) {
 		      (external `small_fixnum(0)`)
 		      )
 @
-        if (type_of(pack_name)==t_character) pack_name=coerce_to_string(pack_name);
+        if (!stringp(pack_name)) pack_name=coerce_to_string(pack_name);
 	check_type_or_string_symbol(&pack_name);
 	@(return `make_package(pack_name, nicknames, use,
 			       fix(internal),fix(external))`)
@@ -860,7 +837,7 @@ delete_package(object n) {
 		      (external `small_fixnum(0)`)
 		    )
 @
-        if (type_of(pack_name)==t_character) pack_name=coerce_to_string(pack_name);
+        if (!stringp(pack_name)) pack_name=coerce_to_string(pack_name);
 	check_type_or_string_symbol(&pack_name);
 	if (find_package(pack_name) == Cnil && !(use_sp))
 		use = make_cons(lisp_package, Cnil);
@@ -874,10 +851,9 @@ DEFUN("IN-PACKAGE-INTERNAL",object,fSin_package_internal,SI,2,2,NONE,OO,OO,OO,OO
 
   object use=Cnil,nick=Cnil;
 
-  if ((type_of(p) == t_character) ||
-      (type_of(p) == t_symbol))
+  if ((!stringp(p)))
     p = coerce_to_string(p);
-  if (type_of(p) != t_string)
+  if (!stringp(p))
     FEerror("Wrong thing in-package ~S.",1,p);
   
   /*fixme non-std error check?*/
@@ -945,7 +921,7 @@ LFD(Lpackage_nicknames)()
 @
 	check_package_designator(pack);
 	pack = coerce_to_package(pack);
-        if (type_of(new_name)==t_character) new_name=coerce_to_string(new_name);
+        if (!stringp(new_name)) new_name=coerce_to_string(new_name);
 	check_type_or_string_symbol(&new_name);
 	@(return `rename_package(pack, new_name, new_nicknames)`)
 @)
@@ -1147,6 +1123,7 @@ BEGIN:
 BEGIN:
 	switch (type_of(symbols)) {
 	case t_symbol: 
+	case t_simple_string:
 	case t_string: 
 	case t_character:
 		if (symbols == Cnil)
@@ -1177,6 +1154,7 @@ BEGIN:
 		if (pack == Cnil)
 			break;
 
+	case t_simple_string:
 	case t_string:
 	case t_package:
 	case t_character:
@@ -1206,6 +1184,7 @@ BEGIN:
 		if (pack == Cnil)
 			break;
 
+	case t_simple_string:
 	case t_string:
 	case t_package:
 	case t_character:

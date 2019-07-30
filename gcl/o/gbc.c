@@ -519,7 +519,7 @@ mark_object1(object x) {
     mark_object(x->s.s_plist);
     mark_object(x->s.s_gfdef);
     mark_object(x->s.s_dbind);
-    MARK_LEAF_DATA(x,x->s.s_self,x->s.s_fillp);
+    mark_object(x->s.s_name);
     break;
     
   case t_package:
@@ -546,9 +546,12 @@ mark_object1(object x) {
     MARK_LEAF_DATA(x,x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
     break;
     
+  case t_simple_array:
   case t_array:
     MARK_LEAF_DATA(x,x->a.a_dims,sizeof(*x->a.a_dims)*x->a.a_rank);
 
+  case t_simple_vector:
+  case t_simple_bitvector:
   case t_vector:
   case t_bitvector:
 
@@ -575,7 +578,7 @@ mark_object1(object x) {
       break;
 
     case aet_object:
-      if (x->v.v_displaced->c.c_car==Cnil)
+      if (ADISP(x)->c.c_car==Cnil)
 	mark_object_array(x->v.v_self,x->v.v_self+x->v.v_dim);
 
     default:
@@ -583,19 +586,16 @@ mark_object1(object x) {
 
     }
 
+  case t_simple_string:
   case t_string:/*FIXME*/
     j=j ? j : x->st.st_dim;
 
-    if (x->v.v_displaced->c.c_car==Cnil) {
-      void *p=x->v.v_self;
+    if (ADISP(x)->c.c_car==Cnil)
       MARK_LEAF_DATA(x,x->v.v_self,j);
-      if (x->v.v_displaced!=Cnil) {
-	j=(void *)x->v.v_self-p;
-	x->v.v_self=p;
-	adjust_displaced(x,j);
-      }
-    }
-    mark_object(x->v.v_displaced);
+
+    mark_object(ADISP(x));
+    set_displaced_body_ptr(x);
+
     break;
     
   case t_structure:
@@ -689,7 +689,7 @@ mark_object1(object x) {
     if (x->fun.fun_env != def_env && x->fun.fun_env != src_env) {
       mark_object(x->fun.fun_env[0]);
       x->fun.fun_env--;
-      MARK_LEAF_DATA(NULL,x->fun.fun_env,(*(ufixnum *)x->fun.fun_env)*sizeof(*x->fun.fun_env));/*funword has no d.st field, FIXME?*/
+      MARK_LEAF_DATA(x,x->fun.fun_env,(*(ufixnum *)x->fun.fun_env)*sizeof(*x->fun.fun_env));
       x->fun.fun_env++;
     }
     break;
@@ -783,7 +783,9 @@ mark_phase(void) {
   STATIC ihs_ptr ihsp;
   
   mark_object(Cnil->s.s_plist);
+  mark_object(Cnil->s.s_name);
   mark_object(Ct->s.s_plist);
+  mark_object(Ct->s.s_name);
   
   mark_stack_carefully(vs_top-1,vs_org,0);
   mark_stack_carefully(MVloc+(sizeof(MVloc)/sizeof(object)),MVloc,0);
@@ -1416,6 +1418,7 @@ DEFUN("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO,(vo
  	switch (type_of(o)) {
  	case t_array:
  	case t_vector:
+ 	case t_simple_vector:
  	  d=o->a.a_self;
  	  s=o->a.a_dim*sizeof(object);
  	  break;
@@ -1423,12 +1426,10 @@ DEFUN("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO,(vo
  	  d=o->ht.ht_self;
  	  s=o->ht.ht_size*sizeof(object)*2;
  	  break;
- 	case t_symbol:
- 	  d=o->s.s_self;
- 	  s=o->s.s_fillp;
- 	  break;
+ 	case t_simple_string:
  	case t_string:
  	case t_bitvector:
+ 	case t_simple_bitvector:
  	  d=o->a.a_self;
  	  s=o->a.a_dim;
  	  break;
@@ -1452,7 +1453,7 @@ DEFUN("CONTIGUOUS-REPORT",object,fScontiguous_report,SI,1,1,NONE,OO,OO,OO,OO,(vo
  	  d=o->fun.fun_env;
  	  s=o->fun.fun_env!=def_env && o->fun.fun_env!=src_env ? ((ufixnum *)o->fun.fun_env)[-1]*sizeof(object) : 0;
  	  break;
- 	case t_cfdata:
+ 	case t_cfdata:/*FIXME*/
  	  d=o->cfd.cfd_start;
  	  s=o->cfd.cfd_size;
  	  break;

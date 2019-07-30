@@ -337,9 +337,11 @@ BEGIN:
 		return(x);
 
 	case t_symbol:
+	  x=coerce_to_string(x);
+	case t_simple_string:
 	case t_string:
-		if (x->st.st_fillp == 1)
-			return(code_char(x->ust.ust_self[0]));
+	  if (VLEN(x) == 1)
+	    return(code_char(x->ust.ust_self[0]));
 		break;
 	default:
 		break;
@@ -568,16 +570,16 @@ int w, r;
 		@(return `code_char('\b')`)
 	if (string_equal(s, STlinefeed) || string_equal(s, STnewline))
 		@(return `code_char('\n')`)
-        if (s->st.st_fillp==1) @(return `code_char(s->st.st_self[0])`)
-        if (s->st.st_fillp==2 && s->st.st_self[0]=='^') {
+        if (VLEN(s)==1) @(return `code_char(s->st.st_self[0])`)
+        if (VLEN(s)==2 && s->st.st_self[0]=='^') {
 	  int ch=s->st.st_self[1]-'A'+1;
 	  @(return `code_char(ch)`)
         }
-        if (s->st.st_fillp==3 && s->st.st_self[0]=='^' && s->st.st_self[1]=='\\' && s->st.st_self[2]=='\\') {
+        if (VLEN(s)==3 && s->st.st_self[0]=='^' && s->st.st_self[1]=='\\' && s->st.st_self[2]=='\\') {
 	  int ch=s->st.st_self[1]-'A'+1;
 	  @(return `code_char(ch)`)
         }
-        if (s->st.st_fillp==4 && s->st.st_self[0]=='\\') {
+        if (VLEN(s)==4 && s->st.st_self[0]=='\\') {
 	  int ch=(s->st.st_self[1]-'0')*8*8+(s->st.st_self[2]-'0')*8+(s->st.st_self[3]-'0');
 	  @(return `code_char(ch)`)
         }
@@ -602,27 +604,24 @@ gcl_init_character()
 	int i;
 
 	for (i = 0;  i < CHCODELIM;  i++) {
-	  object x=(object)(character_table+i);
+	  object x=(object)(character_table+i),y=(object)(character_name_table+i);
 	  x->fw=0;
 	  set_type_of(x,t_character);
 	  x->ch.ch_code = i;
 	  x->ch.tt=((' ' <= i && i < '\177') || i == '\n');
 	  x->ch.ch_font = 0;
 	  x->ch.ch_bits = 0;
-	  x->ch.ch_self=(void *)&x->ch.ch_code;
-	  x->ch.ch_fillp=1;
+	  x->ch.ch_name=y;
+	  y->fw=0;
+	  set_type_of(y,t_simple_string);
+	  y->sst.sst_hasfillp = FALSE;
+	  y->sst.sst_adjustable = FALSE;
+	  y->sst.sst_elttype = aet_ch;
+	  y->sst.sst_rank = 1;
+	  y->sst.sst_dim = 1;
+	  y->sst.sst_self = (void *)&x->ch.ch_code;
+
 	}
-/* #ifdef AV */
-/* 	for (i = -128;  i < 0;  i++) { */
-/* 	  object x=(object)(character_table+i); */
-/* 	  int j=i+CHCODELIM; */
-/* 	  set_type_of(x,t_character); */
-/* 	  x->ch.ch_code = j; */
-/* 	  x->ch.tt=((' ' <= j && j < '\177') || j == '\n'); */
-/* 	  x->ch.ch_font = 0; */
-/* 	  x->ch.ch_bits = 0; */
-/* 	} */
-/* #endif */
 
  	make_constant("CHAR-CODE-LIMIT", make_fixnum(CHCODELIM));
  	make_si_constant("CHAR-FONT-LIMIT", make_fixnum(CHFONTLIM));

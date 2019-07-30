@@ -46,8 +46,7 @@ FFN(siLdefine_macro)(void)
 	clear_compiler_properties(vs_base[0],MMcaddr(vs_base[1]));
 	if (vs_base[0]->s.s_hpack == lisp_package &&
 	    vs_base[0]->s.s_gfdef != OBJNULL && !raw_image) {
-		vs_push(make_simple_string(
-			"~S is being redefined."));
+		vs_push(make_simple_string("~S is being redefined."));
 		ifuncall2(sLwarn, vs_head, vs_base[0]);
 		vs_popp;
 	}
@@ -116,8 +115,7 @@ FFN(Fdefmacro)(object form)
 	clear_compiler_properties(name,top[0]);
 	if (name->s.s_hpack == lisp_package &&
 	    name->s.s_gfdef != OBJNULL && !raw_image) {
-		vs_push(make_simple_string(
-			"~S is being redefined."));
+		vs_push(make_simple_string("~S is being redefined."));
 		ifuncall2(sLwarn, vs_head, name);
 		vs_popp;
 	}

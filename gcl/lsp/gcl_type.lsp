@@ -87,8 +87,18 @@
 		   (non-standard-generic-interpreted-function (set-d-tt 2 (lambda nil nil)))
 		   (standard-generic-compiled-function (set-d-tt 1 (lambda nil nil)))
 		   (standard-generic-interpreted-function (set-d-tt 3 (lambda nil nil)))
-		   ,@(mapcar (lambda (x) `(,(cadr x) (make-vector ',(car x) 1 nil nil nil 0 nil nil))) +vtps+)
-		   ,@(mapcar (lambda (x) `(,(cadr x) (make-array1 ',(car x) nil nil nil 0 '(1 1) nil))) +atps+)
+		   ,@(mapcar (lambda (x)
+			       `((simple-array ,(car x) 1)
+				 (make-vector ',(car x) 1 nil nil nil 0 nil nil))) +vtps+)
+		   ,@(mapcar (lambda (x)
+			       `((matrix ,(car x))
+				 (make-array1 ',(car x) nil nil nil 0 '(1 1) t))) +atps+)
+		   ((non-simple-array character)
+		    (make-vector 'character 1 t nil nil 0 nil nil))
+		   ((non-simple-array bit)
+		    (make-vector 'bit 1 t nil nil 0 nil nil))
+		   ((non-simple-array t)
+		    (make-vector 't 1 t nil nil 0 nil nil))
                    (spice (alloc-spice))
 		   (cons '(1))
 		   (keyword :a)
@@ -206,7 +216,7 @@
 	   (true (cdr x));impossible if in +btp-types+
 	   ((structure std-instance)
 	    (when (singleton-listp (cdr x)) (unless (s-class-p (cadr x)) (cdr x))))
-	   (,(mapcar 'cadr +atps+) (when (singleton-listp (cdr x)) (when (arrayp (cadr x)) (cdr x))))
+	   (,(mapcar 'cdr *all-array-types*) (when (singleton-listp (cdr x)) (when (arrayp (cadr x)) (cdr x))))
 	   (otherwise (singleton-listp (cdr x)))));FIXME others, array....
 
 (defun atomic-ntp (ntp)
@@ -674,7 +684,8 @@
 				  null
 				  boolean keyword symbol
 				  proper-cons cons proper-list list
-				  simple-vector string vector-fixnum vector array
+				  simple-vector simple-string simple-bit-vector
+				  string vector array
 				  proper-sequence sequence
 				  zero one
 				  bit rnkind non-negative-char unsigned-char signed-char char

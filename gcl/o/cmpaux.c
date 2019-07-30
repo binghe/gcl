@@ -231,9 +231,12 @@ object_to_pointer(object x) {
   void *d=0;
   
   switch(type_of(x)) {
+  case t_simple_vector:
+  case t_simple_bitvector:
   case t_vector:
   case t_bitvector:
   case t_symbol:
+  case t_simple_string:
   case t_string:
   case t_array:
   case t_character:
@@ -445,8 +448,8 @@ object_to_string(object x) {
   unsigned int leng;
   char *res;
 
-  if (type_of(x)!=t_string) FEwrong_type_argument(sLstring,x);
-  leng= x->st.st_fillp;
+  if (!stringp(x)) FEwrong_type_argument(sLstring,x);/*FIXME check_type*/
+  leng= VLEN(x);
   /* user has thoughtfully provided a null terminated string ! */
   if (leng > 0 && leng < x->st.st_dim && x->st.st_self[leng]==0)
     return x->st.st_self;
@@ -483,8 +486,8 @@ call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
 /* #endif */
 
 
-  check_type(fasl_vec,t_vector);
-  form=(fasl_vec->v.v_self[fasl_vec->v.v_fillp -1]);
+  check_type(fasl_vec,t_simple_vector);
+  form=(fasl_vec->v.v_self[VLEN(fasl_vec) -1]);
 
  if (fptr) at = fptr;
   else 
@@ -545,21 +548,21 @@ do_init(object *statVV)
 {object fasl_vec=sSPinit->s.s_dbind;
  object data = sSPmemory->s.s_dbind;
  {object *p,*q,y;
-  int n=fasl_vec->v.v_fillp -1;
+   int n=VLEN(fasl_vec)-1;
   int i;
   object form;
-  check_type(fasl_vec,t_vector);
+  check_type(fasl_vec,t_simple_vector);
   form = fasl_vec->v.v_self[n];
   dcheck_type(form,t_cons);  
 
 
   /* switch SPinit to point to a vector of function addresses */
      
-  fasl_vec->v.tt=fasl_vec->v.v_elttype = aet_fix;
-  fasl_vec->v.v_eltsize = elt_size(aet_fix);
-  fasl_vec->v.v_defrank=1;
+  /* fasl_vec->v.tt= */fasl_vec->v.v_elttype = aet_fix;
+  /* fasl_vec->v.v_eltsize = elt_size(aet_fix); */
+  fasl_vec->v.v_rank=1;
   fasl_vec->v.v_dim *= (sizeof(object)/sizeof(fixnum));
-  fasl_vec->v.v_fillp *= (sizeof(object)/sizeof(fixnum));
+  if (fasl_vec->v.v_hasfillp) fasl_vec->v.v_fillp *= (sizeof(object)/sizeof(fixnum));
   
   /* swap the entries */
   p = fasl_vec->v.v_self;
@@ -585,7 +588,7 @@ do_init(object *statVV)
   form=form->c.c_cdr;
   {object *top=vs_top;
    
-   for(i=0 ; i< form->v.v_fillp; i++)
+    for(i=0 ; i< VLEN(form); i++)
      { 
        eval(form->v.v_self[i]);
        vs_top=top;

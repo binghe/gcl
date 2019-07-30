@@ -36,20 +36,36 @@ object sKinitial_element;
 object sKelement_type;
 
 object
-alloc_simple_string(l)
+alloc_string(l)
 int l;
 {
 	object x;
 
 	x = alloc_object(t_string);
-	x->st.st_hasfillp = FALSE;
-	x->st.st_adjustable = FALSE;
-	x->st.tt=x->st.st_elttype = aet_ch;
-	x->st.st_eltsize = elt_size(aet_ch);
-	x->st.st_defrank = 1;
-	x->st.st_displaced = Cnil;
-	x->st.st_dim = x->st.st_fillp = l;
+	x->st.st_hasfillp = TRUE;
+	x->st.st_adjustable = TRUE;
+	x->st.st_elttype = aet_ch;
+	x->st.st_rank = 1;
+	x->st.st_displaced=Cnil;
+	x->st.st_dim = l;
+	x->st.st_fillp = l;
 	x->st.st_self = NULL;
+	return(x);
+}
+
+object
+alloc_simple_string(l)
+int l;
+{
+	object x;
+
+	x = alloc_object(t_simple_string);
+	x->sst.sst_hasfillp = FALSE;
+	x->sst.sst_adjustable = FALSE;
+	x->sst.sst_elttype = aet_ch;
+	x->sst.sst_rank = 1;
+	x->sst.sst_dim = l;
+	x->sst.sst_self = NULL;
 	return(x);
 }
 
@@ -64,10 +80,31 @@ char *s;
 	char *p;
 	object x;
 	vs_mark;
+	{BEGIN_NO_INTERRUPT;
+	for (l = 0;  s[l] != '\0';  l++);
+	x = alloc_simple_string(l);
+	vs_push(x);
+	p = alloc_relblock(l);
+	for (i = 0;  i < l;  i++)
+		p[i] = s[i];
+	x->st.st_self = p;
+	vs_reset;
+	END_NO_INTERRUPT;}
+	return(x);
+}
+
+object
+make_string(s)
+char *s;
+{
+	int l, i;
+	char *p;
+	object x;
+	vs_mark;
 	{BEGIN_NO_INTERRUPT;	
 	for (l = 0;  s[l] != '\0';  l++)
 		;
-	x = alloc_simple_string(l);
+	x = alloc_string(l);
 	vs_push(x);
 	p = alloc_relblock(l);
 	for (i = 0;  i < l;  i++)
@@ -87,12 +124,11 @@ object x, y;
 {
 	int i, j;
 
-/*
-	if (type_of(x) != t_string || type_of(y) != t_string)
-		error("string expected");
-*/
-	i = x->st.st_fillp;
-	j = y->st.st_fillp;
+
+	if (!stringp(x) || !stringp(y))
+	  error("string expected");
+	i = VLEN(x);
+	j = VLEN(y);
 	if (i != j)
 		return(FALSE);
 	for (i = 0;  i < j;  i++)
@@ -116,8 +152,8 @@ object x, y;
 	if (type_of(x) != t_string || type_of(y) != t_string)
 		error("string expected");
 */
-	i = x->st.st_fillp;
-	j = y->st.st_fillp;
+	i = VLEN(x);
+	j = VLEN(y);
 	if (i != j)
 		return(FALSE);
 	p = x->st.st_self;
@@ -141,23 +177,51 @@ object x;
 	vs_mark;
 
 	vs_push(x);
+
+	{BEGIN_NO_INTERRUPT;
+	y = alloc_object(t_simple_string);
+	y->st.st_hasfillp = FALSE;
+	y->st.st_adjustable = FALSE;
+	y->st.st_dim = VLEN(x);
+	y->st.st_elttype = aet_ch;
+	y->st.st_rank = 1;
+	y->st.st_self = NULL;
+	vs_push(y);
+	y->st.st_self = alloc_relblock(VLEN(x));
+	for (i = 0;  i < VLEN(x);  i++)
+		y->st.st_self[i] = x->st.st_self[i];
+	vs_reset;
+	END_NO_INTERRUPT;}
+	return(y);
+}
+
+object
+copy_string(x)
+object x;
+{
+	object y;
+	int i;
+	vs_mark;
+
+	vs_push(x);
 /*
 	if (type_of(x) != t_string)
 		error("string expected");
 */
 	{BEGIN_NO_INTERRUPT;	
 	y = alloc_object(t_string);
-	y->st.st_dim = y->st.st_fillp = x->st.st_fillp;
-	y->st.st_hasfillp = FALSE;
-	y->st.st_adjustable = FALSE;
-	y->st.tt=y->st.st_elttype = aet_ch;
-	y->st.st_eltsize = elt_size(aet_ch);
-	y->st.st_defrank = 1;
-	y->st.st_displaced = Cnil;
+	y->st.st_hasfillp = TRUE;
+	y->st.st_adjustable = TRUE;
+	y->st.st_dim = VLEN(x);
+	VSET_MAX_FILLP(y);
+	/* y->st.tt= */y->st.st_elttype = aet_ch;
+	/* y->st.st_eltsize = elt_size(aet_ch); */
+	y->st.st_rank = 1;
+	SET_ADISP(y,Cnil);
 	y->st.st_self = NULL;
 	vs_push(y);
-	y->st.st_self = alloc_relblock(x->st.st_fillp);
-	for (i = 0;  i < x->st.st_fillp;  i++)
+	y->st.st_self = alloc_relblock(VLEN(x));
+	for (i = 0;  i < VLEN(x);  i++)
 		y->st.st_self[i] = x->st.st_self[i];
 	vs_reset;
 	END_NO_INTERRUPT;	}
@@ -169,24 +233,11 @@ coerce_to_string(x)
 object x;
 {
 	object y;
-	int i;
 	vs_mark;
 
 	switch (type_of(x)) {
 	case t_symbol:
-		{BEGIN_NO_INTERRUPT;	
-		y = alloc_simple_string(x->s.s_fillp);
-		vs_push(y);
-		if (inheap(x->s.s_self))
-			y->st.st_self = x->s.s_self;
-		else {
-			y->st.st_self = alloc_relblock(x->s.s_fillp);
-			for (i = 0;  i < x->s.s_fillp;  i++)
-				y->st.st_self[i] = x->s.s_self[i];
-		}
-		vs_reset;
-		END_NO_INTERRUPT;}
-		return(y);
+	  return(x->s.s_name);
 
 	case t_fixnum:
 		x = coerce_to_character(x);
@@ -202,6 +253,7 @@ object x;
 		END_NO_INTERRUPT;}	
 		return(y);
 
+	case t_simple_string:
 	case t_string:
 		return(x);
 	default:
@@ -254,14 +306,14 @@ int *ps, *pe;
 			goto E;
 	}
 	if (end == Cnil) {
-		*pe = str->st.st_fillp;
+	  *pe = VLEN(str);
 		if (*pe < *ps)
 			goto E;
 	} else if (type_of(end) != t_fixnum)
 		goto E;
 	else {
 		*pe = fix(end);
-		if (*pe < *ps || *pe > str->st.st_fillp)
+		if (*pe < *ps || *pe > VLEN(str))
 			goto E;
 	}
 	return;
@@ -440,21 +492,24 @@ object char_bag;
 		}
 		return(FALSE);
 
+	case t_simple_vector:
 	case t_vector:
-		for (i = 0, f = char_bag->v.v_fillp;  i < f;  i++) {
+	  for (i = 0, f = VLEN(char_bag);  i < f;  i++) {
 			if (type_of(char_bag->v.v_self[i]) == t_character
 			  && c == char_code(char_bag->v.v_self[i]))
 				return(TRUE);
 		}
 		return(FALSE);
 
+	case t_simple_string:
 	case t_string:
-		for (i = 0, f = char_bag->st.st_fillp;  i < f;  i++) {
+	  for (i = 0, f = VLEN(char_bag);  i < f;  i++) {
 			if (c == char_bag->st.st_self[i])
 				return(TRUE);
 		}
 		return(FALSE);
 
+	case t_simple_bitvector:
 	case t_bitvector:
 		return(FALSE);
 
@@ -471,7 +526,7 @@ object char_bag;
 @
 	strng = coerce_to_string(strng);
 	i = 0;
-	j = strng->st.st_fillp - 1;
+        j = VLEN(strng) - 1;
 	if (left_trim)
 		for (;  i <= j;  i++)
 			if (!member_char(strng->st.st_self[i], char_bag))
@@ -582,7 +637,7 @@ DEFUN("STRING-CONCATENATE",object,fLstring_concatenate,SI,0,63,NONE,OO,OO,OO,OO,
   vs_base=vs_top;
   for (l=i=0;(z=NEXT_ARG(narg,ap,ll,first,OBJNULL))!=OBJNULL;i++) {
     vs_push(coerce_to_string(z));
-    l += vs_head->st.st_fillp;
+    l += VLEN(vs_head);
   }
   va_end(ap);
 
@@ -591,7 +646,7 @@ DEFUN("STRING-CONCATENATE",object,fLstring_concatenate,SI,0,63,NONE,OO,OO,OO,OO,
     BEGIN_NO_INTERRUPT;	
     x=alloc_simple_string(l);
     (x)->st.st_self = alloc_relblock(l);
-    for (l=0,p=vs_base;p<vs_top && (m=(*p)->st.st_fillp)>=0;p++,l+=m)
+    for (l=0,p=vs_base;p<vs_top && (m=VLEN(*p))>=0;p++,l+=m)
       memcpy(x->st.st_self+l,(*p)->st.st_self,m);
     END_NO_INTERRUPT;
 

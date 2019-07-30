@@ -8,21 +8,21 @@ typedef unsigned long   ufixnum;
 
 #ifndef WORDS_BIGENDIAN
 
-#define FIRSTWORD ufixnum    e:1,m:1,f:1,s:1,tt:4,t:5,st:3,w:LM(16)
-#define FSTPWORD  ufixnum emfs:4,            tp:9,    st:3,w:LM(16)
-#define MARKWORD  ufixnum    e:1,   mf:2,s:1,tt:4,t:5,x:LM(13)
-#define SGCMWORD  ufixnum    e:1,mfs:3,      tt:4,t:5,x:LM(13)
-#define TYPEWORD  ufixnum  emf:3,        s:1,tt:4,t:5,x:LM(13)
-#define FUNWORD   ufixnum    e:1,m:1,f:1,s:1,tt:4,t:5,fun_minarg:6,fun_maxarg:6,fun_neval:5,fun_vv:1,y:LM(31)
+#define FRSTWRD(t_,a_...) ufixnum    e:1,m:1,f:1,    t_:5,t:5,st:3, ##a_
+#define FIRSTWORD         ufixnum    e:1,m:1,f:1,    tt:5,t:5,st:3,w:LM(16)
+#define FSTPWORD          ufixnum  emf:3,            tp:10,   st:3,w:LM(16)
+#define MARKWORD          ufixnum    e:1,   mf:2,    tt:5,t:5,x:LM(13)
+#define SGCMWORD          ufixnum    e:1,mf:2,       tt:5,t:5,x:LM(13)
+#define TYPEWORD          ufixnum  emf:3,            tt:5,t:5,x:LM(13)
 
 #else
 
-#define FIRSTWORD ufixnum w:LM(16),st:3,t:5,tt:4,s:1,f:1,m:1,e:1
-#define FSTPWORD  ufixnum w:LM(16),st:3,tp:9,             emfs:4
-#define MARKWORD  ufixnum x:LM(13),     t:5,tt:4,s:1,   mf:2,e:1
-#define SGCMWORD  ufixnum x:LM(13),     t:5,tt:4,      mfs:3,e:1
-#define TYPEWORD  ufixnum x:LM(13),     t:5,tt:4,s:1,      emf:3
-#define FUNWORD   ufixnum y:LM(31),fun_vv:1,fun_neval:5,fun_maxarg:6,fun_minarg:6,t:5,tt:4,s:1,f:1,m:1,e:1
+#define FRSTWRD(t_,a_...) ufixnum ##a_,    st:3,t:5,t_:5,    f:1,m:1,e:1
+#define FIRSTWORD         ufixnum w:LM(16),st:3,t:5,tt:5,    f:1,m:1,e:1
+#define FSTPWORD          ufixnum w:LM(16),st:3,tp:10,             emf:3
+#define MARKWORD          ufixnum x:LM(13),     t:5,tt:5,       mf:2,e:1
+#define SGCMWORD          ufixnum x:LM(13),     t:5,tt:5,       mf:2,e:1
+#define TYPEWORD          ufixnum x:LM(13),     t:5,tt:5,          emf:3
 
 #endif
 
@@ -35,6 +35,7 @@ typedef unsigned long   ufixnum;
 typedef union lispunion * object;
 
 typedef struct cons * htent;
+typedef struct rtent * rtentp;
 
 typedef object (*ofunc)();
 typedef void   (*vfunc)();
@@ -128,50 +129,56 @@ struct ocomplex {
   SPAD;
 
 };
+
+#define j(a_,b_) a_##b_
+#define J(a_,b_) j(a_,b_)
+
+#define ARRAY_DIMENSION_BITS 28
+#define ARRAY_DIMENSION_LIMIT (1UL<<ARRAY_DIMENSION_BITS)
+#define FILLP_WORD(a_)				\
+  ufixnum a_:ARRAY_DIMENSION_BITS;		\
+  ufixnum J(fppad,a_):LM(ARRAY_DIMENSION_BITS)
+
 struct character {
 
   FIRSTWORD;
 
+  object            ch_name;
+  ufixnum           pad5;
   uqfixnum          ch_code; /*  code  */
   uqfixnum          pad;     /*  pad  */
   uqfixnum          ch_font; /*  font  */
   uqfixnum          ch_bits; /*  bits  */
   ufixnum           pad1;
-  uchar            *ch_self;
-  ufixnum           pad5:4;
-  ufixnum           ch_fillp:LM4BITS;
   ufixnum           pad2;
   ufixnum           pad3;
   ufixnum           pad4;
 
 };
-struct stdesig {
+/* struct stdesig { */
 
-  FIRSTWORD;
+/*   FIRSTWORD; */
 
-  ufixnum           pad;
-  ufixnum           pad1;
-  uchar             *sd_sdself;
-  ufixnum           pad2:4;
-  ufixnum           sd_sdfillp:LM4BITS;
-  ufixnum           pad3;
+/*   uchar             *sd_sdself; */
+/*   FILLP_WORD(sd_sdfillp); */
+/*   ufixnum            pad; */
+/*   ufixnum            pad1; */
+/*   ufixnum            pad3; */
 
-};
+/* }; */
 struct symbol {
 
   FIRSTWORD;
 
   fixnum     s_sfdef;        /*  special form definition, coincides with c_car  */
   object     s_dbind;        /*  dynamic binding  */
-  char      *s_self;         /*  print name, coincides with st_self  */
-  ufixnum    s_pad1:4;       /*  unused  */
-  ufixnum    s_fillp:LM4BITS;/*  print name length, coincides with st_fillp  */
+  string     s_name;         /*  symbol-name */
   object     s_gfdef;        /*  global function definition, for a macro, its expansion function */
   plist      s_plist;        /*  property list  */
   pack       s_hpack;        /*  home package, Cnil for uninterned symbols  */
-  uhfixnum   s_pad2:HM2BITS; /*  unused  */
+  uhfixnum   s_pad2:HM(2);   /*  unused  */
   uhfixnum   s_stype:2;      /*  symbol type, of enum stype  */
-  uhfixnum   s_pad3:HM1BITS; /*  unused  */
+  uhfixnum   s_pad3:HM(1);   /*  unused  */
   uhfixnum   s_mflag:1;      /*  macro flag  */
   fixnum     s_hash;         /*  cached hash code */
 
@@ -211,93 +218,173 @@ struct hashtable {           /*  hash table header  */
   real          ht_rhsize;          /*  rehash size  */
   real          ht_rhthresh;        /*  rehash threshold  */
   ufixnum       ht_pad1:4;          /*  unused  */
-  ufixnum       ht_nent:LM4BITS;    /*  number of entries  */
+  ufixnum       ht_nent:LM(4);      /*  number of entries  */
   ufixnum       ht_pad2:4;          /*  hash table size  */
-  ufixnum       ht_size:LM4BITS;    /*  hash table size  */
+  ufixnum       ht_size:LM(4);      /*  hash table size  */
   uhfixnum      ht_test:2;          /*  key test function, of enum httest  */
-  uhfixnum      ht_pad3:HM2BITS;    /*  unused */
+  uhfixnum      ht_pad3:HM(2);      /*  unused */
   hfixnum       ht_pad4;            /*  unused */
   ufixnum       ht_pad5:4;          /*  unused */
-  ufixnum       ht_max_ent:LM4BITS; /*  max entries */
+  ufixnum       ht_max_ent:LM(4);   /*  max entries */
 
 };
+
 #define j(a_,b_) a_##b_
 #define J(a_,b_) j(a_,b_)
-#define atempl(a_,b_) \
-  FIRSTWORD;\
-\
-  plist    J(b_,displaced);     /*  displaced  */	\
-  uhfixnum J(b_,hasfillp:1);    /*  fillp compatability */	\
-  uhfixnum J(b_,rank:6);        /*  array rank  */		\
-  uhfixnum J(b_,mode:3);        /*  array data mode  */		\
-  uhfixnum J(b_,pad:HM10BITS);  /*  pad  */			\
-  uhfixnum J(b_,adjustable:1);  /*  adjustable flag  */		\
-  uhfixnum J(b_,elttype:4);     /*  element type  */		\
-  uhfixnum J(b_,eltsize:4);     /*  element size  */		\
-  uhfixnum J(b_,pad1:HM9BITS);  /*  pad  */			\
-  a_      *J(b_,self);          /*  pointer to the array  */	\
-  ufixnum *J(b_,dims);          /*  table of dimensions  */	\
-  ufixnum  J(b_,pad2:4);        /*  pad  */			\
-  ufixnum  J(b_,dim:LM4BITS)    /*  dimension  */		
+
+#define ARRAY_RANK_BITS 6
+#define ARRAY_RANK_LIMIT ((1UL<<ARRAY_RANK_BITS)-1)/*FIXME?*/
+
+#if SIZEOF_LONG == 8
+#define ARRAYWORD(b_,c_)						\
+  FRSTWRD(J(b_,J(c_,elttype)),						\
+	  J(b_,J(c_,hasfillp)):1,					\
+	  J(b_,J(c_,adjustable)):1,					\
+	  J(b_,J(c_,writable)):1,					\
+	  J(b_,J(c_,offset)):3,						\
+	  J(b_,J(c_,rank)):ARRAY_RANK_BITS,				\
+	  J(b_,J(c_,dim)):ARRAY_DIMENSION_BITS,				\
+	  ww:LM(AP(22,AP(ARRAY_RANK_BITS,ARRAY_DIMENSION_BITS))))
+
+#define atem(a_,b_,c_)				\
+  ARRAYWORD(b_,c_);				\
+  a_       *J(b_,J(c_,self))
+
+#else
+
+#define ARRAYWORD(b_,c_)						\
+  FRSTWRD(J(b_,J(c_,elttype)),						\
+	  J(b_,J(c_,hasfillp)):1,					\
+	  J(b_,J(c_,adjustable)):1,					\
+	  J(b_,J(c_,writable)):1,					\
+	  J(b_,J(c_,offset)):3,						\
+	  J(b_,J(c_,rank)):ARRAY_RANK_BITS,				\
+	  ww:LM(AP(22,ARRAY_RANK_BITS)));
+
+#define atem(a_,b_,c_)					\
+  ARRAYWORD(b_,c_);					\
+  a_       *J(b_,J(c_,self));				\
+  ufixnum   J(b_,J(c_,dim)):ARRAY_DIMENSION_BITS;	\
+  ufixnum   pad:LM(ARRAY_DIMENSION_BITS)
+
+#endif
+
+#define dimstempl(b_,c_)			\
+  ufixnum  *J(b_,J(c_,dims))
+
+#define atempl(a_,b_,c_)			\
+  atem(a_,b_,c_);				\
+  dimstempl(b_,c_)
+
+#define vfptempl(b_,c_)						\
+  FILLP_WORD(J(b_,J(c_,fillp)));				\
+  plist     J(b_,J(c_,displaced))
+
+#define vtempl(a_,b_,c_)				\
+  atem(a_,b_,c_);					\
+  vfptempl(b_,c_)
 
 
-#define otempl(a_,b_) \
-  ufixnum  J(b_,offset:3);      /*  bitvector offset  */	\
-  ufixnum  J(b_,pad4:LM3BITS);  /*  not used  */		\
-  SPAD
+struct unadjarray {
 
-
-
-#define vtempl(a_,b_) \
-  FIRSTWORD;\
-\
-  plist    J(b_,displaced);     /*  displaced  */		\
-  uhfixnum J(b_,hasfillp:1);    /*  has-fill-pointer flag  */	\
-  uhfixnum J(b_,defrank:6);     /*  rank compatibility  */		\
-  uhfixnum J(b_,mode:3);        /*  array data mode  */		\
-  uhfixnum J(b_,pad:HM10BITS);  /*  pad  */				\
-  uhfixnum J(b_,adjustable:1);  /*  adjustable flag  */		\
-  uhfixnum J(b_,elttype:4);     /*  element type  */			\
-  uhfixnum J(b_,eltsize:4);     /*  element size  */		\
-  uhfixnum J(b_,pad1:HM9BITS);  /*  pad  */			\
-  a_      *J(b_,self);          /*  pointer to the vector  */	\
-  ufixnum  J(b_,pad2:4);        /*  pad  */				\
-  ufixnum  J(b_,fillp:LM4BITS); /*  fill pointer  */			\
-                                /*  For simple vectors,  */\
-                                /*  b_fillp is equal to b_dim.  */\
-  ufixnum  J(b_,pad3:4);        /*  pad  */		      \
-  ufixnum  J(b_,dim:LM4BITS)    /*  dimension  */
-
-
-struct array {           /*  array header  */
-
-  atempl(object,a_);
-  otempl(object,a_);
+  atempl(object,sa_,);
 
 };
 
-struct vector {           /*  vector header  */
+struct adjarray {
 
-  vtempl(object,v_);
+  atempl(object,,m);
+  plist     aadj_displaced;
+  SPAD;
 
 };
 
-struct string {           /*  string header  */
+struct array {
 
-  vtempl(char,st_);
+  atempl(object,a_,);
+  plist     a_displaced;
+  SPAD;
+
+};
+
+
+/* struct unadjmatrix { */
+
+/*   atempl(object,smt_,); */
+
+/* }; */
+
+/* struct adjmatrix { */
+
+/*   atem(object,,); */
+/*   dimstempl(madj_,); */
+
+/* }; */
+
+struct matrix {
+
+  atem(object,,m);
+  dimstempl(mt_,);
+  plist     displaced;
+  SPAD;
+
+};
+
+
+struct unadjvector {
+
+  atem(object,sv_,);
+  SPAD;
+
+};
+
+struct vector {
+
+  vtempl(object,v_,);
+  SPAD;
+
+};
+
+struct adjvector {
+
+  atem(object,,);
+  vfptempl(vadj_,);
+  SPAD;
+
+};
+
+struct unadjstring {
+
+  atem(char,sst_,);
+  SPAD;
+
+};
+
+struct string {
+
+  vtempl(char,st_,);
+  SPAD;
+
+};
+
+struct unadjbitvector {
+
+  atem(ufixnum,sbv_,);
+  SPAD;
+
+};
+
+struct bitvector {
+
+  vtempl(ufixnum,bv_,);
+  SPAD;
 
 };
 
 struct ustring {
 
-  vtempl(uchar,ust_);
-
-};
-
-struct bitvector {         /*  bitvector header  */
-
-  vtempl(ufixnum,bv_);
-  otempl(ufixnum,bv_);
+  vtempl(uchar,ust_,);
+  SPAD;
 
 };
 
@@ -322,9 +409,9 @@ struct stream {
   fixnum           sm_int1;        /*  column for input or output, stream */
   char            *sm_buffer;      /*  ptr to BUFSIZE block of storage */
   uqfixnum         sm_mode:4;      /*  stream mode  */
-  uqfixnum         sm_pad:QM4BITS; /*  stream mode  */
+  uqfixnum         sm_pad:QM(4);   /*  stream mode  */
   uqfixnum         sm_flags:3;     /*  flags from gcl_sm_flags */
-  uqfixnum         sm_pad1:QM3BITS;/*  flags from gcl_sm_flags */
+  uqfixnum         sm_pad1:QM(3);  /*  flags from gcl_sm_flags */
   hfixnum          sm_fd;          /*  stream fd */
      
 };
@@ -339,7 +426,7 @@ struct readtable {       /*  read table  */
 
   FIRSTWORD;
 
-  struct rtent *rt_self; /*  read table itself  */
+  rtentp        rt_self; /*  read table itself  */
   keyword       rt_case;
   SPAD;
 
@@ -360,26 +447,42 @@ struct pathname {
 
 struct function {
 
-  FUNWORD;
-  
-  ofunc   fun_self;  /* executable code */
-  object  fun_data;  /* cfddata structure */
-  plist   fun_plist; /* sig callees callers src file */
-  ufixnum fun_argd;  /* arg/return type checking */
+  FRSTWRD(tt,
+	  fun_minarg:6,    /* required arguments */
+	  fun_maxarg:6,    /* maximum arguments */
+#if SIZEOF_LONG == 8
+	  fun_neval:5,     /* maximum extra values set */
+	  fun_vv:1,        /* variable number of values */
+	  fw:LM(34)
+#else
+	  fw:LM(28)
+#endif
+	  );
+
+  ofunc   fun_self;         /* executable code */
+  object  fun_data;         /* cfddata structure */
+  plist   fun_plist;        /* sig callees callers src file */
+#if SIZEOF_LONG == 8
+  ufixnum fun_argd;         /* arg/return type checking */
+#else
+  ufixnum fun_neval:5;      /* maximum extra values set */
+  ufixnum fun_vv:1;         /* variable number of values */
+  ufixnum fun_argd:LM(6);   /* arg/return type checking */
+#endif
   object *fun_env;
 
 };
 
 struct cfdata {
 
-  FIRSTWORD;
+  FRSTWRD(tt,
+	  cfd_prof:1,       /* profiling */
+	  cfw:LM(1);
+	  );
 
   char   *cfd_start;             /* beginning of contblock for fun */
-  ufixnum cfd_pad:4;             /* unused */
-  ufixnum cfd_size:LM4BITS;      /* size of contblock */
-  ufixnum cfd_pad1:3;            /* unused */
-  ufixnum cfd_prof:1;            /* profiling */
-  ufixnum cfd_fillp:LM4BITS;     /* size of self */
+  FILLP_WORD(cfd_size);
+  FILLP_WORD(cfd_fillp);
   object *cfd_self;              /* body */
   plist   cfd_dlist;
 
@@ -416,12 +519,20 @@ union lispunion {
  struct package             p; /*  package  */
  struct cons                c; /*  cons  */
  struct hashtable          ht; /*  hash table  */
+ struct unadjstring       sst; /*  simple string  */
  struct string             st; /*  string  */
- struct stdesig            sd; /*  array character symbol -- phony for c package ref  */
+ /* struct stdesig            sd; /\*  array character symbol -- phony for c package ref  *\/ */
  struct ustring           ust; /*  unsigned char string  */
+ struct unadjbitvector    sbv; /*  simple bit-vector  */
  struct bitvector          bv; /*  bit-vector  */
+ struct unadjvector        sv; /*  simple vector  */
  struct vector              v; /*  vector  */
+ struct adjvector        vadj; /*  adjustable vector  */
+ /* struct unadjarray         sa; /\*  simple array  *\/ */
+ /* struct unadjmatrix       smt; /\*  simple vector  *\/ */
  struct array               a; /*  array  */
+ struct matrix             mt; /*  matrix  */
+ struct adjarray         aadj; /*  adjustable array  */
  struct structure         str; /*  structure  */
  struct stream             sm; /*  stream  */
  struct random            rnd; /*  random-states  */

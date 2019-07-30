@@ -1,5 +1,3 @@
-XSI(string_register->st.st_fillp);
-XSI(string_register->st.st_fillp);
 XSI(string_register->st.st_dim);
 XS(string_register->st.st_self);
 XSI(token->st.st_fillp);

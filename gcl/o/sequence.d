@@ -40,21 +40,37 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	I know the following name is not good.
 */
 object
-alloc_simple_vector(l, aet)
+alloc_simple_vector(l)
+int l;
+{
+	object x;
+
+	x = alloc_object(t_simple_vector);
+	x->sv.sv_hasfillp = FALSE;
+	x->sv.sv_adjustable = FALSE;
+	x->sv.sv_dim = l;
+	x->sv.sv_self = NULL;
+	x->sv.sv_elttype = aet_object;
+	x->sv.sv_rank = 1;
+	return(x);
+}
+
+object
+alloc_vector(l, aet)
 int l;
 enum aelttype aet;
 {
 	object x;
 
 	x = alloc_object(t_vector);
-	x->v.v_hasfillp = FALSE;
-	x->v.v_adjustable = FALSE;
+	x->v.v_hasfillp = TRUE;
+	x->v.v_adjustable = TRUE;
 	x->v.v_displaced = Cnil;
-	x->v.v_dim = x->v.v_fillp = l;
+	x->v.v_dim = l;
+	x->v.v_fillp = l;
 	x->v.v_self = NULL;
-	x->v.tt=x->v.v_elttype = (short)aet;
-	x->v.v_eltsize = elt_size(aet);
-	x->v.v_defrank = 1;
+	x->v.v_elttype = (short)aet;
+	x->v.v_rank = 1;
 	return(x);
 }
 
@@ -64,16 +80,33 @@ int l;
 {
 	object x;
 
+	x = alloc_object(t_simple_bitvector);
+	x->sbv.sbv_hasfillp = FALSE;
+	x->sbv.sbv_adjustable = FALSE;
+	x->sbv.sbv_dim = l;
+	x->sbv.sbv_offset = 0;
+	x->sbv.sbv_self = NULL;
+        x->sbv.sbv_elttype = aet_bit;
+        x->sbv.sbv_rank = 1;
+	return(x);
+}
+
+object
+alloc_bitvector(l)
+int l;
+{
+	object x;
+
 	x = alloc_object(t_bitvector);
-	x->bv.bv_hasfillp = FALSE;
-	x->bv.bv_adjustable = FALSE;
+	x->bv.bv_hasfillp = TRUE;
+	x->bv.bv_adjustable = TRUE;
 	x->bv.bv_displaced = Cnil;
-	x->bv.bv_dim = x->bv.bv_fillp = l;
+	x->bv.bv_dim = l;
+	x->bv.bv_fillp = l;
 	x->bv.bv_offset = 0;
 	x->bv.bv_self = NULL;
-        x->bv.tt=x->bv.bv_elttype = aet_bit;
-        x->bv.bv_eltsize = elt_size(aet_bit);
-        x->bv.bv_defrank = 1;
+        x->bv.bv_elttype = aet_bit;
+        x->bv.bv_rank = 1;
 	return(x);
 }
 
@@ -115,15 +148,18 @@ int index;
 
 	case t_vector:
 	case t_bitvector:
-		if (index >= seq->v.v_fillp) {
-			max=seq->v.v_fillp;
+	case t_simple_vector:
+	case t_simple_bitvector:
+	  if (index >= VLEN(seq)) {
+	    max=VLEN(seq);
 			goto E;
 		}
 		return(aref(seq, index));
 
+	case t_simple_string:
 	case t_string:
-		if (index >= seq->st.st_fillp) {
-			max=seq->st.st_fillp;
+	  if (index >= VLEN(seq)) {
+	    max=VLEN(seq);
 			goto E;
 		}
 		return(code_char(seq->ust.ust_self[index]));
@@ -187,12 +223,15 @@ object val;
 
 	case t_vector:
 	case t_bitvector:
+	case t_simple_vector:
+	case t_simple_bitvector:
 		if (index >= seq->v.v_dim) {
 			max=seq->v.v_dim;
 			goto E;
 		}
 		return(aset(seq, index, val));
 
+	case t_simple_string:
 	case t_string:
 		if (index >= seq->st.st_dim) {
 			max=seq->st.st_dim;
@@ -260,14 +299,17 @@ E:
 		x = vs_pop;
 		@(return x)
 
+	case t_simple_vector:/*FIXME simple copies to simple*/
 	case t_vector:
-		if (s > sequence->v.v_fillp)
+		if (s > VLEN(sequence))
 			goto ILLEGAL_START_END;
 		if (e < 0)
-			e = sequence->v.v_fillp;
-		else if (e < s || e > sequence->v.v_fillp)
+		  e = VLEN(sequence);
+		else if (e < s || e > VLEN(sequence))
 			goto ILLEGAL_START_END;
-		x = alloc_simple_vector(e - s, sequence->v.v_elttype);
+		x = sequence->v.v_elttype==aet_object ?
+		  alloc_simple_vector(e-s) :
+		  alloc_vector(e - s, sequence->v.v_elttype);
 		array_allocself(x, FALSE,OBJNULL);
 		switch (sequence->v.v_elttype) {
 		case aet_object:
@@ -318,12 +360,13 @@ E:
 		@(return x)
 
 
+	case t_simple_string:
 	case t_string:
-		if (s > sequence->st.st_fillp)
+		if (s > VLEN(sequence))
 			goto ILLEGAL_START_END;
 		if (e < 0)
-			e = sequence->st.st_fillp;
-		else if (e < s || e > sequence->st.st_fillp)
+		  e = VLEN(sequence);
+		else if (e < s || e > VLEN(sequence))
 			goto ILLEGAL_START_END;
 	       {BEGIN_NO_INTERRUPT;	
 		x = alloc_simple_string(e - s);
@@ -333,12 +376,13 @@ E:
 			x->st.st_self[j] = sequence->st.st_self[i];
 		@(return x)
 
+	case t_simple_bitvector:
 	case t_bitvector:
-		if (s > sequence->bv.bv_fillp)
+		if (s > VLEN(sequence))
 			goto ILLEGAL_START_END;
 		if (e < 0)
-			e = sequence->bv.bv_fillp;
-		else if (e < s || e > sequence->bv.bv_fillp)
+		  e = VLEN(sequence);
+		else if (e < s || e > VLEN(sequence))
 			goto ILLEGAL_START_END;
 		{BEGIN_NO_INTERRUPT;
 		x = alloc_simple_bitvector(e - s);
@@ -391,10 +435,13 @@ object x;
 		return(0);
 
 
+	case t_simple_vector:
+	case t_simple_string:
+	case t_simple_bitvector:
 	case t_vector:
 	case t_string:
 	case t_bitvector:
-		return(x->v.v_fillp);
+	  return(VLEN(x));
 
 	default:
 		FEwrong_type_argument(sLsequence, x);
@@ -436,10 +483,12 @@ object seq;
 			*v = make_cons(x->c.c_car, *v);
 		return(vs_pop);
 
+	case t_simple_vector:
 	case t_vector:
 		x = seq;
-		k = x->v.v_fillp;
-		y = alloc_simple_vector(k, x->v.v_elttype);
+		k = VLEN(x);
+		y = x->v.v_elttype==aet_object ?
+		  alloc_simple_vector(k) : alloc_vector(k, x->v.v_elttype);
 		vs_push(y);
 		array_allocself(y, FALSE,OBJNULL);
 		switch (x->v.v_elttype) {
@@ -484,26 +533,28 @@ object seq;
 		}
 		return(vs_pop);
 
+	case t_simple_string:
 	case t_string:
 		x = seq;
-		y = alloc_simple_string(x->st.st_fillp);
+		y = alloc_simple_string(VLEN(x));
 		TYPE_STRING:
 		{BEGIN_NO_INTERRUPT;
 		vs_push(y);
 		y->st.st_self
-		= alloc_relblock(x->st.st_fillp);
-		for (j = x->st.st_fillp - 1, i = 0;  j >=0;  --j, i++)
+		  = alloc_relblock(VLEN(x));
+		for (j = VLEN(x) - 1, i = 0;  j >=0;  --j, i++)
 			y->st.st_self[j] = x->st.st_self[i];
 		END_NO_INTERRUPT;}
 		return(vs_pop);
 
+	case t_simple_bitvector:
 	case t_bitvector:
 		x = seq;
 		{BEGIN_NO_INTERRUPT;	
-		y = alloc_simple_bitvector(x->bv.bv_fillp);
+		  y = alloc_simple_bitvector(VLEN(x));
 		vs_push(y);
-		y->bv.bv_self=alloc_relblock(ceil(x->bv.bv_fillp,BV_ALLOC)*sizeof(*y->bv.bv_self));
-		for (j = x->bv.bv_fillp - 1, i = x->bv.bv_offset;
+		y->bv.bv_self=alloc_relblock(ceil(VLEN(x),BV_ALLOC)*sizeof(*y->bv.bv_self));
+		for (j = VLEN(x) - 1, i = x->bv.bv_offset;
 		     j >=0;
 		     --j, i++)
 		  if (BITREF(x,i))
@@ -550,9 +601,10 @@ object seq;
 		y->c.c_cdr = x;
 		return(y);
 
+	case t_simple_vector:
 	case t_vector:
 		x = seq;
-		k = x->v.v_fillp;
+		k = VLEN(x);
 		switch (x->v.v_elttype) {
 		case aet_object:
 			for (i = 0, j = k - 1;  i < j;  i++, --j) {
@@ -617,20 +669,22 @@ object seq;
 		    goto TYPE_STRING;
 		}
 
+	case t_simple_string:
 	case t_string:
 		x = seq;
 	TYPE_STRING:	
-		for (i = 0, j = x->st.st_fillp - 1;  i < j;  i++, --j) {
+		for (i = 0, j = VLEN(x) - 1;  i < j;  i++, --j) {
 			k = x->st.st_self[i];
 			x->st.st_self[i] = x->st.st_self[j];
 			x->st.st_self[j] = k;
 		}
 		return(seq);
 
+	case t_simple_bitvector:
 	case t_bitvector:
 		x = seq;
 		for (i = x->bv.bv_offset,
-		     j = x->bv.bv_fillp + x->bv.bv_offset - 1;
+		       j = VLEN(x) + x->bv.bv_offset - 1;
 		     i < j;
 		     i++, --j) {
 		  k = BITREF(x,i);

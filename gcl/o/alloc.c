@@ -1027,7 +1027,7 @@ alloc_code_space(size_t sz) {
     v=sSAcode_block_reserveA->s.s_dbind->st.st_self;
     sSAcode_block_reserveA->s.s_dbind->st.st_self+=sz;
     sSAcode_block_reserveA->s.s_dbind->st.st_dim-=sz;
-    sSAcode_block_reserveA->s.s_dbind->st.st_fillp=sSAcode_block_reserveA->s.s_dbind->st.st_dim;
+    VSET_MAX_FILLP(sSAcode_block_reserveA->s.s_dbind);
     
   } else
     v=alloc_contblock(sz);
@@ -1294,7 +1294,9 @@ gcl_init_alloc(void *cs_start) {
   init_tm(t_cons, ".CONS", sizeof(struct cons), 0 ,50,0 );
   init_tm(t_fixnum, "NFIXNUM",sizeof(struct fixnum_struct), 0,20,0);
   init_tm(t_structure, "SSTRUCTURE", sizeof(struct structure),0,1,0 );
+  init_tm(t_simple_string, "\'SIMPLE-STRING", sizeof(struct unadjstring),0,1,0);
   init_tm(t_string, "\"STRING", sizeof(struct string),0,1,0  );
+  init_tm(t_simple_array, "ASIMPLE-ARRAY", sizeof(struct unadjarray),0,1,0 );
   init_tm(t_array, "aARRAY", sizeof(struct array),0,1,0 );
   init_tm(t_symbol, "|SYMBOL", sizeof(struct symbol),0,1,0 );
   init_tm(t_bignum, "BBIGNUM", sizeof(struct bignum),0,1,0 );
@@ -1305,7 +1307,9 @@ gcl_init_alloc(void *cs_start) {
   init_tm(t_character,"#CHARACTER",sizeof(struct character),0 ,1,0);
   init_tm(t_package, ":PACKAGE", sizeof(struct package),0,1,0);
   init_tm(t_hashtable, "hHASH-TABLE", sizeof(struct hashtable),0,1,0 );
+  init_tm(t_simple_vector, "VSIMPLE-VECTOR", sizeof(struct unadjvector),0 ,1,0);
   init_tm(t_vector, "vVECTOR", sizeof(struct vector),0 ,1,0);
+  init_tm(t_simple_bitvector, "BSIMPLE-BIT-VECTOR", sizeof(struct unadjbitvector),0 ,1,0);
   init_tm(t_bitvector, "bBIT-VECTOR", sizeof(struct bitvector),0 ,1,0);
   init_tm(t_stream, "sSTREAM", sizeof(struct stream),0 ,1,0);
   init_tm(t_random, "$RANDOM-STATE", sizeof(struct random),0 ,1,0);
@@ -1350,10 +1354,11 @@ t_from_type(object type) {
  
   int i;
   check_type_or_symbol_string(&type);
+  type=coerce_to_string(type);
   for (i= t_start ; i < t_other ; i++)
     {struct typemanager *tm = &tm_table[i];
     if(tm->tm_name &&
-       0==strncmp((tm->tm_name)+1,type->st.st_self,type->st.st_fillp)
+       0==strncmp((tm->tm_name)+1,type->st.st_self,VLEN(type))
        )
       return i;}
   /* FEerror("Unrecognized type",0); */
@@ -1648,9 +1653,9 @@ malloc_internal(size_t size) {
 
   CHECK_INTERRUPT;
   
-  malloc_list = make_cons(alloc_simple_string(size), malloc_list);
+  malloc_list = make_cons(alloc_string(size), malloc_list);
   malloc_list->c.c_car->st.st_self = alloc_contblock(size);
-  malloc_list->c.c_car->st.st_adjustable=writable_malloc;
+  malloc_list->c.c_car->st.st_writable=writable_malloc;
   
   return(malloc_list->c.c_car->st.st_self);
 
@@ -1716,11 +1721,12 @@ realloc(void *ptr, size_t size) {
     if (x->c.c_car->st.st_self == ptr) {
       x = x->c.c_car;
       if (x->st.st_dim >= size) {
-	x->st.st_fillp = size;
+	VFILLP_SET(x,size);
 	return(ptr);
       } else {
 	x->st.st_self = alloc_contblock(size);
-	x->st.st_fillp = x->st.st_dim = size;
+	x->st.st_dim = size;
+	VSET_MAX_FILLP(x);
 	for (i = 0;  i < size;  i++)
 	  x->st.st_self[i] = ((char *)ptr)[i];
 	return(x->st.st_self);
@@ -1760,7 +1766,7 @@ cfree(void *ptr) {
 #ifdef WANT_VALLOC
 static void *
 memalign(size_t align,size_t size) { 
-  object x = alloc_simple_string(size);
+  object x = alloc_string(size);
   x->st.st_self = ALLOC_ALIGNED(alloc_contblock,size,align);
   malloc_list = make_cons(x, malloc_list);
   return x->st.st_self;

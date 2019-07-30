@@ -59,32 +59,23 @@ get_init_sym(NSModule module,object ff) {
   if (!inf) {
 
     object x;
-    static struct string st;
-    set_type_of(&st,t_string);
-    st.st_self="COMPILER";
-    st.st_dim=st.st_fillp=strlen(st.st_self);
-    if ((x=find_package((object)&st))==Cnil)
+    if ((x=find_package(str("COMPILER")))==Cnil)
       sfasl_error("Cannot find compiler package\n");
-    st.st_self="INIT-NAME";
-    st.st_dim=st.st_fillp=strlen(st.st_self);
-    if ((inf=find_symbol((object)&st,x))==Cnil) {
+    if ((inf=find_symbol(str("INIT-NAME"),x))==Cnil) {
       inf=NULL;
       sfasl_error("Cannot find function COMPILER::INIT-NAME\n");
     }
     
   }
 
-  set_type_of(&st,t_string);
-  st.st_self=ff->st.st_self;
-  st.st_dim=st.st_fillp=ff->st.st_dim;
-  x=ifuncall1(inf,(object)&st);
-  if (type_of(x)!=t_string)
+  x=ifuncall1(inf,ff);
+  if (!stringp(x))
     sfasl_error("INIT-NAME error\n");
   assert(snprintf(ib,sizeof(ib),"_init_%-.*s",x->st.st_dim,x->st.st_self)>0);
 
   if (!(v=NSLookupSymbolInModule(module, ib))) {
     x=ifuncall2(inf,(object)&st,Ct);
-    if (type_of(x)!=t_string)
+    if (!stringp(x))
       sfasl_error("INIT-NAME error\n");
     assert(snprintf(ib,sizeof(ib),"_init_%-.*s",x->st.st_dim,x->st.st_self)>0);
     if (!(v=NSLookupSymbolInModule(module, ib)))

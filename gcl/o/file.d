@@ -149,11 +149,11 @@ DEFUN("TEMP-STREAM",object,fStemp_stream,SI,2,2,NONE,OO,OO,OO,OO,(object x,objec
   DWORD dwRetVal;
   char lpPathBuffer[MAX_PATH];
   
-  check_type ( x,   t_string );
-  check_type ( ext, t_string );
+  check_type_string ( &x );
+  check_type_string ( &ext );
   
   dwRetVal = GetTempPath ( MAX_PATH, lpPathBuffer );
-  if ( dwRetVal + ext->st.st_fillp + x->st.st_fillp + 2 > MAX_PATH ) {
+  if ( dwRetVal + VLEN(ext) + VLEN(x) + 2 > MAX_PATH ) {
     FEerror ( "Length of temporary file path combined with file name is too large.", 0 );
   }
   
@@ -166,22 +166,22 @@ DEFUN("TEMP-STREAM",object,fStemp_stream,SI,2,2,NONE,OO,OO,OO,OO,(object x,objec
 #else
   char *c, *d;
   int l;
-  check_type(x,t_string);
-  check_type(ext,t_string);
+  check_type_string(&x);
+  check_type_string(&ext);
   
-  if (!(c=alloca(x->st.st_fillp+ext->st.st_fillp+8)))
+  if (!(c=alloca(VLEN(x)+VLEN(ext)+8)))
     FEerror("Cannot allocate temp name space",0);
-  if (!(d=alloca(x->st.st_fillp+ext->st.st_fillp+8)))
+  if (!(d=alloca(VLEN(x)+VLEN(ext)+8)))
     FEerror("Cannot allocate temp name space",0);
-  memcpy(c,x->st.st_self,x->st.st_fillp);
-  memcpy(c+x->st.st_fillp,"XXXXXX",6);
-  c[x->st.st_fillp+6]=0;
+  memcpy(c,x->st.st_self,VLEN(x));
+  memcpy(c+VLEN(x),"XXXXXX",6);
+  c[VLEN(x)+6]=0;
   l=mkstemp(c);
   
-  memcpy(d,c,x->st.st_fillp+6);
-  memcpy(d+x->st.st_fillp+6,".",1);
-  memcpy(d+x->st.st_fillp+7,ext->st.st_self,ext->st.st_fillp);
-  d[x->st.st_fillp+ext->st.st_fillp+7]=0;
+  memcpy(d,c,VLEN(x)+6);
+  memcpy(d+VLEN(x)+6,".",1);
+  memcpy(d+VLEN(x)+7,ext->st.st_self,VLEN(ext));
+  d[VLEN(x)+VLEN(ext)+7]=0;
   if (rename(c,d))
     FEerror("Cannot rename ~s to ~s",2,make_simple_string(c),make_simple_string(d));
   st=make_simple_string(d);
@@ -414,14 +414,10 @@ open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exis
     
     if ((fp == NULL) &&
 	(sSAallow_gzipped_fileA->s.s_dbind != sLnil)) { 
-      union lispunion st;
       char buf[256];
       if (snprintf(buf,sizeof(buf),"%s.gz",FN1)<=0)
 	FEerror("Cannot write .gz filename",0);
-      st.st.st_self=buf;
-      st.st.st_dim=st.st.st_fillp=strlen(buf);
-      set_type_of(&st,t_string);
-      if (fSstat((object)&st)!=Cnil) {
+      if (fSstat(str(buf))!=Cnil) {
 	FILE *pp;
 	int n;
 	if (!(fp=tmpfile()))
@@ -594,7 +590,7 @@ object strm;
 		if (strm->sm.sm_fp == NULL) break;
 		deallocate_stream_buffer(strm);
 		if (strm->sm.sm_object1 &&
-		    type_of(strm->sm.sm_object1)==t_string &&
+		    stringp(strm->sm.sm_object1) &&
 		    strm->sm.sm_object1->st.st_self[0] =='|')
 		  pclose(strm->sm.sm_fp);
 		else 
@@ -790,10 +786,10 @@ int line_length;
 	strng = alloc_object(t_string);
 	strng->st.st_hasfillp = TRUE;
 	strng->st.st_adjustable = TRUE;
-	strng->st.tt=strng->st.st_elttype = aet_ch;
-	strng->st.st_eltsize = elt_size(aet_ch);
-	strng->st.st_defrank = 1;
-	strng->st.st_displaced = Cnil;
+	/* strng->st.tt= */strng->st.st_elttype = aet_ch;
+	/* strng->st.st_eltsize = elt_size(aet_ch); */
+	strng->st.st_rank = 1;
+	SET_ADISP(strng,Cnil);
 	strng->st.st_dim = line_length;
 	strng->st.st_fillp = 0;
 	strng->st.st_self = NULL;
@@ -1100,19 +1096,19 @@ BEGIN:
 			STREAM_FILE_COLUMN(strm)++;
 		x = STRING_STREAM_STRING(strm);
 		if (x->st.st_fillp >= x->st.st_dim) {
-			if (!x->st.st_adjustable)
-				FEerror("The string ~S is not adjustable.",
-					1, x);
-                        p = (inheap((long)x->st.st_self) ? alloc_contblock : alloc_relblock)
-                             (x->st.st_dim * 2 + 16); 
-			for (i = 0;  i < x->st.st_dim;  i++)
-				p[i] = x->st.st_self[i];
-			i = x->st.st_dim * 2 + 16;
-/* #define	ADIMLIM		16*1024*1024 */
-/* 			if (i >= ADIMLIM) */
-/* 				FEerror("Can't extend the string.", 0); */
-			x->st.st_dim = i;
-			adjust_displaced(x, p - x->st.st_self);
+
+		  ufixnum j=x->st.st_dim * 2 + 16;
+
+		  if (!x->st.st_adjustable)
+		    FEerror("The string ~S is not adjustable.",1, x);
+
+		  p = (inheap((long)x->st.st_self) ? alloc_contblock : alloc_relblock)(j);
+		  memcpy(p,x->st.st_self,x->st.st_dim);
+		  x->st.st_dim=j;
+		  x->st.st_self=p;
+
+		  adjust_displaced(x);
+
 		}
 		x->st.st_self[x->st.st_fillp++] = c;
 		break;
@@ -2329,12 +2325,12 @@ object make_stream_from_fd ( object command, int fd, enum smmode smm )
 	else
 		s = fix(istart);
 	if (iend == Cnil)
-		e = strng->st.st_fillp;
+	  e = VLEN(strng);
 	else if (type_of(iend) != t_fixnum)
 		goto E;
 	else
 		e = fix(iend);
-	if (s < 0 || e > strng->st.st_fillp || s > e)
+        if (s < 0 || e > VLEN(strng) || s > e)
 		goto E;
 	@(return `make_string_input_stream(strng, s, e)`)
 
@@ -2668,7 +2664,7 @@ LFD(siLmake_string_output_stream_from_string)()
 
 	check_arg(1);
 	strng = vs_base[0];
-	if (type_of(strng) != t_string || !strng->st.st_hasfillp)
+	if (!stringp(strng) || !strng->st.st_hasfillp)
 		FEerror("~S is not a string with a fill-pointer.", 1, strng);
 	strm = alloc_object(t_stream);
 	strm->sm.tt=strm->sm.sm_mode = (short)smm_string_output;
@@ -2835,7 +2831,7 @@ DEFUN("FWRITE",object,fSfwrite,SI,4,4,NONE,OO,OO,OO,OO,
   if (stream==Cnil) RETURN1(Cnil);
   p = vector->ust.ust_self;
   beg = ((type_of(start)==t_fixnum) ? fix(start) : 0);
-  n = ((type_of(count)==t_fixnum) ? fix(count) : (vector->st.st_fillp - beg));
+  n = ((type_of(count)==t_fixnum) ? fix(count) : (VLEN(vector) - beg));
   if (fwrite(p+beg,1,n,stream->sm.sm_fp)) RETURN1(Ct);
   RETURN1(Cnil);
 }
@@ -2849,7 +2845,7 @@ DEFUN("FREAD",object,fSfread,SI,4,4,NONE,OO,OO,OO,OO,
   if (stream==Cnil) RETURN1(Cnil);
   p = vector->st.st_self;
   beg = ((type_of(start)==t_fixnum) ? fix(start) : 0);
-  n = ((type_of(count)==t_fixnum) ? fix(count) : (vector->st.st_fillp - beg));
+  n = ((type_of(count)==t_fixnum) ? fix(count) : (VLEN(vector) - beg));
   if ((n=SAFE_FREAD(p+beg,1,n,stream->sm.sm_fp)))
     RETURN1(make_fixnum(n));
   RETURN1(Cnil);
@@ -2964,7 +2960,7 @@ object async;
      {
          object buffer;
          x->sm.sm_fp = NULL;
-	 buffer=alloc_simple_string((BUFSIZ < 4096 ? 4096 : BUFSIZ));
+	 buffer=alloc_string((BUFSIZ < 4096 ? 4096 : BUFSIZ));
 	 SOCKET_STREAM_BUFFER(x) =buffer;
 	 buffer->ust.ust_self = alloc_contblock(buffer->st.st_dim);
 	 buffer->ust.ust_fillp = 0;
@@ -3038,7 +3034,7 @@ char buf2[500];
 char *myaddrPtr=buf1,*hostPtr=buf2;
 object x=Cnil;
 @
-  if (type_of(host) == t_string) {
+  if (stringp(host)) {
     hostPtr=lisp_copy_to_null_terminated(host,hostPtr,sizeof(buf1));
   } else { hostPtr = NULL; }
   

@@ -21,7 +21,9 @@
     (setf (fill-pointer x) (+ lx ls))
     (replace x s :start1 lx :start2 ss)))
 
-(defun walk-dir (s e f &optional (y :unknown) (d (opendir s)) (l (length s)) (le (length e))
+(defun walk-dir (s e f
+		   &optional
+		   (y :unknown) (d (opendir (if (string-equal "" s) "./" s))) (l (length s)) (le (length e))
 		   &aux (r (wreaddir d s y l)))
   (cond (r (unless (dot-dir-p r l) (funcall f r (vector-push-string e r l le) l))
 	   (walk-dir s e f y d l le))
@@ -63,5 +65,5 @@
 		       (push (merge-pathnames (parse-namestring dir nil *default-pathname-defaults* :start pos) pexp nil) r)))
 		   :file)
        (when (pathname-match-p dir v) (push pexp r))))
-   (make-frame (if c "./" "")))
+   (make-frame ""))
   r)

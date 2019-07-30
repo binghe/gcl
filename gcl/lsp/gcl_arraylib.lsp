@@ -38,7 +38,7 @@
 (eval-when 
  (compile eval)
 
- (defun proto-array (tp) (make-vector tp 1 nil nil nil 0 nil nil))
+ (defun proto-array (tp) (make-vector tp 1 t nil nil 0 nil nil))
 
  ;(car (assoc x s::+ks+ :test (lambda (x y) (subtypep x (get y 'compiler::lisp-type)))));FIXME vs bug in interpreter
  ;; (defun af (x &aux (x (caar (member x s::+ks+ :test (lambda (x y) (subtypep x (get (car y) 'compiler::lisp-type))))))) 
@@ -52,7 +52,7 @@
 			       (t . *object) (non-negative-fixnum . *fixnum) (fixnum . *fixnum)))))
  
  (defvar *array-type-info* (mapcar (lambda (x &aux (y (proto-array x))) 
-				     (list x (c-array-elttype y) (c-array-eltsize y) (c-array-mode y) (af x)))
+				     (list x (c-array-elttype y) (array-eltsize y) (array-mode y) (af x)))
 				   +array-types+))
 
  (defun maybe-cons (car cdr)
@@ -66,29 +66,21 @@
 		(funcall sf (funcall gf s j) r i)
 		(when sw (funcall sf x s j))))
        (case 
-	   (c-array-eltsize r)
-	   ,@(mapcar (lambda (x &aux (z (pop x))
-				(y (lreduce 'type-or1 (mapcar (lambda (x) (cmp-norm-tp `(array ,x))) x)))
-				(w (fifth (assoc (car x) *array-type-info*))))
-		       `(,z
-			 (infer-tp
-			  r ,y
-			  (infer-tp
-			   s ,y
-			   (sp r i s j
-			       ,(if (zerop z)
-				    `'0-byte-array-self
-				  `(lambda (r i) (,w (c-array-self r) i nil nil)))
-			       ,(if (zerop z)
-				    `'set-0-byte-array-self
-				  `(lambda (v r i) (,w (c-array-self r) i t v))))))))
-		   (mapcar (lambda (x) 
-			     (cons
-			      x
-			      (mapcar
-			       'car
-			       (lremove-if-not (lambda (y) (eql x (caddr y))) *array-type-info*))))
-			   (lremove-duplicates (mapcar 'caddr *array-type-info*)))))))
+	(array-eltsize r);fixme
+	,@(mapcar (lambda (x &aux (z (pop x))(y (pop x))(w (car x)))
+		    `(,z (infer-tp
+			  r ,y (infer-tp
+				s ,y
+				,(if (zerop z)
+				     `(sp r i s j #'0-byte-array-self #'set-0-byte-array-self)
+				   `(let* ((rs (c-array-self r))(ss (if (eq r s) rs (c-array-self s))))
+				      (sp rs i ss j
+					  (lambda (rs i) (,w rs i nil nil))
+					  (lambda (v rs i) (,w rs i t v)))))))))
+		  (lreduce (lambda (y x &aux (sz (caddr x))(fn (fifth x))(z (assoc sz y))(tp (cmp-norm-tp `(array ,(car x)))))
+			     (cond (z (setf (cadr z) (type-or1 (cadr z) tp) (caddr z) fn) y)
+				   ((cons (list sz tp fn) y))))
+			   si::*array-type-info* :initial-value nil)))))
 (declaim (inline set-array))
 
 #.`(defun array-element-type (x)
@@ -137,12 +129,11 @@
 (setf (get 'row-major-aset 'compiler::consider-inline) t)
 
 
-
 (defun 0-byte-array-self (array index)
   (declare (optimize (safety 1)))
   (check-type array (array bit))
   (check-type index seqind)
-  (let* ((off (+ index (c-array-offset array)))
+  (let* ((off (+ index (array-offset array)))
 	 (ind (>> off #.(1- (integer-length fixnum-length))))
 	 (word (*fixnum (c-array-self array) ind nil nil))
 	 (shft (& off #.(1- fixnum-length))))
@@ -154,7 +145,7 @@
   (check-type array (array bit))
   (check-type index seqind)
   (check-type bit bit)
-  (let* ((off (+ index (c-array-offset array)))
+  (let* ((off (+ index (array-offset array)))
 	 (ind (>> off #.(1- (integer-length fixnum-length))))
 	 (word (*fixnum (c-array-self array) ind nil nil))
 	 (shft (& off #.(1- fixnum-length)))
@@ -218,6 +209,14 @@
     (assert (< i r) (i) 'type-error :datum i :expected-type `(integer 0 (,r)))
     (if (= 1 r) (c-array-dim x) (array-dims x i))));(the seqind (*fixnum (c-array-dims x) i nil nil))
 
+(defun array-displacement (x)
+  (declare (optimize (safety 1)))
+  (check-type x array)
+  (typecase
+   x
+   (adjustable-array (let ((x (car (c-adjarray-displaced x)))) (values (car x) (cdr x))))))
+
+
 ;; (defun array-dimension (x i)
 ;;   (declare (optimize (safety 2)))
 ;;   (check-type x array)
@@ -243,7 +242,10 @@
 (defun array-has-fill-pointer-p (x)
   (declare (optimize (safety 1)))
   (check-type x array)
-  (= (c-array-hasfillp x) 1))
+  (typecase
+   x
+   (adjustable-vector
+    (not (zerop (c-array-hasfillp x))))))
 
 ;; (defun upgraded-array-element-type (type &optional environment)
 ;;   (declare (ignore environment) (optimize (safety 1)))
@@ -255,9 +257,10 @@
 ;; 	(t)))
 
 (defun fill-pointer (x)
-  (declare (optimize (safety 2)))
-  (check-type x fpvec)
-  (c-vector-fillp x))
+  (declare (optimize (safety 1)))
+  (check-type x adjustable-vector)
+  (assert (array-has-fill-pointer-p x) (x) 'type-error :datum x :expected-type '(satisfies array-has-fill-pointer-p))
+  (c-adjvector-fillp x))
 ;  (fill-pointer-internal x)
 
 (defun make-array (dimensions
@@ -313,38 +316,42 @@
 
 
 (defun vector-push (new-element vector)
-  (declare (optimize (safety 2)))
-  (check-type vector fpvec)
+  (declare (optimize (safety 1)))
+  (check-type vector adjustable-vector)
+  (assert (array-has-fill-pointer-p vector) (vector) 'type-error :datum vector :expected-type '(satisfies array-has-fill-pointer-p));FIXME
   (let ((fp (fill-pointer vector)))
     (cond ((< fp (array-dimension vector 0))
-           (si:aset new-element vector fp)
-           (si:fill-pointer-set vector (1+ fp))
+	   (setf (aref vector fp) new-element (fill-pointer vector) (1+ fp))
 	   fp))))
 
 
 (defun vector-push-extend (new-element vector &optional extension)
-  (declare (optimize (safety 2)))
-  (check-type vector fpvec)
-  (let ((fp (fill-pointer vector))
-	(dim (array-dimension vector 0)))
-    (unless (< fp dim)
-      (adjust-array vector (the seqind (+ dim (or extension (max 5 dim))))
-		    :element-type (array-element-type vector)
-		    :fill-pointer fp))
-    (aset new-element vector fp)
-    (setf (fill-pointer vector) (1+ fp))
+  (declare (optimize (safety 1)))
+  (check-type vector adjustable-vector)
+  (assert (array-has-fill-pointer-p vector) (vector) 'type-error :datum vector :expected-type '(satisfies array-has-fill-pointer-p))
+  (let* ((fp (fill-pointer vector))
+	 (dim (array-dimension vector 0))
+	 (vector (if (< fp dim) vector
+		   (adjust-array vector (the seqind (+ dim (or extension (max 5 dim))))
+				 :element-type (array-element-type vector)
+				 :fill-pointer fp))))
+    (setf (aref vector fp) new-element (fill-pointer vector) (1+ fp))
     fp))
 
 
+
 (defun vector-pop (vector)
-  (declare (optimize (safety 2)))
-  (check-type vector fpvec)
+  (declare (optimize (safety 1)))
+  (check-type vector adjustable-vector)
+  (assert (array-has-fill-pointer-p vector) (vector) 'type-error :datum vector :expected-type '(satisfies array-has-fill-pointer-p))
   (let ((fp (fill-pointer vector)))
-    (when (= fp 0)
-          (error "The fill pointer of the vector ~S zero." vector))
-    (fill-pointer-set vector (1- fp))
+    (check-type fp (integer 1))
+    (setf (fill-pointer vector) (1- fp))
     (aref vector (1- fp))))
 
+
+(defun adjustable-array-p (array)
+  (typep array 'adjustable-array))
 
 (defun adjust-array (array new-dimensions
                      &rest r
@@ -404,6 +411,16 @@
    
     array))
 
+(defun array-total-size (a)
+  (declare (optimize (safety 1)))
+  (check-type a array)
+  (c-array-dim a))
+
+(defun array-rank (a)
+  (declare (optimize (safety 1)))
+  (check-type a array)
+  (c-array-rank a))
+
 #.`(defun array-eltsize-propagator (f x)
      (cond
       ,@(mapcar (lambda (x)
@@ -425,17 +442,19 @@
 (defun array-rank-propagator (f x)
   (cond
    ((type>= #tvector x) #t(member 1))
-   ((type>= #tarray x) #trnkind);FIXME
-    ;; (let ((x (caddr x)))
-    ;;   (typecase x
-    ;; 		(rnkind (cmp-norm-tp `(member ,x)))
-    ;; 		(list (cmp-norm-tp `(member ,(length x))))
-    ;; 		(otherwise #trnkind)))
-    ))
+   ((let ((d (atomic-tp-array-dimensions x)));FIXME integer rnk
+      (when d (object-tp (length (car d))))))
+   ((type>= #tarray x) #trnkind)))
 (setf (get 'c-array-rank 'type-propagator) 'array-rank-propagator)
+
+(defun array-dim-propagator (f t1 &aux (d (atomic-tp-array-dimensions t1)));c-array-dim?
+  (declare (ignore f))
+  (when d
+    (object-tp (reduce '* (car d)))))
+(setf (get 'c-array-dim 'type-propagator) 'array-dim-propagator)
 
 (defun svref (x i) 
   (declare (optimize (safety 1)))
-  (check-type x (vector t))
+  (check-type x simple-vector)
   (check-type i seqind)
   (aref x i))

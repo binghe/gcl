@@ -39,9 +39,11 @@
 	(case (if atp (car type) type)
 	      (or (chk (make-sequence (or-sequence-tp type) size :initial-element initial-element)))
 	      ((list cons member) (chk (make-list size :initial-element initial-element)))
-	      ((vector array) (chk (make-vector
-				    (upgraded-array-element-type (or (when atp (cadr type)) t))
-				    size nil nil nil 0 nil initial-element)))
+	      ((vector array simple-array non-simple-array)
+	       (chk (make-vector
+		     (upgraded-array-element-type (or (when atp (cadr type)) t))
+		     size (eq 'non-simple-array (if atp (car type) type))
+		     nil nil 0 nil initial-element)))
 	      (otherwise (let ((ntype (expand-deftype type)))
 			   (if ntype (make-sequence ntype size :initial-element initial-element)
 			     (check-type type (member list vector))))))))

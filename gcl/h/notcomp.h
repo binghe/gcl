@@ -4,7 +4,6 @@
 
 #define	CHAR_CODE_LIMIT	256	
 #define	READ_TABLE_SIZE CHAR_CODE_LIMIT
-#define ARRAY_RANK_LIMIT 63
 
 void enter_mark_origin() ;
 
@@ -162,11 +161,11 @@ TS_MEMBER(t0,TS(t1)|TS(t2)|TS(t3)...)
 object IisArray();
 
 /* array to which X is has its body displaced */
-#define DISPLACED_TO(x) Mcar(x->a.a_displaced)
+#define DISPLACED_TO(x) Mcar(ADISP(x))
 
 /* List of arrays whose bodies are displaced to X */
 
-#define DISPLACED_FROM(x) Mcdr(x->a.a_displaced)
+#define DISPLACED_FROM(x) Mcdr(ADISP(x))
 
 #define FIX_CHECK(x) (Mfix(Iis_fixnum(x)))
 
@@ -351,3 +350,17 @@ extern bool writable_malloc;
 #define SET_BITREF(x,i)   ({ufixnum _i=(i);(x->bv.bv_self[_i/BV_BITS]) |= BV_BIT(_i);})
 #define CLEAR_BITREF(x,i) ({ufixnum _i=(i);(x->bv.bv_self[_i/BV_BITS]) &= ~BV_BIT(_i);})
 #define BIT_MASK(n_) ({char _n=n_;(_n==BV_BITS ? -1L : BV_BIT(_n)-1);})
+
+#define VLEN(a_) ({object _a=(a_);(_a)->v.v_hasfillp ? (_a)->v.v_fillp : (_a)->v.v_dim;})
+#define VFILLP_SET(a_,b_)					\
+  ({object _a=(a_);ufixnum _b=(b_);				\
+    if (_a->v.v_hasfillp) _a->v.v_fillp=_b;})
+#define VSET_MAX_FILLP(a_) ({object _x=(a_);VFILLP_SET(_x,_x->v.v_dim);})
+
+#define ADISP(a_) ({object _a=(a_);(_a)->a.a_adjustable ? (_a)->a.a_displaced : Cnil;})
+#define SET_ADISP(a_,b_) ({object _a=(a_);if ((_a)->a.a_adjustable) (_a)->a.a_displaced=(b_);})
+
+#define str(a_)								\
+  ({string_register->st.st_self=(a_);					\
+    string_register->st.st_dim=strlen(string_register->st.st_self);	\
+    string_register;})

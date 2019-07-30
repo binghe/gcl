@@ -155,10 +155,10 @@ typedef struct {
 #define  INT_GCL(x,i)  ((( int *)(x)->ust.ust_self)[i])
 
 #define BV_OFFSET(x) ((type_of(x)==t_bitvector ? x->bv.bv_offset : \
-                       type_of(x)== t_array ? x->a.a_offset : (gcl_abort(),0)))
+                       type_of(x)== t_array ? x->a.a_offset : 0))
 
 #define SET_BV_OFFSET(x,val) ((type_of(x)==t_bitvector ? x->bv.bv_offset = val : \
-                               type_of(x)== t_array ? x->a.a_offset=val : (gcl_abort(),0)))
+                               type_of(x)== t_array ? x->a.a_offset=val : 0))
 
 
 struct s_data {

@@ -9,8 +9,12 @@ enum type {
   t_complex,
   t_pathname,
   t_string,
+  t_simple_string,
+  t_simple_bitvector,
   t_bitvector,
+  t_simple_vector,
   t_vector,
+  t_simple_array,
   t_array,
   t_hashtable,
   t_structure,
@@ -107,7 +111,8 @@ enum type {
 #define characterp(a_) SPP(a_,character)
 #define symbolp(a_)    SPP(a_,symbol)
 #define pathnamep(a_)  SPP(a_,pathname)
-#define stringp(a_)    SPP(a_,string)
+#define stringp_tp(a_) TS_MEMBER(a_,TS(t_string)|TS(t_simple_string))
+#define stringp(a_)    stringp_tp(type_of(a_))
 #define fixnump(a_)    SPP(a_,fixnum)
 #define readtablep(a_) SPP(a_,readtable)
 #define functionp(a_)  (type_of(a_)==t_function)
@@ -122,10 +127,10 @@ enum type {
 #define arrayp(a_)   ({enum type _tp=type_of(a_); _tp >= t_string     && _tp <= t_array;})
 #define vectorp(a_)  ({enum type _tp=type_of(a_); _tp >= t_string     && _tp < t_array;})
 
-#define string_symbolp(a_)                 ({enum type _tp=type_of(a_); _tp == t_string || _tp == t_symbol;})
-#define pathname_string_symbolp(a_)        ({enum type _tp=type_of(a_); _tp==t_pathname || _tp == t_string\
+#define string_symbolp(a_)                 ({enum type _tp=type_of(a_); stringp_tp(_tp) || _tp == t_symbol;})
+#define pathname_string_symbolp(a_)        ({enum type _tp=type_of(a_); _tp==t_pathname || stringp_tp(_tp) \
                                                                      || _tp == t_symbol;})
-#define pathname_string_symbol_streamp(a_) ({enum type _tp=type_of(a_); _tp==t_pathname || _tp == t_string\
+#define pathname_string_symbol_streamp(a_) ({enum type _tp=type_of(a_); _tp==t_pathname || stringp_tp(_tp) \
                                                                      || _tp == t_symbol || _tp==t_stream;})
 #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;}))
 #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector)
@@ -141,21 +146,21 @@ enum type {
 
 #define tp3(x) ({object _x=x;_x==Cnil ? 2 : (is_imm_fixnum(_x) ? 3 : _x->d.e && !is_imm_fixnum(_x->ff.ff));})
 
-#define tp4(x) ({object _x=x;is_imm_fixnum(_x) ? t_fixnum : _x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->d.t : 0;})
+#define tp4(x) ({object _x=x;is_imm_fixnum(_x) ? -1 : _x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->d.t : 0;})
 
-#define tp5(x) ({object _x=x;_x==Cnil ? t_symbol : (is_imm_fixnum(_x) ? t_fixnum : (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->d.t : 0));})
+#define tp5(x) ({object _x=x;_x==Cnil ? -2 : (is_imm_fixnum(_x) ? -1 : (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->d.t : 0));})
 
 
-#define tp6(x) ({object _x=x;is_imm_fixnum(_x) ? (t_fixnum<<4)+1 : (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->fstp.tp : 0);})
+#define tp6(x) ({object _x=x;is_imm_fixnum(_x) ? -1 : (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->fstp.tp : 0);})
 
-#define tp7(x) ({object _x=x;_x==Cnil ? (t_symbol<<4)+3 :\
-      (is_imm_fixnum(_x) ? (t_fixnum<<4)+1 :\
+#define tp7(x) ({object _x=x;_x==Cnil ? -2 :				\
+      (is_imm_fixnum(_x) ? -1 :						\
        (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? _x->fstp.tp : 0));})
 
-#define tp8(x) ({object _x=x;(is_imm_fixnum(_x) ? 0 :  \
-			      (_x->d.e && !is_imm_fixnum(_x->ff.ff) ? \
-			       (_x->d.t<t_complex ? x->d.t :		\
-				(_x->d.t==t_complex&&x->d.tt<4 ? x->d.t :		\
-				 (_x->d.t==t_complex ? x->d.t+x->d.tt-3 : \
-				  0))) : 0));})/*FIXME*/
+#define tp8(x) ({object _x=x;(is_imm_fixnum(_x) ? 0 :			\
+	(_x->d.e && !is_imm_fixnum(_x->ff.ff) ?				\
+	 (_x->d.t<t_complex ? x->d.t :					\
+	  (_x->d.t==t_complex&&x->d.tt<4 ? x->d.t :			\
+	   (_x->d.t==t_complex ? x->d.t+x->d.tt-3 :			\
+	    0))) : 0));})/*FIXME*/
 

@@ -16,5 +16,6 @@ double  double_return;
 EXTER struct call_data fcall;
 
 EXTER struct character character_table[256] OBJ_ALIGN; /*FIXME, sync with char code constants above.*/
+EXTER struct unadjstring character_name_table[256] OBJ_ALIGN;
 
 EXTER object null_string;

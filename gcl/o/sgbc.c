@@ -765,8 +765,8 @@ sgc_start(void) {
       object x;
 
       for (x=malloc_list;x!=Cnil;x=x->c.c_cdr)
-	if (x->c.c_car->st.st_adjustable)
-	  for (i=page(x->c.c_car->st.st_self);i<=page(x->c.c_car->st.st_self+x->c.c_car->st.st_fillp-1);i++)
+	if (x->c.c_car->st.st_writable)
+	  for (i=page(x->c.c_car->st.st_self);i<=page(x->c.c_car->st.st_self+VLEN(x->c.c_car)-1);i++)
 	    SET_WRITABLE(i);
     }
 

@@ -172,8 +172,7 @@ DEFUN("FSET",object,fSfset,SI,2,2,NONE,OO,OO,OO,OO,(object sym,object function),
   }
   if (sym->s.s_hpack == lisp_package &&
       sym->s.s_gfdef != OBJNULL && !raw_image && sLwarn->s.s_gfdef)
-    ifuncall2(sLwarn,make_simple_string("~S is being redefined."),
-	      sym);
+    ifuncall2(sLwarn,make_simple_string("~S is being redefined."),sym);
   sym = clear_compiler_properties(sym,function);
   if (type_of(function) == t_function) {
     sym->s.s_gfdef = function;
@@ -339,14 +338,14 @@ setf(object place, object form)
 	  object p=find_package(make_simple_string("COMMON-LISP"));
 	  char *s;
 
-	  if (fun->s.s_hpack==p && fun->s.s_self[0]=='C' && fun->s.s_self[fun->s.s_fillp-1]=='R' && fun->s.s_fillp!=3) {
+	  if (fun->s.s_hpack==p && fun->s.s_name->st.st_self[0]=='C' && fun->s.s_name->st.st_self[VLEN(fun->s.s_name)-1]=='R' && VLEN(fun->s.s_name)!=3) {
 
-	    s=alloca(fun->s.s_fillp);
+	    s=alloca(VLEN(fun->s.s_name));
 	    s[0]='C';
-	    memcpy(s+1,fun->s.s_self+2,fun->s.s_fillp-2);
-	    s[fun->s.s_fillp-1]=0;
+	    memcpy(s+1,fun->s.s_name->st.st_self+2,VLEN(fun->s.s_name)-2);
+	    s[VLEN(fun->s.s_name)-1]=0;
 	    
-	    fun=sLcar;
+	    fun=fun->s.s_name->st.st_self[1]=='A' ? sLcar : sLcdr;
 	    args=MMcons(MMcons(find_symbol(make_simple_string(s),p),MMcons(args->c.c_car,Cnil)),Cnil);
 
 	  }
@@ -363,9 +362,7 @@ setf(object place, object form)
 	  return putprop(sym,val,key); 
 	}
 
-#define str(a_) ({string_register->st.st_fillp=string_register->st.st_dim=sizeof(a_)-1;string_register->st.st_self=(a_);string_register;})
-	
-	if (fun == find_symbol(make_simple_string("SYMBOL-FUNCTION"),find_package(make_simple_string("COMMON-LISP"))))
+	if (fun == find_symbol(str("SYMBOL-FUNCTION"),lisp_package))
 	  return Ieval1(MMcons(find_symbol(str("FSET"),system_package),MMcons(MMcar(args),MMcons(form,Cnil))));
 	if (fun == sLsbit)
 	  return Ieval1(MMcons(find_symbol(str("ASET"),system_package),MMcons(form,args)));
@@ -409,9 +406,9 @@ setf(object place, object form)
 	y = Ieval1(Mcar(args));
 	result = Ieval1(form);
 	if (x == sLvector) {
-		if (type_of(y) != t_vector || i >= y->v.v_fillp)
-			goto OTHERWISE;
-		y->v.v_self[i] = result;
+	  if (!TS_MEMBER(type_of(y),TS(t_vector)|TS(t_simple_vector)) || i >= VLEN(y))/*FIXME*/
+	    goto OTHERWISE;
+	  y->v.v_self[i] = result;
 	} else if (x == sLlist) {
 		for (x = y;  i > 0;  --i)
 			x = cdr(x);
@@ -612,7 +609,7 @@ DEFUN("EMERGENCY-FSET",object,fSemergency_fset,SI
 {
 
   if (type_of(sym)!=t_symbol || sym->s.s_sfdef!=NOT_SPECIAL || consp(function)) {
-    printf("Emergency fset: skipping %-.*s\n",(int)sym->s.s_fillp,sym->s.s_self);
+    printf("Emergency fset: skipping %-.*s\n",(int)VLEN(sym->s.s_name),sym->s.s_name->st.st_self);
     RETURN1(Cnil);
   }
   sym->s.s_gfdef=function;

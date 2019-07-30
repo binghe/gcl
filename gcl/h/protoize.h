@@ -15,7 +15,7 @@
 /* array.c:262:OF */ extern void siLaset (void); /* () */
 /* array.c:321:OF */ extern void siLsvset (void); /* () */
 /* array.c:480:OF */ extern void siLmake_vector (void); /* () */
-/* array.c:738:OF */ extern void adjust_displaced (object x, long diff); /* (x, diff) object x; int diff; */
+/* array.c:738:OF */ extern void adjust_displaced (object x); /* (x, diff) object x; int diff; */
 /* array.c:790:OF */ extern void gset (void *p1, void *val, fixnum n, int typ); /* (p1, val, n, typ) char *p1; char *val; int n; int typ; */
 /* array.c:879:OF */ extern void array_allocself (object x, int staticp, object dflt); /* (x, staticp, dflt) object x; int staticp; object dflt; */
 /* array.c:920:OF */ extern void siLfill_pointer_set (void); /* () */
@@ -1467,6 +1467,8 @@ fixnum set_tm_maxpage(struct typemanager *,fixnum);
 
 fixnum elt_size(fixnum);
 
+fixnum elt_mode(fixnum);
+
 void init_gmp_rnd_state(__gmp_randstate_struct *);
 
 /* void set_sgc_bit(struct pageinfo *,void *); */
@@ -1558,3 +1560,6 @@ dir_name_length(const char *);
 
 object
 new_cfdata(void);
+
+void
+set_displaced_body_ptr(object);

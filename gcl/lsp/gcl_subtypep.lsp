@@ -4,6 +4,19 @@
 
 (defvar *array-types* (cons (cons nil 'array-nil) +array-type-alist+))
 
+(defvar *simple-array-types*
+  (mapcar (lambda (x)
+	    (cons x (intern (string-concatenate "SIMPLE-ARRAY-" (string x)))))
+	  (cons nil +array-types+)))
+
+(defvar *non-simple-array-types*
+  (mapcan (lambda (x)
+	    (when (member x '(character bit t));FIXME
+	      (list (cons x (intern (string-concatenate "NON-SIMPLE-ARRAY-" (string x)))))))
+	  (cons nil +array-types+)))
+
+(defvar *all-array-types* (append *simple-array-types* *non-simple-array-types*))
+
 (defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+));FIXME
 
 (defvar *k-ops*
@@ -18,7 +31,7 @@
       standard-generic-interpreted-function)
      std^ std~ std-recon)
     ((proper-cons improper-cons) cns^ cns~ cns-recon)
-    (,(mapcar 'cdr *array-types*)  ar^ ar~ ar-recon)
+    (,(mapcar 'cdr *all-array-types*) ar^ ar~ ar-recon)
     (,+singleton-types+  sing^ sing~ sing-recon))))
 
 
@@ -79,18 +92,20 @@
       (mapcan (lambda (y) (mapcar (lambda (x) (cons x y)) cx))
 	      (if x (disu x) (list x))))))
 
-(defun ar-recon (x &optional (tp (car (rassoc (pop x) *array-types*)) tpp)(ax (adims x)))
-  (cond ((not tpp) (?or (mapcar (lambda (z) (ar-recon z tp)) x)))
-	((eq x t) `(array ,tp *));'*
+(defun ar-recon (x &optional (s (rassoc (car x) *simple-array-types*) sp)
+		   (tp (car (rassoc (pop x) *all-array-types*)) tpp)
+		   &aux (ax (adims x))(ar (if s 'simple-array 'non-simple-array)))
+  (cond ((not tpp) (?or (mapcar (lambda (z) (ar-recon z s tp)) x)))
+	((eq x t) `(,ar ,tp *));'*
 	((consp (rnki x))
-	 `(and ,(ar-recon t tp)
-	       (not (or ,@(mapcar (lambda (x) (ar-recon (cons 'rank x) tp)) (rnki x))))))
-	((rnki x) `(array ,tp ,(rnki x)))
+	 `(and ,(ar-recon t s tp)
+	       (not ,(?or (mapcar (lambda (x) (ar-recon (cons 'rank x) s tp)) (rnki x))))))
+	((rnki x) `(,ar ,tp ,(rnki x)))
 	((when (eq x ax) (member-if 'listp x))
-	 `(and ,(ar-recon (mapcar (lambda (x) (if (atom x) x '*)) x) tp)
-	       (not (or ,@(mapcar (lambda (x) (ar-recon x tp)) (disu x))))))
-	((eq ax x) `(array ,tp ,x))
-	((listp x) `(and ,(ar-recon ax) (not (member ,@x))))
+	 `(and ,(ar-recon (mapcar (lambda (x) (if (atom x) x '*)) x) s tp)
+	       (not ,(?or (mapcar (lambda (x) (ar-recon x s tp)) (disu x))))))
+	((eq ax x) `(,ar ,tp ,x))
+	((consp x) `(and ,(ar-recon ax s tp) (not (member ,@x))))
 	(`(member ,x))))
 
 (defun onot (x)
@@ -108,11 +123,11 @@
 	((listp x) (nconc (ar~ (array-dimensions (car x))) x))
 	((nconc (ar~ (array-dimensions x)) `((,x))))))
 
-(defun ar-ld (type)
-  `(,(cdr (assoc (cadr type) *array-types*))
+(defun ar-ld (type &aux (s (eq (car type) 'simple-array)))
+  `(,(cdr (assoc (cadr type) (if s *simple-array-types* *non-simple-array-types*)))
      ,(let ((x (caddr type)))
 	(cond ((eq x '*) t)
-	      ((integerp x) (cons 'rank x))
+	      ((integerp x) (cons 'rank x));FIXME
 	      (x)))))
 
 ;;; SINGETON
@@ -547,7 +562,8 @@
 
 (defconstant +dtypes+ '(or and not member satisfies
 			integer ratio short-float long-float
-			complex* array proper-cons improper-cons))
+			complex* simple-array non-simple-array
+			proper-cons improper-cons))
 
 (defun normalize-type (type &aux e
 			      (type (if (listp type) type (list type)));FIXME
@@ -571,7 +587,7 @@
 	   standard-generic-interpreted-function
 	   standard-generic-compiled-function)
 	  (std-ld type))
-	 (array (ar-ld type))
+	 ((simple-array non-simple-array) (ar-ld type))
 	 (,+singleton-types+ (sing-ld type))
 	 (member (member-ld type))
 	 (otherwise 'unknown))))

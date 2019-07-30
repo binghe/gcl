@@ -47,7 +47,7 @@ DEFUN("PROFILE",object,fSprofile,SI
   void *x;
   fixnum a,s;
 
-  if (type_of(ar)!=t_string)
+  if (!stringp(ar))
     FEerror("si:*Profile-array* not a string",0);
   if( type_of(start_address)!=t_fixnum ||   type_of(scale)!=t_fixnum)
     FEerror("Needs start address and scale as args",0);
@@ -269,7 +269,7 @@ DEFUN("DISPLAY-PROFILE",object,fSdisplay_profile,SI
     unsigned char *ar;
     object obj_ar;
     obj_ar=sSAprofile_arrayA->s.s_dbind;
-    if (type_of(obj_ar)!=t_string)
+    if (!stringp(obj_ar))
       FEerror("si:*Profile-array* not a string",0);
     ar=obj_ar->ust.ust_self;
     scale=fix(scal);

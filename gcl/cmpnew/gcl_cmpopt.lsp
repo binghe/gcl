@@ -371,7 +371,7 @@
    (get 'atom 'inline-always))
 
 ;;BIT-VECTOR-P
- (push '((t) boolean #.(flags rfa)"(type_of(#0)==t_bitvector)")
+ (push '((t) boolean #.(flags rfa)"({enum type tp=type_of(#0);tp==t_bitvector||tp==t_simple_bitvector;})")
    (get 'bit-vector-p 'inline-always))
 
 ;;BOUNDP
@@ -657,21 +657,8 @@
 ;;LENGTH
  (push '((t) seqind #.(flags rfa set)"length(#0)")
    (get 'length 'inline-always))
-(push '((vector) seqind #.(flags rfa)"(#0)->v.v_fillp")
+(push '((vector) seqind #.(flags rfa)"((#0)->v.v_hasfillp ? (#0)->v.v_fillp : (#0)->v.v_dim)")
    (get 'length 'inline-always))
-
-;;CMP-VEC-LENGTH
-;; (push '((t) seqind #.(flags rfa)"(#0)->v.v_fillp")
-;;    (get 'cmp-vec-length 'inline-always))
-;;si::VEC-LENGTH
-(push '((t) seqind #.(flags rfa)"(#0)->v.v_fillp")
-   (get 'si::vec-length 'inline-always))
-;(push '(((array t)) seqind #.(flags rfa)"(#0)->v.v_fillp")
-;   (get 'length 'inline-unsafe))
-;(push '(((array fixnum)) seqind #.(flags rfa)"(#0)->v.v_fillp")
-;   (get 'length 'inline-unsafe))
-;(push '((string) seqind #.(flags rfa)"(#0)->v.v_fillp")
-;   (get 'length 'inline-unsafe))
 
 ;;LIST
  (push '(nil t #.(flags)"Cnil")
@@ -883,7 +870,7 @@
    (get 'string 'inline-always))
 
 ;;STRINGP
- (push '((t) boolean #.(flags rfa)"type_of(#0)==t_string")
+ (push '((t) boolean #.(flags rfa)"({enum type tp=type_of(#0);tp==t_string||tp==t_simple_string;})")
    (get 'stringp 'inline-always))
 
 ;;SVREF
@@ -895,15 +882,6 @@
    (get 'svref 'inline-unsafe))
 (push '((t fixnum) t #.(flags)"(#0)->v.v_self[#1]")
    (get 'svref 'inline-unsafe))
-
-;;SYMBOL-LENGTH
- (push '((t) seqind #.(flags rfa set)
-  "@0;(type_of(#0)==t_symbol ? (#0)->s.st_fillp :not_a_variable((#0)))")
-   (get 'symbol-length 'inline-always))
- (push '((t) seqind #.(flags rfa set) "(#0)->s.st_fillp")
-   (get 'symbol-length 'inline-unsafe))
- (push '((symbol) seqind #.(flags rfa set) "(#0)->s.st_fillp")
-   (get 'symbol-length 'inline-always))
 
 ;;SYMBOL-NAME
  (push '((t) string #.(flags ans rfa)"symbol_name(#0)")

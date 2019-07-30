@@ -35,7 +35,7 @@ extern aet_type_struct aet_types[];
 DEFUN("XDR-OPEN",object,fSxdr_open,SI,1,1,NONE,OO,OO,OO,OO,(object f),"") {
 
   XDR *xdrs;
-  object ar= alloc_simple_string(sizeof(XDR));
+  object ar= alloc_string(sizeof(XDR));
   array_allocself(ar,1,OBJNULL);
   xdrs= (XDR *) ar->a.a_self;
   if (f->sm.sm_fp == 0) FEerror("stream not ok for xdr io",0);
@@ -65,6 +65,7 @@ DEFUN("XDR-WRITE",object,fSxdr_write,SI,2,2,NONE,OO,OO,OO,OO,(object str,object 
   case t_shortfloat:
     if(xdr_float(xdrp,&sf(elt))) goto error;
     break;
+  case t_simple_vector:
   case t_vector:
     
     switch(elt->v.v_elttype) {
@@ -86,8 +87,8 @@ DEFUN("XDR-WRITE",object,fSxdr_write,SI,2,2,NONE,OO,OO,OO,OO,(object str,object 
       break;
     }
     {
-      u_int tmp=elt->v.v_fillp;
-      if (tmp!=elt->v.v_fillp)
+      u_int tmp=VLEN(elt);
+      if (tmp!=VLEN(elt))
 	goto error;
       if(xdr_array(xdrp,(void *)&elt->v.v_self,
 		    &tmp,
@@ -126,6 +127,7 @@ DEFUN("XDR-READ",object,fSxdr_read,SI,2,2,NONE,OO,OO,OO,OO,(object str,object el
     {float x;
     if(xdr_float(xdrp,&x)) goto error;
     return make_shortfloat(x);}
+  case t_simple_vector:
   case t_vector:
     switch(elt->v.v_elttype) {
     case aet_lf:
@@ -147,8 +149,8 @@ DEFUN("XDR-READ",object,fSxdr_read,SI,2,2,NONE,OO,OO,OO,OO,(object str,object el
     }
 
     {
-      u_int tmp=elt->v.v_fillp;
-      if (tmp!=elt->v.v_fillp)
+      u_int tmp=VLEN(elt);
+      if (tmp!=VLEN(elt))
 	goto error;
       if(xdr_array(xdrp,(void *)&elt->v.v_self,
 		    &tmp,

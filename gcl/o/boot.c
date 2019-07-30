@@ -53,9 +53,10 @@ DEFUN("PATCH-SHARP",object,fSpatch_sharp,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") 
     p->c.c_cdr=FFN(fSpatch_sharp)(p->c.c_cdr);
     break;
 
+  case t_simple_vector:
   case t_vector:
     if ((enum aelttype)x->v.v_elttype==aet_object)
-      for (i=0;i<x->v.v_fillp;i++)
+      for (i=0;i<VLEN(x);i++)
 	x->v.v_self[i]=FFN(fSpatch_sharp)(x->v.v_self[i]);
     break;
 

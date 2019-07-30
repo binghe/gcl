@@ -303,7 +303,7 @@
 	  (when (<= start y end)
 	    (format s "~16,'0x T ~s~%" y x))))))
 
-   (let ((string-register ""))
+   (let ((string-register (make-array 0 :element-type 'character :adjustable t :fill-pointer 0)))
      (dotimes (i (ptable-alloc-length))
        (multiple-value-bind
 	(x y) (ptable i string-register)

@@ -51,7 +51,7 @@ object str;
 	char	*sself;
 	char	*cstr;
 
-	len = str->st.st_fillp;
+	len = VLEN(str);
 
 	cstr = (char *) malloc (len+1);
 	sself = &(str->st.st_self[0]);

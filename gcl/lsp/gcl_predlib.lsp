@@ -58,7 +58,7 @@
     (when (and s (boundp s)) (remhash sym (symbol-value s)))))
 
 #+(and pre-gcl raw-image)
-(defun typep (&rest r) t)
+(defun array-offset (x) (c-array-offset x))
 #+(and pre-gcl raw-image)
 (defmacro check-type (&rest r) nil)
 #+(and pre-gcl raw-image)

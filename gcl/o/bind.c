@@ -332,7 +332,7 @@ SEARCH_DECLARE:
 		form = macro_expand(form);
 		vs_head = form;
 
-		if (type_of(form) == t_string) {
+		if (stringp(form)) {
 			if (endp(body->c.c_cdr))
 				break;
 			continue;
@@ -526,7 +526,7 @@ REQUIRED_ONLY:
 		/*  MACRO EXPANSION  */
 		vs_head = form = macro_expand(form);
 
-		if (type_of(form) == t_string) {
+		if (stringp(form)) {
 			if (endp(body->c.c_cdr))
 				break;
 			continue;
@@ -654,7 +654,7 @@ find_special(object body, struct bind_temp *start, struct bind_temp *end,object 
 		form = macro_expand(form);
 		vs_head = form;
 
-		if (type_of(form) == t_string) {
+		if (stringp(form)) {
 			if (endp(body->c.c_cdr))
 				break;
 			continue;

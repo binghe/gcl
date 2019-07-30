@@ -39,9 +39,6 @@ DEFUN("TYPE_OF",fixnum,fStype_of,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
 DEFUN("ALLOC-SPICE",object,fSalloc_spice,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   return alloc_object(t_spice);
 }
-DEFUN("SPICE-P",object,fSspice_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  return type_of(x)==t_spice ? Ct : Cnil;
-}
 
 DEFVAR("PATCH-SHARP",sSpatch_sharp,SI,sLnil,"");
 DEFVAR("NEW-CONTEXT",sSnew_context,SI,sLnil,"");
@@ -741,13 +738,6 @@ SYMBOL:
 	vs_push(p);
 	x = intern(token, p);
 	vs_push(x);
-	if (x->s.s_self == token_buffer) {
-		{BEGIN_NO_INTERRUPT;
-		x->s.s_self = alloc_relblock(token->st.st_fillp);
-		for (i = 0;  i < token->st.st_fillp;  i++)
-			x->s.s_self[i] = token_buffer[i];
-                END_NO_INTERRUPT;}
-	}
 	vs_reset;
 	return(x);
 }
@@ -1108,7 +1098,7 @@ DEFUN("SHARP-\\-READER",object,fSsharp_sl_reader,SI,3,3,NONE,OO,OO,OO,OO,(object
   (void)read_object(s);
   READsuppress = FALSE;
   c = token;
-  if (c->s.s_fillp == 1) {
+  if (c->st.st_fillp == 1) {
     RETURN1(code_char(c->ust.ust_self[0]));
   }
   if (string_equal(c, STreturn))
@@ -1125,15 +1115,15 @@ DEFUN("SHARP-\\-READER",object,fSsharp_sl_reader,SI,3,3,NONE,OO,OO,OO,OO,(object
     s = code_char('\b');
   else if (string_equal(c, STlinefeed) || string_equal(c, STnewline))
     s = code_char('\n');
-  else if (c->s.s_fillp == 2 && c->s.s_self[0] == '^')
-    s = code_char(c->s.s_self[1] & 037);
-  else if (c->s.s_self[0] =='\\' && c->s.s_fillp > 1) {
+  else if (c->st.st_fillp == 2 && c->st.st_self[0] == '^')
+    s = code_char(c->st.st_self[1] & 037);
+  else if (c->st.st_self[0] =='\\' && c->st.st_fillp > 1) {
     int i, n;
-    for (n = 0, i = 1;  i < c->s.s_fillp;  i++)
-      if (c->s.s_self[i] < '0' || '7' < c->s.s_self[i])
+    for (n = 0, i = 1;  i < c->st.st_fillp;  i++)
+      if (c->st.st_self[i] < '0' || '7' < c->st.st_self[i])
 	FEerror("Octal digit expected.", 0);
       else
-	n = 8*n + c->s.s_self[i] - '0';
+	n = 8*n + c->st.st_self[i] - '0';
     s = code_char(n & 0377);
   } else
     FEerror("~S is an illegal character name.", 1, c);
@@ -1301,7 +1291,7 @@ L:
 		}
 	}
         {BEGIN_NO_INTERRUPT;
-	x = alloc_simple_vector(dimcount, aet_object);
+	x = alloc_simple_vector(dimcount);
 	vs_push(x);
 	x->v.v_self
 	= (object *)alloc_relblock(dimcount * sizeof(object));
@@ -2389,7 +2379,7 @@ object x;
 	object in;
 	vs_mark;
 
-	in = make_string_input_stream(x, 0, x->st.st_fillp);
+	in = make_string_input_stream(x, 0, VLEN(x));
 	vs_push(in);
 	preserving_whitespace_flag = FALSE;
 	detect_eos_flag = FALSE;
@@ -2422,7 +2412,7 @@ extra_argument(int c) {
 
 
 #define	make_cf(f)	make_cfun((f), Cnil, Cnil, NULL, 0)
-#define make_f(f)       find_symbol(make_simple_string(f),find_package(make_simple_string("SI")))->s.s_gfdef;
+#define make_f(f)       find_symbol(make_simple_string(f),system_package)->s.s_gfdef;
 
 DEFVAR("*READ-DEFAULT-FLOAT-FORMAT*",sLAread_default_float_formatA,LISP,sLsingle_float,"");
 DEFVAR("*READ-BASE*",sLAread_baseA,LISP,make_fixnum(10),"");
@@ -2482,7 +2472,7 @@ gcl_init_read()
 	rtab[','].rte_macro = make_cf(Lcomma_reader);
 */
 	rtab[';'].rte_chattrib = cat_terminating;
-	rtab[';'].rte_macro = find_symbol(make_simple_string("SEMICOLON-READER"),find_package(make_simple_string("SI")))->s.s_gfdef;
+	rtab[';'].rte_macro = find_symbol(make_simple_string("SEMICOLON-READER"),system_package)->s.s_gfdef;
 	rtab['\\'].rte_chattrib = cat_single_escape;
 /*
 	rtab['`'].rte_chattrib = cat_terminating;
@@ -2688,7 +2678,7 @@ object in;
 			x = vs_head = patch_sharp(x);
 		dimcount++;
 	}
-	if(dimcount==1 && type_of(vs_head)==t_vector)
+	if(dimcount==1 && TS_MEMBER(type_of(vs_head),TS(t_vector)|TS(t_simple_vector)))
 	  {/* new style where all read at once */
 	    x=vs_head;
 	    goto DONE;}

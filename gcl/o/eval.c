@@ -710,7 +710,7 @@ APPLICATION:
 		ifuncall2(sSAbreak_stepA->s.s_dbind,form,
 			  list(3,lex_env[0],lex_env[1],lex_env[2])) == Cnil)
 	      {object* bpts = sSAbreak_pointsA->s.s_dbind->v.v_self;
-	       int i = sSAbreak_pointsA->s.s_dbind->v.v_fillp;
+		int i = VLEN(sSAbreak_pointsA->s.s_dbind);
 	       while (--i >= 0)
 		 { if((*bpts)->c.c_car == form)
 		     {ifuncall2(sSAbreak_pointsA->s.s_gfdef,form,

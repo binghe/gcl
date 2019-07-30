@@ -90,7 +90,7 @@ FFN(Fdefun)(object args)
 	vs_base[0] = oname;
 	for (body = MMcddr(args);  !endp(body);  body = body->c.c_cdr) {
 	  form = macro_expand(body->c.c_car);
-	  if (type_of(form) == t_string) {
+	  if (stringp(form)) {
 	    if (endp(body->c.c_cdr))
 	      break;
 	    vs_push(form);

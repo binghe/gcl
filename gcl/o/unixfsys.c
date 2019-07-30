@@ -43,6 +43,8 @@ static object
 get_string(object x) {
   switch(type_of(x)) {
   case t_symbol:
+    return x->s.s_name;
+  case t_simple_string:
   case t_string:
     return x;
   case t_pathname:
@@ -66,9 +68,9 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 
   object namestring=get_string(spec);
 
-  massert(namestring->st.st_fillp<sz);
-  memcpy(p,namestring->st.st_self,namestring->st.st_fillp);
-  p[namestring->st.st_fillp]=0;
+  massert(VLEN(namestring)<sz);
+  memcpy(p,namestring->st.st_self,VLEN(namestring));
+  p[VLEN(namestring)]=0;
 
 #ifdef FIX_FILENAME
   FIX_FILENAME(spec,p);
@@ -104,7 +106,7 @@ DEFUN("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
   massert(b=alloca(r));
   
-  if (nm->st.st_fillp==1)
+  if (VLEN(nm)==1)
     
     if ((pw.pw_dir=getenv("HOME")))
       pwent=&pw;
@@ -115,9 +117,9 @@ DEFUN("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object
     
     char *name;
     
-    massert(name=alloca(nm->st.st_fillp));
-    memcpy(name,nm->st.st_self+1,nm->st.st_fillp-1);
-    name[nm->st.st_fillp-1]=0;
+    massert(name=alloca(VLEN(nm)));
+    memcpy(name,nm->st.st_self+1,VLEN(nm)-1);
+    name[VLEN(nm)-1]=0;
     
     massert(!getpwnam_r(name,&pw,b,r,&pwent));
     
@@ -213,15 +215,9 @@ DEFUN("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object 
 }
 
 DEFUN("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-  char *b=NULL;
-  size_t z;
-  object s;
 
-  for (z=0;!(errno=0) && !getcwd(b,z) && errno==ERANGE;b=memset(b,0,z),z+=z+10,massert((b=alloca(z))));
-  massert((b=getcwd(b,z)));
-  s=make_simple_string(b);
-  memset(b,0,z);
-  RETURN1(s);
+  massert(getcwd(FN1,sizeof(FN1)));
+  RETURN1(make_simple_string(FN1));
 
 }
 

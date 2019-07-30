@@ -77,9 +77,9 @@ rl_completion_words(const char *text, int state) {
 
     fpref=pref=fmch=NULL;
     fprefl=prefl=0;
-    if (type_of(sSAreadline_prefixA->s.s_dbind)==t_string) {
+    if (stringp(sSAreadline_prefixA->s.s_dbind)) {
       pref=fpref=sSAreadline_prefixA->s.s_dbind->st.st_self;
-      prefl=fprefl=sSAreadline_prefixA->s.s_dbind->st.st_fillp;
+      prefl=fprefl=VLEN(sSAreadline_prefixA->s.s_dbind);
       if ((fmch=memchr(fpref,':',fprefl))) {
 	pref=fmch[1]==':' ? fmch+2 : fmch+1;
 	prefl-=pref-fpref;
@@ -103,12 +103,7 @@ rl_completion_words(const char *text, int state) {
       if (temp==temp1) 
 	package=(temp[1]==':') ? sLApackageA->s.s_dbind : keyword_package;
       else {
-	static struct string st;
-	set_type_of(&st,t_string);
-	st.st_self=(char *)temp1;
-	st.st_fillp=st.st_dim=temp-temp1;
-	st.st_hasfillp=1;
-	package=find_package((object)&st);
+	package=find_package(str((char *)temp1));
       }
     }
     
@@ -132,21 +127,21 @@ rl_completion_words(const char *text, int state) {
     while (1) {
       while (consp(l)) {
 	struct symbol sym=l->c.c_car->s;
+	ufixnum prf=0;
 	l=l->c.c_cdr;
 	if (pref) {
-	  if (sym.s_fillp<prefl ||
-	      strncasecmp(pref,sym.s_self,prefl))
+	  if (VLEN(sym.s_name)<prefl ||
+	      strncasecmp(pref,sym.s_name->st.st_self,prefl))
 	    continue;
-	  sym.s_self+=prefl;
-	  sym.s_fillp-=prefl;
+	  prf=prefl;
 	}
-	if (sym.s_fillp>=len && 
-	    !strncasecmp(wtext,sym.s_self,len)) {
+	if (VLEN(sym.s_name)-prf>=len &&
+	    !strncasecmp(wtext,sym.s_name->st.st_self+prf,len)) {
 	  static char *c;
-	  c=malloc((wtext-ftext)+sym.s_fillp+1);
+	  c=malloc((wtext-ftext)+VLEN(sym.s_name)-prf+1);
 	  memcpy(c,ftext,wtext-ftext);
-	  memcpy(c+(wtext-ftext),sym.s_self,sym.s_fillp);
-	  c[(wtext-ftext)+sym.s_fillp]=0;
+	  memcpy(c+(wtext-ftext),sym.s_name->st.st_self+prf,VLEN(sym.s_name)-prf);
+	  c[(wtext-ftext)+VLEN(sym.s_name)-prf]=0;
 	  return c;
 	}
       }

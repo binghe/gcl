@@ -411,14 +411,17 @@ DEFUN("TYPE-OF-C",object,siLtype_of_c,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
     x = sLarray;
     break;
     
+  case t_simple_vector:
   case t_vector:
     x = sLvector;
     break;
     
+  case t_simple_string:/*FIXME?*/
   case t_string:
     x = sLstring;
     break;
     
+  case t_simple_bitvector:
   case t_bitvector:
     x = sLbit_vector;
     break;

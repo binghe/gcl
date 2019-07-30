@@ -14,17 +14,13 @@
 
 (in-package :si)
 
-(defun character-designator-p (s)
-  (or (typep s 'fixnum)
-      (= (c-stdesig-sdfillp s) 1)))
+(defun symbol-name-length-one-p (x)
+  (eql 1 (length (symbol-name x))))
 
-(deftype character-designator nil `(and string-designator (satisfies character-designator-p)))
+(deftype character-designator nil `(or character (integer 0 255) (array character (1))
+				       (and symbol (satisfies symbol-name-length-one-p))))
 (deftype string-designator    nil `(or string symbol character (integer 0 255)))
 
-;; #.`(defun c-stdesig-self
-;;      ,@(cdr (sublis '((array . string-designator) (c-array-self . c-stdesig-self)) (function-src 'c-array-self))))
-;; #.`(defun c-stdesig-fillp 
-;;      ,@(cdr (sublis '((vector . string-designator) (c-vector-fillp . c-stdesig-fillp)) (function-src 'c-vector-fillp))))
 
 (eval-when
  (compile eval)
@@ -38,9 +34,8 @@
 	     (char-downcase (x) 
 			    (if (upper-case-p x)
 				(+ x #.(- (char-code #\a) (char-code #\A))) x))
-	     (aref (s i) (stdesig-self s i))
-	     (aset (v s i) (set-stdesig-self s i v))
-	     (length (s) (c-stdesig-sdfillp s))
+	     (aref (s i) (*uchar (c-array-self s) i nil nil))
+	     (aset (v s i) (*uchar (c-array-self s) i t v))
 	     (char= (x z) (= x z))
 	     (char< (x z) (< x z))
 	     (char> (x z) (> x z))
@@ -59,8 +54,8 @@
       (check-type start2 seqind)
       (check-type end2 (or null seqind))
       (with-aref-shadow
-       (let* ((s1 (if (typep s1 'fixnum) (code-char s1) s1))
-	      (s2 (if (typep s2 'fixnum) (code-char s2) s2))
+       (let* ((s1 (string s1))
+	      (s2 (string s2))
 	      (l1 (length s1))
 	      (l2 (length s2))
 	      (e1 end1)(c1 0)
@@ -105,7 +100,7 @@
 		   (let ((n (make-array l :element-type 'character)))
 		     (do ((j 0 (1+ j))) ((>= j l) n)
 			 (aset (aref s j) n j)))))
-	    (let* ((s (if (typep s 'fixnum) (code-char s) s))
+	    (let* ((s (string s))
 		   (l (length s))
 		   (e end)
 		   (end (or end l))
@@ -124,7 +119,7 @@
    c
    (character c)
    (unsigned-char (code-char c))
-   (otherwise (code-char (stdesig-self c 0)))))
+   (otherwise (code-char (char (string c) 0)))))
 
 
 (defun char-int (c)
@@ -280,12 +275,11 @@
   (or (graphic-char-p c) (char= c #\Newline)))
 
 (defun char (x i)
-  (declare (optimize (safety 1)))
+  (declare (optimize (safety 2)))
   (check-type x string)
   (check-type i seqind)
   (aref x i))
 
-;FIXME one function
 (defun schar (x i)
   (declare (optimize (safety 1)))
   (check-type x simple-string)
@@ -302,7 +296,7 @@
    x
    (string x)
    (symbol (symbol-name x))
-   (character (let ((n (make-array 1 :element-type 'character))) (setf (aref n 0) x) n))
+   (character (c-character-name x))
    ((integer 0 255) (string (code-char x)))))
 
 
@@ -409,6 +403,10 @@
   (typecase x (fixnum t)))
 (si::putprop 'fixnump t 'compiler::cmp-inline)
 
+(defun spicep (x)
+  (typecase x (spice t)))
+(si::putprop 'spicep t 'compiler::cmp-inline)
+
 
 (defun constantp (x &optional env)
   (declare (ignore env))
@@ -427,6 +425,4 @@
   (typecase x (compiled-function t)))
 
 (defun stringp (x)
-  (typecase
-   x
-   (string t)))
+  (typecase x (string t)))

@@ -168,9 +168,13 @@
 
 (defun length (x)
   (declare (optimize (safety 1)))
-  (check-type x sequence)
+  (check-type x proper-sequence)
   (labels ((ll (x i) (declare (seqind i)) (if x (ll (cdr x) (1+ i)) i)))
-	  (if (listp x) (ll x 0) (if (array-has-fill-pointer-p x) (c-vector-fillp x) (array-dimension x 0)))))
+	  (if (listp x)
+	      (ll x 0)
+	    (if (array-has-fill-pointer-p x)
+		(fill-pointer x)
+	      (array-dimension x 0)))))
 
 ;; (defun length (x)
 ;;   (declare (optimize (safety 2)))
@@ -736,7 +740,7 @@
 
 (defun sort (seq pred &key (key 'identity))
   (declare (optimize (safety 1)))
-  (check-type seq sequence)
+  (check-type seq proper-sequence)
   (let* ((k (comp-key key))
 	 (ll (length seq))
 	 (list (listp seq))
@@ -796,7 +800,7 @@
 
 (defun stable-sort (sequence predicate &key (key #'identity))
   (declare (optimize (safety 1)))
-  (check-type sequence sequence)
+  (check-type sequence proper-sequence)
   (typecase 
    sequence
    (list (list-merge-sort sequence predicate key (comp-key key)))

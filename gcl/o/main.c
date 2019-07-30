@@ -594,11 +594,7 @@ error(char *s)
 #endif
       install_segmentation_catcher();
     {
-      union lispunion st;
-      set_type_of(&st,t_string);
-      st.st.st_dim=st.st.st_fillp=s ? strlen(s) : 0;
-      st.st.st_self=s;
-      FEerror("Caught fatal error [memory may be damaged]: ~a",1,&st);
+      FEerror("Caught fatal error [memory may be damaged]: ~a",1,str(s));
     }
   }
   printf("\nUnrecoverable error: %s.\n", s);
@@ -641,9 +637,8 @@ initlisp(void) {
 	set_type_of(Cnil,t_symbol);
  	Cnil->c.c_cdr=Cnil;
  	Cnil->s.s_dbind = Cnil;
- 	Cnil->s.s_sfdef = NOT_SPECIAL;
- 	Cnil->s.s_fillp = 3;
- 	Cnil->s.s_self = "NIL";
+	Cnil->s.s_sfdef = NOT_SPECIAL;
+	Cnil->s.s_name = make_simple_string("NIL");
  	Cnil->s.s_gfdef = OBJNULL;
  	Cnil->s.s_plist = Cnil;
  	Cnil->s.s_hpack = Cnil;
@@ -656,8 +651,7 @@ initlisp(void) {
  	Ct->s.s_dbind = Ct;
 	Ct->s.tt=1;
  	Ct->s.s_sfdef = NOT_SPECIAL;
- 	Ct->s.s_fillp = 1;
- 	Ct->s.s_self = "T";
+	Ct->s.s_name = make_simple_string("T");
  	Ct->s.s_gfdef = OBJNULL;
  	Ct->s.s_plist = Cnil;
  	Ct->s.s_hpack = Cnil;
@@ -862,9 +856,9 @@ FFN(siLgetenv)(void) {
   
   check_arg(1);
   check_type_string(&vs_base[0]);
-  if (vs_base[0]->st.st_fillp >= 256)
+  if (VLEN(vs_base[0]) >= 256)
     FEerror("Too long name: ~S.", 1, vs_base[0]);
-  for (i = 0;  i < vs_base[0]->st.st_fillp;  i++)
+  for (i = 0;  i < VLEN(vs_base[0]);  i++)
     name[i] = vs_base[0]->st.st_self[i];
   name[i] = '\0';
   if ((value = getenv(name)) != NULL) {

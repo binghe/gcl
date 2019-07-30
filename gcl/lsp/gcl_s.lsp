@@ -1,6 +1,6 @@
 (in-package :s)
 
-(export '(lisp-type defdlfun +ks+ +fl+ strcat))
+(export '(lisp-type defdlfun +ks+ +fl+ strcat adjustable-vector adjustable-array matrix))
 (si::import-internal 'si::(\| & ^ ~ c+ c* << >> object double
 			   c-object-== c-fixnum-== c-float-== c-double-== c-fcomplex-== c-dcomplex-== fcomplex dcomplex
 			   string-concatenate lit seqind fixnum-length char-length cref address short int
@@ -23,7 +23,10 @@
 	     (:string     "make_simple_string"   string)
 	     (:object     ""                     t)
 
-	     (:stdesig    ""                     (or symbol string character))
+;	     (:stdesig    ""                     (or symbol string character))
+	     (:matrix     ""                     matrix)
+	     (:adjvector  ""                     adjustable-vector)
+	     (:adjarray   ""                     adjustable-array)
 	     (:longfloat  ""                     long-float)
 	     (:shortfloat ""                     short-float)
 	     (:hashtable  ""                     hash-table)

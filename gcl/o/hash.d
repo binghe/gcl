@@ -181,21 +181,24 @@ BEGIN:
       goto BEGIN;
       break;
     case t_symbol:
+      x=coerce_to_string(x);
+    case t_simple_string:
     case t_string:
-      h^=uarrhash(x->st.st_self,x->st.st_self+x->st.st_fillp,0,0);
+      h^=uarrhash(x->st.st_self,x->st.st_self+VLEN(x),0,0);
       break;
     case t_package: 
       break;
     case t_bitvector:
+    case t_simple_bitvector:
       {
 	ufixnum *u=x->bv.bv_self+x->bv.bv_offset/BV_BITS;
-	ufixnum *ue=x->bv.bv_self+(x->bv.bv_fillp+x->bv.bv_offset)/BV_BITS;
+	ufixnum *ue=x->bv.bv_self+(VLEN(x)+x->bv.bv_offset)/BV_BITS;
 
 	if (x->bv.bv_offset%BV_BITS)
 	  h^=ufixhash((*u++)&(~(BIT_MASK(x->bv.bv_offset%BV_BITS))));
 	for (;u<ue;u++)
 	  h^=ufixhash(*u);
-	if ((x->bv.bv_fillp+x->bv.bv_offset)%BV_BITS)
+	if ((VLEN(x)+x->bv.bv_offset)%BV_BITS)
 	  h^=ufixhash((*u++)&(BIT_MASK(x->bv.bv_offset%BV_BITS)));
       }
       break;
@@ -244,8 +247,9 @@ BEGIN:
       goto BEGIN;
       break;
     case t_symbol:
+      x=coerce_to_string(x);
       {
-	ufixnum len=x->st.st_fillp;
+	ufixnum len=VLEN(x);
 	uchar *s=(void *)x->st.st_self;
 	for (;len--;)
 	  h^=rtb[toupper(*s++)];
@@ -255,10 +259,13 @@ BEGIN:
     case t_package: 
       break;
 
+    case t_simple_string:
     case t_string:
+    case t_simple_bitvector:
+    case t_simple_vector:
     case t_bitvector:
     case t_vector:
-      h^=ufixhash(j=x->v.v_fillp);
+      h^=ufixhash(j=VLEN(x));
       j=j>10 ? 10 : j;
       for (i=0;i<j;i++)
 	h^=ihash_equalp(aref(x,i),depth);
@@ -941,7 +948,7 @@ gcl_init_hash() {
   make_function("MAKE-HASH-TABLE", Lmake_hash_table);
   
   {
-    object x=find_symbol(make_simple_string("MOST-NEGATIVE-FIXNUM"),find_package(make_simple_string("SI")));
+    object x=find_symbol(make_simple_string("MOST-NEGATIVE-FIXNUM"),system_package);
     x=number_negate(x->s.s_dbind);
     for (i=0;i<sizeof(rtb)/sizeof(*rtb);i++) {
       vs_push(x);

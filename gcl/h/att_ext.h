@@ -534,6 +534,8 @@ object symbol_function();
 /*  sequence.d  */
 object alloc_simple_vector();
 object alloc_simple_bitvector();
+object alloc_vector();
+object alloc_bitvector();
 object elt();
 object elt_set();
 object reverse();
@@ -551,6 +553,9 @@ object structure_to_list();
 object alloc_simple_string();
 object make_simple_string();
 object copy_simple_string();
+object alloc_string();
+object make_string();
+object copy_string();
 object coerce_to_string();
 EXTER int string_sign, string_boundary;
 

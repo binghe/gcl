@@ -79,11 +79,11 @@ DEFUN("CHARACTERP",object,fLcharacterp,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") 
 }
 
 DEFUN("STRINGP",object,fLstringp ,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_string ? Ct : Cnil);
+  RETURN1(stringp(x) ? Ct : Cnil);
 }
 
 DEFUN("BIT-VECTOR-P",object,fLbit_vector_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_bitvector ? Ct : Cnil);
+  RETURN1(TS_MEMBER(type_of(x),TS(t_bitvector)|TS(t_simple_bitvector)) ? Ct : Cnil);
 }
 
 DEFUN("VECTORP",object,fLvectorp,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
@@ -213,29 +213,31 @@ equal1(register object x, register object y) {
   
   switch(x->d.t) {
 
+  case t_simple_string:
   case t_string:
     return(string_eq(x, y));
     
   case t_bitvector:
+  case t_simple_bitvector:
     {
       fixnum i, ox, oy;
       
-      if (x->bv.bv_fillp != y->bv.bv_fillp)
+      if (VLEN(x) != VLEN(y))
 	return(FALSE);
       ox = x->bv.bv_offset;
       oy = y->bv.bv_offset;
       if (!ox && !oy) {
-	for (i=0;i<x->bv.bv_fillp/BV_BITS;i++)
+	for (i=0;i<VLEN(x)/BV_BITS;i++)
 	  if (x->bv.bv_self[i]!=y->bv.bv_self[i])
 	    return(FALSE);
-	if (x->bv.bv_fillp%BV_BITS) {
-	  ufixnum m=(~(~0L<<(x->bv.bv_fillp%BV_BITS)));
+	if (VLEN(x)%BV_BITS) {
+	  ufixnum m=(~(~0L<<(VLEN(x)%BV_BITS)));
 	  if ((x->bv.bv_self[i]&m)!=(y->bv.bv_self[i]&m))
 	    return(FALSE);
 	}
 	return(TRUE);
       }
-      for (i=0;i<x->bv.bv_fillp;i++)
+      for (i=0;i<VLEN(x);i++)
 	if (BITREF(x,i+ox)!=BITREF(y,i+oy))
 	  return(FALSE);
       return(TRUE);
@@ -300,12 +302,16 @@ equalp1(register object x, register object y) {
     else
       return(FALSE);
     
+  case t_simple_vector:
+  case t_simple_string:
+  case t_simple_bitvector:
   case t_vector:
   case t_string:
   case t_bitvector:
-    if (ty==t_vector||ty==t_string||ty==t_bitvector) {
-      j = x->v.v_fillp;
-      if (j != y->v.v_fillp)
+    if (TS_MEMBER(ty,TS(t_vector)|TS(t_string)|TS(t_bitvector)|
+		  TS(t_simple_vector)|TS(t_simple_string)|TS(t_simple_bitvector))) {
+      j = VLEN(x);
+      if (j != VLEN(y))
 	return FALSE;
       goto ARRAY;
     }
@@ -500,11 +506,11 @@ contains_sharp_comma(object x) {
   if (tx==t_complex)
     return(contains_sharp_comma(x->cmp.cmp_real) ||
 	   contains_sharp_comma(x->cmp.cmp_imag));
-  if (tx==t_vector)
+  if (tx==t_vector||tx==t_simple_vector)
     {
       int i;
       if (x->v.v_elttype==aet_object)
-	for (i = 0;  i < x->v.v_fillp;  i++)
+	for (i = 0;  i < VLEN(x);  i++)
 	  if (contains_sharp_comma(x->v.v_self[i]))
 	    return(TRUE);
       return(FALSE);

@@ -17,10 +17,8 @@ object IisSymbol(object f)
 
 object IisArray(object f)
 {
-    if (!TS_MEMBER(type_of(f), TS(t_array)
-		  | TS(t_vector)
-		  | TS(t_bitvector)
-		  | TS(t_string)))
+    if (!TS_MEMBER(type_of(f),TS(t_array)|TS(t_vector)|TS(t_bitvector)|TS(t_string)|
+		   TS(t_simple_array)|TS(t_simple_vector)|TS(t_simple_bitvector)|TS(t_simple_string)))
 	FEwrong_type_argument(sLarray, f);
     return f;
 }
@@ -34,13 +32,12 @@ object Iis_fixnum(object f)
 
 char *lisp_copy_to_null_terminated(object string, char *buf, int n)
 {
-    if (type_of(string) != t_string && type_of(string) != t_symbol)
-	FEerror("Need to give symbol or string", 0);
-    if (string->st.st_fillp + 1 > n) {
-	buf = (void *) malloc(string->st.st_fillp + 1);
+    string=coerce_to_string(string);
+    if (VLEN(string) + 1 > n) {
+      buf = (void *) malloc(VLEN(string) + 1);
     }
-    bcopy(string->st.st_self, buf, string->st.st_fillp);
-    buf[string->st.st_fillp] = 0;
+    bcopy(string->st.st_self, buf, VLEN(string));
+    buf[VLEN(string)] = 0;
     return buf;
 }
 

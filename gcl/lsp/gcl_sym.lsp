@@ -61,10 +61,7 @@
 (defun symbol-name (s)
   (declare (optimize (safety 1)))
   (check-type s symbol)
-  (the string 
-       (or (get s 'pname)
-	   (setf (get s 'pname) 
-		 (symbol-string s)))));FIXME
+  (c-symbol-name s))
 
 (defun symbol-function (s)
   (declare (optimize (safety 1)))

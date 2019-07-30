@@ -447,7 +447,6 @@ getd(str)
 #define READ_SYMBOL(leng,pack,to) \
 	do { BEGIN_NO_INTERRUPT;{char  *p=alloc_relblock(leng);\
 	 D_FREAD(p,1,leng,fas_stream); \
-	 string_register->st.st_fillp = \
 	 string_register->st.st_dim = leng; \
 	 string_register->st.st_self = p; \
 	 to=(pack==Cnil ? make_symbol(string_register) : intern(string_register,pack)); \
@@ -607,7 +606,7 @@ DEFUN("OPEN-FASD",object,fSopen_fasd,SI
     if (tabl==Cnil)
       tabl=alloc_simple_vector(0,aet_object);
     else
-      check_type(tabl,t_vector);}
+      check_type(tabl,t_simple_vector);}
   if(direction==sKoutput)
     {str=coerce_stream(stream,1);
     if(tabl==Cnil) tabl=funcall_cfun(Lmake_hash_table,2,sKtest,sLeq);
@@ -655,7 +654,7 @@ DEFUN("CLOSE-FASD",object,fSclose_fasd,SI
 /* FFN(close_fasd)(object ar) */
 /* { */
   struct fasd *fd= (struct fasd *)(ar->v.v_self);
-   check_type(ar,t_vector);
+   check_type(ar,t_simple_vector);
    if (type_of(fd->table)==t_vector)
      /* input uses a vector */
      {if (fd->table->v.v_self)
@@ -770,7 +769,7 @@ write_fasd(object obj)
        if (obj==Cnil)
 	 {PUT_OP(d_nil); return;}
         TRY_HASH;
-       leng=obj->s.s_fillp;
+	leng=VLEN(obj->s.s_name);
        if (current_fasd.package!=obj->s.s_hpack)
 	 {{
 	   if (leng< SHORT_MAX)
@@ -791,7 +790,7 @@ write_fasd(object obj)
 	     PUT_OP(d_symbol);
 	     PUT4(j);}
 	   }
-       D_FWRITE(obj->s.s_self,1,leng,fas_stream);
+       D_FWRITE(obj->s.s_name->st.st_self,1,leng,fas_stream);
        break;
      case DP(t_fixnum:)
        leng=fix(obj);
@@ -808,8 +807,9 @@ write_fasd(object obj)
        PUT_OP(d_standard_character);
        PUTD("char=%c",char_code(obj));
        break;
+     case DP(t_simple_string:)
      case DP(t_string:)
-       leng=(obj)->st.st_fillp;
+       leng=VLEN(obj);
        if (leng< SHORT_MAX)
 	 {PUT_OP(d_short_string);
 	  PUTD("leng=%d",leng);}
@@ -886,10 +886,11 @@ write_fasd(object obj)
 	    write_fasd(aref(obj,i));}
       break;
 	
+      case DP(t_simple_vector:)
       case DP(t_vector:)
 	TRY_HASH;
 	PUT_OP(d_vector);
-	{ int leng=obj->v.v_fillp;
+	{ int leng=VLEN(obj);
 	  PUT4 (leng);
 	  PUTD("eltype=%d",obj->v.v_elttype);
 	  {int i;
@@ -951,6 +952,7 @@ fasd_patch_sharp(object x, int depth)
 		fasd_patch_sharp_cons(x,depth);
 		break;
 
+	case DP(t_simple_vector:)
 	case DP(t_vector:)
 	{
 		int i;
@@ -958,7 +960,7 @@ fasd_patch_sharp(object x, int depth)
 		if ((enum aelttype)x->v.v_elttype != aet_object)
 		  break;
 
-		for (i = 0;  i < x->v.v_fillp;  i++)
+		for (i = 0;  i < VLEN(x);  i++)
 			x->v.v_self[i] = fasd_patch_sharp(x->v.v_self[i],depth);
 		break;
 	}
@@ -1002,6 +1004,7 @@ is_it_there(object x)
   case t_symbol:
   case t_structure:
   case t_array:
+  case t_simple_vector:
   case t_vector:
   case t_package:
   e= gethash(x,table);
@@ -1037,6 +1040,7 @@ find_sharing(object x)
 	  
 	  break;
 
+	case DP(t_simple_vector:)
 	case DP(t_vector:)
 	{
 		int i;
@@ -1044,7 +1048,7 @@ find_sharing(object x)
 		if ((enum aelttype)x->v.v_elttype != aet_object)
 		  break;
 
-		for (i = 0;  i < x->v.v_fillp;  i++)
+		for (i = 0;  i < VLEN(x);  i++)
 		  find_sharing(x->v.v_self[i]);
 		break;
 	}
@@ -1130,7 +1134,8 @@ grow_vector(object ar)
      {char *p= (char *)AR_ALLOC(alloc_contblock,nl,object);
     bcopy(ar->v.v_self,p,sizeof(object)* len);
     ar->v.v_self= (object *)p;
-    ar->v.v_dim=	   ar->v.v_fillp=nl;
+    ar->v.v_dim=nl;
+    VSET_MAX_FILLP(ar);
     while(--nl >=len)
       ar->v.v_self[nl]=Cnil;
       END_NO_INTERRUPT;}}
@@ -1351,7 +1356,6 @@ read_fasd1(int i, object *loc)
 	      read_fasd1(GET_OP(),p++);
 	    vs_base=base;
 	    vs_top = p;
-#define str(a_) ({string_register->st.st_fillp=string_register->st.st_dim=sizeof(a_)-1;string_register->st.st_self=(a_);string_register;})
 	    funcall(find_symbol(str("MAKE-STRUCTURE"),system_package));
 	    /* siLmake_structure(); */
 	    *loc = vs_base[0];
@@ -1384,15 +1388,12 @@ read_fasd1(int i, object *loc)
       case DP(d_vector:)
 	{int leng,j;
 	 object y;
-	 object x=alloc_object(t_vector);
+	 object x;
 	 GET4(leng);
-	 x->v.tt=x->v.v_elttype = GETD("v_elttype=%d");
-	 x->v.v_eltsize=elt_size(x->v.v_elttype);
-	 x->v.v_defrank=1;
-	 x->v.v_dim=x->v.v_fillp=leng;
-	 x->v.v_self=0;
-	 x->v.v_displaced=Cnil;
-	 x->v.v_hasfillp=x->v.v_adjustable=0;
+	 {
+	   enum aelttype tp=GETD("v_elttype=%d");
+	   x= tp==aet_object ? alloc_simple_vector(leng) : alloc_vector(leng,tp);
+	 }
 	 array_allocself(x,0,Cnil);
 	 for (j=0; j< leng ; j++)
 	   { DPRINTF("{vector_elt=%d}",j);
@@ -1411,14 +1412,13 @@ read_fasd1(int i, object *loc)
 	 object x=alloc_object(t_array);
 	 GET4(leng);
 
-	 x->a.tt=x->a.a_elttype = GETD("a_elttype=%d");
-	 x->a.a_eltsize = elt_size(x->a.a_elttype);
+	 x->a.a_elttype = GETD("a_elttype=%d");
 	 x->a.a_dim=leng;
-	 x->a.a_hasfillp=0;
+	 x->a.a_hasfillp=1;
 	 x->a.a_rank= GETD("a_rank=%d");
 	 x->a.a_self=0;
-	 x->a.a_displaced=Cnil;
-	 x->a.a_adjustable=0;
+	 x->a.a_adjustable=1;
+	 SET_ADISP(x,Cnil);
 	 if (x->a.a_rank > 0)
 	   { x->a.a_dims = (ufixnum *)alloc_relblock(sizeof(fixnum)*(x->a.a_rank)); }
 	 for (i=0; i< x->a.a_rank ; i++)
@@ -1528,7 +1528,6 @@ object
 read_fasl_vector(object in)
 {char ch;
  object orig = in;
- object d;
  int tem;
  if ((tem=(unsigned char)readc_stream(in)) != EOF)
    { unreadc_stream(tem,in);}
@@ -1552,13 +1551,13 @@ read_fasl_vector(object in)
     = (object *)alloc_relblock(n*sizeof(object));
 #endif
   current_fasd.table->v.v_dim=n;
-  current_fasd.table->v.v_fillp=n;
+  VSET_MAX_FILLP(current_fasd.table);
   gset( current_fasd.table->v.v_self,0,n,aet_object);
   END_NO_INTERRUPT;
   }  
   result=FFN(fSread_fasd_top)(ar);
-  if (type_of(result) !=t_vector) goto ERROR;
-  last=result->v.v_self[result->v.v_fillp-1];
+  if (type_of(result) !=t_simple_vector) goto ERROR;
+  last=result->v.v_self[VLEN(result)-1];
   if(!consp(last) || last->c.c_car !=sSPinit)
     goto ERROR;
   current_fasd.table->v.v_self = 0;

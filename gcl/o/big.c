@@ -154,7 +154,6 @@ coerce_big_to_string(x,printbase)
   object ans = alloc_simple_string(q-p);
   ans->ust.ust_self=alloc_relblock(ans->ust.ust_dim);
   bcopy(ans->ust.ust_self,p,ans->ust.ust_dim);
-  ans->ust.ust_fillp=ans->ust.ust_dim-1;
   return ans;
 }
 

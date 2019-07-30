@@ -1797,7 +1797,7 @@ fmt_indirection(bool colon, bool atsign) {
 	fmt_max_param(0);
 	fmt_not_colon(colon);
 	s = fmt_advance();
-	if (type_of(s) != t_string)
+	if (!stringp(s))
 		fmt_error("control string expected");
 	if (atsign) {
 		fmt_save;
@@ -1807,7 +1807,7 @@ fmt_indirection(bool colon, bool atsign) {
 			if (--up_colon)
 				fmt_error("illegal ~:^");
 		} else
-			format(fmt_stream, 0, s->st.st_fillp);
+		  format(fmt_stream, 0, VLEN(s));
 		fmt_restore1;  /*FIXME restore?*/
 	} else {
 		l = fmt_advance();
@@ -1822,7 +1822,7 @@ fmt_indirection(bool colon, bool atsign) {
 			if (--up_colon)
 				fmt_error("illegal ~:^");
 		} else
-			format(fmt_stream, 0, s->st.st_fillp);
+		  format(fmt_stream, 0, VLEN(s));
 		vs_top = fmt_base;
 		fmt_restore;
 	}
@@ -2297,7 +2297,7 @@ DEFUN("FORMAT",object,fLformat,LISP,2,F_ARG_LIMIT,NONE,OO,OO,OO,OO,(object strm,
     x = strm->sm.sm_object0;
   } else if (strm == Ct)
     strm = symbol_value(sLAstandard_outputA);
-  else if (type_of(strm) == t_string) {
+  else if (stringp(strm)) {
     x = strm;
     if (!x->st.st_hasfillp)
       FEerror("The string ~S doesn't have a fill-pointer.", 1, x);
@@ -2307,7 +2307,7 @@ DEFUN("FORMAT",object,fLformat,LISP,2,F_ARG_LIMIT,NONE,OO,OO,OO,OO,(object strm,
     check_type_stream(&strm);
   
   /* check_type_string(&control); */
-  if (type_of(control) == t_string) {
+  if (stringp(control)) {
     fmt_save;
     va_start(ap,control);
     frs_push(FRS_PROTECT, Cnil);
@@ -2339,7 +2339,7 @@ DEFUN("FORMAT",object,fLformat,LISP,2,F_ARG_LIMIT,NONE,OO,OO,OO,OO,(object strm,
 	e = FALSE;
 	goto L;
       }
-      format(strm, 0, control->st.st_fillp);
+      format(strm, 0, VLEN(control));
       if (sSAformat_unused_argsA->s.s_dbind!=OBJNULL) {
 	int i;
 	for (i=fmt_end-1;i>=fmt_index;i--)

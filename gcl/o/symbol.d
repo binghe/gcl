@@ -32,38 +32,23 @@ odd_plist(object);
 
 object siSpname;
 
-void
-set_up_string_register(char *s) {
-	string_register->st.st_fillp =
-	string_register->st.st_dim = strlen(s);
-	string_register->st.st_self = s;
-}
-
 object
 make_symbol(st)
 object st;
 {
 	object x;
-	int i;
+
 	{BEGIN_NO_INTERRUPT;	
 	x = alloc_object(t_symbol);
 	x->s.s_dbind = OBJNULL;
 	x->s.s_sfdef = NOT_SPECIAL;
-	x->s.s_fillp = st->st.st_fillp;
-	x->s.s_self = NULL;
+	x->s.s_name=copy_simple_string(st);/*FIXME*/
 	x->s.s_gfdef = OBJNULL;
 	x->s.s_plist = Cnil;
 	x->s.s_hpack = Cnil;
 	x->s.s_stype = (short)stp_ordinary;
 	x->s.s_mflag = FALSE;
 	vs_push(x);
-	if (0)/* (raw_image && st->st.st_self < heap_end) */
-		x->s.s_self = st->st.st_self;		
-	else {
-		x->s.s_self = alloc_relblock(x->s.s_fillp);
-		for (i = 0;  i < x->s.s_fillp;  i++)
-			x->s.s_self[i] = st->st.st_self[i];
-	}
 	x->s.s_hash = ihash_equal1(x,0);
 	END_NO_INTERRUPT;}	
 	return(vs_pop);
@@ -85,13 +70,12 @@ char *s;
 	object x, l, *ep;
 	vs_mark;
 
-	set_up_string_register(s);
-	j = pack_hash(string_register);
+	j = pack_hash(str(s));
 	ep = &P_EXTERNAL(lisp_package,j);
 	for (l = *ep;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, string_register))
-			return(l->c.c_car);
-	x = make_symbol(string_register);
+	  if (string_eq(l->c.c_car->s.s_name, str(s)))
+	    return(l->c.c_car);
+	x = make_symbol(str(s));
 	vs_push(x);
 	x->s.s_hpack = lisp_package;
 	*ep = make_cons(x, *ep);
@@ -150,18 +134,17 @@ char *s;
 	object x, l, *ep;
 	vs_mark;
 
-	set_up_string_register(s);
-	j = pack_hash(string_register);
+	j = pack_hash(str(s));
 	ep = & P_EXTERNAL(system_package,j);
 	for (l = *ep;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, string_register))
+		if (string_eq(l->c.c_car->s.s_name, str(s)))
 			return(l->c.c_car);
 	for (l =  P_EXTERNAL(lisp_package,j);
 	     consp(l);
 	     l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, string_register))
+		if (string_eq(l->c.c_car->s.s_name, str(s)))
 		    error("name conflict --- can't make_si_ordinary");
-	x = make_symbol(string_register);
+	x = make_symbol(str(s));
 	vs_push(x);
 	x->s.s_hpack = system_package;
 	system_package->p.p_external_fp ++;
@@ -182,18 +165,17 @@ char *s;
 	for (i=0;s[i];i++)
 	  ss[i]=toupper(s[i]);
 	ss[i]=0;
-	set_up_string_register(ss);
-	j = pack_hash(string_register);
+	j = pack_hash(str(ss));
 	ep = & P_EXTERNAL(gmp_package,j);
 	for (l = *ep;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, string_register))
+		if (string_eq(l->c.c_car->s.s_name, str(ss)))
 			return(l->c.c_car);
 	for (l =  P_EXTERNAL(lisp_package,j);
 	     consp(l);
 	     l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, string_register))
+		if (string_eq(l->c.c_car->s.s_name, str(ss)))
 		    error("name conflict --- can't make_si_ordinary");
-	x = make_symbol(string_register);
+	x = make_symbol(str(ss));
 	vs_push(x);
 	x->s.s_hpack = gmp_package;
 	gmp_package->p.p_external_fp ++;
@@ -247,13 +229,12 @@ char *s;
 	object x, l, *ep;
 	vs_mark;
 
-	set_up_string_register(s);
-	j = pack_hash(string_register);
+	j = pack_hash(str(s));
 	ep = &P_EXTERNAL(keyword_package,j);
 	for (l = *ep;  consp(l);  l = l->c.c_cdr)
-		if (string_eq(l->c.c_car, string_register))
+		if (string_eq(l->c.c_car->s.s_name, str(s)))
 			return(l->c.c_car);
-	x = make_symbol(string_register);
+	x = make_symbol(str(s));
 	vs_push(x);
 	x->s.s_hpack = keyword_package;
 	x->s.tt=2;
@@ -460,9 +441,7 @@ DEFUN("SYMBOL-PLIST",object,fLsymbol_plist,LISP,1,1,NONE,OO,OO,OO,OO,(object sym
 @)
 
 DEFUN("SYMBOL-STRING",object,fSsymbol_string,SI,1,1,NONE,OO,OO,OO,OO,(object sym),"") {
-  object y=alloc_simple_string(sym->st.st_fillp);
-  y->st.st_self=sym->st.st_self;
-  RETURN1(y);
+  RETURN1(sym->s.s_name);
 }
 
 
@@ -470,24 +449,8 @@ object
 symbol_name(x)
 object x;
 {
-object y;
  if (type_of(x)!=t_symbol) FEwrong_type_argument(sLsymbol,x);
-  for (y=x->s.s_plist; consp(y) ; y=y->c.c_cdr->c.c_cdr)
-   {if(y->c.c_car==siSpname) return(y->c.c_cdr->c.c_car);}
-   {BEGIN_NO_INTERRUPT;		
-    y = alloc_simple_string(x->s.s_fillp);
-    vs_push(y);
-    if (inheap(x->s.s_self))
-		y->st.st_self = x->s.s_self;
-	else {int i;
-		y->st.st_self = alloc_relblock(x->s.s_fillp);
-		for (i = 0;  i < x->s.s_fillp;  i++)
-			y->st.st_self[i] = x->s.s_self[i];
-	}
-   x->s.s_plist = putf(x->s.s_plist, y, siSpname);
-	vs_popp;
-   END_NO_INTERRUPT;	}	
-    return(y);
+ return(x->s.s_name);
 }
 
 DEFUN("SYMBOL-NAME",object,fLsymbol_name,LISP,1,1,NONE,OO,OO,OO,OO,(object sym),"") {
@@ -547,18 +510,18 @@ gensym_int(object this_gensym_prefix,object this_gensym_counter) {
     break;
   }
   
-  i = (q-p)+(this_gensym_prefix==OBJNULL ? 1 : this_gensym_prefix->st.st_fillp);
-  set_up_string_register("");
-  sym = make_symbol(string_register);
+  i = (q-p)+(this_gensym_prefix==OBJNULL ? 1 : VLEN(this_gensym_prefix));
+  sym = make_symbol(str(""));
   {
     BEGIN_NO_INTERRUPT;	
-    sym->s.s_self = alloc_relblock(i);
-    sym->s.s_fillp = i;
-    i=this_gensym_prefix==OBJNULL ? 1 : this_gensym_prefix->st.st_fillp;
+    sym->s.s_name=alloc_simple_string(i);
+    sym->s.s_name->st.st_self = alloc_relblock(i);
+    /* sym->s.s_fillp = i; */
+    i=this_gensym_prefix==OBJNULL ? 1 : VLEN(this_gensym_prefix);
     for (j = 0;  j < i;  j++)
-      sym->s.s_self[j] = this_gensym_prefix==OBJNULL ? 'G' : this_gensym_prefix->st.st_self[j];
-    for (;j<sym->s.s_fillp;j++)
-      sym->s.s_self[j] = p[j-i];
+      sym->s.s_name->st.st_self[j] = this_gensym_prefix==OBJNULL ? 'G' : this_gensym_prefix->st.st_self[j];
+    for (;j<VLEN(sym->s.s_name);j++)
+      sym->s.s_name->st.st_self[j] = p[j-i];
     END_NO_INTERRUPT;
   }	
   
@@ -627,12 +590,11 @@ ONCE_MORE:
 		i++;
 	if (i == 0)
 		i++;
-	i += prefix->st.st_fillp;
-	set_up_string_register("");
+        i += VLEN(prefix);
 	{BEGIN_NO_INTERRUPT;	
-	string_register->st.st_fillp = string_register->st.st_dim = i;
+	string_register->st.st_dim = i;
 	string_register->st.st_self = alloc_relblock(i);
-	for (j = 0;  j < prefix->st.st_fillp;  j++)
+	for (j = 0;  j < VLEN(prefix);  j++)
 		string_register->st.st_self[j] = prefix->st.st_self[j];
 	if ((j = gentemp_counter) == 0)
 		string_register->st.st_self[--i] = '0';
@@ -728,7 +690,7 @@ gcl_init_symbol()
 /* 	gensym_counter = 0; */
 	gentemp_prefix = make_simple_string("T");
 	gentemp_counter = 0;
-	token = alloc_simple_string(INITIAL_TOKEN_LENGTH);
+	token = alloc_string(INITIAL_TOKEN_LENGTH);
 	token->st.st_fillp = 0;
 	token->st.st_self = alloc_contblock(INITIAL_TOKEN_LENGTH);
 	token->st.st_hasfillp = TRUE;

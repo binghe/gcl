@@ -17,7 +17,7 @@ DEFUN("SET-FUNCTION-ENVIRONMENT",object,fSset_function_environment,SI,2,2,NONE,O
 
     {
       BEGIN_NO_INTERRUPT; 
-      p=(object *)alloc_contblock(n*sizeof(object));/*(object *)alloc_relblock(n*sizeof(object)); Cannot be promoted, FIXME?*/
+      p=(object *)alloc_relblock(n*sizeof(object));
       END_NO_INTERRUPT;
     }
 

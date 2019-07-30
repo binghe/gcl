@@ -131,13 +131,13 @@
   `(array bit (,size)))
 
 (deftype simple-vector (&optional size)
-  `(array t (,size)))
+  `(simple-array t (,size)))
 (deftype simple-string (&optional size)
-  `(array character (,size)))
+  `(simple-array character (,size)))
 (deftype simple-base-string (&optional size)
-  `(array base-char (,size)))
+  `(simple-array base-char (,size)))
 (deftype simple-bit-vector (&optional size)
-  `(array bit (,size)))
+  `(simple-array bit (,size)))
 
 (deftype function-name nil
   `(or symbol (cons (member setf) (cons symbol null))))
@@ -272,14 +272,37 @@
 (deftype non-negative-real nil `(real 0.0))
 
 
-(deftype array (&whole w &optional et dims)
-  (if (eq et '*)
-      `(or ,@(mapcar (lambda (x) `(array ,x ,dims)) (cons nil +array-types+)))
-      (let* ((e (upgraded-array-element-type et))(d (or dims 0)))
-	(if (and (eq (cadr w) e) (eq (caddr w) d)) w `(array ,e ,d)))))
+(deftype unadjustable-array nil
+  `(or simple-string simple-bit-vector simple-vector))
+(deftype adjustable-array nil
+  `(and array (not unadjustable-array)))
+(deftype adjustable-vector nil
+  `(and vector (not unadjustable-array)))
+(deftype matrix (&optional et dims)
+  `(and (array ,et ,dims) (not vector)))
 
-(deftype simple-array (&rest r)
-  (cons 'array r))
+(deftype simple-array (&whole w &optional et dims)
+  (if (eq et '*)
+      `(or ,@(mapcar (lambda (x) `(simple-array ,x ,dims)) (cons nil +array-types+)))
+      (let* ((e (upgraded-array-element-type et))(d (or dims 0)))
+  	(if (and (eq (cadr w) e) (eq (caddr w) d)) w `(simple-array ,e ,d)))))
+
+(deftype non-simple-array (&whole w &optional et dims
+				  &aux (ets '(character t bit))
+				  (d (cond ((eq dims '*) dims)
+					   ((eql dims 1) '*)
+					   ((atom dims) nil)
+					   ((cdr dims) nil)
+					   ((eq (car dims) '*) '*)
+					   (dims))))
+  (when d
+    (if (eq et '*)
+	(?or (mapcar (lambda (x) `(non-simple-array ,x ,d)) ets))
+      (let* ((e (upgraded-array-element-type et)))
+	(when (member e ets)
+	  (if (and (eq (cadr w) e) (eq (caddr w) d)) w `(non-simple-array ,e ,d)))))))
+
+(deftype array (&optional et dims) `(or (simple-array ,et ,dims) (non-simple-array ,et ,dims)))
 
 (deftype true nil
   `(member t))

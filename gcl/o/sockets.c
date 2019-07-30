@@ -223,7 +223,7 @@ and returns (list* named_socket fd name1) when one is established")
       fflush(stderr);
       return Cnil;
     }
-  x = alloc_simple_string(sizeof(struct connection_state));
+  x = alloc_string(sizeof(struct connection_state));
   x->ust.ust_self = (void *)setup_connection_state(fd);
   return make_cons(
 		   make_cons(x
@@ -371,7 +371,7 @@ DEFUN("PRINT-TO-STRING1",object,fSprint_to_string1,SI,3,3,NONE,OO,OO,OO,OO,(obje
 fill pointer, and this will be advanced.")
 
 { enum type t = type_of(x);
-  int fp = str->st.st_fillp;
+  int fp = VLEN(str);
   char *xx = &(str->st.st_self[fp]);
   int left = str->st.st_dim - fp;
   char buf[30];
@@ -394,7 +394,7 @@ fill pointer, and this will be advanced.")
  { 
   int downcase ;
   int do_end_quote = 0;
-  if(type_of(str)!=t_string)
+  if(!stringp(str))
     FEerror("Must be given string with fill pointer",0);
   if (t==t_symbol) downcase=1;
   else downcase=0;
@@ -412,7 +412,7 @@ fill pointer, and this will be advanced.")
   case normal:
     PUSH(' ');
   case no_leading_space:
-    if (t==t_string)
+    if (stringp_tp(t))
       { do_end_quote = 1;
 	PUSH(BEGIN_QUOTE);
       }
@@ -438,8 +438,9 @@ fill pointer, and this will be advanced.")
     if (x->s.s_hpack == keyword_package)
       {if (code == normal)
 	 PUSH('-');}
+  case t_simple_string:/*FIXME?*/
   case t_string:
-    {int len = x->st.st_fillp;
+    {int len = VLEN(x);
       p = &x->st.st_self[0];
      if (downcase)
      while (--len>=0)

@@ -32,7 +32,7 @@ gcl_regerror(char *s)
 #undef endp
 #include "regexp.c"
 #define check_string(x) \
-	if (type_of(x) != t_string) \
+	if (!stringp(x)) \
 		not_a_string(x)
 
 
@@ -68,26 +68,24 @@ DEFUN("COMPILE-REGEXP",object,fScompile_regexp,SI,1,1,NONE,OO,OO,OO,OO,(object p
   void *v;
   fixnum sz=0;
 
-  if (type_of(p)!= t_string && type_of(p)!=t_symbol)
-    not_a_string_or_symbol(p);
-  
-  if (!(tmp=alloca(p->st.st_fillp+1)))
+  p=coerce_to_string(p);
+  if (!(tmp=alloca(VLEN(p)+1)))
     FEerror("out of C stack",0);
-  memcpy(tmp,p->st.st_self,p->st.st_fillp);
-  tmp[p->st.st_fillp]=0;
+  memcpy(tmp,p->st.st_self,VLEN(p));
+  tmp[VLEN(p)]=0;
 
   if (!(v=(void *)regcomp(tmp,&sz)))
     FEerror("regcomp failure",0);
 
   res=alloc_object(t_vector);
-  res->v.v_displaced=Cnil;
+  res->v.v_adjustable=1;
   res->v.v_hasfillp=1;
-  res->v.tt=res->v.v_elttype=aet_uchar;
-  res->v.v_eltsize=elt_size(aet_uchar);
-  res->v.v_defrank=1;
-  res->v.v_adjustable=0;
+  SET_ADISP(res,Cnil);
+  res->v.v_elttype=aet_uchar;
+  res->v.v_rank=1;
   res->v.v_self=v;
-  res->v.v_fillp=res->v.v_dim=sz;
+  res->v.v_dim=sz;
+  VSET_MAX_FILLP(res);
 
   RETURN1(res);
 
@@ -114,24 +112,24 @@ be over written.   \
   object v=sSAmatch_dataA->s.s_dbind,l=Cnil,f=OBJNULL;
   char **pp,*str,save_c=0;
 
-  if (type_of(pattern)!= t_string && type_of(pattern)!=t_symbol &&
+  if (!stringp(pattern) && type_of(pattern)!=t_symbol &&
       (type_of(pattern)!=t_vector || pattern->v.v_elttype!=aet_uchar))
     FEerror("~S is not a regexp pattern", 1 , pattern);
-  if (type_of(string)!= t_string && type_of(string)!=t_symbol)
+  if (!stringp(string) && type_of(string)!=t_symbol)
     not_a_string_or_symbol(string);
   
   if (type_of(v) != t_vector || v->v.v_elttype != aet_fix || v->v.v_dim < NSUBEXP*2)
     /* v=sSAmatch_dataA->s.s_dbind=fSmake_vector1_1((NSUBEXP *2),aet_fix,sLnil); */
-    v=sSAmatch_dataA->s.s_dbind=fSmake_vector(sLfixnum,(NSUBEXP *2),Cnil,Cnil,Cnil,0,Cnil,Cnil);
+    v=sSAmatch_dataA->s.s_dbind=fSmake_vector(sLfixnum,(NSUBEXP *2),Ct,Cnil,Cnil,0,Cnil,Cnil);
   
   va_start(ap,string);
   start=(fixnum)NEXT_ARG(nargs,ap,l,f,(object)0);
-  end=(fixnum)NEXT_ARG(nargs,ap,l,f,(object)(fixnum)string->st.st_fillp);
+  end=(fixnum)NEXT_ARG(nargs,ap,l,f,(object)(fixnum)VLEN(string));
   va_end(ap);
-  if (start < 0 || end > string->st.st_fillp || start > end)
+  if (start < 0 || end > VLEN(string) || start > end)
      FEerror("Bad start or end",0);
 
-  len=pattern->ust.ust_fillp;
+  len=VLEN(pattern);
    if (len==0) {
      /* trivial case of empty pattern */
      for (i=0;i<NSUBEXP;i++) 
@@ -160,9 +158,9 @@ be over written.   \
      str=string->st.st_self;
      if (str+end==(void *)core_end || str+end==(void *)compiled_regexp) {
 
-       if (!(str=alloca(string->st.st_fillp+1)))
+       if (!(str=alloca(VLEN(string)+1)))
 	 FEerror("Cannot allocate memory on C stack",0);
-       memcpy(str,string->st.st_self,string->st.st_fillp);
+       memcpy(str,string->st.st_self,VLEN(string));
 
      } else
        save_c=str[end];

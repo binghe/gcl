@@ -79,19 +79,20 @@ DEFUN("DLSYM",object,fSdlsym,SI,2,2,NONE,OI,OO,OO,OO,(fixnum h,object name),"") 
   void *ad;
 
   dlerror();
-  ch=name->st.st_self[name->st.st_fillp];
-  name->st.st_self[name->st.st_fillp]=0;
+  name=coerce_to_string(name);
+  ch=name->st.st_self[VLEN(name)];
+  name->st.st_self[VLEN(name)]=0;
   if (h) {
     ad=dlsym((void *)h,name->st.st_self);
     if (!dlerror()) {
-      name->st.st_self[name->st.st_fillp]=ch;
+      name->st.st_self[VLEN(name)]=ch;
       RETURN1(make_fixnum((fixnum)ad));
     }
   }
   ad=dlsym(RTLD_DEFAULT,name->st.st_self);
   if ((er=dlerror()))
     FEerror("dlsym lookup failure on ~s: ~s",2,name,make_simple_string(er));
-  name->st.st_self[name->st.st_fillp]=ch;
+  name->st.st_self[VLEN(name)]=ch;
   RETURN1(make_fixnum((fixnum)ad));
 
 }
@@ -127,12 +128,17 @@ DEFUN("DLOPEN",object,fSdlopen,SI,1,1,NONE,OO,OO,OO,OO,(object name),"") {
 
   char ch,*err;
   void *v;
+  ufixnum i;
 
   dlerror();
-  ch=name->st.st_self[name->st.st_fillp];
-  name->st.st_self[name->st.st_fillp]=0;
-  v=dlopen(name->st.st_fillp ? name->st.st_self : 0,RTLD_LAZY|RTLD_GLOBAL);
-  name->st.st_self[name->st.st_fillp]=ch;
+  name=coerce_to_string(name);
+  ch=name->st.st_self[VLEN(name)];
+  name->st.st_self[VLEN(name)]=0;
+  i=VLEN(name);
+  if (!strncmp("libc.so",name->st.st_self,i) || !strncmp("libm.so",name->st.st_self,i))
+    i=0;
+   v=dlopen(i ? name->st.st_self : 0,RTLD_LAZY|RTLD_GLOBAL);
+  name->st.st_self[VLEN(name)]=ch;
   if ((err=dlerror()))
     FEerror("dlopen failure on ~s: ~s",2,name,make_simple_string(err));
   
@@ -234,7 +240,7 @@ make_function_internal(char *s, void (*f)())
 
 	x = make_ordinary(s);
 	if (x->s.s_gfdef!=OBJNULL) {
-	  printf("Skipping redefinition of %-.*s\n",(int)x->st.st_fillp,x->st.st_self);
+	  printf("Skipping redefinition of %-.*s\n",(int)VLEN(x->s.s_name),x->s.s_name->st.st_self);
 	  return(x);
 	}
 	vs_push(x);
@@ -253,7 +259,7 @@ make_si_function_internal(char *s, void (*f)())
 
 	x = make_si_ordinary(s);
 	if (x->s.s_gfdef!=OBJNULL) {
-	  printf("Skipping redefinition of %-.*s\n",(int)x->st.st_fillp,x->st.st_self);
+	  printf("Skipping redefinition of %-.*s\n",(int)VLEN(x->s.s_name),x->s.s_name->st.st_self);
 	  return(x);
 	}
 	vs_push(x);

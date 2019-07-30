@@ -49,7 +49,7 @@ kwote_cdr(void)
 		    x->s.s_dbind == x)
 			return;
 		goto KWOTE;
-	} else if (consp(x) || type_of(x) == t_vector)
+	} else if (consp(x) || TS_MEMBER(type_of(x),TS(t_vector)|TS(t_simple_vector)))
 		goto KWOTE;
 	return;
 
@@ -69,7 +69,7 @@ kwote_car(void)
 		    x->s.s_dbind == x)
 			return;
 		goto KWOTE;
-	} else if (consp(x) || type_of(x) == t_vector)
+	} else if (consp(x) || TS_MEMBER(type_of(x),TS(t_vector)|TS(t_simple_vector)))
 		goto KWOTE;
 	return;
 

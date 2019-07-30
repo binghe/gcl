@@ -581,7 +581,7 @@ fasload(object faslfile) {
   
   if(symbol_value(sLAload_verboseA)!=Cnil)
     printf(";; start address for %.*s %p\n",
-	   (int)faslfile->sm.sm_object1->st.st_fillp,faslfile->sm.sm_object1->st.st_self,
+	   (int)VLEN(faslfile->sm.sm_object1),faslfile->sm.sm_object1->st.st_self,
 	   memory->cfd.cfd_start);
   
   return(memory->cfd.cfd_size);

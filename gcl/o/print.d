@@ -51,8 +51,8 @@ get_line_length(void);
 static void
 per_line_prefix(object strm) {
   int i;
-  if (type_of(sSAprint_line_prefixA->s.s_dbind)==t_string)
-    for (i=0;i<sSAprint_line_prefixA->s.s_dbind->st.st_fillp;i++)
+  if (stringp(sSAprint_line_prefixA->s.s_dbind))
+    for (i=0;i<VLEN(sSAprint_line_prefixA->s.s_dbind);i++)
       writec_stream(sSAprint_line_prefixA->s.s_dbind->st.st_self[i],strm);
 }
 
@@ -714,8 +714,8 @@ static int
 constant_case(object x) {
 
   fixnum i,j=0,jj;
-  for (i=0;i<x->s.s_fillp;i++,j=jj ? jj : j) {
-    jj=isUpper(x->s.s_self[i]) ? 1 : (isLower(x->s.s_self[i]) ? -1 : 0);
+  for (i=0;i<VLEN(x);i++,j=jj ? jj : j) {
+    jj=isUpper(x->st.st_self[i]) ? 1 : (isLower(x->st.st_self[i]) ? -1 : 0);
     if (j*jj==-1)
       return 0;
   }
@@ -728,8 +728,8 @@ needs_escape (object x) {
 
   fixnum i,all_dots=1;
 
-  for (i=0;i<x->s.s_fillp;i++) 
-    switch(x->s.s_self[i]) {
+  for (i=0;i<VLEN(x);i++)
+    switch(x->st.st_self[i]) {
     case ' ':
     case '#':
     case '(':
@@ -753,19 +753,19 @@ needs_escape (object x) {
     return 1;
 
   if (READ_TABLE_CASE==sKupcase || PRINTreadably) {
-    for (i=0;i<x->s.s_fillp;i++) 
-      if (isLower(x->s.s_self[i]))
+    for (i=0;i<VLEN(x);i++)
+      if (isLower(x->st.st_self[i]))
 	return 1;
   } else if (READ_TABLE_CASE==sKdowncase) {
-    for (i=0;i<x->s.s_fillp;i++)
-      if (isUpper(x->s.s_self[i]))
+    for (i=0;i<VLEN(x);i++)
+      if (isUpper(x->st.st_self[i]))
 	return 1;
   }
 
   if (potential_number_p(x, PRINTbase))
     return 1;
 
-  return !x->s.s_fillp;
+  return !VLEN(x);
 
 }
 
@@ -786,8 +786,8 @@ print_symbol_name_body(object x,int pp) {
   if (k)
     write_ch('|');
 
-  for (lw=i=0;i<x->s.s_fillp;i++) {
-    j = x->s.s_self[i];
+  for (lw=i=0;i<VLEN(x);i++) {
+    j = x->st.st_self[i];
     if (PRINTescape && (j == '|' || j == '\\'))
       write_ch('\\');
     fc=convertible_upper(j) ? 1 : 
@@ -912,7 +912,7 @@ int level;
 		}
 		{ object s = coerce_big_to_string(x,PRINTbase);
                   int i=0;
-                  while (i<s->ust.ust_fillp) { write_ch(s->ust.ust_self[i++]); }
+                  while (i<VLEN(s)) { write_ch(s->ust.ust_self[i++]); }
                  } 
 		if (PRINTradix && PRINTbase == 10)
 			write_ch('.');
@@ -1054,7 +1054,7 @@ int level;
 	      }
 
 	    }
-	    print_symbol_name_body(x,1);
+	    print_symbol_name_body(x->s.s_name,1);
 	    break;
 	  }
 	case t_array:
@@ -1152,6 +1152,7 @@ int level;
 		break;
 	}
 
+	case t_simple_vector:
 	case t_vector:
 		if (!PRINTarray) {
 			write_str("#<vector ");
@@ -1184,7 +1185,7 @@ int level;
 		write_ch(MARK);
 		write_ch('(');
 		write_ch(SET_INDENT);
-		if (x->v.v_fillp > 0) {
+		if (VLEN(x) > 0) {
 			if (PRINTlength == 0) {
 				write_str("...)");
 				write_ch(UNMARK);
@@ -1193,7 +1194,7 @@ int level;
 			vs_push(aref(x, 0));
 			write_object(vs_head, level+1);
 			vs_popp;
-			for (i = 1;  i < x->v.v_fillp;  i++) {
+			for (i = 1;  i < VLEN(x);  i++) {
 				write_ch(INDENT);
 				if (PRINTlength>=0 && i>=PRINTlength){
 					write_str("...");
@@ -1208,14 +1209,15 @@ int level;
 		write_ch(UNMARK);
 		break;
 
+	case t_simple_string:
 	case t_string:
 		if (!PRINTescape) {
-			for (i = 0;  i < x->st.st_fillp;  i++)
+		  for (i = 0;  i < VLEN(x);  i++)
 				write_ch(x->st.st_self[i]);
 			break;
 		}
 		write_ch('"');
-		for (i = 0;  i < x->st.st_fillp;  i++) {
+		for (i = 0;  i < VLEN(x);  i++) {
 			if (x->st.st_self[i] == '"' ||
 			    x->st.st_self[i] == '\\')
 				write_ch('\\');
@@ -1225,6 +1227,7 @@ int level;
 		break;
 
 	case t_bitvector:
+	case t_simple_bitvector:
 		if (!PRINTarray) {
 			write_str("#<bit-vector ");
 			write_addr(x);
@@ -1232,7 +1235,7 @@ int level;
 			break;
 		}
 		write_str("#*");
-		for (i = x->bv.bv_offset;  i < x->bv.bv_fillp + x->bv.bv_offset;  i++)
+		for (i = x->bv.bv_offset;  i < VLEN(x) + x->bv.bv_offset;  i++)
 		  write_ch(BITREF(x,i) ? '1' : '0');
 		break;
 
@@ -1442,7 +1445,7 @@ int level;
 			y = x->sm.sm_object0;
 			if (y) {
 			  write_str(" from \"");
-			  j = y->st.st_fillp;
+			  j = VLEN(y);
 			  for (i = 0;  i < j && i < 16;  i++)
 			    write_ch(y->st.st_self[i]);
 			  if (j > 16)
@@ -1599,10 +1602,11 @@ travel_push_new(object x) {
       for (i=0;i<x->a.a_dim;i++)
 	travel_push_new(x->a.a_self[i]);
     break;
+  case t_simple_vector:
   case t_vector:
     mark(x);
     if ((enum aelttype)x->v.v_elttype == aet_object)
-      for (i=0;i<x->v.v_fillp;i++)
+      for (i=0;i<VLEN(x);i++)
 	travel_push_new(x->v.v_self[i]);
     break;
   /* case t_ifun: */
@@ -1642,9 +1646,10 @@ travel_clear_new(object x) {
       for (i=0;i<x->a.a_dim;i++)
 	travel_clear_new(x->a.a_self[i]);
     break;
+  case t_simple_vector:
   case t_vector:
     if ((enum aelttype)x->v.v_elttype == aet_object)
-      for (i=0;i<x->v.v_fillp;i++)
+      for (i=0;i<VLEN(x);i++)
 	travel_clear_new(x->v.v_self[i]);
     break;
   /* case t_ifun: */
@@ -1795,7 +1800,7 @@ int base;
 	int i, l, c, dc;
 	char *s;
 
-	l = strng->st.st_fillp;
+	l = VLEN(strng);
 	if (l == 0)
 		return(FALSE);
 	s = strng->st.st_self;
@@ -2209,6 +2214,7 @@ object obj, strm;
 		PRINTpackage = symbol_value(sSAprint_packageA) != Cnil;
 
 	SIMPLE_CASE:
+	case t_simple_string:
 	case t_string:
 	case t_character:
 		PRINTstream = strm;
@@ -2244,6 +2250,7 @@ object obj, strm;
 		goto SIMPLE_CASE;
 	switch (type_of(obj)) {
 	SIMPLE_CASE:
+	case t_simple_string:
 	case t_string:
 	case t_character:
 		PRINTstream = strm;
@@ -2303,7 +2310,7 @@ object strng, strm;
 		strm = symbol_value(sLAterminal_ioA);
 	check_type_string(&strng);
 	check_type_stream(&strm);
-	for (i = 0;  i < strng->st.st_fillp;  i++)
+	for (i = 0;  i < VLEN(strng);  i++)
 		writec_stream(strng->st.st_self[i], strm);
 	flush_stream(strm);
 }

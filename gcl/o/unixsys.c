@@ -125,9 +125,9 @@ FFN(siLsystem)(void)
 
 	check_arg(1);
 	check_type_string(&vs_base[0]);
-	if (vs_base[0]->st.st_fillp >= 32768)
+	if (VLEN(vs_base[0]) >= 32768)
 		FEerror("Too long command line: ~S.", 1, vs_base[0]);
-	for (i = 0;  i < vs_base[0]->st.st_fillp;  i++)
+	for (i = 0;  i < VLEN(vs_base[0]);  i++)
 		command[i] = vs_base[0]->st.st_self[i];
 	command[i] = '\0';
 	{int old = signals_allowed;
