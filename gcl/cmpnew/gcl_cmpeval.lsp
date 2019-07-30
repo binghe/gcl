@@ -1507,7 +1507,9 @@
   (let* ((s (sgen "ORDS"))(g (sgen "ORDG"))
 	 (e (c1let-* `(((,s ,g)) 
 		       ;(check-type ,s (not list)) FIXME bootstrap
-		       (coerce ,s 'function)) t (list (cons g fn)))); (coerce ,s 'function)
+		       (if (functionp ,s) ,s (funcallable-symbol-function ,s))
+;		       (coerce ,s 'function)
+		       ) t (list (cons g fn)))); (coerce ,s 'function)
 ;	 (e (c1let-* `(((,s ,g)) (etypecase ,s ((and symbol (not boolean)) (fsf ,s)) (function ,s))) t (list (cons g fn)))); (coerce ,s 'function)
 	 (info (make-info)))
     (add-info info (cadr e))
