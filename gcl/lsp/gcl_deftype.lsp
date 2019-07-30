@@ -221,10 +221,10 @@
 (deftype string-stream nil
   `(or string-input-stream string-output-stream))
 
-(deftype input-stream nil
-  `(and stream (satisfies  input-stream-p)))
-(deftype output-stream nil
-  `(and stream (satisfies  output-stream-p)))
+;; (deftype input-stream nil
+;;   `(and stream (satisfies  input-stream-p)))
+;; (deftype output-stream nil
+;;   `(and stream (satisfies  output-stream-p)))
 
 ;(deftype bignum nil `(and integer (not fixnum)))
 (deftype non-negative-bignum nil
@@ -428,11 +428,12 @@
 
 (deftype ftype-spec nil
   `(cons (member function)
-	 (cons (satisfies arg-list-type-p)
-	       (cons (satisfies values-list-type-p) null))))
+	 (cons proper-list;(satisfies arg-list-type-p)
+	       (cons t;(satisfies values-list-type-p)
+		     null))))
 
-(deftype fpvec nil
-  `(and vector (satisfies array-has-fill-pointer-p)))
+;; (deftype fpvec nil
+;;   `(and vector (satisfies array-has-fill-pointer-p)))
 
 
 (deftype vector (&optional et size)

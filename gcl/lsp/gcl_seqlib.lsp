@@ -435,15 +435,15 @@
    (otherwise (the function (c-symbol-gfdef o)))))
 (putprop 'tofn t 'compiler::cmp-inline)
 
-(deftype fn nil `(satisfies fnp))
-(defun fnp (x)
-  (typecase
-   x
-   (function t)
-   ((and symbol (not boolean))
-    (and (= 0 (c-symbol-mflag x))
-	 (/= 0 (address (c-symbol-gfdef x)))))))
-(putprop 'fnp t 'compiler::cmp-inline)
+;; (deftype fn nil `(satisfies fnp))
+;; (defun fnp (x)
+;;   (typecase
+;;    x
+;;    (function t)
+;;    ((and symbol (not boolean))
+;;     (and (= 0 (c-symbol-mflag x))
+;; 	 (/= 0 (address (c-symbol-gfdef x)))))))
+;; (putprop 'fnp t 'compiler::cmp-inline)
 
 (defun reduce (fd s &key key from-end (start 0) end (initial-value nil ivp) 
 		 &aux (kf (when key (coerce key 'function)))(f (coerce fd 'function))
