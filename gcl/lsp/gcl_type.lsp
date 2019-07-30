@@ -415,20 +415,17 @@
 		`((,i ,(cons (cadr x) (caddr x))))))
 	    +btp-types+)))
 
-(eval-when
- (compile load eval)
- (defun slow-sort (fn key)
-   (do* ((x nil (lreduce (lambda (y x &aux (kx (funcall key x)))
-			   (if (eq (max-bnd kx (funcall key y) fn) kx) x y))
-			 r))
-	 (r *btp-bnds* (lremove x r))
-	 (n nil (cons x n)))
-	((not r) (nreverse n)))))
+#.`(progn
+     ,@(flet ((slow-sort (fn key)
+			 (do* ((x nil (lreduce (lambda (y x &aux (kx (funcall key x)))
+						 (if (eq (max-bnd kx (funcall key y) fn) kx) x y))
+					       r))
+			       (r *btp-bnds* (lremove x r))
+			       (n nil (cons x n)))
+			      ((not r) (nreverse n)))))
 
-
-(defvar *btp-bnds<* (slow-sort '< 'caadr))
-
-(defvar *btp-bnds>* (slow-sort '> 'cdadr))
+	   `((defvar *btp-bnds<* ',(slow-sort '< 'caadr))
+	     (defvar *btp-bnds>* ',(slow-sort '> 'cdadr)))))
 
 (defun btp-bnds< (x)
   (dolist (l *btp-bnds<*)
