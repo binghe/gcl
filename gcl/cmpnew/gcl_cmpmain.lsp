@@ -631,43 +631,19 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	(concatenate 'string (subseq flags 0 i) (remove-flag flag (subseq flags (+ i (length flag)))))
       flags)))
 
-(defun  compiler-command (&rest args &aux na )
+(defun compiler-command (&rest args )
   (declare (special *c-debug*))
-  (let ((dirlist (pathname-directory (first args)))
-	(name (pathname-name (first args)))
-	dir)
-    (cond (dirlist (setq dir (namestring (make-pathname :directory dirlist))))
-	  (t (setq dir ".")))
-    (setq na  (namestring
-	       (make-pathname :name name :type (pathname-type(first args)))))
-   (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a ~a"
-	   (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
-	   (if *prof-p* " -pg " "")
-	   (concatenate 'string si::*system-directory* "../h")
-	   (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
-           (case *speed*
-		 (3 *opt-three* )
-		 (2 *opt-two*)
-		 (t ""))
-	   (namestring (first args))
-	   (namestring (second args))
-	   (prog1
-	       #+aix3
-	     (format nil " -w ;ar x /lib/libc.a fsavres.o  ; ar qc XXXfsave fsavres.o ; echo init_~a > XXexp ; mv  ~a  XXX~a ; ld -r -D-1 -bexport:XXexp -bgc XXX~a -o ~a XXXfsave ; rm -f XXX~a XXexp XXXfsave fsavres.o"
-		     *init-name*
-		     (setq na (namestring (get-output-pathname na "o" nil)))
-		     na na na na na)
-	     #+(or dlopen irix5)
-	     (if (not system-p)
-		 (format nil
-			 " -w ; mv ~a XX~a ; ld  ~a -shared XX~a  -o ~a -lc ; rm -f XX~a"  
-			 (setq na (namestring (get-output-pathname na "o" nil)))			    na
-			 #+ignore-unresolved "-ignore_unresolved"
-			 #+expect-unresolved "-expect_unresolved '*'"
-			 na na na))	
-	     
-	     #+bsd ""	;	     #+bsd "-w"
-	     #-(or aix3 bsd irix3) " 2> /dev/null ")))
+  (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a"
+	  (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
+	  (if *prof-p* " -pg " "")
+	  (concatenate 'string si::*system-directory* "../h")
+	  (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
+          (case *speed*
+		(3 *opt-three* )
+		(2 *opt-two*)
+		(t ""))
+	  (namestring (first args))
+	  (namestring (second args))))
 
 
 ; Windows short form paths may contain tilde (~) which conflicts with
