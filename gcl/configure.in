@@ -490,6 +490,11 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC
 AC_PROG_CPP
 AC_SUBST(CC)
+GCL_CC=`basename $CC`
+if echo $GCL_CC |grep gcc |grep -q win; then
+    GCL_CC=gcc
+fi
+AC_SUBST(GCL_CC)
 AC_SUBST(CPP)
 
 add_arg_to_cflags() {
@@ -1222,16 +1227,19 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(char)
 
+AC_MSG_CHECKING([log bits in long])
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	#include <stdio.h>
 	]],[[
 	    FILE *fp=fopen("conftest1","w");
 	    unsigned long c;
-	    int i;
+	    int i,j;
 	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-9);
+            for (j=0,c=1;c!=i;c<<=1,j++);
+            fprintf(fp,"%d",j);
 	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM9BITS,$size,[fill bits needed in certain lisp structures])],
+  AC_MSG_RESULT([$size])
+  AC_DEFINE_UNQUOTED(LOG_LONG_BITS,$size,[fill bits needed in certain lisp structures])],
   [AC_MSG_ERROR([Cannot find fill bits])])
 
 AC_RUN_IFELSE([AC_LANG_PROGRAM([[
@@ -1239,169 +1247,13 @@ AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 	]],[[
 	    FILE *fp=fopen("conftest1","w");
 	    unsigned long c;
-	    int i;
+	    int i,j;
 	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-13);
+            for (j=0,c=1;c!=i;c<<=1,j++);
+            fprintf(fp,"%d",i-j);
 	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM13BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-27);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM27BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-16);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM16BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>1)-1);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(HM1BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>1)-2);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(HM2BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>1)-7);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(HM7BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>1)-9);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(HM9BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>1)-10);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(HM10BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>1)-5);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(HM5BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>2)-3);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(QM3BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",(i>>2)-4);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(QM4BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-4);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM4BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-24);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM24BITS,$size,[fill bits needed in certain lisp structures])],
-  [AC_MSG_ERROR([Cannot find fill bits])])
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    unsigned long c;
-	    int i;
-	    for (i=0,c=1;c;c<<=1,i++);
-	    fprintf(fp,"%d",i-3);
-	    return 0;]])],[size=`cat conftest1`
-  AC_DEFINE_UNQUOTED(LM3BITS,$size,[fill bits needed in certain lisp structures])],
+  AC_MSG_RESULT([$size])
+  AC_DEFINE_UNQUOTED(LMLOG_LONG_BITS,$size,[fill bits needed in certain lisp structures])],
   [AC_MSG_ERROR([Cannot find fill bits])])
 
 

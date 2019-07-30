@@ -8257,9 +8257,14 @@
 #define T_8_6 48
 #define T_8_7 56
 #define T_8_8 64
+#define D_8_2 4
+#define D_8_4 2
+#define D_4_2 2
+#define D_4_4 1
 
 #define AA(c_,a_,b_) Mjoin(Mjoin(c_,_),Mjoin(Mjoin(a_,_),b_))
 
 #define AM(a_,b_) AA(M,a_,b_)
 #define AP(a_,b_) AA(P,a_,b_)
 #define AT(a_,b_) AA(T,a_,b_)
+#define AD(a_,b_) AA(D,a_,b_)

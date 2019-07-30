@@ -249,24 +249,6 @@
 /* using xgcl */
 #undef HAVE_XGCL
 
-/* fill bits needed in certain lisp structures */
-#undef HM10BITS
-
-/* fill bits needed in certain lisp structures */
-#undef HM1BITS
-
-/* fill bits needed in certain lisp structures */
-#undef HM2BITS
-
-/* fill bits needed in certain lisp structures */
-#undef HM5BITS
-
-/* fill bits needed in certain lisp structures */
-#undef HM7BITS
-
-/* fill bits needed in certain lisp structures */
-#undef HM9BITS
-
 /* fraction of core to separate reloc and heap */
 #undef HOLEDIV
 
@@ -304,25 +286,10 @@
 #undef LISTEN_USE_FCNTL
 
 /* fill bits needed in certain lisp structures */
-#undef LM13BITS
+#undef LMLOG_LONG_BITS
 
 /* fill bits needed in certain lisp structures */
-#undef LM16BITS
-
-/* fill bits needed in certain lisp structures */
-#undef LM24BITS
-
-/* fill bits needed in certain lisp structures */
-#undef LM27BITS
-
-/* fill bits needed in certain lisp structures */
-#undef LM3BITS
-
-/* fill bits needed in certain lisp structures */
-#undef LM4BITS
-
-/* fill bits needed in certain lisp structures */
-#undef LM9BITS
+#undef LOG_LONG_BITS
 
 /* upper immediate fixnum bound */
 #undef LOW_SHFT
@@ -380,12 +347,6 @@
 
 /* system pagewidth */
 #undef PAGEWIDTH
-
-/* fill bits needed in certain lisp structures */
-#undef QM3BITS
-
-/* fill bits needed in certain lisp structures */
-#undef QM4BITS
 
 /* have sigcontext in signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT
