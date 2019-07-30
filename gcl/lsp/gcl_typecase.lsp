@@ -147,7 +147,7 @@
 (defun simple-type-case (x type)
   (let ((*expt* t)) (funcall (get 'typecase 'compiler-macro-prop) `(typecase ,x (,type t)) nil)))
 
-n(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
+(defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
 
 (defun branches (f tpsff fnl o c)
   (mapcar (lambda (x)
