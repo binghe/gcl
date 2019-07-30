@@ -36,16 +36,19 @@
 	((single-type-p x) 1)
 	((when (consp x) (eq (car x) 'returns-exactly)) (1- (length x)))))
 
-(defun c1multiple-value-call (args)
+(defun c1multiple-value-call (args
+			      &aux (tsyms (load-time-value
+					   (mapl (lambda (x) (setf (car x) (gensym "MV-CALL")))
+						 (make-list 50)))))
   (when (endp args) (too-few-args 'multiple-value-call 1 0))
   (let* ((info (make-info))
 	 (nargs (c1args args info))
-	 (tps (mapcar (lambda (x) (info-type (cadr x))) (cdr nargs))))
+	 (tps (mapcar (lambda (x) (info-type (cadr x))) (cdr nargs)))
+	 (vals (mapcar 'nval tps))
+	 (n (if (member nil vals) -1 (reduce '+ vals))))
     (cond ((endp (cdr args)) (c1funcall args))
-	  ((and (not (member-if-not 'nval tps))
-		(inline-possible 'multiple-value-bind))
-	   (let* ((n (reduce '+ (mapcar 'nval tps)))
-		  (syms (mapcar (lambda (x) (declare (ignore x)) (tmpsym)) (make-list n)))
+	  ((and (>= (length tsyms) n 0) (inline-possible 'multiple-value-bind))
+	   (let* ((syms (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) (make-list n)))
 		  (r syms))
 	     (c1expr
 	      (reduce (lambda (x y) 
@@ -149,13 +152,19 @@
 ;;          (c2funcall funob 'args-pushed loc)
 ;;          (wt "}"))))
 
-(defun c1multiple-value-prog1 (args &aux (info (make-info)) form)
+(defun c1multiple-value-prog1 (args
+			       &aux (info (make-info)) form
+			       (tsyms (load-time-value
+				       (mapl (lambda (x) (setf (car x) (gensym "MV-PROG1")))
+					     (make-list 50)))))
   (when (endp args) (too-few-args 'multiple-value-prog1 1 0))
   (setq form (c1arg (car args) info))
   (let ((tp (info-type (cadr form))))
-    (cond ((single-type-p tp) (let ((s (tmpsym))) (c1expr `(let ((,s ,(car args))) ,@(cdr args) ,s))))
-	  ((and (consp tp) (eq (car tp) 'returns-exactly))
-	   (let ((syms (mapcar (lambda (x) (declare (ignore x)) (tmpsym)) (cdr tp))))
+    (cond ((single-type-p tp)
+	   (let ((s (pop tsyms)))
+	     (c1expr `(let ((,s ,(car args))) ,@(cdr args) ,s))))
+	  ((and (consp tp) (eq (car tp) 'returns-exactly) (>= (length tsyms) (length (cdr tp))))
+	   (let ((syms (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) (cdr tp))))
 	     (c1expr `(multiple-value-bind (,@syms) ,(car args) ,@(cdr args) (values ,@syms)))))
 	  (t 
 	   (setq args (c1args (cdr args) info))

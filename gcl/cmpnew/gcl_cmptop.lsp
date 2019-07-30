@@ -2336,7 +2336,10 @@
 ;; 			  ,@(mapcar (lambda (x y) 
 ;; 				      `(unbox ,(intern (symbol-name x) 'keyword) ,y)) args syms)))))))
 
-(defmacro defentry (n args c &optional (lt t))
+(defmacro defentry (n args c &optional (lt t)
+		      &aux (tsyms (load-time-value
+				   (mapl (lambda (x) (setf (car x) (gensym "DEFENTRY")))
+					 (make-list call-arguments-limit)))))
   (let* ((cp (consp c))
 	 (st (and cp (eq (car c) 'static)))
 	 (c (if st (cdr c) c))
@@ -2347,7 +2350,7 @@
 	 (decl (reduce (lambda (y x) (strcat y (if (> (length y) 0) "," "") x)) args :initial-value ""))
 	 (decl (concatenate 'string (string-downcase rt) " " m "(" decl ");"))
 	 (decl (if st "" decl))
-	 (syms (mapcar (lambda (x) (declare (ignore x)) (tmpsym)) args)))
+	 (syms (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) args)))
   `(defun ,n ,syms 
      (declare (optimize (safety 2)))
      ,@(mapcar (lambda (x y) `(check-type ,x ,(get y 'lisp-type))) syms tps)

@@ -71,7 +71,7 @@
 (defvar *suppress-compiler-warnings* nil)
 
 (defmacro maybe-to-wn-stack (&rest body)
-  (let ((cf (tmpsym))(sri (tmpsym)))
+  (let ((cf (sgen "MTWSCF"))(sri (sgen "MTWSSRI")))
   `(if (and (boundp '*warning-note-stack*) (not *note-keys*))
        (let ((,cf *current-form*)(,sri *src-inline-recursion*)) 
 	 (push (lambda nil
@@ -197,7 +197,7 @@
 ;				   args)))))
 
 (defmacro macroexpand-helper (pre meth form)
-  (let ((c (tmpsym))(x (tmpsym))(e (tmpsym)))
+  (let ((c (sgen "MHC"))(x (sgen "MHX"))(e (sgen "MHE")))
     `(let ((,c (when (consp ,form) (car ,form))))
        ,@(when pre `(,pre))
        (cond ((not ,c) ,form)

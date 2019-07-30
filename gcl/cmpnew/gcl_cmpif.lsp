@@ -626,7 +626,7 @@
       (setf (var-type v) nt))))
 
 (defun ignorable-pivot (pivot value)
-  (let ((s (tmpsym)))
+  (let ((s (sgen "IGNORABLE-PIVOT")))
     `(let ((,s ,pivot))
        (declare (ignorable ,s))
        ,value)))

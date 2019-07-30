@@ -1504,7 +1504,7 @@
 ;; 	(maybe-reverse-type-prop (car a) (car f)))))
 
 (defun make-ordinary (fn &aux *c1exit*);FIXME *c1exit*
-  (let* ((s (tmpsym))(g (tmpsym))
+  (let* ((s (sgen "ORDS"))(g (sgen "ORDG"))
 	 (e (c1let-* `(((,s ,g)) 
 		       ;(check-type ,s (not list)) FIXME bootstrap
 		       (coerce ,s 'function)) t (list (cons g fn)))); (coerce ,s 'function)
@@ -1902,18 +1902,20 @@
 
 (defun blla (l a last body &optional n nr f
 	       &aux r k lvp np negp ff rr ke tmp nkys post aok bk wv rv keb kbb
+	       (tsyms (load-time-value (mapl (lambda (x) (setf (car x) (tmpsym))) (make-list 50))))
 	       (l (let ((s (last l))) (if (cdr s) (append (butlast l) (list (car s) '&rest (cdr s))) l)))
 	       (l (subst '&rest '&body l))
-	       (l (let ((al (member '&aux l))) (append (ldiff l al) (cons (setq ke (tmpsym)) al))))
+	       (l (let ((al (member '&aux l))) (append (ldiff l al) (cons (setq ke (sgen "KE")) al))))
 	       (llk '(&whole &optional &rest &key &allow-other-keys &aux)));FIXME centralize
   (declare (optimize (safety 0)))
-  (assert (not (and last n)))
+  (assert (not (and last n))) ;(print (length tsyms));(print (list l a last body n nr f))
   (labels
    ((vp nil 
 	(let* ((v `(va-pop))
 	       (v (if f `(cond (,ff (setq ,ff nil) ,f) (,v)) v)))
 	  (setq f nil)
 	  `(progn (setq ,np (si::number-minus ,np 1)) ,v)))
+    (tsym nil (or (pop tsyms) (error 'program-error :format-control "Out of symbols for lambda list ~s" :format-arguments (list l))))
     (kesrc (nap src &aux (q (extra src)) (nap (unless np nap))) (setq keb t);fixme
 	   (cond ((eq k '&key) (when (consp src) `(unless ,aok (when ,(cadr src) ,(badk bk (caddr src))))))
 		 ((eq nap t) q)
@@ -1922,7 +1924,7 @@
     (dfsrc (src defp) (if defp (na src) src))
     (rb (v src srcp defp) (rbb v srcp (dfsrc src defp)))
     (kb (v src srcp defp &aux (nap (nap))) (when nap (rbb v srcp (kesrc nap (dfsrc src defp)))))
-    (bind (targ &optional (src nil srcp) defp &aux (sp (unless (symbolp targ) srcp)) (v (if sp (tmpsym) targ)))
+    (bind (targ &optional (src nil srcp) defp &aux (sp (unless (symbolp targ) srcp)) (v (if sp (tsym) targ)))
 ;	FIXME  (funcall (if (eq v ke) #'kb #'rb) v src srcp defp) leads to closures
 	  (if (eq v ke) (kb v src srcp defp) (rb v src srcp defp))
 	  (when sp (setq r (append (nreverse (cadr (blla targ nil v nil))) r)))
@@ -1932,13 +1934,13 @@
     (extra (x) `(error 'program-error :format-control "Extra argument ~s" :format-arguments (list ,x)))
     (nokv  (x) `(error 'program-error :format-control "Key ~s missing value" :format-arguments (list ,x)))
     (badk  (x v) `(error 'program-error :format-control "Key ~s ~s not permitted" :format-arguments (list ,x ,v)))
-    (bk nil (or bk (setq bk (car (push (tmpsym) r)))))
+    (bk nil (or bk (setq bk (car (push (sgen "BK") r)))));(tsym)
     (unbnd (l &aux (lc (when (or (eq k '&optional) (eq k '&key)) (consp l))) 
 	      (ln (if lc (pop l) l)) (ld (when lc (pop l))) (lp (when lc (car l)))
 	      (lc (when (eq k '&key) (consp ln))) (lnn (if lc (pop ln) ln)) (lb (if lc (car ln) ln)))
 	   (values lnn lb ld lp))
     (post nil
-	  (setq nkys (nreverse nkys) kbb (tmpsym))
+	  (setq nkys (nreverse nkys) kbb (sgen "KBB"));(tsym)
 	  (do (k r (ex a)) ((not ex));FIXME  this is fragile as the binding must be visible to mvars/inls
 	      (bind 'k (pop ex))
 	      (bind 'v (if ex (pop ex) `(if ,(la nil t) ,(la nil 'done) ,(nokv 'k))))
@@ -1955,12 +1957,12 @@
 	 (cond 
 	  (rv (lvp) (when np (bind lvp (rpop rv))))
 	  (lvp)
-	  (last (bind (setq lvp (tmpsym)) last)) 
+	  (last (bind (setq lvp (sgen "LVPL")) last)) ;(tsym)
 	  (n 
-	   (when f (bind (setq ff (tmpsym)) t))
-	   (bind (setq lvp (tmpsym)))
-	   (bind (setq np (tmpsym)) n) 
-	   (bind (setq negp (tmpsym)) `(< ,np 0))
+	   (when f (bind (setq ff (sgen "FF")) t));(tsym)
+	   (bind (setq lvp (sgen "LVP")));(tsym)
+	   (bind (setq np (sgen "NP")) n) ;(tsym)
+	   (bind (setq negp (sgen "NEGP") ) `(< ,np 0));(tsym)
 	   (bind np `(if ,negp (si::number-minus 0 ,np) ,np))
 	   (bind np `(si::number-minus ,np ,nr)))))
     (wcr (x) (when (cdr x) x))
@@ -1977,14 +1979,13 @@
 			    (multiple-value-bind (x y z) (c1body body nil) z));FIXME!
 	   (setq rr t)))
     (rpop (rv)
-	  (let ((vp (tmpsym))(val (tmpsym)))
+	  (let ((vp (sgen "VP"))(val (sgen "VAL")));(tsym)(tsym)
 	    `(do (,vp ,val) 
 		 ((>= 0 ,np) ,lvp)
 		 (declare (proper-list ,val) ,@(unless (srr rv) `((:dynamic-extent ,val))))
 		 (setq ,val ,(vp)
 		       ,val (if (and ,negp (= ,np 0)) ,val (cons ,val nil))
 		       ,vp (cond (,vp (rplacd ,vp ,val) ,val) ((setq ,lvp ,val))))))))
-   (declare (notinline bind kb rb));FIXME consing, closing la lvp na dfsrc breaks
    (do ((l l)(lk llk))
        ((not l)
 	(multiple-value-bind
@@ -2014,7 +2015,7 @@
 		    (&rest
 		     (cond ((not rv)
 			    (setq rv (pop l))
-			    (setq a (mapcar (lambda (x) (bind (tmpsym) x)) a))
+			    (setq a (mapcar (lambda (x) (bind (tsym) x)) a))
 			    (lvp rv)
 			    (bind rv (cond ((not a) lvp) (lvp `(list* ,@a ,lvp)) (`(list ,@a)))))
 			   ((unless (eq (pop l) ke) (badll)))))
@@ -2023,7 +2024,7 @@
 		     (multiple-value-bind
 		      (ln lb ld lp)
 		      (unbnd (if aok (pop l) :allow-other-keys))
-		      (let* ((lpt (tmpsym))(lbt (tmpsym))(kep (eq ln ke))
+		      (let* ((lpt (tsym))(lbt (tsym))(kep (eq ln ke))
 			     (lnk (if kep 'otherwise (intern (string ln) 'keyword))))
 		       (bind lpt)
 		       (bind lbt)
@@ -2568,27 +2569,31 @@
 
 ;;New C ffi
 ;
-(defmacro defdlfun ((crt name &optional (lib "")) &rest tps)
+(defmacro defdlfun ((crt name &optional (lib "")) &rest tps
+		    &aux (tsyms (load-time-value (mapl (lambda (x) (setf (car x) (gensym "DEFDLFUN")))
+						       (make-list call-arguments-limit)))))
+  (unless (>= (length tsyms) (length tps))
+    (baboon))
   (flet ((cc (x) (if (consp x) (car x) x)))
-  (let* ((sym  (mdlsym name lib))
-	 (dls  (strcat "DL" name))
-	 (ttps (mapcan (lambda (x) (if (atom x) (list x) (list (list (car x)) (cadr x)))) tps))
-	 (args (mapcar (lambda (x) (declare (ignore x)) (tmpsym)) ttps))
-	 (cast (apply 'strcat (maplist (lambda (x) (strcat (cc (car x)) (if (cdr x) "," ""))) tps)))
-	 (cast (strcat "(" crt "(*)(" cast "))")))
-  `(progn
-     (mdlsym ,name ,lib)
-     (defun ,sym ,args
-       (declare (optimize (safety 2)))
-       ,@(mapcar (lambda (x y) `(check-type ,x ,(get (cc y) 'lisp-type))) args ttps)
-       (cadd-dladdress ,dls ,sym)
-       (lit ,crt 
-	    ,@(when (eq crt :void) `("("))
-	    "(" ,cast "(" ,dls "))("
-	    ,@(mapcon (lambda (x y) `((,(cc (car x)) ,(car y))
-				      ,(if (cdr x) (if (consp (car x)) "+" ",") ""))) ttps args)
-	    ")"
-	    ,@(when (eq crt :void) `(",Cnil)"))))))))
+	(let* ((sym  (mdlsym name lib))
+	       (dls  (strcat "DL" name))
+	       (ttps (mapcan (lambda (x) (if (atom x) (list x) (list (list (car x)) (cadr x)))) tps))
+	       (args (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) ttps))
+	       (cast (apply 'strcat (maplist (lambda (x) (strcat (cc (car x)) (if (cdr x) "," ""))) tps)))
+	       (cast (strcat "(" crt "(*)(" cast "))")))
+	  `(progn
+	     (mdlsym ,name ,lib)
+	     (defun ,sym ,args
+	       (declare (optimize (safety 2)))
+	       ,@(mapcar (lambda (x y) `(check-type ,x ,(get (cc y) 'lisp-type))) args ttps)
+	       (cadd-dladdress ,dls ,sym)
+	       (lit ,crt
+		    ,@(when (eq crt :void) `("("))
+		    "(" ,cast "(" ,dls "))("
+		    ,@(mapcon (lambda (x y) `((,(cc (car x)) ,(car y))
+					      ,(if (cdr x) (if (consp (car x)) "+" ",") ""))) ttps args)
+		    ")"
+		    ,@(when (eq crt :void) `(",Cnil)"))))))))
 
 (defun c1cadd-dladdress (args)
   (list 'cadd-dladdress (make-info :type #tnull :flags (iflags compiler)) args))

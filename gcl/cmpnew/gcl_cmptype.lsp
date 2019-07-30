@@ -204,7 +204,7 @@
 ;  `'(,@(append l (mapcar 'symbol-function l))))
 
 (defmacro bound (a)
-  (let ((s (tmpsym)))
+  (let ((s (sgen "BOUND")))
     `(let ((,s ,a)) (if (consp ,s) (car ,s) ,s))))
 
 (defmacro boundptr (a)

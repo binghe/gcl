@@ -186,7 +186,7 @@
 
 (defun fn-bind (form args)
   (if (or (symbolp (car args)) (constantp (car args))) form
-    (let ((s (tmpsym)));sgen?
+    (let ((s (sgen "FN-BIND")));sgen?
       `(let ((,s ,(pop args))) (,(car form) ,s ,@args)))))
 
 (define-compiler-macro funcall (&whole form &rest args) (fn-bind form args))
@@ -383,7 +383,7 @@
 	 (cond ((characterp (second args))
 		(setq args (reverse args))))
 	 (cond ((characterp (car args))
-		(let ((c (tmpsym)))
+		(let ((c (sgen "CO1EQL")))
 		  (c1expr
 		   `(let ((,c ,(second args)))
 		      (declare (type ,(result-type (second args))
@@ -478,7 +478,7 @@
 	     ,(fast-read (cons '.strm. (cdr args)) read-fun)))))))
 
 (defun co1read-byte (f args &aux tem) f
-  (let* ((s (tmpsym))(nargs (cons s (cdr args))))
+  (let* ((s (sgen "CO1READ-BYTE"))(nargs (cons s (cdr args))))
   (cond ((setq tem (fast-read nargs 'read-byte1))
 	 (let ((*space* 10))		;prevent recursion!
 	   (c1expr `(let ((,s ,(car args))) 
@@ -496,11 +496,11 @@
 	     (boundp 'si::*eof*))
     (let* ((stream (second args))(stream (or stream '*standard-output*)))
       (if (atom stream)
-	  (let ((ch (tmpsym))) 
+	  (let ((ch (sgen "CFAST-WRITE-CH")))
 	    `(let ((,ch ,(car args)))
 	       (if (and (fp-okp ,stream) (typep ,ch ',tp)) (sputc ,ch ,stream) (,write-fun ,ch ,stream))
 	       ,ch))
-	(let ((str (tmpsym)))
+	(let ((str (sgen "CFAST-WRITE-STR")))
 	  `(let ((,str ,stream))
 	     (declare (type ,(result-type stream) ,str))
 	     ,(cfast-write (list (car args) str) write-fun tp)))))))
@@ -535,7 +535,10 @@
        )
    (let ((*space* 10))
      (c1expr
-       (let ((val (tmpsym)) (v (tmpsym)) (i (tmpsym)) (dim (tmpsym)))
+      (let ((val (sgen "CO1VECTOR-PUSH-VAL"))
+	    (v (sgen "CO1VECTOR-PUSH-V"))
+	    (i (sgen "CO1VECTOR-PUSH-I"))
+	    (dim (sgen "CO1VECTOR-PUSH-DIM")))
 	`(let* ((,val ,(car args))
 		(,v ,(second args))
 		(,i (fill-pointer ,v))

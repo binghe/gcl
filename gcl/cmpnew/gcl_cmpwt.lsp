@@ -157,7 +157,7 @@
 ;  (or (setf-function-base-symbol x)
   (when (and *compiler-compile* (symbolp x))
     (unless (let ((p (symbol-package x))) (and p (package-name p)));FIXME delete-package leaves nil package name hpack
-      (setq *tmp-pack* (or *tmp-pack* (make-package (symbol-name (tmpsym)))))
+      (setq *tmp-pack* (or *tmp-pack* (make-package "TMP")))
       (let ((s (find-symbol (symbol-name x) *tmp-pack*)))
 	(when s (unintern s *tmp-pack*)))
       (import x *tmp-pack*)
