@@ -156,8 +156,7 @@
 	  c))
 
 
-
-
+(defun funcallable-symbol-function (x) (c-symbol-gfdef x))
 
 
 (defconstant +xi+ (let* ((a (type-and-list (list (cmp-norm-tp `(and number (not immfix))))))
