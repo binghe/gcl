@@ -736,6 +736,9 @@
   (cond
    ((cdr r1) (reduce 'type-or1 (mapcar (lambda (x) (mod-propagator f (cdr x) t2)) r1)))
    ((cdr r2) (reduce 'type-or1 (mapcar (lambda (x) (mod-propagator f t1 (cdr x))) r2)))
+   ((let ((a (atomic-tp t1))(b (atomic-tp t2)))
+      (when (and a b)
+	(object-tp (mod (car a) (car b))))))
    ((and (type>= #treal t1) (type>= #treal t2))
 	 (let* ((tp (super-range '* #t(integer 0 1) t2))
 		(r (real-bnds tp))
@@ -745,15 +748,15 @@
 
 (defun random-propagator (f t1 &optional t2)
   (declare (ignore t2))
-  (mod-propagator f t1 t1))
+  (mod-propagator f (super-range '* #t(integer 0 1) t1) t1))
 (si::putprop 'random 'random-propagator 'type-propagator)
 
-(defun gcd-propagator (f &optional (t1 nil t1p) (t2 nil t2p))
+(defun gcd-propagator (f &optional (t1 nil t1p) (t2 nil t2p) &aux (t1 (type-and #tinteger t1))(t2 (type-and #tinteger t2)))
   (cond (t2p (super-range '* #t(integer 0 1) (super-range 'min t1 t2)))
 	(t1p (mod-propagator f t1 t1))
 	((super-range f))))
 (si::putprop 'gcd 'gcd-propagator 'type-propagator)
-(defun lcm-propagator (f &optional (t1 nil t1p) (t2 nil t2p))
+(defun lcm-propagator (f &optional (t1 nil t1p) (t2 nil t2p) &aux (t1 (type-and #tinteger t1))(t2 (type-and #tinteger t2)))
   (cond (t2p (super-range '* #t(integer 1) (super-range 'max t1 t2)))
 	(t1p (mod-propagator f t1 t1))
 	((super-range f))))
@@ -788,7 +791,8 @@
 			((member f (sfl truncate ftruncate round fround)) (rem-propagator f t1 t2))))))))
 					;multiplying by 0.5 for round would convert integer ranges to float
 (dolist (l '(floor ceiling truncate round ffloor fceiling ftruncate fround))
-  (si::putprop l 'floor-propagator 'type-propagator))
+  (si::putprop l 'floor-propagator 'type-propagator)
+  (si::putprop l t 'c1no-side-effects))
 
 (defun ash-propagator (f t1 t2)
   (and
@@ -962,8 +966,13 @@
 (si::putprop 'acosh 'acosh-propagator 'type-propagator)
 
 (defun make-vector-propagator (f et st &rest r)
-  (declare (ignore r f))
-  (cmp-norm-tp `(vector ,(or (car (atomic-tp et)) '*) ,(or (car (atomic-tp st)) '*))))
+  (declare (ignore f))
+  (cmp-norm-tp `(,(if (and (type>= #tnull (pop r))
+			   (type>= #tnull (pop r))
+			   (type>= #tnull (car r)))
+		      'simple-array 'array)
+		 ,(or (car (atomic-tp et)) '*)
+		 (,(or (car (atomic-tp st)) '*)))))
 (si::putprop 'si::make-vector 'make-vector-propagator 'type-propagator)
 (defun make-array1-propagator (f &rest r)
   (declare (ignore f))
@@ -1047,16 +1056,19 @@
   (when a
     (when (constant-type-p b)
       (object-type (funcall f b)))))
-(dolist (l 'si::(expand-array-element-type expand-deftype sdata-includes))
+(dolist (l 'si::(expand-array-element-type
+		 expand-deftype sdata-includes
+		 lookup-simple-typep-fn lookup-typep-fn))
   (setf (get l 'compiler::c1no-side-effects) t)
   (setf (get l 'compiler::type-propagator) 'compiler::expand-type-propagator))
 
-(defun improper-consp-propagator (f t1 &optional t2 &aux (a (atomic-tp t1)));FIXME just constant-eval/side-effects
+(defun improper-consp-type-propagator (f t1 &optional t2)
   (declare (ignore t2))
-  (when a (object-type (funcall f (car a)))))
+  (cond ((not (type-and #tsi::improper-cons t1)) #tnull)
+	((type>= #tsi::improper-cons t1) #ttrue)))
 (dolist (l 'si::(improper-consp))
   (setf (get l 'compiler::c1no-side-effects) t)
-  (setf (get l 'compiler::type-propagator) 'compiler::improper-consp-propagator))
+  (setf (get l 'compiler::type-propagator) 'compiler::improper-consp-type-propagator))
 
 (defun symbol-gfdef-propagator (f t1 &aux (a (atomic-tp t1)))
   (declare (ignore f))
