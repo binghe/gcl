@@ -32,7 +32,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 #define NOT_OBJECT_ALIGNED(a_) ({union lispunion _t={.vw=(void *)(a_)};_t.td.emf;})
-#define ROUNDUP(x_,y_) (((unsigned long)(x_)+(y_ -1)) & ~(y_ -1))
+#define ROUNDUP(x_,y_) (((unsigned long)(x_)+(y_ -1)) & ~(y_ -1))/*FIXME double eval*/
 #define ROUNDDN(x_,y_) (((unsigned long)(x_)) & ~(y_ -1))
 
 #undef PAGESIZE
