@@ -32,7 +32,7 @@ OBJECTS:=$(OBJS) $(LIBFILES) new_init.o  $(GCLIB) $(LAST_FILE)  $(FIRST_FILE)
 
 all:  $(OBJECTS)
 
-boot.o: boot.c $(DECL) boot.h
+boot.o: boot.c $(DECL) boot.h #FIXME clean, include file changes
 	$(CC) -c $(CFLAGS) $(DEFS) -fPIC $*.c $(AUX_INFO) 
 
 gprof.o: gprof.c $(DECL)
