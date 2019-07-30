@@ -2650,3 +2650,15 @@
 	     ((unless (member-if-not 'ignorable-form nargs) (when (consp c) (eq (car c) 'or)))
 	      (keep-vars) `(typecase ,(car args) (,c t)))
 	     (form))))));FIXME hash here
+
+
+(define-compiler-macro vector-push-extend (&whole form &rest args)
+  (let* ((vref (when (symbolp (cadr args)) (c1vref (cadr args))))
+	 (var (car vref)))
+    (when vref
+      (do-setq-tp var form (reduce (lambda (y x) (if (type-and y x) (type-or1 y x) y))
+				    '#.(mapcar (lambda (x) (cmp-norm-tp `(,(cdr x) 1))) si::*all-array-types*)
+				    :initial-value (var-type var)))))
+  form)
+
+
