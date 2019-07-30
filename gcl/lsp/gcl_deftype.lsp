@@ -422,8 +422,9 @@
   'null)
 
 
-(deftype type-spec nil
-  `(satisfies type-spec-p))
+(deftype type-spec nil '(or (and symbol (not (eql values)))
+			    (proper-cons (and symbol (not (member values function))))
+			    (and std-instance (satisfies si-classp))))
 
 (deftype ftype-spec nil
   `(cons (member function)
