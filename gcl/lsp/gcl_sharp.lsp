@@ -51,7 +51,7 @@
       (aset1 x i (patch-sharp (row-major-aref x i)))))
    (structure
     (let ((d (structure-def x))) 
-      (dotimes (i (structure-length x) x)
+      (dotimes (i (structure-length d) x)
 	(declare (fixnum i))
 	(structure-set x d i (patch-sharp (structure-ref x d i))))))
    (spice (let* ((y (gethash1 x (context-spice *sharp-eq-context*)))

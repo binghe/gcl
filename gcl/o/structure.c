@@ -140,6 +140,11 @@ structure_set(object x, object name, fixnum i, object v)
  return(v);
 }
 
+DEFUN("STRUCTURE-LENGTH",object,fSstructure_length,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  check_type_structure(x);
+  return (object)S_DATA(x)->length;
+}
+
 DEFUN("STRUCTURE-SUBTYPE-P",object,fSstructure_subtype_p,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
 
 /* static void */
