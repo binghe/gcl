@@ -818,7 +818,8 @@
 (si::putprop 'si::>> '>>-propagator 'type-propagator)
 
 (defun pexpt (x y)
-  (cond ((or (typep x 'float)
+  (cond ((and (zerop x) (minusp y)) -inf)
+	((or (typep x 'float)
 	     (= (abs x) 1) 
 	     (= (abs x) 0) 
 	     (typep y '(or float ratio (integer 0 #.(integer-length most-positive-fixnum)))))
