@@ -434,15 +434,17 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
        (lam clo) 
        (function-lambda-expression fun)
        (let ((form `(,(if mac 'defmacro 'defun) ,(if mac (cons 'macro na) na) ,(cadr lam) ,@(cddr lam))))
-;       (let ((form `(,(if mac 'defmacro 'defun) ,na ,(cadr lam) ,@(cddr lam))))
-	 (values (if clo 
-		     (let ((f (tmpsym))(v (tmpsym))(o (tmpsym)))
-		       `(let* (,@(mapcar (lambda (x) (list (car x) `(tmpsym))) (reverse clo))
-			       (,o (fun-env ',name));FIXME share structure
-			       (,v ,form)
-			       (,f (c-symbol-gfdef ,v)))
-			  (si::set-function-environment ,f ,o)
-			  ,v)) form) na))))))
+	 (values
+	  (if clo
+	      `(let* (,@(nreverse
+			 (let ((i -1))
+			   (mapcar (lambda (x)
+				     `(,(car x) (nth ,(incf i) (fun-env ',name))))
+				   clo))))
+		 ,form)
+	    form)
+	  na))))))
+
 
 (defun compile (name &optional def &aux na tem gaz (*default-pathname-defaults* #p"."))
   

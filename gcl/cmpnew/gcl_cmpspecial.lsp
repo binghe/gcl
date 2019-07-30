@@ -522,6 +522,14 @@
 ;; 	     `(function ,info ,r)))
 ;; 	  ((cmperr "The function ~s is illegal." fun)))))
 
+(defun update-closure-indices (cl)
+  (mapc (lambda (x &aux (y (var-ref-ccb (car x))))
+	  (setf (cadr x) (when (integerp y) (- y *initial-ccb-vs*))
+		(car x) (var-name (car x))))
+	(second (third cl)))
+  cl)
+
+
 (defun c2function (funob);FIXME
   (case (car funob)
         (call-global
@@ -532,7 +540,7 @@
         (otherwise
 	 (let* ((fun (pop funob))
 		(lam (car funob))
-		(cl (fun-call fun))
+		(cl (update-closure-indices (fun-call fun)))
 		(sig (car cl))
 		(at (car sig))
 		(rt (cadr sig))

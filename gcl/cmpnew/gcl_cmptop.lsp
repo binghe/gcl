@@ -1113,7 +1113,7 @@
 
 (defun get-clv (l &aux (i (cadr l)))
   (mapcan
-   (lambda (v) (when (var-p v) (list (list (var-name v) (car (atomic-tp (var-type v)))))))
+   (lambda (v) (when (var-p v) (list (list v nil))))
    (append (info-ref-ccb i) (info-ref-clb i))))
 
 ;; (defun get-clv (l &aux r)

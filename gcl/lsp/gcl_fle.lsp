@@ -70,11 +70,11 @@
 	 (fas (unless (fixnump fas) fas))
 	 (ss  (if (stringp fas) (open-fasd (make-string-input-stream fas) :input 'eof nil) fas))
 	 (out (if (vectorp ss) (read-fasd-top ss) ss))
-	 (es  (when (eq (car out) 'lambda-closure) (mapcar 'car (cadr out))))
+	 (es  (when (eq (car out) 'lambda-closure) (cadr out)))
 	 (env (when es (function-env fun 0))));(*object (c-function-env fun) 0 nil nil)
     (when env
 ;      (assert (= (length env) (length es))) ;FIXME closure var order
-      (setf (cadr out) (mapcar 'list es env)))
+      (setf (cadr out) (mapcar (lambda (x) (list (pop x) (nth (- (length env) (car x)) env))) es)))
     (when (vectorp ss)
       (close-fasd ss))
     out))
