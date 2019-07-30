@@ -2648,7 +2648,7 @@
        (cond ((type>= c tp) (keep-vars) t)
 	     ((not (type-and c tp)) (keep-vars) nil)
 	     ((unless (member-if-not 'ignorable-form nargs) (when (consp c) (eq (car c) 'or)))
-	      (keep-vars) `(typecase ,(car args) (,c t)))
+	      (keep-vars) `(typecase ,(car args) (,(cmp-unnorm-tp c) t)))
 	     (form))))));FIXME hash here
 
 
