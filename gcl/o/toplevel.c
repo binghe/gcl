@@ -243,7 +243,7 @@ FFN(Fthe)(object args)
 	      FEwrong_type_argument(MMcar(args), Cnil);
 	  
 	} else {
-		if (ifuncall2(sLtypep, vs_base[0], args) == Cnil)
+	  if (sLtypep->s.s_gfdef!=OBJNULL && ifuncall2(sLtypep, vs_base[0], args) == Cnil)
 			FEwrong_type_argument(args, vs_base[0]);
 	}
 }
