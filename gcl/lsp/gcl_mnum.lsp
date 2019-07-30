@@ -13,10 +13,13 @@
        (defdlfun (:fcomplex ,(strcat "c" x "f") ) :fcomplex)
        (defdlfun (:dcomplex ,(strcat "c" x)     ) :dcomplex)))
   
-  (defmacro defrlibmfun (x)
+  (defmacro defrlibmfun (x &optional y)
     `(progn
        (defdlfun (:float    ,(strcat x "f")     ) :float :float)
-       (defdlfun (:double   ,x                  ) :double :double)))
+       (defdlfun (:double   ,x                  ) :double :double)
+       ,@(when y
+	   `((defdlfun (:fcomplex   ,(strcat "c" x "f")     ) :fcomplex :fcomplex)
+  	     (defdlfun (:dcomplex   ,(strcat "c" x)         ) :dcomplex :dcomplex)))))
 
   (defmacro defalibmfun (x)
     `(progn
@@ -29,6 +32,7 @@
 (defalibmfun "abs")
 
 (deflibmfun "exp")
+(defrlibmfun "pow" t)
 (deflibmfun "log")
 (deflibmfun "sqrt")
 
@@ -176,6 +180,8 @@
   (declare (inline rawexp))
   (check-type x number)
   (rawexp x))
+
+;(defrmfun "pow" expt)
 
 (defrmfun "atan2"  rawatan2)
 (defmfun "atan" rawatan)
