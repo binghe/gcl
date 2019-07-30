@@ -568,17 +568,23 @@
 		       if-exists iesp if-does-not-exist idnesp external-format)))
       (when (typep s 'stream) (c-set-stream-object1 s f) s))))
 
-(defun load-pathname (p print if-does-not-exist
+(defun load-pathname-exists (z)
+  (or (probe-file z)
+      (when *allow-gzipped-file*
+	(when (probe-file (string-concatenate (namestring z) ".gz"))
+	  z))))
+
+(defun load-pathname (p print if-does-not-exist external-format
 			&aux (pp (merge-pathnames p))
-			(epp (reduce (lambda (y x) (or y (probe-file (translate-pathname x "" p))))
+			(epp (reduce (lambda (y x) (or y (load-pathname-exists (translate-pathname x "" p))))
 				     '(#P".o" #P".lsp" #P".lisp" #P"") :initial-value nil)));FIXME newest?
   (if epp
       (let* ((*load-pathname* pp)(*load-truename* epp))
-	(if (eql -1 (string-match #v"(^o|\\.o)$" (or (pathname-type epp) "")))
-	    (let ((s (open epp)))
-	      (unwind-protect (load-stream s print)
-		(close s)))
-	  (load-fasl epp print)))
+	(with-open-file
+	 (s epp :external-format external-format)
+	 (if (member (peek-char nil s nil 'eof) '#.(mapcar 'code-char (list 127 #xcf #xce #x4c)))
+	     (load-fasl s print)
+	   (let ((*standard-input* s)) (load-stream s print)))))
     (when if-does-not-exist
       (error 'file-error :pathname pp :format-control "File does not exist."))))
 
@@ -589,7 +595,7 @@
   (when verbose (format t ";; Loading ~s~%" p))
   (prog1
       (typecase p
-	(pathname-designator (load-pathname (pathname p) print if-does-not-exist))
+	(pathname-designator (load-pathname (pathname p) print if-does-not-exist external-format))
 	(stream (load-stream p print)))
     (when verbose (format t ";; Finished loading ~s~%" p))))
 
