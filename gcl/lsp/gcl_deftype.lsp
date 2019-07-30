@@ -96,6 +96,15 @@
 (deftype equalp-is-eq-tp nil
   `(not (or array hash-table structure cons string  bit-vector pathname number)))
 
+(deftype non-negative-byte (&optional s)
+  `(unsigned-byte ,(if (eq s '*) s (1- s))))
+(deftype negative-byte (&optional s)
+  (normalize-type `(integer  ,(if (eq s '*) s (- (ash 1 (1- s)))) -1)))
+(deftype signed-byte (&optional s &aux (n (if (eq s '*) 0 (ash 1 (1- s)))))
+  (normalize-type `(integer ,(if (zerop n) s (- n)) ,(if (zerop n) s (1- n)))))
+(deftype unsigned-byte (&optional s)
+  (normalize-type `(integer 0 ,(if (eq s '*) s (1- (ash 1 s))))))
+
 (deftype non-negative-char nil
   `(non-negative-byte ,char-length))
 (deftype negative-char nil
@@ -170,10 +179,21 @@
 (deftype simple-bit-vector (&optional size)
   `(simple-array bit (,size)))
 
+(deftype cons (&optional car cdr)
+  `(or (proper-cons ,car ,cdr) (improper-cons ,car ,cdr)))
+
+(deftype proper-cons (&whole w &optional car cdr
+		      &aux (a (normalize-type (if (eq car '*) t car)))
+			(d (normalize-type (if (eq cdr '*) t cdr))))
+  (cond ((and (eq a car) (eq d cdr)) w)
+	((and a d) `(,(car w) ,a ,d))))
+
+(setf (get 'improper-cons 'deftype-definition) (get 'proper-cons 'deftype-definition))
+
 (deftype function-name nil
-  `(or symbol (cons (member setf) (cons symbol null))))
+  `(or symbol (proper-cons (member setf) (proper-cons symbol null))))
 (deftype function-identifier nil
-  `(or function-name (cons (member lambda) t)));;FIXME? t?
+  `(or function-name (proper-cons (member lambda) t)));;FIXME? t?
 
 (deftype list nil
   `(or cons null))
@@ -389,17 +409,6 @@
     ;; (if (or (equal w x) (member w x :test 'equal));FIXME
     ;; 	w x)))
 
-(deftype cons (&optional car cdr)
-  `(or (proper-cons ,car ,cdr) (improper-cons ,car ,cdr)))
-
-(deftype proper-cons (&whole w &optional car cdr
-		      &aux (a (normalize-type (if (eq car '*) t car)))
-			(d (normalize-type (if (eq cdr '*) t cdr))))
-  (cond ((and (eq a car) (eq d cdr)) w)
-	((and a d) `(,(car w) ,a ,d))))
-
-(setf (get 'improper-cons 'deftype-definition) (get 'proper-cons 'deftype-definition))
-
 (deftype pathname nil
   `(or non-logical-pathname logical-pathname))
 
@@ -451,14 +460,6 @@
 
 (deftype bit nil
   `(mod 2))
-(deftype non-negative-byte (&optional s)
-  `(unsigned-byte ,(1- s)))
-(deftype negative-byte (&optional s)
-  (normalize-type `(integer  ,(if (eq s '*) s (- (ash 1 (1- s)))) -1)))
-(deftype signed-byte (&optional s &aux (n (if (eq s '*) 0 (ash 1 (1- s)))))
-  (normalize-type `(integer ,(if (zerop n) s (- n)) ,(if (zerop n) s (1- n)))))
-(deftype unsigned-byte (&optional s)
-  (normalize-type `(integer 0 ,(if (eq s '*) s (1- (ash 1 s))))))
 
 
 (defun all-eq (x y)
