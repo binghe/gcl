@@ -374,7 +374,7 @@ truncate_double(char *b,double d,int dp) {
   for (p=c;*p && *p!='e';p++);
   if (p[-1]!='.' && char_inc(c,p-1) && COMP(c,&pp,d,dp)) {
     j=truncate_double(c,d,dp);
-    if (j<k) {
+    if (j<=k) {
       k=j;
       n=c;
     }
