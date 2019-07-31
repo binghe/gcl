@@ -365,6 +365,7 @@ struct typemanager {
   long      tm_distinct;         /* pages of this type are distinct */
   float     tm_adjgbccnt;
   long      tm_opt_maxpage;
+  enum type tm_calling_type;     /* calling type  */
 };
 
 
@@ -373,7 +374,7 @@ struct typemanager {
 */
 EXTER struct typemanager tm_table[ (int)t_other ];
 
-#define tm_of(t) (&(tm_table[(int)tm_table[(int)(t)].tm_type]))
+#define tm_of(t) ({struct typemanager *_tm=tm_table+tm_table[t].tm_type;_tm->tm_calling_type=t;_tm;})
 
 /*
  Contiguous block header.

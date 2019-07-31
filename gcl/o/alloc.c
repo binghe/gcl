@@ -822,7 +822,7 @@ alloc_after_gc(struct typemanager *tm,fixnum n) {
 
     switch (jmp_gmp) {
     case 0: /* not in gmp call*/
-      GBC(tm->tm_type);
+      GBC(tm->tm_calling_type);
       break;
     case 1: /* non-in-place gmp call*/
       longjmp(gmp_jmp,tm->tm_type);
@@ -1056,7 +1056,7 @@ load_cons(object p,object a,object d) {
 object
 make_cons(object a,object d) {
 
-  static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
+  struct typemanager *tm=tm_of(t_cons);
   object obj=alloc_mem(tm,tm->tm_size);
 
   load_cons(obj,a,d);

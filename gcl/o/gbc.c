@@ -1089,8 +1089,11 @@ GBC(enum type t) {
   
   what_to_collect = t;
   
-  tm_table[(int)t].tm_gbccount++;
-  tm_table[(int)t].tm_adjgbccnt++;
+  {
+    struct typemanager *tm=tm_of(t);
+    tm->tm_gbccount++;
+    tm->tm_adjgbccnt++;
+  }
   
   if (sSAnotify_gbcA->s.s_dbind != Cnil
 #ifdef DEBUG
