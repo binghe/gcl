@@ -39,7 +39,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 #include <unistd.h>
 #include "num_include.h"
-#include "page.h"
 
 #define LINE_LENGTH get_line_length()
 #define MINIMUM_RIGHT_MARGIN 1
@@ -809,6 +808,40 @@ print_symbol_name_body(object x,int pp) {
 
 }
 
+#define DONE 1
+#define FOUND -1
+
+static int
+do_write_sharp_eq(struct cons *e,bool dot) {
+
+  fixnum val=fix(e->c_car);
+  bool defined=val&1;
+
+  if (dot) {
+    write_str(" . ");
+    if (!defined) return FOUND;
+  }
+
+  if (!defined) e->c_car=make_fixnum(val|1);
+  write_ch('#');
+  write_decimal(val>>1);
+  write_ch(defined ? '#' : '=');
+
+  return defined ? DONE : FOUND;
+
+}
+
+static int
+write_sharp_eq(object x,bool dot) {
+
+  struct cons *e;
+
+  return PRINTvs_top[0]!=Cnil && (e=gethash(x,PRINTvs_top[0]))->c_cdr!=OBJNULL ?
+    do_write_sharp_eq(e,dot) : 0;
+
+}
+
+
 void
 write_object(x, level)
 object x;
@@ -816,7 +849,6 @@ int level;
 {
 	object r, y;
 	int i, j, k;
-	object *vp;
 	object ppfun;
 
 	cs_check(x);
@@ -1017,23 +1049,9 @@ int level;
 	  {
 
 	    if (PRINTescape) {
-	      if (x->s.s_hpack == Cnil || x->s.s_hpack->p.p_name == Cnil) { /*FIXME???*/
-		if (PRINTcircle) {
-		  for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2)
-		    if (x == *vp) {
-		      if (vp[1] != Cnil) {
-			write_ch('#');
-			write_decimal((vp-PRINTvs_top)/2+1);
-			write_ch('#');
-			return;
-		      } else {
-			write_ch('#');
-			write_decimal((vp-PRINTvs_top)/2+1);
-			write_ch('=');
-			vp[1] = Ct;
-		      }
-		    }
-		}
+	      if (x->s.s_hpack == Cnil) {
+		if (PRINTcircle)
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTgensym)
 		  write_str("#:");
 	      } else if (x->s.s_hpack == keyword_package) {
@@ -1068,23 +1086,8 @@ int level;
 			write_str(">");
 			break;
 		}
-		if (PRINTcircle) {
-			for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2)
-			    if (x == *vp) {
-				if (vp[1] != Cnil) {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('#');
-				    return;
-				} else {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('=');
-				    vp[1] = Ct;
-				    break;
-				}
-			    }
-		}
+		if (PRINTcircle)
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
@@ -1160,23 +1163,8 @@ int level;
 			write_str(">");
 			break;
 		}
-		if (PRINTcircle) {
-			for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2)
-			    if (x == *vp) {
-				if (vp[1] != Cnil) {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('#');
-				    return;
-				} else {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('=');
-				    vp[1] = Ct;
-				    break;
-				}
-			    }
-		}
+		if (PRINTcircle)
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
@@ -1245,23 +1233,8 @@ int level;
 			write_object(x->c.c_cdr, level);
 			break;
 		}
-		if (PRINTcircle) {
-			for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2)
-			    if (x == *vp) {
-				if (vp[1] != Cnil) {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('#');
-				    return;
-				} else {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('=');
-				    vp[1] = Ct;
-				    break;
-				}
-			    }
-		}
+		if (PRINTcircle)
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
                 if (PRINTpretty) {
 		if (x->c.c_car == sLquote &&
 		    consp(x->c.c_cdr) &&
@@ -1307,22 +1280,15 @@ int level;
 				}
 				break;
 			}
-			if (PRINTcircle) {
-			  for (vp = PRINTvs_top; vp < PRINTvs_limit; vp += 2)
-			    if (x == *vp) {
-				if (vp[1] != Cnil) {
-				    write_str(" . #");
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('#');
-				    goto RIGHT_PAREN;
-				} else {
-				    write_ch(INDENT);
-				    write_str(". ");
-				    write_object(x, level);
-				    goto RIGHT_PAREN;
-				}
-			    }
-			}
+			if (PRINTcircle)
+			  switch (write_sharp_eq(x,TRUE)) {
+			  case FOUND:
+			    write_object(x, level);
+			  case DONE:
+			    goto RIGHT_PAREN;
+			  default:
+			    break;
+			  }
 			if (i == 0 && y != OBJNULL && type_of(y) == t_symbol)
 				write_ch(INDENT1);
 			else
@@ -1489,23 +1455,8 @@ int level;
 		break;
 
 	case t_structure:
-		if (PRINTcircle) {
-			for (vp = PRINTvs_top;  vp < PRINTvs_limit;  vp += 2)
-			    if (x == *vp) {
-				if (vp[1] != Cnil) {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('#');
-				    return;
-				} else {
-				    write_ch('#');
-				    write_decimal((vp-PRINTvs_top)/2+1);
-				    write_ch('=');
-				    vp[1] = Ct;
-				    break;
-				}
-			    }
-		}
+		if (PRINTcircle)
+		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
@@ -1569,136 +1520,161 @@ int level;
 	}
 }
 
+static int dgs,dga;
 
-static int dgs;
+#include "page.h"
 
 static void
-travel_push_new(object x) {
+travel_push(object x) {
 
-  object y;
   int i;
 
- BEGIN:
-  if (NULL_OR_ON_C_STACK(x)) return;
-  if (is_marked(x)) {
-    vs_check_push(x);
-    vs_check_push(Cnil);
+  if (is_imm_fixnum(x))
     return;
-  }
-  switch (type_of(x)) {
-  case t_symbol:
-    if (dgs && x->s.s_hpack==Cnil) {mark(x);}
-    break;
-  case t_cons:
-    y=x->c.c_cdr;
-    mark(x);
-    travel_push_new(x->c.c_car);
-    x=y;
-    goto BEGIN;
-    break;
-  case t_array:
-    mark(x);
-    if ((enum aelttype)x->a.a_elttype == aet_object)
-      for (i=0;i<x->a.a_dim;i++)
-	travel_push_new(x->a.a_self[i]);
-    break;
-  case t_simple_vector:
-  case t_vector:
-    mark(x);
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      for (i=0;i<VLEN(x);i++)
-	travel_push_new(x->v.v_self[i]);
-    break;
-  /* case t_ifun: */
-  /*   mark(x); */
-  /*   x=x->ifn.ifn_self; */
-  /*   goto BEGIN; */
-  /*   break; */
-  case t_structure:
-    mark(x);
-    for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
-      travel_push_new(structure_ref(x,x->str.str_def,i));
-    break;
-  default:
-    break;
 
-  }
+  if (is_marked(x)) {
+
+    if (imcdr(x) || !x->d.f)
+      vs_check_push(x);
+    if (!imcdr(x))
+      x->d.f=1;
+
+  } else switch (type_of(x)) {
+
+    case t_symbol:
+
+      if (dgs && x->s.s_hpack==Cnil) {
+    	mark(x);
+      }
+      break;
+
+    case t_cons:
+
+      {
+	object y=x->c.c_cdr;
+	mark(x);
+	travel_push(x->c.c_car);
+	travel_push(y);
+      }
+      break;
+
+    case t_vector:
+    case t_array:
+    case t_simple_vector:
+    case t_simple_array:
+
+      mark(x);
+      if (dga && (enum aelttype)x->a.a_elttype==aet_object)
+	for (i=0;i<x->a.a_dim;i++)
+	  travel_push(x->a.a_self[i]);
+      break;
+
+    case t_structure:
+
+      mark(x);
+      for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
+	travel_push(structure_ref(x,x->str.str_def,i));
+      break;
+
+    default:
+
+      break;
+
+    }
 
 }
 
 
 static void
-travel_clear_new(object x) {
+travel_clear(object x) {
 
   int i;
 
- BEGIN:
-  if (NULL_OR_ON_C_STACK(x) || !is_marked(x)) return;
+  if (is_imm_fixnum(x))
+    return;
+
+  if (!is_marked(x))
+    return;
+
   unmark(x);
+  if (!imcdr(x))
+    x->d.f=0;
+
   switch (type_of(x)) {
+
   case t_cons:
-    travel_clear_new(x->c.c_car);
-    x=x->c.c_cdr;
-    goto BEGIN;
+
+    travel_clear(x->c.c_car);
+    travel_clear(x->c.c_cdr);
     break;
-  case t_array:
-    if ((enum aelttype)x->a.a_elttype == aet_object)
-      for (i=0;i<x->a.a_dim;i++)
-	travel_clear_new(x->a.a_self[i]);
-    break;
-  case t_simple_vector:
+
   case t_vector:
-    if ((enum aelttype)x->v.v_elttype == aet_object)
-      for (i=0;i<VLEN(x);i++)
-	travel_clear_new(x->v.v_self[i]);
+  case t_array:
+  case t_simple_vector:
+  case t_simple_array:
+
+    if (dga && (enum aelttype)x->a.a_elttype == aet_object)
+      for (i=0;i<x->a.a_dim;i++)
+	travel_clear(x->a.a_self[i]);
     break;
-  /* case t_ifun: */
-  /*   x=x->ifn.ifn_self; */
-  /*   goto BEGIN; */
-  /*   break; */
+
   case t_structure:
+
     for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
-      travel_clear_new(structure_ref(x,x->str.str_def,i));
+      travel_clear(structure_ref(x,x->str.str_def,i));
     break;
+
   default:
+
     break;
 
   }
 
 }
 
-
 static void
-setupPRINTcircle(object x,int dogensyms) {
+travel(object x,int mdgs,int mdga) {
 
   BEGIN_NO_INTERRUPT;
-  dgs=dogensyms;
-  travel_push_new(x);
-  dgs=0;
-  PRINTvs_limit = vs_top;
-  travel_clear_new(x);
+  dgs=mdgs;
+  dga=mdga;
+  travel_push(x);
+  travel_clear(x);
   END_NO_INTERRUPT;
 
 }
 
-/* static void */
-/* setupPRINTcircle(object x,int dogensyms) { */
-/*   object *vp,*vq; */
+object sLeq;
 
-/*   travel_push_type[(int)t_symbol]=dogensyms; */
-/*   travel_push_type[(int)t_array]= */
-/*     (travel_push_type[(int)t_vector]=PRINTarray); */
-/*   travel_push_object(x); */
-/*   for (vp = vq = PRINTvs_top;  vp < vs_top;  vp += 2) */
-/*     if (vp[1] != Cnil) { */
-/*       vq[0] = vp[0]; */
-/*       vq[1] = Cnil; */
-/*       vq += 2; */
-/*     } */
+static void
+setupPRINTcircle(object x,int dogensyms) {
 
-/*   PRINTvs_limit = vs_top = vq; */
+  object *vp=vs_top,*v=vp,h;
+  fixnum j;
 
-/* } */
+  travel(x,dogensyms,PRINTarray);
+
+  h=vs_top>vp ? funcall_cfun(Lmake_hash_table,2,sKtest,sLeq) : Cnil;
+  for (j=0;v<vs_top;v++)
+    if (!imcdr(*v) || gethash(*v,h)->c_cdr==OBJNULL)
+      sethash(*v,h,make_fixnum((j++)<<1));
+
+  vs_top=vp;
+  vs_push(h);
+
+}
+
+void
+travel_find_sharing(object x,object table) {
+
+  object *vp=vs_top;
+
+  travel(x,1,1);
+
+  for (;vs_top>vp;vs_top--)
+      sethash(vs_head,table,make_fixnum(-2));
+
+}
 
 void
 setupPRINTdefault(x)

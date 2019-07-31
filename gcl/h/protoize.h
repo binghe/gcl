@@ -1563,3 +1563,7 @@ new_cfdata(void);
 
 void
 set_displaced_body_ptr(object);
+
+void
+travel_find_sharing(object,object);
+
