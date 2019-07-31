@@ -1028,7 +1028,6 @@ int
 writec_stream(int c, object strm) {
 	object x;
 	char *p;
-	int i;
 
 BEGIN:
 	switch (strm->sm.sm_mode) {
