@@ -321,7 +321,6 @@ extern bool writable_malloc;
 
 #include <signal.h>
 
-#ifdef GCL_GPROF
 #define prof_block(x) ({\
       sigset_t prof,old;						\
       int r;								\
@@ -331,9 +330,6 @@ extern bool writable_malloc;
       r=x;								\
       sigprocmask(SIG_SETMASK,&old,NULL);				\
       r;})
-#else
-#define prof_block(x) x
-#endif
 
 #define psystem(x) prof_block(system(x))
 #define pfork() prof_block(fork())
