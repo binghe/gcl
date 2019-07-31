@@ -95,44 +95,42 @@
   (unless (eq t f)
     (print (list "Representative types ill-defined" f))))
 
-#.`(progn
-     ,@(let (y)
-	 (flet ((orthogonalize (x &aux (z y))
-			       (setq y (car (resolve-type (list 'or x y))))
-			       (car (resolve-type `(and ,x (not ,z))))))
+(progn
+  . #.(let (y)
+	(flet ((orthogonalize (x &aux (z y))
+			      (setq y (car (resolve-type (list 'or x y))))
+			      (car (resolve-type `(and ,x (not ,z))))))
 
-	       (let* ((q1 (lremove
-			   nil
-			   (mapcar
-			    #'orthogonalize
-			    `((unsigned-byte 0)
-			      ,@(butlast
-				 (mapcan (lambda (n &aux (m (1- n)))
-					   (list `(unsigned-byte ,m) `(signed-byte ,n) `(unsigned-byte ,n)))
-					 '(2 4 8 16 28 32 62 64)))
-			      (and bignum (integer * -1))
-			      (and bignum (integer 0))
-			      ,@(mapcan (lambda (x)
-					  (mapcar (lambda (y) (cons x y))
-						  '((* (-1))(-1 -1) ((-1) (0)) (0 0) ((0) (1)) (1 1) ((1) *))))
-					'(ratio short-float long-float))
-			      proper-cons improper-cons (vector nil) (array nil);FIXME
-			     ,@(lremove 'gsym (mapcar 'car +r+)))))))
+	      (let* ((q1 (lremove
+			  nil
+			  (mapcar
+			   #'orthogonalize
+			   `((unsigned-byte 0)
+			     ,@(butlast
+				(mapcan (lambda (n &aux (m (1- n)))
+					  (list `(unsigned-byte ,m) `(signed-byte ,n) `(unsigned-byte ,n)))
+					'(2 4 8 16 28 32 62 64)))
+			     (and bignum (integer * -1))
+			     (and bignum (integer 0))
+			     ,@(mapcan (lambda (x)
+					 (mapcar (lambda (y) (cons x y))
+						 '((* (-1))(-1 -1) ((-1) (0)) (0 0) ((0) (1)) (1 1) ((1) *))))
+				       '(ratio short-float long-float))
+			     proper-cons improper-cons (vector nil) (array nil);FIXME
+			     ,@(lremove 'gsym (mapcar 'car +r+))))))
+		     (q2 (mapcar
+			  #'orthogonalize
+			  (multiple-value-bind
+			   (x y) (ceiling (1+ (length q1)) fixnum-length)
+			   (let ((r '(gsym)))
+			     (dotimes (i (- y) r) (push `(member ,(gensym)) r)))))))
 
-		 (unless (eq (car (resolve-type (list 'or 'gsym y))) t)
-		   (print (list "Types ill-defined" y)))
+		(unless (eq y t)
+		  (print (list "Types ill-defined" y)))
 
-		 `((defconstant +btp-types1+ ',q1))))));; pad to fixnum-length with spice
+		`((defconstant +btp-types1+ ',q1)
+		  (defconstant +btp-types+  ',(append q1 q2)))))));; pad to fixnum-length with gensym
 
-(defconstant +spice-atoms+ ;FIXME make readable
-  (multiple-value-bind
-   (x y) (ceiling (1+ (length +btp-types1+)) fixnum-length)
-   (let (r)
-     (dotimes (i (- y) r) (push (gensym) r)))))
-
-(defconstant +btp-types+ (append +btp-types1+
-				 (nconc (mapcar (lambda (x) `(member ,x)) +spice-atoms+)
-					`((and gsym (not (member ,@+spice-atoms+)))))))
 
 (defconstant +btp-length+ (length +btp-types+))
 
@@ -183,23 +181,23 @@
 (defconstant +bit-words+ (ceiling +btp-length+ fixnum-length))
 
 
-(defun copy-btp (tp &aux (n (make-btp)))
+(defun copy-btp (tp &aux (n (make-btp))(ns (c-array-self n))(ts (c-array-self tp)))
   (dotimes (i +bit-words+ n)
-    (*fixnum (c-array-self n) i t (*fixnum (c-array-self tp) i nil nil))))
+    (*fixnum ns i t (*fixnum ts i nil nil))))
 
 (defun copy-tp (x m tp d)
-  (cond ((unless (eql d 1)  (equal x *nil-tp*)) nil)
+  (cond (tp (list (copy-btp x) (copy-btp m) tp))
+	((unless (eql d 1)  (equal x *nil-tp*)) nil)
 	((unless (eql d -1) (equal m *t-tp*))     t)
-	((equal m x) (copy-btp x))
-	(tp (list (copy-btp x) (copy-btp m) tp))))
+	((copy-btp x))))
 
-(defun new-tp4 (k x m d z &aux (nz (unless (eql d -1) (ntp-not z)))(j 0));nz
-  (dotimes (i +btp-length+ (progn  (unless (equal x m) z)))
+(defun new-tp4 (k x m d z &aux (nz (unless (eql d -1) (ntp-not z))))
+  (dotimes (i +btp-length+ (unless (equal x m) z))
     (unless (zerop (sbit k i))
       (let ((a (aref *btpa* i)))
-	(cond ((unless (eql d  1) (incf j) (eq +tp-nil+ (ntp-and (cadr a)  z)))
+	(cond ((unless (eql d  1) (eq +tp-nil+ (ntp-and (cadr a)  z)))
 	       (setf (sbit x i) 0))
-	      ((unless (eql d -1) (incf j) (eq +tp-nil+ (ntp-and (cadr a) nz)))
+	      ((unless (eql d -1) (eq +tp-nil+ (ntp-and (cadr a) nz)))
 	       (setf (sbit m i) 1)))))))
 
 (let ((p1 (make-btp))(p2 (make-btp)))
@@ -210,42 +208,42 @@
       p1)))
 
 
-#.`(defun atomic-type (tp)
-     (when (consp tp)
-       (case (car tp)
-	     (,+range-types+
-	      (let* ((d (cdr tp))(dd (cadr d))(da (car d)))
-		(and (numberp da) (numberp dd) (eql da dd) d)))
-	     ((member eql) (let ((d (cdr tp))) (unless (cdr d) d))))))
+(defun atomic-type (tp)
+  (when (consp tp)
+    (case (car tp)
+	  (#.+range-types+
+	   (let* ((d (cdr tp))(dd (cadr d))(da (car d)))
+	     (and (numberp da) (numberp dd) (eql da dd) d)))
+	  ((member eql) (let ((d (cdr tp))) (unless (cdr d) d))))))
 
 (defun singleton-listp (x) (unless (cdr x) (unless (eq t (car x)) x)))
 
 (defun singleton-rangep (x) (when (singleton-listp x) (when (eql (caar x) (cdar x)) (car x))))
 
-#.`(defun singleton-kingdomp (x);sync with member-ld
-     (case (car x)
-	   ((proper-cons improper-cons)
-	    (let ((x (cddar (singleton-listp (cdr x)))))
-	      (when (car x) x)))
-	   (,+range-types+ (singleton-rangep (cdr x)))
-	   (null '(nil));impossible if in +btp-types+
-	   (true (cdr x));impossible if in +btp-types+
-	   ((structure std-instance)
-	    (when (singleton-listp (cdr x)) (unless (s-class-p (cadr x)) (cdr x))))
-	   (,(mapcar 'cdr *all-array-types*) (when (singleton-listp (cdr x)) (when (arrayp (cadr x)) (cdr x))))
-	   (otherwise (singleton-listp (cdr x)))));FIXME others, array....
+(defun singleton-kingdomp (x);sync with member-ld
+  (case (car x)
+	((proper-cons improper-cons)
+	 (let ((x (cddar (singleton-listp (cdr x)))))
+	   (when (car x) x)))
+	(#.+range-types+ (singleton-rangep (cdr x)))
+	(null '(nil));impossible if in +btp-types+
+	(true (cdr x));impossible if in +btp-types+
+	((structure std-instance)
+	 (when (singleton-listp (cdr x)) (unless (s-class-p (cadr x)) (cdr x))))
+	(#.(mapcar 'cdr *all-array-types*) (when (singleton-listp (cdr x)) (when (arrayp (cadr x)) (cdr x))))
+	(otherwise (singleton-listp (cdr x)))));FIXME others, array....
 
-#.`(defun atomic-ntp-array-dimensions (ntp)
-     (unless (or (cadr ntp) (caddr ntp))
-       (when (singleton-listp (car ntp))
-	 (let ((x (caar ntp)))
-	   (case (car x)
-		 (,(mapcar 'cdr *all-array-types*)
-		  (when (singleton-listp (cdr x))
-		    (when (consp (cadr x))
-		      (unless (improper-consp (cadr x))
-			(unless (member-if 'symbolp (cadr x))
-			  (cdr x)))))))))))
+(defun atomic-ntp-array-dimensions (ntp)
+  (unless (or (cadr ntp) (caddr ntp))
+    (when (singleton-listp (car ntp))
+      (let ((x (caar ntp)))
+	(case (car x)
+	      (#.(mapcar 'cdr *all-array-types*)
+		 (when (singleton-listp (cdr x))
+		   (when (consp (cadr x))
+		     (unless (improper-consp (cadr x))
+		       (unless (member-if 'symbolp (cadr x))
+			 (cdr x)))))))))))
 
 (defun atomic-tp-array-dimensions (tp)
   (when (consp tp)
@@ -256,17 +254,17 @@
     (when (singleton-listp (car ntp))
       (singleton-kingdomp (caar ntp)))))
 
-#.`(defun one-bit-btp (x &aux n)
-     (dotimes (i +bit-words+ n)
-       (let* ((y (*fixnum (c-array-self x) i nil nil))
-	      ,@(let* ((m (mod +btp-length+ fixnum-length))(z (~ (<< -1 m))))
-		  (unless (zerop m)
-		    `((y (if (< i ,(1- +bit-words+)) y (& y ,z)))))))
-	 (unless (zerop y)
-	   (let* ((l (1- (integer-length y)))(l (if (minusp y) (1+ l) l)))
-	     (if (unless n (eql y (<< 1 l)))
-		 (setq n (+ (* i fixnum-length) l))
-	       (return nil)))))))
+(defun one-bit-btp (x &aux n)
+  (dotimes (i +bit-words+ n)
+    (let* ((y (*fixnum (c-array-self x) i nil nil))
+	   . #.(let* ((m (mod +btp-length+ fixnum-length))(z (~ (<< -1 m))))
+		 (unless (zerop m)
+		   `((y (if (< i ,(1- +bit-words+)) y (& y ,z)))))))
+      (unless (zerop y)
+	(let* ((l (1- (integer-length y)))(l (if (minusp y) (1+ l) l)))
+	  (if (unless n (eql y (<< 1 l)))
+	      (setq n (+ (* i fixnum-length) l))
+	    (return nil)))))))
 
 (defun atomic-tp (tp)
   (unless (or (eq tp '*) (when (listp tp) (member (car tp) '(returns-exactly values))));FIXME
@@ -278,12 +276,11 @@
 		(cadr (assoc i *atomic-btp-alist*))
 	      (atomic-ntp (caddr tp)))))))))
 
-#.`(defun object-index (x)
-     (etypecase
-      x
-      ,@(let ((i -1)) (mapcar (lambda (x) `(,(car x) ,(incf i)))
-			      (butlast *btps* (- (length +btp-types+) (length +btp-types1+)))))
-      (gsym ,(1- (length *btps*)))));FIXME
+(defun object-index (x)
+  (etypecase
+   x
+   (gsym #.(1- (length +btp-types+)))
+   . #.(let ((i -1)) (mapcar (lambda (x) `(,x ,(incf i))) +btp-types1+))))
 
 
 (defvar *cmp-verbose* nil)
@@ -401,17 +398,17 @@
 		`((,i ,(cons (cadr x) (caddr x))))))
 	    +btp-types+)))
 
-#.`(progn
-     ,@(flet ((slow-sort (fn key)
-			 (do* ((x nil (lreduce (lambda (y x &aux (kx (funcall key x)))
-						 (if (eq (max-bnd kx (funcall key y) fn) kx) x y))
-					       r))
-			       (r *btp-bnds* (lremove x r))
-			       (n nil (cons x n)))
-			      ((not r) (nreverse n)))))
+(progn
+  . #.(flet ((slow-sort (fn key)
+			(do* ((x nil (lreduce (lambda (y x &aux (kx (funcall key x)))
+						(if (eq (max-bnd kx (funcall key y) fn) kx) x y))
+					      r))
+			      (r *btp-bnds* (lremove x r))
+			      (n nil (cons x n)))
+			     ((not r) (nreverse n)))))
 
-	   `((defvar *btp-bnds<* ',(slow-sort '< 'caadr))
-	     (defvar *btp-bnds>* ',(slow-sort '> 'cdadr)))))
+	    `((defvar *btp-bnds<* ',(slow-sort '< 'caadr))
+	      (defvar *btp-bnds>* ',(slow-sort '> 'cdadr)))))
 
 (defun btp-bnds< (x)
   (dolist (l *btp-bnds<*)
@@ -643,7 +640,7 @@
 
 
 
-#.`(defconstant +rn+ ',(mapcar (lambda (x) (cons (cmp-norm-tp (car x)) (cadr x))) +r+))
+(defconstant +rn+ '#.(mapcar (lambda (x) (cons (cmp-norm-tp (car x)) (cadr x))) +r+))
 
 
 (defconstant +tfns1+ '(tp0 tp1 tp2 tp3 tp4 tp5 tp6 tp7 tp8))
@@ -695,15 +692,15 @@
 	     (if (tp-and tp (car x)) (cons (cdr x) y) y))
 	   rl :initial-value nil))))
 
-#.`(progn;FIXME macrolet norm-tp-ints can only compile-file, not compile
-     ,@(mapcar (lambda (x &aux (s (msym x))) 
-		 `(let* ((rl (cdr (assoc ',x +rq+))))
-		    (defun ,s (f x)
-		      (declare (ignore f))
-		      (norm-tp-ints x rl))
-		    (setf (get ',x 'type-propagator) ',s)
-		    (setf (get ',x 'c1no-side-effects) t)))
-	       +tfns1+))
+(progn;FIXME macrolet norm-tp-ints can only compile-file, not compile
+  . #.(mapcar (lambda (x &aux (s (msym x)))
+		`(let* ((rl (cdr (assoc ',x +rq+))))
+		   (defun ,s (f x)
+		     (declare (ignore f))
+		     (norm-tp-ints x rl))
+		   (setf (get ',x 'type-propagator) ',s)
+		   (setf (get ',x 'c1no-side-effects) t)))
+	      +tfns1+))
 
 
 
