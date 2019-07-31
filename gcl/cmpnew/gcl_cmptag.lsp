@@ -150,11 +150,7 @@
   (if v (ldiff *vars* v) *vars*))
 
 (defun mch nil
-;  (mapcar (lambda (x) (list x (var-type x) (var-store x) (mcpt (var-type x)))) (lvars)))
-  (mapcar (lambda (x) (list x (var-type x) (var-store x) (mcpt (var-type x)))) (remove-if-not 'var-p *vars*)))
-
-;; (defun mch nil
-;;   (mapcar (lambda (x) (list x (var-type x) (var-store x))) (remove-if-not 'var-p *vars*)))
+  (mapcan (lambda (x) (when (var-p x) `((,x ,(var-type x) ,(var-store x) ,(mcpt (var-type x)))))) *vars*))
 
 (defun pr (x &aux (y (member-if 'tag-p x))) 
   (nconc (mapcar 'c1arg (ldiff x y)) 
