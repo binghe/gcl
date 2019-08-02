@@ -665,13 +665,24 @@
  (compile eval)
  (defun msym (x) (intern (string-concatenate (string x) "-TYPE-PROPAGATOR") :si)))
 
+(defconstant +ktn+ (mapcar (lambda (x) (cons x (tp-not x))) +kt+))
+
+(defun decidable-type-p (x)
+  (or (atom x)
+      (not (third (third x)))))
+
 (defun type-and-list (tps)
   (mapcan (lambda (x &aux (q x))
-	    (mapcan (lambda (y &aux (z (tp-and q y)))
-		      (when z (setq q (tp-and q (tp-not y))) `((,x ,y ,z))))
-		    +kt+))
+	    (mapcan (lambda (y)
+		      (unless (tp<= q (cdr y))
+			`((,x ,(car y)
+			      ,(cond ((let ((x (type-and (car y) x)))
+					(when (decidable-type-p x)
+					  x)))
+				     ((tp<= (car y) x) (car y))
+				     (x))))))
+		    +ktn+))
 	  tps))
-
 
 (defconstant +rq+
   (mapcar (lambda (x)
@@ -719,21 +730,16 @@
 	(caar +rs+))))
 
 (defun calist2 (a)
-  (let* ((subs (lremove-duplicates
-		(mapcar 'cadr
-			(lremove-if (lambda (x) (eq (cadr x) (caddr x))) a))))
-	 (x (mapcar (lambda (x)
-		      (cons (list x)
-			    (mapcar (lambda (x) (cons (car x) (caddr x)))
-				    (lremove-if-not (lambda (y) (eq (cadr y) x)) a))))
-		    subs))
-	 (ra (lremove-if (lambda (x) (member (cadr x) subs)) a))
-	 (y (mapcar (lambda (x)
-		      (list (mapcar 'cadr
-				    (lremove-if-not (lambda (y) (eq x (car y))) ra))
-			    (cons x nil)))
-		    (lremove-duplicates (mapcar 'car ra)))))
-    (nconc x y)))
+  (lreduce (lambda (y x &aux (z (rassoc (cdr x) y :test 'equal)));;aggregate identical subtypes, e.g. undecidable
+	     (if z (setf (car z) (cons (caar x) (car z)) y y) (setf y (cons x y))))
+	   (mapcar (lambda (x)
+		     (cons (list x);; collect specified types intersecting with this tps
+			   (mapcan (lambda (y &aux (q (caddr y)))
+				     (when (eq x (cadr y))
+				       (list (cons (car y) (unless (eq q x) q)))));;only subtypes smaller than tps
+				   a)))
+		   (lreduce (lambda (y x) (adjoin (cadr x) y)) a :initial-value nil));;unique tps
+	   :initial-value nil))
 
 (defconstant +useful-type-list+ `(nil
 				  null

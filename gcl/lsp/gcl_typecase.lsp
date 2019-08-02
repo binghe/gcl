@@ -78,33 +78,34 @@
 	  ((eq y t) x)
 	  (`(when ,x ,y)))))
 
-#.`(defun msubt (o tp y &aux (tp (cmp-norm-tp tp))(tp (cond ((type>= tp y) #tt)((not (type-and tp y)) #tnil)(tp)))(tp (cmp-unnorm-tp tp))
-		   (otp (normalize-type tp));FIXME normalize, eg structure
-		   (lp (listp otp))(ctp (if lp (car otp) otp))(tp (when lp (cdr otp))))
-     (case ctp
-	   ((or and) (msubt-and-or ctp o tp y))
-	   (not (let ((x (msubt o (car tp) y))) (cond ((not x))((eq x t) nil)(`(not ,x)))))
-	   (satisfies `(,(car tp) ,o))
-	   (otherwise
-            (ecase ctp
-		   ((t nil) ctp)
-		   (,+range-types+ (mibb o tp))
-		   (member (if (cdr tp) `(member ,o ',tp) `(eql ,o ',(car tp))))
-		   (complex* (let* ((x (complex-part-types y))
-				    (f (and-form (msubt 'r (car tp) (car x)) (msubt 'i (cadr tp) (cadr x)))))
-			       (if (consp f) `(let ((r (realpart ,o))(i (imagpart ,o))) ,f) f)))
-		   ((simple-array non-simple-array) (mdb o (cdr tp)))
-		   ((structure structure-object) (if tp `(mss (c-structure-def ,o) ',(car tp)) t))
-		   ((std-instance standard-generic-interpreted-function standard-generic-compiled-function)
-		    (if tp `(when (member ',(car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
-		   ((proper-cons improper-cons)
-		    (and-form
-		     (and-form (simple-type-case `(car ,o) (car tp)) (simple-type-case `(cdr ,o) (cadr tp)))
-		     (if (eq ctp 'proper-cons)
-			 (or (type>= #tproper-list (cmp-norm-tp (cadr tp))) `(not (improper-consp ,o)))
-		       (or (type>= #t(not proper-list) (cmp-norm-tp (cadr tp))) `(improper-consp ,o)))))
-		   ))))
-
+(defun msubt (o tp y &aux
+		(tp (cmp-unnorm-tp (let ((x (cmp-norm-tp tp))) (or (type>= x y) (when (type-and x y) x)))))
+		(otp (normalize-type tp));FIXME normalize, eg structure
+		(lp (listp otp))(ctp (if lp (car otp) otp))(tp (when lp (cdr otp))))
+  (case ctp
+	((or and) (msubt-and-or ctp o tp y))
+	(not (let ((x (msubt o (car tp) y))) (cond ((not x))((eq x t) nil)(`(not ,x)))))
+	(satisfies `(,(car tp) ,o))
+	(member (if (cdr tp) `(member ,o ',tp) `(eql ,o ',(car tp))))
+	((t nil) ctp)
+	(otherwise
+	 (if (type>= (case ctp ((proper-cons improper-cons) #tcons) (otherwise (cmp-norm-tp ctp))) y) ;FIXME
+             (ecase ctp
+		    (#.+range-types+ (mibb o tp))
+		    (complex* (let* ((x (complex-part-types y))
+				     (f (and-form (msubt 'r (car tp) (car x)) (msubt 'i (cadr tp) (cadr x)))))
+				(if (consp f) `(let ((r (realpart ,o))(i (imagpart ,o))) ,f) f)))
+		    ((simple-array non-simple-array) (mdb o (cdr tp)))
+		    ((structure structure-object) (if tp `(mss (c-structure-def ,o) ',(car tp)) t))
+		    ((std-instance standard-generic-interpreted-function standard-generic-compiled-function)
+		     (if tp `(when (member ',(car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
+		    ((proper-cons improper-cons)
+		     (and-form
+		      (and-form (simple-type-case `(car ,o) (car tp)) (simple-type-case `(cdr ,o) (cadr tp)))
+		      (if (eq ctp 'proper-cons)
+			  (or (type>= #tproper-list (cmp-norm-tp (cadr tp))) `(not (improper-consp ,o)))
+			(or (type>= #t(not proper-list) (cmp-norm-tp (cadr tp))) `(improper-consp ,o))))))
+	   (simple-type-case o otp)))));;undecidable aggregation support
 
 
 (defun spec-tp (f tp y)
