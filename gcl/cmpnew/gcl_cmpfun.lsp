@@ -253,6 +253,9 @@
 		      (ignorable-pivot 
 		       (cadr args) 
 		       (type>= (info-type (cadar nargs)) (info-type (cadadr nargs)))))))
+	    ((let ((x (get-vbind (car nargs)))(y (get-vbind (cadr nargs))))
+	       (when (and x (not (eq x +opaque+)) (eq x y))
+		 (c1t))))
 	    (r)))))
 	   
 (dolist (l `(eq eql equal equalp))
