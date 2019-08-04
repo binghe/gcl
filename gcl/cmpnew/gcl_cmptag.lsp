@@ -1051,9 +1051,8 @@
       (c2tagbody-body body))))
 
 (defun mcpt (tp &aux (a (car (atomic-tp tp))))
-  (if (consp a)
-      (subst (copy-list a) a tp);rplacd, etc.
-    tp))
+  (when (consp a)
+    (subst (copy-list a) a tp)));rplacd, etc.
 
 (defun tag-throw (tag)
   (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x))) 
