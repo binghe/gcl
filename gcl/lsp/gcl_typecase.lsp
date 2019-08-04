@@ -17,8 +17,6 @@
 
 (defmacro infer-tp (x y z) (declare (ignore x y)) z)
 
-(defvar *expt* nil)
-
 (defun mib (o l &optional f)
   (let* ((a (atom l))
 	 (l (if a l (car l)))
@@ -108,12 +106,9 @@
 	   (simple-type-case o otp)))));;undecidable aggregation support
 
 
-(defun spec-tp (f tp y)
-  (if *expt* (msubt f tp y) `(typep ,f ',tp)))
-
 (defun branch (tpsff x f y &aux (q (cdr x))(x (car x))(z (cddr (assoc x tpsff))))
   (if q
-      `((,(spec-tp f (tp-type q) y) ,(mkinfm f q z)))
+      `((,(msubt f (tp-type q) y) ,(mkinfm f q z)))
     `((t ,(?-add 'progn z)))))
 
 
@@ -135,18 +130,18 @@
 	 (tps (mapcar 'cmp-norm-tp (mapcar 'car ff)))
 	 (z nil) (tps (mapcar (lambda (x) (prog1 (type-and x (tp-not z)) (setq z (type-or1 x z)))) tps))
 	 (tpsff (mapcan (lambda (x y) (when x (list (cons x y)))) tps ff))
-	 (a (type-and-list (mapcar 'car tpsff)))(c (calist2 a))
-	 (fn (best-type-of c))
 	 (oth (unless (eq z t) (mkinfm f (tp-not z) (cdar o))))
 	 (nb (>= (+ (length tpsff) (if oth 1 0)) 2))
-	 (fm (if nb `(case (,fn ,f)
-			   ,@(branches f tpsff (cdr (assoc fn +rs+)) o c)
-			   ,@(when oth `((otherwise ,oth))))
+	 (fm (if nb (let* ((c (calist2 (type-and-list (mapcar 'car tpsff))))
+			   (fn (best-type-of c)))
+		      `(case (,fn ,f)
+			     ,@(branches f tpsff (cdr (assoc fn +rs+)) o c)
+			     ,@(when oth `((otherwise ,oth)))))
 	       (if z (mkinfm f (caar tpsff) (cddar tpsff)) oth))))
     (if (when nb bind) `(let ,bind ,fm) fm)))
 
 (defun simple-type-case (x type)
-  (let ((*expt* t)) (funcall (get 'typecase 'compiler-macro-prop) `(typecase ,x (,type t)) nil)))
+  (funcall (get 'typecase 'compiler-macro-prop) `(typecase ,x (,type t)) nil))
 
 (defun ?-add (x tp) (if (atom tp) tp (if (cdr tp) (cons x tp) (car tp))))
 
