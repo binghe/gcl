@@ -76,8 +76,10 @@
 ;;      ((or function cons array))
 ;;      (otherwise (c1constant-value a (when (symbolp a) (symbol-package a)))))))
 
-(defun c1expr-avct (res &aux (atp (atomic-tp (info-type (cadr res)))))
-  (or (when (ignorable-form res) (atomic-type-constant-value atp)) res))
+(defun c1expr-avct (res)
+  (or (when (ignorable-form res)
+	(atomic-type-constant-value (atomic-tp (info-type (cadr res)))))
+      res))
 
 (defun c1expr (form)
   (setq form (catch *cmperr-tag*
