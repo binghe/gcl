@@ -697,6 +697,9 @@
   (when (var-p v) (eq (var-name v) +fun+)))
 (defun is-first-var (v)
   (when (var-p v) (eq (var-name v) +first+)))
+(dolist (l '(is-narg-var is-mv-var is-fun-var is-first-var))
+  (si::putprop l t 'cmp-inline))
+
 
 (defun list-split (x y &optional iy niy (cx nil cxp));FIXME intersection/set-difference bootstrap
   (cond (cxp (if (or (not y) (eq cx (car y))) y (list-split x (cdr y) iy niy cx)))
