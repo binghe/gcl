@@ -297,7 +297,7 @@
       (cmp-norm-tp (car (member x '(long-float short-float) :test 'typep)));FIXME
     (let* ((i (object-index x))(z (caddr (svref *btpa* i))))
       (if (assoc i *atomic-btp-alist*) z
-	(list z *nil-tp* (nprocess-type (normalize-type `(member ,x))))))))
+	(copy-tp z *nil-tp* (nprocess-type (normalize-type `(member ,x))) 0)))))
 
 (defvar *atomic-type-hash* (make-hash-table :test 'eql))
 
