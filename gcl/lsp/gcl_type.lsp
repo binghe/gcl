@@ -186,7 +186,7 @@
     (*fixnum ns i t (*fixnum ts i nil nil))))
 
 (defun copy-tp (x m tp d)
-  (cond (tp (list (copy-btp x) (copy-btp m) tp))
+  (cond (tp (list* (copy-btp x) (copy-btp m) tp (let ((a (atomic-ntp tp))) (when a (list a)))))
 	((unless (eql d 1)  (equal x *nil-tp*)) nil)
 	((unless (eql d -1) (equal m *t-tp*))     t)
 	((copy-btp x))))
@@ -268,13 +268,12 @@
 
 (defun atomic-tp (tp)
   (unless (or (eq tp '*) (when (listp tp) (member (car tp) '(returns-exactly values))));FIXME
-    (when tp
-      (unless (eq tp t)
+    (unless (eq tp t)
+      (if (listp tp)
+	  (fourth tp)
 	(let ((i (one-bit-btp (xtp tp))))
 	  (when i
-	    (if (atom tp)
-		(cadr (assoc i *atomic-btp-alist*))
-	      (atomic-ntp (caddr tp)))))))))
+	    (cadr (assoc i *atomic-btp-alist*))))))))
 
 (defun object-index (x)
   (etypecase
