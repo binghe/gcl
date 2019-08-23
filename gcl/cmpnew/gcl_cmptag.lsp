@@ -128,7 +128,10 @@
 ;; 	   (ref-tags tref tags l)));FIXME?
 ;; 	(t (ref-tags (car form) tags l) (ref-tags (cdr form) tags l))))
 
+
+
 ;FIXME separate pass with no repetitive allocation
+(defvar *ft* nil)
 (defvar *bt* nil)
 
 (defun tst (y x &aux (z (eq (car x) y))) 
@@ -152,10 +155,35 @@
 (defun mch nil
   (mapcan (lambda (x) (when (var-p x) `((,x ,(var-type x) ,(var-store x) ,(mcpt (var-type x)))))) *vars*))
 
-(defun pr (x &aux (y (member-if 'tag-p x))) 
-  (nconc (mapcar 'c1arg (ldiff x y)) 
-	 (when y (let* ((z (pop y))(*bt* (cons (cons z (mch)) *bt*))) (pt z y)))))
+(defun or-mch (l &optional b)
+  (mapc (lambda (x &aux (y x)(v (pop x))(tp (pop x))(st (pop x))(m (car x))
+		   (t1 (type-or1 (var-type v) (or m tp)))
+		   (t1 (if b (bbump-tp t1) t1))
+		   (t1 (type-and (var-dt v) t1)))
+	  (setf (cadr y) t1
+		(caddr y) (if (eq st (var-store v)) st +opaque+)
+		(cadddr y) (mcpt t1)))
+	l))
 
+(defun mch-set (z l)
+  (mapc (lambda (x)
+	  (keyed-cmpnote (list (var-name (car x)) 'tagbody-label)
+			 "Initializing ~s at label ~s:~%   type from ~s to ~s,~%   store from ~s to ~s"
+			 (car x) (tag-name z) (var-type (car x)) (cadr x)
+			 (var-store (car x)) (if (eq (var-store (car x)) (caddr x)) (caddr x) +opaque+))
+	  (do-setq-tp (car x) 'mch-set (cadr x))
+	  (setf (var-store (car x)) (if (eq (var-store (car x)) (caddr x)) (caddr x) +opaque+)))
+	l))
+
+(defun mch-z (z i &aux (f (cdr (assoc z *ft*))))
+  (if f (mch-set z (if i (or-mch f) f)) (mch)))
+
+(defun pr (x &aux (y (member-if 'tag-p x))(z (mapcar 'c1arg (ldiff x y)))(i (when z (info-type (cadar (last z))))))
+  (nconc z
+	 (when y
+	   (let* ((z (pop y))
+		  (*bt* (cons (cons z (mch-z z i)) *bt*)))
+	     (pt z y)))))
 
 (defconstant +ttl-tag-name+ (gensym "TTL"))
 
@@ -174,6 +202,7 @@
   (let* ((body (mapcar (lambda (x) (if (or (symbolp x) (integerp x)) (make-tag :name x) x)) body))
 	 (tags (remove-if-not 'tag-p body))
 	 (body (let* ((*tags* (append tags *tags*))
+		      (*ft* (nconc (mapcar 'list tags) *ft*))
 		      (*ttl-tags* (nttl-tags body)))
 		  (pr body)))
 	 (body (mapc (lambda (x) (unless (tag-p x) (ref-tags x tags))) body))
@@ -302,23 +331,14 @@
   (when (consp a)
     (subst (copy-list a) a tp)));rplacd, etc.
 
-(defun tag-throw (tag)
-  (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x))) 
-			(and (type>= (type-and (var-dt v) tp) (var-type v)) (eq st (var-store v)) (if m (equal tp m) t)))
-		      (cdr (assoc tag *bt*)))))
-    (when v (throw tag (mapc (lambda (x &aux (v (pop x))(y x)(tp (pop x))(st (pop x))(m (car x))
-					(t1 (type-and (var-dt v) (bbump-tp (type-or1 (or m tp) (var-type v))))))
-			       (setf (car y) t1 y (cdr y)
-				     (car y) (if (eq st (var-store v)) st +opaque+) y (cdr y)
-				     (car y) (mcpt t1))) v)))))
-
-;; (defun tag-throw (tag)
-;;   (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (car x))) 
-;; 			(and (type>= tp (var-type v)) (eq st (var-store v))))
-;; 		      (cdr (assoc tag *bt*)))))
-;;     (when v (throw tag (mapc (lambda (x &aux (v (pop x))(y x)(tp (pop x))(st (car x)))
-;; 			       (setf (car y) (bbump-tp (type-or1 tp (var-type v))) y (cdr y)
-;; 				     (car y) (if (eq st (var-store v)) st +opaque+))) v)))))
+(defun tag-throw (tag &aux (b (assoc tag *bt*)))
+  (if b
+      (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x)))
+			    (and (type>= (type-and (var-dt v) tp) (var-type v)) (eq st (var-store v)) (if m (equal tp m) t)))
+			  (cdr b))))
+	(when v (throw tag (or-mch v t))))
+    (let ((f (assoc tag *ft*)))
+      (or (or-mch (cdr f)) (setf (cdr f) (mch))))))
 
 (defun c1go (args &aux (name (car args)) ccb clb inner)
   (cond ((endp args) (too-few-args 'go 1 0))
