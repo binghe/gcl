@@ -1177,7 +1177,7 @@
 	  ((intersection-p '(&key &rest) (cadr src)))
 	  ((member-if-not (lambda (x) (type>= (car x) (cdr x))) 
 			  (mapcar (lambda (x y) (cons (info-type (cadr x)) (coerce-to-one-value y))) fms (get-arg-types fun))))
-	  ((infer-tp-p src))
+	  ((when (exit-to-fmla-p) (infer-tp-p src)))
 	  ((< (cons-count src) 30)))));100
 
 (dolist (l '(upgraded-array-element-type row-major-aref row-major-aset si::set-array array-element-type))
