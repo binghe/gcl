@@ -135,7 +135,8 @@
 	(cond
 	 (*multiply-stacks* (setq *multiply-stacks* nil))
 	 ((stat "init.lsp") (load "init.lsp"))))
-      (and (functionp *top-level-hook*)(funcall   *top-level-hook*)))
+      (when (if (symbolp *top-level-hook*) (fboundp *top-level-hook*) (functionp *top-level-hook*))
+	(funcall *top-level-hook*)))
 
     (when (boundp '*system-banner*)
       (format t *system-banner*)
