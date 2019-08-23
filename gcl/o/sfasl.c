@@ -59,6 +59,21 @@ find_sym_ptable(const char *name) {
 
 }
 
+DEFUN("FIND-SYM-PTABLE",object,fSfind_sym_ptable,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  char c;
+  struct node *a;
+
+  check_type_string(&x);
+
+  c=x->st.st_self[VLEN(x)];
+  x->st.st_self[VLEN(x)]=0;
+  a=find_sym_ptable(x->st.st_self);
+  x->st.st_self[VLEN(x)]=c;
+
+  return (object)(a ? a->address : 0);
+
+}
+
 #endif
 
 #ifdef SEPARATE_SFASL_FILE
