@@ -1143,11 +1143,16 @@
 (defun exit-to-fmla-p nil
   (eq (last *c1exit*) +fmla+))
 
+(defun co1or-arg-tp (arg)
+  (let ((x (with-restore-vars (c1expr arg))))
+    (if (member-if 'is-ttl-tag (info-ref (cadr x)))
+	#tt (info-type (cadr x)))))
+
 (defun co1or (fn args)
   (declare (ignore fn))
   (let* ((tp (when (and args (exit-to-fmla-p)) #t(member t)))
 	 (arg (pop args))
-	 (tp (or tp (info-type (cadr (with-restore-vars (c1expr arg))))))
+	 (tp (or tp (co1or-arg-tp arg)))
 	 (atp (atomic-tp (type-and tp #t(not null)))))
     (when (atomic-type-constant-value atp);FIXME make sure this is never a binding
       (c1expr `(if ,arg ',(car atp) ,@(when args (if (cdr args) `((or ,@args)) args)))))))
