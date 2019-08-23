@@ -143,7 +143,7 @@
 
 (defun code-condition (code)
   (or (reduce (lambda (y x) (if (subtypep y x) (si::si-class-name x) y))
-	  (reduce 'intersection
+	  (reduce (lambda (&rest r) (when r (apply 'intersection r)))
 		  (mapcar (lambda (x) (subclasses (si::si-find-class (car x))))
 			  (remove code +fe-list+ :key 'caddr :test-not 'logtest)))
 	  :initial-value nil)
