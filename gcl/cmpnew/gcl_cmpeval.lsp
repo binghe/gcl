@@ -2400,7 +2400,7 @@
 (defun sv-wrap (x) `(symbol-value ',x))
 
 (defun infinite-val-symbol (val)
-  (or (car (member val '(+inf -inf nan +sinf -sinf) :key 'symbol-value))
+  (or (car (member val '(+inf -inf nan +sinf -sinf snan) :key 'symbol-value))
       (baboon)))
 
 (defun printable-long-float (val)
@@ -2412,6 +2412,15 @@
 	    (add-object (if nval (cons '|#,| nval) val)))))
   
 
+(defun printable-short-float (val)
+  (labels ((scl (val s) `(* ,(/ val (symbol-value s)) ,s)))
+	  (let ((nval
+		 (cond ((not (isfinite val)) `(symbol-value ',(infinite-val-symbol val)))
+		       ((> (abs val) (/ most-positive-short-float 2)) (scl val 'most-positive-short-float))
+		       ((< 0.0 (abs val) (* least-positive-normalized-short-float 1.0d20)) (scl val 'least-positive-normalized-short-float)))))
+	    (add-object (if nval (cons '|#,| nval) val)))))
+
+
 (defun ltvp (val)
   (when (consp val) (eq (car val) '|#,|)))
 
@@ -2422,11 +2431,10 @@
    (immfix                             `(fixnum-value nil ,val))
    (character                          `(character-value nil ,(char-code val)))
    (long-float                         `(vv ,(printable-long-float val)))
-   ((or fixnum float complex)          `(vv ,(add-object val)))
-   (otherwise                          (when (or always
-						 (ltvp val)
-						 (when (arrayp val) (unless (si::staticp val) (eq (array-element-type val) t))))
-					     `(vv ,(add-object val))))))
+   (short-float                        `(vv ,(printable-short-float val)));FIXME
+   ((or fixnum complex)                `(vv ,(add-object val)))
+   (otherwise                          (when (or always (ltvp val))
+					 `(vv ,(add-object val))))))
 
 (defun c1constant-value (val always &aux (val (if (exit-to-fmla-p) (not (not val)) val)))
   (case 
