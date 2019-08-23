@@ -74,7 +74,7 @@ int l;
 */
 object
 make_simple_string(s)
-char *s;
+const char *s;
 {
 	int l, i;
 	char *p;
