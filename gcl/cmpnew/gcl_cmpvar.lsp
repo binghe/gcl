@@ -582,8 +582,9 @@
 
 (defun llvar-p (v)
   (when (eq (var-kind v) 'lexical)
-    (let ((x (member v *vars*))(y (member-if-not 'var-p *vars*)))
-      (tailp y x))))
+    (let ((x (member v *vars*)))
+      (when x
+	(tailp (member-if-not 'var-p *vars*) x)))))
 
 (defun do-setq-tp (v form t1)
   (unless nil ; *compiler-new-safety* FIXME

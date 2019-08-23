@@ -98,7 +98,7 @@
 ;(defmacro vl-type (x) `(var-type (car (third ,x))))  ; Won't work, ref might be across a function boundary
 (defmacro vl-type (x) `(itp ,x))
 (defmacro itp (x) `(info-type (second ,x)))
-(defmacro vlp (x) `(and (eq 'var (car ,x)) (member (car (third ,x)) *vars*)))
+(defmacro vlp (x) `(and (eq 'var (car ,x)) (llvar-p (car (third ,x)))))
 ;(defmacro vlp (x) `(and (eq 'var (car ,x)) (eq (var-kind (car (third ,x))) 'lexical)))
 
 (defun get-object-value (c1x)
@@ -232,23 +232,29 @@
 	  ((inline decl-body let let*) (fmla-infer-tp (car (last fmla))))
 	  (block 
 	   (let ((*infer-tags* (cons (cons (third fmla) (fmla-infer-tp (fourth fmla))) *infer-tags*)))
-	     (labels ((fmla-walk (f) (cond ((atom f))
-					   ((when (eq (car f) 'return-from) (eq (caddr f) (third fmla))) (fmla-infer-tp f))
-					   (t (fmla-walk (car f)) (fmla-walk (cdr f))))))
+	     (labels ((fmla-walk (f)
+				 (cond ((atom f))
+				       ((when (eq (car f) 'return-from)
+					  (eq (caddr f) (third fmla)))
+					(fmla-infer-tp f))
+				       (t (fmla-walk (car f)) (fmla-walk (cdr f))))))
 		     (fmla-walk (fourth fmla)))
 	     (fmla-clean (cdar *infer-tags*))))
 	  (progn (fmla-infer-tp (car (last (third fmla)))))
 	  (return-from 
 	   (let ((x (assoc (third fmla) *infer-tags*)))
-	     (when x (let ((y (fmla-infer-tp (seventh fmla)))) (setf (cdr x) (fmla-if1 nil (cdr x) y))))))
+	     (when x
+	       (let ((y (fmla-infer-tp (seventh fmla))))
+		 (setf (cdr x) (fmla-if1 nil (cdr x) y))))))
 	  (infer-tp (let* ((tp (info-type (cadr (fifth fmla))))
 			   (v (car (third (third fmla))))
-			   (i (when (member v *vars*)
+			   (i (when (llvar-p v)
 				(cond ((type>= #tnull tp) (list (list* v nil (fourth fmla))))
 				      ((type>= #t(not null) tp) (list (list* v (fourth fmla) nil)))))))
 		      (append i (fmla-infer-tp (fifth fmla)))))
 	  (if (apply 'fmla-if (cddr fmla)))
-	  (var (when (member (car (third fmla)) *vars*) (list (cons (car (third fmla)) (cons #t(not null) #tnull)))))
+	  (var (when (llvar-p (car (third fmla)))
+		 (list (cons (car (third fmla)) (cons #t(not null) #tnull)))))
 	  (setq (fmla-infer-tp (fourth fmla)));FIXME set var too, and in call global
 	  (call-global
 	   (let* ((fn (third fmla)) (rfn (cdr (assoc fn +bool-inf-op-list+)))
@@ -258,9 +264,9 @@
 		  (l (length args))
 		  (pt (rassoc fn +cmp-type-alist+)));FIXME +cmp-type-alist+ (get fn 'si::predicate-type)
 	     (cond ((and (= l 1) (vlp (first args)) pt) 
-		    (list (cons (car (third (first args))) (cons (car pt) (tp-not (car pt))))));(cmp-norm-tp pt); FIXME tp-not
+		    (list (cons (car (third (first args))) (cons (car pt) (tp-not (car pt))))))
 		   ((and (= l 2) (eq fn 'typep) (vlp (first args))
-			 (let ((tp (cmp-norm-tp (get-object-value (second args)))))
+			 (let ((tp (cmp-norm-tp (get-object-value (second args)))));FIXME atomic-tp
 			   (when tp (list (cons (car (third (first args))) (cons tp (tp-not tp))))))))
 		   ((and (= l 2) rfn)
 		    (nconc
