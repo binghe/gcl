@@ -412,7 +412,7 @@ calc_space(ul *ns,ul *sl,Sym *sym1,Sym *syme,const char *st1,Sym *d1,Sym *de,con
 
   for (sym=sym1;sym<syme;sym++) {
     
-    if (!LOAD_SYM(sym))
+    if (!LOAD_SYM(sym,st1))
       continue;
 
     if (d1) {
@@ -438,7 +438,7 @@ load_ptable(struct node **a,char **s,Sym *sym1,Sym *syme,const char *st1,
 
   for (sym=sym1;sym<syme;sym++) {
 
-    if (!LOAD_SYM(sym) || (LOCAL_SYM(sym) ? !lp : lp))
+    if (!LOAD_SYM(sym,st1) || (EXT_SYM(sym,st1) ? lp : !lp))
       continue;
 
     if (d1) {
