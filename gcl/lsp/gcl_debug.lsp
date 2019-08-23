@@ -182,7 +182,7 @@
 (defun dbl ()
   (break-level nil nil))
 
-(defun stream-name (str) (namestring (pathname str)))
+(defun stream-name (str) (when (typep str 'pathname-designator) (namestring (pathname str))))
 
 (defstruct instream stream (line 0 :type fixnum) stream-name)
 
