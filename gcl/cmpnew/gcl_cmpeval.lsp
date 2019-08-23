@@ -1429,7 +1429,7 @@
 
     (do ((a at (if (eq '* (car a)) a (cdr a)))
 	 (r args (cdr r))
-	 (f nargs (cdr f)))
+	 (f (if last (butlast nargs) nargs) (cdr f)))
 	((or (endp f) (endp a)) nargs)
 	(maybe-reverse-type-prop (car a) (car f)))))
 
