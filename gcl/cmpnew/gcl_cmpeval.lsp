@@ -393,6 +393,10 @@
 (si::putprop 'gcd 'binary-nest 'si::compiler-macro-prop)
 (si::putprop 'lcm 'binary-nest 'si::compiler-macro-prop)
 
+(si::putprop '- 'binary-nest 'si::compiler-macro-prop)
+(si::putprop '/ 'binary-nest 'si::compiler-macro-prop)
+
+
 (defun multiple-value-bind-expander (form env)
   (declare (ignore env))
   (if (and (consp (caddr form)) (eq (caaddr form) 'values))
@@ -415,20 +419,6 @@
 ;; 	((constantp (cadr form)) `(,(cmp-eval (cadr form)) ,@(cddr form)))
 ;; 	(form)))
 ;; (si::putprop 'funcall 'funcall-expander 'si::compiler-macro-prop)
-
-(defun invert-binary-nest (form env)
-  (declare (ignore env))
-  (if (> (length form) 3)
-      (let* ((op (car form))
-	     (recip (cond
-		     ((eq op '-) '+)
-		     ((eq op '/) '*)
-		     (t (error "Bad op ~S~%" op)))))
-	(list op (cadr form) (cons recip (cddr form))))
-    form))
-
-(si::putprop '- 'invert-binary-nest 'si::compiler-macro-prop)
-(si::putprop '/ 'invert-binary-nest 'si::compiler-macro-prop)
 
 (defun logical-binary-nest (form env)
   (declare (ignore env))
