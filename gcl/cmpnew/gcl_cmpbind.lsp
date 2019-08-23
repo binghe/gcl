@@ -79,15 +79,10 @@
                ((let ((*value-to-go* (list 'vs (var-ref var))))
                      (c2expr* init)))))
         (SPECIAL
-         (let ((*value-to-go* (list 'bds-bind (var-loc var))))
-	   (c2expr* init))
-         (push 'bds-bind *unwind-exit*))
+         (let* ((loc `(cvar ,(cs-push t))) (*value-to-go* loc))
+	   (c2expr* init)
+	   (c2bind-loc var loc)))
 	(t
 	 (let ((*value-to-go* (list 'var var nil)))
 	   (unless (assoc (var-kind var) +wt-loc-alist+) (baboon));FIXME???
 	   (c2expr* init)))))
-
-
-(defun set-bds-bind (loc vv)
-  (setq *bds-used* t)
-  (wt-nl "bds_bind(" (vv-str vv) "," loc ");"))

@@ -100,8 +100,10 @@
 
 (defun add-object2 (object)
   (let* ((init (when (contains-sharp-comma object)
-		 (if (when (consp object) (eq (car object) '|#,|))
-		     (cdr object) (string-to-object (wt-to-string object)))))
+		 (cond ((when (consp object) (eq (car object) '|#,|)) (cdr object))
+		       ((let* ((x (when (si::si-classp object) (si::valid-class-name object))))
+			  (when x `(si::si-find-class ',x))));FIXME
+		       ((string-to-object (wt-to-string object))))))
 	 (object (if (when (consp init) (eq (car init) 'nani)) (nani (cadr init)) object)))
     (cond ((gethash object *objects*))
 	  ((push-data-incf (unless init object))

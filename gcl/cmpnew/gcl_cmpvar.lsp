@@ -697,7 +697,9 @@
   (declare (ignore c1fv))
   (cond ((or (eq t (var-ref v)) (consp (var-ref v)) (var-cb v) (member (var-kind v) '(special global)));FIXME
 	 (push 'var vref)
-	 (let ((*value-to-go* vref)) (c2expr* form))
+	 (let* ((loc `(cvar ,(cs-push t))))
+	   (let ((*value-to-go* loc)) (c2expr* form))
+	   (let ((*value-to-go* vref)) (set-loc loc)))
 	 (case (car form)
 	       (LOCATION (c2location (caddr form)))
 	       (otherwise (unwind-exit vref))))
