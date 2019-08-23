@@ -35,7 +35,7 @@
   (let ((s (typep z 'short-float)))
     (etypecase 
      x
-     (short-float (if (typep z 'long-float) (* 1.0 x) x))
+     (short-float (if s x (* 1.0 x)))
      (long-float  (if s (long-to-short x) x))
      (fixnum      (if s (* 1.0s0 x) (* 1.0 x)))
      (bignum      (let ((z (big-to-double x)))   (if s (long-to-short z) z)))
