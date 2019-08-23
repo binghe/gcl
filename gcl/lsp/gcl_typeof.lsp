@@ -1,35 +1,5 @@
 (in-package :si)
 
-(defun array-type-of (array-tp array)
-  (list array-tp (nth (c-array-elttype array) +array-types+) (array-dimensions array)))
-
-(defun simple-array-type-of (array) (array-type-of 'simple-array array))
-(defun non-simple-array-type-of (array) (array-type-of 'non-simple-array array))
-
-(defun integer-type-of (x) `(integer ,x ,x))
-(defun ratio-type-of (x) `(ratio ,x ,x))
-(defun short-float-type-of (x) `(short-float ,x ,x))
-(defun long-float-type-of (x) `(long-float ,x ,x))
-
-(defun complex-type-of (cmp)
-  (declare (complex cmp));FIXME
-  `(complex* ,(type-of (realpart cmp)) ,(type-of (imagpart cmp))))
-
-(defun structure-type-of (str)
-  (sdata-name (c-structure-def str)))
-
-(defun valid-class-name (class &aux (name (si-class-name class)))
-  (when (eq class (si-find-class name nil))
-    name))
-(setf (get 'valid-class-name 'cmp-inline) t)
-
-(defun std-instance-type-of (x)
-  (let* ((c (si-class-of x))) (or (valid-class-name c) c)))
-
-(defun cons-type-of (x);recurse?
-  (if (improper-consp x) 'improper-cons 'proper-cons))
-
-
 (defconstant +vtps+ (mapcar (lambda (x) (list x (intern (string-concatenate "VECTOR-"  (string x))))) +array-types+))
 (defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+))
 (defconstant +vtpsn+ `((nil vector-nil) ,@+vtps+))
@@ -109,25 +79,59 @@
 
 (defconstant +tfns1+ '(tp0 tp1 tp2 tp3 tp4 tp5 tp6 tp7 tp8))
 
-#.`(progn
-     ,@(let ((x (lreduce (lambda (y x) (if (> (cadr x) (cadr y)) x y))
-	   (mapcar (lambda (x &aux (z (lremove-duplicates
-				       (mapcar (lambda (q) (funcall x (eval (cadr q)))) +nr+))))
-		     (list x (length z) (lreduce 'min z) (lreduce 'max z)))
-		   +tfns1+) :initial-value (list nil 0))))
-	 (unless (eql (cadr x) (length +nr+))
-	   (print "type-of functions too general"))
-	 `((defvar *type-of-dispatch*
-	     (make-vector t ,(1+ (- (cadddr x) (caddr x))) nil nil nil 0 nil nil))
-	   (defmacro tp7-ind (x) `(- (,',(car x) ,x) ,,(caddr x))))))
+(defconstant +tfnsx+
+  '#.(let ((x (lreduce (lambda (y x)
+			 (if (> (cadr x) (cadr y)) x y))
+		       (mapcar (lambda (x &aux (z (lremove-duplicates
+						   (mapcar (lambda (q)
+							     (funcall x (eval (cadr q)))) +nr+))))
+				 (list x (length z) (lreduce 'min z) (lreduce 'max z)))
+			       +tfns1+) :initial-value (list nil 0))))
+       (unless (eql (cadr x) (length +nr+))
+	 (print "type-of functions too general"))
+       x))
+
+
+(defconstant +type-of-dispatch+
+  (make-vector t #.(1+ (- (cadddr +tfnsx+) (caddr +tfnsx+))) nil nil nil 0 nil nil))
+
+(defmacro tp7-ind (x) `(- (#.(car +tfnsx+) ,x) #.(caddr +tfnsx+)))
+
+(defun array-type-of (array-tp array)
+  (list array-tp (nth (c-array-elttype array) +array-types+) (array-dimensions array)))
+
+(defun simple-array-type-of (array) (array-type-of 'simple-array array))
+(defun non-simple-array-type-of (array) (array-type-of 'non-simple-array array))
+
+(defun integer-type-of (x) `(integer ,x ,x))
+(defun ratio-type-of (x) `(ratio ,x ,x))
+(defun short-float-type-of (x) `(short-float ,x ,x))
+(defun long-float-type-of (x) `(long-float ,x ,x))
+
+(defun complex-type-of (cmp)
+  (declare (complex cmp));FIXME
+  `(complex* ,(type-of (realpart cmp)) ,(type-of (imagpart cmp))))
+
+(defun structure-type-of (str)
+  (sdata-name (c-structure-def str)))
+
+(defun valid-class-name (class &aux (name (si-class-name class)))
+  (when (eq class (si-find-class name nil))
+    name))
+(setf (get 'valid-class-name 'cmp-inline) t)
+
+(defun std-instance-type-of (x)
+  (let* ((c (si-class-of x))) (or (valid-class-name c) c)))
+
+(defun cons-type-of (x);recurse?
+  (if (improper-consp x) 'improper-cons 'proper-cons))
 
 
 (mapc (lambda (x &aux (z (caddr x)))
-	(setf (aref *type-of-dispatch* (tp7-ind (eval (cadr x))))
+	(setf (aref +type-of-dispatch+ (tp7-ind (eval (cadr x))))
 	      (if z (symbol-function (intern (string-concatenate (string z) "-TYPE-OF")))
 		(car x))))
       +nr+)
 		
-(defun type-of (x &aux (z (aref *type-of-dispatch* (tp7-ind x))))
-  (declare ((vector t) *type-of-dispatch*));FIXME
+(defun type-of (x &aux (z (aref +type-of-dispatch+ (tp7-ind x))))
   (if (functionp z) (values (funcall z x)) z))
