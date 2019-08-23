@@ -27,81 +27,22 @@
 
 (export '(clines defentry defcfun)); defla
 
-;(defconstant +keyword-package+ (find-package 'keyword))
-;(defvar *features*)
 
-;; (defun eval-feature (x)
-;;   (cond ((atom x)
-;;          (member x *features*))
-;;         ((eq (car x) :and)
-;;          (dolist (x (cdr x) t) (unless (eval-feature x) (return nil))))
-;;         ((eq (car x) :or)
-;;          (dolist (x (cdr x) nil) (when (eval-feature x) (return t))))
-;;         ((eq (car x) :not)
-;; 	 (not (eval-feature (cadr x))))
-;; 	(t (error "~S is not a feature expression." x))))
+(defun lisp-implementation-type nil "GNU Common Lisp (GCL)")
 
-;; ;;; Revised by Marc Rinfret.
-;; (defun sharp-+-reader (stream subchar arg)
-;;   (if (eval-feature (let ((*read-suppress* nil) 
-;; 			  (*read-base* 10.)
-;; 			  (*package* +keyword-package+))
-;; 		      (read stream t nil t)))
-;;       (values (read stream t nil t))
-;;       (let ((*read-suppress* t)) (read stream t nil t) (values))))
+(defun machine-type nil nil)
 
-;; (set-dispatch-macro-character #\# #\+ 'sharp-+-reader)
-;; (set-dispatch-macro-character #\# #\+ 'sharp-+-reader
-;;                               (si::standard-readtable))
+(defun machine-version nil (machine-type))
 
-;; (defun sharp---reader (stream subchar arg)
-;;   (if (eval-feature (let ((*read-suppress* nil)
-;; 			  (*read-base* 10.)
-;; 			  (*package* +keyword-package+))
-;;                          (read stream t nil t)))
-;;       (let ((*read-suppress* t)) (read stream t nil t) (values))
-;;       (values (read stream t nil t))))
+(defun machine-instance nil (machine-type))
 
-;; (set-dispatch-macro-character #\# #\- 'sharp---reader)
-;; (set-dispatch-macro-character #\# #\- 'sharp---reader
-;;                               (si::standard-readtable))
+(defun software-version nil nil)
 
+(defun software-version nil (software-type))
 
+(defun short-site-name nil nil)
 
-(defun lisp-implementation-type () "GNU Common Lisp (GCL)")
-
-(defun machine-type () #+sun "SUN"
-  #+hp-ux "HP-UX"
-  #+eclipse "ECLIPSE"
-  #+vax "VAX"
-  )
-				 
-;(defun machine-type () "DEC VAX11/780")
-
-(defun machine-version () (machine-type))
-;(defun machine-version () nil)
-
-(defun machine-instance () (machine-type))
-;(defun machine-instance () nil)
-
-(defun software-type ()
-  #+aosv "AOS/VS"
-  #+bsd "BSD"
-  #+system-v "SYSTEM-V"
-  #+hp-ux "HP-UX")
-
-;(defun software-type () "UNIX BSD")
-
-(defun software-version () (software-type))
-;(defun software-version () "4.2BSD")
-
-;(defun short-site-name () "RIMS")
-(defun short-site-name () nil)
-
-;(defun long-site-name ()
-;  "Research Institute for Mathematical Sciences, Kyoto University")
-(defun long-site-name () nil)
-
+(defun long-site-name nil nil)
 
 
 ;;; Compiler functions.
@@ -125,23 +66,18 @@
 ;;; Editor.
 
 ;
-(defun get-decoded-time ()
+(defun get-decoded-time nil
   (decode-universal-time (get-universal-time)))
 
-#+never
-(defun get-universal-time ()
-  (multiple-value-bind (sec min h d m y dow dstp tz)
-      (get-decoded-time)
-    (encode-universal-time sec min h d m y tz)))
 
 ; System dependent Temporary directory.
-(defun temp-dir ()
+(defun temp-dir nil
   "A system dependent path to a temporary storage directory as a string." 
-  #+winnt (si::getenv "TEMP") #-winnt "/usr/tmp")
+  (si::getenv "TEMP"))
 
 ;  Set the default system editor to a fairly certain bet.
-#-winnt(defvar *gcl-editor* "vi")
-#+winnt(defvar *gcl-editor* "notepad")
+(defvar *gcl-editor* "vi")
+;; #+winnt(defvar *gcl-editor* "notepad")
 
 (defun new-ed (editor-name)
   "Change the editor called by (ed) held in *gcl-editor*."
@@ -171,77 +107,6 @@
 		      (system (format nil "~A ~A" *gcl-editor* ed-file))))
 		   (t (system (format nil "~A ~A" *gcl-editor* name))))))))) ; Use symbol as filename
 
-;;; Allocator.
-
-(import 'si::allocate)
-;(export '(allocate
-	  ;allocated-pages maximum-allocatable-pages
-          ;allocate-contiguous-pages
-          ;allocated-contiguous-pages maximum-contiguous-pages
-          ;allocate-relocatable-pages allocated-relocatable-pages 
-;          spice structure))
-
-;(defvar type-character-alist
-;             '((cons . #\.)
-;               (fixnum . #\N)
-;               (bignum . #\B)
-;               (ratio . #\R)
-;               (short-float . #\F)
-;               (long-float . #\L)
-;               (complex . #\C)
-;               (character . #\#)
-;               (symbol . #\|)
-;               (package . #\:)
-;               (hash-table . #\h)
-;               (array . #\a)
-;               (vector . #\v)
-;               (string . #\")
-;               (bit-vector . #\b)
-;               (structure . #\S)
-;	       (sfun . #\g)
-;               (stream . #\s)
-;               (random-state . #\$)
-;               (readtable . #\r)
-;               (pathname . #\p)
-;               (cfun . #\f)
-;	       (vfun . #\V)
-;               (cclosure . #\c)
-;               (spice . #\!)))
-;
-;(defun get-type-character (type)
-;  (let ((a (assoc type type-character-alist)))
-;    (unless a
-;            (error "~S is not an implementation type.~%~
-;                   It should be one of:~%~
-;                   ~{~10T~S~^~30T~S~^~50T~S~%~}~%"
-;                   type
-;                   (mapcar #'car type-character-alist)))
-;    (cdr a)))
-
-;(defun allocate (type quantity &optional really-allocate)
-;  (si:alloc (get-type-character type) quantity really-allocate))
-
-;(defun allocated-pages (type)
-;  (si:npage (get-type-character type)))
-
-;(defun maximum-allocatable-pages (type)
-;  (si:maxpage (get-type-character type)))
-
-;(defun allocate-contiguous-pages (quantity &optional really-allocate)
-;  (si::alloc-contpage quantity really-allocate))
-
-;(defun allocated-contiguous-pages ()
-;  (si:ncbpage))
-
-;(defun maximum-contiguous-pages ()
-;  (si::maxcbpage))
-
-;(defun allocate-relocatable-pages (quantity &optional really-allocate)
-;  (si::alloc-relpage quantity))
-
-;(defun allocated-relocatable-pages ()
-;  (si::nrbpage))
-
 ;;; C Interface.
 
 (defmacro Clines (&rest r) nil)
@@ -251,8 +116,6 @@
 (defmacro defla (&rest r) (cons 'defun r))
 
 ;;; Help.
-
-;(export '(help help*))
 
 (defun help (&optional (symbol nil s))
   (if s (si::print-doc symbol)

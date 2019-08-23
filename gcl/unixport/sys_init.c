@@ -27,6 +27,8 @@ gcl_init_init()
 
   lsp_init("lsp","gcl_top");
 
+  lsp_init("lsp","gcl_autoload");
+
 }
 
 void
