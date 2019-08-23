@@ -1071,7 +1071,7 @@
 			      (when m (setq n (+ (* n 10) m) i (1+ i)))
 			      (setq max (max max (1+ n)))
 			      (wt-loc (nth n locs))))
-			   ((baboon))))
+			   ((wt ch))))
 			(incf i 2))
 		       ((char= char #\@);FIXME better error checking
 			(let* ((n (- (char-code (char fun (1+ i))) #.(char-code #\1)))
