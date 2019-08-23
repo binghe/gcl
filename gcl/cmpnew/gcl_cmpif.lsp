@@ -656,6 +656,7 @@
      (let (trv (b (c1expr* (if tf (cadr args) (caddr args)) info)))
 ;       (when (info-type (cadr b)) 
        (dolist (l *restore-vars*) (push (list (car l) (var-type (car l)) (var-store (car l))) trv));)
+       (keep-warnings)
        (list b trv)))))
 
 (defun c-and (y x)
