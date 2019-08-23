@@ -273,7 +273,7 @@
 (defun dntrr (l)
   (reduce 'ntrr (cdr l) :initial-value (car l)))
 
-(defun num-type-rel (fn t1 t2 &optional s)
+(defun num-type-rel (fn t1 t2 &optional s &aux (t1 (coerce-to-one-value t1))(t2 (coerce-to-one-value t2)))
   (let ((nop (car (rassoc fn '((>= . <) (> . <=) (= . /=)))))
 	(rfn (cdr (assoc  fn '((>= . >) (> . >=))))))
     (cond (nop (let ((q (num-type-rel nop t1 t2))) 
