@@ -220,6 +220,7 @@ int fasload (object faslfile)
     close_stream (faslstream);
     
     memory=new_cfdata();
+    memory->cfd.cfd_name=faslstream->sm.sm_object1;
     
     if (symbol_value (sLAload_verboseA) != Cnil)	
         printf (" ;; start address (dynamic) %p ", fptr);

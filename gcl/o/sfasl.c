@@ -258,6 +258,7 @@ SEEK_TO_END_OFILE(fp);
 #ifndef STAND	
 	{BEGIN_NO_INTERRUPT;
 	  memory=new_cfdata();
+	  memory->cfd.cfd_name=make_simple_string(filename);
 	  memory->cfd.cfd_size = datasize+textsize+bsssize + extra_bss;
 	  vs_push(memory);
 	  the_start=start_address=

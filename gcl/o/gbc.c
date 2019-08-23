@@ -697,6 +697,7 @@ mark_object1(object x) {
   case t_cfdata:
     
     mark_object(x->cfd.cfd_dlist);
+    mark_object(x->cfd.cfd_name);
     mark_object_array(x->cfd.cfd_self,x->cfd.cfd_self+x->cfd.cfd_fillp);
     if (what_to_collect == t_contiguous)
       mark_link_array(x->cfd.cfd_start,x->cfd.cfd_start+x->cfd.cfd_size);

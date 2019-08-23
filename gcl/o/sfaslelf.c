@@ -569,6 +569,7 @@ fasload(object faslfile) {
 #endif
 
   massert(memory=load_memory(sec1,sece,v1,&got,&gote));
+  memory->cfd.cfd_name=faslfile->sm.sm_object1;
 
   massert(!relocate_symbols(sym1,syme,sec1,sece,st1));
   

@@ -330,6 +330,7 @@ fasload(object faslfile) {
   start_address = ROUND_UP(start_address,max_align);
   memory->cfd.cfd_size = memory->cfd.cfd_size - (start_address - the_start);
   memory->cfd.cfd_start = (void *)start_address;	
+  memory->cfd.cfd_name=make_simple_string(FN1);
 
   for (m=start_address,s=b->sections;s;s=s->next) {
 

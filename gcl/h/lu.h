@@ -477,7 +477,7 @@ struct cfdata {
 
   FRSTWRD(tt,
 	  cfd_prof:1,       /* profiling */
-	  cfw:LM(1);
+	  cfw:LM(17)
 	  );
 
   char   *cfd_start;             /* beginning of contblock for fun */
@@ -485,6 +485,8 @@ struct cfdata {
   FILLP_WORD(cfd_fillp);
   object *cfd_self;              /* body */
   plist   cfd_dlist;
+  string  cfd_name;
+  SPAD;
 
 };
 

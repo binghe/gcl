@@ -555,6 +555,7 @@ fasload(object faslfile) {
   label_got_symbols(v1,sec1,n1,ne,got);
 
   massert(memory=load_memory(sec1,sece,v1,&rls,&got,&gote,&start));
+  memory->cfd.cfd_name=faslfile->sm.sm_object1;
   
   massert(p=alloca(rls));
   

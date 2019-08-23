@@ -630,6 +630,7 @@ new_cfdata(void) {
   memory->cfd.cfd_self=0;
   memory->cfd.cfd_start=0;
   memory->cfd.cfd_dlist=Cnil;
+  memory->cfd.cfd_name=Cnil;
 
   return memory;
 
@@ -646,6 +647,7 @@ gcl_init_or_load1(void (*fn)(void),const char *file) {
     /* file=FIX_PATH_STRING(file); */
 
     memory=new_cfdata();
+    memory->cfd.cfd_name=make_simple_string(file);
     memory->cfd.cfd_start= (char *)fn;
     printf("Initializing %s\n",file); fflush(stdout);
     fasl_data = read_fasl_data(file);

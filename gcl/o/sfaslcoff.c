@@ -435,6 +435,7 @@ fasload(object faslfile) {
   find_init_address(sy1,sye,&init_address,st1);
 	
   memory=load_memory(sec1,sece,st);
+  memory->cfd.cfd_name=faslfile->sm.sm_object1;
 
   relocate_symbols(sy1,sye,sec1,st1);  
 	

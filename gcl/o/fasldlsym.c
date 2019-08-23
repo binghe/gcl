@@ -95,6 +95,7 @@ fasload(object faslfile) {
 
   data = read_fasl_vector(faslstream);
   memory=new_cfdata();
+  memory->cfd.cfd_name=faslfile->sm.sm_object1;
 
   if(symbol_value(sLAload_verboseA)!=Cnil)	
     printf(" ;; start address (dynamic) %p ",fptr);
