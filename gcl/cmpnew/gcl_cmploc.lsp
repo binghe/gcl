@@ -429,7 +429,15 @@
 	   (wt-var var ccb))
 	  (t (wt-vs (var-ref var))))));FIXME side-effect propagation
 
-(defun wt-gen-loc (key loc &aux p)
+(defun vv-value-loc (key loc &aux (ktp (get key 'cmp-lisp-type)))
+  (unless (eq ktp t)
+    (when (when (consp loc) (eq (car loc) 'vv))
+      (let* ((x (cadr loc))
+	     (x (if (ltvp x) (eval (cdr x)) x)))
+	(when (type>= ktp (object-tp x))
+	  `(,(cdr (assoc ktp +value-types+ :test 'type<=)) nil ,x))))))
+
+(defun wt-gen-loc (key loc &aux (loc (or (vv-value-loc key loc) loc)) p)
   (let* ((cl   (when (consp loc) (car loc)))
 	 (fit  (car (rassoc cl +inline-types-alist+)))
 	 (fvt  (car (rassoc cl +value-types+)))
