@@ -406,117 +406,88 @@ open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exis
   vs_mark;
   
   coerce_to_filename(fn,FN1);
-  if (smm == smm_input || smm == smm_probe) {
-    if(FN1[0]=='|')
-      fp = popen(FN1+1,"r");
-    else 
-      fp = fopen_not_dir(FN1, "r");
-    
-    if ((fp == NULL) &&
-	(sSAallow_gzipped_fileA->s.s_dbind != sLnil)) { 
-      char buf[256];
-      if (snprintf(buf,sizeof(buf),"%s.gz",FN1)<=0)
-	FEerror("Cannot write .gz filename",0);
-      if (fSstat(str(buf))!=Cnil) {
+
+  switch(smm) {
+
+  case smm_input:
+  case smm_probe:
+
+    if (!(fp=*FN1=='|' ? popen(FN1+1,"r") : fopen_not_dir(FN1,"r")) && sSAallow_gzipped_fileA->s.s_dbind!=Cnil) {
+
+      struct stat ss;
+      massert(snprintf(FN2,sizeof(FN2),"%s.gz",FN1)>0);
+
+      if (!stat(FN2,&ss)) {
+
 	FILE *pp;
 	int n;
-	if (!(fp=tmpfile()))
-	  FEerror("Cannot create temporary file",0);
-	if (snprintf(buf,sizeof(buf),"zcat %s.gz",FN1)<=0)
-	  FEerror("Cannot write zcat pipe name",0);
-	if (!(pp=popen(buf,"r")))
-	  FEerror("Cannot open zcat pipe",0);
-	while((n=fread(buf,1,sizeof(buf),pp)))
-	  if (!fwrite(buf,1,n,fp))
-	    FEerror("Cannot write pipe output to temporary file",0);
-	if (pclose(pp)<0)
-	  FEerror("Cannot close zcat pipe",0);
-	if (fseek(fp,0,SEEK_SET))
-	  FEerror("Cannot rewind temporary file\n",0); 
+
+	massert((fp=tmpfile()));
+	massert(snprintf(FN3,sizeof(FN2),"zcat %s",FN2)>0);
+	massert(pp=popen(FN3,"r"));
+	while ((n=fread(FN4,1,sizeof(FN3),pp)))
+	  massert(fwrite(FN4,1,n,fp)==n);
+	massert(pclose(pp)>=0);
+	massert(!fseek(fp,0,SEEK_SET));
+
       }
+
     }
-    if (fp == NULL) {
-      if (if_does_not_exist == sKerror)
-	cannot_open(fn);
-      else if (if_does_not_exist == sKcreate) {
-	fp = fopen_not_dir(FN1, "w");
-	if (fp == NULL)
-	  cannot_create(fn);
+
+    if (!fp) {
+
+      if (if_does_not_exist==sKerror) cannot_open(fn);
+      else if (if_does_not_exist==sKcreate) {
+	if (!(fp=fopen_not_dir(FN1,"w"))) cannot_create(fn);
 	fclose(fp);
-	fp = fopen_not_dir(FN1, "r");
-	if (fp == NULL)
-	  cannot_open(fn);
-      } else if (if_does_not_exist == Cnil)
-	return(Cnil);
-      else
-	FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
-		1, if_does_not_exist);
+	if (!(fp=fopen_not_dir(FN1,"r"))) cannot_open(fn);
+      } else if (if_does_not_exist==Cnil) return(Cnil);
+      else FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",1,if_does_not_exist);
+
     }
-  } else if (smm == smm_output || smm == smm_io) {
-    if (FN1[0] == '|')
-      fp = NULL;
-    else
-      fp = fopen_not_dir(FN1, "r");
-    if (fp != NULL) {
+    break;
+
+  case smm_output:
+  case smm_io:
+
+    if ((fp=*FN1=='|' ? NULL : fopen_not_dir(FN1,"r"))) {
+
       fclose(fp);
-      if (if_exists == sKerror)
-	FILE_ERROR(fn,"File exists");
-      else if (if_exists == sKrename) {
-	massert(snprintf(FN2,sizeof(FN2),"%s.BAK",FN1)>=0);
+      if (if_exists==sKerror) FILE_ERROR(fn,"File exists");
+      else if (if_exists==sKrename) {
+	massert(snprintf(FN2,sizeof(FN2),"%-*.*s~",(int)strlen(FN1)-1,(int)strlen(FN1)-1,FN1)>=0);
+	massert(!unlink(FN2));/*MinGW*/
 	massert(!rename(FN1,FN2));
-	if (smm == smm_output)
-	  fp = fopen(FN1, "w");
-	else
-	  fp = fopen(FN1, "w+");
-	if (fp == NULL)
-	  cannot_create(fn);
-      } else if (if_exists == sKrename_and_delete ||
-		 if_exists == sKnew_version ||
-		 if_exists == sKsupersede) {
-	if (smm == smm_output)
-	  fp = fopen_not_dir(FN1, "w");
-	else
-	  fp = fopen_not_dir(FN1, "w+");
-	if (fp == NULL)
-	  cannot_create(fn);
-      } else if (if_exists == sKoverwrite) {
-	fp = fopen_not_dir(FN1, "r+");
-	if (fp == NULL)
-	  cannot_open(fn);
-      } else if (if_exists == sKappend) {
-	if (smm == smm_output)
-	  fp = fopen_not_dir(FN1, "a");
-	else
-	  fp = fopen_not_dir(FN1, "a+");
-	if (fp == NULL)
+	if (!(fp=fopen(FN1,smm==smm_output ? "w" : "w+"))) cannot_create(fn);
+      } else if (if_exists==sKrename_and_delete ||
+		 if_exists==sKnew_version ||
+		 if_exists==sKsupersede) {
+	if (!(fp=fopen(FN1,smm==smm_output ? "w" : "w+"))) cannot_create(fn);
+      } else if (if_exists==sKoverwrite) {
+	if (!(fp=fopen_not_dir(FN1,"r+"))) cannot_open(fn);
+      } else if (if_exists==sKappend) {
+	if (!(fp = fopen_not_dir(FN1,smm==smm_output ? "a" : "a+")))
 	  FEerror("Cannot append to the file ~A.",1,fn);
-      } else if (if_exists == Cnil)
-	return(Cnil);
-      else
-	FEerror("~S is an illegal IF-EXISTS option.",
-		1, if_exists);
+      } else if (if_exists == Cnil) return(Cnil);
+      else FEerror("~S is an illegal IF-EXISTS option.",1,if_exists);
+
     } else {
+
       if (if_does_not_exist == sKerror)
 	FILE_ERROR(fn,"The file does not exist");
       else if (if_does_not_exist == sKcreate) {
-	if (smm == smm_output) {
-	  if(FN1[0]=='|')
-	    fp = popen(FN1+1,"w");
-	  else 
-	    fp = fopen_not_dir(FN1, "w");
-	} else
-	  fp = fopen_not_dir(FN1, "w+");
-	if (fp == NULL)
+	if (!(fp=smm==smm_output ? (*FN1=='|' ? popen(FN1+1,"w") : fopen_not_dir(FN1, "w")) : fopen_not_dir(FN1, "w+")))
 	  cannot_create(fn);
-      } else if (if_does_not_exist == Cnil)
-	return(Cnil);
-      else
-	FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",
-		1, if_does_not_exist);
+      } else if (if_does_not_exist==Cnil) return(Cnil);
+      else FEerror("~S is an illegal IF-DOES-NOT-EXIST option.",1,if_does_not_exist);
     }
-  } else
+    break;
+
+  default:
     FEerror("Illegal open mode for ~S.",1,fn);
-  
+    break;
+  }
+
   vs_push(make_simple_string(FN1));
   x = alloc_object(t_stream);
   x->sm.tt=x->sm.sm_mode = (short)smm;
