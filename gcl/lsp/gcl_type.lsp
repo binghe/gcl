@@ -617,7 +617,7 @@
 	     ((and (not x) (not y)) t)
 	     (unless (type<= (if x (car x) #tnull) (if y (car y) #tnull))
 	       (return nil))))
-	((cmpt x) (type<= x `(returns-exactly ,y)))
+	((cmpt x) (type<= x `(returns-exactly ,y)));FIXME
 	((cmpt y) (type<= `(returns-exactly ,x) y))
 	((tp<= x y))))
 
@@ -683,28 +683,28 @@
 		    +ktn+))
 	  tps))
 
-(defconstant +rq+
+(defconstant +rq1+
   (mapcar (lambda (x)
 	    (cons (pop x)
-		  (lreduce (lambda (y x)
+		  (lreduce (lambda (y x &aux (nx (tp-not (car x))))
 			     (let ((z (rassoc (cdr x) y)))
 			       (if z
-				    (setf (car z) (type-or1 (car x) (car z)) y y)
-				 (cons (cons (car x) (cdr x)) y))))
+				   (setf (car z) (tp-and nx (car z)) y y)
+				 (cons (cons nx (cdr x)) y))))
 			   x :initial-value nil)))
 	  +rs+))
-
 
 (defun norm-tp-ints (tp rl)
   (cmp-norm-tp
    (cons 'member
 	 (lreduce (lambda (y x)
-	     (if (tp-and tp (car x)) (cons (cdr x) y) y))
+	     (if (tp<= tp (car x)) y (cons (cdr x) y)))
 	   rl :initial-value nil))))
+
 
 (progn;FIXME macrolet norm-tp-ints can only compile-file, not compile
   . #.(mapcar (lambda (x &aux (s (msym x)))
-		`(let* ((rl (cdr (assoc ',x +rq+))))
+		`(let* ((rl (cdr (assoc ',x +rq1+))))
 		   (defun ,s (f x)
 		     (declare (ignore f))
 		     (norm-tp-ints x rl))
