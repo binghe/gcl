@@ -114,7 +114,7 @@
   (read-delimited-list #\; s))
 
 (defun read-instruction (addr context &aux (*readtable* +top-readtable+)
-			      (i (car (disassemble-instruction addr)))(s (make-string-input-stream i))
+			      (i (car (disassemble-instruction addr)))(s (make-string-input-stream (substitute #\; #\# i)))
 			      (*insn* (read s)))
   (cons i (cons *insn* (when context (read-operands s context)))))
 
