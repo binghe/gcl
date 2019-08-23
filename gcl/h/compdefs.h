@@ -82,3 +82,4 @@ is_imm_fixnum(x)
 is_imm_fix(x)
 aref1
 OBJ_ALIGNED_STACK_ALLOC(x)
+NO_RETURN

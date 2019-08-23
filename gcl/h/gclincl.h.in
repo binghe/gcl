@@ -315,6 +315,9 @@
 /* no profil system call */
 #undef NO_PROFILE
 
+/* can use C extension for functions that do not return */
+#undef NO_RETURN
+
 /* no uname call */
 #undef NO_UNAME
 

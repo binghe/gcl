@@ -1502,6 +1502,16 @@ dnl             [AC_MSG_ERROR([Cannot find type_bits])])
 dnl AC_MSG_RESULT($type_bits)
 dnl AC_DEFINE_UNQUOTED(TYPE_BITS,$type_bits,[bit mask for type flags in objects])
 
+AC_MSG_CHECKING([for C extension noreturn function attribute])
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM([[]],
+		     [[
+			 extern int v() __attribute__ ((noreturn));
+		     ]])],
+    [no_return="__attribute__ ((noreturn))"],[no_return=])
+AC_MSG_RESULT($no_return)
+AC_DEFINE_UNQUOTED(NO_RETURN,$no_return,[can use C extension for functions that do not return])
+
 AC_MSG_CHECKING(sizeof struct contblock)
 
 # work around MSYS pwd result incompatibility
