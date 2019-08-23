@@ -55,12 +55,10 @@ License for more details.
 #define ulmax(a_,b_) ({ul _a=a_,_b=b_;_a<_b ? _b : _a;})
 #define ALLOC_SEC(sec) (sec->sh_flags&SHF_ALLOC && (sec->sh_type==SHT_PROGBITS || sec->sh_type==SHT_NOBITS))
 #define LOAD_SEC(sec) (sec->sh_flags&SHF_ALLOC &&  sec->sh_type==SHT_PROGBITS)
-#define EXT_SYM(sym) ({ul _b=ELF_ST_BIND(sym->st_info); \
-      sym->st_value && (_b==STB_GLOBAL || _b==STB_WEAK);})
-#define LOCAL_SYM(sym) (sym->st_value && \
-			ELF_ST_BIND(sym->st_info)==STB_LOCAL)
-			/* && ELF_ST_TYPE(sym->st_info)==STT_FUNC) */
-#define LOAD_SYM(sym) (EXT_SYM(sym)||LOCAL_SYM(sym))
+#define LOAD_SYM(sym,st1) (sym->st_value && (EXT_SYM(sym,st1)||LOCAL_SYM(sym)))
+#define EXT_SYM(sym,st1) (ELF_ST_BIND(sym->st_info)==STB_GLOBAL||ELF_ST_BIND(sym->st_info)==STB_WEAK||LOAD_SYM_BY_NAME(sym,st1))
+#define LOCAL_SYM(sym) ELF_ST_BIND(sym->st_info)==STB_LOCAL
+#define LOAD_SYM_BY_NAME(sym,st1) !strncmp("__muldc3",st1+sym->st_name,8)||!strncmp("__divdc3",st1+sym->st_name,8)/* FIXME! */
 
 #define MASK(n) (~(~0ULL << (n)))
 

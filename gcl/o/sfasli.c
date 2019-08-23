@@ -141,6 +141,13 @@ use_symbols(double d,...) {
 #ifdef GCL_GPROF
   _mcount();
 #endif
+
+  { dcomplex c=d+I*d;
+    c=c*c;
+    d=c+I*c;
+    d=c/d;
+    d=d/(c+I*d);
+  }
   
   return (int)d;
 
