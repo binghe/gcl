@@ -413,7 +413,7 @@ edit_double(int n, double d, int *sp, char *s, int *ep) {
   if (b[FPRC+4] == '-')
     *ep *= -1;
 
-  truncate_double(b,d,n!=9);
+  truncate_double(b,d,n!=7);
 
   if (isdigit(b[0])) {
     b[1]=b[0];
@@ -442,7 +442,7 @@ bool shortp;
 	int n = FPRC+1;
 
 	if (shortp)
-	  n = 9;
+	  n = 7;
 	edit_double(n, d, &sign, buff, &exp);
 	if (sign==2) {write_str("#<");
 		      write_str(buff);
