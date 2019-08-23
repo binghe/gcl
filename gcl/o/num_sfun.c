@@ -56,10 +56,10 @@ pexp(double y,object z,int s) {
 
   double x=exp(y);
   if (s) x=(float)x;
-  if (!x)
-    FLOATING_POINT_UNDERFLOW(sLexp,z);
-  if (!ISFINITE(x) && ISFINITE(y))
-    FLOATING_POINT_OVERFLOW(sLexp,z);
+  /* if (!x) */
+  /*   FLOATING_POINT_UNDERFLOW(sLexp,z); */
+  /* if (!ISFINITE(x) && ISFINITE(y)) */
+  /*   FLOATING_POINT_OVERFLOW(sLexp,z); */
   return x;
 
 }
