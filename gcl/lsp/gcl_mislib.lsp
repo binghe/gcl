@@ -69,7 +69,9 @@
 (defun number-of-days-from-1900 (y)
   (let ((y1 (1- y)))
     (+ (* (- y 1900) 365)
-       (floor y1 4) (- (floor y1 100)) (floor y1 400)
+       (floor y1 4)
+       (- (floor y1 100))
+       (floor y1 400)
        -460)))
 
 (eval-when
@@ -110,7 +112,7 @@
   (check-type h (integer 0 23))
   (check-type d (integer 1 31))
   (check-type m (integer 1 12))
-  (check-type y (integer 1900))
+  (check-type y integer);(integer 1900)
   (check-type tz rational)
   (when (<= 0 y 99)
     (multiple-value-bind
@@ -119,7 +121,11 @@
      (incf y (- y1 (mod y1 100)))
      (cond ((< (- y y1) -50) (incf y 100))
 	   ((>= (- y y1) 50) (decf y 100)))))
-  (+ (* (+ (1- d) (number-of-days-from-1900 y) (if (> m 1) (aref (if (leap-year-p y) +lmd+ +md+) (- m 2)) 0))
+  (+ (* (+ (1- d)
+	   (number-of-days-from-1900 y)
+	   (if (> m 1)
+	       (aref (if (leap-year-p y) +lmd+ +md+) (- m 2))
+	     0))
         seconds-per-day)
      (* (+ h tz) 3600) (* min 60) sec))
 
