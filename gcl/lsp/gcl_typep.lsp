@@ -207,3 +207,90 @@
    ((and (array bit) adjustable-array) (c-array-offset x))
    (otherwise 0)))
 (setf (get 'array-offset 'cmp-inline) t)
+
+
+
+;; (defun open-stream-p (x)
+;;   (declare (optimize (safety 1)))
+;;   (typecase x (open-stream t)))
+
+(defun input-stream-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (input-stream t)))
+
+;; (defun interactive-stream-p (x)
+;;   (declare (optimize (safety 1)))
+;;   (typecase x (interactive-stream t)))
+
+(defun output-stream-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (output-stream t)))
+
+(defun floatp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (float t)))
+
+(defun numberp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (number t)))
+
+(defun characterp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (character t)))
+
+(defun readtablep (x)
+  (declare (optimize (safety 1)))
+  (typecase x (readtable t)))
+
+(defun realp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (real t)))
+
+(defun integerp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (integer t)))
+
+(defun rationalp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (rational t)))
+
+
+(defun complexp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (complex t)))
+
+(defun bit-vector-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (bit-vector t)))
+
+(defun simple-string-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (simple-string t)))
+
+(defun simple-vector-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (simple-vector t)))
+
+(defun streamp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (stream t)))
+
+(defun arrayp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (array t)))
+
+(defun vectorp (x)
+  (declare (optimize (safety 1)))
+  (typecase x (vector t)))
+
+(defun packagep (x)
+  (declare (optimize (safety 1)))
+  (typecase x (package t)))
+
+(defun simple-bit-vector-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (simple-bit-vector t)))
+
+(defun random-state-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (random-state t)))
