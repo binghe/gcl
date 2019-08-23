@@ -2598,7 +2598,7 @@
 		    ,@(when (eq crt :void) `(",Cnil)"))))))))
 
 (defun c1cadd-dladdress (args)
-  (list 'cadd-dladdress (make-info :type #tnull :flags (iflags compiler)) args))
+  (list 'cadd-dladdress (make-info :type #tnull) args))
 (defun c2cadd-dladdress (args)
   (apply 'add-dladdress args))
 (si::putprop 'cadd-dladdress 'c1cadd-dladdress 'c1)

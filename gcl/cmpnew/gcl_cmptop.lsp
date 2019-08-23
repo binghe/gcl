@@ -1980,7 +1980,7 @@
 (defun ignorable-form (f)
   (case (car f)
 	(function t)
-	(infer-tp nil)
+	((cadd-dladdress infer-tp) nil)
 	(otherwise (if1 (cadr f)))))
 
 ;; (defun ignorable-form (f)
