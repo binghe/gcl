@@ -21,6 +21,11 @@
 	   `((defdlfun (:fcomplex   ,(strcat "c" x "f")     ) :fcomplex :fcomplex)
   	     (defdlfun (:dcomplex   ,(strcat "c" x)         ) :dcomplex :dcomplex)))))
 
+  (defmacro defrlibmfun1 (x)
+    `(progn
+       (defdlfun (:float    ,(strcat x "f")     ) :float)
+       (defdlfun (:double   ,x                  ) :double)))
+
   (defmacro defalibmfun (x)
     `(progn
        (defdlfun (:float    ,(strcat "f" x "f") ) :float)
@@ -49,6 +54,15 @@
 (deflibmfun "asinh")
 (deflibmfun "acosh")
 (deflibmfun "atanh")
+
+(defrlibmfun1 "erf")
+(defrlibmfun1 "erfc")
+
+(defrlibmfun1 "lgamma")
+(defrlibmfun1 "tgamma")
+
+(defdlfun (:float    "cargf"     ) :fcomplex)
+(defdlfun (:double    "carg"     ) :dcomplex)
 
 
 (eval-when 
