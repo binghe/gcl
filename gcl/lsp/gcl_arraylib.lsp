@@ -418,22 +418,26 @@
   (check-type a array)
   (c-array-rank a))
 
-#.`(defun array-eltsize-propagator (f x)
-     (cond
-      ,@(mapcar (lambda (x)
-		  `((type>= ',(cmp-norm-tp `(array ,(pop x))) x)
-		    ',(cmp-norm-tp `(member ,(cadr x)))))
-		si::*array-type-info*)
-      ((type>= #tarray x)
-       ',(cmp-norm-tp `(member ,@(lremove-duplicates (mapcar 'caddr *array-type-info*)))))))
+(defun array-eltsize-propagator (f x)
+  (when (type>= #tarray x)
+    (cmp-norm-tp
+     (cons 'member
+	   (lreduce (lambda (y z)
+		      (if (tp<= x (car z)) y (cons (cdr z) y)))
+		    '#.(mapcar (lambda (x) (cons (cmp-norm-tp `(not (array ,(pop x)))) (cadr x)))
+			       *array-type-info*)
+		    :initial-value nil)))))
 (setf (get 'c-array-eltsize 'type-propagator) 'array-eltsize-propagator)
 
-#.`(defun array-elttype-propagator (f x)
-     (cond
-      ,@(mapcar (lambda (x)
-		  `((type>= ',(cmp-norm-tp `(array ,(pop x))) x)
-		  ',(cmp-norm-tp `(member ,(car x)))))
-		*array-type-info*)))
+(defun array-elttype-propagator (f x)
+  (when (type>= #tarray x)
+    (cmp-norm-tp
+     (cons 'member
+	   (lreduce (lambda (y z)
+		      (if (tp<= x (car z)) y (cons (cdr z) y)))
+		    '#.(mapcar (lambda (x) (cons (cmp-norm-tp `(not (array ,(pop x)))) (car x)))
+			       *array-type-info*)
+		    :initial-value nil)))))
 (setf (get 'c-array-elttype 'type-propagator) 'array-elttype-propagator)
 
 (defun array-rank-propagator (f x)
