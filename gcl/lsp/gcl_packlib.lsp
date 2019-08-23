@@ -217,7 +217,7 @@
   (declare (optimize (safety 1)))
   (setq string (string string))
   (do-symbols (symbol package list) ;FIXME?
-	       (when (search string (string symbol))
+	       (when (search string (string symbol) :test 'char-equal)
 		  (push symbol list)))
   (stable-sort list 'string< :key 'symbol-name))
 
