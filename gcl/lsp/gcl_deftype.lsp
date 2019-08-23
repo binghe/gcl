@@ -41,7 +41,7 @@
   (labels ((q (n) (intern (string-concatenate
 			   (string n) "-SIMPLE-TYPEP-FN")))
 	   (f (n &aux (q (q n)))
-	      `(progn (defun ,q (o) ,(simple-type-case 'o n))
+	      `(progn (defun ,q (o) (declare (ignorable o)) ,(simple-type-case 'o n))
 		      (setf (get ',n 'simple-typep-fn) ',q
 			    (get ',q 'cmp-inline) t))))
   (cond ((fboundp 'simple-type-case)

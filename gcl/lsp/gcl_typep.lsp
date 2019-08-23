@@ -71,7 +71,7 @@
 
 (defmacro define-compound-typep-fn (name (o tp) &rest body &aux (q (intern (string-concatenate (string name) "-TYPEP-FN"))))
   `(progn
-     (defun ,q (,o ,tp) (when ,(simple-type-case o name) ,@body))
+     (defun ,q (,o ,tp) (declare (ignorable ,o ,tp)) (when ,(simple-type-case o name) ,@body))
      (setf (get ',name 'typep-fn) ',q (get ',q 'cmp-inline) t)))
 
 
