@@ -164,7 +164,9 @@
     (name (fdefine-carefully (get-setf-function-name name) new-value))))
 
 
-(proclaim '(special *the-class-t* 
+(eval-when
+ (compile load eval)
+ (proclaim '(special *the-class-t*
 	            *the-class-vector* *the-class-symbol*
                     *the-class-string* *the-class-sequence*
                     *the-class-rational* *the-class-ratio*
@@ -192,7 +194,7 @@
                     *the-class-standard-effective-slot-definition*
 
                     *the-eslotd-standard-class-slots*
-                    *the-eslotd-funcallable-standard-class-slots*))
+                    *the-eslotd-funcallable-standard-class-slots*)))
 
 (proclaim '(special *the-wrapper-of-t*
                     *the-wrapper-of-vector* *the-wrapper-of-symbol*
@@ -403,6 +405,7 @@
 			 (convert-to-system-type type2))))))))
 
 (defun do-satisfies-deftype (name predicate)
+  (declare (ignorable predicate))
   (unless (get name 'si::deftype-definition)
 ;    (print `(deftype ,name nil `(si::std-instance ,(si::coerce-to-standard-class ',name))))
 ;    (print (si::coerce-to-standard-class name))
@@ -1026,7 +1029,7 @@
   (let ((l (nth 4 (car (member sym *early-class-definitions* :key 'cadr)))))
     (append l (reduce (lambda (&rest r) (when r (apply 'union r))) (mapcar 'mk-early-cpl l)))))
 
-(defun early-class-precedence-list-symbol (x)
+(defun early-class-precedence-list-symbol (x &aux tem)
   (cond ((mk-early-cpl x))
 	((setq tem (gethash x *find-class*))
 	 (early-class-precedence-list (car tem)))))

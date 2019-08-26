@@ -117,7 +117,8 @@
      (ecase
 	 (c-array-elttype a)
        ,@(mapcar (lambda (y &aux (x (pop y)))
-		   `(,(pop y) 
+		   `(,(pop y)
+		     (check-type v ,x)
 		     ,(case x
 			(character `(progn (*uchar (c-array-self a) i t (char-code v)) v))
 			(bit `(set-0-byte-array-self v a i))
@@ -419,6 +420,7 @@
   (c-array-rank a))
 
 (defun array-eltsize-propagator (f x)
+  (declare (ignorable f))
   (when (type>= #tarray x)
     (cmp-norm-tp
      (cons 'member
@@ -430,6 +432,7 @@
 (setf (get 'c-array-eltsize 'type-propagator) 'array-eltsize-propagator)
 
 (defun array-elttype-propagator (f x)
+  (declare (ignorable f))
   (when (type>= #tarray x)
     (cmp-norm-tp
      (cons 'member

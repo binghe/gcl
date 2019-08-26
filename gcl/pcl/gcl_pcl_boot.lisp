@@ -1522,9 +1522,9 @@ work during bootstrapping.
 		 (format stream "std-instance")))
 	     (fin-lambda-fn (&rest args)
 	       (declare (ignore args))
-	       (error "The function of the funcallable-instance ~S~
-                       has not been set" fin)
-	       (values-list (make-dummy-list))))))
+	       (warn "The function of the funcallable-instance ~S~
+                      has not been set" fin)
+	       (values-list (make-list (random multiple-values-limit)))))))
     (setf (gdefinition spec) fin)
     (bootstrap-set-slot 'standard-generic-function fin 'name spec)
     (bootstrap-set-slot 'standard-generic-function fin 'source (load-truename))
