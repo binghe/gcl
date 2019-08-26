@@ -130,6 +130,7 @@
                   (c1arg (car args))))
   (or-ccb-assignments (list form))
   (add-info info (cadr form))
+  (setf (info-type info) (info-type (cadr form)))
   (setq args (c1progn (cdr args)))
   (add-info info (cadr args))
   (list 'unwind-protect info form args))
