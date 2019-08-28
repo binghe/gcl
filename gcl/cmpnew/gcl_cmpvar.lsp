@@ -126,8 +126,18 @@
 		 (eql-not-nil rx ry))
 	 (return-from is-rep-referred t))))))
 
+(defun ens-k-tp (tp)
+  (or (third tp)
+      (member-if (lambda (x)
+		   (when (member (car x) '(proper-cons si::improper-cons))
+		     (member-if (lambda (x)
+				  (when (listp x)
+				    (or (ens-k-tp (car x)) (ens-k-tp (cadr x)))))
+				(cdr x))))
+		 (car tp))))
+
 (defun ensure-known-type (tp)
-  (if (when (listp tp) (third (third tp)))
+  (if (when (listp tp) (ens-k-tp (third tp)))
       (car tp)
     tp))
 
