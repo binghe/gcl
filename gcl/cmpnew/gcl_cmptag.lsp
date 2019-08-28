@@ -176,7 +176,8 @@
 	l))
 
 (defun mch-z (z i &aux (f (cdr (assoc z *ft*))))
-  (if f (mch-set z (if i (or-mch f) f)) (mch)))
+  (if f (mch-set z (or-mch f)) (mch)));FIXME ccb-ch (if i (or-mch f) f)
+;; The right way to do this is to throw ccb assignments via tag-throw on go into something like *ft*
 
 (defun pr (x &aux (y (member-if 'tag-p x))(z (mapcar 'c1arg (ldiff x y)))(i (when z (info-type (cadar (last z))))))
   (nconc z
