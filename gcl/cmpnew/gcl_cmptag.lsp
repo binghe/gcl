@@ -368,7 +368,7 @@
         (t (c2go-local tag))))
 
 (defun c2go-local (tag)
-  (unless (is-ttl-tag tag) (unwind-no-exit (tag-unwind-exit tag)))
+  (unwind-no-exit (tag-unwind-exit tag))
   (wt-nl) (wt-go (tag-label tag)))
 
 (defun c2go-clb (tag)
