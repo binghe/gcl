@@ -263,7 +263,7 @@ get_gc_environ(void) {
     massert(gc_page_max>=0.0);
   }
 
-  multiprocess_memory_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && *e;
+  multiprocess_memory_pool=(e=getenv("GCL_MULTIPROCESS_MEMORY_POOL")) && (*e=='t' || *e=='T');
 
   wait_on_abort=0;
   if ((e=getenv("GCL_WAIT_ON_ABORT")))
