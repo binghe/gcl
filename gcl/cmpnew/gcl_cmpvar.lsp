@@ -196,7 +196,7 @@
 (defun make-vs (info) (mapcar (lambda (x) (cons x (var-store x))) (remove-if-not 'var-p (info-ref info))))
 
 (defun check-vs (vs &aux (b (member-if-not 'var-p *vars*)))
-  (not (member-if-not (lambda (x &aux (v (pop x))(vv (member v *vars*)) );(unless (member v *lexical-env-mask*) ...)
+  (not (member-if-not (lambda (x &aux (v (pop x))(vv (member v *vars*)))
 			(and (when vv (tailp b vv))
 			     (when x (unless (eq x +opaque+) (eq (var-store v) x))))) vs)))
 
@@ -216,7 +216,7 @@
 	       (when (and tmp );FIXME (type>= (var-mt (car vref)) (var-mt (caaddr tmp)))
 		 (when (check-vs (car (last tmp)))
 		   (let* ((f (pop tmp))(i (copy-info (pop tmp))))
-		     (setf (info-type i) (var-type (caar tmp)));FIXME
+		     (setf (info-type i) (if (eq f 'var) (var-type (caar tmp)) (type-and (info-type i) (info-type info))));FIXME
 ;		     (setf (info-type i) (type-and (info-type i) (info-type info)))
 		     (list* f i tmp))))))
 	    ((list 'var info vref c1fv (make-vs info)))))))
@@ -299,6 +299,7 @@
 (defun repeatable-var-binding (form)
   (case (car form)
 	(var form)
+	(location form)
 	;; (lit (unless (member-if (lambda (x) (when (stringp x) (>= (si::string-match #v"[a-zA-Z0-9]+\\(" x) 0))) form)
 	;;        form))
 	))
