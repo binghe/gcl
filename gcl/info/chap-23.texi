@@ -1174,7 +1174,7 @@ Controls the interpretation of tokens by @b{read} as being
 @i{integers} or @i{ratios}.  
 
 The @i{value} of @b{*read-base*}, called the @i{current input base}
-@IGindex{current input base}
+@IGindex current input base
 ,
 is the radix in which @i{integers} and
 @i{ratios} are to be read by the @i{Lisp reader}.

@@ -20,7 +20,7 @@ interprets them as a printed representation of an @i{object},
 constructs that @i{object}, and returns it.
 
 The syntax described by this chapter is called the @i{standard syntax}
-@IGindex{standard syntax}
+@IGindex standard syntax
 .
 Operations are provided by @r{Common Lisp} so that
 various aspects of the syntax information represented by a @i{readtable} 
@@ -40,7 +40,7 @@ the syntax used throughout this document is @i{standard syntax}.
 
 Syntax information for use by the @i{Lisp reader} is embodied in an
 @i{object} called a @i{readtable}
-@IGindex{readtable}
+@IGindex readtable
 .  Among other things, 
 the @i{readtable} contains the association between @i{characters} 
 and @i{syntax types}.
@@ -74,7 +74,7 @@ Figure 2--1 lists some @i{defined names} that are applicable to
 
 Several @i{readtables} describing different syntaxes can exist,
 but at any given time only one, called the @i{current readtable}
-@IGindex{current readtable}
+@IGindex current readtable
 , 
 affects the way in which @i{expressions}_2 are parsed 
 into @i{objects} by the @i{Lisp reader}.
@@ -87,7 +87,7 @@ To make a different @i{readtable} become the @i{current readtable},
 @subsubsection The Standard Readtable
 
 The @i{standard readtable}
-@IGindex{standard readtable}
+@IGindex standard readtable
  conforms to @i{standard syntax}.
 The consequences are undefined if an attempt is made
 to modify the @i{standard readtable}.
@@ -100,7 +100,7 @@ The @i{readtable case} of the @i{standard readtable} is @t{:upcase}.
 @subsubsection The Initial Readtable
 
 The @i{initial readtable}
-@IGindex{initial readtable}
+@IGindex initial readtable
  is
 the @i{readtable} that is the @i{current readtable}
 at the time when the @i{Lisp image} starts.
@@ -135,7 +135,7 @@ the @i{variables} that influence the behavior of the @i{Lisp reader}.
 All @i{implementations} must support a @i{character} @i{repertoire}
 called @b{standard-char}; @i{characters} that are members of that
 @i{repertoire} are called @i{standard characters}
-@IGindex{standard character}
+@IGindex standard character
 .
 
 The @b{standard-char} @i{repertoire} consists of
@@ -261,7 +261,7 @@ for a more general user-written parser.
 When the @i{Lisp reader} is invoked, it reads a single character from 
 the @i{input} @i{stream} and dispatches according to the
 @i{syntax type}
-@IGindex{syntax type}
+@IGindex syntax type
  of that @i{character}.
 Every @i{character} that can appear in the @i{input} @i{stream}
 is of one of the @i{syntax types} shown in @i{Figure~2--6}.
@@ -357,7 +357,7 @@ The following are descriptions of each kind of @i{syntax type}.
 
 @i{Constituent} @i{characters} are used in @i{tokens}.
 A @i{token}
-@IGindex{token}
+@IGindex token
  is a representation of a @i{number} or a @i{symbol}.  
 Examples of @i{constituent} @i{characters} are letters and digits.
 
@@ -473,7 +473,7 @@ is performed.
 
 A @i{macro character} has an associated @i{function}
 called a @i{reader macro function}
-@IGindex{reader macro function}
+@IGindex reader macro function
  that implements its specialized parsing behavior.
 An association of this kind can be established or modified under control of
 a @i{conforming program} by using 
@@ -494,7 +494,7 @@ A @i{macro character} is either @i{terminating} or @i{non-terminating}.
 The difference between @i{terminating} and @i{non-terminating} @i{macro characters} 
 lies in what happens when such characters occur in the middle of a @i{token}.  
 If a @i{non-terminating}
-@IGindex{non-terminating}
+@IGindex non-terminating
  @i{macro character} occurs in the middle of a @i{token},
 the @i{function} associated 
 with the @i{non-terminating} @i{macro character} is not called,
@@ -502,7 +502,7 @@ and the
 @i{non-terminating} @i{macro character} does not terminate the @i{token}'s name; it
 becomes part of the name as if the @i{macro character} were really a constituent
 character.  A @i{terminating}
-@IGindex{terminating}
+@IGindex terminating
  @i{macro character} terminates any @i{token},
 and its associated @i{reader macro function}
 is called no matter where the @i{character} appears.
@@ -536,7 +536,7 @@ see @ref{Standard Macro Characters}.
 @subsubsection Multiple Escape Characters
 
 A pair of @i{multiple escape}
-@IGindex{multiple escape}
+@IGindex multiple escape
  @i{characters}
 is used to indicate that an enclosed sequence of characters,
 including possible @i{macro characters} and @i{whitespace}_2 @i{characters},
@@ -565,7 +565,7 @@ in @i{standard syntax}.
 @subsubsection Single Escape Character
 
 A @i{single escape}
-@IGindex{single escape}
+@IGindex single escape
  is used to indicate that 
 the next @i{character} is to be treated as 
 an @i{alphabetic}_2 @i{character}

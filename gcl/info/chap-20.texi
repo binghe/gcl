@@ -16,13 +16,13 @@
 This section describes the @r{Common Lisp} interface to file systems.
 The model used by this interface assumes 
      that @i{files}
-@IGindex{file}
+@IGindex file
  are named by @i{filenames}
-@IGindex{filename}
+@IGindex filename
 ,
      that a @i{filename} can be represented by a @i{pathname} @i{object}, 
  and that given a @i{pathname} a @i{stream}
-@IGindex{stream}
+@IGindex stream
  can be constructed 
       that connects to a @i{file} whose @i{filename} it represents.
 
@@ -56,10 +56,10 @@ that are applicable to @i{files} and directories.
 @subsection Coercion of Streams to Pathnames
 
 A @i{stream associated with a file}
-@IGindex{stream associated with a file}
+@IGindex stream associated with a file
  is either a @i{file stream}
 or a @i{synonym stream} whose target is a @i{stream associated with a file}
-@IGindex{stream associated with a file}
+@IGindex stream associated with a file
 .
 Such streams can be used as @i{pathname designators}.
 
@@ -128,7 +128,7 @@ Even where multiple names are possible, most @i{file systems} have a convention
 for generating a canonical @i{filename} in such situations.  Such a canonical
 @i{filename} (or the @i{pathname} representing such a @i{filename}) is
 called a @i{truename}
-@IGindex{truename}
+@IGindex truename
 .  
 
 The @i{truename} of a @i{file} may differ from other @i{filenames}

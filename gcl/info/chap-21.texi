@@ -24,19 +24,19 @@
 @subsection Introduction to Streams
 
 A @i{stream}
-@IGindex{stream}
+@IGindex stream
  is an @i{object} that can be used with an input or output
 function to identify an appropriate source or sink of @i{characters} or 
 @i{bytes} for that operation.
 A @i{character}
-@IGindex{character}
+@IGindex character
  @i{stream}
-@IGindex{stream}
+@IGindex stream
  is a source or sink of @i{characters}.
 A @i{binary}
-@IGindex{binary}
+@IGindex binary
  @i{stream}
-@IGindex{stream}
+@IGindex stream
  is a source or sink of @i{bytes}.
 
 Some operations may be performed on any kind of @i{stream};
@@ -79,14 +79,14 @@ and @b{read-byte} is only defined for @i{binary} @i{streams}.
 
 A @i{stream}, whether a @i{character} @i{stream} or a @i{binary} @i{stream},
 can be an @i{input}
-@IGindex{input}
+@IGindex input
  @i{stream}
-@IGindex{stream}
+@IGindex stream
  (source of data),
        an @i{output}
-@IGindex{output}
+@IGindex output
  @i{stream}
-@IGindex{stream}
+@IGindex stream
  (sink for data),
        both, 
     or (@i{e.g.}, when ``@t{:direction :probe}'' is given to @b{open}) neither.
@@ -129,9 +129,9 @@ Figure 21--3 shows @i{operators} relating to
 
 A @i{stream} that is both an @i{input} @i{stream} and an @i{output} @i{stream}
 is called a @i{bidirectional}
-@IGindex{bidirectional}
+@IGindex bidirectional
  @i{stream}
-@IGindex{stream}
+@IGindex stream
 .
 See the @i{functions} @b{input-stream-p} and @b{output-stream-p}.
 
@@ -155,9 +155,9 @@ shows a list of @i{operators} that relate specificaly to
 @subsubsection Open and Closed Streams
 
 @i{Streams} are either @i{open}
-@IGindex{open}
+@IGindex open
  or @i{closed}
-@IGindex{closed}
+@IGindex closed
 .  
 
 Except as explicitly specified otherwise,
@@ -182,7 +182,7 @@ and for that same @i{stream} once it has been @i{closed}.
 @subsubsection Interactive Streams
 
 An @i{interactive stream}
-@IGindex{interactive stream}
+@IGindex interactive stream
  is one on which it makes sense to perform
 interactive querying.
 
@@ -223,7 +223,7 @@ so interactive queries to such streams might not have the expected effect.
 @subsubsection File Streams
 
 Some @i{streams}, called @i{file streams}
-@IGindex{file stream}
+@IGindex file stream
 , provide access to @i{files}.
 An @i{object} of @i{class} @b{file-stream} is used to represent a @i{file stream}.
 
@@ -276,7 +276,7 @@ about these subclasses.
 
 @i{Variables} whose @i{values} must be @i{streams} are sometimes called 
 @i{stream variables}
-@IGindex{stream variable}
+@IGindex stream variable
 .
 
 Certain @i{stream variables} are defined by this specification 

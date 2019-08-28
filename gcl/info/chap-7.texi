@@ -22,7 +22,7 @@ The @i{generic function} @b{make-instance} creates and returns a new
 @i{instance} of a @i{class}.  The first argument is a @i{class} or
 the @i{name} of a @i{class}, and the remaining arguments form an 
 @i{initialization argument list}
-@IGindex{initialization argument list}
+@IGindex initialization argument list
 .
 
 The initialization of a new @i{instance} consists of several distinct
@@ -295,9 +295,9 @@ used to initialize a @i{slot} only if no initialization argument
 associated with that @i{slot} is given as an argument to 
 @b{make-instance} or is defaulted by @t{:default-initargs}.
 
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 The order of evaluation of default value @i{forms} for initialization
 arguments and the order of evaluation of @t{:initform} forms are
@@ -386,7 +386,6 @@ The following is an example of the above rules:
    (:default-initargs a 1 b 2))
 @end example
 
-@center 
 @example
 @format
 @group
@@ -402,6 +401,7 @@ The following is an example of the above rules:
 @end format
 
 @end example
+
 
 @node Shared-Initialize, Initialize-Instance, Rules for Initialization Arguments, Object Creation and Initialization
 @subsection Shared-Initialize
@@ -1075,7 +1075,7 @@ the @i{method} @i{accesses} the @i{local slot}.
 @subsection Introduction to Generic Functions
 
 A @i{generic function}
-@IGindex{generic function}
+@IGindex generic function
  is a function whose behavior depends on
 the @i{classes} or identities of the @i{arguments} supplied to it.
 A @i{generic function} @i{object} 
@@ -1153,7 +1153,7 @@ The only @i{standardized} @i{operator} in this category is @b{defgeneric}.
 Some @i{operators} define @i{methods} for a @i{generic function}.
 These @i{operators} will be referred to as
 @i{method-defining operators}
-@IGindex{method-defining operator}
+@IGindex method-defining operator
 ;
 their associated @i{forms} are called @i{method-defining forms}.
 The @i{standardized} @i{method-defining operators} are listed in Figure 7--2.
@@ -1235,7 +1235,7 @@ an error is signaled.  If a @i{method-defining operator} that cannot specify
 a @i{lambda list} for that @i{generic function} is derived from the
 @i{lambda list} of the @i{method} in the @i{method-defining form} in such a way
 as to be @i{congruent} with it.  For a discussion of @i{congruence}
-@IGindex{congruence}
+@IGindex congruence
 ,
 see @ref{Congruent Lambda-lists for all Methods of a Generic Function}.
 
@@ -1292,7 +1292,7 @@ selection to determine whether an argument satisfies a @i{parameter specializer}
 
 A method all of whose @i{parameter specializers} are 
 the @i{class} @b{t} is called a @i{default method}
-@IGindex{default method}
+@IGindex default method
 ; it is always applicable but
 may be shadowed by a more specific method.
 
@@ -1475,7 +1475,7 @@ both @t{picture-class} and @t{character-class}.
 When a @i{generic function} is called with particular arguments, it must
 determine the code to execute.  This code is called the 
 @i{effective method}
-@IGindex{effective method}
+@IGindex effective method
  for those @i{arguments}.
 The @i{effective method} is a 
 combination of the @i{applicable methods} in the @i{generic function}
@@ -1573,7 +1573,7 @@ That method can call the next most specific
 method by using the @i{function} @b{call-next-method}.  The method that
 @b{call-next-method} will call is referred to as the 
 @i{next method}
-@IGindex{next method}
+@IGindex next method
 .  The predicate @b{next-method-p} tests whether a next
 method exists.  If @b{call-next-method} is called and there is no
 next most specific method, the generic function @b{no-next-method}
@@ -1608,7 +1608,7 @@ the @b{define-method-combination} @i{macro}.
 @node Standard Method Combination, Declarative Method Combination, Applying method combination to the sorted list of applicable methods, Method Selection and Combination
 @subsubsection Standard Method Combination
 
-@IRindex{standard}
+@IRindex standard
 
 Standard method combination is supported by the @i{class} @b{standard-generic-function}.
 It is used if no other type of method
@@ -1757,25 +1757,25 @@ other operators that specify generic function options.
 
 The names of the built-in  method combination types are listed in Figure 7--3.
 
-@IRindex{+}
+@IRindex +
 
-@IRindex{and}
+@IRindex and
 
-@IRindex{append}
+@IRindex append
 
-@IRindex{list}
+@IRindex list
 
-@IRindex{max}
+@IRindex max
 
-@IRindex{min}
+@IRindex min
 
-@IRindex{nconc}
+@IRindex nconc
 
-@IRindex{or}
+@IRindex or
 
-@IRindex{progn}
+@IRindex progn
 
-@IRindex{standard}
+@IRindex standard
 
 @format
 @group
@@ -3797,7 +3797,6 @@ of an accessor for the @i{instance}.
 
 A @b{with-accessors} expression of the form:
 
-@center 
 @example
 
 @w{@t{(with-accessors} (@r{slot-entry}_1 ...@r{slot-entry}_n) @i{instance-form} @r{form}_1 ...@r{form}_k)}@*
@@ -3806,7 +3805,6 @@ A @b{with-accessors} expression of the form:
 @noindent
 expands into the equivalent of
 
-@center 
 @example
 
 @w{@t{(}@t{let ((}in @i{instance-form}@t{))}}@*
@@ -3816,7 +3814,6 @@ expands into the equivalent of
 @noindent
 where @r{Q}_i is 
 
-@center
 @example
 @t{(}@r{variable-name}_i () 
 @t{(@r{accessor-name}_i in))}
@@ -3919,7 +3916,6 @@ of a @i{slot} in the @i{instance}.
 
 A @b{with-slots} expression of the form:
 
-@center 
 @example
 
 @w{@t{(with-slots} (@r{slot-entry}_1 ...@r{slot-entry}_n) @i{instance-form} @r{form}_1 ...@r{form}_k)}@*
@@ -3928,7 +3924,6 @@ A @b{with-slots} expression of the form:
 @noindent
 expands into the equivalent of
 
-@center 
 @example
 
 @w{@t{(}@t{let ((}in @i{instance-form}@t{))}}@*
@@ -3938,7 +3933,6 @@ expands into the equivalent of
 @noindent
 where @r{Q}_i is 
 
-@center 
 @example
 @t{(}@r{slot-entry}_i () 
 @t{(slot-value }in '@r{slot-entry}_i@t{))}
@@ -3948,7 +3942,6 @@ where @r{Q}_i is
 if @r{slot-entry}_i is a @i{symbol}
 and is
 
-@center 
 @example
 @t{(}@r{variable-name}_i () 
 @t{(slot-value }in '@r{slot-name}_i@t{))}
@@ -3959,7 +3952,6 @@ and is
 if @r{slot-entry}_i
 is of the form 
 
-@center 
 @example
 @t{(}@r{variable-name}_i 
 @r{slot-name}_i@t{)}

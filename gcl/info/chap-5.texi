@@ -24,10 +24,10 @@
 @subsection Overview of Places and Generalized Reference
 
 A @i{generalized reference}
-@IGindex{generalized reference}
+@IGindex generalized reference
  is the use of a @i{form},
 sometimes called a @i{place}
-@IGindex{place}
+@IGindex place
 ,
 as if it were a @i{variable} that could be read and written.
 The @i{value} of a @i{place} is 
@@ -115,9 +115,9 @@ For all @i{places} defined by this specification
 (@i{e.g.}, @b{getf}, @b{ldb}, ...),
 this order of evaluation is left-to-right.
 
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 When a @i{place} is derived from a macro expansion,
 this rule is applied after the macro is expanded to find the appropriate @i{place}. 
@@ -186,9 +186,9 @@ or none of the cases hold in
 @item 4.  
 For @b{assert}, the order of evaluation of the generalized 
 references is not specified.
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 @end table
 
@@ -2570,7 +2570,8 @@ The @i{primary value} of each @i{form} is assigned to the corresponding @i{var}.
 
 @subsubheading  Pronunciation::
 
-@b{psetq}: pronounced  @tex p\=e'set ,ky\"u 
+@b{psetq}: pronounced
+@tex p\=e'set ,ky\"u 
 @end tex
 
 @subsubheading  Arguments and Values::
@@ -2724,9 +2725,9 @@ to which a @b{throw} is transferring control.
 @t{(throw 'bar @i{form})}.
 
 The order of execution of @b{catch} follows:
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 @table @asis
 
@@ -4559,9 +4560,9 @@ and the @b{unless} @i{form} returns @b{nil}.
 
 @w{@i{clause} ::=normal-clause | otherwise-clause}
 
-@IRindex{otherwise}
+@IRindex otherwise
 
-@IRindex{t}
+@IRindex t
 
 @subsubheading  Arguments and Values::
 
@@ -4732,9 +4733,9 @@ message.
 
 @w{@i{clause} ::=normal-clause | otherwise-clause}
 
-@IRindex{otherwise}
+@IRindex otherwise
 
-@IRindex{t}
+@IRindex t
 
 @subsubheading  Arguments and Values::
 
@@ -5123,9 +5124,9 @@ is defined to always behave in the same way as
 
 in order that the rules for order of evaluation and side-effects be consistent
 with those used by @b{setf}.
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 See @ref{VALUES Forms as Places}.
 

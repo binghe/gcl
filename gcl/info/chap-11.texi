@@ -22,11 +22,11 @@
 @subsection Introduction to Packages
 
 A @i{package}
-@IGindex{package}
+@IGindex package
  establishes a mapping from names to @i{symbols}. 
 At any given time, one @i{package} is current.
 The @i{current package}
-@IGindex{current package}
+@IGindex current package
  is the one that is the @i{value} of @b{*package*}.
 When using the @i{Lisp reader},
 it is possible to refer to @i{symbols} in @i{packages} 
@@ -99,14 +99,14 @@ specified by the caller.
 The mappings in a @i{package} are divided into two classes, external and internal.
 The @i{symbols} targeted by these different mappings 
 are called @i{external symbols} and @i{internal symbols}
-@IGindex{internal symbol}
+@IGindex internal symbol
  of the
 @i{package}. Within a @i{package}, a name refers to one
 @i{symbol} or to none; if it does refer
 to a @i{symbol}, then it is either external or internal in that
 @i{package}, but not both.
 @i{External symbols}
-@IGindex{external symbol}
+@IGindex external symbol
 
 are part of the package's public interface to other @i{packages}.
 @i{Symbols} become @i{external symbols} of a given
@@ -127,7 +127,7 @@ However, some of these mappings might be established within the @i{package}
 itself, while other mappings are inherited from other @i{packages} 
 via @b{use-package}.
 A @i{symbol} is said to be @i{present}
-@IGindex{present}
+@IGindex present
  in a @i{package} 
 if the mapping is in the @i{package} itself and is
 not inherited from somewhere else.
@@ -143,7 +143,7 @@ to refer to an @i{internal symbol} using the @i{Lisp reader},
 @subsubsection Accessibility of Symbols in a Package
 
 A @i{symbol} becomes @i{accessible}
-@IGindex{accessible}
+@IGindex accessible
  in a @i{package} 
     if that is its @i{home package} when it is created,
  or if it is @i{imported} into that @i{package},
@@ -246,7 +246,7 @@ never signal a name-conflict error.
 do not need to do any name-conflict checking.
 @b{unintern} does name-conflict checking only when a @i{symbol} 
 being @i{uninterned} is a @i{shadowing symbol}
-@IGindex{shadowing symbol}
+@IGindex shadowing symbol
 .
 
 @item --  
@@ -293,7 +293,7 @@ with the @i{same} @i{name} (under @b{string=})
 from two other @i{packages} can be resolved in
 favor of either @i{symbol} by importing it into the using
 @i{package} and making it a @i{shadowing symbol}
-@IGindex{shadowing symbol}
+@IGindex shadowing symbol
 ,
 just as with @b{use-package}.
 @end table
@@ -335,9 +335,9 @@ is given in Figure 11--2.
 @node The COMMON-LISP Package, Constraints on the COMMON-LISP Package for Conforming Implementations, Standardized Packages, Standardized Packages
 @subsubsection The COMMON-LISP Package
 
-@IPindex{common-lisp}
+@IPindex common-lisp
 
-@IPindex{cl}
+@IPindex cl
 
 The @t{COMMON-LISP} @i{package} contains the primitives of the @r{Common Lisp} system as
 defined by this specification.  Its @i{external} @i{symbols} include
@@ -397,7 +397,7 @@ or a @i{symbol} that is otherwise @i{accessible} in the @t{COMMON-LISP-USER} @i{
 @node Constraints on the COMMON-LISP Package for Conforming Programs, Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs, Constraints on the COMMON-LISP Package for Conforming Implementations, Standardized Packages
 @subsubsection Constraints on the COMMON-LISP Package for Conforming Programs
 
-@ITindex{redefinition}
+@ITindex redefinition
 
 Except where explicitly allowed, the consequences are undefined if any
 of the following actions are performed on an @i{external symbol} 
@@ -542,9 +542,9 @@ and to declare the @b{ftype} of that @i{binding}.
 @node The COMMON-LISP-USER Package, The KEYWORD Package, Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs, Standardized Packages
 @subsubsection The COMMON-LISP-USER Package
 
-@IPindex{common-lisp-user}
+@IPindex common-lisp-user
 
-@IPindex{cl-user}
+@IPindex cl-user
 
 The @t{COMMON-LISP-USER} @i{package} is the @i{current package} when 
 a @r{Common Lisp} system starts up.  This @i{package} @i{uses} the @t{COMMON-LISP} @i{package}.
@@ -556,7 +556,7 @@ it can @i{use} other @i{implementation-defined} @i{packages}.
 @node The KEYWORD Package, Interning a Symbol in the KEYWORD Package, The COMMON-LISP-USER Package, Standardized Packages
 @subsubsection The KEYWORD Package
 
-@IPindex{keyword}
+@IPindex keyword
 
 The @t{KEYWORD} @i{package} contains @i{symbols}, called @i{keywords}_1,
 that are typically used as special markers in @i{programs} 

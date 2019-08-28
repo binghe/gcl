@@ -30,7 +30,7 @@
 @subsection Introduction to Characters
 
 A @i{character}
-@IGindex{character}
+@IGindex character
  is an @i{object} that represents a unitary token 
 (@i{e.g.}, a letter, a special symbol, or a ``control character'')
 in an aggregate quantity of text
@@ -112,7 +112,7 @@ Whether and how the @i{script} or @i{scripts} used by any given
 @subsubsection Character Repertoires
 
 A @i{repertoire}
-@IGindex{repertoire}
+@IGindex repertoire
  is a @i{type specifier} for a @i{subtype} of @i{type} @b{character}.
 
 This term is generally used when describing a collection of @i{characters}
@@ -152,7 +152,7 @@ in some other, @i{implementation-defined} way.
 For any @i{implementation-defined} @i{attribute}
 there is a distinguished value
 called the @i{null}
-@IGindex{null}
+@IGindex null
  value for that @i{attribute}. 
 A @i{character} for which each @i{implementation-defined} @i{attribute}
 has the null value for that @i{attribute} is called a @i{simple} @i{character}.
@@ -198,7 +198,7 @@ which might have been enabled in the @i{current readtable}.
 @subsubsection Graphic Characters
 
 @i{Characters} that are classified as @i{graphic}
-@IGindex{graphic}
+@IGindex graphic
 , or displayable, are each
 associated with a glyph, a visual representation of the @i{character}.
 
@@ -212,7 +212,7 @@ Of the @i{standard characters},
  and all others are @i{graphic}; see @ref{Standard Characters}.
 
 @i{Characters} that are not @i{graphic} are called @i{non-graphic}
-@IGindex{non-graphic}
+@IGindex non-graphic
 .
 
 @i{Non-graphic} @i{characters} are sometimes informally called

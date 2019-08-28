@@ -51,7 +51,7 @@ less than the corresponding @i{array} @i{dimension}.
 @subsubsection Array Dimensions
 
 An axis of an @i{array} is called a @i{dimension}
-@IGindex{dimension}
+@IGindex dimension
 .
 
 Each @i{dimension} is a non-negative 
@@ -76,7 +76,7 @@ but there is a minimum requirement on that limit.  See the @i{variable} @b{array
 
 An @i{array} can have any number of @i{dimensions} (including zero).
 The number of @i{dimensions} is called the @i{rank}
-@IGindex{rank}
+@IGindex rank
 .
 
 If the rank of an @i{array} is zero then the @i{array} is said to have
@@ -88,21 +88,21 @@ is then 1; a zero-rank @i{array} therefore has a single element.
 
 An @i{array} of @i{rank} one (@i{i.e.}, a one-dimensional @i{array})
 is called a @i{vector}
-@IGindex{vector}
+@IGindex vector
 .
 
 @node Fill Pointers, Multidimensional Arrays, Vectors, Array Elements
 @subsubsection Fill Pointers
 
 A @i{fill pointer}
-@IGindex{fill pointer}
+@IGindex fill pointer
  is a non-negative @i{integer} no
 larger than the total number of @i{elements} in a @i{vector}.
 Not all @i{vectors} have @i{fill pointers}.
 See the @i{functions} @b{make-array} and @b{adjust-array}.
 
 An @i{element} of a @i{vector} is said to be @i{active}
-@IGindex{active}
+@IGindex active
  if it has
 an index that is greater than or equal to zero, 
 but less than the @i{fill pointer} (if any).
@@ -175,7 +175,7 @@ creation, @i{access}, and information operations.
 @subsubsection Array Upgrading
 
 The @i{upgraded array element type}
-@IGindex{upgraded array element type}
+@IGindex upgraded array element type
  of a @i{type} T_1
 is a @i{type} T_2 that is a @i{supertype} of T_1
 and that is used instead of T_1 whenever T_1
@@ -185,11 +185,11 @@ for object creation or type discrimination.
 During creation of an @i{array},
 the @i{element type} that was requested 
 is called the @i{expressed array element type}
-@IGindex{expressed array element type}
+@IGindex expressed array element type
 .
 The @i{upgraded array element type} of the @i{expressed array element type}
 becomes the @i{actual array element type}
-@IGindex{actual array element type}
+@IGindex actual array element type
  of the @i{array} that is created.
 
 @i{Type} @i{upgrading} implies a movement upwards in the type hierarchy lattice.
@@ -218,7 +218,7 @@ will @i{upgrade} a given @i{type}.
 @b{character} or a @i{subtype} of @b{character}
 
 are called @i{strings}
-@IGindex{string}
+@IGindex string
 . 
 @i{Strings} are of @i{type} @b{string}.
 Figure 15--2 lists some @i{defined names} related to @i{strings}.
@@ -250,7 +250,7 @@ see instead @ref{Strings}.
 
 @i{Vectors} whose @i{elements} are restricted to @i{type}
 @b{bit} are called @i{bit vectors}
-@IGindex{bit vector}
+@IGindex bit vector
 .
 @i{Bit vectors} are of @i{type} @b{bit-vector}.
 Figure 15--3 lists some @i{defined names} for operations on @i{bit arrays}.

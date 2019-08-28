@@ -11,7 +11,7 @@
 @c @smallbook
 @setfilename gcl-si.info
 @settitle GCL SI Manual
-@synindex vr fn
+@c @synindex vr fn
 
 @c to update the menus do: 
 @c (texinfo-multiple-files-update "gcl-si.texi" t t)
@@ -63,7 +63,8 @@ END-INFO-DIR-ENTRY
 * Miscellaneous::		
 * Compiler Definitions::	
 * JAPI GUI Library Binding::
-* Function and Variable Index::	 
+* Function Index::	 
+* Variable Index::	 
 
  --- The Detailed Node Listing ---
 

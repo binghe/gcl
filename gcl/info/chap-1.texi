@@ -419,7 +419,7 @@ used in this manual.
 @node Notational Conventions, Error Terminology, Definitions, Definitions
 @subsection Notational Conventions
 
-@ITindex{notation}
+@ITindex notation
 
 The following notational conventions are used throughout this document.
 
@@ -442,7 +442,7 @@ The following notational conventions are used throughout this document.
 @node Font Key, Modified BNF Syntax, Notational Conventions, Notational Conventions
 @subsubsection Font Key
 
-@ITindex{font key}
+@ITindex font key
 
 Fonts are used in this document to convey information.
 
@@ -461,7 +461,7 @@ The subscript notation for Glossary terms is generally used where the
 context might be insufficient to disambiguate among the available definitions.
 
 @item @i{name}
-@IGindex{name}
+@IGindex name
 
 Denotes the introduction of a formal term locally to the current text.
 There is still a corresponding glossary entry, and is formally equivalent
@@ -497,7 +497,7 @@ input or output.
 @node Modified BNF Syntax, Splicing in Modified BNF Syntax, Font Key, Notational Conventions
 @subsubsection Modified BNF Syntax
 
-@ITindex{bnf key}
+@ITindex bnf key
 
 This specification uses an extended Backus Normal Form (BNF) to
 describe the syntax of @r{Common Lisp} @i{macro forms} and @i{special forms}.
@@ -813,7 +813,7 @@ but conventions may exist which convey a ``point of view'' or ``sense of intent.
 @node Case in Symbols, Numbers (Objects with Multiple Notations), Objects with Multiple Notations, Notational Conventions
 @subsubsection Case in Symbols
 
-@ITindex{case in symbol names}
+@ITindex case in symbol names
 
 While @i{case} is significant in the process of @i{interning} a @i{symbol},
 the @i{Lisp reader}, by default, attempts to canonicalize the case of a
@@ -872,11 +872,11 @@ and never to a four-letter symbol @t{"CAR."}
 @node NIL, Designators, Use of the Dot Character, Notational Conventions
 @subsubsection NIL
 
-@IGindex{nil}
+@IGindex nil
 
-@IGindex{()}
+@IGindex ()
 
-@IRindex{nil}
+@IRindex nil
 
 @b{nil} has a variety of meanings.
 It is a @i{symbol} in the @t{COMMON-LISP} @i{package} with the @i{name} @t{"NIL"},
@@ -934,7 +934,7 @@ Instead, these phrases are just traditional alternative ways of saying that the
 @subsubsection Designators
 
 A @i{designator}
-@IGindex{designator}
+@IGindex designator
  is an @i{object} that denotes another @i{object}.
 
 Where a @i{parameter} of an @i{operator} is described as a @i{designator},
@@ -988,13 +988,13 @@ from which the @i{value} of <<@i{parameter-name}>> was computed.
 @node Nonsense Words,  , Designators, Notational Conventions
 @subsubsection Nonsense Words
 
-@ICindex{foo}
+@ICindex foo
 
-@ICindex{bar}
+@ICindex bar
 
-@ICindex{baz}
+@ICindex baz
 
-@ICindex{quux}
+@ICindex quux
 
 When a word having no pre-attached semantics is required (@i{e.g.}, in an
 example), it is common in the Lisp community to use one of the words
@@ -1014,7 +1014,7 @@ is an attached semantics which they are overlooking---there is not.
 @node Error Terminology, Sections Not Formally Part Of This Standard, Notational Conventions, Definitions
 @subsection Error Terminology
 
-@IGindex{error terminology}
+@IGindex error terminology
 
 Situations in which errors might, should, or must be signaled are described
 in the standard.  The wording used to describe such situations is intended
@@ -1024,7 +1024,7 @@ to have precise meaning. The following list is a glossary of those meanings.
 
 @item @b{Safe code}  
 
-@IGindex{safe}
+@IGindex safe
 
 This is @i{code} processed with the @b{safety} optimization 
 at its highest setting (@t{3}).  @b{safety} is a lexical property
@@ -1036,7 +1036,7 @@ code signals the error.
 
 @item @b{Unsafe code}  
 
-@IGindex{unsafe}
+@IGindex unsafe
 
 This is code processed with lower safety levels.
 
@@ -1045,11 +1045,11 @@ treat all code as safe code all the time.
 
 @item @b{An error is signaled}  
 
-@IGindex{signal}
+@IGindex signal
 
-@ITindex{is signaled}
+@ITindex is signaled
 
-@ITindex{must signal}
+@ITindex must signal
 
 This means that an error is signaled in both safe and unsafe code.
 @i{Conforming code} may rely on the fact that the error is signaled
@@ -1062,9 +1062,9 @@ If an explicit error type is not specified, the default is @b{error}.
 
 @item @b{An error should be signaled}  
 
-@IGindex{signal}
+@IGindex signal
 
-@ITindex{should signal}
+@ITindex should signal
 
 This means that an error is signaled in safe code, and an error
 might be signaled in unsafe code.  @i{Conforming code} may rely on the
@@ -1076,9 +1076,9 @@ if any argument is not of @i{type} @b{number}.''
 
 @item @b{Should be prepared to signal an error}  
 
-@IGindex{signal}
+@IGindex signal
 
-@ITindex{prepared to signal}
+@ITindex prepared to signal
 
 This is similar to ``should be signaled'' except that it does not
 imply that `extra effort' has to be taken on the part of an @i{operator}
@@ -1128,9 +1128,9 @@ correct operation of the @i{operator}.
 
 @item @b{The consequences are unspecified}  
 
-@ITindex{consequences}
+@ITindex consequences
 
-@ITindex{unspecified consequences}
+@ITindex unspecified consequences
 
 This means that the consequences are unpredictable but harmless.
 Implementations are permitted to specify the consequences of this
@@ -1143,9 +1143,9 @@ specifies a name that does not correspond to any @i{slots}
 
 @item @b{The consequences are undefined}  
 
-@ITindex{consequences}
+@ITindex consequences
 
-@ITindex{undefined consequences}
+@ITindex undefined consequences
 
 This means that the consequences are unpredictable. The consequences
 may range from harmless to fatal.  No @i{conforming code} may depend on
@@ -1162,9 +1162,9 @@ variable has undefined consequences.''
 
 @item @b{An error might be signaled}  
 
-@IGindex{signal}
+@IGindex signal
 
-@ITindex{might signal}
+@ITindex might signal
 
 This means that the situation has undefined consequences;
 however, if an error is signaled, it is of the specified @i{type}.
@@ -1172,7 +1172,7 @@ For example, ``@b{open} might signal an error of @i{type} @b{file-error}.''
 
 @item @b{The return values are unspecified}  
 
-@ITindex{unspecified values}
+@ITindex unspecified values
 
 This means that only the number and nature of the return values of a
 @i{form} are not specified.  However, the issue of whether or not
@@ -1186,7 +1186,7 @@ rely on any particular aspect of the value or values returned by @t{F}.
 
 @item @b{Implementations may be extended to cover this situation}  
 
-@ITindex{extensions}
+@ITindex extensions
 
 This means that the @i{situation} has undefined consequences;
 however, a @i{conforming implementation} is free to treat
@@ -1206,7 +1206,7 @@ specifiers to have a corresponding @i{class}.''
 
 @item @b{Implementations are free to extend the syntax}  
 
-@ITindex{extensions}
+@ITindex extensions
 
 This means that in this situation implementations are permitted to
 define unambiguous extensions to the syntax of the @i{form} being
@@ -1219,7 +1219,7 @@ example, ``no implementation is free to extend the syntax of
 
 @item @b{A warning might be issued}  
 
-@ITindex{warning}
+@ITindex warning
 
 This means that @i{implementations} are encouraged to issue a warning
 if the context is appropriate (@i{e.g.}, when compiling).  However, a
@@ -1799,7 +1799,7 @@ In addition, it imposes requirements on @i{conforming programs}.
 @subsection Conforming Implementations
 
 A @i{conforming implementation}
-@IGindex{conforming implementation}
+@IGindex conforming implementation
  shall adhere to the requirements outlined
 in this section.
 
@@ -1906,9 +1906,9 @@ standard, then the conformance statement shall be
 @node Conforming Programs,  , Conforming Implementations, Conformance
 @subsection Conforming Programs
 
-@IGindex{conforming program}
+@IGindex conforming program
 
-@IGindex{conforming code}
+@IGindex conforming code
 
 Code conforming with the requirements of this standard shall adhere to the
 following:
@@ -1989,7 +1989,7 @@ presence of the feature @t{ACME} really implies that a function named
 @t{acme:initialize-something} is present in the environment.  In effect,
 using @t{#+} or @t{#-} in a @i{conforming program} means that the variable
 @b{*features*}
-@IRindex{*features*}
+@IRindex *features*
 
 becomes just one more piece of input data to that 
 program.  Like any other data coming into a program, the programmer
@@ -2177,7 +2177,7 @@ should be used if that is what is desired.
 
 The figures on the next twelve pages contain a complete enumeration
 of the 978 @i{external} @i{symbols} in the @t{COMMON-LISP} @i{package}.
-@IPindex{common-lisp}
+@IPindex common-lisp
 
 @format
 @group

@@ -15,7 +15,7 @@
 @c including concept-sequences
 
 A @i{sequence}
-@IGindex{sequence}
+@IGindex sequence
  is an ordered collection of @i{elements},
 implemented as either a @i{vector} or a @i{list}.
 
@@ -25,7 +25,7 @@ of @i{types} that are @i{subtypes} of @b{sequence}
 (@i{e.g.}, @b{list}, @b{make-list}, @b{mapcar}, and @b{vector}).
 
 A @i{sequence function}
-@IGindex{sequence function}
+@IGindex sequence function
  is a @i{function} 
    defined by this specification
 or added as an extension by the @i{implementation} 
@@ -131,7 +131,7 @@ is a @i{designator} for a  @i{function}
 of two @i{arguments}, O and Z_i.
 An E_i is said (or, sometimes, an O and an E_i are said)
 to @i{satisfy the test}
-@IGindex{satisfy the test}
+@IGindex satisfy the test
 
 if this @t{:test} @i{function} returns a @i{generalized boolean} representing 
 @i{true}.
@@ -141,7 +141,7 @@ is @i{designator} for a @i{function}
 of two @i{arguments}, O and Z_i.
 An E_i is said (or, sometimes, an O and an E_i are said)
 to @i{satisfy the test}
-@IGindex{satisfy the test}
+@IGindex satisfy the test
 
 if this @t{:test-not} @i{function}
 returns a @i{generalized boolean} representing @i{false}.
@@ -226,7 +226,7 @@ and @i{yielding} an @i{object} Z_i to be used for comparison.
 ends in ``@t{-if}'' accept a first @i{argument} that is a @i{designator} for a 
 @i{function} of one @i{argument}, Z_i.
 An E_i is said to @i{satisfy the test}
-@IGindex{satisfy the test}
+@IGindex satisfy the test
  if this @t{:test} @i{function}
 returns a @i{generalized boolean} representing @i{true}.
 
@@ -234,7 +234,7 @@ returns a @i{generalized boolean} representing @i{true}.
 ends in ``@t{-if-not}'' accept a first @i{argument} that is a @i{designator} for a 
 @i{function} of one @i{argument}, Z_i.
 An E_i is said to @i{satisfy the test}
-@IGindex{satisfy the test}
+@IGindex satisfy the test
  if this @t{:test} @i{function}
 returns a @i{generalized boolean} representing @i{false}.
 

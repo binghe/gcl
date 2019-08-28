@@ -24,20 +24,20 @@
 To @b{load} a @i{file} is to treat its contents as @i{code}
 and @i{execute} that @i{code}.
 The @i{file} may contain @i{source code}
-@IGindex{source code}
+@IGindex source code
  or @i{compiled code}
-@IGindex{compiled code}
+@IGindex compiled code
 .
 
 A @i{file} containing @i{source code} is called a @i{source file}
-@IGindex{source file}
+@IGindex source file
 .
 @i{Loading} a @i{source file} is accomplished essentially 
 by sequentially @i{reading}_2 the @i{forms} in the file,
 @i{evaluating} each immediately after it is @i{read}.
 
 A @i{file} containing @i{compiled code} is called a @i{compiled file}
-@IGindex{compiled file}
+@IGindex compiled file
 .
 @i{Loading} a @i{compiled file} is similar to @i{loading} a @i{source file},
 except that the @i{file} does not contain text but rather an
@@ -53,7 +53,7 @@ is @i{implementation-dependent}.
 @subsection Features
 
 A @i{feature}
-@IGindex{feature}
+@IGindex feature
  is an aspect or attribute
      of @r{Common Lisp}, 
      of the @i{implementation},
@@ -61,12 +61,12 @@ A @i{feature}
 A @i{feature} is identified by a @i{symbol}.
 
 A @i{feature} is said to be @i{present}
-@IGindex{present}
+@IGindex present
  in a @i{Lisp image}
 if and only if the @i{symbol} naming it is an @i{element} of the
 @i{list} held by the @i{variable} @b{*features*}, 
 which is called the @i{features list}
-@IGindex{features list}
+@IGindex features list
 .
 
 @menu
@@ -78,7 +78,7 @@ which is called the @i{features list}
 @subsubsection Feature Expressions
 
 Boolean combinations of @i{features}, called @i{feature expressions}
-@IGindex{feature expression}
+@IGindex feature expression
 ,
 are used by the @t{#+} and @t{#-} @i{reader macros} in order to
 direct conditional @i{reading} of @i{expressions} by the @i{Lisp reader}.

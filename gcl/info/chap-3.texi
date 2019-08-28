@@ -24,7 +24,7 @@ from direct interpretation of a @i{form} representing a @i{program}
 to invocation of @i{compiled code} produced by a @i{compiler}.
 
 @i{Evaluation}
-@IGindex{evaluation}
+@IGindex evaluation
  is the process by which a @i{program} is @i{executed} in @r{Common Lisp}.
 The mechanism of @i{evaluation} is manifested
  both implicitly through the effect of the @i{Lisp read-eval-print loop},
@@ -59,19 +59,19 @@ is described in @ref{The Evaluation Model}.
 @subsection Introduction to Environments
 
 A @i{binding}
-@IGindex{binding}
+@IGindex binding
  is an association between a @i{name} and
 that which the name denotes.  @i{Bindings} are @i{established}
 in a @i{lexical environment} or a @i{dynamic environment}
 by particular @i{special operators}.
 
 An @i{environment}
-@IGindex{environment}
+@IGindex environment
  is a set of @i{bindings} and other information
 used during evaluation (@i{e.g.}, to associate meanings with names).
 
 @i{Bindings} in an @i{environment} are partitioned into @i{namespaces}
-@IGindex{namespace}
+@IGindex namespace
 .
 A single @i{name} can simultaneously have more than one
 associated @i{binding} per @i{environment},
@@ -89,7 +89,7 @@ but can have only one associated @i{binding} per @i{namespace}.
 @subsubsection The Global Environment
 
 The @i{global environment}
-@IGindex{global environment}
+@IGindex global environment
  is that part of an @i{environment}
 that contains @i{bindings} with both @i{indefinite scope} 
 and @i{indefinite extent}.
@@ -115,7 +115,7 @@ information about @i{proclamations}.
 @subsubsection Dynamic Environments
 
 A @i{dynamic environment}
-@IGindex{dynamic environment}
+@IGindex dynamic environment
  for @i{evaluation} is that part of an
 @i{environment} that contains @i{bindings} whose duration
 is bounded by points of @i{establishment} and @i{disestablishment} 
@@ -151,7 +151,7 @@ associated with its name in the @i{global environment}.
 @subsubsection Lexical Environments
 
 A @i{lexical environment}
-@IGindex{lexical environment}
+@IGindex lexical environment
  for @i{evaluation} at some position in a @i{program}
 is that part of the @i{environment} that contains information having 
 @i{lexical scope} within the @i{forms} containing that position.
@@ -189,7 +189,7 @@ associated with its name in the @i{global environment}.
 @subsubsection The Null Lexical Environment
 
 The @i{null lexical environment}
-@IGindex{null lexical environment}
+@IGindex null lexical environment
  is equivalent to the @i{global environment}.
 
 Although in general the representation of an @i{environment} @i{object}
@@ -202,7 +202,7 @@ the @i{null lexical environment}.
 
 Some @i{operators} make use of an @i{object}, 
 called an @i{environment object}
-@IGindex{environment object}
+@IGindex environment object
 ,
 that represents the set of @i{lexical bindings} needed to perform
 semantic analysis on a @i{form} in a given @i{lexical environment}.
@@ -805,7 +805,7 @@ the same @i{name} N are textually nested, then references to N
 within the inner @i{form} refer to the @i{binding} established by
 the inner @i{form}; the inner @i{binding} for N
 @i{shadows}
-@IGindex{shadow}
+@IGindex shadow
  the outer @i{binding} for N.  Outside the inner
 @i{form} but inside the outer one, references to N refer to the
 @i{binding} established by the outer @i{form}.  For example:
@@ -1019,28 +1019,28 @@ See @b{multiple-values-limit} and @b{values-list}.
 The following terminology is used in this section.
 
 The @i{compiler}
-@IGindex{compiler}
+@IGindex compiler
  is a utility that translates code into an
 @i{implementation-dependent} form that might be represented or
 executed efficiently.
 The term @i{compiler}
-@IGindex{compiler}
+@IGindex compiler
  refers to both of the @i{functions}
 @b{compile} and @b{compile-file}.
 
 The term @i{compiled code}
-@IGindex{compiled code}
+@IGindex compiled code
  refers to 
 @i{objects} representing compiled programs, such as @i{objects} constructed
 by @b{compile} or by @b{load} when @i{loading} a @i{compiled file}.
 
 The term @i{implicit compilation}
-@IGindex{implicit compilation}
+@IGindex implicit compilation
  refers to @i{compilation}
 performed during @i{evaluation}.
 
 The term @i{literal object}
-@IGindex{literal object}
+@IGindex literal object
  refers to 
      a quoted @i{object} 
   or a @i{self-evaluating object} 
@@ -1048,7 +1048,7 @@ The term @i{literal object}
 A @i{constant variable} is not itself a @i{literal object}.
 
 The term @i{coalesce}
-@IGindex{coalesce}
+@IGindex coalesce
  is defined as follows.
 Suppose @t{A} and @t{B} are two @i{literal constants} in the @i{source code},
 and that @t{A'} and @t{B'} are the corresponding @i{objects} in the @i{compiled code}.
@@ -1057,19 +1057,19 @@ If @t{A'} and @t{B'} are @b{eql} but
 that @t{A} and @t{B} have been coalesced by the compiler.
 
 The term @i{minimal compilation}
-@IGindex{minimal compilation}
+@IGindex minimal compilation
  refers to actions the compiler
 must take at @i{compile time}. These actions are specified in 
 @ref{Compilation Semantics}.
 
 The verb @i{process}
-@IGindex{process}
+@IGindex process
  refers to performing @i{minimal compilation},
 determining the time of evaluation for a @i{form},
 and possibly @i{evaluating} that @i{form} (if required).
 
 The term @i{further compilation}
-@IGindex{further compilation}
+@IGindex further compilation
  refers to
 @i{implementation-dependent} compilation beyond @i{minimal compilation}.
 That is, @i{processing} does not imply complete compilation.
@@ -1085,13 +1085,13 @@ distinguished:
   the @i{run-time environment}.
 
 The @i{startup environment}
-@IGindex{startup environment}
+@IGindex startup environment
  is
 the @i{environment} of the @i{Lisp image} 
 from which the @i{compiler} was invoked.
 
 The @i{compilation environment}
-@IGindex{compilation environment}
+@IGindex compilation environment
  is maintained by the compiler
 and is used to hold definitions and declarations to be used internally
 by the compiler.  Only those parts of a definition needed for correct
@@ -1102,14 +1102,14 @@ the compiler. It is unspecified whether a definition available in the
 initiated in the @i{startup environment} or @i{evaluation environment}.
 
 The @i{evaluation environment}
-@IGindex{evaluation environment}
+@IGindex evaluation environment
  is a @i{run-time environment}
 in which macro expanders and code specified by @b{eval-when}
 to be evaluated are evaluated.  All evaluations initiated by the
 @i{compiler} take place in the @i{evaluation environment}.
 
 The @i{run-time environment}
-@IGindex{run-time environment}
+@IGindex run-time environment
  is the 
 @i{environment} in which the program being compiled will be executed.
 
@@ -1123,7 +1123,7 @@ and the @i{startup environment} and @i{evaluation environment}
 might be @i{identical}.
 
 The term @i{compile time}
-@IGindex{compile time}
+@IGindex compile time
  refers to the duration of time that
 the compiler is processing @i{source code}.
 At @i{compile time},
@@ -1132,7 +1132,7 @@ and  the @i{evaluation environment}
 are available.
 
 The term @i{compile-time definition}
-@IGindex{compile-time definition}
+@IGindex compile-time definition
  refers to a definition in
 the @i{compilation environment}.
 For example, when compiling a file, 
@@ -1141,18 +1141,18 @@ if it is declared @b{inline}.
 This definition might not be available in the @i{evaluation environment}.
 
 The term @i{run time}
-@IGindex{run time}
+@IGindex run time
  refers to the duration of time that the
 loader is loading compiled code or compiled code is being executed.
 At run time, only the @i{run-time environment} is available.
 
 The term @i{run-time definition}
-@IGindex{run-time definition}
+@IGindex run-time definition
  refers to a definition in the
 @i{run-time environment}.
 
 The term @i{run-time compiler}
-@IGindex{run-time compiler}
+@IGindex run-time compiler
  refers to the @i{function} @b{compile}
 or @i{implicit compilation}, for which the compilation and run-time 
 @i{environments} are maintained in the same @i{Lisp image}.
@@ -1345,26 +1345,26 @@ each @i{implementation}.
 
 @item @t{*}  
 All @i{compiler macro}
-@IGindex{compiler macro}
+@IGindex compiler macro
  calls appearing in the
 @i{source code} being compiled are expanded, if at all, at compile time;
 they will not be expanded at run time.
 
 @item @t{*}  
 All @i{macro}
-@IGindex{macro}
+@IGindex macro
  and 
 @i{symbol macro}
-@IGindex{symbol macro}
+@IGindex symbol macro
  calls
 appearing in the source code being compiled are expanded at compile time
 in such a way that they will not be expanded again at run time.
 @b{macrolet}
-@IRindex{macrolet}
+@IRindex macrolet
 
 and
 @b{symbol-macrolet}
-@IRindex{symbol-macrolet}
+@IRindex symbol-macrolet
 
 are effectively replaced by
 @i{forms} corresponding to their bodies in which calls to 
@@ -1372,15 +1372,15 @@ are effectively replaced by
 
 @item @t{*}  
 The first @i{argument} in a @b{load-time-value}
-@IRindex{load-time-value}
+@IRindex load-time-value
 
 @i{form} 
 in @i{source code} processed by @b{compile}
-@IRindex{compile}
+@IRindex compile
 
 is @i{evaluated} at @i{compile time};
 in @i{source code} processed by @b{compile-file}
-@IRindex{compile-file}
+@IRindex compile-file
 , 
 the compiler arranges for it to be @i{evaluated} at @i{load time}.
 In either case, the result of the @i{evaluation}
@@ -1579,7 +1579,7 @@ is not necessarily the @i{null lexical environment}.)
 
 @item 5.  
 If the form is an @b{eval-when}
-@IRindex{eval-when}
+@IRindex eval-when
  form, it is
 handled according to Figure 3--7.
 
@@ -1781,11 +1781,11 @@ by the @i{file compiler}.
 An @i{object} that can be used as a @i{literal} @i{object} 
 in @i{code} to be processed by the @i{file compiler} is called an
 @i{externalizable object}
-@IGindex{externalizable object}
+@IGindex externalizable object
 .
 
 We define that two @i{objects} are @i{similar}
-@IGindex{similar}
+@IGindex similar
  if they satisfy
 a two-place conceptual equivalence predicate (defined below), which is
 independent of the @i{Lisp image} so that the two @i{objects} in
@@ -1800,7 +1800,7 @@ as a @i{literal object}, the @i{loader} will construct a @i{similar}
 @i{object}.
 
 The set of @i{objects} that are @i{externalizable objects}
-@IGindex{externalizable object}
+@IGindex externalizable object
  are those
 for which the new conceptual term ``@i{similar}'' is defined, such that
 when a @i{compiled file} is @i{loaded}, an @i{object} can be constructed
@@ -2156,19 +2156,19 @@ See @b{with-compilation-unit}.
 @c including concept-decls
 
 @i{Declarations}
-@IGindex{declaration}
+@IGindex declaration
  provide a way of specifying information for use by
 program processors, such as the evaluator or the compiler.
 
 @i{Local declarations}
-@IGindex{local declaration}
+@IGindex local declaration
 
 can be embedded in executable code using @b{declare}.
 @i{Global declarations}
-@IGindex{global declaration}
+@IGindex global declaration
 , 
 or @i{proclamations}
-@IGindex{proclamation}
+@IGindex proclamation
 ,
 are established by @b{proclaim} or @b{declaim}.
 
@@ -2192,16 +2192,16 @@ or a @i{proclamation}.
 In general, an @i{implementation} is free to ignore
 @i{declaration specifiers} except for the
      @b{declaration}
-@IRindex{declaration}
+@IRindex declaration
 ,
      @b{notinline}
-@IRindex{notinline}
+@IRindex notinline
 ,
      @b{safety}
-@IRindex{safety}
+@IRindex safety
 ,
  and @b{special}
-@IRindex{special}
+@IRindex special
  @i{declaration specifiers}.
 
 A @b{declaration} @i{declaration} must suppress warnings
@@ -2224,7 +2224,7 @@ A @b{special} @i{declaration} must be processed by all @i{implementations}.
 @subsection Declaration Specifiers
 
 A @i{declaration specifier}
-@IGindex{declaration specifier}
+@IGindex declaration specifier
  is an @i{expression} that can appear at
 top level of a @b{declare} expression or a @b{declaim} form, or as 
 the argument to @b{proclaim}.
@@ -2237,7 +2237,7 @@ the @i{declaration identifier}.
 
 Figure 3--9 shows a list of all 
 @i{declaration identifiers}
-@IGindex{declaration identifier}
+@IGindex declaration identifier
 
 defined by this standard.
 
@@ -2285,14 +2285,14 @@ do not apply to @i{bindings}.
 A @i{declaration} that appears at the head of a binding @i{form} 
 and applies to a @i{variable} or @i{function} @i{binding} 
 made by that @i{form} is called a @i{bound declaration}
-@IGindex{bound declaration}
+@IGindex bound declaration
 ; 
 such a @i{declaration} affects both the @i{binding} and
 any references within the @i{scope} of the @i{declaration}.  
 
 @i{Declarations} that are not @i{bound declarations} are called
 @i{free declarations}
-@IGindex{free declaration}
+@IGindex free declaration
 .
 
 A @i{free declaration} in a @i{form} F1 that applies to a @i{binding}
@@ -2435,7 +2435,7 @@ and therefore refers to the @i{dynamic binding} of @t{x}.
 @c including concept-bvl
 
 A @i{lambda list}
-@IGindex{lambda list}
+@IGindex lambda list
  is a @i{list} that
 specifies a set of @i{parameters} (sometimes called @i{lambda variables})
 and a protocol for receiving @i{values} for those @i{parameters}.
@@ -2505,7 +2505,7 @@ to @i{lambda lists}.
 @subsection Ordinary Lambda Lists
 
 An @i{ordinary lambda list}
-@IGindex{ordinary lambda list}
+@IGindex ordinary lambda list
  is used to describe how a set of
 @i{arguments} is received by an @i{ordinary} @i{function}.  
 The @i{defined names} in Figure 3--12 are those which use
@@ -2607,7 +2607,7 @@ The other parameters are then processed using any remaining arguments.
 @node Specifiers for optional parameters, A specifier for a rest parameter, Specifiers for the required parameters, Ordinary Lambda Lists
 @subsubsection Specifiers for optional parameters
 
-@IRindex{&optional}
+@IRindex &optional
 
 If @b{&optional} is present,
 the optional parameter specifiers are those following 
@@ -2632,7 +2632,7 @@ an argument had been supplied for the corresponding @i{var}.
 @node A specifier for a rest parameter, Specifiers for keyword parameters, Specifiers for optional parameters, Ordinary Lambda Lists
 @subsubsection A specifier for a rest parameter
 
-@IRindex{&rest}
+@IRindex &rest
 
 @b{&rest}, if present, must be followed by a single @i{rest parameter}
 specifier, which in turn must be followed by another 
@@ -2649,9 +2649,9 @@ The value of a @i{rest parameter}
 is permitted, but not required, to share structure with the
 last argument to @b{apply}.
 
-@IRindex{&key}
+@IRindex &key
 
-@IRindex{&allow-other-keys}
+@IRindex &allow-other-keys
 
 @node Specifiers for keyword parameters, Suppressing Keyword Argument Checking, A specifier for a rest parameter, Ordinary Lambda Lists
 @subsubsection Specifiers for keyword parameters
@@ -2780,7 +2780,7 @@ is @i{false}.
 @node Specifiers for @b{&aux} variables, Examples of Ordinary Lambda Lists, Examples of Suppressing Keyword Argument Checking, Ordinary Lambda Lists
 @subsubsection Specifiers for @b{&aux} variables
 
-@IRindex{&aux}
+@IRindex &aux
 
 These are not really parameters.  If the @i{lambda list keyword}
 @b{&aux} is present, all specifiers after it are auxiliary variable
@@ -2892,7 +2892,7 @@ a @i{true} value causes any extraneous named arguments, including
 @subsection Generic Function Lambda Lists
 
 A @i{generic function lambda list}
-@IGindex{generic function lambda list}
+@IGindex generic function lambda list
  is used to describe the overall shape of
 the argument list to be accepted by a @i{generic function}.
 Individual @i{method} @i{signatures} might contribute additional 
@@ -2944,7 +2944,7 @@ The use of @b{&aux} is not allowed.
 @subsection Specialized Lambda Lists
 
 A @i{specialized lambda list}
-@IGindex{specialized lambda list}
+@IGindex specialized lambda list
  is used to @i{specialize} a @i{method}
 for a particular @i{signature} and to describe how @i{arguments} matching
 that @i{signature} are received by the @i{method}.  
@@ -2996,7 +2996,7 @@ or @i{object} for which that @i{parameter} is @i{specialized}.
 @subsection Macro Lambda Lists
 
 A @i{macro lambda list}
-@IGindex{macro lambda list}
+@IGindex macro lambda list
  is used in describing @i{macros} 
 defined by the @i{operators} in Figure 3--17.
 
@@ -3070,7 +3070,7 @@ just as in an @i{ordinary lambda list}.
 Both may contain default initialization forms and @i{supplied-p parameters}.
 
 @b{&body}
-@IRindex{&body}
+@IRindex &body
 
 is identical in function to @b{&rest},
 but it can be used to inform certain output-formatting 
@@ -3084,7 +3084,7 @@ see @ref{Destructuring by Lambda Lists}.
 for details, see @ref{Destructuring by Lambda Lists}.
 
 @b{&whole}
-@IRindex{&whole}
+@IRindex &whole
 
 is followed by a single variable that is bound to the
 entire macro-call form; this is the value that the @i{macro function}
@@ -3103,7 +3103,7 @@ The use of @b{&whole} does not affect the pattern of arguments
      specified.
 
 @b{&environment}
-@IRindex{&environment}
+@IRindex &environment
 
 is followed by a single variable that is bound
 to an @i{environment} representing the @i{lexical environment} in which the
@@ -3310,7 +3310,7 @@ Stands by itself.
 @subsection Destructuring Lambda Lists
 
 A @i{destructuring lambda list}
-@IGindex{destructuring lambda list}
+@IGindex destructuring lambda list
  is used by @b{destructuring-bind}.
 
 @i{Destructuring lambda lists} are closely related to 
@@ -3352,7 +3352,7 @@ A @i{destructuring lambda list} has the following syntax:
 @subsection Boa Lambda Lists
 
 A @i{boa lambda list}
-@IGindex{boa lambda list}
+@IGindex boa lambda list
  is a @i{lambda list} that is syntactically 
 like an @i{ordinary lambda list}, but that is processed in
 ``@b{b}y @b{o}rder of @b{a}rgument'' style.
@@ -3462,7 +3462,7 @@ might also be used this way.
 @subsection Defsetf Lambda Lists
 
 A @i{defsetf lambda list}
-@IGindex{defsetf lambda list}
+@IGindex defsetf lambda list
  is used by @b{defsetf}.
 
 A @i{defsetf lambda list} has the following syntax:
@@ -3501,7 +3501,7 @@ and that it permits use of @b{&environment},
 @subsection Deftype Lambda Lists
 
 A @i{deftype lambda list}
-@IGindex{deftype lambda list}
+@IGindex deftype lambda list
  is used by @b{deftype}.
 
 A @i{deftype lambda list} has the same syntax as a @i{macro lambda list},
@@ -3516,7 +3516,7 @@ for that @i{parameter} is the @i{symbol} @b{*} (rather than @b{nil}).
 @subsection Define-modify-macro Lambda Lists
 
 A @i{define-modify-macro lambda list}
-@IGindex{define-modify-macro lambda list}
+@IGindex define-modify-macro lambda list
  is used by 
 @b{define-modify-macro}.
 
@@ -3545,7 +3545,7 @@ which could refer to such @i{bindings}.  See the @i{macro} @b{define-modify-macr
 @subsection Define-method-combination Arguments Lambda Lists
 
 A @i{define-method-combination arguments lambda list}
-@IGindex{define-method-combination arguments lambda list}
+@IGindex define-method-combination arguments lambda list
  is used by 
 the @t{:arguments} option to @b{define-method-combination}.
 
@@ -3612,7 +3612,7 @@ is present.
 @subsubsection Safe and Unsafe Calls
 
 A @i{call} is a @i{safe call}
-@IGindex{safe call}
+@IGindex safe call
  if each of the following is
 either @i{safe} @i{code} or @i{system code} (other than
 @i{system code} that results from @i{macro expansion} of 
@@ -3695,7 +3695,7 @@ the point of @i{functional evaluation} of the name @b{call-next-method}.
 @end table
 
 An @i{unsafe call}
-@IGindex{unsafe call}
+@IGindex unsafe call
  is a @i{call} that is not a @i{safe call}.
 
 The informal intent is that the @i{programmer} can rely on a @i{call}
@@ -4298,13 +4298,13 @@ in any @i{function form},
 @c @IKindex{execute}
 ,
 		    @b{compile}
-@IRindex{compile}
+@IRindex compile
 ,
 		    @b{load}
-@IRindex{load}
+@IRindex load
 , or
 		    @b{eval}
-@IRindex{eval}
+@IRindex eval
 .
 
 The use of @b{eval}, @b{compile}, and @b{load} is deprecated.
@@ -4530,9 +4530,9 @@ will take place only once when the @i{file} is @i{loaded}, but
 the order of evaluation with respect to the evaluation of
 @i{top level forms} in the file is @i{implementation-dependent}.
 
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 If a @b{load-time-value} expression appears within a function compiled
 with @b{compile}, the @i{form} is evaluated at compile time in a
@@ -6571,15 +6571,15 @@ compiler or other program processor.
 
 @t{(optimize @{@i{quality} | (@i{quality} @i{value})@}*)}
 
-@IRindex{compilation-speed}
+@IRindex compilation-speed
 
-@IRindex{debug}
+@IRindex debug
 
-@IRindex{safety}
+@IRindex safety
 
-@IRindex{space}
+@IRindex space
 
-@IRindex{speed}
+@IRindex speed
 
 @subsubheading  Arguments::
 

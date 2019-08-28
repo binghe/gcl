@@ -141,7 +141,7 @@ Figure 25--4 shows @i{defined names} relating to @i{time}.
 @subsubsection Decoded Time
 
 A @i{decoded time}
-@IGindex{decoded time}
+@IGindex decoded time
  is an ordered series of nine values that, taken together,
 represent a point in calendar time (ignoring @i{leap seconds}):
 
@@ -206,7 +206,7 @@ Figure 25--5 shows @i{defined names} relating to @i{decoded time}.
 @subsubsection Universal Time
 
 @i{Universal time}
-@IGindex{universal time}
+@IGindex universal time
  is an @i{absolute} @i{time} represented as a
 single non-negative @i{integer}---the number of seconds since
 midnight, January 1, 1900 GMT (ignoring @i{leap seconds}).
@@ -237,7 +237,7 @@ times before the base time of midnight, January 1, 1900 GMT cannot be processed 
 @subsubsection Internal Time
 
 @i{Internal time}
-@IGindex{internal time}
+@IGindex internal time
  represents time as a single @i{integer},
 in terms of an @i{implementation-dependent} unit called an @i{internal time unit}.
 Relative time is measured as a number of these units.

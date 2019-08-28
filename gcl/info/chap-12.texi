@@ -4823,9 +4823,9 @@ in a given @i{place}.
 The order of evaluation, when an @b{ldb} form is supplied
 to @b{setf}, is exactly left-to-right.
 
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 The effect is to perform a @b{dpb} operation
 and then store the result back into the @i{place}.

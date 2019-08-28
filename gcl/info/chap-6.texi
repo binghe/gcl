@@ -373,9 +373,9 @@ For more information, see @ref{Miscellaneous Clauses}.
 @node Order of Execution, Destructuring, Summary of Miscellaneous Clauses, Overview of the Loop Facility
 @subsubsection Order of Execution
 
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
   With the exceptions listed below, clauses are executed in the loop body
   in the order in which they appear in the source.  Execution is repeated 
@@ -688,9 +688,9 @@ For example, either ``@t{from x by y}'' or ``@t{by y from x}'' is permitted.
 However, because left-to-right order of evaluation is preserved,
 the effects will be different in the case of side effects.
 
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 Consider:
 

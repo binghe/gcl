@@ -1012,7 +1012,7 @@ will be called automatically as needed.
 @end menu
 
 @node Regular Expressions,  , System Definitions, System Definitions
-@subsection Regular Expressions
+@section Regular Expressions
 
 The function @code{string-match} (*Index string-match::) is used to
 match a regular expression against a string.  If the variable

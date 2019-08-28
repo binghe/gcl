@@ -14,7 +14,7 @@
 @c including concept-conses
 
 A @i{cons}
-@IGindex{cons}
+@IGindex cons
  is a compound data @i{object} 
 having two components called the @i{car} and the @i{cdr}.
 
@@ -43,13 +43,13 @@ support each of these various views.
 @subsection Conses as Trees
 
 A @i{tree}
-@IGindex{tree}
+@IGindex tree
  is a binary recursive data structure made up of
 @i{conses} and @i{atoms}:
 the @i{conses} are themselves also @i{trees}
 (sometimes called ``subtrees'' or ``branches''), and the @i{atoms}
 are terminal nodes (sometimes called @i{leaves}
-@IGindex{leaves}
+@IGindex leaves
 ). 
 Typically, the @i{leaves} represent data while the branches 
 establish some relationship among that data.
@@ -91,30 +91,30 @@ if that @i{tree} is circular.
 @subsection Conses as Lists
 
 A @i{list}
-@IGindex{list}
+@IGindex list
  is a chain of @i{conses} in which the @i{car} of each
 @i{cons} is an @i{element} of the @i{list}, 
 and the @i{cdr} of each @i{cons} is either the next
 link in the chain or a terminating @i{atom}.  
 
 A @i{proper list}
-@IGindex{proper list}
+@IGindex proper list
  is a @i{list} terminated by the @i{empty list}.
 The @i{empty list} is a @i{proper list}, but is not a @i{cons}.
 
 An @i{improper list}
-@IGindex{improper list}
+@IGindex improper list
  is a @i{list} that is not a @i{proper list};
 that is, it is a @i{circular list} or a @i{dotted list}.
 
 A @i{dotted list}
-@IGindex{dotted list}
+@IGindex dotted list
  is a @i{list} that has a terminating @i{atom}
 that is not the @i{empty list}.  A @i{non-nil} @i{atom} by itself
 is not considered to be a @i{list} of any kind---not even a @i{dotted list}.
 
 A @i{circular list}
-@IGindex{circular list}
+@IGindex circular list
  is a chain of @i{conses} that has no termination 
 because some @i{cons} in the chain is the @i{cdr} of a later @i{cons}.
 
@@ -147,7 +147,7 @@ because some @i{cons} in the chain is the @i{cdr} of a later @i{cons}.
 @subsubsection Lists as Association Lists
 
 An @i{association list}
-@IGindex{association list}
+@IGindex association list
  is a @i{list} of @i{conses} 
 representing an association of @i{keys} with @i{values}, 
 where the @i{car} of each @i{cons} is the @i{key} 
@@ -269,24 +269,24 @@ if that @i{list} is @i{circular}.
 @subsubheading  Description::
 
 A @i{list}
-@IGindex{list}
+@IGindex list
  is a chain of @i{conses} in which the @i{car} of each
 @i{cons} is an @i{element} of the @i{list}, and the @i{cdr} of
 each @i{cons} is either the next link in the chain or a terminating
 @i{atom}.
 
 A @i{proper list}
-@IGindex{proper list}
+@IGindex proper list
  is a chain of @i{conses} terminated by 
 the @i{empty list}
-@IGindex{empty list}
+@IGindex empty list
 , @t{()}, which is  itself a @i{proper list}.
 A @i{dotted list}
-@IGindex{dotted list}
+@IGindex dotted list
  is a @i{list} which has a terminating @i{atom} 
 that is not the @i{empty list}.
 A @i{circular list}
-@IGindex{circular list}
+@IGindex circular list
  is a chain of @i{conses} that has no termination
 because some @i{cons} in the chain is the @i{cdr} of a later @i{cons}.
 

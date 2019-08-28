@@ -37,7 +37,7 @@ as @i{namestrings} and as @i{pathnames}.
 @subsection Namestrings as Filenames
 
 A @i{namestring}
-@IGindex{namestring}
+@IGindex namestring
  is a @i{string} that represents a @i{filename}.
 
 In general, the syntax of @i{namestrings} involves the use of 
@@ -62,7 +62,7 @@ or @b{parse-namestring}.
 @subsection Pathnames as Filenames
 
 @i{Pathnames}
-@IGindex{pathname}
+@IGindex pathname
  are structured @i{objects} that can represent,
 in an @i{implementation-independent} way,
 the @i{filenames} that are used natively by an underlying @i{file system}.

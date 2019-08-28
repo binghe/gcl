@@ -1,5 +1,5 @@
 
-@node JAPI GUI Library Binding, Function and Variable Index, Compiler Definitions, Top
+@node JAPI GUI Library Binding, Function Index, Compiler Definitions, Top
 @chapter JAPI GUI Library Binding
 
 @heading  Introduction::

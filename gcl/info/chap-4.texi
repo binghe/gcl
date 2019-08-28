@@ -61,7 +61,7 @@ For more information, see @ref{Generic Functions and Methods}.
 
 The @i{class} of the @i{class} of an @i{object} 
 is called its @i{metaclass}
-@IGindex{metaclass}
+@IGindex metaclass
 .
 For more information about @i{metaclasses},
 see @ref{Meta-Objects}.
@@ -232,7 +232,7 @@ If a @i{type specifier} is a @i{list}, the @i{car} of the @i{list}
 is a @i{symbol}, and the rest of the @i{list} is subsidiary
 @i{type} information.  Such a @i{type specifier} is called 
 a @i{compound type specifier}
-@IGindex{compound type specifier}
+@IGindex compound type specifier
 .
 Except as explicitly stated otherwise,
 the subsidiary items can be unspecified.
@@ -324,7 +324,7 @@ Defining a structure by using @b{defstruct} without using
  or class to be a new @i{type specifier} @i{symbol}.
 @item @t{*}  
 @b{deftype} can be used to define @i{derived type specifiers}
-@IGindex{derived type specifier}
+@IGindex derived type specifier
 ,
  which act as `abbreviations' for other @i{type specifiers}.
 @end table
@@ -440,10 +440,10 @@ especially relevant to understanding the object system.
 @subsection Introduction to Classes
 
 A @i{class}
-@IGindex{class}
+@IGindex class
  is an @i{object} that determines the structure and behavior 
 of a set of other @i{objects}, which are called its @i{instances}
-@IGindex{instance}
+@IGindex instance
 .   
 
 A @i{class} can inherit structure and behavior from other @i{classes}.
@@ -468,21 +468,21 @@ If C= @t{(find-class S)}, we say that C is the @i{class} @i{named} S.
 
 A @i{class} C_1 is 
 a @i{direct superclass}
-@IGindex{direct superclass}
+@IGindex direct superclass
  of a @i{class} C_2
 if C_2 explicitly designates C_1 
 as a @i{superclass} in its definition.
 In this case C_2 is a @i{direct subclass}
-@IGindex{direct subclass}
+@IGindex direct subclass
  of C_1.
 A @i{class} C_n is a @i{superclass}
-@IGindex{superclass}
+@IGindex superclass
  of 
 a @i{class} C_1 if there exists a series of
 @i{classes} C_2,...,C_@{n-1@} such that 
 C_@{i+1@} is a @i{direct superclass} of C_i for 1 <= i<n.
 In this case, C_1 is a @i{subclass}
-@IGindex{subclass}
+@IGindex subclass
  of C_n.
 A @i{class} is considered neither a @i{superclass} nor a @i{subclass} of itself.
 That is, if C_1 is a @i{superclass} of C_2, 
@@ -491,13 +491,13 @@ The set of @i{classes} consisting of some given @i{class} C
 along with all of its @i{superclasses} is called ``C and its superclasses.''
 
 Each @i{class} has a @i{class precedence list}
-@IGindex{class precedence list}
+@IGindex class precedence list
 ,
 which is a total ordering on the set of the given @i{class} and its @i{superclasses}.
 The total ordering is expressed as a list ordered from most specific to least specific.
 The @i{class precedence list} is used in several ways.  In general, more
 specific @i{classes} can @i{shadow}
-@IGindex{shadow}
+@IGindex shadow
 _1 features that would
 otherwise be inherited from less specific @i{classes}.
 The @i{method} selection and combination process uses 
@@ -507,7 +507,7 @@ from most specific to least specific.
 When a @i{class} is defined, the order in which its direct @i{superclasses}
 are mentioned in the defining form is important.  Each @i{class} has a
 @i{local precedence order}
-@IGindex{local precedence order}
+@IGindex local precedence order
 , which is a @i{list} consisting of the
 @i{class} followed by its @i{direct superclasses} in the order mentioned
 in the defining @i{form}.
@@ -541,7 +541,7 @@ systems is discussed in @ref{Integrating Types and Classes}.
 @i{instances} of @i{classes}. 
 The @i{class} of the @i{class} of an @i{object} is termed
 the @i{metaclass}
-@IGindex{metaclass}
+@IGindex metaclass
  of that @i{object}. When no misinterpretation is
 possible, the term @i{metaclass} is used to refer to a @i{class}
 that has @i{instances} that are themselves @i{classes}. The @i{metaclass}
@@ -606,7 +606,7 @@ The list of the direct @i{superclasses} of the new @i{class}.
 
 @item @t{*}  
 A set of @i{slot specifiers}
-@IGindex{slot specifier}
+@IGindex slot specifier
 .
   Each @i{slot specifier} includes the @i{name} of the @i{slot} 
   and zero or more @i{slot} options.  A @i{slot} option pertains 
@@ -735,11 +735,11 @@ error of @i{type} @b{program-error} is signaled.
 The @b{defclass} form for a @i{class} provides a total ordering
 on that @i{class} and its direct @i{superclasses}.  This ordering is
 called the @i{local precedence order}
-@IGindex{local precedence order}
+@IGindex local precedence order
 .  It is an ordered list of the
 @i{class} and its direct @i{superclasses}. The
 @i{class precedence list}
-@IGindex{class precedence list}
+@IGindex class precedence list
  for a class C is a total ordering on
 C and its @i{superclasses} that is consistent with the
 @i{local precedence orders} for each of C and its @i{superclasses}.
@@ -1518,7 +1518,7 @@ Other @i{functions} might also be of @i{type} @b{compiled-function}.
 @subsubheading  Description::
 
 A @i{generic function}
-@IGindex{generic function}
+@IGindex generic function
  is a @i{function} whose behavior
 depends on the @i{classes} or identities of the @i{arguments}
 supplied to it.  A generic function object contains a set of

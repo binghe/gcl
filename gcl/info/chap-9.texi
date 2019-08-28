@@ -212,7 +212,7 @@ implicitly.  Macros such as @b{ccase}, @b{ctypecase},
 
 A number of the functions in the condition system take arguments which
 are identified as @i{condition designators}
-@IGindex{condition designator}
+@IGindex condition designator
 .
 By convention, those arguments are notated as
 
@@ -275,10 +275,10 @@ If the @t{:report} argument to @b{define-condition} is used,
 a print function is defined that is called whenever 
 the defined @i{condition} is printed while the @i{value} of @b{*print-escape*} is @i{false}. 
 This function is called the @i{condition reporter}
-@IGindex{condition reporter}
+@IGindex condition reporter
 ;
 the text which it outputs is called a @i{report message}
-@IGindex{report message}
+@IGindex report message
 .
 
 When a @i{condition} is printed and @b{*print-escape*}
@@ -1095,9 +1095,9 @@ actually fixing the problem).
 
 The order of evaluation of the @i{places} is not specified;
 see @ref{Evaluation of Subforms to Places}.
-@ITindex{order of evaluation}
+@ITindex order of evaluation
 
-@ITindex{evaluation order}
+@ITindex evaluation order
 
 If a @i{place} @i{form} is supplied that produces more values than there
 are store variables, the extra values are ignored. If the supplied 
@@ -3576,7 +3576,8 @@ signaled.
  (defun read-new-value ()
    (format t "Enter a new value: ")
    (multiple-value-list (eval (read))))
-@result{}  READ-NEW-VALUE@page
+@result{}  READ-NEW-VALUE
+@page
  (defun verify-or-fix-perfect-sundae (ice-cream sauce topping)
    (do ()
       ((all-start-with-same-letter ice-cream sauce topping))
@@ -4061,15 +4062,15 @@ where the handler may wish to supply a replacement datum for one-time use.
 @node abort (Function), , use-value, Conditions Dictionary
 @subsection abort, continue, muffle-warning, store-value, use-value          [Function]
 
-@IRindex{abort}
+@IRindex abort
 
-@IRindex{continue}
+@IRindex continue
 
-@IRindex{muffle-warning}
+@IRindex muffle-warning
 
-@IRindex{store-value}
+@IRindex store-value
 
-@IRindex{use-value}
+@IRindex use-value
 
 @code{abort}  @i{@r{&optional} condition} 
        @result{}  #<NoValue>
