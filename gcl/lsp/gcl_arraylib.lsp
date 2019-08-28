@@ -420,7 +420,7 @@
   (c-array-rank a))
 
 (defun array-eltsize-propagator (f x)
-  (declare (ignorable f))
+  (declare (ignore f))
   (when (type>= #tarray x)
     (cmp-norm-tp
      (cons 'member
@@ -432,7 +432,7 @@
 (setf (get 'c-array-eltsize 'type-propagator) 'array-eltsize-propagator)
 
 (defun array-elttype-propagator (f x)
-  (declare (ignorable f))
+  (declare (ignore f))
   (when (type>= #tarray x)
     (cmp-norm-tp
      (cons 'member
@@ -444,6 +444,7 @@
 (setf (get 'c-array-elttype 'type-propagator) 'array-elttype-propagator)
 
 (defun array-rank-propagator (f x)
+  (declare (ignore f))
   (cond
    ((type>= #tvector x) #t(member 1))
    ((let ((d (atomic-tp-array-dimensions x)));FIXME integer rnk
