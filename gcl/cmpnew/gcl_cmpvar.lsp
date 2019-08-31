@@ -262,7 +262,7 @@
 
 (defun ref-vars (form vars)
   (ref-obs form vars 
-	   (lambda (x) (setf (var-ref-ccb x) t))
+	   (lambda (x) (when (eq (var-kind x) 'lexical) (setf (var-ref-ccb x) t)))
 	   (lambda (x) (when (eq (var-kind x) 'lexical) (setf (var-loc x) 'clb)) (setf (var-ref x) t))
 	   (lambda (x) (setf (var-ref x) t (var-register x) (1+ (var-register x))))
 	   'var-name
@@ -310,7 +310,7 @@
       (setf (var-store var)
 	    (or (let ((b (get-vbind form)))
 		  (unless (eq b +opaque+)
-		    (when (multiple-value-bind (r f) (gethash b *bind-hash*) f)
+		    (when (multiple-value-bind (r f) (gethash b *bind-hash*) (declare (ignore r)) f)
 		      b)));FIXME
 		(let* ((s (alloc-spice))
 		       (i (cadr (repeatable-var-binding form))))
@@ -352,7 +352,10 @@
 	     (set-var-reffed var)
 	     (keyed-cmpnote (list 'var-ref (var-name var))
 			    "Making variable ~s reference with barrier ~s" (var-name var) (if ccb 'cb (if clb 'lb)))
-	     (return-from c1vref (list var ccb clb))))))
+	     (when (or ccb clb)
+	       (unless (eq (var-kind var) 'lexical)
+		 (cmpwarn "Cross closure reference to non-lexical variable ~s, which is likely not what you want" (var-name var))))
+	     (return-from c1vref (list* var (if (eq (var-kind var) 'lexical) (list ccb clb) '(nil nil))))))))
 
 ;; (defun c1vref (name &optional setq &aux ccb clb)
 ;;   (dolist (var *vars*

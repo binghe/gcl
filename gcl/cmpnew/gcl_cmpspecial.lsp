@@ -524,7 +524,7 @@
 
 (defun update-closure-indices (cl)
   (mapc (lambda (x &aux (y (var-ref-ccb (car x))))
-	  (setf (cadr x) (when (integerp y) (- y *initial-ccb-vs*))
+	  (setf (cadr x) (if (integerp y) (- y *initial-ccb-vs*) (baboon))
 		(car x) (var-name (car x))))
 	(second (third cl)))
   cl)
