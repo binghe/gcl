@@ -24,7 +24,7 @@
 (in-package :si)
 
 (export '(*debug* *compiler-check-args* *safe-compile* *compiler-new-safety*
-		  *compiler-push-events* *space* *speed*
+		  *compiler-push-events* *space* *speed* proclaimed-signature
  		  *alien-declarations*
  		  lit sgen cmp-inline cmp-notinline cmp-type))
 
@@ -607,8 +607,8 @@
 		(space (setq *space* ad))
 		(speed (setq *speed* ad))
 		(compilation-speed (setq *speed* (- 3 ad)))))) d))
-   (type  (let ((q (car d))) (check-type q  type-spec) (proclaim d)))
-   (ftype (let ((q (car d))) (check-type q ftype-spec) (proclaim d)))
+   (type  (let ((q (pop d))) (check-type q  type-spec) (proclaim-var q d)))
+   (ftype (let ((q (pop d))) (check-type q ftype-spec) (proclaim-ftype q d)))
    ((inline notinline)
     (mapc (lambda (x &aux (y (funid-sym x)))
 	    (check-type x function-name)
@@ -617,9 +617,7 @@
    ((ignore ignorable) (mapc (lambda (x) (check-type x function-name)) d))
    (declaration (mapc (lambda (x) (check-type x symbol) (pushnew x *alien-declarations*)) d))
    (otherwise
-    (cond ((typep a 'type-spec) (proclaim-var a d))
-	  ((typep a 'ftype-spec)); (add-function-proclamation (pop d) (cdr a) d))
-	  ((unless (member a *alien-declarations*) (warn "The declaration specifier ~s is unknown." a)))
+    (cond ((unless (member a *alien-declarations*) (warn "The declaration specifier ~s is unknown." a)))
 	  ((symbolp a) (let ((y (get a :proclaim))) (when y (mapc (lambda (x) (funcall y x)) d)))))))
  nil)
 
@@ -630,3 +628,43 @@
 	    (check-type x symbol)
 	    (assert (setq tp (type-and tp (get x 'cmp-type t))))
 	    (putprop x tp 'cmp-type)) l)));sch-global, improper-list
+
+(defun readable-sig (sig)
+  (list (mapcar 'cmp-unnorm-tp (car sig)) (cmp-unnorm-tp (cadr sig))))
+
+(defun type= (t1 t2)
+  (when (type>= t1 t2)
+    (type>= t2 t1)))
+
+(defun sig= (s1 s2)
+  (when (eql (length (car s1)) (length (car s2)))
+    (unless (notevery 'type= (car s1) (car s2))
+      (type= (cadr s1) (cadr s2)))))
+
+
+(defun proclaim-ftype (ftype var-list
+			     &aux  (sig (uniq-list (list (mapcar 'cmp-norm-tp (cadr ftype)) (cmp-norm-tp (caddr ftype))))))
+  (mapc (lambda (x &aux (c (car (call x))))
+	  (cond (c (unless (sig= c sig)
+		     (warn "Ignoring proclaimed signature ~s on ~s, currently fboundp to ~s~%"
+			   (readable-sig sig) x (readable-sig c))))
+		((setf (get x 'proclaimed-signature) sig))))
+	var-list))
+
+(defun write-sys-proclaims (fn &rest package-list &aux
+				  (pl (mapcar 'find-package (or package-list (list-all-packages))))
+				  (h (make-hash-table :test 'eq))
+				  (*print-readably* t))
+  (with-open-file
+   (q fn :direction :output)
+   (do-all-symbols
+    (s)
+    (when (member (symbol-package s) pl)
+      (let ((x (sig s)))
+	(when x
+	  (setf (gethash x h)
+		(adjoin s (gethash x h)))))))
+   (maphash (lambda (x y)
+	      (print `(proclaim '(ftype (function ,(mapcar 'cmp-unnorm-tp (car x)) ,(cmp-unnorm-tp (cadr x))) ,@y))
+		     q))
+	    h)))

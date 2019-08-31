@@ -220,22 +220,20 @@
                *function-declarations*))
         (t (warn "The function name ~s is not a symbol." fname))))
 
-(defun get-arg-types (fname &aux x (y (load-time-value (tmpsym))))
+(defun get-arg-types (fname &aux x)
   (cond ((setq x (assoc fname *function-declarations*)) (mapcar 'cmp-norm-tp (cadr x)))
 	((setq x (local-fun-p fname)) (caar (fun-call x)))
 	((setq x (gethash fname *sigs*)) (caar x))
 	((setq x (si::sig fname)) (car x))
-	((not (symbolp fname)) '(*))
-;	((not (eq (setq x (get fname 'proclaimed-arg-types y)) y)) (mapcar 'cmp-norm-tp x))
+	((setq x (when (symbolp fname) (get fname 'proclaimed-signature))) (car x))
 	('(*))))
 
-(defun get-return-type (fname &aux x (y (load-time-value (tmpsym))))
+(defun get-return-type (fname &aux x)
   (cond ((setq x (assoc fname *function-declarations*)) (cmp-norm-tp (caddr x)))
 	((setq x (local-fun-p fname)) (cadar (fun-call x)))
 	((setq x (gethash fname *sigs*)) (cadar x))
 	((setq x (si::sig fname)) (cadr x))
-	((not (symbolp fname)) '*)
-;	((not (eq (setq x (get fname 'proclaimed-return-type y)) y)) (cmp-norm-tp x));FIXME
+	((setq x (when (symbolp fname) (get fname 'proclaimed-signature))) (cadr x))
 	('*)))
 
 (defun get-sig (fname)
