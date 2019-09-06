@@ -1100,7 +1100,8 @@
   (when p
     (when (or (arg-types-match (cdaar p) tp)
 	      (member-if (lambda (x) (when (eq n (caar x)) (arg-types-match (cdar x) tp t))) (cdr p)))
-      (let ((tagged-sir (unless (or (member f *c1exit*) (member-if 'atomic-tp tp)) (top-tagged-sir sir))))
+      (let ((tagged-sir (unless (or (tail-recursion-possible f) (member-if 'atomic-tp tp))
+			  (top-tagged-sir sir))))
 	(if tagged-sir
 	    (throw tagged-sir *src-inline-recursion*)
 	  t)))))
@@ -1346,6 +1347,12 @@
 ;; 	  (*funs* (if ,e (pop ,e) *funs*)))
 ;;      ,form))
 
+(defconstant +bds+ (gensym))
+
+(defun tail-recursion-possible (fun &aux (f (member fun *c1exit*)))
+  (when f
+    (tailp (member +bds+ *c1exit*) f)))
+
 (defun mi2 (fun args la fms envl)
   (let* ((sir (cll fun))
 	 (tag (cadr sir))
@@ -1361,7 +1368,7 @@
 	   (keyed-cmpnote (list* 'inline 'inline-abort inl) "aborting inline of ~s" inl)
 	   (setq *notinline* (nunion inl *notinline*))
 	   nil)
-	  ((and sir (member fun *c1exit*))
+	  ((and sir (tail-recursion-possible fun))
 	   (keyed-cmpnote (list 'tail-recursion fun) "tail recursive call to ~s replaced with iteration" fun)
 	   (c1let-* (cdr (blla-recur tag (caddr sir) args la)) t inls)))))
 
