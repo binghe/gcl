@@ -2192,7 +2192,7 @@
   (cond ((or *compile-ordinaries* (tlclp (portable-source form)))
 	 (maybe-eval nil form)
 	 (let ((gen (gensym "progncompile")))
-	   (proclaim `((function nil t) ,gen))
+	   (proclaim `(ftype (function nil null) ,gen))
 	   (t1expr `(defun ,gen (), form nil))
 	   (push (list 'ordinary `(,gen)) *top-level-forms*)))
 	(t 
