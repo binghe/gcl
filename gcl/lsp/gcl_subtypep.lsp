@@ -448,8 +448,9 @@
 
 
 (defun kktype-of (x)
-  (cond ((atom x) x)
-	((eq (car x) 'array) (cadr (assoc (cadr x) +atps+)))
+  (cond ((atom x) (cond ((coerce-to-standard-class x) 'std-instance) ((when (symbolp x) (get x 's-data)) 'structure)(x)));FIXME
+	((eq (car x) 'simple-array) (cdr (assoc (cadr x) *simple-array-types*)))
+	((eq (car x) 'non-simple-array) (cdr (assoc (cadr x) *non-simple-array-types*)))
 	((member (car x) '(complex complex*))
 	 (cmp-k (cadr x) (or (caddr x) (cadr x))))
 	((car x))))
