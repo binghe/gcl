@@ -306,9 +306,11 @@
 
 (defun push-vbind (var form)
   (when (eq 'lexical (var-kind var))
-    (unless (eq (var-store var) +opaque+) 
+    (unless (eq (var-store var) +opaque+)
       (setf (var-store var)
-	    (or (let ((b (get-vbind form)))
+	    (or (when (get (var-name var) 'tmp);FIXME
+		  +opaque+)
+		(let ((b (get-vbind form)))
 		  (unless (eq b +opaque+)
 		    (when (multiple-value-bind (r f) (gethash b *bind-hash*) (declare (ignore r)) f)
 		      b)));FIXME
