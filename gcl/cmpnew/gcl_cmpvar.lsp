@@ -214,7 +214,7 @@
 	    ((when fmla (type>= #t(not null) (info-type info))) (c1t))
 	    ((let ((tmp (get-vbind-form (local-var vref))))
 	       (when (and tmp );FIXME (type>= (var-mt (car vref)) (var-mt (caaddr tmp)))
-		 (when (check-vs (car (last tmp)))
+		 (when (check-vs (when (eq 'var (car tmp)) (car (last tmp))))
 		   (let* ((f (pop tmp))(i (copy-info (pop tmp))))
 		     (setf (info-type i) (if (eq f 'var) (var-type (caar tmp)) (type-and (info-type i) (info-type info))));FIXME
 ;		     (setf (info-type i) (type-and (info-type i) (info-type info)))
