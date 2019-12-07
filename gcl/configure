@@ -4194,6 +4194,7 @@ case $use in
 		;;
 	    powerpc*)
 		assert_arg_to_cflags -mlongcall
+		if test "$host_cpu" != "powerpc64le" ; then assert_arg_to_cflags -mno-pltseq; fi
 		;;
 	esac;;
 esac
