@@ -1,8 +1,24 @@
+#define R_PPC64_PLTSEQ  119  /*FIXME not in elf.h*/
+#define R_PPC64_PLTCALL 120
+
 #define ha(x_) ((((x_) >> 16) + (((x_) & 0x8000) ? 1 : 0)) & 0xffff)
 #define lo(x_) ((x_) & 0xffff)
 
     case R_PPC64_REL16_HA: 
       store_val(where,MASK(16),ha(s+a-p));
+      break;
+    case R_PPC64_PLT16_HA:
+      gote=got+sym->st_size-1;
+      *gote=s+a;
+      store_val(where,MASK(16),ha((ul)gote-toc->st_value));
+      break;
+    case R_PPC64_PLT16_LO_DS:
+      gote=got+sym->st_size-1;
+      *gote=s+a;
+      store_val(where,MASK(16),lo((ul)gote-toc->st_value));/*>>2*/
+      break;
+    case R_PPC64_PLTSEQ:
+    case R_PPC64_PLTCALL:
       break;
     case R_PPC64_TOC16_HA: 
       store_val(where,MASK(16),ha(s+a-toc->st_value));
