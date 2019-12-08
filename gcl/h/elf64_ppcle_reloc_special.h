@@ -60,13 +60,12 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
   Shdr *sec;
   Sym *sym;
   
-  massert(sec=get_section(".toc",sec1,sece,sn));
-
-  for (sym=sym1;sym<syme;sym++) {
+  for (toc=NULL,sym=sym1;sym<syme;sym++) {
     const char *s=st1+sym->st_name;
     if (!strcmp(s,".TOC.") || !strcmp(s,".toc.")) {
       toc=sym;
       toc->st_info=ELF_ST_INFO(STB_LOCAL,ELF_ST_TYPE(sym->st_info));
+      massert((sec=get_section(".bss",sec1,sece,sn)));
       toc->st_shndx=sec-sec1;
     }
   }
