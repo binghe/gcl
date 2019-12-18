@@ -1971,3 +1971,6 @@ travel_find_sharing(object,object);
 
 object
 new_cfdata(void);
+
+int
+home_namestring1(const char *,int,char *,int);

@@ -95,16 +95,20 @@ DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid
 #endif
 }
 
-DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
+int
+home_namestring1(const char *n,int s,char *o,int so) {
 
-#ifndef __MINGW32__
+  #ifndef __MINGW32__
   struct passwd *pwent,pw;
   long r;
+
+  massert(s>0);
+  massert(*n=='~');
 
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
   massert(r<=sizeof(GETPW_BUF));/*FIXME maybe once at image startup*/
 
-  if (nm->st.st_fillp==1)
+  if (s==1)
 
     if ((pw.pw_dir=getenv("HOME")))
       pwent=&pw;
@@ -113,25 +117,43 @@ DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(ob
 
   else {
 
-    massert(nm->st.st_fillp<sizeof(FN2));
-    memcpy(FN2,nm->st.st_self+1,nm->st.st_fillp-1);
-    FN2[nm->st.st_fillp-1]=0;
+    massert(s<sizeof(FN2));
+    memcpy(FN2,n+1,s-1);
+    FN2[s-1]=0;
 
     massert(!getpwnam_r(FN2,&pw,GETPW_BUF,r,&pwent) && pwent);
 
   }
 
-  massert((r=strlen(pwent->pw_dir))+2<sizeof(FN3));
-  memcpy(FN3,pwent->pw_dir,r);
-  FN3[r]='/';
-  FN3[r+1]=0;
-  RETURN1(make_simple_string(FN3));
+  massert((r=strlen(pwent->pw_dir))+2<so);
+  memcpy(o,pwent->pw_dir,r);
+  o[r]='/';
+  o[r+1]=0;
+  return 0;
 #else
-  massert(snprintf(FN1,sizeof(FN1)-1,"%s%s",getenv("SystemDrive"),getenv("HOMEPATH"))>=0);
-  RETURN1(make_simple_string(FN1));
+  massert(snprintf(o,so-1,"%s%s",getenv("SystemDrive"),getenv("HOMEPATH"))>=0);
+  return 0;
 #endif
 
 }
+
+
+DEFUN_NEW("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
+
+  check_type_string(&nm);
+
+  massert(!home_namestring1(nm->st.st_self,nm->st.st_fillp,FN1,sizeof(FN1)));
+  RETURN1(make_simple_string(FN1));
+
+}
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fShome_namestring(object x) {
+  return FFN(fShome_namestring)(x);
+}
+#endif
+
+
 
 #define FILE_EXISTS_P(a_,b_) !stat(a_,&b_) && S_ISREG(b_.st_mode)
 #define DIR_EXISTS_P(a_,b_) !stat(a_,&b_) && S_ISDIR(b_.st_mode)

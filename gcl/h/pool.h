@@ -20,9 +20,8 @@ static struct pool {
   ufixnum s;
 } *Pool;
 
-static struct flock pl,*plp=&pl;
-
-static const char *gcl_pool="/tmp/gcl_pool";
+static struct flock f,pl,*plp=&pl;
+static char gcl_pool[PATH_MAX];
 
 static int
 set_lock(void) {
@@ -66,8 +65,8 @@ open_pool(void) {
 
   if (pool==-1) {
 
-    struct flock f;
-
+    massert(!home_namestring1("~",1,FN1,sizeof(FN1)));
+    massert(snprintf(gcl_pool,sizeof(gcl_pool),"%sgcl_pool",FN1)>=0);
     massert((pool=open(gcl_pool,O_CREAT|O_RDWR,0644))!=-1);
     massert(!ftruncate(pool,sizeof(struct pool)));
     massert((Pool=mmap(NULL,sizeof(struct pool),PROT_READ|PROT_WRITE,MAP_SHARED,pool,0))!=(void *)-1);
@@ -111,6 +110,9 @@ close_pool(void) {
 
 #ifndef NO_FILE_LOCKING
   if (pool!=-1) {
+    f.l_type=F_WRLCK;
+    if (!fcntl(pool,F_SETLK,&f))
+      massert(!unlink(gcl_pool));
     register_pool(-1);
     massert(!close(pool));
     massert(!munmap(Pool,sizeof(struct pool)));
