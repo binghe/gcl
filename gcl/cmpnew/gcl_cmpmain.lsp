@@ -100,15 +100,7 @@
 ;;  will be performed for separate chunks of the lisp files.
 (defvar *split-files* nil)  ;; if 
 
-(defun check-end (form eof)
-  (cond  ((eq form eof)
-	  (setf (third *split-files*) nil))
-	 ((> (file-position *compiler-input*)
-	     (car *split-files*))
-	  (setf (third *split-files*)(file-position *compiler-input*)))))
-	  
-
-(defun compile-file  (&rest args
+(defun compile-file  (filename &rest args
 			    &aux (*print-pretty* nil)
 			    (*package* *package*) (*split-files* *split-files*)
 			    (*PRINT-CIRCLE* NIL)
@@ -122,17 +114,17 @@
 			    (*PRINT-BASE* 10)
 			    (*PRINT-ESCAPE* T)
 			    (section-length *split-files*)
-			    tem)
+			    tem warnings failures
+			    (filename (pathname filename))
+			    (*compile-file-pathname* (merge-pathnames filename))
+			    (*compile-file-truename* (truename *compile-file-pathname*)))
   (loop 
    (compiler::init-env)
-   (setq tem (apply 'compiler::compile-file1 args))
-   (cond ((atom *split-files*)(return tem))
-	 ((and (consp *split-files*)
-	       (null (third *split-files*)))
-	  (let ((gaz (let ((*DEFAULT-PATHNAME-DEFAULTS* (car args)))
-			    			    (gazonk-name)))
-		(*readtable* (si::standard-readtable)))
-	    (setq gaz (get-output-pathname gaz "lsp" (car args)))
+   (setq tem (apply 'compile-file1 filename args))
+   (cond ((atom *split-files*)
+	  (return (values (when tem (truename tem)) warnings failures)))
+	 ((null (third *split-files*))
+	  (let ((gaz (gazonk-name))(*readtable* (si::standard-readtable)))
 	    (with-open-file (st gaz :direction :output)
 	      (print
 	       `(eval-when (load eval)
@@ -140,16 +132,15 @@
 				   (load (merge-pathnames v si::*load-pathname*))))
 	       st))
 	    (setq *split-files* nil)
-	    (or (member :output-file args)
-		(setq args (append args (list :output-file (car args)))))
 	    (return 
-	     (prog1 (apply 'compile-file gaz (cdr args))
-	       (unless *keep-gaz* (mdelete-file gaz))))
-	    ))
-	 (t nil))
-   (if (consp *split-files*)
-       (setf (car *split-files*) (+ (third *split-files*) section-length)))
-   ))
+	     (let ((tem (apply 'compile-file gaz
+			       (append args
+				       (unless (member :output-file args)
+					 (list :output-file
+					       (get-output-pathname filename "o" nil nil nil)))))))
+	       (unless *keep-gaz* (mdelete-file gaz))
+	       (values (when tem (truename tem)) warnings failures)))))
+	 ((setf (car *split-files*) (+ (third *split-files*) section-length))))))
 
 
 (defun compile-file1 (input-pathname
@@ -163,8 +154,10 @@
                            (prof-p *default-prof-p*)
 			   (print nil)
                            (load nil)
-                      &aux (*standard-output* *standard-output*)
-		           (*prof-p* prof-p)
+			   &aux
+			   (*standard-output* *standard-output*)
+			   (*prof-p* prof-p)
+			   (output-file (pathname output-file))
 		           (*error-output* *error-output*)
                            (*compiler-in-use* *compiler-in-use*)
 			   (*c-debug* c-debug)
@@ -201,41 +194,30 @@ Cannot compile ~a.~%"
    (*compiler-input* (merge-pathnames input-pathname #p".lsp"))
    
    
-   (cond ((numberp *split-files*)
-	  (if (< (file-length *compiler-input*) *split-files*)
-	      (setq *split-files* nil)
-	    (setq *split-files* (list *split-files* nil 0 nil)))))
+   (when (numberp *split-files*)
+     (setq *split-files* (unless (< (file-length *compiler-input*) *split-files*) (list *split-files* nil 0 nil))))
    
-   (cond ((consp *split-files*)
-	  (file-position *compiler-input* (third *split-files*))
-	  (setq output-file
-		(make-pathname :directory (pathname-directory output-file)
-			       :name (format nil "~a~a" (length (second *split-files*)) (pathname-name (pathname output-file)))
-			       :type "o"))
-	  
-	  (push (pathname-name output-file)   (second *split-files*))))
+   (when (consp *split-files*)
+     (file-position *compiler-input* (third *split-files*))
+     (setq output-file
+	   (make-pathname :directory (pathname-directory output-file)
+			  :name (format nil "~a~a"
+					(pathname-name output-file)
+					(length (second *split-files*)))
+			  :type "o")))
 	   
     
-  (let* ((eof (cons nil nil))
-         (dir (or (and (not (null output-file))
-                       (pathname-directory output-file))
-                  (pathname-directory input-pathname)))
-         (name (or (and (not (null output-file))
-                        (pathname-name output-file))
-                   (pathname-name input-pathname)))
-	 (device (or (and (not (null output-file))
-			  (pathname-device output-file))
-		     (pathname-device input-pathname)))
-	 (typ (or (and (not (null output-file))
-		       (pathname-type output-file))
-		  "o"))
-	 
-         (o-pathname (get-output-pathname o-file typ name dir device))
-         (c-pathname (get-output-pathname c-file "c" name dir device))
-         (h-pathname (get-output-pathname h-file "h" name dir device))
-         (data-pathname (get-output-pathname data-file "data" name dir device)))
+   (let* ((eof (cons nil nil))
+	  (dir    (pathname-directory (or output-file input-pathname)))
+	  (name   (pathname-name (or output-file input-pathname)))
+	  (device (pathname-device (or output-file input-pathname)))
+	  (typ    (pathname-type (or output-file #p".o")))
+	  (o-pathname (get-output-pathname o-file typ name dir device))
+	  (c-pathname (get-output-pathname c-file "c" name dir device))
+	  (h-pathname (get-output-pathname h-file "h" name dir device))
+	  (data-pathname (get-output-pathname data-file "data" name dir device)))
 
-    (declare (special dir name ))
+    (declare (special dir name))
     
     (init-env)
     
@@ -268,21 +250,32 @@ Cannot compile ~a.~%"
 	    (setq prev nil))
 	  
 	  ;; t1expr the package ops again..
-	  (if (consp *split-files*)
-	      (dolist (v (fourth *split-files*)) (t1expr v)))
+	  (when (consp *split-files*)
+	    (dolist (v (fourth *split-files*)) (t1expr v)))
+
 	  (unwind-protect
 	      (do ((form (read *compiler-input* nil eof)(read *compiler-input* nil eof))
-		   (load-flag (if  *eval-when-defaults* (member 'load *eval-when-defaults*) t)))
+		   (load-flag (if *eval-when-defaults*
+				  (or (member 'load *eval-when-defaults*)
+				      (member :load-toplevel *eval-when-defaults*))
+				t)))
 		  (nil)
-		  (cond
-		   ((eq form eof))
-		   (load-flag (t1expr form))
-		   ((maybe-eval nil form)))
-		  (cond
-		   ((and *split-files* (check-end form eof))
-		    (setf (fourth *split-files*) nil);(reverse (third *data*)) ;FIXME check this
-		    (return nil))
-		   ((eq form eof) (return nil))))
+
+		  (unless (eq form eof)
+		    (if load-flag
+			(t1expr form)
+		      (maybe-eval nil form)))
+
+		  (when (or (eq form eof)
+			    (when *split-files*
+			      (> (file-position *compiler-input*) (car *split-files*))))
+
+		    (when *split-files*
+		      (push (pathname-name output-file) (second *split-files*))
+		      (setf (third *split-files*) (unless (eq form eof) (file-position *compiler-input*)))
+		      (setf (fourth *split-files*) nil));(reverse (third *data*)) ;FIXME check this
+
+		    (return nil)))
 	    
             (when prev (set-dispatch-macro-character #\# #\, prev rtb)))))
       
@@ -321,7 +314,7 @@ Cannot compile ~a.~%"
           (unless c-file (mdelete-file c-pathname))
           (unless h-file (mdelete-file h-pathname))
           (unless (or data-file #+ld-not-accept-data t system-p) (mdelete-file data-pathname))
-	  o-pathname)
+	  (when o-file o-pathname))
 
         (progn
           (when (probe-file c-pathname) (mdelete-file c-pathname))
@@ -329,8 +322,7 @@ Cannot compile ~a.~%"
           (when (probe-file data-pathname) (mdelete-file data-pathname))
           (format t "~&No FASL generated.~%")
           (setq *error-p* t)
-	  (values)
-	  ))))))
+	  (values))))))
 
 (defun gazonk-name ()
   (dotimes (i 1000)
