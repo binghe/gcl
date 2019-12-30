@@ -116,7 +116,7 @@
 			    (section-length *split-files*)
 			    tem warnings failures
 			    (filename (pathname filename))
-			    (*compile-file-pathname* (merge-pathnames filename))
+			    (*compile-file-pathname* (merge-pathnames filename #p".lsp"))
 			    (*compile-file-truename* (truename *compile-file-pathname*)))
   (loop 
    (compiler::init-env)
