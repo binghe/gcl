@@ -169,7 +169,6 @@
                            (*compiler-in-use* *compiler-in-use*)
 			   (*c-debug* c-debug)
 			   (*compile-print* (or print *compile-print*))
-                           (*package* *package*)
 			   (*DEFAULT-PATHNAME-DEFAULTS* #p"")
 			   (*data* (list nil))
 			   *init-name* 	
