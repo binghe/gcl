@@ -57,28 +57,19 @@
 
 
 ;; Let the user write dump c-file etc to  /dev/null.
-(defun get-output-pathname (file ext name &optional (dir (pathname-directory *default-pathname-defaults*))
+(defun get-output-pathname (file ext name &optional
+				 (dir (pathname-directory *default-pathname-defaults*))
 				 (device (pathname-device *default-pathname-defaults*)))
-  (cond 
-	((equal file "/dev/null") (pathname file))
+  (cond ((equal file "/dev/null") (pathname file))
 	#+aix3
 	((and (equal name "float")
 	      (equal ext "h"))
 	 (get-output-pathname file ext "Float" ))
-	(t
-	 (make-pathname :device (or (and (not (null file))
-					 (not (eq file t))
-					 (pathname-device file))
-				       device)
-			:directory (or (and (not (null file))
-					    (not (eq file t))
-					    (pathname-directory file))
-				       dir)
-			:name (or (and (not (null file))
-				       (not (eq file t))
-				       (pathname-name file))
-				  name)
-			:type ext))))
+	((let ((lf (and file (not (eq file t)))))
+	   (let ((device (if lf (pathname-device file) device))
+		 (dir (if lf (pathname-directory file) dir))
+		 (name (if lf (pathname-name file) name)))
+	     (make-pathname :device device :directory dir :name name :type ext))))))
 
 (defun safe-system (string)
  (multiple-value-bind
