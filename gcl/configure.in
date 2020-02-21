@@ -258,7 +258,7 @@ remove_arg_from_ldflags() {
     
 }
 
-add_args_to_cflags -fsigned-char -pipe \
+add_args_to_cflags -fsigned-char -pipe -fcommon \
                     -fno-builtin-malloc -fno-builtin-free \
                     -fno-PIE -fno-pie -fno-PIC -fno-pic \
 	            -Wall \
