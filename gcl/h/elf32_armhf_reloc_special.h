@@ -6,13 +6,15 @@ static ul tz=sizeof(tramp)/sizeof(ul);
 static ul *
 next_plt_entry(ul *p,ul *pe) {
 
-  ul l0=0xe5bef000,/*ldr pc,[ip,#]*/
-     l1=0xe5bcf000;/*ldr pc,[lr,#]*/
+   /* 4778      	bx	pc */ /*optional*/
+   /* e7fd      	b.n	20dd0 <__fprintf_chk@plt> */ /*optional*/
+   /*      above when stripped becomes undefined instruction*/
+   /* e28fc601 	add	ip, pc, #1048576	; 0x100000 */
+   /* e28ccab0 	add	ip, ip, #176, 20	; 0xb0000 */
+   /* e5bcf914 	ldr	pc, [ip, #2324]!	; 0x914 */
 
-  for (;p<pe && (*p&l0)!=l0 && (*p&l1)!=l1;p++);
-  if ((*p&l0)==l0) p++;
-
-  return p+1;
+  for (p=p+2;p<pe && ((*p)>>20)!=0xe28;p++);
+  return p;
 
 }
 
