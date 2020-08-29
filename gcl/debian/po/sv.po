@@ -9,14 +9,14 @@
 # or http://www.debian.org/intl/l10n/po-debconf/README-trans
 # Developers do not need to manually edit POT or PO files.
 #
-# Martin Ågren <martin.agren@gmail.com>, 2008.
+# Martin gren <martin.agren@gmail.com>, 2008.
 msgid ""
 msgstr ""
 "Project-Id-Version: gcl_2.6.7-36.1_sv\n"
 "Report-Msgid-Bugs-To: gcl@packages.debian.org\n"
 "POT-Creation-Date: 2012-12-30 11:53-0400\n"
 "PO-Revision-Date: 2008-07-24 18:21+0200\n"
-"Last-Translator: Martin Ågren <martin.agren@gmail.com>\n"
+"Last-Translator: Martin gren <martin.agren@gmail.com>\n"
 "Language-Team: Swedish <debian-l10n-swedish@lists.debian.org>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
@@ -29,7 +29,7 @@ msgstr ""
 #. Description
 #: ../gcl.templates:2001
 msgid "Use the work-in-progress ANSI build by default?"
-msgstr "Använd det ännu inte färdiga ANSI-bygget som standard?"
+msgstr "Anvnd det nnu inte frdiga ANSI-bygget som standard?"
 
 #. Type: boolean
 #. Description
@@ -38,8 +38,8 @@ msgid ""
 "GCL is in the process of providing an ANSI compliant image in addition to "
 "its traditional CLtL1 image still in production use."
 msgstr ""
-"GCL arbetar på att tillhandahålla en ANSI-godkänd bild förutom dess "
-"traditionella CLtL1-bild som fortfarande används i produktionsmiljön."
+"GCL arbetar p att tillhandahlla en ANSI-godknd bild frutom dess "
+"traditionella CLtL1-bild som fortfarande anvnds i produktionsmiljn."
 
 #. Type: boolean
 #. Description
@@ -49,9 +49,9 @@ msgid ""
 "Choosing this option will determine which image will be used by default when "
 "executing 'gcl@EXT@'."
 msgstr ""
-"Se README.Debian-filen för en översiktlig beskrivning av dessa termer. När "
-"du väljer det här alternativet avgörs vilken bild som kommer användas som "
-"standard när 'gcl@EXT@' körs."
+"Se README.Debian-filen fr en versiktlig beskrivning av dessa termer. Nr "
+"du vljer det hr alternativet avgrs vilken bild som kommer anvndas som "
+"standard nr 'gcl@EXT@' krs."
 
 #. Type: boolean
 #. Description
@@ -62,22 +62,22 @@ msgid ""
 "CLtL1 build, e.g. GCL_ANSI=t gcl@EXT@. The currently enforced build flavor "
 "will be reported in the initial startup banner."
 msgstr ""
-"Denna inställning kan överskridas genom att sätta miljövariabeln GCL_ANSI "
-"till en icke-tom sträng för ANSI-bygget, och till den tomma strängen för "
-"CLtL1-bygget, t. ex. GCL_ANSI=t gcl@EXT@. Det bygge som för tillfället "
-"används kommer anges i uppstartsutskriften."
+"Denna instllning kan verskridas genom att stta miljvariabeln GCL_ANSI "
+"till en icke-tom strng fr ANSI-bygget, och till den tomma strngen fr "
+"CLtL1-bygget, t. ex. GCL_ANSI=t gcl@EXT@. Det bygge som fr tillfllet "
+"anvnds kommer anges i uppstartsutskriften."
 
 #. Type: boolean
 #. Description
 #: ../gcl.templates:3001
 msgid "Use the profiling build by default?"
-msgstr "Använd profileringsbygget som standard?"
+msgstr "Anvnd profileringsbygget som standard?"
 
 #. Type: boolean
 #. Description
 #: ../gcl.templates:3001
 msgid "GCL has optional support for profiling via gprof."
-msgstr "GCL har valfritt stöd för profilering via gprof."
+msgstr "GCL har valfritt std fr profilering via gprof."
 
 #. Type: boolean
 #. Description
@@ -87,9 +87,9 @@ msgid ""
 "details. As this build is slower than builds without gprof support, it is "
 "not recommended for final production use."
 msgstr ""
-"Se dokumentationen för si::gprof-start och si::gprof-quit för detaljer. "
-"Eftersom detta bygge är långsammare än byggen utan stöd för gprof, "
-"rekommenderas det inte för slutlig användning i produktionsmiljö."
+"Se dokumentationen fr si::gprof-start och si::gprof-quit fr detaljer. "
+"Eftersom detta bygge r lngsammare n byggen utan std fr gprof, "
+"rekommenderas det inte fr slutlig anvndning i produktionsmilj."
 
 #. Type: boolean
 #. Description
@@ -100,7 +100,7 @@ msgid ""
 "gcl@EXT@. If profiling is enabled, this will be reported in the initial "
 "startup banner."
 msgstr ""
-"Sätt miljövariabeln GCL_PROF till den tomma strängen för mer optimiserade "
-"byggen, eller en icke-tom sträng för profileringsstöd; t. ex. GCL_PROF=t "
-"gcl@EXT@. Om profilering är aktiverad, kommer denna rapporteras i den "
+"Stt miljvariabeln GCL_PROF till den tomma strngen fr mer optimiserade "
+"byggen, eller en icke-tom strng fr profileringsstd; t. ex. GCL_PROF=t "
+"gcl@EXT@. Om profilering r aktiverad, kommer denna rapporteras i den "
 "ursprungliga uppstartsutskriften."
