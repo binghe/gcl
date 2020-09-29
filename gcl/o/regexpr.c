@@ -157,7 +157,7 @@ be over written.   \
 
 
      str=string->st.st_self;
-     if (str+end==(void *)core_end || str+end==(void *)compiled_regexp) {
+     if (NULL_OR_ON_C_STACK(str+end) || str+end==(void *)compiled_regexp) {
 
        if (!(str=alloca(string->st.st_fillp+1)))
 	 FEerror("Cannot allocate memory on C stack",0);
