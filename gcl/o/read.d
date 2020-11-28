@@ -1590,6 +1590,7 @@ object from, to;
 	if (to == Cnil) {
 		to = alloc_object(t_readtable);
 		to->rt.rt_self = NULL;
+		to->rt.rt_case = sKupcase;
 			/*  For GBC not to go mad.  */
 		vs_push(to);
 			/*  Saving for GBC.  */
