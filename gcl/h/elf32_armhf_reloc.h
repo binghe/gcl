@@ -4,7 +4,7 @@
      case R_ARM_THM_JUMP24:
       {
     	long x=(long)(s+a-p);
-    	if (abs(x)&(~MASK(23))) {
+    	if (abs(x)&(~MASK(22))) {
 
           got+=(sym->st_size-1)*tz;
     	  memcpy(got,tramp,sizeof(tramp));
