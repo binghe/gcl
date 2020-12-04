@@ -7946,19 +7946,10 @@ fi
 $as_echo "$ac_cv_lib_readline_rl_initialize" >&6; }
 if test "x$ac_cv_lib_readline_rl_initialize" = xyes; then :
 
-$as_echo "#define HAVE_READLINE 1" >>confdefs.h
+$as_echo "#define USE_READLINE 1" >>confdefs.h
 
-				   TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
-				   RL_OBJS=gcl_readline.o
-fi
-
-fi
-
-done
-
-
-    # These tests discover differences between readline 4.1 and 4.3
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for rl_completion_matches in -lreadline" >&5
+				 # These tests discover differences between readline 4.1 and 4.3
+				 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for rl_completion_matches in -lreadline" >&5
 $as_echo_n "checking for rl_completion_matches in -lreadline... " >&6; }
 if ${ac_cv_lib_readline_rl_completion_matches+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -8002,6 +7993,14 @@ $as_echo "#define HAVE_DECL_RL_COMPLETION_MATCHES 1" >>confdefs.h
 $as_echo "#define HAVE_RL_COMPENTRY_FUNC_T 1" >>confdefs.h
 
 fi
+
+   				 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
+				 RL_OBJS=gcl_readline.o
+fi
+
+fi
+
+done
 
 fi
 

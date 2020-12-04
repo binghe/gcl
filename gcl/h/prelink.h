@@ -27,7 +27,7 @@ PRELINK_EXTER FILE *my_stdin;
 PRELINK_EXTER FILE *my_stdout;
 PRELINK_EXTER FILE *my_stderr;
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 PRELINK_EXTER rl_compentry_func_t **my_rl_completion_entry_function_ptr;
 PRELINK_EXTER const char **my_rl_readline_name_ptr;
 #endif

@@ -38,7 +38,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define IN_FILE
 #include "include.h"
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 #define kclgetc(FP)		rl_getc_em(((FILE *)FP))
 #define kclungetc(C, FP)	rl_ungetc_em(C, ((FILE *)FP))
 #define kclputc(C, FP)		rl_putc_em(C, ((FILE *)FP))
@@ -46,7 +46,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define	kclgetc(FP)		getc(((FILE *)FP))
 #define	kclungetc(C, FP)	ungetc(C, ((FILE *)FP))
 #define	kclputc(C, FP)		putc(C, ((FILE *)FP))
-#endif /* HAVE_READLINE */
+#endif /* USE_READLINE */
 
 #define	xkclfeof(c,FP)		feof(((FILE *)FP))
 
@@ -109,7 +109,7 @@ feof1(fp)
 FILE *fp;
 {
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
   if (rl_stream_p(fp) && rl_eof_p(fp))
     return TRUE;
 #endif
@@ -1258,7 +1258,7 @@ BEGIN:
 	case smm_input:
 	case smm_io:
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 	  if (rl_stream_p(strm->sm.sm_fp))
 	    return rl_pending_buffered_input_p(strm->sm.sm_fp);
 #endif
@@ -2372,7 +2372,7 @@ gcl_init_file_function()
 	make_si_function("USER-STREAM-STATE", siLuser_stream_state);
 #endif
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 	gcl_init_readline_function();
 #endif
 }

@@ -1713,15 +1713,14 @@ fi
 
 if test "$enable_readline" != "no" ; then
     AC_CHECK_HEADERS([readline/readline.h],
-		     AC_CHECK_LIB([readline],[rl_initialize],
-				  [AC_DEFINE(HAVE_READLINE,1,[have readline library]) 
-				   TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
-				   RL_OBJS=gcl_readline.o]))
-    
-    # These tests discover differences between readline 4.1 and 4.3
-    AC_CHECK_LIB([readline],[rl_completion_matches],
-		 [AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
-		  AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches])])
+			AC_CHECK_LIB([readline],[rl_initialize],
+				[AC_DEFINE(USE_READLINE,1,[use readline library]) 
+				 # These tests discover differences between readline 4.1 and 4.3
+				 AC_CHECK_LIB([readline],[rl_completion_matches],
+					[AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
+				 	 AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches])])
+   				 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
+				 RL_OBJS=gcl_readline.o]))
 fi
 
 AC_SUBST(RL_OBJS)

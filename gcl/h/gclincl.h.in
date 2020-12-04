@@ -186,9 +186,6 @@
 /* have putenv call */
 #undef HAVE_PUTENV
 
-/* have readline library */
-#undef HAVE_READLINE
-
 /* Define to 1 if you have the <readline/readline.h> header file. */
 #undef HAVE_READLINE_READLINE_H
 
@@ -373,6 +370,9 @@
 
 /* use fionbio for non-blocking io */
 #undef USE_FIONBIO
+
+/* use readline library */
+#undef USE_READLINE
 
 /* protect cdr from immfix and speed up type processing */
 #undef USE_SAFE_CDR

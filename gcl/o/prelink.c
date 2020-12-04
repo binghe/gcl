@@ -7,7 +7,7 @@ extern FILE *stdin __attribute__((weak));
 extern FILE *stderr __attribute__((weak));
 extern FILE *stdout __attribute__((weak));
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 #if RL_READLINE_VERSION < 0x0600
 extern Function		*rl_completion_entry_function __attribute__((weak));
 extern char		*rl_readline_name __attribute__((weak));
@@ -24,7 +24,7 @@ prelink_init(void) {
   my_stdin=stdin;
   my_stdout=stdout;
   my_stderr=stderr;
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
   my_rl_completion_entry_function_ptr=(void *)&rl_completion_entry_function;
   my_rl_readline_name_ptr=(void *)&rl_readline_name;
 #endif
