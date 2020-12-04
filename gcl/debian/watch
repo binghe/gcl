@@ -1,2 +1,2 @@
-version=2
+version=4
 options=pasv,pgpsigurlmangle=s/$/.sig/ ftp://ftp.gnu.org/pub/gnu/gcl	gcl-([0-9.]*).tar.gz	debian	uupdate
