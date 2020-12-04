@@ -263,7 +263,7 @@ add_args_to_cflags -fsigned-char -pipe -fcommon \
                     -fno-PIE -fno-pie -fno-PIC -fno-pic \
 	            -Wall \
 	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
-	            -Wno-unused-but-set-variable -Wno-misleading-indentation
+	            -Wno-unused-but-set-variable
 
 add_args_to_ldflags -no-pie -Wl,-z,lazy
 
