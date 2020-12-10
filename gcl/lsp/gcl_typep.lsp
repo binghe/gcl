@@ -216,7 +216,15 @@
 
 (defun input-stream-p (x)
   (declare (optimize (safety 1)))
-  (typecase x (input-stream t)))
+  (etypecase
+   x
+   (broadcast-stream nil)
+   (string-output-stream nil)
+   (file-output-stream nil)
+   (file-probe-stream nil)
+   (synonym-stream (input-stream-p (symbol-value (synonym-stream-symbol x))))
+   (stream t)))
+
 
 ;; (defun interactive-stream-p (x)
 ;;   (declare (optimize (safety 1)))
