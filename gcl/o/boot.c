@@ -267,6 +267,19 @@ DEFUN("LDIFF",object,fLldiff,LISP,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
   RETURN1(first);
 }
 
+DEFUN("SUBSETP",object,fLsubsetp,LISP,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+
+  if (!listp(x))/*FIXME checktype*/
+    TYPE_ERROR(x,sLlist);
+  if (!listp(y))/*FIXME checktype*/
+    TYPE_ERROR(y,sLlist);
+  for (;consp(x);x=x->c.c_cdr)
+    if (FFN(fLmember(x->c.c_car,y))==Cnil)
+      RETURN1(Cnil);
+
+  RETURN1(Ct);
+}
+
 DEFUN("CAR",object,fLcar,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
   check_type_list(&x);
   RETURN1(x->c.c_car);
