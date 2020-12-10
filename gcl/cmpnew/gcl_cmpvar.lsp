@@ -193,12 +193,14 @@
 	((caddr vref) (push (car vref) (info-ref-clb info)))
 	((not setq)   (push (car vref) (info-ref     info)))))
 
-(defun make-vs (info) (mapcar (lambda (x) (cons x (var-store x))) (remove-if-not 'var-p (info-ref info))))
+(defun make-vs (info) (mapcan (lambda (x) (when (var-p x) (list (cons x (var-bind x))))) (info-ref info)))
 
 (defun check-vs (vs &aux (b (member-if-not 'var-p *vars*)))
   (not (member-if-not (lambda (x &aux (v (pop x))(vv (member v *vars*)))
-			(and (when vv (tailp b vv))
-			     (when x (unless (eq x +opaque+) (eq (var-store v) x))))) vs)))
+			(when vv
+			  (when (tailp b vv)
+			    (bind-match x v))))
+		      vs)))
 
 (defun c1var (name)
   (let* ((info (make-info))
@@ -288,13 +290,27 @@
   (unless (or (car vref) (cadr vref))
     v))
 
-(defun get-vbind-form (form &aux (bind (get-vbind form)))
-  (when bind
-    (unless (eq bind +opaque+)
-      (gethash bind *bind-hash*))))
+(defun get-vbind-form (form &aux (form (gethash (get-vbind form) *bind-hash*)))
+  (when (gethash form *bind-hash*)
+    form))
 
-(defun get-vbind (var &aux (var (if (when (consp var) (eq 'var (car var))) (local-var (caddr var)) var)))
-  (when (var-p var) (var-store var)))
+(defun var-bind (var &aux (st (when (var-p var) (when (eq 'lexical (var-kind var)) (var-store var)))))
+  (unless (cdr st)
+    (car st)))
+
+(defun get-vbind (form)
+  (var-bind
+   (typecase
+    form
+    ((cons (eql var) t) (local-var (caddr form)))
+    (var form))))
+
+(defun get-bind (x)
+  (typecase
+   x
+   ((cons (eql var) t) (var-bind (local-var (caddr x))))
+   (var (var-bind x))
+   (spice x)))
 
 (defun repeatable-var-binding (form)
   (case (car form)
@@ -304,34 +320,47 @@
 	;;        form))
 	))
 
-(defun push-vbind (var form)
-  (when (eq 'lexical (var-kind var))
-    (unless (eq (var-store var) +opaque+)
-      (setf (var-store var)
-	    (or (when (get (var-name var) 'tmp);FIXME
-		  +opaque+)
-		(let ((b (get-vbind form)))
-		  (unless (eq b +opaque+)
-		    (when (multiple-value-bind (r f) (gethash b *bind-hash*) (declare (ignore r)) f)
-		      b)));FIXME
-		(let* ((s (alloc-spice))
-		       (i (cadr (repeatable-var-binding form))))
-		  (setf (gethash s *bind-hash*)
-			(when (and i (info-type i)
-				   (not (iflag-p (info-flags i) side-effects))
-				   (not (or (info-ref-clb i) (info-ref-ccb i))))
-			  form))
-		  s))))))
+(defun repeatable-binding-p (form &aux (i (cadr (repeatable-var-binding form))))
+  (when i
+    (when (info-type i)
+      (unless (iflag-p (info-flags i) side-effects)
+	(unless (or (info-ref-clb i) (info-ref-ccb i))
+	  t)))))
+
+(defun new-bind (&optional form &aux (s (alloc-spice)))
+  (setf (gethash s *bind-hash*) form)
+  (setf (gethash form *bind-hash*) (repeatable-binding-p form))
+  s)
+
+(defun or-bind (b l)
+  (pushnew b l))
+
+(defun or-binds (l1 l2)
+  (reduce (lambda (y x) (or-bind x y)) l1 :initial-value l2))
+
+(defun push-vbind (var form &optional or)
+  (unless (get (var-name var) 'tmp);FIXME
+    (setf (var-store var)
+	  (or-bind
+	   (or (get-bind form) (new-bind form))
+	   (when or (var-store var))))))
+
+(defun push-vbinds (var forms); &optional or
+  (mapc (lambda (x) (push-vbind var x t)) forms))
+
+(defun bind-match (f1 f2 &aux (b1 (get-bind f1)))
+  (when b1
+    (eq b1 (get-bind f2))))
+
 
 (defun get-top-var-binding (bind)
-  (labels ((f (l) (member bind l :key (lambda (x) (when (var-p x) (var-store x)))))
+  (labels ((f (l) (member bind l :key 'var-bind))
 	   (r (l) (let* ((var (car l))
 			 (nl  (f (cdr l)))
-			 (nl  (when (eq nl (member (car nl) *vars*)) nl)))
+			 (nl  (when (eq nl (member (car nl) *vars*)) nl)));FIXME impossible?
 		    (if (tailp nl (member-if-not 'var-p l)) var (r nl)))))
 	  (when bind ;FIXME defvar
-	    (unless (eq bind +opaque+)
-	      (r (f *vars*))))))
+	    (r (f *vars*)))))
 
 (defun get-var (o &aux (vp (var-p o)))
   (or (get-top-var-binding (if vp (get-vbind o) o)) (when vp o)))
@@ -672,9 +701,7 @@
 
   (when (and (eq (car form1) 'var)
 	     (or (eq (car name1) (caaddr form1))
-		 (and (var-store (car name1))
-		      (eq (var-store (car name1)) (var-store (caaddr form1)))
-		      (not (eq +opaque+ (var-store (car name1)))))))
+		 (bind-match form1 (car name1))))
     (return-from c1setq1 form1))
 
   (unless (and (eq (car form1) 'var) (eq (car name1) (caaddr form1)))
@@ -684,19 +711,15 @@
     (unless (eq (caaddr form1) (car name1))
       (pushnew (caaddr form1) (var-aliases (car name1)))))
 
-  (let* ((v (car name1))(st (var-store v)))
+  (let* ((v (car name1))(st (var-bind v)))
     (cond ((and (eq (var-kind v) 'lexical) (or (cadr name1) (caddr name1)))
-	   (assert st)
-;	   (assert (info-type (cadr form1)))
 	   (setq type (info-type (cadr form1)))
-	   (let* ((z (assoc (car name1) (info-ch-ccb info))))
-	     (if z (setf (cdr z) (type-or1 (cdr z) type))
-	       (push (cons (car name1) type) (info-ch-ccb info)))))
+	   (push (cons (car name1) form1) (info-ch-ccb info)))
 	  (t 
 	   (do-setq-tp v (list form form1) (info-type (cadr form1)))
 	   (setq type (var-type (car name1)))
 	   (push-vbind v form1)
-	   (keyed-cmpnote (list (var-name v) 'var-store) "~s store set from ~s to ~s" v st (var-store v)))))
+	   (keyed-cmpnote (list (var-name v) 'var-bind) "~s store set from ~s to ~s" v st (var-bind v)))))
 
   (unless (eq type (info-type (cadr form1)))
     (let ((info1 (copy-info (cadr form1))))

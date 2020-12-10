@@ -37,8 +37,9 @@
 	 (in (mch))
 	 (body (unwind-protect (c1progn args) 
 		 (mapc (lambda (x &aux (v (pop x))) 
-			 (setf (var-type v) (type-or1 (pop x) (var-type v))
-			       (var-store v) (if (eq (car x) (var-store v)) (car x) +opaque+))) in))))
+			 (setf (var-type v) (type-or1 (pop x) (var-type v)))
+			 (push-vbinds v (car x)));FIXME c1throw/c1return-from
+		       in))))
     (add-info info (cadr body))
     (list 'catch info tag body)))
 

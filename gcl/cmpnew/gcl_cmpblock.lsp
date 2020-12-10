@@ -104,12 +104,19 @@
 ;; 	   (ref-blks (cdddr form) blks l)));FIXME?
 ;; 	(t (ref-blks (car form) blks l) (ref-blks (cdr form) blks l))))
 
+(defun prune-mch (l)
+  (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x)))
+	       (and (type>= (type-and (var-dt v) tp) (var-type v))
+		    (subsetp st (var-store v))
+		    (if m (equal tp m) t)))
+	     l))
+
 (defvar *c1exit* nil)
 (defun c1block (args &aux (info (make-info))(*c1exit* (cons (car args) *c1exit*)))
   (when (endp args) (too-few-args 'block 1 0))
   (cmpck (not (symbolp (car args)))
          "The block name ~s is not a symbol." (car args))
-  (let* ((blk (make-blk :name (car args) :ref nil :ref-ccb nil :ref-clb nil :exit *c1exit*))
+  (let* ((blk (make-blk :name (car args) :ref nil :ref-ccb nil :ref-clb nil :exit *c1exit* :var (mch)))
          (body (let ((*blocks* (cons blk *blocks*))) (c1progn (cdr args)))))
     (labels ((nb (b) (if (and (eq (car b) 'return-from) (eq blk (caddr b))) (nb (seventh b)) b))) (setq body (nb body)))
     (add-info info (cadr body))
@@ -117,6 +124,18 @@
     (ref-blks body (list blk))
     (when (or (blk-ref-ccb blk) (blk-ref-clb blk))
       (incf *setjmps*))
+    (mapc (lambda (x &aux (y x)(v (pop x))(tp (pop x))(st (pop x))(m (car x)))
+	    (unless (and (type>= (var-type v) (type-and tp (var-dt v)))
+			 (subsetp st (var-store v))
+			 (if m (equal m tp) t))
+	      (setq tp (type-or1 (var-type v) tp))
+	      (keyed-cmpnote (list (var-name v) 'block-set)
+			     "Altering ~s at end of block ~s:~%   type from ~s to ~s,~%   store from ~s to ~s"
+			     v (blk-name blk) (var-type v) tp
+			     (var-bind v) st)
+	      (do-setq-tp v '(blk-set) tp)
+	      (push-vbinds v st)))
+	  (blk-var blk))
     (cond ((or (blk-ref-ccb blk) (blk-ref-clb blk) (blk-ref blk))(list 'block info blk body))
 	  (body))))
 
@@ -230,6 +249,7 @@
 		      (val (c1expr (cadr args)))
 		      (c1fv (when ccb (c1inner-fun-var))))
 		 (setf (blk-type blk) (type-or1 (blk-type blk) (info-type (cadr val))))
+		 (or-mch (prune-mch (blk-var blk)))
 		 (return (list 'return-from
 			       (let ((info (copy-info (cadr val))))
 				 (setf (info-type info) nil)

@@ -141,7 +141,9 @@
 	    (keyed-cmpnote (list (var-name v) 'tagbody-iteration)
 			   "    Iterating tagbody: setting ~s type ~s to ~s, store ~s to ~s"
 			   v (var-type v) (car x) (var-store v) (cadr x))
-	    (setf (var-type v) (car x) (var-store v) (cadr x))) x))
+	    (setf (var-type v) (car x));FIXME do-setq-tp ?
+	    (push-vbinds v (cadr x)))
+	  x))
   (when z x))
 
 (defun pt (y x) (or (tst y (with-restore-vars (catch y (prog1 (cons y (pr x)) (keep-vars))))) (pt y x)))
@@ -157,11 +159,11 @@
 
 (defun or-mch (l &optional b)
   (mapc (lambda (x &aux (y x)(v (pop x))(tp (pop x))(st (pop x))(m (car x))
-		   (t1 (type-or1 (var-type v) (or m tp)))
+		   (t1 (type-or1 (var-type v) (or m tp)));FIXME check expensive
 		   (t1 (if b (bbump-tp t1) t1))
 		   (t1 (type-and (var-dt v) t1)))
 	  (setf (cadr y) t1
-		(caddr y) (if (eq st (var-store v)) st +opaque+)
+		(caddr y) (or-binds (var-store v) st);FIXME union?
 		(cadddr y) (mcpt t1)))
 	l))
 
@@ -172,7 +174,7 @@
 			 (car x) (tag-name z) (var-type (car x)) (cadr x)
 			 (var-store (car x)) (if (eq (var-store (car x)) (caddr x)) (caddr x) +opaque+))
 	  (do-setq-tp (car x) 'mch-set (cadr x))
-	  (setf (var-store (car x)) (if (eq (var-store (car x)) (caddr x)) (caddr x) +opaque+)))
+	  (push-vbinds (car x) (caddr x)))
 	l))
 
 (defun mch-z (z i &aux (f (cdr (assoc z *ft*))))
@@ -335,7 +337,7 @@
 (defun tag-throw (tag &aux (b (assoc tag *bt*)))
   (if b
       (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x)))
-			    (and (type>= (type-and (var-dt v) tp) (var-type v)) (eq st (var-store v)) (if m (equal tp m) t)))
+			    (and (type>= (type-and (var-dt v) tp) (var-type v)) (or (cdr st) (subsetp (var-store v) st)) (if m (equal tp m) t)))
 			  (cdr b))))
 	(when v (throw tag (or-mch v t))))
     (let ((f (assoc tag *ft*)))
@@ -394,8 +396,8 @@
 
 (defun or-branches (trv)
   (mapc (lambda (x &aux (v (pop x))) 
-	  (setf (var-store v) (if (eq (var-store v) (cadr x)) (var-store v) +opaque+));FIXME *restore-vars*, centralize
-	  (do-setq-tp v (list 'or-branches nil) (type-or1 (var-type v) (car x))))
+	  (do-setq-tp v (list 'or-branches nil) (type-or1 (var-type v) (car x)))
+	  (push-vbinds v (cadr x)))
 	trv))
 
 (defun c1switch (body)

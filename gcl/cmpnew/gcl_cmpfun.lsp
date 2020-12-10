@@ -254,7 +254,7 @@
 		       (cadr args) 
 		       (type>= (info-type (cadar nargs)) (info-type (cadadr nargs)))))))
 	    ((let ((x (get-vbind (car nargs)))(y (get-vbind (cadr nargs))))
-	       (when (and x (not (eq x +opaque+)) (eq x y))
+	       (when (when x (eq x y))
 		 (c1t))))
 	    (r)))))
 	   
@@ -619,7 +619,8 @@
 		     (cond ;((get-vbind x))
 			   (atp (car atp));FIXME
 			   ((get-vbind x))
-			   (+opaque+))) nargs)))
+			   ((new-bind))))
+		    nargs)))
 ;    (when dot (setf (cdr (last y 2)) (car (last y)))) ;FIXME bump-pcons -- get rid of pcons entirely
     (let* ((s (when dot (car (last y))))(s (when s (unless (typep s 'proper-list) s)))(tp (info-type (cadar (last nargs)))));FIXME
       (cond ((when s (type>= #tproper-list tp)) #tproper-cons)

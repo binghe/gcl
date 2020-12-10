@@ -907,10 +907,7 @@
 
 (defun c1side-effects (args)
   (declare (ignore args))
-  (mapc (lambda (x)
-	  (when (var-p x)
-	    (unless (eq (var-store x) +opaque+)
-	      (setf (gethash (var-store x) *bind-hash*) nil))))
+  (mapc (lambda (x) (setf (gethash (get-vbind-form x) *bind-hash*) nil))
 	*vars*)
   (list 'side-effects (make-info :flags (iflags side-effects))))
 

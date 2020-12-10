@@ -549,7 +549,7 @@
   (declare (ignore f))
   (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
 	((let ((a1 (atomic-tp t1)))
-	   (when a1 (let ((tp (cdar a1))) (unless (or (spicep tp) (eq tp +opaque+)) (object-type tp))))))
+	   (when a1 (let ((tp (cdar a1))) (unless (spicep tp) (object-type tp))))));FIXME bind-type?
 	((and (consp t1) (eq (car t1) 'cons)) (caddr t1))
 	((type>= #tproper-list t1) #tproper-list)))
 (si::putprop 'cdr 'cdr-propagator 'type-propagator)
@@ -601,7 +601,7 @@
     (c1side-effects nil)
     (when (consp atp) 
       (when (eq atp atp1) (setq atp1 (copy-list atp1)))
-      (setf (cdr atp) (or atp1 +opaque+)))
+      (setf (cdr atp) (or atp1 (new-bind))))
     (when (eq (caar nargs) 'var)
       (bump-pcons (caaddr (car nargs)) p))
     (setf (info-type info) (if p #tproper-cons #tcons))
@@ -617,7 +617,7 @@
     (c1side-effects nil)
     (when (consp atp) 
       (when (eq atp atp1) (setq atp1 (copy-list atp1)))
-      (setf (car atp) (if atp1 (car atp1) +opaque+)))
+      (setf (car atp) (if atp1 (car atp1) (new-bind))))
     (when (eq (caar nargs) 'var)
       (bump-pconsa (caaddr (car nargs)) (info-type (cadadr nargs))))
     (setf (info-type info) (cons-propagator 'cons (info-type (cadadr nargs))
@@ -642,7 +642,7 @@
     (let ((*in-co1carcdr* t))
       (let* ((tp (car (atomic-tp (info-type (cadr (with-restore-vars (c1arg (car x))))))))
 	     (tp (when (consp tp) (funcall f tp)))
-	     (tp (unless (eq tp +opaque+) (get-var tp))))
+	     (tp (get-var tp)))
 	(when tp (c1var tp))))))
 
 (setf (get 'car 'co1) 'co1carcdr)
@@ -652,7 +652,7 @@
   (declare (ignore f))
   (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
 	((let ((a1 (atomic-tp t1)))
-	   (when a1 (let ((tp (caar a1))) (unless (or (spicep tp) (eq tp +opaque+)) (object-type tp))))))
+	   (when a1 (let ((tp (caar a1))) (unless (spicep tp) (object-type tp))))))
 	((and (consp t1) (eq (car t1) 'cons)) (cadr t1))))
 (si::putprop 'car 'car-propagator 'type-propagator)
 

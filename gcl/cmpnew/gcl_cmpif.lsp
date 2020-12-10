@@ -737,25 +737,27 @@
 			  (fbl (c1branch nil r args info))
 			  (tb (car tbl))
 			  (fb (car fbl))
-			  (trv (append (cadr tbl) (cadr fbl))))
+			  (tret (info-type (cadr tb)))
+			  (fret (info-type (cadr fb)))
+			  (trv (append (when tret (cadr tbl)) (when fret (cadr fbl)))))
 
 		     (setf (info-type info) (type-or1 (info-type (cadr tb)) (info-type (cadr fb))))
 
 		     (do (rv) ((not (setq rv (pop r))))
 			 (setf (var-type (car rv)) (cadr rv))
-			 (if (info-type (cadr fb))
-			     (unless (info-type (cadr tb))
+			 (if fret
+			     (unless tret
 			       (do-setq-tp (car rv) nil (type-and (cdr (caddr rv)) (var-type (car rv)))))
-			   (when (info-type (cadr tb))
+			   (when tret
 			     (do-setq-tp (car rv) nil (type-and (car (caddr rv)) (var-type (car rv)))))))
 
 		     (do (rv) ((not (setq rv (pop trv))))
-			 (unless (eq (var-store (car rv)) (caddr rv))
+			 (unless (subsetp (caddr rv) (var-store (car rv)))
 			   (keyed-cmpnote
 			    (list (var-name (car rv)) 'var-store 'binding '+opaque+)
 			    "~s store set to +opaque+ from ~s/~s across if branches"
 			    (var-name (car rv)) (caddr rv) (var-store (car rv)))
-			   (setf (var-store (car rv)) +opaque+))
+			   (push-vbinds (car rv) (caddr rv)))
 			 (do-setq-tp (car rv) (list args nil) (type-or1 (var-type (car rv)) (cadr rv))))
 
 		     (list 'if info fmla tb fb))

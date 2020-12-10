@@ -497,8 +497,8 @@
 	 (tpi (ensure-known-type (pop args)))
 	 (tp (type-and (var-type x) tpi))
 	 (bind (get-vbind x))
-	 (l (unless (eq bind +opaque+)
-	      (mapcan (lambda (x) (when (and (var-p x) (eq bind (get-vbind x))) (list x)))
+	 (l (when bind
+	      (mapcan (lambda (x) (when (eq bind (get-vbind x)) (list x)))
 		      *vars*)))
 	 (l (mapc (lambda (x) (do-setq-tp x nil tp)) l))
 	 (res (c1expr (car args)))
@@ -1063,9 +1063,7 @@
   (if (atom x) i (cln (cdr x) (1+ i))))
 
 (defun new-type-p (a b)
-  (cond ((eql a +opaque+) nil)
-	((eql b +opaque+) nil)
-	((spicep a) nil);;FIXME ????
+  (cond ((spicep a) nil);;FIXME ????
 	((spicep b) nil)
 	((eql a b) nil)
 	((atom a))
@@ -1150,7 +1148,7 @@
 (defun constant-type-p (tp)
   (typecase
    tp
-   (symbol (unless (eq tp +opaque+) t));FIXME
+   (symbol t)
    (spice nil)
    (atom t)
    (cons (and (constant-type-p (car tp)) (constant-type-p (cdr tp))))))
@@ -1550,11 +1548,16 @@
 ;; 		(setf (var-store v) +opaque+))))) *vars*))
 
 
+(defun do-ccb-ch (ccb-ch)
+  (mapc (lambda (x &aux (v (pop x)))
+	  (do-setq-tp v '(ccb-ch) (type-or1 (var-type v) (info-type (cadr x))))
+	  (push-vbind v x t))
+	ccb-ch))
+
 (defun or-ccb-assignments (fms)
-  (mapc (lambda (x &aux (i (cadr x))) 
-	  (mapc (lambda (x &aux (v (pop x)))
-		  (do-setq-tp v '(ccb-ref) (type-or1 (var-type v) x))
-		  (setf (var-store v) +opaque+)) (info-ch-ccb i))) fms))
+  (mapc (lambda (x)
+	  (do-ccb-ch (info-ch-ccb (cadr x))))
+	fms))
 
 (defun mi6 (fn fms)
   (or-ccb-assignments fms)
@@ -1578,12 +1581,29 @@
 ;; 	    (bump-pcons (caaddr f) p)))))))
 
 
+(defun binding-forms (st)
+  (mapcan (lambda (x &aux (z (gethash x *bind-hash*))) (when z (list z))) st))
+
+(defun global-var-stores (&aux z)
+  (reduce (lambda (y x)
+	    (or-binds
+	     (when (var-p x)
+	      (unless (eq (var-kind x) 'lexical)
+		(var-store x)))
+	     y)) *vars* :initial-value z))
+
+(defun c1v-store (form)
+  (when (eq (car form) 'var)
+    (var-store (caaddr form))))
+
+
 (defun mi5 (fn info fms la &aux (ll (when la (list (length fms)))) fd)
   (mi6 fn fms)
   (let ((r (assoc fn *recursion-detected*))) (when r (setf (cdr r) t)))
   (cond	((consp fn) 
 	 (let ((ord (make-ordinary fn)))
 	   (add-info info (cadr ord))
+	   (or-ccb-assignments (binding-forms (c1v-store fn)))
 	   `(,(if la 'apply 'funcall) ,info ,ord ,fms)))
 	((setq fd (c1local-fun fn))
 	 (add-info info (cadr fd))
@@ -1591,7 +1611,10 @@
 	 (let ((fm (fifth fd)))
 	   (when fm (or-ccb-assignments (list fm)))
 	   `(call-local ,info ,(nconc (caddr fd) ll) ,(cadddr fd) ,fm ,fms)));FIXME
-	(t (push fn (info-ref info)) `(call-global ,info ,fn ,fms nil ,@ll))))
+	(t
+	 (or-ccb-assignments (binding-forms (global-var-stores)))
+	 (push fn (info-ref info))
+	 `(call-global ,info ,fn ,fms nil ,@ll))))
 
 ;; (defun mi5 (fn info fms la &aux (ll (when la (list (length fms)))) fd)
 ;;   (mi6 fn fms)
