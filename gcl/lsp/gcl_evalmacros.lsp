@@ -625,6 +625,7 @@
 
 
 (defun proclaim-var (tp l &aux (tp (cmp-norm-tp tp)))
+  (declare (optimize (safety 2)))
   (unless (or (eq tp '*) (eq tp t))
     (mapc (lambda (x)
 	    (check-type x symbol)
@@ -646,6 +647,7 @@
 
 (defun proclaim-ftype (ftype var-list
 			     &aux  (sig (uniq-list (list (mapcar 'cmp-norm-tp (cadr ftype)) (cmp-norm-tp (caddr ftype))))))
+  (declare (optimize (safety 2)))
   (mapc (lambda (x &aux (c (car (call x))))
 	  (cond (c (unless (sig= c sig)
 		     (warn "Ignoring proclaimed signature ~s on ~s, currently fboundp to ~s~%"
