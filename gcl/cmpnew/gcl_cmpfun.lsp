@@ -151,38 +151,38 @@
       (list* (car all) (car (last all)) (butlast (cdr all)))))
     (close-inline-blocks)))
 
-(defun c1apply-optimize (info requireds rest body args
-                              &aux (vl nil) (fl nil))
-  (do ()
-      ((or (endp (cdr args)) (endp requireds)))
-      (push (pop requireds) vl)
-      (push (pop args) fl))
+;; (defun c1apply-optimize (info requireds rest body args
+;;                               &aux (vl nil) (fl nil))
+;;   (do ()
+;;       ((or (endp (cdr args)) (endp requireds)))
+;;       (push (pop requireds) vl)
+;;       (push (pop args) fl))
 
-  (cond ((cdr args)	;;; REQUIREDS is NIL.
-         (cmpck (null rest)
-                "APPLY passes too many arguments to LAMBDA expression.")
-         (push rest vl)
-         (push (list 'call-global info 'list* args) fl)
-         (list 'let info (reverse vl) (reverse fl) body))
-        (requireds	;;; ARGS is singleton.
-         (let ((temp (make-var :kind 'LEXICAL :ref t)))
-              (push temp vl)
-              (push (car args) fl)
-              (list 'let info (reverse vl) (reverse fl)
-                    (list 'apply-optimize
-                          (cadr body) temp requireds rest body))))
-        (rest (push rest vl)
-              (push (car args) fl)
-              (list 'let info (reverse vl) (reverse fl) body))
-        (t
-         (let ((temp (make-var :kind 'LEXICAL :ref t)))
-              (push temp vl)
-              (push (car args) fl)
-              (list 'let info (reverse vl) (reverse fl)
-                    (list 'apply-optimize
-                          (cadr body) temp requireds rest body))))
-        )
-  )
+;;   (cond ((cdr args)	;;; REQUIREDS is NIL.
+;;          (cmpck (null rest)
+;;                 "APPLY passes too many arguments to LAMBDA expression.")
+;;          (push rest vl)
+;;          (push (list 'call-global info 'list* args) fl)
+;;          (list 'let info (reverse vl) (reverse fl) body))
+;;         (requireds	;;; ARGS is singleton.
+;;          (let ((temp (make-var :kind 'LEXICAL :ref t)))
+;;               (push temp vl)
+;;               (push (car args) fl)
+;;               (list 'let info (reverse vl) (reverse fl)
+;;                     (list 'apply-optimize
+;;                           (cadr body) temp requireds rest body))))
+;;         (rest (push rest vl)
+;;               (push (car args) fl)
+;;               (list 'let info (reverse vl) (reverse fl) body))
+;;         (t
+;;          (let ((temp (make-var :kind 'LEXICAL :ref t)))
+;;               (push temp vl)
+;;               (push (car args) fl)
+;;               (list 'let info (reverse vl) (reverse fl)
+;;                     (list 'apply-optimize
+;;                           (cadr body) temp requireds rest body))))
+;;         )
+;;   )
 
 (defun fn-bind (form args)
   (if (or (symbolp (car args)) (constantp (car args))) form
