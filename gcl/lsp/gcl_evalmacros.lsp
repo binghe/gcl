@@ -539,21 +539,23 @@
        nil)))
 
 
-(defmacro define-compiler-macro (name vl &rest body)
+(defmacro define-compiler-macro (name vl &rest body &aux (n (funid-sym name)))
   (declare (optimize (safety 2)))
-  (let ((n (funid-sym name)))
-    `(progn (putprop ',n
-		     ,(defmacro-lambda (if (eq n name) name (cadr name)) vl body)
-		     'compiler-macro-prop)
-	    ',name)))
-
-(defun compiler-macro-function (name)
-  (let ((name (funid-sym name)))
-    (get name 'compiler-macro-prop)))
+  `(progn (putprop ',n ;FIXME setf not available at pre_gcl stage
+		   ,(defmacro-lambda (if (eq n name) name (cadr name)) vl body)
+		   'compiler-macro-prop)
+	  ',name))
 
 (defun undef-compiler-macro (name)
-  (let ((name (funid-sym name)))
-    (remprop name 'compiler-macro-prop)))
+  (remprop (funid-sym name) 'compiler-macro-prop))
+
+(defun compiler-macro-function (n &optional env &aux (n (funid-sym n)))
+  (declare (ignorable env))
+  (get n 'compiler-macro-prop))
+
+(defun (setf compiler-macro-function) (fun n &optional env &aux (n (funid-sym n)))
+  (declare (ignorable env))
+  (setf (get n 'compiler-macro-prop) fun))
 
 
 (defvar *safe-compile* nil)
