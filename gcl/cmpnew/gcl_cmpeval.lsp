@@ -1592,10 +1592,6 @@
 		(var-store x)))
 	     y)) *vars* :initial-value z))
 
-(defun c1v-store (form)
-  (when (eq (car form) 'var)
-    (var-store (caaddr form))))
-
 
 (defun mi5 (fn info fms la &aux (ll (when la (list (length fms)))) fd)
   (mi6 fn fms)
@@ -1603,7 +1599,7 @@
   (cond	((consp fn) 
 	 (let ((ord (make-ordinary fn)))
 	   (add-info info (cadr ord))
-	   (or-ccb-assignments (binding-forms (c1v-store fn)))
+	   (or-ccb-assignments (list fn))
 	   `(,(if la 'apply 'funcall) ,info ,ord ,fms)))
 	((setq fd (c1local-fun fn))
 	 (add-info info (cadr fd))

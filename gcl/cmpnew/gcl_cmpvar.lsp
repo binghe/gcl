@@ -211,6 +211,8 @@
     (add-vref vref info)
     (when c1fv
       (add-info info (cadr c1fv)))
+    (mapc (lambda (x) (setf (info-ch-ccb info) (nunion (info-ch-ccb info) (info-ch-ccb (cadr x)))));FIXME nunion asym
+	  (binding-forms (var-store (car vref))))
     (let ((fmla (exit-to-fmla-p)))
       (cond ((when fmla (type>= #tnull (info-type info))) (c1nil))
 	    ((when fmla (type>= #t(not null) (info-type info))) (c1t))
