@@ -208,13 +208,12 @@ equal1(register object x, register object y) {
 
   if (valid_cdr(y)) return FALSE;
   
-  if (x->d.t!=y->d.t)
-    return FALSE;
-  
   switch(x->d.t) {
 
   case t_simple_string:
   case t_string:
+    if (y->d.t!=t_simple_string && y->d.t!=t_string)
+      return(FALSE);
     return(string_eq(x, y));
     
   case t_bitvector:
@@ -222,6 +221,8 @@ equal1(register object x, register object y) {
     {
       fixnum i, ox, oy;
       
+      if (y->d.t!=t_simple_bitvector && y->d.t!=t_bitvector)
+	return(FALSE);
       if (VLEN(x) != VLEN(y))
 	return(FALSE);
       ox = x->bv.bv_offset;
@@ -244,6 +245,8 @@ equal1(register object x, register object y) {
     }
     
   case t_pathname:
+    if (y->d.t!=t_pathname)
+      return(FALSE);
     if (equal(x->pn.pn_host, y->pn.pn_host) &&
 	equal(x->pn.pn_device, y->pn.pn_device) &&
 	equal(x->pn.pn_directory, y->pn.pn_directory) &&
