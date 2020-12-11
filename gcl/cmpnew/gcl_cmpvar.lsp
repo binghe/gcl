@@ -340,8 +340,16 @@
 (defun or-binds (l1 l2)
   (reduce (lambda (y x) (or-bind x y)) l1 :initial-value l2))
 
+(defun bind-block (name)
+  (or (eq name +mv+); FIXME c1 *mv-var*
+;      (eq name +first+)
+;      (eq name +fun+)
+;      (get name 'tmp)
+;      (eq name +nargs+) ;FIXME invalidate on call
+      ))
+
 (defun push-vbind (var form &optional or)
-  (unless (get (var-name var) 'tmp);FIXME
+  (unless (bind-block (var-name var))
     (setf (var-store var)
 	  (or-bind
 	   (or (get-bind form) (new-bind form))
