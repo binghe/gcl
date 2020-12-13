@@ -232,7 +232,14 @@
 
 (defun output-stream-p (x)
   (declare (optimize (safety 1)))
-  (typecase x (output-stream t)))
+  (etypecase
+   x
+   (concatenated-stream nil)
+   (string-input-stream nil)
+   (file-input-stream nil)
+   (file-probe-stream nil)
+   (synonym-stream (output-stream-p (symbol-value (synonym-stream-symbol x))))
+   (stream t)))
 
 (defun floatp (x)
   (declare (optimize (safety 1)))
