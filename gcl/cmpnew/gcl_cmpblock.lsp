@@ -112,7 +112,11 @@
 	     l))
 
 (defvar *c1exit* nil)
-(defun c1block (args &aux (info (make-info))(*c1exit* (cons (car args) *c1exit*)))
+
+(defun make-c1exit (n)
+  (cons n (current-env)))
+
+(defun c1block (args &aux (info (make-info))(*c1exit* (cons (make-c1exit (car args)) *c1exit*)))
   (when (endp args) (too-few-args 'block 1 0))
   (cmpck (not (symbolp (car args)))
          "The block name ~s is not a symbol." (car args))

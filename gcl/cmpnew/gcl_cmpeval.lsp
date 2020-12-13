@@ -1346,11 +1346,15 @@
 ;; 	  (*funs* (if ,e (pop ,e) *funs*)))
 ;;      ,form))
 
-(defconstant +bds+ (gensym))
-
-(defun tail-recursion-possible (fun &aux (f (member fun *c1exit*)))
+(defun tail-recursion-possible (fun &aux (f (assoc fun *c1exit*)))
   (when f
-    (tailp (member +bds+ *c1exit*) f)))
+    (do ((l *vars* (cdr l))(e (caddr f)))
+	((eq l e) t)
+	(let ((v (car l)))
+	  (when (var-p v)
+	    (unless (eq 'lexical (var-kind v)) ; FIXME check other objects needing unwind
+	      (unless (member v *lexical-env-mask*)
+		(return nil))))))))
 
 (defun mi2 (fun args la fms envl)
   (let* ((sir (cll fun))

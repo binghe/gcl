@@ -146,7 +146,6 @@
 		   (f (unless (atom x) (car x)))
 		   (v (c1make-var n ss is ts))
 		   (fm (if (and inls (eq f (caar inls))) (cdr (pop inls)) (c1arg f))));FIXME check
-	      (unless (eq 'lexical (var-kind v)) (push +bds+ *c1exit*));FIXME multiple-value-bind, etc.
 	      (set-var-init-type v (info-type (cadr fm)))
 	      (when (eq (car fm) 'var) (pushnew (caaddr fm) (var-aliases v)))
 	      (maybe-reverse-type-prop (var-type v) fm)
@@ -251,7 +250,6 @@
 (defun c1let-* (args &optional star inls
 		     &aux (nm (if star 'let* 'let))
 		     (ov *vars*) (*vars* *vars*) (setjmps *setjmps*)
-		     (*c1exit* *c1exit*)
 		     ss is ts body other-decls
 		     (info (make-info)))
 

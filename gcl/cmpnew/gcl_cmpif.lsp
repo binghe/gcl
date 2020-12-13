@@ -1140,7 +1140,7 @@
 ;; 				  (list 'call-global info 'eq (list r (c1nil)))
 ;; 				  (c1nil) (c1t))))))))))))
 
-(defconstant +fmla+ (list (gensym)))
+(defconstant +fmla+ (list (make-c1exit (gensym))))
 
 (defun exit-to-fmla-p nil
   (eq (last *c1exit*) +fmla+))

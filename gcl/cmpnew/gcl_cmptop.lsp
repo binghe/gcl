@@ -1140,7 +1140,7 @@
 	 (tag (make-ttl-tag))
 	 (*prev-sri* (append *src-inline-recursion* *prev-sri*))
 	 (*src-inline-recursion* (when vis (list (make-tagged-sir (list (sir-name name)) tag (ttl-ll (cadr src))))))
-	 (*c1exit* (list name))
+	 (*c1exit* (list (make-c1exit name)))
 	 (*current-form* `(defun ,name))
 	 (l (do-l1-fun name (cdr (new-defun-args src tag)) e b))
 	 (clv (get-clv l)))
