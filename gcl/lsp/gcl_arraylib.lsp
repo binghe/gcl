@@ -382,7 +382,7 @@
 	   (setf (cadr (member :fill-pointer r)) fill-pointer)))
 	((array-has-fill-pointer-p array) (setq r (cons (fill-pointer array) r) r (cons :fill-pointer r))))
       
-  (let ((x (apply 'make-array new-dimensions :adjustable t r)))	
+  (let ((x (apply 'make-array new-dimensions :adjustable t r))) ;FIXME avoid when possible
 
     (unless (or displaced-to initial-contents-supplied-p)
 
@@ -400,7 +400,9 @@
 				      (row-major-aset (apply 'aref array ind) x i))))))
 		 (set new-dimensions))))))
 
-    (replace-array array x)
+    (if (typep array 'unadjustable-array)
+	(setq array x)
+      (replace-array array x))
 
     (when (eq fill-pointer t)
       (setq fill-pointer (array-total-size array)))
