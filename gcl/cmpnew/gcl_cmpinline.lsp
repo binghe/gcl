@@ -1070,7 +1070,7 @@
 				   (m (when (> (length fun) ii) (digit-char-p (setq ch (char fun ii))))))
 			      (when m (setq n (+ (* n 10) m) i (1+ i)))
 			      (setq max (max max (1+ n)))
-			      (wt-loc (nth n locs))))
+			      (let ((*values-to-go* nil)) (wt-loc (nth n locs)))))
 			   ((wt ch))))
 			(incf i 2))
 		       ((char= char #\@);FIXME better error checking
