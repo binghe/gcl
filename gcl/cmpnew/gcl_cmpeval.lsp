@@ -1925,141 +1925,173 @@
 ;; 	     (let ((x (pop body))) (if (stringp x) (unless doc (push x doc)) (push x d)))) body))
 
 
-(defun blla (l a last body &optional n nr f
-	       &aux r k lvp np negp ff rr ke tmp nkys post aok bk wv rv keb kbb
-	       (tsyms (load-time-value (mapl (lambda (x) (setf (car x) (tmpsym))) (make-list 50))))
-	       (l (let ((s (last l))) (if (cdr s) (append (butlast l) (list (car s) '&rest (cdr s))) l)))
-	       (l (subst '&rest '&body l))
-	       (l (let ((al (member '&aux l))) (append (ldiff l al) (cons (setq ke (sgen "KE")) al))))
-	       (llk '(&whole &optional &rest &key &allow-other-keys &aux)));FIXME centralize
-  (declare (optimize (safety 0)))
-  (assert (not (and last n))) ;(print (length tsyms));(print (list l a last body n nr f))
-  (labels
-   ((vp nil 
-	(let* ((v `(va-pop))
-	       (v (if f `(cond (,ff (setq ,ff nil) ,f) (,v)) v)))
-	  (setq f nil)
-	  `(progn (setq ,np (si::number-minus ,np 1)) ,v)))
-    (tsym nil (or (pop tsyms) (error 'program-error :format-control "Out of symbols for lambda list ~s" :format-arguments (list l))))
-    (kesrc (nap src &aux (q (extra src)) (nap (unless np nap))) (setq keb t);fixme
-	   (cond ((eq k '&key) (when (consp src) `(unless ,aok (when ,(cadr src) ,(badk bk (caddr src))))))
-		 ((eq nap t) q)
-		 (nap `(when ,nap ,q))))
-    (rbb (v srcp src) (push (if srcp (list v src) v) r))
-    (dfsrc (src defp) (if defp (na src) src))
-    (rb (v src srcp defp) (rbb v srcp (dfsrc src defp)))
-    (kb (v src srcp defp &aux (nap (nap))) (when nap (rbb v srcp (kesrc nap (dfsrc src defp)))))
-    (bind (targ &optional (src nil srcp) defp &aux (sp (unless (symbolp targ) srcp)) (v (if sp (tsym) targ)))
-;	FIXME  (funcall (if (eq v ke) #'kb #'rb) v src srcp defp) leads to closures
-	  (if (eq v ke) (kb v src srcp defp) (rb v src srcp defp))
-	  (when sp (setq r (append (nreverse (cadr (blla targ nil v nil))) r)))
-	  v)
-    (badll nil (error 'program-error :format-control "Bad lambda list ~s" :format-arguments (list l)))
-    (insuf (x) (unless (eq x ke) `(error 'program-error :format-control "Insufficient arguments when binding ~s" :format-arguments (list ',x))))
-    (extra (x) `(error 'program-error :format-control "Extra argument ~s" :format-arguments (list ,x)))
-    (nokv  (x) `(error 'program-error :format-control "Key ~s missing value" :format-arguments (list ,x)))
-    (badk  (x v) `(error 'program-error :format-control "Key ~s ~s not permitted" :format-arguments (list ,x ,v)))
-    (bk nil (or bk (setq bk (car (push (sgen "BK") r)))));(tsym)
-    (unbnd (l &aux (lc (when (or (eq k '&optional) (eq k '&key)) (consp l))) 
+(let* ((gsyms (mapl (lambda (x) (setf (car x) (tmpsym))) (make-list 50)))(syms gsyms))
+  (defun tsym (&optional r)
+    (cond (r (setq syms gsyms) nil)
+	  ((or (pop syms) (error 'program-error :format-control "Out of symbols when binding lambda list" :format-arguments nil))))))
+
+
+(defun unbnd (k l &aux (lc (when (or (eq k '&optional) (eq k '&key)) (consp l)))
 	      (ln (if lc (pop l) l)) (ld (when lc (pop l))) (lp (when lc (car l)))
 	      (lc (when (eq k '&key) (consp ln))) (lnn (if lc (pop ln) ln)) (lb (if lc (car ln) ln)))
 	   (values lnn lb ld lp))
-    (post nil
-	  (setq nkys (nreverse nkys) kbb (sgen "KBB"));(tsym)
-	  (do (k r (ex a)) ((not ex));FIXME  this is fragile as the binding must be visible to mvars/inls
-	      (bind 'k (pop ex))
-	      (bind 'v (if ex (pop ex) `(if ,(la nil t) ,(la nil 'done) ,(nokv 'k))))
-	      (bind kbb `(case k ,@nkys)))
-	  (bind kbb (if n;;FIXME this must be inlined, as it uses va_arg
-			`(do (k v) ((not ,(la nil t))) 
-			     (setq k ,(la nil 'done) v (if ,(la nil t) ,(la nil 'done) ,(nokv 'k)))
-			     (case k ,@nkys))
-		      `(labels ((kb (k v) (case k ,@nkys))
-				(kbb (x) (when x (kb (car x) (if (cdr x) (cadr x) ,(nokv 'k)))(kbb (cddr x)))))
-			       (kbb ,(lvp)))))
-	  (dolist (l (nreverse post)) (apply #'bind l)))
-    (lvp (&optional rv)
-	 (cond 
-	  (rv (lvp) (when np (bind lvp (rpop rv))))
-	  (lvp)
-	  (last (bind (setq lvp (sgen "LVPL")) last)) ;(tsym)
-	  (n 
-	   (when f (bind (setq ff (sgen "FF")) t));(tsym)
-	   (bind (setq lvp (sgen "LVP")));(tsym)
-	   (bind (setq np (sgen "NP")) n) ;(tsym)
-	   (bind (setq negp (sgen "NEGP") ) `(< ,np 0));(tsym)
-	   (bind np `(if ,negp (si::number-minus 0 ,np) ,np))
-	   (bind np `(si::number-minus ,np ,nr)))))
-    (wcr (x) (when (cdr x) x))
-    (la (def &optional p &aux (v (lvp)) (pv (eq p 'done)) (p (unless (eq p 'done) p)) (ff f) (vp (vp)))
-	(when p (setq f ff))
-	(wcr `(cond ,@(when (unless pv np) `(((and ,negp (= ,np 1) (setq ,lvp ,vp) ,@(unless p `(nil))))))
-	       ,@(when np `(((> ,np 0) ,@(unless p (list vp)))))
-	       ,@(when v `((,lvp ,@(unless p `((pop ,lvp))))))
-	       ,@(when def `((,def))))))
-    (na (&optional def) (if a (pop a) (la def)))
-    (nap nil (if a t (la nil t)))
-    (srr (rv) 
-	 (unless (member-if (lambda (x) (and (eq (car x) rv) (eq (cdr x) 'dynamic-extent)))
-			    (multiple-value-bind (x y z) (c1body body nil) z));FIXME!
-	   (setq rr t)))
-    (rpop (rv)
-	  (let ((vp (sgen "VP"))(val (sgen "VAL")));(tsym)(tsym)
-	    `(do (,vp ,val) 
-		 ((>= 0 ,np) ,lvp)
-		 (declare (proper-list ,val) ,@(unless (srr rv) `((:dynamic-extent ,val))))
-		 (setq ,val ,(vp)
-		       ,val (if (and ,negp (= ,np 0)) ,val (cons ,val nil))
-		       ,vp (cond (,vp (rplacd ,vp ,val) ,val) ((setq ,lvp ,val))))))))
-   (do ((l l)(lk llk))
-       ((not l)
-	(multiple-value-bind
-	 (doc decls ctps body)
-	 (parse-body-header body)
-	 (declare (ignore doc))
-	 (unless rr (when np (push `(declare (:dynamic-extent ,lvp)) decls)))
-	 (when post (post))
-	 (when keb (push `(declare (ignore ,ke)) decls))
-	 (when kbb (push `(declare (ignore ,kbb)) decls))
-	 `(let* ,(nreverse r) 
-	    ,@decls
-	    ,@ctps
-	    ,@body)))
-       (cond ((setq tmp (member (car l) lk)) (setq lk (cdr tmp) k (pop l)))
-	     ((member (car l) llk) (baboon))
-	     ((case k
-		    (&whole (unless wv (setq k nil) (bind (setq wv (pop l)) (append a last))))
-		    ((nil &optional)
-		     (multiple-value-bind
-		      (ln lb ld lp)
-		      (unbnd (pop l))
-		      (declare (ignore lb))
-		      (when lp (bind lp t))
-		      (let* ((ld (if k ld (insuf ln)))(ld (if lp `(progn (setq ,lp nil) ,ld) ld)))
-			(bind ln ld t))))
-		    (&rest
-		     (cond ((not rv)
-			    (setq rv (pop l))
-			    (setq a (mapcar (lambda (x) (bind (tsym) x)) a))
-			    (lvp rv)
-			    (bind rv (cond ((not a) lvp) (lvp `(list* ,@a ,lvp)) (`(list ,@a)))))
-			   ((unless (eq (pop l) ke) (badll)))))
-		    ((&allow-other-keys &key)
-		     (when (eq k '&allow-other-keys) (setq aok t k '&key))
-		     (multiple-value-bind
-		      (ln lb ld lp)
-		      (unbnd (if aok (pop l) :allow-other-keys))
-		      (let* ((lpt (tsym))(lbt (tsym))(kep (eq ln ke))
-			     (lnk (if kep 'otherwise (intern (string ln) 'keyword))))
-		       (bind lpt)
-		       (bind lbt)
-		       (push `(,lnk (unless ,lpt (setq ,lbt v ,lpt t ,@(when kep `(,(bk) k))))) nkys)
-		       (if aok (push `(,lb (if ,lpt ,lbt ,ld)) post) (setq aok lbt))
-		       (when lp (push `(,lp ,lpt) post)))))
-		    (&aux (bind (pop l)))))))))
 
-(defmacro bll (l a body)
-  `(blla ,l ,a nil ,body))
+(defconstant +np+ (sgen "NP"))
+(defconstant +negp+ (sgen "NEGP"))
+(defconstant +ff+ (sgen "FF"))
+(defconstant +bk+ (sgen "BK"))
+(defconstant +kev+ (sgen "KE"))
+(defconstant +kbbv+ (sgen "KBB"))
+(defconstant +lvpv+ (sgen "LVP"))
+(defvar *rv* nil)
+
+
+(defun rpop (rv lv &aux (vp (sgen "VP"))(val (sgen "VAL")))
+  `(do (,vp ,val)
+       ((>= 0 ,+np+) ,lv)
+       (declare (proper-list ,val) ,@(when (cdr rv) `((:dynamic-extent ,val))))
+       (setq ,val ,(vp)
+	     ,val (if (and ,+negp+ (= ,+np+ 0)) ,val (cons ,val nil))
+	     ,vp (cond (,vp (rplacd ,vp ,val) ,val) ((setq ,lv ,val))))))
+
+(defun bind (targ &optional (src nil srcp) defp &aux (sp (unless (symbolp targ) srcp)) (v (if sp (tsym) targ)))
+  (push (if srcp (list v (if defp (na src) src)) v) *rv*)
+  (when sp
+    (let ((x (tsym))(lv (lvp)))
+      (bind x lv)
+      (setq *rv* (append (nreverse (cadr (blla targ nil v nil nil nil nil t))) *rv*))
+      (bind lv x)))
+  v)
+
+(defun badll (x) (error 'program-error :format-control "Bad lambda list ~s" :format-arguments (list x)))
+(defun insuf (x) (unless (eq x +kev+) `(error 'program-error :format-control "Insufficient arguments when binding ~s" :format-arguments (list ',x))))
+(defun extra (x) `(error 'program-error :format-control "Extra argument ~s" :format-arguments (list ,x)))
+(defun nokv  (x) `(error 'program-error :format-control "Key ~s missing value" :format-arguments (list ,x)))
+(defun badk  (x v) `(error 'program-error :format-control "Key ~s ~s not permitted" :format-arguments (list ,x ,v)))
+
+(defun wcr (x) (when (cdr x) x))
+
+(let (n nr f np lv a last)
+
+  (defun state-init (nn nnr nf na nlast)
+    (setq n nn nr nnr f nf a na last nlast np nil lv nil))
+
+  (defun vp (&aux (v `(va-pop)))
+    `(progn
+       (setq ,+np+ (si::number-minus ,+np+ 1))
+       ,(if f `(cond (,+ff+ (setq ,+ff+ nil) ,f)(,v)) v)))
+
+  (defun la (def &optional k p &aux (v (lvp))(vp (vp)))
+    (wcr `(cond ,@(when np `(((and ,+negp+ (= ,np 1) (setq ,v ,vp) ,@(unless p `(nil))))))
+		,@(when np `(((> ,np 0) ,@(unless p `(,vp)))))
+		,@(when v `((,v ,@(unless p `((pop ,v))))))
+		,@(when def `((,def)))
+		,@(when k `((,(nokv k)))))))
+  (defun na (&optional def) (if a (pop a) (la def)))
+  (defun nap nil (if a t (la nil nil t)))
+
+  (defun bind-a nil (setq a (mapcar (lambda (x) (bind (tsym) x)) a)))
+
+  (defun lvp (&optional rv)
+    (cond
+     (rv (lvp) (if np (bind lv (rpop rv lv)) lv))
+     (lv)
+     (last (bind (setq lv +lvpv+) last))
+     (n
+      (when f (bind +ff+ t))
+      (bind (setq np +np+) n)
+      (bind +negp+ `(< ,np 0))
+      (bind np `(if ,+negp+ (si::number-minus 0 ,np) ,np))
+      (bind np `(si::number-minus ,np ,nr))
+      (bind (setq lv +lvpv+)))))
+
+  (defun post (post nkys &aux lv)
+    (setq nkys (nreverse nkys))
+    (do ((ex a)) ((not ex));FIXME  this is fragile as the binding must be visible to mvars/inls
+	(bind 'k (pop ex))
+	(bind 'v (if ex (pop ex) (la nil 'k)));`(if ,(la nil t) ,(la nil 'done) ,(nokv 'k))))
+	(bind +kbbv+ `(case k ,@nkys)))
+    (cond
+     (n (bind +kbbv+ `(do (k v) ((not ,(nap)))
+			  (setq k ,(la nil) v ,(la nil 'k));(if ,(la nil t) ,(la nil 'done) ,(nokv 'k))
+			  (case k ,@nkys))))
+     ((setq lv (lvp)) (bind +kbbv+ `(labels ((kb (k v) (case k ,@nkys))
+					     (kbb (x) (when x (kb (car x) (if (cdr x) (cadr x) ,(nokv 'k)))(kbb (cddr x)))))
+					    (kbb ,lv)))))
+    (mapc 'bind (nreverse post)))
+  )
+
+(defun sdde (rv decls)
+  (mapc (lambda (decl)
+	  (mapc (lambda (clause)
+		  (case
+		   (pop clause)
+		   ((dynamic-extent :dynamic-extent)
+		    (when (member rv clause)
+		      (return-from sdde t)))))
+		(cdr decl)))
+	decls)
+  nil)
+
+(defconstant +llk+ '(&whole &optional &rest &key &allow-other-keys &aux));FIXME centralize
+;FIXME &environment, macro vs. reg
+
+(defun blla (l a last body &optional n nr f (rcr (tsym t))
+	       &aux rvd kk kev *rv* k tmp nkys post wv rv
+	       (l (subst '&rest '&body (let ((s (last l))) (if (cdr s) (append (butlast l) (list (car s) '&rest (cdr s))) l))))
+	       (lo l))
+  (declare (optimize (safety 0)))
+  (assert (not (and last n)))
+
+  (state-init n nr f a last)
+
+  (multiple-value-bind
+   (doc decls ctps body) (parse-body-header body) (declare (ignore doc))
+
+   (do ((l l)(lk +llk+))((not l))
+      (cond ((setq tmp (member (car l) lk)) (setq lk (cdr tmp) k (pop l) kk (if (eq k '&aux) kk k)))
+	    ((member (car l) +llk+) (badll lo))
+	    ((case k
+		   (&whole (when (or wv (not (eq (cdr lo) l))) (badll lo)) (setq k nil) (bind (setq wv (pop l)) (append a last)))
+		   ((nil &optional)
+		    (multiple-value-bind
+		     (ln lb ld lp) (unbnd k (pop l)) (declare (ignore lb))
+		     (when lp (bind lp t))
+		     (let ((ld (if k ld (insuf ln))))
+		       (bind ln (if lp `(progn (setq ,lp nil) ,ld) ld) t))))
+		   (&rest
+		    (when rv (badll lo))
+		    (bind (setq rv (pop l)) `(list* ,@(bind-a) ,(lvp (cons rv (setq rvd (sdde rv decls)))))))
+		   (&key
+		    (multiple-value-bind
+		     (ln lb ld lp) (unbnd k (pop l))
+		     (let* ((lpt (tsym))(lbt (tsym)))
+		       (bind lpt)(bind lbt)
+		       (push `(,(intern (string ln) 'keyword) (unless ,lpt (setq ,lbt v ,lpt t))) nkys)
+		       (push `(,lb (if ,lpt ,lbt ,ld)) post)
+		       (when lp (push `(,lp ,lpt) post)))))
+		   (&aux (bind (pop l)))))))
+
+   (let ((nap (nap)))
+     (when nap
+       (case kk
+	     ((nil &optional) (unless n (bind (setq kev +kev+) (let ((q (extra (na)))) (if (eq nap t) q `(when ,nap ,q))))))
+	     (&key
+	      (let ((aop (tsym))(aok (tsym))(lpt (tsym))(lbt (tsym)))
+		(bind aop)(bind aok)(bind lpt)(bind lbt)(bind +bk+)
+		(push `(:allow-other-keys (unless ,aop (setq ,aok v ,aop t))) nkys)
+		(push `(otherwise (unless ,lpt (setq ,lbt v ,lpt t ,+bk+ k))) nkys)
+		(push `(,(setq kev +kev+) (unless ,aok (when ,lpt ,(badk +bk+ lbt)))) post))))))
+
+   (when post (post post nkys))
+
+   `(let* ,(nreverse *rv*)
+      ,@(when rvd (when (lvp) `((declare (:dynamic-extent ,(lvp))))))
+       ,@(when post (when (or n (lvp)) `((declare (ignore ,+kbbv+)))))
+      ,@(when kev `((declare (ignore ,+kev+))))
+      ,@decls
+      ,@ctps
+      ,@body)))
 
 (defun c1funcallable-symbol-function (args &aux a)
   (let* ((info (make-info :type #tfunction))
