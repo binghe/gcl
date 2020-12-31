@@ -163,13 +163,18 @@ do { int c = 0; \
 #ifdef __i386__
 #define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->sw,((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->mxcsr))
 #define FPE_ADDR(i_,v_) make_fixnum((UC(v_)->uc_mcontext.fpregs->tag!=-1) ? UC(v_)->uc_mcontext.fpregs->ipoff : (fixnum)SF(i_)->si_addr)
+#define FPE_SET_CTXT_ADDR(c_,a_) ({void *_c=(c_);fixnum _a=fix(a_);(UC(_c)->uc_mcontext.gregs[REG_EIP]=(_a));})
+#define FPE_CLR_CTXT_CWD(c_) ({void *_c=(c_);UC(_c)->uc_mcontext.fpregs->cw|=FE_ALL_EXCEPT;UC(_c)->uc_mcontext.fpregs->mxcsr|=(FE_ALL_EXCEPT<<7);})
 #else
 #define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->swd,((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->mxcsr))
 #define FPE_ADDR(i_,v_) make_fixnum(UC(v_)->uc_mcontext.fpregs->fop ? UC(v_)->uc_mcontext.fpregs->rip : (fixnum)SF(i_)->si_addr)
+#define FPE_SET_CTXT_ADDR(c_,a_) ({void *_c=(c_);fixnum _a=fix(a_);(UC(_c)->uc_mcontext.gregs[REG_RIP]=(_a));})
+#define FPE_CLR_CTXT_CWD(c_) ({void *_c=(c_);UC(_c)->uc_mcontext.fpregs->cwd|=FE_ALL_EXCEPT;UC(_c)->uc_mcontext.fpregs->mxcsr|=(FE_ALL_EXCEPT<<7);})
 #endif
-#define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&UC(v_)->uc_mcontext.gregs),	\
-			    make_fixnum((fixnum)&UC(v_)->uc_mcontext.fpregs->_st), \
-			    make_fixnum((fixnum)&((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->_xmm))
+#define FPE_CTXT(v_)							\
+  list(3,make_fixnum((fixnum)&UC(v_)->uc_mcontext.gregs),		\
+       make_fixnum((fixnum)&UC(v_)->uc_mcontext.fpregs->_st),		\
+       make_fixnum((fixnum)&((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->_xmm))
 
 #define MC(b_) v.uc_mcontext.b_
 #define REG_LIST(a_) MMcons(make_fixnum(sizeof(a_)),make_fixnum(sizeof(*a_)))

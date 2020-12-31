@@ -94,31 +94,6 @@
 	      :reader arithmetic-error-operands))
   (:report ("~%Arithmetic error when performing ~s on ~s: " operation operands)))
 
-(macrolet
- ((make-fpe-conditions
-   (&aux (n "indoux"))
-   (labels
-    ((make-sub-fpe-conditions
-      (l &optional c)
-      (cond (l (append
-		(make-sub-fpe-conditions (cdr l) c)
-		(make-sub-fpe-conditions (cdr l) (cons (car l) c))))
-	    ((cdr c)
-	     `((,(intern
-		  (concatenate 'string "FPE-"
-			       (nstring-upcase
-				(coerce
-				 (mapcar (lambda (x) (aref n (1- (integer-length (caddr x))))) c)
-				 'string))))
-		,(mapcar 'car c)))))))
-    `(progn
-       ,@(mapcar (lambda (x) `(define-condition ,(car x) (arithmetic-error) nil)) fpe::+fe-list+)
-       ,@(mapcar (lambda (x) `(define-condition ,@x nil))
-		 (make-sub-fpe-conditions fpe::+fe-list+))))))
- (make-fpe-conditions))
-
-
-
 (define-condition case-failure (type-error)
  ((name :initarg :name
 	:reader case-failure-name)
@@ -173,3 +148,31 @@
 				,@(mapcar (lambda (x) (intern (concatenate 'string (string x) "-ERROR")))
 					  '(program control parse stream reader file
 						    package cell arithmetic pathname)))))
+
+(macrolet
+ ((make-fpe-conditions (&aux (n "indoux"))
+  (labels
+   ((fpe (st &optional (p "FPE-")) (intern (concatenate 'string p (string st))))
+    (fpess (st) (when (> (length st) 2)
+		  (let ((i -1))
+		    (mapcar (lambda (x)
+			      (fpe (concatenate 'string (subseq st 0 (incf i)) (subseq st (1+ i)))))
+			    (make-list (length st))))))
+    (make-sub-fpe-conditions (l &optional c);FIXME, all combinations not needed nor possible per IEEE
+			     (cond (l (append
+				       (make-sub-fpe-conditions (cdr l) c)
+				       (make-sub-fpe-conditions (cdr l) (cons (car l) c))))
+				   ((cdr c)
+				    (let ((st (nstring-upcase
+					       (coerce
+						(mapcar (lambda (x) (aref n (1- (integer-length (caddr x))))) c)
+						'string))))
+				      `((,(fpe st) ,(or (fpess st) (mapcar (lambda (x) (fpe (car x) "INTERNAL-SIMPLE-")) c)))))))))
+   `(progn
+      ,@(mapcar (lambda (x) `(define-condition ,(car x) (arithmetic-error) nil)) fpe::+fe-list+)
+      ,@(mapcar (lambda (x) `(define-condition ,@x nil))
+		(make-sub-fpe-conditions fpe::+fe-list+))))))
+ (make-fpe-conditions))
+
+
+

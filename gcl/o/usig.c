@@ -198,9 +198,9 @@ DEFUN("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),
 
 #if defined(__x86_64__) || defined(__i386__)
 
-#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(~((mxcsr_)>>7)&(excepts_))
+#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(((mxcsr_))&(excepts_))
 
-DEFUN("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
+DEFUN("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,IO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
 
   RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW|FE_INEXACT));
   
@@ -236,6 +236,9 @@ sigfpe3(int sig,siginfo_t *i,void *v) {
   gcl_signal(SIGFPE,sigfpe3);
 #endif
   ifuncall3(sSfloating_point_error,FPE_CODE(i,v),FPE_ADDR(i,v),FPE_CTXT(v));
+
+  FPE_SET_CTXT_ADDR(v,FPE_ADDR(i,v));
+  FPE_CLR_CTXT_CWD(v);
 
 }
 

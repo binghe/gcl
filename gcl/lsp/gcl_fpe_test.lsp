@@ -1,6 +1,6 @@
-#.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (break-on-floating-point-exceptions))))
+#.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (si::break-on-floating-point-exceptions))))
      (flet ((set-break (x) (when (keywordp r)
-			     (apply 'break-on-floating-point-exceptions (append (unless x o) (list r x))))))
+			     (apply 'si::break-on-floating-point-exceptions (append (unless x o) (list r x))))))
        (let* ((rr (handler-case (unwind-protect (progn (set-break t) (apply f a)) (set-break nil))
 				,@(mapcar (lambda (x &aux (x (car x))) `(,x (c) (setq cc c) ,(intern (symbol-name x) :keyword)))
 					  (append si::+fe-list+ '((arithmetic-error)(error)))))))
@@ -20,13 +20,13 @@
       (compile eval)
     (defmacro deft (n rt args &rest code)
       `(progn
-	 (clines ,(nstring-downcase 
+	 (si::clines ,(nstring-downcase
 		   (apply 'concatenate 'string
-			  (symbol-name rt) " " (symbol-name n) "("
+			  "static " (symbol-name rt) " " (symbol-name n) "("
 			  (apply 'concatenate 'string 
 				 (mapcon (lambda (x) (list* (symbol-name (caar x)) " " (symbol-name (cadar x)) 
 							    (when (cdr x) (list ", ")))) args)) ") " code)))
-	 (defentry ,n ,(mapcar 'car args) (,rt ,(string-downcase (symbol-name n)))))))
+	 (si::defentry ,n ,(mapcar 'car args) (static ,rt ,(string-downcase (symbol-name n)))))))
   
   (deft fdivp object ((object x) (object y))
     "{volatile double a=lf(x),b=lf(y),c;"
