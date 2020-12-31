@@ -290,7 +290,7 @@ object funcall_vec(object,ufixnum,object *);
 /* number.c:44:OF */ extern int fixnnint (object x); /* (x) object x; */
 /* number.c:81:OF */ extern object make_fixnum1 (long i); /* (i) int i; */
 /* number.c:102:OF */ extern object make_ratio (object num, object den,int); /* (num, den) object num; object den; */
-/* number.c:144:OF */ extern object make_shortfloat (double f); /* (f) double f; */
+/* number.c:144:OF */ extern object make_shortfloat (float f); /* (f) double f; */
 /* number.c:157:OF */ extern object make_longfloat (longfloat f); /* (f) longfloat f; */
 /* number.c:170:OF */ extern object make_complex (object r, object i); /* (r, i) object r; object i; */
 /* number.c:229:OF */ extern double number_to_double (object x); /* (x) object x; */

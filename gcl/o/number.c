@@ -138,7 +138,7 @@ make_ratio(object num, object den,int pre_cancelled)
 }
 
 object
-make_shortfloat(double f)
+make_shortfloat(float f)
 {
 	object x;
 

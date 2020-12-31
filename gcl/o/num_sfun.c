@@ -323,7 +323,7 @@ number_sqrt(object x)
 	object z,q;
 	int s;
 	enum type t;
-	double sqrt(double),d;
+	double d;
 	vs_mark;
 
 	if (type_of(x) == t_complex)
@@ -342,8 +342,7 @@ number_sqrt(object x)
 	  t=t_longfloat;
 	  break;
 	case t_shortfloat:
-	  d=sqrt((double)(sf(x)));
-	  q=make_shortfloat((shortfloat)d);
+	  q=make_shortfloat(sqrtf(sf(x)));
 	  break;
 	case t_longfloat:
 	  d=sqrt(lf(x));

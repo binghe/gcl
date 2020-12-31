@@ -127,13 +127,11 @@ integer_decode_double(double d, int *hp, int *lp, int *ep, int *sp)
 }
 
 static void
-integer_decode_float(double d, int *mp, int *ep, int *sp)
+integer_decode_float(float f, int *mp, int *ep, int *sp)
 {
-	float f;
 	int m;
 	union {float f;int i;} u;
 
-	f = d;
 	if (f == 0.0) {
 		*mp = 0;
 		*ep = 0;
@@ -774,7 +772,7 @@ DEFUNM("INTEGER-DECODE-FLOAT",object,fLinteger_decode_float,LISP,1,1,NONE,OO,OO,
   if (type_of(x) == t_longfloat)
     integer_decode_double(lf(x), &h, &l, &e, &s);
   else
-    integer_decode_float((double)(sf(x)), &l, &e, &s);
+    integer_decode_float(sf(x), &l, &e, &s);
   RETURN3((h || l<0) ? bignum2(h, l) : make_fixnum(l),make_fixnum(e),make_fixnum(s));
 
 }

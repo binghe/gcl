@@ -316,7 +316,7 @@ EXTER object shortfloat_zero;
 EXTER object longfloat_zero;
 object make_fixnum1(long);
 object make_ratio();
-object make_shortfloat();
+object make_shortfloat(float);
 object make_longfloat();
 object make_complex();
 double number_to_double();

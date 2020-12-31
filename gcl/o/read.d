@@ -126,7 +126,8 @@ parse_number(char *s,int radix) {
   object x,y;
   char *q,ch,c;
   int n,m;
-  double f;
+  float f;
+  double d;
 
   x=parse_integer(s,&q,radix);
 
@@ -145,21 +146,25 @@ parse_number(char *s,int radix) {
       parse_unsigned_integer(q,&q,10);
       ch=*q ? *q : 'E';
     }
+    ch=ch=='e' || ch=='E' ? READdefault_float_format : ch;
 
     if ((c=*q)) {
       if (parse_integer(q+1,NULL,10)==OBJNULL)
       	return OBJNULL;
       *q='E';
     }
-    n=sscanf(s,"%lf%n",&f,&m);
+    if (ch=='s' || ch=='S')
+      BLOCK_EXCEPTIONS(n=sscanf(s,"%f%n",&f,&m));
+    else
+      BLOCK_EXCEPTIONS(n=sscanf(s,"%lf%n",&d,&m));
     *q=c;
     if (n!=1||s[m]) return OBJNULL;
 
     switch (ch=='e' || ch=='E' ? READdefault_float_format : ch) {
     case 's':case 'S':
-      return make_shortfloat((float)f);
+      return make_shortfloat(f);
     case 'f':case 'F':case 'd':case 'D':case 'l':case 'L':
-      return make_longfloat(f);
+      return make_longfloat(d);
     default:
       return OBJNULL;
     }
