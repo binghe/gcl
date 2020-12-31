@@ -103,7 +103,7 @@ FFN(Fdefmacro)(object form)
 	}
 
 	{
-	  top[0]=fSfset_in(Cnil,top[0]);
+	  top[0]=fSfset_in(Cnil,top[0],name);/*FIXME fSfset ?*/
 	}
 	/* { */
 	/*   object x=alloc_object(t_ifun); */

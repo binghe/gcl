@@ -982,11 +982,11 @@ DEFUNM("EVAL-SRC",object,fSeval_src,SI,0,63,NONE,OO,OO,OO,OO,(object first,...),
 
 void *feval_src=(void *)FFN(fSeval_src);
 
-DEFUN("FSET-IN",object,fSfset_in,SI,2,2,NONE,OO,OO,OO,OO,(object sym,object src),"") {
+DEFUN("FSET-IN",object,fSfset_in,SI,3,3,NONE,OO,OO,OO,OO,(object sym,object src,object name),"") {
   
   object x;
 
-  x=fSinit_function(list(6,Cnil,Cnil,src,Cnil,Cnil,sym),(void *)FFN(fSeval_src),Cnil,Cnil,-1,0,(((1<<6)-1)<<6)|(((1<<5)-1)<<12)|(1<<17));
+  x=fSinit_function(list(6,Cnil,Cnil,src,Cnil,Cnil,name),(void *)FFN(fSeval_src),Cnil,Cnil,-1,0,(((1<<6)-1)<<6)|(((1<<5)-1)<<12)|(1<<17));
   x->fun.fun_env=src_env;
   if (sym!=Cnil) fSfset(sym,x);
   RETURN1(x);
@@ -994,8 +994,8 @@ DEFUN("FSET-IN",object,fSfset_in,SI,2,2,NONE,OO,OO,OO,OO,(object sym,object src)
 }
 #ifdef STATIC_FUNCTION_POINTERS
 object
-fSfset_in(object sym,object src) {
-  RETURN1(FFN(fSfset_in)(sym,src));
+fSfset_in(object sym,object src,object name) {
+  RETURN1(FFN(fSfset_in)(sym,src,object name));
 }
 #endif
 

@@ -77,7 +77,7 @@ FFN(Fdefun)(object args)
 	  vs_base[0] = MMcons(sSlambda_block_closure, vs_base[0]);
 	}
 	{/* object fname; */
-	  vs_base[0]=fSfset_in(name,vs_base[0]);
+	  vs_base[0]=fSfset_in(name,vs_base[0],name);/*FIXME ?*/
 	/* object x=alloc_object(t_ifun); */
 	/* x->ifn.ifn_self=vs_base[0]; */
 	/* x->ifn.ifn_name=name; */

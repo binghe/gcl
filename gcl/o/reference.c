@@ -196,7 +196,7 @@ FFN(Ffunction)(object form)
 		vs_base[0] = MMcons(lex_env[0], vs_base[0]);
 		vs_base[0] = MMcons(sSlambda_closure, vs_base[0]);
 		{
-		  vs_base[0]=fSfset_in(Cnil,vs_base[0]);
+		  vs_base[0]=fSfset_in(Cnil,vs_base[0],Cnil);
 		}
 		/* { */
 		/*   object x=alloc_object(t_ifun); */

@@ -236,7 +236,7 @@ is an illegal function definition in FLET.",
 		top[0] = MMcons(lex[0], top[0]);
 		top[0] = MMcons(sSlambda_block_closure, top[0]);
 		{
-		  top[0]=fSfset_in(Cnil,top[0]);
+		  top[0]=fSfset_in(Cnil,top[0],MMcar(def));
 		}
 		/* { */
 		/*   object x=alloc_object(t_ifun); */
@@ -289,7 +289,7 @@ is an illegal function definition in LABELS.",1, def);
 	  top[0] = MMcons(lex[0], top[0]);
 	  top[0] = MMcons(sSlambda_block_closure, top[0]);
 	  {
-	    top[0]=fSfset_in(Cnil,top[0]);
+	    top[0]=fSfset_in(Cnil,top[0],MMcar(def));
 	  }
 	  /* { */
 	  /*   object x=alloc_object(t_ifun); */
@@ -335,14 +335,14 @@ FFN(Fmacrolet)(object args)
 		if (endp(def) || endp(MMcdr(def)) ||
 		    type_of(MMcar(def)) != t_symbol)
 			FEerror("~S~%\
-is an illegal macro definition in MACROFLET.",
+is an illegal macro definition in MACROLET.",
 				1, def);
 		top[0] = ifuncall3(sSdefmacro_lambda,
 				   MMcar(def),
 				   MMcadr(def),
 				   MMcddr(def));
 		{
-		  top[0]=fSfset_in(Cnil,top[0]);
+		  top[0]=fSfset_in(Cnil,top[0],MMcar(def));
 		}
 		/* { */
 		/*   object x=alloc_object(t_ifun); */
