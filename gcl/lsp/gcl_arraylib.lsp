@@ -210,9 +210,8 @@
 (defun array-displacement (x)
   (declare (optimize (safety 1)))
   (check-type x array)
-  (typecase
-   x
-   (adjustable-array (let ((x (car (c-adjarray-displaced x)))) (values (car x) (cdr x))))))
+  (let ((x (typecase x (adjustable-array (car (c-adjarray-displaced x))))))
+    (values (car x) (or (cdr x) 0))))
 
 
 ;; (defun array-dimension (x i)
