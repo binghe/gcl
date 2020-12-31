@@ -127,7 +127,7 @@
 			 (find-symbol (concatenate 'string "INTERNAL-" (string datum)) :conditions))
 			((condition-class-p datum)
 			 (find-symbol (concatenate 'string "INTERNAL-SIMPLE-" (string datum)) :conditions)))))
-    (coerce-to-condition (or internal datum) (if internal (list* :function-name *sig-fn-name* args) args) default-type 'process-error)))
+    (coerce-to-condition (or internal datum) (if internal (append args (list :function-name *sig-fn-name*)) args) default-type 'process-error)))
 
 (defun universal-error-handler (n cp fn cs es &rest args &aux (*sig-fn-name* fn))
   (declare (ignore es))
