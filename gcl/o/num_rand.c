@@ -67,7 +67,7 @@ rando(object x, object rs) {
     d=mpz_get_d(MP(out));
     d/=(double)fbase;
     z=alloc_object(tx);
-    if (tx==t_shortfloat) sf(z)=sf(x)*d; else lf(z)=lf(x)*d;
+    BLOCK_EXCEPTIONS(if (tx==t_shortfloat) sf(z)=sf(x)*d; else lf(z)=lf(x)*d);
     return z;
   default:
     FEerror("~S is not an integer nor a floating-point number.", 1, x);

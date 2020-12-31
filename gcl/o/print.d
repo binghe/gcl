@@ -351,7 +351,10 @@ char_inc(char *b,char *p) {
 
 }
 
-#define COMP(a_,b_,c_,d_) ((d_) ? strtod((a_),(b_))==(c_) : strtof((a_),(b_))==(float)(c_))
+#define COMP(a_,b_,c_,d_)						\
+  ({fixnum _r;								\
+    BLOCK_EXCEPTIONS(_r=((d_) ? strtod((a_),(b_))==(c_) : strtof((a_),(b_))==(float)(c_))); \
+    _r;})
 
 static int
 truncate_double(char *b,double d,int dp) {

@@ -1,5 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+#include <fenv.h>
+#include <errno.h>
+#include <signal.h>
 
 
 #define	CHAR_CODE_LIMIT	256	
@@ -279,7 +282,6 @@ char FN1[PATH_MAX],FN2[PATH_MAX],FN3[PATH_MAX],FN4[PATH_MAX],FN5[PATH_MAX];
 
 #define coerce_to_filename(a_,b_) coerce_to_filename1(a_,b_,sizeof(b_))
 
-#include <errno.h>
 #define massert(a_) ({errno=0;if (!(a_)||errno) assert_error(#a_,__LINE__,__FILE__,__FUNCTION__);})
 
 extern bool writable_malloc;
@@ -318,8 +320,6 @@ extern bool writable_malloc;
 #define Mcddddr(x)	(x)->c.c_cdr->c.c_cdr->c.c_cdr->c.c_cdr
 
 #include "prelink.h"
-
-#include <signal.h>
 
 #define prof_block(x) ({\
       sigset_t prof,old;						\
@@ -360,3 +360,9 @@ extern bool writable_malloc;
   ({string_register->st.st_self=(a_);					\
     string_register->st.st_dim=strlen(string_register->st.st_self);	\
     string_register;})
+
+#define BLOCK_EXCEPTIONS(a_) \
+  ({fenv_t env;		     \
+  feholdexcept(&env);	     \
+  a_;			     \
+  fesetenv(&env);})

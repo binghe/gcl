@@ -634,11 +634,11 @@ DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,4,4,NONE,OO,OO,OO,OO
     if (max_ent<0 || max_ent>fix(size)) err=1;
     break;
   case t_shortfloat:
-    max_ent=nearbyint(sf(rehash_threshold)*fix(size)+0.5);
+    BLOCK_EXCEPTIONS(max_ent=sf(rehash_threshold)*fix(size)+0.5);
     if (sf(rehash_threshold)<0.0 || sf(rehash_threshold)>1.0) err=1;
     break;
   case t_longfloat:
-    max_ent=nearbyint(lf(rehash_threshold)*fix(size)+0.5);
+    BLOCK_EXCEPTIONS(max_ent=lf(rehash_threshold)*fix(size)+0.5);
     if (lf(rehash_threshold)<0.0 || lf(rehash_threshold)>1.0) err=1;
     break;
   case t_ratio:
