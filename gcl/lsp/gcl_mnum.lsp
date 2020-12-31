@@ -64,14 +64,23 @@
 (defdlfun (:float    "cargf"     ) :fcomplex)
 (defdlfun (:double    "carg"     ) :dcomplex)
 
+(defun bsqrt (x);this is an instruction, or a jump to main body
+  (declare (long-float x))
+  (lit :double "sqrt(" (:double x) ")"))
+(setf (get 'bsqrt 'compiler::cmp-inline) t)
+
+(defun bsqrtf (x);this is an instruction, or a jump to main body
+  (declare (short-float x))
+  (lit :float "sqrtf(" (:float x) ")"))
+(setf (get 'bsqrtf 'compiler::cmp-inline) t)
 
 (eval-when 
  (compile eval)
  
 
- (defmacro defmfun (x &optional n protect-real)
-   (let* ((b (mdlsym x))
-	  (f (mdlsym (string-concatenate x "f")))
+ (defmacro defmfun (x &optional n protect-real sqrtp)
+   (let* ((b (if sqrtp 'bsqrt (mdlsym x)))
+	  (f (if sqrtp 'bsqrtf (mdlsym (string-concatenate x "f"))))
 	  (c (mdlsym (string-concatenate "c" x)))
 	  (cf (mdlsym (string-concatenate "c" x "f")))
 	  (ts (intern (string-upcase x)))
@@ -79,7 +88,7 @@
 	  (body `(typecase x
 		   (long-float  (,b x))
 		   (short-float (,f x))
-;                  (fixnum      (,b (float x 0.0)))
+                   ,@(when sqrtp `((integer (float (isqrt x) 0.0))))
 		   (rational    (,b (float x 0.0)))
 		   (dcomplex    (,c x))
 		   (fcomplex    (,cf x))
@@ -221,7 +230,7 @@
 (defmfun "atanh" atanh (and (>= x -1) (<= x 1)))
 (defmfun "acos"  acos (and (>= x -1) (<= x 1)))
 (defmfun "asin"  asin (and (>= x -1) (<= x 1)))
-(defmfun "sqrt"  sqrt (>= x 0))
+(defmfun "sqrt"  sqrt (>= x 0) t)
 )
 
 #-c99
