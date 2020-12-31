@@ -245,6 +245,7 @@
   (let* ((*inline-blocks* 0)
 	 (types (mapcar (lambda (x) (let ((x (coerce-to-one-value (info-type (cadr x))))) (if (type>= #tboolean x) t x))) forms))
 	 (i -1)
+	 ;FIXME all of this unnecessary, just avoid valp[i]=base[0]
 	 (r (mapcar (lambda (x y &aux (x (when x (write-to-string (incf i))))) (strcat (rep-type y) " _t" x "=#" x ";")) (or forms (list (c1nil))) (or types (list #tnull))))
 	 (i 0)
 	 (s (mapcar (lambda (x &aux (x (when x (write-to-string (incf i))))) (strcat "@" x "(_t" x ")@")) (cdr forms)))
