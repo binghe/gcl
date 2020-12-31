@@ -128,29 +128,21 @@ DEFUN("GET-UNIVERSAL-TIME",object,fLget_universal_time,LISP
 	RETURN1(unix_time_to_universal_time(time(0)));
 }
 
-LFD(Lsleep)(void)
-{
-	object z;
-	
-	check_arg(1);
-	check_type_or_rational_float(&vs_base[0]);
-	if (number_minusp(vs_base[0]) == TRUE)
-		FEerror("~S is not a non-negative number.", 1, vs_base[0]);
-	vs_base[0]=number_times(vs_base[0],make_fixnum(1000000));
-	Lround();
-	z = vs_base[0];
-	if (type_of(z) == t_fixnum)
-		usleep(fix(z));
-	else
-            /* What is this for? -- MJT */
-		for(;;)
-#ifdef __MINGW32__
-			Sleep ( 10000 );
-#else                    
-			sleep(1000);
-#endif        
-	vs_top = vs_base;
-	vs_push(Cnil);
+LFD(Lsleep)(void) {
+
+  useconds_t um=-1,ul=um/1000000;
+  double d;
+
+  check_arg(1);
+  check_type_or_rational_float(&vs_base[0]);
+  if (number_minusp(vs_base[0]) == TRUE)
+    FEerror("~S is not a non-negative number.", 1, vs_base[0]);
+  d=number_to_double(vs_base[0]);
+  d=d<1 ? 0 : d;
+  usleep(d>ul ? um : d*1000000);
+  vs_top = vs_base;
+  vs_push(Cnil);
+
 }
 
 DEFUNM("GET-INTERNAL-RUN-TIMES",object,fSget_internal_run_times,SI,0,0,NONE,OO,OO,OO,OO,(),"") {
