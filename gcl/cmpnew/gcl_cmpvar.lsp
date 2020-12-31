@@ -742,13 +742,21 @@
     (when c1fv (add-info info (cadr c1fv)))
     (list 'setq info name1 form1 c1fv)))
 
+
+(defun untrimmed-var-p (v)
+  (or (eq t (var-ref v)) (consp (var-ref v)) (var-cb v) (member (var-kind v) '(special global))))
+
+
 (defun c2setq (vref form c1fv &aux (v (car vref)))
   (declare (ignore c1fv))
-  (cond ((or (eq t (var-ref v)) (consp (var-ref v)) (var-cb v) (member (var-kind v) '(special global)));FIXME
-	 (push 'var vref)
-	 (let* ((loc `(cvar ,(cs-push t))))
-	   (let ((*value-to-go* loc)) (c2expr* form))
-	   (let ((*value-to-go* vref)) (set-loc loc)))
+  (cond ((untrimmed-var-p v)
+	 (let ((*value-to-go* (push 'var vref)))
+	   (cond
+	    ((member (var-kind v) '(special global));FIXME
+	     (let ((loc `(cvar ,(cs-push (var-type v)))))
+	       (let ((*value-to-go* loc)) (c2expr* form))
+	       (set-loc loc)))
+	    ((c2expr* form))))
 	 (case (car form)
 	       (LOCATION (c2location (caddr form)))
 	       (otherwise (unwind-exit vref))))
