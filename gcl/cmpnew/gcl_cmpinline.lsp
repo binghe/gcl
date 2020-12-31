@@ -932,6 +932,11 @@
 	(when (and (type>= #tcnum pr) (type>= tp ref)) ref))
     tp))
 
+(defun mv-cast (arg-type type);FIXME
+  (cond ((single-type-p type) arg-type)
+	((single-type-p arg-type) (list* (car type) (coerce-to-one-value arg-type) (make-list (length (cddr type)))))
+	((append arg-type (make-list (max 0 (- (length type) (length arg-type))))))))
+
 (defun inline-type-matches (fname inline-info arg-types return-type &optional apnarg
                                         &aux rts (flags (third inline-info)))
   (declare (ignore fname))
@@ -951,7 +956,7 @@
 	      (let* ((s (unless ret (and (eq (car t2) '*) (not (cdr t2)))))
 		     (lst (if (unless (type<= last #topaque) s) #tt last));FIXME (cmp-norm-tp 'opaque)
 		     (type (if s lst (pop t2)))
-		     (arg-type (if ret arg-type (coerce-to-one-value arg-type)))
+		     (arg-type (if ret (mv-cast arg-type type) (coerce-to-one-value arg-type)));FIXME
 		     (tp (adj-cnum-tp type arg-type)))
 		(unless (type>= tp arg-type) (return nil))
 		(setq last type ret nil)
