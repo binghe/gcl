@@ -348,6 +348,8 @@
 
 
 (defun adjustable-array-p (array)
+  (declare (optimize (safety 1)))
+  (check-type array array)
   (typep array 'adjustable-array))
 
 (defun adjust-array (array new-dimensions
