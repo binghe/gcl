@@ -36,7 +36,7 @@ DEFUN("SET-FUNCTION-ENVIRONMENT",object,fSset_function_environment,SI,2,2,NONE,O
 #define PADDR(i) ((void *)(((fixnum *)sSPinit->s.s_dbind->a.a_self)[Mfix(i)]))
 
 #define POP_BITS(x_,y_) ({ufixnum _t=x_&((1<<y_)-1);x_>>=y_;_t;})
-object
+static object
 make_fun(void *addr,object data,object call,object env,ufixnum argd,ufixnum sizes) {
   
   object x;
