@@ -30,16 +30,12 @@
 (defun isqrt (i)
   (declare (optimize (safety 1)))
   (check-type i (integer 0))
-  (if (zerop i)
-      0
-    (let ((n (integer-length i)))
-      (do ((x (ash 1 (ceiling n 2)))
-	   (y))
-	  (nil)
-	(setq y (floor i x))
-	(when (<= x y)
-	  (return x))
-	(setq x (floor (+ x y) 2))))))
+  (typecase
+   i
+   (fixnum (do* ((y 0 (floor i x))
+		 (x (ash 1 (ceiling (integer-length i) 2)) (+ (ash x -1) (ash y -1) (logand x y 1))))
+		((<= x y) x)))
+   (otherwise (mpz_sqrt i))))
 
 (deftype bytespec nil `(cons (integer 0) (integer 0)))
 
