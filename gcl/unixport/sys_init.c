@@ -131,13 +131,13 @@ gcl_init_system(object no_init)
   check_init(cmpnew,gcl_cmpenv,no_init);
   check_init(cmpnew,gcl_cmpflet,no_init);
   check_init(cmpnew,gcl_cmpfun,no_init);
+  check_init(cmpnew,gcl_cmptag,no_init);
   check_init(cmpnew,gcl_cmpif,no_init);
   check_init(cmpnew,gcl_cmplabel,no_init);
   check_init(cmpnew,gcl_cmploc,no_init);
   check_init(cmpnew,gcl_cmpmap,no_init);
   check_init(cmpnew,gcl_cmpmulti,no_init);
   check_init(cmpnew,gcl_cmpspecial,no_init);
-  check_init(cmpnew,gcl_cmptag,no_init);
   check_init(cmpnew,gcl_cmplam,no_init);
   check_init(cmpnew,gcl_cmplet,no_init);
   check_init(cmpnew,gcl_cmpvs,no_init);
