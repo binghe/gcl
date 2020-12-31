@@ -59,18 +59,17 @@
   ;; Replace undefaultized optional parameter X by (X '*).
   (declare (optimize (safety 2)))
   (multiple-value-bind
-	(doc decls ctps body)
-      (parse-body-header body)
-      `(progn
-	 (eval-when (compile eval load)
-		    (putprop ',name '(deftype ,name ,lambda-list ,@body) 'deftype-form)
-		    (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
-		    (putprop ',name ',fun-name 'deftype-definition)
-		    (maybe-clear-tp ',name)
-		    (putprop ',name ,doc 'type-documentation)
-		    ',name)
-	 ,@(when (no-reg-vars-p lambda-list)
-	     `((define-simple-typep-fn ,name))))))
+   (doc decls ctps body) (parse-body-header body)
+   `(progn
+	(eval-when (compile eval load)
+		   (putprop ',name '(deftype ,name ,lambda-list ,@body) 'deftype-form)
+		   (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
+		   (putprop ',name ',fun-name 'deftype-definition)
+		   (maybe-clear-tp ',name)
+		   (putprop ',name ,doc 'type-documentation))
+	,@(when (no-reg-vars-p lambda-list)
+	    `((define-simple-typep-fn ,name)))
+	',name)))
 
 ;;; Some DEFTYPE definitions.
 
