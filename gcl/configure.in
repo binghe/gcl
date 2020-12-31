@@ -728,7 +728,7 @@ if test "$enable_debug" = "yes" ; then
 	# for subconfigurations
 	CFLAGS="$CFLAGS -g"
 else
-	TOSFLAGS="-Os $TFPFLAG"
+	TOSFLAGS="-O2" # "-Os $TFPFLAG"
 	TO3FLAGS="-O3 $TFPFLAG"
 	TO2FLAGS="-O"
 	case $use in
