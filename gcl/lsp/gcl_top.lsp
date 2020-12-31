@@ -390,8 +390,8 @@
           (= i *current-ihs*)
           i
           (let ((fun (ihs-fun i)))
-            (cond ((or (symbolp fun) (compiled-function-p fun)) fun)
-;		  ((when (interpreted-function-p fun) (setq fun (interpreted-function-lambda fun)) nil))
+            (cond ((symbolp fun) fun)
+		  ((functionp fun) (fun-name fun))
                   ((consp fun)
                    (case (car fun)
                      (lambda fun)
@@ -447,13 +447,7 @@
 (defun ihs-fname (ihs-index)
   (let ((fun (ihs-fun ihs-index)))
     (cond ((symbolp fun) fun)
-	  ((when (compiled-function-p fun) (compiled-function-name fun)));FIXME
 	  ((functionp fun) (fun-name fun));(name fun)
-	   ;; (multiple-value-bind ;FIXME faster
-	   ;;  (x y fun) 
-	   ;;  (function-lambda-expression fun)
-	   ;;  (declare (ignore x y))
-	   ;;  fun))
           ((consp fun)
            (case (car fun)
              (lambda 'lambda)

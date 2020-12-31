@@ -63,10 +63,8 @@
      for ihs downfrom (ihs-top) above 2
      for fun = (ihs-fun ihs) with name
      do 
-     (cond ((compiled-function-p fun)
-	    (setq name (compiled-function-name fun)))
+     (cond ((functionp fun) (setq name (fun-name fun)))
 	   ((symbolp fun ) (setq name fun))
-;	   ((when (interpreted-function-p fun) (setq fun (interpreted-function-lambda fun)) nil))
 	   ((and (listp fun)
 		 (member (car fun) '(lambda lambda-block)))
 	    (setq name (second fun)))
@@ -93,9 +91,7 @@
 		 (break-locals) (terpri)(terpri)
 		 )))
 	(t
-	 (cond ((compiled-function-p fun)
-		(setq name (compiled-function-name fun)))
-;	       ((when (interpreted-function-p fun) (setq fun (interpreted-function-lambda fun)) nil))
+	 (cond ((functionp fun) (setq name (fun-name fun)))
 	       (t (setq name fun)))
          (if (symbolp name)(setq args (get name 'debugger)))
 	 (let ((next (ihs-vs (f + 1 *current-ihs*))))
