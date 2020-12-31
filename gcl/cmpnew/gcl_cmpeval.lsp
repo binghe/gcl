@@ -1290,7 +1290,7 @@
 ;; (defun mod-env (ce e l);FIXME
 ;;   (if ce e l))
 
-(defun mod-env (ce e l)
+(defun mod-env (e l)
   (setq *lexical-env-mask* (nconc (remove-if (lambda (x) (or (symbolp x) (is-fun-var x))) (ldiff l e)) *lexical-env-mask*))
   l)
 
@@ -1316,10 +1316,10 @@
 (defmacro under-env (env &rest forms &aux (e (tmpsym)))
   `(let* ((,e ,env)
 	  (*lexical-env-mask* (pop ,e))
-	  (*vars*   (mod-env ,e (pop ,e) *vars*))
-	  (*blocks* (mod-env ,e (pop ,e) *blocks*))
-	  (*tags*   (mod-env ,e (pop ,e) *tags*))
-	  (*funs*   (mod-env ,e (pop ,e) *funs*)))
+	  (*vars*   (mod-env (pop ,e) *vars*))
+	  (*blocks* (mod-env (pop ,e) *blocks*))
+	  (*tags*   (mod-env (pop ,e) *tags*))
+	  (*funs*   (mod-env (pop ,e) *funs*)))
      ,@forms))
 
 ;; (defmacro under-env (env &rest forms &aux (e (tmpsym)))
