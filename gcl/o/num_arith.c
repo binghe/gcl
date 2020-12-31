@@ -275,7 +275,7 @@ number_plus(object x, object y)
 		}
 	SHORTFLOAT:
 		z = alloc_object(t_shortfloat);
-		sf(z) = (shortfloat)(dx + dy);
+		sf(z) = (shortfloat)(dx + dy);/*FPE*/
 		return(z);
 
 	case t_longfloat:
@@ -463,7 +463,7 @@ number_minus(object x, object y)
 		}
 	SHORTFLOAT:
 		z = alloc_object(t_shortfloat);
-		sf(z) = (shortfloat)(dx - dy);
+		sf(z) = (shortfloat)(dx - dy);/*FPE*/
 		return(z);
 
 	case t_longfloat:
@@ -683,7 +683,7 @@ number_times(object x, object y)
 		}
 	SHORTFLOAT:
 		z = alloc_object(t_shortfloat);
-		sf(z) = (shortfloat)(dx * dy);
+		sf(z) = (shortfloat)(dx * dy);/*FPE*/
 		/* if (number_zerop(z) && dx && dy) FLOATING_POINT_UNDERFLOW(sLA,list(2,x,y)); */
 		/* if (!ISFINITE(sf(z)) && ISFINITE(dx) && ISFINITE(dy)) FLOATING_POINT_OVERFLOW(sLA,list(2,x,y)); */
 		return(z);
@@ -707,7 +707,7 @@ number_times(object x, object y)
 		}
 	LONGFLOAT:
 		z = alloc_object(t_longfloat);
-		lf(z) = dx * dy;
+		lf(z) = dx * dy;/*FPE*/
 		/* if (number_zerop(z) && dx && dy) FLOATING_POINT_UNDERFLOW(sLA,list(2,x,y)); */
 		/* if (!ISFINITE(lf(z)) && ISFINITE(dx) && ISFINITE(dy)) FLOATING_POINT_OVERFLOW(sLA,list(2, x,y));*/
 		return(z);
@@ -821,7 +821,7 @@ number_divide(object x, object y)
 	SHORTFLOAT:
 		z = alloc_object(t_shortfloat);
 		/* if (dy == 0.0) DIVISION_BY_ZERO(sLD,list(2,x,y)); */
-		sf(z) = (shortfloat)(dx / dy);
+		sf(z) = (shortfloat)(dx / dy);/*FPE ?*/
 		return(z);
 
 
