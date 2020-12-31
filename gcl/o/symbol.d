@@ -467,7 +467,7 @@ DEFUN("MAKE-SYMBOL",object,fLmake_symbol,LISP,1,1,NONE,OO,OO,OO,OO,(object name)
 @(defun copy_symbol (sym &optional cp &aux x)
 @
 	check_type_sym(&sym);
-	x = make_symbol(sym);
+	x = make_symbol(sym->s.s_name);
 	if (cp == Cnil)
 		@(return x)
 	x->s.s_stype = sym->s.s_stype;
