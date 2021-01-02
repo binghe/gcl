@@ -159,8 +159,8 @@
 
 (defmacro defmacro (name vl &rest body)
   (declare (optimize (safety 2)))
-  `(progn
-     (setf (macro-function ',name) ,(defmacro-lambda name vl body))
+  `(let ((.fn. ,(defmacro-lambda name vl body)))
+     (setf (macro-function ',name) .fn.)
      ',name))
 
 (defmacro define-symbol-macro (sym exp) 

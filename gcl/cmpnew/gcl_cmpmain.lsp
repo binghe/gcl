@@ -433,7 +433,8 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
       (multiple-value-bind
        (lam clo) 
        (function-lambda-expression fun)
-       (let ((form `(,(if mac 'defmacro 'defun) ,na ,(cadr lam) ,@(cddr lam))));(if mac (cons 'macro na) na)
+       (assert (not (when mac clo)));FIXME?
+       (let ((form `(,(if mac 'defmacro 'defun) ,(if mac (cons 'macro na) na) ,(cadr lam) ,@(cddr lam))));na (if mac (cons 'macro na) na)
 	 (values
 	  (if clo
 	      `(let* (,@(nreverse
