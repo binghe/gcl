@@ -91,11 +91,9 @@
 	      (lc (when (eq k '&key) (consp ln))) (lnn (if lc (pop ln) ln)) (lb (if lc (car ln) ln)))
 	   (values lnn lb ld lp))
 
-(mapc '*make-special '( +kev+ *rv*));+np+ +lvpv+  +negp+ +ff+ +bk+ +kbbv+  +llk+
-
-(setq +kev+ (gensym "KE"))
+(*make-special '*rv*)
+(*make-constant '+kev+ (gensym "KE"))
 (setq *rv* nil)
-
 
 (let ((vp (gensym "VP"))(val (gensym "VAL")))
   (defun rpop (rv lv np negp &aux )
