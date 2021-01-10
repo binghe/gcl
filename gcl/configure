@@ -3974,7 +3974,7 @@ $as_echo "removing $1 from LDFLAGS" >&6; }
 
 }
 
-add_args_to_cflags -fsigned-char -pipe -fcommon \
+add_args_to_cflags  -fsigned-char -pipe -fcommon \
                     -fno-builtin-malloc -fno-builtin-free \
                     -fno-PIE -fno-pie -fno-PIC -fno-pic \
 	            -Wall \
@@ -4036,6 +4036,8 @@ case $use in
 	assert_arg_to_cflags -mms-bitfields
         assert_arg_to_ldflags -Wl,--stack,8000000;;
     386-macosx)
+	assert_arg_to_cflags -Wno-error=implicit-function-declaration
+	assert_arg_to_cflags -Wno-incomplete-setjmp-declaration
 	assert_arg_to_ldflags -Wl,-no_pie
 	if test "$build_cpu" = "x86_64" ; then
 	    assert_arg_to_cflags -m64
@@ -6191,6 +6193,7 @@ else
 /* end confdefs.h.  */
 
 		#include <stdio.h>
+		#include <stdlib.h>
 		#define EXTER
 		#define INLINE
 		#include "$MP_INCLUDE"
@@ -6319,6 +6322,7 @@ else
 /* end confdefs.h.  */
 
 		#include <stdio.h>
+		#include <stdlib.h>
 		#define EXTER
 		#define INLINE
 		#include "$MP_INCLUDE"

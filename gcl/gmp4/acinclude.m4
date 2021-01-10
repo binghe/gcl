@@ -610,10 +610,11 @@ GMP_PROG_CC_WORKS_PART([$1], [long long reliability test 1],
 #if defined (__GNUC__) && ! defined (__cplusplus)
 typedef unsigned long long t1;typedef t1*t2;
 static __inline__ t1 e(t2 rp,t2 up,int n,t1 v0)
-{t1 c,x,r;int i;if(v0){c=1;for(i=1;i<n;i++){x=up[i];r=x+1;rp[i]=r;}}return c;}
-f(){static const struct{t1 n;t1 src[9];t1 want[9];}d[]={{1,{0},{1}},};t1 got[9];int i;
-for(i=0;i<1;i++){if(e(got,got,9,d[i].n)==0)h();g(i,d[i].src,d[i].n,got,d[i].want,9);if(d[i].n)h();}}
-h(){}g(){}
+{t1 c=0,x,r;int i;if(v0){c=1;for(i=1;i<n;i++){x=up[i];r=x+1;rp[i]=r;}}return c;}
+int h(){return 0;}
+int g(){return 0;}
+int f(){static const struct{t1 n;t1 src[9];t1 want[9];}d[]={{1,{0},{1}},};t1 got[9];int i;
+        for(i=0;i<1;i++){if(e(got,got,9,d[i].n)==0)h();g(i,d[i].src,d[i].n,got,d[i].want,9);if(d[i].n)h();} return 0;}
 #else
 int dummy;
 #endif
@@ -625,8 +626,8 @@ GMP_PROG_CC_WORKS_PART([$1], [long long reliability test 2],
    1666 to get an ICE with -O1 -mpowerpc64.  */
 
 #if defined (__GNUC__) && ! defined (__cplusplus)
-f(int u){int i;long long x;x=u?~0:0;if(x)for(i=0;i<9;i++);x&=g();if(x)g();}
-g(){}
+int g(){return 0;}
+int f(int u){int i;long long x;x=u?~0:0;if(x)for(i=0;i<9;i++);x&=g();if(x)g();return 0;}
 #else
 int dummy;
 #endif
@@ -3812,6 +3813,7 @@ AC_DEFUN([GMP_PROG_CC_FOR_BUILD_WORKS],
 # remove anything that might look like compiler output to our "||" expression
 rm -f conftest* a.out b.out a.exe a_out.exe
 cat >conftest.c <<EOF
+#include <stdlib.h>
 int
 main ()
 {
@@ -3886,6 +3888,7 @@ AC_DEFUN([GMP_PROG_EXEEXT_FOR_BUILD],
 AC_CACHE_CHECK([for build system executable suffix],
                gmp_cv_prog_exeext_for_build,
 [cat >conftest.c <<EOF
+#include <stdlib.h>
 int
 main ()
 {
@@ -3922,6 +3925,7 @@ AC_DEFUN([GMP_C_FOR_BUILD_ANSI],
 AC_CACHE_CHECK([whether build system compiler is ANSI],
                gmp_cv_c_for_build_ansi,
 [cat >conftest.c <<EOF
+#include <stdlib.h>
 int
 main (int argc, char **argv)
 {
@@ -3956,6 +3960,7 @@ AC_DEFUN([GMP_CHECK_LIBM_FOR_BUILD],
 AC_CACHE_CHECK([for build system compiler math library],
                gmp_cv_check_libm_for_build,
 [cat >conftest.c <<EOF
+#include <stdlib.h>
 int
 main ()
 {

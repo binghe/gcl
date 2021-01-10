@@ -28,6 +28,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 static void
 init_main(void);

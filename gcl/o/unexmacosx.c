@@ -560,7 +560,7 @@ copy_data_segment (struct load_command *lc)
       sc.fileoff = curr_file_offset;
       sc.filesize = core_end-mach_mapstart;
       sc.maxprot = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXECUTE;
-      sc.initprot = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXECUTE;
+      sc.initprot = VM_PROT_READ | VM_PROT_WRITE /* | VM_PROT_EXECUTE */;
       sc.nsects = 0;
       sc.flags = 0;
 
