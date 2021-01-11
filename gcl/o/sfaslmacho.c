@@ -31,7 +31,7 @@
       (_fl<=S_SYMBOL_STUBS || _fl==S_16BYTE_LITERALS) && _fl!=S_ZEROFILL;})
 
 
-#define MASK(n) (~(~0L << (n)))
+#define MASK(n) (~(~0ULL << (n)))
 
 
 

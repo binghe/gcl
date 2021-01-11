@@ -4036,8 +4036,8 @@ case $use in
 	assert_arg_to_cflags -mms-bitfields
         assert_arg_to_ldflags -Wl,--stack,8000000;;
     386-macosx)
-	assert_arg_to_cflags -Wno-error=implicit-function-declaration
-	assert_arg_to_cflags -Wno-incomplete-setjmp-declaration
+#	assert_arg_to_cflags -Wno-error=implicit-function-declaration
+	add_arg_to_cflags -Wno-incomplete-setjmp-declaration
 	assert_arg_to_ldflags -Wl,-no_pie
 	if test "$build_cpu" = "x86_64" ; then
 	    assert_arg_to_cflags -m64
@@ -4248,10 +4248,6 @@ fi
 # for the system.  This can usually be done via the "uname" command, but
 # there are a few systems, like Next, where this doesn't work.
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking system version (for dynamic loading)" >&5
-$as_echo_n "checking system version (for dynamic loading)... " >&6; }
-if machine=`uname -m` ; then true; else machine=unknown ; fi
-
 for ac_prog in makeinfo
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -4296,6 +4292,10 @@ done
 test -n "$MAKEINFO" || MAKEINFO=""false""
 
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking system version (for dynamic loading)" >&5
+$as_echo_n "checking system version (for dynamic loading)... " >&6; }
+if machine=`uname -m` ; then true; else machine=unknown ; fi
 
 if test -f /usr/lib/NextStep/software_version; then
     system=NEXTSTEP-`${AWK} '/3/,/3/' /usr/lib/NextStep/software_version`

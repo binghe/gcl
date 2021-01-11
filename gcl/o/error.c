@@ -146,7 +146,7 @@ Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) {
     b[i]= va_arg(ap,object);
   va_end(ap);
 
-  return IapplyVector(sSuniversal_error_handler,n,b);
+  IapplyVector(sSuniversal_error_handler,n,b);
 
 }
 

@@ -294,8 +294,8 @@ case $use in
 	assert_arg_to_cflags -mms-bitfields
         assert_arg_to_ldflags -Wl,--stack,8000000;;
     386-macosx)
-	assert_arg_to_cflags -Wno-error=implicit-function-declaration
-	assert_arg_to_cflags -Wno-incomplete-setjmp-declaration
+#	assert_arg_to_cflags -Wno-error=implicit-function-declaration
+	add_arg_to_cflags -Wno-incomplete-setjmp-declaration
 	assert_arg_to_ldflags -Wl,-no_pie
 	if test "$build_cpu" = "x86_64" ; then
 	    assert_arg_to_cflags -m64
@@ -455,11 +455,11 @@ fi
 # for the system.  This can usually be done via the "uname" command, but
 # there are a few systems, like Next, where this doesn't work.
 
-AC_MSG_CHECKING([system version (for dynamic loading)])
-if machine=`uname -m` ; then true; else machine=unknown ; fi
-
 AC_CHECK_PROGS(MAKEINFO,makeinfo,"false")
 AC_SUBST(MAKEINFO)
+
+AC_MSG_CHECKING([system version (for dynamic loading)])
+if machine=`uname -m` ; then true; else machine=unknown ; fi
 
 if test -f /usr/lib/NextStep/software_version; then
     system=NEXTSTEP-`${AWK} '/3/,/3/' /usr/lib/NextStep/software_version`

@@ -460,6 +460,8 @@ DEFUN_NEW("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,
   RETURN1((object)(w-stack_to_be_allocated));
 }
 
+#if !defined(DARWIN)&&!defined(__MINGW32__)
+
 static int
 mbin(const char *s,char *o) {
 
@@ -495,7 +497,7 @@ which(const char *n,char *o) {
 
 }
 
-
+#endif
 
 int
 main(int argc, char **argv, char **envp) {
