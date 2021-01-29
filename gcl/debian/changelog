@@ -1,3 +1,822 @@
+gcl (2.6.12-101) unstable; urgency=medium
+
+  * Version_2.6.13pre98
+
+ -- Camm Maguire <camm@debian.org>  Sun, 17 Jan 2021 16:25:34 +0000
+
+gcl (2.6.12-100) unstable; urgency=medium
+
+  * Version_2.6.13pre97
+
+ -- Camm Maguire <camm@debian.org>  Fri, 04 Dec 2020 14:51:41 +0000
+
+gcl (2.6.12-99) unstable; urgency=medium
+
+  * Version_2.6.13pre95
+
+ -- Camm Maguire <camm@debian.org>  Sat, 28 Nov 2020 15:50:42 +0000
+
+gcl (2.6.12-98) unstable; urgency=medium
+
+  * Version_2.6.13pre94
+
+ -- Camm Maguire <camm@debian.org>  Tue, 29 Sep 2020 18:29:10 +0000
+
+gcl (2.6.12-97) unstable; urgency=medium
+
+  * Bug fix: "Removal of obsolete debhelper compat 5 and 6 in bookworm",
+    thanks to Niels Thykier (Closes: #965543).
+  * Version_2.6.13pre93
+
+ -- Camm Maguire <camm@debian.org>  Sat, 29 Aug 2020 16:23:07 +0000
+
+gcl (2.6.12-96) unstable; urgency=high
+
+  * Version_2.6.13pre92: Work around armhf strip bug producing undefined
+    instruction in .plt
+
+ -- Camm Maguire <camm@debian.org>  Sun, 23 Aug 2020 17:53:14 +0000
+
+gcl (2.6.12-95) unstable; urgency=high
+
+  * Version_2_6_13pre90
+  * build under GCL_MEM_MULTIPLE=0.1
+  * Bug fix: "FTBFS: Unrecoverable error: Segmentation violation..",
+    thanks to Lucas Nussbaum (Closes: #952334).
+
+ -- Camm Maguire <camm@debian.org>  Fri, 01 May 2020 12:55:02 +0000
+
+gcl (2.6.12-94) unstable; urgency=medium
+
+  * re-release to overcome hopefully transient buildd failure
+
+ -- Camm Maguire <camm@debian.org>  Mon, 24 Feb 2020 20:02:52 +0000
+
+gcl (2.6.12-93) unstable; urgency=medium
+
+  * Version_2_6_13pre90
+
+ -- Camm Maguire <camm@debian.org>  Fri, 21 Feb 2020 19:06:56 +0000
+
+gcl (2.6.12-92) unstable; urgency=medium
+
+  * Version_2_6_13pre89
+
+ -- Camm Maguire <camm@debian.org>  Mon, 30 Dec 2019 15:46:22 +0000
+
+gcl (2.6.12-91) unstable; urgency=medium
+
+  * Version_2_6_13pre88
+
+ -- Camm Maguire <camm@debian.org>  Wed, 18 Dec 2019 20:14:09 +0000
+
+gcl (2.6.12-90) unstable; urgency=medium
+
+  * Version_2_6_13pre87
+  * latest standards
+
+ -- Camm Maguire <camm@debian.org>  Sun, 08 Dec 2019 19:27:24 +0000
+
+gcl (2.6.12-89) unstable; urgency=medium
+
+  * Bug fix: "gcl - FTBFS on ppc64el - invalid relocation type 31", thanks
+    to thierry.fauck@fr.ibm.com</a>; (Closes: #942312).
+  * Bug fix: "FTBFS on ppc64el", thanks to Ivo De Decker (Closes:
+    #944651).
+
+ -- Camm Maguire <camm@debian.org>  Sat, 07 Dec 2019 23:27:53 +0000
+
+gcl (2.6.12-88) unstable; urgency=medium
+
+  * Source only upload
+
+ -- Camm Maguire <camm@debian.org>  Fri, 11 Oct 2019 19:18:44 +0000
+
+gcl (2.6.12-87) unstable; urgency=medium
+
+  * Version_2_6_13pre84
+
+ -- Camm Maguire <camm@debian.org>  Sat, 06 Apr 2019 13:03:21 +0000
+
+gcl (2.6.12-86) unstable; urgency=medium
+
+  * Version_2_6_13pre83
+
+ -- Camm Maguire <camm@debian.org>  Tue, 02 Apr 2019 19:57:15 +0000
+
+gcl (2.6.12-85) unstable; urgency=medium
+
+  * Version_2_6_13pre82
+
+ -- Camm Maguire <camm@debian.org>  Thu, 28 Mar 2019 18:48:55 +0000
+
+gcl (2.6.12-84) unstable; urgency=medium
+
+  * Version_2_6_13pre80
+
+ -- Camm Maguire <camm@debian.org>  Thu, 21 Mar 2019 18:59:40 +0000
+
+gcl (2.6.12-83) unstable; urgency=high
+
+  * Version_2_6_13pre79
+  * Fix acl2 arm builds (Closes: #919477).
+
+ -- Camm Maguire <camm@debian.org>  Tue, 05 Feb 2019 21:54:42 +0000
+
+gcl (2.6.12-82) unstable; urgency=high
+
+  * Version_2_6_13pre74
+
+ -- Camm Maguire <camm@debian.org>  Sat, 02 Feb 2019 17:40:20 +0000
+
+gcl (2.6.12-81) unstable; urgency=high
+
+  * Version_2_6_13pre72
+  * Fix to ppc64el for acl2 FTBFS bug
+
+ -- Camm Maguire <camm@debian.org>  Mon, 21 Jan 2019 16:40:36 +0000
+
+gcl (2.6.12-80) unstable; urgency=medium
+
+  * Version_2_6_13pre71
+  * Bug fix: "FTBFS on hppa - segmentation fault assembling gbc.s", thanks
+    to John David Anglin (Closes: #912071).
+
+ -- Camm Maguire <camm@debian.org>  Tue, 30 Oct 2018 17:20:43 +0000
+
+gcl (2.6.12-79) unstable; urgency=medium
+
+  * Version_2_6_13pre70
+
+ -- Camm Maguire <camm@debian.org>  Mon, 29 Oct 2018 16:52:17 +0000
+
+gcl (2.6.12-78) unstable; urgency=medium
+
+  * rebuild against latest compilers and tools
+  * Version_2_6_13pre69
+
+ -- Camm Maguire <camm@debian.org>  Thu, 11 Oct 2018 16:40:48 +0000
+
+gcl (2.6.12-77) unstable; urgency=medium
+
+  * Version_2_6_13pre68
+  * Bug fix: "GCL fails to load .o files it generates", thanks to Gong-Yi
+    Liao (Closes: #902475).  Add support for R_X86_64_PLT32 relocs.
+
+ -- Camm Maguire <camm@debian.org>  Tue, 24 Jul 2018 20:06:45 +0000
+
+gcl (2.6.12-76) unstable; urgency=medium
+
+  * Version_2_6_13pre67
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Mar 2018 19:25:22 +0000
+
+gcl (2.6.12-75) unstable; urgency=medium
+
+  * Version_2_6_13pre65
+
+ -- Camm Maguire <camm@debian.org>  Wed, 21 Mar 2018 20:28:08 +0000
+
+gcl (2.6.12-74) unstable; urgency=medium
+
+  * Version_2_6_13pre63
+
+ -- Camm Maguire <camm@debian.org>  Sat, 17 Mar 2018 11:56:05 +0000
+
+gcl (2.6.12-73) unstable; urgency=medium
+
+  * Version_2_6_13pre62
+
+ -- Camm Maguire <camm@debian.org>  Wed, 14 Mar 2018 15:38:43 +0000
+
+gcl (2.6.12-72) unstable; urgency=medium
+
+  * Version_2_6_13pre61
+
+ -- Camm Maguire <camm@debian.org>  Tue, 13 Mar 2018 15:32:44 +0000
+
+gcl (2.6.12-71) unstable; urgency=medium
+
+  * Version_2_6_13pre60
+
+ -- Camm Maguire <camm@debian.org>  Mon, 12 Mar 2018 19:44:47 +0000
+
+gcl (2.6.12-70) unstable; urgency=medium
+
+  * Version_2_6_13pre59
+
+ -- Camm Maguire <camm@debian.org>  Mon, 12 Mar 2018 16:19:00 +0000
+
+gcl (2.6.12-69) unstable; urgency=medium
+
+  * Version_2_6_13pre58
+
+ -- Camm Maguire <camm@debian.org>  Fri, 09 Mar 2018 17:10:51 +0000
+
+gcl (2.6.12-68) unstable; urgency=medium
+
+  * Version_2_6_13pre57
+
+ -- Camm Maguire <camm@debian.org>  Sun, 04 Mar 2018 13:21:00 +0000
+
+gcl (2.6.12-67) unstable; urgency=medium
+
+  * Version_2_6_13pre55
+
+ -- Camm Maguire <camm@debian.org>  Sat, 03 Mar 2018 14:27:51 +0000
+
+gcl (2.6.12-66) unstable; urgency=medium
+
+  * Version_2_6_13pre54
+
+ -- Camm Maguire <camm@debian.org>  Fri, 02 Mar 2018 21:19:03 +0000
+
+gcl (2.6.12-65) unstable; urgency=medium
+
+  * Version_2_6_13pre52
+  * Bug fix: "FTBFS on hurd-i386", thanks to svante.signell@gmail.com</a>;
+    (Closes: #802593).
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Feb 2018 15:55:23 +0000
+
+gcl (2.6.12-64) unstable; urgency=medium
+
+  * list_order.24
+
+ -- Camm Maguire <camm@debian.org>  Sun, 04 Feb 2018 13:26:27 +0000
+
+gcl (2.6.12-63) unstable; urgency=medium
+
+  * list_order.23
+
+ -- Camm Maguire <camm@debian.org>  Thu, 01 Feb 2018 18:36:29 +0000
+
+gcl (2.6.12-62) unstable; urgency=medium
+
+  * list_order.22
+
+ -- Camm Maguire <camm@debian.org>  Thu, 01 Feb 2018 01:05:10 +0000
+
+gcl (2.6.12-61) unstable; urgency=medium
+
+  * list_order.21
+
+ -- Camm Maguire <camm@debian.org>  Tue, 30 Jan 2018 21:13:13 +0000
+
+gcl (2.6.12-60) unstable; urgency=medium
+
+  * list_order.19
+
+ -- Camm Maguire <camm@debian.org>  Tue, 23 Jan 2018 18:11:59 +0000
+
+gcl (2.6.12-59) unstable; urgency=medium
+
+  * list_order.16
+
+ -- Camm Maguire <camm@debian.org>  Fri, 12 Jan 2018 03:25:08 +0000
+
+gcl (2.6.12-58) unstable; urgency=medium
+
+  * list_order.14
+
+ -- Camm Maguire <camm@debian.org>  Mon, 18 Sep 2017 15:45:10 +0000
+
+gcl (2.6.12-57) unstable; urgency=medium
+
+  * list_order.13
+
+ -- Camm Maguire <camm@debian.org>  Fri, 25 Aug 2017 13:44:10 +0000
+
+gcl (2.6.12-56) unstable; urgency=medium
+
+  * list_order.12
+
+ -- Camm Maguire <camm@debian.org>  Thu, 24 Aug 2017 19:12:50 +0000
+
+gcl (2.6.12-55) unstable; urgency=medium
+
+  * disable gprof on aarch64
+  * Bug fix: "gcl FTBFS on arm64: Unrecoverable error: Segmentation
+    violation..", thanks to Adrian Bunk (Closes: #873052).
+
+ -- Camm Maguire <camm@debian.org>  Thu, 24 Aug 2017 16:37:07 +0000
+
+gcl (2.6.12-54) unstable; urgency=medium
+
+  * list_order.11
+
+ -- Camm Maguire <camm@debian.org>  Wed, 23 Aug 2017 22:19:14 +0000
+
+gcl (2.6.12-53) unstable; urgency=medium
+
+  * list_order.9
+
+ -- Camm Maguire <camm@debian.org>  Sun, 18 Jun 2017 18:32:30 +0000
+
+gcl (2.6.12-52) unstable; urgency=medium
+
+  * list_order.8
+
+ -- Camm Maguire <camm@debian.org>  Thu, 15 Jun 2017 18:04:41 +0000
+
+gcl (2.6.12-51) unstable; urgency=medium
+
+  * list_order.7
+
+ -- Camm Maguire <camm@debian.org>  Wed, 14 Jun 2017 18:30:46 +0000
+
+gcl (2.6.12-50) unstable; urgency=medium
+
+  * list_order.6
+
+ -- Camm Maguire <camm@debian.org>  Tue, 13 Jun 2017 22:38:52 +0000
+
+gcl (2.6.12-49) unstable; urgency=medium
+
+  * list_order.5
+
+ -- Camm Maguire <camm@debian.org>  Thu, 08 Jun 2017 17:21:01 +0000
+
+gcl (2.6.12-48) unstable; urgency=medium
+
+  * list_order.1
+
+ -- Camm Maguire <camm@debian.org>  Sun, 28 May 2017 01:42:29 +0000
+
+gcl (2.6.12-47) unstable; urgency=high
+
+  * pathnames1.13
+
+ -- Camm Maguire <camm@debian.org>  Tue, 22 Nov 2016 04:53:35 +0000
+
+gcl (2.6.12-46) unstable; urgency=high
+
+  * pathnames1.12
+  * Bug fix: "maintainer script(s) do not start on #!", thanks to
+    treinen@debian.org</a>; (Closes: #843303).
+
+ -- Camm Maguire <camm@debian.org>  Fri, 18 Nov 2016 18:27:53 +0000
+
+gcl (2.6.12-45) unstable; urgency=high
+
+  * pathnames1.11
+
+ -- Camm Maguire <camm@debian.org>  Mon, 31 Oct 2016 22:57:27 +0000
+
+gcl (2.6.12-44) unstable; urgency=high
+
+  * pathnames1.9
+
+ -- Camm Maguire <camm@debian.org>  Fri, 28 Oct 2016 17:04:38 +0000
+
+gcl (2.6.12-43) unstable; urgency=medium
+
+  * pathnames1.7
+
+ -- Camm Maguire <camm@debian.org>  Thu, 27 Oct 2016 03:46:32 +0000
+
+gcl (2.6.12-42) unstable; urgency=medium
+
+  * pathnames1.6
+  * Bug fix: "FTBFS with bindnow and PIE enabled", thanks to Balint Reczey
+    (Closes: #837481).
+  * Bug fix: "FTBFS with compilers that default to -fPIE (patch
+    attached)", thanks to Adam Conrad (Closes: #822820).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 26 Oct 2016 23:04:57 +0000
+
+gcl (2.6.12-41) unstable; urgency=medium
+
+  * pathnames1.4, kfreebsd fix
+
+ -- Camm Maguire <camm@debian.org>  Fri, 14 Oct 2016 01:17:18 +0000
+
+gcl (2.6.12-40) unstable; urgency=medium
+
+  * pathnames1.2
+  * Bug fix: "popen arguments not quoted causes trouble and security
+    issues", thanks to axel (Closes: #802203).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 12 Oct 2016 18:09:26 +0000
+
+gcl (2.6.12-39) unstable; urgency=medium
+
+  * pathnames1.1
+  * ansi-test clean target
+
+ -- Camm Maguire <camm@debian.org>  Wed, 12 Oct 2016 01:32:05 +0000
+
+gcl (2.6.12-38) unstable; urgency=medium
+
+  * Version_2_6_13pre50
+
+ -- Camm Maguire <camm@debian.org>  Tue, 04 Oct 2016 19:45:38 +0000
+
+gcl (2.6.12-37) unstable; urgency=medium
+
+  * Version_2_6_13pre49
+
+ -- Camm Maguire <camm@debian.org>  Mon, 03 Oct 2016 14:54:09 +0000
+
+gcl (2.6.12-36) unstable; urgency=medium
+
+  * Version_2_6_13pre48
+
+ -- Camm Maguire <camm@debian.org>  Sat, 01 Oct 2016 12:10:25 +0000
+
+gcl (2.6.12-35) unstable; urgency=medium
+
+  * Version_2_6_13pre47
+
+ -- Camm Maguire <camm@debian.org>  Fri, 30 Sep 2016 21:21:43 +0000
+
+gcl (2.6.12-34) unstable; urgency=medium
+
+  * Version_2_6_13pre45
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Sep 2016 19:42:37 +0000
+
+gcl (2.6.12-33) unstable; urgency=medium
+
+  * Version_2_6_13pre43
+
+ -- Camm Maguire <camm@debian.org>  Tue, 03 May 2016 16:17:03 +0000
+
+gcl (2.6.12-32) unstable; urgency=medium
+
+  * Version_2_6_13pre40
+  * Bug fix: "[INTL:pt_BR] Brazilian Portuguese debconf templates
+    translation", thanks to Adriano Rafael Gomes (Closes: #811523).
+
+ -- Camm Maguire <camm@debian.org>  Wed, 20 Apr 2016 15:18:35 +0000
+
+gcl (2.6.12-31) unstable; urgency=medium
+
+  * Version_2_6_13pre39
+
+ -- Camm Maguire <camm@debian.org>  Mon, 11 Apr 2016 00:41:11 +0000
+
+gcl (2.6.12-30) unstable; urgency=medium
+
+  * Version_2_6_13pre38
+
+ -- Camm Maguire <camm@debian.org>  Wed, 06 Apr 2016 00:20:15 +0000
+
+gcl (2.6.12-29) unstable; urgency=medium
+
+  * Version_2_6_13pre35; support latest binutils
+  * Bug fix: "gcl ftbfs on amd64 and i386 with binutils from
+    experimental", thanks to Matthias Klose (Closes: #803214).
+
+ -- Camm Maguire <camm@debian.org>  Thu, 29 Oct 2015 15:20:27 +0000
+
+gcl (2.6.12-28) unstable; urgency=medium
+
+  * Version_2_6_13pre35; restore hppa build
+
+ -- Camm Maguire <camm@debian.org>  Tue, 27 Oct 2015 20:00:46 +0000
+
+gcl (2.6.12-27) unstable; urgency=medium
+
+  * Version_2_6_13pre34; mips64 relocs; stack saving tail-recursive equal.
+
+ -- Camm Maguire <camm@debian.org>  Tue, 27 Oct 2015 16:35:06 +0000
+
+gcl (2.6.12-26) unstable; urgency=medium
+
+  * Version_2_6_13pre32
+
+ -- Camm Maguire <camm@debian.org>  Fri, 23 Oct 2015 00:03:34 +0000
+
+gcl (2.6.12-25) unstable; urgency=medium
+
+  * Version_2_6_13pre31, kfreebsd and mips64 FTBFS fix
+
+ -- Camm Maguire <camm@debian.org>  Fri, 16 Oct 2015 15:03:03 +0000
+
+gcl (2.6.12-24) unstable; urgency=medium
+
+  * Version_2_6_13pre30
+
+ -- Camm Maguire <camm@debian.org>  Fri, 16 Oct 2015 02:44:23 +0000
+
+gcl (2.6.12-23) unstable; urgency=medium
+
+  * Version_2_6_13pre29
+
+ -- Camm Maguire <camm@debian.org>  Thu, 15 Oct 2015 18:09:59 +0000
+
+gcl (2.6.12-22) unstable; urgency=medium
+
+  * Version_2_6_13pre27
+
+ -- Camm Maguire <camm@debian.org>  Tue, 13 Oct 2015 14:38:53 +0000
+
+gcl (2.6.12-21) unstable; urgency=medium
+
+  * Version_2_6_13pre26
+
+ -- Camm Maguire <camm@debian.org>  Wed, 07 Oct 2015 15:14:27 +0000
+
+gcl (2.6.12-20) unstable; urgency=medium
+
+  * Version_2_6_13pre25
+
+ -- Camm Maguire <camm@debian.org>  Thu, 01 Oct 2015 15:16:14 +0000
+
+gcl (2.6.12-19) unstable; urgency=medium
+
+  * Use-dpkg-buidflags-opt-levels-in-debian-rules, -O3 has bug in 5.2.1
+  * Version_2_6_13pre24
+
+ -- Camm Maguire <camm@debian.org>  Wed, 30 Sep 2015 15:45:20 +0000
+
+gcl (2.6.12-18) unstable; urgency=medium
+
+  * Version_2_6_13pre22
+
+ -- Camm Maguire <camm@debian.org>  Tue, 29 Sep 2015 16:51:03 +0000
+
+gcl (2.6.12-17) unstable; urgency=medium
+
+  * Version_2_6_13pre20
+
+ -- Camm Maguire <camm@debian.org>  Sat, 26 Sep 2015 10:34:23 -0400
+
+gcl (2.6.12-16) unstable; urgency=medium
+
+  * Version_2_6_13pre19
+
+ -- Camm Maguire <camm@debian.org>  Fri, 25 Sep 2015 18:39:52 -0400
+
+gcl (2.6.12-15) unstable; urgency=medium
+
+  * Version_2_6_13pre18
+
+ -- Camm Maguire <camm@debian.org>  Fri, 25 Sep 2015 15:08:50 +0000
+
+gcl (2.6.12-14) unstable; urgency=medium
+
+  * Version_2_6_13pre17
+
+ -- Camm Maguire <camm@debian.org>  Thu, 28 May 2015 03:37:47 +0000
+
+gcl (2.6.12-13) unstable; urgency=medium
+
+  * Version_2_6_13pre16
+
+ -- Camm Maguire <camm@debian.org>  Fri, 15 May 2015 18:09:38 +0000
+
+gcl (2.6.12-12) unstable; urgency=medium
+
+  * Version_2_6_13pre13
+
+ -- Camm Maguire <camm@debian.org>  Fri, 01 May 2015 11:08:46 -0400
+
+gcl (2.6.12-11) unstable; urgency=medium
+
+  * Version_2_6_13pre12
+
+ -- Camm Maguire <camm@debian.org>  Thu, 30 Apr 2015 12:49:16 -0400
+
+gcl (2.6.12-10) unstable; urgency=medium
+
+  * rebuild in clean sid environment
+
+ -- Camm Maguire <camm@debian.org>  Mon, 27 Apr 2015 15:34:15 -0400
+
+gcl (2.6.12-9) unstable; urgency=medium
+
+  * Version_2_6_13pre8b
+  * Bug fix: "ftbfs with GCC-5", thanks to Matthias Klose (Closes:
+    #777866).
+
+ -- Camm Maguire <camm@debian.org>  Mon, 27 Apr 2015 12:32:49 -0400
+
+gcl (2.6.12-8) unstable; urgency=medium
+
+  * Version_2_6_13pre7
+
+ -- Camm Maguire <camm@debian.org>  Fri, 24 Apr 2015 13:38:30 -0400
+
+gcl (2.6.12-7) unstable; urgency=medium
+
+  * Version_2_6_13pre6
+
+ -- Camm Maguire <camm@debian.org>  Thu, 23 Apr 2015 13:43:45 -0400
+
+gcl (2.6.12-6) unstable; urgency=medium
+
+  * Version_2_6_13pre5
+
+ -- Camm Maguire <camm@debian.org>  Wed, 22 Apr 2015 17:14:16 -0400
+
+gcl (2.6.12-5) unstable; urgency=medium
+
+  * Version_2_6_13pre4
+
+ -- Camm Maguire <camm@debian.org>  Wed, 22 Apr 2015 10:25:36 -0400
+
+gcl (2.6.12-4) unstable; urgency=medium
+
+  * Version_2_6_13pre3a
+
+ -- Camm Maguire <camm@debian.org>  Mon, 20 Apr 2015 13:26:36 -0400
+
+gcl (2.6.12-3) unstable; urgency=medium
+
+  * Version_2_6_13pre2
+
+ -- Camm Maguire <camm@debian.org>  Fri, 17 Apr 2015 15:50:37 -0400
+
+gcl (2.6.12-2) unstable; urgency=medium
+
+  * Version_2_6_13pre1
+
+ -- Camm Maguire <camm@debian.org>  Wed, 26 Nov 2014 11:12:46 -0500
+
+gcl (2.6.12-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Camm Maguire <camm@debian.org>  Tue, 28 Oct 2014 09:56:15 -0400
+
+gcl (2.6.11-6) unstable; urgency=medium
+
+  * 2.6.12pre5
+
+ -- Camm Maguire <camm@debian.org>  Thu, 23 Oct 2014 17:33:22 -0400
+
+gcl (2.6.11-5) unstable; urgency=medium
+
+  * 2.6.12pre4
+
+ -- Camm Maguire <camm@debian.org>  Sat, 18 Oct 2014 09:46:34 -0400
+
+gcl (2.6.11-4) unstable; urgency=medium
+
+  * 2.6.12pre3
+
+ -- Camm Maguire <camm@debian.org>  Thu, 16 Oct 2014 11:56:15 -0400
+
+gcl (2.6.11-3) unstable; urgency=medium
+
+  * 2.6.12pre2
+
+ -- Camm Maguire <camm@debian.org>  Sun, 28 Sep 2014 20:56:18 -0400
+
+gcl (2.6.11-2) unstable; urgency=medium
+
+  * 2.6.12pre1
+
+ -- Camm Maguire <camm@debian.org>  Fri, 19 Sep 2014 14:49:25 -0400
+
+gcl (2.6.11-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Camm Maguire <camm@debian.org>  Sat, 06 Sep 2014 12:28:46 -0400
+
+gcl (2.6.10-54) unstable; urgency=medium
+
+  * remove-debug-message-from-BUGGY_MAXIMUM_SSCANF_LENGTH-code
+
+ -- Camm Maguire <camm@debian.org>  Fri, 05 Sep 2014 10:35:46 -0400
+
+gcl (2.6.10-53) unstable; urgency=medium
+
+  * ppc64le-support-headers
+
+ -- Camm Maguire <camm@debian.org>  Wed, 03 Sep 2014 15:02:12 -0400
+
+gcl (2.6.10-52) unstable; urgency=medium
+
+  * accept-TMP-paths-with-types-versions
+
+ -- Camm Maguire <camm@debian.org>  Fri, 29 Aug 2014 17:51:04 -0400
+
+gcl (2.6.10-51) unstable; urgency=medium
+
+  * fix-match-function-proclaim-skew
+
+ -- Camm Maguire <camm@debian.org>  Fri, 29 Aug 2014 16:40:30 +0000
+
+gcl (2.6.10-50) unstable; urgency=medium
+
+  * trial_selinux_support
+
+ -- Camm Maguire <camm@debian.org>  Thu, 21 Aug 2014 17:29:50 +0000
+
+gcl (2.6.10-49) unstable; urgency=medium
+
+  * R_ARM_JUMP24
+
+ -- Camm Maguire <camm@debian.org>  Wed, 20 Aug 2014 17:08:23 +0000
+
+gcl (2.6.10-48) unstable; urgency=medium
+
+  * try-SGC-for-aarch64
+
+ -- Camm Maguire <camm@debian.org>  Tue, 19 Aug 2014 18:35:22 +0000
+
+gcl (2.6.10-47) unstable; urgency=medium
+
+  * set-stack_guard-after-alloc-setup
+  * Bug fix: "work around build failure on AArch64", thanks to Matthias
+    Klose (Closes: #758101).
+
+ -- Camm Maguire <camm@debian.org>  Thu, 14 Aug 2014 19:36:48 +0000
+
+gcl (2.6.10-46) unstable; urgency=medium
+
+  * R_AARCH64_LDST128_ABS_LO12_NC
+
+ -- Camm Maguire <camm@debian.org>  Wed, 13 Aug 2014 21:39:50 +0000
+
+gcl (2.6.10-45) unstable; urgency=medium
+
+  * fix sh4 CLEAR_CACHE
+
+ -- Camm Maguire <camm@debian.org>  Sun, 10 Aug 2014 20:12:03 +0000
+
+gcl (2.6.10-44) unstable; urgency=medium
+
+  * clear_protect_memory on all elf machines
+
+ -- Camm Maguire <camm@debian.org>  Sat, 09 Aug 2014 00:55:17 +0000
+
+gcl (2.6.10-43) unstable; urgency=medium
+
+  * mips uses builtin_clear_cache like mipsel
+
+ -- Camm Maguire <camm@debian.org>  Fri, 08 Aug 2014 23:42:42 +0000
+
+gcl (2.6.10-42) unstable; urgency=medium
+
+  * backport travel_push_new from master
+
+ -- Camm Maguire <camm@debian.org>  Wed, 06 Aug 2014 20:14:14 +0000
+
+gcl (2.6.10-41) unstable; urgency=medium
+
+  * protos and CFLAGS for axiom extensions
+
+ -- Camm Maguire <camm@debian.org>  Wed, 06 Aug 2014 01:54:38 +0000
+
+gcl (2.6.10-40) unstable; urgency=medium
+
+  * better solaris unexec fix
+
+ -- Camm Maguire <camm@debian.org>  Mon, 04 Aug 2014 22:00:54 +0000
+
+gcl (2.6.10-39) unstable; urgency=medium
+
+  * earlier prelink_init, phys_pages w/o malloc
+
+ -- Camm Maguire <camm@debian.org>  Mon, 04 Aug 2014 16:52:09 +0000
+
+gcl (2.6.10-38) unstable; urgency=medium
+
+  * error on overflow of array dimensions
+
+ -- Camm Maguire <camm@debian.org>  Fri, 01 Aug 2014 14:35:44 +0000
+
+gcl (2.6.10-37) unstable; urgency=medium
+
+  * FILE * casts for windows feof wrapper
+
+ -- Camm Maguire <camm@debian.org>  Thu, 31 Jul 2014 02:17:11 +0000
+
+gcl (2.6.10-36) unstable; urgency=medium
+
+  * better casts for frs_jmpbuf
+
+ -- Camm Maguire <camm@debian.org>  Wed, 30 Jul 2014 17:00:06 +0000
+
+gcl (2.6.10-35) unstable; urgency=medium
+
+  * find_sym_ptable typo fix
+
+ -- Camm Maguire <camm@debian.org>  Tue, 29 Jul 2014 18:08:57 +0000
+
+gcl (2.6.10-34) unstable; urgency=medium
+
+  * --enable-prelink configure arg; stack_chk_guard for 68k
+
+ -- Camm Maguire <camm@debian.org>  Fri, 25 Jul 2014 20:39:10 +0000
+
+gcl (2.6.10-33) unstable; urgency=medium
+
+  * hurd stack_guard, ppc64 C_GC_OFFSET
+
+ -- Camm Maguire <camm@debian.org>  Thu, 24 Jul 2014 21:46:24 +0000
+
+gcl (2.6.10-32) unstable; urgency=medium
+
+  * __stack_chk_guard fix for arm/sh4
+
+ -- Camm Maguire <camm@debian.org>  Wed, 23 Jul 2014 18:12:56 +0000
+
 gcl (2.6.10-31) unstable; urgency=medium
 
   * dpkg-buildflags trial

@@ -172,41 +172,40 @@
 
 (defvar *old-lib-directory* nil)
 (defun setup-info (name &aux tem file)
-  (or (eq *old-lib-directory* si::*lib-directory*)
-      (progn
-	(setq *old-lib-directory* si::*lib-directory*)
-	(push (si::string-concatenate
-	       si::*lib-directory* "info/") *info-paths*)
-	(setq *info-paths* (si::fix-load-path *info-paths*))))
-  (cond ((or (equal name "DIR"))
-	 (setq name "dir")))
-;; compressed info reading -- search for gzipped files, and open with base filename
+
+  (unless (eq *old-lib-directory* *lib-directory*)
+    (setq *old-lib-directory* *lib-directory*)
+    (push (string-concatenate *lib-directory* "info/") *info-paths*)
+    (setq *info-paths* (fix-load-path *info-paths*)))
+
+  (when (equal name "DIR")
+    (setq name "dir"))
+
+  ;; compressed info reading -- search for gzipped files, and open with base filename
 ;; relying on si::*allow-gzipped-files* to uncompress
-  (setq file (si::file-search name *info-paths* '("" ".info" ".gz") nil))
+  (setq file (file-search name *info-paths* '("" ".info" ".gz") nil))
   (let ((ext (search ".gz" file)))
     (when ext
       (setq file (subseq file 0 ext))))
-  (cond ((and (null file)
-	      (not (equal name "dir")))
-	 (let* (
-		(tem (show-info "(dir)Top" nil nil))
-	       *case-fold-search*)
-	   (cond ((f >= (string-match
-	    (si::string-concatenate
-	    "\\(([^(]*"
-	     (re-quote-string name)
-	     "(.info)?)\\)")
-	    tem ) 0)
-		 (setq file  (get-match tem 1)))))))
-  (cond (file
-	 (let* ((na (namestring (truename file))))
-	   (cond ((setq tem (assoc na *info-data* :test 'equal))
-		  (setq *current-info-data* tem))
-		 (t   (setq *current-info-data*
-			    (list na (info-get-tags na) nil))
-		      (setq *info-data* (cons *current-info-data* *info-data*)
-			    )))))
-	(t (format t "(not found ~s)" name)))
+
+  (unless file
+    (unless (equal name "dir")
+      (let* ((tem (show-info "(dir)Top" nil nil))
+	     *case-fold-search*)
+	(cond ((<= 0 (string-match
+		      (string-concatenate "\\(([^(]*" (re-quote-string name) "(.info)?)\\)")
+		      tem))
+	       (setq file (get-match tem 1)))))))
+
+  (IF file
+      (let* ((na (namestring file )));(truename file)
+	(cond ((setq tem (assoc na *info-data* :test 'equal))
+	       (setq *current-info-data* tem))
+	      (t   (setq *current-info-data*
+			 (list na (info-get-tags na) nil))
+		   (setq *info-data* (cons *current-info-data* *info-data*)
+			 ))))
+      (format t "(not found ~s)" name))
   nil)
 			  
 (defun get-info-choices (pat type)

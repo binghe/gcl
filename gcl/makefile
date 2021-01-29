@@ -234,7 +234,7 @@ gclclean:
 	cd $(PCLDIR) && $(MAKE) clean
 	cd xgcl-2 && $(MAKE) clean
 	(cd $(TESTDIR); $(MAKE) clean)
-#	(cd info ; $(MAKE) clean)
+	(cd info ; $(MAKE) clean)
 #	find binutils -name "*.o" -exec rm {} \;
 	rm -rf binutils
 	rm -f foo.tcl config.log makedefs makedefsafter config.cache config.status makedefc

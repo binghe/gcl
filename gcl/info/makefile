@@ -3,16 +3,16 @@
 
 INFO_DIR=/usr/local/lib/info
 
-GCL_PDF=gcl-tk.pdf gcl-si.pdf #gcl.pdf
+GCL_PDF=gcl-tk.pdf gcl-si.pdf gcl.pdf
 #GCL_DVI=gcl-tk.dvi gcl-si.dvi #gcl.dvi
 #GCL_HTML=gcl-si_toc.html gcl-tk_toc.html gcl_toc.html
-GCL_HTML=gcl-si/index.html gcl-tk/index.html #gcl/index.html
+GCL_HTML=gcl-si/index.html gcl-tk/index.html gcl/index.html
 #HTML_CMD=texi2html -split_chapter
 HTML_CMD=makeinfo --html 
 
 -include ../makedefs
 
-all: gcl-tk.info gcl-si.info  $(GCL_PDF) $(GCL_HTML) #gcl.info
+all: gcl-tk.info gcl-si.info  $(GCL_PDF) $(GCL_HTML) gcl.info
 
 .texi.info:
 	rm -f $*.*gz
@@ -100,7 +100,7 @@ install: #$(GCL_PDF) $(GCL_HTML)
 #	-cp gcl-tk/* $(DESTDIR)$(INFO_DIR)../doc/gcl-doc/gcl-tk.html
 	-mkdir -p $(DESTDIR)$(INFO_DIR)../doc
 #	-cp -r gcl-si gcl gcl-tk $(DESTDIR)$(INFO_DIR)../doc
-	-cp -r gcl-si gcl-tk $(DESTDIR)$(INFO_DIR)../doc
+	-cp -r gcl gcl-si gcl-tk $(DESTDIR)$(INFO_DIR)../doc
 	-cp *pdf $(DESTDIR)$(INFO_DIR)../doc
 
 FILE=gcl-si.texi
