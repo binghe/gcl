@@ -448,13 +448,13 @@ static char *stack_to_be_allocated;
 void
 get_stack_to_be_allocated(unsigned long size) {
   stack_to_be_allocated=alloca(size);
+  memset(stack_to_be_allocated,0,size);
 }
 
 DEFUN_NEW("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,1,NONE,II,OO,OO,OO,(fixnum s),"") {
   object x0=make_list(s/sizeof(object)),x1=make_list(s/sizeof(object));
   char *w;
   get_stack_to_be_allocated(s);
-  memset(stack_to_be_allocated,0,s);
   fLequal(x0,x1);
   for (w=stack_to_be_allocated;w<stack_to_be_allocated+s && !*w;w++);
   RETURN1((object)(w-stack_to_be_allocated));
