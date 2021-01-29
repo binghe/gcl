@@ -1,8 +1,10 @@
-gcl (2.6.12-101) unstable; urgency=medium
+gcl (2.6.12-102) unstable; urgency=medium
 
-  * Version_2.6.13pre98
+  * Version_2.6.13pre99
+  * Bug fix: "describe fails because gcl-si.info does not exist", thanks
+    to Leo Butler (Closes: #980003).
 
- -- Camm Maguire <camm@debian.org>  Sun, 17 Jan 2021 16:25:34 +0000
+ -- Camm Maguire <camm@debian.org>  Fri, 29 Jan 2021 19:08:05 +0000
 
 gcl (2.6.12-100) unstable; urgency=medium
 
