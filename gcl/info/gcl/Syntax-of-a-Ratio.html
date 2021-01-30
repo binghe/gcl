@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Syntax of a Ratio (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Syntax of a Ratio (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Syntax of a Ratio (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Constructing-Numbers-from-Tokens.html" rel="up" title="Constructing Numbers from Tokens">
+<link href="Syntax-of-a-Float.html" rel="next" title="Syntax of a Float">
+<link href="Syntax-of-an-Integer.html" rel="prev" title="Syntax of an Integer">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Syntax-of-a-Ratio"></span><div class="header">
+<p>
+Next: <a href="Syntax-of-a-Float.html" accesskey="n" rel="next">Syntax of a Float</a>, Previous: <a href="Syntax-of-an-Integer.html" accesskey="p" rel="prev">Syntax of an Integer</a>, Up: <a href="Constructing-Numbers-from-Tokens.html" accesskey="u" rel="up">Constructing Numbers from Tokens</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Syntax-of-a-Ratio-1"></span><h4 class="subsubsection">2.3.2.3 Syntax of a Ratio</h4>
+
+<p><i>Ratios</i> can be written as an optional <i>sign</i> followed by two
+non-empty sequences of <i>digits</i> separated by a <i>slash</i>;
+see <i>Figure~2&ndash;9</i>.
+The second sequence may not consist
+entirely of zeros.
+Examples of <i>ratios</i> are in Figure 2&ndash;13.
+</p>
+<div class="format">
+<pre class="format">  <tt>2/3</tt>                 ;This is in canonical form                  <!-- /@w -->
+  <tt>4/6</tt>                 ;A non-canonical form for 2/3               <!-- /@w -->
+  <tt>-17/23</tt>              ;A ratio preceded by a sign                 <!-- /@w -->
+  <tt>-30517578125/32768</tt>  ;This is (-5/2)^15                        <!-- /@w -->
+  <tt>10/5</tt>                ;The canonical form for this is <tt>2</tt>           <!-- /@w -->
+  <tt>#o-101/75</tt>           ;Octal notation for -65/61                  <!-- /@w -->
+  <tt>#3r120/21</tt>           ;Ternary notation for 15/7                  <!-- /@w -->
+  <tt>#Xbc/ad</tt>             ;Hexadecimal notation for 188/173           <!-- /@w -->
+  <tt>#xFADED/FACADE</tt>      ;Hexadecimal notation for 1027565/16435934  <!-- /@w -->
+
+                  Figure 2&ndash;13: Examples of Ratios                <!-- /@w -->
+
+</pre></div>
+
+<p>[Reviewer Note by Barmar: #o, #3r, #X, and #x mentioned above 
+		  are not in the syntax rules defined just above that.]
+</p>
+<p>For information on how <i>ratios</i> are printed,
+see <a href="Printing-Ratios.html">Printing Ratios</a>.
+</p>
+
+
+
+</body>
+</html>

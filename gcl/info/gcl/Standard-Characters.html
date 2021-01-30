@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Standard Characters (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Standard Characters (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Standard Characters (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Character-Syntax.html" rel="up" title="Character Syntax">
+<link href="Character-Syntax-Types.html" rel="next" title="Character Syntax Types">
+<link href="Variables-that-affect-the-Lisp-Reader.html" rel="prev" title="Variables that affect the Lisp Reader">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Standard-Characters"></span><div class="header">
+<p>
+Next: <a href="Character-Syntax-Types.html" accesskey="n" rel="next">Character Syntax Types</a>, Previous: <a href="Variables-that-affect-the-Lisp-Reader.html" accesskey="p" rel="prev">Variables that affect the Lisp Reader</a>, Up: <a href="Character-Syntax.html" accesskey="u" rel="up">Character Syntax</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Standard-Characters-1"></span><h4 class="subsection">2.1.3 Standard Characters</h4>
+
+<p>All <i>implementations</i> must support a <i>character</i> <i>repertoire</i>
+called <b>standard-char</b>; <i>characters</i> that are members of that
+<i>repertoire</i> are called <i>standard characters</i>
+<span id="index-standard-character"></span>
+.
+</p>
+<p>The <b>standard-char</b> <i>repertoire</i> consists of
+the <i>non-graphic</i> <i>character</i> <i>newline</i>,
+the <i>graphic</i> <i>character</i> <i>space</i>,
+and the following additional
+ninety-four <i>graphic</i> <i>characters</i> or their equivalents:
+</p>
+<div class="format">
+<pre class="format">  Graphic ID  Glyph  Description  Graphic ID  Glyph  Description  <!-- /@w -->
+  LA01        <tt>a</tt>      small a      LN01        <tt>n</tt>      small n      <!-- /@w -->
+  LA02        <tt>A</tt>      capital A    LN02        <tt>N</tt>      capital N    <!-- /@w -->
+  LB01        <tt>b</tt>      small b      LO01        <tt>o</tt>      small o      <!-- /@w -->
+  LB02        <tt>B</tt>      capital B    LO02        <tt>O</tt>      capital O    <!-- /@w -->
+  LC01        <tt>c</tt>      small c      LP01        <tt>p</tt>      small p      <!-- /@w -->
+  LC02        <tt>C</tt>      capital C    LP02        <tt>P</tt>      capital P    <!-- /@w -->
+  LD01        <tt>d</tt>      small d      LQ01        <tt>q</tt>      small q      <!-- /@w -->
+  LD02        <tt>D</tt>      capital D    LQ02        <tt>Q</tt>      capital Q    <!-- /@w -->
+  LE01        <tt>e</tt>      small e      LR01        <tt>r</tt>      small r      <!-- /@w -->
+  LE02        <tt>E</tt>      capital E    LR02        <tt>R</tt>      capital R    <!-- /@w -->
+  LF01        <tt>f</tt>      small f      LS01        <tt>s</tt>      small s      <!-- /@w -->
+  LF02        <tt>F</tt>      capital F    LS02        <tt>S</tt>      capital S    <!-- /@w -->
+  LG01        <tt>g</tt>      small g      LT01        <tt>t</tt>      small t      <!-- /@w -->
+  LG02        <tt>G</tt>      capital G    LT02        <tt>T</tt>      capital T    <!-- /@w -->
+  LH01        <tt>h</tt>      small h      LU01        <tt>u</tt>      small u      <!-- /@w -->
+  LH02        <tt>H</tt>      capital H    LU02        <tt>U</tt>      capital U    <!-- /@w -->
+  LI01        <tt>i</tt>      small i      LV01        <tt>v</tt>      small v      <!-- /@w -->
+  LI02        <tt>I</tt>      capital I    LV02        <tt>V</tt>      capital V    <!-- /@w -->
+  LJ01        <tt>j</tt>      small j      LW01        <tt>w</tt>      small w      <!-- /@w -->
+  LJ02        <tt>J</tt>      capital J    LW02        <tt>W</tt>      capital W    <!-- /@w -->
+  LK01        <tt>k</tt>      small k      LX01        <tt>x</tt>      small x      <!-- /@w -->
+  LK02        <tt>K</tt>      capital K    LX02        <tt>X</tt>      capital X    <!-- /@w -->
+  LL01        <tt>l</tt>      small l      LY01        <tt>y</tt>      small y      <!-- /@w -->
+  LL02        <tt>L</tt>      capital L    LY02        <tt>Y</tt>      capital Y    <!-- /@w -->
+  LM01        <tt>m</tt>      small m      LZ01        <tt>z</tt>      small z      <!-- /@w -->
+  LM02        <tt>M</tt>      capital M    LZ02        <tt>Z</tt>      capital Z    <!-- /@w -->
+
+  Figure 2&ndash;3: Standard Character Subrepertoire (Part 1 of 3: Latin Characters)<!-- /@w -->
+
+</pre></div>
+
+<div class="format">
+<pre class="format">  Graphic ID  Glyph  Description  Graphic ID  Glyph  Description  <!-- /@w -->
+  ND01        <tt>1</tt>      digit 1      ND06        <tt>6</tt>      digit 6      <!-- /@w -->
+  ND02        <tt>2</tt>      digit 2      ND07        <tt>7</tt>      digit 7      <!-- /@w -->
+  ND03        <tt>3</tt>      digit 3      ND08        <tt>8</tt>      digit 8      <!-- /@w -->
+  ND04        <tt>4</tt>      digit 4      ND09        <tt>9</tt>      digit 9      <!-- /@w -->
+  ND05        <tt>5</tt>      digit 5      ND10        <tt>0</tt>      digit 0      <!-- /@w -->
+
+  Figure 2&ndash;4: Standard Character Subrepertoire (Part 2 of 3: Numeric Characters)<!-- /@w -->
+
+</pre></div>
+
+<div class="format">
+<pre class="format">  Graphic ID  Glyph  Description                              <!-- /@w -->
+  SP02        <tt>!</tt>      exclamation mark                         <!-- /@w -->
+  SC03        <tt>$</tt>     dollar sign                              <!-- /@w -->
+  SP04        <tt>&quot;</tt>      quotation mark, or double quote          <!-- /@w -->
+  SP05        <tt>'</tt>      apostrophe, or <span class="roman">[</span>single<span class="roman">]</span> quote            <!-- /@w -->
+  SP06        <tt>(</tt>      left parenthesis, or open parenthesis    <!-- /@w -->
+  SP07        <tt>)</tt>      right parenthesis, or close parenthesis  <!-- /@w -->
+  SP08        <tt>,</tt>      comma                                    <!-- /@w -->
+  SP09        <tt>_</tt>      low line, or underscore                  <!-- /@w -->
+  SP10        <tt>-</tt>      hyphen, or minus <span class="roman">[</span>sign<span class="roman">]</span>                  <!-- /@w -->
+  SP11        <tt>.</tt>      full stop, period, or dot                <!-- /@w -->
+  SP12        <tt>/</tt>      solidus, or slash                        <!-- /@w -->
+  SP13        <tt>:</tt>      colon                                    <!-- /@w -->
+  SP14        <tt>;</tt>      semicolon                                <!-- /@w -->
+  SP15        <tt>?</tt>      question mark                            <!-- /@w -->
+  SA01        <tt>+</tt>      plus <span class="roman">[</span>sign<span class="roman">]</span>                              <!-- /@w -->
+  SA03        <tt>&lt;</tt>      less-than <span class="roman">[</span>sign<span class="roman">]</span>                         <!-- /@w -->
+  SA04        <tt>=</tt>      equals <span class="roman">[</span>sign<span class="roman">]</span>                            <!-- /@w -->
+  SA05        <tt>&gt;</tt>      greater-than <span class="roman">[</span>sign<span class="roman">]</span>                      <!-- /@w -->
+  SM01        <tt>#</tt>      number sign, or sharp<span class="roman">[</span>sign<span class="roman">]</span>              <!-- /@w -->
+  SM02        <tt>%</tt>      percent <span class="roman">[</span>sign<span class="roman">]</span>                           <!-- /@w -->
+  SM03        <tt>&amp;</tt>      ampersand                                <!-- /@w -->
+  SM04        <tt>*</tt>      asterisk, or star                        <!-- /@w -->
+  SM05        <tt>@</tt>      commercial at, or at-sign                <!-- /@w -->
+  SM06        <tt>[</tt>      left <span class="roman">[</span>square<span class="roman">]</span> bracket                    <!-- /@w -->
+  SM07        <tt>\</tt>      reverse solidus, or backslash            <!-- /@w -->
+  SM08        <tt>]</tt>      right <span class="roman">[</span>square<span class="roman">]</span> bracket                   <!-- /@w -->
+  SM11        <tt>{</tt>      left curly bracket, or left brace        <!-- /@w -->
+  SM13        <tt>|</tt>      vertical bar                             <!-- /@w -->
+  SM14        <tt>}</tt>      right curly bracket, or right brace      <!-- /@w -->
+  SD13        <tt>`</tt>      grave accent, or backquote               <!-- /@w -->
+  SD15        <tt><tt>^</tt></tt>      circumflex accent                        <!-- /@w -->
+  SD19        <tt>~</tt>      tilde                                    <!-- /@w -->
+
+  Figure 2&ndash;5: Standard Character Subrepertoire (Part 3 of 3: Special Characters)<!-- /@w -->
+
+</pre></div>
+
+<p>The graphic IDs are not used within <span class="roman">Common Lisp</span>,
+but are provided for cross reference purposes with <span class="roman">ISO 6937/2</span>.
+Note that the first letter of the graphic ID 
+categorizes the character as follows:
+L&mdash;Latin, N&mdash;Numeric, S&mdash;Special.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Character-Syntax-Types.html" accesskey="n" rel="next">Character Syntax Types</a>, Previous: <a href="Variables-that-affect-the-Lisp-Reader.html" accesskey="p" rel="prev">Variables that affect the Lisp Reader</a>, Up: <a href="Character-Syntax.html" accesskey="u" rel="up">Character Syntax</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

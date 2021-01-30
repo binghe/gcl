@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Double-Quote (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Double-Quote (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Double-Quote (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Standard-Macro-Characters.html" rel="up" title="Standard Macro Characters">
+<link href="Backquote.html" rel="next" title="Backquote">
+<link href="Examples-of-Style-for-Semicolon.html" rel="prev" title="Examples of Style for Semicolon">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Double_002dQuote"></span><div class="header">
+<p>
+Next: <a href="Backquote.html" accesskey="n" rel="next">Backquote</a>, Previous: <a href="Semicolon.html" accesskey="p" rel="prev">Semicolon</a>, Up: <a href="Standard-Macro-Characters.html" accesskey="u" rel="up">Standard Macro Characters</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Double_002dQuote-1"></span><h4 class="subsection">2.4.5 Double-Quote</h4>
+
+<p><b>Syntax:</b> <tt>&quot;&lt;&lt;<i>text</i>&gt;&gt;&quot;</tt>
+</p>
+<p>The <i>double-quote</i> is used to begin and end a <i>string</i>.
+When a <i>double-quote</i> is encountered,
+<i>characters</i> are read from the <i>input</i> <i>stream</i> 
+and accumulated until another <i>double-quote</i> is encountered.
+If a <i>single escape</i> <i>character</i> is seen,
+the <i>single escape</i> <i>character</i> is discarded,
+the next <i>character</i> is accumulated, and accumulation continues.
+The accumulated <i>characters</i> 
+up to but not including the matching <i>double-quote</i> 
+are made into a <i>simple string</i> and returned.
+</p>
+<p>It is <i>implementation-dependent</i>
+which <i>attributes</i> of the accumulated characters are removed in this process.
+</p>
+<p>Examples of the use of the <i>double-quote</i> character are in Figure 2&ndash;18. 
+</p>
+<div class="format">
+<pre class="format">  <tt>&quot;Foo&quot;</tt>                      ;A string with three characters in it  <!-- /@w -->
+  <tt>&quot;&quot;</tt>                         ;An empty string                       <!-- /@w -->
+  <tt>&quot;\&quot;APL\\360?\&quot; he cried.&quot;</tt>  ;A string with twenty characters       <!-- /@w -->
+  <tt>&quot;|x| = |-x|&quot;</tt>               ;A ten-character string                <!-- /@w -->
+
+          Figure 2&ndash;18: Examples of the use of double-quote         <!-- /@w -->
+
+</pre></div>
+
+<p>Note that to place a single escape character or a <i>double-quote</i> into a string,
+such a character must be preceded by a single escape character.
+Note, too, that a multiple escape character need not be quoted by a 
+single escape character within a string.
+</p>
+<p>For information on how the <i>Lisp printer</i> prints <i>strings</i>,
+see <a href="Printing-Strings.html">Printing Strings</a>.
+</p>
+
+
+
+</body>
+</html>

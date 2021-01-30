@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Introduction to Characters (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Introduction to Characters (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Introduction to Characters (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Character-Concepts.html" rel="up" title="Character Concepts">
+<link href="Introduction-to-Scripts-and-Repertoires.html" rel="next" title="Introduction to Scripts and Repertoires">
+<link href="Character-Concepts.html" rel="prev" title="Character Concepts">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Introduction-to-Characters"></span><div class="header">
+<p>
+Next: <a href="Introduction-to-Scripts-and-Repertoires.html" accesskey="n" rel="next">Introduction to Scripts and Repertoires</a>, Previous: <a href="Character-Concepts.html" accesskey="p" rel="prev">Character Concepts</a>, Up: <a href="Character-Concepts.html" accesskey="u" rel="up">Character Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Introduction-to-Characters-1"></span><h4 class="subsection">13.1.1 Introduction to Characters</h4>
+
+<p>A <i>character</i>
+<span id="index-character"></span>
+ is an <i>object</i> that represents a unitary token 
+(<i>e.g.</i>, a letter, a special symbol, or a &ldquo;control character&rdquo;)
+in an aggregate quantity of text
+(<i>e.g.</i>, a <i>string</i> or a text <i>stream</i>).
+</p>
+<p><span class="roman">Common Lisp</span> allows an implementation to provide support 
+for international language <i>characters</i> as well
+as <i>characters</i> used in specialized arenas (<i>e.g.</i>, mathematics).
+</p>
+<p>The following figures contain lists of <i>defined names</i> applicable to 
+<i>characters</i>.
+</p>
+<p>Figure 13&ndash;1 lists some <i>defined names</i> relating to 
+<i>character</i> <i>attributes</i> and <i>character</i> <i>predicates</i>.
+</p>
+<div class="format">
+<pre class="format">  alpha-char-p     char-not-equal     char&gt;            <!-- /@w -->
+  alphanumericp    char-not-greaterp  char&gt;=           <!-- /@w -->
+  both-case-p      char-not-lessp     digit-char-p     <!-- /@w -->
+  char-code-limit  char/=             graphic-char-p   <!-- /@w -->
+  char-equal       char&lt;              lower-case-p     <!-- /@w -->
+  char-greaterp    char&lt;=             standard-char-p  <!-- /@w -->
+  char-lessp       char=              upper-case-p     <!-- /@w -->
+
+       Figure 13&ndash;1: Character defined names &ndash; 1      <!-- /@w -->
+
+</pre></div>
+
+<p>Figure 13&ndash;2 lists some <i>character</i> construction and conversion <i>defined names</i>.
+</p>
+<div class="format">
+<pre class="format">  char-code      char-name    code-char   <!-- /@w -->
+  char-downcase  char-upcase  digit-char  <!-- /@w -->
+  char-int       character    name-char   <!-- /@w -->
+
+  Figure 13&ndash;2: Character defined names &ndash; 2<!-- /@w -->
+
+</pre></div>
+
+
+
+
+</body>
+</html>

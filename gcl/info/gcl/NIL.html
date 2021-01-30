@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>NIL (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="NIL (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="NIL (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Notational-Conventions.html" rel="up" title="Notational Conventions">
+<link href="Designators.html" rel="next" title="Designators">
+<link href="Use-of-the-Dot-Character.html" rel="prev" title="Use of the Dot Character">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="NIL"></span><div class="header">
+<p>
+Next: <a href="Designators.html" accesskey="n" rel="next">Designators</a>, Previous: <a href="Use-of-the-Dot-Character.html" accesskey="p" rel="prev">Use of the Dot Character</a>, Up: <a href="Notational-Conventions.html" accesskey="u" rel="up">Notational Conventions</a> &nbsp; </p>
+</div>
+<hr>
+<span id="NIL-1"></span><h4 class="subsubsection">1.4.1.11 NIL</h4>
+
+<span id="index-nil"></span>
+
+<span id="index-_0028_0029"></span>
+
+<span id="index-nil-2"></span>
+
+<p><b>nil</b> has a variety of meanings.
+It is a <i>symbol</i> in the <tt>COMMON-LISP</tt> <i>package</i> with the <i>name</i> <tt>&quot;NIL&quot;</tt>,
+it is <i>boolean</i> (and <i>generalized boolean</i>) <i>false</i>,
+it is the <i>empty list</i>,
+and it is the <i>name</i> of the <i>empty type</i> (a <i>subtype</i> of all <i>types</i>).
+</p>
+<p>Within <span class="roman">Common Lisp</span>, <b>nil</b> can be notated interchangeably as either <tt>NIL</tt> or <tt>()</tt>.
+By convention, the choice of notation offers a hint as to which of its many
+roles it is playing.
+</p>
+<div class="format">
+<pre class="format">  <b>For Evaluation?</b>  <b>Notation</b>  <b>Typically Implied Role</b>       <!-- /@w -->
+  ________________________________________________________<!-- /@w -->
+  Yes              <tt>nil</tt>       use as a <i>boolean</i>.            <!-- /@w -->
+  Yes              <tt>'nil</tt>      use as a <i>symbol</i>.             <!-- /@w -->
+  Yes              <tt>'()</tt>       use as an <i>empty list</i>         <!-- /@w -->
+  No               <tt>nil</tt>       use as a <i>symbol</i> or <i>boolean</i>.  <!-- /@w -->
+  No               <tt>()</tt>        use as an <i>empty list</i>.        <!-- /@w -->
+
+               Figure 1&ndash;1: Notations for NIL             <!-- /@w -->
+
+</pre></div>
+
+<p>Within this document only, <b>nil</b> is also sometimes notated as <i>false</i> to
+emphasize its role as a <i>boolean</i>.
+</p>
+<p>For example:
+</p>
+<div class="example">
+<pre class="example"> (print ())                          ;avoided
+ (defun three nil 3)                 ;avoided 
+ '(nil nil)                          ;list of two symbols
+ '(() ())                            ;list of empty lists
+ (defun three () 3)                  ;Emphasize empty parameter list.
+ (append '() '()) &rArr;  ()              ;Emphasize use of empty lists
+ (not nil) &rArr;  <i>true</i>                   ;Emphasize use as Boolean false
+ (get 'nil 'color)                   ;Emphasize use as a symbol
+</pre></div>
+
+<p>A <i>function</i> is sometimes said to &ldquo;be <i>false</i>&rdquo; or &ldquo;be <i>true</i>&rdquo;
+in some circumstance.
+Since no <i>function</i> object can be the same as <b>nil</b> 
+and all <i>function</i> <i>objects</i> represent <i>true</i> when viewed as <i>booleans</i>,
+it would be meaningless to say that the <i>function</i> was literally <i>false</i> 
+and uninteresting to say that it was literally <i>true</i>.
+Instead, these phrases are just traditional alternative ways of saying that the
+<i>function</i> &ldquo;returns <i>false</i>&rdquo; or &ldquo;returns <i>true</i>,&rdquo; respectively.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Designators.html" accesskey="n" rel="next">Designators</a>, Previous: <a href="Use-of-the-Dot-Character.html" accesskey="p" rel="prev">Use of the Dot Character</a>, Up: <a href="Notational-Conventions.html" accesskey="u" rel="up">Notational Conventions</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

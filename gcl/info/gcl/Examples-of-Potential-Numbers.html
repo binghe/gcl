@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Examples of Potential Numbers (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Examples of Potential Numbers (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Examples of Potential Numbers (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Numbers-as-Tokens.html" rel="up" title="Numbers as Tokens">
+<link href="Constructing-Numbers-from-Tokens.html" rel="next" title="Constructing Numbers from Tokens">
+<link href="Escape-Characters-and-Potential-Numbers.html" rel="prev" title="Escape Characters and Potential Numbers">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Examples-of-Potential-Numbers"></span><div class="header">
+<p>
+Previous: <a href="Escape-Characters-and-Potential-Numbers.html" accesskey="p" rel="prev">Escape Characters and Potential Numbers</a>, Up: <a href="Numbers-as-Tokens.html" accesskey="u" rel="up">Numbers as Tokens</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Examples-of-Potential-Numbers-1"></span><h4 class="subsubsection">2.3.1.3 Examples of Potential Numbers</h4>
+
+<p>As examples, the <i>tokens</i> in Figure 2&ndash;10 are <i>potential numbers</i>,
+but they are not actually numbers, and so are reserved <i>tokens</i>;
+a <i>conforming implementation</i> is permitted, but not required,
+to define their meaning.
+</p>
+<div class="format">
+<pre class="format">  <tt>1b5000</tt>                       <tt>777777q</tt>                <tt>1.7J</tt>  <tt>-3/4+6.7J</tt>  <tt>12/25/83</tt>  <!-- /@w -->
+  <tt>27^19</tt>                      <tt>3^4/5</tt>                <tt>6//7</tt>  <tt>3.1.2.6</tt>    <tt><tt>^</tt>-43<tt>^</tt></tt>   <!-- /@w -->
+  <tt>3.141_592_653_589_793_238_4</tt>  <tt>-3.7+2.6i-6.17j+19.6k</tt>  <!-- /@w -->
+
+                     Figure 2&ndash;10: Examples of reserved tokens                   <!-- /@w -->
+
+</pre></div>
+
+<p>The <i>tokens</i> in Figure 2&ndash;11 are not <i>potential numbers</i>; 
+they are always treated as <i>symbols</i>:
+</p>
+<div class="format">
+<pre class="format">  <tt>/</tt>     <tt>/5</tt>     <tt>+</tt>  <tt>1+</tt>  <tt>1-</tt>     <!-- /@w -->
+  <tt>foo+</tt>  <tt>ab.cd</tt>  <tt>_</tt>  <tt><tt>^</tt></tt>   <tt><tt>^</tt>/-</tt>  <!-- /@w -->
+
+  Figure 2&ndash;11: Examples of symbols<!-- /@w -->
+
+</pre></div>
+
+<p>The <i>tokens</i> in Figure 2&ndash;12 are <i>potential numbers</i>
+if the <i>current input base</i> is <tt>16</tt>, 
+but they are always treated as <i>symbols</i> if the <i>current input base</i> is <tt>10</tt>. 
+</p>
+<div class="format">
+<pre class="format">  <tt>bad-face</tt>  <tt>25-dec-83</tt>  <tt>a/b</tt>  <tt>fad_cafe</tt>  <tt>f<tt>^</tt></tt> <!-- /@w -->
+
+  Figure 2&ndash;12: Examples of symbols or potential numbers<!-- /@w -->
+
+</pre></div>
+
+
+
+
+</body>
+</html>

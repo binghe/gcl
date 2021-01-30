@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Sharpsign Backslash (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Sharpsign Backslash (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Sharpsign Backslash (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Sharpsign.html" rel="up" title="Sharpsign">
+<link href="Sharpsign-Single_002dQuote.html" rel="next" title="Sharpsign Single-Quote">
+<link href="Sharpsign.html" rel="prev" title="Sharpsign">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Sharpsign-Backslash"></span><div class="header">
+<p>
+Next: <a href="Sharpsign-Single_002dQuote.html" accesskey="n" rel="next">Sharpsign Single-Quote</a>, Previous: <a href="Sharpsign.html" accesskey="p" rel="prev">Sharpsign</a>, Up: <a href="Sharpsign.html" accesskey="u" rel="up">Sharpsign</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Sharpsign-Backslash-1"></span><h4 class="subsubsection">2.4.8.1 Sharpsign Backslash</h4>
+
+<p><b>Syntax:</b> <tt>#\&lt;&lt;<i>x</i>&gt;&gt;</tt>
+</p>
+<p>When the <i>token</i> <i>x</i> is a single <i>character</i> long, 
+this parses as the literal <i>character</i> <i>char</i>.
+<i>Uppercase</i> and <i>lowercase</i> letters are distinguished after <tt>#\</tt>;
+<tt>#\A</tt> and <tt>#\a</tt> denote different <i>character</i> <i>objects</i>.
+Any single <i>character</i> works after <tt>#\</tt>,
+even those that are normally special to <b>read</b>, 
+such as <i>left-parenthesis</i> and <i>right-parenthesis</i>.
+</p>
+<p>In the single <i>character</i> case,
+the <i>x</i> must be followed by a non-constituent <i>character</i>.
+After <tt>#\</tt> is read,
+the reader backs up over the <i>slash</i> and then reads a <i>token</i>,
+treating the initial <i>slash</i> as a <i>single escape</i> <i>character</i>
+(whether it really is or not in the <i>current readtable</i>).
+</p>
+<p>When the <i>token</i> <i>x</i> is more than one <i>character</i> long,
+the <i>x</i> must have the syntax of a <i>symbol</i> 
+with no embedded <i>package markers</i>.
+In this case, the <i>sharpsign</i> <i>backslash</i> notation
+parses as the <i>character</i> whose <i>name</i> is <tt>(string-upcase <i>x</i>)</tt>;
+see <a href="Character-Names.html">Character Names</a>.
+</p>
+<p>For information about how the <i>Lisp printer</i> prints <i>character</i> <i>objects</i>,
+see <a href="Printing-Characters.html">Printing Characters</a>.
+</p>
+
+
+
+</body>
+</html>

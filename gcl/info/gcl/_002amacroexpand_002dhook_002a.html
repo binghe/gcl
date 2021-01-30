@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>*macroexpand-hook* (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="*macroexpand-hook* (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="*macroexpand-hook* (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Evaluation-and-Compilation-Dictionary.html" rel="up" title="Evaluation and Compilation Dictionary">
+<link href="proclaim.html" rel="next" title="proclaim">
+<link href="symbol_002dmacrolet.html" rel="prev" title="symbol-macrolet">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="g_t_002amacroexpand_002dhook_002a"></span><div class="header">
+<p>
+Next: <a href="proclaim.html" accesskey="n" rel="next">proclaim</a>, Previous: <a href="symbol_002dmacrolet.html" accesskey="p" rel="prev">symbol-macrolet</a>, Up: <a href="Evaluation-and-Compilation-Dictionary.html" accesskey="u" rel="up">Evaluation and Compilation Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="g_t_002amacroexpand_002dhook_002a-_005bVariable_005d"></span><h4 class="subsection">3.8.15 *macroexpand-hook*                                               [Variable]</h4>
+
+<span id="Value-Type_003a_003a"></span><h4 class="subsubheading">Value Type::</h4>
+
+<p>a <i>designator</i> for a <i>function</i> of three <i>arguments</i>:
+  a <i>macro function</i>,
+  a <i>macro form</i>,
+  and an <i>environment</i> <i>object</i>.
+</p>
+<span id="Initial-Value_003a_003a"></span><h4 class="subsubheading">Initial Value::</h4>
+
+<p>a <i>designator</i> for a function that is equivalent to the <i>function</i> <b>funcall</b>,
+but that might have additional <i>implementation-dependent</i> side-effects.
+</p>
+<span id="Description_003a_003a-14"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Used as the expansion interface hook by <b>macroexpand-1</b> to 
+control the <i>macro expansion</i> process.
+When a <i>macro form</i> is to be expanded,
+this <i>function</i> is called with three arguments:
+  the <i>macro function</i>,
+  the <i>macro form</i>,
+  and the <i>environment</i> in which the <i>macro form</i> is to be expanded.
+</p>
+<p>The <i>environment</i> <i>object</i> has <i>dynamic extent</i>;
+the consequences are undefined if the <i>environment</i> <i>object</i> is 
+referred to outside the <i>dynamic extent</i> of the macro expansion function.
+</p>
+<span id="Examples_003a_003a-12"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (defun hook (expander form env)
+    (format t &quot;Now expanding: ~S~
+    (funcall expander form env)) &rArr;  HOOK 
+ (defmacro machook (x y) `(/ (+ ,x ,y) 2)) &rArr;  MACHOOK 
+ (macroexpand '(machook 1 2)) &rArr;  (/ (+ 1 2) 2), <i>true</i> 
+ (let ((*macroexpand-hook* #'hook)) (macroexpand '(machook 1 2)))
+<tt> |&gt; </tt> Now expanding (MACHOOK 1 2) 
+&rArr;  (/ (+ 1 2) 2), <i>true</i>
+</pre></div>
+
+<span id="See-Also_003a_003a-14"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="macroexpand.html">macroexpand</a>
+, <b>macroexpand-1</b>, 
+<a href="funcall.html">funcall</a>
+, <a href="Evaluation.html">Evaluation</a>
+</p>
+<span id="Notes_003a_003a-10"></span><h4 class="subsubheading">Notes::</h4>
+
+<p>The net effect of the chosen initial value is to just invoke the
+<i>macro function</i>, giving it the <i>macro form</i> and
+<i>environment</i> as its two arguments.
+</p>
+<p>Users or user programs can <i>assign</i> this <i>variable</i> to
+customize or trace the <i>macro expansion</i> mechanism.  Note, however,
+that this <i>variable</i> is a global resource, potentially shared by
+multiple <i>programs</i>; as such, if any two <i>programs</i> depend for
+their correctness on the setting of this <i>variable</i>, those
+<i>programs</i> may not be able to run in the same <i>Lisp image</i>.
+For this reason, it is frequently best to confine its uses to debugging
+situations.
+</p>
+<p>Users who put their own function into <b>*macroexpand-hook*</b>
+should consider saving the previous value of the hook, and calling that
+value from their own.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="proclaim.html" accesskey="n" rel="next">proclaim</a>, Previous: <a href="symbol_002dmacrolet.html" accesskey="p" rel="prev">symbol-macrolet</a>, Up: <a href="Evaluation-and-Compilation-Dictionary.html" accesskey="u" rel="up">Evaluation and Compilation Dictionary</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

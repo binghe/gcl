@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Errors When Calling a Next Method (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Errors When Calling a Next Method (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Errors When Calling a Next Method (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Argument-Mismatch-Detection.html" rel="up" title="Argument Mismatch Detection">
+<link href="Traversal-Rules-and-Side-Effects.html" rel="next" title="Traversal Rules and Side Effects">
+<link href="Destructuring-Mismatch.html" rel="prev" title="Destructuring Mismatch">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Errors-When-Calling-a-Next-Method"></span><div class="header">
+<p>
+Previous: <a href="Destructuring-Mismatch.html" accesskey="p" rel="prev">Destructuring Mismatch</a>, Up: <a href="Argument-Mismatch-Detection.html" accesskey="u" rel="up">Argument Mismatch Detection</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Errors-When-Calling-a-Next-Method-1"></span><h4 class="subsubsection">3.5.1.9 Errors When Calling a Next Method</h4>
+
+<p>If <b>call-next-method</b> is called with <i>arguments</i>, the ordered
+set of <i>applicable</i> <i>methods</i> for the changed set of <i>arguments</i>
+for <b>call-next-method</b> must be the same as the ordered set of 
+<i>applicable</i> <i>methods</i> for the original <i>arguments</i> to the
+<i>generic function</i>, or else an error should be signaled.
+</p>
+<p>The comparison between the set of methods applicable to the
+new arguments and the set applicable to the original arguments is
+insensitive to order differences among methods with the same
+specializers.
+</p>
+<p>If <b>call-next-method</b> is called with <i>arguments</i> that specify
+a different ordered set of <i>applicable</i> methods and there is no 
+<i>next method</i> available, the test for different methods and the 
+associated error signaling (when present) takes precedence over calling
+<b>no-next-method</b>.
+</p>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>with-standard-io-syntax (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="with-standard-io-syntax (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="with-standard-io-syntax (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Reader-Dictionary.html" rel="up" title="Reader Dictionary">
+<link href="_002aread_002dbase_002a.html" rel="next" title="*read-base*">
+<link href="set_002dsyntax_002dfrom_002dchar.html" rel="prev" title="set-syntax-from-char">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="with_002dstandard_002dio_002dsyntax"></span><div class="header">
+<p>
+Next: <a href="_002aread_002dbase_002a.html" accesskey="n" rel="next">*read-base*</a>, Previous: <a href="set_002dsyntax_002dfrom_002dchar.html" accesskey="p" rel="prev">set-syntax-from-char</a>, Up: <a href="Reader-Dictionary.html" accesskey="u" rel="up">Reader Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="with_002dstandard_002dio_002dsyntax-_005bMacro_005d"></span><h4 class="subsection">23.2.12 with-standard-io-syntax                                             [Macro]</h4>
+
+<p><code>with-standard-io-syntax</code>  <i>{<i>form</i>}*</i> &rArr;  <i>{<i>result</i>}*</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-481"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>forms</i>&mdash;an <i>implicit progn</i>.
+</p>
+<p><i>results</i>&mdash;the <i>values</i> returned by the <i>forms</i>.
+</p>
+<span id="Description_003a_003a-631"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Within the dynamic extent of the body of <i>forms</i>, all reader/printer control
+variables, including any <i>implementation-defined</i> ones not specified by
+this standard, are bound to values that produce standard read/print
+behavior.  The values for the variables specified by this standard are listed in 
+Figure 23&ndash;1.
+</p>
+<p>[Reviewer Note by Barrett: *print-pprint-dispatch* should probably be mentioned here, too.]
+</p>
+<div class="format">
+<pre class="format">  Variable                     Value                               <!-- /@w -->
+  <b>*package*</b>                    The <tt>CL-USER</tt> <i>package</i>                 <!-- /@w -->
+  <b>*print-array*</b>                <b>t</b>                                   <!-- /@w -->
+  <b>*print-base*</b>                 <tt>10</tt>                                  <!-- /@w -->
+  <b>*print-case*</b>                 <tt>:upcase</tt>                             <!-- /@w -->
+  <b>*print-circle*</b>               <b>nil</b>                                 <!-- /@w -->
+  <b>*print-escape*</b>               <b>t</b>                                   <!-- /@w -->
+  <b>*print-gensym*</b>               <b>t</b>                                   <!-- /@w -->
+  <b>*print-length*</b>               <b>nil</b>                                 <!-- /@w -->
+  <b>*print-level*</b>                <b>nil</b>                                 <!-- /@w -->
+  <b>*print-lines*</b>                <b>nil</b>                                 <!-- /@w -->
+  <b>*print-miser-width*</b>          <b>nil</b>                                 <!-- /@w -->
+  <b>*print-pprint-dispatch*</b>      The <i>standard pprint dispatch table</i>  <!-- /@w -->
+  <b>*print-pretty*</b>               <b>nil</b>                                 <!-- /@w -->
+  <b>*print-radix*</b>                <b>nil</b>                                 <!-- /@w -->
+  <b>*print-readably*</b>             <b>t</b>                                   <!-- /@w -->
+  <b>*print-right-margin*</b>         <b>nil</b>                                 <!-- /@w -->
+  <b>*read-base*</b>                  <tt>10</tt>                                  <!-- /@w -->
+  <b>*read-default-float-format*</b>  <b>single-float</b>                        <!-- /@w -->
+  <b>*read-eval*</b>                  <b>t</b>                                   <!-- /@w -->
+  <b>*read-suppress*</b>              <b>nil</b>                                 <!-- /@w -->
+  <b>*readtable*</b>                  The <i>standard readtable</i>              <!-- /@w -->
+
+         Figure 23&ndash;1: Values of standard control variables        <!-- /@w -->
+
+</pre></div>
+
+<span id="Examples_003a_003a-452"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (with-open-file (file pathname :direction :output)
+   (with-standard-io-syntax
+     (print data file)))
+
+;;; ... Later, in another Lisp:
+
+ (with-open-file (file pathname :direction :input)
+   (with-standard-io-syntax
+     (setq data (read file))))
+</pre></div>
+
+
+
+
+</body>
+</html>

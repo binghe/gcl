@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Condition Types (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Condition Types (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Condition Types (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Condition-System-Concepts.html" rel="up" title="Condition System Concepts">
+<link href="Serious-Conditions.html" rel="next" title="Serious Conditions">
+<link href="Condition-System-Concepts.html" rel="prev" title="Condition System Concepts">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Condition-Types"></span><div class="header">
+<p>
+Next: <a href="Creating-Conditions.html" accesskey="n" rel="next">Creating Conditions</a>, Previous: <a href="Condition-System-Concepts.html" accesskey="p" rel="prev">Condition System Concepts</a>, Up: <a href="Condition-System-Concepts.html" accesskey="u" rel="up">Condition System Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Condition-Types-1"></span><h4 class="subsection">9.1.1 Condition Types</h4>
+
+<p>Figure 9&ndash;1 lists the <i>standardized</i> <i>condition</i> <i>types</i>.
+Additional <i>condition</i> <i>types</i> can be defined by using <b>define-condition</b>.
+</p>
+<div class="format">
+<pre class="format"> arithmetic-error                 floating-point-overflow  simple-type-error  <!-- /@w -->
+ cell-error                       floating-point-underflow simple-warning     <!-- /@w -->
+ condition                        package-error            storage-condition  <!-- /@w -->
+ control-error                    parse-error              stream-error       <!-- /@w -->
+ division-by-zero                 print-not-readable       style-warning      <!-- /@w -->
+ end-of-file                      program-error            type-error         <!-- /@w -->
+ error                            reader-error             unbound-slot       <!-- /@w -->
+ file-error                       serious-condition        unbound-variable   <!-- /@w -->
+ floating-point-inexact           simple-condition         undefined-function <!-- /@w -->
+ floating-point-invalid-operation simple-error             warning            <!-- /@w -->
+
+                    Figure 9&ndash;1: Standardized Condition Types                  <!-- /@w -->
+
+</pre></div>
+
+<p>All <i>condition</i> types are <i>subtypes</i> of <i>type</i> <b>condition</b>.  That is,
+</p>
+<div class="example">
+<pre class="example"> (typep <i>c</i> 'condition) &rArr;  <i>true</i>
+</pre></div>
+
+<p>if and only if <i>c</i> is a <i>condition</i>.
+</p>
+<p><i>Implementations</i> must define all specified <i>subtype</i> relationships.
+Except where noted, all <i>subtype</i> relationships indicated in 
+this document are not mutually exclusive.
+A <i>condition</i> inherits the structure of its <i>supertypes</i>.
+</p>
+<p>The metaclass of the <i>class</i> <b>condition</b> is not specified.
+<i>Names</i> of <i>condition</i> <i>types</i> may be used to specify
+<i>supertype</i> relationships in <b>define-condition</b>, 
+but the consequences are not specified if an attempt is made to use
+a <i>condition</i> <i>type</i> as a <i>superclass</i> in a <b>defclass</b> <i>form</i>.
+</p>
+<p>Figure 9&ndash;2 shows <i>operators</i> that
+define <i>condition</i> <i>types</i> and creating <i>conditions</i>.
+</p>
+<div class="format">
+<pre class="format">  define-condition  make-condition    <!-- /@w -->
+
+  Figure 9&ndash;2: Operators that define and create conditions.<!-- /@w -->
+
+</pre></div>
+
+<p>Figure 9&ndash;3 shows <i>operators</i> that <i>read</i> 
+the <i>value</i> of <i>condition</i> <i>slots</i>.
+</p>
+<div class="format">
+<pre class="format">  arithmetic-error-operands   simple-condition-format-arguments  <!-- /@w -->
+  arithmetic-error-operation  simple-condition-format-control    <!-- /@w -->
+  cell-error-name             stream-error-stream                <!-- /@w -->
+  file-error-pathname         type-error-datum                   <!-- /@w -->
+  package-error-package       type-error-expected-type           <!-- /@w -->
+  print-not-readable-object   unbound-slot-instance              <!-- /@w -->
+
+         Figure 9&ndash;3: Operators that read condition slots.       <!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Serious-Conditions.html" accesskey="1">Serious Conditions</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+</body>
+</html>

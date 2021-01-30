@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Symbols as Tokens (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Symbols as Tokens (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Symbols as Tokens (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Interpretation-of-Tokens.html" rel="up" title="Interpretation of Tokens">
+<link href="Valid-Patterns-for-Tokens.html" rel="next" title="Valid Patterns for Tokens">
+<link href="The-Consing-Dot.html" rel="prev" title="The Consing Dot">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Symbols-as-Tokens"></span><div class="header">
+<p>
+Next: <a href="Valid-Patterns-for-Tokens.html" accesskey="n" rel="next">Valid Patterns for Tokens</a>, Previous: <a href="The-Consing-Dot.html" accesskey="p" rel="prev">The Consing Dot</a>, Up: <a href="Interpretation-of-Tokens.html" accesskey="u" rel="up">Interpretation of Tokens</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Symbols-as-Tokens-1"></span><h4 class="subsection">2.3.4 Symbols as Tokens</h4>
+
+<p>Any <i>token</i> that is not a <i>potential number</i>,
+does not contain a <i>package marker</i>,
+and does not consist entirely of dots
+will always be interpreted as a <i>symbol</i>.
+Any <i>token</i> that is a <i>potential number</i> but does not fit the       
+number syntax is a reserved <i>token</i> and
+has an <i>implementation-dependent</i> interpretation.
+In all other cases, the <i>token</i> is construed to be the name of a <i>symbol</i>.
+</p>
+<p>Examples of the printed representation of <i>symbols</i> are in Figure 2&ndash;15. 
+For presentational simplicity,
+these examples assume that
+the <i>readtable case</i> of the <i>current readtable</i> is <tt>:upcase</tt>.
+</p>
+<div class="format">
+<pre class="format">  <tt>FROBBOZ</tt>         The <i>symbol</i> whose <i>name</i> is <tt>FROBBOZ</tt>.                <!-- /@w -->
+  <tt>frobboz</tt>         Another way to notate the same <i>symbol</i>.           <!-- /@w -->
+  <tt>fRObBoz</tt>         Yet another way to notate it.                    <!-- /@w -->
+  <tt>unwind-protect</tt>  A <i>symbol</i> with a hyphen in its <i>name</i>.              <!-- /@w -->
+  <tt>+$</tt>             The <i>symbol</i> named <tt>+$</tt>.                            <!-- /@w -->
+  <tt>1+</tt>              The <i>symbol</i> named <tt>1+</tt>.                             <!-- /@w -->
+  <tt>+1</tt>              This is the <i>integer</i> <tt>1</tt>, not a <i>symbol</i>.             <!-- /@w -->
+  <tt>pascal_style</tt>    This <i>symbol</i> has an underscore in its <i>name</i>.       <!-- /@w -->
+  <tt>file.rel.43</tt>     This <i>symbol</i> has periods in its <i>name</i>.             <!-- /@w -->
+  <tt>\(</tt>              The <i>symbol</i> whose <i>name</i> is <tt>(</tt>.                      <!-- /@w -->
+  <tt>\+1</tt>             The <i>symbol</i> whose <i>name</i> is <tt>+1</tt>.                     <!-- /@w -->
+  <tt>+\1</tt>             Also the <i>symbol</i> whose <i>name</i> is <tt>+1</tt>.                <!-- /@w -->
+  <tt>\frobboz</tt>        The <i>symbol</i> whose <i>name</i> is <tt>fROBBOZ</tt>.                <!-- /@w -->
+  <tt>3.14159265\s0</tt>   The <i>symbol</i> whose <i>name</i> is <tt>3.14159265s0</tt>.           <!-- /@w -->
+  <tt>3.14159265\S0</tt>   A different <i>symbol</i>, whose <i>name</i> is <tt>3.14159265S0</tt>.  <!-- /@w -->
+  <tt>3.14159265s0</tt>    A possible <i>short float</i> approximation to \pi.     <!-- /@w -->
+
+  Figure 2&ndash;15: Examples of the printed representation of symbols (Part 1 of 2)<!-- /@w -->
+
+</pre></div>
+
+<div class="format">
+<pre class="format">  <tt>APL\\360</tt>               The <i>symbol</i> whose <i>name</i> is <tt>APL\360</tt>.       <!-- /@w -->
+  <tt>apl\\360</tt>               Also the <i>symbol</i> whose <i>name</i> is <tt>APL\360</tt>.  <!-- /@w -->
+  <tt>\(b<tt>^</tt>2\)\ -\ 4*a<tt>*c</tt></tt>    The <i>name</i> is <tt>(B<tt>^</tt>2) - 4*A*C</tt>.            <!-- /@w -->
+                         Parentheses and two spaces in it.       <!-- /@w -->
+  <tt>\(\b<tt>^</tt>2\)\ -\4*\a*\c</tt>  The <i>name</i> is <tt>(b<tt>^</tt>2) - 4*a*c</tt>.            <!-- /@w -->
+                         Letters explicitly lowercase.           <!-- /@w -->
+  <tt>|&quot;|</tt>                    The same as writing <tt>\&quot;</tt>.                 <!-- /@w -->
+  <tt>|(b<tt>^</tt>2) - 4*a*c|</tt>      The <i>name</i> is <tt>(b<tt>^</tt>2) - 4*a*c</tt>.            <!-- /@w -->
+  <tt>|frobboz|</tt>              The <i>name</i> is <tt>frobboz</tt>, not <tt>FROBBOZ</tt>.       <!-- /@w -->
+  <tt>|APL\360|</tt>              The <i>name</i> is <tt>APL360</tt>.                     <!-- /@w -->
+  <tt>|APL\\360|</tt>             The <i>name</i> is <tt>APL\360</tt>.                    <!-- /@w -->
+  <tt>|apl\\360|</tt>             The <i>name</i> is <tt>apl\360</tt>.                    <!-- /@w -->
+  <tt>|\|\||</tt>                 Same as <tt>\|\|</tt> &mdash;the <i>name</i> is <tt>||</tt>.          <!-- /@w -->
+  <tt>|(B<tt>^</tt>2) - 4*A*C|</tt>      The <i>name</i> is <tt>(B<tt>^</tt>2) - 4*A*C</tt>.            <!-- /@w -->
+                         Parentheses and two spaces in it.       <!-- /@w -->
+  <tt>|(b<tt>^</tt>2) - 4*a*c|</tt>      The <i>name</i> is <tt>(b<tt>^</tt>2) - 4*a*c</tt>.            <!-- /@w -->
+
+  Figure 2&ndash;16: Examples of the printed representation of symbols (Part 2 of 2)<!-- /@w -->
+
+</pre></div>
+
+<p>In the process of parsing a <i>symbol</i>,
+it is <i>implementation-dependent</i> which
+<i>implementation-defined</i> <i>attributes</i> are removed
+from the <i>characters</i> forming a <i>token</i> that represents a <i>symbol</i>.
+</p>
+<p>When parsing the syntax for a <i>symbol</i>,
+the <i>Lisp reader</i> looks up the <i>name</i> of that <i>symbol</i> 
+in the <i>current package</i>.
+This lookup may involve looking in other 
+<i>packages</i> whose <i>external symbols</i>
+are inherited by the <i>current package</i>.  If the name is found,
+the corresponding <i>symbol</i> is returned.  If the name is not found
+(that is, there is no <i>symbol</i> 
+of that name <i>accessible</i> in the <i>current package</i>),
+a new <i>symbol</i> is created and is placed in the <i>current package</i>
+as an <i>internal symbol</i>.  The <i>current package</i> becomes the owner
+(<i>home package</i>) of the <i>symbol</i>, 
+and the <i>symbol</i> becomes interned in the <i>current package</i>.
+If the name is later read again while this same <i>package</i> is
+current, the same <i>symbol</i> will be found and returned.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Valid-Patterns-for-Tokens.html" accesskey="n" rel="next">Valid Patterns for Tokens</a>, Previous: <a href="The-Consing-Dot.html" accesskey="p" rel="prev">The Consing Dot</a>, Up: <a href="Interpretation-of-Tokens.html" accesskey="u" rel="up">Interpretation of Tokens</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>elt (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="elt (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="elt (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Sequences-Dictionary.html" rel="up" title="Sequences Dictionary">
+<link href="fill.html" rel="next" title="fill">
+<link href="copy_002dseq.html" rel="prev" title="copy-seq">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="elt"></span><div class="header">
+<p>
+Next: <a href="fill.html" accesskey="n" rel="next">fill</a>, Previous: <a href="copy_002dseq.html" accesskey="p" rel="prev">copy-seq</a>, Up: <a href="Sequences-Dictionary.html" accesskey="u" rel="up">Sequences Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="elt-_005bAccessor_005d"></span><h4 class="subsection">17.3.3 elt                                                              [Accessor]</h4>
+
+<p><code>elt</code>  <i>sequence index</i> &rArr;  <i>object</i>
+</p>
+<p>(setf (<code>         elt</code> <i>sequence index</i>) new-object)<br>
+</p>
+<span id="Arguments-and-Values_003a_003a-355"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>sequence</i>&mdash;a <i>proper sequence</i>.
+</p>
+<p><i>index</i>&mdash;a <i>valid sequence index</i> for <i>sequence</i>.
+</p>
+<p><i>object</i>&mdash;an <i>object</i>.
+</p>
+<p><i>new-object</i>&mdash;an <i>object</i>.
+</p>
+<span id="Description_003a_003a-470"></span><h4 class="subsubheading">Description::</h4>
+
+<p><i>Accesses</i> the <i>element</i> of <i>sequence</i> specified by <i>index</i>.
+</p>
+<span id="Examples_003a_003a-337"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (setq str (copy-seq &quot;0123456789&quot;)) &rArr;  &quot;0123456789&quot;
+ (elt str 6) &rArr;  #\6
+ (setf (elt str 0) #\#) &rArr;  #\#
+ str &rArr;  &quot;#123456789&quot;
+</pre></div>
+
+<span id="Exceptional-Situations_003a_003a-151"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should be prepared to signal an error of <i>type</i> <b>type-error</b>
+			 if <i>sequence</i> is not a <i>proper sequence</i>.
+Should signal an error of <i>type</i> <b>type-error</b>
+			      if <i>index</i> is not a <i>valid sequence index</i> for <i>sequence</i>.
+</p>
+<span id="See-Also_003a_003a-382"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="aref.html">aref</a>
+,
+<a href="nth.html">nth</a>
+,
+</p>
+<p><a href="Compiler-Terminology.html">Compiler Terminology</a>
+</p>
+<span id="Notes_003a_003a-257"></span><h4 class="subsubheading">Notes::</h4>
+
+<p><b>aref</b> may be used to <i>access</i> <i>vector</i> 
+elements that are beyond the <i>vector</i>&rsquo;s <i>fill pointer</i>.
+</p>
+
+
+
+</body>
+</html>

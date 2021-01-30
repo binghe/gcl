@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>bit-and (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="bit-and (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="bit-and (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Arrays-Dictionary.html" rel="up" title="Arrays Dictionary">
+<link href="bit_002dvector_002dp.html" rel="next" title="bit-vector-p">
+<link href="bit-_0028Array_0029.html" rel="prev" title="bit (Array)">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="bit_002dand"></span><div class="header">
+<p>
+Next: <a href="bit_002dvector_002dp.html" accesskey="n" rel="next">bit-vector-p</a>, Previous: <a href="bit-_0028Array_0029.html" accesskey="p" rel="prev">bit (Array)</a>, Up: <a href="Arrays-Dictionary.html" accesskey="u" rel="up">Arrays Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="bit_002dand_002c-bit_002dandc1_002c-bit_002dandc2_002c-bit_002deqv_002c"></span><h4 class="subsection">15.2.34 bit-and, bit-andc1, bit-andc2, bit-eqv,</h4>
+<span id="bit_002dior_002c-bit_002dnand_002c-bit_002dnor_002c-bit_002dnot_002c-bit_002dorc1_002c-bit_002dorc2_002c-bit_002dxor"></span><h4 class="subheading">bit-ior, bit-nand, bit-nor, bit-not, bit-orc1, bit-orc2, bit-xor</h4>
+<p align="right"><i>[Function]</i>
+</p>
+<p><code>bit-and</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-andc1</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-andc2</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-eqv</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-ior</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-nand</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-nor</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-orc1</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-orc2</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-xor</code>  <i>bit-array1 bit-array2 <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<p><code>bit-not</code>  <i>bit-array <span class="roman">&amp;optional</span> opt-arg</i> &rArr;  <i>resulting-bit-array</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-343"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>bit-array</i>, <i>bit-array1</i>, <i>bit-array2</i>&mdash;a <i>bit array</i>.
+</p>
+<p><i>Opt-arg</i>&mdash;a <i>bit array</i>, or <b>t</b>, or <b>nil</b>.
+ The default is <b>nil</b>.
+</p>
+<p><i>Bit-array</i>, <i>bit-array1</i>, <i>bit-array2</i>, and <i>opt-arg</i>
+(if an <i>array</i>) must all be of the same <i>rank</i> and <i>dimensions</i>.  
+</p>
+<p><i>resulting-bit-array</i>&mdash;a <i>bit array</i>.
+</p>
+<span id="Description_003a_003a-453"></span><h4 class="subsubheading">Description::</h4>
+
+<p>These functions perform 
+bit-wise logical operations on <i>bit-array1</i> and <i>bit-array2</i>
+and return an <i>array</i> 
+of matching <i>rank</i> and <i>dimensions</i>,
+such that any given bit of the result
+is produced by operating on corresponding bits from each of the arguments.
+</p>
+<p>In the case of <b>bit-not</b>, an <i>array</i>
+of <i>rank</i> and <i>dimensions</i> matching <i>bit-array</i>
+is returned that contains a copy of <i>bit-array</i> 
+with all the bits inverted.
+</p>
+<p>If <i>opt-arg</i> is of type <tt>(array bit)</tt> the contents of the 
+result are destructively placed into <i>opt-arg</i>.
+If <i>opt-arg</i> is the symbol <b>t</b>,
+<i>bit-array</i> or <i>bit-array1</i> is replaced with the result; 
+if <i>opt-arg</i> is <b>nil</b> or omitted, a new <i>array</i> is created
+to contain the result.  
+</p>
+<p>Figure 15&ndash;4 indicates the logical operation
+performed by each of the <i>functions</i>.
+</p>
+<p>2
+</p><div class="format">
+<pre class="format"><b>Function</b>                                                   <b>Operation</b>                                   <!-- /@w -->
+_______________________________________________________________________________________________________<!-- /@w -->
+                                                           <!-- /@w -->
+<b>bit-and</b>                                                    and                                         <!-- /@w -->
+<b>bit-eqv</b>                                                    equivalence (exclusive nor)                 <!-- /@w -->
+<b>bit-not</b>                                                    complement                                  <!-- /@w -->
+<b>bit-ior</b>                                                    inclusive or                                <!-- /@w -->
+<b>bit-xor</b>                                                    exclusive or                                <!-- /@w -->
+<b>bit-nand</b>                                                   complement of <i>bit-array1</i> and <i>bit-array2</i>     <!-- /@w -->
+<b>bit-nor</b>                                                    complement of <i>bit-array1</i> or <i>bit-array2</i>      <!-- /@w -->
+<b>bit-andc1</b>                                                  and complement of <i>bit-array1</i> with <i>bit-array2</i><!-- /@w -->
+<b>bit-andc2</b>                                                  and <i>bit-array1</i> with complement of <i>bit-array2</i><!-- /@w -->
+<b>bit-orc1</b>                                                   or complement of <i>bit-array1</i> with <i>bit-array2</i> <!-- /@w -->
+<b>bit-orc2</b>                                                   or <i>bit-array1</i> with complement of <i>bit-array2</i> <!-- /@w -->
+  Figure 15&ndash;3: Bit-wise Logical Operations on Bit Arrays<!-- /@w -->
+<!-- /@w -->
+</pre></div>
+
+<span id="Examples_003a_003a-325"></span><h4 class="subsubheading">Examples::</h4>
+<div class="example">
+<pre class="example"> (bit-and (setq ba #*11101010) #*01101011) &rArr;  #*01101010
+ (bit-and #*1100 #*1010) &rArr;  #*1000      
+ (bit-andc1 #*1100 #*1010) &rArr;  #*0010
+ (setq rba (bit-andc2 ba #*00110011 t)) &rArr;  #*11001000
+ (eq rba ba) &rArr;  <i>true</i>
+ (bit-not (setq ba #*11101010)) &rArr;  #*00010101
+ (setq rba (bit-not ba 
+                     (setq tba (make-array 8 
+                                           :element-type 'bit))))
+&rArr;  #*00010101
+ (equal rba tba) &rArr;  <i>true</i>
+ (bit-xor #*1100 #*1010) &rArr;  #*0110
+</pre></div>
+
+<span id="See-Also_003a_003a-372"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><b>lognot</b>, 
+<a href="logand.html">logand</a>
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="bit_002dvector_002dp.html" accesskey="n" rel="next">bit-vector-p</a>, Previous: <a href="bit-_0028Array_0029.html" accesskey="p" rel="prev">bit (Array)</a>, Up: <a href="Arrays-Dictionary.html" accesskey="u" rel="up">Arrays Dictionary</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

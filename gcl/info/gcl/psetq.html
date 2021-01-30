@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>psetq (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="psetq (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="psetq (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Data-and-Control-Flow-Dictionary.html" rel="up" title="Data and Control Flow Dictionary">
+<link href="block.html" rel="next" title="block">
+<link href="setq.html" rel="prev" title="setq">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="psetq"></span><div class="header">
+<p>
+Next: <a href="block.html" accesskey="n" rel="next">block</a>, Previous: <a href="setq.html" accesskey="p" rel="prev">setq</a>, Up: <a href="Data-and-Control-Flow-Dictionary.html" accesskey="u" rel="up">Data and Control Flow Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="psetq-_005bMacro_005d"></span><h4 class="subsection">5.3.21 psetq                                                               [Macro]</h4>
+
+<p><code>psetq</code>  <i>{!<i>pair</i>}*</i> &rArr;  <i><b>nil</b></i>
+</p>
+<p><i>pair</i>&nbsp;::=var&nbsp;form<!-- /@w -->
+</p>
+<span id="Pronunciation_003a_003a-3"></span><h4 class="subsubheading">Pronunciation::</h4>
+
+<p><b>psetq</b>: pronounced
+</p>
+<span id="Arguments-and-Values_003a_003a-42"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>var</i>&mdash;a <i>symbol</i> naming a <i>variable</i> other than a <i>constant variable</i>.
+</p>
+<p><i>form</i>&mdash;a <i>form</i>.
+</p>
+<span id="Description_003a_003a-74"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Assigns values to <i>variables</i>.
+</p>
+<p>This is just like <b>setq</b>, except that the assignments 
+happen &ldquo;in parallel.&rdquo;  That is, first all of the forms are
+evaluated, and only then are the variables set to the resulting values.
+In this way, the assignment to one variable does not affect the value
+computation of another in the way that would occur with <b>setq</b>&rsquo;s 
+sequential assignment.
+</p>
+<p>If any <i>var</i> refers to a <i>binding</i> 
+made by <b>symbol-macrolet</b>,
+then that <i>var</i> is treated as if <b>psetf</b> (not <b>psetq</b>)
+had been used.
+</p>
+<span id="Examples_003a_003a-48"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> ;; A simple use of PSETQ to establish values for variables.
+ ;; As a matter of style, many programmers would prefer SETQ 
+ ;; in a simple situation like this where parallel assignment
+ ;; is not needed, but the two have equivalent effect.
+ (psetq a 1 b 2 c 3) &rArr;  NIL
+ a &rArr;  1
+ b &rArr;  2
+ c &rArr;  3
+
+ ;; Use of PSETQ to update values by parallel assignment.
+ ;; The effect here is very different than if SETQ had been used.
+ (psetq a (1+ b) b (1+ a) c (+ a b)) &rArr;  NIL
+ a &rArr;  3
+ b &rArr;  2
+ c &rArr;  3
+
+ ;; Use of PSETQ on a symbol macro.
+ (let ((x (list 10 20 30)))
+   (symbol-macrolet ((y (car x)) (z (cadr x)))
+     (psetq y (1+ z) z (1+ y))
+     (list x y z)))
+&rArr;  ((21 11 30) 21 11)
+
+ ;; Use of parallel assignment to swap values of A and B.
+ (let ((a 1) (b 2))
+   (psetq a b  b a)
+   (values a b))
+&rArr;  2, 1
+</pre></div>
+
+<span id="Side-Effects_003a_003a-2"></span><h4 class="subsubheading">Side Effects::</h4>
+
+<p>The values of <i>forms</i> are assigned to <i>vars</i>.
+</p>
+<span id="See-Also_003a_003a-59"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><b>psetf</b>,
+<a href="setq.html">setq</a>
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="block.html" accesskey="n" rel="next">block</a>, Previous: <a href="setq.html" accesskey="p" rel="prev">setq</a>, Up: <a href="Data-and-Control-Flow-Dictionary.html" accesskey="u" rel="up">Data and Control Flow Dictionary</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

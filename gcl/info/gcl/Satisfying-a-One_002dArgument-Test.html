@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Satisfying a One-Argument Test (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Satisfying a One-Argument Test (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Satisfying a One-Argument Test (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Rules-about-Test-Functions.html" rel="up" title="Rules about Test Functions">
+<link href="Examples-of-Satisfying-a-One_002dArgument-Test.html" rel="next" title="Examples of Satisfying a One-Argument Test">
+<link href="Examples-of-Satisfying-a-Two_002dArgument-Test.html" rel="prev" title="Examples of Satisfying a Two-Argument Test">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Satisfying-a-One_002dArgument-Test"></span><div class="header">
+<p>
+Previous: <a href="Satisfying-a-Two_002dArgument-Test.html" accesskey="p" rel="prev">Satisfying a Two-Argument Test</a>, Up: <a href="Rules-about-Test-Functions.html" accesskey="u" rel="up">Rules about Test Functions</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Satisfying-a-One_002dArgument-Test-1"></span><h4 class="subsection">17.2.2 Satisfying a One-Argument Test</h4>
+
+<p>When using one of the <i>functions</i> in Figure 17&ndash;3,
+the elements E of a <i>sequence</i> S are filtered
+not on the basis of the presence or absence of an object O 
+under a two <i>argument</i> <i>predicate</i>,
+as with the <i>functions</i> described in <a href="Satisfying-a-Two_002dArgument-Test.html">Satisfying a Two-Argument Test</a>,
+but rather on the basis of a one <i>argument</i> <i>predicate</i>.
+</p>
+<div class="format">
+<pre class="format">  assoc-if       member-if           rassoc-if          <!-- /@w -->
+  assoc-if-not   member-if-not       rassoc-if-not      <!-- /@w -->
+  count-if       nsubst-if           remove-if          <!-- /@w -->
+  count-if-not   nsubst-if-not       remove-if-not      <!-- /@w -->
+  delete-if      nsubstitute-if      subst-if           <!-- /@w -->
+  delete-if-not  nsubstitute-if-not  subst-if-not       <!-- /@w -->
+  find-if        position-if         substitute-if      <!-- /@w -->
+  find-if-not    position-if-not     substitute-if-not  <!-- /@w -->
+
+  Figure 17&ndash;3: Operators that have One-Argument Tests to be Satisfied<!-- /@w -->
+
+</pre></div>
+
+<p>The element E_i might not be considered directly.
+If a <tt>:key</tt> <i>argument</i> is provided,
+it is a <i>designator</i> for a <i>function</i> of one <i>argument</i> 
+to be called with each E_i as an <i>argument</i>, 
+and <i>yielding</i> an <i>object</i> Z_i to be used for comparison.
+(If there is no <tt>:key</tt> <i>argument</i>, Z_i is E_i.)
+</p>
+<p><i>Functions</i> defined in this specification and having a name that
+ends in &ldquo;<tt>-if</tt>&rdquo; accept a first <i>argument</i> that is a <i>designator</i> for a 
+<i>function</i> of one <i>argument</i>, Z_i.
+An E_i is said to <i>satisfy the test</i>
+<span id="index-satisfy-the-test-2"></span>
+ if this <tt>:test</tt> <i>function</i>
+returns a <i>generalized boolean</i> representing <i>true</i>.
+</p>
+<p><i>Functions</i> defined in this specification and having a name that
+ends in &ldquo;<tt>-if-not</tt>&rdquo; accept a first <i>argument</i> that is a <i>designator</i> for a 
+<i>function</i> of one <i>argument</i>, Z_i.
+An E_i is said to <i>satisfy the test</i>
+<span id="index-satisfy-the-test-3"></span>
+ if this <tt>:test</tt> <i>function</i>
+returns a <i>generalized boolean</i> representing <i>false</i>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Examples-of-Satisfying-a-One_002dArgument-Test.html" accesskey="1">Examples of Satisfying a One-Argument Test</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Satisfying-a-Two_002dArgument-Test.html" accesskey="p" rel="prev">Satisfying a Two-Argument Test</a>, Up: <a href="Rules-about-Test-Functions.html" accesskey="u" rel="up">Rules about Test Functions</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>boole (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="boole (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="boole (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Numbers-Dictionary.html" rel="up" title="Numbers Dictionary">
+<link href="boole_002d1.html" rel="next" title="boole-1">
+<link href="parse_002dinteger.html" rel="prev" title="parse-integer">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="boole"></span><div class="header">
+<p>
+Next: <a href="boole_002d1.html" accesskey="n" rel="next">boole-1</a>, Previous: <a href="parse_002dinteger.html" accesskey="p" rel="prev">parse-integer</a>, Up: <a href="Numbers-Dictionary.html" accesskey="u" rel="up">Numbers Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="boole-_005bFunction_005d"></span><h4 class="subsection">12.2.60 boole                                                            [Function]</h4>
+
+<p><code>boole</code>  <i>op integer-1 integer-2</i> &rArr;  <i>result-integer</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-243"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>Op</i>&mdash;a <i>bit-wise logical operation specifier</i>.
+</p>
+<p><i>integer-1</i>&mdash;an <i>integer</i>.
+</p>
+<p><i>integer-2</i>&mdash;an <i>integer</i>.
+</p>
+<p><i>result-integer</i>&mdash;an <i>integer</i>.
+</p>
+<span id="Description_003a_003a-325"></span><h4 class="subsubheading">Description::</h4>
+
+<p><b>boole</b> performs bit-wise logical operations on
+<i>integer-1</i> and <i>integer-2</i>, which are treated as if
+they were binary and in two&rsquo;s complement representation.
+</p>
+<p>The operation to be performed and the return value are determined by 
+<i>op</i>.  
+</p>
+<p><b>boole</b> returns the values 
+specified for any <i>op</i> in Figure 12&ndash;16.
+</p>
+
+
+<div class="format">
+<pre class="format">  Op           Result                                      <!-- /@w -->
+  <b>boole-1</b>      <i>integer-1</i>                                   <!-- /@w -->
+  <b>boole-2</b>      <i>integer-2</i>                                   <!-- /@w -->
+  <b>boole-andc1</b>  and complement of <i>integer-1</i> with <i>integer-2</i>  <!-- /@w -->
+  <b>boole-andc2</b>  and <i>integer-1</i> with complement of <i>integer-2</i>  <!-- /@w -->
+  <b>boole-and</b>    and                                         <!-- /@w -->
+  <b>boole-c1</b>     complement of <i>integer-1</i>                     <!-- /@w -->
+  <b>boole-c2</b>     complement of <i>integer-2</i>                     <!-- /@w -->
+  <b>boole-clr</b>    always 0 (all zero bits)                    <!-- /@w -->
+  <b>boole-eqv</b>    equivalence (exclusive nor)                 <!-- /@w -->
+  <b>boole-ior</b>    inclusive or                                <!-- /@w -->
+  <b>boole-nand</b>   not-and                                     <!-- /@w -->
+  <b>boole-nor</b>    not-or                                      <!-- /@w -->
+  <b>boole-orc1</b>   or complement of <i>integer-1</i> with <i>integer-2</i>   <!-- /@w -->
+  <b>boole-orc2</b>   or <i>integer-1</i> with complement of <i>integer-2</i>   <!-- /@w -->
+  <b>boole-set</b>    always -1 (all one bits)                    <!-- /@w -->
+  <b>boole-xor</b>    exclusive or                                <!-- /@w -->
+
+         Figure 12&ndash;16: Bit-Wise Logical Operations        <!-- /@w -->
+
+</pre></div>
+
+
+
+<span id="Examples_003a_003a-227"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (boole boole-ior 1 16) &rArr;  17
+ (boole boole-and -2 5) &rArr;  4
+ (boole boole-eqv 17 15) &rArr;  -31
+
+;;; These examples illustrate the result of applying BOOLE and each
+;;; of the possible values of OP to each possible combination of bits.
+ (progn
+   (format t &quot;~&amp;Results of (BOOLE &lt;op&gt; #b0011 #b0101) ...~
+           ~
+   (dolist (symbol '(boole-1     boole-2    boole-and  boole-andc1
+                     boole-andc2 boole-c1   boole-c2   boole-clr
+                     boole-eqv   boole-ior  boole-nand boole-nor
+                     boole-orc1  boole-orc2 boole-set  boole-xor))
+     (let ((result (boole (symbol-value symbol) #b0011 #b0101)))
+       (format t &quot;~&amp; ~A~13T~3,' D~23T~:*~5,' B~31T ...~4,'0B~
+               symbol result (logand result #b1111)))))
+<tt> |&gt; </tt> Results of (BOOLE &lt;op&gt; #b0011 #b0101) ...
+<tt> |&gt; </tt> ---Op-------Decimal-----Binary----Bits---
+<tt> |&gt; </tt>  BOOLE-1       3          11    ...0011
+<tt> |&gt; </tt>  BOOLE-2       5         101    ...0101
+<tt> |&gt; </tt>  BOOLE-AND     1           1    ...0001
+<tt> |&gt; </tt>  BOOLE-ANDC1   4         100    ...0100
+<tt> |&gt; </tt>  BOOLE-ANDC2   2          10    ...0010
+<tt> |&gt; </tt>  BOOLE-C1     -4        -100    ...1100
+<tt> |&gt; </tt>  BOOLE-C2     -6        -110    ...1010
+<tt> |&gt; </tt>  BOOLE-CLR     0           0    ...0000
+<tt> |&gt; </tt>  BOOLE-EQV    -7        -111    ...1001
+<tt> |&gt; </tt>  BOOLE-IOR     7         111    ...0111
+<tt> |&gt; </tt>  BOOLE-NAND   -2         -10    ...1110
+<tt> |&gt; </tt>  BOOLE-NOR    -8       -1000    ...1000
+<tt> |&gt; </tt>  BOOLE-ORC1   -3         -11    ...1101
+<tt> |&gt; </tt>  BOOLE-ORC2   -5        -101    ...1011
+<tt> |&gt; </tt>  BOOLE-SET    -1          -1    ...1111
+<tt> |&gt; </tt>  BOOLE-XOR     6         110    ...0110
+&rArr;  NIL
+</pre></div>
+
+<span id="Exceptional-Situations_003a_003a-101"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should signal <b>type-error</b> if its first argument is not a 
+<i>bit-wise logical operation specifier</i> or if any subsequent argument is not
+an <i>integer</i>.
+</p>
+<span id="See-Also_003a_003a-270"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="logand.html">logand</a>
+</p>
+<span id="Notes_003a_003a-171"></span><h4 class="subsubheading">Notes::</h4>
+
+<p>In general,
+</p>
+<div class="example">
+<pre class="example"> (boole boole-and x y) &equiv; (logand x y)
+</pre></div>
+
+<p><i>Programmers</i> who would prefer to use numeric indices rather than 
+<i>bit-wise logical operation specifiers</i> can get an equivalent effect
+by a technique such as the following:
+</p>
+<div class="example">
+<pre class="example">;; The order of the values in this `table' are such that
+;; (logand (boole (elt boole-n-vector n) #b0101 #b0011) #b1111) =&gt; n
+ (defconstant boole-n-vector
+    (vector boole-clr   boole-and  boole-andc1 boole-2
+            boole-andc2 boole-1    boole-xor   boole-ior
+            boole-nor   boole-eqv  boole-c1    boole-orc1
+            boole-c2    boole-orc2 boole-nand  boole-set))
+&rArr;  BOOLE-N-VECTOR
+ (proclaim '(inline boole-n))
+&rArr;  <i>implementation-dependent</i>
+ (defun boole-n (n integer &amp;rest more-integers)
+   (apply #'boole (elt boole-n-vector n) integer more-integers))
+&rArr;  BOOLE-N
+ (boole-n #b0111 5 3) &rArr;  7
+ (boole-n #b0001 5 3) &rArr;  1
+ (boole-n #b1101 5 3) &rArr;  -3
+ (loop for n from #b0000 to #b1111 collect (boole-n n 5 3))
+&rArr;  (0 1 2 3 4 5 6 7 -8 -7 -6 -5 -4 -3 -2 -1)
+</pre></div>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="boole_002d1.html" accesskey="n" rel="next">boole-1</a>, Previous: <a href="parse_002dinteger.html" accesskey="p" rel="prev">parse-integer</a>, Up: <a href="Numbers-Dictionary.html" accesskey="u" rel="up">Numbers Dictionary</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

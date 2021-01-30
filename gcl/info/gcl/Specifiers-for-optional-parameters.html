@@ -1,0 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Specifiers for optional parameters (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Specifiers for optional parameters (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Specifiers for optional parameters (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Ordinary-Lambda-Lists.html" rel="up" title="Ordinary Lambda Lists">
+<link href="A-specifier-for-a-rest-parameter.html" rel="next" title="A specifier for a rest parameter">
+<link href="Specifiers-for-the-required-parameters.html" rel="prev" title="Specifiers for the required parameters">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Specifiers-for-optional-parameters"></span><div class="header">
+<p>
+Next: <a href="A-specifier-for-a-rest-parameter.html" accesskey="n" rel="next">A specifier for a rest parameter</a>, Previous: <a href="Specifiers-for-the-required-parameters.html" accesskey="p" rel="prev">Specifiers for the required parameters</a>, Up: <a href="Ordinary-Lambda-Lists.html" accesskey="u" rel="up">Ordinary Lambda Lists</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Specifiers-for-optional-parameters-1"></span><h4 class="subsubsection">3.4.1.2 Specifiers for optional parameters</h4>
+
+<span id="index-_0026optional"></span>
+
+<p>If <b>&amp;optional</b> is present,
+the optional parameter specifiers are those following 
+<b>&amp;optional</b> 
+up to the next <i>lambda list keyword</i> or the end of the list.
+If optional parameters are specified, then each one is processed as
+follows.  If any unprocessed arguments remain, then the parameter variable
+<i>var</i> is bound to the next remaining argument, just as for a required
+parameter.  If no arguments remain, however, then <i>init-form</i> 
+is evaluated, and the parameter variable
+is bound to the resulting value 
+(or to <b>nil</b> if no <i>init-form</i> appears
+in the parameter specifier).
+If another variable name <i>supplied-p-parameter</i> 
+appears in the specifier, it is bound
+to <i>true</i> if an argument had been available, and to <i>false</i> if no
+argument remained (and therefore <i>init-form</i> had to be evaluated).
+<i>Supplied-p-parameter</i>
+is bound not to an argument but to a value indicating whether or not
+an argument had been supplied for the corresponding <i>var</i>.
+</p>
+
+
+
+</body>
+</html>

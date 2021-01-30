@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>acons (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="acons (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="acons (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Conses-Dictionary.html" rel="up" title="Conses Dictionary">
+<link href="assoc.html" rel="next" title="assoc">
+<link href="mapc.html" rel="prev" title="mapc">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="acons"></span><div class="header">
+<p>
+Next: <a href="assoc.html" accesskey="n" rel="next">assoc</a>, Previous: <a href="mapc.html" accesskey="p" rel="prev">mapc</a>, Up: <a href="Conses-Dictionary.html" accesskey="u" rel="up">Conses Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="acons-_005bFunction_005d"></span><h4 class="subsection">14.2.35 acons                                                            [Function]</h4>
+
+<p><code>acons</code>  <i>key datum alist</i> &rArr;  <i>new-alist</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-304"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>key</i>&mdash;an <i>object</i>.
+</p>
+<p><i>datum</i>&mdash;an <i>object</i>.
+</p>
+<p><i>alist</i>&mdash;an <i>association list</i>.
+</p>
+<p><i>new-alist</i>&mdash;an <i>association list</i>.
+</p>
+<span id="Description_003a_003a-405"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Creates a <i>fresh</i> <i>cons</i>,
+the <i>cdr</i> of which is <i>alist</i> and
+the <i>car</i> of which is another <i>fresh</i> <i>cons</i>,
+ the <i>car</i> of which is <i>key</i> and
+ the <i>cdr</i> of which is <i>datum</i>.
+</p>
+<span id="Examples_003a_003a-288"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (setq alist '()) &rArr;  NIL
+ (acons 1 &quot;one&quot; alist) &rArr;  ((1 . &quot;one&quot;))
+ alist &rArr;  NIL
+ (setq alist (acons 1 &quot;one&quot; (acons 2 &quot;two&quot; alist))) &rArr;  ((1 . &quot;one&quot;) (2 . &quot;two&quot;))
+ (assoc 1 alist) &rArr;  (1 . &quot;one&quot;)
+ (setq alist (acons 1 &quot;uno&quot; alist)) &rArr;  ((1 . &quot;uno&quot;) (1 . &quot;one&quot;) (2 . &quot;two&quot;))
+ (assoc 1 alist) &rArr;  (1 . &quot;uno&quot;)
+</pre></div>
+
+<span id="See-Also_003a_003a-329"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="assoc.html">assoc</a>
+, 
+<a href="pairlis.html">pairlis</a>
+</p>
+<span id="Notes_003a_003a-219"></span><h4 class="subsubheading">Notes::</h4>
+
+<div class="example">
+<pre class="example">(acons <i>key</i> <i>datum</i> <i>alist</i>) &equiv; (cons (cons <i>key</i> <i>datum</i>) <i>alist</i>)
+</pre></div>
+
+
+
+
+</body>
+</html>

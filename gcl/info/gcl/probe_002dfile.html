@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>probe-file (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="probe-file (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="probe-file (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Files-Dictionary.html" rel="up" title="Files Dictionary">
+<link href="ensure_002ddirectories_002dexist.html" rel="next" title="ensure-directories-exist">
+<link href="directory.html" rel="prev" title="directory">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="probe_002dfile"></span><div class="header">
+<p>
+Next: <a href="ensure_002ddirectories_002dexist.html" accesskey="n" rel="next">ensure-directories-exist</a>, Previous: <a href="directory.html" accesskey="p" rel="prev">directory</a>, Up: <a href="Files-Dictionary.html" accesskey="u" rel="up">Files Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="probe_002dfile-_005bFunction_005d"></span><h4 class="subsection">20.2.2 probe-file                                                       [Function]</h4>
+
+<p><code>probe-file</code>  <i>pathspec</i> &rArr;  <i>truename</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-404"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>pathspec</i>&mdash;a <i>pathname designator</i>.
+</p>
+<p><i>truename</i>&mdash;a <i>physical pathname</i> or <b>nil</b>.
+</p>
+<span id="Description_003a_003a-523"></span><h4 class="subsubheading">Description::</h4>
+
+<p><b>probe-file</b> tests whether a file exists.
+</p>
+<p><b>probe-file</b> returns <i>false</i> if there is no file named <i>pathspec</i>,
+and otherwise returns the <i>truename</i> of <i>pathspec</i>.
+</p>
+<p>If the <i>pathspec</i> <i>designator</i> is an open <i>stream</i>,
+then <b>probe-file</b> produces the <i>truename</i> of its associated <i>file</i>.
+</p>
+<p>If <i>pathspec</i> is a <i>stream</i>, whether open or closed,
+it is coerced to a <i>pathname</i> as if by the <i>function</i> <b>pathname</b>.
+</p>
+<span id="Affected-By_003a_003a-76"></span><h4 class="subsubheading">Affected By::</h4>
+
+<p>The host computer&rsquo;s file system.
+</p>
+<span id="Exceptional-Situations_003a_003a-184"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>An error of <i>type</i> <b>file-error</b> is signaled if <i>pathspec</i> is <i>wild</i>.
+</p>
+<p>An error of <i>type</i> <b>file-error</b> is signaled
+if the <i>file system</i> cannot perform the requested operation.
+</p>
+<span id="See-Also_003a_003a-426"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="truename.html">truename</a>
+,
+<a href="open.html">open</a>
+,
+<a href="ensure_002ddirectories_002dexist.html">ensure-directories-exist</a>
+,
+<b>pathname</b>,
+</p>
+<p><b>logical-pathname</b>,
+</p>
+<p><a href="File-System-Concepts.html">File System Concepts</a>,
+<a href="File-Operations-on-Open-and-Closed-Streams.html">File Operations on Open and Closed Streams</a>,
+</p>
+<p><a href="Pathnames-as-Filenames.html">Pathnames as Filenames</a>
+</p>
+
+
+
+</body>
+</html>

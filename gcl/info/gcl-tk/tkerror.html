@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>tkerror (GCL TK Manual)</title>
+
+<meta name="description" content="tkerror (GCL TK Manual)">
+<meta name="keywords" content="tkerror (GCL TK Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Control.html" rel="up" title="Control">
+<link href="tkvars.html" rel="next" title="tkvars">
+<link href="tk.html" rel="prev" title="tk">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="tkerror"></span><div class="header">
+<p>
+Next: <a href="tkvars.html" accesskey="n" rel="next">tkvars</a>, Previous: <a href="tk.html" accesskey="p" rel="prev">tk</a>, Up: <a href="Control.html" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<span id="tkerror-1"></span><h3 class="section">3.20 tkerror</h3>
+
+<p>tkerror \- Command invoked to process background errors
+</p><span id="Synopsis-33"></span><h4 class="unnumberedsubsec">Synopsis</h4>
+<p><b>tkerror </b><i>message</i>
+</p>
+<span id="Description-31"></span><h4 class="unnumberedsubsec">Description</h4>
+
+<p>The <b>tkerror</b> command doesn&rsquo;t exist as built-in part of Tk.  Instead,
+individual applications or users can define a <b>tkerror</b>
+command (e.g. as a Tcl procedure) if they wish to handle background
+errors.
+</p>
+<p>A background error is one that occurs in a command that didn&rsquo;t
+originate with the application.  For example, if an error occurs
+while executing a command specified with a <b>bind</b><span class="roman"> of </span><b>after</b>
+command, then it is a background error.  For a non-background error,
+the error can simply be returned up through nested Tcl command
+evaluations until it reaches the top-level code in the application;
+then the application can report the error in whatever way it
+wishes.  When a background error occurs, the unwinding ends in
+the Tk library and there is no obvious way for Tk to report
+the error.
+</p>
+<p>When Tk detects a background error, it invokes the <b>tkerror</b>
+command, passing it the error message as its only argument.
+Tk assumes that the application has implemented the <b>tkerror</b>
+command, and that the command will report the error in a way that
+makes sense for the application.  Tk will ignore any result returned
+by the <b>tkerror</b> command.
+</p>
+<p>If another Tcl error occurs within the <b>tkerror</b> command
+then Tk reports the error itself by writing a message
+to stderr.
+</p>
+<p>The Tk script library includes a default <b>tkerror</b> procedure
+that posts a dialog box containing the error message and offers
+the user a chance to see a stack trace that shows where the
+error occurred.
+</p>
+<span id="Keywords-34"></span><h4 class="unnumberedsubsec">Keywords</h4>
+<p>background error, reporting
+</p><hr>
+<div class="header">
+<p>
+Next: <a href="tkvars.html" accesskey="n" rel="next">tkvars</a>, Previous: <a href="tk.html" accesskey="p" rel="prev">tk</a>, Up: <a href="Control.html" accesskey="u" rel="up">Control</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

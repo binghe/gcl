@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>class-name (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="class-name (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="class-name (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Objects-Dictionary.html" rel="up" title="Objects Dictionary">
+<link href="setf-class_002dname.html" rel="next" title="setf class-name">
+<link href="initialize_002dinstance.html" rel="prev" title="initialize-instance">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="class_002dname"></span><div class="header">
+<p>
+Next: <a href="setf-class_002dname.html" accesskey="n" rel="next">setf class-name</a>, Previous: <a href="initialize_002dinstance.html" accesskey="p" rel="prev">initialize-instance</a>, Up: <a href="Objects-Dictionary.html" accesskey="u" rel="up">Objects Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="class_002dname-_005bStandard-Generic-Function_005d"></span><h4 class="subsection">7.7.37 class-name                                      [Standard Generic Function]</h4>
+
+<span id="Syntax_003a_003a-34"></span><h4 class="subsubheading">Syntax::</h4>
+
+<p><code>class-name</code>  <i>class</i> &rArr;  <i>name</i>
+</p>
+<span id="Method-Signatures_003a_003a-20"></span><h4 class="subsubheading">Method Signatures::</h4>
+
+<p><code>class-name</code>  <i><span class="roman">(</span><i>class</i> <b>class</b><span class="roman">)</span></i>
+</p>
+<span id="Arguments-and-Values_003a_003a-125"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>class</i>&mdash;a <i>class</i> <i>object</i>.
+</p>
+<p><i>name</i>&mdash;a <i>symbol</i>.
+</p>
+<span id="Description_003a_003a-164"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Returns the <i>name</i> of the given <i>class</i>.
+</p>
+<span id="See-Also_003a_003a-146"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="find_002dclass.html">find-class</a>
+,
+<a href="Classes.html">Classes</a>
+</p>
+<span id="Notes_003a_003a-91"></span><h4 class="subsubheading">Notes::</h4>
+
+<p>If S is a <i>symbol</i> such that S =<tt>(class-name C)</tt>
+and C =<tt>(find-class S)</tt>, then S is the proper name of C.
+For further discussion, see <a href="Classes.html">Classes</a>.
+</p>
+<p>The name of an anonymous <i>class</i> is <b>nil</b>.
+</p>
+
+
+
+</body>
+</html>

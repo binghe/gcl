@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Inititialization (GCL SI Manual)</title>
+
+<meta name="description" content="Inititialization (GCL SI Manual)">
+<meta name="keywords" content="Inititialization (GCL SI Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Miscellaneous.html" rel="up" title="Miscellaneous">
+<link href="Low-Level-X-Interface.html" rel="next" title="Low Level X Interface">
+<link href="Environment.html" rel="prev" title="Environment">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Inititialization"></span><div class="header">
+<p>
+Next: <a href="Low-Level-X-Interface.html" accesskey="n" rel="next">Low Level X Interface</a>, Previous: <a href="Environment.html" accesskey="p" rel="prev">Environment</a>, Up: <a href="Miscellaneous.html" accesskey="u" rel="up">Miscellaneous</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="Initialization"></span><h3 class="section">19.2 Initialization</h3>
+
+<p>If the file init.lsp exists in the current directory, it is
+loaded at startup.  The first argument passed to the executable image
+should be the system directory.  Normally this would be gcl/unixport.
+This directory is stored in the si::*system-directory* variable.  If
+the file sys-init.lsp exists in the system directory, it is loaded
+before init.lsp.  See also si::*TOP-LEVEL-HOOK*.
+</p>
+
+
+
+</body>
+</html>

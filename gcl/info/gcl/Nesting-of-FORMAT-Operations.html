@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Nesting of FORMAT Operations (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Nesting of FORMAT Operations (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Nesting of FORMAT Operations (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Additional-Information-about-FORMAT-Operations.html" rel="up" title="Additional Information about FORMAT Operations">
+<link href="Missing-and-Additional-FORMAT-Arguments.html" rel="next" title="Missing and Additional FORMAT Arguments">
+<link href="Additional-Information-about-FORMAT-Operations.html" rel="prev" title="Additional Information about FORMAT Operations">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Nesting-of-FORMAT-Operations"></span><div class="header">
+<p>
+Next: <a href="Missing-and-Additional-FORMAT-Arguments.html" accesskey="n" rel="next">Missing and Additional FORMAT Arguments</a>, Previous: <a href="Additional-Information-about-FORMAT-Operations.html" accesskey="p" rel="prev">Additional Information about FORMAT Operations</a>, Up: <a href="Additional-Information-about-FORMAT-Operations.html" accesskey="u" rel="up">Additional Information about FORMAT Operations</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Nesting-of-FORMAT-Operations-1"></span><h4 class="subsubsection">22.3.10.1 Nesting of FORMAT Operations</h4>
+
+<p>The case-conversion, conditional, iteration, and justification
+constructs can contain other formatting constructs by bracketing them.
+These constructs must nest properly with respect to each other.
+For example, it is not legitimate to put the start of a case-conversion
+construct in each arm of a conditional and the
+end of the case-conversion construct outside the conditional:
+</p>
+<div class="example">
+<pre class="example"> (format nil &quot;~:[abc~:@(def~;ghi~
+:@(jkl~]mno~)&quot; x) ;Invalid!
+</pre></div>
+
+<p>This notation is invalid because the <tt>~[...~;...~]</tt>
+and <tt>~(...~)</tt> constructs are not properly nested.
+</p>
+<p>The processing indirection caused by the <tt>~?</tt> directive
+is also a kind of nesting for the purposes of this rule of proper nesting.
+It is not permitted to
+start a bracketing construct within a string processed
+under control of a <tt>~?</tt>                                      
+directive and end the construct at some point after the <tt>~?</tt> construct
+in the string containing that construct, or vice versa.
+For example, this situation is invalid:
+</p>
+<div class="example">
+<pre class="example"> (format nil &quot;~@?ghi~)&quot; &quot;abc~@(def&quot;) ;Invalid!
+</pre></div>
+
+<p>This notation
+is invalid because the <tt>~?</tt>
+and <tt>~(...~)</tt> constructs are not properly nested.
+</p>
+
+
+
+</body>
+</html>

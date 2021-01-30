@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Introduction to Packages (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Introduction to Packages (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Introduction to Packages (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Package-Concepts.html" rel="up" title="Package Concepts">
+<link href="Package-Names-and-Nicknames.html" rel="next" title="Package Names and Nicknames">
+<link href="Package-Concepts.html" rel="prev" title="Package Concepts">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Introduction-to-Packages"></span><div class="header">
+<p>
+Next: <a href="Standardized-Packages.html" accesskey="n" rel="next">Standardized Packages</a>, Previous: <a href="Package-Concepts.html" accesskey="p" rel="prev">Package Concepts</a>, Up: <a href="Package-Concepts.html" accesskey="u" rel="up">Package Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Introduction-to-Packages-1"></span><h4 class="subsection">11.1.1 Introduction to Packages</h4>
+
+<p>A <i>package</i>
+<span id="index-package"></span>
+ establishes a mapping from names to <i>symbols</i>. 
+At any given time, one <i>package</i> is current.
+The <i>current package</i>
+<span id="index-current-package"></span>
+ is the one that is the <i>value</i> of <b>*package*</b>.
+When using the <i>Lisp reader</i>,
+it is possible to refer to <i>symbols</i> in <i>packages</i> 
+other than the current one through the use of <i>package prefixes</i> in the 
+printed representation of the <i>symbol</i>.
+</p>
+<p>Figure 11&ndash;1 lists some <i>defined names</i> that are applicable
+to <i>packages</i>.
+Where an <i>operator</i> 
+takes an argument that is either a <i>symbol</i> or a <i>list</i> 
+of <i>symbols</i>,
+an argument of <b>nil</b> is treated as an empty <i>list</i> of <i>symbols</i>.
+Any <i>package</i> argument may be either a <i>string</i>, a <i>symbol</i>, or
+a <i>package</i>.  If a <i>symbol</i> is supplied, its name will be used
+as the <i>package</i> name.
+</p>
+<div class="format">
+<pre class="format">  *modules*            import                     provide           <!-- /@w -->
+  *package*            in-package                 rename-package    <!-- /@w -->
+  defpackage           intern                     require           <!-- /@w -->
+  do-all-symbols       list-all-packages          shadow            <!-- /@w -->
+  do-external-symbols  make-package               shadowing-import  <!-- /@w -->
+  do-symbols           package-name               unexport          <!-- /@w -->
+  export               package-nicknames          unintern          <!-- /@w -->
+  find-all-symbols     package-shadowing-symbols  unuse-package     <!-- /@w -->
+  find-package         package-use-list           use-package       <!-- /@w -->
+  find-symbol          package-used-by-list                         <!-- /@w -->
+
+         Figure 11&ndash;1: Some Defined Names related to Packages       <!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Package-Names-and-Nicknames.html" accesskey="1">Package Names and Nicknames</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Symbols-in-a-Package.html" accesskey="2">Symbols in a Package</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Internal-and-External-Symbols.html" accesskey="3">Internal and External Symbols</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Package-Inheritance.html" accesskey="4">Package Inheritance</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Accessibility-of-Symbols-in-a-Package.html" accesskey="5">Accessibility of Symbols in a Package</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Locating-a-Symbol-in-a-Package.html" accesskey="6">Locating a Symbol in a Package</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Prevention-of-Name-Conflicts-in-Packages.html" accesskey="7">Prevention of Name Conflicts in Packages</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Standardized-Packages.html" accesskey="n" rel="next">Standardized Packages</a>, Previous: <a href="Package-Concepts.html" accesskey="p" rel="prev">Package Concepts</a>, Up: <a href="Package-Concepts.html" accesskey="u" rel="up">Package Concepts</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

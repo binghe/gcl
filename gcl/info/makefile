@@ -7,10 +7,11 @@ GCL_PDF=gcl-tk.pdf gcl-si.pdf gcl.pdf
 #GCL_DVI=gcl-tk.dvi gcl-si.dvi #gcl.dvi
 #GCL_HTML=gcl-si_toc.html gcl-tk_toc.html gcl_toc.html
 GCL_HTML=gcl-si/index.html gcl-tk/index.html gcl/index.html
-#HTML_CMD=texi2html -split_chapter
-HTML_CMD=makeinfo --html 
 
 -include ../makedefs
+
+#HTML_CMD=texi2html -split_chapter
+HTML_CMD=$(MAKEINFO) --html
 
 all: gcl-tk.info gcl-si.info  $(GCL_PDF) $(GCL_HTML) gcl.info
 
@@ -32,24 +33,24 @@ GCL_MAN= chap-1.texi chap-2.texi chap-3.texi chap-4.texi chap-5.texi \
 	 chap-24.texi chap-25.texi chap-26.texi chap-a.texi
 
 %.pdf: %.dvi
-	dvipdfm $<
+	-dvipdfm $<
 
 gcl-si.dvi: ${GCL_SI} gcl-si.texi
-	TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl-si.texi || true
+	-TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl-si.texi || true
 	rm -f *.cp *.ky *.vr *.tp *.pg *.toc *.aux *.log *.fn
 
 gcl-si.info: ${GCL_SI} gcl-si.texi
 	-$(MAKEINFO) gcl-si.texi	
 
 gcl-tk.dvi: ${GCL_TK} gcl-tk.texi
-	TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl-tk.texi || true
+	-TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl-tk.texi || true
 	rm -f *.cp *.ky *.vr *.tp *.pg *.toc *.aux *.log *.fn
 
 gcl-tk.info: ${GCL_TK} gcl-tk.texi
 	-$(MAKEINFO) gcl-tk.texi
 
 gcl.dvi: ${GCL_MAN} gcl.texi
-	TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl.texi || true
+	-TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl.texi || true
 	rm -f *.cp *.ky *.vr *.tp *.pg *.toc *.aux *.log *.fn
 
 gcl.info: ${GCL_MAN} gcl.texi
@@ -109,15 +110,17 @@ srcs:
 	awk '{ i++; printf("%s ",$$2); if ((i%5) == 0) printf("\\\n")}'
 
 tex:
-	TEXINPUTS=.:$$TEXINPUTS tex gcl-si.texi
-	TEXINPUTS=.:$$TEXINPUTS tex gcl-tk.texi
-	TEXINPUTS=.:$$TEXINPUTS tex gcl.texi
+	-TEXINPUTS=.:$$TEXINPUTS tex gcl-si.texi
+	-TEXINPUTS=.:$$TEXINPUTS tex gcl-tk.texi
+	-TEXINPUTS=.:$$TEXINPUTS tex gcl.texi
 	@echo must do twice to get indices correct...
 	@echo so do '$(MAKE) tex' again
 
-clean:
+dist-clean: clean
 	rm -f *.info* *.html *.pdf
-	rm -rf gcl.IC gcl.IE gcl.IG gcl.IP gcl.IR gcl.IT gcl.fu gcl gcl-si gcl-tk
 	rm -rf gcl gcl-si gcl-tk
+
+clean:
+	rm -rf gcl.IC gcl.IE gcl.IG gcl.IP gcl.IR gcl.IT gcl.fu
 
 .INTERMEDIATE: gcl-tk.dvi gcl-si.dvi gcl.dvi

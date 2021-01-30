@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Stream Variables (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Stream Variables (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Stream Variables (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Stream-Concepts.html" rel="up" title="Stream Concepts">
+<link href="Stream-Arguments-to-Standardized-Functions.html" rel="next" title="Stream Arguments to Standardized Functions">
+<link href="Other-Subclasses-of-Stream.html" rel="prev" title="Other Subclasses of Stream">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Stream-Variables"></span><div class="header">
+<p>
+Next: <a href="Stream-Arguments-to-Standardized-Functions.html" accesskey="n" rel="next">Stream Arguments to Standardized Functions</a>, Previous: <a href="Introduction-to-Streams.html" accesskey="p" rel="prev">Introduction to Streams</a>, Up: <a href="Stream-Concepts.html" accesskey="u" rel="up">Stream Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Stream-Variables-1"></span><h4 class="subsection">21.1.2 Stream Variables</h4>
+
+<p><i>Variables</i> whose <i>values</i> must be <i>streams</i> are sometimes called 
+<i>stream variables</i>
+<span id="index-stream-variable"></span>
+.
+</p>
+<p>Certain <i>stream variables</i> are defined by this specification 
+to be the proper source of input or output in various <i>situations</i> 
+where no specific <i>stream</i> has been specified instead.
+A complete list of such <i>standardized</i> <i>stream variables</i>
+appears in Figure 21&ndash;6.  
+The consequences are undefined if at any time
+the <i>value</i> of any of these <i>variables</i> is not an <i>open</i> <i>stream</i>.
+</p>
+<div class="format">
+<pre class="format">  Glossary Term    Variable Name      <!-- /@w -->
+  <i>debug I/O</i>        <b>*debug-io*</b>         <!-- /@w -->
+  <i>error output</i>     <b>*error-output*</b>     <!-- /@w -->
+  <i>query I/O</i>        <b>*query-io*</b>         <!-- /@w -->
+  <i>standard input</i>   <b>*standard-input*</b>   <!-- /@w -->
+  <i>standard output</i>  <b>*standard-output*</b>  <!-- /@w -->
+  <i>terminal I/O</i>     <b>*terminal-io*</b>      <!-- /@w -->
+  <i>trace output</i>     <b>*trace-output*</b>     <!-- /@w -->
+
+  Figure 21&ndash;6: Standardized Stream Variables<!-- /@w -->
+
+</pre></div>
+
+<p>Note that, by convention, <i>standardized</i> <i>stream variables</i> have names 
+    ending in &ldquo;<tt>-input*</tt>&rdquo;  if they must be <i>input</i> <i>streams</i>,
+    ending in &ldquo;<tt>-output*</tt>&rdquo; if they must be <i>output</i> <i>streams</i>,
+ or ending in &ldquo;<tt>-io*</tt>&rdquo;     if they must be <i>bidirectional</i> <i>streams</i>.
+</p>
+<p>User programs may <i>assign</i> or <i>bind</i> any <i>standardized</i> <i>stream variable</i>
+except <b>*terminal-io*</b>.
+</p>
+
+
+
+</body>
+</html>

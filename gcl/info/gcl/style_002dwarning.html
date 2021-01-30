@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>style-warning (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="style-warning (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="style-warning (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Conditions-Dictionary.html" rel="up" title="Conditions Dictionary">
+<link href="serious_002dcondition.html" rel="next" title="serious-condition">
+<link href="warning.html" rel="prev" title="warning">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="style_002dwarning"></span><div class="header">
+<p>
+Next: <a href="serious_002dcondition.html" accesskey="n" rel="next">serious-condition</a>, Previous: <a href="warning.html" accesskey="p" rel="prev">warning</a>, Up: <a href="Conditions-Dictionary.html" accesskey="u" rel="up">Conditions Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="style_002dwarning-_005bCondition-Type_005d"></span><h4 class="subsection">9.2.3 style-warning                                              [Condition Type]</h4>
+
+<span id="Class-Precedence-List_003a_003a-21"></span><h4 class="subsubheading">Class Precedence List::</h4>
+<p><b>style-warning</b>,
+<b>warning</b>,
+<b>condition</b>,
+<b>t</b>
+</p>
+<span id="Description_003a_003a-173"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The <i>type</i> <b>style-warning</b> includes those <i>conditions</i> 
+that represent <i>situations</i> involving <i>code</i> 
+that is <i>conforming code</i> but that is nevertheless 
+considered to be faulty or substandard.
+</p>
+<span id="See-Also_003a_003a-154"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="muffle_002dwarning.html">muffle-warning</a>
+</p>
+<span id="Notes_003a_003a-94"></span><h4 class="subsubheading">Notes::</h4>
+
+<p>An <i>implementation</i> might signal such a <i>condition</i>
+if it encounters <i>code</i>
+     that uses deprecated features 
+  or that appears unaesthetic or inefficient.
+</p>
+<p>An &lsquo;unused variable&rsquo; warning must be of <i>type</i> <b>style-warning</b>.
+</p>
+<p>In general, the question of whether <i>code</i> is faulty or substandard
+is a subjective decision to be made by the facility processing that <i>code</i>.
+The intent is that whenever such a facility wishes to complain about
+<i>code</i> on such subjective grounds, it should use this 
+<i>condition</i> <i>type</i> so that any clients who wish to redirect or
+muffle superfluous warnings can do so without risking that they will be
+redirecting or muffling other, more serious warnings.
+</p>
+
+
+
+</body>
+</html>

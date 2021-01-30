@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Numeric Operations (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Numeric Operations (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Numeric Operations (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Number-Concepts.html" rel="up" title="Number Concepts">
+<link href="Associativity-and-Commutativity-in-Numeric-Operations.html" rel="next" title="Associativity and Commutativity in Numeric Operations">
+<link href="Number-Concepts.html" rel="prev" title="Number Concepts">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Numeric-Operations"></span><div class="header">
+<p>
+Next: <a href="Implementation_002dDependent-Numeric-Constants.html" accesskey="n" rel="next">Implementation-Dependent Numeric Constants</a>, Previous: <a href="Number-Concepts.html" accesskey="p" rel="prev">Number Concepts</a>, Up: <a href="Number-Concepts.html" accesskey="u" rel="up">Number Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Numeric-Operations-1"></span><h4 class="subsection">12.1.1 Numeric Operations</h4>
+
+<p><span class="roman">Common Lisp</span> provides a large variety of operations related to <i>numbers</i>.
+This section provides an overview of those operations by grouping them
+into categories that emphasize some of the relationships among them.
+</p>
+<p>Figure 12&ndash;1 shows <i>operators</i> relating to
+arithmetic operations.
+</p>
+<div class="format">
+<pre class="format">  *  1+         gcd   <!-- /@w -->
+  +  1-         incf  <!-- /@w -->
+  -  conjugate  lcm   <!-- /@w -->
+  /  decf             <!-- /@w -->
+
+  Figure 12&ndash;1: Operators relating to Arithmetic.<!-- /@w -->
+
+</pre></div>
+
+<p>Figure 12&ndash;2 shows <i>defined names</i> relating to
+exponential, logarithmic, and trigonometric operations.
+</p>
+<div class="format">
+<pre class="format">  abs    cos    signum  <!-- /@w -->
+  acos   cosh   sin     <!-- /@w -->
+  acosh  exp    sinh    <!-- /@w -->
+  asin   expt   sqrt    <!-- /@w -->
+  asinh  isqrt  tan     <!-- /@w -->
+  atan   log    tanh    <!-- /@w -->
+  atanh  phase          <!-- /@w -->
+  cis    pi             <!-- /@w -->
+
+  Figure 12&ndash;2: Defined names relating to Exponentials, Logarithms, and Trigonometry.<!-- /@w -->
+
+</pre></div>
+
+<p>Figure 12&ndash;3 shows <i>operators</i> relating to
+numeric comparison and predication.
+</p>
+<div class="format">
+<pre class="format">  /=  &gt;=      oddp   <!-- /@w -->
+  &lt;   evenp   plusp  <!-- /@w -->
+  &lt;=  max     zerop  <!-- /@w -->
+  =   min            <!-- /@w -->
+  &gt;   minusp         <!-- /@w -->
+
+  Figure 12&ndash;3: Operators for numeric comparison and predication.<!-- /@w -->
+
+</pre></div>
+
+<p>Figure 12&ndash;4 shows <i>defined names</i> relating to
+numeric type manipulation and coercion.
+</p>
+<div class="format">
+<pre class="format">  ceiling          float-radix           rational     <!-- /@w -->
+  complex          float-sign            rationalize  <!-- /@w -->
+  decode-float     floor                 realpart     <!-- /@w -->
+  denominator      fround                rem          <!-- /@w -->
+  fceiling         ftruncate             round        <!-- /@w -->
+  ffloor           imagpart              scale-float  <!-- /@w -->
+  float            integer-decode-float  truncate     <!-- /@w -->
+  float-digits     mod                                <!-- /@w -->
+  float-precision  numerator                          <!-- /@w -->
+
+  Figure 12&ndash;4: Defined names relating to numeric type manipulation and coercion.<!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Associativity-and-Commutativity-in-Numeric-Operations.html" accesskey="1">Associativity and Commutativity in Numeric Operations</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Examples-of-Associativity-and-Commutativity-in-Numeric-Operations.html" accesskey="2">Examples of Associativity and Commutativity in Numeric Operations</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Contagion-in-Numeric-Operations.html" accesskey="3">Contagion in Numeric Operations</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Viewing-Integers-as-Bits-and-Bytes.html" accesskey="4">Viewing Integers as Bits and Bytes</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Logical-Operations-on-Integers.html" accesskey="5">Logical Operations on Integers</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Byte-Operations-on-Integers.html" accesskey="6">Byte Operations on Integers</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Implementation_002dDependent-Numeric-Constants.html" accesskey="n" rel="next">Implementation-Dependent Numeric Constants</a>, Previous: <a href="Number-Concepts.html" accesskey="p" rel="prev">Number Concepts</a>, Up: <a href="Number-Concepts.html" accesskey="u" rel="up">Number Concepts</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

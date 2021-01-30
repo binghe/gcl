@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>The &quot;Syntax&quot; Section of a Dictionary Entry (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="The &quot;Syntax&quot; Section of a Dictionary Entry (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="The &quot;Syntax&quot; Section of a Dictionary Entry (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Interpreting-Dictionary-Entries.html" rel="up" title="Interpreting Dictionary Entries">
+<link href="Special-_0022Syntax_0022-Notations-for-Overloaded-Operators.html" rel="next" title="Special &quot;Syntax&quot; Notations for Overloaded Operators">
+<link href="The-_0022Supertypes_0022-Section-of-a-Dictionary-Entry.html" rel="prev" title="The &quot;Supertypes&quot; Section of a Dictionary Entry">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="The-_0022Syntax_0022-Section-of-a-Dictionary-Entry"></span><div class="header">
+<p>
+Next: <a href="Special-_0022Syntax_0022-Notations-for-Overloaded-Operators.html" accesskey="n" rel="next">Special &quot;Syntax&quot; Notations for Overloaded Operators</a>, Previous: <a href="The-_0022Supertypes_0022-Section-of-a-Dictionary-Entry.html" accesskey="p" rel="prev">The &quot;Supertypes&quot; Section of a Dictionary Entry</a>, Up: <a href="Interpreting-Dictionary-Entries.html" accesskey="u" rel="up">Interpreting Dictionary Entries</a> &nbsp; </p>
+</div>
+<hr>
+<span id="The-_0022Syntax_0022-Section-of-a-Dictionary-Entry-1"></span><h4 class="subsubsection">1.4.4.24 The &quot;Syntax&quot; Section of a Dictionary Entry</h4>
+
+<p>This section describes how to use the <i>defined name</i> in code.
+The &quot;Syntax&rdquo; description for a <i>generic function</i> 
+describes the <i>lambda list</i> of the <i>generic function</i> itself, 
+while The &quot;Method Signatures&rdquo; describe the <i>lambda lists</i> 
+of the defined <i>methods</i>.
+The &quot;Syntax&rdquo; description for 
+     an <i>ordinary function</i>,
+     a <i>macro</i>,
+  or a <i>special operator</i>
+describes its <i>parameters</i>.
+</p>
+<p>For example, an <i>operator</i> description might say:
+</p>
+<p><code>F</code>  <i>x y <span class="roman">&amp;optional</span> z <span class="roman">&amp;key</span> k</i>
+</p>
+<p>This description indicates that the function <b>F</b> 
+has two required parameters, <i>x</i> and <i>y</i>.  In addition,
+there is an optional parameter <i>z</i> and a keyword parameter <i>k</i>.
+</p>
+<p>For <i>macros</i> and <i>special operators</i>, syntax is given 
+in modified BNF notation; see <a href="Modified-BNF-Syntax.html">Modified BNF Syntax</a>.
+For <i>functions</i> a <i>lambda list</i> is given.
+In both cases, however, the outermost parentheses are omitted,
+and default value information is omitted.
+</p>
+
+
+
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>values-list (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="values-list (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="values-list (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Data-and-Control-Flow-Dictionary.html" rel="up" title="Data and Control Flow Dictionary">
+<link href="multiple_002dvalues_002dlimit.html" rel="next" title="multiple-values-limit">
+<link href="values.html" rel="prev" title="values">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="values_002dlist"></span><div class="header">
+<p>
+Next: <a href="multiple_002dvalues_002dlimit.html" accesskey="n" rel="next">multiple-values-limit</a>, Previous: <a href="values.html" accesskey="p" rel="prev">values</a>, Up: <a href="Data-and-Control-Flow-Dictionary.html" accesskey="u" rel="up">Data and Control Flow Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="values_002dlist-_005bFunction_005d"></span><h4 class="subsection">5.3.54 values-list                                                      [Function]</h4>
+
+<p><code>values-list</code>  <i>list</i> &rArr;  <i>{<i>element</i>}*</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-73"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>list</i>&mdash;a <i>list</i>.
+</p>
+<p><i>elements</i>&mdash;the <i>elements</i> of the <i>list</i>.
+</p>
+<span id="Description_003a_003a-107"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Returns the <i>elements</i> of the <i>list</i> as <i>multiple values</i>_2.
+</p>
+<span id="Examples_003a_003a-81"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (values-list nil) &rArr;  &lt;<i>no <i>values</i></i>&gt;
+ (values-list '(1)) &rArr;  1
+ (values-list '(1 2)) &rArr;  1, 2
+ (values-list '(1 2 3)) &rArr;  1, 2, 3
+</pre></div>
+
+<span id="Exceptional-Situations_003a_003a-20"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should signal <b>type-error</b> if its argument is not a <i>proper list</i>.
+</p>
+<span id="See-Also_003a_003a-91"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="multiple_002dvalue_002dbind.html">multiple-value-bind</a>
+,
+<a href="multiple_002dvalue_002dlist.html">multiple-value-list</a>
+,
+<a href="multiple_002dvalues_002dlimit.html">multiple-values-limit</a>
+,
+<a href="values.html">values</a>
+</p>
+<span id="Notes_003a_003a-58"></span><h4 class="subsubheading">Notes::</h4>
+
+<div class="example">
+<pre class="example"> (values-list <i>list</i>) &equiv; (apply #'values <i>list</i>)
+</pre></div>
+
+<p><tt>(equal <i>x</i> (multiple-value-list (values-list <i>x</i>)))</tt>
+returns <i>true</i> for all <i>lists</i> <i>x</i>.
+</p>
+
+
+
+</body>
+</html>

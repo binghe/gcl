@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Interpreting Pathname Component Values (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Interpreting Pathname Component Values (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Interpreting Pathname Component Values (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Pathnames.html" rel="up" title="Pathnames">
+<link href="Strings-in-Component-Values.html" rel="next" title="Strings in Component Values">
+<link href="The-Pathname-Version-Component.html" rel="prev" title="The Pathname Version Component">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Interpreting-Pathname-Component-Values"></span><div class="header">
+<p>
+Next: <a href="Merging-Pathnames.html" accesskey="n" rel="next">Merging Pathnames</a>, Previous: <a href="Pathname-Components.html" accesskey="p" rel="prev">Pathname Components</a>, Up: <a href="Pathnames.html" accesskey="u" rel="up">Pathnames</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Interpreting-Pathname-Component-Values-1"></span><h4 class="subsection">19.2.2 Interpreting Pathname Component Values</h4>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Strings-in-Component-Values.html" accesskey="1">Strings in Component Values</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Special-Characters-in-Pathname-Components.html" accesskey="2">Special Characters in Pathname Components</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Case-in-Pathname-Components.html" accesskey="3">Case in Pathname Components</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Local-Case-in-Pathname-Components.html" accesskey="4">Local Case in Pathname Components</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Common-Case-in-Pathname-Components.html" accesskey="5">Common Case in Pathname Components</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Special-Pathname-Component-Values.html" accesskey="6">Special Pathname Component Values</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="NIL-as-a-Component-Value.html" accesskey="7">NIL as a Component Value</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="_002d_003eWILD-as-a-Component-Value.html" accesskey="8">-&gt;WILD as a Component Value</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="_002d_003eUNSPECIFIC-as-a-Component-Value.html" accesskey="9">-&gt;UNSPECIFIC as a Component Value</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Relation-between-component-values-NIL-and-_002d_003eUNSPECIFIC.html">Relation between component values NIL and -&gt;UNSPECIFIC</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Wildcard-Pathnames.html">Restrictions on Wildcard Pathnames</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-Pathname-Components.html">Restrictions on Examining Pathname Components</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-a-Pathname-Host-Component.html">Restrictions on Examining a Pathname Host Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-a-Pathname-Device-Component.html">Restrictions on Examining a Pathname Device Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-a-Pathname-Directory-Component.html">Restrictions on Examining a Pathname Directory Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Directory-Components-in-Non_002dHierarchical-File-Systems.html">Directory Components in Non-Hierarchical File Systems</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-a-Pathname-Name-Component.html">Restrictions on Examining a Pathname Name Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-a-Pathname-Type-Component.html">Restrictions on Examining a Pathname Type Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Examining-a-Pathname-Version-Component.html">Restrictions on Examining a Pathname Version Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Notes-about-the-Pathname-Version-Component.html">Notes about the Pathname Version Component</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Restrictions-on-Constructing-Pathnames.html">Restrictions on Constructing Pathnames</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Merging-Pathnames.html" accesskey="n" rel="next">Merging Pathnames</a>, Previous: <a href="Pathname-Components.html" accesskey="p" rel="prev">Pathname Components</a>, Up: <a href="Pathnames.html" accesskey="u" rel="up">Pathnames</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

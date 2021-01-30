@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Conses as Lists (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Conses as Lists (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Conses as Lists (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Cons-Concepts.html" rel="up" title="Cons Concepts">
+<link href="Lists-as-Association-Lists.html" rel="next" title="Lists as Association Lists">
+<link href="General-Restrictions-on-Parameters-that-must-be-Trees.html" rel="prev" title="General Restrictions on Parameters that must be Trees">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Conses-as-Lists"></span><div class="header">
+<p>
+Previous: <a href="Conses-as-Trees.html" accesskey="p" rel="prev">Conses as Trees</a>, Up: <a href="Cons-Concepts.html" accesskey="u" rel="up">Cons Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Conses-as-Lists-1"></span><h4 class="subsection">14.1.2 Conses as Lists</h4>
+
+<p>A <i>list</i>
+<span id="index-list"></span>
+ is a chain of <i>conses</i> in which the <i>car</i> of each
+<i>cons</i> is an <i>element</i> of the <i>list</i>, 
+and the <i>cdr</i> of each <i>cons</i> is either the next
+link in the chain or a terminating <i>atom</i>.  
+</p>
+<p>A <i>proper list</i>
+<span id="index-proper-list"></span>
+ is a <i>list</i> terminated by the <i>empty list</i>.
+The <i>empty list</i> is a <i>proper list</i>, but is not a <i>cons</i>.
+</p>
+<p>An <i>improper list</i>
+<span id="index-improper-list"></span>
+ is a <i>list</i> that is not a <i>proper list</i>;
+that is, it is a <i>circular list</i> or a <i>dotted list</i>.
+</p>
+<p>A <i>dotted list</i>
+<span id="index-dotted-list"></span>
+ is a <i>list</i> that has a terminating <i>atom</i>
+that is not the <i>empty list</i>.  A <i>non-nil</i> <i>atom</i> by itself
+is not considered to be a <i>list</i> of any kind&mdash;not even a <i>dotted list</i>.
+</p>
+<p>A <i>circular list</i>
+<span id="index-circular-list"></span>
+ is a chain of <i>conses</i> that has no termination 
+because some <i>cons</i> in the chain is the <i>cdr</i> of a later <i>cons</i>.
+</p>
+<div class="format">
+<pre class="format">  append      last           nbutlast  rest       <!-- /@w -->
+  butlast     ldiff          nconc     revappend  <!-- /@w -->
+  copy-alist  list           ninth     second     <!-- /@w -->
+  copy-list   list*          nreconc   seventh    <!-- /@w -->
+  eighth      list-length    nth       sixth      <!-- /@w -->
+  endp        make-list      nthcdr    tailp      <!-- /@w -->
+  fifth       member         pop       tenth      <!-- /@w -->
+  first       member-if      push      third      <!-- /@w -->
+  fourth      member-if-not  pushnew              <!-- /@w -->
+
+  Figure 14&ndash;3: Some defined names relating to lists.<!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Lists-as-Association-Lists.html" accesskey="1">Lists as Association Lists</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Lists-as-Sets.html" accesskey="2">Lists as Sets</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="General-Restrictions-on-Parameters-that-must-be-Lists.html" accesskey="3">General Restrictions on Parameters that must be Lists</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+</body>
+</html>

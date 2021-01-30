@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Examples of Setf Expansions (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Examples of Setf Expansions (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Examples of Setf Expansions (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Overview-of-Places-and-Generalized-Reference.html" rel="up" title="Overview of Places and Generalized Reference">
+<link href="Kinds-of-Places.html" rel="next" title="Kinds of Places">
+<link href="Setf-Expansions.html" rel="prev" title="Setf Expansions">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Examples-of-Setf-Expansions"></span><div class="header">
+<p>
+Previous: <a href="Setf-Expansions.html" accesskey="p" rel="prev">Setf Expansions</a>, Up: <a href="Overview-of-Places-and-Generalized-Reference.html" accesskey="u" rel="up">Overview of Places and Generalized Reference</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Examples-of-Setf-Expansions-1"></span><h4 class="subsubsection">5.1.1.4 Examples of Setf Expansions</h4>
+
+<p>Examples of the contents of the constituents of <i>setf expansions</i>
+follow.
+</p>
+<p>For a variable <i>x</i>:
+</p>
+<div class="format">
+<pre class="format">  <tt>()</tt>              ;list of temporary variables  <!-- /@w -->
+  <tt>()</tt>              ;list of value forms          <!-- /@w -->
+  <tt>(g0001)</tt>         ;list of store variables      <!-- /@w -->
+  <tt>(setq <i>x</i> g0001)</tt>  ;storing form                 <!-- /@w -->
+  <i>x</i>               ;accessing form               <!-- /@w -->
+
+  Figure 5&ndash;3: Sample Setf Expansion of a Variable<!-- /@w -->
+
+</pre></div>
+
+<p>For <tt>(car <i>exp</i>)</tt>:
+</p>
+<div class="format">
+<pre class="format">  <tt>(g0002)</tt>                             ;list of temporary variables  <!-- /@w -->
+  <tt>(<i>exp</i>)</tt>                               ;list of value forms          <!-- /@w -->
+  <tt>(g0003)</tt>                             ;list of store variables      <!-- /@w -->
+  <tt>(progn (rplaca g0002 g0003) g0003)</tt>  ;storing form                 <!-- /@w -->
+  <tt>(car g0002)</tt>                         ;accessing form               <!-- /@w -->
+
+           Figure 5&ndash;4: Sample Setf Expansion of a CAR Form         <!-- /@w -->
+
+</pre></div>
+
+<p>For <tt>(subseq <i>seq</i> <i>s</i> <i>e</i>)</tt>:
+</p>
+<div class="format">
+<pre class="format">  <tt>(g0004 g0005 g0006)</tt>         ;list of temporary variables  <!-- /@w -->
+  <tt>(<i>seq</i> <i>s</i> <i>e</i>)</tt>                   ;list of value forms          <!-- /@w -->
+  <tt>(g0007)</tt>                     ;list of store variables      <!-- /@w -->
+  <tt>(progn (replace g0004 g0007 :start1 g0005 :end1 g0006) g0007)</tt> <!-- /@w -->
+                              ;storing form                 <!-- /@w -->
+  <tt>(subseq g0004 g0005 g0006)</tt>  ; accessing form              <!-- /@w -->
+
+     Figure 5&ndash;5: Sample Setf Expansion of a SUBSEQ Form    <!-- /@w -->
+
+</pre></div>
+
+<p>In some cases, if a <i>subform</i> of a <i>place</i> is itself
+a <i>place</i>, it is necessary to expand the <i>subform</i>
+in order to compute some of the values in the expansion of the outer
+<i>place</i>.  For <tt>(ldb <i>bs</i> (car <i>exp</i>))</tt>:
+</p>
+<div class="format">
+<pre class="format">  <tt>(g0001 g0002)</tt>            ;list of temporary variables  <!-- /@w -->
+  <tt>(<i>bs</i> <i>exp</i>)</tt>                 ;list of value forms          <!-- /@w -->
+  <tt>(g0003)</tt>                  ;list of store variables      <!-- /@w -->
+  <tt>(progn (rplaca g0002 (dpb g0003 g0001 (car g0002))) g0003)</tt> <!-- /@w -->
+                           ;storing form                 <!-- /@w -->
+  <tt>(ldb g0001 (car g0002))</tt>  ; accessing form              <!-- /@w -->
+
+     Figure 5&ndash;6: Sample Setf Expansion of a LDB Form    <!-- /@w -->
+
+</pre></div>
+
+
+
+
+</body>
+</html>

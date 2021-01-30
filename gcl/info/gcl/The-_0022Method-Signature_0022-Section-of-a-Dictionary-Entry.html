@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>The &quot;Method Signature&quot; Section of a Dictionary Entry (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="The &quot;Method Signature&quot; Section of a Dictionary Entry (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="The &quot;Method Signature&quot; Section of a Dictionary Entry (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Interpreting-Dictionary-Entries.html" rel="up" title="Interpreting Dictionary Entries">
+<link href="The-_0022Name_0022-Section-of-a-Dictionary-Entry.html" rel="next" title="The &quot;Name&quot; Section of a Dictionary Entry">
+<link href="The-_0022Argument-Precedence-Order_0022-Section-of-a-Dictionary-Entry.html" rel="prev" title="The &quot;Argument Precedence Order&quot; Section of a Dictionary Entry">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="The-_0022Method-Signature_0022-Section-of-a-Dictionary-Entry"></span><div class="header">
+<p>
+Next: <a href="The-_0022Name_0022-Section-of-a-Dictionary-Entry.html" accesskey="n" rel="next">The &quot;Name&quot; Section of a Dictionary Entry</a>, Previous: <a href="The-_0022Argument-Precedence-Order_0022-Section-of-a-Dictionary-Entry.html" accesskey="p" rel="prev">The &quot;Argument Precedence Order&quot; Section of a Dictionary Entry</a>, Up: <a href="Interpreting-Dictionary-Entries.html" accesskey="u" rel="up">Interpreting Dictionary Entries</a> &nbsp; </p>
+</div>
+<hr>
+<span id="The-_0022Method-Signature_0022-Section-of-a-Dictionary-Entry-1"></span><h4 class="subsubsection">1.4.4.17 The &quot;Method Signature&quot; Section of a Dictionary Entry</h4>
+
+<p>The description of a <i>generic function</i> includes descriptions of the
+<i>methods</i> that are defined on that <i>generic function</i> by the standard.  
+A method signature is used to describe the <i>parameters</i> and 
+<i>parameter specializers</i> for each <i>method</i>. 
+<i>Methods</i> defined for the <i>generic function</i> must be of the form described
+by the <i>method</i> <i>signature</i>. 
+</p>
+<p><code>F</code>  <i><span class="roman">(</span><i>x</i> <i>class</i><span class="roman">)</span>
+	      <span class="roman">(</span><i>y</i> t<span class="roman">)</span>
+	      <span class="roman">&amp;optional</span> <i>z</i> <span class="roman">&amp;key</span> <i>k</i></i>
+</p>
+<p>This <i>signature</i> indicates that this method on the <i>generic function</i>
+<b>F</b> has two <i>required parameters</i>:
+     <i>x</i>, which must be a <i>generalized instance</i> of the <i>class</i> <i>class</i>;
+ and <i>y</i>, which can  be any <i>object</i> 
+       (<i>i.e.</i>, a <i>generalized instance</i> of the <i>class</i> <b>t</b>).
+In addition, there is an <i>optional parameter</i> <i>z</i> and a
+<i>keyword parameter</i> <i>k</i>.  This <i>signature</i> also indicates that this
+method on <tt>F</tt> is a <i>primary method</i> and has no <i>qualifiers</i>.
+</p>
+<p>For each <i>parameter</i>, the <i>argument</i> supplied must be in the
+intersection of the <i>type</i> specified in the description of the
+corresponding <i>generic function</i> and the <i>type</i> given in 
+the <i>signature</i> of some <i>method</i> (including not only those 
+<i>methods</i> defined in this specification, but also
+<i>implementation-defined</i> or user-defined <i>methods</i> in situations
+where the definition of such <i>methods</i> is permitted).
+</p>
+
+
+
+</body>
+</html>

@@ -3,7 +3,7 @@ Section: lisp
 Priority: optional
 Maintainer: Camm Maguire <camm@debian.org>
 Homepage: http://gnu.org/software/gcl
-Build-Depends: debhelper (>= 13), libreadline-dev, m4, tk8.6-dev, libgmp-dev, libxmu-dev, libxaw7-dev, po-debconf, zlib1g-dev, tcl, texinfo
+Build-Depends: debhelper (>= 13), libreadline-dev, m4, tk8.6-dev, libgmp-dev, libxmu-dev, libxaw7-dev, po-debconf, zlib1g-dev, tcl
 Standards-Version: 4.5.0
 
 Package: gcl

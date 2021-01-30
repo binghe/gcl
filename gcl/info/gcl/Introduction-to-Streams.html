@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Introduction to Streams (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Introduction to Streams (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Introduction to Streams (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Stream-Concepts.html" rel="up" title="Stream Concepts">
+<link href="Abstract-Classifications-of-Streams-_0028Introduction-to-Streams_0029.html" rel="next" title="Abstract Classifications of Streams (Introduction to Streams)">
+<link href="Stream-Concepts.html" rel="prev" title="Stream Concepts">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Introduction-to-Streams"></span><div class="header">
+<p>
+Next: <a href="Stream-Variables.html" accesskey="n" rel="next">Stream Variables</a>, Previous: <a href="Stream-Concepts.html" accesskey="p" rel="prev">Stream Concepts</a>, Up: <a href="Stream-Concepts.html" accesskey="u" rel="up">Stream Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Introduction-to-Streams-1"></span><h4 class="subsection">21.1.1 Introduction to Streams</h4>
+
+<p>A <i>stream</i>
+<span id="index-stream-1"></span>
+ is an <i>object</i> that can be used with an input or output
+function to identify an appropriate source or sink of <i>characters</i> or 
+<i>bytes</i> for that operation.
+A <i>character</i>
+<span id="index-character-1"></span>
+ <i>stream</i>
+<span id="index-stream-2"></span>
+ is a source or sink of <i>characters</i>.
+A <i>binary</i>
+<span id="index-binary"></span>
+ <i>stream</i>
+<span id="index-stream-3"></span>
+ is a source or sink of <i>bytes</i>.
+</p>
+<p>Some operations may be performed on any kind of <i>stream</i>;
+Figure 21&ndash;1 provides a list of <i>standardized</i> operations
+that are potentially useful with any kind of <i>stream</i>.
+</p>
+<div class="format">
+<pre class="format">  close                 stream-element-type  <!-- /@w -->
+  input-stream-p        streamp              <!-- /@w -->
+  interactive-stream-p  with-open-stream     <!-- /@w -->
+  output-stream-p                            <!-- /@w -->
+
+  Figure 21&ndash;1: Some General-Purpose Stream Operations<!-- /@w -->
+
+</pre></div>
+
+<p>Other operations are only meaningful on certain <i>stream</i> <i>types</i>.
+For example, <b>read-char</b> is only defined for <i>character</i> <i>streams</i>
+and <b>read-byte</b> is only defined for <i>binary</i> <i>streams</i>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Abstract-Classifications-of-Streams-_0028Introduction-to-Streams_0029.html" accesskey="1">Abstract Classifications of Streams (Introduction to Streams)</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Input.html" accesskey="2">Input</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Open-and-Closed-Streams.html" accesskey="3">Open and Closed Streams</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Interactive-Streams.html" accesskey="4">Interactive Streams</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Abstract-Classifications-of-Streams.html" accesskey="5">Abstract Classifications of Streams</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="File-Streams.html" accesskey="6">File Streams</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Other-Subclasses-of-Stream.html" accesskey="7">Other Subclasses of Stream</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+</body>
+</html>

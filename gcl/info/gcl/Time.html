@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Time (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Time (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Time (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="The-External-Environment.html" rel="up" title="The External Environment">
+<link href="Decoded-Time.html" rel="next" title="Decoded Time">
+<link href="Environment-Inquiry.html" rel="prev" title="Environment Inquiry">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Time"></span><div class="header">
+<p>
+Previous: <a href="Environment-Inquiry.html" accesskey="p" rel="prev">Environment Inquiry</a>, Up: <a href="The-External-Environment.html" accesskey="u" rel="up">The External Environment</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Time-1"></span><h4 class="subsection">25.1.4 Time</h4>
+
+<p>Time is represented in four different ways in <span class="roman">Common Lisp</span>:
+    <i>decoded time</i>,
+    <i>universal time</i>,
+    <i>internal time</i>,
+and seconds.
+<i>Decoded time</i> and <i>universal time</i> are used primarily to represent calendar time,
+and are precise only to one second.
+<i>Internal time</i> is used primarily to represent measurements of computer
+time (such as run time) and is precise to some <i>implementation-dependent</i>
+fraction of a second called an <i>internal time unit</i>,
+as specified by <b>internal-time-units-per-second</b>.
+An <i>internal time</i> can be used 
+  for either <i>absolute</i> and <i>relative</i> <i>time</i> measurements.
+Both a <i>universal time</i> and a <i>decoded time</i> can be used 
+  only for <i>absolute</i> <i>time</i> measurements.
+In the case of one function, <b>sleep</b>,
+time intervals are represented as a non-negative <i>real</i> number of seconds.
+</p>
+<p>Figure 25&ndash;4 shows <i>defined names</i> relating to <i>time</i>.
+</p>
+<div class="format">
+<pre class="format">  decode-universal-time   get-internal-run-time           <!-- /@w -->
+  encode-universal-time   get-universal-time              <!-- /@w -->
+  get-decoded-time        internal-time-units-per-second  <!-- /@w -->
+  get-internal-real-time  sleep                           <!-- /@w -->
+
+        Figure 25&ndash;4: Defined names involving Time.       <!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Decoded-Time.html" accesskey="1">Decoded Time</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Universal-Time.html" accesskey="2">Universal Time</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Internal-Time.html" accesskey="3">Internal Time</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Seconds.html" accesskey="4">Seconds</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+</body>
+</html>

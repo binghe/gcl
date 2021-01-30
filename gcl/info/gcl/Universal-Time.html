@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Universal Time (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Universal Time (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Universal Time (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Time.html" rel="up" title="Time">
+<link href="Internal-Time.html" rel="next" title="Internal Time">
+<link href="Decoded-Time.html" rel="prev" title="Decoded Time">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Universal-Time"></span><div class="header">
+<p>
+Next: <a href="Internal-Time.html" accesskey="n" rel="next">Internal Time</a>, Previous: <a href="Decoded-Time.html" accesskey="p" rel="prev">Decoded Time</a>, Up: <a href="Time.html" accesskey="u" rel="up">Time</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Universal-Time-1"></span><h4 class="subsubsection">25.1.4.2 Universal Time</h4>
+
+<p><i>Universal time</i>
+<span id="index-universal-time"></span>
+ is an <i>absolute</i> <i>time</i> represented as a
+single non-negative <i>integer</i>&mdash;the number of seconds since
+midnight, January 1, 1900 GMT (ignoring <i>leap seconds</i>).
+Thus the time 1 is 00:00:01 (that is, 12:00:01 a.m.) on January 1, 1900 GMT.
+Similarly, the time 2398291201 corresponds to time 00:00:01 on January 1,
+1976 GMT.
+Recall that the year 1900 was not a leap year; for the purposes of
+<span class="roman">Common Lisp</span>, a year is a leap year if and only if its number is divisible by 4,
+except that years divisible by 100 are not leap years, except that years
+divisible by 400 are leap years.  Therefore the year 2000 will
+be a leap year.
+Because <i>universal time</i> must be a non-negative <i>integer</i>,
+times before the base time of midnight, January 1, 1900 GMT cannot be processed by <span class="roman">Common Lisp</span>.
+</p>
+<div class="format">
+<pre class="format">  decode-universal-time  get-universal-time  <!-- /@w -->
+  encode-universal-time                      <!-- /@w -->
+
+  Figure 25&ndash;6: Defined names involving time in Universal Time.<!-- /@w -->
+
+</pre></div>
+
+
+
+
+</body>
+</html>

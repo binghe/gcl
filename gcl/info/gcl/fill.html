@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>fill (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="fill (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="fill (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Sequences-Dictionary.html" rel="up" title="Sequences Dictionary">
+<link href="make_002dsequence.html" rel="next" title="make-sequence">
+<link href="elt.html" rel="prev" title="elt">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="fill"></span><div class="header">
+<p>
+Next: <a href="make_002dsequence.html" accesskey="n" rel="next">make-sequence</a>, Previous: <a href="elt.html" accesskey="p" rel="prev">elt</a>, Up: <a href="Sequences-Dictionary.html" accesskey="u" rel="up">Sequences Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="fill-_005bFunction_005d"></span><h4 class="subsection">17.3.4 fill                                                             [Function]</h4>
+
+<p><code>fill</code>  <i>sequence item <span class="roman">&amp;key</span> start end</i> &rArr;  <i>sequence</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-356"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>sequence</i>&mdash;a <i>proper sequence</i>.
+</p>
+<p><i>item</i>&mdash;a <i>sequence</i>.
+</p>
+<p><i>start</i>, <i>end</i>&mdash;<i>bounding index designators</i> of <i>sequence</i>.
+ The defaults for <i>start</i> and <i>end</i> are <tt>0</tt> and <b>nil</b>, respectively.
+</p>
+<span id="Description_003a_003a-471"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Replaces the <i>elements</i> of <i>sequence</i> 
+<i>bounded</i> by <i>start</i> and <i>end</i>
+with <i>item</i>.
+</p>
+<span id="Examples_003a_003a-338"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (fill (list 0 1 2 3 4 5) '(444)) &rArr;  ((444) (444) (444) (444) (444) (444))
+ (fill (copy-seq &quot;01234&quot;) #\e :start 3) &rArr;  &quot;012ee&quot;
+ (setq x (vector 'a 'b 'c 'd 'e)) &rArr;  #(A B C D E)
+ (fill x 'z :start 1 :end 3) &rArr;  #(A Z Z D E)
+ x &rArr;  #(A Z Z D E)
+ (fill x 'p) &rArr;  #(P P P P P)
+ x &rArr;  #(P P P P P)
+</pre></div>
+
+<span id="Side-Effects_003a_003a-51"></span><h4 class="subsubheading">Side Effects::</h4>
+
+<p><i>Sequence</i> is destructively modified.
+</p>
+<span id="Exceptional-Situations_003a_003a-152"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should be prepared to signal an error of <i>type</i> <b>type-error</b>
+			 if <i>sequence</i> is not a <i>proper sequence</i>. 
+Should signal an error of <i>type</i> <b>type-error</b>
+			      if <i>start</i> is not a non-negative <i>integer</i>.
+Should signal an error of <i>type</i> <b>type-error</b>
+			      if <i>end</i> is not a non-negative <i>integer</i> or <b>nil</b>.
+</p>
+<span id="See-Also_003a_003a-383"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="replace.html">replace</a>
+, <b>nsubstitute</b>
+</p>
+<span id="Notes_003a_003a-258"></span><h4 class="subsubheading">Notes::</h4>
+
+<p><tt>(fill <i>sequence</i> <i>item</i>) &equiv; 
+   (nsubstitute-if <i>item</i> (constantly t) <i>sequence</i>)</tt>
+</p>
+
+
+
+</body>
+</html>

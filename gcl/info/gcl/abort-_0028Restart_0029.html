@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>abort (Restart) (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="abort (Restart) (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="abort (Restart) (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Conditions-Dictionary.html" rel="up" title="Conditions Dictionary">
+<link href="continue.html" rel="next" title="continue">
+<link href="with_002dsimple_002drestart.html" rel="prev" title="with-simple-restart">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="abort-_0028Restart_0029"></span><div class="header">
+<p>
+Next: <a href="continue.html" accesskey="n" rel="next">continue</a>, Previous: <a href="with_002dsimple_002drestart.html" accesskey="p" rel="prev">with-simple-restart</a>, Up: <a href="Conditions-Dictionary.html" accesskey="u" rel="up">Conditions Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="abort-_005bRestart_005d"></span><h4 class="subsection">9.2.41 abort                                                             [Restart]</h4>
+
+<span id="Data-Arguments-Required_003a_003a"></span><h4 class="subsubheading">Data Arguments Required::</h4>
+
+<p>None.
+</p>
+<span id="Description_003a_003a-211"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The intent of the <b>abort</b> restart is to allow return to the
+innermost &ldquo;command level.&rdquo;  Implementors are encouraged to make 
+sure that there is always a restart named <b>abort</b> 
+around any user code so that user code can call <b>abort</b> 
+at any time and expect something reasonable to happen;
+exactly what the reasonable thing is may vary somewhat.  Typically,
+in an interactive listener, the invocation of <b>abort</b>
+returns to the <i>Lisp reader</i> phase of the <i>Lisp read-eval-print loop</i>,
+though in some batch or multi-processing
+situations there may be situations in which having it kill the running 
+process is more appropriate.
+</p>
+<span id="See-Also_003a_003a-185"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="Restarts.html">Restarts</a>,
+<a href="Interfaces-to-Restarts.html">Interfaces to Restarts</a>,
+<a href="invoke_002drestart.html">invoke-restart</a>
+,
+<a href="abort-_0028Function_0029.html">abort (Function)</a>
+ (<i>function</i>)
+</p>
+
+
+
+</body>
+</html>

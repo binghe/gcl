@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>hash-table-test (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="hash-table-test (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="hash-table-test (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Hash-Tables-Dictionary.html" rel="up" title="Hash Tables Dictionary">
+<link href="gethash.html" rel="next" title="gethash">
+<link href="hash_002dtable_002dsize.html" rel="prev" title="hash-table-size">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="hash_002dtable_002dtest"></span><div class="header">
+<p>
+Next: <a href="gethash.html" accesskey="n" rel="next">gethash</a>, Previous: <a href="hash_002dtable_002dsize.html" accesskey="p" rel="prev">hash-table-size</a>, Up: <a href="Hash-Tables-Dictionary.html" accesskey="u" rel="up">Hash Tables Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="hash_002dtable_002dtest-_005bFunction_005d"></span><h4 class="subsection">18.2.8 hash-table-test                                                  [Function]</h4>
+
+<p><code>hash-table-test</code>  <i>hash-table</i> &rArr;  <i>test</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-382"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>hash-table</i>&mdash;a <i>hash table</i>.
+</p>
+<p><i>test</i>&mdash;a <i>function designator</i>.
+ For the four <i>standardized</i> <i>hash table</i> test <i>functions</i>
+ (see <b>make-hash-table</b>), the <i>test</i> value returned
+ is always a <i>symbol</i>.  If an <i>implementation</i> permits additional 
+ tests, it is <i>implementation-dependent</i> whether such tests are
+ returned as <i>function</i> <i>objects</i> or <i>function names</i>.
+</p>
+<span id="Description_003a_003a-498"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Returns the test used for comparing <i>keys</i> in <i>hash-table</i>.
+</p>
+<span id="Exceptional-Situations_003a_003a-172"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should signal an error of <i>type</i> <b>type-error</b>
+			      if <i>hash-table</i> is not a <i>hash table</i>.
+</p>
+<span id="See-Also_003a_003a-407"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="make_002dhash_002dtable.html">make-hash-table</a>
+</p>
+
+
+
+</body>
+</html>

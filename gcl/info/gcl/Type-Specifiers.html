@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Type Specifiers (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Type Specifiers (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Type Specifiers (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Types.html" rel="up" title="Types">
+<link href="Classes.html" rel="next" title="Classes">
+<link href="Type-Relationships.html" rel="prev" title="Type Relationships">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Type-Specifiers"></span><div class="header">
+<p>
+Previous: <a href="Type-Relationships.html" accesskey="p" rel="prev">Type Relationships</a>, Up: <a href="Types.html" accesskey="u" rel="up">Types</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Type-Specifiers-1"></span><h4 class="subsection">4.2.3 Type Specifiers</h4>
+
+<p><i>Type specifiers</i> can be <i>symbols</i>, <i>classes</i>, or <i>lists</i>.
+<i>Figure~4&ndash;2</i> lists <i>symbols</i> that are
+  <i>standardized</i> <i>atomic type specifiers</i>, and
+<i>Figure~4&ndash;3</i> lists
+ <i>standardized</i> <i>compound type specifier</i> <i>names</i>.
+For syntax information, see the dictionary entry for the corresponding <i>type specifier</i>.
+It is possible to define new <i>type specifiers</i> using
+ <b>defclass</b>,
+ <b>define-condition</b>,
+ <b>defstruct</b>, 
+or
+ <b>deftype</b>.
+</p>
+<div class="format">
+<pre class="format"> arithmetic-error                 function           simple-condition          <!-- /@w -->
+ array                            generic-function   simple-error              <!-- /@w -->
+ atom                             hash-table         simple-string             <!-- /@w -->
+ base-char                        integer            simple-type-error         <!-- /@w -->
+ base-string                      keyword            simple-vector             <!-- /@w -->
+ bignum                           list               simple-warning            <!-- /@w -->
+ bit                              logical-pathname   single-float              <!-- /@w -->
+ bit-vector                       long-float         standard-char             <!-- /@w -->
+ broadcast-stream                 method             standard-class            <!-- /@w -->
+ built-in-class                   method-combination standard-generic-function <!-- /@w -->
+ cell-error                       nil                standard-method           <!-- /@w -->
+ character                        null               standard-object           <!-- /@w -->
+ class                            number             storage-condition         <!-- /@w -->
+ compiled-function                package            stream                    <!-- /@w -->
+ complex                          package-error      stream-error              <!-- /@w -->
+ concatenated-stream              parse-error        string                    <!-- /@w -->
+ condition                        pathname           string-stream             <!-- /@w -->
+ cons                             print-not-readable structure-class           <!-- /@w -->
+ control-error                    program-error      structure-object          <!-- /@w -->
+ division-by-zero                 random-state       style-warning             <!-- /@w -->
+ double-float                     ratio              symbol                    <!-- /@w -->
+ echo-stream                      rational           synonym-stream            <!-- /@w -->
+ end-of-file                      reader-error       t                         <!-- /@w -->
+ error                            readtable          two-way-stream            <!-- /@w -->
+ extended-char                    real               type-error                <!-- /@w -->
+ file-error                       restart            unbound-slot              <!-- /@w -->
+ file-stream                      sequence           unbound-variable          <!-- /@w -->
+ fixnum                           serious-condition  undefined-function        <!-- /@w -->
+ float                            short-float        unsigned-byte             <!-- /@w -->
+ floating-point-inexact           signed-byte        vector                    <!-- /@w -->
+ floating-point-invalid-operation simple-array       warning                   <!-- /@w -->
+ floating-point-overflow          simple-base-string                           <!-- /@w -->
+ floating-point-underflow         simple-bit-vector                            <!-- /@w -->
+
+                 Figure 4&ndash;2: Standardized Atomic Type Specifiers               <!-- /@w -->
+
+</pre></div>
+
+<p>\indent               
+If a <i>type specifier</i> is a <i>list</i>, the <i>car</i> of the <i>list</i> 
+is a <i>symbol</i>, and the rest of the <i>list</i> is subsidiary
+<i>type</i> information.  Such a <i>type specifier</i> is called 
+a <i>compound type specifier</i>
+<span id="index-compound-type-specifier"></span>
+.
+Except as explicitly stated otherwise,
+the subsidiary items can be unspecified.
+The unspecified subsidiary items are indicated
+by writing <tt>*</tt>.  For example, to completely specify
+a <i>vector</i>, the <i>type</i> of the elements
+and the length of the <i>vector</i> must be present.
+</p>
+<div class="example">
+<pre class="example"> (vector double-float 100)
+</pre></div>
+
+<p>The following leaves the length unspecified:
+</p>
+<div class="example">
+<pre class="example"> (vector double-float *)
+</pre></div>
+
+<p>The following leaves the element type unspecified:
+</p>
+<div class="example">
+<pre class="example"> (vector * 100)                                      
+</pre></div>
+
+<p>Suppose that two <i>type specifiers</i> are the same except that the first
+has a <tt>*</tt> where the second has a more explicit specification.
+Then the second denotes a <i>subtype</i> 
+of the <i>type</i> denoted by the first.
+</p>
+<p>If a <i>list</i> has one or more unspecified items at the end, 
+those items can be dropped.
+If dropping all occurrences of <tt>*</tt> results in a <i>singleton</i> <i>list</i>,
+then the parentheses can be dropped as well (the list can be replaced
+by the <i>symbol</i> in its <i>car</i>).  
+For example,                       
+<tt>(vector double-float *)</tt>                    
+can be abbreviated to <tt>(vector double-float)</tt>,               
+and <tt>(vector * *)</tt> can be abbreviated to <tt>(vector)</tt> 
+and then to 
+<tt>vector</tt>.
+</p>
+<div class="format">
+<pre class="format">  and           long-float    simple-base-string  <!-- /@w -->
+  array         member        simple-bit-vector   <!-- /@w -->
+  base-string   mod           simple-string       <!-- /@w -->
+  bit-vector    not           simple-vector       <!-- /@w -->
+  complex       or            single-float        <!-- /@w -->
+  cons          rational      string              <!-- /@w -->
+  double-float  real          unsigned-byte       <!-- /@w -->
+  eql           satisfies     values              <!-- /@w -->
+  float         short-float   vector              <!-- /@w -->
+  function      signed-byte                       <!-- /@w -->
+  integer       simple-array                      <!-- /@w -->
+
+  Figure 4&ndash;3: Standardized Compound Type Specifier Names<!-- /@w -->
+
+</pre></div>
+
+<p>Figure 4&ndash;4 show the <i>defined names</i> that can be used as 
+<i>compound type specifier</i> <i>names</i>
+but that cannot be used as <i>atomic type specifiers</i>.
+</p>
+<div class="format">
+<pre class="format">  and     mod  satisfies  <!-- /@w -->
+  eql     not  values     <!-- /@w -->
+  member  or              <!-- /@w -->
+
+  Figure 4&ndash;4: Standardized Compound-Only Type Specifier Names<!-- /@w -->
+
+</pre></div>
+
+<p>New <i>type specifiers</i> can come into existence in two ways.
+</p><dl compact="compact">
+<dt><tt>*</tt></dt>
+<dd><p>Defining a structure by using <b>defstruct</b> without using
+ the <tt>:type</tt> specifier or defining a <i>class</i> by using 
+ <b>defclass</b> 
+ or <b>define-condition</b>
+ automatically causes the name of the structure 
+ or class to be a new <i>type specifier</i> <i>symbol</i>.
+</p></dd>
+<dt><tt>*</tt></dt>
+<dd><p><b>deftype</b> can be used to define <i>derived type specifiers</i>
+<span id="index-derived-type-specifier"></span>
+,
+ which act as &lsquo;abbreviations&rsquo; for other <i>type specifiers</i>.
+</p></dd>
+</dl>
+
+<p>A <i>class</i> <i>object</i> can be used as a <i>type specifier</i>. 
+When used this way, it denotes the set of all members of that <i>class</i>.
+</p>
+<p>Figure 4&ndash;5 shows some <i>defined names</i> relating to 
+<i>types</i> and <i>declarations</i>.
+</p>
+<div class="format">
+<pre class="format">  coerce            defstruct  subtypep  <!-- /@w -->
+  declaim           deftype    the       <!-- /@w -->
+  declare           ftype      type      <!-- /@w -->
+  defclass          locally    type-of   <!-- /@w -->
+  define-condition  proclaim   typep     <!-- /@w -->
+
+  Figure 4&ndash;5: Defined names relating to types and declarations.<!-- /@w -->
+
+</pre></div>
+
+<p>Figure 4&ndash;6 shows all <i>defined names</i> that are <i>type specifier</i> <i>names</i>,
+whether for <i>atomic type specifiers</i> or <i>compound type specifiers</i>;
+this list is the union of the lists in <i>Figure~4&ndash;2</i> 
+and <i>Figure~4&ndash;3</i>.
+</p>
+<div class="format">
+<pre class="format"> and                              function           simple-array              <!-- /@w -->
+ arithmetic-error                 generic-function   simple-base-string        <!-- /@w -->
+ array                            hash-table         simple-bit-vector         <!-- /@w -->
+ atom                             integer            simple-condition          <!-- /@w -->
+ base-char                        keyword            simple-error              <!-- /@w -->
+ base-string                      list               simple-string             <!-- /@w -->
+ bignum                           logical-pathname   simple-type-error         <!-- /@w -->
+ bit                              long-float         simple-vector             <!-- /@w -->
+ bit-vector                       member             simple-warning            <!-- /@w -->
+ broadcast-stream                 method             single-float              <!-- /@w -->
+ built-in-class                   method-combination standard-char             <!-- /@w -->
+ cell-error                       mod                standard-class            <!-- /@w -->
+ character                        nil                standard-generic-function <!-- /@w -->
+ class                            not                standard-method           <!-- /@w -->
+ compiled-function                null               standard-object           <!-- /@w -->
+ complex                          number             storage-condition         <!-- /@w -->
+ concatenated-stream              or                 stream                    <!-- /@w -->
+ condition                        package            stream-error              <!-- /@w -->
+ cons                             package-error      string                    <!-- /@w -->
+ control-error                    parse-error        string-stream             <!-- /@w -->
+ division-by-zero                 pathname           structure-class           <!-- /@w -->
+ double-float                     print-not-readable structure-object          <!-- /@w -->
+ echo-stream                      program-error      style-warning             <!-- /@w -->
+ end-of-file                      random-state       symbol                    <!-- /@w -->
+ eql                              ratio              synonym-stream            <!-- /@w -->
+ error                            rational           t                         <!-- /@w -->
+ extended-char                    reader-error       two-way-stream            <!-- /@w -->
+ file-error                       readtable          type-error                <!-- /@w -->
+ file-stream                      real               unbound-slot              <!-- /@w -->
+ fixnum                           restart            unbound-variable          <!-- /@w -->
+ float                            satisfies          undefined-function        <!-- /@w -->
+ floating-point-inexact           sequence           unsigned-byte             <!-- /@w -->
+ floating-point-invalid-operation serious-condition  values                    <!-- /@w -->
+ floating-point-overflow          short-float        vector                    <!-- /@w -->
+ floating-point-underflow         signed-byte        warning                   <!-- /@w -->
+
+                  Figure 4&ndash;6: Standardized Type Specifier Names                <!-- /@w -->
+
+</pre></div>
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Type-Relationships.html" accesskey="p" rel="prev">Type Relationships</a>, Up: <a href="Types.html" accesskey="u" rel="up">Types</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

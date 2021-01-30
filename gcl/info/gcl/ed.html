@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>ed (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="ed (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="ed (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Environment-Dictionary.html" rel="up" title="Environment Dictionary">
+<link href="inspect.html" rel="next" title="inspect">
+<link href="room.html" rel="prev" title="room">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="ed"></span><div class="header">
+<p>
+Next: <a href="inspect.html" accesskey="n" rel="next">inspect</a>, Previous: <a href="room.html" accesskey="p" rel="prev">room</a>, Up: <a href="Environment-Dictionary.html" accesskey="u" rel="up">Environment Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="ed-_005bFunction_005d"></span><h4 class="subsection">25.2.17 ed                                                               [Function]</h4>
+
+<p><code>ed</code>  <i><span class="roman">&amp;optional</span> x</i> &rArr;  <i><i>implementation-dependent</i></i>
+</p>
+<span id="Arguments-and-Values_003a_003a-502"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>x</i>&mdash;<b>nil</b>, a <i>pathname</i>, a <i>string</i>, or a <i>function name</i>.
+</p>
+<p>The default is <b>nil</b>.
+</p>
+<span id="Description_003a_003a-665"></span><h4 class="subsubheading">Description::</h4>
+
+<p><b>ed</b> invokes the editor if the <i>implementation</i> provides a resident editor.
+</p>
+<p>If <i>x</i> is <b>nil</b>, the editor is entered.
+If the editor had been previously entered, its prior state is resumed, if possible.
+</p>
+<p>If <i>x</i> is a <i>pathname</i> or <i>string</i>, 
+it is taken as the <i>pathname designator</i> for a <i>file</i> to be edited.
+</p>
+<p>If <i>x</i> is a <i>function name</i>, the text of its definition is edited.
+The means by which the function text is obtained is <i>implementation-defined</i>.
+</p>
+<span id="Exceptional-Situations_003a_003a-241"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>The consequences are undefined if the <i>implementation</i> does not provide a resident editor.
+</p>
+<p>Might signal <b>type-error</b> if its argument is supplied but is not
+a <i>symbol</i>, a <i>pathname</i>, or <b>nil</b>. 
+</p>
+<p>If a failure occurs when performing some operation on the <i>file system</i>
+while attempting to edit a <i>file</i>,
+an error of <i>type</i> <b>file-error</b> is signaled.
+</p>
+<p>An error of <i>type</i> <b>file-error</b> might be signaled if <i>x</i>
+is a <i>designator</i> for a <i>wild</i> <i>pathname</i>.
+</p>
+<p><i>Implementation-dependent</i> additional conditions might be signaled as well.
+</p>
+<span id="See-Also_003a_003a-540"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><b>pathname</b>,
+</p>
+<p><b>logical-pathname</b>,
+</p>
+<p><a href="compile_002dfile.html">compile-file</a>
+,
+<a href="load.html">load</a>
+,
+</p>
+<p><a href="Pathnames-as-Filenames.html">Pathnames as Filenames</a>
+</p>
+
+
+
+</body>
+</html>

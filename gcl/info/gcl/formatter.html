@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>formatter (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="formatter (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="formatter (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Printer-Dictionary.html" rel="up" title="Printer Dictionary">
+<link href="pprint_002ddispatch.html" rel="next" title="pprint-dispatch">
+<link href="copy_002dpprint_002ddispatch.html" rel="prev" title="copy-pprint-dispatch">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="formatter"></span><div class="header">
+<p>
+Next: <a href="pprint_002ddispatch.html" accesskey="n" rel="next">pprint-dispatch</a>, Previous: <a href="copy_002dpprint_002ddispatch.html" accesskey="p" rel="prev">copy-pprint-dispatch</a>, Up: <a href="Printer-Dictionary.html" accesskey="u" rel="up">Printer Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="formatter-_005bMacro_005d"></span><h4 class="subsection">22.4.2 formatter                                                           [Macro]</h4>
+
+<p><code>formatter</code>  <i>control-string</i> &rArr;  <i>function</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-456"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>control-string</i>&mdash;a <i>format string</i>; not evaluated.
+</p>
+<p><i>function</i>&mdash;a <i>function</i>.
+</p>
+<span id="Description_003a_003a-590"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Returns a <i>function</i> which has behavior equivalent to:
+</p>
+<div class="example">
+<pre class="example">  #'(lambda (*standard-output* &amp;rest arguments)
+      (apply #'format t <i>control-string</i> arguments)
+      <i>arguments-tail</i>)
+</pre></div>
+
+<p>where <i>arguments-tail</i> is either the tail of <i>arguments</i> 
+which has as its <i>car</i> the argument that would be processed next 
+if there were more format directives in the <i>control-string</i>, 
+or else <b>nil</b> if no more <i>arguments</i> follow the most recently
+processed argument.
+</p>
+<span id="Examples_003a_003a-428"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example">(funcall (formatter &quot;~&amp;~A~A&quot;) *standard-output* 'a 'b 'c)
+<tt> |&gt; </tt> AB
+&rArr;  (C)
+
+(format t (formatter &quot;~&amp;~A~A&quot;) 'a 'b 'c)
+<tt> |&gt; </tt> AB
+&rArr;  NIL
+</pre></div>
+
+<span id="Exceptional-Situations_003a_003a-218"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Might signal an error (at macro expansion time or at run time) if the argument
+is not a valid <i>format string</i>.
+</p>
+<span id="See-Also_003a_003a-480"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="format.html">format</a>
+</p>
+
+
+
+</body>
+</html>

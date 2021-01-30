@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>write-string (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="write-string (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="write-string (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Streams-Dictionary.html" rel="up" title="Streams Dictionary">
+<link href="read_002dsequence.html" rel="next" title="read-sequence">
+<link href="read_002dline.html" rel="prev" title="read-line">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="write_002dstring"></span><div class="header">
+<p>
+Next: <a href="read_002dsequence.html" accesskey="n" rel="next">read-sequence</a>, Previous: <a href="read_002dline.html" accesskey="p" rel="prev">read-line</a>, Up: <a href="Streams-Dictionary.html" accesskey="u" rel="up">Streams Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="write_002dstring_002c-write_002dline-_005bFunction_005d"></span><h4 class="subsection">21.2.23 write-string, write-line                                         [Function]</h4>
+
+<p><code>write-string</code>  <i>string <span class="roman">&amp;optional</span> output-stream <span class="roman">&amp;key</span> start end</i> &rArr;  <i>string</i>
+</p>
+<p><code>write-line</code>  <i>string <span class="roman">&amp;optional</span> output-stream <span class="roman">&amp;key</span> start end</i> &rArr;  <i>string</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-426"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>string</i>&mdash;a <i>string</i>.
+</p>
+<p><i>output-stream</i> &ndash; an <i>output</i> <i>stream designator</i>.
+ The default is <i>standard output</i>.
+</p>
+<p><i>start</i>, <i>end</i>&mdash;<i>bounding index designators</i> of <i>string</i>.
+ The defaults for <i>start</i> and <i>end</i> are <tt>0</tt> and <b>nil</b>, respectively.
+</p>
+<span id="Description_003a_003a-554"></span><h4 class="subsubheading">Description::</h4>
+
+<p><b>write-string</b> writes the <i>characters</i> of 
+the subsequence of <i>string</i> <i>bounded</i> by <i>start</i> and <i>end</i>
+to <i>output-stream</i>.
+<b>write-line</b> does the same thing, 
+but then outputs a newline afterwards.  
+</p>
+<span id="Examples_003a_003a-401"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (prog1 (write-string &quot;books&quot; nil :end 4) (write-string &quot;worms&quot;))
+<tt> |&gt; </tt> bookworms
+&rArr;  &quot;books&quot;
+ (progn (write-char #\*)
+        (write-line &quot;test12&quot; *standard-output* :end 5) 
+        (write-line &quot;*test2&quot;)
+        (write-char #\*)
+        nil)
+<tt> |&gt; </tt> *test1
+<tt> |&gt; </tt> *test2
+<tt> |&gt; </tt> *
+&rArr;  NIL
+</pre></div>
+
+<span id="Affected-By_003a_003a-89"></span><h4 class="subsubheading">Affected By::</h4>
+
+<p><b>*standard-output*</b>,
+<b>*terminal-io*</b>.
+</p>
+<span id="See-Also_003a_003a-451"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="read_002dline.html">read-line</a>
+, 
+<a href="write_002dchar.html">write-char</a>
+</p>
+<span id="Notes_003a_003a-290"></span><h4 class="subsubheading">Notes::</h4>
+
+<p><b>write-line</b> and <b>write-string</b> return <i>string</i>,
+not the substring <i>bounded</i> by <i>start</i> and <i>end</i>.
+</p>
+<div class="example">
+<pre class="example"> (write-string string)
+&equiv; (dotimes (i (length string)
+      (write-char (char string i)))
+
+ (write-line string)
+&equiv; (prog1 (write-string string) (terpri))
+</pre></div>
+
+
+
+
+</body>
+</html>

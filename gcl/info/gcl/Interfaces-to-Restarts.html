@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Interfaces to Restarts (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Interfaces to Restarts (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Interfaces to Restarts (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Signaling-and-Handling-Conditions.html" rel="up" title="Signaling and Handling Conditions">
+<link href="Restart-Tests.html" rel="next" title="Restart Tests">
+<link href="Interactive-Use-of-Restarts.html" rel="prev" title="Interactive Use of Restarts">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Interfaces-to-Restarts"></span><div class="header">
+<p>
+Next: <a href="Restart-Tests.html" accesskey="n" rel="next">Restart Tests</a>, Previous: <a href="Interactive-Use-of-Restarts.html" accesskey="p" rel="prev">Interactive Use of Restarts</a>, Up: <a href="Signaling-and-Handling-Conditions.html" accesskey="u" rel="up">Signaling and Handling Conditions</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Interfaces-to-Restarts-1"></span><h4 class="subsubsection">9.1.4.5 Interfaces to Restarts</h4>
+
+<p>Some <i>restarts</i> have functional interfaces, 
+such as <b>abort</b>, <b>continue</b>, 
+<b>muffle-warning</b>, <b>store-value</b>, and 
+<b>use-value</b>.
+They are ordinary functions that use 
+ <b>find-restart</b> and <b>invoke-restart</b> internally,
+that have the same name as the <i>restarts</i> they manipulate,
+and that are provided simply for notational convenience.
+</p>
+<p>Figure 9&ndash;6 shows <i>defined names</i> relating to
+<i>restarts</i>.
+</p>
+<div class="format">
+<pre class="format">  abort             invoke-restart-interactively  store-value          <!-- /@w -->
+  compute-restarts  muffle-warning                use-value            <!-- /@w -->
+  continue          restart-bind                  with-simple-restart  <!-- /@w -->
+  find-restart      restart-case                                       <!-- /@w -->
+  invoke-restart    restart-name                                       <!-- /@w -->
+
+            Figure 9&ndash;6: Defined names relating to restarts.           <!-- /@w -->
+
+</pre></div>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>continue (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="continue (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="continue (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Conditions-Dictionary.html" rel="up" title="Conditions Dictionary">
+<link href="muffle_002dwarning.html" rel="next" title="muffle-warning">
+<link href="abort-_0028Restart_0029.html" rel="prev" title="abort (Restart)">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="continue"></span><div class="header">
+<p>
+Next: <a href="muffle_002dwarning.html" accesskey="n" rel="next">muffle-warning</a>, Previous: <a href="abort-_0028Restart_0029.html" accesskey="p" rel="prev">abort (Restart)</a>, Up: <a href="Conditions-Dictionary.html" accesskey="u" rel="up">Conditions Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="continue-_005bRestart_005d"></span><h4 class="subsection">9.2.42 continue                                                          [Restart]</h4>
+
+<span id="Data-Arguments-Required_003a_003a-1"></span><h4 class="subsubheading">Data Arguments Required::</h4>
+
+<p>None.
+</p>
+<span id="Description_003a_003a-212"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The <b>continue</b> <i>restart</i> is generally part of protocols where there is
+  a single &ldquo;obvious&rdquo; way to continue, such as in 
+<b>break</b> and <b>cerror</b>.  Some
+  user-defined protocols may also wish to incorporate it for similar reasons.
+  In general, however, it is more reliable to design a special purpose restart
+  with a name that more directly suits the particular application.
+</p>
+<span id="Examples_003a_003a-137"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (let ((x 3))
+   (handler-bind ((error #'(lambda (c)
+                             (let ((r (find-restart 'continue c)))
+                               (when r (invoke-restart r))))))
+     (cond ((not (floatp x))
+            (cerror &quot;Try floating it.&quot; &quot;~D is not a float.&quot; x)
+            (float x))
+           (t x)))) &rArr;  3.0
+</pre></div>
+
+<span id="See-Also_003a_003a-186"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="Restarts.html">Restarts</a>,
+<a href="Interfaces-to-Restarts.html">Interfaces to Restarts</a>,
+<a href="invoke_002drestart.html">invoke-restart</a>
+,
+<a href="#continue">continue</a>
+ (<i>function</i>),
+<a href="assert.html">assert</a>
+,
+<a href="cerror.html">cerror</a>
+</p>
+
+
+
+</body>
+</html>

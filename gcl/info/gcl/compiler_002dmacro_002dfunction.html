@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>compiler-macro-function (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="compiler-macro-function (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="compiler-macro-function (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Evaluation-and-Compilation-Dictionary.html" rel="up" title="Evaluation and Compilation Dictionary">
+<link href="define_002dcompiler_002dmacro.html" rel="next" title="define-compiler-macro">
+<link href="quote.html" rel="prev" title="quote">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="compiler_002dmacro_002dfunction"></span><div class="header">
+<p>
+Next: <a href="define_002dcompiler_002dmacro.html" accesskey="n" rel="next">define-compiler-macro</a>, Previous: <a href="quote.html" accesskey="p" rel="prev">quote</a>, Up: <a href="Evaluation-and-Compilation-Dictionary.html" accesskey="u" rel="up">Evaluation and Compilation Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="compiler_002dmacro_002dfunction-_005bAccessor_005d"></span><h4 class="subsection">3.8.8 compiler-macro-function                                          [Accessor]</h4>
+
+<p><code>compiler-macro-function</code>  <i>name <span class="roman">&amp;optional</span> environment</i> &rArr;  <i>function</i>
+</p>
+<p>(setf (<code>         compiler-macro-function</code> <i>name <span class="roman">&amp;optional</span> environment</i>) new-function)<br>
+</p>
+<span id="Arguments-and-Values_003a_003a-6"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>name</i>&mdash;a <i>function name</i>.
+</p>
+<p><i>environment</i>&mdash;an <i>environment</i> <i>object</i>.
+</p>
+<p><i>function</i>, <i>new-function</i>&mdash;a <i>compiler macro function</i>, or <b>nil</b>.
+</p>
+<span id="Description_003a_003a-7"></span><h4 class="subsubheading">Description::</h4>
+
+<p><i>Accesses</i> the <i>compiler macro function</i> named <i>name</i>, if any,
+in the <i>environment</i>.
+</p>
+<p>A value of <b>nil</b> denotes the absence of a <i>compiler macro function</i> named <i>name</i>.
+</p>
+<span id="Exceptional-Situations_003a_003a-1"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>The consequences are undefined if <i>environment</i> is <i>non-nil</i>
+in a use of <b>setf</b> of <b>compiler-macro-function</b>.
+</p>
+<span id="See-Also_003a_003a-7"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="define_002dcompiler_002dmacro.html">define-compiler-macro</a>
+, <a href="Compiler-Macros.html">Compiler Macros</a>
+</p>
+
+
+
+</body>
+</html>

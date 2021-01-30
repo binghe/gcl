@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Integrating Types and Classes (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Integrating Types and Classes (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Integrating Types and Classes (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Classes.html" rel="up" title="Classes">
+<link href="Types-and-Classes-Dictionary.html" rel="next" title="Types and Classes Dictionary">
+<link href="Customizing-Class-Redefinition.html" rel="prev" title="Customizing Class Redefinition">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Integrating-Types-and-Classes"></span><div class="header">
+<p>
+Previous: <a href="Redefining-Classes.html" accesskey="p" rel="prev">Redefining Classes</a>, Up: <a href="Classes.html" accesskey="u" rel="up">Classes</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Integrating-Types-and-Classes-1"></span><h4 class="subsection">4.3.7 Integrating Types and Classes</h4>
+
+<p>The object system maps the space of <i>classes</i> into the space of <i>types</i>.
+Every <i>class</i> that has a proper name has a corresponding <i>type</i> 
+with the same <i>name</i>.  
+</p>
+<p>The proper name of every <i>class</i> is a valid <i>type specifier</i>.  In
+addition, every <i>class</i> <i>object</i> is a valid <i>type specifier</i>.  
+Thus the expression <tt>(typep <i>object</i> <i>class</i>)</tt> evaluates to 
+<i>true</i> if the <i>class</i> of <i>object</i> is <i>class</i> itself or 
+a <i>subclass</i> of <i>class</i>.  The evaluation of the expression
+<tt>(subtypep class1 class2)</tt> returns the values 
+<i>true</i> and <i>true</i> if <tt>class1</tt> is a subclass of <tt>class2</tt> or if they are the
+same <i>class</i>; otherwise it returns the values 
+<i>false</i> and <i>true</i>.
+If  I is an <i>instance</i> of some <i>class</i> C named S 
+and C is an <i>instance</i> of <b>standard-class</b>, 
+the evaluation of the expression <tt>(type-of I\/)</tt> returns S 
+if S is the <i>proper name</i> of C; 
+otherwise, it returns C.
+</p>
+<p>Because the names of <i>classes</i> 
+and <i>class</i> <i>objects</i> are <i>type specifiers</i>, they may
+be used in the special form <b>the</b> and in type declarations.
+</p>
+<p>Many but not all of the predefined <i>type specifiers</i> have a
+corresponding <i>class</i> with 
+the same proper name as the <i>type</i>.  These type
+specifiers are listed in <i>Figure~4&ndash;8</i>.
+For example, the <i>type</i> <b>array</b> has 
+a corresponding <i>class</i> named <b>array</b>.  
+No <i>type specifier</i> that is a
+list, such as <tt>(vector double-float 100)</tt>, has a corresponding <i>class</i>.
+The <i>operator</i> <b>deftype</b> does not create any <i>classes</i>.
+</p>
+<p>Each <i>class</i> that corresponds to a predefined <i>type specifier</i> can
+be implemented in one of three ways, at the discretion of each implementation.
+It can be a <i>standard class</i>,
+a <i>structure class</i>,
+</p>
+<p>or a <i>system class</i>.
+</p>
+<p>A <i>built-in class</i> is one whose <i>generalized instances</i> have restricted capabilities 
+or special representations.  Attempting to use <b>defclass</b> to define 
+<i>subclasses</i> of a <b>built-in-class</b> signals an error.
+Calling <b>make-instance</b> to create a <i>generalized instance</i> of a 
+<i>built-in class</i> signals an error.  Calling <b>slot-value</b> on a
+<i>generalized instance</i> of a <i>built-in class</i> signals an error.
+Redefining a <i>built-in class</i> or using <b>change-class</b> to change
+the <i>class</i> of an <i>object</i> to or from a <i>built-in class</i> signals an error.
+However, <i>built-in classes</i> can be used as <i>parameter specializers</i> 
+in <i>methods</i>.
+</p>
+<p>It is possible to determine whether a <i>class</i> is a <i>built-in class</i>
+by checking the <i>metaclass</i>.
+A <i>standard class</i>  is an <i>instance</i> of the <i>class</i> <b>standard-class</b>,
+a <i>built-in class</i>  is an <i>instance</i> of the <i>class</i> <b>built-in-class</b>, and
+a <i>structure class</i> is an <i>instance</i> of the <i>class</i> <b>structure-class</b>.
+</p>
+<p>Each <i>structure</i> <i>type</i> created by <b>defstruct</b> without 
+using the <tt>:type</tt> option has a corresponding <i>class</i>.  
+This <i>class</i> is a <i>generalized instance</i> of the <i>class</i> <b>structure-class</b>.  
+The <tt>:include</tt> option of <b>defstruct</b> creates a direct
+<i>subclass</i> of the <i>class</i> 
+that corresponds to the included <i>structure</i> 
+<i>type</i>.
+</p>
+<p>It is <i>implementation-dependent</i> whether <i>slots</i> are involved in the
+operation of <i>functions</i> defined in this specification
+on <i>instances</i> of <i>classes</i> defined in this specification,
+except when <i>slots</i> are explicitly defined by this specification.
+</p>
+<p>If in a particular <i>implementation</i> a <i>class</i> defined in this specification
+has <i>slots</i> that are not defined by this specfication, the names of these <i>slots</i>
+must not be <i>external symbols</i> of <i>packages</i> defined in this specification nor
+otherwise <i>accessible</i> in the <tt>CL-USER</tt> <i>package</i>.
+</p>
+<p>The purpose of specifying that many of the standard <i>type specifiers</i> have a
+corresponding <i>class</i> is to enable users to write <i>methods</i> that
+discriminate on these <i>types</i>.  <i>Method</i> selection requires that a 
+<i>class precedence list</i> can be determined for each <i>class</i>. 
+</p>
+<p>The hierarchical relationships among the <i>type specifiers</i> are mirrored by
+relationships among the <i>classes</i> corresponding to those <i>types</i>.  
+</p>
+<p><i>Figure~4&ndash;8</i> lists the set of <i>classes</i> 
+that correspond to predefined <i>type specifiers</i>.
+</p>
+<div class="format">
+<pre class="format"> arithmetic-error                 generic-function   simple-error              <!-- /@w -->
+ array                            hash-table         simple-type-error         <!-- /@w -->
+ bit-vector                       integer            simple-warning            <!-- /@w -->
+ broadcast-stream                 list               standard-class            <!-- /@w -->
+ built-in-class                   logical-pathname   standard-generic-function <!-- /@w -->
+ cell-error                       method             standard-method           <!-- /@w -->
+ character                        method-combination standard-object           <!-- /@w -->
+ class                            null               storage-condition         <!-- /@w -->
+ complex                          number             stream                    <!-- /@w -->
+ concatenated-stream              package            stream-error              <!-- /@w -->
+ condition                        package-error      string                    <!-- /@w -->
+ cons                             parse-error        string-stream             <!-- /@w -->
+ control-error                    pathname           structure-class           <!-- /@w -->
+ division-by-zero                 print-not-readable structure-object          <!-- /@w -->
+ echo-stream                      program-error      style-warning             <!-- /@w -->
+ end-of-file                      random-state       symbol                    <!-- /@w -->
+ error                            ratio              synonym-stream            <!-- /@w -->
+ file-error                       rational           t                         <!-- /@w -->
+ file-stream                      reader-error       two-way-stream            <!-- /@w -->
+ float                            readtable          type-error                <!-- /@w -->
+ floating-point-inexact           real               unbound-slot              <!-- /@w -->
+ floating-point-invalid-operation restart            unbound-variable          <!-- /@w -->
+ floating-point-overflow          sequence           undefined-function        <!-- /@w -->
+ floating-point-underflow         serious-condition  vector                    <!-- /@w -->
+ function                         simple-condition   warning                   <!-- /@w -->
+
+       Figure 4&ndash;8: Classes that correspond to pre-defined type specifiers      <!-- /@w -->
+
+</pre></div>
+
+<p>The <i>class precedence list</i> information specified in the entries for
+each of these <i>classes</i> are those that are required by the object system.
+</p>
+<p>Individual implementations may be extended to define other type
+specifiers to have a corresponding <i>class</i>.  Individual implementations
+may be extended to add other <i>subclass</i> relationships and to add other
+<i>elements</i> to the <i>class precedence lists</i> as long as
+they do not violate the type relationships and disjointness
+requirements specified by this standard.
+A standard <i>class</i> defined with no direct <i>superclasses</i> is guaranteed to
+be disjoint from all of the <i>classes</i> in the table, except for the
+class named <b>t</b>.
+</p>
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Redefining-Classes.html" accesskey="p" rel="prev">Redefining Classes</a>, Up: <a href="Classes.html" accesskey="u" rel="up">Classes</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

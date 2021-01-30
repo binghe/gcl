@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Syntax of a Float (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Syntax of a Float (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Syntax of a Float (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Constructing-Numbers-from-Tokens.html" rel="up" title="Constructing Numbers from Tokens">
+<link href="Syntax-of-a-Complex.html" rel="next" title="Syntax of a Complex">
+<link href="Syntax-of-a-Ratio.html" rel="prev" title="Syntax of a Ratio">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Syntax-of-a-Float"></span><div class="header">
+<p>
+Next: <a href="Syntax-of-a-Complex.html" accesskey="n" rel="next">Syntax of a Complex</a>, Previous: <a href="Syntax-of-a-Ratio.html" accesskey="p" rel="prev">Syntax of a Ratio</a>, Up: <a href="Constructing-Numbers-from-Tokens.html" accesskey="u" rel="up">Constructing Numbers from Tokens</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Syntax-of-a-Float-1"></span><h4 class="subsubsection">2.3.2.4 Syntax of a Float</h4>
+
+<p><i>Floats</i> can be written in either decimal fraction or computerized
+scientific notation: an optional sign, then a non-empty sequence of digits
+with an embedded decimal point,
+then an optional decimal exponent specification.
+If there is no exponent specifier, then
+the decimal point is required, and there must be digits
+after it.
+The exponent specifier consists of an <i>exponent marker</i>,
+an optional sign, and a non-empty sequence of digits.
+If no exponent specifier is present, or if the <i>exponent marker</i> <tt>e</tt>
+(or <tt>E</tt>) is used, then
+the format specified
+by <b>*read-default-float-format*</b> is used.
+See <i>Figure~2&ndash;9</i>.
+</p>
+<p>An implementation may provide one or more kinds of <i>float</i>
+that collectively make up the <i>type</i> <b>float</b>.
+The letters <tt>s</tt>, <tt>f</tt>, <tt>d</tt>, and <tt>l</tt> (or their
+respective uppercase equivalents) explicitly specify the
+use of the <i>types</i> <b>short-float</b>, <b>single-float</b>, 
+<b>double-float</b>, and <b>long-float</b>, respectively.
+</p>
+<p>The internal format used for an external representation depends only
+on the <i>exponent marker</i>, and not on the number of decimal digits
+in the external representation.
+</p>
+<p>Figure 2&ndash;14 contains examples of notations for <i>floats</i>: 
+</p>
+<div class="format">
+<pre class="format">  <tt>0.0</tt>       ;Floating-point zero in default format                          <!-- /@w -->
+  <tt>0E0</tt>       ;As input, this is also floating-point zero in default format.  <!-- /@w -->
+            ;As output, this would appear as <tt>0.0</tt>.                           <!-- /@w -->
+  <tt>0e0</tt>       ;As input, this is also floating-point zero in default format.  <!-- /@w -->
+            ;As output, this would appear as <tt>0.0</tt>.                           <!-- /@w -->
+  <tt>-.0</tt>       ;As input, this might be a zero or a minus zero,                <!-- /@w -->
+            ; depending on whether the implementation supports              <!-- /@w -->
+            ; a distinct minus zero.                                        <!-- /@w -->
+            ;As output, <tt>0.0</tt> is zero and <tt>-0.0</tt> is minus zero.                 <!-- /@w -->
+  <tt>0.</tt>        ;On input, the integer zero&mdash;<i>not</i> a floating-point number!      <!-- /@w -->
+            ;Whether this appears as <tt>0</tt> or <tt>0.</tt> on output depends              <!-- /@w -->
+            ;on the <i>value</i> of <b>*print-radix*</b>.                                 <!-- /@w -->
+  <tt>0.0s0</tt>     ;A floating-point zero in short format                          <!-- /@w -->
+  <tt>0s0</tt>       ;As input, this is a floating-point zero in short format.       <!-- /@w -->
+            ;As output, such a zero would appear as <tt>0.0s0</tt>                   <!-- /@w -->
+            ; (or as <tt>0.0</tt> if <b>short-float</b> was the default format).            <!-- /@w -->
+  <tt>6.02E+23</tt>  ;Avogadro&rsquo;s number, in default format                           <!-- /@w -->
+  <tt>602E+21</tt>   ;Also Avogadro&rsquo;s number, in default format                      <!-- /@w -->
+
+               Figure 2&ndash;14: Examples of Floating-point numbers             <!-- /@w -->
+
+</pre></div>
+
+<p>For information on how <i>floats</i> are printed,
+see <a href="Printing-Floats.html">Printing Floats</a>.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Syntax-of-a-Complex.html" accesskey="n" rel="next">Syntax of a Complex</a>, Previous: <a href="Syntax-of-a-Ratio.html" accesskey="p" rel="prev">Syntax of a Ratio</a>, Up: <a href="Constructing-Numbers-from-Tokens.html" accesskey="u" rel="up">Constructing Numbers from Tokens</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

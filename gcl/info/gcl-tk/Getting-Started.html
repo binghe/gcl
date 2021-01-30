@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Getting Started (GCL TK Manual)</title>
+
+<meta name="description" content="Getting Started (GCL TK Manual)">
+<meta name="keywords" content="Getting Started (GCL TK Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="wm.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="General.html" rel="up" title="General">
+<link href="Common-Features-of-Widgets.html" rel="next" title="Common Features of Widgets">
+<link href="Introduction.html" rel="prev" title="Introduction">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Getting-Started"></span><div class="header">
+<p>
+Next: <a href="Common-Features-of-Widgets.html" accesskey="n" rel="next">Common Features of Widgets</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="General.html" accesskey="u" rel="up">General</a> &nbsp; [<a href="wm.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<span id="Getting-Started-1"></span><h3 class="section">1.2 Getting Started</h3>
+
+<p>Once <b>GCL</b> has been properly installed you should be able to do the
+following simple example:
+</p>
+<div class="example">
+<pre class="example">(in-package &quot;TK&quot;)
+(tkconnect)
+(button '.hello :text &quot;Hello World&quot; :command '(print &quot;hi&quot;))
+==&gt;.HELLO
+(pack '.hello)
+</pre></div>
+<p>We first switched to the &quot;TK&quot; package, so that functions like button
+and pack would be found.  
+After doing the tkconnect, a window should appear on your screen, see See <a href="tkconnect.html">tkconnect</a>.
+The invocation of the function <code>button</code> creates a new function
+called <code>.hello</code> which is a <i>widget function</i>.   It is then
+made visible in the window by using the <code>pack</code> function.
+</p>
+<p>You may now click on the little window, and you should see the command
+executed in your lisp.  Thus &quot;hi&quot; should be printed in the lisp
+window.  This will happen whether or not you have a job running in
+the lisp, that is lisp will be interrupted and your command will run,
+and then return the control to your program.
+</p>
+<p>The function <code>button</code> is called a widget constructor, and the
+function <code>.hello</code> is called a widget.  If you have managed to
+accomplish the above, then <b>GCL</b> is probably installed correctly, and you
+can graduate to the next section!  If you dont like reading but prefer
+to look at demos and code, then you should look in the demos directory,
+where you will find a number of examples.  A monitor for the garbage
+collector (mkgcmonitor), a demonstration of canvas widgets (mkitems),
+a sample listbox with scrolling (mklistbox).   
+</p>
+
+
+
+</body>
+</html>

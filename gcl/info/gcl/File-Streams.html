@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>File Streams (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="File Streams (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="File Streams (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Introduction-to-Streams.html" rel="up" title="Introduction to Streams">
+<link href="Other-Subclasses-of-Stream.html" rel="next" title="Other Subclasses of Stream">
+<link href="Abstract-Classifications-of-Streams.html" rel="prev" title="Abstract Classifications of Streams">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="File-Streams"></span><div class="header">
+<p>
+Next: <a href="Other-Subclasses-of-Stream.html" accesskey="n" rel="next">Other Subclasses of Stream</a>, Previous: <a href="Abstract-Classifications-of-Streams.html" accesskey="p" rel="prev">Abstract Classifications of Streams</a>, Up: <a href="Introduction-to-Streams.html" accesskey="u" rel="up">Introduction to Streams</a> &nbsp; </p>
+</div>
+<hr>
+<span id="File-Streams-1"></span><h4 class="subsubsection">21.1.1.6 File Streams</h4>
+
+<p>Some <i>streams</i>, called <i>file streams</i>
+<span id="index-file-stream"></span>
+, provide access to <i>files</i>.
+An <i>object</i> of <i>class</i> <b>file-stream</b> is used to represent a <i>file stream</i>.
+</p>
+<p>The basic operation for opening a <i>file</i> is <b>open</b>,
+which typically returns a <i>file stream</i> 
+(see its dictionary entry for details).
+The basic operation for closing a <i>stream</i> is <b>close</b>.
+The macro <b>with-open-file</b> is useful 
+to express the common idiom of opening a <i>file</i> 
+for the duration of a given body of <i>code</i>, 
+and assuring that the resulting <i>stream</i> is closed upon exit from that body.
+</p>
+
+
+
+</body>
+</html>

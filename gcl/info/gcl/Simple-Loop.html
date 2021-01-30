@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Simple Loop (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Simple Loop (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Simple Loop (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Overview-of-the-Loop-Facility.html" rel="up" title="Overview of the Loop Facility">
+<link href="Extended-Loop.html" rel="next" title="Extended Loop">
+<link href="Simple-vs-Extended-Loop.html" rel="prev" title="Simple vs Extended Loop">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Simple-Loop"></span><div class="header">
+<p>
+Next: <a href="Extended-Loop.html" accesskey="n" rel="next">Extended Loop</a>, Previous: <a href="Simple-vs-Extended-Loop.html" accesskey="p" rel="prev">Simple vs Extended Loop</a>, Up: <a href="Overview-of-the-Loop-Facility.html" accesskey="u" rel="up">Overview of the Loop Facility</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Simple-Loop-1"></span><h4 class="subsubsection">6.1.1.2 Simple Loop</h4>
+
+<p>A simple <b>loop</b> <i>form</i> is one that has a body containing
+only <i>compound forms</i>.
+Each <i>form</i> is <i>evaluated</i> in turn from left to right.
+When the last <i>form</i> has been <i>evaluated</i>, 
+then the first <i>form</i> is evaluated again, and so on, in a never-ending cycle.
+A simple <b>loop</b> <i>form</i> establishes an <i>implicit block</i> named <b>nil</b>.
+The execution of a simple <b>loop</b> can be terminated by explicitly
+transfering control to the <i>implicit block</i> (using <b>return</b> or
+<b>return-from</b>) or to some <i>exit point</i> outside of the <i>block</i> 
+(<i>e.g.</i>, using <b>throw</b>, <b>go</b>, or <b>return-from</b>).
+</p>
+
+
+
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>reinitialize-instance (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="reinitialize-instance (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="reinitialize-instance (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Objects-Dictionary.html" rel="up" title="Objects Dictionary">
+<link href="shared_002dinitialize.html" rel="next" title="shared-initialize">
+<link href="allocate_002dinstance.html" rel="prev" title="allocate-instance">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="reinitialize_002dinstance"></span><div class="header">
+<p>
+Next: <a href="shared_002dinitialize.html" accesskey="n" rel="next">shared-initialize</a>, Previous: <a href="allocate_002dinstance.html" accesskey="p" rel="prev">allocate-instance</a>, Up: <a href="Objects-Dictionary.html" accesskey="u" rel="up">Objects Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="reinitialize_002dinstance-_005bStandard-Generic-Function_005d"></span><h4 class="subsection">7.7.4 reinitialize-instance                           [Standard Generic Function]</h4>
+
+<span id="Syntax_003a_003a-13"></span><h4 class="subsubheading">Syntax::</h4>
+
+<p><code>reinitialize-instance</code>  <i>instance <span class="roman">&amp;rest</span> initargs <span class="roman">&amp;key</span> <span class="roman">&amp;allow-other-keys</span></i> &rArr;  <i>instance</i>
+</p>
+<span id="Method-Signatures_003a_003a-2"></span><h4 class="subsubheading">Method Signatures::</h4>
+
+<p><code>reinitialize-instance</code>  <i><span class="roman">(</span><i>instance</i> <b>standard-object</b><span class="roman">)</span> <span class="roman">&amp;rest</span> initargs</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-92"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>instance</i>&mdash;an <i>object</i>.
+</p>
+<p><i>initargs</i>&mdash;an <i>initialization argument list</i>.
+</p>
+<span id="Description_003a_003a-131"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The <i>generic function</i> <b>reinitialize-instance</b> can be used to change
+the values of <i>local slots</i> of an <i>instance</i> according to 
+<i>initargs</i>.
+This <i>generic function</i> can be called by users.
+</p>
+<p>The system-supplied primary <i>method</i> for <b>reinitialize-instance</b>
+checks the validity of <i>initargs</i> and signals an error if
+an <i>initarg</i> is supplied that is not declared as valid.
+The <i>method</i> then calls the generic function <b>shared-initialize</b>
+with the following arguments:  the <i>instance</i>, 
+<b>nil</b> (which means no <i>slots</i>
+should be initialized according to their initforms), and the
+<i>initargs</i> it received.
+</p>
+<span id="Side-Effects_003a_003a-6"></span><h4 class="subsubheading">Side Effects::</h4>
+
+<p>The <i>generic function</i> <b>reinitialize-instance</b> changes the values of <i>local slots</i>.
+</p>
+<span id="Exceptional-Situations_003a_003a-23"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>The system-supplied primary <i>method</i> for <b>reinitialize-instance</b>
+signals an error if an <i>initarg</i> is supplied that is not declared as valid.
+</p>
+<span id="See-Also_003a_003a-113"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="Initialize_002dInstance.html">Initialize-Instance</a>
+,
+<a href="Shared_002dInitialize.html">Shared-Initialize</a>
+,
+<a href="update_002dinstance_002dfor_002dredefined_002dclass.html">update-instance-for-redefined-class</a>
+,
+<a href="update_002dinstance_002dfor_002ddifferent_002dclass.html">update-instance-for-different-class</a>
+,
+<a href="slot_002dboundp.html">slot-boundp</a>
+,
+<a href="slot_002dmakunbound.html">slot-makunbound</a>
+,
+<a href="Reinitializing-an-Instance.html">Reinitializing an Instance</a>,
+<a href="Rules-for-Initialization-Arguments.html">Rules for Initialization Arguments</a>,
+<a href="Declaring-the-Validity-of-Initialization-Arguments.html">Declaring the Validity of Initialization Arguments</a>
+</p>
+<span id="Notes_003a_003a-75"></span><h4 class="subsubheading">Notes::</h4>
+
+<p><i>Initargs</i> are declared as valid by using the
+<tt>:initarg</tt> option to <b>defclass</b>, or by defining 
+<i>methods</i> for <b>reinitialize-instance</b>
+or <b>shared-initialize</b>.  The keyword name
+of each keyword parameter specifier in the <i>lambda list</i> of any 
+<i>method</i>
+defined on <b>reinitialize-instance</b> or <b>shared-initialize</b> is
+declared as a valid initialization argument name for all 
+<i>classes</i> for
+which that <i>method</i> is applicable.
+</p>
+
+
+
+</body>
+</html>

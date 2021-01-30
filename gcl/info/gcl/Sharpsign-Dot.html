@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Sharpsign Dot (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Sharpsign Dot (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Sharpsign Dot (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Sharpsign.html" rel="up" title="Sharpsign">
+<link href="Sharpsign-B.html" rel="next" title="Sharpsign B">
+<link href="Sharpsign-Colon.html" rel="prev" title="Sharpsign Colon">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Sharpsign-Dot"></span><div class="header">
+<p>
+Next: <a href="Sharpsign-B.html" accesskey="n" rel="next">Sharpsign B</a>, Previous: <a href="Sharpsign-Colon.html" accesskey="p" rel="prev">Sharpsign Colon</a>, Up: <a href="Sharpsign.html" accesskey="u" rel="up">Sharpsign</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Sharpsign-Dot-1"></span><h4 class="subsubsection">2.4.8.7 Sharpsign Dot</h4>
+
+<p><tt>#.<i>foo</i></tt> is read as the <i>object</i> resulting from the evaluation
+of the <i>object</i> represented by <i>foo</i>.
+The evaluation is done during the <b>read</b> process,
+when the <tt>#.</tt> notation is encountered.
+The <tt>#.</tt> syntax therefore performs a read-time evaluation of <i>foo</i>.
+</p>
+<p>The normal effect of <tt>#.</tt> is inhibited when the <i>value</i> of <b>*read-eval*</b> is <i>false</i>.
+</p>
+<p>In that situation, an error of <i>type</i> <b>reader-error</b> is signaled.
+</p>
+<p>For an <i>object</i>
+that does not have a convenient printed
+representation, a <i>form</i> that computes the <i>object</i> can be given using
+the <tt>#.</tt> notation.
+</p>
+
+
+
+</body>
+</html>

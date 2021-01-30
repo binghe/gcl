@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Operating System Definitions (GCL SI Manual)</title>
+
+<meta name="description" content="Operating System Definitions (GCL SI Manual)">
+<meta name="keywords" content="Operating System Definitions (GCL SI Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Operating-System.html" rel="up" title="Operating System">
+<link href="Structures.html" rel="next" title="Structures">
+<link href="Command-Line.html" rel="prev" title="Command Line">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Operating-System-Definitions"></span><div class="header">
+<p>
+Previous: <a href="Command-Line.html" accesskey="p" rel="prev">Command Line</a>, Up: <a href="Operating-System.html" accesskey="u" rel="up">Operating System</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="Operating-System-Definitions-1"></span><h3 class="section">9.2 Operating System Definitions</h3>
+
+<dl>
+<dt id="index-GET_002dDECODED_002dTIME">Function: <strong>GET-DECODED-TIME</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the current time in decoded time format.  Returns nine values: second,
+minute, hour, date, month, year, day-of-week, daylight-saving-time-p, and
+time-zone.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-HOST_002dNAMESTRING">Function: <strong>HOST-NAMESTRING</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the host part of PATHNAME as a string.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-RENAME_002dFILE">Function: <strong>RENAME-FILE</strong> <em>(file new-name)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Renames the file FILE to NEW-NAME.  FILE may be a string, a pathname, or
+a stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-FILE_002dAUTHOR">Function: <strong>FILE-AUTHOR</strong> <em>(file)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the author name of the specified file, as a string.
+FILE may be a string or a stream
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-PATHNAME_002dHOST">Function: <strong>PATHNAME-HOST</strong> <em>(pathname)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the host slot of PATHNAME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-FILE_002dPOSITION">Function: <strong>FILE-POSITION</strong> <em>(file-stream &amp;optional position)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Sets the file pointer of the specified file to POSITION, if POSITION is given.
+Otherwise, returns the current file position of the specified file.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-DECODE_002dUNIVERSAL_002dTIME">Function: <strong>DECODE-UNIVERSAL-TIME</strong> <em>(universal-time &amp;optional (timezone -9))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Converts UNIVERSAL-TIME into a decoded time at the TIMEZONE.
+Returns nine values: second, minute, hour, date, month (1 - 12), year,
+day-of-week (0 - 6), daylight-saving-time-p, and time-zone.
+TIMEZONE in GCL defaults to 6, the time zone of Austin, Texas.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-USER_002dHOMEDIR_002dPATHNAME">Function: <strong>USER-HOMEDIR-PATHNAME</strong> <em>(&amp;optional host)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the home directory of the logged in user as a pathname.  HOST
+is ignored.
+</p>
+
+</dd></dl>
+
+
+<dl>
+<dt id="index-_002aMODULES_002a">Variable: <strong>*MODULES*</strong></dt>
+<dd><p>Package:LISP
+A list of names of the modules that have been loaded into GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-SHORT_002dSITE_002dNAME">Function: <strong>SHORT-SITE-NAME</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that identifies the physical location of the current GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-DIRECTORY">Function: <strong>DIRECTORY</strong> <em>(name)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a list of files that match NAME.  NAME may be a string, a pathname,
+or a file stream.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-SOFTWARE_002dVERSION">Function: <strong>SOFTWARE-VERSION</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that identifies the software version of the software
+under which GCL is currently running.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-INTERNAL_002dTIME_002dUNITS_002dPER_002dSECOND">Constant: <strong>INTERNAL-TIME-UNITS-PER-SECOND</strong></dt>
+<dd><p>Package:LISP
+The number of internal time units that fit into a second.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-ENOUGH_002dNAMESTRING">Function: <strong>ENOUGH-NAMESTRING</strong> <em>(pathname &amp;optional (defaults *default-pathname-defaults*))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string which uniquely identifies PATHNAME with respect to
+DEFAULTS.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-REQUIRE">Function: <strong>REQUIRE</strong> <em>(module-name &amp;optional (pathname))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>If the specified module is not present, then loads the appropriate file(s).
+PATHNAME may be a single pathname or it may be a list of pathnames.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-ENCODE_002dUNIVERSAL_002dTIME">Function: <strong>ENCODE-UNIVERSAL-TIME</strong> <em>(second minute hour date month year &amp;optional (timezone ))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Does the inverse operation of DECODE-UNIVERSAL-TIME.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-LISP_002dIMPLEMENTATION_002dVERSION">Function: <strong>LISP-IMPLEMENTATION-VERSION</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that tells you when the current GCL implementation is
+brought up.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-MACHINE_002dINSTANCE">Function: <strong>MACHINE-INSTANCE</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that identifies the machine instance of the machine
+on which GCL is currently running.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-ROOM">Function: <strong>ROOM</strong> <em>(&amp;optional (x t))</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Displays information about storage allocation in the following format.
+</p>
+<ul class="no-bullet">
+<li> for each type class
+<ul class="no-bullet">
+<li> the number of pages so-far allocated for the type class
+</li><li> the maximum number of pages for the type class
+</li><li> the percentage of used cells to cells so-far allocated
+</li><li> the number of times the garbage collector has been called to
+	  collect cells of the type class
+</li><li> the implementation types that belongs to the type class
+</li></ul>
+</li><li> the number of pages actually allocated for contiguous blocks
+</li><li> the maximum number of pages for contiguous blocks
+</li><li> the number of times the garbage collector has been called to collect
+  contiguous blocks
+</li><li> the number of pages in the hole
+</li><li> the maximum number of pages for relocatable blocks
+</li><li> the number of times the garbage collector has been called to collect
+  relocatable blocks
+</li><li> the total number of pages allocated for cells
+</li><li> the total number of pages allocated
+</li><li> the number of available pages
+</li><li> the number of pages GCL can use.
+
+<p>The number of times the garbage collector has been called is not shown,
+if the number is zero.  The optional X is ignored.
+</p></li></ul>
+
+</dd></dl>
+
+<dl>
+<dt id="index-GET_002dUNIVERSAL_002dTIME">Function: <strong>GET-UNIVERSAL-TIME</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the current time as a single integer in universal time format.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-GET_002dINTERNAL_002dRUN_002dTIME">Function: <strong>GET-INTERNAL-RUN-TIME</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the run time in the internal time format.  This is useful for
+finding CPU usage.  If the operating system allows, a second value
+containing CPU usage of child processes is returned.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-_002aDEFAULT_002dPATHNAME_002dDEFAULTS_002a">Variable: <strong>*DEFAULT-PATHNAME-DEFAULTS*</strong></dt>
+<dd><p>Package:LISP
+The default pathname-defaults pathname.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-LONG_002dSITE_002dNAME">Function: <strong>LONG-SITE-NAME</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that identifies the physical location of the current GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-DELETE_002dFILE">Function: <strong>DELETE-FILE</strong> <em>(file)</em></dt>
+<dd><p>Package:LISP
+ Deletes FILE.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-GET_002dINTERNAL_002dREAL_002dTIME">Function: <strong>GET-INTERNAL-REAL-TIME</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns the real time in the internal time format.  This is useful for
+finding elapsed time.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-MACHINE_002dTYPE">Function: <strong>MACHINE-TYPE</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that identifies the machine type of the machine
+on which GCL is currently running.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-TIME">Macro: <strong>TIME</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(time form)
+</pre></div>
+
+<p>Evaluates FORM and outputs timing statistics on *TRACE-OUTPUT*.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-SOFTWARE_002dTYPE">Function: <strong>SOFTWARE-TYPE</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that identifies the software type of the software
+under which GCL is currently running.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-LISP_002dIMPLEMENTATION_002dTYPE">Function: <strong>LISP-IMPLEMENTATION-TYPE</strong> <em>()</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>Returns a string that tells you that you are using a version of GCL.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-SLEEP">Function: <strong>SLEEP</strong> <em>(n)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>This function causes execution to be suspended for N seconds.  N may
+be any non-negative, non-complex number.
+</p>
+
+</dd></dl>
+
+<dl>
+<dt id="index-BREAK_002dON_002dFLOATING_002dPOINT_002dEXCEPTIONS">Function: <strong>BREAK-ON-FLOATING-POINT-EXCEPTIONS</strong> <em>(&amp;key division-by-zero</em></dt>
+<dd><p>floating-point-invalid-operation
+                                                floating-point-overflow
+                                                floating-point-underflow
+                                                floating-point-inexact)
+Package:SI
+</p>
+<p>Break on the specified IEEE floating point error conditions.  With no
+arguments, report the exceptions currently trapped.  Disable the break
+by setting the key to nil, e.g.
+</p>
+<p>&gt; (break-on-floaing-point-exceptions :division-by-zero t)
+   (DIVISION-BY-ZERO)
+</p>
+<p>&gt; (break-on-floaing-point-exceptions)
+   (DIVISION-BY-ZERO)
+</p>
+<p>&gt; (break-on-floaing-point-exceptions :division-by-zero nil)
+   NIL
+</p>
+<p>On some of the most common platforms, the offending instruction will be
+disassembled, and the register arguments looked up in the saved context
+and reported in as operands.  Within the error handler, addresses may be
+disassembled, and other registers inspected, using the functions defined
+in gcl_fpe.lsp.
+</p>
+</dd></dl>
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Command-Line.html" accesskey="p" rel="prev">Command Line</a>, Up: <a href="Operating-System.html" accesskey="u" rel="up">Operating System</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

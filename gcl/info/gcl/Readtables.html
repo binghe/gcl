@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Readtables (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Readtables (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Readtables (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Character-Syntax.html" rel="up" title="Character Syntax">
+<link href="The-Current-Readtable.html" rel="next" title="The Current Readtable">
+<link href="Character-Syntax.html" rel="prev" title="Character Syntax">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Readtables"></span><div class="header">
+<p>
+Next: <a href="Variables-that-affect-the-Lisp-Reader.html" accesskey="n" rel="next">Variables that affect the Lisp Reader</a>, Previous: <a href="Character-Syntax.html" accesskey="p" rel="prev">Character Syntax</a>, Up: <a href="Character-Syntax.html" accesskey="u" rel="up">Character Syntax</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Readtables-1"></span><h4 class="subsection">2.1.1 Readtables</h4>
+
+<p>Syntax information for use by the <i>Lisp reader</i> is embodied in an
+<i>object</i> called a <i>readtable</i>
+<span id="index-readtable"></span>
+.  Among other things, 
+the <i>readtable</i> contains the association between <i>characters</i> 
+and <i>syntax types</i>.
+</p>
+<p>Figure 2&ndash;1 lists some <i>defined names</i> that are applicable to
+<i>readtables</i>.
+</p>
+<div class="format">
+<pre class="format">  *readtable*                    readtable-case                <!-- /@w -->
+  copy-readtable                 readtablep                    <!-- /@w -->
+  get-dispatch-macro-character   set-dispatch-macro-character  <!-- /@w -->
+  get-macro-character            set-macro-character           <!-- /@w -->
+  make-dispatch-macro-character  set-syntax-from-char          <!-- /@w -->
+
+              Figure 2&ndash;1: Readtable defined names             <!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="The-Current-Readtable.html" accesskey="1">The Current Readtable</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-Standard-Readtable.html" accesskey="2">The Standard Readtable</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-Initial-Readtable.html" accesskey="3">The Initial Readtable</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+</body>
+</html>

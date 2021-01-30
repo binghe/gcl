@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>length (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="length (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="length (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Sequences-Dictionary.html" rel="up" title="Sequences Dictionary">
+<link href="reverse.html" rel="next" title="reverse">
+<link href="count.html" rel="prev" title="count">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="length"></span><div class="header">
+<p>
+Next: <a href="reverse.html" accesskey="n" rel="next">reverse</a>, Previous: <a href="count.html" accesskey="p" rel="prev">count</a>, Up: <a href="Sequences-Dictionary.html" accesskey="u" rel="up">Sequences Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="length-_005bFunction_005d"></span><h4 class="subsection">17.3.11 length                                                           [Function]</h4>
+
+<p><code>length</code>  <i>sequence</i> &rArr;  <i>n</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-363"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>sequence</i>&mdash;a <i>proper sequence</i>.
+</p>
+<p><i>n</i>&mdash;a non-negative <i>integer</i>.
+</p>
+<span id="Description_003a_003a-478"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Returns the number of <i>elements</i> in <i>sequence</i>.
+</p>
+<p>If <i>sequence</i> is a <i>vector</i> with a <i>fill pointer</i>,
+the active length as specified by the <i>fill pointer</i> is returned.
+</p>
+<span id="Examples_003a_003a-345"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (length &quot;abc&quot;) &rArr;  3
+ (setq str (make-array '(3) :element-type 'character 
+                            :initial-contents &quot;abc&quot;
+                            :fill-pointer t)) &rArr;  &quot;abc&quot;
+ (length str) &rArr;  3
+ (setf (fill-pointer str) 2) &rArr;  2
+ (length str) &rArr;  2
+</pre></div>
+
+<span id="Exceptional-Situations_003a_003a-159"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should be prepared to signal an error of <i>type</i> <b>type-error</b>
+			 if <i>sequence</i> is not a <i>proper sequence</i>.
+</p>
+<span id="See-Also_003a_003a-389"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="list_002dlength.html">list-length</a>
+,
+<b>sequence</b>
+</p>
+
+
+
+</body>
+</html>

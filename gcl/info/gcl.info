@@ -1,0 +1,1472 @@
+This is gcl.info, produced by makeinfo version 6.7 from gcl.texi.
+
+This is a Texinfo GNU Common Lisp Manual based on the draft ANSI
+standard for Common Lisp.
+
+   Copyright 1994 William F. Schelter
+
+INFO-DIR-SECTION GNU Common Lisp
+START-INFO-DIR-ENTRY
+* gcl: (gcl.info). GNU Common Lisp Manual
+END-INFO-DIR-ENTRY
+
+
+Indirect:
+gcl.info-1: 314
+gcl.info-2: 301351
+gcl.info-3: 608702
+gcl.info-4: 900342
+gcl.info-5: 1205418
+gcl.info-6: 1502760
+gcl.info-7: 1802947
+gcl.info-8: 2100572
+gcl.info-9: 2402082
+
+Tag Table:
+(Indirect)
+Node: Top314
+Node: Introduction (Introduction)41180
+Node: Scope41532
+Node: Scope and Purpose41780
+Node: History42223
+Node: Organization of the Document51793
+Node: Referenced Publications54048
+Node: Definitions57705
+Node: Notational Conventions58097
+Node: Font Key58726
+Node: Modified BNF Syntax60567
+Node: Splicing in Modified BNF Syntax60942
+Node: Indirection in Modified BNF Syntax63438
+Node: Additional Uses for Indirect Definitions in Modified BNF Syntax64086
+Node: Special Symbols65255
+Node: Objects with Multiple Notations70029
+Node: Case in Symbols70473
+Node: Numbers (Objects with Multiple Notations)71643
+Node: Use of the Dot Character72043
+Node: NIL72985
+Node: Designators75105
+Node: Nonsense Words77513
+Node: Error Terminology78192
+Node: Sections Not Formally Part Of This Standard85515
+Node: Interpreting Dictionary Entries87025
+Node: The "Affected By" Section of a Dictionary Entry89424
+Node: The "Arguments" Section of a Dictionary Entry89957
+Node: The "Arguments and Values" Section of a Dictionary Entry90479
+Node: The "Binding Types Affected" Section of a Dictionary Entry91242
+Node: The "Class Precedence List" Section of a Dictionary Entry91930
+Node: Dictionary Entries for Type Specifiers93106
+Node: The "Compound Type Specifier Kind" Section of a Dictionary Entry94248
+Node: The "Compound Type Specifier Syntax" Section of a Dictionary Entry95299
+Node: The "Compound Type Specifier Arguments" Section of a Dictionary Entry95975
+Node: The "Compound Type Specifier Description" Section of a Dictionary Entry96542
+Node: The "Constant Value" Section of a Dictionary Entry97093
+Node: The "Description" Section of a Dictionary Entry97547
+Node: The "Examples" Section of a Dictionary Entry98072
+Node: The "Exceptional Situations" Section of a Dictionary Entry98561
+Node: The "Initial Value" Section of a Dictionary Entry99402
+Node: The "Argument Precedence Order" Section of a Dictionary Entry99926
+Node: The "Method Signature" Section of a Dictionary Entry100454
+Node: The "Name" Section of a Dictionary Entry101986
+Node: The "Notes" Section of a Dictionary Entry104046
+Node: The "Pronunciation" Section of a Dictionary Entry104756
+Node: The "See Also" Section of a Dictionary Entry105571
+Node: The "Side Effects" Section of a Dictionary Entry106046
+Node: The "Supertypes" Section of a Dictionary Entry106478
+Node: The "Syntax" Section of a Dictionary Entry107115
+Node: Special "Syntax" Notations for Overloaded Operators108300
+Node: Naming Conventions for Rest Parameters109438
+Node: Requiring Non-Null Rest Parameters in The "Syntax" Section110293
+Node: Return values in The "Syntax" Section111185
+Node: No Arguments or Values in The "Syntax" Section111864
+Node: Unconditional Transfer of Control in The "Syntax" Section112460
+Node: The "Valid Context" Section of a Dictionary Entry113025
+Node: The "Value Type" Section of a Dictionary Entry113666
+Node: Conformance114021
+Node: Conforming Implementations114437
+Node: Required Language Features115042
+Node: Documentation of Implementation-Dependent Features115671
+Node: Documentation of Extensions116398
+Node: Treatment of Exceptional Situations117041
+Node: Resolution of Apparent Conflicts in Exceptional Situations117440
+Node: Examples of Resolution of Apparent Conflict in Exceptional Situations118110
+Node: Conformance Statement119114
+Node: Conforming Programs120097
+Node: Use of Implementation-Defined Language Features121058
+Node: Use of Read-Time Conditionals122270
+Node: Language Extensions123421
+Node: Language Subsets125834
+Node: Deprecated Language Features126551
+Node: Deprecated Functions127392
+Node: Deprecated Argument Conventions128051
+Node: Deprecated Variables129164
+Node: Deprecated Reader Syntax129413
+Node: Symbols in the COMMON-LISP Package129884
+Node: Syntax160374
+Node: Character Syntax160618
+Node: Readtables161371
+Node: The Current Readtable162277
+Node: The Standard Readtable162862
+Node: The Initial Readtable163399
+Node: Variables that affect the Lisp Reader163854
+Node: Standard Characters164438
+Node: Character Syntax Types169760
+Node: Constituent Characters173982
+Node: Constituent Traits174597
+Node: Invalid Characters179000
+Node: Macro Characters179548
+Node: Multiple Escape Characters182322
+Node: Examples of Multiple Escape Characters182977
+Node: Single Escape Character183478
+Node: Examples of Single Escape Characters183973
+Node: Whitespace Characters184463
+Node: Examples of Whitespace Characters184812
+Node: Reader Algorithm185173
+Node: Interpretation of Tokens191679
+Node: Numbers as Tokens192039
+Node: Potential Numbers as Tokens193289
+Node: Escape Characters and Potential Numbers195879
+Node: Examples of Potential Numbers196644
+Node: Constructing Numbers from Tokens197804
+Node: Syntax of a Rational198605
+Node: Syntax of an Integer198820
+Node: Syntax of a Ratio199411
+Node: Syntax of a Float200691
+Node: Syntax of a Complex203539
+Node: The Consing Dot204595
+Node: Symbols as Tokens205119
+Node: Valid Patterns for Tokens209047
+Node: Package System Consistency Rules212748
+Node: Standard Macro Characters214409
+Node: Left-Parenthesis215181
+Node: Right-Parenthesis216709
+Node: Single-Quote217036
+Node: Examples of Single-Quote217494
+Node: Semicolon217728
+Node: Examples of Semicolon218292
+Node: Notes about Style for Semicolon218518
+Node: Use of Single Semicolon218935
+Node: Use of Double Semicolon219526
+Node: Use of Triple Semicolon220024
+Node: Use of Quadruple Semicolon220404
+Node: Examples of Style for Semicolon220914
+Node: Double-Quote221887
+Node: Backquote223390
+Node: Notes about Backquote227313
+Node: Comma228384
+Node: Sharpsign228675
+Node: Sharpsign Backslash233650
+Node: Sharpsign Single-Quote234813
+Node: Sharpsign Left-Parenthesis235285
+Node: Sharpsign Asterisk236805
+Node: Examples of Sharpsign Asterisk238069
+Node: Sharpsign Colon238487
+Node: Sharpsign Dot239003
+Node: Sharpsign B239681
+Node: Sharpsign O240070
+Node: Sharpsign X240474
+Node: Sharpsign R240978
+Node: Sharpsign C242440
+Node: Sharpsign A243600
+Node: Sharpsign S244797
+Node: Sharpsign P245904
+Node: Sharpsign Equal-Sign246321
+Node: Sharpsign Sharpsign246842
+Node: Sharpsign Plus247911
+Node: Sharpsign Minus248953
+Node: Sharpsign Vertical-Bar249312
+Node: Examples of Sharpsign Vertical-Bar249679
+Node: Notes about Style for Sharpsign Vertical-Bar252661
+Node: Sharpsign Less-Than-Sign253631
+Node: Sharpsign Whitespace254069
+Node: Sharpsign Right-Parenthesis254456
+Node: Re-Reading Abbreviated Expressions254756
+Node: Evaluation and Compilation255249
+Node: Evaluation255630
+Node: Introduction to Environments256918
+Node: The Global Environment257776
+Node: Dynamic Environments258427
+Node: Lexical Environments259586
+Node: The Null Lexical Environment260811
+Node: Environment Objects261325
+Node: The Evaluation Model262292
+Node: Form Evaluation262987
+Node: Symbols as Forms263290
+Node: Lexical Variables265379
+Node: Dynamic Variables266410
+Node: Constant Variables268155
+Node: Symbols Naming Both Lexical and Dynamic Variables268871
+Node: Conses as Forms269722
+Node: Special Forms270669
+Node: Macro Forms272315
+Node: Function Forms274152
+Node: Lambda Forms276705
+Node: Self-Evaluating Objects277363
+Node: Examples of Self-Evaluating Objects278085
+Node: Lambda Expressions278541
+Node: Closures and Lexical Binding279180
+Node: Shadowing282933
+Node: Extent286104
+Node: Return Values288370
+Node: Compilation289751
+Node: Compiler Terminology290058
+Node: Compilation Semantics294351
+Node: Compiler Macros295034
+Node: Purpose of Compiler Macros296703
+Node: Naming of Compiler Macros298418
+Node: When Compiler Macros Are Used299396
+Node: Notes about the Implementation of Compiler Macros301351
+Node: Minimal Compilation302468
+Node: Semantic Constraints303644
+Node: File Compilation307298
+Node: Processing of Top Level Forms309271
+Node: Processing of Defining Macros313498
+Node: Constraints on Macros and Compiler Macros316041
+Node: Literal Objects in Compiled Files316841
+Node: Externalizable Objects318251
+Node: Similarity of Literal Objects319879
+Node: Similarity of Aggregate Objects320123
+Node: Definition of Similarity320707
+Node: Extensions to Similarity Rules325575
+Node: Additional Constraints on Externalizable Objects326451
+Node: Exceptional Situations in the Compiler331188
+Node: Declarations333287
+Node: Minimal Declaration Processing Requirements334074
+Node: Declaration Specifiers335240
+Node: Declaration Identifiers335742
+Node: Shorthand notation for Type Declarations336588
+Node: Declaration Scope336955
+Node: Examples of Declaration Scope338928
+Node: Lambda Lists342126
+Node: Ordinary Lambda Lists345136
+Node: Specifiers for the required parameters347779
+Node: Specifiers for optional parameters348629
+Node: A specifier for a rest parameter349810
+Node: Specifiers for keyword parameters350815
+Node: Suppressing Keyword Argument Checking354838
+Node: Examples of Suppressing Keyword Argument Checking355529
+Node: Specifiers for &aux variables356767
+Node: Examples of Ordinary Lambda Lists357617
+Node: Generic Function Lambda Lists361535
+Node: Specialized Lambda Lists362950
+Node: Macro Lambda Lists364388
+Node: Destructuring by Lambda Lists369811
+Node: Data-directed Destructuring by Lambda Lists371002
+Node: Examples of Data-directed Destructuring by Lambda Lists371549
+Node: Lambda-list-directed Destructuring by Lambda Lists372262
+Node: Destructuring Lambda Lists375323
+Node: Boa Lambda Lists376623
+Node: Defsetf Lambda Lists380499
+Node: Deftype Lambda Lists381527
+Node: Define-modify-macro Lambda Lists382145
+Node: Define-method-combination Arguments Lambda Lists383015
+Node: Syntactic Interaction of Documentation Strings and Declarations383866
+Node: Error Checking in Function Calls384617
+Node: Argument Mismatch Detection384888
+Node: Safe and Unsafe Calls385377
+Node: Error Detection Time in Safe Calls388140
+Node: Too Few Arguments388723
+Node: Too Many Arguments389248
+Node: Unrecognized Keyword Arguments389896
+Node: Invalid Keyword Arguments390516
+Node: Odd Number of Keyword Arguments391120
+Node: Destructuring Mismatch391706
+Node: Errors When Calling a Next Method392243
+Node: Traversal Rules and Side Effects393218
+Node: Destructive Operations394464
+Node: Modification of Literal Objects394789
+Node: Transfer of Control during a Destructive Operation397187
+Node: Examples of Transfer of Control during a Destructive Operation397684
+Node: Evaluation and Compilation Dictionary398560
+Node: lambda (Symbol)399243
+Node: lambda400441
+Node: compile401555
+Node: eval404765
+Node: eval-when406697
+Node: load-time-value413134
+Node: quote418947
+Node: compiler-macro-function420509
+Node: define-compiler-macro421471
+Node: defmacro428947
+Node: macro-function435110
+Node: macroexpand437354
+Node: define-symbol-macro442384
+Node: symbol-macrolet444934
+Node: *macroexpand-hook*448057
+Node: proclaim450319
+Node: declaim452448
+Node: declare453256
+Node: ignore457465
+Node: dynamic-extent459502
+Node: type465888
+Node: inline472661
+Node: ftype476487
+Node: declaration478021
+Node: optimize478949
+Node: special481191
+Node: locally485670
+Node: the487835
+Node: special-operator-p490228
+Node: constantp491141
+Node: Types and Classes494160
+Node: Introduction (Types and Classes)494422
+Node: Types496580
+Node: Data Type Definition496792
+Node: Type Relationships498074
+Node: Type Specifiers499999
+Node: Classes509366
+Node: Introduction to Classes510281
+Node: Standard Metaclasses515009
+Node: Defining Classes515968
+Node: Creating Instances of Classes517640
+Node: Inheritance518431
+Node: Examples of Inheritance518895
+Node: Inheritance of Class Options519872
+Node: Determining the Class Precedence List520692
+Node: Topological Sorting522752
+Node: Examples of Class Precedence List Determination525185
+Node: Redefining Classes528739
+Node: Modifying the Structure of Instances531843
+Node: Initializing Newly Added Local Slots (Redefining Classes)533028
+Node: Customizing Class Redefinition534929
+Node: Integrating Types and Classes536008
+Node: Types and Classes Dictionary542615
+Node: nil (Type)543384
+Node: boolean543840
+Node: function (System Class)544640
+Node: compiled-function549403
+Node: generic-function550242
+Node: standard-generic-function551279
+Node: class551802
+Node: built-in-class552338
+Node: structure-class553264
+Node: standard-class553679
+Node: method554077
+Node: standard-method555216
+Node: structure-object555647
+Node: standard-object556246
+Node: method-combination556684
+Node: t (System Class)557343
+Node: satisfies557709
+Node: member (Type Specifier)558878
+Node: not (Type Specifier)559889
+Node: and (Type Specifier)560601
+Node: or (Type Specifier)561435
+Node: values (Type Specifier)562462
+Node: eql (Type Specifier)563725
+Node: coerce564496
+Node: deftype569142
+Node: subtypep572288
+Node: type-of579324
+Node: typep582215
+Node: type-error585608
+Node: type-error-datum586311
+Node: simple-type-error587646
+Node: Data and Control Flow588390
+Node: Generalized Reference588655
+Node: Overview of Places and Generalized Reference588982
+Node: Evaluation of Subforms to Places591408
+Node: Examples of Evaluation of Subforms to Places593913
+Node: Setf Expansions594635
+Node: Examples of Setf Expansions596705
+Node: Kinds of Places598807
+Node: Variable Names as Places599445
+Node: Function Call Forms as Places599723
+Node: VALUES Forms as Places608702
+Node: THE Forms as Places609840
+Node: APPLY Forms as Places610299
+Node: Setf Expansions and Places611667
+Node: Macro Forms as Places612087
+Node: Symbol Macros as Places612621
+Node: Other Compound Forms as Places613000
+Node: Treatment of Other Macros Based on SETF614031
+Node: Transfer of Control to an Exit Point615455
+Node: Data and Control Flow Dictionary617276
+Node: apply618510
+Node: defun620529
+Node: fdefinition624262
+Node: fboundp626100
+Node: fmakunbound627895
+Node: flet628871
+Node: funcall636716
+Node: function (Special Operator)638413
+Node: function-lambda-expression640490
+Node: functionp643711
+Node: compiled-function-p644654
+Node: call-arguments-limit645784
+Node: lambda-list-keywords646417
+Node: lambda-parameters-limit647160
+Node: defconstant647811
+Node: defparameter650648
+Node: destructuring-bind657202
+Node: let658519
+Node: progv661823
+Node: setq663323
+Node: psetq664997
+Node: block666963
+Node: catch668763
+Node: go671446
+Node: return-from672881
+Node: return675149
+Node: tagbody676129
+Node: throw678542
+Node: unwind-protect681203
+Node: nil686428
+Node: not686822
+Node: t687661
+Node: eq688642
+Node: eql691050
+Node: equal694007
+Node: equalp697789
+Node: identity701900
+Node: complement702652
+Node: constantly704343
+Node: every705309
+Node: and708278
+Node: cond710024
+Node: if711655
+Node: or712902
+Node: when714301
+Node: case716873
+Node: typecase721961
+Node: multiple-value-bind727520
+Node: multiple-value-call729380
+Node: multiple-value-list730626
+Node: multiple-value-prog1731440
+Node: multiple-value-setq732390
+Node: values733989
+Node: values-list735907
+Node: multiple-values-limit736879
+Node: nth-value737705
+Node: prog738988
+Node: prog1742723
+Node: progn744858
+Node: define-modify-macro746234
+Node: defsetf748708
+Node: define-setf-expander754820
+Node: get-setf-expansion759642
+Node: setf761389
+Node: shiftf763835
+Node: rotatef766420
+Node: control-error768135
+Node: program-error768756
+Node: undefined-function769302
+Node: Iteration769907
+Node: The LOOP Facility770081
+Node: Overview of the Loop Facility770547
+Node: Simple vs Extended Loop771328
+Node: Simple Loop771629
+Node: Extended Loop772322
+Node: Loop Keywords772953
+Node: Parsing Loop Clauses773887
+Node: Expanding Loop Forms775510
+Node: Summary of Loop Clauses778207
+Node: Summary of Variable Initialization and Stepping Clauses778508
+Node: Summary of Value Accumulation Clauses779341
+Node: Summary of Termination Test Clauses781131
+Node: Summary of Unconditional Execution Clauses782838
+Node: Summary of Conditional Execution Clauses783558
+Node: Summary of Miscellaneous Clauses784650
+Node: Order of Execution785343
+Node: Destructuring787215
+Node: Restrictions on Side-Effects791628
+Node: Variable Initialization and Stepping Clauses791865
+Node: Iteration Control792717
+Node: The for-as-arithmetic subclause795631
+Node: Examples of for-as-arithmetic subclause799477
+Node: The for-as-in-list subclause800227
+Node: Examples of for-as-in-list subclause801021
+Node: The for-as-on-list subclause801807
+Node: Examples of for-as-on-list subclause802560
+Node: The for-as-equals-then subclause803179
+Node: Examples of for-as-equals-then subclause803937
+Node: The for-as-across subclause804393
+Node: Examples of for-as-across subclause805095
+Node: The for-as-hash subclause805482
+Node: The for-as-package subclause807704
+Node: Examples of for-as-package subclause810268
+Node: Local Variable Initializations810888
+Node: Examples of WITH clause813729
+Node: Value Accumulation Clauses814766
+Node: Examples of COLLECT clause820602
+Node: Examples of APPEND and NCONC clauses821352
+Node: Examples of COUNT clause821971
+Node: Examples of MAXIMIZE and MINIMIZE clauses822292
+Node: Examples of SUM clause823158
+Node: Termination Test Clauses823561
+Node: Examples of REPEAT clause827731
+Node: Examples of ALWAYS828256
+Node: Examples of WHILE and UNTIL clauses830272
+Node: Unconditional Execution Clauses831065
+Node: Examples of unconditional execution831958
+Node: Conditional Execution Clauses832454
+Node: Examples of WHEN clause834159
+Node: Miscellaneous Clauses835835
+Node: Control Transfer Clauses836150
+Node: Examples of NAMED clause836978
+Node: Initial and Final Execution837368
+Node: Examples of Miscellaneous Loop Features838997
+Node: Examples of clause grouping840063
+Node: Notes about Loop842504
+Node: Iteration Dictionary843526
+Node: do843731
+Node: dotimes852155
+Node: dolist855595
+Node: loop857806
+Node: loop-finish863496
+Node: Objects866312
+Node: Object Creation and Initialization866616
+Node: Initialization Arguments870528
+Node: Declaring the Validity of Initialization Arguments873135
+Node: Defaulting of Initialization Arguments876634
+Node: Rules for Initialization Arguments879905
+Node: Shared-Initialize883867
+Node: Initialize-Instance886549
+Node: Definitions of Make-Instance and Initialize-Instance889284
+Node: Changing the Class of an Instance891382
+Node: Modifying the Structure of the Instance892634
+Node: Initializing Newly Added Local Slots (Changing the Class of an Instance)893572
+Node: Customizing the Change of Class of an Instance895309
+Node: Reinitializing an Instance896112
+Node: Customizing Reinitialization897575
+Node: Meta-Objects898239
+Node: Standard Meta-objects898765
+Node: Slots899804
+Node: Introduction to Slots900342
+Node: Accessing Slots902980
+Node: Inheritance of Slots and Slot Options905557
+Node: Generic Functions and Methods910299
+Node: Introduction to Generic Functions910794
+Node: Introduction to Methods914311
+Node: Agreement on Parameter Specializers and Qualifiers920459
+Node: Congruent Lambda-lists for all Methods of a Generic Function921456
+Node: Keyword Arguments in Generic Functions and Methods923598
+Node: Examples of Keyword Arguments in Generic Functions and Methods925290
+Node: Method Selection and Combination926629
+Node: Determining the Effective Method928095
+Node: Selecting the Applicable Methods928689
+Node: Sorting the Applicable Methods by Precedence Order929030
+Node: Applying method combination to the sorted list of applicable methods931095
+Node: Standard Method Combination933262
+Node: Declarative Method Combination938209
+Node: Built-in Method Combination Types939120
+Node: Inheritance of Methods943201
+Node: Objects Dictionary943772
+Node: function-keywords944780
+Node: ensure-generic-function946392
+Node: allocate-instance949695
+Node: reinitialize-instance951209
+Node: shared-initialize953435
+Node: update-instance-for-different-class957934
+Node: update-instance-for-redefined-class962063
+Node: change-class967328
+Node: slot-boundp971337
+Node: slot-exists-p973114
+Node: slot-makunbound973911
+Node: slot-missing975444
+Node: slot-unbound977774
+Node: slot-value979437
+Node: method-qualifiers982234
+Node: no-applicable-method983020
+Node: no-next-method984136
+Node: remove-method985330
+Node: make-instance986143
+Node: make-instances-obsolete987545
+Node: make-load-form988847
+Node: make-load-form-saving-slots1000335
+Node: with-accessors1002278
+Node: with-slots1005210
+Node: defclass1008569
+Node: defgeneric1020992
+Node: defmethod1031724
+Node: find-class1038765
+Node: next-method-p1040735
+Node: call-method1041835
+Node: call-next-method1044841
+Node: compute-applicable-methods1047897
+Node: define-method-combination1048950
+Node: find-method1072775
+Node: add-method1075420
+Node: initialize-instance1076645
+Node: class-name1078428
+Node: setf class-name1079176
+Node: class-of1079796
+Node: unbound-slot1080787
+Node: unbound-slot-instance1081455
+Node: Structures1082018
+Node: Structures Dictionary1082163
+Node: defstruct1082343
+Node: copy-structure1123250
+Node: Conditions1123841
+Node: Condition System Concepts1124016
+Node: Condition Types1127625
+Node: Serious Conditions1130192
+Node: Creating Conditions1130573
+Node: Condition Designators1131126
+Node: Printing Conditions1132964
+Node: Recommended Style in Condition Reporting1134307
+Node: Capitalization and Punctuation in Condition Reports1135436
+Node: Leading and Trailing Newlines in Condition Reports1136159
+Node: Embedded Newlines in Condition Reports1137121
+Node: Note about Tabs in Condition Reports1138294
+Node: Mentioning Containing Function in Condition Reports1138919
+Node: Signaling and Handling Conditions1139404
+Node: Signaling1141672
+Node: Resignaling a Condition1142872
+Node: Restarts1143932
+Node: Interactive Use of Restarts1146109
+Node: Interfaces to Restarts1147305
+Node: Restart Tests1148314
+Node: Associating a Restart with a Condition1148794
+Node: Assertions1149692
+Node: Notes about the Condition System`s Background1150197
+Node: Conditions Dictionary1150688
+Node: condition1151703
+Node: warning1153497
+Node: style-warning1153854
+Node: serious-condition1155058
+Node: error (Condition Type)1156291
+Node: cell-error1156656
+Node: cell-error-name1157262
+Node: parse-error1158252
+Node: storage-condition1158722
+Node: assert1160308
+Node: error1164258
+Node: cerror1167945
+Node: check-type1173062
+Node: simple-error1177338
+Node: invalid-method-error1177837
+Node: method-combination-error1179389
+Node: signal1180514
+Node: simple-condition1183070
+Node: simple-condition-format-control1183999
+Node: warn1185367
+Node: simple-warning1187791
+Node: invoke-debugger1188264
+Node: break1189761
+Node: *debugger-hook*1192196
+Node: *break-on-signals*1194690
+Node: handler-bind1197327
+Node: handler-case1199912
+Node: ignore-errors1205418
+Node: define-condition1207307
+Node: make-condition1218846
+Node: restart1220148
+Node: compute-restarts1220780
+Node: find-restart1223539
+Node: invoke-restart1225537
+Node: invoke-restart-interactively1227272
+Node: restart-bind1229585
+Node: restart-case1233660
+Node: restart-name1243486
+Node: with-condition-restarts1244446
+Node: with-simple-restart1245778
+Node: abort (Restart)1249259
+Node: continue1250253
+Node: muffle-warning1251413
+Node: store-value1253030
+Node: use-value1254265
+Node: abort (Function)1254902
+Node: Symbols1261190
+Node: Symbol Concepts1261346
+Node: Symbols Dictionary1261959
+Node: symbol1262389
+Node: keyword1267402
+Node: symbolp1268002
+Node: keywordp1268744
+Node: make-symbol1269613
+Node: copy-symbol1271217
+Node: gensym1273635
+Node: *gensym-counter*1275934
+Node: gentemp1276704
+Node: symbol-function1279543
+Node: symbol-name1282489
+Node: symbol-package1283184
+Node: symbol-plist1285017
+Node: symbol-value1286216
+Node: get1288207
+Node: remprop1291439
+Node: boundp1294044
+Node: makunbound1295027
+Node: set1295785
+Node: unbound-variable1297509
+Node: Packages1298080
+Node: Package Concepts1298247
+Node: Introduction to Packages1298460
+Node: Package Names and Nicknames1300364
+Node: Symbols in a Package1301135
+Node: Internal and External Symbols1301348
+Node: Package Inheritance1302263
+Node: Accessibility of Symbols in a Package1303213
+Node: Locating a Symbol in a Package1304826
+Node: Prevention of Name Conflicts in Packages1305445
+Node: Standardized Packages1308809
+Node: The COMMON-LISP Package1309771
+Node: Constraints on the COMMON-LISP Package for Conforming Implementations1311106
+Node: Constraints on the COMMON-LISP Package for Conforming Programs1312652
+Node: Some Exceptions to Constraints on the COMMON-LISP Package for Conforming Programs1314763
+Node: The COMMON-LISP-USER Package1316610
+Node: The KEYWORD Package1317209
+Node: Interning a Symbol in the KEYWORD Package1318072
+Node: Notes about The KEYWORD Package1318662
+Node: Implementation-Defined Packages1319585
+Node: Packages Dictionary1320154
+Node: package1320826
+Node: export1321279
+Node: find-symbol1324350
+Node: find-package1326759
+Node: find-all-symbols1327777
+Node: import1328760
+Node: list-all-packages1331258
+Node: rename-package1331926
+Node: shadow1333203
+Node: shadowing-import1335565
+Node: delete-package1337486
+Node: make-package1342466
+Node: with-package-iterator1344509
+Node: unexport1350151
+Node: unintern1351699
+Node: in-package1353784
+Node: unuse-package1354752
+Node: use-package1356156
+Node: defpackage1358234
+Node: do-symbols1366658
+Node: intern1370217
+Node: package-name1372552
+Node: package-nicknames1373598
+Node: package-shadowing-symbols1374371
+Node: package-use-list1375592
+Node: package-used-by-list1376482
+Node: packagep1377348
+Node: *package*1377992
+Node: package-error1379358
+Node: package-error-package1380017
+Node: Numbers (Numbers)1380709
+Node: Number Concepts1380875
+Node: Numeric Operations1381253
+Node: Associativity and Commutativity in Numeric Operations1383468
+Node: Examples of Associativity and Commutativity in Numeric Operations1384591
+Node: Contagion in Numeric Operations1386251
+Node: Viewing Integers as Bits and Bytes1386768
+Node: Logical Operations on Integers1387022
+Node: Byte Operations on Integers1388140
+Node: Implementation-Dependent Numeric Constants1388967
+Node: Rational Computations1390246
+Node: Rule of Unbounded Rational Precision1390658
+Node: Rule of Canonical Representation for Rationals1391113
+Node: Rule of Float Substitutability1392224
+Node: Floating-point Computations1395202
+Node: Rule of Float and Rational Contagion1395682
+Node: Examples of Rule of Float and Rational Contagion1396579
+Node: Rule of Float Approximation1397637
+Node: Rule of Float Underflow and Overflow1398819
+Node: Rule of Float Precision Contagion1399261
+Node: Complex Computations1399612
+Node: Rule of Complex Substitutability1400099
+Node: Rule of Complex Contagion1400500
+Node: Rule of Canonical Representation for Complex Rationals1400907
+Node: Examples of Rule of Canonical Representation for Complex Rationals1401771
+Node: Principal Values and Branch Cuts1402428
+Node: Interval Designators1404479
+Node: Random-State Operations1405994
+Node: Numbers Dictionary1406361
+Node: number1407732
+Node: complex (System Class)1408894
+Node: real1411134
+Node: float (System Class)1412289
+Node: short-float1414947
+Node: rational (System Class)1418992
+Node: ratio1420024
+Node: integer1420623
+Node: signed-byte1421991
+Node: unsigned-byte1423024
+Node: mod (System Class)1424150
+Node: bit (System Class)1424892
+Node: fixnum1425253
+Node: bignum1425744
+Node: =1426050
+Node: max1429657
+Node: minusp1431700
+Node: zerop1432619
+Node: floor1433595
+Node: sin1438404
+Node: asin1439217
+Node: pi1446395
+Node: sinh1447503
+Node: *1452173
+Node: +1453003
+Node: -1453795
+Node: /1454940
+Node: 1+1456552
+Node: abs1457502
+Node: evenp1458937
+Node: exp1459840
+Node: gcd1463019
+Node: incf1464041
+Node: lcm1465218
+Node: log1466321
+Node: mod (Function)1468475
+Node: signum1469773
+Node: sqrt1471430
+Node: random-state1473492
+Node: make-random-state1474337
+Node: random1476274
+Node: random-state-p1477768
+Node: *random-state*1478532
+Node: numberp1479960
+Node: cis1480624
+Node: complex1481194
+Node: complexp1482836
+Node: conjugate1483483
+Node: phase1484250
+Node: realpart1485801
+Node: upgraded-complex-part-type1486786
+Node: realp1487765
+Node: numerator1488388
+Node: rational (Function)1489436
+Node: rationalp1490984
+Node: ash1491644
+Node: integer-length1493141
+Node: integerp1494787
+Node: parse-integer1495428
+Node: boole1497537
+Node: boole-11502760
+Node: logand1503868
+Node: logbitp1507989
+Node: logcount1509172
+Node: logtest1510574
+Node: byte1511637
+Node: deposit-field1512870
+Node: dpb1513891
+Node: ldb1515329
+Node: ldb-test1516924
+Node: mask-field1517755
+Node: most-positive-fixnum1519081
+Node: decode-float1519755
+Node: float1525479
+Node: floatp1526406
+Node: most-positive-short-float1527031
+Node: short-float-epsilon1531332
+Node: arithmetic-error1532717
+Node: arithmetic-error-operands1533471
+Node: division-by-zero1534382
+Node: floating-point-invalid-operation1534860
+Node: floating-point-inexact1535648
+Node: floating-point-overflow1536403
+Node: floating-point-underflow1536912
+Node: Characters1537395
+Node: Character Concepts1537571
+Node: Introduction to Characters1538065
+Node: Introduction to Scripts and Repertoires1539529
+Node: Character Scripts1539837
+Node: Character Repertoires1540850
+Node: Character Attributes1541761
+Node: Character Categories1542769
+Node: Graphic Characters1543992
+Node: Alphabetic Characters1544919
+Node: Characters With Case1545582
+Node: Uppercase Characters1546036
+Node: Lowercase Characters1546491
+Node: Corresponding Characters in the Other Case1546965
+Node: Case of Implementation-Defined Characters1547496
+Node: Numeric Characters1547997
+Node: Alphanumeric Characters1548505
+Node: Digits in a Radix1548824
+Node: Identity of Characters1549552
+Node: Ordering of Characters1549822
+Node: Character Names1551612
+Node: Treatment of Newline during Input and Output1552755
+Node: Character Encodings1553306
+Node: Documentation of Implementation-Defined Scripts1554104
+Node: Characters Dictionary1555575
+Node: character (System Class)1556078
+Node: base-char1556689
+Node: standard-char1558673
+Node: extended-char1559213
+Node: char=1559674
+Node: character1565738
+Node: characterp1566607
+Node: alpha-char-p1567533
+Node: alphanumericp1568695
+Node: digit-char1570080
+Node: digit-char-p1571187
+Node: graphic-char-p1572675
+Node: standard-char-p1573552
+Node: char-upcase1574392
+Node: upper-case-p1576811
+Node: char-code1578338
+Node: char-int1579058
+Node: code-char1580045
+Node: char-code-limit1580800
+Node: char-name1581460
+Node: name-char1583367
+Node: Conses1584236
+Node: Cons Concepts1584384
+Node: Conses as Trees1584933
+Node: General Restrictions on Parameters that must be Trees1585981
+Node: Conses as Lists1586415
+Node: Lists as Association Lists1587871
+Node: Lists as Sets1588406
+Node: General Restrictions on Parameters that must be Lists1588991
+Node: Conses Dictionary1589648
+Node: list (System Class)1590410
+Node: null (System Class)1591644
+Node: cons (System Class)1592136
+Node: atom (Type)1593362
+Node: cons1593602
+Node: consp1594506
+Node: atom1595216
+Node: rplaca1595909
+Node: car1597033
+Node: copy-tree1603439
+Node: sublis1605051
+Node: subst1608774
+Node: tree-equal1613121
+Node: copy-list1614893
+Node: list (Function)1616197
+Node: list-length1617800
+Node: listp1619699
+Node: make-list1620493
+Node: push1621445
+Node: pop1622678
+Node: first1623966
+Node: nth1626733
+Node: endp1627775
+Node: null1629168
+Node: nconc1629967
+Node: append1632083
+Node: revappend1633205
+Node: butlast1635378
+Node: last1637185
+Node: ldiff1638932
+Node: nthcdr1642556
+Node: rest1643680
+Node: member (Function)1644647
+Node: mapc1646928
+Node: acons1651120
+Node: assoc1652126
+Node: copy-alist1655345
+Node: pairlis1656609
+Node: rassoc1658125
+Node: get-properties1660236
+Node: getf1661608
+Node: remf1664450
+Node: intersection1665796
+Node: adjoin1669716
+Node: pushnew1671648
+Node: set-difference1674378
+Node: set-exclusive-or1677734
+Node: subsetp1680812
+Node: union1682826
+Node: Arrays1685909
+Node: Array Concepts1686055
+Node: Array Elements1686243
+Node: Array Indices1686800
+Node: Array Dimensions1687215
+Node: Implementation Limits on Individual Array Dimensions1687805
+Node: Array Rank1688230
+Node: Vectors1688715
+Node: Fill Pointers1688921
+Node: Multidimensional Arrays1689653
+Node: Storage Layout for Multidimensional Arrays1689864
+Node: Implementation Limits on Array Rank1690378
+Node: Specialized Arrays1690752
+Node: Array Upgrading1692213
+Node: Required Kinds of Specialized Arrays1693595
+Node: Arrays Dictionary1695222
+Node: array1696037
+Node: simple-array1699085
+Node: vector (System Class)1701034
+Node: simple-vector1703130
+Node: bit-vector1704139
+Node: simple-bit-vector1705180
+Node: make-array1706162
+Node: adjust-array1714817
+Node: adjustable-array-p1722816
+Node: aref1723785
+Node: array-dimension1725459
+Node: array-dimensions1726318
+Node: array-element-type1727164
+Node: array-has-fill-pointer-p1728548
+Node: array-displacement1729698
+Node: array-in-bounds-p1731369
+Node: array-rank1732539
+Node: array-row-major-index1733308
+Node: array-total-size1734825
+Node: arrayp1736094
+Node: fill-pointer1736845
+Node: row-major-aref1737986
+Node: upgraded-array-element-type1739073
+Node: array-dimension-limit1740675
+Node: array-rank-limit1741204
+Node: array-total-size-limit1741698
+Node: simple-vector-p1742466
+Node: svref1743218
+Node: vector1744277
+Node: vector-pop1745173
+Node: vector-push1746434
+Node: vectorp1749247
+Node: bit (Array)1749944
+Node: bit-and1751266
+Node: bit-vector-p1755663
+Node: simple-bit-vector-p1756459
+Node: Strings1757161
+Node: String Concepts1757314
+Node: Implications of Strings Being Arrays1757530
+Node: Subtypes of STRING1758019
+Node: Strings Dictionary1758426
+Node: string (System Class)1758765
+Node: base-string1759833
+Node: simple-string1760779
+Node: simple-base-string1761818
+Node: simple-string-p1762728
+Node: char1763481
+Node: string1764998
+Node: string-upcase1766257
+Node: string-trim1770275
+Node: string=1771901
+Node: stringp1777370
+Node: make-string1777983
+Node: Sequences1778920
+Node: Sequence Concepts1779117
+Node: General Restrictions on Parameters that must be Sequences1780930
+Node: Rules about Test Functions1781315
+Node: Satisfying a Two-Argument Test1781584
+Node: Examples of Satisfying a Two-Argument Test1784144
+Node: Satisfying a One-Argument Test1785436
+Node: Examples of Satisfying a One-Argument Test1787366
+Node: Sequences Dictionary1787959
+Node: sequence1788398
+Node: copy-seq1789105
+Node: elt1790257
+Node: fill1791330
+Node: make-sequence1792716
+Node: subseq1794821
+Node: map1796902
+Node: map-into1799758
+Node: reduce1802947
+Node: count1806240
+Node: length1808318
+Node: reverse1809299
+Node: sort1811428
+Node: find1816863
+Node: position1819099
+Node: search1821241
+Node: mismatch1823167
+Node: replace1825470
+Node: substitute1827776
+Node: concatenate1833684
+Node: merge1835854
+Node: remove1839996
+Node: remove-duplicates1846346
+Node: Hash Tables1849840
+Node: Hash Table Concepts1850016
+Node: Hash-Table Operations1850248
+Node: Modifying Hash Table Keys1852287
+Node: Visible Modification of Objects with respect to EQ and EQL1854196
+Node: Visible Modification of Objects with respect to EQUAL1854657
+Node: Visible Modification of Conses with respect to EQUAL1855252
+Node: Visible Modification of Bit Vectors and Strings with respect to EQUAL1855739
+Node: Visible Modification of Objects with respect to EQUALP1856400
+Node: Visible Modification of Structures with respect to EQUALP1857010
+Node: Visible Modification of Arrays with respect to EQUALP1857491
+Node: Visible Modification of Hash Tables with respect to EQUALP1858095
+Node: Visible Modifications by Language Extensions1858804
+Node: Hash Tables Dictionary1859564
+Node: hash-table1859986
+Node: make-hash-table1860763
+Node: hash-table-p1863671
+Node: hash-table-count1864408
+Node: hash-table-rehash-size1865794
+Node: hash-table-rehash-threshold1867305
+Node: hash-table-size1868350
+Node: hash-table-test1869123
+Node: gethash1869981
+Node: remhash1872121
+Node: maphash1872958
+Node: with-hash-table-iterator1874789
+Node: clrhash1878221
+Node: sxhash1879063
+Node: Filenames1882037
+Node: Overview of Filenames1882241
+Node: Namestrings as Filenames1883040
+Node: Pathnames as Filenames1884133
+Node: Parsing Namestrings Into Pathnames1887573
+Node: Pathnames1888315
+Node: Pathname Components1888553
+Node: The Pathname Host Component1889041
+Node: The Pathname Device Component1889349
+Node: The Pathname Directory Component1889730
+Node: The Pathname Name Component1890079
+Node: The Pathname Type Component1890396
+Node: The Pathname Version Component1890809
+Node: Interpreting Pathname Component Values1891458
+Node: Strings in Component Values1892662
+Node: Special Characters in Pathname Components1892933
+Node: Case in Pathname Components1893835
+Node: Local Case in Pathname Components1894626
+Node: Common Case in Pathname Components1895425
+Node: Special Pathname Component Values1896218
+Node: NIL as a Component Value1896486
+Node: ->WILD as a Component Value1897030
+Node: ->UNSPECIFIC as a Component Value1898061
+Node: Relation between component values NIL and ->UNSPECIFIC1899452
+Node: Restrictions on Wildcard Pathnames1900299
+Node: Restrictions on Examining Pathname Components1901162
+Node: Restrictions on Examining a Pathname Host Component1902210
+Node: Restrictions on Examining a Pathname Device Component1902649
+Node: Restrictions on Examining a Pathname Directory Component1903353
+Node: Directory Components in Non-Hierarchical File Systems1906956
+Node: Restrictions on Examining a Pathname Name Component1907604
+Node: Restrictions on Examining a Pathname Type Component1908031
+Node: Restrictions on Examining a Pathname Version Component1908459
+Node: Notes about the Pathname Version Component1909438
+Node: Restrictions on Constructing Pathnames1910050
+Node: Merging Pathnames1911592
+Node: Examples of Merging Pathnames1912370
+Node: Logical Pathnames1913247
+Node: Syntax of Logical Pathname Namestrings1913486
+Node: Additional Information about Parsing Logical Pathname Namestrings1915466
+Node: The Host part of a Logical Pathname Namestring1915856
+Node: The Device part of a Logical Pathname Namestring1916501
+Node: The Directory part of a Logical Pathname Namestring1917032
+Node: The Type part of a Logical Pathname Namestring1917630
+Node: The Version part of a Logical Pathname Namestring1918125
+Node: Wildcard Words in a Logical Pathname Namestring1918777
+Node: Lowercase Letters in a Logical Pathname Namestring1919292
+Node: Other Syntax in a Logical Pathname Namestring1919732
+Node: Logical Pathname Components1920247
+Node: Unspecific Components of a Logical Pathname1920554
+Node: Null Strings as Components of a Logical Pathname1920986
+Node: Filenames Dictionary1921348
+Node: pathname (System Class)1921904
+Node: logical-pathname (System Class)1922348
+Node: pathname1922971
+Node: make-pathname1925689
+Node: pathnamep1930205
+Node: pathname-host1931073
+Node: load-logical-pathname-translations1935777
+Node: logical-pathname-translations1937628
+Node: logical-pathname1945662
+Node: *default-pathname-defaults*1947029
+Node: namestring1948249
+Node: parse-namestring1952181
+Node: wild-pathname-p1956931
+Node: pathname-match-p1959054
+Node: translate-logical-pathname1960272
+Node: translate-pathname1962950
+Node: merge-pathnames1969567
+Node: Files1974203
+Node: File System Concepts1974354
+Node: Coercion of Streams to Pathnames1975365
+Node: File Operations on Open and Closed Streams1976302
+Node: Truenames1977550
+Node: Examples of Truenames1978465
+Node: Files Dictionary1980035
+Node: directory1980352
+Node: probe-file1981901
+Node: ensure-directories-exist1983162
+Node: truename1984788
+Node: file-author1987420
+Node: file-write-date1988445
+Node: rename-file1989708
+Node: delete-file1992235
+Node: file-error1994031
+Node: file-error-pathname1994790
+Node: Streams1995334
+Node: Stream Concepts1995484
+Node: Introduction to Streams1995770
+Node: Abstract Classifications of Streams (Introduction to Streams)1997026
+Node: Input1997281
+Node: Open and Closed Streams1999009
+Node: Interactive Streams1999965
+Node: Abstract Classifications of Streams2001361
+Node: File Streams2001593
+Node: Other Subclasses of Stream2002297
+Node: Stream Variables2003645
+Node: Stream Arguments to Standardized Functions2004974
+Node: Restrictions on Composite Streams2008023
+Node: Streams Dictionary2008530
+Node: stream2009807
+Node: broadcast-stream2010400
+Node: concatenated-stream2013185
+Node: echo-stream2014430
+Node: file-stream2015186
+Node: string-stream2015754
+Node: synonym-stream2016377
+Node: two-way-stream2017201
+Node: input-stream-p2017757
+Node: interactive-stream-p2018860
+Node: open-stream-p2019944
+Node: stream-element-type2020838
+Node: streamp2022189
+Node: read-byte2022844
+Node: write-byte2024279
+Node: peek-char2025398
+Node: read-char2028204
+Node: read-char-no-hang2030033
+Node: terpri2032230
+Node: unread-char2033786
+Node: write-char2035753
+Node: read-line2036631
+Node: write-string2038643
+Node: read-sequence2040229
+Node: write-sequence2042524
+Node: file-length2044145
+Node: file-position2045180
+Node: file-string-length2049033
+Node: open2049809
+Node: stream-external-format2059560
+Node: with-open-file2060490
+Node: close2063775
+Node: with-open-stream2065934
+Node: listen2067178
+Node: clear-input2068292
+Node: finish-output2070138
+Node: y-or-n-p2071814
+Node: make-synonym-stream2074450
+Node: synonym-stream-symbol2075547
+Node: broadcast-stream-streams2076067
+Node: make-broadcast-stream2076608
+Node: make-two-way-stream2077665
+Node: two-way-stream-input-stream2078733
+Node: echo-stream-input-stream2079574
+Node: make-echo-stream2080330
+Node: concatenated-stream-streams2081397
+Node: make-concatenated-stream2082176
+Node: get-output-stream-string2083073
+Node: make-string-input-stream2084652
+Node: make-string-output-stream2085812
+Node: with-input-from-string2086933
+Node: with-output-to-string2089485
+Node: *debug-io*2092171
+Node: *terminal-io*2096865
+Node: stream-error2098379
+Node: stream-error-stream2099028
+Node: end-of-file2099768
+Node: Printer2100572
+Node: The Lisp Printer2100773
+Node: Overview of The Lisp Printer2101056
+Node: Multiple Possible Textual Representations2101758
+Node: Printer Escaping2103947
+Node: Printer Dispatching2104871
+Node: Default Print-Object Methods2105437
+Node: Printing Numbers2106348
+Node: Printing Integers2106542
+Node: Printing Ratios2107275
+Node: Printing Floats2108025
+Node: Printing Complexes2109660
+Node: Note about Printing Numbers2110160
+Node: Printing Characters2110508
+Node: Printing Symbols2111447
+Node: Package Prefixes for Symbols2112970
+Node: Effect of Readtable Case on the Lisp Printer2114863
+Node: Examples of Effect of Readtable Case on the Lisp Printer2116716
+Node: Printing Strings2120133
+Node: Printing Lists and Conses2120764
+Node: Printing Bit Vectors2123210
+Node: Printing Other Vectors2123859
+Node: Printing Other Arrays2125357
+Node: Examples of Printing Arrays2127618
+Node: Printing Random States2128341
+Node: Printing Pathnames2129226
+Node: Printing Structures2129813
+Node: Printing Other Objects2130755
+Node: Examples of Printer Behavior2131631
+Node: The Lisp Pretty Printer2133132
+Node: Pretty Printer Concepts2133432
+Node: Dynamic Control of the Arrangement of Output2135046
+Node: Format Directive Interface2138088
+Node: Compiling Format Strings2139476
+Node: Pretty Print Dispatch Tables2140109
+Node: Pretty Printer Margins2141713
+Node: Examples of using the Pretty Printer2142210
+Node: Notes about the Pretty Printer`s Background2153911
+Node: Formatted Output2154432
+Node: FORMAT Basic Output2159127
+Node: Tilde C-> Character2159454
+Node: Tilde Percent-> Newline2161259
+Node: Tilde Ampersand-> Fresh-Line2161613
+Node: Tilde Vertical-Bar-> Page2162023
+Node: Tilde Tilde-> Tilde2162314
+Node: FORMAT Radix Control2162523
+Node: Tilde R-> Radix2162836
+Node: Tilde D-> Decimal2164101
+Node: Tilde B-> Binary2165416
+Node: Tilde O-> Octal2165853
+Node: Tilde X-> Hexadecimal2166291
+Node: FORMAT Floating-Point Printers2166724
+Node: Tilde F-> Fixed-Format Floating-Point2167121
+Node: Tilde E-> Exponential Floating-Point2171212
+Node: Tilde G-> General Floating-Point2176329
+Node: Tilde Dollarsign-> Monetary Floating-Point2177696
+Node: FORMAT Printer Operations2179962
+Node: Tilde A-> Aesthetic2180261
+Node: Tilde S-> Standard2181500
+Node: Tilde W-> Write2181927
+Node: FORMAT Pretty Printer Operations2182735
+Node: Tilde Underscore-> Conditional Newline2183173
+Node: Tilde Less-Than-Sign-> Logical Block2183665
+Node: Tilde I-> Indent2187183
+Node: Tilde Slash-> Call Function2187549
+Node: FORMAT Layout Control2189409
+Node: Tilde T-> Tabulate2189744
+Node: Tilde Less-Than-Sign-> Justification2191969
+Node: Tilde Greater-Than-Sign-> End of Justification2195385
+Node: FORMAT Control-Flow Operations2195718
+Node: Tilde Asterisk-> Go-To2196207
+Node: Tilde Left-Bracket-> Conditional Expression2197100
+Node: Tilde Right-Bracket-> End of Conditional Expression2199603
+Node: Tilde Left-Brace-> Iteration2200004
+Node: Tilde Right-Brace-> End of Iteration2203282
+Node: Tilde Question-Mark-> Recursive Processing2203637
+Node: FORMAT Miscellaneous Operations2204990
+Node: Tilde Left-Paren-> Case Conversion2205353
+Node: Tilde Right-Paren-> End of Case Conversion2206635
+Node: Tilde P-> Plural2206989
+Node: FORMAT Miscellaneous Pseudo-Operations2207768
+Node: Tilde Semicolon-> Clause Separator2208166
+Node: Tilde Circumflex-> Escape Upward2208551
+Node: Tilde Newline-> Ignored Newline2211983
+Node: Additional Information about FORMAT Operations2213395
+Node: Nesting of FORMAT Operations2213839
+Node: Missing and Additional FORMAT Arguments2215230
+Node: Additional FORMAT Parameters2215723
+Node: Undefined FORMAT Modifier Combinations2216124
+Node: Examples of FORMAT2216535
+Node: Notes about FORMAT2220515
+Node: Printer Dictionary2221157
+Node: copy-pprint-dispatch2221926
+Node: formatter2222666
+Node: pprint-dispatch2223856
+Node: pprint-exit-if-list-exhausted2225386
+Node: pprint-fill2226979
+Node: pprint-indent2230407
+Node: pprint-logical-block2232263
+Node: pprint-newline2237752
+Node: pprint-pop2242091
+Node: pprint-tab2245302
+Node: print-object2246687
+Node: print-unreadable-object2251444
+Node: set-pprint-dispatch2253262
+Node: write2255448
+Node: write-to-string2259749
+Node: *print-array*2261941
+Node: *print-base*2262789
+Node: *print-case*2265097
+Node: *print-circle*2267453
+Node: *print-escape*2269073
+Node: *print-gensym*2270212
+Node: *print-level*2270862
+Node: *print-lines*2273942
+Node: *print-miser-width*2275328
+Node: *print-pprint-dispatch*2275874
+Node: *print-pretty*2277184
+Node: *print-readably*2279094
+Node: *print-right-margin*2282865
+Node: print-not-readable2283743
+Node: print-not-readable-object2284589
+Node: format2285160
+Node: Reader2286919
+Node: Reader Concepts2287079
+Node: Dynamic Control of the Lisp Reader2287365
+Node: Effect of Readtable Case on the Lisp Reader2287751
+Node: Examples of Effect of Readtable Case on the Lisp Reader2288796
+Node: Argument Conventions of Some Reader Functions2290317
+Node: The EOF-ERROR-P argument2290638
+Node: The RECURSIVE-P argument2292267
+Node: Reader Dictionary2295038
+Node: readtable2295558
+Node: copy-readtable2296367
+Node: make-dispatch-macro-character2298260
+Node: read2299513
+Node: read-delimited-list2304716
+Node: read-from-string2308419
+Node: readtable-case2310892
+Node: readtablep2312085
+Node: set-dispatch-macro-character2312749
+Node: set-macro-character2315815
+Node: set-syntax-from-char2318369
+Node: with-standard-io-syntax2320481
+Node: *read-base*2323161
+Node: *read-default-float-format*2324515
+Node: *read-eval*2326054
+Node: *read-suppress*2326764
+Node: *readtable*2330412
+Node: reader-error2331464
+Node: System Construction2331998
+Node: System Construction Concepts2332214
+Node: Loading2332466
+Node: Features2333423
+Node: Feature Expressions2333932
+Node: Examples of Feature Expressions2334955
+Node: System Construction Dictionary2336740
+Node: compile-file2337147
+Node: compile-file-pathname2341905
+Node: load2343950
+Node: with-compilation-unit2349533
+Node: *features*2351754
+Node: *compile-file-pathname*2357191
+Node: *load-pathname*2358503
+Node: *compile-print*2359725
+Node: *load-print*2360327
+Node: *modules*2360965
+Node: provide2361523
+Node: Environment2364364
+Node: The External Environment2364565
+Node: Top level loop2364832
+Node: Debugging Utilities2365701
+Node: Environment Inquiry2366224
+Node: Time2366959
+Node: Decoded Time2368260
+Node: Universal Time2369831
+Node: Internal Time2370911
+Node: Seconds2371529
+Node: Environment Dictionary2372078
+Node: decode-universal-time2372784
+Node: encode-universal-time2374722
+Node: get-universal-time2375884
+Node: sleep2378019
+Node: apropos2379099
+Node: describe2380635
+Node: describe-object2382478
+Node: trace2385370
+Node: step2388238
+Node: time2389565
+Node: internal-time-units-per-second2391440
+Node: get-internal-real-time2392052
+Node: get-internal-run-time2392902
+Node: disassemble2394235
+Node: documentation2395612
+Node: room2402082
+Node: ed2403175
+Node: inspect2404633
+Node: dribble2405524
+Node: - (Variable)2407399
+Node: + (Variable)2408041
+Node: * (Variable)2409103
+Node: / (Variable)2410639
+Node: lisp-implementation-type2411783
+Node: short-site-name2413000
+Node: machine-instance2413949
+Node: machine-type2414747
+Node: machine-version2415402
+Node: software-type2416108
+Node: user-homedir-pathname2417114
+Node: Glossary (Glossary)2418420
+Node: Glossary2418561
+Node: Appendix2579627
+Node: Removed Language Features2579765
+Node: Requirements for removed and deprecated features2580128
+Node: Removed Types2581331
+Node: Removed Operators2581564
+Node: Removed Argument Conventions2581943
+Node: Removed Variables2582261
+Node: Removed Reader Syntax2582625
+Node: Packages No Longer Required2582881
+
+End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:

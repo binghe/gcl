@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Examples of Feature Expressions (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Examples of Feature Expressions (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Examples of Feature Expressions (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Features.html" rel="up" title="Features">
+<link href="System-Construction-Dictionary.html" rel="next" title="System Construction Dictionary">
+<link href="Feature-Expressions.html" rel="prev" title="Feature Expressions">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Examples-of-Feature-Expressions"></span><div class="header">
+<p>
+Previous: <a href="Feature-Expressions.html" accesskey="p" rel="prev">Feature Expressions</a>, Up: <a href="Features.html" accesskey="u" rel="up">Features</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Examples-of-Feature-Expressions-1"></span><h4 class="subsubsection">24.1.2.2 Examples of Feature Expressions</h4>
+
+<p>For example, suppose that
+ in <i>implementation</i> A, the <i>features</i> <tt>spice</tt> and <tt>perq</tt> are <i>present</i>,
+			     but the <i>feature</i> <tt>lispm</tt> is not <i>present</i>;
+ in <i>implementation</i> B, the feature <tt>lispm</tt> is <i>present</i>,
+			     but the <i>features</i> <tt>spice</tt> and <tt>perq</tt> are
+			      not <i>present</i>;
+ and 
+ in <i>implementation</i> C, none of the features <tt>spice</tt>, <i>lispm</i>, or <tt>perq</tt> are
+			     <i>present</i>.
+Figure 24&ndash;1 shows some sample <i>expressions</i>, and how they would be 
+<i>read</i>_2 in these <i>implementations</i>.
+</p>
+<div class="format">
+<pre class="format">  <tt>(cons #+spice &quot;Spice&quot; #-spice &quot;Lispm&quot; x)</tt> <!-- /@w -->
+  in <i>implementation</i> A ...    <tt>(CONS &quot;Spice&quot; X)</tt>             <!-- /@w -->
+    in <i>implementation</i> B ...  <tt>(CONS &quot;Lispm&quot; X)</tt>             <!-- /@w -->
+    in <i>implementation</i> C ...  <tt>(CONS &quot;Lispm&quot; X)</tt>             <!-- /@w -->
+  <tt>(cons #+spice &quot;Spice&quot; #+LispM &quot;Lispm&quot; x)</tt> <!-- /@w -->
+  in <i>implementation</i> A ...    <tt>(CONS &quot;Spice&quot; X)</tt>             <!-- /@w -->
+    in <i>implementation</i> B ...  <tt>(CONS &quot;Lispm&quot; X)</tt>             <!-- /@w -->
+    in <i>implementation</i> C ...  <tt>(CONS X)</tt>                     <!-- /@w -->
+  <tt>(setq a '(1 2 #+perq 43 #+(not perq) 27))</tt> <!-- /@w -->
+  in <i>implementation</i> A ...    <tt>(SETQ A '(1 2 43))</tt>           <!-- /@w -->
+    in <i>implementation</i> B ...  <tt>(SETQ A '(1 2 27))</tt>           <!-- /@w -->
+    in <i>implementation</i> C ...  <tt>(SETQ A '(1 2 27))</tt>           <!-- /@w -->
+  <tt>(let ((a 3) #+(or spice lispm) (b 3)) (foo a))</tt> <!-- /@w -->
+  in <i>implementation</i> A ...    <tt>(LET ((A 3) (B 3)) (FOO A))</tt>  <!-- /@w -->
+    in <i>implementation</i> B ...  <tt>(LET ((A 3) (B 3)) (FOO A))</tt>  <!-- /@w -->
+    in <i>implementation</i> C ...  <tt>(LET ((A 3)) (FOO A))</tt>        <!-- /@w -->
+  <tt>(cons #+Lispm &quot;#+Spice&quot; #+Spice &quot;foo&quot; #-(or Lispm Spice) 7 x)</tt> <!-- /@w -->
+  in <i>implementation</i> A ...    <tt>(CONS &quot;foo&quot; X)</tt>               <!-- /@w -->
+    in <i>implementation</i> B ...  <tt>(CONS &quot;#+Spice&quot; X)</tt>           <!-- /@w -->
+    in <i>implementation</i> C ...  <tt>(CONS 7 X)</tt>                   <!-- /@w -->
+
+              Figure 24&ndash;1: Features examples             <!-- /@w -->
+
+</pre></div>
+
+
+
+
+
+</body>
+</html>

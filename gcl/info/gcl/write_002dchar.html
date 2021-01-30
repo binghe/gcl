@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>write-char (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="write-char (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="write-char (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Streams-Dictionary.html" rel="up" title="Streams Dictionary">
+<link href="read_002dline.html" rel="next" title="read-line">
+<link href="unread_002dchar.html" rel="prev" title="unread-char">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="write_002dchar"></span><div class="header">
+<p>
+Next: <a href="read_002dline.html" accesskey="n" rel="next">read-line</a>, Previous: <a href="unread_002dchar.html" accesskey="p" rel="prev">unread-char</a>, Up: <a href="Streams-Dictionary.html" accesskey="u" rel="up">Streams Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="write_002dchar-_005bFunction_005d"></span><h4 class="subsection">21.2.21 write-char                                                       [Function]</h4>
+
+<p><code>write-char</code>  <i>character <span class="roman">&amp;optional</span> output-stream</i> &rArr;  <i>character</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-424"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>character</i>&mdash;a <i>character</i>.
+</p>
+<p><i>output-stream</i> &ndash; an <i>output</i> <i>stream designator</i>.
+ The default is <i>standard output</i>.
+</p>
+<span id="Description_003a_003a-552"></span><h4 class="subsubheading">Description::</h4>
+
+<p><b>write-char</b> outputs <i>character</i> to <i>output-stream</i>.
+</p>
+<span id="Examples_003a_003a-399"></span><h4 class="subsubheading">Examples::</h4>
+<div class="example">
+<pre class="example"> (write-char #\a)
+<tt> |&gt; </tt> a
+&rArr;  #\a
+ (with-output-to-string (s) 
+   (write-char #\a s)
+   (write-char #\Space s)
+   (write-char #\b s))
+&rArr;  &quot;a b&quot;
+</pre></div>
+
+<span id="Side-Effects_003a_003a-63"></span><h4 class="subsubheading">Side Effects::</h4>
+
+<p>The <i>output-stream</i> is modified.
+</p>
+<span id="Affected-By_003a_003a-87"></span><h4 class="subsubheading">Affected By::</h4>
+
+<p><b>*standard-output*</b>,
+<b>*terminal-io*</b>.
+</p>
+<span id="See-Also_003a_003a-449"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="read_002dchar.html">read-char</a>
+,
+<a href="write_002dbyte.html">write-byte</a>
+,
+</p>
+<p><a href="write_002dsequence.html">write-sequence</a>
+</p>
+
+
+
+</body>
+</html>

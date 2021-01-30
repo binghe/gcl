@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Structures (GCL SI Manual)</title>
+
+<meta name="description" content="Structures (GCL SI Manual)">
+<meta name="keywords" content="Structures (GCL SI Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Iteration-and-Tests.html" rel="next" title="Iteration and Tests">
+<link href="Operating-System-Definitions.html" rel="prev" title="Operating System Definitions">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Structures"></span><div class="header">
+<p>
+Next: <a href="Iteration-and-Tests.html" accesskey="n" rel="next">Iteration and Tests</a>, Previous: <a href="Operating-System.html" accesskey="p" rel="prev">Operating System</a>, Up: <a href="index.html" accesskey="u" rel="up">Top</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="Structures-1"></span><h2 class="chapter">10 Structures</h2>
+
+<dl>
+<dt id="index-DEFSTRUCT">Macro: <strong>DEFSTRUCT</strong></dt>
+<dd><p>Package:LISP
+</p>
+<p>Syntax:
+</p><div class="example">
+<pre class="example">(defstruct
+         {name | (name {:conc-name | (:conc-name prefix-string) |
+                        :constructor | (:constructor symbol [lambda-list]) |
+                        :copier | (:copier symbol) |
+                        :predicate | (:predicate symbol) | 
+                        (:include symbol) |
+                        (:print-function function) |
+                        (:type {vector | (vector type) | list}) |
+                        :named | (:static { nil | t})
+                        (:initial-offset number)}*)}
+         [doc]
+         {slot-name |
+          (slot-name [default-value-form] {:type type | :read-only flag}*) }*
+         )
+</pre></div>
+
+<p>Defines a structure.  The doc-string DOC, if supplied, is saved as a STRUCTURE
+doc and can be retrieved by (documentation &rsquo;NAME &rsquo;structure).
+STATIC is gcl specific and makes the body non relocatable.
+</p>
+<p>See the files misc/rusage.lsp misc/cstruct.lsp, for examples of making
+a lisp structure correspond to a C structure.
+</p>
+
+
+</dd></dl>
+
+<dl>
+<dt id="index-HELP">Function: <strong>HELP</strong> <em>(&amp;optional symbol)</em></dt>
+<dd><p>Package:LISP
+</p>
+<p>GCL specific: Prints the documentation associated with SYMBOL.  With no
+argument, this function prints the greeting message to GCL beginners.
+</p>
+
+</dd></dl>
+
+
+
+
+</body>
+</html>

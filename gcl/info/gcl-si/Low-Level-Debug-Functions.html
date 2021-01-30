@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Low Level Debug Functions (GCL SI Manual)</title>
+
+<meta name="description" content="Low Level Debug Functions (GCL SI Manual)">
+<meta name="keywords" content="Low Level Debug Functions (GCL SI Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Function-and-Variable-Index.html" rel="index" title="Function and Variable Index">
+<link href="Function-and-Variable-Index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Debugging.html" rel="up" title="Debugging">
+<link href="Miscellaneous.html" rel="next" title="Miscellaneous">
+<link href="Source-Level-Debugging-in-Emacs.html" rel="prev" title="Source Level Debugging in Emacs">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Low-Level-Debug-Functions"></span><div class="header">
+<p>
+Previous: <a href="Source-Level-Debugging-in-Emacs.html" accesskey="p" rel="prev">Source Level Debugging in Emacs</a>, Up: <a href="Debugging.html" accesskey="u" rel="up">Debugging</a> &nbsp; [<a href="Function-and-Variable-Index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Function-and-Variable-Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="Low-Level-Debug-Functions-1"></span><h3 class="section">18.2 Low Level Debug Functions</h3>
+
+<p>Use the following functions to directly access GCL stacks.
+</p><div class="example">
+<pre class="example">(SI:VS i)	Returns the i-th entity in VS.
+(SI:IHS-VS i)	Returns the VS index of the i-th entity in IHS.
+(SI:IHS-FUN i)	Returns the function of the i-th entity in IHS.
+(SI:FRS-VS i)	Returns the VS index of the i-th entity in FRS.
+(SI:FRS-BDS i)	Returns the BDS index of the i-th entity in FRS.
+(SI:FRS-IHS i)	Returns the IHS index of the i-th entity in FRS.
+(SI:BDS-VAR i)	Returns the symbol of the i-th entity in BDS.
+(SI:BDS-VAL i)	Returns the value of the i-th entity in BDS.
+
+(SI:SUPER-GO i tag)
+	Jumps to the specified tag established by the TAGBODY frame at
+	FRS[i].  Both arguments are evaluated.  If FRS[i] happens to be
+	a non-TAGBODY frame, then (THROW (SI:IHS-TAG i) (VALUES)) is
+	performed.
+</pre></div>
+
+
+
+
+
+</body>
+</html>

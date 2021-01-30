@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>no-applicable-method (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="no-applicable-method (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="no-applicable-method (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Objects-Dictionary.html" rel="up" title="Objects Dictionary">
+<link href="no_002dnext_002dmethod.html" rel="next" title="no-next-method">
+<link href="method_002dqualifiers.html" rel="prev" title="method-qualifiers">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="no_002dapplicable_002dmethod"></span><div class="header">
+<p>
+Next: <a href="no_002dnext_002dmethod.html" accesskey="n" rel="next">no-next-method</a>, Previous: <a href="method_002dqualifiers.html" accesskey="p" rel="prev">method-qualifiers</a>, Up: <a href="Objects-Dictionary.html" accesskey="u" rel="up">Objects Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="no_002dapplicable_002dmethod-_005bStandard-Generic-Function_005d"></span><h4 class="subsection">7.7.16 no-applicable-method                            [Standard Generic Function]</h4>
+
+<span id="Syntax_003a_003a-21"></span><h4 class="subsubheading">Syntax::</h4>
+
+<p><code>no-applicable-method</code>  <i>generic-function <span class="roman">&amp;rest</span> function-arguments</i> &rArr;  <i>{<i>result</i>}*</i>
+</p>
+<span id="Method-Signatures_003a_003a-10"></span><h4 class="subsubheading">Method Signatures::</h4>
+
+<p><code>no-applicable-method</code>  <i><span class="roman">(</span><i>generic-function</i> <b>t</b><span class="roman">)</span>
+				     <span class="roman">&amp;rest</span> function-arguments</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-104"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>generic-function</i>&mdash;a <i>generic function</i> 
+			   on which no <i>applicable method</i> was found.  
+</p>
+<p><i>function-arguments</i>&mdash;<i>arguments</i> to the <i>generic-function</i>.
+</p>
+<p><i>result</i>&mdash;an <i>object</i>.
+</p>
+<span id="Description_003a_003a-143"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The generic function <b>no-applicable-method</b> is called when a
+<i>generic function</i> 
+is invoked
+and no <i>method</i> on that <i>generic function</i> is applicable.
+The <i>default method</i> signals an error.
+</p>
+<p>The generic function <b>no-applicable-method</b> is not intended
+to be called by programmers.  Programmers may write <i>methods</i> for it.
+</p>
+<span id="Exceptional-Situations_003a_003a-31"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>The default <i>method</i> signals an error of <i>type</i> <b>error</b>.
+</p>
+<span id="See-Also_003a_003a-125"></span><h4 class="subsubheading">See Also::</h4>
+
+
+
+
+</body>
+</html>

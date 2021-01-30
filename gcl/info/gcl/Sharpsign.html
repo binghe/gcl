@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Sharpsign (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Sharpsign (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Sharpsign (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Standard-Macro-Characters.html" rel="up" title="Standard Macro Characters">
+<link href="Sharpsign-Backslash.html" rel="next" title="Sharpsign Backslash">
+<link href="Comma.html" rel="prev" title="Comma">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Sharpsign"></span><div class="header">
+<p>
+Next: <a href="Re_002dReading-Abbreviated-Expressions.html" accesskey="n" rel="next">Re-Reading Abbreviated Expressions</a>, Previous: <a href="Comma.html" accesskey="p" rel="prev">Comma</a>, Up: <a href="Standard-Macro-Characters.html" accesskey="u" rel="up">Standard Macro Characters</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Sharpsign-1"></span><h4 class="subsection">2.4.8 Sharpsign</h4>
+
+<p><i>Sharpsign</i> is a <i>non-terminating</i> <i>dispatching macro character</i>.
+It reads an optional 
+sequence of digits and then one more character,
+and uses that character to select a <i>function</i> to run as a
+<i>reader macro function</i>.
+</p>
+<p>The <i>standard syntax</i> includes constructs introduced by the <tt>#</tt> character.
+The syntax of these constructs is as follows:
+a character that identifies the type of construct is 
+followed by arguments in some form.
+If the character is a letter, its <i>case</i> is not important;
+<tt>#O</tt> and <tt>#o</tt> are considered to be equivalent, for example.
+</p>
+<p>Certain <tt>#</tt> constructs allow an unsigned decimal number to appear
+between the <tt>#</tt> and the character.
+</p>
+<p>The <i>reader macros</i> associated with the <i>dispatching macro character</i> <tt>#</tt>
+are described later in this section and summarized in Figure 2&ndash;19.
+</p>
+
+
+<div class="format">
+<pre class="format">  dispatch char  purpose                  dispatch char  purpose                <!-- /@w -->
+  Backspace      signals error            <tt>{</tt>              undefined*             <!-- /@w -->
+  Tab            signals error            <tt>}</tt>              undefined*             <!-- /@w -->
+  Newline        signals error            +              read-time conditional  <!-- /@w -->
+  Linefeed       signals error            -              read-time conditional  <!-- /@w -->
+  Page           signals error            .              read-time evaluation   <!-- /@w -->
+  Return         signals error            /              undefined              <!-- /@w -->
+  Space          signals error            A, a           array                  <!-- /@w -->
+  !              undefined*               B, b           binary rational        <!-- /@w -->
+  <tt>&quot;</tt>              undefined                C, c           complex number         <!-- /@w -->
+  #              reference to = label     D, d           undefined              <!-- /@w -->
+  $             undefined                E, e           undefined              <!-- /@w -->
+  %              undefined                F, f           undefined              <!-- /@w -->
+  &amp;              undefined                G, g           undefined              <!-- /@w -->
+  &rsquo;              function abbreviation    H, h           undefined              <!-- /@w -->
+  (              simple vector            I, i           undefined              <!-- /@w -->
+  )              signals error            J, j           undefined              <!-- /@w -->
+  <tt>*</tt>              bit vector               K, k           undefined              <!-- /@w -->
+  ,              undefined                L, l           undefined              <!-- /@w -->
+  :              uninterned symbol        M, m           undefined              <!-- /@w -->
+  ;              undefined                N, n           undefined              <!-- /@w -->
+  <tt>&lt;</tt>              signals error            O, o           octal rational         <!-- /@w -->
+  <tt>=</tt>              labels following object  P, p           pathname               <!-- /@w -->
+  <tt>&gt;</tt>              undefined                Q, q           undefined              <!-- /@w -->
+  ?              undefined*               R, r           radix-n rational       <!-- /@w -->
+  @              undefined                S, s           structure              <!-- /@w -->
+  [              undefined*               T, t           undefined              <!-- /@w -->
+  <tt>\</tt>              character object         U, u           undefined              <!-- /@w -->
+  ]              undefined*               V, v           undefined              <!-- /@w -->
+  <tt>^</tt>            undefined                W, w           undefined              <!-- /@w -->
+  <tt>_</tt>              undefined                X, x           hexadecimal rational   <!-- /@w -->
+  &lsquo;              undefined                Y, y           undefined              <!-- /@w -->
+  <tt>|</tt>              balanced comment         Z, z           undefined              <!-- /@w -->
+  <tt>~</tt>              undefined                Rubout         undefined              <!-- /@w -->
+
+           Figure 2&ndash;19: Standard # Dispatching Macro Character Syntax         <!-- /@w -->
+
+</pre></div>
+
+
+<p>The combinations marked by an asterisk (*) are explicitly reserved to the
+user.  No <i>conforming implementation</i> defines them.
+</p>
+<p>Note also that <i>digits</i> do not appear in the preceding table.  This is
+because the notations <tt>#0</tt>, <tt>#1</tt>, ..., <tt>#9</tt> are
+reserved for another purpose which occupies the same syntactic space.
+When a <i>digit</i> follows a <i>sharpsign</i>,
+it is not treated as a dispatch character.
+Instead, an unsigned integer argument is accumulated 
+and passed as an <i>argument</i> to the <i>reader macro</i> 
+for the <i>character</i> that follows the digits.
+For example,
+<tt>#2A((1 2) (3 4))</tt> is a use of <tt>#A</tt> with an argument of <tt>2</tt>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Backslash.html" accesskey="1">Sharpsign Backslash</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Single_002dQuote.html" accesskey="2">Sharpsign Single-Quote</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Left_002dParenthesis.html" accesskey="3">Sharpsign Left-Parenthesis</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Asterisk.html" accesskey="4">Sharpsign Asterisk</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Examples-of-Sharpsign-Asterisk.html" accesskey="5">Examples of Sharpsign Asterisk</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Colon.html" accesskey="6">Sharpsign Colon</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Dot.html" accesskey="7">Sharpsign Dot</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-B.html" accesskey="8">Sharpsign B</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-O.html" accesskey="9">Sharpsign O</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-X.html">Sharpsign X</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-R.html">Sharpsign R</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-C.html">Sharpsign C</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-A.html">Sharpsign A</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-S.html">Sharpsign S</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-P.html">Sharpsign P</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Equal_002dSign.html">Sharpsign Equal-Sign</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Sharpsign.html">Sharpsign Sharpsign</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Plus.html">Sharpsign Plus</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Minus.html">Sharpsign Minus</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Vertical_002dBar.html">Sharpsign Vertical-Bar</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Examples-of-Sharpsign-Vertical_002dBar.html">Examples of Sharpsign Vertical-Bar</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Notes-about-Style-for-Sharpsign-Vertical_002dBar.html">Notes about Style for Sharpsign Vertical-Bar</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Less_002dThan_002dSign.html">Sharpsign Less-Than-Sign</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Whitespace.html">Sharpsign Whitespace</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Sharpsign-Right_002dParenthesis.html">Sharpsign Right-Parenthesis</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Re_002dReading-Abbreviated-Expressions.html" accesskey="n" rel="next">Re-Reading Abbreviated Expressions</a>, Previous: <a href="Comma.html" accesskey="p" rel="prev">Comma</a>, Up: <a href="Standard-Macro-Characters.html" accesskey="u" rel="up">Standard Macro Characters</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

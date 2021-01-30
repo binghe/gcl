@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Sharpsign R (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Sharpsign R (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Sharpsign R (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Sharpsign.html" rel="up" title="Sharpsign">
+<link href="Sharpsign-C.html" rel="next" title="Sharpsign C">
+<link href="Sharpsign-X.html" rel="prev" title="Sharpsign X">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Sharpsign-R"></span><div class="header">
+<p>
+Next: <a href="Sharpsign-C.html" accesskey="n" rel="next">Sharpsign C</a>, Previous: <a href="Sharpsign-X.html" accesskey="p" rel="prev">Sharpsign X</a>, Up: <a href="Sharpsign.html" accesskey="u" rel="up">Sharpsign</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Sharpsign-R-1"></span><h4 class="subsubsection">2.4.8.11 Sharpsign R</h4>
+
+<p><tt>#<i>n</i>R</tt>
+</p>
+<p><tt>#<i>radix</i>R<i>rational</i></tt> reads <i>rational</i> in radix <i>radix</i>.
+<i>radix</i> must consist of only digits
+that are interpreted as an <i>integer</i>
+in decimal radix; its value must be between 2 and 36 (inclusive).
+Only valid digits
+for the specified radix may be used.
+</p>
+<p>For example, <tt>#3r102</tt> is another way of writing <tt>11</tt> (decimal), 
+and <tt>#11R32</tt>
+is another way of writing <tt>35</tt> (decimal).  
+For radices larger than 10, letters of
+the alphabet are used in order for the digits after <tt>9</tt>.
+No alternate <tt>#</tt> notation exists for the decimal radix since a
+decimal point suffices.
+</p>
+<p>Figure 2&ndash;20 contains examples of the use of <tt>#B</tt>,
+<tt>#O</tt>, <tt>#X</tt>, and <tt>#R</tt>.
+</p>
+<div class="format">
+<pre class="format">  <tt>#2r11010101</tt>  ;Another way of writing <tt>213</tt> decimal  <!-- /@w -->
+  <tt>#b11010101</tt>   ;Ditto                               <!-- /@w -->
+  <tt>#b+11010101</tt>  ;Ditto                               <!-- /@w -->
+  <tt>#o325</tt>        ;Ditto, in octal radix               <!-- /@w -->
+  <tt>#xD5</tt>         ;Ditto, in hexadecimal radix         <!-- /@w -->
+  <tt>#16r+D5</tt>      ;Ditto                               <!-- /@w -->
+  <tt>#o-300</tt>       ;Decimal <tt>-192</tt>, written in base 8     <!-- /@w -->
+  <tt>#3r-21010</tt>    ;Same thing in base 3                <!-- /@w -->
+  <tt>#25R-7H</tt>      ;Same thing in base 25               <!-- /@w -->
+  <tt>#xACCEDED</tt>    ;<tt>181202413</tt>, in hexadecimal radix     <!-- /@w -->
+
+        Figure 2&ndash;20: Radix Indicator Example       <!-- /@w -->
+
+</pre></div>
+
+<p>The consequences are undefined if the token immediately following
+the <tt>#<i>n</i>R</tt> does not have the syntax of a <i>rational</i> in radix <i>n</i>.
+</p>
+
+
+
+</body>
+</html>

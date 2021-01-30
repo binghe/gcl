@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Ordinary Lambda Lists (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Ordinary Lambda Lists (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Ordinary Lambda Lists (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Lambda-Lists.html" rel="up" title="Lambda Lists">
+<link href="Specifiers-for-the-required-parameters.html" rel="next" title="Specifiers for the required parameters">
+<link href="Lambda-Lists.html" rel="prev" title="Lambda Lists">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Ordinary-Lambda-Lists"></span><div class="header">
+<p>
+Next: <a href="Generic-Function-Lambda-Lists.html" accesskey="n" rel="next">Generic Function Lambda Lists</a>, Previous: <a href="Lambda-Lists.html" accesskey="p" rel="prev">Lambda Lists</a>, Up: <a href="Lambda-Lists.html" accesskey="u" rel="up">Lambda Lists</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Ordinary-Lambda-Lists-1"></span><h4 class="subsection">3.4.1 Ordinary Lambda Lists</h4>
+
+<p>An <i>ordinary lambda list</i>
+<span id="index-ordinary-lambda-list"></span>
+ is used to describe how a set of
+<i>arguments</i> is received by an <i>ordinary</i> <i>function</i>.  
+The <i>defined names</i> in Figure 3&ndash;12 are those which use
+<i>ordinary lambda lists</i>:
+</p>
+<div class="format">
+<pre class="format">  define-method-combination  handler-case  restart-case  <!-- /@w -->
+  defun                      labels                      <!-- /@w -->
+  flet                       lambda                      <!-- /@w -->
+
+  Figure 3&ndash;12: Standardized Operators that use Ordinary Lambda Lists<!-- /@w -->
+
+</pre></div>
+
+<p>An <i>ordinary lambda list</i> can contain the <i>lambda list keywords</i> shown
+in Figure 3&ndash;13.
+</p>
+<div class="format">
+<pre class="format">  <b>&amp;allow-other-keys</b>  <b>&amp;key</b>       <b>&amp;rest</b>  <!-- /@w -->
+  <b>&amp;aux</b>               <b>&amp;optional</b>         <!-- /@w -->
+
+  Figure 3&ndash;13: Lambda List Keywords used by Ordinary Lambda Lists<!-- /@w -->
+
+</pre></div>
+
+<p>Each <i>element</i> of a <i>lambda list</i> is either a parameter specifier
+or a <i>lambda list keyword</i>.
+Implementations are free to provide additional <i>lambda list keywords</i>.
+For a list of all <i>lambda list keywords</i>
+used by the implementation, see <b>lambda-list-keywords</b>.
+</p>
+<p>The syntax for <i>ordinary lambda lists</i> is as follows: 
+</p>
+<p><i><span class="nolinebreak">lambda-list</span></i>&nbsp;::=<span class="roman">(</span>{<i>var</i>}*<!-- /@w -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt>[</tt><span class="roman">&amp;optional</span>&nbsp;{<i>var</i>&nbsp;|&nbsp;		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="roman">(</span><i>var</i>&nbsp;<span class="roman">[</span><span class="nolinebreak">init-form</span>&nbsp;<span class="roman">[</span><span class="nolinebreak">supplied-p-parameter</span>&nbsp;<span class="roman">]</span><span class="roman">]</span><span class="roman">)</span>}*<tt>]</tt><!-- /@w -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt>[</tt><span class="roman">&amp;rest</span>&nbsp;<i>var</i><tt>]</tt><!-- /@w -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt>[</tt><span class="roman">&amp;key</span>&nbsp;{<i>var</i>&nbsp;|&nbsp;		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	&nbsp;<span class="roman">(</span>{<i>var</i>&nbsp;|&nbsp;&nbsp;					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="roman">(</span><i><span class="nolinebreak">keyword-name</span></i>&nbsp;<i>var</i><span class="roman">)</span>}&nbsp;				&nbsp;	<span class="roman">[</span><span class="nolinebreak">init-form</span>&nbsp;<span class="roman">[</span><span class="nolinebreak">supplied-p-parameter</span><span class="roman">]</span><span class="roman">]</span><span class="roman">)</span>}*&nbsp;pt&nbsp;<span class="roman">[</span><tt><span class="nolinebreak">&amp;allow-other-keys</span></tt><span class="roman">]</span><tt>]</tt><!-- /@w -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<tt>[</tt><span class="roman">&amp;aux</span>&nbsp;{<i>var</i>&nbsp;|&nbsp;<span class="roman">(</span><i>var</i>&nbsp;<span class="roman">[</span><i><span class="nolinebreak">init-form</span></i><span class="roman">]</span><span class="roman">)</span>}*<tt>]</tt><span class="roman">)</span><!-- /@w -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<!-- /@w -->
+</p>
+<p>A <i>var</i> or <i>supplied-p-parameter</i> must be a <i>symbol</i>
+that is not the name of a <i>constant variable</i>.
+</p>
+<p>An <i>init-form</i> can be any <i>form</i>.
+Whenever any <i>init-form</i> is evaluated for any parameter
+specifier, that <i>form</i> may refer to any parameter variable to
+the left of the specifier in which the <i>init-form</i> appears,
+including any <i>supplied-p-parameter</i> variables, and may rely 
+on the fact that no other parameter variable has yet been bound
+(including its own parameter variable).
+</p>
+<p>A <i>keyword-name</i> can be any <i>symbol</i>, 
+but by convention is normally a <i>keyword</i>_1;
+all <i>standardized</i> <i>functions</i> follow that convention.
+</p>
+<p>An <i>ordinary lambda list</i> has five parts, any or all of which may be empty.
+For information about the treatment of argument mismatches,
+see <a href="Error-Checking-in-Function-Calls.html">Error Checking in Function Calls</a>.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Specifiers-for-the-required-parameters.html" accesskey="1">Specifiers for the required parameters</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Specifiers-for-optional-parameters.html" accesskey="2">Specifiers for optional parameters</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="A-specifier-for-a-rest-parameter.html" accesskey="3">A specifier for a rest parameter</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Specifiers-for-keyword-parameters.html" accesskey="4">Specifiers for keyword parameters</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Suppressing-Keyword-Argument-Checking.html" accesskey="5">Suppressing Keyword Argument Checking</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Examples-of-Suppressing-Keyword-Argument-Checking.html" accesskey="6">Examples of Suppressing Keyword Argument Checking</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Specifiers-for-_0026aux-variables.html" accesskey="7">Specifiers for <b>&amp;aux</b> variables</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Examples-of-Ordinary-Lambda-Lists.html" accesskey="8">Examples of Ordinary Lambda Lists</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Generic-Function-Lambda-Lists.html" accesskey="n" rel="next">Generic Function Lambda Lists</a>, Previous: <a href="Lambda-Lists.html" accesskey="p" rel="prev">Lambda Lists</a>, Up: <a href="Lambda-Lists.html" accesskey="u" rel="up">Lambda Lists</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

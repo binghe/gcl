@@ -1,0 +1,600 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Symbols in the COMMON-LISP Package (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Symbols in the COMMON-LISP Package (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Symbols in the COMMON-LISP Package (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Introduction-_0028Introduction_0029.html" rel="up" title="Introduction (Introduction)">
+<link href="Syntax.html" rel="next" title="Syntax">
+<link href="Deprecated-Reader-Syntax.html" rel="prev" title="Deprecated Reader Syntax">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Symbols-in-the-COMMON_002dLISP-Package"></span><div class="header">
+<p>
+Previous: <a href="Deprecated-Language-Features.html" accesskey="p" rel="prev">Deprecated Language Features</a>, Up: <a href="Introduction-_0028Introduction_0029.html" accesskey="u" rel="up">Introduction (Introduction)</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Symbols-in-the-COMMON_002dLISP-Package-1"></span><h3 class="section">1.9 Symbols in the COMMON-LISP Package</h3>
+
+
+<p>The figures on the next twelve pages contain a complete enumeration
+of the 978 <i>external</i> <i>symbols</i> in the <tt>COMMON-LISP</tt> <i>package</i>.
+<span id="index-common_002dlisp"></span>
+</p>
+<div class="format">
+<pre class="format">  &amp;allow-other-keys            *print-miser-width*          <!-- /@w -->
+  &amp;aux                         *print-pprint-dispatch*      <!-- /@w -->
+  &amp;body                        *print-pretty*               <!-- /@w -->
+  &amp;environment                 *print-radix*                <!-- /@w -->
+  &amp;key                         *print-readably*             <!-- /@w -->
+  &amp;optional                    *print-right-margin*         <!-- /@w -->
+  &amp;rest                        *query-io*                   <!-- /@w -->
+  &amp;whole                       *random-state*               <!-- /@w -->
+  *                            *read-base*                  <!-- /@w -->
+  **                           *read-default-float-format*  <!-- /@w -->
+  ***                          *read-eval*                  <!-- /@w -->
+  *break-on-signals*           *read-suppress*              <!-- /@w -->
+  *compile-file-pathname*      *readtable*                  <!-- /@w -->
+  *compile-file-truename*      *standard-input*             <!-- /@w -->
+  *compile-print*              *standard-output*            <!-- /@w -->
+  *compile-verbose*            *terminal-io*                <!-- /@w -->
+  *debug-io*                   *trace-output*               <!-- /@w -->
+  *debugger-hook*              +                            <!-- /@w -->
+  *default-pathname-defaults*  ++                           <!-- /@w -->
+  *error-output*               +++                          <!-- /@w -->
+  *features*                   -                            <!-- /@w -->
+  *gensym-counter*             /                            <!-- /@w -->
+  *load-pathname*              //                           <!-- /@w -->
+  *load-print*                 ///                          <!-- /@w -->
+  *load-truename*              /=                           <!-- /@w -->
+  *load-verbose*               1+                           <!-- /@w -->
+  *macroexpand-hook*           1-                           <!-- /@w -->
+  *modules*                    &lt;                            <!-- /@w -->
+  *package*                    &lt;=                           <!-- /@w -->
+  *print-array*                =                            <!-- /@w -->
+  *print-base*                 &gt;                            <!-- /@w -->
+  *print-case*                 &gt;=                           <!-- /@w -->
+  *print-circle*               abort                        <!-- /@w -->
+  *print-escape*               abs                          <!-- /@w -->
+  *print-gensym*               acons                        <!-- /@w -->
+  *print-length*               acos                         <!-- /@w -->
+  *print-level*                acosh                        <!-- /@w -->
+  *print-lines*                add-method                   <!-- /@w -->
+
+  Figure 1&ndash;4: Symbols in the COMMON-LISP package (part one of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  adjoin                      atom          boundp                    <!-- /@w -->
+  adjust-array                base-char     break                     <!-- /@w -->
+  adjustable-array-p          base-string   broadcast-stream          <!-- /@w -->
+  allocate-instance           bignum        broadcast-stream-streams  <!-- /@w -->
+  alpha-char-p                bit           built-in-class            <!-- /@w -->
+  alphanumericp               bit-and       butlast                   <!-- /@w -->
+  and                         bit-andc1     byte                      <!-- /@w -->
+  append                      bit-andc2     byte-position             <!-- /@w -->
+  apply                       bit-eqv       byte-size                 <!-- /@w -->
+  apropos                     bit-ior       caaaar                    <!-- /@w -->
+  apropos-list                bit-nand      caaadr                    <!-- /@w -->
+  aref                        bit-nor       caaar                     <!-- /@w -->
+  arithmetic-error            bit-not       caadar                    <!-- /@w -->
+  arithmetic-error-operands   bit-orc1      caaddr                    <!-- /@w -->
+  arithmetic-error-operation  bit-orc2      caadr                     <!-- /@w -->
+  array                       bit-vector    caar                      <!-- /@w -->
+  array-dimension             bit-vector-p  cadaar                    <!-- /@w -->
+  array-dimension-limit       bit-xor       cadadr                    <!-- /@w -->
+  array-dimensions            block         cadar                     <!-- /@w -->
+  array-displacement          boole         caddar                    <!-- /@w -->
+  array-element-type          boole-1       cadddr                    <!-- /@w -->
+  array-has-fill-pointer-p    boole-2       caddr                     <!-- /@w -->
+  array-in-bounds-p           boole-and     cadr                      <!-- /@w -->
+  array-rank                  boole-andc1   call-arguments-limit      <!-- /@w -->
+  array-rank-limit            boole-andc2   call-method               <!-- /@w -->
+  array-row-major-index       boole-c1      call-next-method          <!-- /@w -->
+  array-total-size            boole-c2      car                       <!-- /@w -->
+  array-total-size-limit      boole-clr     case                      <!-- /@w -->
+  arrayp                      boole-eqv     catch                     <!-- /@w -->
+  ash                         boole-ior     ccase                     <!-- /@w -->
+  asin                        boole-nand    cdaaar                    <!-- /@w -->
+  asinh                       boole-nor     cdaadr                    <!-- /@w -->
+  assert                      boole-orc1    cdaar                     <!-- /@w -->
+  assoc                       boole-orc2    cdadar                    <!-- /@w -->
+  assoc-if                    boole-set     cdaddr                    <!-- /@w -->
+  assoc-if-not                boole-xor     cdadr                     <!-- /@w -->
+  atan                        boolean       cdar                      <!-- /@w -->
+  atanh                       both-case-p   cddaar                    <!-- /@w -->
+
+  Figure 1&ndash;5: Symbols in the COMMON-LISP package (part two of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  cddadr             clear-input                  copy-tree                  <!-- /@w -->
+  cddar              clear-output                 cos                        <!-- /@w -->
+  cdddar             close                        cosh                       <!-- /@w -->
+  cddddr             clrhash                      count                      <!-- /@w -->
+  cdddr              code-char                    count-if                   <!-- /@w -->
+  cddr               coerce                       count-if-not               <!-- /@w -->
+  cdr                compilation-speed            ctypecase                  <!-- /@w -->
+  ceiling            compile                      debug                      <!-- /@w -->
+  cell-error         compile-file                 decf                       <!-- /@w -->
+  cell-error-name    compile-file-pathname        declaim                    <!-- /@w -->
+  cerror             compiled-function            declaration                <!-- /@w -->
+  change-class       compiled-function-p          declare                    <!-- /@w -->
+  char               compiler-macro               decode-float               <!-- /@w -->
+  char-code          compiler-macro-function      decode-universal-time      <!-- /@w -->
+  char-code-limit    complement                   defclass                   <!-- /@w -->
+  char-downcase      complex                      defconstant                <!-- /@w -->
+  char-equal         complexp                     defgeneric                 <!-- /@w -->
+  char-greaterp      compute-applicable-methods   define-compiler-macro      <!-- /@w -->
+  char-int           compute-restarts             define-condition           <!-- /@w -->
+  char-lessp         concatenate                  define-method-combination  <!-- /@w -->
+  char-name          concatenated-stream          define-modify-macro        <!-- /@w -->
+  char-not-equal     concatenated-stream-streams  define-setf-expander       <!-- /@w -->
+  char-not-greaterp  cond                         define-symbol-macro        <!-- /@w -->
+  char-not-lessp     condition                    defmacro                   <!-- /@w -->
+  char-upcase        conjugate                    defmethod                  <!-- /@w -->
+  char/=             cons                         defpackage                 <!-- /@w -->
+  char&lt;              consp                        defparameter               <!-- /@w -->
+  char&lt;=             constantly                   defsetf                    <!-- /@w -->
+  char=              constantp                    defstruct                  <!-- /@w -->
+  char&gt;              continue                     deftype                    <!-- /@w -->
+  char&gt;=             control-error                defun                      <!-- /@w -->
+  character          copy-alist                   defvar                     <!-- /@w -->
+  characterp         copy-list                    delete                     <!-- /@w -->
+  check-type         copy-pprint-dispatch         delete-duplicates          <!-- /@w -->
+  cis                copy-readtable               delete-file                <!-- /@w -->
+  class              copy-seq                     delete-if                  <!-- /@w -->
+  class-name         copy-structure               delete-if-not              <!-- /@w -->
+  class-of           copy-symbol                  delete-package             <!-- /@w -->
+
+    Figure 1&ndash;6: Symbols in the COMMON-LISP package (part three of twelve).  <!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  denominator                    eq                   <!-- /@w -->
+  deposit-field                  eql                  <!-- /@w -->
+  describe                       equal                <!-- /@w -->
+  describe-object                equalp               <!-- /@w -->
+  destructuring-bind             error                <!-- /@w -->
+  digit-char                     etypecase            <!-- /@w -->
+  digit-char-p                   eval                 <!-- /@w -->
+  directory                      eval-when            <!-- /@w -->
+  directory-namestring           evenp                <!-- /@w -->
+  disassemble                    every                <!-- /@w -->
+  division-by-zero               exp                  <!-- /@w -->
+  do                             export               <!-- /@w -->
+  do*                            expt                 <!-- /@w -->
+  do-all-symbols                 extended-char        <!-- /@w -->
+  do-external-symbols            fboundp              <!-- /@w -->
+  do-symbols                     fceiling             <!-- /@w -->
+  documentation                  fdefinition          <!-- /@w -->
+  dolist                         ffloor               <!-- /@w -->
+  dotimes                        fifth                <!-- /@w -->
+  double-float                   file-author          <!-- /@w -->
+  double-float-epsilon           file-error           <!-- /@w -->
+  double-float-negative-epsilon  file-error-pathname  <!-- /@w -->
+  dpb                            file-length          <!-- /@w -->
+  dribble                        file-namestring      <!-- /@w -->
+  dynamic-extent                 file-position        <!-- /@w -->
+  ecase                          file-stream          <!-- /@w -->
+  echo-stream                    file-string-length   <!-- /@w -->
+  echo-stream-input-stream       file-write-date      <!-- /@w -->
+  echo-stream-output-stream      fill                 <!-- /@w -->
+  ed                             fill-pointer         <!-- /@w -->
+  eighth                         find                 <!-- /@w -->
+  elt                            find-all-symbols     <!-- /@w -->
+  encode-universal-time          find-class           <!-- /@w -->
+  end-of-file                    find-if              <!-- /@w -->
+  endp                           find-if-not          <!-- /@w -->
+  enough-namestring              find-method          <!-- /@w -->
+  ensure-directories-exist       find-package         <!-- /@w -->
+  ensure-generic-function        find-restart         <!-- /@w -->
+
+  Figure 1&ndash;7: Symbols in the COMMON-LISP package (part four of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  find-symbol                       get-internal-run-time        <!-- /@w -->
+  finish-output                     get-macro-character          <!-- /@w -->
+  first                             get-output-stream-string     <!-- /@w -->
+  fixnum                            get-properties               <!-- /@w -->
+  flet                              get-setf-expansion           <!-- /@w -->
+  float                             get-universal-time           <!-- /@w -->
+  float-digits                      getf                         <!-- /@w -->
+  float-precision                   gethash                      <!-- /@w -->
+  float-radix                       go                           <!-- /@w -->
+  float-sign                        graphic-char-p               <!-- /@w -->
+  floating-point-inexact            handler-bind                 <!-- /@w -->
+  floating-point-invalid-operation  handler-case                 <!-- /@w -->
+  floating-point-overflow           hash-table                   <!-- /@w -->
+  floating-point-underflow          hash-table-count             <!-- /@w -->
+  floatp                            hash-table-p                 <!-- /@w -->
+  floor                             hash-table-rehash-size       <!-- /@w -->
+  fmakunbound                       hash-table-rehash-threshold  <!-- /@w -->
+  force-output                      hash-table-size              <!-- /@w -->
+  format                            hash-table-test              <!-- /@w -->
+  formatter                         host-namestring              <!-- /@w -->
+  fourth                            identity                     <!-- /@w -->
+  fresh-line                        if                           <!-- /@w -->
+  fround                            ignorable                    <!-- /@w -->
+  ftruncate                         ignore                       <!-- /@w -->
+  ftype                             ignore-errors                <!-- /@w -->
+  funcall                           imagpart                     <!-- /@w -->
+  function                          import                       <!-- /@w -->
+  function-keywords                 in-package                   <!-- /@w -->
+  function-lambda-expression        incf                         <!-- /@w -->
+  functionp                         initialize-instance          <!-- /@w -->
+  gcd                               inline                       <!-- /@w -->
+  generic-function                  input-stream-p               <!-- /@w -->
+  gensym                            inspect                      <!-- /@w -->
+  gentemp                           integer                      <!-- /@w -->
+  get                               integer-decode-float         <!-- /@w -->
+  get-decoded-time                  integer-length               <!-- /@w -->
+  get-dispatch-macro-character      integerp                     <!-- /@w -->
+  get-internal-real-time            interactive-stream-p         <!-- /@w -->
+
+  Figure 1&ndash;8: Symbols in the COMMON-LISP package (part five of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  intern                                  lisp-implementation-type            <!-- /@w -->
+  internal-time-units-per-second          lisp-implementation-version         <!-- /@w -->
+  intersection                            list                                <!-- /@w -->
+  invalid-method-error                    list*                               <!-- /@w -->
+  invoke-debugger                         list-all-packages                   <!-- /@w -->
+  invoke-restart                          list-length                         <!-- /@w -->
+  invoke-restart-interactively            listen                              <!-- /@w -->
+  isqrt                                   listp                               <!-- /@w -->
+  keyword                                 load                                <!-- /@w -->
+  keywordp                                load-logical-pathname-translations  <!-- /@w -->
+  labels                                  load-time-value                     <!-- /@w -->
+  lambda                                  locally                             <!-- /@w -->
+  lambda-list-keywords                    log                                 <!-- /@w -->
+  lambda-parameters-limit                 logand                              <!-- /@w -->
+  last                                    logandc1                            <!-- /@w -->
+  lcm                                     logandc2                            <!-- /@w -->
+  ldb                                     logbitp                             <!-- /@w -->
+  ldb-test                                logcount                            <!-- /@w -->
+  ldiff                                   logeqv                              <!-- /@w -->
+  least-negative-double-float             logical-pathname                    <!-- /@w -->
+  least-negative-long-float               logical-pathname-translations       <!-- /@w -->
+  least-negative-normalized-double-float  logior                              <!-- /@w -->
+  least-negative-normalized-long-float    lognand                             <!-- /@w -->
+  least-negative-normalized-short-float   lognor                              <!-- /@w -->
+  least-negative-normalized-single-float  lognot                              <!-- /@w -->
+  least-negative-short-float              logorc1                             <!-- /@w -->
+  least-negative-single-float             logorc2                             <!-- /@w -->
+  least-positive-double-float             logtest                             <!-- /@w -->
+  least-positive-long-float               logxor                              <!-- /@w -->
+  least-positive-normalized-double-float  long-float                          <!-- /@w -->
+  least-positive-normalized-long-float    long-float-epsilon                  <!-- /@w -->
+  least-positive-normalized-short-float   long-float-negative-epsilon         <!-- /@w -->
+  least-positive-normalized-single-float  long-site-name                      <!-- /@w -->
+  least-positive-short-float              loop                                <!-- /@w -->
+  least-positive-single-float             loop-finish                         <!-- /@w -->
+  length                                  lower-case-p                        <!-- /@w -->
+  let                                     machine-instance                    <!-- /@w -->
+  let*                                    machine-type                        <!-- /@w -->
+
+     Figure 1&ndash;9: Symbols in the COMMON-LISP package (part six of twelve).    <!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  machine-version                mask-field                  <!-- /@w -->
+  macro-function                 max                         <!-- /@w -->
+  macroexpand                    member                      <!-- /@w -->
+  macroexpand-1                  member-if                   <!-- /@w -->
+  macrolet                       member-if-not               <!-- /@w -->
+  make-array                     merge                       <!-- /@w -->
+  make-broadcast-stream          merge-pathnames             <!-- /@w -->
+  make-concatenated-stream       method                      <!-- /@w -->
+  make-condition                 method-combination          <!-- /@w -->
+  make-dispatch-macro-character  method-combination-error    <!-- /@w -->
+  make-echo-stream               method-qualifiers           <!-- /@w -->
+  make-hash-table                min                         <!-- /@w -->
+  make-instance                  minusp                      <!-- /@w -->
+  make-instances-obsolete        mismatch                    <!-- /@w -->
+  make-list                      mod                         <!-- /@w -->
+  make-load-form                 most-negative-double-float  <!-- /@w -->
+  make-load-form-saving-slots    most-negative-fixnum        <!-- /@w -->
+  make-method                    most-negative-long-float    <!-- /@w -->
+  make-package                   most-negative-short-float   <!-- /@w -->
+  make-pathname                  most-negative-single-float  <!-- /@w -->
+  make-random-state              most-positive-double-float  <!-- /@w -->
+  make-sequence                  most-positive-fixnum        <!-- /@w -->
+  make-string                    most-positive-long-float    <!-- /@w -->
+  make-string-input-stream       most-positive-short-float   <!-- /@w -->
+  make-string-output-stream      most-positive-single-float  <!-- /@w -->
+  make-symbol                    muffle-warning              <!-- /@w -->
+  make-synonym-stream            multiple-value-bind         <!-- /@w -->
+  make-two-way-stream            multiple-value-call         <!-- /@w -->
+  makunbound                     multiple-value-list         <!-- /@w -->
+  map                            multiple-value-prog1        <!-- /@w -->
+  map-into                       multiple-value-setq         <!-- /@w -->
+  mapc                           multiple-values-limit       <!-- /@w -->
+  mapcan                         name-char                   <!-- /@w -->
+  mapcar                         namestring                  <!-- /@w -->
+  mapcon                         nbutlast                    <!-- /@w -->
+  maphash                        nconc                       <!-- /@w -->
+  mapl                           next-method-p               <!-- /@w -->
+  maplist                        nil                         <!-- /@w -->
+
+  Figure 1&ndash;10: Symbols in the COMMON-LISP package (part seven of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  nintersection         package-error                  <!-- /@w -->
+  ninth                 package-error-package          <!-- /@w -->
+  no-applicable-method  package-name                   <!-- /@w -->
+  no-next-method        package-nicknames              <!-- /@w -->
+  not                   package-shadowing-symbols      <!-- /@w -->
+  notany                package-use-list               <!-- /@w -->
+  notevery              package-used-by-list           <!-- /@w -->
+  notinline             packagep                       <!-- /@w -->
+  nreconc               pairlis                        <!-- /@w -->
+  nreverse              parse-error                    <!-- /@w -->
+  nset-difference       parse-integer                  <!-- /@w -->
+  nset-exclusive-or     parse-namestring               <!-- /@w -->
+  nstring-capitalize    pathname                       <!-- /@w -->
+  nstring-downcase      pathname-device                <!-- /@w -->
+  nstring-upcase        pathname-directory             <!-- /@w -->
+  nsublis               pathname-host                  <!-- /@w -->
+  nsubst                pathname-match-p               <!-- /@w -->
+  nsubst-if             pathname-name                  <!-- /@w -->
+  nsubst-if-not         pathname-type                  <!-- /@w -->
+  nsubstitute           pathname-version               <!-- /@w -->
+  nsubstitute-if        pathnamep                      <!-- /@w -->
+  nsubstitute-if-not    peek-char                      <!-- /@w -->
+  nth                   phase                          <!-- /@w -->
+  nth-value             pi                             <!-- /@w -->
+  nthcdr                plusp                          <!-- /@w -->
+  null                  pop                            <!-- /@w -->
+  number                position                       <!-- /@w -->
+  numberp               position-if                    <!-- /@w -->
+  numerator             position-if-not                <!-- /@w -->
+  nunion                pprint                         <!-- /@w -->
+  oddp                  pprint-dispatch                <!-- /@w -->
+  open                  pprint-exit-if-list-exhausted  <!-- /@w -->
+  open-stream-p         pprint-fill                    <!-- /@w -->
+  optimize              pprint-indent                  <!-- /@w -->
+  or                    pprint-linear                  <!-- /@w -->
+  otherwise             pprint-logical-block           <!-- /@w -->
+  output-stream-p       pprint-newline                 <!-- /@w -->
+  package               pprint-pop                     <!-- /@w -->
+
+  Figure 1&ndash;11: Symbols in the COMMON-LISP package (part eight of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  pprint-tab                 read-char                   <!-- /@w -->
+  pprint-tabular             read-char-no-hang           <!-- /@w -->
+  prin1                      read-delimited-list         <!-- /@w -->
+  prin1-to-string            read-from-string            <!-- /@w -->
+  princ                      read-line                   <!-- /@w -->
+  princ-to-string            read-preserving-whitespace  <!-- /@w -->
+  print                      read-sequence               <!-- /@w -->
+  print-not-readable         reader-error                <!-- /@w -->
+  print-not-readable-object  readtable                   <!-- /@w -->
+  print-object               readtable-case              <!-- /@w -->
+  print-unreadable-object    readtablep                  <!-- /@w -->
+  probe-file                 real                        <!-- /@w -->
+  proclaim                   realp                       <!-- /@w -->
+  prog                       realpart                    <!-- /@w -->
+  prog*                      reduce                      <!-- /@w -->
+  prog1                      reinitialize-instance       <!-- /@w -->
+  prog2                      rem                         <!-- /@w -->
+  progn                      remf                        <!-- /@w -->
+  program-error              remhash                     <!-- /@w -->
+  progv                      remove                      <!-- /@w -->
+  provide                    remove-duplicates           <!-- /@w -->
+  psetf                      remove-if                   <!-- /@w -->
+  psetq                      remove-if-not               <!-- /@w -->
+  push                       remove-method               <!-- /@w -->
+  pushnew                    remprop                     <!-- /@w -->
+  quote                      rename-file                 <!-- /@w -->
+  random                     rename-package              <!-- /@w -->
+  random-state               replace                     <!-- /@w -->
+  random-state-p             require                     <!-- /@w -->
+  rassoc                     rest                        <!-- /@w -->
+  rassoc-if                  restart                     <!-- /@w -->
+  rassoc-if-not              restart-bind                <!-- /@w -->
+  ratio                      restart-case                <!-- /@w -->
+  rational                   restart-name                <!-- /@w -->
+  rationalize                return                      <!-- /@w -->
+  rationalp                  return-from                 <!-- /@w -->
+  read                       revappend                   <!-- /@w -->
+  read-byte                  reverse                     <!-- /@w -->
+
+  Figure 1&ndash;12: Symbols in the COMMON-LISP package (part nine of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  room                          simple-bit-vector                  <!-- /@w -->
+  rotatef                       simple-bit-vector-p                <!-- /@w -->
+  round                         simple-condition                   <!-- /@w -->
+  row-major-aref                simple-condition-format-arguments  <!-- /@w -->
+  rplaca                        simple-condition-format-control    <!-- /@w -->
+  rplacd                        simple-error                       <!-- /@w -->
+  safety                        simple-string                      <!-- /@w -->
+  satisfies                     simple-string-p                    <!-- /@w -->
+  sbit                          simple-type-error                  <!-- /@w -->
+  scale-float                   simple-vector                      <!-- /@w -->
+  schar                         simple-vector-p                    <!-- /@w -->
+  search                        simple-warning                     <!-- /@w -->
+  second                        sin                                <!-- /@w -->
+  sequence                      single-float                       <!-- /@w -->
+  serious-condition             single-float-epsilon               <!-- /@w -->
+  set                           single-float-negative-epsilon      <!-- /@w -->
+  set-difference                sinh                               <!-- /@w -->
+  set-dispatch-macro-character  sixth                              <!-- /@w -->
+  set-exclusive-or              sleep                              <!-- /@w -->
+  set-macro-character           slot-boundp                        <!-- /@w -->
+  set-pprint-dispatch           slot-exists-p                      <!-- /@w -->
+  set-syntax-from-char          slot-makunbound                    <!-- /@w -->
+  setf                          slot-missing                       <!-- /@w -->
+  setq                          slot-unbound                       <!-- /@w -->
+  seventh                       slot-value                         <!-- /@w -->
+  shadow                        software-type                      <!-- /@w -->
+  shadowing-import              software-version                   <!-- /@w -->
+  shared-initialize             some                               <!-- /@w -->
+  shiftf                        sort                               <!-- /@w -->
+  short-float                   space                              <!-- /@w -->
+  short-float-epsilon           special                            <!-- /@w -->
+  short-float-negative-epsilon  special-operator-p                 <!-- /@w -->
+  short-site-name               speed                              <!-- /@w -->
+  signal                        sqrt                               <!-- /@w -->
+  signed-byte                   stable-sort                        <!-- /@w -->
+  signum                        standard                           <!-- /@w -->
+  simple-array                  standard-char                      <!-- /@w -->
+  simple-base-string            standard-char-p                    <!-- /@w -->
+
+  Figure 1&ndash;13: Symbols in the COMMON-LISP package (part ten of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  standard-class             sublis                      <!-- /@w -->
+  standard-generic-function  subseq                      <!-- /@w -->
+  standard-method            subsetp                     <!-- /@w -->
+  standard-object            subst                       <!-- /@w -->
+  step                       subst-if                    <!-- /@w -->
+  storage-condition          subst-if-not                <!-- /@w -->
+  store-value                substitute                  <!-- /@w -->
+  stream                     substitute-if               <!-- /@w -->
+  stream-element-type        substitute-if-not           <!-- /@w -->
+  stream-error               subtypep                    <!-- /@w -->
+  stream-error-stream        svref                       <!-- /@w -->
+  stream-external-format     sxhash                      <!-- /@w -->
+  streamp                    symbol                      <!-- /@w -->
+  string                     symbol-function             <!-- /@w -->
+  string-capitalize          symbol-macrolet             <!-- /@w -->
+  string-downcase            symbol-name                 <!-- /@w -->
+  string-equal               symbol-package              <!-- /@w -->
+  string-greaterp            symbol-plist                <!-- /@w -->
+  string-left-trim           symbol-value                <!-- /@w -->
+  string-lessp               symbolp                     <!-- /@w -->
+  string-not-equal           synonym-stream              <!-- /@w -->
+  string-not-greaterp        synonym-stream-symbol       <!-- /@w -->
+  string-not-lessp           t                           <!-- /@w -->
+  string-right-trim          tagbody                     <!-- /@w -->
+  string-stream              tailp                       <!-- /@w -->
+  string-trim                tan                         <!-- /@w -->
+  string-upcase              tanh                        <!-- /@w -->
+  string/=                   tenth                       <!-- /@w -->
+  string&lt;                    terpri                      <!-- /@w -->
+  string&lt;=                   the                         <!-- /@w -->
+  string=                    third                       <!-- /@w -->
+  string&gt;                    throw                       <!-- /@w -->
+  string&gt;=                   time                        <!-- /@w -->
+  stringp                    trace                       <!-- /@w -->
+  structure                  translate-logical-pathname  <!-- /@w -->
+  structure-class            translate-pathname          <!-- /@w -->
+  structure-object           tree-equal                  <!-- /@w -->
+  style-warning              truename                    <!-- /@w -->
+
+  Figure 1&ndash;14: Symbols in the COMMON-LISP package (part eleven of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+<div class="format">
+<pre class="format">  truncate                             values-list               <!-- /@w -->
+  two-way-stream                       variable                  <!-- /@w -->
+  two-way-stream-input-stream          vector                    <!-- /@w -->
+  two-way-stream-output-stream         vector-pop                <!-- /@w -->
+  type                                 vector-push               <!-- /@w -->
+  type-error                           vector-push-extend        <!-- /@w -->
+  type-error-datum                     vectorp                   <!-- /@w -->
+  type-error-expected-type             warn                      <!-- /@w -->
+  type-of                              warning                   <!-- /@w -->
+  typecase                             when                      <!-- /@w -->
+  typep                                wild-pathname-p           <!-- /@w -->
+  unbound-slot                         with-accessors            <!-- /@w -->
+  unbound-slot-instance                with-compilation-unit     <!-- /@w -->
+  unbound-variable                     with-condition-restarts   <!-- /@w -->
+  undefined-function                   with-hash-table-iterator  <!-- /@w -->
+  unexport                             with-input-from-string    <!-- /@w -->
+  unintern                             with-open-file            <!-- /@w -->
+  union                                with-open-stream          <!-- /@w -->
+  unless                               with-output-to-string     <!-- /@w -->
+  unread-char                          with-package-iterator     <!-- /@w -->
+  unsigned-byte                        with-simple-restart       <!-- /@w -->
+  untrace                              with-slots                <!-- /@w -->
+  unuse-package                        with-standard-io-syntax   <!-- /@w -->
+  unwind-protect                       write                     <!-- /@w -->
+  update-instance-for-different-class  write-byte                <!-- /@w -->
+  update-instance-for-redefined-class  write-char                <!-- /@w -->
+  upgraded-array-element-type          write-line                <!-- /@w -->
+  upgraded-complex-part-type           write-sequence            <!-- /@w -->
+  upper-case-p                         write-string              <!-- /@w -->
+  use-package                          write-to-string           <!-- /@w -->
+  use-value                            y-or-n-p                  <!-- /@w -->
+  user-homedir-pathname                yes-or-no-p               <!-- /@w -->
+  values                               zerop                     <!-- /@w -->
+
+  Figure 1&ndash;15: Symbols in the COMMON-LISP package (part twelve of twelve).<!-- /@w -->
+
+</pre></div>
+
+
+
+
+
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Deprecated-Language-Features.html" accesskey="p" rel="prev">Deprecated Language Features</a>, Up: <a href="Introduction-_0028Introduction_0029.html" accesskey="u" rel="up">Introduction (Introduction)</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

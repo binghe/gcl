@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>add-method (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="add-method (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="add-method (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Objects-Dictionary.html" rel="up" title="Objects Dictionary">
+<link href="initialize_002dinstance.html" rel="next" title="initialize-instance">
+<link href="find_002dmethod.html" rel="prev" title="find-method">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="add_002dmethod"></span><div class="header">
+<p>
+Next: <a href="initialize_002dinstance.html" accesskey="n" rel="next">initialize-instance</a>, Previous: <a href="find_002dmethod.html" accesskey="p" rel="prev">find-method</a>, Up: <a href="Objects-Dictionary.html" accesskey="u" rel="up">Objects Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="add_002dmethod-_005bStandard-Generic-Function_005d"></span><h4 class="subsection">7.7.35 add-method                                      [Standard Generic Function]</h4>
+
+<span id="Syntax_003a_003a-32"></span><h4 class="subsubheading">Syntax::</h4>
+
+<p><code>add-method</code>  <i>generic-function method</i> &rArr;  <i>generic-function</i>
+</p>
+<span id="Method-Signatures_003a_003a-18"></span><h4 class="subsubheading">Method Signatures::</h4>
+
+<p><code>add-method</code>  <i><span class="roman">(</span><i>generic-function</i> <b>standard-generic-function</b><span class="roman">)</span>
+			   <span class="roman">(</span><i>method</i> <b>method</b><span class="roman">)</span></i>
+</p>
+<span id="Arguments-and-Values_003a_003a-123"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>generic-function</i>&mdash;a <i>generic function</i> <i>object</i>.
+</p>
+<p><i>method</i>&mdash;a <i>method</i> <i>object</i>.
+</p>
+<span id="Description_003a_003a-162"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The generic function <b>add-method</b> adds a <i>method</i>
+to a <i>generic function</i>.
+</p>
+<p>If <i>method</i> agrees with an existing <i>method</i> of <i>generic-function</i>
+on <i>parameter specializers</i> and <i>qualifiers</i>, 
+the existing <i>method</i> is replaced.
+</p>
+<span id="Exceptional-Situations_003a_003a-44"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>The <i>lambda list</i> of the method function of <i>method</i> must be
+congruent with the <i>lambda list</i> of <i>generic-function</i>, 
+or an error of <i>type</i> <b>error</b> is signaled.
+</p>
+<p>If <i>method</i> is a <i>method</i> <i>object</i> of
+another <i>generic function</i>, an error of <i>type</i> <b>error</b> is signaled.
+</p>
+<span id="See-Also_003a_003a-144"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="defmethod.html">defmethod</a>
+,
+<a href="defgeneric.html">defgeneric</a>
+,
+<a href="find_002dmethod.html">find-method</a>
+,
+<a href="remove_002dmethod.html">remove-method</a>
+,
+<a href="Agreement-on-Parameter-Specializers-and-Qualifiers.html">Agreement on Parameter Specializers and Qualifiers</a>
+</p>
+
+
+
+</body>
+</html>

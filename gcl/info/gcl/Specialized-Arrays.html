@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Specialized Arrays (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Specialized Arrays (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Specialized Arrays (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Array-Concepts.html" rel="up" title="Array Concepts">
+<link href="Array-Upgrading.html" rel="next" title="Array Upgrading">
+<link href="Implementation-Limits-on-Array-Rank.html" rel="prev" title="Implementation Limits on Array Rank">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Specialized-Arrays"></span><div class="header">
+<p>
+Previous: <a href="Array-Elements.html" accesskey="p" rel="prev">Array Elements</a>, Up: <a href="Array-Concepts.html" accesskey="u" rel="up">Array Concepts</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Specialized-Arrays-1"></span><h4 class="subsection">15.1.2 Specialized Arrays</h4>
+
+<p>An <i>array</i> can be a <i>general</i> <i>array</i>, 
+    meaning each <i>element</i> may be any <i>object</i>,
+or it may be a <i>specialized</i> <i>array</i>,
+    meaning that each <i>element</i> must be of a restricted <i>type</i>.
+</p>
+<p>The phrasing &ldquo;an <i>array</i> <i>specialized</i> to <i>type</i> &lt;&lt;<i>type</i>&gt;&gt;&rdquo;
+is sometimes used to emphasize the <i>element type</i> of an <i>array</i>.
+This phrasing is tolerated even when the &lt;&lt;<i>type</i>&gt;&gt; is <b>t</b>,
+even though an <i>array</i> <i>specialized</i> to <i>type</i> <i>t</i>
+is a <i>general</i> <i>array</i>, not a <i>specialized</i> <i>array</i>.
+</p>
+<p>Figure 15&ndash;1 lists some <i>defined names</i> that are applicable to <i>array</i> 
+creation, <i>access</i>, and information operations.
+</p>
+<div class="format">
+<pre class="format"> adjust-array             array-in-bounds-p      svref                       <!-- /@w -->
+ adjustable-array-p       array-rank             upgraded-array-element-type <!-- /@w -->
+ aref                     array-rank-limit       upgraded-complex-part-type  <!-- /@w -->
+ array-dimension          array-row-major-index  vector                      <!-- /@w -->
+ array-dimension-limit    array-total-size       vector-pop                  <!-- /@w -->
+ array-dimensions         array-total-size-limit vector-push                 <!-- /@w -->
+ array-element-type       fill-pointer           vector-push-extend          <!-- /@w -->
+ array-has-fill-pointer-p make-array                                         <!-- /@w -->
+
+           Figure 15&ndash;1: General Purpose Array-Related Defined Names          <!-- /@w -->
+
+</pre></div>
+
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="Array-Upgrading.html" accesskey="1">Array Upgrading</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Required-Kinds-of-Specialized-Arrays.html" accesskey="2">Required Kinds of Specialized Arrays</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+
+
+
+</body>
+</html>

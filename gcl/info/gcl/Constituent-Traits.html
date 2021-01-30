@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Constituent Traits (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Constituent Traits (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Constituent Traits (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Character-Syntax-Types.html" rel="up" title="Character Syntax Types">
+<link href="Invalid-Characters.html" rel="next" title="Invalid Characters">
+<link href="Constituent-Characters.html" rel="prev" title="Constituent Characters">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Constituent-Traits"></span><div class="header">
+<p>
+Next: <a href="Invalid-Characters.html" accesskey="n" rel="next">Invalid Characters</a>, Previous: <a href="Constituent-Characters.html" accesskey="p" rel="prev">Constituent Characters</a>, Up: <a href="Character-Syntax-Types.html" accesskey="u" rel="up">Character Syntax Types</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Constituent-Traits-1"></span><h4 class="subsubsection">2.1.4.2 Constituent Traits</h4>
+
+<p>Every <i>character</i> has one or more <i>constituent traits</i>
+that define how the <i>character</i> is to be interpreted by the <i>Lisp reader</i>
+when the <i>character</i> is a <i>constituent</i> <i>character</i>.
+These <i>constituent traits</i> are 
+     <i>alphabetic</i>_2,                  
+     digit,
+     <i>package marker</i>,
+     plus sign,
+     minus sign, 
+     dot,
+     decimal point,
+     <i>ratio marker</i>,
+     <i>exponent marker</i>,
+ and <i>invalid</i>.
+<i>Figure~2&ndash;8</i> shows the <i>constituent traits</i>
+of the <i>standard characters</i>
+and of certain <i>semi-standard</i> <i>characters</i>;
+no mechanism is provided for changing the <i>constituent trait</i> of a <i>character</i>.
+Any <i>character</i> with the alphadigit <i>constituent trait</i>
+in that figure is a digit if the <i>current input base</i> is greater
+than that character&rsquo;s digit value,
+otherwise the <i>character</i> is <i>alphabetic</i>_2.  
+Any <i>character</i> quoted by a <i>single escape</i> 
+is treated as an <i>alphabetic</i>_2 constituent, regardless of its normal syntax.
+</p>
+<div class="format">
+<pre class="format"> constituent traits         constituent traits                                   <!-- /@w -->
+ character                  character   <!-- /@w -->
+ ________________________________________________________________________________<!-- /@w -->
+ Backspace   <i>invalid</i>        <tt>{</tt>           <i>alphabetic</i>_2                             <!-- /@w -->
+ Tab         <i>invalid</i>*       <tt>}</tt>           <i>alphabetic</i>_2                             <!-- /@w -->
+ Newline     <i>invalid</i>*       +           <i>alphabetic</i>_2, plus sign                  <!-- /@w -->
+ Linefeed    <i>invalid</i>*       -           <i>alphabetic</i>_2, minus sign                 <!-- /@w -->
+ Page        <i>invalid</i>*       .           <i>alphabetic</i>_2, dot, decimal point         <!-- /@w -->
+ Return      <i>invalid</i>*       /           <i>alphabetic</i>_2, <i>ratio marker</i>               <!-- /@w -->
+ Space       <i>invalid</i>*       A, a        alphadigit                               <!-- /@w -->
+ !           <i>alphabetic</i>_2   B, b        alphadigit                               <!-- /@w -->
+ <tt>&quot;</tt>           <i>alphabetic</i>_2*  C, c        alphadigit                               <!-- /@w -->
+ #           <i>alphabetic</i>_2*  D, d        alphadigit, double-float <i>exponent marker</i> <!-- /@w -->
+ $          <i>alphabetic</i>_2   E, e        alphadigit, float <i>exponent marker</i>        <!-- /@w -->
+ %           <i>alphabetic</i>_2   F, f        alphadigit, single-float <i>exponent marker</i> <!-- /@w -->
+ &amp;           <i>alphabetic</i>_2   G, g        alphadigit                               <!-- /@w -->
+ &rsquo;           <i>alphabetic</i>_2*  H, h        alphadigit                               <!-- /@w -->
+ (           <i>alphabetic</i>_2*  I, i        alphadigit                               <!-- /@w -->
+ )           <i>alphabetic</i>_2*  J, j        alphadigit                               <!-- /@w -->
+ <tt>*</tt>           <i>alphabetic</i>_2   K, k        alphadigit                               <!-- /@w -->
+ ,           <i>alphabetic</i>_2*  L, l        alphadigit, long-float <i>exponent marker</i>   <!-- /@w -->
+ 0-9         alphadigit     M, m        alphadigit                               <!-- /@w -->
+ :           <i>package marker</i> N, n        alphadigit                               <!-- /@w -->
+ ;           <i>alphabetic</i>_2*  O, o        alphadigit                               <!-- /@w -->
+ <tt>&lt;</tt>           <i>alphabetic</i>_2   P, p        alphadigit                               <!-- /@w -->
+ =           <i>alphabetic</i>_2   Q, q        alphadigit                               <!-- /@w -->
+ <tt>&gt;</tt>           <i>alphabetic</i>_2   R, r        alphadigit                               <!-- /@w -->
+ ?           <i>alphabetic</i>_2   S, s        alphadigit, short-float <i>exponent marker</i>  <!-- /@w -->
+ <tt>@</tt>           <i>alphabetic</i>_2   T, t        alphadigit                               <!-- /@w -->
+ <tt>[</tt>           <i>alphabetic</i>_2   U, u        alphadigit                               <!-- /@w -->
+ <tt>\</tt>           <i>alphabetic</i>_2*  V, v        alphadigit                               <!-- /@w -->
+ <tt>]</tt>           <i>alphabetic</i>_2   W, w        alphadigit                               <!-- /@w -->
+ <tt>^</tt>           <i>alphabetic</i>_2   X, x        alphadigit                               <!-- /@w -->
+ <tt>_</tt>           <i>alphabetic</i>_2   Y, y        alphadigit                               <!-- /@w -->
+ &lsquo;           <i>alphabetic</i>_2*  Z, z        alphadigit                               <!-- /@w -->
+ <tt>|</tt>           <i>alphabetic</i>_2*  Rubout      <i>invalid</i>                                  <!-- /@w -->
+ <tt>~</tt>           <i>alphabetic</i>_2   <!-- /@w -->
+</pre></div>
+
+<p>&nbsp;&nbsp;Figure&nbsp;2&ndash;8:&nbsp;Constituent&nbsp;Traits&nbsp;of&nbsp;Standard&nbsp;Characters&nbsp;and&nbsp;<span class="nolinebreak">Semi-Standard</span>&nbsp;Characters<!-- /@w -->
+</p>
+<p>The interpretations in this table apply only to <i>characters</i>
+whose <i>syntax type</i> is <i>constituent</i>.
+Entries marked with an asterisk (*) are normally <i>shadowed</i>_2 
+because the indicated <i>characters</i> are of <i>syntax type</i>
+<i>whitespace</i>_2,
+<i>macro character</i>,
+<i>single escape</i>,
+or <i>multiple escape</i>;
+these <i>constituent traits</i> apply to them only if their <i>syntax types</i> 
+are changed to <i>constituent</i>.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="Invalid-Characters.html" accesskey="n" rel="next">Invalid Characters</a>, Previous: <a href="Constituent-Characters.html" accesskey="p" rel="prev">Constituent Characters</a>, Up: <a href="Character-Syntax-Types.html" accesskey="u" rel="up">Character Syntax Types</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

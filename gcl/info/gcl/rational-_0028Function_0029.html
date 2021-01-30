@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>rational (Function) (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="rational (Function) (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="rational (Function) (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Numbers-Dictionary.html" rel="up" title="Numbers Dictionary">
+<link href="rationalp.html" rel="next" title="rationalp">
+<link href="numerator.html" rel="prev" title="numerator">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="rational-_0028Function_0029"></span><div class="header">
+<p>
+Next: <a href="rationalp.html" accesskey="n" rel="next">rationalp</a>, Previous: <a href="numerator.html" accesskey="p" rel="prev">numerator</a>, Up: <a href="Numbers-Dictionary.html" accesskey="u" rel="up">Numbers Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="rational_002c-rationalize-_005bFunction_005d"></span><h4 class="subsection">12.2.54 rational, rationalize                                            [Function]</h4>
+
+<p><code>rational</code>  <i>number</i> &rArr;  <i>rational</i>
+</p>
+<p><code>rationalize</code>  <i>number</i> &rArr;  <i>rational</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-237"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>number</i>&mdash;a <i>real</i>.
+</p>
+<p><i>rational</i>&mdash;a <i>rational</i>.
+</p>
+<span id="Description_003a_003a-319"></span><h4 class="subsubheading">Description::</h4>
+
+<p><b>rational</b> and <b>rationalize</b> convert 
+</p>
+<p><i>reals</i>
+</p>
+<p>to <i>rationals</i>.
+</p>
+<p>If <i>number</i> is already <i>rational</i>, it is returned.
+</p>
+<p>If <i>number</i> is a <i>float</i>, 
+<b>rational</b> returns a <i>rational</i> 
+that is mathematically equal in value to the <i>float</i>. 
+<b>rationalize</b> returns a <i>rational</i> that
+approximates the <i>float</i> to the accuracy of 
+the underlying floating-point representation. 
+</p>
+<p><b>rational</b> assumes that the <i>float</i> is completely accurate.
+</p>
+<p><b>rationalize</b> assumes that the
+<i>float</i> is accurate only to the precision of the
+floating-point representation.
+</p>
+<span id="Examples_003a_003a-221"></span><h4 class="subsubheading">Examples::</h4>
+<div class="example">
+<pre class="example"> (rational 0) &rArr;  0
+ (rationalize -11/100) &rArr;  -11/100
+ (rational .1) &rArr;  13421773/134217728 ;implementation-dependent
+ (rationalize .1) &rArr;  1/10
+</pre></div>
+
+<span id="Affected-By_003a_003a-57"></span><h4 class="subsubheading">Affected By::</h4>
+
+<p>The <i>implementation</i>.
+</p>
+<span id="Exceptional-Situations_003a_003a-97"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>Should signal an error of <i>type</i> <b>type-error</b>
+			      if <i>number</i> is not a <i>real</i>.
+Might signal <b>arithmetic-error</b>.
+</p>
+<span id="Notes_003a_003a-166"></span><h4 class="subsubheading">Notes::</h4>
+
+<p>It is always the case that
+</p>
+<div class="example">
+<pre class="example"> (float (rational x) x) &equiv; x
+</pre></div>
+
+<p>and
+</p>
+<div class="example">
+<pre class="example"> (float (rationalize x) x) &equiv; x
+</pre></div>
+
+<p>That is, rationalizing a <i>float</i> by either method
+and then converting it back
+to a <i>float</i> 
+of the same format produces the original <i>number</i>.
+</p>
+
+
+
+</body>
+</html>

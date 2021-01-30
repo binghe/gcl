@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Required Kinds of Specialized Arrays (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Required Kinds of Specialized Arrays (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Required Kinds of Specialized Arrays (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Specialized-Arrays.html" rel="up" title="Specialized Arrays">
+<link href="Arrays-Dictionary.html" rel="next" title="Arrays Dictionary">
+<link href="Array-Upgrading.html" rel="prev" title="Array Upgrading">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Required-Kinds-of-Specialized-Arrays"></span><div class="header">
+<p>
+Previous: <a href="Array-Upgrading.html" accesskey="p" rel="prev">Array Upgrading</a>, Up: <a href="Specialized-Arrays.html" accesskey="u" rel="up">Specialized Arrays</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Required-Kinds-of-Specialized-Arrays-1"></span><h4 class="subsubsection">15.1.2.2 Required Kinds of Specialized Arrays</h4>
+
+<p><i>Vectors</i> whose <i>elements</i> are restricted to <i>type</i>
+</p>
+<p><b>character</b> or a <i>subtype</i> of <b>character</b>
+</p>
+<p>are called <i>strings</i>
+<span id="index-string"></span>
+. 
+<i>Strings</i> are of <i>type</i> <b>string</b>.
+Figure 15&ndash;2 lists some <i>defined names</i> related to <i>strings</i>.
+</p>
+<p><i>Strings</i> are <i>specialized</i> <i>arrays</i> 
+and might logically have been included in this chapter.
+However, for purposes of readability
+most information about <i>strings</i> does not appear in this chapter;
+see instead <a href="Strings.html">Strings</a>.
+</p>
+<div class="format">
+<pre class="format">  char                string-equal         string-upcase  <!-- /@w -->
+  make-string         string-greaterp      string<tt>/=</tt>       <!-- /@w -->
+  nstring-capitalize  string-left-trim     string<tt>&lt;</tt>        <!-- /@w -->
+  nstring-downcase    string-lessp         string<tt>&lt;=</tt>       <!-- /@w -->
+  nstring-upcase      string-not-equal     string<tt>=</tt>        <!-- /@w -->
+  schar               string-not-greaterp  string<tt>&gt;</tt>        <!-- /@w -->
+  string              string-not-lessp     string<tt>&gt;=</tt>       <!-- /@w -->
+  string-capitalize   string-right-trim                   <!-- /@w -->
+  string-downcase     string-trim                         <!-- /@w -->
+
+      Figure 15&ndash;2: Operators that Manipulate Strings     <!-- /@w -->
+
+</pre></div>
+
+<p><i>Vectors</i> whose <i>elements</i> are restricted to <i>type</i>
+<b>bit</b> are called <i>bit vectors</i>
+<span id="index-bit-vector"></span>
+.
+<i>Bit vectors</i> are of <i>type</i> <b>bit-vector</b>.
+Figure 15&ndash;3 lists some <i>defined names</i> for operations on <i>bit arrays</i>.
+</p>
+<div class="format">
+<pre class="format">  bit        bit-ior   bit-orc2  <!-- /@w -->
+  bit-and    bit-nand  bit-xor   <!-- /@w -->
+  bit-andc1  bit-nor   sbit      <!-- /@w -->
+  bit-andc2  bit-not             <!-- /@w -->
+  bit-eqv    bit-orc1            <!-- /@w -->
+
+  Figure 15&ndash;3: Operators that Manipulate Bit Arrays<!-- /@w -->
+
+</pre></div>
+
+
+
+
+
+</body>
+</html>

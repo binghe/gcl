@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>stream-external-format (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="stream-external-format (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="stream-external-format (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Streams-Dictionary.html" rel="up" title="Streams Dictionary">
+<link href="with_002dopen_002dfile.html" rel="next" title="with-open-file">
+<link href="open.html" rel="prev" title="open">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="stream_002dexternal_002dformat"></span><div class="header">
+<p>
+Next: <a href="with_002dopen_002dfile.html" accesskey="n" rel="next">with-open-file</a>, Previous: <a href="open.html" accesskey="p" rel="prev">open</a>, Up: <a href="Streams-Dictionary.html" accesskey="u" rel="up">Streams Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="stream_002dexternal_002dformat-_005bFunction_005d"></span><h4 class="subsection">21.2.30 stream-external-format                                           [Function]</h4>
+
+<p><code>stream-external-format</code>  <i>stream</i> &rArr;  <i>format</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-431"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>stream</i>&mdash;a <i>file stream</i>.
+</p>
+<p><i>format</i>&mdash;an <i>external file format</i>.
+</p>
+<span id="Description_003a_003a-561"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Returns an <i>external file format designator</i> for the <i>stream</i>.
+</p>
+<span id="Examples_003a_003a-407"></span><h4 class="subsubheading">Examples::</h4>
+
+<div class="example">
+<pre class="example"> (with-open-file (stream &quot;test&quot; :direction :output)
+   (stream-external-format stream))
+&rArr;  :DEFAULT
+<i>OR</i>&rArr; :ISO8859/1-1987
+<i>OR</i>&rArr; (:ASCII :SAIL)
+<i>OR</i>&rArr; ACME::PROPRIETARY-FILE-FORMAT-17
+<i>OR</i>&rArr; #&lt;FILE-FORMAT :ISO646-1983 2343673&gt;
+</pre></div>
+
+<span id="See-Also_003a_003a-457"></span><h4 class="subsubheading">See Also::</h4>
+
+<p>the <tt>:external-format</tt> <i>argument</i> to the <i>function</i> 
+<a href="open.html">open</a>
+ and
+the 
+<a href="with_002dopen_002dfile.html">with-open-file</a>
+ <i>macro</i>.
+</p>
+<span id="Notes_003a_003a-295"></span><h4 class="subsubheading">Notes::</h4>
+
+<p>The <i>format</i> returned is not necessarily meaningful 
+to other <i>implementations</i>.
+</p>
+
+
+
+</body>
+</html>

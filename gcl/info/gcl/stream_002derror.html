@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>stream-error (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="stream-error (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="stream-error (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Streams-Dictionary.html" rel="up" title="Streams Dictionary">
+<link href="stream_002derror_002dstream.html" rel="next" title="stream-error-stream">
+<link href="_002aterminal_002dio_002a.html" rel="prev" title="*terminal-io*">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="stream_002derror"></span><div class="header">
+<p>
+Next: <a href="stream_002derror_002dstream.html" accesskey="n" rel="next">stream-error-stream</a>, Previous: <a href="_002aterminal_002dio_002a.html" accesskey="p" rel="prev">*terminal-io*</a>, Up: <a href="Streams-Dictionary.html" accesskey="u" rel="up">Streams Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="stream_002derror-_005bCondition-Type_005d"></span><h4 class="subsection">21.2.55 stream-error                                               [Condition Type]</h4>
+
+<span id="Class-Precedence-List_003a_003a-70"></span><h4 class="subsubheading">Class Precedence List::</h4>
+<p><b>stream-error</b>,
+<b>error</b>,
+<b>serious-condition</b>,
+<b>condition</b>,
+<b>t</b>
+</p>
+<span id="Description_003a_003a-586"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The <i>type</i> <b>stream-error</b>
+consists of error conditions that are related to receiving input from
+or sending output to a <i>stream</i>.  
+The &ldquo;offending stream&rdquo; is initialized by
+the <tt>:stream</tt> initialization argument to <b>make-condition</b>, 
+and is <i>accessed</i> by the <i>function</i> <b>stream-error-stream</b>.
+</p>
+<span id="See-Also_003a_003a-477"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="stream_002derror_002dstream.html">stream-error-stream</a>
+</p>
+
+
+
+</body>
+</html>

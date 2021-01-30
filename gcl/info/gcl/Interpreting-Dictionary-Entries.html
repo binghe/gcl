@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Interpreting Dictionary Entries (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Interpreting Dictionary Entries (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Interpreting Dictionary Entries (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Definitions.html" rel="up" title="Definitions">
+<link href="The-_0022Affected-By_0022-Section-of-a-Dictionary-Entry.html" rel="next" title="The &quot;Affected By&quot; Section of a Dictionary Entry">
+<link href="Sections-Not-Formally-Part-Of-This-Standard.html" rel="prev" title="Sections Not Formally Part Of This Standard">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Interpreting-Dictionary-Entries"></span><div class="header">
+<p>
+Previous: <a href="Sections-Not-Formally-Part-Of-This-Standard.html" accesskey="p" rel="prev">Sections Not Formally Part Of This Standard</a>, Up: <a href="Definitions.html" accesskey="u" rel="up">Definitions</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Interpreting-Dictionary-Entries-1"></span><h4 class="subsection">1.4.4 Interpreting Dictionary Entries</h4>
+
+<p>The dictionary entry for each <i>defined name</i> is partitioned into
+sections.  Except as explicitly indicated otherwise below, each section
+is introduced by a label identifying that section.  The omission of a
+section implies that the section is either not applicable, or would
+provide no interesting information.
+</p>
+<p>This section defines the significance of each potential section in a
+dictionary entry.
+</p>
+<table class="menu" border="0" cellspacing="0">
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Affected-By_0022-Section-of-a-Dictionary-Entry.html" accesskey="1">The &quot;Affected By&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Arguments_0022-Section-of-a-Dictionary-Entry.html" accesskey="2">The &quot;Arguments&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Arguments-and-Values_0022-Section-of-a-Dictionary-Entry.html" accesskey="3">The &quot;Arguments and Values&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Binding-Types-Affected_0022-Section-of-a-Dictionary-Entry.html" accesskey="4">The &quot;Binding Types Affected&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Class-Precedence-List_0022-Section-of-a-Dictionary-Entry.html" accesskey="5">The &quot;Class Precedence List&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Dictionary-Entries-for-Type-Specifiers.html" accesskey="6">Dictionary Entries for Type Specifiers</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Compound-Type-Specifier-Kind_0022-Section-of-a-Dictionary-Entry.html" accesskey="7">The &quot;Compound Type Specifier Kind&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Compound-Type-Specifier-Syntax_0022-Section-of-a-Dictionary-Entry.html" accesskey="8">The &quot;Compound Type Specifier Syntax&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Compound-Type-Specifier-Arguments_0022-Section-of-a-Dictionary-Entry.html" accesskey="9">The &quot;Compound Type Specifier Arguments&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Compound-Type-Specifier-Description_0022-Section-of-a-Dictionary-Entry.html">The &quot;Compound Type Specifier Description&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Constant-Value_0022-Section-of-a-Dictionary-Entry.html">The &quot;Constant Value&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Description_0022-Section-of-a-Dictionary-Entry.html">The &quot;Description&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Examples_0022-Section-of-a-Dictionary-Entry.html">The &quot;Examples&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Exceptional-Situations_0022-Section-of-a-Dictionary-Entry.html">The &quot;Exceptional Situations&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Initial-Value_0022-Section-of-a-Dictionary-Entry.html">The &quot;Initial Value&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Argument-Precedence-Order_0022-Section-of-a-Dictionary-Entry.html">The &quot;Argument Precedence Order&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Method-Signature_0022-Section-of-a-Dictionary-Entry.html">The &quot;Method Signature&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Name_0022-Section-of-a-Dictionary-Entry.html">The &quot;Name&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Notes_0022-Section-of-a-Dictionary-Entry.html">The &quot;Notes&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Pronunciation_0022-Section-of-a-Dictionary-Entry.html">The &quot;Pronunciation&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022See-Also_0022-Section-of-a-Dictionary-Entry.html">The &quot;See Also&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Side-Effects_0022-Section-of-a-Dictionary-Entry.html">The &quot;Side Effects&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Supertypes_0022-Section-of-a-Dictionary-Entry.html">The &quot;Supertypes&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Syntax_0022-Section-of-a-Dictionary-Entry.html">The &quot;Syntax&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Special-_0022Syntax_0022-Notations-for-Overloaded-Operators.html">Special &quot;Syntax&quot; Notations for Overloaded Operators</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Naming-Conventions-for-Rest-Parameters.html">Naming Conventions for Rest Parameters</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Requiring-Non_002dNull-Rest-Parameters-in-The-_0022Syntax_0022-Section.html">Requiring Non-Null Rest Parameters in The &quot;Syntax&quot; Section</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Return-values-in-The-_0022Syntax_0022-Section.html">Return values in The &quot;Syntax&quot; Section</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="No-Arguments-or-Values-in-The-_0022Syntax_0022-Section.html">No Arguments or Values in The &quot;Syntax&quot; Section</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="Unconditional-Transfer-of-Control-in-The-_0022Syntax_0022-Section.html">Unconditional Transfer of Control in The &quot;Syntax&quot; Section</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Valid-Context_0022-Section-of-a-Dictionary-Entry.html">The &quot;Valid Context&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+<tr><td align="left" valign="top">&bull; <a href="The-_0022Value-Type_0022-Section-of-a-Dictionary-Entry.html">The &quot;Value Type&quot; Section of a Dictionary Entry</a></td><td>&nbsp;&nbsp;</td><td align="left" valign="top">
+</td></tr>
+</table>
+
+<hr>
+<div class="header">
+<p>
+Previous: <a href="Sections-Not-Formally-Part-Of-This-Standard.html" accesskey="p" rel="prev">Sections Not Formally Part Of This Standard</a>, Up: <a href="Definitions.html" accesskey="u" rel="up">Definitions</a> &nbsp; </p>
+</div>
+
+
+
+</body>
+</html>

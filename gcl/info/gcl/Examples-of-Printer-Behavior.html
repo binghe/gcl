@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Examples of Printer Behavior (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="Examples of Printer Behavior (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="Examples of Printer Behavior (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="The-Lisp-Printer.html" rel="up" title="The Lisp Printer">
+<link href="The-Lisp-Pretty-Printer.html" rel="next" title="The Lisp Pretty Printer">
+<link href="Printing-Other-Objects.html" rel="prev" title="Printing Other Objects">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Examples-of-Printer-Behavior"></span><div class="header">
+<p>
+Previous: <a href="Default-Print_002dObject-Methods.html" accesskey="p" rel="prev">Default Print-Object Methods</a>, Up: <a href="The-Lisp-Printer.html" accesskey="u" rel="up">The Lisp Printer</a> &nbsp; </p>
+</div>
+<hr>
+<span id="Examples-of-Printer-Behavior-1"></span><h4 class="subsection">22.1.4 Examples of Printer Behavior</h4>
+
+<div class="example">
+<pre class="example"> (let ((*print-escape* t)) (fresh-line) (write #\a))
+<tt> |&gt; </tt> #\a
+&rArr;  #\a
+ (let ((*print-escape* nil) (*print-readably* nil))
+   (fresh-line)
+   (write #\a))
+<tt> |&gt; </tt> a
+&rArr;  #\a
+ (progn (fresh-line) (prin1 #\a))
+<tt> |&gt; </tt> #\a
+&rArr;  #\a
+ (progn (fresh-line) (print #\a))
+<tt> |&gt; </tt> 
+<tt> |&gt; </tt> #\a
+&rArr;  #\a
+ (progn (fresh-line) (princ #\a))
+<tt> |&gt; </tt> a
+&rArr;  #\a
+
+ (dolist (val '(t nil))
+   (let ((*print-escape* val) (*print-readably* val))
+     (print '#\a) 
+     (prin1 #\a) (write-char #\Space)
+     (princ #\a) (write-char #\Space)
+     (write #\a)))
+<tt> |&gt; </tt> #\a #\a a #\a
+<tt> |&gt; </tt> #\a #\a a a
+&rArr;  NIL
+
+ (progn (fresh-line) (write '(let ((a 1) (b 2)) (+ a b))))
+<tt> |&gt; </tt> (LET ((A 1) (B 2)) (+ A B))
+&rArr;  (LET ((A 1) (B 2)) (+ A B))
+
+ (progn (fresh-line) (pprint '(let ((a 1) (b 2)) (+ a b))))
+<tt> |&gt; </tt> (LET ((A 1)
+<tt> |&gt; </tt>       (B 2))               
+<tt> |&gt; </tt>   (+ A B))
+&rArr;  (LET ((A 1) (B 2)) (+ A B))
+
+ (progn (fresh-line) 
+        (write '(let ((a 1) (b 2)) (+ a b)) :pretty t))
+<tt> |&gt; </tt> (LET ((A 1)
+<tt> |&gt; </tt>       (B 2))
+<tt> |&gt; </tt>   (+ A B))                 
+&rArr;  (LET ((A 1) (B 2)) (+ A B))
+
+ (with-output-to-string (s)  
+    (write 'write :stream s)
+    (prin1 'prin1 s))
+&rArr;  &quot;WRITEPRIN1&quot;
+</pre></div>
+
+
+
+
+
+</body>
+</html>

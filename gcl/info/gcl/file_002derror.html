@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>file-error (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="file-error (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="file-error (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Files-Dictionary.html" rel="up" title="Files Dictionary">
+<link href="file_002derror_002dpathname.html" rel="next" title="file-error-pathname">
+<link href="delete_002dfile.html" rel="prev" title="delete-file">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="file_002derror"></span><div class="header">
+<p>
+Next: <a href="file_002derror_002dpathname.html" accesskey="n" rel="next">file-error-pathname</a>, Previous: <a href="delete_002dfile.html" accesskey="p" rel="prev">delete-file</a>, Up: <a href="Files-Dictionary.html" accesskey="u" rel="up">Files Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="file_002derror-_005bCondition-Type_005d"></span><h4 class="subsection">20.2.9 file-error                                                 [Condition Type]</h4>
+
+<span id="Class-Precedence-List_003a_003a-61"></span><h4 class="subsubheading">Class Precedence List::</h4>
+<p><b>file-error</b>,
+<b>error</b>,
+<b>serious-condition</b>,
+<b>condition</b>,
+<b>t</b>
+</p>
+<span id="Description_003a_003a-530"></span><h4 class="subsubheading">Description::</h4>
+
+<p>The <i>type</i> <b>file-error</b> consists of error conditions that occur during 
+an attempt to open or close a file, or during some low-level transactions 
+with a file system.  The &ldquo;offending pathname&rdquo; is initialized by 
+the <tt>:pathname</tt> initialization argument to <b>make-condition</b>, and is <i>accessed</i>
+by the <i>function</i> <b>file-error-pathname</b>.
+</p>
+<span id="See-Also_003a_003a-433"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><span class="roman">file-error-pathname</span>,
+<a href="open.html">open</a>
+,
+<a href="probe_002dfile.html">probe-file</a>
+,
+<a href="directory.html">directory</a>
+,
+<a href="ensure_002ddirectories_002dexist.html">ensure-directories-exist</a>
+</p>
+
+
+
+</body>
+</html>

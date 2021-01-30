@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>in-package (ANSI and GNU Common Lisp Document)</title>
+
+<meta name="description" content="in-package (ANSI and GNU Common Lisp Document)">
+<meta name="keywords" content="in-package (ANSI and GNU Common Lisp Document)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Packages-Dictionary.html" rel="up" title="Packages Dictionary">
+<link href="unuse_002dpackage.html" rel="next" title="unuse-package">
+<link href="unintern.html" rel="prev" title="unintern">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="in_002dpackage"></span><div class="header">
+<p>
+Next: <a href="unuse_002dpackage.html" accesskey="n" rel="next">unuse-package</a>, Previous: <a href="unintern.html" accesskey="p" rel="prev">unintern</a>, Up: <a href="Packages-Dictionary.html" accesskey="u" rel="up">Packages Dictionary</a> &nbsp; </p>
+</div>
+<hr>
+<span id="in_002dpackage-_005bMacro_005d"></span><h4 class="subsection">11.2.16 in-package                                                          [Macro]</h4>
+
+<p><code>in-package</code>  <i>name</i> &rArr;  <i>package</i>
+</p>
+<span id="Arguments-and-Values_003a_003a-188"></span><h4 class="subsubheading">Arguments and Values::</h4>
+
+<p><i>name</i>&mdash;a <i>string designator</i>; not evaluated.
+</p>
+<p><i>package</i>&mdash;the <i>package</i> named by <i>name</i>.
+</p>
+<span id="Description_003a_003a-252"></span><h4 class="subsubheading">Description::</h4>
+
+<p>Causes the the <i>package</i> named by <i>name</i> 
+to become the <i>current package</i>&mdash;that is, the <i>value</i> of <b>*package*</b>.
+If no such <i>package</i> already exists, an error of <i>type</i> <b>package-error</b> is signaled.
+</p>
+<p>Everything <b>in-package</b> does is also performed at compile time
+if the call appears as a <i>top level form</i>.
+</p>
+<span id="Side-Effects_003a_003a-30"></span><h4 class="subsubheading">Side Effects::</h4>
+
+<p>The <i>variable</i> <b>*package*</b> is assigned.
+If the <b>in-package</b> <i>form</i> is a <i>top level form</i>, 
+this assignment also occurs at compile time.
+</p>
+<span id="Exceptional-Situations_003a_003a-70"></span><h4 class="subsubheading">Exceptional Situations::</h4>
+
+<p>An error of <i>type</i> <b>package-error</b> is signaled if the specified <i>package</i> does not exist.
+</p>
+<span id="See-Also_003a_003a-224"></span><h4 class="subsubheading">See Also::</h4>
+
+<p><a href="package.html">package</a>
+</p>
+
+
+
+</body>
+</html>
