@@ -56,3 +56,5 @@
 #define RELOC_H "elf32_sh4_reloc.h"
 
 #define NEED_STACK_CHK_GUARD
+
+#define DEFINED_REAL_MAXPAGE (1UL<<18) /*FIXME brk probe broken*/

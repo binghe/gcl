@@ -305,6 +305,9 @@ update_real_maxpage(void) {
   }
 #endif
 
+#ifdef DEFINED_REAL_MAXPAGE
+  real_maxpage=DEFINED_REAL_MAXPAGE;
+#else
   massert(cur=sbrk(0));
   beg=data_start ? data_start : cur;
   for (i=0,j=(1L<<log_maxpage_bound);j>PAGESIZE;j>>=1)
@@ -314,6 +317,7 @@ update_real_maxpage(void) {
 	i+=j;
       }
   massert(!mbrk(cur));
+#endif
 
   phys_pages=ufmin(get_phys_pages1(0)+page(beg),real_maxpage)-page(beg);
 
