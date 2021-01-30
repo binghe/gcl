@@ -71,11 +71,6 @@
     (setq *current-directory* (current-directory-pathname))))
 
 (defun which (s)
-  (let ((r (let ((s (run-process "which" (list s)))) (prog1 (read-line s nil 'eof) (close s)))))
-    (unless (eq r 'eof)
-      (string-downcase r))))
-  
-(defun which (s)
   (let ((r (with-open-file (s (apply 'string-concatenate "|" #-winnt "which "
 				     #+winnt "for %i in (" s #+winnt ".exe) do @echo.%~$PATH:i" nil))
 			   (read-line s nil 'eof))))
