@@ -138,20 +138,11 @@ do { int c = 0; \
 
 #include <limits.h>
 #include <sys/stat.h>
-#define GET_FULL_PATH_SELF(a_) do {\
- char b[20];\
- static char q[PATH_MAX];\
- struct stat ss;\
- if (snprintf(b,sizeof(b),"/proc/%d/exe",getpid())<=0)\
-   error("Cannot write proc exe pathname");\
- if (stat(b,&ss)) \
-   (a_)=argv[0];\
- else {\
-   if (!realpath(b,q)) \
-     error("realpath error");\
-   (a_)=q;\
- }\
-} while(0)
+#define GET_FULL_PATH_SELF(a_) do {				\
+    static char q[PATH_MAX];					\
+    massert(which("/proc/self/exe",q) || which(argv[0],q));	\
+    (a_)=q;							\
+  } while(0)
 
 
 #define UC(a_) ((ucontext_t *)a_)

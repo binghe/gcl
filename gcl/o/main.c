@@ -475,8 +475,50 @@ DEFUN("EQUAL-TAIL-RECURSION-CHECK",object,fSequal_tail_recursion_check,SI,1,1,NO
   RETURN1((object)(w-stack_to_be_allocated));
 }
 
+#if !defined(DARWIN)&&!defined(__MINGW32__)
+
+static int
+mbin(const char *s,char *o) {
+
+  struct stat ss;
+
+  if (!stat(s,&ss) && (ss.st_mode&S_IFMT)==S_IFREG && !access(s,R_OK|X_OK)) {
+    massert(realpath(s,o));
+    return 1;
+  }
+
+  return 0;
+
+}
+
+static int
+which(const char *n,char *o) {
+
+  char *s;
+
+  if (strchr(n,'/'))
+    return mbin(n,o);
+
+  massert(snprintf(FN1,sizeof(FN1),"%s",getenv("PATH"))>1);
+  for (s=NULL;(s=strtok(s ? NULL : FN1,":"));) {
+
+    massert(snprintf(FN2,sizeof(FN2),"%s/%s",s,n));
+    if (mbin(FN2,o))
+      return 1;
+
+  }
+
+  return 0;
+
+}
+
+#endif
+
 int
 main(int argc, char **argv, char **envp) {
+
+  GET_FULL_PATH_SELF(kcl_self);
+  *argv=kcl_self;
 
 #ifdef CAN_UNRANDOMIZE_SBRK
 #include <stdio.h>
@@ -486,19 +528,6 @@ main(int argc, char **argv, char **envp) {
 
   gcl_init_alloc(&argv);
 
-#ifdef GET_FULL_PATH_SELF
-  GET_FULL_PATH_SELF(kcl_self);
-#else
-  kcl_self = argv[0];
-#endif
-#ifdef __MINGW32__
-  {
-    char *s=kcl_self;
-    for (;*s;s++) if (*s=='\\') *s='/';
-  }
-#endif
-  *argv=kcl_self;
-  
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
 #ifdef _WIN32
