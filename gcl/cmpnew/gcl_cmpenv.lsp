@@ -27,7 +27,6 @@
 ;;; included in the compiled code.  The default value is OFF.
 
 (defvar *dlinks* (make-hash-table :test 'equal))
-(defvar *bind-hash* (make-hash-table :test 'eq))
 
 (defun init-env ()
   (setq *tmpsyms* +tmpsyms+)
@@ -41,7 +40,6 @@
   (setq *fn-src-fn* (make-hash-table :test 'eq))
   (setq *objects* (make-hash-table :test 'eq))
   (setq *dlinks* (make-hash-table :test 'equal))
-  (setq *bind-hash* (make-hash-table :test 'eq))
   (setq *local-funs* nil)
   (setq *global-funs* nil)
   (setq *global-entries* nil)

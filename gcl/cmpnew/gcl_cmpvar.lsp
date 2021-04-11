@@ -292,9 +292,10 @@
   (unless (or (car vref) (cadr vref))
     v))
 
-(defun get-vbind-form (form &aux (form (gethash (get-vbind form) *bind-hash*)))
-  (when (gethash form *bind-hash*)
-    form))
+(defun get-vbind-form (form &aux (binding (get-vbind form)))
+  (when binding
+    (when (binding-repeatable binding)
+      (binding-form binding))))
 
 (defun var-bind (var &aux (st (when (var-p var) (when (eq 'lexical (var-kind var)) (var-store var)))))
   (unless (cdr st)
@@ -312,7 +313,7 @@
    x
    ((cons (eql var) t) (var-bind (local-var (caddr x))))
    (var (var-bind x))
-   (spice x)))
+   (binding x)))
 
 (defun repeatable-var-binding (form)
   (case (car form)
@@ -329,13 +330,20 @@
 	(unless (or (info-ref-clb i) (info-ref-ccb i))
 	  t)))))
 
-(defun new-bind (&optional form &aux (s (alloc-spice)))
-  (setf (gethash s *bind-hash*) form)
-  (setf (gethash form *bind-hash*) (repeatable-binding-p form))
-  s)
+(defstruct binding
+  form
+  repeatable)
 
-(defun or-bind (b l)
-  (pushnew b l))
+(defun new-bind (&optional form)
+  (make-binding :form form :repeatable (repeatable-binding-p form)))
+
+(defun or-bind (b l &aux (bi (cadr (binding-form b))))
+  (cond ((when (cdr l) (when bi (not (info-ch-ccb bi))));FIXME coalesce anonymous too?
+	 (pushnew b l :test (lambda (x y)
+			      (or (eq x y)
+				  (when (binding-form y)
+				    (type<= (info-type bi) (info-type (cadr (binding-form y)))))))))
+	((pushnew b l))))
 
 (defun or-binds (l1 l2)
   (reduce (lambda (y x) (or-bind x y)) l1 :initial-value l2))

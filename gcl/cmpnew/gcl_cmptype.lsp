@@ -549,7 +549,10 @@
   (declare (ignore f))
   (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
 	((let ((a1 (atomic-tp t1)))
-	   (when a1 (let ((tp (cdar a1))) (unless (spicep tp) (object-type tp))))));FIXME bind-type?
+	   (when a1
+	     (let ((tp (cdar a1)))
+	       (unless (binding-p tp)
+		 (object-type tp))))));FIXME bind-type?
 	((and (consp t1) (eq (car t1) 'cons)) (caddr t1))
 	((type>= #tproper-list t1) #tproper-list)))
 (si::putprop 'cdr 'cdr-propagator 'type-propagator)
@@ -652,7 +655,10 @@
   (declare (ignore f))
   (cond ((type>= #tnull t1) t1) ;FIXME clb ccb do-setq-tp
 	((let ((a1 (atomic-tp t1)))
-	   (when a1 (let ((tp (caar a1))) (unless (spicep tp) (object-type tp))))))
+	   (when a1
+	     (let ((tp (caar a1)))
+	       (unless (binding-p tp)
+		 (object-type tp))))))
 	((and (consp t1) (eq (car t1) 'cons)) (cadr t1))))
 (si::putprop 'car 'car-propagator 'type-propagator)
 
@@ -935,7 +941,7 @@
   (case (when (listp u) (car u))
 	((or returns-exactly values) (member-if 'unprintable-individualsp (cdr u)))
 	(member (member-if (lambda (x)
-			     (or (si::si-classp x) (typep x '(or function cons spice array))))
+			     (or (si::si-classp x) (typep x '(or function cons binding array))))
 			   (cdr u)))
 	((short-float long-float) (member-if (lambda (x) (or (isinf x) (isnan x))) (cdr u)))
 	(otherwise (si::si-classp u))))

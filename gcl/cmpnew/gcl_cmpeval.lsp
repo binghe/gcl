@@ -1063,8 +1063,8 @@
   (if (atom x) i (cln (cdr x) (1+ i))))
 
 (defun new-type-p (a b)
-  (cond ((spicep a) nil);;FIXME ????
-	((spicep b) nil)
+  (cond ((binding-p a) nil);;FIXME ????
+	((binding-p b) nil)
 	((eql a b) nil)
 	((atom a))
 	((atom b))
@@ -1149,7 +1149,7 @@
   (typecase
    tp
    (symbol t)
-   (spice nil)
+   (binding nil)
    (atom t)
    (cons (and (constant-type-p (car tp)) (constant-type-p (cdr tp))))))
 
@@ -1586,7 +1586,7 @@
 
 
 (defun binding-forms (st)
-  (mapcan (lambda (x &aux (z (gethash x *bind-hash*))) (when z (list z))) st))
+  (mapcan (lambda (x &aux (z (binding-form x))) (when z (list z))) st))
 
 (defun global-var-stores (&aux z)
   (reduce (lambda (y x)
