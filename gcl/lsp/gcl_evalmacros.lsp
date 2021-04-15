@@ -539,10 +539,11 @@
        nil)))
 
 
-(defmacro define-compiler-macro (name vl &rest body &aux (n (funid-sym name)))
+(defmacro define-compiler-macro (name vl &rest body &aux (n (funid-sym name)) (q (gensym (string name))))
   (declare (optimize (safety 2)))
-  `(progn (putprop ',n ;FIXME setf not available at pre_gcl stage
-		   ,(defmacro-lambda (if (eq n name) name (cadr name)) vl body)
+  `(progn (defun ,q ,@(cdr (defmacro-lambda (if (eq n name) name (cadr name)) vl body)))
+	  (putprop ',n ;FIXME setf not available at pre_gcl stage
+		   (symbol-function ',q)
 		   'compiler-macro-prop)
 	  ',name))
 

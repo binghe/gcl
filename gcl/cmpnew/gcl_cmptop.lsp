@@ -2112,7 +2112,7 @@
     (cmpck (or (endp def) (endp (cdr def)))
            "The macro definition ~s is illegal." def)
     (let* ((n (car def))
-	   (b (si::defmacro-lambda n (cadr def) (cddr def))))
+	   (b (eval (si::defmacro-lambda n (cadr def) (cddr def)))))
       (push (list n 'macro b) env)))
   (when env (setq *macrolet-env* (list nil (append (cadr *macrolet-env*) (nreverse env)) nil)))
   (mapc 't1expr (cdr args)))
