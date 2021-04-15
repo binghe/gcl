@@ -255,7 +255,12 @@
 
 (defun wt-cvar (cvar &optional type)
   (if type (wt "/* " (symbol-name type) " */"))
-  (wt "V" cvar))
+  (let* ((fn (or (car (rassoc cvar *c-vars*)) (cdr (assoc cvar *c-vars*)) t))
+	 (fn (or (car (member fn +c-local-var-types+ :test 'type<=)) 'object))
+	 (fn (cdr (assoc fn +wt-c-var-alist+))))
+    (unless fn (baboon))
+    (wt fn)
+    (wt "(V" cvar ")")))
 
 (defun vv-str (vv) (let ((vv (add-object2 vv))) (string-concatenate "((object)VV[" (write-to-string vv) "])")))
 ;; (defun vv-str (vv) (si::string-concatenate "((object)VV[" (write-to-string vv) "])"))
