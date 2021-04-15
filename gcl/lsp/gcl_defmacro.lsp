@@ -91,26 +91,45 @@
 	      (lc (when (eq k '&key) (consp ln))) (lnn (if lc (pop ln) ln)) (lb (if lc (car ln) ln)))
 	   (values lnn lb ld lp))
 
+(defun make-state (n nr f a last)
+  (list (list n nr f) a last nil nil nil))
+
+
+(defun n (s) (caar s))
+(defun nr (s) (cadar s))
+(defun fst (s) (caddar s))
+(defun a (s) (cadr s))
+(defun set-a (s v) (setf (cadr s) v))
+(defun pop-a (s) (pop (cadr s)))
+(defun lst (s) (caddr s))
+(defun np (s) (cadddr s))
+(defun set-np (s v &aux (s (cdddr s))) (setf (car s) v))
+(defun lv (s) (fifth s))
+(defun set-lv (s v &aux (s (cddddr s))) (setf (car s) v))
+(defun r (s) (sixth s))
+(defun push-r (s v &aux (s (cdr (cddddr s)))) (setf (car s) (cons v (car s))))
+(defun nreconc-r (s v &aux (s (cdr (cddddr s)))) (setf (car s) (nreconc v (car s))))
+
 (*make-special '*rv*)
 (*make-constant '+kev+ (gensym "KE"))
+(*make-constant '+np+ (gensym "NP"))
+(*make-constant '+negp+ (gensym "NEGP"))
+(*make-constant '+ff+ (gensym "FF"))
+(*make-constant '+lvpv+ (gensym "LVP"))
 (setq *rv* nil)
 
-(let ((vp (gensym "VP"))(val (gensym "VAL")))
-  (defun rpop (rv lv np negp &aux )
-    `(do (,vp ,val)
-	 ((>= 0 ,np) ,lv)
-	 (declare (proper-list ,val) ,@(when (cdr rv) `((:dynamic-extent ,val))))
-	 (setq ,val ,(vp)
-	       ,val (if (and ,negp (= ,np 0)) ,val (cons ,val nil))
-	       ,vp (cond (,vp (rplacd ,vp ,val) ,val) ((setq ,lv ,val)))))))
+(defun rpop (s rv negp &aux (np (np s)))
+  `(do (vp val (lv ,(lv s)));FIXME just to use previous lv binding
+       ((>= 0 ,np) lv)
+       (declare (proper-list val) ,@(when (cdr rv) `((:dynamic-extent val))))
+       (setq val ,(vp s)
+	     val (if (and ,negp (= ,np 0)) val (cons val nil))
+	     vp (cond (vp (rplacd vp val) val) ((setq lv val))))))
 
-(defun bind (targ &optional (src nil srcp) defp &aux (sp (when (listp targ) srcp)) (v (if sp (tsym) targ)))
-  (push (if srcp (list v (if defp (na src) src)) v) *rv*)
-  (when sp
-    (let ((x (tsym))(lv (lvp)))
-      (bind x lv)
-      (setq *rv* (nreconc (cadr (blla targ nil v nil nil nil nil t)) *rv*))
-      (bind lv x)))
+
+(defun bind (s targ &optional (src nil srcp) defp &aux (sp (when (listp targ) srcp)) (v (if sp (tsym) targ)))
+  (push-r s (if srcp (list v (if defp  (na s src) src)) v))
+  (when sp (nreconc-r s (cadr (blla targ nil v nil nil nil nil t))))
   v)
 
 (defun badll (x) (error 'program-error :format-control "Bad lambda list ~s" :format-arguments (list x)))
@@ -121,59 +140,48 @@
 
 (defun wcr (x) (when (cdr x) x))
 
-(let (n nr f np lv a last
-	(+np+ (gensym "NP"))
-	(+negp+ (gensym "NEGP"))
-	(+ff+ (gensym "FF"))
-	(+lvpv+ (gensym "LVP")))
+(defun vp (s &aux (v `(va-pop))(np (np s))(f (fst s)))
+  `(progn
+     (setq ,np (number-minus ,np 1))
+     ,(if f `(cond (,+ff+ (setq ,+ff+ nil) ,f)(,v)) v)))
 
-  (defun state-init (nn nnr nf na nlast);FIXME, illogical wrt. recursion
-    (setq n nn nr nnr f nf a na last nlast np nil lv nil))
+(defun la (s def &optional k p &aux (v (lvp s))(vp (vp s))(np (np s)))
+  (wcr `(cond ,@(when np `(((and ,+negp+ (= ,np 1) (setq ,v ,vp) ,@(unless p `(nil))))));FIXME efficiency
+	      ,@(when np `(((> ,np 0) ,@(unless p `(,vp)))))
+	      ,@(when v `((,v ,@(unless p `((pop ,v))))))
+	      ,@(when def `((,def)))
+	      ,@(when k `((,(nokv k)))))))
+(defun na (s &optional def) (if (a s) (pop-a s) (la s def)))
+(defun nap (s) (if (a s) t (la s nil nil t)))
 
-  (defun vp (&aux (v `(va-pop)))
-    `(progn
-       (setq ,+np+ (number-minus ,+np+ 1))
-       ,(if f `(cond (,+ff+ (setq ,+ff+ nil) ,f)(,v)) v)))
+(defun bind-a (s) (set-a s (mapcar #'(lambda (x) (bind s (tsym) x)) (a s))))
 
-  (defun la (def &optional k p &aux (v (lvp))(vp (vp)))
-    (wcr `(cond ,@(when np `(((and ,+negp+ (= ,np 1) (setq ,v ,vp) ,@(unless p `(nil))))))
-		,@(when np `(((> ,np 0) ,@(unless p `(,vp)))))
-		,@(when v `((,v ,@(unless p `((pop ,v))))))
-		,@(when def `((,def)))
-		,@(when k `((,(nokv k)))))))
-  (defun na (&optional def) (if a (pop a) (la def)))
-  (defun nap nil (if a t (la nil nil t)))
+(defun lvp (s &optional rv)
+  (cond
+   (rv (lvp s) (if (np s) (bind s (lv s) (rpop s rv +negp+)) (lv s)))
+   ((lv s))
+   ((lst s) (bind s (set-lv s (tsym)) (lst s)));+lvpv+
+   ((n s)
+    (when (fst s) (bind s +ff+ t))
+    (bind s (set-np s +np+) (n s))
+    (bind s +negp+ `(< ,(np s) 0))
+    (bind s (np s) `(if ,+negp+ (number-minus 0 ,(np s)) ,(np s)))
+    (bind s (np s) `(number-minus ,(np s) ,(nr s)))
+    (bind s (set-lv s (tsym))))));+lvpv+
 
-  (defun bind-a nil (setq a (mapcar #'(lambda (x) (bind (tsym) x)) a)))
-
-  (defun lvp (&optional rv)
-    (cond
-     (rv (lvp) (if np (bind lv (rpop rv lv np +negp+)) lv))
-     (lv)
-     (last (bind (setq lv +lvpv+) last))
-     (n
-      (when f (bind +ff+ t))
-      (bind (setq np +np+) n)
-      (bind +negp+ `(< ,np 0))
-      (bind np `(if ,+negp+ (number-minus 0 ,np) ,np))
-      (bind np `(number-minus ,np ,nr))
-      (bind (setq lv +lvpv+)))))
-
-  (defun post (post nkys &aux lv)
-    (setq nkys (nreverse nkys))
-    (do ((ex a)) ((not ex));FIXME  this is fragile as the binding must be visible to mvars/inls
-	(bind 'k (pop ex))
-	(bind 'v (if ex (pop ex) (la nil 'k)))
-	(bind +kev+ `(case k ,@nkys)))
-    (cond
-     (n (bind +kev+ `(do (k v) ((not ,(nap)))
-			  (setq k ,(la nil) v ,(la nil 'k));(if ,(la nil t) ,(la nil 'done) ,(nokv 'k))
-			  (case k ,@nkys))))
-     ((setq lv (lvp)) (bind +kev+ `(labels ((kb (k v) (case k ,@nkys))
-					     (kbb (x) (when x (kb (car x) (if (cdr x) (cadr x) ,(nokv '(car x))))(kbb (cddr x)))))
-					    (kbb ,lv)))))
-    (mapc #'(lambda (x) (apply 'bind x)) (nreverse post)))
-  )
+(defun post (s post nkys &aux lv (nkys (nreverse nkys)))
+  (do ((ex (a s))) ((not ex));FIXME  this is fragile as the binding must be visible to mvars/inls
+      (bind s 'k (pop ex))
+      (bind s 'v (if ex (pop ex) (la s nil 'k)))
+      (bind s +kev+ `(case k ,@nkys)))
+  (cond
+   ((n s) (bind s +kev+ `(do (k v) ((not ,(nap s)))
+			     (setq k ,(la s nil) v ,(la s nil 'k))
+			     (case k ,@nkys))))
+   ((lvp s) (bind s +kev+ `(labels ((kb (k v) (case k ,@nkys))
+				    (kbb (x) (when x (kb (car x) (if (cdr x) (cadr x) ,(nokv '(car x))))(kbb (cddr x)))))
+				   (kbb ,(lv s))))))
+  (mapc #'(lambda (x) (apply 'bind s x)) (nreverse post)))
 
 (defun sdde (rv decls)
   (mapc #'(lambda (decl)
@@ -188,13 +196,11 @@
   nil)
 
 (defun blla (l a last body &optional n nr f (rcr (tsym t))
-	       &aux rvd kk *rv* k tmp nkys post wv rv aok kev
-	       (l (subst '&rest '&body (let ((s (last l))) (if (cdr s) (append (butlast l) (list (car s) '&rest (cdr s))) l))))
+	       &aux rvd kk *rv* k tmp nkys post wv rv aok kev (s (make-state n nr f a last))
+	       (l (subst '&rest '&body (let ((s (last l))) (if (cdr s) (append (butlast l) (list (car s) '&rest (cdr s))) l))));FIXME only macro + recursion
 	       (lo l)(llk '(&whole &optional &rest &key &allow-other-keys &aux)))
   (declare (optimize (safety 0)))
 ;  (assert (not (and last n)))
-
-  (state-init n nr f a last)
 
   (multiple-value-bind
    (doc decls ctps body) (parse-body-header body) (declare (ignore doc))
@@ -203,50 +209,53 @@
       (cond ((setq tmp (member (car l) lk)) (setq lk (cdr tmp) k (pop l) kk (if (eq k '&aux) kk k)))
 	    ((member (car l) llk) (badll lo))
 	    ((case k
-		   (&whole (when (or wv (not (eq (cdr lo) l))) (badll lo)) (setq k nil) (bind (setq wv (pop l)) (append a last)))
+		   (&whole (when (or wv (not (eq (cdr lo) l))) (badll lo)) (setq k nil) (bind s (setq wv (pop l)) (append a last)))
 		   ((nil &optional)
 		    (multiple-value-bind
 		     (ln lb ld lp) (unbnd k (pop l)) (declare (ignore lb))
-		     (when lp (bind lp t))
+		     (when lp (bind s lp t))
 		     (let ((ld (if k ld (insuf ln))))
-		       (bind ln (if lp `(progn (setq ,lp nil) ,ld) ld) t))))
+		       (bind s ln (if lp `(progn (setq ,lp nil) ,ld) ld) t))))
 		   (&rest
 		    (when rv (badll lo))
-		    (bind (setq rv (pop l)) `(list* ,@(bind-a) ,(lvp (cons rv (setq rvd (sdde rv decls)))))))
+		    (bind s (setq rv (pop l)) `(list* ,@(bind-a s) ,(lvp s (cons rv (setq rvd (sdde rv decls)))))))
 		   (&key
 		    (multiple-value-bind
 		     (ln lb ld lp) (unbnd k (pop l))
 		     (let* ((lpt (tsym))(lbt (tsym))(ln (intern (string ln) 'keyword)))
 		       (when (eq ln :allow-other-keys) (setq aok lbt))
-		       (bind lpt)(bind lbt)
+		       (bind s lpt)(bind s lbt)
 		       (push `(,ln (unless ,lpt (setq ,lbt v ,lpt t))) nkys)
 		       (push `(,lb (if ,lpt ,lbt ,ld)) post)
 		       (when lp (push `(,lp ,lpt) post)))))
-		   (&aux (bind (pop l)))))))
+		   (&aux (bind s (pop l)))))))
 
-   (let ((nap (nap)))
+   (let ((nap (nap s)))
      (when nap
        (case kk
-	     ((nil &optional) (unless n (bind +kev+ (let ((q (extra (na)))) (if (eq nap t) q `(when ,nap ,q))))))
+	     ((nil &optional) (unless n (bind s +kev+ (let ((q (extra (na s)))) (if (eq nap t) q `(when ,nap ,q))))))
 	     (&key
 	      (unless aok
 		(let ((aop (tsym)))
-		  (bind aop)(bind (setq aok (tsym)))
+		  (bind s aop)(bind s (setq aok (tsym)))
 		  (push `(:allow-other-keys (unless ,aop (setq ,aok v ,aop t))) nkys)))
 	      (let ((lpt (tsym))(lbt (tsym))(bk (tsym)))
-		(bind lpt)(bind lbt)(bind bk)
+		(bind s lpt)(bind s lbt)(bind s bk)
 		(push `(otherwise (unless ,lpt (setq ,lbt v ,lpt t ,bk k))) nkys)
 		(push `(,+kev+ (unless ,aok (when ,lpt ,(badk bk lbt)))) post))))))
 
-   (when post (post post nkys))
-   (setq kev (member +kev+ *rv* :key #'(lambda (x) (when (listp x) (car x)))))
+   (when post (post s post nkys))
+   (setq kev (member +kev+ (r s) :key #'(lambda (x) (when (listp x) (car x)))))
 
-   `(let* ,(nreverse *rv*)
-      ,@(when rvd (when (lvp) `((declare (:dynamic-extent ,(lvp))))))
+   `(let* ,(nreverse (r s))
+      ,@(when rvd (when (lv s) `((declare (:dynamic-extent ,(lv s))))))
       ,@(when kev `((declare (ignore ,+kev+))))
       ,@decls
       ,@ctps
       ,@body)))
+
+
+
 
 (export '(blocked-body-name parse-body-header blla va-pop))
 
