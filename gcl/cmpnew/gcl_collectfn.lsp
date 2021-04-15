@@ -64,7 +64,9 @@
   (setf (gethash 'other-form *call-table*) *other-form*) 
   )
 
-(defun emit-fn (flag) (setq *record-call-info* flag))
+(defun emit-fn (flag)
+;  (setq *record-call-info* flag)
+  )
 
 (defun promote-inlines (x)
   (if (eq x 'inline) t
@@ -168,7 +170,7 @@
 (defun result-type-from-loc (x)
   (cond ((consp x)
 	 (case (car x)
-	   ((fixnum-value inline-fixnum) #tfixnum)
+	   ((fixnum-value inline-fixnum) 'fixnum)
 	   (var (var-type (second x)))
 	   ;; eventually separate out other inlines
 	   (t (cond ((and (symbolp (car x))
@@ -223,14 +225,14 @@
       ))
 
 (defun make-all-proclaims (&rest files)
-  (setup-sys-proclaims)
-  (dolist (v files)
-	  (mapcar 'load (directory v)))
-  (write-sys-proclaims))
+  ;; (setup-sys-proclaims)
+  ;; (dolist (v files)
+  ;; 	  (mapcar 'load (directory v)))
+  (write-sys-proclaims "sys-proclaim.lisp"))
 
-(defun write-sys-proclaims ()
-  (with-open-file (st "sys-proclaim.lisp" :direction :output)
-    (make-proclaims st)))
+;; (defun write-sys-proclaims ()
+;;   (with-open-file (st "sys-proclaim.lisp" :direction :output)
+;;     (make-proclaims st)))
 
 (defvar *file-table* (make-hash-table :test 'eq)) 
 
@@ -272,7 +274,7 @@
 	  (add-value-type nil (or fname  'unknown-values))
 	(add-value-type (result-type-from-loc loc) nil)))
     (return-fixnum
-      (add-value-type #tfixnum nil))
+      (add-value-type 'fixnum nil))
     (return-object
       (add-value-type t nil))
     (top (setq *top-data* (cons fname nil)))))

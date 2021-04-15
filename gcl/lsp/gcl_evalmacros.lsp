@@ -25,7 +25,7 @@
 
 (export '(*debug* *compiler-check-args* *safe-compile* *compiler-new-safety*
 		  *compiler-push-events* *space* *speed* proclaimed-signature
- 		  *alien-declarations*
+ 		  *alien-declarations* write-sys-proclaims
  		  lit sgen cmp-inline cmp-notinline cmp-type))
 
 (eval-when (eval compile) (setq si:*inhibit-macro-special* nil))
