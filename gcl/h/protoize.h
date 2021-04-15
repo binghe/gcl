@@ -211,7 +211,7 @@ typedef void (*funcvoid)(void);
 /* multival.c:32:OF */ extern void Lvalues (void); /* () */
 /* multival.c:37:OF */ extern void Lvalues_list (void); /* () */
 /* multival.c:134:OF */ extern void gcl_init_multival (void); /* () */
-object funcall_vec(object,ufixnum,object *);
+object funcall_vec(object,fixnum,object *);
 /* nfunlink.c:190:OF */ extern object IapplyVector (object fun, int nargs, object *base); /* (fun, nargs, base) object fun; int nargs; object *base; */
 /* nfunlink.c:269:OF */ extern void Iinvoke_c_function_from_value_stack (object (*f)(), ufixnum fargd); /* (f, fargd) object (*f)(); int fargd; */
 /* nsocket.c:190:OF */ extern int CreateSocket (int port, char *host, int server, char *myaddr, int myport, int async); /* (port, host, server, myaddr, myport, async) int port; char *host; int server; char *myaddr; int myport; int async; */
@@ -1567,3 +1567,5 @@ set_displaced_body_ptr(object);
 void
 travel_find_sharing(object,object);
 
+object
+coerce_funcall_object_to_function(object);

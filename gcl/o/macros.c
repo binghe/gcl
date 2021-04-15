@@ -147,7 +147,7 @@ Imacro_expand1(object exp_fun, object form) {
 /*   pp(form->c.c_car);printf("\n"); */
   object b[3]={exp_fun,form,MACRO_EXPAND_ENV};
   fcall.valp=0;
-  return funcall_vec(sLAmacroexpand_hookA->s.s_dbind,3,b);
+  return funcall_vec(coerce_funcall_object_to_function(sLAmacroexpand_hookA->s.s_dbind),3,b);
 
 }
 

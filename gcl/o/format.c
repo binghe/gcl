@@ -2374,7 +2374,7 @@ DEFUN("FORMAT",object,fLformat,LISP,2,F_ARG_LIMIT,NONE,OO,OO,OO,OO,(object strm,
 	Xxvl[0] = strm;
 	for (i=1;(Xxvl[i]=NEXT_ARG(nargs,ap,ll,f,OBJNULL))!=OBJNULL;i++);
 	va_end(ap);
-	fcall.valp=0,funcall_vec(control,i,Xxvl);
+	fcall.valp=0,funcall_vec(coerce_funcall_object_to_function(control),i,Xxvl);
 	vs_reset;
 
       }

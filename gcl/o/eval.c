@@ -81,13 +81,13 @@ quick_call_function_vec_coerce(object fun,ufixnum n,object *b) {
   ufixnum argd,j;
   enum ftype restype;
   object *tmp;
-  
+
   argd=fun->fun.fun_argd;
   restype = POP_BITS(argd,2);
 
   if (argd) {
-    tmp=ZALLOCA(n*sizeof(object));
-    for (j=0;j<n;j++)
+    static object q[MAX_ARGS+1];
+    for (tmp=q,j=0;j<n;j++)
       tmp[j]=COERCE_ARG(b[j],POP_BITS(argd,2));
   } else
     tmp=b;
@@ -116,69 +116,51 @@ unwind_vals(object *vals,object *base) {
   
 }
 
-static object
-funcall_cs(object fun,ufixnum n,object *b) {
-
-  object *base;
-  object *vals=(object *)fcall.valp;
-  
-  vs_base=vs_top; 
-
-  for (;n--;)
-    vs_push(*b++);
-
-  base=vs_base;
-  funcall(fun);
-    
-  return unwind_vals(vals,base);
-    
-}
-
 object
-funcall_vec(object fun,ufixnum n,object *b) {
+funcall_vec(object fun,fixnum n,object *b) {
+
+  ufixnum m=labs(n),l=m;
+  object x;
+  
+  if (n<0)
+    for (l=m-1,x=b[l];x!=Cnil;l++,x=x->c.c_cdr);
 
   fcall.argd=n;
   fcall.fun=fun;
 
-  if (type_of(fun)==t_function) {
+  if (l<fun->fun.fun_minarg) {
+    FEtoo_few_arguments(b,b+l);
+    return Cnil;
+  }
 
-    if (n<fun->fun.fun_minarg) {
-      FEtoo_few_arguments(b,b+n);
-      return Cnil;
-    }
+  if (l>fun->fun.fun_maxarg) {
+    FEtoo_many_arguments(b,b+l);
+    return Cnil;
+  }
     
-    if (n>fun->fun.fun_maxarg) {
-      FEtoo_many_arguments(b,b+n);
-      return Cnil;
-    }
-    
-    return quick_call_function_vec_coerce(fun,n,b);
-
-  } else
-
-    return funcall_cs(fun,n,b);
+  return quick_call_function_vec_coerce(fun,m,b);
 
 }
+
 
 static object
 funcall_ap(object fun,fixnum n,va_list ap) {
 
-  object *b,*t;
-  ufixnum i,j;
+  static object b[MAX_ARGS+1];
+  object *t=b;
+  ufixnum j=labs(n),i;
 
-  j=i=labs(n);
-  t=b=ZALLOCA(j*sizeof(*b));
-  for (;j--;)
+  for (i=j;i--;)
     *t++=va_arg(ap,object);
-  if (n<0) {
-    object x=*--t,y=x;
-    for (j=i-1,i=0;x!=Cnil;x=x->c.c_cdr,i++);
-    t=ZALLOCA((j+i)*sizeof(*t));
-    memcpy(t,b,j*sizeof(*t));
-    for (b=t,t=b+j,x=y;x!=Cnil;x=x->c.c_cdr)
-      *t++=x->c.c_car;
+  if (n<0 && fun->fun.fun_minarg>(j-1)) {
+    object x=*--t;
+    for (i=fun->fun.fun_minarg-(j-1);i--;*t++=x->c.c_car,x=x->c.c_cdr,n--)
+      if (x==Cnil)
+	FEtoo_few_arguments(b,t);
+    *t++=x;
   }
-  return funcall_vec(fun,t-b,b);
+
+  return funcall_vec(fun,n,b);
 
 }
     
@@ -826,15 +808,33 @@ call_applyhook(object fun)
 	super_funcall(ah);
 }
 
+object
+coerce_funcall_object_to_function(object fun) {
+
+  switch (type_of(fun)) {
+  case t_function: break;
+  case t_symbol:
+    if (fun->s.s_mflag || fun->s.s_sfdef!=NOT_SPECIAL ||
+	(fun=fun->s.s_gfdef)==OBJNULL)
+    UNDEFINED_FUNCTION(fun);
+    break;
+  default:
+    TYPE_ERROR(fun,list(3,sLor,sLsymbol,sLfunction));
+    break;
+  }
+
+  return fun;
+
+}
+
+
 static object
 funcall_apply(object fun,fixnum nargs,va_list ap) {
 
   object res,*vals=(object *)fcall.valp;
 
-  if (type_of(fun)==t_symbol && 
-      (fun->s.s_mflag || fun->s.s_sfdef!=NOT_SPECIAL))
-    UNDEFINED_FUNCTION(fun);
-  
+  fun=coerce_funcall_object_to_function(fun);
+
   res=funcall_ap(fun,nargs,ap);
 
   if (type_of(fun)==t_function && !fun->fun.fun_neval && !fun->fun.fun_vv && vals)
