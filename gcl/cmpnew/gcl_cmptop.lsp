@@ -867,15 +867,8 @@
     
 (defun c1va-pop (args)
   (declare (ignore args))
-  (list 'va-pop (make-info :type t)))
-(defun c2va-pop nil
-  (unwind-exit (list 'va-pop) nil 'single-value))
-(defun wt-va-pop nil
-  (wt "va_arg(ap,object)"))
+  `(location ,(make-info :type #tt :flags (iflags side-effects)) (inline 0 "va_arg(ap,object)" nil)))
 (setf (get 'va-pop 'c1) 'c1va-pop)
-(setf (get 'va-pop 'c2) 'c2va-pop)
-(setf (get 'va-pop 'wt-loc) 'wt-va-pop)
-
 
 (defun c1vfun-nargs (args)
   (declare (ignore args))
