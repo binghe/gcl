@@ -331,7 +331,7 @@ extern bool writable_malloc;
       sigprocmask(SIG_SETMASK,&old,NULL);				\
       r;})
 
-#define psystem(x) prof_block(system(x))
+#define psystem(x) prof_block(vsystem(x))
 #define pfork() prof_block(fork())
 
 #include "error.h"
