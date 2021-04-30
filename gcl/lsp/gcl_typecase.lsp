@@ -95,7 +95,7 @@
 				(if (consp f) `(let ((r (realpart ,o))(i (imagpart ,o))) ,f) f)))
 		    ((simple-array non-simple-array) (mdb o (cdr tp)))
 		    ((structure structure-object) (if tp `(mss (c-structure-def ,o) ',(car tp)) t))
-		    ((std-instance standard-generic-interpreted-function standard-generic-compiled-function)
+		    ((std-instance funcallable-std-instance)
 		     (if tp `(when (member ',(car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
 		    ((proper-cons improper-cons)
 		     (and-form

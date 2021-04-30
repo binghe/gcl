@@ -25,14 +25,12 @@
 (in-package :system)
 
 (export '(int void static 
-	      non-standard-generic-function
-	      non-standard-generic-compiled-function
-	      non-standard-generic-interpreted-function
-	      standard-generic-compiled-function
-	      standard-generic-interpreted-function
+	      non-standard-object-compiled-function
+	      interpreted-function
 	      non-logical-pathname
 	      non-standard-base-char true gsym
 	      std-instance
+	      funcallable-std-instance
 	      hash-table-eq hash-table-eql hash-table-equal hash-table-equalp
 	      +type-alist+ 
 	      sequencep ratiop short-float-p long-float-p
@@ -263,8 +261,8 @@
 				      readtable 
 				      hash-table-eq hash-table-eql hash-table-equal hash-table-equalp
 				      random-state
-				      non-standard-generic-interpreted-function
-				      non-standard-generic-compiled-function
+				      interpreted-function
+				      non-standard-object-compiled-function
 				      spice))
 
 

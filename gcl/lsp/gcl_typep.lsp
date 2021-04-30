@@ -94,8 +94,7 @@
 
 
 #.`(progn
-     ,@(mapcar (lambda (y) `(define-simple-typep-fn ,y))
-	       (cons 'standard-generic-interpreted-function (cons 'standard-generic-compiled-function +singleton-types+))))
+     ,@(mapcar (lambda (y) `(define-simple-typep-fn ,y)) +singleton-types+))
 
 
 #.`(progn
@@ -160,12 +159,12 @@
 
 (define-compound-typep-fn structure (o tp)
   (if tp (mss (c-structure-def o) (car tp)) t))
-
 (setf (get 'structure-object 'typep-fn) 'structure-typep-fn);FIXME
 
 (define-compound-typep-fn std-instance (o tp)
   (if tp (when (member (car tp) (si-class-precedence-list (si-class-of o))) t) t))
-
+(define-compound-typep-fn funcallable-std-instance (o tp)
+  (if tp (when (member (car tp) (si-class-precedence-list (si-class-of o))) t) t))
 
 (define-compound-typep-fn proper-cons (o tp)
   (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))

@@ -902,7 +902,7 @@
        (or (local-fun-src n)
 	   (let ((fn (when (fboundp n) (symbol-function n))))
 	     (when (functionp fn) 
-	       (unless (typep fn 'standard-generic-function)
+	       (unless (typep fn 'funcallable-std-instance);FIXME really just need to check/handle for closure
 		 (values (or (gethash fn *src-hash*) (setf (gethash fn *src-hash*) (function-lambda-expression fn))))))))))
 
 ;; (defun inline-sym-src (n)

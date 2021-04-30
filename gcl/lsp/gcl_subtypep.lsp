@@ -1,20 +1,25 @@
 (in-package :si)
 
+(let (fso)
+  (defun funcallable-class-p (x)
+    (member (or fso (setq fso (si-find-class (find-symbol "FUNCALLABLE-STANDARD-OBJECT" "PCL") nil))) (si-class-precedence-list x))))
+
+(defun normalize-instance (c)
+  (cond ((funcallable-class-p c) `(funcallable-std-instance ,c))
+	((member-if 'funcallable-class-p (si-subclasses c)) `(or (std-instance ,c) (funcallable-std-instance ,c)))
+	(`(std-instance ,c))))
+
 (defun just-expand-deftype (type &aux tem
 			      (atp (listp type))
 			      (ctp (if atp (car type) type)))
   (cond
-    ((setq tem (coerce-to-standard-class ctp))
-     (let ((name (si-class-name tem)))
-       (if (member name '(standard-generic-function generic-function));FIXME
-	   `(or standard-generic-compiled-function standard-generic-interpreted-function)
-	 `(std-instance ,tem))))
-    ((si-classp ctp) (si-class-name ctp));built-in
-    ((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem))))
-     `(structure ,ctp))
-    ((setq tem (macro-function (get ctp 'deftype-definition)))
-     (funcall tem (if atp type (list type)) nil))
-    (t (print (list 'bad-type type)) nil)));(error "Bad type" 'type-error :datum type :expected-type 'type-spec))))
+   ((setq tem (coerce-to-standard-class ctp)) (normalize-instance tem));FIXME don't want to normalize a nil type, redundant code
+   ((si-classp ctp) (si-class-name ctp));built-in
+   ((let ((tem (get ctp 's-data))) (when tem (null (sdata-type tem))))
+    `(structure ,ctp))
+   ((setq tem (macro-function (get ctp 'deftype-definition)))
+    (funcall tem (if atp type (list type)) nil))
+   (t (print (list 'bad-type type)) nil)))
 
 (defun expand-deftype (type &aux (e (just-expand-deftype type)))
   (unless (eq type e)
@@ -46,10 +51,7 @@
     (complex-integer-ratio cmpir^ cmpir~ cmp-recon)
     (complex-ratio-integer cmpri^ cmpri~ cmp-recon)
     ((complex-ratio complex-short-float complex-long-float) cmp^ cmp~ cmp-recon)
-    ((std-instance structure
-      standard-generic-compiled-function
-      standard-generic-interpreted-function)
-     std^ std~ std-recon)
+    ((std-instance structure funcallable-std-instance) std^ std~ std-recon)
     ((proper-cons improper-cons) cns^ cns~ cns-recon)
     (,(mapcar 'cdr *all-array-types*) ar^ ar~ ar-recon)
     (,+singleton-types+  sing^ sing~ sing-recon))))
@@ -380,15 +382,23 @@
 	(x `(,c ,(nreconstruct-type-int (pop x))
 		,(nreconstruct-type-int (car x))))))
 
+
 ;;; STRUCTURE and CLASS
 
-
-
-  
 (defun gen-def (x)
-  (cond ((si-classp x) (si-class-of x))
-	((symbolp x) 's-data)
-	((sdata-name (c-structure-def x)))))
+  (cond ((or (symbolp x) (si-classp x)) 'top)
+	((structurep x) (sdata-name (c-structure-def x)))
+	((si-class-of x))))
+
+(defun std-car (x c)
+  (if (s-class-p x) (list c) (gen-get-included (std-def x))))
+
+(defun orthog-to-and-not (x c)
+  (cond
+   ((eq x t) (list c))
+   ((listp x) (nconc (std-car (car x) c) x))
+   ((s-class-p x) (gen-get-included x))
+   (`((member ,x)))))
 
 (defun std-def (x) (gen-def (if (listp x) (car x) x)))
 
@@ -406,42 +416,39 @@
 
 (defun si-subclasses (c)
   (when c
-    (cons c (mapcan 'si-subclasses (si-class-direct-subclasses c)))))
+    (cons c (lreduce
+	     (lambda (y x) (lreduce (lambda (y x) (adjoin x y)) (si-subclasses x) :initial-value y))
+	     (si-class-direct-subclasses c) :initial-value nil))))
 
 (defun gen-get-included (x)
-  (if (symbolp x) (get-included x) (lremove-duplicates (si-subclasses x))))
+  (if (symbolp x) (get-included x) (si-subclasses x)))
 
-(defun std-ld (x)
-  (cons (pop x) (or (when x (gen-get-included (car x))) '(t))))
+(defun filter-included (c x)
+  (case c
+	(std-instance (lremove-if 'funcallable-class-p x))
+	(funcallable-std-instance (lremove-if-not 'funcallable-class-p x))
+	(otherwise x)))
+
+(defun std-ld (x &aux (c (pop x)))
+  (cons c (if x (filter-included c (gen-get-included (car x))) '(t))))
 
 
 
 (defun std-matches (x)
-  (intersection (mapcar 'car x) (lreduce 'union (mapcar 'cdr x) :initial-value nil)))
+  (lremove-if-not (lambda (y) (member (car y) x :test 'member :key 'cdr)) x))
 
-(defun std-pru (x &aux (x (mapcar 'gen-get-included x))(m (std-matches x)))
-  (mapcar (lambda (x)
-	    (cons (car x) (set-difference (cdr x) m)))
-	  (set-difference x m :test (lambda (x y) (eq (car x) y)))))
-
-(defun std-prun (x)
-  (mapcar (lambda (x) (list* 'an (pop x) (mapcar 'car (std-pru x))))
-	  (std-pru x)))
-
-(defun std-prune (x)
-  (if (listp x)
-      (let ((s (lremove t (lremove-if-not 's-class-p x))))
-	(nconc (std-prun s) (mapcar 'std-prune (set-difference x s))))
-    x))
-
-(defun std-recon (x &optional (c (pop x) cp))
-  (cond 
-    ((not cp) (?or (mapcar (lambda (x) (std-recon x c)) (std-prune x))))
-    ((eq x t) c)
-    ((atom x) `(member ,x))
-    ((eq (car x) 'an) (if (cddr x) `(and ,(cadr x) (not ,(?or (cddr x)))) (cadr x)))
-    ((atom (car x)) `(and ,(std-def x) (not (member ,@x))))
-    (`(and ,c ,(?or (cons `(not ,(cadr x)) (cddr x)))))))
+(defun std-recon (x &optional (c (pop x) cp) &aux
+		    (x (mapcar (lambda (x) (orthog-to-and-not x c)) x))
+		    (m (std-matches x)))
+  (?or
+   (mapcar (lambda (x &aux (h (pop x)))
+	     (if x `(and ,h (not ,(std-recon x c))) h))
+	   (mapcar (lambda (x)
+		     (lreduce
+		      (lambda (y x &aux (m (member x m :key 'car)))
+			(nconc y (if m (lremove-if 's-class-p (car m)) (list x))))
+		      x :initial-value nil))
+		   (set-difference x m)))))
 
 
 ;;; INDIVIDUALS
@@ -593,8 +600,7 @@
 		    nil x))))))
 
 (defconstant +ntypes+ `(,@+singleton-types+
-			std-instance structure standard-generic-interpreted-function
-			standard-generic-compiled-function
+			std-instance structure funcallable-std-instance
 			t nil))
 
 (defconstant +dtypes+ '(or and not member satisfies
@@ -620,10 +626,7 @@
 	 (,+range-types+ (rng-ld type))
 	 (complex* (cmp-ld type))
 	 ((cons proper-cons improper-cons) (cns-ld type))
-	 ((std-instance structure
-	   standard-generic-interpreted-function
-	   standard-generic-compiled-function)
-	  (std-ld type))
+	 ((std-instance structure funcallable-std-instance) (std-ld type))
 	 ((simple-array non-simple-array) (ar-ld type))
 	 (,+singleton-types+ (sing-ld type))
 	 (member (member-ld type))

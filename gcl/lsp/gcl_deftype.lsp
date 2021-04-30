@@ -250,16 +250,10 @@
 (deftype atom nil
   `(not cons))
 (deftype compiled-function nil
-  `(or standard-generic-compiled-function non-standard-generic-compiled-function))
-(deftype interpreted-function nil
-  `(or standard-generic-interpreted-function non-standard-generic-interpreted-function))
+  `(or funcallable-std-instance non-standard-object-compiled-function))
 (deftype function (&rest r)
   (declare (ignore r))
   `(or compiled-function interpreted-function))
-(deftype standard-generic-function nil
-  `(or standard-generic-compiled-function standard-generic-interpreted-function))
-(deftype non-standard-generic-function nil
-  `(and function (not standard-generic-function)))
 
 (defun ctp-num-bnd (x tp inc &aux (a (atom x))(nx (if a x (car x))))
   (case tp

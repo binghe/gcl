@@ -302,7 +302,7 @@ LFD(siLstructure_set)(void)
 LFD(siLstructurep)(void)
 {
 	check_arg(1);
-	if (type_of(vs_base[0]) == t_structure)
+	if (type_of(vs_base[0]) == t_structure && !vs_base[0]->d.tt)
 		vs_base[0] = Ct;
 	else
 		vs_base[0] = Cnil;

@@ -3,3 +3,4 @@
 (make-package :iterate :use '(:cl :walker))
 (make-package :pcl :use '(:cl :iterate :walker :s))
 (import 'si::std-instance :pcl)
+(import 'si::funcallable-std-instance :pcl)

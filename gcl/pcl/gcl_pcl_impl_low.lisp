@@ -64,7 +64,7 @@
     (c-set-t-tt fin (logior 1 (c-t-tt fin)))
     fin))
 
-(defun funcallable-instance-p (x) (typep x 'standard-generic-function))
+(defun funcallable-instance-p (x) (typep x 'funcallable-std-instance))
 (defun std-instance-p (x) (typep x 'std-instance))
 (declaim (inline std-instance-p funcallable-instance-p))
 (remprop 'std-instance-p 'compiler::co1)
