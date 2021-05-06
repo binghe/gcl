@@ -1297,9 +1297,9 @@ DEFUN("ROOM-REPORT",object,fSroom_report,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   x=make_cons(make_fixnum(maxcbpage),x);
   x=make_cons(make_fixnum(count_contblocks()),x);
   x=make_cons(make_fixnum(cbgbccount),x);
-  x=make_cons(make_fixnum(holepage),x);
-  x=make_cons(make_fixnum(rb_pointer - rb_start),x);
-  x=make_cons(make_fixnum(rb_end - rb_pointer),x);
+  x=make_cons(make_fixnum((rb_start-heap_end)>>PAGEWIDTH),x);
+  x=make_cons(make_fixnum(rb_pointer - rb_begin()),x);
+  x=make_cons(make_fixnum((rb_begin()+rb_size()) - rb_pointer),x);
   x=make_cons(make_fixnum(nrbpage),x);
   x=make_cons(make_fixnum(maxrbpage),x);
   x=make_cons(make_fixnum(rbgbccount),x);
