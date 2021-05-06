@@ -284,7 +284,7 @@ setup_maxpages(double scale) {
   massert(scale*maxpages>=npages);
 
   maxpages*=scale;
-  phys_pages*=scale;
+  phys_pages=phys_pages>maxpages ? maxpages : phys_pages;
   real_maxpage=maxpages+page(beg);
 
   resv_pages=available_pages=0;
