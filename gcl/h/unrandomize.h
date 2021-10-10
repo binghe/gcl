@@ -63,7 +63,7 @@
       }
     }
 #if defined(CSTACKMAX) && CSTACK_DIRECTION < 0
-    if (&argc > (void *)CSTACKMAX) {
+    if ((void *)&argc > (void *)CSTACKMAX) {
       if (mmap((void *)CSTACKMAX-(1L << PAGEWIDTH),(1L << PAGEWIDTH),
 	       PROT_READ|PROT_WRITE|PROT_EXEC,MAP_FIXED|MAP_PRIVATE|MAP_ANON|MAP_STACK|MAP_GROWSDOWN,-1,0)==(void *)-1) {
 	printf("cannot mmap new stack %d\n",errno);
