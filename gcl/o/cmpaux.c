@@ -560,3 +560,8 @@ DEFUN_NEW("FIND-INIT-NAME", object, fSfind_init_name, SI, 1, 1,
 
 }
 
+DEFUN_NEW("SEEK-TO-END-OFILE",object,fSseek_to_end_ofile,SI,1,1,NONE,OO,OO,OO,OO,(object sm),"") {
+  check_type_stream(&sm);
+  SEEK_TO_END_OFILE(sm->sm.sm_fp);
+  RETURN1(sm);
+}
