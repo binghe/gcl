@@ -299,7 +299,7 @@ char FN1[PATH_MAX],FN2[PATH_MAX],FN3[PATH_MAX],FN4[PATH_MAX],FN5[PATH_MAX];
 #define coerce_to_filename(a_,b_) coerce_to_filename1(a_,b_,sizeof(b_))
 
 #include <errno.h>
-#define massert(a_) ({errno=0;if (!(a_)||errno) assert_error(#a_,__LINE__,__FILE__,__FUNCTION__);})
+#define massert(a_) ({errno=0;if (!(a_)) assert_error(#a_,__LINE__,__FILE__,__FUNCTION__);})
 
 extern bool writable_malloc;
 #define writable_malloc_wrap(f_,rt_,a_...) ({rt_ v;bool w=writable_malloc;writable_malloc=1;v=f_(a_);writable_malloc=w;v;})
