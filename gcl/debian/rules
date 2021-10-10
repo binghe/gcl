@@ -51,6 +51,15 @@ GMP?=
 
 DEBUG=
 
+ARCHCONF?=
+ifeq ($(ARCHT),armhf)
+ARCHCONF=--enable-cstackmax=0xc0000000
+endif
+ifeq ($(ARCHT),armel)
+ARCHCONF=--enable-cstackmax=0xc0000000
+endif
+
+
 #ifeq ($(ARCHT),hppa)
 #DEBUG=--enable-debug
 #endif
@@ -98,6 +107,7 @@ configure-%-stamp: $(CFGS)
 		--enable-$(RELOC) \
 		$(GMP) \
 		$(DEBUG) \
+		$(ARCHCONF) \
 		$$FLAGS \
 		--prefix=/usr \
 		--mandir=\$${prefix}/share/man \

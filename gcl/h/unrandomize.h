@@ -1,4 +1,5 @@
 #include <sys/personality.h>
+#include <sys/mman.h>
 #include <syscall.h>
 #include <unistd.h>
 #include <string.h>
@@ -61,5 +62,20 @@
 	exit(-1);
       }
     }
+#if defined(CSTACKMAX) && CSTACK_DIRECTION < 0
+    if (&argc > CSTACKMAX) {
+      if (mmap((void *)CSTACKMAX-(1L << PAGEWIDTH),(1L << PAGEWIDTH),
+	       PROT_READ|PROT_WRITE|PROT_EXEC,MAP_FIXED|MAP_PRIVATE|MAP_ANON|MAP_STACK|MAP_GROWSDOWN,-1,0)==(void *)-1) {
+	printf("cannot mmap new stack %d\n",errno);
+	exit(-1);
+      }
+#ifdef SET_STACK_POINTER
+      {void *p=CSTACKMAX-CSTACK_ALIGNMENT;asm volatile (SET_STACK_POINTER::"r" (p):"memory");}
+#else
+#error Cannot set stack pointer
+#endif
+    }
+#endif
+
   }
 }

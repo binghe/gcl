@@ -761,6 +761,7 @@ enable_gprof
 enable_dynsysgmp
 with_x
 enable_xdr
+enable_cstackmax
 enable_immfix
 enable_fastimmfix
 enable_ansi
@@ -1429,6 +1430,7 @@ Optional Features:
   --enable-gprof builds gcl with -pg in CFLAGS to enable profiling with gprof
   --enable-dynsysgmp will link against the system libgmp3 overriding certain functions with patched versions from the local source
   --enable-xdr=yes will compile in support for XDR
+  --enable-cstackmax=xxxx will ensure that the cstack begins below xxxx or fail
   --enable-immfix will enable an immediate fixnum table above the C stack
   --enable-fastimmfix=XXXX will reject low immediate fixnums unless 2^XXX can be attained
   --enable-ansi builds a large gcl aiming for ansi compliance
@@ -4186,11 +4188,14 @@ case $use in
 	    ia64*)
 		if test "$enable_debug" != "yes" ; then TO3FLAGS="-O" ; fi #FIXME needed asof gcc 4.8.1
 		;;
-	    armhf*)
-		assert_arg_to_cflags -fdollars-in-identifiers
-		assert_arg_to_cflags -g #?
-		;;
 	    arm*)
+
+$as_echo "#define SET_STACK_POINTER \"mov %%sp,%0\\n\\t\"" >>confdefs.h
+
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking how to set stack pointer" >&5
+$as_echo_n "checking how to set stack pointer... " >&6; }
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: result: done" >&5
+$as_echo "done" >&6; }
 		assert_arg_to_cflags -fdollars-in-identifiers
 		assert_arg_to_cflags -g #?
 		;;
@@ -6673,24 +6678,12 @@ else
 
 		#include <stdio.h>
 		#include <stdlib.h>
-
-		unsigned long w;
-
-		void
-		foo(void) {
-		    int i;
-		    w=(unsigned long)&i;
-		}
-
-		int
-		main(int argc,char **argv,char **envp) {
-		    void *b;
+		int main(int argc,char **argv,char **envp) {
 		    FILE *fp = fopen("conftest1","w");
 		    #ifdef CAN_UNRANDOMIZE_SBRK
 		    #include "h/unrandomize.h"
 		    #endif
-		    foo();
-		    fprintf(fp,"%d",((unsigned long) &b) > w ? -1 : 1);
+		    fprintf(fp,"%d",(alloca(sizeof(void *))>alloca(sizeof(void *))) ? -1 : 1);
 		    fclose(fp);
 		    return 0;
 		}
@@ -6712,6 +6705,62 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_direction" >&5
 $as_echo "$cstack_direction" >&6; }
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking finding CSTACK_ALIGNMENT" >&5
+$as_echo_n "checking finding CSTACK_ALIGNMENT... " >&6; }
+if test "$cross_compiling" = yes; then :
+  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "cannot run test program while cross compiling
+See \`config.log' for more details" "$LINENO" 5; }
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		#include <stdio.h>
+		#include <stdlib.h>
+		int main(int argc,char **argv,char **envp) {
+		    void *b,*c;
+		    FILE *fp = fopen("conftest1","w");
+		    long n;
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    b=alloca(sizeof(b));
+		    c=alloca(sizeof(c));
+		    n=b>c ? b-c : c-b;
+		    n=n>sizeof(c) ? n : 1;
+		    fprintf(fp,"%ld",n);
+		    fclose(fp);
+		    return 0;
+		}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  cstack_alignment=`cat conftest1`
+else
+  cstack_alignment=0
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define CSTACK_ALIGNMENT $cstack_alignment
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_alignment" >&5
+$as_echo "$cstack_alignment" >&6; }
+
+# Check whether --enable-cstackmax was given.
+if test "${enable_cstackmax+set}" = set; then :
+  enableval=$enable_cstackmax; if test "$enableval" != "" ; then
+cat >>confdefs.h <<_ACEOF
+#define CSTACKMAX $enableval
+_ACEOF
+ fi
+fi
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking CSTACK_ADDRESS" >&5
 $as_echo_n "checking CSTACK_ADDRESS... " >&6; }
@@ -6728,7 +6777,6 @@ else
 		#include <stdlib.h>
 		int
 		main(int argc,char **argv,char **envp) {
-		    void *v ;
 		    FILE *fp = fopen("conftest1","w");
 		    unsigned long i,j;
 
@@ -6738,7 +6786,7 @@ else
 		    j=1;
 		    j<<=$PAGEWIDTH;
 		    j<<=16;
-		    i=(unsigned long)&v;
+		    i=(unsigned long)alloca(sizeof(void *));
 		    if ($cstack_direction==1) i-=j;
 		    j--;
 		    i+=j;
@@ -6855,52 +6903,6 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
 fi
 
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking finding CSTACK_ALIGNMENT" >&5
-$as_echo_n "checking finding CSTACK_ALIGNMENT... " >&6; }
-if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-		#include <stdio.h>
-		#include <stdlib.h>
-		int main(int argc,char **argv,char **envp) {
-		    void *b,*c;
-		    FILE *fp = fopen("conftest1","w");
-		    long n;
-		    #ifdef CAN_UNRANDOMIZE_SBRK
-		    #include "h/unrandomize.h"
-		    #endif
-		    b=alloca(sizeof(b));
-		    c=alloca(sizeof(c));
-		    n=b>c ? b-c : c-b;
-		    n=n>sizeof(c) ? n : 1;
-		    fprintf(fp,"%ld",n);
-		    fclose(fp);
-		    return 0;
-		}
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  cstack_alignment=`cat conftest1`
-else
-  cstack_alignment=0
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-
-cat >>confdefs.h <<_ACEOF
-#define CSTACK_ALIGNMENT $cstack_alignment
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $cstack_alignment" >&5
-$as_echo "$cstack_alignment" >&6; }
 
 # Check whether --enable-immfix was given.
 if test "${enable_immfix+set}" = set; then :

@@ -503,6 +503,9 @@ which(const char *n,char *o) {
 
 #endif
 
+static int ARGC;
+static char **ARGV;
+
 int
 main(int argc, char **argv, char **envp) {
 
@@ -515,7 +518,7 @@ main(int argc, char **argv, char **envp) {
 #include "unrandomize.h"
 #endif
 
-  gcl_init_alloc(&argv);
+  gcl_init_alloc(alloca(1));
 
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
@@ -527,7 +530,6 @@ main(int argc, char **argv, char **envp) {
 #endif
   ARGC = argc;
   ARGV = argv;
-  ENVP = envp;
   
   vs_top = vs_base = vs_org;
   ihs_top = ihs_org-1;
@@ -539,9 +541,9 @@ main(int argc, char **argv, char **envp) {
     printf("GCL (GNU Common Lisp)  %s  %ld pages\n",LISP_IMPLEMENTATION_VERSION,real_maxpage);
     fflush(stdout);
     
-    if (argc>1) {
-      massert(argv[1][strlen(argv[1])-1]=='/');
-      system_directory=argv[1];
+    if (ARGC>1) {
+      massert(ARGV[1][strlen(ARGV[1])-1]=='/');
+      system_directory=ARGV[1];
     }
 
     initlisp();

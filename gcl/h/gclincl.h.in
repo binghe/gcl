@@ -26,6 +26,9 @@
    */
 #undef CRAY_STACKSEG_END
 
+/* cstack max */
+#undef CSTACKMAX
+
 /* starting C stack address */
 #undef CSTACK_ADDRESS
 
@@ -335,6 +338,9 @@
 
 /* system pagewidth */
 #undef PAGEWIDTH
+
+/* asm string to set the stack pointer */
+#undef SET_STACK_POINTER
 
 /* have sigcontext of signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT

@@ -272,12 +272,7 @@ object macro_expand();
 
 /*  main.c  */
 EXTER char* system_directory;
-EXTER int ARGC;
-EXTER char **ARGV;
 void error();
-#ifdef UNIX
-EXTER char **ENVP;
-#endif
 object vs_overflow(void);
 
 EXTER object sSAsystem_directoryA;
