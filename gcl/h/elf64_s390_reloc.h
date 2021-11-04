@@ -8,5 +8,6 @@
     add_ivals((int *)where,MASK(32),s+a-p);
     break;
   case     R_390_PC32DBL:
+  case     R_390_PLT32DBL:/*FIXME think about this*/
     add_ivals((int *)where,MASK(32),(s+a-p)>>1);
     break;
