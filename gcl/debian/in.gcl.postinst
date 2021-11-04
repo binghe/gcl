@@ -2,7 +2,8 @@
 case "$1" in
   configure)
 
-	CONFIGFILE=$(tempfile -m 644)
+#	CONFIGFILE=$(tempfile -m 644)
+	CONFIGFILE=$(mktemp)
 	set -e
 	. /usr/share/debconf/confmodule
 	
