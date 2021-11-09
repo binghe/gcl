@@ -339,6 +339,9 @@
 /* system pagewidth */
 #undef PAGEWIDTH
 
+/* readline is editline */
+#undef READLINE_IS_EDITLINE
+
 /* asm string to set the stack pointer */
 #undef SET_STACK_POINTER
 

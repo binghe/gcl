@@ -7954,6 +7954,48 @@ if test "x$ac_cv_lib_readline_rl_initialize" = xyes; then :
 
 $as_echo "#define USE_READLINE 1" >>confdefs.h
 
+				 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for el_getc in -lreadline" >&5
+$as_echo_n "checking for el_getc in -lreadline... " >&6; }
+if ${ac_cv_lib_readline_el_getc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lreadline  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char el_getc ();
+int
+main ()
+{
+return el_getc ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_readline_el_getc=yes
+else
+  ac_cv_lib_readline_el_getc=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_readline_el_getc" >&5
+$as_echo "$ac_cv_lib_readline_el_getc" >&6; }
+if test "x$ac_cv_lib_readline_el_getc" = xyes; then :
+
+$as_echo "#define READLINE_IS_EDITLINE 1" >>confdefs.h
+
+fi
+
 				 # These tests discover differences between readline 4.1 and 4.3
 				 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for rl_completion_matches in -lreadline" >&5
 $as_echo_n "checking for rl_completion_matches in -lreadline... " >&6; }

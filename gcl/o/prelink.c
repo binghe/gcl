@@ -8,7 +8,12 @@ extern FILE *stderr __attribute__((weak));
 extern FILE *stdout __attribute__((weak));
 
 #ifdef USE_READLINE
-#if RL_READLINE_VERSION < 0x0600
+#ifdef READLINE_IS_EDITLINE
+#define MY_RL_VERSION 0x0600
+#else
+#define MY_RL_VERSION RL_READLINE_VERSION
+#endif
+#if MY_RL_VERSION < 0x0600
 extern Function		*rl_completion_entry_function __attribute__((weak));
 extern char		*rl_readline_name __attribute__((weak));
 #else

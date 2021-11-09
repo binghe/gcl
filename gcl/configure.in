@@ -1707,7 +1707,8 @@ fi
 if test "$enable_readline" != "no" ; then
     AC_CHECK_HEADERS([readline/readline.h],
 			AC_CHECK_LIB([readline],[rl_initialize],
-				[AC_DEFINE(USE_READLINE,1,[use readline library]) 
+				[AC_DEFINE(USE_READLINE,1,[use readline library])
+				 AC_CHECK_LIB([readline],[el_getc],AC_DEFINE(READLINE_IS_EDITLINE,1,[readline is editline]))
 				 # These tests discover differences between readline 4.1 and 4.3
 				 AC_CHECK_LIB([readline],[rl_completion_matches],
 					[AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])

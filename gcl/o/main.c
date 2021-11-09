@@ -1201,7 +1201,11 @@ init_main(void) {
 #endif	 
   
 #ifdef USE_READLINE
+#ifdef READLINE_IS_EDITLINE
+  ADD_FEATURE("EDITLINE");
+#else
   ADD_FEATURE("READLINE");
+#endif
 #endif
 #if !defined(USE_DLOPEN)
   ADD_FEATURE("NATIVE-RELOC");
