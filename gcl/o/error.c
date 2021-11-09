@@ -148,6 +148,8 @@ Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) {
 
   IapplyVector(sSuniversal_error_handler,n,b);
 
+  while (1);
+
 }
 
 /*
