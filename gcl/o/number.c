@@ -65,7 +65,7 @@ struct {int min,max;} bigger_fixnums;
 struct fixnum_struct *bigger_fixnum_table;
 #if !defined(IM_FIX_BASE) || defined(USE_SAFE_CDR)
 #define STATIC_BIGGER_FIXNUM_TABLE_BITS 10
-static struct fixnum_struct bigger_fixnum_table1[1<<(STATIC_BIGGER_FIXNUM_TABLE_BITS+1)];
+static struct fixnum_struct bigger_fixnum_table1[1<<(STATIC_BIGGER_FIXNUM_TABLE_BITS+1)] OBJ_ALIGN;
 #endif
 
 DEFUN_NEW("ALLOCATE-BIGGER-FIXNUM-RANGE",object,fSallocate_bigger_fixnum_range,SI,2,2,NONE,OI,IO,OO,OO,(fixnum min,fixnum max),"")  {
