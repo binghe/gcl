@@ -1,3 +1,37 @@
+gcl (2.6.12-107) unstable; urgency=medium
+
+  * Version_2.6.13pre102
+
+ -- Camm Maguire <camm@debian.org>  Tue, 09 Nov 2021 10:10:19 +0000
+
+gcl (2.6.12-106) unstable; urgency=medium
+
+  * Version_2.6.13pre101
+
+ -- Camm Maguire <camm@debian.org>  Thu, 04 Nov 2021 14:33:53 +0000
+
+gcl (2.6.12-105) unstable; urgency=medium
+
+  * Version_2.6.13pre101
+  * Bug fix: "fails to start with glibc 2.33", thanks to Andreas Kloeckner
+    (Closes: #995323).
+
+ -- Camm Maguire <camm@debian.org>  Sun, 10 Oct 2021 13:18:39 +0000
+
+gcl (2.6.12-104) unstable; urgency=medium
+
+  * Version_2.6.13pre100
+  * standardize cstack start address on 32bit arm
+
+ -- Camm Maguire <camm@debian.org>  Sun, 10 Oct 2021 12:44:51 +0000
+
+gcl (2.6.12-103) unstable; urgency=medium
+
+  * Bug fix: "Fails to install in unstable", thanks to Samuel Thibault
+    (Closes: #993480).
+
+ -- Camm Maguire <camm@debian.org>  Sat, 04 Sep 2021 19:23:26 +0000
+
 gcl (2.6.12-102) unstable; urgency=medium
 
   * Version_2.6.13pre99
