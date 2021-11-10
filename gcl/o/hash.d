@@ -313,67 +313,87 @@ DEFVAR("*DEFAULT-HASH-TABLE-SIZE*",sSAdefault_hash_table_sizeA,SI,make_fixnum(10
 DEFVAR("*DEFAULT-HASH-TABLE-REHASH-SIZE*",sSAdefault_hash_table_rehash_sizeA,SI,make_shortfloat((shortfloat)1.5),"");
 DEFVAR("*DEFAULT-HASH-TABLE-REHASH-THRESHOLD*",sSAdefault_hash_table_rehash_thresholdA,SI,make_shortfloat((shortfloat)0.7),"");
 
-@(defun make_hash_table (&key (test sLeql)
-			      (size `sSAdefault_hash_table_sizeA->s.s_dbind`)
-			      (rehash_size
-			       `sSAdefault_hash_table_rehash_sizeA->s.s_dbind`)
-			      (rehash_threshold
-			       `sSAdefault_hash_table_rehash_thresholdA->s.s_dbind`)
-  			      (static `Cnil`)
-			 &aux h)
-	enum httest htt=0;
-	int i;
-@
-	if (test == sLeq || test == sLeq->s.s_gfdef)
-		htt = htt_eq;
-	else if (test == sLeql || test == sLeql->s.s_gfdef)
-		htt = htt_eql;
-	else if (test == sLequal || test == sLequal->s.s_gfdef)
-		htt = htt_equal;
-	else
-		FEerror("~S is an illegal hash-table test function.",
-			1, test);
-  	if (type_of(size) != t_fixnum || 0 < fix(size))
-		;
-	else
-		FEerror("~S is an illegal hash-table size.", 1, size);
-	if ((type_of(rehash_size) == t_fixnum && 0 < fix(rehash_size)) ||
-	    (type_of(rehash_size) == t_shortfloat && 1.0 < sf(rehash_size)) ||
-	    (type_of(rehash_size) == t_longfloat && 1.0 < lf(rehash_size)))
-		;
-	else
-		FEerror("~S is an illegal hash-table rehash-size.",
-			1, rehash_size);
-	if ((type_of(rehash_threshold) == t_fixnum &&
-	    0 < fix(rehash_threshold) && fix(rehash_threshold) < fix(size)) ||
-	    (type_of(rehash_threshold) == t_shortfloat &&
-	    0.0 < sf(rehash_threshold) && sf(rehash_threshold) < 1.0) ||
-	    (type_of(rehash_threshold) == t_longfloat &&
-	    0.0 < lf(rehash_threshold) && lf(rehash_threshold) < 1.0))
-		;
-	else
-		FEerror("~S is an illegal hash-table rehash-threshold.",
-			1, rehash_threshold);
-	{BEGIN_NO_INTERRUPT;
-	h = alloc_object(t_hashtable);
-	h->ht.ht_test = (short)htt;
-	h->ht.ht_size = fix(size);
-	h->ht.ht_rhsize = rehash_size;
-	h->ht.ht_rhthresh = rehash_threshold;
-	h->ht.ht_cache=NULL;
-        h->ht.ht_nent = 0;
-        h->ht.ht_static = static!=Cnil ? 1 : 0;
-	h->ht.ht_self = NULL;
-	h->ht.ht_self = h->ht.ht_static ?
-	  (struct htent *)alloc_contblock(fix(size) * sizeof(struct htent)) :
-	  (struct htent *)alloc_relblock(fix(size) * sizeof(struct htent));
-	for(i = 0;  i < fix(size);  i++) {
-		h->ht.ht_self[i].hte_key = OBJNULL;
-		h->ht.ht_self[i].hte_value = OBJNULL;
-	}
-	END_NO_INTERRUPT;}
-	@(return h)
-@)
+DEFUN_NEW("MAKE-HASH-TABLE",object,fLmake_hash_table,LISP,0,63,NONE,OO,OO,OO,OO,(object first,...),"") {
+
+  int i=0,nargs=VFUN_NARGS;
+  object *base=vs_top,test,size,rehash_size,rehash_threshold,staticp,h;
+  enum httest htt=0;
+  va_list ap;
+
+  if (nargs>0) {
+    vs_push(first);
+    va_start(ap,first);
+    for (i++;i<nargs;i++)
+      vs_push(va_arg(ap,object));
+    va_end(ap);
+  }
+
+  parse_key(base,FALSE,FALSE,5,sKtest,sKsize,sKrehash_size,sKrehash_threshold,sKstatic);
+  test=base[5]==Cnil ? sLeql : *base;base++;
+  size=base[5]==Cnil ? sSAdefault_hash_table_sizeA->s.s_dbind : *base;base++;
+  rehash_size=base[5]==Cnil ? sSAdefault_hash_table_rehash_sizeA->s.s_dbind : *base;base++;
+  rehash_threshold=base[5]==Cnil ? sSAdefault_hash_table_rehash_thresholdA->s.s_dbind : *base;base++;
+  staticp=base[5]==Cnil ? Cnil : *base;
+  vs_top=base;
+
+  if (test == sLeq || test == sLeq->s.s_gfdef)
+    htt = htt_eq;
+  else if (test == sLeql || test == sLeql->s.s_gfdef)
+    htt = htt_eql;
+  else if (test == sLequal || test == sLequal->s.s_gfdef)
+    htt = htt_equal;
+  else
+    FEerror("~S is an illegal hash-table test function.",
+	    1, test);
+  if (type_of(size) != t_fixnum || 0 < fix(size))
+    ;
+  else
+    FEerror("~S is an illegal hash-table size.", 1, size);
+  if ((type_of(rehash_size) == t_fixnum && 0 < fix(rehash_size)) ||
+      (type_of(rehash_size) == t_shortfloat && 1.0 < sf(rehash_size)) ||
+      (type_of(rehash_size) == t_longfloat && 1.0 < lf(rehash_size)))
+    ;
+  else
+    FEerror("~S is an illegal hash-table rehash-size.",
+	    1, rehash_size);
+  if ((type_of(rehash_threshold) == t_fixnum &&
+       0 < fix(rehash_threshold) && fix(rehash_threshold) < fix(size)) ||
+      (type_of(rehash_threshold) == t_shortfloat &&
+       0.0 < sf(rehash_threshold) && sf(rehash_threshold) < 1.0) ||
+      (type_of(rehash_threshold) == t_longfloat &&
+       0.0 < lf(rehash_threshold) && lf(rehash_threshold) < 1.0))
+    ;
+  else
+    FEerror("~S is an illegal hash-table rehash-threshold.",
+	    1, rehash_threshold);
+  {BEGIN_NO_INTERRUPT;
+    h = alloc_object(t_hashtable);
+    h->ht.ht_test = (short)htt;
+    h->ht.ht_size = fix(size);
+    h->ht.ht_rhsize = rehash_size;
+    h->ht.ht_rhthresh = rehash_threshold;
+    h->ht.ht_cache=NULL;
+    h->ht.ht_nent = 0;
+    h->ht.ht_static = staticp!=Cnil ? 1 : 0;
+    h->ht.ht_self = NULL;
+    h->ht.ht_self = h->ht.ht_static ?
+      (struct htent *)alloc_contblock(fix(size) * sizeof(struct htent)) :
+      (struct htent *)alloc_relblock(fix(size) * sizeof(struct htent));
+    for(i = 0;  i < fix(size);  i++) {
+      h->ht.ht_self[i].hte_key = OBJNULL;
+      h->ht.ht_self[i].hte_value = OBJNULL;
+    }
+    END_NO_INTERRUPT;}
+
+  RETURN1(h);
+
+}
+
+object
+gcl_make_hash_table(object test) {
+  return (VFUN_NARGS=2,fLmake_hash_table(sKtest,test));
+}
+
 
 LFD(Lhash_table_p)(void)
 {
@@ -550,7 +570,6 @@ gcl_init_hash()
 	sKrehash_threshold = make_keyword("REHASH-THRESHOLD");
 	sKstatic = make_keyword("STATIC");
 	
-	make_function("MAKE-HASH-TABLE", Lmake_hash_table);
 	make_function("HASH-TABLE-P", Lhash_table_p);
 	make_function("GETHASH", Lgethash);
 	make_function("REMHASH", Lremhash);

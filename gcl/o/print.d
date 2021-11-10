@@ -1521,7 +1521,7 @@ setupPRINTcircle(object x,int dogensyms) {
 
   travel(x,dogensyms,PRINTarray);
 
-  h=vs_top>vp ? funcall_cfun(Lmake_hash_table,2,sKtest,sLeq) : Cnil;
+  h=vs_top>vp ? gcl_make_hash_table(sLeq) : Cnil;
   for (j=0;v<vs_top;v++)
     if (!imcdr(*v) || gethash(*v,h)->hte_key==OBJNULL)
       sethash(*v,h,make_fixnum((j++)<<1));

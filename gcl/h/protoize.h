@@ -1974,3 +1974,6 @@ new_cfdata(void);
 
 int
 home_namestring1(const char *,int,char *,int);
+
+object
+gcl_make_hash_table(object);
