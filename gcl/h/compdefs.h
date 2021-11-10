@@ -58,6 +58,7 @@ NULL
 FALSE
 TRUE
 is_imm_fixnum(x)
+is_unmrkd_imm_fixnum(x)
 aref1
 VFUN_NARGS
 KEYTYPE
