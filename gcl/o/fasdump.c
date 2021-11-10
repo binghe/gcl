@@ -1026,7 +1026,7 @@ grow_vector(object ar)
     ar->v.v_dim=	   ar->v.v_fillp=nl;
     while(--nl >=len)
       ar->v.v_self[nl]=Cnil;
-      END_NO_INTERRUPT;}}
+    END_NO_INTERRUPT;}}
   }
 
 static void

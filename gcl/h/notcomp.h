@@ -283,10 +283,12 @@ gcl_init_cmp_anon(void);
 #ifdef SGC
 #define SAFE_READ(a_,b_,c_) \
    ({int _a=(a_),_c=(c_);char *_b=(b_);extern int sgc_enabled;\
-     if (sgc_enabled) memset(_b,0,_c);read(_a,_b,_c);})
+     if (sgc_enabled) memset(_b,0,_c); \
+     read(_a,_b,_c);})
 #define SAFE_FREAD(a_,b_,c_,d_) \
    ({int _b=(b_),_c=(c_);char *_a=(a_);FILE *_d=(d_);extern int sgc_enabled; \
-     if (sgc_enabled) memset(_a,0,_b*_c);fread(_a,_b,_c,_d);})
+     if (sgc_enabled) memset(_a,0,_b*_c); \
+     fread(_a,_b,_c,_d);})
 #else
 #define SAFE_READ(a_,b_,c_) read((a_),(b_),(c_))
 #define SAFE_FREAD(a_,b_,c_,d_) fread((a_),(b_),(c_),(d_))
