@@ -1,6 +1,6 @@
-AC_INIT()
-AC_PREREQ([2.61])
-AC_CONFIG_HEADER(h/gclincl.h)
+AC_INIT
+AC_PREREQ([2.71])
+AC_CONFIG_HEADERS([h/gclincl.h])
 
 VERSION=`cat majvers`.`cat minvers`
 AC_SUBST(VERSION)
@@ -265,7 +265,7 @@ add_args_to_cflags  -fsigned-char -pipe -fcommon \
 	            -Wno-builtin-requires-header -Wno-empty-body -Wno-self-assign \
 	            -Wno-unused-but-set-variable
 
-add_args_to_ldflags -no-pie -Wl,-z,lazy
+add_args_to_ldflags -no-pie # -Wl,-z,lazy
 
 AC_MSG_CHECKING([for clang])
 AC_RUN_IFELSE(
@@ -1277,7 +1277,7 @@ AC_RUN_IFELSE(
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
 		    FILE *fp = fopen("conftest1","w");
-		    unsigned long i,j;
+		    long i,j;
 		    
 		    #ifdef CAN_UNRANDOMIZE_SBRK
 		    #include "h/unrandomize.h"
@@ -1285,7 +1285,7 @@ AC_RUN_IFELSE(
 		    j=1;
 		    j<<=$PAGEWIDTH;
 		    j<<=16;
-		    i=(unsigned long)&v;
+		    i=(long)&v;
 		    if ($cstack_direction==1) i-=j;
 		    j--;
 		    i+=j;
@@ -1329,7 +1329,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
     touch unixport/gcl.script
     echo "int main() {return 0;}" >foo.c
     $CC $LDFLAGS -Wl,--verbose foo.c -o foo 2>&1 | \
-	$AWK '/\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=\=/ {i=1-i;next} {if (i) print}' >gcl.script
+	$AWK '/==================================================/ {i=1-i;next} {if (i) print}' >gcl.script
     rm -rf foo.c foo
     
     if test "`cat gcl.script | wc -l`" != "0" ; then
@@ -1400,6 +1400,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
 	fi
 	rm -rf foo.c foo
     else
+        AC_DEFINE_UNQUOTED(OBJNULL,NULL,[lowest address non-object])
 	AC_MSG_RESULT([not found])
     fi 
     
@@ -2121,7 +2122,8 @@ AC_SUBST(GNU_LD)
 if test -f h/$use.defs  ; then
     
     AC_SUBST(use)
-    AC_OUTPUT(makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp )
+    AC_CONFIG_FILES([makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp ])
+AC_OUTPUT
     echo makedefc
     cat makedefc
     
