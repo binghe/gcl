@@ -524,7 +524,7 @@ close_stream(object strm)  {
 
   switch (strm->sm.sm_mode) {
   case smm_output:
-    if (strm->sm.sm_fp == stdout)
+    if (strm->sm.sm_fp == stdout || strm->sm.sm_fp == stderr)
       FEerror("Cannot close the standard output.", 0);
     fflush(strm->sm.sm_fp);
     deallocate_stream_buffer(strm);
@@ -2226,9 +2226,10 @@ DEF_ORDINARY("SOCKET",sSsocket,SI,"");
 #endif /* HAVE_NSOCKET */
 
 object standard_io;
+object standard_error;
 DEFVAR("*STANDARD-INPUT*",sLAstandard_inputA,LISP,(gcl_init_file(),standard_io),""); 
 DEFVAR("*STANDARD-OUTPUT*",sLAstandard_outputA,LISP,standard_io,"");
-DEFVAR("*ERROR-OUTPUT*",sLAerror_outputA,LISP,standard_io,"");
+DEFVAR("*ERROR-OUTPUT*",sLAerror_outputA,LISP,standard_error,"");
 DEFVAR("*TERMINAL-IO*",sLAterminal_ioA,LISP,terminal_io,"");
 DEFVAR("*QUERY-IO*",sLAquery_ioA,LISP,
     (standard_io->sm.sm_object0 = sLAterminal_ioA,
@@ -2267,6 +2268,19 @@ gcl_init_file(void)
 #endif
 	standard_output->sm.sm_int = 0; /* unused */
 	standard_output->sm.sm_flags=0;
+
+	standard_error = alloc_object(t_stream);
+	standard_error->sm.sm_mode = (short)smm_output;
+	standard_error->sm.sm_fp = stderr;
+	standard_error->sm.sm_buffer = 0;
+	standard_error->sm.sm_object0 = sLcharacter;
+	standard_error->sm.sm_object1
+#ifdef UNIX
+	= make_simple_string("stderr");
+#endif
+	standard_error->sm.sm_int = 0; /* unused */
+	standard_error->sm.sm_flags=0;
+	enter_mark_origin(&standard_error);
 
 	terminal_io = standard
 	= make_two_way_stream(standard_input, standard_output);

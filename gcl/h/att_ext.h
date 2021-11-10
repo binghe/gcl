@@ -179,6 +179,7 @@ EXTER object sLAterminal_ioA;
 EXTER object sLAtrace_outputA;
 EXTER object terminal_io;
 EXTER object standard_io;
+EXTER object standard_error;
 
 EXTER object sLAload_verboseA;
 EXTER object FASL_string;

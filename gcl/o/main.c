@@ -80,6 +80,7 @@ char *system_directory;
 #define EXTRA_BUFSIZE 8
 char stdin_buf[BUFSIZ + EXTRA_BUFSIZE];
 char stdout_buf[BUFSIZ + EXTRA_BUFSIZE];
+char stderr_buf[BUFSIZ + EXTRA_BUFSIZE];
 
 #include "stacks.h"
 
@@ -531,6 +532,7 @@ main(int argc, char **argv, char **envp) {
 
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
+  setbuf(stderr, stderr_buf);
 #ifdef _WIN32
   _fmode = _O_BINARY;
   _setmode( _fileno( stdin ), _O_BINARY );
@@ -565,9 +567,6 @@ main(int argc, char **argv, char **envp) {
     sLApackageA->s.s_dbind = user_package;
     
   } else {
-
-    terminal_io->sm.sm_object0->sm.sm_fp = stdin;
-    terminal_io->sm.sm_object1->sm.sm_fp = stdout;
 
     gcl_init_big1();
 #ifdef USE_READLINE
