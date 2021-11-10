@@ -99,6 +99,7 @@
 ;;  *split-files* long, with the 
 ;;  will be performed for separate chunks of the lisp files.
 (defvar *split-files* nil)  ;; if 
+(defvar *compile-file-truename*)
 
 (defun compile-file  (filename &rest args
 			    &aux (*print-pretty* nil)
