@@ -733,7 +733,7 @@ void
 write_string(object,object);
 
 void
-edit_double(int, double, int *, char *, int *);
+edit_double(int, double, int *, char *, int *,int);
 
 void
 sethash(object,object,object);
