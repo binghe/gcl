@@ -391,7 +391,7 @@ DEFUN_NEW("MAKE-HASH-TABLE",object,fLmake_hash_table,LISP,0,63,NONE,OO,OO,OO,OO,
 
 object
 gcl_make_hash_table(object test) {
-  return (VFUN_NARGS=2,fLmake_hash_table(sKtest,test));
+  return (VFUN_NARGS=2,FFN(fLmake_hash_table)(sKtest,test));
 }
 
 
