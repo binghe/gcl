@@ -398,7 +398,7 @@ edit_double(int n,double d,int *sp,char *s,int *ep,int dp) {
   }
   b[2]=b[1];
 
-  for (i=0,p=b+2;i<n && *p;i++)
+  for (i=0,p=b+2;i<n && p[i];i++)
       s[i] = p[i];
   for (;i<n;i++)
     s[i] = '0';
