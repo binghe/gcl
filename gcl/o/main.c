@@ -568,6 +568,10 @@ main(int argc, char **argv, char **envp) {
     
   } else {
 
+    terminal_io->sm.sm_object0->sm.sm_fp = stdin;
+    terminal_io->sm.sm_object1->sm.sm_fp = stdout;
+    standard_error->sm.sm_fp = stderr;
+
     gcl_init_big1();
 #ifdef USE_READLINE
     gcl_init_readline_function();
