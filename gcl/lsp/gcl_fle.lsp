@@ -74,7 +74,7 @@
 	 (env (when es (function-env fun 0))));(*object (c-function-env fun) 0 nil nil)
     (when env
 ;      (assert (= (length env) (length es))) ;FIXME closure var order
-      (setf (cadr out) (mapcar (lambda (x) (list (pop x) (nth (- (length env) (car x)) env))) es)))
+      (setf (cadr out) (mapcar (lambda (x) (list (pop x) (nth (- (length es) (car x)) env))) es)))
     (when (vectorp ss)
       (close-fasd ss))
     out))
