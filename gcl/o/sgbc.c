@@ -152,7 +152,7 @@ sgc_mark_phase(void) {
 
 static void
 sgc_sweep_phase(void) {
-  STATIC long j, k;
+  STATIC long j, k, l;
   STATIC object x;
   STATIC char *p;
   STATIC struct typemanager *tm;
@@ -160,13 +160,18 @@ sgc_sweep_phase(void) {
   int size;
   STATIC struct pageinfo *v;
   
+  for (j= t_start; j < t_contiguous ; j++) {
+    tm_of(j)->tm_free=OBJNULL;
+    tm_of(j)->tm_nfree=0;
+  }
+
   for (v=cell_list_head;v;v=v->next) {
 
     tm = tm_of((enum type)v->type);
     
     p = pagetochar(page(v));
-    f = tm->tm_free;
-    k = 0;
+    f = FREELIST_TAIL(tm);
+    l = k = 0;
     size=tm->tm_size;
 
     if (v->sgc_flags&SGC_PAGE_FLAG) {
@@ -175,10 +180,9 @@ sgc_sweep_phase(void) {
 
 	x = (object)p;
 	
-	if (is_free(x))
-	  continue;
-	else if (is_marked(x)) {
+	if (is_marked(x)) {
 	  unmark(x);
+	  l++;
 	  continue;
 	}
 
@@ -187,18 +191,18 @@ sgc_sweep_phase(void) {
 	  continue;
 #endif
 	
-	/* it is ok to free x */
-	
-	SET_LINK(x,f);
+	k++;
 	make_free(x);
+	SET_LINK(f,x);
+	f = x;
+
 #ifndef SGC_WHOLE_PAGE
 	if (TYPEWORD_TYPE_P(v->type)) x->d.s = SGC_RECENT;
 #endif
-	f = x;
-	k++;
 
       }
-      tm->tm_free = f;
+      SET_LINK(f,OBJNULL);
+      tm->tm_tail = f;
       tm->tm_nfree += k;
       v->in_use-=k;
 
@@ -674,34 +678,38 @@ sgc_start(void) {
      contain the others */
   for (i= t_start; i < t_contiguous ; i++)
     if (TM_BASE_TYPE_P(i) && (np=(tm=tm_of(i))->tm_sgc)) {
-      object f=tm->tm_free ,x,y,next;
+      object f=tm->tm_free,xf,yf;
+      struct freelist x,y;/*the f_link heads have to be separated on the stack*/
       fixnum count=0;
-      x=y=OBJNULL;
       
+      xf=PHANTOM_FREELIST(x.f_link);
+      yf=PHANTOM_FREELIST(y.f_link);
       while (f!=OBJNULL) {
-	next=OBJ_LINK(f);
 #ifdef SDEBUG	     
 	if (!is_free(f))
 	  printf("Not FREE in freelist f=%d",f);
 #endif
 	if (pageinfo(f)->sgc_flags&SGC_PAGE_FLAG) {
-	  SET_LINK(f,x);
+	  SET_LINK(xf,f);
 #ifndef SGC_WHOLE_PAGE
 	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_RECENT;
 #endif
-	  x=f;
+	  xf=f;
 	  count++;
 	} else {
-	  SET_LINK(f,y);
+	  SET_LINK(yf,f);
 #ifndef SGC_WHOLE_PAGE
  	  if (TYPEWORD_TYPE_P(pageinfo(f)->type)) f->d.s = SGC_NORMAL;
 #endif
-	  y=f;
+	  yf=f;
 	}
-	f=next;
+	f=OBJ_LINK(f);
       }
-      tm->tm_free = x;
-      tm->tm_alt_free = y;
+      SET_LINK(xf,OBJNULL);
+      tm->tm_free = OBJ_LINK(&x);
+      tm->tm_tail = xf;
+      SET_LINK(yf,OBJNULL);
+      tm->tm_alt_free = OBJ_LINK(&y);
       tm->tm_alt_nfree = tm->tm_nfree - count;
       tm->tm_nfree=count;
     }
@@ -852,37 +860,21 @@ sgc_quit(void) {
     
     if (TM_BASE_TYPE_P(i) && (np=(tm=tm_of(i))->tm_sgc)) {
       
-      object f,y;
+      object n=tm->tm_free,o=tm->tm_alt_free,f=PHANTOM_FREELIST(tm->tm_free);
       
-      f=tm->tm_free;
-      if (f==OBJNULL) 
-	tm->tm_free=tm->tm_alt_free;
-      else {
-	/* tack the alt_free onto the end of free */
-#ifdef SDEBUG
-	fixnum count=0;
-	f=tm->tm_free;
-	while(y= (object) F_LINK(f)) {
-	  if(y->d.s != SGC_RECENT)
-	    printf("[bad %d]",y);
-	  count++; f=y;
+      for (;n!=OBJNULL && o!=OBJNULL;)
+	if (o!=OBJNULL && (n==OBJNULL || o<n)) {
+	  SET_LINK(f,o);
+	  f=o;
+	  o=OBJ_LINK(o);
+	} else {
+	  SET_LINK(f,n);
+	  f=n;
+	  n=OBJ_LINK(n);
 	}
-	
-	count=0;
-	if (f==tm->tm_alt_free)
-	  while(y= F_LINK(f)) {
-	    if(y->d.s != SGC_NORMAL)
-	      printf("[alt_bad %d]",y);
-	    count++; f=y;
-	  }
-	
-#endif
-	f=tm->tm_free;
-	while((y= (object) F_LINK(f))!=OBJNULL)
-	  f=y;
-	F_LINK(f)= (long)(tm->tm_alt_free);
-      }
-      /* tm->tm_free has all of the free objects */
+      SET_LINK(f,n!=OBJNULL ? n : o);
+      tm->tm_tail=f;
+      for (;OBJ_LINK(tm->tm_tail)!=OBJNULL;tm->tm_tail=OBJ_LINK(tm->tm_tail));
       tm->tm_nfree += tm->tm_alt_nfree;
       tm->tm_alt_nfree = 0;
       tm->tm_alt_free = OBJNULL;

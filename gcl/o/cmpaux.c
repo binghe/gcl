@@ -535,6 +535,9 @@ call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
 
    */
 
+static int set_min_cfd_self=0;
+object *min_cfd_self=NULL;
+
 DEFUN("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
 
   sSPmemory->s.s_dbind->cfd.cfd_prof=1;
@@ -575,6 +578,8 @@ do_init(object *statVV)
      }
   
   data->cfd.cfd_self = statVV;
+  if (set_min_cfd_self && (!min_cfd_self || data->cfd.cfd_self<min_cfd_self))
+    min_cfd_self=data->cfd.cfd_self;
   data->cfd.cfd_fillp= n+1;
   statVV[n] = data;
   
@@ -636,7 +641,6 @@ new_cfdata(void) {
 
 }
 
-
 void
 gcl_init_or_load1(void (*fn)(void),const char *file) {
 
@@ -651,7 +655,9 @@ gcl_init_or_load1(void (*fn)(void),const char *file) {
     memory->cfd.cfd_start= (char *)fn;
     printf("Initializing %s\n",file); fflush(stdout);
     fasl_data = read_fasl_data(file);
+    set_min_cfd_self=1;
     call_init(0,memory,fasl_data,0);
+    set_min_cfd_self=0;
 
   } else {
     printf("loading %s\n",file);

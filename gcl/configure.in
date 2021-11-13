@@ -1,6 +1,6 @@
-AC_INIT()
-AC_PREREQ([2.61])
-AC_CONFIG_HEADER(h/gclincl.h)
+AC_INIT
+AC_PREREQ([2.71])
+AC_CONFIG_HEADERS([h/gclincl.h])
 
 VERSION=`cat majvers`.`cat minvers`
 AC_SUBST(VERSION)
@@ -654,7 +654,7 @@ if test "$GCC" = "yes" ; then
    AC_MSG_CHECKING([for CFLAG $TMPF])
    CFLAGS_ORI=$CFLAGS
    CFLAGS="$CFLAGS $TMPF"
-   AC_TRY_RUN([int main() {return 0;}],TCFLAGS="$TCFLAGS $TMPF";AC_MSG_RESULT(yes),AC_MSG_RESULT(no),AC_MSG_RESULT(no))
+   AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() {return 0;}]])],[TCFLAGS="$TCFLAGS $TMPF";AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)],[AC_MSG_RESULT(no)])
    CFLAGS=$CFLAGS_ORI
 
 fi
@@ -859,6 +859,23 @@ else
 	    system=AIX-`uname -v`.`uname -r`
 	fi
 	AC_MSG_RESULT($system)
+    fi
+fi
+
+if test "$enable_xdr" != "no" ; then
+    XDR_LIB=""
+    AC_CHECK_FUNC([xdr_double],XDR_LIB=" ",
+		  [AC_CHECK_LIB([tirpc],[xdr_double],[XDR_LIB=tirpc],
+				[AC_CHECK_LIB([gssrpc],[xdr_double],[XDR_LIB=gssrpc],
+					      [AC_CHECK_LIB([rpc],[xdr_double],[XDR_LIB=rpc],
+							    [AC_CHECK_LIB([oncrpc],[xdr_double],[XDR_LIB=oncrpc])])])])])
+
+    if test "$XDR_LIB" != ""; then
+	AC_DEFINE(HAVE_XDR,1,[have xdr extensions])
+	if test "$XDR_LIB" != " "; then
+	    TLIBS="$TLIBS -l$XDR_LIB"
+	    add_arg_to_cflags -I/usr/include/$XDR_LIB
+	fi
     fi
 fi
 
@@ -1207,13 +1224,10 @@ case $use in
      ia64*) ;;    #FIXME
      *) 
      AC_MSG_CHECKING(__builtin___clear_cache)
-     		AC_TRY_COMPILE([],
-			       [void *v,*ve;
+     		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[void *v,*ve;
 			        __builtin___clear_cache(v,ve);
-				],
-				[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE,1,[have __builtin__clear_cache instruction])
-				 AC_MSG_RESULT(yes)],
-				 AC_MSG_RESULT(no));;
+				]])],[AC_DEFINE(HAVE_BUILTIN_CLEAR_CACHE,1,[have __builtin__clear_cache instruction])
+				 AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)]);;
 esac
 
 #AC_CONFIG_SUBDIRS($MY_SUBDIRS)
@@ -1301,6 +1315,33 @@ AC_RUN_IFELSE([
 	AC_DEFINE(DOUBLE_BIGENDIAN,1,[big endian word order])])
 AC_SUBST(DOUBLE_BIGENDIAN)
 
+# pagewidth
+AC_MSG_CHECKING(for pagewidth)
+case $use in
+    mips*) min_pagewidth=14;;
+    *) min_pagewidth=12;;
+esac
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#include <unistd.h>
+		#ifdef __CYGWIN__
+		#define getpagesize() 4096
+		#endif
+	    ]],
+	    [[
+		size_t i=getpagesize(),j;
+		FILE *fp=fopen("conftest1","w");
+		for (j=0;i>>=1;j++);
+		    j=j<$min_pagewidth ? $min_pagewidth : j;
+		    fprintf(fp,"%u",j);
+	    ]])],
+    [PAGEWIDTH=`cat conftest1`],
+    [PAGEWIDTH=0])
+AC_MSG_RESULT($PAGEWIDTH)
+AC_DEFINE_UNQUOTED(PAGEWIDTH,$PAGEWIDTH,[system pagewidth])
+AC_SUBST(PAGEWIDTH)
 
 # On systems with execshield, brk is randomized.  We need to catch
 # this and restore the traditional behavior here
@@ -1438,6 +1479,150 @@ if test "$HAVE_SBRK" = "1" ; then
    fi
 fi
 
+AC_MSG_CHECKING(CSTACK_DIRECTION)
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+
+		unsigned long w;
+
+		void
+		foo(void) {
+		    int i;
+		    w=(unsigned long)&i;
+		}
+
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *b;
+		    FILE *fp = fopen("conftest1","w");
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    foo();
+		    fprintf(fp,"%d",((unsigned long) &b) > w ? -1 : 1);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_direction=`cat conftest1`],[cstack_direction=0])
+AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up or down])
+AC_MSG_RESULT($cstack_direction)
+
+
+AC_MSG_CHECKING(CSTACK_ADDRESS)
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *v ;
+		    FILE *fp = fopen("conftest1","w");
+		    unsigned long i,j;
+
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    j=1;
+		    j<<=$PAGEWIDTH;
+		    j<<=16;
+		    i=(unsigned long)&v;
+		    if ($cstack_direction==1) i-=j;
+		    j--;
+		    i+=j;
+		    i&=~j;
+		    fprintf(fp,"0x%lx",i-1);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_address=`cat conftest1`],[cstack_address=0])
+AC_DEFINE_UNQUOTED(CSTACK_ADDRESS,$cstack_address,[starting C stack address])
+AC_MSG_RESULT($cstack_address)
+
+AC_MSG_CHECKING([cstack bits])
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		int
+		main(int argc,char **argv,char **envp) {
+		    void *v ;
+		    FILE *fp = fopen("conftest1","w");
+		    unsigned long i,j;
+
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    j=1;
+		    j<<=$PAGEWIDTH;
+		    j<<=16;
+		    i=(unsigned long)&v;
+		    if ($cstack_direction==1) i-=j;
+		    j--;
+		    i+=j;
+		    i&=~j;
+		    for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
+		    fprintf(fp,"%ld",j);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_bits=`cat conftest1`],[cstack_bits=0])
+AC_DEFINE_UNQUOTED(CSTACK_BITS,$cstack_bits,[log starting C stack address])
+AC_MSG_RESULT($cstack_bits)
+
+AC_MSG_CHECKING(NEG_CSTACK_ADDRESS)
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		int
+		main(int argc,char **argv,char **envp) {
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    return (long)$cstack_address<0 ? 0 : -1;
+		}]])],
+    [AC_MSG_RESULT(yes)
+     neg_cstack_address=1
+     AC_DEFINE(NEG_CSTACK_ADDRESS,1,[C stack address is negative])],
+    [AC_MSG_RESULT(no)
+     neg_cstack_address=0])
+
+AC_MSG_CHECKING([finding CSTACK_ALIGNMENT])
+AC_RUN_IFELSE(
+    [AC_LANG_SOURCE(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		int main(int argc,char **argv,char **envp) {
+		    void *b,*c;
+		    FILE *fp = fopen("conftest1","w");
+		    long n;
+		    #ifdef CAN_UNRANDOMIZE_SBRK
+		    #include "h/unrandomize.h"
+		    #endif
+		    b=alloca(sizeof(b));
+		    c=alloca(sizeof(c));
+		    n=b>c ? b-c : c-b;
+		    n=n>sizeof(c) ? n : 1;
+		    fprintf(fp,"%ld",n);
+		    fclose(fp);
+		    return 0;
+		}]])],
+    [cstack_alignment=`cat conftest1`],[cstack_alignment=0])
+AC_DEFINE_UNQUOTED(CSTACK_ALIGNMENT,$cstack_alignment,[C stack alignment])
+AC_MSG_RESULT($cstack_alignment)
+
+AC_ARG_ENABLE([immfix],[  --enable-immfix will enable an immediate fixnum table above the C stack])
+
+AC_ARG_ENABLE([fastimmfix],[  --enable-fastimmfix=XXXX will reject low immediate fixnums unless 2^XXX can be attained],,[enable_fastimmfix=64])
+
+
 # Should really find a way to check for prototypes, but this 
 # basically works for now.  CM
 #
@@ -1514,237 +1699,31 @@ AC_DEFINE_UNQUOTED(NO_RETURN,$no_return,[can use C extension for functions that 
 
 AC_MSG_CHECKING(sizeof struct contblock)
 
-# work around MSYS pwd result incompatibility
-if test "$use" = "mingw" ; then
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-        #include <complex.h>
-	#define EXTER
-	#include "$MP_INCLUDE"
-	#include "h/type.h"
-	#include "h/lu.h"
-	#include "h/object.h"
+AC_RUN_IFELSE(
+    [AC_LANG_PROGRAM(
+	    [[
+		#include <stdio.h>
+		#include <stdlib.h>
+		#include <complex.h>
+		#define EXTER
+		#define INLINE
+		#include "$MP_INCLUDE"
+		#include "h/enum.h"
+		#include "h/type.h"
+		#include "h/lu.h"
+		#include "h/object.h"
+	    ]],
+	    [[
+		FILE *f=fopen("conftest1","w");
+		fprintf(f,"%u",sizeof(struct contblock));
+		fclose(f);
+	    ]])],
+    [sizeof_contblock=`cat conftest1`],
+    [AC_MSG_ERROR([Cannot find sizeof struct contblock])],
+    [AC_MSG_ERROR([Cannot find sizeof struct contblock])])
 
-	]],[[
-
-	FILE *f=fopen("conftest1","w");
-	fprintf(f,"%u",sizeof(struct contblock));
-	fclose(f);
-	return 0;
-	]])],[sizeof_contblock=`cat conftest1`],
-	   [AC_MSG_ERROR([Cannot find sizeof struct contblock])])
-else
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-        #include <stdio.h>
-        #include <complex.h>
-	#define EXTER
-	#include "$MP_INCLUDE"
-	#include "h/type.h"
-	#include "h/lu.h"
-	#include "h/object.h"
-
-	]],[[
-
-	FILE *f=fopen("conftest1","w");
-	fprintf(f,"%u",sizeof(struct contblock));
-	fclose(f);
-	return 0;
-	]])],[sizeof_contblock=`cat conftest1`],
-  	    [AC_MSG_ERROR([Cannot find sizeof struct contblock])])
-fi
 AC_MSG_RESULT($sizeof_contblock)
 AC_DEFINE_UNQUOTED(SIZEOF_CONTBLOCK,$sizeof_contblock,[sizeof linked list for contiguous pages])
-
-
-# pagewidth
-AC_MSG_CHECKING(for pagewidth)
-AC_RUN_IFELSE([
-	AC_LANG_PROGRAM([[
-	    #include <stdio.h>
-            #include <unistd.h>
-            #ifdef __CYGWIN__
-            #define getpagesize() 4096
-            #endif
-	    ]],[[
-	    size_t i=getpagesize(),j; 
-	    FILE *fp=fopen("conftest1","w");
-	    for (j=0;i>>=1;j++);
-	    if (j<12) {printf("pagewidth %u is too small\n",j);return -1;}
-	    fprintf(fp,"%u",j);
-	    return 0;
-	]])],
-	[PAGEWIDTH=`cat conftest1`],
-	[PAGEWIDTH=0])
-AC_MSG_RESULT($PAGEWIDTH)
-AC_DEFINE_UNQUOTED(PAGEWIDTH,$PAGEWIDTH,[system pagewidth])
-AC_SUBST(PAGEWIDTH)
-
-AC_MSG_CHECKING(DBEGIN)
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-  #include <stdio.h>
-  #include <stdlib.h>
-  #include <unistd.h>
-  #include <stdlib.h>
-  void gprof_cleanup() {};
-
-  int main(int argc,char **argv,char **envp) {
-
-  void *b;
-  FILE *fp;
-
-  #ifdef CAN_UNRANDOMIZE_SBRK
-  #include "h/unrandomize.h"
-  #endif
-			
-  fp = fopen("conftest1","w");
-
-  #ifdef _WIN32
-  fprintf ( fp,"0x%lx", 0x3000000 );  /* Windows custom allocation from this point up */
-  #else
-  #if defined (__APPLE__) && defined (__MACH__)
-  fprintf(fp,"((unsigned long)get_dbegin())");
-  #else
-  b = sbrk(0);
-  fprintf(fp,"0x%lx",((unsigned long) b) & ~(unsigned long)((1<<PAGEWIDTH)-1));
-  #endif
-  #endif
-  fclose(fp);
-  return 0;}]])],
-  [dbegin=`cat conftest1`],[dbegin=0])
-
-AC_MSG_RESULT($dbegin)
-
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	    #include <stdio.h>
-            #include <unistd.h>
-	    ]],[[
-	    FILE *fp=fopen("conftest1","w");
-	    fprintf(fp,"%u",262144*( SIZEOF_LONG >>2)/(1<<($PAGEWIDTH-12)));
-	    return 0;]])],[def_maxpage=`cat conftest1`],[def_maxpage=262144])
-
-AC_ARG_ENABLE(maxpage,
-[ --enable-maxpage=XXXX  will compile in a page table of size XXX
-                         (eg '--enable-maxpage=64*1024' would produce
-			 64K pages allowing 256 MB if pages are 4K each)],
-,enable_maxpage=$def_maxpage)
-
-
-AC_MSG_CHECKING(CSTACK_ADDRESS)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	void *
-	foo() {
-	      int i;
-	      return (void *)&i;
-        }
-	]],[[
-	void *v ;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long i,j;
-
-	j=1;
-	j<<=$PAGEWIDTH;
-	j<<=16;
-	i=(unsigned long)&v;
-	if (foo()>i) i-=j;
-	j--;
-	i+=j;
-	i&=~j;
-	fprintf(fp,"0x%lx",i-1);
-	fclose(fp);
-	return 0;
-]])],[cstack_address=`cat conftest1`],[cstack_address=0])
-AC_DEFINE_UNQUOTED(CSTACK_ADDRESS,$cstack_address,[starting C stack address])
-AC_MSG_RESULT($cstack_address)
-
-AC_MSG_CHECKING([cstack bits])
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-	#include <stdio.h>
-	#include <stdlib.h>
-	void *
-	foo() {
-	      int i;
-	      return (void *)&i;
-        }
-
-	void gprof_cleanup() {};
-	int main(int argc,char **argv,char **envp) {
-	void *v ;
-	FILE *fp = fopen("conftest1","w");
-	unsigned long i,j;
-
-	#ifdef CAN_UNRANDOMIZE_SBRK
-	#include "h/unrandomize.h"
-	#endif
-	j=1;
-	j<<=$PAGEWIDTH;
-	j<<=16;
-	i=(unsigned long)&v;
-	if (foo()>i) i-=j;
-	j--;
-	i+=j;
-	i&=~j;
-	for (j=0;(i>>j)!=(i>>(sizeof(long)*8-1));j++);
-	fprintf(fp,"%d",j);
-	fclose(fp);
-	return 0;
-}]])],[cstack_bits=`cat conftest1`],[cstack_bits=0])
-AC_DEFINE_UNQUOTED(CSTACK_BITS,$cstack_bits,[log starting C stack address])
-AC_MSG_RESULT($cstack_bits)
-
-AC_MSG_CHECKING(NEG_CSTACK_ADDRESS)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	return (long)$cstack_address<0 ? 0 : -1;
-}]])],[AC_MSG_RESULT(yes)
-	neg_cstack_address=1
-	AC_DEFINE(NEG_CSTACK_ADDRESS,1,[C stack address is negative])],
-      [AC_MSG_RESULT(no)
-	neg_cstack_address=0])
-
-
-AC_MSG_CHECKING([finding CSTACK_ALIGNMENT])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	void *b,*c;
-	FILE *fp = fopen("conftest1","w");
-	long n;
-	b=alloca(sizeof(b));
-	c=alloca(sizeof(c));
-	n=b>c ? b-c : c-b;
-	n=n>sizeof(c) ? n : 1;
-	fprintf(fp,"%ld",n);
-	fclose(fp);
-	return 0;
-]])],[cstack_alignment=`cat conftest1`],[cstack_alignment=0])
-AC_DEFINE_UNQUOTED(CSTACK_ALIGNMENT,$cstack_alignment,[C stack alignment])
-AC_MSG_RESULT($cstack_alignment)
-
-AC_MSG_CHECKING(CSTACK_DIRECTION)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	void *
-	foo(void) {
-	int i;
-	return (void *)&i;
-	}
-
-	]],[[
-
-	char *b;
-	FILE *fp = fopen("conftest1","w");
-	fprintf(fp,"%d",((long) &b) > ((long) foo()) ? -1 : 1);
-	fclose(fp);
-	return 0;
-]])],[cstack_direction=`cat conftest1`],[cstack_direction=0])
-AC_DEFINE_UNQUOTED(CSTACK_DIRECTION,$cstack_direction,[whether C stack grows up or down])
-AC_MSG_RESULT($cstack_direction)
-
-AC_ARG_ENABLE([immfix],[  --enable-immfix will enable an immediate fixnum table above the C stack])
-
-AC_ARG_ENABLE([fastimmfix],[  --enable-fastimmfix=XXXX will reject low immediate fixnums unless 2^XXX can be attained],,[enable_fastimmfix=64])
 
 #hurd can push .data below C stack, but sbrk(0) remains above, foiling unexec
 if test "$use" != "386-gnu" ; then
@@ -1834,21 +1813,6 @@ else
 fi
 AC_DEFINE_UNQUOTED(CSSIZE,$enable_cssize,[maximum C stack size])
 
-AC_MSG_CHECKING(for fast NULL_OR_ON_CSTACK macro)
-AC_RUN_IFELSE([AC_LANG_PROGRAM([[
-	#include <stdio.h>
-	]],[[
-	return ((long)$dbegin>=0 &&
-	       ((long)$dbegin+(long)($enable_maxpage<<$PAGEWIDTH)) >=0 &&
-	       ((long)$cstack_address<0)) ? 0 : 1;
-]])],[tmp_fnocm=yes],[tmp_fnocm=no])
-if test "$tmp_fnocm" = "yes" ; then
-   AC_MSG_RESULT(yes)
-   AC_DEFINE(USE_FAST_NULL_OR_ON_CSTACK_MACRO,1,[whether one instruction heap address check can be used])
-else
-   AC_MSG_RESULT(no)
-fi
-
 mem_top=0
 mem_range=0
 AC_MSG_CHECKING(mem top)
@@ -1937,6 +1901,7 @@ if test "$enable_static" = "yes" ; then
    echo disabling readline when linking statically
    enable_readline="no"
 fi
+
 
 ####  gcc compilation bugs at various optimizations
 
@@ -2237,28 +2202,24 @@ AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, main, [TLIBS="$TLIBS -lnsl"]))
 
 RL_OJBS=""
 RL_LIB=""
-if test "$enable_readline" = "yes" ; then
-	AC_CHECK_HEADERS(readline/readline.h,
-		AC_CHECK_LIB(readline,main,
-			AC_DEFINE(HAVE_READLINE,1,[have readline library]) 
-			TLIBS="$TLIBS -lreadline"
-			RL_OBJS=gcl_readline
-# Readline support now initialized automatically when compiled in, this lisp
-# object no longer needed, 20040102 CM
-#			RL_LIB=mod/gcl_readline.o
-			,,))
-
-# These tests discover differences between readline 4.1 and 4.3
-	AC_CHECK_LIB(readline,rl_completion_matches,
-			AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
-			AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches]),,)
+if test "$enable_readline" != "no" ; then
+    AC_CHECK_HEADERS([readline/readline.h],
+			AC_CHECK_LIB([readline],[rl_initialize],
+				[AC_DEFINE(USE_READLINE,1,[use readline library])
+				 AC_CHECK_LIB([readline],[el_getc],AC_DEFINE(READLINE_IS_EDITLINE,1,[readline is editline]))
+				 # These tests discover differences between readline 4.1 and 4.3
+				 AC_CHECK_LIB([readline],[rl_completion_matches],
+					[AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
+				 	 AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches])])
+   				 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
+				 RL_OBJS=gcl_readline]))
 fi
 
 AC_SUBST(RL_OBJS)
 AC_SUBST(RL_LIB)
 
 AC_MSG_CHECKING(For network code for nsocket.c)
-AC_TRY_LINK([
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -2275,27 +2236,22 @@ AC_TRY_LINK([
 #include <netinet/in.h>		/* struct in_addr, struct sockaddr_in */
 #include <arpa/inet.h>		/* inet_ntoa() */
 #include <netdb.h>		/* gethostbyname() */
-],[ connect(0,(struct sockaddr *)0,0);
+]], [[ connect(0,(struct sockaddr *)0,0);
     gethostbyname("jil");
     socket(AF_INET, SOCK_STREAM, 0);
-	],
-[AC_DEFINE(HAVE_NSOCKET,1,[can use nsocket library])
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+	]])],[AC_DEFINE(HAVE_NSOCKET,1,[can use nsocket library])
+ AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 
 AC_MSG_CHECKING(check for listen using fcntl)
-AC_TRY_COMPILE([#include <stdio.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>
 #include <fcntl.h>
-],
-[FILE *fp=fopen("configure.in","r");
+]], [[FILE *fp=fopen("configure.in","r");
   int orig;
   orig = fcntl(fileno(fp), F_GETFL);
   if (! (orig & O_NONBLOCK )) return 0;
-],
-[AC_DEFINE(LISTEN_USE_FCNTL,1,[can use fcntl for listen function])
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+]])],[AC_DEFINE(LISTEN_USE_FCNTL,1,[can use fcntl for listen function])
+ AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 
 
@@ -2335,35 +2291,26 @@ esac
 
 
 AC_MSG_CHECKING(check for SV_ONSTACK)
-AC_TRY_COMPILE([#include <signal.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
 int joe=SV_ONSTACK;
-],
-[],
-[AC_DEFINE(HAVE_SV_ONSTACK,1,[have sv_onstack])
+]], [[]])],[AC_DEFINE(HAVE_SV_ONSTACK,1,[have sv_onstack])
  AC_SUBST(HAVE_SV_ONSTACK)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+ AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 AC_MSG_CHECKING(check for SIGSYS)
-AC_TRY_COMPILE([#include <signal.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
 int joe=SIGSYS;
-],
-[],
-[AC_DEFINE(HAVE_SIGSYS,1,[have SIGSYS signal])
+]], [[]])],[AC_DEFINE(HAVE_SIGSYS,1,[have SIGSYS signal])
  AC_SUBST(HAVE_SIGSYS)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+ AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 
 AC_MSG_CHECKING(check for SIGEMT)
-AC_TRY_COMPILE([#include <signal.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
 int joe=SIGEMT;
-],
-[],
-[AC_DEFINE(HAVE_SIGEMT,1,[have SIGEMT signal])
+]], [[]])],[AC_DEFINE(HAVE_SIGEMT,1,[have SIGEMT signal])
  AC_SUBST(HAVE_SIGEMT)
- AC_MSG_RESULT(yes)],
-AC_MSG_RESULT(no))
+ AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 AC_CHECK_FUNCS(sigaltstack)
 AC_CHECK_FUNCS(feenableexcept)
@@ -2378,38 +2325,31 @@ AC_CHECK_HEADERS(dis-asm.h,
 	AC_CHECK_HEADERS(asm/sigcontext.h)
 	AC_CHECK_HEADERS(asm/signal.h)
 	AC_MSG_CHECKING([for sigcontext...])
-        AC_TRY_COMPILE([#include <signal.h>
-       ],
-       [
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
+       ]], [[
         struct sigcontext foo;
-       ],
-       [
+       ]])],[
         sigcontext_works=1;
         AC_DEFINE(SIGNAL_H_HAS_SIGCONTEXT,1,[have sigcontext in signal.h])
 	AC_MSG_RESULT(sigcontext in signal.h)
-       ],
-        
-	[sigcontext_works=0;
-         AC_MSG_RESULT(sigcontext NOT in signal.h)]
-       )
+       ],[sigcontext_works=0;
+         AC_MSG_RESULT(sigcontext NOT in signal.h)
+       ])
        if test "$sigcontext_works" = 0 ; then
        AC_MSG_CHECKING([for sigcontext...])
-       AC_TRY_COMPILE([#include <signal.h>
+       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <signal.h>
              #ifdef HAVE_ASM_SIGCONTEXT_H     
              #include <asm/sigcontext.h>
              #endif
              #ifdef HAVE_ASM_SIGNAL_H          
              #include <asm/signal.h>
              #endif
-          ],
-        [ 
+          ]], [[ 
         struct sigcontext foo;
-        ],
-        [
+        ]])],[
         AC_DEFINE(HAVE_SIGCONTEXT,1,[have sigcontext])
 	AC_MSG_RESULT(sigcontext in asm files)
-        ],
-        [
+        ],[
         AC_MSG_RESULT(no sigcontext found)
      ])
 
@@ -2720,7 +2660,8 @@ fi
 if test -f h/$use.defs  ; then
 
   AC_SUBST(use)
-  AC_OUTPUT(makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp)
+  AC_CONFIG_FILES([makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp])
+AC_OUTPUT
   echo makedefc
   cat makedefc
 

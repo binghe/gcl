@@ -94,7 +94,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <math.h>
 #include <complex.h>
 #include <alloca.h>
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 #include <readline/readline.h>
 #endif
 

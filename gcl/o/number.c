@@ -59,14 +59,21 @@ object small_fixnum ( int i ) {
 
 #define BIGGER_FIXNUM_RANGE
 
-#ifdef BIGGER_FIXNUM_RANGE
 struct {int min,max;} bigger_fixnums;
 
+#define STATIC_BIGGER_FIXNUM_TABLE_BITS 10
 struct fixnum_struct *bigger_fixnum_table;
+static struct fixnum_struct bigger_fixnum_table1[1<<(STATIC_BIGGER_FIXNUM_TABLE_BITS+1)] OBJ_ALIGN;
+
 DEFUN("ALLOCATE-BIGGER-FIXNUM-RANGE",object,fSallocate_bigger_fixnum_range,SI,2,2,NONE,OI,IO,OO,OO,(fixnum min,fixnum max),"")  {
+
   int j; 
+
   if (min > max) FEerror("Need Min <= Max",0);
-  bigger_fixnum_table=(void *)malloc(sizeof(struct fixnum_struct)*(max - min));
+  if (min==-(1<<STATIC_BIGGER_FIXNUM_TABLE_BITS) && max==(1<<STATIC_BIGGER_FIXNUM_TABLE_BITS))
+    bigger_fixnum_table=bigger_fixnum_table1;
+  else
+    bigger_fixnum_table=(void *)malloc(sizeof(struct fixnum_struct)*(max - min));
   
   for (j=min ; j < max ; j=j+1) { 		
     object x=(object)(bigger_fixnum_table+j-min);
@@ -79,7 +86,6 @@ DEFUN("ALLOCATE-BIGGER-FIXNUM-RANGE",object,fSallocate_bigger_fixnum_range,SI,2,
   
   return Ct;
 }
-#endif
 #endif
 
 
@@ -288,7 +294,7 @@ void
 gcl_init_number(void) {
 
 #if !defined(IM_FIX_BASE) || defined(USE_SAFE_CDR)
-  FFN(fSallocate_bigger_fixnum_range)(-1024,1023);
+  FFN(fSallocate_bigger_fixnum_range)(-1024,1024);
 #endif
 
   shortfloat_zero = alloc_object(t_shortfloat);

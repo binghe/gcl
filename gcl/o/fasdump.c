@@ -609,7 +609,7 @@ DEFUN("OPEN-FASD",object,fSopen_fasd,SI
       check_type(tabl,t_simple_vector);}
   if(direction==sKoutput)
     {str=coerce_stream(stream,1);
-    if(tabl==Cnil) tabl=funcall_cfun(Lmake_hash_table,2,sKtest,sLeq);
+      if(tabl==Cnil) tabl=gcl_make_hash_table(sLeq);
     else
       check_type(tabl,t_hashtable);}
   check_type(str,t_stream);

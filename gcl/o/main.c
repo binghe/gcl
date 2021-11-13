@@ -579,7 +579,7 @@ main(int argc, char **argv, char **envp) {
     terminal_io->sm.sm_object1->sm.sm_fp = stdout;
 
     gcl_init_big1();
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
     gcl_init_readline_function();
 #endif
 
@@ -790,7 +790,7 @@ initlisp(void) {
 #ifdef CMAC
 	gcl_init_cmac();
 #endif	
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 	gcl_init_readline();
 #endif
 
@@ -1181,8 +1181,12 @@ init_main(void) {
       }  }
 #endif /* PECULIAR_MACHINE */
   
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
+#ifdef READLINE_IS_EDITLINE
+  ADD_FEATURE("EDITLINE");
+#else
   ADD_FEATURE("READLINE");
+#endif
 #endif
 #if !defined(USE_DLOPEN)
   ADD_FEATURE("NATIVE-RELOC");

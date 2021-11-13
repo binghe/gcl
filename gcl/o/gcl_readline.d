@@ -28,7 +28,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define IN_READLINE
 #include "include.h"
 
-#ifdef HAVE_READLINE
+#ifdef USE_READLINE
 
 /* Here begins GNU Readline support. It was designed for Maxima,
  * but it works with GCL fine too. If you want to include word completion
@@ -302,4 +302,4 @@ gcl_init_readline(void) {
   make_si_function("READLINE-OFF", siLreadline_off);
 }
 
-#endif /* HAVE_READLINE */
+#endif /* USE_READLINE */

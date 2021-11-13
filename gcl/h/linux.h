@@ -46,7 +46,7 @@ do {static struct sigaction action; \
 
 #undef SETUP_SIG_STACK
 
-#define ELF_TEXT_BASE  DBEGIN
+/* #define ELF_TEXT_BASE  DBEGIN */
 
 /* #undef SET_REAL_MAXPAGE */
 /* #define SET_REAL_MAXPAGE do { struct rlimit data_rlimit; \ */

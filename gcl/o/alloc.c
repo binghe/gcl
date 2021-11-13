@@ -184,8 +184,8 @@ void
 add_page_to_freelist(char *p, struct typemanager *tm) {
 
   short t,size;
-  long i=tm->tm_nppage,fw;
-  object x,f;
+  long fw;
+  object x,xe,f;
   struct pageinfo *pp;
 
  t=tm->tm_type;
@@ -228,17 +228,18 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
    
 #endif 
 
- fw= *(fixnum *)x;
- while (--i >= 0) {
-   *(fixnum *)x=fw;
-   SET_LINK(x,f);
-   f=x;
-   x= (object) ((char *)x + size);
- }
+  f=FREELIST_TAIL(tm);
+  fw=x->fw;
+  xe=(object)((void *)x+tm->tm_nppage*size);
+  for (;x<xe;f=x,x=(object)((void *)x+size)) {
+    x->fw=fw;
+    SET_LINK(f,x);
+  }
 
- tm->tm_free=f;
- tm->tm_nfree += tm->tm_nppage;
- tm->tm_npage++;
+  SET_LINK(f,OBJNULL);
+  tm->tm_tail=f;
+  tm->tm_nfree += tm->tm_nppage;
+  tm->tm_npage++;
 
 }
 

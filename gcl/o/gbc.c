@@ -446,6 +446,7 @@ mark_object_address(object *o,int f) {
 
   static ufixnum lp;
   static ufixnum lr;
+  extern object *min_cfd_self;
 
   ufixnum p=page(o);
 
@@ -455,7 +456,7 @@ mark_object_address(object *o,int f) {
 #ifdef SGC
       sgc_enabled ? WRITABLE_PAGE_P(lp) :
 #endif
-      1;
+      (o>=min_cfd_self && o<((object *)core_end));
   }
 
   if (lr)
@@ -543,7 +544,9 @@ mark_object1(object x) {
 	  mark_object_address(&x->ht.ht_self[i].c_cdr,i);
 	  mark_object_address(&x->ht.ht_self[i].c_car,i+1);
 	}
+    i=x->ht.ht_cache-x->ht.ht_self;
     MARK_LEAF_DATA(x,x->ht.ht_self,x->ht.ht_size*sizeof(*x->ht.ht_self));
+    if (x->ht.ht_cache) x->ht.ht_cache=x->ht.ht_self+i;
     break;
     
   case t_simple_array:
@@ -600,15 +603,16 @@ mark_object1(object x) {
     
   case t_structure:
     {
-      object def=x->str.str_def;
-      unsigned char *s_type= &SLOT_TYPE(def,0);
-      unsigned short *s_pos= &SLOT_POS(def,0);
       mark_object(x->str.str_def);
-      if (x->str.str_self)
+      if (x->str.str_self) {
+	object def=x->str.str_def;
+	unsigned char *s_type= &SLOT_TYPE(def,0);
+	unsigned short *s_pos= &SLOT_POS(def,0);
 	for (i=0,j=S_DATA(def)->length;i<j;i++)
 	  if (s_type[i]==aet_object)
 	    mark_object_address(&STREF(object,x,s_pos[i]),i);
-      MARK_LEAF_DATA(x,x->str.str_self,S_DATA(def)->size);
+	MARK_LEAF_DATA(x,x->str.str_self,S_DATA(def)->size);
+      }
     }
     break;
     
@@ -662,6 +666,7 @@ mark_object1(object x) {
     break;
     
   case t_readtable:
+    mark_object(x->rt.rt_case);
     if (x->rt.rt_self) {
       for (i=0;i<RTABSIZE;i++)
 	mark_object_address(&x->rt.rt_self[i].rte_macro,i);
@@ -865,9 +870,9 @@ void hppa_save_regs(struct regs);
 
 	asm(".code");
 	asm(".export hppa_save_regs, entry");
+	asm(".label	hppa_save_regs");
 	asm(".proc");
 	asm(".callinfo");
-	asm(".label	hppa_save_regs");
 	asm(".entry");
 
 	asm("stw	%r3,0(%arg0)");
@@ -946,37 +951,46 @@ mark_c_stack(jmp_buf env1, int n, void (*fn)(void *,void *,int)) {
 static void
 sweep_phase(void) {
 
-  STATIC long j, k;
+  STATIC long j, k, l;
   STATIC object x;
   STATIC char *p;
   STATIC struct typemanager *tm;
   STATIC object f;
   STATIC struct pageinfo *v;
   
+  for (j= t_start; j < t_contiguous ; j++) {
+    tm_of(j)->tm_free=OBJNULL;
+    tm_of(j)->tm_nfree=0;
+  }
+
   for (v=cell_list_head;v;v=v->next) {
 
     tm = tm_of((enum type)v->type);
     
     p = pagetochar(page(v));
-    f = tm->tm_free;
-    k = 0;
+    f = FREELIST_TAIL(tm);
+    l = k = 0;
     for (j = tm->tm_nppage; j > 0; --j, p += tm->tm_size) {
       x = (object)p;
-      if (is_free(x))
-	continue;
-      else if (is_marked(x)) {
+
+      if (is_marked(x)) {
 	unmark(x);
+	l++;
 	continue;
       }
 
-      SET_LINK(x,f);
-      make_free(x);
-      f = x;
       k++;
+
+      make_free(x);
+      SET_LINK(f,x);
+      f = x;
+
     }
-    tm->tm_free = f;
+
+    SET_LINK(f,OBJNULL);
+    tm->tm_tail = f;
     tm->tm_nfree += k;
-    pagetoinfo(page(v))->in_use-=k;
+    pagetoinfo(page(v))->in_use=l;
     
   }
 
