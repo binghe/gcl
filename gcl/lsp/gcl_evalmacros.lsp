@@ -569,7 +569,7 @@
 
 (defvar *alien-declarations* nil)
 
-(defvar *uniq-list* (make-hash-table :test 'equal))
+(defvar *uniq-list* (gcl-make-hash-table 'equal))
 
 (defun uniq-list (list) (or (gethash list *uniq-list*) (setf (gethash list *uniq-list*) list)))
 

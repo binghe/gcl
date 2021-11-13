@@ -1,7 +1,10 @@
 (in-package :si)
 
-(defun make-hash-table (&key (test 'eql) (size 1024) (rehash-size 1.5s0) (rehash-threshold 0.7s0))
-  (the hash-table (make-hash-table-int test size rehash-size rehash-threshold)))
+(defun make-hash-table (&key (test 'eql)
+			     (size *default-hash-table-size*)
+			     (rehash-size *default-hash-table-rehash-size*)
+			     (rehash-threshold *default-hash-table-rehash-threshold*))
+  (the hash-table (make-hash-table-int test size rehash-size rehash-threshold nil)))
 
 (defun hash-table-p (x)
   (declare (optimize (safety 1)))
@@ -23,6 +26,14 @@
     (if (eql +objnull+ (htent-key e))
 	(values z nil)
       (values (htent-value e) t))))
+
+(defun gethash1 (x y)
+  (declare (optimize (safety 1)))
+  (check-type y hash-table)
+  (let ((e (gethash-int x y)))
+    (if (eql +objnull+ (htent-key e))
+	nil
+      (htent-value e))))
 
 (defun maphash (f h)
   (declare (optimize (safety 1)))
@@ -75,4 +86,26 @@
 
 (setf (symbol-function 'hash-table-count) (symbol-function 'c-hashtable-nent))
 (setf (symbol-function 'hash-table-size)  (symbol-function 'c-hashtable-size))
+(setf (symbol-function 'hash-table-rehash-size)  (symbol-function 'c-hashtable-rhsize))
+(setf (symbol-function 'hash-table-rehash-threshold)  (symbol-function 'c-hashtable-rhthresh))
+
+(defun hash-table-test (h)
+  (check-type h hash-table)
+  (aref #(eq eql equal equalp) (c-hashtable-test h)))
+
+(defun hash-table-eq-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (hash-table (eq 'eq (hash-table-test x)))))
+
+(defun hash-table-eql-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (hash-table (eq 'eql (hash-table-test x)))))
+
+(defun hash-table-equal-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (hash-table (eq 'equal (hash-table-test x)))))
+
+(defun hash-table-equalp-p (x)
+  (declare (optimize (safety 1)))
+  (typecase x (hash-table (eq 'equalp (hash-table-test x)))))
 

@@ -44,6 +44,7 @@ gcl_init_system(object no_init)
   check_init(lsp,gcl_dl,no_init);
   check_init(lsp,gcl_fle,no_init);
   check_init(lsp,gcl_defmacro,no_init);
+  check_init(lsp,gcl_hash,no_init);
   check_init(lsp,gcl_evalmacros,no_init);
   check_init(lsp,gcl_module,no_init);
   check_init(lsp,gcl_predlib,no_init);
@@ -108,7 +109,6 @@ gcl_init_system(object no_init)
   check_init(lsp,gcl_lr,no_init);
   check_init(lsp,gcl_sym,no_init);
 #endif
-  check_init(lsp,gcl_hash,no_init);
   check_init(lsp,gcl_trace,no_init);
   check_init(lsp,gcl_sloop,no_init);
   check_init(lsp,gcl_packlib,no_init);

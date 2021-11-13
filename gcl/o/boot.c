@@ -682,6 +682,34 @@ DEFUN("SBIT",object,fLsbit,LISP,2,2,NONE,IO,IO,OO,OO,(object x,fixnum i),"") {
 
 }
 
+DEFUNM("GETHASH",object,fLgethash,LISP,2,3,NONE,OO,OO,OO,OO,(object x,object y,...),"") {
+
+  fixnum nargs=INIT_NARGS(2),vals=(fixnum)fcall.valp;
+  object *base=vs_top,l=Cnil,f=OBJNULL,z;
+  va_list ap;
+  struct cons *e;
+
+  check_type_hash_table(&y);
+  e=gethash(x,y);
+  if (e->c_cdr != OBJNULL)
+    RETURN2(e->c_car,Ct);
+  else {
+    va_start(ap,y);
+    z=NEXT_ARG(nargs,ap,l,f,Cnil);
+    va_end(ap);
+    RETURN2(z,Cnil);
+  }
+
+}
+
+DEFUN("HASH-SET",object,fShash_set,SI,3,3,NONE,OO,OO,OO,OO,(object x,object y,object z),"") {
+
+  check_type_hash_table(&y);
+  sethash(x,y,z);
+  RETURN1(z);
+
+}
+
 #ifndef NO_BOOT_H
 #include "boot.h"
 #endif

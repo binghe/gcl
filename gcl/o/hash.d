@@ -55,6 +55,7 @@ object sLequalp;
 object sKsize;
 object sKrehash_size;
 object sKrehash_threshold;
+object sKstatic;
 
 #define MHSH(a_) ((a_) & ~(1UL<<(sizeof(a_)*CHAR_SIZE-1)))
 
@@ -71,7 +72,7 @@ typedef union {
 
 static ufixnum rtb[256];
 
-#define MASK(n) (~(~0L << (n)))
+#define MASK(n) (~(~0UL << (n)))
 
 static ufixnum
 ufixhash(ufixnum g) {
@@ -223,9 +224,8 @@ BEGIN:
 
 }
 
-	
-DEFUN("HASH-EQUAL",fixnum,fShash_equal,SI,2,2,NONE,IO,IO,OO,OO,(object x,fixnum depth),"") {
-  return ihash_equal(x,depth);
+DEFUN("HASH-EQUAL",object,fShash_equal,SI,2,2,NONE,IO,IO,OO,OO,(object x,fixnum depth),"") {
+  return (object)ihash_equal(x,depth);
 }
 
 #define ihash_equalp(a_,b_) ((type_of(a_)==t_symbol && (a_)->s.s_hash) ? (a_)->s.s_hash : ihash_equalp1(a_,b_))
@@ -403,33 +403,28 @@ and wrappping if necessary.
 */
 
 struct cons *
-gethash(object key, object hashtable) {
+gethash(object key, object ht) {
 
-  enum httest htest;
-  long hsize,j,s,q;
-  struct cons *e,*first_objnull=NULL;
-  object hkey;
+  long s,q;
+  struct cons *e,*ee,*first_open=NULL;
   static struct cons dummy={OBJNULL,OBJNULL};
   
-  if (!hashtable->ht.ht_size)
-    return &dummy;
-
-  htest = (enum httest)hashtable->ht.ht_test;
-  hsize = hashtable->ht.ht_size;
+  if (ht->ht.ht_cache && ht->ht.ht_cache->c_cdr==key)
+    return ht->ht.ht_cache;
+  ht->ht.ht_cache=NULL;
 
 #define eq(x,y) x==y
 #define hash_loop(t_,i_)						\
-  for (s=i_%hsize,q=hsize,e=first_objnull;s>=0;q=s,s=s?0:-1)		\
-    for (j=s;j<q;j++) {							\
-      e = &hashtable->ht.ht_self[j];					\
-      hkey = e->c_cdr;							\
+  for (q=ht->ht.ht_size,s=i_%q;s>=0;q=s,s=s?0:-1)			\
+    for (e=ht->ht.ht_self,ee=e+q,e+=s;e<ee;e++) {			\
+      object hkey=e->c_cdr;						\
       if (hkey==OBJNULL) {						\
-	if (e->c_car==OBJNULL) return first_objnull ? first_objnull : e; \
-	if (!first_objnull) first_objnull=e;				\
-      } else if (t_(key,hkey)) return e;				\
+	if (e->c_car==OBJNULL) return first_open ? first_open : e;	\
+	if (!first_open) first_open=e;					\
+      } else if (t_(key,hkey)) return ht->ht.ht_cache=e;		\
     }
 
-  switch (htest) {
+  switch (ht->ht.ht_test) {
   case htt_eq:
     hash_loop(eq,hash_eq(key));
     break;
@@ -445,10 +440,9 @@ gethash(object key, object hashtable) {
   default:
     FEerror( "gethash:  Hash table not of type EQ, EQL, or EQUAL." ,0);
     return &dummy;
-    break;
   }
   
-  return first_objnull ? first_objnull : (FEerror("No free spot in hashtable ~S.", 1, hashtable),&dummy);
+  return first_open ? first_open : (FEerror("No free spot in hashtable ~S.", 1, ht),&dummy);
 
 }
 
@@ -496,7 +490,7 @@ extend_hashtable(object hashtable) {
     old = alloc_object(t_hashtable);
     old->ht = hashtable->ht;
     vs_push(old);
-    hashtable->ht.ht_self = NULL;
+    hashtable->ht.ht_cache = hashtable->ht.ht_self = NULL;
     hashtable->ht.ht_size = new_size;
     if (type_of(hashtable->ht.ht_rhthresh) == t_fixnum)
       hashtable->ht.ht_rhthresh =
@@ -545,55 +539,12 @@ sethash(object key, object hashtable, object value) {
 
 }
 	
-/*
-static void
-print_hash_table (object ht,char *procedure_name) {
-  
-  printf( "\n%s: \n", procedure_name );
-     
-  switch (type_of (ht->ht.ht_rhsize)) {
-  case t_fixnum:
-    printf( "fixnum         ht_rhsize:  %d \n",fix( ht->ht.ht_rhsize));
-    break;
-  case t_shortfloat:
-    printf( "short float    ht_rhsize:  %f \n", sf( ht->ht.ht_rhsize));
-    break;
-  case t_longfloat:
-    printf( "long float     ht_rhsize:  %lf \n",lf( ht->ht.ht_rhsize));
-    break;
-  default:
-    FEerror( "Unknown ht_rhsize type.",0 );
-    break;
-  }
-
-  switch (type_of (ht->ht.ht_rhthresh)) {
-  case t_fixnum:
-    printf( "fixnum         ht_rhthresh:  %d \n",fix( ht->ht.ht_rhthresh));
-    break;
-  case t_shortfloat:
-    printf( "short float    ht_rhthresh:  %f \n", sf( ht->ht.ht_rhthresh));
-    break;
-  case t_longfloat:
-    printf( "long float     ht_rhthresh:  %lf \n",lf( ht->ht.ht_rhthresh));
-    break;
-  default:
-    FEerror( "Unknown ht_rhthresh type.",0 );
-    break;
-  }
-
-  printf( "fixnum       ht_nent:  %d \n",ht->ht.ht_nent );
-  printf( "fixnum       ht_size:  %d \n",ht->ht.ht_size );
-  printf( "fixnum       ht_test:  %d \n",ht->ht.ht_test );
-  printf( "fixnum ht_ht_max_ent:  %d \n",ht->ht.ht_max_ent );
-
-}
-*/
-
-DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,4,4,NONE,OO,OO,OO,OO,
-	  (object test,object size,object rehash_size,object rehash_threshold),"") {
+DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,5,5,NONE,OO,OO,OO,OO,
+	  (object test,object size,object rehash_size,
+	   object rehash_threshold,object staticp),"") {
 
   enum httest htt=0;
-  fixnum i,max_ent,err;
+  fixnum i,max_ent=0,err;
   object h;
 
   if (test == sLeq || test == sLeq->s.s_gfdef)
@@ -650,7 +601,6 @@ DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,4,4,NONE,OO,OO,OO,OO
     }
       
   default:
-    max_ent = (7 * fix(size)) / 10;  /* Default to 70% */    
     err=1;
     break;
   }
@@ -664,11 +614,14 @@ DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,4,4,NONE,OO,OO,OO,OO
     h->ht.ht_size = fix(size);
     h->ht.ht_rhsize = rehash_size;
     h->ht.ht_rhthresh = rehash_threshold;
+    h->ht.ht_cache = NULL;
     h->ht.ht_nent = 0;
     h->ht.ht_max_ent = max_ent;
+    h->ht.ht_static=staticp==Cnil ? 0 : 1;
     h->ht.ht_self = NULL;
-    h->ht.ht_self = (struct cons *)
-      alloc_relblock(fix(size) * sizeof(struct cons));
+    h->ht.ht_self = h->ht.ht_static ?
+      (struct cons *)alloc_contblock(fix(size) * sizeof(struct cons)) :
+      (struct cons *)alloc_relblock(fix(size) * sizeof(struct cons));
     for(i = 0;  i < fix(size);  i++) {
       h->ht.ht_self[i].c_cdr = OBJNULL;
       h->ht.ht_self[i].c_car = OBJNULL;
@@ -678,257 +631,33 @@ DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,4,4,NONE,OO,OO,OO,OO
   RETURN1(h);
 }
 
-@(defun make_hash_table (&key (test sLeql)
-			 (size `make_fixnum(1024)`)
-			 (rehash_size
-			  `make_shortfloat((shortfloat)1.5)`)
-			 (rehash_threshold
-			  `make_shortfloat((shortfloat)0.7)`)
-			 &aux h)
-@
-  h=FFN(fSmake_hash_table_int)(test,size,rehash_size,rehash_threshold);
-  @(return h)
-@)
+DEFVAR("*DEFAULT-HASH-TABLE-SIZE*",sSAdefault_hash_table_sizeA,SI,make_fixnum(1024),"");
+DEFVAR("*DEFAULT-HASH-TABLE-REHASH-SIZE*",sSAdefault_hash_table_rehash_sizeA,SI,make_shortfloat((shortfloat)1.5),"");
+DEFVAR("*DEFAULT-HASH-TABLE-REHASH-THRESHOLD*",sSAdefault_hash_table_rehash_thresholdA,SI,make_shortfloat((shortfloat)0.7),"");
 
-DEFUN("HASH-TABLE-P",object,fLhash_table_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_hashtable ? Ct : Cnil);
+object
+gcl_make_hash_table(object test) {
+  return FFN(fSmake_hash_table_int)(test,
+				    sSAdefault_hash_table_sizeA->s.s_dbind,
+				    sSAdefault_hash_table_rehash_sizeA->s.s_dbind,
+				    sSAdefault_hash_table_rehash_thresholdA->s.s_dbind,
+				    Cnil);
 }
 
-DEFUN("HASH-TABLE-EQ-P",object,fShash_table_eq_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_hashtable && x->ht.ht_test==htt_eq ? Ct : Cnil);
-}
+DEFUN("GCL-MAKE-HASH-TABLE",object,fSgcl_make_hash_table,SI,1,1,NONE,OO,OO,OO,OO,(object test),"") {
 
-DEFUN("HASH-TABLE-EQL-P",object,fShash_table_eql_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_hashtable && x->ht.ht_test==htt_eql  ? Ct : Cnil);
-}
-
-DEFUN("HASH-TABLE-EQUAL-P",object,fShash_table_equal_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_hashtable && x->ht.ht_test==htt_equal  ? Ct : Cnil);
-}
-
-DEFUN("HASH-TABLE-EQUALP-P",object,fShash_table_equalp_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-  RETURN1(type_of(x)==t_hashtable && x->ht.ht_test==htt_equalp  ? Ct : Cnil);
-}
-
-DEFUN("GETHASH-INT",fixnum,fSgethash_int,SI,2,2,NONE,IO,OO,OO,OO,(object x,object y),"") {
-  return (fixnum)gethash(x,y);
-}
-
-DEFUNM("GETHASH",object,fLgethash,LISP,2,3,NONE,OO,OO,OO,OO,(object x,object y,...),"") {
-
-  fixnum nargs=INIT_NARGS(2),vals=(fixnum)fcall.valp;
-  object *base=vs_top,l=Cnil,f=OBJNULL,z;
-  va_list ap;
-  struct cons *e;
-
-  check_type_hash_table(&y);
-  e=gethash(x,y);
-  if (e->c_cdr != OBJNULL)
-    RETURN2(e->c_car,Ct);
-  else {
-    va_start(ap,y);
-    z=NEXT_ARG(nargs,ap,l,f,Cnil);
-    va_end(ap);
-    RETURN2(z,Cnil);
-  }
+  return gcl_make_hash_table(test);
 
 }
   
-/* /\* LFD(Lgethash)() *\/ */
-/* /\* { *\/ */
-/* 	int narg; */
-/* 	struct cons *e; */
-	
-/* 	narg = vs_top - vs_base; */
-/* 	if (narg < 2) */
-/* 		too_few_arguments(); */
-/* 	else if (narg == 2) */
-/* 		vs_push(Cnil); */
-/* 	else if (narg > 3) */
-/* 		too_many_arguments(); */
-/* 	check_type_hash_table(&vs_base[1]); */
-/* 	e = gethash(vs_base[0], vs_base[1]); */
-/* 	if (e->c_cdr != OBJNULL) { */
-/* 		vs_base[0] = e->c_car; */
-/* 		vs_base[1] = Ct; */
-/* 	} else { */
-/* 		vs_base[0] = vs_base[2]; */
-/* 		vs_base[1] = Cnil; */
-/* 	} */
-/* 	vs_popp; */
-/* } */
 
-DEFUN("GETHASH1",object,fSgethash1,SI,2,2,NONE,OO,OO,OO,OO,(object k,object h),"") {
-
-  struct cons *e;
-
-  check_type_hash_table(&h);
-  e = gethash(k,h);
-  return e->c_cdr != OBJNULL ? e->c_car : Cnil;
-
-}
-
-DEFUN("HASH-SET",object,fShash_set,SI,3,3,NONE,OO,OO,OO,OO,(object x,object y,object z),"") {
-/* LFD(siLhash_set)() */
-/* { */
-/* 	check_arg(3); */
-
-  check_type_hash_table(&y);
-  sethash(x,y,z);
-  RETURN1(z);
-/* 	vs_base += 2; */
-}
- 	
-DEFUN("REMHASH",object,fLremhash,LISP,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
-
-  struct cons *e;
-  
-  check_type_hash_table(&y);
-  e = gethash(x,y);
-  if (e->c_cdr != OBJNULL) {
-    e->c_cdr = OBJNULL;
-    e->c_car = Cnil;
-    y->ht.ht_nent--;
-    RETURN1(Ct);
-  } else
-    RETURN1(Cnil);
-
-}
-
-DEFUN("CLRHASH",object,fLclrhash,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
-
-  int i;
-  
-  check_type_hash_table(&x);
-  for(i = 0; i < x->ht.ht_size; i++) {
-    x->ht.ht_self[i].c_cdr = OBJNULL;
-    x->ht.ht_self[i].c_car = OBJNULL;
-  }
-  x->ht.ht_nent = 0;
-  RETURN1(x);
-}
-
-DEFUN("HASH-TABLE-COUNT",fixnum,fLhash_table_count,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"") {
-  
-  check_type_hash_table(&x);
-  RETURN1(x->ht.ht_nent);
-}
-
-
-DEFUN("SXHASH",fixnum,fLsxhash,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"") {
-  /*FIXME 64*/
-  RETURN1(ihash_equal(x,0));/*  & 0x7fffffff */
-}
-
-DEFUN("MAPHASH",object,fLmaphash,LISP,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
-
-  int i;
-  
-  check_type_hash_table(&y);
-  for (i = 0;  i < y->ht.ht_size;  i++) {
-    if(y->ht.ht_self[i].c_cdr != OBJNULL)
-      ifuncall2(x,y->ht.ht_self[i].c_cdr,y->ht.ht_self[i].c_car);
-  }
-  RETURN1(Cnil);
-}
-
-DEFUNM("NEXT-HASH-TABLE-ENTRY",object,fSnext_hash_table_entry,SI,2,2,NONE,OO,OO,OO,OO,
-	   (object table,object ind),"For HASH-TABLE and for index I return three values: NEXT-START, the next KEY and its  VALUE.   NEXT-START will be -1 if there are no more entries, otherwise it will be a value suitable for passing as an index")
-{ 
-  int i = fix(ind);
-  fixnum vals=(fixnum)fcall.valp;
-  object *base=vs_top;
-
-  check_type_hash_table(&table);
-  if ( i < 0) { FEerror("needs non negative index",0);}
-  while ( i <  table->ht.ht_size) {
-    if (table->ht.ht_self[i].c_cdr != OBJNULL) {
-      RETURN(3,object,make_fixnum(i+1),
-	     (RV(table->ht.ht_self[i].c_cdr),
-	      RV(table->ht.ht_self[i].c_car)));}
-    i++;}
-  RETURN(3,object,small_fixnum(-1),(RV(sLnil),RV(sLnil)));
-
-}
-
-DEFUN("NEXT-HASH-TABLE-INDEX",object,fSnext_hash_table_index,SI,2,2,NONE,OO,OO,OO,OO,(object table,object ind),"For HASH-TABLE and for index I return the index of the next valid entry, or -1.") { 
-
-  fixnum i = fix(ind);
-
-  check_type_hash_table(&table);
-  if ( i < 0) 
-    FEerror("needs non negative index",0);
-
-  while ( i <  table->ht.ht_size) {
-    if (table->ht.ht_self[i].c_cdr != OBJNULL)
-      return make_fixnum(i);
-    i++;}
-
-  return small_fixnum(-1);
-
-}
-
-DEFUN("HASH-ENTRY-BY-INDEX",object,fShash_entry_by_index,SI,2,2,NONE,OO,OO,OO,OO,(object table,object ind),"For HASH-TABLE and for index I return the index of the next valid entry, or -1.") { 
-
-  fixnum i = fix(ind);
-
-  check_type_hash_table(&table);
-  if ( i < 0) 
-    FEerror("needs non negative index",0);
-  if (table->ht.ht_self[i].c_cdr == OBJNULL)
-    FEerror("invalid index",0);
-  return table->ht.ht_self[i].c_car;
-
-}
-
-DEFUN("HASH-KEY-BY-INDEX",object,fShash_key_by_index,SI,2,2,NONE,OO,OO,OO,OO,(object table,object ind),"For HASH-TABLE and for index I return the index of the next valid key, or -1.") { 
-
-  fixnum i = fix(ind);
-
-  check_type_hash_table(&table);
-  if ( i < 0) 
-    FEerror("needs non negative index",0);
-  if (table->ht.ht_self[i].c_cdr == OBJNULL)
-    FEerror("invalid index",0);
-  return table->ht.ht_self[i].c_cdr;
-
-}
-
-DEFUN("HASH-TABLE-TEST",object,fLhash_table_test,LISP,1,1,NONE,OO,OO,OO,OO,(object table),
- "Given a HASH-TABLE return a symbol which specifies the function used in its test") 
-{ 
-  check_type_hash_table(&table);
-  switch(table->ht.ht_test) {
-     case htt_equalp: RETURN1(sLequalp);
-     case htt_equal: RETURN1(sLequal);
-     case htt_eq: RETURN1(sLeq);
-     case htt_eql: RETURN1(sLeql);
-     }
-  FEerror("not able to get hash table test for ~a",1,table);
-  RETURN1(sLnil);
-}
-
-DEFUN("HASH-TABLE-SIZE",object,fLhash_table_size,LISP,1,1,NONE,OO,OO,OO,OO,(object table),"")
-{
-  check_type_hash_table(&table);
-  RETURN1(make_fixnum(table->ht.ht_size));
-}
-
-DEFUN("HASH-TABLE-REHASH-SIZE",object,fLhash_table_rehash_size,LISP,1,1,NONE,OO,OO,OO,OO,(object table),"")
-{
-  check_type_hash_table(&table);
-  RETURN1(table->ht.ht_rhsize);
+DEFUN("GETHASH-INT",object,fSgethash_int,SI,2,2,NONE,IO,OO,OO,OO,(object x,object y),"") {
+  return (object)gethash(x,y);
 }
 
 DEFUN("EXTEND-HASHTABLE",fixnum,fSextent_hashtable,SI,1,1,NONE,IO,OO,OO,OO,(object table),"") {
   extend_hashtable(table);
   return table->ht.ht_size;
-}
-
-DEFUN("HASH-TABLE-REHASH-THRESHOLD",object,fLhash_table_rehash_threshold,LISP,1,1,NONE,OO,OO,OO,OO,(object table),"")
-{
-  check_type_hash_table(&table);
-  RETURN1(table->ht.ht_rhthresh);
 }
 
 void
@@ -944,8 +673,7 @@ gcl_init_hash() {
   sKtest = make_keyword("TEST");
   sKrehash_size = make_keyword("REHASH-SIZE");
   sKrehash_threshold = make_keyword("REHASH-THRESHOLD");
-  
-  make_function("MAKE-HASH-TABLE", Lmake_hash_table);
+  sKstatic = make_keyword("STATIC");
   
   {
     object x=find_symbol(make_simple_string("MOST-NEGATIVE-FIXNUM"),system_package);
@@ -956,17 +684,5 @@ gcl_init_hash() {
       rtb[i]=fixint(vs_pop);
     }
   }
-/*   make_function("HASH-TABLE-P", Lhash_table_p); */
-/*   /\* 	make_function("GETHASH", Lgethash); *\/ */
-/*   make_function("REMHASH", Lremhash); */
-/*   make_function("MAPHASH", Lmaphash); */
-/*   make_function("CLRHASH", Lclrhash); */
-/*   make_function("HASH-TABLE-COUNT", Lhash_table_count); */
-/*   make_function("SXHASH", Lsxhash); */
-  /* 	make_si_sfun("HASH-EQUAL",hash_equal,ARGTYPE2(f_object,f_fixnum) */
-  /* 						| RESTYPE(f_object)); */
-  /* 	make_si_sfun("HASH-EQUALP",hash_equalp,ARGTYPE2(f_object,f_fixnum) */
-  /* 						| RESTYPE(f_object)); */
-  /* 	make_si_function("HASH-SET", siLhash_set); */
 }
 

@@ -217,7 +217,8 @@ struct hashtable {           /*  hash table header  */
   htent         ht_self;            /*  pointer to the hash table  */
   real          ht_rhsize;          /*  rehash size  */
   real          ht_rhthresh;        /*  rehash threshold  */
-  ufixnum       ht_pad1:4;          /*  unused  */
+  ufixnum       ht_pad1:3;          /*  unused  */
+  ufixnum       ht_static:1;        /*  unused  */
   ufixnum       ht_nent:LM(4);      /*  number of entries  */
   ufixnum       ht_pad2:4;          /*  hash table size  */
   ufixnum       ht_size:LM(4);      /*  hash table size  */
@@ -226,6 +227,8 @@ struct hashtable {           /*  hash table header  */
   hfixnum       ht_pad4;            /*  unused */
   ufixnum       ht_pad5:4;          /*  unused */
   ufixnum       ht_max_ent:LM(4);   /*  max entries */
+  htent         ht_cache;           /*  gethash cache */
+  SPAD;
 
 };
 

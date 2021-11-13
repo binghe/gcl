@@ -1569,3 +1569,6 @@ travel_find_sharing(object,object);
 
 object
 coerce_funcall_object_to_function(object);
+
+object
+gcl_make_hash_table(object);
