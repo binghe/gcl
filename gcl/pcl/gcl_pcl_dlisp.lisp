@@ -103,7 +103,7 @@
 	 (args (if rest (append ldiff '(&rest .lap-rest-arg.)) args))
 	 (lambda `(lambda ,closure-variables
 		    ,@(when (member 'miss-fn closure-variables)
-			`((declare (type function miss-fn))))
+			`((declare (type (function (t) nil) miss-fn))))
 		    (fin-lambda-fn ,args
 		      #+copy-&rest-arg
 		      ,@(when rest
@@ -159,7 +159,7 @@
 			   ,@(when (eql 2 1-or-2-class)
 			       `((eq wrapper wrapper-1)))))
 		  ,@(when readp `((eq *slot-unbound* (setq value ,read-form)))))
-	      (funcall miss-fn ,@arglist)
+	      (values (funcall miss-fn ,@arglist))
 	      ,(if readp
 		   'value
 		   `(setf ,read-form ,(car arglist))))))))
@@ -172,7 +172,7 @@
 (defun emit-boundp-check (value-form miss-fn arglist)
   `(let ((value ,value-form))
      (if (eq value *slot-unbound*)
-	 (funcall ,miss-fn ,@arglist)
+	 (values (funcall ,miss-fn ,@arglist))
 	 value)))
 
 (defun emit-slot-access (reader/writer class-slot-p slots index miss-fn arglist)
@@ -205,7 +205,7 @@
          ,(emit-dlap arglist metatypes
 		     (emit-slot-access reader/writer class-slot-p
 				       'slots 'index 'miss-fn arglist)
-		     `(funcall miss-fn ,@arglist)
+		     `(values (funcall miss-fn ,@arglist))
 		     (when cached-index-p 'index)
 		     (unless class-slot-p '(slots)))))))
 
@@ -219,8 +219,8 @@
 (defun emit-miss (miss-fn args &optional applyp)
   (let ((restl (when applyp '(.lap-rest-arg.))))
     (if restl
-	`(apply ,miss-fn ,@args ,@restl)
-	`(funcall ,miss-fn ,@args ,@restl))))
+	`(values (apply ,miss-fn ,@args ,@restl))
+	`(values (funcall ,miss-fn ,@args ,@restl)))))
 
 (defun emit-checking-or-caching (cached-emf-p return-value-p metatypes applyp)
   (when (and (null *precompiling-lap*) *emit-function-p*)

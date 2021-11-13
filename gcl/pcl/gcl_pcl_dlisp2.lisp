@@ -136,29 +136,29 @@
   (declare (ignore applyp))
   (if cached-emf-p
       #'(lambda (cache miss-fn)
-	  (declare (type function miss-fn))
+	  (declare (type (function (t) nil) miss-fn))
 	  (fin-lambda-fn (&rest args)
 	    (declare #.*optimize-speed*)
 	    #+copy-&rest-arg (setq args (copy-list args))
 	    (with-dfun-wrappers (args metatypes) (dfun-wrappers invalid-wrapper-p)
-	        (apply miss-fn args)
+	        (values (apply miss-fn args))
 	      (if invalid-wrapper-p
-		  (apply miss-fn args)
+		  (values (apply miss-fn args))
 		  (let ((emf (probe-cache cache dfun-wrappers not-in-cache)))
 		    (if (eq emf not-in-cache)
-			(apply miss-fn args)
+			(values (apply miss-fn args))
 			(if return-value-p
 			    emf
 			    (invoke-emf emf args))))))))
       #'(lambda (cache emf miss-fn)
-	  (declare (type function miss-fn))
+	  (declare (type (function (t) nil) miss-fn))
 	  (fin-lambda-fn (&rest args)
 	    (declare #.*optimize-speed*)
 	    #+copy-&rest-arg (setq args (copy-list args))
 	    (with-dfun-wrappers (args metatypes) (dfun-wrappers invalid-wrapper-p)
-	        (apply miss-fn args)
+	        (values (apply miss-fn args))
 	      (if invalid-wrapper-p
-		  (apply miss-fn args)
+		  (values (apply miss-fn args))
 		  (let ((found-p (not (eq not-in-cache
 					  (probe-cache cache dfun-wrappers
 						       not-in-cache)))))
@@ -166,7 +166,7 @@
 			(invoke-emf emf args)
 			(if return-value-p
 			    t
-			    (apply miss-fn args))))))))))
+			    (values (apply miss-fn args)))))))))))
 
 
 (defun emit-default-only-function (metatypes applyp)
