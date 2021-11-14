@@ -90,6 +90,7 @@
 (setf (symbol-function 'hash-table-rehash-threshold)  (symbol-function 'c-hashtable-rhthresh))
 
 (defun hash-table-test (h)
+  (declare (optimize (safety 1)))
   (check-type h hash-table)
   (aref #(eq eql equal equalp) (c-hashtable-test h)))
 
