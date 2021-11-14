@@ -214,9 +214,10 @@
 		  (cddr a))))
     (when (listp (car opt))
       (unless (flag-p (caddr opt) nt)
-	(setf (car opt) (mapcar 'cmp-norm-tp (car opt))
-	      (cadr opt) (cmp-norm-tp (cadr opt))
-	      (caddr opt) (logior (caddr opt) (flags nt)))))
+	(let ((s (unique-sigs (list (mapcar 'cmp-norm-tp (car opt)) (cmp-norm-tp (cadr opt))))))
+	  (setf (car opt) (car s)
+		(cadr opt) (cadr s)
+		(caddr opt) (logior (caddr opt) (flags nt))))))
     opt))
 
 ;; some hacks for revising a list of optimizers.

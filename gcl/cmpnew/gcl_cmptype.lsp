@@ -951,10 +951,8 @@
       (bump-tp type)
     type))
 
-(defvar *unique-sigs* (make-hash-table :test 'equal))
-(defun unique-sigs (sig)
-  (or (gethash sig *unique-sigs*) (setf (gethash sig *unique-sigs*) sig)))
-		  
+(defun unique-sigs (sig) (si::uniq-list sig))
+
 (defun bump-tp (tp)
   (cond ((eq tp '*) tp)
 	((and (consp tp) (member (car tp) '(values returns-exactly)))
