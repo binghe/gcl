@@ -119,7 +119,7 @@
    c
    (character c)
    (unsigned-char (code-char c))
-   (otherwise (code-char (char (string c) 0)))))
+   (otherwise (char (string c) 0))))
 
 
 (defun char-int (c)
@@ -163,9 +163,9 @@
 	   (let ((l (length s)))
 	     (case l
 		   (1 (aref s 0))
-		   ((2 3) (when (and (char= #\^ (aref s 0)) (or (= l 2) (char= #\\ (aref s 2))))
+		   ((2 3) (when (and (char= #.(char-code #\^) (aref s 0)) (or (= l 2) (char= #.(char-code #\\) (aref s 2))))
 			    (code-char (- (char-code (aref s 1)) #.(- (char-code #\A) 1)))))
-		   (4 (when (char= #\\ (aref s 0))
+		   (4 (when (char= #.(char-code #\\) (aref s 0))
 			(code-char 
 			 (+ (* 64 (- (char-code (aref s 1)) #.(char-code #\0)))
 			    (* 8 (- (char-code (aref s 2)) #.(char-code #\0)))
