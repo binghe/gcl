@@ -505,7 +505,7 @@ void writestr_stream(char *,object);
 
 void write_string(object,object);
 
-void edit_double(int, double, int *, char *, int *);
+void edit_double(int, double, int *, char *, int *, int);
 
 void sethash(object,object,object);
 

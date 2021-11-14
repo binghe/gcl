@@ -335,10 +335,6 @@ static int
 char_inc(char *b,char *p) {
 
   if (b==p) {
-    if (*p=='-') {
-      p++;
-      memmove(p+1,p,strlen(p)+1);
-    }
     *p='1';
   } else if (*p=='9') {
     *p='0';
@@ -375,7 +371,7 @@ truncate_double(char *b,double d,int dp) {
 
   strcpy(c,n);
   for (p=c;*p && *p!='e';p++);
-  if (p[-1]!='.' && char_inc(c,p-1) && COMP(c,&pp,d,dp)) {
+  if (p>c && p[-1]!='.' && char_inc(c,p-1) && COMP(c,&pp,d,dp)) {
     j=truncate_double(c,d,dp);
     if (j<=k) {
       k=j;
@@ -389,15 +385,15 @@ truncate_double(char *b,double d,int dp) {
 }
 
 void
-edit_double(int n, double d, int *sp, char *s, int *ep) {
+edit_double(int n,double d,int *sp,char *s,int *ep,int dp) {
 
-  char *p, b[FPRC + 9];
+  char *p, b[FPRC+9];
   int i;
   
   if (!ISFINITE(d)) {
     if (sSAprint_nansA->s.s_dbind !=Cnil) {
       sprintf(s, "%e",d);
-      *sp = 2;
+      *sp=2;
       return;
     }
     else
@@ -411,25 +407,32 @@ edit_double(int n, double d, int *sp, char *s, int *ep) {
     *ep = (b[FPRC+5]-'0')*100 + (b[FPRC+6]-'0')*10 + (b[FPRC+7]-'0');
 
   *sp = 1;
-  if (b[0] == '-')
+  if (b[0] == '-') {
     *sp *= -1;
+    b[0]=' ';
+  }
   if (b[FPRC+4] == '-')
     *ep *= -1;
 
   truncate_double(b,d,n!=7);
+  if ((p=strchr(b,'e')))
+    *p=0;
+
+  if (n+2<strlen(b) && b[n+2]>='5')
+    char_inc(b,b+n+1);
 
   if (isdigit(b[0])) {
     b[1]=b[0];
     (*ep)++;
   }
-  if (b[2]=='0') (*ep)++;
   b[2] = b[1];
-  p = b + 2;
-  for (i=0;i<n && i<FPRC+1 && isdigit(p[i]);i++)
+
+  for (i=0,p=b+2;i<n && p[i];i++)
       s[i] = p[i];
   for (;i<n;i++)
     s[i] = '0';
   s[n] = '\0';
+
 }
 
 static void
@@ -446,7 +449,7 @@ bool shortp;
 
 	if (shortp)
 	  n = 7;
-	edit_double(n, d, &sign, buff, &exp);
+	edit_double(n, d, &sign, buff, &exp, !shortp);
 	if (sign==2) {write_str("#<");
 		      write_str(buff);
 		      write_ch('>');

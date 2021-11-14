@@ -1077,7 +1077,7 @@ fmt_character(bool colon, bool atsign)
 static void
 fmt_fix_float(bool colon, bool atsign)
 {
-	int w=0, d=0, k=0, overflowchar=0, padchar=0;
+        int w=0, d=0, k=0, overflowchar=0, padchar=0,dp;
 	double f;
 	int sign;
 	char buff[256], *b, buff1[256];
@@ -1121,14 +1121,15 @@ fmt_fix_float(bool colon, bool atsign)
 		vs_reset;
 		return;
 	}
-	if (type_of(x) == t_longfloat)
-/* 		n = 16; */
-		n = 17;
-	else
-/* 		n = 7; */
-		n = 8;
+	if (type_of(x) == t_longfloat) {
+	  n = 17;
+	  dp=1;
+	} else {
+	  n = 8;
+	  dp=0;
+	}
 	f = number_to_double(x);
-	edit_double(n, f, &sign, buff, &exp);
+	edit_double(n, f, &sign, buff, &exp, dp);
 	if (exp + k > 100 || exp + k < -100 || d > 100) {
 		prin1(x, fmt_stream);
 		vs_reset;
@@ -1156,7 +1157,7 @@ fmt_fix_float(bool colon, bool atsign)
 			n = m = 0;
 	} else if (m < n) {
 		n = m;
-		edit_double(n, f, &sign, buff, &exp);
+		edit_double(n, f, &sign, buff, &exp, dp);
 	}
 	while (n >= 0)
 		if (buff[n - 1] == '0')
@@ -1269,7 +1270,7 @@ fmt_exponent1(int e)
 static void
 fmt_exponential_float(bool colon, bool atsign)
 {
-	int w=0, d=0, e=0, k=0, overflowchar=0, padchar=0, exponentchar=0;
+        int w=0, d=0, e=0, k=0, overflowchar=0, padchar=0, exponentchar=0,dp;
 	double f;
 	int sign;
 	char buff[256], *b, buff1[256];
@@ -1319,14 +1320,20 @@ fmt_exponential_float(bool colon, bool atsign)
 		vs_reset;
 		return;
 	}
-	if (type_of(x) == t_longfloat)
-/* 		n = 16; */
-		n = 17;
-	else
-/* 		n = 7; */
-		n = 8;
+	if (type_of(x) == t_longfloat) {
+	  n = 17;
+	  dp=1;
+	} else {
+	  n = 8;
+	  dp=0;
+	}
 	f = number_to_double(x);
-	edit_double(n, f, &sign, buff, &exp);
+	edit_double(n, f, &sign, buff, &exp, dp);
+	if (exp + k > 100 || exp + k < -100 || d > 100) {
+		prin1(x, fmt_stream);
+		vs_reset;
+		return;
+	}
 	if (d >= 0) {
 		if (k > 0) {
 			if (!(k < d + 2))
@@ -1359,7 +1366,7 @@ fmt_exponential_float(bool colon, bool atsign)
 			n = m = 0;
 	} else if (m < n) {
 		n = m;
-		edit_double(n, f, &sign, buff, &exp);
+		edit_double(n, f, &sign, buff, &exp, dp);
 	}
 	while (n >= 0)
 		if (buff[n - 1] == '0')
@@ -1473,7 +1480,7 @@ OVER:
 static void
 fmt_general_float(bool colon, bool atsign)
 {
-	int w=0, d=0, e=0, k, overflowchar, padchar=0, exponentchar;
+        int w=0, d=0, e=0, k, overflowchar, padchar=0, exponentchar,dp;
 	int sign, exp;
 	char buff[256];
 	object x;
@@ -1511,13 +1518,14 @@ fmt_general_float(bool colon, bool atsign)
 		vs_reset;
 		return;
 	}
-	if (type_of(x) == t_longfloat)
-/* 		q = 16; */
-		q = 17;
-	else
-/* 		q = 7; */
-		q = 8;
-	edit_double(q, number_to_double(x), &sign, buff, &exp);
+	if (type_of(x) == t_longfloat) {
+	  q = 17;
+	  dp=1;
+	} else {
+	  q = 8;
+	  dp=0;
+	}
+	edit_double(q, number_to_double(x), &sign, buff, &exp, dp);
 	n = exp + 1;
 	while (q >= 0)
 		if (buff[q - 1] == '0')
@@ -1565,7 +1573,7 @@ fmt_general_float(bool colon, bool atsign)
 static void
 fmt_dollars_float(bool colon, bool atsign)
 {
-	int d=0, n=0, w=0, padchar=0;
+        int d=0, n=0, w=0, padchar=0,dp;
 	double f;
 	int sign;
 	char buff[256];
@@ -1598,15 +1606,16 @@ fmt_dollars_float(bool colon, bool atsign)
 		vs_reset;
 		return;
 	}
-/* 	q = 7; */
 	q = 8;
-	if (type_of(x) == t_longfloat)
-/* 		q = 16; */
+	dp=0;
+	if (type_of(x) == t_longfloat) {
 		q = 17;
+		dp=1;
+	}
 	f = number_to_double(x);
-	edit_double(q, f, &sign, buff, &exp);
+	edit_double(q, f, &sign, buff, &exp, dp);
 	if ((q = exp + d + 1) > 0)
-		edit_double(q, f, &sign, buff, &exp);
+	  edit_double(q, f, &sign, buff, &exp, dp);
 	exp++;
 	if (w > 100 || exp > 100 || exp < -100) {
 		fmt_nparam = 6;
