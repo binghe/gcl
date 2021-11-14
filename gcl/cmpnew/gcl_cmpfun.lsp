@@ -123,8 +123,10 @@
     (unwind-exit
      (get-inline-loc
       (list (make-list (length all) :initial-element t)
-	    '* #.(flags ans set svt) 
-	    "({fixnum _v=(fixnum)#v;object _z,_f=(#0),_l=(#1),_ll=_l;
+	    '* #.(flags ans set svt)
+	    (concatenate
+	     'string
+	     "({fixnum _v=(fixnum)#v;object _z,_f=(#0),_l=(#1),_ll=_l;
         object _x4=Cnil,_x3=Cnil,_x2=Cnil,_x1=Cnil,_x0=Cnil;
         char _m=(#n-2),_q=_f->fun.fun_minarg>_m ? _f->fun.fun_minarg-_m : 0;
         char _n=Rset && !_f->fun.fun_argd ? _q : -1;
@@ -135,7 +137,7 @@
           case 3: if (_l==Cnil) {_n=-1;break;} _x2=_l->c.c_car;_l=_l->c.c_cdr;
           case 2: if (_l==Cnil) {_n=-1;break;} _x1=_l->c.c_car;_l=_l->c.c_cdr;
           case 1: if (_l==Cnil) {_n=-1;break;} _x0=_l->c.c_car;_l=_l->c.c_cdr;
-          case 0: if (_n+_m==_f->fun.fun_maxarg && _l!=Cnil) _n=-1; else fcall.argd-=_n;
+          case 0: if (_n+_m+(_l==Cnil ? 0 : 1)>_f->fun.fun_maxarg) _n=-1; else fcall.argd-=_n;
           default: break;
         }
         switch (_n) {
@@ -144,10 +146,14 @@
           case 3:  _z=_f->fun.fun_self(#*_x2,_x1,_x0,_l);break;
           case 2:  _z=_f->fun.fun_self(#*_x1,_x0,_l);break;
           case 1:  _z=_f->fun.fun_self(#*_x0,_l);break;
-          case 0:  _z=_f->fun.fun_self(#*_l);break;
+          case 0:  _z="
+	     (if (cdr args)
+		 "_f->fun.fun_self(#*_l)"
+	       "(_f->fun.fun_maxarg ? _f->fun.fun_self(#*_l) : _f->fun.fun_self())")
+	     ";break;
           default: _z=call_proc_cs2(#*_ll);break;
         }
-        if (!(_f)->fun.fun_neval && !(_f)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})")
+        if (!(_f)->fun.fun_neval && !(_f)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})"))
       (list* (car all) (car (last all)) (butlast (cdr all)))))
     (close-inline-blocks)))
 
@@ -184,12 +190,24 @@
 ;;         )
 ;;   )
 
+
+;; c2apply alters argument order
+(let ((l (gensym "LV")))
+  (defun apply-bind (form args &aux (la (car (last args))))
+    (if (eq l la)
+	form
+      (let* ((b (mapcar (lambda (x) (list (gensym) x)) (butlast args)))
+	     (v (mapcar 'car b)))
+	`(let (,@b (,l ,la))
+	   (apply ,@v ,l))))))
+
 (defun fn-bind (form args)
   (if (or (symbolp (car args)) (constantp (car args))) form
     (let ((s (sgen "FN-BIND")));sgen?
       `(let ((,s ,(pop args))) (,(car form) ,s ,@args)))))
 
 (define-compiler-macro funcall (&whole form &rest args) (fn-bind form args))
+;(define-compiler-macro apply (&whole form &rest args) (apply-bind form args))
 (define-compiler-macro apply (&whole form &rest args) (fn-bind form args))
 
 (defun c1apply (args)

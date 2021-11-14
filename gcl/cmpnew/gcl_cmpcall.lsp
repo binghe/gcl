@@ -134,12 +134,17 @@
      (get-inline-loc
       (list (make-list (length all) :initial-element t)
 	    '* #.(flags ans set svt) 
+	    (concatenate 'string
 	    "({object _z;fixnum _v=(fixnum)#v;
         fcall.fun=#0;fcall.valp=_v;fcall.argd=#n-1;
         _z=Rset && !(#0)->fun.fun_argd && 
         fcall.argd>=(#0)->fun.fun_minarg && fcall.argd<=((#0)->fun.fun_maxarg) ? 
-           (#0)->fun.fun_self(#*) : call_proc_cs2(#?);
-           if (!(#0)->fun.fun_neval && !(#0)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})") all))
+        "
+	    (if args
+		"(#0)->fun.fun_self(#*)"
+	      "((#0)->fun.fun_maxarg ? (#0)->fun.fun_self(#?) : (#0)->fun.fun_self(#*))")
+	    " : call_proc_cs2(#?);
+           if (!(#0)->fun.fun_neval && !(#0)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})")) all))
     (close-inline-blocks)))
 
 
@@ -330,14 +335,14 @@
   (error 'program-error :format-control "Wrong number of arguments to anonymous function: ~a" :format-arguments (list r)))
 
 (defun insufficient-arg-str (fnstr nreq nsup sig st
-				   &aux (sig (if st sig (cons '(*) (cdr sig)))) 
+				   &aux (sig (if st sig (cons '(*) (cdr sig)))) ;(st nil)(nreq 0)
 				   (fnstr (or fnstr (ms (vv-str (add-object 'wrong-number-args)) "->s.s_gfdef"))))
   (ms (cdr (assoc (cadr sig) +to-c-var-alist+))
       "("
       (nvfun-wrap "call_proc_cs2" 
 		  (ms (commasep (append (nobs nsup "#") (nobs (- nreq nsup)) `(("#" ,nsup))))) 
 		  sig fnstr (1+ nreq)) 
-      ")"));FIXME beter way?
+      ")"));FIXME better way?
 
 ;;FIXME can unroll in lisp only?
 ;; (defun lisp-unroll (sig args)
