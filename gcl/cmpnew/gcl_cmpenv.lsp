@@ -171,6 +171,8 @@
 ;; (defun coerce-to-one-value (type)
 ;;   (or (not type) (type-and type t)))
 
+(defun readable-tp (x) (cmp-unnorm-tp (cmp-norm-tp x)))
+
 (defun function-arg-types (arg-types) (mapcar 'readable-tp arg-types))
 ;; (defun function-arg-types (arg-types &aux vararg (types nil) result)
 ;;   (setq result
