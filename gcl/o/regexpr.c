@@ -123,8 +123,8 @@ be over written.   \
     v=sSAmatch_dataA->s.s_dbind=fSmake_vector(sLfixnum,(NSUBEXP *2),Ct,Cnil,Cnil,0,Cnil,Cnil);
   
   va_start(ap,string);
-  start=(fixnum)NEXT_ARG(nargs,ap,l,f,(object)0);
-  end=(fixnum)NEXT_ARG(nargs,ap,l,f,(object)(fixnum)VLEN(string));
+  start=fixint(NEXT_ARG(nargs,ap,l,f,make_fixnum(0)));
+  end=fixint(NEXT_ARG(nargs,ap,l,f,make_fixnum(VLEN(string))));
   va_end(ap);
   if (start < 0 || end > VLEN(string) || start > end)
      FEerror("Bad start or end",0);
