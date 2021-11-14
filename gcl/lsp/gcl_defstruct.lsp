@@ -337,6 +337,28 @@
 	     (list ar (round-up pos (size-of t)) has-holes)
 	     ))))
 
+
+(defun tp-heads (tp0 &aux r)
+  (maphash (lambda (x y &aux (x (if (symbolp (car x)) (cdr x) x))); (print x)
+	     (mapl (lambda (x) (when (type= tp0 (car x)) (push x r))) (when (cdr x) (pop x)))
+	     (mapl (lambda (x) (when (type= (car x) tp0) (push x r))) x))
+	   *uniq-list*)
+  r)
+
+(defun get-uniq-old-tp-heads (name);fixopt, others?
+  (when name
+    (cons (list* name (tp-heads (cmp-norm-tp name)))
+	  (get-uniq-old-tp-heads (sdata-name (sdata-includes (get name 's-data)))))))
+
+;FIXME reconsider holding on to computed structure types
+(defun update-sdata-included (name &aux (i (sdata-includes (get name 's-data))))
+  (when i; (print (list 'foo (sdata-name i)))
+    (let ((r (get-uniq-old-tp-heads (sdata-name i))))
+      (pushnew name (s-data-included i))
+      (mapc (lambda (x &aux (tp1 (cmp-norm-tp (pop x))))
+	      (mapc (lambda (x) (setf (car x) tp1)) x))
+	    r))))
+
 ;FIXME function-src for all functions, sigs for constructor and copier
 (defun define-structure (name conc-name no-conc type named slot-descriptions copier
 			      static include print-function constructors
@@ -376,8 +398,7 @@
 						    te)
 						  include-str))))))
 			 (warn " ~a was frozen but now included"
-			       include)))
-		  (pushnew name (s-data-included include-str)))
+			       include))))
 	    (when (null type)
 		 (setf slot-position
 		       (get-slot-pos leng include slot-descriptions))
@@ -410,7 +431,7 @@
 	   (or tem (setf (get name 's-data) def)))
 	  (tem 
 	   (check-s-data tem def name))
-	  (t (setf (get name 's-data) def)));(null type)
+	  (t (setf (get name 's-data) def) (update-sdata-included name)))
     (when documentation
 	  (setf (get name 'structure-documentation) documentation))
     (when (and (null type) predicate)
