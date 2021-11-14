@@ -27,7 +27,7 @@ typedef unsigned long   ufixnum;
 #endif
 
 #if SIZEOF_LONG < 8
-#define SPAD object pad
+#define SPAD object spad
 #else
 #define SPAD
 #endif
@@ -181,7 +181,7 @@ struct symbol {
   uhfixnum   s_pad3:HM(1);   /*  unused  */
   uhfixnum   s_mflag:1;      /*  macro flag  */
   fixnum     s_hash;         /*  cached hash code */
-
+  SPAD;
 };
 struct package {
 
@@ -262,7 +262,7 @@ struct hashtable {           /*  hash table header  */
 	  J(b_,J(c_,writable)):1,					\
 	  J(b_,J(c_,offset)):3,						\
 	  J(b_,J(c_,rank)):ARRAY_RANK_BITS,				\
-	  ww:LM(AP(22,ARRAY_RANK_BITS)));
+	  ww:LM(AP(22,ARRAY_RANK_BITS)))
 
 #define atem(a_,b_,c_)					\
   ARRAYWORD(b_,c_);					\
@@ -532,6 +532,7 @@ union lispunion {
  struct bitvector          bv; /*  bit-vector  */
  struct unadjvector        sv; /*  simple vector  */
  struct vector              v; /*  vector  */
+ struct cfdata            cfd; /*  compiled fun data */
  struct adjvector        vadj; /*  adjustable vector  */
  /* struct unadjarray         sa; /\*  simple array  *\/ */
  /* struct unadjmatrix       smt; /\*  simple vector  *\/ */
@@ -544,7 +545,6 @@ union lispunion {
  struct readtable          rt; /*  read table  */
  struct pathname           pn; /*  path name  */
  struct function          fun; /*  function */
- struct cfdata            cfd; /*  compiled fun data */
  struct spice             spc; /*  spice  */
 
  struct dummy               d; /*  dummy  */
