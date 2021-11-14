@@ -376,13 +376,15 @@
  (defmacro clh nil
   `(progn
      ,@(mapcar (lambda (x &aux (f (when (eq x 'find-class) `(&optional ep))) (z (intern (string-concatenate "SI-" (symbol-name x)))))
-		 `(defun ,z (o ,@f &aux e)
-		    (cond ((and (fboundp ',x) (fboundp 'classp))
-			   (prog1 (funcall ',x o ,@(cdr f))
-			     (fset ',z (symbol-function ',x))
-;			     (setf (symbol-function ',z) (symbol-function ',x))
-			     ))
-			  ((setq e (get ',z 'early)) (values (funcall e o ,@(cdr f)))))))
+		 `(let (y)
+		    (defun ,z (o ,@f &aux e)
+		      (cond ((and (fboundp ',x) (fboundp 'classp))
+			     (prog1 (funcall ',x o ,@(cdr f))
+			       (fset ',z (symbol-function ',x))
+					;			     (setf (symbol-function ',z) (symbol-function ',x))
+			       ))
+			    ((setq e (get ',z 'early)) (values (funcall e o ,@(cdr f))))
+			    (y)))))
 	       '(classp class-precedence-list find-class class-name class-of class-direct-subclasses)))))
 (clh)
 
