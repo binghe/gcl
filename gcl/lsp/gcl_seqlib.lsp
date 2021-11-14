@@ -846,16 +846,17 @@
 (defmacro with-hash-table-iterator ((name hash-table) &body body)
   (declare (optimize (safety 1)))
   (let ((table (sgen))
-	(ind (sgen)))
-    `(let ((,table ,hash-table)
-	   (,ind 0))
-       (macrolet ((,name ()
-			 `(multiple-value-bind
-			   (more key val)
-			   (si::next-hash-table-entry ,',table ,',ind)
-			   (cond ((>= (the fixnum more) 0)
-				  (setq ,',ind more)
-				  (values t key val))))))
+	(ind (sgen))
+	(size (sgen)))
+    `(let* ((,table ,hash-table)
+	    (,ind -1)
+	    (,size (1- (hash-table-size ,table))))
+       (macrolet ((,name nil
+			 `(do nil ((>= ,',ind ,',size))
+			      (let* ((e (hashtable-self ,',table (incf ,',ind)))
+				     (k (htent-key e)))
+				(unless (eql +objnull+ k)
+				  (return (values t (nani k) (htent-value e))))))))
 		 ,@body))))
 		 
 
