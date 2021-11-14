@@ -102,20 +102,16 @@ number_to_complex(object x)
 }
 
 static object
-integer_exact_quotient(object x,object y,int in_place) {
-
-  object r;
+integer_exact_quotient(object r,object x,object y) {
 
   if (y==small_fixnum(1) || x==small_fixnum(0))
     return x;
 
   if (type_of(x)==t_fixnum)  /* no in_place for fixnums as could be small */
-    return make_fixnum((type_of(y)==t_fixnum ? fix(x)/fix(y) : -1)); 
+    return make_fixnum((type_of(y)==t_fixnum ? fix(x)/fix(y) : -1));
   /* Only big dividing a fix is most-negative-fix/abs(most-negative-fix)*/
-    
-  r=in_place ? x : new_bignum();
 
-  if (type_of(y)==t_fixnum) 
+  if (type_of(y)==t_fixnum)
     mpz_divexact_ui(MP(r),MP(x),fix(y));
   else
     mpz_divexact(MP(r),MP(x),MP(y));
@@ -125,53 +121,203 @@ integer_exact_quotient(object x,object y,int in_place) {
 }
 
 static object
-ratio_op_with_cancellation(object a,object b,object c,object d,object (*op)(object,object)) {
+fixnum_abs(object x) {
 
-  object b0,d0,g,t,g1;
-  
-  b0=b;
-  d0=d;
+  if (type_of(x)==t_fixnum) {
 
-  g=get_gcd(b,d);
-  
-  b=integer_exact_quotient(b,g,0); /* Try to handle g==1 case quickly above and keep generic */
-  d=integer_exact_quotient(d,g,0);
+    fixnum f=fix(x);
 
-  t=op(number_times(a,d),number_times(b,c));
-  
-  g1=get_gcd(t,g);
-    
-  t=integer_exact_quotient(t,g1,t!=a&&t!=b0&&t!=c&&t!=d0);
-  b=integer_exact_quotient(b0,g1,0);
+    return f==MOST_NEGATIVE_FIX ? sSPminus_most_negative_fixnumP->s.s_dbind : (f<0 ? make_fixnum(-f) : x);
 
-  b=number_times(b,d);
-  
-  return make_ratio(t,b,1);
-  
+  }
+
+  return x;
+
 }
 
+
+
+
+static object
+get_gcd_r(object r,object x,object y) {
+
+  if (x==small_fixnum(1) || y==small_fixnum(1))
+    return small_fixnum(1);
+
+  x=fixnum_abs(x);
+  y=fixnum_abs(y);
+
+  switch(type_of(x)) {
+  case t_fixnum:
+    switch(type_of(y)) {
+    case t_fixnum:
+      return make_fixnum(fixnum_gcd(fix(x),fix(y)));
+    default:
+      mpz_gcd_ui(MP(r),MP(y),fix(x));
+      return normalize_big(r);
+    }
+  default:
+    switch(type_of(y)) {
+    case t_fixnum:
+      mpz_gcd_ui(MP(r),MP(x),fix(y));
+      return normalize_big(r);
+    default:
+      mpz_gcd(MP(r),MP(x),MP(y));
+      return normalize_big(r);
+
+    }
+  }
+}
+
+object
+get_gcd(object x,object y) {
+
+  x=get_gcd_r(big_fixnum1,x,y);
+  return x==big_fixnum1 ? replace_big(x) : x;
+
+}
+
+static object
+integer_times(object r,object a,object b) {
+
+  if (a==small_fixnum(1))
+    return b;
+
+  if (b==small_fixnum(1))
+    return a;
+
+  if (type_of(a)==t_fixnum)
+    if (type_of(b)==t_fixnum)
+      return fixnum_times(fix(a),fix(b));
+    else {
+      mpz_mul_si(MP(r),MP(b),fix(a));
+      return normalize_big(r);
+    }
+  else
+    if (type_of(b)==t_fixnum) {
+      mpz_mul_si(MP(r),MP(a),fix(b));
+      return normalize_big(r);
+    } else {
+      mpz_mul(MP(r),MP(a),MP(b));
+      return normalize_big(r);
+    }
+}
+
+#define mneg(a_) ((a_)==MOST_NEGATIVE_FIX ? (ufixnum)(a_) : (ufixnum)(-(a_)))
+#define mpz_add_si(a_,b_,c_) ((c_)<0 ? mpz_sub_ui(a_,b_,mneg(c_)) : mpz_add_ui(a_,b_,c_))
+#define mpz_sub_si(a_,b_,c_) ((c_)<0 ? mpz_add_ui(a_,b_,mneg(c_)) : mpz_sub_ui(a_,b_,c_))
+
+
+static object
+integer_add(object r,object a,object b) {
+
+  if (a==small_fixnum(0))
+    return b;
+
+  if (b==small_fixnum(0))
+    return a;
+
+  if (type_of(a)==t_fixnum)
+    if (type_of(b)==t_fixnum)
+      return fixnum_add(fix(a),fix(b));
+    else {
+      mpz_add_si(MP(r),MP(b),fix(a));
+      return normalize_big(r);
+    }
+  else
+    if (type_of(b)==t_fixnum) {
+      mpz_add_si(MP(r),MP(a),fix(b));
+      return normalize_big(r);
+    } else {
+      mpz_add(MP(r),MP(a),MP(b));
+      return normalize_big(r);
+    }
+}
+
+static object
+integer_sub(object r,object a,object b) {
+
+  /* if (a==small_fixnum(0)) */
+  /*   return b; */
+
+  if (b==small_fixnum(0))
+    return a;
+
+  if (type_of(a)==t_fixnum)
+    if (type_of(b)==t_fixnum)
+      return fixnum_sub(fix(a),fix(b));
+    else {
+      mpz_sub_si(MP(r),MP(b),fix(a));
+      mpz_neg(MP(r),MP(r));
+      return normalize_big(r);
+    }
+  else
+    if (type_of(b)==t_fixnum) {
+      mpz_sub_si(MP(r),MP(a),fix(b));
+      return normalize_big(r);
+    } else {
+      mpz_sub(MP(r),MP(a),MP(b));
+      return normalize_big(r);
+    }
+}
 
 static object
 ratio_mult_with_cancellation(object a,object b,object c,object d) {
 
-  object g;
-  
-  g=get_gcd(a,d);
-  
-  a=integer_exact_quotient(a,g,0);
-  d=integer_exact_quotient(d,g,0);
+  object gad,gbc;
 
-  g=get_gcd(b,c);
-  
-  b=integer_exact_quotient(b,g,0);
-  c=integer_exact_quotient(c,g,0);
+  gad=get_gcd_r(big_fixnum1,a,d);
+  gbc=get_gcd_r(big_fixnum5,b,c);
 
-  a=number_times(a,c);
-  b=number_times(b,d);
+  a=integer_exact_quotient(big_fixnum3,a,gad);
+  c=integer_exact_quotient(big_fixnum4,c,gbc);
+  a=integer_times(big_fixnum3,a,c);/*number_times can clobber big_fixnum2*/
+  if (a==big_fixnum3 || a==big_fixnum4)
+    a=replace_big(a);
+
+  b=integer_exact_quotient(big_fixnum3,b,gbc);
+  d=integer_exact_quotient(big_fixnum4,d,gad);
+  b=integer_times(big_fixnum3,b,d);
+  if (b==big_fixnum3 || b==big_fixnum4)
+    b=replace_big(b);
 
   return make_ratio(a,b,1);
-  
+
 }
+
+static object
+ratio_op_with_cancellation(object a,object b,object c,object d,object (*op)(object,object,object)) {
+
+  object b0,d0,g,t,g1;
+
+  b0=b;
+  d0=d;
+
+  g=get_gcd_r(big_fixnum1,b,d);
+
+  b=integer_exact_quotient(big_fixnum3,b,g);
+  d=integer_exact_quotient(big_fixnum4,d,g);
+
+  c=integer_times(big_fixnum3,b,c);
+  a=integer_times(big_fixnum5,a,d);
+  t=op(big_fixnum3,a,c);/*number_times can clobber big_fixnum2*/
+  /* t=op(a,c);/\*FIXME*\/ */
+
+  g1=get_gcd_r(big_fixnum1,t,g);
+
+  t=integer_exact_quotient(big_fixnum3,t,g1);
+  if (t==big_fixnum3 || t==big_fixnum4 || t==big_fixnum5)
+    t=replace_big(t);
+
+  b=integer_exact_quotient(big_fixnum1,b0,g1);
+  b=integer_times(big_fixnum1,b,d);
+  if (b==big_fixnum1 || b==big_fixnum4)
+    b=replace_big(b);
+
+  return make_ratio(t,b,1);
+
+}
+
 
 
 object
@@ -189,7 +335,7 @@ number_plus(object x, object y)
 		case t_ratio:
 		  return ratio_op_with_cancellation(x,small_fixnum(1),
 						    y->rat.rat_num,y->rat.rat_den,
-						    number_plus);
+						    integer_add);
 		case t_shortfloat:
 			dx = (double)(fix(x));
 			dy = (double)(sf(y));
@@ -213,7 +359,7 @@ number_plus(object x, object y)
 		case t_ratio:
 		  return ratio_op_with_cancellation(x,small_fixnum(1),
 						    y->rat.rat_num,y->rat.rat_den,
-						    number_plus);
+						    integer_add);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -234,10 +380,11 @@ number_plus(object x, object y)
 		case t_bignum:
 		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
 						    y,small_fixnum(1),
-						    number_plus);
+						    integer_add);
 		case t_ratio:
    		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						    y->rat.rat_num,y->rat.rat_den,number_plus);
+						    y->rat.rat_num,y->rat.rat_den,
+						    integer_add);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -335,7 +482,7 @@ one_plus(object x)
 	case t_ratio:
 	  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
 					    small_fixnum(1),small_fixnum(1),
-					    number_plus);
+					    integer_add);
 	case t_shortfloat:
 		dx = (double)(sf(x));
 		z = alloc_object(t_shortfloat);
@@ -377,7 +524,7 @@ number_minus(object x, object y)
 		case t_ratio:
 		  return ratio_op_with_cancellation(x,small_fixnum(1),
 						    y->rat.rat_num,y->rat.rat_den,
-						    number_minus);
+						    integer_sub);
 		case t_shortfloat:
 			dx = (double)(fix(x));
 			dy = (double)(sf(y));
@@ -401,7 +548,7 @@ number_minus(object x, object y)
 		case t_ratio:
 		  return ratio_op_with_cancellation(x,small_fixnum(1),
 						    y->rat.rat_num,y->rat.rat_den,
-						    number_minus);
+						    integer_sub);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -422,10 +569,11 @@ number_minus(object x, object y)
 		case t_bignum:
 		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
 						    y,small_fixnum(1),
-						    number_minus);
+						    integer_sub);
 		case t_ratio:
    		  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
-						    y->rat.rat_num,y->rat.rat_den,number_minus);
+						    y->rat.rat_num,y->rat.rat_den,
+						    integer_sub);
 		case t_shortfloat:
 			dx = number_to_double(x);
 			dy = (double)(sf(y));
@@ -516,7 +664,7 @@ one_minus(object x)
 	case t_ratio:
 	  return ratio_op_with_cancellation(x->rat.rat_num,x->rat.rat_den,
 					    small_fixnum(1),small_fixnum(1),
-					    number_minus);
+					    integer_sub);
 	case t_shortfloat:
 		dx = (double)(sf(x));
 		z = alloc_object(t_shortfloat);
@@ -548,7 +696,7 @@ number_negate(object x)
 
 	case t_fixnum:
 		if(fix(x) == MOST_NEGATIVE_FIX)
-		  return fixnum_add(1,MOST_POSITIVE_FIX);
+		  return sSPminus_most_negative_fixnumP->s.s_dbind; /* fixnum_add(1,MOST_POSITIVE_FIX); */
 		else
 		  return(make_fixnum(-fix(x)));
 	case t_bignum:
@@ -878,6 +1026,30 @@ number_divide(object x, object y)
 }
 
 object
+number_recip(object x) {
+
+  switch (type_of(x)) {
+  case t_fixnum:
+  case t_bignum:
+    return(make_ratio(small_fixnum(1), x, 1));
+  case t_ratio:
+    return(make_ratio(x->rat.rat_den,x->rat.rat_num, 1));
+  case t_shortfloat:
+    return make_shortfloat(1.0/sf(x));
+  case t_longfloat:
+    return make_longfloat(1.0/lf(x));
+  case t_complex:
+    return number_divide(make_complex(x->cmp.cmp_real,number_negate(x->cmp.cmp_imag)),
+			 number_plus(number_times(x->cmp.cmp_real,x->cmp.cmp_real),
+				     number_times(x->cmp.cmp_imag,x->cmp.cmp_imag)));
+  default:
+    FEwrong_type_argument(sLnumber, x);
+    return(Cnil);
+  }
+
+}
+
+object
 integer_divide1(object x, object y,fixnum d) {
   object q;
 
@@ -894,42 +1066,6 @@ integer_divide2(object x, object y,fixnum d,object *r) {
   return(q);
 
 }
-
-object
-get_gcd_abs(object x,object y) {
-
-  object r;
-  
-  for (;;) {
-    
-    if (type_of(x) == t_fixnum && type_of(y) == t_fixnum)
-      return make_fixnum(fixnum_gcd(fix(x),fix(y)));
-    
-    if (number_compare(x, y) < 0) {
-      r = x;
-      x = y;
-      y = r;
-    }
-    if (type_of(y) == t_fixnum && fix(y) == 0)
-      return(x);
-
-    integer_quotient_remainder_1(x, y, NULL, &r,0);
-    x = y;
-    y = r;
-
-  }
-
-}
-
-
-object
-get_gcd(object x, object y) {
-  
-  return get_gcd_abs(number_abs(x),number_abs(y));
-
-}
-
-/* (+          )   */
 
 DEFUN("P2",object,fSp2,SI
 	  ,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
@@ -960,31 +1096,39 @@ DEFUN("/2",object,fSd2,SI
 }
 
 
-DEFUN("NUMBER-PLUS",object,fSnumber_plus,SI
-	  ,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+DEFUN("NUMBER-PLUS",object,fSnumber_plus,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
 
   RETURN1(number_plus(x,y));
 
 }
 
-DEFUN("NUMBER-MINUS",object,fSnumber_minus,SI
-	  ,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+DEFUN("NUMBER-MINUS",object,fSnumber_minus,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
 
   RETURN1(number_minus(x,y));
 
 }
 
-DEFUN("NUMBER-TIMES",object,fSnumber_times,SI
-	  ,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+DEFUN("NUMBER-NEGATE",object,fSnumber_negate,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  RETURN1(number_negate(x));
+
+}
+
+DEFUN("NUMBER-TIMES",object,fSnumber_times,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
 
   RETURN1(number_times(x,y));
 
 }
 
-DEFUN("NUMBER-DIVIDE",object,fSnumber_divide,SI
-	  ,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
+DEFUN("NUMBER-DIVIDE",object,fSnumber_divide,SI,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
 
   RETURN1(number_divide(x,y));
+
+}
+
+DEFUN("NUMBER-RECIP",object,fSnumber_recip,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  RETURN1(number_recip(x));
 
 }
 
@@ -1105,14 +1249,14 @@ LFD(Lgcd)(void) {
   vs_push(number_abs(vs_base[0]));
   
   for (i = 1;  i < narg;  i++)
-    vs_base[0] = get_gcd_abs(vs_base[0], number_abs(vs_base[i]));
+    vs_base[0] = get_gcd(vs_base[0],vs_base[i]);
 
 }
 
 object
 get_lcm_abs(object x,object y) {
 
-  object g=get_gcd_abs(x,y);
+  object g=get_gcd(x,y);
 
   return number_zerop(g) ? g : number_times(x,integer_divide1(y,g,0));
 

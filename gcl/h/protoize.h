@@ -47,6 +47,7 @@
 /* gmp_big.c:302:OF */ extern object big_minus (object x); /* (x) object x; */
 /* gmp_big.c:324:OF */ extern double big_to_double (object x); /* (x) object x; */
 /* gmp_big.c:454:OF */ extern object maybe_replace_big (object x); /* (x) object x; */
+/* gmp_big.c:454:OF */ extern object replace_big (object x); /* (x) object x; */
 /* gmp_big.c:472:OF */ extern object bignum2 (unsigned int h, unsigned int l); /* (h, l) unsigned int h; unsigned int l; */
 /* gmp_big.c:482:OF */ extern void integer_quotient_remainder_1 (object x, object y, object *qp, object *rp,fixnum z); /* (x, y, qp, rp) object x; object y; object *qp; object *rp; */
 /* gmp_big.c:482:OF */ extern void integer_quotient_remainder_1_ui (object x, unsigned long y, object *qp, object *rp,fixnum z); /* (x, y, qp, rp) object x; object y; object *qp; object *rp; */

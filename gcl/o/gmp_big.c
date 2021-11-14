@@ -489,19 +489,28 @@ stoi(fixnum x) {
 /* return object like *xpt coercing to a fixnum if necessary,
    or return the actual bignum replacing it with another
 */
+
 object
-maybe_replace_big(object x)
-{ 
-/* note  mpz_fits_sint_p(MP(x)) returns arbitrary result if
-   passed 0 in bignum form.
-   bug or feature of gmp..
-*/   
+replace_big(object x) {
+
+  return make_bignum(MP(x));
+
+}
+
+object
+maybe_replace_big(object x) {
+
+  /* note  mpz_fits_sint_p(MP(x)) returns arbitrary result if
+     passed 0 in bignum form.
+     bug or feature of gmp..
+  */
   if (MP_SIZE(x) == 0) return small_fixnum(0);
   if (mpz_fits_slong_p(MP(x))) {
     MP_INT *u = MP(x);
     return make_fixnum(mpz_get_si(u));
   }
-  return make_bignum(MP(x));
+  return replace_big(x);
+
 }
 
 
@@ -595,6 +604,6 @@ gcl_init_big(void)
   enter_mark_origin(&big_fixnum4);
   enter_mark_origin(&big_fixnum5);
   enter_mark_origin(&big_gcprotect);
-
+  sSPminus_most_negative_fixnumP=make_si_constant("+MINUS-MOST-NEGATIVE-FIXNUM+",fixnum_add(MOST_POSITIVE_FIX,1));
 
 }

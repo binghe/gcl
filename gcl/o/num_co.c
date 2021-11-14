@@ -93,6 +93,21 @@ DEFUN("ISFINITE",object,fSisfinite,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
 }
 
+DEFUN("ISNORMAL",object,fSisnormal,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  switch (type_of(x)) {
+  case t_longfloat:
+    return ISNORMAL(lf(x)) ? Ct : Cnil;
+  case t_shortfloat:
+    return ISNORMAL(sf(x)) ? Ct : Cnil;
+  default:
+    return Cnil;
+  }
+
+  /* return Cnil; */
+
+}
+
 void
 integer_decode_double(double d, int *hp, int *lp, int *ep, int *sp)
 {
@@ -348,6 +363,15 @@ intdivrem(object x,object y,fixnum d,object *q,object *r) {
   return;
   
 }
+
+DEFUN("INTDIVREM",object,fSintdivrem,SI,3,3,NONE,OO,OI,OO,OO,(object x,object y,fixnum d),"") {
+
+  intdivrem(x,y,d,&x,&y);
+
+  RETURN1(MMcons(x,y));
+
+}
+
 
 object
 number_ldb(object x,object y) {

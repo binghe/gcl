@@ -65,8 +65,8 @@ object big_plus();
 object big_times();
 object normalize_big_to_object();
 double big_to_double();
-EXTER  struct bignum big_fixnum1_body,big_fixnum2_body,big_fixnum3_body,big_fixnum4_body;
-EXTER object big_fixnum1,big_fixnum2,big_fixnum3,big_fixnum4;
+EXTER  struct bignum big_fixnum1_body,big_fixnum2_body,big_fixnum3_body,big_fixnum4_body,big_fixnum5_body;
+EXTER object big_fixnum1,big_fixnum2,big_fixnum3,big_fixnum4,big_fixnum5;
 object maybe_replace_big();
 
 
@@ -132,6 +132,7 @@ EXTER object sKinvalid_function;
 EXTER object sKpackage_error;
 object wrong_type_argument();
 EXTER object sSuniversal_error_handler;
+EXTER object sSPminus_most_negative_fixnumP;
 
 /*  eval.c  */
 EXTER object sLapply;

@@ -45,6 +45,7 @@ read.d: normalize_big_to_object
 #define remainder gclremainder
 #define NEED_MP_H
 #include "include.h"
+#include "num_include.h"
 
 #ifdef STATIC_FUNCTION_POINTERS
 static void* alloc_relblock_static (size_t n) {return alloc_relblock (n);}
@@ -53,6 +54,28 @@ static void* alloc_contblock_static(size_t n) {return alloc_contblock(n);}
 
 void* (*gcl_gmp_allocfun)(size_t)=FFN(alloc_relblock);
 int gmp_relocatable=1;
+
+DEFUN("INTEGER-QUOTIENT-REMAINDER_1",object,fSinteger_quotient_remainder_1,SI,4,4,NONE,OO,OO,IO,OO,(object r,object x,object y,fixnum d),"") {
+
+  integer_quotient_remainder_1(x,y,&r->c.c_car,&r->c.c_cdr,d);
+
+  RETURN1(r);
+
+}
+
+
+
+DEFUN("MBIGNUM2",object,fSbignum2,SI,2,2,NONE,OI,IO,OO,OO,(fixnum h,fixnum l),"") {
+
+  object x = new_bignum();
+
+  mpz_set_si(MP(x),h);
+  mpz_mul_2exp(MP(x),MP(x),8*sizeof(x));
+  mpz_add_ui(MP(x),MP(x),l);
+
+  RETURN1(normalize_big(x));
+
+}
 
 
 DEFUN("SET-GMP-ALLOCATE-RELOCATABLE",object,fSset_gmp_allocate_relocatable,SI,1,1,NONE,OO,OO,OO,OO,

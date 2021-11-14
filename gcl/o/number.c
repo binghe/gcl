@@ -143,6 +143,13 @@ make_ratio(object num, object den,int pre_cancelled)
 	return(r);
 }
 
+DEFUN("MAKE-RATIO",object,fSmake_ratio,SI,3,3,NONE,OO,OI,OO,OO,(object num,object den,fixnum pre_canceled),"")  {
+
+  RETURN1(make_ratio(num,den,pre_canceled));
+
+}
+
+
 object
 make_shortfloat(float f)
 {

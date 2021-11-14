@@ -12,10 +12,6 @@
 ;FIXME no declaim yet in default init position
 (si::putprop 'cnum-type t 'compiler::cmp-inline)
 
-(defun isnormal (x)
-  (and (isfinite x)
-       (>= (if (< x 0) (- x) x) least-positive-normalized-long-float)));FIXME abs bootstrap
-
 (defun ratio-to-double (x &aux nx ny)
   (declare (inline isnormal))
   (let ((y (denominator x))

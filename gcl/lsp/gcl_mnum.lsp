@@ -231,6 +231,21 @@
 (defmfun "acos"  acos (and (>= x -1) (<= x 1)))
 (defmfun "asin"  asin (and (>= x -1) (<= x 1)))
 (defmfun "sqrt"  sqrt (>= x 0) t)
+
+(defun isfinite (x)
+  (typecase
+   x
+   (short-float (lit :boolean "__builtin_isfinite(" (:float x) ")"))
+   (long-float (lit :boolean "__builtin_isfinite(" (:double x) ")"))))
+(setf (get 'isfinite 'compiler::cmp-inline) t)
+
+(defun isnormal (x)
+  (typecase
+   x
+   (short-float (lit :boolean "__builtin_isnormal(" (:float x) ")"))
+   (long-float (lit :boolean "__builtin_isnormal(" (:double x) ")"))))
+(setf (get 'isnormal 'compiler::cmp-inline) t)
+
 )
 
 #-c99

@@ -33,15 +33,16 @@
       (let ((z (if (,c n1 n2) n1 n2)))
 	(if r (apply ',fn z (car r) (cdr r)) z))))
 
- (defmacro defmd ((fn fn2))
+  (defmacro defmd ((fn fn2 fn3))
    `(defun ,fn (n1 &optional (n2 n1 n2p) &rest r) 
       (declare (:dynamic-extent r))
       (declare (optimize (safety 1)))
       (check-type n1 number)
       (check-type n2 number)
-      (let* ((n1 (if n2p n1 ,(if (eq fn '-) 0 1)))
-	     (z (,fn2 n1 n2)))
-	(if r (apply ',fn z (car r) (cdr r)) z)))))
+      (if n2p
+	  (let ((z (,fn2 n1 n2)))
+	    (if r (apply ',fn z (car r) (cdr r)) z))
+	(,fn3 n1)))))
 
 (defcomp (<  <2))
 (defcomp (<= <=2))
@@ -55,8 +56,8 @@
 (defmm (max >=))
 (defmm (min <=))
 
-(defmd (- number-minus))
-(defmd (/ number-divide))
+(defmd (- number-minus number-negate))
+(defmd (/ number-divide number-recip))
 
 (defun zgcd2 (x y) (cond ((= x 0) y) ((= y 0) x) ((fgcd2 x y))))
 (defun lgcd2 (x y tx tt &aux (tt (>> tt (ctzl tt))))
