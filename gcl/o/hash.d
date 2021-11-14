@@ -194,13 +194,19 @@ BEGIN:
       {
 	ufixnum *u=x->bv.bv_self+x->bv.bv_offset/BV_BITS;
 	ufixnum *ue=x->bv.bv_self+(VLEN(x)+x->bv.bv_offset)/BV_BITS;
+	uchar s=x->bv.bv_offset%BV_BITS;
+	uchar m=((VLEN(x)+x->bv.bv_offset)%BV_BITS);
 
-	if (x->bv.bv_offset%BV_BITS)
-	  h^=ufixhash((*u++)&(~(BIT_MASK(x->bv.bv_offset%BV_BITS))));
-	for (;u<ue;u++)
-	  h^=ufixhash(*u);
-	if ((VLEN(x)+x->bv.bv_offset)%BV_BITS)
-	  h^=ufixhash((*u++)&(BIT_MASK(x->bv.bv_offset%BV_BITS)));
+	for (;u<ue;) {
+	  ufixnum v=(*u++)>>s;
+	  if (u<ue||m) {
+	    ufixnum w=(*u);
+	    if (u==ue)
+	      w&=BIT_MASK(m);
+	    v|=w<<(sizeof(*u)-s);
+	  }
+	  h^=ufixhash(v);
+	}
       }
       break;
     case t_pathname:
