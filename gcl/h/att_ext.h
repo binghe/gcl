@@ -674,7 +674,7 @@ EXTER object TSor_pathname_string_symbol_stream;
 EXTER int interrupt_flag;		/* console interupt flag */
 EXTER int interrupt_enable;		/* console interupt enable */
 
-EXTER object sLAlink_arrayA;
+EXTER object sSAlink_arrayA;
 
 /* nfunlink.c */
 object Icall_proc();
