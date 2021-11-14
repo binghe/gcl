@@ -43,7 +43,11 @@ system: $(PORTDIR)/$(FLISP)
 
 ASRC:=$(shell ls -1 o/*.c o/*.d o/*.h h/*.h lsp/*.lsp cmpnew/*.lsp mod/*.lsp pcl/*sp clcs/*sp xgcl-2/*p) #o/*.d o/*.h h/*.h
 TAGS: $(ASRC)
-	etags --regex='/[ \n\t\#\.`]*(defun[ \n\t]+\([^ \n\t]+\)/' $^
+	etags \
+	--regex='/[ \n\t\#\.`]*(defun[ \n\t]+\([^ \n\t]+\)/' \
+	--regex='/[ \n\t\#\.`]*(defmfun[ \n\t]+"\([^ \n\t"]+\)"[ \n\t]*)/\1/' \
+	--regex='/[ \n\t\#\.`]*(defmfun[ \n\t]+"[^ \n\t"]+"[ \n\t]+\([^ \n\t]+\)/\1/' \
+	$^
 
 xgcl: $(PORTDIR)/saved_xgcl
 
