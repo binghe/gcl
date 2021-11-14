@@ -538,7 +538,7 @@
 (defun split-decls (auxs decls &optional ro &aux ad dd)
   (dolist (l decls (list (nreverse ad) (nreverse dd)))
     (dolist (bb (cdr l))
-      (let ((b (if (eq (car bb) 'type) (cdr bb) bb)))
+      (let ((b (if (member (car bb) '(type ftype)) (cdr bb) bb)))
 	(cond ((eq (car b) 'optimize) (if ro (push `(declare ,b) dd) (push `(declare ,b) ad)))
 	      ((eq (car b) 'class)
 	       (unless (<= (length b) 3)
