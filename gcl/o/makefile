@@ -64,7 +64,7 @@ boot.h: boot.ini
 
 %.ini: %.c grab_defs
 	$(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c |\
-		 sed -e 's,^.* DEFUNB,DEFUNB,g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $*.ini
+		 sed -e 's,DEFUNB(\([^)]*\)),\nDEFUNB(\1),g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $*.ini
 
 %.ini: %.d $(DPP) grab_defs
 	$(DPP) $*

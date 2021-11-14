@@ -41,6 +41,38 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define Q24(a_,b_,c_,d_,e_) KK1(c_,d_)
 #define Q34(a_,b_,c_,d_,e_) KK1(e_,b)
 #define Q44(a_,b_,c_,d_,e_) OO
+#define Q15(a_,b_,c_,d_,e_,f_) KK1(a_,b_)
+#define Q25(a_,b_,c_,d_,e_,f_) KK1(c_,d_)
+#define Q35(a_,b_,c_,d_,e_,f_) KK1(e_,f_)
+#define Q45(a_,b_,c_,d_,e_,f_) OO
+
+/* #define QR11(a_,b_) KK1(a_,b_) */
+/* #define QR21(a_,b_) OO */
+/* #define QR31(a_,b_) OO */
+/* #define QR41(a_,b_) OO */
+/* #define QR12(a_,b_,c_) KK1(a_,b_) */
+/* #define QR22(a_,b_,c_) KK1(c_,b) */
+/* #define QR32(a_,b_,c_) OO */
+/* #define QR42(a_,b_,c_) OO */
+/* #define QR13(a_,b_,c_,d_) KK1(a_,b_) */
+/* #define QR23(a_,b_,c_,d_) KK1(c_,d_) */
+/* #define QR33(a_,b_,c_,d_) OO */
+/* #define QR43(a_,b_,c_,d_) OO */
+/* #define QR14(a_,b_,c_,d_,e_) KK1(a_,b_) */
+/* #define QR24(a_,b_,c_,d_,e_) KK1(c_,d_) */
+/* #define QR34(a_,b_,c_,d_,e_) KK1(e_,b) */
+/* #define QR44(a_,b_,c_,d_,e_) OO */
+
+/* #define QR_fb(a_...)   fb,b,a_ */
+/* #define QR_fbb(a_...)  fbb,b,b,a_ */
+/* #define QR_bb(a_...)   bb,b,b,a_ */
+/* #define QR_bbb(a_...)  bbb,b,b,b,a_ */
+/* #define QR_m(a_...)    m,b,b,a_ */
+/* #define QR_b(a_...)    b,b,a_ */
+/* #define QR_f(a_...)    f,a_ */
+/* #define QR(r_,a_...)   Join(QR_,r_)(a_) */
+/* #define QRR(e_,n_,a_...) Join(Join(Q,e_),n_)(a_) */
+
 
 #define D_fb   fixnum
 #define D_fbb  fixnum
@@ -76,6 +108,22 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define AA_f fixnum u
 #define AA1(a_) Join(AA_,a_)
 
+/* #define AAR_bbb */
+/* #define AAR_bb */
+/* #define AAR_fb fixnum u */
+/* #define AAR_fbb fixnum u */
+/* #define AAR_m */
+/* #define AAR_b */
+/* #define AAR_f fixnum u */
+/* #define AAR1(a_) Join(AAR_,a_) */
+
+/* #define CR_b */
+/* #define CR_f */
+/* #define CR1(a_) Join(CR_,a_)(x) */
+/* #define CR2(a_,b_) CR1(a_),Join(CR_,b_)(y) */
+/* #define CR3(a_,b_,c_) CR2(a_,b_),Join(CR_,c_)(z) */
+/* #define CR4(a_,b_,c_,d_) CR3(a_,b_,c_),Join(CR_,d_)(w) */
+
 #define C_b MP
 #define C_f
 #define C1(a_) Join(C_,a_)(x)
@@ -92,6 +140,24 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define CC_f
 #define CC1(r_) Join(CC_,r_)
 
+/* #define CCR_bbb u,v,v2, */
+/* #define CCR_bb  u,v, */
+/* #define CCR_fb  v, */
+/* #define CCR_fbb v,v, */
+/* #define CCR_m   u,v, */
+/* #define CCR_b   u, */
+/* #define CCR_f */
+/* #define CCR1(r_) Join(CCR_,r_) */
+
+/* #define DR_bbb object u,object v,object v2, */
+/* #define DR_bb  object u,object v, */
+/* #define DR_fb  object v, */
+/* #define DR_fbb object v,object v2, */
+/* #define DR_m   object u,object v, */
+/* #define DR_b   object u, */
+/* #define DR_f */
+/* #define DR1(r_) Join(DR_,r_) */
+
 #define W_bbb
 #define W_bb
 #define W_fb  u=
@@ -99,6 +165,14 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define W_m
 #define W_b
 #define W_f   u=
+
+/* #define WR_bbb */
+/* #define WR_bb */
+/* #define WR_fb  fixnum u= */
+/* #define WR_fbb fixnum u= */
+/* #define WR_m */
+/* #define WR_b */
+/* #define WR_f   fixnum u= */
 
 /* #define Z_m normalize_big(u),normalize_big(v) */
 /* #define Z_b normalize_big(u) */
@@ -123,6 +197,19 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define PT3(a_,b_,c_) MMcons(PT1(a_),PT2(b_,c_))
 #define PT4(a_,b_,c_,d_) MMcons(PT1(a_),PT3(b_,c_,d_))
 
+/* #define PTR_bb sLinteger */
+/* #define PTR_fb sLfixnum */
+/* #define PTR_fbb sLfixnum */
+/* #define PTR_bbb sLinteger */
+/* #define PTR_m sLinteger */
+/* #define PTR_b sLinteger */
+/* #define PTR_f sLfixnum */
+/* #define PTR(a_) Join(PTR_,a_) */
+/* #define PTR1(a_) MMcons(Join(PTR_,a_),Cnil) */
+/* #define PTR2(a_,b_) MMcons(PTR1(a_),PTR1(b_)) */
+/* #define PTR3(a_,b_,c_) MMcons(PTR1(a_),PTR2(b_,c_)) */
+/* #define PTR4(a_,b_,c_,d_) MMcons(PTR1(a_),PTR3(b_,c_,d_)) */
+
 #define HH_bbb(a_...) RETURN3(a_)
 #define HH_bb(a_...)  RETURN2(a_)
 #define HH_fb(a_...)  RETURN2I(a_)
@@ -131,15 +218,44 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define HH_b(a_...)   RETURN1(a_)
 #define HH_f(a_...)   RETURN1(a_)
 
-#define BF(n_,b_,r_,a_...)\
-  DEFUNB("mpz_" #b_,R1(r_),Join(fSmpz_,b_),\
+/* #define BF1(n_,b_,r_,a_...)						\ */
+/*   DEFUNB("mpz_" #b_,R1(r_),Join(fSmpz_,b_),				\ */
+/* 	 GMP,n_,n_,NONE,Join(Q1,n_)(r_,a_),Join(Q2,n_)(r_,a_),Join(Q3,n_)(r_,a_),Join(Q4,n_)(r_,a_), \ */
+/* 	 (Join(D,n_)(a_)),PT(r_),"") {					\ */
+/*   									\ */
+/*     AA1(r_);								\ */
+/*     									\ */
+/*     Join(E,n_)(a_);							\ */
+/*     Join(W_,r_) Join(fSmmpz_,b_)(CCR1(r_)Join(CR,n_)(a_));		\ */
+/*     Join(HH_,r_)(Join(Z_,r_));						\ */
+/*     									\ */
+/*   } */
+
+
+/* Do not expose big_fixnum registers at lisp level, as typing is undefined */
+/* #define BF(n_,m_,s_,b_,r_,a_...)					\ */
+/*   DEFUNB("mmpz_" #b_,R1(r_),Join(fSmmpz_,b_),				\ */
+/* 	 GMP,n_,n_,NONE,						\ */
+/* 	 QRR(1,n_,QR(r_,a_)),QRR(2,n_,QR(r_,a_)),			\ */
+/* 	 QRR(3,n_,QR(r_,a_)),QRR(4,n_,QR(r_,a_)),			\ */
+/* 	 (DR1(r_)Join(D,m_)(a_)),PTR(r_),"") {				\ */
+/*   									\ */
+/*     Join(WR_,r_) Join(m__gmpz_,b_)(CC1(r_)Join(C,m_)(a_));		\ */
+/*     RETURN1(u);								\ */
+/*     									\ */
+/*   }									\ */
+/*   BF1(m_,b_,r_,a_); */
+
+
+#define BF(n0_,n_,s_,b_,r_,a_...)					\
+  DEFUNB("mpz_" #b_,R1(r_),Join(fSmpz_,b_),				\
 	 GMP,n_,n_,NONE,Join(Q1,n_)(r_,a_),Join(Q2,n_)(r_,a_),Join(Q3,n_)(r_,a_),Join(Q4,n_)(r_,a_), \
 	 (Join(D,n_)(a_)),PT(r_),"") {					\
-\
-  AA1(r_);\
-\
-  Join(E,n_)(a_);\
-  Join(W_,r_) Join(m__gmpz_,b_)(CC1(r_)Join(C,n_)(a_));\
-  Join(HH_,r_)(Join(Z_,r_));\
-\
-}
+  									\
+    AA1(r_);								\
+    									\
+    Join(E,n_)(a_);							\
+    Join(W_,r_) Join(m__gmpz_,b_)(CC1(r_)Join(C,n_)(a_));		\
+    Join(HH_,r_)(Join(Z_,r_));						\
+    									\
+  }

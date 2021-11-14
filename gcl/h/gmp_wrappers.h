@@ -189,9 +189,9 @@ EXTER int jmp_gmp,gmp_relocatable;
            return Join(RR_,rt_);\
    }
 
-#define EXPORT_GMP_CALL(n_,rt_,a_,s_,b_...) \
-  MEM_GMP_CALL(n_,rt_,Join(mpz_,a_),s_,b_)\
-  BF(Join(SS_,Join(n_,s_)),a_,Join(ZZ,s_)(rt_),Join(QQ,Join(n_,s_))(b_))
+#define EXPORT_GMP_CALL(n_,rt_,a_,s_,b_...)			\
+  MEM_GMP_CALL(n_,rt_,Join(mpz_,a_),s_,b_)			\
+  BF(n_,Join(SS_,Join(n_,s_)),s_,a_,Join(ZZ,s_)(rt_),Join(QQ,Join(n_,s_))(b_))
 
 MEM_GMP_CALL(3,void,mpz_urandomm,1,mpz_t,gmp_randstate_t,mpz_t)
 MEM_GMP_CALL(2,void,gmp_randseed,1,gmp_randstate_t,mpz_t)
