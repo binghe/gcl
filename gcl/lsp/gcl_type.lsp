@@ -53,7 +53,7 @@
 			     ,@(butlast
 				(mapcan (lambda (n &aux (m (1- n)))
 					  (list `(unsigned-byte ,m) `(signed-byte ,n) `(unsigned-byte ,n)))
-					'(2 4 8 16 28 32 62 64)))
+					'(2 4 8 16 29 32 62 64)))
 			     (and bignum (integer * -1))
 			     (and bignum (integer 0))
 			     ,@(mapcan (lambda (x)
