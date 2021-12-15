@@ -29,6 +29,7 @@ case $canonical in
     *x86_64*linux*) use=amd64-linux;;
     *x86_64*kfreebsd*)	use=amd64-kfreebsd;;
     *86*linux*) use=386-linux;;
+    *riscv64*linux*) use=riscv64-linux;;
     *86*kfreebsd*) use=386-kfreebsd;;
     *86*gnu*)	use=386-gnu;;
     m68k*linux*) use=m68k-linux;;
