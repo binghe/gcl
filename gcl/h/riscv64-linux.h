@@ -22,3 +22,5 @@
 
 #define RELOC_H "elf64_riscv64_reloc.h"
 /* #define MAX_CODE_ADDRESS (1L<<31)/\*large memory model broken gcc 4.8*\/ */
+
+#define NEED_STACK_CHK_GUARD
