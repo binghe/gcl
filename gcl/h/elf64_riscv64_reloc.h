@@ -24,3 +24,6 @@
     case R_RISCV_64:
       store_val(where,MASK(64),(s+a));
       break;
+    case R_RISCV_32:
+      store_val(where,MASK(32),(s+a));
+      break;
