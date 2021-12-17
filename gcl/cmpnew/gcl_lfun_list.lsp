@@ -156,7 +156,7 @@
 (DEFSYSFUN 'TYPE-OF "Ltype_of" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'BUTLAST "Lbutlast" '(T *) 'T NIL NIL) 
 (DEFSYSFUN '1- "Lone_minus" '(T) 'T NIL NIL) 
-(DEFSYSFUN 'MAKE-HASH-TABLE "Lmake_hash_table" '(*) 'T NIL NIL) 
+;(DEFSYSFUN 'MAKE-HASH-TABLE "Lmake_hash_table" '(*) 'T NIL NIL) 
 (DEFSYSFUN 'STRING/= "Lstring_neq" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN '<= "Lmonotonically_nondecreasing" '(T *) 'T NIL T) 
 (DEFSYSFUN 'MAKE-BROADCAST-STREAM "Lmake_broadcast_stream" '(*) 'T NIL
