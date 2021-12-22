@@ -1089,7 +1089,7 @@ fmt_fix_float(bool colon, bool atsign)
 	}
 	f = number_to_double(x);
 	edit_double(n, f, &sign, buff, &exp, dp);
-	if (exp + k > 100 || exp + k < -100 || d > 100) {
+	if (sign==2) {
 		prin1(x, fmt_stream);
 		vs_reset;
 		return;
@@ -1288,7 +1288,7 @@ fmt_exponential_float(bool colon, bool atsign)
 	}
 	f = number_to_double(x);
 	edit_double(n, f, &sign, buff, &exp, dp);
-	if (exp + k > 100 || exp + k < -100 || d > 100) {
+	if (sign==2) {
 		prin1(x, fmt_stream);
 		vs_reset;
 		return;
