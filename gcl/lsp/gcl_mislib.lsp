@@ -75,7 +75,7 @@
 (defun decode-universal-time (ut &optional (tz (current-timezone) tzp) 
 				 &aux (dstp (unless tzp (current-dstp))) (ut (- ut (* tz 3600))))
   (declare (optimize (safety 2)))
-  (check-type ut (integer 0))
+  (check-type ut integer)
   (check-type tz rational)
   (multiple-value-bind
    (d ut) (floor ut seconds-per-day)
@@ -100,7 +100,7 @@
   (check-type h (integer 0 23))
   (check-type d (integer 1 31))
   (check-type m (integer 1 12))
-  (check-type y (integer 1900))
+  (check-type y integer)
   (check-type tz rational)
   (when (<= 0 y 99)
     (multiple-value-bind
