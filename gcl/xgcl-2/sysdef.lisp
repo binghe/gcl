@@ -41,6 +41,9 @@
 
 
 (defun compile-xgcl()
+  #+m68k(progn (trace si::readdir si::opendir si::closedir si::pathname-match-p)
+	       (print (directory "*.c"))
+	       (untrace si::readdir si::opendir si::closedir si::pathname-match-p))
   (mapc (lambda (x) 
 	  (let ((x (concatenate 'string compiler::*cc* " -I../h " (namestring x))))
 	    (unless (zerop (system x))
