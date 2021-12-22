@@ -74,10 +74,11 @@ $(DPP):	../bin/dpp.c
 	${CC} ${DEFS} -o $@ $<
 
 new_init.c: ${INI_FILES}
-	echo '#include "make-init.h"' > new_init.c
-	echo 'void NewInit(void){' >> new_init.c
-	cat ${INI_FILES} >> new_init.c
-	echo '}' >> new_init.c
+	echo '#include "make-init.h"' > $@
+	echo 'void NewInit(void){' >> $@
+	cat ${INI_FILES} >> $@
+	echo '}' >> $@
+	! cat $@ | awk -F, '/DEFUN/ {print $2}' | grep -v object || (rm $@ && false)
 
 ifneq ($(NIFLAGS),)
 new_init.o: new_init.c $(DECL)
