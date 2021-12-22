@@ -434,7 +434,7 @@ number_atan2(object y, object x)
 		if (dy > 0.0)
 			dz = PI / 2.0;
 		else if (dy == 0.0)
-			FEerror("Logarithmic singularity.", 0);
+		        dz = 0.0;
 		else
 			dz = -PI / 2.0;
 	else
