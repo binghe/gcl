@@ -7630,13 +7630,16 @@ else $as_nop
 /* end confdefs.h.  */
 
 				 #include <dirent.h>
+				 #include <string.h>
 
 int
 main (void)
 {
 
-				 struct dirent d;
-				 return d.d_type=0;
+				 struct dirent *d;
+				 DIR *r=opendir("./");
+				 for (;(d=readdir(r)) && strcmp("configure",d->d_name););
+				 return d && d->d_type==DT_REG ? 0 : -1;
 
   ;
   return 0;

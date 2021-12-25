@@ -1495,10 +1495,13 @@ AC_CHECK_HEADERS([dirent.h],
 		     [AC_LANG_PROGRAM(
 			     [[
 				 #include <dirent.h>
+				 #include <string.h>
 			     ]],
 			     [[
-				 struct dirent d;
-				 return d.d_type=0;
+				 struct dirent *d;
+				 DIR *r=opendir("./");
+				 for (;(d=readdir(r)) && strcmp("configure",d->d_name););
+				 return d && d->d_type==DT_REG ? 0 : -1;
 			     ]])],
 		     [AC_MSG_RESULT([yes]) AC_DEFINE(HAVE_D_TYPE,1,[have struct dirent d_type field])],
 		     AC_MSG_RESULT([no]),AC_MSG_RESULT([no])))
