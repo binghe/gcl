@@ -1,3 +1,13 @@
+gcl (2.6.12-118) unstable; urgency=medium
+
+  * Bug fix: "emacs dependency should be &quot;emacs | emacsen&quot;",
+    thanks to Adrian Bunk (Closes: #1006617).
+  * Bug fix: "Please remove dependency on install-info", thanks to
+    hille42@web.de</a>; (Closes: #1013691).
+  * Version_2.6.13pre117
+
+ -- Camm Maguire <camm@debian.org>  Tue, 12 Jul 2022 17:17:09 -0400
+
 gcl (2.6.12-117) unstable; urgency=medium
 
   * Version_2.6.13pre114
