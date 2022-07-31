@@ -1,3 +1,9 @@
+gcl (2.6.12-119) unstable; urgency=medium
+
+  * Version_2.6.13pre119
+
+ -- Camm Maguire <camm@debian.org>  Sun, 31 Jul 2022 12:00:02 -0400
+
 gcl (2.6.12-118) unstable; urgency=medium
 
   * Bug fix: "emacs dependency should be &quot;emacs | emacsen&quot;",
