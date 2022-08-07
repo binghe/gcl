@@ -266,24 +266,24 @@ add_args_to_ldflags -no-pie # -Wl,-z,lazy
 AC_MSG_CHECKING([for inline semantics])
 AC_COMPILE_IFELSE(
     [AC_LANG_SOURCE([[
-			extern inline int foo(int i) {return i;}
+			inline int foo(int i) {return i;}
 
 			int
 			bar(int i) {return foo(i);}
 		     ]])],
-    [if ! `nm conftest.o |grep -q "T foo"` ; then
-	AC_MSG_RESULT([old])
-	AC_DEFINE([OLD_INLINE],[1],[extern inline semantics])
+    [if `nm conftest.o |grep foo |awk '{if (NF==3) exit(-1)}'` ; then
+    	AC_MSG_RESULT([new])
      else
 	AC_COMPILE_IFELSE(
 	    [AC_LANG_SOURCE([[
-	    			inline int foo(int i) {return i;}
+	    			extern inline int foo(int i) {return i;}
 
 				int
 				bar(int i) {return foo(i);}
 			    ]])],
-	    [if ! `nm conftest.o |grep -q "T foo"` ; then
-	    	AC_MSG_RESULT([new])
+	    [if `nm conftest.o |grep foo |awk '{if (NF==3) exit(-1)}'` ; then
+	    	AC_MSG_RESULT([old])
+		AC_DEFINE([OLD_INLINE],[1],[extern inline semantics])
 	     else
 	       	AC_MSG_ERROR([need working inline semantics])
 	     fi],

@@ -4557,7 +4557,7 @@ printf %s "checking for inline semantics... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-			extern inline int foo(int i) {return i;}
+			inline int foo(int i) {return i;}
 
 			int
 			bar(int i) {return foo(i);}
@@ -4565,17 +4565,14 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  if ! `nm conftest.o |grep -q "T foo"` ; then
-	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: old" >&5
-printf "%s\n" "old" >&6; }
-
-printf "%s\n" "#define OLD_INLINE 1" >>confdefs.h
-
+  if `nm conftest.o |grep foo |awk '{if (NF==3) exit(-1)}'` ; then
+    	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: new" >&5
+printf "%s\n" "new" >&6; }
      else
 	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-	    			inline int foo(int i) {return i;}
+	    			extern inline int foo(int i) {return i;}
 
 				int
 				bar(int i) {return foo(i);}
@@ -4583,9 +4580,12 @@ printf "%s\n" "#define OLD_INLINE 1" >>confdefs.h
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  if ! `nm conftest.o |grep -q "T foo"` ; then
-	    	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: new" >&5
-printf "%s\n" "new" >&6; }
+  if `nm conftest.o |grep foo |awk '{if (NF==3) exit(-1)}'` ; then
+	    	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: old" >&5
+printf "%s\n" "old" >&6; }
+
+printf "%s\n" "#define OLD_INLINE 1" >>confdefs.h
+
 	     else
 	       	as_fn_error $? "need working inline semantics" "$LINENO" 5
 	     fi
