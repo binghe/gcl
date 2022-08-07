@@ -4552,9 +4552,6 @@ add_args_to_cflags  -fsigned-char -pipe -fcommon \
 
 add_args_to_ldflags -no-pie # -Wl,-z,lazy
 
-CC=gcc
-GCL_CC=gcc
-
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for inline semantics" >&5
 printf %s "checking for inline semantics... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
