@@ -703,8 +703,8 @@ GMPDIR
 GMP
 HAVE_MALLOC_ZONE_MEMALIGN
 MAKEINFO
-AWK
 GCL_CC
+AWK
 CPP
 OBJEXT
 EXEEXT
@@ -4418,11 +4418,6 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-GCL_CC=`basename $CC`
-if echo $GCL_CC |grep gcc |grep -q win; then
-    GCL_CC=gcc
-fi
-
 
 add_arg_to_cflags() {
 
@@ -4556,6 +4551,56 @@ add_args_to_cflags  -fsigned-char -pipe -fcommon \
 	            -Wno-unused-but-set-variable
 
 add_args_to_ldflags -no-pie # -Wl,-z,lazy
+
+CC=gcc
+GCL_CC=gcc
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for inline semantics" >&5
+printf %s "checking for inline semantics... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+			extern inline int foo(int i) {return i;}
+
+			int
+			bar(int i) {return foo(i);}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  if ! `nm conftest.o |grep -q "T foo"` ; then
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: old" >&5
+printf "%s\n" "old" >&6; }
+
+printf "%s\n" "#define OLD_INLINE 1" >>confdefs.h
+
+     else
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+	    			inline int foo(int i) {return i;}
+
+				int
+				bar(int i) {return foo(i);}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  if ! `nm conftest.o |grep -q "T foo"` ; then
+	    	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: new" >&5
+printf "%s\n" "new" >&6; }
+	     else
+	       	as_fn_error $? "need working inline semantics" "$LINENO" 5
+	     fi
+else $as_nop
+  as_fn_error $? "need to probe inline semantics" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+     fi
+else $as_nop
+  as_fn_error $? "need to probe inline semantics" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for clang" >&5
 printf %s "checking for clang... " >&6; }
@@ -4693,6 +4738,12 @@ fi
 
   test -n "$AWK" && break
 done
+
+GCL_CC_ARGS=`echo $CC | ${AWK} '{$1="";print}'`
+GCL_CC="`basename $CC` $GCL_CC_ARGS"
+if echo $GCL_CC |grep gcc |grep -q win; then
+    GCL_CC=gcc
+fi
 
 
 # Check whether --enable-gprof was given.

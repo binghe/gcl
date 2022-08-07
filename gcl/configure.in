@@ -181,11 +181,6 @@ fi
 AC_PROG_CC
 AC_PROG_CPP
 AC_SUBST(CC)
-GCL_CC=`basename $CC`
-if echo $GCL_CC |grep gcc |grep -q win; then
-    GCL_CC=gcc
-fi
-AC_SUBST(GCL_CC)
 
 add_arg_to_cflags() {
     
@@ -268,6 +263,34 @@ add_args_to_cflags  -fsigned-char -pipe -fcommon \
 
 add_args_to_ldflags -no-pie # -Wl,-z,lazy
 
+AC_MSG_CHECKING([for inline semantics])
+AC_COMPILE_IFELSE(
+    [AC_LANG_SOURCE([[
+			extern inline int foo(int i) {return i;}
+
+			int
+			bar(int i) {return foo(i);}
+		     ]])],
+    [if ! `nm conftest.o |grep -q "T foo"` ; then
+	AC_MSG_RESULT([old])
+	AC_DEFINE([OLD_INLINE],[1],[extern inline semantics])
+     else
+	AC_COMPILE_IFELSE(
+	    [AC_LANG_SOURCE([[
+	    			inline int foo(int i) {return i;}
+
+				int
+				bar(int i) {return foo(i);}
+			    ]])],
+	    [if ! `nm conftest.o |grep -q "T foo"` ; then
+	    	AC_MSG_RESULT([new])
+	     else
+	       	AC_MSG_ERROR([need working inline semantics])
+	     fi],
+    	    [AC_MSG_ERROR([need to probe inline semantics])])
+     fi],
+     [AC_MSG_ERROR([need to probe inline semantics])])
+
 AC_MSG_CHECKING([for clang])
 AC_RUN_IFELSE(
     [AC_LANG_PROGRAM([[
@@ -329,6 +352,12 @@ case "$use" in
 esac
 
 AC_CHECK_PROGS(AWK,[gawk nawk awk])
+GCL_CC_ARGS=`echo $CC | ${AWK} '{$1="";print}'`
+GCL_CC="`basename $CC` $GCL_CC_ARGS"
+if echo $GCL_CC |grep gcc |grep -q win; then
+    GCL_CC=gcc
+fi
+AC_SUBST(GCL_CC)
 
 AC_ARG_ENABLE([gprof],[  --enable-gprof builds gcl with -pg in CFLAGS to enable profiling with gprof],
 	      [if test "$enableval" = "yes" ; then
