@@ -13,6 +13,7 @@ typedef float shortfloat;
 typedef double longfloat;
 
 typedef union lispunion *object;
+typedef union typeunion *hobj;
 
 #ifndef WORDS_BIGENDIAN
 
@@ -430,4 +431,9 @@ union lispunion {
   struct fixarray fixa;
   struct sfarray sfa;
   struct lfarray lfa;
+};
+
+union typeunion {
+  struct dummy d;
+  fixnum fw;
 };

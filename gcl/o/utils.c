@@ -69,9 +69,7 @@ Ifuncall_n(object fun,int n,...) {
   va_list ap;
   object *new;
   va_start(ap,n);
-  {
-    COERCE_VA_LIST(new,ap,n);
-  }
+  COERCE_VA_LIST(new,ap,n);
   va_end(ap);
   return IapplyVector(fun,n,new);
 }

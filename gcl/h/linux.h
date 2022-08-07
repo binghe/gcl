@@ -146,10 +146,10 @@ do { int c = 0; \
 
 /* #define FPE_CODE(i_) make_fixnum((fixnum)SF(i_)->si_code) */
 #ifdef __i386__
-#define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->sw,((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->mxcsr))
+#define FPE_CODE(i_,v_) make_fixnum((long)FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->sw,((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->mxcsr))
 #define FPE_ADDR(i_,v_) make_fixnum((UC(v_)->uc_mcontext.fpregs->tag!=-1) ? UC(v_)->uc_mcontext.fpregs->ipoff : (fixnum)SF(i_)->si_addr)
 #else
-#define FPE_CODE(i_,v_) make_fixnum(FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->swd,((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->mxcsr))
+#define FPE_CODE(i_,v_) make_fixnum((long)FFN(fSfpe_code)(UC(v_)->uc_mcontext.fpregs->swd,((struct _fpstate *)UC(v_)->uc_mcontext.fpregs)->mxcsr))
 #define FPE_ADDR(i_,v_) make_fixnum(UC(v_)->uc_mcontext.fpregs->fop ? UC(v_)->uc_mcontext.fpregs->rip : (fixnum)SF(i_)->si_addr)
 #endif
 #define FPE_CTXT(v_) list(3,make_fixnum((fixnum)&UC(v_)->uc_mcontext.gregs),	\

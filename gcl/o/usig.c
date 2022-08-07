@@ -214,11 +214,11 @@ DEFUN_NEW("FEDISABLEEXCEPT",object,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(vo
 
 DEFUN_NEW("FPE_CODE",object,fSfpe_code,SI,2,2,NONE,II,OO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
 
-  RETURN1((object)(FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV :
-		   (FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV :
-		    (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF :
-		     (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND :
-		      (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0))))));
+  RETURN1((object)(long)(FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV :
+			 (FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV :
+			  (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF :
+			   (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND :
+			    (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0))))));
 }
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
