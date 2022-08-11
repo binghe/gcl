@@ -5,20 +5,16 @@
 (defun dir-conj (x) (if (eq x :relative) :absolute :relative))
 
 (defvar *up-key* :up)
-(defvar *canonicalized* nil)
 
-(defun mfr (x b i) (subseq x b i));  (make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b)
-
-(defvar *sym-sub-alist* '((:host . nil)
-			  (:device . nil)
-			  (:directory . (("." . nil)(".." . :up)("*" . :wild)("**" . :wild-inferiors)))
-			  (:name . (("*" . :wild)))
-			  (:type . (("*" . :wild)))
-			  (:version . (("*" . :wild)("NEWEST" . :newest)))))
-
-(defun element (x b i key)
-  (let* ((z (when (> i b) (mfr x b i)))
-	 (w (assoc z (cdr (assoc key *sym-sub-alist*)) :test 'string-equal))
+(defun element (x b i key &optional def)
+  (let* ((z (if (> i b) (subseq x b i) def));(make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b)
+	 (w (assoc key '((:host . nil)
+			 (:device . nil)
+			 (:directory . ((".." . :up)("*" . :wild)("**" . :wild-inferiors)))
+			 (:name . (("*" . :wild)))
+			 (:type . (("*" . :wild)))
+			 (:version . (("*" . :wild)("NEWEST" . :newest))))))
+	 (w (assoc z (cdr w) :test 'string-equal))
 	 (z (if w (cdr w) z)))
     (if (eq z :up) *up-key* z)))
 
@@ -26,11 +22,11 @@
   (when (stringp x)
     (let ((i (string-match (if lp #v";" +dirsep+) x b)))
       (unless (minusp i)
-	(let* ((y (dir-parse x lp (1+ i)))
-	       (z (element x b i :directory))
-	       (y (if z (cons z y) (progn (when (> i b) (setq *canonicalized* t)) y))))
+	(let ((y (cons (element x b i :directory "") (dir-parse x lp (1+ i)))))
 	  (if (zerop b)
-	      (cons (if (if lp (plusp i) (zerop i)) :absolute :relative) y)
+	      (if (if lp (plusp i) (zerop i))
+		  (cons :absolute (cdr y))
+		(cons :relative y))
 	    y))))))
 
 (defun match-component (x i k &optional (boff 0) (eoff 0))
@@ -38,8 +34,7 @@
 
 (defun version-parse (x)
   (typecase x
-    (string (version-parse (parse-integer x)))
-;    (integer (locally (check-type x (integer 1)) x))
+    (string (when (plusp (length x)) (version-parse (parse-integer x))))
     (otherwise x)))
 
 (defconstant +generic-logical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +logical-pathname-defaults+)) t t)))
@@ -68,13 +63,13 @@
       (prog1 (append (dir-parse (home-namestring (cadr dir))) (cddr dir)) (setq *canonicalized* t))
     dir))
 
-(defun pathname-parse (x b e &aux (*canonicalized* nil))
+(defun pathname-parse (x b e)
   (when (and (eql b (string-match +generic-physical-pathname-regexp+ x b e)) (eql (match-end 0) e))
     (make-pathname :device (match-component x 1 :none 0 -1)
 		   :name (match-component x 4 :name)
 		   :type (match-component x 5 :type 1)
-		   :directory (expand-home-dir (dir-parse (match-component x 2 :none)));must be last
-		   :namestring (unless *canonicalized* (when (and (eql b 0) (eql e (length x))) x)))))
+		   :directory (dir-parse (match-component x 2 :none));must be last
+		   :namestring (when (and (eql b 0) (eql e (length x))) x))))
 
 (defun path-stream-name (x)
   (check-type x pathname-designator)
