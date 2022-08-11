@@ -1584,12 +1584,12 @@ AC_CHECK_FUNC([BSDgettimeofday],
 	      [AC_CHECK_FUNC([gettimeofday], ,
 	                     [AC_DEFINE([NO_GETTOD],1,[no gettimeofday call])])])
 
-AC_MSG_CHECKING([for gettimeofday declaration])
-
 AC_EGREP_HEADER([gettimeofday],
                 [sys/time.h],
-		[AC_MSG_RESULT([present])],
-		[AC_MSG_RESULT([missing])
+		[AC_MSG_CHECKING([for gettimeofday declaration])
+		 AC_MSG_RESULT([present])],
+		[AC_MSG_CHECKING([for gettimeofday declaration])
+		 AC_MSG_RESULT([missing])
 		 AC_DEFINE(GETTOD_NOT_DECLARED,1,[No gettimeofday call -- fixme])])
 
 
@@ -2009,8 +2009,6 @@ AC_ARG_ENABLE([tclconfig],
 
 if test "$enable_tcltk" != "no" ; then
     
-    AC_MSG_CHECKING([for tcl/tk])
-    
     if test -d "${TCL_CONFIG_PREFIX}"  ; then true ; else
 	
 	AC_CHECK_PROG(TCLSH,tclsh,tclsh,${TCLSH})
@@ -2113,6 +2111,7 @@ AC_SUBST(TCL_LIBS)
 
 
 
+AC_MSG_CHECKING([for tcl/tk])
 if test -d "${TK_CONFIG_PREFIX}" ; then
     AC_MSG_RESULT([using TK_VERSION=${TK_VERSION} of ${TK_CONFIG_PREFIX}])
 else

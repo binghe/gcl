@@ -7832,9 +7832,6 @@ fi
 fi
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettimeofday declaration" >&5
-printf %s "checking for gettimeofday declaration... " >&6; }
-
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
 printf %s "checking for grep that handles long lines and -e... " >&6; }
 if test ${ac_cv_path_GREP+y}
@@ -7985,10 +7982,14 @@ _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
   $EGREP "gettimeofday" >/dev/null 2>&1
 then :
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: present" >&5
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettimeofday declaration" >&5
+printf %s "checking for gettimeofday declaration... " >&6; }
+		 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: present" >&5
 printf "%s\n" "present" >&6; }
 else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: missing" >&5
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gettimeofday declaration" >&5
+printf %s "checking for gettimeofday declaration... " >&6; }
+		 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: missing" >&5
 printf "%s\n" "missing" >&6; }
 
 printf "%s\n" "#define GETTOD_NOT_DECLARED 1" >>confdefs.h
@@ -9269,9 +9270,6 @@ fi
 
 if test "$enable_tcltk" != "no" ; then
 
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tcl/tk" >&5
-printf %s "checking for tcl/tk... " >&6; }
-
     if test -d "${TCL_CONFIG_PREFIX}"  ; then true ; else
 
 	# Extract the first word of "tclsh", so it can be a program name with args.
@@ -9454,6 +9452,8 @@ fi
 
 
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tcl/tk" >&5
+printf %s "checking for tcl/tk... " >&6; }
 if test -d "${TK_CONFIG_PREFIX}" ; then
     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: using TK_VERSION=${TK_VERSION} of ${TK_CONFIG_PREFIX}" >&5
 printf "%s\n" "using TK_VERSION=${TK_VERSION} of ${TK_CONFIG_PREFIX}" >&6; }
