@@ -204,6 +204,7 @@ typedef int (*FUNC)();
 /* eval.c:739:OF */ extern void super_funcall (object fun); /* (fun) object fun; */
 /* eval.c:752:OF */ extern void super_funcall_no_event (object fun); /* (fun) object fun; */
 /* eval.c:936:OF */ extern object Ieval (object form); /* (form) object form; */
+#define Ieval1(x) Ieval(x) /*FIXME*/
 /* eval.c:944:OF */ extern void eval (object form); /* (form) object form; */
 /* eval.c:1189:OF */ extern void Leval (void); /* () */
 /* eval.c:1191:OF */ extern object fLeval (object x0); /* (x0) object x0; */

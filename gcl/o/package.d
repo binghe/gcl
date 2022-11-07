@@ -863,9 +863,9 @@ DEFUN_NEW("IN-PACKAGE-INTERNAL",object,fSin_package_internal,SI,2,2,NONE,OO,OO,O
   /*fixme non-std error check?*/
   for (;consp(r) && consp(r->c.c_cdr);r=r->c.c_cdr->c.c_cdr) {
     if (r->c.c_car==sKuse)
-      use=Ieval(r->c.c_cdr->c.c_car);
+      use=Ieval1(r->c.c_cdr->c.c_car);
     if (r->c.c_car==sKnicknames)
-      nick=Ieval(r->c.c_cdr->c.c_car);
+      nick=Ieval1(r->c.c_cdr->c.c_car);
   }
 
   RETURN1(in_package(p,nick,use,0,0));
