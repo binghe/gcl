@@ -366,7 +366,7 @@
 (DEFSYSFUN 'FMAKUNBOUND "Lfmakunbound" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'SLEEP "Lsleep" '(T) 'T NIL NIL) 
 (DEFSYSFUN 'PACKAGE-NAME "Lpackage_name" '(T) 'T NIL NIL) 
-(DEFSYSFUN 'FIND-PACKAGE "Lfind_package" '(T) 'T NIL NIL) 
+;(DEFSYSFUN 'FIND-PACKAGE "Lfind_package" '(T) 'T NIL NIL)
 (DEFSYSFUN 'ASSOC "Lassoc" '(T T *) 'T NIL NIL) 
 (DEFSYSFUN 'SET-CHAR-BIT "Lset_char_bit" '(T T T) 'CHARACTER NIL NIL) 
 (DEFSYSFUN 'FLOOR "Lfloor" '(T *) '(VALUES T T) NIL NIL) 

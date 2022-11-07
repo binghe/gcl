@@ -99,6 +99,7 @@
 ;;; Package operations.
 
 (si:putprop 'in-package t 'eval-at-compile)
+(si:putprop 'si::in-package-internal t 'eval-at-compile)
 
 ;;; Pass 1 top-levels.
 

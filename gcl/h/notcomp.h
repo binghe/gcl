@@ -83,6 +83,7 @@ void old(void) \
 #undef FFD
 #undef STATD
 #undef make_function
+#undef make_macro_function
 #undef make_si_function
 #undef make_si_sfun
 #undef make_special_form
@@ -91,6 +92,7 @@ void old(void) \
 #define LFD(a_) static void FFN(a_) (); void a_  () { FFN(a_)();} static void FFN(a_)
 #define FFD(a_) static void FFN(a_) (object); void a_  (object x) { FFN(a_)(x);} static void FFN(a_)
 #define make_function(a_,b_) make_function_internal(a_,FFN(b_))
+#define make_macro_function(a_,b_) make_macro_internal(a_,FFN(b_))
 #define make_si_function(a_,b_) make_si_function_internal(a_,FFN(b_))
 #define make_special_form(a_,b_) make_special_form_internal(a_,FFN(b_))
 #define make_si_special_form(a_,b_) make_si_special_form_internal(a_,FFN(b_))
@@ -101,6 +103,7 @@ void old(void) \
 #define LFD(a_) void a_
 #define FFD(a_) void a_
 #define make_function(a_,b_) make_function_internal(a_,b_)
+#define make_macro_function(a_,b_) make_macro_internal(a_,b_)
 #define make_si_function(a_,b_) make_si_function_internal(a_,b_)
 #define make_special_form(a_,b_) make_special_form_internal(a_,b_)
 #define make_si_special_form(a_,b_) make_si_special_form_internal(a_,b_)
