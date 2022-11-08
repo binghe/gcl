@@ -129,11 +129,11 @@
     (dolist (l '(:unexec :bfd :readline :xgcl))
       (when (member l *features*)
 	(push l gpled-modules)))
-    (format nil "GCL (GNU Common Lisp)  ~a.~a.~a ~a  ~a  ~a~%~a~%~a ~a~%~a~%~a~%~%~a~%" 
-	    *gcl-major-version* *gcl-minor-version* *gcl-extra-version*
+    (format nil "GCL (GNU Common Lisp)  ~a.~a.~a ~a  ~a  ~a  git: ~a~%~a~%~a ~a~%~a~%~a~%~%~a~%"
+	    *gcl-major-version* *gcl-minor-version* *gcl-extra-version* *gcl-release-date*
 	    (if (member :ansi-cl *features*) "ANSI" "CLtL1")
 	    (if (member :gprof *features*) "profiling" "")
-	    *gcl-release-date*
+	    *gcl-git-tag*
 	    "Source License: LGPL(gcl,gmp), GPL(unexec,bfd,xgcl)"
 	    "Binary License: "
 	    (if gpled-modules (format nil "GPL due to GPL'ed components: ~a" gpled-modules)
@@ -143,10 +143,11 @@
 	    "Use (help) to get some basic information on how to use GCL.")))
 
  (defun lisp-implementation-version nil
-   (format nil "GCL ~a.~a.~a"
+   (format nil "GCL ~a.~a.~a git tag ~a"
 	   *gcl-major-version*
 	   *gcl-minor-version*
-	   *gcl-extra-version*))
+	   *gcl-extra-version*
+	   *gcl-git-tag*))
 
 (defun objlt (x y)
   (declare (object x y))

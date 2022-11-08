@@ -824,6 +824,7 @@
 (defvar *gcl-extra-version* nil)
 (defvar *gcl-minor-version* nil)
 (defvar *gcl-major-version* nil)
+(defvar *gcl-git-tag* nil)
 (defvar *gcl-release-date*  nil)
 
 (defun warn-version (majvers minvers extvers)
