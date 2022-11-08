@@ -257,8 +257,14 @@ Lnumber_compare(int s, int t)
 	narg = vs_top - vs_base;
 	if (narg == 0)
 		too_few_arguments();
-	for (i = 0; i < narg; i++)
+	for (i = 0; i < narg; i++) {
 		check_type_or_rational_float(&vs_base[i]);
+		if (gcl_isnan(vs_base[i])) {
+		  vs_top = vs_base+1;
+		  vs_base[0] = Cnil;
+		  return;
+		}
+	}
 	for (i = 1; i < narg; i++)
 		if (s*number_compare(vs_base[i], vs_base[i-1]) < t) {
 			vs_top = vs_base+1;

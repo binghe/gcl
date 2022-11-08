@@ -1761,6 +1761,9 @@ gcl_isnormal_double(double);
 int 
 gcl_isnormal_float(float);
 
+int
+gcl_isnan(object);
+
 object
 find_init_name1(char *,unsigned);
 
