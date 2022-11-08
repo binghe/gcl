@@ -205,7 +205,7 @@ load_memory(struct section *sec1,struct section *sece,void *v1,
   
   memory=new_cfdata();
   memory->cfd.cfd_size=sz; 
-  memory->cfd.cfd_start=alloc_code_space(sz);
+  memory->cfd.cfd_start=alloc_code_space(sz,-1UL);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;

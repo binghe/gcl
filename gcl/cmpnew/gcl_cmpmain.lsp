@@ -90,8 +90,10 @@
 (defvar *default-h-file* nil)
 (defvar *default-data-file* nil)
 (defvar *default-prof-p* nil)
+#+large-memory-model(defvar *default-large-memory-model-p* nil)
 (defvar *keep-gaz* nil)
 (defvar *prof-p* nil)
+#+large-memory-model(defvar *large-memory-model-p* nil)
 
 ;;  (list section-length split-file-names next-section-start-file-position)
 ;;  Many c compilers cannot handle the large C files resulting from large lisp files.
@@ -153,11 +155,13 @@
 			   (c-debug nil)
                            (system-p *default-system-p*)
                            (prof-p *default-prof-p*)
+			   #+large-memory-model(large-memory-model-p *default-large-memory-model-p*)
 			   (print nil)
                            (load nil)
 			   &aux
 			   (*standard-output* *standard-output*)
 			   (*prof-p* prof-p)
+			   #+large-memory-model(*large-memory-model-p* large-memory-model-p)
 			   (output-file (pathname output-file))
 		           (*error-output* *error-output*)
                            (*compiler-in-use* *compiler-in-use*)
@@ -480,7 +484,10 @@ Cannot compile ~a.~%"
     (setq na  (namestring
 	       (make-pathname :name name :type (pathname-type(first args)))))
    (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a ~a"
-	   (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
+	   (concatenate 'string
+			(if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
+			#+large-memory-model(if *large-memory-model-p* " -mcmodel=large " "")
+			#-large-memory-model "")
 	   (if *prof-p* " -pg " "")
 	   (concatenate 'string si::*system-directory* "../h")
 	   (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
@@ -536,6 +543,8 @@ Cannot compile ~a.~%"
   
             ))
   
+  #+large-memory-model(when *large-memory-model-p* (mark-as-large-memory-model o-pathname))
+
   #+dont_need
   (let ((cname (pathname-name c-pathname))
         (odir (pathname-directory o-pathname))

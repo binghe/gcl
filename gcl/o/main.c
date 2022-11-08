@@ -1229,6 +1229,10 @@ init_main(void) {
   ADD_FEATURE("STATIC");
 #endif	 
 
+#ifdef LARGE_MEMORY_MODEL
+  ADD_FEATURE("LARGE-MEMORY-MODEL");
+#endif
+
   make_special("*FEATURES*",features);}
   
   make_si_function("SAVE-SYSTEM", siLsave_system);

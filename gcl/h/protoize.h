@@ -1813,6 +1813,9 @@ find_init_string(const char *);
 void *
 get_mmap(FILE *,void **);
 
+void *
+get_mmap_shared(FILE *,void **);
+
 int
 un_mmap(void *,void *);
 
@@ -1933,7 +1936,7 @@ void
 maybe_set_hole_from_maxpages(void);
 
 void *
-alloc_code_space(size_t);
+alloc_code_space(size_t,ufixnum);
 
 object 
 fSmake_vector1_2(fixnum,fixnum,object,object);

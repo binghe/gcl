@@ -93,6 +93,7 @@ saved_%:raw_% $(RSYM) sys_init.lsp raw_%_map msys \
 		$(LSPDIR)/gcl_auto_new.lsp
 
 	cp sys_init.lsp foo
+#	[ "$(@F)" != "$(FLISP)" ] || echo "#+large-memory-model (setq compiler::*default-large-memory-model-p* t)" >>foo
 	echo "(unless si::*quit-tags* (in-package \"USER\")(system:save-system \"$@\"))" >>foo
 	j=$$(ar t lib$*.a |grep ^gcl_);[ "$$j" = "" ] || ar x lib$*.a $$j #accelerator
 	$(PORTDIR)/raw_$*$(EXE) $(PORTDIR)/ -libdir $(GCLDIR)/ < foo

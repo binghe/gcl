@@ -1004,12 +1004,8 @@ alloc_contblock_no_gc(size_t n,char *limit) {
 
 }
 
-#ifndef MAX_CODE_ADDRESS
-#define MAX_CODE_ADDRESS -1UL
-#endif
-
 void *
-alloc_code_space(size_t sz) {
+alloc_code_space(size_t sz,ufixnum max_code_address) {
 
   void *v;
 
@@ -1026,7 +1022,15 @@ alloc_code_space(size_t sz) {
   } else
     v=alloc_contblock(sz);
 
-  massert(v && (unsigned long)(v+sz)<MAX_CODE_ADDRESS);
+  if (v && (unsigned long)(v+sz)<max_code_address)
+    return v;
+  else
+    FEerror("File ~a has been compiled for a restricted address space,~% and can no longer be loaded in this heap.~%"
+#ifdef LARGE_MEMORY_MODEL
+	    "You can recompile with :large-memory-model-p t,~% or (setq compiler::*default-large-memory-model-p* t) before recompiling."
+#endif
+	    ,
+	    1,sLAload_pathnameA->s.s_dbind);
 
   return v;
 

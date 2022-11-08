@@ -209,7 +209,7 @@ load_memory(struct scnhdr *sec1,struct scnhdr *sece,void *st) {
 
   memory=new_cfdata();
   memory->cfd.cfd_size=sz;
-  memory->cfd.cfd_start=alloc_code_space(sz);
+  memory->cfd.cfd_start=alloc_code_space(sz,-1UL);
 
   for (sec=sec1;sec<sece;sec++) {
     sec->s_paddr+=(ul)memory->cfd.cfd_start;

@@ -243,6 +243,31 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
   
 }
 
+#ifdef LARGE_MEMORY_MODEL
+
+DEFUN_NEW("MARK-AS-LARGE-MEMORY-MODEL",object,fSmark_as_large_memory_model,SI,1,1,
+	  NONE,OO,OO,OO,OO,(object x),"") {
+
+  FILE *f;
+  void *ve;
+  Ehdr *fhp;
+
+  coerce_to_filename(x,FN1);
+
+  massert(f=fopen(FN1,"r+"));
+  massert(fhp=get_mmap_shared(f,&ve));
+
+  fhp->e_flags|=1;
+
+  massert(!un_mmap(fhp,ve));
+  massert(!fclose(f));
+
+  return Cnil;
+
+}
+
+#endif
+
 static object
 load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 
@@ -274,7 +299,17 @@ load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 
   memory=new_cfdata();
   memory->cfd.cfd_size=sz;
-  memory->cfd.cfd_start=alloc_code_space(sz);
+  memory->cfd.cfd_start=alloc_code_space(sz,
+#ifdef MAX_DEFAULT_MEMORY_MODEL_CODE_ADDRESS
+#ifdef LARGE_MEMORY_MODEL
+					 (((Ehdr *)v1)->e_flags) ? -1UL : MAX_DEFAULT_MEMORY_MODEL_CODE_ADDRESS
+#else
+					 MAX_DEFAULT_MEMORY_MODEL_CODE_ADDRESS
+#endif
+#else
+					 -1UL
+#endif
+					 );
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;

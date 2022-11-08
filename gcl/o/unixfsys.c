@@ -498,8 +498,8 @@ un_mmap(void *v1,void *ve) {
 
 #include <sys/mman.h>
 
-void *
-get_mmap(FILE *fp,void **ve) {
+static void *
+get_mmap_flags(FILE *fp,void **ve,int flags) {
 
   int n;
   void *v1;
@@ -508,7 +508,7 @@ get_mmap(FILE *fp,void **ve) {
   massert((n=fileno(fp))>2);
   massert(!fstat(n,&ss));
   if (sSAload_with_freadA->s.s_dbind==Cnil) {
-    massert((v1=mmap(0,ss.st_size,PROT_READ|PROT_WRITE,MAP_PRIVATE,n,0))!=(void *)-1);
+    massert((v1=mmap(0,ss.st_size,PROT_READ|PROT_WRITE,flags,n,0))!=(void *)-1);
   } else {
     massert(v1=malloc(ss.st_size));
     massert(fread(v1,ss.st_size,1,fp)==1);
@@ -519,6 +519,19 @@ get_mmap(FILE *fp,void **ve) {
 
 }
 
+void *
+get_mmap(FILE *fp,void **ve) {
+
+  return get_mmap_flags(fp,ve,MAP_PRIVATE);
+
+}
+
+void *
+get_mmap_shared(FILE *fp,void **ve) {
+
+  return get_mmap_flags(fp,ve,MAP_SHARED);
+
+}
 
 int
 un_mmap(void *v1,void *ve) {
