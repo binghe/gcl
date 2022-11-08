@@ -26,6 +26,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 object sLeq;
 object sLeql;
 object sLequal;
+object sLequalp;
 
 object sKsize;
 object sKrehash_size;
@@ -194,6 +195,144 @@ DEFUN_NEW("HASH-EQUAL",object,fShash_equal,SI,2,2,NONE,OO,IO,OO,OO,(object x,fix
   RETURN1(make_fixnum(ihash_equal(x,depth)));
 }
 
+unsigned long
+ihash_equalp(object x,int depth) {
+
+  enum type tx;
+  unsigned long h = 0,j;
+  long i;
+
+  cs_check(x);
+
+BEGIN:
+  if (depth++ <=3)
+    switch ((tx=type_of(x))) {
+    case t_cons:
+      h += ihash_equalp(x->c.c_car,depth);
+      x = x->c.c_cdr;
+      goto BEGIN;
+      break;
+    case t_symbol:
+      /* x=coerce_to_string(x); */
+      {
+	ufixnum len=x->st.st_fillp;
+	uchar *s=(void *)x->st.st_self;
+	for (;len--;)
+	  h^=rtb[toupper(*s++)];
+      }
+      break;
+
+    case t_package:
+      break;
+
+    /* case t_simple_string: */
+    case t_string:
+    /* case t_simple_bitvector: */
+    /* case t_simple_vector: */
+    case t_bitvector:
+    case t_vector:
+      h^=ufixhash(j=x->st.st_fillp);
+      j=j>10 ? 10 : j;
+      for (i=0;i<j;i++)
+	h^=ihash_equalp(aref(x,i),depth);
+      break;
+
+    case t_array:
+      h^=ufixhash(j=x->a.a_rank);
+      for (i=0;i<j-1;i++)
+	h^=ufixhash(x->a.a_dims[i]);
+      j=x->a.a_dim;
+      j=j>10 ? 10 : j;
+      for (i=0;i<j;i++)
+	h^=ihash_equalp(aref(x,i),depth);
+      break;
+
+    case t_hashtable:
+      h^=ufixhash(j=x->ht.ht_nent);
+      h^=ufixhash(x->ht.ht_test);
+      j=j>10 ? 10 : j;
+      for (i=0;i<j;i++)
+	if (x->ht.ht_self[i].hte_key!=OBJNULL)
+	  switch (x->ht.ht_test) {
+	  case htt_eq:
+	    h^=(((unsigned long)x->ht.ht_self[i].hte_key)>>3) ^
+	      ihash_equalp(x->ht.ht_self[i].hte_value,depth);
+	    break;
+	  case htt_eql:
+	    h^=hash_eql(x->ht.ht_self[i].hte_key) ^
+	      ihash_equalp(x->ht.ht_self[i].hte_value,depth);
+	    break;
+	  case htt_equal:
+	    h^=ihash_equal(x->ht.ht_self[i].hte_key,depth) ^
+	      ihash_equalp(x->ht.ht_self[i].hte_value,depth);
+	    break;
+	  case htt_equalp:
+	    h^=ihash_equalp(x->ht.ht_self[i].hte_key,depth) ^
+	      ihash_equalp(x->ht.ht_self[i].hte_value,depth);
+	    break;
+	  }
+      break;
+
+    case t_pathname:
+      h^=ihash_equalp(x->pn.pn_host,depth);
+      h^=ihash_equalp(x->pn.pn_device,depth);
+      h^=ihash_equalp(x->pn.pn_directory,depth);
+      h^=ihash_equalp(x->pn.pn_name,depth);
+      h^=ihash_equalp(x->pn.pn_type,depth);
+      h^=ihash_equalp(x->pn.pn_version,depth);
+      break;
+
+    case t_structure:
+      {
+	unsigned char *s_type;
+	struct s_data *def;
+	def=S_DATA(x->str.str_def);
+	s_type= & SLOT_TYPE(x->str.str_def,0);
+	h^=ihash_equalp(def->name,depth);
+	for (i=0;i<def->length;i++)
+	  if (s_type[i]==aet_object)
+	    h^=ihash_equalp(x->str.str_self[i],depth);
+	  else
+	    h^=ufixhash((long)x->str.str_self[i]);
+	break;
+      }
+
+    case t_character:
+      {
+	vs_mark; /*FIXME*/
+	object *base=vs_base;
+	vs_base=vs_top;
+	vs_push(x);
+	Lchar_upcase();
+	x=vs_base[0];
+	vs_base=base;
+	vs_reset;
+	h^=hash_eql(x);
+	break;
+      }
+
+    case t_fixnum:
+    case t_bignum:
+    case t_ratio:
+    case t_shortfloat:
+    case t_longfloat:
+
+      h^=hash_eql(make_longfloat(number_to_double(x)));
+      break;
+
+    default:
+      h^=hash_eql(x);
+      break;
+    }
+
+  return MHSH(h);
+
+}
+
+
+DEFUN_NEW("HASH-EQUALP",object,fShash_equalp,SI,2,2,NONE,OO,IO,OO,OO,(object x,fixnum depth),"") {
+  RETURN1(make_fixnum(ihash_equalp(x,depth)));
+}
 
 struct htent *
 gethash(object key, object ht) {
@@ -226,6 +365,9 @@ gethash(object key, object ht) {
     break;
   case htt_equal:
     hash_loop(equal,ihash_equal(key,0));
+    break;
+  case htt_equalp:
+    hash_loop(equalp,ihash_equalp(key,0));
     break;
   default:
     FEerror( "gethash:  Hash table not of type EQ, EQL, or EQUAL." ,0);
@@ -341,7 +483,9 @@ DEFUN_NEW("MAKE-HASH-TABLE",object,fLmake_hash_table,LISP,0,63,NONE,OO,OO,OO,OO,
   else if (test == sLeql || test == sLeql->s.s_gfdef)
     htt = htt_eql;
   else if (test == sLequal || test == sLequal->s.s_gfdef)
-    htt = htt_equal;
+     htt = htt_equal;
+  else if (test == sLequalp || test == sLequalp->s.s_gfdef)
+     htt = htt_equalp;
   else
     FEerror("~S is an illegal hash-table test function.",
 	    1, test);
@@ -529,7 +673,10 @@ DEFUNM_NEW("NEXT-HASH-TABLE-ENTRY",object,fSnext_hash_table_entry,SI,2,2,NONE,OO
 
 DEFUN_NEW("HASH-TABLE-TEST",object,fLhash_table_test,LISP,1,1,NONE,OO,OO,OO,OO,(object table),
  "Given a HASH-TABLE return a symbol which specifies the function used in its test") 
-{ switch(table->ht.ht_test) {
+{
+  check_type_hash_table(&table);
+  switch(table->ht.ht_test) {
+     case htt_equalp: RETURN1(sLequalp);
      case htt_equal: RETURN1(sLequal);
      case htt_eq: RETURN1(sLeq);
      case htt_eql: RETURN1(sLeql);
@@ -540,6 +687,7 @@ DEFUN_NEW("HASH-TABLE-TEST",object,fLhash_table_test,LISP,1,1,NONE,OO,OO,OO,OO,(
 
 DEFUN_NEW("HASH-TABLE-SIZE",object,fLhash_table_size,LISP,1,1,NONE,OO,OO,OO,OO,(object table),"")
 {
+  check_type_hash_table(&table);
   RETURN1(make_fixnum(table->ht.ht_size));
 
 }
@@ -564,6 +712,7 @@ gcl_init_hash()
 	sLeq = make_ordinary("EQ");
 	sLeql = make_ordinary("EQL");
 	sLequal = make_ordinary("EQUAL");
+	sLequalp = make_ordinary("EQUALP");
 	sKsize = make_keyword("SIZE");
 	sKtest = make_keyword("TEST");
 	sKrehash_size = make_keyword("REHASH-SIZE");
