@@ -330,7 +330,7 @@ of the other up to equal.
 1.4.3 Control Function Return Values
 ------------------------------------
 
-The control funcions (*note Control::) do not return a value or wait
+The control functions (*note Control::) do not return a value or wait
 unless requested to do so, using the ':return' keyword.  The types and
 method of specification are the same as for the Widget Functions in the
 previous section.

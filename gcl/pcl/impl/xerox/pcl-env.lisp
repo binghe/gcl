@@ -43,7 +43,7 @@
   (il:defprint 'il:compiled-closure 'il:print-closure))
 
 (defun il:print-closure (x &optional stream depth)
-  ;; See the IRM, section 25.3.3.  Unfortunatly, that documentation is
+  ;; See the IRM, section 25.3.3.  Unfortunately, that documentation is
   ;; not correct.  In particular, it makes no mention of the third argument.
   (cond ((not (funcallable-instance-p x))
 	 ;; IL:\CCLOSURE.DEFPRINT is the orginal system function for

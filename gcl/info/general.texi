@@ -277,7 +277,7 @@ functions one of the other up to equal.
 
 @subsection Control Function Return Values
 
-The @i{control} funcions (@pxref{Control})  do not return a value
+The @i{control} functions (@pxref{Control})  do not return a value
 or wait unless requested to do so, using the @code{:return} keyword.
 The types and method of specification are the same as for the
 Widget Functions in the previous section.

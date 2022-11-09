@@ -136,8 +136,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;this function tracks the mouse.  when the mouse button is pressed a
 ;;line is drawn from the previous position to the current position.
-;;this funciton also shows a way of handling exposure events.  the
-;;positions are remebered in order to redraw the contents of the window
+;;this function also shows a way of handling exposure events.  The
+;;positions are remembered in order to redraw the contents of the window
 ;;when it is exposed.  this function handles events in two windows, the
 ;;quit window and the draw window.  there is an example of setting the
 ;;input for a window.  the draw window can have button press events,
@@ -272,7 +272,7 @@
 ;;this function draws a ghst line by setting the X function to GXXor. and the
 ;;foreground color to th logxor of the back and foreground pixel
 ;;this function actually changes the graphics context. and does not change it back
-;;to use the ghost method and switch back to regular drawing. set the funciton
+;;to use the ghost method and switch back to regular drawing. set the function
 ;;back to GXcopy and the foregorund pixel appropriately
 
 (defun do-ghost-line-1 (a-window)

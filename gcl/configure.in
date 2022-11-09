@@ -119,9 +119,9 @@ AC_ARG_ENABLE([xgcl],[  --enable-xgcl=yes will compile in support for XGCL],,[en
 
 AC_ARG_ENABLE([dlopen],[  --enable-dlopen uses dlopen for loading objects, which can then not be retained  in saved images],
 	      ,[enable_dlopen=$def_dlopen])
-AC_ARG_ENABLE([statsysbfd],[  --enable-statsysbfd uses a static sytem bfd library for loading and relocationing object files],
+AC_ARG_ENABLE([statsysbfd],[  --enable-statsysbfd uses a static system bfd library for loading and relocating object files],
 	      ,[enable_statsysbfd=$def_statsysbfd])
-AC_ARG_ENABLE([dynsysbfd],[  --enable-dynsysbfd uses a dynamic shared sytem bfd library for loading and relocationing object files],
+AC_ARG_ENABLE([dynsysbfd],[  --enable-dynsysbfd uses a dynamic shared system bfd library for loading and relocating object files],
 	      ,[enable_dynsysbfd=no])
 AC_ARG_ENABLE([custreloc],[  --enable-custreloc uses custom gcl code if available for loading  and relocationing object files],
 	      ,[enable_custreloc=$def_custreloc])

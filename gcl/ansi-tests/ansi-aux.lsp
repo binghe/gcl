@@ -961,10 +961,10 @@ the condition to go uncaught if it cannot be classified."
 		    (format t "Found element of ~S not in ~S: ~S~%"
 			    tp tp2 x)
 		    t))
-	     (condition (c) (format t "Error ~S occured: ~S~%"
+	     (condition (c) (format t "Error ~S occurred: ~S~%"
 				    c tp2)
 			t)))))
-	 (condition (c) (format t "Error ~S occured: ~S~%" c tp)
+	 (condition (c) (format t "Error ~S occurred: ~S~%" c tp)
 		    1))))))))
 
 (defun even-size-p (a)

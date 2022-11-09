@@ -30,10 +30,10 @@
 ;;a C struct in X starts with a 'make' followed by the structure name.  all
 ;;functions involved in getting a field of a C struct strats with the
 ;;name of the C struct followed by the name of the field.  the
-;;parameters it excepts is the varaible contaning the structure.  all
+;;parameters it excepts is the variable contaning the structure.  all
 ;;functions to set a field of a C struct starts with 'set' followed by
 ;;the C struct name followed by the field name.  these functions accept
-;;as parameter, the varaible containing the struct and the value to be
+;;as parameter, the variable containing the struct and the value to be
 ;;put in the field.
 
 ;;;;
@@ -82,7 +82,7 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;; 
-;;this function initializes all varaibles needed by most applications.
+;;this function initializes all variables needed by most applications.
 ;;it uses all defaults which is inherited from the root window, and
 ;;screen.
 

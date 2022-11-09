@@ -22,7 +22,7 @@
 ; See the file dec.copyright for details. */
 
 
-/********* _XQEvent funcions *****/
+/********* _XQEvent functions *****/
 #define NEED_EVENTS
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -60,7 +60,7 @@ long j;
 }
 
 
-/********* XCharStruct funcions *****/
+/********* XCharStruct functions *****/
 
 long  make_XCharStruct (){
           return ((long) calloc(1, sizeof(XCharStruct)));
@@ -145,7 +145,7 @@ int j;
 }
 
 
-/********* XFontProp funcions *****/
+/********* XFontProp functions *****/
 
 long  make_XFontProp (){
           return ((long) calloc(1, sizeof(XFontProp)));
@@ -178,7 +178,7 @@ int j;
 }
 
 
-/********* XFontStruct funcions *****/
+/********* XFontStruct functions *****/
 
 long  make_XFontStruct (){
           return ((long) calloc(1, sizeof(XFontStruct)));
@@ -390,7 +390,7 @@ long j;
 }
 
 
-/********* XTextItem funcions *****/
+/********* XTextItem functions *****/
 
 long  make_XTextItem (){
           return ((long) calloc(1, sizeof(XTextItem)));
@@ -449,7 +449,7 @@ long j;
 }
 
 
-/********* XChar2b funcions *****/
+/********* XChar2b functions *****/
 
 long  make_XChar2b (){
           return ((long) calloc(1, sizeof(XChar2b)));
@@ -482,7 +482,7 @@ char j;
 }
 
 
-/********* XTextItem16 funcions *****/
+/********* XTextItem16 functions *****/
 
 long  make_XTextItem16 (){
           return ((long) calloc(1, sizeof(XTextItem16)));
@@ -541,7 +541,7 @@ long j;
 }
 
 
-/********* XEDataObject funcions *****/
+/********* XEDataObject functions *****/
 
 long  make_XEDataObject (){
           return ((long) calloc(1, sizeof(XEDataObject)));
@@ -613,7 +613,7 @@ GC j;
 }
 
 
-/********* XSizeHints funcions *****/
+/********* XSizeHints functions *****/
 
 long  make_XSizeHints (){
           return ((long) calloc(1, sizeof(XSizeHints)));
@@ -856,7 +856,7 @@ int	j;
 }
 
 
-/********* XWMHints funcions *****/
+/********* XWMHints functions *****/
 
 long  make_XWMHints (){
           return ((long) calloc(1, sizeof(XWMHints)));
@@ -980,7 +980,7 @@ int j;
 }
 
 
-/********* XTextProperty funcions *****/
+/********* XTextProperty functions *****/
 
 long  make_XTextProperty (){
           return ((long) calloc(1, sizeof(XTextProperty)));
@@ -1039,7 +1039,7 @@ long j;
 }
 
 
-/********* XIconSize funcions *****/
+/********* XIconSize functions *****/
 
 long  make_XIconSize (){
           return ((long) calloc(1, sizeof(XIconSize)));
@@ -1124,7 +1124,7 @@ int j;
 }
 
 
-/********* XClassHint funcions *****/
+/********* XClassHint functions *****/
 
 long  make_XClassHint (){
           return ((long) calloc(1, sizeof(XClassHint)));
@@ -1157,7 +1157,7 @@ long j;
 }
 
 
-/********* XComposeStatus funcions *****/
+/********* XComposeStatus functions *****/
 
 long  make_XComposeStatus (){
           return ((long) calloc(1, sizeof(XComposeStatus)));
@@ -1190,7 +1190,7 @@ long j;
 }
 
 
-/********* XVisualInfo funcions *****/
+/********* XVisualInfo functions *****/
 
 long  make_XVisualInfo (){
           return ((long) calloc(1, sizeof(XVisualInfo)));
@@ -1327,7 +1327,7 @@ long j;
 }
 
 
-/********* XStandardColormap funcions *****/
+/********* XStandardColormap functions *****/
 
 long  make_XStandardColormap (){
           return ((long) calloc(1, sizeof(XStandardColormap)));

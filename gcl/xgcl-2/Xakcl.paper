@@ -77,7 +77,7 @@ capabilities and the ease of lisp programming.
 	It is assumed that the reader is familiar with Lisp, and has
 some passing knowledge of C.  Also familiarity with the Xwindows
 library routines and programming conventions would be helpful but is
-not requiered.  All X functions in Xakcl begins with the letter 'X' ,
+not required.  All X functions in Xakcl begin with the letter 'X' ,
 unless otherwise mentioned.  The Syntax and names of Xakcl functions
 are kept as closely to the X library functions as possible, so that a
 user of the Xwindows' C libary will have no trouble in learning how to
@@ -94,8 +94,8 @@ A. Getting Started.
 
 
 
-	In order to start using graphics in Xakcl, a few initilization
-must take place.  These initilization correspond to Xwindows call to
+	In order to start using graphics in Xakcl, a few initializations
+must take place.  These initializations correspond to Xwindows call to
 get the root window, the display, the current screen, the Graphics
 Context and other properties needed by X.  The use of these features
 will be described further in later sections.
@@ -134,7 +134,7 @@ II. The Default Screen and the Root Window
 
 The next steps in getting started is to get the desired screen
 (usually the default screen), and the root window.  These two operations
-are similiar to getting a display and is straight forward.  Use the
+are similar to getting a display and is straight forward.  Use the
 
 commands:
 
@@ -243,7 +243,7 @@ B. Creating and Using Windows
 
 I. Creating a Window
 
-	To create windows in lisp two functions are avaialable,
+	To create windows in lisp two functions are available,
 XCreateWindow and XCreateSimpleWindow.  Even though XCreateWindow is a
 more expansive function, for most applications XCreateSimpleWindow
 will do.  Below is an example of the use of XCreateSimpleWindow.
@@ -277,7 +277,7 @@ the screen.  The user can tell the manager how to control different
 aspects of a window or drawable by passing to the window manager size
 hints.  This is done by first creating a structure know as the
 Xsizehints.  Below are examples of creating an instance of this
-structure, and it's initilization.
+structure, and it's initialization.
 
 
 
@@ -461,7 +461,7 @@ pixel-color.  this informaion can be extracted with (Xcolor-pixel
 pixel-xcolor).  XAllocNamedColo also expects a colormap (the default
 colormap will do), a display, and a String specifying the color (for a
 list of colors see the file rgb.txt in /usr/lib/X11). Thus the
-following funciton will cause all drawings to be done the specify
+following function will cause all drawings to be done the specified
 color.
 
 (Xsetforeground display GC (Xcolor-pixel  pixel-xcolor))
@@ -505,7 +505,7 @@ valid font is found, will set it in the graphics context.
 	(format t "~%can't open font ~a" a-string))
 
 	First the font is loaded with XloadQueryFont.  This function
-expects the display and a string whcih specifies the font (for
+expects the display and a string which specifies the font (for
 complete font information see the directories /usr/lib/X11/fonts).
 After loading the font must be set in the specified graphics context.
 XSetFont expects the font id.  This id resides in the XFontStruct
@@ -517,7 +517,7 @@ iv. XSetFunction
 	Xwindows draws by applying bit operations on the pixel vlaues
 on the screen along with a mask that it creates called the plan_mask.
 Most often only the pixel already on the screen is manipulated.  This
-defualt logical operation is GXcopy (which is the default).  However
+default logical operation is GXcopy (which is the default).  However
 to perform moer complicated operations such as drawing 'ghost' images
 (drawing and erasing images with out affecting drawings in the
 background) other functions could be used.  These functions are
@@ -584,13 +584,13 @@ are the positions.  In this case 'window' is the destination drawable.
 Thus with the specification in the GC, a line on a specified with will
 be drawn.  Its cap style will also be drawn accordingly.  As in other
 drawing request.  the display must be specified and a call to Xflush
-must be made in order to request that the X server proccess the
+must be made in order to request that the X server process the
 request.
 
 
 II. Drawing Rectangles
 
-	Drawing Recatangles is similiar to drawing lines.  The only
+	Drawing Rectangles is similar to drawing lines.  The only
 difference is that the size of the recatangle must be specified.
 
 
@@ -605,7 +605,7 @@ The function expects the x and y position and the width and height.
 II. Drawing Arcs.
 
 	Arcs can form enclosed areas such as elipses or cirlces or
-they coould be a curved line.  The funcion XDrawArc will draw arcs.
+they could be a curved line.  The function XDrawArc will draw arcs.
 
 
 (XdrawArc *default-display* a-window  *default-GC* 100 100 10 10 0 (* 360 64))
@@ -631,7 +631,7 @@ III.  Drawing Text
 	With the font loaded in the Graphics Context as shown in
 Section C, several functions can be called in order to draw text.
 Only XDrawString will be dicussed here, but the other functions are
-similiar.
+similar.
 
 (XDrawString  *default-display*   a-window  *default-GC*  10 15 (get-c-string "hello") 4)
 (Xflush *default-display*)
@@ -676,7 +676,7 @@ position text precisely on the screen.
 E. Handling Events
 
 	So far only request to the X server to do output on the screen
-have been discussed.  X also has a means of getting infomation about
+have been discussed.  X also has a means of getting information about
 what is inputed by a user as well.  The inputs can range from moving
 or clicking the mouse to keys being pressed on the keyboard.  The
 input also encompases events like a window being uncovered or exposed
@@ -700,7 +700,7 @@ the file X.lsp or X.h).
 
 	After Specifiying the input, all events that occur in that
 will go on the event queue.  The event queue is a queue of what events
-have occured, the first one being on top.  The client can both get
+have occurred, the first one being on top.  The client can both get
 information form the queue and manipulate the queue.  
 
 II.  Getting Information form the Event Queue
@@ -718,7 +718,7 @@ description.
 	XNextEvent is the most commonly used function, even though the
 
 	other functions can be useful as well.  Only the call to
-XNextEvent will be discribed because the other functions are similiar
+XNextEvent will be described because the other functions are similar
 to XNextEvent. The following functions will get an event from the
 queue and retrieve the type of the event along with the window that it
 occurs in.
@@ -733,7 +733,7 @@ can occur.  In order to handle an event the appropriate structure must
 be assessed.  For example, if the PointerMotion event needs to be
 handled than the *default-event* must be assessed as a XMotionEvent
 structure.  Below is an example of getting the x and y position of the
-pointer when a PointerMotion Event has occured, and the pointer is in
+pointer when a PointerMotion Event has occurred, and the pointer is in
 the correct window.
 
 	(if (and (eql type MotionNotify)
@@ -751,7 +751,7 @@ III.  Manipulating the Event Queue
 
 	For most applications the client will never have to change the
 event queue, besides removing events of the top or the queue, however
-sometimes the queue needs to be cleared by the client.  The funciton
+sometimes the queue needs to be cleared by the client.  The function
 XSync can be used to do this.  For example:
 
 	 (Xsync *default-display* 1) 
@@ -765,11 +765,11 @@ XSync can be used to do this.  For example:
 	With the commands demonstarted in this tutorial, most
 applications can be managed.  Windows can be created, and graphics
 operations can be performed.  For more complex applications a widget
-set can be created similiar to the X Intrinsics library and the Athena
+set can be created similar to the X Intrinsics library and the Athena
 Widget Set.  For a lisp like implementation of widgets and an advance
 aplications see the GWM application, in the GWM Manual by Colas
 Nahaboo.  GWM is a generic window manager, that is similar to Xakcl.
-It supports objects that are similiar to Widgets in most C Xwindows
+It supports objects that are similar to Widgets in most C Xwindows
 libraries.
 
 

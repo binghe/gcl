@@ -25,7 +25,7 @@
 
 
 
-;;;;;; XExtCodes funcions ;;;;;;
+;;;;;; XExtCodes functions ;;;;;;
 
 (defentry make-XExtCodes () ( fixnum  "make_XExtCodes" ))
 (defentry XExtCodes-first_error (fixnum) ( fixnum "XExtCodes_first_error" ))
@@ -38,7 +38,7 @@
 (defentry set-XExtCodes-extension (fixnum fixnum) ( void "set_XExtCodes_extension" ))
 
 
-;;;;;; XPixmapFormatValues funcions ;;;;;;
+;;;;;; XPixmapFormatValues functions ;;;;;;
 
 (defentry make-XPixmapFormatValues () ( fixnum  "make_XPixmapFormatValues" ))
 (defentry XPixmapFormatValues-scanline_pad (fixnum) ( fixnum "XPixmapFormatValues_scanline_pad" ))
@@ -49,7 +49,7 @@
 (defentry set-XPixmapFormatValues-depth (fixnum fixnum) ( void "set_XPixmapFormatValues_depth" ))
 
 
-;;;;;; XGCValues funcions ;;;;;;
+;;;;;; XGCValues functions ;;;;;;
 
 (defentry make-XGCValues () ( fixnum  "make_XGCValues" ))
 (defentry XGCValues-dashes (fixnum) ( char "XGCValues_dashes" ))
@@ -100,7 +100,7 @@
 (defentry set-XGCValues-function (fixnum fixnum) ( void "set_XGCValues_function" ))
 
 
-;;;;;; *GC funcions ;;;;;;
+;;;;;; *GC functions ;;;;;;
 
 ;;(defentry make-*GC () ( fixnum  "make_*GC" ))
 ;;(defentry *GC-values (fixnum) ( fixnum "*GC_values" ))
@@ -117,7 +117,7 @@
 ;;(defentry set-*GC-ext_data (fixnum fixnum) ( void "set_*GC_ext_data" ))
 
 
-;;;;;; Visual funcions ;;;;;;
+;;;;;; Visual functions ;;;;;;
 
 (defentry make-Visual () ( fixnum  "make_Visual" ))
 (defentry Visual-map_entries (fixnum) ( fixnum "Visual_map_entries" ))
@@ -138,7 +138,7 @@
 (defentry set-Visual-ext_data (fixnum fixnum) ( void "set_Visual_ext_data" ))
 
 
-;;;;;; Depth funcions ;;;;;;
+;;;;;; Depth functions ;;;;;;
 
 (defentry make-Depth () ( fixnum  "make_Depth" ))
 (defentry Depth-visuals (fixnum) ( fixnum "Depth_visuals" ))
@@ -149,7 +149,7 @@
 (defentry set-Depth-depth (fixnum fixnum) ( void "set_Depth_depth" ))
 
 
-;;;;;; Screen funcions ;;;;;;
+;;;;;; Screen functions ;;;;;;
 
 (defentry make-Screen () ( fixnum  "make_Screen" ))
 (defentry Screen-root_input_mask (fixnum) ( fixnum "Screen_root_input_mask" ))
@@ -194,7 +194,7 @@
 (defentry set-Screen-ext_data (fixnum fixnum) ( void "set_Screen_ext_data" ))
 
 
-;;;;;; ScreenFormat funcions ;;;;;;
+;;;;;; ScreenFormat functions ;;;;;;
 
 (defentry make-ScreenFormat () ( fixnum  "make_ScreenFormat" ))
 (defentry ScreenFormat-scanline_pad (fixnum) ( fixnum "ScreenFormat_scanline_pad" ))
@@ -207,7 +207,7 @@
 (defentry set-ScreenFormat-ext_data (fixnum fixnum) ( void "set_ScreenFormat_ext_data" ))
 
 
-;;;;;; XSetWindowAttributes funcions ;;;;;;
+;;;;;; XSetWindowAttributes functions ;;;;;;
 
 (defentry make-XSetWindowAttributes () ( fixnum  "make_XSetWindowAttributes" ))
 (defentry XSetWindowAttributes-cursor (fixnum) ( fixnum "XSetWindowAttributes_cursor" ))
@@ -242,7 +242,7 @@
 (defentry set-XSetWindowAttributes-background_pixmap (fixnum fixnum) ( void "set_XSetWindowAttributes_background_pixmap" ))
 
 
-;;;;;; XWindowAttributes funcions ;;;;;;
+;;;;;; XWindowAttributes functions ;;;;;;
 
 (defentry make-XWindowAttributes () ( fixnum  "make_XWindowAttributes" ))
 (defentry XWindowAttributes-screen (fixnum) ( fixnum "XWindowAttributes_screen" ))
@@ -293,7 +293,7 @@
 (defentry set-XWindowAttributes-x (fixnum fixnum) ( void "set_XWindowAttributes_x" ))
 
 
-;;;;;; XHostAddress funcions ;;;;;;
+;;;;;; XHostAddress functions ;;;;;;
 
 (defentry make-XHostAddress () ( fixnum  "make_XHostAddress" ))
 (defentry XHostAddress-address (fixnum) ( fixnum "XHostAddress_address" ))
@@ -304,7 +304,7 @@
 (defentry set-XHostAddress-family (fixnum fixnum) ( void "set_XHostAddress_family" ))
 
 
-;;;;;; XImage funcions ;;;;;;
+;;;;;; XImage functions ;;;;;;
 
 (defentry make-XImage () ( fixnum  "make_XImage" ))
 ;;(defentry XImage-f (fixnum) ( fixnum "XImage_f" ))
@@ -343,7 +343,7 @@
 (defentry set-XImage-width (fixnum fixnum) ( void "set_XImage_width" ))
 
 
-;;;;;; XWindowChanges funcions ;;;;;;
+;;;;;; XWindowChanges functions ;;;;;;
 
 (defentry make-XWindowChanges () ( fixnum  "make_XWindowChanges" ))
 (defentry XWindowChanges-stack_mode (fixnum) ( fixnum "XWindowChanges_stack_mode" ))
@@ -362,7 +362,7 @@
 (defentry set-XWindowChanges-x (fixnum fixnum) ( void "set_XWindowChanges_x" ))
 
 
-;;;;;; XColor funcions ;;;;;;
+;;;;;; XColor functions ;;;;;;
 
 (defentry make-XColor () ( fixnum  "make_XColor" ))
 (defentry XColor-pad (fixnum) ( char "XColor_pad" ))
@@ -379,7 +379,7 @@
 (defentry set-XColor-pixel (fixnum fixnum) ( void "set_XColor_pixel" ))
 
 
-;;;;;; XSegment funcions ;;;;;;
+;;;;;; XSegment functions ;;;;;;
 
 (defentry make-XSegment () ( fixnum  "make_XSegment" ))
 (defentry XSegment-y2 (fixnum) ( fixnum "XSegment_y2" ))
@@ -392,7 +392,7 @@
 (defentry set-XSegment-x1 (fixnum fixnum) ( void "set_XSegment_x1" ))
 
 
-;;;;;; XPoint funcions ;;;;;;
+;;;;;; XPoint functions ;;;;;;
 
 (defentry make-XPoint () ( fixnum  "make_XPoint" ))
 (defentry XPoint-y (fixnum) ( fixnum "XPoint_y" ))
@@ -401,7 +401,7 @@
 (defentry set-XPoint-x (fixnum fixnum) ( void "set_XPoint_x" ))
 
 
-;;;;;; XRectangle funcions ;;;;;;
+;;;;;; XRectangle functions ;;;;;;
 
 (defentry make-XRectangle () ( fixnum  "make_XRectangle" ))
 (defentry XRectangle-height (fixnum) ( fixnum "XRectangle_height" ))
@@ -414,7 +414,7 @@
 (defentry set-XRectangle-x (fixnum fixnum) ( void "set_XRectangle_x" ))
 
 
-;;;;;; XArc funcions ;;;;;;
+;;;;;; XArc functions ;;;;;;
 
 (defentry make-XArc () ( fixnum  "make_XArc" ))
 (defentry XArc-angle2 (fixnum) ( fixnum "XArc_angle2" ))
@@ -431,7 +431,7 @@
 (defentry set-XArc-x (fixnum fixnum) ( void "set_XArc_x" ))
 
 
-;;;;;; XKeyboardControl funcions ;;;;;;
+;;;;;; XKeyboardControl functions ;;;;;;
 
 (defentry make-XKeyboardControl () ( fixnum  "make_XKeyboardControl" ))
 (defentry XKeyboardControl-auto_repeat_mode (fixnum) ( fixnum "XKeyboardControl_auto_repeat_mode" ))
@@ -452,7 +452,7 @@
 (defentry set-XKeyboardControl-key_click_percent (fixnum fixnum) ( void "set_XKeyboardControl_key_click_percent" ))
 
 
-;;;;;; XKeyboardState funcions ;;;;;;
+;;;;;; XKeyboardState functions ;;;;;;
 
 (defentry make-XKeyboardState () ( fixnum  "make_XKeyboardState" ))
 (defentry XKeyboardState-auto_repeats (fixnum) ( fixnum "XKeyboardState_auto_repeats" ))
@@ -471,7 +471,7 @@
 (defentry set-XKeyboardState-key_click_percent (fixnum fixnum) ( void "set_XKeyboardState_key_click_percent" ))
 
 
-;;;;;; XTimeCoord funcions ;;;;;;
+;;;;;; XTimeCoord functions ;;;;;;
 
 (defentry make-XTimeCoord () ( fixnum  "make_XTimeCoord" ))
 (defentry XTimeCoord-y (fixnum) ( fixnum "XTimeCoord_y" ))
@@ -482,7 +482,7 @@
 (defentry set-XTimeCoord-time (fixnum fixnum) ( void "set_XTimeCoord_time" ))
 
 
-;;;;;; XModifierKeymap funcions ;;;;;;
+;;;;;; XModifierKeymap functions ;;;;;;
 
 (defentry make-XModifierKeymap () ( fixnum  "make_XModifierKeymap" ))
 (defentry XModifierKeymap-modifiermap (fixnum) ( fixnum "XModifierKeymap_modifiermap" ))

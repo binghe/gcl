@@ -1446,8 +1446,8 @@ Optional Features:
   --enable-emacsdir=XXXX will manually specify the location for elisp files
   --enable-xgcl=yes will compile in support for XGCL
   --enable-dlopen uses dlopen for loading objects, which can then not be retained  in saved images
-  --enable-statsysbfd uses a static sytem bfd library for loading and relocationing object files
-  --enable-dynsysbfd uses a dynamic shared sytem bfd library for loading and relocationing object files
+  --enable-statsysbfd uses a static system bfd library for loading and relocating object files
+  --enable-dynsysbfd uses a dynamic shared system bfd library for loading and relocating object files
   --enable-custreloc uses custom gcl code if available for loading  and relocationing object files
   --enable-debug builds gcl with -g in CFLAGS to enable running under gdb
   --enable-static will link your GCL against static as opposed to shared system libraries
