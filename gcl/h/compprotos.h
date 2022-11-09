@@ -179,5 +179,6 @@ void gcl_init_or_load1(void (*)(void),const char *);
 char *gcl_gets(char *,int);
 int gcl_puts(const char *);
 int endp_error(object);
-object Icall_gen_error_handler(object,object,object,object,ufixnum,...) __attribute__((noreturn));
+object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
+object Icall_gen_error_handler_noreturn(object,object,object,object,ufixnum,...) __attribute__((noreturn));
 object file_stream(object);

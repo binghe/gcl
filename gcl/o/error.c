@@ -126,12 +126,11 @@ ihs_top_function_name(ihs_ptr h)
 	return(Cnil);
 }
 
-object
-Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) { 
+static object
+Icall_gen_error_handler_ap(object ci,object cs,object en,object es,ufixnum n,va_list ap) {
 
   object *b;
   ufixnum i;
-  va_list ap;
 
   n+=5;
   b=alloca(n*sizeof(*b));
@@ -141,16 +140,46 @@ Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) {
   b[3] = cs;
   b[4] = es;
    
-  va_start(ap,n);
   for (i=5;i<n;i++)
     b[i]= va_arg(ap,object);
-  va_end(ap);
 
   IapplyVector(sSuniversal_error_handler,n,b);
+
+  return Cnil;
+
+}
+
+object
+Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) {
+
+  object x;
+  va_list ap;
+
+  va_start(ap,n);
+
+  x=Icall_gen_error_handler_ap(ci,cs,en,es,n,ap);
+
+  va_end(ap);
+
+  return x;
+
+}
+
+object
+Icall_gen_error_handler_noreturn(object ci,object cs,object en,object es,ufixnum n,...) {
+
+  va_list ap;
+
+  va_start(ap,n);
+
+  Icall_gen_error_handler_ap(ci,cs,en,es,n,ap);
+
+  va_end(ap);
 
   while (1);
 
 }
+
 
 /*
 	Lisp interface to IHS
