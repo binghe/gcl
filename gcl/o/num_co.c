@@ -112,7 +112,18 @@ gcl_isnan(object x) {
 
 }
 
+int
+gcl_is_not_finite(object x)  {
 
+  switch(type_of(x)) {
+  case t_shortfloat:
+    return !ISFINITE(sf(x));
+  case t_longfloat:
+    return !ISFINITE(lf(x));
+  default:
+    return 0;
+  }
+}
 
 static void
 integer_decode_double(double d, int *hp, int *lp, int *ep, int *sp)

@@ -116,6 +116,9 @@ number_big_iexpt(object x,object y,fixnum ly,fixnum j) {
 static inline object
 number_zero_expt(object x,bool promote_short_p) {
 
+  if (gcl_is_not_finite(x))/*FIXME, better place?*/
+    return number_exp(number_times(number_nlog(x),small_fixnum(0)));
+
   switch (type_of(x)) {
   case t_fixnum:
   case t_bignum:
@@ -180,7 +183,7 @@ number_ump_expt(object x,object y) {
 
 static inline object
 number_log_expt(object x,object y) {
-  return number_zerop(y) ? number_zero_expt(y,type_of(x)==t_longfloat) : number_exp(number_times(number_nlog(x),y));
+  return number_zerop(y) ? number_zero_expt(x,type_of(x)==t_longfloat) : number_exp(number_times(number_nlog(x),y));
 }
 
 static inline object

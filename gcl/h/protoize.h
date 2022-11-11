@@ -1764,6 +1764,9 @@ gcl_isnormal_float(float);
 int
 gcl_isnan(object);
 
+int
+gcl_is_not_finite(object);
+
 object
 find_init_name1(char *,unsigned);
 
