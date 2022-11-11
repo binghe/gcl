@@ -261,9 +261,9 @@ DEF_ORDINARY("FLOATING-POINT-ERROR",sSfloating_point_error,SI,"");
 static void
 sigpipe(void)
 {
-	gcl_signal(SIGPIPE, sigpipe);
-	perror("");
-	FEerror("Broken pipe", 0);
+  unblock_signals(SIGPIPE,SIGPIPE);
+  perror("");
+  FEerror("Broken pipe", 0);
 }
 
 void
