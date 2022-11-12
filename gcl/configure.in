@@ -1,5 +1,5 @@
 AC_INIT
-AC_PREREQ([2.71])
+AC_PREREQ([2.69])
 AC_CONFIG_HEADERS([h/gclincl.h])
 
 VERSION=`cat majvers`.`cat minvers`
@@ -1749,8 +1749,56 @@ if test "$enable_readline" != "no" ; then
 				 AC_CHECK_LIB([readline],[rl_completion_matches],
 					[AC_DEFINE(HAVE_DECL_RL_COMPLETION_MATCHES,1,[have readline completion matches])
 				 	 AC_DEFINE(HAVE_RL_COMPENTRY_FUNC_T,1,[have readline completion matches])])
-   				 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
-				 RL_OBJS=gcl_readline.o]))
+			         AC_MSG_CHECKING([RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION])
+                                 AC_COMPILE_IFELSE(
+                                        [AC_LANG_PROGRAM(
+	                                       [[
+                                                  #include <readline/readline.h>
+						  extern Function *rl_completion_entry_function __attribute__((weak));
+	    				       ]],
+					       [[]])],
+                                        [AC_DEFINE(RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION,1,[rl_completion_entry_function returns type Function])
+                                         AC_MSG_RESULT([yes])],
+                                        [AC_MSG_RESULT([no])
+                                         AC_MSG_CHECKING([RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T])
+                                         AC_COMPILE_IFELSE(
+                                                [AC_LANG_PROGRAM(
+	                                               [[
+		                                          #include <readline/readline.h>
+							  extern rl_compentry_func_t *rl_completion_entry_function __attribute__((weak));
+	                                               ]],
+						       [[]])],
+	                                        [AC_DEFINE(RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T,1,[rl_completion_entry_function returns type rl_compentry_func_t])
+	                                         AC_MSG_RESULT([yes])],
+                                                [AC_MSG_RESULT([no])
+	                                         AC_MSG_ERROR([Unknown rl_completion_entry_function return type])])])
+
+                                 AC_MSG_CHECKING([RL_READLINE_NAME_TYPE_CHAR])
+                                 AC_COMPILE_IFELSE(
+                                        [AC_LANG_PROGRAM(
+	                                       [[
+		                                  #include <readline/readline.h>
+		                                  extern char *rl_readline_name __attribute__((weak));
+	                                       ]],
+	                                       [[]])],
+                                        [AC_DEFINE(RL_READLINE_NAME_TYPE_CHAR,1,[rl_readline_name returns type char])
+                                         AC_MSG_RESULT([yes])],
+                                        [AC_MSG_RESULT([no])
+                                         AC_MSG_CHECKING([RL_READLINE_NAME_TYPE_CONST_CHAR])
+                                         AC_COMPILE_IFELSE(
+                                                [AC_LANG_PROGRAM(
+	                                               [[
+		                                          #include <readline/readline.h>
+		                                          extern const char *rl_readline_name __attribute__((weak));
+	                                               ]],
+	                                               [[]])],
+                                                [AC_DEFINE(RL_READLINE_NAME_TYPE_CONST_CHAR,1,[rl_readline_name returns type const char])
+                                                 AC_MSG_RESULT([yes])],
+                                                [AC_MSG_RESULT([no])
+						 AC_MSG_ERROR([Unknown rl_readline_name return type])])])
+			 	 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
+				 RL_OBJS=gcl_readline.o]),
+				 [],[AC_INCLUDES_DEFAULT([#include <stdio.h>])])
 fi
 
 AC_SUBST(RL_OBJS)

@@ -8,18 +8,23 @@ extern FILE *stderr __attribute__((weak));
 extern FILE *stdout __attribute__((weak));
 
 #ifdef USE_READLINE
-#ifdef READLINE_IS_EDITLINE
-#define MY_RL_VERSION 0x0600
-#else
-#define MY_RL_VERSION RL_READLINE_VERSION
-#endif
-#if MY_RL_VERSION < 0x0600
+
+#if defined(RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION)
 extern Function		*rl_completion_entry_function __attribute__((weak));
-extern char		*rl_readline_name __attribute__((weak));
-#else
+#elif defined(RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T)
 extern rl_compentry_func_t *rl_completion_entry_function __attribute__((weak));
-extern const char *rl_readline_name __attribute__((weak));
+#else
+#error Unknown rl_completion_entry_function return type
 #endif
+
+#if defined(RL_READLINE_NAME_TYPE_CHAR)
+extern char		*rl_readline_name __attribute__((weak));
+#elif defined(RL_READLINE_NAME_TYPE_CONST_CHAR)
+extern const char *rl_readline_name __attribute__((weak));
+#else
+#error Unknown rl_readline_name return type
+#endif
+
 #endif
 #endif
 

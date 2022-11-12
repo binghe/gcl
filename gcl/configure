@@ -8522,7 +8522,9 @@ fi
 if test "$enable_readline" != "no" ; then
            for ac_header in readline/readline.h
 do :
-  ac_fn_c_check_header_compile "$LINENO" "readline/readline.h" "ac_cv_header_readline_readline_h" "$ac_includes_default"
+  ac_fn_c_check_header_compile "$LINENO" "readline/readline.h" "ac_cv_header_readline_readline_h" "#include <stdio.h>
+
+"
 if test "x$ac_cv_header_readline_readline_h" = xyes
 then :
   printf "%s\n" "#define HAVE_READLINE_READLINE_H 1" >>confdefs.h
@@ -8654,7 +8656,122 @@ printf "%s\n" "#define HAVE_RL_COMPENTRY_FUNC_T 1" >>confdefs.h
 
 fi
 
-   				 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
+			         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION" >&5
+printf %s "checking RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION... " >&6; }
+                                 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+                                                  #include <readline/readline.h>
+						  extern Function *rl_completion_entry_function __attribute__((weak));
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+printf "%s\n" "#define RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION 1" >>confdefs.h
+
+                                         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+else $as_nop
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+                                         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T" >&5
+printf %s "checking RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T... " >&6; }
+                                         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		                                          #include <readline/readline.h>
+							  extern rl_compentry_func_t *rl_completion_entry_function __attribute__((weak));
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+printf "%s\n" "#define RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T 1" >>confdefs.h
+
+	                                         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+else $as_nop
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+	                                         as_fn_error $? "Unknown rl_completion_entry_function return type" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+
+                                 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking RL_READLINE_NAME_TYPE_CHAR" >&5
+printf %s "checking RL_READLINE_NAME_TYPE_CHAR... " >&6; }
+                                 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		                                  #include <readline/readline.h>
+		                                  extern char *rl_readline_name __attribute__((weak));
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+printf "%s\n" "#define RL_READLINE_NAME_TYPE_CHAR 1" >>confdefs.h
+
+                                         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+else $as_nop
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+                                         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking RL_READLINE_NAME_TYPE_CONST_CHAR" >&5
+printf %s "checking RL_READLINE_NAME_TYPE_CONST_CHAR... " >&6; }
+                                         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+		                                          #include <readline/readline.h>
+		                                          extern const char *rl_readline_name __attribute__((weak));
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+
+printf "%s\n" "#define RL_READLINE_NAME_TYPE_CONST_CHAR 1" >>confdefs.h
+
+                                                 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+printf "%s\n" "yes" >&6; }
+else $as_nop
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+						 as_fn_error $? "Unknown rl_readline_name return type" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+			 	 TLIBS="$TLIBS -lreadline" #some machines don't link this, e.g. Slackware
 				 RL_OBJS=gcl_readline.o
 fi
 

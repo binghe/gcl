@@ -342,6 +342,18 @@
 /* readline is editline */
 #undef READLINE_IS_EDITLINE
 
+/* rl_completion_entry_function returns type Function */
+#undef RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION
+
+/* rl_completion_entry_function returns type rl_compentry_func_t */
+#undef RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T
+
+/* rl_readline_name returns type char */
+#undef RL_READLINE_NAME_TYPE_CHAR
+
+/* rl_readline_name returns type const char */
+#undef RL_READLINE_NAME_TYPE_CONST_CHAR
+
 /* asm string to set the stack pointer */
 #undef SET_STACK_POINTER
 
