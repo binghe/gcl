@@ -513,7 +513,7 @@ Cannot compile ~a.~%"
 			 na na na))	
 			    
 	     #+(or winnt bsd) ""; "-w"
-	     #-(or aix3 bsd winnt irix3) " 2> /dev/null ")
+	     #-(or aix3 bsd winnt irix3) "");" 2> /dev/null "
 		  
 		 
 	   )
