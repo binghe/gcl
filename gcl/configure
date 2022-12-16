@@ -4649,6 +4649,9 @@ case $use in
     *mingw*)
 	assert_arg_to_cflags -fno-zero-initialized-in-bss
 	assert_arg_to_cflags -mms-bitfields;;
+	for i in makedefc windows/gcl.iss windows/sysdir.bat windows/install.lsp h/gclincl.h;  do
+	    cat $i.in | sed 's,^\r\n$,\r\n,g' >tmp && mv tmp $i.in;
+	done
     *gnuwin*)
 	assert_arg_to_cflags -fno-zero-initialized-in-bss
 	assert_arg_to_cflags -mms-bitfields
