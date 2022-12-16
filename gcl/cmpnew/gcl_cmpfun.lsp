@@ -91,6 +91,7 @@
                        (cond ((char= char #\\) (wt "\\\\"))
                              ((char= char #\") (wt "\\\""))
                              ((char= char #\Newline) (wt "\\n"))
+			     ((char= char #\Return) (wt "\\r"))
                              (t (wt char)))))
                 (wt "\",")
                 (if (null vv-index) (wt "Cnil") (wt (vv-str vv-index)))
