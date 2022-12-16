@@ -77,7 +77,7 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 }
 
 #ifndef __MINGW32__
-static char GETPW_BUF[4096];
+static char GETPW_BUF[16384];
 #endif
 
 DEFUN_NEW("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
