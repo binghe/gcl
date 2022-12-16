@@ -366,6 +366,7 @@ extern bool writable_malloc;
 
 #define psystem(x) prof_block(vsystem(x))
 #define pfork() prof_block(fork())
+#define pvfork() prof_block(vfork())
 
 #include "error.h"
 

@@ -58,7 +58,7 @@ vsystem(const char *command) {
 
   }
 
-  if (!(pid=vfork())) {
+  if (!(pid=pvfork())) {
     errno=0;
     execvp(*p1,(void *)p1);
     _exit(128|(errno&0x7f));

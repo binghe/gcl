@@ -2122,7 +2122,7 @@ object x=Cnil;
 
     massert(!sigaction(SIGCHLD,&sa,&osa));
 
-    switch((pid=pfork())) {
+    switch((pid=pvfork())) {
     case -1:
       FEerror("Cannot fork", 0);
       break;
@@ -2131,7 +2131,7 @@ object x=Cnil;
       massert(setsid()>=0);
 
       if (daemon == sKpersistent)
-	switch(pfork()) {
+	switch(pvfork()) {
 	case -1:
 	  FEerror("daemon fork error", 0);
 	  break;
@@ -2174,7 +2174,7 @@ object x=Cnil;
 	  
 	  y=maccept(x);
 	  
-	  switch((pid=pfork())) {
+	  switch((pid=pvfork())) {
 	  case 0:
 	    massert(!sigaction(SIGCHLD,&osa,NULL));
 	    ifuncall1(server,y);
