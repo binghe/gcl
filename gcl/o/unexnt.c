@@ -282,8 +282,8 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   /* Open the undumped executable file.  */
   if (!open_input_file (&in_file, in_filename))
     {
-      printf ("Failed to open %s (%ld)...bailing.\n", 
-	      in_filename, GetLastError ());
+      printf ("Failed to open %s (%u)...bailing.\n",
+	      in_filename, (unsigned)GetLastError ());
       do_gcl_abort();
     }
 
@@ -303,8 +303,8 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   size = heap_index_in_executable + get_committed_heap_size () + bss_size;
   if (!open_output_file (&out_file, out_filename, size))
     {
-      printf ("Failed to open %s (%ld)...bailing.\n", 
-	      out_filename, GetLastError ());
+      printf ("Failed to open %s (%u)...bailing.\n",
+	      out_filename, (unsigned)GetLastError ());
       do_gcl_abort();
     }
 
@@ -367,7 +367,7 @@ open_input_file (file_data *p_file, char *filename)
 
   file = CreateFile (filename, GENERIC_READ, FILE_SHARE_READ, NULL,
 		     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-  if (file == INVALID_HANDLE_VALUE) 
+  if (file == INVALID_HANDLE_VALUE)
     return FALSE;
 
   size = GetFileSize (file, &upper_size);
@@ -548,8 +548,8 @@ get_section_info (file_data *p_infile)
   /* Check the NT header signature ...  */
   if (nt_header->Signature != IMAGE_NT_SIGNATURE) 
     {
-      printf ("Invalid IMAGE_NT_SIGNATURE 0x%lx in %s...bailing.\n",
-	      nt_header->Signature, p_infile->name);
+      printf ("Invalid IMAGE_NT_SIGNATURE 0x%x in %s...bailing.\n",
+	      (int)nt_header->Signature, p_infile->name);
     }
 
   /* Flip through the sections for .data and .bss ...  */
@@ -657,7 +657,7 @@ copy_executable_and_dump_data_section (file_data *p_infile,
   /* Get a pointer to the raw data in our address space.  */
   data_va = data_start_va;
     
-  size = (DWORD) data_file - (DWORD) p_outfile->file_base;
+  size = (unsigned long) data_file - (unsigned long) p_outfile->file_base;
   /* printf ("Copying executable up to data section...\n"); */
   /* printf ("\t0x%08x Offset in input file.\n", 0); */
   /* printf ("\t0x%08x Offset in output file.\n", 0); */
@@ -672,7 +672,7 @@ copy_executable_and_dump_data_section (file_data *p_infile,
   /* printf ("\t0x%08lx Size in bytes.\n", size); */
   memcpy (data_file, data_va, size);
   
-  index = (DWORD) data_file + size - (DWORD) p_outfile->file_base;
+  index = (unsigned long) data_file + size - (unsigned long) p_outfile->file_base;
   size = p_infile->size - index;
   /* printf ("Copying rest of executable...\n"); */
   /* printf ("\t0x%08lx Offset in input file.\n", index); */
