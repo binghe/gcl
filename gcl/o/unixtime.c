@@ -59,7 +59,9 @@ which is usually 60 maybe 100 or something else. */
 #    include <sys/timeb.h>
 
 static struct timeb t0;
-int usleep ( unsigned int microseconds );
+int usleep1 ( unsigned int microseconds );
+#undef usleep
+#define usleep(x) usleep1(x)
 
 #  endif
 
@@ -252,7 +254,7 @@ gcl_init_unixtime(void) {
 }
 
 #ifdef __MINGW32__
-int usleep ( unsigned int microseconds )
+int usleep1 ( unsigned int microseconds )
 {
     unsigned int milliseconds = microseconds / 1000;
     return ( SleepEx ( milliseconds, TRUE ) );
