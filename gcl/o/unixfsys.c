@@ -69,6 +69,7 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 
   object namestring=get_string(spec);
 
+  massert(type_of(namestring)==t_string);
   massert(namestring->st.st_fillp<sz);
   memcpy(p,namestring->st.st_self,namestring->st.st_fillp);
   p[namestring->st.st_fillp]=0;
