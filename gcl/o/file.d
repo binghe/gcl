@@ -516,6 +516,17 @@ DEFUN_NEW("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(obje
 	Close_stream(strm) closes stream strm.
 	The abort_flag is not used now.
 */
+
+static int
+pipe_designator_p(object x) {
+
+  if (x==OBJNULL||x==Cnil)
+    return 0;
+  coerce_to_filename(x,FN1);
+  return FN1[0]=='|' ? 1 : 0;
+
+}
+
 void
 close_stream(object strm)  {
 
@@ -528,7 +539,10 @@ close_stream(object strm)  {
       FEerror("Cannot close the standard output.", 0);
     fflush(strm->sm.sm_fp);
     deallocate_stream_buffer(strm);
-    fclose(strm->sm.sm_fp);
+    if (pipe_designator_p(strm->sm.sm_object1))
+      pclose(strm->sm.sm_fp);
+    else
+      fclose(strm->sm.sm_fp);
     strm->sm.sm_fp = NULL;
     strm->sm.sm_fd = -1;
     break;
@@ -554,9 +568,7 @@ close_stream(object strm)  {
   case smm_io:
   case smm_probe:
     deallocate_stream_buffer(strm);
-    if (strm->sm.sm_object1 &&
-	type_of(strm->sm.sm_object1)==t_string &&
-	strm->sm.sm_object1->st.st_self[0] =='|')
+    if (pipe_designator_p(strm->sm.sm_object1))
       pclose(strm->sm.sm_fp);
     else
       fclose(strm->sm.sm_fp);
