@@ -208,18 +208,21 @@ _start (void)
 }
 #endif /* UNIXSAVE */
 
+#ifdef __CYGWIN__
+#include <sys/cygwin.h>
+#endif
+
 /* Dump out .data and .bss sections into a new executable.  */
 void
 unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
 	void *entry_address)
 {
-#ifdef __CYGWIN32__
+#ifdef __CYGWIN__
   static file_data in_file, out_file;
   char out_filename[MAX_PATH], in_filename[MAX_PATH];
   char filename[MAX_PATH];
   unsigned long size;
   char *ptr;
-  extern void cygwin_conv_to_full_win32_path(char *,char *);
 
   fflush (stdin);
   /* copy_stdin = *stdin; */
@@ -238,11 +241,11 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   ptr = old_name + strlen (old_name) - 4;
   strcpy(filename, old_name);
   strcat(filename, (strcmp (ptr, ".exe") && strcmp (ptr, ".EXE"))?".exe":"");
-  cygwin_conv_to_full_win32_path(filename,in_filename);
+  cygwin_conv_path(CCP_POSIX_TO_WIN_A,filename,in_filename,sizeof(in_filename));
   ptr = new_name + strlen (new_name) - 4;
   strcpy(filename, new_name);
   strcat(filename, (strcmp (ptr, ".exe") && strcmp (ptr, ".EXE"))?".exe":"");
-  cygwin_conv_to_full_win32_path(filename,out_filename);
+  cygwin_conv_path(CCP_POSIX_TO_WIN_A,filename,out_filename,sizeof(out_filename));
 #else 
   static file_data in_file, out_file;
   char out_filename[MAX_PATH], in_filename[MAX_PATH];
@@ -780,7 +783,7 @@ map_in_heap (char *filename)
     }
     
   size = get_committed_heap_size ();
-  file_base = MapViewOfFileEx (file_mapping, FILE_MAP_COPY|FILE_MAP_EXECUTE, 0,
+  file_base = MapViewOfFileEx (file_mapping, FILE_MAP_ALL_ACCESS, 0,
 			       heap_index_in_executable, size,
 			       get_heap_start ());
   if (file_base != 0) 
@@ -794,7 +797,7 @@ map_in_heap (char *filename)
   CloseHandle (file_mapping);
 
   if (VirtualAlloc (get_heap_start (), get_committed_heap_size (),
-		    MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL)
+		    MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL)
     {
       i = GetLastError ();
       do_gcl_abort();
@@ -922,13 +925,22 @@ get_data_end (void)
   return data_region_end;
 }
 
-unsigned long
-probe_heap_size(void *base,unsigned long try,unsigned long inc,unsigned long max) {
+void *
+probe_base(void *base,unsigned long try,unsigned long inc,unsigned long c) {
   void *r;
   if (!(r=VirtualAlloc(base,try,MEM_RESERVE,PAGE_NOACCESS)))
-    return try>inc ? probe_heap_size(base,try-inc,inc>>1,max) : 0;
+    return probe_base(base+inc,try,inc,c+1);
   VirtualFree (r, 0, MEM_RELEASE);
-  return (!inc || try >=max) ? try : probe_heap_size(base,try+inc,inc,max);
+  return !c || inc<2 ? base : probe_base(base-inc,try,inc>>1,c+1);
+}
+
+unsigned long
+probe_heap_size(void *base,unsigned long try,unsigned long inc) {
+  void *r;
+  if (!(r=VirtualAlloc(base,try,MEM_RESERVE,PAGE_NOACCESS)))
+    return inc<2 ? try-inc : probe_heap_size(base,try-inc,inc>>1);
+  VirtualFree (r, 0, MEM_RELEASE);
+  return probe_heap_size(base,try+inc,inc);
 }
 
 static char *
@@ -970,17 +982,16 @@ allocate_heap (void)
      the region below the 256MB line for our malloc arena - 229MB is
      still a pretty decent arena to play in!  */
 
+  void *base,*ptr;
+  unsigned long min=PAGESIZE,inc=(1UL<<31);
+
 #if defined(__CYGWIN__)
-#define PROBE_BASE NULL
-#elif defined(__MINGW32__)
-#define PROBE_BASE (void *)0x20000000
+  ptr=my_endbss;
 #else
-#error Need PROBE_BASE
+  ptr=(void *)0x5000000;
 #endif
-
-  void *base = PROBE_BASE,*ptr;/*FIXME, someday figure out how to let the heap start address default *//*(void *)0x10100000*/
-
-  reserved_heap_size=probe_heap_size(base,PAGESIZE,(1UL<<31),-1);
+  base=probe_base(ptr,min,(unsigned long)my_endbss,0);
+  reserved_heap_size=probe_heap_size(base,inc+min,inc);
   ptr = VirtualAlloc ((void *) base,get_reserved_heap_size (),MEM_RESERVE,PAGE_NOACCESS);
   /* printf("probe results: %lu at %p\n",reserved_heap_size,ptr); */
 
@@ -1085,8 +1096,8 @@ recreate_heap (char *executable_path) {
   /* First reserve the upper part of our heap.  (We reserve first
      because there have been problems in the past where doing the
      mapping first has loaded DLLs into the VA space of our heap.)  */
-  tmp = VirtualAlloc ((void *) get_heap_end (),
-		      get_reserved_heap_size () - get_committed_heap_size (),
+  tmp = VirtualAlloc ((void *) get_heap_start (),
+		      get_reserved_heap_size (),
 		      MEM_RESERVE,
 		      PAGE_NOACCESS);
   if (!tmp)
