@@ -204,7 +204,7 @@ stat_internal(object x,struct stat *ssp) {
     if (lstat(FN1,ssp))
       return 0;
   } else if ((x=file_stream(x))!=Cnil&&x->sm.sm_fp) {
-    if (fstat(fileno(x->sm.sm_fp),ssp))
+    if (fstat(fileno((FILE *)x->sm.sm_fp),ssp))
       return 0;
   } else
     return 0;

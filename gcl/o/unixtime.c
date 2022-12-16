@@ -280,7 +280,7 @@ DEFUN_NEW("CURRENT-TIMEZONE",object,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(
   fixnum _t=time(0);
   gmtime_r(&_t, &gt);
   localtime_r(&_t, &lt);
-  return (object)(gt.tm_hour-lt.tm_hour+24*(gt.tm_yday!=lt.tm_yday ? (gt.tm_year>lt.tm_year||gt.tm_yday>lt.tm_yday ? 1 : -1) : 0));
+  return (object)(long)(gt.tm_hour-lt.tm_hour+24*(gt.tm_yday!=lt.tm_yday ? (gt.tm_year>lt.tm_year||gt.tm_yday>lt.tm_yday ? 1 : -1) : 0));
 #else
   time_t _t=time(0);
   return (object)(-localtime(&_t)->tm_gmtoff/3600);

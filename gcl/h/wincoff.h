@@ -8,9 +8,7 @@
 
 /* prevent duplicate definition...  we wont be using varargs
    in this */
-#undef va_start
 
-#include "winsock2.h"
 #include "windows.h"
 #ifdef __MINGW32__
 #include "minglacks.h"

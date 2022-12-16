@@ -284,18 +284,18 @@ LFD(siLbit_array_op)(void)
 		xp = x->bv.bv_self;
 		xo = BV_OFFSET(x);
 		if (type_of(y) != t_bitvector)
-			goto ERROR;
+			goto ERROR1;
 		if (d != y->bv.bv_dim)
-			goto ERROR;
+			goto ERROR1;
 		yp = y->bv.bv_self;
 		yo = BV_OFFSET(y);
 		if (r == Ct)
 			r = x;
 		if (r != Cnil) {
 			if (type_of(r) != t_bitvector)
-				goto ERROR;
+				goto ERROR1;
 			if (r->bv.bv_dim != d)
-				goto ERROR;
+				goto ERROR1;
 			i = (r->bv.bv_self - xp)*8 + (BV_OFFSET(r) - xo);
 			if ((i > 0 && i < d) || (i < 0 && -i < d)) {
 				r0 = r;
@@ -325,35 +325,35 @@ LFD(siLbit_array_op)(void)
 		}
 	} else {
 		if (type_of(x) != t_array)
-			goto ERROR;
+			goto ERROR1;
 		if ((enum aelttype)x->a.a_elttype != aet_bit)
-			goto ERROR;
+			goto ERROR1;
 		d = x->a.a_dim;
 		xp = x->bv.bv_self;
 		xo = BV_OFFSET(x);
 		if (type_of(y) != t_array)
-			goto ERROR;
+			goto ERROR1;
 		if ((enum aelttype)y->a.a_elttype != aet_bit)
-			goto ERROR;
+			goto ERROR1;
 		if (x->a.a_rank != y->a.a_rank)
-			goto ERROR;
+			goto ERROR1;
 		yp = y->bv.bv_self;
 		yo = BV_OFFSET(y);
 		for (i = 0;  i < x->a.a_rank;  i++)
 			if (x->a.a_dims[i] != y->a.a_dims[i])
-				goto ERROR;
+				goto ERROR1;
 		if (r == Ct)
 			r = x;
 		if (r != Cnil) {
 			if (type_of(r) != t_array)
-				goto ERROR;
+				goto ERROR1;
 			if ((enum aelttype)r->a.a_elttype != aet_bit)
-				goto ERROR;
+				goto ERROR1;
 			if (r->a.a_rank != x->a.a_rank)
-				goto ERROR;
+				goto ERROR1;
 			for (i = 0;  i < x->a.a_rank;  i++)
 				if (r->a.a_dims[i] != x->a.a_dims[i])
-					goto ERROR;
+					goto ERROR1;
 			i = (r->bv.bv_self - xp)*8 + (BV_OFFSET(r) - xo);
 			if ((i > 0 && i < d) || (i < 0 && -i < d)) {
 				r0 = r;
@@ -487,7 +487,7 @@ LFD(siLbit_array_op)(void)
 	vs_push(r0);
 	return;
 
-ERROR:
+ERROR1:
 	FEerror("Illegal arguments for bit-array operation.", 0);
 }
 

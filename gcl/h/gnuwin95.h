@@ -41,7 +41,6 @@ extern DBEGIN_TY _dbegin;
 
 #define HAVE_SIGACTION
 /* a noop */
-#define SA_ONSTACK 0
 
 #define brk(x) printf("not doing break\n");
 #include <stdarg.h>     
@@ -138,7 +137,7 @@ extern DBEGIN_TY _dbegin;
 
 #define SF(a_) ((siginfo_t *)a_)
 
-#define FPE_CODE(i_,v_) make_fixnum(fSfpe_code(FFN(fSfnstsw)(),FFN(fSstmxcsr)()))
+#define FPE_CODE(i_,v_) make_fixnum((long)fSfpe_code((long)FFN(fSfnstsw)(),(long)FFN(fSstmxcsr)()))
 /* #define FPE_CODE(i_,v_) make_fixnum((fixnum)SF(i_)->si_code) */
 #define FPE_ADDR(i_,v_) make_fixnum((fixnum)SF(i_)->si_addr)
 #define FPE_CTXT(v_) Cnil

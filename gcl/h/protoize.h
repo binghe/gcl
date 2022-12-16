@@ -1634,7 +1634,6 @@ void LlistA(void);
 void Lvalues_list(void);
 void Lequal(void);
 void Ldigit_char_p(void);
-void ERROR(void);
 void Lchar_neq(void);
 void Lpathname_directory(void);
 void Lcdaaar(void);
