@@ -21,6 +21,13 @@ License for more details.
 #define IN_RUN_PROCESS
 #include "include.h"
 
+#if defined(__CYGWIN__)
+#include <tchar.h>
+#include <time.h>
+#include <windows.h>
+#include <sys/cygwin.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
@@ -30,10 +37,11 @@ License for more details.
 void setup_stream_buffer(object);
 object make_two_way_stream(object, object);
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 
 #include<windows.h>
 #include <fcntl.h>
+#include <io.h>
 #define PIPE_BUFFER_SIZE 2048
 
 void DisplayError ( char *pszAPI );
@@ -65,7 +73,7 @@ void run_process ( char *name )
     CHAR chBuf[60] = "button .hello\npack .hello\n\0";
      /*CHAR chBuf[60] = "button .hello\n\0"; */
 #endif
-    
+
     /* Set up the security attributes struct. */
     sec_att.nLength= sizeof(SECURITY_ATTRIBUTES);
     sec_att.lpSecurityDescriptor = NULL;
@@ -156,11 +164,28 @@ void run_process ( char *name )
 #endif
 
     
+#if !defined (__CYGWIN__)
     /* Connect up the Lisp objects with the pipes. */
     ofd = _open_osfhandle ( (int)hChildStdoutRead, _O_RDONLY | _O_TEXT );
     ofp = _fdopen ( ofd, "r" );
     ifd = _open_osfhandle ( (int)hChildStdinWrite, _O_WRONLY | _O_TEXT );
     ifp = _fdopen ( ifd, "w" );
+#else
+    {
+      extern int cygwin_attach_handle_to_fd(char *,int,HANDLE,mode_t,DWORD);
+      static int rpn;
+
+      massert(snprintf(FN1,sizeof(FN1),"run_process_stdin_%d",rpn)>0);
+      ofd=cygwin_attach_handle_to_fd(FN1,-1,hChildStdoutRead,0,GENERIC_READ);
+      ofp=fdopen(ofd,"r");
+      massert(snprintf(FN1,sizeof(FN1),"run_process_stdout_%d",rpn)>0);
+      ifd=cygwin_attach_handle_to_fd(FN1,-1,hChildStdinWrite,0,GENERIC_WRITE);
+      ifp=fdopen(ifd,"w");
+      rpn++;
+
+    }
+
+#endif
 
 #if 0
     {
@@ -256,33 +281,35 @@ void DisplayError(char *pszAPI)
     FEerror ( "RUN-PROCESS encountered problems.", 0 );
 }
 
-void siLrun_process()
-{
-    char cmdline[20480];
-    int i, nargs;
-    int old = signals_allowed;
-    int argc = 0;
+void
+siLrun_process() {
 
-    nargs = vs_top - vs_base;
-    for ( i = 0; i < nargs; i++ ) {
-      check_type_string ( &vs_base[i] );
-    }
+  int i, j;
+  int old = signals_allowed;
+  object x;
 
-    cmdline[0]='\0';
-    for ( i = 0; i < nargs; i++ ) {
-      if ( strlen ( cmdline ) + vs_base[i]->st.st_fillp + 2 > 20480 ) {
-	FEerror ( "RUN-PROCESS command more than 20480 characters long.", 0 );
-      }
-      if ( i != 0 ) {
-        strcat ( cmdline, " ");
-      }
-      strcat ( cmdline,  vs_base[i]->st.st_self );
-      emsg("siLrun_process: cmdline=%s\n", cmdline );
-      argc++;
-    }
-    signals_allowed = sig_at_read;
-    run_process ( cmdline );
-    signals_allowed = old;
+  if (vs_top-vs_base!=2)
+    FEwrong_no_args("RUN-PROCESS requires two arguments",make_fixnum(vs_top-vs_base));
+  check_type_string(&vs_base[0]);
+
+  massert(snprintf(FN1,sizeof(FN1),"%.*s%n",vs_base[0]->st.st_fillp,vs_base[0]->st.st_self,&i)>=0);
+
+#if defined(__CYGWIN__)
+    cygwin_conv_path(CCP_POSIX_TO_WIN_A,FN1,FN2,sizeof(FN2));
+    massert(snprintf(FN1,sizeof(FN1),"%s%n",FN2,&i)>=0);
+#endif
+
+  x=vs_base[1];
+  for (;x!=Cnil;x=x->c.c_cdr,i+=j) {
+    check_type_list(&x);
+    check_type_string(&x->c.c_car);
+    massert(snprintf(FN1+i,sizeof(FN1)-i," %.*s %n",x->c.c_car->st.st_fillp,x->c.c_car->st.st_self,&j)>=0);
+  }
+
+  signals_allowed = sig_at_read;
+  run_process(FN1);
+  signals_allowed = old;
+
 }
 
 void
