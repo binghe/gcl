@@ -551,66 +551,82 @@ make_socket_pair()
  * with "C" type streams.
  */
 
-void
-spawn_process_with_streams(istream, ostream, pname, argv)
-object istream;
-object ostream;
-char *pname;
-char **argv;
-{
+static void
+spawn_process_with_streams(object istream,object ostream,char *pname,char **argv) {
 
   int fdin;
   int fdout;
+
   if (istream->sm.sm_fp == NULL || ostream->sm.sm_fp == NULL)
     FEerror("Cannot spawn process with given stream", 0);
+
   fdin = istream->sm.sm_int;
   fdout = ostream->sm.sm_int;
-  if (pfork() == 0)
-    { /* the child --- replace standard in and out with descriptors given */
-      close(0);
-      massert(dup(fdin)>=0);
-      close(1);
-      massert(dup(fdout)>=0);
-      emsg("\n***** Spawning process %s ", pname);
-      if (execvp(pname, argv) == -1)
-	{
-	  emsg("\n***** Error in process spawning *******");
-	  do_gcl_abort();
-	}
-    }
+
+  if (!pvfork()) {
+
+    /* the child --- replace standard in and out with descriptors given */
+    close(0);
+    massert(dup(fdin)>=0);
+    close(1);
+    massert(dup(fdout)>=0);
+
+    close(fileno(istream->sm.sm_fp));
+    close(fileno(ostream->sm.sm_fp));
+
+    emsg("\n***** Spawning process %s ", pname);
+
+    errno=0;
+    execvp(pname,argv);
+    _exit(128|(errno&0x7f));
+
+  } else {
+
+    close(fdin);
+    close(fdout);
+
+  }
 
 }
     
       
 void
-run_process(filename, argv)
-char *filename;
-char **argv;
-{
+run_process(char *filename,char **argv) {
+
   object stream = make_socket_pair();
-  spawn_process_with_streams(stream->sm.sm_object1,
-			    stream->sm.sm_object0,
-			    filename, argv);
+  spawn_process_with_streams(stream->sm.sm_object1,stream->sm.sm_object0,filename,argv);
+
   vs_base[0] = stream;
   vs_base[1] = Cnil;
   vs_top = vs_base + 2;
+
 }
     
 void
-FFN(siLrun_process)()
-{
-  int i;
-  object arglist;
-  char *argv[100];
+FFN(siLrun_process)() {
 
-  arglist = vs_base[1];
-  argv[0] = "";
-  for(i = 1; arglist != Cnil; i++) {
-     argv[i] = lisp_to_string(arglist->c.c_car);
-     arglist = arglist->c.c_cdr;
+  int i,j;
+  object x;
+  char **p1,**pp,*c,*spc=" \n\t";
+
+  if (vs_top-vs_base!=2)
+    FEwrong_no_args("RUN-PROCESS requires two arguments",make_fixnum(vs_top-vs_base));
+  check_type_string(&vs_base[0]);
+
+  massert(snprintf(FN1,sizeof(FN1),"%.*s%n",vs_base[0]->st.st_fillp,vs_base[0]->st.st_self,&i)>=0);
+
+  x=vs_base[1];
+  for (;x!=Cnil;x=x->c.c_cdr,i+=j) {
+    check_type_list(&x);
+    check_type_string(&x->c.c_car);
+    massert(snprintf(FN1+i,sizeof(FN1)-i," %.*s %n",x->c.c_car->st.st_fillp,x->c.c_car->st.st_self,&j)>=0);
   }
-  argv[i] = (char *)0;
-  run_process(object_to_string(vs_base[0]), argv);
+
+  for (pp=p1=(void *)FN2,c=FN1;(*pp=strtok(c,spc));c=NULL,pp++)
+    massert((void *)(pp+1)<(void *)FN2+sizeof(FN2));
+
+  run_process(FN1,(char **)FN2);
+
 }
 
 void
