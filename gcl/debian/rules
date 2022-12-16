@@ -151,7 +151,7 @@ debian/control.rm:
 	rm -f `echo $@ | sed 's,\.rm$$,,1'`
 
 debian/control: debian/control.rm
-	cp debian/control.$(EXT) debian/control
+	cp debian/control_$(EXT) debian/control
 
 clean: debian/control debian/gcl.templates
 	dh_testdir
