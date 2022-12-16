@@ -1163,6 +1163,10 @@ init_main(void) {
   ADD_FEATURE("WIN32");
 #endif
 
+#if defined(__CYGWIN__)
+  ADD_FEATURE("CYGWIN");
+#endif
+
 #ifdef IEEEFLOAT
   ADD_FEATURE("IEEE-FLOATING-POINT");
 #endif
