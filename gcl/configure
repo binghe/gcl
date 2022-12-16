@@ -3046,7 +3046,7 @@ case $canonical in
     powerpc-*-darwin*) use=powerpc-macosx;;
     *86*darwin*) use=386-macosx;;
     i*mingw*|i*msys*) use=mingw;;
-    i*cygwin*)
+    *cygwin*)
         if $CC -v 2>&1 | fgrep ming > /dev/null ;
         then use=mingw
         else use=gnuwin95
