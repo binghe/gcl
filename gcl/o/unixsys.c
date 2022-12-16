@@ -30,7 +30,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(__CYGWIN__)
 
 int
 vsystem(const char *command) {
@@ -73,6 +73,40 @@ vsystem(const char *command) {
   return s;
 
 }
+#elif defined(__CYGWIN__)
+
+#include <tchar.h>
+#include <time.h>
+#include <windows.h>
+#include <sys/cygwin.h>
+
+int
+vsystem(const char *command) {
+
+  STARTUPINFO s={0};
+  PROCESS_INFORMATION p={0};
+  unsigned int e;
+  char *cmd=NULL,*r;
+
+  massert((r=strpbrk(command," \n\t"))-command<sizeof(FN2));
+  memcpy(FN2,command,r-command);
+  FN2[r-command]=0;
+  cygwin_conv_path(CCP_POSIX_TO_WIN_A,FN2,FN3,sizeof(FN3));
+  massert(snprintf(FN1,sizeof(FN1),"%s %s",FN3,r)>=0);
+  command=FN1;
+
+
+  s.cb=sizeof(s);
+  massert(CreateProcess(cmd,(void *)command,NULL,NULL,FALSE,0,NULL,NULL,&s,&p));
+  massert(!WaitForSingleObject(p.hProcess,INFINITE));
+  massert(GetExitCodeProcess(p.hProcess,&e));
+  massert(CloseHandle(p.hProcess));
+  massert(CloseHandle(p.hThread));
+
+  return e;
+
+}
+
 #endif
 
 

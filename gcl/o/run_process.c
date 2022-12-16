@@ -215,7 +215,7 @@ void PrepAndLaunchRedirectedChild (
                            NULL,
                            NULL,
                            TRUE,
-                           CREATE_NEW_CONSOLE,
+			   0,
                            NULL,
                            NULL,
                            &startup_info,
