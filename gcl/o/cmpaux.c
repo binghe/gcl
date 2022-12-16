@@ -36,6 +36,17 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "page.h"
 
+#ifdef HAVE_AOUT
+#undef ATT
+#undef BSD
+#ifndef HAVE_ELF
+#ifndef HAVE_FILEHDR
+#define BSD
+#endif
+#endif
+#include HAVE_AOUT
+#endif
+
 DEFUNO_NEW("SPECIALP",object,fSspecialp,SI
        ,1,1,NONE,OO,OO,OO,OO,void,siLspecialp,(object sym),"")
 {
