@@ -479,6 +479,7 @@ gcl_init_or_load1(void (*fn)(void),const char *file) {
     faslfile=open_stream(make_simple_string(file),smm_input,Cnil,sKerror);
     SEEK_TO_END_OFILE(faslfile->sm.sm_fp);
     call_init(0,memory,faslfile);
+    close_stream(faslfile);
 
   } else {
     printf("loading %s\n",file); 
