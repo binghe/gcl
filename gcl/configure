@@ -7736,6 +7736,10 @@ then :
 printf "%s\n" "#define ANSI_COMMON_LISP 1" >>confdefs.h
 
 	       fi
+else $as_nop
+
+printf "%s\n" "#define ANSI_COMMON_LISP 1" >>confdefs.h
+
 fi
 
 
