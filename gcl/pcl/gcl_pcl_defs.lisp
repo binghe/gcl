@@ -536,16 +536,13 @@
   ;; name       supers     subs                     cdr of cpl
   ;; prototype
   '(;(t         ()         (number sequence array character symbol) ())
-    (number     (t)        (complex float rational) (t))
-    (complex    (number)   ()                       (number t)
-     #c(1 1))
-    (float      (number)   ()                       (number t)
-     1.0)
-    (rational   (number)   (integer ratio)          (number t))
-    (integer    (rational) ()                       (rational number t)
-     1)
-    (ratio      (rational) ()                       (rational number t)
-     1/2)
+    (number     (t)        (complex real)           (t))
+    (real       (number)   (float rational)         (number t))
+    (complex    (number)   ()                       (number t) #c(1 1))
+    (float      (real)     ()                       (real number t)  1.0)
+    (rational   (real)     (integer ratio)          (real number t))
+    (integer    (rational) ()                       (rational real number t) 1)
+    (ratio      (rational) ()                       (rational real number t) 1/2)
 
     (sequence   (t)        (list vector)            (t))
     (list       (sequence) (cons null)              (sequence t))

@@ -693,7 +693,8 @@
     standard-object structure-object)   ;                         or symbol
    (number array character symbol	; direct subclasses of t, but not sequence
     standard-object structure-object)
-   (complex float rational)		; direct subclasses of number
+   (complex real)		        ; direct subclasses of number
+   (float rational)		        ; direct subclasses of real
    (integer ratio)			; direct subclasses of rational
    (list vector)			; direct subclasses of sequence
    (cons null)				; direct subclasses of list
