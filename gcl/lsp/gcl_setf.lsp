@@ -198,6 +198,7 @@
 (defsetf gethash (k h &optional d) (v) `(si:hash-set ,k ,h ,v))
 (defsetf row-major-aref si:aset1)
 (defsetf readtable-case si::set-readtable-case)
+(defsetf compiler-macro-function (x) (y) `(setf (get ,x 'compiler-macro) ,y))
 (defsetf documentation (s d) (v)
   `(case ,d
      (variable (si:putprop ,s ,v 'variable-documentation))

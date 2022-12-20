@@ -274,4 +274,4 @@
 (defmacro lambda (&rest l) `(function (lambda ,@l)))
 
 (defun compiler-macro-function (name)
-  (get name 'compiler-macro-prop))
+  (get name 'compiler-macro))
