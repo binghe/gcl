@@ -82,7 +82,7 @@
 #+ansi-cl (use-package :pcl :user)
 
 (import 'si::(clines defentry defcfun object void int double quit bye gbc system
-		     *lib-directory* *system-directory* while) :user)
+		     *lib-directory* *system-directory* while help) :user)
 
 (let* ((i 4096)(j (si::equal-tail-recursion-check i)))
   (unless (<= (ash i -1) j)
