@@ -4,6 +4,7 @@ case "$1" in
 
 #	CONFIGFILE=$(tempfile -m 644)
 	CONFIGFILE=$(mktemp)
+	chmod 644 $CONFIGFILE
 	set -e
 	. /usr/share/debconf/confmodule
 	
