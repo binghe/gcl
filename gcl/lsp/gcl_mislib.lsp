@@ -72,8 +72,8 @@
 (mmd +md+)
 (mmd +lmd+ t)
 
-(defun decode-universal-time (ut &optional (tz (current-timezone) tzp) 
-				 &aux (dstp (unless tzp (current-dstp))) (ut (- ut (* tz 3600))))
+(defun decode-universal-time (ut &optional (tz (let ((x (current-timezone))) (if (current-dstp) (1+ x) x)) tzp)
+				 &aux (out ut)(ut (- ut (* tz 3600))))
   (declare (optimize (safety 2)))
   (check-type ut integer)
   (check-type tz rational)
@@ -81,19 +81,28 @@
    (d ut) (floor ut seconds-per-day)
    (let* ((dow (mod d 7))(y (+ 1900 (floor d 366))))
      (labels ((l (y dd &aux (lyp (leap-year-p y))(td (if lyp 366 365))(x (- d dd)))
-		 (if (< x td) (values (1+ x) y lyp) (l (1+ y) (+ dd td)))))
+		(if (< x td) (values (1+ x) y lyp) (l (1+ y) (+ dd td)))))
 	     (multiple-value-bind
 	      (d y lyp) (l y (number-of-days-from-1900 y))
 	      (let* ((l (if lyp +lmd+ +md+))
 		     (m (position d l :test '<=))
 		     (d (if (> m 0) (- d (aref l (1- m))) d)))
 		(multiple-value-bind
-		 (h ut) (floor ut 3600)
-		 (multiple-value-bind
-		  (min sec) (floor ut 60)
-		  (values sec min h d (1+ m) y dow dstp tz)))))))))
+		      (h ut) (floor ut 3600)
+		  (labels ((nsdom (d dow n) (+ (mod (- d dow 1) 7) (* (1- n) 7)))
+			   (dstp (dow d m h)
+			     (cond ((> 10 m 2))
+				   ((eql m 2) (let ((s (nsdom d dow 2))) (or (> d s) (when (= d s) (>= h 2)))))
+				   ((eql m 10) (let ((s (nsdom d dow 1))) (or (< d s) (when (= d s) (< h 1))))))))
+		    (if (unless tzp (dstp dow d m h))
+			(multiple-value-bind
+			      (s m h d o y w) (decode-universal-time out (1- tz))
+			  (values s m h d o y w t tz))
+			(multiple-value-bind
+			      (min sec) (floor ut 60)
+			  (values sec min h d (1+ m) y dow nil tz)))))))))))
 
-(defun encode-universal-time (sec min h d m y &optional (tz (current-timezone)))
+(defun encode-universal-time (sec min h d m y &optional (tz (let ((x (current-timezone))) (if (current-dstp) (1+ x) x))))
   (declare (optimize (safety 2)))
   (check-type sec (integer 0 59))
   (check-type min (integer 0 59))
