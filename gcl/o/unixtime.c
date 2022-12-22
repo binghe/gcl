@@ -308,7 +308,12 @@ DEFUNM_NEW("LOCALTIME",object,fSlocaltime,SI,1,1,NONE,OI,OO,OO,OO,(fixnum t),"")
 #if defined NO_SYSTEM_TIME_ZONE /*solaris*/
   return Cnil;
 #else
+
+#if defined(__MINGW32__)
+  fixnum gmt_hour=gmtime(&t)->tm_hour;
+#endif
   struct tm *lt=localtime(&t);
+
   RETURN(11,object,
 	 make_fixnum(lt->tm_sec),
 	 (
@@ -320,8 +325,14 @@ DEFUNM_NEW("LOCALTIME",object,fSlocaltime,SI,1,1,NONE,OI,OO,OO,OO,(fixnum t),"")
 	  RV(make_fixnum(lt->tm_wday)),
 	  RV(make_fixnum(lt->tm_yday)),
 	  RV(make_fixnum(lt->tm_isdst)),
+#if defined(__MINGW32__)
+	  RV(make_fixnum((lt->tm_hour-gmt_hour)*3600)),
+	  RV(make_simple_string(lt->tm_zone))
+#else
 	  RV(make_fixnum(lt->tm_gmtoff)),
-	  RV(make_simple_string(lt->tm_zone))));
+	  RV(make_simple_string(lt->tm_zone))
+#endif
+	  ));
 #endif
 }
 
@@ -343,8 +354,14 @@ DEFUNM_NEW("GMTIME",object,fSgmtime,SI,1,1,NONE,OI,OO,OO,OO,(fixnum t),"") {
 	  RV(make_fixnum(lt->tm_wday)),
 	  RV(make_fixnum(lt->tm_yday)),
 	  RV(make_fixnum(lt->tm_isdst)),
+#if defined(__MINGW32__)
+	  RV(make_fixnum(0)),
+	  RV(Cnil)
+#else
 	  RV(make_fixnum(lt->tm_gmtoff)),
-	  RV(make_simple_string(lt->tm_zone))));
+	  RV(make_simple_string(lt->tm_zone))
+#endif
+	  ));
 #endif
 }
 
