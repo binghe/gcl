@@ -327,7 +327,7 @@ DEFUNM_NEW("LOCALTIME",object,fSlocaltime,SI,1,1,NONE,OI,OO,OO,OO,(fixnum t),"")
 	  RV(make_fixnum(lt->tm_isdst)),
 #if defined(__MINGW32__)
 	  RV(make_fixnum((lt->tm_hour-gmt_hour)*3600)),
-	  RV(make_simple_string(lt->tm_zone))
+	  RV(Cnil)
 #else
 	  RV(make_fixnum(lt->tm_gmtoff)),
 	  RV(make_simple_string(lt->tm_zone))
