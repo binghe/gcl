@@ -302,3 +302,66 @@ DEFUN_NEW("CURRENT-DSTP",object,fScurrent_dstp,SI,0,0,NONE,OO,OO,OO,OO,(void),""
   return localtime(&_t)->tm_isdst > 0 ? Ct : Cnil;
 #endif
 }
+
+DEFUNM_NEW("LOCALTIME",object,fSlocaltime,SI,1,1,NONE,OI,OO,OO,OO,(fixnum t),"") {
+
+#if defined NO_SYSTEM_TIME_ZONE /*solaris*/
+  return Cnil;
+#else
+  struct tm *lt=localtime(&t);
+  RETURN(11,object,
+	 make_fixnum(lt->tm_sec),
+	 (
+	  RV(make_fixnum(lt->tm_min)),
+	  RV(make_fixnum(lt->tm_hour)),
+	  RV(make_fixnum(lt->tm_mday)),
+	  RV(make_fixnum(lt->tm_mon)),
+	  RV(make_fixnum(lt->tm_year)),
+	  RV(make_fixnum(lt->tm_wday)),
+	  RV(make_fixnum(lt->tm_yday)),
+	  RV(make_fixnum(lt->tm_isdst)),
+	  RV(make_fixnum(lt->tm_gmtoff)),
+	  RV(make_simple_string(lt->tm_zone))));
+#endif
+}
+
+
+DEFUNM_NEW("GMTIME",object,fSgmtime,SI,1,1,NONE,OI,OO,OO,OO,(fixnum t),"") {
+
+#if defined NO_SYSTEM_TIME_ZONE /*solaris*/
+  return Cnil;
+#else
+  struct tm *lt=gmtime(&t);
+  RETURN(11,object,
+	 make_fixnum(lt->tm_sec),
+	 (
+	  RV(make_fixnum(lt->tm_min)),
+	  RV(make_fixnum(lt->tm_hour)),
+	  RV(make_fixnum(lt->tm_mday)),
+	  RV(make_fixnum(lt->tm_mon)),
+	  RV(make_fixnum(lt->tm_year)),
+	  RV(make_fixnum(lt->tm_wday)),
+	  RV(make_fixnum(lt->tm_yday)),
+	  RV(make_fixnum(lt->tm_isdst)),
+	  RV(make_fixnum(lt->tm_gmtoff)),
+	  RV(make_simple_string(lt->tm_zone))));
+#endif
+}
+
+
+DEFUNM_NEW("MKTIME",object,fSmktime,SI,6,6,NONE,OI,II,II,IO,(fixnum s,fixnum n,fixnum h,fixnum d,fixnum m,fixnum y),"") {
+
+  struct tm lt;
+
+  lt.tm_sec=s;
+  lt.tm_min=n;
+  lt.tm_hour=h;
+  lt.tm_mday=d;
+  lt.tm_mon=m;
+  lt.tm_year=y;
+  lt.tm_isdst=-1;
+
+  RETURN(2,object,make_fixnum(mktime(&lt)),(RV(make_fixnum(lt.tm_isdst))));
+
+}
+
