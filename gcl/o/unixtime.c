@@ -303,6 +303,17 @@ DEFUN_NEW("CURRENT-DSTP",object,fScurrent_dstp,SI,0,0,NONE,OO,OO,OO,OO,(void),""
 #endif
 }
 
+#if defined(__MINGW32__) /*FIXME range too small for maxima testsuite*/
+#undef gmtime
+#define gmtime _gmtime64
+#undef localtime
+#define localtime _localtime64
+#undef mktime
+#define mktime _mktime64
+#undef time_t
+#define time_t long long
+#endif
+
 static object
 time_t_to_object(time_t l) {
   object x=new_bignum();
@@ -314,7 +325,7 @@ time_t_to_object(time_t l) {
 
 }
 
-time_t
+static time_t
 object_to_time_t(object x) {
 
   switch(type_of(x)) {

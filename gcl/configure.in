@@ -954,8 +954,10 @@ fi
 AC_CHECK_HEADERS([time.h sys/time.h])
 
 AC_CHECK_SIZEOF(time_t,[0],[#include <time.h>])
-if test "$ac_cv_sizeof_time_t" != "8" ; then
-   AC_MSG_ERROR([Cannot define a 64 bit time_t])
+if test "$use" != "mingw" ; then
+   if test "$ac_cv_sizeof_time_t" != "8" ; then
+      AC_MSG_ERROR([Cannot define a 64 bit time_t])
+   fi
 fi
 
 
