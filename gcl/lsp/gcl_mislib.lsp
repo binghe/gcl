@@ -63,7 +63,7 @@
 	(s n h d m y w yd dstp off) (localtime ut)
     (when (when tzp (> dstp 0))
       (multiple-value-setq (s n h d m y w yd) (localtime (- ut 3600))))
-    (values s n h d (1+ m) (+ 1900 y) (1- w) (unless tzp (> dstp 0)) (if tzp tz (+ (truncate (- off) 3600) dstp))))))
+    (values s n h d (1+ m) (+ 1900 y) (if (zerop w) 6 (1- w)) (unless tzp (> dstp 0)) (if tzp tz (+ (truncate (- off) 3600) dstp))))))
 
 (defun encode-universal-time (s n h d m y &optional (tz (this-tz) tzp))
   (declare (optimize (safety 2)))
