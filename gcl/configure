@@ -4460,7 +4460,7 @@ fi
 }
 
 assert_arg_to_cflags() {
-    if ! add_arg_to_cflags $1 ; then { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: cannot add $1 to CFLAGS" >&5
+    if ! add_arg_to_cflags "$1" ; then { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: cannot add $1 to CFLAGS" >&5
 printf "%s\n" "cannot add $1 to CFLAGS" >&6; }; exit 1 ; fi
     return 0
 }
@@ -6511,6 +6511,64 @@ printf "%s\n" "$ac_cv_sizeof_long" >&6; }
 
 
 printf "%s\n" "#define SIZEOF_LONG $ac_cv_sizeof_long" >>confdefs.h
+
+
+
+if test "$ac_cv_sizeof_long" = "4" ; then
+   assert_arg_to_cflags "-D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
+fi
+
+ac_fn_c_check_header_compile "$LINENO" "time.h" "ac_cv_header_time_h" "$ac_includes_default"
+if test "x$ac_cv_header_time_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_TIME_H 1" >>confdefs.h
+
+fi
+ac_fn_c_check_header_compile "$LINENO" "sys/time.h" "ac_cv_header_sys_time_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_time_h" = xyes
+then :
+  printf "%s\n" "#define HAVE_SYS_TIME_H 1" >>confdefs.h
+
+fi
+
+
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of time_t" >&5
+printf %s "checking size of time_t... " >&6; }
+if test ${ac_cv_sizeof_time_t+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (time_t))" "ac_cv_sizeof_time_t"        "#include <time.h>
+"
+then :
+
+else $as_nop
+  if test "$ac_cv_type_time_t" = yes; then
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (time_t)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_time_t=0
+   fi
+fi
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_time_t" >&5
+printf "%s\n" "$ac_cv_sizeof_time_t" >&6; }
+
+
+
+printf "%s\n" "#define SIZEOF_TIME_T $ac_cv_sizeof_time_t" >>confdefs.h
+
+
+if test "$ac_cv_sizeof_time_t" != "8" ; then
+   as_fn_error $? "Cannot define a 64 bit time_t" "$LINENO" 5
+fi
 
 
 

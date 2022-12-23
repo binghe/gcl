@@ -198,7 +198,7 @@ add_arg_to_cflags() {
 }
 
 assert_arg_to_cflags() {
-    if ! add_arg_to_cflags $1 ; then AC_MSG_RESULT([cannot add $1 to CFLAGS]); exit 1 ; fi
+    if ! add_arg_to_cflags "$1" ; then AC_MSG_RESULT([cannot add $1 to CFLAGS]); exit 1 ; fi
     return 0
 }
 
@@ -947,6 +947,19 @@ esac
 
 AC_CHECK_SIZEOF(long,0)
 
+if test "$ac_cv_sizeof_long" = "4" ; then
+   assert_arg_to_cflags "-D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
+fi
+
+AC_CHECK_HEADERS([time.h sys/time.h])
+
+AC_CHECK_SIZEOF(time_t,[0],[#include <time.h>])
+if test "$ac_cv_sizeof_time_t" != "8" ; then
+   AC_MSG_ERROR([Cannot define a 64 bit time_t])
+fi
+
+
+
 ####  Memory areas and alignment
 
 AC_MSG_CHECKING(for byte order)
@@ -1372,7 +1385,7 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
     $CC $LDFLAGS -Wl,--verbose foo.c -o foo 2>&1 | \
 	$AWK '/==================================================/ {i=1-i;next} {if (i) print}' >gcl.script
     rm -rf foo.c foo
-    
+
     if test "`cat gcl.script | wc -l`" != "0" ; then
 	AC_MSG_RESULT(got it)
 	AC_MSG_NOTICE([trying to adjust text start])
