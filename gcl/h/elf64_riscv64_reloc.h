@@ -13,6 +13,7 @@
       store_val(where,MASK(7)<<25,(s+a)<<20);
       break;
     case R_RISCV_CALL:
+    case R_RISCV_CALL_PLT:
       store_val(where,MASK(20)<<12,riscv_high(s+a-p));
       store_val((void *)where+4,MASK(12)<<20,(s+a-p)<<20);
       break;
