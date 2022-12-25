@@ -491,6 +491,14 @@ if test "$FOMITF" != "" ; then
     TO3FLAGS="$TO3FLAGS $FOMITF"
 fi
 
+AC_MSG_CHECKING([gcc version 12])
+if $CC -v 2>&1|grep gcc |grep -q 'version 12'; then
+   AC_MSG_RESULT([yes])
+   assert_arg_to_cflags -fno-tree-vrp #Bug workaround
+else
+   AC_MSG_RESULT([no])
+fi
+
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but
 # there are a few systems, like Next, where this doesn't work.

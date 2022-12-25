@@ -14,7 +14,7 @@ export GCL_MEM_MULTIPLE=0.1
 # This is the debhelper compatability version to use.
 ARCHT:=$(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-MCC?=gcc-11
+MCC?=gcc
 # ifeq ($(ARCHT),alpha)
 # MCC:=gcc-4.6
 # endif
