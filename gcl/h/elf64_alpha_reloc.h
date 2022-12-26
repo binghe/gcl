@@ -1,16 +1,14 @@
     case R_ALPHA_GPDISP:
-      s=(ul)got;
-      s-=p; 
-      s+=(s&0x8000)<<1;
-      store_val(where,MASK(16),s>>16); 
-      where=(void *)where+a; 
-      store_val(where,MASK(16),s); 
+      gotoff=(ul)(got+HIGH(a)-1);
+      s=gotoff-p;
+      store_val(where,MASK(16),(s-(short)s)>>16);
+      store_val((void *)where+LOW(a),MASK(16),s);
       break;
     case R_ALPHA_SREL32:
       store_val(where,MASK(32),s+a-p);
       break;
     case R_ALPHA_GPREL32:
-      store_val(where,MASK(32),s+a-(ul)got);
+      store_val(where,MASK(32),s+LOW(a)-(ul)(got+HIGH(a)-1));
       break;
     case R_ALPHA_LITUSE:
     case R_ALPHA_HINT:
@@ -22,25 +20,20 @@
       store_val(where,MASK(32),s+a);
       break;
     case R_ALPHA_LITERAL:
-      s+=a;
-      if (a || !(sym->st_other&0x1)) {gotp+=1+(sym->st_other>>1);sym->st_other|=1;}
-      gote=got+(a ? gotp : sym->st_size)-1;
-      massert(s); 
+      s+=LOW(a);
+      a=HIGH(a)-1;
       if (s>=ggot1 && s<ggote) {
-        massert(!write_stub(s,got,gote));
+        massert(!write_stub(s,got+a));
       } else 
-	*gote=s;
-      s=(gote-got)*sizeof(*got);
-      massert(!(s&0x8000));
-      store_val(where,MASK(16),s);
+        got[a]=s;
+      store_vals(where,MASK(16),(ul)(got+a)-gotoff);
       break;
     case R_ALPHA_GPRELHIGH:
-      s+=a-(ul)got;
-      s+=(s&0x8000)<<1;      
-      store_val(where,MASK(16),s>>16);
+      s+=a-gotoff;
+      store_val(where,MASK(16),(s-(short)s)>>16);
       break;
     case R_ALPHA_GPRELLOW:
-      store_val(where,MASK(16),s+a-(ul)got);
+      store_val(where,MASK(16),s+a-gotoff);
       break;
     case R_ALPHA_TLS_GD_HI:
       store_vals(where,MASK(21),((long)(s+a-(p+4)))>>2);

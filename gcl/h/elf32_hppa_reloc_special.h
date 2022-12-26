@@ -34,8 +34,11 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 }
 
 static int
-label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
   return 0;
   
 }
+
+#undef LOAD_SYM_BY_NAME
+#define LOAD_SYM_BY_NAME(sym,st1) (!strncmp(st1+sym->st_name,"$$",2))

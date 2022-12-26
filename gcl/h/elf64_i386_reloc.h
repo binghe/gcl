@@ -9,6 +9,6 @@
       break;
     case R_X86_64_PC32:
     case R_X86_64_PLT32:
-      massert(ovchks(s+a-p,~MASK(32)));
+      massert(ovchks(s+a-p,~MASK(32)));		  
       add_val(where,MASK(32),s+a-p);
       break;

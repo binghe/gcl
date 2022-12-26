@@ -1,29 +1,50 @@
-static ul gpd,ggot,ggote; static Rel *hr;
+#include <page.h>
+
+static ul gpd,ggot,ggote,can_gp; static Rel *hr;
+
+typedef struct {
+  ul addr_hi,addr_lo,jr,nop;
+} mips_26_tramp;
+
+static int
+write_26_stub(ul s,ul *got,ul *gote) {
+
+  static mips_26_tramp t1={(0xf<<26)|(0x0<<21)|(0x19<<16),   /*lui t9*/
+			   (0xe<<26)|(0x19<<21)|(0x19<<16),  /*ori t9,t9 */
+			   0x03200008,                       /*jr t9*/
+			   0x00200825};                      /*mv at,at */;
+  mips_26_tramp *t=(void *)gote;
+
+  *t=t1;
+  t->addr_hi|=s>>16;
+  t->addr_lo|=s&0xffff;
+
+  return 0;
+
+}
+
+typedef struct {
+  ul entry,addr_hi,addr_lo,lw,jr,lwcan;
+} call_16_tramp;
 
 static int
 write_stub(ul s,ul *got,ul *gote) {
 
-  *gote=(ul)(gote+2);
-  *++gote=s;
-  s=((void *)gote-(void *)got);
-  *++gote=(0x23<<26)|(0x1c<<21)|(0x19<<16)|s;
-  *++gote=(0x23<<26)|(0x19<<21)|(0x19<<16)|0;
-  *++gote=0x03200008;
-  *++gote=0x00200825;
+  static call_16_tramp t1={0,
+			   (0xf<<26)|(0x0<<21)|(0x19<<16),   /*lui t9*/
+			   (0xe<<26)|(0x19<<21)|(0x19<<16),  /*ori t9,t9 */
+			   (0x23<<26)|(0x19<<21)|(0x19<<16), /*lw t9,(0)t9*/
+			   0x03200008,                       /*jr t9*/
+                           /*stub addresses need veneer setting gp to canonical*/
+			   (0x23<<26)|(0x1c<<21)|(0x1c<<16)};/*lw gp,(0)gp*/
+  call_16_tramp *t=(void *)gote++;
 
-  return 0;
-  
-}
+  *t=t1;
+  *got=can_gp;
 
-static int
-make_got_room_for_stub(Shdr *sec1,Shdr *sece,Sym *sym,const char *st1,ul *gs) {
-
-  Shdr *ssec=sec1+sym->st_shndx;
-  struct node *a;
-  if ((ssec>=sece || !ALLOC_SEC(ssec)) && 
-      (a=find_sym_ptable(st1+sym->st_name)) &&
-      a->address>=ggot && a->address<ggote)
-    (*gs)+=5;
+  t->entry=(ul)gote;
+  t->addr_hi|=s>>16;
+  t->addr_lo|=s&0xffff;
 
   return 0;
 
@@ -44,14 +65,16 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
       gotsym=q[1];
     if (q[0]==DT_MIPS_LOCAL_GOTNO)
       locgotno=q[1];
-    
+    if (q[0]==DT_PLTGOT)
+      can_gp=q[1]+0x7ff0;
+
   }
-  massert(gotsym && locgotno);
+  massert(gotsym && locgotno && can_gp);
 
   massert(sec=get_section(".MIPS.stubs",sec1,sece,sn));
   stub=sec->sh_addr;
   stube=sec->sh_addr+sec->sh_size;
-      
+
   massert(sec=get_section(".got",sec1,sece,sn));
   ggot=sec->sh_addr+locgotno*sec->sh_entsize;
   ggote=sec->sh_addr+sec->sh_size;
@@ -65,43 +88,53 @@ find_special_params(void *v,Shdr *sec1,Shdr *sece,const char *sn,
 }
 
 static int
-label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,ul *gs) {
+label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char *st1,const char *sn,ul *gs) {
 
   Rel *r;
   Sym *sym;
-  Shdr *sec;
+  Shdr *sec,*ssec;
   void *v,*ve;
   ul q;
+  struct node *a;
 
-  for (q=0,sym=sym1;sym<syme;sym++)
-    if (!strcmp(st1+sym->st_name,"_gp_disp")) {
-      sym->st_other=1;
+  for (q=0,sym=sym1;sym<syme;sym++) {
+    const char *s=st1+sym->st_name;
+    if ((sym->st_other=strcmp(s,"_gp_disp") ? (strcmp(s,"__gnu_local_gp") ? 0 : 2) : 1)) {
       q++;
-    } else if (!strcmp(st1+sym->st_name,"__gnu_local_gp")) {
-      sym->st_other=2;
-      q++;
+      sym->st_info=ELF_ST_INFO(STB_LOCAL,ELF_ST_TYPE(sym->st_info));
     }
+  }
   massert(q<=1);
   
   for (sym=sym1;sym<syme;sym++)
     sym->st_size=0;
 
-  for (*gs=0,sec=sec1;sec<sece;sec++)
-    if (sec->sh_type==SHT_REL)
+  for (*gs=1,sec=sec1;sec<sece;sec++)/*can_gp in got[0]*/
+    if (sec->sh_type==SHT_REL)/*no addend*/
       for (v=v1+sec->sh_offset,ve=v+sec->sh_size,r=v;v<ve;v+=sec->sh_entsize,r=v)
 
-	if (ELF_R_TYPE(r->r_info)==R_MIPS_CALL16||
-	    ELF_R_TYPE(r->r_info)==R_MIPS_GOT16) {
+	if (!(sym=sym1+ELF_R_SYM(r->r_info))->st_size)
 
-	  sym=sym1+ELF_R_SYM(r->r_info);
+	  switch(ELF_R_TYPE(r->r_info)) {
 
-	  if (!sym->st_size) { 
-	    sym->st_size=++*gs; 
-	    massert(!make_got_room_for_stub(sec1,sece,sym,st1,gs));
+	  case R_MIPS_26:
+	    if (((ul)(pagetochar(page(heap_end))+r->r_offset))>>28) {
+	      sym->st_size=++*gs;
+	      (*gs)+=sizeof(mips_26_tramp)/sizeof(ul)-1;
+	    }
+	    break;
+	  case R_MIPS_CALL16:
+	    sym->st_size=++*gs;
+	    if (((ssec=sec1+sym->st_shndx)>=sece || !ALLOC_SEC(ssec)) &&
+		(a=find_sym_ptable(st1+sym->st_name)) &&
+		a->address>=ggot && a->address<ggote)
+	      (*gs)+=sizeof(call_16_tramp)/sizeof(ul)-1;
+	    break;
+	  case R_MIPS_GOT16:
+	    sym->st_size=++*gs;
+	    break;
 	  }
 
-	}
-  
   return 0;
   
 }
@@ -114,3 +147,6 @@ label_got_symbols(void *v1,Shdr *sec1,Shdr *sece,Sym *sym1,Sym *syme,const char 
 	  (*(a_))->address=p->st_value;					\
 	  break;							\
 	}}})
+
+#undef LOAD_SYM_BY_NAME
+#define LOAD_SYM_BY_NAME(sym,st1) (!strncmp(st1+sym->st_name,"__moddi3",8))
