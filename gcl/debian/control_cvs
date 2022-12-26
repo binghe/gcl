@@ -1,4 +1,4 @@
-Source: gcl
+Source: gclcvs
 Section: lisp
 Priority: optional
 Maintainer: Camm Maguire <camm@debian.org>
@@ -6,12 +6,12 @@ Homepage: http://gnu.org/software/gcl
 Build-Depends: debhelper (>= 13), libeditreadline-dev, m4, tk8.6-dev, libgmp-dev, libxmu-dev, libxaw7-dev, po-debconf, zlib1g-dev, tcl, gcc-11
 Standards-Version: 4.5.0
 
-Package: gcl
+Package: gclcvs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${gcc}, debconf (>= 1.2.0), emacs | emacsen, ucf
 Breaks: emacsen-common (<< 2.0.0)
-Suggests: gcl-doc
-Description: GNU Common Lisp compiler
+Suggests: gclcvs-doc
+Description: GNU Common Lisp compiler, CVS snapshot
  GNU Common Lisp (GCL) is a Common Lisp compiler and interpreter
  implemented in C, and complying mostly with the standard set 
  forth in the book "Common Lisp, the Language I".  It attempts
@@ -19,15 +19,15 @@ Description: GNU Common Lisp compiler
  from its design around C.
  .
  This package contains the Lisp system itself.  Documentation 
- is provided in the gcl-doc package.
+ is provided in the gclcvs-doc package.
 
-Package: gcl-doc
+Package: gclcvs-doc
 Section: doc
 Architecture: all
 Conflicts: gclinfo
 Replaces: gclinfo
 Depends: dpkg (>= 1.15.4), ${misc:Depends}
-Description: Documentation for GNU Common Lisp
+Description: Documentation for GNU Common Lisp, CVS snapshot
  GNU Common Lisp (GCL) is a Common Lisp compiler and interpreter
  implemented in C, and complying mostly with the standard set 
  forth in the book "Common Lisp, the Language I".  It attempts

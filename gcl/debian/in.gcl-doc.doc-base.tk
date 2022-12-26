@@ -4,6 +4,9 @@ Author: W. Schelter
 Abstract: Documentation for Graphical Interface to GCL using TCL/Tk
 Section: Programming
 
+Format: PDF
+Files: /usr/share/doc/gcl@EXT@-doc/gcl-tk*.pdf.gz /usr/share/doc/gcl@EXT@-doc/gcl-tk*.pdf.gz
+
 Format: HTML
 Index: /usr/share/doc/gcl@EXT@-doc/gcl-tk/index.html
 Files: /usr/share/doc/gcl@EXT@-doc/gcl-tk/*.html

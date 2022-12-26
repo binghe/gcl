@@ -1,0 +1,9 @@
+gcl: binary-compiled-with-profiling-enabled usr/lib/gcl-2.6.12-prof/unixport/saved_ansi_gcl
+gcl: binary-compiled-with-profiling-enabled usr/lib/gcl-2.6.12-prof/unixport/saved_gcl
+gcl: binary-compiled-with-profiling-enabled usr/lib/gcl-2.6.12/unixport/saved_ansi_gcl
+gcl: binary-compiled-with-profiling-enabled usr/lib/gcl-2.6.12/unixport/saved_gcl
+gcl: hardening-no-pie usr/lib/gcl-2.6.12-prof/unixport/saved_ansi_gcl
+gcl: hardening-no-pie usr/lib/gcl-2.6.12-prof/unixport/saved_gcl
+gcl: hardening-no-pie usr/lib/gcl-2.6.12/unixport/saved_ansi_gcl
+gcl: hardening-no-pie usr/lib/gcl-2.6.12/unixport/saved_gcl
+gcl: emacsen-common-without-dh-elpa

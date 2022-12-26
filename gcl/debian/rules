@@ -9,22 +9,30 @@
 # Uncomment this to turn on verbose mode. 
 #export DH_VERBOSE=1
 
+export GCL_MEM_MULTIPLE=0.1
+
 # This is the debhelper compatability version to use.
 ARCHT:=$(shell dpkg-architecture -qDEB_HOST_ARCH)
 
-MCC:=gcc
-#ifeq ($(ARCHT),arm)
-#MCC:=gcc-3.4
-#endif
-#ifeq ($(ARCHT),hppa)
-#MCC:=gcc-3.4
-#endif
-ifeq ($(ARCHT),alpha)
-MCC:=gcc-4.3
-endif
-#ifeq ($(ARCHT),m68k)
-#MCC:=gcc-3.4
-#endif
+MCC?=gcc
+# ifeq ($(ARCHT),alpha)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),mips)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),mipsel)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),ia64)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),armel)
+# MCC:=gcc-4.6
+# endif
+# ifeq ($(ARCHT),armhf)
+# MCC:=gcc-4.6
+# endif
 
 #RELOC=locbfd
 #RELOC?=statsysbfd
@@ -32,6 +40,9 @@ RELOC?=custreloc
 ifeq ($(ARCHT),ia64)
 RELOC=dlopen
 endif
+# ifeq ($(ARCHT),ppc64)
+# RELOC=dlopen
+# endif
 #ifeq ($(ARCHT),hppa)
 #RELOC=dlopen
 #endif
@@ -39,15 +50,25 @@ endif
 GMP?=
 
 DEBUG=
+
+ARCHCONF?=
+ifeq ($(ARCHT),armhf)
+ARCHCONF=--enable-cstackmax=0xc0000000
+endif
+ifeq ($(ARCHT),armel)
+ARCHCONF=--enable-cstackmax=0xc0000000
+endif
+
+
 #ifeq ($(ARCHT),hppa)
 #DEBUG=--enable-debug
 #endif
 
 VERS=$(shell echo $$(cat majvers).$$(cat minvers))
-EXT:=cvs
+#EXT:=cvs
 
-CFG:=$(addsuffix /config.,. binutils) gmp4/configfsf.
-# Bug in autocont dependency on emacsen-common workaround
+CFG:=$(addsuffix /config.,.)# gmp4/configfsf.
+# Bug in autoconf dependency on emacsen-common workaround
 #CFGS:=$(addsuffix .ori,configure $(addsuffix guess,$(CFG)) $(addsuffix sub,$(CFG)))
 CFGS:=$(addsuffix .ori,$(addsuffix guess,$(CFG)) $(addsuffix sub,$(CFG)))
 
@@ -70,21 +91,23 @@ configure-%-stamp: $(CFGS)
 
 	dh_testdir
 
-	! [ -e unixport/saved_pre_gcl ] || ( for i in o lsp cmpnew unixport pcl clcs gcl-tk ; do $(MAKE) -C $$i clean ; done )
+	! [ -e unixport/saved_pre_gcl ] || $(MAKE) clean
 
-	chmod -R +x gmp4/*
+#	chmod -R +x gmp4/*
 
-#	[ "$(ARCHT)" != "i386" ] || ( cd gmp4 && CC=$(MCC) ./configure --build=i486-unknown-linux-gnu )
-
-	[ "$*" != "ansi" ] || FLAGS="--enable-ansi" ; \
-	[ "$*" != "gprof" ] || FLAGS="--enable-gprof" ; \
-	[ "$*" != "ansi-gprof" ] || FLAGS="--enable-ansi --enable-gprof" ; \
-	CC=$(MCC) ./configure \
+	[ "$*" != "trad" ] || FLAGS="--disable-ansi" ; \
+	[ "$*" != "gprof" ] || FLAGS="--disable-ansi --enable-gprof" ; \
+	[ "$*" != "ansi-gprof" ] || FLAGS="--enable-gprof" ; \
+	eval `dpkg-buildflags --export=sh` && CC=$(MCC) ./configure \
 		--host=$$(dpkg-architecture -qDEB_HOST_GNU_TYPE) \
 		--disable-statsysbfd \
+		--disable-custreloc \
+		--disable-dlopen \
+		--enable-prelink \
 		--enable-$(RELOC) \
 		$(GMP) \
 		$(DEBUG) \
+		$(ARCHCONF) \
 		$$FLAGS \
 		--prefix=/usr \
 		--mandir=\$${prefix}/share/man \
@@ -106,7 +129,7 @@ build-%-stamp: configure-%-stamp
 		tmp=debian/$*; old=/usr/lib/gcl-$(VERS); new=$$old-prof;\
 		if [ "$(findstring ansi,$*)" = "" ] ; then i=saved_gcl ; else i=saved_ansi_gcl ; fi;\
 		mv $$tmp/$$old $$tmp/$$new ;\
-		echo "(reset-sys-paths \"$$new/\")(si::save-system \"debian/tmp-image\")" | $$tmp/$$new/unixport/$$i &&\
+		echo "(si::reset-sys-paths \"$$new/\")(si::save-system \"debian/tmp-image\")" | $$tmp/$$new/unixport/$$i &&\
 		mv debian/tmp-image $$tmp/$$new/unixport/$$i;)
 
 	touch $@
@@ -118,17 +141,19 @@ bclean-stamp:
 ansi-tests/test_results: build-ansi-stamp
 	$(MAKE) $@
 
-build: build-stamp
-build-stamp:  build-trad-stamp build-gprof-stamp build-ansi-gprof-stamp build-ansi-stamp ansi-tests/test_results
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
+build-stamp: build-gprof-stamp build-ansi-gprof-stamp build-trad-stamp build-ansi-stamp ansi-tests/test_results
 	touch $@
 
 debian/control.rm:
 	rm -f `echo $@ | sed 's,\.rm$$,,1'`
 
 debian/control: debian/control.rm
-	cp debian/control.$(EXT) debian/control
+	cp debian/control_$(EXT) debian/control
 
-clean: debian/control debian/gcl$(EXT).templates
+clean: debian/control debian/gcl.templates
 	dh_testdir
 	dh_testroot
 	rm -f *stamp
@@ -137,17 +162,11 @@ clean: debian/control debian/gcl$(EXT).templates
 	$(MAKE) clean
 
 	dh_clean
-	rm -rf debian/gprof debian/ansi-gprof debian/trad debian/ansi $(INS) debian/substvars
+	rm -rf debian/gprof debian/ansi-gprof debian/trad debian/ansi $(INS) debian/substvars debian.upstream
 	rm -rf *stamp
 	for i in $(CFGS) ; do ! [ -e $$i ] || mv $$i $${i%.ori} ; done
 
-
-BVER:=$(shell dpkg -s binutils |grep ^Version: | cut -f2 -d\  )
-BVERB:=$(shell echo $(BVER) | cut -f1 -d-)
-debian/substvars:
-	grep -q ^binutils: $@ 2>/dev/null || echo "binutils:Version=$(BVER)" >> $@
-
-INS:=$(shell for i in debian/in.* ; do echo $$i | sed 's,in.,,1' ; done |sed "s,/gcl,/gcl$(EXT),g")
+INS:=$(shell for i in debian/in.* ; do echo $$i | sed 's,in.,,1' ; done |sed "s,gcl,gcl$(EXT),g")
 
 $(INS): debian/gcl$(EXT)% : debian/in.gcl%
 	cat $< | sed 's,@EXT@,$(EXT),g' >$@
@@ -156,7 +175,8 @@ install: install-stamp
 install-stamp: build-stamp debian/control $(INS)
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+#	dh_clean -k
+	dh_prep
 	dh_installdirs
 
 	mkdir -p debian/tmp
@@ -169,30 +189,18 @@ install-stamp: build-stamp debian/control $(INS)
 	mkdir -p debian/tmp/usr/share/emacs/site-lisp
 	mv debian/tmp/usr/share/emacs/foo debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)
 
-#	cp -a $$(find debian/tmp/usr/local -name site-lisp -type d) \
-#		debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)
-#	rm -rf debian/tmp/usr/local
-
 	cat debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/gcl.el |\
-		sed \
-			-e "s,(provide  *'gcl),(provide 'gcl$(EXT)),g" \
-			-e "s,(require  *'gcl),(require 'gcl$(EXT)),g" \
-			-e "s,gcl-mode,gcl$(EXT)-mode,1" \
-		>tmp &&\
+		sed "s,(provide 'gcl),(provide 'gcl$(EXT)),1" >tmp &&\
 		mv tmp debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/gcl$(EXT).el
 	[ "$(EXT)" = "" ] || rm debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/gcl.el
 
 	cat debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/dbl.el |\
-		sed \
-			-e "s,(provide  *'gcl),(provide 'gcl$(EXT)),g" \
-			-e "s,(require  *'gcl),(require 'gcl$(EXT)),g" \
-			-e "s,gcl-mode,gcl$(EXT)-mode,1" \
-		>tmp &&\
+		sed "s,(provide 'dbl),(provide 'dbl$(EXT)),1" >tmp &&\
 		mv tmp debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/dbl$(EXT).el
 	[ "$(EXT)" = "" ] || rm debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/dbl.el
 
 	[ "$(EXT)" = "" ] || \
-		for i in debian/tmp/usr/share/info/gcl-*.info*; do \
+		for i in debian/tmp/usr/share/info/*.info*; do \
 			mv $$i $$(echo $$i | sed "s,gcl,gcl$(EXT),g"); done
 
 	mv debian/tmp/usr/share/doc debian/tmp/usr/share/foo
@@ -203,9 +211,13 @@ install-stamp: build-stamp debian/control $(INS)
 	[ "$(EXT)" = "" ] || \
 		mv debian/tmp/usr/share/doc/gcl-doc debian/tmp/usr/share/doc/gcl$(EXT)-doc 
 
-	cat debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp | \
-		sed "s,$$(pwd)/debian/tmp,,1" >debian/foo
-	mv debian/foo debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp
+	[ "$(EXT)" = "" ] || \
+		(cat debian/tmp/usr/share/man/man1/gcl.1 |sed -e 's, gcl , gcl$(EXT) ,g' 's, GCL , GCL$(EXT) ,g' >debian/foo && \
+			mv debian/foo debian/tmp/usr/share/man/man1/gcl$(EXT).1)
+
+	# cat debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp | \
+	# 	sed "s,$$(pwd)/debian/tmp,,1" >debian/foo
+	# mv debian/foo debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp
 
 	rm -f debian/tmp/usr/bin/*.exe debian/tmp/usr/bin/*.bat
 
@@ -222,13 +234,6 @@ install-stamp: build-stamp debian/control $(INS)
 	chmod 0755 debian/tmp/usr/bin/gcl$(EXT)
 
 	rm -rf debian/tmp/usr/lib/gcl-$(VERS)/info
-	mkdir -p debian/tmp/etc/default
-	echo DEFAULT_GCL_ANSI= >debian/tmp/etc/default/gcl$(EXT)
-	echo DEFAULT_GCL_PROF= >>debian/tmp/etc/default/gcl$(EXT)
-
-	mkdir -p debian/tmp/usr/lib/common-lisp/bin
-	chmod +x debian/gcl$(EXT)-clc.sh
-	cp debian/gcl$(EXT)-clc.sh debian/tmp/usr/lib/common-lisp/bin/gcl$(EXT).sh
 
 	dh_install
 
@@ -253,11 +258,11 @@ binary-indep: build install
 binary-arch: build install #debian/substvars
 	dh_testdir -a
 	dh_testroot -a
-	dh_installdocs -a
+	dh_installdocs -a -XRELEASE-2.6.2.html
 	dh_installemacsen -a
-#	dh_installmanpages -a gcl/gmp4/ansi2knr.1
 	dh_installman -a
 	dh_installdebconf -a
+	sed -i -e 's,@EXT@,$(EXT),g' debian/gcl$(EXT)/DEBIAN/templates
 	dh_installchangelogs ChangeLog -a
 	dh_strip -a -Xlibgcl -Xlibansi_gcl
 #		-Xgcl-$(VERS)-prof/unixport/saved_gcl -Xgcl-$(VERS)-prof/unixport/saved_ansi_gcl
@@ -267,8 +272,6 @@ binary-arch: build install #debian/substvars
 	dh_fixperms -a
 	dh_installdeb -a
 	dh_shlibdeps -a
-#	[ "$(RELOC)" != statsysbfd ] || dh_gencontrol -a -u"-Vgcc=$(MCC) -Vbinutils=binutils-dev(>=$(BVER)),binutils-dev(<=$(BVERB)-999)"
-#	[ "$(RELOC)" = statsysbfd ] || dh_gencontrol -a -u"-Vgcc=$(MCC)"
 	dh_gencontrol -a -u"-Vgcc=$(MCC)"
 	dh_md5sums -a
 	dh_builddeb -a
