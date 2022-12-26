@@ -1,31 +1,44 @@
 dnl  AMD64 mpn_divexact_1 -- mpn by limb exact division.
 
-dnl  Copyright 2001, 2002, 2004, 2005, 2006 Free Software Foundation, Inc.
+dnl  Copyright 2001, 2002, 2004-2006, 2011, 2012 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
-
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
-dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 3 of the License, or (at
-dnl  your option) any later version.
-
-dnl The GNU MP Library is distributed in the hope that it will be useful, but
+dnl  it under the terms of either:
+dnl
+dnl    * the GNU Lesser General Public License as published by the Free
+dnl      Software Foundation; either version 3 of the License, or (at your
+dnl      option) any later version.
+dnl
+dnl  or
+dnl
+dnl    * the GNU General Public License as published by the Free Software
+dnl      Foundation; either version 2 of the License, or (at your option) any
+dnl      later version.
+dnl
+dnl  or both in parallel, as here.
+dnl
+dnl  The GNU MP Library is distributed in the hope that it will be useful, but
 dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-dnl  License for more details.
-
-dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+dnl  for more details.
+dnl
+dnl  You should have received copies of the GNU General Public License and the
+dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
+dnl  see https://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
 
 C	     cycles/limb
-C K8,K9:	10
-C K10:		10
-C P4:		33
-C P6-15 (Core2):13.25
-C P6-28 (Atom):	42
+C AMD K8,K9	10
+C AMD K10	10
+C Intel P4	33
+C Intel core2	13.25
+C Intel corei	14
+C Intel atom	42
+C VIA nano	43
 
 C A quick adoption of the 32-bit K7 code.
 
@@ -36,67 +49,66 @@ C up		rsi
 C n		rdx
 C divisor	rcx
 
+ABI_SUPPORT(DOS64)
+ABI_SUPPORT(STD64)
+
 ASM_START()
 	TEXT
 	ALIGN(16)
 PROLOGUE(mpn_divexact_1)
-	pushq	%rbx
+	FUNC_ENTRY(4)
+	push	%rbx
 
-	movq	%rcx, %rax
-	movl	$0, %ecx		C shift count
-	movq	%rdx, %r8
+	mov	%rcx, %rax
+	xor	R32(%rcx), R32(%rcx)	C shift count
+	mov	%rdx, %r8
 
-	btl	$0, %eax
+	bt	$0, R32(%rax)
 	jnc	L(evn)			C skip bsfq unless divisor is even
 
-L(odd):	movq	%rax, %rbx
-	shrl	%eax
-	andl	$127, %eax		C d/2, 7 bits
+L(odd):	mov	%rax, %rbx
+	shr	R32(%rax)
+	and	$127, R32(%rax)		C d/2, 7 bits
 
-ifdef(`PIC',`
-	movq	binvert_limb_table@GOTPCREL(%rip), %rdx
-',`
-	movabsq	$binvert_limb_table, %rdx
-')
+	LEA(	binvert_limb_table, %rdx)
 
-	movzbl	(%rax,%rdx), %eax	C inv 8 bits
+	movzbl	(%rdx,%rax), R32(%rax)	C inv 8 bits
 
-	movq	%rbx, %r11		C d without twos
+	mov	%rbx, %r11		C d without twos
 
-	leal	(%rax,%rax), %edx	C 2*inv
-	imull	%eax, %eax		C inv*inv
-	imull	%ebx, %eax		C inv*inv*d
-	subl	%eax, %edx		C inv = 2*inv - inv*inv*d, 16 bits
+	lea	(%rax,%rax), R32(%rdx)	C 2*inv
+	imul	R32(%rax), R32(%rax)	C inv*inv
+	imul	R32(%rbx), R32(%rax)	C inv*inv*d
+	sub	R32(%rax), R32(%rdx)	C inv = 2*inv - inv*inv*d, 16 bits
 
-	leal	(%rdx,%rdx), %eax	C 2*inv
-	imull	%edx, %edx		C inv*inv
-	imull	%ebx, %edx		C inv*inv*d
-	subl	%edx, %eax		C inv = 2*inv - inv*inv*d, 32 bits
+	lea	(%rdx,%rdx), R32(%rax)	C 2*inv
+	imul	R32(%rdx), R32(%rdx)	C inv*inv
+	imul	R32(%rbx), R32(%rdx)	C inv*inv*d
+	sub	R32(%rdx), R32(%rax)	C inv = 2*inv - inv*inv*d, 32 bits
 
-	leaq	(%rax,%rax), %rdx	C 2*inv
-	imulq	%rax, %rax		C inv*inv
-	imulq	%rbx, %rax		C inv*inv*d
-	subq	%rax, %rdx		C inv = 2*inv - inv*inv*d, 64 bits
+	lea	(%rax,%rax), %r10	C 2*inv
+	imul	%rax, %rax		C inv*inv
+	imul	%rbx, %rax		C inv*inv*d
+	sub	%rax, %r10		C inv = 2*inv - inv*inv*d, 64 bits
 
-	leaq	(%rsi,%r8,8), %rsi	C up end
-	leaq	-8(%rdi,%r8,8), %rdi	C rp end
-	negq	%r8			C -n
+	lea	(%rsi,%r8,8), %rsi	C up end
+	lea	-8(%rdi,%r8,8), %rdi	C rp end
+	neg	%r8			C -n
 
-	movq	%rdx, %r10		C final inverse
-	movq	(%rsi,%r8,8), %rax	C up[0]
+	mov	(%rsi,%r8,8), %rax	C up[0]
 
-	incq	%r8
+	inc	%r8
 	jz	L(one)
 
-	movq	(%rsi,%r8,8), %rdx	C up[1]
+	mov	(%rsi,%r8,8), %rdx	C up[1]
 
-	shrdq	%cl, %rdx, %rax
+	shrd	R8(%rcx), %rdx, %rax
 
-	xorl	%ebx, %ebx
-	jmp	L(entry)
+	xor	R32(%rbx), R32(%rbx)
+	jmp	L(ent)
 
-L(evn):	bsfq	%rax, %rcx
-	shrq	%cl, %rax
+L(evn):	bsf	%rax, %rcx
+	shr	R8(%rcx), %rax
 	jmp	L(odd)
 
 	ALIGN(8)
@@ -108,54 +120,39 @@ L(top):
 	C rsi	up end
 	C rdi	rp end
 	C r8	counter, limbs, negative
+	C r10	d^(-1) mod 2^64
+	C r11	d, shifted down
 
-	mulq	%r11			C carry limb in rdx
-
-	movq	-8(%rsi,%r8,8), %rax
-	movq	(%rsi,%r8,8), %r9
-
-	shrdq	%cl, %r9, %rax
-	nop
-
-	subq	%rbx, %rax		C apply carry bit
-	setc	%bl
-
-	subq	%rdx, %rax		C apply carry limb
-	adcq	$0, %rbx
-
-L(entry):
-	imulq	%r10, %rax
-
-	movq	%rax, (%rdi,%r8,8)
-	incq	%r8
+	mul	%r11			C carry limb in rdx	0 10
+	mov	-8(%rsi,%r8,8), %rax	C
+	mov	(%rsi,%r8,8), %r9	C
+	shrd	R8(%rcx), %r9, %rax	C
+	nop				C
+	sub	%rbx, %rax		C apply carry bit
+	setc	%bl			C
+	sub	%rdx, %rax		C apply carry limb	5
+	adc	$0, %rbx		C			6
+L(ent):	imul	%r10, %rax		C			6
+	mov	%rax, (%rdi,%r8,8)	C
+	inc	%r8			C
 	jnz	L(top)
 
-
-	mulq	%r11			C carry limb in rdx
-
-	movq	-8(%rsi), %rax		C up high limb
-	shrq	%cl, %rax
-
-	subq	%rbx, %rax		C apply carry bit
-
-	subq	%rdx, %rax		C apply carry limb
-
-	imulq	%r10, %rax
-
-	movq	%rax, (%rdi)
-
-	popq	%rbx
+	mul	%r11			C carry limb in rdx
+	mov	-8(%rsi), %rax		C up high limb
+	shr	R8(%rcx), %rax
+	sub	%rbx, %rax		C apply carry bit
+	sub	%rdx, %rax		C apply carry limb
+	imul	%r10, %rax
+	mov	%rax, (%rdi)
+	pop	%rbx
+	FUNC_EXIT()
 	ret
 
-
-L(one):
-	shrq	%cl, %rax
-
-	imulq	%r10, %rax
-
-	movq	%rax, (%rdi)
-
-	popq	%rbx
+L(one):	shr	R8(%rcx), %rax
+	imul	%r10, %rax
+	mov	%rax, (%rdi)
+	pop	%rbx
+	FUNC_EXIT()
 	ret
 
 EPILOGUE()

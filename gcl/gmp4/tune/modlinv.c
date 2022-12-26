@@ -6,17 +6,28 @@ Copyright 2000, 2002 Free Software Foundation, Inc.
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include "gmp.h"
@@ -30,7 +41,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
    dependent chain, whereas the "2*" in the standard version isn't.
    Depending on the CPU this should be the same or a touch slower.  */
 
-#if BITS_PER_MP_LIMB <= 32
+#if GMP_LIMB_BITS <= 32
 #define binvert_limb_mul1(inv,n)                                \
   do {                                                          \
     mp_limb_t  __n = (n);                                       \
@@ -44,7 +55,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
   } while (0)
 #endif
 
-#if BITS_PER_MP_LIMB > 32 && BITS_PER_MP_LIMB <= 64
+#if GMP_LIMB_BITS > 32 && GMP_LIMB_BITS <= 64
 #define binvert_limb_mul1(inv,n)                                \
   do {                                                          \
     mp_limb_t  __n = (n);                                       \
@@ -100,7 +111,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
                                                 \
     ASSERT ((__n & 1) == 1);                    \
                                                 \
-    __count = BITS_PER_MP_LIMB-1;               \
+    __count = GMP_LIMB_BITS-1;               \
     do                                          \
       {                                         \
         __inv >>= 1;                            \
@@ -131,11 +142,11 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
                                                                         \
     ASSERT ((__n & 1) == 1);                                            \
                                                                         \
-    __count = BITS_PER_MP_LIMB-1;                                       \
+    __count = GMP_LIMB_BITS-1;                                       \
     do                                                                  \
       {                                                                 \
         __lowbit = __rem & 1;                                           \
-        __inv = (__inv >> 1) | (__lowbit << (BITS_PER_MP_LIMB-1));      \
+        __inv = (__inv >> 1) | (__lowbit << (GMP_LIMB_BITS-1));      \
         __rem = (__rem - (__n & -__lowbit)) >> 1;                       \
       }                                                                 \
     while (-- __count);                                                 \

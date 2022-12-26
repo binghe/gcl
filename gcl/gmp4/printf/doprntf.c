@@ -4,31 +4,35 @@
    CERTAIN TO BE SUBJECT TO INCOMPATIBLE CHANGES OR DISAPPEAR COMPLETELY IN
    FUTURE GNU MP RELEASES.
 
-Copyright 2001, 2002 Free Software Foundation, Inc.
+Copyright 2001, 2002, 2011 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
-#include "config.h"
-
-#if HAVE_STDARG
 #include <stdarg.h>    /* for va_list and hence doprnt_funs_t */
-#else
-#include <varargs.h>
-#endif
-
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
@@ -36,6 +40,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
+#include "longlong.h"
 
 
 /* change this to "#define TRACE(x) x" for diagnostics */
@@ -62,7 +67,7 @@ __gmp_doprnt_mpf (const struct doprnt_funs_t *funs,
   int         fraczeros, fraclen, preczeros;
   char        *s, *free_ptr;
   mp_exp_t    exp;
-  char        exponent[BITS_PER_MP_LIMB + 10];
+  char        exponent[GMP_LIMB_BITS + 10];
   const char  *showbase;
   int         retval = 0;
 
@@ -89,9 +94,11 @@ __gmp_doprnt_mpf (const struct doprnt_funs_t *funs,
 	   overestimate the integer part, and add prec.  If f<1 then
 	   underestimate the zeros between the radix point and the first
 	   digit and subtract that from prec.  In either case add 2 so the
-	   round to nearest can be applied accurately.  */
-	ndigits = prec + 2
-	  + EXP(f) * (__mp_bases[ABS(p->base)].chars_per_limb + (EXP(f)>=0));
+	   round to nearest can be applied accurately.  Finally, we add 1 to
+	   handle the case of 1-eps where EXP(f) = 0 but mpf_get_str returns
+	   exp as 1.  */
+	ndigits = prec + 2 + 1
+	  + EXP(f) * (mp_bases[ABS(p->base)].chars_per_limb + (EXP(f)>=0));
 	ndigits = MAX (ndigits, 1);
 	break;
 

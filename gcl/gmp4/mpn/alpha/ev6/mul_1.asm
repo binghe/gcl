@@ -4,19 +4,30 @@ dnl  result in a second limb vector.
 dnl  Copyright 2000, 2001, 2005 Free Software Foundation, Inc.
 
 dnl  This file is part of the GNU MP Library.
-
+dnl
 dnl  The GNU MP Library is free software; you can redistribute it and/or modify
-dnl  it under the terms of the GNU Lesser General Public License as published
-dnl  by the Free Software Foundation; either version 3 of the License, or (at
-dnl  your option) any later version.
-
+dnl  it under the terms of either:
+dnl
+dnl    * the GNU Lesser General Public License as published by the Free
+dnl      Software Foundation; either version 3 of the License, or (at your
+dnl      option) any later version.
+dnl
+dnl  or
+dnl
+dnl    * the GNU General Public License as published by the Free Software
+dnl      Foundation; either version 2 of the License, or (at your option) any
+dnl      later version.
+dnl
+dnl  or both in parallel, as here.
+dnl
 dnl  The GNU MP Library is distributed in the hope that it will be useful, but
 dnl  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-dnl  License for more details.
-
-dnl  You should have received a copy of the GNU Lesser General Public License
-dnl  along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.
+dnl  or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+dnl  for more details.
+dnl
+dnl  You should have received copies of the GNU General Public License and the
+dnl  GNU Lesser General Public License along with the GNU MP Library.  If not,
+dnl  see https://www.gnu.org/licenses/.
 
 include(`../config.m4')
 
@@ -49,7 +60,7 @@ C   r20,r29,r13-r15  scramble
 C
 C   We're doing 7 of the 8 carry propagations with a br fixup code and 1 with a
 C   put-the-carry-into-hi.  The idea is that these branches are very rarely
-C   taken, and since a non-taken branch consumes no resurces, that is better
+C   taken, and since a non-taken branch consumes no resources, that is better
 C   than an addq.
 C
 C   Software pipeline: a load in cycle #09, feeds a mul in cycle #16, feeds an
@@ -126,7 +137,7 @@ $L_9_or_more:
 	mulq	r2,r19,r3	C r3 = prod_low
 	umulh	r2,r19,r21	C r21 = prod_high
 	beq	r20,$Le1b	C jump if size was == 1
-	bis	r31, r31, r0	C FIXME: shouldtn't need this
+	bis	r31, r31, r0	C FIXME: shouldn't need this
 	ldq	r2,0(r17)	C r2 = s1_limb
 	lda	r17,8(r17)	C s1_ptr++
 	lda	r20,-1(r20)	C size--

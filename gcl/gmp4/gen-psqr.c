@@ -1,26 +1,37 @@
 /* Generate perfect square testing data.
 
-Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
+Copyright 2002-2004, 2012 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "dumbmp.c"
+#include "bootstrap.c"
 
 
 /* The aim of this program is to choose either mpn_mod_34lsub1 or mpn_mod_1
@@ -152,9 +163,9 @@ f_cmp_fraction (const void *parg, const void *qarg)
    accordingly.  */
 #define COLLAPSE_ELEMENT(array, idx, narray)                    \
   do {                                                          \
-    mem_copyi ((char *) &(array)[idx],                          \
-               (char *) &(array)[idx+1],                        \
-               ((narray)-((idx)+1)) * sizeof (array[0]));       \
+    memmove (&(array)[idx],					\
+	     &(array)[idx+1],					\
+	     ((narray)-((idx)+1)) * sizeof (array[0]));		\
     (narray)--;                                                 \
   } while (0)
 
@@ -173,7 +184,7 @@ mul_2exp_mod (int n, int p, int m)
 int
 neg_mod (int n, int m)
 {
-  ASSERT (n >= 0 && n < m);
+  assert (n >= 0 && n < m);
   return (n == 0 ? 0 : m-n);
 }
 
@@ -202,7 +213,7 @@ generate_sq_res_0x100 (int limb_bits)
   int  i, res;
 
   nsq_res_0x100 = (0x100 + limb_bits - 1) / limb_bits;
-  sq_res_0x100 = (mpz_t *) xmalloc (nsq_res_0x100 * sizeof (*sq_res_0x100));
+  sq_res_0x100 = xmalloc (nsq_res_0x100 * sizeof (*sq_res_0x100));
 
   for (i = 0; i < nsq_res_0x100; i++)
     mpz_init_set_ui (sq_res_0x100[i], 0L);
@@ -233,9 +244,8 @@ generate_mod (int limb_bits, int nail_bits)
   /* no more than limb_bits many factors in a one limb modulus (and of
      course in reality nothing like that many) */
   factor_alloc = limb_bits;
-  factor = (struct factor_t *) xmalloc (factor_alloc * sizeof (*factor));
-  rawfactor = (struct rawfactor_t *)
-    xmalloc (factor_alloc * sizeof (*rawfactor));
+  factor = xmalloc (factor_alloc * sizeof (*factor));
+  rawfactor = xmalloc (factor_alloc * sizeof (*rawfactor));
 
   if (numb_bits % 4 != 0)
     {
@@ -301,7 +311,7 @@ generate_mod (int limb_bits, int nail_bits)
           }
         while (mpz_sgn (r) == 0);
 
-        ASSERT (nrawfactor < factor_alloc);
+        assert (nrawfactor < factor_alloc);
         rawfactor[nrawfactor].divisor = i;
         rawfactor[nrawfactor].multiplicity = multiplicity;
         nrawfactor++;
@@ -341,7 +351,7 @@ generate_mod (int limb_bits, int nail_bits)
             break;
           mpz_set (pp, new_pp);
 
-          ASSERT (nrawfactor < factor_alloc);
+          assert (nrawfactor < factor_alloc);
           rawfactor[nrawfactor].divisor = i;
           rawfactor[nrawfactor].multiplicity = 1;
           nrawfactor++;
@@ -377,7 +387,7 @@ generate_mod (int limb_bits, int nail_bits)
   for (i = 0; i < nrawfactor; i++)
     {
       int  j;
-      ASSERT (nfactor < factor_alloc);
+      assert (nfactor < factor_alloc);
       factor[nfactor].divisor = 1;
       for (j = 0; j < rawfactor[i].multiplicity; j++)
         factor[nfactor].divisor *= rawfactor[i].divisor;

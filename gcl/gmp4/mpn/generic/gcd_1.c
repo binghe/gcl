@@ -1,26 +1,54 @@
 /* mpn_gcd_1 -- mpn and limb greatest common divisor.
 
-Copyright 1994, 1996, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1994, 1996, 2000, 2001, 2009, 2012 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
 #include "longlong.h"
 
+#ifndef GCD_1_METHOD
+#define GCD_1_METHOD 2
+#endif
+
+#define USE_ZEROTAB 0
+
+#if USE_ZEROTAB
+#define MAXSHIFT 4
+#define MASK ((1 << MAXSHIFT) - 1)
+static const unsigned char zerotab[1 << MAXSHIFT] =
+{
+#if MAXSHIFT > 4
+  5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+#endif
+  4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0
+};
+#endif
 
 /* Does not work for U == 0 or V == 0.  It would be tough to make it work for
    V == 0 since gcd(x,0) = x, and U does not generally fit in an mp_limb_t.
@@ -81,6 +109,10 @@ mpn_gcd_1 (mp_srcptr up, mp_size_t size, mp_limb_t vlimb)
       goto strip_u_maybe;
     }
 
+  ASSERT (ulimb & 1);
+  ASSERT (vlimb & 1);
+
+#if GCD_1_METHOD == 1
   while (ulimb != vlimb)
     {
       ASSERT (ulimb & 1);
@@ -109,6 +141,58 @@ mpn_gcd_1 (mp_srcptr up, mp_size_t size, mp_limb_t vlimb)
 	  while ((vlimb & 1) == 0);
 	}
     }
+#else
+# if GCD_1_METHOD  == 2
+
+  ulimb >>= 1;
+  vlimb >>= 1;
+
+  while (ulimb != vlimb)
+    {
+      int c;
+      mp_limb_t t;
+      mp_limb_t vgtu;
+
+      t = ulimb - vlimb;
+      vgtu = LIMB_HIGHBIT_TO_MASK (t);
+
+      /* v <-- min (u, v) */
+      vlimb += (vgtu & t);
+
+      /* u <-- |u - v| */
+      ulimb = (t ^ vgtu) - vgtu;
+
+#if USE_ZEROTAB
+      /* Number of trailing zeros is the same no matter if we look at
+       * t or ulimb, but using t gives more parallelism. */
+      c = zerotab[t & MASK];
+
+      while (UNLIKELY (c == MAXSHIFT))
+	{
+	  ulimb >>= MAXSHIFT;
+	  if (0)
+	  strip_u_maybe:
+	    vlimb >>= 1;
+
+	  c = zerotab[ulimb & MASK];
+	}
+#else
+      if (0)
+	{
+	strip_u_maybe:
+	  vlimb >>= 1;
+	  t = ulimb;
+	}
+      count_trailing_zeros (c, t);
+#endif
+      ulimb >>= (c + 1);
+    }
+
+  vlimb = (vlimb << 1) | 1;
+# else
+#  error Unknown GCD_1_METHOD
+# endif
+#endif
 
  done:
   return vlimb << zero_bits;

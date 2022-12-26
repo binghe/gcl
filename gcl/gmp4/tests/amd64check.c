@@ -2,20 +2,20 @@
 
 Copyright 2000, 2001, 2004, 2007 Free Software Foundation, Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include "gmp.h"
@@ -25,18 +25,18 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
 /* Vector if constants and register values.  We use one vector to allow access
    via a base pointer, very beneficial for the PIC-enabled amd64call.asm.  */
-long calling_conventions_values[23] =
+mp_limb_t calling_conventions_values[23] =
 {
-  0x1234567887654321L,		/* want_rbx */
-  0x89ABCDEFFEDCBA98L,		/* want_rbp */
-  0xDEADBEEFBADECAFEL,		/* want_r12 */
-  0xFFEEDDCCBBAA9988L,		/* want_r13 */
-  0x0011223344556677L,		/* want_r14 */
-  0x1234432156788765L,		/* want_r15 */
+  CNST_LIMB(0x1234567887654321),	/* want_rbx */
+  CNST_LIMB(0x89ABCDEFFEDCBA98),	/* want_rbp */
+  CNST_LIMB(0xDEADBEEFBADECAFE),	/* want_r12 */
+  CNST_LIMB(0xFFEEDDCCBBAA9988),	/* want_r13 */
+  CNST_LIMB(0x0011223344556677),	/* want_r14 */
+  CNST_LIMB(0x1234432156788765),	/* want_r15 */
 
-  0xFEEDABBACAAFBEED,		/* JUNK_RAX */
-  0xAB78DE89FF5125BB,		/* JUNK_R10 */
-  0x1238901890189031		/* JUNK_R11 */
+  CNST_LIMB(0xFEEDABBACAAFBEED),	/* JUNK_RAX */
+  CNST_LIMB(0xAB78DE89FF5125BB),	/* JUNK_R10 */
+  CNST_LIMB(0x1238901890189031)		/* JUNK_R11 */
 
   /* rest of array used for dynamic values.  */
 };
@@ -58,7 +58,7 @@ struct {
 } calling_conventions_fenv;
 
 
-char *regname[6] = {"rbx", "rbp", "r12", "r13", "r14", "r15"};
+const char *regname[6] = {"rbx", "rbp", "r12", "r13", "r14", "r15"};
 
 #define DIR_BIT(rflags)   (((rflags) & (1<<10)) != 0)
 

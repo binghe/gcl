@@ -2,20 +2,20 @@
 
 Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 /* Examples:
 
@@ -277,7 +277,7 @@ int main (argc, argv)
     case RFUNC_mpf_urandomb:
 #if 0
       /* Don't init a too small generator.  */
-      size = PREC (f1) * BITS_PER_MP_LIMB;
+      size = PREC (f1) * GMP_LIMB_BITS;
       /* Fall through.  */
 #endif
     case RFUNC_mpz_urandomb:

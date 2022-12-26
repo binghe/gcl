@@ -1,22 +1,32 @@
 /* mpf_sub -- Subtract two floats.
 
-Copyright 1993, 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2004, 2005 Free
-Software Foundation, Inc.
+Copyright 1993-1996, 1999-2002, 2004, 2005, 2011 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 #include "gmp.h"
 #include "gmp-impl.h"
@@ -194,7 +204,7 @@ mpf_sub (mpf_ptr r, mpf_srcptr u, mpf_srcptr v)
 	  vsize = prec - 1;
 	}
 
-      tp = (mp_ptr) TMP_ALLOC (prec * BYTES_PER_MP_LIMB);
+      tp = TMP_ALLOC_LIMBS (prec);
       {
 	mp_limb_t cy_limb;
 	if (vsize == 0)
@@ -273,19 +283,19 @@ general_case:
       vsize = prec - ediff;
     }
 
-  /* Allocate temp space for the result.  Allocate
-     just vsize + ediff later???  */
-  tp = (mp_ptr) TMP_ALLOC (prec * BYTES_PER_MP_LIMB);
-
   if (ediff >= prec)
     {
       /* V completely cancelled.  */
-      if (tp != up)
+      if (rp != up)
 	MPN_COPY (rp, up, usize);
       rsize = usize;
     }
   else
     {
+      /* Allocate temp space for the result.  Allocate
+	 just vsize + ediff later???  */
+      tp = TMP_ALLOC_LIMBS (prec);
+
       /* Locate the least significant non-zero limb in (the needed
 	 parts of) U and V, to simplify the code below.  */
       for (;;)

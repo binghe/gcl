@@ -1,22 +1,21 @@
 /* Test mpz_add, mpz_add_ui, mpz_cmp, mpz_cmp, mpz_mul, mpz_sqrtrem.
 
-Copyright 1991, 1993, 1994, 1996, 2000, 2001, 2002 Free Software Foundation,
-Inc.
+Copyright 1991, 1993, 1994, 1996, 2000-2002 Free Software Foundation, Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,8 +24,8 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 #include "gmp-impl.h"
 #include "tests.h"
 
-void dump_abort __GMP_PROTO ((mpz_t, mpz_t, mpz_t));
-void debug_mp __GMP_PROTO ((mpz_t, int));
+void dump_abort (mpz_t, mpz_t, mpz_t);
+void debug_mp (mpz_t, int);
 
 int
 main (int argc, char **argv)
@@ -36,18 +35,17 @@ main (int argc, char **argv)
   mpz_t temp, temp2;
   mp_size_t x2_size;
   int i;
-  int reps = 200000;
+  int reps = 1000;
   gmp_randstate_ptr rands;
   mpz_t bs;
   unsigned long size_range;
 
   tests_start ();
+  TESTS_REPS (reps, argv, argc);
+
   rands = RANDS;
 
   mpz_init (bs);
-
-  if (argc == 2)
-    reps = atoi (argv[1]);
 
   mpz_init (x2);
   mpz_init (x);
@@ -58,7 +56,7 @@ main (int argc, char **argv)
   for (i = 0; i < reps; i++)
     {
       mpz_urandomb (bs, rands, 32);
-      size_range = mpz_get_ui (bs) % 12 + 2; /* 0..8191 bit operands */
+      size_range = mpz_get_ui (bs) % 17 + 2; /* 0..262144 bit operands */
 
       mpz_urandomb (bs, rands, size_range);
       x2_size = mpz_get_ui (bs);

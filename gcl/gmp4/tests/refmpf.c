@@ -2,20 +2,20 @@
 
 Copyright 1996, 2001, 2004, 2005 Free Software Foundation, Inc.
 
-This file is part of the GNU MP Library.
+This file is part of the GNU MP Library test suite.
 
-The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+The GNU MP Library test suite is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 3 of the License,
+or (at your option) any later version.
 
-The GNU MP Library is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+The GNU MP Library test suite is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received a copy of the GNU General Public License along with
+the GNU MP Library test suite.  If not, see https://www.gnu.org/licenses/.  */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,7 +40,7 @@ refmpf_add (mpf_ptr w, mpf_srcptr u, mpf_srcptr v)
   if (SIZ (u) == 0)
     {
       size = ABSIZ (v);
-      wt = (mp_ptr) TMP_ALLOC ((size+1) * BYTES_PER_MP_LIMB);
+      wt = TMP_ALLOC_LIMBS (size + 1);
       MPN_COPY (wt, PTR (v), size);
       exp = EXP (v);
       neg = SIZ (v) < 0;
@@ -49,7 +49,7 @@ refmpf_add (mpf_ptr w, mpf_srcptr u, mpf_srcptr v)
   if (SIZ (v) == 0)
     {
       size = ABSIZ (u);
-      wt = (mp_ptr) TMP_ALLOC ((size+1) * BYTES_PER_MP_LIMB);
+      wt = TMP_ALLOC_LIMBS (size + 1);
       MPN_COPY (wt, PTR (u), size);
       exp = EXP (u);
       neg = SIZ (u) < 0;
@@ -70,9 +70,9 @@ refmpf_add (mpf_ptr w, mpf_srcptr u, mpf_srcptr v)
   hi = MAX (EXP (u), EXP (v));
   lo = MIN (EXP (u) - ABSIZ (u), EXP (v) - ABSIZ (v));
   size = hi - lo;
-  ut = (mp_ptr) TMP_ALLOC ((size + 1) * BYTES_PER_MP_LIMB);
-  vt = (mp_ptr) TMP_ALLOC ((size + 1) * BYTES_PER_MP_LIMB);
-  wt = (mp_ptr) TMP_ALLOC ((size + 1) * BYTES_PER_MP_LIMB);
+  ut = TMP_ALLOC_LIMBS (size + 1);
+  vt = TMP_ALLOC_LIMBS (size + 1);
+  wt = TMP_ALLOC_LIMBS (size + 1);
   MPN_ZERO (ut, size);
   MPN_ZERO (vt, size);
   {int off;
@@ -211,7 +211,7 @@ refmpf_sub (mpf_ptr w, mpf_srcptr u, mpf_srcptr v)
   if (SIZ (u) == 0)
     {
       size = ABSIZ (v);
-      wt = (mp_ptr) TMP_ALLOC ((size+1) * BYTES_PER_MP_LIMB);
+      wt = TMP_ALLOC_LIMBS (size + 1);
       MPN_COPY (wt, PTR (v), size);
       exp = EXP (v);
       neg = SIZ (v) > 0;
@@ -220,7 +220,7 @@ refmpf_sub (mpf_ptr w, mpf_srcptr u, mpf_srcptr v)
   if (SIZ (v) == 0)
     {
       size = ABSIZ (u);
-      wt = (mp_ptr) TMP_ALLOC ((size+1) * BYTES_PER_MP_LIMB);
+      wt = TMP_ALLOC_LIMBS (size + 1);
       MPN_COPY (wt, PTR (u), size);
       exp = EXP (u);
       neg = SIZ (u) < 0;
@@ -243,9 +243,9 @@ refmpf_sub (mpf_ptr w, mpf_srcptr u, mpf_srcptr v)
   hi = MAX (EXP (u), EXP (v));
   lo = MIN (EXP (u) - ABSIZ (u), EXP (v) - ABSIZ (v));
   size = hi - lo;
-  ut = (mp_ptr) TMP_ALLOC ((size + 1) * BYTES_PER_MP_LIMB);
-  vt = (mp_ptr) TMP_ALLOC ((size + 1) * BYTES_PER_MP_LIMB);
-  wt = (mp_ptr) TMP_ALLOC ((size + 1) * BYTES_PER_MP_LIMB);
+  ut = TMP_ALLOC_LIMBS (size + 1);
+  vt = TMP_ALLOC_LIMBS (size + 1);
+  wt = TMP_ALLOC_LIMBS (size + 1);
   MPN_ZERO (ut, size);
   MPN_ZERO (vt, size);
   {int off;

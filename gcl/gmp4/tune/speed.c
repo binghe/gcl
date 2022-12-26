@@ -1,21 +1,32 @@
 /* Speed measuring program.
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006 Free Software Foundation, Inc.
+Copyright 1999-2003, 2005, 2006, 2008-2012 Free Software Foundation, Inc.
 
 This file is part of the GNU MP Library.
 
 The GNU MP Library is free software; you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 3 of the License, or (at your
-option) any later version.
+it under the terms of either:
+
+  * the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your
+    option) any later version.
+
+or
+
+  * the GNU General Public License as published by the Free Software
+    Foundation; either version 2 of the License, or (at your option) any
+    later version.
+
+or both in parallel, as here.
 
 The GNU MP Library is distributed in the hope that it will be useful, but
 WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-License for more details.
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
 
-You should have received a copy of the GNU Lesser General Public License
-along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
+You should have received copies of the GNU General Public License and the
+GNU Lesser General Public License along with the GNU MP Library.  If not,
+see https://www.gnu.org/licenses/.  */
 
 /* Usage message is in the code below, run with no arguments to print it.
    See README for interesting applications.
@@ -89,10 +100,10 @@ SPEED_EXTRA_PROTOS2
   } while (0)
 
 
-#if BITS_PER_MP_LIMB == 32
+#if GMP_LIMB_BITS == 32
 #define GMP_NUMB_0xAA  (CNST_LIMB(0xAAAAAAAA) & GMP_NUMB_MASK)
 #endif
-#if BITS_PER_MP_LIMB == 64
+#if GMP_LIMB_BITS == 64
 #define GMP_NUMB_0xAA  (CNST_LIMB(0xAAAAAAAAAAAAAAAA) & GMP_NUMB_MASK)
 #endif
 
@@ -152,8 +163,15 @@ const struct routine_t {
   { "mpn_add_n",         speed_mpn_add_n,     FLAG_R_OPTIONAL },
   { "mpn_sub_n",         speed_mpn_sub_n,     FLAG_R_OPTIONAL },
 
-#if HAVE_NATIVE_mpn_addsub_n
-  { "mpn_addsub_n",      speed_mpn_addsub_n,     FLAG_R_OPTIONAL },
+  { "mpn_add_err1_n",    speed_mpn_add_err1_n    },
+  { "mpn_add_err2_n",    speed_mpn_add_err2_n    },
+  { "mpn_add_err3_n",    speed_mpn_add_err3_n    },
+  { "mpn_sub_err1_n",    speed_mpn_sub_err1_n    },
+  { "mpn_sub_err2_n",    speed_mpn_sub_err2_n    },
+  { "mpn_sub_err3_n",    speed_mpn_sub_err3_n    },
+
+#if HAVE_NATIVE_mpn_add_n_sub_n
+  { "mpn_add_n_sub_n",      speed_mpn_add_n_sub_n,     FLAG_R_OPTIONAL },
 #endif
 
   { "mpn_addmul_1",      speed_mpn_addmul_1,  FLAG_R },
@@ -190,6 +208,12 @@ const struct routine_t {
 #if HAVE_NATIVE_mpn_mul_4
   { "mpn_mul_4",         speed_mpn_mul_4,     FLAG_R_OPTIONAL },
 #endif
+#if HAVE_NATIVE_mpn_mul_5
+  { "mpn_mul_5",         speed_mpn_mul_5,     FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_mul_6
+  { "mpn_mul_6",         speed_mpn_mul_6,     FLAG_R_OPTIONAL },
+#endif
 
   { "mpn_divrem_1",      speed_mpn_divrem_1,  FLAG_R },
   { "mpn_divrem_1f",     speed_mpn_divrem_1f, FLAG_R },
@@ -205,6 +229,13 @@ const struct routine_t {
   { "mpn_preinv_divrem_1f", speed_mpn_preinv_divrem_1f, FLAG_R },
   { "mpn_preinv_mod_1",  speed_mpn_preinv_mod_1, FLAG_R },
 
+  { "mpn_mod_1_1",       speed_mpn_mod_1_1,       FLAG_R },
+  { "mpn_mod_1_1_1",     speed_mpn_mod_1_1_1,     FLAG_R },
+  { "mpn_mod_1_1_2",     speed_mpn_mod_1_1_2,     FLAG_R },
+  { "mpn_mod_1s_2",      speed_mpn_mod_1_2,       FLAG_R },
+  { "mpn_mod_1s_3",      speed_mpn_mod_1_3,       FLAG_R },
+  { "mpn_mod_1s_4",      speed_mpn_mod_1_4,       FLAG_R },
+
   { "mpn_divrem_1_div",  speed_mpn_divrem_1_div,  FLAG_R },
   { "mpn_divrem_1_inv",  speed_mpn_divrem_1_inv,  FLAG_R },
   { "mpn_divrem_1f_div", speed_mpn_divrem_1f_div, FLAG_R },
@@ -216,9 +247,19 @@ const struct routine_t {
   { "mpn_divrem_2_div",  speed_mpn_divrem_2_div,    },
   { "mpn_divrem_2_inv",  speed_mpn_divrem_2_inv,    },
 
+  { "mpn_div_qr_1n_pi1", speed_mpn_div_qr_1n_pi1, FLAG_R  },
+  { "mpn_div_qr_1n_pi1_1",speed_mpn_div_qr_1n_pi1_1, FLAG_R  },
+  { "mpn_div_qr_1n_pi1_2",speed_mpn_div_qr_1n_pi1_2, FLAG_R  },
+  { "mpn_div_qr_1",      speed_mpn_div_qr_1,      FLAG_R },
+
+  { "mpn_div_qr_2n",     speed_mpn_div_qr_2n,       },
+  { "mpn_div_qr_2u",     speed_mpn_div_qr_2u,       },
+
   { "mpn_divexact_1",    speed_mpn_divexact_1,    FLAG_R },
   { "mpn_divexact_by3",  speed_mpn_divexact_by3          },
 
+  { "mpn_bdiv_q_1",      speed_mpn_bdiv_q_1,      FLAG_R },
+  { "mpn_pi1_bdiv_q_1",  speed_mpn_pi1_bdiv_q_1,  FLAG_R_OPTIONAL },
   { "mpn_bdiv_dbm1c",    speed_mpn_bdiv_dbm1c,    FLAG_R_OPTIONAL },
 
 #if HAVE_NATIVE_mpn_modexact_1_odd
@@ -230,17 +271,8 @@ const struct routine_t {
   { "mpn_mod_34lsub1",   speed_mpn_mod_34lsub1 },
 #endif
 
-  { "mpn_dc_tdiv_qr",       speed_mpn_dc_tdiv_qr       },
-  { "mpn_dc_divrem_n",      speed_mpn_dc_divrem_n      },
-  { "mpn_dc_divrem_sb",     speed_mpn_dc_divrem_sb     },
-  { "mpn_dc_divrem_sb_div", speed_mpn_dc_divrem_sb_div },
-  { "mpn_dc_divrem_sb_inv", speed_mpn_dc_divrem_sb_inv },
-
-  { "mpn_sb_divrem_m3",     speed_mpn_sb_divrem_m3     },
-  { "mpn_sb_divrem_m3_div", speed_mpn_sb_divrem_m3_div },
-  { "mpn_sb_divrem_m3_inv", speed_mpn_sb_divrem_m3_inv },
-
   { "mpn_lshift",        speed_mpn_lshift, FLAG_R   },
+  { "mpn_lshiftc",       speed_mpn_lshiftc, FLAG_R   },
   { "mpn_rshift",        speed_mpn_rshift, FLAG_R   },
 
   { "mpn_and_n",         speed_mpn_and_n,  FLAG_R_OPTIONAL },
@@ -251,7 +283,7 @@ const struct routine_t {
   { "mpn_nior_n",        speed_mpn_nior_n, FLAG_R_OPTIONAL },
   { "mpn_xor_n",         speed_mpn_xor_n,  FLAG_R_OPTIONAL },
   { "mpn_xnor_n",        speed_mpn_xnor_n, FLAG_R_OPTIONAL },
-  { "mpn_com_n",         speed_mpn_com_n            },
+  { "mpn_com",           speed_mpn_com              },
 
   { "mpn_popcount",      speed_mpn_popcount         },
   { "mpn_hamdist",       speed_mpn_hamdist          },
@@ -260,16 +292,17 @@ const struct routine_t {
 
   { "mpn_hgcd",          speed_mpn_hgcd             },
   { "mpn_hgcd_lehmer",   speed_mpn_hgcd_lehmer      },
+  { "mpn_hgcd_appr",     speed_mpn_hgcd_appr        },
+  { "mpn_hgcd_appr_lehmer", speed_mpn_hgcd_appr_lehmer },
+
+  { "mpn_hgcd_reduce",   speed_mpn_hgcd_reduce      },
+  { "mpn_hgcd_reduce_1", speed_mpn_hgcd_reduce_1    },
+  { "mpn_hgcd_reduce_2", speed_mpn_hgcd_reduce_2    },
 
   { "mpn_gcd_1",         speed_mpn_gcd_1,  FLAG_R_OPTIONAL },
   { "mpn_gcd_1N",        speed_mpn_gcd_1N, FLAG_R_OPTIONAL },
 
   { "mpn_gcd",           speed_mpn_gcd                    },
-#if 0
-  { "mpn_gcd_binary",    speed_mpn_gcd_binary             },
-  { "mpn_gcd_accel",     speed_mpn_gcd_accel              },
-  { "find_a",            speed_find_a,        FLAG_NODATA },
-#endif
 
   { "mpn_gcdext",            speed_mpn_gcdext            },
   { "mpn_gcdext_single",     speed_mpn_gcdext_single     },
@@ -284,6 +317,7 @@ const struct routine_t {
   { "mpn_jacobi_base_1", speed_mpn_jacobi_base_1    },
   { "mpn_jacobi_base_2", speed_mpn_jacobi_base_2    },
   { "mpn_jacobi_base_3", speed_mpn_jacobi_base_3    },
+  { "mpn_jacobi_base_4", speed_mpn_jacobi_base_4    },
 
   { "mpn_mul",           speed_mpn_mul,         FLAG_R_OPTIONAL },
   { "mpn_mul_basecase",  speed_mpn_mul_basecase,FLAG_R_OPTIONAL },
@@ -291,27 +325,74 @@ const struct routine_t {
 #if HAVE_NATIVE_mpn_sqr_diagonal
   { "mpn_sqr_diagonal",  speed_mpn_sqr_diagonal     },
 #endif
+#if HAVE_NATIVE_mpn_sqr_diag_addlsh1
+  { "mpn_sqr_diag_addlsh1", speed_mpn_sqr_diag_addlsh1 },
+#endif
 
   { "mpn_mul_n",         speed_mpn_mul_n            },
-  { "mpn_sqr",           speed_mpn_sqr_n            },
+  { "mpn_sqr",           speed_mpn_sqr              },
 
-  { "mpn_kara_mul_n",    speed_mpn_kara_mul_n       },
-  { "mpn_kara_sqr_n",    speed_mpn_kara_sqr_n       },
-  { "mpn_toom3_mul_n",   speed_mpn_toom3_mul_n      },
-  { "mpn_toom3_sqr_n",   speed_mpn_toom3_sqr_n      },
+  { "mpn_toom2_sqr",     speed_mpn_toom2_sqr        },
+  { "mpn_toom3_sqr",     speed_mpn_toom3_sqr        },
+  { "mpn_toom4_sqr",     speed_mpn_toom4_sqr        },
+  { "mpn_toom6_sqr",     speed_mpn_toom6_sqr        },
+  { "mpn_toom8_sqr",     speed_mpn_toom8_sqr        },
+  { "mpn_toom22_mul",    speed_mpn_toom22_mul       },
+  { "mpn_toom33_mul",    speed_mpn_toom33_mul       },
+  { "mpn_toom44_mul",    speed_mpn_toom44_mul       },
+  { "mpn_toom6h_mul",    speed_mpn_toom6h_mul       },
+  { "mpn_toom8h_mul",    speed_mpn_toom8h_mul       },
+  { "mpn_toom32_mul",    speed_mpn_toom32_mul       },
+  { "mpn_toom42_mul",    speed_mpn_toom42_mul       },
+  { "mpn_toom43_mul",    speed_mpn_toom43_mul       },
+  { "mpn_toom63_mul",    speed_mpn_toom63_mul       },
+  { "mpn_nussbaumer_mul",    speed_mpn_nussbaumer_mul    },
+  { "mpn_nussbaumer_mul_sqr",speed_mpn_nussbaumer_mul_sqr},
+#if WANT_OLD_FFT_FULL
   { "mpn_mul_fft_full",      speed_mpn_mul_fft_full      },
   { "mpn_mul_fft_full_sqr",  speed_mpn_mul_fft_full_sqr  },
-
+#endif
   { "mpn_mul_fft",       speed_mpn_mul_fft,     FLAG_R_OPTIONAL },
   { "mpn_mul_fft_sqr",   speed_mpn_mul_fft_sqr, FLAG_R_OPTIONAL },
 
-  { "mpn_mullow_n",      speed_mpn_mullow_n         },
-  { "mpn_mullow_basecase", speed_mpn_mullow_basecase},
+  { "mpn_mullo_n",        speed_mpn_mullo_n         },
+  { "mpn_mullo_basecase", speed_mpn_mullo_basecase  },
 
-  { "mpn_get_str",       speed_mpn_get_str,  FLAG_R_OPTIONAL },
+  { "mpn_mulmid_basecase",  speed_mpn_mulmid_basecase, FLAG_R_OPTIONAL },
+  { "mpn_toom42_mulmid",    speed_mpn_toom42_mulmid },
+  { "mpn_mulmid_n",         speed_mpn_mulmid_n },
+  { "mpn_mulmid",           speed_mpn_mulmid, FLAG_R_OPTIONAL },
 
-  { "mpn_set_str",         speed_mpn_set_str,     FLAG_R_OPTIONAL },
-  { "mpn_set_str_basecase",speed_mpn_bc_set_str,  FLAG_R_OPTIONAL },
+  { "mpn_bc_mulmod_bnm1",      speed_mpn_bc_mulmod_bnm1      },
+  { "mpn_mulmod_bnm1",         speed_mpn_mulmod_bnm1         },
+  { "mpn_mulmod_bnm1_rounded", speed_mpn_mulmod_bnm1_rounded },
+  { "mpn_sqrmod_bnm1",         speed_mpn_sqrmod_bnm1         },
+
+  { "mpn_invert",              speed_mpn_invert              },
+  { "mpn_invertappr",          speed_mpn_invertappr          },
+  { "mpn_ni_invertappr",       speed_mpn_ni_invertappr       },
+  { "mpn_binvert",             speed_mpn_binvert             },
+  { "mpn_sec_invert",          speed_mpn_sec_invert          },
+
+  { "mpn_sbpi1_div_qr",        speed_mpn_sbpi1_div_qr,    FLAG_R_OPTIONAL},
+  { "mpn_dcpi1_div_qr",        speed_mpn_dcpi1_div_qr,    FLAG_R_OPTIONAL},
+  { "mpn_mu_div_qr",           speed_mpn_mu_div_qr,       FLAG_R_OPTIONAL},
+  { "mpn_mupi_div_qr",         speed_mpn_mupi_div_qr,     FLAG_R_OPTIONAL},
+  { "mpn_sbpi1_divappr_q",     speed_mpn_sbpi1_divappr_q, FLAG_R_OPTIONAL},
+  { "mpn_dcpi1_divappr_q",     speed_mpn_dcpi1_divappr_q, FLAG_R_OPTIONAL},
+
+  { "mpn_sbpi1_bdiv_qr",       speed_mpn_sbpi1_bdiv_qr       },
+  { "mpn_dcpi1_bdiv_qr",       speed_mpn_dcpi1_bdiv_qr       },
+  { "mpn_sbpi1_bdiv_q",        speed_mpn_sbpi1_bdiv_q        },
+  { "mpn_dcpi1_bdiv_q",        speed_mpn_dcpi1_bdiv_q        },
+
+  { "mpn_broot",               speed_mpn_broot,    FLAG_R },
+  { "mpn_broot_invm1",         speed_mpn_broot_invm1, FLAG_R },
+  { "mpn_brootinv",            speed_mpn_brootinv, FLAG_R },
+
+  { "mpn_get_str",          speed_mpn_get_str,     FLAG_R_OPTIONAL },
+  { "mpn_set_str",          speed_mpn_set_str,     FLAG_R_OPTIONAL },
+  { "mpn_set_str_basecase", speed_mpn_bc_set_str,  FLAG_R_OPTIONAL },
 
   { "mpn_sqrtrem",       speed_mpn_sqrtrem          },
   { "mpn_rootrem",       speed_mpn_rootrem, FLAG_R  },
@@ -324,14 +405,18 @@ const struct routine_t {
 
   { "mpz_add",           speed_mpz_add              },
   { "mpz_bin_uiui",      speed_mpz_bin_uiui, FLAG_NODATA | FLAG_R_OPTIONAL },
+  { "mpz_bin_ui",        speed_mpz_bin_ui,   FLAG_NODATA | FLAG_R_OPTIONAL },
   { "mpz_fac_ui",        speed_mpz_fac_ui,   FLAG_NODATA   },
   { "mpz_powm",          speed_mpz_powm             },
   { "mpz_powm_mod",      speed_mpz_powm_mod         },
   { "mpz_powm_redc",     speed_mpz_powm_redc        },
+  { "mpz_powm_sec",      speed_mpz_powm_sec        },
   { "mpz_powm_ui",       speed_mpz_powm_ui,  FLAG_R_OPTIONAL },
 
   { "mpz_mod",           speed_mpz_mod              },
   { "mpn_redc_1",        speed_mpn_redc_1           },
+  { "mpn_redc_2",        speed_mpn_redc_2           },
+  { "mpn_redc_n",        speed_mpn_redc_n           },
 
   { "MPN_COPY",          speed_MPN_COPY             },
   { "MPN_COPY_INCR",     speed_MPN_COPY_INCR        },
@@ -343,18 +428,70 @@ const struct routine_t {
 #if HAVE_NATIVE_mpn_copyd
   { "mpn_copyd",         speed_mpn_copyd            },
 #endif
-#if HAVE_NATIVE_mpn_addlsh1_n
-  { "mpn_addlsh1_n",     speed_mpn_addlsh1_n        },
+  { "mpn_sec_tabselect", speed_mpn_sec_tabselect, FLAG_R_OPTIONAL },
+#if HAVE_NATIVE_mpn_addlsh1_n == 1
+  { "mpn_addlsh1_n",     speed_mpn_addlsh1_n, FLAG_R_OPTIONAL },
 #endif
-#if HAVE_NATIVE_mpn_sublsh1_n
-  { "mpn_sublsh1_n",     speed_mpn_sublsh1_n        },
+#if HAVE_NATIVE_mpn_sublsh1_n == 1
+  { "mpn_sublsh1_n",     speed_mpn_sublsh1_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addlsh1_n_ip1
+  { "mpn_addlsh1_n_ip1", speed_mpn_addlsh1_n_ip1    },
+#endif
+#if HAVE_NATIVE_mpn_addlsh1_n_ip2
+  { "mpn_addlsh1_n_ip2", speed_mpn_addlsh1_n_ip2    },
+#endif
+#if HAVE_NATIVE_mpn_sublsh1_n_ip1
+  { "mpn_sublsh1_n_ip1", speed_mpn_sublsh1_n_ip1    },
+#endif
+#if HAVE_NATIVE_mpn_rsblsh1_n == 1
+  { "mpn_rsblsh1_n",     speed_mpn_rsblsh1_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addlsh2_n == 1
+  { "mpn_addlsh2_n",     speed_mpn_addlsh2_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_sublsh2_n == 1
+  { "mpn_sublsh2_n",     speed_mpn_sublsh2_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addlsh2_n_ip1
+  { "mpn_addlsh2_n_ip1", speed_mpn_addlsh2_n_ip1    },
+#endif
+#if HAVE_NATIVE_mpn_addlsh2_n_ip2
+  { "mpn_addlsh2_n_ip2", speed_mpn_addlsh2_n_ip2    },
+#endif
+#if HAVE_NATIVE_mpn_sublsh2_n_ip1
+  { "mpn_sublsh2_n_ip1", speed_mpn_sublsh2_n_ip1    },
+#endif
+#if HAVE_NATIVE_mpn_rsblsh2_n == 1
+  { "mpn_rsblsh2_n",     speed_mpn_rsblsh2_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addlsh_n
+  { "mpn_addlsh_n",     speed_mpn_addlsh_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_sublsh_n
+  { "mpn_sublsh_n",     speed_mpn_sublsh_n, FLAG_R_OPTIONAL },
+#endif
+#if HAVE_NATIVE_mpn_addlsh_n_ip1
+  { "mpn_addlsh_n_ip1", speed_mpn_addlsh_n_ip1    },
+#endif
+#if HAVE_NATIVE_mpn_addlsh_n_ip2
+  { "mpn_addlsh_n_ip2", speed_mpn_addlsh_n_ip2    },
+#endif
+#if HAVE_NATIVE_mpn_sublsh_n_ip1
+  { "mpn_sublsh_n_ip1", speed_mpn_sublsh_n_ip1    },
+#endif
+#if HAVE_NATIVE_mpn_rsblsh_n
+  { "mpn_rsblsh_n",     speed_mpn_rsblsh_n, FLAG_R_OPTIONAL },
 #endif
 #if HAVE_NATIVE_mpn_rsh1add_n
-  { "mpn_rsh1add_n",     speed_mpn_rsh1add_n        },
+  { "mpn_rsh1add_n",     speed_mpn_rsh1add_n, FLAG_R_OPTIONAL },
 #endif
 #if HAVE_NATIVE_mpn_rsh1sub_n
-  { "mpn_rsh1sub_n",     speed_mpn_rsh1sub_n        },
+  { "mpn_rsh1sub_n",     speed_mpn_rsh1sub_n, FLAG_R_OPTIONAL },
 #endif
+
+  { "mpn_cnd_add_n",     speed_mpn_cnd_add_n, FLAG_R_OPTIONAL },
+  { "mpn_cnd_sub_n",     speed_mpn_cnd_sub_n, FLAG_R_OPTIONAL },
 
   { "MPN_ZERO",          speed_MPN_ZERO             },
 
@@ -385,8 +522,6 @@ const struct routine_t {
   { "count_trailing_zeros", speed_count_trailing_zeros, FLAG_NODATA | FLAG_R_OPTIONAL },
 
   { "udiv_qrnnd",             speed_udiv_qrnnd,             FLAG_R_OPTIONAL },
-  { "udiv_qrnnd_preinv1",     speed_udiv_qrnnd_preinv1,     FLAG_R_OPTIONAL },
-  { "udiv_qrnnd_preinv2",     speed_udiv_qrnnd_preinv2,     FLAG_R_OPTIONAL },
   { "udiv_qrnnd_c",           speed_udiv_qrnnd_c,           FLAG_R_OPTIONAL },
 #if HAVE_NATIVE_mpn_udiv_qrnnd
   { "mpn_udiv_qrnnd",         speed_mpn_udiv_qrnnd,         FLAG_R_OPTIONAL },
@@ -749,7 +884,7 @@ run_gnuplot (int argc, char *argv[])
   fprintf (fp, "set key left\n");
 
   /* designed to make it possible to see crossovers easily */
-  fprintf (fp, "set data style lines\n");
+  fprintf (fp, "set style data lines\n");
 
   fprintf (fp, "plot ");
   for (i = 0; i < num_choices; i++)
@@ -779,7 +914,7 @@ run_gnuplot (int argc, char *argv[])
 /* Return a limb with n many one bits (starting from the least significant) */
 
 #define LIMB_ONES(n) \
-  ((n) == BITS_PER_MP_LIMB ? MP_LIMB_T_MAX      \
+  ((n) == GMP_LIMB_BITS ? MP_LIMB_T_MAX      \
     : (n) == 0 ? CNST_LIMB(0)                   \
     : (CNST_LIMB(1) << (n)) - 1)
 
@@ -806,7 +941,7 @@ r_string (const char *s)
       {
         if (siz > 1 || siz < -1)
           printf ("Warning, r parameter %s truncated to %d bits\n",
-                  s_orig, BITS_PER_MP_LIMB);
+                  s_orig, GMP_LIMB_BITS);
         return l;
       }
   }
@@ -819,10 +954,10 @@ r_string (const char *s)
   if (strcmp (s, "bits") == 0)
     {
       mp_limb_t  l;
-      if (n > BITS_PER_MP_LIMB)
+      if (n > GMP_LIMB_BITS)
         {
           fprintf (stderr, "%ld bit parameter invalid (max %d bits)\n",
-                   n, BITS_PER_MP_LIMB);
+                   n, GMP_LIMB_BITS);
           exit (1);
         }
       mpn_random (&l, 1);
@@ -830,10 +965,10 @@ r_string (const char *s)
     }
   else  if (strcmp (s, "ones") == 0)
     {
-      if (n > BITS_PER_MP_LIMB)
+      if (n > GMP_LIMB_BITS)
         {
           fprintf (stderr, "%ld bit parameter invalid (max %d bits)\n",
-                   n, BITS_PER_MP_LIMB);
+                   n, GMP_LIMB_BITS);
           exit (1);
         }
       return LIMB_ONES (n);
