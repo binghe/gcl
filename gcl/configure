@@ -4888,17 +4888,6 @@ if test "$FOMITF" != "" ; then
     TO3FLAGS="$TO3FLAGS $FOMITF"
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking gcc version 12" >&5
-printf %s "checking gcc version 12... " >&6; }
-if $CC -v 2>&1|grep gcc |grep -q 'version 12'; then
-   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-printf "%s\n" "yes" >&6; }
-   assert_arg_to_cflags -fno-tree-vrp #Bug workaround
-else
-   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but
 # there are a few systems, like Next, where this doesn't work.
@@ -7707,10 +7696,10 @@ if test "$enable_immfix" != "no" ; then
     if test "$mem_top" != "0x0" ; then
 	if test "$mem_range" != "0x0" ; then
 
-printf "%s\n" "#define IM_FIX_BASE $mem_top" >>confdefs.h
+printf "%s\n" "#define IM_FIX_BASE ${mem_top}UL" >>confdefs.h
 
 
-printf "%s\n" "#define IM_FIX_LIM $mem_range" >>confdefs.h
+printf "%s\n" "#define IM_FIX_LIM ${mem_range}UL" >>confdefs.h
 
 	fi
     fi

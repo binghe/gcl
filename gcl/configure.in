@@ -491,14 +491,6 @@ if test "$FOMITF" != "" ; then
     TO3FLAGS="$TO3FLAGS $FOMITF"
 fi
 
-AC_MSG_CHECKING([gcc version 12])
-if $CC -v 2>&1|grep gcc |grep -q 'version 12'; then
-   AC_MSG_RESULT([yes])
-   assert_arg_to_cflags -fno-tree-vrp #Bug workaround
-else
-   AC_MSG_RESULT([no])
-fi
-
 # Step 1: set the variable "system" to hold the name and version number
 # for the system.  This can usually be done via the "uname" command, but
 # there are a few systems, like Next, where this doesn't work.
@@ -1541,8 +1533,8 @@ fi
 if test "$enable_immfix" != "no" ; then
     if test "$mem_top" != "0x0" ; then
 	if test "$mem_range" != "0x0" ; then 
-	    AC_DEFINE_UNQUOTED(IM_FIX_BASE,$mem_top,[beginning address for immediate fixnum range])
-            AC_DEFINE_UNQUOTED(IM_FIX_LIM,$mem_range,[size of immediate fixnum address space])
+	    AC_DEFINE_UNQUOTED(IM_FIX_BASE,${mem_top}UL,[beginning address for immediate fixnum range])
+            AC_DEFINE_UNQUOTED(IM_FIX_LIM,${mem_range}UL,[size of immediate fixnum address space])
 	fi
     fi
 fi
