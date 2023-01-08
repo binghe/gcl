@@ -1245,7 +1245,7 @@ init_main(void) {
   
 }
 
-#ifdef HAVE_PRINT_INSN_I386
+#ifdef HAVE_DIS_ASM_H
 
 #include "dis-asm.h"
 
@@ -1253,6 +1253,16 @@ static char b[4096],*bp;
 
 static int
 my_fprintf(void *v,const char *f,...) {
+  va_list va;
+  int r;
+  va_start(va,f);
+  bp+=(r=vsnprintf(bp,sizeof(b)-(bp-b),f,va));
+  va_end(va);
+  return r;
+}
+
+static int
+my_fprintf_styled(void *v,enum disassembler_style,const char *f,...) {
   va_list va;
   int r;
   va_start(va,f);
@@ -1274,29 +1284,29 @@ my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
 
 #endif
 
+
 DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
 
-#ifdef HAVE_PRINT_INSN_I386
+#ifdef OUTPUT_ARCH
 
   static disassemble_info i;
   void *v;
-  int (*s)();
+  void * (*s)();
   int j;
 
-  memset(&i,0,sizeof(i));
-#ifdef __i386__
-  i.disassembler_options="i386";
-#endif
-  i.fprintf_func=my_fprintf;
-  i.read_memory_func=my_read;
-  i.print_address_func=my_pa;
   bp=b;
 
   if ((v=dlopen("libopcodes.so",RTLD_NOW))) {
-    if ((s=dlsym(v,"print_insn_i386"))) {
-      j=s(addr,&i);
-      my_fprintf(NULL," ;");
-      return MMcons(make_simple_string(b),make_fixnum(j));
+    if ((s=dlsym(v,"init_disassemble_info"))) {
+      s(&i, stdout,(fprintf_ftype) my_fprintf,my_fprintf_styled);
+      i.read_memory_func=my_read;
+      i.print_address_func=my_pa;
+      if ((s=dlsym(v,"disassembler"))) {
+	disassembler_ftype disasm=(disassembler_ftype)(ufixnum)s(OUTPUT_ARCH,false,0,NULL);/*bfd_mach_x86_64*/
+	j=disasm(addr,&i);
+	my_fprintf(NULL," ;");
+	return MMcons(make_simple_string(b),make_fixnum(j));
+      }
     }
     massert(!dlclose(v));
   }

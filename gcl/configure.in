@@ -1397,7 +1397,17 @@ if test "$use" != "386-gnu" ; then #hurd can push .data below C stack, but sbrk(
     rm -rf foo.c foo
 
     if test "`cat gcl.script | wc -l`" != "0" ; then
-	AC_MSG_RESULT(got it)
+	AC_MSG_RESULT([got it])
+
+	AC_MSG_CHECKING([output_arch])
+	output_arch=`cat gcl.script |grep OUTPUT_ARCH|head -n 1|sed 's,.*(\(.*\)).*,\1,1'|cut -f1 -d:`;
+	if test "$output_arch" != "" ; then
+	    AC_DEFINE_UNQUOTED(OUTPUT_ARCH,bfd_arch_${output_arch},[bfd output arch])
+     	    AC_MSG_RESULT([bfd_arch_${output_arch}])
+	else
+     	    AC_MSG_RESULT([not found])
+	fi
+
 	AC_MSG_NOTICE([trying to adjust text start])
 	cp gcl.script gcl.script.def
 	
@@ -1969,7 +1979,7 @@ AC_CHECK_HEADERS(dis-asm.h,
 		 MLIBS=$LIBS
 		 AC_CHECK_LIB(opcodes,init_disassemble_info)
 		 AC_CHECK_LIB(dl,dlopen,#opcodes changes too quickly to link directly 
-			      AC_CHECK_FUNCS(print_insn_i386,LIBS="$MLIBS -ldl")))
+			      LIBS="$MLIBS -ldl"))
 
 #if test $use = "386-linux" ; then
 AC_CHECK_HEADERS(asm/sigcontext.h)

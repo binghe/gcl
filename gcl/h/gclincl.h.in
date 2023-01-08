@@ -177,9 +177,6 @@
 /* output_bfd element present */
 #undef HAVE_OUTPUT_BFD
 
-/* Define to 1 if you have the `print_insn_i386' function. */
-#undef HAVE_PRINT_INSN_I386
-
 /* have putenv call */
 #undef HAVE_PUTENV
 
@@ -237,8 +234,14 @@
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
+
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <time.h> header file. */
+#undef HAVE_TIME_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
@@ -318,6 +321,9 @@
 /* extern inline semantics */
 #undef OLD_INLINE
 
+/* bfd output arch */
+#undef OUTPUT_ARCH
+
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
 
@@ -368,6 +374,9 @@
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG
+
+/* The size of `time_t', as computed by sizeof. */
+#undef SIZEOF_TIME_T
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be

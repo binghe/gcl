@@ -7484,6 +7484,21 @@ printf %s "checking finding default linker script... " >&6; }
     if test "`cat gcl.script | wc -l`" != "0" ; then
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: got it" >&5
 printf "%s\n" "got it" >&6; }
+
+	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking output_arch" >&5
+printf %s "checking output_arch... " >&6; }
+	output_arch=`cat gcl.script |grep OUTPUT_ARCH|head -n 1|sed 's,.*(\(.*\)).*,\1,1'|cut -f1 -d:`;
+	if test "$output_arch" != "" ; then
+
+printf "%s\n" "#define OUTPUT_ARCH bfd_arch_${output_arch}" >>confdefs.h
+
+     	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: bfd_arch_${output_arch}" >&5
+printf "%s\n" "bfd_arch_${output_arch}" >&6; }
+	else
+     	    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: not found" >&5
+printf "%s\n" "not found" >&6; }
+	fi
+
 	{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: trying to adjust text start" >&5
 printf "%s\n" "$as_me: trying to adjust text start" >&6;}
 	cp gcl.script gcl.script.def
@@ -9226,17 +9241,7 @@ printf "%s\n" "$ac_cv_lib_dl_dlopen" >&6; }
 if test "x$ac_cv_lib_dl_dlopen" = xyes
 then :
   #opcodes changes too quickly to link directly
-
-  for ac_func in print_insn_i386
-do :
-  ac_fn_c_check_func "$LINENO" "print_insn_i386" "ac_cv_func_print_insn_i386"
-if test "x$ac_cv_func_print_insn_i386" = xyes
-then :
-  printf "%s\n" "#define HAVE_PRINT_INSN_I386 1" >>confdefs.h
- LIBS="$MLIBS -ldl"
-fi
-
-done
+			      LIBS="$MLIBS -ldl"
 fi
 
 fi
