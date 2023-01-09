@@ -1287,7 +1287,7 @@ my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
 
 DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
 
-#ifdef OUTPUT_ARCH
+#if defined(HAVE_DIS_ASM_H) && defined(OUTPUT_ARCH)
 
   static disassemble_info i;
   void *v;

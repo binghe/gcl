@@ -8751,6 +8751,7 @@ printf %s "checking RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION... " >&6; }
                                  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                                                  #include <stdio.h>
                                                   #include <readline/readline.h>
 						  extern Function *rl_completion_entry_function __attribute__((weak));
 
@@ -8777,6 +8778,7 @@ printf %s "checking RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T... " >
                                          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                                                          #include <stdio.h>
 		                                          #include <readline/readline.h>
 							  extern rl_compentry_func_t *rl_completion_entry_function __attribute__((weak));
 
@@ -8809,6 +8811,7 @@ printf %s "checking RL_READLINE_NAME_TYPE_CHAR... " >&6; }
                                  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                                                  #include <stdio.h>
 		                                  #include <readline/readline.h>
 		                                  extern char *rl_readline_name __attribute__((weak));
 
@@ -8835,6 +8838,7 @@ printf %s "checking RL_READLINE_NAME_TYPE_CONST_CHAR... " >&6; }
                                          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                                                          #include <stdio.h>
 		                                          #include <readline/readline.h>
 		                                          extern const char *rl_readline_name __attribute__((weak));
 
