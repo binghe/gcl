@@ -1292,9 +1292,8 @@ DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE
   static disassemble_info i;
   void *v;
   void * (*s)();
-  int j;
-
-  bp=b;
+  fixnum j,j1,k;
+  object x;
 
   if ((v=dlopen("libopcodes.so",RTLD_NOW))) {
     if ((s=dlsym(v,"init_disassemble_info"))) {
@@ -1303,9 +1302,18 @@ DEFUN_NEW("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE
       i.print_address_func=my_pa;
       if ((s=dlsym(v,"disassembler"))) {
 	disassembler_ftype disasm=(disassembler_ftype)(ufixnum)s(OUTPUT_ARCH,false,0,NULL);/*bfd_mach_x86_64*/
-	j=disasm(addr,&i);
+	bp=b;
+	disasm(addr,&i);
 	my_fprintf(NULL," ;");
-	return MMcons(make_simple_string(b),make_fixnum(j));
+	x=make_simple_string(b);
+
+	j1=j=(addr-16)&(~16UL);
+	bp=b;
+	for (k=0;k<16;k++) {
+	  j+=disasm(j,&i);
+	  my_fprintf(NULL," ;");
+	}
+	return MMcons(x,MMcons(make_simple_string(b),make_fixnum(j-j1)));
       }
     }
     massert(!dlclose(v));
