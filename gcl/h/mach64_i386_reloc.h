@@ -16,6 +16,8 @@
     *got=a;
     a=(ul)got;
 
+  case X86_64_RELOC_SIGNED_1:		// for signed 32-bit displacement with -1 addend,
+                                        //   apparently already in *q
   case X86_64_RELOC_SIGNED:		// for signed 32-bit displacement
   case X86_64_RELOC_BRANCH:		// a CALL/JMP instruction with 32-bit displacement
 
