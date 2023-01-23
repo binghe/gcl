@@ -419,7 +419,7 @@
 		     (t (error "should not get here")))
 	       )))
     (c1expr (cons fun args))))
-(defun shift>> (a b) (ash a  b))
+(defun shift>> (a b) (ash a  (- b)))
 (defun shift<< (a b) (ash a  b))
 (si:putprop 'ash '(c1ash-condition . c1ash)  'c1conditional)
 (si:putprop 'shift>> "Lash" 'lfun)
