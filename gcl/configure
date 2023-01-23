@@ -7091,8 +7091,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		    #include <stdio.h>
-		    #include <stdlib.h>
+		    #include "h/unrandomize_headers.h"
 		    int main(int argc,char *argv[],char *envp[]) {
 			#include "h/unrandomize.h"
 			return 0;
@@ -7128,8 +7127,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		    #include <stdio.h>
-		    #include <stdlib.h>
+		    #include "h/unrandomize_headers.h"
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -7165,8 +7163,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		    #include <stdio.h>
-		    #include <stdlib.h>
+		    #include "h/unrandomize_headers.h"
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -7215,8 +7212,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include <stdio.h>
-		#include <stdlib.h>
+  		#include "h/unrandomize_headers.h"
 		int main(int argc,char **argv,char **envp) {
 		    FILE *fp = fopen("conftest1","w");
 		    #ifdef CAN_UNRANDOMIZE_SBRK
@@ -7255,8 +7251,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int main(int argc,char **argv,char **envp) {
 		    void *b,*c;
 		    FILE *fp = fopen("conftest1","w");
@@ -7311,8 +7306,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int
 		main(int argc,char **argv,char **envp) {
 		    FILE *fp = fopen("conftest1","w");
@@ -7362,8 +7356,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
@@ -7415,8 +7408,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int
 		main(int argc,char **argv,char **envp) {
 		    #ifdef CAN_UNRANDOMIZE_SBRK

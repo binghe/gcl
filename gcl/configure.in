@@ -1181,8 +1181,7 @@ if test "$HAVE_SBRK" = "1" ; then
     AC_RUN_IFELSE(
 	[AC_LANG_SOURCE(
 		[[
-		    #include <stdio.h>
-		    #include <stdlib.h>
+		    #include "h/unrandomize_headers.h"
 		    int main(int argc,char *argv[],char *envp[]) {
 			#include "h/unrandomize.h"
 			return 0;
@@ -1197,8 +1196,7 @@ if test "$HAVE_SBRK" = "1" ; then
     AC_RUN_IFELSE(
 	[AC_LANG_SOURCE(
 		[[
-		    #include <stdio.h>
-		    #include <stdlib.h>
+		    #include "h/unrandomize_headers.h"
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1218,8 +1216,7 @@ if test "$HAVE_SBRK" = "1" ; then
     AC_RUN_IFELSE(
 	[AC_LANG_SOURCE(
 		[[
-		    #include <stdio.h>
-		    #include <stdlib.h>
+		    #include "h/unrandomize_headers.h"
 		    int main(int argc,char * argv[],char * envp[]) {
 			FILE *f;
 			#ifdef CAN_UNRANDOMIZE_SBRK
@@ -1249,8 +1246,7 @@ AC_MSG_CHECKING(CSTACK_DIRECTION)
 AC_RUN_IFELSE(
     [AC_LANG_SOURCE(
 	    [[
-		#include <stdio.h>
-		#include <stdlib.h>
+  		#include "h/unrandomize_headers.h"
 		int main(int argc,char **argv,char **envp) {
 		    FILE *fp = fopen("conftest1","w");
 		    #ifdef CAN_UNRANDOMIZE_SBRK
@@ -1268,8 +1264,7 @@ AC_MSG_CHECKING([finding CSTACK_ALIGNMENT])
 AC_RUN_IFELSE(
     [AC_LANG_SOURCE(
 	    [[
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int main(int argc,char **argv,char **envp) {
 		    void *b,*c;
 		    FILE *fp = fopen("conftest1","w");
@@ -1297,8 +1292,7 @@ AC_MSG_CHECKING(CSTACK_ADDRESS)
 AC_RUN_IFELSE(
     [AC_LANG_SOURCE(
 	    [[
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int
 		main(int argc,char **argv,char **envp) {
 		    FILE *fp = fopen("conftest1","w");
@@ -1327,8 +1321,7 @@ AC_MSG_CHECKING([cstack bits])
 AC_RUN_IFELSE(
     [AC_LANG_SOURCE(
 	    [[
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int
 		main(int argc,char **argv,char **envp) {
 		    void *v ;
@@ -1359,8 +1352,7 @@ AC_MSG_CHECKING(NEG_CSTACK_ADDRESS)
 AC_RUN_IFELSE(
     [AC_LANG_SOURCE(
 	    [[
-		#include <stdio.h>
-		#include <stdlib.h>
+		#include "h/unrandomize_headers.h"
 		int
 		main(int argc,char **argv,char **envp) {
 		    #ifdef CAN_UNRANDOMIZE_SBRK

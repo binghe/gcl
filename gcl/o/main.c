@@ -516,6 +516,8 @@ which(const char *n,char *o) {
 static int ARGC;
 static char **ARGV;
 
+#include "unrandomize_headers.h"
+
 int
 main(int argc, char **argv, char **envp) {
 

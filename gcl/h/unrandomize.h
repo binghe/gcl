@@ -1,11 +1,3 @@
-#include <sys/personality.h>
-#include <sys/mman.h>
-#include <syscall.h>
-#include <unistd.h>
-#include <string.h>
-#include <alloca.h>
-#include <errno.h>
-
 {
   errno=0;
 
