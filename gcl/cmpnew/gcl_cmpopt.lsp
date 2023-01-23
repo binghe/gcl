@@ -1280,11 +1280,6 @@
 ;; type_of(#0)==t_bitvector")
 ;;    (get 'vectorp 'inline-always))
 
-;;WRITE-CHAR
- (push '((t) t #.(flags set)
-  "@0;(writec_stream(char_code(#0),Vstandard_output->s.s_dbind),(#0))")
-   (get 'write-char 'inline-unsafe))
-
 ;;EVENP
 (push '((t) boolean #.(compiler::flags) "immnum_evenp(#0)") (get 'evenp 'compiler::inline-always))
 ;;ODDP
