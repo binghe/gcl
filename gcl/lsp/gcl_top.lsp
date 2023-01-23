@@ -130,6 +130,7 @@
       (cond ((equal x "-load") (load (pop args)))
 	    ((equal x "-eval") (eval (read-from-string (pop args))))
 	    ((equal x "-batch") (setq *top-level-hook* 'bye))
+	    ((or (equal x "-v") (equal x "--version")) (format t "~a~%" (lisp-implementation-version)) (setq *top-level-hook* 'bye))
 	    ((equal x "-o-file") (unless (read-from-string (car args))
 				   (push (cons :o-file nil) compile)
 				   (pop args)))
