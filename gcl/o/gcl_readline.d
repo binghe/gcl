@@ -109,7 +109,7 @@ rl_completion_words(const char *text, int state) {
       }
     }
     
-    package=package ? package : user_package;
+    package=(package!=OBJNULL && package!=Cnil) ? package : user_package;
     use=package->p.p_uselist;
     internal=temp && temp[1]==':' ? 1 : 0;
     ftext=text;
