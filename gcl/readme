@@ -160,7 +160,7 @@ A new compiler has been written, which is closer to the ANSI standard
 and provides some other benefits.   It will be in a future release.
 We will need people willing to beta test and isolate any bugs.
 
-Additonal work planned or desired:
+Additional work planned or desired:
 
   * Clean up distribution and installation.  Make it easier to link in
 C code such as Novak's window stuff.   Faslink is not portable (since

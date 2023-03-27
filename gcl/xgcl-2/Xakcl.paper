@@ -23,7 +23,7 @@
 		B. Creating and Using Windows
 
 			1. Creating Windows 
-			2. Controling Window attributes
+			2. Controlling Window attributes
 			3. Getting Window Geometry
 
 		C. How to Use the Graphics Context
@@ -64,11 +64,11 @@ All rights reserved.  See section G for full copyright statement.
 	Xakcl is the basic Xwindows library for Akcl lisp (the C
 header files for the library correspond to Xlib.h, Xutil.h, and X.h).
 Since Xakcl supports only the basic Xwindows library, Xakcl
-programming is intended to be a low level programming aproach to
+programming is intended to be a low level programming approach to
 graphics.  As a consequence, any Xwindows program written in C can
 also be written in Xakcl, with little cost in performance.  The
-primitive operations range from controling minute details in color, to
-creating pixmaps, and configuring windows.  Thus a programer using
+primitive operations range from controlling minute details in color, to
+creating pixmaps, and configuring windows.  Thus a programmer using
 xakcl can exploit both the extensibility of Xwindows graphics
 capabilities and the ease of lisp programming.
 
@@ -80,12 +80,12 @@ library routines and programming conventions would be helpful but is
 not required.  All X functions in Xakcl begin with the letter 'X' ,
 unless otherwise mentioned.  The Syntax and names of Xakcl functions
 are kept as closely to the X library functions as possible, so that a
-user of the Xwindows' C libary will have no trouble in learning how to
+user of the Xwindows' C library will have no trouble in learning how to
 use Xakcl.  Of course this also makes translation of X programs in C,
 into Lisp easier.  For an introduction to X programming in C 'Xlib
 Programming Manual for version 11' by Adrian Nye is suggested.  Also,
 any reference manual on the X library would be helpful, since the
-names of Xakcl functions are identical to those of the C libararies'
+names of Xakcl functions are identical to those of the C libraries'
 functions.
 
 
@@ -107,7 +107,7 @@ I. Initializing the Display
 
 
 In the X windows system, a display on which graphics is being
-done must be specified.  The display is initilized by calling the X
+done must be specified.  The display is initialised by calling the X
 function XOpenDisplay.  For example,
 
 
@@ -123,7 +123,7 @@ can only handle events for one display at a time.
 
 	Creating many displays could be useful for applications with
 many different windows, but there is a performance cost.  It usually
-takes the X serever some time to return a display ID.
+takes the X server some time to return a display ID.
 
 
 
@@ -144,7 +144,7 @@ commands:
 
 
 The default screen is the screen on which graphics will be
-drawn, and the root window, is the window that the X serever creates
+drawn, and the root window, is the window that the X server creates
 from which all other windows are created.  This is the window that is
 created with the call to xstart, and resides in the background.
 
@@ -187,7 +187,7 @@ on how drawings will be done.  The line width will be determined by
 the graphics context, as well as the color and the way lines join (if
 they join at a rounded edge or at an angle.)  For now, only the
 creation of the graphics context will be of concern.  XDefaultGC will
-get a default grapics context.  For example:
+get a default graphics context.  For example:
 
 
 (setq *default-GC* (XDefaultGC  *default-display*  *default-screen*))
@@ -211,7 +211,7 @@ example, when using XDrawString, X will use the foreground pixel, in
 this case, Black in the GC to draw the string.  Also, XDrawImageString
 could be used.  This routine, X draws the string in the foreground
 pixel and fills the background with the background pixel.  If the
-foregorund and background pixels were switched than the string would
+foreground and background pixels were switched than the string would
 be white letters on a black background.  This is an example of
 highlighting text.
 
@@ -226,7 +226,7 @@ colormap allows the user to match pixel values to an rgb value.  The
 black pixel created by XBlackPixel is an example of a pixel value.  A
 colormap may or may not have the exact color that is being requested.
 The closest pixel value is given to the user.  In order to get a set
-of specific colors it is necesary to create a unique colormap, however
+of specific colors it is necessary to create a unique colormap, however
 for most applications, the default colormap will do.  An example of
 creating a default colormap is shown below.
 
@@ -296,7 +296,7 @@ structure, and it's initialization.
 
 	Like all Xwindows structures in Xakcl, XSizeHints can be
 created using the function make followed by the type name of the
-struture (note however that unlike Xsizehints, the graphics context is
+structure (note however that unlike Xsizehints, the graphics context is
 created using the X function XCreateGC.  The reason is that X provides
 a means of creating this structure, while the 'make' facility is
 provided to make C's struct in lisp).  The fields in the structure is
@@ -319,7 +319,7 @@ windows in the root window.
 the display, the window being managed, the window name, and the icon
 name.  XSetStandardProperties also expects three other parameters, an
 icon_pixmap, which will represent the window when it is iconized, and
-two arguments coressponding to resource information. Both these
+two arguments corresponding to resource information. Both these
 featrues are beyond the scope of this paper (see 'Xlib Programming
 Manual for version 11' for more information).  After
 XSetStandardProperties tells the window manager what to do, the window
@@ -329,7 +329,7 @@ window on the screen.
 (Xmapwindow *default-display* a-window)
 
 	The above function will map the window.  Only one last
-function needs to be caled for a window to appear on the screen.  This
+function needs to be called for a window to appear on the screen.  This
 function is XFlush.  This function, or another function that affects
 the event queue (discussed later) must be called whenever there is a
 drawing request for the X server.
@@ -344,8 +344,8 @@ scaling measurements.  Like most operations in X, there are two ways
 to change window attributes.  The attributes could be changed directly
 by calling XChangeWindowAttributes with one of the parameters being a
 C structure, with the new information, and another parameter to
-specifiy which attribute is being changed.  This could be clumbersome
-and inefficeint in lisp, but fortunately X usually provides a
+specify which attribute is being changed.  This could be clumbersome
+and inefficient in lisp, but fortunately X usually provides a
 functional way of doing a task.  Some functions for changing the
 window attributes are listed.  Like most functions in X the names are
 self descriptive of the function.
@@ -362,10 +362,10 @@ XDefineCursor
 
 
 	As can be seen, the regularity in nameing conventions of X
-routines.  Only the function XSelectInput will be discussd in this
+routines.  Only the function XSelectInput will be discussed in this
 report (see section E).  The list shown is meant to demonstrate how X
-names functions, and how X can provid for functional equivalents for
-most operations.  (Ofcourse any function that is not provided by X can
+names functions, and how X can provide for functional equivalents for
+most operations.  (Of course any function that is not provided by X can
 be written in lisp using primitive operations like
 XChangeWindowAttributes.  The same applies for all objects in X.)
 
@@ -386,16 +386,16 @@ is an example of a call to XGetGeometry.
 	*height-return* *border-width-return* *depth-return*) 
 
 	The values that are returned by XGetGeometry is pointed to by
-the parameters that are denoted by teh word 'return'.  A root of a
+the parameters that are denoted by the word 'return'.  A root of a
 window can be extracted, along with it's position, and size. Its
 border width can also be returned, along with it's depth ( a depth
 tells X how many colors can be drawn for a drawble).  This functions
-also demonstrates how poitners are used in Xakcl to return multiple
+also demonstrates how pointers are used in Xakcl to return multiple
 values.  It is necessary to allocate an area of memory in order to
 write into that memory locations.  The functions int-array and
 char-array will create a C array of integers and characters
 respectively.  A pointer to the array is returned. XGetGemoetry
-expects pointers to integers so it is necessary to alocate integer
+expects pointers to integers so it is necessary to allocate integer
 arrays of one element.  For example:
 
 
@@ -449,7 +449,7 @@ i. XSetBackGround and XSetForeGround.
 	XSetForeground and XSetBackground sets the foreground and
 background pixel as mentioned in section A.  In order to Allocate a
 pixel besides black and white, a call to XAllocNamedColor must be
-done.  XAllocNamedColor needs two Xcolor structrues, so they must be
+done.  XAllocNamedColor needs two Xcolor structures, so they must be
 created as well. For example:
 
 (setq pixel-xcolor (make-Xcolor))	
@@ -457,7 +457,7 @@ created as well. For example:
 (XAllocNamedColor display colormap  (get-c-string color) pixel-xcolor exact-rgb)
 
 	The above function will return a pixel value in the structure
-pixel-color.  this informaion can be extracted with (Xcolor-pixel
+pixel-color.  this information can be extracted with (Xcolor-pixel
 pixel-xcolor).  XAllocNamedColo also expects a colormap (the default
 colormap will do), a display, and a String specifying the color (for a
 list of colors see the file rgb.txt in /usr/lib/X11). Thus the
@@ -466,8 +466,8 @@ color.
 
 (Xsetforeground display GC (Xcolor-pixel  pixel-xcolor))
 
-	Similair to Xsetforeground, XSetBackGround will cause all
-drawings needing the background color to use the sepcified pixel
+	Similar to Xsetforeground, XSetBackGround will cause all
+drawings needing the background color to use the specified pixel
 value.
 
 
@@ -486,7 +486,7 @@ the way lines join.  The width is an integer, while line-style,
 cap-style and join-style are constants.  The default styles are
 LineSolid, CapButt, and JoinMitter.  This will make lines appear
 solid.  They will join at a sharp angle and the lines will end in a
-flat edge.  See any X refernce manual for the complete options on the
+flat edge.  See any X reference manual for the complete options on the
 line styles.
 
 
@@ -514,7 +514,7 @@ fid).
 
 iv. XSetFunction
 
-	Xwindows draws by applying bit operations on the pixel vlaues
+	Xwindows draws by applying bit operations on the pixel values
 on the screen along with a mask that it creates called the plan_mask.
 Most often only the pixel already on the screen is manipulated.  This
 default logical operation is GXcopy (which is the default).  However
@@ -528,9 +528,9 @@ specified with a call to XSetFunction.
 	The above function will make X draw ghost images in mono color
 screens using the function Xor.  The pixel value on the screen is
 Xored with the pixel value of the plan_mask (which is derived from the
-foregroudn color).  On color screens the foregorund color must be set
+foreground color).  On color screens the foreground color must be set
 to (logxor foreground-pixel background-pixel) in order for ghosting
-effects to occurr.  Below is the complete function for ghosting
+effects to occur.  Below is the complete function for ghosting
 effects.
 
 (Xsetforeground  *default-display* *default-GC* (logxor foreground-pixel background-pixel ))
@@ -541,7 +541,7 @@ II.  Getting Information from the Graphics Context
 
 	In the above function, the foreground-pixel and
 background-pixel must be extracted from the graphics context.  In
-order to get information from the graphcis context the function
+order to get information from the graphics context the function
 XGetGCVlues must be used.  XGetGCVlues is an example of a X function
 that expects a structure, and a value mask.  Below are functions for
 extracted the foreground color from the graphics context.  Other
@@ -591,7 +591,7 @@ request.
 II. Drawing Rectangles
 
 	Drawing Rectangles is similar to drawing lines.  The only
-difference is that the size of the recatangle must be specified.
+difference is that the size of the rectangle must be specified.
 
 
 	 (XDrawRectangle *default-display* a-window *default-GC* 
@@ -604,7 +604,7 @@ The function expects the x and y position and the width and height.
 
 II. Drawing Arcs.
 
-	Arcs can form enclosed areas such as elipses or cirlces or
+	Arcs can form enclosed areas such as ellipses or circles or
 they could be a curved line.  The function XDrawArc will draw arcs.
 
 
@@ -613,7 +613,7 @@ they could be a curved line.  The function XDrawArc will draw arcs.
 
 	This function call will draw a circle.  The Arc will be
 bounded by a rectangle.  The points 100 100 correspond to the upper
-left edge of the recatangle. 10 and 10 specifies the width and height
+left edge of the rectangle. 10 and 10 specifies the width and height
 respectively.  The starting and ending position of the arc must also
 be specified.  These two points are in sixty-fourths of a degrees.
 The first angle is relative to the three-o'clock position and the
@@ -630,18 +630,18 @@ III.  Drawing Text
 
 	With the font loaded in the Graphics Context as shown in
 Section C, several functions can be called in order to draw text.
-Only XDrawString will be dicussed here, but the other functions are
+Only XDrawString will be discussed here, but the other functions are
 similar.
 
 (XDrawString  *default-display*   a-window  *default-GC*  10 15 (get-c-string "hello") 4)
 (Xflush *default-display*)
 
 	The above function will draw the string 'hello' at positions
-10, 15 with the font specified in the default grpahics context.
+10, 15 with the font specified in the default graphics context.
 XDrawString also expects the length of the string (in this case 4),
 and the display.
 
-	Often it is necesssary to the size of the string (the
+	Often it is necessary to the size of the string (the
 rectangle that bounds the string). This can be done with a call to
 XTextExtents.
 
@@ -664,9 +664,9 @@ width (an ascent tells how far above a baseline a character is drawn,
 while the descent tells how far below).  After a call to XTextExtents,
 the ascent will be have the maximum ascent of all the characters in
 the string.  Likewise the descent will have the maximum descent of all
-the characters.  The width will be the sum of the characer width of
+the characters.  The width will be the sum of the character width of
 all the characters in the string (thus the width of the string in
-number of pixels).  From this information, the user shouldbe able to
+number of pixels).  From this information, the user should be able to
 position text precisely on the screen.
 
 
@@ -677,15 +677,15 @@ E. Handling Events
 
 	So far only request to the X server to do output on the screen
 have been discussed.  X also has a means of getting information about
-what is inputed by a user as well.  The inputs can range from moving
+what is inputted by a user as well.  The inputs can range from moving
 or clicking the mouse to keys being pressed on the keyboard.  The
-input also encompases events like a window being uncovered or exposed
+input also encompasses events like a window being uncovered or exposed
 by another window, or a window being resized.  
 
 
 I.  Setting the Input
 
-	These inputs are called Events.  The Events themseleves only
+	These inputs are called events.  The events themselves only
 have meaning when they pertain to a window.  In other words, events
 occur in windows.  Thus an attribute of the window must be set.  The
 function XSelectInput must be used.
@@ -698,7 +698,7 @@ Events, PointerMotion Events, and Exposure Event can occur.  As can be
 seen this is specified using mask (for other mask see a Xlib manual or
 the file X.lsp or X.h).
 
-	After Specifiying the input, all events that occur in that
+	After specifying the input, all events that occur in that
 will go on the event queue.  The event queue is a queue of what events
 have occurred, the first one being on top.  The client can both get
 information form the queue and manipulate the queue.  
@@ -762,12 +762,12 @@ XSync can be used to do this.  For example:
 
 		F. Conclusion
 
-	With the commands demonstarted in this tutorial, most
+	With the commands demonstrated in this tutorial, most
 applications can be managed.  Windows can be created, and graphics
 operations can be performed.  For more complex applications a widget
 set can be created similar to the X Intrinsics library and the Athena
 Widget Set.  For a lisp like implementation of widgets and an advance
-aplications see the GWM application, in the GWM Manual by Colas
+applications see the GWM application, in the GWM Manual by Colas
 Nahaboo.  GWM is a generic window manager, that is similar to Xakcl.
 It supports objects that are similar to Widgets in most C Xwindows
 libraries.

@@ -681,7 +681,7 @@ the @t{:test} option to @b{restart-case}.
 
 A @i{restart} can be ``associated with'' a @i{condition} explicitly
 by @b{with-condition-restarts}, or implicitly by @b{restart-case}.
-Such an assocation has @i{dynamic extent}.
+Such an association has @i{dynamic extent}.
 
 A single @i{restart} may be associated with several @i{conditions} 
 at the same time.
@@ -2075,7 +2075,7 @@ This and the lack of any possibility of interception by
 differences between @b{break} and @b{cerror}.
 
 The user interface aspects of @b{break} and @b{cerror} are
-permitted to vary more widely, in order to accomodate the interface
+permitted to vary more widely, in order to accommodate the interface
 needs of the @i{implementation}. For example, it is permissible for a
 @i{Lisp read-eval-print loop} to be entered by @b{break} rather
 than the conventional debugger.
@@ -3464,7 +3464,7 @@ by the @b{restart-case} clause to receive any necessary data from a call
 to @b{invoke-restart}.
 
 By default, @b{invoke-restart-interactively} passes no arguments and
-all arguments must be optional in order to accomodate interactive
+all arguments must be optional in order to accommodate interactive
 restarting.  However, the arguments need not be optional if the
 @t{:interactive} 
 keyword has been used to inform @b{invoke-restart-interactively}

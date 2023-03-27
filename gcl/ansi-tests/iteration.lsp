@@ -121,7 +121,7 @@
 	(%f))))
   45)
 
-;;; Confirm that the variables in succesive iterations are
+;;; Confirm that the variables in successive iterations are
 ;;; identical
 (deftest do.15
   (mapcar #'funcall
@@ -240,7 +240,7 @@
 	(%f))))
   45)
 
-;;; Confirm that the variables in succesive iterations are
+;;; Confirm that the variables in successive iterations are
 ;;; identical
 (deftest do*.15
   (mapcar #'funcall

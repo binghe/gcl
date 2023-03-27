@@ -27,10 +27,10 @@
 ;;large extent.  it would be beneficial to use a X 11 version 4, manual
 ;;in order to look up functions.  the only unique functions of Xakcl are those
 ;;that involove manipulating C structs. all functions involved in creating
-;;a C struct in X starts with a 'make' followed by the structure name.  all
+;;a C struct in X starts with a 'make' followed by the structure name.  All
 ;;functions involved in getting a field of a C struct strats with the
 ;;name of the C struct followed by the name of the field.  the
-;;parameters it excepts is the variable contaning the structure.  all
+;;parameters it excepts is the variable containing the structure.  All
 ;;functions to set a field of a C struct starts with 'set' followed by
 ;;the C struct name followed by the field name.  these functions accept
 ;;as parameter, the variable containing the struct and the value to be
@@ -102,8 +102,8 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
-;;this is an example of creating a window.  this function takes care of
-;;positioning, size and other attirbutes of the window.
+;;This is an example of creating a window.  This function takes care of
+;;positioning, size and other attributes of the window.
 
 (defun open-window(&key (pos-x  *pos-x* ) (pos-y  *pos-y*) (win-width *win-width*) 
 			(win-height *win-height* ) 
@@ -134,7 +134,7 @@
     (Xmapwindow *default-display* a-window)
 
 ;;the X server needs to have the output buffer sent to it before it can
-;;process requests.  this is acomplished with XFlush or functions that
+;;process requests.  this is accomplished with XFlush or functions that
 ;;read and manipulate the event queue.  remember to do this after
 ;;operations that won't be calling an eventhandling function
 

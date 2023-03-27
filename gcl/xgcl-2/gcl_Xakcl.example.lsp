@@ -227,7 +227,7 @@
 ;;the drawing goes so fast that you can't see the text invert, so the
 ;;function wiats for for about .2 seconds.  but it would be better to
 ;;keep the text inverted until the button is released this is done by
-;;setting the quit window to have buton release events as well and
+;;setting the quit window to have button release events as well and
 ;;handling it appropriately
 
 			(dotimes (i 1500))

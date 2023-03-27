@@ -2119,7 +2119,7 @@ is signaled.
 
 @b{translate-logical-pathname} might perform additional translations,
     typically to provide translation of file types to local naming
-    conventions, to accomodate physical file systems with limited length
+    conventions, to accommodate physical file systems with limited length
     names, or to deal with special character requirements such as
     translating hyphens to underscores or uppercase letters to lowercase.
     Any such additional translations are @i{implementation-defined}.  Some

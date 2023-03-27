@@ -996,7 +996,7 @@ If there is no @i{property} with that @i{property indicator},
 
 @b{setf} of @b{get} may be used to associate a new @i{object}
 with an existing indicator already on the @i{symbol}'s @i{property list},
-or to create a new assocation if none exists.
+or to create a new association if none exists.
 
 If there are multiple @i{properties}_1 with that @i{property indicator},
 @b{setf} of @b{get} associates the @i{new-value} 

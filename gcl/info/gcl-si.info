@@ -4228,19 +4228,19 @@ keyword is supplied to compile-file and *fasd-data* is not eq to
      restored by calling GPROF-SET with both argments set to 0.
 
  -- Variable: *DEFAULT-SYSTEM-P*
-     Pakcage:COMPILER Specifies the default setting of :SYSTEM-P used by
+     Package:COMPILER Specifies the default setting of :SYSTEM-P used by
      COMPILE. Defaults to NIL.
 
  -- Variable: *DEFAULT-C-FILE*
-     Pakcage:COMPILER Specifies the default setting of :C-FILE used by
+     Package:COMPILER Specifies the default setting of :C-FILE used by
      COMPILE. Defaults to NIL.
 
  -- Variable: *DEFAULT-H-FILE*
-     Pakcage:COMPILER Specifies the default setting of :H-FILE used by
+     Package:COMPILER Specifies the default setting of :H-FILE used by
      COMPILE. Defaults to NIL.
 
  -- Variable: *DEFAULT-DATA-FILE*
-     Pakcage:COMPILER Specifies the default setting of :DATA-FILE used
+     Package:COMPILER Specifies the default setting of :DATA-FILE used
      by COMPILE. Defaults to NIL.
 
  -- Variable: *FEATURES*

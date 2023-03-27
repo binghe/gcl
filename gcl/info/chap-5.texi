@@ -3595,7 +3595,7 @@ rather than @b{eql} in a way that cannot be overridden by the
 @subsubheading  Description::
 
 The value of @b{eql} is @i{true} of two objects, @i{x} and
-@i{y}, in the folowing cases:
+@i{y}, in the following cases:
 @table @asis
 
 @item 1.  

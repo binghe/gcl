@@ -61,7 +61,7 @@
 
 ;; invoke this to initialize maxima.
 
-;; make this if you dont want the invocation done automatically.
+;; make this if you don't want the invocation done automatically.
 ;(defentry user::user-init () "user_init")
 
 

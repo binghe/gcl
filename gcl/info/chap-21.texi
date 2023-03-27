@@ -867,9 +867,9 @@ restricted to @b{integer} or a @i{subtype} of @i{type} @b{character}.
 @subsubheading  Examples::
 
 @example
-;; Note that the stream must accomodate at least the specified type,
-;; but might accomodate other types.  Further note that even if it does
-;; accomodate exactly the specified type, the type might be specified in
+;; Note that the stream must accommodate at least the specified type,
+;; but might accommodate other types.  Further note that even if it does
+;; accommodate exactly the specified type, the type might be specified in
 ;; any of several ways.
  (with-open-file (s "test" :element-type '(integer 0 1)
                            :if-exists :error
@@ -2180,7 +2180,7 @@ and some aspects of the @i{file system} are beyond the scope of this specificati
 to define.  A given @i{implementation} might not be able to support all of these options 
 in exactly the manner stated.  An @i{implementation} is required to recognize all of 
 these option keywords and to try to do something ``reasonable'' in the context of the 
-host @i{file system}.  Where necessary to accomodate the @i{file system},
+host @i{file system}.  Where necessary to accommodate the @i{file system},
 an @i{implementation} deviate slightly from the semantics specified here without 
 being disqualified for consideration as a @i{conforming implementation}.
 If it is utterly impossible for an @i{implementation} to handle some option

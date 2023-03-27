@@ -2218,7 +2218,7 @@ transitive verb
   and that is one of:
       the @i{symbol} @t{:default} 
          (denoting an @i{implementation-dependent} default 
-          @i{external file format} that can accomodate at least
+          @i{external file format} that can accommodate at least
           the @i{base characters}),
       some other @i{object} defined by the @i{implementation} to be
       an @i{external file format designator}

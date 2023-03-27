@@ -211,7 +211,7 @@
   (loop for x from 1 to 5 do nil finally (return x))
   5)
 
-;;; Test that the index variable acheives the exclusive
+;;; Test that the index variable achieves the exclusive
 ;;; upper bound, but does not exceed it.
 (deftest loop.1.41
   (loop for x from 1 below 5 do nil finally (return x))

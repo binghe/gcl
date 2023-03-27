@@ -507,7 +507,7 @@ Faslink does not work on most UNIX systems which are derived from SYS V or AIX.
 @defun TOP-LEVEL ()
 Package:SI
 
-GCL specific: Starts the standard top-level listner of GCL.  When the GCL
+GCL specific: Starts the standard top-level listener of GCL.  When the GCL
 process is invoked, it calls SI:TOP-LEVEL by (FUNCALL 'SI:TOP-LEVEL).
      To change the top-level of GCL, redefine SI:TOP-LEVEL and save the core
 imange in a file.  When the saved imange is invoked, it will start the
@@ -926,7 +926,7 @@ Non nil means that a string-match should ignore case
 Package: SI
 Match regexp PATTERN in STRING starting in string starting at START
 and ending at END.  Return -1 if match not found, otherwise
-return the start index  of the first matchs.  The variable
+return the start index  of the first matches.  The variable
 *MATCH-DATA* will be set to a fixnum array of sufficient size to hold
 the matches, to be obtained with match-beginning and match-end.
 If it already contains such an array, then the contents of it will

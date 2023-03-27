@@ -108,7 +108,7 @@
 
 ;;; Case where directory shouldn't exist
 
-;; The directort ansi-tests/scratch must not exist before this
+;; The directory ansi-tests/scratch must not exist before this
 ;; test is run
 (deftest ensure-directories-exist.8
   (let* ((subdir (make-pathname :directory '(:relative "scratch")

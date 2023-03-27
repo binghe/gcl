@@ -160,7 +160,7 @@ and the @i{cdr} is the @i{value} associated with that @i{key}.
 @w{  assoc  assoc-if-not  rassoc   rassoc-if-not  }
 
 @noindent
-@w{  Figure 14--4: Some defined names related to assocation lists.}
+@w{  Figure 14--4: Some defined names related to association lists.}
 
 @end group
 @end format
@@ -3046,7 +3046,7 @@ If there is no @i{property} with that @i{property indicator},
 
 @b{setf} of @b{getf} may be used to associate a new @i{object}
 with an existing indicator in the @i{property list} held by @i{place},
-or to create a new assocation if none exists.
+or to create a new association if none exists.
 
 If there are multiple @i{properties}_1 with that @i{property indicator},
 @b{setf} of @b{getf} associates the @i{new-value} 

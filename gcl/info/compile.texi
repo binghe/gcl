@@ -260,22 +260,22 @@ GPROF-SET with both argments set to 0.
 
 
 @defvar *DEFAULT-SYSTEM-P*
-Pakcage:COMPILER
+Package:COMPILER
 Specifies the default setting of :SYSTEM-P used by COMPILE.  Defaults to NIL.
 @end defvar
 
 @defvar *DEFAULT-C-FILE*
-Pakcage:COMPILER
+Package:COMPILER
 Specifies the default setting of :C-FILE used by COMPILE.  Defaults to NIL.
 @end defvar
 
 @defvar *DEFAULT-H-FILE*
-Pakcage:COMPILER
+Package:COMPILER
 Specifies the default setting of :H-FILE used by COMPILE.  Defaults to NIL.
 @end defvar
 
 @defvar *DEFAULT-DATA-FILE*
-Pakcage:COMPILER
+Package:COMPILER
 Specifies the default setting of :DATA-FILE used by COMPILE.  Defaults to NIL.
 @end defvar
 
