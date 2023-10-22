@@ -128,34 +128,9 @@
 	  ,wrapped-body))))
 
 (eval-when (compile load eval)
-(defun extract-declarations (body &optional environment)
-  ;;(declare (values documentation declarations body))
-  (let (documentation declarations form)
-    (when (and (stringp (car body))
-	       (cdr body))
-      (setq documentation (pop body)))
-    (block outer
-      (loop
-	(when (null body) (return-from outer nil))
-	(setq form (car body))
-	(when (block inner
-		(loop (cond ((not (listp form))
-			     (return-from outer nil))
-			    ((eq (car form) 'declare)
-			     (return-from inner 't))
-			    (t
-			     (multiple-value-bind (newform macrop)
-				  (macroexpand-1 form environment)
-			       (if (or (not (eq newform form)) macrop)
-				   (setq form newform)
-				 (return-from outer nil)))))))
-	  (pop body)
-	  (dolist (declaration (cdr form))
-	    (push declaration declarations)))))
-    (values documentation
-	    (and declarations `((declare ,.(nreverse declarations))))
-	    body)))
-)
+  (defun extract-declarations (body &optional environment)
+    (multiple-value-bind (doc decls ctps body) (si::parse-body-header body)
+      (values doc decls (nconc ctps body)))))
 
 (defun get-declaration (name declarations &optional default)
   (dolist (d declarations default)

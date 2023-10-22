@@ -183,7 +183,7 @@
 
 #+kcl
 (progn
-(import '(si:structurep si:structure-def si:structure-ref))
+(import '(si:structurep si:structure-def si:structure-ref si::real-documentation))
 ;(shadow 'lisp:dotimes)
 )
 #+kcl

@@ -289,6 +289,10 @@
 		      val (pop tail))
 		(push ``(,',key ,,(make-initfunction val) ,',val) canonical))
 	  `(':direct-default-initargs (list ,@(nreverse canonical))))))
+    (:documentation
+     (unless (stringp (second option))
+       (error "~S is not a legal :documentation value" (second option)))
+     `(:documentation ,(second option)))
     (otherwise
       `(',(car option) ',(cdr option)))))
 

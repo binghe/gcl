@@ -940,7 +940,7 @@
 			    documentation-mixin
 			    metaobject
 			    funcallable-standard-object)
-     ()
+     ((initial-methods :initform () :accessor generic-function-initial-methods))
   (:metaclass funcallable-standard-class))
     
 (defclass standard-generic-function (generic-function)

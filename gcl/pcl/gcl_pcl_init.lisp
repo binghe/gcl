@@ -245,7 +245,7 @@
     (values legal nil)))
 
 (defun check-initargs-2-plist (initargs class legal &optional (error-p t))
-  (unless (getf initargs :allow-other-keys)
+  (unless (when (evenp (length initargs)) (getf initargs :allow-other-keys))
     ;; Now check the supplied-initarg-names and the default initargs
     ;; against the total set that we know are legal.
     (push :allow-other-keys legal)

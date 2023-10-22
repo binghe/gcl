@@ -212,67 +212,102 @@
   (declare (ignore args))
   `(error "~S outside of an effective method form" 'call-method))
 
+(defun check-applicable-keywords (valid-keys rest-arg &aux aok invalid)
+  (do ((r rest-arg (cddr r)))
+      ((endp r)
+       (when invalid
+	 (unless (car aok)
+	   (error 'program-error "Invalid keys ~S: valid keys are ~S" invalid valid-keys))))
+    (unless (typep r '(cons symbol cons))
+      (error 'program-error "Bad keyword arguments" r))
+    (let ((key (car r)))
+      (if (eq key :allow-other-keys)
+	  (unless aok (setq aok (cdr r)))
+	  (unless (or (eq valid-keys t) (memq key valid-keys))
+	    (push key invalid))))))
+
+
 (defun memf-test-converter (form generic-function method-alist-p wrappers-p)
-  (cond ((and (consp form) (eq (car form) 'call-method))
-	 (case (make-effective-method-function-type 
-		generic-function form method-alist-p wrappers-p)
-	   (fast-method-call
-	    '.fast-call-method.)
-	   (t
-	    '.call-method.)))
-	((and (consp form) (eq (car form) 'call-method-list))
-	 (case (if (every #'(lambda (form)
-			      (eq 'fast-method-call
-				  (make-effective-method-function-type 
-				   generic-function form 
-				   method-alist-p wrappers-p)))
-			  (cdr form))
-		   'fast-method-call
-		   't)
-	   (fast-method-call
-	    '.fast-call-method-list.)
-	   (t
-	    '.call-method-list.)))
-	(t
-	 (default-test-converter form))))
+
+  (case (when (consp form) (car form))
+    (call-method
+     (case (make-effective-method-function-type
+	    generic-function form method-alist-p wrappers-p)
+       (fast-method-call
+	'.fast-call-method.)
+       (t
+	'.call-method.)))
+    (call-method-list
+     (case (if (every #'(lambda (form)
+			  (eq 'fast-method-call
+			      (make-effective-method-function-type
+			       generic-function form
+			       method-alist-p wrappers-p)))
+		      (cdr form))
+	       'fast-method-call
+	       't)
+       (fast-method-call
+	'.fast-call-method-list.)
+       (t
+	'.call-method-list.)))
+    (check-applicable-keywords
+     'check-applicable-keywords)
+    (otherwise
+     (default-test-converter form))))
+
 
 (defun memf-code-converter (form generic-function 
 				 metatypes applyp method-alist-p wrappers-p)
-  (cond ((and (consp form) (eq (car form) 'call-method))
-	 (let ((gensym (get-effective-method-gensym)))
-	   (values (make-emf-call metatypes applyp gensym
-				  (make-effective-method-function-type 
-				   generic-function form method-alist-p wrappers-p))
-		   (list gensym))))
-	((and (consp form) (eq (car form) 'call-method-list))
-	 (let ((gensym (get-effective-method-gensym))
-	       (type (if (every #'(lambda (form)
-				    (eq 'fast-method-call
-					(make-effective-method-function-type 
-					 generic-function form 
-					 method-alist-p wrappers-p)))
-				(cdr form))
-			 'fast-method-call
-			 't)))
-	   (values `(dolist (emf ,gensym nil)
-		      ,(make-emf-call metatypes applyp 'emf type))
-		   (list gensym))))		     
-	(t
-	 (default-code-converter form))))
+
+  (case (when (consp form) (car form))
+
+    (call-method
+     (let ((gensym (get-effective-method-gensym)))
+       (values (make-emf-call metatypes applyp gensym
+			      (make-effective-method-function-type
+			       generic-function form method-alist-p wrappers-p))
+	       (list gensym))))
+    (call-method-list
+     (let ((gensym (get-effective-method-gensym))
+	   (type (if (every #'(lambda (form)
+				(eq 'fast-method-call
+				    (make-effective-method-function-type
+				     generic-function form
+				     method-alist-p wrappers-p)))
+			    (cdr form))
+		     'fast-method-call
+		     't)))
+       (values `(dolist (emf ,gensym nil)
+		  ,(make-emf-call metatypes applyp 'emf type))
+	       (list gensym))))
+    (check-applicable-keywords
+     (values `(check-applicable-keywords ;.keyargs-start.
+                                         .valid-keys.
+;                                         .dfun-more-context.
+;                                         .dfun-more-count.
+					 .dfun-rest-arg.)
+	     '()))
+    (otherwise
+     (default-code-converter form))))
+
 
 (defun memf-constant-converter (form generic-function)
-  (cond ((and (consp form) (eq (car form) 'call-method))
-	 (list (cons '.meth.
-		     (make-effective-method-function-simple
-		      generic-function form))))
-	((and (consp form) (eq (car form) 'call-method-list))
-	 (list (cons '.meth-list.
-		     (mapcar #'(lambda (form)
-				 (make-effective-method-function-simple
-				  generic-function form))
-			     (cdr form)))))
-	(t
-	 (default-constant-converter form))))
+  (case (when (consp form) (car form))
+    (call-method
+     (list (cons '.meth.
+		 (make-effective-method-function-simple
+		  generic-function form))))
+    (call-method-list
+     (list (cons '.meth-list.
+		 (mapcar #'(lambda (form)
+			     (make-effective-method-function-simple
+			      generic-function form))
+			 (cdr form)))))
+    (check-applicable-keywords
+     '())
+    (otherwise
+     (default-constant-converter form))))
+
 
 (defun make-effective-method-function-internal (generic-function effective-method
 					        method-alist-p wrappers-p)
@@ -326,6 +361,37 @@
   `(call-method-list
     ,@(mapcar #'(lambda (method) `(call-method ,method ())) methods)))
 
+(defun key-names (lambda-list
+		  &aux (k (member '&key lambda-list))
+			  (aok (member '&allow-other-keys k))
+			  (aux (or aok (member '&aux k)))
+			  (k (if aux (ldiff k aux) k)))
+  (if aok t
+      (mapcar (lambda (x)
+		(typecase x
+		  (keyword x)
+		  (symbol (intern (string x) :keyword))
+		  ((cons keyword cons) (car x))
+		  ((cons symbol cons) (intern (string (car x)) :keyword))
+		  ((cons cons cons) (caar x))))
+	      (cdr k))))
+
+
+(defun compute-applicable-keywords (gf methods)
+  (reduce (lambda (y x)
+	    (or (eq y t)
+		(let ((knx (key-names x)))
+		  (or (eq knx t) (union knx y)))))
+	  (mapcar (lambda (x)
+		    (if (consp x)
+                        (early-method-lambda-list x)
+                        (method-lambda-list x)))
+		  methods)
+	  :initial-value (key-names (generic-function-lambda-list gf))))
+
+(defun gf-ll-nopt (gf-ll &aux (x (member '&optional gf-ll)))
+  (length (ldiff (cdr x) (member-if (lambda (x) (member x '(&rest &key &allow-other-keys &aux))) x))))
+
 (defun standard-compute-effective-method (generic-function combin applicable-methods)
   (declare (ignore combin))
   (let ((before ())
@@ -357,7 +423,15 @@
 	   ;; By returning a single call-method `form' here we enable an important
 	   ;; implementation-specific optimization.
 	   ;; 
-	   `(call-method ,(first primary) ,(rest primary)))
+	   (let ((call-method `(call-method ,(first primary) ,(rest primary)))
+		 (gf-ll (gf-lambda-list generic-function)))
+	     (if (member '&key gf-ll)
+		 `(progn
+		    (let* ((.valid-keys. ',(compute-applicable-keywords generic-function applicable-methods))
+			 (.dfun-rest-arg. (nthcdr ,(gf-ll-nopt gf-ll) .dfun-rest-arg.)))
+		      (check-applicable-keywords))
+		    ,call-method)
+		 call-method)))
 	  (t
 	   (let ((main-effective-method
 		   (if (or before after)

@@ -403,7 +403,8 @@
 				     :lambda-list lambda-list
 				     other-initargs)))
 ;   (when existing (remove-method generic-function existing))
-    (add-method generic-function new)))
+    (add-method generic-function new)
+    new))
 
 	
 (defun make-specializable (function-name &key (arglist nil arglistp))
@@ -452,12 +453,19 @@
 
 (defun real-get-method (generic-function qualifiers specializers
 					 &optional (errorp t))
+  (when (generic-function-methods generic-function)
+    (unless (eql (length specializers)
+		 (length (arg-info-metatypes (gf-arg-info generic-function))))
+      (error 'program-error
+	     :format-control "Specializer list ~S does not match generic function ~S"
+	     :format-arguments (list specializers generic-function))))
+
   (let ((hit
-	  (dolist (method (generic-function-methods generic-function))
-	    (when (and (equal qualifiers (method-qualifiers method))
-		       (every #'same-specializer-p specializers
-			      (method-specializers method)))
-	      (return method)))))
+	 (dolist (method (generic-function-methods generic-function))
+	   (when (and (equal qualifiers (method-qualifiers method))
+		      (every #'same-specializer-p specializers
+			     (method-specializers method)))
+	     (return method)))))
     (cond (hit hit)
 	  ((null errorp) nil)
 	  (t
@@ -625,10 +633,10 @@
 			  allocate-instance shared-initialize initialize-instance))
 	    (update-make-instance-function-table (type-class (car specializers))))
 	  (update-dfun generic-function))
-	method)))
+	generic-function)))
   
 (defun real-remove-method (generic-function method)
-  (unless (neq generic-function (method-generic-function method))
+  (if (neq generic-function (method-generic-function method)) generic-function
 ;;        (error "The method ~S is attached to the generic function~@
 ;;                ~S.  It can't be removed from the generic function~@
 ;;                to which it is not attached."

@@ -995,7 +995,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
             (unless (null localdecls)
                 (setq top-decls (nconc top-decls (sublis renamed-vars localdecls))))
             (return))
-       (maybe-warn :definition (concatentate 'string 
+       (maybe-warn :definition (concatenate 'string
 					     "Couldn't optimize GATHERING clause ~S because its expansion is not of the form"
 					     "(VALUES #'(LAMBDA ...) #'(LAMBDA () ...))")
 		   (second clause))

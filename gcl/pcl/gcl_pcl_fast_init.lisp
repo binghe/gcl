@@ -397,8 +397,16 @@
 			  (every #'check-meth shared-initialize-methods))))
 	(return-from get-make-instance-function nil))
       (get-make-instance-function-internal 
-       class key (default-initargs class initargs) 
+       class key (default-initargs-1 class initargs)
        initialize-instance-methods shared-initialize-methods))))
+
+(defun default-initargs-1 (class initargs &aux (sym (si::sgen)))
+  (append initargs
+	  (mapcan (lambda (x)
+		    (destructuring-bind (key form fun) x
+		      (when (eq (getf initargs key sym) sym)
+			`(,key ,(if (constantp form) form `(funcall ,fun))))))
+		  (class-default-initargs class))))
 
 (defun get-make-instance-function-internal (class key initargs 
 						  initialize-instance-methods
@@ -859,6 +867,7 @@
 (defun initialize-instance-simple (pv-cell form-list instance initargs)
   (let ((pv (car pv-cell))
 	(initargs-tail initargs)
+	(it initargs)
 	(slots (get-slots-or-nil instance))
 	(class (class-of instance))
 	value)
@@ -893,7 +902,9 @@
 	       (setq *initialize-info-cache-info* (caddr form)))
 	      (finish-pushing-initargs
 	       (setq initargs-tail initargs)))))
-    initargs))
+    (append it
+	    (do ((i (ldiff initargs it) (cddr i)) j)((not i) j)
+	      (push (cadr i) j) (push (car i) j)))))
 
 (defun add-to-cvector (cvector constant)
   (or (position constant cvector)

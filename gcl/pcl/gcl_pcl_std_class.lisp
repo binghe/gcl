@@ -113,27 +113,27 @@
   (when documentation-p
     (setf (plist-value object 'documentation) documentation)))
 
-(defmethod documentation (object &optional doc-type)
+(defmethod documentation (object doc-type)
   (real-documentation object doc-type))
 
-(defmethod (setf documentation) (new-value object &optional doc-type)
+(defmethod (setf documentation) (new-value object doc-type)
   (si::set-documentation object doc-type new-value))
 
 
-(defmethod documentation ((object documentation-mixin) &optional doc-type)
+(defmethod documentation ((object documentation-mixin) doc-type)
   (declare (ignore doc-type))
   (plist-value object 'documentation))
 
-(defmethod (setf documentation) (new-value (object documentation-mixin) &optional doc-type)
+(defmethod (setf documentation) (new-value (object documentation-mixin) doc-type)
   (declare (ignore doc-type))
   (setf (plist-value object 'documentation) new-value))
 
 
-(defmethod documentation ((slotd standard-slot-definition) &optional doc-type)
+(defmethod documentation ((slotd standard-slot-definition) doc-type)
   (declare (ignore doc-type))
   (slot-value slotd 'documentation))
 
-(defmethod (setf documentation) (new-value (slotd standard-slot-definition) &optional doc-type)
+(defmethod (setf documentation) (new-value (slotd standard-slot-definition) doc-type)
   (declare (ignore doc-type))
   (setf (slot-value slotd 'documentation) new-value))
 
@@ -331,7 +331,12 @@
 (setf (gdefinition 'load-defclass) #'real-load-defclass)
 
 (defun ensure-class (name &rest all)
-  (apply #'ensure-class-using-class name (find-class name nil) all))
+  (apply #'ensure-class-using-class name
+	 (let ((class (find-class name nil)))
+             (when (and class (eq name (class-name class)))
+               ;; NAME is the proper name of CLASS, so redefine it
+               class))
+	 all))
 
 (defmethod ensure-class-using-class (name (class null) &rest args &key)
   (multiple-value-bind (meta initargs)
@@ -345,7 +350,7 @@
 (defmethod ensure-class-using-class (name (class pcl-class) &rest args &key)
   (multiple-value-bind (meta initargs)
       (ensure-class-values class args)
-    (unless (eq (class-of class) meta) (change-class class meta))
+    (unless (eq (class-of class) meta) (apply #'change-class class meta initargs))
     (apply #'reinitialize-instance class initargs)
     (setf (find-class name) class)
     (inform-type-system-about-class class name)	                ;***
@@ -476,7 +481,10 @@
 			       (setf (slot-value class 'predicate-name)
 				     (make-class-predicate-name (class-name class))))))
   (add-direct-subclasses class direct-superclasses)
-  (update-class class nil)
+  (if (class-finalized-p class)
+      ;; required by AMOP, "Reinitialization of Class Metaobjects"
+      (finalize-inheritance class)
+      (update-class class nil))
   (make-class-predicate class predicate-name)
   (add-slot-accessors class direct-slots))
 

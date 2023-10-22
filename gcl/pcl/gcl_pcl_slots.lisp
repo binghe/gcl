@@ -166,9 +166,10 @@
 (defun slot-boundp (object slot-name)
   (let* ((class (class-of object))
 	 (slot-definition (find-slot-definition class slot-name)))
-    (if (null slot-definition)
-	(values (slot-missing class object slot-name 'slot-boundp))
-      (slot-boundp-using-class class object slot-definition))))
+    (values
+     (if (null slot-definition)
+	 (slot-missing class object slot-name 'slot-boundp)
+	 (slot-boundp-using-class class object slot-definition)))))
 
 (setf (gdefinition 'slot-boundp-normal) #'slot-boundp)
 

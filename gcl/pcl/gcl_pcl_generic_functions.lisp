@@ -161,6 +161,8 @@
 (defgeneric gf-dfun-state (standard-generic-function))
 ;          (standard-generic-function)
 
+(defgeneric generic-function-initial-methods (standard-generic-function))
+
 (defgeneric gf-pretty-arglist (standard-generic-function))
 ;          (standard-generic-function)
 
@@ -285,6 +287,9 @@
 
 (defgeneric (setf gf-dfun-state) (new-value standard-generic-function))
 ;          (t standard-generic-function)
+
+(defgeneric (setf generic-function-initial-methods)
+  (new-value standard-generic-function))
 
 (defgeneric (setf gf-pretty-arglist) (new-value standard-generic-function))
 ;          (t standard-generic-function)
@@ -641,17 +646,7 @@
 
 ;; FIXME synch with cmucl to use these defs
 
-;(defgeneric (setf documentation) (new-value slotd doc-type)
-;  (:argument-precedence-order doc-type slotd new-value))
-;          (t t)
-;          (t documentation-mixin)
-;          (t standard-slot-definition)
 
-;(defgeneric documentation (slotd doc-type)
-;  (:argument-precedence-order doc-type slotd))
-;          (t)
-;          (documentation-mixin)
-;          (standard-slot-definition)
 
 
 ;;; 3 arguments 
@@ -727,12 +722,12 @@
 (defgeneric get-method (generic-function qualifiers specializers &optional errorp))
 ;          (standard-generic-function t t)
 (defgeneric find-method (generic-function qualifiers specializers &optional errorp))
-(defgeneric (setf documentation) (new-value slotd &optional doc-type))
+(defgeneric (setf documentation) (new-value slotd doc-type))
 ;          (t t)
 ;          (t documentation-mixin)
 ;          (t standard-slot-definition)
 
-(defgeneric documentation (slotd &optional doc-type))
+(defgeneric documentation (slotd doc-type))
 ;          (t)
 ;          (documentation-mixin)
 ;          (standard-slot-definition)
