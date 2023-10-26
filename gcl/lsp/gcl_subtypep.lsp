@@ -2,7 +2,8 @@
 
 (let (fso)
   (defun funcallable-class-p (x)
-    (member (or fso (setq fso (si-find-class (find-symbol "FUNCALLABLE-STANDARD-OBJECT" "PCL") nil))) (si-class-precedence-list x))))
+    (member (or fso (setq fso (si-find-class (find-symbol "FUNCALLABLE-STANDARD-OBJECT" "PCL") nil)))
+	    (si-cpl-or-nil x))))
 
 (defun normalize-instance (c)
   (cond ((funcallable-class-p c) `(funcallable-std-instance ,c))

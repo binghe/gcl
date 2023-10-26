@@ -22,13 +22,12 @@
 			     c-array-rank c-array-dim c-array-elttype c-array-self c-array-hasfillp
 			     array-dimension array-row-major-index row-major-aref si::row-major-aset
 			     si::row-major-aref-int aref array-rank array-total-size
-			     array-has-fill-pointer-p length)))
+			     array-has-fill-pointer-p length memoized-hash-equal)))
 
 (in-package :user)
 
 (defun doitf (l dir ld? cmpl?)
-  (time (funcall ld? (funcall cmpl? (concatenate 'string "../" dir "/gcl_" (string-downcase (string l)) 
-						 (if (eq cmpl? 'compile-file) ".lsp" ""))))))
+  (time (funcall ld? (funcall cmpl? (concatenate 'string "../" dir "/gcl_" (string-downcase (string l)) (if (eq cmpl? 'compile-file) ".lsp" ""))))))
 
 (defun doit (ld? cmpl?)
 

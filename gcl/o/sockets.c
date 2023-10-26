@@ -32,8 +32,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #else
-#  include <windows.h>
 #  include <winsock2.h>
+#  include <windows.h>
 #endif
 
 #ifdef __STDC__
@@ -68,7 +68,7 @@ int w32_socket_init(void)
     } else {
         if (WSAStartup(0x0101, &WSAData)) {
             w32_socket_initialisations = 0;
-            fprintf ( stderr, "WSAStartup failed\n" );
+            emsg("WSAStartup failed\n" );
             WSACleanup();
             rv = -1;
         }
@@ -156,13 +156,9 @@ the socket.  If PORT is zero do automatic allocation of port")
 #endif                
                 (cRetry < BIND_MAX_RETRY));
       if (0)
-	{
-	  fprintf(stderr,
-  "\nAssigned automatic address to socket : port(%d), errno(%d), bind_rc(%d), iLastAddressUsed(%d), retries(%d)\n"
+	  emsg("\nAssigned automatic address to socket : port(%d), errno(%d), bind_rc(%d), iLastAddressUsed(%d), retries(%d)\n"
 		  , addr.sin_port, errno, rc, iLastAddressUsed, cRetry
 		  );
-	  fflush(stderr);
-	}
     }
   else
     {
@@ -211,7 +207,7 @@ DEFUN("ACCEPT-SOCKET-CONNECTION",object,fSaccept_socket_connection,
 and returns (list* named_socket fd name1) when one is established")
 
 {
-  unsigned n;
+  socklen_t n;
   int fd;
   struct sockaddr_in addr;
   object x; 
@@ -219,8 +215,7 @@ and returns (list* named_socket fd name1) when one is established")
   fd = accept(fix(car(named_socket)) , (struct sockaddr *)&addr, &n);
   if (fd < 0)
     {
-      perror("ERROR ! accept on socket failed in sock_accept_connection");
-      fflush(stderr);
+      emsg("ERROR ! accept on socket failed in sock_accept_connection");
       return Cnil;
     }
   x = alloc_string(sizeof(struct connection_state));
@@ -430,7 +425,7 @@ fill pointer, and this will be advanced.")
 
 
     break;
-  default: gcl_abort();
+  default: do_gcl_abort();
   }
   
   switch (t) {
@@ -445,7 +440,7 @@ fill pointer, and this will be advanced.")
      if (downcase)
      while (--len>=0)
        { char c = *p++;
-	 c=tolower(c);
+	 c=tolower((int)c);
 	 if(needs_quoting[(unsigned char)c])
 	   PUSH('\\');
 	 PUSH(c);}
@@ -526,9 +521,10 @@ DEFUN("RESET-STRING-INPUT-STREAM",object,fSreset_string_input_stream,SI,4,4,NONE
       "Reuse a string output STREAM by setting its output to STRING \
 and positioning the ouput/input to start at START and end at END")
 
-{ strm->sm.sm_object0 = string;
-  strm->sm.sm_int0 = start;
-  strm->sm.sm_int1 = end;
+{ massert(type_of(string)==t_string);
+  strm->sm.sm_object0 = string;
+  STRING_INPUT_STREAM_NEXT(strm) = start;
+  STRING_INPUT_STREAM_END(strm) = end;
   return strm;
 }
 

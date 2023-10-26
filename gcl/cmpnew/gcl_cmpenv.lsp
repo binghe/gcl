@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPENV  Environments of the Compiler.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -74,15 +73,17 @@
   (unless (gethash n *dlinks*) 
     (wt-h "static void *" n #+static"=" #+static(symbol-name l) ";")
     (setf (gethash n *dlinks*) t)
-    (add-dl `(si::mdl ',(symbol-name l) ',(package-name (symbol-package l)) ,(add-address (concatenate 'string "&" n))))))
+    (add-init `(si::mdl ',(symbol-name l) ',(package-name (symbol-package l)) ,(add-address (concatenate 'string "&" n))))))
 
 (defun add-symbol (symbol) (add-object symbol))
-;; (defun add-symbol (symbol)
-;;   (let ((x (gethash symbol *objects*)))
-;;        (cond (x)
-;;              ((push-data-incf symbol)
-;; 		(setf (gethash *next-vv* *objects-rev*) symbol)
-;; 		(setf (gethash symbol *objects*) *next-vv*)))))
+
+(defun add-object2 (object)
+  (let* ((init (if (when (consp object) (eq (car object) '|#,|)) (cdr object) `',object))
+	 (object (if (when (consp init) (eq (car init) 'nani)) (nani (cadr init)) object)))
+    (cond ((gethash object *objects*))
+	  ((push-data-incf nil)
+	   (when init (add-init `(setvv ,*next-vv* ,init)))
+	   (setf (gethash object *objects*) *next-vv*)))))
 
 ;; Write to a string with all the *print-.. levels bound appropriately.
 (defun wt-to-string (x &aux
@@ -96,36 +97,10 @@
        (eq (car x) 'si::nani) (eq (car y) 'si::nani)
        (eq (cadr x) (cadr y))))
 
-(defun add-object2 (object)
-  (let* ((init (when (contains-sharp-comma object)
-		 (cond ((when (consp object) (eq (car object) '|#,|)) (cdr object))
-		       ((let* ((x (when (si::si-classp object) (si::valid-class-name object))))
-			  (when x `(si::si-find-class ',x))));FIXME
-		       ((string-to-object (wt-to-string object))))))
-	 (object (if (when (consp init) (eq (car init) 'nani)) (nani (cadr init)) object)))
-    (cond ((gethash object *objects*))
-	  ((push-data-incf (unless init object))
-	   (when init (add-init `(setvv ,*next-vv* ,init)))
-	   (setf (gethash object *objects*) *next-vv*)))))
-
-;; (defun add-object2 (object)
-;;   (let* ((init (when (contains-sharp-comma object)
-;; 		 (if (when (consp object) (eq (car object) '|#,|))
-;; 		     (cdr object) (string-to-object (wt-to-string object))))))
-;;     (cond ((gethash object *objects*))
-;; 	  ((push-data-incf (unless init object))
-;; 	   (when init (add-init `(setvv ,*next-vv* ,init)))
-;; 	   (setf (gethash object *objects*) *next-vv*)))))
-
 (defun add-object (object) 
   (cond ((ltvp object) object)
 	((and *compiler-compile* (not *keep-gaz*)) (cons '|#,| `(nani ,(address object))))
 	(object)))
-
-;; (defun add-object (object) 
-;;   (cond ((when (consp object) (eq (car object) '|#,|)) object)
-;; 	((and *compiler-compile* (not *keep-gaz*)) (cons '|#,| `(nani ,(address object))))
-;; 	(object)))
 
 (defun add-constant (symbol) 
   (add-object (cons '|#,| symbol)))
@@ -262,7 +237,7 @@
 (defvar *bds-used*   nil)
 
 (defun reset-top ()
-  (wt "vs_top=sup;")
+  (wt-nl "vs_top=sup;")
   (setq *sup-used* t))
 
 (defmacro base-used () '(setq *base-used* t))

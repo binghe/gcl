@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -23,11 +22,7 @@
 ;;;;                           sequence routines
 
 
-;; (in-package 'lisp)
-
-;; (export '(make-sequence concatenate map map-into))
-
-(in-package :system)
+(in-package :si)
 
 (defun or-sequence-tp (tp &aux (l (load-time-value `(list ,@(mapcar (lambda (x) `(vector ,x)) +array-types+) vector))))
   (let ((x (remove-duplicates (mapcar (lambda (x) (car (member x l :test 'subtypep))) (cdr tp)))))
@@ -49,7 +44,7 @@
 			     (check-type type (member list vector))))))))
 
 (defun concatenate (rt &rest seqs)
-  (declare (optimize (safety 1)) (:dynamic-extent seqs))
+  (declare (optimize (safety 1)) (dynamic-extent seqs))
   (macrolet
    ((++ (x) `(prog1 ,x (incf ,x))))
    (let* ((rs (make-sequence rt (reduce (lambda (y x) (+ y (length x))) seqs :initial-value 0)))
@@ -72,7 +67,7 @@
    `(labels ((,l (x y) (when x (setf (car x) (car y)) (,l (cdr x) (cdr y)))))
 	    (declare (notinline make-list))
 	    (let ((tmp (make-list (length ,x))))
-	      (declare (:dynamic-extent tmp))
+	      (declare (dynamic-extent tmp))
 	      (,l tmp ,x);Can't be mapl, used by
 	     tmp)))
 
@@ -128,9 +123,9 @@
 (defun map-into (rs g &rest seqs &aux 
 		    (h rs) (lp (unless (listp rs) (array-total-size rs))) 
 		    (fp (when lp (array-has-fill-pointer-p rs)))(j 0))
-  (declare (optimize (safety 1))(:dynamic-extent seqs))
+  (declare (optimize (safety 1))(dynamic-extent seqs))
   (check-type rs proper-sequence)
-  (when fp (setf (fill-pointer rs) lp))
+  (unless (member rs seqs) (when fp (setf (fill-pointer rs) lp)))
   (block exit
 	 (apply 'map nil
 		(lambda (x &rest r) 

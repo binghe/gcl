@@ -1,6 +1,6 @@
 (in-package :s)
 
-(defun strcat (&rest r) (declare (:dynamic-extent r)) (nstring-downcase (apply 'string-concatenate r)))
+(defun strcat (&rest r) (declare (dynamic-extent r)) (nstring-downcase (apply 'string-concatenate r)))
 
 (eval-when
  (eval compile) 

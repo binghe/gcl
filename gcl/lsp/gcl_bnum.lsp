@@ -28,7 +28,7 @@
   (declare (optimize (safety 2)))
   (check-type x real)
   (check-type z (or null float))
-  (let ((s (typep z 'short-float)))
+  (let ((s (typep (or z x) 'short-float)))
     (etypecase 
      x
      (short-float (if s x (* 1.0 x)))

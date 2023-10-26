@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -39,13 +38,13 @@
   (let ((real-start (gensym)) (real-end (gensym)) (gbc-time-start (gensym))
 	(gbc-time (gensym)) (x (gensym)) (run-start (gensym)) (run-end (gensym))
 	(child-run-start (gensym)) (child-run-end (gensym)))
-  `(let (,real-start ,real-end (,gbc-time-start (si::gbc-time)) ,gbc-time ,x)
+  `(let (,real-start ,real-end (,gbc-time-start (gbc-time)) ,gbc-time ,x)
      (setq ,real-start (get-internal-real-time))
      (multiple-value-bind (,run-start ,child-run-start) (get-internal-run-times)
-       (si::gbc-time 0)
+       (gbc-time 0)
        (setq ,x (multiple-value-list ,form))
-       (setq ,gbc-time (si::gbc-time))
-       (si::gbc-time (+ ,gbc-time-start ,gbc-time))
+       (setq ,gbc-time (gbc-time))
+       (gbc-time (+ ,gbc-time-start ,gbc-time))
        (multiple-value-bind (,run-end ,child-run-end) (get-internal-run-times)
 	 (setq ,real-end (get-internal-real-time))
 	 (fresh-line *trace-output*)
@@ -121,11 +120,7 @@
      (incf y (- y1 (mod y1 100)))
      (cond ((< (- y y1) -50) (incf y 100))
 	   ((>= (- y y1) 50) (decf y 100)))))
-  (+ (* (+ (1- d)
-	   (number-of-days-from-1900 y)
-	   (if (> m 1)
-	       (aref (if (leap-year-p y) +lmd+ +md+) (- m 2))
-	     0))
+  (+ (* (+ (1- d) (number-of-days-from-1900 y) (if (> m 1) (aref (if (leap-year-p y) +lmd+ +md+) (- m 2)) 0))
         seconds-per-day)
      (* (+ h tz) 3600) (* min 60) sec))
 
@@ -136,25 +131,27 @@
 (defun compile-file-pathname (pathname)
   (declare (optimize (safety 2)))
   (make-pathname :defaults pathname :type "o"))
+
 (defun constantly (x)
   (declare (optimize (safety 2)))
   (lambda (&rest args)
     (declare (ignore args) (dynamic-extent args))
     x))
+
 (defun complement (fn)
   (declare (optimize (safety 2)))
   (lambda (&rest args) (not (apply fn args))))
 
  (defun lisp-implementation-version nil
-   (declare (optimize (safety 2)))
-   (format nil "GCL ~a.~a.~a"
-	   si::*gcl-major-version*
-	   si::*gcl-minor-version*
-	   si::*gcl-extra-version*))
+   (format nil "GCL ~a.~a.~a git tag ~a"
+	   *gcl-major-version*
+	   *gcl-minor-version*
+	   *gcl-extra-version*
+	   *gcl-git-tag*))
 
 (defun objlt (x y)
   (declare (object x y))
-  (let ((x (si::address x)) (y (si::address y)))
+  (let ((x (address x)) (y (address y)))
     (declare (fixnum x y))
     (if (< y 0)
 	(if (< x 0) (< x y) t)
@@ -278,15 +275,6 @@
 						       (reduce (lambda (y x) (+ y (cadr x))) (cdr y) :initial-value 0)))))
   (print *prof-list*))
 
-(defun reset-sys-paths (s)
-  (declare (string s))
-  (setq *lib-directory* s)
-  (setq *system-directory* (string-concatenate s "unixport/"))
-  (let (nl)
-    (dolist (l '("cmpnew/" "gcl-tk/" "lsp/" "xgcl-2/"))
-      (push (string-concatenate s l) nl))
-    (setq *load-path* nl))
-  nil)
 
 (defun gprof-output (symtab gmon)
   (with-open-file

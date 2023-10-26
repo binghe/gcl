@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 
 ;; Modified data base including return values types
 ;; and making the arglists correct if they have optional args.
@@ -52,6 +51,8 @@
 	  ((print (cdr l))))))
 ;  (si::add-hash (cdr l) (export-sig (car l)) nil nil nil))
 
+(dolist (l '(eq eql equal equalp ldb-test logtest))
+  (setf (get l 'predicate) t))
 
 (dolist (l '(ldb-test logtest))
   (setf (get l 'predicate) t))

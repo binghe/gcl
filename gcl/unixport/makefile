@@ -15,6 +15,7 @@ XDIR	= ../xgcl-2
 CLCSDIR = ../clcs
 PCLDIR  = ../pcl
 PORTDIR = $(shell pwd)
+CFLAGS += -I../h
 
 LD_FLAGS:=$(LDFLAGS)
 ifneq ($(FIRST_FILE),)
@@ -34,7 +35,7 @@ libgclp.a: $(ODIR)/gcllib.a
 	cp $< $@
 	ranlib $@
 
-gmpfiles: $(shell find ../$(GMPDIR) -name "*.o" |grep -v '\.lib')
+gmpfiles: $(shell [ -z "$(GMPDIR)" ] || find ../$(GMPDIR) -name "*.o" |grep -v '\.lib')
 	rm -rf gmp
 	mkdir gmp
 	a="$^" ; \
@@ -43,7 +44,7 @@ gmpfiles: $(shell find ../$(GMPDIR) -name "*.o" |grep -v '\.lib')
 	done
 	touch $@
 
-bfdfiles: $(shell find ../binutils -name "*.o")
+bfdfiles: $(shell ! [ -d ../binutils ] || find ../binutils -name "*.o")
 	rm -rf bfd
 	mkdir bfd
 	a="$^" ; \
@@ -52,9 +53,9 @@ bfdfiles: $(shell find ../binutils -name "*.o")
 	done 
 	touch $@
 
-OOBJS:=$(shell j=$$(ar t $(ODIR)/gcllib.a) ; for i in $$(ls -1 $(ODIR)/*.o) ; do if ! echo $$j |grep $$(basename $$i) >/dev/null 2>&1 ; then echo $$i ; fi ; done)
-OOBJS:=$(filter-out $(FIRST_FILE),$(OOBJS))
-OOBJS:=$(filter-out $(LAST_FILE),$(OOBJS))
+OOBJS:=$(shell j=$$(ar t $(ODIR)/gcllib.a) ; for i in $$(find $(ODIR) -name "*.o") ; do if ! echo $$j |grep $$(basename $$i) >/dev/null 2>&1 ; then echo $$i ; fi ; done)
+OOBJS:=$(filter-out $(ODIR)/$(FIRST_FILE),$(OOBJS))
+OOBJS:=$(filter-out $(ODIR)/$(LAST_FILE),$(OOBJS))
 OOBJS:=$(filter-out $(ODIR)/plttest.o,$(OOBJS))
 OOBJS:=$(filter-out $(ODIR)/boot.o,$(OOBJS))
 OBJS:=$(OOBJS) $(shell ls -1 $(LSPDIR)/*.o | grep -v recompile.o)
@@ -66,9 +67,9 @@ ROBJS:=$(shell ls -1 gcl_recompile.o)
 endif
 OBJS:=$(OBJS) $(ROBJS)
 
-MODOBJS:=$(shell ls -1 $(MDIR)/*.o)
-PCLOBJS:=$(MODOBJS) $(shell ls -1 $(PCLDIR)/*.o)
-ANSIOBJS:=$(PCLOBJS) $(shell ls -1 $(CLCSDIR)/*.o)
+MODOBJS:=$(shell find $(MDIR) -name "*.o")
+PCLOBJS:=$(MODOBJS) $(shell find $(PCLDIR) -name "*.o")
+ANSIOBJS:=$(PCLOBJS) $(shell find $(CLCSDIR) -name "*.o")
 
 $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 	cp $< $@
@@ -109,7 +110,10 @@ saved_%:raw_% $(RSYM) init_raw.lsp.in raw_%_map \
 		! echo "$@ cannot be prelinked"
 
 $(RSYM): $(SPECIAL_RSYM) $(HDIR)/mdefs.h
-	$(CC) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)
+	$(CC) $(LD_FLAGS) $(CFLAGS) -I$(HDIR) -I$(ODIR) -o $(RSYM) $(SPECIAL_RSYM)
+
+msys: msys.c
+	PATH=/usr/bin:$$PATH gcc $< -o $@ # Unix binary if running wine
 
 $(HDIR)/mdefs.h: $(HDIR)/include.h
 	cat $(HDIR)/include.h | sed -e "/include/d" > $(HDIR)/mdefs.h
@@ -140,7 +144,7 @@ libansi_gcl.a: $(OBJS) $(ANSIOBJS) sys_ansi_gcl.o gmpfiles bfdfiles
 	rm -rf $@
 	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
 
-raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) $(EXTRAS)
+raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) #$(EXTRAS)
 	touch raw_$*_map
 ifeq ($(GNU_LD),1)
 	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -rdynamic -L. $(EXTRA_LD_LIBS) $(LD_STACK_FLAGS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
@@ -152,7 +156,7 @@ map_%:
 	touch $@
 
 clean:
-	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) \
+	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) sys_init.lsp \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
 		gazonk*.lsp plt*h *_map saved_* lib* raw_* out* log* tmp* gcl.script
 

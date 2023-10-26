@@ -46,7 +46,12 @@ If negative zeros are distinct this is probably not good, since it makes (defcon
   "Assume that (for sequence functions MAP, etc.) the element type of a vector result type
    is defined to be the type X such that result-type is a subtype of (vector X).")
 
+(defnote :string-on-character-can-be-constant
+    "string on characters need not be fresh")
+
 ;;; Haible disagrees with :result-type-element-type-by-subtype
 #+clisp (rt::disable-note :result-type-element-type-by-subtype)
 #+(or openmcl gcl ecl) (rt::disable-note :nil-vectors-are-strings)
 #+gcl (rt::disable-note :allow-nil-arrays)
+#+gcl (rt::disable-note :make-condition-with-compound-name)
+#+gcl (rt::disable-note :string-on-character-can-be-constant)

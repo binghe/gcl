@@ -1,114 +1,162 @@
-;; (in-package 'lisp)
-;; (export '(pprint-linear
-;; 	  pprint-fill
-;; 	  pprint-tabular
-;; 	  pprint-logical-block
-;; 	  pprint-pop pprint-indent pprint-newline pprint-tab 
-;; 	  pprint-exit-if-list-exhausted))
 (in-package :si)
 
-;placeholder
-(defun pprint-tab (&rest r) nil)
+;FIXME called from C
+(defun pprint-insert-conditional-newlines (st)
+  (if (>= (string-match #v"[^\n\r ] +" st) 0)
+      (concatenate
+       'string
+       (subseq st 0 (match-end 0))
+       "~:_"
+       (pprint-insert-conditional-newlines (subseq st (match-end 0))))
+      st))
 
-(defun pprint-linear (s x &optional (c t) a) 
-  (let* ((z (write-to-string x))
-	 (z (if (not (listp x)) z
-	       (let ((lz (length z)))
-		 (if (and *print-right-margin*
-			  (< 1 *print-right-margin* (if c lz (- lz 2))))
-		     (let ((*print-right-margin* 1))
-		       (return-from pprint-linear (pprint-linear s x c a))))
-		 (if c z (subseq z 1 (1- lz)))))))
-    (write-string z s)
-    nil))
+;FIXME called from C
+(defun pprint-check-format-string (st)
+  (let ((j (>= (string-match #v"~>" st) 0))
+	(pp (>= (string-match #v"~:@?>|~:?@?_|~[0-9]*:?I|~[0-9]+,[0-9]+:?@?T]|~:?@?W" st) 0)))
+    (assert (not (and j pp)))
+    j))
 
-(defun pprint-fill (s x &optional (c t) a)
-  (declare (ignore a))
-  (let* ((z (write-to-string x))
-	 (z (if (not (listp x)) z
-	       (let ((lz (length z)))
-		 (if c z (subseq z 1 (1- lz)))))))
-    (write-string z s)
-    nil))
+;FIXME called from C
+(defun pprint-quit (x h s count)
+  (cond
+    ((or (and x (atom x)) (and *print-circle* h (gethash x h)))
+     (when (>= count 0) (write-string ". " s))
+     (write x :stream s)
+     t)
+    ((and *print-length* (>= count *print-length* 0))
+     (write-string "..." s)
+     t)
+    ((and (< count 0) *print-level* (> *prin-level* *print-level*))
+     (write-string "#" s)
+     t)))
 
-(defun tabify (ts q &optional r (j ts))
-  (cond ((not q) (nreverse r))
-	((member (car q) '(#\( #\))) (tabify ts (cdr q) (cons (car q) r) j))
-	((eql (car q) #\Space)
-	 (let ((z (member #\Space q :test-not 'eql)))
-	   (dotimes (i (- j (- (length q) (length z)))) (push #\Space r))
-	   (tabify ts z (cons (car q) r))))
-	((tabify ts (cdr q) (cons (car q) r) (let ((w (1- j))) (if (= w 0) ts w))))))
-
-(defun pprint-tabular (s x &optional (c t) a (ts 16))
-  (declare (ignore a))
-  (let* ((z (write-to-string x))
-	 (z (if (not (listp x)) z
-             (let* ((z (coerce (tabify ts (coerce z 'list)) 'string))
-                    (lz (length z)))
-              (if c z (subseq z 1 (1- lz)))))))
-    (write-string z s)
-    nil))
-
-(defun circlep-int (x y)
-  (cond ((or (atom x) (atom y)) nil)
-	((eq x y) t)
-	((eq x (cdr y)) t)
-	((atom (cdr y)) nil)
-	((circlep-int (cdr x) (cddr y)))))
-
-(defmacro circlep (x) `(and (consp ,x) (circlep-int ,x (cdr ,x))))
-
-(defun pprint-indent (&rest r)   
-  (declare (ignore r))
-  nil)
-(defun pprint-newline (&rest r) 
-  (declare (ignore r))
-  nil)
-
-(defmacro pprint-logical-block ((s x &key (prefix "") (per-line-prefix "") (suffix "")) &body body)
+(defmacro pprint-logical-block ((s x &key (prefix "") (per-line-prefix "") (suffix ""))
+				&body body &aux (count (gensym))(print-end (gensym)))
   (declare (optimize (safety 1)))
-  (let ((nx (gensym)) (xx (gensym)) (count (gensym)) (end (gensym)) (eprefix (gensym))
-	(epprefix (gensym)) (esuffix (gensym)) (very-end (gensym)))
-    `(let ((,count 0) (,nx ,x))
-       (macrolet
-	((pprint-pop
-	  nil
-	  '(let ((,xx
-		  (cond
-		   ((not (listp ,nx)) (write-string ". " ,s) (write ,nx :stream ,s) nil)
-		   ((and *print-length* (>= ,count *print-length*)) (write-string "..." ,s))
-		   ((and (/= 0 ,count) (circlep ,nx)) (let ((*print-circle* t)) (write ,nx :stream ,s) nil))
-		   (t ,nx))))
-	     (unless (eq ,xx ,nx) (go ,end))
-	     (incf ,count)
-	     (pop ,nx)))
-	 (pprint-indent (&rest r))
-	 (pprint-newline 
-	  (a &optional (b nil bp)) 
-	  (when (eq a :mandatory)
-	    (if bp `(write #\Newline :stream ,b)
-	      `(write #\Newline))))
-	 (pprint-exit-if-list-exhausted
-	  nil
-	  '(unless ,nx (go ,end)))
-	 (ensure-string (x)
-	  `(unless (stringp ,x)
-	     (error 'type-error :datum ,x :expected-type 'string))))
-	(let ((,eprefix ,prefix)
-	      (,esuffix ,suffix)
-	      (,epprefix ,per-line-prefix))
-	  (ensure-string ,eprefix)
-	  (ensure-string ,epprefix)
-	  (ensure-string ,esuffix)
-	  (let ((si::*print-line-prefix* ,epprefix)
-		(si::*prin-level* (1+ si::*prin-level*)))
-	    (tagbody
-	     (unless (listp ,nx) (write ,nx :stream ,s) (go ,very-end))
-	     (when (and *print-level* (> si::*prin-level* *print-level*)) (write-string "#" ,s) (go ,very-end))
-	     (when (stringp ,eprefix) (write-string ,eprefix ,s))
-	     ,@body
-	     ,end
-	     (when (stringp ,esuffix) (write-string ,esuffix ,s))
-	     ,very-end
-	     )))))))
+  `(let* ((*print-line-prefix* ,per-line-prefix)(*prin-level* (1+ *prin-level*)))
+     (check-type *print-line-prefix* string)
+     (flet ((do-pref (x h)
+	      (if (pprint-quit x h ,s -1)
+		  (return-from do-pref nil)
+		  (write-string ,prefix ,s)))
+	    (do-suf (x h) (write-string ,suffix ,s))
+	    (do-pprint (x h &aux (,count 0))
+	      (macrolet
+		  ((pprint-pop nil
+		     '(if (pprint-quit x h ,s ,count)
+		       (return-from do-pprint nil)
+		       (progn (incf ,count)(pop x))))
+		   (pprint-exit-if-list-exhausted nil
+		     '(unless x (return-from do-pprint nil))))
+		,@body)))
+       (write-int1 ,x ,s #'do-pprint #'do-pref #'do-suf))))
+
+(defun pprint-fill (s list &optional (colon-p t) at-sign-p)
+  (declare (ignore at-sign-p))
+  (unless (listp list) (setq colon-p nil))
+  (pprint-logical-block (s list :prefix (if colon-p "(" "")
+                                :suffix (if colon-p ")" ""))
+    (pprint-exit-if-list-exhausted)
+    (loop (write (pprint-pop) :stream s)
+          (pprint-exit-if-list-exhausted)
+          (write-char #\Space s)
+          (pprint-newline :fill s))))
+
+(defun pprint-tabular (s list &optional (colon-p t) at-sign-p (tabsize nil))
+  (declare (ignore at-sign-p))
+  (when (null tabsize) (setq tabsize 16))
+  (pprint-logical-block (s list :prefix (if colon-p "(" "")
+                                :suffix (if colon-p ")" ""))
+    (pprint-exit-if-list-exhausted)
+    (loop
+     (write (pprint-pop) :stream s)
+     (pprint-exit-if-list-exhausted)
+     (write-char #\Space s)
+     (pprint-tab :section-relative 0 tabsize s)
+     (pprint-newline :fill s))))
+
+(defun pprint-linear (s list &optional (colon-p t) at-sign-p)
+  (declare (ignore at-sign-p))
+  (unless (listp list) (setq colon-p nil))
+  (pprint-logical-block (s list :prefix (if colon-p "(" "")
+                                :suffix (if colon-p ")" ""))
+    (pprint-exit-if-list-exhausted)
+    (loop (write (pprint-pop) :stream s)
+          (pprint-exit-if-list-exhausted)
+          (write-char #\Space s)
+     (pprint-newline :linear s))))
+
+(defun coerce-to-stream (strm)
+  (case strm ((nil) *standard-output*) ((t) *terminal-io*)(otherwise strm)))
+
+(defun pprint-tab (kind colnum colinc &optional strm)
+  (declare (optimize (safety 1)))
+  (check-type kind (member :line :section :line-relative :section-relative))
+  (check-type colnum (integer 0))
+  (check-type colinc (integer 0))
+  (check-type strm (or boolean stream));FIXME output-stream
+  (when *print-pretty*
+    (pprint-queue-codes (coerce-to-stream strm) (get kind 'fixnum) colnum colinc)))
+
+
+(defun pprint-indent (kind n &optional stream)
+  (declare (optimize (safety 1)))
+  (check-type kind (member :current :block))
+  (check-type n real)
+  (check-type stream (or boolean stream))
+  (when *print-pretty*
+    (let* ((stream (coerce-to-stream stream)))
+      (unless (pprint-miser-style stream)
+	(pprint-queue-codes stream (get kind 'fixnum) (round n))))))
+
+	   
+(defun pprint-newline (kind &optional stream)
+  (declare (optimize (safety 1)))
+  (check-type kind (member :linear :miser :fill :mandatory))
+  (check-type stream (or boolean stream))
+  (when *print-pretty*
+    (let ((stream (coerce-to-stream stream)))
+      (pprint-queue-codes
+       stream
+       (get (case kind
+	      (:miser (if (pprint-miser-style stream) :linear (return-from pprint-newline nil)))
+	      (:fill (if (pprint-miser-style stream) :linear kind))
+	      (otherwise kind))
+	    'fixnum)))))
+
+(defvar *print-pprint-dispatch* (list nil))
+
+(defun pprint-make-dispatch (table)
+  `(lambda (x)
+     (typecase x
+       ,@(mapcar (lambda (x) `(,(car x) (values ',(cadr x) t)))
+		 table)
+       (otherwise (values nil nil)))))
+
+(defun set-pprint-dispatch (spec fun &optional (pri 0) (tab *print-pprint-dispatch*)
+			    &aux (x (assoc spec (car tab) :test 'equal)))
+  (declare (optimize (safety 1)))
+  (check-type spec type-spec)
+  (check-type fun (or null function-name function))
+  (check-type pri real)
+  (check-type tab (cons list (or null function)))
+	      
+  (if x
+      (setf (cadr x) fun (caddr x) pri)
+      (push (list spec fun pri) (car tab)))
+  (sort (car tab) '> :key 'caddr)
+  (setf (cdr tab) (compile nil (pprint-make-dispatch (car tab))))
+  nil)
+
+(defun pprint-dispatch (obj &optional (table *print-pprint-dispatch*))
+  (declare (optimize (safety 1)))
+  (check-type table (cons list (or null function)))
+  (if (cdr table)
+      (funcall (cdr table) obj)
+      (values nil nil)))
+
+(defun copy-pprint-dispatch (&optional (tab *print-pprint-dispatch*))
+  (declare (optimize (safety 1)))
+  (check-type tab (or null (cons list (or null function))))
+  (cons (car tab) (cdr tab)))

@@ -27,6 +27,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <sys/types.h>
 #include <sys/stat.h>
      
+#include <string.h>
 #include <signal.h>
 #define NEED_MP_H
 #include "include.h"
@@ -269,7 +270,7 @@ object_to_char(object x)
 	case t_character:
 		c = char_code(x);  break;
 	default:
-		FEcannot_coerce(sLcharacter,x);
+		FEerror("~S cannot be coerce to a C char.", 1, x);
 	}
 	return(c);
 }
@@ -294,7 +295,7 @@ object_to_int(object x)
 	case t_longfloat:
 		i = lf(x);  break;
 	default:
-		FEcannot_coerce(sLinteger,x);
+		FEerror("~S cannot be coerce to a C int.", 1, x);
 	}
 	return(i);
 }
@@ -346,7 +347,7 @@ object_to_float(object x)
 	case t_longfloat: 
 		f = lf(x);  break; 
 	default: 
-		FEcannot_coerce(sLfloat,x);
+		FEerror("~S cannot be coerce to a C float.", 1, x);
 	} 
 	return(f); 
 } 
@@ -433,7 +434,7 @@ object_to_double(object x)
 	case t_longfloat: 
 		d = lf(x);  break; 
 	default: 
-		FEcannot_coerce(sLdouble_float,x);
+		FEerror("~S cannot be coerce to a C double.", 1, x);
 	} 
 	return(d); 
 } 
@@ -466,63 +467,18 @@ object_to_string(object x) {
 
 }
 
+
 void
-call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
-{object form;
- FUNC at;
-/* #ifdef CLEAR_CACHE */
-/*  static int n; */
-/*  static sigset_t ss; */
+call_init(int init_address,object memory,object faslfile) {
 
-/*  if (!n) { */
-/*      struct sigaction sa={{(void *)sigh},{{0}},SA_RESTART|SA_SIGINFO,NULL}; */
+  bds_bind(sSPmemory,memory);
+  bds_bind(sSPinit,faslfile);
+  ((FUNC)(memory->cfd.cfd_start+init_address))();
+  bds_unwind1;
+  bds_unwind1;
 
-/*      sigaction(SIGILL,&sa,NULL); */
-/*      sigemptyset(&ss); */
-/*      sigaddset(&ss,SIGILL); */
-/*      sigprocmask(SIG_BLOCK,&ss,NULL); */
-/*      n=1; */
-/*  } */
-/* #endif */
+}
 
-
-  check_type(fasl_vec,t_simple_vector);
-  form=(fasl_vec->v.v_self[VLEN(fasl_vec) -1]);
-
- if (fptr) at = fptr;
-  else 
- at=(FUNC)(memory->cfd.cfd_start+ init_address );
- 
-#ifdef VERIFY_INIT
- VERIFY_INIT
-#endif
-   
- if (consp(form) &&
-     form->c.c_car == sSPinit)
-   {bds_bind(sSPinit,fasl_vec);
-    bds_bind(sSPmemory,memory);
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_UNBLOCK,&ss,NULL); */
-/* #endif */
-    (*at)();
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_BLOCK,&ss,NULL); */
-/* #endif */
-    bds_unwind1;
-    bds_unwind1;
-  }
- else
-   /* old style three arg init, with all init being done by C code. */
-   {memory->cfd.cfd_self = fasl_vec->v.v_self;
-    memory->cfd.cfd_fillp = fasl_vec->v.v_fillp;
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_UNBLOCK,&ss,NULL); */
-/* #endif */
-    (*at)(memory->cfd.cfd_start, memory->cfd.cfd_size, memory);
-/* #ifdef CLEAR_CACHE */
-/*     sigprocmask(SIG_BLOCK,&ss,NULL); */
-/* #endif */
-}}
 
 /* statVV is the address of some static storage, which is used by the
    cfunctions to refer to global variables,..
@@ -538,51 +494,48 @@ call_init(int init_address, object memory, object fasl_vec, FUNC fptr)
 static int set_min_cfd_self=0;
 object *min_cfd_self=NULL;
 
-DEFUN("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-
-  sSPmemory->s.s_dbind->cfd.cfd_prof=1;
-
-  return Cnil;
-
-}
-
 void
-do_init(object *statVV)
-{object fasl_vec=sSPinit->s.s_dbind;
- object data = sSPmemory->s.s_dbind;
- {object *p,*q,y;
-   int n=VLEN(fasl_vec)-1;
-  int i;
-  object form;
-  check_type(fasl_vec,t_simple_vector);
-  form = fasl_vec->v.v_self[n];
-  dcheck_type(form,t_cons);  
+do_init(object *statVV) {
 
+  object faslfile=sSPinit->s.s_dbind;
+  object data=sSPmemory->s.s_dbind;
+  object *p,*q,y;
+  int i,n;
+  object fasl_vec;
+  char ch;
+
+  ch=readc_stream(faslfile);
+  unreadc_stream(ch,faslfile);
+
+  if (ch!='\n') {
+    struct fasd * fd;
+    faslfile=fSopen_fasd(faslfile,sKinput,OBJNULL,Cnil);
+    fd=(struct fasd *)faslfile->sv.sv_self;
+    n=fix(fd->table_length);
+    fd->table->sv.sv_self=alloca(n*sizeof(object));
+    memset(fd->table->sv.sv_self,0,n*sizeof(object));
+    fd->table->sv.sv_dim=faslfile->sv.sv_self[1]->sv.sv_dim=n;
+  }
+
+  n=fix(READ_STREAM_OR_FASD(faslfile));
+  sSPinit->s.s_dbind=fasl_vec=fSmake_vector(Ct,n,Ct,Cnil,Cnil,0,Cnil,Cnil);
 
   /* switch SPinit to point to a vector of function addresses */
-     
-  /* fasl_vec->v.tt= */fasl_vec->v.v_elttype = aet_fix;
-  /* fasl_vec->v.v_eltsize = elt_size(aet_fix); */
-  fasl_vec->v.v_rank=1;
-  fasl_vec->v.v_dim *= (sizeof(object)/sizeof(fixnum));
-  if (fasl_vec->v.v_hasfillp) fasl_vec->v.v_fillp *= (sizeof(object)/sizeof(fixnum));
-  
-  /* swap the entries */
-  p = fasl_vec->v.v_self;
 
-  q = statVV;
-  for (i=0; i<=n ; i++)
-    {  y = *p;
-     *p++ = *q;
-     *q++ = y;
-     }
-  
+  fasl_vec->v.v_elttype = aet_fix;
+
+  /* swap the entries */
+  for (i=0,p=fasl_vec->v.v_self,q=statVV;i<n;i++) {
+    y=*p;
+    *p++=*q;
+    *q++=y;
+  }
+
   data->cfd.cfd_self = statVV;
   if (set_min_cfd_self && (!min_cfd_self || data->cfd.cfd_self<min_cfd_self))
     min_cfd_self=data->cfd.cfd_self;
-  data->cfd.cfd_fillp= n+1;
-  statVV[n] = data;
-  
+  data->cfd.cfd_fillp= n;
+  statVV[n-1] = data;
 
   /* So now the fasl_vec is a fixnum array, containing random addresses of c
      functions and other stuff from the compiled code.
@@ -590,16 +543,20 @@ do_init(object *statVV)
   */
   /* Now we can run the forms f1 f2 in form= (%init f1 f2 ...) */
 
-  form=form->c.c_cdr;
-  {object *top=vs_top;
-   
-    for(i=0 ; i< VLEN(form); i++)
-     { 
-       eval(form->v.v_self[i]);
-       vs_top=top;
-     }
- }
-}}
+  fSload_stream(faslfile,Cnil);
+  if (type_of(faslfile)!=t_stream)
+    fSclose_fasd(faslfile);
+
+}
+
+DEFUN("MARK-MEMORY-AS-PROFILING",object,fSmark_memory_as_profiling,SI,0,0,
+	  NONE,OO,OO,OO,OO,(void),"") {
+
+  sSPmemory->s.s_dbind->cfd.cfd_prof=1;
+
+  return Cnil;
+
+}
 
 #ifdef DOS
 #define PATH_LIM 8
@@ -641,29 +598,33 @@ new_cfdata(void) {
 
 }
 
+
 void
 gcl_init_or_load1(void (*fn)(void),const char *file) {
 
   if (file[strlen(file)-1]=='o') {
 
     object memory;
-    object fasl_data;
+    object faslfile;
     /* file=FIX_PATH_STRING(file); */
 
     memory=new_cfdata();
     memory->cfd.cfd_name=make_simple_string(file);
     memory->cfd.cfd_start= (char *)fn;
     printf("Initializing %s\n",file); fflush(stdout);
-    fasl_data = read_fasl_data(file);
+    faslfile=open_stream(make_simple_string(file),smm_input,Cnil,sKerror);
+    SEEK_TO_END_OFILE(faslfile->sm.sm_fp);
     set_min_cfd_self=1;
-    call_init(0,memory,fasl_data,0);
+    call_init(0,memory,faslfile);
     set_min_cfd_self=0;
+    close_stream(faslfile);
 
   } else {
     printf("loading %s\n",file);
     fflush(stdout);
     load(file);
   }
+
 }
 
 DEFUN("INIT-CMP-ANON", object, fSinit_cmp_anon, SI, 0, 0,
@@ -693,6 +654,7 @@ function.")
 
 object
 find_init_name1(char *s,unsigned len) {
+
 #ifdef _WIN32
 
   char *tmp;
@@ -725,7 +687,9 @@ find_init_name1(char *s,unsigned len) {
   if (fread(tmp,1,ss.st_size,f)!=ss.st_size)
     FEerror("Error reading binary file",0);
   fclose(f);
-  for (s=tmp;s<tmp+ss.st_size && strncmp(s,"init_",5);q=strstr(s+1,"init_"),s=q ? q : s+strlen(s)+1);
+  for (s=tmp+1;s<tmp+ss.st_size
+	 && (strncmp(s,"init_",5) || (s>tmp && (s[-1]=='_' ? (s>tmp+1 && s[-2]) : s[-1])));
+       q=strstr(s+1,"init_"),s=q ? q : s+strlen(s)+1);
   if (strncmp(s,"init_",5))
     FEerror("Init name not found",0);
   return make_simple_string(s);
@@ -743,3 +707,8 @@ DEFUN("FIND-INIT-NAME", object, fSfind_init_name, SI, 1, 1,
 
 }
 
+DEFUN("SEEK-TO-END-OFILE",object,fSseek_to_end_ofile,SI,1,1,NONE,OO,OO,OO,OO,(object sm),"") {
+  check_type_stream(&sm);
+  SEEK_TO_END_OFILE(sm->sm.sm_fp);
+  RETURN1(sm);
+}

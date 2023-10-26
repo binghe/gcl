@@ -212,7 +212,6 @@ gcl_init_system(object no_init)
 #ifndef pcl_gcl
   lsp_init("clcs","package.lisp");
   check_init(clcs,gcl_clcs_precom,no_init);
-  check_init(clcs,gcl_clcs_handler,no_init);
   check_init(clcs,gcl_clcs_conditions,no_init);
   check_init(clcs,gcl_clcs_condition_definitions,no_init);
 #endif

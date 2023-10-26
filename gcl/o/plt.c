@@ -10,7 +10,6 @@
 
 #include "include.h"
 
-
 typedef struct {
   const char *n;
   unsigned long ad;
@@ -30,13 +29,13 @@ pltcomp(const void *v1,const void *v2) {
 
 }
 
-/* extern int _mcount(); */
 extern int mcount();
-extern void sincos(double,double *,double *);
+extern int _mcount();
 extern int __divdi3();
 extern int __moddi3();
 extern int __udivdi3();
 extern int __umoddi3();
+extern void sincos(double,double *,double *);
 extern int __divsi3();
 extern int __modsi3();
 extern int __udivsi3();
@@ -49,10 +48,6 @@ extern int __divq();
 extern int __divqu();
 extern int __remq();
 extern int __remqu();
-
-#ifndef _WIN32
-#  include "pltd.h"
-#endif
 
 #define MY_PLT(a_) {#a_,(unsigned long)(void *)a_}
 
@@ -199,7 +194,7 @@ parse_plt() {
 
   for (;p<pe;p++)
     if ((op=bsearch(p->n,ar->v.v_self,ar->v.v_dim,sizeof(*ar->v.v_self),arsearch)) &&
-	fix((*op)->c.c_cdr) != p->ad)
+	(*op)->c.c_cdr->FIX.FIXVAL != p->ad)
       FEerror("plt/ld address mismatch",0);
 
   sSAplt_tableA->s.s_dbind=ar;
@@ -221,7 +216,7 @@ my_plt(const char *s,unsigned long *v) {
 		 sSAplt_tableA->s.s_dbind->v.v_dim,
 		 sizeof(*sSAplt_tableA->s.s_dbind->v.v_self),
 		 arsearch))) {
-    *v=fix((*op)->c.c_cdr);
+    *v=(*op)->c.c_cdr->FIX.FIXVAL;
     return 0;
   }
     

@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -454,7 +453,7 @@
         copier
         predicate predicate-specified
         include
-        print-function print-object  type named initial-offset
+        print-function print-object type named initial-offset
         offset name-offset
         documentation
 	static
@@ -636,6 +635,7 @@
     (when (and print-function type)
           (error "A print function is supplied to a typed structure."))
 
+
     (let* ((tp (cond ((not type) nil) 
 		     ((subtypep type 'list) 'list)
 		     ((subtypep type 'vector) 'vector)))
@@ -654,6 +654,7 @@
 		  (when sym
 		    (setf (car sd) sym)))
 		(push sd new-slot-descriptions)))))
+
       `(progn
 	 (define-structure ',name  ',conc-name ',no-conc ',type
 	   ',named ',slot-descriptions ',copier ',static ',include 

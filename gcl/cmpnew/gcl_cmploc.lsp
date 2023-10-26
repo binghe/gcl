@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPLOC  Set-loc and Wt-loc.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa

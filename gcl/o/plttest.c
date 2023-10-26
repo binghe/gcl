@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <string.h>
 #include <setjmp.h>
 #include <stdio.h>
 #include <math.h>

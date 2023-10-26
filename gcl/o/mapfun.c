@@ -69,7 +69,6 @@ LFD(Lmapcar)(void)
 			vs_base = base;
 			return;
 		}
-		check_proper_list(x);
 		vs_push(MMcar(x));
 		base[i] = MMcdr(x);
 	}
@@ -113,7 +112,6 @@ LFD(Lmaplist)(void)
 			vs_base = base;
 			return;
 		}
-		check_proper_list(x);
 		vs_push(x);
 		base[i] = MMcdr(x);
 	}
@@ -156,7 +154,6 @@ LFD(Lmapc)(void)
 			vs_base = top;
 			return;
 		}
-		check_proper_list(x);
 		vs_push(MMcar(x));
 		base[i] = MMcdr(x);
 	}
@@ -196,7 +193,6 @@ LFD(Lmapl)(void)
 			vs_base = top;
 			return;
 		}
-		check_proper_list(x);
 		vs_push(x);
 		base[i] = MMcdr(x);
 	}
@@ -237,7 +233,6 @@ LFD(Lmapcan)(void)
 			vs_base = base;
 			return;
 		}
-		check_proper_list(x);
 		vs_push(MMcar(x));
 		base[i] = MMcdr(x);
 	}
@@ -288,7 +283,6 @@ LFD(Lmapcon)(void)
 			vs_base = base;
 			return;
 		}
-		check_proper_list(x);
 		vs_push(x);
 		base[i] = MMcdr(x);
 	}

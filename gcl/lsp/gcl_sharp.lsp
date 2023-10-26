@@ -27,17 +27,19 @@
 
 (defconstant +nil-proxy+ (cons nil nil))
 
-(defun sharp-eq-reader (stream subchar i &aux (x (push-context i)))
-  (declare (ignore subchar)(fixnum i))
+(defun sharp-eq-reader (stream subchar i &aux (x (unless *read-suppress* (push-context i))))
+  (declare (ignore subchar));(fixnum i)
   (let ((y (read stream t 'eof t)))
-    (when (when y (eq y (cdr x))) (error "#= circularly defined"))
-    (setf (car x) (or y +nil-proxy+))
+   (unless *read-suppress*
+     (when (when y (eq y (cdr x))) (error "#= circularly defined"))
+     (setf (car x) (or y +nil-proxy+)))
     y))
 
-(defun sharp-sharp-reader (stream subchar i &aux (x (get-context i)))
-  (declare (ignore stream subchar)(fixnum i))
-  (unless x (error "#~s# without preceding #~s=" i i))
-  (or (cdr x) (let ((s (alloc-spice))) (setf (gethash s (context-spice *sharp-eq-context*)) x (cdr x) s))))
+(defun sharp-sharp-reader (stream subchar i &aux (x (unless *read-suppress* (get-context i))))
+  (declare (ignore stream subchar));(fixnum i)
+  (unless *read-suppress*
+    (unless x (error "#~s# without preceding #~s=" i i))
+    (or (cdr x) (let ((s (alloc-spice))) (setf (gethash s (context-spice *sharp-eq-context*)) x (cdr x) s)))))
 
 (defun patch-sharp (x) 
   (typecase
@@ -51,7 +53,7 @@
       (aset1 x i (patch-sharp (row-major-aref x i)))))
    (structure
     (let ((d (structure-def x))) 
-      (dotimes (i (structure-length d) x)
+      (dotimes (i (structure-length x) x)
 	(declare (fixnum i))
 	(structure-set x d i (patch-sharp (structure-ref x d i))))))
    (spice (let* ((y (gethash1 x (context-spice *sharp-eq-context*)))
@@ -61,4 +63,6 @@
    (otherwise x)))
 
 (set-dispatch-macro-character #\# #\= #'sharp-eq-reader)
+(set-dispatch-macro-character #\# #\= #'sharp-eq-reader (standard-readtable))
 (set-dispatch-macro-character #\# #\# #'sharp-sharp-reader)
+(set-dispatch-macro-character #\# #\# #'sharp-sharp-reader (standard-readtable))

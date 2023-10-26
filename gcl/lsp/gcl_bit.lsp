@@ -80,32 +80,28 @@
 (setf (get 'bit-array-op 'compiler::cmp-inline) t)
 
 ;FIXME array-dimensions allocates....
-(defun bit-array-dimension-check (x y &aux (r (array-rank x)))
+(defvar *bit-array-dimension-check-ref* nil)
+
+(defun bit-array-dimension-check (y &aux (r (array-rank *bit-array-dimension-check-ref*)))
   (when (eql r (array-rank y))
     (dotimes (i r t)
-      (unless (eql (array-dimension x i) (array-dimension y i))
+      (unless (eql (array-dimension *bit-array-dimension-check-ref* i) (array-dimension y i))
 	(return nil)))))
 (setf (get 'bit-array-dimension-check 'compiler::cmp-inline) t)
 
 (eval-when
  (compile eval)
  (defmacro defbitfn (f fn &aux (n (eq f 'bit-not)))
-   `(defun ,f (x ,@(unless n `(y)) &optional r)
+   `(defun ,f (x ,@(unless n `(y)) &optional rz)
       (declare (optimize (safety 1)))
       (check-type x (array bit))
       ,@(unless n `((check-type y (array bit))))
-      (check-type r (or boolean (array bit)))
-      ,@(unless n
-	  `((assert (bit-array-dimension-check x y)
-		    (y)
-		    'type-error :datum y
-		    :expected-type `(array-bit ,(array-dimensions x)))))
-      (assert (or (if r (eq r t) t)
-		  (bit-array-dimension-check x r))
-	      (y)
-	      'type-error :datum r
-	      :expected-type `(array-bit ,(array-dimensions x)))
-      (bit-array-op ,fn x ,(if n 'x 'y) r))))
+      (check-type rz (or boolean (array bit)))
+      (let ((*bit-array-dimension-check-ref* x),@(unless n '((y y)))(rz rz))
+	,@(unless n '((check-type y (and (array bit) (satisfies bit-array-dimension-check)))))
+	(check-type rz (or boolean (and (array bit) (satisfies bit-array-dimension-check))))
+	(bit-array-op ,fn x ,(if n 'x 'y) rz)))))
+
 
 (defbitfn bit-and #'&)
 (defbitfn bit-ior #'\|)
@@ -118,3 +114,12 @@
 (defbitfn bit-orc1  (lambda (x y) (\| (~ x) y)))
 (defbitfn bit-orc2  (lambda (x y) (\| x (~ y))))
 (defbitfn bit-not   (lambda (x y) (~ x)))
+
+(defun baset (v x &rest r)
+  (declare (optimize (safety 1))(dynamic-extent r))
+  (check-type x (array bit))
+  (apply 'aset v x r))
+(defun sbaset (v x &rest r)
+  (declare (optimize (safety 1))(dynamic-extent r))
+  (check-type x (simple-array bit))
+  (apply 'aset v x r))

@@ -115,6 +115,7 @@
 				:defaults *default-pathname-defaults*))
 	 (pn (make-pathname :name "foo" :type "txt"
 			    :defaults subdir)))
+    #+gcl(progn (mapc 'delete-file (directory "./scratch/*"))(si::rmdir "scratch"))
     (assert (not (probe-file pn)) ()
 	    "Delete subdirectory scratch and its contents!")
     (let* ((results nil)

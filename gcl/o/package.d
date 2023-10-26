@@ -37,8 +37,6 @@ void check_type_or_symbol_string_package(object *);
 #define P_EXTERNAL(x,j) ((x)->p.p_external[(j) % (x)->p.p_external_size])
 
 
-
-
 static bool
 member_string_eq(x, l)
 object x, l;
@@ -137,7 +135,6 @@ int isize,esize;
 	vs_mark;
 	{ BEGIN_NO_INTERRUPT;
 	BEGIN:
-	if (!stringp(n))
 	  n=coerce_to_string(n);
 	if (find_package(n) != Cnil) {
 	  PACKAGE_CERROR(n,"Input new package","Package already exists",0);
@@ -159,9 +156,8 @@ int isize,esize;
 	
 	vs_push(x);
 	for (;  !endp(ns);  ns = ns->c.c_cdr) {
-		n = ns->c.c_car;
-		if (!stringp(n))
-		  n=coerce_to_string(n);
+	        n = ns->c.c_car;
+		n=coerce_to_string(n);
 		if (find_package(n) != Cnil) {
 			vs_reset;
 			PACKAGE_CERROR(n,"Input new nicknames list","Package already exists",0);
@@ -217,7 +213,7 @@ int isize,esize;
 	  PACKAGE_CERROR(n,"Input new package","No such package",0);
 	  NEW_INPUT(n);
 	  goto BEGIN;
-	  return Cnil; 
+	  return Cnil;
 #else
 	  x = make_package(n, ns, ul,isize,esize);
 	  goto L;
@@ -227,8 +223,7 @@ int isize,esize;
 		&x->p.p_internal_size,isize);
 	for (;  !endp(ns);  ns = ns->c.c_cdr) {
 		n = ns->c.c_car;
-		if (!stringp(n))
-		  n=coerce_to_string(n);
+		n=coerce_to_string(n);
 		y = find_package(n);
 		if (x == y)
 			continue;
@@ -258,8 +253,7 @@ object x, n, ns;
 	vs_mark;
 
  BEGIN:
-	if (!stringp(n))
-	  n=coerce_to_string(n);
+	n=coerce_to_string(n);
    	if (!(equal(x->p.p_name,n)) &&
 	    find_package(n) != Cnil) {
 	  PACKAGE_CERROR(n,"Input new package","Package already exists",0);
@@ -270,8 +264,7 @@ object x, n, ns;
 	x->p.p_nicknames = Cnil;
 	for (;  !endp(ns);  ns = ns->c.c_cdr) {
 		n = ns->c.c_car;
-		if (!stringp(n))
-		  n=coerce_to_string(n);
+		n=coerce_to_string(n);
 		y = find_package(n);
 		if (x == y)
 			continue;
@@ -345,7 +338,7 @@ int
 pack_hash(x)
 object x;
 {unsigned int h=0;
-  if (!stringp(x)) x=coerce_to_string(x);
+  x=coerce_to_string(x);
   {int len=VLEN(x);
   char *s;
 #define HADD(i,j,k,l) (h+=s[i],h+=s[j]<<8,h+=s[k]<<13,h+=s[l]<<23)
@@ -370,13 +363,12 @@ object x;
 		 }
   }
  END:
-	/*FIXME 64*/
   h &= 0x7fffffff; 
   return(h);
 }}
 
-DEFUN("PACK-HASH",fixnum,fSpack_hash,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
-  RETURN1(pack_hash(x));
+DEFUN("PACK-HASH",object,fSpack_hash,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)(fixnum)pack_hash(x));
 }
 
 DEFUN("SET-SYMBOL-HPACK",object,fSset_symbol_hpack,SI,2,2,NONE,OO,OO,OO,OO,(object p,object s),"") { 
@@ -390,9 +382,9 @@ DEFUN("PACKAGE-INTERNAL",object,fSpackage_internal,SI,2,2,NONE,OO,IO,OO,OO,(obje
   RETURN1(x->p.p_internal[i]);
 }
 
-DEFUN("PACKAGE-INTERNAL_SIZE",fixnum,fSpackage_internal_size,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+DEFUN("PACKAGE-INTERNAL_SIZE",object,fSpackage_internal_size,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   check_type_package(&x);
-  RETURN1(x->p.p_internal_size);
+  RETURN1((object)x->p.p_internal_size);
 }
 
 DEFUN("PACKAGE-EXTERNAL",object,fSpackage_external,SI,2,2,NONE,OO,IO,OO,OO,(object x,fixnum i),"") {
@@ -400,9 +392,9 @@ DEFUN("PACKAGE-EXTERNAL",object,fSpackage_external,SI,2,2,NONE,OO,IO,OO,OO,(obje
   RETURN1(x->p.p_external[i]);
 }
 
-DEFUN("PACKAGE-EXTERNAL_SIZE",fixnum,fSpackage_external_size,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+DEFUN("PACKAGE-EXTERNAL_SIZE",object,fSpackage_external_size,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   check_type_package(&x);
-  RETURN1(x->p.p_external_size);
+  RETURN1((object)x->p.p_external_size);
 }
 
 /*
@@ -472,7 +464,7 @@ object st, p;
 	int j;
 	object *ip, *ep, l, ul;
 	{BEGIN_NO_INTERRUPT;
-	if (!stringp(st)) st=coerce_to_string(st);
+	st=coerce_to_string(st);
 	j = pack_hash(st);
 	ip = &P_INTERNAL(p ,j);
 	for (l = *ip;  consp(l);  l = l->c.c_cdr)
@@ -690,7 +682,7 @@ object s, p;
 	int j;
 	object *ip,x;
 
-	if (!stringp(s)) s=coerce_to_string(s);
+	s=coerce_to_string(s);
 	x=find_symbol(s, p);
 	if (intern_flag == INTERNAL || intern_flag == EXTERNAL) {
 		p->p.p_shadowings = make_cons(x, p->p.p_shadowings);
@@ -818,26 +810,19 @@ delete_package(object n) {
   
 /*  			   (use `make_cons(lisp_package, Cnil)`) */
 
+DEFUN("MAKE-PACKAGE-INT",object,fSmake_package_int,SI,3,3,NONE,OO,OO,OO,OO,(object name,object nicknames,object use),"") {
 
-@(defun make_package (pack_name
-		      &key nicknames
-			   (use Cnil)
-		      (internal `small_fixnum(0)`)
-		      (external `small_fixnum(0)`)
-		      )
-@
-        if (!stringp(pack_name)) pack_name=coerce_to_string(pack_name);
-	check_type_or_string_symbol(&pack_name);
-	@(return `make_package(pack_name, nicknames, use,
-			       fix(internal),fix(external))`)
-@)
+  RETURN1(make_package(name,nicknames,use,0,0));
+
+}
+
 
 @(defun in_package (pack_name &key nicknames (use Cnil use_sp)
 		      (internal `small_fixnum(0)`)
 		      (external `small_fixnum(0)`)
 		    )
 @
-        if (!stringp(pack_name)) pack_name=coerce_to_string(pack_name);
+        pack_name=coerce_to_string(pack_name);
 	check_type_or_string_symbol(&pack_name);
 	if (find_package(pack_name) == Cnil && !(use_sp))
 		use = make_cons(lisp_package, Cnil);
@@ -851,10 +836,7 @@ DEFUN("IN-PACKAGE-INTERNAL",object,fSin_package_internal,SI,2,2,NONE,OO,OO,OO,OO
 
   object use=Cnil,nick=Cnil;
 
-  if ((!stringp(p)))
-    p = coerce_to_string(p);
-  if (!stringp(p))
-    FEerror("Wrong thing in-package ~S.",1,p);
+  p = coerce_to_string(p);
   
   /*fixme non-std error check?*/
   for (;consp(r) && consp(r->c.c_cdr);r=r->c.c_cdr->c.c_cdr) {
@@ -921,7 +903,7 @@ LFD(Lpackage_nicknames)()
 @
 	check_package_designator(pack);
 	pack = coerce_to_package(pack);
-        if (!stringp(new_name)) new_name=coerce_to_string(new_name);
+        new_name=coerce_to_string(new_name);
 	check_type_or_string_symbol(&new_name);
 	@(return `rename_package(pack, new_name, new_nicknames)`)
 @)
@@ -954,17 +936,19 @@ FFN(Lpackage_shadowing_symbols)()
 	vs_base[0] = vs_base[0]->p.p_shadowings;
 }
 
-LFD(Llist_all_packages)()
-{
-	struct package *p;
-	int i;
+LFD(Llist_all_packages)() {
 
-	check_arg(0);
-	for (p = pack_pointer, i = 0;  p != NULL;  p = p->p_link, i++)
-		vs_push((object)p);
-	vs_push(Cnil);
-	while (i-- > 0)
-		stack_cons();
+  struct package *p;
+  object x,*l;
+  int i;
+
+  check_arg(0);
+
+  for (l=&x,p=pack_pointer,i=0;p!=NULL;p=p->p_link,i++)
+    collect(l,make_cons((object)p,Cnil));
+  *l=Cnil;
+  vs_push(x);
+
 }
 
 @(defun intern (strng &optional (p `current_package()`) &aux sym)
@@ -1301,7 +1285,6 @@ gcl_init_package()
 void
 gcl_init_package_function()
 {
-	make_function("MAKE-PACKAGE", Lmake_package);
 	make_si_function("DELETE-PACKAGE-INTERNAL", Ldelete_package_internal);
 #ifdef ANSI_COMMON_LISP
 	make_si_function("KCL-IN-PACKAGE", Lin_package);

@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPTOP  Compiler top-level.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -25,14 +24,7 @@
 (defvar *objects* (make-hash-table :test 'eq))
 (defvar *function-links* nil)
 (defvar *c-gc* t) ;if we gc the c stack.
-
-;; We are expanding the use of *c-vars* to hold type information for C
-;; stack variables initialized in inline blocks too.  conses of form
-;; type . num get initialized at function top as before.  conses of
-;; this form and the alternate form (num . type) are searched for
-;; inline matching late in pass2, e.g. cmp-aref-inline. 20060627 CM
 (defvar *c-vars*)  ;list of *c-vars* to put at beginning of function.
-
 ;;number of address registers available not counting the
 ;;frame pointer and the stack pointer
 ;;If sup and base are used, then their are even 2 less
@@ -82,33 +74,16 @@
 
 ;;; *global-entries* holds (... ( fname cfun return-types arg-type ) ...).
 
-;(defvar *setf-function-proxy-symbols* nil)
-
-;; alist of proxy sybmols to name functions defun'ed as (setf foo)
-
-
 ;;; Package operations.
 
-(si:putprop 'make-package t 'package-operation)
-(if (fboundp 'si::kcl-in-package)
-    (si:putprop 'si::kcl-in-package t 'package-operation))
-(si:putprop 'in-package t 'package-operation)
-(si:putprop 'shadow t 'package-operation)
-(si:putprop 'shadowing-import t 'package-operation)
-(si:putprop 'export t 'package-operation)
-(si:putprop 'unexport t 'package-operation)
-(si:putprop 'use-package t 'package-operation)
-(si:putprop 'unuse-package t 'package-operation)
-(si:putprop 'import t 'package-operation)
-(si:putprop 'provide t 'package-operation)
-(si:putprop 'require t 'package-operation)
-(si:putprop 'defpacakge t 'package-operation)
-(si:putprop 'mdlsym t 'package-operation)
+(si:putprop 'in-package t 'eval-at-compile)
+(si:putprop 'si::in-package-internal t 'eval-at-compile)
 
 ;;; Pass 1 top-levels.
 
 (si:putprop 'eval-when 't1eval-when 't1)
 (si:putprop 'progn 't1progn 't1)
+(si:putprop 'macrolet 't1macrolet 't1)
 (si:putprop 'defun 't1defun 't1)
 (si:putprop 'defmacro 't1defmacro 't1)
 (si:putprop 'macrolet 't1macrolet 't1)
@@ -128,6 +103,7 @@
 ;;; Pass 2 initializers.
 
 (si:putprop 'defun 't2defun 't2)
+(si:putprop 'progn 't2progn 't2)
 (si:putprop 'mflag 't3mflag 't3)
 ;(si:putprop 'defmacro 't2defmacro 't2)
 (si:putprop 'ordinary 't3ordinary 't3)
@@ -138,6 +114,7 @@
 ;;; Pass 2 C function generators.
 
 (si:putprop 'defun 't3defun 't3)
+(si:putprop 'progn 't3progn 't3)
 ;(si:putprop 'defmacro 't3defmacro 't3)
 (si:putprop 'clines 't3clines 't3)
 (si:putprop 'defcfun 't3defcfun 't3)
@@ -198,29 +175,21 @@
   (let ((new (copy-seq str)))
     (dash-to-underscore-int new 0 (length new))))
 
-(defun init-name (p &optional sp (gp t) (dc t) (nt t)) 
 
-  (cond ((not sp) "code")
-	((not (pathnamep p)) (init-name (pathname p) sp gp dc nt))
-	(gp (init-name (truename (merge-pathnames p #p".lsp")) sp nil dc nt))
-	((pathname-type p)
-	 (init-name (make-pathname
-                     :host (pathname-host p)
-                     :device (pathname-device p)
-                     :directory (pathname-directory p)
-                     :name (pathname-name p)
-                     :version (pathname-version p)) sp gp dc nt))
-;	#-aosvs(dc (string-downcase (init-name p sp gp nil nt)))
-	((and nt
-	      (let* ((pn (pathname-name p))
-		     (pp (make-pathname :name pn)))
-		(and (not (equal pp p)) 
-		     (eql 4 (string<= "gcl_" pn))
-		     (init-name pp sp gp dc nil)))))
-	((dash-to-underscore (namestring p)))))
+(defun init-name (p &optional sp)
 
+  (if sp
+      (let* ((p (truename (merge-pathnames p #p".lsp")))
+	     (pn (pathname-name p))
+	     (g (zerop (si::string-match #v"^gcl_" pn))))
+	(dash-to-underscore
+	 (namestring
+	  (make-pathname :host (unless g (pathname-host p))
+			 :device (unless g (pathname-device p))
+			 :directory (unless g (pathname-directory p))
+			 :name pn))))
+    "code"))
 
-;; FIXME consider making this a macro
 (defun c-function-name (prefix num fname)
   (si::string-concatenate
    (string prefix)
@@ -243,12 +212,6 @@
             ((symbolp fun)
              (cond ((eq fun 'si:|#,|)
                     (cmperr "Sharp-comma-macro is in a bad place."))
-                   ((get fun 'package-operation)
-		    (let ((res (if (setq fd (macro-function fun))
-				   (cmp-expand-macro fd fun (copy-list (cdr form)))
-				 form)))
-		      (maybe-eval t res) 
-		      (t1ordinary form)))
                    ((setq fd (get fun 't1))
                     (when *compile-print* (print-current-form))
                     (values (funcall fd args)))
@@ -268,24 +231,39 @@
            )))
   )
 
-;(defun declaration-type (type) 
-;  (cond ((equal type "") "void")
-;	((equal type "long ") "object ")
-;	(t type)))
+(defun declaration-type (type)
+  (cond ((equal type "") "void")
+	((equal type "long ") "object ")
+	(t type)))
 
 (defvar *vaddress-list*)   ;; hold addresses of C functions, and other data
 (defvar *vind*)            ;; index in the VV array where the address is.
 (defvar *Inits*)
 (defvar *add-hash-calls*)
-(defun ctop-write (name &aux
-			def
-		(*function-links* nil) *c-vars* (*volatile* " VOL ")
-		*vaddress-list* (*vind* 0)  *inits*
-		*current-form* *vcs-used* *add-hash-calls*)
+
+
+(defun t23expr (form prop &aux (def (when (consp form) (get (car form) prop)))
+		     *local-funs* (*first-error* t) *vcs-used*)
+  (when def
+    (apply def (cdr form)))
+  (when (eq prop 't3)
+      ;;; Local function and closure function definitions.
+    (block
+     nil
+     (loop
+      (when (endp *local-funs*) (return))
+      (let (*vcs-used*)
+	(apply 't3local-fun (pop *local-funs*)))))))
+
+(defun ctop-write (name
+		   &aux
+		     (*function-links* nil) *c-vars* (*volatile* " VOL ")
+		     *vaddress-list* (*vind* 0)  *inits*
+		     *current-form* *vcs-used* *add-hash-calls*)
+
   (declare (special *current-form* *vcs-used*))
 
-;;  #+gprof(add-libc "mcount")
-  (setq *top-level-forms* (reverse *top-level-forms*))
+  (setq *top-level-forms* (nreverse *top-level-forms*))
 
   ;;; Initialization function.
   (wt-nl1     "void init_" name "(){"
@@ -293,31 +271,13 @@
 	       "do_init((void *)VV);"
 	      "}")
 
-
   ;; write all the inits.
   (dolist (*current-form* *top-level-forms*)
-    (setq *first-error* t)	   
-    (setq *vcs-used* nil)
-    (when (setq def (get (car *current-form*) 't2))
-      (apply def (cdr *current-form*))))
-
+    (t23expr *current-form* 't2))
   
   ;;; C function definitions.
   (dolist (*current-form* *top-level-forms*)
-    (setq *first-error* t)	   
-    (setq *vcs-used* nil)
-    (when (setq def (get (car *current-form*) 't3))
-      (apply def (cdr *current-form*))))
-
-  ;;; Local function and closure function definitions.
-  (let (lf)
-       (block local-fun-process
-         (loop
-          (when (endp *local-funs*) (return-from local-fun-process))
-          (setq lf (car *local-funs*))
-          (pop *local-funs*)
-	  (setq *vcs-used* nil)
-          (apply 't3local-fun lf))))
+    (t23expr *current-form* 't3))
 
   ;;; Global entries for directly called functions.
 
@@ -405,12 +365,13 @@
 
 (defvar *eval-when-defaults* nil);:defaults
 
-(defun maybe-eval (def form &aux (c (car form)) (def (or def (when (symbolp c) (get c 'eval-at-compile)))))
-  (when (if *eval-when-defaults* (list-split '(compile :compile-toplevel) *eval-when-defaults*) def)
+(defun maybe-eval (def form)
+  (when (or def
+	    (intersection '(compile :compile-toplevel) *eval-when-defaults*)
+	    (let ((c (car form))) (when (symbolp c) (get c 'eval-at-compile))))
     (when form
       (cmp-eval form))
     t))
-
 
 (defun t1eval-when (args &aux load-flag compile-flag)
   (when (endp args) (too-few-args 'eval-when 1 0))
@@ -431,7 +392,19 @@
 	 (let ((*compile-ordinaries* t))
 	   (t1progn (cdr args))))
 	(t
-	 (dolist (form args) (t1expr form)))))
+;	 (dolist (form args) (t1expr form))
+	 (let ((f *top-level-forms*))
+	   (dolist (form args) (t1expr form))
+	   (setq *top-level-forms* (cons `(progn ,(nreverse (ldiff *top-level-forms* f))) f)))
+	 )))
+
+(defun t3progn (args)
+  (dolist (arg args)
+    (t23expr arg 't3)))
+
+(defun t2progn (args)
+  (dolist (arg args)
+    (t23expr arg 't2)))
 
 (defun function-symbol (name)
   (si::funid-sym name))
@@ -1230,7 +1203,7 @@
     (keyed-cmpnote (list 'return-type fname) "~s return type ~s" fname (c1retnote lambda-expr))
     
     (unless (or (equal osig sig) (eq fname 'cmp-anon));FIXME
-      (cmpwarn "signature change on function ~s,~%   ~s -> ~s~%" fname (si::ex-sig osig) (si::ex-sig sig))
+      (cmpwarn "signature change on function ~s,~%   ~s -> ~s~%" fname (ex-sig osig) (ex-sig sig))
       (setq *new-sigs-in-file* 
 	    (some
 	     (lambda (x) 
@@ -1249,7 +1222,7 @@
 		  (make-inline-string cfun at fname)))
 	  *inline-functions*)
   
-    (push (list 'defun fname cfun lambda-expr doc nil) *top-level-forms*)
+    (push (list 'defun fname cfun lambda-expr doc nil nil) *top-level-forms*)
     (push (cons fname cfun) *global-funs*)
 
     (output-warning-note-stack)))
@@ -1309,10 +1282,9 @@
    (let ((type (if (or (not type) (eq type 'object)) t type)))
     (when (or (not local) (not (eq type t)))
 	(push (if local (cons tem type) (cons type tem)) *c-vars*)))
-    tem))
+   tem))
 
-
-;For the moment only two types are recognized.
+; For the moment only two types are recognized.
 (defun f-type (x)
   (if (var-p x) (setq x (var-type x)))
   (let ((x (promoted-c-type x)))
@@ -1352,6 +1324,24 @@
 	((> (length tp) multiple-values-limit) (baboon));FIXME
 	((eq (car tp) 'returns-exactly) (- 2 (length tp)))
 	((- (length tp) 2))))
+
+(defun ty-contains-binding-p (tp)
+  (typecase tp
+    (binding t)
+    (atom nil)
+    (cons (or (ty-contains-binding-p (car tp)) (ty-contains-binding-p (cdr tp))))))
+
+(defun ex-tp (tp)
+  (if (ty-contains-binding-p tp)
+      (car tp)
+      tp))
+
+(defun exp-sig (sig)
+  (list (mapcar 'ex-tp (car sig)) (if (consp (cadr sig)) (cons (caadr sig) (mapcar 'ex-tp (cdadr sig))) (ex-tp (cadr sig)))))
+
+(defun ex-sig (sig) (list (mapcar 'cmp-unnorm-tp (car sig)) (cmp-unnorm-tp (cadr sig))))
+(defun export-call-struct (l)
+  `(apply 'make-function-plist ',(exp-sig (pop l)) ',(pop l) ,(apply 'compress-fle (pop l)) ',l))
 
 (defun wt-if-proclaimed (fname cfun lambda-expr macro-p)
   (when (fast-link-proclaimed-type-p fname);(and  (not (member '* (get-arg-types fname))))
@@ -1487,8 +1477,8 @@
     (if mv `(,(car tp) ,@(when (cdr tp) `(,tppn)) ,@(cddr tp)) tppn)))
 
 
-(defun t2defun (fname cfun lambda-expr doc sp)
-  (declare (ignore cfun lambda-expr doc sp))
+(defun t2defun (fname cfun lambda-expr doc sp macro-p)
+  (declare (ignore cfun lambda-expr doc sp macro-p))
 
   (cond ((get fname 'no-global-entry)(return-from t2defun nil)))
   
@@ -1625,8 +1615,8 @@
 ;;   (when *compiler-auto-proclaim*
 ;;     (add-init `(si::add-hash ',fname ,@(mapcar (lambda (x) `(quote ,x)) (export-call (gethash fname *sigs*)))))))
 
-(defun t3defun (fname cfun lambda-expr doc sp &aux inline-info 
-		      (macro-p (equal `(mflag ,fname) (cadr (member *current-form* *top-level-forms*))))
+(defun t3defun (fname cfun lambda-expr doc sp macro-p &aux inline-info 
+;		      (macro-p (equal `(mflag ,fname) (cadr (member *current-form* *top-level-forms*))))
 		      (*current-form* (list 'defun fname))
 		      (*volatile* (volatile (second lambda-expr))))
 
@@ -1838,8 +1828,6 @@
       (c2expr (caddr (cddr lambda-expr)))
       (wt-V*-macros cm (caddr inline-info)))
     
-;;; Use base if defined for lint
-;    (unless (and (zerop *max-vs*) (not *base-used*)) (wt-nl "base[0]=base[0];"))
     
 ;;; Make sure to return object if necessary
 ;    (if (equal "object " (rep-type (caddr inline-info))) (wt-nl "return Cnil;"))
@@ -1947,7 +1935,7 @@
       (setf (get fname 'si::debugger) locals)
       (let ((locals (get fname 'si::debugger)))
 	(if (and locals (or (cdr locals) (not (null (car locals)))))
-	    (add-init `(si::debugger ',fname ',locals) )
+	    (add-init `(debug ',fname ',locals) )
 	    ))
       ))))
 
@@ -2113,8 +2101,10 @@
 (defun t1defmacro (args &aux (w args)(n (pop args))
 			(macp (when (listp n) (eq 'macro (car n))))(n (if macp (cdr n) n)))
   (t1expr `(defun ,n ,@(if macp args (cdr (si::defmacro-lambda n (pop args) args)))))
+  (setf (car (last (car *top-level-forms*))) t)
   (maybe-eval (not (macro-function n)) (cons 'defmacro w));FIXME?
-  (push `(mflag ,n) *top-level-forms*))
+;  (push `(mflag ,n) *top-level-forms*)
+  )
 
 (defun t3mflag (n) (declare (ignore n)) nil)
 ;; (defun t3mflag (n)
@@ -2165,27 +2155,24 @@
 ;; 		nil nil -1 ,(new-proclaimed-argd at rt)
 ;; 		,(argsizes at rt (xa lam))))))
 
-(defun tlclp (form)
-  (cond ((atom form) nil)
-	((eq (car form) 'si::fset))
-;	((member (car form) '(si::define-macro si::fset)))
-	((or (tlclp (car form)) (tlclp (cdr form))))))
+(defvar *compiling-ordinary* nil)
 
-(defun contains-package-operation-p (form)
-  (cond ((atom form) nil)
-	((eq (car form) 'quote) nil)
-	((member (car form) '(mdlsym make-package defpackage)))
-	((or (contains-package-operation-p (car form)) (contains-package-operation-p (cdr form))))))
+(defun compile-ordinary-p (form)
+  (when (consp form)
+    (or (member (car form) '(lambda defun defmacro flet labels))
+	(compile-ordinary-p (car form))
+	(compile-ordinary-p (cdr form)))))
+
 
 (defun t1ordinary (form)
-  ;; check for top level functions
-  (when (contains-package-operation-p form) (wt-data-package-operation form))
-  (cond ((or *compile-ordinaries* (tlclp (portable-source form)))
+  (cond ((unless *compiling-ordinary*
+	   (or *compile-ordinaries* (compile-ordinary-p form)))
 	 (maybe-eval nil form)
-	 (let ((gen (gensym "progncompile")))
-	   (proclaim `(ftype (function nil null) ,gen))
-	   (t1expr `(defun ,gen (), form nil))
-	   (push (list 'ordinary `(,gen)) *top-level-forms*)))
+	 ;; (let ((*compiling-ordinary* t))
+	 ;;   (t1expr `(funcall (lambda nil ,form nil))))
+	 (let ((gen (gensym "progncompile"))(*compiling-ordinary* t))
+	   (t1expr `(progn (defun ,gen nil ,form nil) (,gen))))
+	 )
 	(t 
 	 (maybe-eval nil form)
 	 (let (*vars* *funs* *blocks* *tags*)
@@ -2210,7 +2197,7 @@
 (setf (get 'si::define-structure 't1) 't1define-structure)
 
 (defun t1define-structure (args)
-  (maybe-eval t `(si::define-structure ,@args ,(not (maybe-eval nil nil))))
+  (maybe-eval t `(si::define-structure ,@(copy-tree args) ,(not (maybe-eval nil nil))));FIXME
   (t1ordinary (cons 'si::define-structure args)))
 
 
@@ -2255,7 +2242,7 @@
                         body))
                  (t (cmperr "The defCfun body ~s is illegal." s))))
           (t (cmperr "The defCfun body ~s is illegal." s))))
-  (push (list 'defcfun (car args) (cadr args) (reverse body)) *top-level-forms*))
+  (push (list 'defcfun (car args) (cadr args) (nreverse body)) *top-level-forms*))
 
 (defun t3defcfun (header vs-size body &aux fd)
   (wt-comment "C function defined by " 'defcfun)
@@ -2263,10 +2250,7 @@
   (wt-h header ";")
   (wt-nl1 "{")
   (wt-nl1 "object *vs=vs_top;")
-  (when (or (> vs-size 0)
-	    (some (lambda (x) (or (not (stringp x)) (not (constantp x)))) body))
-    (wt-nl1 "object *old_top=vs_top+" vs-size ";"))
-  (when (> vs-size 0) (wt-nl "vs_top=old_top;"))
+  (when (> vs-size 0) (wt-nl1 "object *old_top=vs_top+" vs-size ";")(wt-nl "vs_top=old_top;"))
   (wt-nl1 "{")
   (dolist (s body)
     (cond ((stringp s) (wt-nl1 s))
@@ -2486,7 +2470,7 @@
 (defun t1defla (args) (declare (ignore args)))
 
 (defun parse-cvspecs (x &aux (cvspecs nil))
-  (dolist (cvs x (reverse cvspecs))
+  (dolist (cvs x (nreverse cvspecs))
     (cond ((symbolp cvs)
            (push (list 'object (string-downcase (symbol-name cvs))) cvspecs))
           ((stringp cvs) (push (list 'object cvs) cvspecs))

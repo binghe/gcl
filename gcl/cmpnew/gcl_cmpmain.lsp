@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPMAIN  Compiler main program.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -28,7 +27,9 @@
 (in-package :compiler)
 
 
-(export '(*compile-print* *compile-verbose* *compile-file-truename* *compile-file-pathname*))
+(export '(*compile-print* *compile-verbose*));FIXME
+(import 'si::(*tmp-dir* *cc* *ld* *objdump*))
+(import 'si::*error-p* 'compiler)
 
 ;;; This had been true with Linux 1.2.13 a.out or even older
 ;;; #+linux   (push :ld-not-accept-data  *features*)
@@ -49,24 +50,18 @@
 ;;If the following is a string, then it is inserted instead of
 ;; the include file cmpinclude.h, EXCEPT for system-p calls.
 (defvar *cmpinclude-string* t)
+  ;; (si::file-to-string
+  ;;  (namestring
+  ;;   (make-pathname :directory (append (pathname-directory si::*system-directory*) (list :back "h"))
+  ;; 		   :name "cmpinclude" :type "h"))))
 (defvar *compiler-default-type* #p".lsp")
 (defvar *compiler-normal-type* #p".lsp")
 (defvar *compile-file-truename* nil)
 (defvar *compile-file-pathname* nil)
 
 
-(defun compiler-default-type (pname) 
-  "Set the default file extension (type) for compilable file names."
-  (setf *compiler-default-type* (if (pathnamep pname)
-				    pname
-				  (make-pathname :type (string-left-trim "." pname)))))
-
-(defun compiler-reset-type ()
-  "Set the default file extension (type) to <.lsp>."
-  (compiler-default-type *compiler-normal-type*))
-
 ;; Let the user write dump c-file etc to  /dev/null.
-(defun get-output-pathname (file ext name &optional 
+(defun get-output-pathname (file ext name &optional
 				 (dir (pathname-directory *default-pathname-defaults*))
 				 (device (pathname-device *default-pathname-defaults*)))
   (cond ((equal file "/dev/null") (pathname file))
@@ -80,15 +75,13 @@
 		 (name (if lf (pathname-name file) name)))
 	     (make-pathname :device device :directory dir :name name :type ext))))))
 
-
 (defun safe-system (string)
  (multiple-value-bind
-  (code result) (system string)
+  (code result) (system (mysub string "$" "\\$"))
     (unless (and (zerop code) (zerop result))
       (cerror "Continues anyway."
-              "(SYSTEM ~S) returned a non-zero value ~D."
-              string
-              result)
+              "(SYSTEM ~S) returned a non-zero value ~D ~D."
+              string code result)
       (setq *error-p* t))
     (values result)))
 
@@ -101,8 +94,10 @@
 (defvar *default-h-file* nil)
 (defvar *default-data-file* nil)
 (defvar *default-prof-p* nil)
+#+large-memory-model(defvar *default-large-memory-model-p* nil)
 (defvar *keep-gaz* nil)
 (defvar *prof-p* nil)
+#+large-memory-model(defvar *large-memory-model-p* nil)
 
 ;;  (list section-length split-file-names next-section-start-file-position)
 ;;  Many c compilers cannot handle the large C files resulting from large lisp files.
@@ -114,6 +109,7 @@
 (defvar *lsp-ext* (make-pathname :type "lsp"))
 
 (defvar *o-ext* (make-pathname  :type "o"))
+(defvar *compile-file-truename*)
 
 (defvar *sigs* (make-hash-table :test 'eq))
 (defvar *new-sigs-in-file* nil)
@@ -126,79 +122,91 @@
   (mapc (lambda (x) (set-first-sig (car x) (cdr x))
 	  (mapc (lambda (x) (set-first-sig (car x) (list (cdr x) nil nil nil nil nil))) (caddr x))) si::*sig-discovery-props*))
 
-(defun compile-file  (filename &rest args
-			    &aux (*print-pretty* nil)
-			    (*package* *package*) (*split-files* *split-files*)
-			    (*PRINT-CIRCLE* NIL)
-			    (*PRINT-RADIX* NIL)
-			    (*PRINT-ARRAY* T)
-			    (*PRINT-LEVEL* NIL)
-			    (*PRINT-PRETTY* T)
-			    (*PRINT-LENGTH* NIL)
-			    (*PRINT-GENSYM* T)
-			    (*PRINT-CASE* :UPCASE)
-			    (*PRINT-BASE* 10)
-			    (*PRINT-ESCAPE* T)
-			    (section-length *split-files*)
-			    tem warnings failures
-			    (*compile-file-pathname* (merge-pathnames filename *lsp-ext*))
-			    (*compile-file-truename* (truename *compile-file-pathname*)))
+(defun compile-file (fn &rest l &aux w e)
+  (values
+   (handler-bind
+       ((style-warning (lambda (c) (declare (ignore c)) (setq w t)))
+	(warning (lambda (c) (declare (ignore c)) (setq w t e t)))
+	(error (lambda (c) (declare (ignore c)) (setq w t e t))))
+       (apply 'compile-file2 fn l))
+   w e))
 
+(defun compile-file2  (filename &rest args
+		       &aux (*print-pretty* nil)
+			 (*package* *package*) (*split-files* *split-files*)
+			 (*PRINT-CIRCLE* NIL)
+			 (*PRINT-RADIX* NIL)
+			 (*PRINT-ARRAY* T)
+			 (*PRINT-LEVEL* NIL)
+			 (*PRINT-PRETTY* T)
+			 (*PRINT-LENGTH* NIL)
+			 (*PRINT-GENSYM* T)
+			 (*PRINT-CASE* :UPCASE)
+			 (*PRINT-BASE* 10)
+			 (*PRINT-ESCAPE* T)
+			 (section-length *split-files*)
+			 tem
+			 (filename (pathname filename))
+			 (*compile-file-pathname* (merge-pathnames filename))
+			 (*compile-file-truename* (truename filename)))
   (loop 
 
    (setup-sigs)
-;   (clrhash *sigs*)
-;   (purge-member-types)
 
    (do nil ((not (eq (setq tem (let (*new-sigs-in-file*) (apply 'compile-file1 filename args))) 'again))))
 
-   (cond ((atom *split-files*)(return (values (when tem (truename tem)) warnings failures)))
+   (cond ((atom *split-files*)(return (when tem (truename tem))))
 	 ((and (consp *split-files*) (null (third *split-files*)))
 	  (let* ((gaz (gazonk-name))
 		 (*readtable* (si::standard-readtable)))
 	    (with-open-file 
-	     (st gaz :direction :output)
-	     (print `(eval-when (load eval)
-				(dolist (v ',(nreverse (second *split-files*)))
-				  (load (merge-pathnames v si::*load-pathname*))))
-		    st))
+		(st gaz :direction :output)
+	      (print `(eval-when (load eval)
+			(dolist (v ',(nreverse (second *split-files*)))
+			  (load (merge-pathnames v si::*load-pathname*))))
+		     st))
 	    (setq *split-files* nil)
 	    (unless (member :output-file args)
-		(setq args (append args (list :output-file (merge-pathnames (make-pathname :type "o") (pathname filename))))))
+	      (setq args (append args (list :output-file (merge-pathnames (make-pathname :type "o") (pathname filename))))))
 	    (return 
-	     (let ((tem (apply 'compile-file gaz args)))
-	       (unless *keep-gaz* (delete-file gaz))
-	       (values (when tem (truename tem)) warnings failures))))))
-   (if (consp *split-files*)
-       (setf (car *split-files*) (+ (third *split-files*) section-length)))))
+	      (let ((tem (apply 'compile-file gaz
+				(append args
+					(unless (member :output-file args)
+					  (list :output-file
+						(get-output-pathname filename "o" nil nil nil)))))))
+		(unless *keep-gaz* (mdelete-file gaz))
+		(when tem (truename tem))))))
+	 ((setf (car *split-files*) (+ (third *split-files*) section-length))))))
 
 (defvar *init-name* nil)
 (defvar *function-filename* nil)
 (defvar *c-debug* nil)
 (defun compile-file1 (input-pathname
-                      &key (output-file (merge-pathnames *o-ext* input-pathname))
+                      &key (output-file (merge-pathnames ".o" (truename input-pathname)))
                            (o-file t)
                            (c-file *default-c-file*)
                            (h-file *default-h-file*)
                            (data-file *default-data-file*)
 			   (c-debug nil)
-                           #+aosvs (ob-file nil)
                            (system-p *default-system-p*)
 			   (print *compile-print*)
 			   (external-format :default)
 			   (verbose *compile-verbose*)
                            (prof-p *default-prof-p*)
+			   #+large-memory-model(large-memory-model-p *default-large-memory-model-p*)
                            (load nil)
-                      &aux (*standard-output* *standard-output*)
-		           (*prof-p* prof-p)
+			   &aux
+			   (*standard-output* *standard-output*)
+			   (*prof-p* prof-p)
+			   #+large-memory-model(*large-memory-model-p* large-memory-model-p)
+			   (output-file (pathname output-file))
 		           (*error-output* *error-output*)
                            (*compiler-in-use* *compiler-in-use*)
 			   (*c-debug* c-debug)
-			   (*compile-print* print)
+			   (*compile-print* (or print *compile-print*))
 			   (*compile-verbose* verbose)
-                           (*package* *package*)
 			   (*DEFAULT-PATHNAME-DEFAULTS* #p"")
-			   (*data* (list (make-array 50 :fill-pointer 0 :adjustable t) nil nil nil))
+			   *data*
 			   (*fasd-data* *fasd-data*)
                            (*error-count* 0)
 			   (*init-name* *init-name*)
@@ -236,7 +244,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	   (make-pathname :device (pathname-device output-file)
 			  :directory (pathname-directory output-file)
 			  :name (format nil "~a~a"
-					(pathname-name (pathname output-file))
+					(pathname-name output-file)
 					(length (second *split-files*)))
 			  :type "o")))
    
@@ -253,28 +261,26 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	  (o-pathname (get-output-pathname o-file tp name dir device))
 	  (c-pathname (get-output-pathname c-file "c" name dir device))
 	  (h-pathname (get-output-pathname h-file "h" name dir device))
-	  (data-pathname (get-output-pathname data-file "data" name dir device))
-	  #+aosvs (ob-pathname (get-output-pathname ob-file "ob" name dir device)))
-     (declare (special dir name ));FIXME
-     
-     (init-env)
-     
-     (and (boundp 'si::*gcl-version*)
-	  (not system-p)
-	  (add-init `(si::warn-version ,si::*gcl-major-version*
-				       ,si::*gcl-minor-version*
-				       ,si::*gcl-extra-version*)))
-     
-     (when (probe-file "./gcl_cmpinit.lsp")
-       (load  "./gcl_cmpinit.lsp" :verbose *compile-verbose*))
-     
-     (with-open-file 
-      (*compiler-output-data* data-pathname :direction :output)
-      
-      (setq *fasd-data*      		      
-	    (when (if system-p (eq *fasd-data* :system-p) *fasd-data*)
-	      (list (si::open-fasd *compiler-output-data* :output nil nil))))
-      
+	  (data-pathname (get-output-pathname data-file "data" name dir device)))
+
+    (declare (special dir name));FIXME
+
+    (init-env)
+
+    (and (boundp 'si::*gcl-version*)
+	 (not system-p)
+	 (add-init `(si::warn-version ,si::*gcl-major-version*
+				      ,si::*gcl-minor-version*
+				      ,si::*gcl-extra-version*)))
+
+    (when (probe-file "./gcl_cmpinit.lsp")
+      (load "./gcl_cmpinit.lsp" :verbose *compile-verbose*))
+
+    (with-open-file (*compiler-output-data* data-pathname :direction :output)
+
+      (when *fasd-data*
+	(setq *fasd-data* (list (si::open-fasd *compiler-output-data* :output nil nil))))
+
       (wt-data-begin)
       
       (if *compiler-compile*
@@ -314,8 +320,8 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 		    (when *split-files*
 		      (push (pathname-name output-file) (second *split-files*))
 		      (setf (third *split-files*) (unless (eq form eof) (file-position *compiler-input*)))
-		      (setf (fourth *split-files*) (reverse (third *data*))))
-		    
+		      (setf (fourth *split-files*) nil));(reverse (third *data*)) ;FIXME check this
+
 		    (return nil)))
 	    
 	    (when prev (set-dispatch-macro-character #\# #\, prev rtb)))))
@@ -333,35 +339,6 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
      
      (if (zerop *error-count*)
 	 
-	 #+aosvs
-       (progn
-	 (when *compile-verbose* (format t "~&;; End of Pass 2.  ~%"))
-	 (when data-file
-	   (with-open-file (in fasl-pathname)
-			   (with-open-file (out data-pathname :direction :output)
-					   (si:copy-stream in out))))
-	 (cond ((or fasl-file ob-file)
-		(compiler-cc c-pathname ob-pathname)
-		(cond ((probe-file ob-pathname)
-		       (when fasl-file
-			 (compiler-build ob-pathname fasl-pathname)
-			 (when load (load fasl-pathname)))
-		       (unless (or *keep-gaz* ob-file) (delete-file ob-pathname))
-		       (when *compile-verbose*
-			 (print-compiler-info)
-			 (format t "~&;; Finished compiling ~a.~%" (namestring output-file))
-			 ))
-		      (t (format t "~&Your C compiler failed to compile the intermediate file.~%")
-			 (setq *error-p* t))))
-	       (*compile-verbose*
-		(print-compiler-info)
-		(format t "~&;; Finished compiling ~a.~%" (namestring output-file)
-			)))
-	 (unless c-file (delete-file c-pathname))
-	 (unless h-file (delete-file h-pathname))
-	 (unless fasl-file (delete-file fasl-pathname)))
-       
-       
        (progn
 	 (when *compile-verbose* (format t "~&;; End of Pass 2.  ~%"))
 	 (cond (*record-call-info*
@@ -405,7 +382,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 (defun prin1-cmp (form strm)
   (let ((*compiler-output-data* strm)
 	(*fasd-data* nil))
-    (wt-data1 form)  ;; this binds all the print stuff
+    (wt-data2 form)  ;; this binds all the print stuff
     ))
 
 (defun fun-env (name)
@@ -527,18 +504,20 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	   (if (and (eq a (car x)) (eq d (cdr x))) x (cons a d))))
    (otherwise x)))
 
-(defun disassemble (name &optional (asm t) file &aux tem)
+(defvar *disassemble-objdump* t)
+
+(defun disassemble (name &aux tem); &optional (asm t) file
+  (declare (optimize (safety 1)))
   (check-type name (or function function-identifier))
-  (cond ((and (consp name)
-	      (eq (car name) 'lambda))
+  (cond ((and (consp name) (eq (car name) 'lambda))
 	 (dolist (l '(proclaimed-function proclaimed-return-type proclaimed-arg-types))
 	   (remprop 'cmp-anon l))
-;	 (remhash 'cmp-anon si::*call-hash-table*)
 	 (eval `(defun cmp-anon ,@ (cdr name)))
-	 (disassemble 'cmp-anon asm file))
-	((not(symbolp name)) (princ "Not a lambda or a name") nil)
+	 (disassemble 'cmp-anon))
+	((consp name) (disassemble (si::funid-sym name)))
+	((functionp name) (disassemble (si::fle name)))
 	((setq tem (get-named-form name))
-	 (let ((gaz (gazonk-name))(*compiler-compile* (unless file tem)))
+	 (let ((gaz (gazonk-name))(*compiler-compile* tem))
 	   (with-open-file
 	     (st gaz :direction :output)
 	     (prin1-cmp tem st))
@@ -563,19 +542,17 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 			     (princ
 			      (let (f) (do nil ((eq 'eof (car (push (read st nil 'eof) f))) 
 						(vec-to-list (nreverse (cdr f))))))))
-;			     (si::copy-stream st *standard-output*))
 	     (with-open-file (st hn)
 			     (si::copy-stream st *standard-output*))
-	     (when asm (si::copy-stream (open (concatenate 'string "|objdump --source " (namestring on)))
-					*standard-output*))
+	     (when *disassemble-objdump*
+	       (si::copy-stream (open (concatenate 'string "|objdump --source " (namestring on)))
+				*standard-output*))
 	     (delete-file cn)
 	     (delete-file dn)
 	     (delete-file hn)
 	     (delete-file on)
 	     (unless *keep-gaz* (delete-file gaz))
-	     nil)))
-	((princ name) nil))) ;(error "can't disassemble ~a" name)
-
+	     nil)))))
 
 (defun compiler-pass2 (c-pathname h-pathname system-p
 				  &aux 
@@ -600,8 +577,6 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	        (make-pathname :name
 	          (pathname-name h-pathname)
 	           :type (pathname-type h-pathname)))
-
-              #+aosvs (string-downcase (namestring h-pathname))
               "\"")
 
       (catch *cmperr-tag* (ctop-write (init-name c-pathname system-p)))
@@ -617,8 +592,6 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
       (terpri *compiler-output2*)))))
 
 
-(defvar *cc* "cc")
-(defvar *ld* "ld")
 (defvar *ld-libs* "ld-libs")
 (defvar *opt-three* "")
 (defvar *opt-two* "")
@@ -635,7 +608,10 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 (defun compiler-command (&rest args )
   (declare (special *c-debug*))
   (format nil  "~a ~a -I~a ~a ~a -c ~a -o ~a"
-	  (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
+	  (concatenate 'string
+		       (if *prof-p* (remove-flag "-fomit-frame-pointer" *cc*) *cc*)
+		       #+large-memory-model(if *large-memory-model-p* " -mcmodel=large " "")
+		       #-large-memory-model "")
 	  (if *prof-p* " -pg " "")
 	  (concatenate 'string si::*system-directory* "../h")
 	  (if (and (boundp '*c-debug*) *c-debug*) " -g " "")
@@ -647,34 +623,29 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	  (namestring (second args))))
 
 
-; Windows short form paths may contain tilde (~) which conflicts with
-; format directives.
-#+winnt (defun prep-win-path-acc ( s acc)
+#+(or cygwin winnt) (defun prep-win-path-acc ( s acc)
   (let ((pos (search "\~" s)))
     (if pos
-      (let ((start (subseq s 0 (1+ pos)))
-            (finish (subseq s (1+ pos))))
-        (prep-win-path-acc finish (concatenate 'string acc start "~")))
+	(let ((start (subseq s 0 (1+ pos)))
+	      (finish (subseq s (1+ pos))))
+	  (prep-win-path-acc finish (concatenate 'string acc start "~")))
       (concatenate 'string acc s))))
-#+winnt (defun prep-win-path ( s ) (prep-win-path-acc s ""))        
 
-(defun compiler-cc (c-pathname o-pathname  )
+(defun compiler-cc (c-pathname o-pathname)
   (safe-system
-   (or 
-;    #+winnt (prep-win-path (compiler-command c-pathname o-pathname))
-    #+(or vax system-v e15 dgux sgi) 
-    (format
+   (format
      nil
-     (prog1
-	 #+vax "~a ~@[~*-O ~]-S -I. -w ~a ; as -J -W -o ~A ~A"
-	 #-vax "~a ~@[~*-O ~]-c -I. ~a 2> /dev/null"
-	 )
+     #+vax "~a ~@[~*-O ~]-S -I. -w ~a ; as -J -W -o ~A ~A"
+     #+(or system-v e15 dgux sgi ) "~a ~@[~*-O ~]-c -I. ~a 2> /dev/null"
+     #+(or cygwin winnt) (prep-win-path-acc (compiler-command c-pathname o-pathname) "")
+     #-(or vax system-v e15 dgux sgi) (compiler-command c-pathname o-pathname)
      *cc*
      (if (or (= *speed* 2) (= *speed* 3)) t nil)
      (namestring c-pathname)
-     (namestring o-pathname))
-    (compiler-command c-pathname o-pathname)))
+     (namestring o-pathname)))
   
+  #+large-memory-model(when *large-memory-model-p* (mark-as-large-memory-model o-pathname))
+
   #+dont_need
   (let ((cname (pathname-name c-pathname))
         (odir (pathname-directory o-pathname))
@@ -715,7 +686,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 			 (namestring o-pathname)))))
 
 (defun print-compiler-info ()
-  (format t "~&;; OPTIMIZE levels: Safety=~d~:[ (No runtime error checking)~;~], Space=~d, Speed=~d, (Debug quality ignored)~%"
+  (format t "~&OPTIMIZE levels: Safety=~d~:[ (No runtime error checking)~;~], Space=~d, Speed=~d~%"
           (cond ((null *compiler-check-args*) 0)
                 ((null *safe-compile*) 1)
                 ((null *compiler-new-safety*) 2)
@@ -745,26 +716,13 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 			    :name (or (pathname-name pa) :wild)
 			    :type (pathname-type pa)))
     (setq name (namestring pa))
-    (system (format nil "ls -d ~a > ~a" name temp))
+    (safe-system (format nil "ls -d ~a > ~a" name temp))
     (with-open-file (st temp)
 	    (loop (setq tem (read-line st nil nil))
 		  (if (and tem (setq tem (probe-file tem)))
 		      (push tem ans) (return))))
     ans))
 
-(defvar *old-compile-file* #'compile-file) 
-(defun compile-file (f &rest l)
-  (let* ((p (pathname f)) dir pwd)
-    (setq dir (pathname-directory p))
-    (when dir
-	  (setq dir (namestring (make-pathname :directory dir
-					       :name ".")))
-	  (setq pwd (namestring (truename ".")))
-	  )
-    (unwind-protect
-	(progn (if dir (si::chdir dir))
-	       (apply *old-compile-file* f l))
-      (if pwd (si::chdir pwd)))))
 
 (defun user-homedir-pathname ()
   (or (si::getenv "HOME") "/"))
@@ -779,7 +737,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 (defun make-user-init (files outn)
 
   (let* ((c (pathname outn))
-	 (c (merge-pathnames c (make-pathname :directory '(:current))))
+	 (c (merge-pathnames c (make-pathname :directory '(:relative))))
 	 (o (merge-pathnames (make-pathname :type "o") c))
 	 (c (merge-pathnames (make-pathname :type "c") c)))
   
@@ -827,6 +785,9 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 				   (format st "load2(\"~a\");~%" tem)))))
 		    (format st "return Cnil;}~%~%")
 
+		    (format st "static int my_strncmp(const char *s1,const char *s2,unsigned long n) {")
+		    (format st "  for (;n--;) if (*s1++!=*s2++) return 1; return 0;}")
+
 		    (format st "int user_match(const char *s,int n) {~%")
 		    (format st "  Fnlst *f;~%")
 		    (format st "  for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
@@ -855,7 +816,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	 (init (merge-pathnames (make-pathname
 				 :name (concatenate 'string "init_" (pathname-name raw))
 				 :type "lsp") raw))
-	 #-winnt (raw (merge-pathnames raw (make-pathname :directory (list :current))))
+	 (raw (merge-pathnames raw (truename "./")))
 	 (raw (merge-pathnames (make-pathname
 				:name (concatenate 'string "raw_" (pathname-name raw)))
 			       raw))

@@ -8,7 +8,7 @@
 	* Added DESTDIR to makefiles to support installing under arbitrary
 	subdir
 	* good 'clean' targets
-	* correct building in absense of tcl/tk
+	* correct building in absence of tcl/tk
 
 
 2001-12-18  David Billinghurst <David.Billinghurst@riotinto.com>

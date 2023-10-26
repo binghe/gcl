@@ -1,11 +1,19 @@
 #include "linux.h"
 
-/*FIXME test Linux default*/
-
+#ifdef IN_GBC
 /* GET_FAULT_ADDR is a bit complicated to implement on m68k, because the fault
    address can't be found directly in the sigcontext. One has to look at the
    CPU frame, and that one is different for each CPU.
    */
+/* the following two files have changed back
+   and forth in recent versions of linux...
+   Include both if they both exist, otherwise
+   include whatever one exists...
+   basically one wants the
+   struct sigcontext_struct { ... } ;
+   so as to get the fault address.
+   */
+
 #if !defined(SIGNAL_H_HAS_SIGCONTEXT) && !defined(HAVE_SIGCONTEXT)
 #error Need sigcontext on linux, at least in some architectures
 #else
@@ -20,7 +28,6 @@
 #endif     
 #endif
 
-#undef GET_FAULT_ADDR
 #define GET_FAULT_ADDR(sig,code,sv,a) \
     ({\
 	struct sigcontext *scp1 = (struct sigcontext *)(sv); \
@@ -45,6 +52,7 @@
            ea=0;\
         } \
 	(char *)ea; })
+#endif
 
 /* #define NULL_OR_ON_C_STACK(x) ( x == 0 || (((unsigned int) x) >= 0xe0000000 ))  */
 
@@ -55,7 +63,7 @@
 
 
 #define	M68K
-#define SGC
+/* #define SGC *//*FIXME:  Unknown m68k cpu in modern emulators*/
 
 #include <asm/cachectl.h>
 int cacheflush(void *,int,int,int);
@@ -68,3 +76,7 @@ int cacheflush(void *,int,int,int);
 #define C_GC_OFFSET 2
 
 #define RELOC_H "elf32_m68k_reloc.h"
+
+#define NEED_STACK_CHK_GUARD
+
+#define DEFINED_REAL_MAXPAGE (1UL<<18) /*FIXME brk probe broken*/

@@ -33,7 +33,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 /* object sLkeyword; */
 
-
 /* void */
 /* check_type_integer(object *p) */
 /* { */
@@ -571,6 +570,7 @@ DEF_ORDINARY("BIGNUM",sLbignum,LISP,"");
 DEF_ORDINARY("RANDOM-STATE",sLrandom_state,LISP,"");
 DEF_ORDINARY("DOUBLE-FLOAT",sLdouble_float,LISP,"");
 DEF_ORDINARY("STREAM",sLstream,LISP,"");
+DEF_ORDINARY("OUTPUT-STREAM-P",sLoutput_stream_p,LISP,"");
 DEF_ORDINARY("BIT",sLbit,LISP,"");
 DEF_ORDINARY("READTABLE",sLreadtable,LISP,"");
 DEF_ORDINARY("LONG-FLOAT",sLlong_float,LISP,"");
@@ -677,6 +677,7 @@ DEF_ORDINARY("EXTENDED-CHAR",sLextended_char,LISP,"");
 /* DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,""); */
 /* DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,""); */
 DEF_ORDINARY("GENERIC-FUNCTION",sLgeneric_function,LISP,"");
+DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
 DEF_ORDINARY("METHOD",sLmethod,LISP,"");
 /* FIXME -- need this for types in predlib.lsp, why can't we use the keyword sKpackage_error ? */
 /* DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,""); */

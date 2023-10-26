@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -71,7 +70,7 @@
 		  (return tail))))))
     (cond (env-m
  	   (setq env (cadr env-m))
- 	   (setq vl (append (ldiff vl env-m) (cddr env-m)))))
+ 	   (setq vl (append (ldiff-nf vl env-m) (cddr env-m)))))
     (values vl env)))
 
 
@@ -121,7 +120,7 @@
 (defun rpop (s rv negp &aux (np (np s)))
   `(do (vp val (lv ,(lv s)));FIXME just to use previous lv binding
        ((>= 0 ,np) lv)
-       (declare (proper-list val) ,@(when (cdr rv) `((:dynamic-extent val))))
+       (declare (proper-list val) ,@(when (cdr rv) `((dynamic-extent val))))
        (setq val ,(vp s)
 	     val (if (and ,negp (= ,np 0)) val (cons val nil))
 	     vp (cond (vp (rplacd vp val) val) ((setq lv val))))))
@@ -169,7 +168,7 @@
     (bind s (np s) `(number-minus ,(np s) ,(nr s)))
     (bind s (set-lv s (tsym))))));+lvpv+
 
-(defun post (s post nkys &aux lv (nkys (nreverse nkys)))
+(defun post (s post nkys &aux (nkys (nreverse nkys)))
   (do ((ex (a s))) ((not ex));FIXME  this is fragile as the binding must be visible to mvars/inls
       (bind s 'k (pop ex))
       (bind s 'v (if ex (pop ex) (la s nil 'k)))
@@ -196,10 +195,10 @@
   nil)
 
 (defun blla (l a last body &optional n nr f (rcr (tsym t))
-	       &aux rvd kk *rv* k tmp nkys post wv rv aok kev (s (make-state n nr f a last))
+	       &aux rvd kk *rv* k tmp nkys post aux wv rv aok kev (s (make-state n nr f a last))
 	       (l (subst '&rest '&body (let ((s (last l))) (if (cdr s) (append (butlast l) (list (car s) '&rest (cdr s))) l))));FIXME only macro + recursion
 	       (lo l)(llk '(&whole &optional &rest &key &allow-other-keys &aux)))
-  (declare (optimize (safety 0)))
+  (declare (optimize (safety 0))(ignore rcr))
 ;  (assert (not (and last n)))
 
   (multiple-value-bind
@@ -228,7 +227,7 @@
 		       (push `(,ln (unless ,lpt (setq ,lbt v ,lpt t))) nkys)
 		       (push `(,lb (if ,lpt ,lbt ,ld)) post)
 		       (when lp (push `(,lp ,lpt) post)))))
-		   (&aux (bind s (pop l)))))))
+		   (&aux (setq aux l l nil))))))
 
    (let ((nap (nap s)))
      (when nap
@@ -247,8 +246,8 @@
    (when post (post s post nkys))
    (setq kev (member +kev+ (r s) :key #'(lambda (x) (when (listp x) (car x)))))
 
-   `(let* ,(nreverse (r s))
-      ,@(when rvd (when (lv s) `((declare (:dynamic-extent ,(lv s))))))
+   `(let* ,(nreconc (r s) aux)
+      ,@(when rvd (when (lv s) `((declare (dynamic-extent ,(lv s))))))
       ,@(when kev `((declare (ignore ,+kev+))))
       ,@decls
       ,@ctps

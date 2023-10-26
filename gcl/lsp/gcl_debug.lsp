@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;Copyright William F. Schelter 1990, All Rights Reserved 
 
 
@@ -162,7 +161,7 @@
      ,@ (do ((v (cdr lis) (cdr v))
 	     (i 0 (1+ i))
 	     (res))
-	    ((null v)(reverse res))
+	    ((null v)(nreverse res))
 	  (push `(setf ,(car v) (mv-ref ,i)) res))))
 
 (defmacro mv-values (&rest lis)
@@ -170,7 +169,7 @@
      ,@ (do ((v (cdr lis) (cdr v))
 	     (i 0 (1+ i))
 	     (res))
-	    ((null v)(reverse res))
+	    ((null v)(nreverse res))
 	  (push `(set-mv ,i ,(car v)) res))))
 
 ;;start a lisp debugger loop.   Exit it by using :step
@@ -344,7 +343,7 @@
   (setq tem (get fun 'line-info))
   (if tem
       (let ((ar tem))
-	(declare ((array t) ar))
+	(declare (type (array (t)) ar))
 	(when ar
 	  (dotimes
 	   (i (length ar))
@@ -689,7 +688,7 @@
 				line env (i 0))
   (loop
    (mv-setq  (ihs fun line file  env)  (next-stack-frame ihs))
-   (or fun (return nil))
+   (or (and ihs fun) (return nil))
    (print-stack-frame i nil ihs fun line file env)
    (incf i)
    (cond ((fb >= i m) (return (values))))

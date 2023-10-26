@@ -132,7 +132,8 @@ enum type {
                                                                      || _tp == t_symbol;})
 #define pathname_string_symbol_streamp(a_) ({enum type _tp=type_of(a_); _tp==t_pathname || stringp_tp(_tp) \
                                                                      || _tp == t_symbol || _tp==t_stream;})
-#define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;}))
+/* #define eql_is_eq(a_)    (is_imm_fixnum(a_) || ({enum type _tp=type_of(a_); _tp == t_cons || _tp > t_complex;})) */
+#define eql_is_eq(a_) (is_imm_fixnum(a_)||valid_cdr(a_)||(a_->d.t>t_complex))
 #define equal_is_eq(a_)  (is_imm_fixnum(a_) || type_of(a_)>t_bitvector)
 #define equalp_is_eq(a_) (type_of(a_)>t_structure)
 

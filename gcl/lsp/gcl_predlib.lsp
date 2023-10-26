@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -25,27 +24,40 @@
 (in-package :system)
 
 (export '(int void static 
-	      non-standard-object-compiled-function
-	      interpreted-function
-	      non-logical-pathname
-	      non-standard-base-char true gsym
-	      std-instance
-	      funcallable-std-instance
-	      hash-table-eq hash-table-eql hash-table-equal hash-table-equalp
-	      +type-alist+ 
-	      sequencep ratiop short-float-p long-float-p
-	      eql-is-eq equal-is-eq equalp-is-eq eql-is-eq-tp equal-is-eq-tp equalp-is-eq-tp
-	      +array-types+
-	      +aet-type-object+ 
-	      returns-exactly
-	      immfix
-	      file-input-stream file-output-stream file-io-stream file-probe-stream
-	      string-input-stream string-output-stream
-	      proper-sequence proper-sequencep proper-cons proper-consp
-	      fcomplex dcomplex 
-	      cnum-type spice
-	      subtypep1 ;FIXME
-	      resolve-type))
+	  non-standard-object-compiled-function
+	  interpreted-function
+	  non-logical-pathname
+	  non-standard-base-char true gsym
+	  std-instance
+	  funcallable-std-instance
+	  hash-table-eq hash-table-eql hash-table-equal hash-table-equalp
+	  +type-alist+
+	  sequencep ratiop short-float-p long-float-p
+	  eql-is-eq equal-is-eq equalp-is-eq eql-is-eq-tp equal-is-eq-tp equalp-is-eq-tp
+	  +array-types+
+	  +aet-type-object+
+	  returns-exactly
+	  immfix
+	  file-input-stream file-output-stream file-io-stream file-probe-stream
+	  string-input-stream string-output-stream
+	  proper-sequence proper-sequencep proper-cons proper-consp
+	  fcomplex dcomplex
+	  cnum-type spice
+	  subtypep1 ;FIXME
+	  resolve-type
+	  ldiff-nf))
+
+(defun ldiff-nf (l tl)
+  (declare (optimize (safety 2)))
+;  (check-type l list)
+  (labels ((srch (x)
+	     (cond ((eql x tl) nil)
+		   ((atom x) x)
+		   ((let* ((d (cdr x))(sd (srch d)))
+		      (if (eq d sd) x (cons (car x) sd)))))))
+    (srch l)))
+(setf (get 'ldiff-nf 'cmp-inline) t)
+;(declaim (inline ldiff-nf))
 
 (defconstant +array-type-alist+ (mapcar (lambda (x) (cons x (intern (string-concatenate "ARRAY-" (string x)))))
 					+array-types+))
@@ -277,7 +289,7 @@
 (defun lremove (q l &key (key #'identity) (test #'eql) &aux r rp (p l))
   (mapl (lambda (x)
 		(when (funcall test q (funcall key (car x)))
-		  (let ((y (ldiff p x)))
+		  (let ((y (ldiff-nf p x)))
 		    (setq rp (last (if rp (rplacd rp y) (setq r y)))
 			  p (cdr x))))) l)
   (cond (rp (rplacd rp p) r)
@@ -337,7 +349,9 @@
 	  (i e s) (integer-decode-float x)
 	  (let ((x (if (>= e 0) (ash i e) (/ i (ash 1 (- e))))))
 	    (if (>= s 0) x (- x)))))
-	((rationalp x) x)))
+	((rationalp x) x)
+	((error 'type-error :datum x :expected-type 'real))
+	))
 (setf (symbol-function 'rationalize) (symbol-function 'rational))
 
 
@@ -377,20 +391,23 @@
   `(progn
      ,@(mapcar (lambda (x &aux (f (when (eq x 'find-class) `(&optional ep))) (z (intern (string-concatenate "SI-" (symbol-name x)))))
 		 `(let (y)
-		    (defun ,z (o ,@f &aux e)
-		      (cond ((and (fboundp ',x) (fboundp 'classp))
-			     (prog1 (funcall ',x o ,@(cdr f))
-			       (fset ',z (symbol-function ',x))
-					;			     (setf (symbol-function ',z) (symbol-function ',x))
-			       ))
+		    (defun ,z (o ,@f &aux e (x ',x)
+				       ;FIXME only one not in cl package
+				       (x (if (eq x 'class-finalized-p) (find-symbol (symbol-name x) "PCL") x)))
+		      (cond ((and x (fboundp x) (fboundp 'classp))
+			     (prog1 (funcall x o ,@(cdr f))
+			       (fset ',z (symbol-function x))))
 			    ((setq e (get ',z 'early)) (values (funcall e o ,@(cdr f))))
 			    (y)))))
-	       '(classp class-precedence-list find-class class-name class-of class-direct-subclasses)))))
+	       '(classp class-precedence-list find-class class-name class-of class-direct-subclasses class-finalized-p)))))
 (clh)
+
+(defun si-cpl-or-nil (x) (when (si-class-finalized-p x) (si-class-precedence-list x)))
 
 (defun is-standard-class (object &aux (o (load-time-value nil)))
   (and (si-classp object)
-       (member (or o (setq o (si-find-class 'standard-object))) (si-class-precedence-list object))
+       (member (or o (setq o (si-find-class 'standard-object)))
+	       (si-cpl-or-nil object))
        object))
 
 (defun find-standard-class (object)
@@ -416,6 +433,8 @@
 (defvar *gcl-extra-version* nil)
 (defvar *gcl-minor-version* nil)
 (defvar *gcl-major-version* nil)
+(defvar *gcl-git-tag* nil)
+(defvar *gcl-release-date*  nil)
 
 (defun warn-version (majvers minvers extvers)
   (and *gcl-major-version* *gcl-minor-version* *gcl-extra-version*

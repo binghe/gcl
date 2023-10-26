@@ -230,7 +230,7 @@ int case_fold_search = 0;
  * of the structure of the compiled regexp.
  */
 static regexp *
-regcomp(char *exp,fixnum *sz)
+regcomp(char *exp,ufixnum *sz)
 {
 	register regexp *r;
 	register char *scan;
@@ -552,8 +552,8 @@ regatom(int *flagp)
 			*flagp |= HASWIDTH|SIMPLE;
 		}
 		 if (regcp - buf > sizeof(buf))
-		   { fprintf(stderr,"wow that is badly defined regexp..");
-		     gcl_abort();}
+		   { emsg("wow that is badly defined regexp..");
+		     do_gcl_abort();}
 		regcp --;
 		{ char *p=buf;
 
@@ -1024,12 +1024,12 @@ regmatch(char *prog)
 	scan = prog;
 #ifdef DEBUG
 	if (scan != NULL && regnarrate)
-		fprintf(stderr, "%s(\n", regprop(scan));
+		emsg("%s(\n", regprop(scan));
 #endif
 	while (scan != NULL) {
 #ifdef DEBUG
 		if (regnarrate)
-			fprintf(stderr, "%s...\n", regprop(scan));
+			emsg("%s...\n", regprop(scan));
 #endif
 		next = regnext(scan);
 
@@ -1457,7 +1457,7 @@ min_initial_branch_length(regexp *x, unsigned char *buf, int advance)
     { op = OP(s);
       next = (s) + NEXT(s);
       if (op != END && op != BRANCH)
-	gcl_abort();
+	do_gcl_abort();
       s = s+3;
       { int this = 0;
 	int anythis =0;
@@ -1544,7 +1544,7 @@ min_initial_branch_length(regexp *x, unsigned char *buf, int advance)
 void
 regerror(char *s)
 {
-    fprintf(stderr, "regexp error %s\n", s);
+    emsg("regexp error %s\n", s);
 }
 #endif
   

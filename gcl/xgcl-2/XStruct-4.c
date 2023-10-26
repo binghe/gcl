@@ -27,7 +27,7 @@
 #include <X11/Xutil.h>
 
 
-/********* XExtCodes funcions *****/
+/********* XExtCodes functions *****/
 
 long  make_XExtCodes (){
           return ((long) calloc(1, sizeof(XExtCodes)));
@@ -86,7 +86,7 @@ int j;
 }
 
 
-/********* XPixmapFormatValues funcions *****/
+/********* XPixmapFormatValues functions *****/
 
 long  make_XPixmapFormatValues (){
           return ((long) calloc(1, sizeof(XPixmapFormatValues)));
@@ -132,7 +132,7 @@ int j;
 }
 
 
-/********* XGCValues funcions *****/
+/********* XGCValues functions *****/
 
 long  make_XGCValues (){
           return ((long) calloc(1, sizeof(XGCValues)));
@@ -438,7 +438,7 @@ int j;
 }
 
 
-/********* GC funcions *****
+/********* GC functions *****
 
 int  make_GC (){
           GC i;
@@ -525,7 +525,7 @@ int j;
 
 */
 
-/********* Visual funcions *****/
+/********* Visual functions *****/
 
 long  make_Visual (){
           return ((long) calloc(1, sizeof(Visual)));
@@ -636,7 +636,7 @@ long j;
 }
 
 
-/********* Depth funcions *****/
+/********* Depth functions *****/
 
 long  make_Depth (){
           return ((long) calloc(1, sizeof(Depth)));
@@ -682,7 +682,7 @@ int j;
 }
 
 
-/********* Screen funcions *****/
+/********* Screen functions *****/
 
 long  make_Screen (){
           return ((long) calloc(1, sizeof(Screen)));
@@ -949,7 +949,7 @@ long j;
 }
 
 
-/********* ScreenFormat funcions *****/
+/********* ScreenFormat functions *****/
 
 long  make_ScreenFormat (){
           return ((long) calloc(1, sizeof(ScreenFormat)));
@@ -1008,7 +1008,7 @@ long j;
 }
 
 
-/********* XSetWindowAttributes funcions *****/
+/********* XSetWindowAttributes functions *****/
 
 long  make_XSetWindowAttributes (){
           return ((long) calloc(1, sizeof(XSetWindowAttributes)));
@@ -1210,7 +1210,7 @@ int j;
 }
 
 
-/********* XWindowAttributes funcions *****/
+/********* XWindowAttributes functions *****/
 
 long  make_XWindowAttributes (){
           return ((long) calloc(1, sizeof(XWindowAttributes)));
@@ -1516,7 +1516,7 @@ int j;
 }
 
 
-/********* XHostAddress funcions *****/
+/********* XHostAddress functions *****/
 
 long  make_XHostAddress (){
           return ((long) calloc(1, sizeof(XHostAddress)));
@@ -1562,7 +1562,7 @@ int j;
 }
 
 
-/********* XImage funcions *****/
+/********* XImage functions *****/
 
 long  make_XImage (){
           return ((long) calloc(1, sizeof(XImage)));
@@ -1777,7 +1777,7 @@ int j;
 }
 
 
-/********* XWindowChanges funcions *****/
+/********* XWindowChanges functions *****/
 
 long  make_XWindowChanges (){
           return ((long) calloc(1, sizeof(XWindowChanges)));
@@ -1875,7 +1875,7 @@ int j;
 }
 
 
-/********* XColor funcions *****/
+/********* XColor functions *****/
 
 long  make_XColor (){
           return ((long) calloc(1, sizeof(XColor)));
@@ -1960,7 +1960,7 @@ int j;
 }
 
 
-/********* XSegment funcions *****/
+/********* XSegment functions *****/
 
 long  make_XSegment (){
           return ((long) calloc(1, sizeof(XSegment)));
@@ -2019,7 +2019,7 @@ int j;
 }
 
 
-/********* XPoint funcions *****/
+/********* XPoint functions *****/
 
 long  make_XPoint (){
           return ((long) calloc(1, sizeof(XPoint)));
@@ -2052,7 +2052,7 @@ int j;
 }
 
 
-/********* XRectangle funcions *****/
+/********* XRectangle functions *****/
 
 long  make_XRectangle (){
           return ((long) calloc(1, sizeof(XRectangle)));
@@ -2111,7 +2111,7 @@ int j;
 }
 
 
-/********* XArc funcions *****/
+/********* XArc functions *****/
 
 long  make_XArc (){
           return ((long) calloc(1, sizeof(XArc)));
@@ -2196,7 +2196,7 @@ int j;
 }
 
 
-/********* XKeyboardControl funcions *****/
+/********* XKeyboardControl functions *****/
 
 long  make_XKeyboardControl (){
           return ((long) calloc(1, sizeof(XKeyboardControl)));
@@ -2307,7 +2307,7 @@ int j;
 }
 
 
-/********* XKeyboardState funcions *****/
+/********* XKeyboardState functions *****/
 
 long  make_XKeyboardState (){
           return ((long) calloc(1, sizeof(XKeyboardState)));
@@ -2405,7 +2405,7 @@ int j;
 }
 
 
-/********* XTimeCoord funcions *****/
+/********* XTimeCoord functions *****/
 
 long  make_XTimeCoord (){
           return ((long) calloc(1, sizeof(XTimeCoord)));
@@ -2451,7 +2451,7 @@ int j;
 }
 
 
-/********* XModifierKeymap funcions *****/
+/********* XModifierKeymap functions *****/
 
 long  make_XModifierKeymap (){
           return ((long) calloc(1, sizeof(XModifierKeymap)));

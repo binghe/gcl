@@ -105,7 +105,7 @@ void recreate_heap1()
   if (GetModuleFileName (NULL, executable_path, MAX_PATH) == 0) 
     {
       printf ("Failed to find path for executable.\n");
-      exit (1);
+      do_gcl_abort();
     }
     recreate_heap (executable_path);
   }
@@ -153,7 +153,7 @@ _start (void)
       if (GetModuleFileName (NULL, executable_path, MAX_PATH) == 0) 
 	{
 	  printf ("Failed to find path for executable.\n");
-	  exit (1);
+	  do_gcl_abort();
 	}
 
 #if 1
@@ -205,13 +205,17 @@ _start (void)
 }
 #endif /* UNIXSAVE */
 
+#ifdef __CYGWIN__
+#include <sys/cygwin.h>
+#endif
+
 /* Dump out .data and .bss sections into a new executable.  */
 void
 unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
 	void *entry_address)
 {
-#ifdef __CYGWIN32__
-  file_data in_file, out_file;
+#ifdef __CYGWIN__
+  static file_data in_file, out_file;
   char out_filename[MAX_PATH], in_filename[MAX_PATH];
   char filename[MAX_PATH];
   unsigned long size;
@@ -234,13 +238,13 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   ptr = old_name + strlen (old_name) - 4;
   strcpy(filename, old_name);
   strcat(filename, (strcmp (ptr, ".exe") && strcmp (ptr, ".EXE"))?".exe":"");
-  cygwin_conv_to_full_win32_path(filename,in_filename);
+  cygwin_conv_path(CCP_POSIX_TO_WIN_A,filename,in_filename,sizeof(in_filename));
   ptr = new_name + strlen (new_name) - 4;
   strcpy(filename, new_name);
   strcat(filename, (strcmp (ptr, ".exe") && strcmp (ptr, ".EXE"))?".exe":"");
-  cygwin_conv_to_full_win32_path(filename,out_filename);
+  cygwin_conv_path(CCP_POSIX_TO_WIN_A,filename,out_filename,sizeof(out_filename));
 #else 
-  file_data in_file, out_file;
+  static file_data in_file, out_file;
   char out_filename[MAX_PATH], in_filename[MAX_PATH];
   unsigned long size;
   char *ptr;
@@ -278,9 +282,9 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   /* Open the undumped executable file.  */
   if (!open_input_file (&in_file, in_filename))
     {
-      printf ("Failed to open %s (%ld)...bailing.\n", 
-	      in_filename, GetLastError ());
-      exit (1);
+      printf ("Failed to open %s (%u)...bailing.\n",
+	      in_filename, (unsigned)GetLastError ());
+      do_gcl_abort();
     }
 
   /* Get the interesting section info, like start and size of .bss...  */
@@ -299,9 +303,9 @@ unexec (char *new_name, char *old_name, void *start_data, void *start_bss,
   size = heap_index_in_executable + get_committed_heap_size () + bss_size;
   if (!open_output_file (&out_file, out_filename, size))
     {
-      printf ("Failed to open %s (%ld)...bailing.\n", 
-	      out_filename, GetLastError ());
-      exit (1);
+      printf ("Failed to open %s (%u)...bailing.\n",
+	      out_filename, (unsigned)GetLastError ());
+      do_gcl_abort();
     }
 
   /* Set the flag (before dumping).  */
@@ -363,7 +367,7 @@ open_input_file (file_data *p_file, char *filename)
 
   file = CreateFile (filename, GENERIC_READ, FILE_SHARE_READ, NULL,
 		     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-  if (file == INVALID_HANDLE_VALUE) 
+  if (file == INVALID_HANDLE_VALUE)
     return FALSE;
 
   size = GetFileSize (file, &upper_size);
@@ -448,7 +452,7 @@ get_bss_info_from_map_file (file_data *p_infile, PUCHAR *p_bss_start,
     {
       printf ("Failed to open map file %s, error %d...bailing out.\n",
 	      map_filename, GetLastError ());
-      exit (-1);
+      do_gcl_abort();
     }
 
   while (fgets (buffer, sizeof (buffer), map))
@@ -459,7 +463,7 @@ get_bss_info_from_map_file (file_data *p_infile, PUCHAR *p_bss_start,
       if (n != 2)
 	{
 	  printf ("Failed to scan the .bss section line:\n%s", buffer);
-	  exit (-1);
+	  do_gcl_abort();
 	}
       break;
     }
@@ -530,7 +534,7 @@ get_section_info (file_data *p_infile)
   if (dos_header->e_magic != IMAGE_DOS_SIGNATURE) 
     {
       printf ("Unknown EXE header in %s...bailing.\n", p_infile->name);
-      exit (1);
+      do_gcl_abort();
     }
   nt_header = (PIMAGE_NT_HEADERS) (((unsigned long) dos_header) + 
 				   dos_header->e_lfanew);
@@ -538,14 +542,14 @@ get_section_info (file_data *p_infile)
     {
       printf ("Failed to find IMAGE_NT_HEADER in %s...bailing.\n", 
 	     p_infile->name);
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Check the NT header signature ...  */
   if (nt_header->Signature != IMAGE_NT_SIGNATURE) 
     {
-      printf ("Invalid IMAGE_NT_SIGNATURE 0x%lx in %s...bailing.\n",
-	      nt_header->Signature, p_infile->name);
+      printf ("Invalid IMAGE_NT_SIGNATURE 0x%x in %s...bailing.\n",
+	      (int)nt_header->Signature, p_infile->name);
     }
 
   /* Flip through the sections for .data and .bss ...  */
@@ -653,7 +657,7 @@ copy_executable_and_dump_data_section (file_data *p_infile,
   /* Get a pointer to the raw data in our address space.  */
   data_va = data_start_va;
     
-  size = (DWORD) data_file - (DWORD) p_outfile->file_base;
+  size = (unsigned long) data_file - (unsigned long) p_outfile->file_base;
   /* printf ("Copying executable up to data section...\n"); */
   /* printf ("\t0x%08x Offset in input file.\n", 0); */
   /* printf ("\t0x%08x Offset in output file.\n", 0); */
@@ -668,7 +672,7 @@ copy_executable_and_dump_data_section (file_data *p_infile,
   /* printf ("\t0x%08lx Size in bytes.\n", size); */
   memcpy (data_file, data_va, size);
   
-  index = (DWORD) data_file + size - (DWORD) p_outfile->file_base;
+  index = (unsigned long) data_file + size - (unsigned long) p_outfile->file_base;
   size = p_infile->size - index;
   /* printf ("Copying rest of executable...\n"); */
   /* printf ("\t0x%08lx Offset in input file.\n", index); */
@@ -725,7 +729,7 @@ read_in_bss (char *filename)
   if (file == INVALID_HANDLE_VALUE) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Seek to where the .bss section is tucked away after the heap...  */
@@ -733,7 +737,7 @@ read_in_bss (char *filename)
   if (SetFilePointer (file, index, NULL, FILE_BEGIN) == 0xFFFFFFFF) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   
@@ -742,7 +746,7 @@ read_in_bss (char *filename)
   if (!ReadFile (file, bss_start, bss_size, &n_read, (void *)NULL))
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   CloseHandle (file);
@@ -763,7 +767,7 @@ map_in_heap (char *filename)
   if (file == INVALID_HANDLE_VALUE) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
   
   size = GetFileSize (file, &upper_size);
@@ -772,11 +776,11 @@ map_in_heap (char *filename)
   if (!file_mapping) 
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
     
   size = get_committed_heap_size ();
-  file_base = MapViewOfFileEx (file_mapping, FILE_MAP_COPY, 0, 
+  file_base = MapViewOfFileEx (file_mapping, FILE_MAP_ALL_ACCESS, 0,
 			       heap_index_in_executable, size,
 			       get_heap_start ());
   if (file_base != 0) 
@@ -790,10 +794,10 @@ map_in_heap (char *filename)
   CloseHandle (file_mapping);
 
   if (VirtualAlloc (get_heap_start (), get_committed_heap_size (),
-		    MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE) == NULL)
+		    MEM_COMMIT, PAGE_EXECUTE_READWRITE) == NULL)
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Seek to the location of the heap data in the executable.  */
@@ -801,7 +805,7 @@ map_in_heap (char *filename)
   if (SetFilePointer (file, i, NULL, FILE_BEGIN) == 0xFFFFFFFF)
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   /* Read in the data.  */
@@ -809,7 +813,7 @@ map_in_heap (char *filename)
 		 get_committed_heap_size (), &n_read, (void *)NULL))
     {
       i = GetLastError ();
-      exit (1);
+      do_gcl_abort();
     }
 
   CloseHandle (file);
@@ -918,13 +922,22 @@ get_data_end (void)
   return data_region_end;
 }
 
-unsigned long
-probe_heap_size(void *base,unsigned long try,unsigned long inc,unsigned long max) {
+void *
+probe_base(void *base,unsigned long try,unsigned long inc,unsigned long c) {
   void *r;
   if (!(r=VirtualAlloc(base,try,MEM_RESERVE,PAGE_NOACCESS)))
-    return try>inc ? probe_heap_size(base,try-inc,inc>>1,max) : 0;
+    return probe_base(base+inc,try,inc,c+1);
   VirtualFree (r, 0, MEM_RELEASE);
-  return (!inc || try >=max) ? try : probe_heap_size(base,try+inc,inc,max);
+  return !c || inc<2 ? base : probe_base(base-inc,try,inc>>1,c+1);
+}
+
+unsigned long
+probe_heap_size(void *base,unsigned long try,unsigned long inc) {
+  void *r;
+  if (!(r=VirtualAlloc(base,try,MEM_RESERVE,PAGE_NOACCESS)))
+    return inc<2 ? try-inc : probe_heap_size(base,try-inc,inc>>1);
+  VirtualFree (r, 0, MEM_RELEASE);
+  return probe_heap_size(base,try+inc,inc);
 }
 
 static char *
@@ -966,17 +979,16 @@ allocate_heap (void)
      the region below the 256MB line for our malloc arena - 229MB is
      still a pretty decent arena to play in!  */
 
+  void *base,*ptr;
+  unsigned long min=PAGESIZE,inc=(1UL<<31);
+
 #if defined(__CYGWIN__)
-#define PROBE_BASE NULL
-#elif defined(__MINGW32__)
-#define PROBE_BASE (void *)0x20000000
+  ptr=my_endbss;
 #else
-#error Need PROBE_BASE
+  ptr=(void *)0x5000000;
 #endif
-
-  void *base = PROBE_BASE,*ptr;/*FIXME, someday figure out how to let the heap start address default *//*(void *)0x10100000*/
-
-  reserved_heap_size=probe_heap_size(base,PAGESIZE,(1UL<<31),-1);
+  base=probe_base(ptr,min,(unsigned long)my_endbss,0);
+  reserved_heap_size=probe_heap_size(base,inc+min,inc);
   ptr = VirtualAlloc ((void *) base,get_reserved_heap_size (),MEM_RESERVE,PAGE_NOACCESS);
   /* printf("probe results: %lu at %p\n",reserved_heap_size,ptr); */
 
@@ -1005,7 +1017,7 @@ sbrk (ptrdiff_t increment)
       if (((unsigned long) data_region_base & ~VALMASK) != 0) 
 	{
 	  printf ("Error: The heap was allocated in upper memory.\n");
-	  exit (1);
+	  do_gcl_abort();
 	}
 
       data_region_end = data_region_base;
@@ -1053,7 +1065,7 @@ sbrk (ptrdiff_t increment)
 
       /* Commit more of our heap. */
       if (VirtualAlloc (data_region_end, size, MEM_COMMIT,
-			PAGE_READWRITE) == NULL)
+			PAGE_EXECUTE_READWRITE) == NULL)
 	return NULL;
       data_region_end += size;
 
@@ -1081,12 +1093,12 @@ recreate_heap (char *executable_path) {
   /* First reserve the upper part of our heap.  (We reserve first
      because there have been problems in the past where doing the
      mapping first has loaded DLLs into the VA space of our heap.)  */
-  tmp = VirtualAlloc ((void *) get_heap_end (),
-		      get_reserved_heap_size () - get_committed_heap_size (),
+  tmp = VirtualAlloc ((void *) get_heap_start (),
+		      get_reserved_heap_size (),
 		      MEM_RESERVE,
 		      PAGE_NOACCESS);
   if (!tmp)
-    exit (1);
+    do_gcl_abort();
 
   /* We read in the data for the .bss section from the executable
      first and map in the heap from the executable second to prevent

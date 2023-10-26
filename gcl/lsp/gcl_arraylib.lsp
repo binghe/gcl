@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -153,7 +152,7 @@
 (declaim (inline set-0-byte-array-self))
 
 (defun array-row-major-index (array &rest indices)
-  (declare (:dynamic-extent indices)(optimize (safety 2)))
+  (declare (dynamic-extent indices)(optimize (safety 2)))
   (check-type array array)
   (assert (apply 'array-in-bounds-p array indices));FIXME type-error??
   (labels ((cpt (i j k l) (the seqind (if (zerop k) i (c+ i (c* j l)))));FIXME
@@ -169,13 +168,13 @@
 ;; 	  (armi-loop indices)))
 
 (defun aref (a &rest q)
-  (declare (optimize (safety 1)) (:dynamic-extent q))
+  (declare (optimize (safety 1)) (dynamic-extent q))
   (check-type a array)
   (row-major-aref a (apply 'array-row-major-index a q)))
 
 #-(and pre-gcl raw-image)
 (defun si::aset (v a &rest q)
-  (declare (optimize (safety 1)) (:dynamic-extent q))
+  (declare (optimize (safety 1)) (dynamic-extent q))
   (check-type a array)
   (row-major-aset v a (apply 'array-row-major-index a q)))
 (declaim (inline si::aset))
@@ -184,7 +183,7 @@
       (symbol-function 'array-total-size) (symbol-function 'c-array-dim))
 
 (defun array-in-bounds-p (a &rest i &aux (j 0))
-  (declare (optimize (safety 1)) (:dynamic-extent i))
+  (declare (optimize (safety 1)) (dynamic-extent i))
   (check-type a array)
   (unless (member-if-not (lambda (x) (< -1 x (array-dimension a (prog1 j (incf j))))) i)
        (= j (c-array-rank a))))
@@ -294,20 +293,20 @@
        x))))
 
 (defun vector (&rest objects)
-  (declare (:dynamic-extent objects))
+  (declare (dynamic-extent objects))
   (make-array (length objects) :element-type t :initial-contents objects))
 
 (deftype bit-array nil `(array bit))
 (deftype simple-bit-array nil `(simple-array bit))
 
 (defun bit (bit-array &rest indices)
-  (declare (:dynamic-extent indices)(optimize (safety 1)))
+  (declare (dynamic-extent indices)(optimize (safety 1)))
   (check-type bit-array bit-array)
   (apply 'aref bit-array indices))
 
 #-(and pre-gcl raw-image)
 (defun sbit (bit-array &rest indices)
-  (declare (:dynamic-extent indices)(optimize (safety 1)))
+  (declare (dynamic-extent indices)(optimize (safety 1)))
   (check-type bit-array simple-bit-array)
   (apply 'aref bit-array indices))
 
@@ -363,7 +362,7 @@
 			  (static nil static-supplied-p))
 
   (declare (ignore initial-element initial-contents static displaced-index-offset) ;FIXME
-	   (:dynamic-extent r)
+	   (dynamic-extent r)
 	   (optimize (safety 2)))
 
   (check-type array array)
@@ -394,7 +393,7 @@
 	     (copy-array-portion array x 0 0 (min (array-total-size x) (array-total-size array))))
 	    ((let ((i -1))
 	       (labels ((set (dim &optional (cur (make-list (length new-dimensions) :initial-element 0)) (ind cur))
-			     (declare (:dynamic-extent cur))
+			     (declare (dynamic-extent cur))
 			     (cond (dim (dotimes (i (pop dim)) (setf (car cur) i) (set dim (cdr cur) ind)))
 				   ((incf i)
 				    (when (apply 'array-in-bounds-p array ind) 
@@ -466,3 +465,10 @@
   (check-type x simple-vector)
   (check-type i seqind)
   (aref x i))
+
+(defun svset (x i v)
+  (declare (optimize (safety 1)))
+  (check-type x simple-vector)
+  (check-type i seqind)
+  (aset v x i))
+(setf (get 'svset 'cmp-inline) t)

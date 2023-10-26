@@ -201,15 +201,16 @@ sgc_sweep_phase(void) {
 #endif
 
       }
+
       SET_LINK(f,OBJNULL);
       tm->tm_tail = f;
       tm->tm_nfree += k;
-      v->in_use-=k;
+      v->in_use=l;
 
     } else if (WRITABLE_PAGE_P(page(v))) /*non sgc_page */
       for (j = tm->tm_nppage; --j >= 0;  p += size) {
 	x = (object)p;
-	if (is_marked(x) && !is_free(x)) {
+	if (is_marked(x)) {
 	  unmark(x);
 	}
       }
@@ -372,7 +373,7 @@ memprotect_handler_test(int sig, long code, void *scp, char *addr) {
     do_gcl_abort();
   }
   memprotect_handler_invocations=1;
-  if (faddr!=memprotect_test_address)
+  if (page(faddr)!=page(memprotect_test_address))
     memprotect_result=memprotect_bad_fault_address;
   else
     memprotect_result=memprotect_none;
@@ -782,6 +783,8 @@ sgc_start(void) {
       object v=sSAwritableA->s.s_dbind;
       for (i=page(v->v.v_self);i<=page(v->v.v_self+CEI(v->bv.bv_offset+v->v.v_dim-1,8*sizeof(fixnum))/(8*sizeof(fixnum)));i++)
 	SET_WRITABLE(i);
+      SET_WRITABLE(page(v));
+      SET_WRITABLE(page(sSAwritableA));
     }
 
     tm_of(t_relocatable)->tm_alt_npage=0;
@@ -859,9 +862,9 @@ sgc_quit(void) {
   for (i= t_start; i < t_contiguous ; i++)
     
     if (TM_BASE_TYPE_P(i) && (np=(tm=tm_of(i))->tm_sgc)) {
-      
+
       object n=tm->tm_free,o=tm->tm_alt_free,f=PHANTOM_FREELIST(tm->tm_free);
-      
+
       for (;n!=OBJNULL && o!=OBJNULL;)
 	if (o!=OBJNULL && (n==OBJNULL || o<n)) {
 	  SET_LINK(f,o);

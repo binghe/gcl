@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 (in-package :si)
 ;;; Autoloaders.
 
@@ -204,22 +203,18 @@
 (AUTOLOAD 'offer-choices '|tinfo|)
 (AUTOLOAD 'tkconnect '|tkl|)
 
-
-
+(AUTOLOAD 'user::xgcl-demo '|gcl_dwtest|)
+(defun user::xgcl nil
+ (use-package :xlib)
+ (format t "Welcome to xgcl! Try (xgcl-demo) for a demonstration."))
 
 ;; the sun has a broken ypbind business, if one wants to save.
 ;; So to stop users from invoking this
 #+sun
 (defun user-homedir-pathname ()
- (let* ((tem (si::getenv "HOME"))
-	(l (- (length tem) 1)))
-   (cond ((null tem) nil)
-	 (t 
-	  (or (and (>= l 0)
-		   (eql (aref tem l) #\/))
-	      (setq tem (concatenate 'string tem "/")))
-	  (pathname tem)))))
-
+ (let* ((tem (si::getenv "HOME")))
+   (when tem
+     (pathname (coerce-slash-terminated tem)))))
 
 (AUTOLOAD 'init-readline '|gcl_readline|)
 (AUTOLOAD 'user::xgcl-demo '|gcl_dwtest|)

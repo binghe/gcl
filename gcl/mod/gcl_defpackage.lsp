@@ -71,8 +71,6 @@
 
 (export '(defpackage))
 
-(si:putprop 'defpackage t 'compiler::package-operation)
-
 (use-package :SLOOP)
 
 (defmacro DEFPACKAGE (name &rest options)

@@ -26,8 +26,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	This file contains those functions that interpret namestrings.
 */
 
+#include <string.h>
 #include "include.h"
-#include <strings.h>
 
 
 DEFUN("INIT-PATHNAME",object,fSinit_pathname,SI,7,7,NONE,OO,OO,OO,OO,

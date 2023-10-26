@@ -121,15 +121,11 @@ EXTER object sKcontrol_error;
 EXTER object sKcatch;
 EXTER object sKprotect;
 EXTER object sKcatchall;
-EXTER object sKtoo_few_arguments;
-EXTER object sKtoo_many_arguments;
-EXTER object sKunexpected_keyword;
-EXTER object sKinvalid_form;
-EXTER object sKunbound_variable;
-EXTER object sKinvalid_variable;
-EXTER object sKundefined_function;
-EXTER object sKinvalid_function;
-EXTER object sKpackage_error;
+EXTER object sKdatum;
+EXTER object sKexpected_type;
+EXTER object sKpackage;
+EXTER object sKformat_control;
+EXTER object sKformat_arguments;
 object wrong_type_argument();
 EXTER object sSuniversal_error_handler;
 EXTER object sSPminus_most_negative_fixnumP;
@@ -141,8 +137,8 @@ object simple_lispcall();
 object simple_lispcall_no_event();
 object simple_symlispcall();
 object simple_symlispcall_no_event();
-EXTER object Vevalhook;
-EXTER object Vapplyhook;
+EXTER object siVevalhook;
+EXTER object siVapplyhook;
 object ieval();
 object ifuncall(object,int,...);
 object ifuncall1();
@@ -160,7 +156,6 @@ EXTER object sKabort;
 EXTER object sKappend;
 EXTER object sKcreate;
 EXTER object sKdefault;
-EXTER object sKexternal_format;
 EXTER object sKdirection;
 EXTER object sKelement_type;
 EXTER object sKif_does_not_exist;
@@ -187,6 +182,7 @@ EXTER object sLAterminal_ioA;
 EXTER object sLAtrace_outputA;
 EXTER object terminal_io;
 EXTER object standard_io;
+EXTER object standard_error;
 
 EXTER object sLAload_verboseA;
 EXTER object FASL_string;
@@ -213,6 +209,10 @@ frame_ptr frs_sch_catch();
 
 /*  gbc.c  */
 EXTER bool GBC_enable;
+
+#ifdef CAN_UNRANDOMIZE_SBRK
+EXTER bool gcl_unrandomized;
+#endif
 
 /*  let.c  */
 
@@ -302,9 +302,9 @@ EXTER object sSlambda_block;
 EXTER object sSlambda_closure;
 EXTER object sSlambda_block_closure;
 
-EXTER object sLfunction,sLfunction_identifier;
-EXTER object sLmacro;
-EXTER object sLtag;
+EXTER object sLfunction;
+EXTER object sSmacro;
+EXTER object sStag;
 EXTER object sLblock;
 
 
@@ -315,6 +315,7 @@ EXTER object sLblock;
 /*  number.c  */
 EXTER object shortfloat_zero;
 EXTER object longfloat_zero;
+/* #define make_fixnum(a) ({fixnum _a=(a);((_a+SMALL_FIXNUM_LIMIT)&(-2*SMALL_FIXNUM_LIMIT))==0?small_fixnum(_a):make_fixnum1(_a);}) */
 object make_fixnum1(long);
 object make_ratio();
 object make_shortfloat(float);
@@ -355,17 +356,6 @@ object shift_integer();
 /*  package.d  */
 EXTER object lisp_package;
 EXTER object user_package;
-/* #ifdef ANSI_COMMON_LISP */
-/* /\* EXTER object common_lisp_package; *\/ */
-/* #endif */
-#if 0
-#ifdef HAVE_TK
-EXTER object tk_package;
-#endif
-#ifdef HAVE_JAPI_H
-EXTER object japi_package;
-#endif
-#endif
 EXTER object keyword_package;
 EXTER object system_package;
 EXTER object gmp_package;
@@ -400,24 +390,14 @@ EXTER object sKname;
 EXTER object sKtype;
 EXTER object sKversion;
 EXTER object sKdefaults;
-EXTER object sKlocal;
-EXTER object sKcommon;
-
-EXTER object sKpathname_error;
 
 EXTER object sKabsolute;
 EXTER object sKrelative;
-EXTER object sKroot;
-EXTER object sKhome;
-EXTER object sKwild;
-EXTER object sKwildinf;
-EXTER object sKnewest;
-EXTER object sKcurrent;
-EXTER object sKparent;
-EXTER object sKback;
 EXTER object sKup;
-EXTER object sKunspecific;
 
+/* object parse_namestring(); */
+object coerce_to_pathname();
+/* object default_device(); */
 object merge_pathnames();
 object namestring();
 object coerce_to_namestring();
@@ -438,6 +418,8 @@ EXTER object sKdowncase;
 EXTER object sKpreserve;
 EXTER object sKinvert;
 EXTER object sKcapitalize;
+EXTER object sKpreserve;
+EXTER object sKinvert;
 EXTER object sKstream;
 EXTER object sKreadably;
 EXTER object sKescape;
@@ -450,6 +432,12 @@ EXTER object sKgensym;
 EXTER object sKlevel;
 EXTER object sKlength;
 EXTER object sKarray;
+EXTER object sKlinear;
+EXTER object sKmiser;
+EXTER object sKfill;
+EXTER object sKmandatory;
+EXTER object sKcurrent;
+EXTER object sKblock;
 EXTER object sLAprint_readablyA;
 EXTER object sLAprint_escapeA;
 EXTER object sLAprint_prettyA;
@@ -461,33 +449,14 @@ EXTER object sLAprint_gensymA;
 EXTER object sLAprint_levelA;
 EXTER object sLAprint_lengthA;
 EXTER object sLAprint_arrayA;
-EXTER object *PRINTvs_top;
-EXTER object *PRINTvs_limit;
-EXTER object PRINTstream;
-EXTER bool PRINTreadably;
-EXTER bool PRINTescape;
-EXTER bool PRINTpretty;
-EXTER bool PRINTcircle;
-EXTER int PRINTbase;
-EXTER bool PRINTradix;
-EXTER object PRINTcase;
-EXTER bool PRINTgensym;
-EXTER int PRINTlevel;
-EXTER int PRINTlength;
-EXTER bool PRINTarray;
-EXTER void (*write_ch_fun)(int);
+EXTER object sSAprint_contextA;
+EXTER object sSAprint_context_headA;
 object princ();
 object prin1();
 object print();
 object terpri();
 EXTER object sSpretty_print_format;
 EXTER int  line_length;
-
-/*  file.d definied but not yet implemented */
-EXTER object sLAprint_linesA;
-EXTER object sLAprint_miser_widthA;
-EXTER object sLAprint_right_marginA;
-EXTER object sLAread_evalA;
 
 /*  Read.d  */
 EXTER object standard_readtable;
@@ -496,7 +465,7 @@ EXTER object sLAread_default_float_formatA;
 EXTER object sLAread_baseA;
 EXTER object sLAread_suppressA;
 EXTER object READtable;
-/* EXTER object read_byte1();  */
+EXTER object read_byte1();
 EXTER int READdefault_float_format;
 EXTER int READbase;
 EXTER bool READsuppress;
@@ -541,8 +510,6 @@ object elt();
 object elt_set();
 object reverse();
 object nreverse();
-
-void check_proper_list();
 
 /*  structure.c  */
 EXTER object sSs_data;
@@ -632,10 +599,9 @@ EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean,sLfile_stream,sLinp
 #ifdef ANSI_COMMON_LISP
 /* new ansi types */
 EXTER object sLarithmetic_error,sLbase_char,sLbase_string,sLbroadcast_stream,sLbuilt_in_class;
-EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLdivision_by_zero;
-EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLcontrol_error;
-EXTER object sLfloating_point_inexact,sLfloating_point_invalid_operation,sLfloating_point_overflow;
-EXTER object sLfloating_point_underflow,sLgeneric_function,sLlogical_pathname,sLmethod,sLpackage_error;
+EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLcontrol_error;
+EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLfile_stream;
+EXTER object sLgeneric_function,sLlogical_pathname,sLmethod,sLpackage_error;
 EXTER object sLparse_error,sLprint_not_readable,sLprogram_error,sLreader_error,sLserious_condition;
 EXTER object sLsimple_base_string,sLsimple_condition,sLsimple_type_error,sLsimple_warning,sLstandard_class;
 EXTER object sLstandard_generic_function,sLstandard_method,sLstandard_object,sLstorage_condition;
@@ -653,10 +619,10 @@ EXTER object sLvalues;
 EXTER object sLmod;
 EXTER object sLsigned_byte;
 EXTER object sLunsigned_byte;
-EXTER object sLsigned_char;
-EXTER object sLunsigned_char;
-EXTER object sLsigned_short;
-EXTER object sLunsigned_short;
+EXTER object sSsigned_char;
+EXTER object sSunsigned_char;
+EXTER object sSsigned_short;
+EXTER object sSunsigned_short;
 EXTER object sLA;
 EXTER object sLplusp;
 EXTER object TSor_symbol_string;
@@ -691,7 +657,6 @@ EXTER object sSPmemory;
 EXTER object sSPinit;
 object sLfset();
 object MakeAfun();
-extern  object Cstd_key_defaults[];   
 extern object call_proc0();
 /* extern object call_proc(); */
 /* extern object call_vproc(); */

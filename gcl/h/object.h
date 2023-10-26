@@ -27,8 +27,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	Some system constants.
 */
 
-#define TRUE   1   /*  boolean true value  */
-#define FALSE  0   /*  boolean false value  */
+#define	TRUE		1	/*  boolean true value  */
+#define	FALSE		0	/*  boolean false value  */
 
 
 #define NOT_OBJECT_ALIGNED(a_) ({union lispunion _t={.vw=(void *)(a_)};_t.td.emf;})
@@ -48,6 +48,7 @@ union int_object {
   fixnum i;
 };
 typedef union int_object iobject;
+/* union int_object {object *o; fixnum i;}; */
 
 #define	CHCODELIM	256	/*  character code limit  */
 				/*  ASCII character set  */
@@ -111,21 +112,23 @@ enum stype {     /*  symbol type  */
 
 
 /*
- The values returned by intern and find_symbol.
- File_symbol may return 0.
+	The values returned by intern and find_symbol.
+	File_symbol may return 0.
 */
-#define INTERNAL 1
-#define EXTERNAL 2
-#define INHERITED 3
+#define	INTERNAL	1
+#define	EXTERNAL	2
+#define	INHERITED	3
 
 /*
- All the packages are linked through p_link.
+	All the packages are linked through p_link.
 */
-EXTER struct package *pack_pointer; /*  package pointer  */
+EXTER struct package *pack_pointer;	/*  package pointer  */
 
-
-/*FIXME, review handling of imm fix here*/
+#ifdef WIDE_CONS
+#define Scdr(a_) (a_)->c.c_cdr
+#else
 #define Scdr(a_) ({union lispunion _t={.vw=(a_)->c.c_cdr};unmark(&_t);_t.vw;})
+#endif
 
 enum httest {   /*  hash table key test function  */
   htt_eq,       /*  eq  */
@@ -210,20 +213,20 @@ enum smmode {      /*  stream mode  */
 };
 
 /* for any stream that takes writec_char, directly (not two_way or echo)
-   ie.   smm_output,smm_io, smm_string_output, smm_socket
+   ie. 	 smm_output,smm_io, smm_string_output, smm_socket
  */
-#define STREAM_FILE_COLUMN(str) ((str)->sm.sm_int1)
+#define STREAM_FILE_COLUMN(str) ((str)->sm.sm_int)
 
 /* for smm_echo */
-#define ECHO_STREAM_N_UNREAD(strm) ((strm)->sm.sm_int0)
+#define ECHO_STREAM_N_UNREAD(strm) ((strm)->sm.sm_int)
 
 /* file fd for socket */
 #define SOCKET_STREAM_FD(strm) ((strm)->sm.sm_fd)
 #define SOCKET_STREAM_BUFFER(strm) ((strm)->sm.sm_object1)
 
 /*  for     smm_string_input  */
-#define STRING_INPUT_STREAM_NEXT(strm) ((strm)->sm.sm_int0)
-#define STRING_INPUT_STREAM_END(strm) ((strm)->sm.sm_int1)
+#define STRING_INPUT_STREAM_NEXT(strm) ((strm)->sm.sm_object0->st.st_fillp)
+#define STRING_INPUT_STREAM_END(strm) ((strm)->sm.sm_object0->st.st_dim)
 
 /* for smm_two_way and smm_echo */
 #define STREAM_OUTPUT_STREAM(strm) ((strm)->sm.sm_object1)
@@ -242,46 +245,34 @@ enum smmode {      /*  stream mode  */
 #define GCL_TCP_ASYNC 1
      
 enum gcl_sm_flags {
-
   gcl_sm_blocking=1,
   gcl_sm_tcp_async,
   gcl_sm_input,
   gcl_sm_output,
+  gcl_sm_closed,
   gcl_sm_had_error
   
 };
-  
-#ifdef BSD
-#ifdef SUN3
-#define BASEFF  (unsigned char *)0xffffffff
-#else
-#define BASEFF  (char *)0xffffffff
-#endif
-#endif
 
-#ifdef ATT
-#define BASEFF  (unsigned char *)0xffffffff
-#endif
-
-#ifdef E15
-#define BASEFF  (unsigned char *)0xffffffff
-#endif
-
-#ifdef MV
-
-
-#endif
-
-
-
-enum chattrib {       /*  character attribute  */
- cat_whitespace,      /*  whitespace  */
- cat_terminating,     /*  terminating macro  */
- cat_non_terminating, /*  non-terminating macro  */
- cat_single_escape,   /*  single-escape  */
- cat_multiple_escape, /*  multiple-escape  */
- cat_constituent      /*  constituent  */
+enum chattrib {			/*  character attribute  */
+	cat_whitespace,		/*  whitespace  */
+	cat_terminating,	/*  terminating macro  */
+	cat_non_terminating,	/*  non-terminating macro  */
+	cat_single_escape,	/*  single-escape  */
+	cat_multiple_escape,	/*  multiple-escape  */
+	cat_constituent		/*  constituent  */
 };
+
+/* struct rtent {				/\*  read table entry  *\/ */
+/* 	enum chattrib	rte_chattrib;	/\*  character attribute  *\/ */
+/* 	object		rte_macro;	/\*  macro function  *\/ */
+/* 	object		*rte_dtab;	/\*  pointer to the  *\/ */
+/* 					/\*  dispatch table  *\/ */
+/* 					/\*  NULL for  *\/ */
+/* 					/\*  non-dispatching  *\/ */
+/* 					/\*  macro character, or  *\/ */
+/* 					/\*  non-macro character  *\/ */
+/* }; */
 
 enum chatrait {       /*  character attribute  */
  trait_alpha,         /*  alphabetic  */
@@ -321,23 +312,35 @@ EXTER object src_env1[2],*src_env;
  The struct of free lists.
 */
 struct freelist {
-
-  FIRSTWORD;
-
-  address_int f_link;
-
+	FIRSTWORD;
+	address_int f_link;
 };
 #ifndef INT_TO_ADDRESS
-#define INT_TO_ADDRESS(x) ((object)(fixnum)x)
+#define INT_TO_ADDRESS(x) ((object )(long )x)
 #endif
 
-#define F_LINK(x) ((struct freelist *)(fixnum) x)->f_link
+#define F_LINK(x) ((struct freelist *)(long) x)->f_link
 #define FL_LINK F_LINK
 #define SET_LINK(x,val) F_LINK(x) = (address_int) (val)
 #define OBJ_LINK(x) ((object) INT_TO_ADDRESS(F_LINK(x)))
 #define PHANTOM_FREELIST(x) ({struct freelist f;(object)((void *)&x+((void *)&f-(void *)&f.f_link));})
 #define FREELIST_TAIL(tm_) ({struct typemanager *_tm=tm_;\
       _tm->tm_free==OBJNULL ? PHANTOM_FREELIST(_tm->tm_free) : _tm->tm_tail;})
+
+struct fasd {
+  object stream;   /* lisp object of type stream */
+  object table;  /* hash table used in dumping or vector on input*/
+  object eof;      /* lisp object to be returned on coming to eof mark */
+  object direction;    /* holds Cnil or sKinput or sKoutput */
+  object package;  /* the package symbols are in by default */
+  object index;     /* integer.  The current_dump index on write  */
+  object filepos;   /* nil or the position of the start */
+  object table_length; /*    On read it is set to the size dump array needed
+		     or 0
+		     */
+  object evald_items;  /* a list of items which have been eval'd and must
+			  not be walked by fasd_patch_sharp */
+};
 
 #define	FREE	(-1)		/*  free object  */
 
@@ -375,14 +378,14 @@ struct typemanager {
 
 
 /*
- The table of type managers.
+	The table of type managers.
 */
-EXTER struct typemanager tm_table[ (int)t_other ];
+EXTER struct typemanager tm_table[ 32  /* (int) t_relocatable */];
 
 #define tm_of(t) ({struct typemanager *_tm=tm_table+tm_table[t].tm_type;_tm->tm_calling_type=t;_tm;})
 
 /*
- Contiguous block header.
+	Contiguous block header.
 */
 EXTER bool prefer_low_mem_contblock;
 struct contblock {            /*  contiguous block header  */
@@ -392,9 +395,9 @@ struct contblock {            /*  contiguous block header  */
 };
 
 /*
- The pointer to the contiguous blocks.
+	The pointer to the contiguous blocks.
 */
-EXTER struct contblock *cb_pointer; /*  contblock pointer  */
+EXTER struct contblock *cb_pointer;	/*  contblock pointer  */
 
 /* SGC cont pages: After SGC_start, old_cb_pointer will be a linked
    list of free blocks on non-SGC pages, and cb_pointer will be
@@ -402,7 +405,7 @@ EXTER struct contblock *cb_pointer; /*  contblock pointer  */
 EXTER struct contblock *old_cb_pointer;	/*  old contblock pointer when in SGC  */
 
 /*
- Variables for memory management.
+	Variables for memory management.
 */
 EXTER fixnum ncb;   /*  number of contblocks  */
 #define ncbpage    tm_table[t_contiguous].tm_npage
@@ -411,9 +414,9 @@ EXTER fixnum ncb;   /*  number of contblocks  */
 #define cbgbccount tm_table[t_contiguous].tm_gbccount  
   
 
-/* int maxcbpage; maximum number of contblock pages  */
-EXTER fixnum holepage;   /*  hole pages  */
-#define nrbpage    tm_table[t_relocatable].tm_npage
+EXTER long holepage;			/*  hole pages  */
+#define nrbpage tm_table[t_relocatable].tm_npage
+#define maxrbpage tm_table[t_relocatable].tm_maxpage
 #define rbgbccount tm_table[t_relocatable].tm_gbccount
 EXTER fixnum new_holepage,starting_hole_div,starting_relb_heap_mult;
 
@@ -421,8 +424,8 @@ EXTER ufixnum recent_allocation,wait_on_abort;
 EXTER double gc_alloc_min,mem_multiple,gc_page_min,gc_page_max;
 EXTER bool multiprocess_memory_pool;
 
-EXTER char *new_rb_start;		/*  relblock start  */
-EXTER char *rb_start;			/*  relblock start  */
+EXTER char *new_rb_start;		/*  desired relblock start after next gc  */
+EXTER char *rb_start;           	/*  relblock start  */
 EXTER char *rb_end;			/*  relblock end  */
 EXTER char *rb_limit;			/*  relblock limit  */
 EXTER char *rb_pointer;		/*  relblock pointer  */
@@ -504,9 +507,10 @@ char *tmp_alloc;
 
 
 #ifdef AV
-#define STATIC register
+#define	STATIC	register
 #endif
-#define TIME_ZONE (-9)
+
+#define	TIME_ZONE	(-9)
 
 /*  For IEEEFLOAT, the double may have exponent in the second word
 (little endian) or first word.*/
@@ -533,7 +537,6 @@ EXTER char *alloca_val;
 
 
 object make_si_sfun();
-EXTER object MVloc[10];
 
 /*FIXME -- this is an effort to minimize uninitialized garbage in the
   stack.  THe only comprehensive solution appears to be to wipe the
@@ -561,29 +564,34 @@ EXTER object MVloc[10];
 #define COERCE_VA_LIST(new,vl,n) new = (object *) (vl)
 #else
 #define COERCE_VA_LIST(new,vl,n) \
- int i;\
- object *Xxvl; \
- Xxvl=ZALLOCA((n)*sizeof(*Xxvl));\
- new=Xxvl; \
- if (n >= 65) FEerror("Too plong vl",0); \
- for (i=0 ; i < (n); i++) new[i]=va_arg(vl,object);
+ object Xxvl[65]; \
+ {int i; \
+  new=Xxvl; \
+  if (n >= 65) FEerror("Too plong vl",0); \
+  for (i=0 ; i < (n); i++) new[i]=va_arg(vl,object);}
 #endif
 
 #ifdef DONT_COPY_VA_LIST
 #error Cannot set DONT_COPY_VA_LIST in ANSI C
 #else
 #define COERCE_VA_LIST_NEW(new,fst,vl,n) \
- int i;\
- object *Xxvl; \
- Xxvl=ZALLOCA((n)*sizeof(*Xxvl));\
- new=Xxvl; \
- if (n >= 65) FEerror("va_list too long",0); \
- for (i=0 ; i < (n); i++) new[i]=i ? va_arg(vl,object) : fst;
+ object Xxvl[65]; \
+ {int i; \
+  new=Xxvl; \
+  if (n >= 65) FEerror("va_list too long",0); \
+  for (i=0 ; i < (n); i++) new[i]=i ? va_arg(vl,object) : fst;}
+#define COERCE_VA_LIST_KR_NEW(new,fst,vl,n) \
+ object Xxvl[65]; \
+ {int i; \
+  new=Xxvl; \
+  if (n >= 65) FEerror("va_list too long",0); \
+  for (i=0 ; i < (n); i++) new[i]=i||fst==OBJNULL ? va_arg(vl,object) : fst;}
 #endif
 
 
 
-#define make_si_vfun(s,f,min,max) make_si_vfun1(s,f,min | (max << 8))
+#define make_si_vfun(s,f,min,max) \
+  make_si_vfun1(s,f,min | (max << 8))
 
 /* Number of args supplied to a variable arg t_vfun
  Used by the C function to set optionals */
@@ -610,7 +618,7 @@ EXTER object MVloc[10];
   do{typ _val1 = val1; object *_p=(object *)vals; listvals; vs_top=_p ? _p : base; return _val1;} while(0)
 /* #define CALL(n,form) (VFUN_NARGS=n,form) */
 
- 
+
 
 
 object funcall_cfun(void(*)(),int,...);
@@ -631,10 +639,10 @@ EXTER object sSlambda_block_expanded;
 
 #define BEGIN_NO_INTERRUPT \
  plong old_signals_allowed = signals_allowed; \
- signals_allowed = 0
+  signals_allowed = 0
 
 #define END_NO_INTERRUPT \
- signals_allowed = old_signals_allowed
+  ({signals_allowed = old_signals_allowed; if (signals_pending) raise_pending_signals(sig_use_signals_allowed_value);})
 /* could add:   if (signals_pending)
    raise_pending_signals(sig_use_signals_allowed_value) */
 
@@ -647,7 +655,7 @@ EXTER object sSlambda_block_expanded;
 
 void raise_pending_signals();
 
-EXTER unsigned plong signals_allowed, signals_pending  ;
+EXTER unsigned plong signals_allowed, signals_pending;
 
 #define endp(a) (consp(a) ? FALSE : ((a)==Cnil ? TRUE : ({TYPE_ERROR((a),sLlist);FALSE;})))
 
@@ -759,10 +767,13 @@ extern void *stack_alloc_start,*stack_alloc_end;
 
 #define object_to_object(x) x
 
-#define proper_list(a) (type_of(a)==t_cons || (a)==Cnil)
+#define proper_list(a) (type_of(a)==t_cons || (a)==Cnil) /*FIXME*/
 
 #define IMMNIL(x) (is_imm_fixnum(x)||x==Cnil)
 
-#define eql(a_,b_)    ({register object _a=(a_);register object _b=(b_);_a==_b ? TRUE : (IMMNIL(_a)||IMMNIL(_b) ? FALSE : eql1(_a,_b));})
+/* #define eql_is_eq(a_) (is_imm_fixnum(a_)||valid_cdr(a_)||(a_->d.t>t_complex)) */
+
+#define eql(a_,b_)    ({register object _a=(a_);register object _b=(b_);\
+      _a==_b ? TRUE : (eql_is_eq(_a)||eql_is_eq(_b)||_a->d.t!=_b->d.t ? FALSE : eql1(_a,_b));})
 #define equal(a_,b_)  ({register object _a=(a_);register object _b=(b_);_a==_b ? TRUE : (IMMNIL(_a)||IMMNIL(_b) ? FALSE : equal1(_a,_b));})
 #define equalp(a_,b_) ({register object _a=(a_);register object _b=(b_);_a==_b ? TRUE : (_a==Cnil||_b==Cnil ? FALSE : equalp1(_a,_b));})

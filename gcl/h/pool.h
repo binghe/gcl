@@ -20,15 +20,14 @@ static struct pool {
   ufixnum s;
 } *Pool;
 
-static struct flock pl;
-
-static const char *gcl_pool="/tmp/gcl_pool";
+static struct flock f,pl,*plp=&pl;
+static char gcl_pool[PATH_MAX];
 
 static int
 set_lock(void) {
   
   errno=0;
-  if (fcntl(pool,F_SETLKW,&pl)) {
+  if (fcntl(pool,F_SETLKW,plp)) {
     if (errno==EINTR)
       set_lock();
     return -1;
@@ -66,8 +65,8 @@ open_pool(void) {
 
   if (pool==-1) {
 
-    struct flock f;
-
+    massert(!home_namestring1("~",1,FN1,sizeof(FN1)));
+    massert(snprintf(gcl_pool,sizeof(gcl_pool),"%sgcl_pool",FN1)>=0);
     massert((pool=open(gcl_pool,O_CREAT|O_RDWR,0644))!=-1);
     massert(!ftruncate(pool,sizeof(struct pool)));
     massert((Pool=mmap(NULL,sizeof(struct pool),PROT_READ|PROT_WRITE,MAP_SHARED,pool,0))!=(void *)-1);
@@ -90,16 +89,13 @@ open_pool(void) {
       Pool->s=0;
       unlock_pool();
 
-      f.l_type=F_UNLCK;
-      massert(!fcntl(pool,F_SETLK,&f));
-
-      fprintf(stderr,"Initializing pool\n");
-      fflush(stderr);
-
     }
 
     f.l_type=F_RDLCK;
-    massert(!fcntl(pool,F_SETLK,&f));
+    plp=&f;
+    massert(!set_lock());
+
+    plp=&pl;
 
     register_pool(1);
     massert(!atexit(close_pool));
@@ -114,6 +110,9 @@ close_pool(void) {
 
 #ifndef NO_FILE_LOCKING
   if (pool!=-1) {
+    f.l_type=F_WRLCK;
+    if (!fcntl(pool,F_SETLK,&f))
+      massert(!unlink(gcl_pool));
     register_pool(-1);
     massert(!close(pool));
     massert(!munmap(Pool,sizeof(struct pool)));

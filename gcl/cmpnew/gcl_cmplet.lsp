@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPLET  Let and Let*.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -730,7 +729,7 @@
 	(c2bind-loc var nil))
        ((member (var-kind var) +c-local-var-types+)
 	(let ((*value-to-go* (list 'var var nil)))
-	      (c2expr* form)))
+	  (c2expr* form)))
        (t
 	(case
     	 (car form)

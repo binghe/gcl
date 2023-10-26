@@ -40,223 +40,116 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <unistd.h>
 #include "num_include.h"
 
-#define LINE_LENGTH get_line_length()
 #define MINIMUM_RIGHT_MARGIN 1
 #define DEFAULT_RIGHT_MARGIN 72
 
-static int
-get_line_length(void);
+#define  PRINTreadably  (sLAprint_readablyA->s.s_dbind != Cnil)
+#define  PRINTescape    (PRINTreadably || (sLAprint_escapeA->s.s_dbind != Cnil))
+#define  PRINTpretty    (sLAprint_prettyA->s.s_dbind != Cnil)
+#define  PRINTcircle    (sLAprint_circleA->s.s_dbind != Cnil)
+#define  PRINTarray     (PRINTreadably || (sLAprint_arrayA->s.s_dbind != Cnil))
+#define  PRINTgensym    (PRINTreadably || (sLAprint_gensymA->s.s_dbind != Cnil))
+#define  PRINTradix     (sLAprint_radixA->s.s_dbind != Cnil)
 
-static void
-per_line_prefix(object strm) {
-  int i;
-  if (stringp(sSAprint_line_prefixA->s.s_dbind))
-    for (i=0;i<VLEN(sSAprint_line_prefixA->s.s_dbind);i++)
-      writec_stream(sSAprint_line_prefixA->s.s_dbind->st.st_self[i],strm);
+#define  PRINTpackage   (sSAprint_packageA->s.s_dbind != Cnil)
+#define  PRINTstructure (sSAprint_structureA->s.s_dbind != Cnil)
+
+#define  PRINTbase      fixint(sLAprint_baseA->s.s_dbind)
+#define  PRINTcase      sLAprint_caseA->s.s_dbind
+
+#define  PRINTlevel     (PRINTreadably || sLAprint_levelA->s.s_dbind==Cnil || type_of(sLAprint_levelA->s.s_dbind)!=t_fixnum ? -1 : fix(sLAprint_levelA->s.s_dbind))
+#define  PRINTlength    (PRINTreadably || sLAprint_lengthA->s.s_dbind==Cnil || type_of(sLAprint_lengthA->s.s_dbind)!=t_fixnum ? -1 : fixint(sLAprint_lengthA->s.s_dbind))
+#define  PRINTlines     (PRINTreadably || sLAprint_linesA->s.s_dbind==Cnil || type_of(sLAprint_linesA->s.s_dbind)!=t_fixnum ? -1 : fixint(sLAprint_linesA->s.s_dbind))
+
+DEFVAR("*PRINT-CONTEXT*",sSAprint_contextA,SI,make_fixnum(0),"");
+DEFVAR("*PRINT-CONTEXT-HEAD*",sSAprint_context_headA,SI,make_fixnum(0),"");
+
+#define	Q_SIZE		256
+#define IS_SIZE		256
+
+struct printStruct {
+  unsigned short p_queue[Q_SIZE];
+  unsigned short p_indent_stack[IS_SIZE];
+  int p_qh;
+  int p_qt;
+  int p_qc;
+  int p_isp;
+  int p_iisp;
+  int p_lb;
+  int p_col;
+  int p_sn;
+  int p_ll;
+};
+
+struct printContext {
+  struct printContext *next;
+  struct printContext *pp;
+  object s,h;
+  void (*write_ch_fun)(int,void *);
+  int (*write_stream_fun)(int,object);
+  int ll,ms;
+  struct printStruct b;
+};
+
+struct printContextshort {
+  struct printContext *next;
+  struct printContext *pp;
+  object s,h;
+  void (*write_ch_fun)(int,void *);
+  int (*write_stream_fun)(int,object);
+};
+
+struct printContext *
+lookup_print_context(object strm) {
+  struct printContext *p=(void *)fix(sSAprint_context_headA->s.s_dbind);
+  for (;p && p->s!=strm;p=p->next);
+  return p;
 }
 
+  /* object y=output_stream(_y);						\ */
+    /* pp->write_stream_fun=writec_stream_fun(y);				\ */
+#define SETUP_PRINT_DEFAULT(_x,_y,_z,_s)				\
+  bds_ptr old_bds_top=bds_top;						\
+  struct printContext *p,*pp=lookup_print_context(_y);			\
+  pp=pp ? pp : ZALLOCA(sizeof(struct printContextshort));		\
+  if (!pp->s) {								\
+    pp->s=_y;								\
+    pp->h=((PRINTcircle&&!_s) ? setupPRINTcircle1(_x,1) : Cnil);	\
+    pp->write_ch_fun=writec_PRINTstream;				\
+    pp->write_stream_fun=writec_stream;					\
+    pp->next=(void *)fix(sSAprint_context_headA->s.s_dbind);		\
+    bds_bind(sSAprint_context_headA,make_fixnum((fixnum)(void *)pp));	\
+  }									\
+  p=(!PRINTpretty || _s || pp->write_ch_fun==writec_queue)&&_z ?	\
+    pp : ZALLOCA(sizeof(*p));						\
+  if (!p->s) {								\
+    p->s=_y;								\
+    p->pp=pp;								\
+    p->h=pp->h;								\
+    p->write_ch_fun=writec_queue;					\
+    p->b.p_col=file_column(_y);						\
+    p->b.p_ll=get_line_length();					\
+    p->ms=get_miser_style(p->b.p_col,p->b.p_ll);			\
+    p->next=(void *)fix(sSAprint_context_headA->s.s_dbind);		\
+    bds_bind(sSAprint_context_headA,make_fixnum((fixnum)(void *)p));	\
+  }									\
+  bds_bind(sSAprint_contextA,make_fixnum((fixnum)(void *)p))		\
 
-#ifndef WRITEC_NEWLINE
-#define  WRITEC_NEWLINE(strm) (writec_stream('\n',strm),per_line_prefix(strm))
-#endif
+#define CLEANUP_PRINT_DEFAULT()				\
+  bds_unwind(old_bds_top);				\
+  if (p!=pp)						\
+    flush_queue(TRUE,p)					\
 
-#define READ_TABLE_CASE (Vreadtable->s.s_dbind->rt.rt_case)
+void
+write_ch_fun(int c) {
+  struct printContext *p=(struct printContext *)(void *)fix(sSAprint_contextA->s.s_dbind);
+  p->write_ch_fun(c,p);
+}
 
-#define	mod(x)		((x)%Q_SIZE)
-
-
-#define queue printStructBufp->p_queue
-#define indent_stack printStructBufp->p_indent_stack
-#define qh printStructBufp->p_qh
-#define qt printStructBufp->p_qt
-#define qc printStructBufp->p_qc
-#define isp printStructBufp->p_isp
-#define iisp printStructBufp->p_iisp
-
-
-object sSAprint_packageA;
-object sSAprint_structureA;
-
-
-/* bool RPINcircle; ??typo?? */
-
-
+#define DONE 1
+#define FOUND -1
 
 #define	write_ch	(*write_ch_fun)
-
-
-#define	MARK		0400
-#define	UNMARK		0401
-#define	SET_INDENT	0402
-#define	INDENT		0403
-#define	INDENT1		0404
-#define	INDENT2		0405
-
-extern object coerce_stream(object,int);
-
-static void
-flush_queue(int);
-
-static void
-writec_queue(c)
-int c;
-{
-	if (qc >= Q_SIZE)
-		flush_queue(FALSE);
-	if (qc >= Q_SIZE)
-		FEerror("Can't pretty-print.", 0);
-	queue[qt] = c;
-	qt = mod(qt+1);
-	qc++;
-}
-
-DEFVAR("*PRINT-LINE-PREFIX*",sSAprint_line_prefixA,SI,Cnil,"");
-
-static void
-flush_queue(int force)
-{
-	int c, i, j, k, l, i0;
-
-	if (!file_position(PRINTstream))
-	  per_line_prefix(PRINTstream);
-
-BEGIN:
-	while (qc > 0) {
-		c = queue[qh];
-		if (c == MARK)
-			goto MDO_MARK;
-		else if (c == UNMARK)
-			isp -= 2;
-		else if (c == SET_INDENT)
-			indent_stack[isp] = file_column(PRINTstream);
-		else if (c == INDENT) {
-			goto MDO_INDENT;
-		} else if (c == INDENT1) {
-			i = file_column(PRINTstream)-indent_stack[isp];
-			if (i < 8 && indent_stack[isp] < LINE_LENGTH/2) {
-				writec_stream(' ', PRINTstream);
-				indent_stack[isp]
-				= file_column(PRINTstream);
-			} else {
-				if (indent_stack[isp] < LINE_LENGTH/2) {
-					indent_stack[isp]
-					= indent_stack[isp-1] + 4;
-				}
-				goto MDO_INDENT;
-			}
-		} else if (c == INDENT2) {
-			indent_stack[isp] = indent_stack[isp-1] + 2;
-			goto PUT_INDENT;
-		} else if (c < 0400)
-			writec_stream(c, PRINTstream);
-		qh = mod(qh+1);
-		--qc;
-	}
-	return;
-
-MDO_MARK:
-	k = LINE_LENGTH - 1 - file_column(PRINTstream);
-	for (i = 1, j = 0, l = 1;  l > 0 && i < qc && j < k;  i++) {
-		c = queue[mod(qh + i)];
-		if (c == MARK)
-			l++;
-		else if (c == UNMARK)
-			--l;
-		else if (c == INDENT || c == INDENT1 || c == INDENT2)
-			j++;
-		else if (c < 0400)
-			j++;
-	}
-	if (l == 0)
-		goto FLUSH;
-	if (i == qc && !force)
-		return;
-	qh = mod(qh+1);
-	--qc;
-	if (++isp >= IS_SIZE-1)
-		FEerror("Can't pretty-print.", 0);
-	indent_stack[isp++] = file_column(PRINTstream);
-	indent_stack[isp] = indent_stack[isp-1];
-	goto BEGIN;
-
-MDO_INDENT:
-	if (iisp > isp)
-		goto PUT_INDENT;
-	k = LINE_LENGTH - 1 - file_column(PRINTstream);
-	for (i0 = 0, i = 1, j = 0, l = 1;  i < qc && j < k;  i++) {
-		c = queue[mod(qh + i)];
-		if (c == MARK)
-			l++;
-		else if (c == UNMARK) {
-			if (--l == 0)
-				goto FLUSH;
-		} else if (c == SET_INDENT) {
-			if (l == 1)
-				break;
-		} else if (c == INDENT) {
-			if (l == 1)
-				i0 = i;
-			j++;
-		} else if (c == INDENT1) {
-			if (l == 1)
-				break;
-			j++;
-		} else if (c == INDENT2) {
-			if (l == 1) {
-				i0 = i;
-				break;
-			}
-			j++;
-		} else if (c < 0400)
-			j++;
-	}
-	if (i == qc && !force)
-		return;
-	if (i0 == 0)
-		goto PUT_INDENT;
-	i = i0;
-	goto FLUSH;
-
-PUT_INDENT:
-	qh = mod(qh+1);
-	--qc;
-	
-        WRITEC_NEWLINE(PRINTstream);
-	for (i = indent_stack[isp];  i > 0;  --i)
-		writec_stream(' ', PRINTstream);
-	iisp = isp;
-	goto BEGIN;
-
-FLUSH:
-	for (j = 0;  j < i;  j++) {
-		c = queue[qh];
-		if (c == INDENT || c == INDENT1 || c == INDENT2)
-			writec_stream(' ', PRINTstream);
-		else if (c < 0400)
-			writec_stream(c, PRINTstream);
-		qh = mod(qh+1);
-		--qc;
-	}
-	goto BEGIN;
-}
-
-void
-writec_PRINTstream(c)
-int c;
-{
-	if (c == INDENT || c == INDENT1)
-		writec_stream(' ', PRINTstream);
-	else if (c < 0400)
-		writec_stream(c, PRINTstream);
-}
-
-void
-write_str(s)
-char *s;
-{
-	while (*s != '\0')
-		write_ch(*s++);
-}
 
 static void
 write_decimal1(int);
@@ -270,6 +163,464 @@ int i;
 		return;
 	}
 	write_decimal1(i);
+}
+
+static int
+do_write_sharp_eq(struct cons *e,bool dot) {
+
+  fixnum val=fix(e->c_car);
+  bool defined=val&1;
+
+  if (dot) {
+    write_str(" . ");
+    if (!defined) return FOUND;
+  }
+
+  if (!defined) e->c_car=make_fixnum(val|1);
+  write_ch('#');
+  write_decimal(val>>1);
+  write_ch(defined ? '#' : '=');
+
+  return defined ? DONE : FOUND;
+
+}
+
+static int
+write_sharp_eq1(object x,bool dot,object h) {
+
+  struct cons *e;
+
+  return h!=Cnil && (e=gethash(x,h))->c_cdr!=OBJNULL ? do_write_sharp_eq(e,dot) : 0;
+
+}
+
+int
+write_sharp_eq(object x,bool dot) {
+  struct printContext *p=(struct printContext *)(void *)fix(sSAprint_contextA->s.s_dbind);
+  return write_sharp_eq1(x,dot,p->h);
+}
+
+
+static void
+per_line_prefix_context(struct printContext *p) {
+  int i;
+  if (stringp(sSAprint_line_prefixA->s.s_dbind))
+    for (i=0;i<VLEN(sSAprint_line_prefixA->s.s_dbind);i++)
+      p->write_ch_fun(sSAprint_line_prefixA->s.s_dbind->st.st_self[i],p);
+}
+
+
+#define READ_TABLE_CASE (Vreadtable->s.s_dbind->rt.rt_case)
+
+#define	mod(x)		((x)%Q_SIZE)
+
+
+object sSAprint_packageA;
+object sSAprint_structureA;
+
+
+#define	MARK	          0400
+#define	UNMARK		  0401
+
+#define	LINEAR		  0406
+#define	MISER		  0407
+#define	FILL		  0410
+#define	MANDATORY	  0411
+#define CURRENT           0412
+#define BLOCK             0413
+#define LINE              0414
+#define SECTION           0415
+#define LINE_RELATIVE     0416
+#define SECTION_RELATIVE  0417
+
+#define	CONTINUATION 	  0x8000
+
+extern object coerce_stream(object,int);
+
+DEFVAR("*PRINT-LINE-PREFIX*",sSAprint_line_prefixA,SI,Cnil,"");
+
+void
+writec_PRINTstream(int c,void *v) {
+  struct printContext *p=v;
+
+  p->write_stream_fun(c,p->s);
+
+}
+
+static int dgs,dga;
+static fixnum mlen,mlev;
+
+#include "page.h"
+
+static void
+travel_push(object x,fixnum lev,fixnum len) {
+
+  int i;
+
+  if (is_imm_fixnum(x))
+    return;
+
+  if (lev>=mlev||len>=mlen)
+    return;
+
+  if (is_marked(x)) {
+
+    if (imcdr(x) || !x->d.f)
+      vs_check_push(x);
+    if (!imcdr(x))
+      x->d.f=1;
+
+  } else switch (type_of(x)) {
+
+    case t_symbol:
+
+      if (dgs && x->s.s_hpack==Cnil) {
+    	mark(x);
+      }
+      break;
+
+    case t_cons:
+
+      {
+	object y=x->c.c_cdr;
+	mark(x);
+	travel_push(x->c.c_car,lev+1,0);
+	travel_push(y,lev,len+1);
+      }
+      break;
+
+    case t_vector:
+    case t_array:
+    case t_simple_vector:
+    case t_simple_array:
+
+      mark(x);
+      if (dga && (enum aelttype)x->a.a_elttype==aet_object)
+	for (i=0;i<x->a.a_dim;i++)
+	  travel_push(x->a.a_self[i],lev+1,i);
+      break;
+
+    case t_structure:
+
+      mark(x);
+      for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
+	travel_push(structure_ref(x,x->str.str_def,i),lev+1,i);
+      break;
+
+    default:
+
+      break;
+
+    }
+
+}
+
+
+static void
+travel_clear(object x) {
+
+  int i;
+
+  if (is_imm_fixnum(x))
+    return;
+
+  if (!is_marked(x))
+    return;
+
+  unmark(x);
+  if (!imcdr(x))
+    x->d.f=0;
+
+  switch (type_of(x)) {
+
+  case t_cons:
+
+    travel_clear(x->c.c_car);
+    travel_clear(x->c.c_cdr);
+    break;
+
+  case t_vector:
+  case t_array:
+  case t_simple_vector:
+  case t_simple_array:
+
+    if (dga && (enum aelttype)x->a.a_elttype == aet_object)
+      for (i=0;i<x->a.a_dim;i++)
+	travel_clear(x->a.a_self[i]);
+    break;
+
+  case t_structure:
+
+    for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
+      travel_clear(structure_ref(x,x->str.str_def,i));
+    break;
+
+  default:
+
+    break;
+
+  }
+
+}
+
+static void
+travel(object x,int mdgs,int mdga,fixnum lev,fixnum len) {
+
+  BEGIN_NO_INTERRUPT;
+  dgs=mdgs;
+  dga=mdga;
+  mlev=lev;
+  mlen=len;
+  travel_push(x,0,0);
+  travel_clear(x);
+  END_NO_INTERRUPT;
+
+}
+
+object sLeq;
+
+static object
+setupPRINTcircle1(object x,int dogensyms) {
+
+  object *vp=vs_top,*v=vp,h;
+  fixnum j;
+
+  travel(x,dogensyms,PRINTarray,
+	 PRINTlevel>=0 ? PRINTlevel : ARRAY_DIMENSION_LIMIT,
+	 PRINTlength>=0 ? PRINTlength : ARRAY_DIMENSION_LIMIT);
+
+  h=vs_top>vp ? gcl_make_hash_table(sLeq) : Cnil;
+  for (j=0;v<vs_top;v++)
+    if (!imcdr(*v) || gethash(*v,h)->c_cdr==OBJNULL)
+      sethash(*v,h,make_fixnum((++j)<<1));
+
+  vs_top=vp;
+
+  return h;
+
+}
+
+static int
+get_miser_style(int col,int ll) {
+  object o=symbol_value(sLAprint_miser_widthA);
+  return o!=Cnil && col>=(ll-fixint(o));
+}
+
+static ushort
+flush_queue_tab_nspaces(ushort c,ushort num,ushort inc,ushort pos,ushort s) {
+  num<<=1;num>>=1;inc<<=1;inc>>=1;
+  switch (c) {
+  case LINE_RELATIVE:
+    num+=pos;
+    num+=(inc && num%inc) ? inc-(num%inc) : 0;
+    break;
+  case SECTION_RELATIVE:
+    num+=pos-s;
+    num+=(inc && num%inc) ? inc-(num%inc) : 0;
+    num+=s;
+    break;
+  case SECTION:
+    num+=s;
+  case LINE:
+    while (num<=pos)
+      if (inc) num+=inc; else break;
+    break;
+  }
+
+  return num>=pos ? num-pos : 0;
+
+}
+
+static int
+flush_queue_flush(int force,int i,struct printContext *p) {
+
+  int j,c;
+
+  for (j=0;j<i;j++) {
+    c = p->b.p_queue[p->b.p_qh];
+    if (c==' ')
+      p->b.p_lb++;
+    else if (c==LINE||c==SECTION||c==LINE_RELATIVE||c==SECTION_RELATIVE)
+      p->b.p_lb+=flush_queue_tab_nspaces(c,p->b.p_queue[mod(p->b.p_qh+1)],p->b.p_queue[mod(p->b.p_qh+2)],
+					 p->b.p_col+p->b.p_lb,p->b.p_indent_stack[p->b.p_isp-1]);
+    else if (c<0400) {
+      for (;p->b.p_lb;p->b.p_lb--) {
+	p->pp->write_ch_fun(' ',p->pp);
+	p->b.p_col++;
+      }
+      p->pp->write_ch_fun(c,p->pp);
+      p->b.p_col=c=='\n' ? 0 : (c=='\t' ? (p->b.p_col&-07)+8 : p->b.p_col+1);
+      p->b.p_sn=c=='\n' || p->b.p_sn;
+      if (!p->b.p_col)
+	per_line_prefix_context(p->pp);
+    }
+    p->b.p_qh = mod(p->b.p_qh+1);
+    --p->b.p_qc;
+  }
+
+  if (!p->b.p_qc)
+    for (;p->b.p_lb;p->b.p_lb--)
+      p->pp->write_ch_fun(' ',p->pp);
+
+  return 0;
+
+}
+
+static int
+flush_queue_put_indent(int force,struct printContext *p) {
+
+  p->pp->write_ch_fun('\n',p->pp);
+  p->b.p_col=0;
+  p->b.p_sn=0;
+  per_line_prefix_context(p->pp);
+  p->b.p_lb=p->b.p_indent_stack[p->b.p_isp];
+  p->b.p_iisp = p->b.p_isp;
+
+  p->b.p_qh = mod(p->b.p_qh+1);
+  --p->b.p_qc;
+
+  return 0;
+
+}
+
+static int
+flush_queue_proc(struct printContext *p,int i,int *l,int *i0,int *j,int *nb) {
+
+  ushort c,s=p->b.p_indent_stack[p->b.p_isp-1];
+
+  switch((c=p->b.p_queue[mod(p->b.p_qh+i)])) {
+  case MARK: (*l)++;return 0;
+  case UNMARK: if (--(*l) == 0) *i0=i;return (*l==0);
+  case FILL: if (*l==1) *i0=i;return 0;
+  case MANDATORY: case LINEAR:if (*l==1) *i0=i;return (*l == 1);
+  case LINE:case SECTION:case LINE_RELATIVE:case SECTION_RELATIVE:
+    (*nb)+=flush_queue_tab_nspaces(c,p->b.p_queue[mod(p->b.p_qh+i+1)],p->b.p_queue[mod(p->b.p_qh+i+2)],*j,s);
+    return 0;
+  case ' ':(*nb)++;return 0;
+  default: if (c < 0400) {(*j)+=1+*nb;*nb=0;} return 0;
+  }
+
+}
+
+static int
+flush_queue_indent(int force,struct printContext *p) {
+
+  int i,j,k,l,i0,nb;
+
+  if (p->b.p_iisp > p->b.p_isp)
+    return flush_queue_put_indent(force,p);
+
+  k = p->b.p_ll-1;
+  for (i0=0,j=p->b.p_col,nb=p->b.p_lb,l=1,i=1;i<p->b.p_qc && j<=k;i++)
+    if (flush_queue_proc(p,i,&l,&i0,&j,&nb))
+      break;
+
+  if (i == p->b.p_qc && !force)
+    return 1;
+
+  if (i0 && !p->b.p_sn && p->b.p_queue[mod(p->b.p_qh)]==FILL)
+    return flush_queue_flush(force,i0,p);
+
+  return flush_queue_put_indent(force,p);
+
+}
+
+static int
+flush_queue_mark(int force,struct printContext *p) {
+
+  int i,j,k,l,c;
+
+  k = p->b.p_ll - 1 - p->b.p_col;
+
+  for (i=l=1,j=p->b.p_lb;l>0 && i<p->b.p_qc && j<k;i++) {
+    c=p->b.p_queue[mod(p->b.p_qh + i)];
+    if (c=='\n' || c==MANDATORY || c==LINE || c==SECTION || c==LINE_RELATIVE || c==SECTION_RELATIVE) break;
+    switch(c) {
+    case MARK:l++;break;
+    case UNMARK:--l;break;
+    default: if (c<0400) j++;break;
+    }
+  }
+
+  if (l == 0 && c!='\n' && c!=MANDATORY && c!=LINE && c!=SECTION && c!=LINE_RELATIVE && c!=SECTION_RELATIVE)
+    return flush_queue_flush(force,i,p);
+
+  if (i == p->b.p_qc && !force)
+    return 1;
+
+  if (++p->b.p_isp >= IS_SIZE-1)
+    FEerror("Can't pretty-print.", 0);
+
+  p->b.p_indent_stack[p->b.p_isp++] = p->b.p_col+p->b.p_lb;
+  p->b.p_indent_stack[p->b.p_isp] = p->b.p_indent_stack[p->b.p_isp-1];
+
+  return flush_queue_flush(force,1,p);
+
+}
+
+static void
+flush_queue(int force,struct printContext *p) {
+
+  int c;
+
+  if (!p->b.p_col)
+    per_line_prefix_context(p->pp);
+
+  while (p->b.p_qc > 0) {
+    switch ((c = p->b.p_queue[p->b.p_qh])) {
+    case MARK:
+      if (flush_queue_mark(force,p)) return;
+      break;
+    case UNMARK:
+      p->b.p_isp -= 2;
+      flush_queue_flush(force,1,p);
+      break;
+    case FILL: case LINEAR:case MANDATORY:
+      if (flush_queue_indent(force,p)) return;
+      break;
+    case CURRENT: case BLOCK:
+      short sh=p->b.p_queue[mod(p->b.p_qh+1)];
+      if (p->b.p_qc<2) return;
+      sh<<=1;sh>>=1;
+      sh+=(c==CURRENT ? p->b.p_col : p->b.p_indent_stack[p->b.p_isp-1]);/*lb*/
+      sh=sh<0 ? 0 : sh;
+      p->b.p_indent_stack[p->b.p_isp] = sh;
+      flush_queue_flush(force,2,p);
+      break;
+    case LINE:case SECTION:case LINE_RELATIVE:case SECTION_RELATIVE:
+      if (p->b.p_qc<3) return;
+      flush_queue_flush(force,3,p);
+      break;
+    default:
+      flush_queue_flush(force,1,p);
+      break;
+    }
+  }
+  flush_queue_flush(force,0,p);
+
+}
+
+static void
+writec_queue(int c,void *v) {
+  struct printContext *p=v;
+  struct printStruct *b=&p->b;
+
+  if (b->p_qc >= Q_SIZE)
+    flush_queue(FALSE,p);
+  if (b->p_qc >= Q_SIZE)
+    FEerror("Can't pretty-print.", 0);
+  b->p_queue[b->p_qt] = c;
+  b->p_qt = mod(b->p_qt+1);
+  b->p_qc++;
+}
+
+
+void
+write_str(s)
+char *s;
+{
+	while (*s != '\0')
+		write_ch(*s++);
 }
 
 static void
@@ -414,7 +765,7 @@ edit_double(int n,double d,int *sp,char *s,int *ep,int dp) {
   if (b[FPRC+4] == '-')
     *ep *= -1;
 
-  truncate_double(b,d,n!=7);
+  truncate_double(b,d,dp);
   if ((p=strchr(b,'e')))
     *p=0;
 
@@ -448,7 +799,7 @@ bool shortp;
 	int n = FPRC+1;
 
 	if (shortp)
-	  n = 7;
+	  n = 10;
 	edit_double(n, d, &sign, buff, &exp, !shortp);
 	if (sign==2) {write_str("#<");
 		      write_str(buff);
@@ -514,145 +865,9 @@ bool shortp;
 }
 
 static void
-call_print_function(object func,object x, fixnum level, ufixnum nargs) {
-
-  int i;
-  bool eflag;
-  bds_ptr old_bds_top;
-
-  void (*wf)(int) = write_ch_fun;
-  
-  object *vt = PRINTvs_top;
-  object *vl = PRINTvs_limit;
-  bool e = PRINTescape;
-  bool ra = PRINTreadably;
-  bool r = PRINTradix;
-  int b = PRINTbase;
-  bool c = PRINTcircle;
-  bool p = PRINTpretty;
-  int lv = PRINTlevel;
-  int ln = PRINTlength;
-  bool g = PRINTgensym;
-  bool a = PRINTarray;
-  
-  /*
-    short oq[Q_SIZE];
-  */
-  short ois[IS_SIZE];
-  
-  int oqh;
-  int oqt;
-  int oqc;
-  int oisp;
-  int oiisp;
-  
- ONCE_MORE:
-  if (interrupt_flag) {
-    interrupt_flag = FALSE;
-#ifdef UNIX
-    alarm(0);
-#endif
-    terminal_interrupt(TRUE);
-    goto ONCE_MORE;
-  }
-  
-  if (PRINTpretty)
-    flush_queue(TRUE);
-  
-  oqh = qh;
-  oqt = qt;
-  oqc = qc;
-  oisp = isp;
-  oiisp = iisp;
-  
-  /*	No need to save the queue, since it is flushed.
-	for (i = 0;  i < Q_SIZE;  i++)
-	oq[i] = queue[i];
-  */
-  if (PRINTpretty)
-    for (i = 0;  i <= isp;  i++)
-      ois[i] = indent_stack[i];
-  
-  vs_push(PRINTstream);
-  vs_push(PRINTcase);
-  
-  vs_push(make_fixnum(level));
-
-  old_bds_top = bds_top;
-  bds_bind(sLAprint_escapeA, PRINTescape?Ct:Cnil);
-  bds_bind(sLAprint_readablyA, PRINTreadably?Ct:Cnil);
-  bds_bind(sLAprint_radixA, PRINTradix?Ct:Cnil);
-  bds_bind(sLAprint_baseA, make_fixnum(PRINTbase));
-  bds_bind(sLAprint_circleA, PRINTcircle?Ct:Cnil);
-  bds_bind(sLAprint_prettyA, PRINTpretty?Ct:Cnil);
-  bds_bind(sLAprint_levelA, PRINTlevel<0?Cnil:make_fixnum(PRINTlevel));
-  bds_bind(sLAprint_lengthA, PRINTlength<0?Cnil:make_fixnum(PRINTlength));
-  bds_bind(sLAprint_gensymA, PRINTgensym?Ct:Cnil);
-  bds_bind(sLAprint_arrayA, PRINTarray?Ct:Cnil);
-  bds_bind(sLAprint_caseA, PRINTcase);
-  
-  frs_push(FRS_PROTECT, Cnil);
-  if (nlj_active) {
-    eflag = TRUE;
-    goto L;
-  }
-  
-  if (nargs == 3)
-    ifuncall3(func, x, PRINTstream, vs_head);
-  else
-    if (nargs == 2) /* pprint is other way round */
-      ifuncall2(func, PRINTstream, x);
-  
-  vs_popp;
-  eflag = FALSE;
-  
- L:
-  frs_pop();
-  bds_unwind(old_bds_top);
-  
-  /*
-    for (i = 0;  i < Q_SIZE;  i++)
-    queue[i] = oq[i];
-  */
-  if (PRINTpretty)
-    for (i = 0;  i <= oisp;  i++)
-      indent_stack[i] = ois[i];
-  
-  iisp = oiisp;
-  isp = oisp;
-  qc = oqc;
-  qt = oqt;
-  qh = oqh;
-  
-  PRINTcase = vs_pop;
-  PRINTstream = vs_pop;
-  PRINTarray = a;
-  PRINTgensym = g;
-  PRINTlength = ln;
-  PRINTlevel = lv;
-  PRINTpretty = p;
-  PRINTcircle = c;
-  PRINTbase = b;
-  PRINTradix = r;
-  PRINTescape = e;
-  PRINTreadably = ra;
-  PRINTvs_limit = vl;
-  PRINTvs_top = vt;
-  
-  write_ch_fun = wf;
-  
-  if (eflag) {
-    nlj_active = FALSE;
-    unwind(nlj_fr, nlj_tag);
-  }
-}
-
-static void
-call_structure_print_function(x, level)
-object x;
-int level;
-{
-    call_print_function(S_DATA(x->str.str_def)->print_function, x, level, 3);
+call_structure_print_function(object x,int level) {
+  struct printContext *p=(struct printContext *)(void *)fix(sSAprint_contextA->s.s_dbind);
+  ifuncall3(S_DATA(x->str.str_def)->print_function,x,p->s,make_fixnum(level));
 }
 
 object copy_big();
@@ -660,60 +875,113 @@ object coerce_big_to_string(object,int);
 extern object cLtype_of(object);
 static bool potential_number_p(object,int);
 
-static object
-pprint_dispatch(obj,a_list)
-object obj,a_list;
-{
-	object ret=Cnil;
-	object pri=Cnil;
+DEF_ORDINARY("PPRINT-DISPATCH",sLpprint_dispatch,LISP,"");
+DEF_ORDINARY("DEFAULT-PPRINT-OBJECT",sSdefault_pprint_object,SI,"");
 
-	if ((sLtypep->s.s_gfdef == OBJNULL) ||
-	    (sLtypep->s.s_gfdef == Cnil))/*FIXME*/
-	    return Cnil; /* we may not have typep in raw_gcl */
-	if (a_list == Cnil)
-	    return Cnil;
-	if (type_of(a_list) == t_symbol)
-	    a_list = symbol_value(a_list);
-	if (consp(a_list))
-	    a_list = a_list->c.c_cdr;
-
-	while ((a_list != Cnil) &&
-	       (consp(a_list)) &&
-	        !endp(a_list)) {
-	    if ((a_list->c.c_car != Cnil) &&
-		(consp(a_list->c.c_car)) &&
-		(a_list->c.c_car->c.c_car != Cnil) &&
-		(a_list->c.c_car->c.c_cdr != Cnil) &&
-		(ifuncall2(sLtypep,obj,a_list->c.c_car->c.c_car) != Cnil)) {
-		    if (pri == Cnil) {
-			    ret =a_list->c.c_car->c.c_cdr;
-			    if ((consp(a_list->c.c_car->c.c_cdr)) &&
-				(consp(a_list->c.c_car->c.c_cdr->c.c_cdr)) &&
-		      (ifuncall2(sLtypep,a_list->c.c_car->c.c_cdr->c.c_cdr->c.c_car,sLnumber) != Cnil))
-				    pri =a_list->c.c_car->c.c_cdr->c.c_cdr->c.c_car;
-			    else
-				    pri =make_fixnum(0);
-		    } else
-		    if ((consp(a_list->c.c_car->c.c_cdr)) &&
-		        (consp(a_list->c.c_car->c.c_cdr->c.c_cdr)) &&
-	      (ifuncall2(sLtypep,a_list->c.c_car->c.c_cdr->c.c_cdr->c.c_car,sLnumber) != Cnil) &&
-		 (number_compare(a_list->c.c_car->c.c_cdr->c.c_cdr->c.c_car,pri)>0)) {
-			    ret =a_list->c.c_car->c.c_cdr;
-			    pri =a_list->c.c_car->c.c_cdr->c.c_cdr->c.c_car;
-		    }
-	    }
-	    a_list = a_list->c.c_cdr;
-	}
-	if (consp(ret))
-	    ret = ret->c.c_car;
-	return ret;
+object
+print(object obj,object strm) {
+  terpri(strm);
+  prin1(obj,strm);
+  princ(code_char(' '),strm);
+  return(obj);
 }
 
-@(defun get_pprint_dispatch (obj &o (table `symbol_value(sLApprint_dispatchA)`))
-@
-	@(return `pprint_dispatch(obj,table)`)
-@)
+object
+terpri(object strm) {
+  if (strm == Cnil)
+    strm = symbol_value(sLAstandard_outputA);
+  else if (strm == Ct)
+    strm = symbol_value(sLAterminal_ioA);
+  if (type_of(strm) != t_stream)
+    FEerror("~S is not a stream.", 1, strm);
+  writec_pstream('\n',strm);
+  return(Cnil);
+}
 
+static int
+get_line_length(void) {
+  int l=0;
+  object o=symbol_value(sLAprint_right_marginA);
+  if ((o!=Cnil) && (type_of(o)==t_fixnum))
+    l=fix(o);
+  if (l<MINIMUM_RIGHT_MARGIN)
+    l=DEFAULT_RIGHT_MARGIN;
+  return l;
+}
+
+int
+writec_pstream(int c,object s) {
+  SETUP_PRINT_DEFAULT(Cnil,s,1,1);
+  write_ch(c);
+  CLEANUP_PRINT_DEFAULT();
+  return c;
+}
+
+void
+writestr_pstream(char *s,object strm) {
+  SETUP_PRINT_DEFAULT(Cnil,strm,1,1);
+  while (*s != '\0')
+    write_ch(*s++);
+  CLEANUP_PRINT_DEFAULT();
+}
+
+void
+write_bounded_string_pstream(object str,int b,int e,object strm) {
+
+  SETUP_PRINT_DEFAULT(str,strm,1,1);
+  for (;b<e;)
+    write_ch(str->st.st_self[b++]);
+  CLEANUP_PRINT_DEFAULT();
+}
+
+void
+write_string_pstream(object str,object strm) {
+  write_bounded_string_pstream(str,0,VLEN(str),strm);
+}
+
+void
+write_string(object strng,object strm) {
+
+  if (strm == Cnil)
+    strm = symbol_value(sLAstandard_outputA);
+  else if (strm == Ct)
+    strm = symbol_value(sLAterminal_ioA);
+  check_type_string(&strng);
+  check_type_stream(&strm);
+  write_string_pstream(strng,strm);
+  flush_stream(strm);
+
+}
+
+
+void
+princ_str(char *s,object sym) {
+  sym = symbol_value(sym);
+  if (sym == Cnil)
+    sym = symbol_value(sLAstandard_outputA);
+  else if (sym == Ct)
+    sym = symbol_value(sLAterminal_ioA);
+  check_type_stream(&sym);
+  writestr_pstream(s, sym);
+}
+
+void
+princ_char(int c,object sym) {
+  sym = symbol_value(sym);
+  if (sym == Cnil)
+    sym = symbol_value(sLAstandard_outputA);
+  else if (sym == Ct)
+    sym = symbol_value(sLAterminal_ioA);
+  check_type_stream(&sym);
+  writec_pstream(c,sym);
+
+}
+
+void
+pp(object x) {
+  princ(x,Cnil);
+  flush_stream(symbol_value(sLAstandard_outputA));
+}
 
 static int
 constant_case(object x) {
@@ -814,59 +1082,21 @@ print_symbol_name_body(object x,int pp) {
 
 }
 
-#define DONE 1
-#define FOUND -1
-
 static int
-do_write_sharp_eq(struct cons *e,bool dot) {
+write_level(void) {
 
-  fixnum val=fix(e->c_car);
-  bool defined=val&1;
-
-  if (dot) {
-    write_str(" . ");
-    if (!defined) return FOUND;
-  }
-
-  if (!defined) e->c_car=make_fixnum(val|1);
-  write_ch('#');
-  write_decimal(val>>1);
-  write_ch(defined ? '#' : '=');
-
-  return defined ? DONE : FOUND;
-
-}
-
-static int
-write_sharp_eq(object x,bool dot) {
-
-  struct cons *e;
-
-  return PRINTvs_top[0]!=Cnil && (e=gethash(x,PRINTvs_top[0]))->c_cdr!=OBJNULL ?
-    do_write_sharp_eq(e,dot) : 0;
+  return type_of(sSAprin_levelA->s.s_dbind)==t_fixnum ? fix(sSAprin_levelA->s.s_dbind) : 0;
 
 }
 
 
-void
-write_object(x, level)
-object x;
-int level;
-{
+static void
+write_object(object x,int level) {
+
 	object r, y;
-	int i, j, k;
-	object ppfun;
+	fixnum i, j, k;
 
 	cs_check(x);
-
-	if (type_of(sSAprin_levelA->s.s_dbind)==t_fixnum &&
-	    fix(sSAprin_levelA->s.s_dbind)>level)
-	  level=fix(sSAprin_levelA->s.s_dbind);
-
-/* 	if (PRINTlevel >= 0 && level >= PRINTlevel) { */
-/* 	  write_ch('#'); */
-/* 	  return; */
-/* 	} */
 
 	if (x == OBJNULL) {
 		write_str("#<OBJNULL>");
@@ -878,29 +1108,13 @@ int level;
 		write_str(">");
 		return;
 	}
-	if (PRINTpretty &&
-	    ((ppfun = pprint_dispatch(x,sLApprint_dispatchA)) != Cnil)) {
-		vs_mark;
-		if (ppfun != Ct)
-		switch (type_of(ppfun)) {
-		/* case t_cfun: */
-		case t_function:/*FIXME*/
-		/* case t_ifun: */
-		case t_symbol:
-		case t_cons:
-		  call_print_function(ppfun, x, 0, 2);
-		  vs_reset;
-		  return;
-		default:
-		  FEwrong_type_argument(sLfunction,ppfun);
-		}
-	}
+
 	switch (type_of(x)) {
+
 	case t_fixnum:
 	{
 		object *vsp;
-		/*FIXME 64*/
-		fixnum i;
+
 		if (PRINTradix && PRINTbase != 10)
 			write_base();
 		i = fix(x);
@@ -910,30 +1124,21 @@ int level;
 				write_ch('.');
 			break;
 		}
+		vsp = vs_top;
 		if (i < 0) {
 			write_ch('-');
 			if (i == MOST_NEGATIVE_FIX) {
-				x = fixnum_add(1,(MOST_POSITIVE_FIX));
-				vs_push(x);
-				i = PRINTradix;
-				PRINTradix = FALSE;
-				write_object(x, level);
-				PRINTradix = i;
-				vs_popp;
-				if (PRINTradix && PRINTbase == 10)
-					write_ch('.');
-				break;
+			  vs_push(code_char(digit_weight(labs(i%PRINTbase),PRINTbase)));
+			  i/=PRINTbase;
 			}
 			i = -i;
 		}
-		vsp = vs_top;
-		for (vsp = vs_top;  i != 0;  i /= PRINTbase)
-			vs_push(code_char(digit_weight(i%PRINTbase,
-						       PRINTbase)));
+		for (;i;i/=PRINTbase)
+		  vs_push(code_char(digit_weight(i%PRINTbase,PRINTbase)));
 		while (vs_top > vsp)
-			write_ch(char_code((vs_pop)));
+		  write_ch(char_code((vs_pop)));
 		if (PRINTradix && PRINTbase == 10)
-			write_ch('.');
+		  write_ch('.');
 		break;
 	}
 
@@ -960,11 +1165,11 @@ int level;
 	case t_ratio:
 		if (PRINTradix) {
 			write_base();
-			PRINTradix = FALSE;
+			bds_bind(sLAprint_radixA,Cnil);
 			write_object(x->rat.rat_num, level);
 			write_ch('/');
 			write_object(x->rat.rat_den, level);
-			PRINTradix = TRUE;
+			bds_unwind1;
 		} else {
 			write_object(x->rat.rat_num, level);
 			write_ch('/');
@@ -999,8 +1204,8 @@ int level;
 
 	case t_character:
 		if (!PRINTescape) {
-			write_ch(char_code(x));
-			break;
+		  write_ch(char_code(x));
+		  break;
 		}
 		write_str("#\\");
 		switch (char_code(x)) {
@@ -1011,6 +1216,7 @@ int level;
 
 		case ' ':
 			write_str(" ");
+			/* write_str("Space"); */
 			break;
 
 		case '\177':
@@ -1053,9 +1259,12 @@ int level;
 
 	case t_symbol:
 	  {
+	    object y=vs_head;
+	    y=y!=OBJNULL && consp(y) && y->c.c_car==sSstructure_list ? y->c.c_cdr: Cnil;
+	    for (;consp(y) && y->c.c_car!=x;y=y->c.c_cdr);
 
-	    if (PRINTescape) {
-	      if (x->s.s_hpack == Cnil) {
+	    if (PRINTescape || consp(y)) {
+	      if (x->s.s_hpack == Cnil || x->s.s_hpack->p.p_name==Cnil) {
 		if (PRINTcircle)
 		  if (write_sharp_eq(x,FALSE)==DONE) return;
 		if (PRINTgensym)
@@ -1111,23 +1320,27 @@ int level;
 		for (;;) {
 			for (i = j;  i < n;  i++) {
 				if (subscripts[i] == 0) {
-					write_ch(MARK);
+					if (PRINTpretty) write_ch(MARK);
 					write_ch('(');
-					write_ch(SET_INDENT);
+					if (PRINTpretty) {write_ch(CURRENT);write_ch(CONTINUATION);}
 					if (x->a.a_dims[i] == 0) {
 						write_ch(')');
-						write_ch(UNMARK);
+						if (PRINTpretty) write_ch(UNMARK);
 						j = i-1;
 						k = 0;
+						if (PRINTreadably)
+						  PRINT_NOT_READABLE(x,"Array has a zero dimension.");
 						goto INC;
 					}
 				}
-				if (subscripts[i] > 0)
-					write_ch(INDENT);
+				if (subscripts[i] > 0) {
+				  write_ch(' ');
+				  if (PRINTpretty) write_ch(FILL);
+				}
 				if (PRINTlength >= 0 &&
 				    subscripts[i] >= PRINTlength) {
 					write_str("...)");
-					write_ch(UNMARK);
+					if (PRINTpretty) write_ch(UNMARK);
 					k=x->a.a_dims[i]-subscripts[i];
 					subscripts[i] = 0;
 					for (j = i+1;  j < n;  j++)
@@ -1151,7 +1364,7 @@ int level;
 					break;
 				subscripts[j] = 0;
 				write_ch(')');
-				write_ch(UNMARK);
+				if (PRINTpretty) write_ch(UNMARK);
 				--j;
 			}
 			if (j < 0)
@@ -1176,20 +1389,21 @@ int level;
 			break;
 		}
 		write_ch('#');
-		write_ch(MARK);
+		if (PRINTpretty) write_ch(MARK);
 		write_ch('(');
-		write_ch(SET_INDENT);
+		if (PRINTpretty) {write_ch(CURRENT);write_ch(CONTINUATION);}
 		if (VLEN(x) > 0) {
 			if (PRINTlength == 0) {
 				write_str("...)");
-				write_ch(UNMARK);
+				if (PRINTpretty) write_ch(UNMARK);
 				break;
 			}
 			vs_push(aref(x, 0));
 			write_object(vs_head, level+1);
 			vs_popp;
 			for (i = 1;  i < VLEN(x);  i++) {
-				write_ch(INDENT);
+			  write_ch(' ');
+			  if (PRINTpretty) write_ch(FILL);
 				if (PRINTlength>=0 && i>=PRINTlength){
 					write_str("...");
 					break;
@@ -1200,14 +1414,14 @@ int level;
 			}
 		}
 		write_ch(')');
-		write_ch(UNMARK);
+		if (PRINTpretty) write_ch(UNMARK);
 		break;
 
 	case t_simple_string:
 	case t_string:
-		if (!PRINTescape) {
+	  if (!PRINTescape) {
 		  for (i = 0;  i < VLEN(x);  i++)
-				write_ch(x->st.st_self[i]);
+		    write_ch((uchar)x->st.st_self[i]);
 			break;
 		}
 		write_ch('"');
@@ -1215,7 +1429,7 @@ int level;
 			if (x->st.st_self[i] == '"' ||
 			    x->st.st_self[i] == '\\')
 				write_ch('\\');
-			write_ch(x->st.st_self[i]);
+			write_ch((uchar)x->st.st_self[i]);
 		}
 		write_ch('"');
 		break;
@@ -1242,29 +1456,29 @@ int level;
 		if (PRINTcircle)
 		  if (write_sharp_eq(x,FALSE)==DONE) return;
                 if (PRINTpretty) {
-		if (x->c.c_car == sLquote &&
-		    consp(x->c.c_cdr) &&
-		    x->c.c_cdr->c.c_cdr == Cnil) {
-			write_ch('\'');
-			write_object(x->c.c_cdr->c.c_car, level);
-			break;
-		}
-		if (x->c.c_car == sLfunction &&
-		    consp(x->c.c_cdr) &&
-		    x->c.c_cdr->c.c_cdr == Cnil) {
-			write_ch('#');
-			write_ch('\'');
-			write_object(x->c.c_cdr->c.c_car, level);
-			break;
-		}
+		  if (x->c.c_car == sLquote &&
+		      consp(x->c.c_cdr) &&
+		      x->c.c_cdr->c.c_cdr == Cnil) {
+		    write_ch('\'');
+		    write_object(x->c.c_cdr->c.c_car, level);
+		    break;
+		  }
+		  if (x->c.c_car == sLfunction &&
+		      consp(x->c.c_cdr) &&
+		      x->c.c_cdr->c.c_cdr == Cnil) {
+		    write_ch('#');
+		    write_ch('\'');
+		    write_object(x->c.c_cdr->c.c_car, level);
+		    break;
+		  }
                 }
 		if (PRINTlevel >= 0 && level >= PRINTlevel) {
 			write_ch('#');
 			break;
 		}
-		write_ch(MARK);
+		if (PRINTpretty) write_ch(MARK);
 		write_ch('(');
-		write_ch(SET_INDENT);
+		if (PRINTpretty) {write_ch(CURRENT);write_ch(CONTINUATION);}
 		if (PRINTpretty && x->c.c_car != OBJNULL &&
 		    type_of(x->c.c_car) == t_symbol &&
 		    (r = getf(x->c.c_car->s.s_plist,
@@ -1280,7 +1494,8 @@ int level;
 			write_object(y, level+1);
 			if (!x || !consp(x)) {
 				if (x != Cnil) {
-					write_ch(INDENT);
+				  write_ch(' ');
+				  if (PRINTpretty) write_ch(FILL);
 					write_str(". ");
 					write_object(x, level);
 				}
@@ -1295,15 +1510,14 @@ int level;
 			  default:
 			    break;
 			  }
-			if (i == 0 && y != OBJNULL && type_of(y) == t_symbol)
-				write_ch(INDENT1);
-			else
-				write_ch(INDENT);
+			write_ch(' ');
+			if (PRINTpretty)
+			  write_ch(i==0 && y!=OBJNULL && type_of(y)==t_symbol ? LINEAR : FILL);
 		}
 
 	RIGHT_PAREN:
 		write_ch(')');
-		write_ch(UNMARK);
+		if (PRINTpretty) write_ch(UNMARK);
 		break;
 
 	PRETTY_PRINT_FORMAT:
@@ -1321,18 +1535,16 @@ int level;
 				write_object(y, level+1);
 			if (!consp(x)) {
 				if (x != Cnil) {
-					write_ch(INDENT);
+				  write_ch(' ');
+				  if (PRINTpretty) write_ch(FILL);
 					write_str(". ");
 					write_object(x, level);
 				}
 				break;
 			}
-			if (i >= j)
-				write_ch(INDENT2);
-			else if (i == 0)
-				write_ch(INDENT1);
-			else
-				write_ch(INDENT);
+			write_ch(' ');
+			if (PRINTpretty)
+			  write_ch(i>=j ? MANDATORY : (!i ? LINEAR : FILL));
 		}
 		goto RIGHT_PAREN;
 
@@ -1461,27 +1673,33 @@ int level;
 		break;
 
 	case t_structure:
-		if (PRINTcircle)
-		  if (write_sharp_eq(x,FALSE)==DONE) return;
-		if (PRINTlevel >= 0 && level >= PRINTlevel) {
-			write_ch('#');
-			break;
-		}
-		if (type_of(x->str.str_def) != t_structure)
-			FEwrong_type_argument(sLstructure, x->str.str_def);
-		if (S_DATA(x->str.str_def)->print_function != Cnil) {
-		  call_structure_print_function(x, level);
-		  break;
-		}
-		if (PRINTstructure) {	
-			write_str("#S");
-			x = structure_to_list(x);
-			vs_push(x);
-			write_object(x, level);
-			vs_popp;
-			break;
-		}
-		break;
+	  object y=structure_to_list(x);
+	  if (PRINTcircle)
+	    if (write_sharp_eq(x,FALSE)==DONE) return;
+	  if (y->c.c_cdr==Cnil) {/*FIXME: Where is this specified?*/
+	    write_str("#S(");
+	    print_symbol_name_body(y->c.c_car->s.s_name,1);
+	    write_ch(')');
+	    break;
+	  }
+	  if (PRINTlevel >= 0 && level >= PRINTlevel) {
+	    write_ch('#');
+	    break;
+	  }
+	  if (type_of(x->str.str_def) != t_structure)
+	    FEwrong_type_argument(sLstructure, x->str.str_def);
+	  if (S_DATA(x->str.str_def)->print_function != Cnil) {
+	    call_structure_print_function(x, level);
+	    break;
+	  }
+	  if (PRINTstructure) {
+	    write_str("#S");
+	    vs_push(MMcons(sSstructure_list,y));/*FIXME alloc etc.*/
+	    write_object(y, level);
+	    vs_popp;
+	    break;
+	  }
+	  break;
 
 	case t_readtable:
 		write_str("#<readtable ");
@@ -1490,18 +1708,30 @@ int level;
 		break;
 
 	case t_pathname:
-		if (PRINTescape) {
-			write_ch('#');
-			write_ch('P');
-			vs_push(x->pn.pn_namestring);
-			write_object(vs_head, level);
-			vs_popp;
-		} else {
-			vs_push(x->pn.pn_namestring);
-			write_object(vs_head, level);
-			vs_popp;
-		}
-		break;
+	  if (PRINTreadably && x->pn.pn_version!=Cnil && x->pn.tt==0) {
+	    write_str("#.(MAKE-PATHNAME ");
+	    write_str(" :HOST ");write_object(x->pn.pn_host,level);
+	    write_str(" :DEVICE ");write_object(x->pn.pn_device,level);
+	    write_str(" :DIRECTORY '");write_object(x->pn.pn_directory,level);
+	    write_str(" :NAME ");write_object(x->pn.pn_name,level);
+	    write_str(" :TYPE ");write_object(x->pn.pn_type,level);
+	    write_str(" :VERSION ");write_object(x->pn.pn_version,level);
+	    write_str(")");
+	    break;
+	  }
+	    /* PRINT_NOT_READABLE(x,"Physical pathname has non-nil version."); */
+	  if (PRINTescape) {
+	    write_ch('#');
+	    write_ch('P');
+	    vs_push(x->pn.pn_namestring);
+	    write_object(vs_head, level);
+	    vs_popp;
+	  } else {
+	    vs_push(x->pn.pn_namestring);
+	    write_object(vs_head, level);
+	    vs_popp;
+	  }
+	  break;
 
 	case t_function:
 		write_str("#<function ");
@@ -1526,147 +1756,57 @@ int level;
 	}
 }
 
-static int dgs,dga;
+void
+write_object_pstream(object obj,object strm) {
+  object ppfun;
 
-#include "page.h"
+  SETUP_PRINT_DEFAULT(obj,strm,1,0);
 
-static void
-travel_push(object x) {
+  if (PRINTpretty &&
+      sLAprint_pprint_dispatchA->s.s_dbind->c.c_cdr!=Cnil &&
+      (ppfun=ifuncall1(sLpprint_dispatch,obj))!=Cnil &&
+      ppfun!=sSdefault_pprint_object) {
+    ifuncall2(ppfun,p->s,obj);
+  } else
+    write_object(obj, write_level());
 
-  int i;
+  CLEANUP_PRINT_DEFAULT();
+}
 
-  if (is_imm_fixnum(x))
-    return;
+object
+princ(object obj,object strm) {
 
-  if (is_marked(x)) {
+  if (strm == Cnil)
+    strm = symbol_value(sLAstandard_outputA);
+  else if (strm == Ct)
+    strm = symbol_value(sLAterminal_ioA);
+  if (type_of(strm) != t_stream)
+    FEerror("~S is not a stream.", 1, strm);
+  bds_bind(sLAprint_readablyA,Cnil);
+  bds_bind(sLAprint_escapeA,Cnil);
+  write_object_pstream(obj,strm);
+  bds_unwind1;
+  bds_unwind1;
 
-    if (imcdr(x) || !x->d.f)
-      vs_check_push(x);
-    if (!imcdr(x))
-      x->d.f=1;
-
-  } else switch (type_of(x)) {
-
-    case t_symbol:
-
-      if (dgs && x->s.s_hpack==Cnil) {
-    	mark(x);
-      }
-      break;
-
-    case t_cons:
-
-      {
-	object y=x->c.c_cdr;
-	mark(x);
-	travel_push(x->c.c_car);
-	travel_push(y);
-      }
-      break;
-
-    case t_vector:
-    case t_array:
-    case t_simple_vector:
-    case t_simple_array:
-
-      mark(x);
-      if (dga && (enum aelttype)x->a.a_elttype==aet_object)
-	for (i=0;i<x->a.a_dim;i++)
-	  travel_push(x->a.a_self[i]);
-      break;
-
-    case t_structure:
-
-      mark(x);
-      for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
-	travel_push(structure_ref(x,x->str.str_def,i));
-      break;
-
-    default:
-
-      break;
-
-    }
+  return(obj);
 
 }
 
+object
+prin1(object obj,object strm) {
+  if (strm == Cnil)
+    strm = symbol_value(sLAstandard_outputA);
+  else if (strm == Ct)
+    strm = symbol_value(sLAterminal_ioA);
+  if (type_of(strm) != t_stream)
+    FEerror("~S is not a stream.", 1, strm);
 
-static void
-travel_clear(object x) {
+  bds_bind(sLAprint_escapeA,Ct);
+  write_object_pstream(obj,strm);
+  bds_unwind1;
 
-  int i;
-
-  if (is_imm_fixnum(x))
-    return;
-
-  if (!is_marked(x))
-    return;
-
-  unmark(x);
-  if (!imcdr(x))
-    x->d.f=0;
-
-  switch (type_of(x)) {
-
-  case t_cons:
-
-    travel_clear(x->c.c_car);
-    travel_clear(x->c.c_cdr);
-    break;
-
-  case t_vector:
-  case t_array:
-  case t_simple_vector:
-  case t_simple_array:
-
-    if (dga && (enum aelttype)x->a.a_elttype == aet_object)
-      for (i=0;i<x->a.a_dim;i++)
-	travel_clear(x->a.a_self[i]);
-    break;
-
-  case t_structure:
-
-    for (i = 0;  i < S_DATA(x->str.str_def)->length;  i++)
-      travel_clear(structure_ref(x,x->str.str_def,i));
-    break;
-
-  default:
-
-    break;
-
-  }
-
-}
-
-static void
-travel(object x,int mdgs,int mdga) {
-
-  BEGIN_NO_INTERRUPT;
-  dgs=mdgs;
-  dga=mdga;
-  travel_push(x);
-  travel_clear(x);
-  END_NO_INTERRUPT;
-
-}
-
-object sLeq;
-
-static void
-setupPRINTcircle(object x,int dogensyms) {
-
-  object *vp=vs_top,*v=vp,h;
-  fixnum j;
-
-  travel(x,dogensyms,PRINTarray);
-
-  h=vs_top>vp ? gcl_make_hash_table(sLeq) : Cnil;
-  for (j=0;v<vs_top;v++)
-    if (!imcdr(*v) || gethash(*v,h)->c_cdr==OBJNULL)
-      sethash(*v,h,make_fixnum((j++)<<1));
-
-  vs_top=vp;
-  vs_push(h);
+  flush_stream(strm);
+  return(obj);
 
 }
 
@@ -1675,104 +1815,12 @@ travel_find_sharing(object x,object table) {
 
   object *vp=vs_top;
 
-  travel(x,1,1);
+  travel(x,1,1,ARRAY_DIMENSION_LIMIT,ARRAY_DIMENSION_LIMIT);
 
   for (;vs_top>vp;vs_top--)
       sethash(vs_head,table,make_fixnum(-2));
 
 }
-
-void
-setupPRINTdefault(x)
-object x;
-{
-	object y;
-
-	PRINTvs_top = vs_top;
-	PRINTstream = symbol_value(sLAstandard_outputA);
-	if (type_of(PRINTstream) != t_stream) {
-		sLAstandard_outputA->s.s_dbind
-		= symbol_value(sLAterminal_ioA);
-		vs_push(PRINTstream);
-		FEwrong_type_argument(sLstream, PRINTstream);
-	}
-	PRINTescape = symbol_value(sLAprint_escapeA) != Cnil;
-	PRINTreadably = symbol_value(sLAprint_readablyA) != Cnil;
-	PRINTpretty = symbol_value(sLAprint_prettyA) != Cnil;
-	PRINTcircle = symbol_value(sLAprint_circleA) != Cnil;
-	y = symbol_value(sLAprint_baseA);
-	if (type_of(y) != t_fixnum || fix(y) < 2 || fix(y) > 36) {
-		sLAprint_baseA->s.s_dbind = make_fixnum(10);
-		vs_push(y);
-		FEerror("~S is an illegal PRINT-BASE.", 1, y);
-	} else
-		PRINTbase = fix(y);
-	PRINTradix = symbol_value(sLAprint_radixA) != Cnil;
-	PRINTcase = symbol_value(sLAprint_caseA);
-	if (PRINTcase != sKupcase && PRINTcase != sKdowncase &&
-	    PRINTcase != sKcapitalize) {
-		sLAprint_caseA->s.s_dbind = sKdowncase;
-		vs_push(PRINTcase);
-		FEerror("~S is an illegal PRINT-CASE.", 1, PRINTcase);
-	}
-	PRINTgensym = symbol_value(sLAprint_gensymA) != Cnil;
-	y = symbol_value(sLAprint_levelA);
-	if (y == Cnil)
-		PRINTlevel = -1;
-	else if (type_of(y) != t_fixnum || fix(y) < 0) {
-		sLAprint_levelA->s.s_dbind = Cnil;
-		vs_push(y);
-		FEerror("~S is an illegal PRINT-LEVEL.", 1, y);
-	} else
-		PRINTlevel = fix(y);
-	y = symbol_value(sLAprint_lengthA);
-	if (y == Cnil)
-		PRINTlength = -1;
-	else if (type_of(y) != t_fixnum || fix(y) < 0) {
-		sLAprint_lengthA->s.s_dbind = Cnil;
-		vs_push(y);
-		FEerror("~S is an illegal PRINT-LENGTH.", 1, y);
-	} else
-		PRINTlength = fix(y);
-	PRINTarray = symbol_value(sLAprint_arrayA) != Cnil;
-	if (PRINTcircle) setupPRINTcircle(x,1);
-	if (PRINTpretty) {
-		qh = qt = qc = 0;
-		isp = iisp = 0;
-		indent_stack[0] = 0;
-		write_ch_fun = writec_queue;
-	} else
-		write_ch_fun = writec_PRINTstream;
-	PRINTpackage = symbol_value(sSAprint_packageA) != Cnil;
-	PRINTstructure = symbol_value(sSAprint_structureA) != Cnil;
-}
-
-void
-cleanupPRINT(void)
-{
-	vs_top = PRINTvs_top;
-	if (PRINTpretty)
-		flush_queue(TRUE);
-}
-
-/*static void
-write_object_by_default(x)
-object x;
-{
-	SETUP_PRINT_DEFAULT(x);
-	write_object(x, 0);
-	flush_stream(PRINTstream);
-	CLEANUP_PRINT_DEFAULT;
-}*/
-
-/*static void
-terpri_by_default()
-{
-	PRINTstream = symbol_value(sLAstandard_outputA);
-	if (type_of(PRINTstream) != t_stream)
-		FEwrong_type_argument(sLstream, PRINTstream);
-        WRITEC_NEWLINE(PRINTstream);
-}*/
 
 static bool
 potential_number_p(strng, base)
@@ -1811,87 +1859,127 @@ int base;
 	return(TRUE);
 }
 
+DEFUN("WRITE-CH",object,fSwrite_ch,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
+  write_ch(x);
+  RETURN1(Cnil);
+}
 
-DEFUN("WRITE-INT",object,fSwrite_int,SI,17,17,NONE,OO,OO,OO,OO,
-	  (object x,object strm,object array,object base,object cas,
-	   object circle,object escape,object gensym,object length,
-	   object level,object lines,object miser_width,object pprint_dispatch,
-	   object pretty,object radix,object readably,object right_margin),"") {
+DEFUN("WRITE-INT",object,fSwrite_int,SI,2,2,NONE,OO,OO,OO,OO,(object x,object strm),"") {
 
-  struct printStruct printStructBuf; 
-  struct printStruct *old_printStructBufp = printStructBufp;  
-  object changer;
-  
-  changer = sLApprint_dispatchA->s.s_dbind;
-  sLApprint_dispatchA->s.s_dbind = pprint_dispatch;
-  pprint_dispatch = changer;
-  changer = sLAprint_linesA->s.s_dbind;
-  sLAprint_linesA->s.s_dbind = lines;
-  lines = changer;
-  changer = sLAprint_right_marginA->s.s_dbind;
-  sLAprint_right_marginA->s.s_dbind = right_margin;
-  right_margin = changer;
-  changer = sLAprint_miser_widthA->s.s_dbind;
-  sLAprint_miser_widthA->s.s_dbind = miser_width;
-  miser_width = changer;
-  
-  printStructBufp = &printStructBuf; 
   if (strm == Cnil)
     strm = symbol_value(sLAstandard_outputA);
   else if (strm == Ct)
     strm = symbol_value(sLAterminal_ioA);
   if (type_of(strm) != t_stream)
     FEerror("~S is not a stream.", 1, strm);
-  PRINTvs_top = vs_top;
-  PRINTstream = strm;
-  PRINTreadably = readably != Cnil;
-  PRINTescape = PRINTreadably || escape != Cnil;
-  PRINTpretty = pretty != Cnil;
-  PRINTcircle = circle != Cnil;
-  if (type_of(base)!=t_fixnum || fix((base))<2 || fix((base))>36)
-    FEerror("~S is an illegal PRINT-BASE.", 1, base);
-  else
-    PRINTbase = fix((base));
-  PRINTradix = radix != Cnil;
-  PRINTcase = cas;
-  if (PRINTcase != sKupcase && PRINTcase != sKdowncase &&
-      PRINTcase != sKcapitalize)
-    FEerror("~S is an illegal PRINT-CASE.", 1, cas);
-  PRINTgensym = PRINTreadably || gensym != Cnil;
-  if (PRINTreadably || level == Cnil)
-    PRINTlevel = -1;
-  else if (type_of(level) != t_fixnum || fix((level)) < 0)
-    FEerror("~S is an illegal PRINT-LEVEL.", 1, level);
-  else
-    PRINTlevel = fix((level));
-  if (PRINTreadably || length == Cnil)
-    PRINTlength = -1;
-  else if (type_of(length) != t_fixnum || fix((length)) < 0)
-    FEerror("~S is an illegal PRINT-LENGTH.", 1, length);
-  else
-    PRINTlength = fix((length));
-  PRINTarray = PRINTreadably || array != Cnil;
-  if (PRINTcircle) setupPRINTcircle(x,1);
-  if (PRINTpretty) {
-    qh = qt = qc = 0;
-    isp = iisp = 0;
-    indent_stack[0] = 0;
-    write_ch_fun = writec_queue;
-  } else
-    write_ch_fun = writec_PRINTstream;
-  PRINTpackage = symbol_value(sSAprint_packageA) != Cnil;
-  PRINTstructure = symbol_value(sSAprint_structureA) != Cnil;
-  write_object(x, 0);
-  CLEANUP_PRINT_DEFAULT;
-  flush_stream(PRINTstream);
-  
-  sLApprint_dispatchA->s.s_dbind = pprint_dispatch;
-  sLAprint_linesA->s.s_dbind = lines;
-  sLAprint_right_marginA->s.s_dbind = right_margin;
-  sLAprint_miser_widthA->s.s_dbind = miser_width;
+  write_object_pstream(x,strm);
+  flush_stream(strm);
   
   RETURN1(x);
   
+}
+
+DEFUN("PPRINT-MISER-STYLE",object,fSpprint_miser_style,SI,1,1,NONE,OO,OO,OO,OO,(object strm),"") {
+
+  struct printContext *p=lookup_print_context(strm);/*output_stream(strm)*/
+
+  RETURN1(p && p->ms ? Ct : Cnil);
+
+}
+
+static void
+queue_continuation(fixnum x,struct printContext *p) {
+
+  short sh=x;
+  sh<<=1;sh>>=1;sh|=CONTINUATION;
+  p->write_ch_fun(sh,p);
+
+}
+
+static void
+queue_codes(object strm,fixnum code,fixnum n,fixnum c1,fixnum c2) {
+  struct printContext *p=lookup_print_context(strm);/*output_stream(strm)*/
+
+  if (p && p->write_ch_fun==writec_queue) {
+
+    p->write_ch_fun(code,p);
+    if (n--) {
+      queue_continuation(c1,p);
+      if (n--)
+	queue_continuation(c2,p);
+    }
+  }
+}
+
+void
+write_codes_pstream(object strm,fixnum code,fixnum nc,fixnum c1,fixnum c2) {
+
+  SETUP_PRINT_DEFAULT(Cnil,strm,1,0);
+  if (PRINTpretty)
+    queue_codes(strm,code,nc,c1,c2);
+  CLEANUP_PRINT_DEFAULT();
+
+}
+
+
+
+DEFUN("PPRINT-QUEUE-CODES",object,fSpprint_queue_codes,SI,2,4,NONE,OO,IO,OO,OO,(object strm,fixnum off,...),"") {
+
+  fixnum n=INIT_NARGS(2),nc=0,c1=0,c2=0;
+  object l=Cnil,f=OBJNULL,x;
+  va_list ap;
+
+  va_start(ap,off);
+  if ((x=NEXT_ARG(n,ap,l,f,OBJNULL))!=OBJNULL) {
+    c1=fixint(x);
+    nc++;
+  }
+  if ((x=NEXT_ARG(n,ap,l,f,OBJNULL))!=OBJNULL) {
+    c2=fixint(x);
+    nc++;
+  }
+  va_end(ap);
+
+  queue_codes(strm,off,nc,c1,c2);
+
+  RETURN1(Cnil);
+
+}
+
+DEFUN("WRITE-INT1",object,fSwrite_int1,SI,5,5,NONE,OO,OO,OO,OO,
+      (object x,object strm,object fun,object pref,object suf),"") {
+
+  object s;
+
+  if (strm == Cnil)
+    strm = symbol_value(sLAstandard_outputA);
+  else if (strm == Ct)
+    strm = symbol_value(sLAterminal_ioA);
+  if (type_of(strm) != t_stream)
+    FEerror("~S is not a stream.", 1, strm);
+
+  {
+    SETUP_PRINT_DEFAULT(x,strm,0,0);
+
+    if ((s=ifuncall2(pref,x,p->h))!=Cnil) {
+
+      p->ms=get_miser_style(file_column(strm)+VLEN(s),p->b.p_ll);
+
+      write_ch(MARK);
+
+      ifuncall2(fun,x,p->h);
+
+      write_ch(UNMARK);
+
+      ifuncall2(suf,x,p->h);
+    }
+
+    CLEANUP_PRINT_DEFAULT();
+
+  }
+
+  RETURN1(Cnil);
+
 }
 
 @(defun write (x
@@ -1907,16 +1995,13 @@ DEFUN("WRITE-INT",object,fSwrite_int,SI,17,17,NONE,OO,OO,OO,OO,
 	       ((:case cas) `symbol_value(sLAprint_caseA)`)
 	       (gensym `symbol_value(sLAprint_gensymA)`)
 	       (array `symbol_value(sLAprint_arrayA)`)
-	       (pprint_dispatch `symbol_value(sLApprint_dispatchA)`)
+	       (pprint_dispatch `symbol_value(sLAprint_pprint_dispatchA)`)
 	       (lines `symbol_value(sLAprint_linesA)`)
 	       (right_margin `symbol_value(sLAprint_right_marginA)`)
 	       (miser_width `symbol_value(sLAprint_miser_widthA)`))
 
   @
-  x=FFN(fSwrite_int)(x,strm,array,base,cas,
-		     circle,escape,gensym,length,
-		     level,lines,miser_width,pprint_dispatch,
-		     pretty,radix,readably,right_margin);
+  x=FFN(fSwrite_int)(x,strm);
   
   @(return x)
   
@@ -1938,44 +2023,29 @@ DEFUN("WRITE-INT",object,fSwrite_int,SI,17,17,NONE,OO,OO,OO,OO,
 
 @(defun pprint (obj &optional strm)
 @
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	check_type_stream(&strm);
-        WRITEC_NEWLINE(strm);
-	{SETUP_PRINT_DEFAULT(obj);
-	PRINTstream = strm;
-	PRINTreadably = FALSE;
-	PRINTescape = TRUE;
-	PRINTpretty = TRUE;
-	qh = qt = qc = 0;
-	isp = iisp = 0;
-	indent_stack[0] = 0;
-	write_ch_fun = writec_queue;
-	write_object(obj, 0);
-	CLEANUP_PRINT_DEFAULT;
-	flush_stream(strm);}
-	@(return)
+  if (strm == Cnil)
+  strm = symbol_value(sLAstandard_outputA);
+ else if (strm == Ct)
+   strm = symbol_value(sLAterminal_ioA);
+  check_type_stream(&strm);
+  terpri(strm);
+  bds_bind(sLAprint_prettyA,Ct);
+  prin1(obj,strm);
+  bds_unwind1;
+  @(return)
 @)
 
 @(defun default_pprint_object (strm obj)
 @
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	check_type_stream(&strm);
-	{   SETUP_PRINT_DEFAULT(obj);
-	    PRINTstream = strm;
-	    qh = qt = qc = 0;
-	    isp = iisp = 0;
-	    indent_stack[0] = 0;
-	    write_ch_fun = writec_queue;
-	    write_object(obj, 0);
-	    CLEANUP_PRINT_DEFAULT;
-	}
-	@(return)
+  if (strm == Cnil)
+  strm = symbol_value(sLAstandard_outputA);
+ else if (strm == Ct)
+   strm = symbol_value(sLAterminal_ioA);
+  check_type_stream(&strm);
+  bds_bind(sLAprint_prettyA,Cnil);
+  write_object_pstream(obj,strm);
+  bds_unwind1;
+  @(return)
 @)
 
 @(defun princ (obj &optional strm)
@@ -1986,50 +2056,45 @@ DEFUN("WRITE-INT",object,fSwrite_int,SI,17,17,NONE,OO,OO,OO,OO,
 
 @(defun write_char (c &optional strm)
 @
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	check_type_character(&c);
-	check_type_stream(&strm);
-	writec_stream(char_code(c), strm);
-/*
-	flush_stream(strm);
-*/
-	@(return c)
+  if (strm == Cnil)
+  strm = symbol_value(sLAstandard_outputA);
+ else if (strm == Ct)
+   strm = symbol_value(sLAterminal_ioA);
+  check_type_character(&c);
+  check_type_stream(&strm);
+  writec_pstream(char_code(c),strm);
+  @(return c)
 @)
 
 @(defun write_string (strng &o strm &k start end)
-	int s, e, i;
+	int s, e;
 @
-	check_type_string(&strng);
-	get_string_start_end(strng, start, end, &s, &e);
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	check_type_stream(&strm);
-	for (i = s;  i < e;  i++)
-		writec_stream(strng->st.st_self[i], strm);
-	flush_stream(strm);
-	@(return strng)
+  check_type_string(&strng);
+  get_string_start_end(strng, start, end, &s, &e);
+  if (strm == Cnil)
+    strm = symbol_value(sLAstandard_outputA);
+  else if (strm == Ct)
+    strm = symbol_value(sLAterminal_ioA);
+  check_type_stream(&strm);
+  write_bounded_string_pstream(strng,s,e,strm);
+  flush_stream(strm);
+  @(return strng)
 @)
 
 @(defun write_line (strng &o strm &k start end)
-	int s, e, i;
+	int s, e;
 @
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	check_type_string(&strng);
-	check_type_stream(&strm);
-	get_string_start_end(strng, start, end, &s, &e);
-	for (i = s;  i < e;  i++)
-		writec_stream(strng->st.st_self[i], strm);
-	WRITEC_NEWLINE(strm);
-	flush_stream(strm);
-	@(return strng)
+  if (strm == Cnil)
+  strm = symbol_value(sLAstandard_outputA);
+ else if (strm == Ct)
+   strm = symbol_value(sLAterminal_ioA);
+  check_type_string(&strng);
+  check_type_stream(&strm);
+  get_string_start_end(strng, start, end, &s, &e);
+  write_bounded_string_pstream(strng,s,e,strm);
+  writec_pstream('\n',strm);
+  flush_stream(strm);
+  @(return strng)
 @)
 
 @(defun terpri (&optional strm)
@@ -2054,7 +2119,7 @@ DEFUN("WRITE-INT",object,fSwrite_int,SI,17,17,NONE,OO,OO,OO,OO,
 		@(return Cnil)
         if (strm->sm.sm_mode==smm_broadcast && strm->sm.sm_object0==Cnil)
            @(return Cnil)
-        WRITEC_NEWLINE(strm);
+	     writec_pstream('\n',strm);
 	flush_stream(strm);
 	@(return Ct)
 @)
@@ -2091,15 +2156,25 @@ DEFUN("WRITE-INT",object,fSwrite_int,SI,17,17,NONE,OO,OO,OO,OO,
 	@(return Cnil)
 @)
 
-/* @(defun write_byte (integer binary_output_stream) */
-/* @ */
-/* 	if (type_of(integer) != t_fixnum) */
-/* 		FEerror("~S is not a byte.", 1, integer); */
-/* 	check_type_stream(&binary_output_stream); */
-/* 	writec_stream(fix(integer), binary_output_stream); */
-/* 	@(return integer) */
-/* @) */
+DEF_ORDINARY("STRUCTURE-LIST",sSstructure_list,SI,"");
+DEF_ORDINARY("PPRINT-QUIT",sSpprint_quit,SI,"");
+DEF_ORDINARY("PPRINT-INSERT-CONDITIONAL-NEWLINES",sSpprint_insert_conditional_newlines,SI,"");
+DEF_ORDINARY("FORMAT-LOGICAL-BLOCK-PREFIX",sSformat_logical_block_prefix,SI,"");
+DEF_ORDINARY("FORMAT-LOGICAL-BLOCK-BODY",sSformat_logical_block_body,SI,"");
+DEF_ORDINARY("FORMAT-LOGICAL-BLOCK-SUFFIX",sSformat_logical_block_suffix,SI,"");
 
+
+DEF_ORDINARY("OBJECT",sKobject,KEYWORD,"");
+DEF_ORDINARY("LINEAR",sKlinear,KEYWORD,"");
+DEF_ORDINARY("MISER",sKmiser,KEYWORD,"");
+DEF_ORDINARY("FILL",sKfill,KEYWORD,"");
+DEF_ORDINARY("MANDATORY",sKmandatory,KEYWORD,"");
+DEF_ORDINARY("CURRENT",sKcurrent,KEYWORD,"");
+DEF_ORDINARY("BLOCK",sKblock,KEYWORD,"");
+DEF_ORDINARY("LINE",sKline,KEYWORD,"");
+DEF_ORDINARY("SECTION",sKsection,KEYWORD,"");
+DEF_ORDINARY("LINE-RELATIVE",sKline_relative,KEYWORD,"");
+DEF_ORDINARY("SECTION-RELATIVE",sKsection_relative,KEYWORD,"");
 DEF_ORDINARY("UPCASE",sKupcase,KEYWORD,"");
 DEF_ORDINARY("DOWNCASE",sKdowncase,KEYWORD,"");
 DEF_ORDINARY("CAPITALIZE",sKcapitalize,KEYWORD,"");
@@ -2114,11 +2189,15 @@ DEF_ORDINARY("CASE",sKcase,KEYWORD,"");
 DEF_ORDINARY("GENSYM",sKgensym,KEYWORD,"");
 DEF_ORDINARY("LEVEL",sKlevel,KEYWORD,"");
 DEF_ORDINARY("LENGTH",sKlength,KEYWORD,"");
-DEF_ORDINARY("ARRAY",sKarray,KEYWORD,"");
 DEF_ORDINARY("PPRINT-DISPATCH",sKpprint_dispatch,KEYWORD,"");
+DEF_ORDINARY("ARRAY",sKarray,KEYWORD,"");
 DEF_ORDINARY("LINES",sKlines,KEYWORD,"");
 DEF_ORDINARY("RIGHT-MARGIN",sKright_margin,KEYWORD,"");
 DEF_ORDINARY("MISER-WIDTH",sKmiser_width,KEYWORD,"");
+DEF_ORDINARY("LINEAR",sKlinear,KEYWORD,"");
+DEF_ORDINARY("MISER",sKmiser,KEYWORD,"");
+DEF_ORDINARY("FILL",sKfill,KEYWORD,"");
+DEF_ORDINARY("MANDATORY",sKmandatory,KEYWORD,"");
 DEFVAR("*PRIN-LEVEL*",sSAprin_levelA,SI,make_fixnum(0),"");
 DEFVAR("*PRINT-ESCAPE*",sLAprint_escapeA,LISP,Ct,"");
 DEFVAR("*PRINT-READABLY*",sLAprint_readablyA,LISP,Cnil,"");
@@ -2137,221 +2216,18 @@ DEF_ORDINARY("PRETTY-PRINT-FORMAT",sSpretty_print_format,SI,"");
 DEFVAR("*PRINT-NANS*",sSAprint_nansA,SI,Ct,"");
 
 
-/*
- * those variables are only defined to make the ansi-test happy
- * they are NOT YET implemented
- */
-
-DEFVAR("*PRINT-PPRINT-DISPATCH*",sLApprint_dispatchA,LISP,Cnil,"");
+DEFVAR("*PRINT-PPRINT-DISPATCH*",sLAprint_pprint_dispatchA,LISP,MMcons(Cnil,Cnil),"");
 DEFVAR("*PRINT-LINES*",sLAprint_linesA,LISP,Cnil,"");
 DEFVAR("*PRINT-MISER-WIDTH*",sLAprint_miser_widthA,LISP,Cnil,"");
 DEFVAR("*PRINT-RIGHT-MARGIN*",sLAprint_right_marginA,LISP,Cnil,"");
 DEFVAR("*READ-EVAL*",sLAread_evalA,LISP,Ct,"");
 
 void
-gcl_init_print()
-{
-
-/*         travel_push_type[(int)t_array]=1; */
-/* 	travel_push_type[(int)t_vector]=1; */
-/* 	travel_push_type[(int)t_structure]=1; */
-/* 	travel_push_type[(int)t_ifun]=1; */
-/* 	travel_push_type[(int) t_cons]=1; */
-/* 	if(sizeof(travel_push_type) < (int) t_other) */
-/* 	  error("travel_push_size to small see print.d"); */
-
-	PRINTstream = Cnil;
-	enter_mark_origin(&PRINTstream);
-	PRINTreadably = FALSE;
-	PRINTescape = TRUE;
-	PRINTpretty = FALSE;
-	PRINTcircle = FALSE;
-	PRINTbase = 10;
-	PRINTradix = FALSE;
-	PRINTcase = sKupcase;
-	enter_mark_origin(&PRINTcase);
-	PRINTgensym = TRUE;
-	PRINTlevel = -1;
-	PRINTlength = -1;
-	PRINTarray = FALSE;
-
-	write_ch_fun = writec_PRINTstream;
-}
-
-object
-princ(obj, strm)
-object obj, strm;
-{
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	if (type_of(strm) != t_stream)
-		FEerror("~S is not a stream.", 1, strm);
-	if (obj == OBJNULL)
-		goto SIMPLE_CASE;
-	switch (type_of(obj)) {
-	case t_symbol:
-		PRINTcase = symbol_value(sLAprint_caseA);
-		PRINTpackage = symbol_value(sSAprint_packageA) != Cnil;
-
-	SIMPLE_CASE:
-	case t_simple_string:
-	case t_string:
-	case t_character:
-		PRINTstream = strm;
-		PRINTreadably = FALSE;
-		PRINTescape = FALSE;
-		write_ch_fun = writec_PRINTstream;
-		write_object(obj, 0);
-		break;
-
-	default:
-		{SETUP_PRINT_DEFAULT(obj);
-		PRINTstream = strm;
-		PRINTreadably = FALSE;
-		PRINTescape = FALSE;
-		write_object(obj, 0);
-		CLEANUP_PRINT_DEFAULT;}
-		break;
-	}
-	return(obj);
-}
-
-object
-prin1(obj, strm)
-object obj, strm;
-{
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	if (type_of(strm) != t_stream)
-		FEerror("~S is not a stream.", 1, strm);
-	if (obj == OBJNULL)
-		goto SIMPLE_CASE;
-	switch (type_of(obj)) {
-	SIMPLE_CASE:
-	case t_simple_string:
-	case t_string:
-	case t_character:
-		PRINTstream = strm;
-		PRINTreadably = FALSE;
-		PRINTescape = TRUE;
-		write_ch_fun = writec_PRINTstream;
-		write_object(obj, 0);
-		break;
-
-	default:
-		{SETUP_PRINT_DEFAULT(obj);
-		PRINTstream = strm;
-		PRINTreadably = FALSE;
-		PRINTescape = TRUE;
-		write_object(obj, 0);
-		CLEANUP_PRINT_DEFAULT;}
-		break;
-	}
-	flush_stream(strm);
-	return(obj);
-}
-
-object
-print(obj, strm)
-object obj, strm;
-{
-	terpri(strm);
-	prin1(obj,strm);
-	princ(code_char(' '),strm);
-	return(obj);
-}
-
-object
-terpri(strm)
-object strm;
-{
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	if (type_of(strm) != t_stream)
-		FEerror("~S is not a stream.", 1, strm);
-        WRITEC_NEWLINE(strm);
-	flush_stream(strm);
-	return(Cnil);
-}
-
-void
-write_string(strng, strm)
-object strng, strm;
-{
-	int i;
-
-	if (strm == Cnil)
-		strm = symbol_value(sLAstandard_outputA);
-	else if (strm == Ct)
-		strm = symbol_value(sLAterminal_ioA);
-	check_type_string(&strng);
-	check_type_stream(&strm);
-	for (i = 0;  i < VLEN(strng);  i++)
-		writec_stream(strng->st.st_self[i], strm);
-	flush_stream(strm);
-}
-
-/*
-	THE ULTRA-SPECIAL-DINNER-SERVICE OPTIMIZATION
-*/
-void
-princ_str(s, sym)
-char *s;
-object sym;
-{
-	sym = symbol_value(sym);
-	if (sym == Cnil)
-		sym = symbol_value(sLAstandard_outputA);
-	else if (sym == Ct)
-		sym = symbol_value(sLAterminal_ioA);
-	check_type_stream(&sym);
-	writestr_stream(s, sym);
-}
-
-void
-princ_char(c, sym)
-int c;
-object sym;
-{
-	sym = symbol_value(sym);
-	if (sym == Cnil)
- 		sym = symbol_value(sLAstandard_outputA);
-	else if (sym == Ct)
-		sym = symbol_value(sLAterminal_ioA);
-	check_type_stream(&sym);
-	if (c == '\n')
-           {WRITEC_NEWLINE(sym);
-	    flush_stream(sym);}
-	else
-	writec_stream(c, sym);
+gcl_init_print(void) {
 
 }
 
-static int
-get_line_length(void)
-{
-    int l=0;
-    object o=symbol_value(sLAprint_right_marginA);
-    if ((o!=Cnil) && (type_of(o)==t_fixnum))
-        l=fix(o);
-    if (l<MINIMUM_RIGHT_MARGIN)
-        l=DEFAULT_RIGHT_MARGIN;
-    return l;
-}
 
-void
-pp(x)
-object x;
-{
-princ(x,Cnil);
-flush_stream(symbol_value(sLAstandard_outputA));
-}
 
 LFD(Lset_line_length)(void)
 {
@@ -2360,6 +2236,8 @@ LFD(Lset_line_length)(void)
   if ((vs_base[0] == Cnil) || (type_of(vs_base[0]) == t_fixnum))
       sLAprint_right_marginA->s.s_dbind = vs_base[0];
 }
+
+DEFVAR("*PRINT-NANS*",sSAprint_nansA,SI,Cnil,"");
 
 void
 gcl_init_print_function()
@@ -2378,10 +2256,22 @@ gcl_init_print_function()
 	make_function("FINISH-OUTPUT", Lfinish_output);
 	make_function("FORCE-OUTPUT", Lforce_output);
 	make_function("CLEAR-OUTPUT", Lclear_output);
-/* 	make_function("WRITE-BYTE", Lwrite_byte); */
 	make_si_function("DEFAULT-PPRINT-OBJECT", Ldefault_pprint_object);
-	make_si_function("GET-PPRINT-DISPATCH", Lget_pprint_dispatch);
 
 	/* KCL compatibility function */
         make_si_function("SET-LINE-LENGTH",Lset_line_length);
+
+	sKlinear->s.s_plist=putf(sKlinear->s.s_plist,make_fixnum(LINEAR),sLfixnum);
+	sKmiser->s.s_plist=putf(sKmiser->s.s_plist,make_fixnum(MISER),sLfixnum);
+	sKfill->s.s_plist=putf(sKfill->s.s_plist,make_fixnum(FILL),sLfixnum);
+	sKmandatory->s.s_plist=putf(sKmandatory->s.s_plist,make_fixnum(MANDATORY),sLfixnum);
+
+	sKcurrent->s.s_plist=putf(sKcurrent->s.s_plist,make_fixnum(CURRENT),sLfixnum);
+	sKblock->s.s_plist=putf(sKblock->s.s_plist,make_fixnum(BLOCK),sLfixnum);
+
+	sKline->s.s_plist=putf(sKline->s.s_plist,make_fixnum(LINE),sLfixnum);
+	sKsection->s.s_plist=putf(sKsection->s.s_plist,make_fixnum(SECTION),sLfixnum);
+	sKline_relative->s.s_plist=putf(sKline_relative->s.s_plist,make_fixnum(LINE_RELATIVE),sLfixnum);
+	sKsection_relative->s.s_plist=putf(sKsection_relative->s.s_plist,make_fixnum(SECTION_RELATIVE),sLfixnum);
+
 }

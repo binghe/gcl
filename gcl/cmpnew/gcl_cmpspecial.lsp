@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPSPECIAL  Miscellaneous special forms.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -41,7 +40,7 @@
   (dolist (situation (car args) (c1nil))
     (case situation
           ((eval :execute) (return-from c1eval-when (c1progn (cdr args))))
-          ((load compile :load-toplevel :compile-toplevel))
+          ((load :load-toplevel compile  :compile-toplevel))
           (otherwise
            (cmperr "The situation ~s is illegal." situation))))
   )

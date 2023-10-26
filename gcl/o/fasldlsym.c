@@ -78,7 +78,7 @@ fasload(object faslfile) {
   massert(!psystem(FN3));
 
   if (!(dlp = dlopen(FN2,RTLD_NOW))) {
-    fputs(dlerror(),stderr);
+    emsg(dlerror());
     FEerror("Cannot open for dynamic link ~a",1,make_simple_string(faslfile));
   }
   

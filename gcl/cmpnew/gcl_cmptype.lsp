@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPTYPE  Type information.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -832,7 +831,8 @@
 (defconstant +pi+ (atan 0 -1))
 (defconstant +pid2+ (* 0.5 (atan 0 -1)))
 
-(defun float-proxy-propagator (f t1) 
+(defun float-proxy-propagator (f t1)
+  (declare (ignore f))
   (reduce 'type-or1
 	  (mapcar (lambda (x)
 		    (super-range (lambda (x)
@@ -890,6 +890,7 @@
 (setf (get 'atanh-pole 'pole) t)
 
 (defun atanh-propagator (f t1)
+  (declare (ignore f))
   (reduce 'type-or1
 	  (mapcar (lambda (x) (super-range 'atanh-pole (type-and t1 x)))
 		  '(#tcomplex #t(real * (-1)) #t(real (-1) (1)) #t(real (1))))

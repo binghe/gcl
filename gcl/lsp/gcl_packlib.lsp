@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -229,3 +228,10 @@
 
 (defun package-name (p) 
   (c-package-name (si::coerce-to-package p)))
+
+(defun make-package (name &key nicknames use)
+  (declare (optimize (safety 1)))
+  (check-type name string-designator)
+  (check-type nicknames proper-list)
+  (check-type use proper-list)
+  (make-package-int name nicknames use))

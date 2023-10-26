@@ -1,3 +1,10 @@
+2006-10-26  Gabriel Dos Reis  <gdr@cs.tamu.edu>
+
+	* configure.in: Don't be overly eager about setting INFO_DIR.
+	Fix quotations, as new Autoconf are pickier.
+
+	* configure: Regenerate.
+
 2002-01-25  Camm Maguire  <camm@intech19.enhanced.com>
 
 	* /cvsroot/gcl/gcl/ChangeLog, /cvsroot/gcl/gcl/ChangeLog.orig:
@@ -108,13 +115,13 @@
 	* /cvsroot/gcl/gcl/ChangeLog: *** empty log message ***
 
 	* /cvsroot/gcl/gcl/unixport/makefile:
-	Added DESTDIR to makefiles to support installing under arbitrary subdir; good 'clean' targets; correct building in absense of tcl/tk
+	Added DESTDIR to makefiles to support installing under arbitrary subdir; good 'clean' targets; correct building in absence of tcl/tk
 
 	* /cvsroot/gcl/gcl/gcl-tk/makefile:
 	Add gcl-tk/demos/index.lsp to clean target
 
 	* /cvsroot/gcl/gcl/o/makefile, /cvsroot/gcl/gcl/elisp/makefile, /cvsroot/gcl/gcl/info/makefile, /cvsroot/gcl/gcl/makefile:
-	Added DESTDIR to makefiles to support installing under arbitrary subdir; good 'clean' targets; correct building in absense of tcl/tk
+	Added DESTDIR to makefiles to support installing under arbitrary subdir; good 'clean' targets; correct building in absence of tcl/tk
 
 	* /cvsroot/gcl/gcl/configure, /cvsroot/gcl/gcl/configure.in, /cvsroot/gcl/gcl/elisp/makefile:
 	changes to configure.in and elisp/makefile to handle emacs not being present

@@ -14,7 +14,7 @@
 (defun special-operator-p (x)
   (declare (optimize (safety 1)))
   (check-type x symbol)
-  (when (/= (address nil) (c-symbol-sfdef x)) t))
+  (if (member x '(locally symbol-macrolet)) t (/= (address nil) (c-symbol-sfdef x))))
 
 (defun find-symbol (s &optional (p *package*) &aux r)
   (declare (optimize (safety 1)))

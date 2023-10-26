@@ -73,8 +73,9 @@
       (format stream "~a: " y))));(type-of x)
 
 (defun make-condition (type &rest slot-initializations)
-  (when (and (consp type) (eq (car type) 'or))
-    (return-from make-condition (apply 'make-condition (cadr type) slot-initializations)));FIXME
+  ;; (when (and (consp type) (eq (car type) 'or))
+  ;;   (return-from make-condition (apply 'make-condition (cadr type) slot-initializations)))
+					;FIXME
   (unless (condition-class-p type)
     (error 'simple-type-error
 	   :datum type

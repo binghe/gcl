@@ -1000,12 +1000,12 @@
 
 (deftest common-lisp-package-nicknames
   :notes :standardized-package-nicknames
-  (package-nicknames (find-package "COMMON-LISP"))
+  (remove "CL" (package-nicknames (find-package "COMMON-LISP")) :test-not 'string=);FIXME double check, spec just says CL is a nickname
   ("CL"))
 
 (deftest common-lisp-user-package-nicknames
   :notes :standardized-package-nicknames
-  (package-nicknames (find-package "COMMON-LISP-USER"))
+  (remove "CL-USER" (package-nicknames (find-package "COMMON-LISP-USER")) :test-not 'string=);FIXME double check, spec just says CL-USER is a nickname
   ("CL-USER"))
 
 

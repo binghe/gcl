@@ -33,8 +33,8 @@ current_readtable(void);
 
 DEFVAR("*SHARP-EQ-CONTEXT*",sSAsharp_eq_contextA,SI,sLnil,"");
 
-DEFUN("TYPE_OF",fixnum,fStype_of,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
-  return type_of(x);
+DEFUN("TYPE_OF",object,fStype_of,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  return (object)(fixnum)type_of(x);
 }
 DEFUN("ALLOC-SPICE",object,fSalloc_spice,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   return alloc_object(t_spice);
@@ -121,7 +121,7 @@ parse_integer(char *s,char **ep,int radix) {
 
 
 static inline object
-parse_number(char *s,int radix) {
+parse_number(object in,char *s,int radix) {
 
   object x,y;
   char *q,ch,c;
@@ -136,7 +136,8 @@ parse_number(char *s,int radix) {
     return x;
   case '/':
     y=parse_unsigned_integer(q+1,&q,radix);
-    return (x==OBJNULL || y==OBJNULL || *q) ? OBJNULL : make_ratio(x,y,0);
+    return (x==OBJNULL || y==OBJNULL || *q) ? OBJNULL :
+      (number_zerop(y) ? (READER_ERROR(in,"Ratio denominator is zero"),Cnil) : make_ratio(x,y,0));
   default:
     if (radix!=10)
       x=parse_integer(s,&q,10);
@@ -256,18 +257,6 @@ setup_READ()
 	LP=NULL;
 	inlp=0;
 
-}
-
-static void
-setup_standard_READ()
-{
-	READtable = standard_readtable;
-	READdefault_float_format = 'F';
-	READbase = 10;
-	READsuppress = FALSE;
-	READeval = TRUE;
-	sSAsharp_eq_contextA->s.s_dbind=Cnil;
-	backq_level = 0;
 }
 
 object
@@ -433,7 +422,7 @@ object in;
 	vs_push(x);
 
 #ifndef _WIN32        
-	while (interactive_stream_p(in)!=Cnil && listen_stream(in)) {
+	while (fLinteractive_stream_p(in)!=Cnil && listen_stream(in)) {
 	  object c=read_char(in);
 	  if (cat(c)!=cat_whitespace) {
 	    unread_char(c,in);
@@ -443,7 +432,7 @@ object in;
 #endif        
 
 	if (sSAsharp_eq_contextA->s.s_dbind!=Cnil)
-		x = vs_head = patch_sharp(x);
+	  x = vs_head = patch_sharp(x);
 
 	e = FALSE;
 
@@ -483,32 +472,36 @@ L:
 	    {eof_code;} \
 	else res=read_char(in);}} while(0)
 
-#define read_char_to(res,in,eof_code) \
-  do{FILE *fp; \
-      if((fp=in->sm.sm_fp)) \
-	{int ch = getc(fp); \
-      if (ch==EOF && feof(fp))  \
-	 { eof_code;} \
-       else res=code_char(ch);} \
-      else \
-	{int ch ; \
-	if(stream_at_end(in)) {eof_code ;} \
-	ch = readc_stream(in); \
-         if (ch == EOF) { eof_code;} \
-         res = code_char(ch); \
-          }} while(0)
+#define read_char_to(res,in,eof_code)		\
+  do{FILE *fp;					\
+    if((fp=in->sm.sm_fp))			\
+      {int ch = getc(fp);			\
+	if (ch==EOF && feof(fp))		\
+	  { eof_code;}				\
+	else res=code_char(ch);}		\
+    else					\
+      {int ch ;					\
+	if(stream_at_end(in)) {eof_code ;}	\
+	ch = readc_stream(in);						\
+	if (ch == EOF && stream_at_end(in)) { eof_code;}		\
+	res = code_char(ch);						\
+      }} while(0)
+#define read_char_to2(in,eof_code)					\
+  ({FILE *fp=in->sm.sm_fp;int ch;					\
+    fp ?								\
+      ((ch=getc(fp))==EOF && feof(fp) ? ({eof_code;Cnil;}) : code_char(ch)) : \
+      (stream_at_end(in) || ((ch=readc_stream(in))==EOF && stream_at_end(in)) ? \
+       ({eof_code;Cnil;}) : code_char(ch));})
 #else
-#define read_char_to(res,in,eof_code) \
- do {if(stream_at_end(in)) {eof_code ;} \
-  else { int ch = readc_stream(in); \
-         if (ch == EOF) { eof_code;} \
-         res = code_char(ch); \
-          } \
-   } while(0)
+#define read_char_to(res,in,eof_code)	\
+  do {if(stream_at_end(in)) {eof_code ;}	\
+    else { int ch = readc_stream(in);		\
+      if (ch == EOF) { eof_code;}		\
+      res = code_char(ch);			\
+    }						\
+  } while(0)
 #endif
 
-static void
-too_long_token(void);
 /*
 	Read_object(in) reads an object from stream in.
 	This routine corresponds to COMMON Lisp function READ.
@@ -671,19 +664,19 @@ M:
 		dot_flag = TRUE;
 		vs_reset;
 		return(Cnil);
-	} else if (!escape_flag && length > 0) {
-		for (i = 0;  i < length;  i++)
-			if (token->st.st_self[i] != '.')
-				goto N;
-		FEerror("Dots appeared illegally.", 0);
+	 } else if (!escape_flag && length > 0) {
+	 	for (i = 0;  i < length;  i++)
+	 		if (token->st.st_self[i] != '.')
+	 			goto N;
+	 	READER_ERROR(in,"Dots appeared illegally.");
 	}
 
 N:
 	token->st.st_fillp = length;
 	if (escape_flag || (READbase<=10 && token_buffer[0]>'9'))
-		goto SYMBOL;
+	  goto SYMBOL;
 	null_terminate_token();
-	x = parse_number(token_buffer, READbase);
+	x = parse_number(in,token_buffer, READbase);
 	if (x != OBJNULL) {
 		vs_reset;
 		return(x);
@@ -698,7 +691,7 @@ SYMBOL:
 			p = find_package(token);
 			if (p == Cnil) {
 			    vs_push(copy_simple_string(token));
-			    FEerror("There is no package with the name ~A.",
+			    FEerror("There is no package with the name \"~A\".",
 				    1, vs_head);
 			}
 		}
@@ -722,7 +715,7 @@ SYMBOL:
 		p = find_package(token);
 		if (p == Cnil) {
 			vs_push(copy_simple_string(token));
-			FEerror("There is no package with the name ~A.",
+			FEerror("There is no package with the name \"~A\".",
 				1, vs_head);
 		}
 		for (i = colon + 2;  i < length;  i++)
@@ -820,7 +813,7 @@ object in;
 		if (char_code(c) == delim)
 			break;
 		else if (cat(c) == cat_single_escape)
-			c = read_char(in);
+		  c = read_char(in);/*FIXME continue*/
 		if (i >= token->st.st_dim)
 			too_long_token();
 		token_buffer[i++] = char_code(c);
@@ -843,7 +836,7 @@ object in;
 	i = 0;
 	for (;;) {
                 read_char_to(c,in,goto FIN);
-		if (cat(c) != cat_constituent) {
+		if (cat(c) != cat_constituent && !READsuppress) {
 			unread_char(c, in);
 			break;
 		}
@@ -903,7 +896,7 @@ Ldispatch_reader()
 	if (i) {
 	  token->st.st_fillp=i;
 	  null_terminate_token();
-	  x=parse_number(token->st.st_self, 10);
+	  x=parse_number(in,token->st.st_self,10);
 	  if (x == OBJNULL)
 	    FEerror("Cannot parse the dispatch macro number.", 0);
 	} else
@@ -1088,20 +1081,21 @@ DEFUN("SHARP-C-READER",object,fSsharp_c_reader,SI,3,3,NONE,OO,OO,OO,OO,(object s
 
 DEFUN("SHARP-\\-READER",object,fSsharp_sl_reader,SI,3,3,NONE,OO,OO,OO,OO,(object s,object x,object y),"") {
 
-  object c;
+  object c,u;
   
-  if (y!=Cnil && !READsuppress)
-    if (type_of(y)!=t_fixnum ||	fix(y) != 0)
-      FEerror("~S is an illegal CHAR-FONT.", 1, y);
-  /*  assuming that CHAR-FONT-LIMIT is 1  */
-  unread_char(((object)(character_table+'\\')), s);
-  if (READsuppress) {
-    (void)read_object(s);
+  /*FIXME, read_token function*/
+  token->st.st_fillp=0;
+  token_buffer[token->st.st_fillp++]=char_code((c=read_char(s)));/*FIXME, eof?*/
+  for (u=Cnil;u!=c;)
+    switch (cat((c=read_char_to2(s,break)))) {
+    case cat_single_escape: c=read_char_to2(s,u=c;break);
+    case cat_constituent: token_buffer[token->st.st_fillp++]=char_code(c);
+    case cat_multiple_escape: continue;
+    default: unread_char(u=c,s);
+    }
+
+  if (READsuppress)
     RETURN1(Cnil);
-  }
-  READsuppress = TRUE;
-  (void)read_object(s);
-  READsuppress = FALSE;
   c = token;
   if (c->st.st_fillp == 1) {
     RETURN1(code_char(c->ust.ust_self[0]));
@@ -1205,14 +1199,8 @@ Lsharp_single_quote_reader()
 	check_arg(3);
 	if(vs_base[2] != Cnil && !READsuppress)
 		extra_argument('#');
-	vs_popp;
-	vs_popp;
-	vs_push(sLfunction);
-	vs_push(read_object(vs_base[0]));
-	vs_push(Cnil);
-	stack_cons();
-	stack_cons();
-	vs_base[0] = vs_pop;
+	vs_base[0] = list(2,sLfunction,read_object(vs_base[0]));
+	vs_top=vs_base+1;
 }
 
 #define	QUOTE	1
@@ -1257,20 +1245,8 @@ Lsharp_left_parenthesis_reader()
 			}	
 			goto L;
 		}
-		vs_push(siScomma);
-		vs_push(sLapply);
-		vs_push(sLquote);
-		vs_push(sLvector);
-		vs_push(Cnil);
-		stack_cons();
-		stack_cons();
-		vs_push(vs_base[2]);
-		vs_push(Cnil);
-		stack_cons();
-		stack_cons();
-		stack_cons();
-		stack_cons();
-		vs_base = vs_top - 1;
+		vs_base[0]=list(4,siScomma,sLapply,list(2,sLquote,sLvector),vs_base[2]);
+		vs_top=vs_base+1;
 		return;
 	}
 	vsp = vs_top;
@@ -1500,28 +1476,6 @@ FFN(siLsharp_comma_reader_for_compiler)()
 	vs_base[0] = make_cons(siSsharp_comma, vs_base[0]);
 }
 
-/*
-	For fasload.
-*/
-static void
-Lsharp_exclamation_reader()
-{
-	check_arg(3);
-	if(vs_base[2] != Cnil && !READsuppress)
-		extra_argument('!');
-	vs_popp;
-	vs_popp;
-	if (READsuppress) {
-		vs_base[0] = Cnil;
-		return;
-	}
-	vs_base[0] = read_object(vs_base[0]);
-	if (sSAsharp_eq_contextA->s.s_dbind!=Cnil)
-		vs_base[0]=patch_sharp(vs_base[0]);
-	ieval(vs_base[0]);
-	vs_popp;
-}
-
 static void
 Lsharp_B_reader()
 {
@@ -1536,7 +1490,7 @@ Lsharp_B_reader()
 	}
 	null_terminate_token();
 	vs_base[0]
-	= parse_number(token_buffer, 2);
+	  = parse_number(vs_base[0],token_buffer, 2);
 	if (vs_base[0] == OBJNULL)
 		FEerror("Cannot parse the #B readmacro.", 0);
 	if (type_of(vs_base[0]) == t_shortfloat ||
@@ -1559,7 +1513,7 @@ Lsharp_O_reader()
 	}
 	null_terminate_token();
 	vs_base[0]
-	= parse_number(token_buffer, 8);
+	  = parse_number(vs_base[0],token_buffer, 8);
 	if (vs_base[0] == OBJNULL)
 		FEerror("Cannot parse the #O readmacro.", 0);
 	if (type_of(vs_base[0]) == t_shortfloat ||
@@ -1582,7 +1536,7 @@ Lsharp_X_reader()
 	}
 	null_terminate_token();
 	vs_base[0]
-	= parse_number(token_buffer, 16);
+	  = parse_number(vs_base[0],token_buffer, 16);
 	if (vs_base[0] == OBJNULL)
 		FEerror("Cannot parse the #X readmacro.", 0);
 	if (type_of(vs_base[0]) == t_shortfloat ||
@@ -1608,13 +1562,16 @@ Lsharp_R_reader()
 	vs_popp;
 	vs_popp;
 	read_constituent(vs_base[0]);
-	null_terminate_token();
-	vs_base[0]
-	= parse_number(token_buffer, radix);
 	if (READsuppress) {
 		vs_base[0] = Cnil;
 		return;
 	}
+	null_terminate_token();
+	vs_base[0]
+	  = parse_number(vs_base[0],token_buffer, radix);
+	null_terminate_token();
+	vs_base[0]
+	  = parse_number(vs_base[0],token_buffer, radix);
 	if (vs_base[0] == OBJNULL)
 		FEerror("Cannot parse the #R readmacro.", 0);
 	if (type_of(vs_base[0]) == t_shortfloat ||
@@ -1668,7 +1625,6 @@ Ldefault_dispatch_macro()
 	READER_ERROR(vs_base[0],"The default dispatch macro signalled an error.");
 }
 
-
 /*
 	#$ fixnum returns a random-state with the fixnum
 	as its content.
@@ -1719,6 +1675,8 @@ copy_readtable(object from,object to) {
   if (to == Cnil) {
     to = alloc_object(t_readtable);
     to->rt.rt_self = NULL;
+    to->rt.rt_self = OBJNULL;
+    to->rt.rt_case = OBJNULL;
     /*  For GBC not to go mad.  */
     vs_push(to);
     /*  Saving for GBC.  */
@@ -2287,7 +2245,8 @@ LFD(Lreadtablep)()
 		rdtbl->rt.rt_self[c].rte_chattrib
 		= cat_terminating;
 	rdtbl->rt.rt_self[c].rte_macro = fnc;
-	@(return Ct)
+        SGC_TOUCH(rdtbl);
+        @(return Ct)
 @)
 
 @(defun get_macro_character (chr &optional (rdtbl `current_readtable()`))
@@ -2384,7 +2343,7 @@ object x;
 	object in;
 	vs_mark;
 
-	in = make_string_input_stream(x, 0, VLEN(x));
+	in = fSmake_string_input_stream_int(x, 0, VLEN(x));
 	vs_push(in);
 	preserving_whitespace_flag = FALSE;
 	detect_eos_flag = FALSE;
@@ -2502,8 +2461,6 @@ gcl_init_read()
 	dtab['*'] = make_cf(Lsharp_asterisk_reader);
 	dtab[':'] = make_cf(Lsharp_colon_reader);
 	dtab['.'] = make_cf(Lsharp_dot_reader);
-	dtab['!'] = make_cf(Lsharp_exclamation_reader);
-	/*  Used for fasload only. */
 	dtab[','] = make_cf(Lsharp_comma_reader);
 	dtab['B'] = dtab['b'] = make_cf(Lsharp_B_reader);
 	dtab['O'] = dtab['o'] = make_cf(Lsharp_O_reader);
@@ -2576,16 +2533,6 @@ gcl_init_read()
 	in_list_flag = FALSE;
 	dot_flag = FALSE;
 
-	big_register_0 = new_bignum();
-	zero_big(big_register_0);
- 
-	enter_mark_origin(&big_register_0);
-/*
-	NOTE:
-
-		The value of big_register_0 changes
-		along the execution of the read routines.
-*/
 }
 
 void
@@ -2623,99 +2570,3 @@ gcl_init_read_function()
 }
 
 object sSPinit;
-
-object
-read_fasl_vector1(in)
-object in;
-{
-	int dimcount, dim;
-	VOL object *vsp;
-	object vspo;
-	VOL object x;
-	long i;
-	bool e;
-	object old_READtable;
-	int old_READdefault_float_format;
-	int old_READbase;
-	int old_READsuppress;
-	int old_READeval;
-	volatile object old_READcontext;
-	int old_backq_level;
-
-        /* to prevent longjmp clobber */
-        i=(long)&vsp;
-	vsp=&vspo;
-	old_READtable = READtable;
-	old_READdefault_float_format = READdefault_float_format;
-	old_READbase = READbase;
-	old_READsuppress = READsuppress;
-	old_READeval = READeval;
-	old_READcontext=sSAsharp_eq_contextA->s.s_dbind;
-	/* BUG FIX by Toshiba */
-	vs_push(old_READtable);
-	old_backq_level = backq_level;
-
-	setup_standard_READ();
-
-	frs_push(FRS_PROTECT, Cnil);
-	if (nlj_active) {
-		e = TRUE;
-		goto L;
-	}
-
-	while (readc_stream(in) != '#')
-		;
-	while (readc_stream(in) != '(')
-		;
-	vsp = vs_top;
-	dimcount = 0;
-	for (;;) {
-                sSAsharp_eq_contextA->s.s_dbind=Cnil;
-		backq_level = 0;
-		delimiting_char = code_char(')');
-		preserving_whitespace_flag = FALSE;
-		detect_eos_flag = FALSE;
-		x = read_object(in);
-		if (x == OBJNULL)
-			break;
-		vs_check_push(x);
-		if (sSAsharp_eq_contextA->s.s_dbind!=Cnil)
-			x = vs_head = patch_sharp(x);
-		dimcount++;
-	}
-	if(dimcount==1 && TS_MEMBER(type_of(vs_head),TS(t_vector)|TS(t_simple_vector)))
-	  {/* new style where all read at once */
-	    x=vs_head;
-	    goto DONE;}
-	/* old style separately sharped, and no %init */
-	{BEGIN_NO_INTERRUPT;
-	x=alloc_simple_vector(dimcount,aet_object);
-	vs_push(x);
-	x->v.v_self
-	= (object *)alloc_relblock(dimcount * sizeof(object));
-	END_NO_INTERRUPT;}
-	for (dim = 0; dim < dimcount; dim++)
-		{SGC_TOUCH(x);
-		 x->cfd.cfd_self[dim] = vsp[dim];}
-	
-		 
-	  DONE:
-	e = FALSE;
-
-L:
-	frs_pop();
-
-	READtable = old_READtable;
-	READdefault_float_format = old_READdefault_float_format;
-	READbase = old_READbase;
-	READsuppress = old_READsuppress;
-	READeval = old_READeval;
-	sSAsharp_eq_contextA->s.s_dbind=old_READcontext;
-	backq_level = old_backq_level;
-	if (e) {
-		nlj_active = FALSE;
-		unwind(nlj_fr, nlj_tag);
-	}
-	vs_top = (object *)vsp;
-	return(x);
-}

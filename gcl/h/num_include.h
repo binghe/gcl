@@ -23,8 +23,13 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	number routine include file
 */
 
-/* #define WSIZ 32 */
-/* #define MASK	0x7fffffff */
+#define WSIZ 32
+#define MASK	0x7fffffff
+
+#ifdef MV
+
+
+#endif
 
 object Vrandom_state;
 

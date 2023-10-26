@@ -25,7 +25,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	string routines
 */
 
-
+#include <string.h>
 #include "include.h"
 
 object sKstart1;
@@ -720,6 +720,4 @@ gcl_init_string_function()
 	make_function("NSTRING-CAPITALIZE", Lnstring_capitalize);
 	make_function("STRING", Lstring);
 
-/* 	make_si_function("STRING-CONCATENATE", */
-/* 			 siLstring_concatenate); */
 }

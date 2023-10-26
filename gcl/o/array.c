@@ -208,11 +208,17 @@ DEFUN("ASET1", object, fSaset1, SI, 3, 3, NONE, OO, IO, OO,OO,(object x, fixnum 
     case aet_bit:
       i +=  BV_OFFSET(x);
       ASSURE_TYPE(val,t_fixnum);
-      {int v = Mfix(val);
-       if (v == 0) CLEAR_BITREF(x,i);
-       else if (v == 1) SET_BITREF(x,i);
-       else TYPE_ERROR(val,sLbit);
-       break;}
+      switch (Mfix(val)) {
+      case 0:
+	CLEAR_BITREF(x,i);
+	break;
+      case 1:
+	SET_BITREF(x,i);
+	break;
+      default:
+	TYPE_ERROR(val,sLbit);
+      }
+      break;
     case aet_fix:
     case aet_nnfix:
       ASSURE_TYPE(val,t_fixnum);
@@ -440,7 +446,7 @@ DEFUN("GET-AELTTYPE",object,fSget_aelttype,SI,1,1,NONE,OO,OO,OO,OO,(object x),""
   for (i=0 ; i <   aet_last ; i++)
     if (x == * aet_types[i].namep)
       return make_fixnum((enum aelttype) i);
-  if (x == sLsingle_float || x == sLdouble_float)
+  if (x == sLlong_float || x == sLsingle_float || x == sLdouble_float)
     return make_fixnum(aet_lf);
   if (x==sSnegative_char)
     return make_fixnum(aet_char);
@@ -485,6 +491,10 @@ DEFUN("MAKE-ARRAY1",object,fSmake_array1,SI,7,7,NONE,OO,OO,OI,OO,
     v = dimensions;
     while (i < rank)
       { x->a.a_dims[i] = FIX_CHECK(Mcar(v));
+	if (x->a.a_dims[i] < 0)
+	  { FEerror("Dimension must be non negative",0);}
+	if (dim && x->a.a_dims[i]>((1UL<<(sizeof(dim)*8-1))-1)/dim)
+	  FEerror("Total dimension overflow on dimensions ~s",1,dimensions);
 	dim *= x->a.a_dims[i++];
 	v = Mcdr(v);}
     x->a.a_dim = dim;
@@ -791,16 +801,18 @@ raw_aet_ptr(object x, short int typ)
 	*/     
 
 void
-gset(void *p1, void *val, fixnum n, int typ)
-{ if (val==0)
+gset(void *p1, void *val, fixnum n, int typ) {
+
+  if (val==0)
     val = aet_types[typ].dflt;
-    switch (typ){
+
+  switch (typ){
 
 #define GSET(p,n,typ,val) {typ x = *((typ *) val); GSET1(p,n,typ,x)}
-#define GSET1(p,n,typ,val) while (n-- > 0) \
+#define GSET1(p,n,typ,val) while (n-- > 0)	\
       { *((typ *) p) = val; \
-	  p = p + sizeof(typ); \
-	  } break;
+	p = p + sizeof(typ);			\
+      } break;
 
     case aet_object: GSET(p1,n,object,val);
     case aet_ch:     GSET(p1,n,char,val);
@@ -849,23 +861,23 @@ implementation dependent results.") {
       if (rest!=0) {
 	if (typ2!=aet_bit)
 	  goto badcopy;
-	{
-	  while(rest> 0) {
-	    fSaset1(y,i2+n1-rest,(fLrow_major_aref(x,i1+n1-rest)));
-	    rest--;
-	  }
+	while(rest> 0) {
+	  FFN(fSaset1)(y,i2+n1-rest,(FFN(fLrow_major_aref)(x,i1+n1-rest)));
+	  rest--;
 	}
       }
       i1=i1/CHAR_SIZE;
       n1=n1/CHAR_SIZE;
       typ1=aet_char;
-     }
-  };
+    }
+  }
+
   if (typ2==aet_bit) {
     if (i2 % CHAR_SIZE)
       goto badcopy;
     i2=i2/CHAR_SIZE ;
   }
+
   if ((typ1 ==aet_object || typ2  ==aet_object) && typ1 != typ2)
     FEerror("Can't copy between different array types",0);
   nc=n1*aet_types[(int)typ1].size;
@@ -874,6 +886,7 @@ implementation dependent results.") {
   bcopy(x->ust.ust_self + (i1*aet_types[(int)typ1].size),
 	y->ust.ust_self + (i2*aet_types[(int)typ2].size),
 	nc);
+
   return x;
 
 }
@@ -1051,28 +1064,28 @@ DEFUN("RREF",object,fSrref,SI,4,5,NONE,OO,II,IO,OO,(object x,fixnum i,fixnum s,f
 
 }
 
-DEFUN("ARRAY-ELTSIZE",fixnum,fSarray_eltsize,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") { 
-  RETURN1(elt_size(x->a.a_elttype));
+DEFUN("ARRAY-ELTSIZE",object,fSarray_eltsize,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)elt_size(x->a.a_elttype));
 }
 
-DEFUN("ARRAY-DIMS",fixnum,fSarray_dims,SI,2,2,NONE,IO,IO,OO,OO,(object x,fixnum i),"") { 
-  RETURN1(x->a.a_dims[i]);
+DEFUN("ARRAY-DIMS",object,fSarray_dims,SI,2,2,NONE,IO,IO,OO,OO,(object x,fixnum i),"") {
+  RETURN1((object)x->a.a_dims[i]);
 }
 
-DEFUN("ARRAY-MODE",fixnum,fSarray_mode,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") { 
-  RETURN1(elt_mode(x->a.a_elttype));
+DEFUN("ARRAY-MODE",object,fSarray_mode,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)elt_mode(x->a.a_elttype));
 }
 
-DEFUN("ARRAY-HASFILLP",fixnum,fSarray_hasfillp,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") { 
-  RETURN1(x->a.a_hasfillp);
+DEFUN("ARRAY-HASFILLP",object,fSarray_hasfillp,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)(fixnum)x->a.a_hasfillp);
 }
 
-DEFUN("VECTOR-DIM",fixnum,fSvector_dim,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") { 
-  RETURN1(x->v.v_dim);
+DEFUN("VECTOR-DIM",object,fSvector_dim,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)(fixnum)x->v.v_dim);
 }
 
-DEFUN("ARRAY-ELTTYPE",fixnum,fSarray_elttype,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") { 
-  RETURN1(x->a.a_elttype);
+DEFUN("ARRAY-ELTTYPE",object,fSarray_elttype,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+  RETURN1((object)(fixnum)x->a.a_elttype);
 }
 
 DEFUN("ADJUSTABLE-ARRAY-P",object,fLadjustable_array_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") { 
@@ -1193,9 +1206,9 @@ DEFUN("REPLACE-ARRAY",object,fSreplace_array,SI,2,2,NONE,OO,OO,OO,OO,(object old
 
 }
 
-DEFUN("ARRAY-TOTAL-SIZE",fixnum,fLarray_total_size,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"") { 
+DEFUN("ARRAY-TOTAL-SIZE",object,fLarray_total_size,LISP,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   x = IisArray(x);
-  RETURN1(x->a.a_dim);
+  RETURN1((object)(fixnum)x->a.a_dim);
 }
 
 DEFUN("ASET-BY-CURSOR",object,fSaset_by_cursor,SI,3,3,NONE,OO,OO,OO,OO,(object array,object val,object cursor),"") {

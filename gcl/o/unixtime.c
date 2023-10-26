@@ -37,6 +37,7 @@ which is usually 60 maybe 100 or something else. */
 #include <sys/param.h>
 #endif
 #endif
+
 #ifndef HZ
 /* #define HZ 60 */
 #define HZ 100
@@ -58,7 +59,9 @@ which is usually 60 maybe 100 or something else. */
 #    include <sys/timeb.h>
 
 static struct timeb t0;
-int usleep ( unsigned int microseconds );
+int usleep1 ( unsigned int microseconds );
+#undef usleep
+#define usleep(x) usleep1(x)
 
 #  endif
 
@@ -171,17 +174,22 @@ DEFUN("GET-INTERNAL-RUN-TIME",object,fLget_internal_run_time,LISP
 
 DEFUN("GETTIMEOFDAY",object,fSgettimeofday,SI,0,0,NONE,OO,OO,OO,OO,(void),"Return time with maximum resolution") {
 #ifdef __MINGW32__
-    struct timeb t;
-    ftime(&t);
-    return make_longfloat(((longfloat)t.time+1.0e-3*t.millitm)*HZ1);
+  LARGE_INTEGER uu,ticks;
+  if (QueryPerformanceFrequency(&ticks)) {
+    QueryPerformanceCounter(&uu);
+    return make_longfloat((longfloat)uu.QuadPart/ticks.QuadPart);
+  } else {
+    FEerror("microsecond timing not available",0);
+    return Cnil;
+  }
 #endif  
 #ifdef BSD
-    struct timeval tzp;
-    gettimeofday(&tzp,0);
-    return make_longfloat((longfloat)tzp.tv_sec+1.0e-6*tzp.tv_usec);
+  struct timeval tzp;
+  gettimeofday(&tzp,0);
+  return make_longfloat((longfloat)tzp.tv_sec+1.0e-6*tzp.tv_usec);
 #endif
 #ifdef ATT
-    return make_longfloat((longfloat)time(0));
+  return make_longfloat((longfloat)time(0));
 #endif
 }
 #ifdef STATIC_FUNCTION_POINTERS
@@ -237,7 +245,7 @@ gcl_init_unixtime(void) {
 }
 
 #ifdef __MINGW32__
-int usleep ( unsigned int microseconds )
+int usleep1 ( unsigned int microseconds )
 {
     unsigned int milliseconds = microseconds / 1000;
     return ( SleepEx ( milliseconds, TRUE ) );
@@ -246,7 +254,7 @@ int usleep ( unsigned int microseconds )
 #endif
 
 
-DEFUN("CURRENT-TIMEZONE",fixnum,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
+DEFUN("CURRENT-TIMEZONE",object,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
 
 #if defined(__MINGW32__)
 
@@ -257,19 +265,19 @@ DEFUN("CURRENT-TIMEZONE",fixnum,fScurrent_timezone,SI,0,0,NONE,IO,OO,OO,OO,(void
   
   /* Now UTC = (local time + bias), in units of minutes, so */
   /*fprintf ( stderr, "Bias = %ld\n", tzi.Bias );*/
-  return tzi.Bias/60;                                    
+  return (object)((tzi.Bias+tzi.DaylightBias)/60);
   
 #elif defined NO_SYSTEM_TIME_ZONE
-  return 0;
+  return (object)0;
 #elif defined __CYGWIN__
   struct tm gt,lt;
-  fixnum _t=0;
+  fixnum _t=time(0);
   gmtime_r(&_t, &gt);
   localtime_r(&_t, &lt);
-  return (lt.tm_mday == gt.tm_mday) ? -(lt.tm_hour) : (24 - lt.tm_hour);
+  return (object)(long)(gt.tm_hour-lt.tm_hour+24*(gt.tm_yday!=lt.tm_yday ? (gt.tm_year>lt.tm_year||gt.tm_yday>lt.tm_yday ? 1 : -1) : 0));
 #else
-  fixnum _t=time(0);
-  return -localtime(&_t)->tm_gmtoff/3600;
+  time_t _t=time(0);
+  return (object)(-localtime(&_t)->tm_gmtoff/3600);
 #endif
 }
 
@@ -282,7 +290,7 @@ DEFUN("CURRENT-DSTP",object,fScurrent_dstp,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
 #elif defined NO_SYSTEM_TIME_ZONE /*solaris*/
   return Cnil;
 #else
-  fixnum _t=time(0);
+  time_t _t=time(0);
   return localtime(&_t)->tm_isdst > 0 ? Ct : Cnil;
 #endif
 }

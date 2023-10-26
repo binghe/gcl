@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -25,10 +24,19 @@
 
 (export '(*debug* *compiler-check-args* *safe-compile* *compiler-new-safety*
 		  *compiler-push-events* *space* *speed* proclaimed-signature
- 		  *alien-declarations* write-sys-proclaims
+ 		  *alien-declarations* write-sys-proclaims make-function-plist
  		  lit sgen cmp-inline cmp-notinline cmp-type))
 
-(eval-when (eval compile) (setq si:*inhibit-macro-special* nil))
+;(eval-when (compile) (proclaim '(optimize (safety 2) (space 3))))
+;(eval-when (eval compile) (defun si:clear-compiler-properties (symbol)))
+(eval-when (eval compile)
+  (setq si:*inhibit-macro-special* nil)
+  (defmacro ?cons (f x &aux (s (sgen "?CONS"))) `(let ((,s ,x)) (if (cdr ,s) (cons ,f ,s) (car ,s))))
+  (defmacro ?list (x &aux (s (sgen "?LIST"))) `(let ((,s ,x)) (when ,s (list ,s))))
+  (defmacro zcollect (v r rp np &aux (s (sgen "ZCOLLECT")))
+    `(let ((,s ,v)) (setf rp (if rp (rplacd rp (list ,s)) (setq r ,s)) rp np)))
+  (defmacro ?let (k kf r) `(let ((r ,r)) (if (eq ,k ,kf) r `(let ((,,k ,,kf)) (declare (ignorable ,,k)) ,r))))
+  (defmacro ?key (x &aux (s (sgen "?KEY"))) `(if (or (constantp ,x) (symbolp ,x)) ,x ',s)))
 
 (defun lit (&rest r)
   (error "lit called with args ~s~%" r))
@@ -38,72 +46,56 @@
 
 (defmacro defvar (var &optional (form nil form-sp) doc-string)
   (declare (optimize (safety 2)))
-  `(progn (si:*make-special ',var)
-	  ,(if doc-string
-	       `(si:putprop ',var ,doc-string 'variable-documentation))
-	  ,(if form-sp
-	       `(or (boundp ',var)
-		    (setq ,var ,form)))
-	  ',var)
-	  )
+  `(progn (*make-special ',var)
+	  ,@(when doc-string `((set-documentation ',var 'variable ,doc-string)))
+	  ,@(when form-sp `((unless (boundp ',var) (setq ,var ,form))))
+	  ',var))
 
 (defmacro defparameter (var form &optional doc-string)
   (declare (optimize (safety 2)))
-  `(progn (si:*make-special ',var)
-	  ,@(when doc-string `((si:putprop ',var ,doc-string 'variable-documentation)))
+  `(progn (*make-special ',var)
+	  ,@(when doc-string `((set-documentation ',var 'variable ,doc-string)))
 	  (setq ,var ,form)
 	  ',var))
 
 (defmacro defconstant (var form &optional doc-string)
   (declare (optimize (safety 2)))
-  `(progn (si:*make-constant ',var ,form)
-	  ,@(when doc-string `((si:putprop ',var ,doc-string 'variable-documentation)))
+  `(progn (*make-constant ',var ,form)
+	  ,@(when doc-string `((set-documentation ',var 'variable ,doc-string)))
 	  ',var))
 
 
 ;;; Each of the following macros is also defined as a special form.
 ;;; Thus their names need not be exported.
 
-(defmacro and (&rest forms)
+(defmacro and (&rest forms &aux r rp np);FIXME simplify with recursive labels
   (declare (optimize (safety 2)))
-  (if (endp forms)
-      t
-      (let ((x (reverse forms)))
-           (do ((forms (cdr x) (cdr forms))
-                (form (car x) `(if ,(car forms) ,form)))
-               ((endp forms) form)))))
+  (do ((y forms))((endp y) (if forms r t))
+    (let ((x (pop y)))
+      (if (constantp x) (unless (if (eval x) y) (zcollect x r rp np) (setq y nil))
+	(if y (zcollect `(if ,@(setq np (list x))) r rp np)
+	  (zcollect x r rp np))))))
 
-(defmacro or (&rest forms)
+(defmacro or (&rest forms &aux r rp np (s (sgen "OR")))
   (declare (optimize (safety 2)))
-  (unless (endp forms)
-    (let ((x (reverse forms)))
-      (do ((forms (cdr x) (cdr forms)) (gs (sgen "OR"))
-	   (form (car x)
-		 (if (or (constantp (car forms)) (symbolp (car forms)))
-		     (let ((temp (car forms)))
-		       `(if ,temp ,temp ,form))
-		   `(let ((,gs ,(car forms)))
-		      (declare (ignorable ,gs))
-		      (if ,gs ,gs ,form)))))
-               ((endp forms) form)))))
+  (do ((y forms))((endp y) r)
+    (let ((x (pop y)))
+      (if (constantp x) (when (eval x) (zcollect x r rp np) (setq y nil))
+	(if (symbolp x) (zcollect `(if ,x ,@(setq np (list x))) r rp np)
+	  (if y (zcollect `(let ((,s ,x)) (if ,s ,@(setq np (list s)))) r rp np)
+	    (zcollect x r rp np)))))))
 
+;; ,@(mapcan (lambda (x &aux (z (pop x))(z (if (eq z 'type) (pop x) z)))
+;; 		      (case z
+;; 			    ((ftype inline notinline optimize special dynamic-extent) nil)
+;; 			    (otherwise (mapcar (lambda (x) (list x x)) x))))
+;; 		   (apply 'append (mapcar 'cdr dec)))
 (defmacro locally (&rest body)
-  (multiple-value-bind
-   (doc decls ctps body)
-   (parse-body-header body)
-   `(let (,@(mapcan (lambda (x &aux (z (pop x))(z (if (eq z 'type) (pop x) z)))
-		      (case z
-			    ((ftype inline notinline optimize special) nil)
-			    (otherwise (mapcar (lambda (x) (list x x)) x))))
-		   (apply 'append (mapcar 'cdr decls))))
-      ,@(when doc (list doc))
-      ,@decls
-      ,@ctps
-      ,@body)))
+  (declare (optimize (safety 2)))
+  `(let () ,@body))
 
 (defmacro loop (&rest body &aux (tag (sgen "LOOP")))
-  (declare (optimize (safety 2)))
-  `(block nil (tagbody ,tag (progn ,@body) (go ,tag))))
+  `(block nil (tagbody ,tag ,(?cons 'progn body) (go ,tag))))
 
 (defun import (s &optional (p *package*))
   (import-internal s p)
@@ -148,14 +140,13 @@
 
 (defun funid-to-sym (funid) (funid-sym funid))
 
-
 (defun setf-sym (funid)
   (values       
    (intern (si::string-concatenate
 	    (let ((x (symbol-package funid))) (if x (package-name x) ""))
 	    "::"
 	    (symbol-name funid))
-	   (load-time-value (or (find-package 'setf) (make-package 'setf))))))
+	   (load-time-value (or (find-package 'setf) (make-package-int 'setf nil nil))))))
 
 (defmacro defmacro (name vl &rest body)
   (declare (optimize (safety 2)))
@@ -179,62 +170,48 @@
 
 (defmacro psetq (&rest args)
   (declare (optimize (safety 2)))
-   (do ((l args (cddr l))
-        (forms nil)
-        (bindings nil))
-       ((endp l) (list* 'let* (nreverse bindings) (nreverse (cons nil forms))))
-       (let ((sym (gensym)))
-            (push (list sym (cadr l)) bindings)
-            (push (list 'setq (car l) sym) forms))))
+  (assert (evenp (length args)))
+  (let ((x (let ((i 0)) (mapcon (lambda (x) (when (oddp (incf i)) `((,(cadr x) ,(car x) ,(gensym))))) args))))
+    (when x
+      `(let* ,(mapcar (lambda (x) `(,(caddr x) ,(car x))) x)
+	 (setq ,@(mapcan 'cdr x))
+	 nil))))
 
 ; conditionals
-
-(defmacro cond (&rest clauses &aux (form nil))
+(defmacro cond (&rest clauses &aux r rp np (s (sgen "COND")))
   (declare (optimize (safety 2)))
-  (let ((x (reverse clauses)))
-    (dolist (l x form)
-      (cond ((endp (cdr l))
-	     (setq form (cond ((eq l (car x)) `(values ,(car l)))
-			      (`(or ,(car l) ,form)))))
-	    ((let ((c (car l)))
-	       (when (constantp c) (cond ((symbolp c) (symbol-value c)) ;fixme constant-eval
-					 ((when (consp c) (eq (car c) 'quote)) (cadr c)) (t))))
-	     (setq form (if (endp (cddr l)) (cadr l) `(progn ,@(cdr l)))))
-	    ((setq form `(if ,(car l) ,(if (endp (cddr l)) (cadr l) `(progn ,@(cdr l))) ,form)))))))
+  (do ((y clauses))((endp y) r)
+    (let* ((x (pop y))(z (pop x)))
+      (if (constantp z) (when (eval z) (zcollect (if x (?cons 'progn x) z) r rp np) (setq y nil))
+	(if x (zcollect `(if ,z ,@(setq np (list (?cons 'progn x)))) r rp np)
+	  (if (symbolp z) (zcollect `(if ,z ,@(setq np (list z))) r rp np)
+	    (if y (zcollect `(let ((,s ,z)) (if ,s ,@(setq np (list s)))) r rp np)
+	      (zcollect `(values ,z) r rp np))))))))
 
-(defmacro when (pred &rest body)
+(defmacro when (pred &rest body &aux (x (?cons 'progn body)))
   (declare (optimize (safety 2)))
-  `(if ,pred (progn ,@body)))
+  (if (constantp pred) (if (eval pred) x) `(if ,pred ,x)))
 
-(defmacro unless (pred &rest body)
+(defmacro unless (pred &rest body &aux (x (?cons 'progn body)))
   (declare (optimize (safety 2)))
-  `(if (not ,pred) (progn ,@body)))
+  (if (constantp pred) (if (not (eval pred)) x) `(if (not ,pred) ,x)))
 
 ; program feature
 
-(defmacro prog (vl &rest body &aux (decl nil))
-  (declare (optimize (safety 2)))
-  (do ()
-      ((or (endp body)
-           (not (consp (car body)))
-           (not (eq (caar body) 'declare)))
-       `(block nil (let ,vl ,@decl (tagbody ,@body)))
-       )
-      (push (car body) decl)
-      (pop body))
-  )
+(defun prog?* (let?* vl body)
+  (multiple-value-bind
+      (doc dec ctp body)
+      (parse-body-header body)
+    (declare (ignore doc))
+    `(block nil (,let?* ,vl ,@dec (tagbody ,@(append ctp body))))))
 
-(defmacro prog* (vl &rest body &aux (decl nil))
+(defmacro prog (vl &rest body)
   (declare (optimize (safety 2)))
-  (do ()
-      ((or (endp body)
-           (not (consp (car body)))
-           (not (eq (caar body) 'declare)))
-       `(block nil (let* ,vl ,@decl (tagbody ,@body)))
-       )
-      (push (car body) decl)
-      (pop body))
-  )
+  (prog?* 'let vl body))
+
+(defmacro prog* (vl &rest body)
+  (declare (optimize (safety 2)))
+  (prog?* 'let* vl body))
 
 ; sequencing
 
@@ -255,78 +232,41 @@
 (defmacro multiple-value-setq (vars form)
   (declare (optimize (safety 2)))
   (let ((syms (mapcar (lambda (x) (declare (ignore x)) (gensym)) (or vars (list nil)))))
-    `(multiple-value-bind ,syms ,form (setq ,@(mapcan 'list vars syms)) ,(car syms))))
-;;   (do ((vl vars (cdr vl))
-;;        (sym (sgen))
-;;        (forms nil))
-;;       ((endp vl) `(let ((,sym (multiple-value-list ,form))) (prog1 ,@(nreverse forms))))
-;;       (push `(setq ,@(when forms `(,sym (cdr ,sym))) ,(car vl) (car ,sym)) forms)))
+    `(multiple-value-bind ,syms ,form ,@(?list (?cons 'setq (mapcan 'list vars syms))) ,(car syms))))
 
-(defmacro multiple-value-bind (vars form &rest body)
+(defmacro multiple-value-bind (vars form &rest body &aux (sym (sgen "MULTIPLE-VALUE-BIND")))
   (declare (optimize (safety 2)))
-  (do ((vl vars (cdr vl))
-       (sym (sgen "MULTIPLE-VALUE-BIND"))
-       (bind nil))
-      ((endp vl) `(let* ((,sym (multiple-value-list ,form)) ,@(nreverse bind))
-		    (declare (ignorable ,sym))
-		    ,@body))
-      (push `(,(car vl) (car ,sym)) bind)
-      (unless (endp (cdr vl)) (push `(,sym (cdr ,sym)) bind))))
+  `(let* ((,sym (multiple-value-list ,form))
+	  ,@(mapcon (lambda (x) `((,(car x) (car ,sym)) ,@(when (cdr x) `((,sym (cdr ,sym)))))) vars))
+     (declare (ignorable ,sym))
+     ,@body))
 
-(defmacro do (control (test . result) &rest body
-              &aux (decl nil) (label (sgen "DO")) (vl nil) (step nil))
+(defun do?* (?* control test result body &aux (label (sgen "DO")))
+  (multiple-value-bind
+      (doc dec ctp body)
+      (parse-body-header body)
+    (declare (ignore doc))
+    (labels ((?let (vl dec body) (if (or vl dec) `(,(if ?* 'let* 'let) ,vl ,@dec ,body) body))
+	     (?tagbody (l x y &aux (x (macroexpand x))) (if x `(tagbody ,l ,x ,@(?list (when (eq (car x) 'if) y))) y)))
+      `(block nil
+	 ,(?let
+	   (mapcar (lambda (x) (if (listp x) (ldiff-nf x (cddr x)) x)) control)
+	   dec
+	   (?tagbody
+	    label
+	    `(unless ,test
+	       ,@(?list (?cons 'tagbody (append ctp body)))
+	       ,@(?list (?cons (if ?* 'setq 'psetq) (mapcan (lambda (x) (when (and (listp x) (cddr x)) (list (car x) (caddr x)))) control)))
+	       (go ,label))
+	    `(return ,(?cons 'progn result))))))))
+
+(defmacro do (control (test . result) &rest body)
   (declare (optimize (safety 2)))
-  (do ()
-      ((or (endp body)
-           (not (consp (car body)))
-           (not (eq (caar body) 'declare))))
-      (push (car body) decl)
-      (pop body))
-  (dolist (c control)
-    (declare (object c))
-    (if (symbolp  c) (setq c (list c)))
-    (push (list (car c) (cadr c)) vl)
-    (unless (endp (cddr c))
-      (push (car c) step)
-      (push (caddr c) step)))
-  `(block nil
-          (let ,(reverse vl)
-	    ,@decl
-	    (tagbody
-	     ,label (if (not ,test)
-			(progn 
-			  (tagbody ,@body)
-			  (psetq ,@(reverse step))
-			  (go ,label))
-		      (return (progn ,@result)))))))
+  (do?* nil control test result body))
 
-(defmacro do* (control (test . result) &rest body
-               &aux (decl nil) (label (sgen "DO*")) (vl nil) (step nil))
+(defmacro do* (control (test . result) &rest body)
   (declare (optimize (safety 2)))
-  (do ()
-      ((or (endp body)
-           (not (consp (car body)))
-           (not (eq (caar body) 'declare))))
-      (push (car body) decl)
-      (pop body))
-  (dolist (c control)
-          (declare (object c))
-    (if(symbolp  c) (setq c (list c)))
-        (push (list (car c) (cadr c)) vl)
-    (unless (endp (cddr c))
-            (push (car c) step)
-            (push (caddr c) step)))
-  `(block nil
-          (let* ,(reverse vl)
-                ,@decl
-                (tagbody
-                 ,label (if (not ,test)
-			    (progn 
-			      (tagbody ,@body)
-			      (setq ,@(reverse step))
-			      (go ,label))
-			  (return (progn ,@result)))))))
-
+  (do?* t control test result body))
 
 (defmacro case (keyform &rest clauses &aux (key (sgen "CASE")) (c (reverse clauses)))
   (declare (optimize (safety 2)))
@@ -340,8 +280,6 @@
 			  (when (dfp a) (error 'program-error "default case must be last"))
 			  `(if ,(if (when (eq a v) (listp v)) (m (mapcar #'sw v) 'or) (sw v)) ,(m c 'progn) ,y))
 			c :initial-value df)))))
-
-
 
 ;; (defmacro case (keyform &rest clauses &aux (key (sgen "CASE")) f)
 ;;   (declare (optimize (safety 2)))
@@ -358,41 +296,25 @@
 ;; 			    `(if ,(if (when ka (listp aa)) `(or ,@(mapcar #'sw v)) (sw v)) ,da ,y))))
 ;; 		      clauses :initial-value nil :from-end t))))
 
-(defmacro ecase (keyform &rest clauses &aux (key (sgen "ECASE")))
+(defmacro ecase (keyform &rest clauses &aux (key (?key keyform)))
   (declare (optimize (safety 2)))
-  `(let ((,key ,keyform))
-     (declare (ignorable ,key))
-     (case ,key
+  (?let key keyform
+	`(case ,key
 	   ,@(mapcar (lambda (x) (if (member (car x) '(t otherwise)) (cons (list (car x)) (cdr x)) x)) clauses)
 	   (otherwise
 	    (error 'type-error :datum ,key
 		   :expected-type '(member ,@(apply 'append (mapcar (lambda (x &aux (x (car x))) (if (listp x) x (list x))) clauses))))))))
 
-
-(defmacro ccase (keyform &rest clauses &aux (key (sgen "CCASE")))
+(defmacro ccase (keyform &rest clauses &aux (key (?key keyform)))
   (declare (optimize (safety 2)))
-  `(let ((,key ,keyform))
-     (declare (ignorable ,key))
-     (loop
-      (case ,key
-	    ,@(mapcar (lambda (x &aux (k (pop x)))
-			`(,(if (member k '(t otherwise)) (list k) k) (return ,(if (cdr x) (cons 'progn x) (car x))))) clauses)
-	    (otherwise 
-	     (check-type ,key (member ,@(apply 'append (mapcar (lambda (x &aux (x (car x))) (if (listp x) x (list x))) clauses)))))))))
-
-;; (defmacro case (keyform &rest clauses &aux (form nil) (key (sgen "CASE")))
-;;   (declare (optimize (safety 2)))
-;;   (dolist (clause (reverse clauses) `(let ((,key ,keyform)) (declare (ignorable ,key)) ,form))
-;;     (cond ((or (eq (car clause) 't) (eq (car clause) 'otherwise))
-;;            (setq form `(progn ,@(cdr clause))))
-;;           ((consp (car clause))
-;;            (setq form `(if (or ,@(mapcar (lambda (x) `(eql ,key ',x)) (car clause)));(member ,key ',(car clause))
-;;                            (progn ,@(cdr clause))
-;;                            ,form)))
-;;           ((car clause)
-;;            (setq form `(if (eql ,key ',(car clause))
-;;                            (progn ,@(cdr clause))
-;;                            ,form))))))
+  (?let key keyform
+	`(do nil (nil);FIXME block
+	   (case ,key
+	     ,@(mapcar (lambda (x &aux (k (pop x)))
+			 `(,(if (member k '(t otherwise)) (list k) k) (return ,(?cons 'progn x))))
+		       clauses)
+	     (otherwise
+	      (check-type ,key (member ,@(apply 'append (mapcar (lambda (x &aux (x (car x))) (if (listp x) x (list x))) clauses)))))))))
 
 
 (defmacro return (&optional (val nil))   (declare (optimize (safety 2))) `(return-from nil ,val))
@@ -418,54 +340,14 @@
 ;; appears to treat this as positive or negative depending on the sign
 ;; of the other argument in the comparison, apparently to symmetrize
 ;; the long integer range.  20040403 CM.
-(defmacro dotimes ((var form &optional (val nil)) &rest body)
+(defmacro dotimes ((var form &optional val) &rest body &aux (s (sgen "DOTIMES"))(m (sgen "DOTIMES")))
   (declare (optimize (safety 2)))
-  `(block 
-    nil
-    ,(cond
-       ((symbolp form)
-	(let ((temp (sgen "DOTIMES")))
-	  `(cond ((< ,form 0)
-		  (let ((,var 0))
-		    (declare (fixnum ,var) (ignorable ,var))
-		    ,val))
-		 ((<= ,form most-positive-fixnum)
-		  (let ((,temp ,form))
-		    (declare (ignorable ,temp) (fixnum ,temp))
-		    (do* ((,var 0 (1+ ,var))) ((>= ,var ,temp) ,val)
-			 (declare (fixnum ,var))
-			 ,@body)))
-		 ((let ((,temp ,form))
-		    (declare (ignorable ,temp))
-		    (do* ((,var 0 (1+ ,var))) ((>= ,var ,temp) ,val)
-			 ,@body))))))
-       ((constantp form)
-	(cond ((< form 0)
-	       `(let ((,var 0))
-		  (declare (fixnum ,var) (ignorable ,var))
-		  ,val))
-	      ((<= form most-positive-fixnum)
-	       `(do* ((,var 0 (1+ ,var))) ((>= ,var ,form) ,val)
-		     (declare (fixnum ,var))
-		     ,@body))
-	      (`(do* ((,var 0 (1+ ,var))) ((>= ,var ,form) ,val)
-		     ,@body))))
-       ((let ((temp (sgen "DOTIMES")))
-	  `(let ((,temp ,form))
-	     (declare (ignorable ,temp))
-	     (cond ((< ,temp 0)
-		    (let ((,var 0))
-		      (declare (fixnum ,var) (ignorable ,var))
-		      ,val))
-		   ((<= ,temp most-positive-fixnum)
-		    (let ((,temp ,temp))
-		      (declare (ignorable ,temp) (fixnum ,temp))
-		      (do* ((,var 0 (1+ ,var))) ((>= ,var ,temp) ,val)
-			   (declare (fixnum ,var))
-			   ,@body)))
-		   ((do* ((,var 0 (1+ ,var))) ((>= ,var ,temp) ,val)
-			 ,@body)))))))))
-
+  `(let* ((,s (block nil ,form))(,m (min ,s most-positive-fixnum)))
+     (declare (fixnum ,m))
+     (do ((,var 0 (1+ ,var)))
+	 ((>= ,var ,m) (if (eql ,s ,m) ,val (do ((,var ,m (1+ ,var)))((>= ,var ,s) ,val) ,@body)))
+	   (declare (fixnum ,var))
+	   ,@body)))
 
 (defmacro declaim (&rest l)
   (declare (optimize (safety 2)))
@@ -539,7 +421,7 @@
        nil)))
 
 
-(defmacro define-compiler-macro (name vl &rest body &aux (n (funid-sym name)) (q (gensym (string name))))
+(defmacro define-compiler-macro (name vl &rest body &aux (n (funid-sym name)) (q (gensym (string n))))
   (declare (optimize (safety 2)))
   `(progn (defun ,q ,@(cdr (defmacro-lambda (if (eq n name) name (cadr name)) vl body)))
 	  (putprop ',n ;FIXME setf not available at pre_gcl stage

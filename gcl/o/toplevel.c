@@ -28,7 +28,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "include.h"
 
-object sLcompile, sLload, sLeval, sKcompile_toplevel, sLload_toplevel, sKexecute;
+object sLcompile, sLload, sLeval, sKcompile_toplevel, sKload_toplevel, sKexecute;
 object sLprogn;
 
 
@@ -55,11 +55,11 @@ FFN(Fdefun)(object args)
 	  name=ifuncall1(sSfunid_to_sym,name);
 
 	if (name->s.s_sfdef != NOT_SPECIAL) {
-	  if (name->s.s_mflag) {
-	    if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
-	      name->s.s_sfdef = NOT_SPECIAL;
-	  } else if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
-	    FEerror("~S, a special form, cannot be redefined.", 1, name);
+		if (name->s.s_mflag) {
+			if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
+				name->s.s_sfdef = NOT_SPECIAL;
+		} else if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
+		 FEerror("~S, a special form, cannot be redefined.", 1, name);
 	}
 	if (name->s.s_hpack == lisp_package &&
 	    name->s.s_gfdef != OBJNULL && !raw_image && sLwarn->s.s_gfdef) {
@@ -116,7 +116,7 @@ FFN(siLAmake_special)(void)
 	vs_base[0]->s.s_stype = (short)stp_special;
 }
 
-DEFUN("OBJNULL",fixnum,fSobjnull,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {return (fixnum)OBJNULL;}
+DEFUN("OBJNULL",object,fSobjnull,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {return OBJNULL;}
 
 DEFUN("*MAKE-CONSTANT",object,fSAmake_constant,SI,2,2,NONE,OO,OO,OO,OO, \
 	  (object s,object v),"") { 
@@ -164,10 +164,10 @@ FFN(Feval_when)(object arg)
 	if(endp(arg))
 		FEtoo_few_argumentsF(arg);
 	for (ss = MMcar(arg);  !endp(ss);  ss = MMcdr(ss))
-            if ( (MMcar(ss) == sLeval) || (MMcar(ss) == sKexecute) )
+		if(MMcar(ss) == sLeval || (MMcar(ss) == sKexecute) )
 			flag = TRUE;
-		else if ( MMcar(ss) != sLload && MMcar(ss) != sLcompile &&
-                          MMcar(ss) != sLload_toplevel && MMcar(ss) != sKcompile_toplevel )
+		else if(MMcar(ss) != sLload && MMcar(ss) != sLcompile &&
+                          MMcar(ss) != sKload_toplevel && MMcar(ss) != sKcompile_toplevel )
 		 FEinvalid_form("~S is an undefined situation for EVAL-WHEN.",
 				MMcar(ss));
 	if(flag) {
@@ -260,12 +260,11 @@ DEF_ORDINARY("EVAL",sLeval,LISP,"");
 DEF_ORDINARY("EXECUTE",sKexecute,KEYWORD,"");
 DEF_ORDINARY("FUNCTION-DOCUMENTATION",sSfunction_documentation,SI,"");
 DEF_ORDINARY("LOAD",sLload,LISP,"");
-DEF_ORDINARY("LOAD-TOPLEVEL",sLload_toplevel,KEYWORD,"");
+DEF_ORDINARY("LOAD-TOPLEVEL",sKload_toplevel,KEYWORD,"");
 DEF_ORDINARY("PROGN",sLprogn,LISP,"");
 DEF_ORDINARY("TYPEP",sLtypep,LISP,"");
 DEF_ORDINARY("VALUES",sLvalues,LISP,"");
 DEF_ORDINARY("VARIABLE-DOCUMENTATION",sSvariable_documentation,SI,"");
-/* DEF_ORDINARY("SETF-FUNCTION",sSsetf_function,SI,""); */
 DEF_ORDINARY("WARN",sLwarn,LISP,"");
 
 void

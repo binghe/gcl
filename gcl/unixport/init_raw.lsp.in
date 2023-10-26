@@ -1,3 +1,7 @@
+;FIXME
+(defun make-package (name &key nicknames use)
+  (si::make-package-int name nicknames use))
+
 (make-package :s :use '(:cl))
 (make-package :compiler :use '(:cl :si :s))
 (make-package :sloop :use '(:cl))

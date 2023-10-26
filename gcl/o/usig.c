@@ -47,7 +47,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 extern char signals_handled[];
 
 void
-gcl_signal(int signo, handler_function_type handler)
+gcl_signal(int signo, void (*handler) (/* ??? */))
 {
   char *p = signals_handled;
   while (*p)
@@ -70,7 +70,7 @@ gcl_signal(int signo, handler_function_type handler)
 #endif      
       ;
     sigemptyset(&action.sa_mask);
-/*     sigaddset(&action.sa_mask,signo); */
+    /* sigaddset(&action.sa_mask,signo); */
     sigaction(signo,&action,0);
 #else
 #ifdef HAVE_SIGVEC
@@ -148,7 +148,7 @@ DEFUN("FLD",object,fSfld,SI,1,1,NONE,OI,OO,OO,OO,(fixnum val),"") {
 
 #endif
 
-DEFUN("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
+DEFUN("FEENABLEEXCEPT",object,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {
 
 #ifdef HAVE_FEENABLEEXCEPT
 
@@ -168,11 +168,11 @@ DEFUN("FEENABLEEXCEPT",fixnum,fSfeenableexcept,SI,1,1,NONE,II,OO,OO,OO,(fixnum x
   }
 #endif
 
-  RETURN1(x);
+  RETURN1((object)x);
 
 }
 
-DEFUN("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
+DEFUN("FEDISABLEEXCEPT",object,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),"") {
 
   fixnum x;
 
@@ -193,35 +193,30 @@ DEFUN("FEDISABLEEXCEPT",fixnum,fSfedisableexcept,SI,0,0,NONE,IO,OO,OO,OO,(void),
   }
 #endif
 
-  RETURN1(x);
+  RETURN1((object)x);
 }
 
 #if defined(__x86_64__) || defined(__i386__)
 
-#define FE_TEST(x87sw_,mxcsr_,excepts_) ((x87sw_)&(excepts_))|(((mxcsr_))&(excepts_))
+#define FE_TEST(x87sw_,mxcsr_,excepts_) (((x87sw_)&(excepts_))|(((mxcsr_))&(excepts_)))
 
-DEFUN("FPE_CODE",fixnum,fSfpe_code,SI,2,2,NONE,II,IO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
+DEFUN("FPE_CODE",object,fSfpe_code,SI,2,2,NONE,II,IO,OO,OO,(fixnum x87sw,fixnum mxcsr),"") {
 
-  RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW|FE_INEXACT));
-  
-  /* RETURN1(FE_TEST(x87sw,mxcsr,FE_INVALID) ? FPE_FLTINV : */
-  /* 	  (FE_TEST(x87sw,mxcsr,FE_DIVBYZERO) ? FPE_FLTDIV : */
-  /* 	   (FE_TEST(x87sw,mxcsr,FE_UNDERFLOW) ? FPE_FLTUND : */
-  /* 	    (FE_TEST(x87sw,mxcsr,FE_OVERFLOW) ? FPE_FLTOVF : */
-  /* 	     (FE_TEST(x87sw,mxcsr,FE_INEXACT) ? FPE_FLTRES : 0))))); */
+  RETURN1((object)FE_TEST(x87sw,mxcsr,FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW|FE_INEXACT));
+
 }
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 
-DEFUN("FNSTSW",fixnum,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+DEFUN("FNSTSW",object,fSfnstsw,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
   volatile unsigned short t;
   ASM ("fnstsw %0" :: "m" (t));
-  RETURN1(t);
+  RETURN1((object)(long)t);
 }
-DEFUN("STMXCSR",fixnum,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
+DEFUN("STMXCSR",object,fSstmxcsr,SI,0,0,NONE,II,OO,OO,OO,(void),"") {
   volatile unsigned int t;
   ASM ("stmxcsr %0" :: "m" (t));
-  RETURN1(t);
+  RETURN1((object)(long)t);
 }
 
 #endif
@@ -254,9 +249,9 @@ DEF_ORDINARY("FLOATING-POINT-ERROR",sSfloating_point_error,SI,"");
 static void
 sigpipe(int s,siginfo_t *a,void *b)
 {
-	gcl_signal(SIGPIPE, sigpipe);
-	perror("");
-	FEerror("Broken pipe", 0);
+  unblock_signals(SIGPIPE,SIGPIPE);
+  perror("");
+  FEerror("Broken pipe", 0);
 }
 
 void

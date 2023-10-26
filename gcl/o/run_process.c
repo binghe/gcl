@@ -24,49 +24,29 @@ License for more details.
 #define IN_RUN_PROCESS
 #include "include.h"
 
+#if defined(__CYGWIN__)
+#include <tchar.h>
+#include <time.h>
+#include <windows.h>
+#include <sys/cygwin.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
 
 #include "page.h"
 
-
 #ifdef RUN_PROCESS
 
 void setup_stream_buffer(object);
 object make_two_way_stream(object, object);
 
-/* LISP - Lisp Wrapper for the "c" code.
- *
- * The lisp OBJECT is passed to the code and a string must be extracted
- * and null terminated to make it work with the "C" code.
- *
- * Lisp Interface code.
- */
-
-char *lisp_to_string(str)
-object str;
-{
-	int	i, len;
-	char	*sself;
-	char	*cstr;
-
-	len = VLEN(str);
-
-	cstr = (char *) malloc (len+1);
-	sself = &(str->st.st_self[0]);
-	for (i=0; i<len; i++)
-	{
-		cstr[i] = sself[i];
-	}
-	cstr[i] = 0;
-	return (cstr);
-}
-
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(__CYGWIN__)
 
 #include<windows.h>
 #include <fcntl.h>
+#include <io.h>
 #define PIPE_BUFFER_SIZE 2048
 
 void DisplayError ( char *pszAPI );
@@ -98,7 +78,7 @@ void run_process ( char *name )
     CHAR chBuf[60] = "button .hello\npack .hello\n\0";
      /*CHAR chBuf[60] = "button .hello\n\0"; */
 #endif
-    
+
     /* Set up the security attributes struct. */
     sec_att.nLength= sizeof(SECURITY_ATTRIBUTES);
     sec_att.lpSecurityDescriptor = NULL;
@@ -173,27 +153,44 @@ void run_process ( char *name )
     if ( ! CloseHandle ( hChildStderrWrite ) ) DisplayError ( "CloseHandle: Error write" );
 
 #if 0
-    fprintf ( stderr, "Before write\n" );
+    emsg("Before write\n" );
     WriteFile ( hChildStdinWrite, chBuf, strlen ( chBuf ), 
                &dwWritten, NULL);
     FlushFileBuffers ( hChildStdinWrite );
     FlushFileBuffers ( hChildStdoutRead );
-    fprintf ( stderr, "Before read\n" );
+    emsg("Before read\n" );
     if ( ! ReadFile( hChildStdoutRead, chBuf, 2, &dwRead, NULL ) || 
          dwRead == 0 ) {
         DisplayError ( "Nothing read\n" );
     } else {
-        fprintf ( stderr, "Got Back: %s\n", chBuf );
+        emsg("Got Back: %s\n", chBuf );
     }
-    fprintf ( stderr, "After read\n" );
+    emsg("After read\n" );
 #endif
 
     
+#if !defined (__CYGWIN__)
     /* Connect up the Lisp objects with the pipes. */
-    ofd = _open_osfhandle ( hChildStdoutRead, _O_RDONLY | _O_TEXT );
+    ofd = _open_osfhandle ( (int)hChildStdoutRead, _O_RDONLY | _O_TEXT );
     ofp = _fdopen ( ofd, "r" );
-    ifd = _open_osfhandle ( hChildStdinWrite, _O_WRONLY | _O_TEXT );
+    ifd = _open_osfhandle ( (int)hChildStdinWrite, _O_WRONLY | _O_TEXT );
     ifp = _fdopen ( ifd, "w" );
+#else
+    {
+      extern int cygwin_attach_handle_to_fd(char *,int,HANDLE,mode_t,DWORD);
+      static int rpn;
+
+      massert(snprintf(FN1,sizeof(FN1),"run_process_stdin_%d",rpn)>0);
+      ofd=cygwin_attach_handle_to_fd(FN1,-1,hChildStdoutRead,0,GENERIC_READ);
+      ofp=fdopen(ofd,"r");
+      massert(snprintf(FN1,sizeof(FN1),"run_process_stdout_%d",rpn)>0);
+      ifd=cygwin_attach_handle_to_fd(FN1,-1,hChildStdinWrite,0,GENERIC_WRITE);
+      ifp=fdopen(ifd,"w");
+      rpn++;
+
+    }
+
+#endif
 
 #if 0
     {
@@ -201,8 +198,7 @@ void run_process ( char *name )
         fprintf ( ifp, "button .wibble\n" );
         fflush (ifp);
         fgets ( buf, 2, ofp );
-        fprintf ( stderr, 
-                  "run_process: ofd = %x, ofp = %x, ifd = %x, ifp = %x, buf[0] = %x, buf[1] = %x, buf = %s\n",
+        emsg("run_process: ofd = %x, ofp = %x, ifd = %x, ifp = %x, buf[0] = %x, buf[1] = %x, buf = %s\n",
                   ofd, ofp, ifd, ifp, buf[0], buf[1], buf );
     }
 #endif
@@ -210,9 +206,13 @@ void run_process ( char *name )
     stream_in = (object) alloc_object(t_stream);
     stream_in->sm.tt=stream_in->sm.sm_mode = smm_input;
     stream_in->sm.sm_fp = ofp;
+    stream_in->sm.sm_buffer = 0;
+    stream_in->sm.sm_flags=0;
     stream_out = (object) alloc_object(t_stream);
     stream_out->sm.tt=stream_out->sm.sm_mode = smm_output;
     stream_out->sm.sm_fp = ifp;
+    stream_out->sm.sm_buffer = 0;
+    stream_out->sm.sm_flags=0;
     setup_stream_buffer ( stream_in );
     setup_stream_buffer ( stream_out );
     stream = make_two_way_stream ( stream_in, stream_out );
@@ -245,7 +245,7 @@ void PrepAndLaunchRedirectedChild (
                            NULL,
                            NULL,
                            TRUE,
-                           CREATE_NEW_CONSOLE,
+			   0,
                            NULL,
                            NULL,
                            &startup_info,
@@ -287,37 +287,34 @@ void DisplayError(char *pszAPI)
 }
 
 void
-FFN(siLrun_process)()
-{
-    int i;
-    object arglist;
-    char cmdline[20480];
+siLrun_process() {
 
-    *cmdline = '\0';
-    strcat ( cmdline, object_to_string ( vs_base[0] ) );
-    arglist = vs_base[1];
-    
-    for ( i = 1; arglist != Cnil; i++ ) {
-        /* The first of any argument list. */
-        char *argument = object_to_string ( arglist->c.c_car );
-        
-        /* Check for buffer overruns in the command string. */
-        if ( strlen ( cmdline ) + strlen ( argument ) + 2 > 20480 ) {
-            FEerror ( "RUN-PROCESS command more than 20480 characters long.", 0 );
-        }
+  int i, j;
+  int old = signals_allowed;
+  object x;
 
-        /* Put spaces between the arguments. */
-        strcat ( cmdline, " " );
+  if (vs_top-vs_base!=2)
+    FEwrong_no_args("RUN-PROCESS requires two arguments",make_fixnum(vs_top-vs_base));
+  check_type_string(&vs_base[0]);
 
-        /* Add the new argument. */
-        strcat ( cmdline, argument );
+  massert(snprintf(FN1,sizeof(FN1),"%.*s%n",vs_base[0]->st.st_fillp,vs_base[0]->st.st_self,&i)>=0);
 
-        /* Find the next Lisp item to append. */
-        arglist = arglist->c.c_cdr;
-    }
+#if defined(__CYGWIN__)
+    cygwin_conv_path(CCP_POSIX_TO_WIN_A,FN1,FN2,sizeof(FN2));
+    massert(snprintf(FN1,sizeof(FN1),"%s%n",FN2,&i)>=0);
+#endif
 
-    /* Do the job. */
-    run_process ( cmdline );
+  x=vs_base[1];
+  for (;x!=Cnil;x=x->c.c_cdr,i+=j) {
+    check_type_list(&x);
+    check_type_string(&x->c.c_car);
+    massert(snprintf(FN1+i,sizeof(FN1)-i," %.*s %n",x->c.c_car->st.st_fillp,x->c.c_car->st.st_self,&j)>=0);
+  }
+
+  signals_allowed = sig_at_read;
+  run_process(FN1);
+  signals_allowed = old;
+
 }
 
 void
@@ -351,6 +348,23 @@ gcl_init_socket_function()
 #include <stdio.h>
 
 
+
+static char *lisp_to_string(object string) {
+
+  int	i, len;
+  char	*sself;
+  char	*cstr;
+
+  len = string->st.st_fillp;
+
+  cstr = (char *) malloc (len+1);
+  sself = &(string->st.st_self[0]);
+  for (i=0; i<len; i++)
+      cstr[i] = sself[i];
+  cstr[i] = 0;
+  return (cstr);
+
+}
 
 /* open_connection - Open_Connection a socket to a server that you know by port number.
  *
@@ -442,10 +456,12 @@ enum smmode smm;
 	stream = (object)  alloc_object(t_stream);
 	stream->sm.tt=stream->sm.sm_mode = (short)smm;
 	stream->sm.sm_fp = fp;
+	stream->sm.sm_buffer = 0;
 
 	stream->sm.sm_object0 = sLcharacter;
 	stream->sm.sm_object1 = host_l;
-	stream->sm.sm_int0 = stream->sm.sm_int1 = 0;
+	stream->sm.sm_int = 0;
+	stream->sm.sm_flags=0;
 	vs_push(stream);
 	setup_stream_buffer(stream);
 	vs_reset;
@@ -512,15 +528,19 @@ make_socket_pair()
   stream_in = (object) alloc_object(t_stream);
   stream_in->sm.tt=stream_in->sm.sm_mode = smm_input;
   stream_in->sm.sm_fp = fp1;
-  stream_in->sm.sm_int0 = sockets_in[1];
-  stream_in->sm.sm_int1 = 0;
+  stream_in->sm.sm_buffer = 0;
+  stream_in->sm.sm_int = sockets_in[1];
+  stream_in->sm.sm_object0=stream_in->sm.sm_object1=OBJNULL;
+  stream_in->sm.sm_flags = 0;
   stream_out = (object) alloc_object(t_stream);
   stream_out->sm.tt=stream_out->sm.sm_mode = smm_output;
   stream_out->sm.sm_fp = fp2;
+  stream_out->sm.sm_buffer = 0;
   setup_stream_buffer(stream_in);
   setup_stream_buffer(stream_out);
-  stream_out->sm.sm_int0 = sockets_out[1];
-  stream_out->sm.sm_int1 = 0;
+  stream_out->sm.sm_int = sockets_out[1];
+  stream_out->sm.sm_flags = 0;
+  stream_out->sm.sm_object0=stream_out->sm.sm_object1=OBJNULL;
   stream = make_two_way_stream(stream_in, stream_out);
   return(stream);
 }
@@ -530,67 +550,82 @@ make_socket_pair()
  * with "C" type streams.
  */
 
-void
-spawn_process_with_streams(istream, ostream, pname, argv)
-object istream;
-object ostream;
-char *pname;
-char **argv;
-{
+static void
+spawn_process_with_streams(object istream,object ostream,char *pname,char **argv) {
 
   int fdin;
   int fdout;
+
   if (istream->sm.sm_fp == NULL || ostream->sm.sm_fp == NULL)
     FEerror("Cannot spawn process with given stream", 0);
-  fdin = istream->sm.sm_int0;
-  fdout = ostream->sm.sm_int0;
-  if (pfork() == 0)
-    { /* the child --- replace standard in and out with descriptors given */
-      close(0);
-      massert(dup(fdin)>=0);
-      close(1);
-      massert(dup(fdout)>=0);
-      fprintf(stderr, "\n***** Spawning process %s ", pname);
-      if (execvp(pname, argv) == -1)
-	{
-	  fprintf(stderr, "\n***** Error in process spawning *******");
-	  fflush(stderr);
-	  exit(1);
-	}
-    }
+
+  fdin = istream->sm.sm_int;
+  fdout = ostream->sm.sm_int;
+
+  if (!pvfork()) {
+
+    /* the child --- replace standard in and out with descriptors given */
+    close(0);
+    massert(dup(fdin)>=0);
+    close(1);
+    massert(dup(fdout)>=0);
+
+    close(fileno(istream->sm.sm_fp));
+    close(fileno(ostream->sm.sm_fp));
+
+    emsg("\n***** Spawning process %s ", pname);
+
+    errno=0;
+    execvp(pname,argv);
+    _exit(128|(errno&0x7f));
+
+  } else {
+
+    close(fdin);
+    close(fdout);
+
+  }
 
 }
     
       
 void
-run_process(filename, argv)
-char *filename;
-char **argv;
-{
+run_process(char *filename,char **argv) {
+
   object stream = make_socket_pair();
-  spawn_process_with_streams(stream->sm.sm_object1,
-			    stream->sm.sm_object0,
-			    filename, argv);
+  spawn_process_with_streams(stream->sm.sm_object1,stream->sm.sm_object0,filename,argv);
+
   vs_base[0] = stream;
   vs_base[1] = Cnil;
   vs_top = vs_base + 2;
+
 }
     
 void
-FFN(siLrun_process)()
-{
-  int i;
-  object arglist;
-  char *argv[100];
+FFN(siLrun_process)() {
 
-  arglist = vs_base[1];
-  argv[0] = "";
-  for(i = 1; arglist != Cnil; i++) {
-     argv[i] = lisp_to_string(arglist->c.c_car);
-     arglist = arglist->c.c_cdr;
+  int i,j;
+  object x;
+  char **p1,**pp,*c,*spc=" \n\t";
+
+  if (vs_top-vs_base!=2)
+    FEwrong_no_args("RUN-PROCESS requires two arguments",make_fixnum(vs_top-vs_base));
+  check_type_string(&vs_base[0]);
+
+  massert(snprintf(FN1,sizeof(FN1),"%.*s%n",vs_base[0]->st.st_fillp,vs_base[0]->st.st_self,&i)>=0);
+
+  x=vs_base[1];
+  for (;x!=Cnil;x=x->c.c_cdr,i+=j) {
+    check_type_list(&x);
+    check_type_string(&x->c.c_car);
+    massert(snprintf(FN1+i,sizeof(FN1)-i," %.*s %n",x->c.c_car->st.st_fillp,x->c.c_car->st.st_self,&j)>=0);
   }
-  argv[i] = (char *)0;
-  run_process(object_to_string(vs_base[0]), argv);
+
+  for (pp=p1=(void *)FN2,c=FN1;(*pp=strtok(c,spc));c=NULL,pp++)
+    massert((void *)(pp+1)<(void *)FN2+sizeof(FN2));
+
+  run_process(FN1,(char **)FN2);
+
 }
 
 void
@@ -764,7 +799,7 @@ getpagesize()
 }
 
 dlclose()
-{fprintf(stderr,"calling 'dl' function sun did not supply..exitting") ;exit(1);}
+{emsg("calling 'dl' function sun did not supply..exitting") ;do_gcl_abort();}
 dgettext()
 {dlclose();}
 dlopen()

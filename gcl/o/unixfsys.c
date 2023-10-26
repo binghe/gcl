@@ -21,7 +21,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <unistd.h>
 #include <errno.h>
-#include <time.h>
+#include <string.h>
 
 #define IN_UNIXFSYS
 #include "include.h"
@@ -32,7 +32,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 
 #ifdef __MINGW32__
-#  include <windows.h>        
+#  include <windows.h>
 /* Windows has no symlink, therefore no lstat.  Without symlinks lstat
    is equivalent to stat anyway.  */
 #  define S_ISLNK(a) 0
@@ -41,6 +41,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 static object
 get_string(object x) {
+
   switch(type_of(x)) {
   case t_symbol:
     return x->s.s_name;
@@ -60,7 +61,9 @@ get_string(object x) {
       return get_string(x->sm.sm_object0->s.s_dbind);
     }
   }
+
   return Cnil;
+
 }
 
 void
@@ -68,6 +71,7 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 
   object namestring=get_string(spec);
 
+  massert(stringp(namestring));
   massert(VLEN(namestring)<sz);
   memcpy(p,namestring->st.st_self,VLEN(namestring));
   p[VLEN(namestring)]=0;
@@ -78,113 +82,66 @@ coerce_to_filename1(object spec, char *p,unsigned sz) {
 
 }
 
-
-#ifndef MAXPATHLEN
-#define MAXPATHLEN 512
+#ifndef __MINGW32__
+static char GETPW_BUF[16384];
 #endif
 
 DEFUN("UID-TO-NAME",object,fSuid_to_name,SI,1,1,NONE,OI,OO,OO,OO,(fixnum uid),"") {
+#ifndef __MINGW32__
   struct passwd *pwent,pw;
-  char *b;
   long r;
 
   massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(b=alloca(r));
-  
-  massert(!getpwuid_r(uid,&pw,b,r,&pwent));
+  massert(r<=sizeof(GETPW_BUF));/*FIXME maybe once at image startup*/
+
+  massert(!getpwuid_r(uid,&pw,GETPW_BUF,r,&pwent));
 
   RETURN1(make_simple_string(pwent->pw_name));
-
-}
-  
-DEFUN("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
-
-  struct passwd *pwent,pw;
-  char *b;
-  long r;
-
-  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
-  massert(b=alloca(r));
-  
-  if (VLEN(nm)==1)
-    
-    if ((pw.pw_dir=getenv("HOME")))
-      pwent=&pw;
-    else
-      massert(!getpwuid_r(getuid(),&pw,b,r,&pwent));
-  
-  else {
-    
-    char *name;
-    
-    massert(name=alloca(VLEN(nm)));
-    memcpy(name,nm->st.st_self+1,VLEN(nm)-1);
-    name[VLEN(nm)-1]=0;
-    
-    massert(!getpwnam_r(name,&pw,b,r,&pwent));
-    
-  }
-  
-  massert((b=alloca(strlen(pwent->pw_dir)+2)));
-  memcpy(b,pwent->pw_dir,strlen(pwent->pw_dir));
-  b[strlen(pwent->pw_dir)]='/';
-  b[strlen(pwent->pw_dir)+1]=0;
-  RETURN1(make_simple_string(b));
-  
-}
-
-FILE *
-fopen_not_dir(char *filename,char * option) {
-
-  struct stat ss;
-
-  if (!stat(filename,&ss) && S_ISDIR(ss.st_mode))
-    return NULL;
-  else
-    return fopen(filename,option);
-
+#else
+  RETURN1(Cnil);
+#endif
 }
 
 int
-file_len(FILE *fp)
-{
-	struct stat filestatus;
+home_namestring1(const char *n,int s,char *o,int so) {
 
-	if (fstat(fileno(fp), &filestatus)==0) 
-	return(filestatus.st_size);
-	else return 0;
-}
+  #ifndef __MINGW32__
+  struct passwd *pwent,pw;
+  long r;
 
+  massert(s>0);
+  massert(*n=='~');
 
+  massert((r=sysconf(_SC_GETPW_R_SIZE_MAX))>=0);
+  massert(r<=sizeof(GETPW_BUF));/*FIXME maybe once at image startup*/
 
-DEF_ORDINARY("DIRECTORY",sKdirectory,KEYWORD,"");
-DEF_ORDINARY("LINK",sKlink,KEYWORD,"");
-DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
+  if (s==1)
 
-DEFUNM("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+    if ((pw.pw_dir=getenv("HOME")))
+      pwent=&pw;
+    else
+      massert(!getpwuid_r(getuid(),&pw,GETPW_BUF,r,&pwent) && pwent);
 
-  object *vals=(object *)fcall.valp;
-  object *base=vs_top;
-  struct stat ss;
-  
-  check_type_string(&x);
-  coerce_to_filename(x,FN1);
+  else {
 
-#ifdef __MINGW32__
-  {
-    char *p=FN1+strlen(FN1)-1;
-    for (;p>FN1 && *p=='/';p--)
-      *p=0;
+    massert(s<sizeof(FN2));
+    memcpy(FN2,n+1,s-1);
+    FN2[s-1]=0;
+
+    massert(!getpwnam_r(FN2,&pw,GETPW_BUF,r,&pwent) && pwent);
+
   }
+
+  massert((r=strlen(pwent->pw_dir))+2<so);
+  memcpy(o,pwent->pw_dir,r);
+  o[r]='/';
+  o[r+1]=0;
+  return 0;
+#else
+  massert(snprintf(o,so-1,"%s%s",getenv("SystemDrive"),getenv("HOMEPATH"))>=0);
+  return 0;
 #endif
-  if (lstat(FN1,&ss))
-    RETURN1(Cnil);
-  else
-    RETURN4(S_ISDIR(ss.st_mode) ? sKdirectory : 
-	    (S_ISLNK(ss.st_mode) ? sKlink : sKfile),
-	    make_fixnum(ss.st_size),
-	    make_fixnum(ss.st_ctime),
-	    make_fixnum(ss.st_uid));
+
 }
 
 #include <sys/types.h>
@@ -192,26 +149,146 @@ DEFUNM("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 #include <fcntl.h>
 #include <unistd.h>
 
+DEFUN("HOME-NAMESTRING",object,fShome_namestring,SI,1,1,NONE,OO,OO,OO,OO,(object nm),"") {
+
+  check_type_string(&nm);
+
+  massert(!home_namestring1(nm->st.st_self,VLEN(nm),FN1,sizeof(FN1)));
+  RETURN1(make_simple_string(FN1));
+
+}
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fShome_namestring(object x) {
+  return FFN(fShome_namestring)(x);
+}
+#endif
+
+
+
+#define FILE_EXISTS_P(a_,b_) !stat(a_,&b_) && S_ISREG(b_.st_mode)
+#define DIR_EXISTS_P(a_,b_) !stat(a_,&b_) && S_ISDIR(b_.st_mode)
+
+FILE *
+fopen_not_dir(char *filename,char *option) {
+
+  struct stat ss;
+
+  return DIR_EXISTS_P(filename,ss) ? NULL : fopen(filename,option);
+
+}
+
+int
+file_len(FILE *fp) {/*FIXME dir*/
+
+  struct stat filestatus;
+
+  return fstat(fileno(fp), &filestatus) ? 0 : filestatus.st_size;
+
+}
+
+bool
+file_exists(object x) {
+
+  struct stat ss;
+
+  coerce_to_filename(x,FN1);
+
+  return FILE_EXISTS_P(FN1,ss) ? TRUE : FALSE;
+
+}
+
+DEF_ORDINARY("DIRECTORY",sKdirectory,KEYWORD,"");
+DEF_ORDINARY("LINK",sKlink,KEYWORD,"");
+DEF_ORDINARY("FILE",sKfile,KEYWORD,"");
+
+static int
+stat_internal(object x,struct stat *ssp) {
+
+  if (({enum type _t=type_of(x);_t==t_string || _t==t_simple_string;})) {
+
+    coerce_to_filename(x,FN1);
+
+#ifdef __MINGW32__
+    {char *p=FN1+strlen(FN1)-1;for (;p>FN1 && *p=='/';p--) *p=0;}
+#endif
+    if (lstat(FN1,ssp))
+      return 0;
+  } else if ((x=file_stream(x))!=Cnil&&x->sm.sm_fp) {
+    if (fstat(fileno((FILE *)x->sm.sm_fp),ssp))
+      return 0;
+  } else
+    return 0;
+  return 1;
+}
+
+static object
+stat_mode_key(struct stat *ssp) {
+
+  return S_ISDIR(ssp->st_mode) ? sKdirectory : (S_ISLNK(ssp->st_mode) ? sKlink : sKfile);
+
+}
+
+DEFUN("STAT1",object,fSstat1,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  struct stat ss;
+
+  RETURN1(stat_internal(x,&ss) ? stat_mode_key(&ss) : Cnil);
+
+}
+
+
+DEFUNM("STAT",object,fSstat,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  object *vals=(object *)fcall.valp;
+  object *base=vs_top;
+  struct stat ss;
+
+  if (stat_internal(x,&ss))
+    RETURN4(stat_mode_key(&ss),
+	    make_fixnum(ss.st_size),
+	    make_fixnum(ss.st_mtime),
+	    make_fixnum(ss.st_uid));
+  else
+    RETURN1(Cnil);
+
+}
+
+DEFUN("FTELL",object,fSftell,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
+
+  RETURN1((x=file_stream(x))!=Cnil&&x->sm.sm_fp ? (object)ftell(x->sm.sm_fp) : (object)0);
+
+}
+
+DEFUN("FSEEK",object,fSfseek,SI,2,2,NONE,OO,IO,OO,OO,(object x,fixnum pos),"") {
+
+  RETURN1((x=file_stream(x))!=Cnil&&x->sm.sm_fp&&!fseek(x->sm.sm_fp,pos,SEEK_SET) ? Ct : Cnil);
+
+}
+
+
+#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 DEFUN("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object s),"") {
-  char *b1,*b2=NULL;
-  ssize_t l,z1,z2;
+  ssize_t l,z1;
+
   check_type_string(&s);
   /* l=s->st.st_hasfillp ? s->st.st_fillp : s->st.st_dim; */
   z1=length(s);
-  massert((b1=alloca(z1+1)));
-  memcpy(b1,s->st.st_self,z1);
-  b1[z1]=0;
-  for (l=z2=0;l>=z2;) {
-    memset(b2,0,z2);
-    z2+=z2+10;
-    massert((b2=alloca(z2)));
-    massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,b1,b2,z2))>=0);
-  }
-  b2[l]=0;
-  s=make_simple_string(b2);
-  memset(b1,0,z1);
-  memset(b2,0,z2);
-  RETURN1(s);
+  massert(z1<sizeof(FN1));
+  memcpy(FN1,s->st.st_self,z1);
+  FN1[z1]=0;
+#ifndef __MINGW32__
+  massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,FN1,FN2,sizeof(FN2)))>=0 && l<sizeof(FN2));
+#else
+  l=0;
+#endif
+  FN2[l]=0;
+  RETURN1(make_simple_string(FN2));
+
 }
 
 DEFUN("GETCWD",object,fSgetcwd,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
@@ -246,18 +323,18 @@ DEFUN("SETENV",object,fSsetenv,SI,2,2,NONE,OO,OO,OO,OO,(object variable,object v
 #include <sys/types.h>
 #include <dirent.h>
 
-DEFUN("OPENDIR",fixnum,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
-  DIR *d;
+DEFUN("OPENDIR",object,fSopendir,SI,1,1,NONE,IO,OO,OO,OO,(object x),"") {
   check_type_string(&x);
   coerce_to_filename(x,FN1);
-  d=opendir(FN1);
-  return (fixnum)d;
+  return (object)opendir(strlen(FN1) ? FN1 : "./");
 }
 
-#ifdef HAVE_D_TYPE
-  
+
 DEFUN("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") {
-  RETURN1(list(8,
+  RETURN1(
+
+#ifdef HAVE_D_TYPE
+	  list(8,
 	       MMcons(make_fixnum(DT_BLK),make_keyword("BLOCK")),
 	       MMcons(make_fixnum(DT_CHR),make_keyword("CHAR")),
 	       MMcons(make_fixnum(DT_DIR),make_keyword("DIRECTORY")),
@@ -266,21 +343,47 @@ DEFUN("D-TYPE-LIST",object,fSd_type_list,SI,0,0,NONE,OI,OO,OO,OO,(void),"") {
 	       MMcons(make_fixnum(DT_REG),make_keyword("FILE")),
 	       MMcons(make_fixnum(DT_SOCK),make_keyword("SOCKET")),
 	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
-	       ));
-}
+	       )
+#else
+#undef DT_UNKNOWN
+#define DT_UNKNOWN 0
+#undef DT_REG
+#define DT_REG 1
+#undef DT_DIR
+#define DT_DIR 2
+	  list(3,
+	       MMcons(make_fixnum(DT_REG),make_keyword("FILE")),
+	       MMcons(make_fixnum(DT_DIR),make_keyword("DIRECTORY")),
+	       MMcons(make_fixnum(DT_UNKNOWN),make_keyword("UNKNOWN"))
+	       )
 #endif
+	  );
+}
+
+
 
 DEFUN("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,object s),"") {
   struct dirent *e;
   object z;
   long tl;
   size_t l;
-  if (!x) RETURN1(Cnil);
-  tl=telldir((DIR *)x);
+  long d_type=DT_UNKNOWN;
 #ifdef HAVE_D_TYPE
-  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && e->d_type!=y;);
+#define get_d_type(e,s) e->d_type
+#else
+#define get_d_type(e,s) \
+  ({struct stat ss;\
+    massert(snprintf(FN1,sizeof(FN1),"%-*.*s%s",s->st.st_fillp,s->st.st_fillp,s->st.st_self,e->d_name)>=0);\
+    lstat(FN1,&ss);S_ISDIR(ss.st_mode) ? DT_DIR : DT_REG;})
 #endif
+
+  if (!x) RETURN1(Cnil);
+
+  tl=telldir((DIR *)x);
+
+  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && y!=(d_type=get_d_type(e,s)););
   if (!e) RETURN1(Cnil);
+
   if (s==Cnil)
     z=make_simple_string(e->d_name);
   else {
@@ -295,10 +398,11 @@ DEFUN("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,obje
       RETURN1(make_fixnum(l));
     }
   }
-#ifdef HAVE_D_TYPE
-  if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(e->d_type));
-#endif
+
+  if (y==DT_UNKNOWN) z=MMcons(z,make_fixnum(d_type));
+
   RETURN1(z);
+
 }
 
 DEFUN("CLOSEDIR",object,fSclosedir,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
@@ -328,7 +432,7 @@ DEFUN("UNLINK",object,fSunlink,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
 }
   
-DEFUN("CHDIR",object,fSchdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+DEFUN("CHDIR1",object,fSchdir1,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
 
   check_type_string(&x);
 
@@ -345,7 +449,7 @@ DEFUN("MKDIR",object,fSmkdir,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
   coerce_to_filename(x,FN1);
 
   RETURN1(mkdir(FN1
-#ifndef __MINGW32__		
+#ifndef __MINGW32__
 		,01777
 #endif
 		) ? Cnil : Ct);
@@ -367,7 +471,7 @@ DEFVAR("*LOAD-WITH-FREAD*",sSAload_with_freadA,SI,Cnil,"");
 
 void *
 get_mmap(FILE *fp,void **ve) {
-  
+
   int n;
   void *st;
   size_t sz;
@@ -408,9 +512,9 @@ un_mmap(void *v1,void *ve) {
 
 #include <sys/mman.h>
 
-void *
-get_mmap(FILE *fp,void **ve) {
-  
+static void *
+get_mmap_flags(FILE *fp,void **ve,int flags) {
+
   int n;
   void *v1;
   struct stat ss;
@@ -418,7 +522,7 @@ get_mmap(FILE *fp,void **ve) {
   massert((n=fileno(fp))>2);
   massert(!fstat(n,&ss));
   if (sSAload_with_freadA->s.s_dbind==Cnil) {
-    massert((v1=mmap(0,ss.st_size,PROT_READ|PROT_WRITE,MAP_PRIVATE,n,0))!=(void *)-1);
+    massert((v1=mmap(0,ss.st_size,PROT_READ|PROT_WRITE,flags,n,0))!=(void *)-1);
   } else {
     massert(v1=malloc(ss.st_size));
     massert(fread(v1,ss.st_size,1,fp)==1);
@@ -428,7 +532,20 @@ get_mmap(FILE *fp,void **ve) {
   return v1;
 
 }
- 
+
+void *
+get_mmap(FILE *fp,void **ve) {
+
+  return get_mmap_flags(fp,ve,MAP_PRIVATE);
+
+}
+
+void *
+get_mmap_shared(FILE *fp,void **ve) {
+
+  return get_mmap_flags(fp,ve,MAP_SHARED);
+
+}
 
 int
 un_mmap(void *v1,void *ve) {
@@ -444,6 +561,34 @@ un_mmap(void *v1,void *ve) {
 
 #endif
 
+/* export these for AXIOM */
+int gcl_putenv(char *s) {return putenv(s);}
+char *gcl_strncpy(char *d,const char *s,size_t z) {return strncpy(d,s,z);}
+int gcl_strncpy_chk(char *a1,char *b1,size_t z) {char a[10],b[10];strncpy(a,a1,z);strncpy(b,b1,z);return strncmp(a,b,z);}/*compile in __strncpy_chk with FORTIFY_SOURCE*/
+#ifdef __MINGW32__
+#define uid_t int
+#endif
+uid_t gcl_geteuid(void) {
+#ifndef __MINGW32__
+  return geteuid();
+#else
+  return 0;
+#endif
+}
+uid_t gcl_getegid(void) {
+#ifndef __MINGW32__
+  return getegid();
+#else
+  return 0;
+#endif
+}
+int gcl_dup2(int o,int n) {return dup2(o,n);}
+char *gcl_gets(char *s,int z) {return fgets(s,z,stdin);}
+int gcl_puts(const char *s) {int i=fputs(s,stdout);fflush(stdout);return i;}
+
+int gcl_feof(void *v) {return feof(((FILE *)v));}
+int gcl_getc(void *v) {return getc(((FILE *)v));}
+int gcl_putc(int i,void *v) {return putc(i,((FILE *)v));}
 
 void
 gcl_init_unixfsys(void) {

@@ -87,7 +87,7 @@ DEFUN("INIT-FUNCTION",object,fSinit_function,SI,7,7,NONE,OO,OO,OI,II, \
   i=sSPinit;
   i=i ? i->s.s_dbind : i;
   s=i && i!=OBJNULL && !get_pageinfo(addr) && ((void *)addr)>=data_start && type_of(addr)==t_fixnum ? i->v.v_self[fix(addr)] : addr;
-  z=type_of(sc)==t_cons && sc->c.c_car==sLmacro; /*FIXME limited no. of args.*/
+  z=type_of(sc)==t_cons && sc->c.c_car==sSmacro; /*FIXME limited no. of args.*/
   sc=z ? sc->c.c_cdr : sc;
   sc=type_of(sc)==t_function ? sc->fun.fun_plist : sc;
   c=type_of(sc)==t_symbol ? Cnil : sc;
@@ -120,7 +120,7 @@ DEFUN("SET-KEY-STRUCT",object,fSset_key_struct,SI,1,1,NONE,OO,OO,OO,OO,(object k
   return Cnil;
 }
      
-#define collect(top_,next_,val_) ({object _x=MMcons(val_,Cnil);\
+#define mcollect(top_,next_,val_) ({object _x=MMcons(val_,Cnil);\
                                    if (top_==Cnil) top_=next_=_x; \
                                    else next_=next_->c.c_cdr=_x;})
 
@@ -138,23 +138,23 @@ put_fn_procls(object sym,fixnum argd,fixnum oneval,object def,object rdef) {
   for (i=0;i<minargs;i++,atypes >>=F_TYPE_WIDTH) 
     switch(maxargs!=minargs ? F_object : atypes & MASK_RANGE(0,F_TYPE_WIDTH)) {
     case F_object:
-      collect(ta,na,def);
+      mcollect(ta,na,def);
       break;
     case F_int:
-      collect(ta,na,sLfixnum);
+      mcollect(ta,na,sLfixnum);
       break;
     case F_shortfloat:
-      collect(ta,na,sLshort_float);
+      mcollect(ta,na,sLshort_float);
       break;
     case F_double_ptr:
-      collect(ta,na,sLlong_float);
+      mcollect(ta,na,sLlong_float);
       break;
     default:
       FEerror("Bad sfn declaration",0);
       break;
     }
   if (maxargs!=minargs)
-    collect(ta,na,sLA);
+    mcollect(ta,na,sLA);
   putprop(sym,ta,sSproclaimed_arg_types);
   ta=na=Cnil;
   if (oneval) 

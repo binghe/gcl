@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPWT  Output routines.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -106,10 +105,8 @@
   
 
 
-(defmacro data-vector () `(car *data*))
-(defmacro data-inits () `(second *data*))
-(defmacro data-package-ops () `(third *data*))
-(defmacro data-dl () `(fourth *data*))
+;(defmacro data-inits () `(first *data*))
+;(defmacro data-dl () `(second *data*))
 
 )
 
@@ -153,36 +150,53 @@
 
 (defvar *fasd-data*)
 
-(defun data-symbol (x)
-;  (or (setf-function-base-symbol x)
-  (when (and *compiler-compile* (symbolp x))
-    (unless (let ((p (symbol-package x))) (and p (package-name p)));FIXME delete-package leaves nil package name hpack
-      (setq *tmp-pack* (or *tmp-pack* (make-package "TMP")))
-      (let ((s (find-symbol (symbol-name x) *tmp-pack*)))
-	(when s (unintern s *tmp-pack*)))
-      (import x *tmp-pack*)
-      x)))
-
 (defvar *hash-eq* nil)
+(defvar *run-hash-equal-data-checking* t)
 (defun memoized-hash-equal (x depth);FIXME implement all this in lisp
   (declare (fixnum depth))
-  (unless *hash-eq* (setq *hash-eq* (make-hash-table :test 'eq)))
-  (or (gethash x *hash-eq*)
-      (setf (gethash x *hash-eq*)
-	    (if (> depth 3) 0
-	      (if (typep x 'cons)
-		  (logxor (setq depth (the fixnum (1+ depth)));FIXME?
-			  (logxor 
-			   (memoized-hash-equal (car x) depth) 
-			   (memoized-hash-equal (cdr x) depth)))
-	      (si::hash-equal x depth))))))
+  (when *run-hash-equal-data-checking*
+    (unless *hash-eq* (setq *hash-eq* (make-hash-table :test 'eq)))
+    (or (gethash x *hash-eq*)
+	(setf (gethash x *hash-eq*)
+	      (if (> depth 3) 0
+		(if (typep x 'cons)
+		    (logxor (setq depth (the fixnum (1+ depth)));FIXME?
+			    (logxor
+			     (memoized-hash-equal (car x) depth)
+			     (memoized-hash-equal (cdr x) depth)))
+		  (si::hash-equal x depth)))))))
 
 (defun push-data-incf (x)
-  (let ((x (or (data-symbol x) x)))
-    (vector-push-extend (cons (memoized-hash-equal x -1000) x) (data-vector))
-    (incf *next-vv*)))
+  (declare (ignore x));FIXME
+  (incf *next-vv*))
 
 (defun wt-data1 (expr)
+  (terpri *compiler-output-data*)
+  (prin1 expr *compiler-output-data*))
+
+
+(defun add-init (x &optional endp &aux (tem (cons (memoized-hash-equal x -1000) x)))
+  (if endp
+      (nconc *data* (list tem))
+    (push tem *data*))
+  x)
+
+(defun add-dl (x &optional endp &aux (tem (cons (memoized-hash-equal x -1000) x)))
+  (if endp
+      (nconc (data-dl) (list tem))
+    (push tem (data-dl)))
+  x)
+
+(defun verify-datum (v)
+  (unless (eql (pop v) (memoized-hash-equal v -1000))
+    (cmpwarn "A form or constant:~% ~s ~%has changed during the eval compile procedure!.~%  The changed form will be the one put in the compiled file" v))
+  v)
+
+(defun wt-fasd-element (x)
+  (si::find-sharing-top x (fasd-table (car *fasd-data*)))
+  (si::write-fasd-top x (car *fasd-data*)))
+
+(defun wt-data2 (x)
   (let ((*print-radix* nil)
         (*print-base* 10)
         (*print-circle* t)
@@ -192,88 +206,26 @@
         (*print-case* :downcase)
         (*print-gensym* t)
         (*print-array* t)
+        (*print-readably* t)
 	;;This forces the printer to add the float type in the .data file.
-	(*READ-DEFAULT-FLOAT-FORMAT* t) 
+	(*READ-DEFAULT-FLOAT-FORMAT* 'long-float)
         (si::*print-package* t)
         (si::*print-structure* t))
-    (terpri *compiler-output-data*)
-    (prin1 expr *compiler-output-data*)))
-
-(defun verify-data-vector(vec &aux v)
-  (dotimes (i (length vec))
-	   (setq v (aref vec i))
-	   (let ((has (memoized-hash-equal (cdr v) -1000)))
-	     (cond ((not (eql (car v) has))
-		    (cmpwarn "A form or constant:~% ~s ~%has changed during the eval compile procedure!.~%  The changed form will be the one put in the compiled file" (cdr v)))))
-	   (setf (aref vec i) (cdr v)))
-  vec
-  )
-
-(si::putprop 'si::mdl t 'dlfun)
-(si::putprop 'si::mdlsym t 'dlfun)
-(si::putprop 'si::lib-name t 'dlfun)
-(defun add-init (x &optional endp)
-  (let* ((x (if (and (consp x) (member (car x) '(shadow shadowing-import)))
-		(cons 'si::|#,| x) x))
-	 (tem (cons (memoized-hash-equal x -1000) x)))
-    (if (and (member (car x) '(si::mfsfun si::mfvfun))
-	     (consp (cadr x)) (eq (caadr x) 'quote)
-	     (symbolp (cadadr x))
-	     (get (cadadr x) 'dlfun))
-	(setf (data-dl) (if endp (nconc (data-dl) (list tem)) (cons tem (data-dl) )))
-    (setf (data-inits) (if endp (nconc (data-inits) (list tem)) (cons tem (data-inits) ))))
-    x))
-
-(defun add-dl (x &optional endp)
-  (let* ((x (if (and (consp x) (member (car x) '(shadow shadowing-import)))
-		(cons 'si::|#,| x) x))
-	 (tem (cons (si::hash-equal x -1000) x)))
-    (setf (data-dl)
-	  (if endp
-	      (nconc (data-dl) (list tem))
-	    (cons tem (data-dl) )))
-    x))
+    (if *fasd-data*
+	(wt-fasd-element x)
+	(wt-data1 x))))
 
 
-(defun wt-data-file ()
+(defun wt-data-file nil
   (when *prof-p* (add-init `(si::mark-memory-as-profiling)))
-  (verify-data-vector (data-vector))
-  (let* ((vec (coerce (nreverse (data-inits)) 'vector)))
-    (verify-data-vector vec)
-    (let* ((dll (length (data-dl)))
-	   (v (make-array (1+ dll))))
-      (do ((d (nreverse (data-dl)) (cdr d)) (i 0 (1+ i))) ((>= i dll))
-	(setf (aref v i) (cdar d)))
-      (setf (aref v dll) `(progn ,@(coerce vec 'list))
-	    (aref (data-vector) (- (length (data-vector)) 1)) (cons 'si::%init v)))
-    (setf (data-package-ops) (nreverse (data-package-ops)))
-    (cond (*fasd-data*
-	   (wt-fasd-data-file))
-	  (t
-	   (format *compiler-output-data* "       ~%#(")
-	   (dolist (v (data-package-ops))
-		   (format *compiler-output-data* "#! ")
-		   (wt-data1 v))
-	   (wt-data1 (data-vector))
-	   (format *compiler-output-data* "~%)~%")
-	   ))))
+  (wt-data2 (1+ *next-vv*))
+  (dolist (v (nreverse *data*))
+    (wt-data2 (verify-datum v)))
+  (when *fasd-data*
+    (si::close-fasd (car *fasd-data*))))
 
-(defun wt-fasd-data-file ( &aux (x (data-vector)) tem)
-;  (si::find-sharing-top (data-package-ops) (fasd-table (car *fasd-data*)))
-  (si::find-sharing-top x (fasd-table (car *fasd-data*)))
-  (cond ((setq tem  (data-package-ops))
-	 (dolist (v tem)
-	 (put-op d_eval_skip  *compiler-output-data*)
-	 (si::write-fasd-top v (car *fasd-data*)))))
-  (si::write-fasd-top x (car *fasd-data*))
-;  (sloop::sloop for (k v) in-table (fasd-table (car *fasd-data*))
-;		when (>= v 0) do (print (list k v)))
-  (values (si::close-fasd (car *fasd-data*))))
 (defun wt-data-begin ())
 (defun wt-data-end ())
-(defun wt-data-package-operation (x)
-  (push x (data-package-ops)))
-;  (push-data-incf x))
 
 (defmacro wt (&rest forms &aux (fl nil))
   (dolist (form forms (cons 'progn (reverse (cons nil fl))))
@@ -321,13 +273,13 @@
         ((stringp (car forms))
          (dolist (form (cdr forms)
                          (list* 'progn `(princ ,(concatenate 'string "
-" (car forms)) *compiler-output1*) (reverse (cons nil fl))))
+" (car forms)) *compiler-output1*) (nreverse (cons nil fl))))
                    (if (stringp form)
                        (push `(princ ,form *compiler-output1*) fl)
                        (push `(wt1 ,form) fl))))
         (t (dolist (form forms
                            (list* 'progn '(princ "
-" *compiler-output1*) (reverse (cons nil fl))))
+" *compiler-output1*) (nreverse (cons nil fl))))
                      (if (stringp form)
                          (push `(princ ,form *compiler-output1*) fl)
                          (push `(wt1 ,form) fl))))))

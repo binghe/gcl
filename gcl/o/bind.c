@@ -23,6 +23,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 	bind.c
 */
 
+#include <string.h>
+
 #include "include.h"
 
 static void
@@ -386,7 +388,6 @@ SEARCH_DECLARE:
 /* 		  special_processed = TRUE; */
 	if (special_processed)
 		continue;
-	/*  lex_special_bind(v);  */
 	s[0] = MMcons(MMcons(v, Cnil), s[0]);
 
 /**/
@@ -436,10 +437,11 @@ SEARCH_DECLARE:
 					 optional[i].opt_svar_spp);
 		}
 	if (rest_flag) {
-		vs_push(Cnil);
-		for (i = narg, j = nreq+nopt;  --i >= j;  )
-			vs_head = make_cons(base[i], vs_head);
-		bind_var(rest->rest_var, vs_head, rest->rest_spp);
+	  object *l=vs_top++;
+	  for (i=nreq+nopt;i<narg;i++)
+	    collect(l,make_cons(base[i],Cnil));
+	  *l=Cnil;
+	  bind_var(rest->rest_var, vs_head, rest->rest_spp);
 	}
 	if (key_flag) {
                 int allow_other_keys_found=0;
@@ -515,7 +517,7 @@ SEARCH_DECLARE:
 	  ss->c.c_cdr=lex_env[0];
 	  lex_env[0]=s[0];
 	}
-	
+
 	return;
 
 REQUIRED_ONLY:
@@ -585,7 +587,6 @@ REQUIRED_ONLY:
 	  ss->c.c_cdr=lex_env[0];
 	  lex_env[0]=s[0];
 	}
-	
 
 }
 
@@ -828,12 +829,11 @@ parse_key(object *base, bool rest, bool allow_other_keys, int n, ...)
 		}
 	}
 	if (rest) {
-		top = vs_top;
-		vs_push(Cnil);
-		base++;
-		while (base < vs_top)
-			stack_cons();
-		vs_top = top;
+	  object *a,*l;
+	  for (l=a=base;a<vs_top;a++)
+	    collect(l,make_cons(*a,Cnil));
+	  *l=Cnil;
+	  base++;
 	}
 	top = base + n;
 	va_start(ap,n);
@@ -870,7 +870,7 @@ check_other_key(object l, int n, ...)
 		  FEunexpected_keyword(Cnil);
 		if (k == sKallow_other_keys && !allow_other_keys_found) {
 		  allow_other_keys_found=1;
-		  if (l->c.c_cdr->c.c_car != Cnil) 
+		  if (l->c.c_cdr->c.c_car != Cnil)
 		    allow_other_keys = TRUE;
 		} else {
 		  char buf [100];
@@ -894,7 +894,8 @@ check_other_key(object l, int n, ...)
 /*  	   }; */
 
 
-object Cstd_key_defaults[15]={0};
+object Cstd_key_defaults[15]={Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,
+				Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil,Cnil};
 
 /* FIXME rewrite this */
 /* static int */
@@ -947,13 +948,13 @@ object Cstd_key_defaults[15]={0};
 int
 parse_key_new_new(int n, object *base, struct key *keys, object first, va_list ap)
 {object *new;
- COERCE_VA_LIST_NEW(new,first,ap,n);
+ COERCE_VA_LIST_KR_NEW(new,first,ap,n);
 
  /* from here down identical to parse_key_rest */
  new = new + n ;
   {int j=keys->n;
-   object *p= (object *)(keys->defaults);
-   while (--j >=0) base[j]=p[j];
+   object **p= (object **)(keys->defaults);
+   while (--j >=0) base[j]=*(p[j]);
  }
  {if (n==0){ return 0;}
  {int allow = keys->allow_other_keys;
@@ -1049,7 +1050,7 @@ parse_key_new_new(int n, object *base, struct key *keys, object first, va_list a
 int
 parse_key_rest_new(object rest, int n, object *base, struct key *keys, object first,va_list ap)
 {object *new;
- COERCE_VA_LIST_NEW(new,first,ap,n);
+ COERCE_VA_LIST_KR_NEW(new,first,ap,n);
 
  /* copy the rest arg */
  {object *p = new;
@@ -1100,14 +1101,13 @@ parse_key_rest_new(object rest, int n, object *base, struct key *keys, object fi
   return -1;
 }}}
 
-  
 void
 set_key_struct(struct key *ks, object data)
 {int i=ks->n;
  while (--i >=0)
    {ks->keys[i].o =   data->cfd.cfd_self[ ks->keys[i].i ];
     if (ks->defaults != (void *)Cstd_key_defaults)
-      {int m=ks->defaults[i].i;
+      {fixnum m=ks->defaults[i].i;
         ks->defaults[i].o=
 	  (m==-2 ? Cnil :
 	   m==-1 ? OBJNULL :
@@ -1158,13 +1158,4 @@ gcl_init_bind(void)
 	six_nils.nil6_self[3] = Cnil;
 	six_nils.nil6_self[4] = Cnil;
 	six_nils.nil6_self[5] = Cnil;
-
-	{
-
-	  int i;
-	  for (i=0;i<sizeof(Cstd_key_defaults)/sizeof(*Cstd_key_defaults);i++)
-	    Cstd_key_defaults[i]=Cnil;
-
-	}
-
 }

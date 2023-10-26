@@ -35,7 +35,7 @@
    (expected-type :initarg :expected-type
 		  :reader type-error-expected-type))
   (:report ("~s is not of type ~s: " datum expected-type)))
-(define-condition simple-type-error (simple-error type-error) nil)
+(define-condition simple-type-error (simple-condition type-error) nil)
 
 (define-condition program-error (error) nil)
 (define-condition control-error (error) nil)
@@ -176,3 +176,16 @@
 
 
 
+#.`(progn
+     ,@(mapcar (lambda (x)
+		 `(define-condition
+		    ,(intern (concatenate 'string "INTERNAL-SIMPLE-" (string x)))
+		    (internal-condition simple-condition ,x) nil))
+	       `(stack-overflow storage-exhausted print-not-readable end-of-file style-warning
+				unbound-variable unbound-slot undefined-function division-by-zero
+				case-failure abort-failure
+				,@(mapcar (lambda (x) (intern (concatenate 'string "FLOATING-POINT-" (string x))))
+					  '(overflow underflow invalid-operation inexact))
+				,@(mapcar (lambda (x) (intern (concatenate 'string (string x) "-ERROR")))
+					  '(program control parse stream reader file
+						    package cell arithmetic pathname)))))

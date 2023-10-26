@@ -5,12 +5,12 @@ all: objects docs
 LISP?=../unixport/saved_gcl
 
 objects: $(LISP)
-	echo '(load "sysdef.lisp")(xlib::compile-xgcl)' | $(LISP)
+	echo '(load "sysdef.lisp")(load "sys-proclaim.lisp")(xlib::compile-xgcl)' | $(LISP)
 
-#saved_%: $(LISP)
-#	echo '(load "sysdef.lisp")(xlib::compile-xgcl)(xlib::save-xgcl "$@")' | $(LISP)
+sys-proclaim.lisp:
+	echo '(load "sysdef.lisp")(compiler::emit-fn t)(xlib::compile-xgcl)(compiler::make-all-proclaims "*.fn")' | $(LISP)
 
-docs: dwdoc/dwdoccontents.html dwdoc.pdf
+docs: dwdoc/dwdoccontents.html #dwdoc.pdf
 
 dwdoc/dwdoccontents.html: $(LISP)
 	mkdir -p $(@D) && \
@@ -20,12 +20,9 @@ dwdoc/dwdoccontents.html: $(LISP)
 dwdoc.pdf: dwdoc.tex
 	pdflatex $<
 
-#dwdoc/index.html: dwdoc.tex
-#	latex2html $<
-
 clean:
 	rm -f *.o *.data saved_*  cmpinclude.h dwdoc.pdf dwdoc.aux dwdoc.log gmon.out dwdoc.dvi dwdoc.html dwdoc.ps
-	rm -f gcl_xrecompile* user-init* gcl*c gcl*h gcl*data
+	rm -f gcl_xrecompile* user-init* gcl*c gcl*h gcl*data *fn
 	rm -rf dwdoc
 
 install: docs

@@ -2,7 +2,7 @@
 
 (in-package :si);FIXME this belongs in :compiler
 
-(export '(*split-files* *sig-discovery* export-call-struct compress-fle))
+(export '(*split-files* *sig-discovery* compress-fle))
 
 (defstruct (call (:type list) (:constructor make-call))
   sig callees src file props name)
@@ -24,14 +24,6 @@
 			  '(list cons proper-list proper-sequence sequence boolean null true array vector number immfix bfix bignum integer
 				 function-designator
 				 ratio short-float long-float float real number pathname hash-table function)))
-
-(defun ex-type (tp) tp) ;(or (cdr (assoc tp +et+ :test 'equal)) tp))
-(defun ex-sig (sig) (list (mapcar 'ex-type (car sig)) (ex-type (cadr sig))))
-(defun unex-type (tp) (or (car (rassoc tp +et+)) tp))
-(defun unex-sig (sig) (list (mapcar 'unex-type (car sig)) (unex-type (cadr sig))))
-
-(defun export-call-struct (l)
-  `(apply 'make-function-plist ',(ex-sig (pop l)) ',(pop l) ,(apply 'compress-fle (pop l)) ',l))
 
 (defvar *sig-discovery-props* nil)
 
@@ -98,10 +90,10 @@
 	((nsyms (1- n) (cons (gensym) syms)))))
 
 (defun max-types (sigs &optional res)
-  (cond ((not res) (max-types (cdr sigs) (ldiff (caar sigs) (member '* (caar sigs)))))
+  (cond ((not res) (max-types (cdr sigs) (ldiff-nf (caar sigs) (member '* (caar sigs)))))
 	((not sigs) res)
 	((max-types (cdr sigs) 
-		    (let ((z (ldiff (caar sigs) (member '* (caar sigs)))))
+		    (let ((z (ldiff-nf (caar sigs) (member '* (caar sigs)))))
 		      (append
 		       (mapcar (lambda (x y) (or (not (equal x y)) x)) z res)
 		     (early-nthcdr (length z) res)))))))
@@ -128,7 +120,7 @@
 	     (tps (max-types (mapcar 'sig syms)))
 	     (min (reduce 
 		   'min 
-		   (mapcar (lambda (x) (length (ldiff (cadr x) (member '&optional (cadr x))))) fns)
+		   (mapcar (lambda (x) (length (ldiff-nf (cadr x) (member '&optional (cadr x))))) fns)
 		   :initial-value 64));FIXME
 	     (max (reduce 'max (mapcar (lambda (x) (length (lambda-vars (cadr x)))) fns) :initial-value 0))
 	     (reqs (nsyms min))

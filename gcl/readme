@@ -3,7 +3,7 @@ Description of GCL (GNU Common Lisp) system.
 OVERVIEW:
 
 The GCL system contains C and Lisp source files to build a Common Lisp
-sytem.  The original KCL system was written by Taiichi Yuasa and
+system.  The original KCL system was written by Taiichi Yuasa and
 Masami Hagiya in 1984.  The AKCL system work was begun in 1987 by
 William Schelter and continued through 1994.  A number of people have
 contributed ports and pieces.  The file doc/contributors lists some of

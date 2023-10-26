@@ -127,20 +127,43 @@ number_big_iexpt(object x,object y,fixnum ly,fixnum j) {
 
 }
 
-static inline object
-number_zero_expt(object x,bool promote_short_p) {
+static inline fixnum
+number_contagion_index(object x) {
 
-  switch (type_of(x)) {
+  switch(type_of(x)) {
   case t_fixnum:
   case t_bignum:
   case t_ratio:
-    return make_fixnum(1);
+    return 0;
   case t_shortfloat:
-    return promote_short_p ? make_longfloat(1.0) : make_shortfloat(1.0);
+    return 1;
   case t_longfloat:
-    return make_longfloat(1.0);
+    return 2;
   case t_complex:
-    return make_complex(number_zero_expt(x->cmp.cmp_real,promote_short_p),small_fixnum(0));
+    return 3+number_contagion_index(x->cmp.cmp_real);
+  }
+  return 0;
+}
+
+static inline object
+number_zero_expt(object x,fixnum cy) {
+
+  enum type cx=number_contagion_index(x);
+
+  if (gcl_is_not_finite(x))/*FIXME, better place?*/
+    return number_exp(number_times(number_nlog(x),small_fixnum(0)));
+
+  switch (cx<cy ? cy : cx) {
+  case 3:case 0:
+    return make_fixnum(1);
+  case 1:
+    return make_shortfloat(1.0);
+  case 2:
+    return make_longfloat(1.0);
+  case 4:
+    return make_complex(make_shortfloat(1.0),make_fixnum(0));
+  case 5:
+    return make_complex(make_longfloat(1.0),make_fixnum(0));
   default:
     FEwrong_type_argument(sLnumber,x);
     return Cnil;
@@ -189,7 +212,7 @@ number_ump_expt(object x,object y) {
 
 static inline object
 number_log_expt(object x,object y) {
-  return number_zerop(y) ? number_zero_expt(y,type_of(x)==t_longfloat) : number_exp(number_times(number_nlog(x),y));
+  return number_zerop(y) ? number_zero_expt(x,number_contagion_index(y)) : number_exp(number_times(number_nlog(x),y));
 }
 
 static inline object
@@ -320,43 +343,29 @@ number_log(object x, object y)
 static object
 number_sqrt(object x)
 {
-	object z,q;
-	int s;
-	enum type t;
-	double d;
+	object z;
 	vs_mark;
 
 	if (type_of(x) == t_complex)
 		goto COMPLEX;
-	if ((s=number_minusp(x))) 
-	  x=number_negate(x);
-
-	switch ((t=type_of(x))) {
+	if (number_minusp(x))
+		goto COMPLEX;
+	switch (type_of(x)) {
 	case t_fixnum:
 	case t_bignum:
 	case t_ratio:
-	  d=sqrt(number_to_double(x));
-/* 	  if (d!=(number_to_double((q=double_to_integer(d))))) */
-/* 	    t=t_longfloat; */
-	  q=Cnil;
-	  t=t_longfloat;
-	  break;
+		return(make_longfloat(
+			(longfloat)sqrt(number_to_double(x))));
+
 	case t_shortfloat:
-	  q=make_shortfloat(sqrtf(sf(x)));
-	  break;
+		return(make_shortfloat((shortfloat)sqrtf((double)(sf(x)))));
+
 	case t_longfloat:
-	  d=sqrt(lf(x));
-	  q=Cnil;
-	  break;
+		return(make_longfloat(sqrt(lf(x))));
+
 	default:
-	  FEwrong_type_argument(sLnumber, x);
-	  return Cnil;
+		FEwrong_type_argument(sLnumber, x);
 	}
-
-	q=t==t_longfloat ? make_longfloat(d) : q;
-
-	return s ? make_complex(small_fixnum(0),q) : q;
-
 
 COMPLEX:
 	{extern object plus_half;
@@ -373,8 +382,8 @@ number_abs(object x) {
   switch(type_of(x)) {
 
   case t_complex:
+    if (number_zerop(x)) return x->cmp.cmp_real;
     r=number_abs(x->cmp.cmp_real);
-    if (number_zerop(x)) return r;
     i=number_abs(x->cmp.cmp_imag);
     if (number_compare(r,i)<0) {
       object z=i;
@@ -455,7 +464,7 @@ number_atan2(object y, object x)
 		if (dy > 0.0)
 			dz = PI / 2.0;
 		else if (dy == 0.0)
-			FEerror("Logarithmic singularity.", 0);
+		        dz = 0.0;
 		else
 			dz = -PI / 2.0;
 	else
@@ -465,8 +474,7 @@ number_atan2(object y, object x)
 			dz = PI;
 		else
 			dz = -PI + atan(-dy / -dx);
-	if ((type_of(x) == t_shortfloat && type_of(y)!=t_longfloat) || 
-	    (type_of(y) == t_shortfloat && type_of(x)!=t_longfloat))
+	if (type_of(x) == t_shortfloat)
 	  z = make_shortfloat((shortfloat)dz);
 	else
 	  z = make_longfloat(dz);
@@ -880,29 +888,17 @@ void
 gcl_init_num_sfun(void)
 {
 	imag_unit
-	= make_complex(small_fixnum(0),
-		       small_fixnum(1));
+	= make_complex(make_longfloat((longfloat)0.0),
+		       make_longfloat((longfloat)1.0));
 	enter_mark_origin(&imag_unit);
 	minus_imag_unit
-	= make_complex(small_fixnum(0),
-		       small_fixnum(-1));
+	= make_complex(make_longfloat((longfloat)0.0),
+		       make_longfloat((longfloat)-1.0));
 	enter_mark_origin(&minus_imag_unit);
 	imag_two
-	= make_complex(small_fixnum(0),
-		       small_fixnum(2));
+	= make_complex(make_longfloat((longfloat)0.0),
+		       make_longfloat((longfloat)2.0));
 	enter_mark_origin(&imag_two);
-/* 	imag_unit */
-/* 	= make_complex(make_longfloat((longfloat)0.0), */
-/* 		       make_longfloat((longfloat)1.0)); */
-/* 	enter_mark_origin(&imag_unit); */
-/* 	minus_imag_unit */
-/* 	= make_complex(make_longfloat((longfloat)0.0), */
-/* 		       make_longfloat((longfloat)-1.0)); */
-/* 	enter_mark_origin(&minus_imag_unit); */
-/* 	imag_two */
-/* 	= make_complex(make_longfloat((longfloat)0.0), */
-/* 		       make_longfloat((longfloat)2.0)); */
-/* 	enter_mark_origin(&imag_two); */
 
 	make_constant("PI", make_longfloat(PI));
 

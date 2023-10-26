@@ -87,7 +87,7 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 #define D3(a_,b_,c_) D2(a_,b_),D0(c_) z
 #define D4(a_,b_,c_,d_) D3(a_,b_,c_),D0(d_) w
 
-#define R1(a_) D0(a_)
+#define R1(a_) object /*D0(a_)*/
 
 #define EE(a_,b_)
 #define E_b ENSURE_MP
@@ -178,11 +178,11 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 /* #define Z_b normalize_big(u) */
 #define Z_bbb maybe_replace_big(u),maybe_replace_big(v),maybe_replace_big(v2)
 #define Z_bb  maybe_replace_big(u),maybe_replace_big(v)
-#define Z_fb  u,maybe_replace_big(v)
-#define Z_fbb u,maybe_replace_big(v),maybe_replace_big(v2)
+#define Z_fb  (object)u,maybe_replace_big(v)
+#define Z_fbb (object)u,maybe_replace_big(v),maybe_replace_big(v2)
 #define Z_m   maybe_replace_big(u),maybe_replace_big(v)
 #define Z_b   maybe_replace_big(u)
-#define Z_f   u
+#define Z_f   (object)u
 
 #define PT_bb MMcons(sLvalues,MMcons(sLinteger,MMcons(sLinteger,Cnil)))
 #define PT_fb MMcons(sLvalues,MMcons(sLfixnum,MMcons(sLinteger,Cnil)))
@@ -212,8 +212,8 @@ extern object sLvalues,sLinteger,sLfixnum,big_fixnum1,big_fixnum2,big_fixnum3,bi
 
 #define HH_bbb(a_...) RETURN3(a_)
 #define HH_bb(a_...)  RETURN2(a_)
-#define HH_fb(a_...)  RETURN2I(a_)
-#define HH_fbb(a_...) RETURN3I(a_)
+#define HH_fb(a_...)  RETURN2(a_)
+#define HH_fbb(a_...) RETURN3(a_)
 #define HH_m(a_...)   RETURN2(a_)
 #define HH_b(a_...)   RETURN1(a_)
 #define HH_f(a_...)   RETURN1(a_)

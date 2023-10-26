@@ -141,7 +141,17 @@
     (values (string (progn (incf i) "")) i))
   "" 1)
 
-(def-fold-test string.fold.1 (string #\A))
+;;Spec does not appear to require this to be a fresh string
+;#-gcl(def-fold-test string.fold.1 (string #\A))
+
+(deftest string.fold.1
+  :notes (:string-on-character-can-be-constant)
+  (flet
+      ((%f nil
+	 (declare (optimize (speed 3) (safety 0) (space 0) (compilation-speed 0) (debug 0)))
+	 (string #\a)))
+    (eq (%f) (%f)))
+  nil)
 
 ;;; Error tests
 

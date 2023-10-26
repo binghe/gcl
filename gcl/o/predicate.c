@@ -174,9 +174,8 @@ DEFUN("EQ",object,fLeq,LISP,2,2,NONE,OO,OO,OO,OO,(object x0,object x1),"") {
 bool
 eql1(register object x,register object y) {
 
-  /*x and y are not == and not Cnil and not immfix*/
+  /*x and y are not == and not eql_is_eq and d.t == */
 
-  if (valid_cdr(x)||valid_cdr(y)||x->d.t!=y->d.t) return FALSE;
   
   switch (x->d.t) {
 

@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -33,40 +32,44 @@
 
 (defvar *modules* nil)
 
-(defun module-string (module-name)
-  (string-downcase (string module-name)))
 
 (defun provide (module-name)
-  (pushnew (module-string module-name) *modules* :test 'string=))
+  (declare (optimize (safety 1)))
+  (check-type module-name string-designator)
+  (pushnew (string module-name) *modules* :test 'string=))
+
+(defun list-of-pathname-designators-p (x)
+  (not (member-if-not (lambda (x) (typep x 'pathname-designator)) x)))
 
 (defun default-module-pathlist (module-name)
-  (list (make-pathname :name (module-string module-name)
+  (list (make-pathname :name (string module-name)
 		       :directory (append (pathname-directory (pathname *system-directory*))
 					  (list :up "modules")))))
 
-(defun require (module-name &optional (pl (default-module-pathlist module-name))  &aux (*default-pathname-defaults* (make-pathname)))
-  (unless (member (module-string module-name) *modules* :test 'string=)
-    (when pl
-      (load (pop pl))
-      (require module-name pl))))
-          
+(defun require (module-name &optional (pl (default-module-pathlist module-name))
+		&aux (*default-pathname-defaults* (make-pathname))
+		  (pl1 (if (listp pl) pl (list pl))));FIXME ansi-test modules.7
+  (declare (optimize (safety 1)))
+  (check-type module-name string-designator)
+  (check-type pl1 (and proper-list (satisfies list-of-pathname-designators-p)))
+  (unless (member (string module-name) *modules* :test 'string=)
+    (mapc 'load pl1)))
 
-(defun documentation (object doc-type)
-  (let ((x (typecase object
-		     (function (function-name object))
-		     (package (find-symbol (package-name object) :keyword))
-		     ((cons (member setf) (cons symbol nil)) (setf-sym object))
-		     (symbol object)))
-	(p (ecase doc-type
-	       (variable 'variable-documentation)
-	       (function 'function-documentation)
-	       (structure 'structure-documentation)
-	       (type 'type-documentation)
-	       (setf 'setf-documentation)
-	       (compiler-macro 'compiler-macro-documentation)
-	       (method-combination 'method-combination-documentation)
-	       ((t) 'package-documentation))))
-    (when x (get x p))))
+(defun software-type nil nil)
+(defun software-version nil nil)
+
+(defvar *doc-strings* (make-hash-table :test 'eq));FIXME weak
+
+(defun real-documentation (object doc-type)
+  (declare (optimize (safety 1)))
+  (check-type doc-type (member variable function structure type setf compiler-macro method-combination t))
+  (getf (gethash object *doc-strings*) doc-type))
+
+(defun set-documentation (object doc-type value)
+  (declare (optimize (safety 1)))
+  (check-type doc-type (member variable function structure type setf compiler-macro method-combination t))
+  (setf (getf (gethash object *doc-strings*) doc-type) value))
+
 
 
 (defun find-documentation (body)

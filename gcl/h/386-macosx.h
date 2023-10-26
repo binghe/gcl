@@ -77,34 +77,6 @@ extern void *my_sbrk(long incr);
 extern int seek_to_end_ofile (FILE *);
 #define SEEK_TO_END_OFILE(fp) seek_to_end_ofile(fp)
 
-#ifdef IN_SFASL
-#include <sys/mman.h>
-#define CLEAR_CACHE {\
-   void *p,*pe; \
-   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1)); \
-   pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size) & ~(PAGESIZE-1)) + PAGESIZE-1; \
-   if (mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC)) {\
-     fprintf(stderr,"%p %p\n",p,pe);\
-     perror("");\
-     FEerror("Cannot mprotect", 0);\
-   }\
-}
-#endif
-
-
-/* Processor cache synchronization code.  This is based on powerpc-linux.h (Debian ppc).
-   See equivalent code in dyld.  See also vm_msync declared in <mach/vm_maps.h>.  */
-/* #define CLEAR_CACHE_LINE_SIZE 32 */
-/* #define CLEAR_CACHE                                                             \ */
-/* do {                                                                            \ */
-/*   void *v=memory->cfd.cfd_start,*ve=v+memory->cfd.cfd_size;                     \ */
-/*   v=(void *)((unsigned long)v & ~(CLEAR_CACHE_LINE_SIZE - 1));                  \ */
-/*   for (;v<ve;v+=CLEAR_CACHE_LINE_SIZE)                                          \ */
-/*   asm __volatile__                                                              \ */
-/*     ("dcbst 0,%0\n\tsync\n\ticbi 0,%0\n\tsync\n\tisync": : "r" (v) : "memory"); \ */
-/* } while(0) */
-
-
 /** Stratified garbage collection implementation [ (si::sgc-on t) ]  */
 
 /* Mac OS X has sigaction (this is needed in o/usig.c)  */
@@ -197,6 +169,7 @@ if (realpath (buf, fub) == 0) {                             \
 #define RELOC_H "mach32_i386_reloc.h"
 #endif
 
+
 #define UC(a_) ((ucontext_t *)a_)
 #define SF(a_) ((siginfo_t *)a_)
 
@@ -219,6 +192,7 @@ if (realpath (buf, fub) == 0) {                             \
 
 #define FPE_INIT ({ucontext_t v;list(3,MMcons(make_simple_string(({const char *s=FPE_RLST;s;})),REG_LIST(21,MC(__ss))),	\
 				     REG_LIST(8,MCF(__fpu_stmm0)),REG_LIST(16,MCF(__fpu_xmm0)));})
+
 
 #include <sys/param.h>/*PATH_MAX MAXPATHLEN*/
 #undef MIN

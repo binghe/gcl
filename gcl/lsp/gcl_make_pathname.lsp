@@ -33,30 +33,44 @@
 (set-dispatch-macro-character #\# #\v 'sharp-v-reader)
 
 
-
 (defun msub (a x) (if a (msub (cdr a) (substitute (caar a) (cdar a) x)) x))
 
-(defvar *glob-to-regexp-alist* (list (cons #v"{[^}]*}" (lambda (x) (msub '((#\| . #\,)(#\( . #\{)(#\) . #\})) x)))
-				     (cons #v"\\[[^\\]*\\]" (lambda (x)
-							      (concatenate 'string "("
-									   (substitute #\^ #\! (subseq x 0 2))
-									   (subseq x 2) ")")))
-				     (cons #v"\\*" (lambda (x) "([^/.]*)"))
-				     (cons #v"\\?" (lambda (x) "([^/.])"))
-				     (cons #v"\\." (lambda (x) "\\."))))
+(defconstant +glob-to-regexp-alist+ (list (cons #v"{[^}]*}" (lambda (x) (msub '((#\| . #\,)(#\( . #\{)(#\) . #\})) x)))
+					  (cons #v"\\[[^\\]*\\]"
+						(lambda (x)
+						  (string-concatenate "(" (substitute #\^ #\! (subseq x 0 2)) (subseq x 2) ")")))
+					  (cons #v"\\*" (lambda (x) "([^/.]*)"))
+					  (cons #v"\\?" (lambda (x) "([^/.])"))
+					  (cons #v"\\." (lambda (x) "\\."))))
+
+(defconstant +physical-pathname-defaults+ '(("" "" "")
+					    ("" "" "")
+					    ("" "(/?([^/]+/)*)" "" "" "([^/]+/)" "/")
+					    ("" "([^/.]*)" "")
+					    ("." "(\\.[^/]*)?" "")
+					    ("" "" "")))
+(defconstant +logical-pathname-defaults+  '(("" "([-0-9A-Z]+:)?" ":")
+					    ("" "" "")
+					    ("" "(;?((\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*\\*?);)*)" "" "" "((\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*);)" ";");
+;					    ("" "(;?((\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*|\\*\\*);)*)" "" "" "((\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*);)" ";")
+					    ("" "(\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*)?" "")
+;					    ("" "(\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*)?" "")
+					    ("." "(\\.(\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*))?" "")
+;					    ("." "(\\.(\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*))?" "")
+					    ("." "(\\.([1-9][0-9]*|newest|NEWEST|\\*))?" "")))
 
 (defun mglist (x &optional (b 0))
   (let* ((y (mapcan (lambda (z &aux (w (string-match (car z) x b)))
 		      (unless (eql w -1)
 			(list (list w (match-end 0) z))))
-		    *glob-to-regexp-alist*))
+		    +glob-to-regexp-alist+))
 	 (z (when y (reduce (lambda (y x) (if (< (car x) (car y)) x y)) y))))
     (when z
       (cons z (mglist x (cadr z))))))
 
 (defun mgsub (x &optional (l (mglist x)) (b 0) &aux (w (pop l)))
   (if w
-      (concatenate 'string
+      (string-concatenate
 		   (subseq x b (car w))
 		   (funcall (cdaddr w) (subseq x (car w) (cadr w)))
 		   (mgsub x l (cadr w)))
@@ -79,21 +93,10 @@
 ;    )
 )
 
-(defconstant +physical-pathname-defaults+ '(("" "" "")
-					    ("" "" "")
-					    ("" "(/?([^/]+/)*)" "" "" "([^/]+/)" "/")
-					    ("" "([^/.]*)" "")
-					    ("." "(\\.[^/]*)?" "")
-					    ("" "" "")))
-(defconstant +logical-pathname-defaults+  '(("" "([-0-9A-Z]+:)?" ":")
-					    ("" "" "")
-					    ("" "(;?((\\*?([-0-9A-Z]+\\*?)+|\\*|\\*\\*);)*)" "" "" "((\\*?([-0-9A-Z]+\\*?)+|\\*);)" ";")
-					    ("" "(\\*?([-0-9A-Z]+\\*?)+|\\*)?" "")
-					    ("." "(\\.(\\*?([-0-9A-Z]+\\*?)+|\\*))?" "")
-					    ("." "(\\.([1-9][0-9]*|newest|NEWEST|\\*))?" "")))
+
 
 (defun to-regexp-or-namestring (x rp lp)
-  (apply 'concatenate 'string
+  (apply 'string-concatenate
 	 (mapcan (lambda (x y) (elsub x y rp lp))
 		 x (if lp +logical-pathname-defaults+ +physical-pathname-defaults+))))
 
@@ -110,7 +113,8 @@
 	((mapl (lambda (x &aux (c (car x)))
 		 (when (and (or (stringp c) (eq c :wild)) (eq (cadr x) :back))
 		   (return-from canonicalize-pathname-directory
-		     (canonicalize-pathname-directory (nconc (ldiff l x) (cddr x)))))) l))))
+		     (canonicalize-pathname-directory (nconc (ldiff-nf l x) (cddr x))))))
+	       l))))
 
 (defvar *default-pathname-defaults* (init-pathname nil nil nil nil nil nil ""))
 (declaim (type pathname *default-pathname-defaults*))
@@ -122,6 +126,12 @@
 	((find-if 'lower-case-p x) (string-upcase x))
 	(x)))
 
+(defun assert-uppercase (x)
+  (cond ((symbolp x) x)
+	((listp x) (mapcar 'assert-uppercase x))
+	((find-if 'lower-case-p x) (string-upcase x));FIXME find in string-upcase
+	(x)))
+
 (defun logical-pathname (spec &aux (p (pathname spec)))
   (declare (optimize (safety 1)))
   (check-type spec pathname-designator)
@@ -130,15 +140,15 @@
   
 (eval-when (compile eval)
   (defun strsym (p &rest r)
-    (declare (:dynamic-extent r))
-    (intern (apply 'concatenate 'string (mapcar 'string-upcase r)) p)))
+    (declare (dynamic-extent r))
+    (intern (apply 'string-concatenate (mapcar 'string-upcase r)) p)))
 
 #.`(defun make-pathname (&key (host nil hostp) (device nil devicep) (directory nil directoryp)
 			      (name nil namep) (type nil typep) (version nil versionp)
 			      defaults (case :local) namestring &aux defaulted (def (when defaults (pathname defaults))))
      (declare (optimize (safety 1)))
      (check-type host (or (member nil :unspecific) string))
-     (check-type device (member nil :unspecific))
+     (check-type device (or (member nil :unspecific) string))
      (check-type directory (or (member nil :unspecific :wild) string list))
      (check-type name (or string (member nil :unspecific :wild)))
      (check-type type (or string (member nil :unspecific :wild)))
@@ -146,11 +156,15 @@
      (check-type defaults (or null pathname-designator))
      (check-type case (member :common :local))
      ,(flet ((def? (k) `(let* (,@(when (eq k 'host) `((def (or def *default-pathname-defaults*))))
-			       (nk (if ,(strsym :si k "P") ,k (progn (setq defaulted t) (when def (,(strsym :si "C-PATHNAME-" k) def)))))
+			       (nk (if ,(strsym :si k "P") ,k (when def (,(strsym :si "C-PATHNAME-" k) def))))
+			       (nk (unless (equal "" nk) nk))
+			       (nk (if h (assert-uppercase nk) nk))
+			       (nk (progn (unless (eq ,k nk) (setq defaulted t)) nk))
 			       (nk (if (eq case :local) nk (progn (setq defaulted t) (toggle-case nk)))))
-			nk)))
-	`(let* ((h ,(def? 'host))
-		(h (let ((h1 (when (logical-pathname-host-p h) h))) (unless (eq h h1) (setq defaulted t)) h1))
+			  nk)))
+	`(let* (h
+		(h ,(def? 'host))
+		(h (cond ((logical-pathname-host-p h) h)(h (setq defaulted t) nil)))
 		(dev ,(def? 'device))
 		(d ,(def? 'directory))
 		(d (let ((d1 (canonicalize-pathname-directory d))) (unless (eq d d1) (setq defaulted t)) d1))
@@ -182,4 +196,4 @@
      (list ,@(mapcar (lambda (x) `(,(strsym :si "C-PATHNAME-" x) p)) +pathname-keys+)))
 
 (defun pnl1 (x) (list* (pop x) (pop x) (append (pop x) x)))
-(defun lnp (x) (list* (pop x) (pop x) (let ((q (last x 3))) (cons (ldiff x q) q))))
+(defun lnp (x) (list* (pop x) (pop x) (let ((q (last x 3))) (cons (ldiff-nf x q) q))))

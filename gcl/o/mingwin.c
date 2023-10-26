@@ -2,16 +2,14 @@
 
 
 
+#include "winsock2.h"
 #include "windows.h"
 #include "errno.h"
 #include "signal.h"
-extern void sigint ( int );
+#include "stdlib.h"
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     
@@ -85,7 +83,6 @@ static struct {
 static int SocketsEnabled();
 static void close_winsock();
 extern void doReverse ( char *s, int n );
-extern void init_shared_memory (void);
 
 
 /*
@@ -238,8 +235,7 @@ InitSockets()
 	 * Initialize the winsock library and check the version number.
 	 */
 	if ((*winSock.WSAStartup)(MAKEWORD(2,2), &wsaData) != 0) {
-	  fprintf(stderr,"unloading");
-	  fflush(stderr);
+	  emsg("unloading");
 	    goto unloadLibrary;
 	}
 #ifdef WSA_VERSION_REQD
@@ -381,10 +377,8 @@ CreateSocketAddress(sockaddrPtr, host, port)
 #ifdef DEBUG
 static void myerr(char *s,int d)
 {
-  if (0) {
-  fprintf(stderr,s,d);
-  fflush(stderr);
-  }
+  if (0)
+    emsg(s,d);
 
 }
 #else
@@ -706,8 +700,8 @@ int getCharGclSocket(strm,block)
       if (high > 0)
 	{ object bufp = SOCKET_STREAM_BUFFER(strm);
 	int n;
-	n = (*winSock.recv)(fd,bufp->ust.ust_self ,bufp->ust.ust_dim,0);
-	doReverse(bufp->ust.ust_self,n);
+	n = (*winSock.recv)(fd,bufp->st.st_self ,bufp->ust.ust_dim,0);
+	doReverse(bufp->st.st_self,n);
 	bufp->ust.ust_fillp=n;
 	if (n > 0)
 	  {
@@ -770,8 +764,7 @@ sigint()
 #if 0
 BOOL WINAPI inthandler(DWORD i)
 {
-  fprintf(stderr,"in handler %d",i);
-      fflush(stderr); 
+  emsg("in handler %d",i);
   terminal_interrupt(1);
   return TRUE;
 }
@@ -813,14 +806,14 @@ void sigterm()
 #ifdef SIGABRT
 void sigabrt()
 {
-  exit(SIGABRT);
+  do_gcl_abort();
 }
 #endif
 
 
 void sigkill()
 {
-  exit(SIGKILL);
+  do_gcl_abort();
 }
 
 
@@ -931,17 +924,6 @@ sigprocmask (int how , const sigset_t *set,sigset_t *oldset)
   return 0;
 }
   
-void
-fix_filename ( object pathname, char *filename )
-{
-    char *p = filename;
-    while ( *p ) {
-        if (*p=='\\') *p='/';
-        p++;
-    }
-}
-
-
 char *GCLExeName ( void )
 {
     static char module_name_buf[128];
@@ -952,4 +934,21 @@ char *GCLExeName ( void )
       rv = module_name_buf;
     }
     return ( (char *) rv );
+}
+
+int
+vsystem(const char *command) {
+
+  STARTUPINFO s={0};
+  PROCESS_INFORMATION p={0};
+  long unsigned int e;
+
+  massert(CreateProcess(NULL,(void *)command,NULL,NULL,FALSE,0,NULL,NULL,&s,&p));
+  massert(!WaitForSingleObject(p.hProcess,INFINITE));
+  massert(GetExitCodeProcess(p.hProcess,&e));
+  massert(CloseHandle(p.hProcess));
+  massert(CloseHandle(p.hThread));
+
+  return e;
+
 }

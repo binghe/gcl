@@ -6,7 +6,7 @@
 
  (defmacro defcomp ((fn fn2))
    `(defun ,fn (n1 &optional (n2 n1 n2p) &rest r) 
-      (declare (:dynamic-extent r))
+      (declare (dynamic-extent r))
       (declare (optimize (safety 1)))
       (check-type n1 ,(if (member fn '(= /=)) 'number 'real))
       (check-type n2 ,(if (member fn '(= /=)) 'number 'real))
@@ -17,7 +17,7 @@
 
  (defmacro defpt ((fn fn2) &aux (def (if (eq fn '+) 0 1)))
    `(defun ,fn (&optional (n1 ,def) (n2 ,def) &rest r) 
-      (declare (:dynamic-extent r))
+      (declare (dynamic-extent r))
       (declare (optimize (safety 1)))
       (check-type n1 number)
       (check-type n2 number)
@@ -26,7 +26,7 @@
 
  (defmacro defmm ((fn c))
    `(defun ,fn (n1 &optional (n2 n1) &rest r) 
-      (declare (:dynamic-extent r))
+      (declare (dynamic-extent r))
       (declare (optimize (safety 1)))
       (check-type n1 real)
       (check-type n2 real)
@@ -35,7 +35,7 @@
 
   (defmacro defmd ((fn fn2 fn3))
    `(defun ,fn (n1 &optional (n2 n1 n2p) &rest r) 
-      (declare (:dynamic-extent r))
+      (declare (dynamic-extent r))
       (declare (optimize (safety 1)))
       (check-type n1 number)
       (check-type n2 number)

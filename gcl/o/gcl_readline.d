@@ -42,13 +42,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <stdio.h>
 #include <unistd.h>
-#if 1
-#include <readline/readline.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <string.h>
 #include <readline/history.h>
-#else
-#include <readline.h>
-#include <history.h>
-#endif
 
 int readline_on = 0;		/* On (1) or off (0) */
 static int rl_ungetc_em_char = -1;
@@ -175,6 +172,24 @@ typedef char *rl_compentry_func_t(const char *, int);
 
 #endif
 
+static int
+my_getc(FILE *f) {
+  int c;
+  BEGIN_NO_INTERRUPT;
+  c=getc(f);
+  END_NO_INTERRUPT;
+  return c;
+}
+
+static int
+my_putc(int c,FILE *f) {
+  BEGIN_NO_INTERRUPT;
+  c=putc(c,f);
+  END_NO_INTERRUPT;
+  return c;
+}
+
+
 int rl_putc_em(int c, FILE *f) {
 
   static int allocated_length = 0;
@@ -194,7 +209,6 @@ int rl_putc_em(int c, FILE *f) {
     old_line = rl_putc_em_line;
     rl_putc_em_line = realloc(old_line, allocated_length);
     if (rl_putc_em_line==NULL) {
-      free(old_line);
       allocated_length = 0;
       current_length = 0;
       goto tail;
@@ -205,20 +219,21 @@ int rl_putc_em(int c, FILE *f) {
   rl_putc_em_line[current_length] = 0;
   
  tail:
-  return putc(c, f);
+  return my_putc(c, f);
 
 }
+
+#include <setjmp.h>
 
 int rl_getc_em(FILE *f) {
 
   static char *line = NULL;
   static int linepos = 0;
-  int r;
   
-  if (f!=stdin || !isatty(fileno(f)) ) return getc(f);
+  if (f!=stdin || !isatty(fileno(f))) return my_getc(f);
   
   if (rl_ungetc_em_char!=-1) {
-    r = rl_ungetc_em_char;
+    int r = rl_ungetc_em_char;
     rl_ungetc_em_char = -1;
     return r;
   }
@@ -247,7 +262,8 @@ int rl_getc_em(FILE *f) {
 
 }
 
-int rl_ungetc_em(int c, FILE *f) {
+int
+rl_ungetc_em(int c, FILE *f) {
 
   if (f!=stdin || !isatty(fileno(f)) ) return ungetc(c, f);
   rl_ungetc_em_char = ((unsigned char)c);
@@ -287,9 +303,9 @@ void
 gcl_init_readline_function(void) {
   char *cp=getenv("TERM");
 
-  rl_readline_name="GCL";
+  *my_rl_readline_name_ptr="GCL";
 #ifdef RL_COMPLETION
-  rl_completion_entry_function = rl_completion_words;
+  *my_rl_completion_entry_function_ptr = rl_completion_words;
 #endif			
   if (isatty(0) && (!cp || strcmp(cp,"dumb")))
     readline_on=1;

@@ -188,44 +188,43 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
   object x,xe,f;
   struct pageinfo *pp;
 
- t=tm->tm_type;
+  t=tm->tm_type;
 
- size=tm->tm_size;
- f=tm->tm_free;
- pp=pageinfo(p);
- bzero(pp,sizeof(*pp));
- pp->type=t;
- pp->magic=PAGE_MAGIC;
+  size=tm->tm_size;
+  pp=pageinfo(p);
+  bzero(pp,sizeof(*pp));
+  pp->type=t;
+  pp->magic=PAGE_MAGIC;
 
- if (cell_list_head==NULL) 
-   cell_list_tail=cell_list_head=pp;
- else if (pp > cell_list_tail) {
-   cell_list_tail->next=pp;
-   cell_list_tail=pp;
- }
+  if (cell_list_head==NULL)
+    cell_list_tail=cell_list_head=pp;
+  else if (pp > cell_list_tail) {
+    cell_list_tail->next=pp;
+    cell_list_tail=pp;
+  }
 
- x= (object)pagetochar(page(p));
- /* set_type_of(x,t); */
- make_free(x);
+  x= (object)pagetochar(page(p));
+  /* set_type_of(x,t); */
+  make_free(x);
 
 #ifdef SGC
 
- if (sgc_enabled && tm->tm_sgc)
-   pp->sgc_flags=SGC_PAGE_FLAG;
+  if (sgc_enabled && tm->tm_sgc)
+    pp->sgc_flags=SGC_PAGE_FLAG;
 
 #ifndef SGC_WHOLE_PAGE
- if (TYPEWORD_TYPE_P(pp->type))
-   x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
+  if (TYPEWORD_TYPE_P(pp->type))
+    x->d.s=(sgc_enabled && tm->tm_sgc) ? SGC_RECENT : SGC_NORMAL;
 #endif
 
- /* array headers must be always writable, since a write to the
-    body does not touch the header.   It may be desirable if there
-    are many arrays in a system to make the headers not writable,
-    but just SGC_TOUCH the header each time you write to it.   this
-    is what is done with t_structure */
+  /* array headers must be always writable, since a write to the
+     body does not touch the header.   It may be desirable if there
+     are many arrays in a system to make the headers not writable,
+     but just SGC_TOUCH the header each time you write to it.   this
+     is what is done with t_structure */
   if (t==(tm_of(t_array)->tm_type))
     pp->sgc_flags|=SGC_PERM_WRITABLE;
-   
+
 #endif 
 
   f=FREELIST_TAIL(tm);
@@ -238,7 +237,7 @@ add_page_to_freelist(char *p, struct typemanager *tm) {
 
   SET_LINK(f,OBJNULL);
   tm->tm_tail=f;
-  tm->tm_nfree += tm->tm_nppage;
+  tm->tm_nfree+=tm->tm_nppage;
   tm->tm_npage++;
 
 }
@@ -332,7 +331,7 @@ empty_relblock(void) {
 void
 setup_rb(bool preserve_rb_pointerp) {
 
-  int lowp=new_rb_start!=rb_start || rb_high();
+  int lowp=rb_high();
 
   update_pool(2*(nrbpage-page(rb_size())));
   rb_start=new_rb_start;
@@ -352,10 +351,14 @@ resize_hole(ufixnum hp,enum type tp,bool in_placep) {
   char *start=rb_begin(),*new_start=heap_end+hp*PAGESIZE;
   ufixnum size=rb_pointer-start;
 
-  if (!in_placep &&
-      ((new_start<=start && start<new_start+size) || (new_start<start+size && start+size<=new_start+size))) {
+#define OVERLAP(c_,t_,s_) ((t_)<(c_)+(s_) && (c_)<(t_)+(s_))
+  if (!in_placep && (rb_high() ?
+		     OVERLAP(start,new_start,size) :
+		     OVERLAP(start,new_start+(nrbpage<<PAGEWIDTH),size)
+		     /* 0 (20190401  never reached)*/
+		     )) {
     if (sSAnotify_gbcA->s.s_dbind != Cnil)
-      emsg("Toggling relblock when resizing hole to %lu\n",hp);
+      emsg("[GC Toggling relblock when resizing hole to %lu]\n",hp);
     tm_table[t_relocatable].tm_adjgbccnt--;
     GBC(t_relocatable);
     return resize_hole(hp,tp,in_placep);
@@ -392,7 +395,7 @@ alloc_page(long n) {
       d=(available_pages/3)<d ? (available_pages/3) : d;
       
       if (sSAnotify_gbcA && sSAnotify_gbcA->s.s_dbind != Cnil)
-	emsg("Hole overrun\n");
+	emsg("[GC Hole overrun]\n");
 
       resize_hole(d+nn,t_relocatable,0);
 
@@ -855,7 +858,7 @@ add_pages(struct typemanager *tm,fixnum m) {
 
     if (rb_high() && m>((rb_start-heap_end)>>PAGEWIDTH)) {
       if (sSAnotify_gbcA->s.s_dbind != Cnil)
-	emsg("Moving relblock low before expanding relblock pages\n");
+	emsg("[GC Moving relblock low before expanding relblock pages]\n");
       tm_table[t_relocatable].tm_adjgbccnt--;
       GBC(t_relocatable);
     }
@@ -1003,12 +1006,8 @@ alloc_contblock_no_gc(size_t n,char *limit) {
 
 }
 
-#ifndef MAX_CODE_ADDRESS
-#define MAX_CODE_ADDRESS -1UL
-#endif
-
 void *
-alloc_code_space(size_t sz) {
+alloc_code_space(size_t sz,ufixnum max_code_address) {
 
   void *v;
 
@@ -1025,7 +1024,15 @@ alloc_code_space(size_t sz) {
   } else
     v=alloc_contblock(sz);
 
-  massert(v && (unsigned long)(v+sz)<MAX_CODE_ADDRESS);
+  if (v && (unsigned long)(v+sz)<max_code_address)
+    return v;
+  else
+    FEerror("File ~a has been compiled for a restricted address space,~% and can no longer be loaded in this heap.~%"
+#ifdef LARGE_MEMORY_MODEL
+	    "You can recompile with :large-memory-model-p t,~% or (setq compiler::*default-large-memory-model-p* t) before recompiling."
+#endif
+	    ,
+	    1,sLAload_pathnameA->s.s_dbind);
 
   return v;
 
@@ -1050,7 +1057,7 @@ load_cons(object p,object a,object d) {
 object
 make_cons(object a,object d) {
 
-  struct typemanager *tm=tm_of(t_cons);
+  static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
   object obj=alloc_mem(tm,tm->tm_size);
 
   load_cons(obj,a,d);
@@ -1061,9 +1068,8 @@ make_cons(object a,object d) {
 
 }
 
-
-
-object on_stack_cons(object x, object y) {
+object
+on_stack_cons(object x, object y) {
   object p = (object) alloca_val;
   load_cons(p,x,y);
   return p;
@@ -1219,7 +1225,7 @@ gcl_init_alloc(void *cs_start) {
       rl.rlim_cur = rl.rlim_max; /* == RLIM_INFINITY ? rl.rlim_max : rl.rlim_max/64; */
       massert(!setrlimit(RLIMIT_STACK,&rl));
     }
-    cssize = rl.rlim_cur/sizeof(*cs_org);
+    cssize = rl.rlim_cur/sizeof(*cs_org) - sizeof(*cs_org)*CSGETA;
   
   }
 #endif

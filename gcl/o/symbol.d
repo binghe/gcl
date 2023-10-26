@@ -26,6 +26,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <ctype.h>
 #include "include.h"
 
+/*FIXME this symbol is needed my maxima MAKE_SPECIAL*/
+void
+check_type_symbol(object *x) {
+  check_type_sym(x);
+}
+
 static void
 odd_plist(object);
 
@@ -295,7 +301,6 @@ putf(p, v, i)
 object p, v, i;
 {
 	object l;
-	vs_mark;
 
 	for (l = p;  !cendp(l);  l = l->c.c_cdr->c.c_cdr) {
 		if (cendp(l->c.c_cdr))
@@ -306,11 +311,7 @@ object p, v, i;
 		}
 	}
         if(l!=Cnil) FEerror("Bad plist ~a",1,p);
-	l = make_cons(v, p);
-	vs_push(l);
-	l = make_cons(i, l);
-	vs_reset;
-	return(l);
+	return listA(3,i,v,p);
 }
 
 object
@@ -384,7 +385,7 @@ object s;
 /*
 	if (type_of(s) != t_symbol) {
 		vs_push(s);
-		check_type_symbol(&vs_head);
+		check_type_sym(&vs_head);
 		vs_pop;
 	}
 	if (s->s.s_hpack == OBJNULL)
@@ -418,7 +419,6 @@ DEFUN("SYMBOL-PLIST",object,fLsymbol_plist,LISP,1,1,NONE,OO,OO,OO,OO,(object sym
 
 @(defun getf (place indicator &optional deflt)
 @
-	check_proper_list(place);
 	@(return `getf(place, indicator, deflt)`)
 @)
 
@@ -426,8 +426,6 @@ DEFUN("SYMBOL-PLIST",object,fLsymbol_plist,LISP,1,1,NONE,OO,OO,OO,OO,(object sym
 	object l, m;
 
 @
-	check_proper_list(place);
-	check_proper_list(indicator_list);
 	for (l = place;  !endp(l);  l = l->c.c_cdr->c.c_cdr) {
 		if (endp(l->c.c_cdr))
 			odd_plist(place);

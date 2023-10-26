@@ -35,22 +35,6 @@ object make_pathname ();
 
 static int needs_patching;
 
-
-struct fasd {
-  object stream;   /* lisp object of type stream */
-  object table;  /* hash table used in dumping or vector on input*/
-  object eof;      /* lisp object to be returned on coming to eof mark */
-  object direction;    /* holds Cnil or sKinput or sKoutput */
-  object package;  /* the package symbols are in by default */
-  object index;     /* integer.  The current_dump index on write  */
-  object filepos;   /* nil or the position of the start */ 
-  object table_length; /*    On read it is set to the size dump array needed
-		     or 0
-		     */
-  object evald_items;  /* a list of items which have been eval'd and must
-			  not be walked by fasd_patch_sharp */
-};
-
 struct fasd current_fasd;
 
 
@@ -149,7 +133,7 @@ enum dump_type {
 
 /* given SHORT extract top code (say 4 bits) and bottom byte */
 #define TOP(i) (i >> SIZE_BYTE)
-#define BOTTOM(i) (i &  ~(~0 << SIZE_BYTE))
+#define BOTTOM(i) (i &  ~(~0UL << SIZE_BYTE))
 
 #define FASD_VERSION 2
 
@@ -333,7 +317,7 @@ getd(str)
 
       
 #define D_TYPE_OF(byt) \
-  ((enum dump_type )((unsigned int) byt & ~(~0 << SIZE_D_CODE)))
+  ((enum dump_type )((unsigned int) byt & ~(~0UL << SIZE_D_CODE)))
 
 /* this field may be the top of a short for length, or part of an extended
    code */
@@ -350,14 +334,14 @@ getd(str)
 #define READ_BYTE1() ((unsigned char)readc_stream(fas_stream))
 
 #define GET8(varx ) \
- do{unsigned long var=(unsigned long)READ_BYTE1();  \
-   var |=  ((unsigned long)READ_BYTE1() << SIZE_BYTE); \
-   var |=  ((unsigned long)READ_BYTE1() << (2*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (3*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (4*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (5*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (6*SIZE_BYTE)); \
-   var |=  ((unsigned long)READ_BYTE1() << (7*SIZE_BYTE)); \
+ do{unsigned long long var=READ_BYTE1();  \
+   var |=  ((unsigned long long)READ_BYTE1() << SIZE_BYTE); \
+   var |=  ((unsigned long long)READ_BYTE1() << (2*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (3*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (4*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (5*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (6*SIZE_BYTE)); \
+   var |=  ((unsigned long long)READ_BYTE1() << (7*SIZE_BYTE)); \
    DPRINTF("{8byte:varx= %ld}", var); \
      varx=var;} while (0)
 
@@ -384,14 +368,14 @@ getd(str)
 
 
 
-#define MASK ~(~0 << 8)
+#define MASK ~(~0UL << 8)
 #define WRITE_BYTEI(x,i)  writec_stream((((x) >> (i*SIZE_BYTE)) & MASK),fas_stream)
 
 #define PUTFIX(v_) Join(PUT,SIZEOF_LONG)(v_)
 #define GETFIX(v_) Join(GET,SIZEOF_LONG)(v_)
 
 #define PUT8(varx ) \
- do{unsigned long var= varx ; \
+ do{unsigned long long var= varx ; \
      DPRINTF("{8byte:varx= %ld}", var); \
        WRITE_BYTEI(var,0); \
      WRITE_BYTEI(var,1); \
@@ -403,7 +387,7 @@ getd(str)
      WRITE_BYTEI(var,7);} while(0)
 
 #define PUT4(varx ) \
- do{int var= varx ; \
+ do{unsigned long var= varx ; \
      DPRINTF("{4byte:varx= %d}", var); \
        WRITE_BYTEI(var,0); \
      WRITE_BYTEI(var,1); \
@@ -411,14 +395,14 @@ getd(str)
      WRITE_BYTEI(var,3);} while(0)
 
 #define PUT2(var ) \
- do{int v=var; \
+ do{unsigned long v=var; \
      DPRINTF("{2byte:var= %d}", v); \
        WRITE_BYTEI(v,0); \
      WRITE_BYTEI(v,1); \
      } while(0)
 
 #define PUT3(var ) \
- do{int v=var; \
+ do{unsigned long v=var; \
      DPRINTF("{3byte:var= %d}", v); \
        WRITE_BYTEI(v,0); \
      WRITE_BYTEI(v,1); \
@@ -587,6 +571,13 @@ DEFUN("READ-FASD-TOP",object,fSread_fasd_top,SI
      { RESTORE_FASD;
      return result;}
  }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSread_fasd_top(object x) {
+  return FFN(fSread_fasd_top)(x);
+}
+#endif
+
 
 object sLeq;
 object sSPinit;
@@ -612,10 +603,10 @@ DEFUN("OPEN-FASD",object,fSopen_fasd,SI
       if(tabl==Cnil) tabl=gcl_make_hash_table(sLeq);
     else
       check_type(tabl,t_hashtable);}
-  check_type(str,t_stream);
-  result=alloc_simple_vector(sizeof(struct fasd)/sizeof(int),aet_object);
+  massert(str==stream);
+  result=alloc_simple_vector(sizeof(struct fasd)/sizeof(object),aet_object);
   array_allocself(result,1,Cnil);
-  {struct fasd *fd= (struct fasd *)result->v.v_self;
+  {struct fasd *fd= (struct fasd *)result->sv.sv_self;
   fd->table=tabl;
   fd->stream=stream;
   fd->direction=direction;
@@ -645,22 +636,22 @@ DEFUN("OPEN-FASD",object,fSopen_fasd,SI
   fd->index=make_fixnum(dump_index);
   fd->filepos=current_fasd.filepos;
   fd->package=current_fasd.package;
+  fd->table_length=current_fasd.table_length;
   return result;
   }}
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSopen_fasd(object stream, object direction, object eof, object tabl) {
+  return FFN(fSopen_fasd)(stream,direction,eof,tabl);
+}
+#endif
 
-DEFUN("CLOSE-FASD",object,fSclose_fasd,SI
-	  ,1,1,NONE,OO,OO,OO,OO,(object ar),"") {
+DEFUN("CLOSE-FASD",object,fSclose_fasd,SI,1,1,NONE,OO,OO,OO,OO,(object ar),"") {
 /* static object */
 /* FFN(close_fasd)(object ar) */
 /* { */
   struct fasd *fd= (struct fasd *)(ar->v.v_self);
    check_type(ar,t_simple_vector);
-   if (type_of(fd->table)==t_vector)
-     /* input uses a vector */
-     {if (fd->table->v.v_self)
-       gset(fd->table->v.v_self,0,fix(fd->index),aet_object);
-    }
-   else
      if(fd->direction==sKoutput)
        {clrhash(fd->table);
 	SETUP_FASD_IN(fd);
@@ -680,6 +671,12 @@ DEFUN("CLOSE-FASD",object,fSclose_fasd,SI
    return ar;
   
  }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSclose_fasd(object ar) {
+  return FFN(fSclose_fasd)(ar);
+}
+#endif
 
 
 #define HASHP(x) 1
@@ -825,7 +822,7 @@ write_fasd(object obj)
      {int l = MP(obj)->_mp_size;
      int m = (l >= 0 ? l : -l);
       
-     unsigned long *u = (unsigned long *) MP(obj)->_mp_d;
+     mp_limb_t *u = MP(obj)->_mp_d;
      /* fix this */
      /* if (sizeof(mp_limb_t) != 4) { FEerror("fix for gmp",0);} */
      PUT4(l);
@@ -916,7 +913,7 @@ fasd_patch_sharp_cons(object x, int depth)
 		if (consp(x->c.c_cdr))
 			x = x->c.c_cdr;
 		else {
-			x->c.c_cdr = fasd_patch_sharp(x->c.c_cdr,depth+1);
+                        x->c.c_cdr = SAFE_CDR(fasd_patch_sharp(x->c.c_cdr,depth+1));
 			break;
 		}
 	}
@@ -1048,7 +1045,7 @@ grow_vector(object ar)
     VSET_MAX_FILLP(ar);
     while(--nl >=len)
       ar->v.v_self[nl]=Cnil;
-      END_NO_INTERRUPT;}}
+    END_NO_INTERRUPT;}}
   }
 
 static void
@@ -1069,8 +1066,7 @@ read_fasd1(int i, object *loc)
 	*loc=Cnil;return;
       case DP(d_cons:)
 	read_fasd1(GET_OP(),&tem);
-	*loc=make_cons(tem,Cnil);
-	loc= &((*loc)->c.c_cdr);
+        collect(loc,make_cons(tem,Cnil));
 	i=GET_OP();
 	goto BEGIN;
       case DP(d_list1:) i=1;goto READ_LIST;
@@ -1101,8 +1097,7 @@ read_fasd1(int i, object *loc)
 		read_fasd1(j,&tem);
 		DPRINTF("{Item=",(debug >= 2 ? pp(tem) : 0));
 		DPRINTF("}",0);
-		*loc=make_cons(tem,Cnil);
-		loc= &((*loc)->c.c_cdr);}}
+		collect(loc,make_cons(tem,Cnil));}}
 
       case DP(d_delimiter:)
       case DP(d_dot:)
@@ -1207,18 +1202,18 @@ read_fasd1(int i, object *loc)
 	{int leng=GETD("n=%d");
 	 if (leng & (1 << (SIZE_SHORT -1)))
 	   leng= leng - (1 << (SIZE_SHORT));
-	 *loc=make_fixnum(leng);
+	 *loc=SAFE_CDR(make_fixnum(leng));
 	 return;}
     
       case DP(d_fixnum:)
 	{fixnum j;
 	 GETFIX(j);
-	 *loc=make_fixnum(j);       
+	 *loc=SAFE_CDR(make_fixnum(j));
 	 return;}
       case DP( d_bignum:)
 	{int j,m;
 	 object tem;
-	 unsigned long *u;
+	 mp_limb_t *u;
 	 GET4(j);
 #ifdef GMP
 	 tem = new_bignum();
@@ -1226,7 +1221,7 @@ read_fasd1(int i, object *loc)
 	 _mpz_realloc(MP(tem),m);
 	 MP(tem)->_mp_size = j;
 	 j = m;
-	 u = (unsigned long *) MP(tem)->_mp_d;
+	 u = MP(tem)->_mp_d;
 #else	 
         { BEGIN_NO_INTERRUPT;
 	 tem = alloc_object(t_bignum);
@@ -1430,54 +1425,6 @@ clrhash(object table)
        table->ht.ht_self[i].c_cdr = OBJNULL;
        table->ht.ht_self[i].c_car = OBJNULL;}
    table->ht.ht_nent =0;}
-
-
-
-object read_fasl_vector1();
-object
-read_fasl_vector(object in)
-{char ch;
- object orig = in;
- int tem;
- if ((tem=(unsigned char)readc_stream(in)) != EOF)
-   { unreadc_stream(tem,in);}
-  while (1)
-   { ch=(unsigned char)readc_stream(in);
-     if (ch=='#')
-       {unreadc_stream(ch,in);
-	return read_fasl_vector1(in);}
-     if (ch== d_begin_dump){
-       unreadc_stream(ch,in);
-       break;}}
- {object ar=FFN(fSopen_fasd)(in,sKinput,0,Cnil);
-  int n=fix(current_fasd.table_length);
-  object result,last;
-  { BEGIN_NO_INTERRUPT;
-#ifdef HAVE_ALLOCA
-  current_fasd.table->v.v_self
-    = (object *)ZALLOCA(n*sizeof(object));
-#else
-  current_fasd.table->v.v_self
-    = (object *)alloc_relblock(n*sizeof(object));
-#endif
-  current_fasd.table->v.v_dim=n;
-  VSET_MAX_FILLP(current_fasd.table);
-  gset( current_fasd.table->v.v_self,0,n,aet_object);
-  END_NO_INTERRUPT;
-  }  
-  result=FFN(fSread_fasd_top)(ar);
-  if (type_of(result) !=t_simple_vector) goto ERROR;
-  last=result->v.v_self[VLEN(result)-1];
-  if(!consp(last) || last->c.c_car !=sSPinit)
-    goto ERROR;
-  current_fasd.table->v.v_self = 0;
-  FFN(fSclose_fasd)(ar);
-  if (orig != in)
-    close_stream(in);
-  return result;
- ERROR: FEerror("Bad fasd stream ~a",1,in);
-  return Cnil;
-}}
 
 object IfaslInStream;
 /* static void */

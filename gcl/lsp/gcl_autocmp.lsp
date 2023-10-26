@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;SAMPLE USAGE:
 ;;(def-autocomp foo (a b) (+ a b))
 ;;(def-autocomp goo (a b) (- a b))

@@ -24,6 +24,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <time.h>
+#include <string.h>
 
 #include "include.h"
 #include "num_include.h"
@@ -198,7 +199,6 @@ make_random_state(object rs) {
   return(z);
 
 }
-
 
 LFD(Lrandom)(void)
 {

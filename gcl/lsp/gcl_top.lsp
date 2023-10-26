@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -25,15 +24,14 @@
 ;;;;  Revised on July 11, by Carl Hoffman.
 
 
-(in-package :system)
+(in-package :si)
 
 (export '(loc *tmp-dir* *error-p* *debug-print-level* *break-readtable* *break-enable*
 	      vs ihs-vs ihs-fun frs-vs frs-bds frs-ihs bds-var bds-val super-go))
 
 ;FIXME ?
-(eval-when 
- (compile)
- (defvar *command-args* nil))
+
+(defvar *command-args* nil)
 
 (defvar +)
 (defvar ++)
@@ -236,7 +234,7 @@
 	   (file (cdr (assoc :compile compile)))
 	   (o (cdr (assoc :o compile)))
 	   (compile (remove :o (remove :compile compile :key 'car) :key 'car))
-	   (compile (if o (cons (cons :output-file (or o file)) compile) compile))
++	   (compile (cons (cons :output-file (or o (merge-pathnames ".o" file))) compile))
 	   (result (system:error-set `(apply 'compile-file ,file ',(mapcan (lambda (x) (list (car x) (cdr x))) compile)))))
       (bye (if (or *error-p* (equal result '(nil))) 1 0)))))
 
@@ -280,8 +278,11 @@
 (defun break-quit (&optional (level 0)
                    &aux (current-level (length *break-level*)))
   (when (and (>= level 0) (< level current-level))
-    (let ((x (do ((v *quit-tags* (cdr v)) (i 0 (1+ i))) ((= i (- current-level level 1)) (car v)) (declare (fixnum i)))))
-      (throw (cdr x) (cdr x))))
+    (let ((x (nthcdr (- current-level level 1) *quit-tags*))
+	  (y (member nil *quit-tags* :key 'cdr)))
+      (if (tailp x y)
+	  (format *debug-io* "The *quit-tag* is disabled at level ~s.~%" (length y))
+	(throw (cdar x) (cdar x)))))
   (break-current))
 
 (defun break-previous (&optional (offset 1))
@@ -357,7 +358,7 @@
   (do ((bi (1+ (frs-bds (1- *frs-base*))) (1+ bi))
        (last (frs-bds (1+ *frs-top*))))
       ((> bi last) (values))
-    (when (or (null vars) (member (the symbol (bds-var bi)) vars))
+    (when (or (null vars) (member (bds-var bi) vars))
       (do ()
           ((or (> fi *frs-top*) (> (frs-bds fi) bi)))
         (print-frs fi)
@@ -441,7 +442,7 @@
 (defvar *break-hidden-packages* nil)
 
 (defun ihs-visible (i &aux (tem (ihs-fname i)))
-  (and tem (not (member (the symbol tem) *break-hidden-packages*))))
+  (and tem (not (member tem *break-hidden-packages*))))
 
 
 (defun ihs-fname (ihs-index)
@@ -484,11 +485,11 @@
 
 (defun super-go (i tag &aux x)
   (when (and (>= i *frs-base*) (<= i *frs-top*) (spicep (frs-tag i)))
-    (if (setq x (member (the symbol (frs-tag i)) (vs (+ (frs-vs i) 2))
+    (if (setq x (member (frs-tag i) (vs (+ (frs-vs i) 2))
                         :key #'caddr :test #'eq))
         ; Interpreted TAGBODY.
         (when (and (eq (cadar x) 'tag)
-                   (member (the symbol tag) (mapcar #'car (remove (frs-tag i) x
+                   (member tag (mapcar #'car (remove (frs-tag i) x
                                                      :test-not #'eq
                                                      :key #'caddr))))
           (internal-super-go (frs-tag i) tag t))
@@ -520,9 +521,13 @@
       (break-go ihs)
       (return))))
 
+(defun break-resume ()
+  (if *debug-continue*
+      (invoke-restart *debug-continue*)
+    :resume))
 
 (putprop :b 'simple-backtrace 'break-command)
-(putprop :r '(lambda () :resume) 'break-command)
+(putprop :r 'break-resume 'break-command)
 (putprop :resume (get :r 'break-command) 'break-command)
 (putprop :bds 'break-bds 'break-command)
 (putprop :blocks 'break-blocks 'break-command)
@@ -683,10 +688,23 @@ First directory is checked for first name and all extensions etc."
 
 (defvar *lib-directory* (coerce-slash-terminated (dir-name (dir-name (kcl-self)))))
 
+(defvar *cc* nil)
+(defvar *ld* nil)
+(defvar *objdump* nil)
+
+(defvar *current-directory* *system-directory*)
+
+(defun current-directory-namestring nil (coerce-slash-terminated (getcwd)))
+
 (defun set-up-top-level (&aux (i (argc)) tem)
   (declare (fixnum i))
   (reset-lib-syms)
-  (setq *tmp-dir* (get-temp-dir))
+  (setq *tmp-dir* (get-temp-dir) *current-directory* (current-directory-namestring))
+  (when *cc* ;raw-image init complete
+    (setq *current-directory* (pathname *current-directory*)
+	  *cc* (or (get-path *cc*) *cc*)
+	  *ld* (or (get-path *ld*) *ld*)
+	  *objdump* (get-path "objdump --source ")))
   (dotimes (j i) (push (argv j) tem))
   (setq *command-args* (nreverse tem))
   (setq tem *lib-directory*)
@@ -699,7 +717,7 @@ First directory is checked for first name and all extensions etc."
 (defun do-f (file &aux *break-enable*)
   (catch *quit-tag*
     (labels ((read-loop (st &aux (tem (read st nil 'eof))) (when (eq tem 'eof) (bye)) (eval tem) (read-file st))
-	     (read-file (st) (read-line st) (read-loop st)))
+	     (read-file (st) (read-line st nil 'eof) (read-loop st)))
 	    (if file
 		(with-open-file
 		 (st file)

@@ -91,3 +91,6 @@ object cdifference(object,object);
 object cplus(object,object);
 double sqrt(double);
 float sqrtf(float);
+object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
+object Icall_gen_error_handler_noreturn(object,object,object,object,ufixnum,...) __attribute__((noreturn));
+object file_stream(object);

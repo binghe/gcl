@@ -65,9 +65,12 @@ bool saving_system=FALSE;
 
 #define LISP_IMPLEMENTATION_VERSION "April 1994"
 
+char *system_directory;
+
 #define EXTRA_BUFSIZE 8
 char stdin_buf[BUFSIZ + EXTRA_BUFSIZE];
 char stdout_buf[BUFSIZ + EXTRA_BUFSIZE];
+char stderr_buf[BUFSIZ + EXTRA_BUFSIZE];
 
 #include "stacks.h"
 
@@ -98,6 +101,28 @@ unsigned long _dbegin = 0;
 int sgc_enabled;
 #endif
 void install_segmentation_catcher(void);
+
+#ifdef NEED_STACK_CHK_GUARD
+
+unsigned long __stack_chk_guard=0;
+
+static unsigned long
+random_ulong() {
+
+  object y;
+
+  vs_top=vs_base;
+  vs_push(Ct);
+  Lmake_random_state();
+  y=vs_pop;
+  vs_push(number_negate(find_symbol(make_simple_string("MOST-NEGATIVE-FIXNUM"),system_package)->s.s_dbind));
+  vs_push(y);
+  Lrandom();
+
+  return fixint(vs_pop);
+
+}
+#endif
 
 int cstack_dir=0;
 
@@ -284,7 +309,7 @@ setup_maxpages(double scale) {
   massert(scale*maxpages>=npages);
 
   maxpages*=scale;
-  phys_pages=phys_pages>maxpages ? maxpages : phys_pages;
+  phys_pages*=scale;
   real_maxpage=maxpages+page(beg);
 
   resv_pages=available_pages=0;
@@ -540,10 +565,11 @@ main(int argc, char **argv, char **envp) {
 #include "unrandomize.h"
 #endif
 
-  gcl_init_alloc(&argv);
+  gcl_init_alloc(alloca(1));
 
   setbuf(stdin, stdin_buf); 
   setbuf(stdout, stdout_buf);
+  setbuf(stderr, stderr_buf);
 #ifdef _WIN32
   _fmode = _O_BINARY;
   _setmode( _fileno( stdin ), _O_BINARY );
@@ -577,10 +603,14 @@ main(int argc, char **argv, char **envp) {
 
     terminal_io->sm.sm_object0->sm.sm_fp = stdin;
     terminal_io->sm.sm_object1->sm.sm_fp = stdout;
+    standard_error->sm.sm_fp = stderr;
 
     gcl_init_big1();
 #ifdef USE_READLINE
     gcl_init_readline_function();
+#endif
+#ifdef NEED_STACK_CHK_GUARD
+    __stack_chk_guard=random_ulong();/*Cannot be safely set inside a function which returns*/
 #endif
 
     if (in_pre_gcl) init_boot();
@@ -1060,7 +1090,6 @@ DEFUN("LISP-IMPLEMENTATION-VERSION",object,fLlisp_implementation_version,LISP,0,
   RETURN1((make_simple_string(LISP_IMPLEMENTATION_VERSION)));
 }
 
-
 static void
 FFN(siLsave_system)(void) {
   
@@ -1130,7 +1159,7 @@ init_main(void) {
   ADD_FEATURE("GPROF");
 #endif	 
   
-#if defined ( UNIX ) && !defined ( _WIN32 )
+#ifndef _WIN32
   ADD_FEATURE("UNIX");
 #endif
 
@@ -1141,6 +1170,10 @@ init_main(void) {
 #if defined ( _WIN32 ) 
   ADD_FEATURE("WINNT");
   ADD_FEATURE("WIN32");
+#endif
+
+#if defined(__CYGWIN__)
+  ADD_FEATURE("CYGWIN");
 #endif
 
 #ifdef IEEEFLOAT
@@ -1179,7 +1212,7 @@ init_main(void) {
 	 && ((-Seven)/ (-Three)) == 2)
       { ADD_FEATURE("TRUNCATE_USE_C");
       }  }
-#endif /* PECULIAR_MACHINE */
+#endif
   
 #ifdef USE_READLINE
 #ifdef READLINE_IS_EDITLINE
@@ -1217,6 +1250,10 @@ init_main(void) {
   ADD_FEATURE("INTDIV");
   ADD_FEATURE("DYNAMIC-EXTENT");
 
+#ifdef LARGE_MEMORY_MODEL
+  ADD_FEATURE("LARGE-MEMORY-MODEL");
+#endif
+
   make_special("*FEATURES*",features);}
   
   make_si_function("SAVE-SYSTEM", siLsave_system);
@@ -1225,7 +1262,7 @@ init_main(void) {
   
 }
 
-#ifdef HAVE_PRINT_INSN_I386
+#ifdef HAVE_DIS_ASM_H
 
 #include "dis-asm.h"
 
@@ -1233,6 +1270,16 @@ static char b[4096],*bp;
 
 static int
 my_fprintf(void *v,const char *f,...) {
+  va_list va;
+  int r;
+  va_start(va,f);
+  bp+=(r=vsnprintf(bp,sizeof(b)-(bp-b),f,va));
+  va_end(va);
+  return r;
+}
+
+static int
+my_fprintf_styled(void *v,enum disassembler_style,const char *f,...) {
   va_list va;
   int r;
   va_start(va,f);
@@ -1254,29 +1301,37 @@ my_pa(bfd_vma addr,struct disassemble_info *dinfo) {
 
 #endif
 
+
 DEFUN("DISASSEMBLE-INSTRUCTION",object,fSdisassemble_instruction,SI,1,1,NONE,OI,OO,OO,OO,(fixnum addr),"") {
 
-#ifdef HAVE_PRINT_INSN_I386
+#if defined(HAVE_DIS_ASM_H) && defined(OUTPUT_ARCH)
 
   static disassemble_info i;
   void *v;
-  int (*s)();
-  int j;
-
-  memset(&i,0,sizeof(i));
-#ifdef __i386__
-  i.disassembler_options="i386";
-#endif
-  i.fprintf_func=my_fprintf;
-  i.read_memory_func=my_read;
-  i.print_address_func=my_pa;
-  bp=b;
+  void * (*s)();
+  fixnum j,j1,k;
+  object x;
 
   if ((v=dlopen("libopcodes.so",RTLD_NOW))) {
-    if ((s=dlsym(v,"print_insn_i386"))) {
-      j=s(addr,&i);
-      my_fprintf(NULL," ;");
-      return MMcons(make_simple_string(b),make_fixnum(j));
+    if ((s=dlsym(v,"init_disassemble_info"))) {
+      s(&i, stdout,(fprintf_ftype) my_fprintf,my_fprintf_styled);
+      i.read_memory_func=my_read;
+      i.print_address_func=my_pa;
+      if ((s=dlsym(v,"disassembler"))) {
+	disassembler_ftype disasm=(disassembler_ftype)(ufixnum)s(OUTPUT_ARCH,false,0,NULL);/*bfd_mach_x86_64*/
+	bp=b;
+	disasm(addr,&i);
+	my_fprintf(NULL," ;");
+	x=make_simple_string(b);
+
+	j1=j=(addr-16)&(~16UL);
+	bp=b;
+	for (k=0;k<16;k++) {
+	  j+=disasm(j,&i);
+	  my_fprintf(NULL," ;");
+	}
+	return MMcons(x,MMcons(make_simple_string(b),make_fixnum(j-j1)));
+      }
     }
     massert(!dlclose(v));
   }

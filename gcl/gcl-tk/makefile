@@ -18,7 +18,6 @@ GCLIB  = ../o/gcllib.a
 
 
 CFLAGS1=$(CFLAGS) -I../o -I../h ${TK_INCLUDE} ${TCL_INCLUDE} ${TK_XINCLUDES}
-WGCLDIR=`echo $(GCLDIR) | sed -e 'sX^/\([a-z]\)X\1:Xg'`
 
 
 all: gcltksrv   tkl.o tinfo.o  demos/gc-monitor.o gcltkaux
@@ -36,7 +35,7 @@ all: gcltksrv   tkl.o tinfo.o  demos/gc-monitor.o gcltkaux
 GUIOS = guis.o tkAppInit.o tkMain.o
 
 clean::
-	rm -f ${GUIOS} $(OFILES) gcltkaux gcltksrv gcltksrv.bat *.o */*.o demos/index.lsp *.fn demos/*.fn
+	rm -f ${GUIOS} $(OFILES) gcltkaux gcltksrv *.o */*.o demos/index.lsp *.fn demos/*.fn
 
 .c.o:
 	$(GCLTKCC) -c $(filter-out -pg,$(CFLAGS1)) -fPIE ${ODIR_DEBUG}  $*.c
@@ -47,16 +46,12 @@ clean::
 gcltkaux:  $(GUIOS)
 	$(LD_ORDINARY_CC) $(GUIOS) $(filter-out %gcl.script,$(LDFLAGS)) -pie -o gcltkaux  ${TK_LIB_SPEC} ${TCL_LIB_SPEC}
 
-gcltksrv: makefile gcltksrv.in gcltksrv.bat.in
+gcltksrv: makefile
 	cat gcltksrv.in | sed -e "s!TK_LIBRARY=.*!TK_LIBRARY=${TK_LIBRARY}!g" \
 	-e "s!TCL_LIBRARY=.*!TCL_LIBRARY=${TCL_LIBRARY}!g" \
 	-e "s!TK_XLIB_DIR=.*!TK_XLIB_DIR=${TK_XLIB_DIR}!g" \
 	-e "s!GCL_TK_DIR=.*!GCL_TK_DIR=${GCLDIR}/gcl-tk!g" > gcltksrv
 	chmod a+x gcltksrv
-	cat gcltksrv.bat.in | sed -e "s!TK_LIBRARY=.*!TK_LIBRARY=${TK_LIBRARY}!g" \
-	-e "s!TCL_LIBRARY=.*!TCL_LIBRARY=${TCL_LIBRARY}!g" \
-	-e "s!TK_XLIB_DIR=.*!TK_XLIB_DIR=${TK_XLIB_DIR}!g" \
-	-e "s!GCL_TK_DIR=.*!GCL_TK_DIR=${WGCLDIR}/gcl-tk!g" > gcltksrv.bat
 
 gcltksrv.interp: makefile
 	cat gcltksrv.in.interp | sed -e "s!TK_LIBRARY=.*!TK_LIBRARY=${TK_LIBRARY}!g" \
@@ -64,12 +59,6 @@ gcltksrv.interp: makefile
 	-e "s!TCL_LIBRARY=.*!TCL_LIBRARY=${TCL_LIBRARY}!g" \
 	-e "s!GCL_TK_DIR=.*!GCL_TK_DIR=${GCLDIR}/gcl-tk!g" > gcltksrv.interp
 	chmod a+x gcltksrv.interp
-
-winkill.exe: winkill.c
-	gcc -Wall -o winkill.exe winkill.c 
-
-tclwinkill.dll: tclwinkill.c
-	gcc -Wall -shared $(TCL_INCLUDE) tclwinkill.c $(TCL_STUB_LIBS) -o tclwinkill.dll
 
 INTERESTING=*.lsp *.lisp tk*.c guis.c sockets.c  comm.c Makefile  demos/*.lisp  *.h
 

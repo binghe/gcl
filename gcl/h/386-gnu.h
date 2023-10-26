@@ -49,21 +49,6 @@
 #define	I386
 #define SGC
 
-
-#ifdef IN_SFASL
-#include <sys/mman.h>
-#define CLEAR_CACHE {\
-   void *p,*pe; \
-   p=(void *)((unsigned long)memory->cfd.cfd_start & ~(PAGESIZE-1)); \
-   pe=(void *)((unsigned long)(memory->cfd.cfd_start+memory->cfd.cfd_size) & ~(PAGESIZE-1)) + PAGESIZE-1; \
-   if (mprotect(p,pe-p,PROT_READ|PROT_WRITE|PROT_EXEC)) {\
-     fprintf(stderr,"%p %p\n",p,pe);\
-     perror("");\
-     FEerror("Cannot mprotect", 0);\
-   }\
-}
-#endif
-
 #ifndef SA_NOCLDWAIT
 #define SA_NOCLDWAIT 0 /*fixme handler does waitpid(-1, ..., WNOHANG)*/
 #endif
@@ -72,3 +57,8 @@
 #define MAX_BRK 0x70000000 /*GNU Hurd fragmentation bug*/
 
 #define RELOC_H "elf32_i386_reloc.h"
+
+#define NEED_STACK_CHK_GUARD
+
+#undef HAVE_D_TYPE /*FIXME defined, but not implemented in readdir*/
+#define NO_FILE_LOCKING /*FIXME*/

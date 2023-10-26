@@ -13,10 +13,6 @@ PREFS:= cmpbind cmpblock cmpcall cmpcatch cmpenv cmpeval \
 	cmploc cmpmap cmpmulti cmpspecial cmptag cmptop \
 	cmptype cmputil cmpvar cmpvs cmpwt cmpmain
 
-NCPREFS:= cmpmain cmpopt lfun_list
-
-SRC:= $(addprefix gcl_,$(addsuffix .lsp,$(PREFS) $(NCPREFS)))
-OBJS:=$(addprefix gcl_,$(addsuffix .o,$(PREFS)))
 FNS:= $(OBJS:.o=.fn)
 
 LISP:=$(shell ls -1rt ../unixport/saved_pre_gcl ../unixport/saved_gcl|tail -n 1)
@@ -30,15 +26,15 @@ COMPILE_FILE=$(LISP) $(PORTDIR) $(LISPFLAGS) -system-p -c-file -data-file -h-fil
 all:	$(OBJS)
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
-	../xbin/make-fn $*.lsp ../unixport/saved_pre_gcl
+	../xbin/make-fn $*.lsp $(LISP)
 
+fns1:	$(FNS)
 
-.c.o:  
-	$(CC) $(OFLAG) $(CFLAGS) -c $*.c
-	${APPEND} ${NULLFILE} $*.data  $*.o
+fns:	../cmpnew/gcl_collectfn.o
+	$(MAKE) fns1 -e "FNS=`echo ${OBJS} | sed -e 's:\.o:\.fn:g'`"
 
 gcl_collectfn.o:
-	$(PORTDIR)/saved_gcl $(PORTDIR)/ $(LISPFLAGS) -compile $*
+	$(PORTDIR)/saved_gcl $(PORTDIR)/ $(LISPFLAGS) -compile $*.lsp
 
 .lisp.o:
 	@ ../xbin/if-exists $(PORTDIR)/saved_pre_gcl \
@@ -66,6 +62,6 @@ remake:
 	(cd .. ; $(MAKE))
 
 clean:
-	rm -f *.o core a.out *.fn *.c *.h *.data
+	rm -f *.o core a.out *.fn *.c *.data *.h
 allclean:
 	rm -f *.h *.data *.c

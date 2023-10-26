@@ -7,6 +7,11 @@
 
 ;;; Error tests
 
+(defun texpt (x y)
+  #+gcl(si::break-on-floating-point-exceptions :floating-point-overflow t :floating-point-underflow t)
+  (unwind-protect (expt x y)
+    #+gcl(si::break-on-floating-point-exceptions :floating-point-overflow nil :floating-point-underflow nil)))
+
 (deftest expt.error.1
   (signals-error (expt) program-error)
   t)
@@ -20,35 +25,35 @@
   t)
 
 (deftest expt.error.4
-  (signals-error (expt most-positive-short-float 2) floating-point-overflow)
+  (signals-error (texpt most-positive-short-float 2) floating-point-overflow)
   t)
 
 (deftest expt.error.5
-  (signals-error (expt most-positive-single-float 2) floating-point-overflow)
+  (signals-error (texpt most-positive-single-float 2) floating-point-overflow)
   t)
 
 (deftest expt.error.6
-  (signals-error (expt most-positive-double-float 2) floating-point-overflow)
+  (signals-error (texpt most-positive-double-float 2) floating-point-overflow)
   t)
 
 (deftest expt.error.7
-  (signals-error (expt most-positive-long-float 2) floating-point-overflow)
+  (signals-error (texpt most-positive-long-float 2) floating-point-overflow)
   t)
 
 (deftest expt.error.8
-  (signals-error (expt least-positive-short-float 2) floating-point-underflow)
+  (signals-error (texpt least-positive-short-float 2) floating-point-underflow)
   t)
 
 (deftest expt.error.9
-  (signals-error (expt least-positive-single-float 2) floating-point-underflow)
+  (signals-error (texpt least-positive-single-float 2) floating-point-underflow)
   t)
 
 (deftest expt.error.10
-  (signals-error (expt least-positive-double-float 2) floating-point-underflow)
+  (signals-error (texpt least-positive-double-float 2) floating-point-underflow)
   t)
 
 (deftest expt.error.11
-  (signals-error (expt least-positive-long-float 2) floating-point-underflow)
+  (signals-error (texpt least-positive-long-float 2) floating-point-underflow)
   t)
 
 

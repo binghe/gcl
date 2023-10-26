@@ -248,12 +248,14 @@ BEGIN:
   if (depth++ <=3)
     switch ((tx=type_of(x))) {
     case t_cons:
-      h += ihash_equalp(x->c.c_car,depth);
+      h += ihash_equalp(x->c.c_car,depth)^rtb[labs(depth%(sizeof(rtb)/sizeof(*rtb)))];
       x = x->c.c_cdr;
       goto BEGIN;
       break;
     case t_symbol:
       x=coerce_to_string(x);
+    case t_simple_string:
+    case t_string:
       {
 	ufixnum len=VLEN(x);
 	uchar *s=(void *)x->st.st_self;
@@ -261,15 +263,30 @@ BEGIN:
 	  h^=rtb[toupper(*s++)];
       }
       break;
-
     case t_package: 
       break;
-
-    case t_simple_string:
-    case t_string:
-    case t_simple_bitvector:
-    case t_simple_vector:
     case t_bitvector:
+    case t_simple_bitvector:
+      {
+	ufixnum *u=x->bv.bv_self+x->bv.bv_offset/BV_BITS;
+	ufixnum *ue=x->bv.bv_self+(VLEN(x)+x->bv.bv_offset)/BV_BITS;
+	uchar s=x->bv.bv_offset%BV_BITS;
+	uchar m=((VLEN(x)+x->bv.bv_offset)%BV_BITS);
+
+	for (;u<ue;) {
+	  ufixnum v=(*u++)>>s;
+	  if (u<ue||m) {
+	    ufixnum w=(*u);
+	    if (u==ue)
+	      w&=BIT_MASK(m);
+	    v|=w<<(sizeof(*u)-s);
+	  }
+	  h^=ufixhash(v);
+	}
+      }
+      break;
+
+    case t_simple_vector:
     case t_vector:
       h^=ufixhash(j=VLEN(x));
       j=j>10 ? 10 : j;
@@ -338,26 +355,7 @@ BEGIN:
       }
 
     case t_character:
-      {
-	vs_mark; /*FIXME*/
-	object *base=vs_base;
-	vs_base=vs_top;
-	vs_push(x);
-	Lchar_upcase();
-	x=vs_base[0];
-	vs_base=base;
-	vs_reset;
-	h^=hash_eql(x);
-	break;
-      }
-      
-    case t_fixnum:
-    case t_bignum:
-    case t_ratio:
-    case t_shortfloat:
-    case t_longfloat:
-
-      h^=hash_eql(make_longfloat(number_to_double(x)));
+      h^=rtb[toupper(x->ch.ch_code)];
       break;
 
     default:
@@ -554,9 +552,9 @@ DEFUN("MAKE-HASH-TABLE-INT",object,fSmake_hash_table_int,SI,5,5,NONE,OO,OO,OO,OO
   object h;
 
   if (test == sLeq || test == sLeq->s.s_gfdef)
-     htt = htt_eq;
+    htt = htt_eq;
   else if (test == sLeql || test == sLeql->s.s_gfdef)
-     htt = htt_eql;
+    htt = htt_eql;
   else if (test == sLequal || test == sLequal->s.s_gfdef)
      htt = htt_equal;
   else if (test == sLequalp || test == sLequalp->s.s_gfdef)
@@ -661,9 +659,9 @@ DEFUN("GETHASH-INT",object,fSgethash_int,SI,2,2,NONE,IO,OO,OO,OO,(object x,objec
   return (object)gethash(x,y);
 }
 
-DEFUN("EXTEND-HASHTABLE",fixnum,fSextent_hashtable,SI,1,1,NONE,IO,OO,OO,OO,(object table),"") {
+DEFUN("EXTEND-HASHTABLE",object,fSextent_hashtable,SI,1,1,NONE,IO,OO,OO,OO,(object table),"") {
   extend_hashtable(table);
-  return table->ht.ht_size;
+  return (object)(fixnum)table->ht.ht_size;
 }
 
 void

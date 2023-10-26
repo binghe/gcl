@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;                                                                    ;;;;;
 ;;;     Copyright (c) 1989 by William Schelter,University of Texas     ;;;;;
@@ -39,7 +38,7 @@
 
 (defvar *other-form* (make-fn))
 (defvar *all-fns* nil)
-(defvar *call-table* (make-hash-table :test #'equal))
+(defvar *call-table* (make-hash-table))
 (defvar *current-fn* nil)
 (defun add-callee (fname)
   (cond ((consp fname)
@@ -68,17 +67,16 @@
 ;  (setq *record-call-info* flag)
   )
 
-(defun promote-inlines (x)
-  (if (eq x 'inline) t
-    (if (si::memq x '(inline-fixnum fixnum-value)) 'fixnum
-      x)))
-
 (defun type-or (a b)
-  (let ((a (promote-inlines a)))
-    (if (type>= b a) b
-      (if (type>= a b) a
-	'*))))
-      
+  (if (eq b '*) '*
+    (case a
+      ((nil) b)
+      ((t inline) t)
+      ((fixnum inline-fixnum fixnum-value) (if (eq b 'fixnum) 'fixnum
+					     (type-or t b)))
+      (otherwise '*)
+      )))
+
 (defun current-fn ()
   (cond ((and (consp *current-form*)
 	      (member (car *current-form*) '(defun defmacro))
@@ -135,7 +133,7 @@
   (cond ((member fname *called-from* :test 'eq) nil)
 	(t
 	 (let ((tem (cons fname *called-from*)))
-	   (declare (:dynamic-extent tem))
+	   (declare (dynamic-extent tem))
 	   (let ((*called-from* tem))
 	     (get-value-type1 fname))))))
 
@@ -192,10 +190,13 @@
   (sloop::sloop for (ke val) in-table *call-table*
 	 do (progn ke) (setf (fn-no-emit val) 1)))
 
+(defun set-closure ()
+  (setf (fn-def (current-fn)) 'closure))
   
 (defun make-proclaims ( &optional (st *standard-output*)
 				  &aux (ht (make-hash-table :test 'equal))
 				  *print-length* *print-level* 
+				  (si::*print-package* t)
 				  )
 ;  (require "VLFUN"
 ;	 (concatenate 'string si::*system-directory*
@@ -205,15 +206,18 @@
   (sloop::sloop with ret with at
 		for (ke val) in-table *call-table* 
 		do
-		(cond ((or (eql 1 (fn-no-emit val))
+		(cond ((eq (fn-def val) 'closure)
+		       (push ke (gethash 'proclaimed-closure ht)))
+		      ((or (eql 1 (fn-no-emit val))
 			   (not (eq (fn-def val) 'defun))))
 		      (t (setq ret (get-value-type ke))
 			 (setq at (fn-arg-types val))
-			 (push ke   (gethash (list at ret)  ht)))))
+			 (push ke   (gethash (list at ret) ht)))))
   (sloop::sloop for (at fns) in-table ht
 		do 
 		(print
-		 `(proclaim '(ftype (function ,@ at) ,@ fns))
+		 (if (symbolp at) `(mapc (lambda (x) (setf (get x 'compiler::proclaimed-closure) t)) '(,@fns))
+		   `(proclaim '(ftype (function ,@ at) ,@ fns)))
 		 st)))
 		 
 (defun setup-sys-proclaims()
@@ -236,21 +240,22 @@
 
 (defvar *file-table* (make-hash-table :test 'eq)) 
 
-(defun add-fn-data (lis &aux tem)
-  (let ((file (truename *load-pathname*)))
-    (dolist (v lis)
-      (cond ((eql (fn-name v) 'other-form)
-	     (setf (fn-name v) (intern
-				(concatenate 'string "OTHER-FORM-"
-					     (namestring file))))
-	     (setf (get (fn-name v) 'other-form) t)))
-      (setf (gethash (fn-name v) *call-table*) v)
-      (if (setq tem (gethash (fn-name v) *file-table*))
-	  (or (equal tem file)
-	      (format t "~% Warn ~a redefined in ~a. Originally in ~a."
-		      (fn-name v) file tem)))
-      (setf (gethash (fn-name v) *file-table*)
-	    file))))
+(defvar *warn-on-multiple-fn-definitions* t)
+
+(defun add-fn-data (lis &aux tem (file (truename *load-pathname*)));*load-truename*
+  (dolist (v lis)
+    (cond ((eql (fn-name v) 'other-form)
+	   (setf (fn-name v) (intern
+			      (concatenate 'string "OTHER-FORM-"
+					   (namestring file))))
+	   (setf (get (fn-name v) 'other-form) t)))
+    (setf (gethash (fn-name v) *call-table*) v)
+    (when *warn-on-multiple-fn-definitions*
+      (when (setq tem (gethash (fn-name v) *file-table*))
+	(unless (equal tem file)
+	  (warn 'simple-warning :format-control "~% ~a redefined in ~a. Originally in ~a."
+		:format-arguments (list (fn-name v) file tem)))))
+    (setf (gethash (fn-name v) *file-table*) file)))
 
 (defun dump-fn-data (&optional (file "fn-data.lsp")
 			       &aux (*package* (find-package "COMPILER"))
@@ -268,7 +273,7 @@
   (cond ((and fname (symbolp fname))
 	 (add-callee fname)))
   (cond ((eq loc 'record-call-info) (return-from record-call-info nil)))
-  (case (if (multiple-values-p) 'top *value-to-go*)
+  (case *value-to-go*
     (return
       (if (eq loc 'fun-val)
 	  (add-value-type nil (or fname  'unknown-values))
@@ -277,7 +282,10 @@
       (add-value-type 'fixnum nil))
     (return-object
       (add-value-type t nil))
-    (top (setq *top-data* (cons fname nil)))))
+
+    (top  (setq *top-data* (cons fname nil))
+	 ))
+     )
 
 (defun list-undefined-functions (&aux undefs)
   (sloop::sloop for (name fn) in-table *call-table*

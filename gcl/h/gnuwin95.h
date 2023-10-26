@@ -7,15 +7,6 @@
 #define DBEGIN_TY unsigned long
 extern DBEGIN_TY _dbegin;
 
-
-
-/* define if there is no _cleanup,   do here what needs
-   to be done before calling unexec
-   */   
-#define CLEANUP_CODE \
-  setbuf(stdin,0); \
-   setbuf(stdout,0);
-
 /* size to use for mallocs done  */
 /* #define BABY_MALLOC_SIZE 0x5000 */
 
@@ -50,7 +41,6 @@ extern DBEGIN_TY _dbegin;
 
 #define HAVE_SIGACTION
 /* a noop */
-#define SA_ONSTACK 0
 
 #define brk(x) printf("not doing break\n");
 #include <stdarg.h>     
@@ -99,7 +89,7 @@ extern DBEGIN_TY _dbegin;
 #undef  LISTEN_FOR_INPUT
 #define LISTEN_FOR_INPUT(fp) do { \
   int c = 0; \
-  if (((fp)->_r <= 0) && (ioctl((fp)->_file, FIONREAD, &c), c<=0)) \
+  if ((((FILE *)fp)->_r <= 0) && (ioctl(((FILE *)fp)->_file, FIONREAD, &c), c<=0)) \
     return 0; \
 } while (0)
 
@@ -125,23 +115,24 @@ extern DBEGIN_TY _dbegin;
 
 #include <limits.h>
 #include <sys/stat.h>
-#define GET_FULL_PATH_SELF(a_) do {\
-  char b[20];\
-  static char q[PATH_MAX];\
-  struct stat ss;\
-  if (snprintf(b,sizeof(b),"/proc/%d/exe",getpid())<=0)\
-    error("Cannot write proc exe pathname");\
-  if (stat(b,&ss)) \
-    (a_)=argv[0];\
-  else {\
-    if (!realpath(b,q)) \
-      error("realpath error");\
-    (a_)=q;\
-  }\
-} while(0)
+#define GET_FULL_PATH_SELF(a_) do {				\
+    static char q[PATH_MAX];					\
+    massert(which("/proc/self/exe",q) || which(argv[0],q));	\
+    (a_)=q;							\
+  } while(0)
 
 /* Begin for cmpinclude */
 
 
 /* End for cmpinclude */
 
+#define SF(a_) ((siginfo_t *)a_)
+
+#define FPE_CODE(i_,v_) make_fixnum((long)fSfpe_code((long)FFN(fSfnstsw)(),(long)FFN(fSstmxcsr)()))
+/* #define FPE_CODE(i_,v_) make_fixnum((fixnum)SF(i_)->si_code) */
+#define FPE_ADDR(i_,v_) make_fixnum((fixnum)SF(i_)->si_addr)
+#define FPE_CTXT(v_) Cnil
+
+#define FPE_INIT Cnil
+
+#undef HAVE_MPROTECT /*buggy on cygwin and unnecessary*/

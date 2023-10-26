@@ -37,11 +37,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define IN_FILE
 #include "include.h"
 
-#ifdef _WIN32
-#  include<windows.h>
-#  include <fcntl.h>
-#endif
-
 #ifdef USE_READLINE
 #include <readline/readline.h>
 #define kclgetc(FP)		rl_getc_em(FP)
@@ -53,7 +48,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #define	kclputc(C, FP)		putc(C, FP)
 #endif /* USE_READLINE */
 
-#define	xkclfeof(c,FP)		feof(FP)
+#define	xkclfeof(c,FP)		feof(((FILE *)FP))
 
 #ifdef HAVE_AOUT
 #undef ATT
@@ -94,8 +89,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #  include <netinet/in.h>
 #  include <arpa/inet.h>
 #else
-#  include <windows.h>
 #  include <winsock2.h>
+#  include <windows.h>
 #endif
 #include <errno.h>
 
@@ -105,12 +100,9 @@ object terminal_io;
 
 object Vverbose;
 object LSP_string;
-object LISP_string;
 
 
 object sSAignore_eof_on_terminal_ioA;
-
-extern char *lisp_to_string(object string);
 
 static bool
 feof1(fp)
@@ -404,7 +396,7 @@ open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exis
   object x;
   FILE *fp=NULL;
   vs_mark;
-  
+
   coerce_to_filename(fn,FN1);
 
   switch(smm) {
@@ -495,214 +487,172 @@ open_stream(object fn,enum smmode smm, object if_exists, object if_does_not_exis
   x->sm.sm_buffer = 0;
   x->sm.sm_object0 = sLcharacter;
   x->sm.sm_object1 = vs_head;
-  x->sm.sm_int0 = x->sm.sm_int1 = 0;
+  x->sm.sm_int = 0;
+  x->sm.sm_flags=0;
   vs_push(x);
-  
+
   setup_stream_buffer(x);
   vs_reset;
-  
+
   if (smm==smm_probe)
     close_stream(x);
-  
+
   return(x);
 
 }
 
 static void
 gclFlushSocket(object);
-/*
+
+DEFUN("OPEN-STREAM-P",object,fLopen_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+
+  check_type_stream(&x);
+
+  return GET_STREAM_FLAG(x,gcl_sm_closed) ? Cnil : Ct;
+
+}
+    /*
 	Close_stream(strm) closes stream strm.
 	The abort_flag is not used now.
 */
+
+static int
+pipe_designator_p(object x) {
+
+  if (x==OBJNULL||x==Cnil)
+    return 0;
+  coerce_to_filename(x,FN1);
+  return FN1[0]=='|' ? 1 : 0;
+
+}
+
 void
-close_stream(strm)
-object strm;
-/*bool abort_flag; */	/*  Not used now!  */
-{
-/* 	object x; */
+close_stream(object strm)  {
 
-/* BEGIN: */
-	switch (strm->sm.sm_mode) {
-	case smm_output:
-		if (strm->sm.sm_fp == stdout)
-			FEerror("Cannot close the standard output ~S.", 1, strm);
-		if (strm->sm.sm_fp == NULL) break;
-		fflush(strm->sm.sm_fp);
-		deallocate_stream_buffer(strm);
-		fclose(strm->sm.sm_fp);
-		strm->sm.sm_fp = NULL;
-		strm->sm.sm_fd = -1;
-		break;
+  if (FFN(fLopen_stream_p)(strm)==Cnil)
+    return;
 
+  switch (strm->sm.sm_mode) {
+  case smm_output:
+    if (strm->sm.sm_fp == stdout || strm->sm.sm_fp == stderr)
+      FEerror("Cannot close the standard output.", 0);
+    fflush(strm->sm.sm_fp);
+    deallocate_stream_buffer(strm);
+    if (pipe_designator_p(strm->sm.sm_object1))
+      pclose(strm->sm.sm_fp);
+    else
+      fclose(strm->sm.sm_fp);
+    strm->sm.sm_fp = NULL;
+    strm->sm.sm_fd = -1;
+    break;
 
-	case smm_socket:
-	  if (SOCKET_STREAM_FD(strm) < 2) {
-	    fprintf(stderr,"tried Clsing %d ! as scoket \n",SOCKET_STREAM_FD(strm));
-	    fflush(stderr);
-	  }
-	  else {
+  case smm_socket:
+    if (SOCKET_STREAM_FD(strm) < 2)
+      emsg("tried Closing %d ! as socket \n",SOCKET_STREAM_FD(strm));
+    else {
 #ifdef HAVE_NSOCKET
-          if (GET_STREAM_FLAG(strm,gcl_sm_output))
-              {	 
-		gclFlushSocket(strm);
-                 /* there are two for one fd so close only one */
-            	  tcpCloseSocket(SOCKET_STREAM_FD(strm));
-               } 
+      if (GET_STREAM_FLAG(strm,gcl_sm_output)) {
+	gclFlushSocket(strm);
+	/* there are two for one fd so close only one */
+	tcpCloseSocket(SOCKET_STREAM_FD(strm));
+      }
 #endif
-	  SOCKET_STREAM_FD(strm)=-1;
-	  }
+      SOCKET_STREAM_FD(strm)=-1;
+    }
 
-	case smm_input:
-		if (strm->sm.sm_fp == stdin)
-			FEerror("Cannot close the standard input ~S.", 1, strm);
-	  
-	case smm_io:
-	case smm_probe:
-		if (strm->sm.sm_fp == NULL) break;
-		deallocate_stream_buffer(strm);
-		if (strm->sm.sm_object1 &&
-		    stringp(strm->sm.sm_object1) &&
-		    strm->sm.sm_object1->st.st_self[0] =='|')
-		  pclose(strm->sm.sm_fp);
-		else 
-		  fclose(strm->sm.sm_fp);
-		strm->sm.sm_fp = NULL;
-		strm->sm.sm_fd = -1;
-		break;
+  case smm_input:
+    if (strm->sm.sm_fp == stdin)
+      FEerror("Cannot close the standard input.", 0);
 
-	case smm_file_synonym:
-	case smm_synonym:
-/* 		strm = symbol_value(strm->sm.sm_object0); */
-/* 		if (type_of(strm) != t_stream) { */
-/* 			TYPE_ERROR(strm,sLstream); */
-/* 		} */
-		strm->sm.sm_object0=OBJNULL;
-/* 		goto BEGIN; */
-		break;
+  case smm_io:
+  case smm_probe:
+    if (strm->sm.sm_fp == NULL) break; /*FIXME: review this*/
+    deallocate_stream_buffer(strm);
+    if (pipe_designator_p(strm->sm.sm_object1))
+      pclose(strm->sm.sm_fp);
+    else
+      fclose(strm->sm.sm_fp);
+    strm->sm.sm_fp = NULL;
+    strm->sm.sm_fd = -1;
+    break;
 
-	case smm_broadcast:
-/* 		for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr) */
-/* 			close_stream(x->c.c_car); */
-		strm->sm.sm_object0=OBJNULL;
-		break;
+  case smm_file_synonym:
+  case smm_synonym:
+  case smm_broadcast:
+  case smm_concatenated:
+    strm->sm.sm_object0=OBJNULL;
+    break;
 
-	case smm_concatenated:
-/* 		for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr) */
-/* 			close_stream(x->c.c_car); */
-		strm->sm.sm_object0=OBJNULL;
-		break;
+  case smm_two_way:
+  case smm_echo:
+    STREAM_INPUT_STREAM(strm)=OBJNULL;
+    STREAM_OUTPUT_STREAM(strm)=OBJNULL;
+    /* 		close_stream(STREAM_INPUT_STREAM(strm)); */
+    /* 		close_stream(STREAM_OUTPUT_STREAM(strm)); */
+    break;
 
-	case smm_two_way:
-	case smm_echo:
-		STREAM_INPUT_STREAM(strm)=OBJNULL;
-		STREAM_OUTPUT_STREAM(strm)=OBJNULL;
-/* 		close_stream(STREAM_INPUT_STREAM(strm)); */
-/* 		close_stream(STREAM_OUTPUT_STREAM(strm)); */
-		break;
+  case smm_string_input:
+  case smm_string_output:
+    STRING_STREAM_STRING(strm)=OBJNULL;
+    break;
 
-	case smm_string_input:
-	case smm_string_output:
-	  STRING_STREAM_STRING(strm)=OBJNULL;
-	  break;		
+  default:
+    error("Illegal stream mode");
+  }
 
-	default:
-		FEerror("Illegal stream mode for ~S.",1,strm);
-	}
+  SET_STREAM_FLAG(strm,gcl_sm_closed,1);
+
 }
 
-object
-open_stream_p(strm)
-object strm;
-{
-	while(type_of(strm)==t_stream)
-	switch (strm->sm.sm_mode) {
-	case smm_output:
-	case smm_input:
-	case smm_io:
-	case smm_probe:
-		if (strm->sm.sm_fp == NULL) 
-		    return Cnil;
-		return Ct;
-		break;
+DEFUN("INTERACTIVE-STREAM-P",object,fLinteractive_stream_p,LISP,1,1,NONE,OO,OO,OO,OO,(object strm),"") {
 
-	case smm_socket:
-	        if (SOCKET_STREAM_FD(strm) < 0)
-		    return Cnil;
-		return Ct;
-		break;
+  check_type_stream(&strm);
 
-	case smm_file_synonym:
-	case smm_synonym:
-	case smm_broadcast:
-	case smm_concatenated:
-	  return strm->sm.sm_object0!=OBJNULL ? Ct : Cnil;
-	  break;
+  while(type_of(strm)==t_stream)
+    switch (strm->sm.sm_mode) {
+    case smm_output:
+    case smm_input:
+    case smm_io:
+    case smm_probe:
+      if ((strm->sm.sm_fp == stdin) ||
+	  (strm->sm.sm_fp == stdout) ||
+	  (strm->sm.sm_fp == stderr))
+	return Ct;
+      return Cnil;
+      break;
+    case smm_file_synonym:
+    case smm_synonym:
+      strm = symbol_value(strm->sm.sm_object0);
+      if (type_of(strm) != t_stream)
+	FEwrong_type_argument(sLstream, strm);
+      break;
 
-/* 	case smm_broadcast: */
-/* 	case smm_concatenated: */
-/* 		if (( consp(strm->sm.sm_object0) ) &&  */
-/* 		    ( type_of(strm->sm.sm_object0->c.c_car) == t_stream )) */
-/* 		    strm=strm->sm.sm_object0->c.c_car; */
-/* 		else */
-/* 		    return Cnil; */
-/* 		break; */
-
-	case smm_two_way:
-	case smm_echo:
-	  return STREAM_INPUT_STREAM(strm)==OBJNULL && STREAM_OUTPUT_STREAM(strm)==OBJNULL ? Cnil : Ct;
-	  break;
-
-	case smm_string_input:
-	case smm_string_output:
-	  return STRING_STREAM_STRING(strm)!=OBJNULL ? Ct : Cnil;
-	  break;
-
-	default:
-		FEerror("Illegal stream mode for ~S.",1,strm);
-	}
+    case smm_broadcast:
+    case smm_concatenated:
+      if (( consp(strm->sm.sm_object0) ) &&
+	  ( type_of(strm->sm.sm_object0->c.c_car) == t_stream ))
+	strm=strm->sm.sm_object0->c.c_car;
+      else
 	return Cnil;
-}
+      break;
 
+    case smm_two_way:
+    case smm_echo:
+      strm=STREAM_INPUT_STREAM(strm);
+      break;
+    default:
+      return Cnil;
+    }
+
+  return Cnil;
+
+}
+#ifdef STATIC_FUNCTION_POINTERS
 object
-interactive_stream_p(object strm)
-{
-	while(type_of(strm)==t_stream)
-	switch (strm->sm.sm_mode) {
-	case smm_output:
-	case smm_input:
-	case smm_io:
-	case smm_probe:
-		if ((strm->sm.sm_fp == stdin) ||
-		    (strm->sm.sm_fp == stdout) ||
-		    (strm->sm.sm_fp == stderr))
-		    	return Ct;
-		return Cnil;
-		break;
-	case smm_file_synonym:
-	case smm_synonym:
-		strm = symbol_value(strm->sm.sm_object0);
-		if (type_of(strm) != t_stream)
-			FEwrong_type_argument(sLstream, strm);
-		break;
-
-	case smm_broadcast:
-	case smm_concatenated:
-		if (( consp(strm->sm.sm_object0) ) && 
-		    ( type_of(strm->sm.sm_object0->c.c_car) == t_stream ))
-		    strm=strm->sm.sm_object0->c.c_car;
-		else
-		    return Cnil;
-		break;
-
-	case smm_two_way:
-	case smm_echo:
-		strm=STREAM_INPUT_STREAM(strm);
-		break;
-	default:
-		return Cnil;
-	}
-	return Cnil;
+fLinteractive_stream_p(object x,fixnum y,fixnum z) {
+  return FFN(fLinteractive_stream_p)(x,y,z);
 }
+#endif
 
 object
 make_two_way_stream(istrm, ostrm)
@@ -713,9 +663,11 @@ object istrm, ostrm;
 	strm = alloc_object(t_stream);
 	strm->sm.tt=strm->sm.sm_mode = (short)smm_two_way;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STREAM_INPUT_STREAM(strm) = istrm;
 	STREAM_OUTPUT_STREAM(strm) = ostrm;
-	strm->sm.sm_int0 = strm->sm.sm_int1 = 0;
+	strm->sm.sm_int = 0;
+	strm->sm.sm_flags=0;
 	return(strm);
 }
 
@@ -730,21 +682,37 @@ object istrm, ostrm;
 	return(strm);
 }
 
-object
-make_string_input_stream(strng, istart, iend)
-object strng;
-int istart, iend;
-{
-	object strm;
+DEFUN("MAKE-STRING-INPUT-STREAM-INT",object,fSmake_string_input_stream_int,SI,3,3,NONE,OO,II,OO,OO,
+	  (object strng,fixnum istart,fixnum iend),"") {
 
-	strm = alloc_object(t_stream);
-	strm->sm.tt=strm->sm.sm_mode = (short)smm_string_input;
-	strm->sm.sm_fp = NULL;
-	STRING_STREAM_STRING(strm) = strng;
-	strm->sm.sm_object1 = OBJNULL;
-	STRING_INPUT_STREAM_NEXT(strm)= istart;
-	STRING_INPUT_STREAM_END(strm)= iend;
-	return(strm);
+  object strm;
+
+  massert(type_of(strng)==t_string);
+  strm = alloc_object(t_stream);
+  strm->sm.tt=strm->sm.sm_mode = (short)smm_string_input;
+  strm->sm.sm_fp = NULL;
+  strm->sm.sm_buffer = 0;
+  strm->sm.sm_flags=0;
+  STRING_STREAM_STRING(strm) = strng;
+  strm->sm.sm_object1 = OBJNULL;
+  STRING_INPUT_STREAM_NEXT(strm)= istart;
+  STRING_INPUT_STREAM_END(strm)= iend;
+
+  RETURN1(strm);
+
+}
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSmake_string_input_stream_int(object x,fixnum y,fixnum z) {
+  return FFN(fSmake_string_input_stream_int)(x,y,z);
+}
+#endif
+
+DEFUN("STRING-INPUT-STREAM-P",object,fSstring_input_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  return type_of(x)==t_stream && x->sm.sm_mode == (short)smm_string_input ? Ct : Cnil;
+}
+DEFUN("STRING-OUTPUT-STREAM-P",object,fSstring_output_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  return type_of(x)==t_stream && x->sm.sm_mode == (short)smm_string_output ? Ct : Cnil;
 }
 
 object
@@ -771,9 +739,11 @@ int line_length;
 	strm = alloc_object(t_stream);
 	strm->sm.tt=strm->sm.sm_mode = (short)smm_string_output;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
-	strm->sm.sm_int0 = STREAM_FILE_COLUMN(strm) = 0;
+	strm->sm.sm_int = 0;
+	strm->sm.sm_flags=0;
 	vs_reset;
 	return(strm);
 }
@@ -803,8 +773,8 @@ object strm;
 
 BEGIN:
 	switch (strm->sm.sm_mode) {
-	case smm_socket:
 #ifdef HAVE_NSOCKET
+	case smm_socket:
 	  return (getCharGclSocket(strm,Ct));
 #endif
 	case smm_input:
@@ -814,7 +784,7 @@ BEGIN:
 			closed_stream(strm);
 		c = kclgetc(strm->sm.sm_fp);
 /* 		if (c == EOF) { */
-/*         	    if (xkclfeof(c,strm->sm.sm_fp)) */
+/*         	  if (xkclfeof(c,strm->sm.sm_fp)) */
 /* 			end_of_stream(strm); */
 /* 		    else c = kclgetc(strm->sm.sm_fp); */
 /* 		    if (c == EOF) end_of_stream(strm); */
@@ -995,6 +965,129 @@ rl_putc_em(int, FILE *);
 static void
 cannot_write(object);
 
+object
+output_stream(object strm) {
+
+  switch (strm->sm.sm_mode) {
+  case smm_output:
+  case smm_io:
+  case smm_socket:
+  case smm_string_output:
+  case smm_broadcast:
+#ifdef USER_DEFINED_STREAMS
+  case smm_user_defined:
+#endif
+    return strm;
+
+  case smm_file_synonym:
+  case smm_synonym:
+    return output_stream(symbol_value(strm->sm.sm_object0));
+
+  case smm_two_way:
+  case smm_echo:
+    return output_stream(STREAM_OUTPUT_STREAM(strm));
+
+  default:
+    cannot_write(strm);
+    return Cnil;
+
+  }
+
+}
+
+static void
+adjust_stream_column(int c,object strm) {
+
+  if (c == '\n')
+    STREAM_FILE_COLUMN(strm) = 0;
+  else if (c == '\t')
+    STREAM_FILE_COLUMN(strm) = (STREAM_FILE_COLUMN(strm)&~07) + 8;
+  else
+    STREAM_FILE_COLUMN(strm)++;
+
+}
+
+static int
+writec_socket_stream(int c,object strm) {
+
+  adjust_stream_column(c,strm);
+  if (strm->sm.sm_fd>=0)
+    putCharGclSocket(strm,c);
+  else if (!GET_STREAM_FLAG(strm,gcl_sm_had_error))
+    closed_stream(strm);
+
+  return c;
+
+}
+
+static int
+writec_output_stream(int c,object strm) {
+
+  adjust_stream_column(c,strm);
+  if (strm->sm.sm_fp!=NULL)
+    kclputc(c, strm->sm.sm_fp);
+  else if (!GET_STREAM_FLAG(strm,gcl_sm_had_error))
+    closed_stream(strm);
+
+  return c;
+
+}
+
+static int
+writec_string_output_stream(int c,object strm) {
+
+  object x=STRING_STREAM_STRING(strm);
+
+  adjust_stream_column(c,strm);
+
+  if (x->st.st_fillp >= x->st.st_dim) {
+
+    ufixnum j=x->st.st_dim * 2 + 16;
+    char *p;
+
+    if (!x->st.st_adjustable)
+      FEerror("The string ~S is not adjustable.",1, x);
+
+    p = (inheap((long)x->st.st_self) ? alloc_contblock : alloc_relblock)(j);
+    memcpy(p,x->st.st_self,x->st.st_dim);
+    x->st.st_dim=j;
+    x->st.st_self=p;
+
+    adjust_displaced(x);
+
+  }
+
+  x->st.st_self[x->st.st_fillp++] = c;
+
+  return c;
+
+}
+
+static int
+writec_broadcast_stream(int c,object strm) {
+  object x;
+  for (x = strm->sm.sm_object0; !endp(x); x = x->c.c_cdr)
+    writec_stream(c, x->c.c_car);
+  return c;
+}
+
+void *
+writec_stream_fun(object strm) {
+  switch (strm->sm.sm_mode) {
+  case smm_output:
+  case smm_io:
+    return writec_output_stream;
+  case smm_socket:
+    return writec_socket_stream;
+  case smm_broadcast:
+    return writec_broadcast_stream;
+  case smm_string_output:
+    return writec_string_output_stream;
+  default:
+    return NULL;
+  }
+}
+
 int
 writec_stream(int c, object strm) {
 	object x;
@@ -1111,270 +1204,6 @@ BEGIN:
 }
 
 void
-writestr_stream(s, strm)
-char *s;
-object strm;
-{
-	while (*s != '\0')
-		writec_stream(*s++, strm);
-}
-
-/* int */
-/* read_sequence_stream(a,s,start,end) */
-/* object a,s; */
-/* int start,end; */
-/* {	 */
-/* 	int i,j; */
-/* 	int ch=EOF; */
-/* 	object val=Cnil; */
-/* 	FILE *fp; */
-/* 	int charstream; */
-
-/* 	if (type_of(s) != t_stream) */
-/* 	    FEwrong_type_argument(sLstream,a); */
-
-/* 	val=stream_element_type(s); */
-/* 	charstream = (val == sLcharacter) || */
-/* 		     (val == sLstandard_char); */
-
-/* 	switch (s->sm.sm_mode) { */
-/* 	case smm_input: */
-/* 	case smm_io: */
-/* 	case smm_socket: */
-/* 	    fp=s->sm.sm_fp; */
-/* 	    break; */
-/* 	default: */
-/* 	    fp=0; */
-/* 	} */
-
-/* 	i=0; */
-/*         while ((consp(a)) && (i<start)) { */
-/* 	    a=a->c.c_cdr; */
-/* 	    i++; */
-/* 	} */
-/* 	j=start-1; */
-/* 	if (a != Cnil) */
-/* 	for (i=start;i<end;i++) { */
-/* 	    if (fp) { */
-/* 	        ch = kclgetc(fp); */
-/* 		if (ch==EOF && xkclfeof(c,fp)) */
-/* 		    i=end+1; */
-/* 	    } else */
-/* 	    if(stream_at_end(s)) */
-/* 		i=end+1; */
-/* 	    else { */
-/* 		ch = readc_stream(s); */
-/* 		if (ch == EOF) */
-/* 		    i=end+1; */
-/* 	    } */
-/* 	    if (i<end) { */
-/* 		j=i; */
-/* 	        switch (type_of(a)) { */
-/* 		case t_array: */
-/* 		case t_vector: */
-/* 		case t_bitvector: */
-/* 		    switch (a->v.v_elttype) { */
-/* 		    case aet_object: */
-/* 			if (!charstream) { */
-/* 			    val=make_fixnum(ch); */
-/* 			    break; */
-/* 			}  */
-/* 		    case aet_ch: */
-/* 			val = alloc_object(t_character); */
-/* 			char_code(val) = ch; */
-/* 			char_bits(val) = 0; */
-/* 			char_font(val) = 0; */
-/* 			break; */
-/* 		    case aet_bit: */
-/* 		    	val=make_fixnum(ch ? 1 : 0); */
-/* 		        break; */
-/* 		    case aet_fix: */
-/* 		    case aet_char: */
-/* 		    case aet_uchar: */
-/* 		    case aet_short: */
-/* 		    case aet_ushort:  */
-/* 		    	val=make_fixnum(ch); */
-/* 		        break; */
-/* 		    default: */
-/* 		        FEwrong_type_argument(sLarray,a); */
-/* 		    } */
-/* 		    break; */
-/* 		case t_cons: */
-/* 		    if (!charstream) { */
-/* 			val=make_fixnum(ch); */
-/* 			break; */
-/* 		    }  */
-/* 		case t_string: */
-/* 		    val = alloc_object(t_character); */
-/* 		    char_code(val) = ch; */
-/* 		    char_bits(val) = 0; */
-/* 		    char_font(val) = 0; */
-/* 		    break; */
-/* 		default: */
-/* 		    FEwrong_type_argument(sLsequence,a); */
-/* 		} */
-/* 		if (!consp(a)) */
-/* 		    aset1(a,i,val); */
-/* 		else { */
-/* 		    a->c.c_car = val; */
-/* 		    a=a->c.c_cdr; */
-/* 		    if (!consp(a)) */
-/* 		        i=end+1; */
-/* 		} */
-/* 	    } */
-/* 	} */
-/* 	return j+1; */
-/* } */
-
-/* @(defun read_sequence (arr str &k (start `Cnil` start_p) (end `Cnil`)) */
-/* 	int istart,iend,ipos; */
-/* @ */
-/* 	switch (type_of(arr)) { */
-/* 	case t_array: */
-/* 	case t_vector: */
-/* 	case t_bitvector: */
-/* 	case t_string: */
-/* 	case t_cons: */
-/* 	    if (!start_p) */
-/* 		    istart = 0; */
-/* 	    else */
-/* 		    istart = FIX_CHECK(start); */
-/* 	    if (istart < 0) */
-/* 		    FEwrong_type_argument(sSnon_negative_fixnum,start); */
-	
-/* 	    if ((end==Cnil) && */
-/* 	        (consp(arr))) */
-/* 		    iend = length(arr); */
-/* 	    else */
-/* 	    if ((end==Cnil) && */
-/* 		(type_of(arr) != t_array) && */
-/* 		(arr->v.v_hasfillp != 0)) */
-/* 		    iend = arr->v.v_fillp; */
-/* 	    else */
-/* 	    if (end==Cnil) */
-/* 		    iend = arr->a.a_dim; */
-/* 	    else */
-/* 		    iend = FIX_CHECK(end); */
-/* 	    if (iend < 0) */
-/* 		    FEwrong_type_argument(sSnon_negative_fixnum,end); */
-
-/* 	    ipos=read_sequence_stream(arr,str,istart,iend); */
-/* 	    start = make_fixnum(ipos); */
-/* 	    @(return start) */
-/* 	default: */
-/* 	    FEwrong_type_argument(sLsequence,arr); */
-/* 	} */
-/* 	@(return Cnil) */
-/* @) */
-
-/* int */
-/* write_sequence_stream(a,s,start,end) */
-/* object a,s; */
-/* int start,end; */
-/* {	 */
-/* 	int i,j; */
-/* 	int ch=EOF; */
-/* 	object val=Cnil; */
-/* 	FILE *fp; */
-
-/* 	if (type_of(s) != t_stream) */
-/* 	    FEwrong_type_argument(sLstream,a); */
-
-/* 	switch (s->sm.sm_mode) { */
-/* 	case smm_socket: */
-/* 	case smm_output: */
-/* 	case smm_io: */
-/* 	    fp=s->sm.sm_fp; */
-/* 	    break; */
-/* 	default: */
-/* 	    fp=0; */
-/* 	} */
-
-/* 	i=0; */
-/*         while ((consp(a)) && (i<start)) { */
-/* 	    a=a->c.c_cdr; */
-/* 	    i++; */
-/* 	} */
-/* 	j=start-1; */
-/* 	if (a != Cnil) */
-/* 	for (i=start;i<end;i++) { */
-/* 	    if (i<end) { */
-/* 		j=i; */
-/* 		if (!consp(a)) */
-/* 		    val = fLrow_major_aref(a,i); */
-/* 		else { */
-/* 		    val = a->c.c_car; */
-/* 		    a = a->c.c_cdr; */
-/* 		    if (!consp(a)) */
-/* 		        i=end+1; */
-/* 		} */
-
-/* 	        switch (type_of(val)) { */
-/* 		case t_character: */
-/* 		    ch = char_code(val); */
-/* 		    break; */
-/* 		case t_fixnum: */
-/* 		    ch = Mfix(val); */
-/* 		    break; */
-/* 		default: */
-/* 		    FEwrong_type_argument(sLcharacter,val); */
-/* 		} */
-/* 		if (fp) */
-/* 		    kclputc(ch, fp); */
-/* 		else */
-/* 		    writec_stream(ch, s); */
-/* 	    } */
-/* 	} */
-/* 	return j+1; */
-/* } */
-
-/* @(defun write_sequence (arr str &k (start `Cnil` start_p) (end `Cnil`) &a ret) */
-/* 	int istart,iend,ipos; */
-/* @ */
-/* 	if (arr != Cnil) */
-/* 	switch (type_of(arr)) { */
-/* 	case t_array: */
-/* 	case t_vector: */
-/* 	case t_bitvector: */
-/* 	case t_string: */
-/* 	case t_cons: */
-/* 	    if (!start_p) */
-/* 		    istart = 0; */
-/* 	    else */
-/* 		    istart = FIX_CHECK(start); */
-/* 	    if (istart < 0) */
-/* 		    FEwrong_type_argument(sSnon_negative_fixnum,start); */
-	
-/* 	    if ((end==Cnil) && */
-/* 	        (consp(arr))) */
-/* 		    iend = length(arr); */
-/* 	    else */
-/* 	    if ((end==Cnil) && */
-/* 		(type_of(arr) != t_array) && */
-/* 		(arr->v.v_hasfillp != 0)) */
-/* 		    iend = arr->v.v_fillp; */
-/* 	    else */
-/* 	    if (end==Cnil) */
-/* 		    iend = arr->a.a_dim; */
-/* 	    else */
-/* 		    iend = FIX_CHECK(end); */
-/* 	    if (iend < 0) */
-/* 		    FEwrong_type_argument(sSnon_negative_fixnum,end); */
-
-/* 	    ipos=write_sequence_stream(arr,str,istart,iend); */
-/* 	    if (ipos == iend) */
-/* 	        ret = arr; */
-/* 	    else */
-/* 		ret = make_fixnum(ipos); */
-/* 	    @(return ret) */
-/* 	    break; */
-/* 	default: */
-/* 	    FEwrong_type_argument(sLsequence,arr); */
-/* 	} */
-/* 	@(return Cnil) */
-/* @) */
-
-void
 flush_stream(object strm) {
 	object x;
 
@@ -1456,7 +1285,7 @@ BEGIN:
 	case smm_input:
 		if (strm->sm.sm_fp == NULL)
 			closed_stream(strm);
-		if (isatty(fileno(strm->sm.sm_fp)) && !listen_stream(strm))
+		if (isatty(fileno((FILE *)strm->sm.sm_fp)) && !listen_stream(strm))
 		  return(feof(strm->sm.sm_fp) ? TRUE : FALSE);
 		{int prev_signals_allowed = signals_allowed;
 	       AGAIN:
@@ -1575,7 +1404,6 @@ BEGIN:
 	  if (readline_on && strm->sm.sm_fp==rl_instream)
 	    if (rl_line_buffer) return *rl_line_buffer ? TRUE : FALSE;
 #endif
-
 		if (strm->sm.sm_fp == NULL)
 			closed_stream(strm);
 		if (feof(strm->sm.sm_fp))
@@ -1880,15 +1708,20 @@ const char *s;
 
 static int
 file_synonym_stream_p(object x) {
-  switch(x->sm.sm_mode) {
-  case smm_input:
-  case smm_output:
-  case smm_io:
-  case smm_probe:
-  case smm_file_synonym:
-    return 1;
-  case smm_synonym:
-    return file_synonym_stream_p(x->sm.sm_object0->s.s_dbind);
+  switch(type_of(x)) {
+  case t_stream:
+    switch(x->sm.sm_mode) {
+    case smm_input:
+    case smm_output:
+    case smm_io:
+    case smm_probe:
+    case smm_file_synonym:
+      return 1;
+    case smm_synonym:
+      return file_synonym_stream_p(x->sm.sm_object0->s.s_dbind);
+    default:
+      return 0;
+    }
   default:
     return 0;
   }
@@ -1901,56 +1734,67 @@ LFD(Lmake_synonym_stream)()
 	check_arg(1);
 	check_type_sym(&vs_base[0]);
 	x = alloc_object(t_stream);
-	x->sm.tt=x->sm.sm_mode = file_synonym_stream_p(vs_base[0]) ? (short)smm_file_synonym : (short)smm_synonym;
+	x->sm.tt=x->sm.sm_mode = file_synonym_stream_p(vs_base[0]->s.s_dbind) ? (short)smm_file_synonym : (short)smm_synonym;
 	x->sm.sm_fp = NULL;
+	x->sm.sm_buffer = 0;
 	x->sm.sm_object0 = vs_base[0];
 	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
+	x->sm.sm_int = 0;
+	x->sm.sm_flags=0;
 	vs_base[0] = x;
 }
 
-LFD(Lmake_broadcast_stream)()
-{
-	object x;
-	int narg, i;
+LFD(Lmake_broadcast_stream)() {
 
-	narg = vs_top - vs_base;
-	for (i = 0;  i < narg;  i++)
-		if (type_of(vs_base[i]) != t_stream ||
-		    !output_stream_p(vs_base[i]))
-		  TYPE_ERROR(vs_base[i],sLoutput_stream);
-	vs_push(Cnil);
-	for (i = narg;  i > 0;  --i)
-		stack_cons();
-	x = alloc_object(t_stream);
-	x->sm.tt=x->sm.sm_mode = (short)smm_broadcast;
-	x->sm.sm_fp = NULL;
-	x->sm.sm_object0 = vs_base[0];
-	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
-	vs_base[0] = x;
+  object x;
+  int narg, i;
+
+  narg = vs_top - vs_base;
+  for (i = 0;  i < narg;  i++)
+    if (type_of(vs_base[i]) != t_stream ||
+	!output_stream_p(vs_base[i]))
+      TYPE_ERROR(vs_base[i],
+		 MMcons(sLand,MMcons(sLstream,
+				     MMcons(MMcons(sLsatisfies,MMcons(sLoutput_stream_p,Cnil)),Cnil))));
+      /* cannot_write(vs_base[i]); */
+
+  Llist();
+
+  x = alloc_object(t_stream);
+  x->sm.tt=x->sm.sm_mode = (short)smm_broadcast;
+  x->sm.sm_fp = NULL;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = vs_base[0];
+  x->sm.sm_object1 = OBJNULL;
+  x->sm.sm_int = 0;
+  x->sm.sm_flags=0;
+  vs_base[0] = x;
+
 }
 
-LFD(Lmake_concatenated_stream)()
-{
-	object x;
-	int narg, i;
+LFD(Lmake_concatenated_stream)() {
 
-	narg = vs_top - vs_base;
-	for (i = 0;  i < narg;  i++)
-		if (type_of(vs_base[i]) != t_stream ||
-		    !input_stream_p(vs_base[i]))
-		  TYPE_ERROR(vs_base[i],sLinput_stream);
-	vs_push(Cnil);
-	for (i = narg;  i > 0;  --i)
-		stack_cons();
-	x = alloc_object(t_stream);
-	x->sm.tt=x->sm.sm_mode = (short)smm_concatenated;
-	x->sm.sm_fp = NULL;
-	x->sm.sm_object0 = vs_base[0];
-	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0;
-	vs_base[0] = x;
+  object x;
+  int narg, i;
+
+  narg = vs_top - vs_base;
+  for (i = 0;  i < narg;  i++)
+    if (type_of(vs_base[i]) != t_stream ||
+	!input_stream_p(vs_base[i]))
+      cannot_read(vs_base[i]);
+
+  Llist();
+
+  x = alloc_object(t_stream);
+  x->sm.tt=x->sm.sm_mode = (short)smm_concatenated;
+  x->sm.sm_fp = NULL;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = vs_base[0];
+  x->sm.sm_object1 = OBJNULL;
+  x->sm.sm_int = 0;
+  x->sm.sm_flags=0;
+  vs_base[0] = x;
+
 }
 
 DEFUN("MAKE-TWO-WAY-STREAM", object, fLmake_two_way_stream,LISP,2,2,NONE,OO,OO,OO,OO,(object x,object y),"") {
@@ -1975,348 +1819,12 @@ LFD(Lmake_echo_stream)()
 	vs_popp;
 }
 
-static int
-stream_to_handle(object s, int output)
-{
-	FILE *f=NULL;
- BEGIN:
-	if (type_of(s) != t_stream)
-		return -1;
-	switch ((enum smmode)s->sm.sm_mode) {
-	case smm_input:
-		if (output) return -1;
-		f = s->sm.sm_fp;
-		break;
-	case smm_output:
-		if (!output) return -1;
-		f = s->sm.sm_fp;
-		break;
-	case smm_io:
-		f = s->sm.sm_fp;
-		break;
-	case smm_file_synonym:
-	case smm_synonym:
-		s = symbol_value(s->sm.sm_object0);
-		goto BEGIN;
-	case smm_two_way:
-		s = output? s->sm.sm_object1 : s->sm.sm_object0;
-		goto BEGIN;
-	default:
-		error("illegal stream mode");
-	}
-	return fileno(f);
-}
+DEFUN("MAKE-STRING-OUTPUT-STREAM-INT",object,fLmake_string_output_stream_int,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
 
-object make_stream_from_fd ( object command, int fd, enum smmode smm )
-{
-	object stream = (object) alloc_object(t_stream);
-        char *mode="r";
-	switch(smm)
-	{
-	case smm_input:
-		mode = "r";
-		break;
-	case smm_output:
-		mode = "w";
-		break;
-	default:
-		FEerror("make_stream_from_fd : wrong mode",0);
-	}
-        
-	stream->sm.tt=stream->sm.sm_mode    = (short) smm;
-	stream->sm.sm_fp      = fdopen ( fd, mode );
-
-	stream->sm.sm_object0 = sLcharacter;
-	stream->sm.sm_object1 = Cnil;
-	stream->sm.sm_int0    = stream->sm.sm_int1 = 0;
-	return ( stream );
-}
-
-/* Borrowed from ECL */
-@(defun run_program (command argv &key (input sKstream) (output sKstream) (error Ct))
-    int parent_write = 0, parent_read = 0;
-    int child_pid;
-    object stream_write;
-    object stream_read;
-    char *c_command;
-@
-    command = coerce_to_string(command);
-#if defined ( _WIN32 )
-    {
-        object x;
-        BOOL ok;
-        STARTUPINFO st_info;
-        PROCESS_INFORMATION pr_info;
-        HANDLE child_stdout, child_stdin, child_stderr;
-        HANDLE current = GetCurrentProcess();
-        SECURITY_ATTRIBUTES attr;
-        int vargcount;
-        
-        /* Coerce command and args to a single string with quotes around
-         * program name to help with spaces in paths. */
-        for ( x = argv; x != Cnil; x = MMcdr ( x ) ) {
-            MMcar ( x ) = coerce_to_string ( MMcar(x) );
-        }
-        x = make_simple_string ( "~S~{ ~S~}" );
-        command=(VFUN_NARGS=4,FFN(fLformat)(Cnil,x,command,argv));
-
-        c_command  = lisp_to_string ( command );
-        
-        attr.nLength = sizeof(SECURITY_ATTRIBUTES);
-        attr.lpSecurityDescriptor = NULL;
-        attr.bInheritHandle = TRUE;
-        if (input == sKstream) {
-            /* Creates a pipe that we can read from what the child
-               writes to it. We duplicate one extreme of the pipe
-               so that the child does not inherit it. */
-            HANDLE tmp;
-            ok = CreatePipe(&child_stdin, &tmp, &attr, 0);
-            if (ok) {
-                ok = DuplicateHandle(current, tmp, current,
-                                      &tmp, 0, FALSE,
-                                      DUPLICATE_CLOSE_SOURCE |
-                                      DUPLICATE_SAME_ACCESS);
-                if (ok) {
-                    parent_write = _open_osfhandle(tmp, _O_WRONLY /*| _O_TEXT*/);
-                    if (parent_write < 0)
-                        printf("open_osfhandle failed\n");
-                }
-            }
-        } else if (input == Ct) {
-            /* The child inherits a duplicate of our input
-               handle. Creating a duplicate avoids problems when
-               the child closes it */
-            int stream_handle = stream_to_handle(sLAstandard_inputA, 0);
-            if (stream_handle >= 0)
-                DuplicateHandle(current, _get_osfhandle(stream_handle) /*GetStdHandle(STD_INPUT_HANDLE)*/,
-                                 current, &child_stdin, 0, TRUE,
-                                 DUPLICATE_SAME_ACCESS);
-            else
-                child_stdin = NULL;
-        } else {
-            child_stdin = NULL;
-        }
-        if (output == sKstream) {
-            /* Creates a pipe that we can write to and the
-               child reads from. We duplicate one extreme of the
-               pipe so that the child does not inherit it. */
-            HANDLE tmp;
-            ok = CreatePipe(&tmp, &child_stdout, &attr, 0);
-            if (ok) {
-                ok = DuplicateHandle(current, tmp, current,
-                                      &tmp, 0, FALSE,
-                                      DUPLICATE_CLOSE_SOURCE |
-                                      DUPLICATE_SAME_ACCESS);
-                if (ok) {
-                    parent_read = _open_osfhandle(tmp, _O_RDONLY /*| _O_TEXT*/);
-                    if (parent_read < 0)
-                        printf("open_osfhandle failed\n");
-                }
-            }
-        } else if (output == Ct) {
-            /* The child inherits a duplicate of our output
-               handle. Creating a duplicate avoids problems when
-               the child closes it */
-            int stream_handle = stream_to_handle(sLAstandard_outputA, 1);
-            if (stream_handle >= 0)
-                DuplicateHandle(current, _get_osfhandle(stream_handle) /*GetStdHandle(STD_OUTPUT_HANDLE)*/,
-                                 current, &child_stdout, 0, TRUE,
-                                 DUPLICATE_SAME_ACCESS);
-            else
-                child_stdout = NULL;
-        } else {
-            child_stdout = NULL;
-        }
-        if (error == sKoutput) {
-            /* The child inherits a duplicate of its own output
-               handle.*/
-            DuplicateHandle(current, child_stdout, current,
-                             &child_stderr, 0, TRUE,
-                             DUPLICATE_SAME_ACCESS);
-        } else if (error == Ct) {
-            /* The child inherits a duplicate of our output
-               handle. Creating a duplicate avoids problems when
-               the child closes it */
-            int stream_handle = stream_to_handle(sLAerror_outputA, 1);
-            if (stream_handle >= 0)
-                DuplicateHandle(current, _get_osfhandle(stream_handle) /*GetStdHandle(STD_ERROR_HANDLE)*/,
-                                 current, &child_stderr, 0, TRUE,
-                                 DUPLICATE_SAME_ACCESS);
-            else
-                child_stderr = NULL;
-        } else {
-            child_stderr = NULL;
-        }
-        ZeroMemory(&st_info, sizeof(STARTUPINFO));
-        st_info.cb = sizeof(STARTUPINFO);
-        st_info.lpTitle = NULL; /* No window title, just exec name */
-        st_info.dwFlags = STARTF_USESTDHANDLES; /* Specify std{in,out,err} */
-        st_info.hStdInput = child_stdin;
-        st_info.hStdOutput = child_stdout;
-        st_info.hStdError = child_stderr;
-        ZeroMemory(&pr_info, sizeof(PROCESS_INFORMATION));
-        ok = CreateProcess ( NULL, c_command,
-                             NULL, NULL, /* lpProcess/ThreadAttributes */
-                             TRUE, /* Inherit handles (for files) */
-                             /*CREATE_NEW_CONSOLE |*/
-                             0 /*(input == Ct || output == Ct || error == Ct ? 0 : CREATE_NO_WINDOW)*/,
-                             NULL, /* Inherit environment */
-                             NULL, /* Current directory */
-                             &st_info, /* Startup info */
-                             &pr_info ); /* Process info */
-        if (ok) {
-            CloseHandle(pr_info.hProcess);
-            CloseHandle(pr_info.hThread);
-            child_pid = pr_info.dwProcessId;
-            /* Child handles must be closed in the parent process */
-            /* otherwise the created pipes are never closed       */
-            if (child_stdin)  CloseHandle(child_stdin);
-            if (child_stdout) CloseHandle(child_stdout);
-            if (child_stderr) CloseHandle(child_stderr);
-        } else {
-            const char *message;
-            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
-                           FORMAT_MESSAGE_ALLOCATE_BUFFER,
-                           0, GetLastError(), 0, (void*)&message, 0, NULL);
-            printf("%s\n", message);
-            LocalFree(message);
-            child_pid = -1;
-        }
-    }
-#else
-    {
-#define OUR_MAX_ARGS 100
-	int child_stdin, child_stdout, child_stderr;
-        char *argv_ptr[OUR_MAX_ARGS];
-        object arglist = vs_base[1];
-        int i;
-        
-        c_command  = lisp_to_string ( command );
-
-        argv_ptr[0] = "";
-        for ( i = 1; ( arglist != Cnil ) && ( i < OUR_MAX_ARGS - 1 ); i++ ) {
-            argv_ptr[i] = lisp_to_string ( arglist->c.c_car );
-            arglist = arglist->c.c_cdr;
-        }
-        argv_ptr[i] = (char *)0;
-	if (input == sKstream) {
-            int fd[2];
-            pipe(fd);
-            parent_write = fd[1];
-            child_stdin = fd[0];
-	} else {
-            child_stdin = -1;
-            if (input == Ct)
-                child_stdin = stream_to_handle(sLAstandard_inputA, 0);
-            if (child_stdin >= 0)
-                child_stdin = dup(child_stdin);
-            else
-                child_stdin = open("/dev/null", O_RDONLY);
-	}
-	if (output == sKstream) {
-            int fd[2];
-            pipe(fd);
-            parent_read = fd[0];
-            child_stdout = fd[1];
-	} else {
-            child_stdout = -1;
-            if (output == Ct)
-                child_stdout = stream_to_handle(sLAstandard_outputA, 1);
-            if (child_stdout >= 0)
-                child_stdout = dup(child_stdout);
-            else
-                child_stdout = open("/dev/null", O_WRONLY);
-	}
-	if (error == sKoutput) {
-            child_stderr = child_stdout;
-	} else if (error == Ct) {
-            child_stderr = stream_to_handle(sLAerror_outputA, 1);
-	} else {
-            child_stderr = -1;
-	}
-	if (child_stderr < 0) {
-            child_stderr = open("/dev/null", O_WRONLY);
-	} else {
-            child_stderr = dup(child_stderr);
-	}
-	child_pid = fork();
-	if (child_pid == 0) {
-            /* Child */
-            close(0);
-            dup(child_stdin);
-            if (parent_write) close(parent_write);
-            close(1);
-            dup(child_stdout);
-            if (parent_read) close(parent_read);
-            close(2);
-            dup(child_stderr);
-            execvp(c_command, argv_ptr);
-            /* at this point exec has failed */
-            perror("exec");
-            gcl_abort();
-	}
-	close(child_stdin);
-	close(child_stdout);
-	close(child_stderr);
-    }
-#endif  /* _WIN32 */    
-    if (child_pid < 0) {
-        if (parent_write) close(parent_write);
-        if (parent_read) close(parent_read);
-        parent_write = 0;
-        parent_read = 0;
-        FEerror("Could not spawn subprocess to run ~S.", 1, command);
-    }
-    if (parent_write > 0) {
-        stream_write = make_stream_from_fd(command, parent_write,
-                                                smm_output);
-    } else {
-        parent_write = 0;
-        stream_write = NULL;
-    }
-    if (parent_read > 0) {
-        stream_read = make_stream_from_fd(command, parent_read,
-                                               smm_input);
-    } else {
-        parent_read = 0;
-        stream_read = NULL;
-    }
-    @(return `( parent_read || parent_write ) ? make_two_way_stream(stream_read, stream_write) : Cnil` )
-@)
-
-
-@(static defun make_string_input_stream (strng &o istart iend)
-	int s, e;
-@
-	check_type_string(&strng);
-	if (istart == Cnil)
-		s = 0;
-	else if (type_of(istart) != t_fixnum)
-		goto E;
-	else
-		s = fix(istart);
-	if (iend == Cnil)
-	  e = VLEN(strng);
-	else if (type_of(iend) != t_fixnum)
-		goto E;
-	else
-		e = fix(iend);
-        if (s < 0 || e > VLEN(strng) || s > e)
-		goto E;
-	@(return `make_string_input_stream(strng, s, e)`)
-
-E:
-	FEerror("~S and ~S are illegal as :START and :END~%\
-for the string ~S.",
-		3, istart, iend, strng);
-@)
-
-DEFUN("MAKE-STRING-OUTPUT-STREAM",object,fLmake_string_output_stream,LISP,0,2,NONE,OO,OO,OO,OO,(object tp,...),"") {
-
- tp=tp;/*FIXME lintian*/
- RETURN1(make_string_output_stream(64));
+  RETURN1(make_string_output_stream(64));
 
 }
+
 
 DEFUN("GET-OUTPUT-STREAM-STRING",object,fLget_output_stream_string,LISP,
 	   1,1,NONE,OO,OO,OO,OO,(object stream),"") {
@@ -2354,6 +1862,49 @@ LFD(siLoutput_stream_string)()
 	vs_base[0] = vs_base[0]->sm.sm_object0;
 }
 
+object
+file_stream(object x) {
+  if (type_of(x)==t_stream)
+    switch(x->sm.sm_mode) {
+    case smm_input:
+    case smm_output:
+    case smm_io:
+    case smm_probe:
+      return x;
+    case smm_file_synonym:
+      return file_stream(x->sm.sm_object0->s.s_dbind);
+    default:
+      break;
+  }
+  return Cnil;
+}
+
+DEFUN("FILE-STREAM-P",object,fSfile_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(file_stream(x)!=Cnil ? Ct : Cnil);
+}
+
+DEFUN("SYNONYM-STREAM-P",object,fSsynonym_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_synonym ? Ct : Cnil);
+}
+
+DEFUN("BROADCAST-STREAM-P",object,fSbroadcast_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_broadcast ? Ct : Cnil);
+}
+
+DEFUN("ECHO-STREAM-P",object,fSecho_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_echo ? Ct : Cnil);
+}
+
+DEFUN("TWO-WAY-STREAM-P",object,fStwo_way_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_two_way ? Ct : Cnil);
+}
+
+DEFUN("CONCATENATED-STREAM-P",object,fSconcatenated_stream_p,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
+  RETURN1(type_of(x)==t_stream && x->sm.sm_mode==smm_concatenated ? Ct : Cnil);
+}
+
+
+
 LFD(Lstreamp)()
 {
 	check_arg(1);
@@ -2384,30 +1935,6 @@ LFD(Loutput_stream_p)()
 		vs_base[0] = Ct;
 	else
 		vs_base[0] = Cnil;
-}
-
-LFD(Lopen_stream_p)()
-{
-	check_arg(1);
-
-	check_type_stream(&vs_base[0]);
-	vs_base[0] = open_stream_p(vs_base[0]);
-}
-
-LFD(Lstream_external_format)()
-{
-	check_arg(1);
-
-	check_type_stream(&vs_base[0]);
-	vs_base[0] = sKdefault;
-}
-
-LFD(Linteractive_stream_p)()
-{
-	check_arg(1);
-
-	check_type_stream(&vs_base[0]);
-	vs_base[0] = interactive_stream_p(vs_base[0]);
 }
 
 LFD(Lstream_element_type)()
@@ -2546,8 +2073,8 @@ LFD(siLfile_column)()
 		vs_base[0] = make_fixnum(i);
 }
 
-/* extern object truename(); */
 
+object sLAload_pathnameA;
 DEFVAR("*COLLECT-BINARY-MODULES*",sSAcollect_binary_modulesA,SI,sLnil,"");
 DEFVAR("*BINARY-MODULES*",sSAbinary_modulesA,SI,Cnil,"");
 DEFVAR("*DISABLE-RECOMPILE*",sSAdisable_recompile,SI,Ct,"");
@@ -2555,17 +2082,16 @@ DEFVAR("*DISABLE-RECOMPILE*",sSAdisable_recompile,SI,Ct,"");
 DEFUN("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object strm,object print),"") {
 
   object x;
-  
+
   for (;;) {
     preserving_whitespace_flag = FALSE;
     detect_eos_flag = TRUE;
-    x = read_object_non_recursive(strm);
-    if (x == OBJNULL)
+    if ((x = READ_STREAM_OR_FASD(strm))==OBJNULL)
       break;
     {
       object *base = vs_base, *top = vs_top, *lex = lex_env;
       object xx;
-      
+
       lex_new();
       eval(x);
       xx = vs_base[0];
@@ -2575,17 +2101,20 @@ DEFUN("LOAD-STREAM",object,fSload_stream,SI,2,2,NONE,OO,OO,OO,OO,(object strm,ob
       x = xx;
     }
     if (print != Cnil) {
-      SETUP_PRINT_DEFAULT(x);
-      write_object(x, 0);
-      write_str("\n");
-      CLEANUP_PRINT_DEFAULT;
-      flush_stream(PRINTstream);
+      princ(x,symbol_value(sLAstandard_outputA));
+      princ(make_simple_string("\n"),symbol_value(sLAstandard_outputA));
     }
   }
 
   RETURN1(Ct);
-  
+
 }
+#ifdef STATIC_FUNCTION_POINTERS
+object
+fSload_stream(object strm,object print) {
+  return FFN(fSload_stream)(strm,print);
+}
+#endif
 
 DEFUN("LOAD-FASL",object,fSload_fasl,SI,2,2,NONE,OO,OO,OO,OO,(object fasl_filename,object print),"") {
   
@@ -2600,23 +2129,19 @@ DEFUN("LOAD-FASL",object,fSload_fasl,SI,2,2,NONE,OO,OO,OO,OO,(object fasl_filena
     }
     if (_y==Cnil)
       sSAbinary_modulesA->s.s_dbind=make_cons(fasl_filename,Cnil);
-    else 
+    else
       _y->c.c_cdr=make_cons(fasl_filename,Cnil);
   }
   i = fasload(fasl_filename);
   if (print != Cnil) {
-    SETUP_PRINT_DEFAULT(Cnil);
-    vs_top = PRINTvs_top;
-    if (file_column(PRINTstream) != 0)
-      write_str("\n");
-    write_str(";; Fasload successfully ended.");
-    write_str("\n");
-    CLEANUP_PRINT_DEFAULT;
-    flush_stream(PRINTstream);
+    object strm=symbol_value(sLAstandard_outputA);
+    if (file_column(strm)!=0)
+      princ(make_simple_string("\n"),strm);
+    princ(make_simple_string(";; Fasload successfully ended.\n"),strm);
   }
-  
+
   RETURN1(make_fixnum(i));
-  
+
 }
 
 static void
@@ -2640,10 +2165,12 @@ LFD(siLmake_string_output_stream_from_string)()
 	strm = alloc_object(t_stream);
 	strm->sm.tt=strm->sm.sm_mode = (short)smm_string_output;
 	strm->sm.sm_fp = NULL;
+	strm->sm.sm_buffer = 0;
 	STRING_STREAM_STRING(strm) = strng;
 	strm->sm.sm_object1 = OBJNULL;
 	/* strm->sm.sm_int0 = strng->st.st_fillp; */
-	STREAM_FILE_COLUMN(strm) = 0;
+	STREAM_FILE_COLUMN(strm) = 0;/*FIXME*/
+	strm->sm.sm_flags=0;
 	vs_base[0] = strm;
 }
 
@@ -2825,10 +2352,7 @@ DEFUN("FREAD",object,fSfread,SI,4,4,NONE,OO,OO,OO,OO,
 #ifdef HAVE_NSOCKET
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     
@@ -2915,7 +2439,7 @@ object async;
   x->sm.sm_buffer = 0;
   x->sm.sm_object0 = list(3,server,host,port);
   x->sm.sm_object1 = 0;
-  x->sm.sm_int0 = x->sm.sm_int1 = 0;
+  x->sm.sm_int = 0;
   x->sm.sm_flags=0;
   SOCKET_STREAM_FD(x)= fd;
   SET_STREAM_FLAG(x,mode,1);
@@ -2979,7 +2503,7 @@ maccept(object x) {
 static void
 rmc(int e,void *pid) {
 
-  kill((int)(unsigned long)pid,SIGTERM);
+  kill((long)pid,SIGTERM);
 
 }
 #endif
@@ -3023,29 +2547,29 @@ object x=Cnil;
    inPort = (myport == Cnil ? 0 : fix(Iis_fixnum(myport)));
    
 #ifdef BSD
+
   if (isServer && daemon != Cnil) {
 
-    int pid,i;
+    long pid,i;
     struct rlimit r;
-    struct sigaction sa;
+    struct sigaction sa,osa;
 
     sa.sa_handler=SIG_IGN;
     sa.sa_flags=SA_NOCLDWAIT;
     sigemptyset(&sa.sa_mask);
 
-    sigaction(SIGCHLD,&sa,NULL);
+    massert(!sigaction(SIGCHLD,&sa,&osa));
 
-    switch((pid=pfork())) {
+    switch((pid=pvfork())) {
     case -1:
       FEerror("Cannot fork", 0);
       break;
     case 0:
 
-      if (setsid()<0)
-	FEerror("setsid error", 0);
+      massert(setsid()>=0);
 
       if (daemon == sKpersistent)
-	switch(pfork()) {
+	switch(pvfork()) {
 	case -1:
 	  FEerror("daemon fork error", 0);
 	  break;
@@ -3056,23 +2580,17 @@ object x=Cnil;
 	  break;
 	}
       
+      massert(!chdir("/"));
+
       memset(&r,0,sizeof(r));
-      if (getrlimit(RLIMIT_NOFILE,&r))
-	FEerror("Cannot get resourse usage",0);
+      massert(!getrlimit(RLIMIT_NOFILE,&r));
       
       for (i=0;i<r.rlim_cur;i++)
-	close(i);
-      errno=0;
+      	close(i);/*FIXME some of this will return error*/
       
-      if ((i=open("/dev/null",O_RDWR))==-1)
-	FEerror("Can't open /dev/null for stdin",0);
-      if ((i=dup(i))==-1)
-	FEerror("Can't dup",0);
-      if ((i=dup(i))==-1)
-	FEerror("Can't dup twice",0);
-      
-      if (chdir("/"))
-	FEerror("Cannot chdir to /",0);
+      massert((i=open("/dev/null",O_RDWR))>=0);
+      massert((i=dup(i))>=0);
+      massert((i=dup(i))>=0);
       
       umask(0);
       
@@ -3089,16 +2607,14 @@ object x=Cnil;
 	
 	FD_ZERO(&fds);
 	FD_SET(fd,&fds);
-	i=select(fd+1,&fds,NULL,NULL,NULL);
 	
-	if (i>0) {
+	if (select(fd+1,&fds,NULL,NULL,NULL)>0) {
 	  
 	  y=maccept(x);
 	  
-	  sigaction(SIGCHLD,&sa,NULL);
-	  
-	  switch((pid=pfork())) {
+	  switch((pid=pvfork())) {
 	  case 0:
+	    massert(!sigaction(SIGCHLD,&osa,NULL));
 	    ifuncall1(server,y);
 	    exit(0);
 	    break;
@@ -3115,12 +2631,14 @@ object x=Cnil;
       break;
     default:
       if (daemon != sKpersistent) {
-	on_exit(rmc,(void *)(unsigned long)pid);
+	on_exit(rmc,(void *)pid);
 	x=make_fixnum(pid);
       } else
 	x=Cnil;
       break;
     }
+
+    massert(!sigaction(SIGCHLD,&osa,NULL));
 
   } else 
 
@@ -3157,16 +2675,30 @@ DEF_ORDINARY("SOCKET",sSsocket,SI,"");
 
 #endif /* HAVE_NSOCKET */
 
-object standard_io;
-DEFVAR("*STANDARD-INPUT*",sLAstandard_inputA,LISP,(gcl_init_file(),standard_io),""); 
-DEFVAR("*STANDARD-OUTPUT*",sLAstandard_outputA,LISP,standard_io,"");
-DEFVAR("*ERROR-OUTPUT*",sLAerror_outputA,LISP,standard_io,"");
-DEFVAR("*TERMINAL-IO*",sLAterminal_ioA,LISP,terminal_io,"");
-DEFVAR("*QUERY-IO*",sLAquery_ioA,LISP,
-    (standard_io->sm.sm_object0 = sLAterminal_ioA,
-        standard_io),"");
-DEFVAR("*DEBUG-IO*",sLAdebug_ioA,LISP,standard_io,"");
-DEFVAR("*TRACE-OUTPUT*",sLAtrace_outputA,LISP,standard_io,"");
+object
+fresh_synonym_stream_to_terminal_io(void) {
+
+  object x = alloc_object(t_stream);
+  x->sm.tt=x->sm.sm_mode = (short)smm_synonym;
+  x->sm.sm_fp = NULL;
+  x->sm.sm_buffer = 0;
+  x->sm.sm_object0 = sLAterminal_ioA;
+  x->sm.sm_object1 = OBJNULL;
+  x->sm.sm_int = 0; /* unused */
+  x->sm.sm_flags=0;
+  return x;
+
+}
+
+/* object standard_io; */
+object standard_error;
+DEFVAR("*TERMINAL-IO*",sLAterminal_ioA,LISP,(gcl_init_file(),terminal_io),"");
+DEFVAR("*STANDARD-INPUT*",sLAstandard_inputA,LISP,fresh_synonym_stream_to_terminal_io(),"");
+DEFVAR("*STANDARD-OUTPUT*",sLAstandard_outputA,LISP,fresh_synonym_stream_to_terminal_io(),"");
+DEFVAR("*ERROR-OUTPUT*",sLAerror_outputA,LISP,standard_error,"");
+DEFVAR("*QUERY-IO*",sLAquery_ioA,LISP,fresh_synonym_stream_to_terminal_io(),"");
+DEFVAR("*DEBUG-IO*",sLAdebug_ioA,LISP,fresh_synonym_stream_to_terminal_io(),"");
+DEFVAR("*TRACE-OUTPUT*",sLAtrace_outputA,LISP,fresh_synonym_stream_to_terminal_io(),"");
 
 
 void
@@ -3175,40 +2707,44 @@ gcl_init_file(void)
 	object standard_input;
 	object standard_output;
 	object standard;
-	object x;
+
 	standard_input = alloc_object(t_stream);
 	standard_input->sm.tt=standard_input->sm.sm_mode = (short)smm_input;
 	standard_input->sm.sm_fp = stdin;
+	standard_input->sm.sm_buffer = 0;
 	standard_input->sm.sm_object0 = sLcharacter;
 	standard_input->sm.sm_object1 = make_simple_string("stdin");
-	standard_input->sm.sm_int0 = 0; /* unused */
-	standard_input->sm.sm_int1 = 0; /* unused */
+	standard_input->sm.sm_int = 0; /* unused */
+	standard_input->sm.sm_flags = 0;
 
 	standard_output = alloc_object(t_stream);
 	standard_output->sm.tt=standard_output->sm.sm_mode = (short)smm_output;
 	standard_output->sm.sm_fp = stdout;
+	standard_output->sm.sm_buffer = 0;
 	standard_output->sm.sm_object0 = sLcharacter;
 	standard_output->sm.sm_object1 = make_simple_string("stdout");
-	standard_output->sm.sm_int0 = 0; /* unused */
-	STREAM_FILE_COLUMN(standard_output) = 0;
+	standard_output->sm.sm_int = 0; /* unused */
+	standard_output->sm.sm_flags=0;
+
+	standard_error = alloc_object(t_stream);
+	standard_error->sm.tt=standard_error->sm.sm_mode = (short)smm_output;
+	standard_error->sm.sm_fp = stderr;
+	standard_error->sm.sm_buffer = 0;
+	standard_error->sm.sm_object0 = sLcharacter;
+	standard_error->sm.sm_object1 = make_simple_string("stderr");
+	standard_error->sm.sm_int = 0; /* unused */
+	standard_error->sm.sm_flags=0;
+	enter_mark_origin(&standard_error);
 
 	terminal_io = standard
 	= make_two_way_stream(standard_input, standard_output);
 	enter_mark_origin(&terminal_io);
 
-	x = alloc_object(t_stream);
-	x->sm.tt=x->sm.sm_mode = (short)smm_synonym;
-	x->sm.sm_fp = NULL;
-	x->sm.sm_object0 = sLAterminal_ioA;
-	x->sm.sm_object1 = OBJNULL;
-	x->sm.sm_int0 = x->sm.sm_int1 = 0; /* unused */
-	standard_io = x;
-	enter_mark_origin(&standard_io);	
 
 }
 
 DEFVAR("*IGNORE-EOF-ON-TERMINAL-IO*",sSAignore_eof_on_terminal_ioA,SI,Cnil,"");
-DEFVAR("*LOAD-PATHNAME*",sSAload_pathnameA,LISP,Cnil,"");
+DEFVAR("*LOAD-PATHNAME*",sLAload_pathnameA,LISP,Cnil,"");
 DEFVAR("*LOAD-TRUENAME*",sSAload_truenameA,LISP,Cnil,"");
 DEFVAR("*LOAD-VERBOSE*",sLAload_verboseA,LISP,Ct,"");
 DEFVAR("*LOAD-PRINT*",sLAload_printA,LISP,Cnil,"");
@@ -3217,7 +2753,6 @@ DEF_ORDINARY("ABORT",sKabort,KEYWORD,"");
 DEF_ORDINARY("APPEND",sKappend,KEYWORD,"");
 DEF_ORDINARY("CREATE",sKcreate,KEYWORD,"");
 DEF_ORDINARY("DEFAULT",sKdefault,KEYWORD,"");
-DEF_ORDINARY("EXTERNAL-FORMAT",sKexternal_format,KEYWORD,"");
 DEF_ORDINARY("DIRECTION",sKdirection,KEYWORD,"");
 DEF_ORDINARY("ELEMENT-TYPE",sKelement_type,KEYWORD,"");
 DEF_ORDINARY("ERROR",sKerror,KEYWORD,"");
@@ -3266,15 +2801,23 @@ DEFUN("STREAM-OBJECT1",object,fSstream_object1,SI,1,1,NONE,OO,OO,OO,OO,(object s
 void
 gcl_init_file_function()
 {
-	make_si_constant("*EOF*",make_fixnum(EOF));
 
+
+#ifdef UNIX
 	FASL_string = make_simple_string("o");
-	enter_mark_origin(&FASL_string);
-	LSP_string = make_simple_string("lsp");
-	enter_mark_origin(&LSP_string);
-	LISP_string = make_simple_string("lisp");
-	enter_mark_origin(&LISP_string);
+	make_si_constant("*EOF*",make_fixnum(EOF));
+#endif
+#ifdef AOSVS
 
+#endif
+	enter_mark_origin(&FASL_string);
+#ifdef UNIX
+	LSP_string = make_simple_string("lsp");
+#endif
+#ifdef AOSVS
+
+#endif
+	enter_mark_origin(&LSP_string);
 	make_si_function("FP-INPUT-STREAM",	siLfp_input_stream);
 	make_si_function("FP-OUTPUT-STREAM",	siLfp_output_stream);
 
@@ -3284,8 +2827,6 @@ gcl_init_file_function()
 		      Lmake_concatenated_stream);
 /* 	make_function("MAKE-TWO-WAY-STREAM", Lmake_two_way_stream); */
 	make_function("MAKE-ECHO-STREAM", Lmake_echo_stream);
-	make_function("MAKE-STRING-INPUT-STREAM",
-		      Lmake_string_input_stream);
 /* 	make_function("MAKE-STRING-OUTPUT-STREAM", */
 /* 		      Lmake_string_output_stream); */
 /* 	make_function("GET-OUTPUT-STREAM-STRING", */
@@ -3301,9 +2842,6 @@ gcl_init_file_function()
 	make_function("STREAMP", Lstreamp);
 	make_function("INPUT-STREAM-P", Linput_stream_p);
 	make_function("OUTPUT-STREAM-P", Loutput_stream_p);
-	make_function("OPEN-STREAM-P", Lopen_stream_p);
-	make_function("STREAM-EXTERNAL-FORMAT", Lstream_external_format);
-	make_function("INTERACTIVE-STREAM-P", Linteractive_stream_p);
 	make_function("STREAM-ELEMENT-TYPE", Lstream_element_type);
 	make_function("CLOSE", Lclose);
 
@@ -3322,7 +2860,6 @@ gcl_init_file_function()
 	make_si_function("MAKE-STRING-OUTPUT-STREAM-FROM-STRING",
 			 siLmake_string_output_stream_from_string);
 	make_si_function("COPY-STREAM", siLcopy_stream);
-	make_si_function("RUN-PROGRAM", Lrun_program);
 
 #ifdef USER_DEFINED_STREAMS
 	make_si_function("USER-STREAM-STATE", siLuser_stream_state);
@@ -3331,77 +2868,4 @@ gcl_init_file_function()
 #ifdef USE_READLINE
 	gcl_init_readline_function();
 #endif
-}
-
-
-object
-read_fasl_data(str)
-char *str;
-{
-	object faslfile, data;
-#ifndef SEEK_TO_END_OFILE
-#if defined(BSD) && defined(UNIX)
-	FILE *fp;
-	int i;
-#ifdef HAVE_AOUT
- 	struct exec header;
-#endif
-#endif
-#ifdef HAVE_FILEHDR
-	struct filehdr fileheader;
-#endif
-#ifdef E15
-	struct exec header;
-#endif
-#endif
-        vs_mark;
-
-	faslfile = make_simple_string(str);
-	vs_push(faslfile);
-	faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
-	vs_push(faslfile);
-
-#ifdef SEEK_TO_END_OFILE
- 	SEEK_TO_END_OFILE(faslfile->sm.sm_fp);
-#else
-
-#ifdef BSD
-	fp = faslfile->sm.sm_fp;
-	fread(&header, sizeof(header), 1, fp);
-	fseek(fp,
-	      header.a_text+header.a_data+
-	      header.a_syms+header.a_trsize+header.a_drsize,
-	      1);
-	fread(&i, sizeof(i), 1, fp);
-	fseek(fp, i - sizeof(i), 1);
-#endif
-
-#ifdef HAVE_FILEHDR
-	fp = faslfile->sm.sm_fp;
-	fread(&fileheader, sizeof(fileheader), 1, fp);
-	fseek(fp,
-	      fileheader.f_symptr+fileheader.f_nsyms*SYMESZ,
-	      0);
-	fread(&i, sizeof(i), 1, fp);
-	fseek(fp, i - sizeof(i), 1);
-	while ((i = getc(fp)) == 0)
-		;
-	ungetc(i, fp);
-#endif
-
-#ifdef E15
-	fp = faslfile->sm.sm_fp;
-	fread(&header, sizeof(header), 1, fp);
-	fseek(fp,
-	      header.a_text+header.a_data+
-	      header.a_syms+header.a_trsize+header.a_drsize,
-	      1);
-#endif
-#endif
-	data = read_fasl_vector(faslfile);
-
-	vs_push(data);
-	close_stream(faslfile);
-	vs_reset;
-	return(data);
 }

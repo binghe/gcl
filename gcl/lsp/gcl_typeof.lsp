@@ -15,6 +15,10 @@
 	 (i (real-rep (if s x (cadr x)))))
     (complex r i)))
 
+(defun make-string-output-stream (&key (element-type 'character))
+  (declare (optimize (safety 1))(ignore element-type))
+  (make-string-output-stream-int))
+
 (defconstant +r+ `((immfix 1)
 		   (bfix  most-positive-fixnum)
 		   (bignum (1+ most-positive-fixnum))
@@ -39,13 +43,13 @@
 		   (file-output-stream (let ((s (open-int "/dev/null" :output 'character nil nil nil nil :default))) (close s) s))
 		   (file-io-stream (let ((s (open-int "/dev/null" :io 'character nil nil nil nil :default))) (close s) s))
 		   (file-probe-stream (let ((s (open-int "/dev/null" :probe 'character nil nil nil nil :default))) (close s) s))
-		   (file-synonym-stream (make-synonym-stream '*standard-output*))
+		   (file-synonym-stream (let* ((*standard-output* (open-int "/dev/null" :output 'character nil nil nil nil :default))) (close *standard-output*)  (make-synonym-stream '*standard-output*)))
 		   (non-file-synonym-stream *debug-io*);FIXME
 		   (broadcast-stream (make-broadcast-stream))
 		   (concatenated-stream (make-concatenated-stream))
 		   (two-way-stream *terminal-io*)
 		   (echo-stream (make-echo-stream *standard-output* *standard-output*))
-		   (string-input-stream (make-string-input-stream ""))
+		   (string-input-stream (make-string-input-stream-int (make-vector 'character 0 t 0 nil 0 nil nil) 0 0))
 		   (string-output-stream (make-string-output-stream));FIXME user defined, socket
 		   (random-state (make-random-state)) 
 		   (readtable (standard-readtable)) 

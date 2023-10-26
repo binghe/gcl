@@ -8,7 +8,6 @@
 
 /* prevent duplicate definition...  we wont be using varargs
    in this */
-#undef va_start
 
 #include "windows.h"
 #ifdef __MINGW32__

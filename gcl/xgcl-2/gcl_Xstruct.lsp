@@ -25,7 +25,7 @@
 
 
 
-;;;;;; _XQEvent funcions ;;;;;;
+;;;;;; _XQEvent functions ;;;;;;
 
 (defentry make-_XQEvent () ( fixnum  "make__XQEvent" ))
 (defentry _XQEvent-event (fixnum) ( fixnum "_XQEvent_event" ))
@@ -34,7 +34,7 @@
 (defentry set-_XQEvent-next (fixnum fixnum) ( void "set__XQEvent_next" ))
 
 
-;;;;;; XCharStruct funcions ;;;;;;
+;;;;;; XCharStruct functions ;;;;;;
 
 (defentry make-XCharStruct () ( fixnum  "make_XCharStruct" ))
 (defentry XCharStruct-attributes (fixnum) ( fixnum "XCharStruct_attributes" ))
@@ -51,7 +51,7 @@
 (defentry set-XCharStruct-lbearing (fixnum fixnum) ( void "set_XCharStruct_lbearing" ))
 
 
-;;;;;; XFontProp funcions ;;;;;;
+;;;;;; XFontProp functions ;;;;;;
 
 (defentry make-XFontProp () ( fixnum  "make_XFontProp" ))
 (defentry XFontProp-card32 (fixnum) ( fixnum "XFontProp_card32" ))
@@ -60,7 +60,7 @@
 (defentry set-XFontProp-name (fixnum fixnum) ( void "set_XFontProp_name" ))
 
 
-;;;;;; XFontStruct funcions ;;;;;;
+;;;;;; XFontStruct functions ;;;;;;
 
 (defentry make-XFontStruct () ( fixnum  "make_XFontStruct" ))
 (defentry XFontStruct-descent (fixnum) ( fixnum "XFontStruct_descent" ))
@@ -97,7 +97,7 @@
 (defentry set-XFontStruct-ext_data (fixnum fixnum) ( void "set_XFontStruct_ext_data" ))
 
 
-;;;;;; XTextItem funcions ;;;;;;
+;;;;;; XTextItem functions ;;;;;;
 
 (defentry make-XTextItem () ( fixnum  "make_XTextItem" ))
 (defentry XTextItem-font (fixnum) ( fixnum "XTextItem_font" ))
@@ -110,7 +110,7 @@
 (defentry set-XTextItem-chars (fixnum fixnum) ( void "set_XTextItem_chars" ))
 
 
-;;;;;; XChar2b funcions ;;;;;;
+;;;;;; XChar2b functions ;;;;;;
 
 (defentry make-XChar2b () ( fixnum  "make_XChar2b" ))
 (defentry XChar2b-byte2 (fixnum) ( char "XChar2b_byte2" ))
@@ -119,7 +119,7 @@
 (defentry set-XChar2b-byte1 (fixnum char) ( void "set_XChar2b_byte1" ))
 
 
-;;;;;; XTextItem16 funcions ;;;;;;
+;;;;;; XTextItem16 functions ;;;;;;
 
 (defentry make-XTextItem16 () ( fixnum  "make_XTextItem16" ))
 (defentry XTextItem16-font (fixnum) ( fixnum "XTextItem16_font" ))
@@ -132,7 +132,7 @@
 (defentry set-XTextItem16-chars (fixnum fixnum) ( void "set_XTextItem16_chars" ))
 
 
-;;;;;; XEDataObject funcions ;;;;;;
+;;;;;; XEDataObject functions ;;;;;;
 
 (defentry make-XEDataObject () ( fixnum  "make_XEDataObject" ))
 (defentry XEDataObject-font (fixnum) ( fixnum "XEDataObject_font" ))
@@ -147,7 +147,7 @@
 (defentry set-XEDataObject-gc (fixnum fixnum) ( void "set_XEDataObject_gc" ))
 
 
-;;;;;; XSizeHints funcions ;;;;;;
+;;;;;; XSizeHints functions ;;;;;;
 
 (defentry make-XSizeHints () ( fixnum  "make_XSizeHints" ))
 (defentry XSizeHints-win_gravity (fixnum) ( fixnum "XSizeHints_win_gravity" ))
@@ -190,7 +190,7 @@
 (defentry set-XSizeHints-flags (fixnum fixnum) ( void "set_XSizeHints_flags" ))
 
 
-;;;;;; XWMHints funcions ;;;;;;
+;;;;;; XWMHints functions ;;;;;;
 
 (defentry make-XWMHints () ( fixnum  "make_XWMHints" ))
 (defentry XWMHints-window_group (fixnum) ( fixnum "XWMHints_window_group" ))
@@ -213,7 +213,7 @@
 (defentry set-XWMHints-flags (fixnum fixnum) ( void "set_XWMHints_flags" ))
 
 
-;;;;;; XTextProperty funcions ;;;;;;
+;;;;;; XTextProperty functions ;;;;;;
 
 (defentry make-XTextProperty () ( fixnum  "make_XTextProperty" ))
 (defentry XTextProperty-nitems (fixnum) ( fixnum "XTextProperty_nitems" ))
@@ -226,7 +226,7 @@
 (defentry set-XTextProperty-value (fixnum fixnum) ( void "set_XTextProperty_value" ))
 
 
-;;;;;; XIconSize funcions ;;;;;;
+;;;;;; XIconSize functions ;;;;;;
 
 (defentry make-XIconSize () ( fixnum  "make_XIconSize" ))
 (defentry XIconSize-height_inc (fixnum) ( fixnum "XIconSize_height_inc" ))
@@ -243,7 +243,7 @@
 (defentry set-XIconSize-min_width (fixnum fixnum) ( void "set_XIconSize_min_width" ))
 
 
-;;;;;; XClassHint funcions ;;;;;;
+;;;;;; XClassHint functions ;;;;;;
 
 (defentry make-XClassHint () ( fixnum  "make_XClassHint" ))
 (defentry XClassHint-res_class (fixnum) ( fixnum "XClassHint_res_class" ))
@@ -252,7 +252,7 @@
 (defentry set-XClassHint-res_name (fixnum fixnum) ( void "set_XClassHint_res_name" ))
 
 
-;;;;;; XComposeStatus funcions ;;;;;;
+;;;;;; XComposeStatus functions ;;;;;;
 
 (defentry make-XComposeStatus () ( fixnum  "make_XComposeStatus" ))
 (defentry XComposeStatus-chars_matched (fixnum) ( fixnum "XComposeStatus_chars_matched" ))
@@ -261,7 +261,7 @@
 (defentry set-XComposeStatus-compose_ptr (fixnum fixnum) ( void "set_XComposeStatus_compose_ptr" ))
 
 
-;;;;;; XVisualInfo funcions ;;;;;;
+;;;;;; XVisualInfo functions ;;;;;;
 
 (defentry make-XVisualInfo () ( fixnum  "make_XVisualInfo" ))
 (defentry XVisualInfo-bits_per_rgb (fixnum) ( fixnum "XVisualInfo_bits_per_rgb" ))
@@ -286,7 +286,7 @@
 (defentry set-XVisualInfo-visual (fixnum fixnum) ( void "set_XVisualInfo_visual" ))
 
 
-;;;;;; XStandardColormap funcions ;;;;;;
+;;;;;; XStandardColormap functions ;;;;;;
 
 (defentry make-XStandardColormap () ( fixnum  "make_XStandardColormap" ))
 (defentry XStandardColormap-killid (fixnum) ( fixnum "XStandardColormap_killid" ))

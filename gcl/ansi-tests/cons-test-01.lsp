@@ -65,16 +65,16 @@
 	cadaar cadadr caddar cadddr
 	cdaaar cdaadr cdadar cdaddr
 	cddaar cddadr cdddar cddddr
-	copytree sublis nsublis
-	subst substif substifnot
-	nsubst nsubstif nsubstifnot
-	treeequal
-	copylist
+	copy-tree sublis nsublis
+	subst subst-if subst-if-not
+	nsubst nsubst-if nsubst-if-not
+	tree-equal
+	copy-list
 	list
 	list*
-	listlength
+	list-length
 	listp
-	makelist
+	make-list
 	first second third fourth
 	fifth sixth seventh eighth ninth tenth
 	nth
@@ -86,20 +86,20 @@
 	butlast nbutlast
 	last ldiff tailp
 	nthcdr rest
-	member memberif memberifnot
+	member member-if member-if-not
 	mapc mapcar mapcan mapl maplist mapcon
 	acons
-	assoc associf associfnot
-	copyalist
+	assoc assoc-if assoc-if-not
+	copy-alist
 	pairlis
-	rassoc rassocif rassocifnot
-	getproperties
+	rassoc rassoc-if rassoc-if-not
+	get-properties
 	getf
 	intersection
 	nintersection
 	adjoin
-	setdifference nsetdifference
-	setexclusiveor nsetexclusiveor
+	set-difference nset-difference
+	set-exclusive-or nset-exclusive-or
 	subsetp
 	union nunion))
 

@@ -83,7 +83,7 @@
 (defun rewrite-restart-case-clause (r &aux (name (pop r))(ll (pop r)))
   (labels ((l (r) (if (member (car r) '(:report :interactive :test)) (l (cddr r)) r)))
 	  (let ((rd (l r)))
-	    (list* name (gensym) (apply 'transform-keywords (ldiff r rd)) ll rd))))
+	    (list* name (gensym) (apply 'transform-keywords (ldiff-nf r rd)) ll rd))))
 
 
 (defun restart-case-expression-condition (expression env c &aux (e (macroexpand expression env))(n (when (listp e) (pop e))))
@@ -189,7 +189,7 @@
 
 (defun show-restarts (&aux (i 0))
   (mapc (lambda (x)
-	  (format t "~& ~4d ~a ~a ~%" 
+	  (format *debug-io* "~& ~4d ~a ~a ~%"
 		  (incf i)
 		  (cond ((eq x *debug-abort*) "(abort)") ((eq x *debug-continue*) "(continue)") (""))
 		  x)) *debug-restarts*)

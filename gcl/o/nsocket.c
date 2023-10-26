@@ -2,10 +2,7 @@
 #include "include.h"
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     
@@ -63,7 +60,7 @@
 #endif
 
 #define VOID void
-#define ERROR_MESSAGE(msg)     do{ fprintf(stderr,msg); gcl_abort() ; } while(0)    
+#define ERROR_MESSAGE(msg)     do{ emsg(msg); gcl_abort() ; } while(0)
 
 #ifdef STAND
 
@@ -85,7 +82,7 @@ main(argc,argv)
   fd = doConnect(argv[1],atoi(argv[2]));
   if (fd < 0) {
     perror("cant connect");
-    exit(1);
+    do_gcl_abort();
   }
 
   while (1) { int high;
@@ -202,7 +199,7 @@ CreateSocket(int port, char *host, int server, char *myaddr, int myport, int asy
                                  * attempt to do an async connect. Otherwise
                                  * do a synchronous connect or bind. */
 {
-    int status, sock/* , asyncConnect */, curState, origState;
+    int status, sock, /* asyncConnect,  */curState, origState;
     struct sockaddr_in sockaddr;	/* socket address */
     struct sockaddr_in mysockaddr;	/* Socket address for client */
 
@@ -498,8 +495,7 @@ getOneChar(FILE *fp)
   int high;
   /*  fprintf(stderr,"<socket 0x%x>",fp);
   fflush(stderr); */
-  fprintf(stderr,"in getOneChar, fd=%d,fp=%p",fd,fp);
-  fflush(stderr);
+  emsg("in getOneChar, fd=%d,fp=%p",fd,fp);
   if (fd == 0)
    { joe(fd);
    return -1;
@@ -515,16 +511,14 @@ getOneChar(FILE *fp)
   if (high > 0)
     {
       int ch ;
-      fprintf(stderr,"in getOneChar, fd=%d,fp=%p",fd,fp);
-      fflush(stderr);
+      emsg("in getOneChar, fd=%d,fp=%p",fd,fp);
       ch = getc(fp);
       if ( ch != EOF || feof(fp) ) {
 	/*      fprintf(stderr,"< 0x%x returning %d,%c>\n",fp,ch,ch);
       fflush(stderr);
       */
       }
-      fprintf(stderr,"in getOneChar, ch= %c,%d\n",ch,ch);
-      fflush(stderr);
+      emsg("in getOneChar, ch= %c,%d\n",ch,ch);
       CHECK_INTERRUPT;	 
       if (ch != EOF) return ch;
       if (feof(fp)) return EOF;
@@ -534,10 +528,7 @@ getOneChar(FILE *fp)
 }
 
 #ifdef DODEBUG
-#define dprintf(s,arg) \
-  do {fprintf(stderr,s,arg); \
-    fflush(stderr); }\
-    while(0)
+#define dprintf(s,arg) emsg(s,arg)
 #else 
 #define dprintf(s,arg)
 #endif     
@@ -625,50 +616,43 @@ doReverse(char *s, int n)
   of the buffer may be changed.
  */
 int
-getCharGclSocket(object strm, object block)
-{
-  object bufp = SOCKET_STREAM_BUFFER(strm);
-  if (bufp->ust.ust_fillp > 0) {
-    dprintf("getchar returns (%c)\n",bufp->ust.ust_self[-1+(bufp->ust.ust_fillp)]);
+getCharGclSocket(object strm, object block) {
+
+  object bufp=SOCKET_STREAM_BUFFER(strm);
+  int fd=SOCKET_STREAM_FD(strm);
+
+  if (VLEN(bufp) > 0)
     return bufp->ust.ust_self[--(bufp->ust.ust_fillp)];
-  }
-  else {
+
+  if (fd>=0) {
+
     fd_set readfds;
-    struct timeval timeout;
-    int fd = SOCKET_STREAM_FD(strm);
-    if (1)
-      { int high;
-      AGAIN:      
-      /* under cygwin a too large timout like (1<<30) does not work */
-      timeout.tv_sec = (block != Ct ?  0 : 0);
-      timeout.tv_usec = 10000;
-      FD_ZERO(&readfds);
-      FD_SET(fd,&readfds);
-      high = select(fd+1,&readfds,NULL,NULL,&timeout);
-      if (high > 0)
-	{ object bufp = SOCKET_STREAM_BUFFER(strm);
-	int n;
-	n = SAFE_READ(fd,bufp->st.st_self ,bufp->ust.ust_dim);
+    struct timeval t,t1={0,10000},*tp=block==Ct ? NULL : &t;
+    int high,n;
+
+    FD_ZERO(&readfds);
+    FD_SET(fd,&readfds);
+
+    for (;(errno=0,t=t1,high=select(fd+1,&readfds,NULL,NULL,tp))==-1 && !tp && errno==EINTR;);
+
+    if (high > 0) {
+
+      massert((n=SAFE_READ(fd,bufp->st.st_self,bufp->ust.ust_dim))>=0);
+
+      if (n) {
 	doReverse(bufp->st.st_self,n);
 	bufp->ust.ust_fillp=n;
-	if (n > 0)
-	  {
-	    dprintf("getchar returns (%c)\n",bufp->ust.ust_self[-1+(bufp->ust.ust_fillp)]);
-	    return bufp->ust.ust_self[--(bufp->ust.ust_fillp)];
-	  }
-	else
-	  {
-	    SOCKET_STREAM_FD(strm)=-1;
-	    return EOF;
-	    /* FEerror("select said there was stuff there but there was not",0); */
-	  }
-	}
-      /* probably a signal interrupted us.. */
-      if (block == Ct)
-	goto AGAIN;
-      return EOF;
-      }
+      } else
+	SOCKET_STREAM_FD(strm)=-1;
+
+      return getCharGclSocket(strm,block);
+
+    }
+
   }
+
+  return EOF;
+
 }
 
 #else

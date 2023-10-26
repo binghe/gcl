@@ -28,14 +28,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 #include "page.h"
 
-/* #undef endp */
-
-/* #define	endp(obje)	((enum type)(type_of(endp_temp = (obje))) == t_cons ? \ */
-/* 			 FALSE : endp_temp == Cnil ? TRUE : \ */
-/* 			 (FEwrong_type_argument(sLlist, endp_temp),FALSE)) */
-
-/* object endp_temp; */
-
 /*
 	I know the following name is not good.
 */
@@ -118,69 +110,48 @@ LFD(Lelt)()
 }
 
 object
-elt(seq, index)
-object seq;
-int index;
-{
-/* 	object endp_temp; */
+elt(object seq, int index) {
 
-	int i,max;
-	object l;
+  int i;
 
-	if (index < 0) {
-	  object y=make_fixnum(index);
-	  TYPE_ERROR(y,sSnon_negative_fixnum);
-	  index=fix(y);
-	}
-	switch (type_of(seq)) {
-	case t_cons:
-		for (i = index, l = seq;  i > 0;  --i)
-			if (endp(l)) {
-				max=i;
-				goto E;
-			} else
-				l = l->c.c_cdr;
-		if (endp(l)) {
-			max=i;
-			goto E;
-		} 
-		return(l->c.c_car);
+  if (index < 0) {
+    TYPE_ERROR(make_fixnum(index),sSnon_negative_fixnum);
+    return Cnil;
+  }
+  switch (type_of(seq)) {
+  case t_cons:
+    for (i=index;i>0 && !endp(seq);i--,seq=seq->c.c_cdr);
+    if (endp(seq))
+      break;
+    return(seq->c.c_car);
 
-	case t_vector:
-	case t_bitvector:
-	case t_simple_vector:
-	case t_simple_bitvector:
-	  if (index >= VLEN(seq)) {
-	    max=VLEN(seq);
-			goto E;
-		}
-		return(aref(seq, index));
+  case t_vector:
+  case t_bitvector:
+  case t_simple_vector:
+  case t_simple_bitvector:
+    if (index>=(i=VLEN(seq)))
+      break;
+    return(aref(seq, index));
 
-	case t_simple_string:
-	case t_string:
-	  if (index >= VLEN(seq)) {
-	    max=VLEN(seq);
-			goto E;
-		}
-		return(code_char(seq->ust.ust_self[index]));
+  case t_simple_string:
+  case t_string:
+    if (index>=(i=VLEN(seq)))
+      break;
+    return(code_char(seq->ust.ust_self[index]));
 
-	case t_symbol:
-	  if (seq == Cnil) {
-	    max=0;
-	    goto E;
-	  }
-	default:
-	  TYPE_ERROR(seq,sLsequence);
-	  return(Cnil);
-	}
+  case t_symbol:
+    if (seq==Cnil) {
+      i=0;
+      break;
+    }
+  default:
+    TYPE_ERROR(seq,sLsequence);
+    return(Cnil);
+  }
 
-E:
-	{
-	  object y=make_fixnum(index);
-	  TYPE_ERROR(y,MMcons(sLinteger,MMcons(make_fixnum(0),MMcons(MMcons(make_fixnum(max),Cnil),Cnil))));
-	  index=fix(y);
-	}
-	return(Cnil);
+  TYPE_ERROR(make_fixnum(index),MMcons(sLinteger,MMcons(make_fixnum(0),MMcons(MMcons(make_fixnum(i),Cnil),Cnil))));
+  return(Cnil);
+
 }
 
 LFD(siLelt_set)()
@@ -192,68 +163,53 @@ LFD(siLelt_set)()
 }
 
 object
-elt_set(seq, index, val)
-object seq;
-int index;
-object val;
-{
-/* 	object endp_temp; */
+elt_set(object seq,int index,object val) {
 
-	int i,max;
-	object l;
+  int i;
 
-	if (index < 0) {
-	  object y=make_fixnum(index);
-	  TYPE_ERROR(y,sSnon_negative_fixnum);
-	  index=fix(y);
-	}
-	switch (type_of(seq)) {
-	case t_cons:
-		for (i = index, l = seq;  i > 0;  --i)
-			if (endp(l)) {
-				max=i;
-				goto E;
-			} else
-				l = l->c.c_cdr;
-		if (endp(l)) {
-			max=i;
-			goto E;
-		}
-		return(l->c.c_car = val);
+  if (index < 0) {
+    TYPE_ERROR(make_fixnum(index),sSnon_negative_fixnum);
+    return Cnil;
+  }
+  switch (type_of(seq)) {
+  case t_cons:
+    for (i=index;i>0 && !endp(seq);i--,seq=seq->c.c_cdr);
+    if (endp(seq))
+      break;
+    return(seq->c.c_car = val);
 
-	case t_vector:
-	case t_bitvector:
-	case t_simple_vector:
-	case t_simple_bitvector:
-		if (index >= seq->v.v_dim) {
-			max=seq->v.v_dim;
-			goto E;
-		}
-		return(aset(seq, index, val));
+  case t_vector:
+  case t_bitvector:
+  case t_simple_vector:
+  case t_simple_bitvector:
+    if (index>=(i=VLEN(seq)))
+      break;
+    return(aset(seq, index, val));
 
-	case t_simple_string:
-	case t_string:
-		if (index >= seq->st.st_dim) {
-			max=seq->st.st_dim;
-			goto E;
-		}
-		if (type_of(val) != t_character)
-		  TYPE_ERROR(val,sLcharacter);
-		seq->st.st_self[index] = val->ch.ch_code;
-		return(val);
+  case t_simple_string:
+  case t_string:
+    if (index>=(i=VLEN(seq)))
+      break;
+    if (type_of(val) != t_character)
+      TYPE_ERROR(val,sLcharacter);
+    seq->st.st_self[index] = val->ch.ch_code;
+    return(val);
 
-	default:
-		max=0;
-		TYPE_ERROR(seq,sLsequence);
-	}
+  case t_symbol:
+    if (seq==Cnil) {
+      i=0;
+      break;
+    }
 
-E:
-	{
-	  object y=make_fixnum(index);
-	  TYPE_ERROR(y,MMcons(sLinteger,MMcons(make_fixnum(0),MMcons(MMcons(make_fixnum(max),Cnil),Cnil))));
-	  index=fix(y);
-	}
-	return(Cnil);	
+  default:
+    TYPE_ERROR(seq,sLsequence);
+    return Cnil;
+
+  }
+
+  TYPE_ERROR(make_fixnum(index),MMcons(sLinteger,MMcons(make_fixnum(0),MMcons(MMcons(make_fixnum(i),Cnil),Cnil))));
+  return(Cnil);
+
 }
 
 @(defun subseq (sequence start &optional end &aux x)
@@ -287,16 +243,7 @@ E:
 		}
 		if (e < 0)
 			@(return `copy_list(sequence)`)
-		for (i = 0;  i < e;  i++) {
-			if (!consp(sequence))
-				goto ILLEGAL_START_END;
-			vs_check_push(sequence->c.c_car);
-			sequence = sequence->c.c_cdr;
-		}
-		vs_push(Cnil);
-		while (e-- > 0)
-			stack_cons();
-		x = vs_pop;
+		x=n_cons_from_x(e,sequence);
 		@(return x)
 
 	case t_simple_vector:/*FIXME simple copies to simple*/
@@ -313,6 +260,7 @@ E:
 		array_allocself(x, FALSE,OBJNULL);
 		switch (sequence->v.v_elttype) {
 		case aet_object:
+		  /*FIXME: memcpy size*/
 			for (i = s, j = 0;  i < e;  i++, j++)
 				x->v.v_self[j] = sequence->v.v_self[i];
 			break;
@@ -465,8 +413,6 @@ object
 reverse(seq)
 object seq;
 {
-/* 	object endp_temp; */
-
 	object x, y, *v;
 	int i, j, k;
 
@@ -580,8 +526,6 @@ object
 nreverse(seq)
 object seq;
 {
-/* 	object endp_temp; */
-
 	object x, y, z;
 	int i, j, k;
 

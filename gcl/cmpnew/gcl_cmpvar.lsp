@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPVAR  Variables.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -330,7 +329,7 @@
 	(unless (or (info-ref-clb i) (info-ref-ccb i))
 	  t)))))
 
-(defstruct binding
+(defstruct (binding (:print-function (lambda (x s i) (s-print 'binding (binding-repeatable x) (si::address x) s))))
   form
   repeatable)
 

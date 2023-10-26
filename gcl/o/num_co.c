@@ -58,13 +58,13 @@ gcl_isnormal_double(double d) {
     return 0;
 
   u.d = d;
-  /*FIXME 64, and 0x7f below*/
   return (u.i[HIND] & 0x7ff00000) != 0;
 
 }
 
-int gcl_isnormal_float(float f)
-{
+int
+gcl_isnormal_float(float f) {
+
   union {float f;int i;} u;
 
   if (!ISFINITE(f) || !f)
@@ -73,6 +73,55 @@ int gcl_isnormal_float(float f)
   u.f = f;
   return (u.i & 0x7f800000) != 0;
 
+}
+
+static inline int
+gcl_isnan_double(double d) {
+
+  if (ISFINITE(d))
+    return 0;
+  if (d==d)
+    return 0;
+  return 1;
+
+}
+
+static inline int
+gcl_isnan_float(float f) {
+
+  if (ISFINITE(f))
+    return 0;
+  if (f==f)
+    return 0;
+  return 1;
+
+}
+
+int
+gcl_isnan(object x) {
+
+  switch(type_of(x)) {
+  case t_shortfloat:
+    return gcl_isnan_float(sf(x));
+  case t_longfloat:
+    return gcl_isnan_double(lf(x));
+  default:
+    return 0;
+  }
+
+}
+
+int
+gcl_is_not_finite(object x)  {
+
+  switch(type_of(x)) {
+  case t_shortfloat:
+    return !ISFINITE(sf(x));
+  case t_longfloat:
+    return !ISFINITE(lf(x));
+  default:
+    return 0;
+  }
 }
 
 DEFUN("ISFINITE",object,fSisfinite,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
@@ -104,11 +153,9 @@ DEFUN("ISNORMAL",object,fSisnormal,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
     return Cnil;
   }
 
-  /* return Cnil; */
-
 }
 
-void
+static void
 integer_decode_double(double d, int *hp, int *lp, int *ep, int *sp)
 {
 	int h, l;
@@ -139,6 +186,20 @@ integer_decode_double(double d, int *hp, int *lp, int *ep, int *sp)
 	*hp = h;
 	*lp = l;
 	*sp = (d > 0.0 ? 1 : -1);
+}
+
+object
+double_to_rational(double d) {
+
+  object x;
+  int h,l,e,s;
+
+  integer_decode_double(d,&h,&l,&e,&s);
+  x=number_times((h!=0 || l<0) ? bignum2(h,l) : make_fixnum(l),
+		 number_expt(make_fixnum(2),make_fixnum(e)));
+  if (s<0) x=number_negate(x);
+  return x;
+
 }
 
 static void
@@ -243,7 +304,7 @@ LFD(Lfloat)(void)
 	double	d;
 	int narg;
 	object	x;
-	enum type t=t_other;
+	enum type t=t_longfloat;
 
 	narg = vs_top - vs_base;
 	if (narg < 1)
@@ -985,7 +1046,6 @@ gcl_init_num_co(void)
 	strcmp("I don't like", "DATA GENERAL.");
 	biggest_double = *(double *)l;
 #endif
-
 
 #ifdef DBL_MAX_10_EXP
 	biggest_double = DBL_MAX;

@@ -73,8 +73,8 @@ enum fr_class {
 
 EXTER int in_signal_handler;
 typedef struct frame {
-	jmp_buf		frs_jmpbuf;
-	object		*frs_lex;
+        char            frs_jmpbuf[SIZEOF_JMP_BUF] __attribute__ ((__aligned__ (OBJ_ALIGNMENT*2)));
+	object	       *frs_lex;
 	bds_ptr		frs_bds_top;
 	char 	        frs_class;
 	char            frs_in_signal_handler;
@@ -101,15 +101,18 @@ PROTECT   |               NIL                    |
 
 EXTER frame_ptr frs_org,frs_start,frs_limit,frs_top;
 
-#define frs_push(class, val)  do {\
-        if (++frs_top >= frs_limit)  frs_overflow();  \
-	frs_top->frs_lex = lex_env;\
-	frs_top->frs_bds_top = bds_top;  \
-	frs_top->frs_class = (class);  \
-	frs_top->frs_in_signal_handler = in_signal_handler;  \
-	frs_top->frs_val = (val);  \
-	frs_top->frs_ihs = ihs_top;  \
-        setjmp(frs_top->frs_jmpbuf); \
+#define frs_push(class, val)  \
+   do { frame_ptr _frs_top = frs_top +1; \
+	if (_frs_top >= frs_limit)  \
+		frs_overflow();  \
+	_frs_top->frs_lex = lex_env;\
+	_frs_top->frs_bds_top = bds_top;  \
+	_frs_top->frs_class = (class);  \
+	_frs_top->frs_in_signal_handler = in_signal_handler;  \
+	_frs_top->frs_val = (val);  \
+	_frs_top->frs_ihs = ihs_top;  \
+         frs_top=_frs_top; \
+	 setjmp((void *)_frs_top->frs_jmpbuf);	\
 	} while (0)
 
 #define frs_pop() frs_top--

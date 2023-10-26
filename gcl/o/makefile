@@ -39,7 +39,7 @@ gprof.o: gprof.c $(DECL)
 	$(CC) -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO)
 
 prelink.o: prelink.c $(DECL)
-	$(CC) -fPIE -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO)
+	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
 
 %.o: %.c $(DECL)
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
@@ -76,10 +76,11 @@ $(DPP):	../bin/dpp.c
 	${CC} ${DEFS} -o $@ $<
 
 new_init.c: ${INI_FILES}
-	echo '#include "make-init.h"' > new_init.c
-	echo 'void NewInit(void){' >> new_init.c
-	cat ${INI_FILES} >> new_init.c
-	echo '}' >> new_init.c
+	echo '#include "make-init.h"' > $@
+	echo 'void NewInit(void){' >> $@
+	cat ${INI_FILES} >> $@
+	echo '}' >> $@
+	! cat $@ | awk -F, '/DEFUN/ {print $$1,$$2}' | grep -v object || (rm $@ && false)
 
 ifneq ($(NIFLAGS),)
 new_init.o: new_init.c $(DECL)
@@ -96,6 +97,9 @@ $(DECL): $(HDIR)/make-decl.h $(INI_FILES)
 grab_defs: grab_defs.c
 	${CC} $(OFLAGS) -o grab_defs  grab_defs.c
 
+wpool: wpool.o
+	$(CC) $(LDFLAGS) -o $@ $<
+
 $(GCLIB): ${ALIB} 
 	rm -f gcllib.a
 	$(AR) gcllib.a ${ALIB}
@@ -103,6 +107,6 @@ $(GCLIB): ${ALIB}
 
 clean:
 	rm -f $(OBJS) ${ALIB} new_init.o  $(LAST_FILE) $(FIRST_FILE) *.a grab_defs$(EXE) *.ini tmpx foo.c
-	rm -f  cmpinclude.h new_init.c $(DECL) def undef udef.h void.h TAGS boot.h
+	rm -f  cmpinclude.h new_init.c $(DECL) def undef udef.h void.h TAGS boot.h wpool
 
 .INTERMEDIATE: $(patsubst %.d,%.c,$(shell ls -1 *.d))

@@ -58,7 +58,7 @@ License for more details.
 #define LOAD_SYM(sym,st1) (sym->st_value && (EXT_SYM(sym,st1)||LOCAL_SYM(sym)))
 #define EXT_SYM(sym,st1) (ELF_ST_BIND(sym->st_info)==STB_GLOBAL||ELF_ST_BIND(sym->st_info)==STB_WEAK||LOAD_SYM_BY_NAME(sym,st1))
 #define LOCAL_SYM(sym) ELF_ST_BIND(sym->st_info)==STB_LOCAL
-#define LOAD_SYM_BY_NAME(sym,st1) !strncmp("__muldc3",st1+sym->st_name,8)||!strncmp("__divdc3",st1+sym->st_name,8)/* FIXME! */
+#define LOAD_SYM_BY_NAME(sym,st1) 0
 
 #define MASK(n) (~(~0ULL << (n)))
 
@@ -243,6 +243,31 @@ relocate_symbols(Sym *sym,Sym *syme,Shdr *sec1,Shdr *sece,const char *st1) {
   
 }
 
+#ifdef LARGE_MEMORY_MODEL
+
+DEFUN("MARK-AS-LARGE-MEMORY-MODEL",object,fSmark_as_large_memory_model,SI,1,1,
+	  NONE,OO,OO,OO,OO,(object x),"") {
+
+  FILE *f;
+  void *ve;
+  Ehdr *fhp;
+
+  coerce_to_filename(x,FN1);
+
+  massert(f=fopen(FN1,"r+"));
+  massert(fhp=get_mmap_shared(f,&ve));
+
+  fhp->e_flags|=1;
+
+  massert(!un_mmap(fhp,ve));
+  massert(!fclose(f));
+
+  return Cnil;
+
+}
+
+#endif
+
 static object
 load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 
@@ -274,7 +299,17 @@ load_memory(Shdr *sec1,Shdr *sece,void *v1,ul **got,ul **gote) {
 
   memory=new_cfdata();
   memory->cfd.cfd_size=sz;
-  memory->cfd.cfd_start=alloc_code_space(sz);
+  memory->cfd.cfd_start=alloc_code_space(sz,
+#ifdef MAX_DEFAULT_MEMORY_MODEL_CODE_ADDRESS
+#ifdef LARGE_MEMORY_MODEL
+					 (((Ehdr *)v1)->e_flags) ? -1UL : MAX_DEFAULT_MEMORY_MODEL_CODE_ADDRESS
+#else
+					 MAX_DEFAULT_MEMORY_MODEL_CODE_ADDRESS
+#endif
+#else
+					 -1UL
+#endif
+					 );
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;
@@ -550,12 +585,11 @@ fasload(object faslfile) {
   FILE *fp;
   char *sn,*st1,*dst1;
   ul init_address=0,end,gs=0,*got=&gs,*gote=got+1;
-  object memory,data;
+  object memory;
   Shdr *sec1,*sece;
   Sym *sym1,*syme,*dsym1,*dsyme;
   void *v1,*ve;
 
-  faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
   fp = faslfile->sm.sm_fp;
   
   massert(v1=get_mmap(fp,&ve));
@@ -576,10 +610,8 @@ fasload(object faslfile) {
   massert(!relocate_code(v1,sec1,sece,sym1,got,gote));
   
   massert(!fseek(fp,end,SEEK_SET));
-  data=feof(fp) ? 0 : read_fasl_vector(faslfile);
   
   massert(!un_mmap(v1,ve));
-  close_stream(faslfile);
   
   massert(!clear_protect_memory(memory));
 
@@ -590,12 +622,12 @@ fasload(object faslfile) {
 #endif  
 
   init_address-=(ul)memory->cfd.cfd_start;
-  call_init(init_address,memory,data,0);
+  call_init(init_address,memory,faslfile);
   
-  if(symbol_value(sLAload_verboseA)!=Cnil)
-    printf(";; start address for %.*s %p\n",
-	   (int)VLEN(faslfile->sm.sm_object1),faslfile->sm.sm_object1->st.st_self,
-	   memory->cfd.cfd_start);
+  if(symbol_value(sLAload_verboseA)!=Cnil) {
+    coerce_to_filename(memory->cfd.cfd_name,FN1);
+    printf(";; start address for %s %p\n",FN1,memory->cfd.cfd_start);
+  }
   
   return(memory->cfd.cfd_size);
   

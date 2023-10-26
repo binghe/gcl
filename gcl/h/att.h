@@ -72,7 +72,7 @@
 
 #define INIT_ALLOC \
      	heap_end = sbrk(0); \
-	({fixnum i;if ((i = ((int)heap_end & (PAGESIZE - 1))))	\
+	({fixnum i;if ((i = ((unsigned long)heap_end & (PAGESIZE - 1))))	\
 		     sbrk(PAGESIZE - i);});			\
 	heap_end = core_end = sbrk(0);
 
@@ -87,7 +87,7 @@
 
   /* if there is no input there return false */
 #define LISTEN_FOR_INPUT(fp) \
-  if((fp)->_cnt <=0 && (c=0,ioctl((fp)->_file, FIONREAD, &c),c<=0)) \
+   if(((FILE *)fp)->_cnt <=0 && (c=0,ioctl(((FILE *)fp)->_file, FIONREAD, &c),c<=0)) \
      return 0
 
  /* have sys/ioctl.h */

@@ -70,7 +70,10 @@ object on_stack_list_vector_new(fixnum n,object first,va_list ap)
  p=(struct cons *) res;
  if (n<=0) return Cnil;
  TOP:
- p->c_car= jj ? va_arg(ap,object) : first;
+#ifdef WIDE_CONS
+ set_type_of(p,t_cons);
+#endif
+ p->c_car= jj||first==OBJNULL ? va_arg(ap,object) : first;
  jj=1;
  if (--n == 0)
    {p->c_cdr = Cnil;
@@ -92,64 +95,65 @@ object on_stack_list(fixnum n,...) {
 }
 
 
-object list_vector_new(fixnum n,object first,va_list ap)
-{object ans,*p;
- 
- if (n == 0) return Cnil;
- ans = make_cons(first,Cnil);
- p = & (ans->c.c_cdr); 
- while (--n > 0)
-   { *p = make_cons(va_arg(ap,object),Cnil);
-     p = & ((*p)->c.c_cdr);
-   }
- return ans;}
+object
+list_vector_new(int n,object first,va_list ap) {
 
+  object ans,*p;
 
+  for (p=&ans;n-->0;first=OBJNULL)
+    collect(p,make_cons(first==OBJNULL ? va_arg(ap,object) : first,Cnil));
+  *p=Cnil;
+ return ans;
+
+}
    
-object listqA(fixnum a,fixnum n,va_list ap) { 
+#ifdef WIDE_CONS
+#define maybe_set_type_of(a,b) set_type_of(a,b)
+#else
+#define maybe_set_type_of(a,b)
+#endif
 
-  struct typemanager *tm=(&tm_table[(int)t_cons]);
-  object tail=tm->tm_free,lis=tail;
+#define multi_cons(n_,next_,last_)					\
+  ({_tm->tm_nfree -= n_;						\
+    for(_x=_tm->tm_free,_p=&_x;n_-->0;_p=&(*_p)->c.c_cdr) {		\
+      object _z=*_p;							\
+      pageinfo(_z)->in_use++;						\
+      maybe_set_type_of(_z,t_cons);					\
+      _z->c.c_cdr=OBJ_LINK(_z);						\
+      _z->c.c_car=next_;						\
+    }									\
+    _tm->tm_free=*_p;							\
+    *_p=SAFE_CDR(last_);						\
+    _x;})
 
-  if (n<=0) return Cnil;
+#define n_cons(n_,next_,last_)						\
+  ({fixnum _n=n_;object _x=Cnil,*_p;					\
+    static struct typemanager *_tm=tm_table+t_cons;			\
+    if (_n>=0) {/*FIXME vs_top<vs_base*/				\
+      BEGIN_NO_INTERRUPT;						\
+      if (_n<=_tm->tm_nfree && !stack_alloc_start)			\
+	_x=multi_cons(_n,next_,last_);					\
+      else {								\
+	for (_p=&_x;_n--;)						\
+	  collect(_p,make_cons(next_,Cnil));				\
+	*_p=SAFE_CDR(last_);						\
+      }									\
+      END_NO_INTERRUPT;							\
+    }									\
+    _x;})
 
-  CHECK_INTERRUPT;
-  if (stack_alloc_start || tm->tm_nfree < n )  {
-    
-    object *p = vs_top;
-    
-    vs_push(Cnil);
-    while(--n>=0)
-      { *p=make_cons(va_arg(ap,object),Cnil);
-      p= &((*p)->c.c_cdr);
-      }
-    if (a) 
-      *p=va_arg(ap,object);
-    return(vs_pop);
+object
+n_cons_from_x(fixnum n,object x) {
 
-  }
+  return n_cons(n,({object _z=x->c.c_car;x=x->c.c_cdr;_z;}),Cnil);
 
-   
-  {
+}
 
-    BEGIN_NO_INTERRUPT;
 
-    tm->tm_nfree -= n;
-    while (--n) {
-      pageinfo(tail)->in_use++;
-      tail->c.c_cdr=OBJ_LINK(tail);
-      tail->c.c_car=va_arg(ap,object); 
-      tail=tail->c.c_cdr;
-    }
-    tm->tm_free=OBJ_LINK(tail);
-    pageinfo(tail)->in_use++;
-    tail->c.c_car=va_arg(ap,object); 
-    tail->c.c_cdr=a ? va_arg(ap,object) : Cnil;
-    
-    END_NO_INTERRUPT;
-    return lis;
-    
-  }
+object
+listqA(int a,int n,va_list ap) {
+
+  return n_cons(n,va_arg(ap,object),a ? va_arg(ap,object) : Cnil);
 
 }
 
@@ -180,25 +184,10 @@ object listA(fixnum n,...) {
 
 
 object
-append(x, y)
-object x, y;
-{
-	object z;
+append(object x, object y) {
 
-	if (endp(x))
-		return(y);
-	z = make_cons(Cnil, Cnil);
-	vs_push(z);
-	for (;;) {
-		z->c.c_car = x->c.c_car;
-		x = x->c.c_cdr;
-		if (endp(x))
-			break;
-		z->c.c_cdr = make_cons(Cnil, Cnil);
-		z = z->c.c_cdr;
-	}
-	z->c.c_cdr = y;
-	return(vs_pop);
+  return n_cons(length(x),({object _t=x->c.c_car;x=x->c.c_cdr;_t;}),y);
+
 }
 
 object
@@ -237,29 +226,38 @@ make_list(fixnum n) {
   return x;
 }
 
-LFD(Llist)()
-{
-	vs_push(Cnil);
-	while (vs_top > vs_base + 1)
-		stack_cons();
+LFD(Llist)() {
+
+  object *a;
+
+  a=vs_base;
+  vs_base[0]=n_cons(vs_top-vs_base,*a++,Cnil);
+  vs_top=vs_base+1;
+
 }
 
-LFD(LlistA)()
-{
-	if (vs_top == vs_base)
-		too_few_arguments();
-	while (vs_top > vs_base + 1)
-		stack_cons();
-}
+LFD(LlistA)() {
 
-        
+  object *a;
+
+  if (vs_top == vs_base)
+    too_few_arguments();
+
+  a=vs_base;
+  vs_base[0]=n_cons(vs_top-vs_base-1,*a++,vs_head);
+  vs_top=vs_base+1;
+
+}
  
 object on_stack_make_list(n)
-fixnum n;
+int n;
 { object res=(object) alloca_val;
  struct cons *p = (struct cons *)res;
  if (n<=0) return Cnil;
   TOP:
+#ifdef WIDE_CONS
+ set_type_of(p,t_cons);
+#endif
  p->c_car=Cnil;
  if (--n == 0)
    {p->c_cdr = Cnil;
@@ -329,6 +327,14 @@ object x, *lp;
 			*lp = (*lp)->c.c_cdr;
 			return;
 		}
+}
+
+DEFUN("STATIC-INVERSE-CONS",object,fSstatic_inverse_cons,SI,1,1,NONE,OI,OO,OO,OO,(fixnum x),"") {
+
+   object y=(object)x;
+
+   return is_imm_fixnum(y) ? Cnil : (is_imm_fixnum(y->c.c_cdr) ? y : (y->d.f||y->d.e ? Cnil : y));
+
 }
 
 void

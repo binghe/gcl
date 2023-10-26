@@ -53,7 +53,7 @@ object fixnum_sub(fixnum i, fixnum j)
       }
    MPOP(return,subss,i,j);
    } else { /* i < 0 */
-     if ((MOST_NEGATIVE_FIX -i) <= -j) {
+     if (j <= (i-MOST_NEGATIVE_FIX)) {
        return make_fixnum(i-j);
      }
    MPOP(return,subss,i,j);
@@ -139,13 +139,10 @@ fixnum_abs(object x) {
 
 
 static object
-get_gcd_r(object r,object x,object y) {
+get_gcd_r_abs(object r,object x,object y) {
 
   if (x==small_fixnum(1) || y==small_fixnum(1))
     return small_fixnum(1);
-
-  x=fixnum_abs(x);
-  y=fixnum_abs(y);
 
   switch(type_of(x)) {
   case t_fixnum:
@@ -169,10 +166,26 @@ get_gcd_r(object r,object x,object y) {
   }
 }
 
+static object
+get_gcd_r(object r,object x,object y) {
+
+  return get_gcd_r_abs(r,fixnum_abs(x),fixnum_abs(y));
+
+}
+
+
 object
 get_gcd(object x,object y) {
 
   x=get_gcd_r(big_fixnum1,x,y);
+  return x==big_fixnum1 ? replace_big(x) : x;
+
+}
+
+static object
+get_gcd_abs(object x,object y) {
+
+  x=get_gcd_r_abs(big_fixnum1,x,y);
   return x==big_fixnum1 ? replace_big(x) : x;
 
 }
@@ -472,11 +485,7 @@ one_plus(object x)
 	switch (type_of(x)) {
 
 	case t_fixnum:
-	  
-	  if (fix(x)< MOST_POSITIVE_FIX-1) {
-	    return make_fixnum(fix(x)+1);
-	  }
-	  MPOP(return,addss,1,fix(x));
+	  return fixnum_add(fix(x),1);
 	case t_bignum:
 	  MPOP(return,addsi,1,MP(x));
 	case t_ratio:
@@ -658,7 +667,7 @@ one_minus(object x)
 	switch (type_of(x)) {
 
 	case t_fixnum:
-	  MPOP(return,addss,fix(x),-1);
+	  return fixnum_sub(fix(x),1);
 	case t_bignum:
 	  MPOP(return,addsi,-1,MP(x));
 	case t_ratio:
@@ -731,18 +740,12 @@ number_times(object x, object y)
 	object z;
 	double dx, dy;
 
-	if (x==small_fixnum(1))
-	  return y;
-	if (y==small_fixnum(1))
-	  return x;
-
 	switch (type_of(x)) {
 
 	case t_fixnum:
 		switch (type_of(y)) {
 		case t_fixnum:
 		  return fixnum_times(fix(x),fix(y));
-/* 		  MPOP(return,mulss,fix(x),fix(y)); */
 		case t_bignum:
 		  MPOP(return,mulsi,fix(x),MP(y));
 		case t_ratio:
@@ -1135,7 +1138,7 @@ DEFUN("NUMBER-RECIP",object,fSnumber_recip,SI,1,1,NONE,OO,OO,OO,OO,(object x),""
 
 LFD(Lplus)(void)
 {
-        int i, j;
+        fixnum i, j;
 	
 	j = vs_top - vs_base;
 	if (j == 0) {
@@ -1151,7 +1154,7 @@ LFD(Lplus)(void)
 
 LFD(Lminus)(void)
 {
-	int i, j;
+	fixnum i, j;
 
 	j = vs_top - vs_base;
 	if (j == 0)
@@ -1169,7 +1172,7 @@ LFD(Lminus)(void)
 
 LFD(Ltimes)(void)
 {
-	int i, j;
+	fixnum i, j;
 
 	j = vs_top - vs_base;
 	if (j == 0) {
@@ -1185,7 +1188,7 @@ LFD(Ltimes)(void)
 
 LFD(Ldivide)(void)
 {
-	int i, j;
+	fixnum i, j;
 
 	j = vs_top - vs_base;
 	if (j == 0)
@@ -1249,14 +1252,14 @@ LFD(Lgcd)(void) {
   vs_push(number_abs(vs_base[0]));
   
   for (i = 1;  i < narg;  i++)
-    vs_base[0] = get_gcd(vs_base[0],vs_base[i]);
+    vs_base[0] = get_gcd_abs(vs_base[0],number_abs(vs_base[i]));
 
 }
 
 object
 get_lcm_abs(object x,object y) {
 
-  object g=get_gcd(x,y);
+  object g=get_gcd_abs(x,y);
 
   return number_zerop(g) ? g : number_times(x,integer_divide1(y,g,0));
 

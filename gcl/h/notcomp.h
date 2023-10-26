@@ -83,6 +83,7 @@ EXTER object user_package;
 #undef FFD
 #undef STATD
 #undef make_function
+#undef make_macro_function
 #undef make_si_function
 #undef make_si_sfun
 #undef make_special_form
@@ -91,6 +92,7 @@ EXTER object user_package;
 #define LFD(a_) static void FFN(a_) (); void a_  () { FFN(a_)();} static void FFN(a_)
 #define FFD(a_) static void FFN(a_) (object); void a_  (object x) { FFN(a_)(x);} static void FFN(a_)
 #define make_function(a_,b_) make_function_internal(a_,FFN(b_))
+#define make_macro_function(a_,b_) make_macro_internal(a_,FFN(b_))
 #define make_si_function(a_,b_) make_si_function_internal(a_,FFN(b_))
 #define make_special_form(a_,b_) make_special_form_internal(a_,FFN(b_))
 #define make_macro_function(a_,b_) make_macro_internal(a_,FFN(b_))
@@ -101,6 +103,7 @@ EXTER object user_package;
 #define LFD(a_) void a_
 #define FFD(a_) void a_
 #define make_function(a_,b_) make_function_internal(a_,b_)
+#define make_macro_function(a_,b_) make_macro_internal(a_,b_)
 #define make_si_function(a_,b_) make_si_function_internal(a_,b_)
 #define make_special_form(a_,b_) make_special_form_internal(a_,b_)
 #define make_macro_function(a_,b_) make_macro_internal(a_,b_)
@@ -124,6 +127,12 @@ STATD ret FFN(fname) args
 #define DEFUNM(string,ret,fname,pack,min,max, flags, ret0a0,a12,a34,a56,args,doc) STATD ret FFN(fname) args;\
 void Mjoin(fname,_init) () {\
   MAKEFUNM(pack,string,(void *)FFN(fname),F_ARGD(min,max,flags,ARGTYPES(ret0a0,a12,a34,a56))); \
+}\
+STATD ret FFN(fname) args
+
+#define DEFUNM_NEW(string,ret,fname,pack,min,max, flags, ret0a0,a12,a34,a56,args,doc) STATD ret FFN(fname) args;\
+void Mjoin(fname,_init) () {\
+   MAKEFUNM(pack,string,(ret (*)())FFN(fname),F_ARGD(min,max,flags,ARGTYPES(ret0a0,a12,a34,a56)));\
 }\
 STATD ret FFN(fname) args
 
@@ -176,8 +185,6 @@ object IisArray();
 
 /* externals not needed by cmp */
 /* print.d */
-EXTER bool PRINTpackage;
-EXTER bool PRINTstructure;
 
 /* from format.c */
 EXTER VOL object fmt_stream;
@@ -187,6 +194,7 @@ EXTER VOL int ctl_end;
 EXTER  object * VOL fmt_base;
 EXTER VOL int fmt_index;
 EXTER VOL int fmt_end;
+EXTER VOL object fmt_iteration_list;
 typedef jmp_buf *jmp_bufp;
 EXTER jmp_bufp VOL fmt_jmp_bufp;
 EXTER VOL int fmt_indents;
@@ -209,30 +217,6 @@ object (*car_or_cdr)();
 EXTER  bool left_trim;
 EXTER bool right_trim;
 int  (*casefun)();
-
-#define	Q_SIZE		256
-#define IS_SIZE		256
-
-struct printStruct {
- short p_queue[Q_SIZE];
- short p_indent_stack[IS_SIZE];
- int p_qh;
- int p_qt;
- int p_qc;
- int p_isp;
- int p_iisp;};
-
-EXTER struct printStruct *printStructBufp;
-
-#define SETUP_PRINT_DEFAULT(x) \
-  struct printStruct printStructBuf; \
-  struct printStruct * old_printStructBufp = printStructBufp; \
-  printStructBufp = &printStructBuf; \
-   setupPRINTdefault(x)
-
-#define CLEANUP_PRINT_DEFAULT \
-  cleanupPRINT(); \
-  printStructBufp = old_printStructBufp
 
 
 /* on most machines this will test in one instruction
@@ -264,10 +248,12 @@ gcl_init_cmp_anon(void);
 #ifdef SGC
 #define SAFE_READ(a_,b_,c_) \
    ({int _a=(a_),_c=(c_);char *_b=(b_);extern int sgc_enabled;\
-     if (sgc_enabled) memset(_b,0,_c);read(_a,_b,_c);})
+     if (sgc_enabled) memset(_b,0,_c); \
+     read(_a,_b,_c);})
 #define SAFE_FREAD(a_,b_,c_,d_) \
    ({int _b=(b_),_c=(c_);char *_a=(a_);FILE *_d=(d_);extern int sgc_enabled; \
-     if (sgc_enabled) memset(_a,0,_b*_c);fread(_a,_b,_c,_d);})
+     if (sgc_enabled) memset(_a,0,_b*_c); \
+     fread(_a,_b,_c,_d);})
 #else
 #define SAFE_READ(a_,b_,c_) read((a_),(b_),(c_))
 #define SAFE_FREAD(a_,b_,c_,d_) fread((a_),(b_),(c_),(d_))
@@ -333,6 +319,7 @@ extern bool writable_malloc;
 
 #define psystem(x) prof_block(vsystem(x))
 #define pfork() prof_block(fork())
+#define pvfork() prof_block(vfork())
 
 #include "error.h"
 
@@ -366,3 +353,7 @@ extern bool writable_malloc;
   feholdexcept(&env);	     \
   a_;			     \
   fesetenv(&env);})
+
+#define collect(p_,f_) (p_)=&(*(p_)=(f_))->c.c_cdr
+#define READ_STREAM_OR_FASD(strm_) \
+  type_of(strm_)==t_stream ? read_object_non_recursive(strm_) : fSread_fasd_top(strm_)

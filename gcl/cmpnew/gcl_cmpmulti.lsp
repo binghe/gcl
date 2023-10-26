@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPMULT  Multiple-value-call and Multiple-value-prog1.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa

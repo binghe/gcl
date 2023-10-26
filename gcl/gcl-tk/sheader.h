@@ -45,7 +45,7 @@ struct message_header {
 
 
 #define BYTE_S 8
-#define BYTE_MASK (~(~0 << BYTE_S))
+#define BYTE_MASK (~(~0UL << BYTE_S))
 
 #define GET_3BYTES(p,ans) do{ unsigned char* __p = (unsigned char *) p; \
 				ans = BYTE_MASK&(*__p++); \

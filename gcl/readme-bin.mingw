@@ -2,8 +2,8 @@ Hi there!
 
 WHAT NOW:
 
-You are installing GNU Common Lisp for Windows, 2.7.0
-This compiler uses the Minimalist GNU Windows 32 
+You are installing GNU Common Lisp for Windows, 2.6.8
+This compiler uses the Minimalist GNU Windows 32
 compiler tools (MinGW32, see below).
 
 IF YOU INSTALL INTO A DIRECTORY WITH SPACES IN THE NAME,
@@ -19,14 +19,14 @@ of the files:
 
  "COPYING" and "COPYING.LIB"
 
-located in the mingw sub-directory.  The source 
-code and updated binary packages can be obtained via 
+located in the mingw sub-directory.  The source
+code and updated binary packages can be obtained via
 the official MinGW web site:
 
 http://sourceforge.net/projects/mingw/
 
 We recommend that you use the compiler provided when
-working with this GCL package for compatibility.  
+working with this GCL package for compatibility.
 
 Clean and rebuild pre-existing projects whenever you
 upgrade the GCL binary package for this reason.

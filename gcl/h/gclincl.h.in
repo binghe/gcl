@@ -9,23 +9,26 @@
 /* punt guess for no randomize value */
 #undef ADDR_NO_RANDOMIZE
 
-/* compile ansi compliant image */
+/* ANSI compliant image */
 #undef ANSI_COMMON_LISP
 
 /* binding stack size */
 #undef BDSSIZE
 
+/* sscanf terminates prematurely (Windows XP) */
+#undef BUGGY_MAXIMUM_SSCANF_LENGTH
+
 /* can prevent sbrk from returning random values */
 #undef CAN_UNRANDOMIZE_SBRK
-
-/* sizeof char */
-#undef CHAR_SIZE
 
 /* running clang compiler */
 #undef CLANG
 
 /* maximum C stack size */
 #undef CSSIZE
+
+/* cstack max */
+#undef CSTACKMAX
 
 /* starting C stack address */
 #undef CSTACK_ADDRESS
@@ -41,6 +44,9 @@
 
 /* Define to 1 if using 'alloca.c'. */
 #undef C_ALLOCA
+
+/* debug safecdr code */
+#undef DEBUG_SAFE_CDR
 
 /* big endian word order */
 #undef DOUBLE_BIGENDIAN
@@ -68,6 +74,12 @@
 
 /* Define to 1 if you have the <asm/signal.h> header file. */
 #undef HAVE_ASM_SIGNAL_H
+
+/* bfd_boolean defined */
+#undef HAVE_BFD_BOOLEAN
+
+/* Define to 1 if you have the <bfd.h> header file. */
+#undef HAVE_BFD_H
 
 /* have bsdgettimeofday */
 #undef HAVE_BSDGETTIMEOFDAY
@@ -117,6 +129,9 @@
 /* Define to 1 if you have the `getwd' function. */
 #undef HAVE_GETWD
 
+/* Define to 1 if you have the <gmp.h> header file. */
+#undef HAVE_GMP_H
+
 /* gnu linker present */
 #undef HAVE_GNU_LD
 
@@ -132,11 +147,14 @@
 /* Have isnormal function */
 #undef HAVE_ISNORMAL
 
-/* use windows japi extensions */
+/* Define to 1 if you have the <japi.h> header file. */
 #undef HAVE_JAPI_H
 
 /* use libbfd */
 #undef HAVE_LIBBFD
+
+/* Define to 1 if you have the `dl' library (-ldl). */
+#undef HAVE_LIBDL
 
 /* Define to 1 if you have the `opcodes' library (-lopcodes). */
 #undef HAVE_LIBOPCODES
@@ -144,8 +162,11 @@
 /* long long is available */
 #undef HAVE_LONG_LONG
 
-/* Have malloc.h */
+/* Define to 1 if you have the <malloc/malloc.h> header file. */
 #undef HAVE_MALLOC_MALLOC_H
+
+/* memalign element present */
+#undef HAVE_MALLOC_ZONE_MEMALIGN
 
 /* Define to 1 if you have the <math.h> header file. */
 #undef HAVE_MATH_H
@@ -159,17 +180,14 @@
 /* can use nsocket library */
 #undef HAVE_NSOCKET
 
-/* Have objc_malloc.h */
-#undef HAVE_OBJC_MALLOC_H
+/* output_bfd element present */
+#undef HAVE_OUTPUT_BFD
 
 /* Define to 1 if you have the `print_insn_i386' function. */
 #undef HAVE_PRINT_INSN_I386
 
 /* have putenv call */
 #undef HAVE_PUTENV
-
-/* have readline library */
-#undef HAVE_READLINE
 
 /* Define to 1 if you have the <readline/readline.h> header file. */
 #undef HAVE_READLINE_READLINE_H
@@ -180,11 +198,11 @@
 /* have readline completion matches */
 #undef HAVE_RL_COMPENTRY_FUNC_T
 
-/* Define to 1 if you have the <rpc/rpc.h> header file. */
-#undef HAVE_RPC_RPC_H
-
 /* have setenv call */
 #undef HAVE_SETENV
+
+/* Define to 1 if you have the <setjmp.h> header file. */
+#undef HAVE_SETJMP_H
 
 /* Define to 1 if you have the `sigaltstack' function. */
 #undef HAVE_SIGALTSTACK
@@ -249,12 +267,6 @@
 /* using xgcl */
 #undef HAVE_XGCL
 
-/* fraction of core to separate reloc and heap */
-#undef HOLEDIV
-
-/* number of pages to use for hole */
-#undef HOLEPAGE
-
 /* Host cpu */
 #undef HOST_CPU
 
@@ -263,9 +275,6 @@
 
 /* Host system */
 #undef HOST_SYSTEM
-
-/* time system constant */
-#undef HZ
 
 /* invocation history stack size */
 #undef IHSSIZE
@@ -276,20 +285,11 @@
 /* size of immediate fixnum address space */
 #undef IM_FIX_LIM
 
-/* Have builtin_inf */
-#undef INFINITY
-
 /* symbol name mangling convention */
 #undef LEADING_UNDERSCORE
 
 /* can use fcntl for listen function */
 #undef LISTEN_USE_FCNTL
-
-/* fill bits needed in certain lisp structures */
-#undef LMLOG_LONG_BITS
-
-/* fill bits needed in certain lisp structures */
-#undef LOG_LONG_BITS
 
 /* upper immediate fixnum bound */
 #undef LOW_SHFT
@@ -303,8 +303,8 @@
 /* sizeof mp_limb in gmp library */
 #undef MP_LIMB_BYTES
 
-/* Have builtin_nan */
-#undef NAN
+/* binutils requires CONST definition */
+#undef NEED_CONST
 
 /* C stack address is negative */
 #undef NEG_CSTACK_ADDRESS
@@ -327,8 +327,14 @@
 /* can use C extension for object alignment */
 #undef OBJ_ALIGN
 
-/* needed object alignment in bytes */
+/* needed object alignment bytes */
 #undef OBJ_ALIGNMENT
+
+/* extern inline semantics */
+#undef OLD_INLINE
+
+/* bfd output arch */
+#undef OUTPUT_ARCH
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
@@ -354,17 +360,32 @@
 /* readline is editline */
 #undef READLINE_IS_EDITLINE
 
-/* have sigcontext in signal.h */
-#undef SIGNAL_H_HAS_SIGCONTEXT
+/* rl_completion_entry_function returns type Function */
+#undef RL_COMPLETION_ENTRY_FUNCTION_TYPE_FUNCTION
 
-/* The size of `char', as computed by sizeof. */
-#undef SIZEOF_CHAR
+/* rl_completion_entry_function returns type rl_compentry_func_t */
+#undef RL_COMPLETION_ENTRY_FUNCTION_TYPE_RL_COMPENTRY_FUNC_T
+
+/* rl_readline_name returns type char */
+#undef RL_READLINE_NAME_TYPE_CHAR
+
+/* rl_readline_name returns type const char */
+#undef RL_READLINE_NAME_TYPE_CONST_CHAR
+
+/* asm string to set the stack pointer */
+#undef SET_STACK_POINTER
+
+/* have sigcontext of signal.h */
+#undef SIGNAL_H_HAS_SIGCONTEXT
 
 /* sizeof linked list for contiguous pages */
 #undef SIZEOF_CONTBLOCK
 
 /* The size of `int', as computed by sizeof. */
 #undef SIZEOF_INT
+
+/* sizeof jmp_buf */
+#undef SIZEOF_JMP_BUF
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG
@@ -399,6 +420,9 @@
 
 /* use readline library */
 #undef USE_READLINE
+
+/* protect cdr from immfix and speed up type processing */
+#undef USE_SAFE_CDR
 
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
@@ -491,8 +515,8 @@
 /* value stack size */
 #undef VSSIZE
 
-/* special windows main function */
-#undef WITH_WINMAIN
+/* three word cons */
+#undef WIDE_CONS
 
 /* big endian byte order */
 #undef WORDS_BIGENDIAN

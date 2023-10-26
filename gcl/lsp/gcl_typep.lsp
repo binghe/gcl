@@ -110,10 +110,10 @@
 	       +array-typep-alist+)
      ,@(mapcan (lambda (x)
 		 `((define-typep-fn ,(car x) (o tp)
-		     (when (funcall (cddr (assoc (upgraded-array-element-type (if tp (pop tp) '*))
+		     (when (funcall (cddr (assoc (upgraded-array-element-type (if tp (car tp) '*))
 						 (cdr (assoc ',(car x) +array-typep-alist+))))
 				    o)
-		       (,(if (eq (car x) 'vector) 'dbv 'db) o tp)))))
+		       (,(if (eq (car x) 'vector) 'dbv 'db) o (cdr tp))))))
 	       +array-typep-alist+))
 
 (defun cmp-real-tp (x y)
@@ -162,9 +162,9 @@
 (setf (get 'structure-object 'typep-fn) 'structure-typep-fn);FIXME
 
 (define-compound-typep-fn std-instance (o tp)
-  (if tp (when (member (car tp) (si-class-precedence-list (si-class-of o))) t) t))
+  (if tp (when (member (car tp) (si-cpl-or-nil (si-class-of o))) t) t))
 (define-compound-typep-fn funcallable-std-instance (o tp)
-  (if tp (when (member (car tp) (si-class-precedence-list (si-class-of o))) t) t))
+  (if tp (when (member (car tp) (si-cpl-or-nil (si-class-of o))) t) t))
 
 (define-compound-typep-fn proper-cons (o tp)
   (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))

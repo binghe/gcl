@@ -11,12 +11,13 @@
 			    (when (and s z)
 			      (funcall (setf (symbol-function ',n)
 					     (lambda (x &aux (x (if (symbolp x) (si-find-class x nil) x)))
-					       (when (typep x s)
-						 (member z (si-class-precedence-list x))))) x)))))
- (make-conditionp condition)
- (make-conditionp warning)
- (make-condition-classp condition)
- (make-condition-classp simple-condition))
+					       (when (and x (typep x s))
+						 (member z (si-cpl-or-nil x)))))
+				       x)))))
+  (make-conditionp condition)
+  (make-conditionp warning)
+  (make-condition-classp condition)
+  (make-condition-classp simple-condition))
  
 
 (defun coerce-to-condition (datum arguments default-type function-name)
@@ -39,20 +40,59 @@
 (defvar *handler-clusters* nil)
 (defvar *break-on-signals* nil)
 
+(defmacro handler-bind (bindings &body forms)
+  (declare (optimize (safety 2)))
+  `(let ((*handler-clusters*
+	  (cons (list ,@(mapcar (lambda (x) `(cons ',(car x) ,(cadr x))) bindings))
+		*handler-clusters*)))
+     ,@forms))
+
+(defmacro handler-case (form &rest cases)
+  (declare (optimize (safety 2)))
+  (let ((no-error-clause (assoc ':no-error cases)))
+    (if no-error-clause
+	(let ((normal-return (gensym)) (error-return  (gensym)))
+	  `(block ,error-return
+	     (multiple-value-call (lambda ,@(cdr no-error-clause))
+	       (block ,normal-return
+		 (return-from ,error-return
+		   (handler-case (return-from ,normal-return ,form)
+		     ,@(remove no-error-clause cases)))))))
+	(let ((block (gensym))(var (gensym))
+	      (tcases (mapcar (lambda (x) (cons (gensym) x)) cases)))
+	  `(block ,block
+	     (let (,var)
+	       (declare (ignorable ,var))
+	       (tagbody
+		 (handler-bind ,(mapcar (lambda (x &aux (tag (pop x))(type (pop x))(ll (car x)))
+					  (list type `(lambda (x)
+							,(if ll `(setq ,var x) `(declare (ignore x)))
+							(go ,tag))))
+					tcases)
+			       (return-from ,block ,form))
+		 ,@(mapcan (lambda (x &aux (tag (pop x))(type (pop x))(ll (pop x))(body x))
+			     (list tag `(return-from ,block (let ,(when ll `((,(car ll) ,var))) ,@body))))
+			   tcases))))))))
+
+(defmacro ignore-errors (&rest forms)
+  `(handler-case (progn ,@forms)
+     (error (condition) (values nil condition))))
+
 (defun signal (datum &rest arguments)
   (declare (optimize (safety 1)))
   (let ((*handler-clusters* *handler-clusters*)
 	(condition (coerce-to-condition datum arguments 'simple-condition 'signal)))
     (if (typep condition *break-on-signals*)
 	(break "~a~%break entered because of *break-on-signals*." condition))
-    (do nil ((not *handler-clusters*))
+    (unless (stringp condition)
+      (do nil ((not *handler-clusters*))
 	(dolist (handler (pop *handler-clusters*))
 	  (when (typep condition (car handler))
-	    (funcall (cdr handler) condition))))
+	    (funcall (cdr handler) condition)))))
     nil))
 
 (defvar *debugger-hook* nil)
-(defvar *debug-level* 0)
+(defvar *debug-level* 1)
 (defvar *debug-restarts* nil)
 (defvar *debug-abort* nil)
 (defvar *debug-continue* nil)
@@ -239,6 +279,7 @@
          (- -)
          (* *) (** **) (*** ***)
          (/ /) (// //) (/// ///)
+	 (debug-level *debug-level*)
 	 (*quit-tags* (cons (cons *break-level* *quit-tag*) *quit-tags*))
 	 *quit-tag*
 	 (*break-level* (if p-e-p (cons t *break-level*) *break-level*))
@@ -255,7 +296,7 @@
 	 (*readtable* (or *break-readtable* *readtable*))
 	 *break-env* *read-suppress*)
     
-      (do-break-level at env p-e-p *debug-level*)))
+      (do-break-level at env p-e-p debug-level)))
 
 (putprop 'break-level t 'compiler::cmp-notinline)
 

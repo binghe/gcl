@@ -936,7 +936,7 @@ copy_text_and_data (int new, int a_out)
    
 
     /* The use of _execname is incompatible with RISCiX 1.1 */
-    sprintf (command, "nm %s | fgrep mcount", _execname);
+    sprintf (command, "nm '%s' | fgrep mcount", _execname);
 
     if ( (pfile = popen(command, "r")) == NULL)
     {

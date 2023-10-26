@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPEVAL  The Expression Dispatcher.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -23,7 +22,6 @@
 
 
 (export '(si::define-compiler-macro
-          si::compiler-macro-function
 	  si::undef-compiler-macro
           si::define-inline-function) :si)
 
@@ -257,7 +255,7 @@
 		 (format t "~%;;~s~% " sym)
        (sloop::sloop for u in '(inline-always inline-safe inline-unsafe)
 		     do (sloop::sloop
-			 for w in (reverse (remove-duplicates
+			 for w in (nreverse (remove-duplicates
 					    (copy-list (get sym u))
 					    :test 'equal))
 			 do (output-opt w  sym u)))))))				      
@@ -1072,39 +1070,269 @@
 	((or (new-type-p (car a) (car b)) (new-type-p (cdr a) (cdr b))))))
 
 (defun tm (a b &aux (ca (cons-count a)))
-  (when (< ca (if (< ca (cons-count b)) 25 16));FIXME
+  (when (< ca (if (< ca (cons-count b)) 50 32));FIXME, catch si::+array-typep-alist+
     (new-type-p a b)))
 
-(defun arg-types-match (tps sir &optional ctp)
-  (if tps
-      (and (= (length tps) (length sir));FIXME unroll strategy	       
-	   (every (lambda (x y) 
-		    (or (type>= x y)
-			(and (type>= #tinteger x) (type>= #tinteger y))
-			(when ctp 
-			  (let ((ax (car (atomic-tp x)))(ay (car (atomic-tp y))))
-			    (when (consp ay) ;(setq aax ax aay ay) ;(print (list aax aay))(break)
-			      (not 
-			       (tm ay ax)
-;			       (when (and (consp ax) (<= (length ax) 15)) (tailp ay ax))
-			       )))))) tps sir))
-    (not (member-if 'atomic-tp sir))))
+;; (defun arg-types-match (tps sir &optional ctp)
+;;   (if tps
+;;       (and (= (length tps) (length sir));FIXME unroll strategy	       
+;; 	   (every (lambda (x y) 
+;; 		    (or (type>= x y)
+;; 			(and (type>= #tinteger x) (type>= #tinteger y))
+;; 			(when ctp 
+;; 			  (let ((ax (car (atomic-tp x)))(ay (car (atomic-tp y))))
+;; 			    (when (consp ay) ;(setq aax ax aay ay) ;(print (list aax aay))(break)
+;; 			      (not 
+;; 			       (tm ay ax)
+;; ;			       (when (and (consp ax) (<= (length ax) 15)) (tailp ay ax))
+;; 			       )))))) tps sir))
+;;     (not (member-if 'atomic-tp sir))))
 
-(defun top-tagged-sir (sir &aux tagged-sir)
-  (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq tagged-sir x))))
+;; (defun top-tagged-sir (sir &aux tagged-sir)
+;;   (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq tagged-sir x))))
+;; 	*src-inline-recursion*)
+;;   tagged-sir)
+
+;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))
+;; 		     (p (member n *src-inline-recursion* :key 'caar)))
+;;   (when p
+;;     (when (or (arg-types-match (cdaar p) tp)
+;; 	      (member-if (lambda (x) (when (eq n (caar x)) (arg-types-match (cdar x) tp t))) (cdr p)))
+;;       (let ((tagged-sir (unless (or (tail-recursion-possible f) (member-if 'atomic-tp tp))
+;; 			  (top-tagged-sir sir))))
+;; 	(if tagged-sir
+;; 	    (throw tagged-sir *src-inline-recursion*)
+;; 	  t)))))
+
+;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)) sub)
+
+;;   (let ((p (member-if (lambda (x)
+;; 			(when (eq n (caar x))
+;; 			  (when (cdddr x)
+;; 			    (arg-types-match (cdar x) tp (prog1 sub (setq sub t))))))
+;; 		      *src-inline-recursion*)))
+;;     (when p
+;;       (cond ((tail-recursion-possible f) t)
+;; 	    ((member-if 'atomic-tp tp) t)
+;; 	    ((throw (car p) *src-inline-recursion*))))))
+
+;; (defun arg-types-match (tps sir &optional ctp)
+;;   (if t;tps
+;;       (and (= (length tps) (length sir));FIXME unroll strategy	       
+;; 	   (every (lambda (x y) 
+;; 		    (or (si::type= x y)
+;; 			(and (type>= #tinteger x) (type>= #tinteger y))
+;; ;; 			(when ctp 
+;; ;; 			  (let ((ax (car (atomic-tp x)))(ay (car (atomic-tp y))))
+;; ;; 			    (when (consp ay) ;(setq aax ax aay ay) ;(print (list aax aay))(break)
+;; ;; 			      (not 
+;; ;; 			       (tm ay ax)
+;; ;; ;			       (when (and (consp ax) (<= (length ax) 15)) (tailp ay ax))
+;; ;; 			       ))))
+;; 			)) tps sir))
+;;       (progn (break "foo")(not (member-if 'atomic-tp sir)))))
+
+;; (defun too-complicated-p (sir)
+;;   (>
+;;    (max (count (car sir) *src-inline-recursion* :key 'caar)
+;; 	(reduce (lambda (y x &aux (x (car (atomic-tp x))))
+;; 		  (max y (if (listp x) (length x) 0)))
+;; 		(cdr sir) :initial-value 0))
+;;    20))
+
+;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)) sub)
+;; ;  (print (list n (count n *src-inline-recursion* :key 'caar)))
+;;   ;; (let ((x (mapcan (lambda (x) (when (consp x) (list x (length x))))
+;;   ;; 		   (remove nil (mapcar (lambda (x) (car (atomic-tp x))) tp)))))
+;;   ;;   (when x (print x)))
+;;   (let* ((p (member-if (lambda (x)
+;; 			(when (eq n (caar x))
+;; 			  (when (cdddr x)
+;; 			    (arg-types-match (cdar x) tp)))); (prog1 sub (setq sub t))
+;; 		       *src-inline-recursion*))
+;; 	 (ts (top-tagged-sir sir))
+;; 	 (c (when ts (when (too-complicated-p sir) (list ts))))
+;; ;	 (c (when ts (when (member-if 'complicated-cons-type-p tp) (list ts))))
+;; 	 (p (or p c)))
+;;     (when p
+;;       (cond ((unless c (tail-recursion-possible f)) t)
+;; 	    ((unless c (member-if 'atomic-tp tp)) (break "bar") t)
+;; 	    ((throw (car p) *src-inline-recursion*))))))
+
+
+;; (defun arg-types-match (tps sir)
+;;   (and (= (length tps) (length sir))
+;;        (every (lambda (x y) 
+;; 		(or (si::type= x y)
+;; 		    (and (type>= #tinteger x) (type>= #tinteger y))))
+;; 		  tps sir)))
+
+;; (defun too-complicated-p (sir)
+;;   (mapc (lambda (x) (when (eq (car sir) (caar x))
+;; 		      (when (cddr x)
+;; 			(when (some (lambda (x y &aux (x (car (atomic-tp x)))(y (car (atomic-tp y))))
+;; 				      (and (consp x) (consp y) (tailp x y) (> (length y) 20)))
+;; 				    (cdr sir) (cdar x))
+;; ;			  (print sir)(break)
+;; 			  (return-from too-complicated-p t)))))
+;; 	*src-inline-recursion*)
+;;   (>
+;;    (count (car sir) *src-inline-recursion* :key 'caar)
+;;    20))
+
+;; (defun top-tagged-sir (sir &aux tagged-sir tts)
+;;   (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq tts tagged-sir tagged-sir x))))
+;; 	*src-inline-recursion*)
+;;   tagged-sir)
+
+;; (defun top-tagged-sir (sir &aux tagged-sir tts)
+;;   (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq tts tagged-sir tagged-sir x))))
+;; 	*src-inline-recursion*)
+;;   tts)
+
+;; (defun top-tagged-sir (sir &aux tagged-sir tts)
+;;   (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq tts tagged-sir tagged-sir x))))
+;; 	*src-inline-recursion*)
+;;   (if (member-if 'atomic-tp tagged-sir) tts tagged-sir))
+
+;; (defun top-tagged-sir (sir &aux last-tagged-sir penultimate-tagged-sir)
+;;   (mapc (lambda (x)
+;; 	  (when (eq (caar x) (car sir))
+;; 	    (when (cdddr x)
+;; 	      (setq penultimate-tagged-sir last-tagged-sir last-tagged-sir x))))
+;; 	*src-inline-recursion*)
+;;   (or (unless (member-if 'atomic-tp (cdr last-tagged-sir)) last-tagged-sir)
+;;       penultimate-tagged-sir))
+
+;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)) sub)
+;;   (let* ((p (member-if (lambda (x)
+;; 			(when (eq n (caar x))
+;; 			  (when (cdddr x)
+;; 			    (arg-types-match (cdar x) tp))))
+;; 		       *src-inline-recursion*))
+;; 	 (ts (top-tagged-sir sir))
+;; 	 (c (when ts (when (too-complicated-p sir) (list ts))))
+;; 	 (p (or p c)))
+;;     (when p
+;;       (cond ((unless c (tail-recursion-possible f)) t)
+;; 	    ((unless c (member-if 'atomic-tp tp)) t)
+;; 	    ((throw (car p) *src-inline-recursion*))))))
+
+;; (defun last-or-penultimate (sir filter &aux (n (car sir)) last penultimate)
+;;   (mapc (lambda (x) (when (and (eq n (caar x)) (cdddr x) (funcall filter x))
+;; 		      (setq penultimate last last x)))
+;; 	*src-inline-recursion*)
+;;   (or last ;(unless (member-if 'atomic-tp last) last) ;inline at least one of these
+;;       penultimate))
+
+;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)) sub)
+;;   (let* ((p (last-or-penultimate sir (lambda (x) (arg-types-match (cdar x) tp))))
+;; 	 (c (unless p
+;; 	      (when (too-complicated-p sir)
+;; 		(last-or-penultimate sir 'identity))))
+;; 	 (p (or p c)))
+;;     (when p
+;;       (or (unless c (tail-recursion-possible f))
+;; 	  (unless c (member-if 'atomic-tp tp))
+;; 	  (throw p *src-inline-recursion*)))))
+
+
+
+;; (defun top-tagged-sir (sir &aux last penul)
+;;   (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq penul last last x))))
+;; 	*src-inline-recursion*)
+;;   (cond ((member-if 'atomic-tp (car last)) penul)
+;; 	((eql (length (car last)) (length (car penul))) last);types t?
+;; 	(penul)))
+
+;; (defun top-tagged-sir (sir &aux last penul)
+;;   (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq penul last last x))))
+;; 	*src-inline-recursion*)
+;;   (cond ;((member-if 'atomic-tp (car last)) penul)
+;; 	;((eql (length (car last)) (length (car penul))) last);types t?
+;; 	(penul)))
+
+;; (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)))
+;;   (let* ((p (car (member-if
+;; 		  (lambda (x)
+;; 		    (when (eq n (caar x))
+;; 		      (when (cdddr x)
+;; 			(arg-types-match (cdar x) tp))))
+;; 		  *src-inline-recursion*)))
+;; 	 (c (unless p (when (too-complicated-p sir) (top-tagged-sir sir))))
+;; 	 (p (or p c)))
+;;     (when p
+;;       (cond ((unless c (tail-recursion-possible f)) t)
+;; 	    ((unless c (member-if 'atomic-tp tp)) t)
+;; 	    ((throw p *src-inline-recursion*))))))
+
+(defvar *src-loop-unroll-limit* 20)
+
+(defun arg-types-match (tps sir)
+  (and (= (length tps) (length sir))
+       (every (lambda (x y) 
+		(or (si::type= x y)
+		    (and (type>= #tinteger x) (type>= #tinteger y))
+		    (let ((cx (car (atomic-tp x)))(cy (car (atomic-tp y))))
+		      (and (consp cx) (consp cy) (tailp cy cx)
+			   (> (length cx) *src-loop-unroll-limit*)
+			   ;; (when (not (tm cx cy))
+			   ;;   (when (<= (length cx) 20)
+			   ;; 	 (print (setq ccc (list cx cy)))
+			   ;; 	 (break))
+			   ;;   t)
+			   ))
+		    ))
+	      tps sir)))
+
+(defun top-tagged-sir (sir &aux last penul)
+  (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq penul last last x))))
 	*src-inline-recursion*)
-  tagged-sir)
+  (cond ;(last)
+	((member-if 'atomic-tp (cdar last)) penul)
+	((eql (length (car last)) (length (car penul))) last);types t?
+	(penul)))
 
-(defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp))
-		     (p (member n *src-inline-recursion* :key 'caar)))
-  (when p
-    (when (or (arg-types-match (cdaar p) tp)
-	      (member-if (lambda (x) (when (eq n (caar x)) (arg-types-match (cdar x) tp t))) (cdr p)))
-      (let ((tagged-sir (unless (or (tail-recursion-possible f) (member-if 'atomic-tp tp))
-			  (top-tagged-sir sir))))
-	(if tagged-sir
-	    (throw tagged-sir *src-inline-recursion*)
-	  t)))))
+(defun prior-inline-similar-types (n tp)
+    (car (member-if
+	(lambda (x)
+	  (when (eq n (caar x))
+	    (when (cdddr x)
+	      (arg-types-match (cdar x) tp))))
+	*src-inline-recursion*)))
+  
+(defun too-complicated-p (sir)
+  (> (count (car sir) *src-inline-recursion* :key 'caar) *src-loop-unroll-limit*))
+
+(defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)) p)
+  (cond ((setq p (prior-inline-similar-types n tp))
+	 (or (tail-recursion-possible f) (throw p *src-inline-recursion*)))
+	((setq p (when (too-complicated-p sir) (top-tagged-sir sir)))
+	 (throw p *src-inline-recursion*))))
+
+;; (let* ((p (car (member-if
+;; 		  (lambda (x)
+;; 		    (when (eq n (caar x))
+;; 		      (when (cdddr x)
+;; 			(arg-types-match (cdar x) tp t))))
+;; 		  *src-inline-recursion*)))
+;; ;	 (p (when p (or (top-tagged-sir sir) p)));ldiff
+;; 	 (c (unless p (when (too-complicated-p sir) (top-tagged-sir sir))))
+;; 	 (p (or p c)))
+;;     (when p
+;;       ;; (print (list n (caar c) (count (car sir) *src-inline-recursion* :key 'caar) (length *src-inline-recursion*)
+;;       ;; 		   (or (unless c (tail-recursion-possible f)) (unless c (member-if 'atomic-tp tp))) ))
+;;       (cond ((unless c (tail-recursion-possible f)) t)
+;; ;	    ((unless c (member-if 'atomic-tp tp)) t)
+;; 	    ((throw p *src-inline-recursion*))))))
+
+
+
+
+
+
+
+
 
 (defun make-tagged-sir (sir tag ll &optional (ttag nil ttag-p))
   (list* sir tag ll (when ttag-p (list ttag))))
@@ -2478,19 +2706,17 @@
 	       (args (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) ttps))
 	       (cast (apply 'strcat (maplist (lambda (x) (strcat (cc (car x)) (if (cdr x) "," ""))) tps)))
 	       (cast (strcat "(" crt "(*)(" cast "))")))
-	  `(progn
-	     (mdlsym ,name ,lib)
-	     (defun ,sym ,args
-	       (declare (optimize (safety 2)))
-	       ,@(mapcar (lambda (x y) `(check-type ,x ,(get (cc y) 'lisp-type))) args ttps)
-	       (cadd-dladdress ,dls ,sym)
-	       (lit ,crt
-		    ,@(when (eq crt :void) `("("))
-		    "(" ,cast "(" ,dls "))("
-		    ,@(mapcon (lambda (x y) `((,(cc (car x)) ,(car y))
-					      ,(if (cdr x) (if (consp (car x)) "+" ",") ""))) ttps args)
-		    ")"
-		    ,@(when (eq crt :void) `(",Cnil)"))))))))
+	  `(defun ,sym ,args
+	     (declare (optimize (safety 2)))
+	     ,@(mapcar (lambda (x y) `(check-type ,x ,(get (cc y) 'lisp-type))) args ttps)
+	     (cadd-dladdress ,dls ,sym)
+	     (lit ,crt
+		  ,@(when (eq crt :void) `("("))
+		  "(" ,cast "(" ,dls "))("
+		  ,@(mapcon (lambda (x y) `((,(cc (car x)) ,(car y))
+					    ,(if (cdr x) (if (consp (car x)) "+" ",") ""))) ttps args)
+		  ")"
+		  ,@(when (eq crt :void) `(",Cnil)")))))))
 
 (defun c1cadd-dladdress (args)
   (list 'cadd-dladdress (make-info :type #tnull) args))

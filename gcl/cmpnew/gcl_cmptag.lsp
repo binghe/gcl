@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPTAG  Tagbody and Go.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -29,7 +28,7 @@
 (si:putprop 'go 'c1go 'c1special)
 (si:putprop 'go 'c2go 'c2)
 
-(defstruct tag
+(defstruct (tag (:print-function (lambda (x s i) (s-print 'tag (tag-name x) (si::address x) s))))
            name			;;; Tag name.
            ref			;;; Referenced or not.  T or NIL.
            ref-clb		;;; Cross local function reference.

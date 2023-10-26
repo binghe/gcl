@@ -31,7 +31,7 @@
       (_fl<=S_SYMBOL_STUBS || _fl==S_16BYTE_LITERALS) && _fl!=S_ZEROFILL;})
 
 
-#define MASK(n) (~(~0L << (n)))
+#define MASK(n) (~(~0ULL << (n)))
 
 
 
@@ -205,7 +205,7 @@ load_memory(struct section *sec1,struct section *sece,void *v1,
   
   memory=new_cfdata();
   memory->cfd.cfd_size=sz; 
-  memory->cfd.cfd_start=alloc_code_space(sz);
+  memory->cfd.cfd_start=alloc_code_space(sz,-1UL);
 
   a=(ul)memory->cfd.cfd_start;
   a=(a+ma)&~ma;
@@ -421,7 +421,7 @@ load_self_symbols() {
 
   for (a=c_table.ptable,sym=sym1;sym<syme;sym++) {
     
-    if (sym->n_type & N_STAB || !(sym->n_type & N_EXT))
+    if ((sym->n_type & N_STAB) || !(sym->n_type & N_EXT))
       continue;
 
     a->address=sym->n_value;
@@ -435,10 +435,9 @@ load_self_symbols() {
   c_table.length=a-c_table.ptable;
   qsort(c_table.ptable,c_table.length,sizeof(*c_table.ptable),node_compare);
 
-  c_table.local_ptable=a;
-  for (a=c_table.ptable,sym=sym1;sym<syme;sym++) {
+  for (c_table.local_ptable=a,sym=sym1;sym<syme;sym++) {
 
-    if (sym->n_type & N_STAB || sym->n_type & N_EXT)
+    if ((sym->n_type & N_STAB) || sym->n_type & N_EXT)
       continue;
 
     a->address=sym->n_value;
@@ -536,7 +535,6 @@ int
 fasload(object faslfile) {
 
   FILE *fp;
-  object data;
   ul init_address=-1;
   object memory;
   void *v1,*ve,*p;
@@ -545,7 +543,6 @@ fasload(object faslfile) {
   char *st1=NULL,*ste=NULL;
   ul gs,*got=&gs,*gote,*io1=NULL,rls,start;
 
-  faslfile = open_stream(faslfile, smm_input, Cnil, sKerror);
   fp = faslfile->sm.sm_fp;
 
   massert(v1=get_mmap(fp,&ve));
@@ -566,7 +563,6 @@ fasload(object faslfile) {
   relocate_code(v1,sec1,sece,&p,io1,n1,got,gote,start);
 
   fseek(fp,(void *)ste-v1,SEEK_SET);
-  data = feof(fp) ? 0 : read_fasl_vector(faslfile);
   
   massert(!clear_protect_memory(memory));
 
@@ -575,14 +571,13 @@ fasload(object faslfile) {
 #endif
   
   massert(!un_mmap(v1,ve));
-  close_stream(faslfile);
   
   init_address-=(ul)memory->cfd.cfd_start;
-  call_init(init_address,memory,data,0);
+  call_init(init_address,memory,faslfile);
   
   if(symbol_value(sLAload_verboseA)!=Cnil)
     printf(";; start address for %.*s %p\n",
-	   (int)VLEN(faslfile->sm.sm_object1),faslfile->sm.sm_object1->st.st_self,
+	   (int)VLEN(memory->cfd.cfd_name),memory->cfd.cfd_name->st.st_self,
 	   memory->cfd.cfd_start);
   
   return(memory->cfd.cfd_size);

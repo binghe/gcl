@@ -99,7 +99,7 @@ struct key {short n,allow_other_keys;
 /* cmpaux.c:185:OF */ extern fixnum object_to_fixnum (object x); /* (x) object x; */
 /* cmpaux.c:263:OF */ extern char *object_to_string (object x); /* (x) object x; */
 typedef int (*FUNC)();
-/* cmpaux.c:294:OF */ extern void call_init (int init_address, object memory, object fasl_vec, FUNC fptr); /* (init_address, memory, fasl_vec, fptr) int init_address; object memory; object fasl_vec; FUNC fptr; */
+/* cmpaux.c:294:OF */ extern void call_init (int init_address,object memory,object faslfile); /* (init_address, memory, fasl_vec, fptr) int init_address; object memory; object fasl_vec; FUNC fptr; */
 /* cmpaux.c:339:OF */ extern void do_init (object *statVV); /* (statVV) object *statVV; */
 /* cmpaux.c:416:OF */ extern void gcl_init_or_load1 (void (*fn) (void), const char *file); /* (fn, file) int (*fn)(); char *file; */
 /* conditional.c:200:OF */ extern void gcl_init_conditional (void); /* () */
@@ -137,7 +137,8 @@ typedef int (*FUNC)();
 /* eval.c:1293:OF */ extern object ieval (object x); /* (x) object x; */
 /* eval.c:1309:OF */ extern object ifuncall1 (object fun, object arg1); /* (fun, arg1) object fun; object arg1; */
 /* eval.c:1328:OF */ extern object ifuncall2 (object fun, object arg1, object arg2); /* (fun, arg1, arg2) object fun; object arg1; object arg2; */
-/* eval.c:1348:OF */ extern object ifuncall3 (object fun, object arg1, object arg2, object arg3); /* (fun, arg1, arg2, arg3) object fun; object arg1; object arg2; object arg3; */
+/* eval.c:1348:OF */ extern object ifuncall3 (object fun, object arg1, object arg2, object arg3);
+/* eval.c:1348:OF */ extern object ifuncall4 (object fun, object arg1, object arg2, object arg3, object arg4);
 typedef void (*funcvoid)(void);
 /* eval.c:1545:OF */ extern void gcl_init_eval (void); /* () */
 /* fasdump.c:1465:OF */ extern object read_fasl_vector (object in); /* (in) object in; */
@@ -145,7 +146,7 @@ typedef void (*funcvoid)(void);
 /* sfasli.c::OF */ extern void gcl_init_sfasl (void); /* () */
 /* format.c:2084:OF */ extern void Lformat (void); /* () */
 /* format.c:2171:OF */ extern void gcl_init_format (void); /* () */
-/* frame.c:32:OF */ extern void unwind (frame_ptr fr, object tag); /* (fr, tag) frame_ptr fr; object tag; */
+/* frame.c:32:OF */ extern void unwind (frame_ptr fr, object tag) NO_RETURN; /* (fr, tag) frame_ptr fr; object tag; */
 /* frame.c:58:OF */ extern frame_ptr frs_sch (object frame_id); /* (frame_id) object frame_id; */
 /* frame.c:69:OF */ extern frame_ptr frs_sch_catch (object frame_id); /* (frame_id) object frame_id; */
 /* funlink.c:19:OF */ extern void call_or_link (object sym, int setf, void **link); /* (sym, link) object sym; void **link; */
@@ -349,8 +350,8 @@ object funcall_vec(object,fixnum,object *);
 /* unixfsys.c:209:OF */ extern void coerce_to_filename1 (object pathname, char *p,unsigned sz); /* (pathname, p) object pathname; char *p; */
 /* unixfsys.c:209:OF */ extern void coerce_to_local_filename1 (object pathname, char *p,unsigned sz); /* (pathname, p) object pathname; char *p; */
 /* unixfsys.c:329:OF */ extern bool file_exists (object file); /* (file) object file; */
-/* unixfsys.c:359:OF */ extern FILE *fopen_not_dir (char *filename, char *option); /* (filename, option) char *filename; char *option; */
 /* unixfsys.c:359:OF */ extern FILE *backup_fopen (char *filename, char *option); /* (filename, option) char *filename; char *option; */
+/* unixfsys.c:359:OF */ extern FILE *fopen_not_dir (char *filename, char *option); /* (filename, option) char *filename; char *option; */
 /* unixfsys.c:372:OF */ extern int file_len (FILE *fp); /* (fp) FILE *fp; */
 /* unixfsys.c:382:OF */ extern object truename (object); /* () */
 /* unixfsys.c:382:OF */ extern void Ltruename (void); /* () */
@@ -467,11 +468,9 @@ int length(object);
 
 int rl_getc_em(FILE *);
 
-void setupPRINTdefault(object);
+void setupPRINTdefault(object,object);
 
 void write_str(char *);
-
-void write_object(object,int);
 
 void cleanupPRINT(void);
 
@@ -497,11 +496,20 @@ int file_column(object);
 
 int writec_stream(int,object);
 
+int writec_pstream(int,object);
+
+void
+write_codes_pstream(object,fixnum,fixnum,fixnum,fixnum);
+
+void *writec_stream_fun(object);
+
+object output_stream(object);
+
 int digit_weight(int,int);
 
 void flush_stream(object);
 
-void writestr_stream(char *,object);
+void writestr_pstream(char *,object);
 
 void write_string(object,object);
 
@@ -991,7 +999,6 @@ void Lforce_output(void);
 void Lnthcdr(void);
 void Llogior(void);
 void Lchar_downcase(void);
-void Lstring_char_p(void);
 void Lstream_element_type(void);
 void Lpackage_used_by_list(void);
 void Ldivide(void);
@@ -1225,7 +1232,6 @@ void LlistA(void);
 void Lvalues_list(void);
 void Lequal(void);
 void Ldigit_char_p(void);
-void ERROR(void);
 void Lchar_neq(void);
 void Lpathname_directory(void);
 void Lcdaaar(void);
@@ -1329,10 +1335,10 @@ object cplus(object,object);
 
 object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
 
-#define Icall_error_handler(a_,b_,c_,d_...) \
-  Icall_gen_error_handler(Cnil,null_string,a_,b_,c_,##d_)
-#define Icall_continue_error_handler(a_,b_,c_,d_,e_...) \
-  Icall_gen_error_handler(Ct,a_,b_,c_,d_,##e_)
+/* #define Icall_error_handler(a_,b_,c_,d_...) \ */
+/*   Icall_gen_error_handler(Cnil,null_string,a_,b_,c_,##d_) */
+/* #define Icall_continue_error_handler(a_,b_,c_,d_,e_...) \ */
+/*   Icall_gen_error_handler(Ct,a_,b_,c_,d_,##e_) */
 /* object */
 /* Icall_error_handler(object,object,int,...); */
 
@@ -1355,6 +1361,12 @@ int  gcl_isnormal_double(double);
 
 int  gcl_isnormal_float(float);
 
+int
+gcl_isnan(object);
+
+int
+gcl_is_not_finite(object);
+
 object powm_bbb(object,object,object);
 object powm_bfb(object,fixnum,object);
 object powm_fbb(fixnum,object,object);
@@ -1366,8 +1378,8 @@ object powm_fff(fixnum,fixnum,fixnum);
 
 object find_init_name1(char *,unsigned);
 
-void wipe_stack   (VOL void *);
-void clear_c_stack(VOL unsigned);
+int
+gcl_isnan(object);
 
 long opt_maxpage(struct typemanager *);
 
@@ -1389,7 +1401,6 @@ int bcmp ( const void *s1, const void *s2, size_t n );
 void bcopy ( const void *s1, void *s2, size_t n );
 void bzero(void *b, size_t length);
 int TcpOutputProc ( int fd, char *buf, int toWrite, int *errorCodePtr, int block );
-void recreate_heap1 ( void );
 void gcl_init_shared_memory ( void );
 void fix_filename ( object pathname, char *filename1 );
 void alarm ( int n );
@@ -1448,7 +1459,11 @@ object quick_call_function_cs(object,...);
 
 object call_proc_cs(object,...);
 
-void * get_mmap(FILE *,void **);
+void *
+get_mmap(FILE *,void **);
+
+void *
+get_mmap_shared(FILE *,void **);
 
 object call_proc_cs1(object,...);
 
@@ -1515,7 +1530,7 @@ int
 gcl_mprotect(void *,unsigned long,int);
 
 void *
-alloc_code_space(size_t);
+alloc_code_space(size_t,ufixnum);
 
 void *
 alloc_contblock_no_gc(size_t,char *);
@@ -1540,6 +1555,9 @@ gcl_cleanup(int);
 
 void
 do_gcl_abort(void);
+
+object
+n_cons_from_x(fixnum,object);
 
 int
 mbrk(void *);
@@ -1573,3 +1591,12 @@ coerce_funcall_object_to_function(object);
 
 object
 gcl_make_hash_table(object);
+
+int
+home_namestring1(const char *,int,char *,int);
+
+object
+double_to_rational(double);
+
+object
+fresh_synonym_stream_to_terminal_io(void);

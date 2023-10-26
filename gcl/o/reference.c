@@ -131,7 +131,7 @@ symbol_function_internal(object sym,int allow_setf) {
     FEundefined_function(sym);
   
   if (sym->s.s_mflag)
-    return make_cons(sLmacro,sym->s.s_gfdef);
+    return make_cons(sSmacro,sym->s.s_gfdef);
   
   return sym->s.s_gfdef;
   

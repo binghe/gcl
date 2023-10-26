@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -25,7 +24,7 @@
 
 (in-package :system)
 
-(defconstant imag-one #C(0 1))
+(defconstant imag-one #C(0.0d0 1.0d0))
 
 (defun isqrt (i)
   (declare (optimize (safety 1)))

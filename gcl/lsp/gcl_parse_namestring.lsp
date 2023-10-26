@@ -13,18 +13,15 @@
 
 (defvar *up-key* :up)
 
-(defun mfr (x b i) (subseq x b i));  (make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b)
-
-(defvar *sym-sub-alist* '((:host . nil)
-			  (:device . nil)
-			  (:directory . (("." . nil)(".." . :up)("*" . :wild)("**" . :wild-inferiors)))
-			  (:name . (("*" . :wild)))
-			  (:type . (("*" . :wild)))
-			  (:version . (("*" . :wild)("NEWEST" . :newest)))))
-
-(defun element (x b i key)
-  (let* ((z (when (> i b) (mfr x b i)))
-	 (w (assoc z (cdr (assoc key *sym-sub-alist*)) :test 'string-equal))
+(defun element (x b i key &optional def)
+  (let* ((z (if (> i b) (subseq x b i) def));(make-array (- i b) :element-type 'character :displaced-to x :displaced-index-offset b)
+	 (w (assoc key '((:host . nil)
+			 (:device . nil)
+			 (:directory . ((".." . :up)("*" . :wild)("**" . :wild-inferiors)))
+			 (:name . (("*" . :wild)))
+			 (:type . (("*" . :wild)))
+			 (:version . (("*" . :wild)("NEWEST" . :newest))))))
+	 (w (assoc z (cdr w) :test 'string-equal))
 	 (z (if w (cdr w) z)))
     (if (eq z :up) *up-key* z)))
 
@@ -44,18 +41,12 @@
 
 (defun version-parse (x)
   (typecase x
-    (string (version-parse (parse-integer x)))
-;    (integer (locally (check-type x (integer 1)) x))
+    (string (when (plusp (length x)) (version-parse (parse-integer x))))
     (otherwise x)))
 
 (defconstant +generic-logical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +logical-pathname-defaults+)) t t)))
 
-(defun expand-home-dir (dir)
-  (cond ((and (eq (car dir) :relative) (stringp (cadr dir)) (eql #\~ (aref (cadr dir) 0)))
-	 (append (dir-parse (home-namestring (cadr dir)) "/" :absolute) (cddr dir)))
-	(dir)))
-
-(defun logical-pathname-parse (x &optional host def (b 0) (e (length x)))
+(defun logical-pathname-parse (x &optional host def (b 0) (e (length x)) &aux (x (string-upcase x)))
   (when (and (eql b (string-match +generic-logical-pathname-regexp+ x b e)) (eql (match-end 0) e))
     (let ((mhost (match-component x 1 :host 0 -1)))
       (when (and host mhost)
@@ -72,8 +63,13 @@
 			 :type (match-component x 8 :type 1)
 			 :version (version-parse (match-component x 11 :version 1))
 			 :namestring (when (and mhost (eql b 0) (eql e (length x)) (eq dir edir)) x))))))))
-  
+
 (defconstant +generic-physical-pathname-regexp+ (compile-regexp (to-regexp-or-namestring (make-list (length +physical-pathname-defaults+)) t nil)))
+
+(defun expand-home-dir (dir)
+  (if (and (eq (car dir) :relative) (stringp (cadr dir)) (eql #\~ (aref (cadr dir) 0)))
+      (append (dir-parse (home-namestring (cadr dir)) "/" :absolute) (cddr dir))
+    dir))
 
 (defun pathname-parse (x b e)
   (when (and (eql b (string-match +generic-physical-pathname-regexp+ x b e)) (eql (match-end 0) e))
@@ -83,7 +79,6 @@
 		     :name (match-component x 3 :name)
 		     :type (match-component x 4 :type 1)
 		     :namestring (when (and (eql b 0) (eql e (length x)) (eq dir edir)) x)))))
-
 
 (defun path-stream-name (x)
   (check-type x pathname-designator)
@@ -131,4 +126,3 @@
 (set-dispatch-macro-character #\# #\p 'sharp-p-reader)
 (set-dispatch-macro-character #\# #\P 'sharp-p-reader)
 (set-dispatch-macro-character #\# #\" 'sharp-dq-reader)
-

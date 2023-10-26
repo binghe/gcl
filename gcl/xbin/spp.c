@@ -2,7 +2,7 @@
 
 /*
  * spp.c
- * Extracts the symbol table from an HP-UX excutable file
+ * Extracts the symbol table from an HP-UX executable file
  * to be used in a later pass of the linker. (ld does not
  * support the -A option.)
  */

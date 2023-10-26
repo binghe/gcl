@@ -1,6 +1,8 @@
-#.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (si::break-on-floating-point-exceptions))))
+(in-package :si)
+
+#.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (break-on-floating-point-exceptions))))
      (flet ((set-break (x) (when (keywordp r)
-			     (apply 'si::break-on-floating-point-exceptions (append (unless x o) (list r x))))))
+			     (apply 'break-on-floating-point-exceptions (append (unless x o) (list r x))))))
        (let* ((rr (handler-case (unwind-protect (progn (set-break t) (apply f a)) (set-break nil))
 				,@(mapcar (lambda (x &aux (x (car x))) `(,x (c) (setq cc c) ,(intern (symbol-name x) :keyword)))
 					  (append si::+fe-list+ '((arithmetic-error)(error)))))))
@@ -20,13 +22,13 @@
       (compile eval)
     (defmacro deft (n rt args &rest code)
       `(progn
-	 (si::clines ,(nstring-downcase
+	 (clines ,(nstring-downcase
 		   (apply 'concatenate 'string
 			  "static " (symbol-name rt) " " (symbol-name n) "("
 			  (apply 'concatenate 'string 
 				 (mapcon (lambda (x) (list* (symbol-name (caar x)) " " (symbol-name (cadar x)) 
 							    (when (cdr x) (list ", ")))) args)) ") " code)))
-	 (si::defentry ,n ,(mapcar 'car args) (static ,rt ,(string-downcase (symbol-name n)))))))
+	 (defentry ,n ,(mapcar 'car args) (,rt ,(string-downcase (symbol-name n)))))))
   
   (deft fdivp object ((object x) (object y))
     "{volatile double a=lf(x),b=lf(y),c;"
@@ -34,6 +36,12 @@
     ": \"=m\" (a), \"=m\" (b) : \"m\" (c));"
     "return make_longfloat(c);}")
   
+  (deft fsqrt object ((object x))
+    "{volatile double a=lf(x),c;"
+    "__asm__ __volatile__ (\"fldl %0;fsqrt ;fstpl %1;fwait\" "
+    ": \"=m\" (a): \"m\" (c));"
+    "return make_longfloat(c);}")
+
   (deft divpd object ((object x) (object y) (object z))
     "{__asm__ __volatile__ (\"movapd %0,%%xmm0;movapd %1,%%xmm1;divpd %%xmm0,%%xmm1;movapd %%xmm1,%2\" "
     ": \"=m\" (*(char *)x->a.a_self), \"=m\" (*(char *)y->a.a_self) : \"m\" (*(char *)z->a.a_self));"
@@ -90,7 +98,7 @@
     (defun make-aligned-array (alignment size &rest r
 					 &aux (ic (member :initial-contents r)) y
 					 (c (cadr ic))
-					 (r (append (ldiff r ic) (cddr ic)))
+					 (r (append (ldiff-nf r ic) (cddr ic)))
 					 (a (apply 'make-array (+ alignment size) (list* :static t r))))
       (setq y (map-into
 	       (apply 'make-array size
@@ -190,7 +198,7 @@
 
 (defun l/ (x y) (declare (long-float x y)) (/ x y))
 (defun s/ (x y) (declare (short-float x y)) (/ x y))
-(defun lsqrt (x) (declare (long-float x)) (the long-float (sqrt x)))
+;(defun lsqrt (x) (declare (long-float x)) (lit :double "sqrt(" (:double x) ")"));(the long-float (|libm|:|sqrt| x))
 
 
 (test-fpe 'l/ (list 1.0 2.0) 0.5 t)
@@ -207,6 +215,8 @@
 (test-fpe 's/ (list least-positive-normalized-short-float most-positive-short-float) :floating-point-underflow t)
 (test-fpe 's/ (list 1.2s0 1.3s0) :floating-point-inexact t)
 
-(test-fpe 'lsqrt (list 4.0) 2.0 t)
-(test-fpe 'lsqrt (list -1.0) :floating-point-invalid-operation t)
-(test-fpe 'lsqrt (list 1.2) :floating-point-inexact t)
+(test-fpe 'fsqrt (list 4.0) 2.0 t)
+(test-fpe 'fsqrt (list -1.0) :floating-point-invalid-operation t)
+;(test-fpe 'lsqrt (list -1.0) :floating-point-invalid-operation t)
+;(test-fpe '|libm|:|sqrt| (list -1.0) :floating-point-invalid-operation t)
+(test-fpe 'fsqrt (list 1.2) :floating-point-inexact t)

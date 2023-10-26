@@ -26,40 +26,11 @@
 #define f_nsyms NumberOfSymbols
 #define NO_PWD_H
 
-
-/* Maxima won't build if default used.
- * Temporary hack until better understanding of cause. */
-
-#ifdef MAXPATHLEN
-#  undef MAXPATHLEN
-#endif
-#define MAXPATHLEN (PATH_MAX*2)
-
-/* alter pathToAlter to fit in with the Clibrary of the system.
-   and report error using name 'x' if you cant do it.
-   The result in pathToAlter should be less
-*/   
-#define FIX_FILENAME(x,pathToAlter) fix_filename(x,pathToAlter)
-
-#define MEMORY_SAVE(self,filename) \
-  do { char buf[MAXPATHLEN]; \
-       strcpy(buf,self); \
-       fix_filename(Cnil,buf); \
-       memory_save(buf,filename); \
-       } while (0)
-
 #define signals_pending *signalsPendingPtr
 
 #undef DBEGIN_TY
 #define DBEGIN_TY unsigned int
 extern DBEGIN_TY _stacktop, _stackbottom, _dbegin;
-
-/* define if there is no _cleanup,   do here what needs
-   to be done before calling unexec
-   */   
-#define CLEANUP_CODE \
-  setbuf(stdin,0); \
-  setbuf(stdout,0);
 
 #define NO_SYS_PARAM_H
 #define NO_SYS_TIMES_H
@@ -189,7 +160,7 @@ extern char *GCLExeName ( void );
    (a_)=GCLExeName();\
 } while(0)
 
-n/* Needed if optimiser moves object initialisation code around. */
+/* Needed if optimiser moves object initialisation code around. */
 #define FIND_INIT \
 { if (*ptr==0 && (NTYPE(sym) == TEXT_NSCN) && sym->n_value ) \
   { char tem [9]; \
@@ -226,3 +197,28 @@ extern int mingwlisten(FILE *);
 #define DBEGIN _dbegin
 
 #define NOFREE_ERR
+
+#define FPE_CODE(i_,v_) make_fixnum((long)fSfpe_code((long)FFN(fSfnstsw)(),(long)FFN(fSstmxcsr)()))
+#define FPE_ADDR(i_,v_) make_fixnum(0)
+#define FPE_CTXT(v_) Cnil
+
+#define FPE_INIT Cnil
+
+#ifndef FE_INVALID
+#define FE_INVALID 1
+#define FE_DIVBYZERO 4
+#define FE_OVERFLOW 8
+#define FE_UNDERFLOW 16
+#define FE_INEXACT 32
+#endif
+
+#define FPE_FLTDIV 3
+#define FPE_FLTOVF 4
+#define FPE_FLTUND 5
+#define FPE_FLTRES 6
+#define FPE_FLTINV 7
+
+#include <limits.h>
+
+
+#define NO_FILE_LOCKING /*FIXME*/

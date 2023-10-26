@@ -1,8 +1,7 @@
 (in-package :si)
 
 (defun eval-feature (x)
-  (cond ((atom x)
-         (member x *features*))
+  (cond ((atom x) (member x *features*))
         ((eq (car x) :and)
          (dolist (x (cdr x) t) (unless (eval-feature x) (return nil))))
         ((eq (car x) :or)

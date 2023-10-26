@@ -1,7 +1,7 @@
 #include "include.h"
+#include "winsock2.h"
 #include "windows.h"
 #include "winsock2.h"
-
 
 int
 mingwlisten(FILE *fp) {

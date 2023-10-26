@@ -96,7 +96,7 @@
 		    ((simple-array non-simple-array) (mdb o (cdr tp)))
 		    ((structure structure-object) (if tp `(mss (c-structure-def ,o) ',(car tp)) t))
 		    ((std-instance funcallable-std-instance)
-		     (if tp `(when (member ',(car tp) (si-class-precedence-list (si-class-of ,o))) t) t))
+		     (if tp `(when (member ',(car tp) (si-cpl-or-nil (si-class-of ,o))) t) t))
 		    ((proper-cons improper-cons)
 		     (and-form
 		      (and-form (simple-type-case `(car ,o) (car tp)) (simple-type-case `(cdr ,o) (cadr tp)))
@@ -112,10 +112,10 @@
     `((t ,(?-add 'progn z)))))
 
 
-(defun branch1 (x tpsff f o &aux (y (lreduce 'type-or1 (car x))))
+(defun branch1 (x tpsff f o &aux (y (lreduce 'type-or1 (car x) :initial-value nil)))
   (let* ((z (mapcan (lambda (x) (branch tpsff x f y)) (cdr x)))
 	 (s (lremove nil (mapcar 'cdr (cdr x))))
-	 (z (if s (nconc z `((t ,(mkinfm f (tp-not (lreduce 'type-or1 s)) (cdar o))))) z)))
+	 (z (if s (nconc z `((t ,(mkinfm f (tp-not (lreduce 'type-or1 s :initial-value nil)) (cdar o))))) z)))
     (cons 'cond z)))
 
 (defun mkinfm (f tp z &aux (z (?-add 'progn z)))
@@ -125,7 +125,7 @@
   (let* ((bind (unless (symbolp x) (list (list (gensym) x))));FIXME sgen?
 	 (f (or (caar bind) x))
 	 (o (member-if (lambda (x) (or (eq (car x) t) (eq (car x) 'otherwise))) ff));FIXME
-	 (ff (if o (ldiff ff o) ff))
+	 (ff (if o (ldiff-nf ff o) ff))
 	 (o (list (cons t (cdar o))))
 	 (tps (mapcar 'cmp-norm-tp (mapcar 'car ff)))
 	 (z nil) (tps (mapcar (lambda (x) (prog1 (type-and x (tp-not z)) (setq z (type-or1 x z)))) tps))
@@ -148,7 +148,7 @@
 (defun branches (f tpsff fnl o c)
   (mapcar (lambda (x)
 	    `(,(lremove-duplicates (mapcar (lambda (x) (cdr (assoc x fnl))) (car x)))
-	      ,(mkinfm f (lreduce 'type-or1 (car x)) (list (branch1 x tpsff f o)))))
+	      ,(mkinfm f (lreduce 'type-or1 (car x) :initial-value nil) (list (branch1 x tpsff f o)))))
 	  c))
 
 

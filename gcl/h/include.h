@@ -36,7 +36,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "options.h"
 #include "gclincl.h"
-#include "config.h"
 
 #ifdef __GNUC__
 #ifndef alloca
@@ -72,6 +71,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #endif
 
+#include "config.h"
+
 #ifdef IN_NUM_CO
 #ifdef HAVE_VALUES_H
 #include <values.h>
@@ -90,15 +91,17 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "../h/mp.h"
 #endif
 
+#include <setjmp.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <complex.h>
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
+#endif
 #ifdef USE_READLINE
 #include <readline/readline.h>
 #endif
-
-
 
 #include "../h/sfun_argd.h"
 #include "../h/compbas.h"
@@ -117,6 +120,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "../h/compprotos.h"
 #include "../h/protoize.h"
+#include "../h/compprotos.h"
 #include "../h/notcomp.h"
 #include "../h/funlink.h"
 #include "../h/att_ext.h"

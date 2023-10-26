@@ -2,9 +2,8 @@
 #include "include.h"
 
 /* The functions IisProp check the property holds, and return the
- * argument.
- * They may in future allow resetting the argument.
- */
+   argument.   They may in future allow resetting the argument.
+*/
 
 /* object CEerror(char *error_str, char *cont_str, int num, object arg1, */
 /* 	       object arg2, object arg3, object arg4); */
@@ -41,14 +40,4 @@ char *lisp_copy_to_null_terminated(object string, char *buf, int n)
     return buf;
 }
 
-/* deleted the following junk : */
 
-/* IisFboundp(object f) */
-/* Iapply_ap(object (*f) (/\* ??? *\/), va_list ap) */
-/* Iapply_fun_n(object fun,int n,int m,...) { */
-/* Iapply_fun_n1(object (*fun)(),int n,int m,...) { */
-/* Iapply_fun_n2(object fun,int n,int m,...) { */
-/* ImakeStructure(int n, object *p) */
-/* Ineed_in_image(object (*foo) (/\* ??? *\/)) */
-
-/* pull them from CVS if in need - they destroy readabilty of code */

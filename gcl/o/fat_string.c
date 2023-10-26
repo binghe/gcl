@@ -260,11 +260,13 @@ endar=aar+dim;
 
 
 DEFUN("DISPLAY-PROFILE",object,fSdisplay_profile,SI
-       ,2,2,NONE,OO,OO,OO,OO,(object start_addr,object scal),"")
-{if (!combined_table.ptable)
+       ,2,2,NONE,OO,OO,OO,OO,(object start_addr,object scal),"") {
+
+  if (!combined_table.ptable)
    FEerror("must symbols first",0);
    /* 2 args */
-   {unsigned int prev,next,upto,dim,total;
+  {
+    unsigned int prev,next,upto,dim,total;
     int j,scale,count;
     unsigned char *ar;
     object obj_ar;
@@ -278,19 +280,22 @@ DEFUN("DISPLAY-PROFILE",object,fSdisplay_profile,SI
     dim= (obj_ar->ust.ust_dim);
 
     total=string_sum(ar,dim);
-  
+
     j=0;
-    {int i, finish = combined_table.length-1;
-     for(i =0,prev=SYM_ADDRESS(combined_table,i); i< finish;
-	 prev=next)
-       { ++i;
-	 next=SYM_ADDRESS(combined_table,i);
-	 if ( prev < prof_start) continue;
-	 upto=prof_ind(next,scale);
-	 if (upto >= dim) upto=dim;
-	 {const char *name; unsigned long uname;
+    {
+      int i, finish = combined_table.length-1;
+      for(i =0,prev=SYM_ADDRESS(combined_table,i); i< finish;prev=next)	{
+	++i;
+	next=SYM_ADDRESS(combined_table,i);
+	if (prev<prof_start)
+	  continue;
+	upto=prof_ind(next,scale);
+	if (upto >= dim)
+	  upto=dim;
+	{
+	  const char *name; unsigned long uname;
 	  count=0;
-	  for( ; j<upto;j++)
+	  for(;j<upto;j++)
 	    count += ar[j];
 	  if (count > 0) {
 	    name=SYM_STRING(combined_table,i-1);
@@ -301,12 +306,14 @@ DEFUN("DISPLAY-PROFILE",object,fSdisplay_profile,SI
 	      ;/*{ if (~CF_FLAG & uname) prin1( ((object) (~CF_FLAG & uname))->cf.cf_name,Cnil);} *//*FIXME*/
 	     else if (name ) printf("%s",name);};
 	  if (upto==dim) goto TOTALS ;
-	  
-	}}}
- TOTALS:
-  printf("\nTotal ticks %d",total);fflush(stdout);
+
+	}
+      }
+    }
+  TOTALS:
+    printf("\nTotal ticks %d",total);fflush(stdout);
   }
- RETURN1(start_addr);
+  RETURN1(start_addr);
 }
 
 

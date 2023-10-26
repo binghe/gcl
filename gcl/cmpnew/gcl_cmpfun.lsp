@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; CMPFUN  Library functions.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -153,7 +152,8 @@
 	     ";break;
           default: _z=call_proc_cs2(#*_ll);break;
         }
-        if (!(_f)->fun.fun_neval && !(_f)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})"))
+        if (!(_f)->fun.fun_neval && !(_f)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;
+        _z;})"))
       (list* (car all) (car (last all)) (butlast (cdr all)))))
     (close-inline-blocks)))
 
@@ -469,7 +469,7 @@
 ;; You must declare the stream to be :in-file
 ;; or :out-file
 
-(si::putprop 'read-byte 'co1read-byte 'co1)
+;(si::putprop 'read-byte 'co1read-byte 'co1)
 (si::putprop 'read-char 'co1read-char 'co1)
 (si::putprop 'write-byte 'co1write-byte 'co1)
 (si::putprop 'write-char 'co1write-char 'co1)
@@ -499,12 +499,12 @@
 	   (declare (type ,(result-type (car args)) .strm.))
 	     ,(fast-read (cons '.strm. (cdr args)) read-fun)))))))
 
-(defun co1read-byte (f args &aux tem) f
-  (let* ((s (sgen "CO1READ-BYTE"))(nargs (cons s (cdr args))))
-  (cond ((setq tem (fast-read nargs 'read-byte1))
-	 (let ((*space* 10))		;prevent recursion!
-	   (c1expr `(let ((,s ,(car args))) 
-		      (if (= 1 (si::get-byte-stream-nchars ,s)) ,tem ,(cons f nargs)))))))))
+;; (defun co1read-byte (f args &aux tem) f
+;;   (let* ((s (sgen "CO1READ-BYTE"))(nargs (cons s (cdr args))))
+;;   (cond ((setq tem (fast-read nargs 'read-byte1))
+;; 	 (let ((*space* 10))		;prevent recursion!
+;; 	   (c1expr `(let ((,s ,(car args)))
+;; 		      (if (= 1 (si::get-byte-stream-nchars ,s)) ,tem ,(cons f nargs)))))))))
 
 (defun co1read-char (f args &aux tem)
   (declare (ignore f))

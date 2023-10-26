@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPLAM  Lambda expression.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa

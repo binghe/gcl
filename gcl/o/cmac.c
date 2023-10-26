@@ -21,9 +21,17 @@ object *gclModulus;
 
 /* Note: the gclModulus is guaranteed > 0 */
 
-#define FIX_MOD(X,MOD) {register fixnum MOD_2; \
-			     if (X > (MOD_2=(MOD >>1))) X=X-MOD; else \
-			       if (X < -MOD_2)  X=X+MOD;}
+#define FIX_MOD(X,MOD) {			\
+  register fixnum MOD_2;			\
+  if (X > (MOD_2=(MOD>>1)))			\
+    X=X-MOD;					\
+  else						\
+    if (X < -MOD_2)				\
+      X=X+MOD;					\
+    else					\
+      if (X == -MOD_2 && (MOD&0x1)==0)		\
+	X=X+MOD;				\
+  }
 
 
 object ctimes(object a, object b),cplus(object a, object b),cdifference(object a, object b),cmod(object x);

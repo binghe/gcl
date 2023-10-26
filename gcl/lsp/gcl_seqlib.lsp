@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -526,7 +525,7 @@
    `(labels ((,l (x y) (when x (setf (car x) (car y)) (,l (cdr x) (cdr y)))))
 	    (declare (notinline make-list))
 	    (let ((tmp (make-list (length ,x))))
-	      (declare (:dynamic-extent tmp))
+	      (declare (dynamic-extent tmp))
 	      (,l tmp ,x);Can't be mapl, used by
 	     tmp)))
 
@@ -557,23 +556,25 @@
 (defun every (pred seq &rest seqs &aux (pred (coerce pred 'function)))
   (declare (optimize (safety 1))(dynamic-extent seqs))
   (check-type pred function-designator)
-  (check-type seq sequence)
+  (check-type seq proper-sequence)
   (apply 'map nil (lambda (x &rest r) (unless (apply pred x r) (return-from every nil))) seq seqs)
   t)
 
 (defun some (pred seq &rest seqs &aux (pred (coerce pred 'function)))
   (declare (optimize (safety 1))(dynamic-extent seqs))
   (check-type pred function-designator)
-  (check-type seq sequence)
+  (check-type seq proper-sequence)
   (apply 'map nil (lambda (x &rest r &aux (v (apply pred x r))) (when v (return-from some v))) seq seqs))
 
 (defun notevery (pred seq &rest seqs)
-  (declare (optimize (safety 1))(:dynamic-extent seqs))
+  (declare (optimize (safety 1))(dynamic-extent seqs))
+  (check-type pred function-designator)
   (check-type seq proper-sequence)
   (not (apply 'every pred seq seqs)))
 
 (defun notany (pred seq &rest seqs)
-  (declare (optimize (safety 1))(:dynamic-extent seqs))
+  (declare (optimize (safety 1))(dynamic-extent seqs))
+  (check-type pred function-designator)
   (check-type seq proper-sequence)
   (not (apply 'some pred seq seqs)))
 
@@ -748,7 +749,7 @@
     (when list
       (do ((fi 0 (1+ fi)) (l seq (cdr l))) ((>= fi ll)) (setf (aref a fi) l)))
     (do ((ii (list ll 0))) ((not ii) seq)
-	(declare (:dynamic-extent ii))
+	(declare (dynamic-extent ii))
 	(let* ((ls (pop ii)) (fi (pop ii)))
 	  (declare (seqind ls fi))
 	  (do nil ((>= fi (1- ls)))

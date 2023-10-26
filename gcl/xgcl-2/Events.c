@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <X11/Xlib.h>
 
-/********* XKeyEvent funcions *****/
+/********* XKeyEvent functions *****/
 
 long  make_XKeyEvent (){
           return ((long) calloc(1, sizeof(XKeyEvent)));
@@ -226,7 +226,7 @@ int j;
 }
 
 
-/********* XButtonEvent funcions *****/
+/********* XButtonEvent functions *****/
 
 long  make_XButtonEvent (){
           return ((long) calloc(1, sizeof(XButtonEvent)));
@@ -428,7 +428,7 @@ int j;
 }
 
 
-/********* XMotionEvent funcions *****/
+/********* XMotionEvent functions *****/
 
 long  make_XMotionEvent (){
           return ((long) calloc(1, sizeof(XMotionEvent)));
@@ -630,7 +630,7 @@ int j;
 }
 
 
-/********* XCrossingEvent funcions *****/
+/********* XCrossingEvent functions *****/
 
 long  make_XCrossingEvent (){
           return ((long) calloc(1, sizeof(XCrossingEvent)));
@@ -858,7 +858,7 @@ int j;
 }
 
 
-/********* XFocusChangeEvent funcions *****/
+/********* XFocusChangeEvent functions *****/
 
 long  make_XFocusChangeEvent (){
           return ((long) calloc(1, sizeof(XFocusChangeEvent)));
@@ -956,7 +956,7 @@ int j;
 }
 
 
-/********* XKeymapEvent funcions *****/
+/********* XKeymapEvent functions *****/
 
 long  make_XKeymapEvent (){
           return ((long) calloc(1, sizeof(XKeymapEvent)));
@@ -1033,7 +1033,7 @@ int j;
 }
 
 
-/********* XExposeEvent funcions *****/
+/********* XExposeEvent functions *****/
 
 long  make_XExposeEvent (){
           return ((long) calloc(1, sizeof(XExposeEvent)));
@@ -1170,7 +1170,7 @@ int j;
 }
 
 
-/********* XGraphicsExposeEvent funcions *****/
+/********* XGraphicsExposeEvent functions *****/
 
 long  make_XGraphicsExposeEvent (){
           return ((long) calloc(1, sizeof(XGraphicsExposeEvent)));
@@ -1333,7 +1333,7 @@ int j;
 }
 
 
-/********* XNoExposeEvent funcions *****/
+/********* XNoExposeEvent functions *****/
 
 long  make_XNoExposeEvent (){
           return ((long) calloc(1, sizeof(XNoExposeEvent)));
@@ -1431,7 +1431,7 @@ int j;
 }
 
 
-/********* XVisibilityEvent funcions *****/
+/********* XVisibilityEvent functions *****/
 
 long  make_XVisibilityEvent (){
           return ((long) calloc(1, sizeof(XVisibilityEvent)));
@@ -1516,7 +1516,7 @@ int j;
 }
 
 
-/********* XCreateWindowEvent funcions *****/
+/********* XCreateWindowEvent functions *****/
 
 long  make_XCreateWindowEvent (){
           return ((long) calloc(1, sizeof(XCreateWindowEvent)));
@@ -1679,7 +1679,7 @@ int j;
 }
 
 
-/********* XDestroyWindowEvent funcions *****/
+/********* XDestroyWindowEvent functions *****/
 
 long  make_XDestroyWindowEvent (){
           return ((long) calloc(1, sizeof(XDestroyWindowEvent)));
@@ -1764,7 +1764,7 @@ int j;
 }
 
 
-/********* XUnmapEvent funcions *****/
+/********* XUnmapEvent functions *****/
 
 long  make_XUnmapEvent (){
           return ((long) calloc(1, sizeof(XUnmapEvent)));
@@ -1862,7 +1862,7 @@ int j;
 }
 
 
-/********* XMapEvent funcions *****/
+/********* XMapEvent functions *****/
 
 long  make_XMapEvent (){
           return ((long) calloc(1, sizeof(XMapEvent)));
@@ -1960,7 +1960,7 @@ int j;
 }
 
 
-/********* XMapRequestEvent funcions *****/
+/********* XMapRequestEvent functions *****/
 
 long  make_XMapRequestEvent (){
           return ((long) calloc(1, sizeof(XMapRequestEvent)));
@@ -2045,7 +2045,7 @@ int j;
 }
 
 
-/********* XReparentEvent funcions *****/
+/********* XReparentEvent functions *****/
 
 long  make_XReparentEvent (){
           return ((long) calloc(1, sizeof(XReparentEvent)));
@@ -2182,7 +2182,7 @@ int j;
 }
 
 
-/********* XConfigureEvent funcions *****/
+/********* XConfigureEvent functions *****/
 
 long  make_XConfigureEvent (){
           return ((long) calloc(1, sizeof(XConfigureEvent)));
@@ -2358,7 +2358,7 @@ int j;
 }
 
 
-/********* XGravityEvent funcions *****/
+/********* XGravityEvent functions *****/
 
 long  make_XGravityEvent (){
           return ((long) calloc(1, sizeof(XGravityEvent)));
@@ -2469,7 +2469,7 @@ int j;
 }
 
 
-/********* XResizeRequestEvent funcions *****/
+/********* XResizeRequestEvent functions *****/
 
 long  make_XResizeRequestEvent (){
           return ((long) calloc(1, sizeof(XResizeRequestEvent)));
@@ -2567,7 +2567,7 @@ int j;
 }
 
 
-/********* XConfigureRequestEvent funcions *****/
+/********* XConfigureRequestEvent functions *****/
 
 long  make_XConfigureRequestEvent (){
           return ((long) calloc(1, sizeof(XConfigureRequestEvent)));
@@ -2756,7 +2756,7 @@ int j;
 }
 
 
-/********* XCirculateEvent funcions *****/
+/********* XCirculateEvent functions *****/
 
 long  make_XCirculateEvent (){
           return ((long) calloc(1, sizeof(XCirculateEvent)));
@@ -2854,7 +2854,7 @@ int j;
 }
 
 
-/********* XCirculateRequestEvent funcions *****/
+/********* XCirculateRequestEvent functions *****/
 
 long  make_XCirculateRequestEvent (){
           return ((long) calloc(1, sizeof(XCirculateRequestEvent)));
@@ -2952,7 +2952,7 @@ int j;
 }
 
 
-/********* XPropertyEvent funcions *****/
+/********* XPropertyEvent functions *****/
 
 long  make_XPropertyEvent (){
           return ((long) calloc(1, sizeof(XPropertyEvent)));
@@ -3063,7 +3063,7 @@ int j;
 }
 
 
-/********* XSelectionClearEvent funcions *****/
+/********* XSelectionClearEvent functions *****/
 
 long  make_XSelectionClearEvent (){
           return ((long) calloc(1, sizeof(XSelectionClearEvent)));
@@ -3161,7 +3161,7 @@ int j;
 }
 
 
-/********* XSelectionRequestEvent funcions *****/
+/********* XSelectionRequestEvent functions *****/
 
 long  make_XSelectionRequestEvent (){
           return ((long) calloc(1, sizeof(XSelectionRequestEvent)));
@@ -3298,7 +3298,7 @@ int j;
 }
 
 
-/********* XSelectionEvent funcions *****/
+/********* XSelectionEvent functions *****/
 
 long  make_XSelectionEvent (){
           return ((long) calloc(1, sizeof(XSelectionEvent)));
@@ -3422,7 +3422,7 @@ int j;
 }
 
 
-/********* XColormapEvent funcions *****/
+/********* XColormapEvent functions *****/
 
 long  make_XColormapEvent (){
           return ((long) calloc(1, sizeof(XColormapEvent)));
@@ -3533,7 +3533,7 @@ int j;
 }
 
 
-/********* XClientMessageEvent funcions *****/
+/********* XClientMessageEvent functions *****/
 
 long  make_XClientMessageEvent (){
           return ((long) calloc(1, sizeof(XClientMessageEvent)));
@@ -3632,7 +3632,7 @@ int j;
 }
 
 
-/********* XMappingEvent funcions *****/
+/********* XMappingEvent functions *****/
 
 long  make_XMappingEvent (){
           return ((long) calloc(1, sizeof(XMappingEvent)));
@@ -3743,7 +3743,7 @@ int j;
 }
 
 
-/********* XErrorEvent funcions *****/
+/********* XErrorEvent functions *****/
 
 long  make_XErrorEvent (){
           return ((long) calloc(1, sizeof(XErrorEvent)));
@@ -3841,7 +3841,7 @@ int j;
 }
 
 
-/********* XAnyEvent funcions *****/
+/********* XAnyEvent functions *****/
 
 long  make_XAnyEvent (){
           return ((long) calloc(1, sizeof(XAnyEvent)));
@@ -3913,7 +3913,7 @@ int j;
 }
 
 
-/********* XEvent funcions *****/
+/********* XEvent functions *****/
 
 long  make_XEvent (){
           return ((long) calloc(1, sizeof(XEvent)));

@@ -1,9 +1,9 @@
 ;;; Binding to the cross platform Japi GUI library from http://www.japi.de/
 
 (eval-when (load eval)
-	   (make-package "japi-primitives" :nicknames '(jpr) :use '(lisp)))
-(eval-when (compile)
-	   (in-package :japi-primitives))
+	   (make-package :japi-primitives :nicknames '(jpr) :use '(lisp)))
+(in-package :japi-primitives)
+
 
 (clines "#include <japi.h>")
 
@@ -201,15 +201,16 @@
 (defentry j_getitem ( int int string ) ( string "j_getitem" ))
 (defentry j_getitemcount ( int ) ( int "j_getitemcount" ))
 (defentry j_delete ( int int int ) ( void "j_delete" ))
-(defentry j_replacetext ( int string int int ) ( void "j_replacetext" ))
-(defentry j_appendtext ( int string ) ( void "j_appendtext" ))
-(defentry j_inserttext ( int string int ) ( void "j_inserttext" ))
+(defentry j_replacetext ( int int int int ) ( void "j_replacetext" ))
+(defentry j_appendtext ( int int ) ( void "j_appendtext" ))
+(defentry j_inserttext ( int int int ) ( void "j_inserttext" ))
 (defentry j_settext ( int string ) ( void "j_settext" ))
 (defentry j_selectall ( int ) ( void "j_selectall" ))
 (defentry j_selecttext ( int int int ) ( void "j_selecttext" ))
 (defentry j_getselstart ( int ) ( int "j_getselstart" ))
 (defentry j_getselend ( int ) ( int "j_getselend" ))
-(defentry j_getseltext ( int string ) ( string "j_getseltext" ))
+;(defentry j_getseltext ( int string ) ( string "j_getseltext" ))
+(defentry j_getseltext ( int int ) ( int "j_getseltext" ))
 (defentry j_getcurpos ( int ) ( int "j_getcurpos" ))
 (defentry j_setcurpos ( int int ) ( void "j_setcurpos" ))
 (defentry j_setechochar ( int char ) ( void "j_setechochar" ))

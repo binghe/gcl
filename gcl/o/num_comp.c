@@ -35,16 +35,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 	If x or y is complex, 0 or 1 is returned.
 */
-void integer_decode_double(double,int *,int *, int *,int *);
-
-#define double_to_rational(d_) ({\
-                    object x;\
-		    int h,l,e,s;\
-		    integer_decode_double(d_,&h,&l,&e,&s);\
-		    x=number_times((h!=0 || l<0) ? bignum2(h,l) : make_fixnum(l),\
-                                   number_expt(make_fixnum(2),make_fixnum(e)));\
-		    if (s<0) x=number_negate(x);\
-                    x;})
 
 int
 number_compare(object x, object y) {
@@ -388,8 +378,14 @@ Lnumber_compare(int s, int t)
 	narg = vs_top - vs_base;
 	if (narg == 0)
 		too_few_arguments();
-	for (i = 0; i < narg; i++)
+	for (i = 0; i < narg; i++) {
 		check_type_or_rational_float(&vs_base[i]);
+		if (gcl_isnan(vs_base[i])) {
+		  vs_top = vs_base+1;
+		  vs_base[0] = Cnil;
+		  return;
+		}
+	}
 	for (i = 1; i < narg; i++)
 		if (s*number_compare(vs_base[i], vs_base[i-1]) < t) {
 			vs_top = vs_base+1;

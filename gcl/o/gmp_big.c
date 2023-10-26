@@ -125,7 +125,7 @@ new_bignum(void)
  (__u)->_mp_d =   (u)->_mp_d; \
  (__u)->_mp_alloc = (u)->_mp_alloc 
 #define GC_PROTECTED_SELF (__u)->_mp_d
-#define END_GCPROTECT if (__u==MP(big_gcprotect)) (__u)->_mp_d = 0
+#define END_GCPROTECT (__u)->_mp_d = 0
  
 static object
 make_bignum(__mpz_struct *u) {
@@ -518,9 +518,9 @@ object
 bignum2( unsigned int h,  unsigned int l)
 {
   object x = new_bignum();
-  mpz_set_si(MP(x),h);
+  mpz_set_ui(MP(x),h);
   mpz_mul_2exp(MP(x),MP(x),32);
-  mpz_add_ui(MP(x),MP(x),((unsigned int)l));
+  mpz_add_ui(MP(x),MP(x),l);
   return normalize_big(x);
 }
 

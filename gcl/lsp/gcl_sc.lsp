@@ -17,10 +17,8 @@
 (defun symbol-name-length-one-p (x)
   (eql 1 (length (symbol-name x))))
 
-(deftype character-designator nil `(or character (integer 0 255) (array character (1))
+(deftype character-designator nil `(or character (integer 0 255) (array character (1));FIXME deftype.lsp
 				       (and symbol (satisfies symbol-name-length-one-p))))
-(deftype string-designator    nil `(or string symbol character (integer 0 255)))
-
 
 (eval-when
  (compile eval)
@@ -74,7 +72,7 @@
 
  (defmacro defchr (n (comp key))
    `(defun ,n (c1 &optional (c2 c1 c2p) &rest r) 
-      (declare (optimize (safety 1)) (list r) (:dynamic-extent r));fixme
+      (declare (optimize (safety 1)) (list r) (dynamic-extent r));fixme
       (check-type c1 character)
       (or (not c2p)
 	  (when (,comp (,key c1) (,key c2))
@@ -82,7 +80,7 @@
  
  (defmacro defnchr (n (test key))
    `(defun ,n (c1 &rest r) 
-      (declare (optimize (safety 1)) (list r) (:dynamic-extent r));fixme
+      (declare (optimize (safety 1)) (list r) (dynamic-extent r));fixme
       (check-type c1 character)
       (cond ((null r))
 	    ((member (,key c1) r :test ',test :key ',key) nil)
@@ -144,12 +142,15 @@
 	  (#.(char-code #\Tab) "Tab")
 	  (#.(char-code #\Backspace) "Backspace")
 	  (#.(char-code #\Newline) "Newline")
-	  (otherwise (string c)))))
+	  (otherwise
+	   (let ((ch (code-char c)))
+	     (unless (graphic-char-p ch)
+	       (subseq (with-output-to-string (s) (prin1 ch s)) 2)))))))
 
-(defun name-char (s)
+
+(defun name-char (sd &aux (s (string sd)))
   (declare (optimize (safety 1)))
-  (check-type s string-designator)
-  (when (integerp s) (setq s (code-char s)))
+  (check-type sd string-designator)
   (cond ((cdr (assoc s '(("Return" . #\Return)
 			 ("Space" . #\Space)
 			 ("Rubout" . #\Rubout)
@@ -157,19 +158,21 @@
 			 ("Tab" . #\Tab)
 			 ("Backspace" . #\Backspace)
 			 ("Newline" . #\Newline)
-			 ("Linefeed" . #\Newline)) :test 'string-equal)))
-	((code-char
-	  (with-aref-shadow
-	   (let ((l (length s)))
-	     (case l
-		   (1 (aref s 0))
-		   ((2 3) (when (and (char= #.(char-code #\^) (aref s 0)) (or (= l 2) (char= #.(char-code #\\) (aref s 2))))
-			    (code-char (- (char-code (aref s 1)) #.(- (char-code #\A) 1)))))
-		   (4 (when (char= #.(char-code #\\) (aref s 0))
-			(code-char 
-			 (+ (* 64 (- (char-code (aref s 1)) #.(char-code #\0)))
-			    (* 8 (- (char-code (aref s 2)) #.(char-code #\0)))
-			    (- (char-code (aref s 3)) #.(char-code #\0)))))))))))))
+			 ("Linefeed" . #\Newline))
+		     :test 'string-equal)))
+	((let ((l (length s)))
+	   (case l
+	     (1 (aref s 0))
+	     (2 (when (char= #\^ (aref s 0))
+		  (code-char (- (char-code (aref s 1)) #.(- (char-code #\A) 1)))))
+	     (3 (when (and (char= #\^ (aref s 0)) (char= #\\ (aref s 2)))
+		      (code-char (- (char-code (aref s 1)) #.(- (char-code #\A) 1)))))
+	     (4 (when (char= #\\ (aref s 0))
+		  (code-char
+		   (+ (* 64 (- (char-code (aref s 1)) #.(char-code #\0)))
+		      (* 8 (- (char-code (aref s 2)) #.(char-code #\0)))
+		      (- (char-code (aref s 3)) #.(char-code #\0)))))))))))
+
 		
    
 (defun char-code (c)

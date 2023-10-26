@@ -170,7 +170,7 @@ macro_def_int(object sym) {
       return(sym->s.s_gfdef);
     else
       return(Cnil);
-  else if (MMcadr(fd) == sLmacro)
+  else if (MMcadr(fd) == sSmacro)
     return(MMcaddr(fd));
   else
     return(Cnil);
@@ -288,7 +288,7 @@ macro_expand(object form)
 			exp_fun = head->s.s_gfdef;
 		else
 			return(form);
-	else if (MMcadr(fd) == sLmacro)
+	else if (MMcadr(fd) == sSmacro)
 		exp_fun = MMcaddr(fd);
 	else
 		return(form);
@@ -325,7 +325,7 @@ LOOP:
 			exp_fun = head->s.s_gfdef;
 		else
 			goto END;
-	else if (MMcadr(fd) == sLmacro)
+	else if (MMcadr(fd) == sSmacro)
 		exp_fun = MMcaddr(fd);
 	else
 		goto END;

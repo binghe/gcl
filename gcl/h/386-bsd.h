@@ -41,7 +41,7 @@
 #endif
 #define LISTEN_FOR_INPUT(fp) \
 {\
-  int fd = (fp)->_file;\
+  int fd = ((FILE *)fp)->_file;			\
   static struct timeval tv = {0,0};\
   static fd_set rmask; FD_ZERO(&rmask); FD_SET(fd,&rmask);\
   select(fd+1,&rmask,NULL,NULL,&tv);\

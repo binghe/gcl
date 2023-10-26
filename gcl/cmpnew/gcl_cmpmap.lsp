@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPMAP  Map functions.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa

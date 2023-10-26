@@ -9,7 +9,7 @@
 
 (defun default-to-* (x)
   (let* ((z (member-if (lambda (x) (member x lambda-list-keywords)) x))
-	 (y (ldiff x z)))
+	 (y (ldiff-nf x z)))
     (if (member-if 'atom y)
 	(nconc (mapcar (lambda (x) (if (atom x) `(,x '*) x)) y) z)
 	x)))
@@ -17,7 +17,7 @@
 (defun deftype-lambda-list (x)
   (let* ((y (cdr (member-if (lambda (x) (member x '(&optional &key))) x)))
 	 (z (when y (deftype-lambda-list (default-to-* y)))))
-    (if (eq y z) x (append (ldiff x y) z))))
+    (if (eq y z) x (append (ldiff-nf x y) z))))
 
 
 (defun no-reg-vars-p (lambda-list)
@@ -65,6 +65,8 @@
 		   (putprop ',name '(deftype ,name ,lambda-list ,@body) 'deftype-form)
 		   (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
 		   (putprop ',name ',fun-name 'deftype-definition)
+		   ;; (putprop ',name (defmacro ,fun-name ,lambda-list ,@decls ,@ctps (block ,name ,@body))
+		   ;; 	    'deftype-definition)
 		   (maybe-clear-tp ',name)
 		   (putprop ',name ,doc 'type-documentation))
 	,@(when (no-reg-vars-p lambda-list)
@@ -254,6 +256,10 @@
 (deftype function (&rest r)
   (declare (ignore r))
   `(or compiled-function interpreted-function))
+
+(deftype string-designator    nil `(or string symbol character (integer 0 255)))
+
+
 
 (defun ctp-num-bnd (x tp inc &aux (a (atom x))(nx (if a x (car x))))
   (case tp

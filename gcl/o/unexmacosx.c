@@ -298,18 +298,7 @@ unexec_copy (off_t dest, off_t src, ssize_t count)
 
 /* Debugging and informational messages routines.  */
 
-static void
-unexec_error (char *format, ...)
-{
-  va_list ap;
-
-  va_start (ap, format);
-  fprintf (stderr, "unexec: ");
-  vfprintf (stderr, format, ap);
-  fprintf (stderr, "\n");
-  va_end (ap);
-  exit (1);
-}
+#define unexec_error(a,b...) emsg(a,##b),do_gcl_abort()
 
 /* More informational messages routines.  */
 
@@ -570,7 +559,7 @@ copy_data_segment (struct load_command *lc)
       sc.fileoff = curr_file_offset;
       sc.filesize = core_end-mach_mapstart;
       sc.maxprot = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXECUTE;
-      sc.initprot = VM_PROT_READ | VM_PROT_WRITE | VM_PROT_EXECUTE;
+      sc.initprot = VM_PROT_READ | VM_PROT_WRITE /* | VM_PROT_EXECUTE */;
       sc.nsects = 0;
       sc.flags = 0;
 

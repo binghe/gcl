@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPCALL  Function call.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -144,7 +143,8 @@
 		"(#0)->fun.fun_self(#*)"
 	      "((#0)->fun.fun_maxarg ? (#0)->fun.fun_self(#?) : (#0)->fun.fun_self(#*))")
 	    " : call_proc_cs2(#?);
-           if (!(#0)->fun.fun_neval && !(#0)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;_z;})")) all))
+           if (!(#0)->fun.fun_neval && !(#0)->fun.fun_vv) vs_top=_v ? (object *)_v : sup;
+           _z;})")) all))
     (close-inline-blocks)))
 
 
@@ -451,7 +451,7 @@
 		 (let ((x (last x 2))) 
 		   (when (eq 'link-call (car x)) 
 		     (eql n (cadr x))))) *inline-functions*)))
-	((let* ((n (next-cfun))
+	((let* ((n (progn (add-object2 (add-symbol fname)) (next-cfun)))
 		(f (flags ans set))
 		(f (if (single-type-p rt) f (flag-or f svt)))
 		(f (if apnarg (flag-or f aa) f)))

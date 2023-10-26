@@ -49,7 +49,7 @@ do {								\
 								\
 	if (							\
 		(fp)->_r <= 0 &&				\
-		    (ioctl((fp)->_file, FIONREAD, &c), c <= 0)	\
+		(ioctl(((FILE *)fp)->_file, FIONREAD, &c), c <= 0)	\
 	)							\
 		return(FALSE);					\
 } while (0)
@@ -84,6 +84,15 @@ do {								\
  *	one of which needs to go in cmpinclude.h.
  */
 #define SIGPROTV SIGBUS
+
+#ifdef IN_GBC
+#undef MPROTECT_ACTION_FLAGS
+#define MPROTECT_ACTION_FLAGS SA_RESTART|SA_SIGINFO
+#define GET_FAULT_ADDR(sig,code,sv,a) \
+ ((siginfo_t *)code)->si_addr
+/*  #define GET_FAULT_ADDR(sig,code,sv,a) \ */
+/*      ((void *)(*((char ***)(&code)))[44]) */
+#endif
 
 /* Begin for cmpinclude */
 #define SGC	/* can mprotect pages and so selective gc will work */

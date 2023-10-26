@@ -1,3 +1,6 @@
+#ifndef GMP_WRAPPERS_H
+#define GMP_WRAPPERS_H
+
 EXTER jmp_buf gmp_jmp;
 EXTER int jmp_gmp,gmp_relocatable;
 
@@ -352,6 +355,14 @@ EXPORT_GMP_CALL(2,void,abs,1,mpz_t,mpz_t)
 #define __gmpz_mul_2exp m__gmpz_mul_2exp
 #define __gmpz_neg m__gmpz_neg
 #define __gmpz_tdiv_qr m__gmpz_tdiv_qr
+#define __gmpz_tdiv_q m__gmpz_tdiv_q
+#define __gmpz_tdiv_r m__gmpz_tdiv_r
+#define __gmpz_fdiv_qr m__gmpz_fdiv_qr
+#define __gmpz_fdiv_q m__gmpz_fdiv_q
+#define __gmpz_fdiv_r m__gmpz_fdiv_r
+#define __gmpz_cdiv_qr m__gmpz_cdiv_qr
+#define __gmpz_cdiv_q m__gmpz_cdiv_q
+#define __gmpz_cdiv_r m__gmpz_cdiv_r
 #define __gmpz_fdiv_q_2exp m__gmpz_fdiv_q_2exp
 #define __gmpz_cmp m__gmpz_cmp
 #define __gmpz_and m__gmpz_and
@@ -369,7 +380,6 @@ EXPORT_GMP_CALL(2,void,abs,1,mpz_t,mpz_t)
 #define __gmpz_set_str m__gmpz_set_str
 #define __gmpz_get_si m__gmpz_get_si
 #define __gmpz_fits_sint_p m__gmpz_fits_sint_p
-#define __gmpz_fits_slong_p m__gmpz_fits_slong_p
 #define __gmpz_popcount m__gmpz_popcount
 #define __gmpz_size m__gmpz_size
 #define __gmpz_sizeinbase m__gmpz_sizeinbase
@@ -453,3 +463,5 @@ EXPORT_GMP_CALL(2,void,abs,1,mpz_t,mpz_t)
 #define __gmpz_submul_ui m__gmpz_submul_ui
 
 #define __gmpz_abs m__gmpz_abs
+
+#endif

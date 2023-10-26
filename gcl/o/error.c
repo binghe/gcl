@@ -29,20 +29,18 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 object siSuniversal_error_handler;
 
-/* static object null_string; */
-
 object sSterminal_interrupt;
 
 void
 assert_error(const char *a,unsigned l,const char *f,const char *n) {
 
-  if (!raw_image)
-    FEerror("The assertion ~a~% on line ~a of ~a in function ~a~% failed: ~a",5,
+  if (!raw_image && core_end && core_end==sbrk(0))
+    FEerror("The assertion ~a on line ~a of ~a in function ~a failed: ~a",5,
 	    make_simple_string(a),make_fixnum(l),
 	    make_simple_string(f),make_simple_string(n),make_simple_string(strerror(errno)));
   else {
-    fprintf(stderr,"The assertion %s\n on line %d of %s in function %s\n failed: %s",a,l,f,n,strerror(errno));
-    exit(-1);
+    emsg("The assertion %s on line %d of %s in function %s failed: %s",a,l,f,n,strerror(errno));
+    gcl_abort();
   }
 
 }
@@ -63,9 +61,6 @@ ihs_function_name(object x)
 	case t_symbol:
 		return(x);
 
-	/* case t_ifun: */
-	/*   x=x->ifn.ifn_self; */
-	/*   /\*pass through*\/ */
 	case t_cons:
 		y = x->c.c_car;
 		if (y == sLlambda)
@@ -126,27 +121,57 @@ ihs_top_function_name(ihs_ptr h)
 	return(Cnil);
 }
 
-object
-Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) { 
+static object
+Icall_gen_error_handler_ap(object ci,object cs,object en,object es,ufixnum n,va_list ap) {
 
   object *b;
   ufixnum i;
-  va_list ap;
 
   n+=5;
-  b=ZALLOCA(n*sizeof(*b));
+  b=alloca(n*sizeof(*b));
   b[0]= en;
   b[1]= ci; 
   b[2] = ihs_top_function_name(ihs_top);
   b[3] = cs;
   b[4] = es;
    
-  va_start(ap,n);
   for (i=5;i<n;i++)
     b[i]= va_arg(ap,object);
-  va_end(ap);
 
   return funcall_vec(coerce_funcall_object_to_function(sSuniversal_error_handler),n,b);
+
+  return Cnil;
+
+}
+
+object
+Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) {
+
+  object x;
+  va_list ap;
+
+  va_start(ap,n);
+
+  x=Icall_gen_error_handler_ap(ci,cs,en,es,n,ap);
+
+  va_end(ap);
+
+  return x;
+
+}
+
+object
+Icall_gen_error_handler_noreturn(object ci,object cs,object en,object es,ufixnum n,...) {
+
+  va_list ap;
+
+  va_start(ap,n);
+
+  Icall_gen_error_handler_ap(ci,cs,en,es,n,ap);
+
+  va_end(ap);
+
+  while (1);
 
 }
 
@@ -154,19 +179,20 @@ Icall_gen_error_handler(object ci,object cs,object en,object es,ufixnum n,...) {
 	Lisp interface to IHS
 */
 
-static ihs_ptr get_ihs_ptr(object x)
-{
-	ihs_ptr p;
+static ihs_ptr get_ihs_ptr(object x) {
 
-	if (type_of(x) != t_fixnum)
-		goto ILLEGAL;
-	p = ihs_org + fix(x);
-	if (fix(x)==0) return p;
-	if (ihs_org <= p && p <= ihs_top)
-		return(p);
-ILLEGAL:
-	FEerror("~S is an illegal ihs index.", 1, x);
-	return(NULL);
+  ihs_ptr p;
+
+  if (type_of(x) != t_fixnum)
+    goto ILLEGAL;
+  p = ihs_org + fix(x);
+  p=p<ihs_org ? ihs_org : p;
+  p=p>ihs_top ? ihs_top : p;
+  return p;
+ ILLEGAL:
+  FEerror("~S is an illegal ihs index.", 1, x);
+  return(NULL);
+
 }
 
 DEFUN("IHS-TOP",object,fSihs_top,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
@@ -264,8 +290,8 @@ DEFUN("BDS-VAR",object,fSbds_var,SI,1,1,NONE,OO,OO,OO,OO,(object x0),"") {
   RETURN1(x0);
 }
 
-DEFUN("BDS-VAL",fixnum,fSbds_val,SI,1,1,NONE,IO,OO,OO,OO,(object x0),"") {
-  RETURN1((fixnum)get_bds_ptr(x0)->bds_val);
+DEFUN("BDS-VAL",object,fSbds_val,SI,1,1,NONE,IO,OO,OO,OO,(object x0),"") {
+  RETURN1(get_bds_ptr(x0)->bds_val);
 }
 
 static object *get_vs_ptr(object x) {
@@ -341,7 +367,7 @@ DEFUN("UNIVERSAL-ERROR-HANDLER",object,fSuniversal_error_handler,SI
 
   va_list ap;
   object z,l,f;
-  ufixnum n;
+  ufixnum n=INIT_NARGS(6);
 
   /* 5 args */
   princ(x0,Cnil);
@@ -357,7 +383,7 @@ DEFUN("UNIVERSAL-ERROR-HANDLER",object,fSuniversal_error_handler,SI
   princ(error_fmt_string,Cnil);
   putchar(' ');
   va_start(ap,error_fmt_string);
-  for (n=VFUN_NARGS,l=Cnil,f=OBJNULL;(z=NEXT_ARG(n,ap,l,f,OBJNULL))!=OBJNULL;)
+  for (l=Cnil,f=OBJNULL;(z=NEXT_ARG(n,ap,l,f,OBJNULL))!=OBJNULL;)
     princ(z,Cnil);
   flush_stream(symbol_value(sLAstandard_outputA));
   va_end(ap);
@@ -410,24 +436,6 @@ invalid_macro_call(void)
 	FEinvalid_macro_call();
 }
 
-/* static void */
-/* keyword_value_mismatch(void) */
-/* { */
-/* 	FEerror("Keywords and values do not match.", 0); */
-/* } */
-
-/* static void */
-/* not_a_keyword(object x) */
-/* { */
-/* 	FEunexpected_keyword(x); */
-/* } */
-
-/* static void */
-/* unexpected_keyword(object key) */
-/* { */
-/* 	FEunexpected_keyword(key); */
-/* } */
-
 object
 wrong_type_argument(object typ, object obj)
 {
@@ -441,11 +449,6 @@ illegal_declare(object form)
 {
 	FEinvalid_form("~S is an illegal declaration form.", form);
 }
-
-/* static void */
-/* not_a_string(object obj) */
-/* { FEwrong_type_argument(sLstring,obj); */
-/* } */
 
 void
 not_a_string_or_symbol(object x)
@@ -521,12 +524,62 @@ DEF_ORDINARY("PROTECT",sKprotect,KEYWORD,"");
 DEF_ORDINARY("CATCHALL",sKcatchall,KEYWORD,"");
 
 
+DEF_ORDINARY("CONDITION",sLcondition,LISP,"");
+DEF_ORDINARY("SERIOUS-CONDITION",sLserious_condition,LISP,"");
+DEF_ORDINARY("SIMPLE-CONDITION",sLsimple_condition,LISP,"");
+
+DEF_ORDINARY("ERROR",sLerror,LISP,"");
+DEF_ORDINARY("SIMPLE-ERROR",sLsimple_error,LISP,"");
+DEF_ORDINARY("FORMAT-CONTROL",sKformat_control,KEYWORD,"");
+DEF_ORDINARY("FORMAT-ARGUMENTS",sKformat_arguments,KEYWORD,"");
+
+DEF_ORDINARY("TYPE-ERROR",sLtype_error,LISP,"");
+DEF_ORDINARY("DATUM",sKdatum,KEYWORD,"");
+DEF_ORDINARY("EXPECTED-TYPE",sKexpected_type,KEYWORD,"");
+DEF_ORDINARY("SIMPLE-TYPE-ERROR",sLsimple_type_error,LISP,"");
+
+DEF_ORDINARY("PROGRAM-ERROR",sLprogram_error,LISP,"");
+DEF_ORDINARY("CONTROL-ERROR",sLcontrol_error,LISP,"");
+DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,"");
+DEF_ORDINARY("PACKAGE",sKpackage,KEYWORD,"");
+
+DEF_ORDINARY("STREAM-ERROR",sLstream_error,LISP,"");
+DEF_ORDINARY("STREAM",sKstream,KEYWORD,"");
+DEF_ORDINARY("END-OF-FILE",sLend_of_file,LISP,"");
+
+DEF_ORDINARY("FILE-ERROR",sLfile_error,LISP,"");
+DEF_ORDINARY("PATHNAME",sKpathname,KEYWORD,"");
+
+DEF_ORDINARY("CELL-ERROR",sLcell_error,LISP,"");
+DEF_ORDINARY("NAME",sKname,KEYWORD,"");
+DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,"");
+DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,"");
+DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,"");
+
+DEF_ORDINARY("ARITHMETIC-ERROR",sLarithmetic_error,LISP,"");
+DEF_ORDINARY("OPERATION",sKoperation,KEYWORD,"");
+DEF_ORDINARY("OPERANDS",sKoperands,KEYWORD,"");
+DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,"");
+DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,"");
+
+DEF_ORDINARY("PARSE-ERROR",sLparse_error,LISP,"");
+
+DEF_ORDINARY("PRINT-NOT-READABLE",sLprint_not_readable,LISP,"");
+
+DEF_ORDINARY("READER-ERROR",sLreader_error,LISP,"");
+DEF_ORDINARY("PATHNAME-ERROR",sLpathname_error,SI,"");
+
+DEF_ORDINARY("STORAGE-CONDITION",sLstorage_condition,LISP,"");
+
+DEF_ORDINARY("WARNING",sLwarning,LISP,"");
+DEF_ORDINARY("SIMPLE-WARNING",sLsimple_warning,LISP,"");
+DEF_ORDINARY("STYLE-WARNING",sLstyle_warning,LISP,"");
+
 void
-gcl_init_error(void)
-{
-/* 	make_function("ERROR", Lerror); */
-/* 	make_function("CERROR", Lcerror); */
-/* 	make_si_function("IHS-TOP", siLihs_top); */
-	null_string = make_simple_string("");
-	enter_mark_origin(&null_string);
+gcl_init_error(void) {
+  null_string = make_simple_string("");
+  enter_mark_origin(&null_string);
 }

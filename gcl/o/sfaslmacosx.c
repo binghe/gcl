@@ -35,17 +35,7 @@ typedef int (*func) ();
 /* Externalize the command line used to build loadable object files (a.k.a. bundles).  */
 object sSAmacosx_ldcmdA = 0L;
 
-static void sfasl_error (char *format, ...)
-{
-    va_list ap;
-    
-    va_start (ap, format);
-    fprintf (stderr, "fasload: ");
-    vfprintf (stderr, format, ap);
-    fprintf (stderr, "\n");
-    va_end (ap);
-    exit (1);
-}
+#define sfasl_error(a,b...) {emsg(a,b);do_gcl_abort();}
 
 static NSSymbol
 get_init_sym(NSModule module,object ff) {
@@ -215,8 +205,6 @@ int fasload (object faslfile)
         sfasl_error ("error seeking to end of object file");
     }
 
-    data = read_fasl_vector (faslstream);
-    
     close_stream (faslstream);
     
     memory=new_cfdata();
@@ -225,7 +213,7 @@ int fasload (object faslfile)
     if (symbol_value (sLAload_verboseA) != Cnil)	
         printf (" ;; start address (dynamic) %p ", fptr);
     
-    call_init (0, memory, data, fptr);
+    call_init (0,memory,faslstream);
     
     unlink (tmpfile);
     

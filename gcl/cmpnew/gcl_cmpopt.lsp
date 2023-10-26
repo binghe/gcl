@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 (in-package :compiler)
 
 ;; The optimizers have been redone to allow more flags
@@ -7,14 +6,13 @@
 ;; ( arglist result-type flags {string | function})
 
 ;; meaning of the flags slot.
-;;       '((allocates-new-storage ans)          ;; might invoke gbc
-;;	 (side-effect-p set)                    ;; no effect on arguments
-;;	 (constantp)                            ;; always returns same result,
-;;	                                        ;; double eval ok.
-;;	 (result-type-from-args rfa)            ;; if passed args of matching
-;;					        ;; type result is of result type
-;;       (is)                                   ;; extends the `integer stack'.
-;;	 (inline-types-function itf)))          ;; car of ii is a function returning match info
+;       '((allocates-new-storage ans); might invoke gbc
+;	 (side-effect-p set)        ; no effect on arguments
+;	 (constantp)                ; always returns same result,
+;	                            ;double eval ok.
+;	 (result-type-from-args rfa); if passed args of matching
+;					;type result is of result type
+;         (is)))                     ;; extends the `integer stack'.
 ;    (cond ((member flag v :test 'eq)
 ;
 ;;;   valid properties are 'inline-always 'inline-safe 'inline-unsafe
@@ -48,6 +46,10 @@
 ;;LONG-FLOAT-P
  (push '((t) boolean #.(flags rfa)"type_of(#0)==t_longfloat")
    (get 'long-float-p 'inline-always))
+
+;;COMPLEX-P
+ (push '((t) boolean #.(flags)"type_of(#0)==t_complex")
+   (get 'si::complexp 'inline-always))
 
 ;;SFEOF
  (push `((t) boolean #.(flags set rfa) ,(lambda (x) (add-libc "feof") (wt "(feof((" x ")->sm.sm_fp))")))
@@ -198,6 +200,8 @@
    (get 'system:elt-set 'inline-always))
 (push '((t t t) t #.(flags set)"elt_set(#0,fix(#1),#2)")
    (get 'system:elt-set 'inline-unsafe))
+(push '((t fixnum t) t #.(flags set)"elt_set(#0,#1,#2)")
+   (get 'system:elt-set 'inline-unsafe))
 
 ;;SYSTEM:FILL-POINTER-SET
  (push '((t fixnum) seqind #.(flags rfa set)"(((#0)->st.st_fillp)=(((#0)->st.st_hasfillp) ? (#1) : ((#0)->st.st_fillp)))")
@@ -218,6 +222,10 @@
 ;;    (get 'system::seqindp 'inline-always))
 ;; (push '((seqind) boolean #.(flags rfa)"1")
 ;;    (get 'system::seqindp 'inline-always))
+
+;;SYSTEM:HASH-SET
+(push '((t t t) t #.(flags rfa) "@2;(sethash(#0,#1,#2),#2)") (get 'si::hash-set 'inline-always));FIXME
+;(push '((t t t) t #.(flags rfa) "@2;(sethash_with_check(#0,#1,#2),#2)") (get 'si::hash-set 'inline-always))
 
 ;;SYSTEM:MV-REF
  (push '((fixnum) t #.(flags)"(MVloc[(#0)])")
@@ -252,6 +260,10 @@
  (push '((structure) structure #.(flags)"(#0)->str.str_def")
    (get 'system:structure-def 'inline-always))
 
+;;SYSTEM:STRUCTURE-LENGTH
+ ;; (push '((t) fixnum #.(flags rfa)"S_DATA(#0)->length")
+ ;;   (get 'system:structure-length 'inline-unsafe))
+
 ;;SYSTEM:STRUCTURE-REF
  (push '((t t fixnum) t #.(flags ans)"structure_ref(#0,#1,#2)")
    (get 'system:structure-ref 'inline-always))
@@ -267,15 +279,19 @@
  (push '((t) boolean #.(flags rfa)"type_of(#0)==t_structure")
    (get 'compiler::structurep 'inline-always))
 
+;;SYSTEM:gethash1
+ ;; (push '((t t) t #.(flags)"({struct htent *e=gethash(#0,#1);e->hte_key != OBJNULL ? e->hte_value : Cnil;})")
+ ;;   (get 'system:gethash1 'inline-always))
+
 ;;SYSTEM:SVSET
- (push '((t t t) t #.(flags set)"aset1(#0,fixint(#1),#2)")
-   (get 'system:svset 'inline-always))
-(push '((t fixnum t) t #.(flags set)"aset1(#0,#1,#2)")
-   (get 'system:svset 'inline-always))
-(push '((t t t) t #.(flags set)"((#0)->v.v_self[fix(#1)]=(#2))")
-   (get 'system:svset 'inline-unsafe))
-(push '((t fixnum t) t #.(flags set)"(#0)->v.v_self[#1]= (#2)")
-   (get 'system:svset 'inline-unsafe))
+;;  (push '((t t t) t #.(flags set)"aset1(#0,fixint(#1),#2)")
+;;    (get 'system:svset 'inline-always))
+;; (push '((t fixnum t) t #.(flags set)"aset1(#0,#1,#2)")
+;;    (get 'system:svset 'inline-always))
+;; (push '((t t t) t #.(flags set)"((#0)->v.v_self[fix(#1)]=(#2))")
+;;    (get 'system:svset 'inline-unsafe))
+;; (push '((t fixnum t) t #.(flags set)"(#0)->v.v_self[#1]= (#2)")
+;;    (get 'system:svset 'inline-unsafe))
 
 ;;ASH
 ;(si::putprop 'ash 'ash-propagator 'type-propagator)
@@ -311,6 +327,7 @@
 (push '((t t) t #.(flags ans)"immnum_times(#0,#1)") (get 'si::number-times 'inline-always))
 (push '((fixnum fixnum) integer #.(flags ans rfa)"safe_mul(#0,#1)") (get 'si::number-times 'inline-always))
 (push '((cnum cnum) cnum #.(flags)"(#0)*(#1)") (get 'si::number-times 'inline-always))
+
 
 ;;/
 (push '((t t) t #.(flags ans) "number_divide(#0,#1)") (get 'si::number-divide 'inline-always))
@@ -373,6 +390,37 @@
 ;;BIT-VECTOR-P
  (push '((t) boolean #.(flags rfa)"({enum type tp=type_of(#0);tp==t_bitvector||tp==t_simple_bitvector;})")
    (get 'bit-vector-p 'inline-always))
+
+;;HASH-TABLE-P
+ (push '((t) boolean #.(flags)"(type_of(#0)==t_hashtable)")
+   (get 'hash-table-p 'inline-always))
+
+;;RANDOM-STATE-P
+ (push '((t) boolean #.(flags)"(type_of(#0)==t_random)")
+   (get 'random-state-p 'inline-always))
+
+;;RANDOM-STATE-P
+ (push '((t) boolean #.(flags)"(type_of(#0)==t_random)")
+   (get 'random-state-p 'inline-always))
+
+;;PACKAGEP
+ (push '((t) boolean #.(flags)"(type_of(#0)==t_package)")
+   (get 'packagep 'inline-always))
+
+;;STREAMP
+ (push '((t) boolean #.(flags)"(type_of(#0)==t_stream)")
+   (get 'streamp 'inline-always))
+
+;;READTABLEP
+ (push '((t) boolean #.(flags)"(type_of(#0)==t_readtable)")
+   (get 'readtablep 'inline-always))
+
+;;COMPOUND PREDICATES
+;; (dolist (l '(integerp rationalp floatp realp numberp vectorp arrayp compiled-function-p))
+;;   (push
+;;    `((t) boolean #.(flags) ,(substitute #\_ #\- (concatenate 'string (string-downcase l) "(#0)")))
+;;    (get l 'inline-always)))
+
 
 ;;BOUNDP
  (push '((t) boolean #.(flags rfa)"(#0)->s.s_dbind!=OBJNULL")
@@ -450,10 +498,10 @@
 ;   (get 'code-char 'inline-always))
 
 ;;CONS
- (push '((t t) t #.(flags ans) CONS-INLINE)
+ (push '((t t) t #.(flags ans)"make_cons(#0,#1)")
    (get 'cons 'inline-always))
-;(push '((t t) :dynamic-extent #.(flags ans)"ON_STACK_CONS(#0,#1)")
-;   (get 'cons 'inline-always))
+;; (push '((t t) dynamic-extent #.(flags ans)"ON_STACK_CONS(#0,#1)")
+;;    (get 'cons 'inline-always))
 
 ;;CONSP
  (push '((t) boolean #.(flags rfa)"consp(#0)")
@@ -655,7 +703,7 @@
 
 
 ;;LENGTH
- (push '((t) seqind #.(flags rfa set)"length(#0)")
+ (push '((t) fixnum #.(flags rfa)"length(#0)")
    (get 'length 'inline-always))
 (push '((vector) seqind #.(flags rfa)"((#0)->v.v_hasfillp ? (#0)->v.v_fillp : (#0)->v.v_dim)")
    (get 'length 'inline-always))
@@ -710,7 +758,30 @@
  (push '((t) boolean #.(flags rfa)"listp(#0)")
    (get 'listp 'inline-always))
 
+;;si::spice-p
+ (push '((t) boolean #.(flags)"@0;type_of(#0)==t_spice")
+   (get 'si::spice-p 'inline-always))
+
+;;LOGNAND
+(push '((t t) t #.(compiler::flags) "immnum_nand(#0,#1)") (get 'lognand 'compiler::inline-always))
+;;LOGNOR
+(push '((t t) t #.(compiler::flags) "immnum_nor(#0,#1)") (get 'lognor 'compiler::inline-always))
+;;LOGEQV
+(push '((t t) t #.(compiler::flags) "immnum_eqv(#0,#1)") (get 'logeqv 'compiler::inline-always))
+
+;;LOGANDC1
+(push '((t t) t #.(compiler::flags) "immnum_andc1(#0,#1)") (get 'logandc1 'compiler::inline-always))
+;;LOGANDC2
+(push '((t t) t #.(compiler::flags) "immnum_andc2(#0,#1)") (get 'logandc2 'compiler::inline-always))
+;;LOGORC1
+(push '((t t) t #.(compiler::flags) "immnum_orc1(#0,#1)") (get 'logorc1 'compiler::inline-always))
+;;LOGORC1
+(push '((t t) t #.(compiler::flags) "immnum_orc2(#0,#1)") (get 'logorc2 'compiler::inline-always))
+
+
 ;;LOGAND
+ (push '((t t) t #.(flags)"immnum_and((#0),(#1))")
+   (get 'logand 'inline-always))
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) & (#1))")
    (get 'logand 'inline-always))
 
@@ -723,14 +794,20 @@
    (get 'logandc2 'inline-always))
 
 ;;LOGIOR
+ (push '((t t) t #.(flags)"immnum_ior((#0),(#1))")
+   (get 'logior 'inline-always))
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) | (#1))")
    (get 'logior 'inline-always))
 
 ;;LOGXOR
+ (push '((t t) t #.(flags)"immnum_xor((#0),(#1))")
+   (get 'logxor 'inline-always))
  (push '((fixnum fixnum) fixnum #.(flags rfa)"((#0) ^ (#1))")
    (get 'logxor 'inline-always))
 
 ;;LOGNOT
+ (push '((t) t #.(flags)"immnum_not(#0)")
+   (get 'lognot 'inline-always))
  (push '((fixnum) fixnum #.(flags rfa)"(~(#0))")
    (get 'lognot 'inline-always))
 
@@ -869,15 +946,23 @@
  (push '((t) t #.(flags ans)"coerce_to_string(#0)")
    (get 'string 'inline-always))
 
+;;PATHNAME-DESIGNATORP
+(push '((t) boolean #.(flags)"pathname_designatorp(#0)")
+      (get 'si::pathname-designatorp 'inline-always))
+
+;;PATHNAMEP
+(push '((t) boolean #.(flags)"type_of(#0)==t_pathname")
+      (get 'pathnamep 'inline-always))
+
 ;;STRINGP
  (push '((t) boolean #.(flags rfa)"({enum type tp=type_of(#0);tp==t_string||tp==t_simple_string;})")
    (get 'stringp 'inline-always))
 
 ;;SVREF
- (push '((t t) t #.(flags ans)"aref1(#0,fixint(#1))")
-   (get 'svref 'inline-always))
-(push '((t fixnum) t #.(flags ans)"aref1(#0,#1)")
-   (get 'svref 'inline-always))
+;;  (push '((t t) t #.(flags ans)"aref1(#0,fixint(#1))")
+;;    (get 'svref 'inline-always))
+;; (push '((t fixnum) t #.(flags ans)"aref1(#0,#1)")
+;;    (get 'svref 'inline-always))
 (push '((t t) t #.(flags)"(#0)->v.v_self[fix(#1)]")
    (get 'svref 'inline-unsafe))
 (push '((t fixnum) t #.(flags)"(#0)->v.v_self[#1]")
@@ -892,7 +977,7 @@
     (get 'symbol-value 'inline-unsafe))
 
 ;;SYMBOL-FUNCTION FIXME
-(push '((t) (or cons function) #.(flags rfa) "({register object _sym=#0;_sym->s.s_sfdef!=NOT_SPECIAL ? make_cons(sLspecial,make_fixnum((long)_sym->s.s_sfdef)) : (_sym->s.s_mflag ? make_cons(sLmacro,_sym->s.s_gfdef) : _sym->s.s_gfdef);})")
+(push '((t) (or cons function) #.(flags rfa) "({register object _sym=#0;_sym->s.s_sfdef!=NOT_SPECIAL ? make_cons(sLspecial,make_fixnum((long)_sym->s.s_sfdef)) : (_sym->s.s_mflag ? make_cons(sSmacro,_sym->s.s_gfdef) : _sym->s.s_gfdef);})")
       (get 'symbol-function 'inline-unsafe))
 
 ;;FUNCALLABLE-SYMBOL-FUNCTION
@@ -942,7 +1027,7 @@
  (push '((long-float long-float) dcomplex #.(flags) "(#0 + I * #1)")
    (get 'complex 'inline-always))
 
-;;FIXME boolean -> t opts
+
 ;;VECTORP
  (push '((t) boolean #.(flags rfa)
   "@0;({enum type _tp=type_of(#0);_tp>=t_string && _tp<=t_vector;})")
@@ -982,9 +1067,11 @@
  (push '((t t) t #.(flags) "cdifference(#0,#1)")
    (get 'system:cdifference 'inline-always))
 
-;;IDENTITY
- (push '((t) t #.(flags) "(#0)")
-   (get 'identity 'inline-always))
+;;si::static-inverse-cons
+(push '((t) t #.(compiler::flags) "({object _y=(object)fixint(#0);is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-always))
+(push '((fixnum) t #.(compiler::flags) "({object _y=(object)#0;is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-always))
+(push '((t) t #.(compiler::flags) "({object _y=(object)fix(#0);is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-unsafe))
+(push '((fixnum) t #.(compiler::flags) "({object _y=(object)#0;is_imm_fixnum(_y) ? Cnil : (is_imm_fixnum(_y->c.c_cdr) ? _y : (_y->d.f||_y->d.e ? Cnil : _y));})") (get 'si::static-inverse-cons 'compiler::inline-unsafe))
 
 ;;SI::NEXT-HASH-TABLE-INDEX
  (push '((t t) fixnum #.(flags rfa) 

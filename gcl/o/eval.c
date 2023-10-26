@@ -608,11 +608,11 @@ Ievaln(object form,object *vals) {
 void
 eval(object form)
 { 
-        object temporary=OBJNULL;
+        object temporary;
         DEBUG_AVMA
-	object fun=OBJNULL, x=OBJNULL;
-	object *top=NULL;
-	object *base=NULL;
+	object fun, x;
+	object *top;
+	object *base;
 
 	cs_check(form);
 
@@ -620,22 +620,16 @@ EVAL:
 
 	vs_check;
 
-	if (Vevalhook->s.s_dbind != Cnil && eval1 == 0)
+	if (siVevalhook->s.s_dbind != Cnil && eval1 == 0)
 	{
 		bds_ptr old_bds_top = bds_top;
-		object hookfun = symbol_value(Vevalhook);
-		/*  check if Vevalhook is unbound  */
+		object hookfun = symbol_value(siVevalhook);
+		/*  check if siVevalhook is unbound  */
 
-		bds_bind(Vevalhook, Cnil);
+		bds_bind(siVevalhook, Cnil);
 		vs_base = vs_top;
 		vs_push(form);
-		vs_push(lex_env[0]);
-		vs_push(lex_env[1]);
-		vs_push(lex_env[2]);
-		vs_push(Cnil);
-		stack_cons();
-		stack_cons();
-		stack_cons();
+		vs_push(list(3,lex_env[0],lex_env[1],lex_env[2]));
 		super_funcall(hookfun);
 		bds_unwind(old_bds_top);
 		return;
@@ -718,7 +712,7 @@ APPLICATION:
 	for (x = lex_env[1];  consp(x);  x = x->c.c_cdr)
 		if (x->c.c_car->c.c_car == fun) {
 			x = x->c.c_car;
-			if (MMcadr(x) == sLmacro) {
+			if (MMcadr(x) == sSmacro) {
 				x = MMcaddr(x);
 				goto EVAL_MACRO;
 			}
@@ -755,7 +749,7 @@ EVAL_ARGS:
 		form = MMcdr(form);
 	}
 	vs_base = base;
-	if (Vapplyhook->s.s_dbind != Cnil) {
+	if (siVapplyhook->s.s_dbind != Cnil) {
 		call_applyhook(fun);
 		return;
 	}
@@ -789,22 +783,12 @@ static void
 call_applyhook(object fun)
 {
 	object ah;
-	object *v;
 
-	ah = symbol_value(Vapplyhook);
-	v = vs_base + 1;
-	vs_push(Cnil);
-	while (vs_top > v)
-		stack_cons();
+	ah = symbol_value(siVapplyhook);
+	Llist();
 	vs_push(vs_base[0]);
 	vs_base[0] = fun;
-	vs_push(lex_env[0]);
-	vs_push(lex_env[1]);
-	vs_push(lex_env[2]);
-	vs_push(Cnil);
-	stack_cons();
-	stack_cons();
-	stack_cons();
+	vs_push(list(3,lex_env[0],lex_env[1],lex_env[2]));
 	super_funcall(ah);
 }
 
@@ -1021,8 +1005,8 @@ LFD(siLevalhook)(void)
 		vs_push(car(env));
 	} else
 		too_many_arguments();
-	bds_bind(Vevalhook, vs_base[1]);
-	bds_bind(Vapplyhook, vs_base[2]);
+	bds_bind(siVevalhook, vs_base[1]);
+	bds_bind(siVapplyhook, vs_base[2]);
 	eval1 = 1;
 	eval(vs_base[0]);
 	lex_env = lex;
@@ -1053,8 +1037,8 @@ LFD(siLapplyhook)(void)
 		vs_push(car(env));
 	} else
 		too_many_arguments();
-	bds_bind(Vevalhook, vs_base[2]);
-	bds_bind(Vapplyhook, vs_base[3]);
+	bds_bind(siVevalhook, vs_base[2]);
+	bds_bind(siVapplyhook, vs_base[3]);
 	z = vs_top;
 	for (l = vs_base[1];  !endp(l);  l = l->c.c_cdr)
 		vs_push(l->c.c_car);
@@ -1142,6 +1126,28 @@ ifuncall3(object fun, object arg1, object arg2, object arg3) {
   vs_push(arg1);
   vs_push(arg2);
   vs_push(arg3);
+  super_funcall(fun);
+  x = vs_base[0];
+  vs_top = old_vs_top;
+  vs_base = old_vs_base;
+  return(x);
+
+}
+
+object
+ifuncall4(object fun, object arg1, object arg2, object arg3,object arg4) {
+
+  object *old_vs_base;
+  object *old_vs_top;
+  object x;
+
+  old_vs_base = vs_base;
+  old_vs_top = vs_top;
+  vs_base = vs_top;
+  vs_push(arg1);
+  vs_push(arg2);
+  vs_push(arg3);
+  vs_push(arg4);
   super_funcall(fun);
   x = vs_base[0];
   vs_top = old_vs_top;
@@ -1280,8 +1286,8 @@ gcl_init_eval(void)
         make_constant("CALL-ARGUMENTS-LIMIT", make_fixnum(MAX_ARGS+1));
 
 
-	Vevalhook = make_si_special("*EVALHOOK*", Cnil);
-	Vapplyhook = make_si_special("*APPLYHOOK*", Cnil);
+	siVevalhook = make_si_special("*EVALHOOK*", Cnil);
+	siVapplyhook = make_si_special("*APPLYHOOK*", Cnil);
 
 
 	three_nils.nil3_self[0] = Cnil;

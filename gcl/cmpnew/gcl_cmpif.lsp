@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPIF  Conditionals.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -685,13 +684,14 @@
 	(fmla-not (c-not (fmla-c1expr (cadr fmla))))
 	(otherwise fmla)))
 
-(defun maybe-progn-fmla (fmla args info)
+(defun maybe-progn-fmla (fmla args)
   (let ((fmla (fmla-c1expr fmla))
 	(c1 (c1expr args)))
-    (add-info (cadr fmla) info);FIXME?
     (if (ignorable-form fmla)
 	c1
-      (new-c1progn fmla c1))))
+	(if (truncate-progn-at-nil-return-p (list fmla) args);FIXME run this through c1progn
+	    fmla
+	    (new-c1progn fmla c1)))))
 
 (defun c1if (args &aux info f)
   (when (or (endp args) (endp (cdr args)))
@@ -722,9 +722,9 @@
 
  	       (cond (fmlae 
   		      (when (caddr args) (note-branch-elimination (car args) t (caddr args)))
-		      (maybe-progn-fmla fmla (cadr args) info))
+		      (maybe-progn-fmla fmla (cadr args)))
   		     (t (note-branch-elimination (car args) nil (cadr args)) 
-			(maybe-progn-fmla fmla (caddr args) info)))
+			(maybe-progn-fmla fmla (caddr args))))
 	     
 	     (let (r)
 	       (dolist (l inf)

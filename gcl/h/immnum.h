@@ -205,8 +205,7 @@ fixnum_bitp(fixnum p,fixnum x) {return fixnum_rshft(x,p)&0x1;}
 INLINE bool
 immnum_bitp(object x,object y) {return iif2(x,y) ? fixnum_bitp(fif(x),fif(y)) : integer_bitp(x,y);}
 
-
-#define immnum_comp(x,y,c) iif2(x,y) ? (x c y) : (number_compare(x,y) c 0)
+#define immnum_comp(x,y,c) iif2(x,y) ? ((fixnum)x c (fixnum)y) : (number_compare(x,y) c 0)
 
 INLINE bool
 immnum_lt(object x,object y) {return immnum_comp(x,y,<);}
@@ -222,19 +221,19 @@ INLINE bool
 immnum_ge(object x,object y) {return immnum_comp(x,y,>=);}
 
 INLINE bool
-immnum_minusp(object x) {return iif(x) ? ((ufixnum)x)<((ufixnum)make_fixnum(0)) : number_minusp(x);}
+immnum_minusp(object x) {return iif(x) ? ((fixnum)x)<((fixnum)make_fixnum(0)) : number_minusp(x);}
 INLINE bool
-immnum_plusp(object x) {return iif(x) ? ((ufixnum)x)>((ufixnum)make_fixnum(0)) : number_plusp(x);}
+immnum_plusp(object x) {return iif(x) ? ((fixnum)x)>((fixnum)make_fixnum(0)) : number_plusp(x);}
 INLINE bool
-immnum_zerop(object x) {return iif(x) ? ((ufixnum)x)==((ufixnum)make_fixnum(0)) : number_zerop(x);}
+immnum_zerop(object x) {return iif(x) ? ((fixnum)x)==((fixnum)make_fixnum(0)) : number_zerop(x);}
 INLINE bool
-immnum_evenp(object x) {return iif(x) ? !(((ufixnum)x)&0x1) : number_evenp(x);}
+immnum_evenp(object x) {return iif(x) ? !(((fixnum)x)&0x1) : number_evenp(x);}
 INLINE bool
-immnum_oddp(object x) {return iif(x) ? (((ufixnum)x)&0x1) : number_oddp(x);}
+immnum_oddp(object x) {return iif(x) ? (((fixnum)x)&0x1) : number_oddp(x);}
 
 INLINE object
 immnum_signum(object x) {
-  ufixnum ux=(ufixnum)x,uz=((ufixnum)make_fixnum(0));
+  fixnum ux=(fixnum)x,uz=((fixnum)make_fixnum(0));
   return iif(x) ? (ux<uz ? mif(-1) : (ux==uz ? mif(0) : mif(1))) : number_signum(x);
 }
 INLINE object
@@ -314,9 +313,9 @@ immnum_dpf(object n,object x,object i) {
 }
 
 INLINE object
-immnum_max(object x,object y) {return iif2(x,y) ? ((ufixnum)x>=(ufixnum)y ? x : y) : (number_compare(x,y)>=0?x:y);}
+immnum_max(object x,object y) {return iif2(x,y) ? ((fixnum)x>=(fixnum)y ? x : y) : (number_compare(x,y)>=0?x:y);}
 INLINE object
-immnum_min(object x,object y) {return iif2(x,y) ? ((ufixnum)x<=(ufixnum)y ? x : y) : (number_compare(x,y)<=0?x:y);}
+immnum_min(object x,object y) {return iif2(x,y) ? ((fixnum)x<=(fixnum)y ? x : y) : (number_compare(x,y)<=0?x:y);}
 
 INLINE bool
 immnum_logt(object x,object y) {return iif2(x,y) ? fixnum_boole(BOOLAND,fif(x),fif(y))!=0 : !number_zerop(log_op2(BOOLAND,x,y));}

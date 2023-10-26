@@ -39,7 +39,7 @@ are available on the web site.
 
 SHORT SETUP NOTES
 
-- Install Mingw32 and MSYS using the instructions at those sites. 
+- Install Mingw32 and MSYS using the instructions at those sites.
 
 
 DETAILED SETUP NOTES
@@ -48,7 +48,7 @@ DETAILED SETUP NOTES
 
 - By looking at the dates and version numbers appended to the other
   packages on the download page, get any versions of gcc 3.2, binutils,
-  mingw-runtime, and w32api that are later than the Mingw2 package. 
+  mingw-runtime, and w32api that are later than the Mingw2 package.
 
 - Go to the top level Mingw32 installation directory - the one in which you
   can see "bin", "lib" etc
@@ -58,7 +58,7 @@ DETAILED SETUP NOTES
   tar xzf rumpty-dumpty.tar.gz
 
 - Remove the Mingw version of "make" from the bin directory - it has serious
-  bugs and will not work properly for most tasks including building GCL and 
+  bugs and will not work properly for most tasks including building GCL and
   Maxima.  We will be using the MSYS version.
 
 - Get MSYS and install it - follow the instructions - subscribe to the
@@ -79,7 +79,7 @@ BUILDING
 
   ./configure --prefix="c:/gcl" > configure.log 2>&1
 
-  Change the prefix directory as required for your final installation path.  
+  Change the prefix directory as required for your final installation path.
   I find it helpful to redirect output from "configure" and "make" into log
   files for debugging and checking.
 
@@ -87,7 +87,7 @@ BUILDING
 
 - Type:
 
-  	make >& make.log 
+  	make >& make.log
 
 - The "saved_gcl.exe" should turn up eventually in the unixport directory.  You
   can try it out directly by typing:
@@ -102,13 +102,13 @@ BUILDING
 
   It is necessary to install GCL before building Maxima.
 
-- The batch file "gclm.bat" can be used to make a Windows desktop 
+- The batch file "gclm.bat" can be used to make a Windows desktop
   shortcut.
 
-- BFD fasloading, Stratified Garbage Collection (SGC) readline and GCL-TK 
+- BFD fasloading, Stratified Garbage Collection (SGC) readline and GCL-TK
   don't work under Windows.  The configuration options above provide a
   "traditional" GCL executable which will build the current CVS version of
-  Maxima.  The BFD option will depend on someone with knowledge of BFD and 
+  Maxima.  The BFD option will depend on someone with knowledge of BFD and
   PE-COFF linking fixing some problems with the BFD library - I am slowly
   absorbing the info needed, but we really need input from an expert.  My
   inclination is to stick with custom relocation as BFD is less efficient.

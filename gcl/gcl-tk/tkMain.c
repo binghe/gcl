@@ -58,23 +58,6 @@
 int writable_malloc=0; /*FIXME, don't wrap fopen here, exclude notcomp.h or equivalent */
 
 #include "guis.h"
-
-#ifdef __MINGW32__
-
-#include <windows.h>
-
-#define signal_mask(n)  (1 << (n))
-
-static struct {
-  HANDLE handle;
-  LPVOID address;
-  DWORD length ;
-  char name[20] ;
-} sharedMemory = {0,0,0x10000} ;
-
-#endif
-
-
 struct connection_state *dsfd;
 /*-------------------------------------------------------------------*/
 
@@ -123,59 +106,6 @@ static char *geometry = NULL;
 int debug = 0;
 
 static void guiCreateCommand _ANSI_ARGS_((int idLispObject, int iSlot , char *arglist));
-
-#ifdef __MINGW32__
-
-int
-ErrorHandler ( char *s )
-{
-  fprintf ( stderr, s );
-  fflush ( stderr );
-  exit ( 1 );
-}
-
-void
-close_shared_memory ( void )
-{
-  if ( sharedMemory.handle ) {
-    CloseHandle ( sharedMemory.handle );
-  }
-  sharedMemory.handle = NULL;
-  if ( sharedMemory.address ) {
-    UnmapViewOfFile ( sharedMemory.address );
-  }
-  sharedMemory.address = NULL;
-}
-
-void
-kill ( unsigned int pid, int sig )
-{
-  int value;
-  int *at;
-  sprintf(sharedMemory.name,"gcl-%d",pid);
-  value = signal_mask(sig);
-  sharedMemory.handle = OpenFileMapping ( FILE_MAP_WRITE,       /*  Read/write permission.   */
-					  FALSE,                /*  Do not inherit the name  */
-					  sharedMemory.name );  /*  of the mapping object.   */
- 
-  if ( sharedMemory.handle == NULL ) {
-    ErrorHandler("kill: Could not open file-mapping object."); 
-  } 
- 
-  sharedMemory.address = MapViewOfFile ( sharedMemory.handle,      /* Handle to mapping object.  */
-					 FILE_MAP_WRITE,           /* Read/write permission.  */
-					 0,                        /* Max.  object size.  */
-					 0,                        /* Size of hFile.  */
-					 0 );                      /* Map entire file.  */
- 
-  if ( sharedMemory.address == NULL ) {
-    ErrorHandler("kill: Could not map view of file."); 
-  }
-  at = (int *) ( sharedMemory.address );
-  *at |= value;
-  close_shared_memory ();
-}
-#endif
 
 void
 dfprintf(FILE *fp,char *s,...) {
@@ -299,7 +229,7 @@ TkX_Wish (argc, argv)
 	    name = p;
 	}
     }
-#ifndef __MINGW32__
+
     /*
      * If a display was specified, put it into the DISPLAY
      * environment variable so that it will be available for
@@ -309,7 +239,7 @@ TkX_Wish (argc, argv)
     if (display != NULL) {
 	Tcl_SetVar2(interp, "env", "DISPLAY", display, TCL_GLOBAL_ONLY);
     }
-#endif
+
     /*
      * Initialize the Tk application.
      */
@@ -365,13 +295,11 @@ TkX_Wish (argc, argv)
     /*
      * Invoke application-specific initialization.
      */
-#ifdef _WIN32
-    Tcl_FindExecutable ( argv[0] ); 
-#else
+
     if (Tcl_AppInit(interp) != TCL_OK) {
 	fprintf(stderr, "Tcl_AppInit failed: %s\n", INTERP_RESULT(interp));
     }
-#endif
+
     /*
      * Set the geometry of the main window, if requested.
      */
@@ -483,7 +411,9 @@ tell_lisp_var_changed(
 				 val, strlen(val))
 		 < 0)
 		{		/* what do we want to do if the write failed */}
+#ifndef __MINGW32__	      
     if (parent > 0)  kill(parent, SIGUSR1);
+#endif      
     }
   else
   /* avoid going back to lisp if it is lisp that is doing the setting! */
@@ -547,9 +477,9 @@ StdinProc(clientData, mask)
 	{
 	  /*dfprintf(stderr, "Yoo !!! Empty command\n"); */
 	  if (debug)perror("zero message");
-#ifndef __MINGW32__
+#ifndef __MINGW32__          
 	  Tk_CreateFileHandler(dsfd->fd, TK_READABLE, StdinProc, (ClientData) 0);
-#endif
+#endif          
 	  return;
 	}
 
@@ -585,8 +515,10 @@ StdinProc(clientData, mask)
 	      
 	      if (msg->type == m_tcl_command_wait_response)
 		{ /* parent is waiting so dong signal */ ;}
+#ifndef __MINGW32__              
 	      else
 		if (parent> 0)kill(parent, SIGUSR1);
+#endif              
 	    }
 
 	  Tcl_DStringFree(&command);
@@ -709,7 +641,9 @@ TclGenericCommandProcedure( clientData,
 	      , szCmd, dsfd->fd, errno, cb);
 
     }
+#ifndef __MINGW32__  
   if (parent > 0)kill(parent, SIGUSR1);
+#endif  
   return TCL_OK;
 }
 
@@ -775,3 +709,4 @@ guiBindCallback(char *szNameCmdProc, char *szTclObject, char *szModifier,char* a
 /* } */
 
 /*  */
+

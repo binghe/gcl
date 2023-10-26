@@ -1,4 +1,3 @@
-;;-*-Lisp-*-
 ;;; CMPLABEL  Exit manager.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -45,7 +44,7 @@
   `(when (cdr ,label) (wt-nl "goto T" (car ,label) ";")(wt-nl1 "T" (car ,label) ":;")))
 
 (defmacro wt-go (label)
-  `(progn (rplacd ,label t) (wt "goto T" (car ,label) ";")))
+  `(progn (rplacd ,label t) (wt "goto T" (car ,label) ";")(wt-nl)))
 
 
 (defvar *restore-avma* nil)
@@ -66,11 +65,10 @@
   (declare (fixnum bds-bind))
   (and *record-call-info* (record-call-info loc fname))
   (when (and (eq loc 'fun-val)
-	     (not (multiple-values-p))
              (not (eq *value-to-go* 'return))
 	     (not (rassoc *value-to-go* +return-alist+))
              (not (eq *value-to-go* 'top)))
-	(wt-nl) (reset-top))
+        (wt-nl) (reset-top))
   (cond ((and (consp *value-to-go*) (eq (car *value-to-go*) 'jump-true))
          (set-jump-true loc (cadr *value-to-go*))
          (when (eq loc t) (return-from unwind-exit)))

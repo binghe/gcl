@@ -23,7 +23,7 @@
 ; See the file dec.copyright for details.
 
 
-;;;;;; XKeyEvent funcions ;;;;;;
+;;;;;; XKeyEvent functions ;;;;;;
 
 (defentry make-XKeyEvent () ( fixnum  "make_XKeyEvent" ))
 (defentry XKeyEvent-same_screen (fixnum) ( fixnum "XKeyEvent_same_screen" ))
@@ -58,7 +58,7 @@
 (defentry set-XKeyEvent-type (fixnum fixnum) ( void "set_XKeyEvent_type" ))
 
 
-;;;;;; XButtonEvent funcions ;;;;;;
+;;;;;; XButtonEvent functions ;;;;;;
 
 (defentry make-XButtonEvent () ( fixnum  "make_XButtonEvent" ))
 (defentry XButtonEvent-same_screen (fixnum) ( fixnum "XButtonEvent_same_screen" ))
@@ -93,7 +93,7 @@
 (defentry set-XButtonEvent-type (fixnum fixnum) ( void "set_XButtonEvent_type" ))
 
 
-;;;;;; XMotionEvent funcions ;;;;;;
+;;;;;; XMotionEvent functions ;;;;;;
 
 (defentry make-XMotionEvent () ( fixnum  "make_XMotionEvent" ))
 (defentry XMotionEvent-same_screen (fixnum) ( fixnum "XMotionEvent_same_screen" ))
@@ -128,7 +128,7 @@
 (defentry set-XMotionEvent-type (fixnum fixnum) ( void "set_XMotionEvent_type" ))
 
 
-;;;;;; XCrossingEvent funcions ;;;;;;
+;;;;;; XCrossingEvent functions ;;;;;;
 
 (defentry make-XCrossingEvent () ( fixnum  "make_XCrossingEvent" ))
 (defentry XCrossingEvent-state (fixnum) ( fixnum "XCrossingEvent_state" ))
@@ -167,7 +167,7 @@
 (defentry set-XCrossingEvent-type (fixnum fixnum) ( void "set_XCrossingEvent_type" ))
 
 
-;;;;;; XFocusChangeEvent funcions ;;;;;;
+;;;;;; XFocusChangeEvent functions ;;;;;;
 
 (defentry make-XFocusChangeEvent () ( fixnum  "make_XFocusChangeEvent" ))
 (defentry XFocusChangeEvent-detail (fixnum) ( fixnum "XFocusChangeEvent_detail" ))
@@ -186,7 +186,7 @@
 (defentry set-XFocusChangeEvent-type (fixnum fixnum) ( void "set_XFocusChangeEvent_type" ))
 
 
-;;;;;; XKeymapEvent funcions ;;;;;;
+;;;;;; XKeymapEvent functions ;;;;;;
 
 (defentry make-XKeymapEvent () ( fixnum  "make_XKeymapEvent" ))
 ;;(defentry XKeymapEvent-key_vector[32] (fixnum) ( char "XKeymapEvent_key_vector[32]" ))
@@ -203,7 +203,7 @@
 (defentry set-XKeymapEvent-type (fixnum fixnum) ( void "set_XKeymapEvent_type" ))
 
 
-;;;;;; XExposeEvent funcions ;;;;;;
+;;;;;; XExposeEvent functions ;;;;;;
 
 (defentry make-XExposeEvent () ( fixnum  "make_XExposeEvent" ))
 (defentry XExposeEvent-count (fixnum) ( fixnum "XExposeEvent_count" ))
@@ -228,7 +228,7 @@
 (defentry set-XExposeEvent-type (fixnum fixnum) ( void "set_XExposeEvent_type" ))
 
 
-;;;;;; XGraphicsExposeEvent funcions ;;;;;;
+;;;;;; XGraphicsExposeEvent functions ;;;;;;
 
 (defentry make-XGraphicsExposeEvent () ( fixnum  "make_XGraphicsExposeEvent" ))
 (defentry XGraphicsExposeEvent-minor_code (fixnum) ( fixnum "XGraphicsExposeEvent_minor_code" ))
@@ -257,7 +257,7 @@
 (defentry set-XGraphicsExposeEvent-type (fixnum fixnum) ( void "set_XGraphicsExposeEvent_type" ))
 
 
-;;;;;; XNoExposeEvent funcions ;;;;;;
+;;;;;; XNoExposeEvent functions ;;;;;;
 
 (defentry make-XNoExposeEvent () ( fixnum  "make_XNoExposeEvent" ))
 (defentry XNoExposeEvent-minor_code (fixnum) ( fixnum "XNoExposeEvent_minor_code" ))
@@ -276,7 +276,7 @@
 (defentry set-XNoExposeEvent-type (fixnum fixnum) ( void "set_XNoExposeEvent_type" ))
 
 
-;;;;;; XVisibilityEvent funcions ;;;;;;
+;;;;;; XVisibilityEvent functions ;;;;;;
 
 (defentry make-XVisibilityEvent () ( fixnum  "make_XVisibilityEvent" ))
 (defentry XVisibilityEvent-state (fixnum) ( fixnum "XVisibilityEvent_state" ))
@@ -293,7 +293,7 @@
 (defentry set-XVisibilityEvent-type (fixnum fixnum) ( void "set_XVisibilityEvent_type" ))
 
 
-;;;;;; XCreateWindowEvent funcions ;;;;;;
+;;;;;; XCreateWindowEvent functions ;;;;;;
 
 (defentry make-XCreateWindowEvent () ( fixnum  "make_XCreateWindowEvent" ))
 (defentry XCreateWindowEvent-override_redirect (fixnum) ( fixnum "XCreateWindowEvent_override_redirect" ))
@@ -322,7 +322,7 @@
 (defentry set-XCreateWindowEvent-type (fixnum fixnum) ( void "set_XCreateWindowEvent_type" ))
 
 
-;;;;;; XDestroyWindowEvent funcions ;;;;;;
+;;;;;; XDestroyWindowEvent functions ;;;;;;
 
 (defentry make-XDestroyWindowEvent () ( fixnum  "make_XDestroyWindowEvent" ))
 (defentry XDestroyWindowEvent-window (fixnum) ( fixnum "XDestroyWindowEvent_window" ))
@@ -339,7 +339,7 @@
 (defentry set-XDestroyWindowEvent-type (fixnum fixnum) ( void "set_XDestroyWindowEvent_type" ))
 
 
-;;;;;; XUnmapEvent funcions ;;;;;;
+;;;;;; XUnmapEvent functions ;;;;;;
 
 (defentry make-XUnmapEvent () ( fixnum  "make_XUnmapEvent" ))
 (defentry XUnmapEvent-from_configure (fixnum) ( fixnum "XUnmapEvent_from_configure" ))
@@ -358,7 +358,7 @@
 (defentry set-XUnmapEvent-type (fixnum fixnum) ( void "set_XUnmapEvent_type" ))
 
 
-;;;;;; XMapEvent funcions ;;;;;;
+;;;;;; XMapEvent functions ;;;;;;
 
 (defentry make-XMapEvent () ( fixnum  "make_XMapEvent" ))
 (defentry XMapEvent-override_redirect (fixnum) ( fixnum "XMapEvent_override_redirect" ))
@@ -377,7 +377,7 @@
 (defentry set-XMapEvent-type (fixnum fixnum) ( void "set_XMapEvent_type" ))
 
 
-;;;;;; XMapRequestEvent funcions ;;;;;;
+;;;;;; XMapRequestEvent functions ;;;;;;
 
 (defentry make-XMapRequestEvent () ( fixnum  "make_XMapRequestEvent" ))
 (defentry XMapRequestEvent-window (fixnum) ( fixnum "XMapRequestEvent_window" ))
@@ -394,7 +394,7 @@
 (defentry set-XMapRequestEvent-type (fixnum fixnum) ( void "set_XMapRequestEvent_type" ))
 
 
-;;;;;; XReparentEvent funcions ;;;;;;
+;;;;;; XReparentEvent functions ;;;;;;
 
 (defentry make-XReparentEvent () ( fixnum  "make_XReparentEvent" ))
 (defentry XReparentEvent-override_redirect (fixnum) ( fixnum "XReparentEvent_override_redirect" ))
@@ -419,7 +419,7 @@
 (defentry set-XReparentEvent-type (fixnum fixnum) ( void "set_XReparentEvent_type" ))
 
 
-;;;;;; XConfigureEvent funcions ;;;;;;
+;;;;;; XConfigureEvent functions ;;;;;;
 
 (defentry make-XConfigureEvent () ( fixnum  "make_XConfigureEvent" ))
 (defentry XConfigureEvent-override_redirect (fixnum) ( fixnum "XConfigureEvent_override_redirect" ))
@@ -450,7 +450,7 @@
 (defentry set-XConfigureEvent-type (fixnum fixnum) ( void "set_XConfigureEvent_type" ))
 
 
-;;;;;; XGravityEvent funcions ;;;;;;
+;;;;;; XGravityEvent functions ;;;;;;
 
 (defentry make-XGravityEvent () ( fixnum  "make_XGravityEvent" ))
 (defentry XGravityEvent-y (fixnum) ( fixnum "XGravityEvent_y" ))
@@ -471,7 +471,7 @@
 (defentry set-XGravityEvent-type (fixnum fixnum) ( void "set_XGravityEvent_type" ))
 
 
-;;;;;; XResizeRequestEvent funcions ;;;;;;
+;;;;;; XResizeRequestEvent functions ;;;;;;
 
 (defentry make-XResizeRequestEvent () ( fixnum  "make_XResizeRequestEvent" ))
 (defentry XResizeRequestEvent-height (fixnum) ( fixnum "XResizeRequestEvent_height" ))
@@ -490,7 +490,7 @@
 (defentry set-XResizeRequestEvent-type (fixnum fixnum) ( void "set_XResizeRequestEvent_type" ))
 
 
-;;;;;; XConfigureRequestEvent funcions ;;;;;;
+;;;;;; XConfigureRequestEvent functions ;;;;;;
 
 (defentry make-XConfigureRequestEvent () ( fixnum  "make_XConfigureRequestEvent" ))
 (defentry XConfigureRequestEvent-value_mask (fixnum) ( fixnum "XConfigureRequestEvent_value_mask" ))
@@ -523,7 +523,7 @@
 (defentry set-XConfigureRequestEvent-type (fixnum fixnum) ( void "set_XConfigureRequestEvent_type" ))
 
 
-;;;;;; XCirculateEvent funcions ;;;;;;
+;;;;;; XCirculateEvent functions ;;;;;;
 
 (defentry make-XCirculateEvent () ( fixnum  "make_XCirculateEvent" ))
 (defentry XCirculateEvent-place (fixnum) ( fixnum "XCirculateEvent_place" ))
@@ -542,7 +542,7 @@
 (defentry set-XCirculateEvent-type (fixnum fixnum) ( void "set_XCirculateEvent_type" ))
 
 
-;;;;;; XCirculateRequestEvent funcions ;;;;;;
+;;;;;; XCirculateRequestEvent functions ;;;;;;
 
 (defentry make-XCirculateRequestEvent () ( fixnum  "make_XCirculateRequestEvent" ))
 (defentry XCirculateRequestEvent-place (fixnum) ( fixnum "XCirculateRequestEvent_place" ))
@@ -561,7 +561,7 @@
 (defentry set-XCirculateRequestEvent-type (fixnum fixnum) ( void "set_XCirculateRequestEvent_type" ))
 
 
-;;;;;; XPropertyEvent funcions ;;;;;;
+;;;;;; XPropertyEvent functions ;;;;;;
 
 (defentry make-XPropertyEvent () ( fixnum  "make_XPropertyEvent" ))
 (defentry XPropertyEvent-state (fixnum) ( fixnum "XPropertyEvent_state" ))
@@ -582,7 +582,7 @@
 (defentry set-XPropertyEvent-type (fixnum fixnum) ( void "set_XPropertyEvent_type" ))
 
 
-;;;;;; XSelectionClearEvent funcions ;;;;;;
+;;;;;; XSelectionClearEvent functions ;;;;;;
 
 (defentry make-XSelectionClearEvent () ( fixnum  "make_XSelectionClearEvent" ))
 (defentry XSelectionClearEvent-time (fixnum) ( fixnum "XSelectionClearEvent_time" ))
@@ -601,7 +601,7 @@
 (defentry set-XSelectionClearEvent-type (fixnum fixnum) ( void "set_XSelectionClearEvent_type" ))
 
 
-;;;;;; XSelectionRequestEvent funcions ;;;;;;
+;;;;;; XSelectionRequestEvent functions ;;;;;;
 
 (defentry make-XSelectionRequestEvent () ( fixnum  "make_XSelectionRequestEvent" ))
 (defentry XSelectionRequestEvent-time (fixnum) ( fixnum "XSelectionRequestEvent_time" ))
@@ -626,7 +626,7 @@
 (defentry set-XSelectionRequestEvent-type (fixnum fixnum) ( void "set_XSelectionRequestEvent_type" ))
 
 
-;;;;;; XSelectionEvent funcions ;;;;;;
+;;;;;; XSelectionEvent functions ;;;;;;
 
 (defentry make-XSelectionEvent () ( fixnum  "make_XSelectionEvent" ))
 (defentry XSelectionEvent-time (fixnum) ( fixnum "XSelectionEvent_time" ))
@@ -649,7 +649,7 @@
 (defentry set-XSelectionEvent-type (fixnum fixnum) ( void "set_XSelectionEvent_type" ))
 
 
-;;;;;; XColormapEvent funcions ;;;;;;
+;;;;;; XColormapEvent functions ;;;;;;
 
 (defentry make-XColormapEvent () ( fixnum  "make_XColormapEvent" ))
 (defentry XColormapEvent-state (fixnum) ( fixnum "XColormapEvent_state" ))
@@ -670,7 +670,7 @@
 (defentry set-XColormapEvent-type (fixnum fixnum) ( void "set_XColormapEvent_type" ))
 
 
-;;;;;; XClientMessageEvent funcions ;;;;;;
+;;;;;; XClientMessageEvent functions ;;;;;;
 
 (defentry make-XClientMessageEvent () ( fixnum  "make_XClientMessageEvent" ))
 (defentry XClientMessageEvent-format (fixnum) ( fixnum "XClientMessageEvent_format" ))
@@ -689,7 +689,7 @@
 (defentry set-XClientMessageEvent-type (fixnum fixnum) ( void "set_XClientMessageEvent_type" ))
 
 
-;;;;;; XMappingEvent funcions ;;;;;;
+;;;;;; XMappingEvent functions ;;;;;;
 
 (defentry make-XMappingEvent () ( fixnum  "make_XMappingEvent" ))
 (defentry XMappingEvent-count (fixnum) ( fixnum "XMappingEvent_count" ))
@@ -710,7 +710,7 @@
 (defentry set-XMappingEvent-type (fixnum fixnum) ( void "set_XMappingEvent_type" ))
 
 
-;;;;;; XErrorEvent funcions ;;;;;;
+;;;;;; XErrorEvent functions ;;;;;;
 
 (defentry make-XErrorEvent () ( fixnum  "make_XErrorEvent" ))
 (defentry XErrorEvent-minor_code (fixnum) ( char "XErrorEvent_minor_code" ))
@@ -729,7 +729,7 @@
 (defentry set-XErrorEvent-type (fixnum fixnum) ( void "set_XErrorEvent_type" ))
 
 
-;;;;;; XAnyEvent funcions ;;;;;;
+;;;;;; XAnyEvent functions ;;;;;;
 
 (defentry make-XAnyEvent () ( fixnum  "make_XAnyEvent" ))
 (defentry XAnyEvent-window (fixnum) ( fixnum "XAnyEvent_window" ))
@@ -744,7 +744,7 @@
 (defentry set-XAnyEvent-type (fixnum fixnum) ( void "set_XAnyEvent_type" ))
 
 
-;;;;;; XEvent funcions ;;;;;;
+;;;;;; XEvent functions ;;;;;;
 
 (defentry make-XEvent () ( fixnum  "make_XEvent" ))
 ;;(defentry XEvent-pad[24] (fixnum) ( fixnum "XEvent_pad[24]" ))

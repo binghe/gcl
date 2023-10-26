@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;;; CMPBLOCK  Block and Return-from.
 ;;;
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
@@ -28,7 +27,7 @@
 (si:putprop 'return-from 'c1return-from 'c1special)
 (si:putprop 'return-from 'c2return-from 'c2)
 
-(defstruct blk
+(defstruct (blk (:print-function (lambda (x s i) (s-print 'blk (blk-name x) (si::address x) s))))
            name			;;; Block name.
            ref			;;; Referenced or not.  T or NIL.
            ref-clb		;;; Cross local function reference.

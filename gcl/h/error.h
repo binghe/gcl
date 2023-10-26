@@ -1,5 +1,8 @@
-#define Icall_error_handler(a_,b_,c_,d_...) \
-  Icall_gen_error_handler(Cnil,null_string,a_,b_,c_,##d_)
+#ifndef ERROR_H
+#define ERROR_H
+
+#define Icall_error_handler(a_,b_,c_,d_...)			\
+  Icall_gen_error_handler_noreturn(Cnil,null_string,a_,b_,c_,##d_)
 #define Icall_continue_error_handler(a_,b_,c_,d_,e_...) \
   Icall_gen_error_handler(Ct,a_,b_,c_,d_,##e_)
 
@@ -19,6 +22,7 @@ PFN(numberp)
 PFN(characterp)
 PFN(symbolp)
 PFN(stringp)
+PFN(pathnamep)
 PFN(string_symbolp)
 PFN(packagep)
 PFN(consp)
@@ -49,6 +53,7 @@ PFN(functionp)
 #define check_type_character(a_)                        TPE(a_,characterp_fn,sLcharacter)
 #define check_type_sym(a_)                              TPE(a_,symbolp_fn,sLsymbol)
 #define check_type_string(a_)                           TPE(a_,stringp_fn,sLstring)
+#define check_type_pathname(a_)                         TPE(a_,pathnamep_fn,sLpathname)
 #define check_type_or_string_symbol(a_)                 TPE(a_,string_symbolp_fn,TSor_symbol_string)
 #define check_type_or_symbol_string(a_)                 TPE(a_,string_symbolp_fn,TSor_symbol_string)
 #define check_type_or_pathname_string_symbol_stream(a_) TPE(a_,pathname_string_symbol_streamp_fn,TSor_pathname_string_symbol_stream)
@@ -75,12 +80,6 @@ PFN(functionp)
                             (a_)=(object)&_s;\
                             set_type_of((a_),t_fixnum);\
                             (a_)->FIX.FIXVAL=(b_);}
-
-/*FIXME the stack stuff is dangerous It works for error handling, but
-  simple errors may evan pass the format tring up the stack as a slot
-  in ansi*/
-/* #define TYPE_ERROR(a_,b_) {stack_string(tp_err,"~S is not of type ~S.");\ */
-/*                            Icall_error_handler(sKwrong_type_argument,tp_err,2,(a_),(b_));} */
 
 object ihs_top_function_name(ihs_ptr h);
 #define FEerror(a_,b_...)   Icall_error_handler(sLerror,null_string,\
@@ -141,6 +140,9 @@ object ihs_top_function_name(ihs_ptr h);
 #define READER_ERROR(a_,b_) Icall_error_handler(sLreader_error,null_string,6,\
                                                 sKstream,a_,\
                                                 sKformat_control,make_simple_string(b_),sKformat_arguments,Cnil)
+#define PRINT_NOT_READABLE(a_,b_) Icall_error_handler(sLprint_not_readable,null_string,6,\
+                                                sKobject,a_,\
+                                                sKformat_control,make_simple_string(b_),sKformat_arguments,Cnil)
 #define FILE_ERROR(a_,b_) Icall_error_handler(sLfile_error,null_string,6,\
                                                 sKpathname,a_,\
                                                 sKformat_control,make_simple_string(b_),sKformat_arguments,Cnil)
@@ -197,3 +199,4 @@ object ihs_top_function_name(ihs_ptr h);
    abort();\
  })
 
+#endif /*ERROR_H*/

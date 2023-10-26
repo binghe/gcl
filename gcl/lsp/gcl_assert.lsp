@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -23,10 +22,6 @@
 
 (in-package :si)
 
-(defun read-evaluated-form nil
-  (format *query-io* "~&type a form to be evaluated:~%")
-  (list (eval (read *query-io*))))
-
 (defun check-type-symbol (symbol value type &optional type-string 
 				 &aux (type-string (when type-string (concatenate 'string ": need a " type-string))))
   (restart-case 
@@ -42,6 +37,9 @@
   `(progn (,(if (symbolp place) 'setq 'setf) ,place 
 	   (the ,typespec (if (typep ,place ',typespec) ,place (check-type-symbol ',place ,place ',typespec ',string)))) nil))
 
+(defun read-evaluated-form nil
+  (format *query-io* "~&type a form to be evaluated:~%")
+  (list (eval (read *query-io*))))
 
 (defun assert-places (places values string &rest args)
   (declare (dynamic-extent args))

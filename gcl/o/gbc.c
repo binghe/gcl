@@ -625,9 +625,10 @@ mark_object1(object x) {
     case smm_probe:
       mark_object(x->sm.sm_object0);
       mark_object(x->sm.sm_object1);
-      if (x->sm.sm_fp) {
-	MARK_LEAF_DATA(x,x->sm.sm_buffer,BUFSIZ);
-      }
+      /* Only set by malloc, handled by malloc_list */
+      /* if (x->sm.sm_fp) { */
+      /* 	MARK_LEAF_DATA(x,x->sm.sm_buffer,BUFSIZ); */
+      /* } */
       break;
 
     case smm_file_synonym:
@@ -1090,7 +1091,7 @@ GBC(enum type t) {
       if (tm->tm_type==v->type)
 	for (x=pagetochar(page(v)),j=tm->tm_nppage;j--;x+=tm->tm_size) {
 	  object o=x;
-	  if (type_of(o)==t_stream && !is_free(o) && o->sm.sm_fp && o->sm.sm_fp!=stdin && o->sm.sm_fp!=stdout)
+	  if (type_of(o)==t_stream && !is_free(o) && o->sm.sm_fp && o->sm.sm_fp!=stdin && o->sm.sm_fp!=stdout && o->sm.sm_fp!=stderr)
 	    close_stream(o);
 	}
 

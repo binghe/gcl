@@ -33,7 +33,7 @@ UNIX_SAVE_DEP = unexnt.c
 # requires c/rel_.. machine dependent code.
 
 RSYM	= rsym
-SFASL	= $(ODIR)/sfasl.o
+SFASL	= sfasl.o
 
 
 

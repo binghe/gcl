@@ -44,8 +44,8 @@ fns1:	$(FNS)
 fns:	../cmpnew/gcl_collectfn.o
 	$(MAKE) fns1 -e "FNS=`echo ${OBJS} | sed -e 's:\.o:\.fn:g'`"
 
-#../cmpnew/collectfn.o: ../cmpnew/collectfn.lsp
-#	(cd ../cmpnew ; $(PORTDIR)/saved_gcl $(PORTDIR)/ collectfn.lisp collectfn S1000)
+#../cmpnew/gcl_collectfn.o: ../cmpnew/gcl_collectfn.lsp
+#	(cd ../cmpnew ; $(PORTDIR)/saved_gcl $(PORTDIR)/ gcl_collectfn.lisp gcl_collectfn S1000)
 
 
 clean:

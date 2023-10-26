@@ -6,8 +6,11 @@ TMP=/tmp/tmpd$$
 mkdir ${TMP}
 cp $@ ${TMP}
 
-for v in $@ ; 
+for v in $1 ;
 do
+echo '(load (format nil "~a~a" si::*system-directory* "../cmpnew/gcl_collectfn"))' \
+   '(compiler::emit-fn t)'\
+   "(compile-file \"${TMP}/$v\" :o-file nil)"
 echo '(load (format nil "~a~a" si::*system-directory* "../cmpnew/gcl_collectfn"))' \
    '(compiler::emit-fn t)'\
    "(compile-file \"${TMP}/$v\" :o-file nil)" | ${LISP}

@@ -1,4 +1,3 @@
-;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
@@ -42,7 +41,7 @@
 (eval-when
  (compile eval)
  
- (defmacro defktn (fn ll &rest args &aux (a (member '&aux ll))(ll (ldiff ll a)))
+ (defmacro defktn (fn ll &rest args &aux (a (member '&aux ll))(ll (ldiff-nf ll a)))
    `(progn
       (defun ,fn (,@ll &key test test-not key &aux ,@(cdr a)
 		       (kf (when key (coerce key 'function)))
@@ -54,18 +53,18 @@
 	(check-type test key-test-type)
 	(check-type test-not key-test-type)
 	,@(sublis '((key . kf)(test . tf)(test-not . tnf)) args))
-      ,@(let* ((s (gensym))(ts (gensym))
-	       (x `(defun ,s 
-		     (fd list &key key)
-		     (declare (optimize (safety 1)))
-		     (check-type fd function-designator)
-		     (check-type list proper-list)
-		     (check-type key key-test-type)
-		     (,fn (coerce fd 'function) list ,ts 'funcall :key key))))
-	  (list (sublis `((,s . ,(intern (string-concatenate (string fn) "-IF")))(,ts . :test)) x)
-		(sublis `((,s . ,(intern (string-concatenate (string fn) "-IF-NOT")))(,ts . :test-not)) x)))))
+      ,@(unless (eq fn 'adjoin)
+	  (let* ((s (gensym))(ts (gensym))
+		 (x `(defun ,s (fd list &key key)
+		       (declare (optimize (safety 2)))
+		       (check-type fd function-designator)
+		       (check-type list proper-list)
+		       (check-type key key-test-type)
+		       (,fn (coerce fd 'function) list ,ts 'funcall :key key))))
+	    (list (sublis `((,s . ,(intern (string-concatenate (string fn) "-IF")))(,ts . :test)) x)
+		  (sublis `((,s . ,(intern (string-concatenate (string fn) "-IF-NOT")))(,ts . :test-not)) x))))))
  
- (defmacro defnfn (n ll &rest body &aux (a (member '&aux ll))(ll (ldiff ll a)))
+ (defmacro defnfn (n ll &rest body &aux (a (member '&aux ll))(ll (ldiff-nf ll a)))
    `(defun ,n ,(append ll `(&key test test-not key &aux ,@(cdr a)
 				 (kf (when key (coerce key 'function)))
 				 (tf (when test (coerce test 'function)))
@@ -141,7 +140,8 @@
 	(declare (optimize (safety 2)))
 	,@(when plp `((check-type ,list proper-list)))
 	(and test test-not (error "both test and test not supplied"))
-	(let* ((key (or key #'identity))(key (if (functionp key) key (funcallable-symbol-function key)))
+	(let* ((key (or key #'identity))
+	       (key (if (functionp key) key (funcallable-symbol-function key)))
 	       (key-comp  (comp-key key))
 	       (test (or test test-not #'eql))
 	       (test (if (functionp test) test (funcallable-symbol-function test)))
@@ -185,11 +185,11 @@
 
 
 (defun mapl (fd list &rest r &aux (fun (coerce fd 'function)))
-  (declare (optimize (safety 1))(:dynamic-extent r)(notinline make-list));FIXME
+  (declare (optimize (safety 1))(dynamic-extent r)(notinline make-list));FIXME
   (check-type fd function-designator)
   (check-type list proper-list)
   (let ((q (when r (make-list (length r)))))
-    (declare (:dynamic-extent q))
+    (declare (dynamic-extent q))
     (labels ((a-cons (x) (check-type x list) (or x (return-from mapl list)))
 	     (lmap (f x h) (cond (x (funcall f x) (lmap f (cdr x) h)) (h)))
 	     (last nil (lmap (lambda (x) (rplaca x (if r (a-cons (pop r)) (a-cons (cdar x))))) q q)))
@@ -208,16 +208,16 @@
 
 
 (defun mapc (fd list &rest r &aux (fun (coerce fd 'function)))
-  (declare (optimize (safety 1))(:dynamic-extent r))
+  (declare (optimize (safety 1))(dynamic-extent r))
   (check-type fd function-designator)
   (check-type list proper-list)
   (let ((q (when r (make-list (length r)))))
-    (declare (:dynamic-extent q))
+    (declare (dynamic-extent q))
     (apply 'mapl (lambda (x &rest r) (apply fun (car x) (mapl (lambda (x) (setf (car x) (car (pop r)))) q))) list r)))
 
 
 (defun mapcar (fd list &rest r &aux (fun (coerce fd 'function)) res rp)
-  (declare (optimize (safety 1))(:dynamic-extent r))
+  (declare (optimize (safety 1))(dynamic-extent r))
   (check-type fd function-designator)
   (check-type list proper-list)
   (apply 'mapc (lambda (x &rest z &aux (tem (cons (apply fun x z) nil)))
@@ -225,7 +225,7 @@
   res)
 
 (defun mapcan (fd list &rest r &aux (fun (coerce fd 'function)) res rp)
-  (declare (optimize (safety 1))(:dynamic-extent r))
+  (declare (optimize (safety 1))(dynamic-extent r))
   (check-type fd function-designator)
   (check-type list proper-list)
   (apply 'mapc (lambda (x &rest z &aux (tem (apply fun x z)))
@@ -234,7 +234,7 @@
   res)
 
 (defun maplist (fd list &rest r &aux (fun (coerce fd 'function)) res rp)
-  (declare (optimize (safety 1))(:dynamic-extent r))
+  (declare (optimize (safety 1))(dynamic-extent r))
   (check-type fd function-designator)
   (check-type list proper-list)
   (apply 'mapl (lambda (x &rest z &aux (tem (cons (apply fun x z) nil)))
@@ -242,7 +242,7 @@
   res)
 
 (defun mapcon(fd list &rest r &aux (fun (coerce fd 'function)) res rp)
-  (declare (optimize (safety 1))(:dynamic-extent r))
+  (declare (optimize (safety 1))(dynamic-extent r))
   (check-type fd function-designator)
   (check-type list proper-list)
   (apply 'mapl (lambda (x &rest z &aux (tem (apply fun x z)))
@@ -388,19 +388,24 @@
     (do ((r x) (rp nil x) (x x (cdr x)) (w w (cdr w)))
 	((atom w) (when rp (rplacd rp nil) r)))))
 
-(defun ldiff (l tl &aux (test #'eql))
-  (declare (optimize (safety 2)) (ignorable test))
+(defun ldiff (l tl)
+  (declare (optimize (safety 1)))
   (check-type l list)
-  (do (r rp (tc (bump-test (comp-test test nil) tl)) (l l (cdr l))) 
-      ((cond ((do-test test tc l tl)) ((atom l) (when rp (rplacd rp l)))) r)
-      (let ((tmp (cons (car l) nil))) (collect r rp tmp))))
+  (labels ((srch (x)
+	     (unless (eql x tl)
+	       (if (atom x) x
+		   (cons (car x) (srch (cdr x)))))))
+    (srch l)))
 
-(defun tailp (tl l &aux (test #'eql))
-  (declare (optimize (safety 2)) (ignorable test))
+(defun tailp (tl l)
+  (declare (optimize (safety 1)))
   (check-type l list)
-  (do (r (tc (bump-test (comp-test test nil) tl)) (l l (cdr l))) 
-      ((cond ((setq r (do-test test tc l tl))) ((atom l))) r)))
-	   
+  (labels ((srch (x)
+	     (or (eql x tl)
+		 (unless (atom x)
+		   (srch (cdr x))))))
+    (srch l)))
+
 (defun list-length (l)
   (declare (optimize (safety 2)))
   (check-type l list)
@@ -454,7 +459,7 @@
 ;; 	(collect r rp tmp))))
 
 (defun nconc (&rest l &aux r rp)
-  (declare (:dynamic-extent l))
+  (declare (dynamic-extent l))
   (mapl (lambda (l &aux (it (car l)))
 	  (if rp (rplacd rp it) (setq r it))
 	  (when (and (cdr l) (consp it)) (setq rp (last it)))) l)
@@ -506,7 +511,7 @@
 (defun copy-tree (tr)
   (declare (optimize (safety 2)))
   (do (st cs a (g (sgen))) (nil)
-      (declare (:dynamic-extent st cs))
+      (declare (dynamic-extent st cs))
       (cond ((atom tr)
 	     (do nil ((or (not cs) (eq g (car cs))))
 		 (setq a (pop cs) st (cdr st) tr (cons a tr)))
@@ -521,7 +526,7 @@
 	 (test (if (functionp test) test (funcallable-symbol-function test)))
 	 (test-comp (comp-test test test-not)))
     (do (st1 cs1 st2 (g (sgen))) (nil)
-	(declare (:dynamic-extent st1 cs1 st2))
+	(declare (dynamic-extent st1 cs1 st2))
 	(cond ((and (atom tr1) (consp tr2)) (return nil))
 	      ((and (consp tr1) (atom tr2)) (return nil))
 	      ((atom tr1)
@@ -535,7 +540,7 @@
 
 (deflist subst ((n o) tr t nil)
   (do (st cs a c rep (g (sgen))) (nil)
-      (declare (:dynamic-extent st cs))
+      (declare (dynamic-extent st cs))
       (setq rep (do-test test test-comp o (do-key key key-comp tr)))
       (cond ((or rep (atom tr))
 	     (setq tr (if rep n tr))
@@ -546,7 +551,7 @@
 
 (deflist nsubst ((n o) tr t nil)
   (do (st cs rep (g (sgen))) (nil)
-      (declare (:dynamic-extent st cs))
+      (declare (dynamic-extent st cs))
       (setq rep (do-test test test-comp o (do-key key key-comp tr)))
       (cond ((or rep (atom tr))
 	     (setq tr (if rep n tr))
@@ -558,7 +563,7 @@
 (defllist sublis (al tr nil)
   (or (unless al tr)
       (do (st cs a c rep (g (sgen))) (nil)
-	(declare (:dynamic-extent st cs))
+	(declare (dynamic-extent st cs))
 	(setq rep (assoc (do-key key key-comp tr) al :test test :test-not test-not))
 	(cond ((or rep (atom tr))
 	       (setq tr (if rep (cdr rep) tr))
@@ -570,7 +575,7 @@
 (defllist nsublis (al tr nil)
   (or (unless al tr)
       (do (st cs rep (g (sgen))) (nil)
-	(declare (:dynamic-extent st cs))
+	(declare (dynamic-extent st cs))
 	(setq rep (assoc (do-key key key-comp tr) al :test test :test-not test-not))
 	(cond ((or rep (atom tr))
 	       (setq tr (if rep (cdr rep) tr))
@@ -580,7 +585,7 @@
 	      ((setq st (cons tr st) cs (cons g cs) tr (car tr)))))))
 
 (defun append (&rest l &aux r rp)
-  (declare (:dynamic-extent l))
+  (declare (dynamic-extent l))
   (mapl (lambda (x &aux (y (car x)))
 	  (declare (optimize (safety 2)))
 	  (if (cdr x)

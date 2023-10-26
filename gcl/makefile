@@ -35,10 +35,15 @@ TESTDIR = ansi-tests
 
 VERSION=`cat majvers`.`cat minvers`
 
-all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk do-info pargcl_all
+all: $(BUILD_BFD) system command cmpnew/gcl_collectfn.o lsp/gcl_info.o do-gcl-tk do-info release #pargcl_all FIXME
 
-system: $(PORTDIR)/$(FLISP)
-	$(MAKE) -C $(PORTDIR) final
+release: majvers minvers
+	date >$@
+
+TARGET:=$(shell if [ "$(FLISP)" != "saved_ansi_gcl" ] ; then echo $(PORTDIR)/$(FLISP); else echo ansi-tests/test_results; fi)
+
+system: $(TARGET)
+#	$(MAKE) -C $(PORTDIR) final
 	touch $@
 
 ASRC:=$(shell ls -1 o/*.c o/*.d o/*.h h/*.h lsp/*.lsp cmpnew/*.lsp mod/*.lsp pcl/*sp clcs/*sp xgcl-2/*p) #o/*.d o/*.h h/*.h
@@ -54,23 +59,23 @@ xgcl: $(PORTDIR)/saved_xgcl
 $(PORTDIR)/saved_xgcl: $(PORTDIR)/saved_gcl
 	cd xgcl-2 && $(MAKE)
 
-binutils/intl/libintl.a:
-	cd $(@D) && $(MAKE)
+#binutils/intl/libintl.a:
+#	cd $(@D) && $(MAKE)
 
-binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
-	cd $(@D) && $(MAKE)
+#binutils/bfd/libbfd.a binutils/libiberty/libiberty.a: binutils/intl/libintl.a
+#	cd $(@D) && $(MAKE)
 
 copy_iberty: $(LIBIBERTY)
-	cd binutils/libiberty && ar x $<
+	mkdir -p binutils/libiberty && cd binutils/libiberty && ar x $<
 
 copy_bfd: $(LIBBFD) copy_iberty
-	cd binutils/bfd && ar x $<
+	mkdir -p binutils/bfd && cd binutils/bfd && ar x $<
 
-h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
-	cp $(<D)/$(@F) $@
+#h/bfd.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
+#	cp $(<D)/$(@F) $@
 
-h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
-	cp $(<D)/../include/$(@F) $@
+#h/bfdlink.h h/ansidecl.h h/symcat.h: binutils/bfd/libbfd.a binutils/libiberty/libiberty.a
+#	cp $(<D)/../include/$(@F) $@
 
 $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	(cd $(BINDIR); $(MAKE) all)
@@ -150,8 +155,10 @@ $(MPDIR)/libmport.a:
 $(GMPDIR)/libgmp.a: $(GMPDIR)/Makefile
 	cd $(GMPDIR) && $(MAKE) && rm -f libgmp.a &&  ar qc libgmp.a *.o */*.o
 
+PWD_CMD?=pwd
+
 gmp_all: $(GMPDIR)/Makefile
-	cd $(GMPDIR) && $(MAKE) 
+	cd $(GMPDIR) && echo '#include <stdio.h>' >> gmp.h && echo "#include \"`$(PWD_CMD)`/../h/prelink.h\"" >> gmp.h && $(MAKE) 
 	touch $@
 
 $(GMPDIR)/mpn/mul_n.o $(GMPDIR)/mpn/lshift.o $(GMPDIR)/mpn/rshift.o: $(GMPDIR)/Makefile
@@ -162,9 +169,9 @@ $(GMPDIR)/mpn/mul_n.o $(GMPDIR)/mpn/lshift.o $(GMPDIR)/mpn/rshift.o: $(GMPDIR)/M
 # By setting make variables, pargcl_all should work for build, and for install
 pargcl_all: $(BUILD_BFD) $(PORTDIR)/$(FLISP) command cmpnew/gcl_collectfn.o \
 		lsp/gcl_info.o do-gcl-tk do-info
-	# MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'`
-	# $(MAKE) install_command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
-	# Logic copied from `command' target, but with FLISP modified:
+# MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'`
+# $(MAKE) install_command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
+# Logic copied from `command' target, but with FLISP modified:
 	if test "$(PARGCLDIR)" != ""; then \
 	  MGCLDIR=`echo $(GCLDIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
 	  GCLDIR=`echo $(GCLDIR)` ; \
@@ -195,7 +202,7 @@ command:
 	rm -f bin/gcl xbin/gcl
 	MGCLDIR=`echo $(GCLDIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
 	GCLDIR=`echo $(GCLDIR)` ; \
-	$(MAKE) install_command "INSTALL_LIB_DIR=$$GCLDIR" "prefix=$$GCLDIR" "BINDIR=$$MGCLDIR/$(PORTDIR)"
+	$(MAKE) install-command "INSTALL_LIB_DIR=$$GCLDIR" "prefix=$$GCLDIR" "BINDIR=$$MGCLDIR/$(PORTDIR)"
 	(cd xbin ; cp ../bin/gcl .)
 
 #	GCLDIR=`echo $(GCLDIR) | sed -e 'sX^/cygdrive/\([a-z]\)X\1!Xg' -e 'sX^//\([a-z]\)X\1!Xg'` ; \
@@ -205,7 +212,7 @@ merge:
 
 LISP_LIB=clcs/package.lisp clcs/myload1.lisp clcs/gcl_clcs_macros.lisp cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp xgcl-2/sysdef.lisp xgcl-2/gcl_dwtest.lsp xgcl-2/gcl_dwtestcases.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h unixport/init_$(SYSTEM).lsp unixport/lib$(SYSTEM).a unixport/libgclp.a gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs) unixport/gcl.script
 
-install_command:
+install-command:
 	rm -f bin/$(BINSCPT)
 	(echo '#!/bin/sh' ; \
 	echo exec $(BINDIR)/$(FLISP)$(EXE) \\ ; \
@@ -238,12 +245,15 @@ install_windows_command:
 	 echo 'PROMPT %promp$%'; \
 	 echo 'FOR %%c IN (CALL DEL) DO %%c %temp%.\setdir.bat'; \
 	 echo 'set cwd=%cd%'; \
-	 echo 'set libdir=%cd%\..\lib\gcl-'$(VERSION); \
+	 echo 'set libdir=%cd%\..\lib\gcl-$(VERSION)'; \
 	 echo 'set unixportdir=%libdir%\unixport'; \
 	 echo 'path %cd%\..\mingw\bin;%PATH%'; \
-	 echo "start %unixportdir%\$(FLISP).exe -dir %unixportdir% -libdir %libdir% -eval \"(setq si::*allow-gzipped-file* t)\" %1 %2 %3 %4 %5 %6 %7 %8 %9" ) > $(prefix)/bin/gclm.bat
+	 echo "start %unixportdir%\$(FLISP).exe -dir %unixportdir% -libdir %libdir% -eval \"(setq si::*allow-gzipped-file* t)\" %1 %2 %3 %4 %5 %6 %7 %8 %9" ) > $(DESTDIR)$(prefix)/bin/gclm.bat ; fi
+	rm -f $(DESTDIR)$(prefix)/bin/gclfinal.bat
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then (echo 'ECHO path %1\mingw\bin;%PATH% > gcli.bat'; \
+	 echo "ECHO start %1\lib\gcl-$(VERSION)\unixport\$(FLISP).exe -dir %1\lib\gcl-$(VERSION)\unixport -libdir %1\lib\gcl-$(VERSION) -eval \"(setq si::*allow-gzipped-file* t)\" %1 %2 %3 %4 %5 %6 %7 %8 %9 >> gcli.bat" ) > $(DESTDIR)$(prefix)/bin/gclfinal.bat ; fi
 
-install: all
+install: 
 	$(MAKE) install1 "INSTALL_LIB_DIR=$(prefix)/lib/gcl-`cat majvers`.`cat minvers`" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)"
 
 INSTALL_LIB_DIR=
@@ -263,6 +273,8 @@ install1:
 install_unix:
 	mkdir -p $(DESTDIR)$(prefix)/lib 
 	mkdir -p $(DESTDIR)$(prefix)/bin
+	mkdir -p $(DESTDIR)$(prefix)/share
+	cp -a man $(DESTDIR)$(prefix)/share/
 	mkdir -p $(DESTDIR)$(INSTALL_LIB_DIR)
 	MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
 	$(MAKE) install_command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
@@ -270,6 +282,7 @@ install_unix:
 	rm -f $(DESTDIR)$(prefix)/bin/gcl.exe
 	tar cf - $(PORTDIR)/$(FLISP)$(EXE) info/*.info* $(LISP_LIB) \
 	$(TCL_EXES)  |  (cd $(DESTDIR)$(INSTALL_LIB_DIR) ;tar xf -)
+	if gcc --version | grep -i mingw >/dev/null 2>&1 ; then if grep -i oncrpc makedefs >/dev/null 2>&1 ; then cp /mingw/bin/oncrpc.dll $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR); fi ; fi
 	cd $(DESTDIR)$(INSTALL_LIB_DIR)/$(PORTDIR) && \
 		mv $(FLISP)$(EXE) temp$(EXE) && \
 		echo '(si::reset-sys-paths "$(INSTALL_LIB_DIR)/")(si::save-system "$(FLISP)$(EXE)")' | ./temp$(EXE) && \
@@ -323,7 +336,6 @@ gclclean:
 	(cd mp ; $(MAKE) clean)
 	(cd $(ODIR); $(MAKE) clean)
 	(cd $(LSPDIR); $(MAKE) clean)
-	(cd $(MODDIR); $(MAKE) clean)
 	(cd $(CMPDIR); $(MAKE) clean)
 	(cd $(PORTDIR); $(MAKE) clean)
 	(cd gcl-tk ; $(MAKE) clean)
@@ -332,7 +344,8 @@ gclclean:
 	cd xgcl-2 && $(MAKE) clean
 	(cd $(TESTDIR); $(MAKE) clean)
 	(cd info ; $(MAKE) clean)
-	find binutils -name "*.o" -exec rm {} \;
+#	find binutils -name "*.o" -exec rm {} \;
+	rm -rf binutils
 	rm -f foo.tcl config.log makedefs makedefsafter config.cache config.status makedefc
 	rm -f h/config.h h/gclincl.h h/cmpinclude.h
 	rm -f xbin/gcl foo foo.c bin/gclm.bat gmp_all
@@ -346,23 +359,20 @@ gclclean:
 
 
 clean: gclclean
-	-cd $(GMPDIR) && $(MAKE) distclean
-	rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
-	-cd $(PARGCLDIR) && $(MAKE) distclean
-	rm -f unixport/saved_pargcl unixport/saved_prepargcl \
-		bin/pargcl bin/procgroup unixport/_rsym1
-	-cd binutils/intl && $(MAKE) distclean
-	-cd binutils/bfd && $(MAKE) distclean
-	-cd binutils/libiberty && $(MAKE) distclean
-
-#$(HDIR)att_ext.h $(HDIR)new_decl.h $(HDIR)eval.h  $(HDIR)/protoize.h $(HDIR)lex.h  $(HDIR)funlink.h $(HDIR)compat.h $(HDIR)cmponly.h $(HDIR)object.h $(HDIR)mgmp.h
+	-[ -z "$(GMPDIR)" ] || (cd $(GMPDIR) && $(MAKE) distclean)
+	-[ -z "$(GMPDIR)" ] || rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
+	-[ -z "$(PARGCLDIR)" ] || (cd $(PARGCLDIR) && $(MAKE) distclean)
+	-[ -z "$(PARGCLDIR)" ] || (rm -f unixport/saved_pargcl unixport/saved_prepargcl bin/pargcl bin/procgroup unixport/_rsym1)
+#	-cd binutils/intl && $(MAKE) distclean
+#	-cd binutils/bfd && $(MAKE) distclean
+#	-cd binutils/libiberty && $(MAKE) distclean
 
 CMPINCLUDE_FILES=$(HDIR)cmpincl1.h $(HDIR)gclincl.h $(HDIR)compbas.h $(HDIR)type.h $(HDIR)mgmp.h \
 	$(HDIR)lu.h $(HDIR)globals.h  $(HDIR)vs.h \
 	$(HDIR)bds.h $(HDIR)frame.h \
 	$(HDIR)lex.h \
 	$(HDIR)compbas2.h \
-	$(HDIR)compprotos.h  $(HDIR)/immnum.h
+	$(HDIR)compprotos.h  $(HDIR)immnum.h
 
 OTHERS=$(HDIR)notcomp.h $(HDIR)rgbc.h $(HDIR)stacks.h 
 
@@ -373,13 +383,10 @@ $(HDIR)mcompdefs.h: $(HDIR)compdefs.h $(HDIR)new_decl.h
 	$(AWK) 'BEGIN {print "#include \"include.h\"";print "#include \"page.h\"";print "---"} {a=$$1;gsub("\\.\\.\\.","",a);print "\"#define " $$1 "\" " a}' $< |\
 	$(CC) -E -P -I./$(HDIR) - |\
 	$(AWK) '/^\-\-\-$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
-	# awk 'BEGIN {print "#include \"include.h\"";print "---"} {print "\"#define " $$1 "\" " $$1}' $< |\
-	# cpp -I$(HDIR) |\
-	# awk '/^---$$/ {i=1;next} {if (!i) next} {gsub("\"","");print}' >$@
 
 $(HDIR)cmpinclude.h: $(HDIR)mcompdefs.h $(CMPINCLUDE_FILES) $(HDIR)config.h $(HDIR)cmponly_last.h
 	cp $< $(@F)
-	cat $(CMPINCLUDE_FILES) | $(CC) -E -I./$(HDIR) - | awk '/^# |^$$/ {next}{print}' >> $(@F)
+	cat $(CMPINCLUDE_FILES) | $(CC) -E -I./$(HDIR) - | $(AWK) '/^# |^$$|^#pragma/ {next}{print}' >> $(@F)
 	cat $(HDIR)cmponly_last.h >>$(@F)
 	./xbin/move-if-changed mv $(@F) $@
 	./xbin/move-if-changed cp $@ o/$(@F)
@@ -401,4 +408,4 @@ kcp:
 	(cd go ; $(MAKE)  "CFLAGS = -I../h -pg  -c -g ")
 	(cd unixport ; $(MAKE) gcp)
 
-#.INTERMEDIATE: unixport/saved_pcl_gcl
+.INTERMEDIATE: $(HDIR)mcompdefs.h

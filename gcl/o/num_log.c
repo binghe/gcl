@@ -28,8 +28,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 #include "num_include.h"
 
-/*FIXME 64*/
-#define int fixnum
    
 #ifdef GMP
 #include "gmp_num_log.c"
@@ -181,9 +179,9 @@ DEFLOG("LOGEQV",logeqv,BOOLEQV,small_fixnum(-1));
 
 
 #define BI(n_)\
-  DEFUN(#n_,fixnum,Join(fS,n_),SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {\
+  DEFUN(#n_,object,Join(fS,n_),SI,1,1,NONE,II,OO,OO,OO,(fixnum x),"") {\
 \
-  RETURN1(Join(__builtin_,n_)(x));\
+    RETURN1((object)(fixnum)Join(__builtin_,n_)(x));	\
 \
 }
 

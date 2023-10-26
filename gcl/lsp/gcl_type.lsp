@@ -1,6 +1,6 @@
 (in-package :si)
 
-(export '(cmp-norm-tp
+(export '(cmp-norm-tp tp-p
 	  cmp-unnorm-tp
 	  type-and type-or1 type>= type<= tp-not tp-and tp-or
 	  atomic-tp tp-bnds object-tp

@@ -66,7 +66,7 @@ DEFUN("COMPILE-REGEXP",object,fScompile_regexp,SI,1,1,NONE,OO,OO,OO,OO,(object p
   char *tmp;
   object res;
   void *v;
-  fixnum sz=0;
+  ufixnum sz=0;
 
   p=coerce_to_string(p);
   if (!(tmp=alloca(VLEN(p)+1)))
@@ -92,7 +92,7 @@ DEFUN("COMPILE-REGEXP",object,fScompile_regexp,SI,1,1,NONE,OO,OO,OO,OO,(object p
 }
 
 
-DEFUN("STRING-MATCH",fixnum,fSstring_match,SI,2,4,NONE,IO,OO,OO,OO,
+DEFUN("STRING-MATCH",object,fSstring_match,SI,2,4,NONE,IO,OO,OO,OO,
 	  (object pattern,object string,...),
       "Match regexp PATTERN in STRING starting in string starting at START \
 and ending at END.  Return -1 if match not found, otherwise \
@@ -156,7 +156,7 @@ be over written.   \
 
 
      str=string->st.st_self;
-     if (str+end==(void *)core_end || str+end==(void *)compiled_regexp) {
+     if (NULL_OR_ON_C_STACK(str+end) || str+end==(void *)compiled_regexp) {
 
        if (!(str=alloca(VLEN(string)+1)))
 	 FEerror("Cannot allocate memory on C stack",0);
@@ -172,7 +172,7 @@ be over written.   \
 
      if (!ans ) {
        END_NO_INTERRUPT;
-       RETURN1(-1);
+       RETURN1((object)-1);
      }
 
      pp=compiled_regexp->startp;
@@ -183,10 +183,8 @@ be over written.   \
        ((fixnum *)v->a.a_self)[i]=*pp ? *pp-str : -1;
 
      END_NO_INTERRUPT;
-     RETURN1(((fixnum *)v->a.a_self)[0]);
+     RETURN1((object)((fixnum *)v->a.a_self)[0]);
 
    }
 
 }
-	
-

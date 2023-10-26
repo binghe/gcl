@@ -54,7 +54,7 @@
 		(if (,(if sa 'or 'and) n1f n2f) ,f (the integer (,fb n1 n2 ,c)))))
 	  (q (if r `(let ((z ,q)) (if r (apply ',ls z (car r) (cdr r)) z)) q)))
      `(defun ,ls ,(if r `(&optional (n1 ,d) (n2 ,d) &rest r) `(n1 n2))
-	,@(when r `((declare (:dynamic-extent r))))
+	,@(when r `((declare (dynamic-extent r))))
 	(declare (optimize (safety 1)))
 	(check-type n1 integer)
 	(check-type n2 integer)

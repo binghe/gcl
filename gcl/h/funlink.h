@@ -1,5 +1,6 @@
 #ifndef FUNLINK_H
 #define FUNLINK_H
+
 /* the link_desc, is an INT which carries the call information
    for all uses of that link.   It tells whether fcall.nargs is
    set before the call, whether the VFUN_FUN is set, (to pass in
@@ -21,6 +22,7 @@ A link arg descriptor:
     ai = i'th arg type in F_arg_types
 */
 
+/* 2^6 is the limit on the number of args */
 #define F_NARG_WIDTH 6
 #define F_START_TYPES_POS   (2* F_NARG_WIDTH + F_end )
 enum F_arg_flags
@@ -52,7 +54,7 @@ enum F_arg_types
   };
 
 /* Make a mask for bits i < j, masking j-i bits */
-#define MASK_RANGE(i,j)  ((~(~0 << (j-i)))<< i)
+#define MASK_RANGE(i,j)  ((~(~0UL << (j-i)))<< i)
 
 #define F_PLAIN(x) (((x) & MASK_RANGE( F_START_TYPES_POS,31)) == 0)
 #define ARG_LIMIT 63

@@ -145,10 +145,10 @@ struct character {
 
   object            ch_name;
   ufixnum           pad5;
-  uqfixnum          ch_code; /*  code  */
-  uqfixnum          pad;     /*  pad  */
-  uqfixnum          ch_font; /*  font  */
-  uqfixnum          ch_bits; /*  bits  */
+  uchar             ch_code; /*  code  */
+  uchar             ch_font; /*  code  */
+  uchar             ch_bits; /*  code  */
+  ufixnum           pad:LM(24);
   ufixnum           pad1;
   ufixnum           pad2;
   ufixnum           pad3;
@@ -408,14 +408,11 @@ struct stream {
   void            *sm_fp;          /*  file pointer  */
   object           sm_object0;     /*  some object  */
   object           sm_object1;     /*  some object */
-  fixnum           sm_int0;        /*  some int  */
-  fixnum           sm_int1;        /*  column for input or output, stream */
   char            *sm_buffer;      /*  ptr to BUFSIZE block of storage */
-  uqfixnum         sm_mode:4;      /*  stream mode  */
-  uqfixnum         sm_pad:QM(4);   /*  stream mode  */
-  uqfixnum         sm_flags:3;     /*  flags from gcl_sm_flags */
-  uqfixnum         sm_pad1:QM(3);  /*  flags from gcl_sm_flags */
-  hfixnum          sm_fd;          /*  stream fd */
+  ufixnum          sm_mode:4;      /*  stream mode  */
+  ufixnum          sm_flags:6;     /*  flags from gcl_sm_flags */
+  ufixnum          sm_fd:6;        /*  file descriptor */
+  ufixnum          sm_int:LM(16);  /*  general purpose integer */
      
 };
 struct random {
