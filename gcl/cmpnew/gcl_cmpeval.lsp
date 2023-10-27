@@ -1598,7 +1598,7 @@
 	  (inl
 	   (setq inl (mapcar (lambda (x) (name-sir (car x))) (ldiff inl *src-inline-recursion*)))
 	   (keyed-cmpnote (list* 'inline 'inline-abort inl) "aborting inline of ~s" inl)
-	   (setq *notinline* (nunion inl *notinline*))
+	   (setq *notinline* (nunion inl *notinline*));FIXME too extreme?
 	   nil)
 	  ((and sir (tail-recursion-possible fun))
 	   (keyed-cmpnote (list 'tail-recursion fun) "tail recursive call to ~s replaced with iteration" fun)

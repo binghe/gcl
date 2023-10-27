@@ -619,7 +619,7 @@
     (c1side-effects nil)
     (when (consp atp) 
       (when (eq atp atp1) (setq atp1 (copy-list atp1)))
-      (setf (car atp) (if atp1 (car atp1) (new-bind))))
+      (setf (car atp) (if atp1 atp1 (new-bind))));(car atp1)
     (when (eq (caar nargs) 'var)
       (bump-pconsa (caaddr (car nargs)) (info-type (cadadr nargs))))
     (setf (info-type info) (cons-propagator 'cons (info-type (cadadr nargs))

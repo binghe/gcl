@@ -40,6 +40,7 @@
   (setq *objects* (make-hash-table :test 'eq))
   (setq *dlinks* (make-hash-table :test 'equal))
   (setq *local-funs* nil)
+  (setq *hash-eq* nil)
   (setq *global-funs* nil)
   (setq *global-entries* nil)
   (setq *undefined-vars* nil)

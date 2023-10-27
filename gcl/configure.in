@@ -1627,6 +1627,19 @@ AC_CHECK_HEADERS([dirent.h],
 		     [AC_MSG_RESULT([yes]) AC_DEFINE(HAVE_D_TYPE,1,[have struct dirent d_type field])],
 		     AC_MSG_RESULT([no]),AC_MSG_RESULT([no])))
 
+#
+# ParGCL
+#
+
+# ParGCL (includes MPINU)
+AC_ARG_ENABLE(pargcl,
+[ --enable-pargcl        enables ParGCL (for parallel computing),
+			 including subset of MPI (see pargcl/doc/)],
+,enable_pargcl="no")
+AC_ARG_WITH(mpicc,
+[  --with-mpicc=PATH       define path to mpicc (default is built-in MPI subset)],
+, with_mpicc=no)
+
 # ansi lisp
 SYSTEM=ansi_gcl
 CLSTANDARD=ANSI

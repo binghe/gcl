@@ -400,7 +400,7 @@
       
       (let* ((fun (pop def))
 	     (lam (car def))
-	     (cl (fun-call fun))
+	     (cl (update-closure-indices (fun-call fun)))
 	     (sig (car cl))
 	     (at (car sig))
 	     (rt (cadr sig)))

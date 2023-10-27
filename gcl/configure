@@ -792,6 +792,8 @@ enable_xdr
 enable_immfix
 enable_fastimmfix
 enable_cstackmax
+enable_pargcl
+with_mpicc
 enable_ansi
 enable_japi
 enable_readline
@@ -1460,6 +1462,8 @@ Optional Features:
   --enable-immfix will enable an immediate fixnum table above the C stack
   --enable-fastimmfix=XXXX will reject low immediate fixnums unless 2^XXX can be attained
   --enable-cstackmax=xxxx will ensure that the cstack begins below xxxx or fail
+ --enable-pargcl        enables ParGCL (for parallel computing),
+			 including subset of MPI (see pargcl/doc/)
   --enable-ansi builds a large gcl aiming for ansi compliance
   --enable-japi=yes will compile in support for the JAPI graphical interface if present on your system
   --enable-readline    enables command line completion via the readline library
@@ -1472,6 +1476,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-x                use the X Window System
+  --with-mpicc=PATH       define path to mpicc (default is built-in MPI subset)
 
 Some influential environment variables:
   CC          C compiler command
@@ -8834,6 +8839,29 @@ fi
 fi
 
 done
+
+#
+# ParGCL
+#
+
+# ParGCL (includes MPINU)
+# Check whether --enable-pargcl was given.
+if test ${enable_pargcl+y}
+then :
+  enableval=$enable_pargcl;
+else $as_nop
+  enable_pargcl="no"
+fi
+
+
+# Check whether --with-mpicc was given.
+if test ${with_mpicc+y}
+then :
+  withval=$with_mpicc;
+else $as_nop
+  with_mpicc=no
+fi
+
 
 # ansi lisp
 SYSTEM=ansi_gcl
