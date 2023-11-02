@@ -1285,13 +1285,6 @@
 		    ))
 	      tps sir)))
 
-(defun top-tagged-sir (sir &aux last penul)
-  (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (setq penul last last x))))
-	*src-inline-recursion*)
-  (cond ;(last)
-	((member-if 'atomic-tp (cdar last)) penul)
-	((eql (length (car last)) (length (car penul))) last);types t?
-	(penul)))
 
 (defun prior-inline-similar-types (n tp)
     (car (member-if
@@ -1301,14 +1294,23 @@
 	      (arg-types-match (cdar x) tp))))
 	*src-inline-recursion*)))
   
-(defun too-complicated-p (sir)
-  (> (count (car sir) *src-inline-recursion* :key 'caar) *src-loop-unroll-limit*))
+
+(defun inline-too-complex (sir list &aux (i 0) last penul)
+  (mapc (lambda (x) (when (eq (caar x) (car sir)) (when (cdddr x) (incf i) (setq penul last last x))))
+	list)
+  (when (> i *src-loop-unroll-limit*)
+    (let ((p (cond
+               ;(last)
+	       ((member-if 'atomic-tp (cdar last)) penul)
+	       ((eql (length (car last)) (length (car penul))) last);types t?
+	       (penul))))
+      (if p (throw p list) t))))
 
 (defun prev-sir (sir &aux (f (name-sir sir))(tp sir)(n (pop tp)) p)
   (cond ((setq p (prior-inline-similar-types n tp))
 	 (or (tail-recursion-possible f) (throw p *src-inline-recursion*)))
-	((setq p (when (too-complicated-p sir) (top-tagged-sir sir)))
-	 (throw p *src-inline-recursion*))))
+	((inline-too-complex sir *src-inline-recursion*))
+	((inline-too-complex sir *prev-sri*))))
 
 ;; (let* ((p (car (member-if
 ;; 		  (lambda (x)
