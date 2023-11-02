@@ -954,22 +954,20 @@
 
 (defun unique-sigs (sig) (si::uniq-list sig))
 
+
+(defun tsrch (tp &optional (y *useful-type-tree*))
+  (let ((x (member tp y :test 'type<= :key 'car)))
+    (when x
+      (or (tsrch tp (cdar x)) (caar x)))))
+
 (defun bump-tp (tp)
   (cond ((eq tp '*) tp)
 	((and (consp tp) (member (car tp) '(values returns-exactly)))
 	 `(,(car tp) ,@(mapcar 'bump-tp (cdr tp))))
 	((type>= tp #tnull) (type-or1 #tnull (bump-tp (type-and #t(not null) tp))))
-	((cdr (rassoc tp +useful-types-alist+ :test 'type<=)))))
+	((tsrch tp))
+	(t)))
 
-(defun and-form-type (type form original-form &aux type1)
-  (setq type1 (type-and type (info-type (cadr form))))
-  (when (and (null type1) type (info-type (cadr form)))
-        (cmpwarn "The type of the form ~s is not ~s, but ~s." original-form type (info-type (cadr form))))
-  (if (or *compiler-check-args* (eq type1 (info-type (cadr form))))
-      form
-      (let ((info (copy-info (cadr form))))
-           (setf (info-type info) type1)
-           (list* (car form) info (cddr form)))))
 
 (defun check-form-type (type form original-form)
   (when (and (null (type-and type (info-type (cadr form)))) type (info-type (cadr form)))

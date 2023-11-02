@@ -6,7 +6,7 @@
 	  atomic-tp tp-bnds object-tp
 	  cmpt t-to-nil returs-exactly funcallable-symbol-function
 	  infer-tp cnum creal long
-	  sharp-t-reader +useful-types-alist+ +useful-type-list+))
+	  sharp-t-reader +useful-types-alist+ +useful-type-list+ *useful-type-tree*))
 
 (defun sharp-t-reader (stream subchar arg)
   (declare (ignore subchar arg))
@@ -341,17 +341,26 @@
 		`((,i ,(cons (cadr x) (caddr x))))))
 	    +btp-types+)))
 
-(progn
-  . #.(flet ((slow-sort (fn key)
-			(do* ((x nil (lreduce (lambda (y x &aux (kx (funcall key x)))
-						(if (eq (max-bnd kx (funcall key y) fn) kx) x y))
-					      r))
-			      (r *btp-bnds* (lremove x r))
-			      (n nil (cons x n)))
-			     ((not r) (nreverse n)))))
+(defun list-merge-sort1 (l pred key)
 
-	    `((defvar *btp-bnds<* ',(slow-sort '< 'caadr))
-	      (defvar *btp-bnds>* ',(slow-sort '> 'cdadr)))))
+  (let* ((ll (length l)))
+    (if (< ll 2) l
+      (let* ((i (ash ll -1))
+	     (lf l)
+	     (l1 (nthcdr (1- i) l))
+	     (rt (prog1 (cdr l1) (rplacd l1 nil)))
+	     (lf (list-merge-sort1 lf pred key))
+	     (rt (list-merge-sort1 rt pred key)))
+	(do (l0 l1) ((not (and lf rt)) l0)
+	  (cond ((funcall pred (funcall key (car rt)) (funcall key (car lf)))
+		 (setq l1 (if l1 (cdr (rplacd l1 rt)) (setq l0 rt)) rt (cdr rt))
+		 (unless rt (rplacd l1 lf)))
+		(t (setq l1 (if l1 (cdr (rplacd l1 lf)) (setq l0 lf)) lf (cdr lf))
+		   (unless lf (rplacd l1 rt)))))))))
+
+
+(defvar *btp-bnds<* (list-merge-sort1 (copy-list *btp-bnds*) (lambda (x y) (eq (max-bnd x y '<) x)) 'caadr))
+(defvar *btp-bnds>* (list-merge-sort1 (copy-list *btp-bnds*) (lambda (x y) (eq (max-bnd x y '>) x)) 'cdadr))
 
 (defun btp-bnds< (x)
   (dolist (l *btp-bnds<*)
@@ -692,11 +701,12 @@
 				  string vector array
 				  proper-sequence sequence
 				  zero one
-				  bit rnkind non-negative-char unsigned-char signed-char char
-				  non-negative-short unsigned-short signed-short short
-				  seqind non-negative-fixnum
-				  non-negative-integer
-				  immfix tractable-fixnum fixnum bignum integer
+				  bit rnkind non-negative-char unsigned-char signed-char
+				  non-negative-short unsigned-short signed-short
+				  seqind
+				  non-negative-immfix immfix
+				  non-negative-fixnum non-negative-bignum non-negative-integer
+				  tractable-fixnum fixnum bignum integer
 				  negative-short-float positive-short-float
 				  non-negative-short-float non-positive-short-float
 				  short-float
@@ -718,3 +728,22 @@
 				  t))
 ;; (defconstant +useful-types+ (mapcar 'cmp-norm-tp +useful-type-list+))
 (defconstant +useful-types-alist+ (mapcar (lambda (x) (cons x (cmp-norm-tp x))) +useful-type-list+))
+
+(defvar *useful-type-tree*
+  (labels ((cons-count (f)
+	     (cond ((atom f) 0)
+		   ((+ 1 (cons-count (car f)) (cons-count (cdr f))))))
+	   (group-useful-types (tp y)
+	     (cons tp
+		   (list-merge-sort1
+		    (mapcar (lambda (z) (group-useful-types (car z) (cdr z)))
+			    (lreduce (lambda (y x)
+				      (if (member-if (lambda (z) (member (car x) (cdr z))) y) y (cons x y)))
+				    (list-merge-sort1
+				     (mapcar (lambda (z) (cons z (lremove z (lremove-if-not (lambda (x) (type>= z x)) y)))) y)
+				     '> 'length)
+				    :initial-value nil))
+		    '> #'cons-count))))
+    (cdr (group-useful-types t (mapcan (lambda (x &aux (x (cdr x)))
+					 (when x (unless (eq x t) (list x))))
+				       +useful-types-alist+)))))
