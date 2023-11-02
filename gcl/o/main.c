@@ -878,15 +878,9 @@ segmentation_catcher(int i, long code, void *scp, char *addr) {
   error("Segmentation violation.");
 }
 
-DEFUN("BYE",object,fSbye,SI,0,1,NONE,OI,OO,OO,OO,(ufixnum exit_code,...),"") {
+DEFUN("BYE",object,fSbye,SI,0,1,NONE,OI,OO,OO,OO,(fixnum exit_code,...),"") {
 
-  fixnum n=INIT_NARGS(0);
-  object l=Cnil,f=(object)(exit_code+1);
-  va_list ap;
-
-  va_start(ap,exit_code);
-  exit_code=((fixnum)NEXT_ARG(n,ap,l,f,(object)1))-1;
-  va_end(ap);
+  if (!INIT_NARGS(0)) exit_code=0;
 
 #ifdef UNIX
   exit(exit_code);
