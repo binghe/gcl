@@ -1091,6 +1091,13 @@ write_level(void) {
 
 
 static void
+write_unreadable_str(object x,char *str) {
+  if (PRINTreadably)
+    PRINT_NOT_READABLE(x,"No readable print representation.");
+  write_str(str);
+}
+
+static void
 write_object(object x,int level) {
 
 	object r, y;
@@ -1099,11 +1106,11 @@ write_object(object x,int level) {
 	cs_check(x);
 
 	if (x == OBJNULL) {
-		write_str("#<OBJNULL>");
+	        write_unreadable_str(x,"#<OBJNULL>");
 		return;
 	}
 	if (is_free(x)) {
-		write_str("#<FREE OBJECT ");
+	        write_unreadable_str(x,"#<FREE OBJECT ");
 		write_addr(x);
 		write_str(">");
 		return;
@@ -1296,7 +1303,7 @@ write_object(object x,int level) {
 		int n, m;
 
 		if (!PRINTarray) {
-			write_str("#<array ");
+		        write_unreadable_str(x,"#<array ");
 			write_addr(x);
 			write_str(">");
 			break;
@@ -1377,7 +1384,7 @@ write_object(object x,int level) {
 	case t_simple_vector:
 	case t_vector:
 		if (!PRINTarray) {
-			write_str("#<vector ");
+		        write_unreadable_str(x,"#<vector ");
 			write_addr(x);
 			write_str(">");
 			break;
@@ -1437,7 +1444,7 @@ write_object(object x,int level) {
 	case t_bitvector:
 	case t_simple_bitvector:
 		if (!PRINTarray) {
-			write_str("#<bit-vector ");
+		        write_unreadable_str(x,"#<bit-vector ");
 			write_addr(x);
 			write_str(">");
 			break;
@@ -1549,13 +1556,13 @@ write_object(object x,int level) {
 		goto RIGHT_PAREN;
 
 	case t_package:
-		write_str("#<");
+	        write_unreadable_str(x,"#<");
 		write_object(x->p.p_name, level);
  		write_str(" package>");
 		break;
 
 	case t_hashtable:
-		write_str("#<hash-table ");
+	        write_unreadable_str(x,"#<hash-table ");
 		write_addr(x);
 		write_str(">");
 		break;
@@ -1563,69 +1570,69 @@ write_object(object x,int level) {
 	case t_stream:
 		switch (x->sm.sm_mode) {
 		case smm_input:
-			write_str("#<input stream ");
+		        write_unreadable_str(x,"#<input stream ");
 			write_object(x->sm.sm_object1, level);
 			write_ch('>');
 			break;
 
 		case smm_output:
-			write_str("#<output stream ");
+		        write_unreadable_str(x,"#<output stream ");
 			write_object(x->sm.sm_object1, level);
 			write_ch('>');
 			break;
 
 		case smm_io:
-			write_str("#<io stream ");
+		        write_unreadable_str(x,"#<io stream ");
 			write_object(x->sm.sm_object1, level);
 			write_ch('>');
 			break;
 
 		case smm_socket:
-			write_str("#<socket stream ");
+		        write_unreadable_str(x,"#<socket stream ");
 			write_object(x->sm.sm_object0, level);
 			write_ch('>');
 			break;
 
 
 		case smm_probe:
-			write_str("#<probe stream ");
+		        write_unreadable_str(x,"#<probe stream ");
 			write_object(x->sm.sm_object1, level);
 			write_ch('>');
 			break;
 
 		case smm_file_synonym:
 		case smm_synonym:
-			write_str("#<synonym stream to ");
+		        write_unreadable_str(x,"#<synonym stream to ");
 			write_object(x->sm.sm_object0, level);
 			write_ch('>');
 			break;
 
 		case smm_broadcast:
-			write_str("#<broadcast stream ");
+		        write_unreadable_str(x,"#<broadcast stream ");
 			write_addr(x);
 			write_str(">");
 			break;
 
 		case smm_concatenated:
-			write_str("#<concatenated stream ");
+		        write_unreadable_str(x,"#<concatenated stream ");
 			write_addr(x);
 			write_str(">");
 			break;
 
 		case smm_two_way:
-			write_str("#<two-way stream ");
+		        write_unreadable_str(x,"#<two-way stream ");
 			write_addr(x);
 			write_str(">");
 			break;
 
 		case smm_echo:
-			write_str("#<echo stream ");
+		        write_unreadable_str(x,"#<echo stream ");
 			write_addr(x);
 			write_str(">");
 			break;
 
 		case smm_string_input:
-			write_str("#<string-input stream ");
+		        write_unreadable_str(x,"#<string-input stream ");
 			y = x->sm.sm_object0;
 			if (y) {
 			  write_str(" from \"");
@@ -1640,14 +1647,14 @@ write_object(object x,int level) {
 			break;
 #ifdef USER_DEFINED_STREAMS
 	        case smm_user_defined:
-			write_str("#<use-define stream");
+		        write_unreadable_str(x,"#<use-define stream");
 			write_addr(x);
 			write_str(">");
 			break;
 #endif
 
 		case smm_string_output:
-			write_str("#<string-output stream ");
+		        write_unreadable_str(x,"#<string-output stream ");
 			write_addr(x);
 			write_str(">");
 			break;
@@ -1702,7 +1709,7 @@ write_object(object x,int level) {
 	  break;
 
 	case t_readtable:
-		write_str("#<readtable ");
+	        write_unreadable_str(x,"#<readtable ");
 		write_addr(x);
 		write_str(">");
 		break;
@@ -1734,13 +1741,13 @@ write_object(object x,int level) {
 	  break;
 
 	case t_function:
-		write_str("#<function ");
+	        write_unreadable_str(x,"#<function ");
 		write_addr(x);
 		write_str(">");
 		break;
 
 	case t_spice:
-		write_str("#<\100");
+	        write_unreadable_str(x,"#<\100");
 		for (i = CHAR_SIZE*sizeof(long)-4;  i >= 0;  i -= 4) {
 			j = ((long)x >> i) & 0xf;
 			if (j < 10)
