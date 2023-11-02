@@ -520,13 +520,23 @@
     (unless (notevery 'type= (car s1) (car s2))
       (type= (cadr s1) (cadr s2)))))
 
+;FIXME, implement these in place of returns-exactly, etc.
+(defun ftype-to-sig (ftype &aux (a (pop ftype))(d (car ftype)))
+  (let* ((x (member-if (lambda (x) (member x '(&optional &rest &key))) a))
+	 (a (nconc (ldiff a x) (when x '(*))))
+	 (x (when (and (listp d) (eq (car d) 'values)) d))
+	 (y (member '&optional x))
+	 (z (member-if (lambda (x) (member x '(&rest &allow-other-keys))) x))
+	 (d (cond (z '*)(y (remove '&optional d))(x `(returns-exactly ,@(cdr d)))(d))))
+    (list a d)))
 
 (defun proclaim-ftype (ftype var-list
-			     &aux  (sig (uniq-list (list (mapcar 'cmp-norm-tp (cadr ftype)) (cmp-norm-tp (caddr ftype))))))
+		       &aux  (sig (ftype-to-sig (cdr ftype)))
+			 (sig (uniq-list (list (mapcar 'cmp-norm-tp (car sig)) (cmp-norm-tp (cadr sig))))))
   (declare (optimize (safety 2)))
   (mapc (lambda (x &aux (c (car (call x))))
 	  (cond (c (unless (sig= c sig)
-		     (warn "Ignoring proclaimed signature ~s on ~s, currently fboundp to ~s~%"
+		     (warn "Ignoring proclaimed signature ~s on ~s, currently fbound to ~s~%"
 			   (readable-sig sig) x (readable-sig c))))
 		((setf (get x 'proclaimed-signature) sig))))
 	var-list))
