@@ -167,11 +167,11 @@
   (if tp (when (member (car tp) (si-cpl-or-nil (si-class-of o))) t) t))
 
 (define-compound-typep-fn proper-cons (o tp)
-  (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))
+  (if tp (and (typep (car o) (car tp)) (if (cdr tp) (typep (cdr o) (cadr tp)) t)) t))
 (define-compound-typep-fn improper-cons (o tp)
-  (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))
+  (if tp (and (typep (car o) (car tp)) (if (cdr tp) (typep (cdr o) (cadr tp)) t)) t))
 (define-compound-typep-fn cons (o tp)
-  (if tp (and (typep (car o) (car tp)) (typep (cdr o) (cadr tp)) t) t))
+  (if tp (and (typep (car o) (car tp)) (if (cdr tp) (typep (cdr o) (cadr tp)) t)) t))
 
 (define-typep-fn eql (o tp)
   (when tp (eql o (car tp))))
