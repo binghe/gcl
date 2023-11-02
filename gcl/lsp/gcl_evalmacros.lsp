@@ -328,26 +328,19 @@
 	(declare (ignorable ,temp))
 	,@body))
 
-;; In principle, a more complete job could be done here by trying to
-;; capture fixnum type declarations from the surrounding context or
-;; environment, or from within the compiler's internal structures at
-;; compile time.  See gcl-devel archives for examples.  This
-;; implementation relies on the fact that the gcc optimizer will
-;; eliminate the bignum branch if the supplied form is a symbol
-;; declared to be fixnum, as the comparison of a long integer variable
-;; with most-positive-fixnum is then vacuous.  Care must be taken in
-;; making comparisons with most-negative-fixnum, as the C environment
-;; appears to treat this as positive or negative depending on the sign
-;; of the other argument in the comparison, apparently to symmetrize
-;; the long integer range.  20040403 CM.
-(defmacro dotimes ((var form &optional val) &rest body &aux (s (sgen "DOTIMES"))(m (sgen "DOTIMES")))
-  (declare (optimize (safety 2)))
-  `(let* ((,s (block nil ,form))(,m (min ,s most-positive-fixnum)))
-     (declare (fixnum ,m))
+;FIXME try labels
+(defmacro dotimes ((var form &optional val) &rest body
+		   &aux (s (sgen "DOTIMES"))(m (sgen "DOTIMES")))
+  (declare (optimize (safety 1)))
+  `(let* ((,s (block nil ,form))(,m (min (max 0 ,s) most-positive-fixnum)))
+     (check-type ,s integer)
      (do ((,var 0 (1+ ,var)))
-	 ((>= ,var ,m) (if (eql ,s ,m) ,val (do ((,var ,m (1+ ,var)))((>= ,var ,s) ,val) ,@body)))
-	   (declare (fixnum ,var))
-	   ,@body)))
+	 ((>= ,var ,m)
+	  (if (<= ,s most-positive-fixnum)
+	      ,val
+	      (do ((,var most-positive-fixnum (1+ ,var)))((>= ,var ,s) ,val) ,@body)));FIXME bbumps to non-negative-integer
+       ,@body)))
+
 
 (defmacro declaim (&rest l)
   (declare (optimize (safety 2)))
