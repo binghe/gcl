@@ -437,6 +437,16 @@
 	  ((and (consp form) (eq (car form) 'declare)
 		(mapc (lambda (x) (and (consp x) (eq (car x) 'special) (member sym (cdr x)) (return t))) (cdr form)))))))
 
+(defun printable-tp (tp)
+  (typecase tp
+    (cons (and (printable-tp (car tp)) (printable-tp (cdr tp))))
+    ((or number array symbol character pathname) t)))
+
+(defun ensure-printable-tp (tp)
+  (cond ((printable-tp tp) tp)
+	((listp tp) (car tp))
+	(#tt)))
+
 (defun portable-source (form &optional cdr)
   (cond ((atom form) form)
 	(cdr (cons (portable-source (car form)) (portable-source (cdr form) t)))
@@ -449,7 +459,8 @@
 		      (when r `((declare (special ,@r)))))
 		  ,@(ndbctxt (portable-source (cddr form) t))))
 	       ((quote function side-effects) form)
-	       (infer-tp `(,(car form) ,(cadr form) ,(caddr form) ,@(portable-source (cdddr form) t)))
+	       (infer-tp `(,(car form) ,(cadr form)
+			    ,(ensure-printable-tp (caddr form)) ,@(portable-source (cdddr form) t)))
 	       (declare 
 		(let ((opts (mapcan (lambda (x) (if (eq (car x) 'optimize) (cdr x) (list x)))
 				    (remove-if-not
