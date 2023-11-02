@@ -623,20 +623,16 @@
 
 (defun the-end (x y)
   (declare (seqind y))
-  (cond ((seqindp x)
-	 (unless (<= x y)
-	   (bad-seq-limit x y))
-	 x)
-	((null x) y)
-	(t (error 'type-error :datum x :expected-type '(or null seqind)) y)))
+  (etypecase
+      x
+    (seqind (assert (<= x y)) x)
+    (null y)))
 	
 (defun the-start (x)
-  (cond ((seqindp x)
-	 (unless (>= x 0)
-	     (bad-seq-limit x 0))
-	 x)
-	((null x) 0)
-	(t (error 'type-error :datum x :expected-type '(or null seqind)))))
+  (etypecase
+      x
+    (seqind x)
+    (null 0)))
   
 
 (defun fill (sequence item &key start end );FIXME
