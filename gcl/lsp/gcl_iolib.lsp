@@ -402,8 +402,13 @@
     (values ps created)))
 
 (defun get-byte-stream-nchars (s)
-  (let* ((tp (stream-element-type s)))
-    (values (ceiling (if (consp tp) (cadr tp) char-length) char-length))))
+  (let* ((tp (stream-element-type s))(ctp (cmp-norm-tp tp)))
+    (labels ((ts (i) (when (<= i 32)
+		       (if (type<= ctp (cmp-norm-tp `(unsigned-byte ,(* i char-length))))
+			   i (ts (1+ i))))))
+      (cond ((type<= ctp #tcharacter) 1)
+	    ((ts 0))
+	    (1)))))
 
 (defun parse-integer (s &key start end (radix 10) junk-allowed)
   (declare (optimize (safety 1)))
