@@ -412,7 +412,7 @@
 	       (body (remove-if-not (lambda (b)
 				      (cond ((tgs-p b)
 					     (unless cs (setq cs t skip t rt nil))
-					     (let* ((e (object-type b))(df (type>= #tsymbol e))(e (if df st e)))
+					     (let* ((e (object-type b))(df (member b '(t otherwise)))(e (if df st e)))
 					       (cond ((and df dfp) (cmperr "default tag must be last~%"))
 						     ((type-and st e) (setq skip nil dfp (or df dfp) rt (type-or1 rt e)))
 						     ((keyed-cmpnote 'branch-elimination "Eliminating unreachable switch ~s" b)))))
