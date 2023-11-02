@@ -57,6 +57,8 @@
  (defun maybe-cons (car cdr)
    (if (cdr cdr) (cons car cdr) (car cdr))))
 
+(defun c-array-eltsize (x) (array-eltsize x));FIXME
+
 #.`(defun set-array (r i s j &optional sw);assumes arrays of same type and indices in bounds
      (declare (optimize (safety 1))(seqind i j))
      (check-type r array)
@@ -65,7 +67,7 @@
 		(funcall sf (funcall gf s j) r i)
 		(when sw (funcall sf x s j))))
        (case 
-	(array-eltsize r);fixme
+	(c-array-eltsize r);fixme, done?
 	,@(mapcar (lambda (x &aux (z (pop x))(y (pop x))(w (car x)))
 		    `(,z (infer-tp
 			  r ,y (infer-tp
