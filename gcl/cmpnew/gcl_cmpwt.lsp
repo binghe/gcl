@@ -219,8 +219,10 @@
 (defun wt-data-file nil
   (when *prof-p* (add-init `(si::mark-memory-as-profiling)))
   (wt-data2 (1+ *next-vv*))
-  (dolist (v (nreverse *data*))
-    (wt-data2 (verify-datum v)))
+  (if *fasd-data*;FIXME
+      (dolist (v (nreverse *data*))
+	(wt-data2 (verify-datum v)))
+      (wt-data2 `(progn ,@(mapcar 'verify-datum (nreverse *data*)))))
   (when *fasd-data*
     (si::close-fasd (car *fasd-data*))))
 
