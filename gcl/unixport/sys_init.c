@@ -77,9 +77,9 @@ gcl_init_system(object no_init)
 #ifndef pre_gcl
   check_init(lsp,gcl_sc,no_init);
 #endif
+  check_init(lsp,gcl_assert,no_init);
   check_init(lsp,gcl_defstruct,no_init);
   check_init(lsp,gcl_restart,no_init);
-  check_init(lsp,gcl_assert,no_init);
   check_init(lsp,gcl_serror,no_init);
   check_init(lsp,gcl_sharp,no_init);
 
