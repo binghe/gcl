@@ -49,7 +49,8 @@
 (defconstant +setf-syms+ (let ((*gensym-counter* 0))
 			   (mapl (lambda (x) (rplaca x (gensym +setf-prefix+)))
 				   (make-list 19))))
-(defun setf-set nil (or *setf-set* (setq *setf-syms* +setf-syms+)))
+(defun setf-set nil (setq *setf-syms* nil *gensym-counter* 0))
+;(defun setf-set nil (or *setf-set* (setq *setf-syms* +setf-syms+)));FIXME, this does not seem possible
 (defun setf-gensym nil (if *setf-syms* (prog1 (car *setf-syms*) (setq *setf-syms* (cdr *setf-syms*))) (gensym +setf-prefix+)))
 
 ;;; DEFSETF macro.
