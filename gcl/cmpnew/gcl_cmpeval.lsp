@@ -1575,15 +1575,20 @@
 ;; 	  (*funs* (if ,e (pop ,e) *funs*)))
 ;;      ,form))
 
+(defun barrier-cross-p (fun &aux (f (local-fun-p fun)))
+  (not (tailp (member-if-not 'fun-p *funs*)
+	      (member f *funs*))))
+
 (defun tail-recursion-possible (fun &aux (f (assoc fun *c1exit*)))
   (when f
-    (do ((l *vars* (cdr l))(e (caddr f)))
-	((eq l e) t)
+    (unless (barrier-cross-p fun)
+      (do ((l *vars* (cdr l))(e (caddr f)))
+	  ((eq l e) t)
 	(let ((v (car l)))
 	  (when (var-p v)
 	    (unless (eq 'lexical (var-kind v)) ; FIXME check other objects needing unwind
 	      (unless (member v *lexical-env-mask*)
-		(return nil))))))))
+		(return nil)))))))))
 
 (defun mi2 (fun args la fms envl)
   (let* ((sir (cll fun))
