@@ -627,7 +627,7 @@
   (unless (type>= lt ot)
     (let ((nt (type-and ot lt)))
       (keyed-cmpnote (list 'type 'type-restriction (var-name v))
-		     "restricting type of ~s to ~s~%" (var-name v) nt)
+		     "restricting type of ~s to ~s~%" (var-name v) (cmp-unnorm-tp nt))
       (setf (var-type v) nt))))
 
 (defun ignorable-pivot (pivot value)
@@ -717,7 +717,7 @@
 		(fmlae (if (notevery 'cddr inf) t   fmlae)))
 	   (when inf 
 	     (keyed-cmpnote (list* 'type-inference (mapcar (lambda (x) (var-name (car x))) inf))
-			  "inferring types on form ~s, ~s" f inf))
+			  "inferring types on form ~s, ~s" f (mapcar (lambda (x) (list (pop x) (cmp-unnorm-tp (pop x)) (cmp-unnorm-tp x))) inf)))
 	   (if (not (eq fmlae 'boolean))
 
  	       (cond (fmlae 

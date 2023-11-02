@@ -1659,11 +1659,12 @@
 		 (f nargs (cdr f)))
 		((or p (endp f) (endp a))
 		 (or p f (and a (not (eq (car a) '*))))) ; (when (setq nargs (nreverse n)) nil)))
-		(check-form-type (car a) (car f) (car r))
-					;	      (push (and-form-type (or (car a) '*) (car f) (car r)) n)
-		(setq p (when (info-type (cadar f)) (null (info-type (cadar f))))))
+	      (unless (type-and (car a) (info-type (cadar f)))
+		(cmpwarn "The type of the form ~s is not ~s, but ~s."
+			 (car r) (cmp-unnorm-tp (car a)) (cmp-unnorm-tp (info-type (cadar f))))
+		(setq p t)))
 	(cmpwarn "inlining of ~a prevented due to argument type mismatch: ~a ~a~%" 
-		 fn at nat)
+		 fn (mapcar 'cmp-unnorm-tp at) (mapcar 'cmp-unnorm-tp nat))
 	(setf (info-type info) nil)))
 
     (do ((a at (if (eq '* (car a)) a (cdr a)))

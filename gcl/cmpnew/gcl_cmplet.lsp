@@ -37,7 +37,7 @@
 	  (var-loc v) (unless (and (eq (var-loc v) 'object)
 				   (unless (eq t (var-type v)) (var-type v))) (var-loc v)))
     (keyed-cmpnote (list (var-name v) 'type-propagation 'type 'init-type)
-		   "Setting init type of ~s to ~s" (var-name v) (var-type v))))
+		   "Setting init type of ~s to ~s" (var-name v) (cmp-unnorm-tp (var-type v)))))
 
 (defun new-c1progn (f body)
   (let ((info (copy-info (cadr body))))

@@ -973,7 +973,7 @@
 
 (defun check-form-type (type form original-form)
   (when (and (null (type-and type (info-type (cadr form)))) type (info-type (cadr form)))
-        (cmpwarn "The type of the form ~s is not ~s, but ~s." original-form type (info-type (cadr form)))))
+        (cmpwarn "The type of the form ~s is not ~s, but ~s." original-form (cmp-unnorm-tp type) (cmp-unnorm-tp (info-type (cadr form))))))
 
 
 (defun c-structure-def-propagator (f t1)

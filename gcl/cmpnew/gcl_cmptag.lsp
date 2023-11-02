@@ -139,7 +139,7 @@
     (mapc (lambda (x &aux (v (pop x))) 
 	    (keyed-cmpnote (list (var-name v) 'tagbody-iteration)
 			   "    Iterating tagbody: setting ~s type ~s to ~s, store ~s to ~s"
-			   v (var-type v) (car x) (var-store v) (cadr x))
+			   v (cmp-unnorm-tp (var-type v)) (cmp-unnorm-tp (car x)) (var-store v) (cadr x))
 	    (setf (var-type v) (car x));FIXME do-setq-tp ?
 	    (push-vbinds v (cadr x)))
 	  x))

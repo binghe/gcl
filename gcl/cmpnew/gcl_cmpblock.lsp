@@ -134,7 +134,7 @@
 	      (setq tp (type-or1 (var-type v) tp))
 	      (keyed-cmpnote (list (var-name v) 'block-set)
 			     "Altering ~s at end of block ~s:~%   type from ~s to ~s,~%   store from ~s to ~s"
-			     v (blk-name blk) (var-type v) tp
+			     v (blk-name blk) (cmp-unnorm-tp (var-type v)) (cmp-unnorm-tp tp)
 			     (var-bind v) st)
 	      (do-setq-tp v '(blk-set) tp)
 	      (push-vbinds v st)))

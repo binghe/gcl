@@ -94,7 +94,7 @@
 	       (mapc (lambda (l &aux (v (pop l))(tp (pop l))(st (car l)))
 		       (keyed-cmpnote (list (var-name v) 'type-propagation 'type)
 				      "Restoring var type on ~s from ~s to ~s"
-				      (var-name v) (var-type v) tp)
+				      (var-name v) (cmp-unnorm-tp (var-type v)) (cmp-unnorm-tp tp))
 		       (setf (var-type v) tp (var-store v) st))
 		     (ldiff *restore-vars* ,rv))))
 	     (prog1
