@@ -1666,7 +1666,7 @@
 		 (f nargs (cdr f)))
 		((or p (endp f) (endp a))
 		 (or p f (and a (not (eq (car a) '*))))) ; (when (setq nargs (nreverse n)) nil)))
-	      (unless (type-and (car a) (info-type (cadar f)))
+	      (unless (or (eq '* (car a)) (type-and (car a) (info-type (cadar f))))
 		(cmpwarn "The type of the form ~s is not ~s, but ~s."
 			 (car r) (cmp-unnorm-tp (car a)) (cmp-unnorm-tp (info-type (cadar f))))
 		(setq p t)))
