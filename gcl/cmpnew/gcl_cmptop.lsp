@@ -2175,7 +2175,7 @@
 	(compile-ordinary-p (cdr form)))))
 
 (defun compile-ordinaryp (form)
-  (compile-ordinary-p (pd 'cmp-anon nil form)))
+  (compile-ordinary-p (pd 'cmp-anon nil (list form))))
 
 (defun t1ordinary (form)
   (cond ((unless *compiling-ordinary*
