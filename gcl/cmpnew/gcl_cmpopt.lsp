@@ -272,12 +272,6 @@
  (push '((t t fixnum t) t #.(flags set)"structure_set(#0,#1,#2,#3)")
    (get 'system:structure-set 'inline-always))
 
-;;SYSTEM:STRUCTUREP
- (push '((t) boolean #.(flags rfa)"type_of(#0)==t_structure")
-   (get 'system:structurep 'inline-always))
-;;COMPILER:STRUCTUREP
- (push '((t) boolean #.(flags rfa)"type_of(#0)==t_structure")
-   (get 'compiler::structurep 'inline-always))
 
 ;;SYSTEM:gethash1
  ;; (push '((t t) t #.(flags)"({struct htent *e=gethash(#0,#1);e->hte_key != OBJNULL ? e->hte_value : Cnil;})")

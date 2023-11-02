@@ -198,6 +198,9 @@
       (type-list-p (cdr x) '(&optional &rest &allow-other-keys))
     (typep x 'type-spec)))
 
+(defun structurep (x)
+  (typecase x (structure t)))
+
 (defconstant +type-alist+ '((null . null)
 	  (not-type . not)
           (symbol . symbolp)
