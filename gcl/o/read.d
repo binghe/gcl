@@ -836,7 +836,7 @@ object in;
 	i = 0;
 	for (;;) {
                 read_char_to(c,in,goto FIN);
-		if (cat(c) != cat_constituent && !READsuppress) {
+		if (cat(c) != cat_constituent && !(READsuppress && cat(c)==cat_non_terminating)) {
 			unread_char(c, in);
 			break;
 		}
