@@ -2170,14 +2170,16 @@
 
 (defun compile-ordinary-p (form)
   (when (consp form)
-    (or (member (car form) '(lambda defun defmacro flet labels))
+    (or (eq (car form) 'fset)
 	(compile-ordinary-p (car form))
 	(compile-ordinary-p (cdr form)))))
 
+(defun compile-ordinaryp (form)
+  (compile-ordinary-p (pd 'cmp-anon nil form)))
 
 (defun t1ordinary (form)
   (cond ((unless *compiling-ordinary*
-	   (or *compile-ordinaries* (compile-ordinary-p form)))
+	   (or *compile-ordinaries* (compile-ordinaryp form)))
 	 (maybe-eval nil form)
 	 ;; (let ((*compiling-ordinary* t))
 	 ;;   (t1expr `(funcall (lambda nil ,form nil))))
