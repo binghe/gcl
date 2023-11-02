@@ -30,10 +30,10 @@
   (when z
     (when (boundp z)
       (multiple-value-bind
-       (r f) (gethash sym (symbol-value z))
-       (when f
-	 (remhash r (symbol-value (find-symbol "*UNNRM-HASH*")))
-	 (remhash sym (symbol-value z)))))))
+	    (r f) (gethash sym (symbol-value z))
+	(declare (ignore r))
+	(when f
+	  (remhash sym (symbol-value z)))))))
 
 (defvar *deftype-simple-typep-fns* nil)
 

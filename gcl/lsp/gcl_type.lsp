@@ -487,26 +487,35 @@
 	     (bit-vector-p (cadr x))
 	     (consp (caddr x))))));FIXME
 
-(defvar *nrm-hash* (make-hash-table :test 'equal))
+(defvar *nrm-hash* (make-hash-table :test 'eq))
 (defvar *unnrm-hash* (make-hash-table :test 'eq))
+(defvar *uniq-hash* (make-hash-table :test 'equal));FIXME type=?
+(defvar *intindiv-hash* (make-hash-table :test 'equal))
+
+(defun uniq-integer-individuals-type (type)
+  (let ((type `(,(car type) ,@(list-merge-sort1 (copy-list (cdr type)) '< 'identity))))
+    (or (gethash type *intindiv-hash*)
+	(setf (gethash type *intindiv-hash*) type))))
 
 (defun hashable-typep (x)
   (or (when (symbolp x)
 	(unless (si-find-class x nil)
-	  (let ((x (get x 's-data))) (if x (s-data-frozen x) t))))
+	  (let ((z (get x 's-data))) (if z (when (s-data-frozen z) x) x))))
       (when (listp x)
 	(when (eq (car x) 'member)
-	  (not (member-if-not 'integerp (cdr x)))))))
+	  (unless (member-if-not 'integerp (cdr x))
+	    (uniq-integer-individuals-type x))))))
 
 (defun comp-tp1 (x &aux (s (hashable-typep x)))
   (multiple-value-bind
-   (r f) (when s (gethash x *nrm-hash*))
+   (r f) (when s (gethash s *nrm-hash*))
    (if f r
-     (let ((y (comp-tp x)))
-       (when (and s (unless (eq y t) y))
-	 (setf (gethash y *unnrm-hash*) x)
-	 (setf (gethash x *nrm-hash*) y))
-       y))))
+       (let* ((y (comp-tp x)))
+	 (when (and s (unless (eq y t) y))
+	   (setq y (or (gethash y *uniq-hash*) (setf (gethash y *uniq-hash*) y)))
+	   (unless (gethash y *unnrm-hash*) (setf (gethash y *unnrm-hash*) s));e.g. first
+	   (setf (gethash s *nrm-hash*) y))
+	 y))))
 
 (defun cmp-norm-tp (x)
   (cond ((if x (eq x t) t) x)
@@ -518,7 +527,7 @@
 
 (defun tp-type1 (x)
   (multiple-value-bind
-   (r f) (gethash x *unnrm-hash*)
+   (r f) (or (gethash x *unnrm-hash*) (gethash (gethash x *uniq-hash*) *unnrm-hash*))
    (if f r (tp-type x))))
 
 (defun cmp-unnorm-tp (x)
