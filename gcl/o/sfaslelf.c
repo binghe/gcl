@@ -58,7 +58,7 @@ License for more details.
 #define LOAD_SYM(sym,st1) (sym->st_value && (EXT_SYM(sym,st1)||LOCAL_SYM(sym)))
 #define EXT_SYM(sym,st1) (ELF_ST_BIND(sym->st_info)==STB_GLOBAL||ELF_ST_BIND(sym->st_info)==STB_WEAK||LOAD_SYM_BY_NAME(sym,st1))
 #define LOCAL_SYM(sym) ELF_ST_BIND(sym->st_info)==STB_LOCAL
-#define LOAD_SYM_BY_NAME(sym,st1) 0
+#define LOAD_SYM_BY_NAME(sym,st1) !strncmp(st1+sym->st_name,"__muldc3",8)||!strncmp(st1+sym->st_name,"__divdc3",8)
 
 #define MASK(n) (~(~0ULL << (n)))
 
