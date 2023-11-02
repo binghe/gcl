@@ -42,8 +42,8 @@ typedef struct
 
 #define MPOP(action,function,x1,x2) \
   do {  \
-   function(MP(big_fixnum2) ,x1,x2); \
-   action maybe_replace_big(big_fixnum2); \
+   function(MP(big_fixnum1) ,x1,x2); \
+   action maybe_replace_big(big_fixnum1); \
   } while(0)
 
 

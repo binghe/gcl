@@ -279,12 +279,12 @@ ratio_mult_with_cancellation(object a,object b,object c,object d) {
 
   object gad,gbc;
 
-  gad=get_gcd_r(big_fixnum1,a,d);
+  gad=get_gcd_r(big_fixnum2,a,d);
   gbc=get_gcd_r(big_fixnum5,b,c);
 
   a=integer_exact_quotient(big_fixnum3,a,gad);
   c=integer_exact_quotient(big_fixnum4,c,gbc);
-  a=integer_times(big_fixnum3,a,c);/*number_times can clobber big_fixnum2*/
+  a=integer_times(big_fixnum3,a,c);/*number_times can clobber big_fixnum1*/
   if (a==big_fixnum3 || a==big_fixnum4)
     a=replace_big(a);
 
