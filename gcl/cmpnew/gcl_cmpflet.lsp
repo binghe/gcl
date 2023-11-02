@@ -378,8 +378,6 @@
 (defun c1flet (args)
   (c1flet-labels nil args))
 
-(defun export-call (l)
-  (list* (export-sig (pop l)) (pop l) (apply 'compress-fle (pop l)) l))
 
 (defun c2flet-labels (labels local-funs closures body
 			     &aux (*vs* *vs*) (oclink *clink*) (*clink* *clink*) 

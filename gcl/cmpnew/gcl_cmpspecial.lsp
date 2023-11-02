@@ -301,11 +301,6 @@
     (si::close-fasd ss)
     (get-output-stream-string w)))
 
-(defun fn-to-src (l)
-  (multiple-value-bind
-   (l y z)
-   (function-lambda-expression l)
-   (compress-fle l y z)))
 
 ;; (defun process-local-fun-env (env b f fun tp)
 ;;   (under-env env (process-local-fun b f fun tp)))

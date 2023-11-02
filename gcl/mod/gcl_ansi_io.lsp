@@ -32,7 +32,7 @@
      t)))
 
 (defmacro pprint-logical-block ((s x &key (prefix "") (per-line-prefix "") (suffix ""))
-				&body body &aux (count (gensym))(print-end (gensym)))
+				&body body &aux (count (gensym)))
   (declare (optimize (safety 1)))
   `(let* ((*print-line-prefix* ,per-line-prefix)(*prin-level* (1+ *prin-level*)))
      (check-type *print-line-prefix* string)
