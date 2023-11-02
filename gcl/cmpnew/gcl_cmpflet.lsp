@@ -203,6 +203,8 @@
 	,@ctps
 	,@body)))
 
+(defvar *local-fun-inline-limit* 200)
+
 (defun c1flet-labels (labels args &aux body ss ts is other-decl (info (make-info))
 			     defs1 fnames (ofuns *funs*) (*funs* *funs*))
 
@@ -218,6 +220,10 @@
 	   (src (si::block-lambda (cadr def) (car def) (cddr def)))
 	   (fun (make-fun :name (car def) :src src :info (make-info :type nil :sp-change 1))))
       (push fun *funs*)
+      (unless (< (cons-count src) *local-fun-inline-limit*)
+	(keyed-cmpnote (list (car def) 'notinline)
+		       "Blocking inline of large local fun ~s" (car def))
+	(pushnew (car def) *notinline*))
       (push (list fun (cdr def)) defs1)))
   
   (let ((*funs* (if labels *funs* ofuns)))
