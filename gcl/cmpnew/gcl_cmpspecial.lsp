@@ -62,13 +62,6 @@
     (unless (type>= dtype (info-type info))
       (return-from c1the (c1expr `(when ,(cadr args) t)))))
   (setq type (type-and dtype (info-type info)))
-  (when (null type)
-    (when (eq (car form) 'var)
-      (do-setq-tp (car (third form)) nil dtype))
-    (setq type dtype)
-    (unless (not (and dtype (info-type info)))
-      (cmpwarn "Type mismatch was found in ~s.~%Modifying type ~s to ~s."
-	       (cons 'the args) (info-type info) type)))
 
   (setq form (list* (car form) info (cddr form)))
   (if (type>= #tboolean dtype) (setf (info-type (cadr form)) type) (set-form-type form type))
