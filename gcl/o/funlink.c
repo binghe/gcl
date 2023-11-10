@@ -326,12 +326,15 @@ call_proc_new(object sym,ufixnum clp,ufixnum vld,void **link,ufixnum argd,object
   }
 
   if (fas!=Rset && sSAfast_link_warningsA->s.s_dbind==Ct) {
-    if (tp==t_function)
-      fprintf(stderr,"Warning: arg/val mismatch in call to %-.*s (%p) prevents fast linking:\n %lu %lu/%lu %u(%u)  %lu %u  %lu %u  %lu, recompile caller\n",
+    if (tp==t_function) {
+      fprintf(stderr,"Warning: arg/val mismatch in call to %-.*s (%p) prevents fast linking:\n %ld %ld/%ld %d(%d)  %ld %d  %ld %d  %ld, recompile caller\n",
 	      (int)(type_of(sym)==t_symbol ? VLEN(sym->s.s_name) : 0),sym->s.s_name->st.st_self,sym,
 	      argd,fun->fun.fun_argd,
 	      vald,fun->fun.fun_neval,fun->fun.fun_vv,
 	      margs,fun->fun.fun_minarg,nargs,fun->fun.fun_maxarg,pushed);
+      fflush(stderr);
+    }
+
     /* if (tp==t_cfun) */
     /*   fprintf(stderr,"Warning: arg/val mismatch in call to %-.*s (%p) prevents fast linking:is cfun\n", */
     /* 	      (int)(type_of(sym)==t_symbol ? sym->s.s_fillp : 0),sym->s.s_self,sym); */
