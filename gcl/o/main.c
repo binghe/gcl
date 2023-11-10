@@ -966,11 +966,8 @@ DEFUN("CATCH-FATAL",object,fScatch_fatal,SI,1,1,NONE,OI,OO,OO,OO,(fixnum i),"") 
   return Cnil;
 }
 
-LFD(siLreset_stack_limits)(void)
-{
-  long i=0;
+DEFUN("RESET-STACK-LIMITS",object,fSreset_stack_limits,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
 
-  check_arg(0);
   if(catch_fatal <0) catch_fatal=1;
 #ifdef SGC	
   {extern int fault_count ; fault_count = 0;}
@@ -991,17 +988,15 @@ LFD(siLreset_stack_limits)(void)
     ihs_limit = ihs_org + stack_multiple *  IHSSIZE;
   else
     error("can't reset ihs_limit");
-  if (cs_base==cs_org)
-    cs_org=(void *)&i;
+  cs_org=alloca(1);
 #ifdef __ia64__
  {
    extern void * GC_save_regs_in_stack();
-   if (cs_base2==cs_org2)
-     cs_org2=GC_save_regs_in_stack();
+   cs_org2=GC_save_regs_in_stack();
  }
 #endif
   /* reset_cstack_limit(i); */
-  vs_base[0] = Cnil;
+ RETURN1(Cnil);
 }
 
 #define COPYSTACK(org,p,typ,lim,top,geta,size) \
@@ -1124,7 +1119,6 @@ init_main(void) {
   
   make_si_function("MARK-VS", siLmark_vs);
   make_si_function("CHECK-VS", siLcheck_vs);
-  make_si_function("RESET-STACK-LIMITS", siLreset_stack_limits);
   make_si_function("INIT-SYSTEM", siLinit_system);
   make_si_function("USER-INIT", siLuser_init);
   make_si_function("INITIALIZATION-FAILURE",
