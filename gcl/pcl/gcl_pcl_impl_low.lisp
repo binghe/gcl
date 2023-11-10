@@ -96,7 +96,7 @@
   (c-set-function-data r   (c-function-data v))
   (c-set-function-plist r  (c-function-plist v))
   (c-set-function-argd r   (c-function-argd v))
-  (mapl (lambda (x y) (setf (car x) (car y))) (%cclosure-env r) (%cclosure-env v))
+  (mapl (lambda (x y) (setf (car x) (car y))) (%cclosure-env r) (%cclosure-env v)))
 
 (defun structure-functions-exist-p nil t)
 
