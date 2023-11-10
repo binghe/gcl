@@ -4,11 +4,11 @@
 (macrolet 
  ((make-conditionp (condition &aux (n (intern (concatenate 'string (string condition) "P"))))
 		   `(defun ,n (x &aux (z (si-find-class ',condition nil)))
-		      (when z
+		      (when (unless (symbolp z) z)
 			(funcall (setf (symbol-function ',n) (lambda (x) (typep x z))) x))))
   (make-condition-classp (class &aux (n (intern (concatenate 'string (string class) "-CLASS-P"))))
 			 `(defun ,n (x &aux (s (si-find-class 'standard-class nil)) (z (si-find-class ',class nil)))
-			    (when (and s z)
+			    (when (and (unless (symbolp s) s) (unless (symbolp z) z))
 			      (funcall (setf (symbol-function ',n)
 					     (lambda (x &aux (x (if (symbolp x) (si-find-class x nil) x)))
 					       (when (and x (typep x s))
