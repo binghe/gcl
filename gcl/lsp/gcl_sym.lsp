@@ -4,8 +4,8 @@
 
 (defun macro-function (x &optional env)
   (declare (optimize (safety 2)))
-;  (check-type x symbol)
-;  (check-type env proper-list)
+  (check-type x symbol)
+  (check-type env proper-list)
   (cond ((when env
 	   (let* ((l (cdr (assoc x (cadr env)))))
 	     (when (eq (car l) 'macro) (cadr l)))))
@@ -91,12 +91,12 @@
 
 (defun get (s y &optional d)
   (declare (optimize (safety 1)))
-  (check-type s symbol)
+  #-pre-gcl(check-type s symbol)
   (getf (symbol-plist s) y d))
 
 #-pre-gcl(defun symbolp (x) (if x (typecase x (symbol t)) t))
 #+pre-gcl(defun symbolp (x) (typecase x (list (not x)) (symbol t)))
 (defun keywordp (x) (typecase x (keyword t)))
 
-(setf (symbol-function 'symbol-plist)   (symbol-function 'c-symbol-plist))
+#-pre-gcl(setf (symbol-function 'symbol-plist)   (symbol-function 'c-symbol-plist))
 (setf (symbol-function 'symbol-package) (symbol-function 'c-symbol-hpack))
