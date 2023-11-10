@@ -54,8 +54,8 @@
   (let (dummy)
     (lambda (&rest args)
       (declare (ignore args))
-      (called-fin-without-function)
-      (values-list (make-dummy-list (setq dummy (make-dummy-var)))))))
+      (setq dummy (make-dummy-var));use dummy to ensure freshly allocated closure
+      (called-fin-without-function))))
 
 (defun allocate-funcallable-instance-1 ()
   (let ((fin (allocate-funcallable-instance-2))
@@ -75,20 +75,14 @@
 
 (defun set-function-name-1 (fn new-name ignore)
   (declare (ignore ignore))
-  (cond ((compiled-function-p fn)
-	 (when (symbolp new-name) (pcl::proclaim-defmethod new-name nil))
-	 (setf (si::call-name (c-function-plist fn)) new-name))
-        ((and (listp fn)
-              (eq (car fn) 'lambda-block))
-         (setf (cadr fn) new-name))
-        ((and (listp fn)
-              (eq (car fn) 'lambda))
-         (setf (car fn) 'lambda-block
-               (cdr fn) (cons new-name (cdr fn)))))
+  (typecase fn
+    (function;compiled-function
+     (when (symbolp new-name) (pcl::proclaim-defmethod new-name nil))
+     (setf (si::call-name (c-function-plist fn)) new-name)))
   fn)
 
-(defun %set-cclosure (r v s)
-  (declare (fixnum s))
+(defun %set-cclosure (r v)
+
   (unless (typep r 'function)
     (error "Bad fn 1"))
   (unless (typep v 'function)
@@ -102,10 +96,7 @@
   (c-set-function-data r   (c-function-data v))
   (c-set-function-plist r  (c-function-plist v))
   (c-set-function-argd r   (c-function-argd v))
-  (let* ((ve (%cclosure-env v))
-	 (l (- (length ve) s))
-	 (ve (if (> l 0) (butlast ve l) ve)))
-    (maplist (lambda (x y) (setf (car x) (car y))) (%cclosure-env r) ve)))
+  (mapl (lambda (x y) (setf (car x) (car y))) (%cclosure-env r) (%cclosure-env v))
 
 (defun structure-functions-exist-p nil t)
 

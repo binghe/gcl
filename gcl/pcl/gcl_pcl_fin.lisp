@@ -1379,7 +1379,7 @@ explicitly marked saying who wrote it.
         ((and (cclosurep new-value)
               (<= (length (%cclosure-env new-value))
                   funcallable-instance-available-size))
-         (%set-cclosure fin new-value funcallable-instance-available-size))
+         (%set-cclosure fin new-value))
         ((set-funcallable-instance-function
 	  fin (make-trampoline new-value))))
   fin)
