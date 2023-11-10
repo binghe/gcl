@@ -89,14 +89,15 @@
   (check-type s symbol)
   (c-set-symbol-dbind s y))
 
+#-pre-gcl
 (defun get (s y &optional d)
   (declare (optimize (safety 1)))
-  #-pre-gcl(check-type s symbol)
+  (check-type s symbol)
   (getf (symbol-plist s) y d))
 
 #-pre-gcl(defun symbolp (x) (if x (typecase x (symbol t)) t))
 #+pre-gcl(defun symbolp (x) (typecase x (list (not x)) (symbol t)))
 (defun keywordp (x) (typecase x (keyword t)))
 
-#-pre-gcl(setf (symbol-function 'symbol-plist)   (symbol-function 'c-symbol-plist))
+(setf (symbol-function 'symbol-plist)   (symbol-function 'c-symbol-plist))
 (setf (symbol-function 'symbol-package) (symbol-function 'c-symbol-hpack))
