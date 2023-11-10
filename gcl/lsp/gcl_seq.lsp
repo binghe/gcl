@@ -84,7 +84,7 @@
 
 (defun map (rt f seq &rest sqs &aux (f (coerce f 'function)) (l (listp seq));FIXME test array-dimension-limit instead of length for lists
 	       (sl (reduce (lambda (y x) (min y (length x))) sqs :initial-value (length seq)))
-	       (x (when rt (make-sequence rt sl))))
+	       (x (when rt (make-sequence rt sl)))(lx (listp x)))
   (declare (optimize (safety 1))(dynamic-extent sqs))
   (check-type rt type-spec)
   (check-type f function-designator)
@@ -92,7 +92,7 @@
   (labels ((ml (i xp seq ns vals) 
 	       (unless (>= i sl)
 		 (let ((tmp (apply f (if l (car seq) (aref seq i)) (seqvals vals ns i))))
-		   (cond (xp (setf (car xp) tmp)) (rt (setf (aref x i) tmp))))
+		   (when rt (if lx (setf (car xp) tmp) (setf (aref x i) tmp))))
 		 (ml (1+ i) (cdr xp) (if l (cdr seq) seq) ns vals))))
 	  (ml 0 (when (consp x) x) seq (dyncpl sqs) (dyncpl sqs)) x))
 
