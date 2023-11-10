@@ -23,6 +23,16 @@
 (in-package :si)
 (gbc t)
 
+;FIXME
+(progn
+  (do-all-symbols (s)
+    (when (or (coerce-to-standard-class s) (get s 's-data))
+      (remprop s 'deftype-definition)
+      (remprop s 'deftype-form)))
+  (let* ((p (find-package "PCL"))(x (when p (find-symbol "DO-SATISFIES-DEFTYPE" p))))
+    (when (and x (fboundp x))
+      (setf (symbol-function x) (lambda (x y) nil)))))
+
 (do-symbols (s)
   (when (get s 'proclaimed-function)
     (unless (sig s)

@@ -708,8 +708,6 @@
 			       `(and (typep x '(vector t))
 				     (> (length x) ,name-offset)
 				     (eq (aref x ,name-offset) ',name))))))))
-	 ,@(when predicate ;(and predicate named);predicate;
-	     `((deftype ,name nil (list 'satisfies ',predicate))))
 	 ',name))))
 
 ;; First several fields of this must coincide with the C structure

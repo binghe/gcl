@@ -14,11 +14,11 @@
 			      (atp (listp type))
 			      (ctp (if atp (car type) type)))
   (cond
+   ((setq tem (when (symbolp ctp) (macro-function (get ctp 'deftype-definition))))
+    (funcall tem (if atp type (list type)) nil))
    ((setq tem (coerce-to-standard-class ctp)) (normalize-instance tem));FIXME don't want to normalize a nil type, redundant code
    ((si-classp ctp) (si-class-name ctp));built-in
    ((setq tem (get ctp 's-data)) (or (sdata-type tem) `(structure ,ctp)))
-   ((setq tem (macro-function (get ctp 'deftype-definition)))
-    (funcall tem (if atp type (list type)) nil))
    (t (print (list 'bad-type type)) nil)))
 
 (defun expand-deftype (type &aux (e (just-expand-deftype type)))
