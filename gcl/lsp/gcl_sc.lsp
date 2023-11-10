@@ -132,7 +132,7 @@
 
 (defun char-name (c)
   (declare (optimize (safety 1)))
-  (check-type c character-designator)
+  (check-type c character)
   (let ((c (char-code c)))
     (case c
 	  (#.(char-code #\Return) "Return")
