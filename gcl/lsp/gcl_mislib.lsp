@@ -59,70 +59,42 @@
 		 (/ ,gbc-time internal-time-units-per-second))))
        (values-list ,x))))
 
-(defconstant seconds-per-day #.(* 24 3600))
-
-(defun leap-year-p (y)
-  (and (zerop (mod y 4))
-       (or (not (zerop (mod y 100))) (zerop (mod y 400)))))
-
-(defun number-of-days-from-1900 (y)
-  (let ((y1 (1- y)))
-    (+ (* (- y 1900) 365)
-       (floor y1 4)
-       (- (floor y1 100))
-       (floor y1 400)
-       -460)))
-
-(eval-when
- (compile eval)
- (defmacro mmd (n &optional lp 
-		  &aux (l '(31 28 31 30 31 30 31 31 30 31 30 31))
-		  (l (if lp (cons (pop l) (cons (1+ (pop l)) l)) l))(r 0)(s (mapcar (lambda (x) (incf r x)) l)))
-  `(defconstant ,n (make-array ,(length s) :element-type '(integer ,(car s) ,(car (last s))) :initial-contents ',s))))
        
-(mmd +md+)
-(mmd +lmd+ t)
 
-(defun decode-universal-time (ut &optional (tz (current-timezone) tzp) 
-				 &aux (dstp (unless tzp (current-dstp))) (ut (- ut (* tz 3600))))
+(defun this-tz (&aux (x (current-timezone)))
+  (if (current-dstp) (1+ x) x))
+
+(defconstant +secs-to-1970+ (* (+ 17 (* 70 365)) 24 60 60))
+
+(defun decode-universal-time (ut &optional (tz (this-tz) tzp) &aux dstp1)
   (declare (optimize (safety 2)))
-  (check-type ut (integer 0))
+  (check-type ut integer)
   (check-type tz rational)
-  (multiple-value-bind
-   (d ut) (floor ut seconds-per-day)
-   (let* ((dow (mod d 7))(y (+ 1900 (floor d 366))))
-     (labels ((l (y dd &aux (lyp (leap-year-p y))(td (if lyp 366 365))(x (- d dd)))
-		 (if (< x td) (values (1+ x) y lyp) (l (1+ y) (+ dd td)))))
-	     (multiple-value-bind
-	      (d y lyp) (l y (number-of-days-from-1900 y))
-	      (let* ((l (if lyp +lmd+ +md+))
-		     (m (position d l :test '<=))
-		     (d (if (> m 0) (- d (aref l (1- m))) d)))
-		(multiple-value-bind
-		 (h ut) (floor ut 3600)
-		 (multiple-value-bind
-		  (min sec) (floor ut 60)
-		  (values sec min h d (1+ m) y dow dstp tz)))))))))
+  (let ((ut (- ut +secs-to-1970+  (* (- tz (this-tz)) 3600))))
+    (multiple-value-bind
+	(s n h d m y w yd dstp off) (localtime ut)
+    (when (when tzp (> dstp 0))
+      (multiple-value-setq (s n h d m y w yd dstp1) (localtime (- ut 3600))))
+    (values s
+	    n
+	    (+ h (- dstp (or dstp1 dstp)))
+	    d
+	    (1+ m)
+	    (+ 1900 y)
+	    (if (zerop w) 6 (1- w))
+	    (unless tzp (> dstp 0))
+	    (if tzp tz (+ (truncate (- off) 3600) dstp))))))
 
-(defun encode-universal-time (sec min h d m y &optional (tz (current-timezone)))
+(defun encode-universal-time (s n h d m y &optional (tz (this-tz) tzp))
   (declare (optimize (safety 2)))
-  (check-type sec (integer 0 59))
-  (check-type min (integer 0 59))
+  (check-type s (integer 0 59))
+  (check-type n (integer 0 59))
   (check-type h (integer 0 23))
   (check-type d (integer 1 31))
   (check-type m (integer 1 12))
-  (check-type y integer);(integer 1900)
+  (check-type y integer)
   (check-type tz rational)
-  (when (<= 0 y 99)
-    (multiple-value-bind
-     (sec min h d m y1 dow dstp tz) (get-decoded-time)
-     (declare (ignore sec min h d m dow dstp tz))
-     (incf y (- y1 (mod y1 100)))
-     (cond ((< (- y y1) -50) (incf y 100))
-	   ((>= (- y y1) 50) (decf y 100)))))
-  (+ (* (+ (1- d) (number-of-days-from-1900 y) (if (> m 1) (aref (if (leap-year-p y) +lmd+ +md+) (- m 2)) 0))
-        seconds-per-day)
-     (* (+ h tz) 3600) (* min 60) sec))
+  (+ (mktime s n h d (1- m) (- y 1900) (if tzp 0 -1)) +secs-to-1970+ (* (- tz (this-tz)) 3600)))
 
 (defun get-decoded-time ()
   (decode-universal-time (get-universal-time)))
