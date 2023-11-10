@@ -616,8 +616,9 @@
   (check-type i proper-list)
   (cond ((endp p) (values nil nil nil))
 	((member (setq s (car p)) i :test 'eq) (values s (cadr p) p))
-	((endp (setq s (cdr p))) (error "Bad plist"))
-	(t (get-properties (cdr s) i))))
+	(t (let ((p (cdr p)))
+	     (check-type p proper-cons);FIXME, cons loses proper in return
+	     (get-properties (cdr p) i)))))
 
 (defun rplaca (x y)
   (declare (optimize (safety 1)))
@@ -639,8 +640,9 @@
   (declare (optimize (safety 1)))
   (check-type l proper-list)
   (cond ((endp l) d) 
-	((eq (car l) i) (cadr l)) 
-	((endp (setq s (cdr l))) (error "Bad plist"))
-	((getf (cdr s) i d))))
+	((eq (car l) i) (cadr l))
+	((let ((l (cdr l)))
+	   (check-type l cons)
+	   (getf (cdr l) i d)))))
 
 (defun identity (x) x)

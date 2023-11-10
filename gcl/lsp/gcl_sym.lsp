@@ -98,5 +98,5 @@
 #+pre-gcl(defun symbolp (x) (typecase x (list (not x)) (symbol t)))
 (defun keywordp (x) (typecase x (keyword t)))
 
-;; (setf (symbol-function 'symbol-plist)   (symbol-function 'c-symbol-plist))
-;; (setf (symbol-function 'symbol-package) (symbol-function 'c-symbol-hpack))
+(setf (symbol-function 'symbol-plist)   (symbol-function 'c-symbol-plist))
+(setf (symbol-function 'symbol-package) (symbol-function 'c-symbol-hpack))

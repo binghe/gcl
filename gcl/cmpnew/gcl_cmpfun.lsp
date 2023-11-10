@@ -29,8 +29,6 @@
 (si:putprop 'apply 'c2apply 'c2)
 (si:putprop 'funcall 'c1funcall 'c1)
 
-(si:putprop 'get 'c1get 'c1)
-(si:putprop 'get 'c2get 'c2)
 
 (defvar *princ-string-limit* 80)
 
@@ -373,29 +371,7 @@
   (cond ((and (consp type) (eq (car type) 'cons)) (the seqind (+ 1 (cons-type-length (caddr type)))))
 	(0)))
 
-(defun c1get (args &aux (info (make-info)))
 
-  (when (or (endp args) (endp (cdr args)))
-        (too-few-args 'get 2 (length args)))
-  (when (and (not (endp (cddr args))) (not (endp (cdddr args))))
-        (too-many-args 'get 3 (length args)))
-  (list 'get info (c1args args info)))
-
-(defun c2get (args)
-  (if *safe-compile*
-      (c2call-global 'get args nil t)
-      (let ((*vs* *vs*) (*inline-blocks* 0) (pl (cs-push t t)))
-           (setq args (inline-args args (if (cddr args) '(t t t) '(t t))))
-           (wt-nl "{object V" pl" =(" (car args) ")->s.s_plist;")
-           (wt-nl " object ind= " (cadr args) ";")
-           (wt-nl "while(V" pl "!=Cnil){")
-           (wt-nl "if(V" pl "->c.c_car==ind){")
-           (unwind-exit (list 'CADR pl) 'jump)
-           (wt-nl "}else V" pl "=V" pl "->c.c_cdr->c.c_cdr;}")
-           (unwind-exit (if (cddr args) (caddr args) nil))
-           (wt "}")
-           (close-inline-blocks)))
-  )
 
 (defun co1eql (f args)
   (declare (ignore f))
