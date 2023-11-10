@@ -120,7 +120,9 @@
 (defun setup-sigs nil
   (clrhash *sigs*)
   (mapc (lambda (x) (set-first-sig (car x) (cdr x))
-	  (mapc (lambda (x) (set-first-sig (car x) (list (cdr x) nil nil nil nil nil))) (caddr x))) si::*sig-discovery-props*))
+	  (mapc (lambda (x) (set-first-sig (car x) (list (cdr x) nil nil nil nil nil)))
+		(caddr x)))
+	si::*sig-discovery-props*))
 
 (defun compile-file (fn &rest l &aux w e)
   (values
@@ -326,7 +328,10 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	    
 	    (when prev (set-dispatch-macro-character #\# #\, prev rtb)))))
       
-      (when *sig-discovery* (return-from compile-file1 (values)))
+      (when *sig-discovery*
+	(close *compiler-output-data*)
+	(close *compiler-input*)
+	(return-from compile-file1 (values)))
 
       (when (zerop *error-count*)
 	(when *compile-verbose* (format t "~&;; End of Pass 1.  ~%"))

@@ -39,8 +39,11 @@
     (make-package ':iterate :use '(:lisp :walker)))
 
 (if (find-package ':pcl)
-    (use-package '(:walker :iterate :lisp) ':pcl)
+    (use-package '(:walker :iterate :lisp :s) ':pcl)
     (make-package ':pcl :use '(:walker :iterate :lisp)))
+
+(import 'si::(clines defentry defcfun object void int double non-negative-fixnum macro memq seqind structurep structure-def structure-ref std-instance funcallable-std-instance) :pcl)
+(import 'si::(macro) :walker)
 
 (export (intern (symbol-name :iterate)		;Have to do this here,
 		(find-package :iterate))	;because in the defsystem
