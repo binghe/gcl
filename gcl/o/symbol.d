@@ -511,7 +511,7 @@ gensym_int(object this_gensym_prefix,object this_gensym_counter) {
   i = (q-p)+(this_gensym_prefix==OBJNULL ? 1 : VLEN(this_gensym_prefix));
   sym = make_symbol(str(""));
   {
-    BEGIN_NO_INTERRUPT;	
+    BEGIN_NO_INTERRUPT;
     sym->s.s_name=alloc_simple_string(i);
     sym->s.s_name->st.st_self = alloc_relblock(i);
     /* sym->s.s_fillp = i; */
@@ -521,7 +521,7 @@ gensym_int(object this_gensym_prefix,object this_gensym_counter) {
     for (;j<VLEN(sym->s.s_name);j++)
       sym->s.s_name->st.st_self[j] = p[j-i];
     END_NO_INTERRUPT;
-  }	
+  }
   
   RETURN1(sym);
 
