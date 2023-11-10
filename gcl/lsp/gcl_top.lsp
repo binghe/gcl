@@ -249,7 +249,7 @@
 
   (let* ((x (read stream eof-error-p eof-value))
 	 (ch (read-char-no-hang stream eof-error-p eof-value)))
-    (cond ((and ch (unread-char ch stream)))
+    (cond ((when ch (unless (eq ch eof-value) (unread-char ch stream))))
 	  ((and (keywordp x) ch)
 	   (cons x (read-from-string (string-concatenate "(" (read-line stream eof-error-p eof-value) ")"))))
 	  (x))))
