@@ -394,18 +394,30 @@
   `(progn
      ,@(mapcar (lambda (x &aux (f (when (eq x 'find-class) `(&optional ep))) (z (intern (string-concatenate "SI-" (symbol-name x)))))
 		 `(let (y)
-		    (defun ,z (o ,@f &aux e (x ',x)
-				       ;FIXME only one not in cl package
-				       (x (if (eq x 'class-finalized-p) (find-symbol (symbol-name x) "PCL") x)))
+		    (defun ,z (o ,@f &aux e (x ',x))
+		      (declare (notinline find-class));to enable recompile file in ansi image
 		      (cond ((and x (fboundp x) (fboundp 'classp))
 			     (prog1 (funcall x o ,@(cdr f))
 			       (fset ',z (symbol-function x))))
 			    ((setq e (get ',z 'early)) (values (funcall e o ,@(cdr f))))
 			    (y)))))
-	       '(classp class-precedence-list find-class class-name class-of class-direct-subclasses class-finalized-p)))))
+	       '(classp class-precedence-list find-class class-name class-of class-direct-subclasses))
+     (let (fun)
+       (defun si-class-finalized-p (x)
+	 (unless fun (let* ((p (find-package "PCL"))(sym (when p (find-symbol "CLASS-FINALIZED-P" p))))
+		       (when (and sym (fboundp sym) (fboundp 'classp))
+			 (setq fun (symbol-function sym)))))
+	 (when (and fun (funcall fun x)) t)))
+     )))
 (clh)
 
-(defun si-cpl-or-nil (x) (when (si-class-finalized-p x) (si-class-precedence-list x)))
+(let ((h (make-hash-table :test 'eq)))
+  (defun si-cpl-or-nil (x)
+    (or (gethash x h)
+	(let ((y (when (si-class-finalized-p x) (si-class-precedence-list x))))
+	  (when y (setf (gethash x h) y))))))
+
+;(defun si-cpl-or-nil (x) (when (si-class-finalized-p x) (si-class-precedence-list x)))
 
 (defun is-standard-class (object &aux (o (load-time-value nil)))
   (and (si-classp object)
