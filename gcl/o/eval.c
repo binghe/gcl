@@ -107,7 +107,7 @@ unwind_vals(object *vals,object *base) {
   o=vs_base[0];
   n=vs_top-vs_base;
   if (vals) {
-    if (n>1) memcpy(vals,vs_base+1,(n-1)*sizeof(*vals));
+    if (n>1) memmove(vals,vs_base+1,(n-1)*sizeof(*vals));
     vs_top=(vals-1)+n;
   } else
     vs_top=base;
