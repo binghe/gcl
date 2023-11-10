@@ -424,6 +424,8 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	  na))))))
 
 
+(defvar *compiler-compile-data* nil)
+
 (defun compile (name &optional def &aux na tem gaz (*default-pathname-defaults* #p"."))
   
   (when (eq name 'cmp-anon)
@@ -441,7 +443,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 	(def (error "def not a lambda expression"))
 	 ;; FIXME -- support warnings-p and failures-p.  CM 20041119
 	((multiple-value-setq (tem na) (get-named-form name))
-	 (let (warnings failures)
+	 (let (warnings failures *compiler-compile-data*)
 	   (unless (and (fboundp 'si::init-cmp-anon) (or (si::init-cmp-anon) (fmakunbound 'si::init-cmp-anon)))
 	     (with-open-file
 	      (st (setq gaz (gazonk-name)) :direction :output))

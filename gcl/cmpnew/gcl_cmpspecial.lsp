@@ -293,13 +293,15 @@
 	 (fname (or z fname))
 	 (args  (pop l))
 	 (w   (make-string-output-stream))
-	 (ss  (si::open-fasd w :output nil nil))
 	 (out (pd fname args l))
 	 (out (if y `(lambda-closure ,y nil nil ,@(cdr out)) out)))
-    (si::find-sharing-top out (aref ss 1))
-    (si::write-fasd-top out ss)
-    (si::close-fasd ss)
-    (get-output-stream-string w)))
+    (if *compiler-compile* out
+	(let ((ss  (si::open-fasd w :output nil nil)))
+	  (si::find-sharing-top out (aref ss 1))
+	  (si::write-fasd-top out ss)
+	  (si::close-fasd ss)
+	  (get-output-stream-string w)))))
+
 
 
 ;; (defun process-local-fun-env (env b f fun tp)

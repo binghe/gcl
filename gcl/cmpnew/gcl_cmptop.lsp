@@ -1352,7 +1352,12 @@
 
 (defun ex-sig (sig) (list (mapcar 'cmp-unnorm-tp (car sig)) (cmp-unnorm-tp (cadr sig))))
 (defun export-call-struct (l)
-  `(apply 'make-function-plist ',(exp-sig (pop l)) ',(pop l) ,(apply 'compress-fle (pop l)) ',l))
+  `(apply 'make-function-plist
+	  ',(exp-sig (pop l))
+	  ',(pop l)
+	  ',(apply 'compress-fle (pop l))
+	  ',l))
+
 
 (defun wt-if-proclaimed (fname cfun lambda-expr macro-p)
   (when (fast-link-proclaimed-type-p fname);(and  (not (member '* (get-arg-types fname))))

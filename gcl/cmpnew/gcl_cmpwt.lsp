@@ -206,7 +206,7 @@
         (*print-case* :downcase)
         (*print-gensym* t)
         (*print-array* t)
-        (*print-readably* t)
+        (*print-readably* (not *compiler-compile*))
 	;;This forces the printer to add the float type in the .data file.
 	(*READ-DEFAULT-FLOAT-FORMAT* 'long-float)
         (si::*print-package* t)
@@ -219,10 +219,13 @@
 (defun wt-data-file nil
   (when *prof-p* (add-init `(si::mark-memory-as-profiling)))
   (wt-data2 (1+ *next-vv*))
-  (if *fasd-data*;FIXME
-      (dolist (v (nreverse *data*))
-	(wt-data2 (verify-datum v)))
-      (wt-data2 `(progn ,@(mapcar 'verify-datum (nreverse *data*)))))
+  (cond (*compiler-compile*;FIXME, clean this up
+	 (setq *compiler-compile-data* (mapcar 'verify-datum (nreverse *data*)))
+	 (wt-data2 `(mapc 'eval *compiler-compile-data*)))
+	(*fasd-data*
+	 (dolist (v (nreverse *data*))
+	   (wt-data2 (verify-datum v))))
+	((wt-data2 `(progn ,@(mapcar 'verify-datum (nreverse *data*))))))
   (when *fasd-data*
     (si::close-fasd (car *fasd-data*))))
 
