@@ -1,9 +1,15 @@
 (in-package :si)
 
-(let (fso)
+(let (fso (h (make-hash-table :test 'eq)))
   (defun funcallable-class-p (x)
-    (member (or fso (setq fso (si-find-class (find-symbol "FUNCALLABLE-STANDARD-OBJECT" "PCL") nil)))
-	    (si-cpl-or-nil x))))
+    (multiple-value-bind
+	  (r f) (gethash x h)
+      (if f r
+	  (let ((y (si-cpl-or-nil x)))
+	    (when y
+	      (setf (gethash x h)
+		    (member (or fso (setq fso (si-find-class (find-symbol "FUNCALLABLE-STANDARD-OBJECT" "PCL") nil)))
+			    y))))))))
 
 (defun normalize-instance (c)
   (cond ((funcallable-class-p c) `(funcallable-std-instance ,c))
