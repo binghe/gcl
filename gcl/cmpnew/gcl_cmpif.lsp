@@ -1157,7 +1157,7 @@
 	 (tp (or tp (co1or-arg-tp arg)))
 	 (atp (atomic-tp (type-and tp #t(not null)))))
     (when (atomic-type-constant-value atp);FIXME make sure this is never a binding
-      (c1expr `(if ,arg ',(car atp) ,@(when args (if (cdr args) `((or ,@args)) args)))))))
+      (c1expr (if args `(if ,arg ',(car atp) (or ,@args)) arg)))))
 
 ;; (defun co1or (fn args)
 ;;   (declare (ignore fn))
