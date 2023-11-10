@@ -491,11 +491,13 @@
     (mapc (lambda (x &aux (y (funid-sym x)))
 	    (check-type x function-name)
 	    (putprop y t (if (eq a 'inline) 'cmp-inline    'cmp-notinline))
-	    (remprop y   (if (eq a 'inline) 'cmp-notinline 'cmp-inline))) d))
+	    (remprop y   (if (eq a 'inline) 'cmp-notinline 'cmp-inline)))
+	  d))
    ((ignore ignorable) (mapc (lambda (x) (check-type x function-name)) d))
    (declaration (mapc (lambda (x) (check-type x symbol) (pushnew x *alien-declarations*)) d))
    (otherwise
-    (cond ((unless (member a *alien-declarations*) (warn "The declaration specifier ~s is unknown." a)))
+    (cond ((when (symbolp a) (cmp-norm-tp a)) (proclaim-var a d))
+	  ((unless (member a *alien-declarations*) (warn "The declaration specifier ~s is unknown." a)))
 	  ((symbolp a) (let ((y (get a :proclaim))) (when y (mapc (lambda (x) (funcall y x)) d)))))))
  nil)
 
@@ -530,9 +532,15 @@
 	 (d (cond (z '*)(y (remove '&optional d))(x `(returns-exactly ,@(cdr d)))(d))))
     (list a d)))
 
+(defun norm-possibly-unkown-type (type &aux (tp (cmp-norm-tp type)))
+  (flet ((fix (tp) (or tp t)))
+    (cond ((cmpt tp) `(,(pop tp) ,@(mapcar #'fix tp)))
+	  ((fix tp)))))
+
 (defun proclaim-ftype (ftype var-list
 		       &aux  (sig (ftype-to-sig (cdr ftype)))
-			 (sig (uniq-list (list (mapcar 'cmp-norm-tp (car sig)) (cmp-norm-tp (cadr sig))))))
+			 (sig (uniq-list (list (mapcar 'norm-possibly-unkown-type (car sig))
+					       (norm-possibly-unkown-type (cadr sig))))))
   (declare (optimize (safety 2)))
   (mapc (lambda (x &aux (c (car (call x))))
 	  (cond (c (unless (sig= c sig)
