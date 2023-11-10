@@ -159,7 +159,10 @@
    (mrd
     (mapcan #'(lambda (x &aux (c 0))
 		(mapcan #'(lambda (y &aux (y (or (pp y) y))(sz (bs y))(c (prog1 c (incf c sz)))(x (fp c x y)))
-			    (when x `((,(cadar x) ,(cadr x) ,c ,sz ,y)))) (caddr x))) (slist)) :test 'equal :key 'cddr)))
+			    (when x `((,(cadar x) ,(cadr x) ,c ,sz ,y))))
+			(caddr x)))
+	    (slist))
+    :test 'equal :key 'cddr)))
 
 #.`(progn ,@(mapcan #'(lambda (x) (apply 'afn2 x)) (macc)))
 
