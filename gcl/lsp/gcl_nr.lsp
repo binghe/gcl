@@ -42,7 +42,7 @@
       (if n2p
 	  (let ((z (,fn2 n1 n2)))
 	    (if r (apply ',fn z (car r) (cdr r)) z))
-	(,fn3 n1)))))
+	(,fn ,fn3 n1)))))
 
 (defcomp (<  <2))
 (defcomp (<= <=2))
@@ -56,8 +56,8 @@
 (defmm (max >=))
 (defmm (min <=))
 
-(defmd (- number-minus number-negate))
-(defmd (/ number-divide number-recip))
+(defmd (- number-minus 0))
+(defmd (/ number-divide 1))
 
 (defun zgcd2 (x y) (cond ((= x 0) y) ((= y 0) x) ((fgcd2 x y))))
 (defun lgcd2 (x y tx tt &aux (tt (>> tt (ctzl tt))))
