@@ -175,12 +175,8 @@
 
 		
    
-(defun char-code (c)
-  (declare (optimize (safety 1)))
-  (check-type c character)
-  (let ((b #.(- (1- (integer-length (- (address #\^A) (address #\^@)))))))
-    (declare (ignorable b))
-    (the unsigned-char (ash (the seqind (- (address c) (address #\^@))) b))))
+
+(setf (symbol-function 'char-code) (symbol-function 'c-character-code))
 
 (defun code-char (d)
 ;  (declare (optimize (safety 1)))
