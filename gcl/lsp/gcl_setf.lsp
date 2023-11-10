@@ -43,13 +43,13 @@
 ;(eval-when (eval compile) (defun si:clear-compiler-properties (symbol code)))
 (eval-when (eval compile) (setq si:*inhibit-macro-special* nil))
 
-(defvar *setf-syms*)
+(defvar *setf-syms* nil)
 (defvar *setf-set* nil)
 (defconstant +setf-prefix+ "SETF")
 (defconstant +setf-syms+ (let ((*gensym-counter* 0))
 			   (mapl (lambda (x) (rplaca x (gensym +setf-prefix+)))
 				   (make-list 19))))
-(defun setf-set nil (setq *setf-syms* nil *gensym-counter* 0))
+;(defun setf-set nil (setq *setf-syms* nil *gensym-counter* 0))
 ;(defun setf-set nil (or *setf-set* (setq *setf-syms* +setf-syms+)));FIXME, this does not seem possible
 (defun setf-gensym nil (if *setf-syms* (prog1 (car *setf-syms*) (setq *setf-syms* (cdr *setf-syms*))) (gensym +setf-prefix+)))
 
@@ -417,7 +417,7 @@
 ;; ;(setf (macro-function 'setf) 'setf-help)
 ;; (si::fset 'setf (cons 'macro (symbol-function 'setf-helper)))
 
-(defmacro setf (&environment env &rest rest &aux (*setf-set* (setf-set)))
+(defmacro setf (&environment env &rest rest &aux (*gensym-counter* 0))
   (cond ((endp rest) nil)
 ;        ((endp (cdr rest)) (error "~S is an illegal SETF form." rest))
         ((endp (cddr rest)) (setf-expand-1 (car rest) (cadr rest) env))
@@ -425,7 +425,7 @@
 
 ;;; PSETF macro.
 
-(defmacro psetf (&environment env &rest rest &aux (*setf-set* (setf-set)))
+(defmacro psetf (&environment env &rest rest &aux (*gensym-counter* 0))
   (declare (optimize (safety 2)))
   (cond ((endp rest) nil)
         ((endp (cdr rest)) (error "~S is an illegal PSETF form." rest))
@@ -451,7 +451,7 @@
 
 
 ;;; SHIFTF macro.
-(defmacro shiftf (&environment env &rest rest &aux (*setf-set* (setf-set)))
+(defmacro shiftf (&environment env &rest rest &aux (*gensym-counter* 0))
   (declare (optimize (safety 2)))
   (do ((r rest (cdr r))
        (pairs nil)
@@ -478,7 +478,7 @@
 
 
 ;;; ROTATEF macro.
-(defmacro rotatef (&environment env &rest rest &aux (*setf-set* (setf-set)))
+(defmacro rotatef (&environment env &rest rest &aux  (*gensym-counter* 0))
   (declare (optimize (safety 2)))
   (do ((r rest (cdr r))
        (pairs nil)
@@ -517,7 +517,7 @@
 	     ,@,(cadr r))))
     `(defmacro ,name (&environment env reference . ,lambda-list)
        ,@(when doc-string `(,doc-string))
-       (let ((*setf-set* (setf-set))(rest-var (setf-gensym)))
+       (let ((*gensym-counter* 0)(rest-var (setf-gensym)))
 	 (when (symbolp reference)
            (return-from ,name
              (let ((access-form reference))
@@ -542,7 +542,7 @@
 ;;;         flag))))
 
 ;;; This definition was obtained from SBCL
-(defmacro remf (&environment env place indicator &aux (*setf-set* (setf-set)))
+(defmacro remf (&environment env place indicator &aux  (*gensym-counter* 0))
   (declare (optimize (safety 2)))
   (let* ((ind-temp (setf-gensym))(local1 (setf-gensym))(local2 (setf-gensym)))
     (multiple-value-bind (dummies vals newval setter getter)
@@ -572,7 +572,7 @@
 (define-modify-macro incf (&optional (delta 1)) +)
 (define-modify-macro decf (&optional (delta 1)) -)
 
-(defmacro push (&environment env item place &aux (*setf-set* (setf-set)))
+(defmacro push (&environment env item place &aux  (*gensym-counter* 0))
   (declare (optimize (safety 2)))
   (let ((myitem (setf-gensym)))
     (when (symbolp place)
@@ -584,7 +584,7 @@
 	 (declare (ignorable ,@vars))
 	 ,store-form))))
 
-(defmacro pushnew (&environment env item place &rest rest &aux (*setf-set* (setf-set)))
+(defmacro pushnew (&environment env item place &rest rest &aux  (*gensym-counter* 0))
   (declare (optimize (safety 2)))
   (let ((myitem (setf-gensym)))
     (cond ((symbolp place)
@@ -597,7 +597,7 @@
 	 (declare (ignorable ,@vars))
 	 ,store-form))))
 
-(defmacro pop (&environment env place &aux (*setf-set* (setf-set)))
+(defmacro pop (&environment env place &aux  (*gensym-counter* 0))
     (declare (optimize (safety 2)))
     (when (symbolp place)
       (return-from pop
