@@ -434,14 +434,16 @@ int fasload ( object faslfile )
 	}
 	close_stream ( faslfile );
 
+        if ( symbol_value ( sLAload_verboseA ) != Cnil ) {
+            printf(" ;; start address -T %x ", memory->cfd.cfd_start);
+	    fflush(stdout);
+        }
+
 	ALLOCA_FREE ( my_string_table );
 	ALLOCA_FREE ( symbol_table );
 	call_init ( init_address, memory, data, 0 );
         vs_base = old_vs_base;
 	vs_top  = old_vs_top;
-        if ( symbol_value ( sLAload_verboseA ) != Cnil ) {
-            printf(" ;; start address -T %x ", memory->cfd.cfd_start);
-        }
 	return ( memory->cfd.cfd_size );
     }
 }

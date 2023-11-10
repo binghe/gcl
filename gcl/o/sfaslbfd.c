@@ -432,14 +432,16 @@ fasload(object faslfile) {
   CLEAR_CACHE;
 #endif
   
+  if(symbol_value(sLAload_verboseA)!=Cnil) {
+    printf(" ;; start address -T %p ",memory->cfd.cfd_start);
+    fflush(stdout);
+  }
+
   call_init(init_address,memory,data,0);
   
   vs_base=old_vs_base;
   vs_top=old_vs_top;
   
-  if(symbol_value(sLAload_verboseA)!=Cnil)
-    printf(" ;; start address -T %p ",memory->cfd.cfd_start);
-
   return memory->cfd.cfd_size;
 
  }

@@ -572,13 +572,15 @@ fasload(object faslfile) {
   
   massert(!un_mmap(v1,ve));
   
-  init_address-=(ul)memory->cfd.cfd_start;
-  call_init(init_address,memory,faslfile);
-  
-  if(symbol_value(sLAload_verboseA)!=Cnil)
+  if(symbol_value(sLAload_verboseA)!=Cnil) {
     printf(";; start address for %.*s %p\n",
 	   (int)VLEN(memory->cfd.cfd_name),memory->cfd.cfd_name->st.st_self,
 	   memory->cfd.cfd_start);
+    fflush(stdout);
+  }
+
+  init_address-=(ul)memory->cfd.cfd_start;
+  call_init(init_address,memory,faslfile);
   
   return(memory->cfd.cfd_size);
 
