@@ -636,7 +636,7 @@
 (defun consp (x) (when x (listp x)))
 (defun atom (x) (not (consp x)))
 
-(defun getf (l i &optional d &aux s)
+(defun getf (l i &optional d)
   (declare (optimize (safety 1)))
   (check-type l proper-list)
   (cond ((endp l) d) 
