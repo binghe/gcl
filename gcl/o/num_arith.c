@@ -284,13 +284,13 @@ ratio_mult_with_cancellation(object a,object b,object c,object d) {
 
   a=integer_exact_quotient(big_fixnum3,a,gad);
   c=integer_exact_quotient(big_fixnum4,c,gbc);
-  a=integer_times(big_fixnum3,a,c);/*number_times can clobber big_fixnum1*/
+  a=integer_times(big_fixnum3,a,c);/*integer_times can clobber big_fixnum1*/
   if (a==big_fixnum3 || a==big_fixnum4)
     a=replace_big(a);
 
   b=integer_exact_quotient(big_fixnum3,b,gbc);
   d=integer_exact_quotient(big_fixnum4,d,gad);
-  b=integer_times(big_fixnum3,b,d);
+  b=integer_times(big_fixnum3,b,d);/*integer_times can clobber big_fixnum1*/
   if (b==big_fixnum3 || b==big_fixnum4)
     b=replace_big(b);
 
@@ -306,25 +306,24 @@ ratio_op_with_cancellation(object a,object b,object c,object d,object (*op)(obje
   b0=b;
   d0=d;
 
-  g=get_gcd_r(big_fixnum1,b,d);
+  g=get_gcd_r(big_fixnum2,b,d);
 
   b=integer_exact_quotient(big_fixnum3,b,g);
   d=integer_exact_quotient(big_fixnum4,d,g);
 
-  c=integer_times(big_fixnum3,b,c);
-  a=integer_times(big_fixnum5,a,d);
-  t=op(big_fixnum3,a,c);/*number_times can clobber big_fixnum2*/
-  /* t=op(a,c);/\*FIXME*\/ */
+  c=integer_times(big_fixnum3,b,c);/*integer_times can clobber big_fixnum1*/
+  a=integer_times(big_fixnum5,a,d);/*integer_times can clobber big_fixnum1*/
+  t=op(big_fixnum3,a,c);
 
-  g1=get_gcd_r(big_fixnum1,t,g);
+  g1=get_gcd_r(big_fixnum2,t,g);
 
   t=integer_exact_quotient(big_fixnum3,t,g1);
   if (t==big_fixnum3 || t==big_fixnum4 || t==big_fixnum5)
     t=replace_big(t);
 
-  b=integer_exact_quotient(big_fixnum1,b0,g1);
-  b=integer_times(big_fixnum1,b,d);
-  if (b==big_fixnum1 || b==big_fixnum4)
+  b=integer_exact_quotient(big_fixnum2,b0,g1);
+  b=integer_times(big_fixnum2,b,d);/*integer_times can clobber big_fixnum1*/
+  if (b==big_fixnum2 || b==big_fixnum4)
     b=replace_big(b);
 
   return make_ratio(t,b,1);
