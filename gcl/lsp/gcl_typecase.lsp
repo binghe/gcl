@@ -77,7 +77,7 @@
 	  (`(when ,x ,y)))))
 
 (defun msubt (o tp y &aux
-		(tp (tp-type (let ((x (cmp-norm-tp tp))) (or (type>= x y) (when (type-and x y) x)))))
+		(tp (let ((x (cmp-norm-tp tp))) (or (type>= x y) (when (type-and x y) tp))))
 		(otp (normalize-type tp));FIXME normalize, eg structure
                 (lp (listp otp))(ctp (if lp (car otp) otp))(tp (when lp (cdr otp))))
   (case ctp
