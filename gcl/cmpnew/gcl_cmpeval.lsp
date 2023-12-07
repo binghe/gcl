@@ -1403,7 +1403,7 @@
 	  ((member-if-not (lambda (x) (type>= (car x) (cdr x))) 
 			  (mapcar (lambda (x y) (cons (info-type (cadr x)) (coerce-to-one-value y))) fms (get-arg-types fun))))
 	  ((when (exit-to-fmla-p) (infer-tp-p src)))
-	  ((< (cons-count src) 30)))));100
+	  ((< (cons-count src) 50)))));100
 
 (dolist (l '(upgraded-array-element-type row-major-aref row-major-aset si::set-array array-element-type))
   (setf (get l 'consider-inline) t))
