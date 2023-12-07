@@ -145,9 +145,9 @@ struct character {
 
   object            ch_name;
   ufixnum           pad5;
-  uchar             ch_code; /*  code  */
-  uchar             ch_font; /*  code  */
-  uchar             ch_bits; /*  code  */
+  uchar             ch_code;
+  uchar             ch_font;
+  uchar             ch_bits;
   ufixnum           pad:LM(24);
   ufixnum           pad1;
   ufixnum           pad2;
@@ -155,17 +155,7 @@ struct character {
   ufixnum           pad4;
 
 };
-/* struct stdesig { */
 
-/*   FIRSTWORD; */
-
-/*   uchar             *sd_sdself; */
-/*   FILLP_WORD(sd_sdfillp); */
-/*   ufixnum            pad; */
-/*   ufixnum            pad1; */
-/*   ufixnum            pad3; */
-
-/* }; */
 struct symbol {
 
   FIRSTWORD;
@@ -236,7 +226,8 @@ struct hashtable {           /*  hash table header  */
 #define J(a_,b_) j(a_,b_)
 
 #define ARRAY_RANK_BITS 6
-#define ARRAY_RANK_LIMIT ((1UL<<ARRAY_RANK_BITS)-1)/*FIXME?*/
+/* #define ARRAY_RANK_LIMIT ((1UL<<ARRAY_RANK_BITS)-1)/\*FIXME?*\/ */
+#define ARRAY_RANK_LIMIT (1UL<<ARRAY_RANK_BITS)
 
 #if SIZEOF_LONG == 8
 #define ARRAYWORD(b_,c_)						\
@@ -245,9 +236,10 @@ struct hashtable {           /*  hash table header  */
 	  J(b_,J(c_,adjustable)):1,					\
 	  J(b_,J(c_,writable)):1,					\
 	  J(b_,J(c_,offset)):3,						\
+	  J(b_,J(c_,eltsize)):4,					\
+	  J(b_,J(c_,eltmode)):4,					\
 	  J(b_,J(c_,rank)):ARRAY_RANK_BITS,				\
-	  J(b_,J(c_,dim)):ARRAY_DIMENSION_BITS,				\
-	  ww:LM(AP(22,AP(ARRAY_RANK_BITS,ARRAY_DIMENSION_BITS))))
+	  J(b_,J(c_,dim)):ARRAY_DIMENSION_BITS)
 
 #define atem(a_,b_,c_)				\
   ARRAYWORD(b_,c_);				\
@@ -261,14 +253,14 @@ struct hashtable {           /*  hash table header  */
 	  J(b_,J(c_,adjustable)):1,					\
 	  J(b_,J(c_,writable)):1,					\
 	  J(b_,J(c_,offset)):3,						\
-	  J(b_,J(c_,rank)):ARRAY_RANK_BITS,				\
-	  ww:LM(AP(22,ARRAY_RANK_BITS)))
+	  J(b_,J(c_,eltsize)):4,					\
+	  J(b_,J(c_,rank)):ARRAY_RANK_BITS)
 
 #define atem(a_,b_,c_)					\
   ARRAYWORD(b_,c_);					\
   a_       *J(b_,J(c_,self));				\
   ufixnum   J(b_,J(c_,dim)):ARRAY_DIMENSION_BITS;	\
-  ufixnum   pad:LM(ARRAY_DIMENSION_BITS)
+  ufixnum   J(b_,J(c_,eltmode)):4
 
 #endif
 

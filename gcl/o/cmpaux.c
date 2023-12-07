@@ -522,7 +522,7 @@ do_init(object *statVV) {
 
   /* switch SPinit to point to a vector of function addresses */
 
-  fasl_vec->v.v_elttype = aet_fix;
+  set_array_elttype(fasl_vec,aet_fix);
 
   /* swap the entries */
   for (i=0,p=fasl_vec->v.v_self,q=statVV;i<n;i++) {

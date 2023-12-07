@@ -60,9 +60,7 @@ Iarray_element_type(object);
 
 /*  #define ARRAY_DIMENSION_LIMIT MOST_POSITIVE_FIXNUM */
 
-DEFCONST("ARRAY-RANK-LIMIT", sLarray_rank_limit, LISP,
-	 make_fixnum(ARRAY_RANK_LIMIT),"");
-
+DEFCONST("ARRAY-RANK-LIMIT",sLarray_rank_limit,LISP,make_fixnum(ARRAY_RANK_LIMIT),"");
 DEFCONST("ARRAY-DIMENSION-LIMIT", sLarray_dimension_limit,LISP,make_fixnum(ARRAY_DIMENSION_LIMIT),"");
 DEFCONST("ARRAY-TOTAL-SIZE-LIMIT", sLarray_total_size_limit,LISP,make_fixnum(ARRAY_DIMENSION_LIMIT),"");
 
@@ -75,7 +73,7 @@ DEF_ORDINARY("SBIT",sLsbit,LISP,"");
 #define N_FIXNUM_ARGS 6
 
 /*FIXME*/
-DEFUN("AREF",object,fLaref,LISP,1,ARRAY_RANK_LIMIT,ONE_VAL,OO,II,II,II,(object x,...),"") {
+DEFUN("AREF",object,fLaref,LISP,1,MAX_ARGS,ONE_VAL,OO,II,II,II,(object x,...),"") {
 
   va_list ap;
   fixnum k,n=INIT_NARGS(1);
@@ -314,7 +312,14 @@ DEFUN("SVSET",object,fSsvset,SI,3,3,NONE,OO,IO,OO,OO,(object x,fixnum i,object v
     FEerror("out of bounds",0);
   return x->v.v_self[i] = val;
 }
-  
+
+void
+set_array_elttype(object x,enum aelttype tp) {
+  x->a.a_elttype=tp;
+  x->a.a_eltsize=fixnum_length(elt_size(tp));
+  x->a.a_eltmode=elt_mode(tp);
+}
+
 fixnum
 elt_size(fixnum elt_type) {
   switch (elt_type) {
@@ -365,7 +370,7 @@ elt_mode(fixnum elt_type) {
   case aet_short:       /*  signed short */
   case aet_nnint:       /*  non-neg int   */
   case aet_int:         /*  signed int */
-  case aet_nnfix:       /*  non-neg fixnum  */
+  case aet_nnfix:       /*  non-neg fixnum  */  /*FIXME*/
   case aet_fix:         /*  fixnum  */
     return aem_signed;
   case aet_object:      /*  t  */
@@ -475,14 +480,14 @@ DEFUN("MAKE-ARRAY1",object,fSmake_array1,SI,7,7,NONE,OO,OO,OI,OO,
 
   int rank = length(dimensions);
   fixnum elt_type=fix(fSget_aelttype(x0));
-  if (rank > ARRAY_RANK_LIMIT)
+  if (rank >= ARRAY_RANK_LIMIT)
     FEerror("Array rank limit exceeded.",0);
   { object x,v;
     char *tmp_alloc;
     int dim =1,i; 
     BEGIN_NO_INTERRUPT;
     x = alloc_object(t_array);
-    x->a.a_elttype = elt_type;
+    set_array_elttype(x,elt_type);
     x->a.a_self = 0;
     x->a.a_hasfillp = 0;
     x->a.a_rank = rank;

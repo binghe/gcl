@@ -42,7 +42,7 @@ int l;
 	x->sv.sv_adjustable = FALSE;
 	x->sv.sv_dim = l;
 	x->sv.sv_self = NULL;
-	x->sv.sv_elttype = aet_object;
+	set_array_elttype(x,aet_object);
 	x->sv.sv_rank = 1;
 	return(x);
 }
@@ -61,7 +61,7 @@ enum aelttype aet;
 	x->v.v_dim = l;
 	x->v.v_fillp = l;
 	x->v.v_self = NULL;
-	x->v.v_elttype = (short)aet;
+	set_array_elttype(x,(short)aet);
 	x->v.v_rank = 1;
 	return(x);
 }
@@ -78,7 +78,7 @@ int l;
 	x->sbv.sbv_dim = l;
 	x->sbv.sbv_offset = 0;
 	x->sbv.sbv_self = NULL;
-        x->sbv.sbv_elttype = aet_bit;
+	set_array_elttype(x,aet_bit);
         x->sbv.sbv_rank = 1;
 	return(x);
 }
@@ -97,7 +97,7 @@ int l;
 	x->bv.bv_fillp = l;
 	x->bv.bv_offset = 0;
 	x->bv.bv_self = NULL;
-        x->bv.bv_elttype = aet_bit;
+	set_array_elttype(x,aet_bit);
         x->bv.bv_rank = 1;
 	return(x);
 }
@@ -522,7 +522,7 @@ LFD(Lnreverse)()
 	vs_base[0] = nreverse(vs_base[0]);
 }
 
-object
+object /*FIXME boot*/
 nreverse(seq)
 object seq;
 {

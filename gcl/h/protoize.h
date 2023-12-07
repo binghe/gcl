@@ -1600,3 +1600,6 @@ double_to_rational(double);
 
 object
 fresh_synonym_stream_to_terminal_io(void);
+
+void
+set_array_elttype(object,enum aelttype);

@@ -541,7 +541,7 @@ gcl_init_character()
 	  set_type_of(y,t_simple_string);
 	  y->sst.sst_hasfillp = FALSE;
 	  y->sst.sst_adjustable = FALSE;
-	  y->sst.sst_elttype = aet_ch;
+	  set_array_elttype(y,aet_ch);
 	  y->sst.sst_rank = 1;
 	  y->sst.sst_dim = 1;
 	  y->sst.sst_self = (void *)&x->ch.ch_code;

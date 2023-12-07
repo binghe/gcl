@@ -81,7 +81,7 @@ DEFUN("COMPILE-REGEXP",object,fScompile_regexp,SI,1,1,NONE,OO,OO,OO,OO,(object p
   res->v.v_adjustable=1;
   res->v.v_hasfillp=1;
   SET_ADISP(res,Cnil);
-  res->v.v_elttype=aet_uchar;
+  set_array_elttype(res,aet_uchar);
   res->v.v_rank=1;
   res->v.v_self=v;
   res->v.v_dim=sz;

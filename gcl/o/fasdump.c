@@ -1317,7 +1317,7 @@ read_fasd1(int i, object *loc)
 	 object x=alloc_object(t_array);
 	 GET4(leng);
 
-	 x->a.a_elttype = GETD("a_elttype=%d");
+	 set_array_elttype(x,GETD("a_elttype=%d"));
 	 x->a.a_dim=leng;
 	 x->a.a_hasfillp=1;
 	 x->a.a_rank= GETD("a_rank=%d");
