@@ -1274,17 +1274,11 @@
 		(or (si::type= x y)
 		    (and (type>= #tinteger x) (type>= #tinteger y))
 		    (let ((cx (car (atomic-tp x)))(cy (car (atomic-tp y))))
-		      (and (consp cx) (consp cy) (tailp cy cx)
-			   (> (length cx) *src-loop-unroll-limit*)
-			   ;; (when (not (tm cx cy))
-			   ;;   (when (<= (length cx) 20)
-			   ;; 	 (print (setq ccc (list cx cy)))
-			   ;; 	 (break))
-			   ;;   t)
-			   ))
-		    ))
+		      (and (consp cx) (consp cy)
+			   (if (tailp cy cx)
+			       (> (length cx) *src-loop-unroll-limit*)
+			       (tailp cx cy))))))
 	      tps sir)))
-
 
 (defun prior-inline-similar-types (n tp)
     (car (member-if
