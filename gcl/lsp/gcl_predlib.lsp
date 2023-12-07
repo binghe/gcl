@@ -290,10 +290,8 @@
 (defconstant +range-types+ `(integer ratio short-float long-float))
 (defconstant +complex-types+ `(integer ratio short-float long-float))
 
-;(defconstant +array-types+ (append '(nil) +array-types+))
-
 (mapc (lambda (x) (setf (get x 'cmp-inline) t))
-      '(lremove lremove-if lremove-if-not lremove-duplicates lreduce lsubstitute ldelete ldelete-if ldelete-if-not))
+      '(lremove lremove-if lremove-if-not lremove-duplicates lreduce))
 
 (defun lremove (q l &key (key #'identity) (test #'eql) &aux r rp (p l))
   (mapl (lambda (x)
@@ -304,21 +302,12 @@
   (cond (rp (rplacd rp p) r)
 	(p)))
 
-;; (defun lremove (q l &key (key #'identity) (test #'eql))
-;;   (labels ((l (l) (when l
-;; 		    (let* ((x (car l))(z (cdr l))(y (l z)))
-;; 		      (if (funcall test q (funcall key x)) y (if (eq y z) l (cons x y)))))))
-;; 	  (l l)))
-
-
 (defun lremove-if (f l) (lremove f l :test 'funcall))
 (defun lremove-if-not (f l) (lremove (lambda (x) (not (funcall f x))) l :test 'funcall))
 
 (defun lremove-duplicates (l &key (test #'eql))
-  (labels ((f (l) (when l
-		    (let* ((x (car l))(z (cdr l))(y (f z)))
-		      (if (member x y :test test) y (if (eq y z) l (cons x y)))))))
-	  (f l)))
+  (lremove-if (lambda (x) (member x (setq l (cdr l)) :test test)) l))
+
 
 (defun lreduce (f l &key (key #'identity) (initial-value nil ivp))
   (labels ((rl (s &optional (res initial-value)(ft ivp))
@@ -326,21 +315,6 @@
 		 (if ft res (values (funcall f))))))
 	  (rl l)))
 
-(defun lsubstitute (n o l &key (test #'eql))
-  (labels ((f (l) (when l
-		    (let* ((x (car l))(z (cdr l))(y (f z))(sp (funcall test x o)))
-		      (if (unless sp (eq y z)) l (cons (if sp n x) y))))))
-	  (f l)))
-
-(defun ldelete (q l &key (key #'identity)(test #'eql))
-  (labels ((l (l) 
-	      (when l
-		(let* ((x (car l))(z (cdr l))(y (l z)))
-		  (if (funcall test q (funcall key x)) y (if (eq y z) l (rplacd l y)))))))
-	  (l l)))
-
-(defun ldelete-if (f l) (ldelete f l :test 'funcall))
-(defun ldelete-if-not (f l) (ldelete (lambda (x) (not (funcall f x))) l :test 'funcall))
 
 
 
