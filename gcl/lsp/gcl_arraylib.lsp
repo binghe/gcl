@@ -51,13 +51,11 @@
 			       (t . *object) (non-negative-fixnum . *fixnum) (fixnum . *fixnum)))))
  
  (defvar *array-type-info* (mapcar (lambda (x &aux (y (proto-array x))) 
-				     (list x (c-array-elttype y) (array-eltsize y) (array-mode y) (af x)))
+				     (list x (c-array-elttype y) (c-array-eltsize y) (c-array-eltmode y) (af x)))
 				   +array-types+))
 
  (defun maybe-cons (car cdr)
    (if (cdr cdr) (cons car cdr) (car cdr))))
-
-(defun c-array-eltsize (x) (array-eltsize x));FIXME
 
 #.`(defun set-array (r i s j &optional sw);assumes arrays of same type and indices in bounds
      (declare (optimize (safety 1))(seqind i j))
@@ -435,40 +433,49 @@
   (check-type a array)
   (c-array-rank a))
 
-(defun array-eltsize-propagator (f x)
+(defun array-dims-propagator (f t1 t2 &aux (d (atomic-tp-array-dimensions t1))
+					(a (car (atomic-tp t2))))
   (declare (ignore f))
+  (when (and a d)
+    (object-tp (nth a (car d)))))
+(setf (get 'array-dims 'type-propagator) 'array-dims-propagator)
+
+(defun applicable-array-infos (x k)
   (when (type>= #tarray x)
     (cmp-norm-tp
      (cons 'member
-	   (lreduce (lambda (y z)
-		      (if (tp<= x (car z)) y (cons (cdr z) y)))
-		    '#.(mapcar (lambda (x) (cons (cmp-norm-tp `(not (array ,(pop x)))) (cadr x)))
-			       *array-type-info*)
-		    :initial-value nil)))))
-(setf (get 'c-array-eltsize 'type-propagator) 'array-eltsize-propagator)
+	   (mapcar k
+		   (lreduce (lambda (y z)
+			      (if (tp<= x (car z)) y (cons (cdr z) y)))
+			    '#.(mapcar (lambda (x) (cons (cmp-norm-tp `(not (array ,(pop x)))) x))
+				       *array-type-info*)
+			    :initial-value nil))))))
 
 (defun array-elttype-propagator (f x)
   (declare (ignore f))
-  (when (type>= #tarray x)
-    (cmp-norm-tp
-     (cons 'member
-	   (lreduce (lambda (y z)
-		      (if (tp<= x (car z)) y (cons (cdr z) y)))
-		    '#.(mapcar (lambda (x) (cons (cmp-norm-tp `(not (array ,(pop x)))) (car x)))
-			       *array-type-info*)
-		    :initial-value nil)))))
+  (applicable-array-infos x 'car))
 (setf (get 'c-array-elttype 'type-propagator) 'array-elttype-propagator)
+
+(defun array-eltsize-propagator (f x)
+  (declare (ignore f))
+  (applicable-array-infos x 'cadr))
+(setf (get 'c-array-eltsize 'type-propagator) 'array-eltsize-propagator)
+
+(defun array-eltmode-propagator (f x)
+  (declare (ignore f))
+  (applicable-array-infos x 'caddr))
+(setf (get 'c-array-eltmode 'type-propagator) 'array-eltmode-propagator)
 
 (defun array-rank-propagator (f x)
   (declare (ignore f))
   (cond
-   ((type>= #tvector x) #t(member 1))
-   ((let ((d (atomic-tp-array-dimensions x)));FIXME integer rnk
-      (when d (object-tp (length (car d))))))
-   ((type>= #tarray x) #trnkind)))
+    ((type>= #tvector x) #t(member 1))
+    ((let ((d (atomic-tp-array-rank x)))
+      (when d (object-tp d))))
+    ((type>= #tarray x) #trnkind)))
 (setf (get 'c-array-rank 'type-propagator) 'array-rank-propagator)
 
-(defun array-dim-propagator (f t1 &aux (d (atomic-tp-array-dimensions t1)));c-array-dim?
+(defun array-dim-propagator (f t1 &aux (d (atomic-tp-array-dimensions t1)))
   (declare (ignore f))
   (when d
     (object-tp (reduce '* (car d)))))
