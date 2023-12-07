@@ -486,3 +486,12 @@
   (check-type i seqind)
   (aset v x i))
 (setf (get 'svset 'cmp-inline) t)
+
+#.`(defun array-eql-is-eq (x)
+     (case (c-array-elttype x)
+       (,(mapcan (lambda (x)
+		   (when (subtypep x 'eql-is-eq-tp)
+		     (list (c-array-elttype (make-array 1 :element-type x)))))
+		 +array-types+)
+	t)))
+(declaim (inline array-eql-is-eq))
