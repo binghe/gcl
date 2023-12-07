@@ -271,3 +271,18 @@
 ;; #.(let ((x (truncate fixnum-length char-length)))
 ;;     `(defun mpz_cmp (x y) (|libgmp|:|__gmpz_cmp| (+ ,x (address x)) (+ ,x (address y)))));FIXME
 ;; (setf (get 'mpz_cmp 'compiler::cmp-inline) t)
+
+
+(defdlfun (:fixnum "memcpy") :fixnum :fixnum :fixnum)
+(defun memcpy (a b c)
+  (declare (fixnum a b c))
+  (lit :fixnum "{fixnum f=1;f;}");(side-effects)
+  (|libc|:|memcpy| a b c))
+(declaim (inline memcpy))
+
+(defdlfun (:fixnum "memmove") :fixnum :fixnum :fixnum)
+(defun memmove (a b c)
+  (declare (fixnum a b c))
+  (lit :fixnum "{fixnum f=1;f;}");(side-effects)
+  (|libc|:|memmove| a b c))
+(declaim (inline memmove))

@@ -1157,6 +1157,18 @@ Icheck_displaced(object displaced_list, object ar, int dim)
     }
 }
 
+DEFUN("MEMCPY",object,fSmemcpy,SI,3,3,NONE,II,II,OO,OO,(fixnum x,fixnum y,fixnum z),"") {
+
+  RETURN1((object)(fixnum)memcpy((void *)x,(void *)y,z));
+
+}
+
+DEFUN("MEMMOVE",object,fSmemmove,SI,3,3,NONE,II,II,OO,OO,(fixnum x,fixnum y,fixnum z),"") {
+
+  RETURN1((object)(fixnum)memmove((void *)x,(void *)y,z));
+
+}
+
 
 DEFUN("REPLACE-ARRAY",object,fSreplace_array,SI,2,2,NONE,OO,OO,OO,OO,(object old,object new),"") { 
   
