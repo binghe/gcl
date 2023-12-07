@@ -650,13 +650,12 @@
 (defun c1branch (tf r args info)
   (if (and (not tf) (endp (cddr args)))
       (list (c1nil) nil)
-    (with-restore-vars ;FIXME eliminate if any variable restricts to nil
-     (dolist (l r) (restrict-type (car l) (cadr l) (let ((l (caddr l))) (if tf (car l) (cdr l)))))
-     (let (trv (b (c1expr* (if tf (cadr args) (caddr args)) info)))
-;       (when (info-type (cadr b)) 
-       (dolist (l *restore-vars*) (push (list (car l) (var-type (car l)) (var-store (car l))) trv));)
-       (keep-warnings)
-       (list b trv)))))
+      (with-restore-vars ;FIXME eliminate if any variable restricts to nil
+	(dolist (l r) (restrict-type (car l) (cadr l) (let ((l (caddr l))) (if tf (car l) (cdr l)))))
+	(let (trv (b (c1expr* (if tf (cadr args) (caddr args)) info)))
+	  (dolist (l *restore-vars*) (push (list (car l) (var-type (car l)) (var-store (car l))) trv));)
+	  (keep-warnings)
+	  (list b trv)))))
 
 (defun c-and (y x)
   (if (type>= #tnull (info-type (cadr y))) y

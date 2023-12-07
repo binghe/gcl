@@ -88,22 +88,22 @@
 
   (do* (nv nf (vs vars (cdr vs)) (fs forms (cdr fs)) 
 	   (av (append vars *vars*)) (fv (cdr av) (cdr fv)))
-      ((or (endp vs) (endp fs)) (list nv nf body))
-      (let ((var (car vs)) (form (car fs)))
-	(cond ((and (eq (var-kind var) 'LEXICAL)
-		    (not (eq t (var-ref var))) ;;; This field may be IGNORE.
-		    (not (var-ref-ccb var)))
-	       (check-vref var)
-	       (keyed-cmpnote (list 'var-trim (var-name var))
-			      "Trimming ~s; bound form ~a ignorable"
-			      (var-name var) (if (ignorable-form form) "" "not "))
-	       (unless (ignorable-form-with-local-unreferenced-changes form (cdr vs));(ignorable-form form) 
-		 (when star (ref-vars form (cdr vs)))
-		 (let* ((*vars* (if nf (if star fv *vars*) av))
-			(f (if nf (car nf) body))
-			(np (new-c1progn form f)))
-		   (if nf (setf (car nf) np) (setf body np)))))
-	      ((push var nv) (when star (ref-vars form (cdr vs))) (push form nf))))))
+       ((or (endp vs) (endp fs)) (list nv nf body))
+    (let ((var (car vs)) (form (car fs)))
+      (cond ((and (eq (var-kind var) 'LEXICAL)
+		  (not (eq t (var-ref var))) ;;; This field may be IGNORE.
+		  (not (var-ref-ccb var)))
+	     (check-vref var)
+	     (keyed-cmpnote (list 'var-trim (var-name var))
+			    "Trimming ~s; bound form ~a ignorable"
+			    (var-name var) (if (ignorable-form form) "" "not "))
+	     (unless (ignorable-form-with-local-unreferenced-changes form (cdr vs));(ignorable-form form)
+	       (when star (ref-vars form (cdr vs)))
+	       (let* ((*vars* (if nf (if star fv *vars*) av))
+		      (f (if nf (car nf) body))
+		      (np (new-c1progn form f)))
+		 (if nf (setf (car nf) np) (setf body np)))))
+	    ((push var nv) (when star (ref-vars form (cdr vs))) (push form nf))))))
 
 ;; (defun trim-vars (vars forms body &optional star &aux (bp (have-provfn body)))
 
