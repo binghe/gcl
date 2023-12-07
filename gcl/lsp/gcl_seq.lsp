@@ -46,17 +46,18 @@
 (defun concatenate (rt &rest seqs)
   (declare (optimize (safety 1)) (dynamic-extent seqs))
   (macrolet
-   ((++ (x) `(prog1 ,x (incf ,x))))
-   (let* ((rs (make-sequence rt (reduce (lambda (y x) (+ y (length x))) seqs :initial-value 0)))
+   ((++ (x &optional (n 1)) `(prog1 ,x (incf ,x ,n))));FIXME immnum
+   (let* ((rs (make-sequence rt (reduce '+ seqs :key 'length :initial-value 0)))
 	  (rt (unless (listp rs) (array-element-type rs)))(rh rs)(i 0))
      (dolist (seq seqs rs)
        (let* ((st (unless (listp seq) (array-element-type seq)))(sh seq)(j 0)
 	      (ls (if st (length seq) array-dimension-limit)))
-	 (do nil ((or (>= j ls) (unless st (endp sh))))
-	     (if (when rt (eq rt st)) (set-array rs (++ i) seq (++ j))
+	 (if (when rt (eq rt st))
+	     (set-array-n rs (++ i ls) seq (++ j ls) ls)
+	     (do nil ((or (>= j ls) (unless st (endp sh))))
 	       (let ((tmp (if st (aref seq (++ j)) (pop sh))))
 		 (if rt (setf (aref rs (++ i)) tmp)
-		   (setf (car rh) tmp rh (cdr rh)))))))))))
+		     (setf (car rh) tmp rh (cdr rh)))))))))))
 
 (eval-when
  (compile eval)
