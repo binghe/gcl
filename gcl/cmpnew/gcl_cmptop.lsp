@@ -884,7 +884,9 @@
 (defun c1side-effects (args)
   (declare (ignore args))
   (mapc (lambda (x &aux (b (get-vbind x)))
-	  (when b (setf (binding-repeatable b) nil)))
+	  (when b
+	    (unless (eq 'var (car (binding-form b)))
+	      (setf (binding-repeatable b) nil))))
 	*vars*)
   (list 'side-effects (make-info :flags (iflags side-effects))))
 

@@ -204,6 +204,9 @@
 (defun c1var (name)
   (let* ((info (make-info))
 	 (vref (c1vref name))
+	 (tmp (get-var (local-var vref)))
+	 (tmp (unless (eq tmp (car vref)) tmp))
+	 (vref (if tmp (c1vref tmp) vref))
 	 (c1fv (when (cadr vref) (c1inner-fun-var))))
     (setf (info-type info) (if (or (cadr vref) (caddr vref)) (var-dt (car vref)) (var-type (car vref)))
 	  (var-mt (car vref)) (type-or1 (info-type info) (var-mt (car vref))))
@@ -219,8 +222,10 @@
 	       (when (and tmp );FIXME (type>= (var-mt (car vref)) (var-mt (caaddr tmp)))
 		 (when (check-vs (when (eq 'var (car tmp)) (car (last tmp))))
 		   (let* ((f (pop tmp))(i (copy-info (pop tmp))))
-		     (setf (info-type i) (if (eq f 'var) (var-type (caar tmp)) (type-and (info-type i) (info-type info))));FIXME
-;		     (setf (info-type i) (type-and (info-type i) (info-type info)))
+;		     (setf (info-type i) (if (eq f 'var) (var-type (caar tmp)) (type-and (info-type i) (info-type info))));FIXME
+		     (setf (info-type i) (type-and (info-type i) (info-type info)))
+		     (when (eq f 'var)
+		       (setf (info-type i) (type-and (info-type i) (var-type (caar tmp)))))
 		     (list* f i tmp))))))
 	    ((list 'var info vref c1fv (make-vs info)))))))
 
@@ -310,7 +315,7 @@
 (defun get-bind (x)
   (typecase
    x
-   ((cons (eql var) t) (var-bind (local-var (caddr x))))
+   ((cons (eql var) t) (when (check-vs (car (last x))) (var-bind (local-var (caddr x)))))
    (var (var-bind x))
    (binding x)))
 
@@ -385,15 +390,16 @@
 (defun c1vref (name &aux ccb clb)
   (dolist (var *vars*
                (let ((var (sch-global name)))
-                    (unless var
-                      (unless (or (si:specialp name) (constantp name)) (undefined-variable name))
-                      (setq var (make-var :name name
-                                          :kind 'GLOBAL
-                                          :loc (add-symbol name)
-                                          :type (or (get name 'cmp-type) t)
-					  :ref t));FIXME
-                      (push var *undefined-vars*))
-                    (list var ccb)))
+                 (unless var
+		   (unless (symbolp name) (baboon))
+                   (unless (or (si:specialp name) (constantp name)) (undefined-variable name))
+                   (setq var (make-var :name name
+                                       :kind 'GLOBAL
+                                       :loc (add-symbol name)
+                                       :type (or (get name 'cmp-type) t)
+				       :ref t));FIXME
+                   (push var *undefined-vars*))
+                 (list var ccb)))
       (cond ((eq var 'cb) (setq ccb t))
             ((eq var 'lb) (setq clb t))
             ((or (when (eq (var-name var) name) (not (member var *lexical-env-mask*))) (eq var name))
@@ -623,7 +629,7 @@
 
 (defun sch-global (name)
   (dolist (var *undefined-vars* nil)
-    (when (eq (var-name var) name) (return-from sch-global var))))
+    (when (or (eq var name) (eq (var-name var) name)) (return-from sch-global var))))
 
 (defun c1add-globals (globals)
   (dolist (name globals)
