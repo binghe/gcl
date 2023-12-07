@@ -36,7 +36,7 @@
 	 (in (mch))
 	 (body (unwind-protect (c1progn args) 
 		 (mapc (lambda (x &aux (v (pop x))) 
-			 (setf (var-type v) (type-or1 (pop x) (var-type v)))
+			 (setf (var-type v) (type-or1 (pop x) (var-type v)));FIXME do-setq-tp
 			 (push-vbinds v (car x)));FIXME c1throw/c1return-from
 		       in))))
     (add-info info (cadr body))
