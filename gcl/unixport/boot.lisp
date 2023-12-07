@@ -1,4 +1,4 @@
-(in-package :compiler)(cdebug)(setq *compile-print* nil si::*notify-gbc* t)
+(in-package :compiler)(cdebug)(setq *compile-print* nil si::*notify-gbc* t *annotate* nil)
 
 
 
