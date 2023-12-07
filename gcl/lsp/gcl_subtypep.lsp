@@ -120,7 +120,7 @@
       (mapcan (lambda (y) (mapcar (lambda (x) (cons x y)) cx))
 	      (if x (disu x) (list x))))))
 
-(defun ar-recon (x &optional (s (rassoc (car x) *simple-array-types*) sp)
+(defun ar-recon (x &optional (s (rassoc (car x) *simple-array-types*))
 		   (tp (car (rassoc (pop x) *all-array-types*)) tpp)
 		   &aux (ax (adims x))(ar (if s 'simple-array 'non-simple-array)))
   (cond ((not tpp) (?or (mapcar (lambda (z) (ar-recon z s tp)) x)))
@@ -443,7 +443,7 @@
 (defun std-matches (x)
   (lremove-if-not (lambda (y) (member (car y) x :test 'member :key 'cdr)) x))
 
-(defun std-recon (x &optional (c (pop x) cp) &aux
+(defun std-recon (x &optional (c (pop x)) &aux
 		    (x (mapcar (lambda (x) (orthog-to-and-not x c)) x))
 		    (m (std-matches x)))
   (?or
