@@ -27,10 +27,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 object imag_unit, minus_imag_unit, imag_two;
 
-int
-fixnum_expt(int x, int y)
+fixnum
+fixnum_expt(fixnum x, fixnum y)
 {
-	int z;
+	fixnum z;
 
  	z = 1;
 	while (y > 0)

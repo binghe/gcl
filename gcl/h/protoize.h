@@ -912,7 +912,7 @@ void Lhash_table_p(void);
 
 void Lreadtablep(void);
 
-int  fixnum_expt(int, int);
+fixnum fixnum_expt(fixnum,fixnum);
 
 void check_alist(object);
 

@@ -94,3 +94,4 @@ float sqrtf(float);
 object Icall_gen_error_handler(object,object,object,object,ufixnum,...);
 object Icall_gen_error_handler_noreturn(object,object,object,object,ufixnum,...) __attribute__((noreturn));
 object file_stream(object);
+fixnum fixnum_expt(fixnum, fixnum);
