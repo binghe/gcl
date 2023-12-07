@@ -553,8 +553,11 @@
 
 (defun tp-type1 (x)
   (multiple-value-bind
-   (r f) (or (gethash x *unnrm-hash*) (gethash (gethash x *uniq-hash*) *unnrm-hash*))
-   (if f r (tp-type x))))
+	(r f) (gethash x *unnrm-hash*)
+    (if f r
+	(multiple-value-bind
+	      (r f) (gethash (gethash x *uniq-hash*) *unnrm-hash*)
+	  (if f r (tp-type x))))))
 
 (defun cmp-unnorm-tp (x)
   (cond ((tp-p x) (tp-type1 x))
