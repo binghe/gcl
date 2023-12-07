@@ -84,6 +84,18 @@
 			   si::*array-type-info* :initial-value nil)))))
 (declaim (inline set-array))
 
+(defun set-array-n (r i s j n);assumes arrays of same type and indices in bounds
+  (declare (optimize (safety 1))(seqind i j n));FIXME
+  (check-type r array)
+  (check-type s array)
+  (let ((z (c-array-eltsize r)))
+    (if (zerop z)
+	(copy-bit-vector r i s j n)
+	(let* ((rs (c-array-self r))(ss (if (eq r s) rs (c-array-self s))))
+	  (memmove (c+ rs (<< i (1- z))) (c+ ss (<< j (1- z))) (<< n (1- z))))))
+  r)
+(declaim (inline set-array-n))
+
 #.`(defun array-element-type (x)
      (declare (optimize (safety 1)))
      (check-type x array)
