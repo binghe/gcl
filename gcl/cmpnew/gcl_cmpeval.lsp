@@ -1384,7 +1384,8 @@
 
 (defun maybe-inline-src (fun fms src &aux fm)
   (when src
-    (cond ((setq fm (type-fm fun fms)) (known-type-p fm))
+    (cond ((member fun *inline*))
+	  ((setq fm (type-fm fun fms)) (known-type-p fm))
 	  ((member fun '(row-major-aref
 			 si::row-major-aset
 			 si::row-major-aref-int
