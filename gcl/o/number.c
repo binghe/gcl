@@ -153,6 +153,14 @@ DEFUN("MAKE-RATIO",object,fSmake_ratio,SI,3,3,NONE,OO,OI,OO,OO,(object num,objec
 
 }
 
+DEFUN("MAKE-COMPLEX",object,fSmake_complex,SI,3,3,NONE,OI,OO,OO,OO,(fixnum tt,object r,object i),"")  {
+  object x=alloc_object(t_complex);
+  massert(tt>=0 && tt<=5);
+  x->d.tt=tt;
+  x->cmp.cmp_real=r;
+  x->cmp.cmp_imag=i;
+  RETURN1(x);
+}
 
 object
 make_shortfloat(float f)
