@@ -20,10 +20,6 @@
 (defun t-to-nil (x) (unless (eq x t) x))
 (setf (get 't-to-nil 'cmp-inline) t)
 
-(defconstant +vtps+ (mapcar (lambda (x) (list x (intern (string-concatenate "VECTOR-"  (string x))))) +array-types+))
-(defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+))
-(defconstant +vtpsn+ `((nil vector-nil) ,@+vtps+))
-(defconstant +atpsn+ `((nil array-nil) ,@+atps+))
 
 
 (defun real-rep (x)
@@ -50,10 +46,18 @@
 			  (mapcar
 			   #'orthogonalize
 			   `((unsigned-byte 0)
+			     ,@(mapcan (lambda (n &aux (m (1- n)))
+					  (list `(unsigned-byte ,m) `(signed-byte ,n) `(unsigned-byte ,n)))
+					'(2 4))
+			     rnkind
+			     ,@(mapcan (lambda (n &aux (m (1- n)))
+					  (list `(unsigned-byte ,m) `(signed-byte ,n) `(unsigned-byte ,n)))
+					'(8 16))
+			     seqind
 			     ,@(butlast
 				(mapcan (lambda (n &aux (m (1- n)))
 					  (list `(unsigned-byte ,m) `(signed-byte ,n) `(unsigned-byte ,n)))
-					'(2 4 8 16 29 32 62 64)))
+					'(29 32 62 64)))
 			     (and bignum (integer * -1))
 			     (and bignum (integer 0))
 			     ,@(mapcan (lambda (x)
@@ -741,7 +745,7 @@
 				  zero one
 				  bit rnkind non-negative-char unsigned-char signed-char
 				  non-negative-short unsigned-short signed-short
-				  seqind
+				  seqind seqbnd
 				  non-negative-immfix immfix
 				  non-negative-fixnum non-negative-bignum non-negative-integer
 				  tractable-fixnum fixnum bignum integer
