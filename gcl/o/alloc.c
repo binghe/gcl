@@ -1060,6 +1060,8 @@ make_cons(object a,object d) {
   static struct typemanager *tm=tm_table+t_cons;/*FIXME*/
   object obj=alloc_mem(tm,tm->tm_size);
 
+  tm->tm_calling_type=t_cons;
+
   load_cons(obj,a,d);
 
   pageinfo(obj)->in_use++;
