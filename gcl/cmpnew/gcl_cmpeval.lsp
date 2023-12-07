@@ -1050,10 +1050,10 @@
 
 (defun bbump-tp (tp)
   (cond ((car (member tp '(#tnull
-			   #t(and seqind (not (integer 0 0)))
-			   #tseqind
-			   #t(or null (and seqind (not (integer 0 0))))
-			   #t(or null seqind))
+			   #t(and seqbnd (not (integer 0 0)))
+			   #tseqbnd
+			   #t(or null (and seqbnd (not (integer 0 0))))
+			   #t(or null seqbnd))
 		      :test 'type<=)))
 	((discrete-tp tp) tp)
 	((bump-tp tp))))
