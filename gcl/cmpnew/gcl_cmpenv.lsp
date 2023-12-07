@@ -382,9 +382,7 @@
 ;	  (setq body `((let ,(mapcar (lambda (x) (list (car x) (car x))) cps) ,@body)))
 	(setq ts (nconc cps ts))))
     (when ctps
-      (if s
-	  (setq body (nreconc ctps body))
-	(mapc (lambda (x) (when (eq (car x) 'assert) (push (cadr x) body))) ctps))))
+      (setq body (nconc (if s ctps (mapcan (lambda (x) (when (eq (car x) 'assert) (list (cadr x)))) ctps)) body))))
   (values body ss ts is others (when doc-p doc) cps)))
 
 ;; (defun c1body (body doc-p &aux ss is ts others cps)
