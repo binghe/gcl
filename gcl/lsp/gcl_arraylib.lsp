@@ -224,28 +224,12 @@
   (let ((x (typecase x (adjustable-array (car (c-adjarray-displaced x))))))
     (values (car x) (or (cdr x) 0))))
 
-
-;; (defun array-dimension (x i)
-;;   (declare (optimize (safety 2)))
-;;   (check-type x array)
-;;   (check-type i rnkind)
-;;   (let ((r (c-array-rank x)));FIXME
-;;     (let ((*dim* r)(i i))(check-type i (satisfies array-dimension-index-less-than-rank)))
-;;     (if (= 1 r) (c-array-dim x) (the seqind (*fixnum (c-array-dims x) i nil nil)))))
-
-;; (defun array-dimension (x i)
-;;   (declare (optimize (safety 1)))
-;;   (check-type x array)
-;;   (check-type i rnkind)
-;;   (let ((r (array-rank x)))
-;;     (if (= 1 r) (c-array-dim x) (the seqind (*fixnum (c-array-dims x) i nil nil)))))
-					;FIXME
-
-(defun array-dimensions (x &aux (j 0))
+(defun array-dimensions (x)
   (declare (optimize (safety 1)))
   (check-type x array)
-  (mapl (lambda (y) (setf (car y) (array-dimension x (prog1 j (incf j))))) (make-list (c-array-rank x))));FIXME c-array-rank propagator
-
+  (let ((r (array-rank x)) z)
+    (labels ((collect (i) (cond ((minusp i) z) ((push (array-dimension x i) z) (collect (1- i))))))
+      (collect (1- r)))))
 
 (defun array-has-fill-pointer-p (x)
   (declare (optimize (safety 1)))
