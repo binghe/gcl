@@ -3,7 +3,7 @@
 (export '(lisp-type defdlfun +ks+ +fl+ strcat adjustable-vector adjustable-array matrix))
 (si::import-internal 'si::(\| & ^ ~ c+ c* << >> object double
 			   c-object-== c-fixnum-== c-float-== c-double-== c-fcomplex-== c-dcomplex-== fcomplex dcomplex
-			   string-concatenate lit seqind fixnum-length char-length cref address short int
+			   string-concatenate lit seqind seqbnd fixnum-length char-length cref address nani short int
 			   cnum unsigned-char unsigned-short unsigned-int
 			   package-internal package-external array-dims cmp-norm-tp tp0 tp1 tp2 tp3 tp4 tp5 tp6 tp7 tp8))
 
@@ -43,7 +43,7 @@
 	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
 	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
 	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
-	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
+	     (:void*      nil                    nil             (array t)           "->v.v_self")));FIXME
   (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l))))
 
 (si::*make-constant '+fl+ (- (integer-length fixnum-length) 4))
@@ -65,6 +65,7 @@
   (defmacro mfff nil
    `(progn
       (idefun address (x) (lit :fixnum "((fixnum)" (:object x) ")"))
+      (idefun nani (x) (declare (fixnum x)) (lit :object "((object)" (:fixnum x) ")"))
       (idefun ~ (x) (declare (fixnum x)) (lit :fixnum "(~" (:fixnum x) ")"))
       ,@(mapcar (lambda (x &aux (c (consp x))(n (if c (car x) x))(s (string (if c (cdr x) x))))
 		  `(idefun ,n (x y) (declare (fixnum x y)) (lit :fixnum "(" (:fixnum x) ,s (:fixnum y) ")")))
@@ -113,5 +114,3 @@
 
 (mffe)
 (mfff)
-
-
