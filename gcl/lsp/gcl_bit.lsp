@@ -33,18 +33,18 @@
 	  (mask (- od))))))
 (setf (get 'gw 'compiler::cmp-inline) t)
 
-(defun bit-array-op (fn ba1 ba2 &optional rba
+(defun bit-array-op (fn ba1 ba2 &optional rba (so1 0) (so2 0) (so3 0) n
 		     &aux
 		       (rba (case rba
 			      ((t) ba1)
 			      ((nil) (make-array (array-dimensions ba1) :element-type 'bit))
 			      (otherwise rba))))
-  (let* ((o3 (array-offset rba))
-	 (y (array-total-size rba))
-	 (o1 (array-offset ba1))
+  (let* ((o3 (+ so3 (array-offset rba)))
+	 (y (or n (array-total-size rba)));min
+	 (o1 (+ so1 (array-offset ba1)))
 	 (n1 (ceiling (+ o1 (array-total-size ba1)) fixnum-length))
 	 (o1 (- o1 o3))
-	 (o2 (array-offset ba2))
+	 (o2 (+ so2 (array-offset ba2)))
 	 (n2 (ceiling (+ o2 (array-total-size ba2)) fixnum-length))
 	 (o2 (- o2 o3)))
     
@@ -59,7 +59,7 @@
 	  (merge-word
 	   (funcall fn (gw ba1 i n1 o1) (gw ba2 i n2 o2)) 
 	   (bit-array-fixnum rba i n3)
-	    (<< (mask (min y (- fixnum-length o3))) o3)))
+	   (<< (mask (min y (- fixnum-length o3))) o3)))
 	 (incf i))
        
        (do nil ((>= i nw))
@@ -78,6 +78,10 @@
        
        rba))))
 (setf (get 'bit-array-op 'compiler::cmp-inline) t)
+
+(defun copy-bit-vector (a i b j n)
+  (bit-array-op (lambda (x y) y) a b t i j i n))
+
 
 ;FIXME array-dimensions allocates....
 (defvar *bit-array-dimension-check-ref* nil)
