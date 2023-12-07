@@ -1135,7 +1135,7 @@
 
 ;;; Borrowed from CMPOPT.LSP
 
-(defmacro can-allocate-on-stack ()
+(defmacro can-allocate-on-stack ();FIXME protect against closure boundaries
   `(and (consp *value-to-go*)
 	(eq (car *value-to-go*) 'var)
 	(var-dynamic (second *value-to-go*))))

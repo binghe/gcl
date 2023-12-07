@@ -748,6 +748,10 @@
 (push '((t t t t t t t t t t) t #.(flags ans)LIST*-INLINE)
    (get 'list* 'inline-always))
 
+;;CONS
+ (push '((t t) t #.(flags ans) CONS-INLINE)
+   (get 'cons 'inline-always))
+
 ;;LISTP
  (push '((t) boolean #.(flags rfa)"listp(#0)")
    (get 'listp 'inline-always))
@@ -1251,7 +1255,7 @@
 	     (:float*     nil                    nil             (array short-float) "->sfa.sfa_self")
 	     (:double*    nil                    nil             (array long-float)  "->lfa.lfa_self")
 	     (:long*      nil                    nil             (array fixnum)      "->fixa.fixa_self")
-	     (:void*      nil                    nil             (or array symbol character) "->v.v_self")))
+	     (:void*      nil                    nil             (array t)           "->v.v_self")))
   (setf (get (car l) 'lisp-type) (if (cadr l) (caddr l) (cadddr l)))
   (when (cadr l)
     (push `(((member ,(car l)) opaque) t #.(flags rfa) ,(strcat (cadr l) "(#1)"))
