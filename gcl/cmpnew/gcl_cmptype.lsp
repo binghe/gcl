@@ -365,9 +365,17 @@
 	(integer x)
 	(otherwise (coerce x tp))))
 
-(defconstant +cmp-range-types+ (let ((z '(integer ratio short-float long-float)))
-				 (nconc (mapcar (lambda (x) (cons x (cmp-norm-tp x))) z)
-					(mapcar (lambda (x) (cons x (cmp-norm-tp `(complex ,x)))) z))))
+(defconstant +cmp-range-types+
+  (let ((z '(integer ratio short-float long-float)))
+    (nconc (mapcar (lambda (x) (cons x (cmp-norm-tp x))) z)
+	   (mapcar (lambda (x)
+		     (cons x
+			   (case x
+			     (integer #t(complex rational))
+			     (ratio #t(and (complex rational) (not (complex integer))))
+			     (otherwise (cmp-norm-tp `(complex ,x))))))
+		   z))))
+
 
 (defun complex-contagion (z)
   (car (member (object-tp z)
@@ -399,7 +407,7 @@
     (super-range f t1)))
 (si::putprop 'atan 'atan-propagator 'type-propagator)
 
-(defun float-propagator (f t1 &optional (t2 #tnull t2p))
+(defun float-propagator (f t1 &optional (t2 #tnull))
   (if (equal t2 #tnull)
       (super-range f (type-and #treal t1))
     (super-range f (type-and #treal t1) (type-and #tfloat t2))))
@@ -423,7 +431,7 @@
   (when (and (type>= #tfixnum t2) (type>= #tfixnum t1));FIXME
     (let ((t1 (bit-type t1))(t2 (bit-type t2)))
       (super-range '*
-		   #t(integer 0 1)
+		   (if (and (atomic-tp t1) (atomic-tp t2)) #t(integer 1 1) #t(integer 0 1))
 		   (type-or1
 		    (super-range f
 				 (type-and #tnon-negative-integer t1)
@@ -483,32 +491,63 @@
 (si::putprop '/ '/-propagator 'type-propagator)
 (si::putprop 'si::number-divide '/-propagator 'type-propagator)
 
-(defun real-imag-tp (x)
-  (if (eq (car x) 'complex) (cadr x)
-    (real-imag-tp (cadr x))));FIXME
+(defun real-imag-tp (x rp)
+  (when (consp x)
+    (case (car x)
+      (member (reduce (lambda (y x) (type-or1 y (object-tp (if rp (realpart x) (imagpart x))))) (cdr x)
+		      :initial-value nil))
+      (or (reduce (lambda (y x) (type-or1 y (real-imag-tp x rp))) (cdr x) :initial-value nil))
+      (complex (cmp-norm-tp (cadr x)))
+      (si::complex* (cmp-norm-tp (if rp (cadr x) (caddr x)))))))
 
-(defun complex-real-imag-type-propagator (f t1)
+
+(defun complex-real-imag-type-propagator (f t1 rp)
   (declare (ignore f))
   (when (type>= #tcomplex t1)
     (reduce (lambda (&rest r) (when r (apply 'type-or1 r)))
-	    (mapcar (lambda (x) (cmp-norm-tp (real-imag-tp (si::tp-type (cdr x)))))
+	    (mapcar (lambda (x) (real-imag-tp (si::tp-type (cdr x)) rp))
 		    (range-decomp t1)))))
-(si::putprop 'si::complex-real 'complex-real-imag-type-propagator 'type-propagator)
-(si::putprop 'si::complex-imag 'complex-real-imag-type-propagator 'type-propagator)
+(defun complex-real-type-propagator (f t1)
+  (declare (ignore f))
+  (complex-real-imag-type-propagator f t1 t))
 
-(defun complex-propagator (f t1 &optional (t2 #t(real 0 0)))
+(defun complex-imag-type-propagator (f t1)
+  (declare (ignore f))
+  (complex-real-imag-type-propagator f t1 nil))
+(si::putprop 'si::complex-real 'complex-real-type-propagator 'type-propagator)
+(si::putprop 'si::complex-imag 'complex-imag-type-propagator 'type-propagator)
+(si::putprop 'c-ocomplex-real 'complex-real-type-propagator 'type-propagator)
+(si::putprop 'c-ocomplex-imag 'complex-imag-type-propagator 'type-propagator)
+
+(defun tp-contagion (tp c &aux (s #tshort-float)(l #tlong-float))
+  (cond ((type>= c s)
+	 (if (type>= s tp) tp
+	     (cmp-norm-tp `(short-float ,@(real-bnds tp)))))
+	((type>= c l)
+	 (if (type>= l tp) tp
+	     (cmp-norm-tp `(long-float ,@(real-bnds tp)))))
+	(tp)))
+
+(defun complex-propagator (f t1 &optional (t2 (cond ((type>= #trational t1) #t(integer 0 0))
+						    ((type>= #tshort-float t1) #t(short-float 0 0))
+						    (#t(long-float 0 0)))))
   (declare (ignore f))
   (when (and (type>= #treal t1) (type>= #treal t2))
-    (let* ((t1 (type-and #treal t1))(t2 (type-and #treal t2))
+    (let* ((c (contagion t1 t2))
+	   (t1 (tp-contagion t1 c))(t2 (tp-contagion t2 c))
 	   (a1 (atomic-tp t1))(a2 (atomic-tp t2)))
-      (if (and a1 a2) (object-tp (complex (car a1) (car a2)))
-	(reduce 'type-or1
-		(mapcar (lambda (x &aux (t1 (cmp-unnorm-tp (type-and t1 x)))
-				   (t2 (cmp-unnorm-tp (type-and t2 x))))
-			  (when (and t1 t2)
-			    (cmp-norm-tp `(si::complex* ,t1 ,t2))))
-			'(#trational #tshort-float #tlong-float))
-		:initial-value nil)))))
+      (cond ((and a1 a2) (object-tp (complex (car a1) (car a2))))
+	    ((and (type>= #t(integer 0 0) t2) (type>= #trational t1))
+	     t1)
+	    ((reduce 'type-or1
+		     (mapcar (lambda (x &aux (t1 (type-and t1 (complex-real-type-propagator 'complex-real x)))
+					  (t2 (type-and t2 (complex-imag-type-propagator 'complex-imag x))))
+			       (when (and t1 t2)
+				 (cmp-norm-tp `(si::complex* ,(cmp-unnorm-tp t1) ,(cmp-unnorm-tp t2)))))
+			     '(#t(complex integer) #t(complex ratio) #t(complex short-float)
+			       #t(complex long-float) #t(si::complex* integer ratio)
+			       #t(si::complex* ratio integer)))
+		:initial-value nil))))))
 (si::putprop 'complex 'complex-propagator 'type-propagator)
 
 (defun c-type-propagator (f t1)
@@ -542,7 +581,8 @@
 (defun last-cons-type (tp &optional l)
   (cond ((and l (atom tp)) tp)
 	((and (consp tp) (eq (car tp) 'cons) 
-	      (cddr tp) (not (cdddr tp))) (last-cons-type (caddr tp) t))))
+	      (cddr tp) (not (cdddr tp)))
+	 (last-cons-type (caddr tp) t))))
 
 (defun cdr-propagator (f t1 &aux (t1 (type-and #tlist t1)))
   (declare (ignore f))
@@ -664,8 +704,8 @@
 (defun contagion (t1 t2)
   (car (member (type-or1 t1 t2) `(,#tlong-float ,#tshort-float #tratio #tinteger)
 	       :test 'type-and)))
-
-(defun mod-propagator (f t1 t2 &aux (r1 (range-decomp t1))(r2 (range-decomp t2)))
+(defun mod-propagator (f t1 t2 &aux (t1 (type-and #treal t1))(t2 (type-and #treal t2))
+				 (r1 (range-decomp t1))(r2 (range-decomp t2)))
   (declare (ignore f))
   (cond
    ((cdr r1) (reduce 'type-or1 (mapcar (lambda (x) (mod-propagator f (cdr x) t2)) r1) :initial-value nil))
@@ -676,7 +716,7 @@
    ((and (type>= #treal t1) (type>= #treal t2))
 	 (let* ((tp (super-range '* #t(integer 0 1) t2))
 		(r (real-bnds tp))
-		(r (when (numberp (cadr r)) (list (car r) (list (cadr r))))))
+		(r (if (numberp (cadr r)) (list (car r) (list (cadr r))) r)))
 	   (type-and (contagion t1 t2) (cmp-norm-tp (cons 'real r)))))))
 (si::putprop 'mod 'mod-propagator 'type-propagator)
 
@@ -800,11 +840,12 @@
   (when t1
     (type-and #tnon-negative-real
 	      (type-or1
-	       (abs-propagator 
-		f
-		(super-range 
-		 'float 
-		 (complex-real-imag-type-propagator 'complex-real (type-and #tcomplex t1))))
+	       (let ((t1 (type-and t1 #tcomplex)))
+		 (when t1
+		   (super-range
+		    '+
+		    (abs-propagator f (complex-real-type-propagator 'complex-real t1))
+		    (abs-propagator f (complex-imag-type-propagator 'complex-imag t1)))))
 	       (let ((t1 (type-and #treal t1)))
 		 (type-or1 t1 (super-range '- t1)))))))
 (si::putprop 'abs 'abs-propagator 'type-propagator)
