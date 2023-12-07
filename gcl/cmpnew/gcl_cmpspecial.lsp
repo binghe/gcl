@@ -215,12 +215,13 @@
 	((si::function-name fn))))
 ;	((portable-closure-src fn))
 
-(defun find-special-var (l f &aux v)
-  (labels ((ccar (x) (when (listp x) (car x))))
-	  (cond ((atom l) nil)
-		((setq v (cadr (member 'bind-reg-clv l :key #'ccar)))
-		 (when (eq 'let* (ccar v)) (car (member-if f (caddr v)))))
-		((or (find-special-var (car l) f) (find-special-var (cdr l) f))))))
+(defun find-special-var (l f)
+  (when (consp l)
+    (case (car l)
+      (lambda (find-special-var (fifth l) f))
+      (decl-body (find-special-var (fourth l) f))
+      (let* (car (member-if f (third l)))))))
+
 
 ;; (defun find-special-var (l f &aux v)
 ;;   (labels ((ccar (x) (when (listp x) (car x))))

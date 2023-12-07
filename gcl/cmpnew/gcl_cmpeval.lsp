@@ -955,18 +955,22 @@
    (parse-body-header src)
    (let* ((aux (member '&aux ll));FIXME centralize with new-defun-args
 	  (ll (ldiff ll aux))
- 	  (regs (mapcan (lambda (x &aux (lp (listp x))) 
+ 	  (non-aux (mapcan (lambda (x &aux (lp (listp x)))
 			  (cons (if lp (if (listp (car x)) (cadar x) (car x)) x)
 				(when (when lp (cddr x)) (list (caddr x))))) ll))
-	  (regs (set-difference regs '(&optional &rest &key &allow-other-keys)))
-	  (od (split-decls regs decls))
+	  (non-aux (set-difference non-aux '(&optional &rest &key &allow-other-keys)))
+	  (od (split-decls non-aux decls))
 	  (rd (cons `(declare (optimize (safety ,(decl-safety decls)))) (pop od)))
-	  (oc (split-ctps regs ctps))
+	  (oc (split-ctps non-aux ctps))
 	  (rc (pop oc))
 	  (n (blocked-body-name body))
 	  (body (if n (cddar body) body))
 	  (n (or n block))
-	  (body `(block ,n (tagbody ,tag (return-from ,n (let* ,(cdr aux) ,@(car od) ,@(car oc) ,@body))))))
+	  ;rebind args beneath ttl tag for tail recursion with closures
+	  (bind (when block (mapcar 'list non-aux non-aux)))
+	  (bind (nconc bind (cdr aux)))
+;	  (bind (nconc (mapcar 'list non-aux non-aux) (cdr aux)))
+	  (body `(block ,n (tagbody ,tag (return-from ,n (let* ,bind ,@(when block rd) ,@(car od) ,@(when block rc) ,@(car oc) ,@body))))))
      `(,h ,ll ,@(when doc (list doc)) ,@rd ,@rc ,body))))
 
 ;; (defun ttl-tag-src (src &optional (tag (tmpsym)) (block (tmpsym)) &aux (h (pop src)) (ll (pop src)))
@@ -1583,7 +1587,7 @@
 	  ((eq l e) t)
 	(let ((v (car l)))
 	  (when (var-p v)
-	    (unless (eq 'lexical (var-kind v)) ; FIXME check other objects needing unwind
+	    (unless (eq 'lexical (var-kind v))
 	      (unless (member v *lexical-env-mask*)
 		(return nil)))))))))
 

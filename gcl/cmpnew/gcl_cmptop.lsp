@@ -732,11 +732,10 @@
 	    (opts (if narg (cons narg opts) opts))
 	    (args (if narg (cons `(declare ((integer ,(- m) ,m) ,narg)) args) args))
 	    (rc (if narg (cons `(declare (hint (integer ,(- m) ,m) ,narg)) rc) rc))
-	    (opts (cons +mv+ opts))
-	    (args `((declare (ignorable ,+mv+) (fixnum ,+mv+)) ,@args))
-	    (vals `((fun-valp) ,@(when narg `((vfun-nargs)))));FIXME
-	    (bl (list (blla opts vals nil args narg nr (when (eq (car regs) +first+) +first+))))
-	    (bl `((let ((,+fun+ (fun-fun))) (declare (ignorable ,+fun+)) (bind-reg-clv) ,@bl))))
+	    (opts `(,+fun+ ,+mv+ ,@opts))
+	    (args `((declare (ignorable ,+fun+ ,+mv+) (fixnum ,+mv+)) ,@args))
+	    (vals `((fun-fun) (fun-valp) ,@(when narg `((vfun-nargs)))));FIXME
+	    (bl (list (blla opts vals nil args narg nr (when (eq (car regs) +first+) +first+)))))
        `(,nm ,regs 
 	     ,@(when doc `(,doc))
 	     ,@rd ,@rc ,@bl)))))
