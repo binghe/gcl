@@ -292,7 +292,7 @@ work during bootstrapping.
 			   *defgeneric-times*
 			   `(load-defgeneric ',function-specifier ',lambda-list ,@initargs))
      ,@(when methods
-	 `((set-initial-methods (list ,@methods) (function ,function-specifier))))
+	 `((set-initial-methods (mapcar 'eval ',methods) (function ,function-specifier))))
      `,(function ,function-specifier))))
 
 (defun set-initial-methods (methods gf)
