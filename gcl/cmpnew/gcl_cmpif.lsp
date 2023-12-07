@@ -100,9 +100,6 @@
 (defmacro vlp (x) `(and (eq 'var (car ,x)) (llvar-p (car (third ,x)))))
 ;(defmacro vlp (x) `(and (eq 'var (car ,x)) (eq (var-kind (car (third ,x))) 'lexical)))
 
-(defun get-object-value (c1x)
-  (when (and (eq 'location (car c1x)) (listp (caddr c1x)) (eq 'vv (caaddr c1x)))
-    (cadr (caddr c1x))))
 ;; (defun get-object-value (c1x)
 ;;   (when (and (eq 'location (car c1x)) (eq 'vv (caaddr c1x)))
 ;;     (values (gethash (cadr (caddr c1x)) *objects-rev*))))
@@ -264,7 +261,7 @@
 	     (cond ((and (= l 1) (vlp (first args)) pt) 
 		    (list (cons (car (third (first args))) (cons (car pt) (tp-not (car pt))))))
 		   ((and (= l 2) (eq fn 'typep) (vlp (first args))
-			 (let ((tp (cmp-norm-tp (get-object-value (second args)))));FIXME atomic-tp
+			 (let ((tp (cmp-norm-tp (car (atomic-tp (info-type (cadr (second args))))))))
 			   (when tp (list (cons (car (third (first args))) (cons tp (tp-not tp))))))))
 		   ((and (= l 2) rfn)
 		    (nconc
