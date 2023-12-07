@@ -120,17 +120,20 @@
 (declaim (type pathname *default-pathname-defaults*))
 
 (defun toggle-case (x)
-  (cond ((symbolp x) x)
-	((listp x) (mapcar 'toggle-case x))
-	((find-if 'upper-case-p x) (if (find-if 'lower-case-p x) x (string-downcase x)))
-	((find-if 'lower-case-p x) (string-upcase x))
-	(x)))
+  (etypecase x
+    (symbol x)
+    (list (mapcar 'toggle-case x))
+    (string (if (find-if 'upper-case-p x)
+		(if (find-if 'lower-case-p x) x (string-downcase x))
+		(string-upcase x)))))
+(declaim (inline toggle-case))
 
 (defun assert-uppercase (x)
-  (cond ((symbolp x) x)
-	((listp x) (mapcar 'assert-uppercase x))
-	((find-if 'lower-case-p x) (string-upcase x));FIXME find in string-upcase
-	(x)))
+  (etypecase x
+    (symbol x)
+    (list (mapcar 'assert-uppercase x))
+    (string (if (find-if 'lower-case-p x) (string-upcase x) x))));FIXME find in string-upcase
+(declaim (inline assert-uppercase))
 
 (defun logical-pathname (spec &aux (p (pathname spec)))
   (declare (optimize (safety 1)))
