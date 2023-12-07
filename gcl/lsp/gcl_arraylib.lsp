@@ -22,26 +22,12 @@
 ;;;;                            array routines
 
 
-;; (in-package :lisp)
-
 (in-package :system)
-
-;; (use-package :s)
-
-;; (export 'strcat)
-
-;; (defun strcat (&rest r)
-;;   (declare (:dynamic-extent r))
-;;   (apply 'string-concatenate (mapcar 'string-downcase r)))
 
 (eval-when 
  (compile eval)
 
  (defun proto-array (tp) (make-vector tp 1 t nil nil 0 nil nil))
-
- ;(car (assoc x s::+ks+ :test (lambda (x y) (subtypep x (get y 'compiler::lisp-type)))));FIXME vs bug in interpreter
- ;; (defun af (x &aux (x (caar (member x s::+ks+ :test (lambda (x y) (subtypep x (get (car y) 'compiler::lisp-type))))))) 
- ;;   (intern (string-concatenate "*" (string (or x :object))) :s))
 
  (defun af (x) (cdr (assoc x '((character . *char) (bit . *char) (non-negative-char . *char);fixme
 			       (unsigned-char . *uchar) (signed-char . *char)
@@ -65,7 +51,7 @@
 		(funcall sf (funcall gf s j) r i)
 		(when sw (funcall sf x s j))))
        (case 
-	(c-array-eltsize r);fixme, done?
+	(c-array-eltsize r)
 	,@(mapcar (lambda (x &aux (z (pop x))(y (pop x))(w (car x)))
 		    `(,z (infer-tp
 			  r ,y (infer-tp
@@ -173,12 +159,6 @@
 		      (if s (armi-loop (cdr s) (cpt (car s) j k (array-dimension array k)) (1+ k)) j)))
 	  (armi-loop indices)))
 
-;; (defun array-row-major-index (array &rest indices)
-;;   (declare (:dynamic-extent indices))
-;;   (labels ((cpt (i j k)	(check-type i seqind) (if (zerop j) i (+ i (the seqind (* j k)))));FIXME
-;; 	   (armi-loop (s &optional (j 0) (k 0)) (if s (armi-loop (cdr s) (cpt (car s) j (array-dimension array k)) (1+ k)) j)))
-;; 	  (armi-loop indices)))
-
 (defun aref (a &rest q)
   (declare (optimize (safety 1)) (dynamic-extent q))
   (check-type a array)
@@ -199,16 +179,6 @@
   (check-type a array)
   (unless (member-if-not (lambda (x) (<= 0 x (1- (array-dimension a (prog1 j (incf j)))))) i)
        (= j (c-array-rank a))))
-
-;; (defun array-in-bounds-p (a &rest i)
-;;   (declare (optimize (safety 1)) (:dynamic-extent i))
-;;   (check-type a array)
-;;   (let ((r (array-rank a)))
-;;     (labels ((aibp-loop (i &optional (j 0))
-;; 			(cond ((>= j r))
-;; 			      ((not i) (error "bad indices"))
-;; 			      ((< -1 (car i) (array-dimension a j)) (aibp-loop (cdr i) (1+ j))))))
-;; 	    (aibp-loop i))))
 
 (defun array-dimension (x i)
   (declare (optimize (safety 2)))
@@ -238,15 +208,6 @@
    x
    (adjustable-vector
     (not (zerop (c-array-hasfillp x))))))
-
-;; (defun upgraded-array-element-type (type &optional environment)
-;;   (declare (ignore environment) (optimize (safety 1)))
-;;   (cond ((not type))
-;; 	((eq type '*) '*)
-;; 	((car (member type +array-types+)))
-;; 	((car (member type +array-types+ :test 'subtypep1)))
-;; 	((subtypep1 type 'float) 'long-float)
-;; 	(t)))
 
 (defun fill-pointer (x)
   (declare (optimize (safety 1)))
