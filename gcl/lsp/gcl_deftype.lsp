@@ -1,11 +1,13 @@
 (in-package :si)
 
 (export '(zero one negative-integer non-negative-integer tractable-fixnum
-	       negative-short-float positive-short-float non-positive-short-float
-	       non-negative-short-float negative-long-float positive-long-float
-	       non-positive-long-float non-negative-long-float negative-float
-	       positive-float non-positive-float non-negative-float negative-real
-	       positive-real non-positive-real non-negative-real));FIXME
+	  negative-short-float positive-short-float non-positive-short-float
+	  non-negative-short-float negative-long-float positive-long-float
+	  non-positive-long-float non-negative-long-float negative-float
+	  positive-float non-positive-float non-negative-float negative-real
+	  positive-real non-positive-real non-negative-real complex*
+	  complex-integer complex-integer-ratio complex-ratio-integer seqind seqbnd
+	  complex-ratio complex-short-float complex-long-float make-complex));FIXME
 
 (defun default-to-* (x)
   (let* ((z (member-if (lambda (x) (member x lambda-list-keywords)) x))
@@ -41,10 +43,10 @@
   (labels ((q (n) (intern (string-concatenate
 			   (string n) "-SIMPLE-TYPEP-FN")))
 	   (f (n &aux (q (q n)))
-	      `(progn (defun ,q (o) (declare (ignorable o)) ,(simple-type-case 'o n))
-		      (setf (get ',n 'simple-typep-fn) ',q
-			    (get ',q 'cmp-inline) t))))
-  (cond ((fboundp 'simple-type-case)
+	     `(progn (defun ,q (o) (declare (ignorable o)) ,(simple-type-case 'o n))
+		     (setf (get ',n 'simple-typep-fn) ',q
+			   (get ',q 'cmp-inline) t))))
+  (cond ((and (fboundp 'simple-type-case) (fboundp 'cmp-norm-tp))
 	 `(progn
 	    ,@(mapcar #'f (nreverse *deftype-simple-typep-fns*))
 	    ,@(setq *deftype-simple-typep-fns* nil)
@@ -395,7 +397,7 @@
 	    (cons x (lremove-if-not (lambda (y) (eq x (if (eq (car y) 'or) (caadr y) (car y)))) y)))
 	  +range-types+))
 
-(deftype complex* (&whole w &optional rp (ip rp)
+(deftype complex* (&optional rp (ip rp)
 			  &aux (r (nc (if (eq rp '*) 'real rp)))
 			  (i (nc (if (eq ip '*) 'real ip))));FIXME upgraded
   (let* ((qr (group-real-types r))
@@ -405,8 +407,9 @@
 		  (make-complex* (assoc 'ratio qr) (assoc 'integer qi))
 		  (mapcan (lambda (x) (make-complex* (assoc x qr) (assoc x qi)))  +range-types+)))))
     x))
-    ;; (if (or (equal w x) (member w x :test 'equal));FIXME
-    ;; 	w x)))
+;; &whole w
+;; (if (or (equal w x) (member w x :test 'equal));FIXME
+;; 	w x)))
 
 (deftype pathname nil
   `(or non-logical-pathname logical-pathname))
@@ -455,6 +458,8 @@
   `(or type-spec function-type-spec))
 
 (deftype seqind nil
+  `(integer 0 ,(- array-dimension-limit 2)))
+(deftype seqbnd nil
   `(integer 0 ,(1- array-dimension-limit)))
 (deftype rnkind nil
   `(integer 0 ,(1- array-rank-limit)))
