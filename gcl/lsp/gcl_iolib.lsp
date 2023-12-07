@@ -337,9 +337,10 @@
 (defmacro with-compilation-unit (opt &rest body)   
   (declare (optimize (safety 2)))
   (declare (ignore opt)) 
-  `(let ((res (multiple-value-list (let ((*disable-recompile* t)) ,@body))))
-     (do-recompile nil)
-     (values-list res)))
+  `(multiple-value-prog1
+       (progn ,@body)
+;     (do-recomp)
+     ))
 
 
 (defun restrict-stream-element-type (tp)
