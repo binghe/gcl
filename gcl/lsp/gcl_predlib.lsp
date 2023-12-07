@@ -47,15 +47,21 @@
 	  resolve-type
 	  ldiff-nf))
 
-(defun ldiff-nf (l tl)
-  (declare (optimize (safety 2)))
-;  (check-type l list)
+(defun ldiff-nf-with-last (l tl &aux r rp)
+  (declare (optimize (safety 1)))
+  (check-type l list)
   (labels ((srch (x)
-	     (cond ((eql x tl) nil)
-		   ((atom x) x)
-		   ((let* ((d (cdr x))(sd (srch d)))
-		      (if (eq d sd) x (cons (car x) sd)))))))
-    (srch l)))
+	     (cond ((eq x tl) (values r rp))
+		   ((atom x) (when rp (rplacd rp x)) (values (or r x) rp))
+		   (t (let ((tmp (cons (car x) nil)))
+			(setq rp (if rp (cdr (rplacd rp tmp)) (setq r tmp)))
+			(srch (cdr x)))))))
+    (if tl (srch l) (values l nil))))
+(setf (get 'ldiff-nf-with-last 'cmp-inline) t)
+
+(defun ldiff-nf (l tl) (values (ldiff-nf-with-last l tl)))
+(setf (get 'ldiff-nf 'cmp-inline) t)
+
 (setf (get 'ldiff-nf 'cmp-inline) t)
 ;(declaim (inline ldiff-nf))
 
