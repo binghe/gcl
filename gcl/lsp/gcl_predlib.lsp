@@ -132,8 +132,8 @@
 
 ;To pevent typep/predicate loops
 ;(defun eql-is-eq (x) (typep x (funcall (get 'eql-is-eq-tp 'deftype-definition))))
-(defun equal-is-eq (x) (typep x (funcall (get 'equal-is-eq-tp 'deftype-definition))))
-(defun equalp-is-eq (x) (typep x (funcall (get 'equalp-is-eq-tp 'deftype-definition))))
+(defun equal-is-eq (x) (typep x (funcall (macro-function (get 'equal-is-eq-tp 'deftype-definition)) nil nil)));FIXME
+(defun equalp-is-eq (x) (typep x (funcall (macro-function (get 'equalp-is-eq-tp 'deftype-definition)) nil nil)))
 
 (defun seqindp (x) (and (fixnump x) (>= x 0) (< x array-dimension-limit)))
 (si::putprop 'seqindp t 'cmp-inline)
