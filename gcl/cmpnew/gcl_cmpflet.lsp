@@ -684,6 +684,7 @@
 			(recursive-p (fourth fun-stack-prev))
 			(i (cadr res))
 			(callees (all-callees i)))
+		   (declare (ignore i))
 		   (when recursive-p
 		     (setf (info-flags (fun-info fun)) (logior (info-flags (fun-info fun)) (iflags compiler))))
 		   (cond ((iflag-p (info-flags i) provisional)
