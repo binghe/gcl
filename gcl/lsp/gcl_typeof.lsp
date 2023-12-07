@@ -67,6 +67,8 @@
 		    (make-vector 'bit 1 t nil nil 0 nil nil))
 		   ((non-simple-array t)
 		    (make-vector 't 1 t nil nil 0 nil nil))
+		   ((vector nil) (set-d-tt 16 (make-vector 't 1 t nil nil 0 nil nil)));FIXME
+		   ((matrix nil) (set-d-tt 16 (make-array1 't nil nil nil 0 '(1 1) t)));FIXME
                    (spice (alloc-spice))
 		   (cons '(1))
 		   (keyword :a)
