@@ -1135,10 +1135,11 @@
 
 ;;; Borrowed from CMPOPT.LSP
 
-(defmacro can-allocate-on-stack ();FIXME protect against closure boundaries
+(defmacro can-allocate-on-stack ()
   `(and (consp *value-to-go*)
 	(eq (car *value-to-go*) 'var)
-	(var-dynamic (second *value-to-go*))))
+	(var-dynamic (second *value-to-go*))
+	(not (var-cb (second *value-to-go*)))))
 
 (defun wt-stack-list* (x l &optional n (st "Cnil") (lst "Cnil"))
   (let ((z (or n (length x))))
