@@ -127,7 +127,7 @@ $(PORTDIR)/saved_ansi_gcl: $(PORTDIR)/saved_pcl_gcl
 	(cd $(CLCSDIR); $(MAKE) clean; $(MAKE) all)
 	cd $(@D) && $(MAKE) $(@F)
 
-ansi-tests/test_results: #$(PORTDIR)/saved_ansi_gcl
+ansi-tests/test_results: $(PORTDIR)/saved_ansi_gcl
 	cd $(@D) && $(MAKE) $(@F)
 #	cd $(@D) && rm -f *.o rt/*.o && echo '(load "gclload.lsp")' | ../$<  2>&1 |tee $(@F) & j=$$! ; \
 #		tail -f --pid=$$j --retry $@ & wait $$j
