@@ -466,11 +466,11 @@
      ;; n-ary ops
      (let* ((op (random-from-seq #(+ - * logand min max
                                       logior values lcm gcd logxor)))
-             (nmax (case op ((* lcm gcd) 4) (t (1+ (random 40)))))
-             (nargs (1+ (min (random nmax) (random nmax))))
-             (sizes (random-partition (1- size) nargs))
-             (args (mapcar #'make-random-integer-form sizes)))
-        `(,op ,@args))
+            (nmax (case op ((* lcm gcd) 4) (values (1- multiple-values-limit)) (t (1+ (random 40)))))
+            (nargs (1+ (min (random nmax) (random nmax))))
+            (sizes (random-partition (1- size) nargs))
+            (args (mapcar #'make-random-integer-form sizes)))
+       `(,op ,@args))
 
      ;; expt
      `(expt ,(make-random-integer-form (1- size)) ,(random 3))
