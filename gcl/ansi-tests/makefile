@@ -14,6 +14,9 @@ test:
 	@rm -rf scratch
 	cat doit.lsp | $(LISP) | tee test.out
 
+test_results: ../unixport/saved_ansi_gcl
+	echo '(load "gclload")' | $< |tee $@
+
 test-symbols:
 	(cat doit1.lsp ; echo "(load \"load-symbols.lsp\")"; cat doit2.lsp) | $(LISP) | tee test-symbols.out
 
@@ -144,5 +147,5 @@ clean:
 	@rm -f tmp.txt tmp.dat tmp2.dat temp.dat
 	@rm -f gazonk* out.class
 	@rm -rf TMP/
-	@rm -f "CLTEST:file-that-was-renamed.txt" file-that-was-renamed.txt
-	@rm -f compile-file-test-lp.lsp compile-file-test-lp.out ldtest.lsp
+	@rm -f "CLTEST:file-that-was-renamed.txt" file-that-was-renamed.txt COMPILE-FILE-TEST-LP.OUT
+	@rm -f compile-file-test-lp.lsp compile-file-test-lp.out ldtest.lsp test_results
