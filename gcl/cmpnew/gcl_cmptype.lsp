@@ -798,19 +798,35 @@
 (si::putprop 'integer-length 'integer-length-propagator 'type-propagator)
 ;(defconstant +clzl0+ (let ((x (1+ (si::clzl 1)))) (cmp-norm-tp `(integer ,x ,x))))
 ;(defconstant +clzl0+ (let ((x (1- si::fixnum-length))) (cmp-norm-tp `(integer ,x ,x))))
-(defun clzl-propagator (f t1)
-  (when (type>= #tfixnum t1)
-    (type-or1 (when (type-and #t(real 0 0) t1) +clzl0+)
-	      (type-or1 (super-range f (type-and #tpositive-real t1))
-			(super-range f (type-and #tnegative-real t1))))))
+
+(defun bnd-clzl (x y)
+  (let* ((lx (si::clzl x))(ly (si::clzl y))(m (if (if (minusp x) (plusp y) (minusp y)) (si::clzl 0) lx)))
+    (cmp-norm-tp `(integer ,(min lx ly m) ,(max lx ly m)))))
+
+(defun clzl-propagator (f t1 &aux (t1 (type-and #tfixnum t1)));FIXME wrap
+  (declare (ignorable f))
+  (unless (type<= #tfixnum t1)
+    (if (atom t1) (apply 'bnd-clzl (real-bnds t1))
+	(reduce 'type-or1
+		(mapcar (lambda (x) (bnd-clzl (car x) (cdr x)))
+			(cdr (assoc 'integer (caaddr t1))))
+		:initial-value nil))))
 (si::putprop 'si::clzl 'clzl-propagator 'type-propagator)
 (si::putprop 'si::clzl t 'cmp-inline);FIXME no declaim
 
-(defun ctzl-propagator (f t1 &aux r)
-  (when (type>= #tfixnum t1)
-    (dotimes (i si::fixnum-length r)
-      (let ((j (ash 1 i)))
-	(setq r (type-or1 r (when (type-and t1 (object-type j)) (object-type (funcall f j)))))))))
+(defun bnd-ctzl (x y &optional (i 0) res)
+  (if (eql x y)
+      (cmp-norm-tp (cons 'member (cons (+ (if (zerop x) 0 i) (si::ctzl x)) res)))
+      (bnd-ctzl (>> (if (oddp x) (1+ x) x) 1) (>> (if (oddp y) (1- y) y) 1) (1+ i) (cons i res))))
+
+(defun ctzl-propagator (f t1 &aux (t1 (type-and #tfixnum t1)))
+  (declare (ignorable f))
+  (unless (type<= #tfixnum t1)
+    (if (atom t1) (apply 'bnd-ctzl (real-bnds t1))
+	(reduce 'type-or1
+		(mapcar (lambda (x) (bnd-ctzl (car x) (cdr x)))
+			(cdr (assoc 'integer (caaddr t1))))
+		:initial-value nil))))
 (si::putprop 'si::ctzl 'ctzl-propagator 'compiler::type-propagator)
 (si::putprop 'si::ctzl t 'compiler::cmp-inline);FIXME no declaim
 
