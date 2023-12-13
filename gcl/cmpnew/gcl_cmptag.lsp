@@ -172,7 +172,7 @@
 			 "Initializing ~s at label ~s:~%   type from ~s to ~s,~%   store from ~s to ~s"
 			 (car x) (tag-name z) (var-type (car x)) (cadr x)
 			 (var-store (car x)) (if (eq (var-store (car x)) (caddr x)) (caddr x) +opaque+))
-	  (do-setq-tp (car x) 'mch-set (cadr x))
+	  (do-setq-tp (car x) 'mch-set (cadr x));FIXME too prolix
 	  (push-vbinds (car x) (caddr x)))
 	l))
 
