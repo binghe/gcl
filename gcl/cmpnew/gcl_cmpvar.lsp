@@ -786,6 +786,7 @@
   
   (wt-nl "{object symbols,values;")
   (wt-nl "bds_ptr V" cvar "=bds_top;")
+  (wt-nl "V" cvar "=V" cvar ";");FIXME lintian unused var
   (push cvar *unwind-exit*)
   
   (let ((*vs* *vs*))
