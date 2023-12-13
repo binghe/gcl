@@ -713,16 +713,17 @@
 	((type-and #t(not (integer 0 0)) (super-range '* #t(integer 0 1) (super-range 'min t1 t2))))))
 (si::putprop 'si::lgcd2 'lgcd2-propagator 'type-propagator)
 
-(defun rem-propagator (f t1 t2)
-  (let ((t2 (mod-propagator f t1 t2)))
-    (when t2
+
+(defun rem-propagator (f t1 t2 &aux (ta (abs-propagator 'abs t2)))
+  (let ((tm (mod-propagator f t1 t2)))
+    (when tm
       (cond ((type>= #tnon-negative-real t1)
-	     (type-or1 (type-and #tnon-negative-real t2)
-		       (super-range '- (type-and #tnon-positive-real t2))))
+	     (type-or1 (type-and #tnon-negative-real tm)
+		       (super-range '+ (type-and #tnon-positive-real tm) ta)))
 	    ((type>= #tnon-positive-real t1)
-	     (type-or1 (type-and #tnon-positive-real t2)
-		       (super-range '- (type-and #tnon-negative-real t2))))
-	    ((type-or1 t2 (super-range '- t2)))))))
+	     (type-or1 (type-and #tnon-positive-real tm)
+		       (super-range '- (type-and #tnon-negative-real tm) ta)))
+	    ((type-or1 tm (super-range '- tm)))))))
 (si::putprop 'rem 'rem-propagator 'type-propagator)
 
 (defun floor-propagator (f t1 &optional (t2 #t(member 1))
