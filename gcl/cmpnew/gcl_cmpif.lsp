@@ -680,13 +680,8 @@
 	(otherwise fmla)))
 
 (defun maybe-progn-fmla (fmla args)
-  (let ((fmla (fmla-c1expr fmla))
-	(c1 (c1expr args)))
-    (if (ignorable-form fmla)
-	c1
-	(if (truncate-progn-at-nil-return-p (list fmla) args);FIXME run this through c1progn
-	    fmla
-	    (new-c1progn fmla c1)))))
+  (c1progn (list fmla args) (list (fmla-c1expr fmla) (c1expr args))))
+
 
 (defun c1if (args &aux info f)
   (when (or (endp args) (endp (cdr args)))
