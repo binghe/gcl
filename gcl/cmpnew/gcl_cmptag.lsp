@@ -404,7 +404,7 @@
 	(let* ((switch-op (pop body))
 	       (info (make-info :type #tnil))
 	       (switch-op-1 (c1arg switch-op info))
-	       (st (info-type (cadr switch-op-1)))
+	       (st (coerce-to-one-value (info-type (cadr switch-op-1))))
 	       (st (if (type>= #tfixnum st) st (baboon)))
 	       tags
 	       (body (remove-if (lambda (x) (when (tgs-p x) (prog1 (member x tags) (push x tags)))) body))
