@@ -450,7 +450,7 @@
 	 (cast (if (member key '(:cnum :creal)) "" (strcat "(" key ")")))
 	 (pp   (search "*" cast)))
 
-    (cond ((eq ft tt))
+    (cond ((unless fvt (eq ft tt)))
 	  ((equal ft #tt)
 	   (if *compiler-new-safety*
 	       (let ((v (member key '(:char :int :fixnum))))
