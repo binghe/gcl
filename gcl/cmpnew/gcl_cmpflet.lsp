@@ -126,7 +126,8 @@
 	 (res (list fun lam)))
 
     ;closures almost always called anonymously which will be slow unless argd is 0
-    (when (fun-c1cb fun) (setf (car (fun-call fun)) (bump-closure-lam-sig lam)))
+    (unless (tailp (member-if-not 'fun-p *funs*) (member fun *funs*))
+      (setf (car (fun-call fun)) (bump-closure-lam-sig lam)))
 
     (ref-environment);FIXME?
     (setf (fun-cfun fun) (next-cfun))
