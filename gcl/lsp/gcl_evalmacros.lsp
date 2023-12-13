@@ -336,9 +336,9 @@
      (check-type ,s integer)
      (do ((,var 0 (1+ ,var)))
 	 ((>= ,var ,m)
-	  (if (<= ,s most-positive-fixnum)
-	      ,val
-	      (do ((,var most-positive-fixnum (1+ ,var)))((>= ,var ,s) ,val) ,@body)));FIXME bbumps to non-negative-integer
+	  (when (> ,s most-positive-fixnum)
+	    (do ((,var most-positive-fixnum (1+ ,var)))((>= ,var ,s)) ,@body))
+	  ,val);FIXME bbumps to non-negative-integer
        ,@body)))
 
 
