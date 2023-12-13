@@ -436,22 +436,26 @@ DEFUN("INTDIVREM",object,fSintdivrem,SI,3,3,NONE,OO,OI,OO,OO,(object x,object y,
 
 object
 number_ldb(object x,object y) {
-  return ifuncall2(sLldb,x,y);
+  object (*foo)(object,object)=(void *)sLldb->s.s_gfdef->fun.fun_self;
+  return foo(x,y);
 }
 
 object
 number_ldbt(object x,object y) {
-  return ifuncall2(sLldb_test,x,y);
+  object (*foo)(object,object)=(void *)sLldb_test->s.s_gfdef->fun.fun_self;
+  return foo(x,y);
 }
 
 object
 number_dpb(object x,object y,object z) {
-  return ifuncall3(sLdpb,x,y,z);
+  object (*foo)(object,object,object)=(void *)sLdpb->s.s_gfdef->fun.fun_self;
+  return foo(x,y,z);
 }
 
 object
 number_dpf(object x,object y,object z) {
-  return ifuncall3(sLdeposit_field,x,y,z);
+  object (*foo)(object,object,object)=(void *)sLdeposit_field->s.s_gfdef->fun.fun_self;
+  return foo(x,y,z);
 }
 
 DEFUNM("FLOOR",object,fLfloor,LISP,1,2,NONE,OO,OO,OO,OO,(object x,...),"") {

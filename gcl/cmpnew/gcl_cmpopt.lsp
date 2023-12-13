@@ -1203,16 +1203,18 @@
 (push '((t t) t #.(compiler::flags) "immnum_orc2(#0,#1)") (get 'logorc2 'compiler::inline-always))
        
 
-;;LDB
-(push '((t t) t #.(compiler::flags) "immnum_ldb(#0,#1)") (get 'ldb 'compiler::inline-always))
-;;LDB-TEST
-(push '((t t) boolean #.(compiler::flags) "immnum_ldbt(#0,#1)") (get 'ldb-test 'compiler::inline-always))
 ;;LOGTEST
 (push '((t t) boolean #.(compiler::flags) "immnum_logt(#0,#1)") (get 'logtest 'compiler::inline-always))
-;;DPB
-(push '((t t t) t #.(compiler::flags) "immnum_dpb(#0,#1,#2)") (get 'dpb 'compiler::inline-always))
-;;DEPOSIT-FIELD
-(push '((t t t) t #.(compiler::flags) "immnum_dpf(#0,#1,#2)") (get 'deposit-field 'compiler::inline-always))
+
+;LDB
+(push '(((cons fixnum fixnum) fixnum) fixnum #.(compiler::flags) "fixnum_ldb(fix(#0->c.c_car),fix(#0->c.c_cdr),#1)") (get 'ldb 'compiler::inline-always))
+;LDB-TEST
+(push '(((cons fixnum fixnum) fixnum) boolean #.(compiler::flags) "fixnum_ldb(fix(#0->c.c_car),fix(#0->c.c_cdr),#1)") (get 'ldb-test 'compiler::inline-always))
+;DPB
+(push '((fixnum (cons fixnum fixnum) fixnum) t #.(compiler::flags) "fixnum_dpb(fix(#1->c.c_car),fix(#1->c.c_cdr),#0,#2)") (get 'dpb 'compiler::inline-always))
+;DEPOSIT-FIELD
+(push '((fixnum (cons fixnum fixnum) fixnum) t #.(compiler::flags) "fixnum_dpf(fix(#1->c.c_car),fix(#1->c.c_cdr),#0,#2)") (get 'deposit-field 'compiler::inline-always))
+
 
 ;;MINUSP
 (push '((t) boolean #.(flags) "immnum_minusp(#0)") (get 'minusp 'inline-always));"number_compare(small_fixnum(0),#0)>0"
