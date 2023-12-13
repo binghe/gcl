@@ -140,3 +140,49 @@
   (check-type x integer)
   (check-type y integer)
   (not (zerop (logand x y))))
+
+(defconstant +make-complex-alist+
+  `((complex-integer #tinteger #tinteger)
+    (complex-integer-ratio #tinteger #tratio)
+    (complex-ratio-integer #tratio #tinteger)
+    (complex-ratio #tratio #tratio)
+    (complex-short-float #tshort-float #tshort-float)
+    (complex-long-float #tlong-float #tlong-float)))
+
+(eval-when (compile eval) (defmacro complex-tt (s) (or (position s +make-complex-alist+ :key 'car) (baboon))))
+
+(defun complex (rp &optional (ip (typecase rp (rational 0)(short-float 0.0s0)(long-float 0.0))))
+  (declare (optimize (safety 1)))
+  (check-type rp real)
+  (check-type ip real)
+  (typecase rp
+    (integer
+     (typecase ip
+       ((integer 0 0) rp)
+       (integer       (make-complex #.(complex-tt complex-integer)       rp            ip))
+       (ratio         (make-complex #.(complex-tt complex-integer-ratio) rp            ip))
+       (short-float   (make-complex #.(complex-tt complex-short-float)   (float rp ip) ip))
+       (long-float    (make-complex #.(complex-tt complex-long-float)    (float rp ip) ip))))
+    (ratio
+     (typecase ip
+       ((integer 0 0) rp)
+       (integer       (make-complex #.(complex-tt complex-ratio-integer) rp            ip))
+       (ratio         (make-complex #.(complex-tt complex-ratio)         rp            ip))
+       (short-float   (make-complex #.(complex-tt complex-short-float)   (float rp ip) ip))
+       (long-float    (make-complex #.(complex-tt complex-long-float)    (float rp ip) ip))))
+    (short-float
+     (typecase ip
+       (rational      (make-complex #.(complex-tt complex-short-float)   rp            (float ip rp)))
+       (short-float   (make-complex #.(complex-tt complex-short-float)   rp            ip))
+       (long-float    (make-complex #.(complex-tt complex-long-float)    (float rp ip) ip))))
+    (long-float       (make-complex #.(complex-tt complex-long-float)    rp            (float ip rp)))))
+
+(defun make-complex-propagator (f t1 t2 t3 &aux (i -1))
+  (declare (ignore f))
+  (reduce 'type-or1
+	  (mapcan (lambda (x)
+		    (when (type-and t1 (object-tp (incf i)))
+		      (list (cmp-norm-tp `(complex* ,(cmp-unnorm-tp (type-and t2 (cadr x))) ,(cmp-unnorm-tp (type-and t3 (caddr x))))))))
+		  +make-complex-alist+)
+	  :initial-value nil))
+(setf (get 'make-complex 'type-propagator) 'make-complex-propagator)
