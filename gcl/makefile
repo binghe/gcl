@@ -42,9 +42,21 @@ release: majvers minvers
 
 TARGET:=$(shell if [ "$(FLISP)" != "saved_ansi_gcl" ] ; then echo $(PORTDIR)/$(FLISP); else echo ansi-tests/test_results; fi)
 
-system: $(TARGET)
+system: $(TARGET) $(GPROF)
 #	$(MAKE) -C $(PORTDIR) final
 	touch $@
+
+gprof_objs: $(addprefix $(PORTDIR)/,$(addsuffix _gprof,$(FLISP)))
+	echo $<
+
+$(PORTDIR)/saved_gcl_gprof: $(PORTDIR)/saved_gcl
+	mkdir -p gprof
+	for i in o lsp cmpnew xgcl-2; do $(MAKE) -C $$i gprof_objs; done
+	$(MAKE) -C unixport $(@F)
+
+$(PORTDIR)/saved_ansi_gcl_gprof: $(PORTDIR)/saved_gcl_gprof $(PORTDIR)/saved_ansi_gcl
+	for i in mod pcl clcs; do $(MAKE) -C $$i gprof_objs; done
+	$(MAKE) -C unixport $(@F)
 
 ASRC:=$(shell ls -1 o/*.c o/*.d o/*.h h/*.h lsp/*.lsp cmpnew/*.lsp mod/*.lsp pcl/*sp clcs/*sp xgcl-2/*p) #o/*.d o/*.h h/*.h
 TAGS: $(ASRC)
@@ -92,20 +104,14 @@ $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	touch $< $@
 
 $(PORTDIR)/saved_gcl0: $(PORTDIR)/saved_pre_gcl $(HDIR)cmpinclude.h
-#	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
-#	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
 	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F)
 	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
 
 $(PORTDIR)/saved_gcl1: $(PORTDIR)/saved_gcl0 $(HDIR)cmpinclude.h
-#	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
-#	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
 	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F)
 	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
 
 $(PORTDIR)/saved_gcl: $(PORTDIR)/saved_gcl1 $(HDIR)cmpinclude.h
-#	(cd $(LSPDIR); touch *.lsp ; $(MAKE) all)
-#	(cd $(CMPDIR); touch *.lsp ; $(MAKE) all)
 	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F) && $(MAKE) $(@F)
 
 $(PORTDIR)/saved_mod_gcl: $(PORTDIR)/saved_gcl
@@ -121,9 +127,10 @@ $(PORTDIR)/saved_ansi_gcl: $(PORTDIR)/saved_pcl_gcl
 	(cd $(CLCSDIR); $(MAKE) clean; $(MAKE) all)
 	cd $(@D) && $(MAKE) $(@F)
 
-ansi-tests/test_results: $(PORTDIR)/saved_ansi_gcl
-	cd $(@D) && rm -f *.o rt/*.o && echo '(load "gclload.lsp")' | ../$<  2>&1 |tee $(@F) & j=$$! ; \
-		tail -f --pid=$$j --retry $@ & wait $$j
+ansi-tests/test_results: #$(PORTDIR)/saved_ansi_gcl
+	cd $(@D) && $(MAKE) $(@F)
+#	cd $(@D) && rm -f *.o rt/*.o && echo '(load "gclload.lsp")' | ../$<  2>&1 |tee $(@F) & j=$$! ; \
+#		tail -f --pid=$$j --retry $@ & wait $$j
 
 #$(PCLDIR)/saved_gcl_pcl: $(PORTDIR)/saved_gcl
 #	cd $(@D) &&  $(MAKE) compile LISP="../$<" &&  $(MAKE) $(@F) LISP="../$<"
@@ -352,7 +359,7 @@ gclclean:
 	rm -f h/*-linux.defs h/bfd.h h/bfdlink.h h/ansidecl.h h/symcat.h
 	rm -f windows/gcl.iss bin/gcl.bat windows/gcl.ansi.iss windows/install.ansi.lsp \
 		windows/install.lsp windows/sysdir.bat
-	rm -rf windows/Output h/mcompdefs.h
+	rm -rf windows/Output h/mcompdefs.h gprof
 	rm -f ansi-tests/test_results ansi-tests/gazonk* \
 		ansi-tests/generated-eval-when-test-file.lisp
 	rm -f config.log config.cache config.status $(PORTDIR)/gmon.out gcl.script machine system

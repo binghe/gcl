@@ -14,7 +14,10 @@ PREFS:= s sf dl fle rm typep type typecase hash sym lr nr recompile sharp callha
 	  iolib listlib mislib module numlib mnum \
 	  packlib predlib \
 	  seq seqlib setf top trace sloop \
-          debug info serror bnum c sc restart
+          debug info serror bnum c sc restart bit deftype directory fpe \
+	  logical_pathname_translations make_pathname merge_pathnames \
+	  namestring parse_namestring pathname_match_p rename_file subtypep \
+	  translate_pathname truename typeof wild_pathname_p
 NPREFS:= export autoload auto_new
 SRC:= $(addprefix gcl_,$(addsuffix .lsp,$(PREFS) $(NCPREFS)))
 OBJS:=$(addprefix gcl_,$(addsuffix .o,$(PREFS)))
@@ -29,6 +32,12 @@ COMPILE_FILE=$(LISP) $(PORTDIR) $(LISPFLAGS) -system-p -c-file -data-file -h-fil
 
 
 all:	$(OBJS)
+
+gprof_objs: $(addprefix ../gprof/,$(OBJS))
+
+../gprof/%.o: %.c $(DECL)
+	$(CC) -I../h -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO) -o $@
+	${APPEND} ${NULLFILE} $*.data  $@
 
 .c.o:
 	$(CC) $(OFLAG) $(CFLAGS) -c $*.c

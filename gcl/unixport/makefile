@@ -44,15 +44,6 @@ gmpfiles: $(shell [ -z "$(GMPDIR)" ] || find ../$(GMPDIR) -name "*.o" |grep -v '
 	done
 	touch $@
 
-bfdfiles: $(shell ! [ -d ../binutils ] || find ../binutils -name "*.o")
-	rm -rf bfd
-	mkdir bfd
-	a="$^" ; \
-	for i in $$a ; do \
-		cp $$i bfd/$$(echo $$i | sed -e 's,\.\./,,1' -e 's,/,_,g') ; \
-	done 
-	touch $@
-
 OOBJS:=$(shell j=$$(ar t $(ODIR)/gcllib.a) ; for i in $$(find $(ODIR) -name "*.o") ; do if ! echo $$j |grep $$(basename $$i) >/dev/null 2>&1 ; then echo $$i ; fi ; done)
 OOBJS:=$(filter-out $(ODIR)/$(FIRST_FILE),$(OOBJS))
 OOBJS:=$(filter-out $(ODIR)/$(LAST_FILE),$(OOBJS))
@@ -121,35 +112,50 @@ $(HDIR)/mdefs.h: $(HDIR)/include.h
 sys_%.o: sys_init.c sys.c
 	$(CC) $(CFLAGS) -c -D $* -D FLAVOR="$*" $< -o $@
 
-libpre_gcl.a: $(OOBJS) sys_pre_gcl.o gmpfiles bfdfiles libboot.so
+libpre_gcl.a: $(OOBJS) sys_pre_gcl.o gmpfiles libboot.so
 	rm -rf $@
-	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
 
-libgcl.a: $(OBJS) sys_gcl.o gmpfiles bfdfiles
+libgcl.a: $(OBJS) sys_gcl.o gmpfiles
 	rm -rf $@
-	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
 
-libmod_gcl.a: $(OBJS) $(MODOBJS) sys_mod_gcl.o gmpfiles bfdfiles
+libgcl_gprof.a: $(addprefix ../gprof/,$(notdir $(OBJS))) sys_gcl.o gmpfiles
 	rm -rf $@
-	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
+
+libmod_gcl.a: $(OBJS) $(MODOBJS) sys_mod_gcl.o gmpfiles
+	rm -rf $@
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
+
+libmod_gcl.a: $(OBJS) $(MODOBJS) sys_mod_gcl.o gmpfiles
+	rm -rf $@
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
 
 libxgcl.a: libgcl.a
 	ln -snf $< $@
 
-libpcl_gcl.a: $(OBJS) $(PCLOBJS) sys_pcl_gcl.o gmpfiles bfdfiles
+libpcl_gcl.a: $(OBJS) $(PCLOBJS) sys_pcl_gcl.o gmpfiles
 	rm -rf $@
-	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
 
-libansi_gcl.a: $(OBJS) $(ANSIOBJS) sys_ansi_gcl.o gmpfiles bfdfiles
+libansi_gcl.a: $(OBJS) $(ANSIOBJS) sys_ansi_gcl.o gmpfiles
 	rm -rf $@
-	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp bfd -name "*.o")
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
+
+libansi_gcl_gprof.a: $(addprefix ../gprof/,$(notdir $(OBJS) $(ANSIOBJS))) sys_ansi_gcl.o gmpfiles
+	rm -rf $@
+	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
 
 raw_%_map raw_%: lib%.a libgclp.a $(SYSTEM_OBJS) #$(EXTRAS)
 	touch raw_$*_map
 ifeq ($(GNU_LD),1)
-	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -rdynamic -L. $(EXTRA_LD_LIBS) $(LD_STACK_FLAGS) -Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) \
+		$(shell if echo $@ | grep -q gprof ; then echo "-pg"; else echo ""; fi) \
+		-rdynamic -L. $(EXTRA_LD_LIBS) $(LD_STACK_FLAGS) \
+		-Wl,-Map raw_$*_map $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 else
-	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) -L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
+	$(CC) $(LD_FLAGS) -o raw_$*$(EXE) $(filter %.o,$^) $(shell if grep -q gprof $@ ; then echo "-pg"; else echo ""; fi) -L. $(EXTRA_LD_LIBS) $(LD_LIBS_PRE) -l$* $(LD_LIBS_POST)
 endif
 
 map_%:
@@ -157,7 +163,7 @@ map_%:
 
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) sys_init.lsp \
-		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* bfd* *.lsp.tmp \
+		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* *.lsp.tmp \
 		gazonk*.lsp plt*h *_map saved_* lib* raw_* out* log* tmp* gcl.script
 
 .INTERMEDIATE: raw_gcl raw_ansi_gcl recompile.h pre_init.lsp post_init.lsp

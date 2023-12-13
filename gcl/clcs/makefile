@@ -4,8 +4,15 @@ COMPILE_FILE=./saved_clcs_gcl ./ $(LISPFLAGS) -system-p -c-file -data-file \
 	-o-file nil -h-file -compile
 
 FILES:=$(shell ls -1 gcl_clcs_*.lisp | sed 's,\.lisp,,1')
+APPEND=../xbin/append
 
 all: $(addsuffix .c,$(FILES)) $(addsuffix .o,$(FILES))
+
+gprof_objs: $(addprefix ../gprof/,$(addsuffix .o,$(FILES)))
+
+../gprof/%.o: %.c #$(DECL)
+	$(CC) -I../h -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO) -o $@
+	${APPEND} ${NULLFILE} $*.data  $@
 
 saved_clcs_gcl: ../unixport/saved_pcl_gcl
 	echo '(load "package.lisp")(load "myloadp.lisp")(setq si::*disable-recompile* t)(si::save-system "$@")' | $< $(<D)/ $(LISPFLAGS)

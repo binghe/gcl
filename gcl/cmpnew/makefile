@@ -20,10 +20,16 @@ LISP:=$(shell ls -1rt ../unixport/saved_pre_gcl ../unixport/saved_gcl|tail -n 1)
 COMPILE_FILE=$(LISP) $(PORTDIR) $(LISPFLAGS) -system-p -c-file -data-file -h-file -compile
 #CFLAGS	= -c -O -I../h 
 
+all: $(OBJS)
+
+gprof_objs: $(addprefix ../gprof/gcl_,$(addsuffix .o,$(PREFS)))
+
+../gprof/%.o: %.c #$(DECL)
+	$(CC) -I../h -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO) -o $@
+	${APPEND} ${NULLFILE} $*.data  $@
+
 %.o: %.lsp $(LISP) 
 	$(COMPILE_FILE) $<
-
-all:	$(OBJS)
 
 .lsp.fn: ../cmpnew/gcl_collectfn.o
 	../xbin/make-fn $*.lsp $(LISP)

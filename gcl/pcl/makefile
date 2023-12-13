@@ -23,8 +23,16 @@ SETUP='(load "../clcs/package.lisp")(load "../clcs/myload1.lisp")(load "sys-pack
 	'(setq compiler::*keep-gaz* t compiler::*tmp-dir* "" si::*disable-recompile* t)'
 
 LISP?=../unixport/saved_mod_gcl
+APPEND=../xbin/append
+
 
 all: $(addsuffix .c,$(AFILES)) $(addsuffix .o,$(AFILES)) 
+
+gprof_objs: $(addprefix ../gprof/,$(addsuffix .o,$(AFILES)))
+
+../gprof/%.o: %.c #$(DECL)
+	$(CC) -I../h -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO) -o $@
+	${APPEND} ${NULLFILE} $*.data  $@
 
 saved_gcl_pcl: $(LISP)
 	cp ../h/cmpinclude.h .

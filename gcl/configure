@@ -704,6 +704,7 @@ GMPDIR
 GMP
 HAVE_MALLOC_ZONE_MEMALIGN
 MAKEINFO
+GPROF
 GCL_CC
 CPP
 OBJEXT
@@ -5727,40 +5728,39 @@ if echo $GCL_CC |grep gcc |grep -q win; then
 fi
 
 
+
+GPROF="gprof_objs"
 # Check whether --enable-gprof was given.
 if test ${enable_gprof+y}
 then :
-  enableval=$enable_gprof; if test "$enableval" = "yes" ; then
-		   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking working gprof" >&5
+  enableval=$enable_gprof; if test "$enableval" != "yes" ; then GPROF=""; fi
+fi
+
+
+if test "$GPROF" != "" ; then
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking working gprof" >&5
 printf %s "checking working gprof... " >&6; }
-		   case $use in
-		       powerpc*) if test "$host_cpu" = "powerpc64le" ; then enableval="no"; fi;;
-		       s390*) enableval="no";;#mcount smashes float args in make_shortfloat 20180313
-		       sh4*)  enableval="no";;
-		       m68k*)  enableval="no";;
-		       ia64*) enableval="no";;
-		       hppa*) enableval="no";;
-#		       arm*)  if echo $canonical |grep -q hf$; then enableval="no"; fi;;#FIXME CALL and JUMP24 veneers needed for thumb 20190201 #FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
-		       aarch64*) enableval="no";;#unreproducible buildd bug 20170824
-		       *gnu)  enableval="no";;
-		   esac
-                   GP_FLAG=""
-                   if test "$enableval" != "yes" ; then
-		       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: disabled" >&5
+   case $use in
+       powerpc*) if test "$host_cpu" = "powerpc64le" ; then GPROF=""; fi;;
+       s390*) GPROF="";;#mcount smashes float args in make_shortfloat 20180313
+       sh4*)  GPROF="";;
+       m68k*) GPROF="";;
+       ia64*) GPROF="";;
+       hppa*) GPROF="";;
+       arm*)  if echo $canonical |grep -q hf$; then GPROF=""; fi;;#FIXME CALL and JUMP24 veneers needed for thumb 20190201 #FIXME mcount compiled as a 24/22 bit reloc even with -mlong-calls, marginally accessible
+       aarch64*) GPROF="";;#unreproducible buildd bug 20170824
+       *gnu)  GPROF="";;
+   esac
+   if test "$GPROF" = "" ; then
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: disabled" >&5
 printf "%s\n" "disabled" >&6; }
-		   else
-		       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ok" >&5
+   else
+       { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ok" >&5
 printf "%s\n" "ok" >&6; }
-		       OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
-                       assert_arg_to_cflags -pg
-                       GP_FLAG="-pg"
-                       CFLAGS=$OLD_CFLAGS
-       		       TFPFLAG=""
-
-printf "%s\n" "#define GCL_GPROF 1" >>confdefs.h
-
-		   fi
-	       fi
+       OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
+       assert_arg_to_cflags -pg
+       CFLAGS=$OLD_CFLAGS
+   fi
 fi
 
 

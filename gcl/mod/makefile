@@ -30,8 +30,6 @@ COMPILE_FILE=$(LISP) $(PORTDIR) $(LISPFLAGS) -system-p -c-file -data-file \
 # 	"$(CC) $(OFLAG) $(CFLAGS) -c $*.c " \
 # 	"${APPEND} ${NULLFILE} $*.data $*.o "
 
-%.o: %.lsp $(LISP) 
-	$(COMPILE_FILE) $<
 
 
 # .lsp.o: $(PORTDIR)/saved_gcl
@@ -42,6 +40,14 @@ COMPILE_FILE=$(LISP) $(PORTDIR) $(LISPFLAGS) -system-p -c-file -data-file \
 
 all:	$(OBJS) #$(RL_OBJS)
 
+gprof_objs: $(addprefix ../gprof/,$(OBJS))
+
+../gprof/%.o: %.c #$(DECL)
+	$(CC) -I../h -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO) -o $@
+	${APPEND} ${NULLFILE} $*.data  $@
+
+%.o: %.lsp $(LISP)
+	$(COMPILE_FILE) $<
 
 
 # .c.o:

@@ -30,7 +30,9 @@ INI_FILES:=$(filter-out new_init.ini,$(filter-out boot.ini,$(INI_FILES)))
 
 OBJECTS:=$(OBJS) $(LIBFILES) new_init.o  $(GCLIB) $(LAST_FILE)  $(FIRST_FILE) 
 
-all:  $(OBJECTS)
+all:  $(OBJECTS) #$(GPROF)
+
+gprof_objs: $(addprefix ../gprof/,$(OBJECTS))
 
 boot.o: boot.c $(DECL) boot.h #FIXME clean, include file changes
 	$(CC) -c $(CFLAGS) $(DEFS) -fPIC $*.c $(AUX_INFO) 
@@ -43,6 +45,9 @@ prelink.o: prelink.c $(DECL)
 
 %.o: %.c $(DECL)
 	$(CC) -c $(CFLAGS) $(DEFS) $*.c $(AUX_INFO) 
+
+../gprof/%.o: %.c $(DECL)
+	$(CC) -DGCL_GPROF -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO) -o $@
 
 %.c: %.d $(DPP)
 	$(DPP) $*
@@ -104,6 +109,12 @@ $(GCLIB): ${ALIB}
 	rm -f gcllib.a
 	$(AR) gcllib.a ${ALIB}
 	${RANLIB} gcllib.a
+
+../gprof/$(GCLIB): $(addprefix ../gprof/,${ALIB})
+	rm -f $@
+	$(AR) $@ $^
+	${RANLIB} $@
+
 
 clean:
 	rm -f $(OBJS) ${ALIB} new_init.o  $(LAST_FILE) $(FIRST_FILE) *.a grab_defs$(EXE) *.ini tmpx foo.c
