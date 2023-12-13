@@ -423,7 +423,7 @@
 		(h (caddr tp))
 		(h (if (consp h) (car h) h))
 		(h (if (eq h '*) h (if (>= h 0) (1- (ash 1 (integer-length h))) -1)))
-		(l (if (eq l '*) l (if (< l 0) (- (1- (ash 1 (integer-length l)))) 0))))
+		(l (if (eq l '*) l (if (< l 0) (- (ash 1 (integer-length l))) 0))))
 	   (cmp-norm-tp `(integer ,l ,h))))))
 
 
