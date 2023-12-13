@@ -309,7 +309,7 @@
   (var-bind
    (typecase
     form
-    ((cons (eql var) t) (local-var (caddr form)))
+    ((cons (eql var) t) (when (check-vs (car (last form)))  (local-var (caddr form))))
     (var form))))
 
 (defun get-bind (x)
