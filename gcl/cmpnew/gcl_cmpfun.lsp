@@ -258,7 +258,7 @@
 	 (a1 (atomic-tp t1))
 	 (a2 (atomic-tp t2))
 	 (nfn (if (when tf (or (funcall tf t1) (funcall tf t2))) 'eq fn)))
-    (unless (and t1 t2) (setf (info-type info nil)))
+    (unless (and t1 t2) (setf (info-type info) nil))
     (cond ((not (type-and t1 t2))
 	   (c1progn (append args (list nil)) (nconc nargs (list (c1nil)))))
 	  ((and a1 a2 (case nfn (eq (eql-is-eq (car a1)))(eql t)))
