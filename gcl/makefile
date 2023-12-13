@@ -182,7 +182,7 @@ pargcl_all: $(BUILD_BFD) $(PORTDIR)/$(FLISP) command cmpnew/gcl_collectfn.o \
 	if test "$(PARGCLDIR)" != ""; then \
 	  MGCLDIR=`echo $(GCLDIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
 	  GCLDIR=`echo $(GCLDIR)` ; \
-	  $(MAKE) install_command FLISP=saved_pargcl BINSCPT=pargcl \
+	  $(MAKE) install-command FLISP=saved_pargcl BINSCPT=pargcl \
 	    "INSTALL_LIB_DIR=$$GCLDIR" "prefix=$$GCLDIR" \
 	    "BINDIR=$$MGCLDIR/$(PORTDIR)" \
 	  && cat bin/pargcl \
@@ -284,7 +284,7 @@ install_unix:
 	cp -a man $(DESTDIR)$(prefix)/share/
 	mkdir -p $(DESTDIR)$(INSTALL_LIB_DIR)
 	MINSTALL_LIB_DIR=`echo $(INSTALL_LIB_DIR) | sed -e 'sX^\([a-z]\):X/\1Xg'` ; \
-	$(MAKE) install_command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
+	$(MAKE) install-command "INSTALL_LIB_DIR=$(INSTALL_LIB_DIR)" "prefix=$(prefix)" "DESTDIR=$(DESTDIR)" "BINDIR=$$MINSTALL_LIB_DIR/unixport"
 	cp bin/$(BINSCPT) $(DESTDIR)$(prefix)/bin/
 	rm -f $(DESTDIR)$(prefix)/bin/gcl.exe
 	tar cf - $(PORTDIR)/$(FLISP)$(EXE) info/*.info* $(LISP_LIB) \
