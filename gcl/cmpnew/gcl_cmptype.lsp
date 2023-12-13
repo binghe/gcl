@@ -691,11 +691,13 @@
    ((cdr r2) (reduce 'type-or1 (mapcar (lambda (x) (mod-propagator f t1 (cdr x))) r2) :initial-value nil))
    ((let ((a (atomic-tp t1))(b (atomic-tp t2)))
       (when (and a b)
-	(object-tp (mod (car a) (car b))))))
+	(unless (zerop (car b))
+	  (object-tp (mod (car a) (car b)))))))
    ((and (type>= #treal t1) (type>= #treal t2))
-	 (let* ((tp (super-range '* #t(integer 0 1) t2))
+	 (let* ((tp (super-range '* #t(integer 0 1) t2));FIXME this might break for integers in the future
 		(r (real-bnds tp))
-		(r (if (numberp (cadr r)) (list (car r) (list (cadr r))) r)))
+		(r (labels ((b (x) (if (when (numberp x) (not (zerop x))) (list x) x)))
+		     (list (b (car r)) (b (cadr r))))))
 	   (type-and (contagion t1 t2) (cmp-norm-tp (cons 'real r)))))))
 (si::putprop 'mod 'mod-propagator 'type-propagator)
 
