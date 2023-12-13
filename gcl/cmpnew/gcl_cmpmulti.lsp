@@ -152,23 +152,26 @@
 ;;          (wt "}"))))
 
 (defun c1multiple-value-prog1 (args
-			       &aux (info (make-info)) form
-			       (tsyms (load-time-value
+			       &aux form info tp (tsyms (load-time-value
 				       (mapl (lambda (x) (setf (car x) (gensym "MV-PROG1")))
 					     (make-list 50)))))
   (when (endp args) (too-few-args 'multiple-value-prog1 1 0))
-  (setq form (c1arg (car args) info))
-  (let ((tp (info-type (cadr form))))
-    (cond ((single-type-p tp)
-	   (let ((s (pop tsyms)))
-	     (c1expr `(let ((,s ,(car args))) ,@(cdr args) ,s))))
-	  ((and (consp tp) (eq (car tp) 'returns-exactly) (>= (length tsyms) (length (cdr tp))))
-	   (let ((syms (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) (cdr tp))))
-	     (c1expr `(multiple-value-bind (,@syms) ,(car args) ,@(cdr args) (values ,@syms)))))
-	  (t 
-	   (setq args (c1args (cdr args) info))
-	   (setf (info-type info) (info-type (cadr form)))
-	   (list 'multiple-value-prog1 info form args)))))
+  (with-restore-vars
+      (setq form (c1expr (car args)) info (copy-info (cadr form)) tp (info-type info))
+    (unless (or (single-type-p tp)
+		(and (consp tp) (eq (car tp) 'returns-exactly) (>= (length tsyms) (length (cdr tp)))))
+      (keep-vars)))
+  (cond ((single-type-p tp)
+	 (let ((s (pop tsyms)))
+	   (c1expr `(let ((,s ,(car args))) ,@(cdr args) ,s))))
+	((and (consp tp) (eq (car tp) 'returns-exactly) (>= (length tsyms) (length (cdr tp))))
+	 (let ((syms (mapcar (lambda (x) (declare (ignore x)) (pop tsyms)) (cdr tp))))
+	   (c1expr `(multiple-value-bind (,@syms) ,(car args) ,@(cdr args) (values ,@syms)))))
+	(t
+	 (setq args (c1args (cdr args) info))
+					;	       (setf (info-type info) (info-type (cadr form)))
+	 (list 'multiple-value-prog1 info form args))))
+
 
 ;; (defun c1multiple-value-prog1 (args &aux (info (make-info)) form)
 ;;   (when (endp args) (too-few-args 'multiple-value-prog1 1 0))
