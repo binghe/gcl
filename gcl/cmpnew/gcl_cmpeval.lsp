@@ -2785,13 +2785,13 @@
 	  (tp (info-type (cadar nargs)))
 	  (a (atomic-tp (info-type (cadadr nargs))))
 	  (c (if (when a (constant-type-p (car a))) (cmp-norm-tp (car a)) '*)))
-     (if (eq c '*)
-	 form
-       (cond ((type>= c tp) (keep-vars) t)
-	     ((not (type-and c tp)) (keep-vars) nil)
-	     ((unless (member-if-not 'ignorable-form nargs) (when (consp c) (eq (car c) 'or)))
-	      (keep-vars) `(typecase ,(car args) (,(cmp-unnorm-tp c) t)))
-	     (form))))));FIXME hash here
+     (cond ((eq c '*) form)
+	   ((member-if-not 'ignorable-form nargs) form)
+	   ((type>= c tp) (keep-vars) t)
+	   ((not (type-and c tp)) (keep-vars) nil)
+	   ((when (consp (car a)) (eq (caar a) 'or))
+	    `(typecase ,(car args) (,(car a) t)))
+	   (form)))));FIXME hash here
 
 
 (define-compiler-macro vector-push-extend (&whole form &rest args)
