@@ -63,11 +63,11 @@
 (defmd (/ number-divide 1))
 
 (defun zgcd2 (x y) (cond ((= x 0) y) ((= y 0) x) ((fgcd2 x y))))
-(defun lgcd2 (x y tx tt &aux (tt (>> tt (ctzl tt))))
+(defun lgcd2 (x y tt &aux (tt (>> tt (ctzl tt))))
   (if (plusp tt) (setq x tt) (setq y (- tt)))
-  (if (= x y) (<< x tx) (lgcd2 x y tx (- x y))))
-(defun fgcd2 (x y &aux (tx (ctzl x))(ty (ctzl y))(tx (min tx ty)))
-  (lgcd2 (>> x tx) (>> y ty) tx (if (oddp x) (- y) (>> x 1))))
+  (if (= x y) x (lgcd2 x y (- x y))));FIXME too many tagbody iterations
+(defun fgcd2 (x y &aux (tx (min (ctzl x) (ctzl y)))(x (>> x tx))(y (>> y tx)))
+  (<< (lgcd2 x y (if (oddp x) (- y) (>> x 1))) tx))
 (setf (get 'zgcd2 'cmp-inline) t)
 (setf (get 'lgcd2 'cmp-inline) t)
 (setf (get 'fgcd2 'cmp-inline) t)
