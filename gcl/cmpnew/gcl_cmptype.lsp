@@ -706,16 +706,12 @@
   (mod-propagator f (super-range '* #t(integer 0 1) t1) t1))
 (si::putprop 'random 'random-propagator 'type-propagator)
 
-(defun gcd-propagator (f &optional (t1 nil t1p) (t2 nil t2p) &aux (t1 (type-and #tinteger t1))(t2 (type-and #tinteger t2)))
-  (cond (t2p (super-range '* #t(integer 0 1) (super-range 'min t1 t2)))
-	(t1p (mod-propagator f t1 t1))
-	((super-range f))))
-(si::putprop 'gcd 'gcd-propagator 'type-propagator)
-(defun lcm-propagator (f &optional (t1 nil t1p) (t2 nil t2p) &aux (t1 (type-and #tinteger t1))(t2 (type-and #tinteger t2)))
-  (cond (t2p (super-range '* #t(integer 1) (super-range 'max t1 t2)))
-	(t1p (mod-propagator f t1 t1))
-	((super-range f))))
-(si::putprop 'lcm 'lcm-propagator 'type-propagator)
+(defun lgcd2-propagator (f t1 t2 t3
+			 &aux (a1 (car (atomic-tp t1)))(a2 (car (atomic-tp t2)))
+			   (a3 (car (atomic-tp t3))))
+  (cond ((and a1 a2 a3) (object-type (funcall f a1 a2 a3)))
+	((type-and #t(not (integer 0 0)) (super-range '* #t(integer 0 1) (super-range 'min t1 t2))))))
+(si::putprop 'si::lgcd2 'lgcd2-propagator 'type-propagator)
 
 (defun rem-propagator (f t1 t2)
   (let ((t2 (mod-propagator f t1 t2)))
