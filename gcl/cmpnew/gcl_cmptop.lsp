@@ -1866,8 +1866,8 @@
   
   (let ((vstb (if (or *mv-var* (> *max-vs* 0) *base-used*)
 		  (concatenate 'string " register object * " *volatile* " base=vs_top;") ""))
-	(bdsb (if *bds-used* " bds_ptr old_bds_top=bds_top;" ""))
-	(frsb (if *frame-used* " frame_ptr old_frs_top=frs_top;" "")))
+	(bdsb (if *bds-used* (concatenate 'string " bds_ptr " *volatile* " old_bds_top=bds_top;") ""))
+	(frsb (if *frame-used* (concatenate 'string " frame_ptr " *volatile* " old_frs_top=frs_top;") "")))
     (wt-h "#define VMB" cm vstb bdsb frsb))
 
   (wt-cvars)
