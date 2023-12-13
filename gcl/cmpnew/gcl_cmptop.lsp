@@ -1301,7 +1301,7 @@
 (defun f-type (x)
   (if (var-p x) (setq x (var-type x)))
   (let ((x (promoted-c-type x)))
-    (let ((x (position x +c-global-arg-types+)))
+    (let ((x (position x +c-global-arg-types+ :test 'type<=)))
       (if x (1+ x) 0))))
 
 (defun new-proclaimed-argd (args return)
@@ -2522,7 +2522,8 @@
 			      (*volatile* (volatile (cadr lambda-expr))))
   (declare (fixnum level))
 
-  (setq h (fun-call fun) at (caar h) rt (cadar h));FIXME
+  (setq h (fun-call fun) at (caar h) rt (cadar h)
+	at (mapcar 'global-type-bump at) rt (global-type-bump rt));FIXME
   (dolist (vl requireds)
     (cond ((eq (var-kind vl) 'special)
 	   (push (cons vl (var-loc vl)) specials))
