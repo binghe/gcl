@@ -1,4 +1,6 @@
-(in-package "TK" :use '("LISP" "SLOOP"))
+(unless (find-package "TK")
+  (make-package "TK" :use '("LISP" "SLOOP")))
+
 (in-package "SI")
 (import '(
 string begin end header name

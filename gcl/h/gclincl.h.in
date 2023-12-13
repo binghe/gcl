@@ -9,9 +9,6 @@
 /* punt guess for no randomize value */
 #undef ADDR_NO_RANDOMIZE
 
-/* ANSI compliant image */
-#undef ANSI_COMMON_LISP
-
 /* binding stack size */
 #undef BDSSIZE
 
@@ -53,9 +50,6 @@
 
 /* frame stack size */
 #undef FRSSIZE
-
-/* use gprof profiling */
-#undef GCL_GPROF
 
 /* No gettimeofday call -- fixme */
 #undef GETTOD_NOT_DECLARED

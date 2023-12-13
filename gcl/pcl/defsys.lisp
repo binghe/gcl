@@ -52,9 +52,12 @@
 
 (in-package :user)
 
-#+kcl (in-package :walker :use '(:lisp))
-#+kcl (in-package :iterate :use '(:lisp :walker))
-#+kcl (in-package :pcl :use '(:walker :iterate :lisp))
+(unless (find-package :walker)
+  (make-package :walker :use '(:lisp)))
+(unless (find-package :iterate)
+  (make-package :iterate :use '(:lisp :walker)))
+(unless (find-package :pcl)
+  (make-package :pcl :use '(:lisp :walker :iterate)))
 
 (eval-when (compile load eval)
 

@@ -1,5 +1,19 @@
 (in-package :si)
 
+(defun in-package-internal (n &aux (p (find-package n)))
+  (or (when p (setq *package* p))
+      (progn
+	(restart-case (error 'package-error :package n)
+	  (store-value (v)
+	    :report (lambda (s) (format s "Supply a new package name"))
+	    :interactive read-evaluated-form
+	    (setq n v)))
+	(in-package-internal n))))
+
+(defmacro in-package (name)
+  `(in-package-internal ',name))
+
+
 ;FIXME called from C
 (defun pprint-insert-conditional-newlines (st)
   (if (>= (string-match #v"[^\n\r ] +" st) 0)

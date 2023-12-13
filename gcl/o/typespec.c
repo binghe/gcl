@@ -347,147 +347,112 @@ DEFUN("TYPE-OF-C",object,siLtype_of_c,SI,1,1,NONE,OO,OO,OO,OO,(object x),"") {
   switch (type_of(x)) {
   case t_fixnum:
     i=fix(x);
-    RETURN1(!i || i==1 ? sLbit : (i>0 ? sSnon_negative_fixnum : sLfixnum));
-    break;
+    return (!i || i==1 ? sLbit : (i>0 ? sSnon_negative_fixnum : sLfixnum));
 
   case t_bignum:
-    x = big_sign(x)<0 ? sLbignum : sSnon_negative_bignum;
-    break;
+    return big_sign(x)<0 ? sLbignum : sSnon_negative_bignum;
     
   case t_ratio:
-    x = sLratio;
-    break;
+    return sLratio;
     
   case t_shortfloat:
-    x = sLshort_float;
-    break;
+    return sLshort_float;
     
   case t_longfloat:
-    x = sLlong_float;
-    break;
+    return sLlong_float;
     
   case t_complex:
-    x = sLcomplex;
-    break;
+    return sLcomplex;
     
   case t_character:
-    if (char_font(x) != 0
-	|| char_bits(x) != 0)
-      x = sLcharacter;
-    else {
+    if (char_font(x) != 0 || char_bits(x) != 0)
+      return sLcharacter;
+    {
       i = char_code(x);
       if ((' ' <= i && i < '\177') || i == '\n')
-	x = sLstandard_char;
-      else
-	x = sLbase_char;
+	return sLstandard_char;
+      return sLbase_char;
     }
-    break;
     
   case t_symbol:
     if (x==Cnil)
-      x = sLnull;
-    else if (x==Ct)
-      x=sLboolean;
-    else if (x->s.s_hpack == keyword_package)
-      x = sLkeyword;
-    else
-      x = sLsymbol;
-    break;
+      return sLnull;
+    if (x==Ct)
+      return sLboolean;
+    if (x->s.s_hpack == keyword_package)
+      return sLkeyword;
+    return sLsymbol;
     
   case t_package:
-    x = sLpackage;
-    break;
+    return sLpackage;
     
   case t_cons:
-    x = sLcons;
-    break;
+    return sLcons;
     
   case t_hashtable:
-    x = sLhash_table;
-    break;
+    return sLhash_table;
     
   case t_array:
-    x = sLarray;
-    break;
+    return sLarray;
     
   case t_simple_vector:
   case t_vector:
-    x = sLvector;
-    break;
+    return sLvector;
     
   case t_simple_string:/*FIXME?*/
   case t_string:
-    x = sLstring;
-    break;
+    return sLstring;
     
   case t_simple_bitvector:
   case t_bitvector:
-    x = sLbit_vector;
-    break;
+    return sLbit_vector;
     
   case t_structure:
-    
-    x = S_DATA(x->str.str_def)->name;
-    break;
+    return S_DATA(x->str.str_def)->name;
     
   case t_stream:
-#ifdef ANSI_COMMON_LISP
     if ((x->sm.sm_mode == smm_input) ||
 	(x->sm.sm_mode == smm_output) ||
 	(x->sm.sm_mode == smm_probe) ||
 	(x->sm.sm_mode == smm_io))
-      x = sLfile_stream;
-    else if ((x->sm.sm_mode == smm_string_input) ||
-	  (x->sm.sm_mode == smm_string_output))
-	x = sLstring_stream;
-    else if (x->sm.sm_mode == smm_synonym || x->sm.sm_mode == smm_file_synonym)
-      x = sLsynonym_stream;
-    else if (x->sm.sm_mode == smm_broadcast)
-      x = sLbroadcast_stream;
-    else if (x->sm.sm_mode == smm_concatenated)
-      x = sLconcatenated_stream;
-    else if (x->sm.sm_mode == smm_two_way)
-      x = sLtwo_way_stream;
-    else if (x->sm.sm_mode == smm_echo)
-      x = sLecho_stream;
-    else 
+      return sLfile_stream;
+    if ((x->sm.sm_mode == smm_string_input) || (x->sm.sm_mode == smm_string_output))
+	return sLstring_stream;
+    if (x->sm.sm_mode == smm_synonym || x->sm.sm_mode == smm_file_synonym)
+      return sLsynonym_stream;
+    if (x->sm.sm_mode == smm_broadcast)
+      return sLbroadcast_stream;
+    if (x->sm.sm_mode == smm_concatenated)
+      return sLconcatenated_stream;
+    if (x->sm.sm_mode == smm_two_way)
+      return sLtwo_way_stream;
+    if (x->sm.sm_mode == smm_echo)
+      return sLecho_stream;
 #ifdef USER_DEFINED_STREAMS
     if (x->sm.sm_mode == (int)smm_user_defined)
-      x= x->sm.sm_object1->str.str_self[8];
-    else
+      return x->sm.sm_object1->str.str_self[8];
 #endif
-#endif
-      x = sLstream;
-    break;
+    return sLstream;
     
   case t_readtable:
-    x = sLreadtable;
-    break;
+    return sLreadtable;
     
   case t_pathname:
     if (x->d.tt)
-      x = sLlogical_pathname;
-    else
-      x = sLpathname;
-    break;
+      return sLlogical_pathname;
+    return sLpathname;
     
   case t_random:
-    x = sLrandom_state;
-    break;
+    return sLrandom_state;
     
   case t_function:	
-  /* case t_cfun: */
-    x = sLcompiled_function;
-    break;
-    
-  /* case t_ifun: */
-  /*   x=siLinterpreted_function; */
-  /*   break; */
+    return sLcompiled_function;
     
   default:
     error("not a lisp data object");
   }
-  RETURN1(x);
+  return Cnil;
+
 }
 
 DEF_ORDINARY("IN-CALL",sSin_call,SI,"");
@@ -653,59 +618,6 @@ DEF_ORDINARY("STORAGE-CONDITION",sLstorage_condition,LISP,"");
 DEF_ORDINARY("WARNING",sLwarning,LISP,"");
 DEF_ORDINARY("SIMPLE-WARNING",sLsimple_warning,LISP,"");
 DEF_ORDINARY("STYLE-WARNING",sLstyle_warning,LISP,"");
-#ifdef ANSI_COMMON_LISP
-/* New ansi types */
-DEF_ORDINARY("METHOD-COMBINATION",sLmethod_combination,LISP,"");
-/* DEF_ORDINARY("ARITHMETIC-ERROR",sLarithmetic_error,LISP,""); */
-DEF_ORDINARY("BASE-STRING",sLbase_string,LISP,"");
-DEF_ORDINARY("BROADCAST-STREAM",sLbroadcast_stream,LISP,"");
-DEF_ORDINARY("BUILT-IN-CLASS",sLbuilt_in_class,LISP,"");
-/* DEF_ORDINARY("CELL-ERROR",sLcell_error,LISP,""); */
-DEF_ORDINARY("CLASS",sLclass,LISP,"");
-DEF_ORDINARY("CONCATENATED-STREAM",sLconcatenated_stream,LISP,"");
-/* DEF_ORDINARY("CONDITION",sLcondition,LISP,""); */
-/* DEF_ORDINARY("SERIOUS-CONDITION",sLserious_condition,LISP,""); */
-/* DEF_ORDINARY("SIMPLE-CONDITION",sLsimple_condition,LISP,""); */
-/* DEF_ORDINARY("DIVISION-BY-ZERO",sLdivision_by_zero,LISP,""); */
-DEF_ORDINARY("ECHO-STREAM",sLecho_stream,LISP,"");
-/* DEF_ORDINARY("END-OF-FILE",sLend_of_file,LISP,""); */
-/* DEF_ORDINARY("CONTROL-ERROR",sLcontrol_error,LISP,""); */
-DEF_ORDINARY("EXTENDED-CHAR",sLextended_char,LISP,"");
-/* DEF_ORDINARY("FILE-ERROR",sLfile_error,LISP,""); */
-/* DEF_ORDINARY("FLOATING-POINT-INEXACT",sLfloating_point_inexact,LISP,""); */
-/* DEF_ORDINARY("FLOATING-POINT-INVALID-OPERATION",sLfloating_point_invalid_operation,LISP,""); */
-/* DEF_ORDINARY("FLOATING-POINT-OVERFLOW",sLfloating_point_overflow,LISP,""); */
-/* DEF_ORDINARY("FLOATING-POINT-UNDERFLOW",sLfloating_point_underflow,LISP,""); */
-DEF_ORDINARY("GENERIC-FUNCTION",sLgeneric_function,LISP,"");
-DEF_ORDINARY("LOGICAL-PATHNAME",sLlogical_pathname,LISP,"");
-DEF_ORDINARY("METHOD",sLmethod,LISP,"");
-/* FIXME -- need this for types in predlib.lsp, why can't we use the keyword sKpackage_error ? */
-/* DEF_ORDINARY("PACKAGE-ERROR",sLpackage_error,LISP,""); */
-/* DEF_ORDINARY("PARSE-ERROR",sLparse_error,LISP,""); */
-/* DEF_ORDINARY("PRINT-NOT-READABLE",sLprint_not_readable,LISP,""); */
-/* DEF_ORDINARY("PROGRAM-ERROR",sLprogram_error,LISP,""); */
-/* DEF_ORDINARY("READER-ERROR",sLreader_error,LISP,""); */
-DEF_ORDINARY("SIMPLE-BASE-STRING",sLsimple_base_string,LISP,"");
-/* DEF_ORDINARY("SIMPLE-TYPE-ERROR",sLsimple_type_error,LISP,""); */
-/* DEF_ORDINARY("SIMPLE-WARNING",sLsimple_warning,LISP,""); */
-DEF_ORDINARY("STANDARD-CLASS",sLstandard_class,LISP,"");
-DEF_ORDINARY("STANDARD-GENERIC-FUNCTION",sLstandard_generic_function,LISP,"");
-DEF_ORDINARY("STANDARD-METHOD",sLstandard_method,LISP,"");
-DEF_ORDINARY("STANDARD-OBJECT",sLstandard_object,LISP,"");
-/* DEF_ORDINARY("STORAGE-CONDITION",sLstorage_condition,LISP,""); */
-/* DEF_ORDINARY("STREAM-ERROR",sLstream_error,LISP,""); */
-DEF_ORDINARY("STRING-STREAM",sLstring_stream,LISP,"");
-DEF_ORDINARY("STRUCTURE-CLASS",sLstructure_class,LISP,"");
-DEF_ORDINARY("STRUCTURE-OBJECT",sLstructure_object,LISP,"");
-/* DEF_ORDINARY("STYLE-WARNING",sLstyle_warning,LISP,""); */
-DEF_ORDINARY("SYNONYM-STREAM",sLsynonym_stream,LISP,"");
-DEF_ORDINARY("TWO-WAY-STREAM",sLtwo_way_stream,LISP,"");
-/* DEF_ORDINARY("UNBOUND-SLOT",sLunbound_slot,LISP,""); */
-/* DEF_ORDINARY("UNBOUND-VARIABLE",sLunbound_variable,LISP,""); */
-/* DEF_ORDINARY("UNDEFINED-FUNCTION",sLundefined_function,LISP,""); */
-/* DEF_ORDINARY("WARNING",sLwarning,LISP,""); */
-DEF_ORDINARY("DYNAMIC-EXTENT",sLdynamic_extent,LISP,"");
-#endif
 
 DEFCONST("CHAR-LENGTH",   sSchar_length,   SI,small_fixnum(CHAR_SIZE),
 	 "Size in bits of a character");

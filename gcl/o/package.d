@@ -209,15 +209,8 @@ int isize,esize;
  BEGIN:
 	x = find_package(n);
 	if (x == Cnil) {
-#ifdef ANSI_COMMON_LISP
-	  PACKAGE_CERROR(n,"Input new package","No such package",0);
-	  NEW_INPUT(n);
-	  goto BEGIN;
-	  return Cnil;
-#else
 	  x = make_package(n, ns, ul,isize,esize);
 	  goto L;
-#endif
 	}
 	if (isize) rehash_pack(&(x->p.p_internal),
 		&x->p.p_internal_size,isize);
@@ -236,9 +229,7 @@ int isize,esize;
 	}
 	for (;  !endp(ul);  ul = ul->c.c_cdr)
 		use_package(ul->c.c_car, x);
-#ifndef ANSI_COMMON_LISP
 L:
-#endif
 	sLApackageA->s.s_dbind = x;
 	vs_reset;
 	return(x);
@@ -850,23 +841,6 @@ DEFUN("IN-PACKAGE-INTERNAL",object,fSin_package_internal,SI,2,2,NONE,OO,OO,OO,OO
 
 }
 
-#ifdef ANSI_COMMON_LISP
-
-static void
-FFN(Fin_package)(void) {
-
-  object x;
-
-  check_arg_range(vs_top-vs_base,2,2);
-  x=MMcadr(vs_base[0]);
-  x=type_of(x)==t_symbol ? list(2,sLquote,x) : x;
-  vs_base[0]=list(3,sSin_package_internal,x,list(2,sLquote,MMcddr(vs_base[0])));
-  vs_top=vs_base+1;
-
-}
-
-#endif
-
 DEFUN("FIND-PACKAGE",object,fLfind_package,LISP,1,1,NONE,OO,OO,OO,OO,(object x),"") {
   RETURN1(find_package(x));/*FIXME p->p_link not exposable in lisp*/
 }
@@ -1286,12 +1260,8 @@ void
 gcl_init_package_function()
 {
 	make_si_function("DELETE-PACKAGE-INTERNAL", Ldelete_package_internal);
-#ifdef ANSI_COMMON_LISP
 	make_si_function("KCL-IN-PACKAGE", Lin_package);
-	make_macro_function("IN-PACKAGE", Fin_package);
-#else
 	make_function("IN-PACKAGE", Lin_package);
-#endif
 /* 	make_function("FIND-PACKAGE", Lfind_package); */
 	make_function("PACKAGE-NAME", Lpackage_name);
 	make_function("PACKAGE-NICKNAMES", Lpackage_nicknames);

@@ -13,7 +13,7 @@
 ;;; existing condition systems is beyond the goal of this implementation attempt.
 
 (make-package :conditions :use '(:lisp))
-(in-package :conditions :use '(:lisp))
+(in-package :conditions)
 
 (import '(si::*handler-clusters* si::unique-id si::condition-class-p si::make-condition))
 

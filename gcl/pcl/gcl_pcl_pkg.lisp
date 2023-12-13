@@ -198,7 +198,7 @@
 	  %instance-ref
 	  %set-instance-ref))
 #+kcl
-(in-package 'pcl)
+(in-package :pcl)
 
 #+cmu (shadow 'lisp:dotimes)
 

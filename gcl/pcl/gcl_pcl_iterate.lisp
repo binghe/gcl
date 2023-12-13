@@ -26,7 +26,7 @@
 ;;; 
 ;;; Original source {pooh/n}<pooh>vanmelle>lisp>iterate;4 created 27-Sep-88 12:35:33
 
-(in-package :iterate :use '(:lisp :walker))
+(in-package :iterate)
    
 
 (export '(iterate iterate* gathering gather with-gathering interval elements 

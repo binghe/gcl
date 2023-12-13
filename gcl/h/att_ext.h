@@ -595,20 +595,9 @@ EXTER object sLseqind,sLrnkind;
 EXTER object sLcomplex;
 EXTER object sLsingle_float,sLpackage,sLbignum,sLrandom_state,sLdouble_float,sLstream,sLbit,sLreadtable;
 EXTER object sLlong_float,sLhash_table,sLstructure,sLboolean,sLfile_stream,sLinput_stream,sLoutput_stream,sLtype_error;
+EXTER object sLbroadcast_stream,sLconcatenated_stream,sLecho_stream,sLfile_stream,sLstring_stream;
+EXTER object sLsynonym_stream,sLtwo_way_stream;
 
-#ifdef ANSI_COMMON_LISP
-/* new ansi types */
-EXTER object sLarithmetic_error,sLbase_char,sLbase_string,sLbroadcast_stream,sLbuilt_in_class;
-EXTER object sLcell_error,sLclass,sLconcatenated_stream,sLcondition,sLcontrol_error;
-EXTER object sLecho_stream,sLend_of_file,sLerror,sLextended_char,sLfile_error,sLfile_stream;
-EXTER object sLgeneric_function,sLlogical_pathname,sLmethod,sLpackage_error;
-EXTER object sLparse_error,sLprint_not_readable,sLprogram_error,sLreader_error,sLserious_condition;
-EXTER object sLsimple_base_string,sLsimple_condition,sLsimple_type_error,sLsimple_warning,sLstandard_class;
-EXTER object sLstandard_generic_function,sLstandard_method,sLstandard_object,sLstorage_condition;
-EXTER object sLstream_error,sLstring_stream,sLstructure_class,sLstyle_warning,sLsynonym_stream;
-EXTER object sLtwo_way_stream,sLunbound_slot,sLunbound_variable,sLundefined_function,sLwarning;
-EXTER object sLmethod_combination,sLstructure_object,sLdynamic_extent;
-#endif
 
 EXTER object sLsatisfies;
 EXTER object sLmember;
