@@ -127,11 +127,11 @@
                    (*tags* (cons 'lb *tags*))
                    (*funs* (cons 'lb *funs*))
                    (*vars* (cons 'lb *vars*)))
-                  (c1arg (car args))))
+                  (c1expr (car args))))
   (or-ccb-assignments (list form))
   (add-info info (cadr form))
   (setf (info-type info) (info-type (cadr form)))
-  (setq args (c1progn (cdr args)))
+  (setq args (c1arg (cons 'progn (cdr args))))
   (add-info info (cadr args))
   (list 'unwind-protect info form args))
 
