@@ -47,7 +47,10 @@
 (defcomp (<  <2))
 (defcomp (<= <=2))
 (defcomp (=  =2))
-(defcomp (/= /=2))
+(defun /= (n1 &rest r)
+  (declare (optimize (safety 1))(dynamic-extent r))
+  (check-type n1 number)
+  (if r (unless (member n1 r :test '=) (apply '/= r)) t))
 (defcomp (>= >=2))
 (defcomp (>  >2))
 
