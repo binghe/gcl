@@ -2216,15 +2216,19 @@
   (if *safe-compile*
       (wt-nl "vs_reserve(VM" *reservation-cmacro* ");")
       (wt-nl "vs_check;"))
-  (let ((cm *reservation-cmacro*))
-    (if (zerop *max-vs*)
-	(wt-h "#define VMR" cm "(VMT" cm ") return(VMT" cm ");")
-      (wt-h "#define VMR" cm "(VMT" cm ") vs_top=base ; return(VMT" cm ");")))
+  (let* ((cm *reservation-cmacro*)
+	 (vstu (if *mv-var*
+		   (let ((loc (write-to-string (var-loc *mv-var*))))
+		     (concatenate
+		      'string
+		      " if ((b_)>=-1) vs_top=V" loc " ? (object *)V" loc "+(b_) : base;"))
+		   " vs_top=base;")))
+    (wt-h "#define VMRV" cm "(a_,b_)" vstu " return(a_);")
+    (wt-h "#define VMR" cm "(a_) VMRV" cm "(a_,0);"))
   (wt-nl) (reset-top)
   (c2expr form)
   (push (cons *reservation-cmacro* *max-vs*) *reservations*)
-  (wt-nl "}}")
-  )
+  (wt-nl "}}"))
 
 (defun c2expr-top* (form top)
   (let* ((*exit* (next-label))
