@@ -187,7 +187,7 @@
     `(let ((,stream (open ,@filespec)))
        ,@decls
        ,@ctps
-       (multiple-value-prog1 (progn ,@body)
+       (unwind-protect (progn ,@body)
 	 (when ,stream (close ,stream))))))
 
 (defun y-or-n-p (&optional string &rest args)
