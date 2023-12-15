@@ -65,6 +65,7 @@ endif
 #endif
 
 VERS=$(shell echo $$(cat majvers).$$(cat minvers))
+EXT=$(shell echo $(VERS) | sed 's,\([0-9]\)\.\([0-9]\)\..*,\1\2,')
 #EXT:=cvs
 
 CFG:=$(addsuffix /config.,.)# gmp4/configfsf.
@@ -135,6 +136,42 @@ build-%-stamp: configure-%-stamp
 
 	touch $@
 
+configure-stamp: $(CFGS)
+
+	dh_testdir
+
+#	! [ -e unixport/saved_pre_gcl ] || $(MAKE) clean
+
+#	chmod -R +x gmp4/*
+
+	eval `dpkg-buildflags --export=sh` && CC=$(MCC) ./configure \
+		--host=$$(dpkg-architecture -qDEB_HOST_GNU_TYPE) \
+		--disable-statsysbfd \
+		--disable-custreloc \
+		--disable-dlopen \
+		--disable-prelink \
+		--disable-pargcl \
+		--enable-$(RELOC) \
+		$(GMP) \
+		$(DEBUG) \
+		$(ARCHCONF) \
+		--prefix=/usr \
+		--mandir=\$${prefix}/share/man \
+		--enable-infodir=\$${prefix}/share/info \
+		--enable-emacsdir=\$${prefix}/share/emacs/site-lisp
+
+	touch $@
+
+
+build-stamp: configure-stamp
+	dh_testdir
+
+	rm -rf debian/tmp1
+	mkdir -p debian/tmp1
+	$(MAKE) install DESTDIR=$$(pwd)/debian/tmp1
+
+	touch $@
+
 bclean-stamp:
 	$(MAKE) clean
 	touch $@
@@ -145,7 +182,7 @@ ansi-tests/test_results: build-ansi-stamp
 build: build-arch build-indep
 build-arch: build-stamp
 build-indep: build-stamp
-build-stamp: build-gprof-stamp build-ansi-gprof-stamp build-trad-stamp build-ansi-stamp ansi-tests/test_results
+#build-stamp: build-gprof-stamp build-ansi-gprof-stamp build-trad-stamp build-ansi-stamp ansi-tests/test_results
 	touch $@
 
 debian/control.rm:
@@ -167,7 +204,7 @@ clean: debian/control debian/gcl.templates
 	rm -rf *stamp
 	for i in $(CFGS) ; do ! [ -e $$i ] || mv $$i $${i%.ori} ; done
 
-INS:=$(shell for i in debian/in.* ; do echo $$i | sed 's,in.,,1' ; done |sed "s,gcl,gcl$(EXT),g")
+INS:=$(shell for i in debian/in.* ; do echo $$i | sed 's,in.,,1' ; done |sed "s,\([^x]gcl\),\1$(EXT),g")
 
 $(INS): debian/gcl$(EXT)% : debian/in.gcl%
 	cat $< | sed 's,@EXT@,$(EXT),g' >$@
@@ -180,11 +217,13 @@ install-stamp: build-stamp debian/control $(INS)
 	dh_prep
 	dh_installdirs
 
-	mkdir -p debian/tmp
-	cp -a debian/ansi/* debian/tmp/
-	cp -a debian/trad/* debian/tmp/
-	cp -a debian/gprof/* debian/tmp/
-	cp -a debian/ansi-gprof/* debian/tmp/
+#	mkdir -p debian/tmp
+	cp -a debian/tmp1 debian/tmp
+
+#	cp -a debian/ansi/* debian/tmp/
+#	cp -a debian/trad/* debian/tmp/
+#	cp -a debian/gprof/* debian/tmp/
+#	cp -a debian/ansi-gprof/* debian/tmp/
 
 	mv debian/tmp/usr/share/emacs/site-lisp debian/tmp/usr/share/emacs/foo
 	mkdir -p debian/tmp/usr/share/emacs/site-lisp
@@ -213,8 +252,7 @@ install-stamp: build-stamp debian/control $(INS)
 		mv debian/tmp/usr/share/doc/gcl-doc debian/tmp/usr/share/doc/gcl$(EXT)-doc 
 
 	[ "$(EXT)" = "" ] || \
-		(cat debian/tmp/usr/share/man/man1/gcl.1 |sed -e 's, gcl , gcl$(EXT) ,g' 's, GCL , GCL$(EXT) ,g' >debian/foo && \
-			mv debian/foo debian/tmp/usr/share/man/man1/gcl$(EXT).1)
+		(mv debian/tmp/usr/share/man/man1/gcl.1 debian/foo && cat debian/foo |sed -e 's, gcl , gcl$(EXT) ,g' -e 's, GCL , GCL$(EXT) ,g' >debian/tmp/usr/share/man/man1/gcl$(EXT).1)
 
 	# cat debian/tmp/usr/lib/gcl-$(VERS)/gcl-tk/demos/index.lsp | \
 	# 	sed "s,$$(pwd)/debian/tmp,,1" >debian/foo

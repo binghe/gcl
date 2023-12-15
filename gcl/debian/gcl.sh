@@ -7,16 +7,20 @@ VERS=@VERS@
 if ! set | grep -q -w GCL_ANSI ; then GCL_ANSI=$DEFAULT_GCL_ANSI ; fi
 if ! set | grep -q -w GCL_PROF ; then GCL_PROF=$DEFAULT_GCL_PROF ; fi
 
-if [ "$GCL_PROF" = "" ] ; then 
-    DIR=/usr/lib/gcl-$VERS ; 
-else
-    DIR=/usr/lib/gcl-$VERS-prof ; 
-fi
+DIR=/usr/lib/gcl-$VERS;
 
 if [ "$GCL_ANSI" = "" ] ; then 
-    EXE=saved_gcl;
+    if [ "$GCL_PROF" = "" ] ; then
+	EXE=saved_gcl;
+    else
+	EXE=saved_gcl_gprof;
+    fi
 else
-    EXE=saved_ansi_gcl;
+    if [ "$GCL_PROF" = "" ] ; then
+	EXE=saved_ansi_gcl;
+    else
+	EXE=saved_ansi_gcl_gprof;
+    fi
 fi
 SYS=$DIR/unixport
 
