@@ -38,4 +38,5 @@ clean:
 install: docs
 	-mkdir -p $(DESTDIR)$(INFO_DIR)../doc
 	-cp -r dwdoc $(DESTDIR)$(INFO_DIR)../doc
-	-cp *tex *.pdf $(DESTDIR)$(INFO_DIR)../doc
+	-cp *tex $(DESTDIR)$(INFO_DIR)../doc
+	find -name "*.pdf" -exec cp {} $(DESTDIR)$(INFO_DIR)../doc \;
