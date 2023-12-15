@@ -70,13 +70,9 @@ $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 libboot.so: ../o/boot.o
 	$(CC) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
 
-saved_%:raw_% $(RSYM) init_raw.lsp.in raw_%_map \
-		$(CMPDIR)/gcl_cmpmain.lsp \
-		$(CMPDIR)/gcl_lfun_list.lsp \
-		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
-		$(LSPDIR)/gcl_auto_new.lsp
+init_raw.lsp: init_raw.lsp.in
 
-	cat init_raw.lsp.in | sed \
+	cat $< | sed \
 		-e "s#@LI-VERS@#(`cat ../majvers`.`cat ../minvers`) `cat ../release`#1" \
 		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
 		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
@@ -88,7 +84,16 @@ saved_%:raw_% $(RSYM) init_raw.lsp.in raw_%_map \
 		-e "s#@LI-LD-LIBS@#\" $(LD_LIBS_POST)\"#1" \
 		-e "s#@LI-OPT-THREE@#\"$(O3FLAGS)\"#1" \
 		-e "s#@LI-OPT-TWO@#\"$(O2FLAGS)\"#1" \
-		-e "s#@LI-INIT-LSP@#\"$@\"#1" >foo
+		-e "s#@LI-INIT-LSP@#\"$@\"#1" >$@
+
+
+saved_%:raw_% $(RSYM) init_raw.lsp raw_%_map \
+		$(CMPDIR)/gcl_cmpmain.lsp \
+		$(CMPDIR)/gcl_lfun_list.lsp \
+		$(CMPDIR)/gcl_cmpopt.lsp $(HDIR)/cmpinclude.h \
+		$(LSPDIR)/gcl_auto_new.lsp
+
+	cp init_raw.lsp foo
 
 	echo "(unless si::*quit-tags* (in-package \"USER\")(system:save-system \"$@\"))" >>foo
 	ar x lib$*.a $$(ar t lib$*.a |grep ^gcl_)
