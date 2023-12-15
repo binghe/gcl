@@ -778,6 +778,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 		    (format st "};~%~%")
 		    
 		    (format st "static int user_init_run;~%")
+		    (format st "extern void gcl_init_or_load1 (void (*fn) (void), const char *file);~%")
 		    (format st "#define my_load(a_,b_) {if (!user_init_run && (a_) && (b_)) gcl_init_or_load1((a_),(b_));(a_)=0;(b_)=0;}~%~%")
                     
 		    (format st "object user_init(void) {~%")
@@ -798,7 +799,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 		    (format st "int user_match(const char *s,int n) {~%")
 		    (format st "  Fnlst *f;~%")
 		    (format st "  for (f=my_fnlst;f<my_fnlst+NF;f++){~%")
-		    (format st "     if (f->s && !strncmp(s,f->s,n)) {~%")
+		    (format st "     if (f->s && !my_strncmp(s,f->s,n)) {~%")
 		    (format st "        my_load(f->fn,f->s);~%")
 		    (format st "        return 1;~%")
 		    (format st "     }~%")
@@ -843,8 +844,8 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 				(setq sfiles (concatenate 'string sfiles " " (namestring tem)))))
 			  sfiles) 
 			si::*system-directory*
-			#+gnu-ld (format nil "-Wl,-Map ~a" (namestring map)) #-gnu-ld ""
-			(let* ((par (namestring (make-pathname :directory '(:parent))))
+			#+gnu-ld (format nil "-rdynamic -Wl,-Map ~a" (namestring map)) #-gnu-ld ""
+			(let* ((par (namestring (make-pathname :directory '(:relative :up))))
 			       (i (concatenate 'string " " par))
 			       (j (concatenate 'string " " si::*system-directory* par)))
 			  (mysub *ld-libs* i j))
