@@ -235,7 +235,7 @@ install-stamp: build-stamp debian/control $(INS)
 	[ "$(EXT)" = "" ] || rm debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/gcl.el
 
 	cat debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/dbl.el |\
-		sed "s,(provide 'dbl),(provide 'dbl$(EXT)),1" >tmp &&\
+		sed -e "s,(provide 'dbl),(provide 'dbl$(EXT)),1" -e "s,(require 'gcl),(require 'gcl$(EXT)),1" >tmp &&\
 		mv tmp debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/dbl$(EXT).el
 	[ "$(EXT)" = "" ] || rm debian/tmp/usr/share/emacs/site-lisp/gcl$(EXT)/dbl.el
 
