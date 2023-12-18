@@ -707,7 +707,8 @@
 			       (unless named (error "The structure should be named."))
 			       `(and (typep x '(vector t))
 				     (> (length x) ,name-offset)
-				     (eq (aref x ,name-offset) ',name))))))))
+				     (eq (aref x ,name-offset) ',name))))))
+	       (si::putprop ',predicate t 'compiler::cmp-inline)))
 	 ',name))))
 
 ;; First several fields of this must coincide with the C structure
