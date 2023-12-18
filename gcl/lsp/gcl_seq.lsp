@@ -24,24 +24,75 @@
 
 (in-package :si)
 
-(defun or-sequence-tp (tp &aux (l (load-time-value `(list ,@(mapcar (lambda (x) `(vector ,x)) +array-types+) vector))))
-  (let ((x (remove-duplicates (mapcar (lambda (x) (car (member x l :test 'subtypep))) (cdr tp)))))
-    (unless (cdr x) (car x))))
+#.`(defun make-sequence-element-type (x &aux (x (cmp-norm-tp x)))
+     (or
+      (cdr (assoc x
+		 ',(mapcar (lambda (x) (cons (cmp-norm-tp (car x)) (cdr x)))
+			   `((null . null) (cons . cons) (list . list) ,@(mapcar (lambda (x) `((vector ,x) . ,x)) +array-types+)))
+		 :test 'type<=))
+      (equal #tvector (if (listp x) (car x) x))))
+(setf (get 'make-sequence-element-type 'type-propagator) 'compiler::expand-type-propagator)
 
-(defun make-sequence (type size &key initial-element &aux (atp (listp type)))
-  (declare (optimize (safety 1)))
-  (flet ((chk (res) (unless (typep res type) (error 'type-error :datum res :expected-type type)) res))
-	(case (if atp (car type) type)
-	      (or (chk (make-sequence (or-sequence-tp type) size :initial-element initial-element)))
-	      ((list cons member) (chk (make-list size :initial-element initial-element)))
-	      ((vector array simple-array non-simple-array)
-	       (chk (make-vector
-		     (upgraded-array-element-type (or (when atp (cadr type)) t))
-		     size (eq 'non-simple-array (if atp (car type) type))
-		     nil nil 0 nil initial-element)))
-	      (otherwise (let ((ntype (expand-deftype type)))
-			   (if ntype (make-sequence ntype size :initial-element initial-element)
-			     (check-type type (member list vector))))))))
+(defun ntp-cons-lengths (x)
+  (labels ((g (x) (if (integerp x) (1+ x) x))
+	   (f (x) (mapcan (lambda (x)
+			    (cond ((eq x t) (list '*))
+				  ((cadr x) (mapcar #'g (ntp-cons-lengths (cadr x))))
+				  ((list (length (caddr x))))))
+			  x)))
+    (let ((y (nconc (f (cdr (assoc 'proper-cons (car x)))) (f (cdr (assoc 'improper-cons (car x)))))))
+      (if (assoc-if-not (lambda (x) (or (eq x 'proper-cons) (eq x 'improper-cons))) (car x))
+	  (cons 0 y) y))))
+
+(defun cons-tp-lengths (tp &aux (tp (type-and #tcons tp)))
+  (when (consp tp)
+    (let ((x (lremove-duplicates (ntp-cons-lengths (caddr tp)))))
+      (unless (member '* x)
+	x))))
+
+(defun ntp-vector-lengths (x)
+  (labels ((f (x) (mapcan (lambda (x)
+			    (cond ((eq x t) (list '*))
+				  ((and (consp x) (not (eq 'rank (car x)))) (list (car x)))
+				  ((arrayp x) (list (array-dimension x 0)))))
+			  x)))
+    (lreduce (lambda (y x)
+	       (when (rassoc (car x) *all-array-types*)
+		 (nunion (f (cdr x)) y)))
+	     (car x) :initial-value nil)))
+
+(defun vector-tp-lengths (tp &aux (tp (type-and #tvector tp)))
+  (when (consp tp)
+    (let ((x (lremove-duplicates (ntp-vector-lengths (caddr tp)))))
+      (unless (member '* x)
+	x))))
+
+(defun sequence-tp-lengths (type &aux (tp (cmp-norm-tp type)))
+  (if (type<= tp #tlist)
+      (cons-tp-lengths tp)
+      (vector-tp-lengths tp)))
+(setf (get 'sequence-tp-lengths 'type-propagator) 'compiler::expand-type-propagator)
+					;type-lengths
+
+
+(defun sequence-tp-nonsimple-p (type)
+  (type<= (cmp-norm-tp type) #tnon-simple-array))
+(setf (get 'sequence-tp-nonsimple-p 'type-propagator) 'compiler::expand-type-propagator)
+
+#.`(defun make-sequence (type size &key initial-element
+			 &aux (st (make-sequence-element-type type))
+			   (lns (sequence-tp-lengths type)))
+     (declare (optimize (safety 1)))
+     (check-type st (not null))
+     (check-type size seqbnd)
+     (when lns
+       (assert (member size lns) (size) 'type-error :datum size :expected-type (cons 'member lns)))
+     (ecase st
+       (null (check-type size (integer 0 0)) nil)
+       ((cons list) (when (eq st 'cons) (check-type size (integer 1))) (make-list size :initial-element initial-element))
+       (,+array-types+
+	(make-vector st size (sequence-tp-nonsimple-p type) nil nil 0 nil initial-element))))
+
 
 (defun concatenate (rt &rest seqs)
   (declare (optimize (safety 1)) (dynamic-extent seqs))
