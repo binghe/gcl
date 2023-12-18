@@ -51,14 +51,14 @@
 	x))))
 
 (defun ntp-vector-lengths (x)
-  (labels ((f (x) (mapcan (lambda (x)
+  (labels ((fx (x) (mapcan (lambda (x)
 			    (cond ((eq x t) (list '*))
 				  ((and (consp x) (not (eq 'rank (car x)))) (list (car x)))
 				  ((arrayp x) (list (array-dimension x 0)))))
 			  x)))
     (lreduce (lambda (y x)
 	       (when (rassoc (car x) *all-array-types*)
-		 (nunion (f (cdr x)) y)))
+		 (nunion (fx (cdr x)) y)))
 	     (car x) :initial-value nil)))
 
 (defun vector-tp-lengths (tp &aux (tp (type-and #tvector tp)))
