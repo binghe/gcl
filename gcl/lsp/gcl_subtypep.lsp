@@ -580,6 +580,17 @@
 				,(if uy (car ly) (car (nreconstruct-type oy)))))
 		 d t)))))
 
+(defun ntp-and?c2-nil-p (x y ?c2)
+  (let* ((x (if (caddr x) (caar x) x))(y (if (caddr y) (if ?c2 (cadar y) (caar y)) y))
+	 (lx (pop x))(ly (pop y))(dx (pop x))(dy (pop y))(dy (if ?c2 (not dy) dy))(i 0)(d (and dx dy))
+	 (lk (or (car x) +k-len+)))
+    (not
+     (or (when dx (member-if-not (lambda (x) (or (eq (cadr x) ?c2) (assoc (car x) lx))) ly))
+	 (member-if (lambda (x &aux (y (assoc (car x) ly)))
+		      (cadr (cond (y (k-op 'and x (if ?c2 (k-op 'not y nil d) y) d));FIXME remove last consing from this
+				  (dy (incf i) x))))
+		    lx)
+	 (when d (not (eql lk (+ i (length ly)))))))))
 
 (defun ntp-and (&rest xy)
   (when xy
