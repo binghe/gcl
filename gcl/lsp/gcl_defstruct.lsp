@@ -699,7 +699,7 @@
 		 (declare (optimize (safety 2)))
 		 (the boolean 
 		      ,(ecase tp
-			      ((nil) `(structure-subtype-p x ',name))
+			      ((nil) `(typecase x (,name t)));`(structure-subtype-p x ',name)
 			      (list
 			       (unless named (error "The structure should be named."))
 			       `(let ((x (when (listp x) (nthcdr ,name-offset x)))) (when x (eq (car x) ',name))))
