@@ -166,7 +166,7 @@
 		     (car (last (broadcast-stream-streams ostream)))
 		   ostream)))
     (cond ((not ostream) 1)
-	  ((subtypep1 (stream-element-type ostream) 'character)
+	  ((subtypep (stream-element-type ostream) 'character)
 	   (length (let ((*print-escape* nil)) (write-to-string object)))))))
 
 (defmacro with-temp-file ((s pn) (tmp ext) &rest body) 
@@ -345,8 +345,8 @@
 
 (defun restrict-stream-element-type (tp)
   (cond ((member tp '(unsigned-byte signed-byte)) tp)
-	((or (member tp '(character :default)) (si::subtypep1 tp 'character)) 'character)
-	((si::subtypep1 tp 'integer) 
+	((or (member tp '(character :default)) (subtypep tp 'character)) 'character)
+	((subtypep tp 'integer)
 	 (let* ((ntp (tp-bnds (cmp-norm-tp tp)))
 		(min (car ntp))(max (cdr ntp))
 		(s (if (or (eq min '*) (< min 0)) 'signed-byte 'unsigned-byte))

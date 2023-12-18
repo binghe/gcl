@@ -43,7 +43,6 @@
 	  proper-sequence proper-sequencep proper-cons proper-consp
 	  fcomplex dcomplex
 	  cnum-type spice
-	  subtypep1 ;FIXME
 	  resolve-type
 	  ldiff-nf))
 
@@ -316,13 +315,6 @@
 	  (rl l)))
 
 
-
-
-
-
-(defvar *tp-mod* 0)
-(eval-when (compile) (proclaim '(type (integer -1 1) *tp-mod*)));FIXME
-
 ;EARLY
 (defun rational (x);FIXME different file -- bootstrap
   (declare (optimize (safety 1)))
@@ -416,12 +408,6 @@
 (defun get-included (name)
   (cons name (mapcan 'get-included (sdata-included (get name 's-data)))))
 
-(defun subtypep1 (t1 t2)
-  (or (not t1) (eq t2 t)
-    (let* ((rt (resolve-type `(and ,t1 ,(negate t2))))
-	   (mt (when (cadr rt) (resolve-type `(and (type-max ,t1) ,(negate `(type-min ,t2))))))
-	   (rt (when (or (not (cadr rt)) (car mt)) rt)))
-      (not (car rt)))))
     
 ;; set by unixport/init_kcl.lsp
 ;; warn if a file was comopiled in another version

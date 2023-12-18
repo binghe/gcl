@@ -143,9 +143,9 @@
   (dotimes (i +btp-length+ (unless (equal x m) z))
     (unless (zerop (sbit k i))
       (let ((a (aref *btpa* i)))
-	(cond ((unless (eql d  1) (eq +tp-nil+ (ntp-and (cadr a)  z)))
+	(cond ((unless (eql d  1) (ntp-and?c2-nil-p (cadr a)  z nil))
 	       (setf (sbit x i) 0))
-	      ((unless (eql d -1) (eq +tp-nil+ (ntp-and (cadr a) nz)))
+	      ((unless (eql d -1) (ntp-and?c2-nil-p (cadr a) nz nil))
 	       (setf (sbit m i) 1)))))))
 
 (let ((p1 (make-btp))(p2 (make-btp)))
@@ -506,7 +506,7 @@
 	  ((or (not t2) (eq t1 t)) nil)
 	  ((equal *nil-tp* (btp-andc2 (xtp t1) (mtp t2) p1)))
 	  ((equal *nil-tp* (btp-andc2 p1 (btp-andc2 (xtp t2) (mtp t1) p2) p1))
-	   (eq +tp-nil+ (ntp-and (caddr t1) (ntp-not (caddr t2))))))))
+	   (ntp-subtp (caddr t1) (caddr t2))))))
 
 (defun tp>= (t1 t2) (tp<= t2 t1))
 

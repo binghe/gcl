@@ -557,8 +557,7 @@
 	     (lreduce (lambda (ll l) (?cns (unless (assoc (car l) lx) l) ll))
 		      ly :initial-value nil))))
 
-(defun ntp-subtp (x y)
-  (eq +tp-nil+ (ntp-and x (ntp-not y))))
+(defun ntp-subtp (x y) (ntp-and?c2-nil-p x y t))
 
 (defun ntp-and-unknown (ox lx ux oy ly uy d)
   (let* ((xx (if ux (pop lx) ox))(xy (if uy (pop ly) oy))(x (ntp-and xx xy))
@@ -651,8 +650,6 @@
 
 (defun nprocess-type (type)
   (case (car type)
-    (type-min (let ((*tp-mod* -1)) (nprocess-type (cadr type))))
-    (type-max (let ((*tp-mod*  1)) (nprocess-type (cadr type))))
     (and (lreduce 'ntp-and (mapcar 'nprocess-type (cdr type))))
     (or (lreduce  'ntp-or  (mapcar 'nprocess-type (cdr type))))
     (not (ntp-not (nprocess-type (cadr type))))
@@ -679,14 +676,14 @@
   (nreconstruct-type (nprocess-type (normalize-type type))))
 
 (defun subtypep (t1 t2 &optional env)
-  (declare (ignore env) (optimize (safety 2)))
+  (declare (ignore env) (optimize (safety 1)))
   (check-type t1 full-type-spec)
   (check-type t2 full-type-spec)
   (if (or (not t1) (eq t2 t))
       (values t t)
-    (let* ((rt (resolve-type `(and ,t1 ,(negate t2))))
-	   (mt (when (cadr rt) (resolve-type `(and (type-max ,t1) ,(negate `(type-min ,t2))))))
-	   (rt (if (or (not (cadr rt)) (car mt)) rt `(nil nil))))
-      (values (not (car rt))  (not (cadr rt))))))
+      (let* ((n1 (nprocess-type (normalize-type t1)))
+	     (n2 (nprocess-type (normalize-type t2))))
+	(values (ntp-subtp n1 n2) (not (or (caddr n1) (caddr n2)))))))
+
 
 
