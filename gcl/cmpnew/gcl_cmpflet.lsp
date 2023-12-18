@@ -96,7 +96,7 @@
 				      "Restoring var type on ~s from ~s to ~s"
 				      (var-name v) (cmp-unnorm-tp (var-type v)) (cmp-unnorm-tp tp))
 		       (setf (var-type v) tp (var-store v) st))
-		     (ldiff *restore-vars* ,rv))))
+		     (ldiff-nf *restore-vars* ,rv))))
 	     (prog1
 		 (let (*restore-vars* (*restore-vars-env* *vars*))
 		   (unwind-protect (progn ,@body) (pop-restore-vars)))
