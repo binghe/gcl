@@ -33,35 +33,38 @@
 
 (eval-when (compile eval load)
 
-(defvar *array-types* (cons (cons nil 'array-nil) +array-type-alist+))
+  (defvar *array-types* (cons (cons nil 'array-nil) +array-type-alist+))
 
-(defvar *simple-array-types*
-  (mapcar (lambda (x)
-	    (cons x (intern (string-concatenate "SIMPLE-ARRAY-" (string x)))))
-	  (cons nil +array-types+)))
+  (defvar *simple-array-types*
+    (mapcar (lambda (x)
+	      (cons x (intern (string-concatenate "SIMPLE-ARRAY-" (string x)))))
+	    (cons nil +array-types+)))
 
-(defvar *non-simple-array-types*
-  (mapcan (lambda (x)
-	    (when (member x '(character bit t));FIXME
-	      (list (cons x (intern (string-concatenate "NON-SIMPLE-ARRAY-" (string x)))))))
-	  (cons nil +array-types+)))
+  (defvar *non-simple-array-types*
+    (mapcan (lambda (x)
+	      (when (member x '(character bit t));FIXME
+		(list (cons x (intern (string-concatenate "NON-SIMPLE-ARRAY-" (string x)))))))
+	    (cons nil +array-types+)))
 
-(defvar *all-array-types* (append *simple-array-types* *non-simple-array-types*))
+  (defvar *all-array-types* (append *simple-array-types* *non-simple-array-types*))
 
-(defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+));FIXME
+  (defconstant +atps+ (mapcar (lambda (x) (list x (intern (string-concatenate "ARRAY-"   (string x))))) +array-types+));FIXME
 
-(defvar *k-ops*
-  `((integer int^ int~ rng-recon)
-    ((ratio short-float long-float) rng^ rng~ rng-recon)
-    (complex-integer cmpi^ cmpi~ cmp-recon)
-    (complex-integer-ratio cmpir^ cmpir~ cmp-recon)
-    (complex-ratio-integer cmpri^ cmpri~ cmp-recon)
-    ((complex-ratio complex-short-float complex-long-float) cmp^ cmp~ cmp-recon)
-    ((std-instance structure funcallable-std-instance) std^ std~ std-recon)
-    ((proper-cons improper-cons) cns^ cns~ cns-recon)
-    (,(mapcar 'cdr *all-array-types*) ar^ ar~ ar-recon)
-    (,+singleton-types+  sing^ sing~ sing-recon))))
+  (defconstant +k-ops+
+    `((integer int^ int~ rng-recon)
+      ((ratio short-float long-float) rng^ rng~ rng-recon)
+      (complex-integer cmpi^ cmpi~ cmp-recon)
+      (complex-integer-ratio cmpir^ cmpir~ cmp-recon)
+      (complex-ratio-integer cmpri^ cmpri~ cmp-recon)
+      ((complex-ratio complex-short-float complex-long-float) cmp^ cmp~ cmp-recon)
+      ((std-instance structure funcallable-std-instance) std^ std~ std-recon)
+      ((proper-cons improper-cons) cns^ cns~ cns-recon)
+      (,(mapcar 'cdr *all-array-types*) ar^ ar~ ar-recon)
+      (,+singleton-types+  sing^ sing~ sing-recon)))
 
+  (defconstant +k-len+ (lreduce (lambda (xx x &aux (x (car x)))
+				  (+ (if (listp x) (length x) 1) xx))
+				+k-ops+ :initial-value 0)))
 
 (defmacro negate (lst)
   (let ((l (gensym)))
@@ -365,7 +368,7 @@
 				  (set-difference
 				   (lreduce (lambda (xx x &aux (x (car x)))
 					      (if (listp x) (append x xx) (cons x xx)))
-					    *k-ops* :initial-value nil)
+					    +k-ops+ :initial-value nil)
 				   *pcnsk*))))
 
 (defun pcdr (u type &aux (z (ntp-and u (nprocess-type type))))
@@ -492,8 +495,8 @@
 
 #.`(defun k^ (k x y)
      (case k
-       ,@(mapcar (lambda (x) `(,(car x) (,(cadr x) x y))) (butlast *k-ops*))
-       (otherwise (,(cadr (car (last *k-ops*))) x y))))
+       ,@(mapcar (lambda (x) `(,(car x) (,(cadr x) x y))) (butlast +k-ops+))
+       (otherwise (,(cadr (car (last +k-ops+))) x y))))
 
 (defun kop-and (k x y)
   (cond ((eq (car x) t) y)
@@ -507,8 +510,8 @@
 #.`(defun k~ (k x)
      (unless (eq x t)
        (case k
-	 ,@(mapcar (lambda (x) `(,(car x) (,(caddr x) x))) (butlast *k-ops*))
-	 (otherwise (,(caddr (car (last *k-ops*))) x)))))
+	 ,@(mapcar (lambda (x) `(,(car x) (,(caddr x) x))) (butlast +k-ops+))
+	 (otherwise (,(caddr (car (last +k-ops+))) x)))))
 
 (defun kop-not (k x)
   (lreduce (lambda (xx x) (when xx (kop-and k (k~ k x) xx))) x :initial-value '(t)))
@@ -533,10 +536,7 @@
   (cond
     ((not (or x z u)) (if y +tp-t+ +tp-nil+))
     ((unless (member (not y) x :test-not 'eq :key 'cadr);FIXME? shortest of list and complement?
-       (eql (length x) (or (car u)
-			   #.(lreduce (lambda (xx x &aux (x (car x)))
-					(+ (if (listp x) (length x) 1) xx))
-				      *k-ops* :initial-value 0))))
+       (eql (length x) (or (car u) +k-len+)))
      (apply 'ntp-prune nil (not y) z u))
     ((list* x y z u))))
 
@@ -649,8 +649,8 @@
 
 #.`(defun k-recon (x)
      (case (car x)
-       ,@(mapcar (lambda (x) `(,(car x) (,(cadddr x) x))) (butlast *k-ops*))
-       (otherwise (,(cadddr (car (last *k-ops*))) x))))
+       ,@(mapcar (lambda (x) `(,(car x) (,(cadddr x) x))) (butlast +k-ops+))
+       (otherwise (,(cadddr (car (last +k-ops+))) x))))
 
 (defun nreconstruct-type-int (x)
   (cond ((caddr x) (caddr (car x)))
