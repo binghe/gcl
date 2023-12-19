@@ -61,12 +61,6 @@ FFN(Fdefun)(object args)
 		} else if (symbol_value(sSAinhibit_macro_specialA) != Cnil)
 		 FEerror("~S, a special form, cannot be redefined.", 1, name);
 	}
-	if (name->s.s_hpack == lisp_package &&
-	    name->s.s_gfdef != OBJNULL && !raw_image && sLwarn->s.s_gfdef) {
-	  vs_push(make_simple_string("~S is being redefined."));
-	  ifuncall2(sLwarn, vs_head, name);
-	  vs_popp;
-	}
 	vs_base = vs_top;
 	if (lex_env[0] == Cnil && lex_env[1] == Cnil && lex_env[2] == Cnil) {
 	  vs_push(MMcons(sSlambda_block, args));
