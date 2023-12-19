@@ -9,7 +9,7 @@
 # Uncomment this to turn on verbose mode. 
 #export DH_VERBOSE=1
 
-export GCL_MEM_MULTIPLE=0.1
+#export GCL_MEM_MULTIPLE=0.1
 
 # This is the debhelper compatability version to use.
 ARCHT:=$(shell dpkg-architecture -qDEB_HOST_ARCH)
