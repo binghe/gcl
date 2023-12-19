@@ -168,6 +168,7 @@ build-stamp: configure-stamp
 
 	rm -rf debian/tmp1
 	mkdir -p debian/tmp1
+	$(MAKE)
 	$(MAKE) install DESTDIR=$$(pwd)/debian/tmp1
 
 	touch $@
