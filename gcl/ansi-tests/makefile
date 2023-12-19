@@ -102,14 +102,15 @@ test-compiled:
 test-unixport:
 	echo "(load \"doit.lsp\")" | ../unixport/saved_ansi_gcl | tee test.out
 
+##+gcl (setq compiler::*cc* \"gcc -c -DVOL=volatile -fsigned-char -pipe \")
 random-test:
-	(echo "(progn #+gcl (setq compiler::*cc* \"gcc -c -DVOL=volatile -fsigned-char -pipe \") \
+	(echo "(progn \
 		(setq *load-verbose* nil) \
 		(let* ((*standard-output* (make-broadcast-stream)) \
 		     (*error-output* *standard-output*)) \
 		(load \"gclload1.lsp\") \
 		(funcall (symbol-function 'compile-and-load) \"random-int-form.lsp\")))  \
-	      (in-package :cl-test) \
+	      (in-package :cl-test) (declaim (optimize (safety 0)))\
 	      (let ((x (cl-test::test-random-integer-forms 1000 3 1000 :random-size t :random-nvars t))) \
 		(setq x (cl-test::prune-results x)) \
 		(with-open-file (*standard-output* \"failures.lsp\" \
