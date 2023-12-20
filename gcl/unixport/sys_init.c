@@ -8,12 +8,13 @@ gcl_init_init()
 
 #if defined(pre_gcl) || defined(ansi_gcl)
   {
-    object features;
-    extern int in_pre_gcl;
-    features=find_symbol(make_simple_string("*FEATURES*"),system_package);
+    object features=find_symbol(make_simple_string("*FEATURES*"),system_package);
 #if defined(pre_gcl)
-    features->s.s_dbind=make_cons(make_keyword("PRE-GCL"),features->s.s_dbind);
-    in_pre_gcl=1;
+    {
+      extern int in_pre_gcl;
+      features->s.s_dbind=make_cons(make_keyword("PRE-GCL"),features->s.s_dbind);
+      in_pre_gcl=1;
+    }
 #else
     features->s.s_dbind=make_cons(make_keyword("ANSI-CL"),make_cons(make_keyword("COMMON-LISP"),features->s.s_dbind));
 #endif
@@ -148,7 +149,6 @@ gcl_init_system(object no_init)
 
 #ifndef pre_gcl  
 
-#ifndef gcl
 #ifdef HAVE_XGCL
   lsp_init("xgcl-2","sysdef.lisp");
   check_init(xgcl-2,gcl_Xlib,no_init);
@@ -167,11 +167,13 @@ gcl_init_system(object no_init)
   check_init(xgcl-2,gcl_index,no_init);
 #endif
   
+#ifndef gcl
+
+  check_init(mod,gcl_ansi_io,no_init);
   check_init(mod,gcl_destructuring_bind,no_init);
   check_init(mod,gcl_loop,no_init);
   check_init(mod,gcl_defpackage,no_init);
   check_init(mod,gcl_make_defpackage,no_init);
-  check_init(mod,gcl_ansi_io,no_init);
 
 
 #ifndef mod_gcl
