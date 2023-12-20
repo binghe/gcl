@@ -98,7 +98,8 @@ $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	rm -f o/cmpinclude.h ; cp h/cmpinclude.h o
 #	(cd $(ODIR); $(MAKE) all)
 	cd $(@D) && $(MAKE) $(@F)
-	cd $(@D) && echo '(time (let ((*features* (cons :pre-gcl *features*)))(load "boot.lisp")))' | ./$(@F)
+	cd $(@D) && echo '(time (let ((*features* (cons :pre-gcl *features*)))(load "boot.lisp")(si::save-system "$(@F)_temp")))' | ./$(@F)
+	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && $(MAKE) LISP=$$(pwd)/../$(@)_temp)
 #	cd $(ODIR) && rm -f boot.h && echo "#define LISP_BOOT" > boot.h && $(MAKE) all
 	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
 	touch $< $@
@@ -112,7 +113,6 @@ $(PORTDIR)/saved_gcl1: $(PORTDIR)/saved_gcl0 $(HDIR)cmpinclude.h
 	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
 
 $(PORTDIR)/saved_gcl: $(PORTDIR)/saved_gcl1 $(HDIR)cmpinclude.h
-	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && $(MAKE) LISP=../$<)
 	cd $(@D) && echo '(time (load "boot.lisp"))' | ./$(<F) && $(MAKE) $(@F)
 	echo '(si::do-recomp)' | $@ && cd $(@D) && $(MAKE) $(@F)
 
