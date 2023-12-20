@@ -217,7 +217,7 @@ command:
 merge:
 	$(CC) -o merge merge.c
 
-LISP_LIB=clcs/package.lisp clcs/myload1.lisp  cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp xgcl-2/sysdef.lisp xgcl-2/gcl_dwtest.lsp xgcl-2/gcl_dwtestcases.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h  unixport/lib$(SYSTEM).a unixport/libgclp.a gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs) unixport/gcl.script
+LISP_LIB=clcs/package.lisp clcs/myload1.lisp  cmpnew/gcl_collectfn.o cmpnew/gcl_collectfn.lsp xgcl-2/sysdef.lisp xgcl-2/gcl_dwtest.lsp xgcl-2/gcl_dwtestcases.lsp lsp/gcl_gprof.lsp lsp/gcl_info.o lsp/gcl_profile.lsp lsp/gcl_export.lsp lsp/gcl_autoload.lsp cmpnew/gcl_cmpmain.lsp cmpnew/gcl_cmpopt.lsp cmpnew/gcl_lfun_list.lsp lsp/gcl_auto_new.lsp h/cmpinclude.h  unixport/init_raw.lsp $(shell ls -1 unixport/*.a) gcl-tk/tk-package.lsp $(TK_LISP_LIB) $(RL_LIB) $(FIRST_FILE) $(LAST_FILE) $(addsuffix /sys-proclaim.lisp,lsp cmpnew pcl clcs) unixport/gcl.script unixport/libboot.so lsp/gcl_defmacro.lsp lsp/gcl_evalmacros.lsp lsp/gcl_top.lsp lsp/gcl_module.lsp xgcl-2/sysdef.lisp pcl/package.lisp
 
 install-command:
 	rm -f bin/$(BINSCPT)

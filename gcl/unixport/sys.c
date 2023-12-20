@@ -27,9 +27,14 @@ ar_init_fn(void (fn)(void),const char *s) {
   struct stat ss;
   
   if (stat(s,&ss)) {
-    assert(snprintf(b,sizeof(b),"ar x %-.*s%s %s",(int)dir_name_length(kcl_self),kcl_self,libname,s)>0);
 
+    char *sysd=getenv("GCL_SYSDIR");
+    char *d=sysd ? sysd : kcl_self;
+    int n=sysd ? strlen(sysd) : dir_name_length(d);
+
+    assert(snprintf(b,sizeof(b),"ar x %-.*s%s %s",n,d,libname,s)>0);
     assert(!msystem(b));
+
   }
   gcl_init_or_load1(fn,s);
   assert(!unlink(s));
@@ -60,13 +65,16 @@ ar_check_init_fn(void (fn)(void),char *s,object b,char *o) {
 static void
 lsp_init(const char *a,const char *b) {
 
-   char c[200];
-   object sysd=sSAsystem_directoryA->s.s_dbind;
+  char c[200],*d;
+  char *sysd=getenv("GCL_SYSDIR");
+  int n;
 
-   assert(snprintf(c,sizeof(c),"%-.*s../%s/%s%s",(int)dir_name_length(kcl_self),kcl_self,a,b,strchr(b,'.') ? "" : ".lsp")>0)
-   printf("loading %s\n",c);
-   fflush(stdout);
-   load(c);
+  d=sysd ? sysd : kcl_self;
+  n=sysd ? strlen(sysd) : dir_name_length(d);
+  assert(snprintf(c,sizeof(c),"%-.*s../%s/%s%s",n,d,a,b,strchr(b,'.') ? "" : ".lsp")>0);
+  printf("loading %s\n",c);
+  fflush(stdout);
+  load(c);
 
 }
 

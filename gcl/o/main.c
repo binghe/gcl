@@ -418,11 +418,13 @@ dir_name_length(const char *s) {
 void
 init_boot(void) {
 
+  char *sysd=getenv("GCL_SYSDIR"),*d=sysd ? sysd : kcl_self;
   void *v,*q;
   char *z,*s="libboot.so";
-  size_t m=dir_name_length(kcl_self),n=m+strlen(s)+1;
+  size_t m=sysd ? strlen(sysd) : dir_name_length(kcl_self),n=m+strlen(s)+1;
+
   z=alloca(n);
-  snprintf(z,n,"%-*.*s%s",(int)m,(int)m,kcl_self,s);
+  snprintf(z,n,"%-*.*s%s",(int)m,(int)m,d,s);
   if (!(v=dlopen(z,RTLD_LAZY|RTLD_GLOBAL)))
     printf("%s\n",dlerror());
   if (!(q=dlsym(v,"gcl_init_boot")))

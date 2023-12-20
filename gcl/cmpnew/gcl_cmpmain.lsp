@@ -864,7 +864,8 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
 		      (if (stringp post) (format st "~a~%" post))
 		      (format st "(setq si::*optimize-maximum-pages* ~s si::*disable-recompile* ~s)(si::use-fast-links t)" si::*optimize-maximum-pages* si::*disable-recompile*)
 		      (format st "(si::save-system \"~a\")~%" (namestring image)))
-      (when (= 0 (system (format nil "~a ~a < ~a" 
+      (when (= 0 (system (format nil "GCL_SYSDIR=~a ~a ~a < ~a"
+				 si::*system-directory*
 				 (namestring raw)
 				 si::*system-directory*
 				 (namestring init))))
