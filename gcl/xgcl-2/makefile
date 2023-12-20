@@ -5,7 +5,7 @@ all: objects docs
 LISP?=../unixport/saved_gcl
 APPEND=../xbin/append
 
-objects: $(LISP)
+objects: $(shell ls -1 *.c *.o) #$(LISP)
 	echo '(load "sysdef.lisp")(load "sys-proclaim.lisp")(compiler::cdebug)(xlib::compile-xgcl)' | $(LISP)
 	touch $@
 
