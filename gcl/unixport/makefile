@@ -133,10 +133,6 @@ libmod_gcl.a: $(OBJS) $(MODOBJS) sys_mod_gcl.o gmpfiles
 	rm -rf $@
 	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
 
-libmod_gcl.a: $(OBJS) $(MODOBJS) sys_mod_gcl.o gmpfiles
-	rm -rf $@
-	$(ARRS) $@ $(filter %.o,$^) $(shell find gmp -name "*.o")
-
 libxgcl.a: libgcl.a
 	ln -snf $< $@
 
