@@ -15,6 +15,8 @@
   (assert (not (string-equal type "lsp")))
   (mapc #'delete-file files))
 
+#+(and gcl x86_64)(si::set-log-maxpage-bound 30)
+
 (load "gclload1.lsp")
 (load "gclload2.lsp")
 
