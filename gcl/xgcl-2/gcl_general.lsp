@@ -28,6 +28,10 @@
 ; 24 Jan 06: Edited by G. Novak to remove vertex-array entries.
 ; 22 Jun 06: Edited by G. Novak to fix entry types
 
+
+(clines "long strlen(char *);");FIXME
+(clines "char *object_to_string(object);");FIXME
+
 ;(defentry free (string) (void free))
 ;(defentry calloc(fixnum fixnum) (string calloc))
 (defentry char-array (int) (fixnum char_array))
