@@ -823,11 +823,16 @@ DEFUN("MAKE-PACKAGE-INT",object,fSmake_package_int,SI,3,3,NONE,OO,OO,OO,OO,(obje
 extern object sKuse;
 extern object sKnicknames;
 DEF_ORDINARY("IN-PACKAGE-INTERNAL",sSin_package_internal,SI,"");
-DEFUN("IN-PACKAGE-INTERNAL",object,fSin_package_internal,SI,2,2,NONE,OO,OO,OO,OO,(object p,object r),"") {
+DEFUN("IN-PACKAGE-INTERNAL",object,fSin_package_internal,SI,1,2,NONE,OO,OO,OO,OO,(object p,...),"") {
 
-  object use=Cnil,nick=Cnil;
+  fixnum nargs=INIT_NARGS(1);
+  va_list ap;
+  object use=Cnil,nick=Cnil,l=Cnil,f=OBJNULL,r;
 
   p = coerce_to_string(p);
+  va_start(ap,p);
+  r = NEXT_ARG(nargs,ap,l,f,Cnil);
+  va_end(ap);
   
   /*fixme non-std error check?*/
   for (;consp(r) && consp(r->c.c_cdr);r=r->c.c_cdr->c.c_cdr) {
