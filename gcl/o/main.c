@@ -589,6 +589,14 @@ main(int argc, char **argv, char **envp) {
 
   if (raw_image) {
 
+#ifdef GCL_GPROF
+    sigset_t prof;
+    int r;
+    sigemptyset(&prof);
+    sigaddset(&prof,SIGPROF);
+    sigprocmask(SIG_BLOCK,&prof,NULL);
+#endif
+
     printf("GCL (GNU Common Lisp)  %s  %ld pages\n",LISP_IMPLEMENTATION_VERSION,real_maxpage);
     fflush(stdout);
     
@@ -756,7 +764,6 @@ initlisp(void) {
 	NewInit();
 	init_boot();
 
-	dlopen("libboot",RTLD_LAZY|RTLD_GLOBAL);
 	gcl_init_typespec();
 	gcl_init_number();
 	gcl_init_character();
