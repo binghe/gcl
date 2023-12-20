@@ -304,7 +304,7 @@ binary-arch: build install #debian/substvars
 	dh_installdebconf -a
 	sed -i -e 's,@EXT@,$(EXT),g' debian/gcl$(EXT)/DEBIAN/templates
 	dh_installchangelogs ChangeLog -a
-	dh_strip -a -Xlibgcl -Xlibansi_gcl
+	dh_strip -a -Xlibgcl -Xlibansi_gcl -Xlibgcl_gprof -Xlibansi_gcl_gprof
 #		-Xgcl-$(VERS)-prof/unixport/saved_gcl -Xgcl-$(VERS)-prof/unixport/saved_ansi_gcl
 	dh_lintian -a
 	dh_link -a
