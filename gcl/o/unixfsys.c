@@ -281,7 +281,7 @@ DEFUN("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object 
   massert(z1<sizeof(FN1));
   memcpy(FN1,s->st.st_self,z1);
   FN1[z1]=0;
-#ifndef __MINGW32__
+#ifndef HAVE_READLINKAT
   massert((l=readlinkat(d ? dirfd((DIR *)d) : AT_FDCWD,FN1,FN2,sizeof(FN2)))>=0 && l<sizeof(FN2));
 #else
   l=0;
