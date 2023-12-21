@@ -87,12 +87,6 @@ DEFUN("GPROF-ADDRESSES",object,fSgprof_addresses,SI,0,0,NONE,OO,OO,OO,OO,(void),
 
 }
 
-DEFUN("KCL-SELF",object,fSkcl_self,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
-
-  return make_simple_string(kcl_self);
-
-}
-
 DEFUN("PTABLE-ALLOC-LENGTH",object,fSptable_alloc_length,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
   return make_fixnum(c_table.alloc_length);
 }

@@ -559,6 +559,12 @@ which(const char *n,char *o) {
 
 #endif
 
+DEFUN("KCL-SELF",object,fSkcl_self,SI,0,0,NONE,OO,OO,OO,OO,(void),"") {
+
+  return make_simple_string(kcl_self);
+
+}
+
 int
 main(int argc, char **argv, char **envp) {
 
