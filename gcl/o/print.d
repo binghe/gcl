@@ -1682,33 +1682,35 @@ write_object(object x,int level) {
 		break;
 
 	case t_structure:
-	  object y=structure_to_list(x);
-	  if (PRINTcircle)
-	    if (write_sharp_eq(x,FALSE)==DONE) return;
-	  if (y->c.c_cdr==Cnil) {/*FIXME: Where is this specified?*/
-	    write_str("#S(");
-	    print_symbol_name_body(y->c.c_car->s.s_name,1);
-	    write_ch(')');
+	  {
+	    object y=structure_to_list(x);
+	    if (PRINTcircle)
+	      if (write_sharp_eq(x,FALSE)==DONE) return;
+	    if (y->c.c_cdr==Cnil) {/*FIXME: Where is this specified?*/
+	      write_str("#S(");
+	      print_symbol_name_body(y->c.c_car->s.s_name,1);
+	      write_ch(')');
+	      break;
+	    }
+	    if (PRINTlevel >= 0 && level >= PRINTlevel) {
+	      write_ch('#');
+	      break;
+	    }
+	    if (type_of(x->str.str_def) != t_structure)
+	      FEwrong_type_argument(sLstructure, x->str.str_def);
+	    if (S_DATA(x->str.str_def)->print_function != Cnil) {
+	      call_structure_print_function(x, level);
+	      break;
+	    }
+	    if (PRINTstructure) {
+	      write_str("#S");
+	      vs_push(MMcons(sSstructure_list,y));/*FIXME alloc etc.*/
+	      write_object(y, level);
+	      vs_popp;
+	      break;
+	    }
 	    break;
 	  }
-	  if (PRINTlevel >= 0 && level >= PRINTlevel) {
-	    write_ch('#');
-	    break;
-	  }
-	  if (type_of(x->str.str_def) != t_structure)
-	    FEwrong_type_argument(sLstructure, x->str.str_def);
-	  if (S_DATA(x->str.str_def)->print_function != Cnil) {
-	    call_structure_print_function(x, level);
-	    break;
-	  }
-	  if (PRINTstructure) {
-	    write_str("#S");
-	    vs_push(MMcons(sSstructure_list,y));/*FIXME alloc etc.*/
-	    write_object(y, level);
-	    vs_popp;
-	    break;
-	  }
-	  break;
 
 	case t_readtable:
 	        write_unreadable_str(x,"#<readtable ");

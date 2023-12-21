@@ -232,8 +232,12 @@ sigfpe3(int sig,siginfo_t *i,void *v) {
 #endif
   ifuncall3(sSfloating_point_error,FPE_CODE(i,v),FPE_ADDR(i,v),FPE_CTXT(v));
 
+#ifdef FPE_SET_CTXT_ADDR
   FPE_SET_CTXT_ADDR(v,FPE_ADDR(i,v));
+#endif
+#ifdef FPE_CLR_CTXT_CWD
   FPE_CLR_CTXT_CWD(v);
+#endif
 
 }
 
