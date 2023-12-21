@@ -1,6 +1,6 @@
 (in-package :compiler)(cdebug)(setq *compile-print* nil si::*notify-gbc* t *annotate* nil)
 
-(si::set-log-maxpage-bound 30);FIXME oom bootstrap less, bss shrank dump error when unrestricted
+#+pre-gcl(si::set-log-maxpage-bound 30);FIXME oom bootstrap less, bss shrank dump error when unrestricted
 
 #+pre-gcl
 (progn
