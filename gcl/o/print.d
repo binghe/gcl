@@ -579,14 +579,16 @@ flush_queue(int force,struct printContext *p) {
       if (flush_queue_indent(force,p)) return;
       break;
     case CURRENT: case BLOCK:
-      short sh=p->b.p_queue[mod(p->b.p_qh+1)];
-      if (p->b.p_qc<2) return;
-      sh<<=1;sh>>=1;
-      sh+=(c==CURRENT ? p->b.p_col : p->b.p_indent_stack[p->b.p_isp-1]);/*lb*/
-      sh=sh<0 ? 0 : sh;
-      p->b.p_indent_stack[p->b.p_isp] = sh;
-      flush_queue_flush(force,2,p);
-      break;
+      {
+	short sh=p->b.p_queue[mod(p->b.p_qh+1)];
+	if (p->b.p_qc<2) return;
+	sh<<=1;sh>>=1;
+	sh+=(c==CURRENT ? p->b.p_col : p->b.p_indent_stack[p->b.p_isp-1]);/*lb*/
+	sh=sh<0 ? 0 : sh;
+	p->b.p_indent_stack[p->b.p_isp] = sh;
+	flush_queue_flush(force,2,p);
+	break;
+      }
     case LINE:case SECTION:case LINE_RELATIVE:case SECTION_RELATIVE:
       if (p->b.p_qc<3) return;
       flush_queue_flush(force,3,p);
