@@ -395,8 +395,9 @@ DEFUN("SET-LOG-MAXPAGE-BOUND",object,fSset_log_maxpage_bound,SI,1,1,NONE,II,OO,O
   GBC(t_relocatable);
   dend=heap_end+PAGESIZE+CEI(rb_pointer-rb_begin(),PAGESIZE);
   if (end >= dend) {
+    putenv("GCL_MEM_MULTIPLE=1.0");/*invoking this function overrides mem_multiple*/
     minimize_image();
-    log_maxpage_bound=l;/*FIXME maybe this should be under mem_multiple, not over*/
+    log_maxpage_bound=l;
     update_real_maxpage();
     maybe_set_hole_from_maxpages();
   }
