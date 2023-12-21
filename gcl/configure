@@ -5762,6 +5762,9 @@ printf "%s\n" "disabled" >&6; }
 printf "%s\n" "ok" >&6; }
        OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
        assert_arg_to_cflags -pg
+
+printf "%s\n" "#define USE_GPROF 1" >>confdefs.h
+
        CFLAGS=$OLD_CFLAGS
    fi
 fi

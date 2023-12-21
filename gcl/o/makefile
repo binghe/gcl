@@ -38,7 +38,8 @@ boot.o: boot.c $(DECL) boot.h #FIXME clean, include file changes
 	$(CC) -c $(CFLAGS) $(DEFS) -fPIC $*.c $(AUX_INFO) 
 
 gprof.o: gprof.c $(DECL)
-	$(CC) -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO)
+	[ "$(GPROF)" = "" ] || $(CC) -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO)
+	touch $@
 
 prelink.o: prelink.c $(DECL)
 	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)

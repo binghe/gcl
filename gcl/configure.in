@@ -409,6 +409,7 @@ if test "$GPROF" != "" ; then
        AC_MSG_RESULT([ok])
        OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
        assert_arg_to_cflags -pg
+       AC_DEFINE(USE_GPROF,1,[use gprof])
        CFLAGS=$OLD_CFLAGS
    fi
 fi

@@ -370,7 +370,9 @@ minimize_image(void) {
   nrbpage=0;
   resize_hole(0,t_relocatable,0);
 
+#ifdef USE_GPROF
   gprof_cleanup();
+#endif
   
 #if defined(BSD) || defined(ATT)  
   mbrk(core_end=heap_end);
@@ -473,7 +475,9 @@ gcl_cleanup(int gc) {
   {extern void _cleanup(void);_cleanup();}
 #endif
 
+#ifdef USE_GPROF
   gprof_cleanup();
+#endif
 
   if (gc) {
 

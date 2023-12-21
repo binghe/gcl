@@ -415,6 +415,9 @@
 /* use fionbio for non-blocking io */
 #undef USE_FIONBIO
 
+/* use gprof */
+#undef USE_GPROF
+
 /* use readline library */
 #undef USE_READLINE
 
