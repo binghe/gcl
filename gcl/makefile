@@ -100,8 +100,7 @@ $(PORTDIR)/saved_pre_gcl: $(HDIR)cmpinclude.h
 	touch $< $@
 
 $(PORTDIR)/saved_gcl0: $(PORTDIR)/saved_pre_gcl $(HDIR)cmpinclude.h
-	cd $(@D) && echo '(time (let ((*features* (cons :pre-gcl *features*)))(load "boot.lisp")(si::save-system "$(@F)_temp")))' | ../$<
-	[ "$(X_LIBS)" == "" ] || (cd xgcl-2 && $(MAKE) LISP=$$(pwd)/../$(@)_temp)#FIXME
+	cd $(@D) && echo '(time (load "boot.lisp"))' | ../$<
 	cd $(@D) && $(MAKE) saved_gcl && mv saved_gcl $(@F)
 
 $(PORTDIR)/saved_gcl1: $(PORTDIR)/saved_gcl0 $(HDIR)cmpinclude.h

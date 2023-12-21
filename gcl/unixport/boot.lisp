@@ -1,7 +1,5 @@
 (in-package :compiler)(cdebug)(setq *compile-print* nil si::*notify-gbc* t *annotate* nil)
 
-#+pre-gcl(si::set-log-maxpage-bound 30);FIXME oom bootstrap less, bss shrank dump error when unrestricted
-
 #+pre-gcl
 (progn
   (declaim (optimize (safety 3)))
@@ -53,3 +51,10 @@
     (doitf l "lsp" ld? cmpl?)))
 
 (doit (if (boundp 'noload) 'identity 'load) 'compile-file)
+
+
+#+pre-gcl
+(progn
+  (si::chdir "../xgcl-2")
+  (load "sysdef.lisp")(load "sys-proclaim.lisp")(compiler::cdebug))
+#+pre-gcl(xlib::compile-xgcl)
