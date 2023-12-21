@@ -335,7 +335,7 @@ setf(object place, object form)
 	args = place->c.c_cdr;
 
 	{
-	  object p=find_package(make_simple_string("COMMON-LISP"));
+	  object p=lisp_package;
 	  char *s;
 
 	  if (fun->s.s_hpack==p && fun->s.s_name->st.st_self[0]=='C' && fun->s.s_name->st.st_self[VLEN(fun->s.s_name)-1]=='R' && VLEN(fun->s.s_name)!=3) {

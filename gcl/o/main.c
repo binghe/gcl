@@ -423,7 +423,9 @@ init_boot(void) {
   void *v,*q;
   char *z,*s="libboot.so";
   size_t m=sysd ? strlen(sysd) : dir_name_length(kcl_self),n=m+strlen(s)+1;
+  object omp=sSAoptimize_maximum_pagesA->s.s_dbind;
 
+  sSAoptimize_maximum_pagesA->s.s_dbind=Cnil;
   z=alloca(n);
   snprintf(z,n,"%-*.*s%s",(int)m,(int)m,d,s);
   if (!(v=dlopen(z,RTLD_LAZY|RTLD_GLOBAL)))
@@ -431,6 +433,7 @@ init_boot(void) {
   if (!(q=dlsym(v,"gcl_init_boot")))
     printf("%s\n",dlerror());
   ((void (*)())q)();
+  sSAoptimize_maximum_pagesA->s.s_dbind=omp;
 
 }
 
