@@ -5,6 +5,8 @@ AC_CONFIG_HEADERS([h/gclincl.h])
 VERSION=`cat majvers`.`cat minvers`
 AC_SUBST(VERSION)
 
+AC_USE_SYSTEM_EXTENSIONS
+AC_INCLUDES_DEFAULT([])
 
 AC_ARG_ENABLE(xgcl,[ --enable-xgcl=yes will compile in support for XGCL],
 [enable_xgcl=$enableval],[enable_xgcl="yes"])
@@ -400,6 +402,7 @@ if test "$GPROF" != "" ; then
        aarch64*) GPROF="";;#unreproducible buildd bug 20170824
        *gnu)  GPROF="";;
    esac
+   if ! add_arg_to_cflags -pg ; then GPROF="" ; fi
    if test "$GPROF" = "" ; then
        AC_MSG_RESULT([disabled])
    else

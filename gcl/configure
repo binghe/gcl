@@ -707,13 +707,6 @@ MAKEINFO
 GPROF
 GCL_CC
 CPP
-OBJEXT
-EXEEXT
-ac_ct_CC
-CPPFLAGS
-LDFLAGS
-CFLAGS
-CC
 PRELINK_CHECK
 host_os
 host_vendor
@@ -724,6 +717,13 @@ build_vendor
 build_cpu
 build
 AWK
+OBJEXT
+EXEEXT
+ac_ct_CC
+CPPFLAGS
+LDFLAGS
+CFLAGS
+CC
 VERSION
 target_alias
 host_alias
@@ -2927,436 +2927,6 @@ VERSION=`cat majvers`.`cat minvers`
 
 
 
-# Check whether --enable-xgcl was given.
-if test ${enable_xgcl+y}
-then :
-  enableval=$enable_xgcl; enable_xgcl=$enableval
-else $as_nop
-  enable_xgcl="yes"
-fi
-
-
-#
-# Host information
-#
-
-for ac_prog in gawk nawk awk
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-printf %s "checking for $ac_word... " >&6; }
-if test ${ac_cv_prog_AWK+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  if test -n "$AWK"; then
-  ac_cv_prog_AWK="$AWK" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  case $as_dir in #(((
-    '') as_dir=./ ;;
-    */) ;;
-    *) as_dir=$as_dir/ ;;
-  esac
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
-    ac_cv_prog_AWK="$ac_prog"
-    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-AWK=$ac_cv_prog_AWK
-if test -n "$AWK"; then
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $AWK" >&5
-printf "%s\n" "$AWK" >&6; }
-else
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
-printf "%s\n" "no" >&6; }
-fi
-
-
-  test -n "$AWK" && break
-done
-
-
-
-
-
-  # Make sure we can run config.sub.
-$SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
-  as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" "$LINENO" 5
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
-printf %s "checking build system type... " >&6; }
-if test ${ac_cv_build+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_build_alias=$build_alias
-test "x$ac_build_alias" = x &&
-  ac_build_alias=`$SHELL "${ac_aux_dir}config.guess"`
-test "x$ac_build_alias" = x &&
-  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
-ac_cv_build=`$SHELL "${ac_aux_dir}config.sub" $ac_build_alias` ||
-  as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $ac_build_alias failed" "$LINENO" 5
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
-printf "%s\n" "$ac_cv_build" >&6; }
-case $ac_cv_build in
-*-*-*) ;;
-*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
-esac
-build=$ac_cv_build
-ac_save_IFS=$IFS; IFS='-'
-set x $ac_cv_build
-shift
-build_cpu=$1
-build_vendor=$2
-shift; shift
-# Remember, the first character of IFS is used to create $*,
-# except with old shells:
-build_os=$*
-IFS=$ac_save_IFS
-case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
-
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
-printf %s "checking host system type... " >&6; }
-if test ${ac_cv_host+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  if test "x$host_alias" = x; then
-  ac_cv_host=$ac_cv_build
-else
-  ac_cv_host=`$SHELL "${ac_aux_dir}config.sub" $host_alias` ||
-    as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $host_alias failed" "$LINENO" 5
-fi
-
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
-printf "%s\n" "$ac_cv_host" >&6; }
-case $ac_cv_host in
-*-*-*) ;;
-*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
-esac
-host=$ac_cv_host
-ac_save_IFS=$IFS; IFS='-'
-set x $ac_cv_host
-shift
-host_cpu=$1
-host_vendor=$2
-shift; shift
-# Remember, the first character of IFS is used to create $*,
-# except with old shells:
-host_os=$*
-IFS=$ac_save_IFS
-case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
-
-
-canonical=$host
-my_host_kernel=`echo $host_os | ${AWK} '{j=split($1,A,"-");print A[1]}'`
-my_host_system=`echo $host_os | ${AWK} '{j=split($1,A,"-");if (j>=2) print A[2]}'`
-
-cat >>confdefs.h <<_ACEOF
-#define HOST_CPU "`echo $host_cpu | ${AWK} '{print toupper($0)}'`"
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define HOST_KERNEL "`echo $my_host_kernel | ${AWK} '{print toupper($0)}'`"
-_ACEOF
-
-if test "$my_host_system" != "" ; then
-
-cat >>confdefs.h <<_ACEOF
-#define HOST_SYSTEM "`echo $my_host_system | ${AWK} '{print toupper($0)}'`"
-_ACEOF
-
-fi
-## host=CPU-COMPANY-SYSTEM
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: host=$host" >&5
-printf "%s\n" "host=$host" >&6; }
-
-use=unknown
-case $canonical in
-    sh4*linux*) use=sh4-linux;;
-    *x86_64*linux*) use=amd64-linux;;
-    *x86_64*kfreebsd*)	use=amd64-kfreebsd;;
-    *86*linux*) use=386-linux;;
-    *riscv64*linux*) use=riscv64-linux;;
-    *86*kfreebsd*) use=386-kfreebsd;;
-    *86*gnu*)	use=386-gnu;;
-    m68k*linux*) use=m68k-linux;;
-    alpha*linux*) use=alpha-linux;;
-    mips*linux*) use=mips-linux;;
-    mipsel*linux*) use=mipsel-linux;;
-    sparc*linux*) use=sparc-linux;;
-    aarch64*linux*) use=aarch64-linux;;
-    arm*linux*hf) use=armhf-linux;;
-    arm*linux*) use=arm-linux;;
-    s390*linux*) use=s390-linux;;
-    ia64*linux*) use=ia64-linux;;
-    hppa*linux*) use=hppa-linux;;
-    powerpc*linux*) use=powerpc-linux;;
-    powerpc-*-darwin*) use=powerpc-macosx;;
-    *86*darwin*) use=386-macosx;;
-    i*mingw*|i*msys*) use=mingw;;
-    *cygwin*)
-        if $CC -v 2>&1 | fgrep ming > /dev/null ;
-        then use=mingw
-        else use=gnuwin95
-        fi;;
-    *openbsd*) use=FreeBSD;;
-    sparc-sun-solaris*) use=solaris;;
-    i?86-pc-solaris*) use=solaris-i386;;
-esac
-
-# Check whether --enable-machine was given.
-if test ${enable_machine+y}
-then :
-  enableval=$enable_machine; echo enable_machine=$enableval ; use=$enableval
-fi
-
-
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: use=$use" >&5
-printf "%s\n" "use=$use" >&6; }
-
-def_dlopen="no"
-def_statsysbfd="no"
-def_custreloc="yes"
-def_oldgmp="no"
-def_pic="no";
-def_static="no";
-def_debug="no";
-case $use in
-    *kfreebsd)
-	ln -snf linux.defs h/$use.defs;;
-    *gnu)
-	ln -snf linux.defs h/$use.defs;;
-    *linux)
-	ln -snf linux.defs h/$use.defs;
-	case $use in
-	    ia64*)
-		def_dlopen="yes" ; def_custreloc="no" ;;
-	    hppa*)
-		def_pic="yes" ;;
-	esac;;
-esac
-
-# Check whether --enable-widecons was given.
-if test ${enable_widecons+y}
-then :
-  enableval=$enable_widecons; if test "$enableval" = "yes" ; then
-printf "%s\n" "#define WIDE_CONS 1" >>confdefs.h
- fi
-fi
-
-
-# Check whether --enable-safecdr was given.
-if test ${enable_safecdr+y}
-then :
-  enableval=$enable_safecdr; if test "$enableval" = "yes" ; then
-
-printf "%s\n" "#define USE_SAFE_CDR 1" >>confdefs.h
-
-		   # Check whether --enable-safecdrdbg was given.
-if test ${enable_safecdrdbg+y}
-then :
-  enableval=$enable_safecdrdbg; if test "$enableval" = "yes" ; then
-printf "%s\n" "#define DEBUG_SAFE_CDR 1" >>confdefs.h
- fi
-fi
-
-	       fi
-fi
-
-
-# Check whether --enable-prelink was given.
-if test ${enable_prelink+y}
-then :
-  enableval=$enable_prelink; if test "$enable_prelink" = "yes" ; then PRELINK_CHECK=t; fi
-fi
-
-
-
-# Check whether --enable-vssize was given.
-if test ${enable_vssize+y}
-then :
-  enableval=$enable_vssize;
-printf "%s\n" "#define VSSIZE $enableval" >>confdefs.h
-
-fi
-
-# Check whether --enable-bdssize was given.
-if test ${enable_bdssize+y}
-then :
-  enableval=$enable_bdssize;
-printf "%s\n" "#define BDSSIZE $enableval" >>confdefs.h
-
-fi
-
-# Check whether --enable-ihssize was given.
-if test ${enable_ihssize+y}
-then :
-  enableval=$enable_ihssize;
-printf "%s\n" "#define IHSSIZE $enableval" >>confdefs.h
-
-fi
-
-# Check whether --enable-frssize was given.
-if test ${enable_frssize+y}
-then :
-  enableval=$enable_frssize;
-printf "%s\n" "#define FRSSIZE $enableval" >>confdefs.h
-
-fi
-
-
-# Check whether --enable-infodir was given.
-if test ${enable_infodir+y}
-then :
-  enableval=$enable_infodir; INFO_DIR=$enableval
-else $as_nop
-  INFO_DIR=$prefix/share/info
-fi
-
-INFO_DIR=`eval echo $INFO_DIR/`
-
-# Check whether --enable-emacsdir was given.
-if test ${enable_emacsdir+y}
-then :
-  enableval=$enable_emacsdir; EMACS_SITE_LISP=$enableval
-else $as_nop
-  EMACS_SITE_LISP=$prefix/share/emacs/site-lisp
-fi
-
-EMACS_SITE_LISP=`eval echo $EMACS_SITE_LISP/`
-
-# Check whether --enable-xgcl was given.
-if test ${enable_xgcl+y}
-then :
-  enableval=$enable_xgcl;
-else $as_nop
-  enable_xgcl=yes
-fi
-
-
-# Check whether --enable-dlopen was given.
-if test ${enable_dlopen+y}
-then :
-  enableval=$enable_dlopen;
-else $as_nop
-  enable_dlopen=$def_dlopen
-fi
-
-# Check whether --enable-statsysbfd was given.
-if test ${enable_statsysbfd+y}
-then :
-  enableval=$enable_statsysbfd;
-else $as_nop
-  enable_statsysbfd=$def_statsysbfd
-fi
-
-# Check whether --enable-dynsysbfd was given.
-if test ${enable_dynsysbfd+y}
-then :
-  enableval=$enable_dynsysbfd;
-else $as_nop
-  enable_dynsysbfd=no
-fi
-
-# Check whether --enable-custreloc was given.
-if test ${enable_custreloc+y}
-then :
-  enableval=$enable_custreloc;
-else $as_nop
-  enable_custreloc=$def_custreloc
-fi
-
-
-# Check whether --enable-debug was given.
-if test ${enable_debug+y}
-then :
-  enableval=$enable_debug;
-else $as_nop
-  enable_debug=$def_debug
-fi
-
-# Check whether --enable-static was given.
-if test ${enable_static+y}
-then :
-  enableval=$enable_static;
-else $as_nop
-  enable_static=$def_static
-fi
-
-# Check whether --enable-pic was given.
-if test ${enable_pic+y}
-then :
-  enableval=$enable_pic;
-else $as_nop
-  enable_pic=$def_pic
-fi
-
-
-load_opt=0
-if test "$enable_dlopen" = "yes" ; then
-    load_opt=1
-fi
-if test "$enable_statsysbfd" = "yes" ; then
-    case $load_opt in
-	0) load_opt=1;;
-	1) load_opt=2;;
-    esac
-fi
-if test "$enable_dynsysbfd" = "yes" ; then
-    case $load_opt in
-	0) load_opt=1;;
-	1) load_opt=2;;
-	2) load_opt=3;;
-    esac
-fi
-if test "$enable_custreloc" = "yes" ; then
-    case $load_opt in
-	0) load_opt=1;;
-	1) load_opt=2;;
-	2) load_opt=3;;
-	3) load_opt=4;;
-	4) load_opt=5;;
-    esac
-fi
-
-if test "$load_opt" != "1" ; then
-    echo "Exactly one loader option must be chosen: dlopen=$enable_dlopen statsysbfd=$enable_statsysbfd dynsysbfd=$enable_dynsysbfd custreloc=$enable_custreloc"
-    as_fn_error $? "loader option failure" "$LINENO" 5
-fi
-
-
-#
-# System programs
-#
-
-# We set the default CFLAGS below, and don't want the autoconf default
-# CM 20040106
-if test "$CFLAGS" = "" ; then
-    CFLAGS=" "
-fi
-if test "$LDFLAGS" = "" ; then
-    LDFLAGS=" "
-fi
-
-
 
 
 
@@ -4521,6 +4091,438 @@ then :
   printf "%s\n" "#define _XOPEN_SOURCE 500" >>confdefs.h
 
 fi
+
+$ac_includes_default
+
+# Check whether --enable-xgcl was given.
+if test ${enable_xgcl+y}
+then :
+  enableval=$enable_xgcl; enable_xgcl=$enableval
+else $as_nop
+  enable_xgcl="yes"
+fi
+
+
+#
+# Host information
+#
+
+for ac_prog in gawk nawk awk
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_prog_AWK+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  if test -n "$AWK"; then
+  ac_cv_prog_AWK="$AWK" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_prog_AWK="$ac_prog"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+AWK=$ac_cv_prog_AWK
+if test -n "$AWK"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $AWK" >&5
+printf "%s\n" "$AWK" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+  test -n "$AWK" && break
+done
+
+
+
+
+
+  # Make sure we can run config.sub.
+$SHELL "${ac_aux_dir}config.sub" sun4 >/dev/null 2>&1 ||
+  as_fn_error $? "cannot run $SHELL ${ac_aux_dir}config.sub" "$LINENO" 5
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
+printf %s "checking build system type... " >&6; }
+if test ${ac_cv_build+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_build_alias=$build_alias
+test "x$ac_build_alias" = x &&
+  ac_build_alias=`$SHELL "${ac_aux_dir}config.guess"`
+test "x$ac_build_alias" = x &&
+  as_fn_error $? "cannot guess build type; you must specify one" "$LINENO" 5
+ac_cv_build=`$SHELL "${ac_aux_dir}config.sub" $ac_build_alias` ||
+  as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $ac_build_alias failed" "$LINENO" 5
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_build" >&5
+printf "%s\n" "$ac_cv_build" >&6; }
+case $ac_cv_build in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical build" "$LINENO" 5;;
+esac
+build=$ac_cv_build
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_build
+shift
+build_cpu=$1
+build_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+build_os=$*
+IFS=$ac_save_IFS
+case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
+printf %s "checking host system type... " >&6; }
+if test ${ac_cv_host+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  if test "x$host_alias" = x; then
+  ac_cv_host=$ac_cv_build
+else
+  ac_cv_host=`$SHELL "${ac_aux_dir}config.sub" $host_alias` ||
+    as_fn_error $? "$SHELL ${ac_aux_dir}config.sub $host_alias failed" "$LINENO" 5
+fi
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_host" >&5
+printf "%s\n" "$ac_cv_host" >&6; }
+case $ac_cv_host in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical host" "$LINENO" 5;;
+esac
+host=$ac_cv_host
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_host
+shift
+host_cpu=$1
+host_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+host_os=$*
+IFS=$ac_save_IFS
+case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
+
+
+canonical=$host
+my_host_kernel=`echo $host_os | ${AWK} '{j=split($1,A,"-");print A[1]}'`
+my_host_system=`echo $host_os | ${AWK} '{j=split($1,A,"-");if (j>=2) print A[2]}'`
+
+cat >>confdefs.h <<_ACEOF
+#define HOST_CPU "`echo $host_cpu | ${AWK} '{print toupper($0)}'`"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define HOST_KERNEL "`echo $my_host_kernel | ${AWK} '{print toupper($0)}'`"
+_ACEOF
+
+if test "$my_host_system" != "" ; then
+
+cat >>confdefs.h <<_ACEOF
+#define HOST_SYSTEM "`echo $my_host_system | ${AWK} '{print toupper($0)}'`"
+_ACEOF
+
+fi
+## host=CPU-COMPANY-SYSTEM
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: host=$host" >&5
+printf "%s\n" "host=$host" >&6; }
+
+use=unknown
+case $canonical in
+    sh4*linux*) use=sh4-linux;;
+    *x86_64*linux*) use=amd64-linux;;
+    *x86_64*kfreebsd*)	use=amd64-kfreebsd;;
+    *86*linux*) use=386-linux;;
+    *riscv64*linux*) use=riscv64-linux;;
+    *86*kfreebsd*) use=386-kfreebsd;;
+    *86*gnu*)	use=386-gnu;;
+    m68k*linux*) use=m68k-linux;;
+    alpha*linux*) use=alpha-linux;;
+    mips*linux*) use=mips-linux;;
+    mipsel*linux*) use=mipsel-linux;;
+    sparc*linux*) use=sparc-linux;;
+    aarch64*linux*) use=aarch64-linux;;
+    arm*linux*hf) use=armhf-linux;;
+    arm*linux*) use=arm-linux;;
+    s390*linux*) use=s390-linux;;
+    ia64*linux*) use=ia64-linux;;
+    hppa*linux*) use=hppa-linux;;
+    powerpc*linux*) use=powerpc-linux;;
+    powerpc-*-darwin*) use=powerpc-macosx;;
+    *86*darwin*) use=386-macosx;;
+    i*mingw*|i*msys*) use=mingw;;
+    *cygwin*)
+        if $CC -v 2>&1 | fgrep ming > /dev/null ;
+        then use=mingw
+        else use=gnuwin95
+        fi;;
+    *openbsd*) use=FreeBSD;;
+    sparc-sun-solaris*) use=solaris;;
+    i?86-pc-solaris*) use=solaris-i386;;
+esac
+
+# Check whether --enable-machine was given.
+if test ${enable_machine+y}
+then :
+  enableval=$enable_machine; echo enable_machine=$enableval ; use=$enableval
+fi
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: use=$use" >&5
+printf "%s\n" "use=$use" >&6; }
+
+def_dlopen="no"
+def_statsysbfd="no"
+def_custreloc="yes"
+def_oldgmp="no"
+def_pic="no";
+def_static="no";
+def_debug="no";
+case $use in
+    *kfreebsd)
+	ln -snf linux.defs h/$use.defs;;
+    *gnu)
+	ln -snf linux.defs h/$use.defs;;
+    *linux)
+	ln -snf linux.defs h/$use.defs;
+	case $use in
+	    ia64*)
+		def_dlopen="yes" ; def_custreloc="no" ;;
+	    hppa*)
+		def_pic="yes" ;;
+	esac;;
+esac
+
+# Check whether --enable-widecons was given.
+if test ${enable_widecons+y}
+then :
+  enableval=$enable_widecons; if test "$enableval" = "yes" ; then
+printf "%s\n" "#define WIDE_CONS 1" >>confdefs.h
+ fi
+fi
+
+
+# Check whether --enable-safecdr was given.
+if test ${enable_safecdr+y}
+then :
+  enableval=$enable_safecdr; if test "$enableval" = "yes" ; then
+
+printf "%s\n" "#define USE_SAFE_CDR 1" >>confdefs.h
+
+		   # Check whether --enable-safecdrdbg was given.
+if test ${enable_safecdrdbg+y}
+then :
+  enableval=$enable_safecdrdbg; if test "$enableval" = "yes" ; then
+printf "%s\n" "#define DEBUG_SAFE_CDR 1" >>confdefs.h
+ fi
+fi
+
+	       fi
+fi
+
+
+# Check whether --enable-prelink was given.
+if test ${enable_prelink+y}
+then :
+  enableval=$enable_prelink; if test "$enable_prelink" = "yes" ; then PRELINK_CHECK=t; fi
+fi
+
+
+
+# Check whether --enable-vssize was given.
+if test ${enable_vssize+y}
+then :
+  enableval=$enable_vssize;
+printf "%s\n" "#define VSSIZE $enableval" >>confdefs.h
+
+fi
+
+# Check whether --enable-bdssize was given.
+if test ${enable_bdssize+y}
+then :
+  enableval=$enable_bdssize;
+printf "%s\n" "#define BDSSIZE $enableval" >>confdefs.h
+
+fi
+
+# Check whether --enable-ihssize was given.
+if test ${enable_ihssize+y}
+then :
+  enableval=$enable_ihssize;
+printf "%s\n" "#define IHSSIZE $enableval" >>confdefs.h
+
+fi
+
+# Check whether --enable-frssize was given.
+if test ${enable_frssize+y}
+then :
+  enableval=$enable_frssize;
+printf "%s\n" "#define FRSSIZE $enableval" >>confdefs.h
+
+fi
+
+
+# Check whether --enable-infodir was given.
+if test ${enable_infodir+y}
+then :
+  enableval=$enable_infodir; INFO_DIR=$enableval
+else $as_nop
+  INFO_DIR=$prefix/share/info
+fi
+
+INFO_DIR=`eval echo $INFO_DIR/`
+
+# Check whether --enable-emacsdir was given.
+if test ${enable_emacsdir+y}
+then :
+  enableval=$enable_emacsdir; EMACS_SITE_LISP=$enableval
+else $as_nop
+  EMACS_SITE_LISP=$prefix/share/emacs/site-lisp
+fi
+
+EMACS_SITE_LISP=`eval echo $EMACS_SITE_LISP/`
+
+# Check whether --enable-xgcl was given.
+if test ${enable_xgcl+y}
+then :
+  enableval=$enable_xgcl;
+else $as_nop
+  enable_xgcl=yes
+fi
+
+
+# Check whether --enable-dlopen was given.
+if test ${enable_dlopen+y}
+then :
+  enableval=$enable_dlopen;
+else $as_nop
+  enable_dlopen=$def_dlopen
+fi
+
+# Check whether --enable-statsysbfd was given.
+if test ${enable_statsysbfd+y}
+then :
+  enableval=$enable_statsysbfd;
+else $as_nop
+  enable_statsysbfd=$def_statsysbfd
+fi
+
+# Check whether --enable-dynsysbfd was given.
+if test ${enable_dynsysbfd+y}
+then :
+  enableval=$enable_dynsysbfd;
+else $as_nop
+  enable_dynsysbfd=no
+fi
+
+# Check whether --enable-custreloc was given.
+if test ${enable_custreloc+y}
+then :
+  enableval=$enable_custreloc;
+else $as_nop
+  enable_custreloc=$def_custreloc
+fi
+
+
+# Check whether --enable-debug was given.
+if test ${enable_debug+y}
+then :
+  enableval=$enable_debug;
+else $as_nop
+  enable_debug=$def_debug
+fi
+
+# Check whether --enable-static was given.
+if test ${enable_static+y}
+then :
+  enableval=$enable_static;
+else $as_nop
+  enable_static=$def_static
+fi
+
+# Check whether --enable-pic was given.
+if test ${enable_pic+y}
+then :
+  enableval=$enable_pic;
+else $as_nop
+  enable_pic=$def_pic
+fi
+
+
+load_opt=0
+if test "$enable_dlopen" = "yes" ; then
+    load_opt=1
+fi
+if test "$enable_statsysbfd" = "yes" ; then
+    case $load_opt in
+	0) load_opt=1;;
+	1) load_opt=2;;
+    esac
+fi
+if test "$enable_dynsysbfd" = "yes" ; then
+    case $load_opt in
+	0) load_opt=1;;
+	1) load_opt=2;;
+	2) load_opt=3;;
+    esac
+fi
+if test "$enable_custreloc" = "yes" ; then
+    case $load_opt in
+	0) load_opt=1;;
+	1) load_opt=2;;
+	2) load_opt=3;;
+	3) load_opt=4;;
+	4) load_opt=5;;
+    esac
+fi
+
+if test "$load_opt" != "1" ; then
+    echo "Exactly one loader option must be chosen: dlopen=$enable_dlopen statsysbfd=$enable_statsysbfd dynsysbfd=$enable_dynsysbfd custreloc=$enable_custreloc"
+    as_fn_error $? "loader option failure" "$LINENO" 5
+fi
+
+
+#
+# System programs
+#
+
+# We set the default CFLAGS below, and don't want the autoconf default
+# CM 20040106
+if test "$CFLAGS" = "" ; then
+    CFLAGS=" "
+fi
+if test "$LDFLAGS" = "" ; then
+    LDFLAGS=" "
+fi
+
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -5751,6 +5753,7 @@ printf %s "checking working gprof... " >&6; }
        aarch64*) GPROF="";;#unreproducible buildd bug 20170824
        *gnu)  GPROF="";;
    esac
+   if ! add_arg_to_cflags -pg ; then GPROF="" ; fi
    if test "$GPROF" = "" ; then
        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: disabled" >&5
 printf "%s\n" "disabled" >&6; }
