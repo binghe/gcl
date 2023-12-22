@@ -41,6 +41,11 @@ gprof.o: gprof.c $(DECL)
 	[ "$(GPROF)" = "" ] || $(CC) -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO)
 	[ "$(GPROF)" != "" ] || (touch foo.c ;$(CC) -c foo.c $(CFLAGS) $(DEFS) $(AUX_INFO) -o $@; rm foo.c)
 
+gprof.ini: gprof.c grab_defs
+	[ "$(GPROF)" = "" ] || $(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c |\
+		 sed -e 's,DEFUNB(\([^)]*\)),\nDEFUNB(\1),g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $@
+	touch $@
+
 prelink.o: prelink.c $(DECL)
 	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
 
