@@ -390,7 +390,6 @@ AC_ARG_ENABLE([gprof],[  --enable-gprof builds gcl with -pg in CFLAGS to enable 
 	      [if test "$enableval" != "yes" ; then GPROF=""; fi])
 
 if test "$GPROF" != "" ; then
-   AC_MSG_CHECKING([working gprof])
    case $use in
        powerpc*) if test "$host_cpu" = "powerpc64le" ; then GPROF=""; fi;;
        s390*) GPROF="";;#mcount smashes float args in make_shortfloat 20180313
@@ -402,15 +401,15 @@ if test "$GPROF" != "" ; then
        aarch64*) GPROF="";;#unreproducible buildd bug 20170824
        *gnu)  GPROF="";;
    esac
+   OLD_CFLAGS=$CFLAGS
    if ! add_arg_to_cflags -pg ; then GPROF="" ; fi
+   CFLAGS=$OLD_CFLAGS
+   AC_MSG_CHECKING([working gprof])
    if test "$GPROF" = "" ; then
        AC_MSG_RESULT([disabled])
    else
        AC_MSG_RESULT([ok])
-       OLD_CFLAGS=$CFLAGS  # Do not run configure tests with -pg
-       assert_arg_to_cflags -pg
        AC_DEFINE(USE_GPROF,1,[use gprof])
-       CFLAGS=$OLD_CFLAGS
    fi
 fi
 AC_SUBST(GPROF)
