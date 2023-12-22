@@ -79,6 +79,7 @@
 (setq *gcl-extra-version* @LI-EXTVERS@
       *gcl-minor-version* @LI-MINVERS@ 
       *gcl-major-version* @LI-MAJVERS@
+      *gcl-git-tag* @LI-GITTAG@
       *gcl-release-date*  "@LI-RELEASE@")
 
 (defvar *system-banner* (default-system-banner))

@@ -177,12 +177,12 @@
     (dolist (l '(:unexec :bfd :readline :xgcl))
       (when (member l *features*)
 	(push l gpled-modules)))
-    (format nil "GCL (GNU Common Lisp)  ~a.~a.~a ~a  ~a  ~a~%~a~%~a ~a~%~a~%~a~%~%~a~%" 
-	    *gcl-major-version* *gcl-minor-version* *gcl-extra-version*
+    (format nil "GCL (GNU Common Lisp)  ~a.~a.~a ~a  ~a  ~a  git: ~a~%~a~%~a ~a~%~a~%~a~%~%~a~%"
+	    *gcl-major-version* *gcl-minor-version* *gcl-extra-version* *gcl-release-date*
 	    (if (member :ansi-cl *features*) "ANSI" "CLtL1")
 	    (if (member :gprof *features*) "profiling" "")
-	    (si::gcl-compile-time)
-	    "Source License: LGPL(gcl,gmp,pargcl), GPL(unexec,bfd,xgcl)"
+	    *gcl-git-tag*
+	    "Source License: LGPL(gcl,gmp), GPL(unexec,bfd,xgcl)"
 	    "Binary License: "
 	    (if gpled-modules (format nil "GPL due to GPL'ed components: ~a" gpled-modules)
 	      "LGPL")

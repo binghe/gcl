@@ -77,6 +77,7 @@ init_raw.lsp: init_raw.lsp.in
 		-e "s#@LI-EXTVERS@#`cat ../minvers | cut -f2 -d.`#1" \
 		-e "s#@LI-MINVERS@#`cat ../minvers | cut -f1 -d.`#1" \
 		-e "s#@LI-MAJVERS@#`cat ../majvers`#1" \
+		-e "s#@LI-GITTAG@#`cat ../git.tag`#1" \
 		-e "s#@LI-RELEASE@#`cat ../release`#1" \
 		-e "s#@LI-CC@#\"$(GCL_CC) -c $(filter-out -pg,$(FINAL_CFLAGS))\"#1" \
 		-e "s#@LI-DFP@#\"$(filter -pg,$(FINAL_CFLAGS))\"#1" \
