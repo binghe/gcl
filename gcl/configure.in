@@ -5,9 +5,6 @@ AC_CONFIG_HEADERS([h/gclincl.h])
 VERSION=`cat majvers`.`cat minvers`
 AC_SUBST(VERSION)
 
-AC_USE_SYSTEM_EXTENSIONS
-AC_CHECK_INCLUDES_DEFAULT
-
 AC_ARG_ENABLE(xgcl,[ --enable-xgcl=yes will compile in support for XGCL],
 [enable_xgcl=$enableval],[enable_xgcl="yes"])
 
@@ -1894,6 +1891,7 @@ if test "$enable_readline" != "no" ; then
                                  AC_COMPILE_IFELSE(
                                         [AC_LANG_PROGRAM(
 	                                       [[
+                                                  #include <stdio.h>
                                                   #include <readline/readline.h>
 						  extern Function *rl_completion_entry_function __attribute__((weak));
 	    				       ]],
@@ -1905,6 +1903,7 @@ if test "$enable_readline" != "no" ; then
                                          AC_COMPILE_IFELSE(
                                                 [AC_LANG_PROGRAM(
 	                                               [[
+						          #include <stdio.h>
 		                                          #include <readline/readline.h>
 							  extern rl_compentry_func_t *rl_completion_entry_function __attribute__((weak));
 	                                               ]],
@@ -1918,6 +1917,7 @@ if test "$enable_readline" != "no" ; then
                                  AC_COMPILE_IFELSE(
                                         [AC_LANG_PROGRAM(
 	                                       [[
+					          #include <stdio.h>
 		                                  #include <readline/readline.h>
 		                                  extern char *rl_readline_name __attribute__((weak));
 	                                       ]],
@@ -1929,6 +1929,7 @@ if test "$enable_readline" != "no" ; then
                                          AC_COMPILE_IFELSE(
                                                 [AC_LANG_PROGRAM(
 	                                               [[
+						          #include <stdio.h>
 		                                          #include <readline/readline.h>
 		                                          extern const char *rl_readline_name __attribute__((weak));
 	                                               ]],
