@@ -24,32 +24,6 @@
 (in-package :system)
 
 
-(eval-when
- (compile eval)
-
-  #-pre-gcl (load "../lsp/gcl_defseq.lsp")
-
-  (defmacro comp-key (key);FIXME
-    `(if (eq ,key #'identity) 0 1))
-
-  (defmacro do-key (key n x);FIXME
-    (let ((xx (sgen)))
-      `(let ((,xx ,x)) (case ,n (0 ,xx) (otherwise (funcall ,key ,xx))))))
-
- 
- (defmacro mrotatef (a b &aux (s (sgen "MRF-S"))) `(let ((,s ,a)) (setf ,a ,b ,b ,s)))
- 
- (defmacro raref (a seq i j l) 
-   `(if ,l 
-	(mrotatef (car (aref ,a ,i)) (car (aref ,a ,j)))
-      (set-array ,seq ,i ,seq ,j t)))
- 
- (defmacro garef (a seq i l) `(if ,l (car (aref ,a ,i)) (aref ,seq ,i)))
- 
- 
-)
-
-
 (defun length (x)
   (declare (optimize (safety 1)))
   (check-type x proper-sequence)
@@ -99,6 +73,10 @@
       (let* ((ls (length s))(n (- (if (when end (< end ls)) end ls) start)))
 	(set-array-n (make-array n :element-type (array-element-type s)) 0 s start n))))
 
+
+(eval-when
+ (compile eval)
+  #-pre-gcl (load "../lsp/gcl_defseq.lsp"))
 
 (defseq find ((item) s)
   (labels ((find-loop (i p)
@@ -336,11 +314,21 @@
 			:start1 start1 :start2 (if p 0 i) :end1 end1 :end2 (if p n (+ i n)))
 	(return i)))))
 
+(eval-when (compile eval)
+
+  (defmacro mrotatef (a b &aux (s (sgen "MRF-S"))) `(let ((,s ,a)) (setf ,a ,b ,b ,s)))
+
+  (defmacro raref (a seq i j l)
+    `(if ,l
+	 (mrotatef (car (aref ,a ,i)) (car (aref ,a ,j)))
+	 (set-array ,seq ,i ,seq ,j t)))
+
+  (defmacro garef (a seq i l) `(if ,l (car (aref ,a ,i)) (aref ,seq ,i))))
+
 (defun sort (seq pred &key (key 'identity))
   (declare (optimize (safety 1)))
   (check-type seq proper-sequence)
-  (let* ((k (comp-key key))
-	 (ll (length seq))
+  (let* ((ll (length seq))
 	 (list (listp seq))
 	 (a (when list (make-array ll))))
     (when list
@@ -351,13 +339,15 @@
 	  (declare (seqind ls fi))
 	  (do nil ((>= fi (1- ls)))
 	    (let* ((spi (+ fi (random (- ls fi))))
-		   (sp (do-key key k (garef a seq spi list))))
+		   (sp (garef a seq spi list))
+		   (sp (if key (funcall key sp) sp)))
 	      (raref a seq fi spi list)
 	      (do ((lf fi) (rt ls)) ((>= lf rt))
 		(declare (seqind lf rt));FIXME
 		(do ((q t)) 
 		    ((or (>= (if q (incf lf) lf) (if q rt (decf rt)))
-			 (let ((f (do-key key k (garef a seq (if q lf rt) list))))
+			 (let* ((f (garef a seq (if q lf rt) list))
+				(f (if key (funcall key f) f)))
 			   (and (not (funcall pred (if q f sp) (if q sp f)))
 				(setq q (not q)))))))
 		(let* ((r (< lf rt))
@@ -377,35 +367,17 @@
 		  (push ns ii) (push ns1 ii))
 		(setq ls nls fi nfi))))))))
 
-(defun list-merge-sort (l pred key k)
 
-  (let* ((ll (length l)))
-    (if (< ll 2) l
-      (let* ((i (ash ll -1))
-	     (lf l)
-	     (l1 (nthcdr (1- i) l))
-	     (rt (prog1 (cdr l1) (rplacd l1 nil)))
-	     (lf (list-merge-sort lf pred key k))
-	     (rt (list-merge-sort rt pred key k)))
-	(do (l0 l1) ((not (and lf rt)) l0)
-	  (cond ((funcall pred (do-key key k (car rt)) (do-key key k (car lf)))
-		 (setq l1 (if l1 (cdr (rplacd l1 rt)) (setq l0 rt)) rt (cdr rt))
-		 (unless rt (rplacd l1 lf)))
-		(t (setq l1 (if l1 (cdr (rplacd l1 lf)) (setq l0 lf)) lf (cdr lf))
-		   (unless lf (rplacd l1 rt)))))))))
-
-
-
-(defun stable-sort (sequence predicate &key (key #'identity))
+(defun stable-sort (sequence predicate &key key)
   (declare (optimize (safety 1)))
   (check-type sequence proper-sequence)
   (typecase 
    sequence
-   (list (list-merge-sort sequence predicate key (comp-key key)))
+   (list (list-merge-sort sequence predicate key))
    (string (sort sequence predicate :key key))
    (bit-vector (sort sequence predicate :key key))
    (otherwise 
-    (coerce (list-merge-sort (coerce sequence 'list) predicate key (comp-key key))
+    (coerce (list-merge-sort (coerce sequence 'list) predicate key)
 	    (seqtype sequence)))))
 
 (eval-when (compile eval)

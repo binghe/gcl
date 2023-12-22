@@ -376,26 +376,27 @@
 		`((,i ,(cons (cadr x) (caddr x))))))
 	    +btp-types+)))
 
-(defun list-merge-sort1 (l pred key)
+(defun list-merge-sort (l pred key)
 
-  (let* ((ll (length l)))
-    (if (< ll 2) l
-      (let* ((i (ash ll -1))
-	     (lf l)
-	     (l1 (nthcdr (1- i) l))
-	     (rt (prog1 (cdr l1) (rplacd l1 nil)))
-	     (lf (list-merge-sort1 lf pred key))
-	     (rt (list-merge-sort1 rt pred key)))
-	(do (l0 l1) ((not (and lf rt)) l0)
-	  (cond ((funcall pred (funcall key (car rt)) (funcall key (car lf)))
-		 (setq l1 (if l1 (cdr (rplacd l1 rt)) (setq l0 rt)) rt (cdr rt))
-		 (unless rt (rplacd l1 lf)))
-		(t (setq l1 (if l1 (cdr (rplacd l1 lf)) (setq l0 lf)) lf (cdr lf))
-		   (unless lf (rplacd l1 rt)))))))))
+  (labels ((ky (x) (if key (funcall key x) x)))
+    (let* ((ll (length l)))
+      (if (< ll 2) l
+	  (let* ((i (ash ll -1))
+		 (lf l)
+		 (l1 (nthcdr (1- i) l))
+		 (rt (prog1 (cdr l1) (rplacd l1 nil)))
+		 (lf (list-merge-sort lf pred key))
+		 (rt (list-merge-sort rt pred key)))
+	    (do (l0 l1) ((not (and lf rt)) l0)
+	      (cond ((funcall pred (ky (car rt)) (ky (car lf)))
+		     (setq l1 (if l1 (cdr (rplacd l1 rt)) (setq l0 rt)) rt (cdr rt))
+		     (unless rt (rplacd l1 lf)))
+		    (t (setq l1 (if l1 (cdr (rplacd l1 lf)) (setq l0 lf)) lf (cdr lf))
+		       (unless lf (rplacd l1 rt))))))))))
 
 
-(defvar *btp-bnds<* (list-merge-sort1 (copy-list *btp-bnds*) (lambda (x y) (eq (max-bnd x y '<) x)) 'caadr))
-(defvar *btp-bnds>* (list-merge-sort1 (copy-list *btp-bnds*) (lambda (x y) (eq (max-bnd x y '>) x)) 'cdadr))
+(defvar *btp-bnds<* (list-merge-sort (copy-list *btp-bnds*) (lambda (x y) (eq (max-bnd x y '<) x)) #'caadr))
+(defvar *btp-bnds>* (list-merge-sort (copy-list *btp-bnds*) (lambda (x y) (eq (max-bnd x y '>) x)) #'cdadr))
 
 (defun btp-bnds< (x)
   (dolist (l *btp-bnds<*)
@@ -528,7 +529,7 @@
 (defvar *intindiv-hash* (make-hash-table :test 'equal))
 
 (defun uniq-integer-individuals-type (type)
-  (let ((type `(,(car type) ,@(list-merge-sort1 (copy-list (cdr type)) '< 'identity))))
+  (let ((type `(,(car type) ,@(list-merge-sort (copy-list (cdr type)) #'< nil))))
     (or (gethash type *intindiv-hash*)
 	(setf (gethash type *intindiv-hash*) type))))
 
@@ -784,15 +785,15 @@
 		   ((+ 1 (cons-count (car f)) (cons-count (cdr f))))))
 	   (group-useful-types (tp y)
 	     (cons tp
-		   (list-merge-sort1
+		   (list-merge-sort
 		    (mapcar (lambda (z) (group-useful-types (car z) (cdr z)))
 			    (lreduce (lambda (y x)
 				      (if (member-if (lambda (z) (member (car x) (cdr z))) y) y (cons x y)))
-				    (list-merge-sort1
+				    (list-merge-sort
 				     (mapcar (lambda (z) (cons z (lremove z (lremove-if-not (lambda (x) (type>= z x)) y)))) y)
-				     '> 'length)
+				     #'> #'length)
 				    :initial-value nil))
-		    '> #'cons-count))))
+		    #'> #'cons-count))))
     (cdr (group-useful-types t (mapcan (lambda (x &aux (x (cdr x)))
 					 (when x (unless (eq x t) (list x))))
 				       +useful-types-alist+)))))
