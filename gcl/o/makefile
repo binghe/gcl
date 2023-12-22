@@ -39,7 +39,7 @@ boot.o: boot.c $(DECL) boot.h #FIXME clean, include file changes
 
 gprof.o: gprof.c $(DECL)
 	[ "$(GPROF)" = "" ] || $(CC) -c $(filter-out -fomit-frame-pointer,$(CFLAGS)) $(DEFS) -pg $*.c $(AUX_INFO)
-	touch $@
+	[ "$(GPROF)" != "" ] || (touch foo.c ;$(CC) -c foo.c $(CFLAGS) $(DEFS) $(AUX_INFO) -o $@; rm foo.c)
 
 prelink.o: prelink.c $(DECL)
 	$(CC) -c $(filter-out -pg,$(CFLAGS)) -fPIE $(DEFS) $*.c $(AUX_INFO)
