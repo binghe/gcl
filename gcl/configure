@@ -4092,7 +4092,7 @@ then :
 
 fi
 
-$ac_includes_default
+
 
 # Check whether --enable-xgcl was given.
 if test ${enable_xgcl+y}
