@@ -274,15 +274,15 @@
 
 
 (defdlfun (:fixnum "memcpy") :fixnum :fixnum :fixnum)
-(defun memcpy (a b c)
-  (declare (fixnum a b c))
-  (lit :fixnum "{fixnum f=1;f;}");(side-effects)
-  (|libc|:|memcpy| a b c))
+#.`(defun memcpy (a b c)
+     (declare (fixnum a b c))
+     (lit :fixnum "{fixnum f=1;f;}");(side-effects)
+     (,(mdlsym "memcpy") a b c))
 (declaim (inline memcpy))
 
 (defdlfun (:fixnum "memmove") :fixnum :fixnum :fixnum)
-(defun memmove (a b c)
-  (declare (fixnum a b c))
-  (lit :fixnum "{fixnum f=1;f;}");(side-effects)
-  (|libc|:|memmove| a b c))
+#.`(defun memmove (a b c)
+     (declare (fixnum a b c))
+     (lit :fixnum "{fixnum f=1;f;}");(side-effects)
+     (,(mdlsym "memmove") a b c))
 (declaim (inline memmove))

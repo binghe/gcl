@@ -255,7 +255,8 @@
      (member fname *inline*)
      (local-fun-fn fname)
      (get fname 'cmp-inline)
-     (member (symbol-package fname) (load-time-value (mapcar 'find-package '(:s |libm| |libc| |libgmp|)))))))
+     (member (symbol-package fname)
+	     (load-time-value (mapcar #'symbol-package (list 'c-t-tt (mdlsym "sin") (mdlsym "memmove"))))))))
 
 ;; (defun inline-asserted (fname)
 ;;   (unless *compiler-push-events*
