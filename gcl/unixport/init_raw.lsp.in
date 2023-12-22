@@ -42,7 +42,7 @@
 	 (apply 'make-function-plist
 		(list (mapcar 'cmp-norm-tp (get s 'proclaimed-arg-types))
 		      (cmp-norm-tp (get s 'proclaimed-return-type)))
-		(or (cdr (c-function-plist fun)) (list nil nil nil nil s))))))
+		(or (cdr (c-function-plist fun)) (list nil nil nil 1 s))))));FIXME props
     (dolist (l '(proclaimed-function proclaimed-arg-types proclaimed-return-type))
       (remprop s l))))
 
