@@ -416,18 +416,13 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
        (lam clo) 
        (function-lambda-expression fun)
        (assert (not (when mac clo)));FIXME?
-       (let ((form `(,(if mac 'defmacro 'defun) ,(if mac (cons 'macro na) na) ,(cadr lam) ,@(cddr lam))));na (if mac (cons 'macro na) na)
+       (let ((form `(,(if mac 'defmacro 'defun) ,(if mac (cons 'macro na) na) ,(cadr lam) ,@(cddr lam))))
 	 (values
 	  (if clo
-	      `(let* (,@(nreverse
-			 (let ((i -1))
-			   (mapcar (lambda (x)
-				     `(,(car x) (nth ,(incf i) (fun-env ',name))))
-				   clo))))
+	      `(let* ((e (fun-env ',name)) ,@(mapcar (lambda (x) `(,(car x) (pop e))) clo))
 		 ,form)
 	    form)
 	  na))))))
-
 
 (defvar *compiler-compile-data* nil)
 
