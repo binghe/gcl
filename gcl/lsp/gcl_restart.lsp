@@ -64,20 +64,19 @@
     restarts))
 
 (defun compute-restarts (&optional condition)
-  (remove-if-not (lambda (x) (condition-pass condition x)) (remove-duplicates (nconc (mapcar 'car *restarts*) (kcl-top-restarts)))))
+  (remove-if-not (lambda (x) (condition-pass condition x)) (nconc (mapcar 'car *restarts*) (kcl-top-restarts))))
 
 (defun find-restart (name &optional condition &aux (sn (symbolp name)))
   (car (member name (compute-restarts condition) :key (lambda (x) (if sn (restart-name x) x)))))
 
 (defun transform-keywords (&key report interactive test 
 				&aux rr (report (if (stringp report) `(lambda (s) (write-string ,report s)) report)))
-  (macrolet ((do-setf (x) 
+  (macrolet ((do-setf (x y)
 		      `(when ,x 
-			 (setf (getf rr ,(intern (concatenate 'string (symbol-name x) "-FUNCTION") :keyword))
-			       (list 'function ,x)))))
-	    (do-setf report)
-	    (do-setf interactive)
-	    (do-setf test)
+			 (setf (getf rr ,y) (list 'function ,x)))))
+	    (do-setf report :report-function)
+	    (do-setf interactive :interactive-function)
+	    (do-setf test :test-function)
 	    rr))
 
 (defun rewrite-restart-case-clause (r &aux (name (pop r))(ll (pop r)))

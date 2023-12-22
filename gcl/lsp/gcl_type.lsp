@@ -716,7 +716,9 @@
 
 (defun best-type-of (c)
   (let* ((r (lreduce 'set-difference c :key 'car :initial-value +kt+))
-	 (tps (nconc (mapcar 'car c) (list r))))
+	 (tps (nconc (mapcar 'car c) (list r)))
+	 (rs +rs+))
+    (declare (special rs));FIXME to prevent unroll of +rs+
     (or (caar (member-if (lambda (x)
 			   (let* ((f (pop x))
 				  (z (mapcan
@@ -725,8 +727,8 @@
 					 (mapcar (lambda (z) (cdr (assoc z x))) y)))
 				      tps)))
 			     (eq z (lremove-duplicates z))))
-			 +rs+))
-	(caar +rs+))))
+			 rs))
+	(caar rs))))
 
 (defun calist2 (a)
   (lreduce (lambda (y x &aux (z (rassoc (cdr x) y :test 'equal)));;aggregate identical subtypes, e.g. undecidable

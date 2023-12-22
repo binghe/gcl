@@ -223,31 +223,6 @@
     (heaprep))
   (values))
 
-
-(defvar *call-stack* nil)
-(defvar *prof-list* nil)
-(defvar *profiling* nil)
-(defun in-call (sym)
-  (when *profiling*
-    (push (cons sym (gettimeofday)) *call-stack*)))
-(defun out-call (tm)
-  (when *call-stack*
-    (let* ((r (pop *call-stack*))
-	   (tm (- tm (cdr r)))
-	   (e (car (member (caar *call-stack*) (pushnew (list (caar *call-stack*)) *prof-list* :key 'car) :key 'car)))
-	   (f (car (member (car r) (pushnew (list* (car r) 0 0) (cdr e) :key 'car) :key 'car))))
-      (setf (cadr f) (+ tm (cadr f)) (cddr f) (1+ (cddr f))))))
-(defun prof (v)
-  (print-prof)
-  (setq *call-stack* nil *prof-list* nil *profiling* v))
-(defun print-prof nil
-  (dolist (l *prof-list*)
-    (setf (cdr l) (sort (cdr l) (lambda (x y) (> (cadr x) (cadr y))))))
-  (setq *prof-list* (sort *prof-list* (lambda (x y) (> (reduce (lambda (y x) (+ y (cadr x))) (cdr x) :initial-value 0)
-						       (reduce (lambda (y x) (+ y (cadr x))) (cdr y) :initial-value 0)))))
-  (print *prof-list*))
-
-
 (defun gprof-output (symtab gmon)
   (with-open-file
      (s (format nil "|gprof -S '~a' '~a' '~a'" symtab (kcl-self) gmon))
