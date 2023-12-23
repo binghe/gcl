@@ -2381,7 +2381,7 @@
 				      tp))
 	   (list 'structure-ref info
 		 (c1arg form info)
-		 (add-symbol name)
+		 name
 		 index sd)))))
 
 ;; (defun c1structure-ref1 (form name index &aux (info (make-info)))
@@ -2484,7 +2484,7 @@
             (y (c1arg (cadddr args) info)))
         (setf (info-type info) (info-type (cadr y)))
         (list 'structure-set info x
-              (add-symbol (cadadr args)) ;;; remove QUOTE.
+              (cadadr args) ;;; remove QUOTE.
               (caddr args) y (get (cadadr args) 'si::s-data)))
       (list 'call-global info 'si:structure-set (c1args args info))))
 
@@ -2551,7 +2551,7 @@
 		 (cond ((not (isfinite val)) `(symbol-value ',(infinite-val-symbol val)))
 		       ((> (abs val) (/ most-positive-long-float 2)) (scl val 'most-positive-long-float))
 		       ((< 0.0 (abs val) (* least-positive-normalized-long-float 1.0d20)) (scl val 'least-positive-normalized-long-float)))))
-	    (add-object (if nval (cons '|#,| nval) val)))))
+	    (if nval (cons '|#,| nval) val))))
   
 
 (defun printable-short-float (val)
@@ -2560,7 +2560,7 @@
 		 (cond ((not (isfinite val)) `(symbol-value ',(infinite-val-symbol val)))
 		       ((> (abs val) (/ most-positive-short-float 2)) (scl val 'most-positive-short-float))
 		       ((< 0.0 (abs val) (* least-positive-normalized-short-float 1.0d20)) (scl val 'least-positive-normalized-short-float)))))
-	    (add-object (if nval (cons '|#,| nval) val)))))
+	    (if nval (cons '|#,| nval) val))))
 
 
 (defun ltvp (val)
@@ -2574,9 +2574,9 @@
    (character                          `(character-value nil ,(char-code val)))
    (long-float                         `(vv ,(printable-long-float val)))
    (short-float                        `(vv ,(printable-short-float val)));FIXME
-   ((or fixnum complex)                `(vv ,(add-object val)))
+   ((or fixnum complex)                `(vv ,val))
    (otherwise                          (when (or always (ltvp val))
-					 `(vv ,(add-object val))))))
+					 `(vv ,val)))))
 
 (defun c1constant-value (val always &aux (val (if (exit-to-fmla-p) (not (not val)) val)))
   (case 

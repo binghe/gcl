@@ -523,7 +523,7 @@
 (defun c2function (funob);FIXME
   (case (car funob)
         (call-global
-         (unwind-exit (list 'symbol-function (add-symbol (caddr funob)))))
+         (unwind-exit (list 'symbol-function (caddr funob))))
         (call-local
 	 (let* ((funob (caddr funob))(fun (pop funob)))
 	   (unwind-exit (if (cadr funob) (list 'ccb-vs (fun-ref-ccb fun)) (list 'vs* (fun-ref fun))))))

@@ -224,7 +224,7 @@
   (setf (blk-exit blk) *exit*)
   (setf (blk-value-to-go blk) *value-to-go*)
   (setf (blk-ref-clb blk) (vs-push))
-  (setf (blk-var blk) (add-symbol (blk-name blk)))
+  (setf (blk-var blk) (blk-name blk))
   (wt-nl) (wt-vs (blk-ref-clb blk)) (wt "=alloc_frame_id();")
   (wt-nl)
   (clink (blk-ref-clb blk))

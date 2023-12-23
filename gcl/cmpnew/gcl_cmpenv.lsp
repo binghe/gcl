@@ -76,11 +76,11 @@
     (setf (gethash n *dlinks*) t)
     (add-init `(si::mdl ',(symbol-name l) ',(package-name (symbol-package l)) ,(add-address (concatenate 'string "&" n))))))
 
-(defun add-symbol (symbol) (add-object symbol))
+;(defun add-symbol (symbol) symbol)
 
 (defun add-object2 (object)
-  (let* ((init (if (when (consp object) (eq (car object) '|#,|)) (cdr object) `',object))
-	 (object (if (when (consp init) (eq (car init) 'nani)) (nani (cadr init)) object)))
+  (let* ((init (if (when (consp object) (eq (car object) '|#,|)) (cdr object) `',object)))
+;    (unless init (break))
     (cond ((gethash object *objects*))
 	  ((push-data-incf nil)
 	   (when init (add-init `(setvv ,*next-vv* ,init)))
@@ -98,13 +98,10 @@
        (eq (car x) 'si::nani) (eq (car y) 'si::nani)
        (eq (cadr x) (cadr y))))
 
-(defun add-object (object) 
-  (cond ((ltvp object) object)
-	((and *compiler-compile* (not *keep-gaz*)) (cons '|#,| `(nani ,(address object))))
-	(object)))
+;(defun add-object (object) object)
 
-(defun add-constant (symbol) 
-  (add-object (cons '|#,| symbol)))
+
+(defun add-constant (symbol) (cons '|#,| symbol))
 
 (defmacro next-cvar () '(incf *next-cvar*))
 (defmacro next-cmacro () '(incf *next-cmacro*))

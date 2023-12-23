@@ -159,7 +159,7 @@
     
     (cond ((or (member name specials) (si:specialp name))
 	   (setf (var-kind var) 'SPECIAL)
-	   (setf (var-loc var) (add-symbol name))
+	   (setf (var-loc var) name)
 	   (when (and (not *compiler-new-safety*) (not (assoc name types)) (setq x (get name 'cmp-type)))
 	     (setf (var-type var) (ensure-known-type x)))
 	   (setq *special-binding* t))
@@ -395,7 +395,7 @@
                    (unless (or (si:specialp name) (constantp name)) (undefined-variable name))
                    (setq var (make-var :name name
                                        :kind 'GLOBAL
-                                       :loc (add-symbol name)
+                                       :loc name
                                        :type (or (get name 'cmp-type) t)
 				       :ref t));FIXME
                    (push var *undefined-vars*))
@@ -635,7 +635,7 @@
   (dolist (name globals)
     (push (make-var :name name
                     :kind 'GLOBAL
-                    :loc (add-symbol name)
+                    :loc name
                     :type (or (get name 'cmp-type) t))
           *vars*)))
 

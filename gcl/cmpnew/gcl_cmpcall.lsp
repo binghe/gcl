@@ -336,7 +336,7 @@
 
 (defun insufficient-arg-str (fnstr nreq nsup sig st
 				   &aux (sig (if st sig (cons '(*) (cdr sig)))) ;(st nil)(nreq 0)
-				   (fnstr (or fnstr (ms (vv-str (add-object 'wrong-number-args)) "->s.s_gfdef"))))
+				   (fnstr (or fnstr (ms (vv-str 'wrong-number-args) "->s.s_gfdef"))))
   (ms (cdr (assoc (cadr sig) +to-c-var-alist+))
       "("
       (nvfun-wrap "call_proc_cs2" 
@@ -415,7 +415,7 @@
 
 (defun g (fname n sig &optional apnarg (clp t)
 		&aux (cname (format nil "/* ~a */(*LnkLI~d)" (function-string fname) n))
-		(fnstr (ms (vv-str (add-object fname)) "->s.s_gfdef"))
+		(fnstr (ms (vv-str fname) "->s.s_gfdef"))
 		(clp (when clp fnstr)))
   (g1 fnstr cname sig apnarg clp))
 
@@ -451,7 +451,7 @@
 		 (let ((x (last x 2))) 
 		   (when (eq 'link-call (car x)) 
 		     (eql n (cadr x))))) *inline-functions*)))
-	((let* ((n (progn (add-object2 (add-symbol fname)) (next-cfun)))
+	((let* ((n (progn (add-object2 fname) (next-cfun)))
 		(f (flags ans set))
 		(f (if (single-type-p rt) f (flag-or f svt)))
 		(f (if apnarg (flag-or f aa) f)))
@@ -512,11 +512,11 @@
        (let ((d (declaration-type (rep-type (if (link-arg-p type) type t)))));FIXME
 	 (if (or args (not (eq t type)))
 	     (wt "(object first,...){" d "V1;va_list ap;va_start(ap,first);V1=(" d ")"
-		 "call_proc_new(" (vv-str (add-object name)) "," (if clp "1" "0") "," 
+		 "call_proc_new(" (vv-str name) "," (if clp "1" "0") ","
 		 (write-to-string (argsizes args type 0));FIXME
 		 ",(void **)(void *)&Lnk" num "," (new-proclaimed-argd args type)
 		 ",first,ap);va_end(ap);return V1;}")
-	   (wt "(){" d "V1=(" d ")call_proc_new(" (vv-str (add-object name)) "," (if clp "1" "0") "," 
+	   (wt "(){" d "V1=(" d ")call_proc_new(" (vv-str name) "," (if clp "1" "0") ","
 	       (write-to-string (argsizes args type 0));FIXME
 	       ",(void **)(void *)&Lnk" num "," (new-proclaimed-argd args type)
 	       ",0,0);return V1;}")))))
@@ -554,8 +554,7 @@
 ;;     (and loc (wt "}")))
 ;;   (unwind-exit 'fun-val))
 
-(defun inline-proc (fname args &aux (n (length args)) res
-			  (obj (add-object fname)))
+(defun inline-proc (fname args &aux (n (length args)) res (obj fname))
   (format t "~%Using ifuncall: ~a" fname)
   (let ((result
   (case n

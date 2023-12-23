@@ -79,7 +79,7 @@
             'princ
             (list (list 'LOCATION
                         (make-info :type (cmp-norm-tp (if (characterp string) 'character 'string)))
-                        (list 'VV (add-object string)))
+                        (list 'VV string))
                   stream) nil t))))
 
 (defun c1terpri (args &aux stream (info (make-info :flags (iflags side-effects))))

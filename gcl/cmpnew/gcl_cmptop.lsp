@@ -2257,7 +2257,7 @@
 			      (special-operator-p (caar s)))))
                   (push (cons (cons (caar s)
                                     (if (eq (caar s) 'quote)
-                                        (list (add-object (cadar s)))
+                                        (list (cadar s))
 				      (parse-cvspecs (cdar s))))
                               (parse-cvspecs (cdr s)))
                         body))
@@ -2295,15 +2295,15 @@
                (wt ");"))
              (cond ((setq fd (assoc (caar s) *global-funs*))
                     (cond (*compiler-push-events*
-                           (wt-nl1 "ihs_push(" (vv-str (add-symbol (caar s))) ");")
+                           (wt-nl1 "ihs_push(" (vv-str (caar s)) ");")
                            (wt-nl1 (c-function-name "L" (cdr fd) (caar s)) "();")
                            (wt-nl1 "ihs_pop();"))
                           (t (wt-nl1 (c-function-name "L" (cdr fd) (caar s)) "();"))))
                    (*compiler-push-events*
-                    (wt-nl1 "super_funcall(" (vv-str (add-symbol (caar s))) ");"))
+                    (wt-nl1 "super_funcall(" (vv-str (caar s)) ");"))
                    (*safe-compile*
-                    (wt-nl1 "super_funcall_no_event(" (vv-str (add-symbol (caar s))) ");"))
-                   (t (wt-nl1 "CMPfuncall(" (vv-str (add-symbol (caar s))) "->s.s_gfdef);")))
+                    (wt-nl1 "super_funcall_no_event(" (vv-str (caar s)) ");"))
+                   (t (wt-nl1 "CMPfuncall(" (vv-str (caar s)) "->s.s_gfdef);")))
              (unless (endp (cdr s))
                (wt-nl1 (cadadr s))
                (case (caadr s)
