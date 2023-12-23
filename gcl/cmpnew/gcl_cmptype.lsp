@@ -259,7 +259,10 @@
 	(x)))
 
 (defun ?list-bound (x r)
-  (if (unless (isinf x) (unless (isnan x) (when (numberp x) (member-if 'consp r)))) (list x) x))
+  (if (when (and (numberp x) (member-if 'consp r))
+	(not (or (isinf x) (isnan x) (integerp x))))
+      (list x)
+      x))
 
 (defun pole-d (x)
   (if (consp x) (car x) 0))
