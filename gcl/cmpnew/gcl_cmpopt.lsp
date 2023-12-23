@@ -921,7 +921,7 @@
 ;;REM
 (push '((t t) t #.(compiler::flags) "immnum_rem(#0,#1)") (get 'rem 'compiler::inline-always))
 #+intdiv
-(push '((fixnum fixnum) fixnum #.(flags rfa)"(#0)%(#1)")
+(push '((fixnum fixnum) fixnum #.(flags rfa)"((#0)%(#1))")
    (get 'rem 'inline-always))
 
 ;;SCHAR
