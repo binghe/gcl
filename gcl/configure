@@ -7567,6 +7567,39 @@ printf "%s\n" "$ac_cv_sizeof_int" >&6; }
 printf "%s\n" "#define SIZEOF_INT $ac_cv_sizeof_int" >>confdefs.h
 
 
+# The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking size of char" >&5
+printf %s "checking size of char... " >&6; }
+if test ${ac_cv_sizeof_char+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (char))" "ac_cv_sizeof_char"        "$ac_includes_default"
+then :
+
+else $as_nop
+  if test "$ac_cv_type_char" = yes; then
+     { { printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+printf "%s\n" "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (char)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_char=0
+   fi
+fi
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_char" >&5
+printf "%s\n" "$ac_cv_sizeof_char" >&6; }
+
+
+
+printf "%s\n" "#define SIZEOF_CHAR $ac_cv_sizeof_char" >>confdefs.h
+
+
 
 
 # Check whether --enable-immfix was given.
@@ -8133,6 +8166,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                    #include <unistd.h>
 		    #include <stdio.h>
 		    #include <stdlib.h>
 		    int main(int argc,char *argv[],char *envp[]) {
@@ -8170,6 +8204,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                    #include <unistd.h>
 		    #include <stdio.h>
 		    #include <stdlib.h>
 		    int main(int argc,char * argv[],char * envp[]) {
@@ -8207,6 +8242,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                    #include <unistd.h>
 		    #include <stdio.h>
 		    #include <stdlib.h>
 		    int main(int argc,char * argv[],char * envp[]) {
@@ -8257,6 +8293,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                #include <unistd.h>
 		#include <stdio.h>
 		#include <stdlib.h>
 		int main(int argc,char **argv,char **envp) {
@@ -8297,6 +8334,7 @@ else $as_nop
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+                #include <unistd.h>
 		#include <stdio.h>
 		#include <stdlib.h>
 		int main(int argc,char **argv,char **envp) {

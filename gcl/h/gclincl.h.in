@@ -375,6 +375,9 @@
 /* have sigcontext of signal.h */
 #undef SIGNAL_H_HAS_SIGCONTEXT
 
+/* The size of `char', as computed by sizeof. */
+#undef SIZEOF_CHAR
+
 /* sizeof linked list for contiguous pages */
 #undef SIZEOF_CONTBLOCK
 

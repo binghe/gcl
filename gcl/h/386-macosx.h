@@ -186,6 +186,8 @@ if (realpath (buf, fub) == 0) {                             \
 
 #ifdef __x86_64__
 #define FPE_RLST "RAX RBX RCX RDX RDI RSI RBP RSP R8 R9 R10 R11 R12 R13 R14 R15 RIP RFLAGS CS FS GS"
+#elif defined(__i386__)
+#define FPE_RLST "GS FS ES DS EDI ESI EBP ESP EBX EDX ECX EAX TRAPNO ERR EIP CS EFL UESP SS"
 #else
 #error Missing reg list
 #endif
