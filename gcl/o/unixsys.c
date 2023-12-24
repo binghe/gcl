@@ -24,6 +24,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <spawn.h>
 #ifndef __MINGW32__
 #include <sys/wait.h>
 #endif
@@ -31,6 +32,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "include.h"
 
 #if !defined(__MINGW32__) && !defined(__CYGWIN__)
+
 
 int
 vsystem(const char *command) {
@@ -40,6 +42,9 @@ vsystem(const char *command) {
   const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp;
   int s;
   pid_t pid;
+  posix_spawnattr_t attr;
+  posix_spawn_file_actions_t file_actions;
+  extern char **environ;
 
   if (strpbrk(command,"\"'$<>"))
 
@@ -58,11 +63,13 @@ vsystem(const char *command) {
 
   }
 
-  if (!(pid=pvfork())) {
-    errno=0;
-    execvp(*p1,(void *)p1);
-    _exit(128|(errno&0x7f));
-  }
+  massert(!posix_spawn_file_actions_init(&file_actions));
+  massert(!posix_spawnattr_init(&attr));
+
+  massert(!posix_spawnp(&pid, *p1, &file_actions, &attr,  (void *)p1, environ));
+
+  massert(!posix_spawnattr_destroy(&attr));
+  massert(!posix_spawn_file_actions_destroy(&file_actions));
 
   massert(pid>0);
   massert(pid==waitpid(pid,&s,0));
