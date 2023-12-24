@@ -2192,8 +2192,10 @@
 	 ;; (let ((*compiling-ordinary* t))
 	 ;;   (t1expr `(funcall (lambda nil ,form nil))))
 	 (let ((gen (gensym "progncompile"))(*compiling-ordinary* t))
-	   (t1expr `(progn (defun ,gen nil ,form nil) (,gen))))
-	 )
+	   (t1expr
+	    `(progn
+	       (defun ,gen nil (comment ',form) ,form nil)
+	       (,gen)))))
 	(t 
 	 (maybe-eval nil form)
 	 (let (*vars* *funs* *blocks* *tags*)

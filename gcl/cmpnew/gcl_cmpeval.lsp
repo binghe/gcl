@@ -659,8 +659,10 @@
 
 (defvar *basic-inlines* nil)
 
+(defun comment (x) x)
 (defun c1comment (args)
-  (list 'comment (make-info :type nil) (with-output-to-string (s) (princ (car args) s))))
+  (list 'comment (make-info :type t  :flags (iflags side-effects))
+	(with-output-to-string (s) (princ (car args) s))))
 (defun c2comment (comment)
   (wt-nl "/*" comment "*/"))
 (si::putprop 'comment 'c1comment 'c1)
