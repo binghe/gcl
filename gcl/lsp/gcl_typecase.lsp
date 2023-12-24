@@ -1,19 +1,19 @@
 (in-package :si)
 
-(let ((sym (gensym "TYPECASE")))
-  (defmacro typecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform sym)))
-    (declare (optimize (safety 2)))
-    (labels ((l (x &aux (c (pop x))(tp (pop c))(fm (if (cdr c) (cons 'progn c) (car c)))(y (when x (l x))))
-		(if (or (eq tp t) (eq tp 'otherwise)) fm `(if (typep ,key ',tp) ,fm ,y))))
-	    (let ((x (l clauses)))
-	      (if (eq key keyform) x `(let ((,key ,keyform)) ,x))))))
-
-(let ((sym (gensym "ETYPECASE")))
-  (defmacro etypecase (keyform &rest clauses &aux (key (if (symbolp keyform) keyform sym)))
-    (declare (optimize (safety 2)))
-    (let* ((x `((t (error 'type-error :datum ,key :expected-type '(or ,@(mapcar 'car clauses))))))
-	   (x `(typecase ,key ,@(append clauses x))))
+(defmacro typecase (keyform &rest clauses
+		    &aux (sym (sgen "TYPECASE"))(key (if (symbolp keyform) keyform sym)))
+  (declare (optimize (safety 2)))
+  (labels ((l (x &aux (c (pop x))(tp (pop c))(fm (if (cdr c) (cons 'progn c) (car c)))(y (when x (l x))))
+	     (if (or (eq tp t) (eq tp 'otherwise)) fm `(if (typep ,key ',tp) ,fm ,y))))
+    (let ((x (l clauses)))
       (if (eq key keyform) x `(let ((,key ,keyform)) ,x)))))
+
+(defmacro etypecase (keyform &rest clauses
+		     &aux (sym (sgen "ETYPECASE"))(key (if (symbolp keyform) keyform sym)))
+  (declare (optimize (safety 2)))
+  (let* ((x `((t (error 'type-error :datum ,key :expected-type '(or ,@(mapcar 'car clauses))))))
+	 (x `(typecase ,key ,@(append clauses x))))
+    (if (eq key keyform) x `(let ((,key ,keyform)) ,x))))
 
 (defmacro infer-tp (x y z) (declare (ignore x y)) z)
 
