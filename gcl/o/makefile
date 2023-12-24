@@ -84,7 +84,7 @@ boot.h: boot.ini
 	rm $*.c
 
 $(DPP):	../bin/dpp.c
-	${CC} ${DEFS} -o $@ $<
+	${CC} $(CFLAGS) ${DEFS} -o $@ $<
 
 new_init.c: ${INI_FILES}
 	echo '#include "make-init.h"' > $@

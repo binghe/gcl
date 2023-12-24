@@ -68,7 +68,7 @@ $(LSPDIR)/auto_new.lsp: $(LSPDIR)/auto.lsp
 		echo "(AUTOLOAD 'init-readline '|readline|)" >>$@
 
 libboot.so: ../o/boot.o
-	$(CC) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
+	$(CC) $(CFLAGS) -shared -Wl,-undefined -Wl,dynamic_lookup $< -o $@
 
 init_raw.lsp: init_raw.lsp.in
 
