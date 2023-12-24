@@ -286,7 +286,7 @@
       (add-info info (cadr body))
       
       (setf (info-type info) (info-type (cadr body)))
-      (unless (eq setjmps *setjmps*) (setf (info-volatile info) 1))
+      (unless (eq setjmps *setjmps*) (set-volatile info))
       
       (if vars (list nm info vars fms body)
 	(list* (car body) info (cddr body))))))

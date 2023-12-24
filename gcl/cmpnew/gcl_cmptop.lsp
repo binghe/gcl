@@ -1213,7 +1213,7 @@
 	 (osig (if (equal '((*) *) osig) sig osig));FIXME
 	 (doc (cadddr lambda-expr)))
 	 
-    (or (eql setjmps *setjmps*) (setf (info-volatile (cadr lambda-expr)) 1))
+    (unless (eql setjmps *setjmps*) (set-volatile (cadr lambda-expr)))
     (keyed-cmpnote (list 'return-type fname) "~s return type ~s" fname (c1retnote lambda-expr))
     
     (unless (or (equal osig sig) (eq fname 'cmp-anon));FIXME
@@ -1447,8 +1447,8 @@
 ;; 	       nil))))))
 	
 
-(defun volatile (info)
-   (if  (/= (info-volatile info) 0) "VOL " ""))
+(defun volatile (info) (if (iflag-p (info-flags info) volatile) "VOL " ""))
+(defun set-volatile (info) (setf (info-flags info) (logior (iflags volatile) (info-flags info))))
 
 (defun register (var)
   (cond ((and (equal *volatile* "")
