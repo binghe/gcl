@@ -308,23 +308,6 @@
                        ;; see gcl_cmplet.lsp
    (cadr (var-loc x))))
 
-(defun args-info-referred-vars (var forms)
-  (if (member (var-kind var) +c-local-var-types+)
-      (dolist (form forms nil)
-		(when (or (is-referred var (cadr form))
-			  (is-rep-referred var (cadr form)))
-		  (return-from args-info-referred-vars t)))
-    (case (var-kind var)
-	  ((LEXICAL REPLACED OBJECT)
-	   (dolist (form forms nil)
-		     (when (or (is-referred var (cadr form))
-			       (is-rep-referred var (cadr form)))
-		       (return-from args-info-referred-vars t))))
-	  (t (dolist (form forms nil)
-		       (when (or (is-referred var (cadr form))
-				 (is-rep-referred var (cadr form))
-				 (/= (info-sp-change (cadr form)) 0))
-			 (return-from args-info-referred-vars t)))))))
 
 ;;; Valid property names for open coded functions are:
 ;;;  INLINE
