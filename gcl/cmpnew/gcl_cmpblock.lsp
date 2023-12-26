@@ -100,10 +100,10 @@
 ;; 	   (ref-blks (cdddr form) blks l)));FIXME?
 ;; 	(t (ref-blks (car form) blks l) (ref-blks (cdr form) blks l))))
 
-(defun prune-mch (l)
+(defun prune-mch (l &optional tag-conflict-p)
   (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x)))
-	       (and (type>= (type-and (var-dt v) tp) (var-type v))
-		    (subsetp st (var-store v))
+	       (and (type<= (var-type v) tp)
+		    (or (when tag-conflict-p (cdr st)) (subsetp (var-store v) st))
 		    (if m (equal tp m) t)))
 	     l))
 
@@ -119,12 +119,12 @@
   (let* ((blk (make-blk :name (car args) :ref nil :ref-ccb nil :ref-clb nil :exit *c1exit*
 			:var (mapcan (lambda (x) (when (var-p x) (list (list x nil nil nil)))) *vars*)))
          (body (let ((*blocks* (cons blk *blocks*))) (c1progn (cdr args)))))
+    (when (info-type (cadr body))
+      (or-mch (prune-mch (blk-var blk))))
     (labels ((nb (b) (if (and (eq (car b) 'return-from) (eq blk (caddr b))) (nb (seventh b)) b)))
       (setq body (nb body)))
     (add-info info (cadr body))
     (setf (info-type info) (type-or1 (info-type (cadr body)) (blk-type blk)))
-    (when (info-type (cadr body))
-      (or-mch (prune-mch (blk-var blk))))
     (ref-blks body (list blk))
     (when (or (blk-ref-ccb blk) (blk-ref-clb blk))
       (incf *setjmps*))

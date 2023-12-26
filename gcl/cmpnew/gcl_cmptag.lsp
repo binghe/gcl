@@ -155,9 +155,9 @@
 
 (defun or-mch (l &optional b)
   (mapc (lambda (x &aux (y x)(v (pop x))(tp (pop x))(st (pop x))(m (car x))
-		   (t1 (type-or1 (var-type v) (or m tp)));FIXME check expensive
-		   (t1 (if b (bbump-tp t1) t1))
-		   (t1 (type-and (var-dt v) t1)))
+		     (m (unless (equal tp m) m))
+		     (t1 (type-or1 (var-type v) (or m tp)));FIXME check expensive
+		     (t1 (if b (type-and (var-dt v) (bbump-tp t1)) t1)))
 	  (setf (cadr y) t1
 		(caddr y) (or-binds (var-store v) st);FIXME union?
 		(cadddr y) (mcpt t1)))
@@ -332,9 +332,7 @@
 
 (defun tag-throw (tag &aux (b (assoc tag *bt*)))
   (if b
-      (let ((v (remove-if (lambda (x &aux (v (pop x))(tp (pop x))(st (pop x))(m (car x)))
-			    (and (type>= (type-and (var-dt v) tp) (var-type v)) (or (cdr st) (subsetp (var-store v) st)) (if m (equal tp m) t)))
-			  (cdr b))))
+      (let ((v (prune-mch (cdr b) t)))
 	(when v (throw tag (or-mch v t))))
     (let ((f (assoc tag *ft*)))
       (or (or-mch (cdr f)) (setf (cdr f) (mch))))))
