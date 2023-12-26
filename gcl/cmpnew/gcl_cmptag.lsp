@@ -83,10 +83,7 @@
   (ref-obs form tags 
 	   (lambda (x) (setf (tag-ref-ccb x) t))
 	   (lambda (x) (setf (tag-ref-clb x) t))
-	   (lambda (x) (setf (tag-ref x) t))
-	   'tag-name
-	   "Tag"
-	   (lambda (x &aux (y (pop x))) (when (eq y 'go) (cdr x)))))
+	   (lambda (x) (setf (tag-ref x) t))))
 
 ;; (defun ref-tags1 (form tags &aux (i (cadr form)))
 ;;   (dolist (tag tags)

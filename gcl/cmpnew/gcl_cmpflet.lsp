@@ -160,10 +160,7 @@
   (ref-obs form funs 
 	   (lambda (x) (setf (fun-ref-ccb x) t))
 	   (lambda (x))
-	   (lambda (x) (setf (fun-ref x) t))
-	   'fun-name
-	   "Fun"
-	   (lambda (x &aux (y (pop x))) (when (eq y 'call-local) (butlast (cadr x))))))
+	   (lambda (x) (setf (fun-ref x) t))))
 
 ;; (defun ref-funs1 (form funs &aux (i (cadr form)))
 ;;   (dolist (fun funs)

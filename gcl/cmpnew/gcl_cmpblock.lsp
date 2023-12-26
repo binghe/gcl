@@ -59,10 +59,7 @@
   (ref-obs form blks 
 	   (lambda (x) (setf (blk-ref-ccb x) t))
 	   (lambda (x) (setf (blk-ref-clb x) t))
-	   (lambda (x) (setf (blk-ref x) t))
-	   'blk-name
-	   "Blk"
-	   (lambda (x &aux (y (pop x))) (when (eq y 'return-from) (cdr x)))))
+	   (lambda (x) (setf (blk-ref x) t))))
 
 ;; (defun ref-blks1 (form blks &aux (i (cadr form)))
 ;;   (dolist (blk blks)
