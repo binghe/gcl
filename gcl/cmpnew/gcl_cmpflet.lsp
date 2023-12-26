@@ -219,7 +219,7 @@
       (push (car def) fnames))
     (let* ((def (effective-safety-src def))
 	   (src (si::block-lambda (cadr def) (car def) (cddr def)))
-	   (fun (make-fun :name (car def) :src src :info (make-info :type nil :sp-change 1))))
+	   (fun (make-fun :name (car def) :src src :info (make-info :type nil :flags (iflags sp-change)))))
       (push fun *funs*)
       (unless (< (cons-count src) *local-fun-inline-limit*)
 	(keyed-cmpnote (list (car def) 'notinline)

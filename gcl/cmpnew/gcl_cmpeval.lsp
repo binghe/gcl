@@ -2068,7 +2068,7 @@
 (defun mi1 (fn args &optional last ff)
   (let* ((tp (get-return-type fn))
 	 (sp (if (when (symbolp fn) (get fn 'no-sp-change)) 0 1))
-	 (info (make-info :type tp :sp-change sp))
+	 (info (make-info :type tp :flags (if sp (iflags sp-change) 0)))
  	 (res (mi1a fn args last info ff)))
     (when tp 
       (let ((t1 (info-type (cadr res)))(t2 (info-type info)))

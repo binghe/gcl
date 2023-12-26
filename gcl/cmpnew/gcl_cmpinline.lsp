@@ -48,10 +48,7 @@
 (defstruct (info (:print-function (lambda (x s i) (s-print 'info (info-type x) (si::address x) s)))
 		 (:copier old-copy-info))
   (type t)		    ;;; Type of the form.
-  (sp-change 0   :type bit) ;;; Whether execution of the form may change the value of a special variable *VS*.
-  (volatile  0   :type bit) ;;; whether there is a possible setjmp
-  (flags     0   :type char)
-  (unused1   0   :type char)
+  (flags     0   :type fixnum)
   (ch      nil   :type list)
   (ref-ccb nil   :type list)
   (ref-clb nil   :type list)
@@ -61,8 +58,8 @@
 
 (si::freeze-defstruct 'info)
 
-
-(defconstant +iflags+ '(side-effects provisional compiler args volatile))
+;;; Old sp-change comment: Whether execution of the form may change the value of a special variable *VS*.
+(defconstant +iflags+ '(side-effects provisional compiler args volatile sp-change))
 
 (defmacro iflag-p (flags flag)
   (let ((i (position flag +iflags+)))
@@ -180,7 +177,6 @@
 	    (mrg info-ref-ccb)
 	    (mrg info-ref-clb)
 	    (mrg info-ref))
-  (when (/= (info-sp-change from-info) 0) (setf (info-sp-change to-info) 1))
   (setf (info-flags to-info) (logior (info-flags to-info) (info-flags from-info)))
   (setf (info-ref to-info) (nunion (info-ref to-info) (remove-if-not 'symbolp (info-ref from-info))));FIXME nunion asym
   (setf (info-ch-ccb to-info) (nunion (info-ch-ccb to-info) (info-ch-ccb from-info)))
@@ -288,8 +284,8 @@
 		       (return-from args-info-changed-vars t))))
 	  (REPLACED nil)
 	  (t (dolist (form forms nil)
-		       (when (or (is-changed var (cadr form))
-				 (/= (info-sp-change (cadr form)) 0))
+	       (when (or (is-changed var (cadr form))
+			 (iflag-p (info-flags (cadr form)) sp-change))
 			 (return-from args-info-changed-vars t)))))))
 
 ;; Variable references in arguments can also be via replaced variables
