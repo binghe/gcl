@@ -308,11 +308,6 @@
 ;; (defun process-local-fun-env (env b f fun tp)
 ;;   (under-env env (process-local-fun b f fun tp)))
 
-(defun fun-def-env (fn)
-  (let ((fun (car (member-if (lambda (x) (when (fun-p x) (eq (fun-fn x) fn))) *funs*))))
-    (if fun
-	(car (fourth (fun-c1 fun)))
-      (current-env))))
 
 (defun mc nil (let ((env (cons nil nil))) (lambda nil env)))
 

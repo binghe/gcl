@@ -2031,11 +2031,6 @@
 ;;     (uu (or inl (mi5 (or (when (symbolp fun) fun) ff) info fms last)))))
 
 
-(defun unprovfn (w &optional b fun &aux (f (cddr w)) (args (pop f)) (env (caar f)))
-  (let ((r (under-env env (c1function args nil b fun))))
-    (mapl (lambda (x y) (setf (car x) (car y))) w r)
-    (setf (cdddr w) nil)
-    w))
 
 ;; (defun unprovfn (f &optional b fun &aux (args (pop f)) (env (caar f)))
 ;;   (under-env env (c1function args nil b fun)))
@@ -2044,16 +2039,6 @@
 
 (defun current-env nil (list *lexical-env-mask* *vars* *blocks* *tags* *funs*))
 
-(defun uui (inl &aux (m inl))
-  (when (eq (car m) 'inline)
-    (when (eq (car (setq m (car (last m)))) 'let*)
-      (uu (fourth m))))
-  inl)
-
-(defun uu (f)
-  (cond ((atom f) f)
-	((eq (car f) 'provfn) (unprovfn f))
-	(t (uu (car f)) (uu (cdr f)) f)))
 
 ;; (defun uu (f)
 ;;   (cond ((atom f) f)
