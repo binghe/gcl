@@ -1199,6 +1199,15 @@ gcl_init_alloc(void *cs_start) {
 
   fixnum cssize=(1L<<23);
 
+#ifdef GCL_GPROF
+  if (raw_image) {
+    sigset_t prof;
+    sigemptyset(&prof);
+    sigaddset(&prof,SIGPROF);
+    sigprocmask(SIG_BLOCK,&prof,NULL);
+  }
+#endif
+
   prelink_init();
   
 #ifdef RECREATE_HEAP
