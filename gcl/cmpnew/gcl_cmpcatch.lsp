@@ -28,8 +28,7 @@
 (si:putprop 'throw 'c1throw 'c1special)
 (si:putprop 'throw 'c2throw 'c2)
 
-(defun c1catch (args &aux (info (make-info :type #t* :flags (iflags sp-change))) tag)
-  (incf *setjmps*)
+(defun c1catch (args &aux (info (make-info :type #t* :flags (iflags sp-change volatile))) tag)
   (when (endp args) (too-few-args 'catch 1 0))
   (setq tag (c1arg (car args) info))
   (let* ((tag (c1arg (pop args) info))
@@ -120,8 +119,7 @@
   (setq *frame-used* t)
   (wt-nl "frs_push(FRS_CATCH," loc ");"))
 
-(defun c1unwind-protect (args &aux (info (make-info :flags (iflags sp-change))) form)
-  (incf *setjmps*)
+(defun c1unwind-protect (args &aux (info (make-info :flags (iflags sp-change volatile))) form)
   (when (endp args) (too-few-args 'unwind-protect 1 0))
   (setq form (let ((*blocks* (cons 'lb *blocks*))
                    (*tags* (cons 'lb *tags*))

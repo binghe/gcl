@@ -212,7 +212,7 @@
 	 (body (remove-if-not (lambda (x) (if (tag-p x) (member x tags) t)) body)))
 	 
     (mapc (lambda (x) (setf (tag-var x) (tag-name x))) tagsc)
-    (if tagsc (incf *setjmps*) (add-loop-registers body))
+    (if tagsc (set-volatile info) (add-loop-registers body))
     (when ref-ccb (mapc (lambda (x) (setf (tag-ref-ccb x) t)) ref-clb));FIXME?
     (mapc (lambda (x) (unless (tag-p x) (add-info info (cadr x)))) body)
     (let ((x (car (last body))))

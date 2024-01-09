@@ -749,8 +749,8 @@
 			&aux (cvar (cs-push t t))
 			(*unwind-exit* *unwind-exit*))
   
-  (wt-nl "{object symbols,values;")
-  (wt-nl "bds_ptr V" cvar "=bds_top;")
+  (wt-nl "{object " *volatile* "symbols,values;")
+  (wt-nl "bds_ptr " *volatile* "V" cvar "=bds_top;")
   (wt-nl "V" cvar "=V" cvar ";");FIXME lintian unused var
   (push cvar *unwind-exit*)
   

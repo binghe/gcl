@@ -127,7 +127,7 @@
     (setf (info-type info) (type-or1 (info-type (cadr body)) (blk-type blk)))
     (ref-blks body (list blk))
     (when (or (blk-ref-ccb blk) (blk-ref-clb blk))
-      (incf *setjmps*))
+      (set-volatile info))
     (mapc (lambda (x &aux (y x)(v (pop x))(tp (pop x))(st (pop x))(m (car x))
 		       (tp (type-and tp (var-dt v))));FIXME, unnecessary?
 	    (unless (and (si::type= tp (var-type v))

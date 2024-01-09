@@ -33,7 +33,6 @@
 (defvar *free-data-registers* 6)
 
 (defvar *volatile*)
-(defvar *setjmps* 0)
 
 ;; Functions may use a block of C stack space.
 ;; (cs . i)  will become Vcs[i].
@@ -1207,13 +1206,11 @@
 	 (oal (get-arg-types fname)) (ort (get-return-type fname))
 	 (osig (export-sig (list oal ort)))
 	 (e (or (gethash fname *sigs*) (setf (gethash fname *sigs*) (make-list 6))))
-	 (setjmps *setjmps*)
 	 (lambda-expr (do-fun fname args e t nil))
 	 (sig (car e))
 	 (osig (if (equal '((*) *) osig) sig osig));FIXME
 	 (doc (cadddr lambda-expr)))
 	 
-    (unless (eql setjmps *setjmps*) (set-volatile (cadr lambda-expr)))
     (keyed-cmpnote (list 'return-type fname) "~s return type ~s" fname (c1retnote lambda-expr))
     
     (unless (or (equal osig sig) (eq fname 'cmp-anon));FIXME

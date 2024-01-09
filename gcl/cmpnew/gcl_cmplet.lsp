@@ -248,7 +248,7 @@
 
 (defun c1let-* (args &optional star inls
 		     &aux (nm (if star 'let* 'let))
-		     (ov *vars*) (*vars* *vars*) (setjmps *setjmps*)
+		     (ov *vars*) (*vars* *vars*)
 		     ss is ts body other-decls
 		     (info (make-info)))
 
@@ -286,10 +286,9 @@
       (add-info info (cadr body))
       
       (setf (info-type info) (info-type (cadr body)))
-      (unless (eq setjmps *setjmps*) (set-volatile info))
       
       (if vars (list nm info vars fms body)
-	(list* (car body) info (cddr body))))))
+	  (list* (car body) info (cddr body))))))
 
 ;; (defun c1let-* (args &optional star inls
 ;; 		     &aux (nm (if star 'let* 'let))
