@@ -55,23 +55,9 @@ number_compare(object x, object y) {
 
     case t_fixnum:
 
-      if (is_imm_fixnum(x)) {
-
-	if (is_imm_fixnum(y))
-	  return fix(x)<fix(y) ? -1 : (fix(x)==fix(y) ? 0 : 1);
-	else
-	  return fix(y)<0 ? 1 : -1;
-
-      } else {
-
-	if (is_imm_fixnum(y))
-	  return fix(x)<0 ? -1 : 1;
-	else {
-	  fixnum fx=fix(x),fy=fix(y);
-	  return fx<fy ? -1 : (fx==fy ? 0 : 1);
-
-	}
-
+      {
+	fixnum fx=fix(x),fy=fix(y);
+	return fx<fy ? -1 : (fx==fy ? 0 : 1);
       }
 
     case t_bignum:
