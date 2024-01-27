@@ -1,7 +1,6 @@
 debian/tmp/usr/share/info/gcl@EXT@-si.info
-debian/tmp/usr/share/info/gcl@EXT@-tk.info
-debian/tmp/usr/share/info/gcl@EXT@-tk.info-1
-debian/tmp/usr/share/info/gcl@EXT@-tk.info-2
+debian/tmp/usr/share/info/gcl@EXT@-si.info-1
+debian/tmp/usr/share/info/gcl@EXT@-si.info-2
 debian/tmp/usr/share/info/gcl@EXT@.info
 debian/tmp/usr/share/info/gcl@EXT@.info-1
 debian/tmp/usr/share/info/gcl@EXT@.info-2

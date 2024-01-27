@@ -5,5 +5,5 @@ Abstract: A Common Lisp compiler and interpreter based on C
 Section: Programming
 
 Format: HTML
-Index: /usr/share/doc/gcl@EXT@-doc/gcl/index.html
-Files: /usr/share/doc/gcl@EXT@-doc/gcl/*.html
+Index: /usr/share/doc/gcl@EXT@/gcl_html/index.html
+Files: /usr/share/doc/gcl@EXT@/gcl_html/*.html

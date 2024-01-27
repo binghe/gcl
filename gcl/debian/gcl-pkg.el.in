@@ -1,0 +1,3 @@
+
+(define-package "gcl@EXT@" "@VR@"
+  "Emacs mode for running GCL.")

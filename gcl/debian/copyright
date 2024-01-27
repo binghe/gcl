@@ -1,65 +1,87 @@
-This package was debianized by JP Sugarbroad <taral@taral.net> on
-Mon, 30 Apr 2001 19:07:49 -0500.
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
-It was downloaded from http://savannah.gnu.org/projects/gcl
+Files: cmpnew/*
+Copyright: 1989 The University of Texas at Austin,William F. Schelter
+Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
+License: LGPL-2
 
-Upstream Author: Bill Schelter <wfs@mail.ma.utexas.edu>
+Files: dos/*
+Copyright: 1989 Free Software Foundation
+License: GPL-2
 
-Copyright:
+Files: elisp/*
+Copyright: 1994,1998 William F. Schelter
+Copyright: 1985-1988 Free Software Foundation
+License: GPL-2
 
-    This package is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+Files: gcl-tk/*
+Copyright: 1994 Rami el Charif,William F. Schelter
+Copyright: 1996 Sun Microsystems
+License: LGPL-2
 
-    This package is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+Files: gmp4/*
+Copyright: 1984-2014 Free Software Foundation
+License: GPL-2
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this package; if not, write to the Free
-    Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
-    02110-1301, USA.
+Files: h/*
+Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
+License: LGPL-2
 
-On Debian GNU/Linux systems, the complete text of the GNU Lesser General
-Public License can be found in `/usr/share/common-licenses/LGPL-2'.
+Files: info/*
+Copyright: 1994 William F. Schelter
+License: GPL-2
 
-The source under xgcl-2 is
+Files: lsp/*
+Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
+Copyright: 1985,1986,1989,1990 William F. Schelter
+License: LGPL-2
 
-Copyright (c) 1995 Gordon S. Novak Jr., Hiep Huu Nguyen, William F. Schelter,
-and The University of Texas at Austin.
+Files: mod/gcl_defpackage.lsp
+Copyright: 1990,1991 lsp The Boeing Company
+License: public-domain
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+Files: mp/*
+Copyright: 1994 William F. Schelter
+License: LGPL-2
 
-and
+Files: o/*
+Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter,Rami el Charif
+Copyright: 1991 William F. Schelter
+Copyright: 1985-1994 Free Software Foundation
+License: LGPL-2
 
-;;**********************************************************
-;;Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts,
-;;and the Massachusetts Institute of Technology, Cambridge, Massachusetts.
+Files: o/gcl_readline.d
+Copyright: 2000 Tuukka Toivonen
+License: LGPL-2
 
-;;                        All Rights Reserved
+Files: pargcl/*
+Copyright: 1994-2005 Gene Cooperman
+Copyright: 1991,1999,2003 Free Software Foundation
+License: LGPL-2
 
-;;Permission to use, copy, modify, and distribute this software and its 
-;;documentation for any purpose and without fee is hereby granted, 
-;;provided that the above copyright notice appear in all copies and that
-;;both that copyright notice and this permission notice appear in 
-;;supporting documentation, and that the names of Digital or MIT not be
-;;used in advertising or publicity pertaining to distribution of the
-;;software without specific, written prior permission.  
+Files: pcl/*
+Copyright: 1985-1990 Xerox Corporation
+Copyright: 1990 Franz Inc.
+License: public-domain
 
-;;DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
-;;ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
-;;DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
-;;ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-;;WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
-;;ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
-;;SOFTWARE.
+Files: xgcl-2/*
+Copyright: 1987 Digital Equipment Corporation,Massachusetts Institute of Technology
+Copyright: 1994 Hiep Huu Nguyen,William F. Schelter,The University of Texas at Austin
+Copyright: 1994,1995,1996,2006,2007,2008,2010 Gordon S. Novak Jr.,The University of Texas at Austin
+Copyright: 1992 The University of Texas at Austin
+Copyright: 1989 Free Software Foundation
+Copyright: 2006 Hiep Huu Nguyen
+License: GPL-2
 
-;;*****************************************************************
+License: GPL-2
+ On Debian GNU/Linux systems, the complete text of the GNU General
+ Public License Version 2 can be found in
+ /usr/share/common-licenses/GPL-2.
 
-On Debian GNU/Linux systems, the complete text of the GNU General
-Public License can be found in `/usr/share/common-licenses/GPL-1'.
+License: LGPL-2
+ On Debian GNU/Linux systems, the complete text of the GNU General
+ Public License Version 2 can be found in
+ /usr/share/common-licenses/LGPL-2.
+
+License: public-domain
+ All permissions granted.
