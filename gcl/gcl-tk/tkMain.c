@@ -263,7 +263,7 @@ TkX_Wish (argc, argv)
      * specified on the command line.
      */
 
-    args = Tcl_Merge(argc-1, (void *)argv+1);
+    args = Tcl_Merge(argc-1, (const char **)argv+1);
     Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
     ckfree(args);
     sprintf(buf, "%d", argc-1);

@@ -497,13 +497,3 @@ connection_failure(s)
      char *s;
 { fprintf(stderr,"connection_failure:%s",s); abort();
 }
-
-object
-make_fixnum1(long i) {
-
-  static union lispunion lu; 
-
-  lu.FIX.FIXVAL=i;
-  return &lu;
-
-}

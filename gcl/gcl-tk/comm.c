@@ -34,11 +34,11 @@ available on FD, 0 if timeout reached and -1 if failed.")
   FD_SET(fd, &inp);
   n = select(fd + 1, &inp, NULL, NULL, &t);
   if (n < 0)
-    return make_fixnum1(-1);
+    return make_fixnum(-1);
   else if (FD_ISSET(fd, &inp))
-    return make_fixnum1(1);
+    return make_fixnum(1);
   else
-    return make_fixnum1(0);
+    return make_fixnum(0);
 }
 #ifdef STATIC_FUNCTION_POINTERS
 object
@@ -182,24 +182,25 @@ int m;
       sfd->valid_data=sfd->read_buffer;}
    /* there is at least a packet size of space available */   
   if ((fix(FFN(fScheck_fd_for_input)(sfd->fd,sfd->write_timeout))>0)) {
-
-    char *start = sfd->valid_data+sfd->valid_data_size;
   again:
-    nread = SAFE_READ(sfd->fd,start,sfd->read_buffer_size - (start -  sfd->read_buffer));
-    if (nread<0) {
-      if (errno == EAGAIN) goto again;
-      return -1;
+    {
+      char *start = sfd->valid_data+sfd->valid_data_size;
+      nread = SAFE_READ(sfd->fd,start,sfd->read_buffer_size - (start -  sfd->read_buffer));
+      if (nread<0) {
+	if (errno == EAGAIN) goto again;
+	return -1;
+      }
+      if (nread == 0)  { 
+	return 0;
+      }
+      sfd->total_bytes_received +=  nread;
+      sfd->bytes_received_not_confirmed +=  nread;
+      sfd->valid_data_size += nread; 
+      if(sfd->bytes_received_not_confirmed > MUST_CONFIRM)
+	send_confirmation(sfd);
+      scan_headers(sfd); 
+      goto TRY_PACKET;
     }
-    if (nread == 0)  { 
-      return 0;
-    }
-    sfd->total_bytes_received +=  nread;
-    sfd->bytes_received_not_confirmed +=  nread;
-    sfd->valid_data_size += nread; 
-    if(sfd->bytes_received_not_confirmed > MUST_CONFIRM)
-      send_confirmation(sfd);
-    scan_headers(sfd); 
-    goto TRY_PACKET;
   }
 
   return 0;
@@ -270,7 +271,7 @@ DEFUN("CLEAR-CONNECTION",object,fSclear_connection,SI,1,1,NONE,OI,OO,OO,OO,(fixn
   while (fix(FFN(fScheck_fd_for_input)(fd,0)))
     n+=read(fd,buffer,sizeof(buffer));
   
-  return make_fixnum1(n);
+  return make_fixnum(n);
 
 }
 #ifdef STATIC_FUNCTION_POINTERS

@@ -433,6 +433,7 @@ fill pointer, and this will be advanced.")
     if (x->s.s_hpack == keyword_package)
       {if (code == normal)
 	 PUSH('-');}
+    x=x->s.s_name;
   case t_simple_string:/*FIXME?*/
   case t_string:
     {int len = VLEN(x);
