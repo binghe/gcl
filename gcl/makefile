@@ -351,6 +351,7 @@ gclclean:
 	(cd gcl-tk ; $(MAKE) clean)
 	cd $(CLCSDIR) && $(MAKE) clean
 	cd $(PCLDIR) && $(MAKE) clean
+	cd $(MODDIR) && $(MAKE) clean
 	cd xgcl-2 && $(MAKE) clean
 	(cd $(TESTDIR); $(MAKE) clean)
 	(cd info ; $(MAKE) clean)

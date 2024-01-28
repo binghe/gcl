@@ -4,6 +4,7 @@
 INFO_DIR=${prefix}/lib/info
 
 GCL_DVI=gcl-tk.dvi gcl-si.dvi gcl.dvi
+GCL_PDF=gcl-tk.pdf gcl-si.pdf gcl.pdf
 #GCL_HTML=gcl-si_toc.html gcl-tk_toc.html gcl_toc.html
 GCL_HTML=gcl-si_html/index.html gcl-tk_html/index.html gcl_html/index.html
 #HTML_CMD=texi2html -split_chapter
@@ -11,7 +12,7 @@ HTML_CMD=makeinfo --html
 
 -include ../makedefs
 
-all: gcl-tk.info gcl-si.info gcl.info $(GCL_DVI) $(GCL_HTML)
+all: gcl-tk.info gcl-si.info gcl.info $(GCL_PDF) $(GCL_HTML) #$(GCL_DVI)
 
 .texi.info:
 	rm -f $*.*gz
@@ -29,6 +30,9 @@ GCL_MAN= chap-1.texi chap-2.texi chap-3.texi chap-4.texi chap-5.texi \
 	 chap-12.texi chap-13.texi chap-14.texi chap-15.texi chap-16.texi chap-17.texi \
 	 chap-18.texi chap-19.texi chap-20.texi chap-21.texi chap-22.texi chap-23.texi \
 	 chap-24.texi chap-25.texi chap-26.texi chap-a.texi
+
+%.pdf: %.texi
+	texi2pdf $<
 
 gcl-si.dvi: ${GCL_SI} gcl-si.texi
 	TEXINPUTS=.:$$TEXINPUTS tex --interaction nonstopmode gcl-si.texi || true
@@ -57,17 +61,17 @@ gcl.info: ${GCL_MAN} gcl.texi
 #gcl_toc.html:
 #	$(HTML_CMD) gcl.texi
 
-gcl-si/index.html: ${GCL_SI} gcl-si.texi
+gcl-si_html/index.html: ${GCL_SI} gcl-si.texi
 	mkdir -p $(@D)
 	touch $@
 	-$(HTML_CMD) gcl-si.texi
 
-gcl-tk/index.html: ${GCL_TK} gcl-tk.texi
+gcl-tk_html/index.html: ${GCL_TK} gcl-tk.texi
 	mkdir -p $(@D)
 	touch $@
 	-$(HTML_CMD) gcl-tk.texi
 
-gcl/index.html: gcl.texi
+gcl_html/index.html: gcl.texi
 	mkdir -p $(@D)
 	touch $@
 	-$(HTML_CMD) gcl.texi
@@ -113,4 +117,5 @@ tex:
 clean:
 	rm -f *.info* *.html *.dvi *.cp *.ky *.vr *.tp *.pg *.toc *.aux *.log *.fn
 	rm -rf gcl.IC gcl.IE gcl.IG gcl.IP gcl.IR gcl.IT gcl.fu gcl gcl-si gcl-tk
-	rm -rf gcl-si_html gcl_html gcl-tk_html
+	rm -rf gcl-si_html gcl_html gcl-tk_html $(GCL_DVI) $(GCL_PDF)
+	rm -rf gcl-si.fns gcl-si.vrs gcl.ICs gcl.IGs gcl.IPs gcl.IRs gcl.ITs
