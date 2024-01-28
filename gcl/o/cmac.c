@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #define NEED_MP_H
 #ifndef FIRSTWORD
 #include "include.h"

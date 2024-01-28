@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 (export '(mdlsym mdl lib-name))

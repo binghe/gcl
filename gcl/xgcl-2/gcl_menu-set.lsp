@@ -3,6 +3,7 @@
 ; Functions to handle a set of menus within a single window.
 
 ; Copyright (c) 2008 Gordon S. Novak Jr. and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; See the file gnu.license .
 

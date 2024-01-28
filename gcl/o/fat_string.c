@@ -1,5 +1,6 @@
 /*
 (c) Copyright W. Schelter 1988, All rights reserved.
+    Copyright (c) 2024 Camm Maguire
 */
 
 #include <unistd.h>

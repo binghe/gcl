@@ -1,5 +1,6 @@
 /* 
-Copyright William Schelter. All rights reserved. */
+Copyright William Schelter. All rights reserved.
+Copyright 2024 Camm Maguire */
 
 #if !defined(HAVE_LIBBFD) && !defined(SPECIAL_RSYM)
 #error Need either BFD or SPECIAL_RSYM

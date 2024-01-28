@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 (defconstant +vtps+ (mapcar (lambda (x) (list x (intern (string-concatenate "VECTOR-"  (string x))))) +array-types+))

@@ -1,5 +1,6 @@
 /* unexec for GNU Emacs on Windows NT.
    Copyright (C) 1994 Free Software Foundation, Inc.
+   Copyright (C) 2024 Camm Maguire
 
 This file is part of GNU Emacs.
 

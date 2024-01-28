@@ -1,5 +1,6 @@
 # translation of gcl debconf to Portuguese
 # Copyright (C) 2007 Américo Monteiro
+# Copyright (C) 2024 Camm Maguire
 # This file is distributed under the same license as the gcl package.
 #
 # Américo Monteiro <a_monteiro@netcabo.pt>, 2007.

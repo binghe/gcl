@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 (defmacro destructuring-bind (ll f &rest body)

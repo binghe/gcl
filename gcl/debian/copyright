@@ -1,8 +1,15 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
+Files: *
+Copyright: 1989 The University of Texas at Austin,William F. Schelter
+	   1989 Free Software Foundation
+	   2024 Camm Maguire
+License: LGPL-2
+
 Files: cmpnew/*
 Copyright: 1989 The University of Texas at Austin,William F. Schelter
 	   1994 M. Hagiya,T. Yuasa,William F. Schelter
+	   2024 Camm Maguire
 License: LGPL-2
 
 Files: dos/*
@@ -10,15 +17,14 @@ Copyright: 1989 Free Software Foundation
 License: GPL-2
 
 Files: elisp/*
-Copyright:
- Copyright 1994,1998 William F. Schelter
- Copyright 1985-1988 Free Software Foundation
+Copyright: 1994,1998 William F. Schelter
+	   1985-1988 Free Software Foundation
 License: GPL-2
 
 Files: gcl-tk/*
-Copyright:
- Copyright 1994 Rami el Charif,William F. Schelter
- Copyright 1996 Sun Microsystems
+Copyright: 1994 Rami el Charif,William F. Schelter
+	   1996 Sun Microsystems
+	   2024 Camm Maguire
 License: LGPL-2
 
 Files: gmp4/*
@@ -27,20 +33,34 @@ License: GPL-2
 
 Files: h/*
 Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
+	   2024 Camm Maguire
 License: LGPL-2
+
+Files: debian/*
+Copyright: 2024 Camm Maguire
+License: GPL-2
+
+Files: ansi-tests/*
+Copyright: 2004 Paul Dietz
+License: LGPL-2
+
+Files: ansi-tests/rt.lsp
+Copyright: 1990 Massachusetts Institute of Technology
+License: public-domain
 
 Files: info/*
 Copyright: 1994 William F. Schelter
 License: GPL-2
 
 Files: lsp/*
-Copyright:
- Copyright 1994 M. Hagiya,T. Yuasa,William F. Schelter
- Copyright 1985,1986,1989,1990 William F. Schelter
+Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
+	   1985,1986,1989,1990 William F. Schelter
+	   2024 Camm Maguire
 License: LGPL-2
 
 Files: mod/gcl_defpackage.lsp
 Copyright: 1990,1991 lsp The Boeing Company
+	   2024 Camm Maguire
 License: public-domain
 
 Files: mp/*
@@ -48,36 +68,36 @@ Copyright: 1994 William F. Schelter
 License: LGPL-2
 
 Files: o/*
-Copyright:
- Copyright 1994 M. Hagiya,T. Yuasa,William F. Schelter,Rami el Charif
- Copyright 1991 William F. Schelter
- Copyright 1985-1994 Free Software Foundation
+Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter,Rami el Charif
+	   1991 William F. Schelter
+	   1985-1994 Free Software Foundation
+	   2024 Camm Maguire
 License: LGPL-2
 
 Files: o/gcl_readline.d
 Copyright: 2000 Tuukka Toivonen
+	   2024 Camm Maguire
 License: LGPL-2
 
 Files: pargcl/*
-Copyright:
- Copyright 1994-2005 Gene Cooperman
- Copyright 1991,1999,2003 Free Software Foundation
+Copyright: 1994-2005 Gene Cooperman
+	   1991,1999,2003 Free Software Foundation
 License: LGPL-2
 
 Files: pcl/*
-Copyright:
- Copyright 1985-1990 Xerox Corporation
- Copyright 1990 Franz Inc.
+Copyright: 1985-1990 Xerox Corporation
+	   1990 Franz Inc.
+	   2024 Camm Maguire
 License: public-domain
 
 Files: xgcl-2/*
-Copyright:
- Copyright 1987 Digital Equipment Corporation,Massachusetts Institute of Technology
- Copyright 1994 Hiep Huu Nguyen,William F. Schelter,The University of Texas at Austin
- Copyright 1994,1995,1996,2006,2007,2008,2010 Gordon S. Novak Jr.,The University of Texas at Austin
- Copyright 1992 The University of Texas at Austin
- Copyright 1989 Free Software Foundation
- Copyright 2006 Hiep Huu Nguyen
+Copyright: 1987 Digital Equipment Corporation,Massachusetts Institute of Technology
+	   1994 Hiep Huu Nguyen,William F. Schelter,The University of Texas at Austin
+	   1994,1995,1996,2006,2007,2008,2010 Gordon S. Novak Jr.,The University of Texas at Austin
+	   1992 The University of Texas at Austin
+	   1989 Free Software Foundation
+	   2006 Hiep Huu Nguyen
+	   2024 Camm Maguire
 License: GPL-2
 
 License: GPL-2

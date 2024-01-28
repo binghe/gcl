@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #define ALLOCATE(n) (*gcl_gmp_allocfun)(n)
 
 void *gcl_gmp_alloc(size_t size)

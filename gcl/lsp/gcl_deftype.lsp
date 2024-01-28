@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 (export '(zero one negative-integer non-negative-integer tractable-fixnum

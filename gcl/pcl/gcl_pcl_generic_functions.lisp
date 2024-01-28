@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 ;;;-*-Mode:LISP; Package:PCL; Base:10; Syntax:Common-lisp -*-
 
 (in-package :pcl)

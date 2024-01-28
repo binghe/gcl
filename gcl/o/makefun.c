@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #include "include.h"
 #include "funlink.h"
 #include "page.h"

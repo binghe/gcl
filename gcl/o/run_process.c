@@ -1,6 +1,7 @@
 /* By Mike Ballantyne */
 /*
  Copyright (C) 1994  W. Schelter
+ Copyright (C) 2024 Camm Maguire
 
 This file is part of GNU Common Lisp, herein referred to as GCL
 

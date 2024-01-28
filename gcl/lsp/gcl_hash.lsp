@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 (defun make-hash-table (&key (test 'eql)

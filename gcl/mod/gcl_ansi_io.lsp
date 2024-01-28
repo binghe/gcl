@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 (defun in-package-internal (n &aux (p (find-package n)))

@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #include <unistd.h>
 #include <string.h>
 #include <setjmp.h>

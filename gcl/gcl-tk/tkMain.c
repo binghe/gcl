@@ -7,6 +7,7 @@
  *	applications.
  *
  * Copyright (c) 1990-1993 The Regents of the University of California.
+ * Copyright (c) 2024 Camm Maguire
  * All rights reserved.
  *
  * Permission is hereby granted, without written agreement and without

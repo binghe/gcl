@@ -1,4 +1,5 @@
 /* Copyright (C) 1985,86,87,88,92,93,94 Free Software Foundation, Inc.
+/* Copyright (C) 2024 Camm Maguire
 
 This file is part of GNU Emacs.
 

@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #include "include.h"
 #include "winsock2.h"
 #include "windows.h"

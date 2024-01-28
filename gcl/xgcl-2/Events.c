@@ -1,6 +1,7 @@
 /* Events.c           Hiep Huu Nguyen            27 Jun 06 */
 
 /*; Copyright (c) 1994 Hiep Huu Nguyen and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 ; edited 27 Aug 92; 12 Aug 2002; 23 Jun 06 by GSN; 27 Jun 06 by GSN
 ; See the files gnu.license and dec.copyright .
 

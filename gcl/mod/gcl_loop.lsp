@@ -1,6 +1,7 @@
 ;;;   -*- Mode: LISP; Package: ANSI-LOOP; Syntax: Common-lisp; Base: 10; Lowercase:T -*-
 ;;;>
 ;;;> Portions of LOOP are Copyright (c) 1986 by the Massachusetts Institute of Technology.
+;;;> Portions of LOOP are Copyright (c) 2024 Camm Maguire
 ;;;> All Rights Reserved.
 ;;;> 
 ;;;> Permission to use, copy, modify and distribute this software and its

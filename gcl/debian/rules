@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 # Sample debian/rules that uses debhelper. 
 # GNU copyright 1997 by Joey Hess.
+# GNU copyright 2024 Camm Maguire
 #
 # This version is for a hypothetical package that builds an
 # architecture-dependant package, as well as an architecture-independent
@@ -225,8 +226,15 @@ clean: debian/control debian/gcl.templates
 
 INS:=$(shell for i in `find debian -name "in.*"` ; do echo $$i | sed 's,in.,,1' ; done |sed "s,\([^x]gcl\),\1$(EXT),g")
 
-$(INS): debian/gcl$(EXT)% : debian/in.gcl%
+gcl$(EXT)% : in.gcl%
 	cat $< | sed 's,@EXT@,$(EXT),g' >$@
+
+#$(INS): debian/gcl$(EXT)% : debian/in.gcl%
+#	cat $< | sed 's,@EXT@,$(EXT),g' >$@
+
+#$(INS): debian/source/gcl$(EXT)% : debian/source/in.gcl%
+#	cat $< | sed 's,@EXT@,$(EXT),g' >$@
+
 
 install: DH_OPTIONS:=
 install: install-stamp

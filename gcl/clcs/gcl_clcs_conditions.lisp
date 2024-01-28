@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: "CONDITIONS"; Base: 10 -*-
 
 ;(in-package "CONDITIONS" :USE '(:cl #+(and clos (not pcl)) "CLOS" #+pcl "PCL"))

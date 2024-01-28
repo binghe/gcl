@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

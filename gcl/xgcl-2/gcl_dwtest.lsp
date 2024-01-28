@@ -3,6 +3,7 @@
 ; Some examples for testing the window interface in dwindow.lsp / dwtrans.lsp
 
 ; Copyright (c) 1996 Gordon S. Novak Jr. and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; See the file gnu.license .
 

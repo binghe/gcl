@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 /*
 	x : fixnum or bignum (may be not normalized)
 	y : integer

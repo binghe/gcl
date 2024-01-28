@@ -1,4 +1,5 @@
   /* Copyright William F. Schelter 1991
+     Copyright 2024 Camm Maguire
    Bignum routines.
 
 

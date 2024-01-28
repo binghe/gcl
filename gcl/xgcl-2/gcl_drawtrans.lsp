@@ -2,6 +2,7 @@
 ; drawtrans.lsp  -- translation of draw.lsp       Gordon S. Novak Jr.
 
 ; Copyright (c) 2006 Gordon S. Novak Jr. and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; This program is free software; you can redistribute it and/or modify
 ; it under the terms of the GNU General Public License as published by

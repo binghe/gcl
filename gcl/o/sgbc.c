@@ -1,4 +1,5 @@
 /*  Copyright William Schelter. All rights reserved.
+    Copyright 2024 Camm Maguire
     
     Stratified Garbage Collection  (SGC)
     

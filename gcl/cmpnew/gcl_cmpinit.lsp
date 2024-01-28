@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 ;(proclaim '(optimize (safety 0) (space 3)))
 ;(proclaim '(optimize (safety 2) (space 3)))
 ;(load "../lsp/sys-proclaim.lisp")

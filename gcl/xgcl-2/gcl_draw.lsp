@@ -3,6 +3,7 @@
 ; Functions to make drawings interactively
 
 ; Copyright (c) 2007 Gordon S. Novak Jr. and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; 11 Nov 94; 05 Jan 95; 15 Jan 98; 09 Feb 99; 04 Dec 00; 28 Feb 02; 05 Jan 04
 ; 27 Jan 06

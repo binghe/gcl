@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 /* This file has been modified from the file dldbfd.c in the lush
    source tree.  It is brought into GCL under the terms of the GNU
    General Public License, version 2 or, at the user's option, any

@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :s)
 
 (export '(lisp-type defdlfun +ks+ +fl+ strcat adjustable-vector adjustable-array matrix))

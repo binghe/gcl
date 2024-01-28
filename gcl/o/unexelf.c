@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 /* Foundation; either version 2, or (at your option)
 any later version.
 

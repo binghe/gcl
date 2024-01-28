@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #include <alloca.h>
 #include <sys/mman.h>
 #include <sys/types.h>

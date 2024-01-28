@@ -1,4 +1,5 @@
  /* Copyright William F. Schelter  All Rights Reserved.
+    Copyright 2024 Camm Maguire
 
    Utility for writing out lisp objects and reading them in:
    Basically it attempts to write out only those things which could

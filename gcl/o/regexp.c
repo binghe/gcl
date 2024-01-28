@@ -1,6 +1,7 @@
 /* original regexp.c file written by Henry Spencer.
    many changes made [see below] made by W. Schelter.
    These changes Copyright (c) 1994 W. Schelter
+   These changes Copyright (c) 2024 Camm Maguire
 
 This file is part of GNU Common Lisp, herein referred to as GCL
 

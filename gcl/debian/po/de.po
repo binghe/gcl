@@ -1,6 +1,7 @@
 # Translation of gcl debconf templates to German
 # Copyright (C) Stefan Bauer <stefan.bauer@edv-fix.de>, 2007.
 # Copyright (C) Helge Kreutzmann <debian@helgefjell.de>, 2007, 2008.
+# Copyright (C) 2024 Camm Maguire
 # This file is distributed under the same license as the gcl package.
 #
 msgid ""

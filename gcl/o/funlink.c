@@ -1,4 +1,5 @@
 /*  Copyright William Schelter. All rights reserved.
+    Copyright 2024 Camm Maguire
 Fast linking method for kcl by W. Schelter University of Texas
    Note there are also changes to 
  cmpcall.lsp and cmptop.lsp */

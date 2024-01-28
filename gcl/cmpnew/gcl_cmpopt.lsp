@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :compiler)
 
 ;; The optimizers have been redone to allow more flags

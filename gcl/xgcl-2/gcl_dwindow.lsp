@@ -3,6 +3,7 @@
 ; Window types and interface functions for using X windows from GNU Common Lisp
 
 ; Copyright (c) 2010 Gordon S. Novak Jr. and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; 08 Jan 97; 17 May 02; 17 May 04; 18 May 04; 01 Jun 04; 18 Aug 04; 21 Jan 06
 ; 24 Jan 06; 24 Jun 06; 25 Jun 06; 17 Jul 06; 23 Aug 06; 08 Sep 06; 21 May 09

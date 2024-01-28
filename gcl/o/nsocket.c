@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 /* the following file compiles under win95 using cygwinb19 */ 
 #include "include.h"
 

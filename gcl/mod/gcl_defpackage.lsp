@@ -9,6 +9,7 @@
 ;;;
 ;;;
 ;;; Copyright (c) 1990, 1991 The Boeing Company, All Rights Reserved.
+;;; Copyright (c) 2024 Camm Maguire
 ;;;
 ;;; Permission is granted to any individual or institution to use,
 ;;; copy, modify, and distribute this software, provided that this

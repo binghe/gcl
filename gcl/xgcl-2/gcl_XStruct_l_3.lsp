@@ -2,6 +2,7 @@
 ; XStruct-l-3.lsp        modified by Hiep Huu Nguyen                27 Aug 92
 
 ; Copyright (c) 1994 Hiep Huu Nguyen and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; See the files gnu.license and dec.copyright .
 

@@ -1,5 +1,6 @@
 /* 
 Copyright William Schelter. All rights reserved.
+Copyright 2024 Camm Maguire
 There is a companion file rsym.c which is used to build
 a list of the external symbols in a COFF or A.OUT object file, for
 example saved_kcl.  These are loaded into kcl, and the

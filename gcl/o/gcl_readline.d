@@ -1,6 +1,7 @@
 /* -*-C-*- */
 /*
  Copyright (C) 2000 Tuukka Toivonen <tuukkat AT ee.oulu.fi>
+ Copyright (C) 2024 Camm Maguire
 
 This file is part of GNU Common Lisp, herein referred to as GCL
 

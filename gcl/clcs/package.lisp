@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 ;;; -*- Mode: Lisp; Syntax: Common-Lisp; Package: ("CONDITIONS" :USE "LISP" :SHADOW ("BREAK" "ERROR" "CERROR" "WARN" "CHECK-TYPE" "ASSERT" "ETYPECASE" "CTYPECASE" "ECASE" "CCASE")); Base: 10 -*-
 ; From arisia.xerox.com:/cl/conditions/cond18.lisp
 ;;;

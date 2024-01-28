@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 ;to-do fast link defentry, sig propagation
 
 ;; (in-package 'lisp)

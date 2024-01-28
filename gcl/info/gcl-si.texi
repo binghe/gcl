@@ -23,6 +23,7 @@
 This is a Texinfo GCL SYSTEM INTERNALS Manual
 
 Copyright 1994 William F. Schelter
+Copyright 2024 Camm Maguire
 
 @format
 INFO-DIR-SECTION GNU Common Lisp

@@ -1,4 +1,5 @@
 ; Copyright (c) 1994 William F. Schelter
+; Copyright (c) 2024 Camm Maguire
 
 ; See the files gnu.license and dec.copyright .
 

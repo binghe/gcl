@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 
 ;; Modified data base including return values types
 ;; and making the arglists correct if they have optional args.

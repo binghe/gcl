@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #ifndef FIRSTWORD
 #include "include.h"
 #endif

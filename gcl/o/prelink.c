@@ -1,3 +1,4 @@
+/* Copyright (C) 2024 Camm Maguire */
 #define NO_PRELINK_UNEXEC_DIVERSION
 
 #include "include.h"

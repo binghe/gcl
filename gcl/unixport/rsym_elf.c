@@ -1,5 +1,6 @@
 /*
 Copyright William Schelter. All rights reserved.
+Copyright 2024 Camm Maguire
 
   Use this to build an executable rsym,
 which will grab only the external symbols from an object file,

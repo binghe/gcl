@@ -1,5 +1,6 @@
 ;; -*-Lisp-*-
 ;; Copyright (C) 1994 M. Hagiya, W. Schelter, T. Yuasa
+;; Copyright (C) 2024 Camm Maguire
 
 ;; This file is part of GNU Common Lisp, herein referred to as GCL
 ;;

@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 (in-package :si)
 
 #.`(defun test-fpe (f a r &optional chk &aux cc (o (mapcan (lambda (x) (list x t)) (break-on-floating-point-exceptions))))

@@ -1,6 +1,7 @@
 ;;; -*- Mode:LISP; Package:(SLOOP LISP);Syntax:COMMON-LISP;Base:10 -*- ;;;;;
 ;;;                                                                    ;;;;;
 ;;;     Copyright (c) 1985,86 by William Schelter,                     ;;;;;
+;;;     Copyright (c) 2024 Camm Maguire
 ;;;     All rights reserved                                            ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

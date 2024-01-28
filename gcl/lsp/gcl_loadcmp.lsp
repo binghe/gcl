@@ -1,3 +1,4 @@
+;; Copyright (C) 2024 Camm Maguire
 ;; -*-Lisp-*-
 (in-package :compiler)
 

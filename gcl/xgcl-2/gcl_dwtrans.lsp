@@ -2,6 +2,7 @@
 ; dwtrans.lsp  -- translation of dwindow.lsp          ; 07 Jan 10
 
 ; Copyright (c) 2010 Gordon S. Novak Jr. and The University of Texas at Austin.
+; Copyright (c) 2024 Camm Maguire
 
 ; See the files gnu.license and dec.copyright .
 

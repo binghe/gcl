@@ -2,6 +2,7 @@
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
+;;; Copyright (c) 2024 Camm Maguire
 ;;; All rights reserved.
 ;;;
 ;;; Use and copying of this software and preparation of derivative works

@@ -1,5 +1,6 @@
 # Vietnamese translation for GCL.
 # Copyright © 2007 Free Software Foundation, Inc.
+# Copyright © 2024 Camm Maguire
 # Clytie Siddall <clytie@riverland.net.au>, 2007
 #
 msgid ""
