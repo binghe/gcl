@@ -35,7 +35,7 @@ all: gcltksrv   tkl.o tinfo.o  demos/gc-monitor.o gcltkaux
 GUIOS = guis.o tkAppInit.o tkMain.o
 
 clean::
-	rm -f ${GUIOS} $(OFILES) gcltkaux gcltksrv *.o */*.o demos/index.lsp *.fn demos/*.fn
+	rm -f ${GUIOS} $(OFILES) gcltkaux gcltksrv *.o */*.o demos/index.lsp *.fn demos/*.fn gcltksrv.bat
 
 .c.o:
 	$(GCLTKCC) -c $(filter-out -pg,$(CFLAGS1)) -fPIE ${ODIR_DEBUG}  $*.c

@@ -144,7 +144,7 @@ clean:
 	@rm -f *.dfsl *.d64fsl
 	@(cd beyond-ansi; $(MAKE) clean)
 	@rm -rf scratch/ scratch.txt
-	@rm -f foo.txt foo.lsp foo.dat
+	@rm -f foo.txt foo.lsp foo.dat failures.lsp
 	@rm -f tmp.txt tmp.dat tmp2.dat temp.dat
 	@rm -f gazonk* out.class
 	@rm -rf TMP/

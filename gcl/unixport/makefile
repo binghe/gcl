@@ -166,7 +166,7 @@ map_%:
 clean:
 	rm -rf  saved_*$(EXE) raw_*$(EXE) *.o core a.out $(RSYM) sys_init.lsp \
 		$(LSPDIR)/auto_new.lsp foo *maxima* init_*.lsp lib*.a gmp* *.lsp.tmp \
-		gazonk*.lsp plt*h *_map saved_* lib* raw_* out* log* tmp* gcl.script
+		gazonk*.lsp plt*h *_map saved_* lib* raw_* out* log* tmp* gcl.script gcl_symtab
 
 .INTERMEDIATE: raw_gcl raw_ansi_gcl recompile.h pre_init.lsp post_init.lsp
 .PRECIOUS: libboot.so

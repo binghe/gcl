@@ -113,3 +113,4 @@ tex:
 clean:
 	rm -f *.info* *.html *.dvi *.cp *.ky *.vr *.tp *.pg *.toc *.aux *.log *.fn
 	rm -rf gcl.IC gcl.IE gcl.IG gcl.IP gcl.IR gcl.IT gcl.fu gcl gcl-si gcl-tk
+	rm -rf gcl-si_html gcl_html gcl-tk_html

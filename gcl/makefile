@@ -371,7 +371,7 @@ gclclean:
 clean: gclclean
 	-[ -z "$(GMPDIR)" ] || (cd $(GMPDIR) && $(MAKE) distclean)
 	-[ -z "$(GMPDIR)" ] || rm -rf $(GMPDIR)/.deps $(GMPDIR)/libgmp.a
-	-[ -z "$(PARGCLDIR)" ] || (cd $(PARGCLDIR) && $(MAKE) distclean)
+	-(cd pargcl && $(MAKE) distclean)
 	-[ -z "$(PARGCLDIR)" ] || (rm -f unixport/saved_pargcl unixport/saved_prepargcl bin/pargcl bin/procgroup unixport/_rsym1)
 #	-cd binutils/intl && $(MAKE) distclean
 #	-cd binutils/bfd && $(MAKE) distclean
