@@ -5,10 +5,10 @@ Abstract: Documentation on GCL-specific Lisp system functions
 Section: Programming
 
 Format: Text
-Files: /usr/share/doc/gcl@EXT@-doc/dwdoc.tex.gz
+Files: /usr/share/doc/gcl@EXT@/dwdoc.tex.gz
 
 Format: PDF
-Files: /usr/share/doc/gcl@EXT@-doc/dwdoc.pdf.gz
+Files: /usr/share/doc/gcl@EXT@/dwdoc.pdf.gz
 
 Format: HTML
 Index: /usr/share/doc/gcl@EXT@/dwdoc/dwdoc1.html

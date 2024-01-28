@@ -2,7 +2,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 
 Files: cmpnew/*
 Copyright: 1989 The University of Texas at Austin,William F. Schelter
-Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
+	   1994 M. Hagiya,T. Yuasa,William F. Schelter
 License: LGPL-2
 
 Files: dos/*
@@ -10,13 +10,15 @@ Copyright: 1989 Free Software Foundation
 License: GPL-2
 
 Files: elisp/*
-Copyright: 1994,1998 William F. Schelter
-Copyright: 1985-1988 Free Software Foundation
+Copyright:
+ Copyright 1994,1998 William F. Schelter
+ Copyright 1985-1988 Free Software Foundation
 License: GPL-2
 
 Files: gcl-tk/*
-Copyright: 1994 Rami el Charif,William F. Schelter
-Copyright: 1996 Sun Microsystems
+Copyright:
+ Copyright 1994 Rami el Charif,William F. Schelter
+ Copyright 1996 Sun Microsystems
 License: LGPL-2
 
 Files: gmp4/*
@@ -32,8 +34,9 @@ Copyright: 1994 William F. Schelter
 License: GPL-2
 
 Files: lsp/*
-Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter
-Copyright: 1985,1986,1989,1990 William F. Schelter
+Copyright:
+ Copyright 1994 M. Hagiya,T. Yuasa,William F. Schelter
+ Copyright 1985,1986,1989,1990 William F. Schelter
 License: LGPL-2
 
 Files: mod/gcl_defpackage.lsp
@@ -45,9 +48,10 @@ Copyright: 1994 William F. Schelter
 License: LGPL-2
 
 Files: o/*
-Copyright: 1994 M. Hagiya,T. Yuasa,William F. Schelter,Rami el Charif
-Copyright: 1991 William F. Schelter
-Copyright: 1985-1994 Free Software Foundation
+Copyright:
+ Copyright 1994 M. Hagiya,T. Yuasa,William F. Schelter,Rami el Charif
+ Copyright 1991 William F. Schelter
+ Copyright 1985-1994 Free Software Foundation
 License: LGPL-2
 
 Files: o/gcl_readline.d
@@ -55,22 +59,25 @@ Copyright: 2000 Tuukka Toivonen
 License: LGPL-2
 
 Files: pargcl/*
-Copyright: 1994-2005 Gene Cooperman
-Copyright: 1991,1999,2003 Free Software Foundation
+Copyright:
+ Copyright 1994-2005 Gene Cooperman
+ Copyright 1991,1999,2003 Free Software Foundation
 License: LGPL-2
 
 Files: pcl/*
-Copyright: 1985-1990 Xerox Corporation
-Copyright: 1990 Franz Inc.
+Copyright:
+ Copyright 1985-1990 Xerox Corporation
+ Copyright 1990 Franz Inc.
 License: public-domain
 
 Files: xgcl-2/*
-Copyright: 1987 Digital Equipment Corporation,Massachusetts Institute of Technology
-Copyright: 1994 Hiep Huu Nguyen,William F. Schelter,The University of Texas at Austin
-Copyright: 1994,1995,1996,2006,2007,2008,2010 Gordon S. Novak Jr.,The University of Texas at Austin
-Copyright: 1992 The University of Texas at Austin
-Copyright: 1989 Free Software Foundation
-Copyright: 2006 Hiep Huu Nguyen
+Copyright:
+ Copyright 1987 Digital Equipment Corporation,Massachusetts Institute of Technology
+ Copyright 1994 Hiep Huu Nguyen,William F. Schelter,The University of Texas at Austin
+ Copyright 1994,1995,1996,2006,2007,2008,2010 Gordon S. Novak Jr.,The University of Texas at Austin
+ Copyright 1992 The University of Texas at Austin
+ Copyright 1989 Free Software Foundation
+ Copyright 2006 Hiep Huu Nguyen
 License: GPL-2
 
 License: GPL-2

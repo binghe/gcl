@@ -219,11 +219,11 @@ clean: debian/control debian/gcl.templates
 
 	dh_clean
 	rm -rf debian/gprof debian/ansi-gprof debian/trad debian/ansi $(INS) debian/substvars debian.upstream
-	rm -rf *stamp
+	rm -rf *stamp build-indep debian/tmp1
 	for i in $(CFGS) ; do ! [ -e $$i ] || mv $$i $${i%.ori} ; done
 	rm -f debian/elpa-gcl$(EXT).elpa debian/gcl$(EXT)-pkg.el
 
-INS:=$(shell for i in debian/in.* ; do echo $$i | sed 's,in.,,1' ; done |sed "s,\([^x]gcl\),\1$(EXT),g")
+INS:=$(shell for i in `find debian -name "in.*"` ; do echo $$i | sed 's,in.,,1' ; done |sed "s,\([^x]gcl\),\1$(EXT),g")
 
 $(INS): debian/gcl$(EXT)% : debian/in.gcl%
 	cat $< | sed 's,@EXT@,$(EXT),g' >$@
