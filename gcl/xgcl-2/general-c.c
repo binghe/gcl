@@ -1,7 +1,7 @@
 /* general-c.c           Hiep Huu Nguyen   24 Jun 06 */
 /* 27 Aug 92; 24 Jan 06; 22 Jun 06  */
 /* ; Copyright (c) 1994 Hiep Huu Nguyen and The University of Texas at Austin.
-/* ; Copyright (c) 2024 Camm Maguire
+   ; Copyright (c) 2024 Camm Maguire
 
 ; See the files gnu.license and dec.copyright .
 
