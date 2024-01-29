@@ -277,8 +277,7 @@ DEFUN("READLINKAT",object,fSreadlinkat,SI,2,2,NONE,OI,OO,OO,OO,(fixnum d,object 
   ssize_t l,z1;
 
   check_type_string(&s);
-  /* l=s->st.st_hasfillp ? s->st.st_fillp : s->st.st_dim; */
-  z1=length(s);
+  z1=VLEN(s);
   massert(z1<sizeof(FN1));
   memcpy(FN1,s->st.st_self,z1);
   FN1[z1]=0;
