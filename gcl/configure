@@ -6774,9 +6774,8 @@ fi
 # Dynamic loading
 #
 
-if test "$enable_dlopen" = "yes" ; then
-
-    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
+# boot.so requires dlopen
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
 printf %s "checking for dlopen in -ldl... " >&6; }
 if test ${ac_cv_lib_dl_dlopen+y}
 then :
@@ -6820,6 +6819,9 @@ then :
 else $as_nop
   as_fn_error $? "Cannot find dlopen" "$LINENO" 5
 fi
+
+
+if test "$enable_dlopen" = "yes" ; then
 
 
     TLIBS="$TLIBS -ldl -rdynamic"

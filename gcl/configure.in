@@ -804,9 +804,12 @@ AC_SUBST(X_CFLAGS)
 # Dynamic loading
 #
 
+# boot.so requires dlopen
+AC_CHECK_LIB([dl],[dlopen],,AC_MSG_ERROR([Cannot find dlopen]))
+
 if test "$enable_dlopen" = "yes" ; then
 
-    AC_CHECK_LIB([dl],[dlopen],,AC_MSG_ERROR([Cannot find dlopen]))
+    dnl AC_CHECK_LIB([dl],[dlopen],,AC_MSG_ERROR([Cannot find dlopen]))
 
     TLIBS="$TLIBS -ldl -rdynamic"
     assert_arg_to_cflags -fPIC
