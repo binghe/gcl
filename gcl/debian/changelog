@@ -1,3 +1,9 @@
+gcl27 (2.7.0-10) unstable; urgency=medium
+
+  * Version_2_7_0pre13
+
+ -- Camm Maguire <camm@debian.org>  Sun, 28 Jan 2024 20:17:32 -0500
+
 gcl27 (2.7.0-9) unstable; urgency=medium
 
   * Version_2_7_0pre12
