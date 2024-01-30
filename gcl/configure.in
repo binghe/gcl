@@ -1706,7 +1706,7 @@ AC_CHECK_FUNCS(rename)
 AC_CHECK_FUNC(uname, , AC_DEFINE(NO_UNAME,1,[no uname call]))
 AC_CHECK_FUNC(gettimeofday,, AC_DEFINE(NO_GETTOD,[1],[no gettimeofday call]))
 
-AC_CHECK_FUNCS(readlinkat)
+AC_CHECK_FUNCS(readlinkat,[],[AC_MSG_ERROR([must have readlinkat])])
 
 AC_CHECK_HEADERS(sys/ioctl.h)
 
