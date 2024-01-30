@@ -53,8 +53,8 @@
 (doit (if (boundp 'noload) 'identity 'load) 'compile-file)
 
 
-#+pre-gcl
+#+(and pre-gcl xgcl)
 (progn
   (si::chdir "../xgcl-2")
   (load "sysdef.lisp")(load "sys-proclaim.lisp")(compiler::cdebug))
-#+pre-gcl(xlib::compile-xgcl)
+#+(and pre-gcl xgcl)(xlib::compile-xgcl)
