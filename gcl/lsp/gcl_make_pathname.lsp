@@ -36,29 +36,29 @@
 
 (defun msub (a x) (if a (msub (cdr a) (substitute (caar a) (cdar a) x)) x))
 
-(defconstant +glob-to-regexp-alist+ (list (cons #v"{[^}]*}" (lambda (x) (msub '((#\| . #\,)(#\( . #\{)(#\) . #\})) x)))
+(defconstant +glob-to-regexp-alist+ (list (cons #v"{[^}]*}" (lambda (x y) (msub '((#\| . #\,)(#\( . #\{)(#\) . #\})) x)))
 					  (cons #v"\\[[^\\]*\\]"
-						(lambda (x)
+						(lambda (x y)
 						  (string-concatenate "(" (substitute #\^ #\! (subseq x 0 2)) (subseq x 2) ")")))
-					  (cons #v"\\*" (lambda (x) "([^/.]*)"))
-					  (cons #v"\\?" (lambda (x) "([^/.])"))
-					  (cons #v"\\." (lambda (x) "\\."))))
+					  (cons #v"\\*" (lambda (x y) (if (plusp (length y)) (string-concatenate "([^" y "]*)") "(.*)")))
+					  (cons #v"\\?" (lambda (x y) (if (plusp (length y)) (string-concatenate "([^" y "])") "(.)")))
+					  (cons #v"\\." (lambda (x y) "\\."))))
 
-(defconstant +physical-pathname-defaults+ '(("" "" "")
-					    ("" "" "")
-					    ("" "(/?([^/]+/)*)" "" "" "([^/]+/)" "/")
-					    ("" "([^/.]*)" "")
-					    ("." "(\\.[^/]*)?" "")
-					    ("" "" "")))
-(defconstant +logical-pathname-defaults+  '(("" "([-0-9A-Z]+:)?" ":")
-					    ("" "" "")
-					    ("" "(;?((\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*\\*?);)*)" "" "" "((\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*);)" ";");
+(defconstant +physical-pathname-defaults+ '(("" "" "" "")
+					    ("" "" "" "")
+					    ("" "(/?([^/]+/)*)" "" "" "" "([^/]+/)" "/" "/")
+					    ("" "([^/.]*)" "" ".")
+					    ("." "(\\.[^/]*)?" "" "")
+					    ("" "" "" "")))
+(defconstant +logical-pathname-defaults+  '(("" "([-0-9A-Z]+:)?" ":" ":")
+					    ("" "" "" "")
+					    ("" "(;?((\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*\\*?);)*)" "" "" "" "((\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*);)" ";" ";");
 ;					    ("" "(;?((\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*|\\*\\*);)*)" "" "" "((\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*);)" ";")
-					    ("" "(\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*)?" "")
+					    ("" "(\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*)?" "" ".")
 ;					    ("" "(\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*)?" "")
-					    ("." "(\\.(\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*))?" "")
+					    ("." "(\\.(\\*?([-0-9A-Z]+\\*)*[-0-9A-Z]*))?" "" ".")
 ;					    ("." "(\\.(\\*?([-0-9A-Z]+[-0-9A-Z\\*])+|\\*))?" "")
-					    ("." "(\\.([1-9][0-9]*|newest|NEWEST|\\*))?" "")))
+					    ("." "(\\.([1-9][0-9]*|newest|NEWEST|\\*))?" "" "")))
 
 (defun mglist (x &optional (b 0))
   (let* ((y (mapcan (lambda (z &aux (w (string-match (car z) x b)))
@@ -69,19 +69,19 @@
     (when z
       (cons z (mglist x (cadr z))))))
 
-(defun mgsub (x &optional (l (mglist x)) (b 0) &aux (w (pop l)))
+(defun mgsub (x term &optional (l (mglist x)) (b 0) &aux (w (pop l)))
   (if w
       (string-concatenate
 		   (subseq x b (car w))
-		   (funcall (cdaddr w) (subseq x (car w) (cadr w)))
-		   (mgsub x l (cadr w)))
+		   (funcall (cdaddr w) (subseq x (car w) (cadr w)) term)
+		   (mgsub x term l (cadr w)))
     (subseq x b)))
 
 
-(defun elsub (el x rp lp &aux (y x) (pref (pop y))(dflt (pop y))(post (pop y)))
+(defun elsub (el x rp lp &aux (y x) (pref (pop y))(dflt (pop y))(post (pop y))(term (pop y)))
 ;  (destructuring-bind (pref dflt post &rest y) x
     (etypecase el
-      (string (let ((x (list pref el post))) (unless (zerop (length dflt)) (if rp (mapcar 'mgsub x) x))))
+      (string (let ((x (list pref el post))) (unless (zerop (length dflt)) (if rp (mapcar (lambda (x) (mgsub x term)) x) x))))
       (integer (elsub (write-to-string el) x rp lp))
       ((eql :wild-inferiors) (if rp (list "(" dflt "*)") (elsub "**" x rp lp)))
       ((eql :wild) (if rp (list dflt) (elsub "*" x rp lp)))
