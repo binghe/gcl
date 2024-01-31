@@ -6,7 +6,7 @@
 int
 main() {
 
-  char buf[4096],*c,*d=(void *)-1;
+  char buf[4096],*c,*d=(void *)-1,*e;
 
   for (;fgets(buf,sizeof(buf),stdin);) {
 
@@ -15,12 +15,14 @@ main() {
       return -1;
     }
 
-    if (!(c=!d || !strncmp("DEF",buf,3) ? buf : strstr(buf," DEF")))
-      continue;
+    for (c=buf;(c=(!d&&*c&&*c!='\n') || !strncmp("DEF",c,3) ? c : strstr(c," DEF"));c=e) {
 
-    c=c==buf ? c : c+1;
-    d=strstr(c,"\")");
-    printf("%-.*s\n",(d ? d+2 : buf+strlen(buf)-1)-c,c);
+      c=c==buf ? c : c+1;
+      d=strstr(c,"\")");
+      e=d ? d+2 : buf+strlen(buf)-1;
+      printf("%-.*s\n",e-c,c);
+
+    }
 
   }
 
