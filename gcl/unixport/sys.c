@@ -23,7 +23,6 @@
 static void
 ar_init_fn(void (fn)(void),const char *s) {
 
-  char b[200];
   struct stat ss;
   
   if (stat(s,&ss)) {
@@ -32,8 +31,8 @@ ar_init_fn(void (fn)(void),const char *s) {
     char *d=sysd ? sysd : kcl_self;
     int n=sysd ? strlen(sysd) : dir_name_length(d);
 
-    assert(snprintf(b,sizeof(b),"ar x %-.*s%s %s",n,d,libname,s)>0);
-    assert(!msystem(b));
+    assert(snprintf(FN1,sizeof(FN1),"ar x %-.*s%s %s",n,d,libname,s)>0);
+    assert(!msystem(FN1));
 
   }
   gcl_init_or_load1(fn,s);
@@ -65,16 +64,15 @@ ar_check_init_fn(void (fn)(void),char *s,object b,char *o) {
 static void
 lsp_init(const char *a,const char *b) {
 
-  char c[200],*d;
-  char *sysd=getenv("GCL_SYSDIR");
+  char *d,*sysd=getenv("GCL_SYSDIR");
   int n;
 
   d=sysd ? sysd : kcl_self;
   n=sysd ? strlen(sysd) : dir_name_length(d);
-  assert(snprintf(c,sizeof(c),"%-.*s../%s/%s%s",n,d,a,b,strchr(b,'.') ? "" : ".lsp")>0);
-  printf("loading %s\n",c);
+  assert(snprintf(FN1,sizeof(FN1),"%-.*s../%s/%s%s",n,d,a,b,strchr(b,'.') ? "" : ".lsp")>0);
+  printf("loading %s\n",FN1);
   fflush(stdout);
-  load(c);
+  load(FN1);
 
 }
 
