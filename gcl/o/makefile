@@ -42,8 +42,7 @@ gprof.o: gprof.c $(DECL)
 	[ "$(GPROF)" != "" ] || (touch foo.c ;$(CC) -c foo.c $(CFLAGS) $(DEFS) $(AUX_INFO) -o $@; rm foo.c)
 
 gprof.ini: gprof.c grab_defs
-	[ "$(GPROF)" = "" ] || $(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c |\
-		 sed -e 's,DEFUNB(\([^)]*\)),\nDEFUNB(\1),g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $@
+	[ "$(GPROF)" = "" ] || $(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c | ./grab_defs > $@
 	touch $@
 
 prelink.o: prelink.c $(DECL)
@@ -64,8 +63,7 @@ prelink.o: prelink.c $(DECL)
 	rm $*.c
 
 boot.ini: boot.c grab_defs
-	$(CC) -DINICOMP -DNO_DEFUN -DNO_BOOT_H $(CFLAGS) $(DEFS) -E $*.c |\
-		 sed -e 's,DEFUN,\'$$'\nDEFUN,g' -e 's,^.* DEFUNB,DEFUNB,g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $@
+	$(CC) -DINICOMP -DNO_DEFUN -DNO_BOOT_H $(CFLAGS) $(DEFS) -E $*.c | ./grab_defs > $@
 
 boot.h: boot.ini
 	echo '#include "make-init.h"' > $@
@@ -74,13 +72,11 @@ boot.h: boot.ini
 	echo '}' >> $@
 
 %.ini: %.c grab_defs
-	$(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c |\
-		 sed -e 's,DEFUNB(\([^)]*\)),\nDEFUNB(\1),g' -e 's/DEF,//g' -e 's:\"[ ]*):\"):g' | ./grab_defs > $*.ini
+	$(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c | ./grab_defs > $*.ini
 
 %.ini: %.d $(DPP) grab_defs
 	$(DPP) $*
-	$(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c |\
-		 sed -e 's,^.* DEFUNB,DEFUNB,g' -e 's/DEF,//g' | sed -e 's:\"[ ]*):\"):g' | ./grab_defs > $*.ini
+	$(CC) -DINICOMP -DNO_DEFUN $(CFLAGS) $(DEFS) -E $*.c | ./grab_defs > $*.ini
 	rm $*.c
 
 $(DPP):	../bin/dpp.c

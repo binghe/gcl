@@ -839,6 +839,7 @@ initlisp(void) {
 #ifdef USE_READLINE
 	gcl_init_readline();
 #endif
+	gcl_init_safety();
 
 }
 object

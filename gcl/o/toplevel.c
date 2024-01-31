@@ -119,7 +119,7 @@ DEFUN("*MAKE-CONSTANT",object,fSAmake_constant,SI,2,2,NONE,OO,OO,OO,OO, \
   check_type_sym(&s);
   switch(s->s.s_stype) {
   case stp_special:
-    FEerror("The argument ~S to DEFCONSTANT is a special variable.", 1, s);
+    FEerror("The argument ~S to defconstant is a special variable.", 1, s);
     break;
   case stp_constant:
     break;

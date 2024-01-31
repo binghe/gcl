@@ -150,7 +150,6 @@ gcl_init_safety(void)
   safety_required[SIGALRM]=sig_normal;
 }
   
-DO_INIT(gcl_init_safety();)
 DEFUN("SIGNAL-SAFETY-REQUIRED",object,sSsignal_safety_required,SI,2,2,
 	  NONE,OI,IO,OO,OO,(fixnum signo,fixnum safety),
       "Set the safety level required for handling SIGNO to SAFETY, or if \
