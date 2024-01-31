@@ -3,6 +3,20 @@
 #include <string.h>
 #include <stdio.h>
 
+static char *
+match(char *c) {
+
+  char *d;
+
+  if (!(c=strstr(c,"DEF")))
+    return NULL;
+
+  for (d=c;*d && (*d=='_' || (*d>='A'&& *d<='Z'));d++);
+
+  return *d=='(' ? c : match(d);
+
+}
+
 int
 main() {
 
@@ -15,9 +29,8 @@ main() {
       return -1;
     }
 
-    for (c=buf;(c=(!d&&*c&&*c!='\n') || !strncmp("DEF",c,3) ? c : strstr(c," DEF"));c=e) {
+    for (c=buf;(c=!d&&*c!='\n' ? c : match(c));c=e) {
 
-      c=c==buf ? c : c+1;
       d=strstr(c,"\")");
       e=d ? d+2 : buf+strlen(buf)-1;
       printf("%-.*s\n",e-c,c);
