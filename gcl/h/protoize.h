@@ -1431,7 +1431,7 @@ object macro_def_int(object);
 
 int reset_plt(void);
 
-int msystem(const char *);
+int msystem(char *);
 
 fcomplex object_to_fcomplex(object);
 

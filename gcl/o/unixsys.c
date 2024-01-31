@@ -36,11 +36,10 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 
 int
-vsystem(const char *command) {
+vsystem(char *command) {
 
-  unsigned j,n=strlen(command)+1;
-  char *z,*c;
-  const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp;
+  char *c;
+  const char *x1[]={"/bin/sh","-c",NULL,NULL},*spc=" \n\t",**p1,**pp,**pe;
   int s;
   pid_t pid;
   posix_spawnattr_t attr;
@@ -53,14 +52,10 @@ vsystem(const char *command) {
 
   else {
 
-    massert(n<sizeof(FN1));
-    memcpy((z=FN1),command,n);
-    for (j=1,c=z;strtok(c,spc);c=NULL,j++);
-
-    memcpy(z,command,n);
-    massert(j*sizeof(*p1)<sizeof(FN2));
     p1=(void *)FN2;
-    for (pp=p1,c=z;(*pp=strtok(c,spc));c=NULL,pp++);
+    pe=p1+sizeof(FN2)/sizeof(*p1);
+    for (pp=p1,c=command;pp<pe && (*pp=strtok(c,spc));c=NULL,pp++);
+    massert(pp<pe);
 
   }
 
@@ -153,7 +148,7 @@ char *command;
 #endif
 
 int
-msystem(const char *s) {
+msystem(char *s) {
 
   return psystem(s);
 
@@ -162,7 +157,7 @@ msystem(const char *s) {
 static void
 FFN(siLsystem)(void)
 {
-	char command[32768];
+	static char command[32768];
 	int i;
 
 	check_arg(1);
