@@ -253,6 +253,7 @@ Cannot compile ~a.~%" (namestring (merge-pathnames input-pathname *compiler-defa
    
    (with-open-file (s output-file :if-does-not-exist :create))
    (setq *init-name* (init-name output-file t))
+   (delete-file output-file)
    (setq *function-filename* (unless *compiler-compile*
 			       (namestring (truename (pathname *compiler-input*)))))
 
