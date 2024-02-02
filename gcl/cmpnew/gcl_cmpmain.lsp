@@ -202,7 +202,7 @@
 			   (*standard-output* *standard-output*)
 			   (*prof-p* prof-p)
 			   #+large-memory-model(*large-memory-model-p* large-memory-model-p)
-			   (output-file (pathname output-file))
+			   (output-file (translate-logical-pathname output-file))
 		           (*error-output* *error-output*)
                            (*compiler-in-use* *compiler-in-use*)
 			   (*c-debug* c-debug)
