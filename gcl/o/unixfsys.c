@@ -377,7 +377,7 @@ DEFUN("READDIR",object,fSreaddir,SI,3,3,NONE,OI,IO,OO,OO,(fixnum x,fixnum y,obje
 
   tl=telldir((DIR *)x);
 
-  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && y!=(d_type=get_d_type(e,s)););
+  for (;(e=readdir((DIR *)x)) && y!=DT_UNKNOWN && (d_type=get_d_type(e,s))!=DT_UNKNOWN && y!=d_type;);
   if (!e) RETURN1(Cnil);
 
   if (s==Cnil)
