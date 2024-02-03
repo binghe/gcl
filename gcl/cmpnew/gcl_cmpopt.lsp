@@ -53,18 +53,18 @@
    (get 'si::complexp 'inline-always))
 
 ;;SFEOF
- (push `((t) boolean #.(flags set rfa) ,(lambda (x) (add-libc "feof") (wt "(feof((" x ")->sm.sm_fp))")))
+ (push `((t) boolean #.(flags set rfa) ,(lambda (x) (add-libc "feof") (wt "(((int(*)(void *))dlfeof)((" x ")->sm.sm_fp))")))
    (get 'sfeof 'inline-unsafe))
 
 
 ;;SGETC1
- (push `((t) fixnum #.(flags set rfa) ,(lambda (x) (add-libc "getc") (wt "(getc((" x ")->sm.sm_fp))")))
+ (push `((t) fixnum #.(flags set rfa) ,(lambda (x) (add-libc "getc") (wt "(((int(*)(void *))dlgetc)((" x ")->sm.sm_fp))")))
    (get 'sgetc1 'inline-unsafe))
 
 ;;SPUTC
- (push `((fixnum t) fixnum #.(flags set rfa) ,(lambda (x y) (add-libc "putc") (wt "(putc(" x ",(" y ")->sm.sm_fp))")))
+ (push `((fixnum t) fixnum #.(flags set rfa) ,(lambda (x y) (add-libc "putc") (wt "(((int(*)(int,void *))dlputc)(" x ",(" y ")->sm.sm_fp))")))
    (get 'sputc 'inline-always))
-(push `((character t) fixnum #.(flags set rfa) ,(lambda (x y) (add-libc "putc") (wt "(putc(char_code(" x "),(" y ")->sm.sm_fp))")))
+(push `((character t) fixnum #.(flags set rfa) ,(lambda (x y) (add-libc "putc") (wt "(((int(*)(int,void *))dlputc)(char_code(" x "),(" y ")->sm.sm_fp))")))
    (get 'sputc 'inline-always))
 
 ;;FORK
@@ -1178,8 +1178,8 @@
 (push '((ratio)  integer        #.(flags rfa) "(#0)->rat.rat_num") (get 'ratio-numerator 'inline-always))
 (push '((ratio)  integer        #.(flags rfa) "(#0)->rat.rat_den") (get 'ratio-denominator 'inline-always))
 
-(push `((long-float) boolean #.(flags rfa) ,(lambda (x) (add-libc "isinf") (wt "(isinf(" x "))"))) (get 'si::isinf 'inline-always))
-(push `((long-float) boolean #.(flags rfa) ,(lambda (x) (add-libc "isnan") (wt "(isnan(" x "))"))) (get 'si::isnan 'inline-always))
+(push `((long-float) boolean #.(flags rfa) ,(lambda (x) (add-libc "isinf") (wt "(((int(*)(double))dlisinf)(" x "))"))) (get 'si::isinf 'inline-always))
+(push `((long-float) boolean #.(flags rfa) ,(lambda (x) (add-libc "isnan") (wt "(((int(*)(double))dlisnan)(" x "))"))) (get 'si::isnan 'inline-always))
 
 
 ;;LOGCOUNT

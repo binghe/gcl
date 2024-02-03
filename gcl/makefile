@@ -382,13 +382,16 @@ CMPINCLUDE_FILES=$(HDIR)cmpincl1.h $(HDIR)gclincl.h $(HDIR)compbas.h $(HDIR)type
 	$(HDIR)lu.h $(HDIR)globals.h  $(HDIR)vs.h \
 	$(HDIR)bds.h $(HDIR)frame.h \
 	$(HDIR)lex.h \
-	$(HDIR)compbas2.h \
+	$(HDIR)mstdint.h $(HDIR)compbas2.h \
 	$(HDIR)compprotos.h  $(HDIR)immnum.h
 
 OTHERS=$(HDIR)notcomp.h $(HDIR)rgbc.h $(HDIR)stacks.h 
 
 $(HDIR)new_decl.h:
 	(cd o && $(MAKE) ../$@)
+
+$(HDIR)mstdint.h:
+	echo "#include <stdint.h>" | $(CC) -E -I./$(HDIR) - | $(AWK) '/_u?int/ {print}' >$@
 
 $(HDIR)mcompdefs.h: $(HDIR)compdefs.h $(HDIR)new_decl.h
 	$(AWK) 'BEGIN {print "#include \"include.h\"";print "#include \"page.h\"";print "---"} {a=$$1;gsub("\\.\\.\\.","",a);print "\"#define " $$1 "\" " a}' $< |\
@@ -419,4 +422,4 @@ kcp:
 	(cd go ; $(MAKE)  "CFLAGS = -I../h -pg  -c -g ")
 	(cd unixport ; $(MAKE) gcp)
 
-.INTERMEDIATE: $(HDIR)mcompdefs.h
+.INTERMEDIATE: $(HDIR)mcompdefs.h $(HDIR)mstdint.h

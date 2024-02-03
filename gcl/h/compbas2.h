@@ -10,7 +10,6 @@ EXTER int Rset;
 
 #ifndef U8_DEFINED
 
-#include <stdint.h>
 
 typedef int8_t  i8 ;
 typedef int16_t i16;
