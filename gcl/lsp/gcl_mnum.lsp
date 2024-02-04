@@ -89,7 +89,7 @@
 	  (body `(typecase x
 		   (long-float  (,b x))
 		   (short-float (,f x))
-                   ,@(when sqrtp `((integer (float (isqrt x) 0.0))))
+                   ,@(when sqrtp `((bignum (max (,b (float x 0.0)) (float (isqrt x) 0.0)))))
 		   (rational    (,b (float x 0.0)))
 		   (dcomplex    (,c x))
 		   (fcomplex    (,cf x))

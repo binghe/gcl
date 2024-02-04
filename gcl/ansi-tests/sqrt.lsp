@@ -202,3 +202,6 @@
 	collect (list x s))
   nil)
 
+(deftest sqrt.20
+    (sqrt 1075)
+  32.78719262151)
