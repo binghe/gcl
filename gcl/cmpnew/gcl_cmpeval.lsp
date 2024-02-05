@@ -1292,7 +1292,7 @@
 		    (let ((cx (car (atomic-tp x)))(cy (car (atomic-tp y))))
 		      (and (consp cx) (consp cy)
 			   (if (tailp cy cx)
-			       (> (length cx) *src-loop-unroll-limit*)
+			       (> (labels ((l (x i) (if (consp x) (l (cdr x) (1+ i)) i))) (l cx 0)) *src-loop-unroll-limit*)
 			       (tailp cx cy))))))
 	      tps sir)))
 
