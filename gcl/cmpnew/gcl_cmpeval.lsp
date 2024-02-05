@@ -680,7 +680,7 @@
 
 (defvar *annotate* nil)
 
-(defun c2inline (comment expr)
+(defun c2inline (comment expr &aux (comment (mysub (mysub (write-to-string comment) "/*" "") "*/" "")))
   (when *annotate* (wt-nl "/*")(princ comment *compiler-output1*)(wt "*/"))
   (c2expr expr)
   (when *annotate* (wt-nl "/* END ")(princ comment *compiler-output1*)(wt "*/")))
