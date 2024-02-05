@@ -1349,7 +1349,7 @@
       tp))
 
 (defun exp-sig (sig)
-  (list (mapcar 'ex-tp (car sig)) (if (consp (cadr sig)) (cons (caadr sig) (mapcar 'ex-tp (cdadr sig))) (ex-tp (cadr sig)))))
+  (list (mapcar 'ex-tp (car sig)) (if (cmpt (cadr sig)) (cons (caadr sig) (mapcar 'ex-tp (cdadr sig))) (ex-tp (cadr sig)))))
 
 (defun ex-sig (sig) (list (mapcar 'cmp-unnorm-tp (car sig)) (cmp-unnorm-tp (cadr sig))))
 (defun export-call-struct (l)
