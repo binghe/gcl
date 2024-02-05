@@ -419,7 +419,7 @@ call_proc_new(object sym,ufixnum clp,ufixnum vld,void **link,ufixnum argd,object
     } else
       vs_top=base;
 
-    for (;--old_top>=vs_top;) *old_top=Cnil;
+    for (;--old_top>=vs_top && old_top>=vs_org;) *old_top=Cnil;
     
     switch(result_type) {
     case f_fixnum:
