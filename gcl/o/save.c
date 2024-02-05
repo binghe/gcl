@@ -22,11 +22,11 @@ LFD(siLsave)(void) {
   extern char *kcl_self;
 
   check_arg(1);
-  check_type_or_pathname_string_symbol_stream(&vs_base[0]);
-  coerce_to_filename(vs_base[0], FN1);
 
   gcl_cleanup(1);
-  
+
+  coerce_to_filename(vs_base[0], FN1);
+
 #ifdef MEMORY_SAVE
   MEMORY_SAVE(kcl_self,FN1);
 #else	  
